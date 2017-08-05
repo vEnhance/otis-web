@@ -28,3 +28,5 @@ class Assignment(models.Model):
 	olympiad = models.ForeignKey(MockOlympiad, null = True, blank = True,
 			help_text = "If applicable, a PDF of the suitable mock olympiad")
 	due_date = models.DateField(help_text = "When the assignment is due")
+	def __unicode__(self):
+		return self.name or unicode(self.olympiad)

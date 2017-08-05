@@ -12,6 +12,8 @@ class Semester(models.Model):
 	active = models.BooleanField(default=False,
 			help_text = "Whether the semester is currently active "
 			"(there should thus be at most one active semester)")
+	def __unicode__(self):
+		return self.name
 
 class Handout(models.Model):
 	"""Represents a PDF of a unit, with problems and solutions"""
@@ -27,5 +29,7 @@ class Handout(models.Model):
 			blank = True)
 	position = PositionField(
 			help_text="The ordering of the relative handouts to each other.")
+	def __unicode__(self):
+		return self.name + u" [" + self.code + u"]"
 	class Meta:
 		unique_together = ('name', 'code')
