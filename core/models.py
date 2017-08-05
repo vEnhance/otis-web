@@ -20,9 +20,11 @@ class Handout(models.Model):
 	code = models.CharField(max_length=255,
 			help_text = "The version code for the handout, like 'ZGX'")
 	prob_url = models.CharField(max_length=255,
-			help_text = "The URL for the problems handout")
+			help_text = "The URL for the problems handout",
+			blank = True)
 	soln_url = models.CharField(max_length=255,
-			help_text = "The URL for the solutions handout")
+			help_text = "The URL for the solutions handout",
+			blank = True)
 	position = PositionField(
 			help_text="The ordering of the relative handouts to each other.")
 	class Meta:
