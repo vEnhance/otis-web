@@ -17,6 +17,8 @@ class MockOlympiad(models.Model):
 			help_text = "The URL to the USAMO problems")
 	solns_url = models.CharField(max_length = 120, blank = True,
 			help_text = "The URL to the solutions")
+	def __unicode__(self):
+		return self.family + " " + unicode(self.number)
 
 class Assignment(models.Model):
 	semester = models.ForeignKey(core.models.Semester,
@@ -25,3 +27,4 @@ class Assignment(models.Model):
 			help_text = "Name of the assignment; leave blank for mock olympiads")
 	olympiad = models.ForeignKey(MockOlympiad, null = True, blank = True,
 			help_text = "If applicable, a PDF of the suitable mock olympiad")
+	due_date = models.DateField(help_text = "When the assignment is due")
