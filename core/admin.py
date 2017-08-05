@@ -8,9 +8,11 @@ import core
 
 @admin.register(core.models.Semester)
 class SemesterAdmin(admin.ModelAdmin):
-	list_display = ('name', 'active')
+	list_display = ('name', 'active',)
 	search_fields = ('name',)
+
 @admin.register(core.models.Handout)
 class HandoutAdmin(admin.ModelAdmin):
-	list_display = ('position', 'name', 'code')
+	list_display = ('name', 'code', 'position',)
 	search_fields = ('name', 'code')
+	ordering = ('position',)
