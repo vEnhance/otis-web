@@ -11,6 +11,8 @@ class TA(models.Model):
 	Currently don't need much information about them..."""
 	user = models.ForeignKey(auth.User,
 			help_text = "The Django Auth user attached to the TA")
+	name = models.CharField(max_length = 80,
+			help_text = "The display name for this TA (e.g. a nickname)")
 	def __unicode__(self):
 		return unicode(self.user)
 	def student_count(self):
@@ -22,6 +24,8 @@ class Student(models.Model):
 	It also names the assistant of the student, if any."""
 	user = models.ForeignKey(auth.User,
 			help_text = "The Django Auth user attached to the student")
+	name = models.CharField(max_length = 80,
+			help_text = "The display name for this student (e.g. a nickname)")
 	semester = models.ForeignKey(core.models.Semester,
 			help_text = "The semester for this student")
 	curriculum = models.ManyToManyField(core.models.Unit,

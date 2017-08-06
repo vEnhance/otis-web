@@ -10,9 +10,9 @@ class StudentInline(admin.TabularInline):
 
 @admin.register(roster.models.TA)
 class TAAdmin(admin.ModelAdmin):
-	list_display = ('user', 'student_count',)
+	list_display = ('user', 'name', 'student_count',)
 	inlines=(StudentInline,)
 
 @admin.register(roster.models.Student)
 class StudentAdmin(admin.ModelAdmin):
-	list_display = ('user', 'semester', 'assistant', 'current_unit_index',)
+	list_display = ('user', 'name', 'semester', 'assistant', 'current_unit_index',)
