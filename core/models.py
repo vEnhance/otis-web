@@ -15,7 +15,7 @@ class Semester(models.Model):
 	def __unicode__(self):
 		return self.name
 
-class Handout(models.Model):
+class Unit(models.Model):
 	"""Represents a PDF of a unit, with problems and solutions"""
 	name = models.CharField(max_length=255,
 			help_text = "The display name for the handout, like 'Weird Geo'")

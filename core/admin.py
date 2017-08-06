@@ -11,8 +11,8 @@ class SemesterAdmin(admin.ModelAdmin):
 	list_display = ('name', 'active',)
 	search_fields = ('name',)
 
-@admin.register(core.models.Handout)
-class HandoutAdmin(admin.ModelAdmin):
+@admin.register(core.models.Unit)
+class UnitAdmin(admin.ModelAdmin):
 	list_display = ('name', 'code', 'position',)
 	search_fields = ('name', 'code')
 	ordering = ('position',)
