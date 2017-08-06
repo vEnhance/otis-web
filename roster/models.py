@@ -9,7 +9,8 @@ import core
 class TA(models.Model):
 	"""This is a pair of a user and a semester.
 	Currently don't need much information about them..."""
-	user = models.ForeignKey(auth.User,
+	# TODO: should we really allow user to be null?
+	user = models.ForeignKey(auth.User, blank=True, null=True,
 			help_text = "The Django Auth user attached to the TA")
 	semester = models.ForeignKey(core.models.Semester,
 			help_text = "The semester for this TA")
@@ -24,7 +25,8 @@ class Student(models.Model):
 	"""This is really a pair of a user and a semester,
 	endowed with the data of the curriculum of that student.
 	It also names the assistant of the student, if any."""
-	user = models.ForeignKey(auth.User,
+	# TODO: should we really allow user to be null?
+	user = models.ForeignKey(auth.User, blank=True, null=True,
 			help_text = "The Django Auth user attached to the student")
 	name = models.CharField(max_length = 80,
 			help_text = "The display name for this student (e.g. a nickname)")
