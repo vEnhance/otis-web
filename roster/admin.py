@@ -34,18 +34,18 @@ class RosterResource(resources.ModelResource):
 			attribute = 'semester',
 			widget = widgets.ForeignKeyWidget(core.models.Semester, 'name'))
 
-class TAIEResource(RosterResource):
+class AssistantIEResource(RosterResource):
 	class Meta:
 		skip_unchanged = True
-		model = roster.models.TA
+		model = roster.models.Assistant
 		fields = ('id', 'name', 'semester_name', 'user_name',)
 
-@admin.register(roster.models.TA)
-class TAAdmin(ImportExportModelAdmin):
+@admin.register(roster.models.Assistant)
+class AssistantAdmin(ImportExportModelAdmin):
 	list_display = ('name', 'semester', 'user', 'student_count',)
 	inlines=(StudentInline,)
 	list_filter=(ActiveFilter,)
-	resource_class = TAIEResource
+	resource_class = AssistantIEResource
 
 class StudentIEResource(RosterResource):
 	class Meta:
