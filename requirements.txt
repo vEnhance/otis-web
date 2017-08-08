@@ -1,3 +1,4 @@
 Django>=1.9.6
 django-positions>=0.5.5
 django-import-export>=0.4.5
+django-hijack>=2.1.4
