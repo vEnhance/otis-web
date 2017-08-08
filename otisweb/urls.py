@@ -17,5 +17,9 @@ from django.conf.urls import url
 from django.contrib import admin
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
+	url(r'^admin/', admin.site.urls),
 ]
+
+admin.site.site_header = 'OTIS-WEB Administrative Control Panel'
+admin.site.index_title = 'Dashboard'
+admin.site.site_title  = 'OTIS-WEB Admin'
