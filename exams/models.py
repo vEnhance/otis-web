@@ -19,6 +19,8 @@ class MockOlympiad(models.Model):
 			help_text = "The URL to the solutions")
 	def __unicode__(self):
 		return self.family + " " + unicode(self.number)
+	class Meta:
+		unique_together = ('family', 'number')
 
 class Assignment(models.Model):
 	semester = models.ForeignKey(core.models.Semester,
