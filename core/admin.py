@@ -18,8 +18,16 @@ class SemesterAdmin(admin.ModelAdmin):
 	search_fields = ('name',)
 	inlines = (AssignmentInline,)
 
+
+class UnitIEResource(resources.ModelResource):
+	class Meta:
+		skip_unchanged = True
+		model = core.models.Unit
+		fields = ('id', 'name', 'code', 'prob_url', 'soln_url', 'position')
+
 @admin.register(core.models.Unit)
-class UnitAdmin(admin.ModelAdmin):
+class UnitAdmin(ImportExportModelAdmin):
 	list_display = ('name', 'code', 'position',)
 	search_fields = ('name', 'code')
 	ordering = ('position',)
+	resource_class = UnitIEResource
