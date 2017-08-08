@@ -33,3 +33,4 @@ class Unit(models.Model):
 		return self.name + u" [" + self.code + u"]"
 	class Meta:
 		unique_together = ('name', 'code')
+		ordering = ('position',)
