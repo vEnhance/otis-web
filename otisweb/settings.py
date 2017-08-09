@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
 	'core',
+	'dashboard',
 	'exams',
 	'roster',
 	'otisweb',
