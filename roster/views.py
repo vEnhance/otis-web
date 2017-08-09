@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse
+from django.contrib.admin.views.decorators import staff_member_required
 
 import itertools
 
@@ -9,6 +9,7 @@ import forms
 
 # Create your views here.
 
+@staff_member_required
 def curriculum(request, student_id):
 	student = get_object_or_404(roster.models.Student.objects, id = student_id)
 	units = core.models.Unit.objects.all()
