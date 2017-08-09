@@ -10,8 +10,6 @@ td.unit-select select {
 {% endblock %}
 {% block layout-content %}
 
-You can edit the curriculum for {{ student.name }} here.
-
 <form action="{{ request.path }}" method="post">
 {% csrf_token %}
 

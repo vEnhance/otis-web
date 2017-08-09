@@ -12,9 +12,17 @@ import forms
 def curriculum(request, student_id):
 	student = get_object_or_404(roster.models.Student.objects, id = student_id)
 	units = core.models.Unit.objects.all()
+	original = student.curriculum.values_list('id', flat=True)
 
-	form = forms.CurriculumForm(units = units,
-			original = student.curriculum.values_list('id', flat=True))
+	if request.method == 'POST':
+		form = forms.CurriculumForm(request.POST, units = units)
+		if form.is_valid():
+			data = form.cleaned_data
+			values = [data[k] for k in data if k.startswith('group-') and data[k] is not None]
+			student.curriculum = values
+			student.save()
+	else:
+		form = forms.CurriculumForm(units = units, original = original)
 
 	context = {'title' : "Curriculum for " + student.name,
 			'student' : student, 'form' : form}

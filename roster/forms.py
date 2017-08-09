@@ -6,7 +6,7 @@ class UnitChoiceBoundField(forms.BoundField):
 	def subject(self):
 		return self.field.choices[1][1][1] # terrible hack, but oh well
 
-class UnitChoiceField(forms.ChoiceField):
+class UnitChoiceField(forms.TypedChoiceField):
 	def get_bound_field(self, form, field_name):
 		return UnitChoiceBoundField(form, self, field_name)
 
@@ -15,7 +15,7 @@ class CurriculumForm(forms.Form):
 	and puts together a form letting you pick a curriculum.
 	
 	units: the list of units
-	original: list of unit ID's
+	original: a list of unit ID's
 	"""
 
 	def __init__(self, *args, **kwargs):
@@ -45,6 +45,8 @@ class CurriculumForm(forms.Form):
 			form_kwargs['help_text'] = ' '.join([unit.code for unit in group])
 			form_kwargs['required'] = False
 			form_kwargs['label_suffix'] = 'aoeu'
+			form_kwargs['coerce'] = int
+			form_kwargs['empty_value'] = None
 
 			self.fields[field_name] = UnitChoiceField(**form_kwargs)
 			n += 1
