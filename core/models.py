@@ -29,6 +29,16 @@ class Unit(models.Model):
 			blank = True)
 	position = PositionField(
 			help_text="The ordering of the relative handouts to each other.")
+	SUBJECT_CHOICES = (
+			("A", "Algebra"),
+			("C", "Combinatorics"),
+			("G", "Geometry"),
+			("N", "Number Theory"),
+			("F", "Functional Equations"),
+			("M", "Miscellaneous"),
+			)
+	subject = models.CharField(max_length=2, choices = SUBJECT_CHOICES,
+			help_text = "The subject for the unit")
 	def __unicode__(self):
 		return self.name + u" [" + self.code + u"]"
 	class Meta:

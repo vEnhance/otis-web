@@ -23,11 +23,11 @@ class UnitIEResource(resources.ModelResource):
 	class Meta:
 		skip_unchanged = True
 		model = core.models.Unit
-		fields = ('id', 'name', 'code', 'prob_url', 'soln_url', 'position')
+		fields = ('id', 'name', 'code', 'subject', 'prob_url', 'soln_url', 'position')
 
 @admin.register(core.models.Unit)
 class UnitAdmin(ImportExportModelAdmin):
-	list_display = ('name', 'code', 'position',)
+	list_display = ('name', 'code', 'subject', 'position',)
 	search_fields = ('name', 'code')
 	ordering = ('position',)
 	resource_class = UnitIEResource
