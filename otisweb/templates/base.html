@@ -10,7 +10,11 @@
     <link rel="stylesheet" type="text/css" href="{% static 'hijack/hijack-styles.css' %}" />
     <link href="{% static 'css/simple-53544.css' %}" rel="stylesheet">
     <link href="{% static 'css/otis.css' %}" rel="stylesheet">
+    <link href="{% static 'css/django.css' %}" rel="stylesheet">
 </head>
+
+{% block css %}
+{% endblock %}
 
 <body>
 {% hijack_notification %}

@@ -1,6 +1,15 @@
 from django import forms
 import itertools
 
+class UnitChoiceBoundField(forms.BoundField):
+	@property
+	def subject(self):
+		return self.field.choices[1][1][1] # terrible hack, but oh well
+
+class UnitChoiceField(forms.ChoiceField):
+	def get_bound_field(self, form, field_name):
+		return UnitChoiceBoundField(form, self, field_name)
+
 class CurriculumForm(forms.Form):
 	"""A form which takes a list of units
 	and puts together a form letting you pick a curriculum.
@@ -20,18 +29,22 @@ class CurriculumForm(forms.Form):
 		for name, group in itertools.groupby(units, lambda u : u.name):
 			group = list(group)
 			field_name = 'group-' + str(n)
-			label = name
-			choices = ((None, "---"),) + tuple((unit.id, unit.code) for unit in group)
+
+			form_kwargs = {}
+			form_kwargs['label'] = name
+			form_kwargs['choices'] = ((None, "---"),) \
+					+ tuple((unit.id, unit.code) for unit in group)
 
 			for unit in group:
 				if unit.id in original:
-					initial = unit.id
+					form_kwargs['initial'] = unit.id
 					break
 			else:
-				initial = None
+				form_kwargs['initial'] = None
 
-			self.fields[field_name] = forms.ChoiceField(
-					label = label, choices = choices, initial = initial)
-					
+			form_kwargs['help_text'] = ' '.join([unit.code for unit in group])
+			form_kwargs['required'] = False
+			form_kwargs['label_suffix'] = 'aoeu'
 
+			self.fields[field_name] = UnitChoiceField(**form_kwargs)
 			n += 1

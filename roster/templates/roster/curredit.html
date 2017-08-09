@@ -1,0 +1,54 @@
+{% extends 'layout.html' %}
+{% block css %}
+<style type="text/css">
+td.unit-select select {
+	width: 80px;
+	background: none;
+	border: none;
+}
+</style>
+{% endblock %}
+{% block layout-content %}
+
+You can edit the curriculum for {{ student.name }} here.
+
+<form action="{{ request.path }}" method="post">
+{% csrf_token %}
+
+{% if form.non_field_errors %}
+<ul class="form_error_messages">
+	{% for err in form.non_field_errors %}
+	<li class="form_error_message">{{ err }}</li>
+	{% endfor %}
+</ul>
+{% endif %}
+
+<table class="table form-table">
+{% for hidden in form.hidden_fields %}
+	{{ hidden }}
+{% endfor %}
+
+{% for field in form.visible_fields %}
+	<tr class="subject{{ field.subject }}">
+		<td class="unit-select">
+			{{ field }}
+			{% if field.errors %}
+				<ul class="errorlist">
+				{% for err in field.errors %}
+					{{ err }}
+				{% endfor %}
+				</ul>
+			{% endif %}
+		</td>
+		<th>{{ field.label }}</th>
+		<td>{{ field.help_text }}</td>
+	</tr>
+{% endfor %}
+	<tr>
+	<td><input type="submit" name="submit" value="Update"></td>
+	</tr>
+</table>
+
+</form>
+
+{% endblock %}

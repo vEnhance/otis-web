@@ -8,7 +8,7 @@
 
 body {
 	background-color: #ddeeee;
-	font-size: 12pt;
+	font-size: 11pt;
 }
 
 #header {
@@ -52,3 +52,11 @@ h3 {
 #logo img {
 	width: 12%;
 }
+
+/* Subject colors */
+tr.subjectG { background-color: lightgreen; }
+tr.subjectC { background-color: lightblue; }
+tr.subjectA { background-color: pink; }
+tr.subjectF { background-color: pink; }
+tr.subjectN { background-color: lightgrey; }
+tr.subjectM { background-color: yellow; }

@@ -16,6 +16,7 @@ def curriculum(request, student_id):
 	form = forms.CurriculumForm(units = units,
 			original = student.curriculum.values_list('id', flat=True))
 
-	context = {'title' : student.name, 'content' : form}
+	context = {'title' : "Curriculum for " + student.name,
+			'student' : student, 'form' : form}
 	# return HttpResponse("hi")
-	return render(request, "layout.html", context)
+	return render(request, "roster/curredit.html", context)
