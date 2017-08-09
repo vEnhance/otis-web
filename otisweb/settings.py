@@ -34,12 +34,14 @@ INSTALLED_APPS = [
     'core',
     'exams',
     'roster',
+    'otisweb',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'hijack',
     'import_export',
 ]
 
@@ -68,6 +70,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+        'debug' : DEBUG, # TEMPLATE_DEBUG = DEBUG
         },
     },
 ]
