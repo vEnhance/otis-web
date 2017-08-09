@@ -44,3 +44,11 @@ h3 {
     filter: alpha(opacity=100);
 }
 
+/* Logo in lower right */
+#logo {
+	text-align: right;
+	padding: 14px 14px 14px 14px;
+}
+#logo img {
+	width: 12%;
+}

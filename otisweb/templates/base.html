@@ -20,11 +20,14 @@
 	Cheers, Evan
 </div>
 {% endif %}
-<div id="navigation_box">Internal Use Only</div>
+<div id="navigation_box">&copy; Evan Chen. Internal use only.</div>
 <div id="header"><h1>OTIS-WEB</h1></div>
 <div id="content">
 	{% block base-content %}
 	{% endblock %}
+	<div id="logo">
+	<img src="{% static 'img/logo.png' %}" />
+	</div>
 </div>
 </body>
 </html>
