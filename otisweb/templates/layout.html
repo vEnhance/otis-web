@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block base-content %}
+<div id="side">
+	{% include "sidebar.html" %}
+</div>
+<div id="main">
+	<div class="entry">
+		<h1>{% block title %}{{ title }}{% endblock %}</h1>
+		<div class="entrywrap">
+			{% block layout-content %}
+			{{ content }}
+			{% endblock %}
+		</div>
+	</div>
+</div>
+{% endblock %}
