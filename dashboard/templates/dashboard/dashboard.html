@@ -1,0 +1,23 @@
+{% extends 'layout.html' %}
+{% block layout-content %}
+
+Hi {{ student.name }}, welcome back to {{ student.semester.name }}.
+You have completed {{ student.current_unit_index }} units.
+
+<h2>Materials</h2>
+<table class="table">
+{% for n, unit in curriculum %}
+<tr class="subject{{ unit.subject }}">
+	<th>{{ n|add:1 }}</th>
+	<td>{{ unit.name }}</td>
+	<td>{{ unit.code }}</td>
+	<td>{{ unit.prob_url }}</td>
+	<td>{% if omniscient or n < student.current_unit_index %}{{ unit.soln_url }}{% endif %}</td>
+</tr>
+{% endfor %}
+</table>
+
+<h2>Practice Tests</h2>
+Submit these to <a href="http://www.gradescope.com">GradeScope</a>.
+
+{% endblock %}
