@@ -1,0 +1,46 @@
+#main {
+	width: 68%;
+}
+#side {
+	width: 26%;
+	padding: 10px 10px 10px 10px;
+}
+
+body {
+	background-color: #ddeeee;
+	font-size: 12pt;
+}
+
+#header {
+	background-color: #5266c0;
+	border: 3px solid #2233b2;
+}
+#main { background-color: #; }
+#side { background-color: #aaddff; }
+
+div.entrywrap { background-color: #ffffff; }
+#navigation_box { background-color: #ccccff; }
+
+h1 {
+	color: #000055;
+}
+#header h1 {
+	color: #ffffff;
+	/* font-weight: bold; */
+}
+
+h3 {
+	font-weight: normal;
+	font-family: "Trebuchet MS", sans-serif;
+}
+
+/* Reduce opacity effect */
+#side {
+    opacity: 0.9;
+    filter: alpha(opacity=90);
+}
+#side:hover {
+    opacity: 1.0;
+    filter: alpha(opacity=100);
+}
+
