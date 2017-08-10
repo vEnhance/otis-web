@@ -16,7 +16,7 @@ class MockOlympiad(models.Model):
 			help_text = "The URL to the JMO problems")
 	usamo_url = models.CharField(max_length = 120, blank = True,
 			help_text = "The URL to the USAMO problems")
-	solns_url = models.CharField(max_length = 120, blank = True,
+	soln_url = models.CharField(max_length = 120, blank = True,
 			help_text = "The URL to the solutions")
 	due_date = models.DateField(null = True, blank = True,
 			help_text = "When the assignment should be due. Leave blank if not active this semester.")
