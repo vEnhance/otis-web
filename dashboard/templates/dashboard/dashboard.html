@@ -23,14 +23,14 @@ You have completed {{ student.current_unit_index }} units.
 Submit these to <a href="http://www.gradescope.com">GradeScope</a>.
 
 <table class="table">
-{% for olyassn in olyassns %}
+{% for oly in olympiads %}
 <tr>
 	<th>{{ forloop.counter }}</th>
-	<td>{{ olyassn }}</td>
-	<td><a href="{{olyassn.olympiad.jmo_url}}">JMO Problems</a></td>
-	<td><a href="{{olyassn.olympiad.usamo_url}}">USAMO Problems</a></td>
-	<td><a href="{{olyassn.olympiad.soln_url}}">Solutions</a></td>
-	<td>Due {{ olyassn.due_date|date:"DATE_FORMAT" }}</td>
+	<td>{{ oly }}</td>
+	<td>{% if oly.jmo_url %}<a href="{{oly.jmo_url}}">JMO</a>{% endif %}</td>
+	<td>{% if oly.usamo_url %}<a href="{{oly.usamo_url}}">USAMO</a>{% endif %}</td>
+	<td>{% if oly.soln_url %}<a href="{{oly.soln_url}}">Solutions</a>{% endif %}</td>
+	<td>Due {{ oly.due_date|date:"DATE_FORMAT" }}</td>
 </tr>
 {% endfor %}
 </table>
@@ -39,11 +39,11 @@ Submit these to <a href="http://www.gradescope.com">GradeScope</a>.
 <h2>Practice HMMT</h2>
 Submit these to <a href="http://www.gradescope.com">GradeScope</a>.
 <table class="table">
-{% for pracassn in pracassns %}
+{% for assn in assignments %}
 <tr>
 	<th>{{ forloop.counter }}</th>
-	<td>{{ pracassn }}</td>
-	<td>{{ pracassn.due_date|date:"DATE_FORMAT" }}</td>
+	<td>{{ assn }}</td>
+	<td>{{ assn.due_date|date:"DATE_FORMAT" }}</td>
 </tr>
 {% endfor %}
 </table>

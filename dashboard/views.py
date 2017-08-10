@@ -19,9 +19,8 @@ def dashboard(request, student_id):
 	context['student'] = student
 	context['curriculum'] = student.curriculum.all()
 	context['omniscient'] = False # request.user.is_staff or student.assistant == request.user
-	active_assns = exams.models.Assignment.objects.filter(semester__active=True)
-	context['olyassns'] = active_assns.filter(olympiad__isnull=False)
-	context['pracassns'] = active_assns.filter(olympiad__isnull=True)
+	context['olympiads'] = exams.models.MockOlympiad.objects.filter(due_date__isnull=False)
+	context['assignments'] = exams.models.Assignment.objects.filter(semester__active=True)
 	return render(request, "dashboard/dashboard.html", context)
 
 
