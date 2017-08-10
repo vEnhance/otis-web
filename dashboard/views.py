@@ -22,7 +22,3 @@ def dashboard(request, student_id):
 	context['olympiads'] = exams.models.MockOlympiad.objects.filter(due_date__isnull=False)
 	context['assignments'] = exams.models.Assignment.objects.filter(semester__active=True)
 	return render(request, "dashboard/dashboard.html", context)
-
-
-
-# Create your views here.
