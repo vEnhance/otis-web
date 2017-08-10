@@ -41,5 +41,5 @@ class Student(models.Model):
 			"then the student has completed the first k units of his/her "
 			"curriculum and is working on the (k+1)st unit")
 	def __unicode__(self):
-		return self.name
+		return self.name + " (" + unicode(self.semester) + ")"
 	# TODO unique together: user + semester
