@@ -7,5 +7,5 @@ from django.contrib import admin
 
 @admin.register(dashboard.models.UploadedFile)
 class UploadedFileAdmin(admin.ModelAdmin):
-	list_display = ('description', 'benefactor', 'unit', 'file_type', 'owner',)
+	list_display = ('id', 'description', 'benefactor', 'unit', 'file_type', 'owner',)
 	search_fields = ('description',)
