@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib import messages
 
 import itertools
 
@@ -22,6 +23,8 @@ def curriculum(request, student_id):
 			values = [data[k] for k in data if k.startswith('group-') and data[k] is not None]
 			student.curriculum = values
 			student.save()
+			messages.success(request, "Successfully saved curriculum.")
+
 	else:
 		form = forms.CurriculumForm(units = units, original = original)
 
