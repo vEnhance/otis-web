@@ -6,8 +6,8 @@ table td, th {
 }
 
 tr:nth-child(even) {
-    background-color: #aaa;
+    background-color: #eee;
 }
 tr:nth-child(odd) {
-    background-color: #ddd;
+    background-color: #ccc;
 }

@@ -43,7 +43,7 @@ Submit these to <a href="http://www.gradescope.com">GradeScope</a>.
 <tr>
 	<th>{{ forloop.counter }}</th>
 	<td>{{ assn }}</td>
-	<td>{{ assn.due_date|date:"DATE_FORMAT" }}</td>
+	<td>Due {{ assn.due_date|date:"DATE_FORMAT" }}</td>
 </tr>
 {% endfor %}
 </table>
