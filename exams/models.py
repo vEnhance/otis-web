@@ -32,8 +32,10 @@ class Assignment(models.Model):
 	"""An assignment which is just a text description (e.g. HMMT practices)."""
 	semester = models.ForeignKey(core.models.Semester,
 			help_text = "The semester that the assignment is given in")
-	name = models.CharField(max_length = 80, blank = True, unique = True,
-			help_text = "Name of the assignment; leave blank for mock olympiads")
+	name = models.CharField(max_length = 80,
+			help_text = "Name / description of the assignment")
 	due_date = models.DateField(help_text = "When the assignment is due")
 	def __unicode__(self):
-		return self.name or unicode(self.olympiad)
+		return self.name
+	class Meta:
+		unique_together = ('semester', 'name')
