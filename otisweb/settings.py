@@ -78,6 +78,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'otisweb.wsgi.application'
 
+INTERNAL_IPS = ('127.0.0.1',)
+
 
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
