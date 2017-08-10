@@ -4,3 +4,10 @@ table td, th {
 	border: 0px;
 	text-align: left;
 }
+
+tr:nth-child(even) {
+    background-color: #aaa;
+}
+tr:nth-child(odd) {
+    background-color: #ddd;
+}
