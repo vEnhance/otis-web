@@ -17,9 +17,10 @@ from django.conf.urls import include, url
 from django.contrib import admin
 
 urlpatterns = [
+	url(r'^admin/', admin.site.urls),
 	url(r'^dashboard/', include('dashboard.urls')),
 	url(r'^roster/', include('roster.urls')),
-	url(r'^admin/', admin.site.urls),
+	url(r'^hijack/', include('hijack.urls')),
 ]
 
 admin.site.site_header = 'OTIS-WEB Administrative Control Panel'
