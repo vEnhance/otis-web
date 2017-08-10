@@ -4,20 +4,49 @@
 Hi {{ student.name }}, welcome back to {{ student.semester.name }}.
 You have completed {{ student.current_unit_index }} units.
 
-<h2>Materials</h2>
+<h2>Curriculum Materials</h2>
 <table class="table">
-{% for n, unit in curriculum %}
+{% for unit in curriculum %}
 <tr class="subject{{ unit.subject }}">
-	<th>{{ n|add:1 }}</th>
+	<th>{{ forloop.counter }}</th>
 	<td>{{ unit.name }}</td>
 	<td>{{ unit.code }}</td>
-	<td>{{ unit.prob_url }}</td>
-	<td>{% if omniscient or n < student.current_unit_index %}{{ unit.soln_url }}{% endif %}</td>
+	<td><a href="{{ unit.prob_url }}">Handout</a></td>
+	<td>{% if omniscient or forloop.counter <= student.current_unit_index %}
+		<a href="{{ unit.soln_url }}">Solution Notes</a>{% endif %}</td>
 </tr>
 {% endfor %}
 </table>
+<hr />
 
-<h2>Practice Tests</h2>
+<h2>Mock Olympiad</h2>
 Submit these to <a href="http://www.gradescope.com">GradeScope</a>.
+
+<table class="table">
+{% for olyassn in olyassns %}
+<tr>
+	<th>{{ forloop.counter }}</th>
+	<td>{{ olyassn }}</td>
+	<td><a href="{{olyassn.olympiad.jmo_url}}">JMO Problems</a></td>
+	<td><a href="{{olyassn.olympiad.usamo_url}}">USAMO Problems</a></td>
+	<td><a href="{{olyassn.olympiad.soln_url}}">Solutions</a></td>
+	<td>Due {{ olyassn.due_date|date:"DATE_FORMAT" }}</td>
+</tr>
+{% endfor %}
+</table>
+<hr />
+
+<h2>Practice HMMT</h2>
+Submit these to <a href="http://www.gradescope.com">GradeScope</a>.
+<table class="table">
+{% for pracassn in pracassns %}
+<tr>
+	<th>{{ forloop.counter }}</th>
+	<td>{{ pracassn }}</td>
+	<td>{{ pracassn.due_date|date:"DATE_FORMAT" }}</td>
+</tr>
+{% endfor %}
+</table>
+<hr />
 
 {% endblock %}
