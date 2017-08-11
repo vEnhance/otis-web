@@ -1,6 +1,6 @@
 Logged in as <b>{{ request.user }}</b>.
 
 {% if student %}
-<h3><a href="{% url "dashboard" student.id %}">{{ student.name }}</a></h3>
+<h3><a href="{% url "dashboard" student.id %}">{{ student }}</a></h3>
 {% endif %}
 TODO: more here
