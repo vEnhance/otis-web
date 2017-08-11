@@ -50,7 +50,7 @@ class Student(models.Model):
 		(This means the user is either an assistant for that student
 		or has staff privileges.)"""
 		return user.is_staff or (self.assistant.user == user)
-	def can_view(self, user):
+	def can_view_by(self, user):
 		"""Checks whether the specified user is either same as the student,
 		or is an instructor for that student."""
 		return self.user == user or self.is_taught_by(user)
