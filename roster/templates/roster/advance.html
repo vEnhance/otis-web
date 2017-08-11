@@ -1,0 +1,12 @@
+{% extends 'layout.html' %}
+
+{% block layout-content %}
+<form action="{{ request.path }}" method="post">
+{% csrf_token %}
+{{ form.as_p }}
+<p> <input type="submit" name="submit"> </p>
+</form>
+
+<p>For your reference, here is the existing curriculum.</p>
+{% include 'dashboard/list_curriculum.html' %}
+{% endblock %}

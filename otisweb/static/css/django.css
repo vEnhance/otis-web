@@ -11,3 +11,12 @@ tr:nth-child(even) {
 tr:nth-child(odd) {
     background-color: #ccc;
 }
+
+span.helptext {
+	text-color = #555;
+	font-size: 70%;
+}
+
+input {
+	padding: 4px;
+}

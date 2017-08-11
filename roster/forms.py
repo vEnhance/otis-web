@@ -1,6 +1,8 @@
 from django import forms
 import itertools
 
+import roster
+
 class UnitChoiceBoundField(forms.BoundField):
 	@property
 	def subject(self):
@@ -50,3 +52,9 @@ class CurriculumForm(forms.Form):
 
 			self.fields[field_name] = UnitChoiceField(**form_kwargs)
 			n += 1
+
+
+class AdvanceForm(forms.ModelForm):
+	class Meta:
+		model = roster.models.Student
+		fields = ('current_unit_index',)

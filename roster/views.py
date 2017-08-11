@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
 import itertools
@@ -32,3 +33,22 @@ def curriculum(request, student_id):
 			'student' : student, 'form' : form}
 	# return HttpResponse("hi")
 	return render(request, "roster/curredit.html", context)
+
+@login_required
+def advance(request, student_id):
+	student = get_object_or_404(roster.models.Student.objects, id = student_id)
+	if request.method == 'POST':
+		form = forms.AdvanceForm(request.POST, instance = student)
+		if form.is_valid():
+			form.save()
+			messages.success(request, "Successfully advanced student.")
+	else:
+		form = forms.AdvanceForm(instance = student)
+
+	context = {'title' : "Advance " + student.name}
+	context['form'] = form
+	context['student'] = student
+	context['curriculum'] = student.curriculum.all()
+	context['omniscient'] = student.is_taught_by(request.user) # TODO ugly, template tag this
+	return render(request, "roster/advance.html", context)
+
