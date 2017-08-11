@@ -20,7 +20,7 @@ def main(request, student_id):
 	context['title'] = "Dashboard for " + student.name
 	context['student'] = student
 	context['curriculum'] = student.curriculum.all()
-	context['omniscient'] = False # student.is_taught_by(request.user)
+	context['omniscient'] = student.is_taught_by(request.user)
 	context['olympiads'] = exams.models.MockOlympiad.objects.filter(due_date__isnull=False)
 	context['assignments'] = exams.models.Assignment.objects.filter(semester__active=True)
 	return render(request, "dashboard/main.html", context)

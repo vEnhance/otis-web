@@ -1,12 +1,16 @@
 {% extends 'layout.html' %}
 {% block layout-content %}
 
-Hi {{ student.name }}, welcome back to {{ student.semester.name }}.
-You have completed {{ student.current_unit_index }} units.
+{% if omnsicient %}
+<p>Viewing {{ student.name }} in teacher mode.</p>
+{% else %}
+<p>Hi {{ student.name }}, welcome back to {{ student.semester.name }}.
+You have completed {{ student.current_unit_index }} units.</p>
+{% endif %}
 
 <h2>Curriculum Materials</h2>
-The current unit is marked with a &star;.
-Completed units are marked with &check;.
+<p>The current unit is marked with a &star;.
+Completed units are marked with &check;.</p>
 <table class="table">
 {% for unit in curriculum %}
 <tr class="subject{{ unit.subject }}">
@@ -19,13 +23,17 @@ Completed units are marked with &check;.
 	<td>{{ unit.name }}</td>
 	<td>{{ unit.code }}</td>
 	<td><a href="{{ unit.prob_url }}">Handout</a></td>
-	{% if omniscient or forloop.counter0 <= student.current_unit_index %}
+	{# Whether to show uploads #}
+	{% if forloop.counter0 <= student.current_unit_index %}
 	<td><a href="{% url "uploads" student.id unit.id %}">File Uploads</a></td>
 	{% else %}
 	<td></td>
 	{% endif %}
-	{% if omniscient or forloop.counter <= student.current_unit_index %}
+	{# Whether to show oslutions #}
+	{% if forloop.counter0 < student.current_unit_index %}
 	<td><a href="{{ unit.soln_url }}">Solution Notes</a></td>
+	{% elif omniscient and forloop.counter0 <= student.current_unit_index %}
+	<td><a href="{{ unit.soln_url }}">Draft Solutions</a></td>
 	{% else %}
 	<td></td>
 	{% endif %}
@@ -33,8 +41,14 @@ Completed units are marked with &check;.
 {% endfor %}
 </table>
 
-Click here for 
-<a href="{% url "uploads" student.id 0 %}">miscellaneous uploads</a>.
+<p>Link to <a href="{% url "uploads" student.id 0 %}">miscellaneous uploads</a>.</p>
+
+{% if omniscient or debug %}
+I AM SENSEI
+{% endif %}
+{% if user.is_staff or debug %}
+<p>(Admin) <a href="{% url "curredit" student.id %}">Edit this curriculum</a>.</p>
+{% endif %}
 
 <hr />
 
