@@ -1,0 +1,29 @@
+<table class="table">
+{% for unit in curriculum %}
+<tr class="subject{{ unit.subject }}">
+	<th>{{ forloop.counter }}</th>
+	<td>{% if forloop.counter0 < student.current_unit_index %}
+		&check;
+	{% elif forloop.counter0 == student.current_unit_index %}
+		&star;
+	{% endif %}</td>
+	<td>{{ unit.name }}</td>
+	<td>{{ unit.code }}</td>
+	<td><a href="{{ unit.prob_url }}">Handout</a></td>
+	{# Whether to show uploads #}
+	{% if forloop.counter0 <= student.current_unit_index %}
+	<td><a href="{% url "uploads" student.id unit.id %}">File Uploads</a></td>
+	{% else %}
+	<td></td>
+	{% endif %}
+	{# Whether to show solutions #}
+	{% if forloop.counter0 < student.current_unit_index %}
+	<td><a href="{{ unit.soln_url }}">Solution Notes</a></td>
+	{% elif omniscient and forloop.counter0 <= student.current_unit_index %}
+	<td><a href="{{ unit.soln_url }}">Draft Solutions</a></td>
+	{% else %}
+	<td></td>
+	{% endif %}
+</tr>
+{% endfor %}
+</table>
