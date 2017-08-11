@@ -1,8 +1,16 @@
 {% extends 'layout.html' %}
 {% block layout-content %}
+
+{% if files|length > 0 %}
 <ul>
-{% for file in files %}
-<li>{{ file }}: {{ file.unit }}</li>
-{% endfor %}
+	{% for file in files %}
+	<li>{{ file }}: {{ file.unit }}</li>
+	{% endfor %}
 </ul>
+{% else %}
+Nothing here yet!
+{% endif %}
+
+TODO: form to upload
+
 {% endblock %}

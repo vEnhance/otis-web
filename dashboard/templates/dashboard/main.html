@@ -19,11 +19,23 @@ Completed units are marked with &check;.
 	<td>{{ unit.name }}</td>
 	<td>{{ unit.code }}</td>
 	<td><a href="{{ unit.prob_url }}">Handout</a></td>
-	<td>{% if omniscient or forloop.counter <= student.current_unit_index %}
-		<a href="{{ unit.soln_url }}">Solution Notes</a>{% endif %}</td>
+	{% if omniscient or forloop.counter0 <= student.current_unit_index %}
+	<td><a href="{% url "uploads" student.id unit.id %}">File Uploads</a></td>
+	{% else %}
+	<td></td>
+	{% endif %}
+	{% if omniscient or forloop.counter <= student.current_unit_index %}
+	<td><a href="{{ unit.soln_url }}">Solution Notes</a></td>
+	{% else %}
+	<td></td>
+	{% endif %}
 </tr>
 {% endfor %}
 </table>
+
+Click here for 
+<a href="{% url "uploads" student.id 0 %}">miscellaneous uploads</a>.
+
 <hr />
 
 <h2>Mock Olympiad</h2>

@@ -20,17 +20,21 @@ def main(request, student_id):
 	context['title'] = "Dashboard for " + student.name
 	context['student'] = student
 	context['curriculum'] = student.curriculum.all()
-	context['omniscient'] = student.is_taught_by(request.user)
+	context['omniscient'] = False # student.is_taught_by(request.user)
 	context['olympiads'] = exams.models.MockOlympiad.objects.filter(due_date__isnull=False)
 	context['assignments'] = exams.models.Assignment.objects.filter(semester__active=True)
 	return render(request, "dashboard/main.html", context)
 
 @login_required
-def uploads(request, student_id):
+def uploads(request, student_id, unit_id):
 	student = get_object_or_404(roster.models.Student.objects, id = student_id)
+	if unit_id == "0":
+		unit = None
+	else:
+		unit = get_object_or_404(core.models.Unit.objects, id = unit_id)\
+				if unit_id else None
 	if not student.can_view_by(request.user):
 		return HttpResponse("Permission denied")
-	unit = request.GET.get('unit', None)
 
 	context = {}
 	context['title'] = 'File Uploads'
