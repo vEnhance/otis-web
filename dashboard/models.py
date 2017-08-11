@@ -18,10 +18,10 @@ class UploadedFile(models.Model):
 			help_text = "What kind of file this is")
 	file_content = models.FileField(help_text = "The file itself")
 	description = models.CharField(max_length = 160, blank = True,
-			help_text = "A description of the file (defaults to filename if blank)")
+			help_text = "A description of the file")
 	unit = models.ForeignKey(core.models.Unit, null = True, blank = True,
 			help_text = "The unit for which this file is associated")
 	def __unicode__(self):
-		return self.description or self.content.name
+		return self.file_content.name
 
 # Create your models here.

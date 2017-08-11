@@ -35,6 +35,7 @@ def uploads(request, student_id):
 	context = {}
 	context['title'] = 'File Uploads'
 	context['student'] = student
-	context['files'] = dashboard.objects.filter(benefactor=student, unit=unit)
+	context['files'] = dashboard.models.UploadedFile.objects\
+			.filter(benefactor=student, unit=unit)
 	# TODO form for adding new files
-	return render(request, "dashboard/files.html", context)
+	return render(request, "dashboard/uploads.html", context)

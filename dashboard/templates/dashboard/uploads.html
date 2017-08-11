@@ -1,0 +1,8 @@
+{% extends 'layout.html' %}
+{% block layout-content %}
+<ul>
+{% for file in files %}
+<li>{{ file }}: {{ file.unit }}</li>
+{% endfor %}
+</ul>
+{% endblock %}
