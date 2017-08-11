@@ -2,6 +2,9 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.http import HttpResponseRedirect
+from django.core.urlresolvers import reverse
+
 
 import itertools
 
@@ -25,7 +28,6 @@ def curriculum(request, student_id):
 			student.curriculum = values
 			student.save()
 			messages.success(request, "Successfully saved curriculum.")
-
 	else:
 		form = forms.CurriculumForm(units = units, original = original)
 
@@ -42,6 +44,7 @@ def advance(request, student_id):
 		if form.is_valid():
 			form.save()
 			messages.success(request, "Successfully advanced student.")
+			return HttpResponseRedirect(reverse("dashboard", args=(student_id,)))
 	else:
 		form = forms.AdvanceForm(instance = student)
 
