@@ -43,3 +43,14 @@ class Student(models.Model):
 	def __unicode__(self):
 		return self.name + " (" + unicode(self.semester) + ")"
 	# TODO unique together: user + semester
+
+	def is_taught_by(self, user):
+		"""Checks whether the specified user is not the same as the student,
+		but has permission to view and edit the student's files and so on.
+		(This means the user is either an assistant for that student
+		or has staff privileges.)"""
+		return user.is_staff or (self.assistant.user == user)
+	def can_view(self, user):
+		"""Checks whether the specified user is either same as the student,
+		or is an instructor for that student."""
+		return self.user == user or self.is_taught_by(user)
