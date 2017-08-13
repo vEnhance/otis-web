@@ -21,6 +21,7 @@ class Assistant(models.Model):
 		return self.student_set.count()
 	class Meta:
 		unique_together = ('user', 'semester',)
+		ordering = ('name',)
 
 class Student(models.Model):
 	"""This is really a pair of a user and a semester (with a display name),
@@ -55,3 +56,4 @@ class Student(models.Model):
 		return self.user == user or self.is_taught_by(user)
 	class Meta:
 		unique_together = ('user', 'semester',)
+		ordering = ('name',)
