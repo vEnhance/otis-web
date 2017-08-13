@@ -10,6 +10,7 @@ td.unit-select select {
 {% endblock %}
 {% block layout-content %}
 
+<p><a href="{% url "dashboard" student.id %}">Back to Dashboard</a></p>
 <form action="{{ request.path }}" method="post">
 {% csrf_token %}
 
