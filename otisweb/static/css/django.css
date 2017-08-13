@@ -20,3 +20,13 @@ span.helptext {
 input {
 	padding: 4px;
 }
+
+button.pseudo-button {
+	background: none;
+	color: #bb0000;
+	border: none; 
+	padding: 0;
+	margin: 0;
+	font: inherit;
+	cursor: pointer;
+}
