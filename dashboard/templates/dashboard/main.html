@@ -14,6 +14,8 @@ Completed units are marked with &check;.</p>
 {% include "dashboard/list_curriculum.html" %}
 
 <ul>
+	<li>Link to <a href="http://web.evanchen.cc/private/otis-syllabus.pdf">syllabus</a>.</li>
+	<li>Link to <a href="http://web.evanchen.cc/private/parent-info.pdf">parent information</a>.</li>
 	<li>Link to <a href="{% url "uploads" student.id 0 %}">miscellaneous uploads</a>.</li>
 	{% if omniscient %}
 	<li> <a href="{% url "advance" student.id %}">Advance Student</a> (teacher)</li>
