@@ -16,6 +16,16 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+## Manually added settings
+
+INTERNAL_IPS = ('127.0.0.1',)
+HIJACK_ALLOW_GET_REQUESTS = True
+HIJACK_LOGIN_REDIRECT_URL = '/dash'
+HIJACK_LOGOUT_REDIRECT_URL = '/admin/auth/user/'
+LOGIN_REDIRECT_URL = '/dash'
+
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
 
@@ -79,11 +89,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'otisweb.wsgi.application'
-
-INTERNAL_IPS = ('127.0.0.1',)
-HIJACK_ALLOW_GET_REQUESTS = True
-HIJACK_LOGIN_REDIRECT_URL = '/'
-HIJACK_LOGOUT_REDIRECT_URL = '/admin/auth/user/'
 
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
