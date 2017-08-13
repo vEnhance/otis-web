@@ -9,14 +9,18 @@
 {% if student %}
 <h2><a href="{% url "dashboard" student.id %}">{{ student }}</a></h2>
 {% endif %}
-{% if student %}
-<p><a href="{% url "past" %}">Past Semesters</a></p>
+
+<ul>
+{% if student.user.username == request.user.username %}
+<li><a href="{% url "past" %}">Past semesters</a></li>
+{% else %}
+<li><a href="{% url "index" %}">Change student</a></li>
 {% endif %}
 
 {% if request.user.is_authenticated %}
-<p><a href="{% url "auth_password_change" %}">(change password)</a></p>
+<li><a href="{% url "auth_password_change" %}">Change password</a></li>
 {% endif %}
 {% if request.user.is_staff %}
-<p><a href="{% url "admin:index" %}">Admin Site</a></p>
+<li><a href="{% url "admin:index" %}">Admin Site</a></li>
 {% endif %}
-
+</ul>
