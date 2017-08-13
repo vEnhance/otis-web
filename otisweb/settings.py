@@ -42,7 +42,9 @@ INSTALLED_APPS = [
 	'django.contrib.sessions',
 	'django.contrib.messages',
 	'django.contrib.staticfiles',
+	'hijack_admin',
 	'hijack',
+	'compat',
 	'import_export',
 ]
 
@@ -79,7 +81,9 @@ TEMPLATES = [
 WSGI_APPLICATION = 'otisweb.wsgi.application'
 
 INTERNAL_IPS = ('127.0.0.1',)
-
+HIJACK_ALLOW_GET_REQUESTS = True
+HIJACK_LOGIN_REDIRECT_URL = '/'
+HIJACK_LOGOUT_REDIRECT_URL = '/admin/auth/user/'
 
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
