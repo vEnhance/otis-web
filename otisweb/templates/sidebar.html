@@ -22,5 +22,17 @@
 {% endif %}
 {% if request.user.is_staff %}
 <li><a href="{% url "admin:index" %}">Admin Site</a></li>
+{% if student %}
+<li>
+<form action="/hijack/{{ student.user.id }}/" method="post">
+    {% csrf_token %}
+    <button type="submit">Hijack {{ student.user.username }}</button>
+</form>
+</li>
+{% endif %}
+
+
 {% endif %}
 </ul>
+
+
