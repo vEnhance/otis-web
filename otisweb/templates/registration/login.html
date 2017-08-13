@@ -1,0 +1,10 @@
+{% extends 'layout.html' %}
+{% block title %}Log In{% endblock %}
+{% block layout-content %}
+{% if request.user.is_authenticated %}
+<p>You are already logged in as {{ request.user }},
+but you can log in to a different account here.</p>
+{% else %}
+{% include "generic-form.html" with submit_name="Login" %}
+{% endif %}
+{% endblock layout-content %}
