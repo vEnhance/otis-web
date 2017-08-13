@@ -20,9 +20,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 INTERNAL_IPS = ('127.0.0.1',)
 HIJACK_ALLOW_GET_REQUESTS = True
-HIJACK_LOGIN_REDIRECT_URL = '/dash'
+HIJACK_LOGIN_REDIRECT_URL = '/'
 HIJACK_LOGOUT_REDIRECT_URL = '/admin/auth/user/'
-LOGIN_REDIRECT_URL = '/dash'
+LOGIN_REDIRECT_URL = '/'
 
 
 

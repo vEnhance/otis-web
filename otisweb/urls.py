@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+from django.views.generic import RedirectView
 
 urlpatterns = [
 	url(r'^admin/', admin.site.urls),
@@ -22,6 +23,7 @@ urlpatterns = [
 	url(r'^roster/', include('roster.urls')),
 	url(r'^hijack/', include('hijack.urls')),
 	url(r'^accounts/', include('registration.backends.simple.urls')),
+	url(r'^$', RedirectView.as_view(pattern_name='index')),
 ]
 
 admin.site.site_header = 'OTIS-WEB Administrative Control Panel'
