@@ -1,13 +1,9 @@
 {% if request.user.is_authenticated %}
 <p>Logged in as <b>{{ request.user }}</b>.
-<a href="{% url "auth_password_change" %}">(change password)</a>
 <a href="{% url "auth_logout" %}">(logout)</a>
 </p>
 {% else %}
 <p>Not logged in. <a href="{% url "auth_login" %}">(login)</a></p>
-{% endif %}
-{% if request.user.is_staff %}
-<p><a href="{% url "admin:index" %}">Admin Site</a></p>
 {% endif %}
 
 {% if student %}
@@ -15,3 +11,11 @@
 {% endif %}
 
 <p>TODO: MORE HERE</p>
+
+{% if request.user.is_authenticated %}
+<p><a href="{% url "auth_password_change" %}">(change password)</a></p>
+{% endif %}
+{% if request.user.is_staff %}
+<p><a href="{% url "admin:index" %}">Admin Site</a></p>
+{% endif %}
+
