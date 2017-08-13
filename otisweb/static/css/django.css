@@ -6,10 +6,10 @@ table td, th {
 }
 
 tr:nth-child(even) {
-    background-color: #eee;
+    background-color: #e4e4e4;
 }
 tr:nth-child(odd) {
-    background-color: #ccc;
+    background-color: #f5f5f5;
 }
 
 span.helptext {
