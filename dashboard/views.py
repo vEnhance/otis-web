@@ -24,7 +24,6 @@ def main(request, student_id):
 	context = {}
 	context['title'] = "Dashboard for " + student.name
 	context['student'] = student
-	context['curriculum'] = student.curriculum.all()
 	context['omniscient'] = student.is_taught_by(request.user)
 	context['olympiads'] = exams.models.MockOlympiad.objects.filter(due_date__isnull=False)
 	context['assignments'] = exams.models.Assignment.objects.filter(semester__active=True)
@@ -46,6 +45,7 @@ def uploads(request, student_id, unit_id):
 	context = {}
 	context['title'] = 'File Uploads'
 	context['student'] = student
+	context['unit'] = unit
 	context['files'] = dashboard.models.UploadedFile.objects\
 			.filter(benefactor=student, unit=unit)
 	# TODO form for adding new files
@@ -64,7 +64,7 @@ def index(request):
 	students = roster.utils.get_visible(request.user,
 		roster.models.Student.objects.filter(semester__active = True))
 	context = {}
-	context['title'] = "OTIS-WEB: Current Listing"
+	context['title'] = "Current Semester Listing"
 	context['students'] = students
 	context['show_past_link'] = True
 	return render(request, "dashboard/stulist.html", context)
@@ -72,6 +72,6 @@ def index(request):
 def past(request):
 	students = roster.utils.get_visible(request.user, roster.models.Student.objects.all())
 	context = {}
-	context['title'] = "OTIS-WEB: Previous Listing"
+	context['title'] = "Previous Semester Listing"
 	context['students'] = students
 	return render(request, "dashboard/stulist.html", context)
