@@ -15,10 +15,10 @@ Completed units are marked with &check;.</p>
 
 <p>Link to <a href="{% url "uploads" student.id 0 %}">miscellaneous uploads</a>.</p>
 
-{% if omniscient or debug %}
+{% if omniscient %}
 <p>(Teacher) <a href="{% url "advance" student.id %}">Advance Student</a></p>
 {% endif %}
-{% if user.is_staff or debug %}
+{% if user.is_staff %}
 <p>(Admin) <a href="{% url "curredit" student.id %}">Edit this curriculum</a></p>
 {% endif %}
 
