@@ -13,14 +13,15 @@ You have completed {{ student.current_unit_index }} units.</p>
 Completed units are marked with &check;.</p>
 {% include "dashboard/list_curriculum.html" %}
 
-<p>Link to <a href="{% url "uploads" student.id 0 %}">miscellaneous uploads</a>.</p>
-
-{% if omniscient %}
-<p>(Teacher) <a href="{% url "advance" student.id %}">Advance Student</a></p>
-{% endif %}
-{% if user.is_staff %}
-<p>(Admin) <a href="{% url "curredit" student.id %}">Edit this curriculum</a></p>
-{% endif %}
+<ul>
+	<li>Link to <a href="{% url "uploads" student.id 0 %}">miscellaneous uploads</a>.</li>
+	{% if omniscient %}
+	<li> <a href="{% url "advance" student.id %}">Advance Student</a> (teacher)</li>
+	{% endif %}
+	{% if user.is_staff %}
+	<li><a href="{% url "curredit" student.id %}">Edit this curriculum</a> (admin)</li>
+	{% endif %}
+</ul>
 
 <hr />
 
