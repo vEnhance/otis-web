@@ -1,11 +1,8 @@
 {% extends 'layout.html' %}
 
 {% block layout-content %}
-<form action="{{ request.path }}" method="post">
-{% csrf_token %}
-{{ form.as_p }}
-<p> <input type="submit" name="submit"> </p>
-</form>
+<p>Use this form to change the pointer for the student.</p>
+{% include "generic-form.html" with submit_name="Advance" %}
 
 <p>For your reference, here is the existing curriculum.</p>
 {% include 'dashboard/list_curriculum.html' %}
