@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse, reverse_lazy
@@ -97,6 +97,24 @@ def past(request):
 class UpdateFile(LoginRequiredMixin, UpdateView):
 	model = dashboard.models.UploadedFile
 	fields = ('category', 'content', 'unit',)
+	def get_success_url(self):
+		f = dashboard.models.UploadedFile.objects.get(id = self.kwargs['pk'])
+		stu_id = f.benefactor.id
+		unit_id = f.unit.id if f.unit is not None else 0
+		return reverse("uploads", args=(stu_id, unit_id,))
+
+	def get_object(self, *args, **kwargs):
+		obj = super(UpdateFile, self).get_object(*args, **kwargs)
+		if not obj.owner == self.request.user:
+			raise Http404
+		return obj
+
 class DeleteFile(LoginRequiredMixin, DeleteView):
 	model = dashboard.models.UploadedFile
 	success_url = reverse_lazy("index")
+
+	def get_object(self, *args, **kwargs):
+		obj = super(DeleteFile, self).get_object(*args, **kwargs)
+		if not obj.owner == self.request.user:
+			raise Http404
+		return obj

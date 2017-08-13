@@ -15,8 +15,11 @@
 	<td>{{ file.created_at|date }}</td>
 	<td><a href="{{ file.content.url }}">{{ file }}</a></td>
 	<td>{{ file.owner }}</td>
-	<td><a href="{% url "editfile" file.id%}">(edit)</a>
-		<a href="{% url "delfile" file.id%}">(delete)</a></td>
+	<td>{% if file.owner.username == request.user.username %}
+		<a href="{% url "editfile" file.id%}">(edit)</a>
+		<a href="{% url "delfile" file.id%}">(delete)</a>
+		{% endif %}
+	</td>
 </tr>
 {% endfor %}
 </table>
