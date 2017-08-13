@@ -20,6 +20,8 @@ class Assistant(models.Model):
 		return self.name
 	def student_count(self):
 		return self.student_set.count()
+	class Meta:
+		unique_together = ('user', 'semester',)
 
 class Student(models.Model):
 	"""This is really a pair of a user and a semester (with a display name),
@@ -54,3 +56,5 @@ class Student(models.Model):
 		"""Checks whether the specified user is either same as the student,
 		or is an instructor for that student."""
 		return self.user == user or self.is_taught_by(user)
+	class Meta:
+		unique_together = ('user', 'semester',)
