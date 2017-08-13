@@ -14,8 +14,10 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import include, url
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.views.generic import RedirectView
+import settings
 
 urlpatterns = [
 	url(r'^admin/', admin.site.urls),
@@ -24,7 +26,7 @@ urlpatterns = [
 	url(r'^hijack/', include('hijack.urls')),
 	url(r'^accounts/', include('registration.backends.simple.urls')),
 	url(r'^$', RedirectView.as_view(pattern_name='index')),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 admin.site.site_header = 'OTIS-WEB Administrative Control Panel'
 admin.site.index_title = 'Dashboard'

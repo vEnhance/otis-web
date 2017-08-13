@@ -24,6 +24,7 @@ HIJACK_LOGIN_REDIRECT_URL = '/'
 HIJACK_LOGOUT_REDIRECT_URL = '/admin/auth/user/'
 LOGIN_REDIRECT_URL = '/'
 MEDIA_ROOT = '/home/evan/Desktop/otisweb'
+MEDIA_URL = '/media/'
 
 
 
