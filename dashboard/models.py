@@ -8,7 +8,7 @@ from django.contrib.auth import models as auth
 
 class UploadedFile(models.Model):
 	"""An uploaded file, for example a transcript or homework solutions."""
-	CHOICES = (("HMWK", "Homework"), ("TRNS", "Transcript"),
+	CHOICES = (("HMWK", "PSet Submission"), ("TRNS", "Transcript"),
 			("NOTE", "Notes / Comments"), ("MISC", "Miscellaneous"))
 	benefactor = models.ForeignKey(roster.models.Student,
 			help_text = "The student for which this file is meant")
