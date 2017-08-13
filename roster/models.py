@@ -9,7 +9,6 @@ import core
 class Assistant(models.Model):
 	"""This is a pair of a user and a semester (with a display name).
 	Currently don't need much information about them..."""
-	# TODO: should we really allow user to be null?
 	user = models.ForeignKey(auth.User, blank=True, null=True,
 			help_text = "The Django Auth user attached to the Assistant")
 	semester = models.ForeignKey(core.models.Semester,
@@ -27,7 +26,6 @@ class Student(models.Model):
 	"""This is really a pair of a user and a semester (with a display name),
 	endowed with the data of the curriculum of that student.
 	It also names the assistant of the student, if any."""
-	# TODO: should we really allow user to be null?
 	user = models.ForeignKey(auth.User, blank=True, null=True,
 			help_text = "The Django Auth user attached to the student")
 	name = models.CharField(max_length = 80,
@@ -44,7 +42,6 @@ class Student(models.Model):
 			"curriculum and is working on the (k+1)st unit")
 	def __unicode__(self):
 		return self.name + " (" + unicode(self.semester) + ")"
-	# TODO unique together: user + semester
 
 	def is_taught_by(self, user):
 		"""Checks whether the specified user is not the same as the student,

@@ -52,6 +52,6 @@ def advance(request, student_id):
 	context['form'] = form
 	context['student'] = student
 	context['curriculum'] = student.curriculum.all()
-	context['omniscient'] = student.is_taught_by(request.user) # TODO ugly, template tag this
+	context['omniscient'] = student.is_taught_by(request.user) # TODO ugly, template tag `omniscient`
 	return render(request, "roster/advance.html", context)
 
