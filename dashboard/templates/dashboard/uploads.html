@@ -9,11 +9,17 @@
 {% endif %}
 
 {% if files|length > 0 %}
-<ul>
-	{% for file in files %}
-	<li>{{ file }}</li>
-	{% endfor %}
-</ul>
+<table class="table">
+{% for file in files %}
+<tr>
+	<td>{{ file.created_at|date }}</td>
+	<td><a href="{{ file.file_content.url }}">{{ file }}</a></td>
+	<td>{{ file.owner }}</td>
+	<td><a href="{% url "editfile" file.id%}">(edit)</a>
+		<a href="{% url "delfile" file.id%}">(delete)</a></td>
+</tr>
+{% endfor %}
+</table>
 {% else %}
 <p><i>Nothing here yet!</i></p>
 {% endif %}
