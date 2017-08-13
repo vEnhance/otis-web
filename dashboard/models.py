@@ -14,16 +14,14 @@ class UploadedFile(models.Model):
 			help_text = "The student for which this file is meant")
 	owner = models.ForeignKey(auth.User,
 			help_text = "The user who uploaded the file")
-	file_type = models.CharField(max_length = 10, choices = CHOICES,
+	category = models.CharField(max_length = 10, choices = CHOICES,
 			help_text = "What kind of file this is")
-	file_content = models.FileField(help_text = "The file itself")
-	description = models.CharField(max_length = 160, blank = True,
-			help_text = "A description of the file")
+	content = models.FileField(help_text = "The file itself")
 	unit = models.ForeignKey(core.models.Unit, null = True, blank = True,
 			help_text = "The unit for which this file is associated")
 	created_at = models.DateTimeField(auto_now_add=True)
 	def __unicode__(self):
-		return self.file_content.name
+		return self.content.name
 	class Meta:
 		ordering = ('-created_at',)
 

@@ -96,7 +96,7 @@ def past(request):
 
 class UpdateFile(LoginRequiredMixin, UpdateView):
 	model = dashboard.models.UploadedFile
-	fields = ('file_type', 'file_content', 'description', 'unit',)
+	fields = ('category', 'content', 'unit',)
 class DeleteFile(LoginRequiredMixin, DeleteView):
 	model = dashboard.models.UploadedFile
 	success_url = reverse_lazy("index")
