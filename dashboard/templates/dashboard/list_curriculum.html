@@ -1,5 +1,5 @@
 <table class="table">
-{% for unit in curriculum %}
+{% for unit in student.curriculum.all %}
 <tr class="subject{{ unit.subject }}">
 	<th>{{ forloop.counter }}</th>
 	<td>{% if forloop.counter0 < student.current_unit_index %}
