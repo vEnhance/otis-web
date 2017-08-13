@@ -21,7 +21,10 @@ class UploadedFile(models.Model):
 			help_text = "A description of the file")
 	unit = models.ForeignKey(core.models.Unit, null = True, blank = True,
 			help_text = "The unit for which this file is associated")
+	created_at = models.DateTimeField(auto_now_add=True)
 	def __unicode__(self):
 		return self.file_content.name
+	class Meta:
+		ordering = ('-created_at',)
 
 # Create your models here.
