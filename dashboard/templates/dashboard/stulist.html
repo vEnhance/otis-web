@@ -1,12 +1,17 @@
 {% extends 'layout.html' %}
 {% block layout-content %}
 {% if students|length > 0 %}
+	<p>Here are the students to which you have access.</p>
 	<ol>
 	{% for student in students %}
 	<li><a href="{% url "dashboard" student.id %}">{{ student }}</a></li>
 	{% endfor %}
 	</ol>
 {% else %}
-<i>But nobody came.</i>
+	<p><i>But nobody came.</i></p>
+{% endif %}
+
+{% if show_past_link %}
+<p>For past semesters, <a href="{% url "past" %}">see here</a>.</p>
 {% endif %}
 {% endblock %}

@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse
+from django.core.exceptions import ObjectDoesNotExist
 
 import core
 import dashboard
 import exams
-import roster
+import roster, roster.utils
+
 
 @login_required
 def main(request, student_id):
@@ -43,3 +46,29 @@ def uploads(request, student_id, unit_id):
 			.filter(benefactor=student, unit=unit)
 	# TODO form for adding new files
 	return render(request, "dashboard/uploads.html", context)
+
+@login_required
+def index(request):
+	# Check if active student
+	try:
+		student = roster.models.Student.objects.get(user = request.user, semester__active = True)
+		return HttpResponseRedirect(reverse("dashboard", args=(student.id,)))
+	except ObjectDoesNotExist:
+		pass
+
+	# Otherwise, do listing
+	students = roster.utils.get_visible(request.user,
+		roster.models.Student.objects.filter(semester__active = True))
+	context = {}
+	context['title'] = "OTIS-WEB: Current Listing"
+	context['students'] = students
+	context['show_past_link'] = True
+	return render(request, "dashboard/stulist.html", context)
+
+def past(request):
+	students = roster.utils.get_visible(request.user,
+		roster.models.Student.objects.filter(semester__active = False))
+	context = {}
+	context['title'] = "OTIS-WEB: Previous Listing"
+	context['students'] = students
+	return render(request, "dashboard/stulist.html", context)
