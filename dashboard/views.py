@@ -17,7 +17,9 @@ import roster, roster.utils
 def main(request, student_id):
 	student = get_object_or_404(roster.models.Student.objects, id = student_id)
 	if not student.can_view_by(request.user):
-		return HttpResponse("Permission denied")
+		context = {}
+		context['student'] = student
+		return render(request, "roster/denied.html", context)
 	
 	context = {}
 	context['title'] = "Dashboard for " + student.name
@@ -37,7 +39,9 @@ def uploads(request, student_id, unit_id):
 		unit = get_object_or_404(core.models.Unit.objects, id = unit_id)\
 				if unit_id else None
 	if not student.can_view_by(request.user):
-		return HttpResponse("Permission denied")
+		context = {}
+		context['student'] = student
+		return render(request, "roster/denied.html", context)
 
 	context = {}
 	context['title'] = 'File Uploads'
@@ -66,8 +70,7 @@ def index(request):
 	return render(request, "dashboard/stulist.html", context)
 
 def past(request):
-	students = roster.utils.get_visible(request.user,
-		roster.models.Student.objects.filter(semester__active = False))
+	students = roster.utils.get_visible(request.user, roster.models.Student.objects.all())
 	context = {}
 	context['title'] = "OTIS-WEB: Previous Listing"
 	context['students'] = students

@@ -1,0 +1,6 @@
+{% extends 'layout.html' %}
+{% block title %}Permission Denied{% endblock %}
+{% block layout-content %}
+<p>You are logged in as {{ request.user }},
+and tried to view {{ student }}.</p>
+{% endblock %}
