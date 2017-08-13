@@ -1,7 +1,6 @@
 {% extends 'layout.html' %}
+{% block title %}{% if unit %}Uploads for {{ unit }}{% else %}Miscellaneous Uploads{% endif %}{% endblock %}
 {% block layout-content %}
-<h2>{% if unit %}{{ unit }}{% else %}Miscellaneous Uploads{% endif %}</h2>
-
 {% if unit %}
 <p>These are the uploaded files for the unit <b>{{ unit }}</b>.</p>
 {% else %}
@@ -21,7 +20,7 @@
 
 <h2>Upload</h2>
 To upload files to this unit (or any other), use the following form.
-{# TODO FORM #}
+{% include "generic-form.html" with submit_name="Upload" %}
 
 <h2>Other Uploads</h2>
 <p>Use the links below to access other materials.</p>

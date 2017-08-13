@@ -6,11 +6,13 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist
+from django.contrib import messages
 
 import core
 import dashboard
 import exams
 import roster, roster.utils
+import forms
 
 
 @login_required
@@ -42,10 +44,23 @@ def uploads(request, student_id, unit_id):
 		context['student'] = student
 		return render(request, "roster/denied.html", context)
 
+	if request.method == "POST":
+		form = forms.NewUploadForm(request.POST, request.FILES)
+		if form.is_valid():
+			new_upload = form.save(commit=False)
+			new_upload.benefactor = student
+			new_upload.owner = request.user
+			new_upload.save()
+			messages.success(request, "New file has been uploaded.")
+	else:
+		form = forms.NewUploadForm(initial = {'unit' : unit})
+
+
 	context = {}
 	context['title'] = 'File Uploads'
 	context['student'] = student
 	context['unit'] = unit
+	context['form'] = form
 	context['files'] = dashboard.models.UploadedFile.objects\
 			.filter(benefactor=student, unit=unit)
 	# TODO form for adding new files
