@@ -1,0 +1,7 @@
+{% extends 'layout.html' %}
+{% block title %}Log Out{% endblock %}
+{% block layout-content %}
+<p>You have been logged out.
+Thank you for spending some quality time on OTIS-WEB today!</p>
+<p><a href="{% url "auth_login" %}">Log back in.</a></p>
+{% endblock layout-content %}

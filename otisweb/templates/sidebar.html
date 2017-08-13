@@ -1,6 +1,12 @@
-Logged in as <b>{{ request.user }}</b>.
+{% if request.user.is_authenticated %}
+<p>Logged in as <b>{{ request.user }}</b>.
+<a href="{% url "auth_logout" %}">(logout)</a></p>
+{% else %}
+<p>Not logged in. <a href="{% url "auth_login" %}">(login)</a></p>
+{% endif %}
 
 {% if student %}
 <h3><a href="{% url "dashboard" student.id %}">{{ student }}</a></h3>
 {% endif %}
-TODO: more here
+
+<p>TODO: MORE HERE</p>

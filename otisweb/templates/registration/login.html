@@ -2,9 +2,9 @@
 {% block title %}Log In{% endblock %}
 {% block layout-content %}
 {% if request.user.is_authenticated %}
-<p>You are already logged in as {{ request.user }},
-but you can log in to a different account here.</p>
-{% else %}
-{% include "generic-form.html" with submit_name="Login" %}
+<p>You are already logged in as {{ request.user }}.
+You can <a href="{% url "auth_logout" %}">log out here</a>,
+or sign in to a different account here.</p>
 {% endif %}
+{% include "generic-form.html" with submit_name="Login" %}
 {% endblock layout-content %}
