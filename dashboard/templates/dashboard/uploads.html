@@ -1,16 +1,34 @@
 {% extends 'layout.html' %}
 {% block layout-content %}
+<h2>{% if unit %}{{ unit }}{% else %}Miscellaneous Uploads{% endif %}</h2>
+
+{% if unit %}
+<p>These are the uploaded files for the unit <b>{{ unit }}</b>.</p>
+{% else %}
+<p>These are the <b>miscellaneous</b> uploaded files
+(not attached to any particular unit).</p>
+{% endif %}
 
 {% if files|length > 0 %}
 <ul>
 	{% for file in files %}
-	<li>{{ file }}: {{ file.unit }}</li>
+	<li>{{ file }}</li>
 	{% endfor %}
 </ul>
 {% else %}
-Nothing here yet!
+<p><i>Nothing here yet!</i></p>
 {% endif %}
 
-TODO: form to upload
+<h2>Upload</h2>
+To upload files to this unit (or any other), use the following form.
+{# TODO FORM #}
+
+<h2>Other Uploads</h2>
+<p>Use the links below to access other materials.</p>
+{% include "dashboard/list_curriculum.html" with omniscient=False %}
+<ul>
+<li><a href="{% url "uploads" student.id 0 %}">Link to miscellaneous uploads</a>.</li>
+<li><a href="{% url "dashboard" student.id %}">Back to dashboard</a></li>
+</ul>
 
 {% endblock %}
