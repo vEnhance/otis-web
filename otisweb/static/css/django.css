@@ -5,10 +5,10 @@ table td, th {
 	text-align: left;
 }
 
-tr:nth-child(even) {
+tr:nth-child(odd) {
     background-color: #e4e4e4;
 }
-tr:nth-child(odd) {
+tr:nth-child(even) {
     background-color: #f5f5f5;
 }
 
