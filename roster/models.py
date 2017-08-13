@@ -49,7 +49,7 @@ class Student(models.Model):
 		but has permission to view and edit the student's files and so on.
 		(This means the user is either an assistant for that student
 		or has staff privileges.)"""
-		return user.is_staff or (self.assistant.user == user)
+		return user.is_staff or (self.assistant is not None and self.assistant.user == user)
 	def can_view_by(self, user):
 		"""Checks whether the specified user is either same as the student,
 		or is an instructor for that student."""
