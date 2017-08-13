@@ -21,7 +21,7 @@ urlpatterns = [
 	url(r'^dash/', include('dashboard.urls')),
 	url(r'^roster/', include('roster.urls')),
 	url(r'^hijack/', include('hijack.urls')),
-	url(r'^reg/', include('registration.backends.simple.urls')),
+	url(r'^accounts/', include('registration.backends.simple.urls')),
 ]
 
 admin.site.site_header = 'OTIS-WEB Administrative Control Panel'
