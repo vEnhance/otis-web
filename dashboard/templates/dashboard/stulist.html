@@ -1,0 +1,12 @@
+{% extends 'layout.html' %}
+{% block layout-content %}
+{% if students|length > 0 %}
+	<ol>
+	{% for student in students %}
+	<li><a href="{% url "dashboard" student.id %}">{{ student }}</a></li>
+	{% endfor %}
+	</ol>
+{% else %}
+<i>But nobody came.</i>
+{% endif %}
+{% endblock %}
