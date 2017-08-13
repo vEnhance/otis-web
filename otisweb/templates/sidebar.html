@@ -7,10 +7,11 @@
 {% endif %}
 
 {% if student %}
-<h3><a href="{% url "dashboard" student.id %}">{{ student }}</a></h3>
+<h2><a href="{% url "dashboard" student.id %}">{{ student }}</a></h2>
 {% endif %}
-
-<p>TODO: MORE HERE</p>
+{% if student %}
+<p><a href="{% url "past" %}">Past Semesters</a></p>
+{% endif %}
 
 {% if request.user.is_authenticated %}
 <p><a href="{% url "auth_password_change" %}">(change password)</a></p>
