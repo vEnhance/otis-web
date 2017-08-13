@@ -4,9 +4,11 @@ from __future__ import unicode_literals
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, reverse_lazy
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
+from django.views.generic.edit import UpdateView, DeleteView
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 import core
 import dashboard
@@ -84,9 +86,17 @@ def index(request):
 	context['show_past_link'] = True
 	return render(request, "dashboard/stulist.html", context)
 
+@login_required
 def past(request):
 	students = roster.utils.get_visible(request.user, roster.models.Student.objects.all())
 	context = {}
 	context['title'] = "Previous Semester Listing"
 	context['students'] = students
 	return render(request, "dashboard/stulist.html", context)
+
+class UpdateFile(LoginRequiredMixin, UpdateView):
+	model = dashboard.models.UploadedFile
+	fields = ('file_type', 'file_content', 'description', 'unit',)
+class DeleteFile(LoginRequiredMixin, DeleteView):
+	model = dashboard.models.UploadedFile
+	success_url = reverse_lazy("index")
