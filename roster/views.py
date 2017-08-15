@@ -10,7 +10,7 @@ import itertools
 
 import core
 import roster
-import forms
+from . import forms
 
 # Create your views here.
 

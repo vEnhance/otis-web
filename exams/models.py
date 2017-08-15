@@ -21,7 +21,7 @@ class MockOlympiad(models.Model):
 	due_date = models.DateField(null = True, blank = True,
 			help_text = "When the assignment should be due. Leave blank if not active this semester.")
 	def __unicode__(self):
-		return self.family + " " + unicode(self.number)
+		return self.family + " " + str(self.number)
 	@property
 	def active(self):
 		return (self.due_date is not None)

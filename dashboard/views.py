@@ -14,7 +14,7 @@ import core
 import dashboard
 import exams
 import roster, roster.utils
-import forms
+from . import forms
 
 
 @login_required

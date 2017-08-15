@@ -40,7 +40,7 @@ class Unit(models.Model):
 	subject = models.CharField(max_length=2, choices = SUBJECT_CHOICES,
 			help_text = "The subject for the unit")
 	def __unicode__(self):
-		return self.name + u" [" + self.code + u"]"
+		return self.name + " [" + self.code + "]"
 	class Meta:
 		unique_together = ('name', 'code')
 		ordering = ('position',)

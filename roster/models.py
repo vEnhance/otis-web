@@ -42,7 +42,7 @@ class Student(models.Model):
 			"then the student has completed the first k units of his/her "
 			"curriculum and is working on the (k+1)st unit")
 	def __unicode__(self):
-		return self.name + " (" + unicode(self.semester) + ")"
+		return self.name + " (" + str(self.semester) + ")"
 
 	def is_taught_by(self, user):
 		"""Checks whether the specified user is not the same as the student,

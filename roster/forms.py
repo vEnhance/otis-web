@@ -23,7 +23,7 @@ class CurriculumForm(forms.Form):
 	def __init__(self, *args, **kwargs):
 		units = kwargs.pop('units')
 		original = kwargs.pop('original', [])
-		print original
+		print(original)
 
 		super(CurriculumForm, self).__init__(*args, **kwargs)
 		
