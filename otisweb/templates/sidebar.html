@@ -22,12 +22,12 @@
 {% endif %}
 {% if request.user.is_staff %}
 <li><a href="{% url "admin:index" %}">Admin Site</a></li>
-{% if student %}
+{% if student.user %}
 <li>
-<form action="/hijack/{{ student.user.id }}/" method="post">
+	<form action="/hijack/{{ student.user.id }}/" method="post">
     {% csrf_token %}
     <button class="pseudo-button" type="submit">Hijack {{ student.user.username }}</button>
-</form>
+	</form>
 </li>
 {% endif %}
 
