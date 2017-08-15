@@ -20,7 +20,7 @@ class MockOlympiad(models.Model):
 			help_text = "The URL to the solutions")
 	due_date = models.DateField(null = True, blank = True,
 			help_text = "When the assignment should be due. Leave blank if not active this semester.")
-	def __unicode__(self):
+	def __str__(self):
 		return self.family + " " + str(self.number)
 	@property
 	def active(self):
@@ -35,7 +35,7 @@ class Assignment(models.Model):
 	name = models.CharField(max_length = 80,
 			help_text = "Name / description of the assignment")
 	due_date = models.DateField(help_text = "When the assignment is due")
-	def __unicode__(self):
+	def __str__(self):
 		return self.name
 	class Meta:
 		unique_together = ('semester', 'name')

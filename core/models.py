@@ -12,7 +12,7 @@ class Semester(models.Model):
 	active = models.BooleanField(default=False,
 			help_text = "Whether the semester is currently active "
 			"(there should thus be at most one active semester)")
-	def __unicode__(self):
+	def __str__(self):
 		return self.name
 
 class Unit(models.Model):
@@ -39,7 +39,7 @@ class Unit(models.Model):
 			)
 	subject = models.CharField(max_length=2, choices = SUBJECT_CHOICES,
 			help_text = "The subject for the unit")
-	def __unicode__(self):
+	def __str__(self):
 		return self.name + " [" + self.code + "]"
 	class Meta:
 		unique_together = ('name', 'code')

@@ -20,7 +20,7 @@ class UploadedFile(models.Model):
 	unit = models.ForeignKey(core.models.Unit, null = True, blank = True,
 			help_text = "The unit for which this file is associated")
 	created_at = models.DateTimeField(auto_now_add=True)
-	def __unicode__(self):
+	def __str__(self):
 		return self.content.name
 	class Meta:
 		ordering = ('-created_at',)

@@ -15,7 +15,7 @@ class Assistant(models.Model):
 			help_text = "The semester for this Assistant")
 	name = models.CharField(max_length = 80,
 			help_text = "The display name for this Assistant (e.g. a nickname)")
-	def __unicode__(self):
+	def __str__(self):
 		return self.name
 	def student_count(self):
 		return self.student_set.count()
@@ -41,7 +41,7 @@ class Student(models.Model):
 			help_text = "If this is equal to k, "
 			"then the student has completed the first k units of his/her "
 			"curriculum and is working on the (k+1)st unit")
-	def __unicode__(self):
+	def __str__(self):
 		return self.name + " (" + str(self.semester) + ")"
 
 	def is_taught_by(self, user):
