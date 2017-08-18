@@ -25,6 +25,7 @@ urlpatterns = [
 	url(r'^roster/', include('roster.urls')),
 	url(r'^hijack/', include('hijack.urls')),
 	url(r'^accounts/', include('registration.backends.simple.urls')),
+	url(r'^_ah/health/', RedirectView.as_view(pattern_name='index')), # health checks
 	url(r'^$', RedirectView.as_view(pattern_name='index')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
