@@ -4,8 +4,21 @@ env: flex
 entrypoint: gunicorn -b :$PORT otisweb.wsgi
 
 beta_settings:
-  cloud_sql_instances: 'evanchen-cc-otis:us-central1:otis-db'
+  cloud_sql_instances: "evanchen-cc-otis:us-central1:otis-db"
 
 runtime_config:
   python_version: 3
+
+env_variables:
+  DATABASE_NAME: otis
+  DATABASE_USER: otisweb
+  DATABASE_PASSWORD: "MEOWMEOW"
+  DATABASE_HOST: "/cloudsql/evanchen-cc-otis:us-central1:otis-db"
+  STATIC_URL: "http://storage.googleapis.com/otisweb-static/static/"
+  GS_ACCESS_KEY_ID: "GOOGXYZ"
+  GS_SECRET_ACCESS_KEY: "HERE+KITTY+KITTY+"
+  GS_BUCKET_NAME: "otisweb-media"
+  MEDIA_URL: "https://storage.googleapis.com/otisweb-media/"
+
+
 # [END runtime]

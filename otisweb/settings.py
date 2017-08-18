@@ -24,7 +24,7 @@ HIJACK_LOGIN_REDIRECT_URL = '/'
 HIJACK_LOGOUT_REDIRECT_URL = '/admin/auth/user/'
 LOGIN_REDIRECT_URL = '/'
 
-PRODUCTION = bool(os.getenv('GAE_INSTANCE'))
+PRODUCTION = bool(os.getenv('DATABASE_NAME'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
@@ -103,15 +103,13 @@ if PRODUCTION:
 	DATABASES = {
 		'default': {
 			'ENGINE': 'django.db.backends.postgresql',
-			'NAME' : 'otis',
-			'USER' : "otisweb",
-			'PASSWORD' : "MEOWMEOW",
-			'HOST' : '/cloudsql/evanchen-cc-otis:us-central1:otis-db', # meow
+			'NAME' : os.getenv("DATABASE_NAME"),
+			'USER' : os.getenv("DATABASE_USER"),
+			'PASSWORD' : os.getenv("DATABASE_PASSWORD"),
+			'HOST' : os.getenv("DATABASE_HOST"),
 			'PORT' : '5432',
 		}
 	}
-	if os.getenv('GAE_INSTANCE') == "local":
-		DATABASES['default']['HOST'] = '127.0.0.1'
 else:
 	DATABASES = {
 		'default': {
@@ -160,12 +158,12 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 if PRODUCTION:
-	STATIC_URL = 'http://storage.googleapis.com/otisweb-static/static/'
 	DEFAULT_FILE_STORAGE = 'storages.backends.gs.GSBotoStorage'
-	GS_ACCESS_KEY_ID = 'GOOGXYZ'
-	GS_SECRET_ACCESS_KEY = 'HERE+KITTY+KITTY+'
-	GS_BUCKET_NAME = 'otisweb-media'
-	MEDIA_URL = 'https://storage.googleapis.com/otisweb-media/'
+	STATIC_URL = os.getenv("STATIC_URL")
+	GS_ACCESS_KEY_ID = os.getenv("GS_ACCESS_KEY_ID")
+	GS_SECRET_ACCESS_KEY = os.getenv("GS_SECRET_ACCESS_KEY")
+	GS_BUCKET_NAME = os.getenv("GS_BUCKET_NAME")
+	MEDIA_URL = os.getenv("MEDIA_URL")
 else:
 	STATIC_URL = '/static/'
 	MEDIA_URL = '/media/'
