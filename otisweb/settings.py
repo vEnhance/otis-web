@@ -106,14 +106,10 @@ if PRODUCTION:
 			'NAME' : 'otis',
 			'USER' : "otisweb",
 			'PASSWORD' : "MEOWMEOW",
-			'HOST' : '127.0.0.1',
+			'HOST' : '/cloudsql/evanchen-cc-otis:us-central1:otis-db', # meow
 			'PORT' : '5432',
 		}
 	}
-	# In the flexible environment, you connect to CloudSQL using a unix socket.
-	# Locally, you can use the CloudSQL proxy to proxy a localhost connection
-	# to the instance
-	DATABASES['default']['HOST'] = '/cloudsql/evanchen-cc-otis:us-central-1:otis-db'
 else:
 	DATABASES = {
 		'default': {
@@ -121,7 +117,6 @@ else:
 			'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
 		}
 	}
-	DATABASES['default']['HOST'] = '127.0.0.1'
 
 # Password validation
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
