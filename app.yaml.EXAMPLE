@@ -12,11 +12,11 @@ runtime_config:
 env_variables:
   DATABASE_NAME: otis
   DATABASE_USER: otisweb
-  DATABASE_PASSWORD: "MEOWMEOW"
+  DATABASE_PASSWORD: "<db password here>"
   DATABASE_HOST: "/cloudsql/evanchen-cc-otis:us-central1:otis-db"
   STATIC_URL: "http://storage.googleapis.com/otisweb-static/static/"
-  GS_ACCESS_KEY_ID: "GOOGXYZ"
-  GS_SECRET_ACCESS_KEY: "HERE+KITTY+KITTY+"
+  GS_ACCESS_KEY_ID: "<access id here>"
+  GS_SECRET_ACCESS_KEY: "<access key here>"
   GS_BUCKET_NAME: "otisweb-media"
   MEDIA_URL: "https://storage.googleapis.com/otisweb-media/"
 
