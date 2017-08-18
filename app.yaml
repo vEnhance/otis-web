@@ -1,0 +1,11 @@
+# [START runtime]
+runtime: python
+env: flex
+entrypoint: gunicorn -b :$PORT otisweb.wsgi
+
+beta_settings:
+  cloud_sql_instances: 'evanchen-cc-otis:us-central1:otis-db'
+
+runtime_config:
+  python_version: 3
+# [END runtime]
