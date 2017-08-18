@@ -23,8 +23,6 @@ HIJACK_ALLOW_GET_REQUESTS = True
 HIJACK_LOGIN_REDIRECT_URL = '/'
 HIJACK_LOGOUT_REDIRECT_URL = '/admin/auth/user/'
 LOGIN_REDIRECT_URL = '/'
-MEDIA_ROOT = '/home/evan/Desktop/otisweb'
-MEDIA_URL = '/media/'
 
 PRODUCTION = bool(os.getenv('GAE_INSTANCE'))
 
@@ -92,6 +90,8 @@ TEMPLATES = [
 		'debug' : not PRODUCTION,
 		},
 	},
+
+
 ]
 
 WSGI_APPLICATION = 'otisweb.wsgi.application'
@@ -110,6 +110,8 @@ if PRODUCTION:
 			'PORT' : '5432',
 		}
 	}
+	if os.getenv('GAE_INSTANCE') == "local":
+		DATABASES['default']['HOST'] = '127.0.0.1'
 else:
 	DATABASES = {
 		'default': {
@@ -155,8 +157,15 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+
 if PRODUCTION:
-	STATIC_URL = 'http://storage.googleapis.com/otisweb-static.evanchen.cc/static/'
+	STATIC_URL = 'http://storage.googleapis.com/otisweb-static/static/'
+	DEFAULT_FILE_STORAGE = 'storages.backends.gs.GSBotoStorage'
+	GS_ACCESS_KEY_ID = 'GOOGXYZ'
+	GS_SECRET_ACCESS_KEY = 'HERE+KITTY+KITTY+'
+	GS_BUCKET_NAME = 'otisweb-media'
+	MEDIA_URL = 'https://storage.googleapis.com/otisweb-media/'
 else:
 	STATIC_URL = '/static/'
-
+	MEDIA_URL = '/media/'
