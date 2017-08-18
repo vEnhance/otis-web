@@ -30,7 +30,7 @@ def main(request, student_id):
 	context['student'] = student
 	context['omniscient'] = student.is_taught_by(request.user)
 	context['olympiads'] = exams.models.MockOlympiad.objects.filter(due_date__isnull=False)
-	context['assignments'] = exams.models.Assignment.objects.filter(semester__active=True)
+	context['assignments'] = exams.models.Assignment.objects.filter(due_date__isnull=False)
 	return render(request, "dashboard/main.html", context)
 
 @login_required

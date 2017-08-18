@@ -30,12 +30,9 @@ class MockOlympiad(models.Model):
 
 class Assignment(models.Model):
 	"""An assignment which is just a text description (e.g. HMMT practices)."""
-	semester = models.ForeignKey(core.models.Semester,
-			help_text = "The semester that the assignment is given in")
-	name = models.CharField(max_length = 80,
+	name = models.CharField(max_length = 80, unique = True,
 			help_text = "Name / description of the assignment")
-	due_date = models.DateField(help_text = "When the assignment is due")
+	due_date = models.DateField(null = True, blank = True,
+			help_text = "When the assignment is due. Leave blank if not active this semester.")
 	def __str__(self):
 		return self.name
-	class Meta:
-		unique_together = ('semester', 'name')

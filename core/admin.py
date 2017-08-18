@@ -7,17 +7,10 @@ import exams
 
 # Register your models here.
 
-class AssignmentInline(admin.TabularInline):
-	model = exams.models.Assignment
-	fields = ('name', 'olympiad', 'due_date',)
-	extra = 0
-
 @admin.register(core.models.Semester)
 class SemesterAdmin(admin.ModelAdmin):
 	list_display = ('name', 'active',)
 	search_fields = ('name',)
-	inlines = (AssignmentInline,)
-
 
 class UnitIEResource(resources.ModelResource):
 	class Meta:

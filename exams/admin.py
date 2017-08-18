@@ -15,17 +15,17 @@ class MockOlympiadIEResource(resources.ModelResource):
 @admin.register(exams.models.MockOlympiad)
 class MockOlympiadAdmin(ImportExportModelAdmin):
 	list_display = ('family', 'number', 'due_date',)
-	search_fields = ('family', 'number', 'due_date',)
+	search_fields = ('family', 'number',)
 	resource_class = MockOlympiadIEResource
 
 class AssignmentIEResource(resources.ModelResource):
 	class Meta:
 		skip_unchanged = True
 		model = exams.models.Assignment
-		fields = ('id', 'semester', 'name', 'due_date',)
+		fields = ('id', 'name', 'due_date',)
 
 @admin.register(exams.models.Assignment)
 class AssignmentAdmin(ImportExportModelAdmin):
-	list_display = ('id', 'semester', 'name', 'due_date',)
-	search_fields = ('olympiad__family', 'name',)
+	list_display = ('id', 'name', 'due_date',)
+	search_fields = ('name',)
 	resource_class = AssignmentIEResource
