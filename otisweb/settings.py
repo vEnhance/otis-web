@@ -26,7 +26,7 @@ LOGIN_REDIRECT_URL = '/'
 MEDIA_ROOT = '/home/evan/Desktop/otisweb'
 MEDIA_URL = '/media/'
 
-
+PRODUCTION = bool(os.getenv('GAE_INSTANCE'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
@@ -35,9 +35,13 @@ MEDIA_URL = '/media/'
 SECRET_KEY = 'n@hi1t%ubp)c9)77r^-1(#u8zt@9b-nife%f1orc3(!wr=#zip'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = True # not PRODUCTION
 
-ALLOWED_HOSTS = []
+# SECURITY WARNING: App Engine's security features ensure that it is safe to
+# have ALLOWED_HOSTS = ['*'] when the app is deployed. If you deploy a Django
+# app not on App Engine, make sure to set an appropriate host here.
+# See https://docs.djangoproject.com/en/1.10/ref/settings/
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -85,7 +89,7 @@ TEMPLATES = [
 				'django.contrib.auth.context_processors.auth',
 				'django.contrib.messages.context_processors.messages',
 			],
-		'debug' : DEBUG, # TEMPLATE_DEBUG = DEBUG
+		'debug' : not PRODUCTION,
 		},
 	},
 ]
@@ -95,13 +99,29 @@ WSGI_APPLICATION = 'otisweb.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
-DATABASES = {
-	'default': {
-		'ENGINE': 'django.db.backends.sqlite3',
-		'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+if PRODUCTION:
+	DATABASES = {
+		'default': {
+			'ENGINE': 'django.db.backends.postgresql',
+			'NAME' : 'otis',
+			'USER' : "otisweb",
+			'PASSWORD' : "MEOWMEOW",
+			'HOST' : '127.0.0.1',
+			'PORT' : '5432',
+		}
 	}
-}
-
+	# In the flexible environment, you connect to CloudSQL using a unix socket.
+	# Locally, you can use the CloudSQL proxy to proxy a localhost connection
+	# to the instance
+	DATABASES['default']['HOST'] = '/cloudsql/evanchen-cc-otis:us-central-1:otis-db'
+else:
+	DATABASES = {
+		'default': {
+			'ENGINE': 'django.db.backends.sqlite3',
+			'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+		}
+	}
+	DATABASES['default']['HOST'] = '127.0.0.1'
 
 # Password validation
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
@@ -139,4 +159,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+if PRODUCTION:
+	STATIC_URL = 'http://storage.googleapis.com/otisweb-static.evanchen.cc/static/'
+else:
+	STATIC_URL = '/static/'
+
