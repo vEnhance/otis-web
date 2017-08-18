@@ -7,10 +7,17 @@ import exams
 
 # Register your models here.
 
+class SemesterResource(resources.ModelResource):
+	class Meta:
+		skip_unchanged = True
+		model = core.models.Semester
+		fields = ('id', 'name', 'active')
+
 @admin.register(core.models.Semester)
-class SemesterAdmin(admin.ModelAdmin):
-	list_display = ('name', 'active',)
+class SemesterAdmin(ImportExportModelAdmin):
+	list_display = ('name', 'id', 'active',)
 	search_fields = ('name',)
+	resource_class = SemesterResource
 
 class UnitIEResource(resources.ModelResource):
 	class Meta:
