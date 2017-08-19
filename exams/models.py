@@ -43,6 +43,7 @@ class MockOlympiad(AbstractAssignmentModel):
 		return self.family + " " + str(self.number)
 	class Meta:
 		unique_together = ('family', 'number')
+		ordering = ('due_date', 'start_date', 'family', 'number')
 
 class Assignment(AbstractAssignmentModel):
 	"""An assignment which is just a text description (e.g. HMMT practices)."""
@@ -54,3 +55,5 @@ class Assignment(AbstractAssignmentModel):
 			help_text = "When the assignment is due. Leave blank if not active this semester.")
 	def __str__(self):
 		return self.name
+	class Meta:
+		ordering = ('due_date', 'start_date', 'name')
