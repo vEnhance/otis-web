@@ -96,7 +96,7 @@ def past(request):
 
 class UpdateFile(LoginRequiredMixin, UpdateView):
 	model = dashboard.models.UploadedFile
-	fields = ('category', 'content', 'unit',)
+	fields = ('category', 'content', 'description', 'unit',)
 	def get_success_url(self):
 		f = dashboard.models.UploadedFile.objects.get(id = self.kwargs['pk'])
 		stu_id = f.benefactor.id

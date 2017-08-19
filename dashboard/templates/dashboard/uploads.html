@@ -9,20 +9,21 @@
 {% endif %}
 
 {% if files|length > 0 %}
-<table class="table">
+<ol>
 {% for file in files %}
-<tr>
-	<td>{{ file.created_at|date }}</td>
-	<td><a href="{{ file.content.url }}">{{ file }}</a></td>
-	<td>{{ file.owner }}</td>
-	<td>{% if file.owner.username == request.user.username %}
-		<a href="{% url "editfile" file.id%}">(edit)</a>
-		<a href="{% url "delfile" file.id%}">(delete)</a>
-		{% endif %}
-	</td>
-</tr>
+<li>
+	<p><b><a href="{{ file.content.url }}">{{ file }}</a></b>
+	{% if file.description %} &mdash; {{file.description}}{% endif %}
+	<br />
+	<small>Uploaded by <i>{{ file.owner }}</i> at {{ file.created_at|date }}.
+	{% if file.owner.username == request.user.username %}
+	<a href="{% url "editfile" file.id%}">(edit)</a>
+	<a href="{% url "delfile" file.id%}">(delete)</a></small>
+	{% endif %}
+	</p>
+</li>
 {% endfor %}
-</table>
+</ol>
 {% else %}
 <p><i>Nothing here yet!</i></p>
 {% endif %}
