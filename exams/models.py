@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import core
+import datetime
 from django.db import models
 
 # Create your models here.
@@ -25,9 +26,17 @@ class MockOlympiad(models.Model):
 			help_text = "When the assignment should be due. Leave blank if not active this semester.")
 	def __str__(self):
 		return self.family + " " + str(self.number)
+
 	@property
-	def active(self):
-		return (self.due_date is not None)
+	def overdue(self):
+		return (self.due_date is not None) and (self.due_date < datetime.date.today())
+	@property
+	def started(self):
+		return (self.due_date is not None) and (self.start_date <= datetime.date.today())
+	@property
+	def current(self):
+		return self.started and not self.overdue
+
 	class Meta:
 		unique_together = ('family', 'number')
 

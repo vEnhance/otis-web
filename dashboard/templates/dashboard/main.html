@@ -14,8 +14,8 @@ Completed units are marked with &check;.</p>
 {% include "dashboard/list_curriculum.html" %}
 
 <ul>
-	<li>Link to <a href="http://web.evanchen.cc/private/otis-syllabus.pdf">syllabus</a></li>
-	<li>Link to <a href="http://web.evanchen.cc/private/parent-info.pdf">parent information</a></li>
+	<li>Link to <a href="http://web.evanchen.cc/private/otis-syllabus.pdf">syllabus</a>,
+		<a href="http://web.evanchen.cc/private/parent-info.pdf">parent information</a>.</li>
 	<li>Link to <a href="{% url "uploads" student.id 0 %}">miscellaneous uploads</a></li>
 	{% if omniscient %}
 	<li> <a href="{% url "advance" student.id %}">Advance Student</a> (teacher)</li>
@@ -27,25 +27,47 @@ Completed units are marked with &check;.</p>
 
 <hr />
 
-<h2>Mock Olympiad</h2>
-Submit these to <a href="http://www.gradescope.com">GradeScope</a>.
+<h2>Mock Olympiads</h2>
+<p>Submit these to <a href="http://www.gradescope.com">GradeScope</a>,
+unless otherwise specified.
+</p>
 
 <table class="table">
 {% for oly in olympiads %}
 <tr>
-	<th>{{ forloop.counter }}</th>
-	<td>{{ oly }}</td>
+	{# Status symbol for olympiads is more complex #}
+	{% if oly.overdue %}
+	<td>&check;</td>
+	{% elif oly.current %}
+	<td>&star;</td>
+	{% else %}
+	<td></td>
+	{% endif %}
+	<td>{{ oly.family }} {{ oly.number }}</td>
+	{% if oly.started %}
 	<td>{% if oly.jmo_url %}<a href="{{oly.jmo_url}}">JMO</a>{% endif %}</td>
 	<td>{% if oly.usamo_url %}<a href="{{oly.usamo_url}}">USAMO</a>{% endif %}</td>
 	<td>{% if oly.soln_url %}<a href="{{oly.soln_url}}">Solutions</a>{% endif %}</td>
+	{% else  %}
+	<td>&ndash;</td> <td>&ndash;</td> <td>&ndash;</td>
+	{% endif %}
+
+	{% if oly.overdue %}
+	<td>&check;</td>
+	{% elif oly.started %}
 	<td>Due {{ oly.due_date|date:"DATE_FORMAT" }}</td>
+	{% else %}
+	<td>{{ oly.start_date|date:"DATE_FORMAT" }} &ndash; {{ oly.due_date|date:"DATE_FORMAT" }}</td>
+	{% endif %}
 </tr>
 {% endfor %}
 </table>
 <hr />
 
 <h2>Practice HMMT</h2>
-Submit these to <a href="http://www.gradescope.com">GradeScope</a>.
+<p>Submit these to <a href="http://www.gradescope.com">GradeScope</a>,
+unless otherwise specified.</p>
+
 <table class="table">
 {% for assn in assignments %}
 <tr>
@@ -55,6 +77,4 @@ Submit these to <a href="http://www.gradescope.com">GradeScope</a>.
 </tr>
 {% endfor %}
 </table>
-<hr />
-
 {% endblock %}
