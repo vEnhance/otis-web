@@ -33,7 +33,7 @@ PRODUCTION = bool(os.getenv('DATABASE_NAME'))
 SECRET_KEY = 'n@hi1t%ubp)c9)77r^-1(#u8zt@9b-nife%f1orc3(!wr=#zip'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True # not PRODUCTION
+DEBUG = not PRODUCTION
 
 # SECURITY WARNING: App Engine's security features ensure that it is safe to
 # have ALLOWED_HOSTS = ['*'] when the app is deployed. If you deploy a Django
