@@ -10,7 +10,7 @@ class MockOlympiadIEResource(resources.ModelResource):
 	class Meta:
 		skip_unchanged = True
 		model = exams.models.MockOlympiad
-		fields = ('family', 'number', 'jmo_url', 'usamo_url', 'solns_url',' id', 'start_date', 'due_date',)
+		fields = ('family', 'number', 'jmo_url', 'usamo_url', 'soln_url', 'id', 'start_date', 'due_date',)
 
 @admin.register(exams.models.MockOlympiad)
 class MockOlympiadAdmin(ImportExportModelAdmin):
