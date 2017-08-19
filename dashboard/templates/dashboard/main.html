@@ -31,11 +31,7 @@ Completed units are marked with &check;.</p>
 <hr />
 
 <h2>Mock Olympiads</h2>
-<p><a href="{% static "answersheets/long.pdf" %}">Link to olympiad answer sheets.</a>
-Submit these to <a href="http://www.gradescope.com">GradeScope</a>,
-unless otherwise specified.
-See the syllabus for full instructions.</p>
-
+<p><a href="{% static "answersheets/long.pdf" %}">Link to <b>olympiad answer sheets</b>.</a></p>
 <table class="table">
 {% for oly in olympiads %}
 <tr>
@@ -66,13 +62,15 @@ See the syllabus for full instructions.</p>
 </tr>
 {% endfor %}
 </table>
+<p>Submit these to <a href="http://www.gradescope.com">GradeScope</a>,
+unless otherwise specified.
+See the syllabus for full instructions.</p>
+
+
 <hr />
 
 <h2>Practice HMMT</h2>
-<p><a href="{% static "answersheets/short.pdf" %}">Link to short-answer forms.</a>
-Submit these to <a href="http://www.gradescope.com">GradeScope</a>,
-unless otherwise specified.
-See the syllabus for full instructions.</p>
+<p><a href="{% static "answersheets/short.pdf" %}">Link to <b>short-answer forms</b>.</a></p>
 
 <table class="table">
 {% for assn in assignments %}
@@ -83,4 +81,8 @@ See the syllabus for full instructions.</p>
 </tr>
 {% endfor %}
 </table>
+
+<p>Submit these to <a href="http://www.gradescope.com">GradeScope</a>,
+unless otherwise specified.
+See the syllabus for full instructions.</p>
 {% endblock %}

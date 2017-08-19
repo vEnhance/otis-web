@@ -2,7 +2,13 @@
 {% block title %}{% if unit %}Uploads for {{ unit }}{% else %}Miscellaneous Uploads{% endif %}{% endblock %}
 {% block layout-content %}
 {% if unit %}
-<p>These are the uploaded files for the unit <b>{{ unit }}</b>.</p>
+<p>These are the uploaded files for the unit <b>{{ unit }}</b>.
+The main thing this will be used for is:
+<ul>
+<li>For instructors to upload transcripts of lessons, and</li>
+<li>for you to upload submissions for the problem set.</li>
+</ul>
+</p>
 {% else %}
 <p>These are the <b>miscellaneous</b> uploaded files
 (not attached to any particular unit).</p>
