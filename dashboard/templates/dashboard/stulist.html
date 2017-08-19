@@ -2,11 +2,13 @@
 {% block layout-content %}
 {% if students|length > 0 %}
 	<p>Here are the students to which you have access.</p>
-	<ol>
+	<table>
 	{% for student in students %}
-	<li><a href="{% url "dashboard" student.id %}">{{ student }}</a></li>
+	<tr><td>{{ forloop.counter }}</td>
+		<td><a href="{% url "dashboard" student.id %}">{{ student.name }}</a></td>
+		<td>{{ student.semester }}</td></tr>
 	{% endfor %}
-	</ol>
+	</table>
 {% else %}
 	<p><i>But nobody came.</i></p>
 {% endif %}
