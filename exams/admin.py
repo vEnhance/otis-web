@@ -22,10 +22,10 @@ class AssignmentIEResource(resources.ModelResource):
 	class Meta:
 		skip_unchanged = True
 		model = exams.models.Assignment
-		fields = ('id', 'name', 'due_date',)
+		fields = ('id', 'name', 'start_date', 'due_date',)
 
 @admin.register(exams.models.Assignment)
 class AssignmentAdmin(ImportExportModelAdmin):
-	list_display = ('id', 'name', 'due_date',)
+	list_display = ('id', 'name', 'start_date', 'due_date',)
 	search_fields = ('name',)
 	resource_class = AssignmentIEResource
