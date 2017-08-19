@@ -1,4 +1,7 @@
 {% extends 'layout.html' %}
+{% load static %}
+{% load staticfiles %}
+
 {% block layout-content %}
 
 {% if omnsicient %}
@@ -28,9 +31,10 @@ Completed units are marked with &check;.</p>
 <hr />
 
 <h2>Mock Olympiads</h2>
-<p>Submit these to <a href="http://www.gradescope.com">GradeScope</a>,
+<p><a href="{% static "answersheets/long.pdf" %}">Link to olympiad answer sheets.</a>
+Submit these to <a href="http://www.gradescope.com">GradeScope</a>,
 unless otherwise specified.
-</p>
+See the syllabus for full instructions.</p>
 
 <table class="table">
 {% for oly in olympiads %}
@@ -65,8 +69,10 @@ unless otherwise specified.
 <hr />
 
 <h2>Practice HMMT</h2>
-<p>Submit these to <a href="http://www.gradescope.com">GradeScope</a>,
-unless otherwise specified.</p>
+<p><a href="{% static "answersheets/short.pdf" %}">Link to short-answer forms.</a>
+Submit these to <a href="http://www.gradescope.com">GradeScope</a>,
+unless otherwise specified.
+See the syllabus for full instructions.</p>
 
 <table class="table">
 {% for assn in assignments %}
