@@ -12,7 +12,8 @@ class AbstractAssignmentModel(models.Model):
 		return (self.due_date is not None) and (self.due_date < datetime.date.today())
 	@property
 	def started(self):
-		return (self.due_date is not None) and (self.start_date <= datetime.date.today())
+		if self.start_date is None: return True
+		return (self.start_date <= datetime.date.today())
 	@property
 	def current(self):
 		return self.started and not self.overdue
