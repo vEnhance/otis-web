@@ -23,6 +23,8 @@ class UploadedFile(models.Model):
 			help_text = "The user who uploaded the file")
 	category = models.CharField(max_length = 10, choices = CHOICES,
 			help_text = "What kind of file this is")
+	description = models.CharField(max_length = 250, blank = True,
+			help_text = "Optional description of the file")
 	content = models.FileField(help_text = "The file itself",
 			upload_to = content_file_name)
 	unit = models.ForeignKey(core.models.Unit, null = True, blank = True,
