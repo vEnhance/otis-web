@@ -43,6 +43,7 @@ Completed units are marked with &check;.</p>
 	{% else %}
 	<td></td>
 	{% endif %}
+
 	<td>{{ oly.family }} {{ oly.number }}</td>
 	{% if oly.started %}
 	<td>{% if oly.jmo_url %}<a href="{{oly.jmo_url}}">JMO</a>{% endif %}</td>
@@ -53,7 +54,7 @@ Completed units are marked with &check;.</p>
 	{% endif %}
 
 	{% if oly.overdue %}
-	<td>&check;</td>
+	<td>Finished {{ oly.due_date|date:"DATE_FORMAT" }}</td>
 	{% elif oly.started %}
 	<td>Due {{ oly.due_date|date:"DATE_FORMAT" }}</td>
 	{% else %}
@@ -76,8 +77,25 @@ See the syllabus for full instructions.</p>
 {% for assn in assignments %}
 <tr>
 	<th>{{ forloop.counter }}</th>
+
+	{# Status symbol #}
+	{% if assn.overdue %}
+	<td>&check;</td>
+	{% elif assn.current %}
+	<td>&star;</td>
+	{% else %}
+	<td></td>
+	{% endif %}
+
 	<td>{{ assn }}</td>
+
+	{% if assn.overdue %}
+	<td>Finished {{ assn.due_date|date:"DATE_FORMAT" }}</td>
+	{% elif assn.started %}
 	<td>Due {{ assn.due_date|date:"DATE_FORMAT" }}</td>
+	{% else %}
+	<td>{{ assn.start_date|date:"DATE_FORMAT" }} &ndash; {{ assn.due_date|date:"DATE_FORMAT" }}</td>
+	{% endif %}
 </tr>
 {% endfor %}
 </table>
