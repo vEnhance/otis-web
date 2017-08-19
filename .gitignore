@@ -4,3 +4,8 @@ static/*
 media/*
 postgre
 app.yaml
+otisweb/static/answersheets/*.aux
+otisweb/static/answersheets/*.fls
+otisweb/static/answersheets/*.fdb_latexmk
+otisweb/static/answersheets/*.log
+otisweb/static/answersheets/*.pdf

@@ -1,0 +1,64 @@
+\documentclass[11pt]{article}
+\usepackage{graphicx}
+
+\setlength{\parindent}{0pt}
+\usepackage[margin=1in]{geometry}
+\usepackage{tabularx}
+\newcommand{\answerbox}[1]{
+	\begin{tabular}{|m{0.3in}|m{2in}|}
+		\hline
+		\LARGE \bfseries #1 & \\[0.45in]
+		\hline
+	\end{tabular}
+	\par\vspace{0.55in}
+}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\setlength{\headheight}{30pt}
+\renewcommand{\headrulewidth}{0pt}
+\rhead{\Huge$\bullet$}
+\cfoot{}
+\lhead{\includegraphics[height=1.3cm]{../img/logo.png}}
+\rfoot{\footnotesize OTIS, by Evan Chen}
+
+\begin{document}
+
+\begin{center}
+	{ \bfseries\huge Short-Answer Submission Form } \\[0.2in]
+	\begin{tabular}{|m{1.2in}|m{4.95in}|}
+		\hline
+		\textsc{Name} & \\[0.4in]
+	\end{tabular}
+	\begin{tabular}{|m{0.6in}|m{3.6in}|m{0.6in}|m{1in}|}
+		\hline
+		\textsc{Test} & \hspace{4in} & \textsc{Date} & \\[0.4in] \hline
+	\end{tabular}
+\end{center}
+
+\vspace{0.2in}
+Your work is graded by computer;
+illegible answers may affect your score.
+Write \emph{darkly} and \emph{legibly} in \emph{large font},
+staying within the borders for each problem.
+\par\vspace{0.2in} 
+
+\begin{center}
+	\begin{minipage}[t]{2.8in}
+		\answerbox{1}
+		\answerbox{2}
+		\answerbox{3}
+		\answerbox{4}
+		\answerbox{5}
+	\end{minipage}
+	\hspace{0.7in}
+	\begin{minipage}[t]{2.8in}
+		\answerbox{6}
+		\answerbox{7}
+		\answerbox{8}
+		\answerbox{9}
+		\answerbox{10}
+	\end{minipage}
+\end{center}
+
+
+\end{document}
