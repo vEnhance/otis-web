@@ -56,7 +56,7 @@ def uploads(request, student_id, unit_id):
 			messages.success(request, "New file has been uploaded.")
 	else:
 		form = forms.NewUploadForm(initial = {'unit' : unit})
-
+	form.fields["unit"].queryset = student.curriculum
 
 	context = {}
 	context['title'] = 'File Uploads'
