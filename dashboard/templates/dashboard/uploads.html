@@ -22,10 +22,11 @@ The main thing this will be used for is:
 	{% if file.description %} &mdash; {{file.description}}{% endif %}
 	<br />
 	<small>Uploaded by <i>{{ file.owner }}</i> at {{ file.created_at|date }}.
-	{% if file.owner.username == request.user.username %}
-	<a href="{% url "editfile" file.id%}">(edit)</a>
-	<a href="{% url "delfile" file.id%}">(delete)</a></small>
-	{% endif %}
+		{% if file.owner.username == request.user.username %}
+		<a href="{% url "editfile" file.id%}">(edit)</a>
+		<a href="{% url "delfile" file.id%}">(delete)</a>
+		{% endif %}
+	</small>
 	</p>
 </li>
 {% endfor %}
