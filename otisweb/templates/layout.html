@@ -1,8 +1,5 @@
 {% extends 'base.html' %}
 {% block base-content %}
-<div id="side">
-	{% include "sidebar.html" %}
-</div>
 <div id="main">
 	<div class="entry">
 		<h1>{% block title %}{{ title }}{% endblock %}</h1>
@@ -19,5 +16,8 @@
 			{% endblock %}
 		</div>
 	</div>
+</div>
+<div id="side">
+	{% include "sidebar.html" %}
 </div>
 {% endblock %}
