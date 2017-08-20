@@ -57,3 +57,7 @@ class Student(models.Model):
 	class Meta:
 		unique_together = ('user', 'semester',)
 		ordering = ('name',)
+
+	@property
+	def curriculum_length(self):
+		return self.curriculum.count()
