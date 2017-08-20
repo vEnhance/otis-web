@@ -20,11 +20,8 @@ from . import forms
 @login_required
 def main(request, student_id):
 	student = get_object_or_404(roster.models.Student.objects, id = student_id)
-	if not student.can_view_by(request.user):
-		context = {}
-		context['student'] = student
-		return render(request, "roster/denied.html", context)
-	
+	roster.utils.check_can_view(request, student)
+
 	context = {}
 	context['title'] = "Dashboard for " + student.name
 	context['student'] = student
@@ -36,16 +33,9 @@ def main(request, student_id):
 @login_required
 def uploads(request, student_id, unit_id):
 	student = get_object_or_404(roster.models.Student.objects, id = student_id)
-	if unit_id == "0":
-		unit = None
-	else:
-		unit = get_object_or_404(core.models.Unit.objects, id = unit_id)\
-				if unit_id else None
-	if not student.can_view_by(request.user):
-		context = {}
-		context['student'] = student
-		return render(request, "roster/denied.html", context)
-
+	roster.utils.check_can_view(request, student)
+	unit = get_object_or_404(core.models.Unit.objects, id = unit_id)\
+			if unit_id != "0" else None
 	if request.method == "POST":
 		form = forms.NewUploadForm(request.POST, request.FILES)
 		if form.is_valid():

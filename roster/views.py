@@ -9,7 +9,7 @@ from django.core.urlresolvers import reverse
 import itertools
 
 import core
-import roster
+import roster, roster.utils
 from . import forms
 
 # Create your views here.
@@ -39,6 +39,8 @@ def curriculum(request, student_id):
 @login_required
 def advance(request, student_id):
 	student = get_object_or_404(roster.models.Student.objects, id = student_id)
+	roster.utils.check_taught_by(student)
+	
 	if request.method == 'POST':
 		form = forms.AdvanceForm(request.POST, instance = student)
 		if form.is_valid():
