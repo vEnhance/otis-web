@@ -1,3 +1,4 @@
+{% if student.curriculum_length != 0 %}
 <table class="table">
 {% for unit in student.curriculum.all %}
 <tr class="subject{{ unit.subject }}">
@@ -33,3 +34,6 @@
 </tr>
 {% endfor %}
 </table>
+{% else %}
+<i>No curriculum materials yet! Please check back later.</i>
+{% endif %}
