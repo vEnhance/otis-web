@@ -39,7 +39,7 @@ def curriculum(request, student_id):
 @login_required
 def advance(request, student_id):
 	student = get_object_or_404(roster.models.Student.objects, id = student_id)
-	roster.utils.check_taught_by(student)
+	roster.utils.check_taught_by(request, student)
 	
 	if request.method == 'POST':
 		form = forms.AdvanceForm(request.POST, instance = student)
