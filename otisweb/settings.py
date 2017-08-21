@@ -18,13 +18,14 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 ## Manually added settings
 
-INTERNAL_IPS = ('127.0.0.1',)
 HIJACK_ALLOW_GET_REQUESTS = True
 HIJACK_LOGIN_REDIRECT_URL = '/'
 HIJACK_LOGOUT_REDIRECT_URL = '/'
 LOGIN_REDIRECT_URL = '/'
 
 PRODUCTION = bool(os.getenv('DATABASE_NAME'))
+if not PRODUCTION:
+	INTERNAL_IPS = ('127.0.0.1',)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
@@ -33,7 +34,7 @@ PRODUCTION = bool(os.getenv('DATABASE_NAME'))
 SECRET_KEY = 'n@hi1t%ubp)c9)77r^-1(#u8zt@9b-nife%f1orc3(!wr=#zip'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = not PRODUCTION
+DEBUG = not bool(os.getenv('GAE_INSTANCE'))
 
 # SECURITY WARNING: App Engine's security features ensure that it is safe to
 # have ALLOWED_HOSTS = ['*'] when the app is deployed. If you deploy a Django
