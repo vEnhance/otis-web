@@ -8,7 +8,8 @@
 <p>Viewing {{ student.name }} in teacher mode.</p>
 {% else %}
 <p>Hi {{ student.name }}, welcome back to {{ student.semester.name }}.
-You have completed {{ student.current_unit_index }} units.</p>
+You have completed {{ student.current_unit_index }} of 
+{{ student.curriculum_length }} units.</p>
 {% endif %}
 
 <h2>Curriculum Materials</h2>
