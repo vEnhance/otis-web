@@ -8,6 +8,9 @@
 
 {% if student %}
 <h2><a href="{% url "dashboard" student.id %}">{{ student }}</a></h2>
+{% if student.assistant %}
+<h3>with {{ student.assistant.name }}</h3>
+{% endif %}
 {% endif %}
 
 {% if request.user.is_authenticated %}
@@ -21,6 +24,7 @@
 <li><a href="{% url "auth_password_change" %}">Change password</a></li>
 	{% if request.user.is_staff %}
 	<li><a href="{% url "admin:index" %}">Admin Site</a></li>
+		{# Hijack student account #}
 		{% if student.user %}
 		<li>
 		<form action="/hijack/{{ student.user.id }}/" method="post">
@@ -29,6 +33,17 @@
 		</form>
 		</li>
 		{% endif %}
+		{# Hijack assistant account #}
+		{% if student.assistant.user %}
+		<li>
+		<form action="/hijack/{{ student.assistant.user.id }}/" method="post">
+		{% csrf_token %}
+		<button class="pseudo-button" type="submit">
+			Hijack {{ student.assistant.user.username }}</button>
+		</form>
+		</li>
+		{% endif %}
+
 	{% endif %}
 
 </ul>
