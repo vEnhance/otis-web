@@ -18,7 +18,7 @@ from . import forms
 
 
 @login_required
-def main(request, student_id):
+def portal(request, student_id):
 	student = get_object_or_404(roster.models.Student.objects, id = student_id)
 	roster.utils.check_can_view(request, student)
 
@@ -28,7 +28,7 @@ def main(request, student_id):
 	context['omniscient'] = student.is_taught_by(request.user)
 	context['olympiads'] = exams.models.MockOlympiad.objects.filter(due_date__isnull=False)
 	context['assignments'] = exams.models.Assignment.objects.filter(due_date__isnull=False)
-	return render(request, "dashboard/main.html", context)
+	return render(request, "dashboard/portal.html", context)
 
 @login_required
 def uploads(request, student_id, unit_id):
