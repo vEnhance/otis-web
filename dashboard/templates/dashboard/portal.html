@@ -21,11 +21,9 @@ Completed units are marked with &check;.</p>
 	<li>Link to <a href="http://web.evanchen.cc/private/otis-syllabus.pdf">syllabus</a>,
 		<a href="http://web.evanchen.cc/private/parent-info.pdf">parent information</a>.</li>
 	<li>Link to <a href="{% url "uploads" student.id 0 %}">miscellaneous uploads</a></li>
+	<li><a href="{% url "currshow" student.id %}">Show full catalog</a></li>
 	{% if omniscient %}
 	<li> <a href="{% url "advance" student.id %}">Advance Student</a> (teacher)</li>
-	{% endif %}
-	{% if user.is_staff %}
-	<li><a href="{% url "curredit" student.id %}">Edit this curriculum</a> (admin)</li>
 	{% endif %}
 </ul>
 
