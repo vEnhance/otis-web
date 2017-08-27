@@ -23,7 +23,7 @@ class CurriculumForm(forms.Form):
 	def __init__(self, *args, **kwargs):
 		units = kwargs.pop('units')
 		original = kwargs.pop('original', [])
-		print(original)
+		enabled = kwargs.pop('enabled', False)
 
 		super(CurriculumForm, self).__init__(*args, **kwargs)
 		
@@ -49,6 +49,7 @@ class CurriculumForm(forms.Form):
 			form_kwargs['label_suffix'] = 'aoeu'
 			form_kwargs['coerce'] = int
 			form_kwargs['empty_value'] = None
+			form_kwargs['disabled'] = not enabled
 
 			self.fields[field_name] = UnitChoiceField(**form_kwargs)
 			n += 1

@@ -14,27 +14,31 @@ from . import forms
 
 # Create your views here.
 
-@staff_member_required
+@login_required
 def curriculum(request, student_id):
 	student = get_object_or_404(roster.models.Student.objects, id = student_id)
+	roster.utils.check_taught_by(request, student)
 	units = core.models.Unit.objects.all()
 	original = student.curriculum.values_list('id', flat=True)
 
-	if request.method == 'POST':
-		form = forms.CurriculumForm(request.POST, units = units)
+	if request.method == 'POST' and request.user.is_staff:
+		form = forms.CurriculumForm(request.POST, units = units, enabled = True)
 		if form.is_valid():
 			data = form.cleaned_data
 			values = [data[k] for k in data if k.startswith('group-') and data[k] is not None]
 			student.curriculum = values
 			student.save()
 			messages.success(request, "Successfully saved curriculum of %d units." % len(values))
-	else:
+	elif request.user.is_staff: # staff can edit
+		form = forms.CurriculumForm(units = units, original = original, enabled = True)
+	else: # otherwise can only read
 		form = forms.CurriculumForm(units = units, original = original)
+		messages.info(request, "You can't edit this curriculum since you are not a staff member.")
 
 	context = {'title' : "Curriculum for " + student.name,
 			'student' : student, 'form' : form}
 	# return HttpResponse("hi")
-	return render(request, "roster/curredit.html", context)
+	return render(request, "roster/currshow.html", context)
 
 @login_required
 def advance(request, student_id):

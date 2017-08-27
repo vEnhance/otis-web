@@ -26,9 +26,12 @@ td.unit-select select {
 {% for hidden in form.hidden_fields %}
 	{{ hidden }}
 {% endfor %}
+
+{% if request.user.is_staff %}
 <tr>
 	<td><input type="submit" name="submit" value="Update"></td>
 </tr>
+{% endif %}
 
 {% for field in form.visible_fields %}
 	<tr class="subject{{ field.subject }}">
@@ -46,9 +49,13 @@ td.unit-select select {
 		<td>{{ field.help_text }}</td>
 	</tr>
 {% endfor %}
+
+{% if request.user.is_staff %}
 <tr>
 	<td><input type="submit" name="submit" value="Update"></td>
 </tr>
+{% endif %}
+
 </table>
 
 </form>
