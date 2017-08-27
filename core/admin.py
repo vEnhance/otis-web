@@ -31,3 +31,6 @@ class UnitAdmin(ImportExportModelAdmin):
 	search_fields = ('name', 'code')
 	ordering = ('position',)
 	resource_class = UnitIEResource
+	list_per_page = 150
+	list_max_show_all = 400
+
