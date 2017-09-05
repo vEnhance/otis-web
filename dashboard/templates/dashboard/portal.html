@@ -24,6 +24,7 @@ Completed units are marked with &check;.</p>
 	<li><a href="{% url "currshow" student.id %}">Show full catalog</a></li>
 	{% if omniscient %}
 	<li> <a href="{% url "advance" student.id %}">Advance Student</a> (teacher)</li>
+	<li> <a href="">Advance Student</a> (teacher)</li>
 	{% endif %}
 </ul>
 
@@ -65,7 +66,7 @@ Obviously, don't open the solutions until you've submitted!</p>
 </tr>
 {% endfor %}
 </table>
-<p>Submit these to <a href="http://www.gradescope.com">GradeScope</a>,
+<p>Submit these to <a href="http://www.gradescope.com" target="_blank">GradeScope</a>,
 unless otherwise specified.
 See the syllabus for full instructions.</p>
 
@@ -102,7 +103,19 @@ See the syllabus for full instructions.</p>
 {% endfor %}
 </table>
 
-<p>Submit these to <a href="http://www.gradescope.com">GradeScope</a>,
+<p>Submit these to <a href="http://www.gradescope.com" target="_blank">GradeScope</a>,
 unless otherwise specified.
 See the syllabus for full instructions.</p>
+
+<hr />
+
+<h2>Calendar</h2>
+<p>Here is the list of upcoming video calls.
+<a href="https://calendar.google.com/calendar/embed?src=tn78o9o548n501k09s18efcq78%40group.calendar.google.com" target="_blank">Link to <b>full-screen calendar</b></a>
+(opens in new window).
+Be sure to convert for <b>time zones</b>!
+</p>
+
+<iframe src="https://calendar.google.com/calendar/embed?mode=AGENDA&amp;height=600&amp;wkst=1&amp;bgcolor=%23FFFFFF&amp;src=tn78o9o548n501k09s18efcq78%40group.calendar.google.com&amp;color=%2342104A" style="border-width:0" width="520" height="600" frameborder="0" scrolling="no"></iframe>
+
 {% endblock %}
