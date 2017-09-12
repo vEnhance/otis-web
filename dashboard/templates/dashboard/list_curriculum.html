@@ -18,7 +18,7 @@
 	{% endif %}
 	</td>
 	{# Whether to show uploads #}
-	{% if forloop.counter0 <= student.current_unit_index %}
+	{% if forloop.counter0|add:"-2" <= student.current_unit_index %}
 	<td><a href="{% url "uploads" student.id unit.id %}">File Uploads</a></td>
 	{% else %}
 	<td></td>
