@@ -60,16 +60,11 @@ def uploads(request, student_id, unit_id):
 
 @login_required
 def index(request):
-	# Check if active student
-	try:
-		student = roster.models.Student.objects.get(user = request.user, semester__active = True)
-		return HttpResponseRedirect(reverse("dashboard", args=(student.id,)))
-	except ObjectDoesNotExist:
-		pass
-
-	# Otherwise, do listing
 	students = roster.utils.get_visible(request.user,
 		roster.models.Student.objects.filter(semester__active = True))
+	if len(students) == 1: # unique match
+		return HttpResponseRedirect(reverse("dashboard", args=(students[0].id,)))
+
 	context = {}
 	context['title'] = "Current Semester Listing"
 	context['students'] = students
