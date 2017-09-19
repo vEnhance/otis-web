@@ -64,7 +64,7 @@ def advance(request, student_id):
 @staff_member_required
 def master_schedule(request):
 	student_names_and_unit_ids = roster.models.Student.objects\
-			.filter(semester__active=True).values('name', 'curriculum')
+			.filter(semester__active=True, legit=True).values('name', 'curriculum')
 	unit_to_student_names = collections.defaultdict(list)
 	for d in student_names_and_unit_ids:
 		# e.g. d = {'name' : Student, 'curriculum' : 30}
