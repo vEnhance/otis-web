@@ -5,8 +5,8 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 
-
 import itertools
+import collections
 
 import core
 import roster, roster.utils
@@ -61,3 +61,22 @@ def advance(request, student_id):
 	context['omniscient'] = student.is_taught_by(request.user) # TODO ugly, template tag `omniscient`
 	return render(request, "roster/advance.html", context)
 
+@staff_member_required
+def master_schedule(request):
+	student_names_and_unit_ids = roster.models.Student.objects\
+			.filter(semester__active=True).values('name', 'curriculum')
+	unit_to_student_names = collections.defaultdict(list)
+	for d in student_names_and_unit_ids:
+		# e.g. d = {'name' : Student, 'curriculum' : 30}
+		unit_to_student_names[d['curriculum']].append(d['name'])
+
+	chart = collections.OrderedDict() # ordered dict(unit -> students)
+	units = core.models.Unit.objects.all()
+	for unit in core.models.Unit.objects.all():
+		chart[unit] = unit_to_student_names[unit.id]
+	semester = core.models.Semester.objects.get(active=True)
+	context = {
+			'chart' : chart,
+			'title' : "Master Schedule",
+			'semester' : semester}
+	return render(request, "roster/master-schedule.html", context)
