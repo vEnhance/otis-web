@@ -23,7 +23,8 @@
 
 <li><a href="{% url "auth_password_change" %}">Change password</a></li>
 	{% if request.user.is_staff %}
-	<li><a href="{% url "admin:index" %}">Admin Site</a></li>
+	<li><a href="{% url "master-schedule" %}">Master schedule</a></li>
+	<li><a href="{% url "admin:index" %}">Admin site</a></li>
 		{# Hijack student account #}
 		{% if student.user %}
 		<li>
@@ -43,8 +44,6 @@
 		</form>
 		</li>
 		{% endif %}
-
 	{% endif %}
-
 </ul>
 {% endif %}
