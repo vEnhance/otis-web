@@ -16,7 +16,7 @@
 {% if request.user.is_authenticated %}
 <ul>
 	{% if student.user.username == request.user.username %}
-	<li><a href="{% url "past" %}">Past semesters</a></li>
+	<li><a href="{% url "past" %}">Change student</a></li>
 	{% else %}
 	<li><a href="{% url "index" %}">Change student</a></li>
 	{% endif %}
