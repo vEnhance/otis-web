@@ -41,6 +41,10 @@ class Student(models.Model):
 			help_text = "If this is equal to k, "
 			"then the student has completed the first k units of his/her "
 			"curriculum and is working on the (k+1)st unit")
+	legit = models.BooleanField(default = True,
+			help_text = "Whether this student is real. "
+			"Set to false for dummy accounts and the like. "
+			"This will hide them from the master schedule, for example.")
 	def __str__(self):
 		return self.name + " (" + str(self.semester) + ")"
 
