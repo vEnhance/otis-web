@@ -92,7 +92,8 @@ class UpdateFile(LoginRequiredMixin, UpdateView):
 
 	def get_object(self, *args, **kwargs):
 		obj = super(UpdateFile, self).get_object(*args, **kwargs)
-		if not obj.owner == self.request.user:
+		if not obj.owner == self.request.user \
+				and not self.request.user.is_staff:
 			raise Http404
 		return obj
 
@@ -102,6 +103,7 @@ class DeleteFile(LoginRequiredMixin, DeleteView):
 
 	def get_object(self, *args, **kwargs):
 		obj = super(DeleteFile, self).get_object(*args, **kwargs)
-		if not obj.owner == self.request.user:
+		if not obj.owner == self.request.user \
+				and not self.request.user.is_staff:
 			raise Http404
 		return obj
