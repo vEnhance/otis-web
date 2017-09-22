@@ -36,6 +36,7 @@ def uploads(request, student_id, unit_id):
 	roster.utils.check_can_view(request, student)
 	unit = get_object_or_404(core.models.Unit.objects, id = unit_id)\
 			if unit_id != "0" else None
+	form = None
 	if request.method == "POST":
 		form = forms.NewUploadForm(request.POST, request.FILES)
 		if form.is_valid():
@@ -44,7 +45,8 @@ def uploads(request, student_id, unit_id):
 			new_upload.owner = request.user
 			new_upload.save()
 			messages.success(request, "New file has been uploaded.")
-	else:
+			form = None # clear form on successful upload, prevent duplicates
+	if form is None:
 		form = forms.NewUploadForm(initial = {'unit' : unit})
 	form.fields["unit"].queryset = student.curriculum
 
