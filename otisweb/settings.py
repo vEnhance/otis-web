@@ -23,7 +23,7 @@ HIJACK_LOGIN_REDIRECT_URL = '/'
 HIJACK_LOGOUT_REDIRECT_URL = '/'
 LOGIN_REDIRECT_URL = '/'
 
-PRODUCTION = bool(os.getenv('DATABASE_NAME'))
+PRODUCTION = bool(os.getenv('GAE_INSTANCE'))
 if not PRODUCTION:
 	INTERNAL_IPS = ('127.0.0.1',)
 
@@ -100,7 +100,7 @@ WSGI_APPLICATION = 'otisweb.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
-if PRODUCTION:
+if os.getenv("DATABASE_NAME"):
 	DATABASES = {
 		'default': {
 			'ENGINE': 'django.db.backends.postgresql',
