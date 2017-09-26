@@ -22,7 +22,7 @@ class ActiveFilter(admin.SimpleListFilter):
 
 class StudentInline(admin.TabularInline):
 	model = roster.models.Student
-	fields = ('user', 'name', 'semester', 'current_unit_index',)
+	fields = ('user', 'name', 'semester', 'legit', 'current_unit_index',)
 	readonly_fields = ('user', 'name', 'semester',)
 	extra = 0
 
@@ -51,11 +51,11 @@ class StudentIEResource(RosterResource):
 	class Meta:
 		skip_unchanged = True
 		model = roster.models.Student
-		fields = ('id', 'name', 'semester_name', 'user_name', 'assistant', 'current_unit_index', 'curriculum')
+		fields = ('id', 'name', 'semester_name', 'user_name', 'assistant', 'legit', 'current_unit_index', 'curriculum')
 
 @admin.register(roster.models.Student)
 class StudentAdmin(ImportExportModelAdmin):
-	list_display = ('name', 'user', 'semester', 'assistant', 'current_unit_index', 'curriculum_length',)
+	list_display = ('name', 'user', 'semester', 'assistant', 'legit', 'current_unit_index', 'curriculum_length',)
 	ordering = ('semester', 'name', )
 	list_filter=(ActiveFilter,)
 	resource_class = StudentIEResource
