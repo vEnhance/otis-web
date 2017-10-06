@@ -50,10 +50,6 @@ class Assignment(AbstractAssignmentModel):
 	"""An assignment which is just a text description (e.g. HMMT practices)."""
 	name = models.CharField(max_length = 80, unique = True,
 			help_text = "Name / description of the assignment")
-	start_date = models.DateField(null = True, blank = True,
-			help_text = "When the assignment opens. Leave blank if not active this semester.")
-	due_date = models.DateField(null = True, blank = True,
-			help_text = "When the assignment is due. Leave blank if not active this semester.")
 	def __str__(self):
 		return self.name
 	class Meta:
