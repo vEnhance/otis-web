@@ -23,7 +23,7 @@ HIJACK_LOGIN_REDIRECT_URL = '/'
 HIJACK_LOGOUT_REDIRECT_URL = '/'
 LOGIN_REDIRECT_URL = '/'
 
-PRODUCTION = bool(os.getenv('GAE_INSTANCE'))
+PRODUCTION = bool(os.getenv('IS_PRODUCTION'))
 if not PRODUCTION:
 	INTERNAL_IPS = ('127.0.0.1',)
 
@@ -34,7 +34,7 @@ if not PRODUCTION:
 SECRET_KEY = 'n@hi1t%ubp)c9)77r^-1(#u8zt@9b-nife%f1orc3(!wr=#zip'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = not bool(os.getenv('GAE_INSTANCE'))
+DEBUG = not bool(os.getenv('IS_PRODUCTION'))
 
 # SECURITY WARNING: App Engine's security features ensure that it is safe to
 # have ALLOWED_HOSTS = ['*'] when the app is deployed. If you deploy a Django
