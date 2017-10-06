@@ -8,7 +8,9 @@
 		<td><a href="{% url "dashboard" student.id %}">{{ student.name }}</a></td>
 		<td>{{ student.semester }}</td>
 		<td>{% if student.assistant %}{{ student.assistant }}{% endif %}</td>
-		<td>{{ student.current_unit_index }} / {{ student.curriculum_length }}</td>
+		<td>{% if student.legit %}
+			{{ student.current_unit_index }} / {{ student.curriculum_length }}
+			{% endif %}</td>
 	</tr>
 	{% endfor %}
 	</table>
