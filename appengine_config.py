@@ -8,3 +8,4 @@ vendor.add('lib')
 # Monkey fix...
 import tempfile
 tempfile.SpooledTemporaryFile = tempfile.TemporaryFile
+tempfile.NamedTemporaryFile = tempfile.TemporaryFile

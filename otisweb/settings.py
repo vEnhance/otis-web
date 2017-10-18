@@ -169,3 +169,6 @@ if PRODUCTION:
 else:
 	STATIC_URL = '/static/'
 	MEDIA_URL = '/media/'
+
+FILE_UPLOAD_HANDLERS = ('django.core.files.uploadhandler.MemoryFileUploadHandler',)
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760 # 10MB
