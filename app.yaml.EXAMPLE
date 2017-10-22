@@ -1,24 +1,41 @@
-# [START runtime]
-runtime: python
-env: flex
-entrypoint: gunicorn -b :$PORT otisweb.wsgi
+# [START django_app]
+runtime: python27
+api_version: 1
+threadsafe: yes
+env: standard
+
+handlers:
+  - url: /static
+    static_dir: static/
+  - url: .*
+    script: otisweb.wsgi.application
+
+instance_class: B1
+basic_scaling:
+  max_instances: 2
+  idle_timeout: 10m
 
 beta_settings:
-  cloud_sql_instances: "evanchen-cc-otis:us-central1:otis-db"
+  cloud_sql_instances: <fill-in>
 
-runtime_config:
-  python_version: 3
+libraries:
+  - name: MySQLdb
+    version: "latest"
+
+skip_files:
+  - ^(.*/)?.*\.py[co]$
+  - ^\.git/.*$
 
 env_variables:
-  DATABASE_NAME: otis
-  DATABASE_USER: otisweb
-  DATABASE_PASSWORD: "<db password here>"
-  DATABASE_HOST: "/cloudsql/evanchen-cc-otis:us-central1:otis-db"
-  STATIC_URL: "http://storage.googleapis.com/otisweb-static/static/"
-  GS_ACCESS_KEY_ID: "<access id here>"
-  GS_SECRET_ACCESS_KEY: "<access key here>"
-  GS_BUCKET_NAME: "otisweb-media"
-  MEDIA_URL: "https://storage.googleapis.com/otisweb-media/"
+  DATABASE_NAME: <fill-in>
+  DATABASE_USER: <fill-in>
+  DATABASE_PASSWORD: <fill-in>
+  DATABASE_HOST: <fill-in>
+  STATIC_URL: <fill-in>
+  GS_ACCESS_KEY_ID: <fill-in>
+  GS_SECRET_ACCESS_KEY: <fill-in>
+  GS_BUCKET_NAME: <fill-in>
+  MEDIA_URL: <fill-in>
+  IS_PRODUCTION: 1
 
-
-# [END runtime]
+# [END django_app]
