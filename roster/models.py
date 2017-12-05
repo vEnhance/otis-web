@@ -44,7 +44,7 @@ class Student(models.Model):
 			"Set to false for dummy accounts and the like. "
 			"This will hide them from the master schedule, for example.")
 	def __str__(self):
-		return self.name + " (" + str(self.semester) + ")"
+		return "%s (%s)" %(self.name, self.semester)
 
 	def is_taught_by(self, user):
 		"""Checks whether the specified user is not the same as the student,
@@ -84,7 +84,7 @@ class Invoice(models.Model):
 	updated_at = models.DateTimeField(auto_now=True)
 
 	def __str__(self):
-		return "Invoice for " + str(self.student.name)
+		return "Invoice %d" %(self.id or 0,)
 
 	@property
 	def total_cost(self):
