@@ -4,8 +4,6 @@ from django.db import models
 from django.contrib.auth import models as auth
 import core
 
-# Create your models here.
-
 class Assistant(models.Model):
 	"""This is a pair of a user and a semester (with a display name).
 	Currently don't need much information about them..."""
@@ -66,11 +64,12 @@ class Student(models.Model):
 	def curriculum_length(self):
 		return self.curriculum.count()
 
+
+PREP_RATE = 400 # 400 per semester...
+HOUR_RATE = 80  # plus 80 per hour
+
 class Invoice(models.Model):
 	"""Billing information object for students."""
-
-	PREP_RATE = 400 # 400 per semester...
-	HOUR_RATE = 80  # plus 80 per hour
 
 	student = models.OneToOneField(Student,
 			help_text = "The invoice that this student is for.")
@@ -82,13 +81,24 @@ class Invoice(models.Model):
 			help_text = "Number of hours taught for.")
 	amount_owed = models.DecimalField(max_digits = 8,
 			decimal_places = 2, default = 0,
+			null = True, blank = True,
 			help_text = "Amount currently owed.")
 	updated_at = models.DateTimeField(auto_now=True)
 
 	@property
 	def total_cost(self):
-		return PREP_RATE*self.preps_taught+HOUR_RATE*self.hours_taught
+		return PREP_RATE*self.preps_taught + HOUR_RATE*self.hours_taught
+
+	@property
+	def total_owed(self):
+		if self.amount_owed is None:
+			return self.total_cost
+		else:
+			return self.amount_owed
 
 	@property
 	def total_paid(self):
-		return self.total_cost - self.total_paid
+		if self.amount_owed is None:
+			return 0
+		else:
+			return self.total_cost - self.amount_owed
