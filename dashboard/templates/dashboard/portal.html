@@ -22,6 +22,9 @@ Completed units are marked with &check;.</p>
 		<a href="http://web.evanchen.cc/private/parent-info.pdf">parent information</a>.</li>
 	<li>Link to <a href="{% url "uploads" student.id 0 %}">miscellaneous uploads</a></li>
 	<li><a href="{% url "currshow" student.id %}">Show full catalog</a></li>
+	{% if student.semester.show_invoices %}
+	<li>Link to <a href="{% url "invoice" student.id %}">invoice</a>.</li>
+	{% endif %}
 	{% if omniscient %}
 	<li> <a href="{% url "advance" student.id %}">Advance Student</a> (teacher)</li>
 	{% endif %}
@@ -116,11 +119,5 @@ Be sure to convert for <b>time zones</b>!
 </p>
 
 <iframe src="https://calendar.google.com/calendar/embed?mode=AGENDA&amp;height=600&amp;wkst=1&amp;bgcolor=%23FFFFFF&amp;src=tn78o9o548n501k09s18efcq78%40group.calendar.google.com&amp;color=%2342104A" style="border-width:0" width="520" height="600" frameborder="0" scrolling="no"></iframe>
-
-{% if student.semester.show_invoices %}
-<hr />
-<h3>Payment</h3>
-<p>Link to <a href="{% url "invoice" student.id %}">invoice</a>.</p>
-{% endif %}
 
 {% endblock %}
