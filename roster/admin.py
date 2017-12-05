@@ -57,5 +57,20 @@ class StudentIEResource(RosterResource):
 class StudentAdmin(ImportExportModelAdmin):
 	list_display = ('name', 'user', 'semester', 'assistant', 'legit', 'current_unit_index', 'curriculum_length',)
 	ordering = ('semester', 'name', )
-	list_filter=(ActiveFilter,)
+	list_filter = (ActiveFilter,)
 	resource_class = StudentIEResource
+
+class InvoiceIEResource(resources.ModelResource):
+	class Meta:
+		skip_unchanged = True
+		model = roster.models.Invoice
+		fields = ('student', 'preps_taught', 'hours_taught', 'amount_owed')
+		readonly_fields = ('student__user__username',)
+
+@admin.register(roster.models.Invoice)
+class InvoiceAdmin(ImportExportModelAdmin):
+	list_display = ('student', 'preps_taught', 'hours_taught', 'amount_owed',)
+	list_filter = ('semester',)
+	ordering = ('student',)
+	list_filter = ('student__semester', 'student__semester__active',)
+	resource_class = InvoiceIEResource
