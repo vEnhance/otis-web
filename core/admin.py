@@ -11,11 +11,11 @@ class SemesterResource(resources.ModelResource):
 	class Meta:
 		skip_unchanged = True
 		model = core.models.Semester
-		fields = ('id', 'name', 'active')
+		fields = ('id', 'name', 'active', 'show_invoices',)
 
 @admin.register(core.models.Semester)
 class SemesterAdmin(ImportExportModelAdmin):
-	list_display = ('name', 'id', 'active',)
+	list_display = ('name', 'id', 'active', 'show_invoices',)
 	search_fields = ('name',)
 	resource_class = SemesterResource
 

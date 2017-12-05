@@ -117,4 +117,10 @@ Be sure to convert for <b>time zones</b>!
 
 <iframe src="https://calendar.google.com/calendar/embed?mode=AGENDA&amp;height=600&amp;wkst=1&amp;bgcolor=%23FFFFFF&amp;src=tn78o9o548n501k09s18efcq78%40group.calendar.google.com&amp;color=%2342104A" style="border-width:0" width="520" height="600" frameborder="0" scrolling="no"></iframe>
 
+{% if student.semester.show_invoices %}
+<hr />
+<h3>Payment</h3>
+<p>Link to <a href="{% url "invoice" student.id %}">invoice</a>.</p>
+{% endif %}
+
 {% endblock %}

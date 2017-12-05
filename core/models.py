@@ -13,6 +13,8 @@ class Semester(models.Model):
 	active = models.BooleanField(default=False,
 			help_text = "Whether the semester is currently active "
 			"(there should thus be at most one active semester)")
+	show_invoices = models.BooleanField(default=False,
+			help_text = "Whether to display invoices for this semester.")
 	def __str__(self):
 		return self.name
 
