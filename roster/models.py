@@ -80,8 +80,7 @@ class Invoice(models.Model):
 			decimal_places = 2, default = 0,
 			help_text = "Number of hours taught for.")
 	amount_owed = models.DecimalField(max_digits = 8,
-			decimal_places = 2, default = 0,
-			null = True, blank = True,
+			decimal_places = 2, null = True, blank = True,
 			help_text = "Amount currently owed.")
 	updated_at = models.DateTimeField(auto_now=True)
 
@@ -95,6 +94,11 @@ class Invoice(models.Model):
 			return self.total_cost
 		else:
 			return self.amount_owed
+
+	@property
+	def cleared(self):
+		"""Whether or not the student owes anything"""
+		return (self.total_owed <= 0)
 
 	@property
 	def total_paid(self):

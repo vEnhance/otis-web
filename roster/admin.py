@@ -44,7 +44,7 @@ class StudentIEResource(RosterResource):
 class StudentAdmin(ImportExportModelAdmin):
 	list_display = ('name', 'user', 'semester', 'assistant', 'legit', 'current_unit_index', 'curriculum_length',)
 	ordering = ('semester', 'name', )
-	list_filter = ('semester__active',)
+	list_filter = ('semester__active', 'legit',)
 	resource_class = StudentIEResource
 
 class InvoiceIEResource(resources.ModelResource):
@@ -56,8 +56,7 @@ class InvoiceIEResource(resources.ModelResource):
 
 @admin.register(roster.models.Invoice)
 class InvoiceAdmin(ImportExportModelAdmin):
-	list_display = ('student', 'preps_taught', 'hours_taught', 'amount_owed',)
-	list_filter = ('semester',)
+	list_display = ('student', 'cleared', 'amount_owed', 'total_cost', 'updated_at',)
 	ordering = ('student',)
-	list_filter = ('student__semester', 'student__semester__active',)
+	list_filter = ('student__semester__active', 'student__semester',)
 	resource_class = InvoiceIEResource
