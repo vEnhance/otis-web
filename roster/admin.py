@@ -40,13 +40,13 @@ class InvoiceIEResource(resources.ModelResource):
 	class Meta:
 		skip_unchanged = True
 		model = roster.models.Invoice
-		fields = ('student', 'preps_taught', 'hours_taught', 'total_paid',
+		fields = ('id', 'student', 'preps_taught', 'hours_taught', 'total_paid',
 				'student__name', 'student__semester__name',)
 
 class InvoiceInline(admin.StackedInline):
 	model = roster.models.Invoice
 	fields = ('preps_taught', 'hours_taught', 'total_paid',)
-	readonly_fields = ('student',)
+	readonly_fields = ('student', 'id',)
 
 @admin.register(roster.models.Invoice)
 class InvoiceAdmin(ImportExportModelAdmin):
