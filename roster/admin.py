@@ -7,19 +7,6 @@ import roster
 
 # Register your models here.
 
-class ActiveFilter(admin.SimpleListFilter):
-	title = "Current"
-	parameter_name = 'type'
-	def lookups(self, request, model_admin):
-		return (("current", "Current"), ("past", "Past"),)
-	def queryset(self, request, queryset):
-		if self.value() is None:
-			return queryset
-		elif self.value() == "current":
-			return queryset.filter(semester__active=True)
-		elif self.value() == "past":
-			return queryset.filter(semester__active=False)
-
 class StudentInline(admin.TabularInline):
 	model = roster.models.Student
 	fields = ('user', 'name', 'semester', 'legit', 'current_unit_index',)
@@ -43,8 +30,8 @@ class AssistantIEResource(RosterResource):
 @admin.register(roster.models.Assistant)
 class AssistantAdmin(ImportExportModelAdmin):
 	list_display = ('name', 'semester', 'user', 'student_count',)
-	inlines=(StudentInline,)
-	list_filter=(ActiveFilter,)
+	inlines = (StudentInline,)
+	list_filter = ('semester__active',)
 	resource_class = AssistantIEResource
 
 class StudentIEResource(RosterResource):
@@ -57,7 +44,7 @@ class StudentIEResource(RosterResource):
 class StudentAdmin(ImportExportModelAdmin):
 	list_display = ('name', 'user', 'semester', 'assistant', 'legit', 'current_unit_index', 'curriculum_length',)
 	ordering = ('semester', 'name', )
-	list_filter = (ActiveFilter,)
+	list_filter = ('semester__active',)
 	resource_class = StudentIEResource
 
 class InvoiceIEResource(resources.ModelResource):
