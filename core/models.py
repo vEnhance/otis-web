@@ -6,9 +6,10 @@ from positions import PositionField
 # Create your models here.
 
 class Semester(models.Model):
-	"""Represents an academic semester, e.g. "Fall 2017"."""
+	"""Represents an academic semester/year/etc, e.g. "Fall 2017"
+	or "Year III"."""
 	name = models.CharField(max_length=255,
-			help_text = "Text description such as 'Fall 2017'", unique=True)
+			help_text = "Text description such as 'Year III'", unique=True)
 	active = models.BooleanField(default=False,
 			help_text = "Whether the semester is currently active "
 			"(there should thus be at most one active semester)")
