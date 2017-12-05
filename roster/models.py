@@ -79,10 +79,13 @@ class Invoice(models.Model):
 	hours_taught = models.DecimalField(max_digits = 8,
 			decimal_places = 2, default = 0,
 			help_text = "Number of hours taught for.")
-	amount_owed = models.DecimalField(max_digits = 8,
-			decimal_places = 2, null = True, blank = True,
-			help_text = "Amount currently owed.")
+	total_paid = models.DecimalField(max_digits = 8,
+			decimal_places = 2, default = 0,
+			help_text = "Amount paid.")
 	updated_at = models.DateTimeField(auto_now=True)
+
+	def __str__(self):
+		return "Invoice for " + str(self.student.name)
 
 	@property
 	def total_cost(self):
@@ -90,19 +93,9 @@ class Invoice(models.Model):
 
 	@property
 	def total_owed(self):
-		if self.amount_owed is None:
-			return self.total_cost
-		else:
-			return self.amount_owed
+		return self.total_cost - self.total_paid
 
 	@property
 	def cleared(self):
 		"""Whether or not the student owes anything"""
 		return (self.total_owed <= 0)
-
-	@property
-	def total_paid(self):
-		if self.amount_owed is None:
-			return 0
-		else:
-			return self.total_cost - self.amount_owed

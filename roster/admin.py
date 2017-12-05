@@ -21,6 +21,7 @@ class RosterResource(resources.ModelResource):
 			attribute = 'semester',
 			widget = widgets.ForeignKeyWidget(core.models.Semester, 'name'))
 
+## ASSISTANT
 class AssistantIEResource(RosterResource):
 	class Meta:
 		skip_unchanged = True
@@ -34,6 +35,27 @@ class AssistantAdmin(ImportExportModelAdmin):
 	list_filter = ('semester__active',)
 	resource_class = AssistantIEResource
 
+## INVOICE
+class InvoiceIEResource(resources.ModelResource):
+	class Meta:
+		skip_unchanged = True
+		model = roster.models.Invoice
+		fields = ('student', 'preps_taught', 'hours_taught', 'total_paid',
+				'student__name', 'student__semester__name',)
+
+class InvoiceInline(admin.StackedInline):
+	model = roster.models.Invoice
+	fields = ('preps_taught', 'hours_taught', 'total_paid',)
+	readonly_fields = ('student',)
+
+@admin.register(roster.models.Invoice)
+class InvoiceAdmin(ImportExportModelAdmin):
+	list_display = ('student', 'total_owed', 'total_paid', 'total_cost', 'updated_at',)
+	ordering = ('student',)
+	list_filter = ('student__semester__active', 'student__semester',)
+	resource_class = InvoiceIEResource
+
+## STUDENT
 class StudentIEResource(RosterResource):
 	class Meta:
 		skip_unchanged = True
@@ -46,17 +68,4 @@ class StudentAdmin(ImportExportModelAdmin):
 	ordering = ('semester', 'name', )
 	list_filter = ('semester__active', 'legit',)
 	resource_class = StudentIEResource
-
-class InvoiceIEResource(resources.ModelResource):
-	class Meta:
-		skip_unchanged = True
-		model = roster.models.Invoice
-		fields = ('student', 'preps_taught', 'hours_taught', 'amount_owed',
-				'student__name', 'student__semester__name',)
-
-@admin.register(roster.models.Invoice)
-class InvoiceAdmin(ImportExportModelAdmin):
-	list_display = ('student', 'cleared', 'amount_owed', 'total_cost', 'updated_at',)
-	ordering = ('student',)
-	list_filter = ('student__semester__active', 'student__semester',)
-	resource_class = InvoiceIEResource
+	inlines = (InvoiceInline,)
