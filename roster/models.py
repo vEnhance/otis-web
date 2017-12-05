@@ -65,11 +65,10 @@ class Student(models.Model):
 		return self.curriculum.count()
 
 
-PREP_RATE = 400 # 400 per semester...
-HOUR_RATE = 80  # plus 80 per hour
-
 class Invoice(models.Model):
 	"""Billing information object for students."""
+	PREP_RATE = 400 # 400 per semester...
+	HOUR_RATE = 80  # plus 80 per hour
 
 	student = models.OneToOneField(Student,
 			help_text = "The invoice that this student is for.")
@@ -89,7 +88,7 @@ class Invoice(models.Model):
 
 	@property
 	def total_cost(self):
-		return PREP_RATE*self.preps_taught + HOUR_RATE*self.hours_taught
+		return self.PREP_RATE*self.preps_taught + self.HOUR_RATE*self.hours_taught
 
 	@property
 	def total_owed(self):
