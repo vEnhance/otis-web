@@ -1,0 +1,49 @@
+{% extends 'layout.html' %}
+
+{% block layout-content %}
+
+<p>Payment information linked can be found in the OTIS
+<a href="http://web.evanchen.cc/private/otis-syllabus.pdf">syllabus</a>.</p>
+
+{% if student.invoice %}
+{% with invoice=student.invoice %}
+<center>
+<table>
+<tbody>
+	<tr>
+		<th>Item</th>
+		<th>Amount</th>
+	</tr>
+	<tr>
+		<td>Preparation cost</td>
+		<td>{{ invoice.PREP_RATE }} &times; {{ invoice.preps_taught }}</td>
+	</tr>
+	<tr>
+		<td>Hourly cost</td>
+		<td>{{ invoice.HOUR_RATE }} &times; {{ invoice.hours_taught }}</td>
+	</tr>
+	<tr>
+		<td>Total cost</td>
+		<td>{{ invoice.total_cost }}</td>
+	</tr>
+	<tr>
+		<td>Total paid</td>
+		<td>{{ invoice.total_paid }}</td>
+	</tr>
+	<tr>
+		<td>Total owed</td>
+		<th>{{ invoice.total_owed }}</th>
+	</tr>
+</tbody>
+</table>
+</center>
+<p>This invoice was last updated on {{ invoice.updated_at }} server time.
+Please contact me if you think there are any errors.</p>
+
+{% endwith %}
+{% else %}
+<p>No invoice has been entered for you yet..</p>
+{% endif %}
+
+<p><a href="{% url "dashboard" student.id %}">Back to Dashboard</a></p>
+{% endblock %}

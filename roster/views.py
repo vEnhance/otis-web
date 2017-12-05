@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.core.urlresolvers import reverse
 
 import itertools
@@ -60,6 +60,18 @@ def advance(request, student_id):
 	context['curriculum'] = student.curriculum.all()
 	context['omniscient'] = student.is_taught_by(request.user) # TODO ugly, template tag `omniscient`
 	return render(request, "roster/advance.html", context)
+
+
+@login_required
+def invoice(request, student_id):
+	student = get_object_or_404(roster.models.Student.objects, id = student_id)
+	if student.user != request.user and not request.user.is_staff:
+		raise Http404("Can't view invoice")
+
+	context = {'title' : "Invoice for " + student.name,
+			'student' : student}
+	# return HttpResponse("hi")
+	return render(request, "roster/invoice.html", context)
 
 @staff_member_required
 def master_schedule(request):
