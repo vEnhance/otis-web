@@ -65,3 +65,30 @@ class Student(models.Model):
 	@property
 	def curriculum_length(self):
 		return self.curriculum.count()
+
+class Invoice(models.Model):
+	"""Billing information object for students."""
+
+	PREP_RATE = 400 # 400 per semester...
+	HOUR_RATE = 80  # plus 80 per hour
+
+	student = models.OneToOneField(Student,
+			help_text = "The invoice that this student is for.")
+	preps_taught = models.SmallIntegerField(default = 0,
+			help_text = "Number of semesters that development/preparation "
+			"costs are charged.")
+	hours_taught = models.DecimalField(max_digits = 8,
+			decimal_places = 2, default = 0,
+			help_text = "Number of hours taught for.")
+	amount_owed = models.DecimalField(max_digits = 8,
+			decimal_places = 2, default = 0,
+			help_text = "Amount currently owed.")
+	updated_at = models.DateTimeField(auto_now=True)
+
+	@property
+	def total_cost(self):
+		return PREP_RATE*self.preps_taught+HOUR_RATE*self.hours_taught
+
+	@property
+	def total_paid(self):
+		return self.total_cost - self.total_paid
