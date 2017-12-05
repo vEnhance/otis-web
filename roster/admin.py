@@ -51,8 +51,8 @@ class InvoiceIEResource(resources.ModelResource):
 	class Meta:
 		skip_unchanged = True
 		model = roster.models.Invoice
-		fields = ('student', 'preps_taught', 'hours_taught', 'amount_owed')
-		readonly_fields = ('student__user__username',)
+		fields = ('student', 'preps_taught', 'hours_taught', 'amount_owed',
+				'student__name', 'student__semester__name',)
 
 @admin.register(roster.models.Invoice)
 class InvoiceAdmin(ImportExportModelAdmin):
