@@ -5,8 +5,7 @@
 <p>Payment information linked can be found in the OTIS
 <a href="http://web.evanchen.cc/private/otis-syllabus.pdf">syllabus</a>.</p>
 
-{% if student.invoice %}
-{% with invoice=student.invoice %}
+{% if invoice %}
 <center>
 <table>
 <tbody>
@@ -43,9 +42,8 @@ Detailed invoices with full dates, lecture names, et cetera
 are available on request.</p>
 <p>If you have a TA, that payment should be done separately.</p>
 
-{% endwith %}
 {% else %}
-<p>No invoice has been entered for you yet..</p>
+<p><b>No invoice is currently available.</b></p>
 {% endif %}
 
 <p><a href="{% url "dashboard" student.id %}">Back to Dashboard</a></p>

@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponseRedirect, Http404
 from django.core.urlresolvers import reverse
+from django.core.exceptions import ObjectDoesNotExist
 
 import itertools
 import collections
@@ -78,8 +79,16 @@ def invoice(request, student_id=None):
 	if student.user != request.user and not request.user.is_staff:
 		raise Http404("Can't view invoice")
 
+	if not student.semester.show_invoices:
+		invoice = None
+	else:
+		try:
+			invoice = student.invoice
+		except ObjectDoesNotExist:
+			invoice = None
+
 	context = {'title' : "Invoice for " + student.name,
-			'student' : student}
+			'student' : student, 'invoice' : invoice}
 	# return HttpResponse("hi")
 	return render(request, "roster/invoice.html", context)
 
