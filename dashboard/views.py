@@ -84,10 +84,10 @@ def past(request):
 class UpdateFile(LoginRequiredMixin, UpdateView):
 	model = dashboard.models.UploadedFile
 	fields = ('category', 'content', 'description', 'unit',)
+
 	def get_success_url(self):
-		f = dashboard.models.UploadedFile.objects.get(id = self.kwargs['pk'])
-		stu_id = f.benefactor.id
-		unit_id = f.unit.id if f.unit is not None else 0
+		stu_id = self.object.benefactor.id
+		unit_id = self.object.unit.id if self.object.unit is not None else 0
 		return reverse("uploads", args=(stu_id, unit_id,))
 
 	def get_object(self, *args, **kwargs):
