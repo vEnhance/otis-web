@@ -1,5 +1,26 @@
 {% extends 'layout.html' %}
 {% block title %}Update Invoice{% endblock %}
 {% block layout-content %}
+<h2>Update</h2>
 {% include "generic-form.html" %}
+<h2>Current totals</h2>
+<center>
+<table>
+<tbody>
+	<tr>
+		<td>Total cost</td>
+		<td>{{ object.total_cost }}</td>
+	</tr>
+	<tr>
+		<td>Total paid</td>
+		<td>{{ object.total_paid }}</td>
+	</tr>
+	<tr>
+		<td>Total owed</td>
+		<th>{{ object.total_owed }}</th>
+	</tr>
+</tbody>
+</table>
+</center>
 {% endblock %}
+

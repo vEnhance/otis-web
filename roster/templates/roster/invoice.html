@@ -1,7 +1,6 @@
 {% extends 'layout.html' %}
 
 {% block layout-content %}
-
 <p>Payment information linked can be found in the OTIS
 <a href="http://web.evanchen.cc/private/otis-syllabus.pdf">syllabus</a>.</p>
 
@@ -36,16 +35,18 @@
 </tbody>
 </table>
 </center>
-<p>This invoice was last updated on {{ invoice.updated_at }} server time.
-Please contact me if you think there are any errors.
+
+<p>This invoice was last updated on {{ invoice.updated_at }} server time.</p>
+
+<p>Please contact me if you think there are any errors.
 Detailed invoices with full dates, lecture names, et cetera
 are available on request.</p>
 <p>If you have a TA, that payment should be done separately.</p>
 
 {% if request.user.is_staff %}
-<ol>
+<ul>
 	<li>(Staff) <a href="{% url "edit-invoice" invoice.id %}">Edit invoice</a></li>
-</ol>
+</ul>
 {% endif %}
 
 {% else %}
