@@ -5,6 +5,8 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect, Http404
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist
+from django.views.generic.edit import UpdateView
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 import itertools
 import collections
@@ -111,3 +113,15 @@ def master_schedule(request):
 			'title' : "Master Schedule",
 			'semester' : semester}
 	return render(request, "roster/master-schedule.html", context)
+
+class UpdateInvoice(LoginRequiredMixin, UpdateView):
+	model = roster.models.Invoice
+	fields = ('preps_taught', 'hours_taught', 'total_paid',)
+
+	def get_success_url(self):
+		return reverse("invoice", args=(self.object.student.id,))
+
+	def get_object(self, *args, **kwargs):
+		if not self.request.user.is_staff:
+			raise Http404("Not authorized to update this invoice")
+		return super(UpdateInvoice, self).get_object(*args, **kwargs)

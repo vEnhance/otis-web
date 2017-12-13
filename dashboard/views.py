@@ -94,7 +94,7 @@ class UpdateFile(LoginRequiredMixin, UpdateView):
 		obj = super(UpdateFile, self).get_object(*args, **kwargs)
 		if not obj.owner == self.request.user \
 				and not self.request.user.is_staff:
-			raise Http404
+			raise Http404("Not authorized to update this file")
 		return obj
 
 class DeleteFile(LoginRequiredMixin, DeleteView):
@@ -105,5 +105,5 @@ class DeleteFile(LoginRequiredMixin, DeleteView):
 		obj = super(DeleteFile, self).get_object(*args, **kwargs)
 		if not obj.owner == self.request.user \
 				and not self.request.user.is_staff:
-			raise Http404
+			raise Http404("Not authorized to delete this file")
 		return obj

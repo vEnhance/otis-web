@@ -42,6 +42,12 @@ Detailed invoices with full dates, lecture names, et cetera
 are available on request.</p>
 <p>If you have a TA, that payment should be done separately.</p>
 
+{% if request.user.is_staff %}
+<ol>
+	<li>(Staff) <a href="{% url "edit-invoice" invoice.id %}">Edit invoice</a></li>
+</ol>
+{% endif %}
+
 {% else %}
 <p><b>No invoice is currently available.</b></p>
 {% endif %}
