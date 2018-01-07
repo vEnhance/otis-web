@@ -21,6 +21,8 @@ beta_settings:
 libraries:
   - name: MySQLdb
     version: "latest"
+  - name: django
+    version: "1.11"
 
 skip_files:
   - ^(.*/)?.*\.py[co]$
