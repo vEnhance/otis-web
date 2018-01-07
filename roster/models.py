@@ -58,7 +58,7 @@ class Student(models.Model):
 		return self.user == user or self.is_taught_by(user)
 	class Meta:
 		unique_together = ('user', 'semester',)
-		ordering = ('name',)
+		ordering = ('-legit', 'name',)
 
 	@property
 	def curriculum_length(self):
