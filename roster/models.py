@@ -38,7 +38,11 @@ class Student(models.Model):
 	current_unit_index = models.SmallIntegerField(default = 0,
 			help_text = "If this is equal to k, "
 			"then the student has completed the first k units of his/her "
-			"curriculum and is working on the (k+1)st unit")
+			"curriculum and by default is working on the (k+1)st unit.")
+	pointer_current_unit = models.ForeignKey(core.models.Unit,
+			blank=True, null=True, related_name='pointer_unit',
+			help_text = "If set, the counter will skip ahead "
+			"so that the student is working on this unit instead.")
 	legit = models.BooleanField(default = True,
 			help_text = "Whether this student is real. "
 			"Set to false for dummy accounts and the like. "
