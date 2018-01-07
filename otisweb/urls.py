@@ -20,7 +20,7 @@ from django.views.generic import RedirectView
 from . import settings
 
 urlpatterns = [
-	url(r'^admin/', admin.site.urls),
+	url(r'^admin/', include(admin.site.urls)),
 	url(r'^dash/', include('dashboard.urls')),
 	url(r'^roster/', include('roster.urls')),
 	url(r'^hijack/', include('hijack.urls')),

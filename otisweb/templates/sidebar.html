@@ -24,7 +24,13 @@
 <li><a href="{% url "auth_password_change" %}">Change password</a></li>
 	{% if request.user.is_staff %}
 	<li><a href="{% url "master-schedule" %}">Master schedule</a></li>
-	<li><a href="{% url "admin:index" %}">Admin site</a></li>
+	{% endif %}
+	{% if request.user.is_superuser %}
+	<li><a href="{% url "admin:index" %}">Django admin</a></li>
+		{% if student %}
+		<li> <a href="{% url "admin:roster_student_change" student.id %}">
+				Admin edit {{ student.name }}</a></li>
+		{% endif %}
 		{# Hijack student account #}
 		{% if student.user %}
 		<li>
