@@ -1,8 +1,5 @@
 from google.appengine.ext import vendor
-vendor.add('lib')
-# To use, run
-# pip2 install -t lib -r requirements-vendor.txt
-
+vendor.add('venv/lib/python2.7/site-packages')
 
 # https://github.com/jschneier/django-storages/issues/281
 # Monkey fix...
