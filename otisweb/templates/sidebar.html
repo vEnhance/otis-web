@@ -16,9 +16,9 @@
 {% if request.user.is_authenticated %}
 <ul>
 	{% if student.user.username == request.user.username %}
-	<li><a href="{% url "past" %}">Change student</a></li>
+	<li><a href="{% url "past" %}">Change semester</a></li>
 	{% else %}
-	<li><a href="{% url "index" %}">Change student</a></li>
+	<li><a href="{% url "index" %}">Change kid</a></li>
 	{% endif %}
 
 <li><a href="{% url "auth_password_change" %}">Change password</a></li>

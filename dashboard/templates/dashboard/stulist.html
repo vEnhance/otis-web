@@ -1,7 +1,7 @@
 {% extends 'layout.html' %}
 {% block layout-content %}
 {% if students|length > 0 %}
-	<p>Here are the students to which you have access.</p>
+	<p>Here are the participants to which you have access.</p>
 	<table>
 	{% for student in students %}
 	<tr><td>{{ forloop.counter }}</td>
