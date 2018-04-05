@@ -4,6 +4,9 @@ vendor.add('venv/lib/python2.7/site-packages')
 
 # https://github.com/jschneier/django-storages/issues/281
 # Monkey fix...
+
 import tempfile
-tempfile.SpooledTemporaryFile = tempfile.TemporaryFile
-tempfile.NamedTemporaryFile = tempfile.TemporaryFile
+def FilePlaceHolder(*args, **kwargs):
+	return tempfile.TemporaryFile
+tempfile.SpooledTemporaryFile = FilePlaceHolder
+tempfile.NamedTemporaryFile = FilePlaceHolder
