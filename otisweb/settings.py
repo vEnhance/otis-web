@@ -166,6 +166,8 @@ if PRODUCTION:
 	GS_SECRET_ACCESS_KEY = os.getenv("GS_SECRET_ACCESS_KEY")
 	GS_BUCKET_NAME = os.getenv("GS_BUCKET_NAME")
 	MEDIA_URL = os.getenv("MEDIA_URL")
+	import import_export.tmp_storages
+	IMPORT_EXPORT_TMP_STORAGE_CLASS = import_export.tmp_storages.CacheStorage
 else:
 	STATIC_URL = '/static/'
 	MEDIA_URL = '/media/'
