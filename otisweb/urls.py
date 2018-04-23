@@ -18,15 +18,33 @@ from django.conf.urls import include, url
 from django.conf.urls.static import static
 from django.contrib import admin, auth
 from django.views.generic import RedirectView
+
+from registration.views import RegistrationView
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
+from django.db.utils import OperationalError
 from . import settings
+from django.views.generic.base import TemplateView
+
+import core
+
+class EditedRegistrationView(RegistrationView):
+	def registration_allowed(self):
+		try:
+			semester = core.models.Semester.objects.get(active=True)
+			return semester.registration_open
+		except (MultipleObjectsReturned, ObjectDoesNotExist, OperationalError):
+			return False
 
 urlpatterns = [
 	url(r'^admin/', include(admin.site.urls)),
 	url(r'^dash/', include('dashboard.urls')),
 	url(r'^roster/', include('roster.urls')),
 	url(r'^hijack/', include('hijack.urls')),
-	# url(r'^accounts/', include('registration.backends.simple.urls')),
 	url(r'^accounts/', include('django.contrib.auth.urls')),
+	url(r'^register/$', EditedRegistrationView.as_view(), name='registration_register'),
+	url(r'^register/closed/$', TemplateView.as_view(
+		template_name="registration/registration_closed.html"
+		), name='registration_disallowed'),
 	url(r'^_ah/health/', RedirectView.as_view(pattern_name='index')), # health checks
 	url(r'^$', RedirectView.as_view(pattern_name='index')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
