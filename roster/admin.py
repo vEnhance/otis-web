@@ -65,7 +65,7 @@ class StudentIEResource(RosterResource):
 @admin.register(roster.models.Student)
 class StudentAdmin(ImportExportModelAdmin):
 	list_display = ('name', 'user', 'semester', 'assistant', 'legit', 'current_unit_index', 'curriculum_length',)
-	ordering = ('semester', 'name', )
-	list_filter = ('semester__active', 'legit',)
+	ordering = ('semester', 'name',)
+	list_filter = ('semester__active', 'legit', 'semester',)
 	resource_class = StudentIEResource
 	inlines = (InvoiceInline,)

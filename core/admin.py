@@ -1,5 +1,5 @@
 from django.contrib import admin
-from import_export import resources
+from import_export import resources, widgets, fields
 from import_export.admin import ImportExportModelAdmin
 
 import core
@@ -20,17 +20,44 @@ class SemesterAdmin(ImportExportModelAdmin):
 	resource_class = SemesterResource
 
 class UnitIEResource(resources.ModelResource):
+	group_name = fields.Field(column_name = "group_name",
+			attribute = "group",
+			widget = widgets.ForeignKeyWidget(core.models.UnitGroup, "name"))
 	class Meta:
 		skip_unchanged = True
 		model = core.models.Unit
-		fields = ('id', 'name', 'code', 'subject', 'prob_url', 'soln_url', 'position')
+		fields = ('id', 'group_name', 'code', 'position', 'prob_url', 'soln_url',)
+		export_order = ('id', 'group_name', 'code', 'position', 'prob_url', 'soln_url',)
 
 @admin.register(core.models.Unit)
 class UnitAdmin(ImportExportModelAdmin):
-	list_display = ('name', 'code', 'subject', 'position',)
-	search_fields = ('name', 'code')
+	list_display = ('group', 'code', 'position',)
+	list_filter = ('group__subject',)
+	search_fields = ('group__name', 'code')
 	ordering = ('position',)
 	resource_class = UnitIEResource
 	list_per_page = 150
 	list_max_show_all = 400
 
+class UnitInline(admin.TabularInline):
+	model = core.models.Unit
+	fields = ('code', 'position',)
+	readonly_fields = ('prob_url', 'soln_url',)
+	extra = 0
+
+class UnitGroupIEResource(resources.ModelResource):
+	class Meta:
+		skip_unchanged = True
+		model = core.models.UnitGroup
+		fields = ('subject', 'name', 'description',)
+		export_order = ('subject', 'name', 'description',)
+		import_id_fields = ('name',)
+
+@admin.register(core.models.UnitGroup)
+class UnitGroupAdmin(ImportExportModelAdmin):
+	list_display = ('name', 'subject', 'description',)
+	search_fields = ('name', 'code')
+	resource_class = UnitGroupIEResource
+	list_per_page = 150
+	list_max_show_all = 400
+	inlines = (UnitInline,)
