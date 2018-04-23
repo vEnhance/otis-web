@@ -28,7 +28,7 @@ class CurriculumForm(forms.Form):
 		super(CurriculumForm, self).__init__(*args, **kwargs)
 		
 		n = 0
-		for name, group in itertools.groupby(units, lambda u : u.name):
+		for name, group in itertools.groupby(units, lambda u : u.group.name):
 			group = list(group)
 			field_name = 'group-' + str(n)
 
@@ -46,7 +46,7 @@ class CurriculumForm(forms.Form):
 
 			form_kwargs['help_text'] = ' '.join([unit.code for unit in group])
 			form_kwargs['required'] = False
-			form_kwargs['label_suffix'] = 'aoeu'
+			form_kwargs['label_suffix'] = 'aoeu' # wait why is this here again
 			form_kwargs['coerce'] = int
 			form_kwargs['empty_value'] = None
 			form_kwargs['disabled'] = not enabled

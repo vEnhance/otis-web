@@ -2,7 +2,7 @@
 <table class="table">
 {% for unit in student.curriculum.all %}
 {% with u=student.pointer_current_unit %}
-<tr class="subject{{ unit.subject }}">
+<tr class="subject{{ unit.group.subject }}">
 	<th>{{ forloop.counter }}</th>
 	<td>
 	{% if unit == u %}
@@ -12,7 +12,7 @@
 	{% elif forloop.counter0 < student.current_unit_index %}
 		&check;
 	{% endif %}</td>
-	<td>{{ unit.name }}</td>
+	<td>{{ unit.group.name }}</td>
 	<td>{{ unit.code }}</td>
 	<td>
 	{% if unit == u or forloop.counter0|add:"-2" <= student.current_unit_index %}

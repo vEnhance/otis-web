@@ -104,8 +104,8 @@ def master_schedule(request):
 		unit_to_student_names[d['curriculum']].append(d['name'])
 
 	chart = collections.OrderedDict() # ordered dict(unit -> students)
-	units = core.models.Unit.objects.all()
-	for unit in core.models.Unit.objects.all():
+	units = core.models.Unit.objects.order_by('position')
+	for unit in units:
 		chart[unit] = unit_to_student_names[unit.id]
 	semester = core.models.Semester.objects.get(active=True)
 	context = {

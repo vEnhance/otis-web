@@ -4,9 +4,9 @@
 <p>Showing the current enrollments for <b>{{ semester }}</b>.</p>
 <table>
 {% for unit, students in chart.items %}
-<tr class="subject{{ unit.subject }}">
+<tr class="subject{{ unit.group.subject }}">
 	<th>{{ forloop.counter }}</th>
-	<td>{{ unit.name }}</td>
+	<td>{{ unit.group.name }}</td>
 	<td>{{ unit.code }}</td>
 	<td>{{ students|length }}</td>
 	<td style="font-size: 70%;">{{ students|join:", "}}</td>
