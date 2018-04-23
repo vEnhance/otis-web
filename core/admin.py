@@ -15,7 +15,7 @@ class SemesterResource(resources.ModelResource):
 
 @admin.register(core.models.Semester)
 class SemesterAdmin(ImportExportModelAdmin):
-	list_display = ('name', 'id', 'active', 'show_invoices',)
+	list_display = ('name', 'id', 'active', 'show_invoices', 'registration_open',)
 	search_fields = ('name',)
 	resource_class = SemesterResource
 

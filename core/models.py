@@ -15,6 +15,8 @@ class Semester(models.Model):
 			"(there should thus be at most one active semester)")
 	show_invoices = models.BooleanField(default=False,
 			help_text = "Whether to display invoices for this semester.")
+	registration_open = models.BooleanField(default=False,
+			help_text = "Whether students can register for this semester yet.")
 	def __str__(self):
 		return self.name
 
