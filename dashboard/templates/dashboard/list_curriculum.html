@@ -1,3 +1,4 @@
+{% load core_extras %}
 {% if student.curriculum_length != 0 %}
 <table class="table">
 {% for unit in student.curriculum.all %}
@@ -16,7 +17,7 @@
 	<td>{{ unit.code }}</td>
 	<td>
 	{% if unit == u or forloop.counter0|add:"-2" <= student.current_unit_index %}
-		<a href="{{ unit.prob_url }}">Handout</a>
+		<a href="{% view_problems unit %}">Handout</a>
 	{% else %}
 		&mdash;
 	{% endif %}
@@ -29,9 +30,9 @@
 	{% endif %}
 	{# Whether to show solutions #}
 	{% if forloop.counter0 < student.current_unit_index and unit != u %}
-	<td><a href="{{ unit.soln_url }}">Solution Notes</a></td>
+	<td><a href="{% view_solutions unit %}">Solution Notes</a></td>
 	{% elif omniscient and forloop.counter0 <= student.current_unit_index %}
-	<td><a href="{{ unit.soln_url }}">Draft Solutions</a></td>
+	<td><a href="{% view_solutions unit %}">Draft Solutions</a></td>
 	{% else %}
 	<td></td>
 	{% endif %}
