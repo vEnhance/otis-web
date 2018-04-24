@@ -28,7 +28,7 @@
 	<td></td>
 	{% endif %}
 	{# Whether to show solutions #}
-	{% if forloop.counter0 < student.current_unit_index %}
+	{% if forloop.counter0 < student.current_unit_index and unit != u %}
 	<td><a href="{{ unit.soln_url }}">Solution Notes</a></td>
 	{% elif omniscient and forloop.counter0 <= student.current_unit_index %}
 	<td><a href="{{ unit.soln_url }}">Draft Solutions</a></td>
