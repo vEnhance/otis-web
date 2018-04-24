@@ -39,6 +39,7 @@ urlpatterns = [
 	url(r'^admin/', include(admin.site.urls)),
 	url(r'^dash/', include('dashboard.urls')),
 	url(r'^roster/', include('roster.urls')),
+	url(r'^core/', include('core.urls')),
 	url(r'^hijack/', include('hijack.urls')),
 	url(r'^accounts/', include('django.contrib.auth.urls')),
 	url(r'^register/$', EditedRegistrationView.as_view(), name='registration_register'),

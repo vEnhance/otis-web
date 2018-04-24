@@ -49,8 +49,8 @@ class UnitGroupIEResource(resources.ModelResource):
 	class Meta:
 		skip_unchanged = True
 		model = core.models.UnitGroup
-		fields = ('subject', 'name', 'description',)
-		export_order = ('subject', 'name', 'description',)
+		fields = ('id', 'subject', 'name', 'description',)
+		export_order = ('id', 'subject', 'name', 'description',)
 
 @admin.register(core.models.UnitGroup)
 class UnitGroupAdmin(ImportExportModelAdmin):
