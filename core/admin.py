@@ -51,7 +51,6 @@ class UnitGroupIEResource(resources.ModelResource):
 		model = core.models.UnitGroup
 		fields = ('subject', 'name', 'description',)
 		export_order = ('subject', 'name', 'description',)
-		import_id_fields = ('name',)
 
 @admin.register(core.models.UnitGroup)
 class UnitGroupAdmin(ImportExportModelAdmin):
