@@ -21,8 +21,8 @@
 	<li><a href="{% url "index" %}">Change kid</a></li>
 	{% endif %}
 
-<li><a href="{% url "password_change" %}">Change password</a></li>
-<li><a href="{% url "synopsis" %}">Catalog synopsis</a></li>
+<li><a href="{% url "password_change" %}">Edit password</a></li>
+<li><a href="{% url "synopsis" %}">OTIS Catalog</a></li>
 </ul>
 {% if request.user.is_staff %}
 	Staff panel:

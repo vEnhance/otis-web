@@ -1,5 +1,5 @@
 {% extends 'layout.html' %}
-{% block title %}Catalog Synopsis{% endblock %}
+{% block title %}Catalog{% endblock %}
 
 {% block layout-content %}
 <p>This list is sorted by olympiad category, then alphabetically by name.</p>
@@ -8,8 +8,8 @@ by a three-letter code.
 The first letter of the code represents the difficulty,
 the second letter repeats the olympiad category,
 and the third letter is a version identifier.
-Many topics have multiple versions so they can be repeated in different years.
-</p>
+Many topics have multiple versions so they can be repeated in different years.</p>
+<p>This page was last updated {% now "r" %}.</p>
 
 {% regroup object_list by get_subject_display as grouped_unit_list %}
 
