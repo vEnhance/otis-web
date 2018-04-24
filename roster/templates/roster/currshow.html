@@ -11,6 +11,10 @@ td.unit-select select {
 {% block layout-content %}
 
 <p><a href="{% url "dashboard" student.id %}">Back to Dashboard</a></p>
+
+For a description of what these units are,
+see the <a href="{% url "synopsis" %}">catalog synopsis</a>.
+
 <form action="{{ request.path }}" method="post">
 {% csrf_token %}
 
