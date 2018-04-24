@@ -23,14 +23,17 @@
 
 <li><a href="{% url "password_change" %}">Change password</a></li>
 <li><a href="{% url "synopsis" %}">Catalog synopsis</a></li>
-	{% if request.user.is_staff %}
+</ul>
+{% if request.user.is_staff %}
+	Staff panel:
+	<ul>
 	<li><a href="{% url "master-schedule" %}">Master schedule</a></li>
 	{% endif %}
 	{% if request.user.is_superuser %}
 	<li><a href="{% url "admin:index" %}">Django admin</a></li>
 		{% if student %}
 		<li> <a href="{% url "admin:roster_student_change" student.id %}">
-				Edit {{ student.name.username }}</a></li>
+				Edit {{ student.user.username }}</a></li>
 		{% endif %}
 		{# Hijack student account #}
 		{% if student.user %}
@@ -51,6 +54,6 @@
 		</form>
 		</li>
 		{% endif %}
-	{% endif %}
-</ul>
+	</ul>
+{% endif %}
 {% endif %}
