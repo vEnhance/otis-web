@@ -19,7 +19,7 @@ from django.conf.urls.static import static
 from django.contrib import admin, auth
 from django.views.generic import RedirectView
 
-from registration.views import RegistrationView
+from registration.backends.simple.views import RegistrationView
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.db.utils import OperationalError
 from . import settings
