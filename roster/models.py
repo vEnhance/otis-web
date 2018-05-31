@@ -71,6 +71,10 @@ class Student(models.Model):
 	class Meta:
 		unique_together = ('user', 'semester',)
 		ordering = ('semester', '-legit', 'track', 'name',)
+	
+	@property
+	def meets_evan(self):
+		return (self.track == "A" or self.track == "B") and self.legit
 
 	@property
 	def curriculum_length(self):
