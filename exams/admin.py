@@ -6,26 +6,15 @@ import exams
 
 # Register your models here.
 
-class MockOlympiadIEResource(resources.ModelResource):
+class PracticeExamIEResource(resources.ModelResource):
 	class Meta:
 		skip_unchanged = True
-		model = exams.models.MockOlympiad
-		fields = ('family', 'number', 'jmo_url', 'usamo_url', 'soln_url', 'id', 'start_date', 'due_date',)
+		model = exams.models.PracticeExam
+		fields = ('family', 'is_test', 'number', 'pdf_url', 'id', 'start_date', 'due_date',)
 
-@admin.register(exams.models.MockOlympiad)
-class MockOlympiadAdmin(ImportExportModelAdmin):
-	list_display = ('family', 'number', 'start_date', 'due_date',)
+@admin.register(exams.models.PracticeExam)
+class PracticeExamAdmin(ImportExportModelAdmin):
+	list_display = ('id', 'family', 'is_test', 'number', 'start_date', 'due_date',)
+	list_filter = ('family', 'is_test',)
 	search_fields = ('family', 'number',)
-	resource_class = MockOlympiadIEResource
-
-class AssignmentIEResource(resources.ModelResource):
-	class Meta:
-		skip_unchanged = True
-		model = exams.models.Assignment
-		fields = ('id', 'name', 'start_date', 'due_date',)
-
-@admin.register(exams.models.Assignment)
-class AssignmentAdmin(ImportExportModelAdmin):
-	list_display = ('id', 'name', 'start_date', 'due_date',)
-	search_fields = ('name',)
-	resource_class = AssignmentIEResource
+	resource_class = PracticeExamIEResource
