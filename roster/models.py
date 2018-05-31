@@ -43,8 +43,16 @@ class Student(models.Model):
 			blank=True, null=True, related_name='pointer_unit',
 			help_text = "If set, the counter will skip ahead "
 			"so that the student is working on this unit instead.")
+	track = models.CharField(max_length = 5,
+			choices = (
+				("A", "Weekly"),
+				("B", "Biweekly"),
+				("C", "Correspondence"),
+				("N", "Not applicable"),
+				),
+			help_text = "")
 	legit = models.BooleanField(default = True,
-			help_text = "Whether this student is real. "
+			help_text = "Whether this student is still active. "
 			"Set to false for dummy accounts and the like. "
 			"This will hide them from the master schedule, for example.")
 	def __str__(self):
@@ -62,7 +70,7 @@ class Student(models.Model):
 		return self.user == user or self.is_taught_by(user)
 	class Meta:
 		unique_together = ('user', 'semester',)
-		ordering = ('-legit', 'name',)
+		ordering = ('semester', '-legit', 'track', 'name',)
 
 	@property
 	def curriculum_length(self):

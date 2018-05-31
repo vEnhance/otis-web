@@ -9,7 +9,7 @@ import roster
 
 class StudentInline(admin.TabularInline):
 	model = roster.models.Student
-	fields = ('user', 'name', 'semester', 'legit', 'current_unit_index',)
+	fields = ('user', 'name', 'semester', 'track', 'legit', 'current_unit_index',)
 	readonly_fields = ('user', 'name', 'semester',)
 	extra = 0
 
@@ -60,12 +60,11 @@ class StudentIEResource(RosterResource):
 	class Meta:
 		skip_unchanged = True
 		model = roster.models.Student
-		fields = ('id', 'name', 'semester_name', 'user_name', 'assistant', 'legit', 'current_unit_index', 'curriculum')
+		fields = ('id', 'name', 'semester_name', 'user_name', 'assistant', 'track', 'legit', 'current_unit_index', 'curriculum')
 
 @admin.register(roster.models.Student)
 class StudentAdmin(ImportExportModelAdmin):
-	list_display = ('name', 'user', 'semester', 'assistant', 'legit', 'current_unit_index', 'curriculum_length',)
-	ordering = ('semester', 'name',)
-	list_filter = ('semester__active', 'legit', 'semester',)
+	list_display = ('name', 'user', 'semester', 'assistant', 'legit', 'track', 'current_unit_index', 'curriculum_length',)
+	list_filter = ('semester__active', 'legit', 'semester', 'track',)
 	resource_class = StudentIEResource
 	inlines = (InvoiceInline,)
