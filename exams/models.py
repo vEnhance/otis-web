@@ -28,7 +28,7 @@ class PracticeExam(models.Model):
 	due_date = models.DateField(null = True, blank = True,
 			help_text = "When the assignment should be due.")
 	class Meta:
-		ordering = ('family', 'is_test', 'number')
+		ordering = ('family', '-is_test', 'number')
 		unique_together = ('family', 'is_test', 'number')
 
 	@property
