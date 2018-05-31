@@ -17,6 +17,7 @@ You have completed {{ student.current_unit_index }} of
 Completed units are marked with &check;.</p>
 {% include "dashboard/list_curriculum.html" %}
 
+<h2>Handouts etc</h2>
 <ul>
 	<li>Link to <a href="http://web.evanchen.cc/private/otis-syllabus.pdf">syllabus</a>,
 		<a href="http://web.evanchen.cc/private/parent-info.pdf">parent information</a>.</li>
@@ -34,6 +35,7 @@ Completed units are marked with &check;.</p>
 
 <hr />
 
+{% if student.semester.active %}
 <h2>Mock Olympiads (Tests)</h2>
 <p><a href="https://www.dropbox.com/s/vx2e7hm4n5dfj8x/long.pdf?dl=1">Link to <b>olympiad answer sheets</b>.</a></p>
 <p>Solutions are available immediately here so that you can
@@ -49,8 +51,6 @@ on olympiad strategy.</p>
 unless otherwise specified.
 See the syllabus for full instructions.</p>
 
-<hr />
-
 <h2>Quizzes</h2>
 <p>Here is the
 <a href="https://www.dropbox.com/s/j2r3gzhuljnqaih/short.pdf?dl=1">link to <b>short-answer forms</b>.</a></p>
@@ -60,8 +60,14 @@ See the syllabus for full instructions.</p>
 <p>Submit these to <a href="http://www.gradescope.com" target="_blank">GradeScope</a>,
 unless otherwise specified.
 See the syllabus for full instructions.</p>
+{% else %}
 
-{% if student.meets_evan %}
+<p>This page from {{ student.semester }} is now archived.
+Thanks for playing.</p>
+
+{% endif %}
+
+{% if student.meets_evan and student.semester.active %}
 <hr />
 
 <h2>Calendar</h2>
