@@ -60,7 +60,7 @@ class StudentIEResource(RosterResource):
 	class Meta:
 		skip_unchanged = True
 		model = roster.models.Student
-		fields = ('id', 'name', 'semester_name', 'user_name', 'assistant', 'track', 'legit', 'current_unit_index', 'curriculum')
+		fields = ('id', 'name', 'semester_name', 'user_name', 'assistant', 'track', 'legit',)
 
 @admin.register(roster.models.Student)
 class StudentAdmin(ImportExportModelAdmin):
