@@ -1,0 +1,31 @@
+<table class="table">
+{% for exam in exams %}
+<tr>
+	<th>{{ forloop.counter }}</th>
+	{# Status symbol #}
+	{% if exam.overdue %}
+	<td>&check;</td>
+	{% elif exam.current %}
+	<td>&star;</td>
+	{% else %}
+	<td></td>
+	{% endif %}
+
+	<td>{{ exam.family }} {{ exam }}</td>
+
+	{% if exam.started %}
+	<td>{% if exam.pdf_url %}<a href="{{exam.pdf_url}}">PDF</a>{% else %}TBD{% endif %}</td>
+	{% else %}
+	<td>&ndash;</td>
+	{% endif %}
+
+	{% if exam.overdue %}
+	<td>Finished {{ exam.due_date|date:"DATE_FORMAT" }}</td>
+	{% elif exam.started %}
+	<td>Due {{ exam.due_date|date:"DATE_FORMAT" }}</td>
+	{% else %}
+	<td>{{ exam.start_date|date:"DATE_FORMAT" }} &ndash; {{ exam.due_date|date:"DATE_FORMAT" }}</td>
+	{% endif %}
+</tr>
+{% endfor %}
+</table>

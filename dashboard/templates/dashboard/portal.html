@@ -34,7 +34,7 @@ Completed units are marked with &check;.</p>
 
 <hr />
 
-<h2>Mock Olympiads</h2>
+<h2>Mock Olympiads (Tests)</h2>
 <p><a href="https://www.dropbox.com/s/vx2e7hm4n5dfj8x/long.pdf?dl=1">Link to <b>olympiad answer sheets</b>.</a></p>
 <p>Solutions are available immediately here so that you can
 read them right after completing a mock olympiad.
@@ -42,73 +42,20 @@ Obviously, don't open the solutions until you've submitted!</p>
 <p>Before taking your first practice exam, I recommend reading the
 <a href="https://www.dropbox.com/s/rs21apzqpm4b0qq/psychology.pdf?dl=0">handout</a>
 on olympiad strategy.</p>
-<table class="table">
-{% for oly in olympiads %}
-<tr>
-	{# Status symbol for olympiads is more complex #}
-	{% if oly.overdue %}
-	<td>&check;</td>
-	{% elif oly.current %}
-	<td>&star;</td>
-	{% else %}
-	<td></td>
-	{% endif %}
 
-	<td>{{ oly.family }} {{ oly.number }}</td>
-	{% if oly.started %}
-	<td>{% if oly.jmo_url %}<a href="{{oly.jmo_url}}">JMO</a>{% endif %}</td>
-	<td>{% if oly.usamo_url %}<a href="{{oly.usamo_url}}">USAMO</a>{% endif %}</td>
-	<td>{% if oly.soln_url %}<a href="{{oly.soln_url}}">Solutions</a>{% endif %}</td>
-	{% else  %}
-	<td>&ndash;</td> <td>&ndash;</td> <td>&ndash;</td>
-	{% endif %}
+{% include "dashboard/list_exam.html" with exams=tests %}
 
-	{% if oly.overdue %}
-	<td>Finished {{ oly.due_date|date:"DATE_FORMAT" }}</td>
-	{% elif oly.started %}
-	<td>Due {{ oly.due_date|date:"DATE_FORMAT" }}</td>
-	{% else %}
-	<td>{{ oly.start_date|date:"DATE_FORMAT" }} &ndash; {{ oly.due_date|date:"DATE_FORMAT" }}</td>
-	{% endif %}
-</tr>
-{% endfor %}
-</table>
 <p>Submit these to <a href="http://www.gradescope.com" target="_blank">GradeScope</a>,
 unless otherwise specified.
 See the syllabus for full instructions.</p>
 
-
 <hr />
 
-<h2>Other Assignments</h2>
-<p>For HMMT practices, <a href="https://www.dropbox.com/s/j2r3gzhuljnqaih/short.pdf?dl=1">link to <b>short-answer forms</b>.</a></p>
+<h2>Quizzes</h2>
+<p>Here is the
+<a href="https://www.dropbox.com/s/j2r3gzhuljnqaih/short.pdf?dl=1">link to <b>short-answer forms</b>.</a></p>
 
-<table class="table">
-{% for assn in assignments %}
-<tr>
-	<th>{{ forloop.counter }}</th>
-
-	{# Status symbol #}
-	{% if assn.overdue %}
-	<td>&check;</td>
-	{% elif assn.current %}
-	<td>&star;</td>
-	{% else %}
-	<td></td>
-	{% endif %}
-
-	<td>{{ assn }}</td>
-
-	{% if assn.overdue %}
-	<td>Finished {{ assn.due_date|date:"DATE_FORMAT" }}</td>
-	{% elif assn.started %}
-	<td>Due {{ assn.due_date|date:"DATE_FORMAT" }}</td>
-	{% else %}
-	<td>{{ assn.start_date|date:"DATE_FORMAT" }} &ndash; {{ assn.due_date|date:"DATE_FORMAT" }}</td>
-	{% endif %}
-</tr>
-{% endfor %}
-</table>
+{% include "dashboard/list_exam.html" with exams=quizzes %}
 
 <p>Submit these to <a href="http://www.gradescope.com" target="_blank">GradeScope</a>,
 unless otherwise specified.

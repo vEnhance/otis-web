@@ -21,13 +21,16 @@ from . import forms
 def portal(request, student_id):
 	student = get_object_or_404(roster.models.Student.objects, id = student_id)
 	roster.utils.check_can_view(request, student)
+	semester = student.semester
 
 	context = {}
 	context['title'] = "Dashboard for " + student.name
 	context['student'] = student
 	context['omniscient'] = student.is_taught_by(request.user)
-	context['olympiads'] = exams.models.MockOlympiad.objects.filter(due_date__isnull=False)
-	context['assignments'] = exams.models.Assignment.objects.filter(due_date__isnull=False)
+	context['tests'] = exams.models.PracticeExam.objects.filter(
+			is_test = True, family = semester.exam_family, due_date__isnull=False)
+	context['quizzes'] = exams.models.PracticeExam.objects.filter(
+			is_test = False, family = semester.exam_family, due_date__isnull=False)
 	return render(request, "dashboard/portal.html", context)
 
 @login_required
