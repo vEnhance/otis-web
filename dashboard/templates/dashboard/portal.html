@@ -17,12 +17,12 @@ You have completed {{ student.current_unit_index }} of
 Completed units are marked with &check;.</p>
 {% include "dashboard/list_curriculum.html" %}
 
-<h2>Handouts etc</h2>
+<h2>Links</h2>
 <ul>
 	<li>Link to <a href="http://web.evanchen.cc/private/otis-syllabus.pdf">syllabus</a>,
 		<a href="http://web.evanchen.cc/private/parent-info.pdf">parent information</a>.</li>
 	<li>Link to <a href="https://www.dropbox.com/s/rs21apzqpm4b0qq/psychology.pdf?dl=0">handout
-			on olympiad psychology and test-taking strategies</a>.</li>
+			on test-taking strategies</a>.</li>
 	<li>Link to <a href="{% url "uploads" student.id 0 %}">miscellaneous uploads</a></li>
 	<li><a href="{% url "currshow" student.id %}">Show full catalog</a></li>
 	{% if student.semester.show_invoices %}
@@ -37,27 +37,25 @@ Completed units are marked with &check;.</p>
 
 {% if student.semester.active %}
 <h2>Mock Olympiads (Tests)</h2>
-<p><a href="https://www.dropbox.com/s/vx2e7hm4n5dfj8x/long.pdf?dl=1">Link to <b>olympiad answer sheets</b>.</a></p>
-<p>Solutions are available immediately here so that you can
-read them right after completing a mock olympiad.
-Obviously, don't open the solutions until you've submitted!</p>
-<p>Before taking your first practice exam, I recommend reading the
-<a href="https://www.dropbox.com/s/rs21apzqpm4b0qq/psychology.pdf?dl=0">handout</a>
-on olympiad strategy.</p>
-
 {% include "dashboard/list_exam.html" with exams=tests %}
 
-<p>Submit these to <a href="http://www.gradescope.com" target="_blank">GradeScope</a>,
+<p><a href="https://www.dropbox.com/s/vx2e7hm4n5dfj8x/long.pdf?dl=0">
+Link to <b>olympiad answer sheets</b>.</a>
+Submit these to <a href="http://www.gradescope.com" target="_blank">GradeScope</a>,
 unless otherwise specified.
 See the syllabus for full instructions.</p>
 
+<p>Solutions are available immediately here so that you can
+read them right after completing a mock olympiad.
+Obviously, don't open the solutions until you've submitted!
+Before taking your first mock olympiad, I recommend reading the
+<a href="https://www.dropbox.com/s/rs21apzqpm4b0qq/psychology.pdf?dl=0">handout</a>
+on olympiad strategy.</p>
+
 <h2>Quizzes</h2>
-<p>Here is the
-<a href="https://www.dropbox.com/s/j2r3gzhuljnqaih/short.pdf?dl=1">link to <b>short-answer forms</b>.</a></p>
-
 {% include "dashboard/list_exam.html" with exams=quizzes %}
-
-<p>Submit these to <a href="http://www.gradescope.com" target="_blank">GradeScope</a>,
+<p><a href="https://www.dropbox.com/s/j2r3gzhuljnqaih/short.pdf?dl=0">Link to <b>short-answer forms</b>.</a>
+Submit these to <a href="http://www.gradescope.com" target="_blank">GradeScope</a>,
 unless otherwise specified.
 See the syllabus for full instructions.</p>
 {% else %}
