@@ -20,6 +20,7 @@
 <ul>
 	{% if not student %}
 	<li><a href="{% url "index" %}">Back to index</a></li>
+	<li><a href="{% url "past" %}">Past semesters</a></li>
 	{% elif student.user.username == request.user.username %}
 	<li><a href="{% url "past" %}">Change semester</a></li>
 	{% else %}
