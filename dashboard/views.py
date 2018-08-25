@@ -24,7 +24,7 @@ def portal(request, student_id):
 	semester = student.semester
 
 	context = {}
-	context['title'] = "Dashboard for " + student.name
+	context['title'] = "%s (%s) Dashboard" %(student.name, student.semester.name)
 	context['student'] = student
 	context['omniscient'] = student.is_taught_by(request.user)
 	context['tests'] = exams.models.PracticeExam.objects.filter(
