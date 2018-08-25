@@ -26,14 +26,13 @@ class AssistantIEResource(RosterResource):
 	class Meta:
 		skip_unchanged = True
 		model = roster.models.Assistant
-		fields = ('id', 'name', 'semester_name', 'user_name',)
+		fields = ('id', 'user_name', 'user__first_name', 'user__last_name',)
 
 @admin.register(roster.models.Assistant)
 class AssistantAdmin(ImportExportModelAdmin):
-	list_display = ('name', 'semester', 'user', 'student_count',)
-	inlines = (StudentInline,)
-	list_filter = ('semester__active',)
-	resource_class = AssistantIEResource
+		list_display = ('name', 'user',)
+		inlines = (StudentInline,)
+		resource_class = AssistantIEResource
 
 ## INVOICE
 class InvoiceIEResource(resources.ModelResource):
@@ -41,7 +40,7 @@ class InvoiceIEResource(resources.ModelResource):
 		skip_unchanged = True
 		model = roster.models.Invoice
 		fields = ('id', 'student', 'preps_taught', 'hours_taught', 'total_paid',
-				'student__name', 'student__semester__name',)
+				'student__semester__name',)
 
 class InvoiceInline(admin.StackedInline):
 	model = roster.models.Invoice
@@ -60,7 +59,8 @@ class StudentIEResource(RosterResource):
 	class Meta:
 		skip_unchanged = True
 		model = roster.models.Student
-		fields = ('id', 'name', 'semester_name', 'user_name', 'assistant', 'track', 'legit',)
+		fields = ('id', 'user__first_name', 'user__last_name',
+				'semester_name', 'user_name', 'assistant', 'track', 'legit',)
 
 @admin.register(roster.models.Student)
 class StudentAdmin(ImportExportModelAdmin):

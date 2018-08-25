@@ -47,7 +47,7 @@
 		</li>
 		{% endif %}
 		{# Hijack assistant account #}
-		{% if student.assistant.user %}
+		{% if student.assistant %}
 		<li>
 		<form action="/hijack/{{ student.assistant.user.id }}/" method="post">
 		{% csrf_token %}
