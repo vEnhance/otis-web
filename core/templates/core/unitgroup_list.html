@@ -4,11 +4,15 @@
 {% block layout-content %}
 <p>This list is sorted by olympiad category, then alphabetically by name.</p>
 <p>Each topic has one or more units which is designated
-by a three-letter code.
-The first letter of the code represents the difficulty,
-the second letter repeats the olympiad category,
-and the third letter is a version identifier.
-Many topics have multiple versions so they can be repeated in different years.</p>
+by a three-letter code.</p>
+<ul>
+	<li>The first letter of the code represents the difficulty.
+		B is the easiest, D is medium, Z is quite hard.
+		There is some grey room in this department.</li>
+	<li>The second letter repeats the olympiad category.</li>
+	<li>The third letter is a version identifier (either W, X, or Y).
+	Many topics have multiple versions so they can be repeated in different years.</li>
+</ul>
 <p>This page was last updated {% now "r" %}.</p>
 
 {% regroup object_list by get_subject_display as grouped_unit_list %}
