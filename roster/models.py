@@ -9,7 +9,9 @@ class Assistant(models.Model):
 	"""This is a wrapper object for a single assistant.
 	Just need a username at the moment..."""
 	user = models.OneToOneField(User,
-		help_text = "The Django Auth user attached to the Assistant.")
+			help_text = "The Django Auth user attached to the Assistant.")
+	shortname = models.CharField(max_length = 10,
+			help_text = "Initials or short name for this Assistant")
 	@property
 	def name(self):
 		return self.user.get_full_name()

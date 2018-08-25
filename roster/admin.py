@@ -26,11 +26,11 @@ class AssistantIEResource(RosterResource):
 	class Meta:
 		skip_unchanged = True
 		model = roster.models.Assistant
-		fields = ('id', 'user_name', 'user__first_name', 'user__last_name',)
+		fields = ('id', 'user_name', 'shortname', 'user__first_name', 'user__last_name',)
 
 @admin.register(roster.models.Assistant)
 class AssistantAdmin(ImportExportModelAdmin):
-		list_display = ('name', 'user',)
+		list_display = ('name', 'user', 'shortname')
 		inlines = (StudentInline,)
 		resource_class = AssistantIEResource
 
