@@ -8,6 +8,10 @@
 You have completed {{ student.current_unit_index }} of
 {{ student.curriculum_length }} units.</p>
 
+{% if student.assistant %}
+<p>Your assistant instructor is <b>{{ student.assistant.name }}</b>.</p>
+{% endif %}
+
 <h2>Curriculum Materials</h2>
 <p>The current unit is marked with a &star;.
 Completed units are marked with &check;.</p>
