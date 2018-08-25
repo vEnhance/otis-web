@@ -83,7 +83,7 @@ class Student(models.Model):
 
 class Invoice(models.Model):
 	"""Billing information object for students."""
-	PREP_RATE = 400 # 400 per semester...
+	PREP_RATE = 320 # 320 per semester...
 	HOUR_RATE = 80  # plus 80 per hour
 
 	student = models.OneToOneField(Student,
