@@ -71,7 +71,7 @@ class Student(models.Model):
 		return self.user == user or self.is_taught_by(user)
 	class Meta:
 		unique_together = ('user', 'semester',)
-		ordering = ('semester', '-legit', 'track',)
+		ordering = ('semester', '-legit', 'track', 'user__first_name', 'user__last_name')
 	
 	@property
 	def meets_evan(self):
