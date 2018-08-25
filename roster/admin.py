@@ -20,6 +20,9 @@ class RosterResource(resources.ModelResource):
 	semester_name = fields.Field(column_name = 'Semester Name',
 			attribute = 'semester',
 			widget = widgets.ForeignKeyWidget(core.models.Semester, 'name'))
+	unit_list = fields.Field(column_name = 'Unit List',
+			attribute = 'curriculum',
+			widget = widgets.ManyToManyWidget(core.models.Unit, separator=';'))
 
 ## ASSISTANT
 class AssistantIEResource(RosterResource):
@@ -59,8 +62,10 @@ class StudentIEResource(RosterResource):
 	class Meta:
 		skip_unchanged = True
 		model = roster.models.Student
-		fields = ('id', 'user__first_name', 'user__last_name',
-				'semester_name', 'user_name', 'assistant', 'track', 'legit',)
+		fields = ('id', 'user__first_name', 'user__last_name', 'semester_name',
+				'user_name', 'assistant', 'track', 'legit', 'unit_list',)
+		export_order = ('id', 'user__first_name', 'user__last_name', 'semester_name',
+				'user_name', 'assistant', 'track', 'legit', 'unit_list',)
 
 @admin.register(roster.models.Student)
 class StudentAdmin(ImportExportModelAdmin):
