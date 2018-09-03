@@ -31,6 +31,8 @@
 	{# Whether to show solutions #}
 	{% if forloop.counter0 < student.current_unit_index and unit != u %}
 	<td><a href="{% view_solutions unit %}">Solution Notes</a></td>
+	{% elif omniscient and unit == u %}
+	<td><a href="{% view_solutions unit %}">Sol (current)</a></td>
 	{% elif omniscient and forloop.counter0 <= student.current_unit_index %}
 	<td><a href="{% view_solutions unit %}">Sol (current)</a></td>
 	{% elif omniscient and forloop.counter0|add:"-2" <= student.current_unit_index %}
