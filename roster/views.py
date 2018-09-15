@@ -53,7 +53,8 @@ def advance(request, student_id):
 		if form.is_valid():
 			form.save()
 			messages.success(request, "Successfully advanced student.")
-			return HttpResponseRedirect(reverse("dashboard", args=(student_id,)))
+			# uncomment the below if you want to load the dashboard again
+			# return HttpResponseRedirect(reverse("dashboard", args=(student_id,)))
 	else:
 		form = forms.AdvanceForm(instance = student)
 

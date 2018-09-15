@@ -56,6 +56,16 @@ class CurriculumForm(forms.Form):
 
 
 class AdvanceForm(forms.ModelForm):
+	def __init__(self, *args, **kwargs):
+		super(AdvanceForm, self).__init__(*args, **kwargs)
+		student = kwargs['instance']
+		self.fields['pointer_current_unit'] = forms.ModelChoiceField(
+				queryset = student.curriculum.all(),
+				empty_label = "(none)",
+				help_text = "Use this if you want to \"jump\" the counter "
+				"to a certain point.",
+				required = False)
+
 	class Meta:
 		model = roster.models.Student
-		fields = ('current_unit_index',)
+		fields = ('current_unit_index', 'pointer_current_unit')
