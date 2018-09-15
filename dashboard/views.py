@@ -27,6 +27,8 @@ def portal(request, student_id):
 	context['title'] = "%s (%s)" %(student.name, student.semester.name)
 	context['student'] = student
 	context['omniscient'] = student.is_taught_by(request.user)
+	context['curriculum'] = student.generate_curriculum_rows(
+			omniscient = context['omniscient'])
 	context['tests'] = exams.models.PracticeExam.objects.filter(
 			is_test = True, family = semester.exam_family, due_date__isnull=False)
 	context['quizzes'] = exams.models.PracticeExam.objects.filter(

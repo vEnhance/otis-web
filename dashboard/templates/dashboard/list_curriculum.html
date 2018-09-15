@@ -1,49 +1,40 @@
 {% load core_extras %}
-{% if student.curriculum_length != 0 %}
+
+{% if curriculum %}
 <table class="table">
-{% for unit in student.curriculum.all %}
-{% with u=student.pointer_current_unit %}
-<tr class="subject{{ unit.group.subject }}">
-	<th>{{ forloop.counter }}</th>
-	<td>
-	{% if unit == u %}
-		&star;
-	{% elif forloop.counter0 == student.current_unit_index and not u %}
-		&star;
-	{% elif forloop.counter0 < student.current_unit_index %}
-		&check;
-	{% endif %}</td>
-	<td>{{ unit.group.name }}</td>
-	<td>{{ unit.code }}</td>
-	<td>
-	{% if unit == u or forloop.counter0|add:"-2" <= student.current_unit_index %}
-		<a href="{% view_problems unit %}">Handout</a>
+{% for row in curriculum %}
+<tr class="subject{{ row.unit.group.subject }}">
+	<th>{{ row.number }}</th>
+	<td>{% if row.is_current %}&star;{% elif row.is_completed %}&check;{% endif %}</td>
+	<td>{{ row.unit.group.name }}</td>
+	<td>{{ row.unit.code }}</td>
+
+	{# Handout #}
+	{% if row.is_unlocked %}
+		<td><a href="{% view_problems row.unit %}">Handout</a></td>
 	{% else %}
-		&mdash;
+		<td>&mdash;</td>
 	{% endif %}
-	</td>
-	{# Whether to show uploads #}
-	{% if unit == u or forloop.counter0|add:"-2" <= student.current_unit_index %}
-	<td><a href="{% url "uploads" student.id unit.id %}">File Uploads</a></td>
+
+	{# File uploads #}
+	{% if row.is_unlocked or row.num_uploads > 0 %}
+		<td><a href="{% url "uploads" student.id row.unit.id %}">File Uploads
+			({{ row.num_uploads }})</a></td>
 	{% else %}
-	<td></td>
+		<td>&mdash;</td>
 	{% endif %}
-	{# Whether to show solutions #}
-	{% if forloop.counter0 < student.current_unit_index and unit != u %}
-	<td><a href="{% view_solutions unit %}">Solution Notes</a></td>
-	{% elif omniscient and unit == u %}
-	<td><a href="{% view_solutions unit %}">Sol (current)</a></td>
-	{% elif omniscient and forloop.counter0 <= student.current_unit_index %}
-	<td><a href="{% view_solutions unit %}">Sol (current)</a></td>
-	{% elif omniscient and forloop.counter0|add:"-2" <= student.current_unit_index %}
-	<td><a href="{% view_solutions unit %}">Sol (future)</a></td>
+
+	{# Solutions #}
+	{% if row.sols_label %}
+		<td><a href="{% view_solutions row.unit %}">{{ row.sols_label }}</a></td>
 	{% else %}
-	<td></td>
+		<td>&mdash;</td>
 	{% endif %}
 </tr>
-{% endwith %}
 {% endfor %}
 </table>
+
 {% else %}
 <i>No curriculum materials yet! Please check back later.</i>
+
 {% endif %}

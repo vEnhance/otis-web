@@ -2,8 +2,10 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.contrib.auth.models import User
-import core
+from django.db.models import Count, Q, Subquery, OuterRef, Exists
 
+import core
+import dashboard
 
 class Assistant(models.Model):
 	"""This is a wrapper object for a single assistant.
@@ -81,6 +83,53 @@ class Student(models.Model):
 	def curriculum_length(self):
 		return self.curriculum.count()
 
+	def generate_curriculum_rows(self, omniscient):
+		current_index = self.current_unit_index
+		jumped_unit = self.pointer_current_unit or None
+
+		# In Django 2.0 we would just use the following
+		# curriculum = self.curriculum.all().annotate(
+		# 		num_uploads = Count('uploadedfile',
+		# 			filter = Q(uploadedfile__benefactor = self.id)),
+		# 		num_psets = Count('uploadedfile',
+		# 			filter = Q(uploadedfile__benefactor = self.id, category = 'psets')))
+		# Unfortunately google app engine uses Python 2.7
+		# so I'm instead stuck with some subquery crap,
+		# go me. Go life. WAHHHH
+
+		curriculum = self.curriculum.all().annotate(
+				num_uploads = Subquery(
+					dashboard.models.UploadedFile.objects\
+							.filter(benefactor = self, unit = OuterRef('pk'))\
+							.values('unit').annotate(cnt=Count('pk')).values('cnt'),
+					output_field = models.IntegerField()
+					),
+				has_pset = Exists(
+					dashboard.models.UploadedFile.objects.filter(
+						benefactor = self, category = 'psets', unit = OuterRef('pk'))))
+
+		for n, unit in enumerate(curriculum):
+			row = {}
+			row['unit'] = unit
+			row['number'] = n+1
+			row['is_completed'] = (unit.has_pset) or (n < current_index)
+			row['num_uploads'] = unit.num_uploads or 0
+			row['is_current'] = (unit==jumped_unit) \
+					or (jumped_unit is None and n == current_index)
+			row['is_unlocked'] = row['is_completed'] \
+					or row['is_current'] \
+					or (jumped_unit is None and n <= current_index+2) \
+					or (jumped_unit is not None and n <= current_index+1)
+
+			if row['is_completed']:
+				row['sols_label'] = "Solution Notes"
+			elif omniscient and row['is_current']:
+				row['sols_label'] = "Sols (current)"
+			elif omniscient and row['is_unlocked']:
+				row['sols_label'] = "Sols (future)"
+			else:
+				row['sols_label'] = None # solutions not shown
+			yield row
 
 # TODO rewrite this af I think
 class Invoice(models.Model):

@@ -61,8 +61,9 @@ def advance(request, student_id):
 	context = {'title' : "Advance " + student.name}
 	context['form'] = form
 	context['student'] = student
-	context['curriculum'] = student.curriculum.all()
-	context['omniscient'] = student.is_taught_by(request.user) # TODO ugly, template tag `omniscient`
+	context['omniscient'] = student.is_taught_by(request.user)
+	context['curriculum'] = student.generate_curriculum_rows(
+			omniscient = context['omniscient'])
 	return render(request, "roster/advance.html", context)
 
 
