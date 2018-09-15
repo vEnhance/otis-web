@@ -39,9 +39,6 @@ The main thing this will be used for is:
 To upload files to this unit (or any other), use the following form.
 {% include "generic-form.html" with submit_name="Upload" %}
 
-<h2>Other Uploads</h2>
-<p>Use the links below to access other materials.</p>
-{% include "dashboard/list_curriculum.html" with omniscient=False %}
 <ul>
 <li><a href="{% url "uploads" student.id 0 %}">Link to miscellaneous uploads</a></li>
 <li><a href="{% url "dashboard" student.id %}">Back to dashboard</a></li>
