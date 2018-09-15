@@ -98,12 +98,11 @@ class Student(models.Model):
 		# go me. Go life. WAHHHH
 
 		curriculum = self.curriculum.all().annotate(
-				num_uploads = Subquery(
-					dashboard.models.UploadedFile.objects\
-							.filter(benefactor = self, unit = OuterRef('pk'))\
-							.values('unit').annotate(cnt=Count('pk')).values('cnt'),
-					output_field = models.IntegerField()
-					),
+				num_uploads = models.Sum(
+					models.Case(
+						models.When(uploadedfile__benefactor=self, then=1),
+						default = 0,
+						output_field = models.IntegerField())),
 				has_pset = Exists(
 					dashboard.models.UploadedFile.objects.filter(
 						benefactor = self, category = 'psets', unit = OuterRef('pk'))))
