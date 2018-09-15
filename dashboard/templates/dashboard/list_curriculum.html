@@ -5,7 +5,9 @@
 {% for row in curriculum %}
 <tr class="subject{{ row.unit.group.subject }}">
 	<th>{{ row.number }}</th>
-	<td>{% if row.is_completed %}&check;{% elif row.is_current %}&star;{% endif %}</td>
+	<td>{% if row.is_completed %}&check;{% endif %}
+		{% if row.is_current %}&star;{% endif %}
+	</td>
 	<td>{{ row.unit.group.name }}</td>
 	<td>{{ row.unit.code }}</td>
 
@@ -18,7 +20,7 @@
 
 	{# File uploads #}
 	{% if row.is_unlocked or row.num_uploads > 0 %}
-		<td><a href="{% url "uploads" student.id row.unit.id %}">File Uploads
+		<td><a href="{% url "uploads" student.id row.unit.id %}">Uploads
 			({{ row.num_uploads }})</a></td>
 	{% else %}
 		<td>&mdash;</td>

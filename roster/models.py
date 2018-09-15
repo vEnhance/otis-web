@@ -122,7 +122,7 @@ class Student(models.Model):
 					or (jumped_unit is not None and n <= current_index+1)
 
 			if row['is_completed']:
-				row['sols_label'] = "Solution Notes"
+				row['sols_label'] = "Solutions"
 			elif omniscient and row['is_current']:
 				row['sols_label'] = "Sols (current)"
 			elif omniscient and row['is_unlocked']:
