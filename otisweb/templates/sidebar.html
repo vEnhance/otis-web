@@ -9,7 +9,7 @@
 {% if student %}
 <h2><a href="{% url "dashboard" student.id %}">{{ student }}</a></h2>
 {% if student.assistant %}
-<h3>with {{ student.assistant.name }}</h3>
+<h4>with {{ student.assistant.name }}</h4>
 {% endif %}
 {% endif %}
 
