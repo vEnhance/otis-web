@@ -117,8 +117,7 @@ class Student(models.Model):
 					or (jumped_unit is None and n == current_index)
 			row['is_unlocked'] = row['is_completed'] \
 					or row['is_current'] \
-					or (jumped_unit is None and n <= current_index+2) \
-					or (jumped_unit is not None and n <= current_index+1)
+					or n <= current_index + 2
 
 			if row['is_completed']:
 				row['sols_label'] = "Solutions"
