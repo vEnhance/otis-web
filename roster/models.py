@@ -111,7 +111,8 @@ class Student(models.Model):
 			row = {}
 			row['unit'] = unit
 			row['number'] = n+1
-			row['is_completed'] = (unit.has_pset) or (n < current_index)
+			row['is_completed'] = (unit.has_pset) \
+					or (n < current_index and unit != jumped_unit)
 			row['num_uploads'] = unit.num_uploads or 0
 			row['is_current'] = (unit==jumped_unit) \
 					or (jumped_unit is None and n == current_index)
