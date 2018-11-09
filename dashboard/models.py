@@ -6,6 +6,7 @@ import core.models
 import roster.models
 import datetime
 from django.db import models
+from django.core.validators import FileExtensionValidator
 from django.contrib.auth import models as auth
 from django.forms import ValidationError
 
@@ -13,20 +14,6 @@ def content_file_name(instance, filename):
 	now = datetime.datetime.now()
 	return os.path.join(instance.category, instance.owner.username,\
 			now.strftime("%Y-%m"), filename)
-
-ALLOWED_UPLOAD_TYPES = (
-		'application/pdf',
-		'application/x-latex',
-		'text/x-tex',
-		'text/plain',
-		)
-
-def validate_file_extension(value):
-	content_type = value.file.content_type
-	if not content_type.startswith('text/') and content_type not in ALLOWED_UPLOAD_TYPES:
-		raise ValidationError("File type not accepted: " \
-				"must be PDF or plain TeX/text, "
-				"but got MIME-type " + content_type)
 
 class UploadedFile(models.Model):
 	"""An uploaded file, for example a transcript or homework solutions."""
@@ -42,7 +29,8 @@ class UploadedFile(models.Model):
 			help_text = "Optional description of the file")
 	content = models.FileField(help_text = "The file itself",
 			upload_to = content_file_name,
-			validators = [validate_file_extension])
+			validators = [FileExtensionValidator(
+				allowed_extensions=['pdf','txt','tex'])])
 	unit = models.ForeignKey(core.models.Unit, null = True, blank = True,
 			help_text = "The unit for which this file is associated")
 	created_at = models.DateTimeField(auto_now_add=True)
