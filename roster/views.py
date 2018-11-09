@@ -99,11 +99,13 @@ def invoice(request, student_id=None):
 @staff_member_required
 def master_schedule(request):
 	student_names_and_unit_ids = roster.models.Student.objects\
-			.filter(semester__active=True, legit=True).values('name', 'curriculum')
+			.filter(semester__active=True, legit=True)\
+			.values('user__first_name', 'user__last_name', 'curriculum')
 	unit_to_student_names = collections.defaultdict(list)
 	for d in student_names_and_unit_ids:
 		# e.g. d = {'name' : Student, 'curriculum' : 30}
-		unit_to_student_names[d['curriculum']].append(d['name'])
+		unit_to_student_names[d['curriculum']].append(
+				d['user__first_name'] + ' ' + d['user__last_name'])
 
 	chart = collections.OrderedDict() # ordered dict(unit -> students)
 	units = core.models.Unit.objects.order_by('position')
