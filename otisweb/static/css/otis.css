@@ -67,6 +67,6 @@ tr.subjectM { background-color: yellow; }
 
 /* Unit selection */
 td.unit-select select {
-	width: 120px;
+	width: 180px;
 	font-size: 10px;
 }
