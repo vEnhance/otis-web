@@ -64,3 +64,9 @@ tr.subjectA { background-color: pink; }
 tr.subjectF { background-color: pink; }
 tr.subjectN { background-color: lightgrey; }
 tr.subjectM { background-color: yellow; }
+
+/* Unit selection */
+td.unit-select select {
+	width: 120px;
+	font-size: 10px;
+}
