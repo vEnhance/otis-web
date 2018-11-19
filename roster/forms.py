@@ -6,9 +6,12 @@ import roster
 class UnitChoiceBoundField(forms.BoundField):
 	@property
 	def subject(self):
-		return self.field.choices[1][1][1] # terrible hack, but oh well
+		first_unit_pair = self.field.choices[0]
+		first_unit_code = first_unit_pair[1]
+		first_unit_subject = first_unit_code[1] # second letter
+		return first_unit_subject
 
-class UnitChoiceField(forms.TypedChoiceField):
+class UnitChoiceField(forms.TypedMultipleChoiceField):
 	def get_bound_field(self, form, field_name):
 		return UnitChoiceBoundField(form, self, field_name)
 
@@ -34,8 +37,7 @@ class CurriculumForm(forms.Form):
 
 			form_kwargs = {}
 			form_kwargs['label'] = name
-			form_kwargs['choices'] = ((None, "---"),) \
-					+ tuple((unit.id, unit.code) for unit in group)
+			form_kwargs['choices'] = tuple((unit.id, unit.code) for unit in group)
 
 			for unit in group:
 				if unit.id in original:

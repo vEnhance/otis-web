@@ -28,7 +28,11 @@ def curriculum(request, student_id):
 		form = forms.CurriculumForm(request.POST, units = units, enabled = True)
 		if form.is_valid():
 			data = form.cleaned_data
-			values = [data[k] for k in data if k.startswith('group-') and data[k] is not None]
+			print(data)
+			# get groups with nonempty unit sets
+			unit_lists = [data[k] for k in data if k.startswith('group-')
+					and data[k] is not None]
+			values = [unit_id for unit_list in unit_lists for unit_id in unit_list]
 			student.curriculum = values
 			student.save()
 			messages.success(request, "Successfully saved curriculum of %d units." % len(values))
