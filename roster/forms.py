@@ -34,25 +34,18 @@ class CurriculumForm(forms.Form):
 		for name, group in itertools.groupby(units, lambda u : u.group.name):
 			group = list(group)
 			field_name = 'group-' + str(n)
+			chosen_units = [unit for unit in group if unit.id in original]
 
 			form_kwargs = {}
 			form_kwargs['label'] = name
 			form_kwargs['choices'] = tuple((unit.id, unit.code) for unit in group)
-
-			for unit in group:
-				if unit.id in original:
-					form_kwargs['initial'] = unit.id
-					break
-			else:
-				form_kwargs['initial'] = None
-
 			form_kwargs['help_text'] = ' '.join([unit.code for unit in group])
 			form_kwargs['required'] = False
 			form_kwargs['label_suffix'] = 'aoeu' # wait why is this here again
 			form_kwargs['coerce'] = int
 			form_kwargs['empty_value'] = None
 			form_kwargs['disabled'] = not enabled
-
+			form_kwargs['initial'] = [unit.id for unit in chosen_units]
 			self.fields[field_name] = UnitChoiceField(**form_kwargs)
 			n += 1
 

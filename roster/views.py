@@ -24,26 +24,28 @@ def curriculum(request, student_id):
 	units = core.models.Unit.objects.all()
 	original = student.curriculum.values_list('id', flat=True)
 
-	if request.method == 'POST' and request.user.is_staff:
+	enabled = (request.user.is_staff)
+	if request.method == 'POST' and enabled:
 		form = forms.CurriculumForm(request.POST, units = units, enabled = True)
 		if form.is_valid():
 			data = form.cleaned_data
-			print(data)
 			# get groups with nonempty unit sets
 			unit_lists = [data[k] for k in data if k.startswith('group-')
 					and data[k] is not None]
-			values = [unit_id for unit_list in unit_lists for unit_id in unit_list]
+			values = [unit for unit_list in unit_lists for unit in unit_list]
 			student.curriculum = values
 			student.save()
-			messages.success(request, "Successfully saved curriculum of %d units." % len(values))
-	elif request.user.is_staff: # staff can edit
-		form = forms.CurriculumForm(units = units, original = original, enabled = True)
-	else: # otherwise can only read
-		form = forms.CurriculumForm(units = units, original = original)
-		messages.info(request, "You can't edit this curriculum since you are not a staff member.")
+			messages.success(request,
+					"Successfully saved curriculum of %d units." % len(values))
+	else:
+		form = forms.CurriculumForm(units = units,
+				original = original, enabled = enabled)
+		if not enabled:
+			messages.info(request, "You can't edit this curriculum " \
+					"since you are not a staff member.")
 
 	context = {'title' : "Curriculum for " + student.name,
-			'student' : student, 'form' : form}
+			'student' : student, 'form' : form, 'enabled' : enabled}
 	# return HttpResponse("hi")
 	return render(request, "roster/currshow.html", context)
 

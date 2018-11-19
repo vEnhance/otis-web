@@ -1,16 +1,21 @@
 {% extends 'layout.html' %}
 {% load static %}
+
 {% block css %}
+{% if enabled %}
 <link href="{% static 'chosen/chosen.css' %}" rel="stylesheet" />
+{% endif %}
 {% endblock %}
 
 {% block scripts %}
-<script src="{% static 'chosen/chosen.jquery.js' %}" type="text/javascript"></script>
-<script type="text/javascript">
-$("td.unit-select > select").chosen({
-	placeholder_text : "(none)",
-});
-</script>
+{% if enabled %}
+	<script src="{% static 'chosen/chosen.jquery.js' %}" type="text/javascript"></script>
+	<script type="text/javascript">
+	$("td.unit-select > select").chosen({
+		placeholder_text : "(none)",
+	});
+	</script>
+{% endif %}
 {% endblock %}
 
 {% block layout-content %}
@@ -35,27 +40,27 @@ see the <a href="{% url "synopsis" %}">catalog synopsis</a>.
 	{{ hidden }}
 {% endfor %}
 
-{% if request.user.is_staff %}
+{% if enabled %}
 <tr>
 	<td><input type="submit" name="submit" value="Update"></td>
 </tr>
 {% endif %}
 
 {% for field in form.visible_fields %}
-	<tr class="subject{{ field.subject }}">
-		<td class="unit-select">
-			{{ field }}
-			{% if field.errors %}
-				<ul class="errorlist">
-				{% for err in field.errors %}
-					{{ err }}
-				{% endfor %}
-				</ul>
-			{% endif %}
-		</td>
-		<th>{{ field.label }}</th>
-		<td>{{ field.help_text }}</td>
-	</tr>
+<tr class="subject{{ field.subject }}">
+	<td class="unit-select">
+		{{ field }}
+		{% if field.errors %}
+			<ul class="errorlist">
+			{% for err in field.errors %}
+				{{ err }}
+			{% endfor %}
+			</ul>
+		{% endif %}
+	</td>
+	<th>{{ field.label }}</th>
+	<td>{{ field.help_text }}</td>
+</tr>
 {% endfor %}
 
 {% if request.user.is_staff %}
