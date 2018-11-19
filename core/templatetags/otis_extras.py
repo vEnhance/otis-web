@@ -14,3 +14,8 @@ def view_problems(unit):
 @register.simple_tag
 def view_solutions(unit):
 	return reverse("view_solutions", args=(unit.id, sha(unit.soln_url),))
+
+@register.filter(name='display_initial_choice')
+def display_initial_choice(field):
+	return ' '.join([ucode for (uid, ucode) in field.field._choices\
+			if uid in field.initial])

@@ -1,5 +1,6 @@
 {% extends 'layout.html' %}
 {% load static %}
+{% load otis_extras %}
 
 {% block css %}
 {% if enabled %}
@@ -13,7 +14,7 @@
 	<script type="text/javascript">
 	$(document).ready(function() {
 		$("td.unit-select > select").chosen({
-			placeholder_text : "(none)",
+			placeholder_text : "...",
 		});
 	});
 	</script>
@@ -51,13 +52,15 @@ see the <a href="{% url "synopsis" %}">catalog synopsis</a>.
 {% for field in form.visible_fields %}
 <tr class="subject{{ field.subject }}">
 	<td class="unit-select">
+		{% if enabled %}
 		{{ field }}
-		{% if field.errors %}
+			{% if field.errors %}
 			<ul class="errorlist">
-			{% for err in field.errors %}
-				{{ err }}
-			{% endfor %}
+			{% for err in field.errors %}<li>{{ err }}</li>{% endfor %}
 			</ul>
+			{% endif %}
+		{% else %}
+		{{ field|display_initial_choice }}
 		{% endif %}
 	</td>
 	<th>{{ field.label }}</th>
