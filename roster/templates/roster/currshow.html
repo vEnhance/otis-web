@@ -11,8 +11,10 @@
 {% if enabled %}
 	<script src="{% static 'chosen/chosen.jquery.js' %}" type="text/javascript"></script>
 	<script type="text/javascript">
-	$("td.unit-select > select").chosen({
-		placeholder_text : "(none)",
+	$(document).ready(function() {
+		$("td.unit-select > select").chosen({
+			placeholder_text : "(none)",
+		});
 	});
 	</script>
 {% endif %}
