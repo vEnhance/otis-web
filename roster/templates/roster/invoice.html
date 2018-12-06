@@ -2,7 +2,9 @@
 
 {% block layout-content %}
 <p>Payment information linked can be found in the OTIS
-<a href="http://web.evanchen.cc/private/otis-syllabus.pdf">syllabus</a>.</p>
+<a href="http://web.evanchen.cc/upload/otis-syllabus.pdf">syllabus</a>
+and in more detail in the
+<a href="http://web.evanchen.cc/private/parent-info.pdf">parent info</a>.</p>
 
 {% if invoice %}
 <center>
@@ -38,16 +40,18 @@
 
 <p>This invoice was last updated on {{ invoice.updated_at }} server time.</p>
 
-<p>Please contact me if you think there are any errors.
+<p>Please contact me if you think there are any errors
+(I make mistakes every year!).
 Detailed invoices with full dates, lecture names, et cetera
 are available on request.</p>
-<p>If you have a TA, that payment should be done separately.</p>
+<p>If you have an assistant instructor,
+that payment should be done separately.</p>
 
-{% if request.user.is_staff %}
-<ul>
+	{% if request.user.is_staff %}
+	<ul>
 	<li>(Staff) <a href="{% url "edit-invoice" invoice.id %}">Edit invoice</a></li>
-</ul>
-{% endif %}
+	</ul>
+	{% endif %}
 
 {% else %}
 <p><b>No invoice is currently available.</b></p>
