@@ -47,6 +47,7 @@ class Student(models.Model):
 				("A", "Weekly"),
 				("B", "Biweekly"),
 				("C", "Correspondence"),
+				("E", "External"),
 				("N", "Not applicable"),
 				),
 			help_text = "")
