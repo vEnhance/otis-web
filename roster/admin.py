@@ -42,8 +42,8 @@ class InvoiceIEResource(resources.ModelResource):
 	class Meta:
 		skip_unchanged = True
 		model = roster.models.Invoice
-		fields = ('id', 'student', 'preps_taught', 'hours_taught', 'total_paid',
-				'student__semester__name',)
+		fields = ('id', 'student', 'student__user__first_name', 'student__user__last_name',
+				'preps_taught', 'hours_taught', 'total_paid', 'student__semester__name',)
 
 class InvoiceInline(admin.StackedInline):
 	model = roster.models.Invoice
