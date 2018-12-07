@@ -52,9 +52,9 @@ class InvoiceInline(admin.StackedInline):
 
 @admin.register(roster.models.Invoice)
 class InvoiceAdmin(ImportExportModelAdmin):
-	list_display = ('student', 'total_owed', 'total_paid', 'total_cost', 'updated_at',)
+	list_display = ('student', 'track', 'total_owed', 'total_paid', 'total_cost', 'updated_at',)
 	ordering = ('student',)
-	list_filter = ('student__semester__active', 'student__semester',)
+	list_filter = ('student__semester__active', 'student__track', 'student__semester',)
 	resource_class = InvoiceIEResource
 
 ## STUDENT

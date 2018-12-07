@@ -131,7 +131,6 @@ class Student(models.Model):
 				row['sols_label'] = None # solutions not shown
 			yield row
 
-# TODO rewrite this af I think
 class Invoice(models.Model):
 	"""Billing information object for students."""
 	PREP_RATE = 320 # 320 per semester...
@@ -165,3 +164,7 @@ class Invoice(models.Model):
 	def cleared(self):
 		"""Whether or not the student owes anything"""
 		return (self.total_owed <= 0)
+
+	@property
+	def track(self):
+		return self.student.track
