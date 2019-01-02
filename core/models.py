@@ -43,6 +43,8 @@ class UnitGroup(models.Model):
 			help_text = "The subject for the unit")
 	def __str__(self):
 		return self.name
+	class Meta:
+		ordering = ('name',)
 
 class Unit(models.Model):
 	"""Represents a PDF of a unit, with problems and solutions"""
