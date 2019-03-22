@@ -1,14 +1,11 @@
 # [START django_app]
-runtime: python27
-api_version: 1
-threadsafe: yes
-env: standard
+runtime: python37
 
 handlers:
   - url: /static
     static_dir: static/
   - url: .*
-    script: otisweb.wsgi.application
+    script: auto
 
 instance_class: B1
 basic_scaling:
@@ -17,16 +14,6 @@ basic_scaling:
 
 beta_settings:
   cloud_sql_instances: <fill-in>
-
-libraries:
-  - name: MySQLdb
-    version: "latest"
-  - name: django
-    version: "1.11"
-
-skip_files:
-  - ^(.*/)?.*\.py[co]$
-  - ^\.git/.*$
 
 env_variables:
   DATABASE_NAME: <fill-in>
