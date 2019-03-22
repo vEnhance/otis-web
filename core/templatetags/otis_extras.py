@@ -1,5 +1,5 @@
 from django import template
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 register = template.Library()
 
@@ -9,11 +9,13 @@ def sha(value):
 
 @register.simple_tag
 def view_problems(unit):
-	return reverse("view_problems", args=(unit.id, sha(unit.prob_url),))
+	s = sha(unit.prob_url.encode('utf-8'))
+	return reverse("view_problems", args=(unit.id, s))
 
 @register.simple_tag
 def view_solutions(unit):
-	return reverse("view_solutions", args=(unit.id, sha(unit.soln_url),))
+	s = sha(unit.soln_url.encode('utf-8'))
+	return reverse("view_solutions", args=(unit.id, s))
 
 @register.filter(name='display_initial_choice')
 def display_initial_choice(field):

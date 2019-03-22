@@ -18,7 +18,7 @@ class UnitGroupListView(ListView):
 			.prefetch_related('unit_set')
 
 def _core_redir(url, hash):
-	if sha(url) == hash:
+	if sha(url.encode('utf-8')) == hash:
 		# return HttpResponse(url)
 		return redirect(url, permanent=False)
 	else:

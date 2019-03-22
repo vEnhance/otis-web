@@ -32,7 +32,7 @@ class UnitIEResource(resources.ModelResource):
 
 @admin.register(core.models.Unit)
 class UnitAdmin(ImportExportModelAdmin):
-	list_display = ('group', 'code', 'position',)
+	list_display = ('group', 'code', 'list_display_position',)
 	list_filter = ('group__subject',)
 	search_fields = ('group__name', 'code')
 	ordering = ('position',)

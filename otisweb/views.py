@@ -1,6 +1,6 @@
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.db.utils import OperationalError
-from registration.backends.simple.views import RegistrationView
+from django_registration.views import RegistrationView
 import core
 
 class EditedRegistrationView(RegistrationView):

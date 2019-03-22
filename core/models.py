@@ -68,3 +68,6 @@ class Unit(models.Model):
 	class Meta:
 		unique_together = ('group', 'code')
 		ordering = ('position',)
+	@property
+	def list_display_position(self):
+		return self.position

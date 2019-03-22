@@ -1,4 +1,4 @@
-from registration.forms import RegistrationForm
+from django_registration.forms import RegistrationForm
 from django import forms
 
 class ExtendedUserRegistrationForm(RegistrationForm):
