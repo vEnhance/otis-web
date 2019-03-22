@@ -42,12 +42,16 @@ class Student(models.Model):
 			blank=True, null=True, related_name='pointer_unit',
 			help_text = "If set, the counter will skip ahead "
 			"so that the student is working on this unit instead.")
+	vision = models.SmallIntegerField(default = 3,
+			help_text = "How many units ahead of the most "
+			"recently completed unit the student can see.")
 	track = models.CharField(max_length = 5,
 			choices = (
 				("A", "Weekly"),
 				("B", "Biweekly"),
 				("C", "Correspondence"),
 				("E", "External"),
+				("G", "Graduate"),
 				("N", "Not applicable"),
 				),
 			help_text = "")
