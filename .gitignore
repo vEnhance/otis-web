@@ -10,3 +10,4 @@ otisweb/static/answersheets/*.log
 otisweb/static/answersheets/*.pdf
 lib/
 venv/
+evanchen-cc-*.json

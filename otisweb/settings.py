@@ -159,10 +159,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 if PRODUCTION:
-	DEFAULT_FILE_STORAGE = 'storages.backends.gs.GSBotoStorage'
+	DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
 	STATIC_URL = os.getenv("STATIC_URL")
-	GS_ACCESS_KEY_ID = os.getenv("GS_ACCESS_KEY_ID")
-	GS_SECRET_ACCESS_KEY = os.getenv("GS_SECRET_ACCESS_KEY")
 	GS_BUCKET_NAME = os.getenv("GS_BUCKET_NAME")
 	MEDIA_URL = os.getenv("MEDIA_URL")
 	import import_export.tmp_storages

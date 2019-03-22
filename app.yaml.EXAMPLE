@@ -21,9 +21,8 @@ env_variables:
   DATABASE_PASSWORD: <fill-in>
   DATABASE_HOST: <fill-in>
   STATIC_URL: <fill-in>
-  GS_ACCESS_KEY_ID: <fill-in>
-  GS_SECRET_ACCESS_KEY: <fill-in>
   GS_BUCKET_NAME: <fill-in>
+  GOOGLE_APPLICATION_CREDENTIALS: <fill-in path to json>
   MEDIA_URL: <fill-in>
   IS_PRODUCTION: 1
 
