@@ -96,31 +96,17 @@ class Student(models.Model):
 		current_index = self.current_unit_index
 		jumped_unit = self.pointer_current_unit or None
 
-		# In Django 2.0 we would just use the following
-		# curriculum = self.curriculum.all().annotate(
-		# 		num_uploads = Count('uploadedfile',
-		# 			filter = Q(uploadedfile__benefactor = self.id)),
-		# 		num_psets = Count('uploadedfile',
-		# 			filter = Q(uploadedfile__benefactor = self.id, category = 'psets')))
-		# Unfortunately google app engine uses Python 2.7
-		# so I'm instead stuck with some subquery crap,
-		# go me. Go life. WAHHHH
-
 		curriculum = self.curriculum.all().annotate(
-				num_uploads = models.Sum(
-					models.Case(
-						models.When(uploadedfile__benefactor=self, then=1),
-						default = 0,
-						output_field = models.IntegerField())),
-				has_pset = Exists(
-					dashboard.models.UploadedFile.objects.filter(
-						benefactor = self, category = 'psets', unit = OuterRef('pk'))))
+				num_uploads = Count('uploadedfile',
+					filter = Q(uploadedfile__benefactor = self.id)),
+				has_pset = Exists(dashboard.models.UploadedFile.objects.filter(
+					unit=OuterRef('pk'), benefactor=self.id, category='psets')))
 
 		for n, unit in enumerate(curriculum):
 			row = {}
 			row['unit'] = unit
 			row['number'] = n+1
-			row['is_completed'] = (unit.has_pset) \
+			row['is_completed'] = unit.has_pset \
 					or (n < current_index and unit != jumped_unit)
 			row['num_uploads'] = unit.num_uploads or 0
 			row['is_current'] = (unit==jumped_unit) \
