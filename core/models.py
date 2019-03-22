@@ -49,6 +49,7 @@ class UnitGroup(models.Model):
 class Unit(models.Model):
 	"""Represents a PDF of a unit, with problems and solutions"""
 	group = models.ForeignKey(UnitGroup, null=True,
+			on_delete = models.CASCADE,
 			help_text = "The group that this unit belongs to")
 	code = models.CharField(max_length=255,
 			help_text = "The version code for the handout, like 'ZGX'")

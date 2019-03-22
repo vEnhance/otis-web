@@ -20,8 +20,10 @@ class UploadedFile(models.Model):
 	CHOICES = (("psets", "PSet Submission"), ("scripts", "Transcript"),
 			("notes", "Notes / Comments"), ("misc", "Miscellaneous"))
 	benefactor = models.ForeignKey(roster.models.Student,
+			on_delete = models.CASCADE,
 			help_text = "The student for which this file is meant")
 	owner = models.ForeignKey(auth.User,
+			on_delete = models.CASCADE,
 			help_text = "The user who uploaded the file")
 	category = models.CharField(max_length = 10, choices = CHOICES,
 			help_text = "What kind of file this is")
@@ -32,6 +34,7 @@ class UploadedFile(models.Model):
 			validators = [FileExtensionValidator(
 				allowed_extensions=['pdf','txt','tex'])])
 	unit = models.ForeignKey(core.models.Unit, null = True, blank = True,
+			on_delete = models.SET_NULL,
 			help_text = "The unit for which this file is associated")
 	created_at = models.DateTimeField(auto_now_add=True)
 	def __str__(self):

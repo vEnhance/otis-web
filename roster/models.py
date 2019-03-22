@@ -10,7 +10,7 @@ import dashboard
 class Assistant(models.Model):
 	"""This is a wrapper object for a single assistant.
 	Just need a username at the moment..."""
-	user = models.OneToOneField(User,
+	user = models.OneToOneField(User, on_delete = models.CASCADE,
 			help_text = "The Django Auth user attached to the Assistant.")
 	shortname = models.CharField(max_length = 10,
 			help_text = "Initials or short name for this Assistant")
@@ -27,12 +27,15 @@ class Student(models.Model):
 	endowed with the data of the curriculum of that student.
 	It also names the assistant of the student, if any."""
 	user = models.ForeignKey(User, blank = True, null = True,
+			on_delete = models.CASCADE,
 			help_text = "The Django Auth user attached to the student")
 	semester = models.ForeignKey(core.models.Semester,
+			on_delete = models.CASCADE,
 			help_text = "The semester for this student")
 	curriculum = models.ManyToManyField(core.models.Unit, blank = True,
 			help_text = "The choice of units that this student will work on")
 	assistant = models.ForeignKey(Assistant, blank = True, null = True,
+			on_delete = models.SET_NULL,
 			help_text = "The assistant for this student, if any")
 	current_unit_index = models.SmallIntegerField(default = 0,
 			help_text = "If this is equal to k, "
@@ -40,6 +43,7 @@ class Student(models.Model):
 			"curriculum and by default is working on the (k+1)st unit.")
 	pointer_current_unit = models.ForeignKey(core.models.Unit,
 			blank=True, null=True, related_name='pointer_unit',
+			on_delete = models.SET_NULL,
 			help_text = "If set, the counter will skip ahead "
 			"so that the student is working on this unit instead.")
 	vision = models.SmallIntegerField(default = 3,
@@ -141,6 +145,7 @@ class Invoice(models.Model):
 	HOUR_RATE = 80  # plus 80 per hour
 
 	student = models.OneToOneField(Student,
+			on_delete = models.CASCADE,
 			help_text = "The invoice that this student is for.")
 	preps_taught = models.SmallIntegerField(default = 0,
 			help_text = "Number of semesters that development/preparation "
