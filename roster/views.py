@@ -33,7 +33,7 @@ def curriculum(request, student_id):
 			unit_lists = [data[k] for k in data if k.startswith('group-')
 					and data[k] is not None]
 			values = [unit for unit_list in unit_lists for unit in unit_list]
-			student.curriculum = values
+			student.curriculum.set(values)
 			student.save()
 			messages.success(request,
 					"Successfully saved curriculum of %d units." % len(values))
