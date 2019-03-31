@@ -42,7 +42,7 @@ class InvoiceIEResource(resources.ModelResource):
 	class Meta:
 		skip_unchanged = True
 		model = roster.models.Invoice
-		fields = ('id', 'student', 'student__user__first_name', 'student__user__last_name',
+		fields = ('id', 'student', 'student__user__first_name', 'student__user__last_name', 'student__track',
 				'preps_taught', 'hours_taught', 'total_paid', 'student__semester__name',)
 
 class InvoiceInline(admin.StackedInline):
@@ -54,7 +54,7 @@ class InvoiceInline(admin.StackedInline):
 class InvoiceAdmin(ImportExportModelAdmin):
 	list_display = ('student', 'track', 'total_owed', 'total_paid', 'total_cost', 'updated_at',)
 	ordering = ('student',)
-	list_filter = ('student__semester__active', 'student__track', 'student__semester',)
+	list_filter = ('student__semester__active', 'student__track', 'student__semester', 'student__legit')
 	resource_class = InvoiceIEResource
 
 ## STUDENT
