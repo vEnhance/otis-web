@@ -100,7 +100,8 @@ class Student(models.Model):
 				num_uploads = Count('uploadedfile',
 					filter = Q(uploadedfile__benefactor = self.id)),
 				has_pset = Exists(dashboard.models.UploadedFile.objects.filter(
-					unit=OuterRef('pk'), benefactor=self.id, category='psets')))
+					unit=OuterRef('pk'), benefactor=self.id, category='psets')))\
+				.order_by('-has_pset', 'position')
 
 		for n, unit in enumerate(curriculum):
 			row = {}
