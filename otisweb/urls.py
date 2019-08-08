@@ -24,7 +24,6 @@ urlpatterns = [
 	url(r'^register/closed/$', TemplateView.as_view(
 		template_name="registration/registration_closed.html"
 		), name='registration_disallowed'),
-	url(r'^_ah/health/', RedirectView.as_view(pattern_name='index')), # health checks
 	url(r'^$', RedirectView.as_view(pattern_name='index')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
