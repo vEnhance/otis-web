@@ -8,8 +8,8 @@ from django.views.generic import RedirectView
 
 from . import settings
 from django.views.generic.base import TemplateView
-from .forms import ExtendedUserRegistrationForm
-from .views import EditedRegistrationView
+from .forms import OTISUserRegistrationForm
+from .views import OTISRegistrationView
 
 urlpatterns = [
 	url(r'^admin/', admin.site.urls),
@@ -19,11 +19,14 @@ urlpatterns = [
 	url(r'^hijack/', include('hijack.urls')),
 	url(r'^accounts/', include('django.contrib.auth.urls')),
 	url(r'^register/$',
-		EditedRegistrationView.as_view(form_class=ExtendedUserRegistrationForm),
-		name='registration_register'),
+		OTISRegistrationView.as_view(form_class=OTISUserRegistrationForm),
+		name='django_registration_register'),
 	url(r'^register/closed/$', TemplateView.as_view(
-		template_name="registration/registration_closed.html"
-		), name='registration_disallowed'),
+		template_name="django_registration/registration_closed.html"
+		), name='django_registration_disallowed'),
+	url(r'^register/complete/$',
+		RedirectView.as_view(pattern_name='index'),
+		name='django_registration_complete'),
 	url(r'^$', RedirectView.as_view(pattern_name='index')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
