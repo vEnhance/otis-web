@@ -53,9 +53,9 @@ class Student(models.Model):
 			choices = (
 				("A", "Weekly"),
 				("B", "Biweekly"),
-				("C", "Correspondence"),
-				("E", "External"),
-				("G", "Graduate"),
+				("C", "Corr."),
+				("E", "Ext."),
+				("G", "Grad"),
 				("N", "Not applicable"),
 				),
 			help_text = "")
@@ -128,9 +128,6 @@ class Student(models.Model):
 
 class Invoice(models.Model):
 	"""Billing information object for students."""
-	PREP_RATE = 320 # 320 per semester...
-	HOUR_RATE = 80  # plus 80 per hour
-
 	student = models.OneToOneField(Student,
 			on_delete = models.CASCADE,
 			help_text = "The invoice that this student is for.")
@@ -149,8 +146,15 @@ class Invoice(models.Model):
 		return "Invoice %d" %(self.id or 0,)
 
 	@property
+	def prep_rate(self):
+		return self.student.semester.prep_rate
+	@property
+	def hour_rate(self):
+		return self.student.semester.hour_rate
+
+	@property
 	def total_cost(self):
-		return self.PREP_RATE*self.preps_taught + self.HOUR_RATE*self.hours_taught
+		return self.prep_rate*self.preps_taught + self.hour_rate*self.hours_taught
 
 	@property
 	def total_owed(self):

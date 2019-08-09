@@ -13,14 +13,27 @@ class Semester(models.Model):
 	active = models.BooleanField(default=False,
 			help_text = "Whether the semester is currently active "
 			"(there should thus be at most one active semester).")
-	show_invoices = models.BooleanField(default=False,
-			help_text = "Whether to display invoices for this semester.")
 	registration_open = models.BooleanField(default=False,
 			help_text = "Whether students can register for this semester yet.")
 	exam_family = models.CharField(max_length = 10,
 			choices = (("Waltz", "Waltz"), ("Foxtrot", "Foxtrot"), ("", "--"),),
 			default = "",
 			help_text = "The family of practice exams to display.")
+
+	show_invoices = models.BooleanField(default=False,
+			help_text = "Whether to display invoices for this semester.")
+	prep_rate = models.PositiveSmallIntegerField(default=240,
+			help_text = "The prep rate for the semester.")
+	hour_rate = models.PositiveSmallIntegerField(default=80,
+			help_text = "The hourly rate for the semester.")
+
+	gradescope_key = models.CharField(max_length=10, blank=True,
+			help_text = "The entry code for GradeScope this semester.")
+	zoom_room_id = models.CharField(max_length=32, blank=True,
+			help_text = "The entry point for the Zoom meeting room.")
+	facebook_url = models.CharField(max_length=128, blank=True,
+			help_text = "The link to the Facebook group for this year.")
+
 	def __str__(self):
 		return self.name
 
