@@ -33,23 +33,74 @@ While waiting, you can see two units ahead of the current unit
 (in addition to those that were skipped ahead to).</p>
 {% include "dashboard/list_curriculum.html" %}
 
-<h2>Links</h2>
-<ul>
-	<li>Link to <a href="http://web.evanchen.cc/upload/otis-syllabus.pdf">syllabus</a>,
-		<a href="http://web.evanchen.cc/private/parent-info.pdf">parent information</a>.</li>
-	<li>Link to <a href="https://www.dropbox.com/s/rs21apzqpm4b0qq/psychology.pdf?dl=0">handout
-			on test-taking strategies</a>.</li>
-	<li>Link to <a href="{% url "uploads" student.id 0 %}">miscellaneous uploads</a>.</li>
-	<li><a href="{% url "currshow" student.id %}">Show class selection</a>.
-		Also available are <a href="{% url "synopsis" %}">detailed class descriptions</a>.
-	</li>
-	{% if student.semester.show_invoices %}
-	<li>Link to <a href="{% url "invoice" student.id %}">invoice</a>.</li>
-	{% endif %}
-	{% if omniscient %}
-	<li> <a href="{% url "advance" student.id %}">Advance Student</a> (teacher)</li>
-	{% endif %}
-</ul>
+<hr />
+
+<h2>Launchpad (places to go)</h2>
+
+<table class="table">
+<tr>
+<td valign="top" width="50%">
+	<h3>General info</h3>
+	<ul>
+	<li><a href="http://web.evanchen.cc/upload/otis-syllabus.pdf">Syllabus</a></li>
+	<li><a href="http://web.evanchen.cc/private/parent-info.pdf">Parent info</a></li>
+	<li><a href="{% url "synopsis" %}">Class descriptions</a></li>
+	</ul>
+</td>
+<td valign="top" width="50%">
+	<h3>Site controls</h3>
+	<ul>
+		<li><a href="{% url "uploads" student.id 0 %}">Miscellaneous uploads</a></li>
+		<li><a href="{% url "currshow" student.id %}">Class selection</a></li>
+		{% if student.semester.show_invoices %}
+		<li><a href="{% url "invoice" student.id %}">Invoice</a></li>
+		{% endif %}
+		{% if omniscient %}
+		<li> <a href="{% url "advance" student.id %}">Advance student</a> (instructor)</li>
+		{% endif %}
+	</ul>
+</td>
+</tr>
+<tr>
+<td valign="top">
+	<h3>Downloads</h3>
+	<ul>
+		<li> <a href="https://www.dropbox.com/s/vx2e7hm4n5dfj8x/long.pdf?dl=0">
+			Olympiad answer sheets</a></li>
+		<li><a href="https://www.dropbox.com/s/j2r3gzhuljnqaih/short.pdf?dl=0">
+			Short-answer (quiz) forms</a></li>
+		<li><a href="https://www.dropbox.com/s/rs21apzqpm4b0qq/psychology.pdf?dl=0">
+			Psychology</a>  (test-taking strategies)</li>
+	</ul>
+</td>
+<td valign="top">
+	<h3>External sites</h3>
+	<ul>
+		<li><a href="https://www.gradescope.com">GradeScope</a>
+		{% if student.semester.gradescope_key %}
+		<br><i>Entry key</i>: <b>{{ student.semester.gradescope_key }}</b>
+		{% endif %}
+		</li>
+
+		{% if student.semester.zoom_room_id %}
+		<li><a href="https://www.zoom.us/{{ student.semester.zoom_room_id }}">Zoom classroom</a>
+		</li>
+		{% endif %}
+
+		{% if student.semester.facebook_url %}
+		<li><a href="{{ student.semester.facebook_url }}">Facebook group</a></li>
+		{% endif %}
+
+		{% if student.meets_evan and student.semester.active %}
+		<li>
+		<a href="https://calendar.google.com/calendar/embed?src=tn78o9o548n501k09s18efcq78%40group.calendar.google.com" target="_blank">Meeting schedule (GCal)</a>
+		</li>
+		{% endif %}
+	</ul>
+</td>
+</tr>
+</table>
+
 
 <hr />
 
@@ -58,7 +109,7 @@ While waiting, you can see two units ahead of the current unit
 {% include "dashboard/list_exam.html" with exams=tests %}
 
 <p><a href="https://www.dropbox.com/s/vx2e7hm4n5dfj8x/long.pdf?dl=0">
-Link to <b>olympiad answer sheets</b>.</a>
+Link to olympiad answer sheets.</a>
 Submit these to <a href="http://www.gradescope.com" target="_blank">GradeScope</a>,
 unless otherwise specified.
 See the syllabus for full instructions.</p>
@@ -72,7 +123,7 @@ on olympiad strategy.</p>
 
 <h2>Quizzes</h2>
 {% include "dashboard/list_exam.html" with exams=quizzes %}
-<p><a href="https://www.dropbox.com/s/j2r3gzhuljnqaih/short.pdf?dl=0">Link to <b>short-answer forms</b>.</a>
+<p><a href="https://www.dropbox.com/s/j2r3gzhuljnqaih/short.pdf?dl=0">Link to short-answer forms.</a>
 Submit these to <a href="http://www.gradescope.com" target="_blank">GradeScope</a>,
 unless otherwise specified.
 See the syllabus for full instructions.</p>
