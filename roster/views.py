@@ -20,11 +20,11 @@ from . import forms
 @login_required
 def curriculum(request, student_id):
 	student = get_object_or_404(roster.models.Student.objects, id = student_id)
-	roster.utils.check_taught_by(request, student)
+	roster.utils.check_can_view(request, student)
 	units = core.models.Unit.objects.all()
 	original = student.curriculum.values_list('id', flat=True)
 
-	enabled = (request.user.is_staff)
+	enabled = student.is_taught_by(request.user)
 	if request.method == 'POST' and enabled:
 		form = forms.CurriculumForm(request.POST, units = units, enabled = True)
 		if form.is_valid():
@@ -42,7 +42,7 @@ def curriculum(request, student_id):
 				original = original, enabled = enabled)
 		if not enabled:
 			messages.info(request, "You can't edit this curriculum " \
-					"since you are not a staff member.")
+					"since you are not an instructor.")
 
 	context = {'title' : "Curriculum for " + student.name,
 			'student' : student, 'form' : form, 'enabled' : enabled}

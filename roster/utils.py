@@ -13,5 +13,5 @@ def check_can_view(request, student):
 	if not student.can_view_by(request.user):
 		raise Http404("%s cannot view %s" %(request.user, student))
 def check_taught_by(request, student):
-	if not student.can_view_by(request.user):
-		raise Http404("%s cannot view %s" %(request.user, student))
+	if not student.is_taught_by(request.user):
+		raise Http404("%s cannot edit %s" %(request.user, student))
