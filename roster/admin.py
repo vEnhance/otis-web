@@ -33,7 +33,7 @@ class AssistantIEResource(RosterResource):
 
 @admin.register(roster.models.Assistant)
 class AssistantAdmin(ImportExportModelAdmin):
-		list_display = ('name', 'user', 'shortname')
+		list_display = ('id', 'name', 'user', 'shortname')
 		inlines = (StudentInline,)
 		resource_class = AssistantIEResource
 
@@ -69,7 +69,7 @@ class StudentIEResource(RosterResource):
 
 @admin.register(roster.models.Student)
 class StudentAdmin(ImportExportModelAdmin):
-	list_display = ('name', 'user', 'semester', 'assistant', 'legit', 'track', 'current_unit_index', 'curriculum_length',)
+	list_display = ('name', 'user', 'id', 'semester', 'assistant', 'legit', 'track', 'current_unit_index', 'curriculum_length',)
 	list_filter = ('semester__active', 'legit', 'semester', 'track',)
 	resource_class = StudentIEResource
 	inlines = (InvoiceInline,)
