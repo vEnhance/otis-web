@@ -39,13 +39,20 @@ def portal(request, student_id):
 def uploads(request, student_id, unit_id):
 	student = get_object_or_404(roster.models.Student.objects, id = student_id)
 	roster.utils.check_can_view(request, student)
-	unit = get_object_or_404(core.models.Unit.objects, id = unit_id)\
-			if unit_id != "0" else None
+
+	if unit_id != "0":
+		unit = get_object_or_404(core.models.Unit.objects, id = unit_id)
+		if not student.check_unit_unlocked(unit):
+			raise Http404("This unit is not unlocked yet")
+	else:
+		unit = None
+
 	form = None
 	if request.method == "POST":
 		form = forms.NewUploadForm(request.POST, request.FILES)
 		if form.is_valid():
 			new_upload = form.save(commit=False)
+			new_upload.unit = unit
 			new_upload.benefactor = student
 			new_upload.owner = request.user
 			new_upload.save()
@@ -53,7 +60,6 @@ def uploads(request, student_id, unit_id):
 			form = None # clear form on successful upload, prevent duplicates
 	if form is None:
 		form = forms.NewUploadForm(initial = {'unit' : unit})
-	form.fields["unit"].queryset = student.curriculum
 
 	context = {}
 	context['title'] = 'File Uploads'
@@ -88,7 +94,7 @@ def past(request):
 
 class UpdateFile(LoginRequiredMixin, UpdateView):
 	model = dashboard.models.UploadedFile
-	fields = ('category', 'content', 'description', 'unit',)
+	fields = ('category', 'content', 'description',)
 
 	def get_success_url(self):
 		stu_id = self.object.benefactor.id
