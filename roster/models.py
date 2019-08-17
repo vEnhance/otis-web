@@ -92,16 +92,33 @@ class Student(models.Model):
 	def curriculum_length(self):
 		return self.curriculum.count()
 
-	def generate_curriculum_rows(self, omniscient):
-		current_index = self.current_unit_index
-		jumped_unit = self.pointer_current_unit or None
-
-		curriculum = self.curriculum.all().annotate(
+	def generate_curriculum_queryset(self):
+		return self.curriculum.all().annotate(
 				num_uploads = Count('uploadedfile',
 					filter = Q(uploadedfile__benefactor = self.id)),
 				has_pset = Exists(dashboard.models.UploadedFile.objects.filter(
 					unit=OuterRef('pk'), benefactor=self.id, category='psets')))\
 				.order_by('-has_pset', 'position')
+
+	def check_unit_unlocked(self, unit):
+		if self.pointer_current_unit == unit:
+			return True
+		curriculum = list(self.generate_curriculum_queryset())
+		if not unit in curriculum:
+			return False
+		i = curriculum.index(unit)
+		unit = curriculum[i] # grab the annotations
+		if unit.has_pset:
+			return True
+		elif i <= self.current_unit_index + (self.vision-1):
+			return True
+		else:
+			return False
+
+	def generate_curriculum_rows(self, omniscient):
+		current_index = self.current_unit_index
+		jumped_unit = self.pointer_current_unit or None
+		curriculum = self.generate_curriculum_queryset()
 
 		for n, unit in enumerate(curriculum):
 			row = {}
