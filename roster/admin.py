@@ -73,3 +73,4 @@ class StudentAdmin(ImportExportModelAdmin):
 	list_filter = ('semester__active', 'legit', 'semester', 'track',)
 	resource_class = StudentIEResource
 	inlines = (InvoiceInline,)
+	search_fields = ('user__first_name', 'user__last_name', 'user__username',)
