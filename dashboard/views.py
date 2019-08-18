@@ -42,10 +42,11 @@ def uploads(request, student_id, unit_id):
 
 	if unit_id != "0":
 		unit = get_object_or_404(core.models.Unit.objects, id = unit_id)
-		if not student.check_unit_unlocked(unit):
-			raise Http404("This unit is not unlocked yet")
 	else:
 		unit = None
+	uploads = dashboard.models.UploadedFile.objects.filter(benefactor=student, unit=unit)
+	if unit is not None and not student.check_unit_unlocked(unit) and not uploads.exists():
+		raise Http404("This unit is not unlocked yet")
 
 	form = None
 	if request.method == "POST":
@@ -66,8 +67,7 @@ def uploads(request, student_id, unit_id):
 	context['student'] = student
 	context['unit'] = unit
 	context['form'] = form
-	context['files'] = dashboard.models.UploadedFile.objects\
-			.filter(benefactor=student, unit=unit)
+	context['files'] = uploads
 	# TODO form for adding new files
 	return render(request, "dashboard/uploads.html", context)
 
