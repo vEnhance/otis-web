@@ -32,7 +32,7 @@ class UploadedFile(models.Model):
 	content = models.FileField(help_text = "The file itself",
 			upload_to = content_file_name,
 			validators = [FileExtensionValidator(
-				allowed_extensions=['pdf','txt','tex'])])
+				allowed_extensions=['pdf','txt','tex','png','jpg'])])
 	unit = models.ForeignKey(core.models.Unit, null = True, blank = True,
 			on_delete = models.SET_NULL,
 			help_text = "The unit for which this file is associated")
