@@ -74,16 +74,14 @@ While waiting, you can see two units ahead of the current unit
 <td valign="top">
 	<h3>External sites</h3>
 	<ul>
+		<li><a href="https://www.zoom.us/j/{{ student.semester.zoom_room_id }}">Zoom classroom</a>
+		</li>
+
 		<li><a href="https://www.gradescope.com">GradeScope</a>
 		{% if student.semester.gradescope_key %}
 		<br><i>Entry key</i>: <b>{{ student.semester.gradescope_key }}</b>
 		{% endif %}
 		</li>
-
-		{% if student.semester.zoom_room_id %}
-		<li><a href="https://www.zoom.us/{{ student.semester.zoom_room_id }}">Zoom classroom</a>
-		</li>
-		{% endif %}
 
 		{% if student.semester.facebook_url %}
 		<li><a href="{{ student.semester.facebook_url }}">Facebook group</a></li>
