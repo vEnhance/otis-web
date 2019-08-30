@@ -87,11 +87,13 @@ While waiting, you can see two units ahead of the current unit
 		<li><a href="{{ semester.facebook_url }}">Facebook group</a></li>
 		{% endif %}
 
-		{% if semester.active %}
+		{% if semester.active and student.meets_evan %}
 		<li>
 		<a href="{{ semester.calendar_url_meets_evan }}" target="_blank">
 			OTIS calendar (meetings)</a>
 		</li>
+		{% endif %}
+		{% if semester.active %}
 		<li>
 		<a href="{{ semester.calendar_url_no_meets_evan }}" target="_blank">
 			OTIS calendar (no meetings)</a>
@@ -135,17 +137,19 @@ Thanks for playing.</p>
 
 {% endif %}
 
-{% if student.meets_evan and semester.active %}
+{% if semester.active %}
 <hr />
 
 <h2>Calendar</h2>
 <p> Be sure to check that the time zones display correctly!</p>
 <p>You can also open these in a new window:</p>
 <ul>
+	{% if student.meets_evan %}
 	<li>
 	<a href="{{ semester.calendar_url_meets_evan }}" target="_blank">
 		OTIS calendar (meetings)</a>
 	</li>
+	{% endif %}
 	<li>
 	<a href="{{ semester.calendar_url_no_meets_evan }}" target="_blank">
 		OTIS calendar (no meetings)</a>
