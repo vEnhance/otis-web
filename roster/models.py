@@ -87,7 +87,12 @@ class Student(models.Model):
 	@property
 	def meets_evan(self):
 		return (self.track == "A" or self.track == "B") and self.legit
-
+	@property
+	def calendar_url(self):
+		if self.meets_evan:
+			return self.semester.calendar_url_meets_evan
+		else:
+			return self.semester.calendar_url_no_meets_evan
 	@property
 	def curriculum_length(self):
 		return self.curriculum.count()
@@ -186,9 +191,3 @@ class Invoice(models.Model):
 	def track(self):
 		return self.student.track
 
-	@property
-	def calendar_url(self):
-		if self.meets_evan:
-			return self.semester.calendar_url_meets_evan
-		else:
-			return self.semester.calendar_url_no_meets_evan

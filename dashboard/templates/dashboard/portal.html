@@ -89,7 +89,12 @@ While waiting, you can see two units ahead of the current unit
 
 		{% if semester.active %}
 		<li>
-		<a href="{{ student.calendar_url }}" target="_blank">OTIS calendar (GCal)</a>
+		<a href="{{ semester.calendar_url_meets_evan }}" target="_blank">
+			OTIS calendar (meetings)</a>
+		</li>
+		<li>
+		<a href="{{ semester.calendar_url_no_meets_evan }}" target="_blank">
+			OTIS calendar (no meetings)</a>
 		</li>
 		{% endif %}
 	</ul>
@@ -134,11 +139,18 @@ Thanks for playing.</p>
 <hr />
 
 <h2>Calendar</h2>
-<p>Here is the list of upcoming video calls.
-<a href="{{ student.calendar_url }}" target="_blank">Link to <b>full-screen calendar</b></a>
-(opens in new window).
-Be sure to check that the time zones display correctly!
-</p>
+<p> Be sure to check that the time zones display correctly!</p>
+<p>You can also open these in a new window:</p>
+<ul>
+	<li>
+	<a href="{{ semester.calendar_url_meets_evan }}" target="_blank">
+		OTIS calendar (meetings)</a>
+	</li>
+	<li>
+	<a href="{{ semester.calendar_url_no_meets_evan }}" target="_blank">
+		OTIS calendar (no meetings)</a>
+	</li>
+</ul>
 
 <iframe src="{{ student.calendar_url }}" style="border-width:0" width="520" height="600" frameborder="0" scrolling="no"></iframe>
 {% endif %}
