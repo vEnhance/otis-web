@@ -34,6 +34,11 @@ class Semester(models.Model):
 	facebook_url = models.CharField(max_length=128, blank=True,
 			help_text = "The link to the Facebook group for this year.")
 
+	calendar_url_meets_evan = models.TextField(blank=True,
+			help_text = "Link to calendar for students with meetings with Evan")
+	calendar_url_no_meets_evan = models.TextField(blank=True,
+			help_text = "Link to calendar for students without meetings with Evan")
+
 	def __str__(self):
 		return self.name
 
