@@ -185,3 +185,10 @@ class Invoice(models.Model):
 	@property
 	def track(self):
 		return self.student.track
+
+	@property
+	def calendar_url(self):
+		if self.meets_evan:
+			return self.semester.calendar_url_meets_evan
+		else:
+			return self.semester.calendar_url_no_meets_evan

@@ -87,9 +87,9 @@ While waiting, you can see two units ahead of the current unit
 		<li><a href="{{ semester.facebook_url }}">Facebook group</a></li>
 		{% endif %}
 
-		{% if student.meets_evan and semester.active %}
+		{% if semester.active %}
 		<li>
-		<a href="https://calendar.google.com/calendar/embed?src=evanchen.mit%40gmail.com" target="_blank">Meeting schedule (GCal)</a>
+		<a href="{{ student.calendar_url }}" target="_blank">OTIS calendar (GCal)</a>
 		</li>
 		{% endif %}
 	</ul>
@@ -135,12 +135,12 @@ Thanks for playing.</p>
 
 <h2>Calendar</h2>
 <p>Here is the list of upcoming video calls.
-<a href="https://calendar.google.com/calendar/embed?src=evanchen.mit%40gmail.com" target="_blank">Link to <b>full-screen calendar</b></a>
+<a href="{{ student.calendar_url }}" target="_blank">Link to <b>full-screen calendar</b></a>
 (opens in new window).
 Be sure to check that the time zones display correctly!
 </p>
 
-<iframe src="https://calendar.google.com/calendar/embed?mode=AGENDA&amp;height=600&amp;wkst=1&amp;bgcolor=%23FFFFFF&amp;src=evanchen.mit%40gmail.com&amp;color=%2342104A" style="border-width:0" width="520" height="600" frameborder="0" scrolling="no"></iframe>
+<iframe src="{{ student.calendar_url }}" style="border-width:0" width="520" height="600" frameborder="0" scrolling="no"></iframe>
 {% endif %}
 
 {% endblock %}
