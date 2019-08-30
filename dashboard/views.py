@@ -26,6 +26,7 @@ def portal(request, student_id):
 	context = {}
 	context['title'] = "%s (%s)" %(student.name, student.semester.name)
 	context['student'] = student
+	context['semester'] = student.semester
 	context['omniscient'] = student.is_taught_by(request.user)
 	context['curriculum'] = student.generate_curriculum_rows(
 			omniscient = context['omniscient'])

@@ -6,7 +6,7 @@
 
 {% if omniscient %}
 	<p>This is the dashboard for {{ student.name }},
-	for <b>{{ student.semester.name }}</b>
+	for <b>{{ semester.name }}</b>
 	(their track is <b>{{ student.get_track_display }}</b>).
 	{% if student.assistant %}
 		The assistant instructor is <b>{{ student.assistant.name }}</b>.
@@ -15,7 +15,7 @@
 	<p>So far they completed <b>{{ student.current_unit_index }} of
 		{{ student.curriculum_length }} units</b>.</p>
 {% else %}
-	<p>Hi {{ student.name }}, welcome back to <b>{{ student.semester.name }}</b>.
+	<p>Hi {{ student.name }}, welcome back to <b>{{ semester.name }}</b>.
 	You have completed {{ student.current_unit_index }} of
 	{{ student.curriculum_length }} units.</p>
 	{% if student.assistant %}
@@ -50,7 +50,7 @@ While waiting, you can see two units ahead of the current unit
 	<ul>
 		<li><a href="{% url "uploads" student.id 0 %}">Miscellaneous uploads</a></li>
 		<li><a href="{% url "currshow" student.id %}">Class selection</a></li>
-		{% if student.semester.show_invoices %}
+		{% if semester.show_invoices %}
 		<li><a href="{% url "invoice" student.id %}">Invoice</a></li>
 		{% endif %}
 		{% if omniscient %}
@@ -74,22 +74,22 @@ While waiting, you can see two units ahead of the current unit
 <td valign="top">
 	<h3>External sites</h3>
 	<ul>
-		<li><a href="https://www.zoom.us/j/{{ student.semester.zoom_room_id }}">Zoom classroom</a>
+		<li><a href="https://www.zoom.us/j/{{ semester.zoom_room_id }}">Zoom classroom</a>
 		</li>
 
 		<li><a href="https://www.gradescope.com">GradeScope</a>
-		{% if student.semester.gradescope_key %}
-		<br><i>Entry key</i>: <b>{{ student.semester.gradescope_key }}</b>
+		{% if semester.gradescope_key %}
+		<br><i>Entry key</i>: <b>{{ semester.gradescope_key }}</b>
 		{% endif %}
 		</li>
 
-		{% if student.semester.facebook_url %}
-		<li><a href="{{ student.semester.facebook_url }}">Facebook group</a></li>
+		{% if semester.facebook_url %}
+		<li><a href="{{ semester.facebook_url }}">Facebook group</a></li>
 		{% endif %}
 
-		{% if student.meets_evan and student.semester.active %}
+		{% if student.meets_evan and semester.active %}
 		<li>
-		<a href="https://calendar.google.com/calendar/embed?src=tn78o9o548n501k09s18efcq78%40group.calendar.google.com" target="_blank">Meeting schedule (GCal)</a>
+		<a href="https://calendar.google.com/calendar/embed?src=evanchen.mit%40gmail.com" target="_blank">Meeting schedule (GCal)</a>
 		</li>
 		{% endif %}
 	</ul>
@@ -100,7 +100,7 @@ While waiting, you can see two units ahead of the current unit
 
 <hr />
 
-{% if student.semester.active %}
+{% if semester.active %}
 <h2>Mock Olympiads (Tests)</h2>
 {% include "dashboard/list_exam.html" with exams=tests %}
 
@@ -125,22 +125,22 @@ unless otherwise specified.
 See the syllabus for full instructions.</p>
 {% else %}
 
-<p>This page from {{ student.semester }} is now archived.
+<p>This page from {{ semester }} is now archived.
 Thanks for playing.</p>
 
 {% endif %}
 
-{% if student.meets_evan and student.semester.active %}
+{% if student.meets_evan and semester.active %}
 <hr />
 
 <h2>Calendar</h2>
 <p>Here is the list of upcoming video calls.
-<a href="https://calendar.google.com/calendar/embed?src=tn78o9o548n501k09s18efcq78%40group.calendar.google.com" target="_blank">Link to <b>full-screen calendar</b></a>
+<a href="https://calendar.google.com/calendar/embed?src=evanchen.mit%40gmail.com" target="_blank">Link to <b>full-screen calendar</b></a>
 (opens in new window).
 Be sure to check that the time zones display correctly!
 </p>
 
-<iframe src="https://calendar.google.com/calendar/embed?mode=AGENDA&amp;height=600&amp;wkst=1&amp;bgcolor=%23FFFFFF&amp;src=tn78o9o548n501k09s18efcq78%40group.calendar.google.com&amp;color=%2342104A" style="border-width:0" width="520" height="600" frameborder="0" scrolling="no"></iframe>
+<iframe src="https://calendar.google.com/calendar/embed?mode=AGENDA&amp;height=600&amp;wkst=1&amp;bgcolor=%23FFFFFF&amp;src=evanchen.mit%40gmail.com&amp;color=%2342104A" style="border-width:0" width="520" height="600" frameborder="0" scrolling="no"></iframe>
 {% endif %}
 
 {% endblock %}
