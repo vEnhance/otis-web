@@ -10,14 +10,14 @@
 
 {% block scripts %}
 {% if enabled %}
-	<script src="{% static 'chosen/chosen.jquery.js' %}" type="text/javascript"></script>
-	<script type="text/javascript">
-	$(document).ready(function() {
-		$("td.unit-select > select").chosen({
-			placeholder_text : "...",
-		});
+<script src="{% static 'chosen/chosen.jquery.js' %}" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+	$("td.unit-select > select").chosen({
+		placeholder_text : "...",
 	});
-	</script>
+});
+</script>
 {% endif %}
 {% endblock %}
 
