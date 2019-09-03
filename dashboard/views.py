@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.urls import reverse, reverse_lazy
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
@@ -119,3 +120,21 @@ class DeleteFile(LoginRequiredMixin, DeleteView):
 				and not self.request.user.is_staff:
 			raise Http404("Not authorized to delete this file")
 		return obj
+
+@staff_member_required
+def quasigrader(request, num_limit = 10):
+	context = {}
+	context['title'] = 'Quasi-Grader'
+	num_limit = int(num_limit)
+
+	context['items'] = []
+	uploads = dashboard.models.UploadedFile.objects\
+			.filter(category='psets').order_by('-created_at')[:num_limit]
+	for upload in uploads:
+		d = {'student' : upload.benefactor,
+				'file' : upload,
+				'rows' : upload.benefactor.generate_curriculum_rows(True)
+				}
+		context['items'].append(d)
+
+	return render(request, "dashboard/quasigrader.html", context)

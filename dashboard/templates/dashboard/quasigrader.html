@@ -1,0 +1,28 @@
+{% extends 'layout.html' %}
+{% load static %}
+{% load staticfiles %}
+
+{% block layout-content %}
+
+<p>The most recent {{ items|length }}
+are listed below.
+For problem sets, additional controls are provided.</p>
+
+{% for item in items %}
+<h3>#{{ forloop.counter }}.
+	{{ item.file.unit }} &mdash;
+	<a href="{% url "dashboard" item.student.id %}">{{ item.student }}</a>
+	</h3>
+<ul>
+	<li>{% include "dashboard/show_file.html" with file=item.file %}</li>
+</ul>
+
+{% include "dashboard/list_curriculum.html" with student=item.student curriculum=item.rows %}
+
+<p><a href="{% url "advance" item.student.id %}">Advance {{ item.student }}</a></p>
+
+
+<hr />
+{% endfor %}
+
+{% endblock %}

@@ -33,6 +33,7 @@
 	Staff panel:
 	<ul>
 	<li><a href="{% url "master-schedule" %}">Master schedule</a></li>
+	<li><a href="{% url "quasigrader" 10 %}">Quasi-grader</a></li>
 	{% endif %}
 	{% if request.user.is_superuser %}
 	<li><a href="{% url "admin:index" %}">Django admin</a></li>
