@@ -18,16 +18,7 @@ The main thing this will be used for is:
 <ol>
 {% for file in files %}
 <li>
-	<p><b><a href="{{ file.content.url }}">{{ file }}</a></b>
-	{% if file.description %} &mdash; {{file.description}}{% endif %}
-	<br />
-	<small>Uploaded by <i>{{ file.owner }}</i> at {{ file.created_at|date }}.
-		{% if file.owner.username == request.user.username or request.user.is_staff %}
-		<a href="{% url "editfile" file.id%}">(edit)</a>
-		<a href="{% url "delfile" file.id%}">(delete)</a>
-		{% endif %}
-	</small>
-	</p>
+	{% include "dashboard/show_file.html" %}
 </li>
 {% endfor %}
 </ol>
