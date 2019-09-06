@@ -10,3 +10,4 @@ class UploadedFileAdmin(admin.ModelAdmin):
 	list_display = ('id', 'content', 'created_at', 'description',
 			'benefactor', 'unit', 'category', 'owner',)
 	search_fields = ('description',)
+	list_per_page = 30
