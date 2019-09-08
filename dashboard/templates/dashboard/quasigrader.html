@@ -17,10 +17,9 @@ For problem sets, additional controls are provided.</p>
 	<li>{% include "dashboard/show_file.html" with file=item.file %}</li>
 </ul>
 
+<p>&rArr; <a href="{% url "advance" item.student.id %}"><b>Advance</b> {{ item.student }}</a></p>
+
 {% include "dashboard/list_curriculum.html" with student=item.student curriculum=item.rows %}
-
-<p><a href="{% url "advance" item.student.id %}">Advance {{ item.student }}</a></p>
-
 
 <hr />
 {% endfor %}
