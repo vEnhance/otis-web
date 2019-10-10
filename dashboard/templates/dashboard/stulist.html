@@ -7,7 +7,7 @@
 	<tr><td>{{ forloop.counter }}</td>
 		<td><a href="{% url "dashboard" student.id %}">{{ student.name }}</a></td>
 		<td>{{ student.semester }}</td>
-		<td>{{ student.get_track_display }}{% if student.assistant %} + {{ student.assistant.shortname }}{% endif %}</td>
+		<td>{{ student.get_track }}</td>
 		<td>{% if student.legit %}
 			{{ student.current_unit_index }} / {{ student.curriculum_length }}
 			{% endif %}</td>

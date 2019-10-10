@@ -56,7 +56,7 @@ class Student(models.Model):
 				("C", "Corr."),
 				("E", "Ext."),
 				("G", "Grad"),
-				("N", "Not applicable"),
+				("N", "N/A"),
 				),
 			help_text = "")
 	legit = models.BooleanField(default = True,
@@ -65,10 +65,18 @@ class Student(models.Model):
 			"This will hide them from the master schedule, for example.")
 	def __str__(self):
 		return "%s (%s)" %(self.name, self.semester)
+
 	@property
 	def name(self):
 		if self.user: return self.user.get_full_name() or self.user.username
 		else: return "?"
+	@property
+	def get_track(self):
+		if self.assistant is None:
+			return self.get_track_display()
+		else:
+			return self.get_track_display() \
+					+ " + " + self.assistant.shortname
 
 	def is_taught_by(self, user):
 		"""Checks whether the specified user is not the same as the student,

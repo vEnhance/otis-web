@@ -22,8 +22,7 @@ problem set submissions are listed below.</p>
 	{{ item.student.name }}
 	</a>
 	&ndash;
-	{{ item.student.get_track_display }}
-	{% if item.student.assistant %} + {{ item.student.assistant }}{% endif %}
+	{{ item.student.get_track }}
 	</i>
 </p>
 
