@@ -78,7 +78,8 @@ def uploads(request, student_id, unit_id):
 def index(request):
 	students = roster.utils.get_visible_students(request.user)
 	if len(students) == 1: # unique match
-		return HttpResponseRedirect(reverse("dashboard", args=(students[0].id,)))
+		return HttpResponseRedirect(\
+				reverse("portal", args=(students[0].id,)))
 
 	context = {}
 	context['title'] = "Current Semester Listing"

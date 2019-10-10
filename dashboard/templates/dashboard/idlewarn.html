@@ -15,7 +15,7 @@
 {% for student in students %}
 <tr>
 	<td>{{ forloop.counter }}</td>
-	<td><a href="{% url "dashboard" student.id %}">{{ student.name }}</a></td>
+	<td><a href="{% url "portal" student.id %}">{{ student.name }}</a></td>
 	<td>
 	{% if student.latest_pset %}
 		{{ student.latest_pset|date:"Y-m-d H:i a" }}
