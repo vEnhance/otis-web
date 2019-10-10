@@ -10,6 +10,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
 from django.views.generic.edit import UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Count, Q, Subquery, OuterRef
 
 import core
 import dashboard
@@ -138,3 +139,22 @@ def quasigrader(request, num_limit = 10):
 		context['items'].append(d)
 
 	return render(request, "dashboard/quasigrader.html", context)
+
+@staff_member_required
+def idlewarn(request):
+	context = {}
+	context['title'] = 'Idle-Warn'
+
+	newest = dashboard.models.UploadedFile.objects\
+			.filter(category='psets')\
+			.filter(benefactor=OuterRef('pk'))\
+			.order_by('-created_at')\
+			.values('created_at')[:1]
+
+	context['students'] = roster.utils\
+			.get_visible_students(request.user)\
+			.filter(legit=True)\
+			.annotate(latest_pset=Subquery(newest))\
+			.order_by('latest_pset')
+
+	return render(request, "dashboard/idlewarn.html", context)

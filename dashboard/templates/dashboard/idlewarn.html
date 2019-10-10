@@ -1,0 +1,32 @@
+{% extends 'layout.html' %}
+{% load static %}
+{% load staticfiles %}
+
+{% block layout-content %}
+<table>
+<tr>
+	<th>#</th>
+	<th>Name</th>
+	<th>Latest PSet</th>
+	<th>Format</th>
+	<th>Score</th>
+</tr>
+
+{% for student in students %}
+<tr>
+	<td>{{ forloop.counter }}</td>
+	<td><a href="{% url "dashboard" student.id %}">{{ student.name }}</a></td>
+	<td>
+	{% if student.latest_pset %}
+		{{ student.latest_pset|date:"Y-m-d H:i a" }}
+	{% else %}
+		<i>None</i>
+	{% endif%}
+	</td>
+	<td>{{ student.get_track }}</td>
+	<td>{{ student.current_unit_index }} / {{ student.curriculum_length }}</td>
+</tr>
+{% endfor %}
+</table>
+
+{% endblock %}
