@@ -1,3 +1,15 @@
+"""Roster views
+
+For historical reasons (aka I didn't plan ahead),
+the division between dashboard and roster is a bit weird.
+
+* roster handles the list of students and their curriculums
+* roster also handles invoices
+* dashboard handles stuff and uploads and pset submissions
+
+So e.g. "list students by most recent pset" goes under dashboard.
+"""
+
 from django.shortcuts import render, get_object_or_404
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
