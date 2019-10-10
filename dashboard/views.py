@@ -75,8 +75,7 @@ def uploads(request, student_id, unit_id):
 
 @login_required
 def index(request):
-	students = roster.utils.get_visible(request.user,
-		roster.models.Student.objects.filter(semester__active = True))
+	students = roster.utils.get_visible_students(request.user)
 	if len(students) == 1: # unique match
 		return HttpResponseRedirect(reverse("dashboard", args=(students[0].id,)))
 
@@ -88,7 +87,8 @@ def index(request):
 
 @login_required
 def past(request):
-	students = roster.utils.get_visible(request.user, roster.models.Student.objects.all())
+	students = roster.utils.get_visible_students(
+			request.user, current=False)
 	context = {}
 	context['title'] = "Previous Semester Listing"
 	context['students'] = students
