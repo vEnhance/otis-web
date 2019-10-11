@@ -142,3 +142,45 @@ class UpdateInvoice(PermissionRequiredMixin, UpdateView):
 	def get_success_url(self):
 		return reverse("invoice", args=(self.object.student.id,))
 
+# Inquiry views
+def inquiry(request, student_id):
+	student = utils.get_student(student_id)
+	utils.check_can_view(request, student)
+	context = {}
+	context['title'] = 'Unit Inquiry'
+
+	# Create form for submitting new inquiries
+	if request.method == 'POST':
+		form = forms.InquiryForm(request.POST)
+		if form.is_valid():
+			inquiry = form.save(commit=False)
+			inquiry.student = student
+			inquiry.save()
+			messages.success(request, "Request successful")
+	else:
+		form = forms.InquiryForm()
+	context['form'] = form
+
+	context['inquiries'] = models.UnitInquiry.objects\
+			.filter(student=student)
+	context['student'] = student
+	context['curriculum'] = student.generate_curriculum_rows(
+			omniscient = student.is_taught_by(request.user))
+
+	return render(request, 'roster/inquiry.html', context)
+
+class ListOpenInquiries(PermissionRequiredMixin, ListView):
+	permission_required = 'is_staff'
+	model = models.UnitInquiry
+	def get_queryset(self):
+		return models.UnitInquiry.objects.filter(status='NEW')
+class EditInquiry(PermissionRequiredMixin, UpdateView):
+	permission_required = 'is_staff'
+	model = models.UnitInquiry
+
+@staff_member_required
+def approve_inquiry(request, pk):
+	inquiry = models.UnitInquiry.objects.get(id=pk)
+	inquiry.run_accept()
+	return HttpResponseRedirect(reverse("list-inquiry"))
+

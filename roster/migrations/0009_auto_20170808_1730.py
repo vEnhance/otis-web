@@ -8,6 +8,7 @@ from django.conf import settings
 
 
 class Migration(migrations.Migration):
+    atomic = False
 
     dependencies = [
         ('roster', '0008_auto_20170806_0053'),

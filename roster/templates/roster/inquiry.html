@@ -1,0 +1,58 @@
+{% extends 'layout.html' %}
+
+{% block layout-content %}
+<h2>New inquiry</h2>
+<p>Use this form to submit unit inquiries.</p>
+{% include "generic-form.html" with submit_name="Inquire" %}
+
+<h2>Current inquiries</h2>
+<table>
+	<tr>
+		<th>Created</th>
+		<th>Status</th>
+		<th>Action</th>
+		<th>Unit</th>
+		<th>Last change</th>
+	</tr>
+	{% for inquiry in inquiries %}
+	<tr>
+		<td>{{ inquiry.created_at|date:"Y-m-d" }}</td>
+		<td>
+			{% if inquiry.status == "NEW" %}
+			Pending
+			{% elif inquiry.status == "ACC" %}
+			<b style="color:green;">Approved</b>
+			{% elif inquiry.status == "REJ" %}
+			<b style="color:red;">Rejected</b>
+			{% elif inquiry.status == "HOLD" %}
+			<b style="color:orange;">On hold</b>
+			{% endif %}
+		</td>
+		<td>{{ inquiry.action_type }}</td>
+		<td>{{ inquiry.unit }}</td>
+		<td>
+			{% if inquiry.status == "NEW" %}
+			{% if request.user.is_staff %}
+			<a href="{% url "approve-inquiry" inquiry.id %}">(approve)</a>
+			{% else %}
+			(none)
+			{% endif %}
+			{% else %}
+			{{ inquiry.updated_at|date:"Y-m-d" }}
+			{% endif %}
+
+			{% if request.user.is_staff %}
+			<a href="{% url "edit-inquiry" inquiry.id %}">(edit)</a>
+			{% endif %}
+		</td>
+
+	</tr>
+	{% endfor %}
+</table>
+
+<h2>Current units</h2>
+<p>For your reference, here is the existing curriculum.</p>
+{% include 'dashboard/list_curriculum.html' %}
+
+{% include 'dashboard/back_link.html' %}
+{% endblock %}

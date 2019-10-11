@@ -64,3 +64,19 @@ class AdvanceForm(forms.ModelForm):
 	class Meta:
 		model = roster.models.Student
 		fields = ('current_unit_index', 'pointer_current_unit', 'vision')
+
+
+class InquiryForm(forms.ModelForm):
+	def __init__(self, *args, **kwargs):
+		super(InquiryForm, self).__init__(*args, **kwargs)
+		self.fields['unit'].queryset = \
+				self.fields['unit'].queryset\
+				.order_by('group__name', 'code')
+
+	class Meta:
+		model = roster.models.UnitInquiry
+		fields = ('unit', 'action_type', 'explanation')
+		widgets = {
+			'explanation': forms.Textarea(
+				attrs={'cols': 60, 'rows': 3}),
+			}

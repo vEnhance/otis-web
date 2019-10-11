@@ -200,3 +200,53 @@ class Invoice(models.Model):
 	def track(self):
 		return self.student.track
 
+class UnitInquiry(models.Model):
+	unit = models.ForeignKey(core.models.Unit,
+			on_delete = models.CASCADE,
+			help_text = "The unit being requested.")
+	student = models.ForeignKey(Student,
+			on_delete = models.CASCADE,
+			help_text = "The student making the request")
+	created_at = models.DateTimeField(auto_now_add=True)
+	updated_at = models.DateTimeField(auto_now=True)
+
+	action_type = models.CharField(max_length = 10,
+			choices = (
+				("DROP", "Drop unit"),
+				("JUMP", "Mark current (and add)"),
+				("ADD", "Add unit"),
+				),
+			help_text = "")
+	status = models.CharField(max_length = 5,
+			choices = (
+				("ACC", "Approved"),
+				("REJ", "Rejected"),
+				("NEW", "Pending"),
+				("HOLD", "On hold"),
+				),
+			default = "NEW",
+			help_text = "")
+	explanation = models.TextField(max_length = 300, blank=True,
+			help_text="Short explanation for this request (if needed).")
+
+	def run_accept(self):
+		unit = self.unit
+		if self.action_type == "DROP":
+			self.student.curriculum.remove(unit)
+			if self.student.pointer_current_unit == unit:
+				self.student.pointer_current_unit = None
+		elif self.action_type == "ADD":
+			self.student.curriculum.add(unit)
+		elif self.action_type == "JUMP":
+			self.student.curriculum.add(unit)
+			self.student.pointer_current_unit = unit
+		self.student.save()
+
+		self.status = "ACC"
+		self.save()
+
+	def __str__(self):
+		return self.action_type + " " + str(self.unit)
+	
+	class Meta:
+		ordering = ('-created_at',)

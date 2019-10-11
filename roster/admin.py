@@ -74,3 +74,12 @@ class StudentAdmin(ImportExportModelAdmin):
 	resource_class = StudentIEResource
 	inlines = (InvoiceInline,)
 	search_fields = ('user__first_name', 'user__last_name', 'user__username',)
+
+@admin.register(roster.models.UnitInquiry)
+class UnitInquiryAdmin(admin.ModelAdmin):
+	list_display = ('id', 'created_at', 'updated_at', 'status', 'action_type',
+			'unit', 'student', 'explanation',)
+	search_fields = ('student__user__first_name',
+			'student__user__last_name', 'student__user__username')
+	list_filter = ('status',)
+	list_display_links = ('created_at',)
