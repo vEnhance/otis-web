@@ -149,6 +149,7 @@ def inquiry(request, student_id):
 	utils.check_can_view(request, student)
 	context = {}
 	context['title'] = 'Unit Inquiry'
+	current_inquiries = models.UnitInquiry.objects.filter(student=student)
 
 	# Create form for submitting new inquiries
 	if request.method == 'POST':
@@ -157,9 +158,14 @@ def inquiry(request, student_id):
 			inquiry = form.save(commit=False)
 			inquiry.student = student
 			inquiry.save()
-			if inquiry.action_type == "DROP":
+			# auto-acceptance criteria
+			auto_accept_criteria = (inquiry.action_type == "DROP" or \
+				current_inquiries.exclude(action_type="DROP").count() <= 3)
+			if auto_accept_criteria is True:
 				inquiry.run_accept()
-			messages.success(request, "Request successful")
+				messages.success(request, "Inquiry automatically approved")
+			else:
+				messages.success(request, "Inquiry sent")
 	else:
 		form = forms.InquiryForm()
 	context['form'] = form
@@ -197,7 +203,7 @@ class EditInquiry(PermissionRequiredMixin, UpdateView):
 def approve_inquiry(request, pk):
 	inquiry = models.UnitInquiry.objects.get(id=pk)
 	inquiry.run_accept()
-	return HttpResponseRedirect(reverse("list-inquiry"))
+	return HttpResponseRedirect(reverse("inquiry", args=(inquiry.student.id,)))
 
 @staff_member_required
 def approve_inquiry_all(request):
