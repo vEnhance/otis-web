@@ -10,7 +10,7 @@ the division between dashboard and roster is a bit weird.
 So e.g. "list students by most recent pset" goes under dashboard.
 """
 
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -31,7 +31,7 @@ from . import forms
 
 @login_required
 def curriculum(request, student_id):
-	student = get_object_or_404(roster.models.Student.objects, id = student_id)
+	student = roster.utils.get_student(student_id)
 	roster.utils.check_can_view(request, student)
 	units = core.models.Unit.objects.all()
 	original = student.curriculum.values_list('id', flat=True)
@@ -63,7 +63,7 @@ def curriculum(request, student_id):
 
 @login_required
 def advance(request, student_id):
-	student = get_object_or_404(roster.models.Student.objects, id = student_id)
+	student = roster.utils.get_student(student_id)
 	roster.utils.check_taught_by(request, student)
 	
 	if request.method == 'POST':
@@ -96,8 +96,9 @@ def invoice(request, student_id=None):
 			raise Http404("No such student")
 		else:
 			return HttpResponseRedirect(reverse("invoice", args=(student.id,)))
+
 	# Now assume student_id is not None
-	student = get_object_or_404(roster.models.Student.objects, id = student_id)
+	student = get_student(student_id)
 	if student.user != request.user and not request.user.is_staff:
 		raise Http404("Can't view invoice")
 

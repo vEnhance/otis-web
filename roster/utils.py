@@ -1,5 +1,6 @@
 from django.db.models import Q
 from django.http import Http404
+from django.shortcuts import get_object_or_404
 from . import models
 
 def get_current_students(queryset = models.Student.objects):
@@ -25,3 +26,6 @@ def check_can_view(request, student):
 def check_taught_by(request, student):
 	if not student.is_taught_by(request.user):
 		raise Http404("%s cannot edit %s" %(request.user, student))
+
+def get_student(pk):
+	return get_object_or_404(roster.models.Student.objects, pk)
