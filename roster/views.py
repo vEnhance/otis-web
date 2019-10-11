@@ -116,8 +116,8 @@ def invoice(request, student_id=None):
 
 @staff_member_required
 def master_schedule(request):
-	student_names_and_unit_ids = roster.models.Student.objects\
-			.filter(semester__active=True, legit=True)\
+	student_names_and_unit_ids = roster.utils\
+			.get_current_students().filter(legit=True)\
 			.values('user__first_name', 'user__last_name', 'curriculum')
 	unit_to_student_names = collections.defaultdict(list)
 	for d in student_names_and_unit_ids:
