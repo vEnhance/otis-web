@@ -6,7 +6,8 @@ class NewUploadForm(forms.ModelForm):
 		model = dashboard.models.UploadedFile
 		fields = ('category', 'content', 'description')
 		widgets = {
-			'description': forms.Textarea(attrs={'cols': 28, 'rows': 2}),
+			'description': forms.Textarea(
+				attrs={'cols': 60, 'rows': 2}),
 		}
 		help_texts = {
 			'content' : "",
