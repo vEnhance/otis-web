@@ -84,7 +84,6 @@ def index(request):
 	context = {}
 	context['title'] = "Current Semester Listing"
 	context['students'] = students
-	context['show_past_link'] = True
 	return render(request, "dashboard/stulist.html", context)
 
 @login_required

@@ -16,12 +16,10 @@
 	</table>
 {% else %}
 	<p><i>But nobody came.</i></p>
-	<p>There isn't anything here yet. If you just recently registered an account,
+	<p>There isn't anything here yet.
+	If you just recently registered an account,
 	you'll need to wait for it to be approved and activated.
 	Feel free to contact me if you think this is an error.</p>
 {% endif %}
 
-{% if show_past_link %}
-<p>For past semesters, <a href="{% url "past" %}">see here</a>.</p>
-{% endif %}
 {% endblock %}
