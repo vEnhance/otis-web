@@ -3,6 +3,14 @@
 {% load staticfiles %}
 
 {% block layout-content %}
+{% if inquiry_nag > 0 %}
+<p style="color:red;"><i>Note:</i>:
+There are <a href="{% url "list-inquiry" %}">
+	<b>{{ inquiry_nag }} unit inquiries</b></a>
+which haven't been answered yet.</p>
+{% else %}
+<p>Thankfully, there are no inquiries to process now.</p>
+{% endif %}
 
 <p>The most recent {{ items|length }}
 problem set submissions are listed below.</p>

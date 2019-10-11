@@ -141,6 +141,9 @@ def quasigrader(request, num_limit = 10):
 				}
 		context['items'].append(d)
 
+	context['inquiry_nag'] = roster.models.UnitInquiry.objects\
+			.filter(status='NEW').count()
+
 	return render(request, "dashboard/quasigrader.html", context)
 
 @staff_member_required
