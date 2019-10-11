@@ -3,7 +3,6 @@
 
 {% if students|length > 0 %} {# if >0 student to list #}
 <p>Here are the participants to which you have access.</p>
-
 <table>
 {% for student in students %}
 <tr> {# begin table row for this student #}
@@ -25,6 +24,9 @@
 {% endfor %}
 </table>
 
+<p>This list was generated {% now "r" %}.
+Have a nice day.</p>
+
 {% else %} {# if no students at all #}
 <p><i>But nobody came.</i></p>
 <p>There isn't anything here yet.
@@ -33,5 +35,4 @@ you'll need to wait for it to be approved and activated.
 Feel free to contact me if you think this is an error.</p>
 
 {% endif %}
-
 {% endblock %}
