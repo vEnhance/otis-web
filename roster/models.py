@@ -139,6 +139,7 @@ class Student(models.Model):
 		jumped_unit = self.pointer_current_unit or None
 		curriculum = self.generate_curriculum_queryset()
 
+		rows = []
 		for n, unit in enumerate(curriculum):
 			row = {}
 			row['unit'] = unit
@@ -160,7 +161,8 @@ class Student(models.Model):
 				row['sols_label'] = "Sols (future)"
 			else:
 				row['sols_label'] = None # solutions not shown
-			yield row
+			rows.append(row)
+		return rows
 
 class Invoice(models.Model):
 	"""Billing information object for students."""
