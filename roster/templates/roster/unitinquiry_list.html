@@ -9,20 +9,32 @@ if you want.</p>
 <table>
 <tr>
 	<th>Time</th>
+	<th>#</th>
 	<th>Student</th>
-	<th>Inquiry</th>
+	<th colspan="2">Inquiry</th>
 	<th>Controls</th>
 </tr>
 {% for inquiry in unitinquiry_list %}
 <tr>
-<td>{{ inquiry.created_at|date:"Y-m-d H:i" }}</td>
-<td><a href="{% url "portal" inquiry.student.id %}">
-		{{ inquiry.student }}</a></td>
-<td>{{ inquiry }}</td>
+<td style="font-size:80%;">{{ inquiry.created_at|date:"Y-m-d H:i" }}</td>
+<td>{{ inquiry.num_inq }}</td>
+<td><a href="{% url "inquiry" inquiry.student.id %}">
+		{{ inquiry.student.name }}</a></td>
+<td>{{ inquiry.action_type }}</td>
+<td>{{ inquiry.unit }}</td>
 <td>
-	<a href="{% url "approve-inquiry" inquiry.id %}">Approve</a>
-	<a href="{% url "edit-inquiry" inquiry.id %}">Edit</a>
+	<a href="{% url "approve-inquiry" inquiry.id %}">&check;</a>
+	or
+	<a href="{% url "edit-inquiry" inquiry.id %}">edit</a>
 </td>
+</tr>
+{% if inquiry.explanation %}
+<tr>
+<td></td>
+<td></td>
+<td colspan="3"><i>{{ inquiry.explanation }}</i></td>
+</tr>
+{% endif %}
 {% endfor %}
 </table>
 

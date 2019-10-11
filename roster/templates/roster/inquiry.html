@@ -52,8 +52,14 @@ please send me a reminder.</p>
 			<a href="{% url "edit-inquiry" inquiry.id %}">(edit)</a>
 			{% endif %}
 		</td>
-
 	</tr>
+	{% if inquiry.explanation %}
+	<tr>
+	<td></td>
+	<td></td>
+	<td colspan="3"><i>{{ inquiry.explanation }}</i></td>
+	</tr>
+	{% endif %}
 	{% endfor %}
 </table>
 

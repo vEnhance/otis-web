@@ -112,8 +112,11 @@ class Student(models.Model):
 		return self.curriculum.all().annotate(
 				num_uploads = Count('uploadedfile',
 					filter = Q(uploadedfile__benefactor = self.id)),
-				has_pset = Exists(dashboard.models.UploadedFile.objects.filter(
-					unit=OuterRef('pk'), benefactor=self.id, category='psets')))\
+				has_pset = Exists(
+					dashboard.models.UploadedFile.objects.filter(
+						unit=OuterRef('pk'),
+						benefactor=self.id,
+						category='psets')))\
 				.order_by('-has_pset', 'position')
 
 	def check_unit_unlocked(self, unit):

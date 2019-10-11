@@ -2,6 +2,9 @@
 {% block title %}Process Inquiry{% endblock %}
 
 {% block layout-content %}
-<p>You can edit the inquiry here.</p>
+<p>You can change the inquiry here.
+This is for
+<a href="{% url "inquiry" unitinquiry.student.id %}">
+	{{ unitinquiry.student }}</a>.</p>
 {% include "generic-form.html" %}
 {% endblock %}

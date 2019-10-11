@@ -9,7 +9,7 @@ There are <a href="{% url "list-inquiry" %}">
 	<b>{{ inquiry_nag }} unit inquiries</b></a>
 which haven't been answered yet.</p>
 {% else %}
-<p>Thankfully, there are no inquiries to process now.</p>
+<p>Thankfully, there are <b>0 inquiries</b> to process now.</p>
 {% endif %}
 
 <p>The most recent {{ items|length }}

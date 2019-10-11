@@ -20,6 +20,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.views.generic.edit import UpdateView
 from django.views.generic import ListView
 from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.db.models import Subquery, OuterRef, Count, IntegerField
 
 import itertools
 import collections
@@ -173,10 +174,22 @@ class ListOpenInquiries(PermissionRequiredMixin, ListView):
 	permission_required = 'is_staff'
 	model = models.UnitInquiry
 	def get_queryset(self):
-		return models.UnitInquiry.objects.filter(status='NEW')
+		# some amazing code vv seriously wtf
+		count_others = models.UnitInquiry.objects\
+				.filter(student=OuterRef('student'))\
+				.order_by().values('student')\
+				.annotate(c=Count('*')).values('c')
+		return models.UnitInquiry.objects\
+				.filter(status='NEW')\
+				.annotate(num_inq = Subquery(count_others,
+					output_field=IntegerField()))
+
 class EditInquiry(PermissionRequiredMixin, UpdateView):
+	fields = ('unit', 'action_type', 'status', 'explanation')
 	permission_required = 'is_staff'
 	model = models.UnitInquiry
+	def get_success_url(self):
+		return reverse("edit-inquiry", args=(self.object.id,))
 
 @staff_member_required
 def approve_inquiry(request, pk):
@@ -185,7 +198,7 @@ def approve_inquiry(request, pk):
 	return HttpResponseRedirect(reverse("list-inquiry"))
 
 @staff_member_required
-def approve_inquiry_all(request, pk):
+def approve_inquiry_all(request):
 	for inquiry in models.UnitInquiry.objects.filter(status="NEW"):
 		inquiry.run_accept()
 	return HttpResponseRedirect(reverse("list-inquiry"))
