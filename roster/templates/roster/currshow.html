@@ -22,7 +22,7 @@ $(document).ready(function() {
 {% endblock %}
 
 {% block layout-content %}
-<p><a href="{% url "portal" student.id %}">Back to Dashboard</a></p>
+{% include 'dashboard/back_link.html' %}
 
 For a description of what these units are,
 see the <a href="{% url "synopsis" %}">catalog synopsis</a>.

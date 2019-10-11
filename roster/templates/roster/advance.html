@@ -7,7 +7,5 @@
 <p>For your reference, here is the existing curriculum.</p>
 {% include 'dashboard/list_curriculum.html' %}
 
-<ul>
-	<li><a href="{% url "portal" student.id %}">Back to Dashboard</a></li>
-</ul>
+{% include 'dashboard/back_link.html' %}
 {% endblock %}
