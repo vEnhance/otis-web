@@ -184,3 +184,8 @@ def approve_inquiry(request, pk):
 	inquiry.run_accept()
 	return HttpResponseRedirect(reverse("list-inquiry"))
 
+@staff_member_required
+def approve_inquiry_all(request, pk):
+	for inquiry in models.UnitInquiry.objects.filter(status="NEW"):
+		inquiry.run_accept()
+	return HttpResponseRedirect(reverse("list-inquiry"))

@@ -13,4 +13,5 @@ urlpatterns = [
 	url(r'inquiry/list/$', views.ListOpenInquiries.as_view(), name='list-inquiry'),
 	url(r'inquiry/edit/(?P<pk>[0-9]+)/$', views.EditInquiry.as_view(), name='edit-inquiry'),
 	url(r'inquiry/approve/(?P<pk>[0-9]+)/$', views.approve_inquiry, name='approve-inquiry'),
+	url(r'inquiry/approve/all/$', views.approve_inquiry_all, name='approve-inquiry-all'),
 ]

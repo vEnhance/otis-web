@@ -2,7 +2,9 @@
 
 {% block title %}Approve Inquiries{% endblock %}
 {% block layout-content %}
-<p>This is a list of all open inquiries.</p>
+<p>This is a list of all open inquiries.
+You can <a href="{% url "approve-inquiry-all" %}">approve all</a>
+if you want.</p>
 
 <table>
 <tr>
