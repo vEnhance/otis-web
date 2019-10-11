@@ -8,14 +8,16 @@
 
 {% if student %}
 <h2><a href="{% url "portal" student.id %}">{{ student }}</a></h2>
-<h4>{{ student.get_track }}</h4>
+<p><i>{{ student.get_track }}</i></p>
 {% endif %}
 
+<h4>Global panel</h4>
 <ul>
 <li><a href="{% url "synopsis" %}">Course Synopsis</a></li>
 </ul>
 {% if request.user.is_authenticated %}
-<ul>
+	<h4>User panel</h4>
+	<ul>
 	{% if not student %}
 	<li><a href="{% url "index" %}">Back to index</a></li>
 	<li><a href="{% url "past" %}">Past semesters</a></li>
@@ -26,38 +28,42 @@
 	<li><a href="{% url "past" %}">Past semesters</a></li>
 	{% endif %}
 	<li><a href="{% url "password_change" %}">Edit password</a></li>
-</ul>
-{% if request.user.is_staff %}
-	Staff panel:
+	</ul>
+
+	{% if request.user.is_staff %}
+	<h4>Staff panel</h4>
 	<ul>
 	<li><a href="{% url "master-schedule" %}">Master schedule</a></li>
 	<li><a href="{% url "quasigrader" 10 %}">Quasi-grader</a></li>
+	</ul>
 	{% endif %}
+
 	{% if request.user.is_superuser %}
+	<h4>Admin panel</h4>
+	<ul>
 	<li><a href="{% url "admin:index" %}">Django admin</a></li>
 		{% if student %}
-		<li> <a href="{% url "admin:roster_student_change" student.id %}">
+		<li><a href="{% url "admin:roster_student_change" student.id %}">
 				Edit {{ student.user.username }}</a></li>
 		{% endif %}
-		{# Hijack student account #}
-		{% if student.user %}
+		{% if student.user %} {# Hijack student account #}
 		<li>
-		<form action="/hijack/{{ student.user.id }}/" method="post">
-		{% csrf_token %}
-		<button class="pseudo-button" type="submit">Hijack {{ student.user.username }}</button>
-		</form>
+			<form action="/hijack/{{ student.user.id }}/" method="post">
+			{% csrf_token %}
+			<button class="pseudo-button" type="submit">
+				Hijack {{ student.user.username }}</button>
+			</form>
 		</li>
 		{% endif %}
-		{# Hijack assistant account #}
-		{% if student.assistant %}
+		{% if student.assistant %} {# Hijack assistant account #}
 		<li>
-		<form action="/hijack/{{ student.assistant.user.id }}/" method="post">
-		{% csrf_token %}
-		<button class="pseudo-button" type="submit">
-			Hijack {{ student.assistant.user.username }}</button>
-		</form>
+			<form action="/hijack/{{ student.assistant.user.id }}/" method="post">
+			{% csrf_token %}
+			<button class="pseudo-button" type="submit">
+				Hijack {{ student.assistant.user.username }}</button>
+			</form>
 		</li>
 		{% endif %}
 	</ul>
-{% endif %}
+	{% endif %}
 {% endif %}
