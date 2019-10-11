@@ -21,7 +21,7 @@
 		<td class="field-tag">
 			{{ field }}
 			{% if field.help_text %}
-			<span class="helptext">{{ field.help_text|safe }}</span>
+			<div class="helptext">{{ field.help_text|safe }}</div>
 			{% endif %}
 			{% if field.errors %}
 				<ul class="errorlist">
