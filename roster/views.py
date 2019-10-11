@@ -157,6 +157,8 @@ def inquiry(request, student_id):
 			inquiry = form.save(commit=False)
 			inquiry.student = student
 			inquiry.save()
+			if inquiry.action_type == "DROP":
+				inquiry.run_accept()
 			messages.success(request, "Request successful")
 	else:
 		form = forms.InquiryForm()
