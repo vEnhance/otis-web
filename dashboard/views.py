@@ -84,6 +84,7 @@ def index(request):
 	context = {}
 	context['title'] = "Current Semester Listing"
 	context['students'] = students
+	context['stulist_show_semester'] = False
 	return render(request, "dashboard/stulist.html", context)
 
 @login_required
@@ -93,6 +94,7 @@ def past(request):
 	context = {}
 	context['title'] = "Previous Semester Listing"
 	context['students'] = students
+	context['stulist_show_semester'] = True
 	return render(request, "dashboard/stulist.html", context)
 
 class UpdateFile(LoginRequiredMixin, UpdateView):

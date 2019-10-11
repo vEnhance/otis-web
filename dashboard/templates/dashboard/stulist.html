@@ -1,25 +1,37 @@
 {% extends 'layout.html' %}
 {% block layout-content %}
-{% if students|length > 0 %}
-	<p>Here are the participants to which you have access.</p>
-	<table>
-	{% for student in students %}
-	<tr><td>{{ forloop.counter }}</td>
-		<td><a href="{% url "portal" student.id %}">{{ student.name }}</a></td>
-		<td>{{ student.semester }}</td>
-		<td>{{ student.get_track }}</td>
-		<td>{% if student.legit %}
-			{{ student.current_unit_index }} / {{ student.curriculum_length }}
-			{% endif %}</td>
-	</tr>
-	{% endfor %}
-	</table>
-{% else %}
-	<p><i>But nobody came.</i></p>
-	<p>There isn't anything here yet.
-	If you just recently registered an account,
-	you'll need to wait for it to be approved and activated.
-	Feel free to contact me if you think this is an error.</p>
+
+{% if students|length > 0 %} {# if >0 student to list #}
+<p>Here are the participants to which you have access.</p>
+
+<table>
+{% for student in students %}
+<tr> {# begin table row for this student #}
+	<td>{{ forloop.counter }}</td>
+	<td><a href="{% url "portal" student.id %}">
+			{{ student.name }}</a></td>
+
+	{% if stulist_show_semester %}
+	<td>{{ student.semester }}</td>
+	{% endif %}
+
+	<td>{{ student.get_track }}</td>
+	<td>{% if student.legit %}
+		{{ student.current_unit_index }}
+		/ {{ student.curriculum_length }}
+		{% endif %}</td>
+
+</tr> {# end table row for this student #}
+{% endfor %}
+</table>
+
+{% else %} {# if no students at all #}
+<p><i>But nobody came.</i></p>
+<p>There isn't anything here yet.
+If you just recently registered an account,
+you'll need to wait for it to be approved and activated.
+Feel free to contact me if you think this is an error.</p>
+
 {% endif %}
 
 {% endblock %}
