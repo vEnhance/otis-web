@@ -38,18 +38,15 @@ While waiting, you can see two units ahead of the current unit
 <table class="table">
 <tr>
 <td valign="top" width="50%">
-	<h3>General info</h3>
+	<h3>Service center</h3>
 	<ul>
-	<li><a href="//web.evanchen.cc/upload/otis-syllabus.pdf">Syllabus</a></li>
-	<li><a href="//web.evanchen.cc/private/parent-info.pdf">Parent info</a> (payment)</li>
-	<li><a href="{% url "synopsis" %}">Class descriptions</a></li>
+	<li><a href="{% url "inquiry" student.id %}">Unit inquiries</a></li>
 	</ul>
 </td>
 <td valign="top" width="50%">
 	<h3>Site controls</h3>
 	<ul>
 		<li><a href="{% url "currshow" student.id %}">Class selection</a></li>
-		<li><a href="{% url "inquiry" student.id %}">Unit inquiries</a></li>
 		<li><a href="{% url "uploads" student.id 0 %}">Miscellaneous uploads</a></li>
 		{% if semester.show_invoices %}
 		<li><a href="{% url "invoice" student.id %}">Invoice</a></li>
