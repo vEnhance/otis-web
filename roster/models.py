@@ -56,7 +56,7 @@ class Student(models.Model):
 				("C", "Corr."),
 				("E", "Ext."),
 				("G", "Grad"),
-				("N", "N/A"),
+				("N", "N.A."),
 				),
 			help_text = "")
 	legit = models.BooleanField(default = True,
