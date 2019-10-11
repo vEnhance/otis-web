@@ -3,7 +3,18 @@
 
 {% if students|length > 0 %} {# if >0 student to list #}
 <p>Here are the participants to which you have access.</p>
+
 <table>
+<tr>
+	<th>#</th>
+	<th>Name</th>
+	{% if stulist_show_semester %}
+	<th>Year</th>
+	{% endif %}
+	<th>Track</th>
+	<th>Progress</th>
+</tr>
+
 {% for student in students %}
 <tr> {# begin table row for this student #}
 	<td>{{ forloop.counter }}</td>

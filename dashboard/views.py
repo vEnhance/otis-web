@@ -76,7 +76,8 @@ def uploads(request, student_id, unit_id):
 
 @login_required
 def index(request):
-	students = roster.utils.get_visible_students(request.user)
+	students = roster.utils.get_visible_students(
+			request.user, current=True)
 	if len(students) == 1: # unique match
 		return HttpResponseRedirect(\
 				reverse("portal", args=(students[0].id,)))
