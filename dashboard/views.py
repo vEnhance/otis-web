@@ -21,7 +21,7 @@ from . import forms
 
 @login_required
 def portal(request, student_id):
-	student = get_object_or_404(roster.models.Student.objects, id = student_id)
+	student = roster.utils.get_student(student_id)
 	roster.utils.check_can_view(request, student)
 	semester = student.semester
 
@@ -40,7 +40,7 @@ def portal(request, student_id):
 
 @login_required
 def uploads(request, student_id, unit_id):
-	student = get_object_or_404(roster.models.Student.objects, id = student_id)
+	student = roster.utils.get_student(student_id)
 	roster.utils.check_can_view(request, student)
 
 	if unit_id != "0":

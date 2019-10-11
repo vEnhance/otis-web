@@ -88,17 +88,12 @@ def advance(request, student_id):
 @login_required
 def invoice(request, student_id=None):
 	if student_id is None:
-		try:
-			student = roster.models.Student.objects.get(
-					semester__active = True, user = request.user)
-		except(roster.models.Student.MultipleObjectsReturned,
-				roster.models.Student.DoesNotExist):
-			raise Http404("No such student")
-		else:
-			return HttpResponseRedirect(reverse("invoice", args=(student.id,)))
+		student = roster.utils.infer_student(request)
+		return HttpResponseRedirect(
+				reverse("invoice", args=(student.id,)))
 
 	# Now assume student_id is not None
-	student = get_student(student_id)
+	student = roster.utils.get_student(student_id)
 	if student.user != request.user and not request.user.is_staff:
 		raise Http404("Can't view invoice")
 

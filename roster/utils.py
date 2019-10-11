@@ -27,5 +27,15 @@ def check_taught_by(request, student):
 	if not student.is_taught_by(request.user):
 		raise Http404("%s cannot edit %s" %(request.user, student))
 
-def get_student(pk):
-	return get_object_or_404(roster.models.Student.objects, pk)
+def get_student(student_id):
+	return get_object_or_404(models.Student.objects, id=student_id)
+
+def infer_student(request):
+	try:
+		student = models.Student.objects.get(
+				semester__active = True, user = request.user)
+	except(models.Student.MultipleObjectsReturned,
+			models.Student.DoesNotExist):
+		raise Http404("No such student")
+	return student
+
