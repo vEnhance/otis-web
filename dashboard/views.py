@@ -10,7 +10,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
 from django.views.generic.edit import UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Count, Q, Subquery, OuterRef
+from django.db.models import Subquery, OuterRef
 
 import core
 import dashboard
@@ -172,4 +172,4 @@ def leaderboard(request):
 			.filter(legit=True)\
 			.order_by('-current_unit_index')
 
-	return render(request, "dashboard/leaderboard.html", context)
+	return render(request, "dashboard/stulist.html", context)
