@@ -24,15 +24,16 @@ import itertools
 import collections
 
 import core
-import roster, roster.utils
+from . import models
 from . import forms
+from . import utils
 
 # Create your views here.
 
 @login_required
 def curriculum(request, student_id):
-	student = roster.utils.get_student(student_id)
-	roster.utils.check_can_view(request, student)
+	student = utils.get_student(student_id)
+	utils.check_can_view(request, student)
 	units = core.models.Unit.objects.all()
 	original = student.curriculum.values_list('id', flat=True)
 
@@ -63,8 +64,8 @@ def curriculum(request, student_id):
 
 @login_required
 def advance(request, student_id):
-	student = roster.utils.get_student(student_id)
-	roster.utils.check_taught_by(request, student)
+	student = utils.get_student(student_id)
+	utils.check_taught_by(request, student)
 	
 	if request.method == 'POST':
 		form = forms.AdvanceForm(request.POST, instance = student)
@@ -88,12 +89,12 @@ def advance(request, student_id):
 @login_required
 def invoice(request, student_id=None):
 	if student_id is None:
-		student = roster.utils.infer_student(request)
+		student = utils.infer_student(request)
 		return HttpResponseRedirect(
 				reverse("invoice", args=(student.id,)))
 
 	# Now assume student_id is not None
-	student = roster.utils.get_student(student_id)
+	student = utils.get_student(student_id)
 	if student.user != request.user and not request.user.is_staff:
 		raise Http404("Can't view invoice")
 
@@ -112,7 +113,7 @@ def invoice(request, student_id=None):
 
 @staff_member_required
 def master_schedule(request):
-	student_names_and_unit_ids = roster.utils\
+	student_names_and_unit_ids = utils\
 			.get_current_students().filter(legit=True)\
 			.values('user__first_name', 'user__last_name', 'curriculum')
 	unit_to_student_names = collections.defaultdict(list)
@@ -133,7 +134,7 @@ def master_schedule(request):
 	return render(request, "roster/master-schedule.html", context)
 
 class UpdateInvoice(LoginRequiredMixin, UpdateView):
-	model = roster.models.Invoice
+	model = models.Invoice
 	fields = ('preps_taught', 'hours_taught', 'total_paid',)
 
 	def get_success_url(self):
