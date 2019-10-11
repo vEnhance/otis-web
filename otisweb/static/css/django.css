@@ -13,7 +13,7 @@ tr:nth-child(even) {
 }
 
 div.helptext, span.helptext {
-	color = #555;
+	color : #555;
 	font-size: 70%;
 }
 
