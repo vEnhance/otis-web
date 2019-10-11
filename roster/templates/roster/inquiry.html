@@ -1,8 +1,12 @@
 {% extends 'layout.html' %}
 
 {% block layout-content %}
+<p>A <b>unit inquiry</b> lets you make requests
+for changes to your set of units.
+Here you can open new inquiries
+and see the status of previous ones.</p>
+
 <h2>New inquiry</h2>
-<p>Use this form to submit unit inquiries.</p>
 {% include "generic-form.html" with submit_name="Inquire" %}
 
 <h2>Current inquiries</h2>
@@ -53,6 +57,29 @@
 <h2>Current units</h2>
 <p>For your reference, here is the existing curriculum.</p>
 {% include 'dashboard/list_curriculum.html' %}
+
+<h2>Instructions</h2>
+<p>An explanation of the three action types:
+<ul>
+	<li><b>Drop</b>: this removes a unit entirely from your list.
+		If the unit is marked as current (&star;),
+		then the choice of current unit will reset as well.</li>
+	<li><b>Mark current</b>:
+		this marks a unit as current (&star;)
+		so that you can access its handout.
+		If you specify a unit that you don't already have,
+		then that unit will also be added to your list.</li>
+	<li><b>Add unit</b>:
+		This adds a unit to your list.
+		Because of the silly way in which the curriculum management
+		is set up, you might not immediately get access to the unit,
+		or it might block off later units.
+		I hope to fix this in future years.
+		For now, you can see the global order of units in
+		<a href="{% url "currshow" student.id %}">class selection</a>
+		so you can tell where the unit will get inserted.</li>
+</ul>
+</p>
 
 {% include 'dashboard/back_link.html' %}
 {% endblock %}
