@@ -58,7 +58,7 @@ class Student(models.Model):
 				("G", "Grad"),
 				("N", "N.A."),
 				),
-			help_text = "")
+			help_text = "The track that the student is enrolled in for this semester.")
 	legit = models.BooleanField(default = True,
 			help_text = "Whether this student is still active. "
 			"Set to false for dummy accounts and the like. "
@@ -79,13 +79,16 @@ class Student(models.Model):
 					+ " + " + self.assistant.shortname
 
 	def is_taught_by(self, user):
-		"""Checks whether the specified user is not the same as the student,
-		but has permission to view and edit the student's files and so on.
+		"""Checks whether the specified user
+		is not the same as the student,
+		but has permission to view and edit the student's files etc.
 		(This means the user is either an assistant for that student
 		or has staff privileges.)"""
-		return user.is_staff or (self.assistant is not None and self.assistant.user == user)
+		return user.is_staff or (self.assistant is not None \
+				and self.assistant.user == user)
 	def can_view_by(self, user):
-		"""Checks whether the specified user is either same as the student,
+		"""Checks whether the specified user
+		is either same as the student,
 		or is an instructor for that student."""
 		return self.user == user or self.is_taught_by(user)
 	class Meta:
@@ -185,11 +188,9 @@ class Invoice(models.Model):
 	@property
 	def total_cost(self):
 		return self.prep_rate*self.preps_taught + self.hour_rate*self.hours_taught
-
 	@property
 	def total_owed(self):
 		return self.total_cost - self.total_paid
-
 	@property
 	def cleared(self):
 		"""Whether or not the student owes anything"""
