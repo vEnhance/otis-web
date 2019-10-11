@@ -216,7 +216,7 @@ class UnitInquiry(models.Model):
 				("JUMP", "Mark current (and add)"),
 				("ADD", "Add unit"),
 				),
-			help_text = "")
+			help_text = "Describe the action you want to make.")
 	status = models.CharField(max_length = 5,
 			choices = (
 				("ACC", "Approved"),
@@ -225,7 +225,7 @@ class UnitInquiry(models.Model):
 				("HOLD", "On hold"),
 				),
 			default = "NEW",
-			help_text = "")
+			help_text = "The current status of the inquiry.")
 	explanation = models.TextField(max_length = 300, blank=True,
 			help_text="Short explanation for this request (if needed).")
 
