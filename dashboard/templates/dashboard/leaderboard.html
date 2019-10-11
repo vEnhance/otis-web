@@ -1,0 +1,29 @@
+{% extends 'layout.html' %}
+{% load static %}
+{% load staticfiles %}
+
+{% block layout-content %}
+<p>
+In this table you can see how everyone is doing
+as a function of the number of units marked completed.
+This page is available only to staff.
+</p>
+
+<table>
+<tr>
+	<th>Rank</th>
+	<th>Name</th>
+	<th>Score</th>
+</tr>
+
+{% for student in students %}
+<tr>
+	<td>{{ forloop.counter }}</td>
+	<td><a href="{% url "portal" student.id %}">{{ student.name }}</a></td>
+	<td>{{ student.get_track }}</td>
+	<td><b>{{ student.current_unit_index }}</b> / {{ student.curriculum_length }}</td>
+</tr>
+{% endfor %}
+</table>
+
+{% endblock %}

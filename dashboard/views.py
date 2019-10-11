@@ -159,3 +159,15 @@ def idlewarn(request):
 			.order_by('latest_pset')
 
 	return render(request, "dashboard/idlewarn.html", context)
+
+@staff_member_required
+def leaderboard(request):
+	context = {}
+	context['title'] = 'Leader-Board'
+
+	context['students'] = roster.utils\
+			.get_visible_students(request.user)\
+			.filter(legit=True)\
+			.order_by('-current_unit_index')
+
+	return render(request, "dashboard/leaderboard.html", context)
