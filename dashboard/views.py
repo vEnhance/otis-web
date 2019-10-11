@@ -128,7 +128,7 @@ class DeleteFile(LoginRequiredMixin, DeleteView):
 @staff_member_required
 def quasigrader(request, num_limit = 10):
 	context = {}
-	context['title'] = 'Quasi-Grader'
+	context['title'] = 'Quasi-grader'
 	num_limit = int(num_limit)
 
 	context['items'] = []
@@ -146,7 +146,7 @@ def quasigrader(request, num_limit = 10):
 @staff_member_required
 def idlewarn(request):
 	context = {}
-	context['title'] = 'Idle-Warn'
+	context['title'] = 'Idle-warn'
 
 	newest = dashboard.models.UploadedFile.objects\
 			.filter(category='psets')\
@@ -165,7 +165,7 @@ def idlewarn(request):
 @staff_member_required
 def leaderboard(request):
 	context = {}
-	context['title'] = 'Leader-Board'
+	context['title'] = 'Leader-board'
 
 	context['students'] = roster.utils\
 			.get_visible_students(request.user)\
