@@ -16,7 +16,7 @@ def get_visible_students(user, current = True):
 	if current:
 		queryset = get_current_students()
 	else:
-		queryset = models.Student.objects
+		queryset = models.Student.objects.all()
 	return get_visible_from_queryset(user, queryset)
 
 def check_can_view(request, student):
