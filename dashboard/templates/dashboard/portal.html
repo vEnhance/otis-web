@@ -48,8 +48,9 @@ While waiting, you can see two units ahead of the current unit
 <td valign="top" width="50%">
 	<h3>Site controls</h3>
 	<ul>
-		<li><a href="{% url "uploads" student.id 0 %}">Miscellaneous uploads</a></li>
 		<li><a href="{% url "currshow" student.id %}">Class selection</a></li>
+		<li><a href="{% url "inquiry" student.id %}">Unit inquiries</a></li>
+		<li><a href="{% url "uploads" student.id 0 %}">Miscellaneous uploads</a></li>
 		{% if semester.show_invoices %}
 		<li><a href="{% url "invoice" student.id %}">Invoice</a></li>
 		{% endif %}
