@@ -2,8 +2,9 @@
 
 {% block title %}Approve Inquiries{% endblock %}
 {% block layout-content %}
-<p>This is a list of all open inquiries.
-You can <a href="{% url "approve-inquiry-all" %}">approve all</a>
+<p>This is a list of the most recent inquiries.
+You can <a href="{% url "approve-inquiry-all" %}">
+	approve all open inquiries</a>
 if you want.</p>
 
 <table>
@@ -12,7 +13,7 @@ if you want.</p>
 	<th>#</th>
 	<th>Student</th>
 	<th colspan="2">Inquiry</th>
-	<th>Controls</th>
+	<th colspan="2">Controls</th>
 </tr>
 {% for inquiry in unitinquiry_list %}
 <tr>
@@ -20,19 +21,31 @@ if you want.</p>
 <td>{{ inquiry.num_inq }}</td>
 <td><a href="{% url "inquiry" inquiry.student.id %}">
 		{{ inquiry.student.name }}</a></td>
-<td>{{ inquiry.action_type }}</td>
-<td>{{ inquiry.unit }}</td>
+<td style="font-family: monospace;">{{ inquiry.action_type }}</td>
+<td style="font-family: monospace;">{{ inquiry.unit }}</td>
+<td style="font-family: monospace;">
+	{% if inquiry.status == "NEW" %}
+	NEW
+	{% elif inquiry.status == "ACC" %}
+	<span style="color:green;">OK</span>
+	{% elif inquiry.status == "REJ" %}
+	<span style="color:red;">REJ</span>
+	{% elif inquiry.status == "HOLD" %}
+	<span style="color:orange;">HOLD</span>
+	{% endif %}
+</td>
 <td>
+	<a href="{% url "edit-inquiry" inquiry.id %}">&#x270e;</a>
+	{% if inquiry.status == "NEW" %}
 	<a href="{% url "approve-inquiry" inquiry.id %}">&check;</a>
-	or
-	<a href="{% url "edit-inquiry" inquiry.id %}">edit</a>
+	{% endif %}
 </td>
 </tr>
 {% if inquiry.explanation %}
 <tr>
 <td></td>
 <td></td>
-<td colspan="3"><i>{{ inquiry.explanation }}</i></td>
+<td colspan="5"><i>{{ inquiry.explanation }}</i></td>
 </tr>
 {% endif %}
 {% endfor %}

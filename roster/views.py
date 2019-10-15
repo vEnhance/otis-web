@@ -178,18 +178,17 @@ def inquiry(request, student_id):
 
 	return render(request, 'roster/inquiry.html', context)
 
-class ListOpenInquiries(PermissionRequiredMixin, ListView):
+class ListInquiries(PermissionRequiredMixin, ListView):
 	permission_required = 'is_staff'
 	model = models.UnitInquiry
 	def get_queryset(self):
+		queryset = models.UnitInquiry.objects.all()[:30]
 		# some amazing code vv seriously wtf
 		count_others = models.UnitInquiry.objects\
 				.filter(student=OuterRef('student'))\
 				.order_by().values('student')\
 				.annotate(c=Count('*')).values('c')
-		return models.UnitInquiry.objects\
-				.filter(status='NEW')\
-				.annotate(num_inq = Subquery(count_others,
+		return queryset.annotate(num_inq = Subquery(count_others,
 					output_field=IntegerField()))
 
 class EditInquiry(PermissionRequiredMixin, UpdateView):
