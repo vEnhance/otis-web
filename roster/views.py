@@ -16,7 +16,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.views.generic.edit import UpdateView
 from django.views.generic import ListView
 from django.contrib.auth.mixins import PermissionRequiredMixin
@@ -98,7 +98,7 @@ def invoice(request, student_id=None):
 	# Now assume student_id is not None
 	student = utils.get_student(student_id)
 	if student.user != request.user and not request.user.is_staff:
-		raise Http404("Can't view invoice")
+		raise PermissionDenied("Can't view invoice")
 
 	if not student.semester.show_invoices:
 		invoice = None
@@ -147,6 +147,8 @@ class UpdateInvoice(PermissionRequiredMixin, UpdateView):
 def inquiry(request, student_id):
 	student = utils.get_student(student_id)
 	utils.check_can_view(request, student)
+	if not student.semester.active:
+		raise PermissionDenied("Not an active semester")
 	context = {}
 	context['title'] = 'Unit Inquiry'
 	current_inquiries = models.UnitInquiry.objects.filter(student=student)
