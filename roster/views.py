@@ -59,7 +59,7 @@ def curriculum(request, student_id):
 			messages.info(request, "You can't edit this curriculum " \
 					"since you are not an instructor.")
 
-	context = {'title' : "Curriculum for " + student.name,
+	context = {'title' : "Units for " + student.name,
 			'student' : student, 'form' : form, 'enabled' : enabled}
 	# return HttpResponse("hi")
 	return render(request, "roster/currshow.html", context)

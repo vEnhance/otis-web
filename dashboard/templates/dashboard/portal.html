@@ -24,7 +24,7 @@
 {% endif %}
 
 
-<h2>Curriculum Materials</h2>
+<h2>Your units</h2>
 {% include "dashboard/list_curriculum.html" %}
 <p>Completed units are marked with &check;.
 This occurs automatically once a problem set is submitted.</p>
@@ -106,7 +106,7 @@ While waiting, you can see two units ahead of the current unit
 <hr />
 
 {% if semester.active %}
-<h2>Mock Olympiads (Tests)</h2>
+<h2>Mock olympiads (tests)</h2>
 {% include "dashboard/list_exam.html" with exams=tests %}
 
 <p><a href="https://www.dropbox.com/s/vx2e7hm4n5dfj8x/long.pdf?dl=0">
