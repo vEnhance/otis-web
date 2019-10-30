@@ -30,6 +30,6 @@ urlpatterns = [
 	url(r'^$', RedirectView.as_view(pattern_name='index')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-admin.site.site_header = 'OTIS-WEB Administrative Control Panel'
+admin.site.site_header = 'OTIS-WEB Admin Control Panel'
 admin.site.index_title = 'Dashboard'
 admin.site.site_title  = 'OTIS-WEB Admin'
