@@ -30,9 +30,6 @@ if not PRODUCTION:
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'n@hi1t%ubp)c9)77r^-1(#u8zt@9b-nife%f1orc3(!wr=#zip'
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True # not bool(os.getenv('IS_PRODUCTION'))
 # Yeah, screw good practice, I've been fighting for four hours because GAE standard sux
@@ -165,9 +162,11 @@ if PRODUCTION:
 	MEDIA_URL = os.getenv("MEDIA_URL")
 	import import_export.tmp_storages
 	IMPORT_EXPORT_TMP_STORAGE_CLASS = import_export.tmp_storages.CacheStorage
+	SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 else:
 	STATIC_URL = '/static/'
 	MEDIA_URL = '/media/'
+	SECRET_KEY = 'evan_chen_is_really_cool'
 
 FILE_UPLOAD_HANDLERS = ('django.core.files.uploadhandler.MemoryFileUploadHandler',)
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760 # 10MB
