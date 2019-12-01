@@ -55,7 +55,7 @@ class AdvanceForm(forms.ModelForm):
 		super(AdvanceForm, self).__init__(*args, **kwargs)
 		student = kwargs['instance']
 		self.fields['extra_units'] = forms.ModelMultipleChoiceField(
-				widget=forms.CheckboxSelectMultiple,
+				widget=forms.SelectMultiple(attrs={'class' : 'chosen-select'}),
 				queryset = student.curriculum.all(),
 				help_text = "Use this for extra out-of-order unlocks",
 				required = False)

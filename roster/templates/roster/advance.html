@@ -1,4 +1,25 @@
 {% extends 'layout.html' %}
+{% load static %}
+
+{% block css %}
+<link href="{% static 'chosen/chosen.css' %}" rel="stylesheet" />
+<style type="text/css">
+ul.chosen-choices {
+	border: 2px solid #aaa;
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'chosen/chosen.jquery.js' %}" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+	$("select.chosen-select").chosen({
+		placeholder_text : "...",
+	});
+});
+</script>
+{% endblock %}
 
 {% block layout-content %}
 <p>Use this form to change the pointer for this person.</p>
