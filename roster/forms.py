@@ -54,16 +54,15 @@ class AdvanceForm(forms.ModelForm):
 	def __init__(self, *args, **kwargs):
 		super(AdvanceForm, self).__init__(*args, **kwargs)
 		student = kwargs['instance']
-		self.fields['pointer_current_unit'] = forms.ModelChoiceField(
+		self.fields['extra_units'] = forms.ModelMultipleChoiceField(
+				widget=forms.CheckboxSelectMultiple,
 				queryset = student.curriculum.all(),
-				empty_label = "(none)",
-				help_text = "Use this if you want to \"jump\" the counter "
-				"to a certain point.",
+				help_text = "Use this for extra out-of-order unlocks",
 				required = False)
 
 	class Meta:
 		model = roster.models.Student
-		fields = ('num_units_done', 'pointer_current_unit', 'vision')
+		fields = ('num_units_done', 'vision', 'extra_units',)
 
 
 class InquiryForm(forms.ModelForm):

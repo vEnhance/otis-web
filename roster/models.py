@@ -32,23 +32,25 @@ class Student(models.Model):
 	semester = models.ForeignKey(core.models.Semester,
 			on_delete = models.CASCADE,
 			help_text = "The semester for this student")
-	curriculum = models.ManyToManyField(core.models.Unit, blank = True,
-			help_text = "The choice of units that this student will work on")
 	assistant = models.ForeignKey(Assistant, blank = True, null = True,
 			on_delete = models.SET_NULL,
 			help_text = "The assistant for this student, if any")
+
+	curriculum = models.ManyToManyField(core.models.Unit, blank = True,
+			related_name = 'curriculum',
+			help_text = "The choice of units that this student will work on")
+	extra_units = models.ManyToManyField(core.models.Unit, blank = True,
+			related_name = 'extra_units',
+			help_text = "A list of units that the student "
+			"can access out-of-order relative to their curriculum.")
 	num_units_done = models.SmallIntegerField(default = 0,
 			help_text = "If this is equal to k, "
 			"then the student has completed the first k units of his/her "
 			"curriculum and by default is working on the (k+1)st unit.")
-	pointer_current_unit = models.ForeignKey(core.models.Unit,
-			blank=True, null=True, related_name='pointer_unit',
-			on_delete = models.SET_NULL,
-			help_text = "If set, the counter will skip ahead "
-			"so that the student is working on this unit instead.")
 	vision = models.SmallIntegerField(default = 3,
 			help_text = "How many units ahead of the most "
 			"recently completed unit the student can see.")
+
 	track = models.CharField(max_length = 5,
 			choices = (
 				("A", "Weekly"),
@@ -120,7 +122,7 @@ class Student(models.Model):
 				.order_by('-has_pset', 'position')
 
 	def check_unit_unlocked(self, unit):
-		if self.pointer_current_unit == unit:
+		if self.extra_units.exists(pk=unit):
 			return True
 		curriculum = list(self.generate_curriculum_queryset())
 		if not unit in curriculum:
@@ -136,21 +138,20 @@ class Student(models.Model):
 
 	def generate_curriculum_rows(self, omniscient):
 		current_index = self.num_units_done
-		jumped_unit = self.pointer_current_unit or None
 		curriculum = self.generate_curriculum_queryset()
+		extra_units_ids = self.extra_units.values_list('id', flat=True)
 
 		rows = []
 		for n, unit in enumerate(curriculum):
 			row = {}
 			row['unit'] = unit
 			row['number'] = n+1
-			row['is_completed'] = unit.has_pset \
-					or (n < current_index and unit != jumped_unit)
+			row['is_completed'] = unit.has_pset or n < current_index
 			row['num_uploads'] = unit.num_uploads or 0
-			row['is_current'] = (unit==jumped_unit) \
-					or (jumped_unit is None and n == current_index)
+			row['is_current'] = (n == current_index)
 			row['is_unlocked'] = row['is_completed'] \
 					or row['is_current'] \
+					or (unit.id in extra_units_ids) \
 					or n <= current_index + (self.vision-1)
 
 			if row['is_completed']:
@@ -218,8 +219,7 @@ class UnitInquiry(models.Model):
 	action_type = models.CharField(max_length = 10,
 			choices = (
 				("DROP", "Drop"),
-				("JUMP", "Unlock"),
-				("ADD", "Add later"),
+				("ADD", "Add"),
 				),
 			help_text = "Describe the action you want to make.")
 	status = models.CharField(max_length = 5,
@@ -238,13 +238,10 @@ class UnitInquiry(models.Model):
 		unit = self.unit
 		if self.action_type == "DROP":
 			self.student.curriculum.remove(unit)
-			if self.student.pointer_current_unit == unit:
-				self.student.pointer_current_unit = None
+			self.student.extra_units.remove(unit)
 		elif self.action_type == "ADD":
 			self.student.curriculum.add(unit)
-		elif self.action_type == "JUMP":
-			self.student.curriculum.add(unit)
-			self.student.pointer_current_unit = unit
+			self.student.extra_units.add(unit)
 		self.student.save()
 
 		self.status = "ACC"
