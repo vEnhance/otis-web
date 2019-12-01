@@ -9,7 +9,7 @@ import roster
 
 class StudentInline(admin.TabularInline):
 	model = roster.models.Student
-	fields = ('user', 'name', 'semester', 'track', 'legit', 'current_unit_index',)
+	fields = ('user', 'name', 'semester', 'track', 'legit', 'num_units_done',)
 	readonly_fields = ('user', 'name', 'semester',)
 	extra = 0
 
@@ -69,7 +69,7 @@ class StudentIEResource(RosterResource):
 
 @admin.register(roster.models.Student)
 class StudentAdmin(ImportExportModelAdmin):
-	list_display = ('name', 'user', 'id', 'semester', 'assistant', 'legit', 'track', 'current_unit_index', 'curriculum_length',)
+	list_display = ('name', 'user', 'id', 'semester', 'assistant', 'legit', 'track', 'num_units_done', 'curriculum_length',)
 	list_filter = ('semester__active', 'legit', 'semester', 'track',)
 	resource_class = StudentIEResource
 	inlines = (InvoiceInline,)

@@ -12,11 +12,11 @@
 		The assistant instructor is <b>{{ student.assistant.name }}</b>.
 	{% endif %}
 	</p>
-	<p>So far they completed <b>{{ student.current_unit_index }} of
+	<p>So far they completed <b>{{ student.num_units_done }} of
 		{{ student.curriculum_length }} units</b>.</p>
 {% else %}
 	<p>Hi {{ student.name }}, welcome back to <b>{{ semester.name }}</b>.
-	You have completed {{ student.current_unit_index }} of
+	You have completed {{ student.num_units_done }} of
 	{{ student.curriculum_length }} units.</p>
 	{% if student.assistant %}
 		<p>Your assistant instructor is <b>{{ student.assistant.name }}</b>.</p>

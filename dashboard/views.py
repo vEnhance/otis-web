@@ -173,6 +173,6 @@ def leaderboard(request):
 	context['students'] = roster.utils\
 			.get_visible_students(request.user)\
 			.filter(legit=True)\
-			.order_by('-current_unit_index')
+			.order_by('-num_units_done')
 
 	return render(request, "dashboard/stulist.html", context)

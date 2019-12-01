@@ -27,7 +27,7 @@
 
 	<td>{{ student.get_track }}</td>
 	<td>{% if student.legit %}
-		{{ student.current_unit_index }}
+		{{ student.num_units_done }}
 		/ {{ student.curriculum_length }}
 		{% endif %}</td>
 

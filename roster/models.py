@@ -37,7 +37,7 @@ class Student(models.Model):
 	assistant = models.ForeignKey(Assistant, blank = True, null = True,
 			on_delete = models.SET_NULL,
 			help_text = "The assistant for this student, if any")
-	current_unit_index = models.SmallIntegerField(default = 0,
+	num_units_done = models.SmallIntegerField(default = 0,
 			help_text = "If this is equal to k, "
 			"then the student has completed the first k units of his/her "
 			"curriculum and by default is working on the (k+1)st unit.")
@@ -129,13 +129,13 @@ class Student(models.Model):
 		unit = curriculum[i] # grab the annotations
 		if unit.has_pset:
 			return True
-		elif i <= self.current_unit_index + (self.vision-1):
+		elif i <= self.num_units_done + (self.vision-1):
 			return True
 		else:
 			return False
 
 	def generate_curriculum_rows(self, omniscient):
-		current_index = self.current_unit_index
+		current_index = self.num_units_done
 		jumped_unit = self.pointer_current_unit or None
 		curriculum = self.generate_curriculum_queryset()
 

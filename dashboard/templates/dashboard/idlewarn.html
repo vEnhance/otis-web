@@ -30,7 +30,7 @@ Be gentle! Don't be the bad guy.</p>
 		<td colspan="2"><i>None</i></td>
 	{% endif%}
 	<td>{{ student.get_track }}</td>
-	<td>{{ student.current_unit_index }} / {{ student.curriculum_length }}</td>
+	<td>{{ student.num_units_done }} / {{ student.curriculum_length }}</td>
 </tr>
 {% endfor %}
 </table>
