@@ -10,9 +10,6 @@ but if I don't get to yours for a few days,
 please send me a reminder.</p>
 
 <h2>New inquiry</h2>
-<p>If this is your <i>first time</i> here,
-read the instructions at the bottom of the page
-before submitting an inquiry!</p>
 {% include "generic-form.html" with submit_name="Inquire" %}
 
 <h2>Current inquiries</h2>
@@ -71,30 +68,15 @@ before submitting an inquiry!</p>
 {% include 'dashboard/list_curriculum.html' %}
 
 <h2>Instructions</h2>
-<p>An explanation of the three action types:
+<p>There are a currently just two options.</p>
 <ul>
-	<li><b>Drop</b>: this removes a unit entirely from your list.
-		If the unit is marked as current (&star;),
-		then the choice of current unit will reset as well.</li>
-	<li><b>Unlock</b> (recommended):
-		this marks a unit as current (&star;)
-		so that you can access its handout.
-		Importantly, <b>the unit is added
-		even if you don't have it already</b>.
-		But note that this will <i>de-activate</i> the current unit
-		if it was skipped to out of order;
-		so you want to use this option one at a time,
-		rather than unlocking multiple units at once.</li>
-	<li><b>Add later</b>:
-		This adds a unit to your list but doesn't mark it as current.
-		Because of the silly way in which the curriculum management
-		is set up, you might not immediately get access to the unit.
-		I hope to fix this in future years.
-		For now, you can see the global order of units in
-		<a href="{% url "currshow" student.id %}">class selection</a>
-		so you can tell where the unit will get inserted.</li>
+	<li><b>Drop</b>:
+		This removes a unit entirely from your list.</li>
+	<li><b>Add</b>:
+		The unit is added if it wasn't
+		there already, and moreover is automatically unlocked.
+		</li>
 </ul>
-</p>
 <p>Requests to DROP a unit are approved automatically.
 Also, your first few inquiries will probably be approved
 automatically as well (be careful what you wish for!).
