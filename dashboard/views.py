@@ -48,7 +48,9 @@ def uploads(request, student_id, unit_id):
 	else:
 		unit = None
 	uploads = dashboard.models.UploadedFile.objects.filter(benefactor=student, unit=unit)
-	if unit is not None and not student.check_unit_unlocked(unit) and not uploads.exists():
+	if unit is not None \
+			and not student.check_unit_unlocked(unit) \
+			and not uploads.exists():
 		raise Http404("This unit is not unlocked yet")
 
 	form = None

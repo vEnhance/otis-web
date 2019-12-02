@@ -122,7 +122,7 @@ class Student(models.Model):
 				.order_by('-has_pset', 'position')
 
 	def check_unit_unlocked(self, unit):
-		if self.extra_units.exists(pk=unit):
+		if self.extra_units.filter(pk=unit.id).exists():
 			return True
 		curriculum = list(self.generate_curriculum_queryset())
 		if not unit in curriculum:
