@@ -39,7 +39,7 @@ def curriculum(request, student_id):
 	units = core.models.Unit.objects.all()
 	original = student.curriculum.values_list('id', flat=True)
 
-	enabled = student.is_taught_by(request.user)
+	enabled = student.is_taught_by(request.user) or student.newborn
 	if request.method == 'POST' and enabled:
 		form = forms.CurriculumForm(request.POST, units = units, enabled = True)
 		if form.is_valid():
@@ -149,6 +149,8 @@ def inquiry(request, student_id):
 	utils.check_can_view(request, student)
 	if not student.semester.active:
 		raise PermissionDenied("Not an active semester")
+	if student.newborn:
+		raise PermissionDenied("This form isn't enabled yet.")
 	context = {}
 	context['title'] = 'Unit Inquiry'
 	current_inquiries = models.UnitInquiry.objects.filter(student=student)

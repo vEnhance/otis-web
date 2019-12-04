@@ -124,6 +124,8 @@ class Student(models.Model):
 				.order_by('-has_pset', 'position')
 
 	def check_unit_unlocked(self, unit):
+		if self.newborn:
+			return False
 		if self.extra_units.filter(pk=unit.id).exists():
 			return True
 		curriculum = list(self.generate_curriculum_queryset())
@@ -150,11 +152,15 @@ class Student(models.Model):
 			row['number'] = n+1
 			row['is_completed'] = unit.has_pset or n < current_index
 			row['num_uploads'] = unit.num_uploads or 0
-			row['is_current'] = (n == current_index)
-			row['is_unlocked'] = row['is_completed'] \
-					or row['is_current'] \
-					or (unit.id in extra_units_ids) \
-					or n <= current_index + (self.vision-1)
+			if self.newborn:
+				row['is_current'] = False
+				row['is_unlocked'] = False
+			else:
+				row['is_current'] = (n == current_index)
+				row['is_unlocked'] = row['is_completed'] \
+						or row['is_current'] \
+						or (unit.id in extra_units_ids) \
+						or n <= current_index + (self.vision-1)
 
 			if row['is_completed']:
 				row['sols_label'] = "Solutions"
