@@ -6,7 +6,7 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.urls import reverse, reverse_lazy
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.contrib import messages
 from django.views.generic.edit import UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -51,7 +51,7 @@ def uploads(request, student_id, unit_id):
 	if unit is not None \
 			and not student.check_unit_unlocked(unit) \
 			and not uploads.exists():
-		raise Http404("This unit is not unlocked yet")
+		raise PermissionDenied("This unit is not unlocked yet")
 
 	form = None
 	if request.method == "POST":
@@ -113,7 +113,7 @@ class UpdateFile(LoginRequiredMixin, UpdateView):
 		obj = super(UpdateFile, self).get_object(*args, **kwargs)
 		if not obj.owner == self.request.user \
 				and not self.request.user.is_staff:
-			raise Http404("Not authorized to update this file")
+			raise PermissionDenied("Not authorized to update this file")
 		return obj
 
 class DeleteFile(LoginRequiredMixin, DeleteView):
@@ -124,7 +124,7 @@ class DeleteFile(LoginRequiredMixin, DeleteView):
 		obj = super(DeleteFile, self).get_object(*args, **kwargs)
 		if not obj.owner == self.request.user \
 				and not self.request.user.is_staff:
-			raise Http404("Not authorized to delete this file")
+			raise PermissionDenied("Not authorized to delete this file")
 		return obj
 
 @staff_member_required
