@@ -69,9 +69,15 @@ def finalize(request, student_id):
 	# Removes a newborn status, thus activating everything
 	student = utils.get_student(student_id)
 	utils.check_can_view(request, student)
-	student.newborn = False
-	student.save()
-	messages.success("Your curriculum has been finalized.")
+	if student.curriculum.count() > 0:
+		student.newborn = False
+		student.save()
+		messages.success(request, "Your curriculum has been finalized! "
+				"You can start working now; "
+				"the first few units have been unlocked.")
+	else:
+		messages.error(request, "You didn't select any units. "
+				"You should select some units before using this link.")
 	return HttpResponseRedirect(reverse("portal", args=(student_id,)))
 
 @login_required
