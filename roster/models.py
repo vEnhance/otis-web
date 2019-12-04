@@ -65,6 +65,8 @@ class Student(models.Model):
 			help_text = "Whether this student is still active. "
 			"Set to false for dummy accounts and the like. "
 			"This will hide them from the master schedule, for example.")
+	newborn = models.BooleanField(default = True,
+			help_text = "Whether the student is newly created.")
 	def __str__(self):
 		return "%s (%s)" %(self.name, self.semester)
 
