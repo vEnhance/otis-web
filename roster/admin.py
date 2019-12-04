@@ -69,8 +69,8 @@ class StudentIEResource(RosterResource):
 
 @admin.register(roster.models.Student)
 class StudentAdmin(ImportExportModelAdmin):
-	list_display = ('name', 'user', 'id', 'semester', 'assistant', 'legit', 'track', 'num_units_done', 'curriculum_length',)
-	list_filter = ('semester__active', 'legit', 'semester', 'track',)
+	list_display = ('name', 'user', 'id', 'semester', 'legit', 'track', 'num_units_done', 'curriculum_length',)
+	list_filter = ('semester__active', 'legit', 'semester', 'track', 'newborn',)
 	resource_class = StudentIEResource
 	inlines = (InvoiceInline,)
 	search_fields = ('user__first_name', 'user__last_name', 'user__username',)
