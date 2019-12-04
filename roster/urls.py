@@ -4,6 +4,7 @@ from . import views
 
 urlpatterns = [
 	url(r'curriculum/([0-9]+)/$', views.curriculum, name='currshow'),
+	url(r'finalize/([0-9]+)/$', views.finalize, name='finalize'),
 	url(r'advance/([0-9]+)/$', views.advance, name='advance'),
 	url(r'invoice/$', views.invoice),
 	url(r'invoice/([0-9]+)/$', views.invoice, name='invoice'),

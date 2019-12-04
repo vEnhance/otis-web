@@ -65,6 +65,16 @@ def curriculum(request, student_id):
 	return render(request, "roster/currshow.html", context)
 
 @login_required
+def finalize(request, student_id):
+	# Removes a newborn status, thus activating everything
+	student = utils.get_student(student_id)
+	utils.check_can_view(request, student)
+	student.newborn = False
+	student.save()
+	messages.success("Your curriculum has been finalized.")
+	return HttpResponseRedirect(reverse("portal", args=(student_id,)))
+
+@login_required
 def advance(request, student_id):
 	student = utils.get_student(student_id)
 	utils.check_taught_by(request, student)
