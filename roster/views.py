@@ -159,15 +159,20 @@ def inquiry(request, student_id):
 		if form.is_valid():
 			inquiry = form.save(commit=False)
 			inquiry.student = student
-			inquiry.save()
-			# auto-acceptance criteria
-			auto_accept_criteria = (inquiry.action_type == "DROP" or \
-				current_inquiries.exclude(action_type="DROP").count() <= 3)
-			if auto_accept_criteria is True:
-				inquiry.run_accept()
-				messages.success(request, "Inquiry automatically approved")
+			# check if exists already
+			if models.UnitInquiry.objects.filter(unit=inquiry.unit,
+					student=student, status="NEW").exists():
+				messages.warning(request, "Inquiry already saved...")
 			else:
-				messages.success(request, "Inquiry sent")
+				inquiry.save()
+				# auto-acceptance criteria
+				auto_accept_criteria = (inquiry.action_type == "DROP" or \
+					current_inquiries.exclude(action_type="DROP").count() <= 3)
+				if auto_accept_criteria is True:
+					inquiry.run_accept()
+					messages.success(request, "Inquiry automatically approved")
+				else:
+					messages.success(request, "Inquiry sent")
 	else:
 		form = forms.InquiryForm()
 	context['form'] = form
