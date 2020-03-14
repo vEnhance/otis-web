@@ -29,7 +29,7 @@ class Semester(models.Model):
 
 	gradescope_key = models.CharField(max_length=10, blank=True,
 			help_text = "The entry code for GradeScope this semester.")
-	zoom_room_id = models.CharField(max_length=32, blank=True,
+	zoom_room_url = models.CharField(max_length=32, blank=True,
 			help_text = "The entry point for the Zoom meeting room.")
 	facebook_url = models.CharField(max_length=128, blank=True,
 			help_text = "The link to the Facebook group for this year.")
