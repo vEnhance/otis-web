@@ -70,28 +70,40 @@ While waiting, you can see two units ahead of the current unit
 <table class="table">
 <tr>
 <td valign="top" width="50%">
-	<h3>Service center</h3>
+	<h3>Academic</h3>
 	<ul>
 	<li><a href="{% url "inquiry" student.id %}">Unit inquiries</a></li>
+	{# <li><a href="{% url "uploads" student.id 0 %}">Miscellaneous uploads</a></li> #}
+	<li><a href="{% url "currshow" student.id %}">Class selection</a></li>
+	{% if omniscient %}
+	<li> <a href="{% url "advance" student.id %}">Advance student</a> (instructor)</li>
+	{% endif %}
+	</ul>
+</td>
+<td valign="top" width="50%">
+	<h3>Logistics</h3>
+	<ul>
+	{% if semester.active and student.meets_evan %}
+	<li>
+	<a href="{{ semester.calendar_url_meets_evan }}" target="_blank">
+		OTIS calendar (meetings)</a>
+	</li>
+	{% endif %}
+	{% if semester.active %}
+	<li>
+	<a href="{{ semester.calendar_url_no_meets_evan }}" target="_blank">
+		OTIS calendar (no meetings)</a>
+	</li>
+	{% endif %}
 	{% if semester.show_invoices %}
 	<li><a href="{% url "invoice" student.id %}">Invoice</a></li>
 	{% endif %}
 	</ul>
 </td>
-<td valign="top" width="50%">
-	<h3>Site controls</h3>
-	<ul>
-		<li><a href="{% url "currshow" student.id %}">Class selection</a></li>
-		<li><a href="{% url "uploads" student.id 0 %}">Miscellaneous uploads</a></li>
-		{% if omniscient %}
-		<li> <a href="{% url "advance" student.id %}">Advance student</a> (instructor)</li>
-		{% endif %}
-	</ul>
-</td>
 </tr>
 <tr>
 <td valign="top">
-	<h3>Downloads</h3>
+	<h3>Downloads and files</h3>
 	<ul>
 		<li> <a href="https://www.dropbox.com/s/vx2e7hm4n5dfj8x/long.pdf?dl=0">
 			Olympiad answer sheets</a></li>
@@ -110,7 +122,7 @@ While waiting, you can see two units ahead of the current unit
 
 		<li><a href="https://www.gradescope.com">GradeScope</a>
 		{% if semester.gradescope_key %}
-		<br><i>Entry key</i>: <b>{{ semester.gradescope_key }}</b>
+		(<i>entry key</i> <b>{{ semester.gradescope_key }}</b>)
 		{% endif %}
 		</li>
 
@@ -118,18 +130,6 @@ While waiting, you can see two units ahead of the current unit
 		<li><a href="{{ semester.facebook_url }}">Facebook group</a></li>
 		{% endif %}
 
-		{% if semester.active and student.meets_evan %}
-		<li>
-		<a href="{{ semester.calendar_url_meets_evan }}" target="_blank">
-			OTIS calendar (meetings)</a>
-		</li>
-		{% endif %}
-		{% if semester.active %}
-		<li>
-		<a href="{{ semester.calendar_url_no_meets_evan }}" target="_blank">
-			OTIS calendar (no meetings)</a>
-		</li>
-		{% endif %}
 	</ul>
 </td>
 </tr>
@@ -152,8 +152,8 @@ See the syllabus for full instructions.</p>
 read them right after completing a mock olympiad.
 Obviously, don't open the solutions until you've submitted!
 Before taking your first mock olympiad, I recommend reading the
-<a href="https://www.dropbox.com/s/rs21apzqpm4b0qq/psychology.pdf?dl=0">handout</a>
-on olympiad strategy.</p>
+<a href="https://www.dropbox.com/s/rs21apzqpm4b0qq/psychology.pdf?dl=0">
+handout on olympiad strategy.</a></p>
 
 <h2>Quizzes</h2>
 {% include "dashboard/list_exam.html" with exams=quizzes %}
