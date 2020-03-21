@@ -9,6 +9,7 @@ from django.urls import reverse, reverse_lazy
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.contrib import messages
 from django.views.generic.edit import UpdateView, DeleteView
+from django.views.generic import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Subquery, OuterRef
 
@@ -36,6 +37,8 @@ def portal(request, student_id):
 			is_test = True, family = semester.exam_family, due_date__isnull=False)
 	context['quizzes'] = exams.models.PracticeExam.objects.filter(
 			is_test = False, family = semester.exam_family, due_date__isnull=False)
+	context['num_sem_download'] = dashboard.models.SemesterDownloadFile\
+			.objects.filter(semester = student.semester).count()
 	return render(request, "dashboard/portal.html", context)
 
 @login_required
@@ -178,3 +181,11 @@ def leaderboard(request):
 			.order_by('-num_units_done')
 
 	return render(request, "dashboard/stulist.html", context)
+
+class DownloadListView(ListView):
+	template_name = 'dashboard/download_list.html'
+
+	def get_queryset(self):
+		student = roster.models.Student.objects.get(id=self.kwargs['pk'])
+		roster.utils.check_can_view(self.request, student)
+		return dashboard.models.SemesterDownloadFile.objects.filter(semester = student.semester)

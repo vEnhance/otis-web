@@ -78,6 +78,8 @@ While waiting, you can see two units ahead of the current unit
 	{% if omniscient %}
 	<li> <a href="{% url "advance" student.id %}">Advance student</a> (instructor)</li>
 	{% endif %}
+	<li><a href="{% url "downloads" student.id %}">Semester downloads
+			({{ num_sem_download }})</a></li>
 	</ul>
 </td>
 <td valign="top" width="50%">
@@ -103,9 +105,9 @@ While waiting, you can see two units ahead of the current unit
 </tr>
 <tr>
 <td valign="top">
-	<h3>Downloads and files</h3>
+	<h3>Files</h3>
 	<ul>
-		<li> <a href="https://www.dropbox.com/s/vx2e7hm4n5dfj8x/long.pdf?dl=0">
+		<li><a href="https://www.dropbox.com/s/vx2e7hm4n5dfj8x/long.pdf?dl=0">
 			Olympiad answer sheets</a></li>
 		<li><a href="https://www.dropbox.com/s/j2r3gzhuljnqaih/short.pdf?dl=0">
 			Short-answer (quiz) forms</a></li>

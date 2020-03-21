@@ -10,6 +10,7 @@ urlpatterns = [
 	url(r'quasigrader/([0-9]+)/$', views.quasigrader, name='quasigrader'),
 	url(r'idlewarn/$', views.idlewarn, name='idlewarn'),
 	url(r'leaderboard/$', views.leaderboard, name='leaderboard'),
+	url(r'downloads/(?P<pk>[0-9]+)/$', views.DownloadListView.as_view(), name='downloads'),
 	url(r'past/$', views.past, name='past'),
 	url(r'index/$', views.index, name='index'),
 ]
