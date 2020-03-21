@@ -1,5 +1,5 @@
 {% extends 'layout.html' %}
-{% block title %}{% if unit %}Uploads for {{ unit }}{% else %}Miscellaneous Uploads{% endif %}{% endblock %}
+{% block title %}{% if unit %}Uploads for {{ unit }}{% else %}Hidden Uploads{% endif %}{% endblock %}
 {% block layout-content %}
 {% if unit %}
 <p>These are the uploaded files for the unit <b>{{ unit }}</b>.
@@ -31,7 +31,7 @@ To upload files to this unit (or any other), use the following form.
 {% include "generic-form.html" with submit_name="Upload" %}
 
 <ul>
-<li><a href="{% url "uploads" student.id 0 %}">Link to miscellaneous uploads</a></li>
+{# <li><a href="{% url "uploads" student.id 0 %}">Link to miscellaneous uploads</a></li> #}
 <li><a href="{% url "portal" student.id %}">Back to portal</a></li>
 </ul>
 
