@@ -77,9 +77,9 @@ class StudentAdmin(ImportExportModelAdmin):
 
 @admin.register(roster.models.UnitInquiry)
 class UnitInquiryAdmin(admin.ModelAdmin):
-	list_display = ('id', 'created_at', 'updated_at', 'status', 'action_type',
+	list_display = ('id', 'status', 'action_type',
 			'unit', 'student', 'explanation',)
 	search_fields = ('student__user__first_name',
 			'student__user__last_name', 'student__user__username')
 	list_filter = ('status',)
-	list_display_links = ('created_at',)
+	list_display_links = ('id',)
