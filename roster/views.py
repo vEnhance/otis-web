@@ -22,6 +22,8 @@ from django.views.generic import ListView
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.db.models import Subquery, OuterRef, Count, IntegerField
 
+from django.utils import timezone
+import datetime
 import itertools
 import collections
 
@@ -177,10 +179,12 @@ def inquiry(request, student_id):
 		if form.is_valid():
 			inquiry = form.save(commit=False)
 			inquiry.student = student
-			# check if exists already
-			if models.UnitInquiry.objects.filter(unit=inquiry.unit,
-					student=student, status="NEW").exists():
-				messages.warning(request, "Inquiry already saved...")
+			# check if exists already and created recently
+			one_day_ago = timezone.now() - datetime.timedelta(days=1)
+			if models.UnitInquiry.objects.filter(unit=inquiry.unit, \
+					student=student, action_type=inquiry.action_type, \
+					created_at__gte = one_day_ago).exists():
+				messages.warning(request, "The same inquiry already exists...")
 			else:
 				inquiry.save()
 				# auto-acceptance criteria
