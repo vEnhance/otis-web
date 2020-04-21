@@ -61,6 +61,7 @@ class Student(models.Model):
 				("E", "Ext."),
 				("G", "Grad"),
 				("N", "N.A."),
+				("P", "Phantom"),
 				),
 			help_text = "The track that the student is enrolled in for this semester.")
 	legit = models.BooleanField(default = True,
