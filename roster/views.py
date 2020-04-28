@@ -73,7 +73,8 @@ def finalize(request, student_id):
 	utils.check_can_view(request, student)
 	if student.curriculum.count() > 0:
 		student.newborn = False
-		self.unlocked_units.add(student.curriculum[0:3])
+		first_units = student.curriculum[0:3]
+		self.unlocked_units.add(*first_units)
 		student.save()
 		messages.success(request, "Your curriculum has been finalized! "
 				"You can start working now; "
