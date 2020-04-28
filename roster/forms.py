@@ -62,7 +62,7 @@ class AdvanceForm(forms.ModelForm):
 
 	class Meta:
 		model = roster.models.Student
-		fields = ('num_units_done', 'vision', 'unlocked_units',)
+		fields = ('num_units_done', 'unlocked_units',)
 
 
 class InquiryForm(forms.ModelForm):
