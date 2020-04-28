@@ -105,6 +105,8 @@ def advance(request, student_id):
 	context['omniscient'] = student.is_taught_by(request.user)
 	context['curriculum'] = student.generate_curriculum_rows(
 			omniscient = context['omniscient'])
+	context['num_psets'] = student.uploadedfile_set.filter(category='psets')\
+			.values('unit').distinct().count()
 	return render(request, "roster/advance.html", context)
 
 
