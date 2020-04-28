@@ -55,6 +55,7 @@ INSTALLED_APPS = [
 	'django.contrib.sessions',
 	'django.contrib.messages',
 	'django.contrib.staticfiles',
+	'bootstrap4',
 	'hijack_admin',
 	'hijack',
 	'compat',

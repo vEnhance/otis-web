@@ -1,16 +1,12 @@
 {% extends 'base.html' %}
+{% load bootstrap4 %}
 {% block base-content %}
 <div id="main">
 	<div class="entry">
 		<h1>{% block title %}{{ title }}{% endblock %}</h1>
 		<div class="entrywrap">
-			{% if messages %}
-			<ul class="messages">
-				{% for message in messages %}
-				<li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-				{% endfor %}
-			</ul>
-			{% endif %}
+			{% bootstrap_messages %}
+
 			{% block layout-content %}
 			{{ content }}
 			{% endblock %}
