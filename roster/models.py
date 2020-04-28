@@ -218,8 +218,9 @@ class UnitInquiry(models.Model):
 
 	action_type = models.CharField(max_length = 10,
 			choices = (
+				("UNLOCK", "Unlock"),
+				("APPEND", "Add for later"),
 				("DROP", "Drop"),
-				("ADD", "Add"),
 				),
 			help_text = "Describe the action you want to make.")
 	status = models.CharField(max_length = 5,
@@ -236,14 +237,14 @@ class UnitInquiry(models.Model):
 
 	def run_accept(self):
 		unit = self.unit
-		if self.action_type == "DROP":
-			self.student.curriculum.remove(unit)
-			self.student.unlocked_units.remove(unit)
-		elif self.action_type == "ADD":
+		if self.action_type == "UNLOCK":
 			self.student.curriculum.add(unit)
 			self.student.unlocked_units.add(unit)
-		self.student.save()
-
+		elif self.action_type == "APPEND":
+			self.student.curriculum.add(unit)
+		elif self.action_type == "DROP":
+			self.student.curriculum.remove(unit)
+			self.student.unlocked_units.remove(unit)
 		self.status = "ACC"
 		self.save()
 
