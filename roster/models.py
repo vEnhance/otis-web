@@ -121,7 +121,6 @@ class Student(models.Model):
 						unit=OuterRef('pk'),
 						benefactor=self.id,
 						category='psets')))\
-				.order_by('-has_pset', 'position')
 
 	def has_submitted_pset(self, unit):
 		return dashboard.models.UploadedFile.objects.filter(
@@ -144,13 +143,14 @@ class Student(models.Model):
 		unlocked_units_ids = self.unlocked_units.values_list('id', flat=True)
 
 		rows = []
-		for n, unit in enumerate(curriculum):
+		for i, unit in enumerate(curriculum):
+			n = i+1
 			row = {}
 			row['unit'] = unit
-			row['number'] = n+1
+			row['number'] = n
 			row['num_uploads'] = unit.num_uploads or 0
 
-			row['is_complete'] = unit.has_pset or (n+1 <= self.num_units_done)
+			row['is_complete'] = unit.has_pset
 			row['is_current'] = unit.id in unlocked_units_ids
 			row['is_visible'] = row['is_complete'] or row['is_current']
 
