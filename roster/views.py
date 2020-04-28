@@ -189,8 +189,10 @@ def inquiry(request, student_id):
 			else:
 				inquiry.save()
 				# auto-acceptance criteria
-				auto_accept_criteria = (inquiry.action_type == "DROP" or \
-					current_inquiries.exclude(action_type="DROP").count() <= 3)
+				auto_accept_criteria = (inquiry.action_type == "APPEND") \
+						or (inquiry.action_type == "DROP") \
+						or (inquiry.action_type == "UNLOCK" and \
+						current_inquiries.filter(action_type="UNLOCK").count() <= 3)
 				if auto_accept_criteria is True:
 					inquiry.run_accept()
 					messages.success(request, "Inquiry automatically approved")
