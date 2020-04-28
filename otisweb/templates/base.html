@@ -10,7 +10,7 @@
 
 {% load bootstrap4 %}
 {% bootstrap_css %}
-{% bootstrap_javascript %}
+{% bootstrap_javascript jquery='full' %}
 
 <link rel="stylesheet" type="text/css"
 	href="{% static 'hijack/hijack-styles.css' %}" />
@@ -68,7 +68,6 @@ body {
 
 </div>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 {% block scripts %}
 {% endblock %}
 </body>
