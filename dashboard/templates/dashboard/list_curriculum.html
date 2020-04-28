@@ -4,24 +4,32 @@
 <table class="table">
 {% for row in curriculum %}
 <tr class="subject{{ row.unit.group.subject }}">
-	<th>{{ row.number }}</th>
-	<td>{% if row.is_completed %}&check;{% endif %}
-		{% if row.is_current %}&star;{% endif %}
+	<th style="text-align: right;">{{ row.number }}</th>
+	<td style="text-align: center; font-size:80%;">
+	{% if row.is_complete and row.is_current%}
+		&star;
+	{% elif row.is_current %}
+		&sect;
+	{% elif row.is_complete %}
+		&check;
+	{% endif %}
 	</td>
-	<td>{{ row.unit.group.name }}</td>
-	<td>{{ row.unit.code }}</td>
 
 	{# Handout #}
-	{% if row.is_unlocked %}
-		<td><a href="{% view_problems row.unit %}">Handout</a></td>
+	<td style="text-align: right; font-size: 70%;">
+		<tt>{{ row.unit.position }} {{ row.unit.code }}</tt></td>
+	{% if row.is_visible %}
+		<td><a href="{% view_problems row.unit %}">
+			{{ row.unit.group.name }}
+			</a></td>
 	{% else %}
-		<td>&mdash;</td>
+		<td>{{ row.unit.group.name }}</td>
 	{% endif %}
 
 	{# File uploads #}
-	{% if row.is_unlocked or row.num_uploads > 0 %}
-		<td><a href="{% url "uploads" student.id row.unit.id %}">Uploads
-			({{ row.num_uploads }})</a></td>
+	{% if row.is_visible or row.num_uploads > 0 %}
+		<td><a href="{% url "uploads" student.id row.unit.id %}">
+			Files ({{ row.num_uploads }})</a></td>
 	{% else %}
 		<td>&mdash;</td>
 	{% endif %}
