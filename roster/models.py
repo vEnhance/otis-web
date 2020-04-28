@@ -218,9 +218,9 @@ class UnitInquiry(models.Model):
 
 	action_type = models.CharField(max_length = 10,
 			choices = (
-				("UNLOCK", "Unlock"),
+				("UNLOCK", "Unlock now"),
 				("APPEND", "Add for later"),
-				("DROP", "Drop"),
+				("DROP",   "Drop"),
 				),
 			help_text = "Describe the action you want to make.")
 	status = models.CharField(max_length = 5,
