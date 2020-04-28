@@ -215,12 +215,22 @@ class ListInquiries(PermissionRequiredMixin, ListView):
 	model = models.UnitInquiry
 	def get_queryset(self):
 		queryset = models.UnitInquiry.objects.all()[:30]
-		# some amazing code vv seriously wtf
-		count_others = models.UnitInquiry.objects\
+
+		# some amazing code vv
+		count_unlock = models.UnitInquiry.objects\
+				.filter(action_type="UNLOCK")\
 				.filter(student=OuterRef('student'))\
 				.order_by().values('student')\
 				.annotate(c=Count('*')).values('c')
-		return queryset.annotate(num_inq = Subquery(count_others,
+		count_all = models.UnitInquiry.objects\
+				.filter(student=OuterRef('student'))\
+				.order_by().values('student')\
+				.annotate(c=Count('*')).values('c')
+		# seriously wtf
+		return queryset.annotate(
+				num_unlock = Subquery(count_unlock,
+					output_field=IntegerField()),
+				num_all = Subquery(count_all,
 					output_field=IntegerField()))
 
 class EditInquiry(PermissionRequiredMixin, UpdateView):
