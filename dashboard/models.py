@@ -38,7 +38,13 @@ class UploadedFile(models.Model):
 			help_text = "The unit for which this file is associated")
 	created_at = models.DateTimeField(auto_now_add=True)
 	def __str__(self):
+		return self.filename
+	@property
+	def filename(self):
 		return os.path.basename(self.content.name)
+	@property
+	def url(self):
+		return self.content.url
 	class Meta:
 		ordering = ('-created_at',)
 
