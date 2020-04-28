@@ -1,9 +1,12 @@
 {% extends 'base.html' %}
+{% load static %}
 {% load bootstrap4 %}
+
 {% block base-content %}
+<div class="col-12 col-md-9">
 <div id="main">
 	<div class="entry">
-		<h1>{% block title %}{{ title }}{% endblock %}</h1>
+		<h1 id="pagetitle">{% block title %}{{ title }}{% endblock %}</h1>
 		<div class="entrywrap">
 			{% bootstrap_messages %}
 
@@ -13,7 +16,14 @@
 		</div>
 	</div>
 </div>
-<div id="side">
+<div id="logo">
+<img src="{% static 'img/otis-logo-v2018.svg' %}" />
+</div>
+</div>
+
+<div class="col-8 col-md-3">
+<div id="side" class="container">
 	{% include "sidebar.html" %}
+</div>
 </div>
 {% endblock %}

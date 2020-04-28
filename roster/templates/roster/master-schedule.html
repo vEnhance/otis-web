@@ -2,7 +2,7 @@
 {% block layout-content %}
 
 <p>Showing the current enrollments for <b>{{ semester }}</b>.</p>
-<table>
+<table class="table">
 {% for unit, students in chart.items %}
 <tr class="subject{{ unit.group.subject }}">
 	<th>{{ forloop.counter }}</th>

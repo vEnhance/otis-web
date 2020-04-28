@@ -19,7 +19,6 @@
 <link href="{% static 'css/django.css' %}" rel="stylesheet">
 <link href="{% static 'css/otis.css' %}" rel="stylesheet">
 
-
 {# favicon #}
 <link rel="apple-touch-icon" sizes="180x180" href="//web.evanchen.cc/icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" href="//web.evanchen.cc/icons/favicon-32x32.png" sizes="32x32">
@@ -35,6 +34,7 @@
 
 <body>
 {% hijack_notification %}
+
 {% if debug %}
 <div id="debug-warning" class="alert" role="alert">
 	Site currently in <b style="color:red;">DEBUG</b> mode.
@@ -46,14 +46,26 @@ body {
 }
 </style>
 {% endif %}
-<div id="navigation_box">&copy; Evan Chen. Internal use only.</div>
-<div id="header"><h1>OTIS-WEB</h1></div>
-<div id="content">
+
+<div class="container">
+
+<div class="row align-items-center">
+	<div class="col-12">
+		<div id="header"><a href="/"><h1 id="sitetitle">OTIS-WEB</h1></a></div>
+	</div>
+</div>
+
+<div class="row">
+    <div class="co-6 offset-6 col-md-4 offset-md-8">
+		<div id="email_box">&copy; Evan Chen, internal use only.</div>
+    </div>
+</div>
+
+<div id="content" class="row">
 	{% block base-content %}
 	{% endblock %}
-	<div id="logo">
-	<img src="{% static 'img/otis-logo-v2018.svg' %}" />
-	</div>
+</div>
+
 </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>

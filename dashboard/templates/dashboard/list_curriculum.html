@@ -1,7 +1,7 @@
 {% load otis_extras %}
 
 {% if curriculum %}
-<table class="table">
+<table class="table curriculum">
 {% for row in curriculum %}
 <tr class="subject{{ row.unit.group.subject }}">
 	<th style="text-align: right;">{{ row.number }}</th>

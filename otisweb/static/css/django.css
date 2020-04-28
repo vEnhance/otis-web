@@ -1,10 +1,29 @@
-table td, th {
-	padding: 4px 8px 4px 8px;
-	margin: 0px;
-	border: 0px;
-	text-align: left;
+body {
+	line-height: 1.2;
 }
 
+table.table {
+	border-collapse: separate;
+	border: none;
+	width: auto !important;
+}
+
+p {
+	margin-top: 0.5rem;
+	margin-bottom: 0.5rem;
+}
+
+table.table tr {
+	height: fit-content;
+}
+
+table.table td, table.table th {
+	margin: 0px;
+	border: 0px;
+	border-top: none;
+	text-align: left;
+	padding: 2px 8px 2px 8px;
+}
 tr:nth-child(odd) {
     background-color: #e4e4e4;
 }
