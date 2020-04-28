@@ -141,7 +141,7 @@ def quasigrader(request, num_hours):
 	context['items'] = []
 
 	num_psets = dict(roster.models.Student.objects\
-			.filter(semester__active=True)\
+			.filter(semester__active=True, legit=True)\
 			.filter(uploadedfile__category='psets')\
 			.annotate(num_psets = Count('uploadedfile__unit', distinct=True))\
 			.values_list('id', 'num_psets'))
@@ -203,7 +203,9 @@ def leaderboard(request):
 	context['students'] = roster.utils\
 			.get_visible_students(request.user)\
 			.filter(legit=True)\
+			.annotate(num_psets = Count('uploadedfile__unit', distinct=True))\
 			.order_by('-num_units_done')
+	context['num_psets_available'] = True
 
 	return render(request, "dashboard/stulist.html", context)
 
