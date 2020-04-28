@@ -123,25 +123,23 @@ class Student(models.Model):
 						category='psets')))\
 				.order_by('-has_pset', 'position')
 
+	def has_submitted_pset(self, unit):
+		return dashboard.models.UploadedFile.objects.filter(
+				unit = unit,
+				benefactor = self,
+				category = 'psets')
+
 	def check_unit_unlocked(self, unit):
 		if self.newborn:
 			return False
-		if self.unlocked_units.filter(pk=unit.id).exists():
+		elif self.unlocked_units.filter(pk=unit.id).exists():
 			return True
-		curriculum = list(self.generate_curriculum_queryset())
-		if not unit in curriculum:
-			return False
-		i = curriculum.index(unit)
-		unit = curriculum[i] # grab the annotations
-		if unit.has_pset:
-			return True
-		elif i <= self.num_units_done + (self.vision-1):
+		elif self.has_submitted_pset(unit):
 			return True
 		else:
 			return False
 
 	def generate_curriculum_rows(self, omniscient):
-		current_index = self.num_units_done
 		curriculum = self.generate_curriculum_queryset()
 		unlocked_units_ids = self.unlocked_units.values_list('id', flat=True)
 
@@ -150,23 +148,17 @@ class Student(models.Model):
 			row = {}
 			row['unit'] = unit
 			row['number'] = n+1
-			row['is_completed'] = unit.has_pset or n < current_index
 			row['num_uploads'] = unit.num_uploads or 0
-			if self.newborn:
-				row['is_current'] = False
-				row['is_unlocked'] = False
-			else:
-				row['is_current'] = (n == current_index)
-				row['is_unlocked'] = row['is_completed'] \
-						or row['is_current'] \
-						or (unit.id in unlocked_units_ids) \
-						or n <= current_index + (self.vision-1)
 
-			if row['is_completed']:
+			row['is_complete'] = unit.has_pset or (n+1 <= self.num_units_done)
+			row['is_current'] = unit.id in unlocked_units_ids
+			row['is_visible'] = row['is_complete'] or row['is_current']
+
+			if row['is_complete']:
 				row['sols_label'] = "Solutions"
 			elif omniscient and row['is_current']:
 				row['sols_label'] = "Sols (current)"
-			elif omniscient and row['is_unlocked']:
+			elif omniscient and row['is_visible']:
 				row['sols_label'] = "Sols (future)"
 			else:
 				row['sols_label'] = None # solutions not shown
