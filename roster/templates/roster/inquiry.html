@@ -92,19 +92,26 @@ please send me a reminder.</p>
 {% include 'dashboard/list_curriculum.html' %}
 
 <h2>Instructions</h2>
-<p>There are a currently just two options.</p>
+<p>There are currently three permitted actions.</p>
 <ul>
-	<li><b>Drop</b>:
-		This removes a unit entirely from your list.</li>
-	<li><b>Add</b>:
+	<li><b>Unlock</b>:
 		The unit is added if it wasn't
 		there already, and moreover is automatically unlocked.
-		</li>
+
+		The first three actions of this type are automatically approved;
+		the rest should be approved manually.
+	</li>
+	<li><b>Add for later</b>:
+		The unit is added to the list, but not unlocked.
+		Inquiries of this form are approved automatically.
+	</li>
+	<li><b>Drop</b>:
+		This removes a unit entirely from your list.
+		Inquiries of this form are approved automatically.
+		(Be careful what you wish for!)
+		Note that this does not automatically "replace" the dropped unit.
+	</li>
 </ul>
-<p>Requests to DROP a unit are approved automatically.
-Also, your first few inquiries will probably be approved
-automatically as well (be careful what you wish for!).
-Other unit inquiries are processed manually.</p>
 
 {% include 'dashboard/back_link.html' %}
 {% endblock %}
