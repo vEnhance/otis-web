@@ -73,10 +73,11 @@ def finalize(request, student_id):
 	utils.check_can_view(request, student)
 	if student.curriculum.count() > 0:
 		student.newborn = False
+		self.unlocked_units.add(student.curriculum[0:3])
 		student.save()
 		messages.success(request, "Your curriculum has been finalized! "
 				"You can start working now; "
-				"the first few units have been unlocked.")
+				"the first three units have been unlocked.")
 	else:
 		messages.error(request, "You didn't select any units. "
 				"You should select some units before using this link.")
