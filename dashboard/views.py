@@ -11,7 +11,9 @@ from django.contrib import messages
 from django.views.generic.edit import UpdateView, DeleteView
 from django.views.generic import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Subquery, OuterRef
+from django.db.models import Subquery, OuterRef, F, Count
+from django.utils.timezone import now
+from datetime import timedelta
 
 import core
 import dashboard
@@ -131,23 +133,46 @@ class DeleteFile(LoginRequiredMixin, DeleteView):
 		return obj
 
 @staff_member_required
-def quasigrader(request, num_limit = 10):
+def quasigrader(request, num_hours):
 	context = {}
 	context['title'] = 'Quasi-grader'
-	num_limit = int(num_limit)
+	num_hours = int(num_hours)
 
 	context['items'] = []
+
+	num_psets = dict(roster.models.Student.objects\
+			.filter(semester__active=True)\
+			.filter(uploadedfile__category='psets')\
+			.annotate(num_psets = Count('uploadedfile__unit', distinct=True))\
+			.values_list('id', 'num_psets'))
+
 	uploads = dashboard.models.UploadedFile.objects\
-			.filter(category='psets').order_by('-created_at')[:num_limit]
+			.filter(created_at__gte = now() - timedelta(hours=num_hours))\
+			.filter(category='psets')\
+			.select_related('benefactor')\
+			.prefetch_related('benefactor__unlocked_units')\
+			.filter(benefactor__unlocked_units=F('unit'))\
+			.order_by('-created_at')
+
 	for upload in uploads:
+		# cut off filename
+		if len(upload.filename) > 20:
+			name = upload.filename[:12] + "..." + upload.filename[-3:]
+		else:
+			name = upload.filename
+
 		d = {'student' : upload.benefactor,
 				'file' : upload,
-				'rows' : upload.benefactor.generate_curriculum_rows(True)
+				'rows' : upload.benefactor.generate_curriculum_rows(True),
+				'num_psets' : num_psets[upload.benefactor.id],
+				'num_done' : upload.benefactor.num_units_done,
+				'filename' : name
 				}
 		context['items'].append(d)
 
 	context['inquiry_nag'] = roster.models.UnitInquiry.objects\
 			.filter(status='NEW').count()
+	context['num_hours'] = num_hours
 
 	return render(request, "dashboard/quasigrader.html", context)
 
