@@ -56,7 +56,7 @@ class UnitGroupIEResource(resources.ModelResource):
 @admin.register(core.models.UnitGroup)
 class UnitGroupAdmin(ImportExportModelAdmin):
 	list_display = ('name', 'subject', 'description',)
-	search_fields = ('name', 'code',)
+	search_fields = ('name', 'description',)
 	list_filter = ('subject',)
 	resource_class = UnitGroupIEResource
 	list_per_page = 150
