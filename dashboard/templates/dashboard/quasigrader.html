@@ -1,5 +1,6 @@
 {% extends 'layout.html' %}
 {% load static %}
+{% load humanize %}
 
 {% block layout-content %}
 {% if inquiry_nag > 0 %}
@@ -26,11 +27,11 @@ They are listed below.
 	</td>
 	<td><a href="{% url 'advance' item.student.id %}">&#x2694;
 		<i>{{ item.student.name }}</i></a></td>
-	<td>{{ item.file.created_at|date:"m-d H:i" }}</td>
+	<td style="font-size:90%;">{{ item.file.unit }}</td>
 </tr>
 <tr>
 	<td></td>
-	<td style="font-size:90%;">{{ item.file.unit }}</td>
+	<td style="font-size:80%;">{{ item.file.created_at|naturaltime }}</td>
 	<td>{% if item.student.assistant %}<b>(+ {{item.student.assistant.shortname}})</b>{% endif %}</td>
 	<td>{{ item.num_done }} of {{ item.num_psets }}</td>
 </tr>

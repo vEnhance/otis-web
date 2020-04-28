@@ -1,4 +1,5 @@
 {% extends 'layout.html' %}
+{% load humanize %}
 
 {% block title %}Approve Inquiries{% endblock %}
 {% block layout-content %}
@@ -17,7 +18,7 @@ if you want.</p>
 </tr>
 {% for inquiry in unitinquiry_list %}
 <tr>
-<td style="font-size:80%;">{{ inquiry.created_at|date:"m-d H:i" }}</td>
+<td style="font-size:80%;">{{ inquiry.created_at|naturaltime }}</td>
 <td>{{ inquiry.num_unlock }}/{{ inquiry.num_all }} </td>
 <td style="font-size:80%;"><a href="{% url "inquiry" inquiry.student.id %}">
 		{{ inquiry.student.name }}</a></td>
