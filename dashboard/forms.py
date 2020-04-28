@@ -7,7 +7,7 @@ class NewUploadForm(forms.ModelForm):
 		fields = ('category', 'content', 'description')
 		widgets = {
 			'description': forms.Textarea(
-				attrs={'cols': 60, 'rows': 2}),
+				attrs={'cols': 40, 'rows': 2}),
 		}
 		help_texts = {
 			'content' : "",
