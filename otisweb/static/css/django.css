@@ -22,7 +22,7 @@ table.table td, table.table th {
 	border: 0px;
 	border-top: none;
 	text-align: left;
-	padding: 2px 8px 2px 8px;
+	padding: 4px 8px 2px 8px;
 }
 tr:nth-child(odd) {
     background-color: #e4e4e4;
