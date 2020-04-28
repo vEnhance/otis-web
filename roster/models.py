@@ -43,12 +43,10 @@ class Student(models.Model):
 			related_name = 'unlocked_units',
 			help_text = "A list of units that the student may work on.")
 	num_units_done = models.SmallIntegerField(default = 0,
-			help_text = "If this is equal to k, "
-			"then the student has completed the first k units of his/her "
-			"curriculum and by default is working on the (k+1)st unit.")
+			help_text = "The number of completed units. "
+			"This is set manually for Evan's book-keeping.")
 	vision = models.SmallIntegerField(default = 3,
-			help_text = "How many units ahead of the most "
-			"recently completed unit the student can see.")
+			help_text = "Deprecated and no longer in use. To be deleted.")
 
 	track = models.CharField(max_length = 5,
 			choices = (
