@@ -54,15 +54,15 @@ class AdvanceForm(forms.ModelForm):
 	def __init__(self, *args, **kwargs):
 		super(AdvanceForm, self).__init__(*args, **kwargs)
 		student = kwargs['instance']
-		self.fields['extra_units'] = forms.ModelMultipleChoiceField(
+		self.fields['unlocked_units'] = forms.ModelMultipleChoiceField(
 				widget=forms.SelectMultiple(attrs={'class' : 'chosen-select'}),
 				queryset = student.curriculum.all(),
-				help_text = "Use this for extra out-of-order unlocks",
+				help_text = "The set of unlocked units.",
 				required = False)
 
 	class Meta:
 		model = roster.models.Student
-		fields = ('num_units_done', 'vision', 'extra_units',)
+		fields = ('num_units_done', 'vision', 'unlocked_units',)
 
 
 class InquiryForm(forms.ModelForm):

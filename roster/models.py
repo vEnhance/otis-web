@@ -39,10 +39,9 @@ class Student(models.Model):
 	curriculum = models.ManyToManyField(core.models.Unit, blank = True,
 			related_name = 'curriculum',
 			help_text = "The choice of units that this student will work on")
-	extra_units = models.ManyToManyField(core.models.Unit, blank = True,
-			related_name = 'extra_units',
-			help_text = "A list of units that the student "
-			"can access out-of-order relative to their curriculum.")
+	unlocked_units = models.ManyToManyField(core.models.Unit, blank = True,
+			related_name = 'unlocked_units',
+			help_text = "A list of units that the student may work on.")
 	num_units_done = models.SmallIntegerField(default = 0,
 			help_text = "If this is equal to k, "
 			"then the student has completed the first k units of his/her "
@@ -129,7 +128,7 @@ class Student(models.Model):
 	def check_unit_unlocked(self, unit):
 		if self.newborn:
 			return False
-		if self.extra_units.filter(pk=unit.id).exists():
+		if self.unlocked_units.filter(pk=unit.id).exists():
 			return True
 		curriculum = list(self.generate_curriculum_queryset())
 		if not unit in curriculum:
@@ -146,7 +145,7 @@ class Student(models.Model):
 	def generate_curriculum_rows(self, omniscient):
 		current_index = self.num_units_done
 		curriculum = self.generate_curriculum_queryset()
-		extra_units_ids = self.extra_units.values_list('id', flat=True)
+		unlocked_units_ids = self.unlocked_units.values_list('id', flat=True)
 
 		rows = []
 		for n, unit in enumerate(curriculum):
@@ -162,7 +161,7 @@ class Student(models.Model):
 				row['is_current'] = (n == current_index)
 				row['is_unlocked'] = row['is_completed'] \
 						or row['is_current'] \
-						or (unit.id in extra_units_ids) \
+						or (unit.id in unlocked_units_ids) \
 						or n <= current_index + (self.vision-1)
 
 			if row['is_completed']:
@@ -249,10 +248,10 @@ class UnitInquiry(models.Model):
 		unit = self.unit
 		if self.action_type == "DROP":
 			self.student.curriculum.remove(unit)
-			self.student.extra_units.remove(unit)
+			self.student.unlocked_units.remove(unit)
 		elif self.action_type == "ADD":
 			self.student.curriculum.add(unit)
-			self.student.extra_units.add(unit)
+			self.student.unlocked_units.add(unit)
 		self.student.save()
 
 		self.status = "ACC"
