@@ -5,11 +5,11 @@
 {% for row in curriculum %}
 <tr class="subject{{ row.unit.group.subject }}">
 	<th style="text-align: right;">{{ row.number }}</th>
-	<td style="text-align: center; font-size:80%;">
+	<td style="text-align: center;">
 	{% if row.is_complete and row.is_current%}
-		&star;
+		&check;&starf;
 	{% elif row.is_current %}
-		&sect;
+		&star;
 	{% elif row.is_complete %}
 		&check;
 	{% endif %}
