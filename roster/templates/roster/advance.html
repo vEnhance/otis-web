@@ -7,6 +7,9 @@
 ul.chosen-choices {
 	border: 2px solid #aaa;
 }
+.chosen-container-multi .chosen-choices li {
+	float: none;
+}
 </style>
 {% endblock %}
 
@@ -16,6 +19,7 @@ ul.chosen-choices {
 $(document).ready(function() {
 	$("select.chosen-select").chosen({
 		placeholder_text : "...",
+		width: "250",
 	});
 });
 </script>
