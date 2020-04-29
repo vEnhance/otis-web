@@ -69,4 +69,8 @@ table.curriculum td {
 	vertical-align: middle;
 }
 
+table.curriculum a.active {
+	font-weight: 700;
+	color: #aa00ff;
+}
 
