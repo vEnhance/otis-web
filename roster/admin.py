@@ -67,12 +67,18 @@ class StudentIEResource(RosterResource):
 		export_order = ('id', 'user__first_name', 'user__last_name', 'semester_name',
 				'user_name', 'assistant', 'track', 'legit', 'unit_list',)
 
+class UnlistedInline(admin.TabularInline):
+	model = roster.models.Student.unlisted_assistants.through
+	verbose_name = "Unlisted Assistant"
+	verbose_name_plural = "Unlisted Assistants"
+	extra = 0
+
 @admin.register(roster.models.Student)
 class StudentAdmin(ImportExportModelAdmin):
 	list_display = ('name', 'user', 'id', 'semester', 'legit', 'track', 'num_units_done', 'curriculum_length',)
 	list_filter = ('semester__active', 'legit', 'semester', 'track', 'newborn',)
 	resource_class = StudentIEResource
-	inlines = (InvoiceInline,)
+	inlines = (InvoiceInline, UnlistedInline,)
 	search_fields = ('user__first_name', 'user__last_name', 'user__username',)
 
 @admin.register(roster.models.UnitInquiry)

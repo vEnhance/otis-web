@@ -8,13 +8,15 @@ import core
 import dashboard
 
 class Assistant(models.Model):
-	"""This is a wrapper object for a single assistant.
-	Just need a username at the moment..."""
+	"""This is a wrapper object for a single assistant."""
 	user = models.OneToOneField(User, on_delete = models.CASCADE,
 			help_text = "The Django Auth user attached to the Assistant.")
 	shortname = models.CharField(max_length = 10,
 			help_text = "Initials or short name for this Assistant")
-
+	unlisted_students = models.ManyToManyField("Student", blank = True,
+			related_name = "unlisted_assistants",
+			help_text = "A list of students this assistant can see "
+					"but which is not listed visibly.")
 
 	@property
 	def name(self):
@@ -90,8 +92,10 @@ class Student(models.Model):
 		but has permission to view and edit the student's files etc.
 		(This means the user is either an assistant for that student
 		or has staff privileges.)"""
-		return user.is_staff or (self.assistant is not None \
-				and self.assistant.user == user)
+		return user.is_staff \
+				or (self.assistant is not None and self.assistant.user == user) \
+				or (self.unlisted_assistants.filter(user=user).exists())
+
 	def can_view_by(self, user):
 		"""Checks whether the specified user
 		is either same as the student,

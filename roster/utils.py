@@ -12,7 +12,8 @@ def get_visible_from_queryset(user, queryset):
 	if user.is_staff:
 		return queryset
 	else:
-		return queryset.filter(Q(user = user) | Q(assistant__user = user))
+		return queryset.filter(Q(user = user) | Q(assistant__user = user)
+				| Q(unlisted_assistants__user = user))
 
 def get_visible_students(user, current = True):
 	if current:
