@@ -20,7 +20,11 @@
 		<tt>{{ row.unit.position }} {{ row.unit.code }}</tt></td>
 	{% if row.is_visible %}
 		<td><a href="{% view_problems row.unit %}">
+			{% if row.is_current %}
+			<b>{{ row.unit.group.name }}</b>
+			{% else %}
 			{{ row.unit.group.name }}
+			{% endif %}
 			</a></td>
 	{% else %}
 		<td>{{ row.unit.group.name }}</td>
