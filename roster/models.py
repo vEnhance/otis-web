@@ -14,6 +14,8 @@ class Assistant(models.Model):
 			help_text = "The Django Auth user attached to the Assistant.")
 	shortname = models.CharField(max_length = 10,
 			help_text = "Initials or short name for this Assistant")
+
+
 	@property
 	def name(self):
 		return self.user.get_full_name()
@@ -37,10 +39,10 @@ class Student(models.Model):
 			help_text = "The assistant for this student, if any")
 
 	curriculum = models.ManyToManyField(core.models.Unit, blank = True,
-			related_name = 'curriculum',
+			related_name = 'students_taking',
 			help_text = "The choice of units that this student will work on")
 	unlocked_units = models.ManyToManyField(core.models.Unit, blank = True,
-			related_name = 'unlocked_units',
+			related_name = 'students_unlocked',
 			help_text = "A list of units that the student may work on.")
 	num_units_done = models.SmallIntegerField(default = 0,
 			help_text = "The number of completed units. "
