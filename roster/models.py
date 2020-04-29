@@ -162,10 +162,8 @@ class Student(models.Model):
 
 			if row['is_complete']:
 				row['sols_label'] = "Solutions"
-			elif omniscient and row['is_current']:
-				row['sols_label'] = "Sols (current)"
 			elif omniscient and row['is_visible']:
-				row['sols_label'] = "Sols (future)"
+				row['sols_label'] = "Sol (hidden)"
 			else:
 				row['sols_label'] = None # solutions not shown
 			rows.append(row)
