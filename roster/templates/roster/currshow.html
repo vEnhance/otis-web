@@ -27,16 +27,20 @@ $(document).ready(function() {
 For a description of what these units are,
 see the <a href="{% url "synopsis" %}">unit catalog</a>.
 
+{% if form.errors %}
+	<div class="alert alert-error">
+		<ul>
+		{% for field in form %}
+			{% if field.errors %}
+			<li>{{ field.label }}: {{ field.errors|striptags }}</li>
+			{% endif %}
+		{% endfor %}
+		</ul>
+	</div>
+{% endif %}
+
 <form action="{{ request.path }}" method="post">
 {% csrf_token %}
-
-{% if form.non_field_errors %}
-<ul class="form_error_messages">
-	{% for err in form.non_field_errors %}
-	<li class="form_error_message">{{ err }}</li>
-	{% endfor %}
-</ul>
-{% endif %}
 
 <table class="table form-table">
 {% for hidden in form.hidden_fields %}
@@ -44,9 +48,11 @@ see the <a href="{% url "synopsis" %}">unit catalog</a>.
 {% endfor %}
 
 {% if enabled %}
-<tr>
-	<td><input type="submit" name="submit" value="Update"></td>
-</tr>
+<tr><td>
+	<button type="submit" class="btn btn-sm btn-success">
+	{{ submit_name|default:"Submit" }}
+	</button>
+</td></tr>
 {% endif %}
 
 {% for field in form.visible_fields %}
@@ -54,11 +60,6 @@ see the <a href="{% url "synopsis" %}">unit catalog</a>.
 	<td class="unit-select">
 		{% if enabled %}
 		{{ field }}
-			{% if field.errors %}
-			<ul class="errorlist">
-			{% for err in field.errors %}<li>{{ err }}</li>{% endfor %}
-			</ul>
-			{% endif %}
 		{% else %}
 		{{ field|display_initial_choice }}
 		{% endif %}
@@ -68,10 +69,12 @@ see the <a href="{% url "synopsis" %}">unit catalog</a>.
 </tr>
 {% endfor %}
 
-{% if request.user.is_staff %}
-<tr>
-	<td><input type="submit" name="submit" value="Update"></td>
-</tr>
+{% if enabled %}
+<tr><td>
+	<button type="submit" class="btn btn-small btn-success">
+	{{ submit_name|default:"Submit" }}
+	</button>
+</td></tr>
 {% endif %}
 
 </table>
