@@ -7,7 +7,7 @@
 {% endif %}
 
 {% if student %}
-<h2><a href="{% url "portal" student.id %}">{{ student }}</a></h2>
+<h3><a href="{% url "portal" student.id %}">{{ student }}</a></h3>
 <p><i>{{ student.get_track }}</i></p>
 {% endif %}
 
