@@ -43,9 +43,23 @@ input {
 button.pseudo-button {
 	background: none;
 	color: #bb0000;
-	border: none; 
+	border: none;
 	padding: 0;
 	margin: 0;
 	font: inherit;
 	cursor: pointer;
+}
+
+div.form-group > label {
+	display: inline-block;
+	vertical-align: top;
+	font-weight: bold;
+	font-family: Verdana, Geneva, sans-serif;
+	font-size: 80%;
+	padding-right: 5px;
+	width: 18%;
+}
+div.form-group > div {
+	display: inline-block;
+	width: 76%;
 }

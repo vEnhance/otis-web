@@ -15,9 +15,9 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
 ## Manually added settings
 
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
 HIJACK_ALLOW_GET_REQUESTS = True
 HIJACK_LOGIN_REDIRECT_URL = '/'
 HIJACK_LOGOUT_REDIRECT_URL = '/'
@@ -40,7 +40,6 @@ DEBUG = True # not bool(os.getenv('IS_PRODUCTION'))
 # See https://docs.djangoproject.com/en/1.10/ref/settings/
 ALLOWED_HOSTS = ['*']
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -57,6 +56,7 @@ INSTALLED_APPS = [
 	'django.contrib.messages',
 	'django.contrib.staticfiles',
 	'bootstrap4',
+	'crispy_forms',
 	'hijack_admin',
 	'hijack',
 	'compat',
@@ -141,15 +141,10 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'America/New_York'
-
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/

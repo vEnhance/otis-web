@@ -1,42 +1,29 @@
-<form action="{{ request.path }}" method="post" enctype="multipart/form-data">
+{% load crispy_forms_tags %}
+
+<form action="{{ request.path }}" method="post" enctype="multipart/form-data" class="form">
 {% csrf_token %}
 
 {% if form.non_field_errors %}
-<ul class="form_error_messages">
+<div class="alert alert-error">
 	{% for err in form.non_field_errors %}
-	<li class="form_error_message">{{ err }}</li>
+	<p>{{ err }}</p>
 	{% endfor %}
-</ul>
+</div>
 {% endif %}
 
+	<table class="table form-table">
+		{% for hidden in form.hidden_fields %}
+		{{ hidden }}
+		{% endfor %}
 
-<table class="table">
-{% for hidden in form.hidden_fields %}
-	{{ hidden }}
-{% endfor %}
+		{% for field in form.visible_fields %}
+		<tr><td>{{ field|as_crispy_field }}</td></tr>
+		{% endfor %}
 
-{% for field in form.visible_fields %}
-	<tr {% if field.errors %} class="field_error"{% endif %}>
-		<th class="label-tag"> {{ field.label_tag }} </th>
-		<td class="field-tag">
-			{{ field }}
-			{% if field.help_text %}
-			<div class="helptext">{{ field.help_text|safe }}</div>
-			{% endif %}
-			{% if field.errors %}
-				<ul class="errorlist">
-				{% for err in field.errors %}
-					{{ err }}
-				{% endfor %}
-				</ul>
-			{% endif %}
-		</td>
-	</tr>
-{% endfor %}
-	<tr>
-		<td></td>
-		<td><input type="submit" {% if submit_name %}value="{{ submit_name }}"{% endif %}></td>
-	</tr>
-</table>
+		<tr><td>
+			<button type="submit" class="btn btn-success">
+			{{ submit_name|default:"Submit" }}
+			</button>
+		</td></tr>
+	</table>
 </form>
-
