@@ -15,18 +15,22 @@ which haven't been answered yet.</p>
 <p>There are {{ items|length }} problem sets
 from the last {{ num_hours }} hours
 which apparently haven't been completely processed yet.
-They are listed below.
-</p>
+They are listed below.</p>
 
 <table class="table">
 {% for item in items %}
 <tr>
-	<th>#{{ forloop.counter }}</th>
+	<th>
+		#{{ forloop.counter }}
+		<a target="_blank"
+			href="{% url 'auto-advance' item.student.id item.file.unit.id %}">&#x26d1;</a>
+	</th>
 	<td>
 	<a href="{{item.file.url}}"><tt>{{ item.filename }}</tt></a>
 	</td>
-	<td><a href="{% url 'advance' item.student.id %}">&#x2694;
-		<i>{{ item.student.name }}</i></a></td>
+	<td>
+		<a href="{% url 'advance' item.student.id %}">
+			&#x2694; {{ item.student.name }}</a></td>
 	<td style="font-size:90%;">{{ item.file.unit }}</td>
 </tr>
 <tr>

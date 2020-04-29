@@ -85,6 +85,37 @@ def finalize(request, student_id):
 	return HttpResponseRedirect(reverse("portal", args=(student_id,)))
 
 @login_required
+def auto_advance(request, student_id, unit_id):
+	student = utils.get_student(student_id)
+	utils.check_taught_by(request, student)
+	unit = core.models.Unit.objects.get(id=unit_id)
+	assert student.unlocked_units.filter(id=unit_id).exists(), "Not valid for auto unlock"
+
+	# get next unit to unlock
+	unlockable_units = student.generate_curriculum_queryset()\
+			.exclude(has_pset = True)\
+			.exclude(id__in = student.unlocked_units.all())\
+			.values('id', 'group__name')
+
+	to_add = unlockable_units.first()
+	if to_add is not None:
+		student.unlocked_units.add(to_add['id'])
+	student.unlocked_units.remove(unit)
+	student.num_units_done += 1
+	student.save()
+
+	context = {}
+	context["added"] = to_add["group__name"] if to_add is not None else None
+	if context["added"]:
+		context["title"] = "Unlocked " + context["added"]
+	else:
+		context["title"] = str(student) + " is done!"
+	context["finished"] = str(unit)
+	context["student"] = student
+
+	return render(request, "roster/auto-advance.html", context)
+
+@login_required
 def advance(request, student_id):
 	student = utils.get_student(student_id)
 	utils.check_taught_by(request, student)
