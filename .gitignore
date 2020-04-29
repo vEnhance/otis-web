@@ -9,5 +9,6 @@ otisweb/static/answersheets/*.fdb_latexmk
 otisweb/static/answersheets/*.log
 otisweb/static/answersheets/*.pdf
 lib/
+venv
 venv/
 evanchen-cc-*.json
