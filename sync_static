@@ -2,3 +2,5 @@
 
 # If you aren't Evan, replace the bucket name...
 gsutil -m rsync -R static/ gs://otisweb-static/static
+gsutil -m setmeta -R -h 'Cache-Control:private, max-age=0, no-transform' gs://otisweb-static/static/*
+
