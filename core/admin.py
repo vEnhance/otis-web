@@ -35,6 +35,7 @@ class UnitAdmin(ImportExportModelAdmin):
 	list_display = ('group', 'code', 'list_display_position',)
 	list_filter = ('group__subject',)
 	search_fields = ('group__name', 'code')
+	autocomplete_fields = ('group',)
 	ordering = ('position',)
 	resource_class = UnitIEResource
 	list_per_page = 150

@@ -12,6 +12,7 @@ class UploadedFileAdmin(admin.ModelAdmin):
 	search_fields = ('description',)
 	list_filter = ('category',)
 	list_per_page = 30
+	autocomplete_fields = ('benefactor', 'unit', 'owner',)
 
 @admin.register(dashboard.models.SemesterDownloadFile)
 class SemesterDownloadFileAdmin(admin.ModelAdmin):

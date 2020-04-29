@@ -14,7 +14,8 @@ class PracticeExamIEResource(resources.ModelResource):
 
 @admin.register(exams.models.PracticeExam)
 class PracticeExamAdmin(ImportExportModelAdmin):
-	list_display = ('id', 'family', 'is_test', 'number', 'start_date', 'due_date',)
+	list_display = ('family', 'number',  'is_test', 'start_date', 'due_date', 'id', )
 	list_filter = ('family', 'is_test',)
+	list_display_links = ('family', 'number',)
 	search_fields = ('family', 'number',)
 	resource_class = PracticeExamIEResource
