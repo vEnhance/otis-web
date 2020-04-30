@@ -109,7 +109,7 @@ def auto_advance(request, student_id, unit_id):
 	if context["added"]:
 		context["title"] = "Unlocked " + context["added"]
 	else:
-		context["title"] = str(student) + " is done!"
+		context["title"] = student.name + " is done!"
 	context["finished"] = str(unit)
 	context["student"] = student
 
