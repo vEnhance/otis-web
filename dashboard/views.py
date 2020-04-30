@@ -156,8 +156,8 @@ def quasigrader(request, num_hours):
 
 	for upload in uploads:
 		# cut off filename
-		if len(upload.filename) > 20:
-			name = upload.filename[:12] + "..." + upload.filename[-3:]
+		if len(upload.filename) > 16:
+			name = upload.filename[:12] + upload.filename[-4:]
 		else:
 			name = upload.filename
 
