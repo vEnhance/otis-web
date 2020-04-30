@@ -23,18 +23,19 @@ if you want.</p>
 		{{ inquiry.num_unlock|default:0 }}/{{ inquiry.num_all|default:0 }}</a></td>
 <td style="font-size:80%;"><a href="{% url "portal" inquiry.student.id %}">
 		{{ inquiry.student.name }}</a></td>
-<td style="font-family: monospace; font-size: 80%;">
-	{{ inquiry.action_type }} {{ inquiry.unit }}</td>
-<td style="font-family: monospace;">
+<td style="font-size: 80%;">
+	<tt>{{ inquiry.action_type }} {{ inquiry.unit }}</tt></td>
+<td><tt>
 	{% if inquiry.status == "NEW" %}
 	NEW
 	{% elif inquiry.status == "ACC" %}
-	<span style="color:green;">OK</span>
+	<span class="text-success">OK</span>
 	{% elif inquiry.status == "REJ" %}
-	<span style="color:red;">REJ</span>
+	<span class="text-danger">REJ</span>
 	{% elif inquiry.status == "HOLD" %}
-	<span style="color:orange;">HOLD</span>
+	<span class="text-warning">HOLD</span>
 	{% endif %}
+	</tt>
 </td>
 <td>
 	<a href="{% url "edit-inquiry" inquiry.id %}">&#x270e;</a>

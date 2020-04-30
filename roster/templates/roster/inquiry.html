@@ -52,11 +52,11 @@ please send me a reminder.</p>
 			{% if inquiry.status == "NEW" %}
 			Pending
 			{% elif inquiry.status == "ACC" %}
-			<b style="color:green;">Approved</b>
+			<strong class="text-success">Approved</strong>
 			{% elif inquiry.status == "REJ" %}
-			<b style="color:red;">Rejected</b>
+			<strong class="text-danger">Rejected</strong>
 			{% elif inquiry.status == "HOLD" %}
-			<b style="color:orange;">On hold</b>
+			<strong class="text-warning">On hold</strong>
 			{% endif %}
 		</td>
 		<td>{{ inquiry.get_action_type_display }}</td>

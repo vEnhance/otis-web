@@ -4,12 +4,15 @@
 
 {% block layout-content %}
 {% if inquiry_nag > 0 %}
-<p style="color:red;"><i>Note:</i>:
-There are <a href="{% url "list-inquiry" %}">
-	<b>{{ inquiry_nag }} unit inquiries</b></a>
-which haven't been answered yet.</p>
-{% else %}
-<p>Thankfully, there are <b>0 inquiries</b> to process now.</p>
+<div class="alert alert-warning alert-dismissible" role="alert">
+There are
+<a href="{% url "list-inquiry" %}" class="alert-link">
+	{{ inquiry_nag }} unit inquiries</a>
+which haven't been answered yet.
+<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+</button>
+</div>
 {% endif %}
 
 <p>There are {{ items|length }} problem sets

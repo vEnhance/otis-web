@@ -2,13 +2,15 @@
 {% block layout-content %}
 <p>The auto-advancer made the following changes:</p>
 <ul>
-	<li><b style="color:red;">{{ student }}</b> has
-		<b style="color:red;">{{ student.num_units_done }} units</b> done now.</li>
+	<li><strong class="text-info">{{ student }}</strong> has
+		<strong class="text-info">{{ student.num_units_done }} units</strong>
+		done now.</li>
 	<li>The unit {{ finished }} is completed.</li>
 	{% if added %}
-	<li>The unit <b style="color:red;">{{ added }}</b> was unlocked.</li>
+	<li>The unit <strong class="text-success">{{ added }}</strong> was unlocked.</li>
 	{% else %}
-	<li><b style="color:red;">No new unit was unlocked.</b> There wasn't one to unlock.</li>
+	<li><strong class="text-warning">No new unit was unlocked.</strong>
+		There wasn't one to unlock.</li>
 	{% endif %}
 </ul>
 <p>You can close this window.</p>
