@@ -11,7 +11,7 @@ from django.contrib import messages
 from django.views.generic.edit import UpdateView, DeleteView
 from django.views.generic import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Subquery, OuterRef, F, Count
+from django.db.models import Subquery, OuterRef, F, Q, Count
 from django.utils.timezone import now
 from datetime import timedelta
 
@@ -203,7 +203,8 @@ def leaderboard(request):
 	context['students'] = roster.utils\
 			.get_visible_students(request.user)\
 			.filter(legit=True)\
-			.annotate(num_psets = Count('uploadedfile__unit', distinct=True))\
+			.annotate(num_psets = Count('uploadedfile__unit',
+				filter=Q(uploadedfile__category='psets'), distinct=True))\
 			.order_by('-num_units_done')
 	context['num_psets_available'] = True
 
