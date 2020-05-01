@@ -57,7 +57,8 @@ div.form-group > label {
 	font-family: Verdana, Geneva, sans-serif;
 	font-size: 80%;
 	padding-right: 5px;
-	width: 18%;
+	width: 22%;
+	min-width: 6rem;
 }
 div.form-group > div {
 	display: inline-block;
