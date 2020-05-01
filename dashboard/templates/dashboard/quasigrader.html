@@ -23,24 +23,27 @@ They are listed below.</p>
 <table class="table">
 {% for item in items %}
 <tr>
-	<th>
-		#{{ forloop.counter }}
+	<th style="width:3.5em;">
 		<a target="_blank"
-			href="{% url 'auto-advance' item.student.id item.file.unit.id %}">&#x26d1;</a>
+			href="{% url 'auto-advance' item.student.id item.file.unit.id %}">
+			#{{ forloop.counter }}&#x26d1;</a>
 	</th>
-	<td>
-	<a href="{{item.file.url}}"><tt>{{ item.filename }}</tt></a>
-	</td>
-	<td>
-		<a href="{% url 'advance' item.student.id %}">
+	<td><a href="{% url 'advance' item.student.id %}">
 			&#x2694; {{ item.student.name }}</a></td>
-	<td style="font-size:90%;">{{ item.file.unit }}</td>
+	<td>
+		{% if item.student.assistant %}
+		<strong class="text-info">(+{{item.student.assistant.shortname}})</strong>
+		{% endif %}
+		<a href="{{item.file.url}}"><tt>{{ item.filename }}</tt></a>
+		&mdash;
+		{{ item.file.created_at|naturaltime }}
+	</td>
 </tr>
-<tr>
-	<td></td>
-	<td style="font-size:90%;">{{ item.file.created_at|naturaltime }}</td>
-	<td>{% if item.student.assistant %}<b>(+ {{item.student.assistant.shortname}})</b>{% endif %}</td>
-	<td>{{ item.num_done }} of {{ item.num_psets }}</td>
+<tr style="font-size:85%;">
+	<td>{{ item.num_done }}-{{ item.num_psets }}</td>
+	<td><a href="{% url 'uploads' item.student.id item.file.unit.id %}">
+			{{ item.file.unit }}</a></td>
+	<td>{{ item.file.description }}</td>
 </tr>
 {% endfor %}
 </table>
