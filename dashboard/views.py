@@ -168,6 +168,7 @@ def quasigrader(request, num_hours):
 				'num_done' : upload.benefactor.num_units_done,
 				'filename' : name
 				}
+		d['flag_num_not_one'] = (d['num_psets'] - d['num_done'] != 1)
 		context['items'].append(d)
 
 	context['inquiry_nag'] = roster.models.UnitInquiry.objects\

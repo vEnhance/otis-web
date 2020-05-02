@@ -40,7 +40,11 @@ They are listed below.</p>
 	</td>
 </tr>
 <tr style="font-size:85%;">
+	{% if item.flag_num_not_one %}
+	<td><strong>{{ item.num_done }}-{{ item.num_psets }}</strong></td>
+	{% else %}
 	<td>{{ item.num_done }}-{{ item.num_psets }}</td>
+	{% endif %}
 	<td><a href="{% url 'uploads' item.student.id item.file.unit.id %}">
 			{{ item.file.unit }}</a></td>
 	<td>{{ item.file.description }}</td>
