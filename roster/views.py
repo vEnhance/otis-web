@@ -89,7 +89,12 @@ def auto_advance(request, student_id, unit_id):
 	student = utils.get_student(student_id)
 	utils.check_taught_by(request, student)
 	unit = core.models.Unit.objects.get(id=unit_id)
-	assert student.unlocked_units.filter(id=unit_id).exists(), "Not valid for auto unlock"
+
+	if not student.unlocked_units.filter(id=unit_id).exists() \
+			or not student.curriculum.filter(id=unit_id).exists():
+		messages.error(request,
+				"The unit %s is not valid for auto-unlock." % unit)
+		return HttpResponseRedirect(reverse("advance", args=(student_id,)))
 
 	# get next unit to unlock
 	unlockable_units = student.generate_curriculum_queryset()\
@@ -107,7 +112,8 @@ def auto_advance(request, student_id, unit_id):
 	context = {}
 	context["added"] = to_add["group__name"] if to_add is not None else None
 	if context["added"]:
-		context["title"] = "Unlocked " + context["added"]
+		context["title"] = "Unlocked %s for %s" \
+				%(context["added"], student.first_name)
 	else:
 		context["title"] = student.name + " is done!"
 	context["finished"] = str(unit)
