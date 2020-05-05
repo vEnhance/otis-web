@@ -19,6 +19,12 @@ class Assistant(models.Model):
 					"but which is not listed visibly.")
 
 	@property
+	def first_name(self):
+		return self.user.first_name
+	@property
+	def last_name(self):
+		return self.user.last_name
+	@property
 	def name(self):
 		return self.user.get_full_name()
 	def __str__(self):
@@ -75,9 +81,16 @@ class Student(models.Model):
 		return "%s (%s)" %(self.name, self.semester)
 
 	@property
+	def first_name(self):
+		return self.user.first_name
+	@property
+	def last_name(self):
+		return self.user.last_name
+	@property
 	def name(self):
 		if self.user: return self.user.get_full_name() or self.user.username
 		else: return "?"
+
 	@property
 	def get_track(self):
 		if self.assistant is None:
