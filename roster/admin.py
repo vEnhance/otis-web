@@ -48,8 +48,10 @@ class InvoiceIEResource(resources.ModelResource):
 	class Meta:
 		skip_unchanged = True
 		model = roster.models.Invoice
-		fields = ('id', 'student', 'student__user__first_name', 'student__user__last_name', 'student__track',
-				'preps_taught', 'hours_taught', 'total_paid', 'student__semester__name',)
+		fields = ('id', 'student','student__track',
+				'student__user__first_name', 'student__user__last_name',
+				'preps_taught', 'hours_taught', 'adjustment',
+				'total_paid', 'student__semester__name',)
 @admin.register(roster.models.Invoice)
 class InvoiceAdmin(ImportExportModelAdmin):
 	list_display = ('student', 'track', 'total_owed', 'total_paid', 'total_cost', 'updated_at',)
@@ -76,7 +78,7 @@ class UnlistedInline(admin.TabularInline):
 	extra = 0
 class InvoiceInline(admin.StackedInline):
 	model = roster.models.Invoice
-	fields = ('preps_taught', 'hours_taught', 'total_paid',)
+	fields = ('preps_taught', 'hours_taught', 'adjustment', 'total_paid',)
 	readonly_fields = ('student', 'id',)
 @admin.register(roster.models.Student)
 class StudentAdmin(ImportExportModelAdmin):
