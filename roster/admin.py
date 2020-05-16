@@ -92,8 +92,19 @@ class StudentAdmin(ImportExportModelAdmin):
 class UnitInquiryAdmin(admin.ModelAdmin):
 	list_display = ('id', 'status', 'action_type',
 			'unit', 'student', 'explanation',)
-	list_filter = ('status',)
+	list_filter = ('status', 'action_type',)
 	search_fields = ('student__user__first_name',
 			'student__user__last_name', 'student__user__username')
 	list_display_links = ('id',)
 	autocomplete_fields = ('unit', 'student',)
+
+	actions = ['hold_inquiry', 'reject_inquiry', 'accept_inquiry', 'reset_inquiry']
+
+	def hold_inquiry(self, request, queryset):
+		queryset.update(status='HOLD')
+	def reject_inquiry(self, request, queryset):
+		queryset.update(status='REJ')
+	def accept_inquiry(self, request, queryset):
+		queryset.update(status='ACC')
+	def reset_inquiry(self, request, queryset):
+		queryset.update(status='NEW')
