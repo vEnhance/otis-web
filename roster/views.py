@@ -247,7 +247,7 @@ def inquiry(request, student_id):
 					messages.error(request,
 							"You can't have more than 9 unfinished units unlocked at once.")
 				else:
-					messages.success(request, "Inquiry sent and pending approval.")
+					messages.success(request, "Inquiry submitted, should be approved soon!")
 	else:
 		form = forms.InquiryForm()
 	context['form'] = form
