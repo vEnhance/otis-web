@@ -225,19 +225,29 @@ def inquiry(request, student_id):
 			if models.UnitInquiry.objects.filter(unit=inquiry.unit, \
 					student=student, action_type=inquiry.action_type, \
 					created_at__gte = one_day_ago).exists():
-				messages.warning(request, "The same inquiry already exists...")
+				messages.warning(request, "The same inquiry already was "\
+						"submitted within the last day.")
 			else:
 				inquiry.save()
 				# auto-acceptance criteria
 				auto_accept_criteria = (inquiry.action_type == "APPEND") \
 						or (inquiry.action_type == "DROP") \
-						or (inquiry.action_type == "UNLOCK" and \
-						current_inquiries.filter(action_type="UNLOCK").count() <= 3)
-				if auto_accept_criteria is True:
+						or current_inquiries.filter(action_type="UNLOCK").count() <= 3 \
+						or student.unlocked_units.count() <= 4
+				auto_reject_criteria = inquiry.action_type == "UNLOCK" and \
+						(current_inquiries.filter(action_type="UNLOCK", status="NEW").count()
+						+ student.unlocked_units.count()) > 9
+
+				if auto_accept_criteria:
 					inquiry.run_accept()
-					messages.success(request, "Inquiry automatically approved")
+					messages.success(request, "Inquiry automatically approved.")
+				elif auto_reject_criteria:
+					inquiry.status = "REJ"
+					inquiry.save()
+					messages.error(request,
+							"You can't have more than 9 unfinished units unlocked at once.")
 				else:
-					messages.success(request, "Inquiry sent")
+					messages.success(request, "Inquiry sent and pending approval.")
 	else:
 		form = forms.InquiryForm()
 	context['form'] = form
