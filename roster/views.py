@@ -221,12 +221,12 @@ def inquiry(request, student_id):
 			inquiry = form.save(commit=False)
 			inquiry.student = student
 			# check if exists already and created recently
-			one_day_ago = timezone.now() - datetime.timedelta(days=1)
+			one_day_ago = timezone.now() - datetime.timedelta(seconds=90)
 			if models.UnitInquiry.objects.filter(unit=inquiry.unit, \
 					student=student, action_type=inquiry.action_type, \
 					created_at__gte = one_day_ago).exists():
 				messages.warning(request, "The same inquiry already was "\
-						"submitted within the last day.")
+						"submitted within the last 90 seconds.")
 			else:
 				inquiry.save()
 				# auto-acceptance criteria
