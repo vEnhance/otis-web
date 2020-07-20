@@ -1,4 +1,6 @@
 from django.contrib import admin, auth
+from django.db.models import F, FloatField
+from django.db.models.functions import Cast
 from import_export import resources, widgets, fields
 from import_export.admin import ImportExportModelAdmin
 
@@ -52,6 +54,25 @@ class InvoiceIEResource(resources.ModelResource):
 				'student__user__first_name', 'student__user__last_name',
 				'preps_taught', 'hours_taught', 'adjustment',
 				'total_paid', 'student__semester__name',)
+class OwedFilter(admin.SimpleListFilter):
+	title = 'remaining balance'
+	parameter_name = 'has_owed'
+
+	def lookups(self, request, model_admin):
+		return [("incomplete", "Incomplete"), ("paid", "Paid in full")]
+	def queryset(self, request, queryset):
+		if self.value() is None:
+			return queryset
+		else:
+			queryset = queryset.annotate(owed =
+					Cast(F("student__semester__prep_rate") * F("preps_taught")
+					+ F("student__semester__hour_rate") * F("hours_taught")
+					+ F("adjustment") - F("total_paid"), FloatField()))
+			if self.value() == "incomplete":
+				return queryset.filter(owed__gt=0)
+			elif self.value() == "paid":
+				return queryset.filter(owed__lte=0)
+
 @admin.register(roster.models.Invoice)
 class InvoiceAdmin(ImportExportModelAdmin):
 	list_display = ('student', 'track', 'total_owed', 'total_paid', 'total_cost', 'updated_at',)
@@ -59,7 +80,7 @@ class InvoiceAdmin(ImportExportModelAdmin):
 	search_fields = ('student__user__first_name', 'student__user__last_name',)
 	autocomplete_fields = ('student',)
 	ordering = ('student',)
-	list_filter = ('student__semester__active', 'student__track', 'student__semester', 'student__legit')
+	list_filter = (OwedFilter, 'student__semester__active', 'student__semester', 'student__legit', 'student__track',)
 	resource_class = InvoiceIEResource
 
 ## STUDENT
