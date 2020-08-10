@@ -31,8 +31,8 @@ class Semester(models.Model):
 			help_text = "The entry code for GradeScope this semester.")
 	zoom_room_url = models.CharField(max_length=32, blank=True,
 			help_text = "The entry point for the Zoom meeting room.")
-	facebook_url = models.CharField(max_length=128, blank=True,
-			help_text = "The link to the Facebook group for this year.")
+	social_url = models.CharField(max_length=128, blank=True,
+			help_text = "The link to social platform for this year.")
 
 	calendar_url_meets_evan = models.TextField(blank=True,
 			help_text = "Link to calendar for students with meetings with Evan")
