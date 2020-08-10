@@ -77,6 +77,7 @@ and their links are highlighted in purple.
 	{# <li><a href="{% url "uploads" student.id 0 %}">Miscellaneous uploads</a></li> #}
 	<li><a href="{% url "currshow" student.id %}">Class selection</a></li>
 	{% if omniscient %}
+	<li><a href="{% url "synopsis" %}">Unit catalog</a></li>
 	<li> <a href="{% url "advance" student.id %}">Advance student</a> (instructor)</li>
 	{% endif %}
 	<li><a href="{% url "downloads" student.id %}">Semester downloads
@@ -86,6 +87,9 @@ and their links are highlighted in purple.
 <td valign="top" width="50%">
 	<h3>Logistics</h3>
 	<ul>
+	{% if semester.show_invoices %}
+	<li><a href="{% url "invoice" student.id %}">Invoice</a></li>
+	{% endif %}
 	{% if semester.active and student.meets_evan %}
 	<li>
 	<a href="{{ semester.calendar_url_meets_evan }}" target="_blank">
@@ -98,9 +102,8 @@ and their links are highlighted in purple.
 		OTIS calendar (no meetings)</a>
 	</li>
 	{% endif %}
-	{% if semester.show_invoices %}
-	<li><a href="{% url "invoice" student.id %}">Invoice</a></li>
-	{% endif %}
+	<li><a href="//web.evanchen.cc/upload/otis-syllabus.pdf">Syllabus</a></li>
+	<li><a href="//web.evanchen.cc/private/parent-info.pdf">Payment info</a></li>
 	</ul>
 </td>
 </tr>
