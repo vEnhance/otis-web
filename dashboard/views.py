@@ -164,7 +164,7 @@ def quasigrader(request, num_hours):
 		d = {'student' : upload.benefactor,
 				'file' : upload,
 				'rows' : upload.benefactor.generate_curriculum_rows(True),
-				'num_psets' : num_psets[upload.benefactor.id],
+				'num_psets' : num_psets.get(upload.benefactor.id, 0),
 				'num_done' : upload.benefactor.num_units_done,
 				'filename' : name
 				}
