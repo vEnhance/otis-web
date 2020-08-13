@@ -164,11 +164,12 @@ def quasigrader(request, num_hours):
 		d = {'student' : upload.benefactor,
 				'file' : upload,
 				'rows' : upload.benefactor.generate_curriculum_rows(True),
-				'num_psets' : num_psets.get(upload.benefactor.id, 0),
+				'num_psets' : num_psets.get(upload.benefactor.id, None),
 				'num_done' : upload.benefactor.num_units_done,
 				'filename' : name
 				}
-		d['flag_num_not_one'] = (d['num_psets'] - d['num_done'] != 1)
+		d['flag_num_not_one'] = d['num_psets'] is not None \
+			and (d['num_psets'] - d['num_done'] != 1)
 		context['items'].append(d)
 
 	context['inquiry_nag'] = roster.models.UnitInquiry.objects\
