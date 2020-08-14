@@ -5,7 +5,7 @@
 <table class="table">
 {% for unit, students in chart.items %}
 <tr class="subject{{ unit.group.subject }}">
-	<th>{{ forloop.counter }}</th>
+	<th>{{ unit.position }}</th>
 	<td>{{ unit.group.name }}</td>
 	<td>{{ unit.code }}</td>
 	<td>{{ students|length }}</td>
