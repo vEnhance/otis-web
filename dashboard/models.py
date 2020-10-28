@@ -13,7 +13,7 @@ from django.forms import ValidationError
 def content_file_name(instance, filename):
 	now = datetime.datetime.now()
 	return os.path.join(instance.category, instance.owner.username,\
-			now.strftime("%Y-%m"), filename)
+			now.strftime("%Y-%m-%d-%H%M%S"), filename)
 
 class UploadedFile(models.Model):
 	"""An uploaded file, for example a transcript or homework solutions."""
