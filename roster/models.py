@@ -51,7 +51,9 @@ class Student(models.Model):
 			help_text = "The choice of units that this student will work on")
 	unlocked_units = models.ManyToManyField(core.models.Unit, blank = True,
 			related_name = 'students_unlocked',
-			help_text = "A list of units that the student may work on.")
+			help_text = "A list of units that the student is actively working on. " \
+			"Once the student submits a problem set, " \
+			"delete it from this list to mark them as complete.")
 	num_units_done = models.SmallIntegerField(default = 0,
 			help_text = "The number of completed units. "
 			"This is set manually for Evan's book-keeping.")
