@@ -64,9 +64,7 @@ class Student(models.Model):
 			choices = (
 				("A", "Weekly"),
 				("B", "Biweekly"),
-				("BW", "Biwk. WS"),
 				("C", "Corr."),
-				("CW", "Corr. WS"),
 				("E", "Ext."),
 				("G", "Grad"),
 				("N", "N.A."),
