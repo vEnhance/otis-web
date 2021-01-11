@@ -47,6 +47,7 @@ INSTALLED_APPS = [
 	'dashboard',
 	'exams',
 	'roster',
+	'arch',
 	'otisweb',
 	'django.contrib.admin',
 	'django.contrib.auth',
