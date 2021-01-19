@@ -11,4 +11,5 @@ otisweb/static/answersheets/*.pdf
 lib/
 venv
 venv/
+.venv
 evanchen-cc-*.json
