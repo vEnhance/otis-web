@@ -53,9 +53,9 @@ class ProblemUpdate(LoginRequiredMixin, RevisionMixin, UpdateView):
 	model = models.Problem
 	form_class = forms.ProblemUpdateFormWithReason
 	def get_success_url(self):
-		return reverse_lazy("list_problems", args=(self.object.group.id,))
+		return reverse_lazy("hint_list", args=(self.object.id,))
 	def form_valid(self, form):
-		reversion.set_comment(form.cleaned_data['reason'] or form.cleaned_data['content'])
+		reversion.set_comment(form.cleaned_data['reason'] or form.cleaned_data['description'])
 		return super().form_valid(form)
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)

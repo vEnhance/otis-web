@@ -25,6 +25,7 @@ please help future students by
 
 <ul>
 	<li><a href="{% url "hint_create" problem.id %}">Add hint</a></li>
+	<li><a href="{% url "problem_update" problem.id %}">Edit problem</a></li>
 	<li><a href="{% url "problem_list" problem.group.id %}">Back to {{ problem.group }}</a></li>
 </ul>
 
