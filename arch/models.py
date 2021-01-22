@@ -19,8 +19,6 @@ class Problem(models.Model):
 	group = models.ForeignKey(core.models.UnitGroup,
 			on_delete = models.CASCADE,
 			help_text = "The unit to which this problem belongs.")
-	class Meta:
-		ordering = ('source', 'description',)
 	def __str__(self):
 		return str(self.group) + ": " + (self.source or self.description)
 	def get_absolute_url(self):

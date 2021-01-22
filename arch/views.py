@@ -18,7 +18,7 @@ class ProblemList(LoginRequiredMixin, ListView):
 	context_object_name = "problem_list"
 	def get_queryset(self):
 		group = core.models.UnitGroup.objects.get(id=self.kwargs['group'])
-		return models.Problem.objects.filter(group=group)
+		return models.Problem.objects.filter(group=group).order_by('source')
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		context['group'] = core.models.UnitGroup.objects.get(id=self.kwargs['group'])
