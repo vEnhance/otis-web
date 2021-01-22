@@ -22,13 +22,15 @@ class Problem(models.Model):
 		ordering = ('source', 'description',)
 	def __str__(self):
 		return str(self.group) + ": " + (self.source or self.description)
+	def get_absolute_url(self):
+		return reverse_lazy("hint_list", args=(self.id,))
 
 @reversion.register()
 class Hint(models.Model):
 	problem = models.ForeignKey(Problem,
 			on_delete = models.CASCADE,
 			help_text = r"The container of the current hint.")
-	keywords = models.CharField(max_length = 255, default='', blank=False,
+	keywords = models.CharField(max_length = 255, default='', blank=True,
 			help_text = r"A comma-separated list of keywords that a solver could look at " \
 			"to help them guess whether the hint is relevant or not. " \
 			"These are viewable immediately, so no spoilers here.")
