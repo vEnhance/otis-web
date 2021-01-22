@@ -4,4 +4,7 @@
 {% include "generic-form.html" %}
 
 <p><a href="{% url "problem_list" group.id %}">Back to problems for {{ group }}</a></p>
+<p>All edits are tracked by timestamp and username,
+so if for some reason you need to rewind some edits,
+please contact a staff member for assistance.</p>
 {% endblock %}
