@@ -62,6 +62,7 @@ INSTALLED_APPS = [
 	'hijack',
 	'compat',
 	'import_export',
+	'reversion',
 ]
 
 MIDDLEWARE = [

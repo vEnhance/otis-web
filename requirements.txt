@@ -6,6 +6,7 @@ django-import-export>=2.0.1
 django-hijack>=2.1.10
 django-hijack-admin>=2.1.10
 django-registration>=3.1
+django_reversion>=3.0.8
 django-storages[google]>=1.9.1
 mysqlclient>=1.4.6
 wheel>=0.33.1
