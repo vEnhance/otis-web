@@ -2,7 +2,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.db.models import Subquery, OuterRef, Q, ExpressionWrapper, BooleanField
+from django.db.models import Subquery, OuterRef, Q, ExpressionWrapper, BooleanField, Count
 from django.urls import reverse_lazy
 from reversion.views import RevisionMixin
 import reversion
@@ -20,6 +20,7 @@ class ProblemList(LoginRequiredMixin, ListView):
 		return models.Problem.objects.filter(group=group)\
 				.annotate(unsourced = ExpressionWrapper(
 					Q(source=''), output_field = BooleanField()))\
+				.annotate(num_hints = Count('hint'))\
 				.order_by('unsourced', 'source')
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)

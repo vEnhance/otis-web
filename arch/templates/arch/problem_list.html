@@ -17,6 +17,8 @@ to help you get unstuck on problems.</p>
 		{{problem.source|default:"(no source)"}}
 	</a>
 	</b> &mdash;
+	{{ problem.num_hints }}
+	hints.
 	<a href="{% url "problem_update" problem.id %}">(edit)</a>
 	<a href="{% url "problem_delete" problem.id %}">(delete)</a>
 </p>
