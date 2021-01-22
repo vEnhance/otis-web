@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -13,7 +14,7 @@ import core
 
 # Create your views here.
 
-class ProblemList(ListView):
+class ProblemList(LoginRequiredMixin, ListView):
 	context_object_name = "problem_list"
 	def get_queryset(self):
 		group = core.models.UnitGroup.objects.get(id=self.kwargs['group'])
@@ -23,7 +24,7 @@ class ProblemList(ListView):
 		context['group'] = core.models.UnitGroup.objects.get(id=self.kwargs['group'])
 		return context
 
-class HintList(ListView):
+class HintList(LoginRequiredMixin, ListView):
 	context_object_name = "hint_list"
 	def get_queryset(self):
 		self.problem = models.Problem.objects.get(id=self.kwargs['problem'])
@@ -32,11 +33,11 @@ class HintList(ListView):
 		context = super().get_context_data(**kwargs)
 		context['problem'] = self.problem
 		return context
-class HintDetail(DetailView):
+class HintDetail(LoginRequiredMixin, DetailView):
 	context_object_name = "hint"
 	model = models.Hint
 
-class HintUpdate(RevisionMixin, UpdateView):
+class HintUpdate(LoginRequiredMixin, RevisionMixin, UpdateView):
 	context_object_name = "hint"
 	model = models.Hint
 	form_class = forms.HintUpdateFormWithReason
@@ -47,7 +48,7 @@ class HintUpdate(RevisionMixin, UpdateView):
 		context = super().get_context_data(**kwargs)
 		context['problem'] = self.object.problem
 		return context
-class ProblemUpdate(RevisionMixin, UpdateView):
+class ProblemUpdate(LoginRequiredMixin, RevisionMixin, UpdateView):
 	context_object_name = "problem"
 	model = models.Problem
 	form_class = forms.ProblemUpdateFormWithReason
@@ -61,7 +62,7 @@ class ProblemUpdate(RevisionMixin, UpdateView):
 		context['group'] = self.object.group
 		return context
 
-class HintCreate(RevisionMixin, CreateView):
+class HintCreate(LoginRequiredMixin, RevisionMixin, CreateView):
 	context_object_name = "hint"
 	fields = ('problem', 'keywords', 'number', 'content',)
 	model = models.Hint
@@ -74,7 +75,7 @@ class HintCreate(RevisionMixin, CreateView):
 		context = super().get_context_data(**kwargs)
 		context['problem'] = models.Problem.objects.get(id=self.kwargs['problem'])
 		return context
-class ProblemCreate(RevisionMixin, CreateView):
+class ProblemCreate(LoginRequiredMixin, RevisionMixin, CreateView):
 	context_object_name = "problem"
 	fields = ('group', 'source', 'description',)
 	model = models.Problem
@@ -88,7 +89,7 @@ class ProblemCreate(RevisionMixin, CreateView):
 		context['group'] = core.models.UnitGroup.objects.get(id=self.kwargs['group'])
 		return context
 
-class HintDelete(RevisionMixin, DeleteView):
+class HintDelete(LoginRequiredMixin, RevisionMixin, DeleteView):
 	context_object_name = "hint"
 	model = models.Hint
 	def get_success_url(self):
