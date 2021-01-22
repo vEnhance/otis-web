@@ -11,6 +11,16 @@
 {% load bootstrap4 %}
 {% bootstrap_css %}
 {% bootstrap_javascript jquery='full' %}
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({tex2jax: 
+	{
+		inlineMath: [['$','$'], ['\\(','\\)']],
+		displayMath: [['\\[', '\\]']],
+		processEnvironments: true
+	}
+});
+</script>
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mate">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Verdana">
