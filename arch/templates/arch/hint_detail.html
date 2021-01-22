@@ -1,21 +1,21 @@
 {% extends 'layout.html' %}
 {% load static %}
-{% block title %}Hint {{ object.number }} for {{ object.problem }}{% endblock %}
+{% block title %}Hint {{ hint.number }} for {{ hint.problem.get_source }}{% endblock %}
 
 {% block layout-content %}
 <p>Here is your hint:</p>
 <div class="alert alert-info">
-{{ object.content }}
+{{ hint.content }}
 </div>
 
 <ul>
-<li><a href="{% url "hint_list" object.problem.id %}">
-		Back to {{ object.problem }}</a>
+<li><a href="{% url "hint_list" hint.problem.id %}">
+		Back to {{ hint.problem.get_source }}</a>
 </ul>
 <hr />
 <ul>
-<li><a href="{% url "hint_create" object.problem.id %}">Add another hint</a></li>
-<li><a href="{% url "hint_update" object.id %}">Update hint</a></li>
-<li><a href="{% url "hint_delete" object.id %}">Delete hint</a></li>
+<li><a href="{% url "hint_create" hint.problem.id %}">Add another hint</a></li>
+<li><a href="{% url "hint_update" hint.id %}">Update hint</a></li>
+<li><a href="{% url "hint_delete" hint.id %}">Delete hint</a></li>
 </li>
 {% endblock %}
