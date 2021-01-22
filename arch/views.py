@@ -96,4 +96,9 @@ class HintDelete(LoginRequiredMixin, RevisionMixin, DeleteView):
 	model = models.Hint
 	def get_success_url(self):
 		return reverse_lazy("hint_list", args=(self.object.problem.id,))
+class ProblemDelete(LoginRequiredMixin, RevisionMixin, DeleteView):
+	context_object_name = "problem"
+	model = models.Problem
+	def get_success_url(self):
+		return reverse_lazy("problem_list", args=(self.object.group.id,))
 
