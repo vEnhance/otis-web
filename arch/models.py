@@ -29,15 +29,15 @@ class Hint(models.Model):
 			on_delete = models.CASCADE,
 			help_text = r"The container of the current hint.")
 	keywords = models.CharField(max_length = 255, default='', blank=False,
-			help_text = r"A list of keywords that a solver could look at " \
+			help_text = r"A comma-separated list of keywords that a solver could look at " \
 			"to help them guess whether the hint is relevant or not. " \
 			"These are viewable immediately, so no spoilers here.")
 	number = models.PositiveIntegerField(
 			help_text = r"A number from 0 to 100 used to indicate an " \
-			r"ordering for the hints." \
+			r"ordering for the hints. " \
 			r"Here a number 0 means a small nudge given to someone at the very start " \
 			r"whereas 100 means a hint given to someone who was read all previous hints " \
-			r"or is close to the end of the problem." \
+			r"or is close to the end of the problem. " \
 			r"Do your best to make up an extrapolation for everything in between. " \
 			r"A good idea is to give a sequence of hints with nearby numbers, say 20/21/22, " \
 			r"each of which elaborates on the previous hint." \
