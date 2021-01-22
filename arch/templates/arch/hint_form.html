@@ -1,0 +1,7 @@
+{% extends 'layout.html' %}
+{% block title %}Create Hint{% endblock %}
+{% block layout-content %}
+{% include "generic-form.html" %}
+<hr />
+<p><a href="{% url "hint_list" problem.id %}">Back to hints for {{ problem }}</a></p>
+{% endblock %}

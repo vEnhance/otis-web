@@ -1,0 +1,7 @@
+{% extends 'layout.html' %}
+{% block title %}Create Problem{% endblock %}
+{% block layout-content %}
+{% include "generic-form.html" %}
+
+<p><a href="{% url "problem_list" group.id %}">Back to problems for {{ group }}</a></p>
+{% endblock %}

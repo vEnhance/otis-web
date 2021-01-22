@@ -1,0 +1,7 @@
+{% extends 'layout.html' %}
+{% block title %}Update Problem{% endblock %}
+{% block layout-content %}
+{% include "generic-form.html" %}
+<hr />
+<p><a href="{% url problem %}">Back to {{ problem }}</a></p>
+{% endblock %}

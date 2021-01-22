@@ -1,0 +1,19 @@
+{% extends 'layout.html' %}
+{% load static %}
+{% block title %}Hint {{ object.number }} for {{ object.problem }}{% endblock %}
+
+{% block layout-content %}
+<div class="alert alert-info">
+{{ object.content }}
+</div>
+
+<hr />
+
+<ul>
+<li><a href="{% url "hint_list" object.problem.id %}">
+		Back to {{ object.problem }}</a>
+<li><a href="{% url "hint_update" object.id %}">Update hint</a></li>
+<li><a href="{% url "hint_delete" object.id %}">Delete hint</a></li>
+</li>
+
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends 'layout.html' %}
+{% load static %}
+{% block title %}Available for {{ group }}{% endblock %}
+
+{% block layout-content %}
+
+{% if problem_list %}
+<p>Hints have been written for the following problems:</p>
+<ul>
+{% for problem in problem_list %}
+<li><a href="{% url "hint_list" problem.id %}">
+		{{problem.source|default:"(no source)"}}
+	</a>:
+	{{ problem.description }}
+</li>
+{% endfor %}
+</ul>
+{% else %}
+<p><i>There aren't any problems with hints here yet.
+Want to <a href="{% url "problem_create" group.id %}">add some</a>?</i></p>
+{% endif %}
+<hr />
+<ul>
+	<li><a href="{% url "problem_create" group.id %}">Add problem</a></li>
+</ul>
+
+{% endblock %}

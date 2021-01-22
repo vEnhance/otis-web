@@ -1,0 +1,27 @@
+{% extends 'layout.html' %}
+{% load static %}
+{% block title %}Hints for {{ problem }}{% endblock %}
+
+{% block layout-content %}
+
+{% if hint_list %}
+{% for hint in hint_list %}
+<h2><a href="{% url "hint_detail" hint.id %}">Hint {{hint.number}}%</a></h2>
+{% if hint.keywords %}<i>Keywords</i>: {{ hint.keywords }}{% endif %}
+<hr />
+{% endfor %}
+{% else %}
+<p><i>There aren't any hints here yet.
+If you've solved this problem,
+please help future students by
+<a href="{% url "hint_create" problem.id %}">adding a hint</a></i>.</p>
+</i>
+<hr />
+{% endif %}
+
+<ul>
+	<li><a href="{% url "hint_create" problem.id %}">Add hint</a></li>
+	<li><a href="{% url "problem_list" problem.group.id %}">Back to {{ problem.group }}</a></li>
+</ul>
+
+{% endblock %}
