@@ -4,10 +4,13 @@
 {% csrf_token %}
 
 {% if form.non_field_errors %}
-<div class="alert alert-error">
+<div class="alert alert-danger" role="alert">
+	<p>The following errors were thrown:</p>
+	<ul>
 	{% for err in form.non_field_errors %}
-	<p>{{ err }}</p>
+	<li>{{ err }}</li>
 	{% endfor %}
+	</ul>
 </div>
 {% endif %}
 
