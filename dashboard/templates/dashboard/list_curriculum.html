@@ -55,6 +55,14 @@ $("#hide-locked-units").click(function() {
 	{% else %}
 		<td>&mdash;</td>
 	{% endif %}
+
+	{# ARCH #}
+	{% if row.is_visible or row.num_uploads > 0 %}
+		<td><a href="{% url "problem_list" row.unit.group.id %}">
+			ARCH</a></td>
+	{% else %}
+		<td>&mdash;</td>
+	{% endif %}
 </tr>
 {% endfor %}
 </table>
