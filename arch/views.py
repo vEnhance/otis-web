@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.views.generic import ListView
+from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.db.models import Subquery, OuterRef
 from django.urls import reverse_lazy
@@ -13,45 +13,77 @@ import core
 
 # Create your views here.
 
-class ListProblems(ListView):
+class ProblemList(ListView):
+	context_object_name = "problem_list"
 	def get_queryset(self):
 		group = core.models.UnitGroup.objects.get(id=self.kwargs['group'])
-		return models.Problem.objects.filter(group=group)\
-				.order_by(problem_source, description)
+		return models.Problem.objects.filter(group=group)
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context['group'] = core.models.UnitGroup.objects.get(id=self.kwargs['group'])
+		return context
 
-class ListHints(ListView):
+class HintList(ListView):
+	context_object_name = "hint_list"
 	def get_queryset(self):
-		problem  = models.Problem.objects.get(id=self.kwargs['problem'])
-		sq = models.Hint.objects.filter(number=OuterRef('number'))\
-				.order_by('-created_at').values('id')[:1]
-		return models.Hint.objects.filter(problem=problem).filter(id=Subquery(sq))
-
-class UpdateHint(RevisionMixin, UpdateView):
+		self.problem = models.Problem.objects.get(id=self.kwargs['problem'])
+		return models.Hint.objects.filter(problem=self.problem)
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context['problem'] = self.problem
+		return context
+class HintDetail(DetailView):
+	context_object_name = "hint"
 	model = models.Hint
-	form_class = forms.HintFormWithReason
-	def get_success_url(self):
-		return reverse_lazy("list_hints", args=(self.object.problem.id,))
+
+class HintUpdate(RevisionMixin, UpdateView):
+	context_object_name = "hint"
+	model = models.Hint
+	form_class = forms.HintUpdateFormWithReason
 	def form_valid(self, form):
 		reversion.set_comment(form.cleaned_data['reason'] or form.cleaned_data['content'])
 		return super(UpdateHint, self).form_valid(form)
 
-class UpdateProblem(RevisionMixin, UpdateView):
+class ProblemUpdate(RevisionMixin, UpdateView):
+	context_object_name = "problem"
 	model = models.Problem
-	form_class = forms.ProblemFormWithReason
+	form_class = forms.ProblemUpdateFormWithReason
 	def get_success_url(self):
 		return reverse_lazy("list_problems", args=(self.object.group.id,))
 	def form_valid(self, form):
 		reversion.set_comment(form.cleaned_data['reason'] or form.cleaned_data['content'])
 		return super(UpdateHint, self).form_valid(form)
 
-class CreateHint(RevisionMixin, CreateView):
-	fields = ('keywords', 'number', 'content',)
+class HintCreate(RevisionMixin, CreateView):
+	context_object_name = "hint"
+	fields = ('problem', 'keywords', 'number', 'content',)
 	model = models.Hint
-class CreateProblem(RevisionMixin, CreateView):
-	fields = ('source', 'description',)
+	def get_initial(self):
+		initial = super(HintCreate, self).get_initial()
+		initial = initial.copy()
+		initial['problem'] = self.kwargs['problem']
+		return initial
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context['problem'] = models.Problem.objects.get(id=self.kwargs['problem'])
+		return context
+class ProblemCreate(RevisionMixin, CreateView):
+	context_object_name = "problem"
+	fields = ('group', 'source', 'description',)
 	model = models.Problem
+	def get_initial(self):
+		initial = super(ProblemCreate, self).get_initial()
+		initial = initial.copy()
+		initial['group'] = self.kwargs['group']
+		return initial
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context['group'] = core.models.UnitGroup.objects.get(id=self.kwargs['group'])
+		return context
 
-class DeleteHint(RevisionMixin, DeleteView):
+class HintDelete(RevisionMixin, DeleteView):
+	context_object_name = "hint"
 	model = models.Hint
-class DeleteProblem(RevisionMixin, DeleteView):
+class ProblemDelete(RevisionMixin, DeleteView):
+	context_object_name = "problem"
 	model = models.Problem

@@ -1,14 +1,15 @@
-from django.conf.urls import url
+from django.urls import path
 
 from . import views
 
 urlpatterns = [
-	url(r'problem/(?P<group>[0-9]+)/$', views.ListProblems.as_view(), name='list_problems'),
-	url(r'problem/(?P<group>[0-9]+)/create$', views.CreateProblem.as_view(), name='create_problem'),
-	url(r'problem/update/(?P<pk>[0-9]+)/$', views.UpdateProblem.as_view(), name='edit_problem'),
-	url(r'problem/delete/(?P<pk>[0-9]+)/$', views.DeleteProblem.as_view(), name='delete_problem'),
-	url(r'hint/(?P<problem>[0-9]+)/$', views.ListHints.as_view(), name='list_hints'),
-	url(r'hint/(?P<problem>[0-9]+)/create$', views.CreateHint.as_view(), name='create_hint'),
-	url(r'hint/update/(?P<pk>[0-9]+)/$', views.UpdateHint.as_view(), name='edit_hint'),
-	url(r'hint/delete/(?P<pk>[0-9]+)/$', views.DeleteHint.as_view(), name='delete_hint'),
+	path(r'problem/<int:group>/', views.ProblemList.as_view(), name='problem_list'),
+	path(r'problem/<int:group>/create/', views.ProblemCreate.as_view(), name='problem_create'),
+	path(r'problem/update/<int:pk>/', views.ProblemUpdate.as_view(), name='problem_update'),
+	path(r'problem/delete/<int:pk>/', views.ProblemDelete.as_view(), name='problem_delete'),
+	path(r'hint/view/<int:pk>/', views.HintDetail.as_view(), name='hint_detail'),
+	path(r'hints/<int:problem>/', views.HintList.as_view(), name='hint_list'),
+	path(r'hints/<int:problem>/create', views.HintCreate.as_view(), name='hint_create'),
+	path(r'hint/update/<int:pk>/', views.HintUpdate.as_view(), name='hint_update'),
+	path(r'hint/delete/<int:pk>/', views.HintDelete.as_view(), name='hint_delete'),
 	]
