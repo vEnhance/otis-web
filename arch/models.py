@@ -53,7 +53,6 @@ class Hint(models.Model):
 			help_text = "The content of the hint. LaTeX rendering is okay."
 			)
 	class Meta:
-		ordering = ('number',)
 		unique_together = ('problem', 'number',)
 	def __str__(self):
 		return "Hint %d for %s" %(self.number, self.problem)
