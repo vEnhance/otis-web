@@ -34,7 +34,11 @@ class Hint(models.Model):
 	keywords = models.CharField(max_length = 255, default='', blank=True,
 			help_text = r"A comma-separated list of keywords that a solver could look at " \
 			"to help them guess whether the hint is relevant or not. " \
-			"These are viewable immediately, so no spoilers here.")
+			"These are viewable immediately, so no spoilers here. " \
+			"Examples are `getting started`, `solution set`,"\
+			"`converse direction`, `construction`, etc. " \
+			"Not all problems go well with keywords, so you can leave this " \
+			"blank if you can't think of anything useful to write.")
 	number = models.PositiveIntegerField(
 			help_text = r"A number from 0 to 100 used to indicate an " \
 			r"ordering for the hints. " \
