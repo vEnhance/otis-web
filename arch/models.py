@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.urls import reverse_lazy
 import core
 import reversion
 
@@ -52,3 +53,6 @@ class Hint(models.Model):
 		unique_together = ('problem', 'number',)
 	def __str__(self):
 		return "Hint %d for %s" %(self.number, self.problem)
+
+	def get_absolute_url(self):
+		return reverse_lazy("hint_detail", args=(self.id,))
