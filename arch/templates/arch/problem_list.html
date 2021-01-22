@@ -14,7 +14,7 @@ to help you get unstuck on problems.</p>
 <p>
 	<b>
 	<a href="{% url "hint_list" problem.id %}">
-		{{problem.source|default:"(no source)"}}
+		{{problem.get_source}}
 	</a>
 	</b> &mdash;
 	{{ problem.num_hints }}

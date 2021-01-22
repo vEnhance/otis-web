@@ -23,6 +23,8 @@ class Problem(models.Model):
 		return str(self.group) + ": " + (self.source or self.description)
 	def get_absolute_url(self):
 		return reverse_lazy("hint_list", args=(self.id,))
+	def get_source(self):
+		return self.source or "(no source)"
 
 @reversion.register()
 class Hint(models.Model):
