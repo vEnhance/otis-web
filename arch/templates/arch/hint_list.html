@@ -4,6 +4,10 @@
 
 {% block layout-content %}
 
+<h1>{{ problem.source }}</h1>
+<h3>{{ problem.description }}</h3>
+<hr />
+
 {% if hint_list %}
 <p>The following hints are available for this problem.</p>
 {% for hint in hint_list %}
