@@ -13,6 +13,7 @@ from .views import OTISRegistrationView
 
 urlpatterns = [
 	url(r'^admin/', admin.site.urls),
+	url(r'^arch/', include('arch.urls')),
 	url(r'^dash/', include('dashboard.urls')),
 	url(r'^roster/', include('roster.urls')),
 	url(r'^core/', include('core.urls')),
