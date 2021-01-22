@@ -11,10 +11,16 @@ to help you get unstuck on problems.</p>
 <p>Hints have been written for the following problems:</p>
 {% for problem in problem_list %}
 <div class="alert alert-success">
-<h2><a href="{% url "hint_list" problem.id %}">
+<p>
+	<b>
+	<a href="{% url "hint_list" problem.id %}">
 		{{problem.source|default:"(no source)"}}
-	</a></h2>
-	{{ problem.description }}
+	</a>
+	</b> &mdash;
+	<a href="{% url "problem_update" problem.id %}">(edit)</a>
+	<a href="{% url "problem_delete" problem.id %}">(delete)</a>
+</p>
+	<p>{{ problem.description }}</p>
 </div>
 {% endfor %}
 {% else %}
