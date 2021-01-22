@@ -2,9 +2,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.db.models import Subquery, OuterRef
+from django.db.models import Subquery, OuterRef, Q, ExpressionWrapper, BooleanField
 from django.urls import reverse_lazy
-from django import forms
 from reversion.views import RevisionMixin
 import reversion
 
@@ -18,7 +17,10 @@ class ProblemList(LoginRequiredMixin, ListView):
 	context_object_name = "problem_list"
 	def get_queryset(self):
 		group = core.models.UnitGroup.objects.get(id=self.kwargs['group'])
-		return models.Problem.objects.filter(group=group).order_by('source')
+		return models.Problem.objects.filter(group=group)\
+				.annotate(unsourced = ExpressionWrapper(
+					Q(source=''), output_field = BooleanField()))\
+				.order_by('unsourced', 'source')
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		context['group'] = core.models.UnitGroup.objects.get(id=self.kwargs['group'])
