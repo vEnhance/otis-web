@@ -266,8 +266,9 @@ class ListInquiries(PermissionRequiredMixin, ListView):
 	permission_required = 'is_staff'
 	model = models.UnitInquiry
 	def get_queryset(self):
-		queryset = models.UnitInquiry.objects.filter(
-				created_at__gte = timezone.now() - datetime.timedelta(days=7))
+		queryset = models.UnitInquiry.objects\
+				.filter(created_at__gte = timezone.now() - datetime.timedelta(days=7))\
+				.exclude(status="ACC")
 
 		# some amazing code vv
 		count_unlock = models.UnitInquiry.objects\
