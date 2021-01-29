@@ -11,4 +11,4 @@ class ProblemUpdateFormWithReason(forms.ModelForm):
 	reason = forms.CharField(max_length=255, help_text = "Reason for editing.", required = False)
 	class Meta:
 		model = models.Problem
-		fields = ('source', 'description', 'reason',)
+		fields = ('source', 'description', 'aops_url', 'reason',)

@@ -8,7 +8,7 @@ import reversion
 
 @reversion.register()
 class Problem(models.Model):
-	source = models.CharField(max_length = 255,
+	source = models.CharField(max_length = 64,
 			help_text = r"The source of the problem, such as `TSTST 2020/3`." \
 			r"If in doubt on formatting, follow what is written on the handout.",
 			blank = True)
@@ -16,6 +16,9 @@ class Problem(models.Model):
 			help_text = r"A short description of the problem, e.g. `Quirky triangles.`. "\
 			r"Most important if the problem does not have a source given. " \
 			r"Use sentence case.")
+	aops_url = models.URLField(max_length = 128,
+			help_text = "Hyperlink to problem on Art of Problem Solving. Include HTTPS.",
+			blank = True)
 	group = models.ForeignKey(core.models.UnitGroup,
 			on_delete = models.CASCADE,
 			help_text = "The unit to which this problem belongs.")

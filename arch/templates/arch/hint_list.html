@@ -6,6 +6,9 @@
 
 <h1>{{ problem.get_source }}</h1>
 <p><i>{{ problem.description }}</i></p>
+{% if problem.aops_url %}
+<p><a href="{{ problem.aops_url }}">{{ problem.aops_url }}</a></p>
+{% endif %}
 <hr />
 
 {% if hint_list %}

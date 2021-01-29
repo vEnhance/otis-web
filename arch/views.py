@@ -80,7 +80,7 @@ class HintCreate(LoginRequiredMixin, RevisionMixin, CreateView):
 		return context
 class ProblemCreate(LoginRequiredMixin, RevisionMixin, CreateView):
 	context_object_name = "problem"
-	fields = ('group', 'source', 'description',)
+	fields = ('group', 'source', 'description', 'aops_url',)
 	model = models.Problem
 	def get_initial(self):
 		initial = super(ProblemCreate, self).get_initial()
