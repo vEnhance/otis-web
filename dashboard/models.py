@@ -87,4 +87,4 @@ class ProblemSuggestion(models.Model):
 	comments = models.TextField(help_text = "Any extra comments.", blank=True)
 	reviewed = models.BooleanField(help_text = "Whether staff has processed this.", default=False)
 	review_notes = models.TextField(help_text = "Staff notes on reviewing.", blank=True)
-
+	created_at = models.DateTimeField(auto_now_add=True)
