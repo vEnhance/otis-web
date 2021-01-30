@@ -88,3 +88,6 @@ class ProblemSuggestion(models.Model):
 	resolved = models.BooleanField(help_text = "Whether staff has processed this.", default=False)
 	review_notes = models.TextField(help_text = "Staff notes on reviewing.", blank=True)
 	created_at = models.DateTimeField(auto_now_add=True)
+	def __str__(self):
+		return self.student.name + " suggested " + self.source \
+				+ " for " + str(self.unit.group)
