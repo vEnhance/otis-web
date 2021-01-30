@@ -1,7 +1,99 @@
 {% extends 'layout.html' %}
 {% block title %}Problem Suggestion{% endblock %}
 {% block layout-content %}
-{% include "generic-form.html" %}
 
-<p>TODO flesh out</p>
+<p><a href="{% url "suggest_list" student.id %}">
+	⬅️ List all suggestions you've made.</a></p>
+
+
+{% load crispy_forms_tags %}
+<form action="{{ request.path }}" method="post" class="form">
+{% csrf_token %}
+
+{% if form.non_field_errors %}
+<div class="alert alert-danger" role="alert">
+	<p>The following errors were thrown:</p>
+	<ul>
+	{% for err in form.non_field_errors %}
+	<li>{{ err }}</li>
+	{% endfor %}
+	</ul>
+</div>
+{% endif %}
+
+<table class="table form-table">
+<tr>
+<td> {{ form.weight|as_crispy_field }} </td>
+<td> {{ form.unit|as_crispy_field }} </td>
+</tr>
+<tr> <td colspan="2"> {{ form.source|as_crispy_field }} </td> </tr>
+<tr> <td colspan="2"> {{ form.description|as_crispy_field }} </td> </tr>
+<tr> <td colspan="2"> {{ form.statement|as_crispy_field }} </td> </tr>
+<tr> <td colspan="2"> <div id="statement_render"></div></td> </tr>
+<tr> <td colspan="2"> {{ form.solution|as_crispy_field }} </td> </tr>
+<tr> <td colspan="2"> <div id="solution_render"></div></td> </tr>
+<tr> <td colspan="2"> {{ form.comments|as_crispy_field }} </td> </tr>
+<tr>
+	<td><button type="submit" class="btn btn-success">Save suggestion</button></td>
+	<td>
+		<button id="render-enable" class="btn btn-primary">TeX On</button>
+		<button id="render-disable" class="btn btn-danger disabled">TeX Off</button>
+	</td>
+</tr>
+</table>
+
+{% endblock %}
+
+{% block css %}
+<style type="text/css">
+#solution_render, #statement_render {
+	color: blue;
+	font-family: sans-serif;
+}
+#id_solution, #id_statement {
+	font-family: monospace;
+}
+</style>
+{% endblock %}
+{% block scripts %}
+<script type="text/javascript">
+$(document).ready(function() {
+	var render_enabled = true;
+	$("#render-enable").click(function (e) {
+		e.preventDefault();
+		render_enabled = true;
+		$("#render-enable").removeClass('disabled');
+		$("#render-disable").addClass('disabled');
+		render_statement();
+		render_solution();
+	});
+	$("#render-disable").click(function (e) {
+		e.preventDefault();
+		render_enabled = false;
+		$("#render-enable").addClass('disabled');
+		$("#render-disable").removeClass('disabled');
+		$("#statement_render").html('');
+		$("#solution_render").html('');
+	});
+
+	function render_statement() {
+		if (!render_enabled) return;
+		MathJax.Hub.Queue(
+			function () {$("#statement_render").text($("#id_statement").val());},
+			["Typeset", MathJax.Hub, 'statement_render'],
+		);
+	}
+	function render_solution() {
+		if (!render_enabled) return;
+		MathJax.Hub.Queue(
+			function () {$("#solution_render").text($("#id_solution").val());},
+			["Typeset", MathJax.Hub, 'solution_render'],
+		);
+	}
+	$("#id_statement").blur(render_statement);
+	$("#id_solution").blur(render_solution);
+	render_statement();
+	render_solution();
+});
+</script>
 {% endblock %}
