@@ -5,7 +5,9 @@ body {
 table.table {
 	border-collapse: separate;
 	border: none;
-	width: auto !important;
+}
+.table-nonfluid {
+   width: auto !important;
 }
 
 p {
