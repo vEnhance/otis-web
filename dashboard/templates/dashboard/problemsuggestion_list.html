@@ -1,7 +1,25 @@
 {% extends 'layout.html' %}
 {% block title %}Problem suggestions{% endblock %}
 {% block layout-content %}
+<p>Here are all the past suggestions that you provided.</p>
 {% for suggestion in problem_suggestions %}
-{{ suggestion.source }}
+{% if suggestion.resolved %}
+<div class="alert alert-success">
+{% else %}
+<div class="alert alert-primary">
+{% endif %}
+<h3><a href="{% url "suggest_update" suggestion.id %}">
+{% if suggestion.resolved %}
+Resolved {{ suggestion.source }} for {{ suggestion.unit.group }}
+{% else %}
+You suggested {{ suggestion.source }} for {{ suggestion.unit.group }}
+{% endif %}
+</a></h3>
+<p>{{ suggestion.statement }}</p>
+{% if suggestion.review_notes %}
+<p><b>Comments</b>: {{ suggestion.review_notes }}</p>
+{% endif %}
+<p><b>Date</b>: {{ suggestion.created_at }}</p>
+</div>
 {% endfor %}
 {% endblock %}
