@@ -67,3 +67,24 @@ class SemesterDownloadFile(models.Model):
 		return os.path.basename(self.content.name)
 	class Meta:
 		ordering = ('-created_at',)
+
+class ProblemSuggestion(models.Model):
+	student = models.ForeignKey(roster.models.Student,
+			on_delete = models.CASCADE,
+			help_text = "Student who suggested the problem.")
+	unit = models.ForeignKey(core.models.Unit,
+			on_delete = models.CASCADE,
+			help_text = "The unit to suggest the problem for.")
+	weight = models.PositiveSmallIntegerField(
+			choices = ((2,2), (3,3), (5,5), (9,9)),
+			null = True, blank = True)
+	source = models.CharField(max_length = 60,
+			help_text = "Source of the problem, e.g. `Shortlist 2018 A7`.")
+	description = models.CharField(max_length = 100,
+			help_text = "A one-line summary of problem, e.g. `Inequality with cube roots`.")
+	statement = models.TextField(help_text = "Statement of the problem, in LaTeX.")
+	solution = models.TextField(help_text = "Solution to the problem, in LaTeX.")
+	comments = models.TextField(help_text = "Any extra comments.", blank=True)
+	reviewed = models.BooleanField(help_text = "Whether staff has processed this.", default=False)
+	review_notes = models.TextField(help_text = "Staff notes on reviewing.", blank=True)
+
