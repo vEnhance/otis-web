@@ -1,0 +1,7 @@
+{% extends 'layout.html' %}
+{% block title %}Problem suggestions{% endblock %}
+{% block layout-content %}
+{% for suggestion in problem_suggestions %}
+{{ suggestion.source }}
+{% endfor %}
+{% endblock %}

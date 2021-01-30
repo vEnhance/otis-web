@@ -8,7 +8,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.urls import reverse, reverse_lazy
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.contrib import messages
-from django.views.generic.edit import UpdateView, DeleteView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Subquery, OuterRef, F, Q, Count
@@ -212,10 +212,50 @@ def leaderboard(request):
 
 	return render(request, "dashboard/stulist.html", context)
 
-class DownloadListView(ListView):
+class DownloadListView(LoginRequiredMixin, ListView):
 	template_name = 'dashboard/download_list.html'
 
 	def get_queryset(self):
 		student = roster.models.Student.objects.get(id=self.kwargs['pk'])
 		roster.utils.check_can_view(self.request, student)
 		return dashboard.models.SemesterDownloadFile.objects.filter(semester = student.semester)
+
+class ProblemSuggestionCreate(LoginRequiredMixin, CreateView):
+	context_object_name = "problem_suggestion"
+	fields = ('unit', 'weight', 'source', 'description', 'statement', 'solution', 'comments',)
+	model = dashboard.models.ProblemSuggestion
+	def get_initial(self):
+		initial = super().get_initial()
+		initial['unit'] = self.kwargs['unit_id']
+		return initial
+	def form_valid(self, form):
+		form.instance.student = roster.utils.get_student(self.kwargs['student_id'])
+		messages.success(self.request, "Successfully submitted suggestion! Thanks much :)")
+		return super().form_valid(form)
+	def get_success_url(self):
+		return reverse_lazy("suggest_new", kwargs=self.kwargs)
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context['student'] = roster.utils.get_student(self.kwargs['student_id'])
+		return context
+
+class ProblemSuggestionUpdate(LoginRequiredMixin, UpdateView):
+	context_object_name = "problem_suggestion"
+	fields = ('unit', 'weight', 'source', 'description', 'statement', 'solution', 'comments',)
+	model = dashboard.models.ProblemSuggestion
+	def get_success_url(self):
+		return reverse_lazy("suggest_update", kwargs=self.kwargs)
+	def form_valid(self, form):
+		messages.success(self.request, "Edits saved.")
+		return super().form_valid(form)
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context['student'] = roster.utils.get_student(self.object.student.id)
+		return context
+
+class ProblemSuggestionList(LoginRequiredMixin, ListView):
+	context_object_name = "problem_suggestions"
+	def get_queryset(self):
+		student = roster.models.Student.objects.get(id=self.kwargs['student_id'])
+		roster.utils.check_can_view(self.request, student)
+		return dashboard.models.ProblemSuggestion.objects.filter(student=student).order_by('resolved', 'created_at')
