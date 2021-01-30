@@ -23,8 +23,8 @@ class SemesterDownloadFileAdmin(admin.ModelAdmin):
 
 @admin.register(dashboard.models.ProblemSuggestion)
 class ProblemSuggestionAdmin(admin.ModelAdmin):
-	list_display = ('id', 'student', 'source', 'description', 'reviewed',)
+	list_display = ('id', 'student', 'source', 'description', 'resolved',)
 	search_fields = ('student', 'unit', 'source', 'description', 'statement', 'solution',  'comments',)
-	list_filter = ('unit__group', 'student__semester',)
+	list_filter = ('resolved', 'unit__group', 'student__semester',)
 	autocomplete_fields = ('student', 'unit',)
 	list_per_page = 50
