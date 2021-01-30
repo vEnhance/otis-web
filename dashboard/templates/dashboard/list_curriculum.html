@@ -57,9 +57,17 @@ $("#hide-locked-units").click(function() {
 	{% endif %}
 
 	{# ARCH #}
-	{% if row.is_visible or row.num_uploads > 0 %}
+	{% if row.is_visible %}
 		<td><a href="{% url "problem_list" row.unit.group.id %}">
 			ARCH</a></td>
+	{% else %}
+		<td>&mdash;</td>
+	{% endif %}
+
+	{# Suggest #}
+	{% if row.is_visible %}
+		<td><a href="{% url "suggest_new" student.id row.unit.id %}">
+			Suggest</a></td>
 	{% else %}
 		<td>&mdash;</td>
 	{% endif %}
