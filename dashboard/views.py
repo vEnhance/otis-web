@@ -230,7 +230,7 @@ class ProblemSuggestionCreate(LoginRequiredMixin, CreateView):
 		return initial
 	def form_valid(self, form):
 		form.instance.student = roster.utils.get_student(self.kwargs['student_id'])
-		messages.success(self.request, "Successfully submitted suggestion! Thanks much :)")
+		messages.success(self.request, "Successfully submitted suggestion! Thanks much :) You can add more using the form below.")
 		return super().form_valid(form)
 	def get_success_url(self):
 		return reverse_lazy("suggest_new", kwargs=self.kwargs)
@@ -259,3 +259,7 @@ class ProblemSuggestionList(LoginRequiredMixin, ListView):
 		student = roster.models.Student.objects.get(id=self.kwargs['student_id'])
 		roster.utils.check_can_view(self.request, student)
 		return dashboard.models.ProblemSuggestion.objects.filter(student=student).order_by('resolved', 'created_at')
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context['student'] = roster.utils.get_student(self.kwargs['student_id'])
+		return context
