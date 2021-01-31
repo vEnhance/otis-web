@@ -6,7 +6,9 @@
 {% for form in forms %}
 <h3>{{ form.instance.source }} &mdash; {{ form.instance.description }}</h3>
 <ul>
-	<li>Suggested by {{ form.instance.student.name }} for {{ form.instance.unit }}</li>
+	<li>Suggested by
+		{{ form.instance.student.name }}{% if not form.instance.acknowledge %}*{% endif %}
+		for {{ form.instance.unit }}</li>
 	<li><a href="{% url "admin:dashboard_problemsuggestion_change" form.instance.id %}">
 			Edit in Django admin</a></td>
 </ul>
@@ -34,7 +36,9 @@
 
 ---
 
-{{ form.instance.solution }}
+{% if form.instance.acknowledge %}\emph{This problem and solution were suggested by {{ form.instance.student.name }}.}
+
+{% endif %}{{ form.instance.solution }}
 </textarea>
 
 <script type="text/javascript">
