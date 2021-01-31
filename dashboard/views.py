@@ -174,6 +174,8 @@ def quasigrader(request, num_hours):
 
 	context['inquiry_nag'] = roster.models.UnitInquiry.objects\
 			.filter(status='NEW').count()
+	context['suggestion_nag'] = dashboard.models.ProblemSuggestion.objects\
+			.filter(resolved=False).count()
 	context['num_hours'] = num_hours
 
 	return render(request, "dashboard/quasigrader.html", context)
