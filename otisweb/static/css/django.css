@@ -66,3 +66,7 @@ div.form-group > div {
 	display: inline-block;
 	width: 76%;
 }
+
+textarea {
+	font-family: "Dejavu Sans Mono", monospace;
+}
