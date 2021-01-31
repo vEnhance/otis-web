@@ -16,8 +16,8 @@ You suggested {{ suggestion.source }} for {{ suggestion.unit.group }}
 {% endif %}
 </a></h3>
 <p>{{ suggestion.statement }}</p>
-{% if suggestion.review_notes %}
-<p><b>Comments</b>: {{ suggestion.review_notes }}</p>
+{% if suggestion.reason %}
+<p><b>Comments</b>: {{ suggestion.reason }}</p>
 {% endif %}
 <p><b>Date</b>: {{ suggestion.created_at }}</p>
 </div>
