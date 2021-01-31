@@ -5,6 +5,12 @@
 <p><a href="{% url "suggest_list" student.id %}">
 	⬅️ List all suggestions you've made.</a></p>
 
+<p>Thank you for suggesting problems for OTIS!
+Your contributions are appreciated.</p>
+<p>Note that you are giving Evan permission to use, edit, or adapt
+anything you submit for OTIS or other math-olympiad-related purposes.
+On the other hand, you retain copyright/ownership of your submission,
+so you can also use it for whatever you want elsewhere.</p>
 
 {% load crispy_forms_tags %}
 <form action="{{ request.path }}" method="post" class="form">
@@ -34,7 +40,7 @@
 <tr> <td colspan="2"> <div id="solution_render"></div></td> </tr>
 <tr> <td colspan="2"> {{ form.comments|as_crispy_field }} </td> </tr>
 <tr>
-	<td><button type="submit" class="btn btn-success">Save suggestion</button></td>
+	<td><button type="submit" class="btn btn-success">Submit</button></td>
 	<td>
 		<button id="render-enable" class="btn btn-primary">TeX On</button>
 		<button id="render-disable" class="btn btn-danger disabled">TeX Off</button>
