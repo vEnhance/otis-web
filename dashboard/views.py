@@ -222,7 +222,7 @@ class DownloadListView(LoginRequiredMixin, ListView):
 
 class ProblemSuggestionCreate(LoginRequiredMixin, CreateView):
 	context_object_name = "problem_suggestion"
-	fields = ('unit', 'weight', 'source', 'description', 'statement', 'solution', 'comments',)
+	fields = ('unit', 'weight', 'source', 'description', 'statement', 'solution', 'comments', 'acknowledge',)
 	model = dashboard.models.ProblemSuggestion
 	def get_initial(self):
 		initial = super().get_initial()
@@ -241,7 +241,7 @@ class ProblemSuggestionCreate(LoginRequiredMixin, CreateView):
 
 class ProblemSuggestionUpdate(LoginRequiredMixin, UpdateView):
 	context_object_name = "problem_suggestion"
-	fields = ('unit', 'weight', 'source', 'description', 'statement', 'solution', 'comments',)
+	fields = ('unit', 'weight', 'source', 'description', 'statement', 'solution', 'comments', 'acknowledge',)
 	model = dashboard.models.ProblemSuggestion
 	def get_success_url(self):
 		return reverse_lazy("suggest_update", kwargs=self.kwargs)

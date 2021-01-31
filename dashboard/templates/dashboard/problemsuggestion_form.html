@@ -32,13 +32,14 @@ so you can also use it for whatever you want elsewhere.</p>
 <td> {{ form.weight|as_crispy_field }} </td>
 <td> {{ form.unit|as_crispy_field }} </td>
 </tr>
-<tr> <td colspan="2"> {{ form.source|as_crispy_field }} </td> </tr>
-<tr> <td colspan="2"> {{ form.description|as_crispy_field }} </td> </tr>
-<tr> <td colspan="2"> {{ form.statement|as_crispy_field }} </td> </tr>
-<tr> <td colspan="2"> <div id="statement_render"></div></td> </tr>
-<tr> <td colspan="2"> {{ form.solution|as_crispy_field }} </td> </tr>
-<tr> <td colspan="2"> <div id="solution_render"></div></td> </tr>
-<tr> <td colspan="2"> {{ form.comments|as_crispy_field }} </td> </tr>
+<tr><td colspan="2">{{ form.source|as_crispy_field }}</td></tr>
+<tr><td colspan="2">{{ form.description|as_crispy_field }}</td></tr>
+<tr><td colspan="2">{{ form.statement|as_crispy_field }}</td></tr>
+<tr><td colspan="2"><div id="statement_render"></div></td></tr>
+<tr><td colspan="2">{{ form.solution|as_crispy_field }}</td></tr>
+<tr><td colspan="2"><div id="solution_render"></div></td></tr>
+<tr><td colspan="2">{{ form.comments|as_crispy_field }}</td></tr>
+<tr><td colspan="2">{{ form.acknowledge|as_crispy_field }}</td></tr>
 <tr>
 	<td><button type="submit" class="btn btn-success">Submit</button></td>
 	<td>
