@@ -263,3 +263,23 @@ class ProblemSuggestionList(LoginRequiredMixin, ListView):
 		context = super().get_context_data(**kwargs)
 		context['student'] = roster.utils.get_student(self.kwargs['student_id'])
 		return context
+
+@staff_member_required
+def pending_contributions(request, suggestion_id = None):
+	context = {}
+	if request.method == "POST":
+		assert suggestion_id is not None
+		suggestion = dashboard.models.ProblemSuggestion.objects.get(id = suggestion_id)
+		form = forms.ResolveSuggestionForm(request.POST, instance = suggestion)
+		if form.is_valid():
+			messages.success(request, "Successfully resolved " + suggestion.source)
+			suggestion = form.save(commit = False)
+			suggestion.resolved = True
+			suggestion.save()
+
+	context['forms'] = []
+	for suggestion in dashboard.models.ProblemSuggestion.objects.filter(resolved=False):
+		form = forms.ResolveSuggestionForm(instance = suggestion)
+		context['forms'].append(form)
+
+	return render(request, "dashboard/pending_contributions.html", context)
