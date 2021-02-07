@@ -38,14 +38,14 @@ class Hint(models.Model):
 			help_text = r"A comma-separated list of keywords that a solver could look at " \
 			"to help them guess whether the hint is relevant or not. " \
 			"These are viewable immediately, so no spoilers here. " \
-			"Examples are `getting started`, `solution set`,"\
+			"Examples are `answer confirmation`, `nudge`, `main idea`, `solution set`,"\
 			"`converse direction`, `construction`, etc. " \
-			"Not all problems go well with keywords, so you can leave this " \
+			"Not all hints go well with keywords, so you can leave this " \
 			"blank if you can't think of anything useful to write.")
 	number = models.PositiveIntegerField(
 			help_text = r"A number from 0 to 100 used to indicate an " \
 			r"ordering for the hints. " \
-			r"Here a number 0 means a small nudge given to someone at the very start " \
+			r"Here a number 0 means a hint given to someone at the very start " \
 			r"whereas 100 means a hint given to someone who was read all previous hints " \
 			r"or is close to the end of the problem. " \
 			r"Do your best to make up an extrapolation for everything in between. " \
