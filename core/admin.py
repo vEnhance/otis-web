@@ -32,7 +32,7 @@ class UnitIEResource(resources.ModelResource):
 
 @admin.register(core.models.Unit)
 class UnitAdmin(ImportExportModelAdmin):
-	list_display = ('group', 'code', 'list_display_position',)
+	list_display = ('group', 'code', 'id', 'list_display_position',)
 	list_filter = ('group__subject',)
 	search_fields = ('group__name', 'code')
 	autocomplete_fields = ('group',)
@@ -56,7 +56,7 @@ class UnitGroupIEResource(resources.ModelResource):
 
 @admin.register(core.models.UnitGroup)
 class UnitGroupAdmin(ImportExportModelAdmin):
-	list_display = ('name', 'subject', 'description',)
+	list_display = ('name', 'subject', 'id', 'description',)
 	search_fields = ('name', 'description',)
 	list_filter = ('subject',)
 	resource_class = UnitGroupIEResource
