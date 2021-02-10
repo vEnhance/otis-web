@@ -29,7 +29,7 @@ def portal(request, student_id):
 	semester = student.semester
 
 	context = {}
-	context['title'] = "%s (%s)" %(student.name, student.semester.name)
+	context['title'] = f"{student.name} ({student.semester.name})"
 	context['student'] = student
 	context['semester'] = student.semester
 	context['omniscient'] = student.is_taught_by(request.user)

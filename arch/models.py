@@ -58,7 +58,7 @@ class Hint(models.Model):
 	class Meta:
 		unique_together = ('problem', 'number',)
 	def __str__(self):
-		return "Hint %d for %s" %(self.number, self.problem)
+		return f"Hint {self.number} for {self.problem}"
 
 	def get_absolute_url(self):
 		return reverse_lazy("hint_detail", args=(self.id,))

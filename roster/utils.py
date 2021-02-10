@@ -24,10 +24,10 @@ def get_visible_students(user, current = True):
 
 def check_can_view(request, student):
 	if not student.can_view_by(request.user):
-		raise PermissionDenied("%s cannot view %s" %(request.user, student))
+		raise PermissionDenied(f"{request.user} cannot view {student}")
 def check_taught_by(request, student):
 	if not student.is_taught_by(request.user):
-		raise PermissionDenied("%s cannot edit %s" %(request.user, student))
+		raise PermissionDenied(f"{request.user} cannot edit {student}")
 
 def get_student(student_id):
 	return get_object_or_404(models.Student.objects, id=student_id)

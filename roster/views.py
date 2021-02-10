@@ -53,7 +53,7 @@ def curriculum(request, student_id):
 			student.curriculum.set(values)
 			student.save()
 			messages.success(request,
-					"Successfully saved curriculum of %d units." % len(values))
+					f"Successfully saved curriculum of {len(values)} units.")
 	else:
 		form = forms.CurriculumForm(units = units,
 				original = original, enabled = enabled)
@@ -93,7 +93,7 @@ def auto_advance(request, student_id, unit_id):
 	if not student.unlocked_units.filter(id=unit_id).exists() \
 			or not student.curriculum.filter(id=unit_id).exists():
 		messages.error(request,
-				"The unit %s is not valid for auto-unlock." % unit)
+				f"The unit {unit} is not valid for auto-unlock.")
 		return HttpResponseRedirect(reverse("advance", args=(student_id,)))
 
 	# get next unit to unlock
@@ -112,8 +112,7 @@ def auto_advance(request, student_id, unit_id):
 	context = {}
 	context["added"] = to_add["group__name"] if to_add is not None else None
 	if context["added"]:
-		context["title"] = "Unlocked %s for %s" \
-				%(context["added"], student.first_name)
+		context["title"] = f"Unlocked {context['added']} for {student.first_name}"
 	else:
 		context["title"] = student.name + " is done!"
 	context["finished"] = str(unit)

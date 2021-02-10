@@ -78,7 +78,7 @@ class Student(models.Model):
 	newborn = models.BooleanField(default = True,
 			help_text = "Whether the student is newly created.")
 	def __str__(self):
-		return "%s (%s)" %(self.name, self.semester)
+		return f"{self.name} ({self.semester})"
 
 	@property
 	def first_name(self):
@@ -202,7 +202,7 @@ class Invoice(models.Model):
 	updated_at = models.DateTimeField(auto_now=True)
 
 	def __str__(self):
-		return "Invoice %d" %(self.id or 0,)
+		return f"Invoice {self.id or 0}"
 
 	@property
 	def prep_rate(self):
