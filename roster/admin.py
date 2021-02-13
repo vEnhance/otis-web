@@ -52,7 +52,7 @@ class InvoiceIEResource(resources.ModelResource):
 		model = roster.models.Invoice
 		fields = ('id', 'student','student__track',
 				'student__user__first_name', 'student__user__last_name',
-				'preps_taught', 'hours_taught', 'adjustment',
+				'preps_taught', 'hours_taught', 'adjustment', 'extras',
 				'total_paid', 'student__semester__name',)
 class OwedFilter(admin.SimpleListFilter):
 	title = 'remaining balance'
@@ -67,7 +67,7 @@ class OwedFilter(admin.SimpleListFilter):
 			queryset = queryset.annotate(owed =
 					Cast(F("student__semester__prep_rate") * F("preps_taught")
 					+ F("student__semester__hour_rate") * F("hours_taught")
-					+ F("adjustment") - F("total_paid"), FloatField()))
+					+ F("adjustment") + F('extras') - F("total_paid"), FloatField()))
 			if self.value() == "incomplete":
 				return queryset.filter(owed__gt=0)
 			elif self.value() == "paid":
@@ -99,7 +99,7 @@ class UnlistedInline(admin.TabularInline):
 	extra = 0
 class InvoiceInline(admin.StackedInline):
 	model = roster.models.Invoice
-	fields = ('preps_taught', 'hours_taught', 'adjustment', 'total_paid',)
+	fields = ('preps_taught', 'hours_taught', 'extras', 'adjustment', 'total_paid',)
 	readonly_fields = ('student', 'id',)
 @admin.register(roster.models.Student)
 class StudentAdmin(ImportExportModelAdmin):

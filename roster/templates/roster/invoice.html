@@ -26,6 +26,10 @@ All quantities below are in <strong>US dollars (USD)</strong>.</p>
 		<td class="text-right">{{ invoice.hours_total|floatformat:2 }}</td>
 	</tr>
 	<tr>
+		<td colspan="2">Extras</td>
+		<td class="text-right">{{ invoice.extras|stringformat:"+.2f" }}</td>
+	</tr>
+	<tr>
 		<td colspan="2">Adjustment</td>
 		<td class="text-right">{{ invoice.adjustment|stringformat:"+.2f" }}</td>
 	</tr>

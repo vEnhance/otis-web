@@ -196,7 +196,7 @@ def master_schedule(request):
 class UpdateInvoice(PermissionRequiredMixin, UpdateView):
 	permission_required = 'is_staff'
 	model = models.Invoice
-	fields = ('preps_taught', 'hours_taught', 'total_paid',)
+	fields = ('preps_taught', 'hours_taught', 'adjustment', 'extras', 'total_paid',)
 
 	def get_success_url(self):
 		return reverse("invoice", args=(self.object.student.id,))

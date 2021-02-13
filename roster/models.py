@@ -195,7 +195,10 @@ class Invoice(models.Model):
 			help_text = "Number of hours taught for.")
 	adjustment = models.DecimalField(max_digits = 8,
 			decimal_places = 2, default = 0,
-			help_text = "Adjustment to the cost.")
+			help_text = "Adjustment to the cost, e.g. for financial aid.")
+	extras = models.DecimalField(max_digits = 8,
+			decimal_places = 2, default = 0,
+			help_text = "Additional payment, e.g. for T-shirts.")
 	total_paid = models.DecimalField(max_digits = 8,
 			decimal_places = 2, default = 0,
 			help_text = "Amount paid.")
@@ -221,6 +224,7 @@ class Invoice(models.Model):
 	def total_cost(self):
 		return self.prep_rate*self.preps_taught \
 				+ self.hour_rate*self.hours_taught \
+				+ self.extras \
 				+ self.adjustment
 	@property
 	def total_owed(self):
