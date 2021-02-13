@@ -38,6 +38,7 @@ please send me a reminder.</p>
 
 <h2>Current inquiries</h2>
 <table class="table">
+	<thead class="thead-dark">
 	<tr>
 		<th>Created</th>
 		<th>Status</th>
@@ -45,6 +46,8 @@ please send me a reminder.</p>
 		<th>Unit</th>
 		<th>Last change</th>
 	</tr>
+	</thead>
+	<tbody>
 	{% for inquiry in inquiries %}
 	<tr>
 		<td>{{ inquiry.created_at|date:"Y-m-d" }}</td>
@@ -85,6 +88,7 @@ please send me a reminder.</p>
 	</tr>
 	{% endif %}
 	{% endfor %}
+	</tbody>
 </table>
 
 <h2>Current units</h2>

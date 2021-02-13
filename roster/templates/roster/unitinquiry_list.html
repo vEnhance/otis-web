@@ -9,6 +9,7 @@ You can <a href="{% url "approve-inquiry-all" %}">
 if you want.</p>
 
 <table class="table">
+<thead class="thead-dark">
 <tr>
 	<th>Time</th>
 	<th>#</th>
@@ -16,6 +17,8 @@ if you want.</p>
 	<th>Inquiry</th>
 	<th colspan="2">Controls</th>
 </tr>
+</thead>
+<tbody>
 {% for inquiry in unitinquiry_list %}
 <tr>
 <td style="font-size:80%;">{{ inquiry.created_at|naturaltime }}</td>
@@ -52,6 +55,7 @@ if you want.</p>
 </tr>
 {% endif %}
 {% endfor %}
+</tbody>
 </table>
 
 {% endblock %}

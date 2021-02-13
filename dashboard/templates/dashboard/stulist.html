@@ -5,6 +5,7 @@
 <p>Here are the participants to which you have access.</p>
 
 <table class="table">
+<thead class="thead-dark">
 <tr>
 	<th>#</th>
 	<th>Name</th>
@@ -17,7 +18,8 @@
 	<th>N PS</th>
 	{% endif %}
 </tr>
-
+</thead>
+<tbody>
 {% for student in students %}
 <tr> {# begin table row for this student #}
 	<td>{{ forloop.counter }}</td>
@@ -39,6 +41,7 @@
 	{% endif %}
 </tr> {# end table row for this student #}
 {% endfor %}
+</tbody>
 </table>
 
 <p>This list was generated {% now "r" %}.

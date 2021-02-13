@@ -9,6 +9,7 @@ or have not submitted a problem set for a while.
 Be gentle! Don't be the bad guy.</p>
 
 <table class="table">
+<thead class="thead-dark">
 <tr>
 	<th>#</th>
 	<th>Name</th>
@@ -16,7 +17,9 @@ Be gentle! Don't be the bad guy.</p>
 	<th>Format</th>
 	<th>Score</th>
 </tr>
+</thead>
 
+<tbody>
 {% for student in students %}
 <tr>
 	<td>{{ forloop.counter }}</td>
@@ -32,6 +35,7 @@ Be gentle! Don't be the bad guy.</p>
 	<td>{{ student.num_units_done }} / {{ student.curriculum_length }}</td>
 </tr>
 {% endfor %}
+</tbody>
 </table>
 
 <p>This list was generated {% now "r" %}.</p>
