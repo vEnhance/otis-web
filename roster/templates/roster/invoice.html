@@ -11,12 +11,16 @@ All quantities below are in <strong>US dollars (USD)</strong>.</p>
 <center>
 <table class="table">
 <tbody>
+	<thead class="thead-dark">
 	<tr>
-		<th colspan="2">Item</th>
-		<th class="text-right">Amount</th>
+		<th class="text-center" colspan="2">Item</th>
+		<th class="text-center">Amount</th>
 	</tr>
+	</thead>
+
+	<tbody>
 	<tr>
-		<td>Preparation</td>
+		<td>Semesters</td>
 		<td>${{ invoice.prep_rate }} &times; {{ invoice.preps_taught }}</td>
 		<td class="text-right">{{ invoice.prep_total|floatformat:2 }}</td>
 	</tr>
@@ -41,6 +45,9 @@ All quantities below are in <strong>US dollars (USD)</strong>.</p>
 		<td colspan="2">Total paid</td>
 		<td class="text-right">{{ invoice.total_paid }}</td>
 	</tr>
+	</tbody>
+
+	<tfoot>
 	<tr>
 		<th colspan="2">Total owed to Evan</th>
 		{% if invoice.total_owed <= 0 %}
@@ -49,7 +56,7 @@ All quantities below are in <strong>US dollars (USD)</strong>.</p>
 			<th class="text-danger text-right">{{ invoice.total_owed }}</th>
 		{% endif %}
 	</tr>
-</tbody>
+	</tfoot>
 </table>
 </center>
 
