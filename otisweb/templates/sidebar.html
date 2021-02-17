@@ -1,33 +1,36 @@
 {% if request.user.is_authenticated %}
-<p>Logged in as <b>{{ request.user }}</b>.
+<p>👋, <b>{{ request.user }}</b>.
 <a href="{% url "logout" %}">(logout)</a>
 </p>
 {% else %}
-<p>Not logged in. <a href="{% url "login" %}">(login)</a></p>
+<p><a href="{% url "login" %}">(login)</a></p>
 {% endif %}
+<hr />
 
 {% if student %}
-<h3><a href="{% url "portal" student.id %}">{{ student }}</a></h3>
-<p><i>{{ student.get_track }}</i></p>
+<p><b><a href="{% url "portal" student.id %}">{{ student.name }}</a></b></p>
+<p><i>{{ student.semester }}, {{ student.get_track }}</i></p>
+<hr />
 {% endif %}
 
 {% if request.user.is_authenticated %}
 	<h4>User panel</h4>
-	<ul>
+	<div style="font-size:150%;">
 	{% if not student %}
-	<li><a href="{% url "index" %}">Back to index</a></li>
-	<li><a href="{% url "past" %}">Past semesters</a></li>
+	<a href="{% url "index" %}">🏠</a>
+	<a href="{% url "past" %}">🕗</a>
 	{% elif student.user.username == request.user.username %}
-	<li><a href="{% url "past" %}">Change semester</a></li>
+	<a href="{% url "past" %}">🕗</a>
 	{% else %}
-	<li><a href="{% url "index" %}">Change kid</a></li>
-	<li><a href="{% url "past" %}">Past semesters</a></li>
+	<a href="{% url "index" %}">🏠</a>
+	<a href="{% url "past" %}">🕗</a>
 	{% endif %}
-	<li><a href="{% url "password_change" %}">Edit password</a></li>
-	<li><a href="{% url "synopsis" %}">Course catalog</a></li>
-	</ul>
+	<a href="{% url "password_change" %}">🔐</a>
+	<a href="{% url "synopsis" %}">📜</a>
+	</div>
 
 	{% if request.user.is_staff %}
+	<hr />
 	<h4>Staff panel</h4>
 	<ul>
 	<li><a href="{% url "list-inquiry" %}">Display inquiries</a></li>
@@ -40,6 +43,7 @@
 	{% endif %}
 
 	{% if request.user.is_superuser %}
+	<hr />
 	<h4>Admin panel</h4>
 	<ul>
 	<li><a href="{% url "admin:index" %}">Django admin</a></li>
