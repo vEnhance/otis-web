@@ -22,7 +22,7 @@ by a three-letter code.</p>
 {% for subject, item_list in grouped_unit_list %}
 <h2>{{ subject }}</h2>
 	{% for unitgroup in item_list %}
-	<p><b class="text-danger">{{ unitgroup.name }}</b>
+	<p><b class="text-info">{{ unitgroup.name }}</b>
 	[{{ unitgroup.get_subject_display }},
 	{% for unit in unitgroup.unit_set.all %} {{ unit.code }}{% endfor %}].
 	<br />
