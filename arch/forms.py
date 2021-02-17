@@ -5,7 +5,7 @@ class HintUpdateFormWithReason(forms.ModelForm):
 	reason = forms.CharField(max_length=255, help_text = "Reason for editing.", required = False)
 	class Meta:
 		model = models.Hint
-		fields = ('keywords', 'number', 'content', 'reason',)
+		fields = ('number', 'keywords', 'content', 'reason',)
 
 class ProblemUpdateFormWithReason(forms.ModelForm):
 	reason = forms.CharField(max_length=255, help_text = "Reason for editing.", required = False)

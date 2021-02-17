@@ -67,7 +67,7 @@ class ProblemUpdate(LoginRequiredMixin, RevisionMixin, UpdateView):
 
 class HintCreate(LoginRequiredMixin, RevisionMixin, CreateView):
 	context_object_name = "hint"
-	fields = ('problem', 'keywords', 'number', 'content',)
+	fields = ('problem', 'number', 'keywords', 'content',)
 	model = models.Hint
 	def get_initial(self):
 		initial = super(HintCreate, self).get_initial()
