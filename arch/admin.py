@@ -13,7 +13,7 @@ class ProblemAdmin(VersionAdmin):
 @admin.register(models.Hint)
 class HintAdmin(VersionAdmin):
 	list_display = ('id', 'problem', 'number', 'keywords', 'content',)
-	search_fields = ('number', 'problem', 'keywords', 'content',)
-	list_filter = ('problem__group',)
+	search_fields = ('number', 'problem__source', 'keywords', 'content',)
+	list_filter = ('problem__group__subject', 'problem__group',)
 	autocomplete_fields = ('problem',)
 	list_per_page = 30
