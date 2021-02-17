@@ -22,7 +22,12 @@ by a three-letter code.</p>
 {% for subject, item_list in grouped_unit_list %}
 <h2>{{ subject }}</h2>
 	{% for unitgroup in item_list %}
-	<p><b class="text-info">{{ unitgroup.name }}</b>
+	<p>
+	{% if request.user.is_staff %}
+	<a href="{% url "problem_list" unitgroup.id %}">{{ unitgroup.name }}</a>
+	{% else %}
+	<b class="text-info">{{ unitgroup.name }}</b>
+	{% endif %}
 	[{{ unitgroup.get_subject_display }},
 	{% for unit in unitgroup.unit_set.all %} {{ unit.code }}{% endfor %}].
 	<br />
