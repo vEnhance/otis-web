@@ -11,6 +11,7 @@
 		for {{ form.instance.unit }}</li>
 	<li><a href="{% url "admin:dashboard_problemsuggestion_change" form.instance.id %}">
 			Edit in Django admin</a></li>
+	<li>{{ form.instance.comments }}</li>
 </ul>
 <div class="alert alert-primary">
 	{% if form.instance.weight %}
