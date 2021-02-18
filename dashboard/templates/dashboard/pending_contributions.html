@@ -10,7 +10,7 @@
 		{{ form.instance.student.name }}{% if not form.instance.acknowledge %}*{% endif %}
 		for {{ form.instance.unit }}</li>
 	<li><a href="{% url "admin:dashboard_problemsuggestion_change" form.instance.id %}">
-			Edit in Django admin</a></td>
+			Edit in Django admin</a></li>
 </ul>
 <div class="alert alert-primary">
 	{% if form.instance.weight %}
