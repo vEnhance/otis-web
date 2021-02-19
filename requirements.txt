@@ -8,6 +8,7 @@ django-hijack-admin>=2.1.10
 django-registration>=3.1
 django_reversion>=3.0.8
 django-storages[google]>=1.9.1
+django-stubs>=1.7.0
 mysqlclient>=1.4.6
 wheel>=0.33.1
 boto>=2.49.0
