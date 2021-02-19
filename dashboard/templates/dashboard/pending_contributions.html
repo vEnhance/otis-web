@@ -7,11 +7,16 @@
 <h3>{{ form.instance.source }} &mdash; {{ form.instance.description }}</h3>
 <ul>
 	<li>Suggested by
-		{{ form.instance.student.name }}{% if not form.instance.acknowledge %}*{% endif %}
+		{{ form.instance.student.name }}
 		for {{ form.instance.unit }}</li>
 	<li><a href="{% url "admin:dashboard_problemsuggestion_change" form.instance.id %}">
 			Edit in Django admin</a></li>
-	<li>{{ form.instance.comments }}</li>
+	{% if not form.instance.acknowledge %}
+	<li><i>Anonymous submission</i></li>
+	{% endif %}
+	{% if form.instance.comments %}
+	<li><b>Comment:</b> {{ form.instance.comments }}</li>
+	{% endif %}
 </ul>
 <div class="alert alert-primary">
 	{% if form.instance.weight %}
