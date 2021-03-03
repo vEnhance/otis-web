@@ -89,50 +89,47 @@ def auto_advance(request, student_id, unit_id, target_id = None):
 	student = utils.get_student(student_id)
 	utils.check_taught_by(request, student)
 	unit = core.models.Unit.objects.get(id=unit_id)
-	target = core.models.Unit.objects.get(id=target_id)
 
 	if not student.unlocked_units.filter(id=unit_id).exists() \
 			or not student.curriculum.filter(id=unit_id).exists():
 		messages.error(request,
 				f"The unit {unit} is not valid for auto-unlock.")
 		return HttpResponseRedirect(reverse("advance", args=(student_id,)))
-	if student.unlocked_units.filter(id=target_id).exists() \
-			or not student.curriculum.filter(id=target_id).exists():
-		messages.error(request,
-				f"The unit {target} is not valid for replacement.")
-		return HttpResponseRedirect(reverse("advance", args=(student_id,)))
+
+	unlockable_units = student.generate_curriculum_queryset()\
+			.exclude(has_pset = True)\
+			.exclude(id__in = student.unlocked_units.all())
 
 	if target_id is None:
-		# get next unit to unlock
-		unlockable_units = student.generate_curriculum_queryset()\
-				.exclude(has_pset = True)\
-				.exclude(id__in = student.unlocked_units.all())\
-				.values('id', 'group__name')
-
-		to_add = unlockable_units.first()
-		if to_add is not None:
-			student.unlocked_units.add(to_add['id'])
+		target = unlockable_units.first()
+		if target is not None:
+			student.unlocked_units.add(target)
 		student.unlocked_units.remove(unit)
 		student.num_units_done += 1
 		student.save()
-		replace = True
+		replace = False
 	else:
+		target = core.models.Unit.objects.get(id=target_id)
+		if student.unlocked_units.filter(id=target_id).exists() \
+				or not student.curriculum.filter(id=target_id).exists():
+			messages.error(request,
+					f"The unit {target} is not valid for replacement.")
+			return HttpResponseRedirect(reverse("advance", args=(student_id,)))
+
 		student.unlocked_units.remove(unit)
 		student.unlocked_units.add(target)
-		to_add = target
-		replace = False
+		replace = True
 
 	context = {}
-	context["added"] = to_add["group__name"] if to_add is not None else None
-	if context["added"]:
-		context["title"] = f"Unlocked {context['added']} for {student.first_name}"
+	context["target"] = target
+	if context["target"]:
+		context["title"] = f"Unlocked {target} for {student.first_name}"
 	else:
 		context["title"] = student.name + " is done!"
 	context["replace"] = replace
 	context["finished"] = str(unit)
 	context["student"] = student
 	context["alternatives"] = unlockable_units
-
 	return render(request, "roster/auto-advance.html", context)
 
 @login_required

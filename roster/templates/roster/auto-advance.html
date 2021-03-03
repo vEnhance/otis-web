@@ -1,5 +1,6 @@
 {% extends 'layout.html' %}
 {% block layout-content %}
+<div class="alert {% if replace %}alert-info{% else %}alert-success{% endif %}">
 <p>The auto-advancer made the following changes:</p>
 <ul>
 	{% if replace %}
@@ -13,25 +14,31 @@
 		done now.</li>
 	<li>The unit {{ finished }} is completed.</li>
 	{% endif %}
-	{% if added %}
-	<li>The unit <strong class="text-success">{{ added }}</strong> was unlocked.</li>
+	{% if target %}
+	<li>The unit <strong class="text-success">{{ target }}</strong> was unlocked.</li>
 	{% else %}
 	<li><strong class="text-warning">No new unit was unlocked.</strong>
 		There wasn't one to unlock.</li>
 	{% endif %}
 </ul>
+</div>
 <p>You can close this window if you are done.</p>
-{% if added %}
+{% if target and alternatives %}
 <p>If you want to unlock a different unit instead,
 	choose from the list below:</p>
-<ul>
+<table class="table curriculum">
 {% for unit in alternatives %}
-	<li>
-		<a href="{% url "auto-advance" student.id added.id unit.id %}">
-			Unlock <strong>{{ unit }}</strong> instead.
-		</a>
-	</li>
+<tr class="subject{{unit.group.subject}}">
+	<td style="text-align: right; font-size: 70%; width:7em;">
+		<tt>{{ unit.position }} {{ unit.code }}</tt></td>
+	<td>
+	<a href="{% url "auto-advance" student.id target.id unit.id %}">
+		{{ unit.group.name }}
+	</a>
+	</td>
+</tr>
 {% endfor %}
+</table>
 </ul>
 {% endif %}
 {% endblock %}
