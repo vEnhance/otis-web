@@ -235,7 +235,7 @@ class ProblemSuggestionCreate(LoginRequiredMixin, CreateView):
 		messages.success(self.request, "Successfully submitted suggestion! Thanks much :) You can add more using the form below.")
 		return super().form_valid(form)
 	def get_success_url(self):
-		return reverse_lazy("suggest_new", kwargs=self.kwargs)
+		return reverse_lazy("suggest-new", kwargs=self.kwargs)
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		context['student'] = roster.utils.get_student(self.kwargs['student_id'])
@@ -246,7 +246,7 @@ class ProblemSuggestionUpdate(LoginRequiredMixin, UpdateView):
 	fields = ('unit', 'weight', 'source', 'description', 'statement', 'solution', 'comments', 'acknowledge',)
 	model = dashboard.models.ProblemSuggestion
 	def get_success_url(self):
-		return reverse_lazy("suggest_update", kwargs=self.kwargs)
+		return reverse_lazy("suggest-update", kwargs=self.kwargs)
 	def form_valid(self, form):
 		messages.success(self.request, "Edits saved.")
 		return super().form_valid(form)

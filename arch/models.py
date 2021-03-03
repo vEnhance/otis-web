@@ -25,7 +25,7 @@ class Problem(models.Model):
 	def __str__(self):
 		return str(self.group) + ": " + (self.source or self.description)
 	def get_absolute_url(self):
-		return reverse_lazy("hint_list", args=(self.id,))
+		return reverse_lazy("hint-list", args=(self.id,))
 	def get_source(self):
 		return self.source or "(no source)"
 
@@ -61,4 +61,4 @@ class Hint(models.Model):
 		return f"Hint {self.number} for {self.problem}"
 
 	def get_absolute_url(self):
-		return reverse_lazy("hint_detail", args=(self.id,))
+		return reverse_lazy("hint-detail", args=(self.id,))

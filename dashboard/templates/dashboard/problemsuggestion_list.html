@@ -8,7 +8,7 @@
 {% else %}
 <div class="alert alert-primary">
 {% endif %}
-<h3><a href="{% url "suggest_update" suggestion.id %}">
+<h3><a href="{% url "suggest-update" suggestion.id %}">
 {% if suggestion.resolved %}
 Resolved {{ suggestion.source }} for {{ suggestion.unit.group }}
 {% else %}

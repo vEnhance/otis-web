@@ -24,7 +24,7 @@ by a three-letter code.</p>
 	{% for unitgroup in item_list %}
 	<p>
 	{% if request.user.is_staff %}
-	<a href="{% url "problem_list" unitgroup.id %}">{{ unitgroup.name }}</a>
+	<a href="{% url "problem-list" unitgroup.id %}">{{ unitgroup.name }}</a>
 	{% else %}
 	<b class="text-info">{{ unitgroup.name }}</b>
 	{% endif %}

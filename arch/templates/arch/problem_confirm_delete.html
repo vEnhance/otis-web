@@ -3,7 +3,7 @@
 {% block layout-content %}
 {% include "generic-delete.html" %}
 <hr />
-<a href="{% url "hint_list" problem.id %}">&lt;&lt; Go back to problem</a>
+<a href="{% url "hint-list" problem.id %}">&lt;&lt; Go back to problem</a>
 <ul>
 	<li>{{ problem.get_source }}</li>
 	<li>{{ problem.description }} </li>

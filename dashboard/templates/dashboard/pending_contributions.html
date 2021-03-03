@@ -25,7 +25,7 @@
 	{{ form.instance.statement }}
 </div>
 
-<form action="{% url "resolve_suggest" form.instance.id %}" method="post">
+<form action="{% url "resolve-suggest" form.instance.id %}" method="post">
 {% csrf_token %}
 <table class="table">
 	<td>

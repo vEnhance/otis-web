@@ -58,7 +58,7 @@ $("#hide-locked-units").click(function() {
 
 	{# ARCH #}
 	{% if row.is_visible %}
-		<td><a href="{% url "problem_list" row.unit.group.id %}">
+		<td><a href="{% url "problem-list" row.unit.group.id %}">
 			ARCH</a></td>
 	{% else %}
 		<td>&mdash;</td>
@@ -66,7 +66,7 @@ $("#hide-locked-units").click(function() {
 
 	{# Suggest #}
 	{% if row.is_visible %}
-		<td><a href="{% url "suggest_new" student.id row.unit.id %}">
+		<td><a href="{% url "suggest-new" student.id row.unit.id %}">
 			Suggest</a></td>
 	{% else %}
 		<td>&mdash;</td>

@@ -9,13 +9,13 @@
 </div>
 
 <ul>
-<li><a href="{% url "hint_list" hint.problem.id %}">
+<li><a href="{% url "hint-list" hint.problem.id %}">
 		Back to {{ hint.problem.get_source }}</a>
 </ul>
 <hr />
 <ul>
-<li><a href="{% url "hint_create" hint.problem.id %}">Add another hint</a></li>
-<li><a href="{% url "hint_update" hint.id %}">Update hint</a></li>
-<li><a href="{% url "hint_delete" hint.id %}">Delete hint</a></li>
+<li><a href="{% url "hint-create" hint.problem.id %}">Add another hint</a></li>
+<li><a href="{% url "hint-update" hint.id %}">Update hint</a></li>
+<li><a href="{% url "hint-delete" hint.id %}">Delete hint</a></li>
 </li>
 {% endblock %}

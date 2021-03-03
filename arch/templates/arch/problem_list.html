@@ -17,25 +17,25 @@ or asking on Discord.
 <div class="alert alert-success">
 <p>
 	<b>
-	<a href="{% url "hint_list" problem.id %}">
+	<a href="{% url "hint-list" problem.id %}">
 		{{problem.get_source}}
 	</a>
 	</b> &mdash;
 	{{ problem.num_hints }}
 	hints.
-	<a href="{% url "problem_update" problem.id %}">(edit)</a>
-	<a href="{% url "problem_delete" problem.id %}">(delete)</a>
+	<a href="{% url "problem-update" problem.id %}">(edit)</a>
+	<a href="{% url "problem-delete" problem.id %}">(delete)</a>
 </p>
 	<p>{{ problem.description }}</p>
 </div>
 {% endfor %}
 {% else %}
 <p><i>There aren't any problems with hints here yet.
-Want to <a href="{% url "problem_create" group.id %}">add one</a>?</i></p>
+Want to <a href="{% url "problem-create" group.id %}">add one</a>?</i></p>
 {% endif %}
 <hr />
 <ul>
-	<li><a href="{% url "problem_create" group.id %}">Add problem</a></li>
+	<li><a href="{% url "problem-create" group.id %}">Add problem</a></li>
 	<li><a href="{% url "index" %}">Back to index</a></li>
 </ul>
 

@@ -14,7 +14,7 @@
 {% if hint_list %}
 <p>The following hints are available for this problem.</p>
 {% for hint in hint_list %}
-<a href="{% url "hint_detail" hint.id %}">
+<a href="{% url "hint-detail" hint.id %}">
 <div class="alert alert-primary">
 <h2>Hint {{hint.number}}%</h2>
 {% if hint.keywords %}<i>Keywords</i>: {{ hint.keywords }}{% endif %}
@@ -29,17 +29,17 @@ for more personalized help!
 <p><i>There aren't any hints here yet.
 If you've solved this problem,
 please help future students by
-<a href="{% url "hint_create" problem.id %}">adding a hint</a></i>.</p>
+<a href="{% url "hint-create" problem.id %}">adding a hint</a></i>.</p>
 </i>
 {% endif %}
 
 <hr />
 
 <ul>
-	<li><a href="{% url "hint_create" problem.id %}">Add hint</a></li>
-	<li><a href="{% url "problem_update" problem.id %}">Edit problem</a></li>
-	<li><a href="{% url "problem_delete" problem.id %}">Delete problem</a></li>
-	<li><a href="{% url "problem_list" problem.group.id %}">Back to {{ problem.group }}</a></li>
+	<li><a href="{% url "hint-create" problem.id %}">Add hint</a></li>
+	<li><a href="{% url "problem-update" problem.id %}">Edit problem</a></li>
+	<li><a href="{% url "problem-delete" problem.id %}">Delete problem</a></li>
+	<li><a href="{% url "problem-list" problem.group.id %}">Back to {{ problem.group }}</a></li>
 </ul>
 
 {% endblock %}

@@ -56,7 +56,7 @@ class ProblemUpdate(LoginRequiredMixin, RevisionMixin, UpdateView):
 	model = models.Problem
 	form_class = forms.ProblemUpdateFormWithReason
 	def get_success_url(self):
-		return reverse_lazy("hint_list", args=(self.object.id,))
+		return reverse_lazy("hint-list", args=(self.object.id,))
 	def form_valid(self, form):
 		reversion.set_comment(form.cleaned_data['reason'] or form.cleaned_data['description'])
 		return super().form_valid(form)
@@ -96,10 +96,10 @@ class HintDelete(LoginRequiredMixin, RevisionMixin, DeleteView):
 	context_object_name = "hint"
 	model = models.Hint
 	def get_success_url(self):
-		return reverse_lazy("hint_list", args=(self.object.problem.id,))
+		return reverse_lazy("hint-list", args=(self.object.problem.id,))
 class ProblemDelete(LoginRequiredMixin, RevisionMixin, DeleteView):
 	context_object_name = "problem"
 	model = models.Problem
 	def get_success_url(self):
-		return reverse_lazy("problem_list", args=(self.object.group.id,))
+		return reverse_lazy("problem-list", args=(self.object.group.id,))
 

@@ -81,7 +81,7 @@ and their links are highlighted in purple.
 	{% if omniscient %}
 	<li> <a href="{% url "advance" student.id %}">Advance student</a> (instructor)</li>
 	{% endif %}
-	<li><a href="{% url "suggest_list" student.id %}">
+	<li><a href="{% url "suggest-list" student.id %}">
 			Show suggestions</a></li>
 	<li><a href="{% url "downloads" student.id %}">Semester downloads
 			({{ num_sem_download }})</a></li>
