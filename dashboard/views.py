@@ -133,7 +133,7 @@ class DeleteFile(LoginRequiredMixin, DeleteView):
 		return obj
 
 @staff_member_required
-def quasigrader(request, num_hours):
+def quasigrader(request, num_hours = 336):
 	context = {}
 	context['title'] = 'Quasi-grader'
 	num_hours = int(num_hours)

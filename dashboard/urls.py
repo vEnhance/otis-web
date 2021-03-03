@@ -7,6 +7,7 @@ urlpatterns = [
 	path(r'uploads/<int:student_id>/<int:unit_id>/', views.uploads, name='uploads'),
 	path(r'editfile/<int:pk>/', views.UpdateFile.as_view(), name='editfile'),
 	path(r'deletefile/<int:pk>/', views.DeleteFile.as_view(), name='delfile'),
+	path(r'quasigrader/', views.quasigrader, name='quasigrader'),
 	path(r'quasigrader/<int:num_hours>/', views.quasigrader, name='quasigrader'),
 	path(r'idlewarn/', views.idlewarn, name='idlewarn'),
 	path(r'leaderboard/', views.leaderboard, name='leaderboard'),
