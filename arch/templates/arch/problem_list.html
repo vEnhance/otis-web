@@ -9,7 +9,10 @@ This page provides a growing database of pre-written hints
 to help you get unstuck on problems.</p>
 
 {% if problem_list %}
-<p>Hints have been written for the following problems:</p>
+<p>Hints have been written for the following problems.
+If a problem you want is not listed, try searching the OTIS Discord,
+or asking on Discord.
+</p>
 {% for problem in problem_list %}
 <div class="alert alert-success">
 <p>
@@ -28,7 +31,7 @@ to help you get unstuck on problems.</p>
 {% endfor %}
 {% else %}
 <p><i>There aren't any problems with hints here yet.
-Want to <a href="{% url "problem_create" group.id %}">add some</a>?</i></p>
+Want to <a href="{% url "problem_create" group.id %}">add one</a>?</i></p>
 {% endif %}
 <hr />
 <ul>
