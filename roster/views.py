@@ -123,7 +123,7 @@ def auto_advance(request, student_id, unit_id, target_id = None):
 	context = {}
 	context["target"] = target
 	if context["target"]:
-		context["title"] = f"Unlocked {target} for {student.first_name}"
+		context["title"] = f"{'Toggled' if replace else 'Unlocked'} {target} for {student.first_name}"
 	else:
 		context["title"] = student.name + " is done!"
 	context["replace"] = replace
