@@ -140,6 +140,7 @@ class Student(models.Model):
 						unit=OuterRef('pk'),
 						benefactor=self.id,
 						category='psets')))\
+					.order_by('position')
 
 	def has_submitted_pset(self, unit):
 		return dashboard.models.UploadedFile.objects.filter(
