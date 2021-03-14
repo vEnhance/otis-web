@@ -38,8 +38,8 @@ class Hint(models.Model):
 			help_text = r"A comma-separated list of keywords that a solver could look at " \
 			"to help them guess whether the hint is relevant or not. " \
 			"These are viewable immediately, so no spoilers here. " \
-			"Examples are `answer confirmation`, `nudge`, `main idea`, `solution set`,"\
-			"`converse direction`, `construction`, etc. " \
+			"Examples are `setup`, `advice`, `answer confirmation`, `nudge`, "\
+			"`main idea`, `solution set`, `converse direction`, `construction`, etc. " \
 			"Not all hints go well with keywords, so you can leave this " \
 			"blank if you can't think of anything useful to write.")
 	number = models.PositiveIntegerField(
