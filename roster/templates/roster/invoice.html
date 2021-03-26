@@ -1,4 +1,5 @@
 {% extends 'layout.html' %}
+{% load static %}
 
 {% block layout-content %}
 <p>Payment information linked can be found in the OTIS
@@ -7,7 +8,38 @@ and in more detail in the
 <a href="//web.evanchen.cc/private/parent-info.pdf">parent info</a>.
 All quantities below are in <strong>US dollars (USD)</strong>.</p>
 
+<hr />
+
 {% if invoice %}
+<h1>Invoice</h1>
+<div class="container">
+	<div class="row">
+		<div class="col-4">
+			<img width="150px" src="{% static 'img/otis-logo-v2018.svg' %}" /> <br/>
+			<tt>web.evanchen.cc</tt>
+		</div>
+		<div class="col">
+			<table class="table">
+				<tr>
+					<th>Bill to</th>
+					<td>{{ invoice.student.name }}</td>
+				</tr>
+				<tr>
+					<th>Course</th>
+					<td>{{ invoice.student.semester }}</td>
+				</tr>
+				<tr>
+					<th>Date</th>
+					<td>{{ invoice.updated_at|date:"Y-m-d" }}</td>
+				</tr>
+				<tr>
+					<th>Invoice #</th>
+					<td>{{ invoice.student.id|stringformat:"07d" }}</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+</div>
 <center>
 <table class="table">
 <tbody>
@@ -60,8 +92,9 @@ All quantities below are in <strong>US dollars (USD)</strong>.</p>
 </table>
 </center>
 
-<p>This invoice was last updated on {{ invoice.updated_at }} server time.</p>
+<hr />
 
+<p>This invoice was last updated on {{ invoice.updated_at }} server time.</p>
 <p>Please contact me if you think there are any errors
 (I make mistakes every year!).
 Detailed invoices with full dates, lecture names, et cetera
