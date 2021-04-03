@@ -61,6 +61,22 @@ class UnitGroup(models.Model):
 			help_text = "The subject for the unit")
 	def __str__(self):
 		return self.name
+
+	@property
+	def get_subject_short_display(self):
+		if self.subject == "A":
+			return "Algebra"
+		elif self.subject == "C":
+			return "Combo"
+		elif self.subject == "G":
+			return "Geom"
+		elif self.subject == "N":
+			return "Number theory"
+		elif self.subject == "M":
+			return "Misc"
+		elif self.subject == "F":
+			return "Func eqn"
+
 	class Meta:
 		ordering = ('name',)
 
