@@ -50,10 +50,10 @@ class UnitGroup(models.Model):
 	description = models.TextField(help_text = "A description of what this unit is",
 			blank = True)
 	SUBJECT_CHOICES = (
-			("A", "Algebra"),
-			("C", "Combinatorics"),
-			("G", "Geometry"),
-			("N", "Number Theory"),
+			("A", "Algebra (Hufflepuff)"),
+			("C", "Combinatorics (Gryffindor)"),
+			("G", "Geometry (Slytherin)"),
+			("N", "Number Theory (Ravenclaw)"),
 			("F", "Functional Equations"),
 			("M", "Miscellaneous"),
 			)
