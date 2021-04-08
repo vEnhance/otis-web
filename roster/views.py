@@ -244,7 +244,6 @@ def inquiry(request, student_id):
 				auto_accept_criteria = (inquiry.action_type == "APPEND") \
 						or (inquiry.action_type == "DROP") \
 						or current_inquiries.filter(action_type="UNLOCK").count() <= 3 \
-						or student.unlocked_units.count() <= 4 \
 						or request.user.is_staff
 				# auto reject criteria
 				auto_reject_criteria = inquiry.action_type == "UNLOCK" and \
