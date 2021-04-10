@@ -52,6 +52,7 @@ class InvoiceIEResource(resources.ModelResource):
 		model = roster.models.Invoice
 		fields = ('id', 'student','student__track',
 				'student__user__first_name', 'student__user__last_name',
+				'student__email', 'student__parent_email',
 				'preps_taught', 'hours_taught', 'adjustment', 'extras',
 				'total_paid', 'student__semester__name',)
 class OwedFilter(admin.SimpleListFilter):
@@ -89,9 +90,9 @@ class StudentIEResource(RosterResource):
 		skip_unchanged = True
 		model = roster.models.Student
 		fields = ('id', 'user__first_name', 'user__last_name', 'semester_name',
-				'user_name', 'assistant', 'track', 'legit', 'unit_list',)
+				'user_name', 'assistant', 'track', 'legit', 'unit_list', 'email', 'parent_email')
 		export_order = ('id', 'user__first_name', 'user__last_name', 'semester_name',
-				'user_name', 'assistant', 'track', 'legit', 'unit_list',)
+				'user_name', 'assistant', 'track', 'legit', 'unit_list', 'email', 'parent_email')
 class UnlistedInline(admin.TabularInline):
 	model = roster.models.Student.unlisted_assistants.through
 	verbose_name = "Unlisted Assistant"

@@ -77,6 +77,12 @@ class Student(models.Model):
 			"This will hide them from the master schedule, for example.")
 	newborn = models.BooleanField(default = True,
 			help_text = "Whether the student is newly created.")
+
+	email = models.EmailField(blank = True,
+			help_text = "Student email address.")
+	parent_email = models.EmailField(blank = True,
+			help_text = "Parent email address.")
+	
 	def __str__(self):
 		return f"{self.name} ({self.semester})"
 
