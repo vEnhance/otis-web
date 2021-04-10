@@ -60,7 +60,7 @@ class OwedFilter(admin.SimpleListFilter):
 	parameter_name = 'has_owed'
 
 	def lookups(self, request, model_admin):
-		return [("incomplete", "Incomplete"), ("paid", "Paid in full")]
+		return [("incomplete", "Incomplete"), ("paid", "Paid in full"), ("zero", "No payment")]
 	def queryset(self, request, queryset):
 		if self.value() is None:
 			return queryset
@@ -73,6 +73,8 @@ class OwedFilter(admin.SimpleListFilter):
 				return queryset.filter(owed__gt=0)
 			elif self.value() == "paid":
 				return queryset.filter(owed__lte=0)
+			elif self.value() == "zero":
+				return queryset.filter(owed__gt=0).filter(total_paid=0)
 
 @admin.register(roster.models.Invoice)
 class InvoiceAdmin(ImportExportModelAdmin):
