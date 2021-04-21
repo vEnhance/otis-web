@@ -26,7 +26,9 @@ from django.utils import timezone
 import datetime
 import itertools
 import collections
+from hashlib import pbkdf2_hmac
 
+import os
 import core
 from . import models
 from . import forms
@@ -158,6 +160,12 @@ def advance(request, student_id):
 	return render(request, "roster/advance.html", context)
 
 
+def get_checksum(student):
+	key = os.getenv("INVOICE_HASH_KEY", "evan_chen_is_still_really_cool")
+	return pbkdf2_hmac('sha256',
+			(key+str(student.id)+student.user.username+'meow').encode('utf-8'),
+			b'salt is yummy so is sugar', 100000, dklen = 18).hex()
+
 @login_required
 def invoice(request, student_id=None):
 	if student_id is None:
@@ -177,11 +185,30 @@ def invoice(request, student_id=None):
 			invoice = student.invoice
 		except ObjectDoesNotExist:
 			invoice = None
-
+	
 	context = {'title' : "Invoice for " + student.name,
-			'student' : student, 'invoice' : invoice}
+			'student' : student, 'invoice' : invoice,
+			'checksum' : get_checksum(student)}
 	# return HttpResponse("hi")
 	return render(request, "roster/invoice.html", context)
+
+def invoice_standalone(request, student_id, checksum):
+	# Now assume student_id is not None
+	student = utils.get_student(student_id)
+
+	if checksum != get_checksum(student):
+		raise PermissionDenied("Bad hash provided")
+
+	try:
+		invoice = student.invoice
+	except ObjectDoesNotExist:
+		raise Http404("No invoice exists for this student")
+
+	context = {'title' : "Invoice for " + student.name,
+			'student' : student, 'invoice' : invoice, 'checksum' : checksum}
+	# return HttpResponse("hi")
+	return render(request, "roster/invoice-standalone.html", context)
+
 
 @staff_member_required
 def master_schedule(request):
