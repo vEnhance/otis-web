@@ -61,26 +61,8 @@ body {
 </style>
 {% endif %}
 
-<div class="container">
-
-<div class="row align-items-center">
-	<div class="col-12">
-		<div id="header"><a href="/"><h1 id="sitetitle">OTIS-WEB</h1></a></div>
-	</div>
-</div>
-
-<div class="row">
-    <div class="col-6 offset-6 col-md-4 offset-md-8">
-		<div id="email_box">&copy; Evan Chen, internal use only.</div>
-    </div>
-</div>
-
-<div id="content" class="row">
-	{% block base-content %}
-	{% endblock %}
-</div>
-
-</div>
+{% block base-content %}
+{% endblock %}
 
 {% block scripts %}
 {% endblock %}

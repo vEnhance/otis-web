@@ -3,27 +3,43 @@
 {% load bootstrap4 %}
 
 {% block base-content %}
-<div class="col-12 col-md-9">
-<div id="main">
-	<div class="entry">
-		<h1 id="pagetitle">{% block title %}{{ title }}{% endblock %}</h1>
-		<div class="entrywrap">
-			{% bootstrap_messages %}
+<div class="container">
+	<div class="row align-items-center">
+		<div class="col-12">
+			<div id="header"><a href="/"><h1 id="sitetitle">OTIS-WEB</h1></a></div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-6 offset-6 col-md-4 offset-md-8">
+			<div id="email_box">&copy; Evan Chen, internal use only.</div>
+		</div>
+	</div>
+	<div id="content" class="row">
+		<div class="col-12 col-md-9">
+			<div id="main">
+				<div class="entry">
+					<h1 id="pagetitle">
+						{% block title %}{{ title }}{% endblock %}
+					</h1>
+					<div class="entrywrap">
+						{% bootstrap_messages %}
 
-			{% block layout-content %}
-			{{ content }}
-			{% endblock %}
+						{% block layout-content %}
+						{{ content }}
+						{% endblock %}
+					</div>
+				</div>
+			</div>
+			<div id="logo">
+				<img src="{% static 'img/otis-logo-v2018.svg' %}" />
+			</div>
+		</div>
+		<div class="col-8 col-md-3">
+			<div id="side">
+			{% include "sidebar.html" %}
+			</div>
 		</div>
 	</div>
 </div>
-<div id="logo">
-<img src="{% static 'img/otis-logo-v2018.svg' %}" />
-</div>
-</div>
 
-<div class="col-8 col-md-3">
-<div id="side">
-	{% include "sidebar.html" %}
-</div>
-</div>
 {% endblock %}
