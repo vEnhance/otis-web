@@ -1,6 +1,7 @@
 from django.urls import path
 
 from . import views
+from django.views.generic.base import RedirectView
 
 urlpatterns = [
 	path(r'problem/<int:group>/', views.ProblemList.as_view(), name='problem-list'),
@@ -12,4 +13,5 @@ urlpatterns = [
 	path(r'hints/<int:problem>/create', views.HintCreate.as_view(), name='hint-create'),
 	path(r'hint/update/<int:pk>/', views.HintUpdate.as_view(), name='hint-update'),
 	path(r'hint/delete/<int:pk>/', views.HintDelete.as_view(), name='hint-delete'),
+	path(r'', RedirectView.as_view(pattern_name='synopsis'), name='problem-list'),
 	]
