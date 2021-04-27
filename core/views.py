@@ -1,10 +1,10 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
 from hashlib import sha256
 from django.contrib.auth.decorators import login_required
 
 from django.views.generic.list import ListView
-from .models import UnitGroup, Unit
+from .models import UnitGroup, Unit, Semester
 
 from hashlib import sha256
 def sha(value):
@@ -33,3 +33,8 @@ def unit_problems(request, pk, hash):
 def unit_solutions(request, pk, hash):
 	unit = Unit.objects.get(pk=pk)
 	return _core_redir(unit.soln_url, hash)
+
+@login_required
+def classroom(request):
+	semester = Semester.objects.get(active=True)
+	return HttpResponseRedirect(semester.classroom_url)
