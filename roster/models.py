@@ -263,6 +263,8 @@ class Invoice(models.Model):
 			decimal_places = 2, default = 0,
 			help_text = "Amount paid.")
 	updated_at = models.DateTimeField(auto_now=True)
+	forgive = models.BooleanField(default = False,
+			help_text="When switched on, won't hard-lock delinquents.")
 
 	def __str__(self):
 		return f"Invoice {self.id or 0}"

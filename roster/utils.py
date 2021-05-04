@@ -29,7 +29,10 @@ def check_can_view(request, student, delinquent_check = True):
 		raise PermissionDenied("Missing payment permission error")
 
 def is_delinquent_locked(request, student):
-	return not request.user.is_staff and student.is_payment_locked
+	return not request.user.is_staff \
+			and student.is_payment_locked \
+			and student.invoice.forgive is False
+			# student.invoice must exist if student.is_payment_locked is True
 
 def check_taught_by(request, student):
 	if not student.is_taught_by(request.user):

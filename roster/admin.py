@@ -78,7 +78,7 @@ class OwedFilter(admin.SimpleListFilter):
 
 @admin.register(roster.models.Invoice)
 class InvoiceAdmin(ImportExportModelAdmin):
-	list_display = ('student', 'track', 'total_owed', 'total_paid', 'total_cost', 'updated_at',)
+	list_display = ('student', 'track', 'total_owed', 'total_paid', 'total_cost', 'updated_at', 'forgive',)
 	list_display_links = ('student',)
 	search_fields = ('student__user__first_name', 'student__user__last_name',)
 	autocomplete_fields = ('student',)
@@ -102,7 +102,7 @@ class UnlistedInline(admin.TabularInline):
 	extra = 0
 class InvoiceInline(admin.StackedInline):
 	model = roster.models.Invoice
-	fields = ('preps_taught', 'hours_taught', 'extras', 'adjustment', 'total_paid',)
+	fields = ('preps_taught', 'hours_taught', 'extras', 'adjustment', 'total_paid', 'forgive',)
 	readonly_fields = ('student', 'id',)
 @admin.register(roster.models.Student)
 class StudentAdmin(ImportExportModelAdmin):
