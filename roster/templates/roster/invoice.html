@@ -20,23 +20,34 @@ All quantities below are in <strong>US dollars (USD)</strong>.</p>
 <hr />
 
 {% if invoice %}
-<h1>Invoice</h1>
-{% include "roster/invoice-table.html" %}
-<hr />
+	<h1>Invoice</h1>
+	{% include "roster/invoice-table.html" %}
+	<hr />
 
-<p>This invoice was last updated on {{ invoice.updated_at }} server time.</p>
-<p>Please contact me if you think there are any errors
-(I make mistakes every year!).
-Detailed invoices with full dates, lecture names, et cetera
-are available on request.</p>
-<p>If you have an assistant instructor,
-that payment should be done separately.</p>
+	<p>This invoice was last updated on {{ invoice.updated_at }} server time.</p>
+	<p>Please contact me if you think there are any errors
+	(I make mistakes every year!).</p>
+	{% if student.semester.first_payment_deadline or student.semester.most_payment_deadline %}
+	<p>As a reminder, the payment deadlines are:</p>
+	<ul>
+		{% if student.semester.first_payment_deadline %}
+		<li>{{ student.semester.first_payment_deadline|date:"F j, Y" }}</li>
+		{% endif %}
+		{% if student.semester.most_payment_deadline %}
+		<li>{{ student.semester.most_payment_deadline|date:"F j, Y" }}</li>
+		{% endif %}
+	</ul>
+	{% endif %}
 
-{% if request.user.is_staff %}
-<ul>
-<li>(Staff) <a href="{% url "edit-invoice" invoice.id %}">Edit invoice</a></li>
-</ul>
-{% endif %}
+	<p>If you have an assistant instructor,
+	that payment should be done separately.</p>
+
+	{% if request.user.is_staff %}
+	<ul>
+	<li>(Staff) <a href="{% url "edit-invoice" invoice.id %}">
+			Edit invoice</a></li>
+	</ul>
+	{% endif %}
 
 {% else %}
 <p><b>No invoice is currently available.</b></p>
