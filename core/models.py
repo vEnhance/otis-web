@@ -26,6 +26,10 @@ class Semester(models.Model):
 			help_text = "The prep rate for the semester.")
 	hour_rate = models.PositiveSmallIntegerField(default=80,
 			help_text = "The hourly rate for the semester.")
+	first_payment_deadline = models.DateTimeField(null=True, blank=True,
+			help_text = "Deadline for nonzero payment.")
+	most_payment_deadline = models.DateTimeField(null=True, blank=True,
+			help_text = "Deadline for two-thirds of the payment.")
 
 	gradescope_key = models.CharField(max_length=10, blank=True,
 			help_text = "The entry code for GradeScope this semester.")

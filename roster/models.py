@@ -3,6 +3,9 @@ from __future__ import unicode_literals
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Count, Q, Subquery, OuterRef, Exists
+from django.core.exceptions import ObjectDoesNotExist
+from django.utils.timezone import localtime
+from datetime import timedelta
 
 import core
 import dashboard
@@ -188,6 +191,52 @@ class Student(models.Model):
 				row['sols_label'] = None # solutions not shown
 			rows.append(row)
 		return rows
+
+	@property
+	def payment_status(self):
+		"""Returns one of several codes:
+			0: student is clear (no invoice exists or total owed is nonpositive)
+			1: remind of upcoming payment for initial deadline
+			2: warn of late payment for initial deadline
+			3: lock late payment for initial deadline
+			4: no warning yet, but student has something owed
+			5: remind of upcoming payment for primary deadline
+			6: warn of late payment for primary deadline
+			7: lock late payment for primary deadline
+			"""
+		if self.semester.show_invoices is False:
+			return 0
+		try:
+			invoice = self.invoice
+		except ObjectDoesNotExist:
+			return 0
+		if invoice.total_owed <= 0:
+			return 0
+
+		now = localtime()
+
+		if self.semester.first_payment_deadline is not None \
+				and invoice.total_paid <= 0:
+			d = self.semester.first_payment_deadline - now
+			if d < timedelta(days = -7):
+				return 3
+			elif d < timedelta(days = 0):
+				return 2
+			elif d < timedelta(days = 7):
+				return 1
+
+		if self.semester.most_payment_deadline is not None \
+				and invoice.total_paid < 2*invoice.total_cost/3:
+			d = self.semester.most_payment_deadline - now
+			if d < timedelta(days = -7):
+				return 7
+			elif d < timedelta(days = 0):
+				return 6
+			elif d < timedelta(days = 7):
+				return 5
+
+		return 4
+
 
 class Invoice(models.Model):
 	"""Billing information object for students."""
