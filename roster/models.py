@@ -237,6 +237,10 @@ class Student(models.Model):
 
 		return 4
 
+	@property
+	def is_payment_locked(self):
+		return self.payment_status % 4 == 3
+
 
 class Invoice(models.Model):
 	"""Billing information object for students."""
