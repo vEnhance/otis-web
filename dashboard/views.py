@@ -25,7 +25,9 @@ from . import forms
 @login_required
 def portal(request, student_id):
 	student = roster.utils.get_student(student_id)
-	roster.utils.check_can_view(request, student)
+	roster.utils.check_can_view(request, student, delinquent_check = False)
+	if roster.utils.is_delinquent_locked(request, student):
+		return HttpResponseRedirect(reverse_lazy('delinquent', args=(student_id,)))
 	semester = student.semester
 
 	context = {}

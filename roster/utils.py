@@ -22,9 +22,15 @@ def get_visible_students(user, current = True):
 		queryset = models.Student.objects.all()
 	return get_visible_from_queryset(user, queryset)
 
-def check_can_view(request, student):
+def check_can_view(request, student, delinquent_check = True):
 	if not student.can_view_by(request.user):
 		raise PermissionDenied(f"{request.user} cannot view {student}")
+	if delinquent_check is True and is_delinquent_locked(request, student):
+		raise PermissionDenied("Missing payment permission error")
+
+def is_delinquent_locked(request, student):
+	return not request.user.is_staff and student.payment_status % 4 == 3
+
 def check_taught_by(request, student):
 	if not student.is_taught_by(request.user):
 		raise PermissionDenied(f"{request.user} cannot edit {student}")
