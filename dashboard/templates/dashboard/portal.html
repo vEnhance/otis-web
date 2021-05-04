@@ -13,7 +13,15 @@
 		alert-danger
 	{% endif %}
 	">
-	<h1 class="alert-heading">Payment reminder</h1>
+	<h1 class="alert-heading">
+		{% if student.payment_status == 1 or student.payment_status == 5 %}
+		Payment reminder
+		{% elif student.payment_status == 2 or student.payment_status == 3 %}
+		Payment due
+		{% else %}
+		Payment overdue
+		{% endif %}
+	</h1>
 	{% if student.payment_status == 1 %}
 		As a quick reminder, the payment deadline
 		{{ semester.first_payment_deadline|date:"Y-m-d" }}
@@ -37,7 +45,7 @@
 	{% elif student.payment_status == 7 %}
 		More than a week since the deadline
 		{{ semester.most_payment_deadline|date:"Y-m-d" }}
-		has passed, but no payment is recorded.
+		has passed, but your payment is incomplete.
 	{% endif %}
 	<a href="{% url "invoice" student.id %}" class="alert-link">Link to invoice.</a>
 </div>
