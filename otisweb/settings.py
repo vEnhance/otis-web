@@ -31,7 +31,8 @@ if not PRODUCTION:
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = not bool(os.getenv('IS_PRODUCTION'))
+DEBUG = True
+# DEBUG = not bool(os.getenv('IS_PRODUCTION'))
 
 # SECURITY WARNING: App Engine's security features ensure that it is safe to
 # have ALLOWED_HOSTS = ['*'] when the app is deployed. If you deploy a Django
