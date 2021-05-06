@@ -7,7 +7,7 @@
 <h3>{{ form.instance.source }} &mdash; {{ form.instance.description }}</h3>
 <ul>
 	<li>Suggested by
-		{{ form.instance.student.name }}
+		<a href="{{ form.instance.student.get_absolute_url }}">{{ form.instance.student.name }}</a>
 		for {{ form.instance.unit }}</li>
 	<li><a href="{% url "admin:dashboard_problemsuggestion_change" form.instance.id %}">
 			Edit in Django admin</a></li>
