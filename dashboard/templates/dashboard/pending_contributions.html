@@ -11,6 +11,7 @@
 		for {{ form.instance.unit }}</li>
 	<li><a href="{% url "admin:dashboard_problemsuggestion_change" form.instance.id %}">
 			Edit in Django admin</a></li>
+	<li>Timestamp: {{ form.instance.created_at|date:"DATETIME_FORMAT" }}</li>
 	{% if not form.instance.acknowledge %}
 	<li><i>Anonymous submission</i></li>
 	{% endif %}
