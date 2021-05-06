@@ -30,10 +30,15 @@ def portal(request, student_id):
 		return HttpResponseRedirect(reverse_lazy('invoice', args=(student_id,)))
 	semester = student.semester
 
+	# check if the student has any new processed suggestions
+	suggestions = dashboard.models.ProblemSuggestion.objects.filter(
+			resolved = True, notified = False)
+
 	context = {}
 	context['title'] = f"{student.name} ({semester.name})"
 	context['student'] = student
 	context['semester'] = semester
+	context['suggestions'] = list(suggestions)
 	context['omniscient'] = student.is_taught_by(request.user)
 	context['curriculum'] = student.generate_curriculum_rows(
 			omniscient = context['omniscient'])
@@ -43,6 +48,10 @@ def portal(request, student_id):
 			is_test = False, family = semester.exam_family, due_date__isnull=False)
 	context['num_sem_download'] = dashboard.models.SemesterDownloadFile\
 			.objects.filter(semester = semester).count()
+
+	# now mark the suggestions as processed
+	if request.user == student.user:
+		suggestions.update(notified = True)
 	return render(request, "dashboard/portal.html", context)
 
 @login_required

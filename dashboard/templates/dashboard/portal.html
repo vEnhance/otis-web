@@ -103,6 +103,32 @@
 	{% endif %}
 {% endif %}
 
+{% if suggestions|length %}
+<div class="alert alert-success">
+<p>Your recent problem suggestions have been processed.
+They are listed below, with comments from staff.</p>
+<ul>
+{% for suggestion in suggestions %}
+	<li>
+	<p><b>
+		{% if suggestion.source %}
+		{{ suggestion.source }}
+		{% else %}
+		{{ suggestion.description }}
+		{% endif %}
+	</b>
+	{% if suggestion.reason %}
+	&mdash;
+	{{ suggestion.reason }}
+	</p>
+	{% endif %}
+{% endfor %}
+</ul>
+<p><a class="alert-link" href="{% url "suggest-list" student.id %}">
+	See all past suggestions.
+</a></p>
+</div>
+{% endif %}
 
 <h2>Your units</h2>
 {% include "dashboard/list_curriculum.html" %}
