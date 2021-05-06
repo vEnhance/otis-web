@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.db.models import Count, Q, Subquery, OuterRef, Exists
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.timezone import localtime
+from django.urls import reverse_lazy
 from datetime import timedelta
 
 import core
@@ -88,6 +89,9 @@ class Student(models.Model):
 	
 	def __str__(self):
 		return f"{self.name} ({self.semester})"
+
+	def get_absolute_url(self):
+		return reverse_lazy('portal', args=(self.id,))
 
 	@property
 	def first_name(self):
