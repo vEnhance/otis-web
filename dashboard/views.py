@@ -32,7 +32,7 @@ def portal(request, student_id):
 
 	# check if the student has any new processed suggestions
 	suggestions = dashboard.models.ProblemSuggestion.objects.filter(
-			resolved = True, notified = False)
+			resolved = True, student = student, notified = False)
 
 	context = {}
 	context['title'] = f"{student.name} ({semester.name})"
