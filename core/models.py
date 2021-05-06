@@ -3,6 +3,9 @@ from __future__ import unicode_literals
 from django.db import models
 from positions import PositionField
 
+from django.urls import reverse_lazy
+import dashboard
+
 # Create your models here.
 
 class Semester(models.Model):
@@ -45,6 +48,8 @@ class Semester(models.Model):
 
 	def __str__(self):
 		return self.name
+	def get_absolute_url(self):
+		return reverse_lazy("past", args=(self.id,))
 
 class UnitGroup(models.Model):
 	"""Represents an entire group of units with the same name,

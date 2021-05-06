@@ -13,6 +13,7 @@ urlpatterns = [
 	path(r'leaderboard/', views.leaderboard, name='leaderboard'),
 	path(r'downloads/<int:pk>/', views.DownloadListView.as_view(), name='downloads'),
 	path(r'past/', views.past, name='past'),
+	path(r'past/<int:semester>/', views.past, name='past'),
 	path(r'index/', views.index, name='index'),
 	path(r'suggest/<int:student_id>/<int:unit_id>/new', views.ProblemSuggestionCreate.as_view(), name='suggest-new'),
 	path(r'suggest/<int:pk>/edit', views.ProblemSuggestionUpdate.as_view(), name='suggest-update'),

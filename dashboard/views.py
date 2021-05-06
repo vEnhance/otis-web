@@ -98,9 +98,14 @@ def index(request):
 	return render(request, "dashboard/stulist.html", context)
 
 @login_required
-def past(request):
+def past(request, semester = None):
 	students = roster.utils.get_visible_students(
 			request.user, current=False)
+	if semester is None:
+		students = students.order_by('-semester',
+				'user__first_name', 'user__last_name')[0:256]
+	else:
+		students = students.filter(semester=semester)
 	context = {}
 	context['title'] = "Previous Semester Listing"
 	context['students'] = students
