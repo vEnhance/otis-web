@@ -31,9 +31,9 @@ def portal(request, student_id):
 	semester = student.semester
 
 	context = {}
-	context['title'] = f"{student.name} ({student.semester.name})"
+	context['title'] = f"{student.name} ({semester.name})"
 	context['student'] = student
-	context['semester'] = student.semester
+	context['semester'] = semester
 	context['omniscient'] = student.is_taught_by(request.user)
 	context['curriculum'] = student.generate_curriculum_rows(
 			omniscient = context['omniscient'])
@@ -42,7 +42,7 @@ def portal(request, student_id):
 	context['quizzes'] = exams.models.PracticeExam.objects.filter(
 			is_test = False, family = semester.exam_family, due_date__isnull=False)
 	context['num_sem_download'] = dashboard.models.SemesterDownloadFile\
-			.objects.filter(semester = student.semester).count()
+			.objects.filter(semester = semester).count()
 	return render(request, "dashboard/portal.html", context)
 
 @login_required
