@@ -180,7 +180,7 @@ def quasigrader(request, num_hours = 336):
 		context['items'].append(d)
 
 	context['inquiry_nag'] = roster.models.UnitInquiry.objects\
-			.filter(status='NEW').count()
+			.filter(status='NEW', student__semester__active = True).count()
 	context['suggestion_nag'] = dashboard.models.ProblemSuggestion.objects\
 			.filter(resolved=False).count()
 	context['num_hours'] = num_hours

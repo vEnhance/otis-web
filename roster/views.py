@@ -306,6 +306,7 @@ class ListInquiries(PermissionRequiredMixin, ListView):
 	def get_queryset(self):
 		queryset = models.UnitInquiry.objects\
 				.filter(created_at__gte = timezone.now() - datetime.timedelta(days=7))\
+				.filter(student__semester__active = True)\
 				.exclude(status="ACC")
 
 		# some amazing code vv
@@ -340,6 +341,7 @@ def approve_inquiry(request, pk):
 
 @staff_member_required
 def approve_inquiry_all(request):
-	for inquiry in models.UnitInquiry.objects.filter(status="NEW"):
+	for inquiry in models.UnitInquiry.objects\
+			.filter(status="NEW", student__semester__active = True):
 		inquiry.run_accept()
 	return HttpResponseRedirect(reverse("list-inquiry"))
