@@ -89,10 +89,13 @@ class ProblemSuggestion(models.Model):
 			"Acknowledge me for this contribution. "
 			"(Uncheck for an anonymous contribution.)", default=True)
 
-	resolved = models.BooleanField(help_text = "\
-			Whether staff has processed this.", default=False)
-	reason = models.TextField(help_text = "Staff notes on reviewing.", blank=True)
-	created_at = models.DateTimeField(auto_now_add=True)
+	resolved = models.BooleanField(default = False,
+			help_text = "Whether staff has processed this.")
+	reason = models.TextField(blank = True,
+			help_text = "Staff notes on reviewing.")
+	created_at = models.DateTimeField(auto_now_add = True)
+	notified = models.BooleanField(default = False,
+			help_text = "Whether student has received the staff's comments.")
 
 	def __str__(self):
 		return self.student.name + " suggested " + self.source \
