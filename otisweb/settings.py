@@ -117,7 +117,7 @@ if os.getenv("DATABASE_NAME"):
 			'USER' : os.getenv("DATABASE_USER"),
 			'PASSWORD' : os.getenv("DATABASE_PASSWORD"),
 			'HOST' : os.getenv("DATABASE_HOST"),
-			'PORT' : '5432',
+			'PORT' : os.getenv("DATABASE_PORT", '3306'),
 		}
 	}
 else:
