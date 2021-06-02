@@ -30,6 +30,7 @@ from hashlib import pbkdf2_hmac
 
 import os
 import core
+from otisweb.settings import INVOICE_HASH_KEY
 from . import models
 from . import forms
 from . import utils
@@ -161,7 +162,7 @@ def advance(request, student_id):
 
 
 def get_checksum(student):
-	key = os.getenv("INVOICE_HASH_KEY", "evan_chen_is_still_really_cool")
+	key = INVOICE_HASH_KEY
 	return pbkdf2_hmac('sha256',
 			(key+str(student.id)+student.user.username+'meow').encode('utf-8'),
 			b'salt is yummy so is sugar', 100000, dklen = 18).hex()

@@ -12,6 +12,14 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 
 import os
 
+from pathlib import Path
+from dotenv import load_dotenv
+
+PROJECT_ROOT = Path(__file__).parent.parent.absolute()
+ENV_PATH = PROJECT_ROOT / '.env'
+if ENV_PATH.exists():
+	load_dotenv(ENV_PATH)
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -166,6 +174,7 @@ else:
 	STATIC_URL = '/static/'
 	MEDIA_URL = '/media/'
 	SECRET_KEY = 'evan_chen_is_really_cool'
+INVOICE_HASH_KEY = os.getenv("INVOICE_HASH_KEY", "evan_chen_is_still_really_cool")
 
 FILE_UPLOAD_HANDLERS = ('django.core.files.uploadhandler.MemoryFileUploadHandler',)
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760 # 10MB
