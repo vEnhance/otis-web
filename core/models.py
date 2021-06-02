@@ -1,10 +1,7 @@
 from __future__ import unicode_literals
-
 from django.db import models
 from positions import PositionField
-
 from django.urls import reverse_lazy
-import dashboard
 
 # Create your models here.
 
