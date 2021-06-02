@@ -12,3 +12,4 @@ django-stubs>=1.7.0
 django_reversion>=3.0.9
 mysqlclient>=2.0.3
 wheel>=0.36.2
+python-dotenv>=0.17.1
