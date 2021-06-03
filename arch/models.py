@@ -1,13 +1,13 @@
 from django.db import models
-from django.contrib.auth.models import User
 from django.urls import reverse_lazy
 import core
+import core.models
 import reversion
 
 # Create your models here.
-
 @reversion.register()
 class Problem(models.Model):
+	id = models.AutoField(primary_key=True)
 	source = models.CharField(max_length = 64,
 			help_text = r"The source of the problem, such as `TSTST 2020/3`." \
 			r"If in doubt on formatting, follow what is written on the handout.",
@@ -31,6 +31,7 @@ class Problem(models.Model):
 
 @reversion.register()
 class Hint(models.Model):
+	id = models.AutoField(primary_key=True)
 	problem = models.ForeignKey(Problem,
 			on_delete = models.CASCADE,
 			help_text = r"The container of the current hint.")
