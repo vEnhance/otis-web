@@ -1,8 +1,8 @@
+from typing import ClassVar
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render
 from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.db.models import Subquery, OuterRef, Q, ExpressionWrapper, BooleanField, Count
+from django.db.models import Q, ExpressionWrapper, BooleanField, Count
 from django.urls import reverse_lazy
 from reversion.views import RevisionMixin
 import reversion
@@ -10,6 +10,7 @@ import reversion
 from . import models
 from . import forms
 import core
+import core.models
 
 # Create your views here.
 
@@ -44,6 +45,7 @@ class HintUpdate(LoginRequiredMixin, RevisionMixin, UpdateView):
 	context_object_name = "hint"
 	model = models.Hint
 	form_class = forms.HintUpdateFormWithReason
+	object : ClassVar[models.Hint] = models.Hint()
 	def form_valid(self, form):
 		reversion.set_comment(form.cleaned_data['reason'] or form.cleaned_data['content'])
 		return super().form_valid(form)
@@ -55,6 +57,7 @@ class ProblemUpdate(LoginRequiredMixin, RevisionMixin, UpdateView):
 	context_object_name = "problem"
 	model = models.Problem
 	form_class = forms.ProblemUpdateFormWithReason
+	object : ClassVar[models.Problem] = models.Problem()
 	def get_success_url(self):
 		return reverse_lazy("hint-list", args=(self.object.id,))
 	def form_valid(self, form):
@@ -95,11 +98,13 @@ class ProblemCreate(LoginRequiredMixin, RevisionMixin, CreateView):
 class HintDelete(LoginRequiredMixin, RevisionMixin, DeleteView):
 	context_object_name = "hint"
 	model = models.Hint
+	object : ClassVar[models.Hint] = models.Hint()
 	def get_success_url(self):
 		return reverse_lazy("hint-list", args=(self.object.problem.id,))
 class ProblemDelete(LoginRequiredMixin, RevisionMixin, DeleteView):
 	context_object_name = "problem"
 	model = models.Problem
+	object : ClassVar[models.Problem] = models.Problem()
 	def get_success_url(self):
 		return reverse_lazy("problem-list", args=(self.object.group.id,))
 
