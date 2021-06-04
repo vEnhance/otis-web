@@ -25,7 +25,7 @@ class Problem(models.Model):
 			on_delete = models.CASCADE,
 			help_text = "The unit to which this problem belongs.")
 	def __str__(self):
-		return str(self.group) + ": " + (self.source or self.description)
+		return self.puid
 	def get_absolute_url(self):
 		return reverse_lazy("hint-list", args=(self.id,))
 	def get_source(self):
