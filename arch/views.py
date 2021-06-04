@@ -153,7 +153,8 @@ def api(request):
 		for hint in models.Hint.objects.filter(problem=problem):
 			response['hints'].append({
 				'number' : hint.number,
-				'keywords' : hint.keywords
+				'keywords' : hint.keywords,
+				'url' : hint.get_absolute_url(),
 				})
 		return JsonResponse(response)
 
