@@ -169,9 +169,9 @@ def api(request):
 			return err()
 		else:
 			return JsonResponse({
-				'edit_link' : reverse_lazy('problem-update',
+				'edit_url' : reverse_lazy('problem-update',
 					args=(problem.puid,)),
-				'view_link' : problem.get_absolute_url(),
+				'view_url' : problem.get_absolute_url(),
 				})
 
 	if action == 'add':
@@ -189,4 +189,4 @@ def api(request):
 		except:
 			return err()
 		else:
-			return JsonResponse({'link' : hint.get_absolute_url()})
+			return JsonResponse({'url' : hint.get_absolute_url()})
