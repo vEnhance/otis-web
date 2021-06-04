@@ -7,7 +7,8 @@ import reversion
 class Problem(models.Model):
 	id = models.AutoField(primary_key=True)
 	puid = models.CharField(max_length=24,
-			help_text = "Unique problem identifier, as printed in OTIS handout.")
+			help_text = "Unique problem identifier, as printed in OTIS handout.",
+			unique = True)
 	source = models.CharField(max_length = 64,
 			help_text = r"Human-readable source such as 'TSTST 2020/3'." \
 			r"If in doubt on formatting, follow what is written on the handout.",
