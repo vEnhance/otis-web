@@ -149,7 +149,9 @@ def api(request):
 		response = {
 				'hints' : [],
 				'description' : problem.description,
-				'url' : problem.get_absolute_url()
+				'url' : problem.get_absolute_url(),
+				'add_url' : reverse_lazy("hint-create",
+					args = (problem.puid,))
 				}
 		for hint in models.Hint.objects.filter(problem=problem):
 			response['hints'].append({
