@@ -18,20 +18,19 @@ $("#hide-locked-units").click(function() {
 <table class="table curriculum">
 {% for row in curriculum %}
 <tr class="subject{{ row.unit.group.subject }}{% if row.is_complete %} unit-completed{% endif %}{% if not row.is_visible %} unit-locked{% endif %}">
-	<th style="text-align: right;">{{ row.number }}</th>
-	<td style="text-align: center;">
+	<th class="number" >{{ row.number }}</th>
+	<td class="icon">
 	{% if row.is_complete and row.is_current%}
-		&check;&starf;
+		⏳
 	{% elif row.is_current %}
-		&star;
+		▶️
 	{% elif row.is_complete %}
-		&check;
+		✅
 	{% endif %}
 	</td>
 
 	{# Handout #}
-	<td style="text-align: right; font-size: 70%;">
-		<tt>{{ row.unit.position }} {{ row.unit.code }}</tt></td>
+	<td class="code">{{ row.unit.position }} {{ row.unit.code }}</td>
 	{% if row.is_visible %}
 		<td><a href="{% view_problems row.unit %}"
 			   {% if not row.is_complete %}class="active"{% endif %}>
@@ -43,25 +42,26 @@ $("#hide-locked-units").click(function() {
 
 	{# File uploads #}
 	{% if row.is_visible or row.num_uploads > 0 %}
-		<td><a href="{% url "uploads" student.id row.unit.id %}">
-			Files ({{ row.num_uploads }})</a></td>
+		<td class="righticon"><a href="{% url "uploads" student.id row.unit.id %}">
+			📂 ×{{ row.num_uploads }}</a></td>
 	{% else %}
-		<td>&mdash;</td>
+		<td class="righticon">&mdash;</td>
 	{% endif %}
 
 	{# Solutions #}
 	{% if row.sols_label %}
-		<td><a href="{% view_solutions row.unit %}">{{ row.sols_label }}</a></td>
+		<td class="righticon"><a href="{% view_solutions row.unit %}">{{ row.sols_label }}</a></td>
 	{% else %}
-		<td>&mdash;</td>
+		<td class="righticon">&mdash;</td>
 	{% endif %}
 
 	{# Suggest #}
 	{% if row.is_visible %}
-		<td><a href="{% url "suggest-new" student.id row.unit.id %}">
-			Suggest</a></td>
+		<td class="righticon">
+			<a href="{% url "suggest-new" student.id row.unit.id %}">➕</a>
+		</td>
 	{% else %}
-		<td>&mdash;</td>
+		<td class="righticon">&mdash;</td>
 	{% endif %}
 </tr>
 {% endfor %}

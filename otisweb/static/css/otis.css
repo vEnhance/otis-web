@@ -66,12 +66,28 @@ td.unit-select select {
 }
 
 /* Curriculum */
-table.curriculum td {
+table.curriculum th, table.curriculum td {
 	vertical-align: middle;
+	font-size: 14px;
+}
+
+table.curriculum th.number {
+	text-align: right;
+	font-size: 12px;
+}
+table.curriculum td.icon {
+	width: 20px;
+}
+table.curriculum td.code {
+	text-align: right;
+	font-size: 12px;
+	font-family: Inconsolata, Consolas, monaco, monospace;
+	width: 52px;
 }
 
 table.curriculum a.active {
 	font-weight: 700;
 	color: #aa00ff;
+
 }
 
