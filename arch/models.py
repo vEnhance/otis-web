@@ -9,11 +9,11 @@ class Problem(models.Model):
 	puid = models.CharField(max_length=24,
 			help_text = "Unique problem identifier.")
 	source = models.CharField(max_length = 64,
-			help_text = r"The source of the problem, such as `TSTST 2020/3`." \
+			help_text = r"The source of the problem, such as 'TSTST 2020/3'." \
 			r"If in doubt on formatting, follow what is written on the handout.",
 			blank = True)
 	description = models.CharField(max_length = 255,
-			help_text = r"A short description of the problem, e.g. `Quirky triangles.`. "\
+			help_text = r"A short description of the problem, e.g. 'Quirky triangles.'. "\
 			r"Most important if the problem does not have a source given. " \
 			r"Use sentence case.")
 	aops_url = models.URLField(max_length = 128,
@@ -36,8 +36,8 @@ class Hint(models.Model):
 			help_text = r"A comma-separated list of keywords that a solver could look at " \
 			"to help them guess whether the hint is relevant or not. " \
 			"These are viewable immediately, so no spoilers here. " \
-			"Examples are `setup`, `advice`, `answer confirmation`, `nudge`, "\
-			"`main idea`, `solution set`, `converse direction`, `construction`, etc. " \
+			"Examples are 'setup', 'advice', 'answer confirmation', 'nudge', "\
+			"'main idea', 'solution set', 'converse direction', 'construction', etc. " \
 			"Not all hints go well with keywords, so you can leave this " \
 			"blank if you can't think of anything useful to write.")
 	number = models.PositiveIntegerField(
