@@ -1,6 +1,6 @@
 {% load crispy_forms_tags %}
 
-<form action="{{ request.path }}" method="post" enctype="multipart/form-data" class="form">
+<form action="{{ target|default:request.path }}" method="post" enctype="multipart/form-data" class="form">
 {% csrf_token %}
 
 {% if form.non_field_errors %}
@@ -24,8 +24,9 @@
 		{% endfor %}
 
 		<tr><td>
-			<button type="submit" class="btn btn-success">
-			{{ submit_name|default:"Submit" }}
+			<button type="submit"
+				class="btn {{ btn_class|default:"btn-success"}}">
+				{{ submit_name|default:"Submit" }}
 			</button>
 		</td></tr>
 	</table>

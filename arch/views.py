@@ -1,6 +1,7 @@
 from typing import ClassVar, Dict
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView
@@ -76,11 +77,6 @@ class HintCreate(LoginRequiredMixin, RevisionMixin, CreateView):
 		initial['problem'] = models.Problem.objects.get(puid=self.kwargs['puid'])
 		return initial
 
-class ProblemCreate(LoginRequiredMixin, RevisionMixin, CreateView):
-	context_object_name = "problem"
-	fields = ('puid', 'source', 'description', 'aops_url',)
-	model = models.Problem
-
 class HintDelete(HintObjectView, LoginRequiredMixin, RevisionMixin, DeleteView):
 	context_object_name = "hint"
 	model = models.Hint
@@ -95,7 +91,25 @@ class ProblemDelete(ProblemObjectView, LoginRequiredMixin, RevisionMixin, Delete
 	def get_success_url(self):
 		return reverse_lazy("arch-index")
 
+# this is actually the index page as well :P bit of a hack I guess...
+class ProblemCreate(LoginRequiredMixin, RevisionMixin, CreateView):
+	context_object_name = "problem"
+	fields = ('puid', 'description',)
+	model = models.Problem
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context['lookup_form'] = forms.ProblemSelectForm()
+		context['num_problems'] = models.Problem.objects.all().count()
+		context['num_hints'] = models.Hint.objects.all().count()
+		context['lookup_url'] = reverse_lazy('arch-lookup',)
+		return context
+
 @login_required
-def index(request):
-	context = {'title' : 'ARCH'}
-	return render(request, "arch/index.html", context)
+def lookup(request):
+	if request.method == 'POST':
+		form = forms.ProblemSelectForm(request.POST)
+		assert form.is_valid()
+		problem = form.cleaned_data['lookup_problem']
+		return HttpResponseRedirect(problem.get_absolute_url())
+	else:
+		return HttpResponseRedirect(reverse_lazy('arch-index',))

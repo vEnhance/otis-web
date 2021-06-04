@@ -12,3 +12,14 @@ class ProblemUpdateFormWithReason(forms.ModelForm):
 	class Meta:
 		model = models.Problem
 		fields = ('source', 'description', 'aops_url', 'reason',)
+
+class ProblemModelChoiceField(forms.ModelChoiceField):
+	def label_from_instance(self, obj ):
+		assert isinstance(obj, models.Problem)
+		return f'[{obj.puid}] {obj.description}'
+
+class ProblemSelectForm(forms.Form):
+	lookup_problem = ProblemModelChoiceField(
+			to_field_name='puid',
+			queryset = models.Problem.objects.all()
+			)
