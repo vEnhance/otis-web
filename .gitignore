@@ -14,3 +14,4 @@ venv/
 .env
 .venv
 evanchen-cc-*.json
+env
