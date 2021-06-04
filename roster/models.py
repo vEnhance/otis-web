@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.contrib.auth.models import User
-from django.db.models import Count, Q, Subquery, OuterRef, Exists
+from django.db.models import Count, Q, OuterRef, Exists
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.timezone import localtime
 from django.urls import reverse_lazy

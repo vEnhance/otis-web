@@ -1,14 +1,17 @@
 from typing import ClassVar, Dict
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from reversion.views import RevisionMixin
 from typing import ClassVar
+from hashlib import sha256
+from django.views.decorators.csrf import csrf_exempt
 import reversion
+import traceback
+import logging
 
 from . import models
 from . import forms
@@ -113,3 +116,70 @@ def lookup(request):
 		return HttpResponseRedirect(problem.get_absolute_url())
 	else:
 		return HttpResponseRedirect(reverse_lazy('arch-index',))
+
+TARGET_HASH = '1c3592aa9241522fea1dd572c43c192a277e832dcd1ae63adfe069cb05624ead'
+# what don't look at me like that
+# who is bored enough to try hacking the arch api
+
+@csrf_exempt
+def api(request):
+	if request.method != 'POST':
+		return
+	token = request.POST.get('token')
+	if not sha256(token.encode('ascii')).hexdigest() == TARGET_HASH:
+		return
+
+	def err() -> JsonResponse:
+		logging.error(traceback.format_exc())
+		return JsonResponse(
+				{'error' : ''.join(traceback.format_exc(limit=1)) },
+				status = 418)
+
+	action = request.POST.get('action')
+	puid = request.POST.get('puid').upper()
+
+	if action == 'hints':
+		try:
+			problem = models.Problem.objects.get(puid = puid)
+		except:
+			return err()
+		response = {
+				'hints' : [],
+				'url' : problem.get_absolute_url()
+				}
+		for hint in models.Hint.objects.filter(problem=problem):
+			response['hints'].append({
+				'number' : hint.number,
+				'keywords' : hint.keywords
+				})
+		return JsonResponse(response)
+
+	if action == 'create':
+		try:
+			problem = models.Problem(
+					description = request.POST.get('description'),
+					puid = puid
+					)
+			problem.save()
+		except:
+			return err()
+		else:
+			return JsonResponse({
+				'edit_link' : reverse_lazy('problem-update', (problem.puid,)),
+				'view_link' : problem.get_absolute_url(),
+				})
+
+	if action == 'add':
+		try:
+			problem = models.Problem.objects.get(puid = puid)
+			hint = models.Hint(
+					problem = problem,
+					content = request.POST.get('content'),
+					keywords = request.POST.get('keywords'),
+					number = request.POST.get('number'),
+					)
+			hint.save()
+		except:
+			return err()
+		else:
+			return JsonResponse({'link' : hint.get_absolute_url()})

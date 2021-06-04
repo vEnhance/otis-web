@@ -11,5 +11,6 @@ urlpatterns = [
 	path(r'<str:puid>/<int:number>/edit', views.HintUpdate.as_view(), name='hint-update'),
 	path(r'<str:puid>/<int:number>/delete', views.HintDelete.as_view(), name='hint-delete'),
 	path(r'lookup', views.lookup, name='arch-lookup'),
+	path(r'api', views.api, name='arch-api'),
 	path(r'', views.ProblemCreate.as_view(), name='arch-index'),
 	]
