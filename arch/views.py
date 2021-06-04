@@ -1,6 +1,7 @@
 from typing import ClassVar, Dict
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView
@@ -129,11 +130,11 @@ def api(request):
 	if not sha256(token.encode('ascii')).hexdigest() == TARGET_HASH:
 		return HttpResponse("☕", status = 418)
 
-	def err() -> JsonResponse:
+	def err(status = 400) -> JsonResponse:
 		logging.error(traceback.format_exc())
 		return JsonResponse(
 				{'error' : ''.join(traceback.format_exc(limit=1)) },
-				status = 400)
+				status = status)
 
 	action = request.POST.get('action')
 	puid = request.POST.get('puid').upper()
@@ -141,6 +142,8 @@ def api(request):
 	if action == 'hints':
 		try:
 			problem = models.Problem.objects.get(puid = puid)
+		except ObjectDoesNotExist:
+			return err(404)
 		except:
 			return err()
 		response = {
@@ -180,6 +183,8 @@ def api(request):
 					number = request.POST.get('number'),
 					)
 			hint.save()
+		except ObjectDoesNotExist:
+			return err(404)
 		except:
 			return err()
 		else:
