@@ -148,6 +148,7 @@ def api(request):
 			return err()
 		response = {
 				'hints' : [],
+				'description' : problem.description,
 				'url' : problem.get_absolute_url()
 				}
 		for hint in models.Hint.objects.filter(problem=problem):
