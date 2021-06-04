@@ -1,7 +1,5 @@
 from django.db import models
 from django.urls import reverse_lazy
-import core
-import core.models
 import reversion
 
 # Create your models here.
@@ -21,13 +19,10 @@ class Problem(models.Model):
 	aops_url = models.URLField(max_length = 128,
 			help_text = "Hyperlink to problem on Art of Problem Solving. Include HTTPS.",
 			blank = True)
-	group = models.ForeignKey(core.models.UnitGroup,
-			on_delete = models.CASCADE,
-			help_text = "The unit to which this problem belongs.")
 	def __str__(self):
 		return self.puid
 	def get_absolute_url(self):
-		return reverse_lazy("hint-list", args=(self.id,))
+		return reverse_lazy("hint-list", args=(self.puid,))
 	def get_source(self):
 		return self.source or "(no source)"
 
@@ -62,6 +57,8 @@ class Hint(models.Model):
 		unique_together = ('problem', 'number',)
 	def __str__(self):
 		return f"Hint {self.number} for {self.problem}"
+	def puid(self):
+		return self.problem.puid
 
 	def get_absolute_url(self):
-		return reverse_lazy("hint-detail", args=(self.id,))
+		return reverse_lazy("hint-detail", args=(self.problem.puid,self.number,))

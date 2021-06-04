@@ -23,11 +23,7 @@ by a three-letter code.</p>
 <h2>{{ subject }}</h2>
 	{% for unitgroup in item_list %}
 	<p>
-	{% if request.user.is_staff %}
-	<a href="{% url "problem-list" unitgroup.id %}">{{ unitgroup.name }}</a>
-	{% else %}
 	<b class="text-info">{{ unitgroup.name }}</b>
-	{% endif %}
 	[{{ unitgroup.get_subject_short_display }},
 	{% for unit in unitgroup.unit_set.all %} {{ unit.code }}{% endfor %}].
 	<br />

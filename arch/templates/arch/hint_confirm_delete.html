@@ -3,7 +3,7 @@
 {% block layout-content %}
 {% include "generic-delete.html" %}
 <hr />
-<a href="{% url "hint-detail" hint.id %}">&lt;&lt; Go back to hint</a>
+<a href="{{ hint.get_absolute_url }}">&lt;&lt; Go back to hint</a>
 <ul>
 	<li>{{ hint.problem }}</li>
 	<li>{{ hint.keywords }}</li>

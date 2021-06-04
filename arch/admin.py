@@ -6,13 +6,11 @@ from . import models
 class ProblemAdmin(VersionAdmin):
 	list_display = ('id', 'puid', 'source', 'description',)
 	search_fields = ('puid', 'source', 'description',)
-	list_filter = ('group',)
 	list_per_page = 100
 
 @admin.register(models.Hint)
 class HintAdmin(VersionAdmin):
 	list_display = ('id', 'problem', 'number', 'keywords', 'content',)
 	search_fields = ('number', 'problem__source', 'keywords', 'content',)
-	list_filter = ('problem__group__subject', 'problem__group',)
 	autocomplete_fields = ('problem',)
 	list_per_page = 30
