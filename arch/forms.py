@@ -13,13 +13,24 @@ class ProblemUpdateFormWithReason(forms.ModelForm):
 		model = models.Problem
 		fields = ('source', 'description', 'aops_url', 'reason',)
 
-class ProblemModelChoiceField(forms.ModelChoiceField):
-	def label_from_instance(self, obj ):
-		assert isinstance(obj, models.Problem)
-		return f'[{obj.puid}] {obj.description}'
+class ProblemSelectWidget(forms.Select):
+	def create_option(
+		self, name, value, label, selected, index, subindex=None, attrs=None
+	):
+		option = super().create_option(
+			name, value, label, selected, index, subindex, attrs or {},
+		)
+		if value:
+			problem = models.Problem.objects.get(puid=value)
+			option['attrs'].update({
+				'data-source' : problem.source or '',
+				'data-description' : problem.description,
+				})
+		return option
 
 class ProblemSelectForm(forms.Form):
-	lookup_problem = ProblemModelChoiceField(
+	lookup_problem = forms.ModelChoiceField(
 			to_field_name='puid',
-			queryset = models.Problem.objects.all()
+			queryset = models.Problem.objects.all(),
+			widget = ProblemSelectWidget
 			)
