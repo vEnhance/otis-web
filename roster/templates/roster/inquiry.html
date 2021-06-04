@@ -2,7 +2,6 @@
 {% load static %}
 
 {% block css %}
-<link href="{% static 'chosen/chosen.css' %}" rel="stylesheet" />
 <style type="text/css">
 a.chosen-single {
 	border: 2px solid #aaa;
@@ -10,11 +9,9 @@ a.chosen-single {
 	border-radius: 5px;
 }
 </style>
-
 {% endblock %}
 
 {% block scripts %}
-<script src="{% static 'chosen/chosen.jquery.js' %}" type="text/javascript"></script>
 <script type="text/javascript">
 $(document).ready(function() {
 	$("#id_unit").chosen({
