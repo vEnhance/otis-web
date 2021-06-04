@@ -1,7 +1,7 @@
 from typing import ClassVar, Dict
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -124,16 +124,16 @@ TARGET_HASH = '1c3592aa9241522fea1dd572c43c192a277e832dcd1ae63adfe069cb05624ead'
 @csrf_exempt
 def api(request):
 	if request.method != 'POST':
-		return
+		return HttpResponse("☕", status = 418)
 	token = request.POST.get('token')
 	if not sha256(token.encode('ascii')).hexdigest() == TARGET_HASH:
-		return
+		return HttpResponse("☕", status = 418)
 
 	def err() -> JsonResponse:
 		logging.error(traceback.format_exc())
 		return JsonResponse(
 				{'error' : ''.join(traceback.format_exc(limit=1)) },
-				status = 418)
+				status = 400)
 
 	action = request.POST.get('action')
 	puid = request.POST.get('puid').upper()
