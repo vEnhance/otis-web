@@ -165,7 +165,8 @@ def api(request):
 			return err()
 		else:
 			return JsonResponse({
-				'edit_link' : reverse_lazy('problem-update', (problem.puid,)),
+				'edit_link' : reverse_lazy('problem-update',
+					args=(problem.puid,)),
 				'view_link' : problem.get_absolute_url(),
 				})
 
