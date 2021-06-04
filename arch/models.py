@@ -7,17 +7,16 @@ import reversion
 class Problem(models.Model):
 	id = models.AutoField(primary_key=True)
 	puid = models.CharField(max_length=24,
-			help_text = "Unique problem identifier.")
+			help_text = "Unique problem identifier, as printed in OTIS handout.")
 	source = models.CharField(max_length = 64,
-			help_text = r"The source of the problem, such as 'TSTST 2020/3'." \
+			help_text = r"Human-readable source such as 'TSTST 2020/3'." \
 			r"If in doubt on formatting, follow what is written on the handout.",
 			blank = True)
 	description = models.CharField(max_length = 255,
-			help_text = r"A short description of the problem, e.g. 'Quirky triangles.'. "\
-			r"Most important if the problem does not have a source given. " \
-			r"Use sentence case.")
+			help_text = r"Short description of problem, e.g. 'Quirky triangles.'. "\
+			r"Use sentence case. Used to assist in searching.")
 	aops_url = models.URLField(max_length = 128,
-			help_text = "Hyperlink to problem on Art of Problem Solving. Include HTTPS.",
+			help_text = "URL to problem on AoPS. Include HTTPS.",
 			blank = True)
 	def __str__(self):
 		return self.puid

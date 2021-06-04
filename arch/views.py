@@ -40,7 +40,7 @@ class HintDetail(HintObjectView, LoginRequiredMixin, DetailView):
 	context_object_name = "hint"
 	model = models.Hint
 
-class HintUpdate(LoginRequiredMixin, RevisionMixin, UpdateView, HintObjectView):
+class HintUpdate(HintObjectView, LoginRequiredMixin, RevisionMixin, UpdateView):
 	context_object_name = "hint"
 	model = models.Hint
 	form_class = forms.HintUpdateFormWithReason
@@ -52,17 +52,19 @@ class HintUpdate(LoginRequiredMixin, RevisionMixin, UpdateView, HintObjectView):
 		context = super().get_context_data(**kwargs)
 		context['problem'] = self.object.problem
 		return context
+	def get_success_url(self):
+		return self.object.get_absolute_url()
 
-class ProblemUpdate(LoginRequiredMixin, RevisionMixin, UpdateView, ProblemObjectView):
+class ProblemUpdate(ProblemObjectView, LoginRequiredMixin, RevisionMixin, UpdateView):
 	context_object_name = "problem"
 	model = models.Problem
 	form_class = forms.ProblemUpdateFormWithReason
 	object : ClassVar[models.Problem] = models.Problem()
-	def get_success_url(self):
-		return reverse_lazy("hint-list", args=(self.object.id,))
 	def form_valid(self, form):
 		reversion.set_comment(form.cleaned_data['reason'] or form.cleaned_data['description'])
 		return super().form_valid(form)
+	def get_success_url(self):
+		return self.object.get_absolute_url()
 
 class HintCreate(LoginRequiredMixin, RevisionMixin, CreateView):
 	context_object_name = "hint"
@@ -79,14 +81,14 @@ class ProblemCreate(LoginRequiredMixin, RevisionMixin, CreateView):
 	fields = ('puid', 'source', 'description', 'aops_url',)
 	model = models.Problem
 
-class HintDelete(LoginRequiredMixin, RevisionMixin, DeleteView, HintObjectView):
+class HintDelete(HintObjectView, LoginRequiredMixin, RevisionMixin, DeleteView):
 	context_object_name = "hint"
 	model = models.Hint
 	object : ClassVar[models.Hint] = models.Hint()
 	def get_success_url(self):
-		return reverse_lazy("hint-list", args=(self.object.problem.id,))
+		return reverse_lazy("hint-list", args=(self.object.problem.puid,))
 
-class ProblemDelete(LoginRequiredMixin, RevisionMixin, DeleteView, ProblemObjectView):
+class ProblemDelete(ProblemObjectView, LoginRequiredMixin, RevisionMixin, DeleteView):
 	context_object_name = "problem"
 	model = models.Problem
 	object : ClassVar[models.Problem] = models.Problem()
