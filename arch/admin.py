@@ -4,11 +4,10 @@ from . import models
 
 @admin.register(models.Problem)
 class ProblemAdmin(VersionAdmin):
-	list_display = ('id', 'source', 'description', 'group',)
-	search_fields = ('source', 'description',)
+	list_display = ('id', 'puid', 'source', 'description',)
+	search_fields = ('puid', 'source', 'description',)
 	list_filter = ('group',)
 	list_per_page = 100
-	autocomplete_fields = ('group',)
 
 @admin.register(models.Hint)
 class HintAdmin(VersionAdmin):
