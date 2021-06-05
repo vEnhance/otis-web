@@ -168,9 +168,13 @@ if PRODUCTION:
 	STATIC_URL = os.getenv("STATIC_URL")
 	GS_BUCKET_NAME = os.getenv("GS_BUCKET_NAME")
 	MEDIA_URL = os.getenv("MEDIA_URL")
+	assert STATIC_URL is not None
+	assert GS_BUCKET_NAME is not None
+	assert MEDIA_URL is not None
 	import import_export.tmp_storages
 	IMPORT_EXPORT_TMP_STORAGE_CLASS = import_export.tmp_storages.CacheStorage
 	SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+	assert SECRET_KEY is not None
 else:
 	STATIC_URL = '/static/'
 	MEDIA_URL = '/media/'
