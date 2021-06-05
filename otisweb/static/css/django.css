@@ -2,10 +2,6 @@ body {
 	line-height: 1.2;
 }
 
-table.table {
-	border-collapse: separate;
-	border: none;
-}
 .table-nonfluid {
    width: auto !important;
 }
@@ -15,16 +11,12 @@ p {
 	margin-bottom: 0.5rem;
 }
 
-table.table tr {
-	height: fit-content;
-}
-
 table.table td, table.table th {
-	margin: 0px;
 	border: 0px;
 	border-top: none;
 	text-align: left;
-	padding: 4px 8px 2px 8px;
+	padding: 2px 4px 2px 4px;
+	font-size: 15px;
 }
 tr:nth-child(odd) {
     background-color: #e4e4e4;

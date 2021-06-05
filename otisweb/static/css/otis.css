@@ -51,12 +51,20 @@ h3 {
 }
 
 /* Subject colors */
-tr.subjectG { background-color: lightgreen; }
-tr.subjectC { background-color: lightblue; }
-tr.subjectA { background-color: pink; }
-tr.subjectF { background-color: pink; }
-tr.subjectN { background-color: lightgrey; }
-tr.subjectM { background-color: yellow; }
+tr.subjectG:nth-child(odd) { background-color: #aaffaa; }
+tr.subjectC:nth-child(odd) { background-color: #aaddff; }
+tr.subjectA:nth-child(odd), /* vvvv */
+tr.subjectF:nth-child(odd) { background-color: #ffaaaa; }
+tr.subjectN:nth-child(odd) { background-color: #eeeeee; }
+tr.subjectM:nth-child(odd) { background-color: #ffee77; }
+
+tr.subjectG:nth-child(even) { background-color: #a5f5a5; }
+tr.subjectC:nth-child(even) { background-color: #a5d5f5; }
+tr.subjectA:nth-child(even), /* vvvv */
+tr.subjectF:nth-child(even) { background-color: #f5a5a5; }
+tr.subjectN:nth-child(even) { background-color: #dddddd; }
+tr.subjectM:nth-child(even) { background-color: #f5e575; }
+
 
 /* Unit selection */
 td.unit-select select {
@@ -70,12 +78,10 @@ table.curriculum th, table.curriculum td {
 	font-size: 14px;
 }
 
-table.curriculum th.number {
+table.curriculum td.number {
 	text-align: right;
 	font-size: 12px;
-}
-table.curriculum td.icon {
-	width: 20px;
+	max-width: 30px;
 }
 table.curriculum td.code {
 	text-align: right;

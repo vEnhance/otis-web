@@ -18,21 +18,23 @@ $("#hide-locked-units").click(function() {
 <table class="table curriculum">
 {% for row in curriculum %}
 <tr class="subject{{ row.unit.group.subject }}{% if row.is_complete %} unit-completed{% endif %}{% if not row.is_visible %} unit-locked{% endif %}">
-	<th class="number" >{{ row.number }}</th>
-	<td class="icon">
+	<td class="number">
+	{{ row.number }}
 	{% if row.is_complete and row.is_current%}
 		⏳
 	{% elif row.is_current %}
 		▶️
 	{% elif row.is_complete %}
 		✅
+	{% else %}
+		❓
 	{% endif %}
 	</td>
 
 	<td class="code">{{ row.unit.position }} {{ row.unit.code }}</td>
 
 	{# Handout/suggest #}
-	<td {% if not row.is_complete %}class="active"{% endif %}>
+	<td {% if not row.is_current %}class="active"{% endif %}>
 		{{ row.unit.group.name }}
 	</td>
 	<td class="emojis">
