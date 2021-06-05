@@ -29,8 +29,6 @@ class DiscordHandler(logging.Handler):
 		self.url = url
 
 	def emit(self, r : logging.LogRecord):
-		print(r)
-		print(r.__dict__)
 		level = r.levelname.lower().strip()
 		emoji = EMOJIS.get(level, ':question:')
 		color = COLORS.get(level, 0xaaaaaa)
