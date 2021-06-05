@@ -29,40 +29,34 @@ $("#hide-locked-units").click(function() {
 	{% endif %}
 	</td>
 
-	{# Handout #}
 	<td class="code">{{ row.unit.position }} {{ row.unit.code }}</td>
-	{% if row.is_visible %}
-		<td><a href="{% view_problems row.unit %}"
-			   {% if not row.is_complete %}class="active"{% endif %}>
-			{{ row.unit.group.name }}
-			</a></td>
-	{% else %}
-		<td>{{ row.unit.group.name }}</td>
-	{% endif %}
 
-	{# File uploads #}
-	{% if row.is_visible or row.num_uploads > 0 %}
-		<td class="righticon"><a href="{% url "uploads" student.id row.unit.id %}">
-			📂 ×{{ row.num_uploads }}</a></td>
-	{% else %}
-		<td class="righticon">&mdash;</td>
-	{% endif %}
-
-	{# Solutions #}
-	{% if row.sols_label %}
-		<td class="righticon"><a href="{% view_solutions row.unit %}">{{ row.sols_label }}</a></td>
-	{% else %}
-		<td class="righticon">&mdash;</td>
-	{% endif %}
-
-	{# Suggest #}
-	{% if row.is_visible %}
-		<td class="righticon">
-			<a href="{% url "suggest-new" student.id row.unit.id %}">➕</a>
-		</td>
-	{% else %}
-		<td class="righticon">&mdash;</td>
-	{% endif %}
+	{# Handout/suggest #}
+	<td {% if not row.is_complete %}class="active"{% endif %}>
+		{{ row.unit.group.name }}
+	</td>
+	<td class="emojis">
+		{% if row.is_visible %}
+			<a class="emoji-link" style="font-size: 80%"
+				href="{% view_problems row.unit %}">💾</a>
+			<a class="emoji-link"
+				href="{% view_tex row.unit %}">📋</a>
+			<a class="emoji-link"
+				href="{% url "suggest-new" student.id row.unit.id %}">➕</a>
+		{% endif %}
+		{% if row.is_visible %}
+			<a class="emoji-link"
+				href="{% url "uploads" student.id row.unit.id %}">
+				📂 {{ row.num_uploads }}
+			</a>
+		{% endif %}
+		{% if row.sols_label %}
+			<a class="emoji-link"
+				href="{% view_solutions row.unit %}">
+				{{ row.sols_label }}
+			</a>
+		{% endif %}
+	</td>
 </tr>
 {% endfor %}
 </table>
