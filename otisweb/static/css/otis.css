@@ -1,6 +1,5 @@
 body {
 	background-color: #ddeeee;
-	font-size: 1rem;
 	font-family: "Open Sans", sans-serif;
 }
 
@@ -85,9 +84,13 @@ table.curriculum td.code {
 	width: 64px;
 }
 
-table.curriculum a.active {
+table.curriculum td.active {
 	font-weight: 700;
-	color: #aa00ff;
-
+	font-family: 'Trebuchet MS', sans-serif;
+	font-size: 13px;
 }
 
+table.curriculum td.emojis {
+	width: 135px;
+	font-size: 17px;
+}
