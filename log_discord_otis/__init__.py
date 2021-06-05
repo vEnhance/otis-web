@@ -37,6 +37,7 @@ class DHandler(logging.StreamHandler):
 			etype, value, tb = r.exc_info
 			kwargs['error'] = '\n'.join(
 					traceback.format_exception(etype, value, tb)[:2000])
+			kwargs['description'] = 'An error has occurred...'
 		try:
 			dlogger.construct(**kwargs)
 			dlogger.send()
