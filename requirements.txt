@@ -13,3 +13,4 @@ django_reversion>=3.0.9
 mysqlclient>=2.0.3
 wheel>=0.36.2
 python-dotenv>=0.17.1
+discord_logger>=1.2.3

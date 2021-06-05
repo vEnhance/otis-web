@@ -182,3 +182,23 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760 # 10MB
 # Custom Evan keys
 INVOICE_HASH_KEY = os.getenv("INVOICE_HASH_KEY", "evan_chen_is_still_really_cool")
 OTIS_TEX_PATH = os.getenv("OTIS_TEX_PATH", "/home/evan/Documents/OTIS/TeX")
+
+import log_discord_otis
+LOGGING = {
+	'version' : 1,
+	'disable_existing_loggers' : False,
+	'handlers' : {
+		'console' : {
+			'class' : 'logging.StreamHandler',
+			'level' : 'DEBUG',
+		},
+		'discord' : {
+			'class' : 'log_discord_otis.DHandler',
+			'level' : 'WARNING',
+		}
+	},
+	'root' : {
+		'handlers' : ['console', 'discord'],
+		'level' : 'INFO' if PRODUCTION else 'DEBUG',
+	}
+}
