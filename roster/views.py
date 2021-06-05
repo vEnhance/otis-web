@@ -11,6 +11,7 @@ So e.g. "list students by most recent pset" goes under dashboard.
 """
 
 from django.shortcuts import render
+from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -24,13 +25,10 @@ from django.db.models import Subquery, OuterRef, Count, IntegerField
 
 from django.utils import timezone
 import datetime
-import itertools
 import collections
 from hashlib import pbkdf2_hmac
 
-import os
 import core
-from otisweb.settings import INVOICE_HASH_KEY
 from . import models
 from . import forms
 from . import utils
@@ -162,7 +160,7 @@ def advance(request, student_id):
 
 
 def get_checksum(student):
-	key = INVOICE_HASH_KEY
+	key = settings.INVOICE_HASH_KEY
 	return pbkdf2_hmac('sha256',
 			(key+str(student.id)+student.user.username+'meow').encode('utf-8'),
 			b'salt is yummy so is sugar', 100000, dklen = 18).hex()

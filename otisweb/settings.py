@@ -175,7 +175,10 @@ else:
 	STATIC_URL = '/static/'
 	MEDIA_URL = '/media/'
 	SECRET_KEY = 'evan_chen_is_really_cool'
-INVOICE_HASH_KEY = os.getenv("INVOICE_HASH_KEY", "evan_chen_is_still_really_cool")
 
 FILE_UPLOAD_HANDLERS = ('django.core.files.uploadhandler.MemoryFileUploadHandler',)
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760 # 10MB
+
+# Custom Evan keys
+INVOICE_HASH_KEY = os.getenv("INVOICE_HASH_KEY", "evan_chen_is_still_really_cool")
+OTIS_TEX_PATH = os.getenv("OTIS_TEX_PATH", "/home/evan/Documents/OTIS/TeX")

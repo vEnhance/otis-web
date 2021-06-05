@@ -1,12 +1,11 @@
+from django.conf import settings
 from django.shortcuts import redirect
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
 from django.utils.encoding import smart_str
 from django.contrib.auth.decorators import login_required
 from django.views.generic.list import ListView
 from hashlib import sha256
-import os
 import pathlib
-
 
 from .models import UnitGroup, Unit, Semester
 
@@ -37,9 +36,7 @@ def unit_tex(request, pk, hash):
 	unit = Unit.objects.get(pk=pk)
 	url = unit.prob_url
 	if sha(url.encode('utf-8')) == hash:
-		tex_dir = pathlib.Path(os.getenv(
-			"PROBLEM_TEX_PATH",
-			'/home/evan/Documents/OTIS/TeX/'))
+		tex_dir = pathlib.Path(settings.OTIS_TEX_PATH)
 		# kludge
 		basename = url[url.rindex('/')+1:url.index('?')].replace('.pdf', '.tex')
 		tex_path = tex_dir / (basename[:3] + '-tex-' + basename[4:])
