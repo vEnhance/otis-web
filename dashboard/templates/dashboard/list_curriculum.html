@@ -3,8 +3,17 @@
 {% if curriculum %}
 
 <p>
-<button id="hide-completed-units">Toggle completed</button>
-<button id="hide-locked-units">Toggle locked</button>
+<button id="hide-completed-units"
+	title="Toggle completed unit visibility">
+	Toggle ✅
+</button>
+<button id="hide-locked-units"
+	title="Toggle locked unit visibility">
+	Toggle ❓
+</button>
+<span style="font-size: 80%; font-style: italic;">
+	Mouse over icons for hints.
+</span>
 </p>
 <script>
 $("#hide-completed-units").click(function() {
@@ -21,13 +30,13 @@ $("#hide-locked-units").click(function() {
 	<td class="number">
 	{{ row.number }}
 	{% if row.is_complete and row.is_current%}
-		⏳
+		<span title="Unit pending review">⏳</span>
 	{% elif row.is_current %}
-		▶️
+		<span title="Current unit">▶️</span>
 	{% elif row.is_complete %}
-		✅
+		<span title="Completed unit">✅</span>
 	{% else %}
-		❓
+		<span title="Locked unit">❓</span>
 	{% endif %}
 	</td>
 
@@ -39,21 +48,21 @@ $("#hide-locked-units").click(function() {
 	</td>
 	<td class="emojis">
 		{% if row.is_visible %}
-			<a class="emoji-link" style="font-size: 80%"
+			<a class="emoji-link" style="font-size: 80%" title = "Download PDF"
 				href="{% view_problems row.unit %}">💾</a>
-			<a class="emoji-link"
+			<a class="emoji-link" title = "Copy LaTeX"
 				href="{% view_tex row.unit %}">📋</a>
-			<a class="emoji-link"
+			<a class="emoji-link" title = "Add suggestion"
 				href="{% url "suggest-new" student.id row.unit.id %}">➕</a>
 		{% endif %}
 		{% if row.is_visible %}
-			<a class="emoji-link"
+			<a class="emoji-link" title = "File uploads"
 				href="{% url "uploads" student.id row.unit.id %}">
 				📂 {{ row.num_uploads }}
 			</a>
 		{% endif %}
 		{% if row.sols_label %}
-			<a class="emoji-link"
+			<a class="emoji-link" title = "Download solutions"
 				href="{% view_solutions row.unit %}">
 				{{ row.sols_label }}
 			</a>
