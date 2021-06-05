@@ -190,7 +190,7 @@ class Student(models.Model):
 			if row['is_complete']:
 				row['sols_label'] = "🗝️"
 			elif omniscient and row['is_visible']:
-				row['sols_label'] = "🔐"
+				row['sols_label'] = "㊙️"
 			else:
 				row['sols_label'] = None # solutions not shown
 			rows.append(row)
