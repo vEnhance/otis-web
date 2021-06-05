@@ -198,7 +198,7 @@ LOGGING = {
 		}
 	},
 	'root' : {
-		'handlers' : ['console', 'discord'],
+		'handlers' : ['console'],
 		'level' : 'INFO' if PRODUCTION else 'DEBUG',
 	}
 }
