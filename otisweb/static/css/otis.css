@@ -65,7 +65,6 @@ tr.subjectF:nth-child(even) { background-color: #f5a5a5; }
 tr.subjectN:nth-child(even) { background-color: #dddddd; }
 tr.subjectM:nth-child(even) { background-color: #f5e575; }
 
-
 /* Unit selection */
 td.unit-select select {
 	width: 180px;
@@ -73,6 +72,9 @@ td.unit-select select {
 }
 
 /* Curriculum */
+table.curriculum tr {
+	height: 28px;
+}
 table.curriculum th, table.curriculum td {
 	vertical-align: middle;
 	font-size: 14px;
@@ -97,6 +99,10 @@ table.curriculum td.active {
 }
 
 table.curriculum td.emojis {
-	width: 135px;
+	width: 150px;
 	font-size: 17px;
+}
+
+#side .emoji-link {
+	font-size: 20px;
 }

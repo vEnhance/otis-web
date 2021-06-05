@@ -15,7 +15,7 @@
 
 {% if request.user.is_authenticated %}
 	<h4>User panel</h4>
-	<div style="font-size:23px;">
+	<div>
 	{% if not student %}
 	<a class="emoji-link" href="{% url "index" %}">🏠</a>
 	<a class="emoji-link" href="{% url "past" %}">🕗</a>
