@@ -29,7 +29,7 @@ class DHandler(logging.StreamHandler):
 			level = 'default'
 		kwargs = {
 				'title' : f'{r.name} (line {r.lineno} of {r.filename})',
-				'description' : r.message,
+				'description' : r.message or '(no message)',
 				'level' : level,
 				}
 		self.service_environment = r.funcName
