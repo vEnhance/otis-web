@@ -29,14 +29,14 @@ class DHandler(logging.StreamHandler):
 			level = 'default'
 		kwargs = {
 				'title' : f'{r.name} (line {r.lineno} of {r.filename})',
-				'description' : r.message or '(no message)',
+				'description' : r.message[:2000] or '(no message)',
 				'level' : level,
 				}
 		self.service_environment = r.funcName
 		if r.exc_info is not None:
 			etype, value, tb = r.exc_info
 			kwargs['error'] = '\n'.join(
-					traceback.format_exception(etype, value, tb))
+					traceback.format_exception(etype, value, tb)[:2000])
 		try:
 			dlogger.construct(**kwargs)
 			dlogger.send()
