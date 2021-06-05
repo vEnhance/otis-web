@@ -34,7 +34,7 @@ $("#hide-locked-units").click(function() {
 	<td class="code">{{ row.unit.position }} {{ row.unit.code }}</td>
 
 	{# Handout/suggest #}
-	<td {% if not row.is_current %}class="active"{% endif %}>
+	<td {% if row.is_current %}class="active"{% endif %}>
 		{{ row.unit.group.name }}
 	</td>
 	<td class="emojis">
