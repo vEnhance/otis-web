@@ -32,7 +32,13 @@ class DiscordHandler(logging.Handler):
 		level = r.levelname.lower().strip()
 		emoji = EMOJIS.get(level, ':question:')
 		color = COLORS.get(level, 0xaaaaaa)
-		title = f'{emoji} {r.message[:200]}'
+		if '\n' not in r.message:
+			i = None
+			title = f'{emoji} {r.message[:200]}'
+		else:
+			i = r.message.index('\n')
+			title = f"{emoji} {r.message[:i]}"
+
 		fields = [
 				{ 'name' : 'Line', 'value' : '`' + str(r.lineno) + '`', 'inline' : True, },
 				{ 'name' : 'File', 'value' : '`' + str(r.filename) + '`', 'inline' : True, },
@@ -45,13 +51,23 @@ class DiscordHandler(logging.Handler):
 					'color' : color,
 					'fields' : fields
 				}
+
+		description = ''
 		if r.exc_text is not None:
-			error_msg = r.exc_text
-			if len(error_msg) > 800:
-				error_msg = error_msg[:300] + '\n...\n' + error_msg[-500:]
-			embed['description'] = (f'HTTP {status_code}' \
+			msg = r.exc_text
+			if len(msg) > 800:
+				msg = msg[:300] + '\n...\n' + msg[-500:]
+			description = (f'HTTP {status_code}' \
 					if status_code is not None else '') + \
-					f'```\n{error_msg}\n```'
+					f'```\n{msg}\n```'
+		if i is not None:
+			msg = r.message[i+1:]
+			if len(msg) > 800:
+				msg = msg[:300] + '\n...\n' + msg[-500:]
+			description += "\n```{msg}```\n"
+		description = description.strip()
+		if len(description) > 0:
+			embed['description']  = description
 
 		data = {
 				'username' : socket.gethostname(),
