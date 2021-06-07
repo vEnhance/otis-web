@@ -64,7 +64,7 @@ class DiscordHandler(logging.Handler):
 			msg = r.message[i+1:]
 			if len(msg) > 800:
 				msg = msg[:300] + '\n...\n' + msg[-500:]
-			description += "\n```{msg}```\n"
+			description += f"\n```{msg}```\n"
 		description = description.strip()
 		if len(description) > 0:
 			embed['description']  = description
