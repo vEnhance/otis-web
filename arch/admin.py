@@ -20,5 +20,3 @@ class HintAdmin(VersionAdmin):
 	search_fields = ('number', 'problem__source', 'keywords', 'content',)
 	autocomplete_fields = ('problem',)
 	list_per_page = 30
-
-
