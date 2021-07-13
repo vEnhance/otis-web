@@ -20,6 +20,8 @@ ENV_PATH = PROJECT_ROOT / '.env'
 if ENV_PATH.exists():
 	load_dotenv(ENV_PATH)
 
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
