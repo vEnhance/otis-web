@@ -42,11 +42,7 @@ if not PRODUCTION:
 # DEBUG = True
 DEBUG = not bool(os.getenv('IS_PRODUCTION'))
 
-# SECURITY WARNING: App Engine's security features ensure that it is safe to
-# have ALLOWED_HOSTS = ['*'] when the app is deployed. If you deploy a Django
-# app not on App Engine, make sure to set an appropriate host here.
-# See https://docs.djangoproject.com/en/1.10/ref/settings/
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['otis.evanchen.cc', '.localhost', '127.0.0.1']
 
 # Application definition
 
