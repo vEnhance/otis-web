@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 from django.db import models
 from positions import PositionField
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 
 # Create your models here.
 
@@ -105,6 +105,19 @@ class Unit(models.Model):
 	class Meta:
 		unique_together = ('group', 'code')
 		ordering = ('position',)
+
 	@property
 	def list_display_position(self):
 		return self.position
+	@property
+	def problems_pdf_filename(self):
+		return self.code + '-' + self.group.slug + '.pdf'
+	@property
+	def problems_soln_filename(self):
+		return self.code + '-sol-' + self.group.slug + '.pdf'
+	@property
+	def problems_tex_filename(self):
+		return self.code + '-tex-' + self.group.slug + '.tex'
+
+	def get_absolute_url(self):
+		return reverse("view-problems", args=(self.id,))
