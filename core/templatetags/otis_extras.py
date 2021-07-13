@@ -3,24 +3,17 @@ from django.urls import reverse
 
 register = template.Library()
 
-from hashlib import sha256
-def sha(value):
-	return sha256(value).hexdigest()
-
 @register.simple_tag
 def view_problems(unit):
-	s = sha(unit.prob_url.encode('utf-8'))
-	return reverse("view-problems", args=(unit.id, s))
+	return reverse("view-problems", args=(unit.id,))
 
 @register.simple_tag
 def view_solutions(unit):
-	s = sha(unit.soln_url.encode('utf-8'))
-	return reverse("view-solutions", args=(unit.id, s))
+	return reverse("view-solutions", args=(unit.id,))
 
 @register.simple_tag
 def view_tex(unit):
-	s = sha(unit.prob_url.encode('utf-8'))
-	return reverse("view-tex", args=(unit.id, s))
+	return reverse("view-tex", args=(unit.id,))
 
 @register.filter(name='display_initial_choice')
 def display_initial_choice(field):
