@@ -27,8 +27,8 @@ class UnitIEResource(resources.ModelResource):
 	class Meta:
 		skip_unchanged = True
 		model = core.models.Unit
-		fields = ('id', 'group_name', 'code', 'position', 'prob_url', 'soln_url',)
-		export_order = ('id', 'group_name', 'code', 'position', 'prob_url', 'soln_url',)
+		fields = ('id', 'group_name', 'code', 'position',)
+		export_order = ('id', 'group_name', 'code', 'position',)
 
 @admin.register(core.models.Unit)
 class UnitAdmin(ImportExportModelAdmin):
@@ -44,15 +44,14 @@ class UnitAdmin(ImportExportModelAdmin):
 class UnitInline(admin.TabularInline):
 	model = core.models.Unit
 	fields = ('code', 'position',)
-	readonly_fields = ('prob_url', 'soln_url',)
 	extra = 0
 
 class UnitGroupIEResource(resources.ModelResource):
 	class Meta:
 		skip_unchanged = True
 		model = core.models.UnitGroup
-		fields = ('id', 'subject', 'name', 'description',)
-		export_order = ('id', 'subject', 'name', 'description',)
+		fields = ('id', 'subject', 'name', 'slug', 'description',)
+		export_order = ('id', 'subject', 'name', 'slug', 'description',)
 
 @admin.register(core.models.UnitGroup)
 class UnitGroupAdmin(ImportExportModelAdmin):

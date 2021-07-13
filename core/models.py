@@ -53,6 +53,9 @@ class UnitGroup(models.Model):
 	differing only in difficulty and version"""
 	name = models.CharField(max_length=255, unique=True,
 			help_text = "The display name for the handout, like 'Weird Geo'")
+	slug = models.SlugField(max_length = 80,
+			help_text = "The slug for the filename for this unit group",
+			unique = True)
 	description = models.TextField(help_text = "A description of what this unit is",
 			blank = True)
 	SUBJECT_CHOICES = (
@@ -93,12 +96,6 @@ class Unit(models.Model):
 			help_text = "The group that this unit belongs to")
 	code = models.CharField(max_length=255,
 			help_text = "The version code for the handout, like 'ZGX'")
-	prob_url = models.CharField(max_length=255,
-			help_text = "The URL for the problems handout",
-			blank = True)
-	soln_url = models.CharField(max_length=255,
-			help_text = "The URL for the solutions handout",
-			blank = True)
 	position = PositionField(
 			help_text="The ordering of the relative handouts to each other.")
 	def __str__(self):
