@@ -113,7 +113,7 @@ class Unit(models.Model):
 	def problems_pdf_filename(self):
 		return self.code + '-' + self.group.slug + '.pdf'
 	@property
-	def problems_soln_filename(self):
+	def solutions_pdf_filename(self):
 		return self.code + '-sol-' + self.group.slug + '.pdf'
 	@property
 	def problems_tex_filename(self):
