@@ -18,7 +18,7 @@ urlpatterns = [
 	path(r'roster/', include('roster.urls')),
 	path(r'core/', include('core.urls')),
 	path(r'hijack/', include('hijack.urls')),
-	path(r'accounts/', include('django.contrib.auth.urls')),
+	path(r'accounts/', include('allauth.urls')),
 	path(r'register/',
 		OTISRegistrationView.as_view(form_class=OTISUserRegistrationForm),
 		name='django_registration_register'),

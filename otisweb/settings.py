@@ -59,9 +59,14 @@ INSTALLED_APPS = [
 	'django.contrib.auth',
 	'django.contrib.contenttypes',
 	'django.contrib.humanize',
-	'django.contrib.sessions',
 	'django.contrib.messages',
+	'django.contrib.sessions',
+	'django.contrib.sites',
 	'django.contrib.staticfiles',
+	'allauth',
+	'allauth.account',
+	'allauth.socialaccount',
+	'allauth.socialaccount.providers.google',
 	'bootstrap4',
 	'crispy_forms',
 	'hijack_admin',
@@ -144,7 +149,13 @@ AUTH_PASSWORD_VALIDATORS = [
 		'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
 	},
 ]
-
+AUTHENTICATION_BACKENDS = [
+		'django.contrib.auth.backends.ModelBackend',
+		'allauth.account.auth_backends.AuthenticationBackend',
+		]
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+SOCIALACCOUNT_EMAIL_REQUIRED = True
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/

@@ -1,9 +1,9 @@
 {% if request.user.is_authenticated %}
 <p>👋, <b>{{ request.user }}</b>.
-<a href="{% url "logout" %}">(logout)</a>
+<a href="{% url "account_logout" %}">(logout)</a>
 </p>
 {% else %}
-<p><a href="{% url "login" %}">(login)</a></p>
+<p><a href="{% url "account_login" %}">(login)</a></p>
 {% endif %}
 <hr />
 
@@ -25,7 +25,7 @@
 	<a class="emoji-link" href="{% url "index" %}">🏠</a>
 	<a class="emoji-link" href="{% url "past" %}">🕗</a>
 	{% endif %}
-	<a class="emoji-link" href="{% url "password_change" %}">🔐</a>
+	<a class="emoji-link" href="{% url "socialaccount_connections" %}">🔐</a>
 	<a class="emoji-link" href="{% url "arch-index" %}">🗼</a>
 	<a class="emoji-link" href="{% url "synopsis" %}">🗃️</a>
 	</div>
