@@ -156,6 +156,8 @@ AUTHENTICATION_BACKENDS = [
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 SOCIALACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_PRESERVE_USERNAME_CASING = False
+ACCOUNT_SIGNUP_FORM_CLASS = 'otisweb.forms.OTISUserRegistrationForm'
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/

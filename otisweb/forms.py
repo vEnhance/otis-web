@@ -1,6 +1,21 @@
-from django_registration.forms import RegistrationForm
+from django.contrib.auth.models import User
 from django import forms
 
-class OTISUserRegistrationForm(RegistrationForm):
-	first_name = forms.CharField()
-	last_name = forms.CharField()
+class OTISUserRegistrationForm(forms.Form):
+	first_name = forms.CharField(required=False)
+	last_name = forms.CharField(required=False)
+
+	def signup(self, request, user : User):
+		if self.is_valid():
+			data = self.cleaned_data
+			changed = False
+
+			if 'first_name' in data:
+				user.first_name = data['first_name']
+				changed = True
+			if 'last_name' in data:
+				user.last_name = data['last_name']
+				changed = True
+
+			if changed is True:
+				user.save()
