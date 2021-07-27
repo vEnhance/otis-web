@@ -392,16 +392,16 @@ class StudentRegistration(models.Model):
 			"in case Evan needs to contact your parents or something.")
 	track = models.CharField(max_length = 6, choices = (
 				("C", "Correspondence"),
-				("E", "Meeting with another instructor"),
 				("B", "Meeting with Evan"),
+				("E", "Meeting with another instructor"),
 				("N", "None of the above"),
 			))
 	gender = models.CharField(max_length = 2, default = '', choices = (
+				("", "Prefer not to say"),
 				("M", "Male"),
 				("F", "Female"),
 				("H", "Nonbinary"),
 				("O", "Other"),
-				("", "Prefer not to say"),
 			), help_text = "If you are comfortable answering, "
 			"specify which gender you most closely identify with.",
 			blank = True)
