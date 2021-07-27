@@ -4,8 +4,8 @@ from django.db.models.functions import Cast
 from import_export import resources, widgets, fields
 from import_export.admin import ImportExportModelAdmin
 
-import core
-import roster
+import core, core.models
+import roster, roster.models
 
 class RosterResource(resources.ModelResource):
 	user_name = fields.Field(column_name = 'User Name',
@@ -134,3 +134,15 @@ class UnitInquiryAdmin(admin.ModelAdmin):
 		queryset.update(status='ACC')
 	def reset_inquiry(self, request, queryset):
 		queryset.update(status='NEW')
+
+## REGISTRATION
+@admin.register(roster.models.RegistrationContainer)
+class RegistrationContainerAdmin(admin.ModelAdmin):
+	list_display = ('id', 'semester', 'enabled', 'passcode',)
+	list_display_links = ('id', 'semester',)
+
+# TODO later make this import export able
+@admin.register(roster.models.StudentRegistration)
+class StudentRegistrationAdmin(admin.ModelAdmin):
+	list_display = ('name', 'container', 'track', 'gender', 'grade_level', 'aops_username',)
+	list_filter = ('container', 'track', 'gender', 'grade_level',)

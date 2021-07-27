@@ -330,7 +330,7 @@ class EditInquiry(PermissionRequiredMixin, UpdateView):
 	permission_required = 'is_staff'
 	model = models.UnitInquiry
 	def get_success_url(self):
-		return reverse("edit-inquiry", args=(self.object.id,))
+		return reverse("edit-inquiry", args=(self.object.id,)) # typing: ignore
 
 @staff_member_required
 def approve_inquiry(request, pk):
@@ -344,3 +344,35 @@ def approve_inquiry_all(request):
 			.filter(status="NEW", student__semester__active = True):
 		inquiry.run_accept()
 	return HttpResponseRedirect(reverse("list-inquiry"))
+
+@login_required
+def register(request):
+	container = models.RegistrationContainer.objects.get(
+			enabled = True, semester__active = True)
+	semester = container.semester
+	if models.StudentRegistration.objects.filter(
+			user = request.user,
+			container = container
+			).exists():
+		messages.info(request,
+				message = "You have already submitted a decision form for this year!")
+		form = None
+	elif request.method == 'POST':
+		form = forms.DecisionForm(request.POST, request.FILES)
+		if form.is_valid():
+			passcode = form.cleaned_data['passcode']
+			if passcode != container.passcode:
+				messages.error(request,
+						message = "Wrong passcode")
+			else:
+				registration = form.save(commit = False)
+				registration.container = container
+				registration.user = request.user
+				registration.save()
+				messages.success(request, message = "Submitted! Sit tight.")
+				form = None
+	else:
+		form = forms.DecisionForm()
+
+	context = {'title' : f'{semester} Decision Form', 'form' : form}
+	return render(request, 'roster/decision_form.html', context)

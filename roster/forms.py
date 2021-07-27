@@ -2,6 +2,7 @@ from django import forms
 import itertools
 
 import roster
+import roster.models
 
 class UnitChoiceBoundField(forms.BoundField):
 	@property
@@ -79,3 +80,13 @@ class InquiryForm(forms.ModelForm):
 			'explanation': forms.Textarea(
 				attrs={'cols': 40, 'rows': 3}),
 			}
+
+class DecisionForm(forms.ModelForm):
+	passcode = forms.CharField(max_length = 128,
+			label = "Password for this year",
+			help_text = "Enter the password",
+			widget = forms.PasswordInput)
+	class Meta:
+		model = roster.models.StudentRegistration
+		fields = ('name', 'email', 'parent_email', 'track', 'gender',
+				'grade_level', 'school_name', 'aops_username', 'agreement_form',)

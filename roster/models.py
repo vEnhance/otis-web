@@ -1,14 +1,17 @@
 from __future__ import unicode_literals
 
+from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Count, Q, OuterRef, Exists
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.timezone import localtime
 from django.urls import reverse_lazy
-from datetime import timedelta
+from datetime import timedelta, datetime
+import os
 
 import core
+import core.models
 import dashboard
 
 class Assistant(models.Model):
@@ -19,7 +22,7 @@ class Assistant(models.Model):
 			help_text = "Initials or short name for this Assistant")
 	unlisted_students = models.ManyToManyField("Student", blank = True,
 			related_name = "unlisted_assistants",
-			help_text = "A list of students this assistant can see "
+			help_text = "A list of students this assistant can see " \
 					"but which is not listed visibly.")
 
 	@property
@@ -351,3 +354,87 @@ class UnitInquiry(models.Model):
 	
 	class Meta:
 		ordering = ('-created_at',)
+
+
+def content_file_name(instance, filename):
+	now = datetime.now()
+	return os.path.join("agreement",
+			str(instance.container.id),
+			instance.user.username + '_' + filename + '.pdf')
+
+
+class RegistrationContainer(models.Model):
+	semester = models.OneToOneField(core.models.Semester,
+			help_text = "Controls the settings for registering for a semester",
+			on_delete = models.CASCADE,
+			)
+	enabled = models.BooleanField(
+			help_text = "Whether to accept new registrations",
+			default = False)
+	passcode = models.CharField(max_length = 128,
+			help_text = "The passcode for that year's registration")
+	def __str__(self):
+		return str(self.semester)
+
+class StudentRegistration(models.Model):
+	user = models.ForeignKey(User,
+			help_text = "The user to attach",
+			on_delete = models.CASCADE,
+			)
+	container = models.ForeignKey(RegistrationContainer,
+			help_text = "Where to register for",
+			on_delete = models.CASCADE,
+			)
+	name = models.CharField(max_length = 192,
+			help_text = "Enter your full name in American format "
+			"(given name followed by family name). "
+			"Middle name is optional."
+			)
+	email = models.EmailField(help_text = "The email address. "
+			"Please choose an email you check frequently "
+			"because all future email communication will be sent to this address.")
+	parent_email = models.EmailField(help_text = "An email address "
+			"in case Evan needs to contact your parents or something.")
+	track = models.CharField(max_length = 6, choices = (
+				("C", "Correspondence"),
+				("E", "Meeting with another instructor"),
+				("B", "Meeting with Evan"),
+				("N", "None of the above"),
+			))
+	gender = models.CharField(max_length = 2, default = '', choices = (
+				("M", "Male"),
+				("F", "Female"),
+				("H", "Nonbinary"),
+				("O", "Other"),
+				("", "Prefer not to say"),
+			), help_text = "If you are comfortable answering, "
+			"specify which gender you most closely identify with.",
+			blank = True)
+
+	grade_level = models.IntegerField(choices = (
+				(13, "Already graduated high school"),
+				(12, "Graduating in 2022"),
+				(11, "Graduating in 2023"),
+				(10, "Graduating in 2024"),
+				( 9, "Graduating in 2025"),
+				( 8, "Graduating in 2026"),
+				( 7, "Graduating in 2027"),
+				( 6, "Graduating in 2028"),
+				( 5, "Graduating in 2029"),
+			), help_text = "Enter your expected graduation year")
+	school_name = models.CharField(max_length = 200,
+			help_text = "Enter the name of your high school")
+	aops_username = models.CharField(max_length = 200,
+			help_text = "Enter your Art of Problem Solving username (leave blank for none)",
+			blank = True)
+
+	agreement_form = models.FileField(
+			help_text = "Signed agreement form, as a single PDF",
+			upload_to = content_file_name,
+			validators = [FileExtensionValidator(allowed_extensions=['pdf',])],
+			null = True, blank = True)
+
+	class Meta:
+		unique_together = ('user', 'container',)
+	def __str__(self):
+		return self.user.username
