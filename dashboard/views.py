@@ -104,6 +104,10 @@ def index(request):
 	context['title'] = "Current Semester Listing"
 	context['students'] = students
 	context['stulist_show_semester'] = False
+	context['submitted_registration'] = roster.models.StudentRegistration.objects\
+			.filter(user = request.user, container__semester__active = True)\
+			.exists()
+
 	return render(request, "dashboard/stulist.html", context)
 
 @login_required

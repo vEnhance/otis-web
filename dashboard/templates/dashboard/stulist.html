@@ -50,12 +50,19 @@ Have a nice day.</p>
 {% else %} {# if no students at all #}
 <p><i>But nobody came.</i></p>
 <hr />
-<p>There isn't anything here yet.
-If you just recently registered an account,
-you'll need to wait for it to be approved and activated.
-Contact me if you think this is an error.</p>
-<p>You can also click the clock icon at the right
-if you're looking for a past semester.</p>
+<p>There isn't anything here yet.</p>
+	{% if request.user.is_staff %}
+	<p>You're a staff member, so if you're expecting to see something, contact Evan.</p>
 
+	{% elif submitted_registration %}
+	<p>You just recently registered,
+	so you'll need to wait for it to be approved and activated.
+	Contact me if you think this is an error.</p>
+
+	{% else %}
+	<p>You can view <a href="{% url "past" %}">🕗 past semesters</a>.</p>
+	<p>To register for this year,
+		<a href="{% url "register" %}">submit the decision form</a>.</p>
+	{% endif %}
 {% endif %}
 {% endblock %}
