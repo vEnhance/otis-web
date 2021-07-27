@@ -360,7 +360,7 @@ def content_file_name(instance, filename):
 	now = datetime.now()
 	return os.path.join("agreement",
 			str(instance.container.id),
-			instance.user.username + '_' + filename + '.pdf')
+			instance.user.username + '_' + filename)
 
 
 class RegistrationContainer(models.Model):
@@ -368,6 +368,8 @@ class RegistrationContainer(models.Model):
 			help_text = "Controls the settings for registering for a semester",
 			on_delete = models.CASCADE,
 			)
+	end_year = models.IntegerField(
+			help_text = "The year in which OTIS will end")
 	enabled = models.BooleanField(
 			help_text = "Whether to accept new registrations",
 			default = False)
@@ -411,16 +413,16 @@ class StudentRegistration(models.Model):
 			"specify which gender you most closely identify with.",
 			blank = True)
 
-	grade_level = models.IntegerField(choices = (
-				(13, "Already graduated high school"),
-				(12, "Graduating in 2022"),
-				(11, "Graduating in 2023"),
-				(10, "Graduating in 2024"),
-				( 9, "Graduating in 2025"),
-				( 8, "Graduating in 2026"),
-				( 7, "Graduating in 2027"),
-				( 6, "Graduating in 2028"),
-				( 5, "Graduating in 2029"),
+	graduation_year = models.IntegerField(choices = (
+				(   0, "Already graduated high school"),
+				(2022, "Graduating in 2022"),
+				(2023, "Graduating in 2023"),
+				(2024, "Graduating in 2024"),
+				(2025, "Graduating in 2025"),
+				(2026, "Graduating in 2026"),
+				(2027, "Graduating in 2027"),
+				(2028, "Graduating in 2028"),
+				(2029, "Graduating in 2029"),
 			), help_text = "Enter your expected graduation year")
 	school_name = models.CharField(max_length = 200,
 			help_text = "Enter the name of your high school")
@@ -433,6 +435,17 @@ class StudentRegistration(models.Model):
 			upload_to = content_file_name,
 			validators = [FileExtensionValidator(allowed_extensions=['pdf',])],
 			null = True, blank = True)
+	processed = models.BooleanField(
+			help_text = "Whether Evan has dealt with this kid yet",
+			default = False)
+
+	@property
+	def about(self):
+		if self.graduation_year == 0:
+			grade = "?"
+		else:
+			grade = 12 - (self.container.end_year - self.graduation_year)
+		return f"{grade}{self.gender or 'U'}"
 
 	class Meta:
 		unique_together = ('user', 'container',)

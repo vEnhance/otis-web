@@ -89,4 +89,4 @@ class DecisionForm(forms.ModelForm):
 	class Meta:
 		model = roster.models.StudentRegistration
 		fields = ('name', 'email', 'parent_email', 'track', 'gender',
-				'grade_level', 'school_name', 'aops_username', 'agreement_form',)
+				'graduation_year', 'school_name', 'aops_username', 'agreement_form',)

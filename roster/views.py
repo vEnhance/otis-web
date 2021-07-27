@@ -376,3 +376,5 @@ def register(request):
 
 	context = {'title' : f'{semester} Decision Form', 'form' : form}
 	return render(request, 'roster/decision_form.html', context)
+
+

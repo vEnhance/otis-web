@@ -144,5 +144,6 @@ class RegistrationContainerAdmin(admin.ModelAdmin):
 # TODO later make this import export able
 @admin.register(roster.models.StudentRegistration)
 class StudentRegistrationAdmin(admin.ModelAdmin):
-	list_display = ('name', 'container', 'track', 'gender', 'grade_level', 'aops_username',)
-	list_filter = ('container', 'track', 'gender', 'grade_level',)
+	list_display = ('processed', 'name', 'track', 'about', 'aops_username', 'agreement_form',)
+	list_filter = ('processed', 'track', 'gender', 'graduation_year',)
+	list_display_links = ('name', 'track',)
