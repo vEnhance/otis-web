@@ -365,9 +365,6 @@ class RegistrationContainer(models.Model):
 			)
 	end_year = models.IntegerField(
 			help_text = "The year in which OTIS will end")
-	enabled = models.BooleanField(
-			help_text = "Whether to accept new registrations",
-			default = False)
 	passcode = models.CharField(max_length = 128,
 			help_text = "The passcode for that year's registration")
 	def __str__(self):

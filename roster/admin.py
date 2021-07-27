@@ -138,7 +138,7 @@ class UnitInquiryAdmin(admin.ModelAdmin):
 ## REGISTRATION
 @admin.register(roster.models.RegistrationContainer)
 class RegistrationContainerAdmin(admin.ModelAdmin):
-	list_display = ('id', 'semester', 'enabled', 'passcode',)
+	list_display = ('id', 'semester', 'passcode',)
 	list_display_links = ('id', 'semester',)
 
 # TODO later make this import export able

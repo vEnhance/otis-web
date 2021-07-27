@@ -347,8 +347,8 @@ def approve_inquiry_all(request):
 
 @login_required
 def register(request):
-	container = models.RegistrationContainer.objects.get(
-			enabled = True, semester__active = True)
+	container = models.RegistrationContainer.objects\
+			.get(semester__active = True)
 	semester = container.semester
 	if models.StudentRegistration.objects.filter(
 			user = request.user,
@@ -370,7 +370,7 @@ def register(request):
 				registration.user = request.user
 				registration.save()
 				messages.success(request, message = "Submitted! Sit tight.")
-				form = None
+				return HttpResponseRedirect(reverse("index"))
 	else:
 		initial_data_dict = {
 			'first_name' : request.user.first_name,
