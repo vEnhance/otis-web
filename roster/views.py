@@ -364,6 +364,9 @@ def register(request):
 			if passcode != container.passcode:
 				messages.error(request,
 						message = "Wrong passcode")
+			elif form.cleaned_data['track'] not in container.allowed_tracks.split(','):
+				messages.error(request,
+						message = "That track is not currently accepting registrations.")
 			else:
 				registration = form.save(commit = False)
 				registration.container = container

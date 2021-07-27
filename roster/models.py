@@ -367,6 +367,8 @@ class RegistrationContainer(models.Model):
 			help_text = "The year in which OTIS will end")
 	passcode = models.CharField(max_length = 128,
 			help_text = "The passcode for that year's registration")
+	allowed_tracks = models.CharField(max_length = 256,
+			help_text = "A comma separated list of allowed tracks students can register for")
 	def __str__(self):
 		return str(self.semester)
 
