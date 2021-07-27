@@ -387,10 +387,11 @@ class StudentRegistration(models.Model):
 			help_text = "Where to register for",
 			on_delete = models.CASCADE,
 			)
-	name = models.CharField(max_length = 192,
-			help_text = "Enter your full name in American format "
-			"(given name followed by family name). "
-			"Middle name is optional."
+	first_name = models.CharField(max_length = 1282,
+			help_text = "Your first name",
+			)
+	last_name = models.CharField(max_length = 128,
+			help_text = "Your last name",
 			)
 	email = models.EmailField(help_text = "The email address. "
 			"Please choose an email you check frequently "

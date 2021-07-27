@@ -372,7 +372,16 @@ def register(request):
 				messages.success(request, message = "Submitted! Sit tight.")
 				form = None
 	else:
-		form = forms.DecisionForm()
+		initial_data_dict = {
+			'first_name' : request.user.first_name,
+			'last_name' : request.user.last_name,
+			'email' : request.user.email,
+			}
+		most_recent_reg = models.StudentRegistration.objects.filter(user = request.user).order_by('-id').first()
+		if most_recent_reg is not None:
+			for k in ('parent_email', 'graduation_year', 'school_name', 'aops_username', 'gender'):
+				initial_data_dict[k] = getattr(most_recent_reg, k)
+		form = forms.DecisionForm(initial = initial_data_dict)
 
 	context = {'title' : f'{semester} Decision Form', 'form' : form}
 	return render(request, 'roster/decision_form.html', context)

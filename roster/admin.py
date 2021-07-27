@@ -1,6 +1,7 @@
 from django.contrib import admin, auth
-from django.db.models import F, FloatField
+from django.db.models import F, FloatField, QuerySet
 from django.db.models.functions import Cast
+from django.http import HttpRequest
 from import_export import resources, widgets, fields
 from import_export.admin import ImportExportModelAdmin
 
@@ -34,7 +35,7 @@ class StudentInline(admin.TabularInline):
 	readonly_fields = ('user', 'name', 'semester',)
 	extra = 0
 	show_change_link = True
-	def has_delete_permission(self, request, obj=None):
+	def has_delete_permission(self, request : HttpRequest, obj=None):
 		return False
 @admin.register(roster.models.Assistant)
 class AssistantAdmin(ImportExportModelAdmin):
@@ -59,9 +60,9 @@ class OwedFilter(admin.SimpleListFilter):
 	title = 'remaining balance'
 	parameter_name = 'has_owed'
 
-	def lookups(self, request, model_admin):
+	def lookups(self, request : HttpRequest, model_admin):
 		return [("incomplete", "Incomplete"), ("paid", "Paid in full"), ("zero", "No payment")]
-	def queryset(self, request, queryset):
+	def queryset(self, request : HttpRequest, queryset : QuerySet):
 		if self.value() is None:
 			return queryset
 		else:
@@ -126,13 +127,13 @@ class UnitInquiryAdmin(admin.ModelAdmin):
 
 	actions = ['hold_inquiry', 'reject_inquiry', 'accept_inquiry', 'reset_inquiry']
 
-	def hold_inquiry(self, request, queryset):
+	def hold_inquiry(self, request: HttpRequest, queryset: QuerySet):
 		queryset.update(status='HOLD')
-	def reject_inquiry(self, request, queryset):
+	def reject_inquiry(self, request: HttpRequest, queryset: QuerySet):
 		queryset.update(status='REJ')
-	def accept_inquiry(self, request, queryset):
+	def accept_inquiry(self, request: HttpRequest, queryset: QuerySet):
 		queryset.update(status='ACC')
-	def reset_inquiry(self, request, queryset):
+	def reset_inquiry(self, request: HttpRequest, queryset: HttpRequest):
 		queryset.update(status='NEW')
 
 ## REGISTRATION
@@ -144,6 +145,15 @@ class RegistrationContainerAdmin(admin.ModelAdmin):
 # TODO later make this import export able
 @admin.register(roster.models.StudentRegistration)
 class StudentRegistrationAdmin(admin.ModelAdmin):
-	list_display = ('processed', 'name', 'track', 'about', 'aops_username', 'agreement_form',)
+	list_display = ('processed', 'first_name', 'last_name','track', 'about', 'aops_username', 'agreement_form',)
 	list_filter = ('processed', 'track', 'gender', 'graduation_year',)
-	list_display_links = ('name', 'track',)
+	list_display_links = ('first_name', 'last_name', 'track',)
+
+	actions = ['create_student',]
+	def create_student(self, request : HttpRequest, queryset : QuerySet):
+		students_to_create = []
+		for registration in queryset:
+			students_to_create.append(roster.models.Student(
+				))
+			registration.user
+
