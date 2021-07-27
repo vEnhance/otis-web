@@ -85,11 +85,6 @@ class Student(models.Model):
 	newborn = models.BooleanField(default = True,
 			help_text = "Whether the student is newly created.")
 
-	email = models.EmailField(blank = True,
-			help_text = "Student email address.")
-	parent_email = models.EmailField(blank = True,
-			help_text = "Parent email address.")
-	
 	def __str__(self):
 		return f"{self.name} ({self.semester})"
 
@@ -387,7 +382,7 @@ class StudentRegistration(models.Model):
 			help_text = "Where to register for",
 			on_delete = models.CASCADE,
 			)
-	first_name = models.CharField(max_length = 1282,
+	first_name = models.CharField(max_length = 128,
 			help_text = "Your first name",
 			)
 	last_name = models.CharField(max_length = 128,
@@ -443,7 +438,7 @@ class StudentRegistration(models.Model):
 	@property
 	def about(self):
 		if self.graduation_year == 0:
-			grade = "?"
+			grade = 13
 		else:
 			grade = 12 - (self.container.end_year - self.graduation_year)
 		return f"{grade}{self.gender or 'U'}"

@@ -1,4 +1,4 @@
-from django.contrib import admin, auth
+from django.contrib import admin, auth, messages
 from django.db.models import F, FloatField, QuerySet
 from django.db.models.functions import Cast
 from django.http import HttpRequest
@@ -53,7 +53,6 @@ class InvoiceIEResource(resources.ModelResource):
 		model = roster.models.Invoice
 		fields = ('id', 'student','student__track',
 				'student__user__first_name', 'student__user__last_name',
-				'student__email', 'student__parent_email',
 				'preps_taught', 'hours_taught', 'adjustment', 'extras',
 				'total_paid', 'student__semester__name',)
 class OwedFilter(admin.SimpleListFilter):
@@ -152,8 +151,19 @@ class StudentRegistrationAdmin(admin.ModelAdmin):
 	actions = ['create_student',]
 	def create_student(self, request : HttpRequest, queryset : QuerySet):
 		students_to_create = []
+		queryset = queryset.exclude(processed=True)
+		queryset.select_related('user', 'container', 'container__semester')
 		for registration in queryset:
 			students_to_create.append(roster.models.Student(
-				))
-			registration.user
+					user = registration.user,
+					semester = registration.container.semester,
+					track = registration.track,
+					))
+			registration.user.first_name = registration.first_name
+			registration.user.last_name = registration.last_name
+			registration.user.email = registration.email
+			registration.user.save()
+		messages.success(request, message=f"Built {len(students_to_create)} students")
+		roster.models.Student.objects.bulk_create(students_to_create)
+		queryset.update(processed=True)
 
