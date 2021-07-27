@@ -12,6 +12,10 @@
 	{% endfor %}
 	</ul>
 </div>
+{% elif form.errors %}
+<div class="alert alert-danger" role="alert">
+	Some errors were thrown, please see below.
+</div>
 {% endif %}
 
 	<table class="table form-table">
