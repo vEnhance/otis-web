@@ -139,7 +139,8 @@ AUTHENTICATION_BACKENDS = [
 		'django.contrib.auth.backends.ModelBackend',
 		'allauth.account.auth_backends.AuthenticationBackend',
 		]
-ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
+
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https" if PRODUCTION else "http"
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_PRESERVE_USERNAME_CASING = False
 ACCOUNT_SIGNUP_FORM_CLASS = 'otisweb.forms.OTISUserRegistrationForm'
@@ -184,6 +185,7 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760 # 10MB
 # Custom Evan keys
 INVOICE_HASH_KEY = os.getenv("INVOICE_HASH_KEY", "evan_chen_is_still_really_cool")
 UNIT_HASH_KEY = os.getenv("UNIT_HASH_KEY", "look_at_me_im_a_cute_kitten")
+API_TARGET_HASH = os.getenv("API_TARGET_HASH", '1c3592aa9241522fea1dd572c43c192a277e832dcd1ae63adfe069cb05624ead')
 
 import discordLogging # typing: ignore
 LOGGING = {

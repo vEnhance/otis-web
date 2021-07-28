@@ -1,4 +1,5 @@
 from typing import ClassVar, Dict
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist
@@ -118,17 +119,14 @@ def lookup(request):
 	else:
 		return HttpResponseRedirect(reverse_lazy('arch-index',))
 
-TARGET_HASH = '1c3592aa9241522fea1dd572c43c192a277e832dcd1ae63adfe069cb05624ead'
-# what don't look at me like that
-# who is bored enough to try hacking the arch api
-
 @csrf_exempt
 def api(request):
 	if request.method != 'POST':
 		return JsonResponse({'error' : "☕"}, status = 418)
-	token = request.POST.get('token')
-	if not sha256(token.encode('ascii')).hexdigest() == TARGET_HASH:
-		return JsonResponse({'error' : "☕"}, status = 418)
+	if settings.PRODUCTION:
+		token = request.POST.get('token')
+		if not sha256(token.encode('ascii')).hexdigest() == settings.API_TARGET_HASH:
+			return JsonResponse({'error' : "☕"}, status = 418)
 
 	def err(status = 400) -> JsonResponse:
 		logging.error(traceback.format_exc())

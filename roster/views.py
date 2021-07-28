@@ -10,25 +10,29 @@ the division between dashboard and roster is a bit weird.
 So e.g. "list students by most recent pset" goes under dashboard.
 """
 
-from django.shortcuts import render
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.http import HttpResponseRedirect, Http404
-from django.urls import reverse
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
-from django.views.generic.edit import UpdateView
-from django.views.generic import ListView
 from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.db.models import Subquery, OuterRef, Count, IntegerField
-
+from django.http import HttpRequest, HttpResponseRedirect, Http404, JsonResponse
+from django.shortcuts import render
+from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import ListView
+from django.views.generic.edit import UpdateView
 from django.utils import timezone
+from allauth.socialaccount.models import SocialAccount
+
 import datetime
 import collections
-from hashlib import pbkdf2_hmac
+from hashlib import pbkdf2_hmac, sha256
 
 import core
+import core.models
 from . import models
 from . import forms
 from . import utils
@@ -36,7 +40,7 @@ from . import utils
 # Create your views here.
 
 @login_required
-def curriculum(request, student_id):
+def curriculum(request : HttpRequest, student_id):
 	student = utils.get_student(student_id)
 	utils.check_can_view(request, student)
 	units = core.models.Unit.objects.all()
@@ -236,6 +240,7 @@ class UpdateInvoice(PermissionRequiredMixin, UpdateView):
 	model = models.Invoice
 	fields = ('preps_taught', 'hours_taught',
 			'adjustment', 'extras', 'total_paid', 'forgive',)
+	object : models.Invoice
 
 	def get_success_url(self):
 		return reverse("invoice", args=(self.object.student.id,))
@@ -329,27 +334,29 @@ class EditInquiry(PermissionRequiredMixin, UpdateView):
 	fields = ('unit', 'action_type', 'status', 'explanation')
 	permission_required = 'is_staff'
 	model = models.UnitInquiry
+	object: models.UnitInquiry
 	def get_success_url(self):
 		return reverse("edit-inquiry", args=(self.object.id,)) # typing: ignore
 
 @staff_member_required
-def approve_inquiry(request, pk):
+def approve_inquiry(request : HttpRequest, pk):
 	inquiry = models.UnitInquiry.objects.get(id=pk)
 	inquiry.run_accept()
 	return HttpResponseRedirect(reverse("inquiry", args=(inquiry.student.id,)))
 
 @staff_member_required
-def approve_inquiry_all(request):
+def approve_inquiry_all(request : HttpRequest):
 	for inquiry in models.UnitInquiry.objects\
 			.filter(status="NEW", student__semester__active = True):
 		inquiry.run_accept()
 	return HttpResponseRedirect(reverse("list-inquiry"))
 
 @login_required
-def register(request):
+def register(request : HttpRequest):
 	container = models.RegistrationContainer.objects\
 			.get(semester__active = True)
-	semester = container.semester
+	semester : core.models.Semester = container.semester
+	assert isinstance(request.user, User)
 	if models.StudentRegistration.objects.filter(
 			user = request.user,
 			container = container
@@ -386,4 +393,27 @@ def register(request):
 	context = {'title' : f'{semester} Decision Form', 'form' : form, 'container' : container}
 	return render(request, 'roster/decision_form.html', context)
 
-
+@csrf_exempt
+def api(request):
+	if request.method != 'POST':
+		return JsonResponse({'error' : "☕"}, status = 418)
+	if settings.PRODUCTION:
+		token = request.POST.get('token')
+		if not sha256(token.encode('ascii')).hexdigest() == settings.API_TARGET_HASH:
+			return JsonResponse({'error' : "☕"}, status = 418)
+	# check whether social account exists
+	uid = int(request.POST.get('uid'))
+	queryset = SocialAccount.objects.filter(uid = uid)
+	if not (n := len(queryset)) == 1:
+		return JsonResponse({'result' : 'nonexistent', 'length' : n, 'uid' : uid})
+	elif models.Student.objects.filter(user__socialaccount = (social := queryset.get())):
+		demographics = models.StudentRegistration.objects.filter(container__semester__active = True)\
+				.order_by('-pk').values('track', 'gender', 'graduation_year', 'country',).first()
+		return JsonResponse({
+			'result' : 'unregistered',
+			'user' : social.user.username,
+			'uid' : uid,
+			'demographics' : demographics,
+			})
+	else:
+		return JsonResponse({'result' : 'success', 'user' : social.user.username, 'uid' : uid})

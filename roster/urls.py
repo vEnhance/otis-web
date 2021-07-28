@@ -19,4 +19,5 @@ urlpatterns = [
 	path(r'inquiry/approve/<int:pk>/', views.approve_inquiry, name='approve-inquiry'),
 	path(r'inquiry/approve/all/', views.approve_inquiry_all, name='approve-inquiry-all'),
 	path(r'register', views.register, name='register'),
+	path(r'api', views.api, name='api'),
 ]
