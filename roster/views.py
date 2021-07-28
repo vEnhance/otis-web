@@ -405,16 +405,25 @@ def api(request):
 	uid = int(request.POST.get('uid'))
 	queryset = SocialAccount.objects.filter(uid = uid)
 	if not (n := len(queryset)) == 1:
-		return JsonResponse({'result' : 'nonexistent', 'length' : n, 'uid' : uid})
-	elif models.Student.objects.filter(user__socialaccount = (social := queryset.get())).exists():
-		demographics = models.StudentRegistration.objects.filter(container__semester__active = True)\
-				.order_by('-pk').values('track', 'gender', 'graduation_year', 'country',).first()
+		return JsonResponse({'result' : 'nonexistent', 'length' : n})
+
+	social = queryset.get() # get the social account for this
+	user = social.user
+	student = models.Student.objects.filter(user = user, semester__active = True).first()
+	regform = models.StudentRegistration.objects.filter(user = user, container__semester__active = True).first()
+
+	if student is not None:
 		return JsonResponse({
-			'result' : 'unregistered',
+			'result' : 'success',
 			'user' : social.user.username,
 			'name': social.user.get_full_name(),
 			'uid' : uid,
-			'demographics' : demographics,
+			'track' : student.track,
+			'gender' : regform.gender if regform is not None else '?',
+			'country': regform.country if regform is not None else '???',
+			'num_years' : models.Student.objects.filter(user = user).count(),
 			})
+	elif student is None and regform is not None:
+		return JsonResponse({ 'result' : 'pending' })
 	else:
-		return JsonResponse({'result' : 'success', 'user' : social.user.username, 'uid' : uid})
+		return JsonResponse({ 'result' : 'unregistered' })
