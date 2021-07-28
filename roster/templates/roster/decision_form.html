@@ -7,3 +7,10 @@ TODO text instructions for student
 {% endif %}
 
 {% endblock %}
+{% block scripts %}
+<script type="text/javascript">
+$(() => {
+	$("select").chosen();
+});
+</script>
+{% endblock %}
