@@ -406,12 +406,13 @@ def api(request):
 	queryset = SocialAccount.objects.filter(uid = uid)
 	if not (n := len(queryset)) == 1:
 		return JsonResponse({'result' : 'nonexistent', 'length' : n, 'uid' : uid})
-	elif models.Student.objects.filter(user__socialaccount = (social := queryset.get())):
+	elif models.Student.objects.filter(user__socialaccount = (social := queryset.get())).exists():
 		demographics = models.StudentRegistration.objects.filter(container__semester__active = True)\
 				.order_by('-pk').values('track', 'gender', 'graduation_year', 'country',).first()
 		return JsonResponse({
 			'result' : 'unregistered',
 			'user' : social.user.username,
+			'name': social.user.get_full_name(),
 			'uid' : uid,
 			'demographics' : demographics,
 			})
