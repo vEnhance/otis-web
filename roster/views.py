@@ -375,12 +375,9 @@ def register(request):
 				messages.success(request, message = "Submitted! Sit tight.")
 				return HttpResponseRedirect(reverse("index"))
 	else:
-		initial_data_dict = {
-			'first_name' : request.user.first_name,
-			'last_name' : request.user.last_name,
-			'email' : request.user.email,
-			}
-		most_recent_reg = models.StudentRegistration.objects.filter(user = request.user).order_by('-id').first()
+		initial_data_dict = {}
+		most_recent_reg = models.StudentRegistration.objects\
+				.filter(user = request.user).order_by('-id').first()
 		if most_recent_reg is not None:
 			for k in ('parent_email', 'graduation_year', 'school_name', 'aops_username', 'gender'):
 				initial_data_dict[k] = getattr(most_recent_reg, k)

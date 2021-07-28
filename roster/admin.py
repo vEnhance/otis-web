@@ -144,9 +144,9 @@ class RegistrationContainerAdmin(admin.ModelAdmin):
 # TODO later make this import export able
 @admin.register(roster.models.StudentRegistration)
 class StudentRegistrationAdmin(admin.ModelAdmin):
-	list_display = ('processed', 'first_name', 'last_name','track', 'about', 'aops_username', 'agreement_form',)
+	list_display = ('processed', 'name', 'track', 'about', 'country', 'aops_username', 'agreement_form',)
 	list_filter = ('processed', 'track', 'gender', 'graduation_year',)
-	list_display_links = ('first_name', 'last_name', 'track',)
+	list_display_links = ('track',)
 
 	actions = ['create_student',]
 	def create_student(self, request : HttpRequest, queryset : QuerySet):
@@ -159,9 +159,6 @@ class StudentRegistrationAdmin(admin.ModelAdmin):
 					semester = registration.container.semester,
 					track = registration.track,
 					))
-			registration.user.first_name = registration.first_name
-			registration.user.last_name = registration.last_name
-			registration.user.email = registration.email
 			registration.user.save()
 		messages.success(request, message=f"Built {len(students_to_create)} students")
 		roster.models.Student.objects.bulk_create(students_to_create)

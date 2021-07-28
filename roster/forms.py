@@ -88,5 +88,5 @@ class DecisionForm(forms.ModelForm):
 			widget = forms.PasswordInput)
 	class Meta:
 		model = roster.models.StudentRegistration
-		fields = ('first_name', 'last_name','email', 'parent_email', 'track', 'gender',
-				'graduation_year', 'school_name', 'aops_username', 'agreement_form',)
+		fields = ('parent_email', 'track', 'gender', 'graduation_year', 'school_name',
+				'country', 'aops_username', 'agreement_form',)
