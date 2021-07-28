@@ -6,13 +6,22 @@
 {% block head_title %}{% trans "Register" %}{% endblock %}
 
 {% block content %}
-<p>{% blocktrans with provider_name=account.get_provider.name site_name=site.name %}You are about to use your {{provider_name}} account to login to
-{{site_name}}.
+<p>{% blocktrans with provider_name=account.get_provider.name site_name=site.name %}
+You are about to use your {{provider_name}} account to login to {{site_name}}.
 As a final step, please complete the following form.
 {% endblocktrans %}</p>
-<p><strong>Please use an email you check regularly</strong>
-as future OTIS communications
-will be sent to the email you specify below.</p>
+<div class="alert alert-secondary">
+<ul>
+	<li><b>Don't continue if you already have an account</b>;
+		you will inadvertently end up with two accounts.
+		Instead, you should log in with an <em>existing</em> connection and then use
+		<a class="alert-link" href="{% url "socialaccount_connections" %}">🔐account settings</a>
+		to establish the connection.</li>
+	<li><strong>Please use an email you check regularly</strong>
+	as future OTIS communications
+	will be sent to the email you specify below.</li>
+</ul>
+</div>
 
 <form class="signup" id="signup_form" method="post" action="{% url 'socialaccount_signup' %}">
   {% csrf_token %}

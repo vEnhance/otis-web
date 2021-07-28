@@ -383,7 +383,7 @@ def register(request):
 				initial_data_dict[k] = getattr(most_recent_reg, k)
 		form = forms.DecisionForm(initial = initial_data_dict)
 
-	context = {'title' : f'{semester} Decision Form', 'form' : form}
+	context = {'title' : f'{semester} Decision Form', 'form' : form, 'container' : container}
 	return render(request, 'roster/decision_form.html', context)
 
 

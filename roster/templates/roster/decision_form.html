@@ -1,12 +1,29 @@
 {% extends 'layout.html' %}
 {% block layout-content %}
-TODO text instructions for student
 
 {% if form %}
+<h1>Decision form</h1>
+<p>You should submit this form in order to register for a year of OTIS.
+The current semester is <b>{{ container.semester }}</b>.</p>
+
+<p>As part of this, you need to sign and upload the following form
+with your parent or guardian:</p>
+<div class="alert alert-primary text-center">
+<a href="https://web.evanchen.cc/private/agreement-form.pdf" class="alert-link">
+⬇️Download agreement form (PDF)
+</a>
+</div>
+
+<p>If you have any additional special considerations,
+please send those in an email to Evan.
+The purpose of this form is just to automate the setup process
+on the website.</p>
+
 {% include "generic-form.html" with submit_name="Register" %}
 {% endif %}
 
 {% endblock %}
+
 {% block scripts %}
 <script type="text/javascript">
 $(() => {
