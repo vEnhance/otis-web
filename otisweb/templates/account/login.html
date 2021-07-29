@@ -9,11 +9,30 @@
 {% block content %}
 {% get_providers as socialaccount_providers %}
 
-{% if socialaccount_providers %}
-<h3>Social Login</h3>
-<p>Please log in with one of your existing third party accounts.
-If no account is associated, one will be created for you.</p>
+<h3>Log in</h3>
+<p>Alternatively, log in manually:</p>
+<form class="login" method="POST" action="{% url 'account_login' %}">
+  {% csrf_token %}
+  {{ form|crispy }}
+  {% if redirect_field_value %}
+  <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+  {% endif %}
+  <button class="btn btn-success" type="submit">{% trans "Sign In" %}</button>
+</form>
 
+{% if socialaccount_providers %}
+<h3>New account</h3>
+<p>You may also log in with one of your existing third party accounts if:
+<ul>
+	<li>You are a new user creating a new account; or</li>
+	<li>You have <i>already</i> configured a connection to an existing account;
+		then these links will log you in rather than spawn a new account.</li>
+</ul>
+<div class="alert alert-danger">
+	If you are a <b>returning user</b> hoping to add a <b>new connection</b>,
+	then you should <b>NOT</b> use this page because it will create a duplicated account.
+	You should log in first and then try to set the connection.
+</div>
 <div class="socialaccount_ballot">
   <ul class="socialaccount_providers">
     {% include "socialaccount/snippets/provider_list.html" with process="login" %}
@@ -24,14 +43,6 @@ If no account is associated, one will be created for you.</p>
 
 <hr />
 {% endif %}
-<h3>Standard Login </h3>
-<p>Alternatively, log in manually:</p>
-<form class="login" method="POST" action="{% url 'account_login' %}">
-  {% csrf_token %}
-  {{ form|crispy }}
-  {% if redirect_field_value %}
-  <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
-  {% endif %}
-  <button class="btn btn-success" type="submit">{% trans "Sign In" %}</button>
-</form>
+
+
 {% endblock %}
