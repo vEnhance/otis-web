@@ -18,7 +18,7 @@ from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.db.models import Subquery, OuterRef, Count, IntegerField
-from django.http import HttpRequest, HttpResponseRedirect, Http404, JsonResponse
+from django.http import HttpResponse, HttpRequest, HttpResponseRedirect, Http404, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
@@ -339,22 +339,25 @@ class EditInquiry(PermissionRequiredMixin, UpdateView):
 		return reverse("edit-inquiry", args=(self.object.id,)) # typing: ignore
 
 @staff_member_required
-def approve_inquiry(request : HttpRequest, pk):
+def approve_inquiry(request : HttpRequest, pk) -> HttpResponse:
 	inquiry = models.UnitInquiry.objects.get(id=pk)
 	inquiry.run_accept()
 	return HttpResponseRedirect(reverse("inquiry", args=(inquiry.student.id,)))
 
 @staff_member_required
-def approve_inquiry_all(request : HttpRequest):
+def approve_inquiry_all(request : HttpRequest) -> HttpResponse:
 	for inquiry in models.UnitInquiry.objects\
 			.filter(status="NEW", student__semester__active = True):
 		inquiry.run_accept()
 	return HttpResponseRedirect(reverse("list-inquiry"))
 
 @login_required
-def register(request : HttpRequest):
-	container = models.RegistrationContainer.objects\
-			.get(semester__active = True)
+def register(request : HttpRequest) -> HttpResponse:
+	try:
+		container = models.RegistrationContainer.objects.get(semester__active = True)
+	except:
+		return HttpResponse("There isn't a currently active OTIS semester.", status = 503)
+
 	semester : core.models.Semester = container.semester
 	assert isinstance(request.user, User)
 	if models.StudentRegistration.objects.filter(
@@ -382,14 +385,17 @@ def register(request : HttpRequest):
 				messages.success(request, message = "Submitted! Sit tight.")
 				return HttpResponseRedirect(reverse("index"))
 	else:
-		initial_data_dict = {}
-		most_recent_reg = models.StudentRegistration.objects\
-				.filter(user = request.user).order_by('-id').first()
-		if most_recent_reg is not None:
-			for k in ('parent_email', 'graduation_year', 'school_name', 'aops_username', 'gender'):
-				initial_data_dict[k] = getattr(most_recent_reg, k)
-		form = forms.DecisionForm(initial = initial_data_dict)
-
+		if container.allowed_tracks:
+			initial_data_dict = {}
+			most_recent_reg = models.StudentRegistration.objects\
+					.filter(user = request.user).order_by('-id').first()
+			if most_recent_reg is not None:
+				for k in ('parent_email', 'graduation_year', 'school_name', 'aops_username', 'gender'):
+					initial_data_dict[k] = getattr(most_recent_reg, k)
+			form = forms.DecisionForm(initial = initial_data_dict)
+		else:
+			messages.warning(request, message = "The currently active semester isn't accepting registrations right now.")
+			form = None
 	context = {'title' : f'{semester} Decision Form', 'form' : form, 'container' : container}
 	return render(request, 'roster/decision_form.html', context)
 
