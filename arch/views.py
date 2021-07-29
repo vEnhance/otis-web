@@ -3,7 +3,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpRequest, HttpResponseRedirect, JsonResponse
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -120,11 +120,12 @@ def lookup(request):
 		return HttpResponseRedirect(reverse_lazy('arch-index',))
 
 @csrf_exempt
-def api(request):
+def archapi(request : HttpRequest) -> JsonResponse:
 	if request.method != 'POST':
 		return JsonResponse({'error' : "☕"}, status = 418)
 	if settings.PRODUCTION:
 		token = request.POST.get('token')
+		assert token is not None
 		if not sha256(token.encode('ascii')).hexdigest() == settings.API_TARGET_HASH:
 			return JsonResponse({'error' : "☕"}, status = 418)
 
@@ -134,8 +135,8 @@ def api(request):
 				{'error' : ''.join(traceback.format_exc(limit=1)) },
 				status = status)
 
-	action = request.POST.get('action')
-	puid = request.POST.get('puid').upper()
+	action = request.POST['action']
+	puid = request.POST['puid'].upper()
 
 	if action == 'hints':
 		try:
@@ -161,8 +162,9 @@ def api(request):
 
 	if action == 'create':
 		try:
+			assert 'description' in request.POST
 			problem = models.Problem(
-					description = request.POST.get('description'),
+					description = request.POST['description'],
 					puid = puid
 					)
 			problem.save()
@@ -178,11 +180,14 @@ def api(request):
 	if action == 'add':
 		try:
 			problem = models.Problem.objects.get(puid = puid)
+			assert 'content' in request.POST
+			assert 'keywords' in request.POST
+			assert 'number' in request.POST
 			hint = models.Hint(
 					problem = problem,
-					content = request.POST.get('content'),
-					keywords = request.POST.get('keywords'),
-					number = request.POST.get('number'),
+					content = request.POST['content'],
+					keywords = request.POST['keywords'],
+					number = request.POST['number'],
 					)
 			hint.save()
 		except ObjectDoesNotExist:
@@ -191,3 +196,5 @@ def api(request):
 			return err()
 		else:
 			return JsonResponse({'url' : hint.get_absolute_url()})
+
+	return JsonResponse({})
