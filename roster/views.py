@@ -22,6 +22,7 @@ from django.http import HttpResponse, HttpRequest, HttpResponseRedirect, Http404
 from django.shortcuts import render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 from django.views.generic import ListView
 from django.views.generic.edit import UpdateView
 from django.utils import timezone
@@ -72,6 +73,7 @@ def curriculum(request : HttpRequest, student_id):
 	return render(request, "roster/currshow.html", context)
 
 @login_required
+@require_POST
 def finalize(request, student_id):
 	# Removes a newborn status, thus activating everything
 	student = utils.get_student(student_id)
@@ -400,9 +402,8 @@ def register(request : HttpRequest) -> HttpResponse:
 	return render(request, 'roster/decision_form.html', context)
 
 @csrf_exempt
+@require_POST
 def api(request):
-	if request.method != 'POST':
-		return JsonResponse({'error' : "☕"}, status = 418)
 	if settings.PRODUCTION:
 		token = request.POST.get('token')
 		if not sha256(token.encode('ascii')).hexdigest() == settings.API_TARGET_HASH:

@@ -73,7 +73,12 @@
 			You can save this form multiple times;
 			the intermediate results will be shown below.</li>
 		<li>Once you are happy with your selection, you may
-			<a href="{% url "finalize" student.id %}">finalize your choices</a>.
+			finalize your choices.
+			<form action="{% url "finalize" student.id %}" method="post">
+				{% csrf_token %}
+				<input type="submit"
+							 class="btn btn-warning" value="Finalize" />
+			</form>
 			<i>Warning:</i> once you click this link,
 			your decision is complete and you cannot directly
 			make further changes.
