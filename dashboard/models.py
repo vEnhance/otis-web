@@ -8,7 +8,6 @@ import datetime
 from django.db import models
 from django.core.validators import FileExtensionValidator
 from django.contrib.auth import models as auth
-from django.forms import ValidationError
 
 def content_file_name(instance, filename):
 	now = datetime.datetime.now()
@@ -93,6 +92,7 @@ class PSetSubmission(models.Model):
 			verbose_name = "Total ♣ earned",
 			)
 	feedback = models.TextField(
+			verbose_name = "Feedback on problem set, worth [1♣]",
 			help_text = "Any other feedback about the problem set",
 			blank = True)
 	next_unit_to_unlock = models.ForeignKey(core.models.Unit,
@@ -102,8 +102,8 @@ class PSetSubmission(models.Model):
 			related_name = 'unblocking_submissions',
 			)
 	special_notes = models.TextField(
-			help_text = "If there's anything you need to say before we proceed"
-			)
+			help_text = "If there's anything you need to say before we proceed",
+			blank = True)
 
 class ProblemSuggestion(models.Model):
 	student = models.ForeignKey(roster.models.Student,

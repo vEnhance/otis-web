@@ -75,7 +75,7 @@ def submit_pset(request, student_id) -> HttpResponse:
 						owner = student.user,
 						category = 'psets',
 						description = '',
-						content = submission.upload,
+						content = form.cleaned_data['content'],
 						unit = submission.unit,
 						)
 				f.save()
@@ -87,6 +87,10 @@ def submit_pset(request, student_id) -> HttpResponse:
 						"and is pending review!")
 	else:
 		form = forms.PSetSubmissionForm()
+
+	# TODO change this
+	form.fields['unit'].queryset = student.unlocked_units.all() # type: ignore
+	form.fields['next_unit_to_unlock'].queryset = student.curriculum.all() 
 
 	# TODO more stats
 	context = {
