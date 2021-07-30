@@ -75,5 +75,9 @@ class DiscordHandler(logging.Handler):
 				}
 
 		if self.url is not None:
-			response = requests.post(self.url, json = data)
-			return response
+			try:
+				response = requests.post(self.url, json = data)
+			except:
+				pass
+			else:
+				return response
