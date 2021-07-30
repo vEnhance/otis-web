@@ -68,6 +68,43 @@ class SemesterDownloadFile(models.Model):
 	class Meta:
 		ordering = ('-created_at',)
 
+class PSetSubmission(models.Model):
+	approved = models.BooleanField(
+			help_text = "Whether the problem set has been checked off",
+			default = False)
+	student = models.ForeignKey(roster.models.Student,
+			help_text = "The student attached to this",
+			on_delete = models.CASCADE)
+	unit = models.ForeignKey(core.models.Unit,
+			help_text = "The unit you want to submit for",
+			on_delete = models.SET_NULL,
+			null = True,
+			)
+	upload = models.ForeignKey(UploadedFile,
+			help_text = "The associated upload file for this problem set",
+			on_delete = models.CASCADE,
+			)
+	hours = models.FloatField(
+			help_text = "Number of hours spent on this problem set",
+			verbose_name = "Total hours spent",
+			)
+	clubs = models.IntegerField(
+			help_text = "Total number of clubs that you solved",
+			verbose_name = "Total ♣ earned",
+			)
+	feedback = models.TextField(
+			help_text = "Any other feedback about the problem set",
+			blank = True)
+	next_unit_to_unlock = models.ForeignKey(core.models.Unit,
+			help_text = "The unit you want to work on next (leave blank for any)",
+			on_delete = models.SET_NULL,
+			null = True, blank = True,
+			related_name = 'unblocking_submissions',
+			)
+	special_notes = models.TextField(
+			help_text = "If there's anything you need to say before we proceed"
+			)
+
 class ProblemSuggestion(models.Model):
 	student = models.ForeignKey(roster.models.Student,
 			on_delete = models.CASCADE,

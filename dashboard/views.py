@@ -17,6 +17,7 @@ from datetime import timedelta
 
 import core
 import dashboard
+import dashboard.models
 import exams
 import roster, roster.utils
 from . import forms
@@ -49,10 +50,56 @@ def portal(request, student_id):
 	context['num_sem_download'] = dashboard.models.SemesterDownloadFile\
 			.objects.filter(semester = semester).count()
 
-	# now mark the suggestions as processed
+	# now mark suggestions as viewed
 	if request.user == student.user:
 		suggestions.update(notified = True)
 	return render(request, "dashboard/portal.html", context)
+
+@login_required
+def submit_pset(request, student_id) -> HttpResponse:
+	student = roster.utils.get_student(student_id)
+	roster.utils.check_can_view(request, student)
+	if request.method == 'POST':
+		form = forms.PSetSubmissionForm(
+				request.POST, request.FILES)
+		if form.is_valid():
+			submission = form.save(commit=False)
+			if dashboard.models.PSetSubmission.objects.filter(
+					student = student,
+					unit = submission.unit).exists():
+				messages.error(request,
+						"You have already submitted for this unit.")
+			else:
+				f = dashboard.models.UploadedFile(
+						benefactor = student,
+						owner = student.user,
+						category = 'psets',
+						description = '',
+						content = submission.upload,
+						unit = submission.unit,
+						)
+				f.save()
+				submission.student = student
+				submission.upload = f
+				submission.save()
+				messages.success(request,
+						"The problem set is submitted successfully "
+						"and is pending review!")
+	else:
+		form = forms.PSetSubmissionForm()
+
+	# TODO more stats
+	context = {
+			'title' : 'Ready to submit?',
+			'student' : student,
+			'past_submissions' : \
+					dashboard.models.PSetSubmission.objects\
+					.filter(student = student)\
+					.order_by('-upload__created_at'),
+			'form' : form,
+			}
+	return render(request, "dashboard/submit_pset.html", context)
+
 
 @login_required
 def uploads(request, student_id, unit_id):
