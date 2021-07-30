@@ -29,6 +29,9 @@ div.helptext, span.helptext {
 	color : #555;
 	font-size: 70%;
 }
+small.form-text.text-muted {
+	display: block;
+}
 
 input {
 	padding: 4px;
@@ -45,18 +48,21 @@ button.pseudo-button {
 }
 
 div.form-group > label {
-	display: inline-block;
+	display: block;
 	vertical-align: top;
 	font-weight: bold;
 	font-family: Verdana, Geneva, sans-serif;
-	font-size: 80%;
 	padding-right: 5px;
-	width: 22%;
 	min-width: 6rem;
+	color: #331199;
 }
-div.form-group > div {
-	display: inline-block;
-	width: 76%;
+div.form-group > label.requiredField {
+	color: #991111;
+}
+table.table.form-table td {
+	padding-left: 12px;
+	padding-right: 12px;
+	padding-top: 9px;
 }
 
 textarea {
