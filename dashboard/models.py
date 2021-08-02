@@ -85,10 +85,10 @@ class PSetSubmission(models.Model):
 			)
 	hours = models.FloatField(
 			help_text = "Number of hours spent on this problem set",
-			verbose_name = "Total hours spent",
+			verbose_name = "Hours spent (estimate)",
 			)
 	clubs = models.IntegerField(
-			help_text = "Total number of clubs that you solved",
+			help_text = "Total number of clubs that you solved (including 1♣ if feedback written)",
 			verbose_name = "Total ♣ earned",
 			)
 	feedback = models.TextField(

@@ -27,7 +27,7 @@ class PSetSubmissionForm(forms.ModelForm):
 				allowed_extensions=['pdf','txt','tex','png','jpg'])])
 	class Meta:
 		model = dashboard.models.PSetSubmission
-		fields = ('unit', 'hours', 'clubs', 'feedback',
+		fields = ('unit', 'hours', 'feedback', 'clubs',
 				'next_unit_to_unlock', 'special_notes',)
 	# TODO: restrict to units where the student
 	# has not already submitted a problem set
