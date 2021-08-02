@@ -1,4 +1,5 @@
 {% extends 'layout.html' %}
+{% load static %}
 {% block layout-content %}
 
 {% if form %}
@@ -20,6 +21,9 @@ The purpose of this form is just to automate the setup process
 on the website.</p>
 
 {% include "generic-form.html" with submit_name="Register" %}
+
+{% else %}
+<p><a href="/">Go back</a></p>
 {% endif %}
 
 {% endblock %}
