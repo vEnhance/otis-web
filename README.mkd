@@ -1,0 +1,9 @@
+# OTIS-WEB
+
+These are the source files for the internal website
+that I use to teach my course [OTIS](https://web.evanchen.cc/otis.html).
+It is pretty standard Django, so you should be able to spin
+up a local server and play around if you so choose.
+
+For OTIS students: pull requests welcome!
+If you think the website can be improved in some way, feel free to implement it.
