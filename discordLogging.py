@@ -40,7 +40,7 @@ class DiscordHandler(logging.Handler):
 			title = f"{emoji} {r.message[:i]}"
 
 		try:
-			user = r.request.user.username # type: ignore
+			user = r.request.user.first_name + ' ' + r.request.user.last_name # type: ignore
 		except AttributeError:
 			user = 'anonymous'
 		s = str(getattr(r, 'status_code', ''))
@@ -54,7 +54,7 @@ class DiscordHandler(logging.Handler):
 				{ 'name' : 'Level', 'value' : r.levelname.title(), 'inline' : True, },
 				{ 'name' : 'Scope', 'value' : f"`{r.name}`", 'inline' : True, },
 				{ 'name' : 'Module', 'value' : f"`{r.module}`", 'inline' : True, },
-				{ 'name' : 'User', 'value' : f"`{user}`", 'inline' : True, },
+				{ 'name' : 'User', 'value' : user, 'inline' : True, },
 				{ 'name' : 'Filename', 'value' : f"{r.lineno}:`{r.filename}`", 'inline' : True, },
 				]
 		print(r.__dict__)
