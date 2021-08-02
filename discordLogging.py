@@ -39,13 +39,25 @@ class DiscordHandler(logging.Handler):
 			i = r.message.index('\n')
 			title = f"{emoji} {r.message[:i]}"
 
-		fields = [
-				{ 'name' : 'Filename', 'value' : f"`{r.filename}` ({r.lineno})", 'inline' : True, },
-				{ 'name' : 'Module', 'value' : f"`{r.module}`", 'inline' : True, },
-				{ 'name' : 'Scope', 'value' : f"`{r.name}`", 'inline' : True, }
-				]
+		try:
+			user = r.request.user.username # type: ignore
+		except AttributeError:
+			user = 'anonymous'
+		s = str(getattr(r, 'status_code', ''))
+		if s:
+			s = '**' + s + '**'
+		else:
+			s = 'None'
 
-		status_code = getattr(r, 'status_code', None)
+		fields = [
+				{ 'name' : 'Status', 'value' : s, 'inline' : True, },
+				{ 'name' : 'Level', 'value' : r.levelname.title(), 'inline' : True, },
+				{ 'name' : 'Scope', 'value' : f"`{r.name}`", 'inline' : True, },
+				{ 'name' : 'Module', 'value' : f"`{r.module}`", 'inline' : True, },
+				{ 'name' : 'User', 'value' : f"`{user}`", 'inline' : True, },
+				{ 'name' : 'Filename', 'value' : f"{r.lineno}:`{r.filename}`", 'inline' : True, },
+				]
+		print(r.__dict__)
 		embed = {
 					'title' : title,
 					'color' : color,
@@ -57,9 +69,7 @@ class DiscordHandler(logging.Handler):
 			msg = r.exc_text
 			if len(msg) > 800:
 				msg = msg[:300] + '\n...\n' + msg[-500:]
-			description = (f'HTTP {status_code}' \
-					if status_code is not None else '') + \
-					f'```\n{msg}\n```'
+			description = '```\n{msg}\n```'
 		if i is not None:
 			msg = r.message[i+1:]
 			if len(msg) > 800:
@@ -75,9 +85,5 @@ class DiscordHandler(logging.Handler):
 				}
 
 		if self.url is not None:
-			try:
-				response = requests.post(self.url, json = data)
-			except:
-				pass
-			else:
-				return response
+			response = requests.post(self.url, json = data)
+			return response
