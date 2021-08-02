@@ -40,7 +40,7 @@ class DiscordHandler(logging.Handler):
 			title = f"{emoji} {r.message[:i]}"
 
 		fields = [
-				{ 'name' : 'Filename', 'value' : f"`{r.filename}` ({r.lineno})"'`', 'inline' : True, },
+				{ 'name' : 'Filename', 'value' : f"`{r.filename}` ({r.lineno})", 'inline' : True, },
 				{ 'name' : 'Module', 'value' : f"`{r.module}`", 'inline' : True, },
 				{ 'name' : 'Scope', 'value' : f"`{r.name}`", 'inline' : True, }
 				]
