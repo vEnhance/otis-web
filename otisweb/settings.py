@@ -235,18 +235,28 @@ LOGGING = {
 			'class' : 'discordLogging.DiscordHandler',
 			'level' : 'WARNING',
 			'url' : os.getenv("WEBHOOK_URL"),
-			'filters' : ['require_debug_true', 'filter_useless_404'],
+			'filters' : ['require_debug_false', 'filter_useless_404'],
 		}
+	},
+	'root' : {
+		'handlers' : ['console', 'discord'],
+		'level' : 'INFO',
 	},
 	'loggers' : {
 		'django' : {
 			'handlers' : ['console', 'discord'],
 			'level' : 'INFO',
+			'propagate' : False,
 		},
 		'django.db.backends' : {
 			'handlers' : ['console',],
 			'level' : 'DEBUG',
 			'filters' : ['require_debug_true'],
+		},
+		'django.server' : {
+			'handlers' : ['console'],
+			'level' : 'DEBUG',
+			'propagate' : False,
 		}
 	},
 }
