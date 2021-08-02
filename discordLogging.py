@@ -15,7 +15,7 @@ COLORS = {
 EMOJIS = {
 	"default": ":loudspeaker:",
 	"error": ":x:",
-	"critical": ":fire:",
+	"critical": ":skull_crossbones:",
 	"warning": ":warning:",
 	"info": ":bell:",
 	"verbose": ":mega:",
@@ -40,10 +40,9 @@ class DiscordHandler(logging.Handler):
 			title = f"{emoji} {r.message[:i]}"
 
 		fields = [
-				{ 'name' : 'Line', 'value' : '`' + str(r.lineno) + '`', 'inline' : True, },
-				{ 'name' : 'File', 'value' : '`' + str(r.filename) + '`', 'inline' : True, },
-				{ 'name' : 'Module', 'value' : '`' + str(r.module) + '`', 'inline' : True, },
-				{ 'name' : 'Scope', 'value' : '`' + r.name + '`', 'inline' : True, }
+				{ 'name' : 'Line', 'value' : f"`{r.filename}` ({r.lineno})"'`', 'inline' : True, },
+				{ 'name' : 'Module', 'value' : f"`{r.module}`", 'inline' : True, },
+				{ 'name' : 'Scope', 'value' : f"`{r.name}`", 'inline' : True, }
 				]
 
 		status_code = getattr(r, 'status_code', None)
