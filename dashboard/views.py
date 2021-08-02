@@ -60,37 +60,36 @@ def submit_pset(request, student_id) -> HttpResponse:
 	student = roster.utils.get_student(student_id)
 	roster.utils.check_can_view(request, student)
 	if request.method == 'POST':
-		form = forms.PSetSubmissionForm(
-				request.POST, request.FILES)
-		if form.is_valid():
-			submission = form.save(commit=False)
-			if dashboard.models.PSetSubmission.objects.filter(
-					student = student,
-					unit = submission.unit).exists():
-				messages.error(request,
-						"You have already submitted for this unit.")
-			else:
-				f = dashboard.models.UploadedFile(
-						benefactor = student,
-						owner = student.user,
-						category = 'psets',
-						description = '',
-						content = form.cleaned_data['content'],
-						unit = submission.unit,
-						)
-				f.save()
-				submission.student = student
-				submission.upload = f
-				submission.save()
-				messages.success(request,
-						"The problem set is submitted successfully "
-						"and is pending review!")
+		form = forms.PSetSubmissionForm(request.POST, request.FILES)
 	else:
 		form = forms.PSetSubmissionForm()
 
-	# TODO change this
 	form.fields['unit'].queryset = student.unlocked_units.all() # type: ignore
-	form.fields['next_unit_to_unlock'].queryset = student.curriculum.all() 
+	form.fields['next_unit_to_unlock'].queryset \
+			= student.generate_curriculum_queryset().filter(pset__isnull = True)
+	if request.method == 'POST' and form.is_valid():
+		submission = form.save(commit=False)
+		if dashboard.models.PSetSubmission.objects.filter(
+				student = student,
+				unit = submission.unit).exists():
+			messages.error(request,
+					"You have already submitted for this unit.")
+		else:
+			f = dashboard.models.UploadedFile(
+					benefactor = student,
+					owner = student.user,
+					category = 'psets',
+					description = '',
+					content = form.cleaned_data['content'],
+					unit = submission.unit,
+					)
+			f.save()
+			submission.student = student
+			submission.upload = f
+			submission.save()
+			messages.success(request,
+					"The problem set is submitted successfully "
+					"and is pending review!")
 
 	# TODO more stats
 	context = {
@@ -102,7 +101,7 @@ def submit_pset(request, student_id) -> HttpResponse:
 					.order_by('-upload__created_at'),
 			'form' : form,
 			}
-	return render(request, "dashboard/submit_pset.html", context)
+	return render(request, "dashboard/submit_pset_form.html", context)
 
 
 @login_required
@@ -299,7 +298,8 @@ class ProblemSuggestionCreate(LoginRequiredMixin, CreateView):
 	model = dashboard.models.ProblemSuggestion
 	def get_initial(self):
 		initial = super().get_initial()
-		initial['unit'] = self.kwargs['unit_id']
+		if 'unit_id' in self.kwargs:
+			initial['unit'] = self.kwargs['unit_id']
 		return initial
 	def form_valid(self, form):
 		form.instance.student = roster.utils.get_student(self.kwargs['student_id'])

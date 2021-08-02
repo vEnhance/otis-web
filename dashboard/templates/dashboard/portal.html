@@ -89,8 +89,8 @@
 	<hr />
 {% else %}
 	<h1>Your progress</h1>
+	{# TODO show progress bar #}
 
-	<h2>Submit problem set</h2>
 	<a href="{% url "submit-pset" student.id %}"
 		class="btn btn-success text-white" role="button">Submit new problem set</a>
 {% endif %}

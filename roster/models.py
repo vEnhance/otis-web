@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.contrib.auth.models import User
-from django.db.models import Count, Q, OuterRef, Exists
+from django.db.models import Count, FilteredRelation, Q, OuterRef, Exists
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.timezone import localtime
 from django.urls import reverse_lazy
@@ -13,6 +13,7 @@ import os
 import core
 import core.models
 import dashboard
+import dashboard.models
 
 class Assistant(models.Model):
 	"""This is a wrapper object for a single assistant."""
@@ -85,6 +86,8 @@ class Student(models.Model):
 	newborn = models.BooleanField(default = True,
 			help_text = "Whether the student is newly created.")
 
+	id: int
+
 	def __str__(self):
 		return f"{self.name} ({self.semester})"
 
@@ -143,21 +146,40 @@ class Student(models.Model):
 		return self.curriculum.count()
 
 	def generate_curriculum_queryset(self):
-		return self.curriculum.all().annotate(
-				num_uploads = Count('uploadedfile',
-					filter = Q(uploadedfile__benefactor = self.id)),
-				has_pset = Exists(
-					dashboard.models.UploadedFile.objects.filter(
-						unit=OuterRef('pk'),
-						benefactor=self.id,
-						category='psets')))\
-					.order_by('position')
+		if self.semester.uses_legacy_pset_system is True:
+			return self.curriculum.all().annotate(
+					num_uploads = Count('uploadedfile',
+						filter = Q(uploadedfile__benefactor = self.id)),
+					has_pset = Exists(
+						dashboard.models.UploadedFile.objects.filter(
+							unit=OuterRef('pk'),
+							benefactor=self.id,
+							category='psets')))
+		else:
+			return self.curriculum.all().annotate(
+					num_uploads = Count('uploadedfile',
+						filter = Q(uploadedfile__benefactor = self.id)),
+					has_pset = Exists(
+						dashboard.models.PSetSubmission.objects.filter(
+							student=self,
+							unit=OuterRef('pk'))),
+					approved = Exists(
+						dashboard.models.PSetSubmission.objects.filter(
+							student=self,
+							unit=OuterRef('pk'),
+							approved=True)),
+					)
 
 	def has_submitted_pset(self, unit):
-		return dashboard.models.UploadedFile.objects.filter(
-				unit = unit,
-				benefactor = self,
-				category = 'psets')
+		if self.semester.uses_legacy_pset_system:
+			return dashboard.models.UploadedFile.objects.filter(
+					unit = unit,
+					benefactor = self,
+					category = 'psets').exists()
+		else:
+			return dashboard.models.PSetSubmission.objects.filter(
+					unit = unit,
+					student = self).exists()
 
 	def check_unit_unlocked(self, unit):
 		if self.newborn:
@@ -170,7 +192,7 @@ class Student(models.Model):
 			return False
 
 	def generate_curriculum_rows(self, omniscient):
-		curriculum = self.generate_curriculum_queryset()
+		curriculum = self.generate_curriculum_queryset().order_by('position')
 		unlocked_units_ids = self.unlocked_units.values_list('id', flat=True)
 
 		rows = []
@@ -180,12 +202,14 @@ class Student(models.Model):
 			row['unit'] = unit
 			row['number'] = n
 			row['num_uploads'] = unit.num_uploads or 0
+			print(unit.__dict__)
 
-			row['is_complete'] = unit.has_pset
+			row['is_submitted'] = unit.has_pset
 			row['is_current'] = unit.id in unlocked_units_ids
-			row['is_visible'] = row['is_complete'] or row['is_current']
+			row['is_visible'] = row['is_submitted'] or row['is_current']
+			row['is_approved'] = unit.approved
 
-			if row['is_complete']:
+			if row['is_submitted']:
 				row['sols_label'] = "🗝️"
 			elif omniscient and row['is_visible']:
 				row['sols_label'] = "㊙️"

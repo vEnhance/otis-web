@@ -132,7 +132,7 @@ class UnitInquiryAdmin(admin.ModelAdmin):
 		queryset.update(status='REJ')
 	def accept_inquiry(self, request: HttpRequest, queryset: QuerySet):
 		queryset.update(status='ACC')
-	def reset_inquiry(self, request: HttpRequest, queryset: HttpRequest):
+	def reset_inquiry(self, request: HttpRequest, queryset: QuerySet):
 		queryset.update(status='NEW')
 
 ## REGISTRATION

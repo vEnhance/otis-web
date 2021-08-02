@@ -4,6 +4,8 @@ from __future__ import unicode_literals
 import dashboard.models
 
 from django.contrib import admin
+from django.http import HttpRequest
+from django.db.models import QuerySet
 
 @admin.register(dashboard.models.UploadedFile)
 class UploadedFileAdmin(admin.ModelAdmin):
@@ -30,6 +32,11 @@ class PSetSubmissionAdmin(admin.ModelAdmin):
 	list_filter = ('approved', 'student__semester',)
 	list_display_links = ('student', 'unit',)
 	list_per_page = 30
+	def approve_pset(self, request: HttpRequest, queryset: QuerySet):
+		queryset.update(approved=True)
+	def reject_pset(self, request: HttpRequest, queryset: QuerySet):
+		queryset.update(approved=False)
+	actions = ['approve_pset', 'reject_pset',]
 
 @admin.register(dashboard.models.ProblemSuggestion)
 class ProblemSuggestionAdmin(admin.ModelAdmin):
@@ -38,3 +45,4 @@ class ProblemSuggestionAdmin(admin.ModelAdmin):
 	list_filter = ('resolved', 'unit__group', 'student__semester',)
 	autocomplete_fields = ('student', 'unit',)
 	list_per_page = 50
+

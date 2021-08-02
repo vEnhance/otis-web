@@ -4,6 +4,10 @@
 
 <p><a href="{% url "portal" student.id %}">
 	⬅️ Back to portal</a></p>
+<div class="alert alert-info">
+	If you have problems to suggest for this unit,
+	please use the <a href="{% url "suggest-new" student.id %}">problem suggestion form</a>.
+</div>
 
 {% include "generic-form.html" %}
 
