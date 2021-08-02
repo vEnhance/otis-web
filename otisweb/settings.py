@@ -193,10 +193,14 @@ from typing import Tuple
 def filter_useless_404(record : logging.LogRecord) -> bool:
 	a = tuple(record.args)
 	return not (
-			getattr(record, 'status_code', None) == 404 \
-			and len(a) == 2 and type(a) == tuple \
+			len(a) == 2 \
 			and a[0] == 'Not Found' \
-			and ('wp-includes' in a[1] or a[1].endswith('.php'))
+			and ('wp-include' in a[1] or '.php' in a[1])
+			) \
+		and not (
+			len(a) == 3 \
+			and a[1] == '404' \
+			and ('wp-include' in a[0] or '.php' in a[0])
 			)
 
 LOGGING = {
@@ -224,19 +228,19 @@ LOGGING = {
 		'console' : {
 			'class' : 'logging.StreamHandler',
 			'level' : 'DEBUG' if DEBUG else 'INFO',
-			'filters' : ['filter_useless_404'],
 			'formatter' : 'verbose',
+			'filters' : ['filter_useless_404'],
 		},
 		'discord' : {
 			'class' : 'discordLogging.DiscordHandler',
 			'level' : 'WARNING',
 			'url' : os.getenv("WEBHOOK_URL"),
-			'filters' : ['require_debug_false', 'filter_useless_404'],
+			'filters' : ['require_debug_true', 'filter_useless_404'],
 		}
 	},
 	'loggers' : {
 		'django' : {
-			'handlers' : ['console',],
+			'handlers' : ['console', 'discord'],
 			'level' : 'INFO',
 		},
 		'django.db.backends' : {
