@@ -207,7 +207,10 @@ class Student(models.Model):
 			row['is_submitted'] = unit.has_pset
 			row['is_current'] = unit.id in unlocked_units_ids
 			row['is_visible'] = row['is_submitted'] or row['is_current']
-			row['is_approved'] = unit.approved
+			if self.semester.uses_legacy_pset_system is True:
+				row['is_approved'] = row['is_submitted'] and not row['is_current']
+			else:
+				row['is_approved'] = unit.approved
 
 			if row['is_submitted']:
 				row['sols_label'] = "🗝️"
