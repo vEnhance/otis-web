@@ -42,6 +42,7 @@ class DiscordHandler(logging.Handler):
 		fields = [
 				{ 'name' : 'Line', 'value' : '`' + str(r.lineno) + '`', 'inline' : True, },
 				{ 'name' : 'File', 'value' : '`' + str(r.filename) + '`', 'inline' : True, },
+				{ 'name' : 'Module', 'value' : '`' + str(r.module) + '`', 'inline' : True, },
 				{ 'name' : 'Scope', 'value' : '`' + r.name + '`', 'inline' : True, }
 				]
 
