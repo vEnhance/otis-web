@@ -13,8 +13,6 @@ class Semester(models.Model):
 	active = models.BooleanField(default=False,
 			help_text = "Whether the semester is currently active "
 			"(there should thus be at most one active semester).")
-	registration_open = models.BooleanField(default=False,
-			help_text = "Whether students can register for this semester yet.")
 	exam_family = models.CharField(max_length = 10,
 			choices = (("Waltz", "Waltz"), ("Foxtrot", "Foxtrot"), ("", "--"),),
 			default = "",
