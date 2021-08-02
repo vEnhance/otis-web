@@ -64,9 +64,9 @@ def submit_pset(request, student_id) -> HttpResponse:
 	else:
 		form = forms.PSetSubmissionForm()
 
-	form.fields['unit'].queryset = student.unlocked_units.all() # type: ignore
-	form.fields['next_unit_to_unlock'].queryset \
-			= student.generate_curriculum_queryset().filter(pset__isnull = True)
+	available = student.generate_curriculum_queryset().filter(has_pset = False)
+	form.fields['next_unit_to_unlock'].queryset = available
+	form.fields['unit'].queryset = available
 	if request.method == 'POST' and form.is_valid():
 		submission = form.save(commit=False)
 		if dashboard.models.PSetSubmission.objects.filter(
