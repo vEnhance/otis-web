@@ -188,38 +188,61 @@ UNIT_HASH_KEY = os.getenv("UNIT_HASH_KEY", "look_at_me_im_a_cute_kitten")
 API_TARGET_HASH = os.getenv("API_TARGET_HASH", '1c3592aa9241522fea1dd572c43c192a277e832dcd1ae63adfe069cb05624ead')
 
 import discordLogging # typing: ignore
-if DEBUG is True:
-	LOGGING = {
-		'version' : 1,
-		'disable_existing_loggers' : False,
-		'handlers' : {
-			'console' : {
-				'class' : 'logging.StreamHandler',
-				'level' : 'DEBUG',
-			},
+import logging
+from typing import Tuple
+def filter_useless_404(record : logging.LogRecord) -> bool:
+	a = tuple(record.args)
+	return not (
+			getattr(record, 'status_code', None) == 404 \
+			and len(a) == 2 and type(a) == tuple \
+			and a[0] == 'Not Found' \
+			and ('wp-includes' in a[1] or a[1].endswith('.php'))
+			)
+
+LOGGING = {
+	'version' : 1,
+	'disable_existing_loggers' : False,
+	'formatters' : {
+		'verbose': {
+			'format': '[{levelname}] {asctime} {module} {name}\n{message}\n',
+			'style': '{',
+        },
+	},
+	'filters' : {
+		'filter_useless_404' : {
+			'()' : 'django.utils.log.CallbackFilter',
+			'callback' : filter_useless_404,
 		},
-		'root' : {
+		'require_debug_false': {
+			'()': 'django.utils.log.RequireDebugFalse',
+		},
+		'require_debug_true': {
+			'()': 'django.utils.log.RequireDebugTrue',
+		}
+	},
+	'handlers' : {
+		'console' : {
+			'class' : 'logging.StreamHandler',
+			'level' : 'DEBUG' if DEBUG else 'INFO',
+			'filters' : ['filter_useless_404'],
+			'formatter' : 'verbose',
+		},
+		'discord' : {
+			'class' : 'discordLogging.DiscordHandler',
+			'level' : 'WARNING',
+			'url' : os.getenv("WEBHOOK_URL"),
+			'filters' : ['require_debug_false', 'filter_useless_404'],
+		}
+	},
+	'loggers' : {
+		'django' : {
+			'handlers' : ['console',],
+			'level' : 'INFO',
+		},
+		'django.db.backends' : {
 			'handlers' : ['console',],
 			'level' : 'DEBUG',
+			'filters' : ['require_debug_true'],
 		}
-	}
-else:
-	LOGGING = {
-		'version' : 1,
-		'disable_existing_loggers' : False,
-		'handlers' : {
-			'console' : {
-				'class' : 'logging.StreamHandler',
-				'level' : 'DEBUG',
-			},
-			'discord' : {
-				'class' : 'discordLogging.DiscordHandler',
-				'level' : 'WARNING',
-				'url' : os.getenv("WEBHOOK_URL")
-			}
-		},
-		'root' : {
-			'handlers' : ['console', 'discord'],
-			'level' : 'INFO' if PRODUCTION else 'DEBUG',
-		}
-	}
+	},
+}
