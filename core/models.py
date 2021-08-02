@@ -17,6 +17,9 @@ class Semester(models.Model):
 			choices = (("Waltz", "Waltz"), ("Foxtrot", "Foxtrot"), ("", "--"),),
 			default = "",
 			help_text = "The family of practice exams to display.")
+	uses_legacy_pset_system = models.BooleanField(
+			help_text = "Whether the pset uses the old system of upload checking",
+			default = False)
 
 	show_invoices = models.BooleanField(default=False,
 			help_text = "Whether to display invoices for this semester.")
