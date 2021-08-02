@@ -13,12 +13,12 @@ Your contributions are appreciated.</p>
 	<li><strong>You should submit a solution</strong>.
 		If you don't, I might get to solving the problem eventually,
 		but let's be real, there's at least 200 problems on my
-		someone-told-me-to-do-it list</li>
-	<li><strong>The solution must be in your own words</strong>.
-		It's okay if the ideas in the solution are not your own,
+		someone-told-me-to-do-it list.</li>
+	<li><strong>You cannot copy the wording of
+		someone else's solution</strong>, at least not without permission.
+		However, it's okay if the ideas in the solution are not your own,
 		or someone else found an isomorphic solution to yours.
-		However, <strong>you cannot copy the wording of
-		someone else's solution</strong>, at least not without permission.</li>
+	</li>
 	<li>By submitting, you are granting Evan permission to use, edit, or adapt
 		anything you submit for OTIS,
 		or any other math-olympiad-related purposes.</li>
@@ -81,6 +81,7 @@ and placed it on some unit. So it might be worth double-checking first.</p>
 {% block scripts %}
 <script type="text/javascript">
 $(document).ready(function() {
+	$("#id_unit").chosen();
 	var render_enabled = true;
 	$("#render-enable").click(function (e) {
 		e.preventDefault();
