@@ -1,12 +1,12 @@
 from django.core.files.storage import default_storage
 from django.conf import settings
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
-from django.utils.encoding import smart_str
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseServerError, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.views.generic.list import ListView
 from django.conf import settings
 from hashlib import sha256
-import os
+import logging
+logger = logging.getLogger(__name__)
 
 from .models import UnitGroup, Unit, Semester
 
@@ -22,9 +22,15 @@ class UnitGroupListView(ListView):
 			.prefetch_related('unit_set')
 
 def _get_from_google_storage(filename : str):
-	ext = filename[-3:]
-	assert ext == 'tex' or ext == 'pdf'
-	file = default_storage.open('units/' + h(filename) + '.' + ext)
+	ext = filename[-4:]
+	if not (ext == '.tex' or ext == '.pdf'):
+		return HttpResponseBadRequest('Bad filename extension')
+	try:
+		file = default_storage.open('units/' + h(filename) + ext)
+	except FileNotFoundError:
+		errmsg = f"Unable to find {filename}."
+		logger.critical(errmsg)
+		return HttpResponseServerError(errmsg)
 	response = HttpResponse(content = file)
 	response['Content-Type'] = f'application/{ext}'
 	response['Content-Disposition'] = f'attachment; filename="{filename}"'
