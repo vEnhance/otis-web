@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.http import HttpResponse, HttpResponseRedirect, Http404
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.urls import reverse, reverse_lazy
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
+from django.core.exceptions import PermissionDenied
 from django.contrib import messages
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic import ListView
@@ -14,17 +14,16 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Subquery, OuterRef, F, Q, Count
 from django.utils.timezone import now
 from datetime import timedelta
+from typing import Any, Dict, Optional
 
-import core
-import dashboard
+import core.models
 import dashboard.models
-import exams
-import roster, roster.utils
+import exams.models
+import roster.models, roster.utils
 from . import forms
 
-
 @login_required
-def portal(request, student_id):
+def portal(request, student_id) -> HttpResponse:
 	student = roster.utils.get_student(student_id)
 	roster.utils.check_can_view(request, student, delinquent_check = False)
 	if roster.utils.is_delinquent_locked(request, student):
@@ -35,7 +34,7 @@ def portal(request, student_id):
 	suggestions = dashboard.models.ProblemSuggestion.objects.filter(
 			resolved = True, student = student, notified = False)
 
-	context = {}
+	context : Dict[str, Any] = {}
 	context['title'] = f"{student.name} ({semester.name})"
 	context['student'] = student
 	context['semester'] = semester
@@ -103,14 +102,12 @@ def submit_pset(request, student_id) -> HttpResponse:
 			}
 	return render(request, "dashboard/submit_pset_form.html", context)
 
-
 @login_required
-def uploads(request, student_id, unit_id):
+def uploads(request, student_id, unit_id) -> HttpResponse:
 	student = roster.utils.get_student(student_id)
 	roster.utils.check_can_view(request, student)
-
 	if unit_id != "0":
-		unit = get_object_or_404(core.models.Unit.objects, id = unit_id)
+		unit : Optional[core.models.Unit] = get_object_or_404(core.models.Unit.objects, id = unit_id)
 	else:
 		unit = None
 	uploads = dashboard.models.UploadedFile.objects.filter(benefactor=student, unit=unit)
@@ -133,7 +130,7 @@ def uploads(request, student_id, unit_id):
 	if form is None:
 		form = forms.NewUploadForm(initial = {'unit' : unit})
 
-	context = {}
+	context : Dict[str, Any] = {}
 	context['title'] = 'File Uploads'
 	context['student'] = student
 	context['unit'] = unit
@@ -143,14 +140,14 @@ def uploads(request, student_id, unit_id):
 	return render(request, "dashboard/uploads.html", context)
 
 @login_required
-def index(request):
+def index(request) -> HttpResponse:
 	students = roster.utils.get_visible_students(
 			request.user, current=True)
 	if len(students) == 1: # unique match
 		return HttpResponseRedirect(\
 				reverse("portal", args=(students[0].id,)))
 
-	context = {}
+	context : Dict[str, Any] = {}
 	context['title'] = "Current Semester Listing"
 	context['students'] = students
 	context['stulist_show_semester'] = False
@@ -178,6 +175,7 @@ def past(request, semester = None):
 class UpdateFile(LoginRequiredMixin, UpdateView):
 	model = dashboard.models.UploadedFile
 	fields = ('category', 'content', 'description',)
+	object : dashboard.models.UploadedFile
 
 	def get_success_url(self):
 		stu_id = self.object.benefactor.id
@@ -186,8 +184,9 @@ class UpdateFile(LoginRequiredMixin, UpdateView):
 
 	def get_object(self, *args, **kwargs):
 		obj = super(UpdateFile, self).get_object(*args, **kwargs)
+		assert isinstance(obj, dashboard.models.UploadedFile)
 		if not obj.owner == self.request.user \
-				and not self.request.user.is_staff:
+				and getattr(self.request.user, 'is_staff', False):
 			raise PermissionDenied("Not authorized to update this file")
 		return obj
 
@@ -197,14 +196,15 @@ class DeleteFile(LoginRequiredMixin, DeleteView):
 
 	def get_object(self, *args, **kwargs):
 		obj = super(DeleteFile, self).get_object(*args, **kwargs)
+		assert isinstance(obj, dashboard.models.UploadedFile)
 		if not obj.owner == self.request.user \
-				and not self.request.user.is_staff:
+				and getattr(self.request.user, 'is_staff', False):
 			raise PermissionDenied("Not authorized to delete this file")
 		return obj
 
 @staff_member_required
-def quasigrader(request, num_hours = 336):
-	context = {}
+def quasigrader(request, num_hours = 336) -> HttpResponse:
+	context : Dict[str, Any] = {}
 	context['title'] = 'Quasi-grader'
 	num_hours = int(num_hours)
 
@@ -316,6 +316,8 @@ class ProblemSuggestionUpdate(LoginRequiredMixin, UpdateView):
 	context_object_name = "problem_suggestion"
 	fields = ('unit', 'weight', 'source', 'description', 'statement', 'solution', 'comments', 'acknowledge',)
 	model = dashboard.models.ProblemSuggestion
+	object: dashboard.models.ProblemSuggestion
+
 	def get_success_url(self):
 		return reverse_lazy("suggest-update", kwargs=self.kwargs)
 	def form_valid(self, form):
@@ -338,8 +340,8 @@ class ProblemSuggestionList(LoginRequiredMixin, ListView):
 		return context
 
 @staff_member_required
-def pending_contributions(request, suggestion_id = None):
-	context = {}
+def pending_contributions(request, suggestion_id = None) -> HttpResponse:
+	context : Dict[str, Any] = {}
 	if request.method == "POST":
 		assert suggestion_id is not None
 		suggestion = dashboard.models.ProblemSuggestion.objects.get(id = suggestion_id)
