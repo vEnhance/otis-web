@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+from import_export import resources, widgets, fields
+from import_export.admin import ImportExportModelAdmin
 
 import dashboard.models
 
@@ -46,3 +48,14 @@ class ProblemSuggestionAdmin(admin.ModelAdmin):
 	autocomplete_fields = ('student', 'unit',)
 	list_per_page = 50
 
+class LevelIEResource(resources.ModelResource):
+	class Meta:
+		skip_unchanged = True
+		model = dashboard.models.Level
+		fields = ('id', 'number', 'name')
+
+@admin.register(dashboard.models.Level)
+class LevelAdmin(ImportExportModelAdmin):
+	list_display = ('number', 'name',)
+	search_fields = ('name',)
+	resource_class = LevelIEResource

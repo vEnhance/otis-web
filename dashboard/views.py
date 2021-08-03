@@ -1,21 +1,19 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-
+from datetime import timedelta
+from django.contrib import messages
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import PermissionDenied
+from django.db.models import Subquery, OuterRef, F, Q, Count, Sum
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from django.contrib.admin.views.decorators import staff_member_required
 from django.urls import reverse, reverse_lazy
-from django.core.exceptions import PermissionDenied
-from django.contrib import messages
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.views.generic import ListView
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Subquery, OuterRef, F, Q, Count, Sum
 from django.utils.timezone import now
-from datetime import timedelta
+from django.views.generic import ListView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from typing import Any, Dict, Optional
-
 import core.models
 import dashboard.models
 import exams.models
@@ -28,7 +26,7 @@ class Meter:
 		self.value = value
 		self.unit = unit
 		self.color = color
-	
+
 	@property
 	def level(self) -> int:
 		return int(self.value**0.5)
@@ -49,16 +47,16 @@ class Meter:
 		return self.value
 
 	@staticmethod
-	def ClubMeter(value):
+	def ClubMeter(value: int):
 		return Meter(emoji = "♣️", value = value, unit = "♣", color = '#007bff;')
 	@staticmethod
-	def HeartMeter(value):
+	def HeartMeter(value: int):
 		return Meter(emoji = "🕰️", value = value, unit = "♥", color = '#198754')
 	@staticmethod
-	def SpadeMeter(value):
+	def SpadeMeter(value: int):
 		return Meter(emoji = "🏆", value = value, unit = "♠", color = '#ff901a')
 	@staticmethod
-	def DiamondMeter(value):
+	def DiamondMeter(value: int):
 		return Meter(emoji = "㊙️", value = value, unit = "◆", color = '#9c1421')
 
 @login_required
@@ -95,17 +93,29 @@ def portal(request, student_id) -> HttpResponse:
 			.filter(earned = student).aggregate(Sum('diamonds'))['diamonds__sum'] or 0
 
 	context['meters'] = {
-			'clubs' : Meter.ClubMeter(pset_data['clubs__sum']),
-			'hearts' : Meter.HeartMeter(int(pset_data['hours__sum'])),
+			'clubs' : Meter.ClubMeter(pset_data['clubs__sum'] or 0),
+			'hearts' : Meter.HeartMeter(int(pset_data['hours__sum'] or 0)),
 			'diamonds' : Meter.DiamondMeter(total_diamonds),
 			'spades' : Meter.SpadeMeter(0), # TODO input value
 			}
-	context['level'] = sum(meter.level for meter in context['meters'].values())
-
-	# now mark suggestions as viewed
-	if request.user == student.user:
-		suggestions.update(notified = True)
+	level, wtf = dashboard.models.Level.objects.get_or_create(
+			number = sum(meter.level for meter in context['meters'].values())
+			)
+	if wtf is True:
+		level.name = student.user.username
+		level.save()
+	context['level'] = level
 	return render(request, "dashboard/portal.html", context)
+
+@login_required
+def achievements(request, student_id) -> HttpResponse:
+	student = roster.utils.get_student(student_id)
+	roster.utils.check_can_view(request, student, delinquent_check = False)
+	if roster.utils.is_delinquent_locked(request, student):
+		return HttpResponseRedirect(reverse_lazy('invoice', args=(student_id,)))
+	# semester = student.semester
+	context : Dict[str,Any] = {} # TODO write
+	return render(request, "dashboard/achievements.html", context)
 
 @login_required
 def submit_pset(request, student_id) -> HttpResponse:

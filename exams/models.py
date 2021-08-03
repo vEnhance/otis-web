@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
-import core
 from django.db import models
+import roster.models
 
 import string
 import datetime
@@ -41,3 +41,30 @@ class PracticeExam(models.Model):
 	@property
 	def current(self):
 		return self.started and not self.overdue
+
+class Quiz(models.Model):
+	exam = models.OneToOneField(PracticeExam,
+			on_delete = models.CASCADE,
+			help_text = "The associated exam for this answer key")
+	answer1 = models.IntegerField(help_text = "Answer to p1", default = 0)
+	answer2 = models.IntegerField(help_text = "Answer to p2", default = 0)
+	answer3 = models.IntegerField(help_text = "Answer to p3", default = 0)
+	answer4 = models.IntegerField(help_text = "Answer to p4", default = 0)
+	answer5 = models.IntegerField(help_text = "Answer to p5", default = 0)
+
+class ExamSubmission(models.Model):
+	quiz = models.ForeignKey(Quiz,
+			on_delete = models.CASCADE,
+			help_text = "The quiz being submitted for")
+	student = models.ForeignKey(roster.models.Student,
+			on_delete = models.CASCADE,
+			help_text = "The student taking the exam")
+	guess1 = models.IntegerField(help_text = "Guess for p1", default = 0)
+	guess2 = models.IntegerField(help_text = "Guess for p2", default = 0)
+	guess3 = models.IntegerField(help_text = "Guess for p3", default = 0)
+	guess4 = models.IntegerField(help_text = "Guess for p4", default = 0)
+	guess5 = models.IntegerField(help_text = "Guess for p5", default = 0)
+	submitted = models.DateTimeField(help_text = "When the quiz was submitted",
+			auto_now_add = True)
+	class Meta:
+		unique_together = ('quiz', 'student',)
