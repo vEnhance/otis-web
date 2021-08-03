@@ -91,6 +91,8 @@ class PSetSubmission(models.Model):
 			help_text = "Total number of clubs that you solved (including 1♣ if feedback written)",
 			verbose_name = "Total ♣ earned",
 			)
+	eligible = models.BooleanField(default = True,
+			help_text = "Whether to count this for leveling up")
 	feedback = models.TextField(
 			verbose_name = "Feedback on problem set, worth [1♣]",
 			help_text = "Any other feedback about the problem set",
@@ -148,6 +150,8 @@ class AchievementCode(models.Model):
 	description = models.TextField(help_text = "How to obtain this achievement")
 	active = models.BooleanField(help_text = "Whether the code is active right now")
 	earned = models.ManyToManyField(roster.models.Student, related_name = "achievements")
+	diamonds = models.PositiveSmallIntegerField(default = 1,
+			help_text = "Amount of diamonds for this achievement")
 
 class Level(models.Model):
 	number = models.IntegerField(unique = True,

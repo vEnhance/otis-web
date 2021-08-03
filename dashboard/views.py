@@ -87,13 +87,17 @@ def portal(request, student_id) -> HttpResponse:
 			is_test = False, family = semester.exam_family, due_date__isnull=False)
 	context['num_sem_download'] = dashboard.models.SemesterDownloadFile\
 			.objects.filter(semester = semester).count()
-	data = dashboard.models.PSetSubmission.objects\
-			.filter(student = student, approved = True).aggregate(Sum('clubs'), Sum('hours'))
+
+	pset_data = dashboard.models.PSetSubmission.objects\
+			.filter(student = student, approved = True, eligible = True)\
+			.aggregate(Sum('clubs_granted'), Sum('hours'))
+	num_achievements = dashboard.models.AchievementCode.objects\
+			.filter(earned = student).aggregate(Sum('diamonds'))
 
 	context['meters'] = {
-			'clubs' : Meter.ClubMeter(data['clubs__sum']),
-			'hearts' : Meter.HeartMeter(int(data['hours__sum'])),
-			'diamonds' : Meter.DiamondMeter(0), # TODO input value
+			'clubs' : Meter.ClubMeter(pset_data['clubs__sum']),
+			'hearts' : Meter.HeartMeter(int(pset_data['hours__sum'])),
+			'diamonds' : Meter.DiamondMeter(num_achievements),
 			'spades' : Meter.SpadeMeter(0), # TODO input value
 			}
 	context['level'] = sum(meter.level for meter in context['meters'].values())
