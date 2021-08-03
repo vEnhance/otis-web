@@ -1,6 +1,7 @@
 from django.core.files.storage import default_storage
+from django.core.exceptions import PermissionDenied
 from django.conf import settings
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseServerError, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest, HttpResponseServerError, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.views.generic.list import ListView
 from django.conf import settings
@@ -9,6 +10,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 from .models import UnitGroup, Unit, Semester
+import roster.models
+import dashboard.models
 
 def h(value):
 	s = settings.UNIT_HASH_KEY + '|' + value
@@ -36,20 +39,46 @@ def _get_from_google_storage(filename : str):
 	response['Content-Disposition'] = f'attachment; filename="{filename}"'
 	return response
 
-@login_required
-def unit_problems(request, pk):
-	unit = Unit.objects.get(pk=pk)
-	return _get_from_google_storage(unit.problems_pdf_filename)
+def permitted(unit : Unit, request : HttpRequest, asking_solution : bool) -> bool:
+	if getattr(request.user, 'is_staff', False):
+		return True
+	elif dashboard.models.PSetSubmission.objects\
+			.filter(student__user = request.user, unit = unit).exists():
+		return True
+	elif dashboard.models.UploadedFile.objects\
+			.filter(benefactor__semester__uses_legacy_pset_system = True,
+					benefactor__user = request.user,
+					category = 'psets',
+					unit = unit).exists():
+		return True
+	elif asking_solution is False and roster.models.Student.objects\
+			.filter(user = request.user, unlocked_units = unit).exists():
+		return True
+	return False
 
 @login_required
-def unit_tex(request, pk):
+def unit_problems(request, pk) -> HttpResponse:
 	unit = Unit.objects.get(pk=pk)
-	return _get_from_google_storage(unit.problems_tex_filename)
+	if permitted(unit, request, asking_solution = False):
+		return _get_from_google_storage(unit.problems_pdf_filename)
+	else:
+		raise PermissionDenied(f"Can't view the problems pdf for {unit}")
 
 @login_required
-def unit_solutions(request, pk):
+def unit_tex(request, pk) -> HttpResponse:
 	unit = Unit.objects.get(pk=pk)
-	return _get_from_google_storage(unit.solutions_pdf_filename)
+	if permitted(unit, request, asking_solution = False):
+		return _get_from_google_storage(unit.problems_pdf_filename)
+	else:
+		raise PermissionDenied(f"Can't view the problems TeX for {unit}")
+
+@login_required
+def unit_solutions(request, pk) -> HttpResponse:
+	unit = Unit.objects.get(pk=pk)
+	if permitted(unit, request, asking_solution = True):
+		return _get_from_google_storage(unit.problems_pdf_filename)
+	else:
+		raise PermissionDenied(f"Can't view the solutions for {unit}")
 
 @login_required
 def classroom(request):
