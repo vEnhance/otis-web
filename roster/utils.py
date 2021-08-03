@@ -36,7 +36,7 @@ def is_delinquent_locked(request, student):
 
 def check_taught_by(request, student):
 	if not student.is_taught_by(request.user):
-		raise PermissionDenied(f"{request.user} cannot edit {student}")
+		raise PermissionDenied(f"{request.user} cannot edit this student")
 
 def get_student(student_id):
 	return get_object_or_404(models.Student.objects, id=student_id)
