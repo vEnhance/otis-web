@@ -24,7 +24,7 @@ def get_visible_students(user, current = True):
 
 def check_can_view(request, student, delinquent_check = True):
 	if not student.can_view_by(request.user):
-		raise PermissionDenied(f"{request.user} cannot view {student}")
+		raise PermissionDenied(f"{request.user} cannot view this student")
 	if delinquent_check is True and is_delinquent_locked(request, student):
 		raise PermissionDenied("Missing payment permission error")
 
