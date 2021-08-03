@@ -90,14 +90,14 @@ def portal(request, student_id) -> HttpResponse:
 
 	pset_data = dashboard.models.PSetSubmission.objects\
 			.filter(student = student, approved = True, eligible = True)\
-			.aggregate(Sum('clubs_granted'), Sum('hours'))
-	num_achievements = dashboard.models.AchievementCode.objects\
-			.filter(earned = student).aggregate(Sum('diamonds'))
+			.aggregate(Sum('clubs'), Sum('hours'))
+	total_diamonds = dashboard.models.AchievementCode.objects\
+			.filter(earned = student).aggregate(Sum('diamonds'))['diamonds__sum'] or 0
 
 	context['meters'] = {
 			'clubs' : Meter.ClubMeter(pset_data['clubs__sum']),
 			'hearts' : Meter.HeartMeter(int(pset_data['hours__sum'])),
-			'diamonds' : Meter.DiamondMeter(num_achievements),
+			'diamonds' : Meter.DiamondMeter(total_diamonds),
 			'spades' : Meter.SpadeMeter(0), # TODO input value
 			}
 	context['level'] = sum(meter.level for meter in context['meters'].values())

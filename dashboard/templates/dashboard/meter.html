@@ -6,7 +6,7 @@
 		<div class="progress-bar" 
 				style="width: {{ meter.percent }}%; background-color: {{ meter.color }};"
 			aria-valuenow="{{ meter.excess }}" aria-valuemin="0" aria-valuemax="{{ meter.bar_max }}">
-			+{{ meter.level }} to total level
+			+{{ meter.level }} level{{ meter.level|pluralize }}
 		</div>
 	</div>
 	<div style="position: relative;">
@@ -16,7 +16,7 @@
 			Total {{ meter.total }}{{ meter.unit }}
 		</span>
 		<span style="position:absolute; right: 0;" class="text-muted" style="text-align: right;">
-			Next level in {{ meter.needed }}{{ meter.unit }}
+			{{ meter.needed }}{{ meter.unit }} more
 		</span>
 	</div>
 </div>
