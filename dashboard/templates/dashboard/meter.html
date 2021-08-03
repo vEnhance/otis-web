@@ -1,0 +1,23 @@
+<div style="position: relative; padding: 5px 9px; height: 60px;" class="col-md-6 col-12">
+	<div style="font-size:42px; position: absolute; top: -8px; left: -12px;">
+		{{ meter.emoji }}
+	</div>
+	<div class="progress" style="height: 32px;">
+		<div class="progress-bar" 
+				style="width: {{ meter.percent }}%; background-color: {{ meter.color }};"
+			aria-valuenow="{{ meter.excess }}" aria-valuemin="0" aria-valuemax="{{ meter.bar_max }}">
+			+{{ meter.level }} to total level
+		</div>
+	</div>
+	<div style="position: relative;">
+		<span style="position:absolute; left: 0px;
+			color: {{ meter.color }};
+			text-align: left;">
+			Total {{ meter.total }}{{ meter.unit }}
+		</span>
+		<span style="position:absolute; right: 0;" class="text-muted" style="text-align: right;">
+			Next level in {{ meter.needed }}{{ meter.unit }}
+		</span>
+	</div>
+</div>
+{# vim: ft=htmldjango #}

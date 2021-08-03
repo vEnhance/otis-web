@@ -87,12 +87,25 @@
 		</li>
 	</ol>
 	<hr />
-{% else %}
-	<h1>Your progress</h1>
-	{# TODO show progress bar #}
+{% elif not student.semester.uses_legacy_pset_system %}
+	<h1>Level {{ level }} &mdash; {{ level_name }}</h1>
 
-	<a href="{% url "submit-pset" student.id %}"
-		class="btn btn-success text-white" role="button">Submit new problem set</a>
+	<div class="container">
+		<div class="row">
+			{% include "dashboard/meter.html" with meter=meters.clubs %}
+			{% include "dashboard/meter.html" with meter=meters.hearts %}
+			{% include "dashboard/meter.html" with meter=meters.spades %}
+			{% include "dashboard/meter.html" with meter=meters.diamonds %}
+		</div>
+	</div>
+
+	<br />
+
+	<div class="text-center">
+		<a href="{% url "submit-pset" student.id %}" style="margin: 0 auto;"
+			class="btn btn-secondary text-white" role="button">Submit new problem set</a>
+	</div>
+	<hr />
 {% endif %}
 
 {% if suggestions|length %}

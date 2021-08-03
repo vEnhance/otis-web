@@ -137,3 +137,20 @@ class ProblemSuggestion(models.Model):
 	def __str__(self):
 		return self.student.name + " suggested " + self.source \
 				+ " for " + str(self.unit.group)
+
+def achievement_image_file_name(instance, filename):
+	return os.path.join('badges', instance.code + '_' + filename)
+
+class AchievementCode(models.Model):
+	code = models.CharField(max_length = 96, unique = True)
+	image = models.FileField(upload_to = 'badges',
+			help_text = "Image for the obtained badge", null = True, blank = True)
+	description = models.TextField(help_text = "How to obtain this achievement")
+	active = models.BooleanField(help_text = "Whether the code is active right now")
+	earned = models.ManyToManyField(roster.models.Student, related_name = "achievements")
+
+class Level(models.Model):
+	number = models.IntegerField(unique = True,
+			help_text = "The number of the level")
+	name = models.CharField(max_length = 128, unique = True,
+			help_text = "The name of the level")
