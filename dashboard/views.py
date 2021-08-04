@@ -407,7 +407,7 @@ def pending_contributions(request, suggestion_id = None) -> HttpResponse:
 	context : Dict[str, Any] = {}
 	if request.method == "POST":
 		if suggestion_id is None:
-			raise HttpResponseBadRequest("The form must include a suggestion ID")
+			return HttpResponseBadRequest("The form must include a suggestion ID")
 		suggestion = get_object_or_404(dashboard.models.ProblemSuggestion, id = suggestion_id)
 		form = forms.ResolveSuggestionForm(request.POST, instance = suggestion)
 		if form.is_valid():
