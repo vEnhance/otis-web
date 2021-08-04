@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models import Subquery, OuterRef, F, Q, Count, Sum
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.utils.timezone import now
@@ -351,7 +351,7 @@ class DownloadListView(LoginRequiredMixin, ListView):
 	template_name = 'dashboard/download_list.html'
 
 	def get_queryset(self):
-		student = roster.models.Student.objects.get(id=self.kwargs['pk'])
+		student = get_object_or_404(roster.models.Student, id=self.kwargs['pk'])
 		roster.utils.check_can_view(self.request, student)
 		return dashboard.models.SemesterDownloadFile.objects.filter(semester = student.semester)
 
@@ -394,7 +394,7 @@ class ProblemSuggestionUpdate(LoginRequiredMixin, UpdateView):
 class ProblemSuggestionList(LoginRequiredMixin, ListView):
 	context_object_name = "problem_suggestions"
 	def get_queryset(self):
-		student = roster.models.Student.objects.get(id=self.kwargs['student_id'])
+		student = get_object_or_404(roster.models.Student, id=self.kwargs['student_id'])
 		roster.utils.check_can_view(self.request, student)
 		return dashboard.models.ProblemSuggestion.objects.filter(student=student).order_by('resolved', 'created_at')
 	def get_context_data(self, **kwargs):
@@ -406,8 +406,9 @@ class ProblemSuggestionList(LoginRequiredMixin, ListView):
 def pending_contributions(request, suggestion_id = None) -> HttpResponse:
 	context : Dict[str, Any] = {}
 	if request.method == "POST":
-		assert suggestion_id is not None
-		suggestion = dashboard.models.ProblemSuggestion.objects.get(id = suggestion_id)
+		if suggestion_id is None:
+			raise HttpResponseBadRequest("The form must include a suggestion ID")
+		suggestion = get_object_or_404(dashboard.models.ProblemSuggestion, id = suggestion_id)
 		form = forms.ResolveSuggestionForm(request.POST, instance = suggestion)
 		if form.is_valid():
 			messages.success(request, "Successfully resolved " + suggestion.source)

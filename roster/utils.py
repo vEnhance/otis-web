@@ -42,11 +42,5 @@ def get_student(student_id):
 	return get_object_or_404(models.Student.objects, id=student_id)
 
 def infer_student(request):
-	try:
-		student = models.Student.objects.get(
+	return get_object_or_404(models.Student.objects,
 				semester__active = True, user = request.user)
-	except(models.Student.MultipleObjectsReturned,
-			models.Student.DoesNotExist):
-		raise Http404("No such student")
-	return student
-

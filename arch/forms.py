@@ -1,4 +1,5 @@
 from django import forms
+from django.shortcuts import get_object_or_404
 from . import models
 
 class HintUpdateFormWithReason(forms.ModelForm):
@@ -21,7 +22,7 @@ class ProblemSelectWidget(forms.Select):
 			name, value, label, selected, index, subindex, attrs or {},
 		)
 		if value:
-			problem = models.Problem.objects.get(puid=value)
+			problem = get_object_or_404(models.Problem, puid=value)
 			option['attrs'].update({
 				'data-source' : problem.source or '',
 				'data-description' : problem.description,

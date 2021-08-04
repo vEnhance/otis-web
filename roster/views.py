@@ -19,7 +19,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.db.models import Subquery, OuterRef, Count, IntegerField
 from django.http import HttpResponse, HttpRequest, HttpResponseRedirect, Http404, JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
@@ -95,7 +95,7 @@ def finalize(request, student_id):
 def auto_advance(request, student_id, unit_id, target_id = None):
 	student = utils.get_student(student_id)
 	utils.check_taught_by(request, student)
-	unit = core.models.Unit.objects.get(id=unit_id)
+	unit = get_object_or_404(core.models.Unit, id = unit_id)
 
 	if not student.unlocked_units.filter(id=unit_id).exists() \
 			or not student.curriculum.filter(id=unit_id).exists():
@@ -116,7 +116,7 @@ def auto_advance(request, student_id, unit_id, target_id = None):
 		student.save()
 		replace = False
 	else:
-		target = core.models.Unit.objects.get(id=target_id)
+		target = get_object_or_404(core.models.Unit, id = target_id)
 		if student.unlocked_units.filter(id=target_id).exists() \
 				or not student.curriculum.filter(id=target_id).exists():
 			messages.error(request,
@@ -143,7 +143,7 @@ def auto_advance(request, student_id, unit_id, target_id = None):
 def advance(request, student_id):
 	student = utils.get_student(student_id)
 	utils.check_taught_by(request, student)
-	
+
 	if request.method == 'POST':
 		form = forms.AdvanceForm(request.POST, instance = student)
 		if form.is_valid():
@@ -190,7 +190,7 @@ def invoice(request, student_id=None):
 			invoice = student.invoice
 		except ObjectDoesNotExist:
 			invoice = None
-	
+
 	context = {'title' : "Invoice for " + student.name,
 			'student' : student, 'invoice' : invoice,
 			'checksum' : get_checksum(student)}
@@ -338,16 +338,16 @@ class EditInquiry(PermissionRequiredMixin, UpdateView):
 	model = models.UnitInquiry
 	object: models.UnitInquiry
 	def get_success_url(self):
-		return reverse("edit-inquiry", args=(self.object.id,)) # typing: ignore
+		return reverse("edit-inquiry", args=(self.object.pk,)) # typing: ignore
 
 @staff_member_required
-def approve_inquiry(request : HttpRequest, pk) -> HttpResponse:
+def approve_inquiry(_ : HttpRequest, pk) -> HttpResponse:
 	inquiry = models.UnitInquiry.objects.get(id=pk)
 	inquiry.run_accept()
 	return HttpResponseRedirect(reverse("inquiry", args=(inquiry.student.id,)))
 
 @staff_member_required
-def approve_inquiry_all(request : HttpRequest) -> HttpResponse:
+def approve_inquiry_all(_ : HttpRequest) -> HttpResponse:
 	for inquiry in models.UnitInquiry.objects\
 			.filter(status="NEW", student__semester__active = True):
 		inquiry.run_accept()
@@ -414,7 +414,7 @@ def api(request):
 	if not (n := len(queryset)) == 1:
 		return JsonResponse({'result' : 'nonexistent', 'length' : n})
 
-	social = queryset.get() # get the social account for this
+	social = queryset.get() # get the social account for this; should never 404
 	user = social.user
 	student = models.Student.objects.filter(user = user, semester__active = True).first()
 	regform = models.StudentRegistration.objects.filter(user = user, container__semester__active = True).first()

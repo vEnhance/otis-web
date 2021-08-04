@@ -2,9 +2,9 @@ from typing import ClassVar, Dict
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpRequest, HttpResponseRedirect, JsonResponse
 from django.urls import reverse_lazy
+from django.shortcuts import get_object_or_404
 from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from reversion.views import RevisionMixin
@@ -23,14 +23,14 @@ class HintObjectView:
 	def get_object(self, queryset=None):
 		if queryset is None:
 			queryset = self.get_queryset() # type: ignore
-		return queryset.get(problem__puid=self.kwargs['puid'],
+		return get_object_or_404(queryset, problem__puid=self.kwargs['puid'],
 				number=self.kwargs['number'])
 class ProblemObjectView:
 	kwargs : ClassVar[Dict] = {}
 	def get_object(self, queryset=None):
 		if queryset is None:
 			queryset = self.get_queryset() # type: ignore
-		return queryset.get(puid=self.kwargs['puid'])
+		return get_object_or_404(queryset, puid=self.kwargs['puid'])
 
 class HintList(LoginRequiredMixin, ListView):
 	context_object_name = "hint_list"
@@ -139,12 +139,7 @@ def archapi(request : HttpRequest) -> JsonResponse:
 	puid = request.POST['puid'].upper()
 
 	if action == 'hints':
-		try:
-			problem = models.Problem.objects.get(puid = puid)
-		except ObjectDoesNotExist:
-			return err(404)
-		except:
-			return err()
+		problem = get_object_or_404(models.Problem.objects, puid = puid)
 		response = {
 				'hints' : [],
 				'description' : problem.description,
@@ -178,8 +173,8 @@ def archapi(request : HttpRequest) -> JsonResponse:
 				})
 
 	if action == 'add':
+		problem = get_object_or_404(models.Problem.objects, puid = puid)
 		try:
-			problem = models.Problem.objects.get(puid = puid)
 			assert 'content' in request.POST
 			assert 'keywords' in request.POST
 			assert 'number' in request.POST
@@ -190,9 +185,7 @@ def archapi(request : HttpRequest) -> JsonResponse:
 					number = request.POST['number'],
 					)
 			hint.save()
-		except ObjectDoesNotExist:
-			return err(404)
-		except:
+		except AssertionError:
 			return err()
 		else:
 			return JsonResponse({'url' : hint.get_absolute_url()})
