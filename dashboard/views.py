@@ -78,8 +78,7 @@ def _get_meter_update(student: roster.models.Student):
 	psets = dashboard.models.PSet.objects\
 			.filter(student = student, approved = True, eligible = True)
 	pset_data = psets.aggregate(Sum('clubs'), Sum('hours'))
-	total_diamonds = dashboard.models.AchievementCode.objects\
-			.filter(earned = student).aggregate(Sum('diamonds'))['diamonds__sum'] or 0
+	total_diamonds = student.achievements.aggregate(Sum('diamonds'))['diamonds__sum'] or 0
 	meters = {
 		'clubs' : Meter.ClubMeter(pset_data['clubs__sum'] or 0),
 		'hearts' : Meter.HeartMeter(int(pset_data['hours__sum'] or 0)),
