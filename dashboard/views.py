@@ -367,7 +367,7 @@ def leaderboard(request):
 
 	return render(request, "dashboard/stulist.html", context)
 
-class DownloadListView(LoginRequiredMixin, ListView):
+class DownloadList(LoginRequiredMixin, ListView):
 	template_name = 'dashboard/download_list.html'
 
 	def get_queryset(self):
@@ -375,9 +375,10 @@ class DownloadListView(LoginRequiredMixin, ListView):
 		roster.utils.check_can_view(self.request, student)
 		return dashboard.models.SemesterDownloadFile.objects.filter(semester = student.semester)
 
-class PSetView(LoginRequiredMixin, DetailView):
-	template_name = 'dashboard/pset_list.html'
+class PSetDetail(LoginRequiredMixin, DetailView):
+	template_name = 'dashboard/pset_detail.html'
 	model = dashboard.models.PSet
+	object_name = 'pset'
 
 class ProblemSuggestionCreate(LoginRequiredMixin, CreateView):
 	context_object_name = "problem_suggestion"
