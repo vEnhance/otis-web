@@ -8,7 +8,9 @@
 						background-color: {{ meter.color }};
 						text-align: right;
 						padding-right: 2%;">
-			{{ meter.total }}{{ meter.unit }}
+			<span class="d-md-none d-lg-inline">
+				{{ meter.total }}{{ meter.unit }}
+			</span>
 		</div>
 	</div>
 	<div style="position: relative;">
@@ -16,8 +18,13 @@
 			<big style="font-family: impact; font-weight: 900;">{{ meter.level }}</big>
 			{{ meter.name }}
 		</span>
-		<span style="position:absolute; right: 0; text-align: right;" class="text-muted">
-			/ {{ meter.thresh }}{{ meter.unit }}
+		<span style="position:absolute; right: 0; text-align: right;">
+			<span class="text-muted d-md-none d-lg-inline">
+				/ {{ meter.thresh }}{{ meter.unit }}
+			</span>
+			<span class="d-none d-md-block d-lg-none" style = "color: {{ meter.color }};">
+				{{ meter.total }} / {{ meter.thresh }}{{ meter.unit }}
+			</span>
 		</span>
 	</div>
 </div>

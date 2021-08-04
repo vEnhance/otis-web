@@ -46,7 +46,7 @@ class Meter:
 		return self.level * 2 + 1
 	@property
 	def percent(self) -> int:
-		return 20 + int(80 * self.excess / self.bar_max)
+		return 15 + int(85 * self.excess / self.bar_max)
 	@property
 	def needed(self) -> int:
 		return (self.level+1) ** 2 - self.value
