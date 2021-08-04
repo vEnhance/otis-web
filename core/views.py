@@ -68,7 +68,7 @@ def unit_problems(request, pk) -> HttpResponse:
 def unit_tex(request, pk) -> HttpResponse:
 	unit = Unit.objects.get(pk=pk)
 	if permitted(unit, request, asking_solution = False):
-		return _get_from_google_storage(unit.problems_pdf_filename)
+		return _get_from_google_storage(unit.problems_tex_filename)
 	else:
 		raise PermissionDenied(f"Can't view the problems TeX for {unit}")
 
@@ -76,7 +76,7 @@ def unit_tex(request, pk) -> HttpResponse:
 def unit_solutions(request, pk) -> HttpResponse:
 	unit = Unit.objects.get(pk=pk)
 	if permitted(unit, request, asking_solution = True):
-		return _get_from_google_storage(unit.problems_pdf_filename)
+		return _get_from_google_storage(unit.solutions_pdf_filename)
 	else:
 		raise PermissionDenied(f"Can't view the solutions for {unit}")
 
