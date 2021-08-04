@@ -16,15 +16,8 @@
 {% if request.user.is_authenticated %}
 	<h4>User panel</h4>
 	<div>
-	{% if not student %}
 	<a class="emoji-link" href="{% url "index" %}">🏠</a>
 	<a class="emoji-link" href="{% url "past" %}">🕗</a>
-	{% elif student.user.username == request.user.username %}
-	<a class="emoji-link" href="{% url "past" %}">🕗</a>
-	{% else %}
-	<a class="emoji-link" href="{% url "index" %}">🏠</a>
-	<a class="emoji-link" href="{% url "past" %}">🕗</a>
-	{% endif %}
 	<a class="emoji-link" href="{% url "socialaccount_connections" %}">🔐</a>
 	<a class="emoji-link" href="{% url "arch-index" %}">🗼</a>
 	<a class="emoji-link" href="{% url "synopsis" %}">🗃️</a>
