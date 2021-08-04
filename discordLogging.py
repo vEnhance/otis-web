@@ -1,3 +1,6 @@
+from collections import OrderedDict
+from django.http import HttpRequest
+import pprint
 import logging
 import requests
 import socket
@@ -32,12 +35,6 @@ class DiscordHandler(logging.Handler):
 		level = r.levelname.lower().strip()
 		emoji = EMOJIS.get(level, ':question:')
 		color = COLORS.get(level, 0xaaaaaa)
-		if '\n' not in r.message:
-			i = None
-			title = f'{emoji} {r.message[:200]}'
-		else:
-			i = r.message.index('\n')
-			title = f"{emoji} {r.message[:i]}"
 
 		try:
 			user = r.request.user.first_name + ' ' + r.request.user.last_name # type: ignore
@@ -57,27 +54,62 @@ class DiscordHandler(logging.Handler):
 				{ 'name' : 'User', 'value' : user, 'inline' : True, },
 				{ 'name' : 'Filename', 'value' : f"{r.lineno}:`{r.filename}`", 'inline' : True, },
 				]
-		print(r.__dict__)
+
+		description_parts = OrderedDict()
+
+		# if the message is short (< 1 line), we set it as the title
+		if '\n' not in r.message:
+			title = f'{emoji} {r.message[:200]}'
+		# otherwise, set the first line as title and include the rest in description
+		else:
+			i = r.message.index('\n')
+			title = f"{emoji} {r.message[:i]}"
+			description_parts[':green_heart: MESSAGE :green_heart:'] =  "```" + r.message[i+1:] + "```"
+
+		# if exc_text nonempty, add that to description
+		if r.exc_text is not None:
+			# always truncate r.exc_text to at most 600 chars since it's fking long
+			if len(r.exc_text) > 600:
+				blob = r.exc_text[:300] + '\n...\n' + r.exc_text[-300:]
+			else:
+				blob = r.exc_text
+			description_parts[':yellow_heart: EXCEPTION :yellow_heart:'] =  "```" + blob + "```"
+
+		# if request data is there, include that too
+		if hasattr(r, 'request'):
+			request : HttpRequest = getattr(r, 'request')
+			s = ''
+			s += f'> **Method** {request.method}\n'
+			s += f'> **Path** `{request.path}`\n'
+			s += f'> **Content Type** {request.content_type}\n'
+			s += f'> **Agent** {request.headers.get("User-Agent", "Unknown")}\n'
+			if request.user.is_authenticated:
+				s += f'> **User** {getattr(request.user, "username", "wtf")}\n'
+			if request.method == 'POST':
+				s += r'**POST data**' + '\n'
+				s += r'```' + '\n'
+				pp = pprint.PrettyPrinter(indent = 2)
+				s += pp.pformat(request.POST)
+				s += r'```'
+			if request.FILES is not None and len(request.FILES) > 0:
+				s += f'**Files included**\n'
+				for name, fileobj in request.FILES.items():
+					s += f'> `{name}` ({fileobj.size} bytes, { fileobj.content_type })\n'
+			description_parts[':blue_heart: REQUEST :blue_heart:'] = s
+
 		embed = {
 					'title' : title,
 					'color' : color,
 					'fields' : fields
 				}
 
-		description = ''
-		if r.exc_text is not None:
-			msg = r.exc_text
-			if len(msg) > 800:
-				msg = msg[:300] + '\n...\n' + msg[-500:]
-			description = f'```\n{msg}\n```'
-		if i is not None:
-			msg = r.message[i+1:]
-			if len(msg) > 800:
-				msg = msg[:300] + '\n...\n' + msg[-500:]
-			description += f"\n```{msg}```\n"
-		description = description.strip()
-		if len(description) > 0:
-			embed['description']  = description
+		desc = ''
+		no_worries = sum(len(_) for _ in description_parts.values()) <= 1800
+		for k,v in description_parts.items():
+			if len(v) < 600 or no_worries:
+				desc += k + '\n' + v.strip() + '\n'
+		if desc:
+			embed['description'] = desc
 
 		data = {
 				'username' : socket.gethostname(),
