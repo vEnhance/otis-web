@@ -21,13 +21,15 @@
 				</div>
 				<div class="progress" style="height: 24px;">
 					<div class="progress-bar"
-							style="width: {{ meter.percent }}%; background-color: {{ meter.color }};"
-						aria-valuenow="{{ meter.excess }}" aria-valuemin="0" aria-valuemax="{{ meter.bar_max }}">
-						{{ meter.excess }}{{ meter.unit }}
+							style="width: {{ meter.percent }}%;
+									background-color: {{ meter.color }};
+									text-align: right;
+									padding-right: 4%;">
+						{{ meter.total }}{{ meter.unit }}
 					</div>
 				</div>
-				<span style="position:absolute; right: 8px; text-align: right;" class="text-muted">
-					/ {{ meter.bar_max }}{{ meter.unit }}
+				<span style="position:absolute; right: 5%; text-align: right;" class="text-muted">
+					/ {{ meter.thresh }}{{ meter.unit }}
 				</span>
 			</div>
 			<p>
