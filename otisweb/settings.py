@@ -16,7 +16,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 ## Manually added settings
 
-CRISPY_TEMPLATE_PACK = 'bootstrap4'
+CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
+CRISPY_TEMPLATE_PACK = 'bootstrap5'
 HIJACK_ALLOW_GET_REQUESTS = True
 HIJACK_LOGIN_REDIRECT_URL = '/'
 HIJACK_LOGOUT_REDIRECT_URL = '/'
@@ -54,8 +55,9 @@ INSTALLED_APPS = [
 	'allauth.socialaccount.providers.discord',
 	'allauth.socialaccount.providers.github',
 	'allauth.socialaccount.providers.google',
-	'bootstrap4',
+	'bootstrap5',
 	'crispy_forms',
+	'crispy_bootstrap5',
 	'hijack_admin',
 	'hijack',
 	'compat',
