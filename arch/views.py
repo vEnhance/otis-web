@@ -139,7 +139,7 @@ def archapi(request : HttpRequest) -> JsonResponse:
 	puid = request.POST['puid'].upper()
 
 	if action == 'hints':
-		problem = get_object_or_404(models.Problem.objects, puid = puid)
+		problem = get_object_or_404(models.Problem, puid = puid)
 		response = {
 				'hints' : [],
 				'description' : problem.description,
@@ -173,7 +173,7 @@ def archapi(request : HttpRequest) -> JsonResponse:
 				})
 
 	if action == 'add':
-		problem = get_object_or_404(models.Problem.objects, puid = puid)
+		problem = get_object_or_404(models.Problem, puid = puid)
 		try:
 			assert 'content' in request.POST
 			assert 'keywords' in request.POST
