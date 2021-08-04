@@ -11,7 +11,7 @@ from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadReque
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.utils.timezone import now
-from django.views.generic import ListView
+from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from typing import Any, Dict, Optional
 import core.models
@@ -87,6 +87,7 @@ def _get_meter_update(student: roster.models.Student):
 			.filter(threshold__lte = level_number).order_by('threshold').first()
 	level_name = level.name if level is not None else 'Initiate'
 	return {
+			'pset_data' : pset_data,
 			'meters' : meters,
 			'level_number' : level_number,
 			'level_name' : level_name
@@ -373,6 +374,10 @@ class DownloadListView(LoginRequiredMixin, ListView):
 		student = get_object_or_404(roster.models.Student, id=self.kwargs['pk'])
 		roster.utils.check_can_view(self.request, student)
 		return dashboard.models.SemesterDownloadFile.objects.filter(semester = student.semester)
+
+class PSetView(LoginRequiredMixin, DetailView):
+	template_name = 'dashboard/pset_list.html'
+	model = dashboard.models.PSetSubmission
 
 class ProblemSuggestionCreate(LoginRequiredMixin, CreateView):
 	context_object_name = "problem_suggestion"
