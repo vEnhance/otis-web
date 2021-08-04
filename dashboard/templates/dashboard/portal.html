@@ -88,7 +88,8 @@
 	</ol>
 	<hr />
 {% elif not student.semester.uses_legacy_pset_system %}
-	<h1>Level {{ level_number }} &mdash; <a href="{% url "achievements" student.id %}">{{ level_name }}</a></h1>
+	<h1>Level {{ level_number }} &mdash;
+		<a href="{% url "achievements" student.id %}">🏅{{ level_name }}</a></h1>
 
 	<div class="container">
 		<div class="row">
@@ -99,11 +100,12 @@
 		</div>
 	</div>
 
-	<br />
-
 	<div class="text-center">
-		<a href="{% url "submit-pset" student.id %}" style="margin: 0 auto;"
-			class="btn btn-success text-white" role="button">Submit new problem set</a>
+		<a href="{% url "achievements" student.id %}" style="margin: 0 auto; width: 120px;"
+			class="btn btn-primary text-white" role="button">View stats</a>
+		&nbsp;
+		<a href="{% url "submit-pset" student.id %}" style="margin: 0 auto; width: 120px;"
+			class="btn btn-success text-white" role="button">Submit unit</a>
 	</div>
 	<hr />
 {% endif %}

@@ -21,7 +21,14 @@ import roster.models, roster.utils
 from . import forms
 
 class Meter:
-	def __init__(self, emoji : str, value : int, unit : str, color: str):
+	def __init__(self,
+			name : str,
+			emoji : str,
+			value : int,
+			unit : str,
+			color: str
+			):
+		self.name = name
 		self.emoji = emoji
 		self.value = value
 		self.unit = unit
@@ -48,16 +55,42 @@ class Meter:
 
 	@staticmethod
 	def ClubMeter(value: int):
-		return Meter(emoji = "♣️", value = value, unit = "♣", color = '#007bff;')
+		return Meter(name = "Dexterity", emoji = "♣️", value = value,
+				unit = "♣", color = '#007bff;')
 	@staticmethod
 	def HeartMeter(value: int):
-		return Meter(emoji = "🕰️", value = value, unit = "♥", color = '#198754')
+		return Meter(name = "Wisdom", emoji = "🕰️", value = value,
+				unit = "♥", color = '#198754')
 	@staticmethod
 	def SpadeMeter(value: int):
-		return Meter(emoji = "🏆", value = value, unit = "♠", color = '#ff901a')
+		return Meter(name = "Strength", emoji = "🏆", value = value,
+				unit = "♠", color = '#ae610f')
 	@staticmethod
 	def DiamondMeter(value: int):
-		return Meter(emoji = "㊙️", value = value, unit = "◆", color = '#9c1421')
+		return Meter(name = "Charisma", emoji = "㊙️", value = value,
+				unit = "◆", color = '#9c1421')
+
+def _get_meter_update(student: roster.models.Student):
+	pset_data = dashboard.models.PSetSubmission.objects\
+			.filter(student = student, approved = True, eligible = True)\
+			.aggregate(Sum('clubs'), Sum('hours'))
+	total_diamonds = dashboard.models.AchievementCode.objects\
+			.filter(earned = student).aggregate(Sum('diamonds'))['diamonds__sum'] or 0
+	meters = {
+		'clubs' : Meter.ClubMeter(pset_data['clubs__sum'] or 0),
+		'hearts' : Meter.HeartMeter(int(pset_data['hours__sum'] or 0)),
+		'diamonds' : Meter.DiamondMeter(total_diamonds),
+		'spades' : Meter.SpadeMeter(0), # TODO input value
+		}
+	level_number = sum(meter.level for meter in meters.values())
+	level = dashboard.models.Level.objects\
+			.filter(threshold__lte = level_number).order_by('threshold').first()
+	level_name = level.name if level is not None else 'Initiate'
+	return {
+			'meters' : meters,
+			'level_number' : level_number,
+			'level_name' : level_name
+			}
 
 @login_required
 def portal(request, student_id) -> HttpResponse:
@@ -85,23 +118,7 @@ def portal(request, student_id) -> HttpResponse:
 			is_test = False, family = semester.exam_family, due_date__isnull=False)
 	context['num_sem_download'] = dashboard.models.SemesterDownloadFile\
 			.objects.filter(semester = semester).count()
-
-	pset_data = dashboard.models.PSetSubmission.objects\
-			.filter(student = student, approved = True, eligible = True)\
-			.aggregate(Sum('clubs'), Sum('hours'))
-	total_diamonds = dashboard.models.AchievementCode.objects\
-			.filter(earned = student).aggregate(Sum('diamonds'))['diamonds__sum'] or 0
-
-	context['meters'] = {
-			'clubs' : Meter.ClubMeter(pset_data['clubs__sum'] or 0),
-			'hearts' : Meter.HeartMeter(int(pset_data['hours__sum'] or 0)),
-			'diamonds' : Meter.DiamondMeter(total_diamonds),
-			'spades' : Meter.SpadeMeter(0), # TODO input value
-			}
-	level_number = sum(meter.level for meter in context['meters'].values())
-	level = dashboard.models.Level.objects.filter(threshold__lte = level_number).order_by('threshold').first()
-	context['level_name'] = level.name if level is not None else 'Newcomer'
-	context['level_number'] = level_number
+	context.update(_get_meter_update(student))
 	return render(request, "dashboard/portal.html", context)
 
 @login_required
@@ -111,7 +128,8 @@ def achievements(request, student_id) -> HttpResponse:
 	if roster.utils.is_delinquent_locked(request, student):
 		return HttpResponseRedirect(reverse_lazy('invoice', args=(student_id,)))
 	# semester = student.semester
-	context : Dict[str,Any] = {} # TODO write
+	context : Dict[str,Any] = {'student' : student}
+	context.update(_get_meter_update(student))
 	return render(request, "dashboard/achievements.html", context)
 
 @login_required

@@ -1,5 +1,26 @@
 {% extends 'layout.html' %}
 {% load static %}
+{% block title %}Achievements{% endblock %}
 {% block layout-content %}
+
+<h1>Current level</h1>
+<p>You have reached <b>Level {{ level_number }}</b>,
+granting you the title of <b>{{ level_name }}</b>.</p>
+<p>Your level is defined as the sum of the four statistics below.
+Each statistic has value $\lfloor \sqrt{n} \rfloor$
+where $n$ is the number of points amassed towards that statistic.</p>
+
+{% include "dashboard/meter.html" with meter=meters.clubs full=1 %}
+<p>You gain {{ meters.clubs.unit }} by solving problems on units.</p>
+
+{% include "dashboard/meter.html" with meter=meters.hearts full=1 %}
+<p>You gain {{ meters.hearts.unit }} by spending time units.</p>
+
+{% include "dashboard/meter.html" with meter=meters.spades full=1 %}
+<p>You gain {{ meters.spades.unit }} by scoring points on
+<a href="https://web.evanchen.cc/usemo.html">USEMO</a> and OTIS quizzes.</p>
+
+{% include "dashboard/meter.html" with meter=meters.diamonds full=1 %}
+<p>You gain {{ meters.diamonds.unit }} by finding hidden achievement codes.</p>
 
 {% endblock %}
