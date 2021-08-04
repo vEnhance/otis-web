@@ -1,10 +1,19 @@
 {% extends 'layout.html' %}
 {% load humanize %}
 {% load static %}
-{% block title %}Achievements{% endblock %}
+{% block title %}Your Stats{% endblock %}
 {% block layout-content %}
 
-<h1>Current level</h1>
+<h1>{{ student.name }} &mdash; {{ level_name }}</h1>
+
+{% if obtained_achievement %}
+<div class="alert alert-success">
+	<h2 class="alert-heading">Achievement unlocked! 🎉</h2>
+	You earned the achievement <b>"{{ obtained_achievement.name }}"</b>
+	<hr />
+</div>
+{% endif %}
+
 <p>You have reached <b>Level {{ level_number }}</b>,
 granting you the title of <b>{{ level_name }}</b>.</p>
 <p>Your level is defined as the sum of the four statistics below.

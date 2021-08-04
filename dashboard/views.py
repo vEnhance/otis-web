@@ -11,7 +11,6 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, HttpRes
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.utils.timezone import now
-from django.views.decorators.http import require_POST
 from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from typing import Any, Dict, Optional
@@ -133,27 +132,27 @@ def achievements(request, student_id) -> HttpResponse:
 	if roster.utils.is_delinquent_locked(request, student):
 		return HttpResponseRedirect(reverse_lazy('invoice', args=(student_id,)))
 
+	context : Dict[str,Any] = {
+			'student' : student,
+			'form' : forms.DiamondsForm(),
+			'achievements' : student.achievements.all().order_by('name'),
+			}
 	if request.method == 'POST':
 		form = forms.DiamondsForm(request.POST)
 		if form.is_valid():
 			code = form.cleaned_data['code']
-			if student.achievements.filter(code=code).exists():
+			if student.achievements.filter(code__iexact = code).exists():
 				messages.warning(request, "You already earned this achievement!")
 			else:
-				achievement_code : dashboard.models.Achievement \
-						= get_object_or_404(dashboard.models.Achievement, code = code)
-				student.achievements.add(achievement_code)
-				messages.success(request, "Achievement unlocked! 🎉")
+				achievement : dashboard.models.Achievement \
+						= get_object_or_404(dashboard.models.Achievement, code__iexact = code)
+				student.achievements.add(achievement)
+				context['obtained_achievement']  = achievement
 			form = forms.DiamondsForm()
 	else:
 		form = forms.DiamondsForm()
-	context : Dict[str,Any] = {
-			'student' : student,
-			'form' : forms.DiamondsForm(),
-			}
 	try:
-		context['first_code'] = dashboard.models.Achievement.objects\
-				.get(pk=0).values('code', flat=True)[0]
+		context['first_achievement'] = dashboard.models.Achievement.objects.get(pk=1)
 	except dashboard.models.Achievement.DoesNotExist:
 		pass
 	context.update(_get_meter_update(student))

@@ -62,6 +62,6 @@ class LevelAdmin(ImportExportModelAdmin):
 
 @admin.register(dashboard.models.Achievement)
 class AchievementAdmin(admin.ModelAdmin):
-	list_display = ('code', 'diamonds', 'active', 'description', 'image')
+	list_display = ('code', 'name', 'diamonds', 'active', 'description', 'image')
 	search_fields = ('code', 'description')
 	list_filter = ('active',)

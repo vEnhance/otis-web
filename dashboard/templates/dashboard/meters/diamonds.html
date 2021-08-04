@@ -4,17 +4,27 @@
 <p>You gain
 <span style="color: {{ meters.diamonds.color }};">{{ meters.diamonds.unit }}</span>
 by finding metaphorical diamonds.</p>
+{% if first_achievement %}
+<p>Here's one to start you off: <code>{{ first_achievement.code }}</code>.</p>
+{% endif %}
 
-{% if student.achievements %}
-<ul class="list-group">
-	{% for achievement in student.achievements.objects.all %}
-		<li class="list-group-item">
-			<code>{{ achievement.code }}</code>
-		</li>
+{% if achievements|length > 0 %}
+<div class="list-group">
+	{% for achievement in achievements %}
+		<div class="list-group-item container">
+			<div class="d-flex justify-content-between">
+				<strong>{{ achievement.name }}</strong>
+				<span style="color: {{ meters.diamonds.color }};">{{ achievement.diamonds }}{{ meters.diamonds.unit }}</span>
+			</div>
+			{% if achievement.image %}
+				<img width="64px" style="float: right;" src="{{ achievement.image.url }}" />
+			{% endif %}
+			<p>{{ achievement.description }}</p>
+		</div>
 	{% endfor %}
-</ul>
+</div>
 {% else %}
-<p>You haven't submitted any units yet.</p>
+<p>You have no achievements yet.</p>
 {% endif  %}
 
 {% endblock %}

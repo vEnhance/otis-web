@@ -85,9 +85,9 @@ class Student(models.Model):
 			"This will hide them from the master schedule, for example.")
 	newborn = models.BooleanField(default = True,
 			help_text = "Whether the student is newly created.")
-
 	achievements = models.ManyToManyField('dashboard.Achievement',
-			help_text = "Codes that this student has obtained")
+			help_text = "Codes that this student has obtained",
+			blank = True)
 
 	id: int
 
