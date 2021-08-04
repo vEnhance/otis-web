@@ -86,6 +86,9 @@ class Student(models.Model):
 	newborn = models.BooleanField(default = True,
 			help_text = "Whether the student is newly created.")
 
+	achievements = models.ManyToManyField('dashboard.AchievementCode',
+			help_text = "Codes that this student has obtained")
+
 	id: int
 
 	def __str__(self):

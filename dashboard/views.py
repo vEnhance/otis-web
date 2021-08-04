@@ -136,13 +136,27 @@ def achievements(request, student_id) -> HttpResponse:
 
 	if request.method == 'POST':
 		form = forms.DiamondsForm(request.POST)
+		if form.is_valid():
+			code = form.cleaned_data['code']
+			if student.achievements.filter(code=code).exists():
+				messages.warning(request, "You already earned this achievement!")
+			else:
+				achievement_code : dashboard.models.AchievementCode \
+						= get_object_or_404(dashboard.models.AchievementCode, code = code)
+				student.achievements.add(achievement_code)
+				messages.success(request, "Achievement unlocked! 🎉")
+			form = forms.DiamondsForm()
 	else:
 		form = forms.DiamondsForm()
-	# semester = student.semester
 	context : Dict[str,Any] = {
 			'student' : student,
 			'form' : forms.DiamondsForm(),
 			}
+	try:
+		context['first_code'] = dashboard.models.AchievementCode.objects\
+				.get(pk=0).values('code', flat=True)[0]
+	except dashboard.models.AchievementCode.DoesNotExist:
+		pass
 	context.update(_get_meter_update(student))
 	return render(request, "dashboard/achievements.html", context)
 

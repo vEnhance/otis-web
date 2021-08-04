@@ -153,11 +153,10 @@ def achievement_image_file_name(instance, filename):
 
 class AchievementCode(models.Model):
 	code = models.CharField(max_length = 96, unique = True)
-	image = models.FileField(upload_to = 'badges',
+	image = models.FileField(upload_to = achievement_image_file_name,
 			help_text = "Image for the obtained badge", null = True, blank = True)
 	description = models.TextField(help_text = "How to obtain this achievement")
 	active = models.BooleanField(help_text = "Whether the code is active right now")
-	earned = models.ManyToManyField(roster.models.Student, related_name = "achievements")
 	diamonds = models.PositiveSmallIntegerField(default = 1,
 			help_text = "Amount of diamonds for this achievement")
 
