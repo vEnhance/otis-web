@@ -160,11 +160,11 @@ class Student(models.Model):
 					num_uploads = Count('uploadedfile',
 						filter = Q(uploadedfile__benefactor = self.id)),
 					has_pset = Exists(
-						dashboard.models.PSetSubmission.objects.filter(
+						dashboard.models.PSet.objects.filter(
 							student=self,
 							unit=OuterRef('pk'))),
 					approved = Exists(
-						dashboard.models.PSetSubmission.objects.filter(
+						dashboard.models.PSet.objects.filter(
 							student=self,
 							unit=OuterRef('pk'),
 							approved=True)),
@@ -177,7 +177,7 @@ class Student(models.Model):
 					benefactor = self,
 					category = 'psets').exists()
 		else:
-			return dashboard.models.PSetSubmission.objects.filter(
+			return dashboard.models.PSet.objects.filter(
 					unit = unit,
 					student = self).exists()
 

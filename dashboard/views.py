@@ -71,7 +71,7 @@ class Meter:
 				unit = "◆", color = '#9c1421')
 
 def _get_meter_update(student: roster.models.Student):
-	pset_data = dashboard.models.PSetSubmission.objects\
+	pset_data = dashboard.models.PSet.objects\
 			.filter(student = student, approved = True, eligible = True)\
 			.aggregate(Sum('clubs'), Sum('hours'))
 	total_diamonds = dashboard.models.AchievementCode.objects\
@@ -138,18 +138,18 @@ def submit_pset(request, student_id) -> HttpResponse:
 	student = roster.utils.get_student(student_id)
 	roster.utils.check_can_view(request, student)
 	if request.method == 'POST':
-		form = forms.PSetSubmissionForm(request.POST, request.FILES)
+		form = forms.PSetForm(request.POST, request.FILES)
 	else:
-		form = forms.PSetSubmissionForm()
+		form = forms.PSetForm()
 
 	available = student.generate_curriculum_queryset().filter(has_pset = False)
 	form.fields['next_unit_to_unlock'].queryset = available
 	form.fields['unit'].queryset = available
 	if request.method == 'POST' and form.is_valid():
-		submission = form.save(commit=False)
-		if dashboard.models.PSetSubmission.objects.filter(
+		pset = form.save(commit=False)
+		if dashboard.models.PSet.objects.filter(
 				student = student,
-				unit = submission.unit).exists():
+				unit = pset.unit).exists():
 			messages.error(request,
 					"You have already submitted for this unit.")
 		else:
@@ -159,12 +159,12 @@ def submit_pset(request, student_id) -> HttpResponse:
 					category = 'psets',
 					description = '',
 					content = form.cleaned_data['content'],
-					unit = submission.unit,
+					unit = pset.unit,
 					)
 			f.save()
-			submission.student = student
-			submission.upload = f
-			submission.save()
+			pset.student = student
+			pset.upload = f
+			pset.save()
 			messages.success(request,
 					"The problem set is submitted successfully "
 					"and is pending review!")
@@ -174,11 +174,11 @@ def submit_pset(request, student_id) -> HttpResponse:
 			'title' : 'Ready to submit?',
 			'student' : student,
 			'pending_psets' : \
-					dashboard.models.PSetSubmission.objects\
+					dashboard.models.PSet.objects\
 					.filter(student = student, approved = False)\
 					.order_by('-upload__created_at'),
 			'approved_psets' : \
-					dashboard.models.PSetSubmission.objects\
+					dashboard.models.PSet.objects\
 					.filter(student = student, approved = True)\
 					.order_by('-upload__created_at'),
 			'form' : form,
@@ -377,7 +377,7 @@ class DownloadListView(LoginRequiredMixin, ListView):
 
 class PSetView(LoginRequiredMixin, DetailView):
 	template_name = 'dashboard/pset_list.html'
-	model = dashboard.models.PSetSubmission
+	model = dashboard.models.PSet
 
 class ProblemSuggestionCreate(LoginRequiredMixin, CreateView):
 	context_object_name = "problem_suggestion"

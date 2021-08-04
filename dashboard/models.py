@@ -66,7 +66,7 @@ class SemesterDownloadFile(models.Model):
 	class Meta:
 		ordering = ('-created_at',)
 
-class PSetSubmission(models.Model):
+class PSet(models.Model):
 	approved = models.BooleanField(
 			help_text = "Whether the problem set has been checked off",
 			default = False)
@@ -100,7 +100,7 @@ class PSetSubmission(models.Model):
 			help_text = "The unit you want to work on next (leave blank for any)",
 			on_delete = models.SET_NULL,
 			null = True, blank = True,
-			related_name = 'unblocking_submissions',
+			related_name = 'unblocking_psets',
 			)
 	special_notes = models.TextField(
 			help_text = "If there's anything you need to say before we proceed",

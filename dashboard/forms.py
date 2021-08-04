@@ -21,12 +21,12 @@ class ResolveSuggestionForm(forms.ModelForm):
 		widgets = {'reason' : forms.Textarea(attrs = {'cols':  30, 'rows' : 4}), }
 		help_texts = { 'reason' : '' }
 
-class PSetSubmissionForm(forms.ModelForm):
+class PSetForm(forms.ModelForm):
 	content = forms.FileField(help_text = "The file itself",
 			validators = [FileExtensionValidator(
 				allowed_extensions=['pdf','txt','tex','png','jpg'])])
 	class Meta:
-		model = dashboard.models.PSetSubmission
+		model = dashboard.models.PSet
 		fields = ('unit', 'hours', 'feedback', 'clubs',
 				'next_unit_to_unlock', 'special_notes',)
 	# TODO: restrict to units where the student

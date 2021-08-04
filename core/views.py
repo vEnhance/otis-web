@@ -42,7 +42,7 @@ def _get_from_google_storage(filename : str):
 def permitted(unit : Unit, request : HttpRequest, asking_solution : bool) -> bool:
 	if getattr(request.user, 'is_staff', False):
 		return True
-	elif dashboard.models.PSetSubmission.objects\
+	elif dashboard.models.PSet.objects\
 			.filter(student__user = request.user, unit = unit).exists():
 		return True
 	elif dashboard.models.UploadedFile.objects\

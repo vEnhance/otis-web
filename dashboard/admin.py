@@ -25,8 +25,8 @@ class SemesterDownloadFileAdmin(admin.ModelAdmin):
 	list_filter = ('semester',)
 	list_per_page = 30
 
-@admin.register(dashboard.models.PSetSubmission)
-class PSetSubmissionAdmin(admin.ModelAdmin):
+@admin.register(dashboard.models.PSet)
+class PSetAdmin(admin.ModelAdmin):
 	list_display = ('approved', 'student', 'unit', 'hours', 'clubs',)
 	search_fields = ('unit__group__name',
 			'student__user__first_name', 'student__user__last_name',
