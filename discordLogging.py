@@ -1,5 +1,6 @@
 from collections import OrderedDict
 from django.http import HttpRequest
+from typing import Dict, Any
 import pprint
 import logging
 import requests
@@ -87,12 +88,16 @@ class DiscordHandler(logging.Handler):
 				s += f'> **User** {getattr(request.user, "username", "wtf")}\n'
 			if request.method == 'POST':
 				# redact the token for evan's personal api
-				if 'token' in request.POST:
-					request.POST['token'] = '<redacted>'
+				d : Dict[str, Any] = {}
+				for k,v in request.POST.items():
+					if k == 'token':
+						d['token'] = '<redacted>'
+					else:
+						d[k] = v
 				s += r'POST data' + '\n'
 				s += r'```' + '\n'
 				pp = pprint.PrettyPrinter(indent = 2)
-				s += pp.pformat(request.POST)
+				s += pp.pformat(d)
 				s += r'```'
 			if request.FILES is not None and len(request.FILES) > 0:
 				s += f'Files included\n'
