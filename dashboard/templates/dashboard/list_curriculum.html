@@ -26,7 +26,7 @@ $("#hide-locked-units").click(function() {
 
 <table class="table curriculum">
 {% for row in curriculum %}
-<tr class="subject{{ row.unit.group.subject }}{% if row.is_complete %} unit-completed{% endif %}{% if not row.is_visible %} unit-locked{% endif %}">
+<tr class="subject{{ row.unit.group.subject }}{% if row.is_approved %} unit-completed{% endif %}{% if not row.is_visible %} unit-locked{% endif %}">
 	<td class="number">
 	{{ row.number }}
 	{% if row.is_approved %}
@@ -40,7 +40,7 @@ $("#hide-locked-units").click(function() {
 	{% elif semester.active %}
 		<span title="Locked unit">❓</span>
 	{% else %}
-		<span></span>
+		<span title="Inactive unit">✖️</span>
 	{% endif %}
 	</td>
 
