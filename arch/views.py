@@ -35,7 +35,7 @@ class ProblemObjectView:
 class HintList(LoginRequiredMixin, ListView):
 	context_object_name = "hint_list"
 	def get_queryset(self):
-		self.problem = models.Problem.objects.get(**self.kwargs)
+		self.problem = get_object_or_404(models.Problem, **self.kwargs)
 		return models.Hint.objects.filter(problem=self.problem).order_by('number')
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
