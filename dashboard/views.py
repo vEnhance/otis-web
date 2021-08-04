@@ -98,13 +98,10 @@ def portal(request, student_id) -> HttpResponse:
 			'diamonds' : Meter.DiamondMeter(total_diamonds),
 			'spades' : Meter.SpadeMeter(0), # TODO input value
 			}
-	level, wtf = dashboard.models.Level.objects.get_or_create(
-			number = sum(meter.level for meter in context['meters'].values())
-			)
-	if wtf is True:
-		level.name = student.user.username
-		level.save()
-	context['level'] = level
+	level_number = sum(meter.level for meter in context['meters'].values())
+	level = dashboard.models.Level.objects.filter(threshold__lte = level_number).order_by('threshold').first()
+	context['level_name'] = level.name if level is not None else 'Newcomer'
+	context['level_number'] = level_number
 	return render(request, "dashboard/portal.html", context)
 
 @login_required

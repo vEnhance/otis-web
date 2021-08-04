@@ -48,7 +48,6 @@ class UploadedFile(models.Model):
 		ordering = ('-created_at',)
 
 def download_file_name(instance, filename):
-	now = datetime.datetime.now()
 	return os.path.join("global", str(instance.semester.id), filename)
 
 class SemesterDownloadFile(models.Model):
@@ -154,7 +153,7 @@ class AchievementCode(models.Model):
 			help_text = "Amount of diamonds for this achievement")
 
 class Level(models.Model):
-	number = models.IntegerField(unique = True,
+	threshold = models.IntegerField(unique = True,
 			help_text = "The number of the level")
 	name = models.CharField(max_length = 128, unique = True,
 			help_text = "The name of the level")

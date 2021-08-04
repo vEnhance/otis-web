@@ -52,10 +52,10 @@ class LevelIEResource(resources.ModelResource):
 	class Meta:
 		skip_unchanged = True
 		model = dashboard.models.Level
-		fields = ('id', 'number', 'name')
+		fields = ('id', 'threshold', 'name')
 
 @admin.register(dashboard.models.Level)
 class LevelAdmin(ImportExportModelAdmin):
-	list_display = ('number', 'name',)
+	list_display = ('threshold', 'name',)
 	search_fields = ('name',)
 	resource_class = LevelIEResource
