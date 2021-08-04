@@ -1,6 +1,6 @@
 Django==3.2.5
 boto>=2.49.0
-crispy-bootstrap>=0.4
+crispy-bootstrap5>=0.4
 django-allauth>=0.45.0
 django-bootstrap-v5>=1.0.5
 django-crispy-forms>=1.11.1
