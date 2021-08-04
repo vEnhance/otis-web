@@ -3,10 +3,11 @@
 {% block meter-content %}
 <p>You gain
 <span style="color: {{ meters.diamonds.color }};">{{ meters.diamonds.unit }}</span>
-by finding metaphorical diamonds.</p>
+by finding metaphorical diamonds.
 {% if first_achievement %}
-<p>Here's one to start you off: <code>{{ first_achievement.code }}</code>.</p>
+Here's one to start: <code>{{ first_achievement.code }}</code>.
 {% endif %}
+</p>
 
 {% if achievements|length > 0 %}
 <div class="list-group">
@@ -26,5 +27,6 @@ by finding metaphorical diamonds.</p>
 {% else %}
 <p>You have no achievements yet.</p>
 {% endif  %}
+{% include "generic-form.html" with submit_name="♦️" %}
 
 {% endblock %}
