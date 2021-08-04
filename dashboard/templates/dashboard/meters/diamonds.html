@@ -5,5 +5,16 @@
 <span style="color: {{ meters.diamonds.color }};">{{ meters.diamonds.unit }}</span>
 by finding metaphorical diamonds.</p>
 
-{# TODO list obtained diamonds #}
+{% if student.achievements %}
+<ul class="list-group">
+	{% for achievement in student.achievements.objects.all %}
+		<li class="list-group-item">
+			<code>{{ achievement.code }}</code>
+		</li>
+	{% endfor %}
+</ul>
+{% else %}
+<p>You haven't submitted any units yet.</p>
+{% endif  %}
+
 {% endblock %}

@@ -140,8 +140,8 @@ def achievements(request, student_id) -> HttpResponse:
 			if student.achievements.filter(code=code).exists():
 				messages.warning(request, "You already earned this achievement!")
 			else:
-				achievement_code : dashboard.models.AchievementCode \
-						= get_object_or_404(dashboard.models.AchievementCode, code = code)
+				achievement_code : dashboard.models.Achievement \
+						= get_object_or_404(dashboard.models.Achievement, code = code)
 				student.achievements.add(achievement_code)
 				messages.success(request, "Achievement unlocked! 🎉")
 			form = forms.DiamondsForm()
@@ -152,9 +152,9 @@ def achievements(request, student_id) -> HttpResponse:
 			'form' : forms.DiamondsForm(),
 			}
 	try:
-		context['first_code'] = dashboard.models.AchievementCode.objects\
+		context['first_code'] = dashboard.models.Achievement.objects\
 				.get(pk=0).values('code', flat=True)[0]
-	except dashboard.models.AchievementCode.DoesNotExist:
+	except dashboard.models.Achievement.DoesNotExist:
 		pass
 	context.update(_get_meter_update(student))
 	return render(request, "dashboard/achievements.html", context)

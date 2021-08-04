@@ -151,7 +151,7 @@ class ProblemSuggestion(models.Model):
 def achievement_image_file_name(instance, filename):
 	return os.path.join('badges', instance.code + '_' + filename)
 
-class AchievementCode(models.Model):
+class Achievement(models.Model):
 	code = models.CharField(max_length = 96, unique = True)
 	image = models.FileField(upload_to = achievement_image_file_name,
 			help_text = "Image for the obtained badge", null = True, blank = True)

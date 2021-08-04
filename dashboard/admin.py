@@ -60,8 +60,8 @@ class LevelAdmin(ImportExportModelAdmin):
 	search_fields = ('name',)
 	resource_class = LevelIEResource
 
-@admin.register(dashboard.models.AchievementCode)
-class AchievementCodeAdmin(admin.ModelAdmin):
+@admin.register(dashboard.models.Achievement)
+class AchievementAdmin(admin.ModelAdmin):
 	list_display = ('code', 'diamonds', 'active', 'description', 'image')
 	search_fields = ('code', 'description')
 	list_filter = ('active',)
