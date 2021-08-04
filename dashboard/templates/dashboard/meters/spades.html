@@ -1,0 +1,12 @@
+{% extends "dashboard/meters/large.html" %}
+{% load humanize %}
+{% block meter-content %}
+<p>You gain
+<span style="color:{{meters.spades.color}};">{{ meters.spades.unit }}</span>
+by scoring points on
+<a href="https://web.evanchen.cc/usemo.html">USEMO</a> and OTIS quizzes.</p>
+
+{# TODO create quiz submission system #}
+{# TODO create usemo score import system #}
+
+{% endblock %}

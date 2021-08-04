@@ -11,15 +11,13 @@ granting you the title of <b>{{ level_name }}</b>.</p>
 Each statistic has value $\lfloor \sqrt{n} \rfloor$
 where $n$ is the number of points amassed towards that statistic.</p>
 
-
 <div class="accordion" id="accordion">
 	{% include "dashboard/meters/clubs.html" with meter=meters.clubs %}
 	{% include "dashboard/meters/hearts.html" with meter=meters.hearts %}
+	{% include "dashboard/meters/spades.html" with meter=meters.spades %}
+	{% include "dashboard/meters/diamonds.html" with meter=meters.diamonds %}
 </div>
 
-<p>You gain {{ meters.spades.unit }} by scoring points on
-<a href="https://web.evanchen.cc/usemo.html">USEMO</a> and OTIS quizzes.</p>
-
-<p>You gain {{ meters.diamonds.unit }} by finding hidden achievement codes.</p>
+{% include "generic-form.html" %}
 
 {% endblock %}

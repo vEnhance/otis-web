@@ -29,7 +29,6 @@ class PSetForm(forms.ModelForm):
 		model = dashboard.models.PSet
 		fields = ('unit', 'hours', 'feedback', 'clubs',
 				'next_unit_to_unlock', 'special_notes',)
-	# TODO: restrict to units where the student
-	# has not already submitted a problem set
-	# TODO move content to first field
-	# TODO change widgets
+
+class DiamondsForm(forms.Form):
+	code = forms.CharField(label = "♦️", max_length = 64, required = False)

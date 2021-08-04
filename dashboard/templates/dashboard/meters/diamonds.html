@@ -1,0 +1,9 @@
+{% extends "dashboard/meters/large.html" %}
+{% load humanize %}
+{% block meter-content %}
+<p>You gain
+<span style="color: {{ meters.diamonds.color }};">{{ meters.diamonds.unit }}</span>
+by finding metaphorical diamonds.</p>
+
+{# TODO list obtained diamonds #}
+{% endblock %}

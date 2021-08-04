@@ -7,10 +7,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models import Subquery, OuterRef, F, Q, Count, Sum
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.utils.timezone import now
+from django.views.decorators.http import require_POST
 from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from typing import Any, Dict, Optional
@@ -132,8 +133,16 @@ def achievements(request, student_id) -> HttpResponse:
 	roster.utils.check_can_view(request, student, delinquent_check = False)
 	if roster.utils.is_delinquent_locked(request, student):
 		return HttpResponseRedirect(reverse_lazy('invoice', args=(student_id,)))
+
+	if request.method == 'POST':
+		form = forms.DiamondsForm(request.POST)
+	else:
+		form = forms.DiamondsForm()
 	# semester = student.semester
-	context : Dict[str,Any] = {'student' : student}
+	context : Dict[str,Any] = {
+			'student' : student,
+			'form' : forms.DiamondsForm(),
+			}
 	context.update(_get_meter_update(student))
 	return render(request, "dashboard/achievements.html", context)
 
