@@ -1,16 +1,4 @@
-{% if full %}
-<hr />
-<h1 style="font-weight: bold; color: {{meter.color}}"><span style="font-size: 150%;">{{ meter.level }}</span>
-	{{ meter.name }} <span class="badge badge-dark">Total {{meter.value}}{{meter.unit}}</span></h1>
-{% endif %}
-<div style="position: relative; padding: 5px 9px;
-		{% if full %}
-			height : 36px;
-		{% else %}
-			height : 64px;
-		{% endif %}
-		"
-		class="{% if not full %}col-md-6{% endif %} col-12">
+<div style="position: relative; padding: 5px 9px; height : 64px;" class="col-md-6 col-12">
 	<div style="font-size:32px; position: absolute; top: -6px; left: -8px;">
 		{{ meter.emoji }}
 	</div>
@@ -21,11 +9,6 @@
 			{{ meter.excess }}{{ meter.unit }}
 		</div>
 	</div>
-	{% if full %}
-		<span style="position:absolute; right: 8px; text-align: right;" class="text-muted">
-			/ {{ meter.bar_max }}{{ meter.unit }}
-		</span>
-	{% else %}
 	<div style="position: relative;">
 		<span style="position:absolute; left: 0; text-align: left; color: {{ meter.color }};">
 			<big style="font-family: impact; font-weight: 900;">{{ meter.level }}</big>
@@ -35,13 +18,8 @@
 			/ {{ meter.bar_max }}{{ meter.unit }}
 		</span>
 	</div>
-	{% endif %}
 </div>
-{% if full %}
-<p>Your <strong style="color: {{meter.color}}">{{ meter.name }}</strong>
-will increase if you gain another
-<strong style="color: {{meter.color}}">{{ meter.needed }}{{ meter.unit }}</strong>.</p>
-{% endif %}
+
 {% comment %}
 vim: ft=htmldjango
 {% endcomment %}

@@ -1,4 +1,5 @@
 {% extends 'layout.html' %}
+{% load humanize %}
 {% load static %}
 {% block title %}Achievements{% endblock %}
 {% block layout-content %}
@@ -10,17 +11,37 @@ granting you the title of <b>{{ level_name }}</b>.</p>
 Each statistic has value $\lfloor \sqrt{n} \rfloor$
 where $n$ is the number of points amassed towards that statistic.</p>
 
-{% include "dashboard/meter.html" with meter=meters.clubs full=1 %}
-<p>You gain {{ meters.clubs.unit }} by solving problems on units.</p>
+<div class="accordion" id="accordion">
+	{% include "dashboard/meters/clubs.html" with meter=meters.clubs %}
+</div>
 
-{% include "dashboard/meter.html" with meter=meters.hearts full=1 %}
 <p>You gain {{ meters.hearts.unit }} by spending time units.</p>
+{% if psets %}
+	<table class="table table-sm">
+		<thead class="thead-dark">
+			<tr>
+				<th width="16%">{{ meters.hearts.unit }}</th>
+				<th width="42%">Unit</th>
+				<th width="42%">Timestamp</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for pset in psets %}
+				<tr>
+					<td style="color:{{ meter.hearts.color }};">+{{ pset.hours }}{{ meters.hearts.unit }}</td>
+					<td><a href="{{ pset.get_absolute_url }}">{{ pset.unit }}</a></td>
+					<td>{{ pset.upload.created_at|naturaltime }}</td>
+				</tr>
+			{% endfor %}
+	</table>
+	</table>
+{% else %}
+<p>You haven't submitted any units yet.</p>
+{% endif  %}
 
-{% include "dashboard/meter.html" with meter=meters.spades full=1 %}
 <p>You gain {{ meters.spades.unit }} by scoring points on
 <a href="https://web.evanchen.cc/usemo.html">USEMO</a> and OTIS quizzes.</p>
 
-{% include "dashboard/meter.html" with meter=meters.diamonds full=1 %}
 <p>You gain {{ meters.diamonds.unit }} by finding hidden achievement codes.</p>
 
 {% endblock %}

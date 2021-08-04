@@ -1,0 +1,44 @@
+<div class="accordion-item">
+	<h1 class="accordion-header" style="font-weight: bold; color: {{meter.color}}" id="heading{{meter.name}}">
+		<button class"accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#{{meter.name}}Meter" aria-expanded="false" aria-controls="#{{meter.name}}Meter">
+			<span style="font-size: 150%;">{{ meter.level }}</span>
+			{{ meter.name }}
+			<span class="badge badge-dark">
+				Total {{meter.value}}{{meter.unit}}
+			</span>
+		</button>
+	</h1>
+	<div id="{{meter.name}}Meter" class="according-collapse collapse show" aria-labelledby="heading{{meter.name}}">
+		<div class="accordion-body">
+			<div style="position: relative; padding: 5px 9px; height : 64px;"
+					class="col-12">
+				<div style="font-size:32px; position: absolute; top: -6px; left: -8px;">
+					{{ meter.emoji }}
+				</div>
+				<div class="progress" style="height: 24px;">
+					<div class="progress-bar"
+							style="width: {{ meter.percent }}%; background-color: {{ meter.color }};"
+						aria-valuenow="{{ meter.excess }}" aria-valuemin="0" aria-valuemax="{{ meter.bar_max }}">
+						{{ meter.excess }}{{ meter.unit }}
+					</div>
+				</div>
+				<span style="position:absolute; right: 8px; text-align: right;" class="text-muted">
+					/ {{ meter.bar_max }}{{ meter.unit }}
+				</span>
+			</div>
+			<p>
+				Your <strong style="color: {{meter.color}}">{{ meter.name }}</strong>
+				will increase if you gain another
+				<strong style="color: {{meter.color}}">{{ meter.needed }}{{ meter.unit }}</strong>.
+			</p>
+			<div>
+				{% block meter-content %}
+				{% endblock %}
+			</div>
+		</div>
+	</div>
+</div>
+
+{% comment %}
+vim: ft=htmldjango
+{% endcomment %}

@@ -8,6 +8,7 @@ import datetime
 from django.db import models
 from django.core.validators import FileExtensionValidator
 from django.contrib.auth import models as auth
+from django.urls import reverse_lazy
 
 def content_file_name(instance, filename):
 	now = datetime.datetime.now()
@@ -49,6 +50,8 @@ class UploadedFile(models.Model):
 
 def download_file_name(instance, filename):
 	return os.path.join("global", str(instance.semester.id), filename)
+def get_absolute_url(self):
+	return self.url
 
 class SemesterDownloadFile(models.Model):
 	semester = models.ForeignKey(core.models.Semester,
@@ -65,6 +68,8 @@ class SemesterDownloadFile(models.Model):
 		return os.path.basename(self.content.name)
 	class Meta:
 		ordering = ('-created_at',)
+	def get_absolute_url(self):
+		return self.content.url
 
 class PSet(models.Model):
 	approved = models.BooleanField(
@@ -107,6 +112,8 @@ class PSet(models.Model):
 			blank = True)
 	def __str__(self):
 		return f'{self.student.name} submits {self.unit}'
+	def get_absolute_url(self):
+		return reverse_lazy('pset', args=(self.pk,))
 
 class ProblemSuggestion(models.Model):
 	student = models.ForeignKey(roster.models.Student,

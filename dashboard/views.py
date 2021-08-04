@@ -71,9 +71,9 @@ class Meter:
 				unit = "◆", color = '#9c1421')
 
 def _get_meter_update(student: roster.models.Student):
-	pset_data = dashboard.models.PSet.objects\
-			.filter(student = student, approved = True, eligible = True)\
-			.aggregate(Sum('clubs'), Sum('hours'))
+	psets = dashboard.models.PSet.objects\
+			.filter(student = student, approved = True, eligible = True)
+	pset_data = psets.aggregate(Sum('clubs'), Sum('hours'))
 	total_diamonds = dashboard.models.AchievementCode.objects\
 			.filter(earned = student).aggregate(Sum('diamonds'))['diamonds__sum'] or 0
 	meters = {
@@ -87,6 +87,7 @@ def _get_meter_update(student: roster.models.Student):
 			.filter(threshold__lte = level_number).order_by('threshold').first()
 	level_name = level.name if level is not None else 'Initiate'
 	return {
+			'psets' : psets,
 			'pset_data' : pset_data,
 			'meters' : meters,
 			'level_number' : level_number,

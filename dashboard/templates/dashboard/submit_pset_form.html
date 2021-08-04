@@ -12,13 +12,14 @@
 
 {% if pending_psets %}
 <h2>Pending submissions</h2>
-<ul class="list-group">
+<div class="list-group">
 {% for pset in pending_psets %}
-	<li class="list-group-item">
-		<a href="{% url "pset" pset.pk %}">{{ pset.unit }}</a>, submitted {{ pset.upload.created_at|naturaltime }}
-	</li>
+	<a href="{{pset.get_absolute_url}}"
+		class="list-group-item list-group-item-action">
+		{{ pset.unit }}, submitted {{ pset.upload.created_at|naturaltime }}
+	</a>
 {% endfor %}
-</ul>
+</div>
 {% endif %}
 
 <h2>Submit new problem set</h2>
@@ -27,13 +28,14 @@
 
 <h2>Approved submissions</h2>
 {% if approved_psets %}
-<ul class="list-group">
+<div class="list-group">
 {% for pset in approved_psets %}
-	<li class="list-group-item">
-		<a href="{% url "pset" pset.pk %}">{{ pset.unit }}</a>, submitted {{ pset.upload.created_at|naturaltime }}
-	</li>
+	<a href="{{pset.get_absolute_url}}"
+		class="list-group-item list-group-item-action">
+		{{ pset.unit }}, submitted {{ pset.upload.created_at|naturaltime }}
+	</a>
 {% endfor %}
-</ul>
+</div>
 {% else %}
 <p>You haven't submitted any problem sets yet this year.</p>
 {% endif %}
