@@ -52,7 +52,7 @@ class Quiz(models.Model):
 	answer4 = models.IntegerField(help_text = "Answer to p4", default = 0)
 	answer5 = models.IntegerField(help_text = "Answer to p5", default = 0)
 
-class ExamSubmission(models.Model):
+class ExamAttempt(models.Model):
 	quiz = models.ForeignKey(Quiz,
 			on_delete = models.CASCADE,
 			help_text = "The quiz being submitted for")
