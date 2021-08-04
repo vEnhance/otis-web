@@ -227,7 +227,7 @@ LOGGING = {
 	'handlers' : {
 		'console' : {
 			'class' : 'logging.StreamHandler',
-			'level' : 'DEBUG' if DEBUG else 'INFO',
+			'level' : 'INFO',
 			'formatter' : 'verbose',
 			'filters' : ['filter_useless_404'],
 		},
