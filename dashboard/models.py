@@ -105,6 +105,8 @@ class PSet(models.Model):
 	special_notes = models.TextField(
 			help_text = "If there's anything you need to say before we proceed",
 			blank = True)
+	def __str__(self):
+		return f'{self.student.name} submits {self.unit}'
 
 class ProblemSuggestion(models.Model):
 	student = models.ForeignKey(roster.models.Student,
