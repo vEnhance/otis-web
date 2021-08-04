@@ -37,7 +37,7 @@ $("#hide-locked-units").click(function() {
 		<span title="Unit pending review">⏳</span>
 	{% elif row.is_current and semester.active %}
 		<span title="Current unit">▶️</span>
-	{% elif semester.active %}
+	{% elif not row.is_visible %}
 		<span title="Locked unit">❓</span>
 	{% else %}
 		<span title="Inactive unit">✖️</span>
