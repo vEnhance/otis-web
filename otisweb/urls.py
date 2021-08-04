@@ -5,6 +5,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.views.generic import RedirectView
 from django.views.generic.base import TemplateView
+import debug_toolbar
 
 from . import settings
 assert settings.MEDIA_URL is not None
@@ -17,6 +18,7 @@ urlpatterns = [
 	path(r'core/', include('core.urls')),
 	path(r'hijack/', include('hijack.urls')),
 	path(r'accounts/', include('allauth.urls')),
+	path(r'__debug__/', include(debug_toolbar.urls)),
 	path(r'robots.txt',
 		TemplateView.as_view(template_name='robots.txt', content_type='text/plain'),
 		),

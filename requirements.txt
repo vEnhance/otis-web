@@ -14,3 +14,4 @@ mysqlclient>=2.0.3
 wheel>=0.36.2
 python-dotenv>=0.17.1
 django-allauth>=0.45.0
+django-debug-toolbar>=3.2.1

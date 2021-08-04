@@ -47,6 +47,7 @@ INSTALLED_APPS = [
 	'django.contrib.sessions',
 	'django.contrib.sites',
 	'django.contrib.staticfiles',
+	'debug_toolbar',
 	'allauth',
 	'allauth.account',
 	'allauth.socialaccount',
@@ -63,6 +64,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+	'debug_toolbar.middleware.DebugToolbarMiddleware',
 	'django.middleware.security.SecurityMiddleware',
 	'django.contrib.sessions.middleware.SessionMiddleware',
 	'django.middleware.common.CommonMiddleware',
