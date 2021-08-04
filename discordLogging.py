@@ -86,13 +86,16 @@ class DiscordHandler(logging.Handler):
 			if request.user.is_authenticated:
 				s += f'> **User** {getattr(request.user, "username", "wtf")}\n'
 			if request.method == 'POST':
-				s += r'**POST data**' + '\n'
+				# redact the token for evan's personal api
+				if 'token' in request.POST:
+					request.POST['token'] = '<redacted>'
+				s += r'POST data' + '\n'
 				s += r'```' + '\n'
 				pp = pprint.PrettyPrinter(indent = 2)
 				s += pp.pformat(request.POST)
 				s += r'```'
 			if request.FILES is not None and len(request.FILES) > 0:
-				s += f'**Files included**\n'
+				s += f'Files included\n'
 				for name, fileobj in request.FILES.items():
 					s += f'> `{name}` ({fileobj.size} bytes, { fileobj.content_type })\n'
 			description_parts[':blue_heart: REQUEST :blue_heart:'] = s
