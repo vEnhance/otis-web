@@ -202,7 +202,6 @@ class Student(models.Model):
 			row['unit'] = unit
 			row['number'] = n
 			row['num_uploads'] = unit.num_uploads or 0
-			print(unit.__dict__)
 
 			row['is_submitted'] = unit.has_pset
 			row['is_current'] = unit.id in unlocked_units_ids
