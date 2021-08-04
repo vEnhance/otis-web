@@ -1,5 +1,5 @@
 {% extends 'layout.html' %}
-{% block title %}Submit Problem Set{% endblock %}
+{% block title %}Problem Sets{% endblock %}
 {% block layout-content %}
 
 <p><a href="{% url "portal" student.id %}">
@@ -9,7 +9,33 @@
 	please use the <a href="{% url "suggest-new" student.id %}">problem suggestion form</a>.
 </div>
 
+{% if pending_psets %}
+<h2>Pending submissions</h2>
+<ul class="list-group">
+{% for pset in pending_psets %}
+	<li class="list-group-item">
+		{{ pset.unit }}, submitted {{ pset.upload.created_at }}
+	</li>
+{% endfor %}
+</ul>
+{% endif %}
+
+<h2>Submit new problem set</h2>
+
 {% include "generic-form.html" %}
+
+<h2>Approved submissions</h2>
+{% if approved_psets %}
+<ul class="list-group">
+{% for pset in approved_psets %}
+	<li class="list-group-item">
+		{{ pset.unit }}, submitted {{ pset.upload.created_at }}
+	</li>
+{% endfor %}
+</ul>
+{% else %}
+<p>You haven't submitted any problem sets yet this year.</p>
+{% endif %}
 
 {% endblock %}
 

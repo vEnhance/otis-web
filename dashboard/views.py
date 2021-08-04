@@ -157,9 +157,13 @@ def submit_pset(request, student_id) -> HttpResponse:
 	context = {
 			'title' : 'Ready to submit?',
 			'student' : student,
-			'past_submissions' : \
+			'pending_psets' : \
 					dashboard.models.PSetSubmission.objects\
-					.filter(student = student)\
+					.filter(student = student, approved = False)\
+					.order_by('-upload__created_at'),
+			'approved_psets' : \
+					dashboard.models.PSetSubmission.objects\
+					.filter(student = student, approved = True)\
 					.order_by('-upload__created_at'),
 			'form' : form,
 			}
