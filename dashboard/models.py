@@ -112,6 +112,9 @@ class PSet(models.Model):
 	special_notes = models.TextField(
 			help_text = "If there's anything you need to say before we proceed",
 			blank = True)
+	instructor_comments = models.TextField(
+			help_text = "Any comment from the instructor about the submission",
+			blank = True)
 	def __str__(self):
 		return f'{self.student.name} submits {self.unit}'
 	def get_absolute_url(self):
