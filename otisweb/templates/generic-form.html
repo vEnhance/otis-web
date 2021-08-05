@@ -18,20 +18,16 @@
 </div>
 {% endif %}
 
-	<table class="table form-table">
-		{% for hidden in form.hidden_fields %}
-		{{ hidden }}
-		{% endfor %}
+	{% for hidden in form.hidden_fields %}
+	{{ hidden }}
+	{% endfor %}
 
-		{% for field in form.visible_fields %}
-		<tr><td>{{ field|as_crispy_field }}</td></tr>
-		{% endfor %}
+	{% for field in form.visible_fields %}
+	{{ field|as_crispy_field }}
+	{% endfor %}
 
-		<tr><td>
-			<button type="submit"
-				class="btn {{ btn_class|default:"btn-success"}}">
-				{{ submit_name|default:"Submit" }}
-			</button>
-		</td></tr>
-	</table>
+	<button type="submit"
+		class="btn {{ btn_class|default:"btn-success"}}">
+		{{ submit_name|default:"Submit" }}
+	</button>
 </form>
