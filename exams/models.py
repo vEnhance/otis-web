@@ -59,11 +59,11 @@ class ExamAttempt(models.Model):
 	student = models.ForeignKey(roster.models.Student,
 			on_delete = models.CASCADE,
 			help_text = "The student taking the exam")
-	guess1 = models.IntegerField(help_text = "Guess for p1", default = 0)
-	guess2 = models.IntegerField(help_text = "Guess for p2", default = 0)
-	guess3 = models.IntegerField(help_text = "Guess for p3", default = 0)
-	guess4 = models.IntegerField(help_text = "Guess for p4", default = 0)
-	guess5 = models.IntegerField(help_text = "Guess for p5", default = 0)
+	guess1 = models.IntegerField(verbose_name = "Problem 1 response", default = 0)
+	guess2 = models.IntegerField(verbose_name = "Problem 2 response", default = 0)
+	guess3 = models.IntegerField(verbose_name = "Problem 3 response", default = 0)
+	guess4 = models.IntegerField(verbose_name = "Problem 4 response", default = 0)
+	guess5 = models.IntegerField(verbose_name = "Problem 5 response", default = 0)
 	submitted = models.DateTimeField(help_text = "When the quiz was submitted",
 			auto_now_add = True)
 	class Meta:
