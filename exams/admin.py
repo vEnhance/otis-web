@@ -10,7 +10,11 @@ class PracticeExamIEResource(resources.ModelResource):
 	class Meta:
 		skip_unchanged = True
 		model = exams.models.PracticeExam
-		fields = ('family', 'is_test', 'number', 'pdf_url', 'id', 'start_date', 'due_date',)
+		fields = ('family', 'is_test', 'number', 'pdf_url', 'id',
+				'start_date', 'due_date',
+				'answer1', 'answer2', 'answer3', 'answer4', 'answer5',
+				'url1', 'url2', 'url3', 'url4', 'url5',
+				)
 
 @admin.register(exams.models.PracticeExam)
 class PracticeExamAdmin(ImportExportModelAdmin):
