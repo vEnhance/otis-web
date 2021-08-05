@@ -48,7 +48,7 @@ class Semester(models.Model):
 	def __str__(self):
 		return self.name
 	def get_absolute_url(self):
-		return reverse_lazy("past", args=(self.id,))
+		return reverse_lazy("past", args=(self.pk,))
 
 class UnitGroup(models.Model):
 	"""Represents an entire group of units with the same name,
@@ -122,4 +122,4 @@ class Unit(models.Model):
 		return self.code + '-tex-' + self.group.slug + '.tex'
 
 	def get_absolute_url(self):
-		return reverse("view-problems", args=(self.id,))
+		return reverse("view-problems", args=(self.pk,))
