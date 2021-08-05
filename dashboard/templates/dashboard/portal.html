@@ -253,12 +253,8 @@ handout on olympiad strategy.</a></p>
 
 <h2>Quizzes</h2>
 {% include "dashboard/list_exam.html" with exams=quizzes %}
-<p><a href="https://www.dropbox.com/s/j2r3gzhuljnqaih/short.pdf?dl=1">Link to short-answer forms.</a>
-Submit these to <a href="https://www.gradescope.com" target="_blank">GradeScope</a>,
-unless otherwise specified.
-See the syllabus for full instructions.</p>
-{% else %}
 
+{% else %}
 <p>This page from {{ semester }} is now archived.
 Thanks for playing.</p>
 
@@ -266,7 +262,6 @@ Thanks for playing.</p>
 
 {% if semester.active %}
 <hr />
-
 <h2>Calendar</h2>
 <p> Be sure to check that the time zones display correctly!</p>
 <p>You can also open these in a new window:</p>
@@ -282,7 +277,6 @@ Thanks for playing.</p>
 		OTIS calendar (no meetings)</a>
 	</li>
 </ul>
-
 <iframe src="{{ student.calendar_url }}" style="border-width:0" width="520" height="600" frameborder="0" scrolling="no"></iframe>
 {% endif %}
 
