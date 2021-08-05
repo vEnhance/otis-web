@@ -99,7 +99,7 @@ def _get_meter_update(student: roster.models.Student):
 	level_number = sum(meter.level for meter in meters.values())
 	level = dashboard.models.Level.objects\
 			.filter(threshold__lte = level_number).order_by('threshold').first()
-	level_name = level.name if level is not None else 'Starter'
+	level_name = level.name if level is not None else 'No Level'
 	return {
 			'psets' : psets,
 			'pset_data' : pset_data,
