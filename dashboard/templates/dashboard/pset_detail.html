@@ -1,8 +1,43 @@
 {% extends 'layout.html' %}
 {% block title %}Submission for {{ pset.upload.unit }}{% endblock %}
 {% block layout-content %}
+
+{% if pset.approved %}
+<div class="alert alert-success">
+	{% if pset.instructor_comments %}
+	You're all set. Here are instructor comments:
+	<hr />
+	<div style="white-space: pre;">{{ pset.instructor_comments }}</div>
+	{% else %}
+	This unit submission was approved.
+	{% endif %}
+</div>
+{% else %}
+<div class="alert alert-primary">
+	This unit submission is still pending approval from your instructor.
+</div>
+{% endif %}
 <ul>
-	<li>Submitted: </li>
-	<li>Submitted: </li>
+	<li>Unit: <a href="{% url "view-problems" pset.unit.pk %}">{{ pset.unit }}</a>
+		<ul><li><a href="{% url "view-problems" pset.unit.pk %}">Solutions</a></li></ul>
+	</li>
+	<li>Submitted: {{ pset.upload.created_at }}</li>
+	<ul>
+		{% if pset.clubs is not None %}
+		<li>Clubs: {{ pset.clubs }}♣ </li>
+		{% endif %}
+		{% if pset.hours is not None %}
+		<li>Hours: {{ pset.hours }}♥ </li>
+		{% endif %}
+	</ul>
+	{% if pset.feedback %}
+	<li>Your comments: <div><pre>{{ pset.feedback }}</pre></div></li>
+	{% endif %}
+	{% if pset.special_notes %}
+	<li>Your special notes: <div><pre>{{ pset.special_notes }}</pre></div></li>
+	{% endif %}
 </ul>
+
+<p><a href="{{ pset.upload.url }}">Download your submission.</a></p>
+<iframe width="100%" height="200px" src="{{pset.upload.url}}"></iframe>
 {% endblock %}
