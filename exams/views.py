@@ -21,6 +21,9 @@ def quiz(request : HttpRequest, student_id : int, pk : int) -> HttpResponse:
 	if not quiz.started:
 		return HttpResponseForbidden("You can't start this quiz")
 
+	if student.semester.exam_family != quiz.family:
+		return HttpResponseForbidden("You can't access this quiz.")
+
 	attempt : Optional[exams.models.ExamAttempt] = None
 	try:
 		attempt = exams.models.ExamAttempt.objects.get(student=student, quiz=pk)
@@ -35,29 +38,39 @@ def quiz(request : HttpRequest, student_id : int, pk : int) -> HttpResponse:
 				assert attempt is not None
 				attempt.quiz = quiz
 				attempt.student = student
-				attempt.save()
-				context['finished'] = True
-			else:
-				context['finished'] = False
+		else:
+			form = ExamAttemptForm()
+		context['form'] = form
 	else:
-		context['finished'] = True
 		if request.method == 'POST':
 			return HttpResponseForbidden('You already submitted this quiz')
 
 	if attempt is not None:
-		form = ExamAttemptForm(instance = attempt)
+		context['attempt'] = attempt
+		dummy_form = ExamAttemptForm(instance = attempt)
 		for i in range(1,6):
-			form.fields[f'guess{i}'].disabled = True
-			guess = getattr(attempt, f'guess{i}')
-			accepted_str = getattr(quiz, f'answer{i}', '')
-			accepted = [int(_) for _ in accepted_str]
-	elif request.method != 'POST':
-		form = ExamAttemptForm()
-		for i in range(1,6):
-			form.fields[f'guess{i}'].min_value = -10**9
-			form.fields[f'guess{i}'].max_value = 10**9
+			dummy_form.fields[f'guess{i}'].disabled = True
+		context['rows'] = []
 
-	context['form'] = form
+		score = 0
+		for i in range(1,6):
+			field = dummy_form.visible_fields()[i-1]
+			guess = getattr(attempt, f'guess{i}')
+			accepted = getattr(quiz, f'answer{i}')
+			correct = guess in [int(_) for _ in accepted.split(',') if _]
+			context['rows'].append(
+					{ 'field' : field,
+						'accepted' : accepted.replace(',', ' '),
+						'correct' : correct,
+						'url' : getattr(quiz, f'url{i}', None)
+						})
+			if correct:
+				score += 1
+
+			if attempt.score != score:
+				attempt.score = score
+				attempt.save()
+
 	context['quiz'] = quiz
 	context['student'] = student
 	return render(request, 'exams/quiz.html', context)

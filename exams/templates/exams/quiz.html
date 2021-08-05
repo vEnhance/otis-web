@@ -13,13 +13,29 @@
 <h2>Download problems</h2>
 <a href=" {{quiz.pdf_url}}">Download problems file</a>
 
-<hr />
 
-{% if finished %}
-	<h2>Your answers</h2>
-	{{ form|crispy }}
+{% if attempt %}
+	<hr />
+	<h1>Score: {{ attempt.score }}</h1>
+	<div class="list-group row">
+		{% for row in rows %}
+			<div class="list-group-item" style="background-color:
+					{% if row.correct %}#e5ffe5{% else %}#ffe5e5{% endif %}";>
+				<div class="col-12 col-md-5" style="display:inline-block;">
+					{{ row.field|as_crispy_field }}
+				</div>
+				<div class="d-none d-md-inline-block col-md-1">
+				</div>
+				<div class="col-12 col-md-5" style="display:inline-block; vertical-align: top;">
+					<p>Answers: <b>{{ row.accepted }}</b></p>
+					<p><a target="_top" href="{{ row.url }}">View solution</a></p>
+				</div>
+			</div>
+		{% endfor %}
+	</div>
 {% elif not quiz.overdue %}
-	<h2>Submit answers</h2>
+	<hr />
+	<h1>Submit answers</h1>
 	<p>Enter your responses below. Each answer is an integer.</p>
 	<p>You should enforce a time limit yourself; the website will not do so.</p>
 	{% include "generic-form.html" %}
@@ -29,22 +45,17 @@
 		}
 	</script>
 {% else %}
-	<p>You did not attempt this quiz before the deadline of {{ quiz.due_date }}.</p>
+	<hr />
+	<h2>Read solutions</h2>
+	<p>The quiz deadline has passed, so you can't submit,
+		but you can read the solutions here.</p>
+	<div class="list-group">
+		<a href="{{ quiz.url1 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}1</a>
+		<a href="{{ quiz.url2 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}2</a>
+		<a href="{{ quiz.url3 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}3</a>
+		<a href="{{ quiz.url4 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}4</a>
+		<a href="{{ quiz.url5 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}5</a>
+	</div>
 {% endif %}
-
-{% if quiz.overdue or finished %}
-<hr />
-<h2>Solutions</h2>
-
-<div class="list-group">
-	<a href="{{ quiz.url1 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}1</a>
-	<a href="{{ quiz.url2 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}2</a>
-	<a href="{{ quiz.url3 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}3</a>
-	<a href="{{ quiz.url4 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}4</a>
-	<a href="{{ quiz.url5 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}5</a>
-</div>
-
-{% endif %}
-
 
 {% endblock %}

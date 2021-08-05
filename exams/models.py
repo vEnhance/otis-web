@@ -78,6 +78,8 @@ class ExamAttempt(models.Model):
 	quiz = models.ForeignKey(PracticeExam,
 			on_delete = models.CASCADE,
 			help_text = "The quiz being submitted for")
+	score = models.SmallIntegerField(null = True, blank = True,
+			help_text = "The number of correct answers")
 	student = models.ForeignKey(roster.models.Student,
 			on_delete = models.CASCADE,
 			help_text = "The student taking the exam")
