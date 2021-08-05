@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
+
 from __future__ import unicode_literals
 
 import datetime
 import os
 
+import core.models
+import roster.models
 from django.contrib.auth import models as auth
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.urls import reverse_lazy
-
-import core.models
-import roster.models
 
 
 def content_file_name(instance, filename):
@@ -179,5 +179,4 @@ class Level(models.Model):
 	name = models.CharField(max_length = 128, unique = True,
 			help_text = "The name of the level")
 	def __str__(self):
-		return f'Level {{number}}: {{name}}'
-
+		return f'Level {self.threshold}: {self.name}'
