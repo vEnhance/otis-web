@@ -2,9 +2,12 @@
 Django settings for otisweb project.
 """
 
+import logging
 import os
 from pathlib import Path
 
+import discordLogging  # typing: ignore
+import import_export.tmp_storages
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).parent.parent.absolute()
@@ -93,8 +96,6 @@ TEMPLATES = [
 		'debug' : not PRODUCTION,
 		},
 	},
-
-
 ]
 
 WSGI_APPLICATION = 'otisweb.wsgi.application'
@@ -174,7 +175,6 @@ if PRODUCTION:
 	assert STATIC_URL is not None
 	assert GS_BUCKET_NAME is not None
 	assert MEDIA_URL is not None
-	import import_export.tmp_storages
 	IMPORT_EXPORT_TMP_STORAGE_CLASS = import_export.tmp_storages.CacheStorage
 	SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 	assert SECRET_KEY is not None
@@ -191,10 +191,7 @@ INVOICE_HASH_KEY = os.getenv("INVOICE_HASH_KEY", "evan_chen_is_still_really_cool
 UNIT_HASH_KEY = os.getenv("UNIT_HASH_KEY", "look_at_me_im_a_cute_kitten")
 API_TARGET_HASH = os.getenv("API_TARGET_HASH", '1c3592aa9241522fea1dd572c43c192a277e832dcd1ae63adfe069cb05624ead')
 
-import logging
-from typing import Tuple
 
-import discordLogging  # typing: ignore
 
 
 def filter_useless_404(record : logging.LogRecord) -> bool:
@@ -217,7 +214,7 @@ LOGGING = {
 		'verbose': {
 			'format': '[{levelname}] {asctime} {module} {name}\n{message}\n',
 			'style': '{',
-        },
+		},
 	},
 	'filters' : {
 		'filter_useless_404' : {
