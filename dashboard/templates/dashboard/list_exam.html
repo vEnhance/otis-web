@@ -12,30 +12,28 @@
 				{% endif %}
 			{% endspaceless %}
 		</td>
-		{% if exam.started %}
-			<td>
-				{% if exam.is_test and exam.started %}
-					<a href="{{exam.get_absolute_url}}">
-						{{exam}}
-					</a>
-				{% elif not exam.is_test and exam.started %}
-					<a href="{% url "quiz" student.pk exam.pk %}">
-						{{exam}}
-					</a>
-				{% else %}
-					<span class="text-muted">
-						{{ exam}}
-					</span>
-				{% endif %}
-			</td>
-		{% endif %}
+		<td>
+			{% if exam.is_test and exam.started %}
+				<a href="{{exam.get_absolute_url}}">
+					{{exam}}
+				</a>
+			{% elif not exam.is_test and exam.started %}
+				<a href="{% url "quiz" student.pk exam.pk %}">
+					{{exam}}
+				</a>
+			{% else %}
+				<span class="text-muted">
+					{{ exam }}
+				</span>
+			{% endif %}
+		</td>
 
 		{% if exam.overdue %}
 			<td>Ended {{ exam.due_date|date:"DATE_FORMAT" }}</td>
 		{% elif exam.started %}
 			<td>Due {{ exam.due_date|date:"DATE_FORMAT" }}</td>
 		{% else %}
-			<td>{{ exam.start_date|date:"DATE_FORMAT" }} &ndash; {{ exam.due_date|date:"DATE_FORMAT" }}</td>
+			<td>Open {{ exam.start_date|date:"DATE_FORMAT" }} &ndash; {{ exam.due_date|date:"DATE_FORMAT" }}</td>
 		{% endif %}
 	</tr>
 	{% endfor %}
