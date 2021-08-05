@@ -1,7 +1,8 @@
 from __future__ import unicode_literals
 
 import os
-from datetime import datetime, timedelta
+from datetime import timedelta
+from typing import Callable
 
 import core
 import core.models
@@ -39,7 +40,7 @@ class Assistant(models.Model):
 	def __str__(self):
 		return self.name
 	def student_count(self):
-		return self.student_set.count()
+		return self.student_set.count() # type: ignore
 
 class Student(models.Model):
 	"""This is really a pair of a user and a semester (with a display name),
@@ -80,6 +81,7 @@ class Student(models.Model):
 				("P", "Phantom"),
 				),
 			help_text = "The track that the student is enrolled in for this semester.")
+
 	legit = models.BooleanField(default = True,
 			help_text = "Whether this student is still active. "
 			"Set to false for dummy accounts and the like. "
@@ -91,6 +93,7 @@ class Student(models.Model):
 			blank = True)
 
 	id: int
+	invoice : 'Invoice'
 
 	def __str__(self):
 		return f"{self.name} ({self.semester})"
@@ -109,6 +112,7 @@ class Student(models.Model):
 		if self.user: return self.user.get_full_name() or self.user.username
 		else: return "?"
 
+	get_track_display : Callable[[], str]
 	@property
 	def get_track(self):
 		if self.assistant is None:
@@ -117,25 +121,10 @@ class Student(models.Model):
 			return self.get_track_display() \
 					+ " + " + self.assistant.shortname
 
-	def is_taught_by(self, user):
-		"""Checks whether the specified user
-		is not the same as the student,
-		but has permission to view and edit the student's files etc.
-		(This means the user is either an assistant for that student
-		or has staff privileges.)"""
-		return user.is_staff \
-				or (self.assistant is not None and self.assistant.user == user) \
-				or (self.unlisted_assistants.filter(user=user).exists())
-
-	def can_view_by(self, user):
-		"""Checks whether the specified user
-		is either same as the student,
-		or is an instructor for that student."""
-		return self.user == user or self.is_taught_by(user)
 	class Meta:
 		unique_together = ('user', 'semester',)
 		ordering = ('semester', '-legit', 'track', 'user__first_name', 'user__last_name')
-	
+
 	@property
 	def meets_evan(self):
 		return (self.track == "A" or self.track == "B") and self.legit
@@ -242,6 +231,8 @@ class Student(models.Model):
 			invoice = self.invoice
 		except ObjectDoesNotExist:
 			return 0
+
+		assert invoice is not None
 		if invoice.total_owed <= 0:
 			return 0
 
@@ -266,12 +257,14 @@ class Student(models.Model):
 				return 6
 			elif d < timedelta(days = 7):
 				return 5
-
 		return 4
 
 	@property
 	def is_payment_locked(self):
 		return self.payment_status % 4 == 3
+	@property
+	def is_delinquent(self):
+		return self.is_payment_locked and self.invoice.forgive is False
 
 
 class Invoice(models.Model):
@@ -299,7 +292,7 @@ class Invoice(models.Model):
 			help_text="When switched on, won't hard-lock delinquents.")
 
 	def __str__(self):
-		return f"Invoice {self.id or 0}"
+		return f"Invoice {self.pk or 0}"
 
 	@property
 	def prep_rate(self):
@@ -376,13 +369,12 @@ class UnitInquiry(models.Model):
 
 	def __str__(self):
 		return self.action_type + " " + str(self.unit)
-	
+
 	class Meta:
 		ordering = ('-created_at',)
 
 
 def content_file_name(instance, filename):
-	now = datetime.now()
 	return os.path.join("agreement",
 			str(instance.container.id),
 			instance.user.username + '_' + filename)

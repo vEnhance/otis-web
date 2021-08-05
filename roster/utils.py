@@ -1,6 +1,9 @@
+from typing import Tuple
+
+from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
-from django.http import Http404
+from django.http.request import HttpRequest
 from django.shortcuts import get_object_or_404
 
 from . import models
@@ -24,24 +27,44 @@ def get_visible_students(user, current = True):
 		queryset = models.Student.objects.all()
 	return get_visible_from_queryset(user, queryset)
 
-def check_can_view(request, student, delinquent_check = True):
-	if not student.can_view_by(request.user):
-		raise PermissionDenied(f"{request.user} cannot view this student")
-	if delinquent_check is True and is_delinquent_locked(request, student):
-		raise PermissionDenied("Missing payment permission error")
+def get_student_by_id(
+		request : HttpRequest,
+		student_id : int,
+		requires_edit : bool = False,
+		payment_exempt : bool = False,
+		) -> models.Student:
+	"""Returns an ordered pair containing a Student object and
+	a boolean indicating whether editing is allowed (is instructor)."""
 
-def is_delinquent_locked(request, student):
-	return not request.user.is_staff \
-			and student.is_payment_locked \
-			and student.invoice.forgive is False
-			# student.invoice must exist if student.is_payment_locked is True
+	student = get_object_or_404(models.Student.objects, id=student_id)
 
-def check_taught_by(request, student):
-	if not student.is_taught_by(request.user):
-		raise PermissionDenied(f"{request.user} cannot edit this student")
+	if not isinstance(request.user, User):
+		raise PermissionDenied("Authentication is needed, how did you even get here?")
 
-def get_student(student_id):
-	return get_object_or_404(models.Student.objects, id=student_id)
+	if payment_exempt is False and student.is_delinquent and not request.user.is_staff:
+		raise PermissionDenied("Payment needs to be processed before this page can be used")
+
+	is_instructor = can_edit(request, student)
+	if requires_edit is True and not is_instructor:
+		raise PermissionDenied("Staff member doesn't teach this student")
+
+	if not can_view(request, student):
+		raise PermissionDenied("This student is not viewable to the logged in user")
+
+	return student
+
+def can_view(request, student):
+	return request.user == student.user or can_edit(request, student)
+def can_edit(request, student):
+	if not request.user.is_authenticated:
+		raise PermissionDenied("Need login")
+	assert isinstance(request.user, User)
+	if request.user.is_superuser:
+		return True
+	return request.user.is_staff and (
+			(student.assistant is not None and student.assistant.user == request.user)
+			or (student.unlisted_assistants.filter(user=request.user).exists())
+			)
 
 def infer_student(request):
 	return get_object_or_404(models.Student.objects,

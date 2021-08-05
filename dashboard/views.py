@@ -3,12 +3,11 @@
 from __future__ import unicode_literals
 
 from datetime import timedelta
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 import core.models
 import exams.models
 import roster.models
-import roster.utils
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
@@ -16,11 +15,13 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count, F, OuterRef, Q, Subquery, Sum
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect  # NOQA
+from django.http.request import HttpRequest
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
 from django.utils.timezone import now
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
+from roster.utils import can_edit, can_view, get_student_by_id, get_visible_students  # NOQA
 
 import dashboard.models
 
@@ -110,9 +111,8 @@ def _get_meter_update(student: roster.models.Student):
 
 @login_required
 def portal(request, student_id) -> HttpResponse:
-	student = roster.utils.get_student(student_id)
-	roster.utils.check_can_view(request, student, delinquent_check = False)
-	if roster.utils.is_delinquent_locked(request, student):
+	student = get_student_by_id(request, student_id, payment_exempt = True)
+	if not request.user.is_staff and student.is_delinquent:
 		return HttpResponseRedirect(reverse_lazy('invoice', args=(student_id,)))
 	semester = student.semester
 
@@ -125,7 +125,7 @@ def portal(request, student_id) -> HttpResponse:
 	context['student'] = student
 	context['semester'] = semester
 	context['suggestions'] = list(suggestions)
-	context['omniscient'] = student.is_taught_by(request.user)
+	context['omniscient'] = can_edit(request, student)
 	context['curriculum'] = student.generate_curriculum_rows(
 			omniscient = context['omniscient'])
 	context['tests'] = exams.models.PracticeExam.objects.filter(
@@ -139,8 +139,7 @@ def portal(request, student_id) -> HttpResponse:
 
 @login_required
 def achievements(request, student_id) -> HttpResponse:
-	student = roster.utils.get_student(student_id)
-	roster.utils.check_can_view(request, student)
+	student = get_student_by_id(request, student_id)
 	context : Dict[str,Any] = {
 			'student' : student,
 			'form' : forms.DiamondsForm(),
@@ -169,8 +168,7 @@ def achievements(request, student_id) -> HttpResponse:
 
 @login_required
 def submit_pset(request, student_id) -> HttpResponse:
-	student = roster.utils.get_student(student_id)
-	roster.utils.check_can_view(request, student)
+	student = get_student_by_id(request, student_id)
 	if request.method == 'POST':
 		form = forms.PSetForm(request.POST, request.FILES)
 	else:
@@ -221,16 +219,10 @@ def submit_pset(request, student_id) -> HttpResponse:
 
 @login_required
 def uploads(request, student_id, unit_id) -> HttpResponse:
-	student = roster.utils.get_student(student_id)
-	roster.utils.check_can_view(request, student)
-	if unit_id != "0":
-		unit : Optional[core.models.Unit] = get_object_or_404(core.models.Unit.objects, id = unit_id)
-	else:
-		unit = None
+	student = get_student_by_id(request, student_id)
+	unit = get_object_or_404(core.models.Unit.objects, id = unit_id)
 	uploads = dashboard.models.UploadedFile.objects.filter(benefactor=student, unit=unit)
-	if unit is not None \
-			and not student.check_unit_unlocked(unit) \
-			and not uploads.exists():
+	if not student.check_unit_unlocked(unit) and not uploads.exists():
 		raise PermissionDenied("This unit is not unlocked yet")
 
 	form = None
@@ -258,8 +250,7 @@ def uploads(request, student_id, unit_id) -> HttpResponse:
 
 @login_required
 def index(request) -> HttpResponse:
-	students = roster.utils.get_visible_students(
-			request.user, current=True)
+	students = get_visible_students(request.user, current=True)
 	if len(students) == 1: # unique match
 		return HttpResponseRedirect(\
 				reverse("portal", args=(students[0].id,)))
@@ -276,8 +267,7 @@ def index(request) -> HttpResponse:
 
 @login_required
 def past(request, semester = None):
-	students = roster.utils.get_visible_students(
-			request.user, current=False)
+	students = get_visible_students(request.user, current=False)
 	if semester is None:
 		students = students.order_by('-semester',
 				'user__first_name', 'user__last_name')[0:256]
@@ -287,6 +277,7 @@ def past(request, semester = None):
 	context['title'] = "Previous Semester Listing"
 	context['students'] = students
 	context['stulist_show_semester'] = True
+	context['past'] = True
 	return render(request, "dashboard/stulist.html", context)
 
 class UpdateFile(LoginRequiredMixin, UpdateView):
@@ -378,8 +369,7 @@ def idlewarn(request):
 			.order_by('-created_at')\
 			.values('created_at')[:1]
 
-	context['students'] = roster.utils\
-			.get_visible_students(request.user)\
+	context['students'] = get_visible_students(request.user)\
 			.filter(legit=True)\
 			.annotate(latest_pset=Subquery(newest))\
 			.order_by('latest_pset')
@@ -391,8 +381,7 @@ def leaderboard(request):
 	context = {}
 	context['title'] = 'Leader-board'
 
-	context['students'] = roster.utils\
-			.get_visible_students(request.user)\
+	context['students'] = get_visible_students(request.user)\
 			.filter(legit=True)\
 			.annotate(num_psets = Count('uploadedfile__unit',
 				filter=Q(uploadedfile__category='psets'), distinct=True))\
@@ -403,35 +392,40 @@ def leaderboard(request):
 
 class DownloadList(LoginRequiredMixin, ListView):
 	template_name = 'dashboard/download_list.html'
-
 	def get_queryset(self):
-		student = get_object_or_404(roster.models.Student, id=self.kwargs['pk'])
-		roster.utils.check_can_view(self.request, student)
+		student = get_student_by_id(self.request, self.kwargs['pk'])
 		return dashboard.models.SemesterDownloadFile.objects.filter(semester = student.semester)
 
 class PSetDetail(LoginRequiredMixin, DetailView):
 	template_name = 'dashboard/pset_detail.html'
 	model = dashboard.models.PSet
 	object_name = 'pset'
+	def dispatch(self, request : HttpRequest, *args, **kwargs):
+		pset = self.get_object(*args, **kwargs)
+		assert isinstance(pset, dashboard.models.PSet)
+		if not can_view(request, pset.student):
+			raise PermissionDenied("Can't view work by this student")
 
 class ProblemSuggestionCreate(LoginRequiredMixin, CreateView):
 	context_object_name = "problem_suggestion"
 	fields = ('unit', 'weight', 'source', 'description', 'statement', 'solution', 'comments', 'acknowledge',)
 	model = dashboard.models.ProblemSuggestion
+
 	def get_initial(self):
 		initial = super().get_initial()
 		if 'unit_id' in self.kwargs:
 			initial['unit'] = self.kwargs['unit_id']
 		return initial
 	def form_valid(self, form):
-		form.instance.student = roster.utils.get_student(self.kwargs['student_id'])
+		form.instance.student = get_student_by_id(self.request, self.kwargs['studetn_id'])
 		messages.success(self.request, "Successfully submitted suggestion! Thanks much :) You can add more using the form below.")
 		return super().form_valid(form)
+
 	def get_success_url(self):
 		return reverse_lazy("suggest-new", kwargs=self.kwargs)
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
-		context['student'] = roster.utils.get_student(self.kwargs['student_id'])
+		context['student'] = get_student_by_id(self.request, self.kwargs['studetn_id'])
 		return context
 
 class ProblemSuggestionUpdate(LoginRequiredMixin, UpdateView):
@@ -447,18 +441,18 @@ class ProblemSuggestionUpdate(LoginRequiredMixin, UpdateView):
 		return super().form_valid(form)
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
-		context['student'] = roster.utils.get_student(self.object.student.id)
+		context['student'] = get_student_by_id(self.request, self.kwargs['studetn_id'])
 		return context
 
 class ProblemSuggestionList(LoginRequiredMixin, ListView):
 	context_object_name = "problem_suggestions"
 	def get_queryset(self):
-		student = get_object_or_404(roster.models.Student, id=self.kwargs['student_id'])
-		roster.utils.check_can_view(self.request, student)
+		student = get_student_by_id(self.request, self.kwargs['student_id'])
+		self.student = student
 		return dashboard.models.ProblemSuggestion.objects.filter(student=student).order_by('resolved', 'created_at')
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
-		context['student'] = roster.utils.get_student(self.kwargs['student_id'])
+		context['student'] = self.student
 		return context
 
 @staff_member_required

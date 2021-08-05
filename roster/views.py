@@ -14,6 +14,8 @@ import collections
 import datetime
 from hashlib import pbkdf2_hmac, sha256
 
+import core
+import core.models
 from allauth.socialaccount.models import SocialAccount
 from django.conf import settings
 from django.contrib import messages
@@ -23,8 +25,8 @@ from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.db.models import Count, IntegerField, OuterRef, Subquery
-from django.http import (Http404, HttpRequest, HttpResponse,
-                         HttpResponseRedirect, JsonResponse)
+from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse  # NOQA
+from django.http.response import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
@@ -33,21 +35,19 @@ from django.views.decorators.http import require_POST
 from django.views.generic import ListView
 from django.views.generic.edit import UpdateView
 
-import core
-import core.models
+from roster.utils import can_edit, get_current_students, get_student_by_id, infer_student  # NOQA
 
-from . import forms, models, utils
+from . import forms, models
 
 # Create your views here.
 
 @login_required
 def curriculum(request : HttpRequest, student_id):
-	student = utils.get_student(student_id)
-	utils.check_can_view(request, student)
+	student = get_student_by_id(request, student_id)
 	units = core.models.Unit.objects.all()
 	original = student.curriculum.values_list('id', flat=True)
 
-	enabled = student.is_taught_by(request.user) or student.newborn
+	enabled = can_edit(request, student) or student.newborn
 	if request.method == 'POST' and enabled:
 		form = forms.CurriculumForm(request.POST, units = units, enabled = True)
 		if form.is_valid():
@@ -76,8 +76,7 @@ def curriculum(request : HttpRequest, student_id):
 @require_POST
 def finalize(request, student_id):
 	# Removes a newborn status, thus activating everything
-	student = utils.get_student(student_id)
-	utils.check_can_view(request, student)
+	student = get_student_by_id(request, student_id)
 	if student.curriculum.count() > 0:
 		student.newborn = False
 		first_units = student.curriculum.all()[0:3]
@@ -93,8 +92,7 @@ def finalize(request, student_id):
 
 @login_required
 def auto_advance(request, student_id, unit_id, target_id = None):
-	student = utils.get_student(student_id)
-	utils.check_taught_by(request, student)
+	student = get_student_by_id(request, student_id)
 	unit = get_object_or_404(core.models.Unit, id = unit_id)
 
 	if not student.unlocked_units.filter(id=unit_id).exists() \
@@ -141,9 +139,7 @@ def auto_advance(request, student_id, unit_id, target_id = None):
 
 @login_required
 def advance(request, student_id):
-	student = utils.get_student(student_id)
-	utils.check_taught_by(request, student)
-
+	student = get_student_by_id(request, student_id)
 	if request.method == 'POST':
 		form = forms.AdvanceForm(request.POST, instance = student)
 		if form.is_valid():
@@ -174,14 +170,12 @@ def get_checksum(student):
 @login_required
 def invoice(request, student_id=None):
 	if student_id is None:
-		student = utils.infer_student(request)
+		student = infer_student(request)
 		return HttpResponseRedirect(
 				reverse("invoice", args=(student.id,)))
 
 	# Now assume student_id is not None
-	student = utils.get_student(student_id)
-	if student.user != request.user and not request.user.is_staff:
-		raise PermissionDenied("Can't view invoice")
+	student = get_student_by_id(request, student_id, payment_exempt = True)
 
 	if not student.semester.show_invoices:
 		invoice = None
@@ -197,18 +191,15 @@ def invoice(request, student_id=None):
 	# return HttpResponse("hi")
 	return render(request, "roster/invoice.html", context)
 
+# this is not gated
 def invoice_standalone(request, student_id, checksum):
-	# Now assume student_id is not None
-	student = utils.get_student(student_id)
-
+	student = models.Student.objects.get(id=student_id)
 	if checksum != get_checksum(student):
-		raise PermissionDenied("Bad hash provided")
-
+		raise HttpResponseBadRequest("Bad hash provided")
 	try:
 		invoice = student.invoice
 	except ObjectDoesNotExist:
 		raise Http404("No invoice exists for this student")
-
 	context = {'title' : "Invoice for " + student.name,
 			'student' : student, 'invoice' : invoice, 'checksum' : checksum}
 	# return HttpResponse("hi")
@@ -217,8 +208,7 @@ def invoice_standalone(request, student_id, checksum):
 
 @staff_member_required
 def master_schedule(request):
-	student_names_and_unit_ids = utils\
-			.get_current_students().filter(legit=True)\
+	student_names_and_unit_ids = get_current_students().filter(legit=True)\
 			.values('user__first_name', 'user__last_name', 'curriculum')
 	unit_to_student_names = collections.defaultdict(list)
 	for d in student_names_and_unit_ids:
@@ -248,9 +238,9 @@ class UpdateInvoice(PermissionRequiredMixin, UpdateView):
 		return reverse("invoice", args=(self.object.student.id,))
 
 # Inquiry views
+@login_required
 def inquiry(request, student_id):
-	student = utils.get_student(student_id)
-	utils.check_can_view(request, student)
+	student = get_student_by_id(request, student_id)
 	if not student.semester.active:
 		raise PermissionDenied("Not an active semester")
 	if student.newborn:
@@ -302,7 +292,7 @@ def inquiry(request, student_id):
 			.filter(student=student)
 	context['student'] = student
 	context['curriculum'] = student.generate_curriculum_rows(
-			omniscient = student.is_taught_by(request.user))
+			omniscient = can_edit(request, student))
 
 	return render(request, 'roster/inquiry.html', context)
 

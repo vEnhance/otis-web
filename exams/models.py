@@ -18,13 +18,11 @@ class PracticeExam(models.Model):
 	is_test = models.BooleanField(help_text = "Whether this is a quiz or test")
 	number = models.PositiveSmallIntegerField(
 			help_text = "The number of the assignment (e.g. Test 8, Quiz D) ")
-	pdf_url = models.CharField(max_length = 120, blank = True,
-			help_text = "The URL for the external final for this exam.")
 	def __str__(self):
 		if self.is_test:
-			return self.family + " Test " + str(self.number)
+			return self.family + " Test " + self.get_number_display()
 		else:
-			return self.family + " Quiz " + string.ascii_uppercase[self.number-1]
+			return self.family + " Quiz " + self.get_number_display()
 
 	# For quizzes only
 	answer1 = models.CharField(max_length = 64,
@@ -57,6 +55,18 @@ class PracticeExam(models.Model):
 		unique_together = ('family', 'is_test', 'number')
 
 	@property
+	def pdfname(self):
+		kind = 'Exam' if self.is_test else 'Quiz'
+		return f'{kind}-{self.family}-{self.get_number_display()}.pdf'
+
+	def get_number_display(self) -> str:
+		if self.is_test:
+			return f'{self.number:02d}'
+		else:
+			return string.ascii_uppercase[self.number-1]
+
+
+	@property
 	def overdue(self):
 		return (self.due_date is not None) and (self.due_date < datetime.date.today())
 	@property
@@ -66,9 +76,6 @@ class PracticeExam(models.Model):
 	@property
 	def current(self):
 		return self.started and not self.overdue
-	def get_absolute_url(self):
-		# TODO fix
-		return self.pdf_url or 'TODO'
 
 student_answer_validators = [
 		MinValueValidator(-10**9), MaxValueValidator(10**9),

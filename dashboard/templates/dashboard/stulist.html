@@ -60,9 +60,15 @@ Have a nice day.</p>
 	Contact me if you think this is an error.</p>
 
 	{% else %}
-	<p>You can view <a href="{% url "past" %}">🕗 past semesters</a>.</p>
 	<p>To register for this year,
 		<a href="{% url "register" %}">submit the decision form</a>.</p>
 	{% endif %}
+{% endif %}
+
+{% if past %}
+	<p>This page includes past years of OTIS too.</p>
+{% else %}
+	<p>You can view <a href="{% url "past" %}">🕗 past semesters</a>
+	if you participated in OTIS before.</p>
 {% endif %}
 {% endblock %}

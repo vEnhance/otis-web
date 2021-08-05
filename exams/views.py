@@ -1,7 +1,8 @@
 from typing import Any, Dict, Optional
+from core.utils import get_from_google_storage
 
 import roster.models
-import roster.utils
+from roster.utils import get_student_by_id
 from django.http import HttpRequest, HttpResponse
 from django.http.response import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render
@@ -11,13 +12,26 @@ from exams.forms import ExamAttemptForm
 
 # Create your views here.
 
+def pdf(request : HttpRequest, student_id : int, pk : int) -> HttpResponse:
+	student = get_student_by_id(request, student_id)
+	exam = get_object_or_404(exams.models.PracticeExam, pk = pk)
+
+	if getattr(request.user, 'is_staff', True):
+		return get_from_google_storage(exam.pdfname)
+
+	if not exam.started:
+		return HttpResponseForbidden("Not ready to download this exam yet")
+	elif student.semester.exam_family != quiz.family:
+		return HttpResponseForbidden("You can't access this quiz.")
+
+	return get_from_google_storage(exam.pdfname)
+
 def quiz(request : HttpRequest, student_id : int, pk : int) -> HttpResponse:
+	student = get_student_by_id(request, student_id)
 	context : Dict[str, Any] = {}
 	quiz = get_object_or_404(exams.models.PracticeExam, pk = pk)
 	if quiz.is_test:
 		return HttpResponseForbidden("You can't submit numerical answers to an olympiad exam.")
-	student = get_object_or_404(roster.models.Student, id = student_id)
-	roster.utils.check_can_view(request, student)
 	if not quiz.started:
 		return HttpResponseForbidden("You can't start this quiz")
 

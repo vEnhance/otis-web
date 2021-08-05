@@ -7,16 +7,31 @@ import reversion
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import User
+from django.core.exceptions import PermissionDenied
 from django.http import HttpRequest, HttpResponseRedirect, JsonResponse
+from django.http.request import HttpRequest
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from reversion.views import RevisionMixin
+from roster.models import Student
 
 from . import forms, models
 
+
+class ExistStudentRequiredMixin(LoginRequiredMixin):
+	def dispatch(self, request : HttpRequest, *args, **kwargs):
+		if not request.user.is_authenticated:
+			return super().dispatch(request, *args, **kwargs)
+		assert isinstance(request.user, User)
+		if not Student.objects.filter(user=request.user).exists() and not request.user.is_staff:
+			raise PermissionDenied('You have to be enrolled in at least one semester '
+					'of OTIS to use the ARCH system')
+		else:
+			return super().dispatch(request, *args, **kwargs)
 
 class HintObjectView:
 	kwargs : ClassVar[Dict] = {}
@@ -32,7 +47,7 @@ class ProblemObjectView:
 			queryset = self.get_queryset() # type: ignore
 		return get_object_or_404(queryset, puid=self.kwargs['puid'])
 
-class HintList(LoginRequiredMixin, ListView):
+class HintList(ExistStudentRequiredMixin, ListView):
 	context_object_name = "hint_list"
 	def get_queryset(self):
 		self.problem = get_object_or_404(models.Problem, **self.kwargs)
@@ -42,11 +57,11 @@ class HintList(LoginRequiredMixin, ListView):
 		context['problem'] = self.problem
 		return context
 
-class HintDetail(HintObjectView, LoginRequiredMixin, DetailView):
+class HintDetail(HintObjectView, ExistStudentRequiredMixin, DetailView):
 	context_object_name = "hint"
 	model = models.Hint
 
-class HintUpdate(HintObjectView, LoginRequiredMixin, RevisionMixin, UpdateView):
+class HintUpdate(HintObjectView, ExistStudentRequiredMixin, RevisionMixin, UpdateView):
 	context_object_name = "hint"
 	model = models.Hint
 	form_class = forms.HintUpdateFormWithReason
@@ -61,7 +76,7 @@ class HintUpdate(HintObjectView, LoginRequiredMixin, RevisionMixin, UpdateView):
 	def get_success_url(self):
 		return self.object.get_absolute_url()
 
-class ProblemUpdate(ProblemObjectView, LoginRequiredMixin, RevisionMixin, UpdateView):
+class ProblemUpdate(ProblemObjectView, ExistStudentRequiredMixin, RevisionMixin, UpdateView):
 	context_object_name = "problem"
 	model = models.Problem
 	form_class = forms.ProblemUpdateFormWithReason
@@ -72,7 +87,7 @@ class ProblemUpdate(ProblemObjectView, LoginRequiredMixin, RevisionMixin, Update
 	def get_success_url(self):
 		return self.object.get_absolute_url()
 
-class HintCreate(LoginRequiredMixin, RevisionMixin, CreateView):
+class HintCreate(ExistStudentRequiredMixin, RevisionMixin, CreateView):
 	context_object_name = "hint"
 	fields = ('problem', 'number', 'keywords', 'content',)
 	model = models.Hint
@@ -82,14 +97,14 @@ class HintCreate(LoginRequiredMixin, RevisionMixin, CreateView):
 		initial['problem'] = models.Problem.objects.get(puid=self.kwargs['puid'])
 		return initial
 
-class HintDelete(HintObjectView, LoginRequiredMixin, RevisionMixin, DeleteView):
+class HintDelete(HintObjectView, ExistStudentRequiredMixin, RevisionMixin, DeleteView):
 	context_object_name = "hint"
 	model = models.Hint
 	object : ClassVar[models.Hint] = models.Hint()
 	def get_success_url(self):
 		return reverse_lazy("hint-list", args=(self.object.problem.puid,))
 
-class ProblemDelete(ProblemObjectView, LoginRequiredMixin, RevisionMixin, DeleteView):
+class ProblemDelete(ProblemObjectView, ExistStudentRequiredMixin, RevisionMixin, DeleteView):
 	context_object_name = "problem"
 	model = models.Problem
 	object : ClassVar[models.Problem] = models.Problem()
@@ -97,7 +112,7 @@ class ProblemDelete(ProblemObjectView, LoginRequiredMixin, RevisionMixin, Delete
 		return reverse_lazy("arch-index")
 
 # this is actually the index page as well :P bit of a hack I guess...
-class ProblemCreate(LoginRequiredMixin, RevisionMixin, CreateView):
+class ProblemCreate(ExistStudentRequiredMixin, RevisionMixin, CreateView):
 	context_object_name = "problem"
 	fields = ('puid', 'description',)
 	model = models.Problem
