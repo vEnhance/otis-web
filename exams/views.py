@@ -1,10 +1,12 @@
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
-from django.urls import reverse_lazy
 from typing import Any, Dict
-from exams.forms import ExamAttemptForm
-import exams.models
+
 import roster.models
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse_lazy
+
+import exams.models
+from exams.forms import ExamAttemptForm
 
 # Create your views here.
 
