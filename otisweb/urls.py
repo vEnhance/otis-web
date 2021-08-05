@@ -14,9 +14,10 @@ assert settings.MEDIA_URL is not None
 urlpatterns = [
 	path(r'admin/', admin.site.urls),
 	path(r'arch/', include('arch.urls')),
-	path(r'dash/', include('dashboard.urls')),
-	path(r'roster/', include('roster.urls')),
 	path(r'core/', include('core.urls')),
+	path(r'dash/', include('dashboard.urls')),
+	path(r'exams/', include('exams.urls')),
+	path(r'roster/', include('roster.urls')),
 	path(r'hijack/', include('hijack.urls')),
 	path(r'accounts/', include('allauth.urls')),
 	path(r'__debug__/', include(debug_toolbar.urls)),

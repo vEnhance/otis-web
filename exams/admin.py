@@ -2,7 +2,7 @@ from django.contrib import admin
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
-import exams
+import exams.models
 
 # Register your models here.
 
@@ -19,3 +19,15 @@ class PracticeExamAdmin(ImportExportModelAdmin):
 	list_display_links = ('family', 'number',)
 	search_fields = ('family', 'number',)
 	resource_class = PracticeExamIEResource
+
+@admin.register(exams.models.Quiz)
+class QuizAdmin(ImportExportModelAdmin):
+	list_display = ('exam', 'answer1', 'answer2', 'answer3', 'answer4', 'answer5',)
+	list_filter = ('exam__family',)
+	list_display_links = ('exam',)
+
+@admin.register(exams.models.ExamAttempt)
+class ExamAttemptAdmin(ImportExportModelAdmin):
+	list_display = ('quiz', 'student', 'submit_time',)
+	list_filter = ('quiz__exam__family',)
+	list_display_links = ('quiz',)
