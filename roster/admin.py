@@ -1,12 +1,13 @@
-from django.contrib import admin, auth, messages
+import core
+import core.models
+from django.contrib import admin, messages
+from django.contrib.auth.models import User
 from django.db.models import F, FloatField, QuerySet
 from django.db.models.functions import Cast
 from django.http import HttpRequest
 from import_export import fields, resources, widgets
 from import_export.admin import ImportExportModelAdmin
 
-import core
-import core.models
 import roster
 import roster.models
 
@@ -14,7 +15,7 @@ import roster.models
 class RosterResource(resources.ModelResource):
 	user_name = fields.Field(column_name = 'User Name',
 			attribute = 'user',
-			widget = widgets.ForeignKeyWidget(auth.models.User, 'username'))
+			widget = widgets.ForeignKeyWidget(User, 'username'))
 	semester_name = fields.Field(column_name = 'Semester Name',
 			attribute = 'semester',
 			widget = widgets.ForeignKeyWidget(core.models.Semester, 'name'))
@@ -166,4 +167,3 @@ class StudentRegistrationAdmin(admin.ModelAdmin):
 		messages.success(request, message=f"Built {len(students_to_create)} students")
 		roster.models.Student.objects.bulk_create(students_to_create)
 		queryset.update(processed=True)
-
