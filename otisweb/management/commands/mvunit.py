@@ -1,7 +1,9 @@
 from django.core.management.base import BaseCommand, CommandError
+
 from core.models import Unit
 from dashboard.models import UploadedFile
 from roster.models import Student
+
 
 class Command(BaseCommand):
 	help = 'Replaces all instances of unit X with unit Y'

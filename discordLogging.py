@@ -1,10 +1,11 @@
-from collections import OrderedDict
-from django.http import HttpRequest
-from typing import Dict, Any
-import pprint
 import logging
-import requests
+import pprint
 import socket
+from collections import OrderedDict
+from typing import Any, Dict
+
+import requests
+from django.http import HttpRequest
 
 COLORS = {
 	"default": 2040357,

@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import datetime
 import os
+
+from django.contrib.auth import models as auth
+from django.core.validators import FileExtensionValidator
+from django.db import models
+from django.urls import reverse_lazy
+
 import core.models
 import roster.models
-import datetime
-from django.db import models
-from django.core.validators import FileExtensionValidator
-from django.contrib.auth import models as auth
-from django.urls import reverse_lazy
+
 
 def content_file_name(instance, filename):
 	now = datetime.datetime.now()

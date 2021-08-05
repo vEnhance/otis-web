@@ -2,11 +2,14 @@ from django.contrib import admin, auth, messages
 from django.db.models import F, FloatField, QuerySet
 from django.db.models.functions import Cast
 from django.http import HttpRequest
-from import_export import resources, widgets, fields
+from import_export import fields, resources, widgets
 from import_export.admin import ImportExportModelAdmin
 
-import core, core.models
-import roster, roster.models
+import core
+import core.models
+import roster
+import roster.models
+
 
 class RosterResource(resources.ModelResource):
 	user_name = fields.Field(column_name = 'User Name',

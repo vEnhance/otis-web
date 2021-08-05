@@ -1,6 +1,7 @@
+import reversion
 from django.db import models
 from django.urls import reverse_lazy
-import reversion
+
 
 # Create your models here.
 @reversion.register()

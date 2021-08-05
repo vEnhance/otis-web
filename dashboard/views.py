@@ -1,24 +1,31 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+
 from datetime import timedelta
+from typing import Any, Dict, Optional
+
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
-from django.db.models import Subquery, OuterRef, F, Q, Count, Sum
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
-from django.shortcuts import render, get_object_or_404
+from django.db.models import Count, F, OuterRef, Q, Subquery, Sum
+from django.http import (HttpRequest, HttpResponse, HttpResponseBadRequest,
+                         HttpResponseRedirect)
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
 from django.utils.timezone import now
-from django.views.generic import ListView, DetailView
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from typing import Any, Dict, Optional
+from django.views.generic import DetailView, ListView
+from django.views.generic.edit import CreateView, DeleteView, UpdateView
+
 import core.models
 import dashboard.models
 import exams.models
-import roster.models, roster.utils
+import roster.models
+import roster.utils
+
 from . import forms
+
 
 class Meter:
 	def __init__(self,

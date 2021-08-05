@@ -1,6 +1,8 @@
-from django.core.validators import FileExtensionValidator
 from django import forms
+from django.core.validators import FileExtensionValidator
+
 import dashboard.models
+
 
 class NewUploadForm(forms.ModelForm):
 	class Meta:

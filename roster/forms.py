@@ -1,8 +1,10 @@
-from django import forms
 import itertools
+
+from django import forms
 
 import roster
 import roster.models
+
 
 class UnitChoiceBoundField(forms.BoundField):
 	@property

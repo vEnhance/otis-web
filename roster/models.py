@@ -1,19 +1,21 @@
 from __future__ import unicode_literals
 
+import os
+from datetime import datetime, timedelta
+
+from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import FileExtensionValidator
 from django.db import models
-from django.contrib.auth.models import User
-from django.db.models import Count, FilteredRelation, Q, OuterRef, Exists
-from django.core.exceptions import ObjectDoesNotExist
-from django.utils.timezone import localtime
+from django.db.models import Count, Exists, FilteredRelation, OuterRef, Q
 from django.urls import reverse_lazy
-from datetime import timedelta, datetime
-import os
+from django.utils.timezone import localtime
 
 import core
 import core.models
 import dashboard
 import dashboard.models
+
 
 class Assistant(models.Model):
 	"""This is a wrapper object for a single assistant."""

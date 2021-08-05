@@ -1,9 +1,9 @@
 from django.core.management.base import BaseCommand, CommandError
-from roster.models import Student
-from django.db.models import Count, Q, F, Subquery, OuterRef
+from django.db.models import Count, F, OuterRef, Q, Subquery
 
-from roster.models import Student
 from dashboard.models import UploadedFile
+from roster.models import Student
+
 
 class Command(BaseCommand):
 	help = 'Recalculates the number of problem sets completed by each student'

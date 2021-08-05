@@ -2,6 +2,7 @@
 
 from django.db import migrations, models
 
+
 def set_slug(apps, scheme_editor):
     UnitGroup = apps.get_model('core', 'UnitGroup')
     for ug in UnitGroup.objects.all():

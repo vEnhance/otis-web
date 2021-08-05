@@ -1,13 +1,14 @@
 """otisweb URL Configuration"""
 
-from django.urls import include, path
+import debug_toolbar
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.urls import include, path
 from django.views.generic import RedirectView
 from django.views.generic.base import TemplateView
-import debug_toolbar
 
 from . import settings
+
 assert settings.MEDIA_URL is not None
 
 urlpatterns = [

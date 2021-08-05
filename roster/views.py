@@ -10,6 +10,11 @@ the division between dashboard and roster is a bit weird.
 So e.g. "list students by most recent pset" goes under dashboard.
 """
 
+import collections
+import datetime
+from hashlib import pbkdf2_hmac, sha256
+
+from allauth.socialaccount.models import SocialAccount
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
@@ -17,26 +22,21 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
-from django.db.models import Subquery, OuterRef, Count, IntegerField
-from django.http import HttpResponse, HttpRequest, HttpResponseRedirect, Http404, JsonResponse
-from django.shortcuts import render, get_object_or_404
+from django.db.models import Count, IntegerField, OuterRef, Subquery
+from django.http import (Http404, HttpRequest, HttpResponse,
+                         HttpResponseRedirect, JsonResponse)
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.views.generic import ListView
 from django.views.generic.edit import UpdateView
-from django.utils import timezone
-from allauth.socialaccount.models import SocialAccount
-
-import datetime
-import collections
-from hashlib import pbkdf2_hmac, sha256
 
 import core
 import core.models
-from . import models
-from . import forms
-from . import utils
+
+from . import forms, models, utils
 
 # Create your views here.
 

@@ -1,6 +1,8 @@
 from django.contrib import admin
 from reversion.admin import VersionAdmin
+
 from . import models
+
 
 class HintInline(admin.TabularInline):
 	model = models.Hint

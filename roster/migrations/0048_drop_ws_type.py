@@ -2,6 +2,7 @@
 
 from django.db import migrations
 
+
 def remove_winter(apps, scheme_editor):
     Student = apps.get_model('roster', 'Student')
     Student.objects.filter(track="CW").update(track="C")

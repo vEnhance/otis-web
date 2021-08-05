@@ -2,6 +2,7 @@
 
 from django.db import migrations
 
+
 def change_to_unlock(apps, scheme_editor):
     UnitInquiry = apps.get_model('roster', 'UnitInquiry')
     UnitInquiry.objects.filter(action_type="ADD").update(action_type="UNLOCK")

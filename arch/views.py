@@ -1,22 +1,22 @@
+import logging
+import traceback
+from hashlib import sha256
 from typing import ClassVar, Dict
+
+import reversion
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpRequest, HttpResponseRedirect, JsonResponse
-from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
-from django.views.generic import ListView, DetailView
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from reversion.views import RevisionMixin
-from typing import ClassVar
-from hashlib import sha256
+from django.urls import reverse_lazy
 from django.views.decorators.csrf import csrf_exempt
-import reversion
-import traceback
-import logging
+from django.views.generic import DetailView, ListView
+from django.views.generic.edit import CreateView, DeleteView, UpdateView
+from reversion.views import RevisionMixin
 
-from . import models
-from . import forms
+from . import forms, models
+
 
 class HintObjectView:
 	kwargs : ClassVar[Dict] = {}

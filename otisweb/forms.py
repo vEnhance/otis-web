@@ -1,5 +1,6 @@
-from django.contrib.auth.models import User
 from django import forms
+from django.contrib.auth.models import User
+
 
 class OTISUserRegistrationForm(forms.Form):
 	first_name = forms.CharField(required=False)

@@ -1,17 +1,21 @@
-from django.core.files.storage import default_storage
-from django.core.exceptions import PermissionDenied
-from django.conf import settings
-from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest, HttpResponseServerError, HttpResponseRedirect
-from django.contrib.auth.decorators import login_required
-from django.views.generic.list import ListView
-from django.conf import settings
-from hashlib import sha256
 import logging
+from hashlib import sha256
+
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
+from django.core.files.storage import default_storage
+from django.http import (HttpRequest, HttpResponse, HttpResponseBadRequest,
+                         HttpResponseRedirect, HttpResponseServerError)
+from django.views.generic.list import ListView
+
 logger = logging.getLogger(__name__)
 
-from .models import UnitGroup, Unit, Semester
-import roster.models
 import dashboard.models
+import roster.models
+
+from .models import Semester, Unit, UnitGroup
+
 
 def h(value):
 	s = settings.UNIT_HASH_KEY + '|' + value

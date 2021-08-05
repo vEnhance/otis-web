@@ -1,8 +1,10 @@
+from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404
-from django.core.exceptions import PermissionDenied
+
 from . import models
+
 
 def get_current_students(queryset = models.Student.objects):
 	return queryset.filter(semester__active=True)

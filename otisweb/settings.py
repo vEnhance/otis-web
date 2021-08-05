@@ -3,8 +3,8 @@ Django settings for otisweb project.
 """
 
 import os
-
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).parent.parent.absolute()
@@ -191,9 +191,12 @@ INVOICE_HASH_KEY = os.getenv("INVOICE_HASH_KEY", "evan_chen_is_still_really_cool
 UNIT_HASH_KEY = os.getenv("UNIT_HASH_KEY", "look_at_me_im_a_cute_kitten")
 API_TARGET_HASH = os.getenv("API_TARGET_HASH", '1c3592aa9241522fea1dd572c43c192a277e832dcd1ae63adfe069cb05624ead')
 
-import discordLogging # typing: ignore
 import logging
 from typing import Tuple
+
+import discordLogging  # typing: ignore
+
+
 def filter_useless_404(record : logging.LogRecord) -> bool:
 	a = tuple(record.args)
 	return not (

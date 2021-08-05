@@ -1,7 +1,8 @@
 from __future__ import unicode_literals
+
 from django.db import models
-from positions import PositionField
 from django.urls import reverse, reverse_lazy
+from positions import PositionField
 
 # Create your models here.
 

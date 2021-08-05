@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from import_export import resources, widgets, fields
+
+from django.contrib import admin
+from django.db.models import QuerySet
+from django.http import HttpRequest
+from import_export import fields, resources, widgets
 from import_export.admin import ImportExportModelAdmin
 
 import dashboard.models
 
-from django.contrib import admin
-from django.http import HttpRequest
-from django.db.models import QuerySet
 
 @admin.register(dashboard.models.UploadedFile)
 class UploadedFileAdmin(admin.ModelAdmin):

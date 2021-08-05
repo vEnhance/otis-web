@@ -1,11 +1,11 @@
 from typing import Any, Dict
 
-import roster.models
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy
 
 import exams.models
+import roster.models
 from exams.forms import ExamAttemptForm
 
 # Create your views here.

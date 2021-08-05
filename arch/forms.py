@@ -1,6 +1,8 @@
 from django import forms
 from django.shortcuts import get_object_or_404
+
 from . import models
+
 
 class HintUpdateFormWithReason(forms.ModelForm):
 	reason = forms.CharField(max_length=255, help_text = "Reason for editing.", required = False)

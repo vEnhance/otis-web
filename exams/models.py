@@ -1,10 +1,11 @@
 from __future__ import unicode_literals
 
-from django.db import models
-import roster.models
-
-import string
 import datetime
+import string
+
+from django.db import models
+
+import roster.models
 
 # Create your models here.
 
