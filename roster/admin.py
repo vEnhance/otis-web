@@ -16,13 +16,6 @@ class RosterResource(resources.ModelResource):
 	user_name = fields.Field(column_name = 'User Name',
 			attribute = 'user',
 			widget = widgets.ForeignKeyWidget(User, 'username'))
-	semester_name = fields.Field(column_name = 'Semester Name',
-			attribute = 'semester',
-			widget = widgets.ForeignKeyWidget(core.models.Semester, 'name'))
-	unit_list = fields.Field(column_name = 'Unit List',
-			attribute = 'curriculum',
-			widget = widgets.ManyToManyWidget(core.models.Unit, separator=';'))
-
 
 # Register your models here.
 
@@ -62,7 +55,6 @@ class InvoiceIEResource(resources.ModelResource):
 class OwedFilter(admin.SimpleListFilter):
 	title = 'remaining balance'
 	parameter_name = 'has_owed'
-
 	def lookups(self, request : HttpRequest, model_admin):
 		return [("incomplete", "Incomplete"), ("paid", "Paid in full"), ("zero", "No payment")]
 	def queryset(self, request : HttpRequest, queryset : QuerySet):
@@ -79,7 +71,6 @@ class OwedFilter(admin.SimpleListFilter):
 				return queryset.filter(owed__lte=0)
 			elif self.value() == "zero":
 				return queryset.filter(owed__gt=0).filter(total_paid=0)
-
 @admin.register(roster.models.Invoice)
 class InvoiceAdmin(ImportExportModelAdmin):
 	list_display = ('student', 'track', 'total_owed', 'total_paid', 'total_cost', 'updated_at', 'forgive',)
@@ -92,13 +83,18 @@ class InvoiceAdmin(ImportExportModelAdmin):
 
 ## STUDENT
 class StudentIEResource(RosterResource):
+	semester_name = fields.Field(column_name = 'Semester Name',
+			attribute = 'semester',
+			widget = widgets.ForeignKeyWidget(core.models.Semester, 'name'))
+	unit_list = fields.Field(column_name = 'Unit List',
+			attribute = 'curriculum',
+			widget = widgets.ManyToManyWidget(core.models.Unit, separator=';'))
 	class Meta:
 		skip_unchanged = True
 		model = roster.models.Student
 		fields = ('id', 'user__first_name', 'user__last_name', 'semester_name',
-				'user_name', 'track', 'legit', 'usemo',)
-		export_order = ('id', 'user__first_name', 'user__last_name', 'semester_name',
-				'user_name', 'track', 'legit', 'usemo',)
+				'user_name', 'track', 'legit', 'usemo_score',)
+		export_order = fields
 class UnlistedInline(admin.TabularInline):
 	model = roster.models.Student.unlisted_assistants.through # type: ignore
 	verbose_name = "Unlisted Assistant"
@@ -116,6 +112,39 @@ class StudentAdmin(ImportExportModelAdmin):
 	autocomplete_fields = ('user', 'curriculum', 'unlocked_units',)
 	inlines = (InvoiceInline, UnlistedInline,)
 	resource_class = StudentIEResource
+
+# REG FORM
+class StudentRegistrationIEResource(RosterResource):
+	class Meta:
+		model = roster.models.StudentRegistration
+		fields = ('user_name', 'container__semester__name', 'processed',
+				'parent_email', 'track', 'country',
+				'gender', 'graduation_year', 'school_name', 'aops_username', )
+		export_order = fields
+@admin.register(roster.models.StudentRegistration)
+class StudentRegistrationAdmin(ImportExportModelAdmin):
+	list_display = ('processed', 'name', 'track', 'about',
+			'country', 'aops_username', 'agreement_form',)
+	list_filter = ('processed', 'track', 'gender', 'graduation_year',)
+	list_display_links = ('track',)
+	resource_class = StudentRegistrationIEResource
+
+	actions = ['create_student',]
+	def create_student(self, request : HttpRequest, queryset : QuerySet):
+		students_to_create = []
+		queryset = queryset.exclude(processed=True)
+		queryset.select_related('user', 'container', 'container__semester')
+		for registration in queryset:
+			students_to_create.append(roster.models.Student(
+					user = registration.user,
+					semester = registration.container.semester,
+					track = registration.track,
+					))
+			registration.user.save()
+		messages.success(request, message=f"Built {len(students_to_create)} students")
+		roster.models.Student.objects.bulk_create(students_to_create)
+		queryset.update(processed=True)
+
 
 ## INQUIRY
 @admin.register(roster.models.UnitInquiry)
@@ -145,25 +174,3 @@ class RegistrationContainerAdmin(admin.ModelAdmin):
 	list_display = ('id', 'semester', 'passcode', 'allowed_tracks',)
 	list_display_links = ('id', 'semester',)
 
-# TODO later make this import export able
-@admin.register(roster.models.StudentRegistration)
-class StudentRegistrationAdmin(admin.ModelAdmin):
-	list_display = ('processed', 'name', 'track', 'about', 'country', 'aops_username', 'agreement_form',)
-	list_filter = ('processed', 'track', 'gender', 'graduation_year',)
-	list_display_links = ('track',)
-
-	actions = ['create_student',]
-	def create_student(self, request : HttpRequest, queryset : QuerySet):
-		students_to_create = []
-		queryset = queryset.exclude(processed=True)
-		queryset.select_related('user', 'container', 'container__semester')
-		for registration in queryset:
-			students_to_create.append(roster.models.Student(
-					user = registration.user,
-					semester = registration.container.semester,
-					track = registration.track,
-					))
-			registration.user.save()
-		messages.success(request, message=f"Built {len(students_to_create)} students")
-		roster.models.Student.objects.bulk_create(students_to_create)
-		queryset.update(processed=True)
