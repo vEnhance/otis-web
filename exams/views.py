@@ -6,7 +6,6 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.http.response import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy
-from django.utils import timezone
 
 import exams.models
 from exams.forms import ExamAttemptForm
@@ -19,8 +18,9 @@ def attempt_exam(request : HttpRequest, student_id : int, pk : int) -> HttpRespo
 	student = get_object_or_404(roster.models.Student, id = student_id)
 	roster.utils.check_can_view(request, student)
 
-	if not (quiz.exam.start_date < timezone.now() < quiz.exam.due_date):
-		return HttpResponseForbidden("You can't start this exam")
+	if quiz.exam.overdue or not quiz.exam.started:
+		return HttpResponseForbidden("You can't start this quiz")
+	# TODO redirect if already finished
 	
 	if request.method == 'POST':
 		form = ExamAttemptForm(request.POST)
@@ -28,7 +28,9 @@ def attempt_exam(request : HttpRequest, student_id : int, pk : int) -> HttpRespo
 			attempt = form.save(commit=False)
 			attempt.quiz = quiz
 			attempt.student = student
-			return HttpResponseRedirect(reverse_lazy())
+			attempt.save()
+			return HttpResponseRedirect(
+					reverse_lazy('show-exam', args=(student.id, pk)))
 		form = ExamAttemptForm()
 	else:
 		form = ExamAttemptForm()

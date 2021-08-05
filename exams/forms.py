@@ -4,5 +4,6 @@ import exams.models
 
 
 class ExamAttemptForm(ModelForm):
-	fields = ('guess1', 'guess2', 'guess3', 'guess4', 'guess5')
-	model = exams.models.ExamAttempt
+	class Meta:
+		fields = ('guess1', 'guess2', 'guess3', 'guess4', 'guess5')
+		model = exams.models.ExamAttempt
