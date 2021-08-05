@@ -1,11 +1,30 @@
 {% extends 'layout.html' %}
-{% block title %}{{ quiz.exam.family }} {{quiz.exam.number }}{% endblock %}
+{% load crispy_forms_tags %}
+{% block title %}{{ quiz }}{% endblock %}
+
 {% block layout-content %}
+<p>
+	Welcome to <b>{{ quiz }}</b>!
+	{% if not quiz.overdue %}
+		<p>Submit on or before end-of-day {{ quiz.due_date }} server time (US).</p>
+	{% endif %}
+</p>
 
-TODO download link
+<h2>Download problems</h2>
+<a href=" {{quiz.pdf_url}}">Download problems file</a>
 
-{% if form %}
-{% include "generic-form.html" %}
+<hr />
+
+{% if attempted %}
+	<h2>Your answers</h2>
+	{{ form|crispy }}
+{% elif not quiz.overdue %}
+	<h2>Submit answers</h2>
+	<p>Enter your responses below. Each answer is an integer.</p>
+	<p>You should enforce a time limit yourself; the website will not do so.</p>
+	{% include "generic-form.html" %}
+{% else %}
+	<p>You did not attempt this quiz before the deadline of {{ quiz.due_date }}.</p>
 {% endif %}
 
 {% endblock %}

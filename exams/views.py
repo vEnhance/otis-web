@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import roster.models
 import roster.utils
@@ -21,6 +21,7 @@ def quiz(request : HttpRequest, student_id : int, pk : int) -> HttpResponse:
 	if not quiz.started:
 		return HttpResponseForbidden("You can't start this quiz")
 
+	attempt : Optional[exams.models.ExamAttempt] = None
 	try:
 		attempt = exams.models.ExamAttempt.objects.get(student=student, quiz=pk)
 	except exams.models.ExamAttempt.DoesNotExist:
@@ -31,22 +32,25 @@ def quiz(request : HttpRequest, student_id : int, pk : int) -> HttpResponse:
 			form = ExamAttemptForm(request.POST)
 			if form.is_valid():
 				attempt = form.save(commit=False)
+				assert attempt is not None
 				attempt.quiz = quiz
 				attempt.student = student
 				attempt.save()
-			else:
-				form = ExamAttemptForm()
-		else:
-			form = ExamAttemptForm()
 	else:
 		if request.method == 'POST':
 			return HttpResponseForbidden('You already submitted this quiz')
-		form = ExamAttemptForm(attempt)
+
+	if attempt is not None:
+		form = ExamAttemptForm(instance = attempt)
+		for i in range(1,6):
+			form.fields[f'guess{i}'].disabled = True
+	elif request.method != 'POST':
+		form = ExamAttemptForm()
 
 	context['form'] = form
 	context['quiz'] = quiz
 	context['student'] = student
-	return render(request, 'exams/quiz_form.html', context)
+	return render(request, 'exams/quiz.html', context)
 
 def show_exam(request : HttpRequest,  student_id : int, pk : int) -> HttpResponse:
 	context : Dict[str, Any] = {}

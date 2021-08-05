@@ -4,11 +4,13 @@ import datetime
 import string
 
 import roster.models
+from django.core.validators import MaxValueValidator, MinValueValidator, URLValidator, validate_comma_separated_integer_list  # NOQA
 from django.db import models
 from django.urls.base import reverse_lazy
 
 # Create your models here.
 
+exam_ans_validators = [validate_comma_separated_integer_list,]
 class PracticeExam(models.Model):
 	family = models.CharField(max_length = 10,
 			choices = (("Waltz", "Waltz"), ("Foxtrot", "Foxtrot"),),
@@ -25,16 +27,26 @@ class PracticeExam(models.Model):
 			return self.family + " Quiz " + string.ascii_uppercase[self.number-1]
 
 	# For quizzes only
-	answer1 = models.IntegerField(help_text = "Answer to p1",
-			null = True, blank = True)
-	answer2 = models.IntegerField(help_text = "Answer to p2",
-			null = True, blank = True)
-	answer3 = models.IntegerField(help_text = "Answer to p3",
-			null = True, blank = True)
-	answer4 = models.IntegerField(help_text = "Answer to p4",
-			null = True, blank = True)
-	answer5 = models.IntegerField(help_text = "Answer to p5",
-			null = True, blank = True)
+	answer1 = models.CharField(max_length = 64,
+			validators = exam_ans_validators, blank = True)
+	answer2 = models.CharField(max_length = 64,
+			validators = exam_ans_validators, blank = True)
+	answer3 = models.CharField(max_length = 64,
+			validators = exam_ans_validators, blank = True)
+	answer4 = models.CharField(max_length = 64,
+			validators = exam_ans_validators, blank = True)
+	answer5 = models.CharField(max_length = 64,
+			validators = exam_ans_validators, blank = True)
+	url1 = models.CharField(max_length = 128, blank=True,
+			validators = [URLValidator(),])
+	url2 = models.CharField(max_length = 128, blank=True,
+			validators = [URLValidator(),])
+	url3 = models.CharField(max_length = 128, blank=True,
+			validators = [URLValidator(),])
+	url4 = models.CharField(max_length = 128, blank=True,
+			validators = [URLValidator(),])
+	url5 = models.CharField(max_length = 128, blank=True,
+			validators = [URLValidator(),])
 
 	start_date = models.DateField(null = True, blank = True,
 			help_text = "When the assignment opens.")
@@ -58,6 +70,10 @@ class PracticeExam(models.Model):
 		# TODO fix
 		return self.pdf_url or 'TODO'
 
+student_answer_validators = [
+		MinValueValidator(-1000000000), MaxValueValidator(1000000000),
+		]
+
 class ExamAttempt(models.Model):
 	quiz = models.ForeignKey(PracticeExam,
 			on_delete = models.CASCADE,
@@ -66,15 +82,15 @@ class ExamAttempt(models.Model):
 			on_delete = models.CASCADE,
 			help_text = "The student taking the exam")
 	guess1 = models.IntegerField(verbose_name = "Problem 1 response",
-			default = 0, blank = True, null = True)
+			blank = True, null = True, validators = student_answer_validators)
 	guess2 = models.IntegerField(verbose_name = "Problem 2 response",
-			default = 0, blank = True, null = True)
+			blank = True, null = True, validators = student_answer_validators)
 	guess3 = models.IntegerField(verbose_name = "Problem 3 response",
-			default = 0, blank = True, null = True)
+			blank = True, null = True, validators = student_answer_validators)
 	guess4 = models.IntegerField(verbose_name = "Problem 4 response",
-			default = 0, blank = True, null = True)
+			blank = True, null = True, validators = student_answer_validators)
 	guess5 = models.IntegerField(verbose_name = "Problem 5 response",
-			default = 0, blank = True, null = True)
+			blank = True, null = True, validators = student_answer_validators)
 	submit_time = models.DateTimeField(help_text = "When the quiz was submitted",
 			auto_now_add = True)
 	class Meta:
