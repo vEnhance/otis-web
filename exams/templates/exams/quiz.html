@@ -5,7 +5,7 @@
 {% block layout-content %}
 <p>
 	Welcome to <b>{{ quiz }}</b>!
-	{% if not quiz.overdue %}
+	{% if not finished and not quiz.overdue %}
 		<p>Submit on or before end-of-day {{ quiz.due_date }} server time (US).</p>
 	{% endif %}
 </p>
@@ -15,7 +15,7 @@
 
 <hr />
 
-{% if attempted %}
+{% if finished %}
 	<h2>Your answers</h2>
 	{{ form|crispy }}
 {% elif not quiz.overdue %}
@@ -26,5 +26,20 @@
 {% else %}
 	<p>You did not attempt this quiz before the deadline of {{ quiz.due_date }}.</p>
 {% endif %}
+
+{% if quiz.overdue or finished %}
+<hr />
+<h2>Solutions</h2>
+
+<div class="list-group">
+	<a href="{{ quiz.url1 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}1</a>
+	<a href="{{ quiz.url2 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}2</a>
+	<a href="{{ quiz.url3 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}3</a>
+	<a href="{{ quiz.url4 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}4</a>
+	<a href="{{ quiz.url5 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}5</a>
+</div>
+
+{% endif %}
+
 
 {% endblock %}

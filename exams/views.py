@@ -36,7 +36,11 @@ def quiz(request : HttpRequest, student_id : int, pk : int) -> HttpResponse:
 				attempt.quiz = quiz
 				attempt.student = student
 				attempt.save()
+				context['finished'] = True
+			else:
+				context['finished'] = False
 	else:
+		context['finished'] = True
 		if request.method == 'POST':
 			return HttpResponseForbidden('You already submitted this quiz')
 
@@ -46,6 +50,8 @@ def quiz(request : HttpRequest, student_id : int, pk : int) -> HttpResponse:
 			form.fields[f'guess{i}'].disabled = True
 	elif request.method != 'POST':
 		form = ExamAttemptForm()
+	else:
+		raise Exception("This should never happen")
 
 	context['form'] = form
 	context['quiz'] = quiz
