@@ -60,8 +60,15 @@ class LevelAdmin(ImportExportModelAdmin):
 	search_fields = ('name',)
 	resource_class = LevelIEResource
 
+class AchievementIEResource(resources.ModelResource):
+	class Meta:
+		skip_unchanged = True
+		model = dashboard.models.Level
+		fields = ('code', 'name', 'diamonds', 'active', 'description',)
+
 @admin.register(dashboard.models.Achievement)
-class AchievementAdmin(admin.ModelAdmin):
+class AchievementAdmin(ImportExportModelAdmin):
 	list_display = ('code', 'name', 'diamonds', 'active', 'description', 'image')
 	search_fields = ('code', 'description')
 	list_filter = ('active',)
+	resource_class = AchievementIEResource
