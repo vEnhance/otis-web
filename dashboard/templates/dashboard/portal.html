@@ -59,7 +59,7 @@
 	<h1>Getting Started &mdash; Setup Instructions</h1>
 	<p>Follow the three steps below to get everything working.</p>
 	<ol>
-		<li>Read the <a href="https://www.dropbox.com/s/9ifm3bzv71nhdo8/unit-guide.pdf?dl=1">unit selection guide</a>
+		<li>Read the <a href="{% url "info/unit-guide.pdf" %}">unit selection guide</a>
 			to give yourself ideas on which units you want to work on.
 		</li>
 		<li>Read the <a href="{% url "synopsis" %}">catalog</a>
@@ -238,7 +238,7 @@ Units to work on are marked ▶️.
 <h2>Mock olympiads (tests)</h2>
 {% include "dashboard/list_exam.html" with exams=tests %}
 
-<p><a href="https://www.dropbox.com/s/vx2e7hm4n5dfj8x/long.pdf?dl=1">
+<p><a href="{% static "info/blank.pdf" %}">
 Link to olympiad answer sheets.</a>
 Submit these to <a href="https://www.gradescope.com" target="_blank">GradeScope</a>,
 unless otherwise specified.
@@ -248,8 +248,7 @@ See the syllabus for full instructions.</p>
 read them right after completing a mock olympiad.
 Obviously, don't open the solutions until you've submitted!
 Before taking your first mock olympiad, I recommend reading the
-<a href="https://www.dropbox.com/s/rs21apzqpm4b0qq/psychology.pdf?dl=1">
-handout on olympiad strategy.</a></p>
+<a href="{% static "info/psychology.pdf" %}">handout on olympiad strategy.</a></p>
 
 <h2>Quizzes</h2>
 {% include "dashboard/list_exam.html" with exams=quizzes %}
