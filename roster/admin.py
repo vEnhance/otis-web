@@ -96,11 +96,11 @@ class StudentIEResource(RosterResource):
 		skip_unchanged = True
 		model = roster.models.Student
 		fields = ('id', 'user__first_name', 'user__last_name', 'semester_name',
-				'user_name', 'track', 'legit', 'email', 'parent_email')
+				'user_name', 'track', 'legit', 'usemo',)
 		export_order = ('id', 'user__first_name', 'user__last_name', 'semester_name',
-				'user_name', 'track', 'legit', 'email', 'parent_email')
+				'user_name', 'track', 'legit', 'usemo',)
 class UnlistedInline(admin.TabularInline):
-	model = roster.models.Student.unlisted_assistants.through
+	model = roster.models.Student.unlisted_assistants.through # type: ignore
 	verbose_name = "Unlisted Assistant"
 	verbose_name_plural = "Unlisted Assistants"
 	extra = 0

@@ -3,18 +3,17 @@ from __future__ import unicode_literals
 import os
 from datetime import datetime, timedelta
 
-from django.contrib.auth.models import User
-from django.core.exceptions import ObjectDoesNotExist
-from django.core.validators import FileExtensionValidator
-from django.db import models
-from django.db.models import Count, Exists, FilteredRelation, OuterRef, Q
-from django.urls import reverse_lazy
-from django.utils.timezone import localtime
-
 import core
 import core.models
 import dashboard
 import dashboard.models
+from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
+from django.core.validators import FileExtensionValidator
+from django.db import models
+from django.db.models import Count, Exists, OuterRef, Q
+from django.urls import reverse_lazy
+from django.utils.timezone import localtime
 
 
 class Assistant(models.Model):
@@ -67,8 +66,8 @@ class Student(models.Model):
 	num_units_done = models.SmallIntegerField(default = 0,
 			help_text = "The number of completed units. "
 			"This is set manually for Evan's book-keeping.")
-	vision = models.SmallIntegerField(default = 3,
-			help_text = "Deprecated and no longer in use. To be deleted.")
+	usemo_score = models.SmallIntegerField(null = True, blank = True,
+			help_text = "The USEMO score for this year")
 
 	track = models.CharField(max_length = 5,
 			choices = (
