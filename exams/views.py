@@ -2,38 +2,46 @@ from typing import Any, Dict
 
 import roster.models
 import roster.utils
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse
 from django.http.response import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render
-from django.urls import reverse_lazy
 
 import exams.models
 from exams.forms import ExamAttemptForm
 
 # Create your views here.
 
-def attempt_exam(request : HttpRequest, student_id : int, pk : int) -> HttpResponse:
+def quiz(request : HttpRequest, student_id : int, pk : int) -> HttpResponse:
 	context : Dict[str, Any] = {}
-	quiz = get_object_or_404(exams.models.Quiz, pk = pk)
+	quiz = get_object_or_404(exams.models.PracticeExam, pk = pk)
+	if quiz.is_test:
+		return HttpResponseForbidden("You can't submit numerical answers to an olympiad exam.")
 	student = get_object_or_404(roster.models.Student, id = student_id)
 	roster.utils.check_can_view(request, student)
-
-	if quiz.exam.overdue or not quiz.exam.started:
+	if not quiz.started:
 		return HttpResponseForbidden("You can't start this quiz")
-	# TODO redirect if already finished
-	
-	if request.method == 'POST':
-		form = ExamAttemptForm(request.POST)
-		if form.is_valid():
-			attempt = form.save(commit=False)
-			attempt.quiz = quiz
-			attempt.student = student
-			attempt.save()
-			return HttpResponseRedirect(
-					reverse_lazy('show-exam', args=(student.id, pk)))
-		form = ExamAttemptForm()
+
+	try:
+		attempt = exams.models.ExamAttempt.objects.get(student=student, quiz=pk)
+	except exams.models.ExamAttempt.DoesNotExist:
+		if request.method == 'POST':
+			if quiz.overdue:
+				return HttpResponseForbidden("You can't submit this quiz " \
+						"since the deadline passed.")
+			form = ExamAttemptForm(request.POST)
+			if form.is_valid():
+				attempt = form.save(commit=False)
+				attempt.quiz = quiz
+				attempt.student = student
+				attempt.save()
+			else:
+				form = ExamAttemptForm()
+		else:
+			form = ExamAttemptForm()
 	else:
-		form = ExamAttemptForm()
+		if request.method == 'POST':
+			return HttpResponseForbidden('You already submitted this quiz')
+		form = ExamAttemptForm(attempt)
 
 	context['form'] = form
 	context['quiz'] = quiz
@@ -42,7 +50,9 @@ def attempt_exam(request : HttpRequest, student_id : int, pk : int) -> HttpRespo
 
 def show_exam(request : HttpRequest,  student_id : int, pk : int) -> HttpResponse:
 	context : Dict[str, Any] = {}
-	quiz = get_object_or_404(exams.models.Quiz, pk = pk)
+	quiz = get_object_or_404(exams.models.PracticeExam, pk = pk)
+	if quiz.is_test:
+		return HttpResponseForbidden("You can only use this view for short-answer quizzes.")
 	student = get_object_or_404(roster.models.Student, id = student_id)
 	roster.utils.check_can_view(request, student)
 	return render(request, 'exams/quiz_detail.html', context)

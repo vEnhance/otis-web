@@ -5,6 +5,7 @@ import string
 
 import roster.models
 from django.db import models
+from django.urls.base import reverse_lazy
 
 # Create your models here.
 
@@ -19,9 +20,21 @@ class PracticeExam(models.Model):
 			help_text = "The URL for the external final for this exam.")
 	def __str__(self):
 		if self.is_test:
-			return "Test " + str(self.number)
+			return self.family + " Test " + str(self.number)
 		else:
-			return "Quiz " + string.ascii_uppercase[self.number-1]
+			return self.family + " Quiz " + string.ascii_uppercase[self.number-1]
+
+	# For quizzes only
+	answer1 = models.IntegerField(help_text = "Answer to p1",
+			null = True, blank = True)
+	answer2 = models.IntegerField(help_text = "Answer to p2",
+			null = True, blank = True)
+	answer3 = models.IntegerField(help_text = "Answer to p3",
+			null = True, blank = True)
+	answer4 = models.IntegerField(help_text = "Answer to p4",
+			null = True, blank = True)
+	answer5 = models.IntegerField(help_text = "Answer to p5",
+			null = True, blank = True)
 
 	start_date = models.DateField(null = True, blank = True,
 			help_text = "When the assignment opens.")
@@ -41,21 +54,12 @@ class PracticeExam(models.Model):
 	@property
 	def current(self):
 		return self.started and not self.overdue
-
-class Quiz(models.Model):
-	exam = models.OneToOneField(PracticeExam,
-			on_delete = models.CASCADE,
-			help_text = "The associated exam for this answer key")
-	answer1 = models.IntegerField(help_text = "Answer to p1", default = 0)
-	answer2 = models.IntegerField(help_text = "Answer to p2", default = 0)
-	answer3 = models.IntegerField(help_text = "Answer to p3", default = 0)
-	answer4 = models.IntegerField(help_text = "Answer to p4", default = 0)
-	answer5 = models.IntegerField(help_text = "Answer to p5", default = 0)
-	def __str__(self) -> str:
-		return str(self.exam)
+	def get_absolute_url(self):
+		# TODO fix
+		return self.pdf_url or 'TODO'
 
 class ExamAttempt(models.Model):
-	quiz = models.ForeignKey(Quiz,
+	quiz = models.ForeignKey(PracticeExam,
 			on_delete = models.CASCADE,
 			help_text = "The quiz being submitted for")
 	student = models.ForeignKey(roster.models.Student,
@@ -77,3 +81,5 @@ class ExamAttempt(models.Model):
 		unique_together = ('quiz', 'student',)
 	def __str__(self) -> str:
 		return f'{self.student} tries {self.quiz}'
+	def get_absolute_url(self) -> str:
+		return reverse_lazy('show-exam', args=(self.student.pk, self.quiz.pk))

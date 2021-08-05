@@ -1,5 +1,11 @@
 {% extends 'layout.html' %}
 {% block title %}{{ quiz.exam.family }} {{quiz.exam.number }}{% endblock %}
 {% block layout-content %}
+
+TODO download link
+
+{% if form %}
 {% include "generic-form.html" %}
+{% endif %}
+
 {% endblock %}

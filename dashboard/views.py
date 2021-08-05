@@ -126,7 +126,8 @@ def portal(request, student_id) -> HttpResponse:
 	context['tests'] = exams.models.PracticeExam.objects.filter(
 			is_test = True, family = semester.exam_family, due_date__isnull=False)
 	context['quizzes'] = exams.models.PracticeExam.objects.filter(
-			is_test = False, family = semester.exam_family, due_date__isnull=False)
+			is_test = False, family = semester.exam_family, due_date__isnull=False)\
+					.select_related('quiz')
 	context['num_sem_download'] = dashboard.models.SemesterDownloadFile\
 			.objects.filter(semester = semester).count()
 	context.update(_get_meter_update(student))

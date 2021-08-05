@@ -20,12 +20,6 @@ class PracticeExamAdmin(ImportExportModelAdmin):
 	search_fields = ('family', 'number',)
 	resource_class = PracticeExamIEResource
 
-@admin.register(exams.models.Quiz)
-class QuizAdmin(ImportExportModelAdmin):
-	list_display = ('exam', 'answer1', 'answer2', 'answer3', 'answer4', 'answer5',)
-	list_filter = ('exam__family',)
-	list_display_links = ('exam',)
-
 @admin.register(exams.models.ExamAttempt)
 class ExamAttemptAdmin(ImportExportModelAdmin):
 	list_display = ('quiz', 'student', 'submit_time',)

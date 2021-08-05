@@ -1,31 +1,42 @@
 <table class="table">
 {% for exam in exams %}
-<tr>
-	<th>{{ forloop.counter }}</th>
-	{# Status symbol #}
-	{% if exam.overdue %}
-	<td>&check;</td>
-	{% elif exam.current %}
-	<td>&star;</td>
-	{% else %}
-	<td></td>
-	{% endif %}
+	<tr>
+		<td>
+			{% spaceless %}
+				{% if exam.overdue %}
+					☑️
+				{% elif exam.started %}
+					🟢
+				{% else %}
+					🔏
+				{% endif %}
+			{% endspaceless %}
+		</td>
+		{% if exam.started %}
+			<td>
+				{% if exam.is_test and exam.started %}
+					<a href="{{exam.get_absolute_url}}">
+						{{exam}}
+					</a>
+				{% elif not exam.is_test and exam.started %}
+					<a href="{% url "quiz" student.pk exam.quiz.pk %}">
+						{{exam}}
+					</a>
+				{% else %}
+					<span class="text-muted">
+						{{ exam}}
+					</span>
+				{% endif %}
+			</td>
+		{% endif %}
 
-	<td>{{ exam.family }} {{ exam }}</td>
-
-	{% if exam.started %}
-	<td>{% if exam.pdf_url %}<a href="{{exam.pdf_url}}">PDF</a>{% else %}TBD{% endif %}</td>
-	{% else %}
-	<td>&ndash;</td>
-	{% endif %}
-
-	{% if exam.overdue %}
-	<td>Finished {{ exam.due_date|date:"DATE_FORMAT" }}</td>
-	{% elif exam.started %}
-	<td>Due {{ exam.due_date|date:"DATE_FORMAT" }}</td>
-	{% else %}
-	<td>{{ exam.start_date|date:"DATE_FORMAT" }} &ndash; {{ exam.due_date|date:"DATE_FORMAT" }}</td>
-	{% endif %}
-</tr>
-{% endfor %}
+		{% if exam.overdue %}
+			<td>Ended {{ exam.due_date|date:"DATE_FORMAT" }}</td>
+		{% elif exam.started %}
+			<td>Due {{ exam.due_date|date:"DATE_FORMAT" }}</td>
+		{% else %}
+			<td>{{ exam.start_date|date:"DATE_FORMAT" }} &ndash; {{ exam.due_date|date:"DATE_FORMAT" }}</td>
+		{% endif %}
+	</tr>
+	{% endfor %}
 </table>
