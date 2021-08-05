@@ -1,28 +1,28 @@
 # -*- coding: utf-8 -*-
+
 from __future__ import unicode_literals
 
 from datetime import timedelta
 from typing import Any, Dict, Optional
 
+import core.models
+import exams.models
+import roster.models
+import roster.utils
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count, F, OuterRef, Q, Subquery, Sum
-from django.http import (HttpRequest, HttpResponse, HttpResponseBadRequest,
-                         HttpResponseRedirect)
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect  # NOQA
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
 from django.utils.timezone import now
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 
-import core.models
 import dashboard.models
-import exams.models
-import roster.models
-import roster.utils
 
 from . import forms
 
@@ -135,10 +135,7 @@ def portal(request, student_id) -> HttpResponse:
 @login_required
 def achievements(request, student_id) -> HttpResponse:
 	student = roster.utils.get_student(student_id)
-	roster.utils.check_can_view(request, student, delinquent_check = False)
-	if roster.utils.is_delinquent_locked(request, student):
-		return HttpResponseRedirect(reverse_lazy('invoice', args=(student_id,)))
-
+	roster.utils.check_can_view(request, student)
 	context : Dict[str,Any] = {
 			'student' : student,
 			'form' : forms.DiamondsForm(),
