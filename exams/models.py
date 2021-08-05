@@ -71,7 +71,7 @@ class PracticeExam(models.Model):
 		return self.pdf_url or 'TODO'
 
 student_answer_validators = [
-		MinValueValidator(-1000000000), MaxValueValidator(1000000000),
+		MinValueValidator(-10**9), MaxValueValidator(10**9),
 		]
 
 class ExamAttempt(models.Model):

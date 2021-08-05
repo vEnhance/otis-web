@@ -48,8 +48,14 @@ def quiz(request : HttpRequest, student_id : int, pk : int) -> HttpResponse:
 		form = ExamAttemptForm(instance = attempt)
 		for i in range(1,6):
 			form.fields[f'guess{i}'].disabled = True
+			guess = getattr(attempt, f'guess{i}')
+			accepted_str = getattr(quiz, f'answer{i}', '')
+			accepted = [int(_) for _ in accepted_str]
 	elif request.method != 'POST':
 		form = ExamAttemptForm()
+		for i in range(1,6):
+			form.fields[f'guess{i}'].min_value = -10**9
+			form.fields[f'guess{i}'].max_value = 10**9
 
 	context['form'] = form
 	context['quiz'] = quiz
