@@ -19,7 +19,7 @@
 						{{exam}}
 					</a>
 				{% elif not exam.is_test and exam.started %}
-					<a href="{% url "quiz" student.pk exam.quiz.pk %}">
+					<a href="{% url "quiz" student.pk exam.pk %}">
 						{{exam}}
 					</a>
 				{% else %}

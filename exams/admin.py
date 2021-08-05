@@ -23,5 +23,5 @@ class PracticeExamAdmin(ImportExportModelAdmin):
 @admin.register(exams.models.ExamAttempt)
 class ExamAttemptAdmin(ImportExportModelAdmin):
 	list_display = ('quiz', 'student', 'submit_time',)
-	list_filter = ('quiz__exam__family',)
+	list_filter = ('quiz', 'quiz__family',)
 	list_display_links = ('quiz',)
