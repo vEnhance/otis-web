@@ -23,6 +23,11 @@
 	<p>Enter your responses below. Each answer is an integer.</p>
 	<p>You should enforce a time limit yourself; the website will not do so.</p>
 	{% include "generic-form.html" %}
+	<script type="text/javascript">
+		$("form.form")[0].onsubmit = function () {
+			return confirm('Are you ready to submit? This cannot be reversed.');
+		}
+	</script>
 {% else %}
 	<p>You did not attempt this quiz before the deadline of {{ quiz.due_date }}.</p>
 {% endif %}

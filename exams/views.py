@@ -50,8 +50,6 @@ def quiz(request : HttpRequest, student_id : int, pk : int) -> HttpResponse:
 			form.fields[f'guess{i}'].disabled = True
 	elif request.method != 'POST':
 		form = ExamAttemptForm()
-	else:
-		raise Exception("This should never happen")
 
 	context['form'] = form
 	context['quiz'] = quiz
