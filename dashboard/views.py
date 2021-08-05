@@ -52,7 +52,7 @@ class Meter:
 		return self.level * 2 + 1
 	@property
 	def percent(self) -> int:
-		return 15 + int(85 * self.excess / self.bar_max)
+		return 15 + int(85 * (self.excess+0.2) / (self.bar_max+0.2))
 	@property
 	def needed(self) -> int:
 		return (self.level+1) ** 2 - self.value
@@ -85,11 +85,15 @@ def _get_meter_update(student: roster.models.Student):
 			.filter(student = student, approved = True, eligible = True)
 	pset_data = psets.aggregate(Sum('clubs'), Sum('hours'))
 	total_diamonds = student.achievements.aggregate(Sum('diamonds'))['diamonds__sum'] or 0
+	quiz_data = exams.models.ExamAttempt.objects.filter(student = student)
+	total_spades = \
+			(quiz_data.aggregate(Sum('score'))['score__sum'] or 0) \
+			+ (student.usemo_score or 0)
 	meters = {
 		'clubs' : Meter.ClubMeter(pset_data['clubs__sum'] or 0),
 		'hearts' : Meter.HeartMeter(int(pset_data['hours__sum'] or 0)),
 		'diamonds' : Meter.DiamondMeter(total_diamonds),
-		'spades' : Meter.SpadeMeter(0), # TODO input value
+		'spades' : Meter.SpadeMeter(total_spades), # TODO input value
 		}
 	level_number = sum(meter.level for meter in meters.values())
 	level = dashboard.models.Level.objects\
@@ -98,6 +102,7 @@ def _get_meter_update(student: roster.models.Student):
 	return {
 			'psets' : psets,
 			'pset_data' : pset_data,
+			'quiz_data' : quiz_data,
 			'meters' : meters,
 			'level_number' : level_number,
 			'level_name' : level_name

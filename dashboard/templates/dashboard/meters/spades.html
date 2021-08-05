@@ -6,6 +6,58 @@
 by scoring points on
 <a href="https://web.evanchen.cc/usemo.html">USEMO</a> and OTIS quizzes.</p>
 
+{% if student.usemo_score is not None %}
+<p>On the USEMO, you scored {{ student.usemo_score }}.</p>
+{% endif %}
+
+{% if quiz_data or student.usemo_score %}
+	<table class="table table-sm">
+		<thead class="table-dark">
+			<tr>
+				<th width="16%">{{ meters.spades.unit }}</th>
+				<th width="42%">Description</th>
+				<th width="42%">Timestamp</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% if student.usemo_score %}
+				<tr style="background-color: #ffff99;">
+					<td style="color:#121212;">
+						<b>
+							+{{ student.usemo_score }}{{ meters.spades.unit }}
+						</b>
+					</td>
+					<td>
+						<b>
+							<a href="https://web.evanchen.cc/usemo.html">
+								US Ersatz MO
+							</a>
+						</b>
+					</td>
+					<td>
+						🐁
+						🐭
+						🖱️
+					</td>
+				</tr>
+			{% endif %}
+			{% for attempt in quiz_data %}
+				<tr>
+					<td style="color:{{ meters.spades.color }};">
+						+{{ attempt.score }}{{ meters.spades.unit }}
+					</td>
+					<td>
+						<a href="{% url "quiz" student.id attempt.quiz.pk %}">
+							{{ attempt.quiz }}
+						</a>
+					</td>
+					<td>{{ attempt.submit_time|naturaltime }}</td>
+				</tr>
+			{% endfor %}
+	</table>
+	</table>
+
+{% endif %}
 {# TODO create quiz submission system #}
 {# TODO create usemo score import system #}
 
