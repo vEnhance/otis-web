@@ -34,26 +34,24 @@ class Meter:
 			emoji : str,
 			value : int,
 			unit : str,
-			color: str
+			color: str,
+			max_value : int,
 			):
 		self.name = name
 		self.emoji = emoji
 		self.value = value
 		self.unit = unit
 		self.color = color
+		self.max_value = max_value
 
 	@property
 	def level(self) -> int:
 		return int(self.value**0.5)
 	@property
-	def excess(self) -> int:
-		return self.value - self.level ** 2
-	@property
-	def bar_max(self) -> int:
-		return self.level * 2 + 1
-	@property
 	def percent(self) -> int:
-		return 15 + int(85 * (self.excess+0.2) / (self.bar_max+0.2))
+		eps = 0.2
+		k = (self.value + eps * self.max_value) / ((1 + eps) * self.max_value)
+		return min(100, int(100 * k))
 	@property
 	def needed(self) -> int:
 		return (self.level+1) ** 2 - self.value
@@ -67,19 +65,19 @@ class Meter:
 	@staticmethod
 	def ClubMeter(value: int):
 		return Meter(name = "Dexterity", emoji = "♣️", value = value,
-				unit = "♣", color = '#007bff;')
+				unit = "♣", color = '#007bff;', max_value = 2500)
 	@staticmethod
 	def HeartMeter(value: int):
 		return Meter(name = "Wisdom", emoji = "🕰️", value = value,
-				unit = "♥", color = '#198754')
+				unit = "♥", color = '#198754', max_value = 2500)
 	@staticmethod
 	def SpadeMeter(value: int):
 		return Meter(name = "Strength", emoji = "🏆", value = value,
-				unit = "♠", color = '#ae610f')
+				unit = "♠", color = '#ae610f', max_value = 82)
 	@staticmethod
 	def DiamondMeter(value: int):
 		return Meter(name = "Charisma", emoji = "㊙️", value = value,
-				unit = "◆", color = '#9c1421')
+				unit = "◆", color = '#9c1421', max_value = 50)
 
 def _get_meter_update(student: roster.models.Student):
 	psets = dashboard.models.PSet.objects\
