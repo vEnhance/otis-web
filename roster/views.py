@@ -363,7 +363,7 @@ def register(request : HttpRequest) -> HttpResponse:
 		form = forms.DecisionForm(request.POST, request.FILES)
 		if form.is_valid():
 			passcode = form.cleaned_data['passcode']
-			if passcode != container.passcode:
+			if passcode.lower() != container.passcode.lower():
 				messages.error(request,
 						message = "Wrong passcode")
 			elif form.cleaned_data['track'] not in container.allowed_tracks.split(','):
