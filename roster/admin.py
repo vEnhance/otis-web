@@ -126,7 +126,7 @@ class StudentRegistrationAdmin(ImportExportModelAdmin):
 	list_display = ('processed', 'name', 'track', 'about',
 			'country', 'aops_username', 'agreement_form',)
 	list_filter = ('processed', 'track', 'gender', 'graduation_year',)
-	list_display_links = ('track',)
+	list_display_links = ('name', 'track',)
 	resource_class = StudentRegistrationIEResource
 
 	actions = ['create_student',]
