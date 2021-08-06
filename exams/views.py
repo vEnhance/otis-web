@@ -74,7 +74,7 @@ def quiz(request : HttpRequest, student_id : int, pk : int) -> HttpResponse:
 			accepted_str = getattr(quiz, f'answer{i}')
 			accepted_vals = [expr_compute(_) for _ in accepted_str.split(',') if _]
 			if guess_val is not None:
-				correct = any(abs(guess_val-v) < 1e-6 for v in accepted_vals)
+				correct = any(v is not None and abs(guess_val-v) < 1e-12 for v in accepted_vals)
 			else:
 				correct = False
 
