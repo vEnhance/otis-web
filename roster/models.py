@@ -442,8 +442,7 @@ class StudentRegistration(models.Model):
 	agreement_form = models.FileField(
 			help_text = "Signed agreement form, as a single PDF",
 			upload_to = content_file_name,
-			validators = [FileExtensionValidator(allowed_extensions=['pdf',])],
-			null = True, blank = True)
+			validators = [FileExtensionValidator(allowed_extensions=['pdf',])])
 	processed = models.BooleanField(
 			help_text = "Whether Evan has dealt with this kid yet",
 			default = False)
