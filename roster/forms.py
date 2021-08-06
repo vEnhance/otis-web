@@ -9,7 +9,7 @@ import roster.models
 class UnitChoiceBoundField(forms.BoundField):
 	@property
 	def subject(self):
-		first_unit_pair = self.field.choices[0]
+		first_unit_pair = self.field.choices[0] # type: ignore
 		first_unit_code = first_unit_pair[1]
 		first_unit_subject = first_unit_code[1] # second letter
 		return first_unit_subject
@@ -21,7 +21,7 @@ class UnitChoiceField(forms.TypedMultipleChoiceField):
 class CurriculumForm(forms.Form):
 	"""A form which takes a list of units
 	and puts together a form letting you pick a curriculum.
-	
+
 	units: the list of units
 	original: a list of unit ID's
 	"""
@@ -32,7 +32,7 @@ class CurriculumForm(forms.Form):
 		enabled = kwargs.pop('enabled', False)
 
 		super(CurriculumForm, self).__init__(*args, **kwargs)
-		
+
 		n = 0
 		for name, group in itertools.groupby(units, lambda u : u.group.name):
 			group = list(group)
