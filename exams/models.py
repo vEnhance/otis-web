@@ -5,7 +5,7 @@ import string
 
 import roster.models
 from django.core.exceptions import ValidationError
-from django.core.validators import URLValidator, validate_comma_separated_integer_list  # NOQA
+from django.core.validators import URLValidator
 from django.db import models
 from django.urls.base import reverse_lazy
 
@@ -14,7 +14,7 @@ from exams.calculator import expr_compute
 
 def expr_validator(value : str):
 	try:
-		x = float(expr_compute(value) or 0)
+		float(expr_compute(value) or 0)
 	except OverflowError:
 		raise ValidationError(r'This result has absolute value too large to parse.')
 	except:
