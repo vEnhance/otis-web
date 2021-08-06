@@ -598,7 +598,7 @@ class StudentRegistration(models.Model):
 		if self.graduation_year == 0:
 			grade = 13
 		else:
-			grade = 12 - (self.container.end_year - self.graduation_year)
+			grade = 12 - (self.graduation_year - self.container.end_year)
 		return f"{grade}{self.gender or 'U'}"
 
 	class Meta:
