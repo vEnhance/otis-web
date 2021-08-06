@@ -24,6 +24,9 @@
 			{% else %}
 				<span class="text-muted">
 					{{ exam }}
+					{% if request.user.is_staff %}
+						<a href="((exam.get_absolute_url}}">🔍</a>
+					{% endif %}
 				</span>
 			{% endif %}
 		</td>
@@ -38,3 +41,6 @@
 	</tr>
 	{% endfor %}
 </table>
+{#
+	vim: ft=htmldjango
+#}
