@@ -417,7 +417,7 @@ class ProblemSuggestionCreate(LoginRequiredMixin, CreateView):
 			initial['unit'] = self.kwargs['unit_id']
 		return initial
 	def form_valid(self, form):
-		form.instance.student = get_student_by_id(self.request, self.kwargs['studetn_id'])
+		form.instance.student = get_student_by_id(self.request, self.kwargs['student_id'])
 		messages.success(self.request, "Successfully submitted suggestion! Thanks much :) You can add more using the form below.")
 		return super().form_valid(form)
 
@@ -425,7 +425,7 @@ class ProblemSuggestionCreate(LoginRequiredMixin, CreateView):
 		return reverse_lazy("suggest-new", kwargs=self.kwargs)
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
-		context['student'] = get_student_by_id(self.request, self.kwargs['studetn_id'])
+		context['student'] = get_student_by_id(self.request, self.kwargs['student_id'])
 		return context
 
 class ProblemSuggestionUpdate(LoginRequiredMixin, UpdateView):
@@ -441,7 +441,7 @@ class ProblemSuggestionUpdate(LoginRequiredMixin, UpdateView):
 		return super().form_valid(form)
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
-		context['student'] = get_student_by_id(self.request, self.kwargs['studetn_id'])
+		context['student'] = get_student_by_id(self.request, self.kwargs['student_id'])
 		return context
 
 class ProblemSuggestionList(LoginRequiredMixin, ListView):
