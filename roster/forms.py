@@ -85,8 +85,8 @@ class InquiryForm(forms.ModelForm):
 
 class DecisionForm(forms.ModelForm):
 	passcode = forms.CharField(max_length = 128,
-			label = "Password for this year",
-			help_text = "Enter the password",
+			label = "Invitation passcode",
+			help_text = "You should have gotten the passcode in your acceptance email.",
 			widget = forms.PasswordInput)
 	class Meta:
 		model = roster.models.StudentRegistration
