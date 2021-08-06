@@ -1,13 +1,13 @@
 from typing import Any, Dict, Optional
-from core.utils import get_from_google_storage
 
-import roster.models
-from roster.utils import get_student_by_id
+from core.utils import get_from_google_storage
 from django.http import HttpRequest, HttpResponse
 from django.http.response import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render
+from roster.utils import get_student_by_id
 
 import exams.models
+from exams.calculator import expr_compute
 from exams.forms import ExamAttemptForm
 
 # Create your views here.
@@ -69,12 +69,18 @@ def quiz(request : HttpRequest, student_id : int, pk : int) -> HttpResponse:
 		score = 0
 		for i in range(1,6):
 			field = dummy_form.visible_fields()[i-1]
-			guess = getattr(attempt, f'guess{i}')
-			accepted = getattr(quiz, f'answer{i}')
-			correct = guess in [int(_) for _ in accepted.split(',') if _]
+			guess_str = getattr(attempt, f'guess{i}')
+			guess_val = expr_compute(guess_str)
+			accepted_str = getattr(quiz, f'answer{i}')
+			accepted_vals = [expr_compute(_) for _ in accepted_str.split(',') if _]
+			if guess_val is not None:
+				correct = any(abs(guess_val-v) < 1e-6 for v in accepted_vals)
+			else:
+				correct = False
+
 			context['rows'].append(
 					{ 'field' : field,
-						'accepted' : accepted.replace(',', ' '),
+						'accepted' : accepted_str,
 						'correct' : correct,
 						'url' : getattr(quiz, f'url{i}', None)
 						})
@@ -94,6 +100,5 @@ def show_exam(request : HttpRequest,  student_id : int, pk : int) -> HttpRespons
 	quiz = get_object_or_404(exams.models.PracticeExam, pk = pk)
 	if quiz.is_test:
 		return HttpResponseForbidden("You can only use this view for short-answer quizzes.")
-	student = get_object_or_404(roster.models.Student, id = student_id)
-	roster.utils.check_can_view(request, student)
+	student = get_student_by_id(request, student_id)
 	return render(request, 'exams/quiz_detail.html', context)

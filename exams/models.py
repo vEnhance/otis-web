@@ -4,13 +4,24 @@ import datetime
 import string
 
 import roster.models
-from django.core.validators import MaxValueValidator, MinValueValidator, URLValidator, validate_comma_separated_integer_list  # NOQA
+from django.core.exceptions import ValidationError
+from django.core.validators import URLValidator, validate_comma_separated_integer_list  # NOQA
 from django.db import models
 from django.urls.base import reverse_lazy
 
-# Create your models here.
+from exams.calculator import expr_compute
 
-exam_ans_validators = [validate_comma_separated_integer_list,]
+
+def expr_validator(value : str):
+	try:
+		expr_compute(value)
+	except:
+		raise ValidationError('Could not evaluate this expression, please fix it')
+def expr_validator_multiple(value : str):
+	if value != '':
+		for v in value.split(','):
+			expr_validator(v)
+
 class PracticeExam(models.Model):
 	family = models.CharField(max_length = 10,
 			choices = (("Waltz", "Waltz"), ("Foxtrot", "Foxtrot"),),
@@ -25,16 +36,11 @@ class PracticeExam(models.Model):
 			return self.family + " Quiz " + self.get_number_display()
 
 	# For quizzes only
-	answer1 = models.CharField(max_length = 64,
-			validators = exam_ans_validators, blank = True)
-	answer2 = models.CharField(max_length = 64,
-			validators = exam_ans_validators, blank = True)
-	answer3 = models.CharField(max_length = 64,
-			validators = exam_ans_validators, blank = True)
-	answer4 = models.CharField(max_length = 64,
-			validators = exam_ans_validators, blank = True)
-	answer5 = models.CharField(max_length = 64,
-			validators = exam_ans_validators, blank = True)
+	answer1 = models.CharField(max_length = 64, validators = [expr_validator_multiple], blank = True)
+	answer2 = models.CharField(max_length = 64, validators = [expr_validator_multiple], blank = True)
+	answer3 = models.CharField(max_length = 64, validators = [expr_validator_multiple], blank = True)
+	answer4 = models.CharField(max_length = 64, validators = [expr_validator_multiple], blank = True)
+	answer5 = models.CharField(max_length = 64, validators = [expr_validator_multiple], blank = True)
 	url1 = models.CharField(max_length = 128, blank=True,
 			validators = [URLValidator(),])
 	url2 = models.CharField(max_length = 128, blank=True,
@@ -77,9 +83,6 @@ class PracticeExam(models.Model):
 	def current(self):
 		return self.started and not self.overdue
 
-student_answer_validators = [
-		MinValueValidator(-10**9), MaxValueValidator(10**9),
-		]
 
 class ExamAttempt(models.Model):
 	quiz = models.ForeignKey(PracticeExam,
@@ -90,16 +93,16 @@ class ExamAttempt(models.Model):
 	student = models.ForeignKey(roster.models.Student,
 			on_delete = models.CASCADE,
 			help_text = "The student taking the exam")
-	guess1 = models.IntegerField(verbose_name = "Problem 1 response",
-			blank = True, null = True, validators = student_answer_validators)
-	guess2 = models.IntegerField(verbose_name = "Problem 2 response",
-			blank = True, null = True, validators = student_answer_validators)
-	guess3 = models.IntegerField(verbose_name = "Problem 3 response",
-			blank = True, null = True, validators = student_answer_validators)
-	guess4 = models.IntegerField(verbose_name = "Problem 4 response",
-			blank = True, null = True, validators = student_answer_validators)
-	guess5 = models.IntegerField(verbose_name = "Problem 5 response",
-			blank = True, null = True, validators = student_answer_validators)
+	guess1 = models.CharField(max_length = 18, blank = True,
+			verbose_name = "Problem 1 response", validators=[expr_validator,])
+	guess2 = models.CharField(max_length = 18, blank = True,
+			verbose_name = "Problem 2 response", validators=[expr_validator,])
+	guess3 = models.CharField(max_length = 18, blank = True,
+			verbose_name = "Problem 3 response", validators=[expr_validator,])
+	guess4 = models.CharField(max_length = 18, blank = True,
+			verbose_name = "Problem 4 response", validators=[expr_validator,])
+	guess5 = models.CharField(max_length = 18, blank = True,
+			verbose_name = "Problem 5 response", validators=[expr_validator,])
 	submit_time = models.DateTimeField(help_text = "When the quiz was submitted",
 			auto_now_add = True)
 	class Meta:
