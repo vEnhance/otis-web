@@ -91,8 +91,8 @@ class DiscordHandler(logging.Handler):
 				# redact the token for evan's personal api
 				d : Dict[str, Any] = {}
 				for k,v in request.POST.items():
-					if k == 'token':
-						d['token'] = '<redacted>'
+					if k == 'token' or k == 'password':
+						d[k] = '<redacted>'
 					else:
 						d[k] = v
 				s += r'POST data' + '\n'
