@@ -2,12 +2,14 @@
 
 from __future__ import unicode_literals
 
+import logging
 from datetime import timedelta
 from typing import Any, Dict
 
 import core.models
 import exams.models
 import roster.models
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
@@ -27,6 +29,7 @@ import dashboard.models
 
 from . import forms
 
+logger = logging.getLogger(__name__)
 
 class Meter:
 	def __init__(self,
@@ -147,13 +150,21 @@ def achievements(request, student_id) -> HttpResponse:
 		form = forms.DiamondsForm(request.POST)
 		if form.is_valid():
 			code = form.cleaned_data['code']
-			if student.achievements.filter(code__iexact = code).exists():
+			if student.semester.active is False:
+				messages.warning(request, "Not an active semester.")
+			elif student.achievements.filter(code__iexact = code).exists():
 				messages.warning(request, "You already earned this achievement!")
 			else:
-				achievement : dashboard.models.Achievement \
-						= get_object_or_404(dashboard.models.Achievement, code__iexact = code)
-				student.achievements.add(achievement)
-				context['obtained_achievement']  = achievement
+				try:
+					achievement = dashboard.models.Achievement.objects.get(code__iexact = code)
+				except dashboard.models.Achievement.DoesNotExist:
+					messages.error(request, "You entered an invalid code.")
+				else:
+					logging.log(settings.SUCCESS_LOG_LEVEL,
+							f"{student.name} obtained {achievement}"
+							)
+					student.achievements.add(achievement)
+					context['obtained_achievement']  = achievement
 			form = forms.DiamondsForm()
 	else:
 		form = forms.DiamondsForm()

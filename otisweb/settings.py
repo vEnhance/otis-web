@@ -204,6 +204,13 @@ def filter_useless_404(record : logging.LogRecord) -> bool:
 			and ('wp-include' in a[0] or '.php' in a[0])
 			)
 
+
+VERBOSE_LOG_LEVEL = 15
+SUCCESS_LOG_LEVEL = 25
+import logging
+logging.addLevelName(VERBOSE_LOG_LEVEL, "VERBOSE")
+logging.addLevelName(SUCCESS_LOG_LEVEL, "SUCCESS")
+
 LOGGING = {
 	'version' : 1,
 	'disable_existing_loggers' : False,
