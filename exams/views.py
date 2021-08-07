@@ -12,7 +12,7 @@ from exams.forms import ExamAttemptForm
 
 # Create your views here.
 
-def pdf(request : HttpRequest, student_id : int, pk : int) -> HttpResponse:
+def pdf(request: HttpRequest, student_id: int, pk: int) -> HttpResponse:
 	student = get_student_by_id(request, student_id)
 	exam = get_object_or_404(exams.models.PracticeExam, pk = pk)
 
@@ -26,9 +26,9 @@ def pdf(request : HttpRequest, student_id : int, pk : int) -> HttpResponse:
 
 	return get_from_google_storage(exam.pdfname)
 
-def quiz(request : HttpRequest, student_id : int, pk : int) -> HttpResponse:
+def quiz(request: HttpRequest, student_id: int, pk: int) -> HttpResponse:
 	student = get_student_by_id(request, student_id)
-	context : Dict[str, Any] = {}
+	context: Dict[str, Any] = {}
 	quiz = get_object_or_404(exams.models.PracticeExam, pk = pk)
 	if quiz.is_test:
 		return HttpResponseForbidden("You can't submit numerical answers to an olympiad exam.")
@@ -38,7 +38,7 @@ def quiz(request : HttpRequest, student_id : int, pk : int) -> HttpResponse:
 	if student.semester.exam_family != quiz.family:
 		return HttpResponseForbidden("You can't access this quiz.")
 
-	attempt : Optional[exams.models.ExamAttempt] = None
+	attempt: Optional[exams.models.ExamAttempt] = None
 	try:
 		attempt = exams.models.ExamAttempt.objects.get(student=student, quiz=pk)
 	except exams.models.ExamAttempt.DoesNotExist:
@@ -79,10 +79,10 @@ def quiz(request : HttpRequest, student_id : int, pk : int) -> HttpResponse:
 				correct = False
 
 			context['rows'].append(
-					{ 'field' : field,
-						'accepted' : accepted_str,
-						'correct' : correct,
-						'url' : getattr(quiz, f'url{i}', None)
+					{ 'field': field,
+						'accepted': accepted_str,
+						'correct': correct,
+						'url': getattr(quiz, f'url{i}', None)
 						})
 			if correct:
 				score += 1
@@ -95,8 +95,8 @@ def quiz(request : HttpRequest, student_id : int, pk : int) -> HttpResponse:
 	context['student'] = student
 	return render(request, 'exams/quiz.html', context)
 
-def show_exam(request : HttpRequest,  student_id : int, pk : int) -> HttpResponse:
-	context : Dict[str, Any] = {}
+def show_exam(request: HttpRequest,  student_id: int, pk: int) -> HttpResponse:
+	context: Dict[str, Any] = {}
 	quiz = get_object_or_404(exams.models.PracticeExam, pk = pk)
 	if quiz.is_test:
 		return HttpResponseForbidden("You can only use this view for short-answer quizzes.")

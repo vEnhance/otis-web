@@ -33,7 +33,7 @@ class DiscordHandler(logging.Handler):
 		super().__init__()
 		self.url = url
 
-	def emit(self, r : logging.LogRecord):
+	def emit(self, r: logging.LogRecord):
 		level = r.levelname.lower().strip()
 		emoji = EMOJIS.get(level, ':question:')
 		color = COLORS.get(level, 0xaaaaaa)
@@ -49,12 +49,12 @@ class DiscordHandler(logging.Handler):
 			s = 'None'
 
 		fields = [
-				{ 'name' : 'Status', 'value' : s, 'inline' : True, },
-				{ 'name' : 'Level', 'value' : r.levelname.title(), 'inline' : True, },
-				{ 'name' : 'Scope', 'value' : f"`{r.name}`", 'inline' : True, },
-				{ 'name' : 'Module', 'value' : f"`{r.module}`", 'inline' : True, },
-				{ 'name' : 'User', 'value' : user, 'inline' : True, },
-				{ 'name' : 'Filename', 'value' : f"{r.lineno}:`{r.filename}`", 'inline' : True, },
+				{ 'name': 'Status', 'value': s, 'inline': True, },
+				{ 'name': 'Level', 'value': r.levelname.title(), 'inline': True, },
+				{ 'name': 'Scope', 'value': f"`{r.name}`", 'inline': True, },
+				{ 'name': 'Module', 'value': f"`{r.module}`", 'inline': True, },
+				{ 'name': 'User', 'value': user, 'inline': True, },
+				{ 'name': 'Filename', 'value': f"{r.lineno}:`{r.filename}`", 'inline': True, },
 				]
 
 		description_parts = OrderedDict()
@@ -79,7 +79,7 @@ class DiscordHandler(logging.Handler):
 
 		# if request data is there, include that too
 		if hasattr(r, 'request'):
-			request : HttpRequest = getattr(r, 'request')
+			request: HttpRequest = getattr(r, 'request')
 			s = ''
 			s += f'> **Method** {request.method}\n'
 			s += f'> **Path** `{request.path}`\n'
@@ -89,7 +89,7 @@ class DiscordHandler(logging.Handler):
 				s += f'> **User** {getattr(request.user, "username", "wtf")}\n'
 			if request.method == 'POST':
 				# redact the token for evan's personal api
-				d : Dict[str, Any] = {}
+				d: Dict[str, Any] = {}
 				for k,v in request.POST.items():
 					if k == 'token' or k == 'password':
 						d[k] = '<redacted>'
@@ -107,9 +107,9 @@ class DiscordHandler(logging.Handler):
 			description_parts[':blue_heart: REQUEST :blue_heart:'] = s
 
 		embed = {
-					'title' : title,
-					'color' : color,
-					'fields' : fields
+					'title': title,
+					'color': color,
+					'fields': fields
 				}
 
 		desc = ''
@@ -121,8 +121,8 @@ class DiscordHandler(logging.Handler):
 			embed['description'] = desc
 
 		data = {
-				'username' : socket.gethostname(),
-				'embeds' : [embed],
+				'username': socket.gethostname(),
+				'embeds': [embed],
 				}
 
 		if self.url is not None:

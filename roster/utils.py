@@ -28,10 +28,10 @@ def get_visible_students(user, current = True):
 	return get_visible_from_queryset(user, queryset)
 
 def get_student_by_id(
-		request : HttpRequest,
-		student_id : int,
-		requires_edit : bool = False,
-		payment_exempt : bool = False,
+		request: HttpRequest,
+		student_id: int,
+		requires_edit: bool = False,
+		payment_exempt: bool = False,
 		) -> models.Student:
 	"""Returns an ordered pair containing a Student object and
 	a boolean indicating whether editing is allowed (is instructor)."""

@@ -42,7 +42,7 @@ from . import forms, models
 # Create your views here.
 
 @login_required
-def curriculum(request : HttpRequest, student_id):
+def curriculum(request: HttpRequest, student_id):
 	student = get_student_by_id(request, student_id)
 	units = core.models.Unit.objects.all()
 	original = student.curriculum.values_list('id', flat=True)
@@ -67,8 +67,8 @@ def curriculum(request : HttpRequest, student_id):
 			messages.info(request, "You can't edit this curriculum " \
 					"since you are not an instructor.")
 
-	context = {'title' : "Units for " + student.name,
-			'student' : student, 'form' : form, 'enabled' : enabled}
+	context = {'title': "Units for " + student.name,
+			'student': student, 'form': form, 'enabled': enabled}
 	# return HttpResponse("hi")
 	return render(request, "roster/currshow.html", context)
 
@@ -150,7 +150,7 @@ def advance(request, student_id):
 	else:
 		form = forms.AdvanceForm(instance = student)
 
-	context = {'title' : "Advance " + student.name}
+	context = {'title': "Advance " + student.name}
 	context['form'] = form
 	context['student'] = student
 	context['omniscient'] = student.is_taught_by(request.user)
@@ -185,9 +185,9 @@ def invoice(request, student_id=None):
 		except ObjectDoesNotExist:
 			invoice = None
 
-	context = {'title' : "Invoice for " + student.name,
-			'student' : student, 'invoice' : invoice,
-			'checksum' : get_checksum(student)}
+	context = {'title': "Invoice for " + student.name,
+			'student': student, 'invoice': invoice,
+			'checksum': get_checksum(student)}
 	# return HttpResponse("hi")
 	return render(request, "roster/invoice.html", context)
 
@@ -200,8 +200,8 @@ def invoice_standalone(request, student_id, checksum):
 		invoice = student.invoice
 	except ObjectDoesNotExist:
 		raise Http404("No invoice exists for this student")
-	context = {'title' : "Invoice for " + student.name,
-			'student' : student, 'invoice' : invoice, 'checksum' : checksum}
+	context = {'title': "Invoice for " + student.name,
+			'student': student, 'invoice': invoice, 'checksum': checksum}
 	# return HttpResponse("hi")
 	return render(request, "roster/invoice-standalone.html", context)
 
@@ -212,7 +212,7 @@ def master_schedule(request):
 			.values('user__first_name', 'user__last_name', 'curriculum')
 	unit_to_student_names = collections.defaultdict(list)
 	for d in student_names_and_unit_ids:
-		# e.g. d = {'name' : Student, 'curriculum' : 30}
+		# e.g. d = {'name': Student, 'curriculum': 30}
 		unit_to_student_names[d['curriculum']].append(
 				d['user__first_name'] + ' ' + d['user__last_name'])
 
@@ -222,9 +222,9 @@ def master_schedule(request):
 		chart[unit] = unit_to_student_names[unit.id]
 	semester = core.models.Semester.objects.get(active=True)
 	context = {
-			'chart' : chart,
-			'title' : "Master Schedule",
-			'semester' : semester}
+			'chart': chart,
+			'title': "Master Schedule",
+			'semester': semester}
 	return render(request, "roster/master-schedule.html", context)
 
 class UpdateInvoice(PermissionRequiredMixin, UpdateView):
@@ -232,7 +232,7 @@ class UpdateInvoice(PermissionRequiredMixin, UpdateView):
 	model = models.Invoice
 	fields = ('preps_taught', 'hours_taught',
 			'adjustment', 'extras', 'total_paid', 'forgive',)
-	object : models.Invoice
+	object: models.Invoice
 
 	def get_success_url(self):
 		return reverse("invoice", args=(self.object.student.id,))
@@ -331,26 +331,26 @@ class EditInquiry(PermissionRequiredMixin, UpdateView):
 		return reverse("edit-inquiry", args=(self.object.pk,)) # typing: ignore
 
 @staff_member_required
-def approve_inquiry(_ : HttpRequest, pk) -> HttpResponse:
+def approve_inquiry(_: HttpRequest, pk) -> HttpResponse:
 	inquiry = models.UnitInquiry.objects.get(id=pk)
 	inquiry.run_accept()
 	return HttpResponseRedirect(reverse("inquiry", args=(inquiry.student.id,)))
 
 @staff_member_required
-def approve_inquiry_all(_ : HttpRequest) -> HttpResponse:
+def approve_inquiry_all(_: HttpRequest) -> HttpResponse:
 	for inquiry in models.UnitInquiry.objects\
 			.filter(status="NEW", student__semester__active = True):
 		inquiry.run_accept()
 	return HttpResponseRedirect(reverse("list-inquiry"))
 
 @login_required
-def register(request : HttpRequest) -> HttpResponse:
+def register(request: HttpRequest) -> HttpResponse:
 	try:
 		container = models.RegistrationContainer.objects.get(semester__active = True)
 	except:
 		return HttpResponse("There isn't a currently active OTIS semester.", status = 503)
 
-	semester : core.models.Semester = container.semester
+	semester: core.models.Semester = container.semester
 	assert isinstance(request.user, User)
 	if models.StudentRegistration.objects.filter(
 			user = request.user,
@@ -388,7 +388,7 @@ def register(request : HttpRequest) -> HttpResponse:
 		else:
 			messages.warning(request, message = "The currently active semester isn't accepting registrations right now.")
 			form = None
-	context = {'title' : f'{semester} Decision Form', 'form' : form, 'container' : container}
+	context = {'title': f'{semester} Decision Form', 'form': form, 'container': container}
 	return render(request, 'roster/decision_form.html', context)
 
 @csrf_exempt
@@ -397,12 +397,12 @@ def api(request):
 	if settings.PRODUCTION:
 		token = request.POST.get('token')
 		if not sha256(token.encode('ascii')).hexdigest() == settings.API_TARGET_HASH:
-			return JsonResponse({'error' : "☕"}, status = 418)
+			return JsonResponse({'error': "☕"}, status = 418)
 	# check whether social account exists
 	uid = int(request.POST.get('uid'))
 	queryset = SocialAccount.objects.filter(uid = uid)
 	if not (n := len(queryset)) == 1:
-		return JsonResponse({'result' : 'nonexistent', 'length' : n})
+		return JsonResponse({'result': 'nonexistent', 'length': n})
 
 	social = queryset.get() # get the social account for this; should never 404
 	user = social.user
@@ -411,16 +411,16 @@ def api(request):
 
 	if student is not None:
 		return JsonResponse({
-			'result' : 'success',
-			'user' : social.user.username,
+			'result': 'success',
+			'user': social.user.username,
 			'name': social.user.get_full_name(),
-			'uid' : uid,
-			'track' : student.track,
-			'gender' : regform.gender if regform is not None else '?',
+			'uid': uid,
+			'track': student.track,
+			'gender': regform.gender if regform is not None else '?',
 			'country': regform.country if regform is not None else '???',
-			'num_years' : models.Student.objects.filter(user = user).count(),
+			'num_years': models.Student.objects.filter(user = user).count(),
 			})
 	elif student is None and regform is not None:
-		return JsonResponse({ 'result' : 'pending' })
+		return JsonResponse({ 'result': 'pending' })
 	else:
-		return JsonResponse({ 'result' : 'unregistered' })
+		return JsonResponse({ 'result': 'unregistered' })

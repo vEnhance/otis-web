@@ -93,7 +93,7 @@ TEMPLATES = [
 				'django.contrib.auth.context_processors.auth',
 				'django.contrib.messages.context_processors.messages',
 			],
-		'debug' : not PRODUCTION,
+		'debug': not PRODUCTION,
 		},
 	},
 ]
@@ -107,12 +107,12 @@ if os.getenv("DATABASE_NAME"):
 	DATABASES = {
 		'default': {
 			'ENGINE': 'django.db.backends.mysql',
-			'NAME' : os.getenv("DATABASE_NAME"),
-			'USER' : os.getenv("DATABASE_USER"),
-			'PASSWORD' : os.getenv("DATABASE_PASSWORD"),
-			'HOST' : os.getenv("DATABASE_HOST"),
-			'PORT' : os.getenv("DATABASE_PORT", '3306'),
-			'OPTIONS' : {'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"},
+			'NAME': os.getenv("DATABASE_NAME"),
+			'USER': os.getenv("DATABASE_USER"),
+			'PASSWORD': os.getenv("DATABASE_PASSWORD"),
+			'HOST': os.getenv("DATABASE_HOST"),
+			'PORT': os.getenv("DATABASE_PORT", '3306'),
+			'OPTIONS': {'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"},
 		},
 	}
 else:
@@ -191,7 +191,7 @@ INVOICE_HASH_KEY = os.getenv("INVOICE_HASH_KEY", "evan_chen_is_still_really_cool
 STORAGE_HASH_KEY = os.getenv("STORAGE_HASH_KEY", "look_at_me_im_a_cute_kitten")
 API_TARGET_HASH = os.getenv("API_TARGET_HASH", '1c3592aa9241522fea1dd572c43c192a277e832dcd1ae63adfe069cb05624ead')
 
-def filter_useless_404(record : logging.LogRecord) -> bool:
+def filter_useless_404(record: logging.LogRecord) -> bool:
 	a = tuple(record.args)
 	return not (
 			len(a) == 2 \
@@ -212,18 +212,18 @@ logging.addLevelName(VERBOSE_LOG_LEVEL, "VERBOSE")
 logging.addLevelName(SUCCESS_LOG_LEVEL, "SUCCESS")
 
 LOGGING = {
-	'version' : 1,
-	'disable_existing_loggers' : False,
-	'formatters' : {
+	'version': 1,
+	'disable_existing_loggers': False,
+	'formatters': {
 		'verbose': {
 			'format': '[{levelname}] {asctime} {module} {name}\n{message}\n',
 			'style': '{',
 		},
 	},
-	'filters' : {
-		'filter_useless_404' : {
-			'()' : 'django.utils.log.CallbackFilter',
-			'callback' : filter_useless_404,
+	'filters': {
+		'filter_useless_404': {
+			'()': 'django.utils.log.CallbackFilter',
+			'callback': filter_useless_404,
 		},
 		'require_debug_false': {
 			'()': 'django.utils.log.RequireDebugFalse',
@@ -232,39 +232,39 @@ LOGGING = {
 			'()': 'django.utils.log.RequireDebugTrue',
 		}
 	},
-	'handlers' : {
-		'console' : {
-			'class' : 'logging.StreamHandler',
-			'level' : 'INFO',
-			'formatter' : 'verbose',
-			'filters' : ['filter_useless_404'],
+	'handlers': {
+		'console': {
+			'class': 'logging.StreamHandler',
+			'level': 'INFO',
+			'formatter': 'verbose',
+			'filters': ['filter_useless_404'],
 		},
-		'discord' : {
-			'class' : 'discordLogging.DiscordHandler',
-			'level' : 'WARNING',
-			'url' : os.getenv("WEBHOOK_URL"),
-			'filters' : ['require_debug_false', 'filter_useless_404'],
+		'discord': {
+			'class': 'discordLogging.DiscordHandler',
+			'level': 'WARNING',
+			'url': os.getenv("WEBHOOK_URL"),
+			'filters': ['require_debug_false', 'filter_useless_404'],
 		}
 	},
-	'root' : {
-		'handlers' : ['console', 'discord'],
-		'level' : 'INFO',
+	'root': {
+		'handlers': ['console', 'discord'],
+		'level': 'INFO',
 	},
-	'loggers' : {
-		'django' : {
-			'handlers' : ['console', 'discord'],
-			'level' : 'INFO',
-			'propagate' : False,
+	'loggers': {
+		'django': {
+			'handlers': ['console', 'discord'],
+			'level': 'INFO',
+			'propagate': False,
 		},
-		'django.db.backends' : {
-			'handlers' : ['console',],
-			'level' : 'DEBUG',
-			'filters' : ['require_debug_true'],
+		'django.db.backends': {
+			'handlers': ['console',],
+			'level': 'DEBUG',
+			'filters': ['require_debug_true'],
 		},
-		'django.server' : {
-			'handlers' : ['console'],
-			'level' : 'DEBUG',
-			'propagate' : False,
+		'django.server': {
+			'handlers': ['console'],
+			'level': 'DEBUG',
+			'propagate': False,
 		}
 	},
 }

@@ -162,7 +162,7 @@ def evaluate_stack(s):
 		except ValueError:
 			return float(op)
 
-def expr_compute(s : str) -> Optional[float]:
+def expr_compute(s: str) -> Optional[float]:
 	if s == '':
 		return None
 	exprStack[:] = []

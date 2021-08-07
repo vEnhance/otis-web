@@ -34,7 +34,7 @@ class CurriculumForm(forms.Form):
 		super(CurriculumForm, self).__init__(*args, **kwargs)
 
 		n = 0
-		for name, group in itertools.groupby(units, lambda u : u.group.name):
+		for name, group in itertools.groupby(units, lambda u: u.group.name):
 			group = list(group)
 			field_name = 'group-' + str(n)
 			chosen_units = [unit for unit in group if unit.id in original]
@@ -58,7 +58,7 @@ class AdvanceForm(forms.ModelForm):
 		super(AdvanceForm, self).__init__(*args, **kwargs)
 		student = kwargs['instance']
 		self.fields['unlocked_units'] = forms.ModelMultipleChoiceField(
-				widget=forms.SelectMultiple(attrs={'class' : 'chosen-select'}),
+				widget=forms.SelectMultiple(attrs={'class': 'chosen-select'}),
 				queryset = student.curriculum.all(),
 				help_text = "The set of unlocked units.",
 				required = False)

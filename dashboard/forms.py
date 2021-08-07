@@ -13,15 +13,15 @@ class NewUploadForm(forms.ModelForm):
 				attrs = {'cols': 40, 'rows': 2}),
 		}
 		help_texts = {
-			'content' : "",
+			'content': "",
 		}
 
 class ResolveSuggestionForm(forms.ModelForm):
 	class Meta:
 		model = dashboard.models.ProblemSuggestion
 		fields = ('reason',)
-		widgets = {'reason' : forms.Textarea(attrs = {'cols':  30, 'rows' : 4}), }
-		help_texts = { 'reason' : '' }
+		widgets = {'reason': forms.Textarea(attrs = {'cols':  30, 'rows': 4}), }
+		help_texts = { 'reason': '' }
 
 class PSetForm(forms.ModelForm):
 	content = forms.FileField(help_text = "The file itself",

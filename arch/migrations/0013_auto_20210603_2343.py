@@ -196,9 +196,9 @@ REGEX = r"(?P<contest>[a-zA-Z ]+)(19|20)(?P<year>[0-9][0-9])(?P<stem>[ \/](?P<lo
 re_generic = re.compile(REGEX)
 
 sorted_lookup_keys = list(lookup.keys())
-sorted_lookup_keys.sort(key = lambda x : (-len(x), x))
+sorted_lookup_keys.sort(key = lambda x: (-len(x), x))
 
-def getOnlyAlphanum(s : str) -> str:
+def getOnlyAlphanum(s: str) -> str:
 	return re.sub(r'[^A-Z0-9]', '', s.upper())
 
 def inferPUID(source: str) -> str:

@@ -12,14 +12,14 @@ from django.urls.base import reverse_lazy
 from exams.calculator import expr_compute
 
 
-def expr_validator(value : str):
+def expr_validator(value: str):
 	try:
 		float(expr_compute(value) or 0)
 	except OverflowError:
 		raise ValidationError(r'This result has absolute value too large to parse.')
 	except:
 		raise ValidationError('Could not evaluate this expression, please fix it')
-def expr_validator_multiple(value : str):
+def expr_validator_multiple(value: str):
 	if value != '':
 		for v in value.split(','):
 			expr_validator(v)

@@ -32,7 +32,7 @@ class StudentInline(admin.TabularInline):
 	readonly_fields = ('user', 'name', 'semester',)
 	extra = 0
 	show_change_link = True
-	def has_delete_permission(self, request : HttpRequest, obj=None):
+	def has_delete_permission(self, request: HttpRequest, obj=None):
 		return False
 @admin.register(roster.models.Assistant)
 class AssistantAdmin(ImportExportModelAdmin):
@@ -55,9 +55,9 @@ class InvoiceIEResource(resources.ModelResource):
 class OwedFilter(admin.SimpleListFilter):
 	title = 'remaining balance'
 	parameter_name = 'has_owed'
-	def lookups(self, request : HttpRequest, model_admin):
+	def lookups(self, request: HttpRequest, model_admin):
 		return [("incomplete", "Incomplete"), ("paid", "Paid in full"), ("zero", "No payment")]
-	def queryset(self, request : HttpRequest, queryset : QuerySet):
+	def queryset(self, request: HttpRequest, queryset: QuerySet):
 		if self.value() is None:
 			return queryset
 		else:
@@ -130,7 +130,7 @@ class StudentRegistrationAdmin(ImportExportModelAdmin):
 	resource_class = StudentRegistrationIEResource
 
 	actions = ['create_student',]
-	def create_student(self, request : HttpRequest, queryset : QuerySet):
+	def create_student(self, request: HttpRequest, queryset: QuerySet):
 		students_to_create = []
 		queryset = queryset.exclude(processed=True)
 		queryset.select_related('user', 'container', 'container__semester')

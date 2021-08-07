@@ -33,12 +33,12 @@ logger = logging.getLogger(__name__)
 
 class Meter:
 	def __init__(self,
-			name : str,
-			emoji : str,
-			value : int,
-			unit : str,
+			name: str,
+			emoji: str,
+			value: int,
+			unit: str,
 			color: str,
-			max_value : int,
+			max_value: int,
 			):
 		self.name = name
 		self.emoji = emoji
@@ -92,22 +92,22 @@ def _get_meter_update(student: roster.models.Student):
 			(quiz_data.aggregate(Sum('score'))['score__sum'] or 0) \
 			+ (student.usemo_score or 0)
 	meters = {
-		'clubs' : Meter.ClubMeter(pset_data['clubs__sum'] or 0),
-		'hearts' : Meter.HeartMeter(int(pset_data['hours__sum'] or 0)),
-		'diamonds' : Meter.DiamondMeter(total_diamonds),
-		'spades' : Meter.SpadeMeter(total_spades), # TODO input value
+		'clubs': Meter.ClubMeter(pset_data['clubs__sum'] or 0),
+		'hearts': Meter.HeartMeter(int(pset_data['hours__sum'] or 0)),
+		'diamonds': Meter.DiamondMeter(total_diamonds),
+		'spades': Meter.SpadeMeter(total_spades), # TODO input value
 		}
 	level_number = sum(meter.level for meter in meters.values())
 	level = dashboard.models.Level.objects\
 			.filter(threshold__lte = level_number).order_by('threshold').first()
 	level_name = level.name if level is not None else 'No Level'
 	return {
-			'psets' : psets,
-			'pset_data' : pset_data,
-			'quiz_data' : quiz_data,
-			'meters' : meters,
-			'level_number' : level_number,
-			'level_name' : level_name
+			'psets': psets,
+			'pset_data': pset_data,
+			'quiz_data': quiz_data,
+			'meters': meters,
+			'level_number': level_number,
+			'level_name': level_name
 			}
 
 @login_required
@@ -121,7 +121,7 @@ def portal(request, student_id) -> HttpResponse:
 	suggestions = dashboard.models.ProblemSuggestion.objects.filter(
 			resolved = True, student = student, notified = False)
 
-	context : Dict[str, Any] = {}
+	context: Dict[str, Any] = {}
 	context['title'] = f"{student.name} ({semester.name})"
 	context['student'] = student
 	context['semester'] = semester
@@ -141,10 +141,10 @@ def portal(request, student_id) -> HttpResponse:
 @login_required
 def achievements(request, student_id) -> HttpResponse:
 	student = get_student_by_id(request, student_id)
-	context : Dict[str,Any] = {
-			'student' : student,
-			'form' : forms.DiamondsForm(),
-			'achievements' : student.achievements.all().order_by('name'),
+	context: Dict[str,Any] = {
+			'student': student,
+			'form': forms.DiamondsForm(),
+			'achievements': student.achievements.all().order_by('name'),
 			}
 	if request.method == 'POST':
 		form = forms.DiamondsForm(request.POST)
@@ -212,17 +212,17 @@ def submit_pset(request, student_id) -> HttpResponse:
 
 	# TODO more stats
 	context = {
-			'title' : 'Ready to submit?',
-			'student' : student,
-			'pending_psets' : \
+			'title': 'Ready to submit?',
+			'student': student,
+			'pending_psets': \
 					dashboard.models.PSet.objects\
 					.filter(student = student, approved = False)\
 					.order_by('-upload__created_at'),
-			'approved_psets' : \
+			'approved_psets': \
 					dashboard.models.PSet.objects\
 					.filter(student = student, approved = True)\
 					.order_by('-upload__created_at'),
-			'form' : form,
+			'form': form,
 			}
 	return render(request, "dashboard/submit_pset_form.html", context)
 
@@ -246,9 +246,9 @@ def uploads(request, student_id, unit_id) -> HttpResponse:
 			messages.success(request, "New file has been uploaded.")
 			form = None # clear form on successful upload, prevent duplicates
 	if form is None:
-		form = forms.NewUploadForm(initial = {'unit' : unit})
+		form = forms.NewUploadForm(initial = {'unit': unit})
 
-	context : Dict[str, Any] = {}
+	context: Dict[str, Any] = {}
 	context['title'] = 'File Uploads'
 	context['student'] = student
 	context['unit'] = unit
@@ -264,7 +264,7 @@ def index(request) -> HttpResponse:
 		return HttpResponseRedirect(\
 				reverse("portal", args=(students[0].id,)))
 
-	context : Dict[str, Any] = {}
+	context: Dict[str, Any] = {}
 	context['title'] = "Current Semester Listing"
 	context['students'] = students
 	context['stulist_show_semester'] = False
@@ -292,7 +292,7 @@ def past(request, semester = None):
 class UpdateFile(LoginRequiredMixin, UpdateView):
 	model = dashboard.models.UploadedFile
 	fields = ('category', 'content', 'description',)
-	object : dashboard.models.UploadedFile
+	object: dashboard.models.UploadedFile
 
 	def get_success_url(self):
 		stu_id = self.object.benefactor.id
@@ -321,7 +321,7 @@ class DeleteFile(LoginRequiredMixin, DeleteView):
 
 @staff_member_required
 def quasigrader(request, num_hours = 336) -> HttpResponse:
-	context : Dict[str, Any] = {}
+	context: Dict[str, Any] = {}
 	context['title'] = 'Quasi-grader'
 	num_hours = int(num_hours)
 
@@ -348,12 +348,12 @@ def quasigrader(request, num_hours = 336) -> HttpResponse:
 		else:
 			name = upload.filename
 
-		d = {'student' : upload.benefactor,
-				'file' : upload,
-				'rows' : upload.benefactor.generate_curriculum_rows(True),
-				'num_psets' : num_psets.get(upload.benefactor.id, None),
-				'num_done' : upload.benefactor.num_units_done,
-				'filename' : name
+		d = {'student': upload.benefactor,
+				'file': upload,
+				'rows': upload.benefactor.generate_curriculum_rows(True),
+				'num_psets': num_psets.get(upload.benefactor.id, None),
+				'num_done': upload.benefactor.num_units_done,
+				'filename': name
 				}
 		d['flag_num_not_one'] = d['num_psets'] is not None \
 			and (d['num_psets'] - d['num_done'] != 1)
@@ -409,7 +409,7 @@ class PSetDetail(LoginRequiredMixin, DetailView):
 	template_name = 'dashboard/pset_detail.html'
 	model = dashboard.models.PSet
 	object_name = 'pset'
-	def dispatch(self, request : HttpRequest, *args, **kwargs):
+	def dispatch(self, request: HttpRequest, *args, **kwargs):
 		pset = self.get_object()
 		assert isinstance(pset, dashboard.models.PSet)
 		if not can_view(request, pset.student):
@@ -469,7 +469,7 @@ class ProblemSuggestionList(LoginRequiredMixin, ListView):
 
 @staff_member_required
 def pending_contributions(request, suggestion_id = None) -> HttpResponse:
-	context : Dict[str, Any] = {}
+	context: Dict[str, Any] = {}
 	if request.method == "POST":
 		if suggestion_id is None:
 			return HttpResponseBadRequest("The form must include a suggestion ID")

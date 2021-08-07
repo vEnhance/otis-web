@@ -11,7 +11,7 @@ def h(value):
 	s = settings.STORAGE_HASH_KEY + '|' + value
 	return sha256(s.encode('ascii')).hexdigest()
 
-def get_from_google_storage(filename : str):
+def get_from_google_storage(filename: str):
 	ext = filename[-4:]
 	if not (ext == '.tex' or ext == '.pdf'):
 		return HttpResponseBadRequest('Bad filename extension')

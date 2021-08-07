@@ -15,7 +15,7 @@ class UnitGroupListView(ListView):
 	queryset = UnitGroup.objects.all().order_by('subject', 'name')\
 			.prefetch_related('unit_set')
 
-def permitted(unit : Unit, request : HttpRequest, asking_solution : bool) -> bool:
+def permitted(unit: Unit, request: HttpRequest, asking_solution: bool) -> bool:
 	if getattr(request.user, 'is_staff', False):
 		return True
 	elif dashboard.models.PSet.objects\

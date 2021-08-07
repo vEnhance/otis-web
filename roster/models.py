@@ -93,7 +93,7 @@ class Student(models.Model):
 			blank = True)
 
 	id: int
-	invoice : 'Invoice'
+	invoice: 'Invoice'
 
 	def __str__(self):
 		return f"{self.name} ({self.semester})"
@@ -112,7 +112,7 @@ class Student(models.Model):
 		if self.user: return self.user.get_full_name() or self.user.username
 		else: return "?"
 
-	get_track_display : Callable[[], str]
+	get_track_display: Callable[[], str]
 	@property
 	def get_track(self):
 		if self.assistant is None:

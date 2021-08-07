@@ -26,8 +26,8 @@ class ProblemSelectWidget(forms.Select):
 		if value:
 			problem = get_object_or_404(models.Problem, puid=value)
 			option['attrs'].update({
-				'data-source' : problem.source or '',
-				'data-description' : problem.description,
+				'data-source': problem.source or '',
+				'data-description': problem.description,
 				})
 		return option
 
