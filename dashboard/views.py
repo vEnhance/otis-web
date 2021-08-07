@@ -451,7 +451,9 @@ class ProblemSuggestionUpdate(LoginRequiredMixin, UpdateView):
 		return super().form_valid(form)
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
-		context['student'] = get_student_by_id(self.request, self.kwargs['student_id'])
+		context['student'] = self.object.student
+		if not can_view(self.request, self.object.student):
+			raise PermissionError("Logged-in user cannot view suggestions made by this student")
 		return context
 
 class ProblemSuggestionList(LoginRequiredMixin, ListView):
