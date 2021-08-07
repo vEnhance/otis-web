@@ -33,4 +33,4 @@ class PSetForm(forms.ModelForm):
 				'next_unit_to_unlock', 'special_notes',)
 
 class DiamondsForm(forms.Form):
-	code = forms.CharField(label = "", max_length = 64, required = False)
+	code = forms.CharField(label = "", max_length = 64, required = True)
