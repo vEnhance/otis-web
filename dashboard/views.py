@@ -399,10 +399,11 @@ class PSetDetail(LoginRequiredMixin, DetailView):
 	model = dashboard.models.PSet
 	object_name = 'pset'
 	def dispatch(self, request : HttpRequest, *args, **kwargs):
-		pset = self.get_object(*args, **kwargs)
+		pset = self.get_object()
 		assert isinstance(pset, dashboard.models.PSet)
 		if not can_view(request, pset.student):
 			raise PermissionDenied("Can't view work by this student")
+		return super().dispatch(request, *args, **kwargs)
 
 class ProblemSuggestionCreate(LoginRequiredMixin, CreateView):
 	context_object_name = "problem_suggestion"
