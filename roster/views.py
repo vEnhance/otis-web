@@ -14,8 +14,8 @@ import collections
 import datetime
 from hashlib import pbkdf2_hmac, sha256
 
-import core
 import core.models
+import dashboard.models
 from allauth.socialaccount.models import SocialAccount
 from django.conf import settings
 from django.contrib import messages
@@ -26,7 +26,6 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.db.models import Count, IntegerField, OuterRef, Subquery
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse  # NOQA
-from django.http.response import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
@@ -153,11 +152,15 @@ def advance(request, student_id):
 	context = {'title': "Advance " + student.name}
 	context['form'] = form
 	context['student'] = student
-	context['omniscient'] = student.is_taught_by(request.user)
+	context['omniscient'] = can_edit(request, student)
 	context['curriculum'] = student.generate_curriculum_rows(
 			omniscient = context['omniscient'])
-	context['num_psets'] = student.uploadedfile_set.filter(category='psets')\
-			.values('unit').distinct().count()
+	if student.semester.uses_legacy_pset_system:
+		uploads = student.uploadedfile_set # type: ignore
+		context['num_psets'] = uploads.filter(category='psets').values('unit').distinct().count()
+	else:
+		context['num_psets'] = dashboard.models.PSet.objects.filter(student=student).count()
+
 	return render(request, "roster/advance.html", context)
 
 
@@ -195,7 +198,7 @@ def invoice(request, student_id=None):
 def invoice_standalone(request, student_id, checksum):
 	student = models.Student.objects.get(id=student_id)
 	if checksum != get_checksum(student):
-		raise HttpResponseBadRequest("Bad hash provided")
+		raise PermissionDenied("Bad hash provided")
 	try:
 		invoice = student.invoice
 	except ObjectDoesNotExist:
