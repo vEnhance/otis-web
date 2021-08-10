@@ -1,0 +1,35 @@
+[tool.poetry]
+name = "otisweb"
+version = "1.9.0"
+description = "OTIS-WEB Course Management System"
+authors = ["Evan Chen <evan@evanchen.cc>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+Django = "^3.2.6"
+boto = "^2.49.0"
+crispy-bootstrap5 = "^0.4"
+django-allauth = "^0.45.0"
+django-bootstrap-v5 = "^1.0.5"
+django-crispy-forms = "^1.12.0"
+django-debug-toolbar = "^3.2.1"
+django-hijack = "^3.0.0"
+django-import-export = "^2.5.0"
+django-positions = "^0.6.0"
+django-registration = "^3.2"
+django-storages = {extras = ["google"], version = "^1.11.1"}
+django-stubs = "^1.8.0"
+django-reversion = "^4.0.0"
+mysqlclient = "^2.0.3"
+python-dotenv = "^0.19.0"
+wheel = "^0.37.0"
+
+[tool.poetry.dev-dependencies]
+pdbpp = "^0.10.3"
+jedi = "^0.18.0"
+ipython = "^7.26.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

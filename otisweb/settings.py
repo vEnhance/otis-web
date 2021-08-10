@@ -61,7 +61,6 @@ INSTALLED_APPS = [
 	'bootstrap5',
 	'crispy_forms',
 	'crispy_bootstrap5',
-	'hijack_admin',
 	'hijack',
 	'compat',
 	'import_export',
