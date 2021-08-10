@@ -30,6 +30,14 @@ pdbpp = "^0.10.3"
 jedi = "^0.18.0"
 ipython = "^7.26.0"
 
+[tool.pyright]
+reportMissingImports = true
+reportMissingTypeStubs = false
+useLibraryCodeForTypes = true
+pythonVersion = "3.9"
+pythonPlatform = "Linux"
+typeCheckingMode = "basic"
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
