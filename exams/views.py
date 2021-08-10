@@ -100,5 +100,4 @@ def show_exam(request: HttpRequest,  student_id: int, pk: int) -> HttpResponse:
 	quiz = get_object_or_404(exams.models.PracticeExam, pk = pk)
 	if quiz.is_test:
 		return HttpResponseForbidden("You can only use this view for short-answer quizzes.")
-	student = get_student_by_id(request, student_id)
 	return render(request, 'exams/quiz_detail.html', context)

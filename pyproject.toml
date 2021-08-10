@@ -37,10 +37,21 @@ useLibraryCodeForTypes = true
 pythonVersion = "3.9"
 pythonPlatform = "Linux"
 typeCheckingMode = "basic"
-strictDictionaryInference = true
-strictListInference = true
-strictSetInference = true
+strictDictionaryInference = false
+strictListInference = false
+strictSetInference = false
 reportUnusedImport = "warning"
+reportUnusedClass = "error"
+reportUnusedFunction = "error"
+reportUnusedVariable = "error"
+reportDuplicateImport = "error"
+reportUntypedFunctionDecorator = "warning"
+reportUntypedBaseClass = "warning"
+reportUnusedNamedTuple = "error"
+reportPrivateUsage = "error"
+reportIncompatibleMethodOverride = "error"
+reportIncompatibleVariableOverride = "none"
+reportOverlappingOverload = "warning"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

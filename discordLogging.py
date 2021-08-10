@@ -33,16 +33,16 @@ class DiscordHandler(logging.Handler):
 		super().__init__()
 		self.url = url
 
-	def emit(self, r: logging.LogRecord):
-		level = r.levelname.lower().strip()
+	def emit(self, record: logging.LogRecord):
+		level = record.levelname.lower().strip()
 		emoji = EMOJIS.get(level, ':question:')
 		color = COLORS.get(level, 0xaaaaaa)
 
 		try:
-			user = r.request.user.first_name + ' ' + r.request.user.last_name # type: ignore
+			user = record.request.user.first_name + ' ' + record.request.user.last_name # type: ignore
 		except AttributeError:
 			user = 'anonymous'
-		s = str(getattr(r, 'status_code', ''))
+		s = str(getattr(record, 'status_code', ''))
 		if s:
 			s = '**' + s + '**'
 		else:
@@ -50,36 +50,36 @@ class DiscordHandler(logging.Handler):
 
 		fields = [
 				{ 'name': 'Status', 'value': s, 'inline': True, },
-				{ 'name': 'Level', 'value': r.levelname.title(), 'inline': True, },
-				{ 'name': 'Scope', 'value': f"`{r.name}`", 'inline': True, },
-				{ 'name': 'Module', 'value': f"`{r.module}`", 'inline': True, },
+				{ 'name': 'Level', 'value': record.levelname.title(), 'inline': True, },
+				{ 'name': 'Scope', 'value': f"`{record.name}`", 'inline': True, },
+				{ 'name': 'Module', 'value': f"`{record.module}`", 'inline': True, },
 				{ 'name': 'User', 'value': user, 'inline': True, },
-				{ 'name': 'Filename', 'value': f"{r.lineno}:`{r.filename}`", 'inline': True, },
+				{ 'name': 'Filename', 'value': f"{record.lineno}:`{record.filename}`", 'inline': True, },
 				]
 
 		description_parts = OrderedDict()
 
 		# if the message is short (< 1 line), we set it as the title
-		if '\n' not in r.message:
-			title = f'{emoji} {r.message[:200]}'
+		if '\n' not in record.message:
+			title = f'{emoji} {record.message[:200]}'
 		# otherwise, set the first line as title and include the rest in description
 		else:
-			i = r.message.index('\n')
-			title = f"{emoji} {r.message[:i]}"
-			description_parts[':green_heart: MESSAGE :green_heart:'] =  "```" + r.message[i+1:] + "```"
+			i = record.message.index('\n')
+			title = f"{emoji} {record.message[:i]}"
+			description_parts[':green_heart: MESSAGE :green_heart:'] =  "```" + record.message[i+1:] + "```"
 
 		# if exc_text nonempty, add that to description
-		if r.exc_text is not None:
+		if record.exc_text is not None:
 			# always truncate r.exc_text to at most 600 chars since it's fking long
-			if len(r.exc_text) > 600:
-				blob = r.exc_text[:300] + '\n...\n' + r.exc_text[-300:]
+			if len(record.exc_text) > 600:
+				blob = record.exc_text[:300] + '\n...\n' + record.exc_text[-300:]
 			else:
-				blob = r.exc_text
+				blob = record.exc_text
 			description_parts[':yellow_heart: EXCEPTION :yellow_heart:'] =  "```" + blob + "```"
 
 		# if request data is there, include that too
-		if hasattr(r, 'request'):
-			request: HttpRequest = getattr(r, 'request')
+		if hasattr(record, 'request'):
+			request: HttpRequest = getattr(record, 'request')
 			s = ''
 			s += f'> **Method** {request.method}\n'
 			s += f'> **Path** `{request.path}`\n'
@@ -126,5 +126,4 @@ class DiscordHandler(logging.Handler):
 				}
 
 		if self.url is not None:
-			response = requests.post(self.url, json = data)
-			return response
+			requests.post(self.url, json = data)

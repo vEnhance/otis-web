@@ -7,7 +7,6 @@ from django.db.models import Exists, OuterRef
 def unlock_stuff(apps, scheme_editor):
     Student = apps.get_model('roster', 'Student')
     UploadedFile = apps.get_model('dashboard', 'UploadedFile')
-    Unit = apps.get_model('core', 'Unit')
     for student in Student.objects.all():
         curriculum = student.curriculum.all().annotate(
                 has_pset = Exists(
