@@ -21,9 +21,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
 CRISPY_TEMPLATE_PACK = 'bootstrap5'
-HIJACK_ALLOW_GET_REQUESTS = True
-HIJACK_LOGIN_REDIRECT_URL = '/'
-HIJACK_LOGOUT_REDIRECT_URL = '/'
 LOGIN_REDIRECT_URL = '/'
 
 PRODUCTION = bool(os.getenv('IS_PRODUCTION'))
@@ -62,7 +59,7 @@ INSTALLED_APPS = [
 	'crispy_forms',
 	'crispy_bootstrap5',
 	'hijack',
-	'compat',
+	'hijack.contrib.admin',
 	'import_export',
 	'reversion',
 ]
@@ -76,6 +73,7 @@ MIDDLEWARE = [
 	'django.contrib.auth.middleware.AuthenticationMiddleware',
 	'django.contrib.messages.middleware.MessageMiddleware',
 	'django.middleware.clickjacking.XFrameOptionsMiddleware',
+	'hijack.middleware.HijackUserMiddleware',
 ]
 
 ROOT_URLCONF = 'otisweb.urls'

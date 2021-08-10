@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 {% load static %}
-{% load hijack_tags %}
+{% load hijack %}
 <html>
 <head>
 <meta charset="utf-8">
@@ -29,9 +29,6 @@ MathJax = {
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mate">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Verdana">
 <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400&display=swap" rel="stylesheet">
-<link rel="stylesheet" type="text/css"
-	href="{% static 'hijack/hijack-styles.css' %}" />
-<link href="{% static 'hijack/hijack-styles.css' %}" rel="stylesheet">
 <link href="//web.evanchen.cc/css/simple-53544.css" rel="stylesheet">
 <link href="{% static 'css/django.css' %}" rel="stylesheet">
 <link href="{% static 'css/otis.css' %}" rel="stylesheet">
@@ -51,7 +48,9 @@ MathJax = {
 </head>
 
 <body>
-{% hijack_notification %}
+{% if request.user.is_hijacked %}
+	{% include "hijack/notification.html" %}
+{% endif %}
 
 {% if debug %}
 <div id="debug-warning" class="alert" role="alert">

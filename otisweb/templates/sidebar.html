@@ -47,8 +47,10 @@
 		{% endif %}
 		{% if student.user %} {# Hijack student account #}
 		<li>
-			<form action="/hijack/{{ student.user.id }}/" method="post">
+			<form action="{% url 'hijack:acquire' %}" method="post">
 			{% csrf_token %}
+			<input type="hidden" name="user_pk" value="{{student.user.pk}}" />
+			<input type="hidden" name="next" value="{{request.path}}" />
 			<button class="pseudo-button" type="submit">
 				Hijack {{ student.user.username }}</button>
 			</form>
