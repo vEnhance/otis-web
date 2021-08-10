@@ -37,6 +37,10 @@ useLibraryCodeForTypes = true
 pythonVersion = "3.9"
 pythonPlatform = "Linux"
 typeCheckingMode = "basic"
+strictDictionaryInference = true
+strictListInference = true
+strictSetInference = true
+reportUnusedImport = "warning"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

@@ -1,7 +1,5 @@
-from django.core.management.base import BaseCommand, CommandError
-from django.db.models import Count, F, OuterRef, Q, Subquery
-
-from dashboard.models import UploadedFile
+from django.core.management.base import BaseCommand
+from django.db.models import Count, Q
 from roster.models import Student
 
 
@@ -26,4 +24,3 @@ class Command(BaseCommand):
 			s.num_units_done = s.num_psets
 
 		Student.objects.bulk_update(students, ['num_units_done',], batch_size = 100)
-

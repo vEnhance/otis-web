@@ -1,5 +1,3 @@
-from typing import Tuple
-
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q

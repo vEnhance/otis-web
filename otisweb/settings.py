@@ -6,7 +6,7 @@ import logging
 import os
 from pathlib import Path
 
-import discordLogging  # typing: ignore
+import discordLogging  # type: ignore
 import import_export.tmp_storages
 from dotenv import load_dotenv
 

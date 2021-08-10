@@ -1,7 +1,6 @@
-from django.core.management.base import BaseCommand, CommandError
-
 import core.models
 import roster.models
+from django.core.management.base import BaseCommand
 
 
 class Command(BaseCommand):

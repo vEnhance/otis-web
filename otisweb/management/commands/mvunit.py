@@ -1,7 +1,6 @@
-from django.core.management.base import BaseCommand, CommandError
-
 from core.models import Unit
 from dashboard.models import UploadedFile
+from django.core.management.base import BaseCommand
 from roster.models import Student
 
 
