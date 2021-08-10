@@ -1,3 +1,5 @@
+![OTIS-WEB status](https://github.com/vEnhance/otis-web/actions/workflows/main.yml/badge.svg)
+
 # OTIS-WEB
 
 These are the source files for the internal website
