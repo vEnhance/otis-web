@@ -45,7 +45,7 @@ class Semester(models.Model):
 	calendar_url_no_meets_evan = models.TextField(blank=True,
 			help_text = "Link to calendar for students without meetings with Evan")
 
-	def __str__(self):
+	def __str__(self) -> str:
 		return self.name
 	def get_absolute_url(self):
 		return reverse_lazy("past", args=(self.pk,))
@@ -70,7 +70,7 @@ class UnitGroup(models.Model):
 			)
 	subject = models.CharField(max_length=2, choices = SUBJECT_CHOICES,
 			help_text = "The subject for the unit")
-	def __str__(self):
+	def __str__(self) -> str:
 		return self.name
 
 	@property
@@ -100,7 +100,7 @@ class Unit(models.Model):
 			help_text = "The version code for the handout, like 'ZGX'")
 	position = PositionField(
 			help_text="The ordering of the relative handouts to each other.")
-	def __str__(self):
+	def __str__(self) -> str:
 		if self.group is not None:
 			return self.group.name + " [" + self.code + "]"
 		return "-" + " [" + self.code + "]"
@@ -112,13 +112,13 @@ class Unit(models.Model):
 	def list_display_position(self):
 		return self.position
 	@property
-	def problems_pdf_filename(self):
+	def problems_pdf_filename(self) -> str:
 		return self.code + '-' + self.group.slug + '.pdf'
 	@property
-	def solutions_pdf_filename(self):
+	def solutions_pdf_filename(self) -> str:
 		return self.code + '-sol-' + self.group.slug + '.pdf'
 	@property
-	def problems_tex_filename(self):
+	def problems_tex_filename(self) -> str:
 		return self.code + '-tex-' + self.group.slug + '.tex'
 
 	def get_absolute_url(self):

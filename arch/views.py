@@ -1,7 +1,7 @@
 import logging
 import traceback
 from hashlib import sha256
-from typing import ClassVar, Dict
+from typing import Any, ClassVar, Dict
 
 import reversion
 from django.conf import settings
@@ -9,8 +9,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
+from django.db.models.query import QuerySet
+from django.forms.models import BaseModelForm
 from django.http import HttpRequest, HttpResponseRedirect, JsonResponse
 from django.http.request import HttpRequest
+from django.http.response import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.views.decorators.csrf import csrf_exempt
@@ -21,9 +24,10 @@ from roster.models import Student
 
 from . import forms, models
 
+ContextType = Dict[str, Any]
 
 class ExistStudentRequiredMixin(LoginRequiredMixin):
-	def dispatch(self, request: HttpRequest, *args, **kwargs):
+	def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any):
 		if not request.user.is_authenticated:
 			return super().dispatch(request, *args, **kwargs)
 		assert isinstance(request.user, User)
@@ -35,14 +39,14 @@ class ExistStudentRequiredMixin(LoginRequiredMixin):
 
 class HintObjectView:
 	kwargs: ClassVar[Dict] = {}
-	def get_object(self, queryset=None):
+	def get_object(self, queryset: QuerySet[models.Hint] = None) -> models.Hint:
 		if queryset is None:
 			queryset = self.get_queryset() # type: ignore
 		return get_object_or_404(queryset, problem__puid=self.kwargs['puid'],
 				number=self.kwargs['number'])
 class ProblemObjectView:
 	kwargs: ClassVar[Dict] = {}
-	def get_object(self, queryset=None):
+	def get_object(self, queryset: QuerySet[models.Problem] = None) -> models.Problem:
 		if queryset is None:
 			queryset = self.get_queryset() # type: ignore
 		return get_object_or_404(queryset, puid=self.kwargs['puid'])
@@ -52,7 +56,7 @@ class HintList(ExistStudentRequiredMixin, ListView):
 	def get_queryset(self):
 		self.problem = get_object_or_404(models.Problem, **self.kwargs)
 		return models.Hint.objects.filter(problem=self.problem).order_by('number')
-	def get_context_data(self, **kwargs):
+	def get_context_data(self, **kwargs: Dict[Any, Any]):
 		context = super().get_context_data(**kwargs)
 		context['problem'] = self.problem
 		return context
@@ -66,10 +70,10 @@ class HintUpdate(HintObjectView, ExistStudentRequiredMixin, RevisionMixin, Updat
 	model = models.Hint
 	form_class = forms.HintUpdateFormWithReason
 	object: ClassVar[models.Hint] = models.Hint()
-	def form_valid(self, form):
+	def form_valid(self, form: BaseModelForm) -> HttpResponse:
 		reversion.set_comment(form.cleaned_data['reason'] or form.cleaned_data['content'])
 		return super().form_valid(form)
-	def get_context_data(self, **kwargs):
+	def get_context_data(self, **kwargs: Any) -> ContextType:
 		context = super().get_context_data(**kwargs)
 		context['problem'] = self.object.problem
 		return context
@@ -81,7 +85,7 @@ class ProblemUpdate(ProblemObjectView, ExistStudentRequiredMixin, RevisionMixin,
 	model = models.Problem
 	form_class = forms.ProblemUpdateFormWithReason
 	object: ClassVar[models.Problem] = models.Problem()
-	def form_valid(self, form):
+	def form_valid(self, form: BaseModelForm) -> HttpResponse:
 		reversion.set_comment(form.cleaned_data['reason'] or form.cleaned_data['description'])
 		return super().form_valid(form)
 	def get_success_url(self):
@@ -116,7 +120,7 @@ class ProblemCreate(ExistStudentRequiredMixin, RevisionMixin, CreateView):
 	context_object_name = "problem"
 	fields = ('puid', 'description',)
 	model = models.Problem
-	def get_context_data(self, **kwargs):
+	def get_context_data(self, **kwargs: Any):
 		context = super().get_context_data(**kwargs)
 		context['lookup_form'] = forms.ProblemSelectForm()
 		context['num_problems'] = models.Problem.objects.all().count()
@@ -125,7 +129,7 @@ class ProblemCreate(ExistStudentRequiredMixin, RevisionMixin, CreateView):
 		return context
 
 @login_required
-def lookup(request):
+def lookup(request: HttpRequest):
 	if request.method == 'POST':
 		form = forms.ProblemSelectForm(request.POST)
 		assert form.is_valid()
@@ -144,7 +148,7 @@ def archapi(request: HttpRequest) -> JsonResponse:
 		if not sha256(token.encode('ascii')).hexdigest() == settings.API_TARGET_HASH:
 			return JsonResponse({'error': "☕"}, status = 418)
 
-	def err(status = 400) -> JsonResponse:
+	def err(status: int = 400) -> JsonResponse:
 		logging.error(traceback.format_exc())
 		return JsonResponse(
 				{'error': ''.join(traceback.format_exc(limit=1)) },
