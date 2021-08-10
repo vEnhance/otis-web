@@ -2,8 +2,7 @@ from django.contrib import admin
 from import_export import fields, resources, widgets
 from import_export.admin import ImportExportModelAdmin
 
-import core
-import exams
+import core.models
 
 # Register your models here.
 

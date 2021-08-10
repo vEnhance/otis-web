@@ -192,7 +192,7 @@ STORAGE_HASH_KEY = os.getenv("STORAGE_HASH_KEY", "look_at_me_im_a_cute_kitten")
 API_TARGET_HASH = os.getenv("API_TARGET_HASH", '1c3592aa9241522fea1dd572c43c192a277e832dcd1ae63adfe069cb05624ead')
 
 def filter_useless_404(record: logging.LogRecord) -> bool:
-	a = tuple(record.args)
+	a = tuple(record.args) # type: ignore
 	return not (
 			len(a) == 2 \
 			and a[0] == 'Not Found' \
@@ -207,7 +207,6 @@ def filter_useless_404(record: logging.LogRecord) -> bool:
 
 VERBOSE_LOG_LEVEL = 15
 SUCCESS_LOG_LEVEL = 25
-import logging
 logging.addLevelName(VERBOSE_LOG_LEVEL, "VERBOSE")
 logging.addLevelName(SUCCESS_LOG_LEVEL, "SUCCESS")
 
