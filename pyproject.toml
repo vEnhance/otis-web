@@ -52,6 +52,8 @@ reportPrivateUsage = "error"
 reportIncompatibleMethodOverride = "error"
 reportIncompatibleVariableOverride = "none"
 reportOverlappingOverload = "warning"
+reportUnknownParameterType = "warning"
+exclude = ["**/node_modules", "**/__pycache__", ".git", "venv", "**/migrations"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

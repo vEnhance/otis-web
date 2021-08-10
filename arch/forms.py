@@ -1,3 +1,5 @@
+from typing import Any, Dict, Set, Union
+
 from django import forms
 from django.shortcuts import get_object_or_404
 
@@ -18,7 +20,7 @@ class ProblemUpdateFormWithReason(forms.ModelForm):
 
 class ProblemSelectWidget(forms.Select):
 	def create_option(
-		self, name, value, label, selected, index, subindex=None, attrs=None
+			self, name: str, value: Any, label : Union[int, str], selected : Union[Set[str], bool], index : int, subindex: int = None, attrs: Dict[str, Any] = None
 	):
 		option = super().create_option(
 			name, value, label, selected, index, subindex, attrs or {},

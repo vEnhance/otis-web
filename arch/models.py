@@ -20,11 +20,11 @@ class Problem(models.Model):
 	aops_url = models.URLField(max_length = 128,
 			help_text = "URL to problem on AoPS. Include HTTPS.",
 			blank = True)
-	def __str__(self):
+	def __str__(self) -> str:
 		return self.puid
 	def get_absolute_url(self):
 		return reverse_lazy("hint-list", args=(self.puid,))
-	def get_source(self):
+	def get_source(self) -> str:
 		return self.source or "(no source)"
 
 @reversion.register()
@@ -58,7 +58,7 @@ class Hint(models.Model):
 		unique_together = ('problem', 'number',)
 	def __str__(self):
 		return f"Hint {self.number} for {self.problem}"
-	def puid(self):
+	def puid(self) -> str:
 		return self.problem.puid
 
 	def get_absolute_url(self):
