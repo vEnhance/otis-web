@@ -424,6 +424,7 @@ class StudentRegistration(models.Model):
 
 	graduation_year = models.IntegerField(choices = (
 				(   0, "Already graduated high school"),
+				(2021, "Graduating in 2021"),
 				(2022, "Graduating in 2022"),
 				(2023, "Graduating in 2023"),
 				(2024, "Graduating in 2024"),
