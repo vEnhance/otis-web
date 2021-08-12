@@ -1,6 +1,7 @@
 import dashboard.models
 import roster.models
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import PermissionDenied
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.views.generic.list import ListView
@@ -18,6 +19,8 @@ class UnitGroupListView(ListView):
 def permitted(unit: Unit, request: HttpRequest, asking_solution: bool) -> bool:
 	if getattr(request.user, 'is_staff', False):
 		return True
+	elif isinstance(request.user, AnonymousUser):
+		return False
 	elif dashboard.models.PSet.objects\
 			.filter(student__user = request.user, unit = unit).exists():
 		return True
@@ -33,7 +36,7 @@ def permitted(unit: Unit, request: HttpRequest, asking_solution: bool) -> bool:
 	return False
 
 @login_required
-def unit_problems(request, pk) -> HttpResponse:
+def unit_problems(request: HttpRequest, pk: int) -> HttpResponse:
 	unit = Unit.objects.get(pk=pk)
 	if permitted(unit, request, asking_solution = False):
 		return get_from_google_storage(unit.problems_pdf_filename)
@@ -41,7 +44,7 @@ def unit_problems(request, pk) -> HttpResponse:
 		raise PermissionDenied(f"Can't view the problems pdf for {unit}")
 
 @login_required
-def unit_tex(request, pk) -> HttpResponse:
+def unit_tex(request: HttpRequest, pk: int) -> HttpResponse:
 	unit = Unit.objects.get(pk=pk)
 	if permitted(unit, request, asking_solution = False):
 		return get_from_google_storage(unit.problems_tex_filename)
@@ -49,7 +52,7 @@ def unit_tex(request, pk) -> HttpResponse:
 		raise PermissionDenied(f"Can't view the problems TeX for {unit}")
 
 @login_required
-def unit_solutions(request, pk) -> HttpResponse:
+def unit_solutions(request: HttpRequest, pk: int) -> HttpResponse:
 	unit = Unit.objects.get(pk=pk)
 	if permitted(unit, request, asking_solution = True):
 		return get_from_google_storage(unit.solutions_pdf_filename)
@@ -57,6 +60,6 @@ def unit_solutions(request, pk) -> HttpResponse:
 		raise PermissionDenied(f"Can't view the solutions for {unit}")
 
 @login_required
-def classroom(request):
+def classroom(request: HttpRequest):
 	semester = Semester.objects.get(active=True)
 	return HttpResponseRedirect(semester.classroom_url)

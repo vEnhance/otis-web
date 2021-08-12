@@ -7,7 +7,7 @@ from django.http.response import HttpResponse, HttpResponseBadRequest, HttpRespo
 
 logger = logging.getLogger(__name__)
 
-def h(value):
+def h(value : str) -> str:
 	s = settings.STORAGE_HASH_KEY + '|' + value
 	return sha256(s.encode('ascii')).hexdigest()
 
