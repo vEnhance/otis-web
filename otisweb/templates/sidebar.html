@@ -42,28 +42,30 @@
 	<ul>
 	<li><a href="{% url "admin:index" %}">Django admin</a></li>
 		{% if student %}
-		<li><a href="{% url "admin:roster_student_change" student.id %}">
-				Edit {{ student.user.username }}</a></li>
+			<li><a href="{% url "admin:roster_student_change" student.id %}">
+					Edit {{ student.user.username }}</a></li>
 		{% endif %}
 		{% if student.user %} {# Hijack student account #}
-		<li>
-			<form action="{% url 'hijack:acquire' %}" method="post">
-			{% csrf_token %}
-			<input type="hidden" name="user_pk" value="{{student.user.pk}}" />
-			<input type="hidden" name="next" value="{{request.path}}" />
-			<button class="pseudo-button" type="submit">
-				Hijack {{ student.user.username }}</button>
-			</form>
-		</li>
+			<li>
+				<form action="{% url 'hijack:acquire' %}" method="post">
+				{% csrf_token %}
+				<input type="hidden" name="user_pk" value="{{student.user.pk}}" />
+				<input type="hidden" name="next" value="{{request.path}}" />
+				<button class="pseudo-button" type="submit">
+					Hijack {{ student.user.username }}</button>
+				</form>
+			</li>
 		{% endif %}
 		{% if student.assistant %} {# Hijack assistant account #}
-		<li>
-			<form action="/hijack/{{ student.assistant.user.id }}/" method="post">
-			{% csrf_token %}
-			<button class="pseudo-button" type="submit">
-				Hijack {{ student.assistant.user.username }}</button>
-			</form>
-		</li>
+			<li>
+				<form action="{% url 'hijack:acquire' %}" method="post">
+				{% csrf_token %}
+				<input type="hidden" name="user_pk" value="{{student.assistant.user.pk}}" />
+				<input type="hidden" name="next" value="{{request.path}}" />
+				<button class="pseudo-button" type="submit">
+					Hijack {{ student.assistant.user.username }}</button>
+				</form>
+			</li>
 		{% endif %}
 	</ul>
 	{% endif %}
