@@ -126,4 +126,4 @@ class DiscordHandler(logging.Handler):
 				}
 
 		if self.url is not None:
-			requests.post(self.url, json = data)
+			print(requests.post(self.url, json = data))

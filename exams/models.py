@@ -14,7 +14,7 @@ from exams.calculator import expr_compute
 
 def expr_validator(value: str):
 	try:
-		float(expr_compute(value) or 0)
+		_ = float(expr_compute(value) or 0)
 	except OverflowError:
 		raise ValidationError(r'This result has absolute value too large to parse.')
 	except:
@@ -31,7 +31,7 @@ class PracticeExam(models.Model):
 	is_test = models.BooleanField(help_text = "Whether this is a quiz or test")
 	number = models.PositiveSmallIntegerField(
 			help_text = "The number of the assignment (e.g. Test 8, Quiz D) ")
-	def __str__(self):
+	def __str__(self) -> str:
 		if self.is_test:
 			return self.family + " Test " + self.get_number_display()
 		else:
@@ -63,7 +63,7 @@ class PracticeExam(models.Model):
 		unique_together = ('family', 'is_test', 'number')
 
 	@property
-	def pdfname(self):
+	def pdfname(self) -> str:
 		kind = 'Exam' if self.is_test else 'Quiz'
 		return f'{kind}-{self.family}-{self.get_number_display()}.pdf'
 
@@ -75,14 +75,14 @@ class PracticeExam(models.Model):
 
 
 	@property
-	def overdue(self):
+	def overdue(self) -> bool:
 		return (self.due_date is not None) and (self.due_date < datetime.date.today())
 	@property
-	def started(self):
+	def started(self) -> bool:
 		if self.start_date is None: return True
 		return (self.start_date <= datetime.date.today())
 	@property
-	def current(self):
+	def current(self) -> bool:
 		return self.started and not self.overdue
 
 

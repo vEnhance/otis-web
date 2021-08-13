@@ -14,8 +14,11 @@ from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count, F, OuterRef, Q, Subquery, Sum
+from django.db.models.query import QuerySet
+from django.forms.models import BaseModelForm
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect  # NOQA
 from django.http.request import HttpRequest
 from django.shortcuts import get_object_or_404, render
@@ -82,7 +85,7 @@ class Meter:
 		return Meter(name = "Charisma", emoji = "㊙️", value = value,
 				unit = "◆", color = '#9c1421', max_value = 50)
 
-def _get_meter_update(student: roster.models.Student):
+def _get_meter_update(student: roster.models.Student) -> Dict[str, Any]:
 	psets = dashboard.models.PSet.objects\
 			.filter(student = student, approved = True, eligible = True)
 	pset_data = psets.aggregate(Sum('clubs'), Sum('hours'))
@@ -111,8 +114,9 @@ def _get_meter_update(student: roster.models.Student):
 			}
 
 @login_required
-def portal(request, student_id) -> HttpResponse:
+def portal(request: HttpRequest, student_id: int) -> HttpResponse:
 	student = get_student_by_id(request, student_id, payment_exempt = True)
+	assert isinstance(request.user, User)
 	if not request.user.is_staff and student.is_delinquent:
 		return HttpResponseRedirect(reverse_lazy('invoice', args=(student_id,)))
 	semester = student.semester
@@ -139,7 +143,7 @@ def portal(request, student_id) -> HttpResponse:
 	return render(request, "dashboard/portal.html", context)
 
 @login_required
-def achievements(request, student_id) -> HttpResponse:
+def achievements(request: HttpRequest, student_id: int) -> HttpResponse:
 	student = get_student_by_id(request, student_id)
 	context: Dict[str,Any] = {
 			'student': student,
@@ -176,7 +180,7 @@ def achievements(request, student_id) -> HttpResponse:
 	return render(request, "dashboard/achievements.html", context)
 
 @login_required
-def submit_pset(request, student_id) -> HttpResponse:
+def submit_pset(request: HttpRequest, student_id: int) -> HttpResponse:
 	student = get_student_by_id(request, student_id)
 	if request.method == 'POST':
 		form = forms.PSetForm(request.POST, request.FILES)
@@ -227,7 +231,7 @@ def submit_pset(request, student_id) -> HttpResponse:
 	return render(request, "dashboard/submit_pset_form.html", context)
 
 @login_required
-def uploads(request, student_id, unit_id) -> HttpResponse:
+def uploads(request: HttpRequest, student_id: int, unit_id: int) -> HttpResponse:
 	student = get_student_by_id(request, student_id)
 	unit = get_object_or_404(core.models.Unit.objects, id = unit_id)
 	uploads = dashboard.models.UploadedFile.objects.filter(benefactor=student, unit=unit)
@@ -258,12 +262,12 @@ def uploads(request, student_id, unit_id) -> HttpResponse:
 	return render(request, "dashboard/uploads.html", context)
 
 @login_required
-def index(request) -> HttpResponse:
+def index(request: HttpRequest) -> HttpResponse:
 	students = get_visible_students(request.user, current=True)
 	if len(students) == 1: # unique match
 		return HttpResponseRedirect(\
 				reverse("portal", args=(students[0].id,)))
-
+	assert isinstance(request.user, User)
 	context: Dict[str, Any] = {}
 	context['title'] = "Current Semester Listing"
 	context['students'] = students
@@ -275,14 +279,14 @@ def index(request) -> HttpResponse:
 	return render(request, "dashboard/stulist.html", context)
 
 @login_required
-def past(request, semester = None):
+def past(request: HttpRequest, semester: core.models.Semester = None):
 	students = get_visible_students(request.user, current=False)
 	if semester is None:
 		students = students.order_by('-semester',
 				'user__first_name', 'user__last_name')[0:256]
 	else:
 		students = students.filter(semester=semester)
-	context = {}
+	context: Dict[str, Any] = {}
 	context['title'] = "Previous Semester Listing"
 	context['students'] = students
 	context['stulist_show_semester'] = True
@@ -299,7 +303,7 @@ class UpdateFile(LoginRequiredMixin, UpdateView):
 		unit_id = self.object.unit.id if self.object.unit is not None else 0
 		return reverse("uploads", args=(stu_id, unit_id,))
 
-	def get_object(self, *args, **kwargs):
+	def get_object(self, *args: Any, **kwargs: Any) -> dashboard.models.UploadedFile:
 		obj = super(UpdateFile, self).get_object(*args, **kwargs)
 		assert isinstance(obj, dashboard.models.UploadedFile)
 		if not obj.owner == self.request.user \
@@ -311,7 +315,7 @@ class DeleteFile(LoginRequiredMixin, DeleteView):
 	model = dashboard.models.UploadedFile
 	success_url = reverse_lazy("index")
 
-	def get_object(self, *args, **kwargs):
+	def get_object(self, *args: Any, **kwargs: Any) -> dashboard.models.UploadedFile:
 		obj = super(DeleteFile, self).get_object(*args, **kwargs)
 		assert isinstance(obj, dashboard.models.UploadedFile)
 		if not obj.owner == self.request.user \
@@ -320,7 +324,7 @@ class DeleteFile(LoginRequiredMixin, DeleteView):
 		return obj
 
 @staff_member_required
-def quasigrader(request, num_hours = 336) -> HttpResponse:
+def quasigrader(request: HttpRequest, num_hours: int = 336) -> HttpResponse:
 	context: Dict[str, Any] = {}
 	context['title'] = 'Quasi-grader'
 	num_hours = int(num_hours)
@@ -368,7 +372,7 @@ def quasigrader(request, num_hours = 336) -> HttpResponse:
 	return render(request, "dashboard/quasigrader.html", context)
 
 @staff_member_required
-def idlewarn(request):
+def idlewarn(request: HttpRequest) -> HttpResponse:
 	context = {}
 	context['title'] = 'Idle-warn'
 
@@ -386,8 +390,8 @@ def idlewarn(request):
 	return render(request, "dashboard/idlewarn.html", context)
 
 @staff_member_required
-def leaderboard(request):
-	context = {}
+def leaderboard(request: HttpRequest) -> HttpResponse:
+	context: Dict[str, Any] = {}
 	context['title'] = 'Leader-board'
 
 	context['students'] = get_visible_students(request.user)\
@@ -401,7 +405,7 @@ def leaderboard(request):
 
 class DownloadList(LoginRequiredMixin, ListView):
 	template_name = 'dashboard/download_list.html'
-	def get_queryset(self):
+	def get_queryset(self) -> QuerySet[dashboard.models.SemesterDownloadFile]:
 		student = get_student_by_id(self.request, self.kwargs['pk'])
 		return dashboard.models.SemesterDownloadFile.objects.filter(semester = student.semester)
 
@@ -409,7 +413,7 @@ class PSetDetail(LoginRequiredMixin, DetailView):
 	template_name = 'dashboard/pset_detail.html'
 	model = dashboard.models.PSet
 	object_name = 'pset'
-	def dispatch(self, request: HttpRequest, *args, **kwargs):
+	def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
 		pset = self.get_object()
 		assert isinstance(pset, dashboard.models.PSet)
 		if not can_view(request, pset.student):
@@ -426,14 +430,14 @@ class ProblemSuggestionCreate(LoginRequiredMixin, CreateView):
 		if 'unit_id' in self.kwargs:
 			initial['unit'] = self.kwargs['unit_id']
 		return initial
-	def form_valid(self, form):
+	def form_valid(self, form: BaseModelForm):
 		form.instance.student = get_student_by_id(self.request, self.kwargs['student_id'])
 		messages.success(self.request, "Successfully submitted suggestion! Thanks much :) You can add more using the form below.")
 		return super().form_valid(form)
 
 	def get_success_url(self):
 		return reverse_lazy("suggest-new", kwargs=self.kwargs)
-	def get_context_data(self, **kwargs):
+	def get_context_data(self, **kwargs: Any):
 		context = super().get_context_data(**kwargs)
 		context['student'] = get_student_by_id(self.request, self.kwargs['student_id'])
 		return context
@@ -446,10 +450,10 @@ class ProblemSuggestionUpdate(LoginRequiredMixin, UpdateView):
 
 	def get_success_url(self):
 		return reverse_lazy("suggest-update", kwargs=self.kwargs)
-	def form_valid(self, form):
+	def form_valid(self, form: BaseModelForm):
 		messages.success(self.request, "Edits saved.")
 		return super().form_valid(form)
-	def get_context_data(self, **kwargs):
+	def get_context_data(self, **kwargs: Any):
 		context = super().get_context_data(**kwargs)
 		context['student'] = self.object.student
 		if not can_view(self.request, self.object.student):
@@ -462,13 +466,13 @@ class ProblemSuggestionList(LoginRequiredMixin, ListView):
 		student = get_student_by_id(self.request, self.kwargs['student_id'])
 		self.student = student
 		return dashboard.models.ProblemSuggestion.objects.filter(student=student).order_by('resolved', 'created_at')
-	def get_context_data(self, **kwargs):
+	def get_context_data(self, **kwargs: Any):
 		context = super().get_context_data(**kwargs)
 		context['student'] = self.student
 		return context
 
 @staff_member_required
-def pending_contributions(request, suggestion_id = None) -> HttpResponse:
+def pending_contributions(request: HttpRequest, suggestion_id: int = None) -> HttpResponse:
 	context: Dict[str, Any] = {}
 	if request.method == "POST":
 		if suggestion_id is None:

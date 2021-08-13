@@ -13,7 +13,7 @@ from django.db import models
 from django.urls import reverse_lazy
 
 
-def content_file_name(instance, filename):
+def content_file_name(instance: 'UploadedFile', filename: str) -> str:
 	now = datetime.datetime.now()
 	return os.path.join(instance.category, instance.owner.username,\
 			now.strftime("%Y-%m-%d-%H%M%S"), filename)
@@ -50,11 +50,11 @@ class UploadedFile(models.Model):
 		return self.content.url
 	class Meta:
 		ordering = ('-created_at',)
+	def get_absolute_url(self):
+		return self.url
 
-def download_file_name(instance, filename):
+def download_file_name(instance: 'SemesterDownloadFile', filename: str) -> str:
 	return os.path.join("global", str(instance.semester.id), filename)
-def get_absolute_url(self):
-	return self.url
 
 class SemesterDownloadFile(models.Model):
 	semester = models.ForeignKey(core.models.Semester,
@@ -152,11 +152,10 @@ class ProblemSuggestion(models.Model):
 	notified = models.BooleanField(default = False,
 			help_text = "Whether student has received the staff's comments.")
 
-	def __str__(self):
-		return self.student.name + " suggested " + self.source \
-				+ " for " + str(self.unit.group)
+	def __str__(self) -> str:
+		return f"{self.student.name} suggested {self.source} for {self.unit.group}"
 
-def achievement_image_file_name(instance, filename):
+def achievement_image_file_name(instance: 'Achievement', filename: str) -> str:
 	return os.path.join('badges', instance.code + '_' + filename)
 
 class Achievement(models.Model):
@@ -170,8 +169,8 @@ class Achievement(models.Model):
 			help_text = "Whether the code is active right now", default = True)
 	diamonds = models.PositiveSmallIntegerField(default = 1,
 			help_text = "Amount of diamonds for this achievement")
-	def __str__(self):
-		return self.name
+	def __str__(self) -> str:
+		return str(self.name)
 
 class Level(models.Model):
 	threshold = models.IntegerField(unique = True,
