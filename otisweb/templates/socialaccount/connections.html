@@ -4,6 +4,10 @@
 {% block head_title %}{% trans "Account Connections" %}{% endblock %}
 
 {% block content %}
+<p>Your name is {{ user.first_name }} {{ user.last_name }}.
+You registered with the email <tt>{{ user.email }}</tt>.
+You can <a href="{% url "update-profile" %}">change your name or email</a>.</p>
+
 <h3>Password</h3>
 {% if user.has_usable_password %}
 <p>You can <a href="{% url "account_set_password" %}">change your password</a>

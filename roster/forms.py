@@ -1,6 +1,7 @@
 import itertools
 
 from django import forms
+from django.contrib.auth.models import User
 
 import roster
 import roster.models
@@ -98,3 +99,8 @@ class DecisionForm(forms.ModelForm):
 		model = roster.models.StudentRegistration
 		fields = ('parent_email', 'track', 'gender', 'graduation_year', 'school_name',
 				'country', 'aops_username', 'agreement_form',)
+
+class UserForm(forms.ModelForm):
+	class Meta:
+		model = User
+		fields = ('first_name', 'last_name', 'email')

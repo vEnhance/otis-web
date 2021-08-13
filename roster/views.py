@@ -398,6 +398,19 @@ def register(request: HttpRequest) -> HttpResponse:
 	context = {'title': f'{semester} Decision Form', 'form': form, 'container': container}
 	return render(request, 'roster/decision_form.html', context)
 
+@login_required
+def update_profile(request: HttpRequest) -> HttpResponse:
+	assert isinstance(request.user, User)
+	if request.method == 'POST':
+		form = forms.UserForm(request.POST, instance = request.user)
+		if form.is_valid():
+			form.save()
+			messages.success(request, "Your information has been updated")
+	else:
+		form = forms.UserForm(instance = request.user)
+	context = {'form' : form}
+	return render(request, "roster/update_profile.html", context)
+
 @csrf_exempt
 @require_POST
 def api(request):
