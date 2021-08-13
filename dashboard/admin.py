@@ -36,10 +36,10 @@ class PSetAdmin(admin.ModelAdmin):
 	list_filter = ('approved', 'student__semester',)
 	list_display_links = ('student', 'unit',)
 	list_per_page = 30
-	def approve_pset(self, request: HttpRequest, queryset: QuerySet):
-		queryset.update(approved=True)
-	def reject_pset(self, request: HttpRequest, queryset: QuerySet):
-		queryset.update(approved=False)
+	def approve_pset(self, request: HttpRequest, queryset: QuerySet[dashboard.models.PSet]):
+		_ = queryset.update(approved=True)
+	def reject_pset(self, request: HttpRequest, queryset: QuerySet[dashboard.models.PSet]):
+		_ = queryset.update(approved=False)
 	actions = ['approve_pset', 'reject_pset',]
 
 @admin.register(dashboard.models.ProblemSuggestion)

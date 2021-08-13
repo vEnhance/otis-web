@@ -32,18 +32,18 @@
 
 import math
 import operator
-from typing import Optional
+from typing import Any, List, Optional, Union
 
-from pyparsing import CaselessKeyword, Forward, Group, Literal, Regex, Suppress, Word, alphanums, alphas, delimitedList  # NOQA
+from pyparsing import CaselessKeyword, Forward, Group, Literal, Regex, Suppress, Token, Word, alphanums, alphas, delimitedList  # NOQA
 
 exprStack = []
 
 
-def push_first(toks):
+def push_first(toks: List[Token]):
 	exprStack.append(toks[0])
 
 
-def push_unary_minus(toks):
+def push_unary_minus(toks: List[Token]):
 	for t in toks:
 		if t == "-":
 			exprStack.append("unary -")
@@ -54,7 +54,7 @@ def push_unary_minus(toks):
 bnf = None
 
 
-def BNF():
+def BNF() -> Any:
 	"""
 	expop   :: '^'
 	multop  :: '*' | '/'
@@ -89,7 +89,7 @@ def BNF():
 		expr = Forward()
 		expr_list = delimitedList(Group(expr))
 		# add parse action that replaces the function identifier with a (name, number of args) tuple
-		def insert_fn_argcount_tuple(t):
+		def insert_fn_argcount_tuple(t: List[Any]):
 			fn = t.pop(0)
 			num_args = len(t[0])
 			t.insert(0, (fn, num_args))
@@ -133,7 +133,7 @@ fn = {
 }
 
 
-def evaluate_stack(s):
+def evaluate_stack(s: List[Any]) -> Union[int, float]:
 	op, num_args = s.pop(), 0
 	if isinstance(op, tuple):
 		op, num_args = op
