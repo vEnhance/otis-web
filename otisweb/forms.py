@@ -1,12 +1,13 @@
 from django import forms
 from django.contrib.auth.models import User
+from django.http.request import HttpRequest
 
 
 class OTISUserRegistrationForm(forms.Form):
 	first_name = forms.CharField(required=False)
 	last_name = forms.CharField(required=False)
 
-	def signup(self, request, user: User):
+	def signup(self, request: HttpRequest, user: User):
 		if self.is_valid():
 			data = self.cleaned_data
 			changed = False

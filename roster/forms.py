@@ -1,7 +1,9 @@
 import itertools
+from typing import Any
 
 from django import forms
 from django.contrib.auth.models import User
+from django.forms.forms import BaseForm
 
 import roster
 import roster.models
@@ -9,14 +11,14 @@ import roster.models
 
 class UnitChoiceBoundField(forms.BoundField):
 	@property
-	def subject(self):
+	def subject(self) -> str:
 		first_unit_pair = self.field.choices[0] # type: ignore
 		first_unit_code = first_unit_pair[1]
 		first_unit_subject = first_unit_code[1] # second letter
 		return first_unit_subject
 
 class UnitChoiceField(forms.TypedMultipleChoiceField):
-	def get_bound_field(self, form, field_name):
+	def get_bound_field(self, form: BaseForm, field_name: str):
 		return UnitChoiceBoundField(form, self, field_name)
 
 class CurriculumForm(forms.Form):
@@ -27,7 +29,7 @@ class CurriculumForm(forms.Form):
 	original: a list of unit ID's
 	"""
 
-	def __init__(self, *args, **kwargs):
+	def __init__(self, *args: Any, **kwargs: Any):
 		units = kwargs.pop('units')
 		original = kwargs.pop('original', [])
 		enabled = kwargs.pop('enabled', False)
@@ -35,8 +37,8 @@ class CurriculumForm(forms.Form):
 		super(CurriculumForm, self).__init__(*args, **kwargs)
 
 		n = 0
-		for name, group in itertools.groupby(units, lambda u: u.group.name):
-			group = list(group)
+		for name, group_iter in itertools.groupby(units, lambda u: u.group.name):
+			group = list(group_iter)
 			field_name = 'group-' + str(n)
 			chosen_units = [unit for unit in group if unit.id in original]
 
@@ -55,7 +57,7 @@ class CurriculumForm(forms.Form):
 
 
 class AdvanceForm(forms.ModelForm):
-	def __init__(self, *args, **kwargs):
+	def __init__(self, *args: Any, **kwargs: Any):
 		super(AdvanceForm, self).__init__(*args, **kwargs)
 		student = kwargs['instance']
 		self.fields['unlocked_units'] = forms.ModelMultipleChoiceField(
@@ -70,7 +72,7 @@ class AdvanceForm(forms.ModelForm):
 
 
 class InquiryForm(forms.ModelForm):
-	def __init__(self, *args, **kwargs):
+	def __init__(self, *args: Any, **kwargs: Any):
 		super(InquiryForm, self).__init__(*args, **kwargs)
 		self.fields['unit'].queryset = \
 				self.fields['unit'].queryset\

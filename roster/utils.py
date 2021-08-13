@@ -1,16 +1,17 @@
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
+from django.db.models.query import QuerySet
 from django.http.request import HttpRequest
 from django.shortcuts import get_object_or_404
 
 from . import models
 
 
-def get_current_students(queryset = models.Student.objects):
+def get_current_students(queryset: QuerySet[models.Student] = models.Student.objects):
 	return queryset.filter(semester__active=True)
 
-def get_visible_from_queryset(user, queryset):
+def get_visible_from_queryset(user: User, queryset: QuerySet[models.Student]):
 	"""From a queryset, filter out the students which the user can see."""
 	if user.is_staff:
 		return queryset
@@ -18,7 +19,7 @@ def get_visible_from_queryset(user, queryset):
 		return queryset.filter(Q(user = user) | Q(assistant__user = user)
 				| Q(unlisted_assistants__user = user))
 
-def get_visible_students(user, current = True):
+def get_visible_students(user: User, current: bool = True):
 	if current:
 		queryset = get_current_students()
 	else:
@@ -51,9 +52,9 @@ def get_student_by_id(
 
 	return student
 
-def can_view(request, student):
+def can_view(request: HttpRequest, student: models.Student) -> bool:
 	return request.user == student.user or can_edit(request, student)
-def can_edit(request, student):
+def can_edit(request: HttpRequest, student: models.Student) -> bool:
 	if not request.user.is_authenticated:
 		raise PermissionDenied("Need login")
 	assert isinstance(request.user, User)
@@ -64,6 +65,6 @@ def can_edit(request, student):
 			or (student.unlisted_assistants.filter(user=request.user).exists())
 			)
 
-def infer_student(request):
+def infer_student(request: HttpRequest) -> models.Student:
 	return get_object_or_404(models.Student.objects,
 				semester__active = True, user = request.user)

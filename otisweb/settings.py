@@ -5,15 +5,16 @@ Django settings for otisweb project.
 import logging
 import os
 from pathlib import Path
+from typing import Any, Dict
 
-import discordLogging  # type: ignore
+import discordLogging  # NOQA
 import import_export.tmp_storages
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).parent.parent.absolute()
 ENV_PATH = BASE_DIR / '.env'
 if ENV_PATH.exists():
-	load_dotenv(ENV_PATH)
+	_ = load_dotenv(ENV_PATH)
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
@@ -101,7 +102,7 @@ WSGI_APPLICATION = 'otisweb.wsgi.application'
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
 if os.getenv("DATABASE_NAME"):
-	DATABASES = {
+	DATABASES: Dict[str, Any] = {
 		'default': {
 			'ENGINE': 'django.db.backends.mysql',
 			'NAME': os.getenv("DATABASE_NAME"),

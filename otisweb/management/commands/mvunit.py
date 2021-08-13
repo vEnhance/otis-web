@@ -1,3 +1,6 @@
+from argparse import ArgumentParser
+from typing import Any
+
 from core.models import Unit
 from dashboard.models import UploadedFile
 from django.core.management.base import BaseCommand
@@ -6,11 +9,11 @@ from roster.models import Student
 
 class Command(BaseCommand):
 	help = 'Replaces all instances of unit X with unit Y'
-	def add_arguments(self, parser):
+	def add_arguments(self, parser: ArgumentParser):
 		parser.add_argument('source', type=int, help="ID of source unit")
 		parser.add_argument('dest', type=int, help="ID of destination unit")
 
-	def handle(self, *args, **options):
+	def handle(self, *args: Any, **options: Any):
 		source_id = options.pop('source')
 		dest_id = options.pop('dest')
 		print(f"Deleting {Unit.objects.get(id=source_id)}")

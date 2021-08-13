@@ -263,6 +263,7 @@ def uploads(request: HttpRequest, student_id: int, unit_id: int) -> HttpResponse
 
 @login_required
 def index(request: HttpRequest) -> HttpResponse:
+	assert isinstance(request.user, User)
 	students = get_visible_students(request.user, current=True)
 	if len(students) == 1: # unique match
 		return HttpResponseRedirect(\
@@ -280,6 +281,7 @@ def index(request: HttpRequest) -> HttpResponse:
 
 @login_required
 def past(request: HttpRequest, semester: core.models.Semester = None):
+	assert isinstance(request.user, User)
 	students = get_visible_students(request.user, current=False)
 	if semester is None:
 		students = students.order_by('-semester',
@@ -373,6 +375,7 @@ def quasigrader(request: HttpRequest, num_hours: int = 336) -> HttpResponse:
 
 @staff_member_required
 def idlewarn(request: HttpRequest) -> HttpResponse:
+	assert isinstance(request.user, User)
 	context = {}
 	context['title'] = 'Idle-warn'
 
@@ -391,6 +394,7 @@ def idlewarn(request: HttpRequest) -> HttpResponse:
 
 @staff_member_required
 def leaderboard(request: HttpRequest) -> HttpResponse:
+	assert isinstance(request.user, User)
 	context: Dict[str, Any] = {}
 	context['title'] = 'Leader-board'
 

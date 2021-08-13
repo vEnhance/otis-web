@@ -2,17 +2,19 @@ from __future__ import unicode_literals
 
 import os
 from datetime import timedelta
-from typing import Callable
+from typing import Any, Callable, Dict, List
 
 import core
 import core.models
 import dashboard
 import dashboard.models
+from _pydecimal import Decimal
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.db.models import Count, Exists, OuterRef, Q
+from django.db.models.query import QuerySet
 from django.urls import reverse_lazy
 from django.utils.timezone import localtime
 
@@ -29,17 +31,17 @@ class Assistant(models.Model):
 					"but which is not listed visibly.")
 
 	@property
-	def first_name(self):
+	def first_name(self) -> str:
 		return self.user.first_name
 	@property
-	def last_name(self):
+	def last_name(self) -> str:
 		return self.user.last_name
 	@property
-	def name(self):
+	def name(self) -> str:
 		return self.user.get_full_name()
-	def __str__(self):
+	def __str__(self) -> str:
 		return self.name
-	def student_count(self):
+	def student_count(self) -> int:
 		return self.student_set.count() # type: ignore
 
 class Student(models.Model):
@@ -94,6 +96,7 @@ class Student(models.Model):
 
 	id: int
 	invoice: 'Invoice'
+	unlisted_assistants: QuerySet['Assistant']
 
 	def __str__(self):
 		return f"{self.name} ({self.semester})"
@@ -102,19 +105,23 @@ class Student(models.Model):
 		return reverse_lazy('portal', args=(self.id,))
 
 	@property
-	def first_name(self):
+	def first_name(self) -> str:
+		if self.user is None:
+			return '???'
 		return self.user.first_name
 	@property
-	def last_name(self):
+	def last_name(self) -> str:
+		if self.user is None:
+			return '???'
 		return self.user.last_name
 	@property
-	def name(self):
+	def name(self) -> str:
 		if self.user: return self.user.get_full_name() or self.user.username
 		else: return "?"
 
 	get_track_display: Callable[[], str]
 	@property
-	def get_track(self):
+	def get_track(self) -> str:
 		if self.assistant is None:
 			return self.get_track_display()
 		else:
@@ -126,19 +133,19 @@ class Student(models.Model):
 		ordering = ('semester', '-legit', 'track', 'user__first_name', 'user__last_name')
 
 	@property
-	def meets_evan(self):
+	def meets_evan(self) -> str:
 		return (self.track == "A" or self.track == "B") and self.legit
 	@property
-	def calendar_url(self):
+	def calendar_url(self) -> str:
 		if self.meets_evan:
 			return self.semester.calendar_url_meets_evan
 		else:
 			return self.semester.calendar_url_no_meets_evan
 	@property
-	def curriculum_length(self):
+	def curriculum_length(self) -> int:
 		return self.curriculum.count()
 
-	def generate_curriculum_queryset(self):
+	def generate_curriculum_queryset(self) -> QuerySet[core.models.Unit]:
 		if self.semester.uses_legacy_pset_system is True:
 			return self.curriculum.all().annotate(
 					num_uploads = Count('uploadedfile',
@@ -163,7 +170,7 @@ class Student(models.Model):
 							approved=True)),
 					)
 
-	def has_submitted_pset(self, unit):
+	def has_submitted_pset(self, unit: core.models.Unit) -> bool:
 		if self.semester.uses_legacy_pset_system:
 			return dashboard.models.UploadedFile.objects.filter(
 					unit = unit,
@@ -174,35 +181,35 @@ class Student(models.Model):
 					unit = unit,
 					student = self).exists()
 
-	def check_unit_unlocked(self, unit):
+	def check_unit_unlocked(self, unit: core.models.Unit) -> bool:
 		if self.newborn:
 			return False
-		elif self.unlocked_units.filter(pk=unit.id).exists():
+		elif self.unlocked_units.filter(pk=unit.pk).exists():
 			return True
 		elif self.has_submitted_pset(unit):
 			return True
 		else:
 			return False
 
-	def generate_curriculum_rows(self, omniscient):
+	def generate_curriculum_rows(self, omniscient: bool) -> List[Dict[str, Any]]:
 		curriculum = self.generate_curriculum_queryset().order_by('position')
 		unlocked_units_ids = self.unlocked_units.values_list('id', flat=True)
 
 		rows = []
 		for i, unit in enumerate(curriculum):
 			n = i+1
-			row = {}
+			row: Dict[str, Any] = {}
 			row['unit'] = unit
 			row['number'] = n
-			row['num_uploads'] = unit.num_uploads or 0
+			row['num_uploads'] = getattr(unit, 'num_uploads', 0)
 
-			row['is_submitted'] = unit.has_pset
-			row['is_current'] = unit.id in unlocked_units_ids
+			row['is_submitted'] = getattr(unit, 'has_pset', False)
+			row['is_current'] = unit.pk in unlocked_units_ids
 			row['is_visible'] = row['is_submitted'] or row['is_current']
 			if self.semester.uses_legacy_pset_system is True:
 				row['is_approved'] = row['is_submitted'] and not row['is_current']
 			else:
-				row['is_approved'] = unit.approved
+				row['is_approved'] = getattr(unit, 'approved')
 
 			if row['is_submitted']:
 				row['sols_label'] = "🗝️"
@@ -295,34 +302,34 @@ class Invoice(models.Model):
 		return f"Invoice {self.pk or 0}"
 
 	@property
-	def prep_rate(self):
+	def prep_rate(self) -> int:
 		return self.student.semester.prep_rate
 	@property
-	def prep_total(self):
+	def prep_total(self) -> int:
 		return self.prep_rate * self.preps_taught
 	@property
-	def hour_rate(self):
+	def hour_rate(self) -> int:
 		return self.student.semester.hour_rate
 	@property
-	def hours_total(self):
+	def hours_total(self) -> Decimal:
 		return self.hour_rate * self.hours_taught
 
 	@property
-	def total_cost(self):
+	def total_cost(self) -> Decimal:
 		return self.prep_rate*self.preps_taught \
 				+ self.hour_rate*self.hours_taught \
 				+ self.extras \
 				+ self.adjustment
 	@property
-	def total_owed(self):
+	def total_owed(self) -> Decimal:
 		return self.total_cost - self.total_paid
 	@property
-	def cleared(self):
+	def cleared(self) -> bool:
 		"""Whether or not the student owes anything"""
 		return (self.total_owed <= 0)
 
 	@property
-	def track(self):
+	def track(self) -> str:
 		return self.student.track
 
 class UnitInquiry(models.Model):
@@ -367,14 +374,14 @@ class UnitInquiry(models.Model):
 		self.status = "ACC"
 		self.save()
 
-	def __str__(self):
+	def __str__(self) -> str:
 		return self.action_type + " " + str(self.unit)
 
 	class Meta:
 		ordering = ('-created_at',)
 
 
-def content_file_name(instance, filename):
+def content_file_name(instance: 'StudentRegistration', filename: str) -> str:
 	return os.path.join("agreement",
 			str(instance.container.id),
 			instance.user.username + '_' + filename)
@@ -590,7 +597,7 @@ class StudentRegistration(models.Model):
 			), default = "USA")
 
 	@property
-	def name(self):
+	def name(self) -> str:
 		return self.user.first_name + ' ' + self.user.last_name
 
 	@property
@@ -603,5 +610,5 @@ class StudentRegistration(models.Model):
 
 	class Meta:
 		unique_together = ('user', 'container',)
-	def __str__(self):
+	def __str__(self) -> str:
 		return self.user.username

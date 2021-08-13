@@ -1,3 +1,5 @@
+from typing import List, Tuple
+
 import core
 import core.models
 from django.contrib import admin, messages
@@ -32,7 +34,7 @@ class StudentInline(admin.TabularInline):
 	readonly_fields = ('user', 'name', 'semester',)
 	extra = 0
 	show_change_link = True
-	def has_delete_permission(self, request: HttpRequest, obj=None):
+	def has_delete_permission(self, request: HttpRequest, obj: roster.models.Student = None) -> bool:
 		return False
 @admin.register(roster.models.Assistant)
 class AssistantAdmin(ImportExportModelAdmin):
@@ -55,9 +57,9 @@ class InvoiceIEResource(resources.ModelResource):
 class OwedFilter(admin.SimpleListFilter):
 	title = 'remaining balance'
 	parameter_name = 'has_owed'
-	def lookups(self, request: HttpRequest, model_admin):
+	def lookups(self, request: HttpRequest, model_admin: 'InvoiceAdmin') -> List[Tuple[str, str]]:
 		return [("incomplete", "Incomplete"), ("paid", "Paid in full"), ("zero", "No payment")]
-	def queryset(self, request: HttpRequest, queryset: QuerySet):
+	def queryset(self, request: HttpRequest, queryset: QuerySet[roster.models.Invoice]):
 		if self.value() is None:
 			return queryset
 		else:
@@ -130,10 +132,14 @@ class StudentRegistrationAdmin(ImportExportModelAdmin):
 	resource_class = StudentRegistrationIEResource
 
 	actions = ['create_student',]
-	def create_student(self, request: HttpRequest, queryset: QuerySet):
+	def create_student(
+			self,
+			request: HttpRequest,
+			queryset: QuerySet[roster.models.StudentRegistration]
+			):
 		students_to_create = []
 		queryset = queryset.exclude(processed=True)
-		queryset.select_related('user', 'container', 'container__semester')
+		queryset = queryset.select_related('user', 'container', 'container__semester')
 		for registration in queryset:
 			students_to_create.append(roster.models.Student(
 					user = registration.user,
@@ -142,8 +148,8 @@ class StudentRegistrationAdmin(ImportExportModelAdmin):
 					))
 			registration.user.save()
 		messages.success(request, message=f"Built {len(students_to_create)} students")
-		roster.models.Student.objects.bulk_create(students_to_create)
-		queryset.update(processed=True)
+		_ = roster.models.Student.objects.bulk_create(students_to_create)
+		_ = queryset.update(processed=True)
 
 
 ## INQUIRY
@@ -159,18 +165,17 @@ class UnitInquiryAdmin(admin.ModelAdmin):
 
 	actions = ['hold_inquiry', 'reject_inquiry', 'accept_inquiry', 'reset_inquiry']
 
-	def hold_inquiry(self, request: HttpRequest, queryset: QuerySet):
-		queryset.update(status='HOLD')
-	def reject_inquiry(self, request: HttpRequest, queryset: QuerySet):
-		queryset.update(status='REJ')
-	def accept_inquiry(self, request: HttpRequest, queryset: QuerySet):
-		queryset.update(status='ACC')
-	def reset_inquiry(self, request: HttpRequest, queryset: QuerySet):
-		queryset.update(status='NEW')
+	def hold_inquiry(self, request: HttpRequest, queryset: QuerySet[roster.models.UnitInquiry]):
+		_ = queryset.update(status='HOLD')
+	def reject_inquiry(self, request: HttpRequest, queryset: QuerySet[roster.models.UnitInquiry]):
+		_ = queryset.update(status='REJ')
+	def accept_inquiry(self, request: HttpRequest, queryset: QuerySet[roster.models.UnitInquiry]):
+		_ = queryset.update(status='ACC')
+	def reset_inquiry(self, request: HttpRequest, queryset: QuerySet[roster.models.UnitInquiry]):
+		_ = queryset.update(status='NEW')
 
 ## REGISTRATION
 @admin.register(roster.models.RegistrationContainer)
 class RegistrationContainerAdmin(admin.ModelAdmin):
 	list_display = ('id', 'semester', 'passcode', 'allowed_tracks',)
 	list_display_links = ('id', 'semester',)
-

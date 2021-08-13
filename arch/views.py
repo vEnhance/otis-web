@@ -38,14 +38,14 @@ class ExistStudentRequiredMixin(LoginRequiredMixin):
 			return super().dispatch(request, *args, **kwargs)
 
 class HintObjectView:
-	kwargs: ClassVar[Dict] = {}
+	kwargs: ClassVar[Dict[str, Any]] = {}
 	def get_object(self, queryset: QuerySet[models.Hint] = None) -> models.Hint:
 		if queryset is None:
 			queryset = self.get_queryset() # type: ignore
 		return get_object_or_404(queryset, problem__puid=self.kwargs['puid'],
 				number=self.kwargs['number'])
 class ProblemObjectView:
-	kwargs: ClassVar[Dict] = {}
+	kwargs: ClassVar[Dict[str, Any]] = {}
 	def get_object(self, queryset: QuerySet[models.Problem] = None) -> models.Problem:
 		if queryset is None:
 			queryset = self.get_queryset() # type: ignore

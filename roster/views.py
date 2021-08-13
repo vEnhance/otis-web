@@ -13,6 +13,7 @@ So e.g. "list students by most recent pset" goes under dashboard.
 import collections
 import datetime
 from hashlib import pbkdf2_hmac, sha256
+from typing import Any, Dict
 
 import core.models
 import dashboard.models
@@ -41,7 +42,7 @@ from . import forms, models
 # Create your views here.
 
 @login_required
-def curriculum(request: HttpRequest, student_id):
+def curriculum(request: HttpRequest, student_id: int) -> HttpResponse:
 	student = get_student_by_id(request, student_id)
 	units = core.models.Unit.objects.all()
 	original = student.curriculum.values_list('id', flat=True)
@@ -73,7 +74,7 @@ def curriculum(request: HttpRequest, student_id):
 
 @login_required
 @require_POST
-def finalize(request, student_id):
+def finalize(request: HttpRequest, student_id: int) -> HttpResponse:
 	# Removes a newborn status, thus activating everything
 	student = get_student_by_id(request, student_id)
 	if student.curriculum.count() > 0:
@@ -90,7 +91,12 @@ def finalize(request, student_id):
 	return HttpResponseRedirect(reverse("portal", args=(student_id,)))
 
 @login_required
-def auto_advance(request, student_id, unit_id, target_id = None):
+def auto_advance(
+		request: HttpRequest,
+		student_id: int,
+		unit_id: int,
+		target_id: int = None
+		):
 	student = get_student_by_id(request, student_id)
 	unit = get_object_or_404(core.models.Unit, id = unit_id)
 
@@ -124,7 +130,7 @@ def auto_advance(request, student_id, unit_id, target_id = None):
 		student.unlocked_units.add(target)
 		replace = True
 
-	context = {}
+	context: Dict[str, Any] = {}
 	context["target"] = target
 	if context["target"]:
 		context["title"] = f"{'Toggled' if replace else 'Unlocked'} {target} for {student.first_name}"
@@ -137,7 +143,7 @@ def auto_advance(request, student_id, unit_id, target_id = None):
 	return render(request, "roster/auto-advance.html", context)
 
 @login_required
-def advance(request, student_id):
+def advance(request: HttpRequest, student_id: int) -> Any:
 	student = get_student_by_id(request, student_id)
 	if request.method == 'POST':
 		form = forms.AdvanceForm(request.POST, instance = student)
@@ -149,7 +155,7 @@ def advance(request, student_id):
 	else:
 		form = forms.AdvanceForm(instance = student)
 
-	context = {'title': "Advance " + student.name}
+	context: Dict[str, Any] = {'title': "Advance " + student.name}
 	context['form'] = form
 	context['student'] = student
 	context['omniscient'] = can_edit(request, student)
@@ -164,14 +170,14 @@ def advance(request, student_id):
 	return render(request, "roster/advance.html", context)
 
 
-def get_checksum(student):
+def get_checksum(student: models.Student) -> str:
 	key = settings.INVOICE_HASH_KEY
 	return pbkdf2_hmac('sha256',
-			(key+str(student.id)+student.user.username+'meow').encode('utf-8'),
+			(key+str(student.id)+'meow').encode('utf-8'),
 			b'salt is yummy so is sugar', 100000, dklen = 18).hex()
 
 @login_required
-def invoice(request, student_id=None):
+def invoice(request: HttpRequest, student_id: int = None) -> HttpResponse:
 	if student_id is None:
 		student = infer_student(request)
 		return HttpResponseRedirect(
@@ -195,7 +201,7 @@ def invoice(request, student_id=None):
 	return render(request, "roster/invoice.html", context)
 
 # this is not gated
-def invoice_standalone(request, student_id, checksum):
+def invoice_standalone(request: HttpRequest, student_id: int, checksum: str) -> HttpResponse:
 	student = models.Student.objects.get(id=student_id)
 	if checksum != get_checksum(student):
 		raise PermissionDenied("Bad hash provided")
@@ -210,7 +216,7 @@ def invoice_standalone(request, student_id, checksum):
 
 
 @staff_member_required
-def master_schedule(request):
+def master_schedule(request: HttpRequest) -> HttpResponse:
 	student_names_and_unit_ids = get_current_students().filter(legit=True)\
 			.values('user__first_name', 'user__last_name', 'curriculum')
 	unit_to_student_names = collections.defaultdict(list)
@@ -242,14 +248,15 @@ class UpdateInvoice(PermissionRequiredMixin, UpdateView):
 
 # Inquiry views
 @login_required
-def inquiry(request, student_id):
+def inquiry(request: HttpRequest, student_id: int) -> HttpResponse:
+	assert isinstance(request.user, User)
 	student = get_student_by_id(request, student_id)
 	if not student.semester.active:
 		raise PermissionDenied("Not an active semester, so change petitions are no longer possible.")
 	if student.newborn:
 		raise PermissionDenied("This form isn't enabled yet because you have not chosen your initial units.")
-	context = {}
-	context['title'] = 'Unit Inquiry'
+
+	context: Dict[str, Any]= {}
 	current_inquiries = models.UnitInquiry.objects.filter(student=student)
 
 	# Create form for submitting new inquiries
@@ -334,7 +341,7 @@ class EditInquiry(PermissionRequiredMixin, UpdateView):
 		return reverse("edit-inquiry", args=(self.object.pk,)) # typing: ignore
 
 @staff_member_required
-def approve_inquiry(_: HttpRequest, pk) -> HttpResponse:
+def approve_inquiry(_: HttpRequest, pk: int) -> HttpResponse:
 	inquiry = models.UnitInquiry.objects.get(id=pk)
 	inquiry.run_accept()
 	return HttpResponseRedirect(reverse("inquiry", args=(inquiry.student.id,)))
@@ -413,13 +420,14 @@ def update_profile(request: HttpRequest) -> HttpResponse:
 
 @csrf_exempt
 @require_POST
-def api(request):
+def api(request: HttpRequest) -> JsonResponse:
 	if settings.PRODUCTION:
 		token = request.POST.get('token')
+		assert token is not None
 		if not sha256(token.encode('ascii')).hexdigest() == settings.API_TARGET_HASH:
 			return JsonResponse({'error': "☕"}, status = 418)
 	# check whether social account exists
-	uid = int(request.POST.get('uid'))
+	uid = int(request.POST['uid'])
 	queryset = SocialAccount.objects.filter(uid = uid)
 	if not (n := len(queryset)) == 1:
 		return JsonResponse({'result': 'nonexistent', 'length': n})
