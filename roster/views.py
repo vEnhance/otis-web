@@ -245,9 +245,9 @@ class UpdateInvoice(PermissionRequiredMixin, UpdateView):
 def inquiry(request, student_id):
 	student = get_student_by_id(request, student_id)
 	if not student.semester.active:
-		raise PermissionDenied("Not an active semester")
+		raise PermissionDenied("Not an active semester, so change petitions are no longer possible.")
 	if student.newborn:
-		raise PermissionDenied("This form isn't enabled yet.")
+		raise PermissionDenied("This form isn't enabled yet because you have not chosen your initial units.")
 	context = {}
 	context['title'] = 'Unit Inquiry'
 	current_inquiries = models.UnitInquiry.objects.filter(student=student)
