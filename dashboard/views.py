@@ -533,7 +533,7 @@ def api(request: HttpRequest) -> JsonResponse:
 										'student__user__last_name',
 										'unit__group__name',
 										'unit__code',
-										'upload',
+										'upload__content',
 										'hours',
 										'clubs',
 										'eligible',
