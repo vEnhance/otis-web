@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 import logging
 from datetime import timedelta
+from hashlib import sha256
 from typing import Any, Dict
 
 import core.models
@@ -21,9 +22,12 @@ from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect  # NOQA
 from django.http.request import HttpRequest
+from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
 from django.utils.timezone import now
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from roster.utils import can_edit, can_view, get_student_by_id, get_visible_students  # NOQA
@@ -495,3 +499,13 @@ def pending_contributions(request: HttpRequest, suggestion_id: int = None) -> Ht
 		context['forms'].append(form)
 
 	return render(request, "dashboard/pending_contributions.html", context)
+
+@csrf_exempt
+@require_POST
+def api(request: HttpRequest) -> JsonResponse:
+	if settings.PRODUCTION:
+		token = request.POST.get('token')
+		assert token is not None
+		if not sha256(token.encode('ascii')).hexdigest() == settings.API_TARGET_HASH:
+			return JsonResponse({'error': "☕"}, status = 418)
+	return JsonResponse({'status' : 'ok'})
