@@ -377,6 +377,10 @@ def register(request: HttpRequest) -> HttpResponse:
 				registration.container = container
 				registration.user = request.user
 				registration.save()
+				request.user.first_name = form.cleaned_data['given_name']
+				request.user.last_name = form.cleaned_data['surname']
+				request.user.email = form.cleaned_data['email_address']
+				request.user.save()
 				messages.success(request, message = "Submitted! Sit tight.")
 				return HttpResponseRedirect(reverse("index"))
 	else:
