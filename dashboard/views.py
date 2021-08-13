@@ -18,6 +18,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count, F, OuterRef, Q, Subquery, Sum
+from django.db.models.expressions import F
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect  # NOQA
@@ -509,4 +510,68 @@ def api(request: HttpRequest) -> JsonResponse:
 		assert token is not None
 		if not sha256(token.encode('ascii')).hexdigest() == settings.API_TARGET_HASH:
 			return JsonResponse({'error': "☕"}, status = 418)
-	return JsonResponse({'status' : 'ok'})
+
+	action = request.POST.get('action', None)
+
+	if action == 'grade_problem_set':
+		raise NotImplementedError
+	elif action == 'approve_inquiry':
+		raise NotImplementedError
+	elif action == 'mark_suggestion':
+		raise NotImplementedError
+	else:
+		data: Dict[str, Any] = {
+				'_name' : 'Root',
+				'_children' : [
+						{
+							'_name': 'Problem sets',
+							'_children': list(PSet.objects\
+									.filter(approved=False, student__semester__active = True)\
+									.values(
+										'pk',
+										'student__user__first_name',
+										'student__user__last_name',
+										'unit__group__name',
+										'unit__code',
+										'upload',
+										'hours',
+										'clubs',
+										'eligible',
+										'next_unit_to_unlock__group__name',
+										'next_unit_to_unlock__code',
+										'special_notes',
+										))
+						},
+						{
+							'_name': 'Inquiries',
+							'inquiries': list(roster.models.UnitInquiry.objects\
+									.filter(status = "NEW", student__semester__active = True)\
+									.values(
+										'pk',
+										'unit__group__name',
+										'unit__code',
+										'student__user__first_name',
+										'student__user__last_name',
+										'explanation',
+										)),
+						},
+						{
+							'_name' : 'Suggestions',
+							'_children' : list(ProblemSuggestion.objects.filter(resolved=False)\
+									.values(
+										'pk',
+										'created_at',
+										'student__user__first_name',
+										'student__user__last_name',
+										'source',
+										'description',
+										'statement',
+										'solution',
+										'comments',
+										'acknowledge',
+										'weight',
+										))
+						}
+					],
+				}
+		return JsonResponse(data, status = 200)
