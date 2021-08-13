@@ -32,9 +32,10 @@ from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from roster.utils import can_edit, can_view, get_student_by_id, get_visible_students  # NOQA
 
-import dashboard.models
+from dashboard.models import Achievement
 
 from . import forms
+from .models import Level, ProblemSuggestion, PSet, SemesterDownloadFile, UploadedFile  # NOQA
 
 logger = logging.getLogger(__name__)
 
@@ -90,7 +91,7 @@ class Meter:
 				unit = "◆", color = '#9c1421', max_value = 50)
 
 def _get_meter_update(student: roster.models.Student) -> Dict[str, Any]:
-	psets = dashboard.models.PSet.objects\
+	psets = PSet.objects\
 			.filter(student = student, approved = True, eligible = True)
 	pset_data = psets.aggregate(Sum('clubs'), Sum('hours'))
 	total_diamonds = student.achievements.aggregate(Sum('diamonds'))['diamonds__sum'] or 0
@@ -105,7 +106,7 @@ def _get_meter_update(student: roster.models.Student) -> Dict[str, Any]:
 		'spades': Meter.SpadeMeter(total_spades), # TODO input value
 		}
 	level_number = sum(meter.level for meter in meters.values())
-	level = dashboard.models.Level.objects\
+	level = Level.objects\
 			.filter(threshold__lte = level_number).order_by('threshold').first()
 	level_name = level.name if level is not None else 'No Level'
 	return {
@@ -126,7 +127,7 @@ def portal(request: HttpRequest, student_id: int) -> HttpResponse:
 	semester = student.semester
 
 	# check if the student has any new processed suggestions
-	suggestions = dashboard.models.ProblemSuggestion.objects.filter(
+	suggestions = ProblemSuggestion.objects.filter(
 			resolved = True, student = student, notified = False)
 
 	context: Dict[str, Any] = {}
@@ -141,7 +142,7 @@ def portal(request: HttpRequest, student_id: int) -> HttpResponse:
 			is_test = True, family = semester.exam_family, due_date__isnull=False)
 	context['quizzes'] = exams.models.PracticeExam.objects.filter(
 			is_test = False, family = semester.exam_family, due_date__isnull=False)
-	context['num_sem_download'] = dashboard.models.SemesterDownloadFile\
+	context['num_sem_download'] = SemesterDownloadFile\
 			.objects.filter(semester = semester).count()
 	context.update(_get_meter_update(student))
 	return render(request, "dashboard/portal.html", context)
@@ -164,8 +165,8 @@ def achievements(request: HttpRequest, student_id: int) -> HttpResponse:
 				messages.warning(request, "You already earned this achievement!")
 			else:
 				try:
-					achievement = dashboard.models.Achievement.objects.get(code__iexact = code)
-				except dashboard.models.Achievement.DoesNotExist:
+					achievement = Achievement.objects.get(code__iexact = code)
+				except Achievement.DoesNotExist:
 					messages.error(request, "You entered an invalid code.")
 				else:
 					logging.log(settings.SUCCESS_LOG_LEVEL,
@@ -177,8 +178,8 @@ def achievements(request: HttpRequest, student_id: int) -> HttpResponse:
 	else:
 		form = forms.DiamondsForm()
 	try:
-		context['first_achievement'] = dashboard.models.Achievement.objects.get(pk=1)
-	except dashboard.models.Achievement.DoesNotExist:
+		context['first_achievement'] = Achievement.objects.get(pk=1)
+	except Achievement.DoesNotExist:
 		pass
 	context.update(_get_meter_update(student))
 	return render(request, "dashboard/achievements.html", context)
@@ -196,13 +197,13 @@ def submit_pset(request: HttpRequest, student_id: int) -> HttpResponse:
 	form.fields['unit'].queryset = available
 	if request.method == 'POST' and form.is_valid():
 		pset = form.save(commit=False)
-		if dashboard.models.PSet.objects.filter(
+		if PSet.objects.filter(
 				student = student,
 				unit = pset.unit).exists():
 			messages.error(request,
 					"You have already submitted for this unit.")
 		else:
-			f = dashboard.models.UploadedFile(
+			f = UploadedFile(
 					benefactor = student,
 					owner = student.user,
 					category = 'psets',
@@ -223,11 +224,11 @@ def submit_pset(request: HttpRequest, student_id: int) -> HttpResponse:
 			'title': 'Ready to submit?',
 			'student': student,
 			'pending_psets': \
-					dashboard.models.PSet.objects\
+					PSet.objects\
 					.filter(student = student, approved = False)\
 					.order_by('-upload__created_at'),
 			'approved_psets': \
-					dashboard.models.PSet.objects\
+					PSet.objects\
 					.filter(student = student, approved = True)\
 					.order_by('-upload__created_at'),
 			'form': form,
@@ -238,7 +239,7 @@ def submit_pset(request: HttpRequest, student_id: int) -> HttpResponse:
 def uploads(request: HttpRequest, student_id: int, unit_id: int) -> HttpResponse:
 	student = get_student_by_id(request, student_id)
 	unit = get_object_or_404(core.models.Unit.objects, id = unit_id)
-	uploads = dashboard.models.UploadedFile.objects.filter(benefactor=student, unit=unit)
+	uploads = UploadedFile.objects.filter(benefactor=student, unit=unit)
 	if not student.check_unit_unlocked(unit) and not uploads.exists():
 		raise PermissionDenied("This unit is not unlocked yet")
 
@@ -300,30 +301,30 @@ def past(request: HttpRequest, semester: core.models.Semester = None):
 	return render(request, "dashboard/stulist.html", context)
 
 class UpdateFile(LoginRequiredMixin, UpdateView):
-	model = dashboard.models.UploadedFile
+	model = UploadedFile
 	fields = ('category', 'content', 'description',)
-	object: dashboard.models.UploadedFile
+	object: UploadedFile
 
 	def get_success_url(self):
 		stu_id = self.object.benefactor.id
 		unit_id = self.object.unit.id if self.object.unit is not None else 0
 		return reverse("uploads", args=(stu_id, unit_id,))
 
-	def get_object(self, *args: Any, **kwargs: Any) -> dashboard.models.UploadedFile:
+	def get_object(self, *args: Any, **kwargs: Any) -> UploadedFile:
 		obj = super(UpdateFile, self).get_object(*args, **kwargs)
-		assert isinstance(obj, dashboard.models.UploadedFile)
+		assert isinstance(obj, UploadedFile)
 		if not obj.owner == self.request.user \
 				and getattr(self.request.user, 'is_staff', False):
 			raise PermissionDenied("Not authorized to update this file")
 		return obj
 
 class DeleteFile(LoginRequiredMixin, DeleteView):
-	model = dashboard.models.UploadedFile
+	model = UploadedFile
 	success_url = reverse_lazy("index")
 
-	def get_object(self, *args: Any, **kwargs: Any) -> dashboard.models.UploadedFile:
+	def get_object(self, *args: Any, **kwargs: Any) -> UploadedFile:
 		obj = super(DeleteFile, self).get_object(*args, **kwargs)
-		assert isinstance(obj, dashboard.models.UploadedFile)
+		assert isinstance(obj, UploadedFile)
 		if not obj.owner == self.request.user \
 				and getattr(self.request.user, 'is_staff', False):
 			raise PermissionDenied("Not authorized to delete this file")
@@ -343,7 +344,7 @@ def quasigrader(request: HttpRequest, num_hours: int = 336) -> HttpResponse:
 			.annotate(num_psets = Count('uploadedfile__unit', distinct=True))\
 			.values_list('id', 'num_psets'))
 
-	uploads = dashboard.models.UploadedFile.objects\
+	uploads = UploadedFile.objects\
 			.filter(created_at__gte = now() - timedelta(hours=num_hours))\
 			.filter(category='psets')\
 			.select_related('benefactor')\
@@ -371,7 +372,7 @@ def quasigrader(request: HttpRequest, num_hours: int = 336) -> HttpResponse:
 
 	context['inquiry_nag'] = roster.models.UnitInquiry.objects\
 			.filter(status='NEW', student__semester__active = True).count()
-	context['suggestion_nag'] = dashboard.models.ProblemSuggestion.objects\
+	context['suggestion_nag'] = ProblemSuggestion.objects\
 			.filter(resolved=False).count()
 	context['num_hours'] = num_hours
 
@@ -383,7 +384,7 @@ def idlewarn(request: HttpRequest) -> HttpResponse:
 	context = {}
 	context['title'] = 'Idle-warn'
 
-	newest = dashboard.models.UploadedFile.objects\
+	newest = UploadedFile.objects\
 			.filter(category='psets')\
 			.filter(benefactor=OuterRef('pk'))\
 			.order_by('-created_at')\
@@ -413,17 +414,17 @@ def leaderboard(request: HttpRequest) -> HttpResponse:
 
 class DownloadList(LoginRequiredMixin, ListView):
 	template_name = 'dashboard/download_list.html'
-	def get_queryset(self) -> QuerySet[dashboard.models.SemesterDownloadFile]:
+	def get_queryset(self) -> QuerySet[SemesterDownloadFile]:
 		student = get_student_by_id(self.request, self.kwargs['pk'])
-		return dashboard.models.SemesterDownloadFile.objects.filter(semester = student.semester)
+		return SemesterDownloadFile.objects.filter(semester = student.semester)
 
 class PSetDetail(LoginRequiredMixin, DetailView):
 	template_name = 'dashboard/pset_detail.html'
-	model = dashboard.models.PSet
+	model = PSet
 	object_name = 'pset'
 	def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
 		pset = self.get_object()
-		assert isinstance(pset, dashboard.models.PSet)
+		assert isinstance(pset, PSet)
 		if not can_view(request, pset.student):
 			raise PermissionDenied("Can't view work by this student")
 		return super().dispatch(request, *args, **kwargs)
@@ -431,7 +432,7 @@ class PSetDetail(LoginRequiredMixin, DetailView):
 class ProblemSuggestionCreate(LoginRequiredMixin, CreateView):
 	context_object_name = "problem_suggestion"
 	fields = ('unit', 'weight', 'source', 'description', 'statement', 'solution', 'comments', 'acknowledge',)
-	model = dashboard.models.ProblemSuggestion
+	model = ProblemSuggestion
 
 	def get_initial(self):
 		initial = super().get_initial()
@@ -453,8 +454,8 @@ class ProblemSuggestionCreate(LoginRequiredMixin, CreateView):
 class ProblemSuggestionUpdate(LoginRequiredMixin, UpdateView):
 	context_object_name = "problem_suggestion"
 	fields = ('unit', 'weight', 'source', 'description', 'statement', 'solution', 'comments', 'acknowledge',)
-	model = dashboard.models.ProblemSuggestion
-	object: dashboard.models.ProblemSuggestion
+	model = ProblemSuggestion
+	object: ProblemSuggestion
 
 	def get_success_url(self):
 		return reverse_lazy("suggest-update", kwargs=self.kwargs)
@@ -473,7 +474,7 @@ class ProblemSuggestionList(LoginRequiredMixin, ListView):
 	def get_queryset(self):
 		student = get_student_by_id(self.request, self.kwargs['student_id'])
 		self.student = student
-		return dashboard.models.ProblemSuggestion.objects.filter(student=student).order_by('resolved', 'created_at')
+		return ProblemSuggestion.objects.filter(student=student).order_by('resolved', 'created_at')
 	def get_context_data(self, **kwargs: Any):
 		context = super().get_context_data(**kwargs)
 		context['student'] = self.student
@@ -485,7 +486,7 @@ def pending_contributions(request: HttpRequest, suggestion_id: int = None) -> Ht
 	if request.method == "POST":
 		if suggestion_id is None:
 			return HttpResponseBadRequest("The form must include a suggestion ID")
-		suggestion = get_object_or_404(dashboard.models.ProblemSuggestion, id = suggestion_id)
+		suggestion = get_object_or_404(ProblemSuggestion, id = suggestion_id)
 		form = forms.ResolveSuggestionForm(request.POST, instance = suggestion)
 		if form.is_valid():
 			messages.success(request, "Successfully resolved " + suggestion.source)
@@ -494,7 +495,7 @@ def pending_contributions(request: HttpRequest, suggestion_id: int = None) -> Ht
 			suggestion.save()
 
 	context['forms'] = []
-	for suggestion in dashboard.models.ProblemSuggestion.objects.filter(resolved=False):
+	for suggestion in ProblemSuggestion.objects.filter(resolved=False):
 		form = forms.ResolveSuggestionForm(instance = suggestion)
 		context['forms'].append(form)
 
