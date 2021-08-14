@@ -587,18 +587,19 @@ def api(request: HttpRequest) -> JsonResponse:
 									.values(
 										'pk',
 										'approved',
+										'feedback',
+										'special_notes',
 										'student__user__first_name',
 										'student__user__last_name',
 										'student__user__email',
-										'unit__group__name',
-										'unit__code',
-										'upload__content',
 										'hours',
 										'clubs',
 										'eligible',
+										'unit__group__name',
+										'unit__code',
 										'next_unit_to_unlock__group__name',
 										'next_unit_to_unlock__code',
-										'special_notes',
+										'upload__content',
 										))
 						},
 						{
