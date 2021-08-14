@@ -238,7 +238,7 @@ LOGGING = {
 		},
 		'discord': {
 			'class': 'discordLogging.DiscordHandler',
-			'level': 'WARNING',
+			'level': 'INFO',
 			'filters': ['require_debug_false', 'filter_useless_404'],
 		}
 	},
