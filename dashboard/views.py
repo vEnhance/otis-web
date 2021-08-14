@@ -226,7 +226,7 @@ def leaderboard(request: HttpRequest) -> HttpResponse:
 		row['hearts'] = getattr(student, 'hearts', 0) or 0
 		row['clubs'] = getattr(student, 'clubs', 0) or 0
 		row['diamonds'] = getattr(student, 'diamonds', 0) or 0
-		row['level'] = row['spades_level']+row['hearts_level']+row['clubs_level']+row['diamonds_level']
+		row['level'] = sum(int(row[k]**0.5) for k in ('spades', 'hearts', 'clubs', 'diamonds'))
 		if row['level'] > max_level:
 			row['level_name'] = levels[max_level]
 		else:
