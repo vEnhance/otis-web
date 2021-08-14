@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).parent.parent.absolute()
 ENV_PATH = BASE_DIR / '.env'
 if ENV_PATH.exists():
-	_ = load_dotenv(ENV_PATH)
+	load_dotenv(ENV_PATH)
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
@@ -239,7 +239,6 @@ LOGGING = {
 		'discord': {
 			'class': 'discordLogging.DiscordHandler',
 			'level': 'WARNING',
-			'url': os.getenv("WEBHOOK_URL"),
 			'filters': ['require_debug_false', 'filter_useless_404'],
 		}
 	},

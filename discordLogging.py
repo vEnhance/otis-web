@@ -1,4 +1,5 @@
 import logging
+import os
 import pprint
 import socket
 from collections import OrderedDict
@@ -6,6 +7,10 @@ from typing import Any, Dict
 
 import requests
 from django.http import HttpRequest
+from dotenv import load_dotenv
+
+load_dotenv()
+WEBHOOK_DEFAULT_URL = os.getenv('WEBHOOK_URL')
 
 COLORS = {
 	"default": 2040357,
@@ -29,9 +34,8 @@ EMOJIS = {
 }
 
 class DiscordHandler(logging.Handler):
-	def __init__(self, url = None):
+	def __init__(self):
 		super().__init__()
-		self.url = url
 
 	def emit(self, record: logging.LogRecord):
 		level = record.levelname.lower().strip()
@@ -125,5 +129,7 @@ class DiscordHandler(logging.Handler):
 				'embeds': [embed],
 				}
 
-		if self.url is not None:
-			print(requests.post(self.url, json = data))
+		url = os.getenv(f'WEBHOOK_URL_{level.upper()}', WEBHOOK_DEFAULT_URL)
+
+		if url is not None:
+			print(requests.post(url, json = data))
