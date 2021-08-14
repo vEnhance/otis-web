@@ -205,7 +205,7 @@ class FoundList(PermissionRequiredMixin, ListView):
 				Achievement, pk=self.kwargs['pk'])
 		students = self.achievement.student_set # type: ignore
 		return students.filter(semester__active = True)\
-				.select_related('user') # type: ignore
+				.select_related('user').order_by('user__first_name', 'user__last_name')
 	def get_context_data(self, **kwargs: Any) -> ContextType:
 		context = super().get_context_data(**kwargs)
 		context['achievement'] = self.achievement
@@ -218,7 +218,7 @@ def leaderboard(request: HttpRequest) -> HttpResponse:
 	rows: List[Dict[str, Any]] = []
 	levels: Dict[int, str] = {level.threshold: level.name for level in Level.objects.all()}
 	max_level = max(levels.keys())
-	for student in annotate_level(students):
+	for student in annotate_multiple_students(students):
 		row: Dict[str, Any] = {}
 		row['id'] = student.id
 		row['name'] = student.name
@@ -319,14 +319,16 @@ def uploads(request: HttpRequest, student_id: int, unit_id: int) -> HttpResponse
 	# TODO form for adding new files
 	return render(request, "dashboard/uploads.html", context)
 
-def annotate_level(queryset: QuerySet[roster.models.Student]) -> QuerySet[roster.models.Student]:
+def annotate_multiple_students(queryset: QuerySet[roster.models.Student]) -> QuerySet[roster.models.Student]:
+	"""Helper function for constructing large lists of students
+	Selects all importart information to prevent a bunch of SQL queries"""
 	return queryset.annotate(
-			num_psets = Count('pset__pk', filter = Q(pset__approved = True, pset__eligible = True)),
-			clubs = Sum('pset__clubs', filter = Q(pset__approved = True, pset__eligible = True)),
-			hearts = Sum('pset__hours', filter = Q(pset__approved = True, pset__eligible = True)),
-			spades_quizzes = Sum('examattempt__score'),
-			diamonds = Sum('achievements__diamonds'),
-			)
+				num_psets = Count('pset__pk', filter = Q(pset__approved = True, pset__eligible = True)),
+				clubs = Sum('pset__clubs', filter = Q(pset__approved = True, pset__eligible = True)),
+				hearts = Sum('pset__hours', filter = Q(pset__approved = True, pset__eligible = True)),
+				spades_quizzes = Sum('examattempt__score'),
+				diamonds = Sum('achievements__diamonds'),
+				).select_related('user', 'assistant', 'semester')
 
 @login_required
 def index(request: HttpRequest) -> HttpResponse:
@@ -338,26 +340,24 @@ def index(request: HttpRequest) -> HttpResponse:
 	assert isinstance(request.user, User)
 	context: Dict[str, Any] = {}
 	context['title'] = "Current Semester Listing"
-	context['students'] = annotate_level(students)
+	context['students'] = annotate_multiple_students(students)\
+			.order_by('track', 'user__first_name', 'user__last_name')
 	context['stulist_show_semester'] = False
 	context['submitted_registration'] = roster.models.StudentRegistration.objects\
 			.filter(user = request.user, container__semester__active = True)\
 			.exists()
-
 	return render(request, "dashboard/stulist.html", context)
 
 @login_required
 def past(request: HttpRequest, semester: core.models.Semester = None):
 	assert isinstance(request.user, User)
 	students = get_visible_students(request.user, current=False)
-	if semester is None:
-		students = students.order_by('-semester',
-				'user__first_name', 'user__last_name')[0:256]
-	else:
+	if semester is not None:
 		students = students.filter(semester=semester)
 	context: Dict[str, Any] = {}
 	context['title'] = "Previous Semester Listing"
-	context['students'] = annotate_level(students)
+	context['students'] = annotate_multiple_students(students)\
+			.order_by('-semester', 'user__first_name', 'user__last_name')
 	context['stulist_show_semester'] = True
 	context['past'] = True
 	return render(request, "dashboard/stulist.html", context)

@@ -33,10 +33,7 @@
 	{% endif %}
 
 	<td>{{ student.get_track }}</td>
-	<td>{% if student.legit %}
-		{{ student.num_psets|default:0 }}
-		/ {{ student.curriculum_length }}
-		{% endif %}</td>
+	<td>{% if student.legit %}{{ student.num_psets|default:0 }}{% endif %}</td>
 </tr> {# end table row for this student #}
 {% endfor %}
 </tbody>
