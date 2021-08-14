@@ -586,8 +586,10 @@ def api(request: HttpRequest) -> JsonResponse:
 									.filter(approved=False, student__semester__active = True)\
 									.values(
 										'pk',
+										'approved',
 										'student__user__first_name',
 										'student__user__last_name',
+										'student__user__email',
 										'unit__group__name',
 										'unit__code',
 										'upload__content',
