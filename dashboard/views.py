@@ -269,6 +269,7 @@ def uploads(request: HttpRequest, student_id: int, unit_id: int) -> HttpResponse
 
 def annotate_level(queryset: QuerySet[roster.models.Student]) -> QuerySet[roster.models.Student]:
 	return queryset.annotate(
+			num_psets = Count('pset__pk', filter = Q(pset__approved = True, pset__eligible = True)),
 			clubs = Sum('pset__clubs', filter = Q(pset__approved = True, pset__eligible = True)),
 			hearts = Sum('pset__hours', filter = Q(pset__approved = True, pset__eligible = True)),
 			spades_quizzes = Sum('examattempt__score'),
@@ -304,7 +305,7 @@ def past(request: HttpRequest, semester: core.models.Semester = None):
 		students = students.filter(semester=semester)
 	context: Dict[str, Any] = {}
 	context['title'] = "Previous Semester Listing"
-	context['students'] = students
+	context['students'] = annotate_level(students)
 	context['stulist_show_semester'] = True
 	context['past'] = True
 	return render(request, "dashboard/stulist.html", context)
@@ -405,21 +406,6 @@ def idlewarn(request: HttpRequest) -> HttpResponse:
 			.order_by('latest_pset')
 
 	return render(request, "dashboard/idlewarn.html", context)
-
-@staff_member_required
-def leaderboard(request: HttpRequest) -> HttpResponse:
-	assert isinstance(request.user, User)
-	context: Dict[str, Any] = {}
-	context['title'] = 'Leader-board'
-
-	context['students'] = get_visible_students(request.user)\
-			.filter(legit=True)\
-			.annotate(num_psets = Count('uploadedfile__unit',
-				filter=Q(uploadedfile__category='psets'), distinct=True))\
-			.order_by('-num_units_done')
-	context['num_psets_available'] = True
-
-	return render(request, "dashboard/stulist.html", context)
 
 class DownloadList(LoginRequiredMixin, ListView):
 	template_name = 'dashboard/download_list.html'

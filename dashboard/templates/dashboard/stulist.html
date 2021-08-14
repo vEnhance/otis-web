@@ -17,9 +17,6 @@
 	{% endif %}
 	<th>Track</th>
 	<th>Progress</th>
-	{% if num_psets_available %}
-	<th>N PS</th>
-	{% endif %}
 </tr>
 </thead>
 <tbody>
@@ -37,13 +34,9 @@
 
 	<td>{{ student.get_track }}</td>
 	<td>{% if student.legit %}
-		{{ student.num_units_done }}
+		{{ student.num_psets|default:0 }}
 		/ {{ student.curriculum_length }}
 		{% endif %}</td>
-
-	{% if num_psets_available %}
-	<td>{{ student.num_psets }}</td>
-	{% endif %}
 </tr> {# end table row for this student #}
 {% endfor %}
 </tbody>

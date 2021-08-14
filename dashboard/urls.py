@@ -12,7 +12,6 @@ urlpatterns = [
 	path(r'quasigrader/', views.quasigrader, name='quasigrader'),
 	path(r'quasigrader/<int:num_hours>/', views.quasigrader, name='quasigrader'),
 	path(r'idlewarn/', views.idlewarn, name='idlewarn'),
-	path(r'leaderboard/', views.leaderboard, name='leaderboard'),
 	path(r'downloads/<int:pk>/', views.DownloadList.as_view(), name='downloads'),
 	path(r'pset/<int:pk>/', views.PSetDetail.as_view(), name='pset'),
 	path(r'past/', views.past, name='past'),
