@@ -1,0 +1,21 @@
+{% extends 'layout.html' %}
+{% block title %}Achievements Listing{% endblock %}
+
+{% block layout-content %}
+<div class="list-group">
+	{% for achievement in achievement_list %}
+		<div class="list-group-item container">
+			<div class="d-flex justify-content-between">
+				<span style="color: #9c1421;">{{ achievement.diamonds }}♦️</span>
+			</div>
+			<img width="64px" style="float: right;" src="{{ achievement.image.url }}" />
+			<p>Found by {{ achievement.num_found }} user{{ achievement.num_found|pluralize }}.</p>
+			{% if achievement.obtained %}
+			<p>You have obtained this achievement.</p>
+			{% else %}
+			<p>You have not obtained this achievement.</p>
+			{% endif %}
+		</div>
+	{% endfor %}
+</div>
+{% endblock %}

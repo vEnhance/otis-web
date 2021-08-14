@@ -17,7 +17,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
-from django.db.models import Count, F, OuterRef, Q, Subquery, Sum
+from django.db.models import BooleanField, Case, Count, F, OuterRef, Q, Subquery, Sum, When  # NOQA
 from django.db.models.expressions import F
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
@@ -184,6 +184,17 @@ def achievements(request: HttpRequest, student_id: int) -> HttpResponse:
 		pass
 	context.update(_get_meter_update(student))
 	return render(request, "dashboard/achievements.html", context)
+
+
+class AchievementList(LoginRequiredMixin, ListView):
+	template_name = 'dashboard/diamond_list.html'
+	def get_queryset(self) -> QuerySet[Achievement]:
+		# TODO gross
+		return Achievement.objects.filter(active = True).annotate(
+				num_found = Count('student__user__pk', unique = True, distinct = True),
+				obtained = Count('student__user__pk', unique = True, distinct = True,
+					filter = Q(student__user = self.request.user)),
+			).order_by('-num_found')
 
 @login_required
 def submit_pset(request: HttpRequest, student_id: int) -> HttpResponse:
