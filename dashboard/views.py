@@ -571,7 +571,27 @@ def api(request: HttpRequest) -> JsonResponse:
 	action = request.POST.get('action', None)
 
 	if action == 'grade_problem_set':
-		raise NotImplementedError
+		# mark problem set as done
+		pset = get_object_or_404(PSet, pk=request.POST['pk'])
+		pset.approved = bool(request.POST['approved'])
+		pset.clubs = request.POST['clubs']
+		pset.hours = request.POST['hours']
+		pset.save()
+		# unlock the unit the student asked for
+		finished_unit = get_object_or_404(core.models.Unit, pk=request.POST['unit__pk'])
+		student = get_object_or_404(roster.models.Student, pk=request.POST['student__pk'])
+		if 'next_unit_to_unlock__pk' not in request.POST:
+			unlockable_units = student.generate_curriculum_queryset()\
+					.exclude(has_pset = True)\
+					.exclude(id__in = student.unlocked_units.all())
+			target = unlockable_units.first()
+		else:
+			target = get_object_or_404(core.models.Unit,
+					pk=request.POST['next_unit_to_unlock__pk'])
+		if target is not None:
+			student.unlocked_units.add(target)
+		student.unlocked_units.remove(finished_unit)
+		return JsonResponse({'result' : 'success'}, status = 200)
 	elif action == 'approve_inquiry':
 		raise NotImplementedError
 	elif action == 'mark_suggestion':
@@ -589,6 +609,7 @@ def api(request: HttpRequest) -> JsonResponse:
 										'approved',
 										'feedback',
 										'special_notes',
+										'student__pk',
 										'student__user__first_name',
 										'student__user__last_name',
 										'student__user__email',
@@ -597,8 +618,10 @@ def api(request: HttpRequest) -> JsonResponse:
 										'eligible',
 										'unit__group__name',
 										'unit__code',
+										'unit__pk',
 										'next_unit_to_unlock__group__name',
 										'next_unit_to_unlock__code',
+										'next_unit_to_unlock__pk',
 										'upload__content',
 										))
 						},
