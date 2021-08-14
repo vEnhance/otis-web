@@ -33,12 +33,14 @@
 	{% endif %}
 
 	<td>{{ student.get_track }}</td>
-	<td>{% if student.legit %}
-		{% if student.newborn %}
-			{{ student.num_psets|default:0 }}
-		{% else %}
-			<em>Not started</em>
-		{% endif %}
+	<td>
+		{% if student.legit %}
+			{% if student.newborn %}
+				{{ student.num_psets|default:0 }}
+			{% else %}
+				<em>Not started</em>
+			{% endif %}
+		{%endif %}
 	</td>
 </tr> {# end table row for this student #}
 {% endfor %}
