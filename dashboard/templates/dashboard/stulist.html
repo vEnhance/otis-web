@@ -1,5 +1,6 @@
 {% extends 'layout.html' %}
 {% block layout-content %}
+{% load otis_extras %}
 
 {% if students|length > 0 %} {# if >0 student to list #}
 <p>Here are the participants to which you have access.</p>
@@ -11,6 +12,8 @@
 	<th>Name</th>
 	{% if stulist_show_semester %}
 	<th>Year</th>
+	{% else %}
+	<th>Level</th>
 	{% endif %}
 	<th>Track</th>
 	<th>Progress</th>
@@ -28,6 +31,8 @@
 
 	{% if stulist_show_semester %}
 	<td>{{ student.semester }}</td>
+	{% else %}
+	<td>Level {{ student|level }}</td>
 	{% endif %}
 
 	<td>{{ student.get_track }}</td>

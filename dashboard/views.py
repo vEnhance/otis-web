@@ -267,6 +267,14 @@ def uploads(request: HttpRequest, student_id: int, unit_id: int) -> HttpResponse
 	# TODO form for adding new files
 	return render(request, "dashboard/uploads.html", context)
 
+def annotate_level(queryset: QuerySet[roster.models.Student]) -> QuerySet[roster.models.Student]:
+	return queryset.annotate(
+			clubs = Sum('pset__clubs', filter = Q(pset__approved = True, pset__eligible = True)),
+			hearts = Sum('pset__hours', filter = Q(pset__approved = True, pset__eligible = True)),
+			spades_quizzes = Sum('examattempt__score'),
+			diamonds = Sum('achievements__diamonds'),
+			)
+
 @login_required
 def index(request: HttpRequest) -> HttpResponse:
 	assert isinstance(request.user, User)
@@ -277,7 +285,7 @@ def index(request: HttpRequest) -> HttpResponse:
 	assert isinstance(request.user, User)
 	context: Dict[str, Any] = {}
 	context['title'] = "Current Semester Listing"
-	context['students'] = students
+	context['students'] = annotate_level(students)
 	context['stulist_show_semester'] = False
 	context['submitted_registration'] = roster.models.StudentRegistration.objects\
 			.filter(user = request.user, container__semester__active = True)\
