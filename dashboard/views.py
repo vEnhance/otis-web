@@ -10,11 +10,12 @@ from typing import Any, Dict, List
 import core.models
 import exams.models
 import roster.models
+from arch.views import ContextType
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin  # NOQA
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count, F, OuterRef, Q, Subquery, Sum  # NOQA
@@ -194,6 +195,21 @@ class AchievementList(LoginRequiredMixin, ListView):
 				obtained = Count('student__user__pk', unique = True, distinct = True,
 					filter = Q(student__user = self.request.user)),
 			).order_by('-obtained', '-num_found')
+
+
+class FoundList(PermissionRequiredMixin, ListView):
+	permission_required = 'is_staff'
+	template_name = 'dashboard/found_list.html'
+	def get_queryset(self) -> QuerySet[roster.models.Student]:
+		self.achievement = get_object_or_404(
+				Achievement, pk=self.kwargs['pk'])
+		students = self.achievement.student_set # type: ignore
+		return students.filter(semester__active = True)\
+				.select_related('user') # type: ignore
+	def get_context_data(self, **kwargs: Any) -> ContextType:
+		context = super().get_context_data(**kwargs)
+		context['achievement'] = self.achievement
+		return context
 
 @staff_member_required
 def leaderboard(request: HttpRequest) -> HttpResponse:

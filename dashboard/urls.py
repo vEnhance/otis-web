@@ -7,6 +7,7 @@ urlpatterns = [
 	path(r'conquer/<int:student_id>/', views.submit_pset, name='submit-pset'),
 	path(r'achievements/<int:student_id>/', views.achievements, name='achievements'),
 	path(r'achievements/listing/', views.AchievementList.as_view(), name='achievements-listing'),
+	path(r'foundlist/<int:pk>/', views.FoundList.as_view(), name='found-listing'),
 	path(r'uploads/<int:student_id>/<int:unit_id>/', views.uploads, name='uploads'),
 	path(r'editfile/<int:pk>/', views.UpdateFile.as_view(), name='editfile'),
 	path(r'deletefile/<int:pk>/', views.DeleteFile.as_view(), name='delfile'),

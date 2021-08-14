@@ -1,0 +1,13 @@
+{% extends 'layout.html' %}
+{% block title %}Found by...{% endblock %}
+{% block layout-content %}
+<p>The following students found
+<strong>{{ achievement }}</strong>.</p>
+<img style="float:right;" width="96px" src="{{ achievement.image.url }}"/>
+<ul>
+	{% for student in object_list %}
+		<li><a href="{% url "achievements" student.pk %}">{{ student.name }}</a></li>
+	{% endfor %}
+</ul>
+<p>{{ achievement.description }}</p>
+{% endblock %}
