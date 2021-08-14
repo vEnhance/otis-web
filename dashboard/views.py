@@ -17,7 +17,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
-from django.db.models import BooleanField, Case, Count, F, OuterRef, Q, Subquery, Sum, When  # NOQA
+from django.db.models import Count, F, OuterRef, Q, Subquery, Sum  # NOQA
 from django.db.models.expressions import F
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
