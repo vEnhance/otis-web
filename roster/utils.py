@@ -13,7 +13,7 @@ def get_current_students(queryset: QuerySet[models.Student] = models.Student.obj
 
 def get_visible_from_queryset(user: User, queryset: QuerySet[models.Student]):
 	"""From a queryset, filter out the students which the user can see."""
-	if user.is_staff:
+	if user.is_superuser:
 		return queryset
 	else:
 		return queryset.filter(Q(user = user) | Q(assistant__user = user)
