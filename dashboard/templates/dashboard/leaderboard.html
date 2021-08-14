@@ -1,0 +1,50 @@
+{% extends 'layout.html' %}
+{% block title %}Leaderboard{% endblock %}
+
+{% block layout-content %}
+{% load otis_extras %}
+{% load humanize %}
+
+<table id="students" class="table tablesorter">
+<thead>
+<tr>
+	<th>Level achieved</th>
+	<th>Rk</th>
+	<th>Name</th>
+	<th>♣️</th>
+	<th>♥️</th>
+	<th>♠️</th>
+	<th>♦️</th>
+</tr>
+</thead>
+<tbody>
+{% for row in rows %}
+<tr> {# begin table row for this student #}
+	<td>
+		<strong class="text-danger">Lv {{ row.level }}</strong>
+		<i>{{ row.level_name }}</i>
+	</td>
+	<td>
+			<sup>{{ forloop.counter|ordinal }}</sup>
+	</td>
+	<td><a href="{% url "achievements" row.id %}">
+			{{ row.name }}</a>
+	</td>
+	<td>{{ row.clubs_level }}</td>
+	<td>{{ row.hearts_level }}</td>
+	<td>{{ row.spades_level }}</td>
+	<td>{{ row.diamonds_level }}</td>
+</tr> {# end table row for this row #}
+{% endfor %}
+</tbody>
+</table>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/tablesorter@2.31.3/dist/js/jquery.tablesorter.combined.min.js" integrity="sha256-ounC3wWwZ9iBUyF8x1+X+REppGjK+p6/+w+ky1MGoMM=" crossorigin="anonymous"></script>
+<script type="text/javascript">
+$(() => {
+		$("#students").tablesorter();
+});
+</script>
+{% endblock %}

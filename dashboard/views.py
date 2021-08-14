@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import logging
 from datetime import timedelta
 from hashlib import sha256
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import core.models
 import exams.models
@@ -185,7 +185,6 @@ def achievements(request: HttpRequest, student_id: int) -> HttpResponse:
 	context.update(_get_meter_update(student))
 	return render(request, "dashboard/achievements.html", context)
 
-
 class AchievementList(LoginRequiredMixin, ListView):
 	template_name = 'dashboard/diamond_list.html'
 	def get_queryset(self) -> QuerySet[Achievement]:
@@ -195,6 +194,34 @@ class AchievementList(LoginRequiredMixin, ListView):
 				obtained = Count('student__user__pk', unique = True, distinct = True,
 					filter = Q(student__user = self.request.user)),
 			).order_by('-obtained', '-num_found')
+
+@staff_member_required
+def leaderboard(request: HttpRequest) -> HttpResponse:
+	assert isinstance(request.user, User)
+	students = roster.models.Student.objects.filter(semester__active=True)
+	rows: List[Dict[str, Any]] = []
+	levels: Dict[int, str] = {level.threshold: level.name for level in Level.objects.all()}
+	max_level = max(levels.keys())
+	for student in annotate_level(students):
+		row: Dict[str, Any] = {}
+		row['id'] = student.id
+		row['name'] = student.name
+		row['spades_level'] = int(
+				((getattr(student, 'spades_quizzes', 0) or 0) + (student.usemo_score or 0))
+				**0.5)
+		row['hearts_level'] = int((getattr(student, 'hearts', 0) or 0)**0.5)
+		row['clubs_level'] = int((getattr(student, 'clubs', 0) or 0)**0.5)
+		row['diamonds_level'] = int((getattr(student, 'diamonds', 0) or 0)**0.5)
+		row['level'] = row['spades_level']+row['hearts_level']+row['clubs_level']+row['diamonds_level']
+		if row['level'] > max_level:
+			row['level_name'] = levels[max_level]
+		else:
+			row['level_name'] = levels.get(row['level'], "No level")
+		rows.append(row)
+	rows.sort(key = lambda row: (-row['level'], row['name'].upper()))
+	context: Dict[str, Any] = {}
+	context['rows'] = rows
+	return render(request, "dashboard/leaderboard.html", context)
 
 @login_required
 def submit_pset(request: HttpRequest, student_id: int) -> HttpResponse:

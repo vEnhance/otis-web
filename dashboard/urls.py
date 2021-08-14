@@ -24,5 +24,6 @@ urlpatterns = [
 	path(r'suggest/<int:student_id>/list/', views.ProblemSuggestionList.as_view(), name='suggest-list'),
 	path(r'suggest/resolve/', views.pending_contributions, name='pending-suggest'),
 	path(r'suggest/resolve/<int:suggestion_id>/', views.pending_contributions, name='resolve-suggest'),
+	path(r'leaderboard/', views.leaderboard, name='leaderboard'),
 	path(r'api/', views.api, name='resolve-suggest'),
 ]
