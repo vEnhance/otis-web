@@ -232,7 +232,9 @@ def leaderboard(request: HttpRequest) -> HttpResponse:
 		else:
 			row['level_name'] = levels.get(row['level'], "No level")
 		rows.append(row)
-	rows.sort(key = lambda row: (-row['level'], row['name'].upper()))
+	rows.sort(key = lambda row: (-row['level'],
+		row['spades'], row['hearts'], row['clubs'], row['diamonds'],
+		row['name'].upper()))
 	context: Dict[str, Any] = {}
 	context['rows'] = rows
 	return render(request, "dashboard/leaderboard.html", context)
