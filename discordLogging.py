@@ -34,9 +34,6 @@ EMOJIS = {
 }
 
 class DiscordHandler(logging.Handler):
-	def __init__(self):
-		super().__init__()
-
 	def emit(self, record: logging.LogRecord):
 		level = record.levelname.lower().strip()
 		emoji = EMOJIS.get(level, ':question:')
