@@ -193,7 +193,7 @@ class AchievementList(LoginRequiredMixin, ListView):
 		assert isinstance(self.request.user, User)
 		return Achievement.objects.filter(active = True).annotate(
 				num_found = Count('student__user__pk', unique = True, distinct = True),
-				obtained = Exists(Achievement.objects.filter(student__user=self.request.user)),
+				obtained = Exists(Achievement.objects.filter(pk = OuterRef('pk'), student__user=self.request.user)),
 			).order_by('-obtained', '-num_found')
 
 
