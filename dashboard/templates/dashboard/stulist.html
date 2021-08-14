@@ -36,7 +36,7 @@
 	<td>
 		{% if student.legit %}
 			{% if student.newborn %}
-				<em>Not started</em>
+				&mdash;
 			{% else %}
 				{{ student.num_psets|default:0 }}
 			{% endif %}
