@@ -222,12 +222,10 @@ def leaderboard(request: HttpRequest) -> HttpResponse:
 		row: Dict[str, Any] = {}
 		row['id'] = student.id
 		row['name'] = student.name
-		row['spades_level'] = int(
-				((getattr(student, 'spades_quizzes', 0) or 0) + (student.usemo_score or 0))
-				**0.5)
-		row['hearts_level'] = int((getattr(student, 'hearts', 0) or 0)**0.5)
-		row['clubs_level'] = int((getattr(student, 'clubs', 0) or 0)**0.5)
-		row['diamonds_level'] = int((getattr(student, 'diamonds', 0) or 0)**0.5)
+		row['spades'] = (getattr(student, 'spades_quizzes', 0) or 0) + (student.usemo_score or 0)
+		row['hearts'] = getattr(student, 'hearts', 0) or 0
+		row['clubs'] = getattr(student, 'clubs', 0) or 0
+		row['diamonds'] = getattr(student, 'diamonds', 0) or 0
 		row['level'] = row['spades_level']+row['hearts_level']+row['clubs_level']+row['diamonds_level']
 		if row['level'] > max_level:
 			row['level_name'] = levels[max_level]
