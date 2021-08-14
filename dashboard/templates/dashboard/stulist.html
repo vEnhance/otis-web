@@ -36,9 +36,9 @@
 	<td>
 		{% if student.legit %}
 			{% if student.newborn %}
-				{{ student.num_psets|default:0 }}
-			{% else %}
 				<em>Not started</em>
+			{% else %}
+				{{ student.num_psets|default:0 }}
 			{% endif %}
 		{%endif %}
 	</td>
