@@ -156,7 +156,7 @@ class ProblemSuggestion(models.Model):
 		return f"{self.student.name} suggested {self.source} for {self.unit.group}"
 
 def achievement_image_file_name(instance: 'Achievement', filename: str) -> str:
-	return os.path.join('badges', instance.code + '_' + filename)
+	return os.path.join('badges', str(instance.pk) + os.path.splitext(filename)[-1])
 
 class Achievement(models.Model):
 	code = models.CharField(max_length = 96, unique = True)
