@@ -194,7 +194,7 @@ class AchievementList(LoginRequiredMixin, ListView):
 				num_found = Count('student__user__pk', unique = True, distinct = True),
 				obtained = Count('student__user__pk', unique = True, distinct = True,
 					filter = Q(student__user = self.request.user)),
-			).order_by('-num_found')
+			).order_by('-obtained', '-num_found')
 
 @login_required
 def submit_pset(request: HttpRequest, student_id: int) -> HttpResponse:
