@@ -5,7 +5,7 @@
 {% if students|length > 0 %} {# if >0 student to list #}
 <p>Here are the participants to which you have access.</p>
 
-<table class="table">
+<table id="students" class="table tablesorter">
 <thead class="table-dark">
 <tr>
 	<th>#</th>
@@ -29,7 +29,7 @@
 	{% if stulist_show_semester %}
 	<td>{{ student.semester }}</td>
 	{% else %}
-	<td>Level {{ student|level }}</td>
+	<td>{{ student|level }}</td>
 	{% endif %}
 
 	<td>{{ student.get_track }}</td>
@@ -69,4 +69,13 @@ Have a nice day.</p>
 	<p>You can view <a href="{% url "past" %}">🕗 past semesters</a>
 	if you participated in OTIS before.</p>
 {% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/tablesorter@2.31.3/dist/js/jquery.tablesorter.combined.min.js" integrity="sha256-ounC3wWwZ9iBUyF8x1+X+REppGjK+p6/+w+ky1MGoMM=" crossorigin="anonymous"></script>
+<script type="text/javascript">
+$(() => {
+		$("#students").tablesorter();
+});
+</script>
 {% endblock %}
