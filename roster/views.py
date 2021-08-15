@@ -12,6 +12,7 @@ So e.g. "list students by most recent pset" goes under dashboard.
 
 import collections
 import datetime
+import logging
 import os
 from hashlib import pbkdf2_hmac, sha256
 from typing import Any, Dict, List
@@ -347,6 +348,20 @@ def approve_inquiry_all(_: HttpRequest) -> HttpResponse:
 	return HttpResponseRedirect(reverse("list-inquiry"))
 
 
+def mailchimp_subscribe(user: User):
+	client = MailChimp(mc_api=os.getenv('MAILCHIMP_API_KEY'), mc_user='vEnhance')
+	client.lists.members.create(
+		os.getenv('MAILCHIMP_LIST_ID'), {
+			'email_address': user.email,
+			'status': 'subscribed',
+			'merge_fields': {
+				'FNAME': user.first_name,
+				'LNAME': user.last_name,
+			}
+		}
+	)
+
+
 @login_required
 def register(request: HttpRequest) -> HttpResponse:
 	try:
@@ -376,18 +391,7 @@ def register(request: HttpRequest) -> HttpResponse:
 				request.user.last_name = form.cleaned_data['surname']
 				request.user.email = form.cleaned_data['email_address']
 				request.user.save()
-				client = MailChimp(mc_api=os.getenv('MAILCHIMP_API_KEY'), mc_user='vEnhance')
-				client.lists.members.create(
-					os.getenv('MAILCHIMP_LIST_ID'), {
-						'email_address': request.user.email,
-						'status': 'subscribed',
-						'merge_fields':
-							{
-								'FNAME': request.user.first_name,
-								'LNAME': request.user.last_name,
-							}
-					}
-				)
+				mailchimp_subscribe(request.user)
 				messages.success(request, message="Submitted! Sit tight.")
 				return HttpResponseRedirect(reverse("index"))
 	else:
@@ -415,7 +419,16 @@ def update_profile(request: HttpRequest) -> HttpResponse:
 	if request.method == 'POST':
 		form = forms.UserForm(request.POST, instance=request.user)
 		if form.is_valid():
-			form.save()
+			user: User = form.save(commit=False)
+			if user.email != request.user.email:
+				logging.info(
+					f"User {user.first_name} {user.last_name} is now at {user.email} "
+					f"(formerly {request.user.email})"
+				)
+				user.save()
+				mailchimp_subscribe(user)
+			else:
+				user.save()
 			messages.success(request, "Your information has been updated")
 	else:
 		form = forms.UserForm(instance=request.user)
