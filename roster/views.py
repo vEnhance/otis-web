@@ -27,7 +27,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.db.models import Count, IntegerField, OuterRef, Subquery
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse  # NOQA
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
@@ -403,3 +403,21 @@ def api(request: HttpRequest) -> JsonResponse:
 		return JsonResponse({ 'result': 'pending' })
 	else:
 		return JsonResponse({ 'result': 'unregistered' })
+
+# TODO ugly hack but I'm tired of answering this requests
+@login_required
+def unlock_rest_of_mystery(request: HttpRequest, delta: int = 1) -> HttpResponse:
+	student = infer_student(request)
+	assert delta == 1 or delta == 2
+	try:
+		mystery = student.unlocked_units.get(group__name = "Mystery")
+	except Unit.DoesNotExist:
+		return HttpResponse("You don't have the Mystery unit unlocked!\n" \
+				+ f"You are currently {student}", status = 403)
+	added_unit = get_object_or_404(Unit, position = mystery.position + delta)
+	student.unlocked_units.remove(mystery)
+	student.curriculum.remove(mystery)
+	student.unlocked_units.add(added_unit)
+	student.curriculum.add(added_unit)
+	messages.success(request, f"Added the unit {added_unit}")
+	return HttpResponseRedirect('/')
