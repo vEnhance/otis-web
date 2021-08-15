@@ -242,6 +242,7 @@ class StudentRegistrationIEResource(RosterResource):
 	class Meta:
 		model = StudentRegistration
 		fields = (
+			'id',
 			'user_name',
 			'container__semester__name',
 			'processed',
