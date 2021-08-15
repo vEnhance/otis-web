@@ -110,7 +110,7 @@ def _get_meter_update(student: roster.models.Student) -> Dict[str, Any]:
 		}
 	level_number = sum(meter.level for meter in meters.values())
 	level = Level.objects\
-			.filter(threshold__lte = level_number).order_by('threshold').first()
+			.filter(threshold__lte = level_number).order_by('-threshold').first()
 	level_name = level.name if level is not None else 'No Level'
 	return {
 			'psets': psets,
