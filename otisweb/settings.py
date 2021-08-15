@@ -7,9 +7,11 @@ import os
 from pathlib import Path
 from typing import Any, Dict
 
-import discordLogging  # NOQA
+import discordLogging
 import import_export.tmp_storages
 from dotenv import load_dotenv
+
+assert discordLogging
 
 BASE_DIR = Path(__file__).parent.parent.absolute()
 ENV_PATH = BASE_DIR / '.env'
