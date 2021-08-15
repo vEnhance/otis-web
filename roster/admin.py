@@ -243,6 +243,9 @@ class StudentRegistrationIEResource(RosterResource):
 		model = StudentRegistration
 		fields = (
 			'id',
+			'user__first_name',
+			'user__last_name',
+			'user__email',
 			'user_name',
 			'container__semester__name',
 			'processed',
