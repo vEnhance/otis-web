@@ -88,29 +88,34 @@ def BNF() -> Any:
 
 		expr = Forward()
 		expr_list = delimitedList(Group(expr))
+
 		# add parse action that replaces the function identifier with a (name, number of args) tuple
 		def insert_fn_argcount_tuple(t: List[Any]):
 			fn = t.pop(0)
 			num_args = len(t[0])
 			t.insert(0, (fn, num_args))
 
-		fn_call = (ident + lpar - Group(expr_list) + rpar).setParseAction( # type: ignore
-			insert_fn_argcount_tuple
-		)
+		f = ident + lpar - Group(expr_list) + rpar  # type: ignore
+		fn_call = f.setParseAction(insert_fn_argcount_tuple)  # type: ignore
+		g = fn_call | pi | e | fnumber | ident  # type: ignore
+		assert g is not None
 		atom = (
-				addop[...] # type: ignore
+			addop[...]  # type: ignore
 			+ (
-				(fn_call | pi | e | fnumber | ident).setParseAction(push_first) # type: ignore
-				| Group(lpar + expr + rpar) # type: ignore
-			)
-			).setParseAction(push_unary_minus) # type: ignore
+			g.setParseAction(push_first) | Group(lpar + expr + rpar)  # type: ignore
+			)).setParseAction(push_unary_minus)  # type: ignore
 
 		# by defining exponentiation as "atom [ ^ factor ]..." instead of "atom [ ^ atom ]...", we get right-to-left
 		# exponents, instead of left-to-right that is, 2^3^2 = 2^(3^2), not (2^3)^2.
 		factor = Forward()
-		factor <<= atom + (expop + factor).setParseAction(push_first)[...] # type: ignore
-		term = factor + (multop + factor).setParseAction(push_first)[...] # type: ignore
-		expr <<= term + (addop + term).setParseAction(push_first)[...] # type: ignore
+		factor <<= atom + (expop +
+			factor).setParseAction(push_first)[...]  # type: ignore
+		term = factor + (
+			multop +  # type: ignore
+			factor).setParseAction(push_first)[...]  # type: ignore
+		expr <<= term + (
+			addop +  # type: ignore
+			term).setParseAction(push_first)[...]  # type: ignore
 		bnf = expr
 	return bnf
 
@@ -160,6 +165,7 @@ def evaluate_stack(s: List[Any]) -> Union[int, float]:
 			return int(op)
 		except ValueError:
 			return float(op)
+
 
 def expr_compute(s: str) -> Optional[float]:
 	if s == '':

@@ -9,6 +9,7 @@ from roster.models import Student
 
 class Command(BaseCommand):
 	help = 'Replaces all instances of unit X with unit Y'
+
 	def add_arguments(self, parser: ArgumentParser):
 		parser.add_argument('source', type=int, help="ID of source unit")
 		parser.add_argument('dest', type=int, help="ID of destination unit")
@@ -24,7 +25,9 @@ class Command(BaseCommand):
 		s2 = Student.objects.filter(unlocked_units=source_id)
 
 		print(f"This will change {u.count()} uploaded files.")
-		print(f"This will affect {s1.count()} students with the unit, of which {s2.count()} have it unlocked.")
+		print(
+			f"This will affect {s1.count()} students with the unit, of which {s2.count()} have it unlocked."
+		)
 
 		if input("Are you sure? ").strip().lower() != 'y':
 			return

@@ -13,8 +13,9 @@ from .models import ExamAttempt, PracticeExam
 
 # Create your views here.
 
+
 def pdf(request: HttpRequest, pk: int) -> HttpResponse:
-	exam = get_object_or_404(PracticeExam, pk = pk)
+	exam = get_object_or_404(PracticeExam, pk=pk)
 	if getattr(request.user, 'is_staff', True):
 		return get_from_google_storage(exam.pdfname)
 
@@ -26,12 +27,14 @@ def pdf(request: HttpRequest, pk: int) -> HttpResponse:
 
 	return get_from_google_storage(exam.pdfname)
 
+
 def quiz(request: HttpRequest, student_id: int, pk: int) -> HttpResponse:
 	student = get_student_by_id(request, student_id)
 	context: Dict[str, Any] = {}
-	quiz = get_object_or_404(PracticeExam, pk = pk)
+	quiz = get_object_or_404(PracticeExam, pk=pk)
 	if quiz.is_test:
-		return HttpResponseForbidden("You can't submit numerical answers to an olympiad exam.")
+		return HttpResponseForbidden(
+			"You can't submit numerical answers to an olympiad exam.")
 	if not quiz.started:
 		return HttpResponseForbidden("You can't start this quiz")
 
@@ -45,7 +48,7 @@ def quiz(request: HttpRequest, student_id: int, pk: int) -> HttpResponse:
 		if request.method == 'POST':
 			if quiz.overdue:
 				return HttpResponseForbidden("You can't submit this quiz " \
-						"since the deadline passed.")
+                                  "since the deadline passed.")
 			form = ExamAttemptForm(request.POST)
 			if form.is_valid():
 				attempt = form.save(commit=False)
@@ -61,29 +64,30 @@ def quiz(request: HttpRequest, student_id: int, pk: int) -> HttpResponse:
 
 	if attempt is not None:
 		context['attempt'] = attempt
-		dummy_form = ExamAttemptForm(instance = attempt)
-		for i in range(1,6):
+		dummy_form = ExamAttemptForm(instance=attempt)
+		for i in range(1, 6):
 			dummy_form.fields[f'guess{i}'].disabled = True
 		context['rows'] = []
 
 		score = 0
-		for i in range(1,6):
-			field = dummy_form.visible_fields()[i-1]
+		for i in range(1, 6):
+			field = dummy_form.visible_fields()[i - 1]
 			guess_str = getattr(attempt, f'guess{i}')
 			guess_val = expr_compute(guess_str)
 			accepted_str = getattr(quiz, f'answer{i}')
 			accepted_vals = [expr_compute(_) for _ in accepted_str.split(',') if _]
 			if guess_val is not None:
-				correct = any(v is not None and abs(guess_val-v) < 1e-12 for v in accepted_vals)
+				correct = any(
+					v is not None and abs(guess_val - v) < 1e-12 for v in accepted_vals)
 			else:
 				correct = False
 
-			context['rows'].append(
-					{ 'field': field,
-						'accepted': accepted_str,
-						'correct': correct,
-						'url': getattr(quiz, f'url{i}', None)
-						})
+			context['rows'].append({
+				'field': field,
+				'accepted': accepted_str,
+				'correct': correct,
+				'url': getattr(quiz, f'url{i}', None)
+			})
 			if correct:
 				score += 1
 
@@ -95,9 +99,11 @@ def quiz(request: HttpRequest, student_id: int, pk: int) -> HttpResponse:
 	context['student'] = student
 	return render(request, 'exams/quiz.html', context)
 
-def show_exam(request: HttpRequest,  student_id: int, pk: int) -> HttpResponse:
+
+def show_exam(request: HttpRequest, student_id: int, pk: int) -> HttpResponse:
 	context: Dict[str, Any] = {}
-	quiz = get_object_or_404(PracticeExam, pk = pk)
+	quiz = get_object_or_404(PracticeExam, pk=pk)
 	if quiz.is_test:
-		return HttpResponseForbidden("You can only use this view for short-answer quizzes.")
+		return HttpResponseForbidden(
+			"You can only use this view for short-answer quizzes.")
 	return render(request, 'exams/quiz_detail.html', context)

@@ -7,9 +7,11 @@ from django.http.response import HttpResponse, HttpResponseBadRequest, HttpRespo
 
 logger = logging.getLogger(__name__)
 
-def h(value : str) -> str:
+
+def h(value: str) -> str:
 	s = settings.STORAGE_HASH_KEY + '|' + value
 	return sha256(s.encode('ascii')).hexdigest()
+
 
 def get_from_google_storage(filename: str):
 	ext = filename[-4:]
@@ -21,7 +23,7 @@ def get_from_google_storage(filename: str):
 		errmsg = f"Unable to find {filename}."
 		logger.critical(errmsg)
 		return HttpResponseServerError(errmsg)
-	response = HttpResponse(content = file)
+	response = HttpResponse(content=file)
 	response['Content-Type'] = f'application/{ext}'
 	response['Content-Disposition'] = f'attachment; filename="{filename}"'
 	return response

@@ -13,60 +13,141 @@ from dashboard.models import Achievement, Level, ProblemSuggestion, PSet, Semest
 
 @admin.register(UploadedFile)
 class UploadedFileAdmin(admin.ModelAdmin):
-	list_display = ('id', 'content', 'created_at', 'description',
-			'benefactor', 'unit', 'category', 'owner',)
+	list_display = (
+		'id',
+		'content',
+		'created_at',
+		'description',
+		'benefactor',
+		'unit',
+		'category',
+		'owner',
+	)
 	search_fields = ('description',)
 	list_filter = ('category',)
 	list_per_page = 30
-	autocomplete_fields = ('benefactor', 'unit', 'owner',)
+	autocomplete_fields = (
+		'benefactor',
+		'unit',
+		'owner',
+	)
+
 
 @admin.register(SemesterDownloadFile)
 class SemesterDownloadFileAdmin(admin.ModelAdmin):
-	list_display = ('id', 'semester', 'content', 'created_at', 'description',)
+	list_display = (
+		'id',
+		'semester',
+		'content',
+		'created_at',
+		'description',
+	)
 	search_fields = ('description',)
 	list_filter = ('semester',)
 	list_per_page = 30
 
+
 @admin.register(PSet)
 class PSetAdmin(admin.ModelAdmin):
-	list_display = ('approved', 'student', 'unit', 'hours', 'clubs',)
-	search_fields = ('unit__group__name',
-			'student__user__first_name', 'student__user__last_name',
-			'feedback', 'special_notes',)
-	list_filter = ('approved', 'student__semester',)
-	list_display_links = ('student', 'unit',)
+	list_display = (
+		'approved',
+		'student',
+		'unit',
+		'hours',
+		'clubs',
+	)
+	search_fields = (
+		'unit__group__name',
+		'student__user__first_name',
+		'student__user__last_name',
+		'feedback',
+		'special_notes',
+	)
+	list_filter = (
+		'approved',
+		'student__semester',
+	)
+	list_display_links = (
+		'student',
+		'unit',
+	)
 	list_per_page = 30
+
 	def approve_pset(self, request: HttpRequest, queryset: QuerySet[PSet]):
 		_ = queryset.update(approved=True)
+
 	def reject_pset(self, request: HttpRequest, queryset: QuerySet[PSet]):
 		_ = queryset.update(approved=False)
-	actions = ['approve_pset', 'reject_pset',]
+
+	actions = [
+		'approve_pset',
+		'reject_pset',
+	]
+
 
 @admin.register(ProblemSuggestion)
 class ProblemSuggestionAdmin(admin.ModelAdmin):
-	list_display = ('id', 'student', 'source', 'description', 'resolved', 'notified',)
-	search_fields = ('student__user__first_name', 'student__user__last_name', 'unit__group__name', 'source', 'description', 'statement', 'solution',  'comments',)
-	list_filter = ('resolved', 'unit__group', 'student__semester',)
-	autocomplete_fields = ('student', 'unit',)
+	list_display = (
+		'id',
+		'student',
+		'source',
+		'description',
+		'resolved',
+		'notified',
+	)
+	search_fields = (
+		'student__user__first_name',
+		'student__user__last_name',
+		'unit__group__name',
+		'source',
+		'description',
+		'statement',
+		'solution',
+		'comments',
+	)
+	list_filter = (
+		'resolved',
+		'unit__group',
+		'student__semester',
+	)
+	autocomplete_fields = (
+		'student',
+		'unit',
+	)
 	list_per_page = 50
 
+
 class LevelIEResource(resources.ModelResource):
+
 	class Meta:
 		skip_unchanged = True
 		model = Level
 		fields = ('id', 'threshold', 'name')
 
+
 @admin.register(Level)
 class LevelAdmin(ImportExportModelAdmin):
-	list_display = ('threshold', 'name',)
+	list_display = (
+		'threshold',
+		'name',
+	)
 	search_fields = ('name',)
 	resource_class = LevelIEResource
 
+
 class AchievementIEResource(resources.ModelResource):
+
 	class Meta:
 		skip_unchanged = True
 		model = Level
-		fields = ('code', 'name', 'diamonds', 'active', 'description',)
+		fields = (
+			'code',
+			'name',
+			'diamonds',
+			'active',
+			'description',
+		)
+
 
 @admin.register(Achievement)
 class AchievementAdmin(ImportExportModelAdmin):

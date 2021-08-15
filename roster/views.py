@@ -41,6 +41,7 @@ from . import forms, models
 
 # Create your views here.
 
+
 @login_required
 def curriculum(request: HttpRequest, student_id: int) -> HttpResponse:
 	student = get_student_by_id(request, student_id)
@@ -49,28 +50,33 @@ def curriculum(request: HttpRequest, student_id: int) -> HttpResponse:
 
 	enabled = can_edit(request, student) or student.newborn
 	if request.method == 'POST' and enabled:
-		form = forms.CurriculumForm(request.POST, units = units, enabled = True)
+		form = forms.CurriculumForm(request.POST, units=units, enabled=True)
 		if form.is_valid():
 			data = form.cleaned_data
 			# get groups with nonempty unit sets
-			unit_lists = [data[k] for k in data if k.startswith('group-')
-					and data[k] is not None]
+			unit_lists = [
+				data[k] for k in data if k.startswith('group-') and data[k] is not None
+			]
 			values = [unit for unit_list in unit_lists for unit in unit_list]
 			student.curriculum.set(values)
 			student.save()
-			messages.success(request,
-					f"Successfully saved curriculum of {len(values)} units.")
+			messages.success(
+				request, f"Successfully saved curriculum of {len(values)} units.")
 	else:
-		form = forms.CurriculumForm(units = units,
-				original = original, enabled = enabled)
+		form = forms.CurriculumForm(units=units, original=original, enabled=enabled)
 		if not enabled:
 			messages.info(request, "You can't edit this curriculum " \
-					"since you are not an instructor.")
+                          "since you are not an instructor.")
 
-	context = {'title': "Units for " + student.name,
-			'student': student, 'form': form, 'enabled': enabled}
+	context = {
+		'title': "Units for " + student.name,
+		'student': student,
+		'form': form,
+		'enabled': enabled
+	}
 	# return HttpResponse("hi")
 	return render(request, "roster/currshow.html", context)
+
 
 @login_required
 @require_POST
@@ -82,36 +88,40 @@ def finalize(request: HttpRequest, student_id: int) -> HttpResponse:
 		first_units = student.curriculum.all()[0:3]
 		student.unlocked_units.set(first_units)
 		student.save()
-		messages.success(request, "Your curriculum has been finalized! "
-				"You can start working now; "
-				"the first three units have been unlocked.")
+		messages.success(
+			request, "Your curriculum has been finalized! "
+			"You can start working now; "
+			"the first three units have been unlocked.")
 	else:
-		messages.error(request, "You didn't select any units. "
-				"You should select some units before using this link.")
+		messages.error(
+			request, "You didn't select any units. "
+			"You should select some units before using this link.")
 	return HttpResponseRedirect(reverse("portal", args=(student_id,)))
+
 
 @login_required
 def advance(request: HttpRequest, student_id: int) -> Any:
 	student = get_student_by_id(request, student_id)
 	if request.method == 'POST':
-		form = forms.AdvanceForm(request.POST, instance = student)
+		form = forms.AdvanceForm(request.POST, instance=student)
 		if form.is_valid():
 			form.save()
 			messages.success(request, "Successfully advanced student.")
 			# uncomment the below if you want to load the portal again
 			# return HttpResponseRedirect(reverse("portal", args=(student_id,)))
 	else:
-		form = forms.AdvanceForm(instance = student)
+		form = forms.AdvanceForm(instance=student)
 
 	context: Dict[str, Any] = {'title': "Advance " + student.name}
 	context['form'] = form
 	context['student'] = student
 	context['omniscient'] = can_edit(request, student)
 	context['curriculum'] = student.generate_curriculum_rows(
-			omniscient = context['omniscient'])
+		omniscient=context['omniscient'])
 	if student.semester.uses_legacy_pset_system:
-		uploads = student.uploadedfile_set # type: ignore
-		context['num_psets'] = uploads.filter(category='psets').values('unit').distinct().count()
+		uploads = student.uploadedfile_set  # type: ignore
+		context['num_psets'] = uploads.filter(
+			category='psets').values('unit').distinct().count()
 	else:
 		context['num_psets'] = PSet.objects.filter(student=student).count()
 
@@ -120,19 +130,20 @@ def advance(request: HttpRequest, student_id: int) -> Any:
 
 def get_checksum(student: models.Student) -> str:
 	key = settings.INVOICE_HASH_KEY
-	return pbkdf2_hmac('sha256',
-			(key+str(student.id)+'meow').encode('utf-8'),
-			b'salt is yummy so is sugar', 100000, dklen = 18).hex()
+	return pbkdf2_hmac('sha256', (key + str(student.id) + 'meow').encode('utf-8'),
+		b'salt is yummy so is sugar',
+		100000,
+		dklen=18).hex()
+
 
 @login_required
 def invoice(request: HttpRequest, student_id: int = None) -> HttpResponse:
 	if student_id is None:
 		student = infer_student(request)
-		return HttpResponseRedirect(
-				reverse("invoice", args=(student.id,)))
+		return HttpResponseRedirect(reverse("invoice", args=(student.id,)))
 
 	# Now assume student_id is not None
-	student = get_student_by_id(request, student_id, payment_exempt = True)
+	student = get_student_by_id(request, student_id, payment_exempt=True)
 
 	if not student.semester.show_invoices:
 		invoice = None
@@ -142,14 +153,19 @@ def invoice(request: HttpRequest, student_id: int = None) -> HttpResponse:
 		except ObjectDoesNotExist:
 			invoice = None
 
-	context = {'title': "Invoice for " + student.name,
-			'student': student, 'invoice': invoice,
-			'checksum': get_checksum(student)}
+	context = {
+		'title': "Invoice for " + student.name,
+		'student': student,
+		'invoice': invoice,
+		'checksum': get_checksum(student)
+	}
 	# return HttpResponse("hi")
 	return render(request, "roster/invoice.html", context)
 
+
 # this is not gated
-def invoice_standalone(request: HttpRequest, student_id: int, checksum: str) -> HttpResponse:
+def invoice_standalone(request: HttpRequest, student_id: int,
+	checksum: str) -> HttpResponse:
 	student = models.Student.objects.get(id=student_id)
 	if checksum != get_checksum(student):
 		raise PermissionDenied("Bad hash provided")
@@ -157,8 +173,12 @@ def invoice_standalone(request: HttpRequest, student_id: int, checksum: str) -> 
 		invoice = student.invoice
 	except ObjectDoesNotExist:
 		raise Http404("No invoice exists for this student")
-	context = {'title': "Invoice for " + student.name,
-			'student': student, 'invoice': invoice, 'checksum': checksum}
+	context = {
+		'title': "Invoice for " + student.name,
+		'student': student,
+		'invoice': invoice,
+		'checksum': checksum
+	}
 	# return HttpResponse("hi")
 	return render(request, "roster/invoice-standalone.html", context)
 
@@ -166,36 +186,41 @@ def invoice_standalone(request: HttpRequest, student_id: int, checksum: str) -> 
 @staff_member_required
 def master_schedule(request: HttpRequest) -> HttpResponse:
 	student_names_and_unit_ids = get_current_students().filter(legit=True)\
-			.values('user__first_name', 'user__last_name', 'curriculum')
+          .values('user__first_name', 'user__last_name', 'curriculum')
 	unit_to_student_names = collections.defaultdict(list)
 	for d in student_names_and_unit_ids:
 		# e.g. d = {'name': Student, 'curriculum': 30}
-		unit_to_student_names[d['curriculum']].append(
-				d['user__first_name'] + ' ' + d['user__last_name'])
+		unit_to_student_names[d['curriculum']].append(d['user__first_name'] + ' ' +
+			d['user__last_name'])
 
 	chart: List[Dict[str, Any]] = []
 	unit_dicts = Unit.objects.order_by('position')\
-			.values('position', 'pk', 'group__subject', 'group__name', 'code')
+          .values('position', 'pk', 'group__subject', 'group__name', 'code')
 	for unit_dict in unit_dicts:
 		row = dict(unit_dict)
 		row['students'] = unit_to_student_names[unit_dict['pk']]
 		chart.append(row)
 	semester = Semester.objects.get(active=True)
-	context = {
-			'chart': chart,
-			'title': "Master Schedule",
-			'semester': semester}
+	context = {'chart': chart, 'title': "Master Schedule", 'semester': semester}
 	return render(request, "roster/master-schedule.html", context)
+
 
 class UpdateInvoice(PermissionRequiredMixin, UpdateView):
 	permission_required = 'is_staff'
 	model = models.Invoice
-	fields = ('preps_taught', 'hours_taught',
-			'adjustment', 'extras', 'total_paid', 'forgive',)
+	fields = (
+		'preps_taught',
+		'hours_taught',
+		'adjustment',
+		'extras',
+		'total_paid',
+		'forgive',
+	)
 	object: models.Invoice
 
 	def get_success_url(self):
 		return reverse("invoice", args=(self.object.student.id,))
+
 
 # Inquiry views
 @login_required
@@ -203,11 +228,14 @@ def inquiry(request: HttpRequest, student_id: int) -> HttpResponse:
 	assert isinstance(request.user, User)
 	student = get_student_by_id(request, student_id)
 	if not student.semester.active:
-		raise PermissionDenied("Not an active semester, so change petitions are no longer possible.")
+		raise PermissionDenied(
+			"Not an active semester, so change petitions are no longer possible.")
 	if student.newborn:
-		raise PermissionDenied("This form isn't enabled yet because you have not chosen your initial units.")
+		raise PermissionDenied(
+			"This form isn't enabled yet because you have not chosen your initial units."
+		)
 
-	context: Dict[str, Any]= {}
+	context: Dict[str, Any] = {}
 	current_inquiries = models.UnitInquiry.objects.filter(student=student)
 
 	# Create form for submitting new inquiries
@@ -219,21 +247,21 @@ def inquiry(request: HttpRequest, student_id: int) -> HttpResponse:
 			# check if exists already and created recently
 			one_day_ago = timezone.now() - datetime.timedelta(seconds=90)
 			if models.UnitInquiry.objects.filter(unit=inquiry.unit, \
-					student=student, action_type=inquiry.action_type, \
-					created_at__gte = one_day_ago).exists():
+                          student=student, action_type=inquiry.action_type, \
+                          created_at__gte = one_day_ago).exists():
 				messages.warning(request, "The same inquiry already was "\
-						"submitted within the last 90 seconds.")
+                                  "submitted within the last 90 seconds.")
 			else:
 				inquiry.save()
 				# auto-acceptance criteria
 				auto_accept_criteria = (inquiry.action_type == "APPEND") \
-						or (inquiry.action_type == "DROP") \
-						or current_inquiries.filter(action_type="UNLOCK").count() <= 3 \
-						or request.user.is_staff
+                                  or (inquiry.action_type == "DROP") \
+                                  or current_inquiries.filter(action_type="UNLOCK").count() <= 3 \
+                                  or request.user.is_staff
 				# auto reject criteria
 				auto_reject_criteria = inquiry.action_type == "UNLOCK" and \
-						(current_inquiries.filter(action_type="UNLOCK", status="NEW").count()
-						+ student.unlocked_units.count()) > 9
+                                  (current_inquiries.filter(action_type="UNLOCK", status="NEW").count()
+					+ student.unlocked_units.count()) > 9
 
 				if auto_accept_criteria:
 					inquiry.run_accept()
@@ -241,55 +269,60 @@ def inquiry(request: HttpRequest, student_id: int) -> HttpResponse:
 				elif auto_reject_criteria:
 					inquiry.status = "REJ"
 					inquiry.save()
-					messages.error(request,
-							"You can't have more than 9 unfinished units unlocked at once.")
+					messages.error(
+						request,
+						"You can't have more than 9 unfinished units unlocked at once.")
 				else:
-					messages.success(request, "Inquiry submitted, should be approved soon!")
+					messages.success(request,
+						"Inquiry submitted, should be approved soon!")
 	else:
 		form = forms.InquiryForm()
 	context['form'] = form
 
 	context['inquiries'] = models.UnitInquiry.objects\
-			.filter(student=student)
+          .filter(student=student)
 	context['student'] = student
 	context['curriculum'] = student.generate_curriculum_rows(
-			omniscient = can_edit(request, student))
+		omniscient=can_edit(request, student))
 
 	return render(request, 'roster/inquiry.html', context)
+
 
 class ListInquiries(PermissionRequiredMixin, ListView):
 	permission_required = 'is_staff'
 	model = models.UnitInquiry
+
 	def get_queryset(self):
 		queryset = models.UnitInquiry.objects\
-				.filter(created_at__gte = timezone.now() - datetime.timedelta(days=7))\
-				.filter(student__semester__active = True)\
-				.exclude(status="ACC")
+                  .filter(created_at__gte = timezone.now() - datetime.timedelta(days=7))\
+                  .filter(student__semester__active = True)\
+                  .exclude(status="ACC")
 
 		# some amazing code vv
 		count_unlock = models.UnitInquiry.objects\
-				.filter(action_type="UNLOCK")\
-				.filter(student=OuterRef('student'))\
-				.order_by().values('student')\
-				.annotate(c=Count('*')).values('c')
+                  .filter(action_type="UNLOCK")\
+                  .filter(student=OuterRef('student'))\
+                  .order_by().values('student')\
+                  .annotate(c=Count('*')).values('c')
 		count_all = models.UnitInquiry.objects\
-				.filter(student=OuterRef('student'))\
-				.order_by().values('student')\
-				.annotate(c=Count('*')).values('c')
+                  .filter(student=OuterRef('student'))\
+                  .order_by().values('student')\
+                  .annotate(c=Count('*')).values('c')
 		# seriously wtf
-		return queryset.annotate(
-				num_unlock = Subquery(count_unlock,
-					output_field=IntegerField()),
-				num_all = Subquery(count_all,
-					output_field=IntegerField()))
+		return queryset.annotate(num_unlock=Subquery(count_unlock,
+			output_field=IntegerField()),
+			num_all=Subquery(count_all, output_field=IntegerField()))
+
 
 class EditInquiry(PermissionRequiredMixin, UpdateView):
 	fields = ('unit', 'action_type', 'status', 'explanation')
 	permission_required = 'is_staff'
 	model = models.UnitInquiry
 	object: models.UnitInquiry
+
 	def get_success_url(self):
-		return reverse("edit-inquiry", args=(self.object.pk,)) # typing: ignore
+		return reverse("edit-inquiry", args=(self.object.pk,))  # typing: ignore
+
 
 @staff_member_required
 def approve_inquiry(_: HttpRequest, pk: int) -> HttpResponse:
@@ -297,41 +330,42 @@ def approve_inquiry(_: HttpRequest, pk: int) -> HttpResponse:
 	inquiry.run_accept()
 	return HttpResponseRedirect(reverse("inquiry", args=(inquiry.student.id,)))
 
+
 @staff_member_required
 def approve_inquiry_all(_: HttpRequest) -> HttpResponse:
 	for inquiry in models.UnitInquiry.objects\
-			.filter(status="NEW", student__semester__active = True):
+          .filter(status="NEW", student__semester__active = True):
 		inquiry.run_accept()
 	return HttpResponseRedirect(reverse("list-inquiry"))
+
 
 @login_required
 def register(request: HttpRequest) -> HttpResponse:
 	try:
-		container = models.RegistrationContainer.objects.get(semester__active = True)
+		container = models.RegistrationContainer.objects.get(semester__active=True)
 	except:
-		return HttpResponse("There isn't a currently active OTIS semester.", status = 503)
+		return HttpResponse("There isn't a currently active OTIS semester.",
+			status=503)
 
 	semester: Semester = container.semester
 	assert isinstance(request.user, User)
-	if models.StudentRegistration.objects.filter(
-			user = request.user,
-			container = container
-			).exists():
+	if models.StudentRegistration.objects.filter(user=request.user,
+		container=container).exists():
 		messages.info(request,
-				message = "You have already submitted a decision form for this year!")
+			message="You have already submitted a decision form for this year!")
 		form = None
 	elif request.method == 'POST':
 		form = forms.DecisionForm(request.POST, request.FILES)
 		if form.is_valid():
 			passcode = form.cleaned_data['passcode']
 			if passcode.lower() != container.passcode.lower():
+				messages.error(request, message="Wrong passcode")
+			elif form.cleaned_data['track'] not in container.allowed_tracks.split(
+				','):
 				messages.error(request,
-						message = "Wrong passcode")
-			elif form.cleaned_data['track'] not in container.allowed_tracks.split(','):
-				messages.error(request,
-						message = "That track is not currently accepting registrations.")
+					message="That track is not currently accepting registrations.")
 			else:
-				registration = form.save(commit = False)
+				registration = form.save(commit=False)
 				registration.container = container
 				registration.user = request.user
 				registration.save()
@@ -339,35 +373,45 @@ def register(request: HttpRequest) -> HttpResponse:
 				request.user.last_name = form.cleaned_data['surname']
 				request.user.email = form.cleaned_data['email_address']
 				request.user.save()
-				messages.success(request, message = "Submitted! Sit tight.")
+				messages.success(request, message="Submitted! Sit tight.")
 				return HttpResponseRedirect(reverse("index"))
 	else:
 		if container.allowed_tracks:
 			initial_data_dict = {}
 			most_recent_reg = models.StudentRegistration.objects\
-					.filter(user = request.user).order_by('-id').first()
+                          .filter(user = request.user).order_by('-id').first()
 			if most_recent_reg is not None:
-				for k in ('parent_email', 'graduation_year', 'school_name', 'aops_username', 'gender'):
+				for k in ('parent_email', 'graduation_year', 'school_name',
+					'aops_username', 'gender'):
 					initial_data_dict[k] = getattr(most_recent_reg, k)
-			form = forms.DecisionForm(initial = initial_data_dict)
+			form = forms.DecisionForm(initial=initial_data_dict)
 		else:
-			messages.warning(request, message = "The currently active semester isn't accepting registrations right now.")
+			messages.warning(request,
+				message=
+				"The currently active semester isn't accepting registrations right now."
+											)
 			form = None
-	context = {'title': f'{semester} Decision Form', 'form': form, 'container': container}
+	context = {
+		'title': f'{semester} Decision Form',
+		'form': form,
+		'container': container
+	}
 	return render(request, 'roster/decision_form.html', context)
+
 
 @login_required
 def update_profile(request: HttpRequest) -> HttpResponse:
 	assert isinstance(request.user, User)
 	if request.method == 'POST':
-		form = forms.UserForm(request.POST, instance = request.user)
+		form = forms.UserForm(request.POST, instance=request.user)
 		if form.is_valid():
 			form.save()
 			messages.success(request, "Your information has been updated")
 	else:
-		form = forms.UserForm(instance = request.user)
-	context = {'form' : form}
+		form = forms.UserForm(instance=request.user)
+	context = {'form': form}
 	return render(request, "roster/update_profile.html", context)
+
 
 @csrf_exempt
 @require_POST
@@ -375,18 +419,21 @@ def api(request: HttpRequest) -> JsonResponse:
 	if settings.PRODUCTION:
 		token = request.POST.get('token')
 		assert token is not None
-		if not sha256(token.encode('ascii')).hexdigest() == settings.API_TARGET_HASH:
-			return JsonResponse({'error': "☕"}, status = 418)
+		if not sha256(
+			token.encode('ascii')).hexdigest() == settings.API_TARGET_HASH:
+			return JsonResponse({'error': "☕"}, status=418)
 	# check whether social account exists
 	uid = int(request.POST['uid'])
-	queryset = SocialAccount.objects.filter(uid = uid)
+	queryset = SocialAccount.objects.filter(uid=uid)
 	if not (n := len(queryset)) == 1:
 		return JsonResponse({'result': 'nonexistent', 'length': n})
 
-	social = queryset.get() # get the social account for this; should never 404
+	social = queryset.get()  # get the social account for this; should never 404
 	user = social.user
-	student = models.Student.objects.filter(user = user, semester__active = True).first()
-	regform = models.StudentRegistration.objects.filter(user = user, container__semester__active = True).first()
+	student = models.Student.objects.filter(user=user,
+		semester__active=True).first()
+	regform = models.StudentRegistration.objects.filter(user=user,
+		container__semester__active=True).first()
 
 	if student is not None:
 		return JsonResponse({
@@ -397,24 +444,26 @@ def api(request: HttpRequest) -> JsonResponse:
 			'track': student.track,
 			'gender': regform.gender if regform is not None else '?',
 			'country': regform.country if regform is not None else '???',
-			'num_years': models.Student.objects.filter(user = user).count(),
-			})
+			'num_years': models.Student.objects.filter(user=user).count(),
+		})
 	elif student is None and regform is not None:
-		return JsonResponse({ 'result': 'pending' })
+		return JsonResponse({'result': 'pending'})
 	else:
-		return JsonResponse({ 'result': 'unregistered' })
+		return JsonResponse({'result': 'unregistered'})
+
 
 # TODO ugly hack but I'm tired of answering this requests
 @login_required
-def unlock_rest_of_mystery(request: HttpRequest, delta: int = 1) -> HttpResponse:
+def unlock_rest_of_mystery(request: HttpRequest,
+	delta: int = 1) -> HttpResponse:
 	student = infer_student(request)
 	assert delta == 1 or delta == 2
 	try:
-		mystery = student.unlocked_units.get(group__name = "Mystery")
+		mystery = student.unlocked_units.get(group__name="Mystery")
 	except Unit.DoesNotExist:
 		return HttpResponse("You don't have the Mystery unit unlocked!\n" \
-				+ f"You are currently {student}", status = 403)
-	added_unit = get_object_or_404(Unit, position = mystery.position + delta)
+                  + f"You are currently {student}", status = 403)
+	added_unit = get_object_or_404(Unit, position=mystery.position + delta)
 	student.unlocked_units.remove(mystery)
 	student.curriculum.remove(mystery)
 	student.unlocked_units.add(added_unit)

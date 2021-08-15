@@ -36,6 +36,10 @@ yapf = "^0.31.0"
 [tool.yapf]
 based_on_style = "google"
 use_tabs = true
+continuation_align_style = "fixed"
+continuation_indent_width = 2
+indent_width = 2
+
 
 [tool.coverage.run]
 branch = true

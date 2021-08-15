@@ -9,16 +9,20 @@ from roster.models import Student, StudentRegistration, UnitInquiry  # NOQA
 
 
 class UnitChoiceBoundField(forms.BoundField):
+
 	@property
 	def subject(self) -> str:
-		first_unit_pair = self.field.choices[0] # type: ignore
+		first_unit_pair = self.field.choices[0]  # type: ignore
 		first_unit_code = first_unit_pair[1]
-		first_unit_subject = first_unit_code[1] # second letter
+		first_unit_subject = first_unit_code[1]  # second letter
 		return first_unit_subject
 
+
 class UnitChoiceField(forms.TypedMultipleChoiceField):
+
 	def get_bound_field(self, form: BaseForm, field_name: str):
 		return UnitChoiceBoundField(form, self, field_name)
+
 
 class CurriculumForm(forms.Form):
 	"""A form which takes a list of units
@@ -46,7 +50,7 @@ class CurriculumForm(forms.Form):
 			form_kwargs['choices'] = tuple((unit.id, unit.code) for unit in group)
 			form_kwargs['help_text'] = ' '.join([unit.code for unit in group])
 			form_kwargs['required'] = False
-			form_kwargs['label_suffix'] = 'aoeu' # wait why is this here again
+			form_kwargs['label_suffix'] = 'aoeu'  # wait why is this here again
 			form_kwargs['coerce'] = int
 			form_kwargs['empty_value'] = None
 			form_kwargs['disabled'] = not enabled
@@ -56,14 +60,15 @@ class CurriculumForm(forms.Form):
 
 
 class AdvanceForm(forms.ModelForm):
+
 	def __init__(self, *args: Any, **kwargs: Any):
 		super(AdvanceForm, self).__init__(*args, **kwargs)
 		student = kwargs['instance']
 		self.fields['unlocked_units'] = forms.ModelMultipleChoiceField(
-				widget=forms.SelectMultiple(attrs={'class': 'chosen-select'}),
-				queryset = student.curriculum.all(),
-				help_text = "The set of unlocked units.",
-				required = False)
+			widget=forms.SelectMultiple(attrs={'class': 'chosen-select'}),
+			queryset=student.curriculum.all(),
+			help_text="The set of unlocked units.",
+			required=False)
 
 	class Meta:
 		model = Student
@@ -71,37 +76,51 @@ class AdvanceForm(forms.ModelForm):
 
 
 class InquiryForm(forms.ModelForm):
+
 	def __init__(self, *args: Any, **kwargs: Any):
 		super(InquiryForm, self).__init__(*args, **kwargs)
 		self.fields['unit'].queryset = \
-				self.fields['unit'].queryset\
-				.order_by('group__name', 'code')
+                  self.fields['unit'].queryset\
+                  .order_by('group__name', 'code')
 
 	class Meta:
 		model = UnitInquiry
 		fields = ('unit', 'action_type', 'explanation')
 		widgets = {
-			'explanation': forms.Textarea(
-				attrs={'cols': 40, 'rows': 3}),
-			}
+			'explanation': forms.Textarea(attrs={
+			'cols': 40,
+			'rows': 3
+			}),
+		}
+
 
 class DecisionForm(forms.ModelForm):
-	given_name = forms.CharField(max_length = 128,
-			help_text = "Your given (first) name, can be more than one")
-	surname = forms.CharField(max_length = 128,
-			help_text = "Your family (last) name")
-	email_address = forms.EmailField(label = "Your email address (one you check)",
-			help_text = "The email you want Evan to contact you with")
-	passcode = forms.CharField(max_length = 128,
-			label = "Invitation passcode",
-			help_text = "You should have gotten the passcode in your acceptance email.",
-			widget = forms.PasswordInput)
+	given_name = forms.CharField(max_length=128,
+		help_text="Your given (first) name, can be more than one")
+	surname = forms.CharField(max_length=128, help_text="Your family (last) name")
+	email_address = forms.EmailField(label="Your email address (one you check)",
+		help_text="The email you want Evan to contact you with")
+	passcode = forms.CharField(max_length=128,
+		label="Invitation passcode",
+		help_text="You should have gotten the passcode in your acceptance email.",
+		widget=forms.PasswordInput)
+
 	class Meta:
 		model = StudentRegistration
-		fields = ('parent_email', 'track', 'gender', 'graduation_year', 'school_name',
-				'country', 'aops_username', 'agreement_form',)
+		fields = (
+			'parent_email',
+			'track',
+			'gender',
+			'graduation_year',
+			'school_name',
+			'country',
+			'aops_username',
+			'agreement_form',
+		)
+
 
 class UserForm(forms.ModelForm):
+
 	class Meta:
 		model = User
 		fields = ('first_name', 'last_name', 'email')
