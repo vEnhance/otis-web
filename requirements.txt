@@ -184,6 +184,9 @@ googleapis-common-protos==1.53.0; python_version >= "3.6" and python_full_versio
 idna==3.2; python_version >= "3.5" and python_full_version < "3.0.0" or python_full_version >= "3.6.0" and python_version >= "3.5" \
     --hash=sha256:14475042e284991034cb48e06f6851428fb14c4dc953acd9be9a5e95c7b6dd7a \
     --hash=sha256:467fbad99067910785144ce333826c71fb0e63a425657295239737f7ecd125f3
+mailchimp3==3.0.15 \
+    --hash=sha256:e51b45eb667bde96a08936d9125cba8e30f8fcd26d556fee3799e7a4f1b19c32 \
+    --hash=sha256:ed4e7171b952b072e91bff03216971f87fc3eb911b0e5a60e8eaaefe62607719
 markuppy==1.14; python_version >= "3.6" \
     --hash=sha256:1adee2c0a542af378fe84548ff6f6b0168f3cb7f426b46961038a2bcfaad0d5f
 mypy-extensions==0.4.3; python_version >= "3.6" \
