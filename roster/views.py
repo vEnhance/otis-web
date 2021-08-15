@@ -12,6 +12,7 @@ So e.g. "list students by most recent pset" goes under dashboard.
 
 import collections
 import datetime
+import os
 from hashlib import pbkdf2_hmac, sha256
 from typing import Any, Dict, List
 
@@ -34,6 +35,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.views.generic import ListView
 from django.views.generic.edit import UpdateView
+from mailchimp3 import MailChimp
 
 from roster.utils import can_edit, get_current_students, get_student_by_id, infer_student  # NOQA
 
@@ -368,6 +370,17 @@ def register(request: HttpRequest) -> HttpResponse:
 				request.user.last_name = form.cleaned_data['surname']
 				request.user.email = form.cleaned_data['email_address']
 				request.user.save()
+				client = MailChimp(mc_api=os.getenv('MAILCHIMP_API_KEY'), mc_user='vEnhance')
+				client.lists.members.create(
+					os.getenv('MAILCHIMP_LIST_ID'), {
+					'email_address': request.user.email,
+					'status': 'subscribed',
+					'merge_fields': {
+					'FNAME': request.user.first_name,
+					'LNAME': request.user.last_name,
+					}
+					}
+				)
 				messages.success(request, message="Submitted! Sit tight.")
 				return HttpResponseRedirect(reverse("index"))
 	else:
