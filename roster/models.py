@@ -4,7 +4,6 @@ import os
 from datetime import timedelta
 from typing import Any, Callable, Dict, List
 
-import dashboard.models  # TODO circular import otherwise, might think about how to workaround
 from _pydecimal import Decimal
 from core.models import Semester, Unit
 from django.contrib.auth.models import User
@@ -163,14 +162,11 @@ class Student(models.Model):
 
 	def has_submitted_pset(self, unit: Unit) -> bool:
 		if self.semester.uses_legacy_pset_system:
-			return dashboard.models.UploadedFile.objects.filter(
-					unit = unit,
-					benefactor = self,
-					category = 'psets').exists()
+			return Unit.objects.filter(pk = unit.pk,
+					uploadedfile__benefactor = self,
+					uploadedfile__category = 'psets').exists()
 		else:
-			return dashboard.models.PSet.objects.filter(
-					unit = unit,
-					student = self).exists()
+			return Unit.objects.filter(pk = unit.pk, pset__student = self).exists()
 
 	def check_unit_unlocked(self, unit: Unit) -> bool:
 		if self.newborn:
