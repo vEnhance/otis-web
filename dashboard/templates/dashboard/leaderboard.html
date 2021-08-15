@@ -8,8 +8,8 @@
 <table id="students" class="table tablesorter">
 <thead>
 <tr>
-	<th>Level achieved</th>
 	<th>Rk</th>
+	<th style="min-width:35%;">Level achieved</th>
 	<th>Name</th>
 	<th>♣️</th>
 	<th>♥️</th>
@@ -21,11 +21,11 @@
 {% for row in rows %}
 <tr> {# begin table row for this student #}
 	<td>
-		<strong>Lv {{ row.level }}</strong>
-		<i>{{ row.level_name }}</i>
+			<sup>{{ forloop.counter|ordinal }}</sup>
 	</td>
 	<td>
-			<sup>{{ forloop.counter|ordinal }}</sup>
+		<strong>Lv {{ row.level }}</strong>
+		<i>{{ row.level_name }}</i>
 	</td>
 	<td><a href="{% url "achievements" row.id %}">
 			{{ row.name }}</a>
