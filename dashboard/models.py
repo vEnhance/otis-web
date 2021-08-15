@@ -5,12 +5,12 @@ from __future__ import unicode_literals
 import datetime
 import os
 
-import core.models
-import roster.models
+from core.models import Semester, Unit
 from django.contrib.auth import models as auth
 from django.core.validators import FileExtensionValidator, MaxValueValidator
 from django.db import models
 from django.urls import reverse_lazy
+from roster.models import Student
 
 
 def content_file_name(instance: 'UploadedFile', filename: str) -> str:
@@ -22,7 +22,7 @@ class UploadedFile(models.Model):
 	"""An uploaded file, for example a transcript or homework solutions."""
 	CHOICES = (("psets", "PSet Submission"), ("scripts", "Transcript"),
 			("notes", "Notes / Comments"), ("misc", "Miscellaneous"))
-	benefactor = models.ForeignKey(roster.models.Student,
+	benefactor = models.ForeignKey(Student,
 			on_delete = models.CASCADE,
 			help_text = "The student for which this file is meant")
 	owner = models.ForeignKey(auth.User,
@@ -36,7 +36,7 @@ class UploadedFile(models.Model):
 			upload_to = content_file_name,
 			validators = [FileExtensionValidator(
 				allowed_extensions=['pdf','txt','tex','png','jpg'])])
-	unit = models.ForeignKey(core.models.Unit, null = True, blank = True,
+	unit = models.ForeignKey(Unit, null = True, blank = True,
 			on_delete = models.SET_NULL,
 			help_text = "The unit for which this file is associated")
 	created_at = models.DateTimeField(auto_now_add=True)
@@ -57,7 +57,7 @@ def download_file_name(instance: 'SemesterDownloadFile', filename: str) -> str:
 	return os.path.join("global", str(instance.semester.id), filename)
 
 class SemesterDownloadFile(models.Model):
-	semester = models.ForeignKey(core.models.Semester,
+	semester = models.ForeignKey(Semester,
 			on_delete = models.CASCADE,
 			help_text = "The semester to which the file is associated")
 	description = models.CharField(max_length = 250, blank = True,
@@ -78,10 +78,10 @@ class PSet(models.Model):
 	approved = models.BooleanField(
 			help_text = "Whether the problem set has been checked off",
 			default = False)
-	student = models.ForeignKey(roster.models.Student,
+	student = models.ForeignKey(Student,
 			help_text = "The student attached to this",
 			on_delete = models.CASCADE)
-	unit = models.ForeignKey(core.models.Unit,
+	unit = models.ForeignKey(Unit,
 			help_text = "The unit you want to submit for",
 			on_delete = models.SET_NULL,
 			null = True,
@@ -108,7 +108,7 @@ class PSet(models.Model):
 			verbose_name = "Feedback on problem set, worth [1♣]",
 			help_text = "Any other feedback about the problem set",
 			blank = True)
-	next_unit_to_unlock = models.ForeignKey(core.models.Unit,
+	next_unit_to_unlock = models.ForeignKey(Unit,
 			help_text = "The unit you want to work on next (leave blank for any)",
 			on_delete = models.SET_NULL,
 			null = True, blank = True,
@@ -126,10 +126,10 @@ class PSet(models.Model):
 		return reverse_lazy('pset', args=(self.pk,))
 
 class ProblemSuggestion(models.Model):
-	student = models.ForeignKey(roster.models.Student,
+	student = models.ForeignKey(Student,
 			on_delete = models.CASCADE,
 			help_text = "Student who suggested the problem.")
-	unit = models.ForeignKey(core.models.Unit,
+	unit = models.ForeignKey(Unit,
 			on_delete = models.CASCADE,
 			help_text = "The unit to suggest the problem for.")
 	weight = models.PositiveSmallIntegerField(

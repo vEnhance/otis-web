@@ -15,9 +15,9 @@ import datetime
 from hashlib import pbkdf2_hmac, sha256
 from typing import Any, Dict
 
-import core.models
-import dashboard.models
 from allauth.socialaccount.models import SocialAccount
+from core.models import Semester, Unit
+from dashboard.models import PSet
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
@@ -44,7 +44,7 @@ from . import forms, models
 @login_required
 def curriculum(request: HttpRequest, student_id: int) -> HttpResponse:
 	student = get_student_by_id(request, student_id)
-	units = core.models.Unit.objects.all()
+	units = Unit.objects.all()
 	original = student.curriculum.values_list('id', flat=True)
 
 	enabled = can_edit(request, student) or student.newborn
@@ -98,7 +98,7 @@ def auto_advance(
 		target_id: int = None
 		):
 	student = get_student_by_id(request, student_id)
-	unit = get_object_or_404(core.models.Unit, id = unit_id)
+	unit = get_object_or_404(Unit, id = unit_id)
 
 	if not student.unlocked_units.filter(id=unit_id).exists() \
 			or not student.curriculum.filter(id=unit_id).exists():
@@ -119,7 +119,7 @@ def auto_advance(
 		student.save()
 		replace = False
 	else:
-		target = get_object_or_404(core.models.Unit, id = target_id)
+		target = get_object_or_404(Unit, id = target_id)
 		if student.unlocked_units.filter(id=target_id).exists() \
 				or not student.curriculum.filter(id=target_id).exists():
 			messages.error(request,
@@ -165,7 +165,7 @@ def advance(request: HttpRequest, student_id: int) -> Any:
 		uploads = student.uploadedfile_set # type: ignore
 		context['num_psets'] = uploads.filter(category='psets').values('unit').distinct().count()
 	else:
-		context['num_psets'] = dashboard.models.PSet.objects.filter(student=student).count()
+		context['num_psets'] = PSet.objects.filter(student=student).count()
 
 	return render(request, "roster/advance.html", context)
 
@@ -226,10 +226,10 @@ def master_schedule(request: HttpRequest) -> HttpResponse:
 				d['user__first_name'] + ' ' + d['user__last_name'])
 
 	chart = collections.OrderedDict() # ordered dict(unit -> students)
-	units = core.models.Unit.objects.order_by('position')
+	units = Unit.objects.order_by('position')
 	for unit in units:
 		chart[unit] = unit_to_student_names[unit.id]
-	semester = core.models.Semester.objects.get(active=True)
+	semester = Semester.objects.get(active=True)
 	context = {
 			'chart': chart,
 			'title': "Master Schedule",
@@ -360,7 +360,7 @@ def register(request: HttpRequest) -> HttpResponse:
 	except:
 		return HttpResponse("There isn't a currently active OTIS semester.", status = 503)
 
-	semester: core.models.Semester = container.semester
+	semester: Semester = container.semester
 	assert isinstance(request.user, User)
 	if models.StudentRegistration.objects.filter(
 			user = request.user,

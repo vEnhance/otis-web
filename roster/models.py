@@ -4,11 +4,9 @@ import os
 from datetime import timedelta
 from typing import Any, Callable, Dict, List
 
-import core
-import core.models
-import dashboard
-import dashboard.models
+import dashboard.models  # TODO circular import otherwise, might think about how to workaround
 from _pydecimal import Decimal
+from core.models import Semester, Unit
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import FileExtensionValidator
@@ -51,17 +49,17 @@ class Student(models.Model):
 	user = models.ForeignKey(User, blank = True, null = True,
 			on_delete = models.CASCADE,
 			help_text = "The Django Auth user attached to the student")
-	semester = models.ForeignKey(core.models.Semester,
+	semester = models.ForeignKey(Semester,
 			on_delete = models.CASCADE,
 			help_text = "The semester for this student")
 	assistant = models.ForeignKey(Assistant, blank = True, null = True,
 			on_delete = models.SET_NULL,
 			help_text = "The assistant for this student, if any")
 
-	curriculum = models.ManyToManyField(core.models.Unit, blank = True,
+	curriculum = models.ManyToManyField(Unit, blank = True,
 			related_name = 'students_taking',
 			help_text = "The choice of units that this student will work on")
-	unlocked_units = models.ManyToManyField(core.models.Unit, blank = True,
+	unlocked_units = models.ManyToManyField(Unit, blank = True,
 			related_name = 'students_unlocked',
 			help_text = "A list of units that the student is actively working on. " \
 			"Once the student submits a problem set, " \
@@ -145,7 +143,7 @@ class Student(models.Model):
 	def curriculum_length(self) -> int:
 		return self.curriculum.count()
 
-	def generate_curriculum_queryset(self) -> QuerySet[core.models.Unit]:
+	def generate_curriculum_queryset(self) -> QuerySet[Unit]:
 		if self.semester.uses_legacy_pset_system is True:
 			return self.curriculum.all().annotate(
 					num_uploads = Count('uploadedfile',
@@ -170,7 +168,7 @@ class Student(models.Model):
 							approved=True)),
 					)
 
-	def has_submitted_pset(self, unit: core.models.Unit) -> bool:
+	def has_submitted_pset(self, unit: Unit) -> bool:
 		if self.semester.uses_legacy_pset_system:
 			return dashboard.models.UploadedFile.objects.filter(
 					unit = unit,
@@ -181,7 +179,7 @@ class Student(models.Model):
 					unit = unit,
 					student = self).exists()
 
-	def check_unit_unlocked(self, unit: core.models.Unit) -> bool:
+	def check_unit_unlocked(self, unit: Unit) -> bool:
 		if self.newborn:
 			return False
 		elif self.unlocked_units.filter(pk=unit.pk).exists():
@@ -333,7 +331,7 @@ class Invoice(models.Model):
 		return self.student.track
 
 class UnitInquiry(models.Model):
-	unit = models.ForeignKey(core.models.Unit,
+	unit = models.ForeignKey(Unit,
 			on_delete = models.CASCADE,
 			help_text = "The unit being requested.")
 	student = models.ForeignKey(Student,
@@ -388,7 +386,7 @@ def content_file_name(instance: 'StudentRegistration', filename: str) -> str:
 
 
 class RegistrationContainer(models.Model):
-	semester = models.OneToOneField(core.models.Semester,
+	semester = models.OneToOneField(Semester,
 			help_text = "Controls the settings for registering for a semester",
 			on_delete = models.CASCADE,
 			)

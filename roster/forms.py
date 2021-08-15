@@ -5,8 +5,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.forms.forms import BaseForm
 
-import roster
-import roster.models
+from roster.models import Student, StudentRegistration, UnitInquiry  # NOQA
 
 
 class UnitChoiceBoundField(forms.BoundField):
@@ -67,7 +66,7 @@ class AdvanceForm(forms.ModelForm):
 				required = False)
 
 	class Meta:
-		model = roster.models.Student
+		model = Student
 		fields = ('num_units_done', 'unlocked_units',)
 
 
@@ -79,7 +78,7 @@ class InquiryForm(forms.ModelForm):
 				.order_by('group__name', 'code')
 
 	class Meta:
-		model = roster.models.UnitInquiry
+		model = UnitInquiry
 		fields = ('unit', 'action_type', 'explanation')
 		widgets = {
 			'explanation': forms.Textarea(
@@ -98,7 +97,7 @@ class DecisionForm(forms.ModelForm):
 			help_text = "You should have gotten the passcode in your acceptance email.",
 			widget = forms.PasswordInput)
 	class Meta:
-		model = roster.models.StudentRegistration
+		model = StudentRegistration
 		fields = ('parent_email', 'track', 'gender', 'graduation_year', 'school_name',
 				'country', 'aops_username', 'agreement_form',)
 

@@ -22,7 +22,10 @@ from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from reversion.views import RevisionMixin
 from roster.models import Student
 
-from . import forms, models
+from arch.forms import ProblemSelectForm, ProblemUpdateFormWithReason
+
+from .forms import HintUpdateFormWithReason
+from .models import Hint, Problem
 
 ContextType = Dict[str, Any]
 
@@ -39,14 +42,14 @@ class ExistStudentRequiredMixin(LoginRequiredMixin):
 
 class HintObjectView:
 	kwargs: ClassVar[Dict[str, Any]] = {}
-	def get_object(self, queryset: QuerySet[models.Hint] = None) -> models.Hint:
+	def get_object(self, queryset: QuerySet[Hint] = None) -> Hint:
 		if queryset is None:
 			queryset = self.get_queryset() # type: ignore
 		return get_object_or_404(queryset, problem__puid=self.kwargs['puid'],
 				number=self.kwargs['number'])
 class ProblemObjectView:
 	kwargs: ClassVar[Dict[str, Any]] = {}
-	def get_object(self, queryset: QuerySet[models.Problem] = None) -> models.Problem:
+	def get_object(self, queryset: QuerySet[Problem] = None) -> Problem:
 		if queryset is None:
 			queryset = self.get_queryset() # type: ignore
 		return get_object_or_404(queryset, puid=self.kwargs['puid'])
@@ -54,8 +57,8 @@ class ProblemObjectView:
 class HintList(ExistStudentRequiredMixin, ListView):
 	context_object_name = "hint_list"
 	def get_queryset(self):
-		self.problem = get_object_or_404(models.Problem, **self.kwargs)
-		return models.Hint.objects.filter(problem=self.problem).order_by('number')
+		self.problem = get_object_or_404(Problem, **self.kwargs)
+		return Hint.objects.filter(problem=self.problem).order_by('number')
 	def get_context_data(self, **kwargs: Dict[Any, Any]):
 		context = super().get_context_data(**kwargs)
 		context['problem'] = self.problem
@@ -63,13 +66,13 @@ class HintList(ExistStudentRequiredMixin, ListView):
 
 class HintDetail(HintObjectView, ExistStudentRequiredMixin, DetailView):
 	context_object_name = "hint"
-	model = models.Hint
+	model = Hint
 
 class HintUpdate(HintObjectView, ExistStudentRequiredMixin, RevisionMixin, UpdateView):
 	context_object_name = "hint"
-	model = models.Hint
-	form_class = forms.HintUpdateFormWithReason
-	object: ClassVar[models.Hint] = models.Hint()
+	model = Hint
+	form_class = HintUpdateFormWithReason
+	object: ClassVar[Hint] = Hint()
 	def form_valid(self, form: BaseModelForm) -> HttpResponse:
 		reversion.set_comment(form.cleaned_data['reason'] or form.cleaned_data['content'])
 		return super().form_valid(form)
@@ -82,9 +85,9 @@ class HintUpdate(HintObjectView, ExistStudentRequiredMixin, RevisionMixin, Updat
 
 class ProblemUpdate(ProblemObjectView, ExistStudentRequiredMixin, RevisionMixin, UpdateView):
 	context_object_name = "problem"
-	model = models.Problem
-	form_class = forms.ProblemUpdateFormWithReason
-	object: ClassVar[models.Problem] = models.Problem()
+	model = Problem
+	form_class = ProblemUpdateFormWithReason
+	object: ClassVar[Problem] = Problem()
 	def form_valid(self, form: BaseModelForm) -> HttpResponse:
 		reversion.set_comment(form.cleaned_data['reason'] or form.cleaned_data['description'])
 		return super().form_valid(form)
@@ -94,24 +97,24 @@ class ProblemUpdate(ProblemObjectView, ExistStudentRequiredMixin, RevisionMixin,
 class HintCreate(ExistStudentRequiredMixin, RevisionMixin, CreateView):
 	context_object_name = "hint"
 	fields = ('problem', 'number', 'keywords', 'content',)
-	model = models.Hint
+	model = Hint
 	def get_initial(self):
 		initial = super(HintCreate, self).get_initial()
 		initial = initial.copy()
-		initial['problem'] = models.Problem.objects.get(puid=self.kwargs['puid'])
+		initial['problem'] = Problem.objects.get(puid=self.kwargs['puid'])
 		return initial
 
 class HintDelete(HintObjectView, ExistStudentRequiredMixin, RevisionMixin, DeleteView):
 	context_object_name = "hint"
-	model = models.Hint
-	object: ClassVar[models.Hint] = models.Hint()
+	model = Hint
+	object: ClassVar[Hint] = Hint()
 	def get_success_url(self):
 		return reverse_lazy("hint-list", args=(self.object.problem.puid,))
 
 class ProblemDelete(ProblemObjectView, ExistStudentRequiredMixin, RevisionMixin, DeleteView):
 	context_object_name = "problem"
-	model = models.Problem
-	object: ClassVar[models.Problem] = models.Problem()
+	model = Problem
+	object: ClassVar[Problem] = Problem()
 	def get_success_url(self):
 		return reverse_lazy("arch-index")
 
@@ -119,19 +122,19 @@ class ProblemDelete(ProblemObjectView, ExistStudentRequiredMixin, RevisionMixin,
 class ProblemCreate(ExistStudentRequiredMixin, RevisionMixin, CreateView):
 	context_object_name = "problem"
 	fields = ('puid', 'description',)
-	model = models.Problem
+	model = Problem
 	def get_context_data(self, **kwargs: Any):
 		context = super().get_context_data(**kwargs)
-		context['lookup_form'] = forms.ProblemSelectForm()
-		context['num_problems'] = models.Problem.objects.all().count()
-		context['num_hints'] = models.Hint.objects.all().count()
+		context['lookup_form'] = ProblemSelectForm()
+		context['num_problems'] = Problem.objects.all().count()
+		context['num_hints'] = Hint.objects.all().count()
 		context['lookup_url'] = reverse_lazy('arch-lookup',)
 		return context
 
 @login_required
 def lookup(request: HttpRequest):
 	if request.method == 'POST':
-		form = forms.ProblemSelectForm(request.POST)
+		form = ProblemSelectForm(request.POST)
 		assert form.is_valid()
 		problem = form.cleaned_data['lookup_problem']
 		return HttpResponseRedirect(problem.get_absolute_url())
@@ -158,7 +161,7 @@ def archapi(request: HttpRequest) -> JsonResponse:
 	puid = request.POST['puid'].upper()
 
 	if action == 'hints':
-		problem = get_object_or_404(models.Problem, puid = puid)
+		problem = get_object_or_404(Problem, puid = puid)
 		response = {
 				'hints': [],
 				'description': problem.description,
@@ -166,7 +169,7 @@ def archapi(request: HttpRequest) -> JsonResponse:
 				'add_url': reverse_lazy("hint-create",
 					args = (problem.puid,))
 				}
-		for hint in models.Hint.objects.filter(problem=problem):
+		for hint in Hint.objects.filter(problem=problem):
 			response['hints'].append({
 				'number': hint.number,
 				'keywords': hint.keywords,
@@ -177,7 +180,7 @@ def archapi(request: HttpRequest) -> JsonResponse:
 	if action == 'create':
 		try:
 			assert 'description' in request.POST
-			problem = models.Problem(
+			problem = Problem(
 					description = request.POST['description'],
 					puid = puid
 					)
@@ -192,12 +195,12 @@ def archapi(request: HttpRequest) -> JsonResponse:
 				})
 
 	if action == 'add':
-		problem = get_object_or_404(models.Problem, puid = puid)
+		problem = get_object_or_404(Problem, puid = puid)
 		try:
 			assert 'content' in request.POST
 			assert 'keywords' in request.POST
 			assert 'number' in request.POST
-			hint = models.Hint(
+			hint = Hint(
 					problem = problem,
 					content = request.POST['content'],
 					keywords = request.POST['keywords'],

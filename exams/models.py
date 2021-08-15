@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import datetime
 import string
 
-import roster.models
+from roster.models import Student
 from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 from django.db import models
@@ -92,7 +92,7 @@ class ExamAttempt(models.Model):
 			help_text = "The quiz being submitted for")
 	score = models.SmallIntegerField(null = True, blank = True,
 			help_text = "The number of correct answers")
-	student = models.ForeignKey(roster.models.Student,
+	student = models.ForeignKey(Student,
 			on_delete = models.CASCADE,
 			help_text = "The student taking the exam")
 	guess1 = models.CharField(max_length = 18, blank = True,

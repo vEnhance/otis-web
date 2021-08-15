@@ -8,10 +8,10 @@ from django.http import HttpRequest
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
-import dashboard.models
+from dashboard.models import Achievement, Level, ProblemSuggestion, PSet, SemesterDownloadFile, UploadedFile  # NOQA
 
 
-@admin.register(dashboard.models.UploadedFile)
+@admin.register(UploadedFile)
 class UploadedFileAdmin(admin.ModelAdmin):
 	list_display = ('id', 'content', 'created_at', 'description',
 			'benefactor', 'unit', 'category', 'owner',)
@@ -20,14 +20,14 @@ class UploadedFileAdmin(admin.ModelAdmin):
 	list_per_page = 30
 	autocomplete_fields = ('benefactor', 'unit', 'owner',)
 
-@admin.register(dashboard.models.SemesterDownloadFile)
+@admin.register(SemesterDownloadFile)
 class SemesterDownloadFileAdmin(admin.ModelAdmin):
 	list_display = ('id', 'semester', 'content', 'created_at', 'description',)
 	search_fields = ('description',)
 	list_filter = ('semester',)
 	list_per_page = 30
 
-@admin.register(dashboard.models.PSet)
+@admin.register(PSet)
 class PSetAdmin(admin.ModelAdmin):
 	list_display = ('approved', 'student', 'unit', 'hours', 'clubs',)
 	search_fields = ('unit__group__name',
@@ -36,13 +36,13 @@ class PSetAdmin(admin.ModelAdmin):
 	list_filter = ('approved', 'student__semester',)
 	list_display_links = ('student', 'unit',)
 	list_per_page = 30
-	def approve_pset(self, request: HttpRequest, queryset: QuerySet[dashboard.models.PSet]):
+	def approve_pset(self, request: HttpRequest, queryset: QuerySet[PSet]):
 		_ = queryset.update(approved=True)
-	def reject_pset(self, request: HttpRequest, queryset: QuerySet[dashboard.models.PSet]):
+	def reject_pset(self, request: HttpRequest, queryset: QuerySet[PSet]):
 		_ = queryset.update(approved=False)
 	actions = ['approve_pset', 'reject_pset',]
 
-@admin.register(dashboard.models.ProblemSuggestion)
+@admin.register(ProblemSuggestion)
 class ProblemSuggestionAdmin(admin.ModelAdmin):
 	list_display = ('id', 'student', 'source', 'description', 'resolved', 'notified',)
 	search_fields = ('student__user__first_name', 'student__user__last_name', 'unit__group__name', 'source', 'description', 'statement', 'solution',  'comments',)
@@ -53,10 +53,10 @@ class ProblemSuggestionAdmin(admin.ModelAdmin):
 class LevelIEResource(resources.ModelResource):
 	class Meta:
 		skip_unchanged = True
-		model = dashboard.models.Level
+		model = Level
 		fields = ('id', 'threshold', 'name')
 
-@admin.register(dashboard.models.Level)
+@admin.register(Level)
 class LevelAdmin(ImportExportModelAdmin):
 	list_display = ('threshold', 'name',)
 	search_fields = ('name',)
@@ -65,10 +65,10 @@ class LevelAdmin(ImportExportModelAdmin):
 class AchievementIEResource(resources.ModelResource):
 	class Meta:
 		skip_unchanged = True
-		model = dashboard.models.Level
+		model = Level
 		fields = ('code', 'name', 'diamonds', 'active', 'description',)
 
-@admin.register(dashboard.models.Achievement)
+@admin.register(Achievement)
 class AchievementAdmin(ImportExportModelAdmin):
 	list_display = ('code', 'name', 'diamonds', 'active', 'description', 'image')
 	search_fields = ('code', 'description')

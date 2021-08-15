@@ -7,10 +7,8 @@ from datetime import timedelta
 from hashlib import sha256
 from typing import Any, Dict, List
 
-import core.models
-import exams.models
-import roster.models
 from arch.views import ContextType
+from core.models import Semester, Unit
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
@@ -32,13 +30,15 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
+from exams.models import ExamAttempt, PracticeExam
+from roster.models import Student, StudentRegistration, UnitInquiry
 from roster.utils import can_edit, can_view, get_student_by_id, get_visible_students  # NOQA
 from sql_util.utils import SubqueryAggregate
 
-from dashboard.models import Achievement
+from dashboard.forms import DiamondsForm, ResolveSuggestionForm
 
-from . import forms
-from .models import Level, ProblemSuggestion, PSet, SemesterDownloadFile, UploadedFile  # NOQA
+from .forms import NewUploadForm, PSetForm
+from .models import Achievement, Level, ProblemSuggestion, PSet, SemesterDownloadFile, UploadedFile  # NOQA
 
 logger = logging.getLogger(__name__)
 
@@ -93,12 +93,12 @@ class Meter:
 		return Meter(name = "Charisma", emoji = "㊙️", value = value,
 				unit = "◆", color = '#9c1421', max_value = 50)
 
-def _get_meter_update(student: roster.models.Student) -> Dict[str, Any]:
+def _get_meter_update(student: Student) -> Dict[str, Any]:
 	psets = PSet.objects\
 			.filter(student = student, approved = True, eligible = True)
 	pset_data = psets.aggregate(Sum('clubs'), Sum('hours'))
 	total_diamonds = student.achievements.aggregate(Sum('diamonds'))['diamonds__sum'] or 0
-	quiz_data = exams.models.ExamAttempt.objects.filter(student = student)
+	quiz_data = ExamAttempt.objects.filter(student = student)
 	total_spades = \
 			(quiz_data.aggregate(Sum('score'))['score__sum'] or 0) \
 			+ (student.usemo_score or 0)
@@ -141,9 +141,9 @@ def portal(request: HttpRequest, student_id: int) -> HttpResponse:
 	context['omniscient'] = can_edit(request, student)
 	context['curriculum'] = student.generate_curriculum_rows(
 			omniscient = context['omniscient'])
-	context['tests'] = exams.models.PracticeExam.objects.filter(
+	context['tests'] = PracticeExam.objects.filter(
 			is_test = True, family = semester.exam_family, due_date__isnull=False)
-	context['quizzes'] = exams.models.PracticeExam.objects.filter(
+	context['quizzes'] = PracticeExam.objects.filter(
 			is_test = False, family = semester.exam_family, due_date__isnull=False)
 	context['num_sem_download'] = SemesterDownloadFile\
 			.objects.filter(semester = semester).count()
@@ -155,11 +155,11 @@ def achievements(request: HttpRequest, student_id: int) -> HttpResponse:
 	student = get_student_by_id(request, student_id)
 	context: Dict[str,Any] = {
 			'student': student,
-			'form': forms.DiamondsForm(),
+			'form': DiamondsForm(),
 			'achievements': student.achievements.all().order_by('name'),
 			}
 	if request.method == 'POST':
-		form = forms.DiamondsForm(request.POST)
+		form = DiamondsForm(request.POST)
 		if form.is_valid():
 			code = form.cleaned_data['code']
 			if student.semester.active is False:
@@ -177,9 +177,9 @@ def achievements(request: HttpRequest, student_id: int) -> HttpResponse:
 							)
 					student.achievements.add(achievement)
 					context['obtained_achievement']  = achievement
-			form = forms.DiamondsForm()
+			form = DiamondsForm()
 	else:
-		form = forms.DiamondsForm()
+		form = DiamondsForm()
 	try:
 		context['first_achievement'] = Achievement.objects.get(pk=1)
 	except Achievement.DoesNotExist:
@@ -200,7 +200,7 @@ class AchievementList(LoginRequiredMixin, ListView):
 class FoundList(PermissionRequiredMixin, ListView):
 	permission_required = 'is_staff'
 	template_name = 'dashboard/found_list.html'
-	def get_queryset(self) -> QuerySet[roster.models.Student]:
+	def get_queryset(self) -> QuerySet[Student]:
 		self.achievement = get_object_or_404(
 				Achievement, pk=self.kwargs['pk'])
 		students = self.achievement.student_set # type: ignore
@@ -214,7 +214,7 @@ class FoundList(PermissionRequiredMixin, ListView):
 @staff_member_required
 def leaderboard(request: HttpRequest) -> HttpResponse:
 	assert isinstance(request.user, User)
-	students = roster.models.Student.objects.filter(semester__active=True)
+	students = Student.objects.filter(semester__active=True)
 	rows: List[Dict[str, Any]] = []
 	levels: Dict[int, str] = {level.threshold: level.name for level in Level.objects.all()}
 	max_level = max(levels.keys())
@@ -243,9 +243,9 @@ def leaderboard(request: HttpRequest) -> HttpResponse:
 def submit_pset(request: HttpRequest, student_id: int) -> HttpResponse:
 	student = get_student_by_id(request, student_id)
 	if request.method == 'POST':
-		form = forms.PSetForm(request.POST, request.FILES)
+		form = PSetForm(request.POST, request.FILES)
 	else:
-		form = forms.PSetForm()
+		form = PSetForm()
 
 	form.fields['next_unit_to_unlock'].queryset = student.generate_curriculum_queryset().filter(has_pset = False)
 	form.fields['unit'].queryset = student.unlocked_units.all()
@@ -292,14 +292,14 @@ def submit_pset(request: HttpRequest, student_id: int) -> HttpResponse:
 @login_required
 def uploads(request: HttpRequest, student_id: int, unit_id: int) -> HttpResponse:
 	student = get_student_by_id(request, student_id)
-	unit = get_object_or_404(core.models.Unit.objects, id = unit_id)
+	unit = get_object_or_404(Unit.objects, id = unit_id)
 	uploads = UploadedFile.objects.filter(benefactor=student, unit=unit)
 	if not student.check_unit_unlocked(unit) and not uploads.exists():
 		raise PermissionDenied("This unit is not unlocked yet")
 
 	form = None
 	if request.method == "POST":
-		form = forms.NewUploadForm(request.POST, request.FILES)
+		form = NewUploadForm(request.POST, request.FILES)
 		if form.is_valid():
 			new_upload = form.save(commit=False)
 			new_upload.unit = unit
@@ -309,7 +309,7 @@ def uploads(request: HttpRequest, student_id: int, unit_id: int) -> HttpResponse
 			messages.success(request, "New file has been uploaded.")
 			form = None # clear form on successful upload, prevent duplicates
 	if form is None:
-		form = forms.NewUploadForm(initial = {'unit': unit})
+		form = NewUploadForm(initial = {'unit': unit})
 
 	context: Dict[str, Any] = {}
 	context['title'] = 'File Uploads'
@@ -320,7 +320,7 @@ def uploads(request: HttpRequest, student_id: int, unit_id: int) -> HttpResponse
 	# TODO form for adding new files
 	return render(request, "dashboard/uploads.html", context)
 
-def annotate_multiple_students(queryset: QuerySet[roster.models.Student]) -> QuerySet[roster.models.Student]:
+def annotate_multiple_students(queryset: QuerySet[Student]) -> QuerySet[Student]:
 	"""Helper function for constructing large lists of students
 	Selects all important information to prevent a bunch of SQL queries"""
 	return queryset.select_related('user', 'assistant', 'semester').annotate(
@@ -344,13 +344,13 @@ def index(request: HttpRequest) -> HttpResponse:
 	context['students'] = annotate_multiple_students(students)\
 			.order_by('track', 'user__first_name', 'user__last_name')
 	context['stulist_show_semester'] = False
-	context['submitted_registration'] = roster.models.StudentRegistration.objects\
+	context['submitted_registration'] = StudentRegistration.objects\
 			.filter(user = request.user, container__semester__active = True)\
 			.exists()
 	return render(request, "dashboard/stulist.html", context)
 
 @login_required
-def past(request: HttpRequest, semester: core.models.Semester = None):
+def past(request: HttpRequest, semester: Semester = None):
 	assert isinstance(request.user, User)
 	students = get_visible_students(request.user, current=False)
 	if semester is not None:
@@ -401,7 +401,7 @@ def quasigrader(request: HttpRequest, num_hours: int = 336) -> HttpResponse:
 
 	context['items'] = []
 
-	num_psets = dict(roster.models.Student.objects\
+	num_psets = dict(Student.objects\
 			.filter(semester__active=True, legit=True)\
 			.filter(uploadedfile__category='psets')\
 			.annotate(num_psets = Count('uploadedfile__unit', distinct=True))\
@@ -433,7 +433,7 @@ def quasigrader(request: HttpRequest, num_hours: int = 336) -> HttpResponse:
 			and (d['num_psets'] - d['num_done'] != 1)
 		context['items'].append(d)
 
-	context['inquiry_nag'] = roster.models.UnitInquiry.objects\
+	context['inquiry_nag'] = UnitInquiry.objects\
 			.filter(status='NEW', student__semester__active = True).count()
 	context['suggestion_nag'] = ProblemSuggestion.objects\
 			.filter(resolved=False).count()
@@ -535,7 +535,7 @@ def pending_contributions(request: HttpRequest, suggestion_id: int = None) -> Ht
 		if suggestion_id is None:
 			return HttpResponseBadRequest("The form must include a suggestion ID")
 		suggestion = get_object_or_404(ProblemSuggestion, id = suggestion_id)
-		form = forms.ResolveSuggestionForm(request.POST, instance = suggestion)
+		form = ResolveSuggestionForm(request.POST, instance = suggestion)
 		if form.is_valid():
 			messages.success(request, "Successfully resolved " + suggestion.source)
 			suggestion = form.save(commit = False)
@@ -544,7 +544,7 @@ def pending_contributions(request: HttpRequest, suggestion_id: int = None) -> Ht
 
 	context['forms'] = []
 	for suggestion in ProblemSuggestion.objects.filter(resolved=False):
-		form = forms.ResolveSuggestionForm(instance = suggestion)
+		form = ResolveSuggestionForm(instance = suggestion)
 		context['forms'].append(form)
 
 	return render(request, "dashboard/pending_contributions.html", context)
@@ -568,15 +568,15 @@ def api(request: HttpRequest) -> JsonResponse:
 		pset.hours = request.POST['hours']
 		pset.save()
 		# unlock the unit the student asked for
-		finished_unit = get_object_or_404(core.models.Unit, pk=request.POST['unit__pk'])
-		student = get_object_or_404(roster.models.Student, pk=request.POST['student__pk'])
+		finished_unit = get_object_or_404(Unit, pk=request.POST['unit__pk'])
+		student = get_object_or_404(Student, pk=request.POST['student__pk'])
 		if 'next_unit_to_unlock__pk' not in request.POST:
 			unlockable_units = student.generate_curriculum_queryset()\
 					.exclude(has_pset = True)\
 					.exclude(id__in = student.unlocked_units.all())
 			target = unlockable_units.first()
 		else:
-			target = get_object_or_404(core.models.Unit,
+			target = get_object_or_404(Unit,
 					pk=request.POST['next_unit_to_unlock__pk'])
 		if target is not None:
 			student.unlocked_units.add(target)
@@ -617,7 +617,7 @@ def api(request: HttpRequest) -> JsonResponse:
 						},
 						{
 							'_name': 'Inquiries',
-							'inquiries': list(roster.models.UnitInquiry.objects\
+							'inquiries': list(UnitInquiry.objects\
 									.filter(status = "NEW", student__semester__active = True)\
 									.values(
 										'pk',

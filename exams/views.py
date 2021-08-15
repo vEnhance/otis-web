@@ -6,22 +6,23 @@ from django.http.response import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render
 from roster.utils import get_student_by_id
 
-import exams.models
 from exams.calculator import expr_compute
-from exams.forms import ExamAttemptForm
+
+from .forms import ExamAttemptForm
+from .models import ExamAttempt, PracticeExam
 
 # Create your views here.
 
 def pdf(request: HttpRequest, student_id: int, pk: int) -> HttpResponse:
 	student = get_student_by_id(request, student_id)
-	exam = get_object_or_404(exams.models.PracticeExam, pk = pk)
+	exam = get_object_or_404(PracticeExam, pk = pk)
 
 	if getattr(request.user, 'is_staff', True):
 		return get_from_google_storage(exam.pdfname)
 
 	if not exam.started:
 		return HttpResponseForbidden("Not ready to download this exam yet")
-	elif student.semester.exam_family != quiz.family:
+	elif student.semester.exam_family != exam.family:
 		return HttpResponseForbidden("You can't access this quiz.")
 
 	return get_from_google_storage(exam.pdfname)
@@ -29,7 +30,7 @@ def pdf(request: HttpRequest, student_id: int, pk: int) -> HttpResponse:
 def quiz(request: HttpRequest, student_id: int, pk: int) -> HttpResponse:
 	student = get_student_by_id(request, student_id)
 	context: Dict[str, Any] = {}
-	quiz = get_object_or_404(exams.models.PracticeExam, pk = pk)
+	quiz = get_object_or_404(PracticeExam, pk = pk)
 	if quiz.is_test:
 		return HttpResponseForbidden("You can't submit numerical answers to an olympiad exam.")
 	if not quiz.started:
@@ -38,10 +39,10 @@ def quiz(request: HttpRequest, student_id: int, pk: int) -> HttpResponse:
 	if student.semester.exam_family != quiz.family:
 		return HttpResponseForbidden("You can't access this quiz.")
 
-	attempt: Optional[exams.models.ExamAttempt] = None
+	attempt: Optional[ExamAttempt] = None
 	try:
-		attempt = exams.models.ExamAttempt.objects.get(student=student, quiz=pk)
-	except exams.models.ExamAttempt.DoesNotExist:
+		attempt = ExamAttempt.objects.get(student=student, quiz=pk)
+	except ExamAttempt.DoesNotExist:
 		if request.method == 'POST':
 			if quiz.overdue:
 				return HttpResponseForbidden("You can't submit this quiz " \
@@ -97,7 +98,7 @@ def quiz(request: HttpRequest, student_id: int, pk: int) -> HttpResponse:
 
 def show_exam(request: HttpRequest,  student_id: int, pk: int) -> HttpResponse:
 	context: Dict[str, Any] = {}
-	quiz = get_object_or_404(exams.models.PracticeExam, pk = pk)
+	quiz = get_object_or_404(PracticeExam, pk = pk)
 	if quiz.is_test:
 		return HttpResponseForbidden("You can only use this view for short-answer quizzes.")
 	return render(request, 'exams/quiz_detail.html', context)

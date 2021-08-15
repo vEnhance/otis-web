@@ -1,12 +1,12 @@
 from django import forms
 from django.core.validators import FileExtensionValidator
 
-import dashboard.models
+from dashboard.models import ProblemSuggestion, PSet, UploadedFile
 
 
 class NewUploadForm(forms.ModelForm):
 	class Meta:
-		model = dashboard.models.UploadedFile
+		model = UploadedFile
 		fields = ('category', 'content', 'description')
 		widgets = {
 			'description': forms.Textarea(
@@ -18,7 +18,7 @@ class NewUploadForm(forms.ModelForm):
 
 class ResolveSuggestionForm(forms.ModelForm):
 	class Meta:
-		model = dashboard.models.ProblemSuggestion
+		model = ProblemSuggestion
 		fields = ('reason',)
 		widgets = {'reason': forms.Textarea(attrs = {'cols':  30, 'rows': 4}), }
 		help_texts = { 'reason': '' }
@@ -28,7 +28,7 @@ class PSetForm(forms.ModelForm):
 			validators = [FileExtensionValidator(
 				allowed_extensions=['pdf','txt','tex','png','jpg'])])
 	class Meta:
-		model = dashboard.models.PSet
+		model = PSet
 		fields = ('unit', 'hours', 'feedback', 'clubs',
 				'next_unit_to_unlock', 'special_notes',)
 

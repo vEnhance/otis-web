@@ -3,19 +3,19 @@ from typing import Any, Dict, Set, Union
 from django import forms
 from django.shortcuts import get_object_or_404
 
-from . import models
+from .models import Hint, Problem
 
 
 class HintUpdateFormWithReason(forms.ModelForm):
 	reason = forms.CharField(max_length=255, help_text = "Reason for editing.", required = False)
 	class Meta:
-		model = models.Hint
+		model = Hint
 		fields = ('number', 'keywords', 'content', 'reason',)
 
 class ProblemUpdateFormWithReason(forms.ModelForm):
 	reason = forms.CharField(max_length=255, help_text = "Reason for editing.", required = False)
 	class Meta:
-		model = models.Problem
+		model = Problem
 		fields = ('source', 'description', 'aops_url', 'reason',)
 
 class ProblemSelectWidget(forms.Select):
@@ -26,7 +26,7 @@ class ProblemSelectWidget(forms.Select):
 			name, value, label, selected, index, subindex, attrs or {},
 		)
 		if value:
-			problem = get_object_or_404(models.Problem, puid=value)
+			problem = get_object_or_404(Problem, puid=value)
 			option['attrs'].update({
 				'data-source': problem.source or '',
 				'data-description': problem.description,
@@ -36,6 +36,6 @@ class ProblemSelectWidget(forms.Select):
 class ProblemSelectForm(forms.Form):
 	lookup_problem = forms.ModelChoiceField(
 			to_field_name='puid',
-			queryset = models.Problem.objects.all(),
+			queryset = Problem.objects.all(),
 			widget = ProblemSelectWidget
 			)
