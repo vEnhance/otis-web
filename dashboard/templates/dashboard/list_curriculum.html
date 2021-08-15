@@ -62,7 +62,7 @@ $("#hide-locked-units").click(function() {
 		{% if row.is_visible %}
 			<a class="emoji-link" title = "File uploads"
 				href="{% url "uploads" student.id row.unit.id %}">
-				📂 {{ row.num_uploads }}
+				📂 {{ row.num_uploads|default:"0" }}
 			</a>
 		{% endif %}
 		{% if row.sols_label %}
