@@ -102,7 +102,7 @@ class DiscordHandler(logging.Handler):
 				s += pp.pformat(d)
 				s += r'```'
 			if request.FILES is not None and len(request.FILES) > 0:
-				s += f'Files included\n'
+				s += 'Files included\n'
 				for name, fileobj in request.FILES.items():
 					s += f'> `{name}` ({fileobj.size} bytes, { fileobj.content_type })\n'
 			description_parts[':blue_heart: REQUEST :blue_heart:'] = s
