@@ -8,7 +8,6 @@ from .models import ExamAttempt, PracticeExam
 
 
 class PracticeExamIEResource(resources.ModelResource):
-
 	class Meta:
 		skip_unchanged = True
 		model = PracticeExam
@@ -70,4 +69,4 @@ class ExamAttemptAdmin(ImportExportModelAdmin):
 		'quiz',
 		'quiz__family',
 	)
-	list_display_links = ('quiz',)
+	list_display_links = ('quiz', )

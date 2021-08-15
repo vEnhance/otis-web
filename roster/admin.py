@@ -13,9 +13,11 @@ from .models import Assistant, Invoice, RegistrationContainer, Student, StudentR
 
 
 class RosterResource(resources.ModelResource):
-	user_name = fields.Field(column_name='User Name',
-														attribute='user',
-														widget=widgets.ForeignKeyWidget(User, 'username'))
+	user_name = fields.Field(
+		column_name='User Name',
+		attribute='user',
+		widget=widgets.ForeignKeyWidget(User, 'username')
+	)
 
 
 # Register your models here.
@@ -23,7 +25,6 @@ class RosterResource(resources.ModelResource):
 
 ## ASSISTANT
 class AssistantIEResource(RosterResource):
-
 	class Meta:
 		skip_unchanged = True
 		model = Assistant
@@ -53,9 +54,9 @@ class StudentInline(admin.TabularInline):
 	extra = 0
 	show_change_link = True
 
-	def has_delete_permission(self,
-														request: HttpRequest,
-														obj: Student = None) -> bool:
+	def has_delete_permission(
+		self, request: HttpRequest, obj: Student = None
+	) -> bool:
 		return False
 
 
@@ -67,19 +68,18 @@ class AssistantAdmin(ImportExportModelAdmin):
 		'shortname',
 		'user',
 	)
-	list_display_links = ('name',)
+	list_display_links = ('name', )
 	search_fields = ('user__first_name', 'user__last_name', 'user__username')
 	autocomplete_fields = (
 		'user',
 		'unlisted_students',
 	)
-	inlines = (StudentInline,)
+	inlines = (StudentInline, )
 	resource_class = AssistantIEResource
 
 
 ## INVOICE
 class InvoiceIEResource(resources.ModelResource):
-
 	class Meta:
 		skip_unchanged = True
 		model = Invoice
@@ -104,17 +104,22 @@ class OwedFilter(admin.SimpleListFilter):
 
 	def lookups(self, request: HttpRequest,
 							model_admin: 'InvoiceAdmin') -> List[Tuple[str, str]]:
-		return [("incomplete", "Incomplete"), ("paid", "Paid in full"),
-						("zero", "No payment")]
+		return [
+			("incomplete", "Incomplete"), ("paid", "Paid in full"),
+			("zero", "No payment")
+		]
 
 	def queryset(self, request: HttpRequest, queryset: QuerySet[Invoice]):
 		if self.value() is None:
 			return queryset
 		else:
-			queryset = queryset.annotate(owed=Cast(
-				F("student__semester__prep_rate") * F("preps_taught") +
-				F("student__semester__hour_rate") * F("hours_taught") +
-				F("adjustment") + F('extras') - F("total_paid"), FloatField()))
+			queryset = queryset.annotate(
+				owed=Cast(
+					F("student__semester__prep_rate") * F("preps_taught") +
+					F("student__semester__hour_rate") * F("hours_taught") +
+					F("adjustment") + F('extras') - F("total_paid"), FloatField()
+				)
+			)
 			if self.value() == "incomplete":
 				return queryset.filter(owed__gt=0)
 			elif self.value() == "paid":
@@ -134,13 +139,13 @@ class InvoiceAdmin(ImportExportModelAdmin):
 		'updated_at',
 		'forgive',
 	)
-	list_display_links = ('student',)
+	list_display_links = ('student', )
 	search_fields = (
 		'student__user__first_name',
 		'student__user__last_name',
 	)
-	autocomplete_fields = ('student',)
-	ordering = ('student',)
+	autocomplete_fields = ('student', )
+	ordering = ('student', )
 	list_filter = (
 		OwedFilter,
 		'student__semester__active',
@@ -153,14 +158,16 @@ class InvoiceAdmin(ImportExportModelAdmin):
 
 ## STUDENT
 class StudentIEResource(RosterResource):
-	semester_name = fields.Field(column_name='Semester Name',
-																attribute='semester',
-																widget=widgets.ForeignKeyWidget(
-																	Semester, 'name'))
-	unit_list = fields.Field(column_name='Unit List',
-														attribute='curriculum',
-														widget=widgets.ManyToManyWidget(Unit,
-																														separator=';'))
+	semester_name = fields.Field(
+		column_name='Semester Name',
+		attribute='semester',
+		widget=widgets.ForeignKeyWidget(Semester, 'name')
+	)
+	unit_list = fields.Field(
+		column_name='Unit List',
+		attribute='curriculum',
+		widget=widgets.ManyToManyWidget(Unit, separator=';')
+	)
 
 	class Meta:
 		skip_unchanged = True
@@ -238,7 +245,6 @@ class StudentAdmin(ImportExportModelAdmin):
 
 # REG FORM
 class StudentRegistrationIEResource(RosterResource):
-
 	class Meta:
 		model = StudentRegistration
 		fields = (
@@ -283,22 +289,26 @@ class StudentRegistrationAdmin(ImportExportModelAdmin):
 		'create_student',
 	]
 
-	def create_student(self, request: HttpRequest,
-											queryset: QuerySet[StudentRegistration]):
+	def create_student(
+		self, request: HttpRequest, queryset: QuerySet[StudentRegistration]
+	):
 		students_to_create = []
 		queryset = queryset.exclude(processed=True)
-		queryset = queryset.select_related('user', 'container',
-																				'container__semester')
+		queryset = queryset.select_related(
+			'user', 'container', 'container__semester'
+		)
 		for registration in queryset:
 			students_to_create.append(
 				Student(
 					user=registration.user,
 					semester=registration.container.semester,
 					track=registration.track,
-				))
+				)
+			)
 			registration.user.save()
-		messages.success(request,
-											message=f"Built {len(students_to_create)} students")
+		messages.success(
+			request, message=f"Built {len(students_to_create)} students"
+		)
 		_ = Student.objects.bulk_create(students_to_create)
 		_ = queryset.update(processed=True)
 
@@ -318,9 +328,11 @@ class UnitInquiryAdmin(admin.ModelAdmin):
 		'status',
 		'action_type',
 	)
-	search_fields = ('student__user__first_name', 'student__user__last_name',
-										'student__user__username')
-	list_display_links = ('id',)
+	search_fields = (
+		'student__user__first_name', 'student__user__last_name',
+		'student__user__username'
+	)
+	list_display_links = ('id', )
 	autocomplete_fields = (
 		'unit',
 		'student',
@@ -333,16 +345,19 @@ class UnitInquiryAdmin(admin.ModelAdmin):
 	def hold_inquiry(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
 		_ = queryset.update(status='HOLD')
 
-	def reject_inquiry(self, request: HttpRequest,
-											queryset: QuerySet[UnitInquiry]):
+	def reject_inquiry(
+		self, request: HttpRequest, queryset: QuerySet[UnitInquiry]
+	):
 		_ = queryset.update(status='REJ')
 
-	def accept_inquiry(self, request: HttpRequest,
-											queryset: QuerySet[UnitInquiry]):
+	def accept_inquiry(
+		self, request: HttpRequest, queryset: QuerySet[UnitInquiry]
+	):
 		_ = queryset.update(status='ACC')
 
-	def reset_inquiry(self, request: HttpRequest,
-										queryset: QuerySet[UnitInquiry]):
+	def reset_inquiry(
+		self, request: HttpRequest, queryset: QuerySet[UnitInquiry]
+	):
 		_ = queryset.update(status='NEW')
 
 

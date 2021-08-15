@@ -103,7 +103,8 @@ def BNF() -> Any:
 			addop[...]  # type: ignore
 			+ (
 				g.setParseAction(push_first) | Group(lpar + expr + rpar)  # type: ignore
-			)).setParseAction(push_unary_minus)  # type: ignore
+			)
+		).setParseAction(push_unary_minus)  # type: ignore
 
 		# by defining exponentiation as "atom [ ^ factor ]..." instead of "atom [ ^ atom ]...", we get right-to-left
 		# exponents, instead of left-to-right that is, 2^3^2 = 2^(3^2), not (2^3)^2.
@@ -112,10 +113,12 @@ def BNF() -> Any:
 												factor).setParseAction(push_first)[...]  # type: ignore
 		term = factor + (
 			multop +  # type: ignore
-			factor).setParseAction(push_first)[...]  # type: ignore
+			factor
+		).setParseAction(push_first)[...]  # type: ignore
 		expr <<= term + (
 			addop +  # type: ignore
-			term).setParseAction(push_first)[...]  # type: ignore
+			term
+		).setParseAction(push_first)[...]  # type: ignore
 		bnf = expr
 	return bnf
 

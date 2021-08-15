@@ -5,7 +5,6 @@ from dashboard.models import ProblemSuggestion, PSet, UploadedFile
 
 
 class NewUploadForm(forms.ModelForm):
-
 	class Meta:
 		model = UploadedFile
 		fields = ('category', 'content', 'description')
@@ -21,10 +20,9 @@ class NewUploadForm(forms.ModelForm):
 
 
 class ResolveSuggestionForm(forms.ModelForm):
-
 	class Meta:
 		model = ProblemSuggestion
-		fields = ('reason',)
+		fields = ('reason', )
 		widgets = {
 			'reason': forms.Textarea(attrs={
 				'cols': 30,
@@ -39,8 +37,10 @@ class PSetForm(forms.ModelForm):
 		help_text="The file itself",
 		validators=[
 			FileExtensionValidator(
-				allowed_extensions=['pdf', 'txt', 'tex', 'png', 'jpg'])
-		])
+				allowed_extensions=['pdf', 'txt', 'tex', 'png', 'jpg']
+			)
+		]
+	)
 
 	class Meta:
 		model = PSet

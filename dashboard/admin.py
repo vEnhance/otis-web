@@ -23,8 +23,8 @@ class UploadedFileAdmin(admin.ModelAdmin):
 		'category',
 		'owner',
 	)
-	search_fields = ('description',)
-	list_filter = ('category',)
+	search_fields = ('description', )
+	list_filter = ('category', )
 	list_per_page = 30
 	autocomplete_fields = (
 		'benefactor',
@@ -42,8 +42,8 @@ class SemesterDownloadFileAdmin(admin.ModelAdmin):
 		'created_at',
 		'description',
 	)
-	search_fields = ('description',)
-	list_filter = ('semester',)
+	search_fields = ('description', )
+	list_filter = ('semester', )
 	list_per_page = 30
 
 
@@ -118,7 +118,6 @@ class ProblemSuggestionAdmin(admin.ModelAdmin):
 
 
 class LevelIEResource(resources.ModelResource):
-
 	class Meta:
 		skip_unchanged = True
 		model = Level
@@ -131,12 +130,11 @@ class LevelAdmin(ImportExportModelAdmin):
 		'threshold',
 		'name',
 	)
-	search_fields = ('name',)
+	search_fields = ('name', )
 	resource_class = LevelIEResource
 
 
 class AchievementIEResource(resources.ModelResource):
-
 	class Meta:
 		skip_unchanged = True
 		model = Level
@@ -153,5 +151,5 @@ class AchievementIEResource(resources.ModelResource):
 class AchievementAdmin(ImportExportModelAdmin):
 	list_display = ('code', 'name', 'diamonds', 'active', 'description', 'image')
 	search_fields = ('code', 'description')
-	list_filter = ('active',)
+	list_filter = ('active', )
 	resource_class = AchievementIEResource

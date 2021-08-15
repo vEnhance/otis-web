@@ -28,15 +28,18 @@ def expr_validator_multiple(value: str):
 
 
 class PracticeExam(models.Model):
-	family = models.CharField(max_length=10,
-														choices=(
-															("Waltz", "Waltz"),
-															("Foxtrot", "Foxtrot"),
-														),
-														help_text="The family that the exam comes from.")
+	family = models.CharField(
+		max_length=10,
+		choices=(
+			("Waltz", "Waltz"),
+			("Foxtrot", "Foxtrot"),
+		),
+		help_text="The family that the exam comes from."
+	)
 	is_test = models.BooleanField(help_text="Whether this is a quiz or test")
 	number = models.PositiveSmallIntegerField(
-		help_text="The number of the assignment (e.g. Test 8, Quiz D) ")
+		help_text="The number of the assignment (e.g. Test 8, Quiz D) "
+	)
 
 	def __str__(self) -> str:
 		if self.is_test:
@@ -45,53 +48,53 @@ class PracticeExam(models.Model):
 			return self.family + " Quiz " + self.get_number_display()
 
 	# For quizzes only
-	answer1 = models.CharField(max_length=64,
-															validators=[expr_validator_multiple],
-															blank=True)
-	answer2 = models.CharField(max_length=64,
-															validators=[expr_validator_multiple],
-															blank=True)
-	answer3 = models.CharField(max_length=64,
-															validators=[expr_validator_multiple],
-															blank=True)
-	answer4 = models.CharField(max_length=64,
-															validators=[expr_validator_multiple],
-															blank=True)
-	answer5 = models.CharField(max_length=64,
-															validators=[expr_validator_multiple],
-															blank=True)
-	url1 = models.CharField(max_length=128,
-													blank=True,
-													validators=[
-														URLValidator(),
-													])
-	url2 = models.CharField(max_length=128,
-													blank=True,
-													validators=[
-														URLValidator(),
-													])
-	url3 = models.CharField(max_length=128,
-													blank=True,
-													validators=[
-														URLValidator(),
-													])
-	url4 = models.CharField(max_length=128,
-													blank=True,
-													validators=[
-														URLValidator(),
-													])
-	url5 = models.CharField(max_length=128,
-													blank=True,
-													validators=[
-														URLValidator(),
-													])
+	answer1 = models.CharField(
+		max_length=64, validators=[expr_validator_multiple], blank=True
+	)
+	answer2 = models.CharField(
+		max_length=64, validators=[expr_validator_multiple], blank=True
+	)
+	answer3 = models.CharField(
+		max_length=64, validators=[expr_validator_multiple], blank=True
+	)
+	answer4 = models.CharField(
+		max_length=64, validators=[expr_validator_multiple], blank=True
+	)
+	answer5 = models.CharField(
+		max_length=64, validators=[expr_validator_multiple], blank=True
+	)
+	url1 = models.CharField(
+		max_length=128, blank=True, validators=[
+			URLValidator(),
+		]
+	)
+	url2 = models.CharField(
+		max_length=128, blank=True, validators=[
+			URLValidator(),
+		]
+	)
+	url3 = models.CharField(
+		max_length=128, blank=True, validators=[
+			URLValidator(),
+		]
+	)
+	url4 = models.CharField(
+		max_length=128, blank=True, validators=[
+			URLValidator(),
+		]
+	)
+	url5 = models.CharField(
+		max_length=128, blank=True, validators=[
+			URLValidator(),
+		]
+	)
 
-	start_date = models.DateField(null=True,
-																blank=True,
-																help_text="When the assignment opens.")
-	due_date = models.DateField(null=True,
-															blank=True,
-															help_text="When the assignment should be due.")
+	start_date = models.DateField(
+		null=True, blank=True, help_text="When the assignment opens."
+	)
+	due_date = models.DateField(
+		null=True, blank=True, help_text="When the assignment should be due."
+	)
 
 	class Meta:
 		ordering = ('family', '-is_test', 'number')
@@ -124,51 +127,64 @@ class PracticeExam(models.Model):
 		return self.started and not self.overdue
 
 	def get_absolute_url(self) -> str:
-		return reverse_lazy('exam-pdf', args=(self.pk,))
+		return reverse_lazy('exam-pdf', args=(self.pk, ))
 
 
 class ExamAttempt(models.Model):
-	quiz = models.ForeignKey(PracticeExam,
-														on_delete=models.CASCADE,
-														help_text="The quiz being submitted for")
-	score = models.SmallIntegerField(null=True,
-																		blank=True,
-																		help_text="The number of correct answers")
-	student = models.ForeignKey(Student,
-															on_delete=models.CASCADE,
-															help_text="The student taking the exam")
-	guess1 = models.CharField(max_length=18,
-														blank=True,
-														verbose_name="Problem 1 response",
-														validators=[
-															expr_validator,
-														])
-	guess2 = models.CharField(max_length=18,
-														blank=True,
-														verbose_name="Problem 2 response",
-														validators=[
-															expr_validator,
-														])
-	guess3 = models.CharField(max_length=18,
-														blank=True,
-														verbose_name="Problem 3 response",
-														validators=[
-															expr_validator,
-														])
-	guess4 = models.CharField(max_length=18,
-														blank=True,
-														verbose_name="Problem 4 response",
-														validators=[
-															expr_validator,
-														])
-	guess5 = models.CharField(max_length=18,
-														blank=True,
-														verbose_name="Problem 5 response",
-														validators=[
-															expr_validator,
-														])
-	submit_time = models.DateTimeField(help_text="When the quiz was submitted",
-																			auto_now_add=True)
+	quiz = models.ForeignKey(
+		PracticeExam,
+		on_delete=models.CASCADE,
+		help_text="The quiz being submitted for"
+	)
+	score = models.SmallIntegerField(
+		null=True, blank=True, help_text="The number of correct answers"
+	)
+	student = models.ForeignKey(
+		Student, on_delete=models.CASCADE, help_text="The student taking the exam"
+	)
+	guess1 = models.CharField(
+		max_length=18,
+		blank=True,
+		verbose_name="Problem 1 response",
+		validators=[
+			expr_validator,
+		]
+	)
+	guess2 = models.CharField(
+		max_length=18,
+		blank=True,
+		verbose_name="Problem 2 response",
+		validators=[
+			expr_validator,
+		]
+	)
+	guess3 = models.CharField(
+		max_length=18,
+		blank=True,
+		verbose_name="Problem 3 response",
+		validators=[
+			expr_validator,
+		]
+	)
+	guess4 = models.CharField(
+		max_length=18,
+		blank=True,
+		verbose_name="Problem 4 response",
+		validators=[
+			expr_validator,
+		]
+	)
+	guess5 = models.CharField(
+		max_length=18,
+		blank=True,
+		verbose_name="Problem 5 response",
+		validators=[
+			expr_validator,
+		]
+	)
+	submit_time = models.DateTimeField(
+		help_text="When the quiz was submitted", auto_now_add=True
+	)
 
 	class Meta:
 		unique_together = (

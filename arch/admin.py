@@ -24,7 +24,7 @@ class ProblemAdmin(VersionAdmin):
 		'description',
 	)
 	list_per_page = 100
-	inlines = (HintInline,)
+	inlines = (HintInline, )
 
 
 @admin.register(Hint)
@@ -42,5 +42,5 @@ class HintAdmin(VersionAdmin):
 		'keywords',
 		'content',
 	)
-	autocomplete_fields = ('problem',)
+	autocomplete_fields = ('problem', )
 	list_per_page = 30

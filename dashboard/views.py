@@ -41,7 +41,6 @@ logger = logging.getLogger(__name__)
 
 
 class Meter:
-
 	def __init__(
 		self,
 		name: str,
@@ -82,51 +81,59 @@ class Meter:
 
 	@staticmethod
 	def ClubMeter(value: int):
-		return Meter(name="Dexterity",
-									emoji="♣️",
-									value=value,
-									unit="♣",
-									color='#007bff;',
-									max_value=2500)
+		return Meter(
+			name="Dexterity",
+			emoji="♣️",
+			value=value,
+			unit="♣",
+			color='#007bff;',
+			max_value=2500
+		)
 
 	@staticmethod
 	def HeartMeter(value: int):
-		return Meter(name="Wisdom",
-									emoji="🕰️",
-									value=value,
-									unit="♥",
-									color='#198754',
-									max_value=2500)
+		return Meter(
+			name="Wisdom",
+			emoji="🕰️",
+			value=value,
+			unit="♥",
+			color='#198754',
+			max_value=2500
+		)
 
 	@staticmethod
 	def SpadeMeter(value: int):
-		return Meter(name="Strength",
-									emoji="🏆",
-									value=value,
-									unit="♠",
-									color='#ae610f',
-									max_value=82)
+		return Meter(
+			name="Strength",
+			emoji="🏆",
+			value=value,
+			unit="♠",
+			color='#ae610f',
+			max_value=82
+		)
 
 	@staticmethod
 	def DiamondMeter(value: int):
-		return Meter(name="Charisma",
-									emoji="㊙️",
-									value=value,
-									unit="◆",
-									color='#9c1421',
-									max_value=50)
+		return Meter(
+			name="Charisma",
+			emoji="㊙️",
+			value=value,
+			unit="◆",
+			color='#9c1421',
+			max_value=50
+		)
 
 
 def _get_meter_update(student: Student) -> Dict[str, Any]:
 	psets = PSet.objects\
-           .filter(student = student, approved = True, eligible = True)
+            .filter(student = student, approved = True, eligible = True)
 	pset_data = psets.aggregate(Sum('clubs'), Sum('hours'))
-	total_diamonds = student.achievements.aggregate(
-		Sum('diamonds'))['diamonds__sum'] or 0
+	total_diamonds = student.achievements.aggregate(Sum('diamonds')
+																									)['diamonds__sum'] or 0
 	quiz_data = ExamAttempt.objects.filter(student=student)
 	total_spades = \
-           (quiz_data.aggregate(Sum('score'))['score__sum'] or 0) \
-           + (student.usemo_score or 0)
+            (quiz_data.aggregate(Sum('score'))['score__sum'] or 0) \
+            + (student.usemo_score or 0)
 	meters = {
 		'clubs': Meter.ClubMeter(pset_data['clubs__sum'] or 0),
 		'hearts': Meter.HeartMeter(int(pset_data['hours__sum'] or 0)),
@@ -135,7 +142,7 @@ def _get_meter_update(student: Student) -> Dict[str, Any]:
 	}
 	level_number = sum(meter.level for meter in meters.values())
 	level = Level.objects\
-           .filter(threshold__lte = level_number).order_by('-threshold').first()
+            .filter(threshold__lte = level_number).order_by('-threshold').first()
 	level_name = level.name if level is not None else 'No Level'
 	return {
 		'psets': psets,
@@ -152,13 +159,13 @@ def portal(request: HttpRequest, student_id: int) -> HttpResponse:
 	student = get_student_by_id(request, student_id, payment_exempt=True)
 	assert isinstance(request.user, User)
 	if not request.user.is_staff and student.is_delinquent:
-		return HttpResponseRedirect(reverse_lazy('invoice', args=(student_id,)))
+		return HttpResponseRedirect(reverse_lazy('invoice', args=(student_id, )))
 	semester = student.semester
 
 	# check if the student has any new processed suggestions
-	suggestions = ProblemSuggestion.objects.filter(resolved=True,
-																									student=student,
-																									notified=False)
+	suggestions = ProblemSuggestion.objects.filter(
+		resolved=True, student=student, notified=False
+	)
 
 	context: Dict[str, Any] = {}
 	context['title'] = f"{student.name} ({semester.name})"
@@ -167,15 +174,16 @@ def portal(request: HttpRequest, student_id: int) -> HttpResponse:
 	context['suggestions'] = list(suggestions)
 	context['omniscient'] = can_edit(request, student)
 	context['curriculum'] = student.generate_curriculum_rows(
-		omniscient=context['omniscient'])
-	context['tests'] = PracticeExam.objects.filter(is_test=True,
-																									family=semester.exam_family,
-																									due_date__isnull=False)
-	context['quizzes'] = PracticeExam.objects.filter(is_test=False,
-																										family=semester.exam_family,
-																										due_date__isnull=False)
+		omniscient=context['omniscient']
+	)
+	context['tests'] = PracticeExam.objects.filter(
+		is_test=True, family=semester.exam_family, due_date__isnull=False
+	)
+	context['quizzes'] = PracticeExam.objects.filter(
+		is_test=False, family=semester.exam_family, due_date__isnull=False
+	)
 	context['num_sem_download'] = SemesterDownloadFile\
-           .objects.filter(semester = semester).count()
+            .objects.filter(semester = semester).count()
 	context.update(_get_meter_update(student))
 	return render(request, "dashboard/portal.html", context)
 
@@ -202,8 +210,9 @@ def achievements(request: HttpRequest, student_id: int) -> HttpResponse:
 				except Achievement.DoesNotExist:
 					messages.error(request, "You entered an invalid code.")
 				else:
-					logging.log(settings.SUCCESS_LOG_LEVEL,
-											f"{student.name} obtained {achievement}")
+					logging.log(
+						settings.SUCCESS_LOG_LEVEL, f"{student.name} obtained {achievement}"
+					)
 					student.achievements.add(achievement)
 					context['obtained_achievement'] = achievement
 			form = DiamondsForm()
@@ -225,8 +234,10 @@ class AchievementList(LoginRequiredMixin, ListView):
 		return Achievement.objects.filter(active=True).annotate(
 			num_found=Count('student__user__pk', unique=True, distinct=True),
 			obtained=Exists(
-				Achievement.objects.filter(pk=OuterRef('pk'),
-																		student__user=self.request.user)),
+				Achievement.objects.filter(
+					pk=OuterRef('pk'), student__user=self.request.user
+				)
+			),
 		).order_by('-obtained', '-num_found')
 
 
@@ -238,7 +249,7 @@ class FoundList(PermissionRequiredMixin, ListView):
 		self.achievement = get_object_or_404(Achievement, pk=self.kwargs['pk'])
 		students = self.achievement.student_set  # type: ignore
 		return students.filter(semester__active = True)\
-                    .select_related('user').order_by('user__first_name', 'user__last_name')
+                      .select_related('user').order_by('user__first_name', 'user__last_name')
 
 	def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
 		context = super().get_context_data(**kwargs)
@@ -252,7 +263,8 @@ def leaderboard(request: HttpRequest) -> HttpResponse:
 	students = Student.objects.filter(semester__active=True)
 	rows: List[Dict[str, Any]] = []
 	levels: Dict[int, str] = {
-		level.threshold: level.name for level in Level.objects.all()
+		level.threshold: level.name
+		for level in Level.objects.all()
 	}
 	max_level = max(levels.keys())
 	for student in annotate_multiple_students(students):
@@ -265,14 +277,19 @@ def leaderboard(request: HttpRequest) -> HttpResponse:
 		row['clubs'] = getattr(student, 'clubs', 0) or 0
 		row['diamonds'] = getattr(student, 'diamonds', 0) or 0
 		row['level'] = sum(
-			int(row[k]**0.5) for k in ('spades', 'hearts', 'clubs', 'diamonds'))
+			int(row[k]**0.5) for k in ('spades', 'hearts', 'clubs', 'diamonds')
+		)
 		if row['level'] > max_level:
 			row['level_name'] = levels[max_level]
 		else:
 			row['level_name'] = levels.get(row['level'], "No level")
 		rows.append(row)
-	rows.sort(key=lambda row: (-row['level'], -row['spades'], -row[
-		'hearts'], -row['clubs'], -row['diamonds'], row['name'].upper()))
+	rows.sort(
+		key=lambda row: (
+			-row['level'], -row['spades'], -row['hearts'], -row['clubs'], -row[
+				'diamonds'], row['name'].upper()
+		)
+	)
 	context: Dict[str, Any] = {}
 	context['rows'] = rows
 	return render(request, "dashboard/leaderboard.html", context)
@@ -286,9 +303,10 @@ def submit_pset(request: HttpRequest, student_id: int) -> HttpResponse:
 	else:
 		form = PSetForm()
 
-	form.fields[
-		'next_unit_to_unlock'].queryset = student.generate_curriculum_queryset(
-		).filter(has_pset=False)
+	form.fields['next_unit_to_unlock'
+							].queryset = student.generate_curriculum_queryset().filter(
+								has_pset=False
+							)
 	form.fields['unit'].queryset = student.unlocked_units.all()
 	if request.method == 'POST' and form.is_valid():
 		pset = form.save(commit=False)
@@ -309,28 +327,30 @@ def submit_pset(request: HttpRequest, student_id: int) -> HttpResponse:
 			pset.save()
 			messages.success(
 				request, "The problem set is submitted successfully "
-				"and is pending review!")
+				"and is pending review!"
+			)
 
 	# TODO more stats
 	context = {
 		'title': 'Ready to submit?',
 		'student': student,
-		'pending_psets':     \
-             PSet.objects\
-             .filter(student = student, approved = False)\
-             .order_by('-upload__created_at'),
-		'approved_psets':     \
-             PSet.objects\
-             .filter(student = student, approved = True)\
-             .order_by('-upload__created_at'),
+		'pending_psets':      \
+              PSet.objects\
+              .filter(student = student, approved = False)\
+              .order_by('-upload__created_at'),
+		'approved_psets':      \
+              PSet.objects\
+              .filter(student = student, approved = True)\
+              .order_by('-upload__created_at'),
 		'form': form,
 		}
 	return render(request, "dashboard/submit_pset_form.html", context)
 
 
 @login_required
-def uploads(request: HttpRequest, student_id: int,
-						unit_id: int) -> HttpResponse:
+def uploads(
+	request: HttpRequest, student_id: int, unit_id: int
+) -> HttpResponse:
 	student = get_student_by_id(request, student_id)
 	unit = get_object_or_404(Unit.objects, id=unit_id)
 	uploads = UploadedFile.objects.filter(benefactor=student, unit=unit)
@@ -362,23 +382,24 @@ def uploads(request: HttpRequest, student_id: int,
 
 
 def annotate_multiple_students(
-		queryset: QuerySet[Student]) -> QuerySet[Student]:
+	queryset: QuerySet[Student]
+) -> QuerySet[Student]:
 	"""Helper function for constructing large lists of students
 	Selects all important information to prevent a bunch of SQL queries"""
 	return queryset.select_related('user', 'assistant', 'semester').annotate(
-		num_psets=SubqueryAggregate('pset__pk',
-																filter=Q(approved=True, eligible=True),
-																aggregate=Count),
-		clubs=SubqueryAggregate('pset__clubs',
-														filter=Q(approved=True, eligible=True),
-														aggregate=Sum),
-		hearts=SubqueryAggregate('pset__hours',
-															filter=Q(approved=True, eligible=True),
-															aggregate=Sum),
+		num_psets=SubqueryAggregate(
+			'pset__pk', filter=Q(approved=True, eligible=True), aggregate=Count
+		),
+		clubs=SubqueryAggregate(
+			'pset__clubs', filter=Q(approved=True, eligible=True), aggregate=Sum
+		),
+		hearts=SubqueryAggregate(
+			'pset__hours', filter=Q(approved=True, eligible=True), aggregate=Sum
+		),
 		spades_quizzes=SubqueryAggregate('examattempt__score', aggregate=Sum),
-		diamonds=SubqueryAggregate('achievements__diamonds',
-																filter=Q(active=True),
-																aggregate=Sum),
+		diamonds=SubqueryAggregate(
+			'achievements__diamonds', filter=Q(active=True), aggregate=Sum
+		),
 	)
 
 
@@ -388,16 +409,16 @@ def index(request: HttpRequest) -> HttpResponse:
 	students = get_visible_students(request.user, current=True)
 	if len(students) == 1:  # unique match
 		return HttpResponseRedirect(\
-                    reverse("portal", args=(students[0].id,)))
+                      reverse("portal", args=(students[0].id,)))
 	assert isinstance(request.user, User)
 	context: Dict[str, Any] = {}
 	context['title'] = "Current Semester Listing"
 	context['students'] = annotate_multiple_students(students)\
-           .order_by('track', 'user__first_name', 'user__last_name')
+            .order_by('track', 'user__first_name', 'user__last_name')
 	context['stulist_show_semester'] = False
 	context['submitted_registration'] = StudentRegistration.objects\
-           .filter(user = request.user, container__semester__active = True)\
-           .exists()
+            .filter(user = request.user, container__semester__active = True)\
+            .exists()
 	return render(request, "dashboard/stulist.html", context)
 
 
@@ -410,7 +431,7 @@ def past(request: HttpRequest, semester: Semester = None):
 	context: Dict[str, Any] = {}
 	context['title'] = "Previous Semester Listing"
 	context['students'] = annotate_multiple_students(students)\
-           .order_by('-semester', 'user__first_name', 'user__last_name')
+            .order_by('-semester', 'user__first_name', 'user__last_name')
 	context['stulist_show_semester'] = True
 	context['past'] = True
 	return render(request, "dashboard/stulist.html", context)
@@ -437,7 +458,7 @@ class UpdateFile(LoginRequiredMixin, UpdateView):
 		obj = super(UpdateFile, self).get_object(*args, **kwargs)
 		assert isinstance(obj, UploadedFile)
 		if not obj.owner == self.request.user \
-                    and getattr(self.request.user, 'is_staff', False):
+                      and getattr(self.request.user, 'is_staff', False):
 			raise PermissionDenied("Not authorized to update this file")
 		return obj
 
@@ -450,7 +471,7 @@ class DeleteFile(LoginRequiredMixin, DeleteView):
 		obj = super(DeleteFile, self).get_object(*args, **kwargs)
 		assert isinstance(obj, UploadedFile)
 		if not obj.owner == self.request.user \
-                    and getattr(self.request.user, 'is_staff', False):
+                      and getattr(self.request.user, 'is_staff', False):
 			raise PermissionDenied("Not authorized to delete this file")
 		return obj
 
@@ -462,16 +483,17 @@ def idlewarn(request: HttpRequest) -> HttpResponse:
 	context['title'] = 'Idle-warn'
 
 	newest = UploadedFile.objects\
-           .filter(category='psets')\
-           .filter(benefactor=OuterRef('pk'))\
-           .order_by('-created_at')\
-           .values('created_at')[:1]
+            .filter(category='psets')\
+            .filter(benefactor=OuterRef('pk'))\
+            .order_by('-created_at')\
+            .values('created_at')[:1]
 
 	students = annotate_multiple_students(
-		get_visible_students(request.user).filter(legit=True))
+		get_visible_students(request.user).filter(legit=True)
+	)
 	context['students'] = students\
-           .annotate(latest_pset=Subquery(newest))\
-           .order_by('latest_pset')
+            .annotate(latest_pset=Subquery(newest))\
+            .order_by('latest_pset')
 
 	return render(request, "dashboard/idlewarn.html", context)
 
@@ -489,8 +511,9 @@ class PSetDetail(LoginRequiredMixin, DetailView):
 	model = PSet
 	object_name = 'pset'
 
-	def dispatch(self, request: HttpRequest, *args: Any,
-								**kwargs: Any) -> HttpResponse:
+	def dispatch(
+		self, request: HttpRequest, *args: Any, **kwargs: Any
+	) -> HttpResponse:
 		pset = self.get_object()
 		assert isinstance(pset, PSet)
 		if not can_view(request, pset.student):
@@ -519,8 +542,9 @@ class ProblemSuggestionCreate(LoginRequiredMixin, CreateView):
 		return initial
 
 	def form_valid(self, form: BaseModelForm):
-		form.instance.student = get_student_by_id(self.request,
-																							self.kwargs['student_id'])
+		form.instance.student = get_student_by_id(
+			self.request, self.kwargs['student_id']
+		)
 		messages.success(
 			self.request,
 			"Successfully submitted suggestion! Thanks much :) You can add more using the form below."
@@ -532,8 +556,9 @@ class ProblemSuggestionCreate(LoginRequiredMixin, CreateView):
 
 	def get_context_data(self, **kwargs: Any):
 		context = super().get_context_data(**kwargs)
-		context['student'] = get_student_by_id(self.request,
-																						self.kwargs['student_id'])
+		context['student'] = get_student_by_id(
+			self.request, self.kwargs['student_id']
+		)
 		return context
 
 
@@ -564,7 +589,8 @@ class ProblemSuggestionUpdate(LoginRequiredMixin, UpdateView):
 		context['student'] = self.object.student
 		if not can_view(self.request, self.object.student):
 			raise PermissionError(
-				"Logged-in user cannot view suggestions made by this student")
+				"Logged-in user cannot view suggestions made by this student"
+			)
 		return context
 
 
@@ -574,8 +600,8 @@ class ProblemSuggestionList(LoginRequiredMixin, ListView):
 	def get_queryset(self):
 		student = get_student_by_id(self.request, self.kwargs['student_id'])
 		self.student = student
-		return ProblemSuggestion.objects.filter(student=student).order_by(
-			'resolved', 'created_at')
+		return ProblemSuggestion.objects.filter(student=student
+																						).order_by('resolved', 'created_at')
 
 	def get_context_data(self, **kwargs: Any):
 		context = super().get_context_data(**kwargs)
@@ -584,8 +610,9 @@ class ProblemSuggestionList(LoginRequiredMixin, ListView):
 
 
 @staff_member_required
-def pending_contributions(request: HttpRequest,
-													suggestion_id: int = None) -> HttpResponse:
+def pending_contributions(
+	request: HttpRequest, suggestion_id: int = None
+) -> HttpResponse:
 	context: Dict[str, Any] = {}
 	if request.method == "POST":
 		if suggestion_id is None:
@@ -612,8 +639,8 @@ def api(request: HttpRequest) -> JsonResponse:
 	if settings.PRODUCTION:
 		token = request.POST.get('token')
 		assert token is not None
-		if not sha256(
-			token.encode('ascii')).hexdigest() == settings.API_TARGET_HASH:
+		if not sha256(token.encode('ascii')
+									).hexdigest() == settings.API_TARGET_HASH:
 			return JsonResponse({'error': "☕"}, status=418)
 
 	action = request.POST.get('action', None)
@@ -630,12 +657,13 @@ def api(request: HttpRequest) -> JsonResponse:
 		student = get_object_or_404(Student, pk=request.POST['student__pk'])
 		if 'next_unit_to_unlock__pk' not in request.POST:
 			unlockable_units = student.generate_curriculum_queryset()\
-                             .exclude(has_pset = True)\
-                             .exclude(id__in = student.unlocked_units.all())
+                                .exclude(has_pset = True)\
+                                .exclude(id__in = student.unlocked_units.all())
 			target = unlockable_units.first()
 		else:
-			target = get_object_or_404(Unit,
-																	pk=request.POST['next_unit_to_unlock__pk'])
+			target = get_object_or_404(
+				Unit, pk=request.POST['next_unit_to_unlock__pk']
+			)
 		if target is not None:
 			student.unlocked_units.add(target)
 		student.unlocked_units.remove(finished_unit)
@@ -649,59 +677,59 @@ def api(request: HttpRequest) -> JsonResponse:
 			'_name' : 'Root',
 			'_children' : [
 			{
-				'_name': 'Problem sets',
-				'_children': list(PSet.objects\
-                         .filter(approved=False, student__semester__active = True)\
-                         .values(
-				'pk',
-				'approved',
-				'feedback',
-				'special_notes',
-				'student__pk',
-				'student__user__first_name',
-				'student__user__last_name',
-				'student__user__email',
-				'hours',
-				'clubs',
-				'eligible',
-				'unit__group__name',
-				'unit__code',
-				'unit__pk',
-				'next_unit_to_unlock__group__name',
-				'next_unit_to_unlock__code',
-				'next_unit_to_unlock__pk',
-				'upload__content',
-				))
+			'_name': 'Problem sets',
+			'_children': list(PSet.objects\
+                           .filter(approved=False, student__semester__active = True)\
+                           .values(
+			'pk',
+			'approved',
+			'feedback',
+			'special_notes',
+			'student__pk',
+			'student__user__first_name',
+			'student__user__last_name',
+			'student__user__email',
+			'hours',
+			'clubs',
+			'eligible',
+			'unit__group__name',
+			'unit__code',
+			'unit__pk',
+			'next_unit_to_unlock__group__name',
+			'next_unit_to_unlock__code',
+			'next_unit_to_unlock__pk',
+			'upload__content',
+			))
 			},
 			{
-				'_name': 'Inquiries',
-				'inquiries': list(UnitInquiry.objects\
-                         .filter(status = "NEW", student__semester__active = True)\
-                         .values(
-				'pk',
-				'unit__group__name',
-				'unit__code',
-				'student__user__first_name',
-				'student__user__last_name',
-				'explanation',
-				)),
+			'_name': 'Inquiries',
+			'inquiries': list(UnitInquiry.objects\
+                           .filter(status = "NEW", student__semester__active = True)\
+                           .values(
+			'pk',
+			'unit__group__name',
+			'unit__code',
+			'student__user__first_name',
+			'student__user__last_name',
+			'explanation',
+			)),
 			},
 			{
-				'_name' : 'Suggestions',
-				'_children' : list(ProblemSuggestion.objects.filter(resolved=False)\
-                         .values(
-				'pk',
-				'created_at',
-				'student__user__first_name',
-				'student__user__last_name',
-				'source',
-				'description',
-				'statement',
-				'solution',
-				'comments',
-				'acknowledge',
-				'weight',
-				))
+			'_name' : 'Suggestions',
+			'_children' : list(ProblemSuggestion.objects.filter(resolved=False)\
+                           .values(
+			'pk',
+			'created_at',
+			'student__user__first_name',
+			'student__user__last_name',
+			'source',
+			'description',
+			'statement',
+			'solution',
+			'comments',
+			'acknowledge',
+			'weight',
+			))
 			}
 			],
 			}

@@ -34,7 +34,7 @@ coverage = {extras = ["toml"], version = "^5.5"}
 yapf = "^0.31.0"
 
 [tool.yapf]
-based_on_style = "google"
+based_on_style = "facebook"
 use_tabs = true
 continuation_align_style = "valign-right"
 continuation_indent_width = 2

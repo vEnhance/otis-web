@@ -87,15 +87,17 @@ TEMPLATES = [
 		'BACKEND': 'django.template.backends.django.DjangoTemplates',
 		'DIRS': [],
 		'APP_DIRS': True,
-		'OPTIONS': {
-			'context_processors': [
-				'django.template.context_processors.debug',
-				'django.template.context_processors.request',
-				'django.contrib.auth.context_processors.auth',
-				'django.contrib.messages.context_processors.messages',
-			],
-			'debug': not PRODUCTION,
-		},
+		'OPTIONS':
+			{
+				'context_processors':
+					[
+						'django.template.context_processors.debug',
+						'django.template.context_processors.request',
+						'django.contrib.auth.context_processors.auth',
+						'django.contrib.messages.context_processors.messages',
+					],
+				'debug': not PRODUCTION,
+			},
 	},
 ]
 
@@ -106,24 +108,26 @@ WSGI_APPLICATION = 'otisweb.wsgi.application'
 
 if os.getenv("DATABASE_NAME"):
 	DATABASES: Dict[str, Any] = {
-		'default': {
-			'ENGINE': 'django.db.backends.mysql',
-			'NAME': os.getenv("DATABASE_NAME"),
-			'USER': os.getenv("DATABASE_USER"),
-			'PASSWORD': os.getenv("DATABASE_PASSWORD"),
-			'HOST': os.getenv("DATABASE_HOST"),
-			'PORT': os.getenv("DATABASE_PORT", '3306'),
-			'OPTIONS': {
-				'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+		'default':
+			{
+				'ENGINE': 'django.db.backends.mysql',
+				'NAME': os.getenv("DATABASE_NAME"),
+				'USER': os.getenv("DATABASE_USER"),
+				'PASSWORD': os.getenv("DATABASE_PASSWORD"),
+				'HOST': os.getenv("DATABASE_HOST"),
+				'PORT': os.getenv("DATABASE_PORT", '3306'),
+				'OPTIONS': {
+					'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+				},
 			},
-		},
 	}
 else:
 	DATABASES = {
-		'default': {
-			'ENGINE': 'django.db.backends.sqlite3',
-			'NAME': BASE_DIR / 'db.sqlite3',
-		}
+		'default':
+			{
+				'ENGINE': 'django.db.backends.sqlite3',
+				'NAME': BASE_DIR / 'db.sqlite3',
+			}
 	}
 
 # Password validation
@@ -188,29 +192,32 @@ else:
 	SECRET_KEY = 'evan_chen_is_really_cool'
 
 FILE_UPLOAD_HANDLERS = (
-	'django.core.files.uploadhandler.MemoryFileUploadHandler',)
+	'django.core.files.uploadhandler.MemoryFileUploadHandler',
+)
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
 
 # Custom Evan keys
-INVOICE_HASH_KEY = os.getenv("INVOICE_HASH_KEY",
-															"evan_chen_is_still_really_cool")
+INVOICE_HASH_KEY = os.getenv(
+	"INVOICE_HASH_KEY", "evan_chen_is_still_really_cool"
+)
 STORAGE_HASH_KEY = os.getenv("STORAGE_HASH_KEY", "look_at_me_im_a_cute_kitten")
 API_TARGET_HASH = os.getenv(
 	"API_TARGET_HASH",
-	'1c3592aa9241522fea1dd572c43c192a277e832dcd1ae63adfe069cb05624ead')
+	'1c3592aa9241522fea1dd572c43c192a277e832dcd1ae63adfe069cb05624ead'
+)
 
 
 def filter_useless_404(record: logging.LogRecord) -> bool:
 	a = tuple(record.args)  # type: ignore
 	return not (
 		len(a) == 2 \
-           and a[0] == 'Not Found' \
-           and ('wp-include' in a[1] or '.php' in a[1])
+            and a[0] == 'Not Found' \
+            and ('wp-include' in a[1] or '.php' in a[1])
 		) \
-          and not (
+           and not (
 		len(a) == 3 \
-           and a[1] == '404' \
-           and ('wp-include' in a[0] or '.php' in a[0])
+            and a[1] == '404' \
+            and ('wp-include' in a[0] or '.php' in a[0])
 		)
 
 
@@ -222,56 +229,67 @@ logging.addLevelName(SUCCESS_LOG_LEVEL, "SUCCESS")
 LOGGING = {
 	'version': 1,
 	'disable_existing_loggers': False,
-	'formatters': {
-		'verbose': {
-			'format': '[{levelname}] {asctime} {module} {name}\n{message}\n',
-			'style': '{',
+	'formatters':
+		{
+			'verbose':
+				{
+					'format': '[{levelname}] {asctime} {module} {name}\n{message}\n',
+					'style': '{',
+				},
 		},
-	},
-	'filters': {
-		'filter_useless_404': {
-			'()': 'django.utils.log.CallbackFilter',
-			'callback': filter_useless_404,
+	'filters':
+		{
+			'filter_useless_404':
+				{
+					'()': 'django.utils.log.CallbackFilter',
+					'callback': filter_useless_404,
+				},
+			'require_debug_false': {
+				'()': 'django.utils.log.RequireDebugFalse',
+			},
+			'require_debug_true': {
+				'()': 'django.utils.log.RequireDebugTrue',
+			}
 		},
-		'require_debug_false': {
-			'()': 'django.utils.log.RequireDebugFalse',
+	'handlers':
+		{
+			'console':
+				{
+					'class': 'logging.StreamHandler',
+					'level': 'INFO',
+					'formatter': 'verbose',
+					'filters': ['filter_useless_404'],
+				},
+			'discord':
+				{
+					'class': 'discordLogging.DiscordHandler',
+					'level': 'INFO',
+					'filters': ['require_debug_false', 'filter_useless_404'],
+				}
 		},
-		'require_debug_true': {
-			'()': 'django.utils.log.RequireDebugTrue',
-		}
-	},
-	'handlers': {
-		'console': {
-			'class': 'logging.StreamHandler',
-			'level': 'INFO',
-			'formatter': 'verbose',
-			'filters': ['filter_useless_404'],
-		},
-		'discord': {
-			'class': 'discordLogging.DiscordHandler',
-			'level': 'INFO',
-			'filters': ['require_debug_false', 'filter_useless_404'],
-		}
-	},
 	'root': {
 		'handlers': ['console', 'discord'],
 		'level': 'INFO',
 	},
-	'loggers': {
-		'django': {
-			'handlers': ['console', 'discord'],
-			'level': 'INFO',
-			'propagate': False,
+	'loggers':
+		{
+			'django':
+				{
+					'handlers': ['console', 'discord'],
+					'level': 'INFO',
+					'propagate': False,
+				},
+			'django.db.backends':
+				{
+					'handlers': ['console', ],
+					'level': 'DEBUG',
+					'filters': ['require_debug_true'],
+				},
+			'django.server':
+				{
+					'handlers': ['console'],
+					'level': 'DEBUG',
+					'propagate': False,
+				}
 		},
-		'django.db.backends': {
-			'handlers': ['console',],
-			'level': 'DEBUG',
-			'filters': ['require_debug_true'],
-		},
-		'django.server': {
-			'handlers': ['console'],
-			'level': 'DEBUG',
-			'propagate': False,
-		}
-	},
 }

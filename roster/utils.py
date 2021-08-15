@@ -9,7 +9,8 @@ from . import models
 
 
 def get_current_students(
-		queryset: QuerySet[models.Student] = models.Student.objects):
+	queryset: QuerySet[models.Student] = models.Student.objects
+):
 	return queryset.filter(semester__active=True)
 
 
@@ -20,7 +21,8 @@ def get_visible_from_queryset(user: User, queryset: QuerySet[models.Student]):
 	else:
 		return queryset.filter(
 			Q(user=user) | Q(assistant__user=user) |
-			Q(unlisted_assistants__user=user))
+			Q(unlisted_assistants__user=user)
+		)
 
 
 def get_visible_students(user: User, current: bool = True):
@@ -44,11 +46,13 @@ def get_student_by_id(
 
 	if not isinstance(request.user, User):
 		raise PermissionDenied(
-			"Authentication is needed, how did you even get here?")
+			"Authentication is needed, how did you even get here?"
+		)
 
 	if payment_exempt is False and student.is_delinquent and not request.user.is_staff:
 		raise PermissionDenied(
-			"Payment needs to be processed before this page can be used")
+			"Payment needs to be processed before this page can be used"
+		)
 
 	is_instructor = can_edit(request, student)
 	if requires_edit is True and not is_instructor:
@@ -72,10 +76,11 @@ def can_edit(request: HttpRequest, student: models.Student) -> bool:
 		return True
 	return request.user.is_staff and (
 		(student.assistant is not None and student.assistant.user == request.user)
-		or (student.unlisted_assistants.filter(user=request.user).exists()))
+		or (student.unlisted_assistants.filter(user=request.user).exists())
+	)
 
 
 def infer_student(request: HttpRequest) -> models.Student:
-	return get_object_or_404(models.Student.objects,
-														semester__active=True,
-														user=request.user)
+	return get_object_or_404(
+		models.Student.objects, semester__active=True, user=request.user
+	)

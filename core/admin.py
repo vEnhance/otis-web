@@ -8,7 +8,6 @@ from .models import Semester, UnitGroup, Unit
 
 
 class SemesterResource(resources.ModelResource):
-
 	class Meta:
 		skip_unchanged = True
 		model = Semester
@@ -30,14 +29,16 @@ class SemesterAdmin(ImportExportModelAdmin):
 		'show_invoices',
 		'exam_family',
 	)
-	search_fields = ('name',)
+	search_fields = ('name', )
 	resource_class = SemesterResource
 
 
 class UnitIEResource(resources.ModelResource):
-	group_name = fields.Field(column_name="group_name",
-														attribute="group",
-														widget=widgets.ForeignKeyWidget(UnitGroup, "name"))
+	group_name = fields.Field(
+		column_name="group_name",
+		attribute="group",
+		widget=widgets.ForeignKeyWidget(UnitGroup, "name")
+	)
 
 	class Meta:
 		skip_unchanged = True
@@ -64,10 +65,10 @@ class UnitAdmin(ImportExportModelAdmin):
 		'id',
 		'list_display_position',
 	)
-	list_filter = ('group__subject',)
+	list_filter = ('group__subject', )
 	search_fields = ('group__name', 'code')
-	autocomplete_fields = ('group',)
-	ordering = ('position',)
+	autocomplete_fields = ('group', )
+	ordering = ('position', )
 	resource_class = UnitIEResource
 	list_per_page = 150
 	list_max_show_all = 400
@@ -83,7 +84,6 @@ class UnitInline(admin.TabularInline):
 
 
 class UnitGroupIEResource(resources.ModelResource):
-
 	class Meta:
 		skip_unchanged = True
 		model = UnitGroup
@@ -115,8 +115,8 @@ class UnitGroupAdmin(ImportExportModelAdmin):
 		'name',
 		'description',
 	)
-	list_filter = ('subject',)
+	list_filter = ('subject', )
 	resource_class = UnitGroupIEResource
 	list_per_page = 150
 	list_max_show_all = 400
-	inlines = (UnitInline,)
+	inlines = (UnitInline, )

@@ -9,7 +9,6 @@ from roster.models import Student, StudentRegistration, UnitInquiry  # NOQA
 
 
 class UnitChoiceBoundField(forms.BoundField):
-
 	@property
 	def subject(self) -> str:
 		first_unit_pair = self.field.choices[0]  # type: ignore
@@ -19,7 +18,6 @@ class UnitChoiceBoundField(forms.BoundField):
 
 
 class UnitChoiceField(forms.TypedMultipleChoiceField):
-
 	def get_bound_field(self, form: BaseForm, field_name: str):
 		return UnitChoiceBoundField(form, self, field_name)
 
@@ -31,7 +29,6 @@ class CurriculumForm(forms.Form):
 	units: the list of units
 	original: a list of unit ID's
 	"""
-
 	def __init__(self, *args: Any, **kwargs: Any):
 		units = kwargs.pop('units')
 		original = kwargs.pop('original', [])
@@ -60,7 +57,6 @@ class CurriculumForm(forms.Form):
 
 
 class AdvanceForm(forms.ModelForm):
-
 	def __init__(self, *args: Any, **kwargs: Any):
 		super(AdvanceForm, self).__init__(*args, **kwargs)
 		student = kwargs['instance']
@@ -68,20 +64,20 @@ class AdvanceForm(forms.ModelForm):
 			widget=forms.SelectMultiple(attrs={'class': 'chosen-select'}),
 			queryset=student.curriculum.all(),
 			help_text="The set of unlocked units.",
-			required=False)
+			required=False
+		)
 
 	class Meta:
 		model = Student
-		fields = ('unlocked_units',)
+		fields = ('unlocked_units', )
 
 
 class InquiryForm(forms.ModelForm):
-
 	def __init__(self, *args: Any, **kwargs: Any):
 		super(InquiryForm, self).__init__(*args, **kwargs)
 		self.fields['unit'].queryset = \
-                    self.fields['unit'].queryset\
-                    .order_by('group__name', 'code')
+                      self.fields['unit'].queryset\
+                      .order_by('group__name', 'code')
 
 	class Meta:
 		model = UnitInquiry
@@ -96,16 +92,19 @@ class InquiryForm(forms.ModelForm):
 
 class DecisionForm(forms.ModelForm):
 	given_name = forms.CharField(
-		max_length=128, help_text="Your given (first) name, can be more than one")
+		max_length=128, help_text="Your given (first) name, can be more than one"
+	)
 	surname = forms.CharField(max_length=128, help_text="Your family (last) name")
 	email_address = forms.EmailField(
 		label="Your email address (one you check)",
-		help_text="The email you want Evan to contact you with")
+		help_text="The email you want Evan to contact you with"
+	)
 	passcode = forms.CharField(
 		max_length=128,
 		label="Invitation passcode",
 		help_text="You should have gotten the passcode in your acceptance email.",
-		widget=forms.PasswordInput)
+		widget=forms.PasswordInput
+	)
 
 	class Meta:
 		model = StudentRegistration
@@ -122,7 +121,6 @@ class DecisionForm(forms.ModelForm):
 
 
 class UserForm(forms.ModelForm):
-
 	class Meta:
 		model = User
 		fields = ('first_name', 'last_name', 'email')

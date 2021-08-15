@@ -30,15 +30,16 @@ ContextType = Dict[str, Any]
 
 
 class ExistStudentRequiredMixin(LoginRequiredMixin):
-
 	def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any):
 		if not request.user.is_authenticated:
 			return super().dispatch(request, *args, **kwargs)
 		assert isinstance(request.user, User)
-		if not Student.objects.filter(
-			user=request.user).exists() and not request.user.is_staff:
-			raise PermissionDenied('You have to be enrolled in at least one semester '
-															'of OTIS to use the ARCH system')
+		if not Student.objects.filter(user=request.user
+																	).exists() and not request.user.is_staff:
+			raise PermissionDenied(
+				'You have to be enrolled in at least one semester '
+				'of OTIS to use the ARCH system'
+			)
 		else:
 			return super().dispatch(request, *args, **kwargs)
 
@@ -49,9 +50,9 @@ class HintObjectView:
 	def get_object(self, queryset: QuerySet[Hint] = None) -> Hint:
 		if queryset is None:
 			queryset = self.get_queryset()  # type: ignore
-		return get_object_or_404(queryset,
-															problem__puid=self.kwargs['puid'],
-															number=self.kwargs['number'])
+		return get_object_or_404(
+			queryset, problem__puid=self.kwargs['puid'], number=self.kwargs['number']
+		)
 
 
 class ProblemObjectView:
@@ -81,16 +82,18 @@ class HintDetail(HintObjectView, ExistStudentRequiredMixin, DetailView):
 	model = Hint
 
 
-class HintUpdate(HintObjectView, ExistStudentRequiredMixin, RevisionMixin,
-									UpdateView):
+class HintUpdate(
+	HintObjectView, ExistStudentRequiredMixin, RevisionMixin, UpdateView
+):
 	context_object_name = "hint"
 	model = Hint
 	form_class = HintUpdateFormWithReason
 	object: ClassVar[Hint] = Hint()
 
 	def form_valid(self, form: BaseModelForm) -> HttpResponse:
-		reversion.set_comment(form.cleaned_data['reason'] or
-													form.cleaned_data['content'])
+		reversion.set_comment(
+			form.cleaned_data['reason'] or form.cleaned_data['content']
+		)
 		return super().form_valid(form)
 
 	def get_context_data(self, **kwargs: Any) -> ContextType:
@@ -102,16 +105,18 @@ class HintUpdate(HintObjectView, ExistStudentRequiredMixin, RevisionMixin,
 		return self.object.get_absolute_url()
 
 
-class ProblemUpdate(ProblemObjectView, ExistStudentRequiredMixin, RevisionMixin,
-										UpdateView):
+class ProblemUpdate(
+	ProblemObjectView, ExistStudentRequiredMixin, RevisionMixin, UpdateView
+):
 	context_object_name = "problem"
 	model = Problem
 	form_class = ProblemUpdateFormWithReason
 	object: ClassVar[Problem] = Problem()
 
 	def form_valid(self, form: BaseModelForm) -> HttpResponse:
-		reversion.set_comment(form.cleaned_data['reason'] or
-													form.cleaned_data['description'])
+		reversion.set_comment(
+			form.cleaned_data['reason'] or form.cleaned_data['description']
+		)
 		return super().form_valid(form)
 
 	def get_success_url(self):
@@ -135,18 +140,20 @@ class HintCreate(ExistStudentRequiredMixin, RevisionMixin, CreateView):
 		return initial
 
 
-class HintDelete(HintObjectView, ExistStudentRequiredMixin, RevisionMixin,
-									DeleteView):
+class HintDelete(
+	HintObjectView, ExistStudentRequiredMixin, RevisionMixin, DeleteView
+):
 	context_object_name = "hint"
 	model = Hint
 	object: ClassVar[Hint] = Hint()
 
 	def get_success_url(self):
-		return reverse_lazy("hint-list", args=(self.object.problem.puid,))
+		return reverse_lazy("hint-list", args=(self.object.problem.puid, ))
 
 
-class ProblemDelete(ProblemObjectView, ExistStudentRequiredMixin, RevisionMixin,
-										DeleteView):
+class ProblemDelete(
+	ProblemObjectView, ExistStudentRequiredMixin, RevisionMixin, DeleteView
+):
 	context_object_name = "problem"
 	model = Problem
 	object: ClassVar[Problem] = Problem()
@@ -169,7 +176,7 @@ class ProblemCreate(ExistStudentRequiredMixin, RevisionMixin, CreateView):
 		context['lookup_form'] = ProblemSelectForm()
 		context['num_problems'] = Problem.objects.all().count()
 		context['num_hints'] = Hint.objects.all().count()
-		context['lookup_url'] = reverse_lazy('arch-lookup',)
+		context['lookup_url'] = reverse_lazy('arch-lookup', )
 		return context
 
 
@@ -181,7 +188,7 @@ def lookup(request: HttpRequest):
 		problem = form.cleaned_data['lookup_problem']
 		return HttpResponseRedirect(problem.get_absolute_url())
 	else:
-		return HttpResponseRedirect(reverse_lazy('arch-index',))
+		return HttpResponseRedirect(reverse_lazy('arch-index', ))
 
 
 @csrf_exempt
@@ -191,14 +198,15 @@ def archapi(request: HttpRequest) -> JsonResponse:
 	if settings.PRODUCTION:
 		token = request.POST.get('token')
 		assert token is not None
-		if not sha256(
-			token.encode('ascii')).hexdigest() == settings.API_TARGET_HASH:
+		if not sha256(token.encode('ascii')
+									).hexdigest() == settings.API_TARGET_HASH:
 			return JsonResponse({'error': "☕"}, status=418)
 
 	def err(status: int = 400) -> JsonResponse:
 		logging.error(traceback.format_exc())
-		return JsonResponse({'error': ''.join(traceback.format_exc(limit=1))},
-												status=status)
+		return JsonResponse(
+			{'error': ''.join(traceback.format_exc(limit=1))}, status=status
+		)
 
 	action = request.POST['action']
 	puid = request.POST['puid'].upper()
@@ -209,14 +217,16 @@ def archapi(request: HttpRequest) -> JsonResponse:
 			'hints': [],
 			'description': problem.description,
 			'url': problem.get_absolute_url(),
-			'add_url': reverse_lazy("hint-create", args=(problem.puid,))
+			'add_url': reverse_lazy("hint-create", args=(problem.puid, ))
 		}
 		for hint in Hint.objects.filter(problem=problem):
-			response['hints'].append({
-				'number': hint.number,
-				'keywords': hint.keywords,
-				'url': hint.get_absolute_url(),
-			})
+			response['hints'].append(
+				{
+					'number': hint.number,
+					'keywords': hint.keywords,
+					'url': hint.get_absolute_url(),
+				}
+			)
 		return JsonResponse(response)
 
 	if action == 'create':
@@ -227,10 +237,12 @@ def archapi(request: HttpRequest) -> JsonResponse:
 		except:
 			return err()
 		else:
-			return JsonResponse({
-				'edit_url': reverse_lazy('problem-update', args=(problem.puid,)),
-				'view_url': problem.get_absolute_url(),
-			})
+			return JsonResponse(
+				{
+					'edit_url': reverse_lazy('problem-update', args=(problem.puid, )),
+					'view_url': problem.get_absolute_url(),
+				}
+			)
 
 	if action == 'add':
 		problem = get_object_or_404(Problem, puid=puid)

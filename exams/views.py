@@ -34,7 +34,8 @@ def quiz(request: HttpRequest, student_id: int, pk: int) -> HttpResponse:
 	quiz = get_object_or_404(PracticeExam, pk=pk)
 	if quiz.is_test:
 		return HttpResponseForbidden(
-			"You can't submit numerical answers to an olympiad exam.")
+			"You can't submit numerical answers to an olympiad exam."
+		)
 	if not quiz.started:
 		return HttpResponseForbidden("You can't start this quiz")
 
@@ -48,7 +49,7 @@ def quiz(request: HttpRequest, student_id: int, pk: int) -> HttpResponse:
 		if request.method == 'POST':
 			if quiz.overdue:
 				return HttpResponseForbidden("You can't submit this quiz " \
-                                      "since the deadline passed.")
+                                          "since the deadline passed.")
 			form = ExamAttemptForm(request.POST)
 			if form.is_valid():
 				attempt = form.save(commit=False)
@@ -78,16 +79,19 @@ def quiz(request: HttpRequest, student_id: int, pk: int) -> HttpResponse:
 			accepted_vals = [expr_compute(_) for _ in accepted_str.split(',') if _]
 			if guess_val is not None:
 				correct = any(
-					v is not None and abs(guess_val - v) < 1e-12 for v in accepted_vals)
+					v is not None and abs(guess_val - v) < 1e-12 for v in accepted_vals
+				)
 			else:
 				correct = False
 
-			context['rows'].append({
-				'field': field,
-				'accepted': accepted_str,
-				'correct': correct,
-				'url': getattr(quiz, f'url{i}', None)
-			})
+			context['rows'].append(
+				{
+					'field': field,
+					'accepted': accepted_str,
+					'correct': correct,
+					'url': getattr(quiz, f'url{i}', None)
+				}
+			)
 			if correct:
 				score += 1
 
@@ -105,5 +109,6 @@ def show_exam(request: HttpRequest, student_id: int, pk: int) -> HttpResponse:
 	quiz = get_object_or_404(PracticeExam, pk=pk)
 	if quiz.is_test:
 		return HttpResponseForbidden(
-			"You can only use this view for short-answer quizzes.")
+			"You can only use this view for short-answer quizzes."
+		)
 	return render(request, 'exams/quiz_detail.html', context)

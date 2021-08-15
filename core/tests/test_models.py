@@ -3,7 +3,6 @@ from django.test import TestCase
 
 
 class TestSemester(TestCase):
-
 	def setUp(self):
 		Semester.objects.create(
 			name="Year 0",

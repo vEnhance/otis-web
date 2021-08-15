@@ -10,13 +10,16 @@ from positions import PositionField
 class Semester(models.Model):
 	"""Represents an academic semester/year/etc, e.g. "Fall 2017"
 	or "Year III"."""
-	name = models.CharField(max_length=255,
-													help_text="Text description such as 'Year III'",
-													unique=True)
+	name = models.CharField(
+		max_length=255,
+		help_text="Text description such as 'Year III'",
+		unique=True
+	)
 	active = models.BooleanField(
 		default=False,
 		help_text="Whether the semester is currently active "
-		"(there should thus be at most one active semester).")
+		"(there should thus be at most one active semester)."
+	)
 	exam_family = models.CharField(
 		max_length=10,
 		choices=(
@@ -25,47 +28,59 @@ class Semester(models.Model):
 			("", "--"),
 		),
 		default="",
-		help_text="The family of practice exams to display.")
+		help_text="The family of practice exams to display."
+	)
 	uses_legacy_pset_system = models.BooleanField(
 		help_text="Whether the pset uses the old system of upload checking",
-		default=False)
+		default=False
+	)
 
 	show_invoices = models.BooleanField(
-		default=False, help_text="Whether to display invoices for this semester.")
+		default=False, help_text="Whether to display invoices for this semester."
+	)
 	prep_rate = models.PositiveSmallIntegerField(
-		default=240, help_text="The prep rate for the semester.")
+		default=240, help_text="The prep rate for the semester."
+	)
 	hour_rate = models.PositiveSmallIntegerField(
-		default=80, help_text="The hourly rate for the semester.")
+		default=80, help_text="The hourly rate for the semester."
+	)
 	first_payment_deadline = models.DateTimeField(
-		null=True, blank=True, help_text="Deadline for nonzero payment.")
+		null=True, blank=True, help_text="Deadline for nonzero payment."
+	)
 	most_payment_deadline = models.DateTimeField(
-		null=True, blank=True, help_text="Deadline for two-thirds of the payment.")
+		null=True, blank=True, help_text="Deadline for two-thirds of the payment."
+	)
 
 	gradescope_key = models.CharField(
 		max_length=10,
 		blank=True,
-		help_text="The entry code for GradeScope this semester.")
+		help_text="The entry code for GradeScope this semester."
+	)
 	classroom_url = models.CharField(
 		max_length=128,
 		blank=True,
-		help_text="The entry point for the meeting room.")
+		help_text="The entry point for the meeting room."
+	)
 	social_url = models.CharField(
 		max_length=128,
 		blank=True,
-		help_text="The link to social platform for this year.")
+		help_text="The link to social platform for this year."
+	)
 
 	calendar_url_meets_evan = models.TextField(
 		blank=True,
-		help_text="Link to calendar for students with meetings with Evan")
+		help_text="Link to calendar for students with meetings with Evan"
+	)
 	calendar_url_no_meets_evan = models.TextField(
 		blank=True,
-		help_text="Link to calendar for students without meetings with Evan")
+		help_text="Link to calendar for students without meetings with Evan"
+	)
 
 	def __str__(self) -> str:
 		return self.name
 
 	def get_absolute_url(self):
-		return reverse_lazy("past", args=(self.pk,))
+		return reverse_lazy("past", args=(self.pk, ))
 
 
 class UnitGroup(models.Model):
@@ -74,13 +89,16 @@ class UnitGroup(models.Model):
 	name = models.CharField(
 		max_length=255,
 		unique=True,
-		help_text="The display name for the handout, like 'Weird Geo'")
+		help_text="The display name for the handout, like 'Weird Geo'"
+	)
 	slug = models.SlugField(
 		max_length=80,
 		help_text="The slug for the filename for this unit group",
-		unique=True)
-	description = models.TextField(help_text="A description of what this unit is",
-																	blank=True)
+		unique=True
+	)
+	description = models.TextField(
+		help_text="A description of what this unit is", blank=True
+	)
 	SUBJECT_CHOICES = (
 		("A", "Algebra (Hufflepuff)"),
 		("C", "Combinatorics (Gryffindor)"),
@@ -89,9 +107,9 @@ class UnitGroup(models.Model):
 		("F", "Functional Equations"),
 		("M", "Miscellaneous"),
 	)
-	subject = models.CharField(max_length=2,
-															choices=SUBJECT_CHOICES,
-															help_text="The subject for the unit")
+	subject = models.CharField(
+		max_length=2, choices=SUBJECT_CHOICES, help_text="The subject for the unit"
+	)
 
 	def __str__(self) -> str:
 		return self.name
@@ -112,18 +130,22 @@ class UnitGroup(models.Model):
 			return "Func eqn"
 
 	class Meta:
-		ordering = ('name',)
+		ordering = ('name', )
 
 
 class Unit(models.Model):
 	"""Represents a PDF of a unit, with problems and solutions"""
-	group = models.ForeignKey(UnitGroup,
-														on_delete=models.CASCADE,
-														help_text="The group that this unit belongs to")
+	group = models.ForeignKey(
+		UnitGroup,
+		on_delete=models.CASCADE,
+		help_text="The group that this unit belongs to"
+	)
 	code = models.CharField(
-		max_length=255, help_text="The version code for the handout, like 'ZGX'")
+		max_length=255, help_text="The version code for the handout, like 'ZGX'"
+	)
 	position = PositionField(
-		help_text="The ordering of the relative handouts to each other.")
+		help_text="The ordering of the relative handouts to each other."
+	)
 
 	def __str__(self) -> str:
 		if self.group is not None:
@@ -132,7 +154,7 @@ class Unit(models.Model):
 
 	class Meta:
 		unique_together = ('group', 'code')
-		ordering = ('position',)
+		ordering = ('position', )
 
 	@property
 	def list_display_position(self):
@@ -151,4 +173,4 @@ class Unit(models.Model):
 		return self.code + '-tex-' + self.group.slug + '.tex'
 
 	def get_absolute_url(self):
-		return reverse("view-problems", args=(self.pk,))
+		return reverse("view-problems", args=(self.pk, ))

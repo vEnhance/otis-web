@@ -22,13 +22,15 @@ class Assistant(models.Model):
 	user = models.OneToOneField(
 		User,
 		on_delete=models.CASCADE,
-		help_text="The Django Auth user attached to the Assistant.")
+		help_text="The Django Auth user attached to the Assistant."
+	)
 	shortname = models.CharField(
-		max_length=10, help_text="Initials or short name for this Assistant")
+		max_length=10, help_text="Initials or short name for this Assistant"
+	)
 	unlisted_students = models.ManyToManyField("Student", blank = True,
 		related_name = "unlisted_assistants",
 		help_text = "A list of students this assistant can see " \
-             "but which is not listed visibly.")
+              "but which is not listed visibly.")
 
 	@property
 	def first_name(self) -> str:
@@ -58,29 +60,35 @@ class Student(models.Model):
 		blank=True,
 		null=True,
 		on_delete=models.CASCADE,
-		help_text="The Django Auth user attached to the student")
-	semester = models.ForeignKey(Semester,
-																on_delete=models.CASCADE,
-																help_text="The semester for this student")
+		help_text="The Django Auth user attached to the student"
+	)
+	semester = models.ForeignKey(
+		Semester,
+		on_delete=models.CASCADE,
+		help_text="The semester for this student"
+	)
 	assistant = models.ForeignKey(
 		Assistant,
 		blank=True,
 		null=True,
 		on_delete=models.SET_NULL,
-		help_text="The assistant for this student, if any")
+		help_text="The assistant for this student, if any"
+	)
 
 	curriculum = models.ManyToManyField(
 		Unit,
 		blank=True,
 		related_name='students_taking',
-		help_text="The choice of units that this student will work on")
+		help_text="The choice of units that this student will work on"
+	)
 	unlocked_units = models.ManyToManyField(Unit, blank = True,
 		related_name = 'students_unlocked',
 		help_text = "A list of units that the student is actively working on. " \
-           "Once the student submits a problem set, " \
-           "delete it from this list to mark them as complete.")
+            "Once the student submits a problem set, " \
+            "delete it from this list to mark them as complete.")
 	usemo_score = models.SmallIntegerField(
-		null=True, blank=True, help_text="The USEMO score for this year")
+		null=True, blank=True, help_text="The USEMO score for this year"
+	)
 
 	track = models.CharField(
 		max_length=5,
@@ -93,19 +101,23 @@ class Student(models.Model):
 			("N", "N.A."),
 			("P", "Phantom"),
 		),
-		help_text="The track that the student is enrolled in for this semester.")
+		help_text="The track that the student is enrolled in for this semester."
+	)
 
 	legit = models.BooleanField(
 		default=True,
 		help_text="Whether this student is still active. "
 		"Set to false for dummy accounts and the like. "
-		"This will hide them from the master schedule, for example.")
+		"This will hide them from the master schedule, for example."
+	)
 	newborn = models.BooleanField(
-		default=True, help_text="Whether the student is newly created.")
+		default=True, help_text="Whether the student is newly created."
+	)
 	achievements = models.ManyToManyField(
 		'dashboard.Achievement',
 		help_text="Codes that this student has obtained",
-		blank=True)
+		blank=True
+	)
 
 	id: int
 	invoice: 'Invoice'
@@ -115,7 +127,7 @@ class Student(models.Model):
 		return f"{self.name} ({self.semester})"
 
 	def get_absolute_url(self):
-		return reverse_lazy('portal', args=(self.id,))
+		return reverse_lazy('portal', args=(self.id, ))
 
 	@property
 	def first_name(self) -> str:
@@ -144,15 +156,16 @@ class Student(models.Model):
 			return self.get_track_display()
 		else:
 			return self.get_track_display() \
-                             + " + " + self.assistant.shortname
+                                + " + " + self.assistant.shortname
 
 	class Meta:
 		unique_together = (
 			'user',
 			'semester',
 		)
-		ordering = ('semester', '-legit', 'track', 'user__first_name',
-								'user__last_name')
+		ordering = (
+			'semester', '-legit', 'track', 'user__first_name', 'user__last_name'
+		)
 
 	@property
 	def meets_evan(self) -> bool:
@@ -170,24 +183,31 @@ class Student(models.Model):
 		return self.curriculum.count()
 
 	def generate_curriculum_queryset(self) -> QuerySet[Unit]:
-		queryset = self.curriculum.all().annotate(num_uploads=SubqueryAggregate(
-			'uploadedfile', filter=Q(benefactor__pk=self.id), aggregate=Count))
+		queryset = self.curriculum.all().annotate(
+			num_uploads=SubqueryAggregate(
+				'uploadedfile', filter=Q(benefactor__pk=self.id), aggregate=Count
+			)
+		)
 		if self.semester.uses_legacy_pset_system is True:
-			return queryset.annotate(has_pset=Exists(
-				'uploadedfile',
-				filter=Q(benefactor__pk=self.id, category='psets'),
-			))
+			return queryset.annotate(
+				has_pset=Exists(
+					'uploadedfile',
+					filter=Q(benefactor__pk=self.id, category='psets'),
+				)
+			)
 		else:
-			return queryset.annotate(has_pset=Exists('pset', filter=Q(student=self)),
-																approved=Exists('pset',
-																								filter=Q(student=self,
-																													approved=True)))
+			return queryset.annotate(
+				has_pset=Exists('pset', filter=Q(student=self)),
+				approved=Exists('pset', filter=Q(student=self, approved=True))
+			)
 
 	def has_submitted_pset(self, unit: Unit) -> bool:
 		if self.semester.uses_legacy_pset_system:
-			return Unit.objects.filter(pk=unit.pk,
-																	uploadedfile__benefactor=self,
-																	uploadedfile__category='psets').exists()
+			return Unit.objects.filter(
+				pk=unit.pk,
+				uploadedfile__benefactor=self,
+				uploadedfile__category='psets'
+			).exists()
 		else:
 			return Unit.objects.filter(pk=unit.pk, pset__student=self).exists()
 
@@ -256,7 +276,7 @@ class Student(models.Model):
 		now = localtime()
 
 		if self.semester.first_payment_deadline is not None \
-                    and invoice.total_paid <= 0:
+                      and invoice.total_paid <= 0:
 			d = self.semester.first_payment_deadline - now
 			if d < timedelta(days=-7):
 				return 3
@@ -266,7 +286,7 @@ class Student(models.Model):
 				return 1
 
 		if self.semester.most_payment_deadline is not None \
-                    and invoice.total_paid < 2*invoice.total_cost/3:
+                      and invoice.total_paid < 2*invoice.total_cost/3:
 			d = self.semester.most_payment_deadline - now
 			if d < timedelta(days=-7):
 				return 7
@@ -290,32 +310,38 @@ class Invoice(models.Model):
 	student = models.OneToOneField(
 		Student,
 		on_delete=models.CASCADE,
-		help_text="The invoice that this student is for.")
+		help_text="The invoice that this student is for."
+	)
 	preps_taught = models.SmallIntegerField(
 		default=0,
 		help_text="Number of semesters that development/preparation "
-		"costs are charged.")
-	hours_taught = models.DecimalField(max_digits=8,
-																			decimal_places=2,
-																			default=0,
-																			help_text="Number of hours taught for.")
+		"costs are charged."
+	)
+	hours_taught = models.DecimalField(
+		max_digits=8,
+		decimal_places=2,
+		default=0,
+		help_text="Number of hours taught for."
+	)
 	adjustment = models.DecimalField(
 		max_digits=8,
 		decimal_places=2,
 		default=0,
-		help_text="Adjustment to the cost, e.g. for financial aid.")
+		help_text="Adjustment to the cost, e.g. for financial aid."
+	)
 	extras = models.DecimalField(
 		max_digits=8,
 		decimal_places=2,
 		default=0,
-		help_text="Additional payment, e.g. for T-shirts.")
-	total_paid = models.DecimalField(max_digits=8,
-																		decimal_places=2,
-																		default=0,
-																		help_text="Amount paid.")
+		help_text="Additional payment, e.g. for T-shirts."
+	)
+	total_paid = models.DecimalField(
+		max_digits=8, decimal_places=2, default=0, help_text="Amount paid."
+	)
 	updated_at = models.DateTimeField(auto_now=True)
 	forgive = models.BooleanField(
-		default=False, help_text="When switched on, won't hard-lock delinquents.")
+		default=False, help_text="When switched on, won't hard-lock delinquents."
+	)
 
 	def __str__(self):
 		return f"Invoice {self.pk or 0}"
@@ -339,9 +365,9 @@ class Invoice(models.Model):
 	@property
 	def total_cost(self) -> Decimal:
 		return self.prep_rate*self.preps_taught \
-                    + self.hour_rate*self.hours_taught \
-                    + self.extras \
-                    + self.adjustment
+                      + self.hour_rate*self.hours_taught \
+                      + self.extras \
+                      + self.adjustment
 
 	@property
 	def total_owed(self) -> Decimal:
@@ -358,12 +384,14 @@ class Invoice(models.Model):
 
 
 class UnitInquiry(models.Model):
-	unit = models.ForeignKey(Unit,
-														on_delete=models.CASCADE,
-														help_text="The unit being requested.")
-	student = models.ForeignKey(Student,
-															on_delete=models.CASCADE,
-															help_text="The student making the request")
+	unit = models.ForeignKey(
+		Unit, on_delete=models.CASCADE, help_text="The unit being requested."
+	)
+	student = models.ForeignKey(
+		Student,
+		on_delete=models.CASCADE,
+		help_text="The student making the request"
+	)
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
@@ -374,20 +402,24 @@ class UnitInquiry(models.Model):
 			("APPEND", "Add for later"),
 			("DROP", "Drop"),
 		),
-		help_text="Describe the action you want to make.")
-	status = models.CharField(max_length=5,
-														choices=(
-															("ACC", "Approved"),
-															("REJ", "Rejected"),
-															("NEW", "Pending"),
-															("HOLD", "On hold"),
-														),
-														default="NEW",
-														help_text="The current status of the inquiry.")
+		help_text="Describe the action you want to make."
+	)
+	status = models.CharField(
+		max_length=5,
+		choices=(
+			("ACC", "Approved"),
+			("REJ", "Rejected"),
+			("NEW", "Pending"),
+			("HOLD", "On hold"),
+		),
+		default="NEW",
+		help_text="The current status of the inquiry."
+	)
 	explanation = models.TextField(
 		max_length=300,
 		blank=True,
-		help_text="Short explanation for this request (if needed).")
+		help_text="Short explanation for this request (if needed)."
+	)
 
 	def run_accept(self):
 		unit = self.unit
@@ -406,12 +438,14 @@ class UnitInquiry(models.Model):
 		return self.action_type + " " + str(self.unit)
 
 	class Meta:
-		ordering = ('-created_at',)
+		ordering = ('-created_at', )
 
 
 def content_file_name(instance: 'StudentRegistration', filename: str) -> str:
-	return os.path.join("agreement", str(instance.container.id),
-											instance.user.username + '_' + filename)
+	return os.path.join(
+		"agreement", str(instance.container.id),
+		instance.user.username + '_' + filename
+	)
 
 
 class RegistrationContainer(models.Model):
@@ -422,12 +456,14 @@ class RegistrationContainer(models.Model):
 	)
 	end_year = models.IntegerField(help_text="The year in which OTIS will end")
 	passcode = models.CharField(
-		max_length=128, help_text="The passcode for that year's registration")
+		max_length=128, help_text="The passcode for that year's registration"
+	)
 	allowed_tracks = models.CharField(
 		max_length=256,
 		help_text=
 		"A comma separated list of allowed tracks students can register for",
-		blank=True)
+		blank=True
+	)
 
 	def __str__(self):
 		return str(self.semester)
@@ -446,14 +482,17 @@ class StudentRegistration(models.Model):
 	)
 	parent_email = models.EmailField(
 		help_text="An email address "
-		"in case Evan needs to contact your parents or something.")
-	track = models.CharField(max_length=6,
-														choices=(
-															("C", "Correspondence"),
-															("B", "Meeting with Evan"),
-															("E", "Meeting with another instructor"),
-															("N", "None of the above"),
-														))
+		"in case Evan needs to contact your parents or something."
+	)
+	track = models.CharField(
+		max_length=6,
+		choices=(
+			("C", "Correspondence"),
+			("B", "Meeting with Evan"),
+			("E", "Meeting with another instructor"),
+			("N", "None of the above"),
+		)
+	)
 	gender = models.CharField(
 		max_length=2,
 		default='',
@@ -466,7 +505,8 @@ class StudentRegistration(models.Model):
 		),
 		help_text="If you are comfortable answering, "
 		"specify which gender you most closely identify with.",
-		blank=True)
+		blank=True
+	)
 
 	graduation_year = models.IntegerField(
 		choices=(
@@ -481,23 +521,28 @@ class StudentRegistration(models.Model):
 			(2028, "Graduating in 2028"),
 			(2029, "Graduating in 2029"),
 		),
-		help_text="Enter your expected graduation year")
+		help_text="Enter your expected graduation year"
+	)
 	school_name = models.CharField(
-		max_length=200, help_text="Enter the name of your high school")
+		max_length=200, help_text="Enter the name of your high school"
+	)
 	aops_username = models.CharField(
 		max_length=200,
 		help_text=
 		"Enter your Art of Problem Solving username (leave blank for none)",
-		blank=True)
+		blank=True
+	)
 
 	agreement_form = models.FileField(
 		help_text="Signed agreement form, as a single PDF",
 		upload_to=content_file_name,
 		validators=[FileExtensionValidator(allowed_extensions=[
 			'pdf',
-		])])
+		])]
+	)
 	processed = models.BooleanField(
-		help_text="Whether Evan has dealt with this kid yet", default=False)
+		help_text="Whether Evan has dealt with this kid yet", default=False
+	)
 	country = models.CharField(
 		max_length=6,
 		choices=(
@@ -641,7 +686,8 @@ class StudentRegistration(models.Model):
 			("YUG", "Yugoslavia (YUG)"),
 			("ZWE", "Zimbabwe (ZWE)"),
 		),
-		default="USA")
+		default="USA"
+	)
 
 	@property
 	def name(self) -> str:
