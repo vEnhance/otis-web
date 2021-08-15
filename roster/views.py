@@ -37,6 +37,7 @@ from django.views.decorators.http import require_POST
 from django.views.generic import ListView
 from django.views.generic.edit import UpdateView
 from mailchimp3 import MailChimp
+from mailchimp3.mailchimpclient import MailChimpError
 
 from roster.utils import can_edit, get_current_students, get_student_by_id, infer_student  # NOQA
 
@@ -416,20 +417,32 @@ def register(request: HttpRequest) -> HttpResponse:
 @login_required
 def update_profile(request: HttpRequest) -> HttpResponse:
 	assert isinstance(request.user, User)
+	old_email = request.user.email
 	if request.method == 'POST':
 		form = forms.UserForm(request.POST, instance=request.user)
 		if form.is_valid():
-			user: User = form.save(commit=False)
-			if user.email != request.user.email:
+			new_email = form.cleaned_data['email']
+			user: User = form.save()
+			if old_email != new_email:
 				logging.info(
-					f"User {user.first_name} {user.last_name} is now at {user.email} "
-					f"(formerly {request.user.email})"
+					f"User {user.first_name} {user.last_name} added {new_email} "
+					f"(formerly {old_email})"
 				)
 				user.save()
-				mailchimp_subscribe(user)
+				try:
+					mailchimp_subscribe(user)
+					messages.info(
+						request, "Your updated email was added to the OTIS mailing list. "
+						"You may want to unsubscribe the old one."
+					)
+				except MailChimpError as e:
+					logging.error(f"Could not add {new_email} to MailChimp", exc_info=e)
+					messages.warning(
+						request, "The new email could not be added to MailChimp, maybe it exists already?"
+					)
 			else:
 				user.save()
-			messages.success(request, "Your information has been updated")
+			messages.success(request, "Your information has been updated.")
 	else:
 		form = forms.UserForm(instance=request.user)
 	context = {'form': form}
