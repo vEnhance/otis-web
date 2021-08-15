@@ -247,9 +247,8 @@ def submit_pset(request: HttpRequest, student_id: int) -> HttpResponse:
 	else:
 		form = forms.PSetForm()
 
-	available = student.generate_curriculum_queryset().filter(has_pset = False)
-	form.fields['next_unit_to_unlock'].queryset = available
-	form.fields['unit'].queryset = available
+	form.fields['next_unit_to_unlock'].queryset = student.generate_curriculum_queryset().filter(has_pset = False)
+	form.fields['unit'].queryset = student.unlocked_units.all()
 	if request.method == 'POST' and form.is_valid():
 		pset = form.save(commit=False)
 		if PSet.objects.filter(
