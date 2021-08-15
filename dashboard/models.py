@@ -8,7 +8,7 @@ import os
 import core.models
 import roster.models
 from django.contrib.auth import models as auth
-from django.core.validators import FileExtensionValidator
+from django.core.validators import FileExtensionValidator, MaxValueValidator
 from django.db import models
 from django.urls import reverse_lazy
 
@@ -94,11 +94,13 @@ class PSet(models.Model):
 			help_text = "Number of hours spent on this problem set",
 			verbose_name = "Hours spent (estimate)",
 			null = True, blank = True,
+			validators = [MaxValueValidator(200),],
 			)
 	clubs = models.IntegerField(
 			help_text = "Total number of clubs that you solved (including 1♣ if feedback written)",
 			verbose_name = "Total ♣ earned",
 			null = True, blank = True,
+			validators = [MaxValueValidator(200),]
 			)
 	eligible = models.BooleanField(default = True,
 			help_text = "Whether to count this for leveling up")
