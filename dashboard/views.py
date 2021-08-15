@@ -294,6 +294,7 @@ def submit_pset(request: HttpRequest, student_id: int) -> HttpResponse:
 				request, "The problem set is submitted successfully "
 				"and is pending review!"
 			)
+			logging.log(settings.SUCCESS_LOG_LEVEL, f"{student} submitted for {pset.unit}")
 
 	# TODO more stats
 	context = {
