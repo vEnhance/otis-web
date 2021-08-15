@@ -20,9 +20,6 @@ class RosterResource(resources.ModelResource):
 	)
 
 
-# Register your models here.
-
-
 ## ASSISTANT
 class AssistantIEResource(RosterResource):
 	class Meta:
@@ -212,7 +209,6 @@ class StudentAdmin(ImportExportModelAdmin):
 		'semester',
 		'legit',
 		'track',
-		'curriculum_length',
 	)
 	list_filter = (
 		'semester__active',
@@ -300,7 +296,6 @@ class StudentRegistrationAdmin(ImportExportModelAdmin):
 					track=registration.track,
 				)
 			)
-			registration.user.save()
 		messages.success(request, message=f"Built {len(students_to_create)} students")
 		_ = Student.objects.bulk_create(students_to_create)
 		_ = queryset.update(processed=True)
