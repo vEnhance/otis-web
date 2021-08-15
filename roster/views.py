@@ -13,7 +13,7 @@ So e.g. "list students by most recent pset" goes under dashboard.
 import collections
 import datetime
 from hashlib import pbkdf2_hmac, sha256
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from allauth.socialaccount.models import SocialAccount
 from core.models import Semester, Unit
@@ -173,10 +173,13 @@ def master_schedule(request: HttpRequest) -> HttpResponse:
 		unit_to_student_names[d['curriculum']].append(
 				d['user__first_name'] + ' ' + d['user__last_name'])
 
-	chart = collections.OrderedDict() # ordered dict(unit -> students)
-	units = Unit.objects.order_by('position')
-	for unit in units:
-		chart[unit] = unit_to_student_names[unit.id]
+	chart: List[Dict[str, Any]] = []
+	unit_dicts = Unit.objects.order_by('position')\
+			.values('position', 'pk', 'group__subject', 'group__name', 'code')
+	for unit_dict in unit_dicts:
+		row = dict(unit_dict)
+		row['students'] = unit_to_student_names[unit_dict['pk']]
+		chart.append(row)
 	semester = Semester.objects.get(active=True)
 	context = {
 			'chart': chart,

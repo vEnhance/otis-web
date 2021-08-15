@@ -3,13 +3,13 @@
 
 <p>Showing the current enrollments for <b>{{ semester }}</b>.</p>
 <table class="table">
-{% for unit, students in chart.items %}
-<tr class="subject{{ unit.group.subject }}">
-	<th>{{ unit.position }}</th>
-	<td>{{ unit.group.name }}</td>
-	<td>{{ unit.code }}</td>
-	<td>{{ students|length }}</td>
-	<td style="font-size: 70%;">{{ students|join:", "}}</td>
+{% for row in chart %}
+<tr class="subject{{ row.group__subject }}">
+	<th>{{ row.position }}</th>
+	<td>{{ row.group__name }}</td>
+	<td>{{ row.code }}</td>
+	<td>{{ row.students|length }}</td>
+	<td style="font-size: 70%;">{{ row.students|join:", "}}</td>
 </tr>
 {% endfor %}
 </table>
