@@ -30,6 +30,14 @@ django-sql-utils = "^0.6.1"
 pdbpp = "^0.10.3"
 jedi = "^0.18.0"
 ipython = "^7.26.0"
+coverage = {extras = ["toml"], version = "^5.5"}
+
+[tool.coverage.run]
+branch = true
+omit = [
+	"*/site-packages/*",
+	"*/migrations/*"
+]
 
 [tool.pyright]
 enableTypeIgnoreComments = true
