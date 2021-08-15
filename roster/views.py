@@ -64,8 +64,9 @@ def curriculum(request: HttpRequest, student_id: int) -> HttpResponse:
 	else:
 		form = forms.CurriculumForm(units=units, original=original, enabled=enabled)
 		if not enabled:
-			messages.info(request, "You can't edit this curriculum " \
-                                      "since you are not an instructor.")
+			messages.info(
+				request, "You can't edit this curriculum " + "since you are not an instructor."
+			)
 
 	context = {
 		'title': "Units for " + student.name,
@@ -185,8 +186,9 @@ def invoice_standalone(request: HttpRequest, student_id: int, checksum: str) -> 
 
 @staff_member_required
 def master_schedule(request: HttpRequest) -> HttpResponse:
-	student_names_and_unit_ids = get_current_students().filter(legit=True)\
-              .values('user__first_name', 'user__last_name', 'curriculum')
+	student_names_and_unit_ids = get_current_students().filter(
+		legit=True
+	).values('user__first_name', 'user__last_name', 'curriculum')
 	unit_to_student_names = collections.defaultdict(list)
 	for d in student_names_and_unit_ids:
 		# e.g. d = {'name': Student, 'curriculum': 30}
@@ -194,8 +196,9 @@ def master_schedule(request: HttpRequest) -> HttpResponse:
 													].append(d['user__first_name'] + ' ' + d['user__last_name'])
 
 	chart: List[Dict[str, Any]] = []
-	unit_dicts = Unit.objects.order_by('position')\
-              .values('position', 'pk', 'group__subject', 'group__name', 'code')
+	unit_dicts = Unit.objects.order_by('position').values(
+		'position', 'pk', 'group__subject', 'group__name', 'code'
+	)
 	for unit_dict in unit_dicts:
 		row = dict(unit_dict)
 		row['students'] = unit_to_student_names[unit_dict['pk']]
@@ -247,22 +250,29 @@ def inquiry(request: HttpRequest, student_id: int) -> HttpResponse:
 			inquiry.student = student
 			# check if exists already and created recently
 			one_day_ago = timezone.now() - datetime.timedelta(seconds=90)
-			if models.UnitInquiry.objects.filter(unit=inquiry.unit, \
-                                      student=student, action_type=inquiry.action_type, \
-                                      created_at__gte = one_day_ago).exists():
-				messages.warning(request, "The same inquiry already was "\
-                                                  "submitted within the last 90 seconds.")
+			if models.UnitInquiry.objects.filter(
+				unit=inquiry.unit,
+				student=student,
+				action_type=inquiry.action_type,
+				created_at__gte=one_day_ago
+			).exists():
+				messages.warning(
+					request, "The same inquiry already was "
+					"submitted within the last 90 seconds."
+				)
 			else:
 				inquiry.save()
 				# auto-acceptance criteria
-				auto_accept_criteria = (inquiry.action_type == "APPEND") \
-                                                  or (inquiry.action_type == "DROP") \
-                                                  or current_inquiries.filter(action_type="UNLOCK").count() <= 3 \
-                                                  or request.user.is_staff
+				auto_accept_criteria = (inquiry.action_type
+																== "APPEND") or (inquiry.action_type
+																									== "DROP") or current_inquiries.filter(
+																										action_type="UNLOCK"
+																									).count() <= 3 or request.user.is_staff
 				# auto reject criteria
-				auto_reject_criteria = inquiry.action_type == "UNLOCK" and \
-                                                  (current_inquiries.filter(action_type="UNLOCK", status="NEW").count()
-					+ student.unlocked_units.count()) > 9
+				auto_reject_criteria = inquiry.action_type == "UNLOCK" and (
+					current_inquiries.filter(action_type="UNLOCK", status="NEW").count() +
+					student.unlocked_units.count()
+				) > 9
 
 				if auto_accept_criteria:
 					inquiry.run_accept()
@@ -279,8 +289,7 @@ def inquiry(request: HttpRequest, student_id: int) -> HttpResponse:
 		form = forms.InquiryForm()
 	context['form'] = form
 
-	context['inquiries'] = models.UnitInquiry.objects\
-              .filter(student=student)
+	context['inquiries'] = models.UnitInquiry.objects.filter(student=student)
 	context['student'] = student
 	context['curriculum'] = student.generate_curriculum_rows(
 		omniscient=can_edit(request, student)
@@ -294,21 +303,17 @@ class ListInquiries(PermissionRequiredMixin, ListView):
 	model = models.UnitInquiry
 
 	def get_queryset(self):
-		queryset = models.UnitInquiry.objects\
-                          .filter(created_at__gte = timezone.now() - datetime.timedelta(days=7))\
-                          .filter(student__semester__active = True)\
-                          .exclude(status="ACC")
+		queryset = models.UnitInquiry.objects.filter(
+			created_at__gte=timezone.now() - datetime.timedelta(days=7)
+		).filter(student__semester__active=True).exclude(status="ACC")
 
 		# some amazing code vv
-		count_unlock = models.UnitInquiry.objects\
-                          .filter(action_type="UNLOCK")\
-                          .filter(student=OuterRef('student'))\
-                          .order_by().values('student')\
-                          .annotate(c=Count('*')).values('c')
-		count_all = models.UnitInquiry.objects\
-                          .filter(student=OuterRef('student'))\
-                          .order_by().values('student')\
-                          .annotate(c=Count('*')).values('c')
+		count_unlock = models.UnitInquiry.objects.filter(action_type="UNLOCK").filter(
+			student=OuterRef('student')
+		).order_by().values('student').annotate(c=Count('*')).values('c')
+		count_all = models.UnitInquiry.objects.filter(
+			student=OuterRef('student')
+		).order_by().values('student').annotate(c=Count('*')).values('c')
 		# seriously wtf
 		return queryset.annotate(
 			num_unlock=Subquery(count_unlock, output_field=IntegerField()),
@@ -335,8 +340,9 @@ def approve_inquiry(_: HttpRequest, pk: int) -> HttpResponse:
 
 @staff_member_required
 def approve_inquiry_all(_: HttpRequest) -> HttpResponse:
-	for inquiry in models.UnitInquiry.objects\
-              .filter(status="NEW", student__semester__active = True):
+	for inquiry in models.UnitInquiry.objects.filter(
+		status="NEW", student__semester__active=True
+	):
 		inquiry.run_accept()
 	return HttpResponseRedirect(reverse("list-inquiry"))
 
@@ -373,12 +379,13 @@ def register(request: HttpRequest) -> HttpResponse:
 				client = MailChimp(mc_api=os.getenv('MAILCHIMP_API_KEY'), mc_user='vEnhance')
 				client.lists.members.create(
 					os.getenv('MAILCHIMP_LIST_ID'), {
-					'email_address': request.user.email,
-					'status': 'subscribed',
-					'merge_fields': {
-					'FNAME': request.user.first_name,
-					'LNAME': request.user.last_name,
-					}
+						'email_address': request.user.email,
+						'status': 'subscribed',
+						'merge_fields':
+							{
+								'FNAME': request.user.first_name,
+								'LNAME': request.user.last_name,
+							}
 					}
 				)
 				messages.success(request, message="Submitted! Sit tight.")
@@ -386,8 +393,8 @@ def register(request: HttpRequest) -> HttpResponse:
 	else:
 		if container.allowed_tracks:
 			initial_data_dict = {}
-			most_recent_reg = models.StudentRegistration.objects\
-                                      .filter(user = request.user).order_by('-id').first()
+			most_recent_reg = models.StudentRegistration.objects.filter(user=request.user
+																																	).order_by('-id').first()
 			if most_recent_reg is not None:
 				for k in ('parent_email', 'graduation_year', 'school_name', 'aops_username', 'gender'):
 					initial_data_dict[k] = getattr(most_recent_reg, k)
@@ -456,7 +463,7 @@ def api(request: HttpRequest) -> JsonResponse:
 		return JsonResponse({'result': 'unregistered'})
 
 
-# TODO ugly hack but I'm tired of answering this requests
+# TODO ugly hack but I'm tired of answering this request
 @login_required
 def unlock_rest_of_mystery(request: HttpRequest, delta: int = 1) -> HttpResponse:
 	student = infer_student(request)
@@ -464,8 +471,10 @@ def unlock_rest_of_mystery(request: HttpRequest, delta: int = 1) -> HttpResponse
 	try:
 		mystery = student.unlocked_units.get(group__name="Mystery")
 	except Unit.DoesNotExist:
-		return HttpResponse("You don't have the Mystery unit unlocked!\n" \
-                          + f"You are currently {student}", status = 403)
+		s = "You don't have the Mystery unit unlocked!"
+		s += "\n"
+		s += f"You are currently {student}"
+		return HttpResponse(s, status=403)
 	added_unit = get_object_or_404(Unit, position=mystery.position + delta)
 	student.unlocked_units.remove(mystery)
 	student.curriculum.remove(mystery)

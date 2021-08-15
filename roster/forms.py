@@ -75,9 +75,7 @@ class AdvanceForm(forms.ModelForm):
 class InquiryForm(forms.ModelForm):
 	def __init__(self, *args: Any, **kwargs: Any):
 		super(InquiryForm, self).__init__(*args, **kwargs)
-		self.fields['unit'].queryset = \
-                            self.fields['unit'].queryset\
-                            .order_by('group__name', 'code')
+		self.fields['unit'].queryset = self.fields['unit'].queryset.order_by('group__name', 'code')
 
 	class Meta:
 		model = UnitInquiry

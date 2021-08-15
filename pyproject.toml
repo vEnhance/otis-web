@@ -25,6 +25,7 @@ python-dotenv = "^0.19.0"
 wheel = "^0.37.0"
 PyMySQL = "^1.0.2"
 django-sql-utils = "^0.6.1"
+mailchimp3 = "^3.0.15"
 
 [tool.poetry.dev-dependencies]
 pdbpp = "^0.10.3"
@@ -37,10 +38,9 @@ yapf = "^0.31.0"
 based_on_style = "facebook"
 column_limit = 96
 use_tabs = true
-continuation_align_style = "valign-right"
+continuation_align_style = "VALIGN-RIGHT"
 continuation_indent_width = 2
 indent_width = 2
-
 
 [tool.coverage.run]
 branch = true

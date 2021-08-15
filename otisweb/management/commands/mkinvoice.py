@@ -18,9 +18,12 @@ class Command(BaseCommand):
 
 		invoices = []
 		for s in students:
-			invoices.append(roster.models.Invoice(student = s, \
-                                        preps_taught = options['preps'], \
-                                        hours_taught = 8.4 if (s.track == 'A' or s.track == 'B') else 0, \
-                                        ))
+			invoices.append(
+				roster.models.Invoice(
+					student=s,
+					preps_taught=options['preps'],
+					hours_taught=8.4 if (s.track == 'A' or s.track == 'B') else 0,
+				)
+			)
 		print(f"Created {len(invoices)} invoices")
 		roster.models.Invoice.objects.bulk_create(invoices)

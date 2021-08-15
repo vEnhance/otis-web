@@ -105,14 +105,12 @@ class Meter:
 
 
 def _get_meter_update(student: Student) -> Dict[str, Any]:
-	psets = PSet.objects\
-               .filter(student = student, approved = True, eligible = True)
+	psets = PSet.objects.filter(student=student, approved=True, eligible=True)
 	pset_data = psets.aggregate(Sum('clubs'), Sum('hours'))
 	total_diamonds = student.achievements.aggregate(Sum('diamonds'))['diamonds__sum'] or 0
 	quiz_data = ExamAttempt.objects.filter(student=student)
-	total_spades = \
-               (quiz_data.aggregate(Sum('score'))['score__sum'] or 0) \
-               + (student.usemo_score or 0)
+	total_spades = (quiz_data.aggregate(Sum('score'))['score__sum'] or
+									0) + (student.usemo_score or 0)
 	meters = {
 		'clubs': Meter.ClubMeter(pset_data['clubs__sum'] or 0),
 		'hearts': Meter.HeartMeter(int(pset_data['hours__sum'] or 0)),
@@ -120,8 +118,7 @@ def _get_meter_update(student: Student) -> Dict[str, Any]:
 		'spades': Meter.SpadeMeter(total_spades),  # TODO input value
 	}
 	level_number = sum(meter.level for meter in meters.values())
-	level = Level.objects\
-               .filter(threshold__lte = level_number).order_by('-threshold').first()
+	level = Level.objects.filter(threshold__lte=level_number).order_by('-threshold').first()
 	level_name = level.name if level is not None else 'No Level'
 	return {
 		'psets': psets,
@@ -157,8 +154,7 @@ def portal(request: HttpRequest, student_id: int) -> HttpResponse:
 	context['quizzes'] = PracticeExam.objects.filter(
 		is_test=False, family=semester.exam_family, due_date__isnull=False
 	)
-	context['num_sem_download'] = SemesterDownloadFile\
-               .objects.filter(semester = semester).count()
+	context['num_sem_download'] = SemesterDownloadFile.objects.filter(semester=semester).count()
 	context.update(_get_meter_update(student))
 	return render(request, "dashboard/portal.html", context)
 
@@ -219,8 +215,9 @@ class FoundList(PermissionRequiredMixin, ListView):
 	def get_queryset(self) -> QuerySet[Student]:
 		self.achievement = get_object_or_404(Achievement, pk=self.kwargs['pk'])
 		students = self.achievement.student_set  # type: ignore
-		return students.filter(semester__active = True)\
-                            .select_related('user').order_by('user__first_name', 'user__last_name')
+		return students.filter(
+			semester__active=True
+		).select_related('user').order_by('user__first_name', 'user__last_name')
 
 	def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
 		context = super().get_context_data(**kwargs)
@@ -296,18 +293,17 @@ def submit_pset(request: HttpRequest, student_id: int) -> HttpResponse:
 
 	# TODO more stats
 	context = {
-		'title': 'Ready to submit?',
-		'student': student,
-		'pending_psets':         \
-                 PSet.objects\
-                 .filter(student = student, approved = False)\
-                 .order_by('-upload__created_at'),
-		'approved_psets':         \
-                 PSet.objects\
-                 .filter(student = student, approved = True)\
-                 .order_by('-upload__created_at'),
-		'form': form,
-		}
+		'title':
+			'Ready to submit?',
+		'student':
+			student,
+		'pending_psets':
+			PSet.objects.filter(student=student, approved=False).order_by('-upload__created_at'),
+		'approved_psets':
+			PSet.objects.filter(student=student, approved=True).order_by('-upload__created_at'),
+		'form':
+			form,
+	}
 	return render(request, "dashboard/submit_pset_form.html", context)
 
 
@@ -366,17 +362,17 @@ def index(request: HttpRequest) -> HttpResponse:
 	assert isinstance(request.user, User)
 	students = get_visible_students(request.user, current=True)
 	if len(students) == 1:  # unique match
-		return HttpResponseRedirect(\
-                            reverse("portal", args=(students[0].id,)))
+		return HttpResponseRedirect(reverse("portal", args=(students[0].id, )))
 	assert isinstance(request.user, User)
 	context: Dict[str, Any] = {}
 	context['title'] = "Current Semester Listing"
-	context['students'] = annotate_multiple_students(students)\
-               .order_by('track', 'user__first_name', 'user__last_name')
+	context['students'] = annotate_multiple_students(students).order_by(
+		'track', 'user__first_name', 'user__last_name'
+	)
 	context['stulist_show_semester'] = False
-	context['submitted_registration'] = StudentRegistration.objects\
-               .filter(user = request.user, container__semester__active = True)\
-               .exists()
+	context['submitted_registration'] = StudentRegistration.objects.filter(
+		user=request.user, container__semester__active=True
+	).exists()
 	return render(request, "dashboard/stulist.html", context)
 
 
@@ -388,8 +384,9 @@ def past(request: HttpRequest, semester: Semester = None):
 		students = students.filter(semester=semester)
 	context: Dict[str, Any] = {}
 	context['title'] = "Previous Semester Listing"
-	context['students'] = annotate_multiple_students(students)\
-               .order_by('-semester', 'user__first_name', 'user__last_name')
+	context['students'] = annotate_multiple_students(students).order_by(
+		'-semester', 'user__first_name', 'user__last_name'
+	)
 	context['stulist_show_semester'] = True
 	context['past'] = True
 	return render(request, "dashboard/stulist.html", context)
@@ -415,8 +412,7 @@ class UpdateFile(LoginRequiredMixin, UpdateView):
 	def get_object(self, *args: Any, **kwargs: Any) -> UploadedFile:
 		obj = super(UpdateFile, self).get_object(*args, **kwargs)
 		assert isinstance(obj, UploadedFile)
-		if not obj.owner == self.request.user \
-                            and getattr(self.request.user, 'is_staff', False):
+		if not obj.owner == self.request.user and getattr(self.request.user, 'is_staff', False):
 			raise PermissionDenied("Not authorized to update this file")
 		return obj
 
@@ -428,8 +424,7 @@ class DeleteFile(LoginRequiredMixin, DeleteView):
 	def get_object(self, *args: Any, **kwargs: Any) -> UploadedFile:
 		obj = super(DeleteFile, self).get_object(*args, **kwargs)
 		assert isinstance(obj, UploadedFile)
-		if not obj.owner == self.request.user \
-                            and getattr(self.request.user, 'is_staff', False):
+		if not obj.owner == self.request.user and getattr(self.request.user, 'is_staff', False):
 			raise PermissionDenied("Not authorized to delete this file")
 		return obj
 
@@ -440,16 +435,12 @@ def idlewarn(request: HttpRequest) -> HttpResponse:
 	context: Dict[str, Any] = {}
 	context['title'] = 'Idle-warn'
 
-	newest = UploadedFile.objects\
-               .filter(category='psets')\
-               .filter(benefactor=OuterRef('pk'))\
-               .order_by('-created_at')\
-               .values('created_at')[:1]
+	newest = UploadedFile.objects.filter(category='psets'
+																			).filter(benefactor=OuterRef('pk')
+																							).order_by('-created_at').values('created_at')[:1]
 
 	students = annotate_multiple_students(get_visible_students(request.user).filter(legit=True))
-	context['students'] = students\
-               .annotate(latest_pset=Subquery(newest))\
-               .order_by('latest_pset')
+	context['students'] = students.annotate(latest_pset=Subquery(newest)).order_by('latest_pset')
 
 	return render(request, "dashboard/idlewarn.html", context)
 
@@ -600,9 +591,9 @@ def api(request: HttpRequest) -> JsonResponse:
 		finished_unit = get_object_or_404(Unit, pk=request.POST['unit__pk'])
 		student = get_object_or_404(Student, pk=request.POST['student__pk'])
 		if 'next_unit_to_unlock__pk' not in request.POST:
-			unlockable_units = student.generate_curriculum_queryset()\
-                                         .exclude(has_pset = True)\
-                                         .exclude(id__in = student.unlocked_units.all())
+			unlockable_units = student.generate_curriculum_queryset().exclude(has_pset=True).exclude(
+				id__in=student.unlocked_units.all()
+			)
 			target = unlockable_units.first()
 		else:
 			target = get_object_or_404(Unit, pk=request.POST['next_unit_to_unlock__pk'])
@@ -616,63 +607,70 @@ def api(request: HttpRequest) -> JsonResponse:
 		raise NotImplementedError
 	else:
 		data: Dict[str, Any] = {
-			'_name' : 'Root',
-			'_children' : [
-			{
-			'_name': 'Problem sets',
-			'_children': list(PSet.objects\
-                                 .filter(approved=False, student__semester__active = True)\
-                                 .values(
-			'pk',
-			'approved',
-			'feedback',
-			'special_notes',
-			'student__pk',
-			'student__user__first_name',
-			'student__user__last_name',
-			'student__user__email',
-			'hours',
-			'clubs',
-			'eligible',
-			'unit__group__name',
-			'unit__code',
-			'unit__pk',
-			'next_unit_to_unlock__group__name',
-			'next_unit_to_unlock__code',
-			'next_unit_to_unlock__pk',
-			'upload__content',
-			))
-			},
-			{
-			'_name': 'Inquiries',
-			'inquiries': list(UnitInquiry.objects\
-                                 .filter(status = "NEW", student__semester__active = True)\
-                                 .values(
-			'pk',
-			'unit__group__name',
-			'unit__code',
-			'student__user__first_name',
-			'student__user__last_name',
-			'explanation',
-			)),
-			},
-			{
-			'_name' : 'Suggestions',
-			'_children' : list(ProblemSuggestion.objects.filter(resolved=False)\
-                                 .values(
-			'pk',
-			'created_at',
-			'student__user__first_name',
-			'student__user__last_name',
-			'source',
-			'description',
-			'statement',
-			'solution',
-			'comments',
-			'acknowledge',
-			'weight',
-			))
-			}
-			],
-			}
+			'_name':
+				'Root',
+			'_children':
+				[
+					{
+						'_name':
+							'Problem sets',
+						'_children':
+							list(
+								PSet.objects.filter(approved=False, student__semester__active=True).values(
+									'pk',
+									'approved',
+									'feedback',
+									'special_notes',
+									'student__pk',
+									'student__user__first_name',
+									'student__user__last_name',
+									'student__user__email',
+									'hours',
+									'clubs',
+									'eligible',
+									'unit__group__name',
+									'unit__code',
+									'unit__pk',
+									'next_unit_to_unlock__group__name',
+									'next_unit_to_unlock__code',
+									'next_unit_to_unlock__pk',
+									'upload__content',
+								)
+							)
+					}, {
+						'_name':
+							'Inquiries',
+						'inquiries':
+							list(
+								UnitInquiry.objects.filter(status="NEW", student__semester__active=True).values(
+									'pk',
+									'unit__group__name',
+									'unit__code',
+									'student__user__first_name',
+									'student__user__last_name',
+									'explanation',
+								)
+							),
+					}, {
+						'_name':
+							'Suggestions',
+						'_children':
+							list(
+								ProblemSuggestion.objects.filter(resolved=False).values(
+									'pk',
+									'created_at',
+									'student__user__first_name',
+									'student__user__last_name',
+									'source',
+									'description',
+									'statement',
+									'solution',
+									'comments',
+									'acknowledge',
+									'weight',
+								)
+							)
+					}
+				],
+		}
 		return JsonResponse(data, status=200)

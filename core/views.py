@@ -14,8 +14,7 @@ from .utils import get_from_google_storage
 
 class UnitGroupListView(ListView):
 	model = UnitGroup
-	queryset = UnitGroup.objects.all().order_by('subject', 'name')\
-               .prefetch_related('unit_set')
+	queryset = UnitGroup.objects.all().order_by('subject', 'name').prefetch_related('unit_set')
 
 
 def permitted(unit: Unit, request: HttpRequest, asking_solution: bool) -> bool:
@@ -23,17 +22,18 @@ def permitted(unit: Unit, request: HttpRequest, asking_solution: bool) -> bool:
 		return True
 	elif isinstance(request.user, AnonymousUser):
 		return False
-	elif PSet.objects\
-               .filter(student__user = request.user, unit = unit).exists():
+	elif PSet.objects.filter(student__user=request.user, unit=unit).exists():
 		return True
-	elif UploadedFile.objects\
-               .filter(benefactor__semester__uses_legacy_pset_system = True,
-		benefactor__user = request.user,
-		category = 'psets',
-		unit = unit).exists():
+	elif UploadedFile.objects.filter(
+		benefactor__semester__uses_legacy_pset_system=True,
+		benefactor__user=request.user,
+		category='psets',
+		unit=unit
+	).exists():
 		return True
-	elif asking_solution is False and Student.objects\
-               .filter(user = request.user, unlocked_units = unit).exists():
+	elif asking_solution is False and Student.objects.filter(
+		user=request.user, unlocked_units=unit
+	).exists():
 		return True
 	return False
 

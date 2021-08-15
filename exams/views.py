@@ -46,8 +46,7 @@ def quiz(request: HttpRequest, student_id: int, pk: int) -> HttpResponse:
 	except ExamAttempt.DoesNotExist:
 		if request.method == 'POST':
 			if quiz.overdue:
-				return HttpResponseForbidden("You can't submit this quiz " \
-                                                      "since the deadline passed.")
+				return HttpResponseForbidden("You can't submit this quiz since the deadline passed.")
 			form = ExamAttemptForm(request.POST)
 			if form.is_valid():
 				attempt = form.save(commit=False)
