@@ -191,7 +191,11 @@ def achievements(request: HttpRequest, student_id: int) -> HttpResponse:
 		context['first_achievement'] = Achievement.objects.get(pk=1)
 	except Achievement.DoesNotExist:
 		pass
-	context.update(_get_meter_update(student))
+	_meter_info = _get_meter_update(student)
+	context.update(_meter_info)
+	level_number = _meter_info['level_number']
+	obtained_levels = Level.objects.filter(threshold__lte=level_number).order_by('-threshold')
+	context['obtained_levels'] = obtained_levels
 	return render(request, "dashboard/achievements.html", context)
 
 

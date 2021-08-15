@@ -27,4 +27,12 @@ where $n$ is the number of points amassed towards that statistic.</p>
 	{% include "dashboard/meters/diamonds.html" with meter=meters.diamonds %}
 </div>
 
+<h3>Previous levels</h3>
+<ul class="list-group">
+	{% for level in obtained_levels %}
+		<li class="list-group-item">
+			<strong>Level {{ level.threshold }}</strong> {{ level.name }}
+		</li>
+	{% endfor %}
+</ul>
 {% endblock %}
