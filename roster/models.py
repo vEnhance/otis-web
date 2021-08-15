@@ -11,10 +11,11 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import FileExtensionValidator
 from django.db import models
-from django.db.models import Count, Exists, OuterRef, Q
+from django.db.models import Count, Q
 from django.db.models.query import QuerySet
 from django.urls import reverse_lazy
 from django.utils.timezone import localtime
+from sql_util.aggregates import Exists, SubqueryAggregate
 
 
 class Assistant(models.Model):
@@ -131,7 +132,7 @@ class Student(models.Model):
 		ordering = ('semester', '-legit', 'track', 'user__first_name', 'user__last_name')
 
 	@property
-	def meets_evan(self) -> str:
+	def meets_evan(self) -> bool:
 		return (self.track == "A" or self.track == "B") and self.legit
 	@property
 	def calendar_url(self) -> str:
@@ -144,29 +145,21 @@ class Student(models.Model):
 		return self.curriculum.count()
 
 	def generate_curriculum_queryset(self) -> QuerySet[Unit]:
+		queryset = self.curriculum.all().annotate(
+					num_uploads = SubqueryAggregate(
+						'uploadedfile',
+						filter = Q(benefactor__pk = self.id),
+						aggregate = Count))
 		if self.semester.uses_legacy_pset_system is True:
-			return self.curriculum.all().annotate(
-					num_uploads = Count('uploadedfile',
-						filter = Q(uploadedfile__benefactor = self.id)),
-					has_pset = Exists(
-						dashboard.models.UploadedFile.objects.filter(
-							unit=OuterRef('pk'),
-							benefactor=self.id,
-							category='psets')))
-		else:
-			return self.curriculum.all().annotate(
-					num_uploads = Count('uploadedfile',
-						filter = Q(uploadedfile__benefactor = self.id)),
-					has_pset = Exists(
-						dashboard.models.PSet.objects.filter(
-							student=self,
-							unit=OuterRef('pk'))),
-					approved = Exists(
-						dashboard.models.PSet.objects.filter(
-							student=self,
-							unit=OuterRef('pk'),
-							approved=True)),
+			return queryset.annotate(
+					has_pset = Exists('uploadedfile',
+						filter = Q(benefactor__pk = self.id, category = 'psets'),
+						)
 					)
+		else:
+			return queryset.annotate(
+					has_pset = Exists('pset', filter = Q(student = self)),
+					approved = Exists('pset', filter = Q(student = self, approved = True)))
 
 	def has_submitted_pset(self, unit: Unit) -> bool:
 		if self.semester.uses_legacy_pset_system:
