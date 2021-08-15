@@ -3,11 +3,11 @@ from __future__ import unicode_literals
 import datetime
 import string
 
-from roster.models import Student
 from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 from django.db import models
 from django.urls.base import reverse_lazy
+from roster.models import Student
 
 from exams.calculator import expr_compute
 
@@ -84,6 +84,9 @@ class PracticeExam(models.Model):
 	@property
 	def current(self) -> bool:
 		return self.started and not self.overdue
+
+	def get_absolute_url(self) -> str:
+		return reverse_lazy('exam-pdf', args=(self.pk,))
 
 
 class ExamAttempt(models.Model):

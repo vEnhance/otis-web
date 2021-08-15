@@ -4,7 +4,7 @@ from core.utils import get_from_google_storage
 from django.http import HttpRequest, HttpResponse
 from django.http.response import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render
-from roster.utils import get_student_by_id
+from roster.utils import get_student_by_id, infer_student
 
 from exams.calculator import expr_compute
 
@@ -13,13 +13,12 @@ from .models import ExamAttempt, PracticeExam
 
 # Create your views here.
 
-def pdf(request: HttpRequest, student_id: int, pk: int) -> HttpResponse:
-	student = get_student_by_id(request, student_id)
+def pdf(request: HttpRequest, pk: int) -> HttpResponse:
 	exam = get_object_or_404(PracticeExam, pk = pk)
-
 	if getattr(request.user, 'is_staff', True):
 		return get_from_google_storage(exam.pdfname)
 
+	student = infer_student(request)
 	if not exam.started:
 		return HttpResponseForbidden("Not ready to download this exam yet")
 	elif student.semester.exam_family != exam.family:
