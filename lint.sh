@@ -1,6 +1,7 @@
 #!/bin/sh
 
-echo "Reformatting files ..."
+echo "Tidying files with yapf..."
+echo "---------------------------"
 yapf --in-place */*.py */tests/*.py */templatetags/*.py */management/commands/*.py
 
 echo "Running manage.py check ..."
