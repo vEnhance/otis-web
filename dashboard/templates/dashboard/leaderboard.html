@@ -31,7 +31,7 @@
 			{{ row.name }}</a>
 	</td>
 	<td>{{ row.clubs }}</td>
-	<td>{{ row.hearts }}</td>
+	<td>{{ row.hearts|floatformat:"0" }}</td>
 	<td>{{ row.spades }}</td>
 	<td>{{ row.diamonds }}</td>
 </tr> {# end table row for this row #}
