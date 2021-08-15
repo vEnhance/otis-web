@@ -170,6 +170,7 @@ class StudentIEResource(RosterResource):
 			'id',
 			'user__first_name',
 			'user__last_name',
+			'user__email',
 			'semester_name',
 			'user_name',
 			'track',
