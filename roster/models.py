@@ -28,7 +28,7 @@ class Assistant(models.Model):
 	unlisted_students = models.ManyToManyField("Student", blank = True,
 		related_name = "unlisted_assistants",
 		help_text = "A list of students this assistant can see " \
-                "but which is not listed visibly.")
+                 "but which is not listed visibly.")
 
 	@property
 	def first_name(self) -> str:
@@ -80,8 +80,8 @@ class Student(models.Model):
 	unlocked_units = models.ManyToManyField(Unit, blank = True,
 		related_name = 'students_unlocked',
 		help_text = "A list of units that the student is actively working on. " \
-              "Once the student submits a problem set, " \
-              "delete it from this list to mark them as complete.")
+               "Once the student submits a problem set, " \
+               "delete it from this list to mark them as complete.")
 	usemo_score = models.SmallIntegerField(
 		null=True, blank=True, help_text="The USEMO score for this year"
 	)
@@ -148,7 +148,7 @@ class Student(models.Model):
 			return self.get_track_display()
 		else:
 			return self.get_track_display() \
-                                      + " + " + self.assistant.shortname
+                                         + " + " + self.assistant.shortname
 
 	class Meta:
 		unique_together = (
@@ -264,7 +264,7 @@ class Student(models.Model):
 		now = localtime()
 
 		if self.semester.first_payment_deadline is not None \
-                          and invoice.total_paid <= 0:
+                            and invoice.total_paid <= 0:
 			d = self.semester.first_payment_deadline - now
 			if d < timedelta(days=-7):
 				return 3
@@ -274,7 +274,7 @@ class Student(models.Model):
 				return 1
 
 		if self.semester.most_payment_deadline is not None \
-                          and invoice.total_paid < 2*invoice.total_cost/3:
+                            and invoice.total_paid < 2*invoice.total_cost/3:
 			d = self.semester.most_payment_deadline - now
 			if d < timedelta(days=-7):
 				return 7
@@ -348,9 +348,9 @@ class Invoice(models.Model):
 	@property
 	def total_cost(self) -> Decimal:
 		return self.prep_rate*self.preps_taught \
-                          + self.hour_rate*self.hours_taught \
-                          + self.extras \
-                          + self.adjustment
+                            + self.hour_rate*self.hours_taught \
+                            + self.extras \
+                            + self.adjustment
 
 	@property
 	def total_owed(self) -> Decimal:

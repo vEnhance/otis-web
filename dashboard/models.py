@@ -16,7 +16,7 @@ from roster.models import Student
 def content_file_name(instance: 'UploadedFile', filename: str) -> str:
 	now = datetime.datetime.now()
 	return os.path.join(instance.category, instance.owner.username,\
-              now.strftime("%Y-%m-%d-%H%M%S"), filename)
+               now.strftime("%Y-%m-%d-%H%M%S"), filename)
 
 
 class UploadedFile(models.Model):
@@ -186,7 +186,7 @@ class ProblemSuggestion(models.Model):
 	solution = models.TextField(help_text="Solution to the problem, in LaTeX.")
 	comments = models.TextField(help_text="Any extra comments.", blank=True)
 	acknowledge = models.BooleanField(help_text = \
-              "Acknowledge me for this contribution. "
+               "Acknowledge me for this contribution. "
 		"(Uncheck for an anonymous contribution.)", default=True)
 
 	resolved = models.BooleanField(default=False, help_text="Whether staff has processed this.")

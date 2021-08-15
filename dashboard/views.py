@@ -106,13 +106,13 @@ class Meter:
 
 def _get_meter_update(student: Student) -> Dict[str, Any]:
 	psets = PSet.objects\
-              .filter(student = student, approved = True, eligible = True)
+               .filter(student = student, approved = True, eligible = True)
 	pset_data = psets.aggregate(Sum('clubs'), Sum('hours'))
 	total_diamonds = student.achievements.aggregate(Sum('diamonds'))['diamonds__sum'] or 0
 	quiz_data = ExamAttempt.objects.filter(student=student)
 	total_spades = \
-              (quiz_data.aggregate(Sum('score'))['score__sum'] or 0) \
-              + (student.usemo_score or 0)
+               (quiz_data.aggregate(Sum('score'))['score__sum'] or 0) \
+               + (student.usemo_score or 0)
 	meters = {
 		'clubs': Meter.ClubMeter(pset_data['clubs__sum'] or 0),
 		'hearts': Meter.HeartMeter(int(pset_data['hours__sum'] or 0)),
@@ -121,7 +121,7 @@ def _get_meter_update(student: Student) -> Dict[str, Any]:
 	}
 	level_number = sum(meter.level for meter in meters.values())
 	level = Level.objects\
-              .filter(threshold__lte = level_number).order_by('-threshold').first()
+               .filter(threshold__lte = level_number).order_by('-threshold').first()
 	level_name = level.name if level is not None else 'No Level'
 	return {
 		'psets': psets,
@@ -158,7 +158,7 @@ def portal(request: HttpRequest, student_id: int) -> HttpResponse:
 		is_test=False, family=semester.exam_family, due_date__isnull=False
 	)
 	context['num_sem_download'] = SemesterDownloadFile\
-              .objects.filter(semester = semester).count()
+               .objects.filter(semester = semester).count()
 	context.update(_get_meter_update(student))
 	return render(request, "dashboard/portal.html", context)
 
@@ -220,7 +220,7 @@ class FoundList(PermissionRequiredMixin, ListView):
 		self.achievement = get_object_or_404(Achievement, pk=self.kwargs['pk'])
 		students = self.achievement.student_set  # type: ignore
 		return students.filter(semester__active = True)\
-                          .select_related('user').order_by('user__first_name', 'user__last_name')
+                            .select_related('user').order_by('user__first_name', 'user__last_name')
 
 	def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
 		context = super().get_context_data(**kwargs)
@@ -298,14 +298,14 @@ def submit_pset(request: HttpRequest, student_id: int) -> HttpResponse:
 	context = {
 		'title': 'Ready to submit?',
 		'student': student,
-		'pending_psets':        \
-                PSet.objects\
-                .filter(student = student, approved = False)\
-                .order_by('-upload__created_at'),
-		'approved_psets':        \
-                PSet.objects\
-                .filter(student = student, approved = True)\
-                .order_by('-upload__created_at'),
+		'pending_psets':         \
+                 PSet.objects\
+                 .filter(student = student, approved = False)\
+                 .order_by('-upload__created_at'),
+		'approved_psets':         \
+                 PSet.objects\
+                 .filter(student = student, approved = True)\
+                 .order_by('-upload__created_at'),
 		'form': form,
 		}
 	return render(request, "dashboard/submit_pset_form.html", context)
@@ -367,16 +367,16 @@ def index(request: HttpRequest) -> HttpResponse:
 	students = get_visible_students(request.user, current=True)
 	if len(students) == 1:  # unique match
 		return HttpResponseRedirect(\
-                          reverse("portal", args=(students[0].id,)))
+                            reverse("portal", args=(students[0].id,)))
 	assert isinstance(request.user, User)
 	context: Dict[str, Any] = {}
 	context['title'] = "Current Semester Listing"
 	context['students'] = annotate_multiple_students(students)\
-              .order_by('track', 'user__first_name', 'user__last_name')
+               .order_by('track', 'user__first_name', 'user__last_name')
 	context['stulist_show_semester'] = False
 	context['submitted_registration'] = StudentRegistration.objects\
-              .filter(user = request.user, container__semester__active = True)\
-              .exists()
+               .filter(user = request.user, container__semester__active = True)\
+               .exists()
 	return render(request, "dashboard/stulist.html", context)
 
 
@@ -389,7 +389,7 @@ def past(request: HttpRequest, semester: Semester = None):
 	context: Dict[str, Any] = {}
 	context['title'] = "Previous Semester Listing"
 	context['students'] = annotate_multiple_students(students)\
-              .order_by('-semester', 'user__first_name', 'user__last_name')
+               .order_by('-semester', 'user__first_name', 'user__last_name')
 	context['stulist_show_semester'] = True
 	context['past'] = True
 	return render(request, "dashboard/stulist.html", context)
@@ -416,7 +416,7 @@ class UpdateFile(LoginRequiredMixin, UpdateView):
 		obj = super(UpdateFile, self).get_object(*args, **kwargs)
 		assert isinstance(obj, UploadedFile)
 		if not obj.owner == self.request.user \
-                          and getattr(self.request.user, 'is_staff', False):
+                            and getattr(self.request.user, 'is_staff', False):
 			raise PermissionDenied("Not authorized to update this file")
 		return obj
 
@@ -429,7 +429,7 @@ class DeleteFile(LoginRequiredMixin, DeleteView):
 		obj = super(DeleteFile, self).get_object(*args, **kwargs)
 		assert isinstance(obj, UploadedFile)
 		if not obj.owner == self.request.user \
-                          and getattr(self.request.user, 'is_staff', False):
+                            and getattr(self.request.user, 'is_staff', False):
 			raise PermissionDenied("Not authorized to delete this file")
 		return obj
 
@@ -441,15 +441,15 @@ def idlewarn(request: HttpRequest) -> HttpResponse:
 	context['title'] = 'Idle-warn'
 
 	newest = UploadedFile.objects\
-              .filter(category='psets')\
-              .filter(benefactor=OuterRef('pk'))\
-              .order_by('-created_at')\
-              .values('created_at')[:1]
+               .filter(category='psets')\
+               .filter(benefactor=OuterRef('pk'))\
+               .order_by('-created_at')\
+               .values('created_at')[:1]
 
 	students = annotate_multiple_students(get_visible_students(request.user).filter(legit=True))
 	context['students'] = students\
-              .annotate(latest_pset=Subquery(newest))\
-              .order_by('latest_pset')
+               .annotate(latest_pset=Subquery(newest))\
+               .order_by('latest_pset')
 
 	return render(request, "dashboard/idlewarn.html", context)
 
@@ -601,8 +601,8 @@ def api(request: HttpRequest) -> JsonResponse:
 		student = get_object_or_404(Student, pk=request.POST['student__pk'])
 		if 'next_unit_to_unlock__pk' not in request.POST:
 			unlockable_units = student.generate_curriculum_queryset()\
-                                      .exclude(has_pset = True)\
-                                      .exclude(id__in = student.unlocked_units.all())
+                                         .exclude(has_pset = True)\
+                                         .exclude(id__in = student.unlocked_units.all())
 			target = unlockable_units.first()
 		else:
 			target = get_object_or_404(Unit, pk=request.POST['next_unit_to_unlock__pk'])
@@ -621,8 +621,8 @@ def api(request: HttpRequest) -> JsonResponse:
 			{
 			'_name': 'Problem sets',
 			'_children': list(PSet.objects\
-                               .filter(approved=False, student__semester__active = True)\
-                               .values(
+                                 .filter(approved=False, student__semester__active = True)\
+                                 .values(
 			'pk',
 			'approved',
 			'feedback',
@@ -646,8 +646,8 @@ def api(request: HttpRequest) -> JsonResponse:
 			{
 			'_name': 'Inquiries',
 			'inquiries': list(UnitInquiry.objects\
-                               .filter(status = "NEW", student__semester__active = True)\
-                               .values(
+                                 .filter(status = "NEW", student__semester__active = True)\
+                                 .values(
 			'pk',
 			'unit__group__name',
 			'unit__code',
@@ -659,7 +659,7 @@ def api(request: HttpRequest) -> JsonResponse:
 			{
 			'_name' : 'Suggestions',
 			'_children' : list(ProblemSuggestion.objects.filter(resolved=False)\
-                               .values(
+                                 .values(
 			'pk',
 			'created_at',
 			'student__user__first_name',
