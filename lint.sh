@@ -1,5 +1,9 @@
 #!/bin/sh
 
+echo "Generating requirements.txt..."
+echo "---------------------------"
+poetry export > requirements.txt
+
 echo "Tidying files with yapf..."
 echo "---------------------------"
 yapf --in-place */*.py */tests/*.py */templatetags/*.py */management/commands/*.py
