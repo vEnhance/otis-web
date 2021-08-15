@@ -11,9 +11,7 @@ class Semester(models.Model):
 	"""Represents an academic semester/year/etc, e.g. "Fall 2017"
 	or "Year III"."""
 	name = models.CharField(
-		max_length=255,
-		help_text="Text description such as 'Year III'",
-		unique=True
+		max_length=255, help_text="Text description such as 'Year III'", unique=True
 	)
 	active = models.BooleanField(
 		default=False,
@@ -31,8 +29,7 @@ class Semester(models.Model):
 		help_text="The family of practice exams to display."
 	)
 	uses_legacy_pset_system = models.BooleanField(
-		help_text="Whether the pset uses the old system of upload checking",
-		default=False
+		help_text="Whether the pset uses the old system of upload checking", default=False
 	)
 
 	show_invoices = models.BooleanField(
@@ -52,28 +49,20 @@ class Semester(models.Model):
 	)
 
 	gradescope_key = models.CharField(
-		max_length=10,
-		blank=True,
-		help_text="The entry code for GradeScope this semester."
+		max_length=10, blank=True, help_text="The entry code for GradeScope this semester."
 	)
 	classroom_url = models.CharField(
-		max_length=128,
-		blank=True,
-		help_text="The entry point for the meeting room."
+		max_length=128, blank=True, help_text="The entry point for the meeting room."
 	)
 	social_url = models.CharField(
-		max_length=128,
-		blank=True,
-		help_text="The link to social platform for this year."
+		max_length=128, blank=True, help_text="The link to social platform for this year."
 	)
 
 	calendar_url_meets_evan = models.TextField(
-		blank=True,
-		help_text="Link to calendar for students with meetings with Evan"
+		blank=True, help_text="Link to calendar for students with meetings with Evan"
 	)
 	calendar_url_no_meets_evan = models.TextField(
-		blank=True,
-		help_text="Link to calendar for students without meetings with Evan"
+		blank=True, help_text="Link to calendar for students without meetings with Evan"
 	)
 
 	def __str__(self) -> str:
@@ -87,18 +76,12 @@ class UnitGroup(models.Model):
 	"""Represents an entire group of units with the same name,
 	differing only in difficulty and version"""
 	name = models.CharField(
-		max_length=255,
-		unique=True,
-		help_text="The display name for the handout, like 'Weird Geo'"
+		max_length=255, unique=True, help_text="The display name for the handout, like 'Weird Geo'"
 	)
 	slug = models.SlugField(
-		max_length=80,
-		help_text="The slug for the filename for this unit group",
-		unique=True
+		max_length=80, help_text="The slug for the filename for this unit group", unique=True
 	)
-	description = models.TextField(
-		help_text="A description of what this unit is", blank=True
-	)
+	description = models.TextField(help_text="A description of what this unit is", blank=True)
 	SUBJECT_CHOICES = (
 		("A", "Algebra (Hufflepuff)"),
 		("C", "Combinatorics (Gryffindor)"),
@@ -136,16 +119,12 @@ class UnitGroup(models.Model):
 class Unit(models.Model):
 	"""Represents a PDF of a unit, with problems and solutions"""
 	group = models.ForeignKey(
-		UnitGroup,
-		on_delete=models.CASCADE,
-		help_text="The group that this unit belongs to"
+		UnitGroup, on_delete=models.CASCADE, help_text="The group that this unit belongs to"
 	)
 	code = models.CharField(
 		max_length=255, help_text="The version code for the handout, like 'ZGX'"
 	)
-	position = PositionField(
-		help_text="The ordering of the relative handouts to each other."
-	)
+	position = PositionField(help_text="The ordering of the relative handouts to each other.")
 
 	def __str__(self) -> str:
 		if self.group is not None:

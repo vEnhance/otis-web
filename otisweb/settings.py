@@ -123,11 +123,10 @@ if os.getenv("DATABASE_NAME"):
 	}
 else:
 	DATABASES = {
-		'default':
-			{
-				'ENGINE': 'django.db.backends.sqlite3',
-				'NAME': BASE_DIR / 'db.sqlite3',
-			}
+		'default': {
+			'ENGINE': 'django.db.backends.sqlite3',
+			'NAME': BASE_DIR / 'db.sqlite3',
+		}
 	}
 
 # Password validation
@@ -135,8 +134,7 @@ else:
 
 AUTH_PASSWORD_VALIDATORS = [
 	{
-		'NAME':
-			'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+		'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
 	},
 	{
 		'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
@@ -191,19 +189,14 @@ else:
 	MEDIA_URL = '/media/'
 	SECRET_KEY = 'evan_chen_is_really_cool'
 
-FILE_UPLOAD_HANDLERS = (
-	'django.core.files.uploadhandler.MemoryFileUploadHandler',
-)
+FILE_UPLOAD_HANDLERS = ('django.core.files.uploadhandler.MemoryFileUploadHandler', )
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
 
 # Custom Evan keys
-INVOICE_HASH_KEY = os.getenv(
-	"INVOICE_HASH_KEY", "evan_chen_is_still_really_cool"
-)
+INVOICE_HASH_KEY = os.getenv("INVOICE_HASH_KEY", "evan_chen_is_still_really_cool")
 STORAGE_HASH_KEY = os.getenv("STORAGE_HASH_KEY", "look_at_me_im_a_cute_kitten")
 API_TARGET_HASH = os.getenv(
-	"API_TARGET_HASH",
-	'1c3592aa9241522fea1dd572c43c192a277e832dcd1ae63adfe069cb05624ead'
+	"API_TARGET_HASH", '1c3592aa9241522fea1dd572c43c192a277e832dcd1ae63adfe069cb05624ead'
 )
 
 
@@ -211,13 +204,13 @@ def filter_useless_404(record: logging.LogRecord) -> bool:
 	a = tuple(record.args)  # type: ignore
 	return not (
 		len(a) == 2 \
-            and a[0] == 'Not Found' \
-            and ('wp-include' in a[1] or '.php' in a[1])
+              and a[0] == 'Not Found' \
+              and ('wp-include' in a[1] or '.php' in a[1])
 		) \
-           and not (
+             and not (
 		len(a) == 3 \
-            and a[1] == '404' \
-            and ('wp-include' in a[0] or '.php' in a[0])
+              and a[1] == '404' \
+              and ('wp-include' in a[0] or '.php' in a[0])
 		)
 
 
@@ -273,23 +266,21 @@ LOGGING = {
 	},
 	'loggers':
 		{
-			'django':
-				{
-					'handlers': ['console', 'discord'],
-					'level': 'INFO',
-					'propagate': False,
-				},
+			'django': {
+				'handlers': ['console', 'discord'],
+				'level': 'INFO',
+				'propagate': False,
+			},
 			'django.db.backends':
 				{
 					'handlers': ['console', ],
 					'level': 'DEBUG',
 					'filters': ['require_debug_true'],
 				},
-			'django.server':
-				{
-					'handlers': ['console'],
-					'level': 'DEBUG',
-					'propagate': False,
-				}
+			'django.server': {
+				'handlers': ['console'],
+				'level': 'DEBUG',
+				'propagate': False,
+			}
 		},
 }

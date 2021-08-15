@@ -35,11 +35,7 @@ class ResolveSuggestionForm(forms.ModelForm):
 class PSetForm(forms.ModelForm):
 	content = forms.FileField(
 		help_text="The file itself",
-		validators=[
-			FileExtensionValidator(
-				allowed_extensions=['pdf', 'txt', 'tex', 'png', 'jpg']
-			)
-		]
+		validators=[FileExtensionValidator(allowed_extensions=['pdf', 'txt', 'tex', 'png', 'jpg'])]
 	)
 
 	class Meta:

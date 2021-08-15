@@ -16,24 +16,20 @@ from roster.models import Student
 def content_file_name(instance: 'UploadedFile', filename: str) -> str:
 	now = datetime.datetime.now()
 	return os.path.join(instance.category, instance.owner.username,\
-            now.strftime("%Y-%m-%d-%H%M%S"), filename)
+              now.strftime("%Y-%m-%d-%H%M%S"), filename)
 
 
 class UploadedFile(models.Model):
 	"""An uploaded file, for example a transcript or homework solutions."""
 	CHOICES = (
-		("psets", "PSet Submission"), ("scripts", "Transcript"),
-		("notes", "Notes / Comments"), ("misc", "Miscellaneous")
+		("psets", "PSet Submission"), ("scripts", "Transcript"), ("notes", "Notes / Comments"),
+		("misc", "Miscellaneous")
 	)
 	benefactor = models.ForeignKey(
-		Student,
-		on_delete=models.CASCADE,
-		help_text="The student for which this file is meant"
+		Student, on_delete=models.CASCADE, help_text="The student for which this file is meant"
 	)
 	owner = models.ForeignKey(
-		auth.User,
-		on_delete=models.CASCADE,
-		help_text="The user who uploaded the file"
+		auth.User, on_delete=models.CASCADE, help_text="The user who uploaded the file"
 	)
 	category = models.CharField(
 		max_length=10, choices=CHOICES, help_text="What kind of file this is"
@@ -44,11 +40,7 @@ class UploadedFile(models.Model):
 	content = models.FileField(
 		help_text="The file itself",
 		upload_to=content_file_name,
-		validators=[
-			FileExtensionValidator(
-				allowed_extensions=['pdf', 'txt', 'tex', 'png', 'jpg']
-			)
-		]
+		validators=[FileExtensionValidator(allowed_extensions=['pdf', 'txt', 'tex', 'png', 'jpg'])]
 	)
 	unit = models.ForeignKey(
 		Unit,
@@ -93,11 +85,7 @@ class SemesterDownloadFile(models.Model):
 	content = models.FileField(
 		help_text="The file itself",
 		upload_to=download_file_name,
-		validators=[
-			FileExtensionValidator(
-				allowed_extensions=['pdf', 'txt', 'tex', 'png', 'jpg']
-			)
-		]
+		validators=[FileExtensionValidator(allowed_extensions=['pdf', 'txt', 'tex', 'png', 'jpg'])]
 	)
 	created_at = models.DateTimeField(auto_now_add=True)
 
@@ -139,8 +127,7 @@ class PSet(models.Model):
 		],
 	)
 	clubs = models.IntegerField(
-		help_text=
-		"Total number of clubs that you solved (including 1♣ if feedback written)",
+		help_text="Total number of clubs that you solved (including 1♣ if feedback written)",
 		verbose_name="Total ♣ earned",
 		null=True,
 		blank=True,
@@ -165,12 +152,10 @@ class PSet(models.Model):
 		related_name='unblocking_psets',
 	)
 	special_notes = models.TextField(
-		help_text="If there's anything you need to say before we proceed",
-		blank=True
+		help_text="If there's anything you need to say before we proceed", blank=True
 	)
 	instructor_comments = models.TextField(
-		help_text="Any comment from the instructor about the submission",
-		blank=True
+		help_text="Any comment from the instructor about the submission", blank=True
 	)
 
 	def __str__(self):
@@ -182,14 +167,10 @@ class PSet(models.Model):
 
 class ProblemSuggestion(models.Model):
 	student = models.ForeignKey(
-		Student,
-		on_delete=models.CASCADE,
-		help_text="Student who suggested the problem."
+		Student, on_delete=models.CASCADE, help_text="Student who suggested the problem."
 	)
 	unit = models.ForeignKey(
-		Unit,
-		on_delete=models.CASCADE,
-		help_text="The unit to suggest the problem for."
+		Unit, on_delete=models.CASCADE, help_text="The unit to suggest the problem for."
 	)
 	weight = models.PositiveSmallIntegerField(
 		choices=((2, 2), (3, 3), (5, 5), (9, 9)), null=True, blank=True
@@ -205,17 +186,14 @@ class ProblemSuggestion(models.Model):
 	solution = models.TextField(help_text="Solution to the problem, in LaTeX.")
 	comments = models.TextField(help_text="Any extra comments.", blank=True)
 	acknowledge = models.BooleanField(help_text = \
-            "Acknowledge me for this contribution. "
+              "Acknowledge me for this contribution. "
 		"(Uncheck for an anonymous contribution.)", default=True)
 
-	resolved = models.BooleanField(
-		default=False, help_text="Whether staff has processed this."
-	)
+	resolved = models.BooleanField(default=False, help_text="Whether staff has processed this.")
 	reason = models.TextField(blank=True, help_text="Staff notes on reviewing.")
 	created_at = models.DateTimeField(auto_now_add=True)
 	notified = models.BooleanField(
-		default=False,
-		help_text="Whether student has received the staff's comments."
+		default=False, help_text="Whether student has received the staff's comments."
 	)
 
 	def __str__(self) -> str:
@@ -223,10 +201,7 @@ class ProblemSuggestion(models.Model):
 
 
 def achievement_image_file_name(instance: 'Achievement', filename: str) -> str:
-	return os.path.join(
-		'badges',
-		str(instance.pk) + os.path.splitext(filename)[-1]
-	)
+	return os.path.join('badges', str(instance.pk) + os.path.splitext(filename)[-1])
 
 
 class Achievement(models.Model):
@@ -239,9 +214,7 @@ class Achievement(models.Model):
 		blank=True
 	)
 	description = models.TextField(help_text="How to obtain this achievement")
-	active = models.BooleanField(
-		help_text="Whether the code is active right now", default=True
-	)
+	active = models.BooleanField(help_text="Whether the code is active right now", default=True)
 	diamonds = models.PositiveSmallIntegerField(
 		default=1, help_text="Amount of diamonds for this achievement"
 	)
@@ -251,12 +224,8 @@ class Achievement(models.Model):
 
 
 class Level(models.Model):
-	threshold = models.IntegerField(
-		unique=True, help_text="The number of the level"
-	)
-	name = models.CharField(
-		max_length=128, unique=True, help_text="The name of the level"
-	)
+	threshold = models.IntegerField(unique=True, help_text="The number of the level")
+	name = models.CharField(max_length=128, unique=True, help_text="The name of the level")
 
 	def __str__(self):
 		return f'Level {self.threshold}: {self.name}'

@@ -25,14 +25,9 @@ urlpatterns = [
 		r'robots.txt',
 		TemplateView.as_view(template_name='robots.txt', content_type='text/plain'),
 	),
-	path(
-		r'favicon.ico',
-		RedirectView.as_view(url="https://web.evanchen.cc/icons/favicon.ico")
-	),
+	path(r'favicon.ico', RedirectView.as_view(url="https://web.evanchen.cc/icons/favicon.ico")),
 	path(r'', RedirectView.as_view(pattern_name='index')),
-] + static(
-	settings.MEDIA_URL, document_root=settings.MEDIA_ROOT
-)  # type: ignore
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)  # type: ignore
 
 admin.site.site_header = 'OTIS-WEB Admin Control Panel'
 admin.site.index_title = 'Dashboard'

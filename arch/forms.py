@@ -7,9 +7,7 @@ from .models import Hint, Problem
 
 
 class HintUpdateFormWithReason(forms.ModelForm):
-	reason = forms.CharField(
-		max_length=255, help_text="Reason for editing.", required=False
-	)
+	reason = forms.CharField(max_length=255, help_text="Reason for editing.", required=False)
 
 	class Meta:
 		model = Hint
@@ -22,9 +20,7 @@ class HintUpdateFormWithReason(forms.ModelForm):
 
 
 class ProblemUpdateFormWithReason(forms.ModelForm):
-	reason = forms.CharField(
-		max_length=255, help_text="Reason for editing.", required=False
-	)
+	reason = forms.CharField(max_length=255, help_text="Reason for editing.", required=False)
 
 	class Meta:
 		model = Problem
@@ -69,7 +65,5 @@ class ProblemSelectWidget(forms.Select):
 
 class ProblemSelectForm(forms.Form):
 	lookup_problem = forms.ModelChoiceField(
-		to_field_name='puid',
-		queryset=Problem.objects.all(),
-		widget=ProblemSelectWidget
+		to_field_name='puid', queryset=Problem.objects.all(), widget=ProblemSelectWidget
 	)

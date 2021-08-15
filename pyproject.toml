@@ -35,6 +35,7 @@ yapf = "^0.31.0"
 
 [tool.yapf]
 based_on_style = "facebook"
+column_limit = 96
 use_tabs = true
 continuation_align_style = "valign-right"
 continuation_indent_width = 2

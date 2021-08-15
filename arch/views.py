@@ -34,8 +34,7 @@ class ExistStudentRequiredMixin(LoginRequiredMixin):
 		if not request.user.is_authenticated:
 			return super().dispatch(request, *args, **kwargs)
 		assert isinstance(request.user, User)
-		if not Student.objects.filter(user=request.user
-																	).exists() and not request.user.is_staff:
+		if not Student.objects.filter(user=request.user).exists() and not request.user.is_staff:
 			raise PermissionDenied(
 				'You have to be enrolled in at least one semester '
 				'of OTIS to use the ARCH system'
@@ -82,18 +81,14 @@ class HintDetail(HintObjectView, ExistStudentRequiredMixin, DetailView):
 	model = Hint
 
 
-class HintUpdate(
-	HintObjectView, ExistStudentRequiredMixin, RevisionMixin, UpdateView
-):
+class HintUpdate(HintObjectView, ExistStudentRequiredMixin, RevisionMixin, UpdateView):
 	context_object_name = "hint"
 	model = Hint
 	form_class = HintUpdateFormWithReason
 	object: ClassVar[Hint] = Hint()
 
 	def form_valid(self, form: BaseModelForm) -> HttpResponse:
-		reversion.set_comment(
-			form.cleaned_data['reason'] or form.cleaned_data['content']
-		)
+		reversion.set_comment(form.cleaned_data['reason'] or form.cleaned_data['content'])
 		return super().form_valid(form)
 
 	def get_context_data(self, **kwargs: Any) -> ContextType:
@@ -105,18 +100,14 @@ class HintUpdate(
 		return self.object.get_absolute_url()
 
 
-class ProblemUpdate(
-	ProblemObjectView, ExistStudentRequiredMixin, RevisionMixin, UpdateView
-):
+class ProblemUpdate(ProblemObjectView, ExistStudentRequiredMixin, RevisionMixin, UpdateView):
 	context_object_name = "problem"
 	model = Problem
 	form_class = ProblemUpdateFormWithReason
 	object: ClassVar[Problem] = Problem()
 
 	def form_valid(self, form: BaseModelForm) -> HttpResponse:
-		reversion.set_comment(
-			form.cleaned_data['reason'] or form.cleaned_data['description']
-		)
+		reversion.set_comment(form.cleaned_data['reason'] or form.cleaned_data['description'])
 		return super().form_valid(form)
 
 	def get_success_url(self):
@@ -140,9 +131,7 @@ class HintCreate(ExistStudentRequiredMixin, RevisionMixin, CreateView):
 		return initial
 
 
-class HintDelete(
-	HintObjectView, ExistStudentRequiredMixin, RevisionMixin, DeleteView
-):
+class HintDelete(HintObjectView, ExistStudentRequiredMixin, RevisionMixin, DeleteView):
 	context_object_name = "hint"
 	model = Hint
 	object: ClassVar[Hint] = Hint()
@@ -151,9 +140,7 @@ class HintDelete(
 		return reverse_lazy("hint-list", args=(self.object.problem.puid, ))
 
 
-class ProblemDelete(
-	ProblemObjectView, ExistStudentRequiredMixin, RevisionMixin, DeleteView
-):
+class ProblemDelete(ProblemObjectView, ExistStudentRequiredMixin, RevisionMixin, DeleteView):
 	context_object_name = "problem"
 	model = Problem
 	object: ClassVar[Problem] = Problem()
@@ -198,15 +185,12 @@ def archapi(request: HttpRequest) -> JsonResponse:
 	if settings.PRODUCTION:
 		token = request.POST.get('token')
 		assert token is not None
-		if not sha256(token.encode('ascii')
-									).hexdigest() == settings.API_TARGET_HASH:
+		if not sha256(token.encode('ascii')).hexdigest() == settings.API_TARGET_HASH:
 			return JsonResponse({'error': "☕"}, status=418)
 
 	def err(status: int = 400) -> JsonResponse:
 		logging.error(traceback.format_exc())
-		return JsonResponse(
-			{'error': ''.join(traceback.format_exc(limit=1))}, status=status
-		)
+		return JsonResponse({'error': ''.join(traceback.format_exc(limit=1))}, status=status)
 
 	action = request.POST['action']
 	puid = request.POST['puid'].upper()

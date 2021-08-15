@@ -109,8 +109,7 @@ def BNF() -> Any:
 		# by defining exponentiation as "atom [ ^ factor ]..." instead of "atom [ ^ atom ]...", we get right-to-left
 		# exponents, instead of left-to-right that is, 2^3^2 = 2^(3^2), not (2^3)^2.
 		factor = Forward()
-		factor <<= atom + (expop +
-												factor).setParseAction(push_first)[...]  # type: ignore
+		factor <<= atom + (expop + factor).setParseAction(push_first)[...]  # type: ignore
 		term = factor + (
 			multop +  # type: ignore
 			factor
