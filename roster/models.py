@@ -64,9 +64,6 @@ class Student(models.Model):
 			help_text = "A list of units that the student is actively working on. " \
 			"Once the student submits a problem set, " \
 			"delete it from this list to mark them as complete.")
-	num_units_done = models.SmallIntegerField(default = 0,
-			help_text = "The number of completed units. "
-			"This is set manually for Evan's book-keeping.")
 	usemo_score = models.SmallIntegerField(null = True, blank = True,
 			help_text = "The USEMO score for this year")
 

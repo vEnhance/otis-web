@@ -27,7 +27,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.db.models import Count, IntegerField, OuterRef, Subquery
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse  # NOQA
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import render
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
@@ -89,58 +89,6 @@ def finalize(request: HttpRequest, student_id: int) -> HttpResponse:
 		messages.error(request, "You didn't select any units. "
 				"You should select some units before using this link.")
 	return HttpResponseRedirect(reverse("portal", args=(student_id,)))
-
-@login_required
-def auto_advance(
-		request: HttpRequest,
-		student_id: int,
-		unit_id: int,
-		target_id: int = None
-		):
-	student = get_student_by_id(request, student_id)
-	unit = get_object_or_404(Unit, id = unit_id)
-
-	if not student.unlocked_units.filter(id=unit_id).exists() \
-			or not student.curriculum.filter(id=unit_id).exists():
-		messages.error(request,
-				f"The unit {unit} is not valid for auto-unlock.")
-		return HttpResponseRedirect(reverse("advance", args=(student_id,)))
-
-	unlockable_units = student.generate_curriculum_queryset()\
-			.exclude(has_pset = True)\
-			.exclude(id__in = student.unlocked_units.all())
-
-	if target_id is None:
-		target = unlockable_units.first()
-		if target is not None:
-			student.unlocked_units.add(target)
-		student.unlocked_units.remove(unit)
-		student.num_units_done += 1
-		student.save()
-		replace = False
-	else:
-		target = get_object_or_404(Unit, id = target_id)
-		if student.unlocked_units.filter(id=target_id).exists() \
-				or not student.curriculum.filter(id=target_id).exists():
-			messages.error(request,
-					f"The unit {target} is not valid for replacement.")
-			return HttpResponseRedirect(reverse("advance", args=(student_id,)))
-
-		student.unlocked_units.remove(unit)
-		student.unlocked_units.add(target)
-		replace = True
-
-	context: Dict[str, Any] = {}
-	context["target"] = target
-	if context["target"]:
-		context["title"] = f"{'Toggled' if replace else 'Unlocked'} {target} for {student.first_name}"
-	else:
-		context["title"] = student.name + " is done!"
-	context["replace"] = replace
-	context["finished"] = str(unit)
-	context["student"] = student
-	context["alternatives"] = unlockable_units
-	return render(request, "roster/auto-advance.html", context)
 
 @login_required
 def advance(request: HttpRequest, student_id: int) -> Any:

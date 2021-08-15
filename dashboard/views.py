@@ -3,11 +3,9 @@
 from __future__ import unicode_literals
 
 import logging
-from datetime import timedelta
 from hashlib import sha256
 from typing import Any, Dict, List
 
-from arch.views import ContextType
 from core.models import Semester, Unit
 from django.conf import settings
 from django.contrib import messages
@@ -16,8 +14,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin  # NOQA
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
-from django.db.models import Count, F, OuterRef, Q, Subquery, Sum  # NOQA
-from django.db.models.expressions import Exists, F
+from django.db.models import Count, OuterRef, Q, Subquery, Sum  # NOQA
+from django.db.models.expressions import Exists
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect  # NOQA
@@ -25,7 +23,6 @@ from django.http.request import HttpRequest
 from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
-from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.views.generic import DetailView, ListView
@@ -206,7 +203,7 @@ class FoundList(PermissionRequiredMixin, ListView):
 		students = self.achievement.student_set # type: ignore
 		return students.filter(semester__active = True)\
 				.select_related('user').order_by('user__first_name', 'user__last_name')
-	def get_context_data(self, **kwargs: Any) -> ContextType:
+	def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
 		context = super().get_context_data(**kwargs)
 		context['achievement'] = self.achievement
 		return context
@@ -394,57 +391,9 @@ class DeleteFile(LoginRequiredMixin, DeleteView):
 		return obj
 
 @staff_member_required
-def quasigrader(request: HttpRequest, num_hours: int = 336) -> HttpResponse:
-	context: Dict[str, Any] = {}
-	context['title'] = 'Quasi-grader'
-	num_hours = int(num_hours)
-
-	context['items'] = []
-
-	num_psets = dict(Student.objects\
-			.filter(semester__active=True, legit=True)\
-			.filter(uploadedfile__category='psets')\
-			.annotate(num_psets = Count('uploadedfile__unit', distinct=True))\
-			.values_list('id', 'num_psets'))
-
-	uploads = UploadedFile.objects\
-			.filter(created_at__gte = now() - timedelta(hours=num_hours))\
-			.filter(category='psets')\
-			.select_related('benefactor')\
-			.prefetch_related('benefactor__unlocked_units')\
-			.filter(benefactor__unlocked_units=F('unit'))\
-			.order_by('-created_at')
-
-	for upload in uploads:
-		# cut off filename
-		if len(upload.filename) > 16:
-			name = upload.filename[:12] + upload.filename[-4:]
-		else:
-			name = upload.filename
-
-		d = {'student': upload.benefactor,
-				'file': upload,
-				'rows': upload.benefactor.generate_curriculum_rows(True),
-				'num_psets': num_psets.get(upload.benefactor.id, None),
-				'num_done': upload.benefactor.num_units_done,
-				'filename': name
-				}
-		d['flag_num_not_one'] = d['num_psets'] is not None \
-			and (d['num_psets'] - d['num_done'] != 1)
-		context['items'].append(d)
-
-	context['inquiry_nag'] = UnitInquiry.objects\
-			.filter(status='NEW', student__semester__active = True).count()
-	context['suggestion_nag'] = ProblemSuggestion.objects\
-			.filter(resolved=False).count()
-	context['num_hours'] = num_hours
-
-	return render(request, "dashboard/quasigrader.html", context)
-
-@staff_member_required
 def idlewarn(request: HttpRequest) -> HttpResponse:
 	assert isinstance(request.user, User)
-	context = {}
+	context: Dict[str, Any] = {}
 	context['title'] = 'Idle-warn'
 
 	newest = UploadedFile.objects\
@@ -453,8 +402,10 @@ def idlewarn(request: HttpRequest) -> HttpResponse:
 			.order_by('-created_at')\
 			.values('created_at')[:1]
 
-	context['students'] = get_visible_students(request.user)\
-			.filter(legit=True)\
+	students = annotate_multiple_students(
+			get_visible_students(request.user).filter(legit=True)
+			)
+	context['students'] = students\
 			.annotate(latest_pset=Subquery(newest))\
 			.order_by('latest_pset')
 

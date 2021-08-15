@@ -1,5 +1,6 @@
 {% extends 'layout.html' %}
 {% load static %}
+{% load otis_extras %}
 
 {% block layout-content %}
 <p>This is <i>Idle-Warn</i>,
@@ -11,18 +12,18 @@ Be gentle! Don't be the bad guy.</p>
 <table class="table">
 <thead class="table-dark">
 <tr>
-	<th>#</th>
+	<th>Lv</th>
 	<th>Name</th>
 	<th colspan="2">Latest PSet Date</th>
 	<th>Format</th>
-	<th>Score</th>
+	<th>Units</th>
 </tr>
 </thead>
 
 <tbody>
 {% for student in students %}
 <tr>
-	<td>{{ forloop.counter }}</td>
+	<td>{{ student|level }}</td>
 	<td><a href="{% url "portal" student.id %}">
 			{{ student.name }}</a></td>
 	{% if student.latest_pset %}
@@ -32,7 +33,7 @@ Be gentle! Don't be the bad guy.</p>
 		<td colspan="2"><i>None</i></td>
 	{% endif%}
 	<td>{{ student.get_track }}</td>
-	<td>{{ student.num_units_done }} / {{ student.curriculum_length }}</td>
+	<td>{{ student.num_psets|default_if_none:0 }}</td>
 </tr>
 {% endfor %}
 </tbody>

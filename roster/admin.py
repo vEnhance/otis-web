@@ -28,7 +28,7 @@ class AssistantIEResource(RosterResource):
 class StudentInline(admin.TabularInline):
 	model = Student
 	fk_name = "assistant"
-	fields = ('name', 'semester', 'track', 'legit', 'num_units_done',)
+	fields = ('name', 'semester', 'track', 'legit',)
 	readonly_fields = ('user', 'name', 'semester',)
 	extra = 0
 	show_change_link = True
@@ -106,7 +106,7 @@ class InvoiceInline(admin.StackedInline):
 	readonly_fields = ('student', 'id',)
 @admin.register(Student)
 class StudentAdmin(ImportExportModelAdmin):
-	list_display = ('name', 'user', 'id', 'semester', 'legit', 'track', 'num_units_done', 'curriculum_length',)
+	list_display = ('name', 'user', 'id', 'semester', 'legit', 'track', 'curriculum_length',)
 	list_filter = ('semester__active', 'legit', 'semester', 'track', 'newborn',)
 	search_fields = ('user__first_name', 'user__last_name', 'user__username',)
 	autocomplete_fields = ('user', 'curriculum', 'unlocked_units',)
