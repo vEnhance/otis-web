@@ -325,11 +325,11 @@ def annotate_multiple_students(queryset: QuerySet[roster.models.Student]) -> Que
 	"""Helper function for constructing large lists of students
 	Selects all important information to prevent a bunch of SQL queries"""
 	clubs_sum = queryset.annotate(clubs_sum = Sum('pset__clubs'))\
-			.filter(pset__approved = True, pset__eligible = True, pk=OuterRef('pk'))
+			.filter(pset__approved = True, pset__eligible = True, pset__student__pk=OuterRef('pk'))
 	hearts_sum = queryset.annotate(hearts_sum = Sum('pset__hours'))\
-			.filter(pset__approved = True, pset__eligible = True, pk=OuterRef('pk'))
+			.filter(pset__approved = True, pset__eligible = True, pset__student__pk=OuterRef('pk'))
 	spades_quizzes = queryset.annotate(spades_quizzes_sum = Sum('examattempt__score'))\
-			.filter(pk=OuterRef('pk'))
+			.filter(examattempt__student__pk=OuterRef('pk'))
 	diamonds_sum = queryset.annotate(diamonds_sum=Sum('achievements__diamonds'))\
 			.filter(pk=OuterRef('pk'))
 
