@@ -14,8 +14,8 @@ from .models import Assistant, Invoice, RegistrationContainer, Student, StudentR
 
 class RosterResource(resources.ModelResource):
 	user_name = fields.Field(column_name='User Name',
-		attribute='user',
-		widget=widgets.ForeignKeyWidget(User, 'username'))
+														attribute='user',
+														widget=widgets.ForeignKeyWidget(User, 'username'))
 
 
 # Register your models here.
@@ -53,8 +53,9 @@ class StudentInline(admin.TabularInline):
 	extra = 0
 	show_change_link = True
 
-	def has_delete_permission(self, request: HttpRequest,
-		obj: Student = None) -> bool:
+	def has_delete_permission(self,
+														request: HttpRequest,
+														obj: Student = None) -> bool:
 		return False
 
 
@@ -102,9 +103,9 @@ class OwedFilter(admin.SimpleListFilter):
 	parameter_name = 'has_owed'
 
 	def lookups(self, request: HttpRequest,
-		model_admin: 'InvoiceAdmin') -> List[Tuple[str, str]]:
+							model_admin: 'InvoiceAdmin') -> List[Tuple[str, str]]:
 		return [("incomplete", "Incomplete"), ("paid", "Paid in full"),
-			("zero", "No payment")]
+						("zero", "No payment")]
 
 	def queryset(self, request: HttpRequest, queryset: QuerySet[Invoice]):
 		if self.value() is None:
@@ -153,11 +154,13 @@ class InvoiceAdmin(ImportExportModelAdmin):
 ## STUDENT
 class StudentIEResource(RosterResource):
 	semester_name = fields.Field(column_name='Semester Name',
-		attribute='semester',
-		widget=widgets.ForeignKeyWidget(Semester, 'name'))
+																attribute='semester',
+																widget=widgets.ForeignKeyWidget(
+																	Semester, 'name'))
 	unit_list = fields.Field(column_name='Unit List',
-		attribute='curriculum',
-		widget=widgets.ManyToManyWidget(Unit, separator=';'))
+														attribute='curriculum',
+														widget=widgets.ManyToManyWidget(Unit,
+																														separator=';'))
 
 	class Meta:
 		skip_unchanged = True
@@ -280,22 +283,22 @@ class StudentRegistrationAdmin(ImportExportModelAdmin):
 		'create_student',
 	]
 
-	def create_student(
-			self, request: HttpRequest, queryset: QuerySet[StudentRegistration]):
+	def create_student(self, request: HttpRequest,
+											queryset: QuerySet[StudentRegistration]):
 		students_to_create = []
 		queryset = queryset.exclude(processed=True)
 		queryset = queryset.select_related('user', 'container',
-			'container__semester')
+																				'container__semester')
 		for registration in queryset:
 			students_to_create.append(
 				Student(
-				user=registration.user,
-				semester=registration.container.semester,
-				track=registration.track,
+					user=registration.user,
+					semester=registration.container.semester,
+					track=registration.track,
 				))
 			registration.user.save()
 		messages.success(request,
-			message=f"Built {len(students_to_create)} students")
+											message=f"Built {len(students_to_create)} students")
 		_ = Student.objects.bulk_create(students_to_create)
 		_ = queryset.update(processed=True)
 
@@ -316,7 +319,7 @@ class UnitInquiryAdmin(admin.ModelAdmin):
 		'action_type',
 	)
 	search_fields = ('student__user__first_name', 'student__user__last_name',
-		'student__user__username')
+										'student__user__username')
 	list_display_links = ('id',)
 	autocomplete_fields = (
 		'unit',
@@ -330,16 +333,16 @@ class UnitInquiryAdmin(admin.ModelAdmin):
 	def hold_inquiry(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
 		_ = queryset.update(status='HOLD')
 
-	def reject_inquiry(
-			self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
+	def reject_inquiry(self, request: HttpRequest,
+											queryset: QuerySet[UnitInquiry]):
 		_ = queryset.update(status='REJ')
 
-	def accept_inquiry(
-			self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
+	def accept_inquiry(self, request: HttpRequest,
+											queryset: QuerySet[UnitInquiry]):
 		_ = queryset.update(status='ACC')
 
-	def reset_inquiry(
-			self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
+	def reset_inquiry(self, request: HttpRequest,
+										queryset: QuerySet[UnitInquiry]):
 		_ = queryset.update(status='NEW')
 
 

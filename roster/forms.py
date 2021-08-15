@@ -80,27 +80,29 @@ class InquiryForm(forms.ModelForm):
 	def __init__(self, *args: Any, **kwargs: Any):
 		super(InquiryForm, self).__init__(*args, **kwargs)
 		self.fields['unit'].queryset = \
-                  self.fields['unit'].queryset\
-                  .order_by('group__name', 'code')
+                    self.fields['unit'].queryset\
+                    .order_by('group__name', 'code')
 
 	class Meta:
 		model = UnitInquiry
 		fields = ('unit', 'action_type', 'explanation')
 		widgets = {
 			'explanation': forms.Textarea(attrs={
-			'cols': 40,
-			'rows': 3
+				'cols': 40,
+				'rows': 3
 			}),
 		}
 
 
 class DecisionForm(forms.ModelForm):
-	given_name = forms.CharField(max_length=128,
-		help_text="Your given (first) name, can be more than one")
+	given_name = forms.CharField(
+		max_length=128, help_text="Your given (first) name, can be more than one")
 	surname = forms.CharField(max_length=128, help_text="Your family (last) name")
-	email_address = forms.EmailField(label="Your email address (one you check)",
+	email_address = forms.EmailField(
+		label="Your email address (one you check)",
 		help_text="The email you want Evan to contact you with")
-	passcode = forms.CharField(max_length=128,
+	passcode = forms.CharField(
+		max_length=128,
 		label="Invitation passcode",
 		help_text="You should have gotten the passcode in your acceptance email.",
 		widget=forms.PasswordInput)

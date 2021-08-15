@@ -36,8 +36,8 @@ class SemesterAdmin(ImportExportModelAdmin):
 
 class UnitIEResource(resources.ModelResource):
 	group_name = fields.Field(column_name="group_name",
-		attribute="group",
-		widget=widgets.ForeignKeyWidget(UnitGroup, "name"))
+														attribute="group",
+														widget=widgets.ForeignKeyWidget(UnitGroup, "name"))
 
 	class Meta:
 		skip_unchanged = True

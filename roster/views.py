@@ -66,7 +66,7 @@ def curriculum(request: HttpRequest, student_id: int) -> HttpResponse:
 		form = forms.CurriculumForm(units=units, original=original, enabled=enabled)
 		if not enabled:
 			messages.info(request, "You can't edit this curriculum " \
-                          "since you are not an instructor.")
+                             "since you are not an instructor.")
 
 	context = {
 		'title': "Units for " + student.name,
@@ -131,9 +131,9 @@ def advance(request: HttpRequest, student_id: int) -> Any:
 def get_checksum(student: models.Student) -> str:
 	key = settings.INVOICE_HASH_KEY
 	return pbkdf2_hmac('sha256', (key + str(student.id) + 'meow').encode('utf-8'),
-		b'salt is yummy so is sugar',
-		100000,
-		dklen=18).hex()
+											b'salt is yummy so is sugar',
+											100000,
+											dklen=18).hex()
 
 
 @login_required
@@ -165,7 +165,7 @@ def invoice(request: HttpRequest, student_id: int = None) -> HttpResponse:
 
 # this is not gated
 def invoice_standalone(request: HttpRequest, student_id: int,
-	checksum: str) -> HttpResponse:
+												checksum: str) -> HttpResponse:
 	student = models.Student.objects.get(id=student_id)
 	if checksum != get_checksum(student):
 		raise PermissionDenied("Bad hash provided")
@@ -186,16 +186,16 @@ def invoice_standalone(request: HttpRequest, student_id: int,
 @staff_member_required
 def master_schedule(request: HttpRequest) -> HttpResponse:
 	student_names_and_unit_ids = get_current_students().filter(legit=True)\
-          .values('user__first_name', 'user__last_name', 'curriculum')
+           .values('user__first_name', 'user__last_name', 'curriculum')
 	unit_to_student_names = collections.defaultdict(list)
 	for d in student_names_and_unit_ids:
 		# e.g. d = {'name': Student, 'curriculum': 30}
 		unit_to_student_names[d['curriculum']].append(d['user__first_name'] + ' ' +
-			d['user__last_name'])
+																									d['user__last_name'])
 
 	chart: List[Dict[str, Any]] = []
 	unit_dicts = Unit.objects.order_by('position')\
-          .values('position', 'pk', 'group__subject', 'group__name', 'code')
+           .values('position', 'pk', 'group__subject', 'group__name', 'code')
 	for unit_dict in unit_dicts:
 		row = dict(unit_dict)
 		row['students'] = unit_to_student_names[unit_dict['pk']]
@@ -247,20 +247,20 @@ def inquiry(request: HttpRequest, student_id: int) -> HttpResponse:
 			# check if exists already and created recently
 			one_day_ago = timezone.now() - datetime.timedelta(seconds=90)
 			if models.UnitInquiry.objects.filter(unit=inquiry.unit, \
-                          student=student, action_type=inquiry.action_type, \
-                          created_at__gte = one_day_ago).exists():
+                             student=student, action_type=inquiry.action_type, \
+                             created_at__gte = one_day_ago).exists():
 				messages.warning(request, "The same inquiry already was "\
-                                  "submitted within the last 90 seconds.")
+                                      "submitted within the last 90 seconds.")
 			else:
 				inquiry.save()
 				# auto-acceptance criteria
 				auto_accept_criteria = (inquiry.action_type == "APPEND") \
-                                  or (inquiry.action_type == "DROP") \
-                                  or current_inquiries.filter(action_type="UNLOCK").count() <= 3 \
-                                  or request.user.is_staff
+                                      or (inquiry.action_type == "DROP") \
+                                      or current_inquiries.filter(action_type="UNLOCK").count() <= 3 \
+                                      or request.user.is_staff
 				# auto reject criteria
 				auto_reject_criteria = inquiry.action_type == "UNLOCK" and \
-                                  (current_inquiries.filter(action_type="UNLOCK", status="NEW").count()
+                                      (current_inquiries.filter(action_type="UNLOCK", status="NEW").count()
 					+ student.unlocked_units.count()) > 9
 
 				if auto_accept_criteria:
@@ -274,13 +274,13 @@ def inquiry(request: HttpRequest, student_id: int) -> HttpResponse:
 						"You can't have more than 9 unfinished units unlocked at once.")
 				else:
 					messages.success(request,
-						"Inquiry submitted, should be approved soon!")
+														"Inquiry submitted, should be approved soon!")
 	else:
 		form = forms.InquiryForm()
 	context['form'] = form
 
 	context['inquiries'] = models.UnitInquiry.objects\
-          .filter(student=student)
+           .filter(student=student)
 	context['student'] = student
 	context['curriculum'] = student.generate_curriculum_rows(
 		omniscient=can_edit(request, student))
@@ -294,24 +294,25 @@ class ListInquiries(PermissionRequiredMixin, ListView):
 
 	def get_queryset(self):
 		queryset = models.UnitInquiry.objects\
-                  .filter(created_at__gte = timezone.now() - datetime.timedelta(days=7))\
-                  .filter(student__semester__active = True)\
-                  .exclude(status="ACC")
+                    .filter(created_at__gte = timezone.now() - datetime.timedelta(days=7))\
+                    .filter(student__semester__active = True)\
+                    .exclude(status="ACC")
 
 		# some amazing code vv
 		count_unlock = models.UnitInquiry.objects\
-                  .filter(action_type="UNLOCK")\
-                  .filter(student=OuterRef('student'))\
-                  .order_by().values('student')\
-                  .annotate(c=Count('*')).values('c')
+                    .filter(action_type="UNLOCK")\
+                    .filter(student=OuterRef('student'))\
+                    .order_by().values('student')\
+                    .annotate(c=Count('*')).values('c')
 		count_all = models.UnitInquiry.objects\
-                  .filter(student=OuterRef('student'))\
-                  .order_by().values('student')\
-                  .annotate(c=Count('*')).values('c')
+                    .filter(student=OuterRef('student'))\
+                    .order_by().values('student')\
+                    .annotate(c=Count('*')).values('c')
 		# seriously wtf
 		return queryset.annotate(num_unlock=Subquery(count_unlock,
-			output_field=IntegerField()),
-			num_all=Subquery(count_all, output_field=IntegerField()))
+																									output_field=IntegerField()),
+															num_all=Subquery(count_all,
+																								output_field=IntegerField()))
 
 
 class EditInquiry(PermissionRequiredMixin, UpdateView):
@@ -334,7 +335,7 @@ def approve_inquiry(_: HttpRequest, pk: int) -> HttpResponse:
 @staff_member_required
 def approve_inquiry_all(_: HttpRequest) -> HttpResponse:
 	for inquiry in models.UnitInquiry.objects\
-          .filter(status="NEW", student__semester__active = True):
+           .filter(status="NEW", student__semester__active = True):
 		inquiry.run_accept()
 	return HttpResponseRedirect(reverse("list-inquiry"))
 
@@ -345,13 +346,14 @@ def register(request: HttpRequest) -> HttpResponse:
 		container = models.RegistrationContainer.objects.get(semester__active=True)
 	except:
 		return HttpResponse("There isn't a currently active OTIS semester.",
-			status=503)
+												status=503)
 
 	semester: Semester = container.semester
 	assert isinstance(request.user, User)
 	if models.StudentRegistration.objects.filter(user=request.user,
-		container=container).exists():
-		messages.info(request,
+																								container=container).exists():
+		messages.info(
+			request,
 			message="You have already submitted a decision form for this year!")
 		form = None
 	elif request.method == 'POST':
@@ -362,7 +364,8 @@ def register(request: HttpRequest) -> HttpResponse:
 				messages.error(request, message="Wrong passcode")
 			elif form.cleaned_data['track'] not in container.allowed_tracks.split(
 				','):
-				messages.error(request,
+				messages.error(
+					request,
 					message="That track is not currently accepting registrations.")
 			else:
 				registration = form.save(commit=False)
@@ -379,17 +382,18 @@ def register(request: HttpRequest) -> HttpResponse:
 		if container.allowed_tracks:
 			initial_data_dict = {}
 			most_recent_reg = models.StudentRegistration.objects\
-                          .filter(user = request.user).order_by('-id').first()
+                             .filter(user = request.user).order_by('-id').first()
 			if most_recent_reg is not None:
 				for k in ('parent_email', 'graduation_year', 'school_name',
-					'aops_username', 'gender'):
+									'aops_username', 'gender'):
 					initial_data_dict[k] = getattr(most_recent_reg, k)
 			form = forms.DecisionForm(initial=initial_data_dict)
 		else:
-			messages.warning(request,
+			messages.warning(
+				request,
 				message=
 				"The currently active semester isn't accepting registrations right now."
-											)
+			)
 			form = None
 	context = {
 		'title': f'{semester} Decision Form',
@@ -431,9 +435,9 @@ def api(request: HttpRequest) -> JsonResponse:
 	social = queryset.get()  # get the social account for this; should never 404
 	user = social.user
 	student = models.Student.objects.filter(user=user,
-		semester__active=True).first()
-	regform = models.StudentRegistration.objects.filter(user=user,
-		container__semester__active=True).first()
+																					semester__active=True).first()
+	regform = models.StudentRegistration.objects.filter(
+		user=user, container__semester__active=True).first()
 
 	if student is not None:
 		return JsonResponse({
@@ -455,14 +459,14 @@ def api(request: HttpRequest) -> JsonResponse:
 # TODO ugly hack but I'm tired of answering this requests
 @login_required
 def unlock_rest_of_mystery(request: HttpRequest,
-	delta: int = 1) -> HttpResponse:
+														delta: int = 1) -> HttpResponse:
 	student = infer_student(request)
 	assert delta == 1 or delta == 2
 	try:
 		mystery = student.unlocked_units.get(group__name="Mystery")
 	except Unit.DoesNotExist:
 		return HttpResponse("You don't have the Mystery unit unlocked!\n" \
-                  + f"You are currently {student}", status = 403)
+                    + f"You are currently {student}", status = 403)
 	added_unit = get_object_or_404(Unit, position=mystery.position + delta)
 	student.unlocked_units.remove(mystery)
 	student.curriculum.remove(mystery)

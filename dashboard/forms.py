@@ -11,8 +11,8 @@ class NewUploadForm(forms.ModelForm):
 		fields = ('category', 'content', 'description')
 		widgets = {
 			'description': forms.Textarea(attrs={
-			'cols': 40,
-			'rows': 2
+				'cols': 40,
+				'rows': 2
 			}),
 		}
 		help_texts = {
@@ -27,18 +27,19 @@ class ResolveSuggestionForm(forms.ModelForm):
 		fields = ('reason',)
 		widgets = {
 			'reason': forms.Textarea(attrs={
-			'cols': 30,
-			'rows': 4
+				'cols': 30,
+				'rows': 4
 			}),
 		}
 		help_texts = {'reason': ''}
 
 
 class PSetForm(forms.ModelForm):
-	content = forms.FileField(help_text="The file itself",
+	content = forms.FileField(
+		help_text="The file itself",
 		validators=[
-		FileExtensionValidator(
-		allowed_extensions=['pdf', 'txt', 'tex', 'png', 'jpg'])
+			FileExtensionValidator(
+				allowed_extensions=['pdf', 'txt', 'tex', 'png', 'jpg'])
 		])
 
 	class Meta:

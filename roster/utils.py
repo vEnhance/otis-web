@@ -70,12 +70,12 @@ def can_edit(request: HttpRequest, student: models.Student) -> bool:
 	assert isinstance(request.user, User)
 	if request.user.is_superuser:
 		return True
-	return request.user.is_staff and ((student.assistant is not None and
-		student.assistant.user == request.user) or
-		(student.unlisted_assistants.filter(user=request.user).exists()))
+	return request.user.is_staff and (
+		(student.assistant is not None and student.assistant.user == request.user)
+		or (student.unlisted_assistants.filter(user=request.user).exists()))
 
 
 def infer_student(request: HttpRequest) -> models.Student:
 	return get_object_or_404(models.Student.objects,
-		semester__active=True,
-		user=request.user)
+														semester__active=True,
+														user=request.user)

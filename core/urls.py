@@ -8,5 +8,5 @@ urlpatterns = [
 	path(r'unit/problems/<int:pk>/', views.unit_problems, name='view-problems'),
 	path(r'unit/tex/<int:pk>/', views.unit_tex, name='view-tex'),
 	path(r'unit/solutions/<int:pk>/', views.unit_solutions,
-	name='view-solutions'),
+				name='view-solutions'),
 ]

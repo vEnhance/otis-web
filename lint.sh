@@ -2,11 +2,6 @@
 
 echo "Reformatting files ..."
 yapf --in-place */*.py */tests/*.py */templatetags/*.py */management/commands/*.py
-if test $(whoami) = "evan"; then
-	if ! git status -s; then
-		vim -c ":Git"
-	fi
-fi
 
 echo "Running manage.py check ..."
 echo "---------------------------"

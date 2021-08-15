@@ -19,15 +19,16 @@ from sql_util.aggregates import Exists, SubqueryAggregate
 
 class Assistant(models.Model):
 	"""This is a wrapper object for a single assistant."""
-	user = models.OneToOneField(User,
+	user = models.OneToOneField(
+		User,
 		on_delete=models.CASCADE,
 		help_text="The Django Auth user attached to the Assistant.")
-	shortname = models.CharField(max_length=10,
-		help_text="Initials or short name for this Assistant")
+	shortname = models.CharField(
+		max_length=10, help_text="Initials or short name for this Assistant")
 	unlisted_students = models.ManyToManyField("Student", blank = True,
 		related_name = "unlisted_assistants",
 		help_text = "A list of students this assistant can see " \
-            "but which is not listed visibly.")
+             "but which is not listed visibly.")
 
 	@property
 	def first_name(self) -> str:
@@ -52,52 +53,57 @@ class Student(models.Model):
 	"""This is really a pair of a user and a semester (with a display name),
 	endowed with the data of the curriculum of that student.
 	It also names the assistant of the student, if any."""
-	user = models.ForeignKey(User,
+	user = models.ForeignKey(
+		User,
 		blank=True,
 		null=True,
 		on_delete=models.CASCADE,
 		help_text="The Django Auth user attached to the student")
 	semester = models.ForeignKey(Semester,
-		on_delete=models.CASCADE,
-		help_text="The semester for this student")
-	assistant = models.ForeignKey(Assistant,
+																on_delete=models.CASCADE,
+																help_text="The semester for this student")
+	assistant = models.ForeignKey(
+		Assistant,
 		blank=True,
 		null=True,
 		on_delete=models.SET_NULL,
 		help_text="The assistant for this student, if any")
 
-	curriculum = models.ManyToManyField(Unit,
+	curriculum = models.ManyToManyField(
+		Unit,
 		blank=True,
 		related_name='students_taking',
 		help_text="The choice of units that this student will work on")
 	unlocked_units = models.ManyToManyField(Unit, blank = True,
 		related_name = 'students_unlocked',
 		help_text = "A list of units that the student is actively working on. " \
-          "Once the student submits a problem set, " \
-          "delete it from this list to mark them as complete.")
-	usemo_score = models.SmallIntegerField(null=True,
-		blank=True,
-		help_text="The USEMO score for this year")
+           "Once the student submits a problem set, " \
+           "delete it from this list to mark them as complete.")
+	usemo_score = models.SmallIntegerField(
+		null=True, blank=True, help_text="The USEMO score for this year")
 
-	track = models.CharField(max_length=5,
+	track = models.CharField(
+		max_length=5,
 		choices=(
-		("A", "Weekly"),
-		("B", "Biweekly"),
-		("C", "Corr."),
-		("E", "Ext."),
-		("G", "Grad"),
-		("N", "N.A."),
-		("P", "Phantom"),
+			("A", "Weekly"),
+			("B", "Biweekly"),
+			("C", "Corr."),
+			("E", "Ext."),
+			("G", "Grad"),
+			("N", "N.A."),
+			("P", "Phantom"),
 		),
 		help_text="The track that the student is enrolled in for this semester.")
 
-	legit = models.BooleanField(default=True,
+	legit = models.BooleanField(
+		default=True,
 		help_text="Whether this student is still active. "
 		"Set to false for dummy accounts and the like. "
 		"This will hide them from the master schedule, for example.")
-	newborn = models.BooleanField(default=True,
-		help_text="Whether the student is newly created.")
-	achievements = models.ManyToManyField('dashboard.Achievement',
+	newborn = models.BooleanField(
+		default=True, help_text="Whether the student is newly created.")
+	achievements = models.ManyToManyField(
+		'dashboard.Achievement',
 		help_text="Codes that this student has obtained",
 		blank=True)
 
@@ -138,7 +144,7 @@ class Student(models.Model):
 			return self.get_track_display()
 		else:
 			return self.get_track_display() \
-                          + " + " + self.assistant.shortname
+                             + " + " + self.assistant.shortname
 
 	class Meta:
 		unique_together = (
@@ -146,7 +152,7 @@ class Student(models.Model):
 			'semester',
 		)
 		ordering = ('semester', '-legit', 'track', 'user__first_name',
-			'user__last_name')
+								'user__last_name')
 
 	@property
 	def meets_evan(self) -> bool:
@@ -173,13 +179,15 @@ class Student(models.Model):
 			))
 		else:
 			return queryset.annotate(has_pset=Exists('pset', filter=Q(student=self)),
-				approved=Exists('pset', filter=Q(student=self, approved=True)))
+																approved=Exists('pset',
+																								filter=Q(student=self,
+																													approved=True)))
 
 	def has_submitted_pset(self, unit: Unit) -> bool:
 		if self.semester.uses_legacy_pset_system:
 			return Unit.objects.filter(pk=unit.pk,
-				uploadedfile__benefactor=self,
-				uploadedfile__category='psets').exists()
+																	uploadedfile__benefactor=self,
+																	uploadedfile__category='psets').exists()
 		else:
 			return Unit.objects.filter(pk=unit.pk, pset__student=self).exists()
 
@@ -248,7 +256,7 @@ class Student(models.Model):
 		now = localtime()
 
 		if self.semester.first_payment_deadline is not None \
-                  and invoice.total_paid <= 0:
+                    and invoice.total_paid <= 0:
 			d = self.semester.first_payment_deadline - now
 			if d < timedelta(days=-7):
 				return 3
@@ -258,7 +266,7 @@ class Student(models.Model):
 				return 1
 
 		if self.semester.most_payment_deadline is not None \
-                  and invoice.total_paid < 2*invoice.total_cost/3:
+                    and invoice.total_paid < 2*invoice.total_cost/3:
 			d = self.semester.most_payment_deadline - now
 			if d < timedelta(days=-7):
 				return 7
@@ -279,31 +287,35 @@ class Student(models.Model):
 
 class Invoice(models.Model):
 	"""Billing information object for students."""
-	student = models.OneToOneField(Student,
+	student = models.OneToOneField(
+		Student,
 		on_delete=models.CASCADE,
 		help_text="The invoice that this student is for.")
-	preps_taught = models.SmallIntegerField(default=0,
+	preps_taught = models.SmallIntegerField(
+		default=0,
 		help_text="Number of semesters that development/preparation "
 		"costs are charged.")
 	hours_taught = models.DecimalField(max_digits=8,
-		decimal_places=2,
-		default=0,
-		help_text="Number of hours taught for.")
-	adjustment = models.DecimalField(max_digits=8,
+																			decimal_places=2,
+																			default=0,
+																			help_text="Number of hours taught for.")
+	adjustment = models.DecimalField(
+		max_digits=8,
 		decimal_places=2,
 		default=0,
 		help_text="Adjustment to the cost, e.g. for financial aid.")
-	extras = models.DecimalField(max_digits=8,
+	extras = models.DecimalField(
+		max_digits=8,
 		decimal_places=2,
 		default=0,
 		help_text="Additional payment, e.g. for T-shirts.")
 	total_paid = models.DecimalField(max_digits=8,
-		decimal_places=2,
-		default=0,
-		help_text="Amount paid.")
+																		decimal_places=2,
+																		default=0,
+																		help_text="Amount paid.")
 	updated_at = models.DateTimeField(auto_now=True)
-	forgive = models.BooleanField(default=False,
-		help_text="When switched on, won't hard-lock delinquents.")
+	forgive = models.BooleanField(
+		default=False, help_text="When switched on, won't hard-lock delinquents.")
 
 	def __str__(self):
 		return f"Invoice {self.pk or 0}"
@@ -327,9 +339,9 @@ class Invoice(models.Model):
 	@property
 	def total_cost(self) -> Decimal:
 		return self.prep_rate*self.preps_taught \
-                  + self.hour_rate*self.hours_taught \
-                  + self.extras \
-                  + self.adjustment
+                    + self.hour_rate*self.hours_taught \
+                    + self.extras \
+                    + self.adjustment
 
 	@property
 	def total_owed(self) -> Decimal:
@@ -347,31 +359,33 @@ class Invoice(models.Model):
 
 class UnitInquiry(models.Model):
 	unit = models.ForeignKey(Unit,
-		on_delete=models.CASCADE,
-		help_text="The unit being requested.")
+														on_delete=models.CASCADE,
+														help_text="The unit being requested.")
 	student = models.ForeignKey(Student,
-		on_delete=models.CASCADE,
-		help_text="The student making the request")
+															on_delete=models.CASCADE,
+															help_text="The student making the request")
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
-	action_type = models.CharField(max_length=10,
+	action_type = models.CharField(
+		max_length=10,
 		choices=(
-		("UNLOCK", "Unlock now"),
-		("APPEND", "Add for later"),
-		("DROP", "Drop"),
+			("UNLOCK", "Unlock now"),
+			("APPEND", "Add for later"),
+			("DROP", "Drop"),
 		),
 		help_text="Describe the action you want to make.")
 	status = models.CharField(max_length=5,
-		choices=(
-		("ACC", "Approved"),
-		("REJ", "Rejected"),
-		("NEW", "Pending"),
-		("HOLD", "On hold"),
-		),
-		default="NEW",
-		help_text="The current status of the inquiry.")
-	explanation = models.TextField(max_length=300,
+														choices=(
+															("ACC", "Approved"),
+															("REJ", "Rejected"),
+															("NEW", "Pending"),
+															("HOLD", "On hold"),
+														),
+														default="NEW",
+														help_text="The current status of the inquiry.")
+	explanation = models.TextField(
+		max_length=300,
 		blank=True,
 		help_text="Short explanation for this request (if needed).")
 
@@ -397,7 +411,7 @@ class UnitInquiry(models.Model):
 
 def content_file_name(instance: 'StudentRegistration', filename: str) -> str:
 	return os.path.join("agreement", str(instance.container.id),
-		instance.user.username + '_' + filename)
+											instance.user.username + '_' + filename)
 
 
 class RegistrationContainer(models.Model):
@@ -407,9 +421,10 @@ class RegistrationContainer(models.Model):
 		on_delete=models.CASCADE,
 	)
 	end_year = models.IntegerField(help_text="The year in which OTIS will end")
-	passcode = models.CharField(max_length=128,
-		help_text="The passcode for that year's registration")
-	allowed_tracks = models.CharField(max_length=256,
+	passcode = models.CharField(
+		max_length=128, help_text="The passcode for that year's registration")
+	allowed_tracks = models.CharField(
+		max_length=256,
 		help_text=
 		"A comma separated list of allowed tracks students can register for",
 		blank=True)
@@ -429,44 +444,48 @@ class StudentRegistration(models.Model):
 		help_text="Where to register for",
 		on_delete=models.CASCADE,
 	)
-	parent_email = models.EmailField(help_text="An email address "
+	parent_email = models.EmailField(
+		help_text="An email address "
 		"in case Evan needs to contact your parents or something.")
 	track = models.CharField(max_length=6,
-		choices=(
-		("C", "Correspondence"),
-		("B", "Meeting with Evan"),
-		("E", "Meeting with another instructor"),
-		("N", "None of the above"),
-		))
-	gender = models.CharField(max_length=2,
+														choices=(
+															("C", "Correspondence"),
+															("B", "Meeting with Evan"),
+															("E", "Meeting with another instructor"),
+															("N", "None of the above"),
+														))
+	gender = models.CharField(
+		max_length=2,
 		default='',
 		choices=(
-		("", "Prefer not to say"),
-		("M", "Male"),
-		("F", "Female"),
-		("H", "Nonbinary"),
-		("O", "Other"),
+			("", "Prefer not to say"),
+			("M", "Male"),
+			("F", "Female"),
+			("H", "Nonbinary"),
+			("O", "Other"),
 		),
 		help_text="If you are comfortable answering, "
 		"specify which gender you most closely identify with.",
 		blank=True)
 
-	graduation_year = models.IntegerField(choices=(
-		(0, "Already graduated high school"),
-		(2021, "Graduating in 2021"),
-		(2022, "Graduating in 2022"),
-		(2023, "Graduating in 2023"),
-		(2024, "Graduating in 2024"),
-		(2025, "Graduating in 2025"),
-		(2026, "Graduating in 2026"),
-		(2027, "Graduating in 2027"),
-		(2028, "Graduating in 2028"),
-		(2029, "Graduating in 2029"),
-	),
+	graduation_year = models.IntegerField(
+		choices=(
+			(0, "Already graduated high school"),
+			(2021, "Graduating in 2021"),
+			(2022, "Graduating in 2022"),
+			(2023, "Graduating in 2023"),
+			(2024, "Graduating in 2024"),
+			(2025, "Graduating in 2025"),
+			(2026, "Graduating in 2026"),
+			(2027, "Graduating in 2027"),
+			(2028, "Graduating in 2028"),
+			(2029, "Graduating in 2029"),
+		),
 		help_text="Enter your expected graduation year")
-	school_name = models.CharField(max_length=200,
-		help_text="Enter the name of your high school")
-	aops_username = models.CharField(max_length=200,
+	school_name = models.CharField(
+		max_length=200, help_text="Enter the name of your high school")
+	aops_username = models.CharField(
+		max_length=200,
 		help_text=
 		"Enter your Art of Problem Solving username (leave blank for none)",
 		blank=True)
@@ -475,151 +494,152 @@ class StudentRegistration(models.Model):
 		help_text="Signed agreement form, as a single PDF",
 		upload_to=content_file_name,
 		validators=[FileExtensionValidator(allowed_extensions=[
-		'pdf',
+			'pdf',
 		])])
 	processed = models.BooleanField(
 		help_text="Whether Evan has dealt with this kid yet", default=False)
-	country = models.CharField(max_length=6,
+	country = models.CharField(
+		max_length=6,
 		choices=(
-		("AFG", "Afghanistan (AFG)"),
-		("ALB", "Albania (ALB)"),
-		("ALG", "Algeria (ALG)"),
-		("AGO", "Angola (AGO)"),
-		("ARG", "Argentina (ARG)"),
-		("ARM", "Armenia (ARM)"),
-		("AUS", "Australia (AUS)"),
-		("AUT", "Austria (AUT)"),
-		("AZE", "Azerbaijan (AZE)"),
-		("BAH", "Bahrain (BAH)"),
-		("BGD", "Bangladesh (BGD)"),
-		("BLR", "Belarus (BLR)"),
-		("BEL", "Belgium (BEL)"),
-		("BEN", "Benin (BEN)"),
-		("BOL", "Bolivia (BOL)"),
-		("BIH", "Bosnia and Herzegovina (BIH)"),
-		("BWA", "Botswana (BWA)"),
-		("BRA", "Brazil (BRA)"),
-		("BRU", "Brunei (BRU)"),
-		("BGR", "Bulgaria (BGR)"),
-		("BFA", "Burkina Faso (BFA)"),
-		("KHM", "Cambodia (KHM)"),
-		("CAN", "Canada (CAN)"),
-		("CHI", "Chile (CHI)"),
-		("CHN", "People's Republic of China (CHN)"),
-		("COL", "Colombia (COL)"),
-		("CIS", "Commonwealth of Independent States (CIS)"),
-		("CRI", "Costa Rica (CRI)"),
-		("HRV", "Croatia (HRV)"),
-		("CUB", "Cuba (CUB)"),
-		("CYP", "Cyprus (CYP)"),
-		("CZE", "Czech Republic (CZE)"),
-		("CZS", "Czechoslovakia (CZS)"),
-		("DEN", "Denmark (DEN)"),
-		("DOM", "Dominican Republic (DOM)"),
-		("ECU", "Ecuador (ECU)"),
-		("EGY", "Egypt (EGY)"),
-		("EST", "Estonia (EST)"),
-		("FIN", "Finland (FIN)"),
-		("FRA", "France (FRA)"),
-		("GMB", "Gambia (GMB)"),
-		("GEO", "Georgia (GEO)"),
-		("GDR", "German Democratic Republic (GDR)"),
-		("GER", "Germany (GER)"),
-		("GHA", "Ghana (GHA)"),
-		("HEL", "Greece (HEL)"),
-		("GTM", "Guatemala (GTM)"),
-		("HND", "Honduras (HND)"),
-		("HKG", "Hong Kong (HKG)"),
-		("HUN", "Hungary (HUN)"),
-		("ISL", "Iceland (ISL)"),
-		("IND", "India (IND)"),
-		("IDN", "Indonesia (IDN)"),
-		("IRQ", "Iraq (IRQ)"),
-		("IRN", "Islamic Republic of Iran (IRN)"),
-		("IRL", "Ireland (IRL)"),
-		("ISR", "Israel (ISR)"),
-		("ITA", "Italy (ITA)"),
-		("CIV", "Ivory Coast (CIV)"),
-		("JAM", "Jamaica (JAM)"),
-		("JPN", "Japan (JPN)"),
-		("KAZ", "Kazakhstan (KAZ)"),
-		("KEN", "Kenya (KEN)"),
-		("PRK", "Democratic People's Republic of Korea (PRK)"),
-		("KOR", "Republic of Korea (KOR)"),
-		("KSV", "Kosovo (KSV)"),
-		("KWT", "Kuwait (KWT)"),
-		("KGZ", "Kyrgyzstan (KGZ)"),
-		("LAO", "Laos (LAO)"),
-		("LVA", "Latvia (LVA)"),
-		("LIE", "Liechtenstein (LIE)"),
-		("LTU", "Lithuania (LTU)"),
-		("LUX", "Luxembourg (LUX)"),
-		("MAC", "Macau (MAC)"),
-		("MDG", "Madagascar (MDG)"),
-		("MAS", "Malaysia (MAS)"),
-		("MRT", "Mauritania (MRT)"),
-		("MEX", "Mexico (MEX)"),
-		("MDA", "Republic of Moldova (MDA)"),
-		("MNG", "Mongolia (MNG)"),
-		("MNE", "Montenegro (MNE)"),
-		("MAR", "Morocco (MAR)"),
-		("MOZ", "Mozambique (MOZ)"),
-		("MMR", "Myanmar (MMR)"),
-		("NPL", "Nepal (NPL)"),
-		("NLD", "Netherlands (NLD)"),
-		("NZL", "New Zealand (NZL)"),
-		("NIC", "Nicaragua (NIC)"),
-		("NGA", "Nigeria (NGA)"),
-		("MKD", "North Macedonia (MKD)"),
-		("NOR", "Norway (NOR)"),
-		("OMN", "Oman (OMN)"),
-		("PAK", "Pakistan (PAK)"),
-		("PAN", "Panama (PAN)"),
-		("PAR", "Paraguay (PAR)"),
-		("PER", "Peru (PER)"),
-		("PHI", "Philippines (PHI)"),
-		("POL", "Poland (POL)"),
-		("POR", "Portugal (POR)"),
-		("PRI", "Puerto Rico (PRI)"),
-		("ROU", "Romania (ROU)"),
-		("RUS", "Russian Federation (RUS)"),
-		("RWA", "Rwanda (RWA)"),
-		("SLV", "El Salvador (SLV)"),
-		("SAU", "Saudi Arabia (SAU)"),
-		("SEN", "Senegal (SEN)"),
-		("SRB", "Serbia (SRB)"),
-		("SCG", "Serbia and Montenegro (SCG)"),
-		("SGP", "Singapore (SGP)"),
-		("SVK", "Slovakia (SVK)"),
-		("SVN", "Slovenia (SVN)"),
-		("SAF", "South Africa (SAF)"),
-		("ESP", "Spain (ESP)"),
-		("LKA", "Sri Lanka (LKA)"),
-		("SWE", "Sweden (SWE)"),
-		("SUI", "Switzerland (SUI)"),
-		("SYR", "Syria (SYR)"),
-		("TWN", "Taiwan (TWN)"),
-		("TJK", "Tajikistan (TJK)"),
-		("TZA", "Tanzania (TZA)"),
-		("THA", "Thailand (THA)"),
-		("TTO", "Trinidad and Tobago (TTO)"),
-		("TUN", "Tunisia (TUN)"),
-		("TUR", "Turkey (TUR)"),
-		("NCY", "Turkish Republic of Northern Cyprus (NCY)"),
-		("TKM", "Turkmenistan (TKM)"),
-		("UGA", "Uganda (UGA)"),
-		("UKR", "Ukraine (UKR)"),
-		("UAE", "United Arab Emirates (UAE)"),
-		("UNK", "United Kingdom (UNK)"),
-		("USA", "United States of America (USA)"),
-		("URY", "Uruguay (URY)"),
-		("USS", "Union of Soviet Socialist Republics (USS)"),
-		("UZB", "Uzbekistan (UZB)"),
-		("VEN", "Venezuela (VEN)"),
-		("VNM", "Vietnam (VNM)"),
-		("YEM", "Yemen (YEM)"),
-		("YUG", "Yugoslavia (YUG)"),
-		("ZWE", "Zimbabwe (ZWE)"),
+			("AFG", "Afghanistan (AFG)"),
+			("ALB", "Albania (ALB)"),
+			("ALG", "Algeria (ALG)"),
+			("AGO", "Angola (AGO)"),
+			("ARG", "Argentina (ARG)"),
+			("ARM", "Armenia (ARM)"),
+			("AUS", "Australia (AUS)"),
+			("AUT", "Austria (AUT)"),
+			("AZE", "Azerbaijan (AZE)"),
+			("BAH", "Bahrain (BAH)"),
+			("BGD", "Bangladesh (BGD)"),
+			("BLR", "Belarus (BLR)"),
+			("BEL", "Belgium (BEL)"),
+			("BEN", "Benin (BEN)"),
+			("BOL", "Bolivia (BOL)"),
+			("BIH", "Bosnia and Herzegovina (BIH)"),
+			("BWA", "Botswana (BWA)"),
+			("BRA", "Brazil (BRA)"),
+			("BRU", "Brunei (BRU)"),
+			("BGR", "Bulgaria (BGR)"),
+			("BFA", "Burkina Faso (BFA)"),
+			("KHM", "Cambodia (KHM)"),
+			("CAN", "Canada (CAN)"),
+			("CHI", "Chile (CHI)"),
+			("CHN", "People's Republic of China (CHN)"),
+			("COL", "Colombia (COL)"),
+			("CIS", "Commonwealth of Independent States (CIS)"),
+			("CRI", "Costa Rica (CRI)"),
+			("HRV", "Croatia (HRV)"),
+			("CUB", "Cuba (CUB)"),
+			("CYP", "Cyprus (CYP)"),
+			("CZE", "Czech Republic (CZE)"),
+			("CZS", "Czechoslovakia (CZS)"),
+			("DEN", "Denmark (DEN)"),
+			("DOM", "Dominican Republic (DOM)"),
+			("ECU", "Ecuador (ECU)"),
+			("EGY", "Egypt (EGY)"),
+			("EST", "Estonia (EST)"),
+			("FIN", "Finland (FIN)"),
+			("FRA", "France (FRA)"),
+			("GMB", "Gambia (GMB)"),
+			("GEO", "Georgia (GEO)"),
+			("GDR", "German Democratic Republic (GDR)"),
+			("GER", "Germany (GER)"),
+			("GHA", "Ghana (GHA)"),
+			("HEL", "Greece (HEL)"),
+			("GTM", "Guatemala (GTM)"),
+			("HND", "Honduras (HND)"),
+			("HKG", "Hong Kong (HKG)"),
+			("HUN", "Hungary (HUN)"),
+			("ISL", "Iceland (ISL)"),
+			("IND", "India (IND)"),
+			("IDN", "Indonesia (IDN)"),
+			("IRQ", "Iraq (IRQ)"),
+			("IRN", "Islamic Republic of Iran (IRN)"),
+			("IRL", "Ireland (IRL)"),
+			("ISR", "Israel (ISR)"),
+			("ITA", "Italy (ITA)"),
+			("CIV", "Ivory Coast (CIV)"),
+			("JAM", "Jamaica (JAM)"),
+			("JPN", "Japan (JPN)"),
+			("KAZ", "Kazakhstan (KAZ)"),
+			("KEN", "Kenya (KEN)"),
+			("PRK", "Democratic People's Republic of Korea (PRK)"),
+			("KOR", "Republic of Korea (KOR)"),
+			("KSV", "Kosovo (KSV)"),
+			("KWT", "Kuwait (KWT)"),
+			("KGZ", "Kyrgyzstan (KGZ)"),
+			("LAO", "Laos (LAO)"),
+			("LVA", "Latvia (LVA)"),
+			("LIE", "Liechtenstein (LIE)"),
+			("LTU", "Lithuania (LTU)"),
+			("LUX", "Luxembourg (LUX)"),
+			("MAC", "Macau (MAC)"),
+			("MDG", "Madagascar (MDG)"),
+			("MAS", "Malaysia (MAS)"),
+			("MRT", "Mauritania (MRT)"),
+			("MEX", "Mexico (MEX)"),
+			("MDA", "Republic of Moldova (MDA)"),
+			("MNG", "Mongolia (MNG)"),
+			("MNE", "Montenegro (MNE)"),
+			("MAR", "Morocco (MAR)"),
+			("MOZ", "Mozambique (MOZ)"),
+			("MMR", "Myanmar (MMR)"),
+			("NPL", "Nepal (NPL)"),
+			("NLD", "Netherlands (NLD)"),
+			("NZL", "New Zealand (NZL)"),
+			("NIC", "Nicaragua (NIC)"),
+			("NGA", "Nigeria (NGA)"),
+			("MKD", "North Macedonia (MKD)"),
+			("NOR", "Norway (NOR)"),
+			("OMN", "Oman (OMN)"),
+			("PAK", "Pakistan (PAK)"),
+			("PAN", "Panama (PAN)"),
+			("PAR", "Paraguay (PAR)"),
+			("PER", "Peru (PER)"),
+			("PHI", "Philippines (PHI)"),
+			("POL", "Poland (POL)"),
+			("POR", "Portugal (POR)"),
+			("PRI", "Puerto Rico (PRI)"),
+			("ROU", "Romania (ROU)"),
+			("RUS", "Russian Federation (RUS)"),
+			("RWA", "Rwanda (RWA)"),
+			("SLV", "El Salvador (SLV)"),
+			("SAU", "Saudi Arabia (SAU)"),
+			("SEN", "Senegal (SEN)"),
+			("SRB", "Serbia (SRB)"),
+			("SCG", "Serbia and Montenegro (SCG)"),
+			("SGP", "Singapore (SGP)"),
+			("SVK", "Slovakia (SVK)"),
+			("SVN", "Slovenia (SVN)"),
+			("SAF", "South Africa (SAF)"),
+			("ESP", "Spain (ESP)"),
+			("LKA", "Sri Lanka (LKA)"),
+			("SWE", "Sweden (SWE)"),
+			("SUI", "Switzerland (SUI)"),
+			("SYR", "Syria (SYR)"),
+			("TWN", "Taiwan (TWN)"),
+			("TJK", "Tajikistan (TJK)"),
+			("TZA", "Tanzania (TZA)"),
+			("THA", "Thailand (THA)"),
+			("TTO", "Trinidad and Tobago (TTO)"),
+			("TUN", "Tunisia (TUN)"),
+			("TUR", "Turkey (TUR)"),
+			("NCY", "Turkish Republic of Northern Cyprus (NCY)"),
+			("TKM", "Turkmenistan (TKM)"),
+			("UGA", "Uganda (UGA)"),
+			("UKR", "Ukraine (UKR)"),
+			("UAE", "United Arab Emirates (UAE)"),
+			("UNK", "United Kingdom (UNK)"),
+			("USA", "United States of America (USA)"),
+			("URY", "Uruguay (URY)"),
+			("USS", "Union of Soviet Socialist Republics (USS)"),
+			("UZB", "Uzbekistan (UZB)"),
+			("VEN", "Venezuela (VEN)"),
+			("VNM", "Vietnam (VNM)"),
+			("YEM", "Yemen (YEM)"),
+			("YUG", "Yugoslavia (YUG)"),
+			("ZWE", "Zimbabwe (ZWE)"),
 		),
 		default="USA")
 

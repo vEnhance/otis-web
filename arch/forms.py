@@ -8,8 +8,8 @@ from .models import Hint, Problem
 
 class HintUpdateFormWithReason(forms.ModelForm):
 	reason = forms.CharField(max_length=255,
-		help_text="Reason for editing.",
-		required=False)
+														help_text="Reason for editing.",
+														required=False)
 
 	class Meta:
 		model = Hint
@@ -23,8 +23,8 @@ class HintUpdateFormWithReason(forms.ModelForm):
 
 class ProblemUpdateFormWithReason(forms.ModelForm):
 	reason = forms.CharField(max_length=255,
-		help_text="Reason for editing.",
-		required=False)
+														help_text="Reason for editing.",
+														required=False)
 
 	class Meta:
 		model = Problem
@@ -39,13 +39,13 @@ class ProblemUpdateFormWithReason(forms.ModelForm):
 class ProblemSelectWidget(forms.Select):
 
 	def create_option(self,
-		name: str,
-		value: Any,
-		label: Union[int, str],
-		selected: Union[Set[str], bool],
-		index: int,
-		subindex: int = None,
-		attrs: Dict[str, Any] = None):
+										name: str,
+										value: Any,
+										label: Union[int, str],
+										selected: Union[Set[str], bool],
+										index: int,
+										subindex: int = None,
+										attrs: Dict[str, Any] = None):
 		option = super().create_option(
 			name,
 			value,
@@ -66,5 +66,5 @@ class ProblemSelectWidget(forms.Select):
 
 class ProblemSelectForm(forms.Form):
 	lookup_problem = forms.ModelChoiceField(to_field_name='puid',
-		queryset=Problem.objects.all(),
-		widget=ProblemSelectWidget)
+																					queryset=Problem.objects.all(),
+																					widget=ProblemSelectWidget)
