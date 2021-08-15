@@ -115,6 +115,9 @@ django-registration==3.2; python_version >= "3.6" \
 django-reversion==4.0.0; python_version >= "3.6" \
     --hash=sha256:ad6d714b4b9b824e22b88d47201cc0f74b5c4294c8d4e1f8d7ac7c3631ef3188 \
     --hash=sha256:f059c654e38c0dd8dccd7f0990aa2f6d9ad22dab55c5e095f9596aeda8079dcd
+django-sql-utils==0.6.1 \
+    --hash=sha256:4690d9e286095e3a027122fb99dc5d4f2285c64b6e35a2f59467567f293b18af \
+    --hash=sha256:4d142f35fbc027e030021ab110d1445bd88988eb6a104169d99abff436dc03d5
 django-storages==1.11.1; python_version >= "3.5" \
     --hash=sha256:c823dbf56c9e35b0999a13d7e05062b837bae36c518a40255d522fbe3750fbb4 \
     --hash=sha256:f28765826d507a0309cfaa849bd084894bc71d81bf0d09479168d44785396f80

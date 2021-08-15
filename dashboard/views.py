@@ -20,7 +20,6 @@ from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count, F, OuterRef, Q, Subquery, Sum  # NOQA
 from django.db.models.expressions import Exists, F
-from django.db.models.fields import FloatField, IntegerField
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect  # NOQA
@@ -34,6 +33,7 @@ from django.views.decorators.http import require_POST
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from roster.utils import can_edit, can_view, get_student_by_id, get_visible_students  # NOQA
+from sql_util.utils import SubqueryAggregate
 
 from dashboard.models import Achievement
 
@@ -324,22 +324,13 @@ def uploads(request: HttpRequest, student_id: int, unit_id: int) -> HttpResponse
 def annotate_multiple_students(queryset: QuerySet[roster.models.Student]) -> QuerySet[roster.models.Student]:
 	"""Helper function for constructing large lists of students
 	Selects all important information to prevent a bunch of SQL queries"""
-	clubs_sum = queryset.annotate(clubs_sum = Sum('pset__clubs'))\
-			.filter(pset__approved = True, pset__eligible = True, pset__student__pk=OuterRef('pk'))
-	hearts_sum = queryset.annotate(hearts_sum = Sum('pset__hours'))\
-			.filter(pset__approved = True, pset__eligible = True, pset__student__pk=OuterRef('pk'))
-	spades_quizzes = queryset.annotate(spades_quizzes_sum = Sum('examattempt__score'))\
-			.filter(examattempt__student__pk=OuterRef('pk'))
-	diamonds_sum = queryset.annotate(diamonds_sum=Sum('achievements__diamonds'))\
-			.filter(pk=OuterRef('pk'))
-
-	return queryset.annotate(
-				num_psets = Count('pset__pk', filter = Q(pset__approved = True, pset__eligible = True)),
-				clubs = Subquery(clubs_sum.values('clubs_sum'), output_field = IntegerField()),
-				hearts = Subquery(hearts_sum.values('hearts_sum'), output_field = FloatField()),
-				spades_quizzes = Subquery(spades_quizzes.values('spades_quizzes_sum'), output_field = IntegerField()),
-				diamonds = Subquery(diamonds_sum.values('diamonds_sum'), output_field = IntegerField())
-				).select_related('user', 'assistant', 'semester')
+	return queryset.select_related('user', 'assistant', 'semester').annotate(
+				num_psets = SubqueryAggregate('pset__pk',filter=Q(approved=True,eligible=True), aggregate=Count),
+				clubs = SubqueryAggregate('pset__clubs', filter=Q(approved=True,eligible=True), aggregate=Sum),
+				hearts = SubqueryAggregate('pset__hours', filter=Q(approved=True,eligible=True), aggregate=Sum),
+				spades_quizzes = SubqueryAggregate('examattempt__score', aggregate=Sum),
+				diamonds = SubqueryAggregate('achievements__diamonds', filter=Q(active=True), aggregate=Sum),
+				)
 
 @login_required
 def index(request: HttpRequest) -> HttpResponse:
