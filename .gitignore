@@ -17,3 +17,4 @@ evanchen-cc-*.json
 env
 poetry.lock
 htmlcov/*
+.coverage

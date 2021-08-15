@@ -31,12 +31,18 @@ pdbpp = "^0.10.3"
 jedi = "^0.18.0"
 ipython = "^7.26.0"
 coverage = {extras = ["toml"], version = "^5.5"}
+yapf = "^0.31.0"
+
+[tool.yapf]
+based_on_style = "google"
+use_tabs = true
 
 [tool.coverage.run]
 branch = true
 omit = [
 	"*/site-packages/*",
-	"*/migrations/*"
+	"*/migrations/*",
+	"manage.py",
 ]
 
 [tool.pyright]
