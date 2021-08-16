@@ -266,10 +266,9 @@ def inquiry(request: HttpRequest, student_id: int) -> HttpResponse:
 				inquiry.save()
 				# auto-acceptance criteria
 				auto_accept_criteria = (inquiry.action_type
-																== "APPEND") or (inquiry.action_type
-																									== "DROP") or current_inquiries.filter(
-																										action_type="UNLOCK"
-																									).count() <= 3 or request.user.is_staff
+					== "APPEND") or (inquiry.action_type
+					== "DROP") or current_inquiries.filter(action_type="UNLOCK"
+																								).count() <= 3 or request.user.is_staff
 				# auto reject criteria
 				auto_reject_criteria = inquiry.action_type == "UNLOCK" and (
 					current_inquiries.filter(action_type="UNLOCK", status="NEW").count() +
@@ -353,12 +352,12 @@ def mailchimp_subscribe(user: User):
 	client = MailChimp(mc_api=os.getenv('MAILCHIMP_API_KEY'), mc_user='vEnhance')
 	client.lists.members.create(
 		os.getenv('MAILCHIMP_LIST_ID'), {
-			'email_address': user.email,
-			'status': 'subscribed',
-			'merge_fields': {
-				'FNAME': user.first_name,
-				'LNAME': user.last_name,
-			}
+		'email_address': user.email,
+		'status': 'subscribed',
+		'merge_fields': {
+		'FNAME': user.first_name,
+		'LNAME': user.last_name,
+		}
 		}
 	)
 
@@ -473,14 +472,14 @@ def api(request: HttpRequest) -> JsonResponse:
 	if student is not None:
 		return JsonResponse(
 			{
-				'result': 'success',
-				'user': social.user.username,
-				'name': social.user.get_full_name(),
-				'uid': uid,
-				'track': student.track,
-				'gender': regform.gender if regform is not None else '?',
-				'country': regform.country if regform is not None else '???',
-				'num_years': models.Student.objects.filter(user=user).count(),
+			'result': 'success',
+			'user': social.user.username,
+			'name': social.user.get_full_name(),
+			'uid': uid,
+			'track': student.track,
+			'gender': regform.gender if regform is not None else '?',
+			'country': regform.country if regform is not None else '???',
+			'num_years': models.Student.objects.filter(user=user).count(),
 			}
 		)
 	elif student is None and regform is not None:

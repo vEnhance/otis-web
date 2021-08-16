@@ -18,28 +18,28 @@ urlpatterns = [
 	path(r'past/<int:semester>/', views.past, name='past'),
 	path(r'index/', views.index, name='index'),
 	path(
-		r'suggest/<int:student_id>/new/',
-		views.ProblemSuggestionCreate.as_view(),
-		name='suggest-new'
+	r'suggest/<int:student_id>/new/',
+	views.ProblemSuggestionCreate.as_view(),
+	name='suggest-new'
 	),
 	path(
-		r'suggest/<int:student_id>/<int:unit_id>/new/',
-		views.ProblemSuggestionCreate.as_view(),
-		name='suggest-new'
+	r'suggest/<int:student_id>/<int:unit_id>/new/',
+	views.ProblemSuggestionCreate.as_view(),
+	name='suggest-new'
 	),
 	path(
-		r'suggest/<int:pk>/edit/', views.ProblemSuggestionUpdate.as_view(), name='suggest-update'
+	r'suggest/<int:pk>/edit/', views.ProblemSuggestionUpdate.as_view(), name='suggest-update'
 	),
 	path(
-		r'suggest/<int:student_id>/list/',
-		views.ProblemSuggestionList.as_view(),
-		name='suggest-list'
+	r'suggest/<int:student_id>/list/',
+	views.ProblemSuggestionList.as_view(),
+	name='suggest-list'
 	),
 	path(r'suggest/resolve/', views.pending_contributions, name='pending-suggest'),
 	path(
-		r'suggest/resolve/<int:suggestion_id>/',
-		views.pending_contributions,
-		name='resolve-suggest'
+	r'suggest/resolve/<int:suggestion_id>/',
+	views.pending_contributions,
+	name='resolve-suggest'
 	),
 	path(r'leaderboard/', views.leaderboard, name='leaderboard'),
 	path(r'api/', views.api, name='resolve-suggest'),
