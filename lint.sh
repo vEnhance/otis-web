@@ -1,17 +1,17 @@
 #!/bin/sh
 
-echo "Generating requirements.txt..."
+echo "Generating requirements.txt ..."
 echo "---------------------------"
 poetry export > requirements.txt
 echo ""
 
-echo "Making migrations..."
+echo "Making migrations ..."
 echo "---------------------------"
 python manage.py makemigrations
 python manage.py migrate
 echo ""
 
-echo "Tidying files with yapf..."
+echo "Tidying files with yapf ..."
 echo "---------------------------"
 yapf --in-place */*.py */tests/*.py */templatetags/*.py */management/commands/*.py
 echo ""
@@ -24,10 +24,10 @@ if ! python manage.py check; then
 fi
 echo ""
 
-echo "Running pyright type ..."
+echo "Running pyright ..."
 echo "---------------------------"
 if ! pyright; then
-	echo "FAILED: python manage.py check failed" >> /dev/stderr
+	echo "FAILED: pyright failed" >> /dev/stderr
 	exit 1
 fi
 echo ""
