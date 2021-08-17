@@ -266,7 +266,7 @@ LOGGING = {
 			},
 			'django.db.backends':
 				{
-					'handlers': ['console', ],
+					'handlers': ['console'],
 					'level': 'DEBUG',
 					'filters': ['require_debug_true'],
 				},
@@ -274,6 +274,17 @@ LOGGING = {
 				'handlers': ['console'],
 				'level': 'DEBUG',
 				'propagate': False,
-			}
+			},
+			'mailchimp3.client': {
+				'handlers': ['NullHandler'],
+				'level': 'DEBUG',
+				'propagate': False,
+			},
+			'mailchimp3.client':
+				{
+					'handlers': ['console', 'discord'],
+					'level': 'WARNING',
+					'propagate': False,
+				}
 		},
 }
