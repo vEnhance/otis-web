@@ -112,7 +112,6 @@
 		<a href="{% url "submit-pset" student.id %}" style="margin: 0 auto; width: 120px;"
 			class="btn btn-success text-white" role="button">Submit unit</a>
 	</div>
-	<hr />
 {% endif %}
 
 {% if suggestions|length %}
@@ -143,6 +142,20 @@ They are listed below, with comments from staff.</p>
 </a></p>
 </div>
 {% endif %}
+
+{% if emails %}
+<h2>Recent announcements</h2>
+<ul>
+{% for email in emails %}
+	<li>
+		<a href="{{email.url}}">{{email.title}}</a>: {{email.timestamp}}<br />
+			{{ email.preview_text }}
+	</li>
+{% endfor %}
+</ul>
+{% endif %}
+
+<hr />
 
 <h2>Your units</h2>
 {% include "dashboard/list_curriculum.html" %}

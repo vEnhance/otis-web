@@ -3,6 +3,8 @@
 from __future__ import unicode_literals
 
 import logging
+import os
+from datetime import datetime, timedelta
 from hashlib import sha256
 from typing import Any, Dict, List
 
@@ -23,11 +25,13 @@ from django.http.request import HttpRequest
 from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from exams.models import ExamAttempt, PracticeExam
+from mailchimp3 import MailChimp
 from roster.models import Student, StudentRegistration, UnitInquiry
 from roster.utils import can_edit, can_view, get_student_by_id, get_visible_students  # NOQA
 from sql_util.utils import SubqueryAggregate
@@ -141,6 +145,17 @@ def portal(request: HttpRequest, student_id: int) -> HttpResponse:
 	# check if the student has any new processed suggestions
 	suggestions = ProblemSuggestion.objects.filter(resolved=True, student=student, notified=False)
 
+	# mailchimp
+	client = MailChimp(mc_api=os.getenv('MAILCHIMP_API_KEY'), mc_user='vEnhance')
+	timestamp = (timezone.now() + timedelta(days=-28))
+	mailchimp_campaign_data = client.campaigns.all(
+		get_all=True, status='sent', since_send_time=timestamp
+	)
+	if mailchimp_campaign_data is not None:
+		campaigns = mailchimp_campaign_data['campaigns']
+	else:
+		campaigns = []
+
 	context: Dict[str, Any] = {}
 	context['title'] = f"{student.name} ({semester.name})"
 	context['student'] = student
@@ -154,6 +169,14 @@ def portal(request: HttpRequest, student_id: int) -> HttpResponse:
 	context['quizzes'] = PracticeExam.objects.filter(
 		is_test=False, family=semester.exam_family, due_date__isnull=False
 	)
+	context['emails'] = [
+		{
+		'url': c['archive_url'],
+		'title': c['settings']['title'],
+		'preview_text': c['settings']['preview_text'],
+		'timestamp': datetime.fromisoformat(c['send_time'])
+		} for c in campaigns
+	]
 	context['num_sem_download'] = SemesterDownloadFile.objects.filter(semester=semester).count()
 	context.update(_get_meter_update(student))
 	return render(request, "dashboard/portal.html", context)
