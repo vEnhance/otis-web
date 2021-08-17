@@ -71,7 +71,12 @@
 			I suggest to pick 15-20 units you are most interested in.
 			(If you're joining halfway through, start with 7-10 units.)
 			You can save this form multiple times;
-			the intermediate results will be shown below.</li>
+			the intermediate results will be shown below.
+
+			<a href="{% url "currshow" student.id %}" class="text-white btn btn-success"/>
+				Open selection form
+			</a>
+		</li>
 		<li>Once you are happy with your selection, you may
 			finalize your choices.
 			<form action="{% url "finalize" student.id %}" method="post">
