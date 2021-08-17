@@ -21,9 +21,9 @@ class Semester(models.Model):
 	exam_family = models.CharField(
 		max_length=10,
 		choices=(
-		("Waltz", "Waltz"),
-		("Foxtrot", "Foxtrot"),
-		("", "--"),
+			("Waltz", "Waltz"),
+			("Foxtrot", "Foxtrot"),
+			("", "--"),
 		),
 		default="",
 		help_text="The family of practice exams to display."

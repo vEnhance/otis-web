@@ -125,7 +125,7 @@ class PSet(models.Model):
 		null=True,
 		blank=True,
 		validators=[
-		MaxValueValidator(200),
+			MaxValueValidator(200),
 		],
 	)
 	clubs = models.IntegerField(
@@ -134,7 +134,7 @@ class PSet(models.Model):
 		null=True,
 		blank=True,
 		validators=[
-		MaxValueValidator(200),
+			MaxValueValidator(200),
 		]
 	)
 	eligible = models.BooleanField(

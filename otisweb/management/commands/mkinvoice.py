@@ -20,9 +20,9 @@ class Command(BaseCommand):
 		for s in students:
 			invoices.append(
 				roster.models.Invoice(
-				student=s,
-				preps_taught=options['preps'],
-				hours_taught=8.4 if (s.track == 'A' or s.track == 'B') else 0,
+					student=s,
+					preps_taught=options['preps'],
+					hours_taught=8.4 if (s.track == 'A' or s.track == 'B') else 0,
 				)
 			)
 		print(f"Created {len(invoices)} invoices")

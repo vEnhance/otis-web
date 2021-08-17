@@ -31,8 +31,8 @@ class PracticeExam(models.Model):
 	family = models.CharField(
 		max_length=10,
 		choices=(
-		("Waltz", "Waltz"),
-		("Foxtrot", "Foxtrot"),
+			("Waltz", "Waltz"),
+			("Foxtrot", "Foxtrot"),
 		),
 		help_text="The family that the exam comes from."
 	)
@@ -119,27 +119,27 @@ class ExamAttempt(models.Model):
 	)
 	guess1 = models.CharField(
 		max_length=18, blank=True, verbose_name="Problem 1 response", validators=[
-		expr_validator,
+			expr_validator,
 		]
 	)
 	guess2 = models.CharField(
 		max_length=18, blank=True, verbose_name="Problem 2 response", validators=[
-		expr_validator,
+			expr_validator,
 		]
 	)
 	guess3 = models.CharField(
 		max_length=18, blank=True, verbose_name="Problem 3 response", validators=[
-		expr_validator,
+			expr_validator,
 		]
 	)
 	guess4 = models.CharField(
 		max_length=18, blank=True, verbose_name="Problem 4 response", validators=[
-		expr_validator,
+			expr_validator,
 		]
 	)
 	guess5 = models.CharField(
 		max_length=18, blank=True, verbose_name="Problem 5 response", validators=[
-		expr_validator,
+			expr_validator,
 		]
 	)
 	submit_time = models.DateTimeField(help_text="When the quiz was submitted", auto_now_add=True)

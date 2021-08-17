@@ -81,10 +81,10 @@ def quiz(request: HttpRequest, student_id: int, pk: int) -> HttpResponse:
 
 			context['rows'].append(
 				{
-				'field': field,
-				'accepted': accepted_str,
-				'correct': correct,
-				'url': getattr(quiz, f'url{i}', None)
+					'field': field,
+					'accepted': accepted_str,
+					'correct': correct,
+					'url': getattr(quiz, f'url{i}', None)
 				}
 			)
 			if correct:

@@ -22,8 +22,8 @@ urlpatterns = [
 	path(r'accounts/', include('allauth.urls')),
 	path(r'__debug__/', include(debug_toolbar.urls)),
 	path(
-	r'robots.txt',
-	TemplateView.as_view(template_name='robots.txt', content_type='text/plain'),
+		r'robots.txt',
+		TemplateView.as_view(template_name='robots.txt', content_type='text/plain'),
 	),
 	path(r'favicon.ico', RedirectView.as_view(url="https://web.evanchen.cc/icons/favicon.ico")),
 	path(r'', RedirectView.as_view(pattern_name='index')),

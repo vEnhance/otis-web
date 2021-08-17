@@ -206,9 +206,9 @@ def archapi(request: HttpRequest) -> JsonResponse:
 		for hint in Hint.objects.filter(problem=problem):
 			response['hints'].append(
 				{
-				'number': hint.number,
-				'keywords': hint.keywords,
-				'url': hint.get_absolute_url(),
+					'number': hint.number,
+					'keywords': hint.keywords,
+					'url': hint.get_absolute_url(),
 				}
 			)
 		return JsonResponse(response)
@@ -223,8 +223,8 @@ def archapi(request: HttpRequest) -> JsonResponse:
 		else:
 			return JsonResponse(
 				{
-				'edit_url': reverse_lazy('problem-update', args=(problem.puid, )),
-				'view_url': problem.get_absolute_url(),
+					'edit_url': reverse_lazy('problem-update', args=(problem.puid, )),
+					'view_url': problem.get_absolute_url(),
 				}
 			)
 

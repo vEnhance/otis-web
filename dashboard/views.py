@@ -113,8 +113,8 @@ def _get_meter_update(student: Student) -> Dict[str, Any]:
 	pset_data = psets.aggregate(Sum('clubs'), Sum('hours'))
 	total_diamonds = student.achievements.aggregate(Sum('diamonds'))['diamonds__sum'] or 0
 	quiz_data = ExamAttempt.objects.filter(student=student)
-	total_spades = (quiz_data.aggregate(Sum('score'))['score__sum'] or
-		0) + (student.usemo_score or 0)
+	total_spades = quiz_data.aggregate(Sum('score'))['score__sum'] or 0
+	total_spades += student.usemo_score or 0
 	meters = {
 		'clubs': Meter.ClubMeter(pset_data['clubs__sum'] or 0),
 		'hearts': Meter.HeartMeter(int(pset_data['hours__sum'] or 0)),
@@ -171,10 +171,10 @@ def portal(request: HttpRequest, student_id: int) -> HttpResponse:
 	)
 	context['emails'] = [
 		{
-		'url': c['archive_url'],
-		'title': c['settings']['title'],
-		'preview_text': c['settings']['preview_text'],
-		'timestamp': datetime.fromisoformat(c['send_time'])
+			'url': c['archive_url'],
+			'title': c['settings']['title'],
+			'preview_text': c['settings']['preview_text'],
+			'timestamp': datetime.fromisoformat(c['send_time'])
 		} for c in campaigns
 	]
 	context['num_sem_download'] = SemesterDownloadFile.objects.filter(semester=semester).count()
@@ -230,7 +230,7 @@ class AchievementList(LoginRequiredMixin, ListView):
 		return Achievement.objects.filter(active=True).annotate(
 			num_found=Count('student__user__pk', unique=True, distinct=True),
 			obtained=Exists(
-			Achievement.objects.filter(pk=OuterRef('pk'), student__user=self.request.user)
+				Achievement.objects.filter(pk=OuterRef('pk'), student__user=self.request.user)
 			),
 		).order_by('-obtained', '-num_found')
 
@@ -275,8 +275,8 @@ def leaderboard(request: HttpRequest) -> HttpResponse:
 		rows.append(row)
 	rows.sort(
 		key=lambda row: (
-		-row['level'], -row['spades'], -row['hearts'], -row['clubs'], -row['diamonds'], row['name'].
-		upper()
+			-row['level'], -row['spades'], -row['hearts'], -row['clubs'], -row['diamonds'], row[
+				'name'].upper()
 		)
 	)
 	context: Dict[str, Any] = {}
@@ -326,9 +326,9 @@ def submit_pset(request: HttpRequest, student_id: int) -> HttpResponse:
 		'student':
 			student,
 		'pending_psets':
-		PSet.objects.filter(student=student, approved=False).order_by('-upload__created_at'),
+			PSet.objects.filter(student=student, approved=False).order_by('-upload__created_at'),
 		'approved_psets':
-		PSet.objects.filter(student=student, approved=True).order_by('-upload__created_at'),
+			PSet.objects.filter(student=student, approved=True).order_by('-upload__created_at'),
 		'form':
 			form,
 	}
@@ -372,13 +372,13 @@ def annotate_multiple_students(queryset: QuerySet[Student]) -> QuerySet[Student]
 	Selects all important information to prevent a bunch of SQL queries"""
 	return queryset.select_related('user', 'assistant', 'semester').annotate(
 		num_psets=SubqueryAggregate(
-		'pset__pk', filter=Q(approved=True, eligible=True), aggregate=Count
+			'pset__pk', filter=Q(approved=True, eligible=True), aggregate=Count
 		),
 		clubs=SubqueryAggregate(
-		'pset__clubs', filter=Q(approved=True, eligible=True), aggregate=Sum
+			'pset__clubs', filter=Q(approved=True, eligible=True), aggregate=Sum
 		),
 		hearts=SubqueryAggregate(
-		'pset__hours', filter=Q(approved=True, eligible=True), aggregate=Sum
+			'pset__hours', filter=Q(approved=True, eligible=True), aggregate=Sum
 		),
 		spades_quizzes=SubqueryAggregate('examattempt__score', aggregate=Sum),
 		diamonds=SubqueryAggregate('achievements__diamonds', filter=Q(active=True), aggregate=Sum),
@@ -463,9 +463,8 @@ def idlewarn(request: HttpRequest) -> HttpResponse:
 	context: Dict[str, Any] = {}
 	context['title'] = 'Idle-warn'
 
-	newest = UploadedFile.objects.filter(category='psets'
-																			).filter(benefactor=OuterRef('pk')
-																							).order_by('-created_at').values('created_at')[:1]
+	newest_qset = UploadedFile.objects.filter(category='psets', benefactor=OuterRef('pk'))
+	newest = newest_qset.order_by('-created_at').values('created_at')[:1]
 
 	students = annotate_multiple_students(get_visible_students(request.user).filter(legit=True))
 	context['students'] = students.annotate(latest_pset=Subquery(newest)).order_by('latest_pset')
@@ -638,67 +637,67 @@ def api(request: HttpRequest) -> JsonResponse:
 			'_name':
 				'Root',
 			'_children':
-			[
-			{
-			'_name':
-				'Problem sets',
-			'_children':
-			list(
-			PSet.objects.filter(approved=False, student__semester__active=True).values(
-			'pk',
-			'approved',
-			'feedback',
-			'special_notes',
-			'student__pk',
-			'student__user__first_name',
-			'student__user__last_name',
-			'student__user__email',
-			'hours',
-			'clubs',
-			'eligible',
-			'unit__group__name',
-			'unit__code',
-			'unit__pk',
-			'next_unit_to_unlock__group__name',
-			'next_unit_to_unlock__code',
-			'next_unit_to_unlock__pk',
-			'upload__content',
-			)
-			)
-			}, {
-			'_name':
-				'Inquiries',
-			'inquiries':
-			list(
-			UnitInquiry.objects.filter(status="NEW", student__semester__active=True).values(
-			'pk',
-			'unit__group__name',
-			'unit__code',
-			'student__user__first_name',
-			'student__user__last_name',
-			'explanation',
-			)
-			),
-			}, {
-			'_name':
-				'Suggestions',
-			'_children':
-			list(
-			ProblemSuggestion.objects.filter(resolved=False).values(
-			'pk',
-			'created_at',
-			'student__user__first_name',
-			'student__user__last_name',
-			'source',
-			'description',
-			'statement',
-			'solution',
-			'comments',
-			'acknowledge',
-			'weight',
-			)
-			)
-			}
-			],
+				[
+					{
+						'_name':
+							'Problem sets',
+						'_children':
+							list(
+								PSet.objects.filter(approved=False, student__semester__active=True).values(
+									'pk',
+									'approved',
+									'feedback',
+									'special_notes',
+									'student__pk',
+									'student__user__first_name',
+									'student__user__last_name',
+									'student__user__email',
+									'hours',
+									'clubs',
+									'eligible',
+									'unit__group__name',
+									'unit__code',
+									'unit__pk',
+									'next_unit_to_unlock__group__name',
+									'next_unit_to_unlock__code',
+									'next_unit_to_unlock__pk',
+									'upload__content',
+								)
+							)
+					}, {
+						'_name':
+							'Inquiries',
+						'inquiries':
+							list(
+								UnitInquiry.objects.filter(status="NEW", student__semester__active=True).values(
+									'pk',
+									'unit__group__name',
+									'unit__code',
+									'student__user__first_name',
+									'student__user__last_name',
+									'explanation',
+								)
+							),
+					}, {
+						'_name':
+							'Suggestions',
+						'_children':
+							list(
+								ProblemSuggestion.objects.filter(resolved=False).values(
+									'pk',
+									'created_at',
+									'student__user__first_name',
+									'student__user__last_name',
+									'source',
+									'description',
+									'statement',
+									'solution',
+									'comments',
+									'acknowledge',
+									'weight',
+								)
+							)
+					}
+				],
 		}
 		return JsonResponse(data, status=200)

@@ -106,9 +106,9 @@ class OwedFilter(admin.SimpleListFilter):
 		else:
 			queryset = queryset.annotate(
 				owed=Cast(
-				F("student__semester__prep_rate") * F("preps_taught") +
-				F("student__semester__hour_rate") * F("hours_taught") + F("adjustment") + F('extras') -
-				F("total_paid"), FloatField()
+					F("student__semester__prep_rate") * F("preps_taught") +
+					F("student__semester__hour_rate") * F("hours_taught") + F("adjustment") +
+					F('extras') - F("total_paid"), FloatField()
 				)
 			)
 			if self.value() == "incomplete":
@@ -291,9 +291,9 @@ class StudentRegistrationAdmin(ImportExportModelAdmin):
 		for registration in queryset:
 			students_to_create.append(
 				Student(
-				user=registration.user,
-				semester=registration.container.semester,
-				track=registration.track,
+					user=registration.user,
+					semester=registration.container.semester,
+					track=registration.track,
 				)
 			)
 		messages.success(request, message=f"Built {len(students_to_create)} students")

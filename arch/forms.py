@@ -56,8 +56,8 @@ class ProblemSelectWidget(forms.Select):
 			problem = get_object_or_404(Problem, puid=value)
 			option['attrs'].update(
 				{
-				'data-source': problem.source or '',
-				'data-description': problem.description,
+					'data-source': problem.source or '',
+					'data-description': problem.description,
 				}
 			)
 		return option

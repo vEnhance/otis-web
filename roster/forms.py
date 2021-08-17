@@ -82,8 +82,8 @@ class InquiryForm(forms.ModelForm):
 		fields = ('unit', 'action_type', 'explanation')
 		widgets = {
 			'explanation': forms.Textarea(attrs={
-			'cols': 40,
-			'rows': 3
+				'cols': 40,
+				'rows': 3
 			}),
 		}
 

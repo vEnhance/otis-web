@@ -102,7 +102,7 @@ def BNF() -> Any:
 		atom = (
 			addop[...]  # type: ignore
 			+ (
-			g.setParseAction(push_first) | Group(lpar + expr + rpar)  # type: ignore
+				g.setParseAction(push_first) | Group(lpar + expr + rpar)  # type: ignore
 			)
 		).setParseAction(push_unary_minus)  # type: ignore
 

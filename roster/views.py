@@ -41,7 +41,8 @@ from mailchimp3.mailchimpclient import MailChimpError
 
 from roster.utils import can_edit, get_current_students, get_student_by_id, infer_student  # NOQA
 
-from . import forms, models
+from .forms import AdvanceForm, CurriculumForm, DecisionForm, InquiryForm, UserForm  # NOQA
+from .models import Invoice, RegistrationContainer, Student, StudentRegistration, UnitInquiry  # NOQA
 
 # Create your views here.
 
@@ -54,7 +55,7 @@ def curriculum(request: HttpRequest, student_id: int) -> HttpResponse:
 
 	enabled = can_edit(request, student) or student.newborn
 	if request.method == 'POST' and enabled:
-		form = forms.CurriculumForm(request.POST, units=units, enabled=True)
+		form = CurriculumForm(request.POST, units=units, enabled=True)
 		if form.is_valid():
 			data = form.cleaned_data
 			# get groups with nonempty unit sets
@@ -64,7 +65,7 @@ def curriculum(request: HttpRequest, student_id: int) -> HttpResponse:
 			student.save()
 			messages.success(request, f"Successfully saved curriculum of {len(values)} units.")
 	else:
-		form = forms.CurriculumForm(units=units, original=original, enabled=enabled)
+		form = CurriculumForm(units=units, original=original, enabled=enabled)
 		if not enabled:
 			messages.info(
 				request, "You can't edit this curriculum " + "since you are not an instructor."
@@ -107,14 +108,14 @@ def finalize(request: HttpRequest, student_id: int) -> HttpResponse:
 def advance(request: HttpRequest, student_id: int) -> Any:
 	student = get_student_by_id(request, student_id)
 	if request.method == 'POST':
-		form = forms.AdvanceForm(request.POST, instance=student)
+		form = AdvanceForm(request.POST, instance=student)
 		if form.is_valid():
 			form.save()
 			messages.success(request, "Successfully advanced student.")
 			# uncomment the below if you want to load the portal again
 			# return HttpResponseRedirect(reverse("portal", args=(student_id,)))
 	else:
-		form = forms.AdvanceForm(instance=student)
+		form = AdvanceForm(instance=student)
 
 	context: Dict[str, Any] = {'title': "Advance " + student.name}
 	context['form'] = form
@@ -130,7 +131,7 @@ def advance(request: HttpRequest, student_id: int) -> Any:
 	return render(request, "roster/advance.html", context)
 
 
-def get_checksum(student: models.Student) -> str:
+def get_checksum(student: Student) -> str:
 	key = settings.INVOICE_HASH_KEY
 	return pbkdf2_hmac(
 		'sha256', (key + str(student.id) + 'meow').encode('utf-8'),
@@ -169,7 +170,7 @@ def invoice(request: HttpRequest, student_id: int = None) -> HttpResponse:
 
 # this is not gated
 def invoice_standalone(request: HttpRequest, student_id: int, checksum: str) -> HttpResponse:
-	student = models.Student.objects.get(id=student_id)
+	student = Student.objects.get(id=student_id)
 	if checksum != get_checksum(student):
 		raise PermissionDenied("Bad hash provided")
 	try:
@@ -194,8 +195,8 @@ def master_schedule(request: HttpRequest) -> HttpResponse:
 	unit_to_student_names = collections.defaultdict(list)
 	for d in student_names_and_unit_ids:
 		# e.g. d = {'name': Student, 'curriculum': 30}
-		unit_to_student_names[d['curriculum']
-													].append(d['user__first_name'] + ' ' + d['user__last_name'])
+		name = d['user__first_name'] + ' ' + d['user__last_name']
+		unit_to_student_names[d['curriculum']].append(name)
 
 	chart: List[Dict[str, Any]] = []
 	unit_dicts = Unit.objects.order_by('position').values(
@@ -212,7 +213,7 @@ def master_schedule(request: HttpRequest) -> HttpResponse:
 
 class UpdateInvoice(PermissionRequiredMixin, UpdateView):
 	permission_required = 'is_staff'
-	model = models.Invoice
+	model = Invoice
 	fields = (
 		'preps_taught',
 		'hours_taught',
@@ -221,7 +222,7 @@ class UpdateInvoice(PermissionRequiredMixin, UpdateView):
 		'total_paid',
 		'forgive',
 	)
-	object: models.Invoice
+	object: Invoice
 
 	def get_success_url(self):
 		return reverse("invoice", args=(self.object.student.id, ))
@@ -242,21 +243,21 @@ def inquiry(request: HttpRequest, student_id: int) -> HttpResponse:
 		)
 
 	context: Dict[str, Any] = {}
-	current_inquiries = models.UnitInquiry.objects.filter(student=student)
+	current_inquiries = UnitInquiry.objects.filter(student=student)
 
 	# Create form for submitting new inquiries
 	if request.method == 'POST':
-		form = forms.InquiryForm(request.POST)
+		form = InquiryForm(request.POST)
 		if form.is_valid():
 			inquiry = form.save(commit=False)
 			inquiry.student = student
 			# check if exists already and created recently
 			one_day_ago = timezone.now() - datetime.timedelta(seconds=90)
-			if models.UnitInquiry.objects.filter(
+			if UnitInquiry.objects.filter(
 				unit=inquiry.unit,
 				student=student,
 				action_type=inquiry.action_type,
-				created_at__gte=one_day_ago
+				created_at__gte=one_day_ago,
 			).exists():
 				messages.warning(
 					request, "The same inquiry already was "
@@ -265,10 +266,10 @@ def inquiry(request: HttpRequest, student_id: int) -> HttpResponse:
 			else:
 				inquiry.save()
 				# auto-acceptance criteria
-				auto_accept_criteria = (inquiry.action_type
-					== "APPEND") or (inquiry.action_type
-					== "DROP") or current_inquiries.filter(action_type="UNLOCK"
-																								).count() <= 3 or request.user.is_staff
+				auto_accept_criteria = (inquiry.action_type == "APPEND")
+				auto_accept_criteria |= (inquiry.action_type == "DROP")
+				auto_accept_criteria |= current_inquiries.filter(action_type="UNLOCK").count() <= 3
+				auto_accept_criteria |= request.user.is_staff
 				# auto reject criteria
 				auto_reject_criteria = inquiry.action_type == "UNLOCK" and (
 					current_inquiries.filter(action_type="UNLOCK", status="NEW").count() +
@@ -287,10 +288,10 @@ def inquiry(request: HttpRequest, student_id: int) -> HttpResponse:
 				else:
 					messages.success(request, "Inquiry submitted, should be approved soon!")
 	else:
-		form = forms.InquiryForm()
+		form = InquiryForm()
 	context['form'] = form
 
-	context['inquiries'] = models.UnitInquiry.objects.filter(student=student)
+	context['inquiries'] = UnitInquiry.objects.filter(student=student)
 	context['student'] = student
 	context['curriculum'] = student.generate_curriculum_rows(
 		omniscient=can_edit(request, student)
@@ -301,32 +302,31 @@ def inquiry(request: HttpRequest, student_id: int) -> HttpResponse:
 
 class ListInquiries(PermissionRequiredMixin, ListView):
 	permission_required = 'is_staff'
-	model = models.UnitInquiry
+	model = UnitInquiry
 
 	def get_queryset(self):
-		queryset = models.UnitInquiry.objects.filter(
+		queryset = UnitInquiry.objects.filter(
 			created_at__gte=timezone.now() - datetime.timedelta(days=7)
 		).filter(student__semester__active=True).exclude(status="ACC")
 
 		# some amazing code vv
-		count_unlock = models.UnitInquiry.objects.filter(action_type="UNLOCK").filter(
+		count_unlock = UnitInquiry.objects.filter(action_type="UNLOCK").filter(
 			student=OuterRef('student')
 		).order_by().values('student').annotate(c=Count('*')).values('c')
-		count_all = models.UnitInquiry.objects.filter(
-			student=OuterRef('student')
-		).order_by().values('student').annotate(c=Count('*')).values('c')
+		count = UnitInquiry.objects.filter(student=OuterRef('student'))
+		count = count.order_by().values('student').annotate(c=Count('*')).values('c')
 		# seriously wtf
 		return queryset.annotate(
 			num_unlock=Subquery(count_unlock, output_field=IntegerField()),
-			num_all=Subquery(count_all, output_field=IntegerField())
+			num_all=Subquery(count, output_field=IntegerField())
 		)
 
 
 class EditInquiry(PermissionRequiredMixin, UpdateView):
 	fields = ('unit', 'action_type', 'status', 'explanation')
 	permission_required = 'is_staff'
-	model = models.UnitInquiry
-	object: models.UnitInquiry
+	model = UnitInquiry
+	object: UnitInquiry
 
 	def get_success_url(self):
 		return reverse("edit-inquiry", args=(self.object.pk, ))  # typing: ignore
@@ -334,16 +334,14 @@ class EditInquiry(PermissionRequiredMixin, UpdateView):
 
 @staff_member_required
 def approve_inquiry(_: HttpRequest, pk: int) -> HttpResponse:
-	inquiry = models.UnitInquiry.objects.get(id=pk)
+	inquiry = UnitInquiry.objects.get(id=pk)
 	inquiry.run_accept()
 	return HttpResponseRedirect(reverse("inquiry", args=(inquiry.student.id, )))
 
 
 @staff_member_required
 def approve_inquiry_all(_: HttpRequest) -> HttpResponse:
-	for inquiry in models.UnitInquiry.objects.filter(
-		status="NEW", student__semester__active=True
-	):
+	for inquiry in UnitInquiry.objects.filter(status="NEW", student__semester__active=True):
 		inquiry.run_accept()
 	return HttpResponseRedirect(reverse("list-inquiry"))
 
@@ -352,12 +350,12 @@ def mailchimp_subscribe(user: User):
 	client = MailChimp(mc_api=os.getenv('MAILCHIMP_API_KEY'), mc_user='vEnhance')
 	client.lists.members.create(
 		os.getenv('MAILCHIMP_LIST_ID'), {
-		'email_address': user.email,
-		'status': 'subscribed',
-		'merge_fields': {
-		'FNAME': user.first_name,
-		'LNAME': user.last_name,
-		}
+			'email_address': user.email,
+			'status': 'subscribed',
+			'merge_fields': {
+				'FNAME': user.first_name,
+				'LNAME': user.last_name,
+			}
 		}
 	)
 
@@ -365,17 +363,17 @@ def mailchimp_subscribe(user: User):
 @login_required
 def register(request: HttpRequest) -> HttpResponse:
 	try:
-		container = models.RegistrationContainer.objects.get(semester__active=True)
+		container = RegistrationContainer.objects.get(semester__active=True)
 	except:
 		return HttpResponse("There isn't a currently active OTIS semester.", status=503)
 
 	semester: Semester = container.semester
 	assert isinstance(request.user, User)
-	if models.StudentRegistration.objects.filter(user=request.user, container=container).exists():
+	if StudentRegistration.objects.filter(user=request.user, container=container).exists():
 		messages.info(request, message="You have already submitted a decision form for this year!")
 		form = None
 	elif request.method == 'POST':
-		form = forms.DecisionForm(request.POST, request.FILES)
+		form = DecisionForm(request.POST, request.FILES)
 		if form.is_valid():
 			passcode = form.cleaned_data['passcode']
 			if passcode.lower() != container.passcode.lower():
@@ -397,12 +395,13 @@ def register(request: HttpRequest) -> HttpResponse:
 	else:
 		if container.allowed_tracks:
 			initial_data_dict = {}
-			most_recent_reg = models.StudentRegistration.objects.filter(user=request.user
-																																	).order_by('-id').first()
+			most_recent_reg = StudentRegistration.objects.filter(
+				user=request.user,
+			).order_by('-id').first()
 			if most_recent_reg is not None:
 				for k in ('parent_email', 'graduation_year', 'school_name', 'aops_username', 'gender'):
 					initial_data_dict[k] = getattr(most_recent_reg, k)
-			form = forms.DecisionForm(initial=initial_data_dict)
+			form = DecisionForm(initial=initial_data_dict)
 		else:
 			messages.warning(
 				request,
@@ -418,7 +417,7 @@ def update_profile(request: HttpRequest) -> HttpResponse:
 	assert isinstance(request.user, User)
 	old_email = request.user.email
 	if request.method == 'POST':
-		form = forms.UserForm(request.POST, instance=request.user)
+		form = UserForm(request.POST, instance=request.user)
 		if form.is_valid():
 			new_email = form.cleaned_data['email']
 			user: User = form.save()
@@ -443,7 +442,7 @@ def update_profile(request: HttpRequest) -> HttpResponse:
 				user.save()
 			messages.success(request, "Your information has been updated.")
 	else:
-		form = forms.UserForm(instance=request.user)
+		form = UserForm(instance=request.user)
 	context = {'form': form}
 	return render(request, "roster/update_profile.html", context)
 
@@ -464,22 +463,22 @@ def api(request: HttpRequest) -> JsonResponse:
 
 	social = queryset.get()  # get the social account for this; should never 404
 	user = social.user
-	student = models.Student.objects.filter(user=user, semester__active=True).first()
-	regform = models.StudentRegistration.objects.filter(
+	student = Student.objects.filter(user=user, semester__active=True).first()
+	regform = StudentRegistration.objects.filter(
 		user=user, container__semester__active=True
 	).first()
 
 	if student is not None:
 		return JsonResponse(
 			{
-			'result': 'success',
-			'user': social.user.username,
-			'name': social.user.get_full_name(),
-			'uid': uid,
-			'track': student.track,
-			'gender': regform.gender if regform is not None else '?',
-			'country': regform.country if regform is not None else '???',
-			'num_years': models.Student.objects.filter(user=user).count(),
+				'result': 'success',
+				'user': social.user.username,
+				'name': social.user.get_full_name(),
+				'uid': uid,
+				'track': student.track,
+				'gender': regform.gender if regform is not None else '?',
+				'country': regform.country if regform is not None else '???',
+				'num_years': Student.objects.filter(user=user).count(),
 			}
 		)
 	elif student is None and regform is not None:

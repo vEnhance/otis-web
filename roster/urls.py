@@ -9,9 +9,9 @@ urlpatterns = [
 	path(r'invoice/', views.invoice),
 	path(r'invoice/<int:student_id>/', views.invoice, name='invoice'),
 	path(
-	r'invoice/<int:student_id>/<str:checksum>/',
-	views.invoice_standalone,
-	name='invoice-standalone'
+		r'invoice/<int:student_id>/<str:checksum>/',
+		views.invoice_standalone,
+		name='invoice-standalone'
 	),
 	path(r'master-schedule/', views.master_schedule, name='master-schedule'),
 	path(r'edit-invoice/<int:pk>/', views.UpdateInvoice.as_view(), name='edit-invoice'),
