@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 import datetime
 import os
+from hashlib import sha256
 
 from core.models import Semester, Unit
 from django.contrib.auth import models as auth
@@ -204,7 +205,8 @@ class ProblemSuggestion(models.Model):
 
 
 def achievement_image_file_name(instance: 'Achievement', filename: str) -> str:
-	return os.path.join('badges', str(instance.pk) + os.path.splitext(filename)[-1])
+	h = sha256((instance.code + '_otis_' + str(instance.pk)).encode('ascii')).hexdigest()
+	return os.path.join('badges', h + os.path.splitext(filename)[-1])
 
 
 class Achievement(models.Model):
