@@ -8,16 +8,16 @@ by finding metaphorical diamonds.
 
 {% if achievements|length > 0 %}
 <div class="list-group">
-	{% for achievement in achievements %}
+	{% for aunlock in achievements %}
 		<div class="list-group-item container">
 			<div class="d-flex justify-content-between">
-				<strong>{{ achievement.name }}</strong>
-				<span style="color: {{ meters.diamonds.color }};">{{ achievement.diamonds }}{{ meters.diamonds.unit }}</span>
+				<strong>{{ aunlock.achievement.name }}</strong>
+				<span style="color: {{ meters.diamonds.color }};">{{ aunlock.achievement.diamonds }}{{ meters.diamonds.unit }}</span>
 			</div>
-			{% if achievement.image %}
-				<img width="64px" style="float: right;" src="{{ achievement.image.url }}" />
+			{% if aunlock.achievement.image %}
+				<img width="64px" style="float: right;" src="{{ aunlock.achievement.image.url }}" />
 			{% endif %}
-			<p>{{ achievement.description }}</p>
+			<p>{{ aunlock.achievement.description }}</p>
 		</div>
 	{% endfor %}
 </div>

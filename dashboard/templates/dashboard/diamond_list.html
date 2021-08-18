@@ -26,7 +26,11 @@
 						style = "filter: grayscale(100%) opacity(40%);"
 					{% endif %}
 						>
-					<img width="64px" style="float: right;" src="{{ achievement.image.url }}" />
+					{% if achievement.image %}
+						<img width="64px" style="float: right;" src="{{ achievement.image.url }}" />
+					{% else %}
+						<div width="64px" style="float: right;">No image</div>
+					{% endif %}
 				</span>
 				<p>Found by
 					{% if request.user.is_staff %}

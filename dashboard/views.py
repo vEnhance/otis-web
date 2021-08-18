@@ -35,11 +35,13 @@ from mailchimp3 import MailChimp
 from roster.models import Student, StudentRegistration, UnitInquiry
 from roster.utils import can_edit, can_view, get_student_by_id, get_visible_students  # NOQA
 from sql_util.utils import SubqueryAggregate
+from sql_util.aggregates import SubqueryCount
+from sql_util.aggregates import SubquerySum
 
 from dashboard.forms import DiamondsForm
 
 from .forms import NewUploadForm, PSetForm
-from .models import Achievement, Level, ProblemSuggestion, PSet, SemesterDownloadFile, UploadedFile  # NOQA
+from .models import Achievement, AchievementUnlock, Level, ProblemSuggestion, PSet, SemesterDownloadFile, UploadedFile  # NOQA
 
 logger = logging.getLogger(__name__)
 
@@ -111,7 +113,9 @@ class Meter:
 def _get_meter_update(student: Student) -> Dict[str, Any]:
 	psets = PSet.objects.filter(student=student, approved=True, eligible=True)
 	pset_data = psets.aggregate(Sum('clubs'), Sum('hours'))
-	total_diamonds = student.achievements.aggregate(Sum('diamonds'))['diamonds__sum'] or 0
+	total_diamonds = AchievementUnlock.objects.filter(user=student.user).aggregate(
+		Sum('achievement__diamonds')
+	)['achievement__diamonds__sum'] or 0
 	quiz_data = ExamAttempt.objects.filter(student=student)
 	total_spades = quiz_data.aggregate(Sum('score'))['score__sum'] or 0
 	total_spades += student.usemo_score or 0
@@ -181,10 +185,11 @@ def portal(request: HttpRequest, student_id: int) -> HttpResponse:
 @login_required
 def achievements(request: HttpRequest, student_id: int) -> HttpResponse:
 	student = get_student_by_id(request, student_id)
+	assert isinstance(student.user, User)
 	context: Dict[str, Any] = {
 		'student': student,
 		'form': DiamondsForm(),
-		'achievements': student.achievements.all().order_by('name'),
+		'achievements': AchievementUnlock.objects.filter(user=student.user).order_by('-timestamp'),
 	}
 	if request.method == 'POST':
 		form = DiamondsForm(request.POST)
@@ -192,7 +197,7 @@ def achievements(request: HttpRequest, student_id: int) -> HttpResponse:
 			code = form.cleaned_data['code']
 			if student.semester.active is False:
 				messages.warning(request, "Not an active semester.")
-			elif student.achievements.filter(code__iexact=code).exists():
+			elif AchievementUnlock.objects.filter(user=student.user, achievement__code=code).exists():
 				messages.warning(request, "You already earned this achievement!")
 			else:
 				try:
@@ -201,7 +206,7 @@ def achievements(request: HttpRequest, student_id: int) -> HttpResponse:
 					messages.error(request, "You entered an invalid code.")
 				else:
 					logging.log(settings.SUCCESS_LOG_LEVEL, f"{student.name} obtained {achievement}")
-					student.achievements.add(achievement)
+					AchievementUnlock.objects.create(user=student.user, achievement=achievement)
 					context['obtained_achievement'] = achievement
 			form = DiamondsForm()
 	else:
@@ -224,7 +229,7 @@ class AchievementList(LoginRequiredMixin, ListView):
 	def get_queryset(self) -> QuerySet[Achievement]:
 		assert isinstance(self.request.user, User)
 		return Achievement.objects.filter(active=True).annotate(
-			num_found=Count('student__user__pk', unique=True, distinct=True),
+			num_found=SubqueryAggregate('achievementunlock', aggregate=Count),
 			obtained=Exists(
 				Achievement.objects.filter(pk=OuterRef('pk'), student__user=self.request.user)
 			),
@@ -235,12 +240,11 @@ class FoundList(PermissionRequiredMixin, ListView):
 	permission_required = 'is_staff'
 	template_name = 'dashboard/found_list.html'
 
-	def get_queryset(self) -> QuerySet[Student]:
+	def get_queryset(self) -> QuerySet[AchievementUnlock]:
 		self.achievement = get_object_or_404(Achievement, pk=self.kwargs['pk'])
-		students = self.achievement.student_set  # type: ignore
-		return students.filter(
-			semester__active=True
-		).select_related('user').order_by('user__first_name', 'user__last_name')
+		return AchievementUnlock.objects.filter(
+			achievement=self.achievement,
+		).select_related('user').order_by('-timestamp')
 
 	def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
 		context = super().get_context_data(**kwargs)
@@ -254,6 +258,8 @@ def leaderboard(request: HttpRequest) -> HttpResponse:
 	students = Student.objects.filter(semester__active=True)
 	rows: List[Dict[str, Any]] = []
 	levels: Dict[int, str] = {level.threshold: level.name for level in Level.objects.all()}
+	if len(levels) == 0:
+		levels[0] = 'No level'
 	max_level = max(levels.keys())
 	for student in annotate_multiple_students(students):
 		row: Dict[str, Any] = {}
@@ -367,17 +373,11 @@ def annotate_multiple_students(queryset: QuerySet[Student]) -> QuerySet[Student]
 	"""Helper function for constructing large lists of students
 	Selects all important information to prevent a bunch of SQL queries"""
 	return queryset.select_related('user', 'assistant', 'semester').annotate(
-		num_psets=SubqueryAggregate(
-			'pset__pk', filter=Q(approved=True, eligible=True), aggregate=Count
-		),
-		clubs=SubqueryAggregate(
-			'pset__clubs', filter=Q(approved=True, eligible=True), aggregate=Sum
-		),
-		hearts=SubqueryAggregate(
-			'pset__hours', filter=Q(approved=True, eligible=True), aggregate=Sum
-		),
-		spades_quizzes=SubqueryAggregate('examattempt__score', aggregate=Sum),
-		diamonds=SubqueryAggregate('achievements__diamonds', filter=Q(active=True), aggregate=Sum),
+		num_psets=SubqueryCount('pset', filter=Q(approved=True, eligible=True)),
+		clubs=SubquerySum('pset__clubs', filter=Q(approved=True, eligible=True)),
+		hearts=SubquerySum('pset__hours', filter=Q(approved=True, eligible=True)),
+		spades_quizzes=SubquerySum('examattempt__score'),
+		diamonds=SubquerySum('user__achievementunlock__achievement__diamonds'),
 	)
 
 
