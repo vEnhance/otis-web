@@ -34,9 +34,8 @@ from exams.models import ExamAttempt, PracticeExam
 from mailchimp3 import MailChimp
 from roster.models import Student, StudentRegistration, UnitInquiry
 from roster.utils import can_edit, can_view, get_student_by_id, get_visible_students  # NOQA
+from sql_util.aggregates import SubqueryCount, SubquerySum
 from sql_util.utils import SubqueryAggregate
-from sql_util.aggregates import SubqueryCount
-from sql_util.aggregates import SubquerySum
 
 from dashboard.forms import DiamondsForm
 
@@ -183,7 +182,7 @@ def portal(request: HttpRequest, student_id: int) -> HttpResponse:
 
 
 @login_required
-def achievements(request: HttpRequest, student_id: int) -> HttpResponse:
+def stats(request: HttpRequest, student_id: int) -> HttpResponse:
 	student = get_student_by_id(request, student_id)
 	assert isinstance(student.user, User)
 	context: Dict[str, Any] = {
@@ -220,7 +219,7 @@ def achievements(request: HttpRequest, student_id: int) -> HttpResponse:
 	level_number = _meter_info['level_number']
 	obtained_levels = Level.objects.filter(threshold__lte=level_number).order_by('-threshold')
 	context['obtained_levels'] = obtained_levels
-	return render(request, "dashboard/achievements.html", context)
+	return render(request, "dashboard/stats.html", context)
 
 
 class AchievementList(LoginRequiredMixin, ListView):
