@@ -244,5 +244,5 @@ class AchievementUnlock(models.Model):
 		auto_now_add=True, help_text='The time the achievement was granted'
 	)
 
-	def __str__(self):
+	def __str__(self) -> str:
 		return self.timestamp.strftime('%c')

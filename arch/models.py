@@ -80,7 +80,9 @@ class Hint(models.Model):
 		return self.problem.puid
 
 	def get_absolute_url(self):
-		return reverse_lazy("hint-detail", args=(
-			self.problem.puid,
-			self.number,
-		))
+		return reverse_lazy(
+			"hint-detail", args=(
+				self.problem.puid,
+				self.number,
+			)
+		)
