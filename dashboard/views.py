@@ -613,8 +613,12 @@ def api(request: HttpRequest) -> JsonResponse:
 			inquiry.run_accept()
 		return JsonResponse({'result': 'success'}, status=200)
 	elif action == 'mark_suggestion':
-		raise NotImplementedError
-	else:
+		suggestion = ProblemSuggestion.objects.get(pk=request.POST['pk'])
+		suggestion.reason = request.POST['reason']
+		suggestion.resolved = True
+		suggestion.save()
+		return JsonResponse({'result': 'success'}, status=200)
+	elif action == 'init':
 		data: Dict[str, Any] = {
 			'_name':
 				'Root',
@@ -683,3 +687,5 @@ def api(request: HttpRequest) -> JsonResponse:
 				],
 		}
 		return JsonResponse(data, status=200)
+	else:
+		return JsonResponse({'error': 'No such command'}, status=400)
