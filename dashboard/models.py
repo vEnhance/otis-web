@@ -7,7 +7,7 @@ import os
 from hashlib import sha256
 
 from core.models import Semester, Unit
-from django.contrib.auth import models as auth
+from django.contrib.auth.models import User
 from django.core.validators import FileExtensionValidator, MaxValueValidator
 from django.db import models
 from django.urls import reverse_lazy
@@ -31,7 +31,7 @@ class UploadedFile(models.Model):
 		Student, on_delete=models.CASCADE, help_text="The student for which this file is meant"
 	)
 	owner = models.ForeignKey(
-		auth.User, on_delete=models.CASCADE, help_text="The user who uploaded the file"
+		User, on_delete=models.CASCADE, help_text="The user who uploaded the file"
 	)
 	category = models.CharField(
 		max_length=10, choices=CHOICES, help_text="What kind of file this is"
