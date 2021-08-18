@@ -204,7 +204,7 @@ API_TARGET_HASH = os.getenv(
 def filter_useless_404(record: logging.LogRecord) -> bool:
 	a = tuple(record.args)  # type: ignore
 	ret = not (len(a) == 2 and a[0] == 'Not Found' and ('wp-include' in a[1] or '.php' in a[1]))
-	ret &= len(a) == 3 and a[1] == '404' and ('wp-include' in a[0] or '.php' in a[0])
+	ret &= not (len(a) == 3 and a[1] == '404' and ('wp-include' in a[0] or '.php' in a[0]))
 	return ret
 
 
