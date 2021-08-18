@@ -27,14 +27,12 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
-from django.db.models import Count, IntegerField, OuterRef, Subquery
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse  # NOQA
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from django.views.generic import ListView
 from django.views.generic.edit import UpdateView
 from mailchimp3 import MailChimp
 from mailchimp3.mailchimpclient import MailChimpError
@@ -298,52 +296,6 @@ def inquiry(request: HttpRequest, student_id: int) -> HttpResponse:
 	)
 
 	return render(request, 'roster/inquiry.html', context)
-
-
-class ListInquiries(PermissionRequiredMixin, ListView):
-	permission_required = 'is_staff'
-	model = UnitInquiry
-
-	def get_queryset(self):
-		queryset = UnitInquiry.objects.filter(
-			created_at__gte=timezone.now() - datetime.timedelta(days=7)
-		).filter(student__semester__active=True).exclude(status="ACC")
-
-		# some amazing code vv
-		count_unlock = UnitInquiry.objects.filter(action_type="UNLOCK").filter(
-			student=OuterRef('student')
-		).order_by().values('student').annotate(c=Count('*')).values('c')
-		count = UnitInquiry.objects.filter(student=OuterRef('student'))
-		count = count.order_by().values('student').annotate(c=Count('*')).values('c')
-		# seriously wtf
-		return queryset.annotate(
-			num_unlock=Subquery(count_unlock, output_field=IntegerField()),
-			num_all=Subquery(count, output_field=IntegerField())
-		)
-
-
-class EditInquiry(PermissionRequiredMixin, UpdateView):
-	fields = ('unit', 'action_type', 'status', 'explanation')
-	permission_required = 'is_staff'
-	model = UnitInquiry
-	object: UnitInquiry
-
-	def get_success_url(self):
-		return reverse("edit-inquiry", args=(self.object.pk, ))  # typing: ignore
-
-
-@staff_member_required
-def approve_inquiry(_: HttpRequest, pk: int) -> HttpResponse:
-	inquiry = UnitInquiry.objects.get(id=pk)
-	inquiry.run_accept()
-	return HttpResponseRedirect(reverse("inquiry", args=(inquiry.student.id, )))
-
-
-@staff_member_required
-def approve_inquiry_all(_: HttpRequest) -> HttpResponse:
-	for inquiry in UnitInquiry.objects.filter(status="NEW", student__semester__active=True):
-		inquiry.run_accept()
-	return HttpResponseRedirect(reverse("list-inquiry"))
 
 
 def mailchimp_subscribe(user: User):

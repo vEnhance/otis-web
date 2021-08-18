@@ -20,7 +20,7 @@ from django.db.models import Count, OuterRef, Q, Subquery, Sum  # NOQA
 from django.db.models.expressions import Exists
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect  # NOQA
+from django.http import HttpResponse, HttpResponseRedirect  # NOQA
 from django.http.request import HttpRequest
 from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404, render
@@ -36,7 +36,7 @@ from roster.models import Student, StudentRegistration, UnitInquiry
 from roster.utils import can_edit, can_view, get_student_by_id, get_visible_students  # NOQA
 from sql_util.utils import SubqueryAggregate
 
-from dashboard.forms import DiamondsForm, ResolveSuggestionForm
+from dashboard.forms import DiamondsForm
 
 from .forms import NewUploadForm, PSetForm
 from .models import Achievement, Level, ProblemSuggestion, PSet, SemesterDownloadFile, UploadedFile  # NOQA
@@ -432,10 +432,12 @@ class UpdateFile(LoginRequiredMixin, UpdateView):
 	def get_success_url(self):
 		stu_id = self.object.benefactor.id
 		unit_id = self.object.unit.id if self.object.unit is not None else 0
-		return reverse("uploads", args=(
-			stu_id,
-			unit_id,
-		))
+		return reverse(
+			"uploads", args=(
+				stu_id,
+				unit_id,
+			)
+		)
 
 	def get_object(self, *args: Any, **kwargs: Any) -> UploadedFile:
 		obj = super(UpdateFile, self).get_object(*args, **kwargs)
@@ -574,28 +576,6 @@ class ProblemSuggestionList(LoginRequiredMixin, ListView):
 		return context
 
 
-@staff_member_required
-def pending_contributions(request: HttpRequest, suggestion_id: int = None) -> HttpResponse:
-	context: Dict[str, Any] = {}
-	if request.method == "POST":
-		if suggestion_id is None:
-			return HttpResponseBadRequest("The form must include a suggestion ID")
-		suggestion = get_object_or_404(ProblemSuggestion, id=suggestion_id)
-		form = ResolveSuggestionForm(request.POST, instance=suggestion)
-		if form.is_valid():
-			messages.success(request, "Successfully resolved " + suggestion.source)
-			suggestion = form.save(commit=False)
-			suggestion.resolved = True
-			suggestion.save()
-
-	context['forms'] = []
-	for suggestion in ProblemSuggestion.objects.filter(resolved=False):
-		form = ResolveSuggestionForm(instance=suggestion)
-		context['forms'].append(form)
-
-	return render(request, "dashboard/pending_contributions.html", context)
-
-
 @csrf_exempt
 @require_POST
 def api(request: HttpRequest) -> JsonResponse:
@@ -628,8 +608,10 @@ def api(request: HttpRequest) -> JsonResponse:
 			student.unlocked_units.add(target)
 		student.unlocked_units.remove(finished_unit)
 		return JsonResponse({'result': 'success'}, status=200)
-	elif action == 'approve_inquiry':
-		raise NotImplementedError
+	elif action == 'approve_inquiries':
+		for inquiry in UnitInquiry.objects.filter(status="NEW", student__semester__active=True):
+			inquiry.run_accept()
+		return JsonResponse({'result': 'success'}, status=200)
 	elif action == 'mark_suggestion':
 		raise NotImplementedError
 	else:
