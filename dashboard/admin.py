@@ -93,7 +93,6 @@ class ProblemSuggestionAdmin(admin.ModelAdmin):
 		'source',
 		'description',
 		'resolved',
-		'notified',
 	)
 	search_fields = (
 		'student__user__first_name',

@@ -142,9 +142,6 @@ def portal(request: HttpRequest, student_id: int) -> HttpResponse:
 		return HttpResponseRedirect(reverse_lazy('invoice', args=(student_id, )))
 	semester = student.semester
 
-	# check if the student has any new processed suggestions
-	suggestions = ProblemSuggestion.objects.filter(resolved=True, student=student, notified=False)
-
 	# mailchimp
 	client = MailChimp(mc_api=os.getenv('MAILCHIMP_API_KEY'), mc_user='vEnhance')
 	timestamp = (timezone.now() + timedelta(days=-28))
@@ -160,7 +157,6 @@ def portal(request: HttpRequest, student_id: int) -> HttpResponse:
 	context['title'] = f"{student.name} ({semester.name})"
 	context['student'] = student
 	context['semester'] = semester
-	context['suggestions'] = list(suggestions)
 	context['omniscient'] = can_edit(request, student)
 	context['curriculum'] = student.generate_curriculum_rows(omniscient=context['omniscient'])
 	context['tests'] = PracticeExam.objects.filter(

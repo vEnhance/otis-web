@@ -196,9 +196,6 @@ class ProblemSuggestion(models.Model):
 	resolved = models.BooleanField(default=False, help_text="Whether staff has processed this.")
 	reason = models.TextField(blank=True, help_text="Staff notes on reviewing.")
 	created_at = models.DateTimeField(auto_now_add=True)
-	notified = models.BooleanField(
-		default=False, help_text="Whether student has received the staff's comments."
-	)
 
 	def __str__(self) -> str:
 		return f"{self.student.name} suggested {self.source} for {self.unit.group}"
