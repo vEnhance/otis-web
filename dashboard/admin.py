@@ -8,7 +8,7 @@ from django.http import HttpRequest
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
-from dashboard.models import Achievement, Level, ProblemSuggestion, PSet, SemesterDownloadFile, UploadedFile  # NOQA
+from .models import Achievement, AchievementUnlock, Level, ProblemSuggestion, PSet, SemesterDownloadFile, UploadedFile  # NOQA
 
 
 @admin.register(UploadedFile)
@@ -152,3 +152,9 @@ class AchievementAdmin(ImportExportModelAdmin):
 	search_fields = ('code', 'description')
 	list_filter = ('active', )
 	resource_class = AchievementIEResource
+
+
+@admin.register(AchievementUnlock)
+class AchievementUnlockAdmin(admin.ModelAdmin):
+	list_display = ('user', 'achievement', 'timestamp')
+	list_filter = ('achievement__active', )

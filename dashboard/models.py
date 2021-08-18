@@ -243,3 +243,6 @@ class AchievementUnlock(models.Model):
 	timestamp = models.DateTimeField(
 		auto_now_add=True, help_text='The time the achievement was granted'
 	)
+
+	def __str__(self):
+		return self.timestamp.strftime('%c')
