@@ -231,3 +231,15 @@ class Level(models.Model):
 
 	def __str__(self):
 		return f'Level {self.threshold}: {self.name}'
+
+
+class AchievementUnlock(models.Model):
+	user = models.ForeignKey(
+		User, on_delete=models.CASCADE, help_text="The user who unlocked the achievement"
+	)
+	achievement = models.ForeignKey(
+		Achievement, on_delete=models.CASCADE, help_text="The achievement that was obtained"
+	)
+	timestamp = models.DateTimeField(
+		auto_now_add=True, help_text='The time the achievement was granted'
+	)
