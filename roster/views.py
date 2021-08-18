@@ -343,6 +343,10 @@ def register(request: HttpRequest) -> HttpResponse:
 				request.user.save()
 				mailchimp_subscribe(request.user)
 				messages.success(request, message="Submitted! Sit tight.")
+				logging.log(
+					settings.ACTION_LOG_LEVEL,
+					f'New registration from f{request.user.first_name} {request.user.last_name}'
+				)
 				return HttpResponseRedirect(reverse("index"))
 	else:
 		if container.allowed_tracks:
