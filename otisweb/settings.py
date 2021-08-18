@@ -210,8 +210,10 @@ def filter_useless_404(record: logging.LogRecord) -> bool:
 
 VERBOSE_LOG_LEVEL = 15
 SUCCESS_LOG_LEVEL = 25
+ACTION_LOG_LEVEL  = 35
 logging.addLevelName(VERBOSE_LOG_LEVEL, "VERBOSE")
 logging.addLevelName(SUCCESS_LOG_LEVEL, "SUCCESS")
+logging.addLevelName(ACTION_LOG_LEVEL, "ACTION")
 
 LOGGING = {
 	'version': 1,

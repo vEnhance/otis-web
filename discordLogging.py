@@ -21,6 +21,7 @@ COLORS = {
 	"verbose": 6559689,
 	"debug": 2196944,
 	"success": 2210373,
+	"action": 17663,
 }
 EMOJIS = {
 	"default": ":loudspeaker:",
@@ -31,6 +32,7 @@ EMOJIS = {
 	"verbose": ":mega:",
 	"debug": ":microscope:",
 	"success": ":rocket:",
+	"action" : ":factory_worker:",
 }
 
 class DiscordHandler(logging.Handler):
