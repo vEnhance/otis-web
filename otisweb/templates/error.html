@@ -1,0 +1,20 @@
+<html>
+<head>
+<title>OTIS: HTTP {% block code %}{% endblock %}</title>
+<style>
+body {
+	text-align: center;
+}
+</style>
+</head>
+<body>
+	<h1>{% block title %}{% endblock %}</h1>
+	<div style="font-size:120px;">{% block emoji %}{% endblock %}</div>
+	<p>
+		If you think you found a website bug, please
+		<a href="https://github.com/vEnhance/otis-webs/issues">report this issue on GitHub</a>.
+	</p>
+	{% block extra %}
+	{% endblock %}
+</body>
+</html>

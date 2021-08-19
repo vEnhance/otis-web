@@ -1,9 +1,4 @@
-<html>
-<head>
-<title>OTIS: 500 Internal Serval Error</title>
-</head>
-<body>
-<h1>500 Internal Server Error</h1>
-{{ exception }}
-</body>
-</html>
+{% extends 'error.html' %}
+{% block code %}500{% endblock %}
+{% block title %}HTTP 500 Internal Server Error{% endblock %}
+{% block emoji %}❌{% endblock %}

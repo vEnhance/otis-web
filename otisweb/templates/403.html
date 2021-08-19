@@ -1,9 +1,4 @@
-<html>
-<head>
-<title>OTIS: 403 Forbidden</title>
-</head>
-<body>
-<h1>403 Forbidden</h1>
-{{ exception }}
-</body>
-</html>
+{% extends 'error.html' %}
+{% block code %}403{% endblock %}
+{% block title %}HTTP 403 Forbidden{% endblock %}
+{% block emoji %}👿{% endblock %}

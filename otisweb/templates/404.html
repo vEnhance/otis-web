@@ -1,9 +1,4 @@
-<html>
-<head>
-<title>OTIS: 404 Not Found</title>
-</head>
-<body>
-<h1>404 Not Found</h1>
-{{ exception }}
-</body>
-</html>
+{% extends 'error.html' %}
+{% block code %}404{% endblock %}
+{% block title %}HTTP 404 Not Found{% endblock %}
+{% block emoji %}⁉️{% endblock %}
