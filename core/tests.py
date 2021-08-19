@@ -17,9 +17,9 @@ class TestCore(OTISTestCase):
 			semester=Semester.objects.get(pk=1)
 		)
 		PSet.objects.create(unit=Unit.objects.get(pk=10), student=alice, approved=True)
-		PSet.objects.create(unit=Unit.objects.get(pk=25), student=alice, approved=False)
-		alice.unlocked_units.add(Unit.objects.get(pk=25))
-		alice.unlocked_units.add(Unit.objects.get(pk=40))
+		PSet.objects.create(unit=Unit.objects.get(pk=20), student=alice, approved=False)
+		alice.unlocked_units.add(Unit.objects.get(pk=20))
+		alice.unlocked_units.add(Unit.objects.get(pk=30))
 
 	def test_semester_url(self):
 		for sem in Semester.objects.all():
@@ -34,14 +34,14 @@ class TestCore(OTISTestCase):
 	def test_alice_core_views(self):
 		self.login('alice')
 		self.assertGet20X('view-problems', 10)
-		self.assertGet20X('view-problems', 25)
-		self.assertGet20X('view-problems', 40)
+		self.assertGet20X('view-problems', 20)
+		self.assertGet20X('view-problems', 30)
 		self.assertGet20X('view-tex', 10)
-		self.assertGet20X('view-tex', 25)
-		self.assertGet20X('view-tex', 40)
+		self.assertGet20X('view-tex', 20)
+		self.assertGet20X('view-tex', 30)
 		self.assertGet20X('view-solutions', 10)
-		self.assertGet20X('view-solutions', 25)
-		self.assertGetDenied('view-solutions', 40)
+		self.assertGet20X('view-solutions', 20)
+		self.assertGetDenied('view-solutions', 30)
 		for v in ('view-problems', 'view-tex', 'view-solutions'):
 			self.assertGetDenied(v, 55)
 
