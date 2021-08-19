@@ -28,10 +28,10 @@ class OTISTestCase(TestCase):
 		self.assertEqual(response.status_code, 403)
 
 	def get(self, name: str, *args: Any):
-		return self.client.get(reverse_lazy(name, args=args))
+		return self.client.get(reverse_lazy(name, args=args), follow=True)
 
 	def post(self, name: str, *args: Any, data: Dict[str, Any]):
-		return self.client.post(reverse_lazy(name, args=args), data)
+		return self.client.post(reverse_lazy(name, args=args), data=data, follow=True)
 
 	def assertGet20X(self, name: str, *args: Any):
 		self.assert20X(self.get(name, *args))
