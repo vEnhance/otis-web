@@ -4,6 +4,7 @@ Django settings for otisweb project.
 
 import logging
 import os
+import sys
 from pathlib import Path
 from typing import Any, Dict
 
@@ -34,6 +35,8 @@ else:
 	INTERNAL_IPS = [
 		'127.0.0.1',
 	]
+SITE_ID = 1
+TESTING = len(sys.argv) > 1 and sys.argv[1] == 'test'
 
 # Application definition
 
