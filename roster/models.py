@@ -504,6 +504,8 @@ class StudentRegistration(models.Model):
 	)
 
 	agreement_form = models.FileField(
+		null=True,
+		blank=False,
 		help_text="Signed agreement form, as a single PDF",
 		upload_to=content_file_name,
 		validators=[FileExtensionValidator(allowed_extensions=[
