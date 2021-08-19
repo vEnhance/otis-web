@@ -20,6 +20,8 @@ urlpatterns = [
 	path(r'roster/', include('roster.urls')),
 	path(r'hijack/', include('hijack.urls')),
 	path(r'accounts/', include('allauth.urls')),
+	path(r'notifications/', include('django_nyt.urls')),
+	path(r'wiki/', include('wiki.urls')),
 	path(r'__debug__/', include(debug_toolbar.urls)),
 	path(
 		r'robots.txt',

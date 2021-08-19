@@ -69,6 +69,16 @@ INSTALLED_APPS = [
 	'hijack.contrib.admin',
 	'import_export',
 	'reversion',
+	'django_nyt.apps.DjangoNytConfig',
+	'mptt',
+	'sekizai',
+	'sorl.thumbnail',
+	'wiki.apps.WikiConfig',
+	'wiki.plugins.attachments.apps.AttachmentsConfig',
+	'wiki.plugins.editsection.apps.EditSectionConfig',
+	'wiki.plugins.images.apps.ImagesConfig',
+	'wiki.plugins.links.apps.LinksConfig',
+	'wiki.plugins.macros.apps.MacrosConfig',
 ]
 
 MIDDLEWARE = [
@@ -98,6 +108,7 @@ TEMPLATES = [
 						'django.template.context_processors.request',
 						'django.contrib.auth.context_processors.auth',
 						'django.contrib.messages.context_processors.messages',
+						"sekizai.context_processors.sekizai",
 					],
 				'debug': not PRODUCTION,
 			},
@@ -201,6 +212,10 @@ STORAGE_HASH_KEY = os.getenv("STORAGE_HASH_KEY", "look_at_me_im_a_cute_kitten")
 API_TARGET_HASH = os.getenv(
 	"API_TARGET_HASH", '1c3592aa9241522fea1dd572c43c192a277e832dcd1ae63adfe069cb05624ead'
 )
+
+WIKI_ACCOUNT_HANDLING = True
+WIKI_ACCOUNT_SIGNUP_ALLOWED = True
+WIKI_PLUGINS_METHODS = ('article_list', 'toc', 'meow')
 
 
 def filter_useless_404(record: logging.LogRecord) -> bool:
