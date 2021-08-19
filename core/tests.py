@@ -1,3 +1,5 @@
+from typing import Type
+
 from dashboard.models import PSet
 from django.contrib.auth.models import User
 from otisweb.tests import OTISTestCase
