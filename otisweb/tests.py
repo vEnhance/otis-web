@@ -17,6 +17,9 @@ class OTISTestCase(TestCase):
 		self.assertGreaterEqual(response.status_code, 200)
 		self.assertLess(response.status_code, 300)
 
+	def assertOK(self, response: HttpResponse):
+		self.assertLess(response.status_code, 400)
+
 	def assert40X(self, response: HttpResponse):
 		self.assertGreaterEqual(response.status_code, 400)
 		self.assertLess(response.status_code, 500)
@@ -33,6 +36,9 @@ class OTISTestCase(TestCase):
 	def assertGet20X(self, name: str, *args: Any):
 		self.assert20X(self.get(name, *args))
 
+	def assertGetOK(self, name: str, *args: Any):
+		self.assertOK(self.get(name, *args))
+
 	def assertGet40X(self, name: str, *args: Any):
 		self.assert40X(self.get(name, *args))
 
@@ -41,6 +47,9 @@ class OTISTestCase(TestCase):
 
 	def assertPost20X(self, name: str, *args: Any, **kwargs: Any):
 		self.assert20X(self.post(name, *args, **kwargs))
+
+	def assertPostOK(self, name: str, *args: Any, **kwargs: Any):
+		self.assertOK(self.post(name, *args, **kwargs))
 
 	def assertPost40X(self, name: str, *args: Any, **kwargs: Any):
 		self.assert40X(self.post(name, *args, **kwargs))

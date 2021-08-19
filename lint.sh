@@ -13,7 +13,7 @@ echo ""
 
 echo "Tidying files with yapf ..."
 echo "---------------------------"
-yapf --in-place */*.py */tests/*.py */templatetags/*.py */management/commands/*.py
+yapf --in-place */*.py */templatetags/*.py */management/commands/*.py
 echo ""
 
 echo "Running manage.py check ..."
@@ -34,7 +34,7 @@ echo ""
 
 echo "Running pyflake ..."
 echo "---------------------------"
-if ! pyflakes */*.py */tests/*.py */templatetags/*.py */management/commands/*.py; then
+if ! pyflakes */*.py */templatetags/*.py */management/commands/*.py; then
 	echo "FAILED: pyflakes gave nonzero status"
 	exit 1
 fi
