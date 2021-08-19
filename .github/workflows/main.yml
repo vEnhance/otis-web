@@ -58,6 +58,7 @@ jobs:
         exit $reviewdog_rc
 
   flake8_py3:
+    name: flake8
     runs-on: ubuntu-latest
     steps:
       - name: Setup Python
@@ -74,7 +75,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   yapf:
-    name: Formatting Check
+    name: yapf
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
