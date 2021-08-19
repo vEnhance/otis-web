@@ -1,0 +1,1558 @@
+- model: auth.user
+  pk: 2
+  fields:
+    password: pbkdf2_sha256$260000$HTfQHZ8xAyq2LsRjItQVUm$XBnLC304QqYsW6klECFFvC8UvN2Agxt+257ynKgkdH8=
+    last_login: null
+    is_superuser: false
+    username: alice
+    first_name: Alice
+    last_name: Aardvark
+    email: alice@evanchen.cc
+    is_staff: false
+    is_active: true
+    date_joined: 2021-08-18 04:17:23+00:00
+    groups: []
+    user_permissions: []
+- model: auth.user
+  pk: 3
+  fields:
+    password: pbkdf2_sha256$260000$TcgB0JnGfUcfVt6vg6TDmc$VuH6fOp35DRbaHk27nYI4dXzFNjkDAfuaii5XyS6Lgs=
+    last_login: null
+    is_superuser: false
+    username: bob
+    first_name: Bob
+    last_name: Beta
+    email: bob@evanchen.cc
+    is_staff: false
+    is_active: true
+    date_joined: 2021-08-18 04:17:36+00:00
+    groups: []
+    user_permissions: []
+- model: auth.user
+  pk: 4
+  fields:
+    password: pbkdf2_sha256$260000$yFIEpKU8CHzAIKzzGrXV6z$Wf3g21p8J/4t4Dwr5iVj89cl4sxqYeeQ4FOcQ9ocq1c=
+    last_login: null
+    is_superuser: false
+    username: carol
+    first_name: Carol
+    last_name: Cutie
+    email: carol@evanchen.cc
+    is_staff: false
+    is_active: true
+    date_joined: 2021-08-18 04:18:12+00:00
+    groups: []
+    user_permissions: []
+- model: auth.user
+  pk: 5
+  fields:
+    password: pbkdf2_sha256$260000$B5wBzcg90f2h26g0Dh7Lnk$aytQfTuWgZPMzO9tBMaXbBMIVjvS6bEiUoHwqqfwg8M=
+    last_login: null
+    is_superuser: false
+    username: staff
+    first_name: Sammy
+    last_name: Staff
+    email: sammy@evanchen.cc
+    is_staff: true
+    is_active: true
+    date_joined: 2021-08-18 04:29:44+00:00
+    groups: []
+    user_permissions: []
+- model: auth.user
+  pk: 6
+  fields:
+    password: pbkdf2_sha256$260000$YcV56MJWGZ08e8uf678Rmi$2Q8qZxKy7SXftDrZ7Gu6hKdwTjAXhaZN2Emx5DzQxs4=
+    last_login: null
+    is_superuser: false
+    username: donald
+    first_name: Donald
+    last_name: Duck
+    email: donald@evanchen.cc
+    is_staff: false
+    is_active: true
+    date_joined: 2021-08-18 04:30:17+00:00
+    groups: []
+    user_permissions: []
+- model: auth.user
+  pk: 7
+  fields:
+    password: pbkdf2_sha256$260000$aggXwCwPm45BxWYnYtuS4d$XCXfH9tfGj3hLTp4HDdWX+aflekrQIwJ098yJ40lyLM=
+    last_login: null
+    is_superuser: false
+    username: esther
+    first_name: Esther
+    last_name: Earl
+    email: esther@evanchen.cc
+    is_staff: false
+    is_active: true
+    date_joined: 2021-08-18 04:33:28+00:00
+    groups: []
+    user_permissions: []
+- model: auth.user
+  pk: 8
+  fields:
+    password: pbkdf2_sha256$260000$6lyBPDMUzWzVGqlItAbF1e$SMTuHGmv9+vZcI3ECX7bMNwH3bE7DesSX0qQkuHJEk8=
+    last_login: null
+    is_superuser: false
+    username: mallory
+    first_name: Mallory
+    last_name: Morpheus
+    email: mallory@evanchen.cc
+    is_staff: false
+    is_active: true
+    date_joined: 2021-08-18 04:35:59+00:00
+    groups: []
+    user_permissions: []
+- model: auth.user
+  pk: 9
+  fields:
+    password: pbkdf2_sha256$260000$MdKneWD3aYCGLpqH3Rwwn4$5ZUMqmOJkSMgWycbSjoMd70FAOXBVqwysqRfVHXnzfc=
+    last_login: null
+    is_superuser: true
+    username: kurumi
+    first_name: Kurumi
+    last_name: Tokisaki
+    email: ''
+    is_staff: true
+    is_active: true
+    date_joined: 2021-08-19 06:08:55+00:00
+    groups: []
+    user_permissions: []
+- model: core.unit
+  pk: 1
+  fields:
+    group: 1
+    code: BGX
+    position: 82
+- model: core.unit
+  pk: 3
+  fields:
+    group: 2
+    code: BNW
+    position: 51
+- model: core.unit
+  pk: 4
+  fields:
+    group: 3
+    code: DGX
+    position: 36
+- model: core.unit
+  pk: 5
+  fields:
+    group: 3
+    code: ZGX
+    position: 37
+- model: core.unit
+  pk: 6
+  fields:
+    group: 73
+    code: ZGY
+    position: 97
+- model: core.unit
+  pk: 7
+  fields:
+    group: 4
+    code: DAY
+    position: 45
+- model: core.unit
+  pk: 8
+  fields:
+    group: 4
+    code: ZAY
+    position: 46
+- model: core.unit
+  pk: 9
+  fields:
+    group: 7
+    code: BGW
+    position: 41
+- model: core.unit
+  pk: 10
+  fields:
+    group: 7
+    code: DGW
+    position: 42
+- model: core.unit
+  pk: 11
+  fields:
+    group: 7
+    code: DGX
+    position: 81
+- model: core.unit
+  pk: 13
+  fields:
+    group: 8
+    code: ZCW
+    position: 50
+- model: core.unit
+  pk: 14
+  fields:
+    group: 9
+    code: BGW
+    position: 38
+- model: core.unit
+  pk: 15
+  fields:
+    group: 9
+    code: DGW
+    position: 39
+- model: core.unit
+  pk: 16
+  fields:
+    group: 9
+    code: DGX
+    position: 80
+- model: core.unit
+  pk: 18
+  fields:
+    group: 11
+    code: DNW
+    position: 53
+- model: core.unit
+  pk: 20
+  fields:
+    group: 13
+    code: BGY
+    position: 78
+- model: core.unit
+  pk: 21
+  fields:
+    group: 13
+    code: DGY
+    position: 79
+- model: core.unit
+  pk: 22
+  fields:
+    group: 14
+    code: DCW
+    position: 23
+- model: core.unit
+  pk: 23
+  fields:
+    group: 14
+    code: ZCW
+    position: 24
+- model: core.unit
+  pk: 25
+  fields:
+    group: 15
+    code: DNY
+    position: 33
+- model: core.unit
+  pk: 26
+  fields:
+    group: 16
+    code: BCW
+    position: 8
+- model: core.unit
+  pk: 27
+  fields:
+    group: 17
+    code: ZCX
+    position: 106
+- model: core.unit
+  pk: 29
+  fields:
+    group: 18
+    code: DCW
+    position: 60
+- model: core.unit
+  pk: 32
+  fields:
+    group: 18
+    code: ZCX
+    position: 61
+- model: core.unit
+  pk: 33
+  fields:
+    group: 19
+    code: BFW
+    position: 16
+- model: core.unit
+  pk: 34
+  fields:
+    group: 19
+    code: DFW
+    position: 17
+- model: core.unit
+  pk: 35
+  fields:
+    group: 19
+    code: DFX
+    position: 91
+- model: core.unit
+  pk: 37
+  fields:
+    group: 19
+    code: ZFX
+    position: 92
+- model: core.unit
+  pk: 38
+  fields:
+    group: 19
+    code: ZFW
+    position: 90
+- model: core.unit
+  pk: 39
+  fields:
+    group: 20
+    code: BAX
+    position: 25
+- model: core.unit
+  pk: 40
+  fields:
+    group: 21
+    code: BCW
+    position: 9
+- model: core.unit
+  pk: 41
+  fields:
+    group: 21
+    code: DCW
+    position: 10
+- model: core.unit
+  pk: 42
+  fields:
+    group: 21
+    code: DCX
+    position: 11
+- model: core.unit
+  pk: 43
+  fields:
+    group: 23
+    code: DCX
+    position: 101
+- model: core.unit
+  pk: 45
+  fields:
+    group: 24
+    code: DMY
+    position: 67
+- model: core.unit
+  pk: 46
+  fields:
+    group: 24
+    code: ZMY
+    position: 66
+- model: core.unit
+  pk: 47
+  fields:
+    group: 25
+    code: BCW
+    position: 112
+- model: core.unit
+  pk: 48
+  fields:
+    group: 26
+    code: ZAY
+    position: 89
+- model: core.unit
+  pk: 49
+  fields:
+    group: 27
+    code: DGW
+    position: 1
+- model: core.unit
+  pk: 50
+  fields:
+    group: 27
+    code: DGX
+    position: 2
+- model: core.unit
+  pk: 53
+  fields:
+    group: 28
+    code: DNW
+    position: 54
+- model: core.unit
+  pk: 55
+  fields:
+    group: 29
+    code: ZGY
+    position: 4
+- model: core.unit
+  pk: 56
+  fields:
+    group: 30
+    code: ZGX
+    position: 49
+- model: core.unit
+  pk: 57
+  fields:
+    group: 31
+    code: BCX
+    position: 20
+- model: core.unit
+  pk: 60
+  fields:
+    group: 31
+    code: DCY
+    position: 21
+- model: core.unit
+  pk: 61
+  fields:
+    group: 32
+    code: BAW
+    position: 28
+- model: core.unit
+  pk: 62
+  fields:
+    group: 33
+    code: BAW
+    position: 86
+- model: core.unit
+  pk: 64
+  fields:
+    group: 36
+    code: ZGY
+    position: 95
+- model: core.unit
+  pk: 65
+  fields:
+    group: 37
+    code: DGW
+    position: 94
+- model: core.unit
+  pk: 67
+  fields:
+    group: 38
+    code: DAX
+    position: 44
+- model: core.unit
+  pk: 68
+  fields:
+    group: 39
+    code: DCY
+    position: 47
+- model: core.unit
+  pk: 69
+  fields:
+    group: 39
+    code: ZCY
+    position: 48
+- model: core.unit
+  pk: 70
+  fields:
+    group: 40
+    code: DCW
+    position: 12
+- model: core.unit
+  pk: 71
+  fields:
+    group: 40
+    code: DCX
+    position: 13
+- model: core.unit
+  pk: 73
+  fields:
+    group: 41
+    code: DFW
+    position: 18
+- model: core.unit
+  pk: 74
+  fields:
+    group: 41
+    code: ZFW
+    position: 19
+- model: core.unit
+  pk: 75
+  fields:
+    group: 42
+    code: BCW
+    position: 111
+- model: core.unit
+  pk: 76
+  fields:
+    group: 44
+    code: BNW
+    position: 52
+- model: core.unit
+  pk: 78
+  fields:
+    group: 56
+    code: BAW
+    position: 5
+- model: core.unit
+  pk: 80
+  fields:
+    group: 48
+    code: DCX
+    position: 58
+- model: core.unit
+  pk: 82
+  fields:
+    group: 48
+    code: ZCX
+    position: 59
+- model: core.unit
+  pk: 83
+  fields:
+    group: 49
+    code: DCX
+    position: 118
+- model: core.unit
+  pk: 84
+  fields:
+    group: 51
+    code: DGW
+    position: 93
+- model: core.unit
+  pk: 86
+  fields:
+    group: 52
+    code: BAX
+    position: 26
+- model: core.unit
+  pk: 87
+  fields:
+    group: 52
+    code: DAX
+    position: 27
+- model: core.unit
+  pk: 88
+  fields:
+    group: 53
+    code: ZGX
+    position: 43
+- model: core.unit
+  pk: 89
+  fields:
+    group: 54
+    code: ZGX
+    position: 40
+- model: core.unit
+  pk: 90
+  fields:
+    group: 55
+    code: ZNW
+    position: 55
+- model: core.unit
+  pk: 91
+  fields:
+    group: 55
+    code: ZNX
+    position: 56
+- model: core.unit
+  pk: 92
+  fields:
+    group: 57
+    code: DAX
+    position: 87
+- model: core.unit
+  pk: 93
+  fields:
+    group: 46
+    code: DCY
+    position: 62
+- model: core.unit
+  pk: 94
+  fields:
+    group: 46
+    code: ZCY
+    position: 64
+- model: core.unit
+  pk: 96
+  fields:
+    group: 58
+    code: ZGX
+    position: 85
+- model: core.unit
+  pk: 98
+  fields:
+    group: 22
+    code: ZCW
+    position: 14
+- model: core.unit
+  pk: 99
+  fields:
+    group: 22
+    code: ZCX
+    position: 15
+- model: core.unit
+  pk: 100
+  fields:
+    group: 43
+    code: DNY
+    position: 68
+- model: core.unit
+  pk: 101
+  fields:
+    group: 43
+    code: ZNY
+    position: 69
+- model: core.unit
+  pk: 102
+  fields:
+    group: 35
+    code: DNY
+    position: 70
+- model: core.unit
+  pk: 103
+  fields:
+    group: 35
+    code: ZNY
+    position: 71
+- model: core.unit
+  pk: 104
+  fields:
+    group: 34
+    code: DAX
+    position: 29
+- model: core.unit
+  pk: 105
+  fields:
+    group: 12
+    code: ZMY
+    position: 123
+- model: core.unit
+  pk: 106
+  fields:
+    group: 73
+    code: DGY
+    position: 96
+- model: core.unit
+  pk: 107
+  fields:
+    group: 25
+    code: DCW
+    position: 113
+- model: core.unit
+  pk: 109
+  fields:
+    group: 5
+    code: DMW
+    position: 76
+- model: core.unit
+  pk: 113
+  fields:
+    group: 10
+    code: DMW
+    position: 103
+- model: core.unit
+  pk: 114
+  fields:
+    group: 10
+    code: ZMW
+    position: 104
+- model: core.unit
+  pk: 115
+  fields:
+    group: 50
+    code: DNW
+    position: 74
+- model: core.unit
+  pk: 116
+  fields:
+    group: 58
+    code: DGX
+    position: 84
+- model: core.unit
+  pk: 118
+  fields:
+    group: 26
+    code: ZAW
+    position: 88
+- model: core.unit
+  pk: 119
+  fields:
+    group: 6
+    code: DCW
+    position: 116
+- model: core.unit
+  pk: 120
+  fields:
+    group: 6
+    code: ZCW
+    position: 117
+- model: core.unit
+  pk: 121
+  fields:
+    group: 13
+    code: BGW
+    position: 32
+- model: core.unit
+  pk: 122
+  fields:
+    group: 45
+    code: BNW
+    position: 30
+- model: core.unit
+  pk: 123
+  fields:
+    group: 47
+    code: ZCY
+    position: 119
+- model: core.unit
+  pk: 124
+  fields:
+    group: 23
+    code: ZCX
+    position: 102
+- model: core.unit
+  pk: 125
+  fields:
+    group: 13
+    code: DGW
+    position: 34
+- model: core.unit
+  pk: 126
+  fields:
+    group: 59
+    code: ZAW
+    position: 100
+- model: core.unit
+  pk: 127
+  fields:
+    group: 29
+    code: DGY
+    position: 3
+- model: core.unit
+  pk: 128
+  fields:
+    group: 61
+    code: ZGW
+    position: 114
+- model: core.unit
+  pk: 129
+  fields:
+    group: 62
+    code: DAW
+    position: 107
+- model: core.unit
+  pk: 130
+  fields:
+    group: 62
+    code: ZAW
+    position: 108
+- model: core.unit
+  pk: 131
+  fields:
+    group: 5
+    code: DMY
+    position: 77
+- model: core.unit
+  pk: 132
+  fields:
+    group: 63
+    code: DFY
+    position: 115
+- model: core.unit
+  pk: 133
+  fields:
+    group: 64
+    code: ZCW
+    position: 122
+- model: core.unit
+  pk: 134
+  fields:
+    group: 45
+    code: DNW
+    position: 31
+- model: core.unit
+  pk: 135
+  fields:
+    group: 14
+    code: BCW
+    position: 22
+- model: core.unit
+  pk: 136
+  fields:
+    group: 48
+    code: BCX
+    position: 57
+- model: core.unit
+  pk: 137
+  fields:
+    group: 65
+    code: BAY
+    position: 6
+- model: core.unit
+  pk: 138
+  fields:
+    group: 66
+    code: BCY
+    position: 7
+- model: core.unit
+  pk: 139
+  fields:
+    group: 68
+    code: DCY
+    position: 63
+- model: core.unit
+  pk: 140
+  fields:
+    group: 68
+    code: ZCY
+    position: 65
+- model: core.unit
+  pk: 141
+  fields:
+    group: 67
+    code: DGX
+    position: 109
+- model: core.unit
+  pk: 142
+  fields:
+    group: 67
+    code: ZGX
+    position: 110
+- model: core.unit
+  pk: 143
+  fields:
+    group: 69
+    code: DAY
+    position: 99
+- model: core.unit
+  pk: 144
+  fields:
+    group: 69
+    code: BAY
+    position: 98
+- model: core.unit
+  pk: 145
+  fields:
+    group: 17
+    code: DCX
+    position: 105
+- model: core.unit
+  pk: 146
+  fields:
+    group: 70
+    code: BMW
+    position: 0
+- model: core.unit
+  pk: 147
+  fields:
+    group: 71
+    code: DGX
+    position: 35
+- model: core.unit
+  pk: 148
+  fields:
+    group: 72
+    code: DAW
+    position: 72
+- model: core.unit
+  pk: 149
+  fields:
+    group: 72
+    code: ZAW
+    position: 73
+- model: core.unit
+  pk: 150
+  fields:
+    group: 1
+    code: DGX
+    position: 83
+- model: core.unit
+  pk: 151
+  fields:
+    group: 75
+    code: ZNY
+    position: 121
+- model: core.unit
+  pk: 152
+  fields:
+    group: 74
+    code: ZGY
+    position: 120
+- model: core.unit
+  pk: 153
+  fields:
+    group: 76
+    code: DNX
+    position: 75
+- model: core.unitgroup
+  pk: 1
+  fields:
+    name: AIME Geo
+    slug: aimegeo
+    description: Computational geometry problems, many taken from the tail end of
+      the AIME. At the border of computational contests and olympiads.
+    subject: G
+- model: core.unitgroup
+  pk: 2
+  fields:
+    name: AIME Mods
+    slug: aimemod
+    description: Computational problems in modular arithmetic, again at the border
+      of short-answer contests and olympiads.
+    subject: N
+- model: core.unitgroup
+  pk: 3
+  fields:
+    name: Classical Geo
+    slug: classicgeo
+    description: Formerly known as "American Geo". This is a unit on geometry problems
+      with a highly traditional or synthetic flavor, for example USAMO 2016/3 and
+      USAMO 2017/3. These sorts of problems have recently gained popularity on the
+      USA olympiads and team selection tests and it is totally not my fault. A lot
+      of these problems involve figuring out what certain points are, adding in new
+      points that were not that already, and altogether slowly piecing together a
+      master diagram that reveals the depth of a configuration.
+    subject: G
+- model: core.unitgroup
+  pk: 4
+  fields:
+    name: Analysis
+    slug: analysis
+    description: Problems involving some real analysis. This is a pretty technical
+      lecture and will delve into the nuances of converge issues, absolute versus
+      conditional convergence, using calculus properly, compact sets, and so on. Featuring
+      the art of Lagrange multipliers.
+    subject: A
+- model: core.unitgroup
+  pk: 5
+  fields:
+    name: Anti Problems
+    slug: antiprobs
+    description: A unit consisting entirely of troll "anti-problems" which are suitable
+      for giving to your enemies.
+    subject: M
+- model: core.unitgroup
+  pk: 6
+  fields:
+    name: Arrows
+    slug: arrows
+    description: Some selected problems revolving around the idea that a function
+      from a set to itself can be thought of as a directed graph with all outdegrees
+      equal to 1. In particular, iterating such a function often involves looking
+      at its cycle decomposition.
+    subject: C
+- model: core.unitgroup
+  pk: 7
+  fields:
+    name: Bary
+    slug: bary
+    description: Barycentric coordinates in olympiad geometry. A follow-up to Chapter
+      7 of EGMO.
+    subject: G
+- model: core.unitgroup
+  pk: 8
+  fields:
+    name: Combo Null
+    slug: cns
+    description: A silly unit on using combinatorial nullstellensatz. Mostly for fun.
+      It is actually a fairly easy (albeit technical) unit, and doesn't take long.
+      This unit is only marked as Z-level because it is considered an advanced trick
+      (in the sense it is more important to learn fundamentals first).
+    subject: C
+- model: core.unitgroup
+  pk: 9
+  fields:
+    name: Complex Nums
+    slug: complex
+    description: Complex numbers in olympiad geometry. A follow-up to Chapter 6 of
+      EGMO.
+    subject: G
+- model: core.unitgroup
+  pk: 10
+  fields:
+    name: Courage
+    slug: courage
+    description: A difficult unit consisting of problems with deceptively short statements.
+      A lot of the difficulty of these problems is setting up an entire framework
+      to attack a simply stated problem. These setups are often more elaborate or
+      detailed than in other problems.
+    subject: M
+- model: core.unitgroup
+  pk: 11
+  fields:
+    name: Expon NT
+    slug: expnt
+    description: Expressions of the form a^n \pm 1, the bread and butter of olympiad
+      number theory. Mods and orders, Fermat's Christmas theorem, lifting the exponent.
+    subject: N
+- model: core.unitgroup
+  pk: 12
+  fields:
+    name: Duluth
+    slug: duluth
+    description: A short end-of-year unit containing open problems I solved at the
+      Duluth REU.
+    subject: M
+- model: core.unitgroup
+  pk: 13
+  fields:
+    name: Elem Geo
+    slug: elemgeo
+    description: 'A unit featuring easy to medium geometry problems which can be solved
+      using only the most basic tools: angle chasing, power of a point, homothety.
+      It can be thought of as a follow-up to Part I of EGMO.'
+    subject: G
+- model: core.unitgroup
+  pk: 14
+  fields:
+    name: Equality
+    slug: equality
+    description: An important unit about taking advantage of the equality case in
+      combinatorial problems in order to solve problems. Mandatory for newcomer students.
+    subject: C
+- model: core.unitgroup
+  pk: 15
+  fields:
+    name: Euclid Alg
+    slug: euclid
+    description: A unit about the idea that if d divides a and b, then d divides any
+      linear combination of a and b. This intuition underlies Bezout's lemma, the
+      Euclidean algorithm, and the division algorithm, as well as a techinque which
+      I privately call remainder bounding. One very good example of a problem of this
+      feeling is SL 2016 N4 (sort of the crown example of remainder bounding).
+    subject: N
+- model: core.unitgroup
+  pk: 16
+  fields:
+    name: Expected Value
+    slug: evcomp
+    description: Computational problems involving probability, expected value (in
+      particular linearity of expectation), and Markov chains (processes which move
+      from state to state).
+    subject: C
+- model: core.unitgroup
+  pk: 17
+  fields:
+    name: Extremal Graph
+    slug: extremegraph
+    description: A difficult unit on problems from extremal graph theory; finding
+      graphs which maximize X under certain constructions. The most basic example
+      is Turan's theorem, which maximizes the number of edges in a graph avoiding
+      an r-clique. Global/local ideas as well as understanding of equality cases feature
+      prominently. Most of the examples in this unit are more challenging.
+    subject: C
+- model: core.unitgroup
+  pk: 18
+  fields:
+    name: Free
+    slug: free
+    description: Problems for which you have a lot of room to make decisions; a lot
+      of the problems in this unit are constructions, for example. You will feel like
+      you are inventing mathematics, rather than discovering it (in contrast to the
+      Rigid unit).
+    subject: C
+- model: core.unitgroup
+  pk: 19
+  fields:
+    name: Func Eqn
+    slug: fneqn
+    description: Functional equations, I guess.
+    subject: F
+- model: core.unitgroup
+  pk: 20
+  fields:
+    name: Gen Func
+    slug: genfunc
+    description: Generating functions and their use in algebraic contexts (computing
+      sums, featuring the so-called snake oil method). Of course, some combinatorial
+      problems included as well.
+    subject: A
+- model: core.unitgroup
+  pk: 21
+  fields:
+    name: Global
+    slug: global
+    description: Linearity of expectation, switching the order of summation, what's
+      often called pigeonhole principle, counting in two ways, ... turns out they're
+      actually all more or less the same idea.
+    subject: C
+- model: core.unitgroup
+  pk: 22
+  fields:
+    name: Global and Local
+    slug: globloc
+    description: An accelerated version of both the global and local units (both done
+      at once).
+    subject: C
+- model: core.unitgroup
+  pk: 23
+  fields:
+    name: Graph Theory
+    slug: graph
+    description: Combinatorics practice with graphs.
+    subject: C
+- model: core.unitgroup
+  pk: 24
+  fields:
+    name: Grinding
+    slug: grinding
+    description: The worst olympiad problems you've ever seen. The name is a reference
+      to the video game term in which you do the same thing over and over.
+    subject: M
+- model: core.unitgroup
+  pk: 25
+  fields:
+    name: Hall
+    slug: hall
+    description: Hall's marriage lemma.
+    subject: C
+- model: core.unitgroup
+  pk: 26
+  fields:
+    name: Hard Ineq
+    slug: hardineq
+    description: A unit featuring some of the hardest gems from the golden age of
+      inequalities.
+    subject: A
+- model: core.unitgroup
+  pk: 27
+  fields:
+    name: Harmonic
+    slug: harmonic
+    description: Your friendly projective geometry unit. Harmonic bundles, poles and
+      polars, and so on. A follow-up to Chapter 9 of EGMO.
+    subject: G
+- model: core.unitgroup
+  pk: 28
+  fields:
+    name: Heavy NT
+    slug: heavynumth
+    description: 'Heavy machinery in number theory: Vieta jumping, quadratic reciprocity,
+      and some big-name theorems you may or may not have heard of.'
+    subject: N
+- model: core.unitgroup
+  pk: 29
+  fields:
+    name: Homography
+    slug: homography
+    description: A less friendly and more abstract projective geometry unit, with
+      an emphasis on projective transformations. Most of the theorems will be stated
+      with respect to an arbitrary conic rather than a circle.
+    subject: G
+- model: core.unitgroup
+  pk: 30
+  fields:
+    name: Hyperbola
+    slug: hyperbola
+    description: A silly (but difficult) unit on the theory of rectangular circumhyperbolas
+      and the Poncelet point. For fun, if you really like hardcore projective geometry.
+    subject: G
+- model: core.unitgroup
+  pk: 31
+  fields:
+    name: Induct
+    slug: induct
+    description: Problems which really use induction and recursion in a substantial
+      way, i.e. the main idea of the problem really is about how (or whether) to induct.
+      Features some AIME-style recursion calculations.
+    subject: C
+- model: core.unitgroup
+  pk: 32
+  fields:
+    name: Ineq Basic
+    slug: ineqbasic
+    description: 'The basics of inequalities: AM-GM, homogenization, Cauchy/Holder.'
+    subject: A
+- model: core.unitgroup
+  pk: 33
+  fields:
+    name: Ineq Func
+    slug: ineqfunc
+    description: Techinques for inequalities of the form f(x_1) + ... + f(x_n). Jensen,
+      Karamata, tangent line trick, and n-1 equal value principle.
+    subject: A
+- model: core.unitgroup
+  pk: 34
+  fields:
+    name: Ineq Standard
+    slug: ineqstandard
+    description: Inequalities which can be approached using all the standard methods.
+      This is sort of a combination of Ineq Basic and Ineq Func.
+    subject: A
+- model: core.unitgroup
+  pk: 35
+  fields:
+    name: Int Polynom
+    slug: intpoly
+    description: A theoretical unit on the algebra and number theory of polynomials
+      over Z, bordering into some algebraic number theory and Galois theory. Algebraic
+      integers and irreducible polynomials feature prominently in this unit. The number
+      theory in this unit goes deeper than that used in the Irreducible unit.
+    subject: N
+- model: core.unitgroup
+  pk: 36
+  fields:
+    name: Inversion and Spiral
+    slug: kansas
+    description: A harder follow-up unit to chapters 8 and 10 of EGMO.
+    subject: G
+- model: core.unitgroup
+  pk: 37
+  fields:
+    name: Invert
+    slug: invert
+    description: Inversion in olympiad geometry, following up chapter 8 of EGMO.
+    subject: G
+- model: core.unitgroup
+  pk: 38
+  fields:
+    name: Irreducible
+    slug: irred
+    description: Problems about showing polynomials are irreducible; these are rare
+      in olympiads, but give you a lot of good intuition about how Z[x] polynomials
+      behave. Techniques that appear include working in F_p[x], looking at the magnitude
+      of complex roots a la Rouche, and other ad-hoc tricks. More olympiad algebra
+      than the integer polynomials unit.
+    subject: A
+- model: core.unitgroup
+  pk: 39
+  fields:
+    name: Linear Algebra
+    slug: linalg
+    description: Problems using linear algebra (rather than problems about linear
+      algebra). Most of the problems here are combinatorial in nature as a result,
+      and there is a mix of linear algebra over R and linear algebra over F_2.
+    subject: C
+- model: core.unitgroup
+  pk: 40
+  fields:
+    name: Local
+    slug: local
+    description: In contrast to the global unit, this unit is about problems starting
+      from somewhere and perturbing it by a little bit. For example, in a greedy algorithm,
+      if I want a set S of size at least 100 with a certain property, I can imagine
+      starting with S empty and then grabbing things to add to S while trying to avoid
+      bad-ness (whatever that means for the current problem). It's then enough to
+      prove I don't get stuck at any point. Most of the problems in this unit will
+      have a similar algorithmic feeling.
+    subject: C
+- model: core.unitgroup
+  pk: 41
+  fields:
+    name: Monster FE
+    slug: monster
+    description: The functional equations that don't bore me, because the solution
+      isn't just f(x) = x anymore! This follows up the Monsters handout on my website.
+    subject: F
+- model: core.unitgroup
+  pk: 42
+  fields:
+    name: Mystery
+    slug: mystery
+    description: This one's a secret. It's a bit weird, but for this unit to work
+      I have to start by not telling you what it's about.
+    subject: C
+- model: core.unitgroup
+  pk: 43
+  fields:
+    name: NT Construct
+    slug: ntconstruct
+    description: Construction problems in number theory. In some ways it's like the
+      free unit because you get to make some decisions, but in other ways Z has a
+      lot of structure that you might know things about, and you'll have to balance
+      these two intuitions.
+    subject: N
+- model: core.unitgroup
+  pk: 44
+  fields:
+    name: Orders
+    slug: orders
+    description: Orders modulo a prime, at the border of AIME and USA(J)MO but leaning
+      a lot more towards the latter. Intended as an introduction into olympiad number
+      theory.
+    subject: N
+- model: core.unitgroup
+  pk: 45
+  fields:
+    name: Prime Exponents
+    slug: vp
+    description: The use of v_p in handling olympiad problems.
+    subject: N
+- model: core.unitgroup
+  pk: 46
+  fields:
+    name: Process
+    slug: process
+    description: This is about staring at a moving process (e.g. windmill) and trying
+      to understand what is going on. (The most common thing people say here is monovariants
+      or invariants, but that's only one example of a way you can understand a process.)
+      In a lot of ways it's like the Rigid unit, except your data is way less concrete,
+      and in some cases unobtainable, so you'll be applying the same intuition in
+      a more hostile environment.
+    subject: C
+- model: core.unitgroup
+  pk: 47
+  fields:
+    name: Grids
+    slug: grids
+    description: A fun but difficult unit on combinatorics problems involving rectangular
+      grids.
+    subject: C
+- model: core.unitgroup
+  pk: 48
+  fields:
+    name: Rigid
+    slug: rigid
+    description: This is one of my favorite units. It's about problems which involve
+      taking a fixed structure, and trying to figure out as much as you can about
+      it --- the task the problem asks you to actually prove becomes unimportant,
+      almost like an answer extraction at the end. Rigid problems often have so few
+      degrees of freedom that a lot of what you'll be doing is writing down a lot
+      of concrete examples, and then trying to figure out what they have in common.
+      You will feel like you are discovering mathematics, rather than inventing it
+      (in contrast to the Free unit).
+    subject: C
+- model: core.unitgroup
+  pk: 49
+  fields:
+    name: Russian Combo
+    slug: russian
+    description: A fun unit involving combinatorics problems from Russia.
+    subject: C
+- model: core.unitgroup
+  pk: 50
+  fields:
+    name: Size in NT
+    slug: sizent
+    description: Using size as a way to handle number theory conditions, for example
+      taking sufficiently large primes. On the border between olympiad algebra and
+      olympiad number theory.
+    subject: N
+- model: core.unitgroup
+  pk: 51
+  fields:
+    name: Spiral
+    slug: spiral
+    description: Spiral similarity and Miquel points, following up chapter 10 of EGMO.
+    subject: G
+- model: core.unitgroup
+  pk: 52
+  fields:
+    name: Sums
+    slug: sums
+    description: Practice with manipulating sums, and in particular switching the
+      order of summation (or integration). Features generating functions and Snake
+      Oil as well.
+    subject: A
+- model: core.unitgroup
+  pk: 53
+  fields:
+    name: Super Bary
+    slug: superbary
+    description: A more difficult version of the barycentric coordinates unit.
+    subject: G
+- model: core.unitgroup
+  pk: 54
+  fields:
+    name: Super Complex
+    slug: supercomplex
+    description: A more difficult version of the complex numbers unit.
+    subject: G
+- model: core.unitgroup
+  pk: 55
+  fields:
+    name: Super NT
+    slug: supernumth
+    description: Number theory practice for experts, combining problems from Exp and
+      Heavy NT as well as some other sources.
+    subject: N
+- model: core.unitgroup
+  pk: 56
+  fields:
+    name: Symm Polynom
+    slug: sympoly
+    description: Vieta formulas, Newton sums, and the fundamental theorem of symmetric
+      polynomials. Involves some computational problems. In my opinion, this is probably
+      the easiest unit.
+    subject: A
+- model: core.unitgroup
+  pk: 57
+  fields:
+    name: Tricky Ineq
+    slug: trickineq
+    description: 'Harder inequality problems that don''t succumb to the standard methods:
+      it takes some more ingenuity to figure out how to approach these.'
+    subject: A
+- model: core.unitgroup
+  pk: 58
+  fields:
+    name: Weird Geo
+    slug: weirdgeo
+    description: Those weird geometry problems that involve pentagons and hexagons
+      and whatnot (see USAMO 2011/3 for example). Careful use of complex numbers and
+      counting degrees of freedom are important for this unit.
+    subject: G
+- model: core.unitgroup
+  pk: 59
+  fields:
+    name: Putnam Analysis
+    slug: putnamana
+    description: An extension of the Sums unit --- rather than just swapping infinite
+      sums, we now get to enjoy swapping infinite integrals as well.
+    subject: A
+- model: core.unitgroup
+  pk: 61
+  fields:
+    name: Moving Points
+    slug: movingpts
+    description: A technique involving animating points and considering resulting
+      projective maps. This lecture was contributed by Anant Mudgal.
+    subject: G
+- model: core.unitgroup
+  pk: 62
+  fields:
+    name: Formulas
+    slug: formulas
+    description: Based on Yang Liu's class "Write Down Formulas" at MOP 2018. This
+      unit consists of problems which involve manipulations of fairly involved formulas,
+      such as combinatorial recursions or number theoretic power sums. Despite officially
+      being algebra, there are just as many (maybe more) problems that would be classified
+      as C or N.
+    subject: A
+- model: core.unitgroup
+  pk: 63
+  fields:
+    name: Wrapped Func Eqn
+    slug: wrapfn
+    description: On real-valued functional equations in which all variables are "wrapped"
+      by the function in some way.
+    subject: F
+- model: core.unitgroup
+  pk: 64
+  fields:
+    name: C8 Summit
+    slug: c8summit
+    description: A challenging combinatorics unit to conclude the year, with difficult
+      problems reviewing everything that has appeared earlier.
+    subject: C
+- model: core.unitgroup
+  pk: 65
+  fields:
+    name: Cyclotomic
+    slug: cyclotomic
+    description: Roots of unity. Using e^{i \theta} = \cos(\theta) + i \sin(\theta),
+      and connecting them to trigonometry, etc. Features a ton of problems from Math
+      Prize for Girls. Despite the name of the unit, cyclotomic polynomials themselves
+      don't appear very often; the idea of roots of unity is much more prevalent.
+    subject: A
+- model: core.unitgroup
+  pk: 66
+  fields:
+    name: Entry Combo
+    slug: entry
+    description: A beginner combinatorics unit, meant to help get people oriented
+      with typical proof styles for olympiad problems. Induction, recursion, invariants,
+      and algorithms.
+    subject: C
+- model: core.unitgroup
+  pk: 67
+  fields:
+    name: Hybrid Geo
+    slug: hybrid
+    description: Geometry problems that involve heavy use of trig/length, featuring
+      a lot of geometric inequalities. Also a bit of combinatorial geometry mixed
+      in.
+    subject: G
+- model: core.unitgroup
+  pk: 68
+  fields:
+    name: IOI
+    slug: ioi
+    description: Algorithmic problems which involve showing that it is possible to
+      achieve some task (rather than finding invariants or proving impossibility).
+      Features selected problems from the IOI, so some CS background is helpful but
+      not necessary.
+    subject: C
+- model: core.unitgroup
+  pk: 69
+  fields:
+    name: Alg Manip
+    slug: algmanip
+    description: Problems that purely involve algebraic manipulations without some
+      other context, e.g. solving rather arbitrary equations or systems of equations.
+    subject: A
+- model: core.unitgroup
+  pk: 70
+  fields:
+    name: Dummy Unit
+    slug: dummy
+    description: Not an actual unit; used internally as a canonical file for testing.
+      If you unlock this unit, you will get a blank file. NOTHING TO SEE HERE MOVE
+      ALONG
+    subject: M
+- model: core.unitgroup
+  pk: 71
+  fields:
+    name: Art School
+    slug: artschool
+    description: 'This is a unit about building "diagram intuition": being able to
+      take a geometry diagram (which may be good or bad) and trying to get a sense
+      of which claims should or shouldn''t be true.'
+    subject: G
+- model: core.unitgroup
+  pk: 72
+  fields:
+    name: Real Polynom
+    slug: realpoly
+    description: General polynomials unit, maintaining some distance from integer
+      polynomials (though still overlapping slightly). Includes Vieta/Newton, multivariable
+      polynomials, Lagrange interpolation, size arguments, differentiation.
+    subject: A
+- model: core.unitgroup
+  pk: 73
+  fields:
+    name: Config Geo
+    slug: configgeo
+    description: Formerly known as "American Geo". This is a unit on geometry problems
+      with a highly traditional or synthetic flavor, for example USAMO 2016/3 and
+      USAMO 2017/3. These sorts of problems have recently gained popularity on the
+      USA olympiads and team selection tests and it is totally not my fault. These
+      particular ones tend to use common or standard configurations as a base and
+      build on top of them, as opposed to starting afresh.
+    subject: G
+- model: core.unitgroup
+  pk: 74
+  fields:
+    name: G6 Summit
+    slug: g6summit
+    description: A challenging geometry unit to conclude the year, with difficult
+      problems reviewing everything that has appeared earlier.
+    subject: G
+- model: core.unitgroup
+  pk: 75
+  fields:
+    name: N7 Summit
+    slug: n7summit
+    description: A challenging number theory unit to conclude the year, with difficult
+      problems reviewing everything that has appeared earlier.
+    subject: N
+- model: core.unitgroup
+  pk: 76
+  fields:
+    name: Misc NT
+    slug: miscnt
+    description: Miscellaneous number theory problems that didn't fit well in other
+      units.
+    subject: N
+- model: core.semester
+  pk: 1
+  fields:
+    name: Year 0
+    active: false
+    exam_family: Foxtrot
+    uses_legacy_pset_system: false
+    show_invoices: false
+    prep_rate: 240
+    hour_rate: 80
+    first_payment_deadline: 2020-10-10 16:00:00+00:00
+    most_payment_deadline: 2021-02-14 17:00:00+00:00
+    gradescope_key: ''
+    classroom_url: ''
+    social_url: ''
+    calendar_url_meets_evan: ''
+    calendar_url_no_meets_evan: ''
+- model: core.semester
+  pk: 2
+  fields:
+    name: Year 1
+    active: true
+    exam_family: Foxtrot
+    uses_legacy_pset_system: false
+    show_invoices: false
+    prep_rate: 240
+    hour_rate: 80
+    first_payment_deadline: 2021-10-10 16:00:00+00:00
+    most_payment_deadline: 2022-02-14 17:00:00+00:00
+    gradescope_key: ''
+    classroom_url: ''
+    social_url: ''
+    calendar_url_meets_evan: ''
+    calendar_url_no_meets_evan: ''
