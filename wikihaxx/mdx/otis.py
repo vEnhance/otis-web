@@ -4,7 +4,7 @@ from typing import Any, List
 import markdown
 import markdown.preprocessors
 
-TABLE = r'''<div class="col-md-6 float-right">
+TABLE = r'''<div class="col-md-4 float-right">
 <table>
 <tbody>
 	<tr>
