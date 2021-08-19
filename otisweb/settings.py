@@ -79,6 +79,7 @@ INSTALLED_APPS = [
 	'wiki.plugins.images.apps.ImagesConfig',
 	'wiki.plugins.links.apps.LinksConfig',
 	'wiki.plugins.macros.apps.MacrosConfig',
+	'wikihaxx',
 ]
 
 MIDDLEWARE = [
