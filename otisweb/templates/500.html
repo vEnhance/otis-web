@@ -2,3 +2,7 @@
 {% block code %}500{% endblock %}
 {% block title %}HTTP 500 Internal Server Error{% endblock %}
 {% block emoji %}❌{% endblock %}
+{% load otis_extras %}
+{% block extra %}
+<tt>{{ "HTTP_500_NOTES"|getenv }}</tt>
+{% endblock %}

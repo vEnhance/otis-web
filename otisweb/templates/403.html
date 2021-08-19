@@ -2,3 +2,7 @@
 {% block code %}403{% endblock %}
 {% block title %}HTTP 403 Forbidden{% endblock %}
 {% block emoji %}👿{% endblock %}
+{% load otis_extras %}
+{% block extra %}
+<tt>{{ "HTTP_403_NOTES"|getenv }}</tt>
+{% endblock %}

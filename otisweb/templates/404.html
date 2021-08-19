@@ -2,3 +2,7 @@
 {% block code %}404{% endblock %}
 {% block title %}HTTP 404 Not Found{% endblock %}
 {% block emoji %}⁉️{% endblock %}
+{% load otis_extras %}
+{% block extra %}
+<tt>{{ "HTTP_404_NOTES"|getenv }}</tt>
+{% endblock %}

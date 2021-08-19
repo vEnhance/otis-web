@@ -219,7 +219,7 @@ class Achievement(models.Model):
 	)
 	description = models.TextField(help_text="How to obtain this achievement")
 	active = models.BooleanField(help_text="Whether the code is active right now", default=True)
-	diamonds = models.PositiveSmallIntegerField(
+	diamonds = models.SmallIntegerField(
 		default=1, help_text="Amount of diamonds for this achievement"
 	)
 

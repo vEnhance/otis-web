@@ -1,3 +1,5 @@
+import os
+
 from core.models import Unit
 from django import template
 from django.forms.boundfield import BoundField
@@ -35,3 +37,8 @@ def level(student: Student) -> int:
 	return sum(
 		int((getattr(student, key, 0) or 0)**0.5) for key in ('clubs', 'hearts', 'diamonds')
 	) + spade_level
+
+
+@register.filter(name='getenv')
+def getenv(s: str) -> str:
+	return os.getenv(s) or ''
