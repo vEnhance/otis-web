@@ -73,10 +73,6 @@ please send me a reminder.</p>
 			{% else %}
 			{{ inquiry.updated_at|date:"Y-m-d" }}
 			{% endif %}
-
-			{% if request.user.is_staff %}
-			<a href="{% url "edit-inquiry" inquiry.id %}">(edit)</a>
-			{% endif %}
 		</td>
 	</tr>
 	{% if inquiry.explanation %}
