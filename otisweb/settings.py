@@ -278,15 +278,9 @@ LOGGING = {
 				'propagate': False,
 			},
 			'mailchimp3.client': {
-				'handlers': ['NullHandler'],
+				'handlers': ['console'],
 				'level': 'DEBUG',
 				'propagate': False,
 			},
-			'mailchimp3.client':
-				{
-					'handlers': ['console', 'discord'],
-					'level': 'WARNING',
-					'propagate': False,
-				}
 		},
 }
