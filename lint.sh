@@ -13,7 +13,7 @@ echo ""
 
 echo "Tidying files with yapf ..."
 echo "---------------------------"
-yapf --in-place */*.py */templatetags/*.py */management/commands/*.py
+yapf --in-place $(git ls-files **.py | grep -v migrations)
 echo ""
 
 echo "Running manage.py check ..."

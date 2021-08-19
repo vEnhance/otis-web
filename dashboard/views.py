@@ -146,9 +146,9 @@ def portal(request: HttpRequest, student_id: int) -> HttpResponse:
 	semester = student.semester
 
 	# mailchimp
-	client = MailChimp(mc_api=os.getenv('MAILCHIMP_API_KEY'), mc_user='vEnhance')
-	timestamp = (timezone.now() + timedelta(days=-28))
 	if not settings.TESTING:
+		timestamp = (timezone.now() + timedelta(days=-28))
+		client = MailChimp(mc_api=os.getenv('MAILCHIMP_API_KEY'), mc_user='vEnhance')
 		mailchimp_campaign_data = client.campaigns.all(
 			get_all=True, status='sent', since_send_time=timestamp
 		)
