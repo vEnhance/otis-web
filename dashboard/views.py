@@ -230,7 +230,9 @@ class AchievementList(LoginRequiredMixin, ListView):
 		return Achievement.objects.filter(active=True).annotate(
 			num_found=SubqueryAggregate('achievementunlock', aggregate=Count),
 			obtained=Exists(
-				Achievement.objects.filter(pk=OuterRef('pk'), student__user=self.request.user)
+				Achievement.objects.filter(
+					pk=OuterRef('pk'), achievementunlock__user=self.request.user
+				)
 			),
 		).order_by('-obtained', '-num_found')
 
