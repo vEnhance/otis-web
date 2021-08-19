@@ -1525,7 +1525,7 @@
 - model: core.semester
   pk: 1
   fields:
-    name: Year 0
+    name: First Year
     active: false
     exam_family: Foxtrot
     uses_legacy_pset_system: false
@@ -1542,9 +1542,9 @@
 - model: core.semester
   pk: 2
   fields:
-    name: Year 1
+    name: Second Year
     active: true
-    exam_family: Foxtrot
+    exam_family: Waltz
     uses_legacy_pset_system: false
     show_invoices: false
     prep_rate: 240
@@ -1556,3 +1556,8 @@
     social_url: ''
     calendar_url_meets_evan: ''
     calendar_url_no_meets_evan: ''
+- model: sites.site
+  pk: 1
+  fields:
+    domain: 127.0.0.1
+    name: localhost
