@@ -32,10 +32,10 @@ if ! pyright; then
 fi
 echo ""
 
-echo "Running pyflake ..."
+echo "Running flake8 ..."
 echo "---------------------------"
-if ! pyflakes */*.py */templatetags/*.py */management/commands/*.py; then
-	echo "FAILED: pyflakes gave nonzero status"
+if ! flake8; then
+	echo "FAILED: flake8 gave nonzero status"
 	exit 1
 fi
 echo ""
