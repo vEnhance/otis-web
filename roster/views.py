@@ -299,6 +299,8 @@ def inquiry(request: HttpRequest, student_id: int) -> HttpResponse:
 
 
 def mailchimp_subscribe(user: User):
+	if settings.TESTING:
+		return
 	client = MailChimp(mc_api=os.getenv('MAILCHIMP_API_KEY'), mc_user='vEnhance')
 	client.lists.members.create(
 		os.getenv('MAILCHIMP_LIST_ID'), {
