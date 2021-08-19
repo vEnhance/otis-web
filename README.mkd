@@ -21,5 +21,6 @@ up a local server and play around if you so choose.
 
 For OTIS students: pull requests welcome!
 If you think the website can be improved in some way, feel free to implement it.
+See [contributing guidelines](CONTRIBUTING.mkd).
 
 `526561645265616452656164`

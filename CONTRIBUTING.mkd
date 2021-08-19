@@ -9,4 +9,4 @@ This project uses tabs for indentation. Sorry not sorry.
 	If your editor supports lanugage server protcols,
 	you should be able to catch these errors inline.
 	If your editor doesn't, consider switching ;)
-* 
+* You should write tests for new functionality.
