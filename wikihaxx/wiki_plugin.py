@@ -1,27 +1,29 @@
 from __future__ import absolute_import, unicode_literals
 
+from typing import Any, Dict
+
 from django.utils.translation import ugettext as _
 from wiki.core.plugins import registry
 from wiki.core.plugins.base import BasePlugin
 
 from . import settings
-from .mdx.condition import ConditionExtension
+from .mdx.otis import OTISExtension
 
 
-class ConditionPlugin(BasePlugin):
+class HaxxPlugin(BasePlugin):
 	slug = settings.SLUG
 
-	sidebar = {
-		'headline': _('Conditions'),
-		'icon_class': 'fa-question-circle',
+	sidebar: Dict[str, Any] = {
+		'headline': _('OTIS'),
+		'icon_class': 'fa-info-circle',
 		'template': 'wikihaxx/sidebar.html',
 		'form_class': None,
 		'get_form_kwargs': (lambda a: {})
 	}
 
 	markdown_extensions = [
-		ConditionExtension(),
+		OTISExtension(),
 	]
 
 
-registry.register(ConditionPlugin)
+registry.register(HaxxPlugin)

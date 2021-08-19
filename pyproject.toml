@@ -34,6 +34,7 @@ jedi = "^0.18.0"
 ipython = "^7.26.0"
 coverage = {extras = ["toml"], version = "^5.5"}
 yapf = "^0.31.0"
+types-Markdown = "^3.3.2"
 
 [tool.yapf]
 based_on_style = "facebook"
