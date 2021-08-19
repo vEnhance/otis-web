@@ -27,6 +27,9 @@ class OTISTestCase(TestCase):
 	def assertDenied(self, response: HttpResponse):
 		self.assertEqual(response.status_code, 403)
 
+	def assertNotFound(self, response: HttpResponse):
+		self.assertEqual(response.status_code, 404)
+
 	def get(self, name: str, *args: Any):
 		return self.client.get(reverse_lazy(name, args=args), follow=True)
 
@@ -45,6 +48,9 @@ class OTISTestCase(TestCase):
 	def assertGetDenied(self, name: str, *args: Any):
 		self.assertDenied(self.get(name, *args))
 
+	def assertGetNotFound(self, name: str, *args: Any):
+		self.assertNotFound(self.get(name, *args))
+
 	def assertPost20X(self, name: str, *args: Any, data: Dict[str, Any]):
 		self.assert20X(self.post(name, *args, data=data))
 
@@ -56,6 +62,9 @@ class OTISTestCase(TestCase):
 
 	def assertPostDenied(self, name: str, *args: Any, data: Dict[str, Any]):
 		self.assertDenied(self.post(name, *args, data=data))
+
+	def assertPostNotFound(self, name: str, *args: Any, data: Dict[str, Any]):
+		self.assertNotFound(self.post(name, *args, data=data))
 
 	def login(self, username: str):
 		self.client.force_login(User.objects.get(username=username))

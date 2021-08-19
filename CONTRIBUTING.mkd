@@ -1,0 +1,12 @@
+This project uses tabs for indentation. Sorry not sorry.
+
+* The tool `yapf` is used for linting and formatting.
+	Probably to preserve your sanity you should configure
+	your editor to automatically apply `yapf` after each save.
+* `pyflakes` and `pyright` are used to catch type errors and other issues.
+	This means type annotations are usually required for function parameters
+	or when initializing empty lists or dictionaries.
+	If your editor supports lanugage server protcols,
+	you should be able to catch these errors inline.
+	If your editor doesn't, consider switching ;)
+* 

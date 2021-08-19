@@ -316,7 +316,7 @@ def mailchimp_subscribe(user: User):
 def register(request: HttpRequest) -> HttpResponse:
 	try:
 		container = RegistrationContainer.objects.get(semester__active=True)
-	except:
+	except (RegistrationContainer.DoesNotExist, RegistrationContainer.MultipleObjectsReturned):
 		return HttpResponse("There isn't a currently active OTIS semester.", status=503)
 
 	semester: Semester = container.semester

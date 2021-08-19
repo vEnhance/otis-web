@@ -59,4 +59,6 @@ class TestCore(OTISTestCase):
 
 	def test_classroom_url_works(self):
 		self.login('mallory')
+		self.assertGet40X('classroom')
+		Semester.objects.filter(active=True).update(classroom_url='/')
 		self.assertGetOK('classroom')

@@ -218,7 +218,7 @@ def archapi(request: HttpRequest) -> JsonResponse:
 			assert 'description' in request.POST
 			problem = Problem(description=request.POST['description'], puid=puid)
 			problem.save()
-		except:
+		except (Problem.DoesNotExist, Problem.MultipleObjectsReturned):
 			return err()
 		else:
 			return JsonResponse(

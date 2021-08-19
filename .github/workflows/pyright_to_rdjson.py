@@ -13,8 +13,8 @@ def pyright_to_rdjson(jsonin: TextIO):
 
 	rdjson: Dict[str, Any] = {
 		"source": {
-		"name": "pyright",
-		"url": "https://github.com/Microsoft/pyright"
+			"name": "pyright",
+			"url": "https://github.com/Microsoft/pyright"
 		},
 		"severity": "WARNING",
 		"diagnostics": [],
@@ -23,24 +23,25 @@ def pyright_to_rdjson(jsonin: TextIO):
 	for d in pyright["generalDiagnostics"]:
 		rdjson["diagnostics"].append(
 			{
-			"message": f"{d['message']} ({d['rule']})",
-			"severity": d["severity"].upper(),
-			"location":
-			{
-			"path": d["file"],
-			"range":
-			{
-			"start":
-			{
-			"line": d["range"]["start"]["line"] + 1,
-			"column": d["range"]["start"]["character"],
-			},
-			"end": {
-			"line": d["range"]["end"]["line"] + 1,
-			"column": d["range"]["end"]["character"],
-			},
-			},
-			},
+				"message": f"{d['message']} ({d['rule']})",
+				"severity": d["severity"].upper(),
+				"location":
+					{
+						"path": d["file"],
+						"range":
+							{
+								"start":
+									{
+										"line": d["range"]["start"]["line"] + 1,
+										"column": d["range"]["start"]["character"],
+									},
+								"end":
+									{
+										"line": d["range"]["end"]["line"] + 1,
+										"column": d["range"]["end"]["character"],
+									},
+							},
+					},
 			}
 		)
 

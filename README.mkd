@@ -7,6 +7,18 @@ that I use to teach my course [OTIS](https://web.evanchen.cc/otis.html).
 It is pretty standard Django, so you should be able to spin
 up a local server and play around if you so choose.
 
+## Installation instructions
+
+1. Install the following standard tools: `python` (version 3.9),
+	`pyright`, `pip`.
+2. Create a new virtual environment and `pip install -r requirements.txt`.
+	(Alternatively, use `poetry`.)
+3. `python manage.py migrate` to create the local database.
+4. `python manage.py createsuperuser` to create a superuser.
+5. Profit.
+
+## Pull requests
+
 For OTIS students: pull requests welcome!
 If you think the website can be improved in some way, feel free to implement it.
 

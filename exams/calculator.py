@@ -72,11 +72,6 @@ def BNF() -> Any:
 		# and CaselessKeyword only match whole words
 		e = CaselessKeyword("E")
 		pi = CaselessKeyword("PI")
-		# fnumber = Combine(Word("+-"+nums, nums) +
-		#					Optional("." + Optional(Word(nums))) +
-		#					Optional(e + Word("+-"+nums, nums)))
-		# or use provided pyparsing_common.number, but convert back to str:
-		# fnumber = ppc.number().addParseAction(lambda t: str(t[0]))
 		fnumber = Regex(r"[+-]?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?")
 		ident = Word(alphas, alphanums + "_$")
 
@@ -176,3 +171,6 @@ def expr_compute(s: str) -> Optional[float]:
 	BNF().parseString(s, parseAll=True)
 	val = evaluate_stack(exprStack[:])
 	return val
+
+
+# flake8: noqa

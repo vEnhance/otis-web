@@ -1,0 +1,4 @@
+[flake8]
+dictionaries=en_US,python,technical,django
+ignore=W191,E501,E251,W504,E122,E123
+exclude=*/migrations/**

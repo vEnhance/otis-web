@@ -32,8 +32,9 @@ EMOJIS = {
 	"verbose": ":mega:",
 	"debug": ":microscope:",
 	"success": ":rocket:",
-	"action" : ":factory_worker:",
+	"action": ":factory_worker:",
 }
+
 
 class DiscordHandler(logging.Handler):
 	def emit(self, record: logging.LogRecord):
@@ -42,7 +43,7 @@ class DiscordHandler(logging.Handler):
 		color = COLORS.get(level, 0xaaaaaa)
 
 		try:
-			user = record.request.user.first_name + ' ' + record.request.user.last_name # type: ignore
+			user = record.request.user.first_name + ' ' + record.request.user.last_name  # type: ignore
 		except AttributeError:
 			user = 'anonymous'
 		s = str(getattr(record, 'status_code', ''))
@@ -52,13 +53,37 @@ class DiscordHandler(logging.Handler):
 			s = 'None'
 
 		fields = [
-				{ 'name': 'Status', 'value': s, 'inline': True, },
-				{ 'name': 'Level', 'value': record.levelname.title(), 'inline': True, },
-				{ 'name': 'Scope', 'value': f"`{record.name}`", 'inline': True, },
-				{ 'name': 'Module', 'value': f"`{record.module}`", 'inline': True, },
-				{ 'name': 'User', 'value': user, 'inline': True, },
-				{ 'name': 'Filename', 'value': f"{record.lineno}:`{record.filename}`", 'inline': True, },
-				]
+			{
+				'name': 'Status',
+				'value': s,
+				'inline': True,
+			},
+			{
+				'name': 'Level',
+				'value': record.levelname.title(),
+				'inline': True,
+			},
+			{
+				'name': 'Scope',
+				'value': f"`{record.name}`",
+				'inline': True,
+			},
+			{
+				'name': 'Module',
+				'value': f"`{record.module}`",
+				'inline': True,
+			},
+			{
+				'name': 'User',
+				'value': user,
+				'inline': True,
+			},
+			{
+				'name': 'Filename',
+				'value': f"{record.lineno}:`{record.filename}`",
+				'inline': True,
+			},
+		]
 
 		description_parts = OrderedDict()
 
@@ -69,7 +94,8 @@ class DiscordHandler(logging.Handler):
 		else:
 			i = record.message.index('\n')
 			title = f"{emoji} {record.message[:i]}"
-			description_parts[':green_heart: MESSAGE :green_heart:'] =  "```" + record.message[i+1:] + "```"
+			msg_key = ':green_heart: MESSAGE :green_heart:'
+			description_parts[msg_key] = "```" + record.message[i + 1:] + "```"
 
 		# if exc_text nonempty, add that to description
 		if record.exc_text is not None:
@@ -78,7 +104,8 @@ class DiscordHandler(logging.Handler):
 				blob = record.exc_text[:300] + '\n...\n' + record.exc_text[-300:]
 			else:
 				blob = record.exc_text
-			description_parts[':yellow_heart: EXCEPTION :yellow_heart:'] =  "```" + blob + "```"
+			msg_key = ':yellow_heart: EXCEPTION :yellow_heart:'
+			description_parts[msg_key] = "```" + blob + "```"
 
 		# if request data is there, include that too
 		if hasattr(record, 'request'):
@@ -93,14 +120,14 @@ class DiscordHandler(logging.Handler):
 			if request.method == 'POST':
 				# redact the token for evan's personal api
 				d: Dict[str, Any] = {}
-				for k,v in request.POST.items():
+				for k, v in request.POST.items():
 					if k == 'token' or k == 'password':
 						d[k] = '<redacted>'
 					else:
 						d[k] = v
 				s += r'POST data' + '\n'
 				s += r'```' + '\n'
-				pp = pprint.PrettyPrinter(indent = 2)
+				pp = pprint.PrettyPrinter(indent=2)
 				s += pp.pformat(d)
 				s += r'```'
 			if request.FILES is not None and len(request.FILES) > 0:
@@ -109,26 +136,22 @@ class DiscordHandler(logging.Handler):
 					s += f'> `{name}` ({fileobj.size} bytes, { fileobj.content_type })\n'
 			description_parts[':blue_heart: REQUEST :blue_heart:'] = s
 
-		embed = {
-					'title': title,
-					'color': color,
-					'fields': fields
-				}
+		embed = {'title': title, 'color': color, 'fields': fields}
 
 		desc = ''
 		no_worries = sum(len(_) for _ in description_parts.values()) <= 1800
-		for k,v in description_parts.items():
+		for k, v in description_parts.items():
 			if len(v) < 600 or no_worries:
 				desc += k + '\n' + v.strip() + '\n'
 		if desc:
 			embed['description'] = desc
 
 		data = {
-				'username': socket.gethostname(),
-				'embeds': [embed],
-				}
+			'username': socket.gethostname(),
+			'embeds': [embed],
+		}
 
 		url = os.getenv(f'WEBHOOK_URL_{level.upper()}', WEBHOOK_DEFAULT_URL)
 
 		if url is not None:
-			print(requests.post(url, json = data))
+			print(requests.post(url, json=data))

@@ -17,7 +17,7 @@ def expr_validator(value: str):
 		_ = float(expr_compute(value) or 0)
 	except OverflowError:
 		raise ValidationError(r'This result has absolute value too large to parse.')
-	except:
+	except Exception:
 		raise ValidationError('Could not evaluate this expression, please fix it')
 
 

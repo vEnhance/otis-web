@@ -20,7 +20,7 @@ class RosterResource(resources.ModelResource):
 	)
 
 
-## ASSISTANT
+# ASSISTANT
 class AssistantIEResource(RosterResource):
 	class Meta:
 		skip_unchanged = True
@@ -73,7 +73,7 @@ class AssistantAdmin(ImportExportModelAdmin):
 	resource_class = AssistantIEResource
 
 
-## INVOICE
+# INVOICE
 class InvoiceIEResource(resources.ModelResource):
 	class Meta:
 		skip_unchanged = True
@@ -147,7 +147,7 @@ class InvoiceAdmin(ImportExportModelAdmin):
 	resource_class = InvoiceIEResource
 
 
-## STUDENT
+# STUDENT
 class StudentIEResource(RosterResource):
 	semester_name = fields.Field(
 		column_name='Semester Name',
@@ -301,7 +301,7 @@ class StudentRegistrationAdmin(ImportExportModelAdmin):
 		_ = queryset.update(processed=True)
 
 
-## INQUIRY
+# INQUIRY
 @admin.register(UnitInquiry)
 class UnitInquiryAdmin(admin.ModelAdmin):
 	list_display = (
@@ -328,19 +328,19 @@ class UnitInquiryAdmin(admin.ModelAdmin):
 	actions = ['hold_inquiry', 'reject_inquiry', 'accept_inquiry', 'reset_inquiry']
 
 	def hold_inquiry(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
-		_ = queryset.update(status='HOLD')
+		queryset.update(status='HOLD')
 
 	def reject_inquiry(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
-		_ = queryset.update(status='REJ')
+		queryset.update(status='REJ')
 
 	def accept_inquiry(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
-		_ = queryset.update(status='ACC')
+		queryset.update(status='ACC')
 
 	def reset_inquiry(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
-		_ = queryset.update(status='NEW')
+		queryset.update(status='NEW')
 
 
-## REGISTRATION
+# REGISTRATION
 @admin.register(RegistrationContainer)
 class RegistrationContainerAdmin(admin.ModelAdmin):
 	list_display = (

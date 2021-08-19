@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import PermissionDenied
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.http.response import HttpResponseNotFound
 from django.views.generic.list import ListView
 from roster.models import Student
 
@@ -68,4 +69,7 @@ def unit_solutions(request: HttpRequest, pk: int) -> HttpResponse:
 @login_required
 def classroom(request: HttpRequest):
 	semester = Semester.objects.get(active=True)
-	return HttpResponseRedirect(semester.classroom_url)
+	if semester.classroom_url:
+		return HttpResponseRedirect(semester.classroom_url)
+	else:
+		return HttpResponseNotFound('No classroom URL')
