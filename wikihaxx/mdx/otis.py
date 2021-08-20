@@ -62,7 +62,6 @@ class OTISPreprocessor(markdown.preprocessors.Preprocessor):
 							output.append(
 								f'<div class="W-100 text-center"><img class="w-50" src="{diamond.image.url}" /></div>'
 							)
-						table_output.append(f'<tr><th>Code</th><td>{tag_arg}</td></tr>')
 						table_output.append(f'<tr><th>Name</th><td>{diamond.name}</td></tr>')
 						table_output.append(f'<tr><th>Value</th><td>{diamond.diamonds}◆</td></tr>')
 						num_found = AchievementUnlock.objects.filter(achievement=diamond).count() or 0
