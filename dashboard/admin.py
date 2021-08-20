@@ -66,6 +66,8 @@ class PSetAdmin(admin.ModelAdmin):
 	list_filter = (
 		'approved',
 		'student__assistant',
+		'student__track',
+		'student__semester__active',
 		'student__semester',
 	)
 	list_display_links = (
