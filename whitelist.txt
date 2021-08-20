@@ -59,6 +59,7 @@ sem
 shortname
 signup
 socialaccount
+staffuser
 storages
 subindex
 ucode

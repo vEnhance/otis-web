@@ -27,6 +27,7 @@ PyMySQL = "^1.0.2"
 django-sql-utils = "^0.6.1"
 mailchimp3 = "^3.0.15"
 wiki = "^0.7.6"
+django-braces = "^1.14.0"
 
 [tool.poetry.dev-dependencies]
 pdbpp = "^0.10.3"

@@ -8,12 +8,12 @@ from datetime import datetime, timedelta
 from hashlib import sha256
 from typing import Any, Dict, List
 
+from braces.views import LoginRequiredMixin, StaffuserRequiredMixin
 from core.models import Semester, Unit
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin  # NOQA
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count, OuterRef, Q, Subquery, Sum  # NOQA
@@ -240,8 +240,8 @@ class AchievementList(LoginRequiredMixin, ListView):
 		).order_by('-obtained', '-num_found')
 
 
-class FoundList(PermissionRequiredMixin, ListView):
-	permission_required = 'is_staff'
+class FoundList(LoginRequiredMixin, StaffuserRequiredMixin, ListView):
+	raise_exception = True
 	template_name = 'dashboard/found_list.html'
 
 	def get_queryset(self) -> QuerySet[AchievementUnlock]:
@@ -492,7 +492,7 @@ class PSetDetail(LoginRequiredMixin, DetailView):
 		assert isinstance(pset, PSet)
 		if not can_view(request, pset.student):
 			raise PermissionDenied("Can't view work by this student")
-		return super().dispatch(request, *args, **kwargs)
+		return super(DetailView, self).dispatch(request, *args, **kwargs)
 
 
 class ProblemSuggestionCreate(LoginRequiredMixin, CreateView):
