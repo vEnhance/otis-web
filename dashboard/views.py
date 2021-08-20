@@ -591,8 +591,8 @@ def api(request: HttpRequest) -> JsonResponse:
 		# mark problem set as done
 		pset = get_object_or_404(PSet, pk=request.POST['pk'])
 		pset.approved = bool(request.POST['approved'])
-		pset.clubs = request.POST['clubs']
-		pset.hours = request.POST['hours']
+		pset.clubs = request.POST.get('clubs', None)
+		pset.hours = request.POST.get('hours', None)
 		pset.save()
 		# unlock the unit the student asked for
 		finished_unit = get_object_or_404(Unit, pk=request.POST['unit__pk'])
