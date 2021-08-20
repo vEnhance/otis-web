@@ -25,7 +25,7 @@ from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Group, User
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse  # NOQA
 from django.shortcuts import get_object_or_404, render
@@ -342,6 +342,8 @@ def register(request: HttpRequest) -> HttpResponse:
 				request.user.first_name = form.cleaned_data['given_name']
 				request.user.last_name = form.cleaned_data['surname']
 				request.user.email = form.cleaned_data['email_address']
+				group, _ = Group.objects.get_or_create(name='Verified')
+				group.user_set.add(request.user)  # type: ignore
 				request.user.save()
 				mailchimp_subscribe(request.user)
 				messages.success(request, message="Submitted! Sit tight.")
