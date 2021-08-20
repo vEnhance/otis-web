@@ -240,7 +240,7 @@ LOGGING = {
 	'disable_existing_loggers': False,
 	'formatters':
 		{
-			'verbose':
+			'stream_format':
 				{
 					'format': '[{levelname}] {asctime} {module} {name}\n{message}\n',
 					'style': '{',
@@ -265,14 +265,14 @@ LOGGING = {
 			'console':
 				{
 					'class': 'logging.StreamHandler',
-					'level': 'INFO',
-					'formatter': 'verbose',
+					'level': 'VERBOSE',
+					'formatter': 'stream_format',
 					'filters': ['filter_useless_404'],
 				},
 			'discord':
 				{
 					'class': 'discordLogging.DiscordHandler',
-					'level': 'INFO',
+					'level': 'VERBOSE',
 					'filters': ['require_debug_false', 'filter_useless_404'],
 				}
 		},
