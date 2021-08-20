@@ -315,9 +315,12 @@ class UnitInquiryAdmin(admin.ModelAdmin):
 	list_filter = (
 		'status',
 		'action_type',
+		'student__assistant',
 	)
 	search_fields = (
-		'student__user__first_name', 'student__user__last_name', 'student__user__username'
+		'student__user__first_name',
+		'student__user__last_name',
+		'student__user__username',
 	)
 	list_display_links = ('id', )
 	autocomplete_fields = (
@@ -334,7 +337,8 @@ class UnitInquiryAdmin(admin.ModelAdmin):
 		queryset.update(status='REJ')
 
 	def accept_inquiry(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
-		queryset.update(status='ACC')
+		for inquiry in queryset:
+			inquiry.run_accept()
 
 	def reset_inquiry(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
 		queryset.update(status='NEW')

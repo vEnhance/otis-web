@@ -65,6 +65,7 @@ class PSetAdmin(admin.ModelAdmin):
 	)
 	list_filter = (
 		'approved',
+		'student__assistant',
 		'student__semester',
 	)
 	list_display_links = (
@@ -74,10 +75,15 @@ class PSetAdmin(admin.ModelAdmin):
 	list_per_page = 30
 
 	def approve_pset(self, request: HttpRequest, queryset: QuerySet[PSet]):
-		_ = queryset.update(approved=True)
+		for pset in queryset:
+			if pset.next_unit_to_unlock is not None:
+				pset.student.unlocked_units.add(pset.next_unit_to_unlock)
+			if pset.unit is not None:
+				pset.student.unlocked_units.remove(pset.unit)
+		queryset.update(approved=True)
 
 	def reject_pset(self, request: HttpRequest, queryset: QuerySet[PSet]):
-		_ = queryset.update(approved=False)
+		queryset.update(approved=False)
 
 	actions = [
 		'approve_pset',
