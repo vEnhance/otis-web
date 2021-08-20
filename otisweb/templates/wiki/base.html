@@ -2,7 +2,7 @@
 {% load static %}
 {% load i18n %}
 
-{% block wiki_site_title %} - OTISWiki{% endblock %}
+{% block wiki_site_title %} - OTIS Fandom{% endblock %}
 
 {% block wiki_header_branding %}
 <a class="navbar-brand" href="{% url 'wiki:root' %}">
@@ -27,16 +27,16 @@ MathJax = {
 	<a class="nav-link" href="{% url 'wiki:root' %}">Fandom</a>
 </li>
 <li class="nav-item">
-	<a class="nav-link" href="otis">About</a>
+	<a class="nav-link" href="/wiki/otis">About</a>
 </li>
 <li class="nav-item">
-	<a class="nav-link" href="units">Units</a>
+	<a class="nav-link" href="/wiki/units">Units</a>
 </li>
 <li class="nav-item">
-	<a class="nav-link" href="notable-problems">Problems</a>
+	<a class="nav-link" href="/wiki/notable-problems">Problems</a>
 </li>
 <li class="nav-item">
-	<a class="nav-link" href="yearbook">Yearbook</a>
+	<a class="nav-link" href="/wiki/yearbook">Yearbook</a>
 </li>
 <li class="nav-item">
 	<a class="nav-link" href="/">{% trans "Exit" %}</a>
@@ -47,4 +47,9 @@ MathJax = {
 {# TODO this is gross #}
 {% block wiki_footer_logo %}
 <a href="https://github.com/vEnhance" class="float-right"><img src="https://web.evanchen.cc/icons/social-github.png" height="48px" /></a>
+<style>
+div.container {
+	max-width: 850px;
+}
+</style>
 {% endblock %}
