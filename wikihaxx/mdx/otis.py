@@ -15,8 +15,8 @@ class OTISExtension(markdown.Extension):
 		md.preprocessors.add('otis-extras', OTISPreprocessor(md), '>html_block')
 
 
-special_start_regex = re.compile(r'\[(arch|diamond|unit|generic)([ a-zA-Z0-9]*)\]')
-special_end_regex = re.compile(r'\[/(arch|diamond|unit|generic)+\]')
+special_start_regex = re.compile(r'\[(problem|diamond|unit|generic)([ a-zA-Z0-9]*)\]')
+special_end_regex = re.compile(r'\[/(problem|diamond|unit|generic)+\]')
 
 
 class OTISPreprocessor(markdown.preprocessors.Preprocessor):
@@ -37,7 +37,7 @@ class OTISPreprocessor(markdown.preprocessors.Preprocessor):
 				tag_name = m_start.group(1)
 				tag_arg = m_start.group(2).strip()
 
-				if tag_name == 'arch':
+				if tag_name == 'problem':
 					try:
 						problem = Problem.objects.get(puid__iexact=tag_arg)
 					except Problem.DoesNotExist:
