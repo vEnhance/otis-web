@@ -1,0 +1,4 @@
+[{"origin": ["https://otis.evanchen.cc/"],
+  "responseHeader": ["Content-Type"],
+  "method": ["GET", "HEAD"],
+  "maxAgeSeconds": 3600}]
