@@ -174,7 +174,7 @@ def portal(request: HttpRequest, student_id: int) -> HttpResponse:
 	context['emails'] = [
 		{
 			'url': c['archive_url'],
-			'title': c['settings']['title'],
+			'title': c['settings']['subject_line'],
 			'preview_text': c['settings']['preview_text'],
 			'timestamp': datetime.fromisoformat(c['send_time'])
 		} for c in campaigns
