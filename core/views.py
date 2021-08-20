@@ -4,6 +4,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import PermissionDenied
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.http.response import HttpResponseNotFound
+from django.shortcuts import get_object_or_404
 from django.views.generic.list import ListView
 from roster.models import Student
 
@@ -41,7 +42,7 @@ def permitted(unit: Unit, request: HttpRequest, asking_solution: bool) -> bool:
 
 @login_required
 def unit_problems(request: HttpRequest, pk: int) -> HttpResponse:
-	unit = Unit.objects.get(pk=pk)
+	unit = get_object_or_404(Unit, pk=pk)
 	if permitted(unit, request, asking_solution=False):
 		return get_from_google_storage(unit.problems_pdf_filename)
 	else:
@@ -50,7 +51,7 @@ def unit_problems(request: HttpRequest, pk: int) -> HttpResponse:
 
 @login_required
 def unit_tex(request: HttpRequest, pk: int) -> HttpResponse:
-	unit = Unit.objects.get(pk=pk)
+	unit = get_object_or_404(Unit, pk=pk)
 	if permitted(unit, request, asking_solution=False):
 		return get_from_google_storage(unit.problems_tex_filename)
 	else:
@@ -59,7 +60,7 @@ def unit_tex(request: HttpRequest, pk: int) -> HttpResponse:
 
 @login_required
 def unit_solutions(request: HttpRequest, pk: int) -> HttpResponse:
-	unit = Unit.objects.get(pk=pk)
+	unit = get_object_or_404(Unit, pk=pk)
 	if permitted(unit, request, asking_solution=True):
 		return get_from_google_storage(unit.solutions_pdf_filename)
 	else:
