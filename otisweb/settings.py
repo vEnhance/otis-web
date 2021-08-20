@@ -74,7 +74,6 @@ INSTALLED_APPS = [
 	'sekizai',
 	'sorl.thumbnail',
 	'wiki.apps.WikiConfig',
-	'wiki.plugins.attachments.apps.AttachmentsConfig',
 	'wiki.plugins.editsection.apps.EditSectionConfig',
 	'wiki.plugins.images.apps.ImagesConfig',
 	'wiki.plugins.links.apps.LinksConfig',
