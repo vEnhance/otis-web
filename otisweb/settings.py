@@ -304,3 +304,5 @@ LOGGING = {
 			},
 		},
 }
+if TESTING:
+	logging.disable(ACTION_LOG_LEVEL)
