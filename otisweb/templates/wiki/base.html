@@ -24,9 +24,6 @@ MathJax = {
 {% block wiki_header_navlinks %}
 <ul class="navbar-nav mr-auto">
 <li class="nav-item">
-	<a class="nav-link" href="{% url 'wiki:root' %}">Fandom</a>
-</li>
-<li class="nav-item">
 	<a class="nav-link" href="/wiki/otis">About</a>
 </li>
 <li class="nav-item">
@@ -42,11 +39,17 @@ MathJax = {
 	<a class="nav-link" href="/">{% trans "Exit" %}</a>
 </li>
 </ul>
+
 {% endblock %}
 
 {# TODO this is gross #}
 {% block wiki_footer_logo %}
-<a href="https://github.com/vEnhance" class="float-right"><img src="https://web.evanchen.cc/icons/social-github.png" height="48px" /></a>
+<div class="text-muted">
+	<a href="{% url 'wiki:globalhistory' %}"><span class="fa fa-clock"> </span>
+		Recent edits
+	</a>
+</div>
+<hr />
 <style>
 div.container {
 	max-width: 850px;

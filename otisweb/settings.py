@@ -79,6 +79,7 @@ INSTALLED_APPS = [
 	'wiki.plugins.links.apps.LinksConfig',
 	'wiki.plugins.macros.apps.MacrosConfig',
 	'wiki.plugins.help.apps.HelpConfig',
+	'wiki.plugins.globalhistory.apps.GlobalHistoryConfig',
 	'wiki.plugins.redlinks.apps.RedlinksConfig',
 	'wikihaxx',
 ]
