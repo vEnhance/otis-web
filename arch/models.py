@@ -36,6 +36,9 @@ class Problem(models.Model):
 	def get_source(self) -> str:
 		return self.source or "(no source)"
 
+	class Meta:
+		ordering = ('puid', )
+
 
 @reversion.register()
 class Hint(models.Model):
