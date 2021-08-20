@@ -24,12 +24,12 @@ $(document).ready(function() {
 {% endblock %}
 
 {% block layout-content %}
-<p>Use this form to adjust the unlocked unit for this student.</p>
-<p>This student has submitted
-<strong class="text-info">{{ num_psets }} problem sets</strong>,
-so be sure to update their score accordingly.</p>
+<p>Use this form to manually adjust the unlocked units for this student.</p>
+
+<h3>Unlocked units</h3>
 {% include "generic-form.html" with submit_name="Advance" %}
 
+<h3>Existing curriculum</h3>
 <p>For your reference, here is the existing curriculum.</p>
 {% include 'dashboard/list_curriculum.html' %}
 
