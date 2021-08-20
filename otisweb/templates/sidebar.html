@@ -28,6 +28,7 @@
 	<hr />
 	<h4>Staff panel</h4>
 	<ul>
+	<li><a href="{% url "admin:index" %}">Django</a></li>
 	<li><a href="{% url "leaderboard" %}">Leaderboard</a></li>
 	<li><a href="{% url "achievements-listing" %}">Achievements</a></li>
 	<li><a href="{% url "idlewarn" %}">Idle-warn</a></li>
@@ -39,7 +40,6 @@
 	<hr />
 	<h4>Admin panel</h4>
 	<ul>
-	<li><a href="{% url "admin:index" %}">Django admin</a></li>
 		{% if student %}
 			<li><a href="{% url "admin:roster_student_change" student.id %}">
 					Edit {{ student.user.username }}</a></li>
