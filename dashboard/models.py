@@ -8,7 +8,7 @@ from hashlib import sha256
 
 from core.models import Semester, Unit
 from django.contrib.auth.models import User
-from django.core.validators import FileExtensionValidator, MaxValueValidator
+from django.core.validators import FileExtensionValidator, MinValueValidator, MaxValueValidator
 from django.db import models
 from django.urls import reverse_lazy
 from roster.models import Student
@@ -127,6 +127,7 @@ class PSet(models.Model):
 		null=True,
 		blank=True,
 		validators=[
+			MinValueValidator(0),
 			MaxValueValidator(200),
 		],
 	)
@@ -136,6 +137,7 @@ class PSet(models.Model):
 		null=True,
 		blank=True,
 		validators=[
+			MinValueValidator(0),
 			MaxValueValidator(200),
 		]
 	)
