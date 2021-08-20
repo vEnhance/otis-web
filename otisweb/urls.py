@@ -33,6 +33,11 @@ urlpatterns = [
 	settings.MEDIA_URL, document_root=settings.MEDIA_ROOT
 )  # type: ignore
 
-admin.site.site_header = 'OTIS-WEB Admin Control Panel'
-admin.site.index_title = 'Dashboard'
-admin.site.site_title = 'OTIS-WEB Admin'
+if settings.DEBUG:
+	admin.site.site_header = '127.0.0.1'
+	admin.site.index_title = 'Switchboard'
+	admin.site.site_title = 'otis@localhost'
+else:
+	admin.site.site_header = 'OTIS Headquarters'
+	admin.site.index_title = 'Control Room'
+	admin.site.site_title = 'OTIS HQ'
