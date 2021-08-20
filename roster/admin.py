@@ -211,9 +211,10 @@ class StudentAdmin(ImportExportModelAdmin):
 		'track',
 	)
 	list_filter = (
+		'assistant',
 		'semester__active',
-		'legit',
 		'semester',
+		'legit',
 		'track',
 		'newborn',
 	)
