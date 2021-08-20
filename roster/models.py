@@ -23,7 +23,7 @@ class Assistant(models.Model):
 		User, on_delete=models.CASCADE, help_text="The Django Auth user attached to the Assistant."
 	)
 	shortname = models.CharField(
-		max_length=10, help_text="Initials or short name for this Assistant"
+		max_length=18, help_text="Initials or short name for this Assistant"
 	)
 	unlisted_students = models.ManyToManyField(
 		"Student",
@@ -45,10 +45,13 @@ class Assistant(models.Model):
 		return self.user.get_full_name()
 
 	def __str__(self) -> str:
-		return self.name
+		return self.shortname
 
 	def student_count(self) -> int:
 		return self.student_set.count()  # type: ignore
+
+	class Meta:
+		ordering = ('shortname', )
 
 
 class Student(models.Model):
