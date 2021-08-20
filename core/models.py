@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.urls import reverse, reverse_lazy
+from django.utils.text import slugify
 from positions import PositionField
 
 # Create your models here.
@@ -96,6 +97,20 @@ class UnitGroup(models.Model):
 
 	def __str__(self) -> str:
 		return self.name
+
+	def get_wiki_link(self) -> str:
+		if self.subject == "A" or self.subject == "F":
+			subject_name = 'algebra'
+		elif self.subject == "C":
+			subject_name = 'combinatorics'
+		elif self.subject == "G":
+			subject_name = 'geometry'
+		elif self.subject == "N":
+			subject_name = 'number-theory'
+		else:
+			subject_name = 'miscellaneous'
+		slug = slugify(self.name)
+		return f'/wiki/units/list-of-{subject_name}-units/{slug}'
 
 	@property
 	def get_subject_short_display(self):

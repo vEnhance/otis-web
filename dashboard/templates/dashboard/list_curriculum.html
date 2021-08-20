@@ -51,13 +51,15 @@ $("#hide-locked-units").click(function() {
 		{{ row.unit.group.name }}
 	</td>
 	<td class="emojis">
+		<a class="emoji-link" title="Wiki"
+			href="{{ row.unit.group.get_wiki_link }}" />🎮</a>
 		{% if row.is_visible %}
 			<a class="emoji-link" style="font-size: 80%" title = "Download PDF"
 				href="{% view_problems row.unit %}">💾</a>
 			<a class="emoji-link" title = "Copy LaTeX"
 				href="{% view_tex row.unit %}">📋</a>
 			<a class="emoji-link" title = "Add suggestion"
-				href="{% url "suggest-new" student.id row.unit.id %}">➕</a>
+				href="{% url "suggest-new" student.id row.unit.id %}">💡</a>
 		{% endif %}
 		{% if row.is_visible %}
 			<a class="emoji-link" title = "File uploads"
