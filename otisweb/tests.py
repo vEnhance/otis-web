@@ -1,5 +1,6 @@
 from typing import Any, Dict
 
+import factory
 from django.contrib.auth.models import User
 from django.http.response import HttpResponse
 from django.test import TestCase
@@ -7,9 +8,16 @@ from django.test.client import Client
 from django.urls.base import reverse_lazy
 
 
-class OTISTestCase(TestCase):
-	fixtures = ('testdata.yaml', )
+# waiting on https://github.com/FactoryBoy/factory_boy/pull/820 ...
+class UniqueFaker(factory.Faker):
+	# based on factory.faker.Faker.generate
+	def generate(self, **params: Any) -> Any:
+		locale = params.pop('locale')
+		subfaker = self._get_faker(locale)
+		return subfaker.unique.format(self.provider, **params)
 
+
+class OTISTestCase(TestCase):
 	def setUp(self):
 		self.client = Client()
 

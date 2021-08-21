@@ -55,8 +55,8 @@ class StudentRegistrationFactory(DjangoModelFactory):
 
 	user = SubFactory(UserFactory)
 	container = SubFactory(RegistrationContainerFactory)
-	parent_email = SubFactory('unique.ascii_safe_email')
+	parent_email = Faker('ascii_safe_email')
 	track = 'C'
 	gender = 'H'
 	graduation_year = 0
-	school_name = Faker('unique.city')
+	school_name = Faker('city')
