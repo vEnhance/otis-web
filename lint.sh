@@ -75,10 +75,10 @@ if ! pyright; then
 fi
 echo -e ""
 
-echo -e "\033[1;35mRunning flake8 ...\033[0m"
+echo -e "\033[1;35mRunning pyflakes ...\033[0m"
 echo -e "---------------------------"
-if ! flake8; then
-	echo -e "$FAILED_HEADER flake8 gave nonzero status"
+if ! pyflakes .; then
+	echo -e "$FAILED_HEADER pyflakes gave nonzero status"
 	git rev-parse HEAD > $BAD_FILE
 	exit 1
 fi
