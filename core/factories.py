@@ -1,7 +1,6 @@
 import random
 
 from django.contrib.auth import get_user_model
-from django.utils.text import slugify
 from factory import Faker, LazyAttribute, Sequence, SubFactory
 from factory.django import DjangoModelFactory
 from factory.fuzzy import FuzzyChoice
@@ -26,8 +25,8 @@ class UnitGroupFactory(DjangoModelFactory):
 	class Meta:
 		model = UnitGroup
 
-	name = Faker('job')
-	slug = LazyAttribute(lambda o: slugify(o.name))
+	name = UniqueFaker('bs')
+	slug = UniqueFaker('slug')
 	description = Faker('catch_phrase')
 	subject = FuzzyChoice(UnitGroup.SUBJECT_CHOICES)
 
