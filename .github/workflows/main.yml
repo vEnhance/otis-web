@@ -50,14 +50,14 @@ jobs:
         echo '::group::🔎 Running pyright with reviewdog 🐶 ...'
         "$(npm bin)/pyright" --outputjson |
           python3 .github/workflows/pyright_to_rdjson.py  |
-          reviewdog -f=rdjson -name="pyright report" \
+          reviewdog -f=rdjson -name="pyright-report" \
             -reporter="github-check" \
             -fail-on-error="true"
         reviewdog_rc=$?
         echo '::endgroup::'
         exit $reviewdog_rc
 
-  pyflakes report:
+  pyflakes-report:
     name: pyflakes
     runs-on: ubuntu-latest
     steps:
@@ -68,7 +68,7 @@ jobs:
           github_token: ${{ secrets.github_token }}
           reporter: github-check # Change reporter.
 
-  yapf diff:
+  yapf-diff:
     name: yapf
     runs-on: ubuntu-latest
     steps:
