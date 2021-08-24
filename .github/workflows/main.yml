@@ -57,18 +57,18 @@ jobs:
         echo '::endgroup::'
         exit $reviewdog_rc
 
-  pyflakes-report:
+  pyflakes:
     name: pyflakes
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: pyflakes
+      - name: pyflakes-report
         uses: reviewdog/action-pyflakes@master
         with:
           github_token: ${{ secrets.github_token }}
           reporter: github-check # Change reporter.
 
-  yapf-diff:
+  yapf:
     name: yapf
     runs-on: ubuntu-latest
     steps:
