@@ -119,8 +119,9 @@
 <ul>
 {% for email in emails %}
 	<li>
-		<a href="{{email.url}}">{{email.title}}</a>: {{email.timestamp}}<br />
-			{{ email.preview_text }}
+		📧<a href="{{email.url}}">{{email.title}}</a><br />
+		{{email.timestamp}}<br />
+		<span class="text-muted">{{ email.preview_text }}</span>
 	</li>
 {% endfor %}
 </ul>
