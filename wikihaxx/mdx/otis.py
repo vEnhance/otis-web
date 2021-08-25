@@ -23,6 +23,7 @@ class OTISPreprocessor(markdown.preprocessors.Preprocessor):
 	# TODO implement cool stuff
 	def run(self, lines: List[str]) -> List[str]:
 		output: List[str] = []
+		body: List[str] = []
 		active = False
 
 		for line in lines:
@@ -93,6 +94,8 @@ class OTISPreprocessor(markdown.preprocessors.Preprocessor):
 						table_output.append(f'<tr><th>♣ earned</th><td>{clubs_given}</td></tr>')
 						table_output.append(f'<tr><th>♥ earned</th><td>{hearts_given}</td></tr>')
 
+						body.append(f'<div>{unitgroup.description}</div>')
+
 				output += table_output
 			elif m_end is not None:
 				output.append(r'</tbody>')
@@ -108,4 +111,6 @@ class OTISPreprocessor(markdown.preprocessors.Preprocessor):
 					output.append('</tr>')
 			else:
 				output.append(line)
-		return output
+		body += output
+
+		return body
