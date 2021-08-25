@@ -264,6 +264,7 @@ def inquiry(request: HttpRequest, student_id: int) -> HttpResponse:
 			else:
 				inquiry.save()
 
+				num_past_unlock_inquiries = current_inquiries.filter(action_type="UNLOCK").count()
 				unlocked_count = current_inquiries.filter(
 					action_type="UNLOCK", status="NEW"
 				).count() + student.unlocked_units.count()
@@ -271,12 +272,13 @@ def inquiry(request: HttpRequest, student_id: int) -> HttpResponse:
 				# auto-acceptance criteria
 				auto_accept_criteria = (inquiry.action_type == "APPEND")
 				auto_accept_criteria |= (inquiry.action_type == "DROP")
-				auto_accept_criteria |= current_inquiries.filter(action_type="UNLOCK").count() <= 3
-				auto_accept_criteria |= request.user.is_staff
-				auto_accept_criteria |= inquiry.action_type == "UNLOCK" and unlocked_count < 9 and (
-					current_inquiries.filter(action_type="DROP", status="ACC", unit=inquiry.unit).count()
-					> 0
+				auto_accept_criteria |= num_past_unlock_inquiries <= 6 and unlocked_count < 9
+				auto_accept_criteria |= (
+					num_past_unlock_inquiries < 25 and inquiry.action_type == "UNLOCK" and
+					unlocked_count < 9 and
+					current_inquiries.filter(action_type="DROP", status="ACC", unit=inquiry.unit).exists()
 				)
+				auto_accept_criteria |= request.user.is_staff
 
 				# auto reject criteria
 				auto_reject_criteria = inquiry.action_type == "UNLOCK" and unlocked_count > 9
