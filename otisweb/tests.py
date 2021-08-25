@@ -1,7 +1,9 @@
 from typing import Any, Dict
+from typing import Union
 
 import factory
 from django.contrib.auth.models import User
+from django.db import models
 from django.http.response import HttpResponse
 from django.test import TestCase
 from django.test.client import Client
@@ -74,8 +76,16 @@ class OTISTestCase(TestCase):
 	def assertPostNotFound(self, name: str, *args: Any, data: Dict[str, Any]):
 		self.assertNotFound(self.post(name, *args, data=data))
 
-	def login(self, username: str):
+	def login_name(self, username: str):
 		self.client.force_login(User.objects.get(username=username))
+
+	def login(self, obj: Union[str, models.Model]):
+		if isinstance(obj, str):
+			self.client.force_login(User.objects.get(username=obj))
+		elif isinstance(obj, User):
+			self.client.force_login(obj)
+		elif hasattr(obj, 'user'):
+			self.client.force_login(getattr(obj, 'user'))
 
 	def assertGetBecomesLoginRedirect(self, name: str, *args: Any):
 		self.assertRedirects(

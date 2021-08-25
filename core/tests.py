@@ -18,11 +18,11 @@ class TestCore(OTISTestCase):
 		self.assertGetBecomesLoginRedirect('view-tex', 10)
 
 	def test_alice_core_views(self):
-		alice = StudentFactory.create(user__username='alice')
+		alice = StudentFactory.create()
 		units = UnitFactory.create_batch(4)
 		alice.curriculum.set(units[:3])
 		alice.unlocked_units.set(units[:2])
-		self.login('alice')
+		self.login(alice)
 
 		# TODO check solutions accessible if pset submitted
 		self.assertGet20X('view-problems', units[0].pk)
@@ -43,23 +43,20 @@ class TestCore(OTISTestCase):
 		self.assertGetDenied('view-solutions', units[3].pk)
 
 	def test_staff_core_views(self):
-		UserFactory.create(username='staff', is_staff=True)
 		u = UnitFactory.create()
-		self.login('staff')
+		self.login(UserFactory.create(is_staff=True))
 		for v in ('view-problems', 'view-tex', 'view-solutions'):
 			self.assertGet20X(v, u.pk)
 
 	def test_mallory_core_views(self):
-		UserFactory.create(username='mallory')
 		u = UnitFactory.create()
-		self.login('mallory')
+		self.login(UserFactory.create())
 		for v in ('view-problems', 'view-tex', 'view-solutions'):
 			self.assertGetDenied(v, u.pk)
 
 	def test_classroom_url_works(self):
 		semester = SemesterFactory.create()
-		UserFactory.create(username='bob')
-		self.login('bob')
+		self.login(UserFactory.create())
 		self.assertGet40X('classroom')
 		semester.classroom_url = '/'
 		semester.save()
