@@ -103,7 +103,7 @@ def finalize(request: HttpRequest, student_id: int) -> HttpResponse:
 
 @login_required
 def advance(request: HttpRequest, student_id: int) -> Any:
-	student = get_student_by_id(request, student_id)
+	student = get_student_by_id(request, student_id, requires_edit=True)
 	if request.method == 'POST':
 		form = AdvanceForm(request.POST, instance=student)
 		if form.is_valid():
