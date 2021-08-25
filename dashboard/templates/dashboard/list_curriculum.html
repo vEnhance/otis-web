@@ -51,8 +51,6 @@ $("#hide-locked-units").click(function() {
 		{{ row.unit.group.name }}
 	</td>
 	<td class="emojis">
-		<a class="emoji-link" title="Wiki"
-			href="{{ row.unit.group.get_wiki_link }}" />🎮</a>
 		{% if row.is_visible %}
 			<a class="emoji-link" style="font-size: 80%" title = "Download PDF"
 				href="{% view_problems row.unit %}">💾</a>
@@ -67,11 +65,15 @@ $("#hide-locked-units").click(function() {
 				📂 {{ row.num_uploads|default:"0" }}
 			</a>
 		{% endif %}
+		<a class="emoji-link" title="Wiki"
+			href="{{ row.unit.group.get_wiki_link }}" />🎮</a>
 		{% if row.sols_label %}
 			<a class="emoji-link" title = "Download solutions"
 				href="{% view_solutions row.unit %}">
 				{{ row.sols_label }}
 			</a>
+		{% else %}
+			<span style="visibility:hidden;">㊙️</span>
 		{% endif %}
 	</td>
 </tr>
