@@ -14,7 +14,6 @@
 {% endif %}
 
 {% if request.user.is_authenticated %}
-	<h4>User panel</h4>
 	<div>
 	<a class="emoji-link" href="{% url "index" %}">🏠</a>
 	<a class="emoji-link" href="{% url "past" %}">🕗</a>
@@ -26,7 +25,6 @@
 
 	{% if request.user.is_staff %}
 	<hr />
-	<h4>Staff panel</h4>
 	<ul>
 	<li><a href="{% url "admin:index" %}">Django HQ</a></li>
 	<li><a href="{% url "leaderboard" %}">Leaderboard</a></li>
@@ -36,14 +34,11 @@
 	</ul>
 	{% endif %}
 
-	{% if request.user.is_superuser %}
+	{% if student and request.user.is_superuser %}
 	<hr />
-	<h4>Admin panel</h4>
 	<ul>
-		{% if student %}
-			<li><a href="{% url "admin:roster_student_change" student.id %}">
-					Edit {{ student.user.username }}</a></li>
-		{% endif %}
+		<li><a href="{% url "admin:roster_student_change" student.id %}">
+				Edit {{ student.user.username }}</a></li>
 		{% if student.user %} {# Hijack student account #}
 			<li>
 				<form action="{% url 'hijack:acquire' %}" method="post">
