@@ -10,7 +10,6 @@
 {% if student %}
 <p><b><a href="{% url "portal" student.id %}">{{ student.name }}</a></b></p>
 <p><i>{{ student.semester }}</i></p>
-<hr />
 {% endif %}
 
 {% if request.user.is_authenticated %}
@@ -35,10 +34,8 @@
 {% endif %}
 
 {% if student and request.user.is_superuser %}
-<hr />
 <ul>
-	<li><a href="{% url "admin:roster_student_change" student.id %}">
-			Edit {{ student.user.username }}</a></li>
+	<li><a href="{% url "admin:roster_student_change" student.id %}">Edit</a></li>
 	{% if student.user %} {# Hijack student account #}
 	<li>
 		<form action="{% url 'hijack:acquire' %}" method="post">
@@ -46,7 +43,7 @@
 			<input type="hidden" name="user_pk" value="{{student.user.pk}}" />
 			<input type="hidden" name="next" value="{{request.path}}" />
 			<button class="pseudo-button" type="submit">
-				Hijack {{ student.user.username }}</button>
+				Hijack</button>
 		</form>
 	</li>
 	{% endif %}
@@ -57,7 +54,7 @@
 			<input type="hidden" name="user_pk" value="{{student.assistant.user.pk}}" />
 			<input type="hidden" name="next" value="{{request.path}}" />
 			<button class="pseudo-button" type="submit">
-				Hijack {{ student.assistant.user.username }}</button>
+				Hijack {{ student.assistant.shortname }}</button>
 		</form>
 	</li>
 	{% endif %}
