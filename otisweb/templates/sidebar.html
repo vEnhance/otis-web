@@ -9,7 +9,7 @@
 
 {% if student %}
 <p><b><a href="{% url "portal" student.id %}">{{ student.name }}</a></b></p>
-<p><i>{{ student.semester }}, {{ student.get_track }}</i></p>
+<p><i>{{ student.semester }}</i></p>
 <hr />
 {% endif %}
 
