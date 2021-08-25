@@ -8,6 +8,7 @@ FAILED_HEADER="\033[1;31mFAILED:\033[0m"
 BAD_FILE=/tmp/otisweb.bad
 GOOD_FILE=/tmp/otisweb.good
 
+
 if [ -f $GOOD_FILE ]; then
 	if [ "$(git rev-parse HEAD)" == "$(cat $GOOD_FILE)" ]; then
 		echo -e "-----------------------------------------------------------------------"
@@ -25,6 +26,16 @@ if [ -f $BAD_FILE ]; then
 		exit 1
 	fi
 fi
+
+echo -e "\033[1;35mChecking against upstream ...\033[0m"
+echo -e "---------------------------"
+git fetch
+if [ "$(git rev-list --count HEAD..@\{u\})" -gt 0 ]; then
+	echo -e "$FAILED_HEADER Upstream is ahead of you"
+	git rev-parse HEAD > $BAD_FILE
+	exit 1
+fi
+echo -e ""
 
 echo -e "\033[1;35mGenerating requirements.txt ...\033[0m"
 echo -e "---------------------------"
