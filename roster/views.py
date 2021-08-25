@@ -75,7 +75,6 @@ def curriculum(request: HttpRequest, student_id: int) -> HttpResponse:
 		'form': form,
 		'enabled': enabled
 	}
-	# return HttpResponse("hi")
 	return render(request, "roster/currshow.html", context)
 
 
