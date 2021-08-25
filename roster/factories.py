@@ -13,8 +13,8 @@ class AssistantFactory(DjangoModelFactory):
 	class Meta:
 		model = Assistant
 
-	user = SubFactory(UserFactory)
-	shortname = LazyAttribute(lambda o: o.first_name)
+	user = SubFactory(UserFactory, is_staff=True)
+	shortname = LazyAttribute(lambda o: o.user.first_name)
 
 
 class StudentFactory(DjangoModelFactory):
@@ -24,6 +24,7 @@ class StudentFactory(DjangoModelFactory):
 	user = SubFactory(UserFactory)
 	semester = SubFactory(SemesterFactory)
 	track = 'C'
+	newborn = False
 
 
 class InvoiceFactory(DjangoModelFactory):
