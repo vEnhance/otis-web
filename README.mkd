@@ -10,12 +10,35 @@ up a local server and play around if you so choose.
 ## Installation instructions
 
 1. Install the following standard tools: `python` (version 3.9),
-	`pyright`, `pip`.
+   `pyright`, `pip`, `gcc`.
 2. Create a new virtual environment and `pip install -r requirements.txt`.
-	(Alternatively, use `poetry`.)
+   (Alternatively, use `poetry`.)
 3. `python manage.py migrate` to create the local database.
 4. `python manage.py createsuperuser` to create a superuser.
 5. Profit.
+
+## Using Docker
+
+If you're using Docker, @AmoleR has created Dockerfile.dev that works well enough.
+Something to note is that the last line (creation of `superuser`) doesn't actually
+work right now due to the interactive nature of django's default, so you have to
+manually run it. To spin up the image, run
+
+```sh
+docker build -f Dockerfile.dev -t otis-web .
+docker run        \
+   -v $(pwd):/app \     # This links your current edits into the docker
+   -p 8000:8000   \     # This maps ports. Change the first number to any other
+                        #     number as per your wish.
+   -it            \     # Connect terminal stdin/stdout with docker
+   otis-web sh
+```
+
+Once in there, use `poetry run python ...` to run any python scripts. Also make sure
+that you start the runserver with `poetry run python manage.py runserver 0.0.0.0:8000`,
+as this will connect to the port you put in the `docker run` command. If you changed
+it from port 8000 in the `docker run` command, **DO NOT** change it here - instead, just
+go to `localhost:PORT`, where `PORT` is the specified port (not 8000 if you changed it).
 
 ## Pull requests
 
