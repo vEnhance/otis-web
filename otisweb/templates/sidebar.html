@@ -1,6 +1,6 @@
 {% if request.user.is_authenticated %}
 <p>👋, <b>{{ request.user }}</b>.
-<a href="{% url "account_logout" %}">(logout)</a>
+	<a href="{% url "account_logout" %}">(logout)</a>
 </p>
 {% else %}
 <p><a href="{% url "account_login" %}">(login)</a></p>
@@ -10,64 +10,56 @@
 {% if student %}
 <p><b><a href="{% url "portal" student.id %}">{{ student.name }}</a></b></p>
 <p><i>{{ student.semester }}</i></p>
-<hr />
 {% endif %}
 
 {% if request.user.is_authenticated %}
-	<h4>User panel</h4>
-	<div>
+<div>
 	<a class="emoji-link" href="{% url "index" %}">🏠</a>
 	<a class="emoji-link" href="{% url "past" %}">🕗</a>
 	<a class="emoji-link" href="{% url "socialaccount_connections" %}">🔐</a>
 	<a class="emoji-link" href="{% url "arch-index" %}">🗼</a>
 	<a class="emoji-link" href="{% url "synopsis" %}">🗃️</a>
 	<a class="emoji-link" href="{% url "wiki:root" %}">🎮</a>
-	</div>
+</div>
 
-	{% if request.user.is_staff %}
-	<hr />
-	<h4>Staff panel</h4>
-	<ul>
+{% if request.user.is_staff %}
+<hr />
+<ul>
 	<li><a href="{% url "admin:index" %}">Django HQ</a></li>
 	<li><a href="{% url "leaderboard" %}">Leaderboard</a></li>
 	<li><a href="{% url "achievements-listing" %}">Achievements</a></li>
 	<li><a href="{% url "idlewarn" %}">Idle-warn</a></li>
 	<li><a href="{% url "master-schedule" %}">Curriculums</a></li>
-	</ul>
-	{% endif %}
+</ul>
+{% endif %}
 
-	{% if request.user.is_superuser %}
-	<hr />
-	<h4>Admin panel</h4>
-	<ul>
-		{% if student %}
-			<li><a href="{% url "admin:roster_student_change" student.id %}">
-					Edit {{ student.user.username }}</a></li>
-		{% endif %}
-		{% if student.user %} {# Hijack student account #}
-			<li>
-				<form action="{% url 'hijack:acquire' %}" method="post">
-				{% csrf_token %}
-				<input type="hidden" name="user_pk" value="{{student.user.pk}}" />
-				<input type="hidden" name="next" value="{{request.path}}" />
-				<button class="pseudo-button" type="submit">
-					Hijack {{ student.user.username }}</button>
-				</form>
-			</li>
-		{% endif %}
-		{% if student.assistant %} {# Hijack assistant account #}
-			<li>
-				<form action="{% url 'hijack:acquire' %}" method="post">
-				{% csrf_token %}
-				<input type="hidden" name="user_pk" value="{{student.assistant.user.pk}}" />
-				<input type="hidden" name="next" value="{{request.path}}" />
-				<button class="pseudo-button" type="submit">
-					Hijack {{ student.assistant.user.username }}</button>
-				</form>
-			</li>
-		{% endif %}
-	</ul>
+{% if student and request.user.is_superuser %}
+<ul>
+	<li><a href="{% url "admin:roster_student_change" student.id %}">Edit</a></li>
+	{% if student.user %} {# Hijack student account #}
+	<li>
+		<form action="{% url 'hijack:acquire' %}" method="post">
+			{% csrf_token %}
+			<input type="hidden" name="user_pk" value="{{student.user.pk}}" />
+			<input type="hidden" name="next" value="{{request.path}}" />
+			<button class="pseudo-button" type="submit">
+				Hijack</button>
+		</form>
+	</li>
 	{% endif %}
+	{% if student.assistant %} {# Hijack assistant account #}
+	<li>
+		<form action="{% url 'hijack:acquire' %}" method="post">
+			{% csrf_token %}
+			<input type="hidden" name="user_pk" value="{{student.assistant.user.pk}}" />
+			<input type="hidden" name="next" value="{{request.path}}" />
+			<button class="pseudo-button" type="submit">
+				Hijack {{ student.assistant.shortname }}</button>
+		</form>
+	</li>
+	{% endif %}
+</ul>
+{% endif %}
 {% endif %}
 
 <!--

@@ -68,7 +68,7 @@ class Meter:
 
 	@property
 	def percent(self) -> int:
-		eps = 0.2
+		eps = 0.25
 		k = (self.value + eps * self.max_value) / ((1 + eps) * self.max_value)
 		return min(100, int(100 * k))
 
