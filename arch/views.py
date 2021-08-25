@@ -110,6 +110,12 @@ class ProblemUpdate(ProblemObjectView, ExistStudentRequiredMixin, RevisionMixin,
 		reversion.set_comment(form.cleaned_data['reason'] or form.cleaned_data['description'])
 		return super().form_valid(form)
 
+	def get_context_data(self, **kwargs: Any):
+		context = super().get_context_data(**kwargs)
+		context['num_problems'] = Problem.objects.all().count()
+		context['num_hints'] = Hint.objects.all().count()
+		return context
+
 	def get_success_url(self):
 		return self.object.get_absolute_url()
 
