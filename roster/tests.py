@@ -108,14 +108,17 @@ class RosterTest(OTISTestCase):
 					"action_type": "UNLOCK",
 				}
 			)
-			self.assertContains(resp, "automatically approved")
+			self.assertContains(resp, "Inquiry automatically approved")
 		self.assertEqual(alice.curriculum.count(), 6)
+		self.assertEqual(alice.unlocked_units.count(), 6)
 		self.assertContains(
 			self.post("inquiry", alice.pk, data={
-				'unit': units[6].pk,
+				'unit': units[19].pk,
 				"action_type": "UNLOCK",
 			}), "should be approved soon!"
 		)
+		self.assertEqual(alice.curriculum.count(), 6)
+		self.assertEqual(alice.unlocked_units.count(), 6)
 
 		self.login(firefly)
 		for i in range(6, 10):
@@ -123,5 +126,49 @@ class RosterTest(OTISTestCase):
 				self.post("inquiry", alice.pk, data={
 					'unit': units[i].pk,
 					"action_type": "UNLOCK",
-				}), "automatically approved"
+				}), "Inquiry automatically approved"
 			)
+		self.assertEqual(alice.curriculum.count(), 10)
+		self.assertEqual(alice.unlocked_units.count(), 10)
+
+		self.login(alice)
+		for i in range(11, 14):
+			self.assertContains(
+				self.post("inquiry", alice.pk, data={
+					'unit': units[i].pk,
+					"action_type": "UNLOCK",
+				}), "more than 9 unfinished"
+			)
+		self.assertEqual(alice.curriculum.count(), 10)
+		self.assertEqual(alice.unlocked_units.count(), 10)
+
+		for i in range(15, 18):
+			self.assertContains(
+				self.post("inquiry", alice.pk, data={
+					'unit': units[i].pk,
+					"action_type": "APPEND",
+				}), "Inquiry automatically approved"
+			)
+		self.assertEqual(alice.curriculum.count(), 13)
+		self.assertEqual(alice.unlocked_units.count(), 10)
+
+		for i in range(5, 14):
+			self.assertContains(
+				self.post("inquiry", alice.pk, data={
+					'unit': units[i].pk,
+					"action_type": "DROP",
+				}), "Inquiry automatically approved"
+			)
+		self.assertEqual(alice.curriculum.count(), 8)
+		self.assertEqual(alice.unlocked_units.count(), 5)
+
+		for i in range(5, 7):
+			self.assertContains(
+				self.post("inquiry", alice.pk, data={
+					'unit': units[i].pk,
+					"action_type": "UNLOCK",
+				}), "Inquiry automatically approved"
+			)
+
+		self.assertEqual(alice.curriculum.count(), 10)
+		self.assertEqual(alice.unlocked_units.count(), 7)

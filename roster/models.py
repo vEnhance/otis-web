@@ -409,6 +409,8 @@ class UnitInquiry(models.Model):
 		elif self.action_type == "DROP":
 			self.student.curriculum.remove(unit)
 			self.student.unlocked_units.remove(unit)
+		else:
+			raise ValueError(f"No action {self.action_type}")
 		self.status = "ACC"
 		self.save()
 

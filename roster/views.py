@@ -246,12 +246,12 @@ def inquiry(request: HttpRequest, student_id: int) -> HttpResponse:
 			inquiry = form.save(commit=False)
 			inquiry.student = student
 			# check if exists already and created recently
-			one_day_ago = timezone.now() - datetime.timedelta(seconds=90)
 			if UnitInquiry.objects.filter(
 				unit=inquiry.unit,
 				student=student,
 				action_type=inquiry.action_type,
-				created_at__gte=one_day_ago,
+				created_at__gte=timezone.now() - datetime.timedelta(seconds=90),
+				status="NEW",
 			).exists():
 				messages.warning(
 					request, "The same inquiry already was "
