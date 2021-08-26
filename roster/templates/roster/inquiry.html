@@ -3,21 +3,21 @@
 
 {% block css %}
 <style type="text/css">
-a.chosen-single {
-	border: 2px solid #aaa;
-	background-color: #fff;
-	border-radius: 5px;
-}
+	a.chosen-single {
+		border: 2px solid #aaa;
+		background-color: #fff;
+		border-radius: 5px;
+	}
 </style>
 {% endblock %}
 
 {% block scripts %}
 <script type="text/javascript">
-$(document).ready(function() {
-	$("#id_unit").chosen({
-		placeholder_text : "...",
+	$(document).ready(function() {
+		$("#id_unit").chosen({
+			placeholder_text: "...",
+		});
 	});
-});
 </script>
 {% endblock %}
 
@@ -25,12 +25,12 @@ $(document).ready(function() {
 
 {% block layout-content %}
 <p>A <b>unit inquiry</b> lets you make requests
-for changes to your set of units.
-Here you can open new inquiries
-and see the status of previous ones.</p>
+	for changes to your set of units.
+	Here you can open new inquiries
+	and see the status of previous ones.</p>
 <p>I try to respond to inquiries somewhat regularly,
-but if I don't get to yours for a few days,
-please send me a reminder.</p>
+	but if I don't get to yours for a few days,
+	please send me a reminder.</p>
 
 <h2>New inquiry</h2>
 {% include "generic-form.html" with submit_name="Inquire" %}
@@ -38,51 +38,40 @@ please send me a reminder.</p>
 <h2>Current inquiries</h2>
 <table class="table">
 	<thead class="thead-dark">
-	<tr>
-		<th>Created</th>
-		<th>Status</th>
-		<th>Action</th>
-		<th>Unit</th>
-		<th>Last change</th>
-	</tr>
+		<tr>
+			<th>Created</th>
+			<th>Status</th>
+			<th>Action</th>
+			<th>Unit</th>
+			<th>Last change</th>
+		</tr>
 	</thead>
 	<tbody>
-	{% for inquiry in inquiries %}
-	<tr>
-		<td>{{ inquiry.created_at|date:"Y-m-d" }}</td>
-		<td>
-			{% if inquiry.status == "NEW" %}
-			Pending
-			{% elif inquiry.status == "ACC" %}
-			<strong class="text-success">Approved</strong>
-			{% elif inquiry.status == "REJ" %}
-			<strong class="text-danger">Rejected</strong>
-			{% elif inquiry.status == "HOLD" %}
-			<strong class="text-warning">On hold</strong>
-			{% endif %}
-		</td>
-		<td>{{ inquiry.get_action_type_display }}</td>
-		<td>{{ inquiry.unit }}</td>
-		<td>
-			{% if inquiry.status == "NEW" %}
-			{% if request.user.is_staff %}
-			<a href="{% url "approve-inquiry" inquiry.id %}">(approve)</a>
-			{% else %}
-			(none)
-			{% endif %}
-			{% else %}
-			{{ inquiry.updated_at|date:"Y-m-d" }}
-			{% endif %}
-		</td>
-	</tr>
-	{% if inquiry.explanation %}
-	<tr>
-	<td></td>
-	<td></td>
-	<td colspan="3"><i>{{ inquiry.explanation }}</i></td>
-	</tr>
-	{% endif %}
-	{% endfor %}
+		{% for inquiry in inquiries %}
+		<tr>
+			<td>{{ inquiry.created_at|date:"Y-m-d" }}</td>
+			<td>
+				{% if inquiry.status == "NEW" %}
+				Pending
+				{% elif inquiry.status == "ACC" %}
+				<strong class="text-success">Approved</strong>
+				{% elif inquiry.status == "REJ" %}
+				<strong class="text-danger">Rejected</strong>
+				{% elif inquiry.status == "HOLD" %}
+				<strong class="text-warning">On hold</strong>
+				{% endif %}
+			</td>
+			<td>{{ inquiry.get_action_type_display }}</td>
+			<td>{{ inquiry.unit }}</td>
+		</tr>
+		{% if inquiry.explanation %}
+		<tr>
+			<td></td>
+			<td></td>
+			<td colspan="3"><i>{{ inquiry.explanation }}</i></td>
+		</tr>
+		{% endif %}
+		{% endfor %}
 	</tbody>
 </table>
 
