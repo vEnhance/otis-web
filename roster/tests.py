@@ -3,6 +3,7 @@ from otisweb.tests import OTISTestCase
 from django.shortcuts import get_object_or_404
 
 from roster.factories import AssistantFactory, StudentFactory
+from roster.factories import InvoiceFactory
 from roster.models import Student
 
 from .views import get_checksum
@@ -45,9 +46,13 @@ class RosterTest(OTISTestCase):
 		)
 		self.assertEqual(bob.unlocked_units.count(), 3)
 
-	def test_checksum_works(self):
-		alice = StudentFactory.create(user__username='alice')
-		self.assertEqual(len(get_checksum(alice)), 36)
-
 	def test_invoice(self):
-		alice = StudentFactory.create(user__username='alice')
+		self.assertGet40X('invoice')
+		alice = StudentFactory.create()
+		self.login(alice)
+		InvoiceFactory.create(student=alice)
+		response = self.get('invoice')
+		self.assertEqual(response.status_code, 200)
+		checksum = get_checksum(alice)
+		self.assertEqual(len(get_checksum(alice)), 36)
+		self.assertContains(response.content, checksum)

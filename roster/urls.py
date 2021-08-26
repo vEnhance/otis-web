@@ -6,7 +6,7 @@ urlpatterns = [
 	path(r'curriculum/<int:student_id>/', views.curriculum, name='currshow'),
 	path(r'finalize/<int:student_id>/', views.finalize, name='finalize'),
 	path(r'advance/<int:student_id>/', views.advance, name='advance'),
-	path(r'invoice/', views.invoice),
+	path(r'invoice/', views.invoice, name='invoice'),
 	path(r'invoice/<int:student_id>/', views.invoice, name='invoice'),
 	path(
 		r'invoice/<int:student_id>/<str:checksum>/',
