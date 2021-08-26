@@ -15,16 +15,16 @@ import datetime
 import logging
 import os
 from hashlib import pbkdf2_hmac, sha256
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from allauth.socialaccount.models import SocialAccount
+from braces.views import LoginRequiredMixin, StaffuserRequiredMixin
 from core.models import Semester, Unit
 from dashboard.models import PSet
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.auth.models import Group, User
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse  # NOQA
@@ -147,13 +147,10 @@ def invoice(request: HttpRequest, student_id: int = None) -> HttpResponse:
 	# Now assume student_id is not None
 	student = get_student_by_id(request, student_id, payment_exempt=True)
 
-	if not student.semester.show_invoices:
+	try:
+		invoice: Optional[Invoice] = student.invoice
+	except ObjectDoesNotExist:
 		invoice = None
-	else:
-		try:
-			invoice = student.invoice
-		except ObjectDoesNotExist:
-			invoice = None
 
 	context = {
 		'title': "Invoice for " + student.name,
@@ -168,6 +165,7 @@ def invoice(request: HttpRequest, student_id: int = None) -> HttpResponse:
 # this is not gated
 def invoice_standalone(request: HttpRequest, student_id: int, checksum: str) -> HttpResponse:
 	student = Student.objects.get(id=student_id)
+
 	if checksum != get_checksum(student):
 		raise PermissionDenied("Bad hash provided")
 	try:
@@ -208,8 +206,7 @@ def master_schedule(request: HttpRequest) -> HttpResponse:
 	return render(request, "roster/master-schedule.html", context)
 
 
-class UpdateInvoice(PermissionRequiredMixin, UpdateView):
-	permission_required = 'is_staff'
+class UpdateInvoice(LoginRequiredMixin, StaffuserRequiredMixin, UpdateView):
 	model = Invoice
 	fields = (
 		'preps_taught',
