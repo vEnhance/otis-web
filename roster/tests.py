@@ -95,3 +95,33 @@ class RosterTest(OTISTestCase):
 				'forgive': False
 			}
 		)
+
+	def test_inquiry(self):
+		firefly = AssistantFactory.create()
+		alice = StudentFactory.create(assistant=firefly)
+		units = UnitFactory.create_batch(20)
+		self.login(alice)
+		for i in range(6):
+			resp = self.post(
+				"inquiry", alice.pk, data={
+					'unit': units[i].pk,
+					"action_type": "UNLOCK",
+				}
+			)
+			self.assertContains(resp, "automatically approved")
+		self.assertEqual(alice.curriculum.count(), 6)
+		self.assertContains(
+			self.post("inquiry", alice.pk, data={
+				'unit': units[6].pk,
+				"action_type": "UNLOCK",
+			}), "should be approved soon!"
+		)
+
+		self.login(firefly)
+		for i in range(6, 10):
+			self.assertContains(
+				self.post("inquiry", alice.pk, data={
+					'unit': units[i].pk,
+					"action_type": "UNLOCK",
+				}), "automatically approved"
+			)
