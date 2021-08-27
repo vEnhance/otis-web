@@ -123,21 +123,6 @@
 </div>
 {% endif %}
 
-{% if emails %}
-<h2>Recent announcements</h2>
-<ul>
-	{% for email in emails %}
-	<li>
-		<a href="{{email.url}}">{{email.title}}</a><br />
-		{{email.timestamp}}<br />
-		<span class="text-muted">{{ email.preview_text }}</span>
-	</li>
-	{% endfor %}
-</ul>
-{% endif %}
-
-<hr />
-
 <h2>Your units</h2>
 {% include "dashboard/list_curriculum.html" %}
 <p>
@@ -146,8 +131,18 @@
 	(You can access solutions in the meantime.)
 	Units to work on are marked ▶️.
 </p>
-<hr />
 
+{% if emails %}
+<h2>Recent announcements</h2>
+{% for email in emails %}
+<div class="mb-3">
+	<b><a href="{{email.url}}">{{email.title}}</a></b><br />
+	{{email.timestamp}} <span class="text-muted">| {{ email.preview_text }}</span>
+</div>
+{% endfor %}
+{% endif %}
+
+<hr />
 <h2>Launchpad (places to go)</h2>
 <table class="table">
 	<tr>
