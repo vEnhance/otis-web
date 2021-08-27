@@ -9,8 +9,8 @@
 	<ul>
 		<li>Track: {{ student.get_track_display }}</li>
 		<li>Assistant: {{ student.assistant.shortname|default:"None" }}</li>
-		<li>Username: <tt>{{request.user.username}}</tt>
-		<li>Email: <tt>{{request.user.email}}</tt>
+		<li>Username: <tt>{{student.user.username}}</tt>
+		<li>Email: <tt>{{student.user.email}}</tt>
 	</ul>
 </div>
 {% endif %}
