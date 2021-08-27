@@ -681,6 +681,8 @@ def api(request: HttpRequest) -> JsonResponse:
 									'comments',
 									'acknowledge',
 									'weight',
+									'unit__group__name',
+									'unit__code',
 								)
 							)
 					}
