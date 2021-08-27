@@ -172,3 +172,7 @@ class RosterTest(OTISTestCase):
 
 		self.assertEqual(alice.curriculum.count(), 10)
 		self.assertEqual(alice.unlocked_units.count(), 7)
+
+
+# TODO tests for reg
+# TODO tests for update profile
