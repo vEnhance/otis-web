@@ -107,6 +107,14 @@ $(document).ready(function() {
 		$("#solution_render").html('');
 	});
 
+	$("#id_statement").on("input", (e) => {
+		$("#statement_render").text(e.target.value);
+	});
+
+	$("#id_solution").on("input", (e) => {
+		$("#solution_render").text(e.target.value);
+	});
+
 	function render_statement() {
 		if (!render_enabled) return;
 		if (!mathjaxLoaded) console.warn("MathJax has not finished loading yet.");
