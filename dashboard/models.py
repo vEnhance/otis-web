@@ -8,7 +8,7 @@ from hashlib import sha256
 
 from core.models import Semester, Unit
 from django.contrib.auth.models import User
-from django.core.validators import FileExtensionValidator, MinValueValidator, MaxValueValidator
+from django.core.validators import FileExtensionValidator, MaxValueValidator, MinValueValidator  # NOQA
 from django.db import models
 from django.urls import reverse_lazy
 from roster.models import Student
@@ -160,9 +160,6 @@ class PSet(models.Model):
 	special_notes = models.TextField(
 		help_text="If there's anything you need to say before we proceed", blank=True
 	)
-	instructor_comments = models.TextField(
-		help_text="Any comment from the instructor about the submission", blank=True
-	)
 
 	def __str__(self):
 		return f'{self.student.name} submits {self.unit}'
@@ -199,6 +196,7 @@ class ProblemSuggestion(models.Model):
 
 	resolved = models.BooleanField(default=False, help_text="Whether staff has processed this.")
 	reason = models.TextField(blank=True, help_text="Staff notes on reviewing.")
+	# ^ TODO this may be obsoleted, in which case we can delete it
 	created_at = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self) -> str:
