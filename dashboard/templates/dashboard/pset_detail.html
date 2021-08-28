@@ -4,13 +4,7 @@
 
 {% if pset.approved %}
 <div class="alert alert-success">
-	{% if pset.instructor_comments %}
-	You're all set. Here are instructor comments:
-	<hr />
-	<div style="white-space: pre;">{{ pset.instructor_comments }}</div>
-	{% else %}
 	This unit submission was approved.
-	{% endif %}
 </div>
 {% else %}
 <div class="alert alert-primary">
@@ -19,7 +13,9 @@
 {% endif %}
 <ul>
 	<li>Unit: <a href="{% url "view-problems" pset.unit.pk %}">{{ pset.unit }}</a>
-		<ul><li><a href="{% url "view-problems" pset.unit.pk %}">Solutions</a></li></ul>
+		<ul>
+			<li><a href="{% url "view-problems" pset.unit.pk %}">Solutions</a></li>
+		</ul>
 	</li>
 	<li>Submitted: {{ pset.upload.created_at }}</li>
 	<ul>
@@ -31,10 +27,16 @@
 		{% endif %}
 	</ul>
 	{% if pset.feedback %}
-	<li>Your comments: <div><pre>{{ pset.feedback }}</pre></div></li>
+	<li>Your comments: <div>
+			<pre>{{ pset.feedback }}</pre>
+		</div>
+	</li>
 	{% endif %}
 	{% if pset.special_notes %}
-	<li>Your special notes: <div><pre>{{ pset.special_notes }}</pre></div></li>
+	<li>Your special notes: <div>
+			<pre>{{ pset.special_notes }}</pre>
+		</div>
+	</li>
 	{% endif %}
 </ul>
 
