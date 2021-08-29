@@ -444,7 +444,8 @@ class UpdateFile(LoginRequiredMixin, UpdateView):
 	def get_object(self, *args: Any, **kwargs: Any) -> UploadedFile:
 		obj = super(UpdateFile, self).get_object(*args, **kwargs)
 		assert isinstance(obj, UploadedFile)
-		if not obj.owner == self.request.user and getattr(self.request.user, 'is_staff', False):
+		is_staff = getattr(self.request.user, 'is_staff', False)
+		if obj.owner != self.request.user and is_staff is False:
 			raise PermissionDenied("Not authorized to update this file")
 		return obj
 
