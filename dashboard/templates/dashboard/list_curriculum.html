@@ -3,81 +3,73 @@
 {% if curriculum %}
 
 <p>
-<button id="hide-completed-units"
-	title="Toggle completed unit visibility">
-	Toggle ✅
-</button>
-<button id="hide-locked-units"
-	title="Toggle locked unit visibility">
-	Toggle ❓
-</button>
-<span style="font-size: 80%; font-style: italic;">
-	Mouse over icons for hints.
-</span>
+	<button id="hide-completed-units" title="Toggle completed unit visibility">
+		Toggle ✅
+	</button>
+	<button id="hide-locked-units" title="Toggle locked unit visibility">
+		Toggle ❓
+	</button>
+	<span style="font-size: 80%; font-style: italic;">
+		Mouse over icons for hints.
+	</span>
 </p>
 <script>
-$("#hide-completed-units").click(function() {
-	$(".unit-completed").toggle();
-});
-$("#hide-locked-units").click(function() {
-	$(".unit-locked").toggle();
-});
+	$("#hide-completed-units").click(function() {
+		$(".unit-completed").toggle();
+	});
+	$("#hide-locked-units").click(function() {
+		$(".unit-locked").toggle();
+	});
 </script>
 
 <table class="table curriculum">
-{% for row in curriculum %}
-<tr class="subject{{ row.unit.group.subject }}{% if row.is_approved %} unit-completed{% endif %}{% if not row.is_visible %} unit-locked{% endif %}">
-	<td class="number">
-	{{ row.number }}
-	{% if row.is_approved %}
-		<span title="Completed unit">✅</span>
-	{% elif row.is_submitted and not semester.active %}
-		<span title="Completed unit">✅</span>
-	{% elif row.is_submitted %}
-		<span title="Unit pending review">⏳</span>
-	{% elif row.is_current and semester.active %}
-		<span title="Current unit">▶️</span>
-	{% elif not row.is_visible %}
-		<span title="Locked unit">❓</span>
-	{% else %}
-		<span title="Inactive unit">✖️</span>
-	{% endif %}
-	</td>
+	{% for row in curriculum %}
+	<tr class="subject{{ row.unit.group.subject }}{% if row.is_approved %} unit-completed{% endif %}{% if not row.is_visible %} unit-locked{% endif %}">
+		<td class="number">
+			{{ row.number }}
+			{% if row.is_approved %}
+			<span title="Completed unit">✅</span>
+			{% elif row.is_submitted and not semester.active %}
+			<span title="Completed unit">✅</span>
+			{% elif row.is_submitted %}
+			<span title="Unit pending review">⏳</span>
+			{% elif row.is_current and semester.active %}
+			<span title="Current unit">▶️</span>
+			{% elif not row.is_visible %}
+			<span title="Locked unit">❓</span>
+			{% else %}
+			<span title="Inactive unit">✖️</span>
+			{% endif %}
+		</td>
 
-	<td class="code">{{ row.unit.position }} {{ row.unit.code }}</td>
+		<td class="code">{{ row.unit.position }} {{ row.unit.code }}</td>
 
-	{# Handout/suggest #}
-	<td {% if row.is_current %}class="active"{% endif %}>
-		{{ row.unit.group.name }}
-	</td>
-	<td class="emojis">
-		{% if row.is_visible %}
-			<a class="emoji-link" style="font-size: 80%" title = "Download PDF"
-				href="{% view_problems row.unit %}">💾</a>
-			<a class="emoji-link" title = "Copy LaTeX"
-				href="{% view_tex row.unit %}">📋</a>
-			<a class="emoji-link" title = "Add suggestion"
-				href="{% url "suggest-new" student.id row.unit.id %}">💡</a>
-		{% endif %}
-		{% if row.is_visible %}
-			<a class="emoji-link" title = "File uploads"
-				href="{% url "uploads" student.id row.unit.id %}">
+		{# Handout/suggest #}
+		<td {% if row.is_current %}class="active" {% endif %}>
+			{{ row.unit.group.name }}
+		</td>
+		<td class="emojis">
+			{% if row.is_visible %}
+			<a class="emoji-link" style="font-size: 80%" title="Download PDF" href="{% view_problems row.unit %}">💾</a>
+			<a class="emoji-link" title="Copy LaTeX" href="{% view_tex row.unit %}">📋</a>
+			<a class="emoji-link" title="Add suggestion" href="{% url "suggest-new" student.id row.unit.id %}">💡</a>
+			{% endif %}
+			{% if row.is_visible %}
+			<a class="emoji-link" title="File uploads" href="{% url "uploads" student.id row.unit.id %}">
 				📂 {{ row.num_uploads|default:"0" }}
 			</a>
-		{% endif %}
-		<a class="emoji-link" title="Wiki"
-			href="{{ row.unit.group.get_wiki_link }}" />🎮</a>
-		{% if row.sols_label %}
-			<a class="emoji-link" title = "Download solutions"
-				href="{% view_solutions row.unit %}">
+			{% endif %}
+			<a class="emoji-link" title="Wiki" href="{{ row.unit.group.get_wiki_link }}" />🎮</a>
+			{% if row.sols_label %}
+			<a class="emoji-link" title="Download solutions" href="{% view_solutions row.unit %}">
 				{{ row.sols_label }}
 			</a>
-		{% else %}
+			{% else %}
 			<span style="visibility:hidden;">㊙️</span>
-		{% endif %}
-	</td>
-</tr>
-{% endfor %}
+			{% endif %}
+		</td>
+	</tr>
+	{% endfor %}
 </table>
 {% else %}
 <i>No curriculum materials yet! Please check back later.</i>

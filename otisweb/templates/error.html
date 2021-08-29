@@ -1,16 +1,19 @@
 <html>
+
 <head>
-<title>OTIS: HTTP {% block code %}{% endblock %}</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Verdana">
-<style>
-body {
-	text-align: center;
-}
-h1 {
-	font-family: Verdana, Geneva, Tahoma, sans-serif;
-}
-</style>
+	<title>OTIS: HTTP {% block code %}{% endblock %}</title>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Verdana">
+	<style>
+		body {
+			text-align: center;
+		}
+
+		h1 {
+			font-family: Verdana, Geneva, Tahoma, sans-serif;
+		}
+	</style>
 </head>
+
 <body>
 	<h1>{% block title %}{% endblock %}</h1>
 	<div style="font-size:120px;">{% block emoji %}{% endblock %}</div>
@@ -22,4 +25,5 @@ h1 {
 	{% block extra %}
 	{% endblock %}
 </body>
+
 </html>

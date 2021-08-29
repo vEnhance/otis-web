@@ -1,8 +1,6 @@
 <div class="accordion-item">
 	<h2 class="accordion-header" id="heading{{ meter.name }}">
-		<button class="accordion-button collapsed" type="button"
-						data-bs-toggle="collapse" data-bs-target="#collapse{{ meter.name }}"
-						aria-expanded="false" aria-controls="collapse{{ meter.name }}">
+		<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ meter.name }}" aria-expanded="false" aria-controls="collapse{{ meter.name }}">
 			<span style="color: {{ meter.color }};">
 				<span style="font-size: 150%;">{{ meter.level }}</span>
 				{{ meter.name }}
@@ -14,14 +12,12 @@
 	</h2>
 	<div id="collapse{{ meter.name }}" class="accordion-collapse collapse" aria-labelledby="heading{{ meter.name }}">
 		<div class="accordion-body">
-			<div style="position: relative; padding: 5px 9px; height : 64px;"
-					class="col-12">
+			<div style="position: relative; padding: 5px 9px; height : 64px;" class="col-12">
 				<div style="font-size:32px; position: absolute; top: -6px; left: -8px;">
 					{{ meter.emoji }}
 				</div>
 				<div class="progress" style="height: 24px;">
-					<div class="progress-bar"
-							style="width: {{ meter.percent }}%;
+					<div class="progress-bar" style="width: {{ meter.percent }}%;
 									background-color: {{ meter.color }};
 									text-align: right;
 									padding-right: 4%;">

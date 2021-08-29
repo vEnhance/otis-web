@@ -2,9 +2,9 @@
 {% load static %}
 
 {% block extrastyle %}
-	{% if debug %}
-		<link rel="stylesheet" type="text/css" href="{% static "css/admin-red.css" %}"/>
-	{% else %}
-		<link rel="stylesheet" type="text/css" href="{% static "css/admin-green.css" %}"/>
-	{% endif %}
+{% if debug %}
+<link rel="stylesheet" type="text/css" href="{% static "css/admin-red.css" %}" />
+{% else %}
+<link rel="stylesheet" type="text/css" href="{% static "css/admin-green.css" %}" />
+{% endif %}
 {% endblock %}

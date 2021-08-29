@@ -9,35 +9,38 @@
 	<img height="48px" src="{% static 'img/otis-logo-v2018.svg' %}" />
 </a>
 <script type="text/javascript">
-MathJax = {
-	tex: {
-		inlineMath: [['$','$']],
-		displayMath: [['\\\\[', '\\\\]']],
-	}
-};
+	MathJax = {
+		tex: {
+			inlineMath: [
+				['$', '$']
+			],
+			displayMath: [
+				['\\\\[', '\\\\]']
+			],
+		}
+	};
 </script>
-<script type="text/javascript" id="MathJax-script" async
-	src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+<script type="text/javascript" id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
 </script>
 {% endblock %}
 
 {% block wiki_header_navlinks %}
 <ul class="navbar-nav mr-auto">
-<li class="nav-item">
-	<a class="nav-link" href="/wiki/otis">About</a>
-</li>
-<li class="nav-item">
-	<a class="nav-link" href="/wiki/units">Units</a>
-</li>
-<li class="nav-item">
-	<a class="nav-link" href="/wiki/notable-problems">Problems</a>
-</li>
-<li class="nav-item">
-	<a class="nav-link" href="/wiki/yearbook">Yearbook</a>
-</li>
-<li class="nav-item">
-	<a class="nav-link" href="/">{% trans "Exit" %}</a>
-</li>
+	<li class="nav-item">
+		<a class="nav-link" href="/wiki/otis">About</a>
+	</li>
+	<li class="nav-item">
+		<a class="nav-link" href="/wiki/units">Units</a>
+	</li>
+	<li class="nav-item">
+		<a class="nav-link" href="/wiki/notable-problems">Problems</a>
+	</li>
+	<li class="nav-item">
+		<a class="nav-link" href="/wiki/yearbook">Yearbook</a>
+	</li>
+	<li class="nav-item">
+		<a class="nav-link" href="/">{% trans "Exit" %}</a>
+	</li>
 </ul>
 
 {% endblock %}
@@ -51,8 +54,8 @@ MathJax = {
 </div>
 <hr />
 <style>
-div.container {
-	max-width: 850px;
-}
+	div.container {
+		max-width: 850px;
+	}
 </style>
 {% endblock %}

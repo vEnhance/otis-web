@@ -2,23 +2,23 @@
 {% load humanize %}
 {% block meter-content %}
 <p>You gain
-<span style="color: {{ meters.diamonds.color }};">{{ meters.diamonds.unit }}</span>
-by finding metaphorical diamonds.
+	<span style="color: {{ meters.diamonds.color }};">{{ meters.diamonds.unit }}</span>
+	by finding metaphorical diamonds.
 </p>
 
 {% if achievements|length > 0 %}
 <div class="list-group">
 	{% for aunlock in achievements %}
-		<div class="list-group-item container">
-			<div class="d-flex justify-content-between">
-				<strong>{{ aunlock.achievement.name }}</strong>
-				<span style="color: {{ meters.diamonds.color }};">{{ aunlock.achievement.diamonds }}{{ meters.diamonds.unit }}</span>
-			</div>
-			{% if aunlock.achievement.image %}
-				<img width="64px" style="float: right;" src="{{ aunlock.achievement.image.url }}" />
-			{% endif %}
-			<p>{{ aunlock.achievement.description }}</p>
+	<div class="list-group-item container">
+		<div class="d-flex justify-content-between">
+			<strong>{{ aunlock.achievement.name }}</strong>
+			<span style="color: {{ meters.diamonds.color }};">{{ aunlock.achievement.diamonds }}{{ meters.diamonds.unit }}</span>
 		</div>
+		{% if aunlock.achievement.image %}
+		<img width="64px" style="float: right;" src="{{ aunlock.achievement.image.url }}" />
+		{% endif %}
+		<p>{{ aunlock.achievement.description }}</p>
+	</div>
 	{% endfor %}
 </div>
 {% else %}
@@ -29,8 +29,8 @@ by finding metaphorical diamonds.
 <p>If you find a diamond, please don't spoil it for others!</p>
 {% if first_achievement %}
 <p>Don't know where to look?<br />
-Here's one to start: <code>{{ first_achievement.code }}</code>.<br />
-See also <a href="{% url "achievements-listing" %}">diamonds leaderboard</a>.
+	Here's one to start: <code>{{ first_achievement.code }}</code>.<br />
+	See also <a href="{% url "achievements-listing" %}">diamonds leaderboard</a>.
 </p>
 {% endif %}
 

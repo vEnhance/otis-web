@@ -3,8 +3,7 @@
 		{{ meter.emoji }}
 	</div>
 	<div class="progress" style="height: 24px;">
-		<div class="progress-bar"
-				style="width: {{ meter.percent }}%;
+		<div class="progress-bar" style="width: {{ meter.percent }}%;
 						background-color: {{ meter.color }};
 						text-align: right;
 						padding-right: 2%;">
@@ -22,7 +21,7 @@
 			<span class="text-muted d-md-none d-lg-inline">
 				/ {{ meter.thresh }}{{ meter.unit }}
 			</span>
-			<span class="d-none d-md-block d-lg-none" style = "color: {{ meter.color }};">
+			<span class="d-none d-md-block d-lg-none" style="color: {{ meter.color }};">
 				{{ meter.total }} / {{ meter.thresh }}{{ meter.unit }}
 			</span>
 		</span>

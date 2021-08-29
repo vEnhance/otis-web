@@ -1,46 +1,46 @@
 <table class="table">
-{% for exam in exams %}
+	{% for exam in exams %}
 	<tr>
 		<td>
 			{% spaceless %}
-				{% if exam.overdue %}
-					☑️
-				{% elif exam.started %}
-					🟢
-				{% else %}
-					🔏
-				{% endif %}
+			{% if exam.overdue %}
+			☑️
+			{% elif exam.started %}
+			🟢
+			{% else %}
+			🔏
+			{% endif %}
 			{% endspaceless %}
 		</td>
 		<td>
 			{% if exam.is_test and exam.started %}
-				<a href="{{exam.get_absolute_url}}">
-					{{exam}}
-				</a>
+			<a href="{{exam.get_absolute_url}}">
+				{{exam}}
+			</a>
 			{% elif not exam.is_test and exam.started %}
-				<a href="{% url "quiz" student.pk exam.pk %}">
-					{{exam}}
-				</a>
+			<a href="{% url "quiz" student.pk exam.pk %}">
+				{{exam}}
+			</a>
 			{% else %}
-				<span class="text-muted">
-					{{ exam }}
-					{% if request.user.is_staff %}
-					<a href="{{exam.get_absolute_url}}">🔍</a>
-					{% endif %}
-				</span>
+			<span class="text-muted">
+				{{ exam }}
+				{% if request.user.is_staff %}
+				<a href="{{exam.get_absolute_url}}">🔍</a>
+				{% endif %}
+			</span>
 			{% endif %}
 		</td>
 
 		{% if exam.overdue %}
-			<td>Ended {{ exam.due_date|date:"DATE_FORMAT" }}</td>
+		<td>Ended {{ exam.due_date|date:"DATE_FORMAT" }}</td>
 		{% elif exam.started %}
-			<td>Due {{ exam.due_date|date:"DATE_FORMAT" }}</td>
+		<td>Due {{ exam.due_date|date:"DATE_FORMAT" }}</td>
 		{% else %}
-			<td>Open {{ exam.start_date|date:"DATE_FORMAT" }} &ndash; {{ exam.due_date|date:"DATE_FORMAT" }}</td>
+		<td>Open {{ exam.start_date|date:"DATE_FORMAT" }} &ndash; {{ exam.due_date|date:"DATE_FORMAT" }}</td>
 		{% endif %}
 	</tr>
 	{% endfor %}
 </table>
 {% comment %}
-	vim: ft=htmldjango
+vim: ft=htmldjango
 {% endcomment %}

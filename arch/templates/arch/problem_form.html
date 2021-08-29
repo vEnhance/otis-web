@@ -10,7 +10,7 @@ We hope you enjoy your visit.
 <h2>Find problem</h2>
 
 <div class="mathjax_ignore">
-{% include "generic-form.html" with form=lookup_form target=lookup_url submit_name="Lookup" btn_class="btn-primary" %}
+	{% include "generic-form.html" with form=lookup_form target=lookup_url submit_name="Lookup" btn_class="btn-primary" %}
 </div>
 
 <h2>New problem</h2>
@@ -18,19 +18,19 @@ We hope you enjoy your visit.
 {% include "generic-form.html" with submit_name="Create new problem" %}
 
 <p>All edits are tracked by timestamp and username,
-so if for some reason you need to rewind some edits,
-please contact a staff member for assistance.</p>
+	so if for some reason you need to rewind some edits,
+	please contact a staff member for assistance.</p>
 
 <hr />
 
 <h2>Statistics</h2>
 <p>
-As of {% now "D, d M Y" %}, ARCH has
-<ul>
-	<li>{{ num_problems }} problems written</li>
-	<li>{{ num_hints }} hints written</li>
-</ul>
-Add more hints to make ARCH more useful to other students!
+	As of {% now "D, d M Y" %}, ARCH has
+	<ul>
+		<li>{{ num_problems }} problems written</li>
+		<li>{{ num_hints }} hints written</li>
+	</ul>
+	Add more hints to make ARCH more useful to other students!
 </p>
 
 <hr />
@@ -42,29 +42,29 @@ To be written
 
 {% block scripts %}
 <script type="text/javascript">
-$(document).ready(function() {
-	$("#id_lookup_problem").children("option").each(function () {
-		if (!($(this).attr('value'))) {
-			return;
-		}
-		const value = $(this).attr('value'); // is a PID
-		const source = $(this).attr('data-source');
-		const description = $(this).attr('data-description');
-		if (source) {
-			$(this).replaceWith(
-				`<optgroup label="${source}">` +
-				`<option value="${value}">[${value}] ${description}</option>` +
-				`</optgroup>`
-			);
-		} else {
-			$(this).html(`<option value="${value}">[${value}] ${description}</option>`);
-		}
+	$(document).ready(function() {
+		$("#id_lookup_problem").children("option").each(function() {
+			if (!($(this).attr('value'))) {
+				return;
+			}
+			const value = $(this).attr('value'); // is a PID
+			const source = $(this).attr('data-source');
+			const description = $(this).attr('data-description');
+			if (source) {
+				$(this).replaceWith(
+					`<optgroup label="${source}">` +
+					`<option value="${value}">[${value}] ${description}</option>` +
+					`</optgroup>`
+				);
+			} else {
+				$(this).html(`<option value="${value}">[${value}] ${description}</option>`);
+			}
+		});
+		$("#id_lookup_problem").chosen({
+			placeholder_text: "...",
+			width: "99%",
+			search_contains: true,
+		});
 	});
-	$("#id_lookup_problem").chosen({
-		placeholder_text : "...",
-		width: "99%",
-		search_contains: true,
-	});
-});
 </script>
 {% endblock %}

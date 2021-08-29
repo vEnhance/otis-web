@@ -4,7 +4,7 @@
 {% block layout-content %}
 
 <p><a href="{% url "portal" student.id %}">
-	⬅️ Back to portal</a></p>
+		⬅️ Back to portal</a></p>
 <div class="alert alert-info">
 	If you have problems to suggest for this unit,
 	please use the <a href="{% url "suggest-new" student.id %}">problem suggestion form</a>.
@@ -13,12 +13,11 @@
 {% if pending_psets %}
 <h2>Pending submissions</h2>
 <div class="list-group">
-{% for pset in pending_psets %}
-	<a href="{{pset.get_absolute_url}}"
-		class="list-group-item list-group-item-action">
+	{% for pset in pending_psets %}
+	<a href="{{pset.get_absolute_url}}" class="list-group-item list-group-item-action">
 		{{ pset.unit }}, submitted {{ pset.upload.created_at|naturaltime }}
 	</a>
-{% endfor %}
+	{% endfor %}
 </div>
 {% endif %}
 
@@ -29,12 +28,11 @@
 <h2>Approved submissions</h2>
 {% if approved_psets %}
 <div class="list-group">
-{% for pset in approved_psets %}
-	<a href="{{pset.get_absolute_url}}"
-		class="list-group-item list-group-item-action">
+	{% for pset in approved_psets %}
+	<a href="{{pset.get_absolute_url}}" class="list-group-item list-group-item-action">
 		{{ pset.unit }}, submitted {{ pset.upload.created_at|naturaltime }}
 	</a>
-{% endfor %}
+	{% endfor %}
 </div>
 {% else %}
 <p>You haven't submitted any problem sets yet this year.</p>
@@ -44,8 +42,8 @@
 
 {% block scripts %}
 <script type="text/javascript">
-$(() => {
-	$("select").chosen();
-});
+	$(() => {
+		$("select").chosen();
+	});
 </script>
 {% endblock %}

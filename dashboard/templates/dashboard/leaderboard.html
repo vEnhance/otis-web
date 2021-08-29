@@ -6,45 +6,45 @@
 {% load humanize %}
 
 <table id="students" class="table tablesorter">
-<thead>
-<tr>
-	<th>Rk</th>
-	<th style="min-width:35%;">Level achieved</th>
-	<th>Name</th>
-	<th>♣️</th>
-	<th>♥️</th>
-	<th>♠️</th>
-	<th>♦️</th>
-</tr>
-</thead>
-<tbody>
-{% for row in rows %}
-<tr> {# begin table row for this student #}
-	<td>
-			<sup>{{ forloop.counter|ordinal }}</sup>
-	</td>
-	<td>
-		<strong>Lv {{ row.level }}</strong>
-		<i>{{ row.level_name }}</i>
-	</td>
-	<td><a href="{% url "stats" row.id %}">
-			{{ row.name }}</a>
-	</td>
-	<td>{{ row.clubs }}</td>
-	<td>{{ row.hearts|floatformat:"0" }}</td>
-	<td>{{ row.spades }}</td>
-	<td>{{ row.diamonds }}</td>
-</tr> {# end table row for this row #}
-{% endfor %}
-</tbody>
+	<thead>
+		<tr>
+			<th>Rk</th>
+			<th style="min-width:35%;">Level achieved</th>
+			<th>Name</th>
+			<th>♣️</th>
+			<th>♥️</th>
+			<th>♠️</th>
+			<th>♦️</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for row in rows %}
+		<tr> {# begin table row for this student #}
+			<td>
+				<sup>{{ forloop.counter|ordinal }}</sup>
+			</td>
+			<td>
+				<strong>Lv {{ row.level }}</strong>
+				<i>{{ row.level_name }}</i>
+			</td>
+			<td><a href="{% url "stats" row.id %}">
+					{{ row.name }}</a>
+			</td>
+			<td>{{ row.clubs }}</td>
+			<td>{{ row.hearts|floatformat:"0" }}</td>
+			<td>{{ row.spades }}</td>
+			<td>{{ row.diamonds }}</td>
+		</tr> {# end table row for this row #}
+		{% endfor %}
+	</tbody>
 </table>
 {% endblock %}
 
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/tablesorter@2.31.3/dist/js/jquery.tablesorter.combined.min.js" integrity="sha256-ounC3wWwZ9iBUyF8x1+X+REppGjK+p6/+w+ky1MGoMM=" crossorigin="anonymous"></script>
 <script type="text/javascript">
-$(() => {
+	$(() => {
 		$("#students").tablesorter();
-});
+	});
 </script>
 {% endblock %}

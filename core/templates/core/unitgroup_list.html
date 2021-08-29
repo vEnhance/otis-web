@@ -4,7 +4,7 @@
 {% block layout-content %}
 <p>This list is sorted by olympiad category, then alphabetically by name.</p>
 <p>Each topic has one or more units which is designated
-by a three-letter code.</p>
+	by a three-letter code.</p>
 <ul>
 	<li>The first letter of the code represents the difficulty.
 		B is the easiest (problems range from sub-IMO level to IMO2),
@@ -13,7 +13,7 @@ by a three-letter code.</p>
 		There is some grey room in this department.</li>
 	<li>The second letter repeats the olympiad category.</li>
 	<li>The third letter is a version identifier (either W, X, or Y).
-	Many topics have multiple versions so they can be repeated in different years.</li>
+		Many topics have multiple versions so they can be repeated in different years.</li>
 </ul>
 <p>This page was last updated {% now "r" %}.</p>
 
@@ -21,8 +21,8 @@ by a three-letter code.</p>
 
 {% for subject, item_list in grouped_unit_list %}
 <h2>{{ subject }}</h2>
-	{% for unitgroup in item_list %}
-	<p>
+{% for unitgroup in item_list %}
+<p>
 	<b class="text-info">
 		<a href="{{unitgroup.get_wiki_link}}">{{ unitgroup.name }}</a>
 	</b>
@@ -30,7 +30,7 @@ by a three-letter code.</p>
 	{% for unit in unitgroup.unit_set.all %} {{ unit.code }}{% endfor %}].
 	<br />
 	{{ unitgroup.description }}</p>
-	{% endfor %}
+{% endfor %}
 <hr />
 {% endfor %}
 {% endblock %}

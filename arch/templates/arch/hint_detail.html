@@ -5,17 +5,17 @@
 {% block layout-content %}
 <p>Here is your hint:</p>
 <div class="alert alert-info">
-{{ hint.content }}
+	{{ hint.content }}
 </div>
 
 <ul>
 	<li><a href="{{ hint.problem.get_absolute_url }}">
-		Back to {{ hint.problem.get_source }}</a>
+			Back to {{ hint.problem.get_source }}</a>
 </ul>
 <hr />
 <ul>
-<li><a href="{% url "hint-create" hint.puid %}">Add another hint</a></li>
-<li><a href="{% url "hint-update" hint.puid hint.number %}">Update hint</a></li>
-<li><a href="{% url "hint-delete" hint.puid hint.number %}">Delete hint</a></li>
-</li>
-{% endblock %}
+	<li><a href="{% url "hint-create" hint.puid %}">Add another hint</a></li>
+	<li><a href="{% url "hint-update" hint.puid hint.number %}">Update hint</a></li>
+	<li><a href="{% url "hint-delete" hint.puid hint.number %}">Delete hint</a></li>
+	</li>
+	{% endblock %}
