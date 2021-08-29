@@ -41,6 +41,7 @@ class PSetFactory(DjangoModelFactory):
 		lambda o: UploadedFileFactory.create(benefactor=o.student, unit=o.unit)
 	)
 	next_unit_to_unlock = SubFactory(UnitFactory)
+	approved = True
 
 
 class ProblemSuggestionFactory(DjangoModelFactory):
