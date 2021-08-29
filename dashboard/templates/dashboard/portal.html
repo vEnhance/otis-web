@@ -1,17 +1,26 @@
 {% extends 'layout.html' %}
 {% load static %}
+{% load humanize %}
 
 {% block layout-content %}
 {% if request.user.is_staff %}
 <div class="alert alert-secondary pb-0 alert-dismissible fade show">
+	{% load account socialaccount %}
+	{% get_social_accounts student.user as linked %}
+
 	<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-	Notes for staff:
-	<ul>
-		<li>Track: {{ student.get_track_display }}</li>
-		<li>Assistant: {{ student.assistant.shortname|default:"None" }}</li>
-		<li>Username: <tt>{{student.user.username}}</tt>
-		<li>Email: <tt>{{student.user.email}}</tt>
-	</ul>
+	<table class="table">
+		<tr>
+			<td>{{ student.get_track_display }}</td>
+			<td><code>{{student.user.username}}</code></td>
+			<td>{{ student.user.last_login|naturaltime }}</td>
+		</tr>
+		<tr>
+			<td>{{ student.assistant.shortname|default:"No assistant" }}</td>
+			<td><code>{{student.user.email}}</code></td>
+			<td><code>{{ linked.discord.0.get_provider_account|default:"No Discord" }}</code></td>
+		</tr>
+	</table>
 </div>
 {% endif %}
 
