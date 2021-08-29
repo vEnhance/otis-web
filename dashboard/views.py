@@ -199,9 +199,7 @@ def stats(request: HttpRequest, student_id: int) -> HttpResponse:
 		form = DiamondsForm(request.POST)
 		if form.is_valid():
 			code = form.cleaned_data['code']
-			if student.semester.active is False:
-				messages.warning(request, "Not an active semester.")
-			elif AchievementUnlock.objects.filter(user=student.user, achievement__code=code).exists():
+			if AchievementUnlock.objects.filter(user=student.user, achievement__code=code).exists():
 				messages.warning(request, "You already earned this achievement!")
 			else:
 				try:

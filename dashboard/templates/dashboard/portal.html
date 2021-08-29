@@ -103,7 +103,7 @@
 	</li>
 </ol>
 <hr />
-{% elif not student.semester.uses_legacy_pset_system %}
+{% else %}
 <h1>Level {{ level_number }} &mdash;
 	<a href="{% url "stats" student.id %}">🏅{{ level_name }}</a></h1>
 
