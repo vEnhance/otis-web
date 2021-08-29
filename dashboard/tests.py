@@ -14,18 +14,26 @@ class TestMeters(OTISTestCase):
 		self.login(alice)
 		self.assertGet20X('portal', alice.pk)
 
-	def test_meter_update(self):
+	def setup_alice_example(self) -> Student:
 		alice = StudentFactory.create()
 		PSetFactory.create(student=alice, clubs=120, hours=37, approved=True)
 		PSetFactory.create(student=alice, clubs=180, hours=47, approved=True)
 		PSetFactory.create(student=alice, clubs=240, hours=87, approved=False)
-		AchievementUnlockFactory.create(user=alice.user, achievement__diamonds=4)
-		AchievementUnlockFactory.create(user=alice.user, achievement__diamonds=7)
+		AchievementUnlockFactory.create(
+			user=alice.user, achievement__diamonds=4, achievement__name="Feel the fours"
+		)
+		AchievementUnlockFactory.create(
+			user=alice.user, achievement__diamonds=7, achievement__name="Lucky number"
+		)
 		ExamAttemptFactory.create(student=alice, score=3)
 		ExamAttemptFactory.create(student=alice, score=4)
-		QuestCompleteFactory.create(student=alice, spades=5)
+		QuestCompleteFactory.create(student=alice, spades=5, title="Not problem six")
+		LevelFactory.reset_sequence(1)
 		LevelFactory.create_batch(size=36)
+		return alice
 
+	def test_meter_update(self):
+		alice = self.setup_alice_example()
 		data = get_meter_update(alice)
 		self.assertEqual(data['meters']['clubs'].level, 17)
 		self.assertEqual(data['meters']['clubs'].value, 300)
@@ -37,6 +45,34 @@ class TestMeters(OTISTestCase):
 		self.assertEqual(data['meters']['spades'].value, 12)
 		self.assertEqual(data['level_number'], 32)
 		self.assertEqual(data['level_name'], Level.objects.get(threshold=32).name)
+
+	def test_portal_stats(self):
+		alice = self.setup_alice_example()
+		self.login(alice)
+		resp = self.get('portal', alice.pk)
+		self.assertContains(resp, Level.objects.get(threshold=32).name)
+		self.assertContains(resp, '300♣')
+		self.assertContains(resp, '84♥')
+		self.assertContains(resp, '11◆')
+		self.assertContains(resp, '12♠')
+
+	def test_stats_page(self):
+		alice = self.setup_alice_example()
+		self.login(alice)
+		bob = StudentFactory.create()
+		AchievementUnlockFactory.create(user=bob.user, achievement__name="FAIL THIS TEST")
+		QuestCompleteFactory.create(student=bob, title="FAIL THIS TEST")
+
+		resp = self.get('stats', alice.pk)
+		self.assertContains(resp, Level.objects.get(threshold=32).name)
+		self.assertContains(resp, '300♣')
+		self.assertContains(resp, '84♥')
+		self.assertContains(resp, '11◆')
+		self.assertContains(resp, '12♠')
+		self.assertContains(resp, 'Feel the fours')
+		self.assertContains(resp, 'Not problem six')
+		self.assertContains(resp, 'Lucky number')
+		self.assertNotContains(resp, 'FAIL THIS TEST')
 
 	def test_multi_student_annotate(self):
 		alice = StudentFactory.create()

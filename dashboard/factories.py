@@ -72,7 +72,7 @@ class LevelFactory(DjangoModelFactory):
 		model = Level
 
 	threshold = Sequence(lambda n: n + 1)
-	name = UniqueFaker('sentence')
+	name = UniqueFaker('bs')
 
 
 class AchievementUnlockFactory(DjangoModelFactory):
@@ -89,3 +89,4 @@ class QuestCompleteFactory(DjangoModelFactory):
 
 	student = SubFactory(StudentFactory)
 	title = Faker('job')
+	spades = FuzzyChoice(list(range(1, 10)))

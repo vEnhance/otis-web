@@ -28,13 +28,13 @@
 				</b>
 			</td>
 			<td>
-				{{ quest.summary }}
+				{{ quest.title }}
 			</td>
 			<td>
 				{{ quest.timestamp|naturaltime }}
 			</td>
 		</tr>
-		{% endif %}
+		{% endfor %}
 		{% for attempt in quiz_data %}
 		<tr>
 			<td style="color:{{ meters.spades.color }};">
