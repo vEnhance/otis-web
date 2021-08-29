@@ -109,7 +109,7 @@ class Meter:
 		)
 
 
-def _get_meter_update(student: Student) -> Dict[str, Any]:
+def get_meter_update(student: Student) -> Dict[str, Any]:
 	psets = PSet.objects.filter(student=student, approved=True, eligible=True)
 	pset_data = psets.aggregate(Sum('clubs'), Sum('hours'))
 	total_diamonds = AchievementUnlock.objects.filter(user=student.user).aggregate(
@@ -180,7 +180,7 @@ def portal(request: HttpRequest, student_id: int) -> HttpResponse:
 		} for c in campaigns
 	]
 	context['num_sem_download'] = SemesterDownloadFile.objects.filter(semester=semester).count()
-	context.update(_get_meter_update(student))
+	context.update(get_meter_update(student))
 	return render(request, "dashboard/portal.html", context)
 
 
@@ -217,7 +217,7 @@ def stats(request: HttpRequest, student_id: int) -> HttpResponse:
 		context['first_achievement'] = Achievement.objects.get(pk=1)
 	except Achievement.DoesNotExist:
 		pass
-	_meter_info = _get_meter_update(student)
+	_meter_info = get_meter_update(student)
 	context.update(_meter_info)
 	level_number = _meter_info['level_number']
 	obtained_levels = Level.objects.filter(threshold__lte=level_number).order_by('-threshold')

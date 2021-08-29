@@ -7,10 +7,15 @@ from factory.fuzzy import FuzzyChoice
 from otisweb.tests import UniqueFaker
 from roster.factories import StudentFactory
 
+from dashboard.models import Achievement, AchievementUnlock, Level, ProblemSuggestion, PSet, SemesterDownloadFile, UploadedFile  # NOQA
+
 User = get_user_model()
 
 
 class UploadedFileFactory(DjangoModelFactory):
+	class Meta:
+		model = UploadedFile
+
 	benefactor = SubFactory(StudentFactory)
 	owner = LazyAttribute(lambda o: o.benefactor.user)
 	category = 'psets'
@@ -19,11 +24,17 @@ class UploadedFileFactory(DjangoModelFactory):
 
 
 class SemesterDownloadFileFactory(DjangoModelFactory):
+	class Meta:
+		model = SemesterDownloadFile
+
 	semester = SubFactory(SemesterFactory)
 	content = FileField(filename='announcement.txt')
 
 
 class PSetFactory(DjangoModelFactory):
+	class Meta:
+		model = PSet
+
 	student = SubFactory(StudentFactory)
 	unit = SubFactory(UnitFactory)
 	upload = LazyAttribute(
@@ -33,6 +44,9 @@ class PSetFactory(DjangoModelFactory):
 
 
 class ProblemSuggestionFactory(DjangoModelFactory):
+	class Meta:
+		model = ProblemSuggestion
+
 	student = SubFactory(StudentFactory)
 	unit = SubFactory(UnitFactory)
 	weight = FuzzyChoice([2, 3, 5, 9])
@@ -43,6 +57,9 @@ class ProblemSuggestionFactory(DjangoModelFactory):
 
 
 class AchievementFactory(DjangoModelFactory):
+	class Meta:
+		model = Achievement
+
 	code = UniqueFaker('bban')
 	name = Faker('job')
 	image = ImageField(filename='achievement_icon.png')
@@ -50,10 +67,16 @@ class AchievementFactory(DjangoModelFactory):
 
 
 class LevelFactory(DjangoModelFactory):
+	class Meta:
+		model = Level
+
 	threshold = Sequence(lambda n: n + 1)
-	name = Faker('job')
+	name = UniqueFaker('sentence')
 
 
 class AchievementUnlockFactory(DjangoModelFactory):
+	class Meta:
+		model = AchievementUnlock
+
 	user = SubFactory(UserFactory)
 	achievement = SubFactory(AchievementFactory)

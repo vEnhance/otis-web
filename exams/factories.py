@@ -1,4 +1,3 @@
-from core.factories import SemesterFactory
 from factory.declarations import LazyAttribute, Sequence, SubFactory
 from factory.django import DjangoModelFactory
 from roster.factories import StudentFactory
@@ -10,7 +9,7 @@ class ExamFactory(DjangoModelFactory):
 	class Meta:
 		model = PracticeExam
 
-	semester = SubFactory(SemesterFactory)
+	family = 'Waltz'
 	number = Sequence(lambda n: n + 1)
 	is_test = False
 
