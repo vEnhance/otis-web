@@ -168,9 +168,11 @@ class AchievementAdmin(ImportExportModelAdmin):
 class AchievementUnlockAdmin(admin.ModelAdmin):
 	list_display = ('user', 'achievement', 'timestamp')
 	list_filter = ('achievement__active', )
+	autocomplete_fields = ('user', )
 
 
 @admin.register(QuestComplete)
 class QuestCompleteAdmin(admin.ModelAdmin):
 	list_display = ('pk', 'title', 'student', 'spades', 'timestamp')
+	autocomplete_fields = ('student', )
 	list_filter = ('student__semester', )
