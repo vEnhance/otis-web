@@ -15,6 +15,5 @@ venv/
 .venv
 evanchen-cc-*.json
 env
-poetry.lock
 htmlcov/*
 .coverage
