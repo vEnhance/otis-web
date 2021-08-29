@@ -249,6 +249,12 @@ class AchievementUnlock(models.Model):
 	def __str__(self) -> str:
 		return self.timestamp.strftime('%c')
 
+	class Meta:
+		unique_together = (
+			'user',
+			'achievement',
+		)
+
 
 class QuestComplete(models.Model):
 	student = models.ForeignKey(
