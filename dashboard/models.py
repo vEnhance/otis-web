@@ -229,7 +229,7 @@ class Achievement(models.Model):
 
 class Level(models.Model):
 	threshold = models.IntegerField(unique=True, help_text="The number of the level")
-	name = models.CharField(max_length=128, unique=True, help_text="The name of the level")
+	name = models.CharField(max_length=128, help_text="The name of the level")
 
 	def __str__(self):
 		return f'Level {self.threshold}: {self.name}'
