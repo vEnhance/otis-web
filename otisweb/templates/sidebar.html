@@ -5,27 +5,31 @@
 {% else %}
 <p><a href="{% url "account_login" %}">(login)</a></p>
 {% endif %}
-<hr />
 
 {% if student %}
 <p><b><a href="{% url "portal" student.id %}">{{ student.name }}</a></b></p>
 <p><i>{{ student.semester }}</i></p>
 {% endif %}
 
+<hr />
+
 {% if request.user.is_authenticated %}
+{% spaceless %}
 <div>
-	<a alt="Home" class="emoji-link" href="{% url "index" %}">🏠</a>
-	<a alt="Past" class="emoji-link" href="{% url "past" %}">🕗</a>
-	<a alt="ARCH" class="emoji-link" href="{% url "arch-index" %}">🗼</a>
-	<a alt="Suggest" class="emoji-link" href="{% url "suggest-new" %}">💡</a>
+	<a alt="Home" class="emoji-link" href="{% url "index" %}">🏠</a>&nbsp;
+	<a alt="Past" class="emoji-link" href="{% url "past" %}">🕗</a>&nbsp;
+	<a alt="ARCH" class="emoji-link" href="{% url "arch-index" %}">🗼</a>&nbsp;
+	<a alt="Suggest" class="emoji-link" href="{% url "suggest-new" %}">💡</a>&nbsp;
 	<a alt="Wiki" class="emoji-link" href="{% url "wiki:root" %}">🎮</a>
 </div>
+<br />
 <div>
-	<a alt="Catalog" class="emoji-link" href="{% url "synopsis" %}">🗃️</a>
-	<a alt="Announcements" class="emoji-link" href="https://us5.campaign-archive.com/home/?u=5c818a0be2f35ee90344a471e&id=808c50e8c9">📢</a>
+	<a alt="Catalog" class="emoji-link" href="{% url "synopsis" %}">🗃️</a>&nbsp;
+	<a alt="Announcements" class="emoji-link" href="https://us5.campaign-archive.com/home/?u=5c818a0be2f35ee90344a471e&id=808c50e8c9">📢</a>&nbsp;
 	<a alt="Security" class="emoji-link" href="{% url "socialaccount_connections" %}">🔐</a>
 	{# <a alt="Settings" class="emoji-link" href="{% url "settings" %}">⚙️</a> #}
 </div>
+{% endspaceless %}
 
 
 {% if request.user.is_staff %}
