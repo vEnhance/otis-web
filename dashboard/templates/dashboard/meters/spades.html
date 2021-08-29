@@ -3,12 +3,12 @@
 {% block meter-content %}
 <p>You gain
 	<span style="color:{{meters.spades.color}};">{{ meters.spades.unit }}</span>
-	by scoring points on
-	<a href="https://web.evanchen.cc/usemo.html">USEMO</a> and OTIS quizzes.</p>
-
-{% if student.usemo_score is not None %}
-<p>On the USEMO, you scored {{ student.usemo_score }}.</p>
-{% endif %}
+	by scoring points on quizzes and completing special quests.
+	Special quests include competing in or grading for the
+	<a href="https://web.evanchen.cc/usemo.html">USEMO</a>,
+	and contributing on GitHub
+	<a href="https://github.com/vEnhance/otis-web/blob/main/CONTRIBUTING.mkd">GitHub</a>.
+</p>
 
 {% if quiz_data or quest_data %}
 <table class="table table-sm">
