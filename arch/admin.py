@@ -1,11 +1,11 @@
 from django.contrib import admin
 from reversion.admin import VersionAdmin
 
-from .models import Problem, Hint
+from .models import Hint, Problem
 
 
 class HintInline(admin.TabularInline):
-	model = Hint
+	model = Hint  # type: ignore
 	fields = ('number', 'keywords', 'content')
 	extra = 0
 

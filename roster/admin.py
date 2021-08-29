@@ -35,7 +35,7 @@ class AssistantIEResource(RosterResource):
 
 
 class StudentInline(admin.TabularInline):
-	model = Student
+	model = Student  # type: ignore
 	fk_name = "assistant"
 	fields = (
 		'name',
@@ -185,7 +185,7 @@ class UnlistedInline(admin.TabularInline):
 
 
 class InvoiceInline(admin.StackedInline):
-	model = Invoice
+	model = Invoice  # type: ignore
 	fields = (
 		'preps_taught',
 		'hours_taught',

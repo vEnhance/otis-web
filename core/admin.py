@@ -2,7 +2,7 @@ from django.contrib import admin
 from import_export import fields, resources, widgets
 from import_export.admin import ImportExportModelAdmin
 
-from .models import Semester, UnitGroup, Unit
+from .models import Semester, Unit, UnitGroup
 
 # Register your models here.
 
@@ -75,7 +75,7 @@ class UnitAdmin(ImportExportModelAdmin):
 
 
 class UnitInline(admin.TabularInline):
-	model = Unit
+	model = Unit  # type: ignore
 	fields = (
 		'code',
 		'position',
