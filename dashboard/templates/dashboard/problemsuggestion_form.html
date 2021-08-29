@@ -3,10 +3,10 @@
 {% block layout-content %}
 
 <p><a href="{% url "suggest-list" student.id %}">
-	⬅️ List all suggestions you've made.</a></p>
+		⬅️ List all suggestions you've made.</a></p>
 
 <p>Thank you for suggesting problems for OTIS!
-Your contributions are appreciated.</p>
+	Your contributions are appreciated.</p>
 
 <p>Some legalese notes:</p>
 <ul>
@@ -15,7 +15,7 @@ Your contributions are appreciated.</p>
 		but let's be real, there's at least 200 problems on my
 		someone-told-me-to-do-it list.</li>
 	<li><strong>You cannot copy the wording of
-		someone else's solution</strong>, at least not without permission.
+			someone else's solution</strong>, at least not without permission.
 		However, it's okay if the ideas in the solution are not your own,
 		or someone else found an isomorphic solution to yours.
 	</li>
@@ -27,97 +27,146 @@ Your contributions are appreciated.</p>
 </ul>
 
 <p>One quick word of advice: if you are suggesting a problem
-from a fairly well-known source (e.g. IMO Shortlist),
-there is a decent chance Evan might have done the problem already
-and placed it on some unit. So it might be worth double-checking first.</p>
+	from a fairly well-known source (e.g. IMO Shortlist),
+	there is a decent chance Evan might have done the problem already
+	and placed it on some unit. So it might be worth double-checking first.</p>
 
 {% load crispy_forms_tags %}
 <form action="{{ request.path }}" method="post" class="form">
-{% csrf_token %}
+	{% csrf_token %}
 
-{% if form.non_field_errors %}
-<div class="alert alert-danger" role="alert">
-	<p>The following errors were thrown:</p>
-	<ul>
-	{% for err in form.non_field_errors %}
-	<li>{{ err }}</li>
-	{% endfor %}
-	</ul>
-</div>
-{% endif %}
+	{% if form.non_field_errors %}
+	<div class="alert alert-danger" role="alert">
+		<p>The following errors were thrown:</p>
+		<ul>
+			{% for err in form.non_field_errors %}
+			<li>{{ err }}</li>
+			{% endfor %}
+		</ul>
+	</div>
+	{% endif %}
 
-<table class="table form-table">
-<tr>
-<td> {{ form.weight|as_crispy_field }} </td>
-<td> {{ form.unit|as_crispy_field }} </td>
-</tr>
-<tr><td colspan="2">{{ form.source|as_crispy_field }}</td></tr>
-<tr><td colspan="2">{{ form.description|as_crispy_field }}</td></tr>
-<tr><td colspan="2">{{ form.statement|as_crispy_field }}</td></tr>
-<tr><td colspan="2"><div id="statement_render"></div></td></tr>
-<tr><td colspan="2">{{ form.solution|as_crispy_field }}</td></tr>
-<tr><td colspan="2"><div id="solution_render"></div></td></tr>
-<tr><td colspan="2">{{ form.comments|as_crispy_field }}</td></tr>
-<tr><td colspan="2">{{ form.acknowledge|as_crispy_field }}</td></tr>
-<tr>
-	<td><button type="submit" class="btn btn-success">Submit</button></td>
-	<td>
-		<button id="render-enable" class="btn btn-primary">TeX On</button>
-		<button id="render-disable" class="btn btn-danger disabled">TeX Off</button>
-	</td>
-</tr>
-</table>
+	<table class="table form-table">
+		<tr>
+			<td> {{ form.weight|as_crispy_field }} </td>
+			<td> {{ form.unit|as_crispy_field }} </td>
+		</tr>
+		<tr>
+			<td colspan="2">{{ form.source|as_crispy_field }}</td>
+		</tr>
+		<tr>
+			<td colspan="2">{{ form.description|as_crispy_field }}</td>
+		</tr>
+		<tr>
+			<td colspan="2">{{ form.statement|as_crispy_field }}</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<div id="statement_render"></div>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">{{ form.solution|as_crispy_field }}</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<div id="solution_render"></div>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">{{ form.comments|as_crispy_field }}</td>
+		</tr>
+		<tr>
+			<td colspan="2">{{ form.acknowledge|as_crispy_field }}</td>
+		</tr>
+		<tr>
+			<td><button type="submit" class="btn btn-success">Submit</button></td>
+			<td>
+				<button id="render-toggle" class="btn btn-info">Disable instant TeX</button>
+			</td>
+		</tr>
+	</table>
 
-{% endblock %}
+	{% endblock %}
 
-{% block css %}
-<style type="text/css">
-#solution_render, #statement_render {
-	color: blue;
-	font-family: sans-serif;
-}
-</style>
-{% endblock %}
-{% block scripts %}
-<script type="text/javascript">
-$(document).ready(function() {
-	$("#id_unit").chosen();
-	var render_enabled = true;
-	$("#render-enable").click(function (e) {
-		e.preventDefault();
-		render_enabled = true;
-		$("#render-enable").removeClass('disabled');
-		$("#render-disable").addClass('disabled');
-		render_statement();
-		render_solution();
-	});
-	$("#render-disable").click(function (e) {
-		e.preventDefault();
-		render_enabled = false;
-		$("#render-enable").addClass('disabled');
-		$("#render-disable").removeClass('disabled');
-		$("#statement_render").html('');
-		$("#solution_render").html('');
-	});
+	{% block css %}
+	<style type="text/css">
+		#solution_render,
+		#statement_render {
+			color: blue;
+			font-family: sans-serif;
+		}
+	</style>
+	{% endblock %}
+	{% block scripts %}
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#id_unit").chosen();
+			let autorender_enabled = true;
+			let render_enabled = true;
+			let mathjaxLoaded = false;
 
-	function render_statement() {
-		if (!render_enabled) return;
-		MathJax.Hub.Queue(
-			function () {$("#statement_render").text($("#id_statement").val());},
-			["Typeset", MathJax.Hub, 'statement_render'],
-		);
-	}
-	function render_solution() {
-		if (!render_enabled) return;
-		MathJax.Hub.Queue(
-			function () {$("#solution_render").text($("#id_solution").val());},
-			["Typeset", MathJax.Hub, 'solution_render'],
-		);
-	}
-	$("#id_statement").blur(render_statement);
-	$("#id_solution").blur(render_solution);
-	render_statement();
-	render_solution();
-});
-</script>
-{% endblock %}
+			$("#render-toggle").click(function(e) {
+				e.preventDefault();
+				if (render_enabled && autorender_enabled) {
+					render_enabled = true;
+					autorender_enabled = false;
+					$("#render-toggle")
+						.addClass("btn-danger")
+						.removeClass("btn-info")
+						.text("Turn off LaTeX");
+				} else if (render_enabled) {
+					render_enabled = false;
+					$("#render-toggle")
+						.addClass("btn-primary")
+						.removeClass("btn-danger")
+						.text("Enable instant-TeX");
+				} else {
+					render_enabled = true;
+					autorender_enabled = true;
+					$("#render-toggle")
+						.addClass("btn-info")
+						.removeClass("btn-primary")
+						.text("Disable instant-TeX");
+				}
+				render_statement();
+				render_solution();
+			});
+
+			$("#id_statement").on("input", (e) => {
+				if (!autorender_enabled || !render_enabled) return;
+				$("#statement_render").text(e.target.value);
+				MathJax.typesetPromise([document.querySelector("#statement_render")]);
+			});
+
+			$("#id_solution").on("input", (e) => {
+				if (!autorender_enabled || !render_enabled) return;
+				$("#solution_render").text(e.target.value);
+				MathJax.typesetPromise([document.querySelector("#solution_render")]);
+			});
+
+			function render_statement() {
+				if (!render_enabled) return;
+				if (!mathjaxLoaded) console.warn("MathJax has not finished loading yet.");
+				$("#statement_render").text($("#id_statement").val());
+				MathJax.typeset([document.querySelector("#statement_render")]);
+			}
+
+			function render_solution() {
+				if (!render_enabled) return;
+				if (!mathjaxLoaded) console.warn("MathJax has not finished loading yet.");
+				$("#solution_render").text($("#id_solution").val());
+				MathJax.typeset([document.querySelector("#solution_render")]);
+			}
+
+			$("#id_statement").blur(render_statement);
+			$("#id_solution").blur(render_solution);
+
+			window.MathJaxLoaded.then(() => {
+				mathjaxLoaded = true;
+				render_statement();
+				render_solution();
+			});
+		});
+	</script>
+	{% endblock %}
