@@ -33,7 +33,7 @@ from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from exams.models import ExamAttempt, PracticeExam
 from mailchimp3 import MailChimp
 from roster.models import Student, StudentRegistration, UnitInquiry
-from roster.utils import can_edit, can_view, get_student_by_id, get_visible_students  # NOQA
+from roster.utils import can_edit, can_view, get_student_by_id, get_visible_students, infer_student  # NOQA
 from sql_util.aggregates import SubqueryCount, SubquerySum
 from sql_util.utils import SubqueryAggregate
 
@@ -518,7 +518,10 @@ class ProblemSuggestionCreate(LoginRequiredMixin, CreateView):
 		return initial
 
 	def form_valid(self, form: BaseModelForm):
-		form.instance.student = get_student_by_id(self.request, self.kwargs['student_id'])
+		if 'student_id' in self.kwargs:
+			form.instance.student = get_student_by_id(self.request, self.kwargs['student_id'])
+		else:
+			form.instance.student = infer_student(self.request)
 		messages.success(
 			self.request,
 			"Successfully submitted suggestion! Thanks much :) You can add more using the form below."
@@ -530,7 +533,10 @@ class ProblemSuggestionCreate(LoginRequiredMixin, CreateView):
 
 	def get_context_data(self, **kwargs: Any):
 		context = super().get_context_data(**kwargs)
-		context['student'] = get_student_by_id(self.request, self.kwargs['student_id'])
+		if 'student_id' in self.kwargs:
+			context['student'] = get_student_by_id(self.request, self.kwargs['student_id'])
+		else:
+			context['student'] = infer_student(self.request)
 		return context
 
 

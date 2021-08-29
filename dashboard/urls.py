@@ -17,6 +17,7 @@ urlpatterns = [
 	path(r'past/', views.past, name='past'),
 	path(r'past/<int:semester>/', views.past, name='past'),
 	path(r'index/', views.index, name='index'),
+	path(r'suggest/new', views.ProblemSuggestionCreate.as_view(), name='suggest-new'),
 	path(
 		r'suggest/<int:student_id>/new/',
 		views.ProblemSuggestionCreate.as_view(),

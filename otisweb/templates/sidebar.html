@@ -14,13 +14,18 @@
 
 {% if request.user.is_authenticated %}
 <div>
-	<a class="emoji-link" href="{% url "index" %}">🏠</a>
-	<a class="emoji-link" href="{% url "past" %}">🕗</a>
-	<a class="emoji-link" href="{% url "socialaccount_connections" %}">🔐</a>
-	<a class="emoji-link" href="{% url "arch-index" %}">🗼</a>
-	<a class="emoji-link" href="{% url "synopsis" %}">🗃️</a>
-	<a class="emoji-link" href="{% url "wiki:root" %}">🎮</a>
+	<a alt="Home" class="emoji-link" href="{% url "index" %}">🏠</a>
+	<a alt="Past" class="emoji-link" href="{% url "past" %}">🕗</a>
+	<a alt="ARCH" class="emoji-link" href="{% url "arch-index" %}">🗼</a>
+	<a alt="Suggest" class="emoji-link" href="{% url "suggest-new" %}">💡</a>
+	<a alt="Wiki" class="emoji-link" href="{% url "wiki:root" %}">🎮</a>
 </div>
+<div>
+	<a alt="Catalog" class="emoji-link" href="{% url "synopsis" %}">🗃️</a>
+	<a alt="Security" class="emoji-link" href="{% url "socialaccount_connections" %}">🔐</a>
+	{# <a alt="Settings" class="emoji-link" href="{% url "settings" %}">⚙️</a> #}
+</div>
+
 
 {% if request.user.is_staff %}
 <hr />
