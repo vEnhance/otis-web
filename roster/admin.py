@@ -172,7 +172,6 @@ class StudentIEResource(RosterResource):
 			'user_name',
 			'track',
 			'legit',
-			'usemo_score',
 		)
 		export_order = fields
 

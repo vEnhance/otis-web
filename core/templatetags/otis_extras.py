@@ -32,8 +32,10 @@ def display_initial_choice(field: BoundField):
 
 @register.filter(name='level')
 def level(student: Student) -> int:
-	spades = (getattr(student, 'spades_quizzes', 0) or 0) + (student.usemo_score or 0)
+	spades = getattr(student, 'spades_quizzes', 0) or 0
+	spades += getattr(student, 'spades_quests', 0) or 0
 	spade_level = int(spades**0.5)
+
 	return sum(
 		int((getattr(student, key, 0) or 0)**0.5) for key in ('clubs', 'hearts', 'diamonds')
 	) + spade_level

@@ -10,7 +10,7 @@
 <p>On the USEMO, you scored {{ student.usemo_score }}.</p>
 {% endif %}
 
-{% if quiz_data or student.usemo_score %}
+{% if quiz_data or quest_data %}
 <table class="table table-sm">
 	<thead class="table-dark">
 		<tr>
@@ -20,24 +20,18 @@
 		</tr>
 	</thead>
 	<tbody>
-		{% if student.usemo_score %}
+		{% for quest in quest_data %}
 		<tr style="background-color: #ffff99;">
-			<td style="color:#121212;">
+			<td style="color:{{ meters.spades.color }};">
 				<b>
-					+{{ student.usemo_score }}{{ meters.spades.unit }}
+					+{{ quest.spades }}{{ meters.spades.unit }}
 				</b>
 			</td>
 			<td>
-				<b>
-					<a href="https://web.evanchen.cc/usemo.html">
-						US Ersatz MO
-					</a>
-				</b>
+				{{ quest.summary }}
 			</td>
 			<td>
-				🐁
-				🐭
-				🖱️
+				{{ quest.timestamp|naturaltime }}
 			</td>
 		</tr>
 		{% endif %}
@@ -56,9 +50,5 @@
 		{% endfor %}
 </table>
 </table>
-
 {% endif %}
-{# TODO create quiz submission system #}
-{# TODO create usemo score import system #}
-
 {% endblock %}

@@ -90,9 +90,6 @@ class Student(models.Model):
 		"Once the student submits a problem set, "
 		"delete it from this list to mark them as complete."
 	)
-	usemo_score = models.SmallIntegerField(
-		null=True, blank=True, help_text="The USEMO score for this year"
-	)
 
 	track = models.CharField(
 		max_length=5,

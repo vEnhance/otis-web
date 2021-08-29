@@ -2,7 +2,7 @@ from exams.factories import ExamAttemptFactory
 from otisweb.tests import OTISTestCase
 from roster.factories import StudentFactory
 
-from dashboard.factories import AchievementUnlockFactory, LevelFactory, PSetFactory  # NOQA
+from dashboard.factories import AchievementUnlockFactory, LevelFactory, PSetFactory, QuestCompleteFactory  # NOQA
 from dashboard.models import Level
 from dashboard.views import get_meter_update
 
@@ -22,7 +22,8 @@ class TestMeters(OTISTestCase):
 		AchievementUnlockFactory.create(user=alice.user, achievement__diamonds=7)
 		ExamAttemptFactory.create(student=alice, score=3)
 		ExamAttemptFactory.create(student=alice, score=4)
-		LevelFactory.create_batch(size=32)
+		QuestCompleteFactory.create(student=alice, spades=5)
+		LevelFactory.create_batch(size=36)
 
 		data = get_meter_update(alice)
 		self.assertEqual(data['meters']['clubs'].level, 17)
@@ -31,7 +32,7 @@ class TestMeters(OTISTestCase):
 		self.assertEqual(data['meters']['hearts'].value, 84)
 		self.assertEqual(data['meters']['diamonds'].level, 3)
 		self.assertEqual(data['meters']['diamonds'].value, 11)
-		self.assertEqual(data['meters']['spades'].level, 2)
-		self.assertEqual(data['meters']['spades'].value, 7)
-		self.assertEqual(data['level_number'], 31)
-		self.assertEqual(data['level_name'], Level.objects.get(threshold=31).name)
+		self.assertEqual(data['meters']['spades'].level, 3)
+		self.assertEqual(data['meters']['spades'].value, 12)
+		self.assertEqual(data['level_number'], 32)
+		self.assertEqual(data['level_name'], Level.objects.get(threshold=32).name)

@@ -40,7 +40,7 @@ from sql_util.utils import SubqueryAggregate
 from dashboard.forms import DiamondsForm
 
 from .forms import NewUploadForm, PSetForm
-from .models import Achievement, AchievementUnlock, Level, ProblemSuggestion, PSet, SemesterDownloadFile, UploadedFile  # NOQA
+from .models import Achievement, AchievementUnlock, Level, ProblemSuggestion, PSet, QuestComplete, SemesterDownloadFile, UploadedFile  # NOQA
 
 logger = logging.getLogger(__name__)
 
@@ -116,8 +116,9 @@ def get_meter_update(student: Student) -> Dict[str, Any]:
 		Sum('achievement__diamonds')
 	)['achievement__diamonds__sum'] or 0
 	quiz_data = ExamAttempt.objects.filter(student=student)
+	quest_data = QuestComplete.objects.filter(student=student)
 	total_spades = quiz_data.aggregate(Sum('score'))['score__sum'] or 0
-	total_spades += student.usemo_score or 0
+	total_spades += quest_data.aggregate(Sum('spades'))['spades__sum'] or 0
 	meters = {
 		'clubs': Meter.ClubMeter(pset_data['clubs__sum'] or 0),
 		'hearts': Meter.HeartMeter(int(pset_data['hours__sum'] or 0)),
@@ -131,6 +132,7 @@ def get_meter_update(student: Student) -> Dict[str, Any]:
 		'psets': psets,
 		'pset_data': pset_data,
 		'quiz_data': quiz_data,
+		'quest_data': quest_data,
 		'meters': meters,
 		'level_number': level_number,
 		'level_name': level_name
@@ -269,7 +271,8 @@ def leaderboard(request: HttpRequest) -> HttpResponse:
 		row: Dict[str, Any] = {}
 		row['id'] = student.id
 		row['name'] = student.name
-		row['spades'] = (getattr(student, 'spades_quizzes', 0) or 0) + (student.usemo_score or 0)
+		row['spades'] = (getattr(student, 'spades_quizzes', 0) or 0)
+		row['spades'] += (getattr(student, 'spades_quests', 0) or 0)
 		row['hearts'] = getattr(student, 'hearts', 0) or 0
 		row['clubs'] = getattr(student, 'clubs', 0) or 0
 		row['diamonds'] = getattr(student, 'diamonds', 0) or 0
@@ -381,6 +384,7 @@ def annotate_multiple_students(queryset: QuerySet[Student]) -> QuerySet[Student]
 		clubs=SubquerySum('pset__clubs', filter=Q(approved=True, eligible=True)),
 		hearts=SubquerySum('pset__hours', filter=Q(approved=True, eligible=True)),
 		spades_quizzes=SubquerySum('examattempt__score'),
+		spades_quests=SubquerySum('questcomplete__spades'),
 		diamonds=SubquerySum('user__achievementunlock__achievement__diamonds'),
 	)
 

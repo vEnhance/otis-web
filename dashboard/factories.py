@@ -7,7 +7,7 @@ from factory.fuzzy import FuzzyChoice
 from otisweb.tests import UniqueFaker
 from roster.factories import StudentFactory
 
-from dashboard.models import Achievement, AchievementUnlock, Level, ProblemSuggestion, PSet, QuestBountyTrophy, SemesterDownloadFile, UploadedFile  # NOQA
+from dashboard.models import Achievement, AchievementUnlock, Level, ProblemSuggestion, PSet, QuestComplete, SemesterDownloadFile, UploadedFile  # NOQA
 
 User = get_user_model()
 
@@ -82,11 +82,9 @@ class AchievementUnlockFactory(DjangoModelFactory):
 	achievement = SubFactory(AchievementFactory)
 
 
-class QuestBountyTrophyFactory(DjangoModelFactory):
+class QuestCompleteFactory(DjangoModelFactory):
 	class Meta:
-		model = QuestBountyTrophy
+		model = QuestComplete
 
 	student = SubFactory(StudentFactory)
 	title = Faker('job')
-	notes = Faker('text')
-	spades = 0

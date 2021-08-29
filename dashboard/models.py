@@ -250,12 +250,11 @@ class AchievementUnlock(models.Model):
 		return self.timestamp.strftime('%c')
 
 
-class QuestBountyTrophy(models.Model):
+class QuestComplete(models.Model):
 	student = models.ForeignKey(
 		Student, on_delete=models.CASCADE, help_text="Student obtaining this reward"
 	)
 	title = models.CharField(max_length=160, help_text="A summary")
-	notes = models.TextField(help_text="Any extra notes", blank=True)
 	spades = models.PositiveSmallIntegerField(help_text="The number of spades granted")
 	timestamp = models.DateTimeField(
 		auto_now_add=True, help_text='The time the achievement was granted'
