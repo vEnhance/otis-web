@@ -96,6 +96,7 @@ def venueq_handler(action: str, request: HttpRequest) -> JsonResponse:
 									'student__user__first_name',
 									'student__user__last_name',
 									'explanation',
+									'created_at',
 								)
 							),
 					}, {
