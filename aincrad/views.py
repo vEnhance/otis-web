@@ -9,6 +9,7 @@ from core.models import Unit
 from dashboard.models import ProblemSuggestion, PSet
 from django.conf import settings
 from django.core.exceptions import SuspiciousOperation
+from django.db.models.query_utils import Q
 from django.http.request import HttpRequest
 from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -16,6 +17,7 @@ from django.urls.base import reverse_lazy
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from roster.models import Student, StudentRegistration, UnitInquiry
+from sql_util.aggregates import SubqueryCount
 
 # Create your views here.
 
@@ -53,6 +55,14 @@ def venueq_handler(action: str, request: HttpRequest) -> JsonResponse:
 		suggestion.save()
 		return JsonResponse({'result': 'success'}, status=200)
 	elif action == 'init':
+		inquiries = UnitInquiry.objects.filter(
+			status="NEW", student__semester__active=True
+		).annotate(
+			total_inquiry_count=SubqueryCount('student__unitinquiry'),
+			unlock_inquiry_count=SubqueryCount(
+				'student__unitinquiry', filter=Q(action_type="UNLOCK")
+			),
+		)
 		data: Dict[str, Any] = {
 			'_name':
 				'Root',
@@ -89,7 +99,7 @@ def venueq_handler(action: str, request: HttpRequest) -> JsonResponse:
 							'Inquiries',
 						'inquiries':
 							list(
-								UnitInquiry.objects.filter(status="NEW", student__semester__active=True).values(
+								inquiries.values(
 									'pk',
 									'unit__group__name',
 									'unit__code',
@@ -97,6 +107,8 @@ def venueq_handler(action: str, request: HttpRequest) -> JsonResponse:
 									'student__user__last_name',
 									'explanation',
 									'created_at',
+									'unlock_inquiry_count',
+									'total_inquiry_count',
 								)
 							),
 					}, {

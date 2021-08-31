@@ -4,7 +4,7 @@ from core.factories import UnitFactory
 from dashboard.factories import PSetFactory
 from django.test.utils import override_settings
 from otisweb.tests import OTISTestCase
-from roster.factories import StudentFactory
+from roster.factories import StudentFactory, UnitInquiryFactory
 
 EXAMPLE_PASSWORD = 'take just the first 24'
 TARGET_HASH = sha256(EXAMPLE_PASSWORD.encode('ascii')).hexdigest()
@@ -28,6 +28,10 @@ class TestVenueQAPI(OTISTestCase):
 			special_notes="Purr",
 		)
 		PSetFactory.create(student=alice, approved=True)
+		UnitInquiryFactory.create_batch(5, student=alice, action_type="UNLOCK", status="ACC")
+		UnitInquiryFactory.create_batch(2, student=alice, action_type="DROP", status="ACC")
+		UnitInquiryFactory.create_batch(3, student=alice, action_type="UNLOCK", status="NEW")
+
 		alice.curriculum.add(submitted_unit)
 		alice.curriculum.add(requested_unit)
 		alice.unlocked_units.add(submitted_unit)
@@ -38,8 +42,13 @@ class TestVenueQAPI(OTISTestCase):
 		out = resp.json()
 		self.assertEqual(len(out['_children'][0]['_children']), 1)
 		pset = out['_children'][0]['_children'][0]
-		assert pset['approved'] is False
-		assert pset['clubs'] == 120
-		assert pset['hours'] == 37
-		assert pset['feedback'] == 'Meow'
-		assert pset['special_notes'] == 'Purr'
+		self.assertEqual(pset['approved'], False)
+		self.assertEqual(pset['clubs'], 120)
+		self.assertEqual(pset['hours'], 37)
+		self.assertEqual(pset['feedback'], 'Meow')
+		self.assertEqual(pset['special_notes'], 'Purr')
+
+		inquiries = out['_children'][1]['inquiries']
+		self.assertEqual(len(inquiries), 3)
+		self.assertEqual(inquiries[0]['unlock_inquiry_count'], 8)
+		self.assertEqual(inquiries[0]['total_inquiry_count'], 10)
