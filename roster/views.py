@@ -14,10 +14,9 @@ import collections
 import datetime
 import logging
 import os
-from hashlib import pbkdf2_hmac, sha256
+from hashlib import pbkdf2_hmac
 from typing import Any, Dict, List, Optional
 
-from allauth.socialaccount.models import SocialAccount
 from braces.views import LoginRequiredMixin, StaffuserRequiredMixin
 from core.models import Semester, Unit
 from dashboard.models import PSet
@@ -27,11 +26,10 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
-from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse  # NOQA
+from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect  # NOQA
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.views.generic.edit import UpdateView
 from mailchimp3 import MailChimp
