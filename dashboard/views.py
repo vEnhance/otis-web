@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import logging
 import os
 from datetime import datetime, timedelta
-from hashlib import sha256
 from typing import Any, Dict, List
 
 from braces.views import LoginRequiredMixin, StaffuserRequiredMixin
@@ -22,17 +21,14 @@ from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http import HttpResponse, HttpResponseRedirect  # NOQA
 from django.http.request import HttpRequest
-from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from exams.models import ExamAttempt, PracticeExam
 from mailchimp3 import MailChimp
-from roster.models import Student, StudentRegistration, UnitInquiry
+from roster.models import Student, StudentRegistration
 from roster.utils import can_edit, can_view, get_student_by_id, get_visible_students, infer_student  # NOQA
 from sql_util.aggregates import SubqueryCount, SubquerySum
 from sql_util.utils import SubqueryAggregate
@@ -583,120 +579,3 @@ class ProblemSuggestionList(LoginRequiredMixin, ListView):
 		context = super().get_context_data(**kwargs)
 		context['student'] = self.student
 		return context
-
-
-@csrf_exempt
-@require_POST
-def api(request: HttpRequest) -> JsonResponse:
-	if settings.PRODUCTION:
-		token = request.POST.get('token')
-		assert token is not None
-		if not sha256(token.encode('ascii')).hexdigest() == settings.API_TARGET_HASH:
-			return JsonResponse({'error': "☕"}, status=418)
-
-	action = request.POST.get('action', None)
-
-	if action == 'grade_problem_set':
-		# mark problem set as done
-		pset = get_object_or_404(PSet, pk=request.POST['pk'])
-		pset.approved = bool(request.POST['approved'])
-		pset.clubs = request.POST.get('clubs', None)
-		pset.hours = request.POST.get('hours', None)
-		pset.save()
-		# unlock the unit the student asked for
-		finished_unit = get_object_or_404(Unit, pk=request.POST['unit__pk'])
-		student = get_object_or_404(Student, pk=request.POST['student__pk'])
-		if 'next_unit_to_unlock__pk' not in request.POST:
-			unlockable_units = student.generate_curriculum_queryset().exclude(has_pset=True).exclude(
-				id__in=student.unlocked_units.all()
-			)
-			target = unlockable_units.first()
-		else:
-			target = get_object_or_404(Unit, pk=request.POST['next_unit_to_unlock__pk'])
-		if target is not None:
-			student.unlocked_units.add(target)
-		student.unlocked_units.remove(finished_unit)
-		return JsonResponse({'result': 'success'}, status=200)
-	elif action == 'approve_inquiries':
-		for inquiry in UnitInquiry.objects.filter(status="NEW", student__semester__active=True):
-			inquiry.run_accept()
-		return JsonResponse({'result': 'success'}, status=200)
-	elif action == 'mark_suggestion':
-		suggestion = ProblemSuggestion.objects.get(pk=request.POST['pk'])
-		suggestion.reason = request.POST['reason']
-		suggestion.resolved = True
-		suggestion.save()
-		return JsonResponse({'result': 'success'}, status=200)
-	elif action == 'init':
-		data: Dict[str, Any] = {
-			'_name':
-				'Root',
-			'_children':
-				[
-					{
-						'_name':
-							'Problem sets',
-						'_children':
-							list(
-								PSet.objects.filter(approved=False, student__semester__active=True).values(
-									'pk',
-									'approved',
-									'feedback',
-									'special_notes',
-									'student__pk',
-									'student__user__first_name',
-									'student__user__last_name',
-									'student__user__email',
-									'hours',
-									'clubs',
-									'eligible',
-									'unit__group__name',
-									'unit__code',
-									'unit__pk',
-									'next_unit_to_unlock__group__name',
-									'next_unit_to_unlock__code',
-									'next_unit_to_unlock__pk',
-									'upload__content',
-								)
-							)
-					}, {
-						'_name':
-							'Inquiries',
-						'inquiries':
-							list(
-								UnitInquiry.objects.filter(status="NEW", student__semester__active=True).values(
-									'pk',
-									'unit__group__name',
-									'unit__code',
-									'student__user__first_name',
-									'student__user__last_name',
-									'explanation',
-								)
-							),
-					}, {
-						'_name':
-							'Suggestions',
-						'_children':
-							list(
-								ProblemSuggestion.objects.filter(resolved=False).values(
-									'pk',
-									'created_at',
-									'student__user__first_name',
-									'student__user__last_name',
-									'source',
-									'description',
-									'statement',
-									'solution',
-									'comments',
-									'acknowledge',
-									'weight',
-									'unit__group__name',
-									'unit__code',
-								)
-							)
-					}
-				],
-		}
-		return JsonResponse(data, status=200)
-	else:
-		return JsonResponse({'error': 'No such command'}, status=400)

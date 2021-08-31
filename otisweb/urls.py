@@ -13,6 +13,7 @@ assert settings.MEDIA_URL is not None
 
 urlpatterns = [
 	path(r'admin/', admin.site.urls),
+	path(r'aincrad/', include('aincraid')),
 	path(r'arch/', include('arch.urls')),
 	path(r'core/', include('core.urls')),
 	path(r'dash/', include('dashboard.urls')),

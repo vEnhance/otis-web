@@ -1,21 +1,16 @@
-import logging
-import traceback
-from hashlib import sha256
 from typing import Any, ClassVar, Dict
 
 import reversion
-from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
-from django.http import HttpRequest, HttpResponseRedirect, JsonResponse
+from django.http import HttpRequest, HttpResponseRedirect
 from django.http.response import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
-from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from reversion.views import RevisionMixin
@@ -182,74 +177,3 @@ def lookup(request: HttpRequest):
 		return HttpResponseRedirect(problem.get_absolute_url())
 	else:
 		return HttpResponseRedirect(reverse_lazy('arch-index', ))
-
-
-@csrf_exempt
-def archapi(request: HttpRequest) -> JsonResponse:
-	if request.method != 'POST':
-		return JsonResponse({'error': "☕"}, status=418)
-	if settings.PRODUCTION:
-		token = request.POST.get('token')
-		assert token is not None
-		if not sha256(token.encode('ascii')).hexdigest() == settings.API_TARGET_HASH:
-			return JsonResponse({'error': "☕"}, status=418)
-
-	def err(status: int = 400) -> JsonResponse:
-		logging.error(traceback.format_exc())
-		return JsonResponse({'error': ''.join(traceback.format_exc(limit=1))}, status=status)
-
-	action = request.POST['action']
-	puid = request.POST['puid'].upper()
-
-	if action == 'hints':
-		problem = get_object_or_404(Problem, puid=puid)
-		response = {
-			'hints': [],
-			'description': problem.description,
-			'url': problem.get_absolute_url(),
-			'add_url': reverse_lazy("hint-create", args=(problem.puid, ))
-		}
-		for hint in Hint.objects.filter(problem=problem):
-			response['hints'].append(
-				{
-					'number': hint.number,
-					'keywords': hint.keywords,
-					'url': hint.get_absolute_url(),
-				}
-			)
-		return JsonResponse(response)
-
-	if action == 'create':
-		try:
-			assert 'description' in request.POST
-			problem = Problem(description=request.POST['description'], puid=puid)
-			problem.save()
-		except (Problem.DoesNotExist, Problem.MultipleObjectsReturned):
-			return err()
-		else:
-			return JsonResponse(
-				{
-					'edit_url': reverse_lazy('problem-update', args=(problem.puid, )),
-					'view_url': problem.get_absolute_url(),
-				}
-			)
-
-	if action == 'add':
-		problem = get_object_or_404(Problem, puid=puid)
-		try:
-			assert 'content' in request.POST
-			assert 'keywords' in request.POST
-			assert 'number' in request.POST
-			hint = Hint(
-				problem=problem,
-				content=request.POST['content'],
-				keywords=request.POST['keywords'],
-				number=request.POST['number'],
-			)
-			hint.save()
-		except AssertionError:
-			return err()
-		else:
-			return JsonResponse({'url': hint.get_absolute_url()})
-
-	return JsonResponse({})

@@ -412,46 +412,6 @@ def update_profile(request: HttpRequest) -> HttpResponse:
 	return render(request, "roster/update_profile.html", context)
 
 
-@csrf_exempt
-@require_POST
-def api(request: HttpRequest) -> JsonResponse:
-	if settings.PRODUCTION:
-		token = request.POST.get('token')
-		assert token is not None
-		if not sha256(token.encode('ascii')).hexdigest() == settings.API_TARGET_HASH:
-			return JsonResponse({'error': "☕"}, status=418)
-	# check whether social account exists
-	uid = int(request.POST['uid'])
-	queryset = SocialAccount.objects.filter(uid=uid)
-	if not (n := len(queryset)) == 1:
-		return JsonResponse({'result': 'nonexistent', 'length': n})
-
-	social = queryset.get()  # get the social account for this; should never 404
-	user = social.user
-	student = Student.objects.filter(user=user, semester__active=True).first()
-	regform = StudentRegistration.objects.filter(
-		user=user, container__semester__active=True
-	).first()
-
-	if student is not None:
-		return JsonResponse(
-			{
-				'result': 'success',
-				'user': social.user.username,
-				'name': social.user.get_full_name(),
-				'uid': uid,
-				'track': student.track,
-				'gender': regform.gender if regform is not None else '?',
-				'country': regform.country if regform is not None else '???',
-				'num_years': Student.objects.filter(user=user).count(),
-			}
-		)
-	elif student is None and regform is not None:
-		return JsonResponse({'result': 'pending'})
-	else:
-		return JsonResponse({'result': 'unregistered'})
-
-
 # TODO ugly hack but I'm tired of answering this request
 @login_required
 def unlock_rest_of_mystery(request: HttpRequest, delta: int = 1) -> HttpResponse:
