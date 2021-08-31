@@ -37,5 +37,4 @@ urlpatterns = [
 		name='suggest-list'
 	),
 	path(r'leaderboard/', views.leaderboard, name='leaderboard'),
-	path(r'api/', views.api, name='resolve-suggest'),
 ]
