@@ -1,4 +1,3 @@
-Warning: The lock file is not up to date with the latest changes in pyproject.toml. You may be getting outdated dependencies. Run update to update them.
 asgiref==3.4.1; python_version >= "3.6" \
     --hash=sha256:ffc141aa908e6f175673e7b1b3b7af4fdb0ecb738fc5c8b88f69f055c2415214 \
     --hash=sha256:4ef1ab46b484e3c706329cedeff284a5d40824200638503f5768edb6de7d58e9
@@ -108,6 +107,9 @@ django-classy-tags==2.0.0 \
 django-crispy-forms==1.12.0; python_version >= "3.6" \
     --hash=sha256:d196db62ee8b4fc32d1f9583d0e4be1bb17328b662682c1ecb9fb77bbc0fcf77 \
     --hash=sha256:a3320356c84d0cdc631e1ec7b8908aa0117bc2a5f0ab1d053d33eba08f584808
+django-debug-toolbar==3.2.2; python_version >= "3.6" \
+    --hash=sha256:8c5b13795d4040008ee69ba82dcdd259c49db346cf7d0de6e561a49d191f0860 \
+    --hash=sha256:d7bab7573fab35b0fd029163371b7182f5826c13da69734beb675c761d06a4d3
 django-hijack==3.0.0 \
     --hash=sha256:15250ee0bf2d27e777fec108406d18195dc0b6861c7daafa46d9d30779a66654 \
     --hash=sha256:b82501c1fb957c407b4b2d0797edb501a145c36543328b06f4c78a9fe343870f
