@@ -1,39 +1,33 @@
 {% if request.user.is_authenticated %}
-<p>👋, <b>{{ request.user }}</b>.
-	<a href="{% url "account_logout" %}">(logout)</a>
-</p>
-{% else %}
-<p><a href="{% url "account_login" %}">(login)</a></p>
-{% endif %}
+<table style="width: 100%; height:100px; font-size: 22px; text-shadow: 1px 0 0 #000, 0 -1px 0 #000, 0 1px 0 #000, -1px 0 0 #000;">
+	<tr>
+		<td><a alt="Home" class="emoji-link" href="{% url "index" %}">🏠</a></td>
+		<td><a alt="Past" class="emoji-link" href="{% url "past" %}">🕗</a></td>
+		<td><a alt="Security" class="emoji-link" href="{% url "socialaccount_connections" %}">🔐</a></td>
+		<td></td> {# <td><a alt="Settings" class="emoji-link" href="">⚙️</a></td> #}
+	</tr>
+	<tr>
+		<td><a alt="ARCH" class="emoji-link" href="{% url "arch-index" %}">🗼</a></td>
+		<td><a alt="Suggest" class="emoji-link" href="{% url "suggest-new" %}">💡</a></td>
+		<td><a alt="Wiki" class="emoji-link" href="{% url "wiki:root" %}">🎮</a></td>
+		<td><a alt="GitHub" class="emoji-link" href="https://github.com/vEnhance/otis-web/">🖥️</a></td>
+	</tr>
+	<tr>
+		<td><a alt="Announcements" class="emoji-link" href="https://us5.campaign-archive.com/home/?u=5c818a0be2f35ee90344a471e&id=808c50e8c9">📢</a></td>
+		<td><a alt="Catalog" class="emoji-link" href="{% url "synopsis" %}">🗃️</a></td>
+		<td></td>
+		<td><a alt="Logout" class="emoji-link" href="{% url "account_logout" %}">🚪</a></td>
+	</tr>
+</table>
+
+<hr />
 
 {% if student %}
 <p><b><a href="{% url "portal" student.id %}">{{ student.name }}</a></b></p>
 <p><i>{{ student.semester }}</i></p>
 {% endif %}
 
-<hr />
-
-{% if request.user.is_authenticated %}
-{% spaceless %}
-<div>
-	<a alt="Home" class="emoji-link" href="{% url "index" %}">🏠</a>&nbsp;
-	<a alt="Past" class="emoji-link" href="{% url "past" %}">🕗</a>&nbsp;
-	<a alt="ARCH" class="emoji-link" href="{% url "arch-index" %}">🗼</a>&nbsp;
-	<a alt="Suggest" class="emoji-link" href="{% url "suggest-new" %}">💡</a>&nbsp;
-	<a alt="Wiki" class="emoji-link" href="{% url "wiki:root" %}">🎮</a>
-</div>
-<br />
-<div>
-	<a alt="Catalog" class="emoji-link" href="{% url "synopsis" %}">🗃️</a>&nbsp;
-	<a alt="Announcements" class="emoji-link" href="https://us5.campaign-archive.com/home/?u=5c818a0be2f35ee90344a471e&id=808c50e8c9">📢</a>&nbsp;
-	<a alt="Security" class="emoji-link" href="{% url "socialaccount_connections" %}">🔐</a>
-	{# <a alt="Settings" class="emoji-link" href="{% url "settings" %}">⚙️</a> #}
-</div>
-{% endspaceless %}
-
-
 {% if request.user.is_staff %}
-<hr />
 <ul>
 	<li><a href="{% url "admin:index" %}">Django HQ</a></li>
 	<li><a href="{% url "leaderboard" %}">Leaderboard</a></li>
@@ -75,6 +69,9 @@
 </ul>
 {% endif %}
 {% endif %}
+{% else %}
+<p>You are not logged in.</p>
+<p><a href="{% url "account_login" %}">Log in now.</a></p>
 {% endif %}
 
 <!--
