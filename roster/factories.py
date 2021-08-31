@@ -1,4 +1,4 @@
-from core.factories import SemesterFactory, UserFactory
+from core.factories import SemesterFactory, UnitFactory, UserFactory
 from django.contrib.auth import get_user_model
 from factory.declarations import LazyAttribute, SubFactory
 from factory.django import DjangoModelFactory
@@ -38,6 +38,11 @@ class InvoiceFactory(DjangoModelFactory):
 class UnitInquiryFactory(DjangoModelFactory):
 	class Meta:
 		model = UnitInquiry
+
+	student = SubFactory(StudentFactory)
+	unit = SubFactory(UnitFactory)
+	action_type = "UNLOCK"
+	explanation = Faker('sentence')
 
 
 class RegistrationContainerFactory(DjangoModelFactory):
