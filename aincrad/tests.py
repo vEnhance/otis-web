@@ -4,7 +4,8 @@ from core.factories import UnitFactory
 from dashboard.factories import PSetFactory
 from django.test.utils import override_settings
 from otisweb.tests import OTISTestCase
-from roster.factories import StudentFactory, UnitInquiryFactory
+from roster.factories import InvoiceFactory, StudentFactory, UnitInquiryFactory
+from roster.models import Invoice
 
 EXAMPLE_PASSWORD = 'take just the first 24'
 TARGET_HASH = sha256(EXAMPLE_PASSWORD.encode('ascii')).hexdigest()
@@ -15,7 +16,8 @@ class TestVenueQAPI(OTISTestCase):
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()
-		alice = StudentFactory.create()
+		alice = StudentFactory.create(user__first_name="Alice", user__last_name="Aardvárk")
+		bob = StudentFactory.create(user__first_name="Bôb B.", user__last_name="Bèta")
 		submitted_unit, requested_unit = UnitFactory.create_batch(2)
 		PSetFactory.create(
 			student=alice,
@@ -36,6 +38,9 @@ class TestVenueQAPI(OTISTestCase):
 		alice.curriculum.add(requested_unit)
 		alice.unlocked_units.add(submitted_unit)
 
+		InvoiceFactory.create(student=alice)
+		InvoiceFactory.create(student=bob)
+
 	def test_init(self):
 		resp = self.post('api', data={'action': 'init', 'token': EXAMPLE_PASSWORD})
 		self.assert20X(resp)
@@ -52,3 +57,25 @@ class TestVenueQAPI(OTISTestCase):
 		self.assertEqual(len(inquiries), 3)
 		self.assertEqual(inquiries[0]['unlock_inquiry_count'], 8)
 		self.assertEqual(inquiries[0]['total_inquiry_count'], 10)
+
+	def test_invoice(self):
+		data = {
+			'action': 'invoice',
+			'token': EXAMPLE_PASSWORD,
+			'adjustment.alice.aardvark': -240,
+			'total_paid.alice.aardvark': 250,
+			'extras.alice.aardvark': 10,
+			'total_paid.bob.beta': 480,
+			'total_paid.carol.cutie': 1152
+		}
+		resp = self.post('api', data=data)
+		self.assert20X(resp)
+		out = resp.json()
+		self.assertEqual(len(out), 1)
+		self.assertTrue('total_paid.carol.cutie' in out)
+		invoice_alice = Invoice.objects.get(student__user__first_name="Alice")
+		invoice_bob = Invoice.objects.get(student__user__first_name="Bôb B.")
+		self.assertAlmostEqual(invoice_alice.adjustment, -240)
+		self.assertAlmostEqual(invoice_alice.total_paid, 250)
+		self.assertAlmostEqual(invoice_bob.adjustment, 0)
+		self.assertAlmostEqual(invoice_bob.total_paid, 480)

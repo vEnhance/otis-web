@@ -16,8 +16,9 @@ from django.shortcuts import get_object_or_404
 from django.urls.base import reverse_lazy
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from roster.models import Student, StudentRegistration, UnitInquiry
+from roster.models import Invoice, Student, StudentRegistration, UnitInquiry
 from sql_util.aggregates import SubqueryCount
+from unidecode import unidecode
 
 # Create your views here.
 
@@ -199,7 +200,7 @@ def problems_handler(action: str, request: HttpRequest) -> JsonResponse:
 			)
 		return JsonResponse(response)
 
-	if action == 'create':
+	elif action == 'create':
 		try:
 			assert 'description' in request.POST
 			problem = Problem(description=request.POST['description'], puid=puid)
@@ -214,7 +215,7 @@ def problems_handler(action: str, request: HttpRequest) -> JsonResponse:
 				}
 			)
 
-	if action == 'add':
+	elif action == 'add':
 		problem = get_object_or_404(Problem, puid=puid)
 		try:
 			assert 'content' in request.POST
@@ -232,7 +233,30 @@ def problems_handler(action: str, request: HttpRequest) -> JsonResponse:
 		else:
 			return JsonResponse({'url': hint.get_absolute_url()})
 
-	return JsonResponse({})
+	else:
+		raise Exception(f"No such command {action}")
+
+
+def invoice_handler(action: str, request: HttpRequest) -> JsonResponse:
+	def sanitize(s: str) -> str:
+		return unidecode(s).lower().split(' ', maxsplit=1)[0]
+
+	invoices = Invoice.objects.filter(student__semester__active=True)
+	invoices = invoices.select_related('student__user')
+	fields = ('adjustment', 'extras', 'total_paid')
+	data = request.POST.dict()
+	del data['token']
+	del data['action']
+	for inv in invoices:
+		if inv.student.user is not None:
+			first_name = sanitize(inv.student.user.first_name)
+			last_name = sanitize(inv.student.user.last_name)
+			for k in fields:
+				if (x := data.pop(f'{k}.{first_name}.{last_name}', None)) is not None:
+					assert isinstance(x, str)
+					setattr(inv, k, float(x))
+	Invoice.objects.bulk_update(invoices, fields, batch_size=25)
+	return JsonResponse(data)
 
 
 @csrf_exempt
@@ -249,10 +273,12 @@ def api(request: HttpRequest) -> JsonResponse:
 
 	if action in ('grade_problem_set', 'approve_inquiries', 'mark_suggestion', 'init'):
 		return venueq_handler(action, request)
-	elif action in ('register'):
+	elif action in ('register', ):
 		return discord_handler(action, request)
 	elif action in ('hints', 'create', 'add'):
 		return problems_handler(action, request)
+	elif action in ('invoice', ):
+		return invoice_handler(action, request)
 	else:
 		return JsonResponse({'error': 'No such command'}, status=400)
 
