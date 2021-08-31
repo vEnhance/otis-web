@@ -8,7 +8,7 @@ from dashboard.models import Level
 from dashboard.views import annotate_multiple_students, get_meter_update
 
 
-class TestMeters(OTISTestCase):
+class TestDashboard(OTISTestCase):
 	def test_portal_loads(self):
 		alice = StudentFactory.create()
 		self.login(alice)
