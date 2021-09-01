@@ -139,6 +139,7 @@
 	after instructor review, it becomes ✅.
 	(You can access solutions in the meantime.)
 	Units to work on are marked ▶️.
+	To change units, <a href="{% url "inquiry" student.id %}">submit an inquiry</a>.
 </p>
 
 {% if emails %}
@@ -159,11 +160,8 @@
 		<td valign="top" width="50%">
 			<h3>Academic</h3>
 			<ul>
-				<li><b><a href="{% url "inquiry" student.id %}">Unit inquiries</a>
-						(request changes to units)</b></li>
-				<li><b><a href="{% url "arch-index" %}">ARCH</a>
-						(for hints)</b></li>
-				{# <li><a href="{% url "uploads" student.id 0 %}">Miscellaneous uploads</a></li> #}
+				<li><a href="{% url "inquiry" student.id %}">Unit inquiries</a></li>
+				<li><a href="{% url "arch-index" %}">ARCH</a></li>
 				<li><a href="{% url "currshow" student.id %}">Class selection</a></li>
 				<li><a href="{% url "synopsis" %}">Unit catalog</a></li>
 				{% if omniscient %}
