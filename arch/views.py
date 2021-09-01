@@ -68,6 +68,7 @@ class HintList(ExistStudentRequiredMixin, ListView):
 	def get_context_data(self, **kwargs: Dict[Any, Any]):
 		context = super().get_context_data(**kwargs)
 		context['problem'] = self.problem
+		context['statement'] = self.problem.get_statement
 		return context
 
 

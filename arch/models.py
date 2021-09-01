@@ -1,4 +1,8 @@
+from pathlib import Path
+from typing import Optional
+
 import reversion
+from django.conf import settings
 from django.core.validators import RegexValidator
 from django.db import models
 from django.urls import reverse_lazy
@@ -31,6 +35,14 @@ class Problem(models.Model):
 
 	def get_absolute_url(self):
 		return reverse_lazy("hint-list", args=(self.puid, ))
+
+	def get_statement(self) -> Optional[str]:
+		if settings.PATH_STATEMENT_ON_DISK is None:
+			return None
+		statement_path = Path(settings.PATH_STATEMENT_ON_DISK) / (self.puid + '.tex')
+		if statement_path.exists() and statement_path.is_file():
+			return statement_path.read_text()
+		return None
 
 	class Meta:
 		ordering = ('puid', )
