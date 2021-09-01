@@ -1,10 +1,7 @@
-import logging
-import traceback
 from hashlib import sha256
 from typing import Any, Dict
 
 from allauth.socialaccount.models import SocialAccount
-from arch.models import Hint, Problem
 from core.models import Unit
 from dashboard.models import ProblemSuggestion, PSet
 from django.conf import settings
@@ -13,7 +10,6 @@ from django.db.models.query_utils import Q
 from django.http.request import HttpRequest
 from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404
-from django.urls.base import reverse_lazy
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from roster.models import Invoice, Student, StudentRegistration, UnitInquiry
@@ -176,65 +172,8 @@ def discord_handler(action: str, request: HttpRequest) -> JsonResponse:
 
 
 def problems_handler(action: str, request: HttpRequest) -> JsonResponse:
-	def err(status: int = 400) -> JsonResponse:
-		logging.error(traceback.format_exc())
-		return JsonResponse({'error': ''.join(traceback.format_exc(limit=1))}, status=status)
-
 	puid = request.POST['puid'].upper()
-
-	if action == 'hints':
-		problem = get_object_or_404(Problem, puid=puid)
-		response = {
-			'hints': [],
-			'description': problem.description,
-			'url': problem.get_absolute_url(),
-			'add_url': reverse_lazy("hint-create", args=(problem.puid, ))
-		}
-		for hint in Hint.objects.filter(problem=problem):
-			response['hints'].append(
-				{
-					'number': hint.number,
-					'keywords': hint.keywords,
-					'url': hint.get_absolute_url(),
-				}
-			)
-		return JsonResponse(response)
-
-	elif action == 'create':
-		try:
-			assert 'description' in request.POST
-			problem = Problem(description=request.POST['description'], puid=puid)
-			problem.save()
-		except (Problem.DoesNotExist, Problem.MultipleObjectsReturned):
-			return err()
-		else:
-			return JsonResponse(
-				{
-					'edit_url': reverse_lazy('problem-update', args=(problem.puid, )),
-					'view_url': problem.get_absolute_url(),
-				}
-			)
-
-	elif action == 'add':
-		problem = get_object_or_404(Problem, puid=puid)
-		try:
-			assert 'content' in request.POST
-			assert 'keywords' in request.POST
-			assert 'number' in request.POST
-			hint = Hint(
-				problem=problem,
-				content=request.POST['content'],
-				keywords=request.POST['keywords'],
-				number=request.POST['number'],
-			)
-			hint.save()
-		except AssertionError:
-			return err()
-		else:
-			return JsonResponse({'url': hint.get_absolute_url()})
-
-	else:
-		raise Exception(f"No such command {action}")
+	raise NotImplementedError(puid)
 
 
 def invoice_handler(action: str, request: HttpRequest) -> JsonResponse:
