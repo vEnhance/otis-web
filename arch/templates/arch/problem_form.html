@@ -7,19 +7,21 @@ the Automated Repository of Canned Hints.
 We hope you enjoy your visit.
 
 <hr />
-<h2>Find problem</h2>
 
-<div class="mathjax_ignore">
-	{% include "generic-form.html" with form=lookup_form target=lookup_url submit_name="Lookup" btn_class="btn-primary" %}
+<div class="container row">
+	<div class="col-6">
+		<h2>Find problem</h2>
+
+		<div class="mathjax_ignore">
+			{% include "generic-form.html" with form=lookup_form target=lookup_url submit_name="Lookup" btn_class="btn-primary" %}
+		</div>
+
+	</div>
+	<div class="col-6">
+		<h2>New problem</h2>
+		{% include "generic-form.html" with submit_name="Create" %}
+	</div>
 </div>
-
-<h2>New problem</h2>
-
-{% include "generic-form.html" with submit_name="Create new problem" %}
-
-<p>All edits are tracked by timestamp and username,
-	so if for some reason you need to rewind some edits,
-	please contact a staff member for assistance.</p>
 
 <hr />
 

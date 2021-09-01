@@ -12,6 +12,7 @@ class Problem(models.Model):
 		max_length=24,
 		help_text="Unique problem identifier, as printed in OTIS handout.",
 		unique=True,
+		verbose_name="PUID",
 		validators=[
 			RegexValidator(
 				regex=r'[A-Z0-9]+', message="Only uppercase letters and digits appear in PUID's."
