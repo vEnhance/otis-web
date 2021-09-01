@@ -4,12 +4,13 @@
 
 {% block layout-content %}
 
-<h1>{{ problem.get_source }}</h1>
-<p><i>{{ problem.description }}</i></p>
-{% if problem.aops_url %}
-<p><a href="{{ problem.aops_url }}">{{ problem.aops_url }}</a></p>
-{% endif %}
-<hr />
+{% spaceless %}
+<h1>{{ problem }}
+	{% if problem.aops_url %}
+	<a href="{{ problem.aops_url }}">(AOPS)</a>
+	{% endif %}
+</h1>
+{% endspaceless %}
 
 {% if hint_list %}
 <p>The following hints are available for this problem.</p>

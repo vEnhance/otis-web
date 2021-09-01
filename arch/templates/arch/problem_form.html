@@ -1,55 +1,12 @@
 {% extends 'layout.html' %}
-{% block title %}Arch{% endblock %}
+{% block title %}Arch: Update {{ problem }}{% endblock %}
 {% block layout-content %}
 
-Welcome to <strong>ARCH</strong>,
-the Automated Repository of Canned Hints.
-We hope you enjoy your visit.
+<h1>Update {{ problem }}</h1>
+<p><a href="{{ problem.get_absolute_url }}">Back to problem.</a></p>
 
 <hr />
 
-<div class="container row">
-	<div class="col-6">
-		<h2>Find problem</h2>
+{% include "generic-form.html" with submit_name="Update" %}
 
-		<div class="mathjax_ignore">
-			{% include "generic-form.html" with form=lookup_form target=lookup_url submit_name="Lookup" btn_class="btn-primary" %}
-		</div>
-
-	</div>
-	<div class="col-6">
-		<h2>New problem</h2>
-		{% include "generic-form.html" with submit_name="Create" %}
-	</div>
-</div>
-
-<hr />
-
-<h2>Statistics</h2>
-<p>
-	As of {% now "D, d M Y" %}, ARCH has
-	<ul>
-		<li>{{ num_problems }} problems written</li>
-		<li>{{ num_hints }} hints written</li>
-	</ul>
-	Add more hints to make ARCH more useful to other students!
-</p>
-
-<hr />
-
-<h2>Discord integration</h2>
-
-To be written
-{% endblock %}
-
-{% block scripts %}
-<script type="text/javascript">
-	$(document).ready(function() {
-		$("#id_problem").chosen({
-			placeholder_text: "...",
-			width: "90%",
-			search_contains: true,
-		});
-	});
-</script>
 {% endblock %}

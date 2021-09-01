@@ -16,7 +16,7 @@ from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from reversion.views import RevisionMixin
 from roster.models import Student
 
-from arch.forms import ProblemSelectForm, ProblemUpdateForm
+from arch.forms import ProblemSelectForm
 
 from .forms import HintUpdateFormWithReason
 from .models import Hint, Problem
@@ -98,8 +98,10 @@ class HintUpdate(HintObjectView, ExistStudentRequiredMixin, RevisionMixin, Updat
 class ProblemUpdate(ProblemObjectView, ExistStudentRequiredMixin, RevisionMixin, UpdateView):
 	context_object_name = "problem"
 	model = Problem
-	form_class = ProblemUpdateForm
-	object: ClassVar[Problem] = Problem()
+	fields = (
+		'puid',
+		'aops_url',
+	)
 
 	def get_context_data(self, **kwargs: Any):
 		context = super().get_context_data(**kwargs)
@@ -107,8 +109,8 @@ class ProblemUpdate(ProblemObjectView, ExistStudentRequiredMixin, RevisionMixin,
 		context['num_hints'] = Hint.objects.all().count()
 		return context
 
-	def get_success_url(self):
-		return self.object.get_absolute_url()
+	def get_success_url(self) -> str:
+		return self.object.get_absolute_url()  # type: ignore
 
 
 class HintCreate(ExistStudentRequiredMixin, RevisionMixin, CreateView):
@@ -151,6 +153,7 @@ class ProblemCreate(ExistStudentRequiredMixin, RevisionMixin, CreateView):
 	context_object_name = "problem"
 	fields = ('puid', )
 	model = Problem
+	template_name = 'arch/index.html'
 
 	def get_context_data(self, **kwargs: Any):
 		context = super().get_context_data(**kwargs)

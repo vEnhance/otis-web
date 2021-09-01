@@ -20,7 +20,10 @@ class Problem(models.Model):
 		],
 	)
 	aops_url = models.URLField(
-		max_length=128, help_text="URL to problem on AoPS. Include HTTPS.", blank=True
+		max_length=128,
+		help_text="URL to problem on AoPS. Include HTTPS.",
+		blank=True,
+		verbose_name="AoPS URL",
 	)
 
 	def __str__(self) -> str:
