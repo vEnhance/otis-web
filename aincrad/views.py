@@ -250,7 +250,7 @@ def invoice_handler(action: str, request: HttpRequest) -> JsonResponse:
 	for inv in invoices:
 		if inv.student.user is not None:
 			first_name = sanitize(inv.student.user.first_name)
-			last_name = sanitize(inv.student.user.last_name)
+			last_name = sanitize(inv.student.user.last_name, last=True)
 			for k in fields:
 				if (x := data.pop(f'{k}.{first_name}.{last_name}', None)) is not None:
 					assert isinstance(x, str)
