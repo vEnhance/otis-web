@@ -132,3 +132,11 @@ table.curriculum td.emojis {
 	font-size: 17px;
 	min-width: max-content;
 }
+
+a.emoji-link {
+	text-shadow: 1px 0 0 black, 0 -1px 0 black, 0 1px 0 black, -1px 0 0 black;
+}
+
+a.emoji-link:hover {
+	text-shadow: 0 0 5px #ff0;
+}

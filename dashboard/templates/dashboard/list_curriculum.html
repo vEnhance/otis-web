@@ -3,10 +3,10 @@
 {% if curriculum %}
 
 <p>
-	<button id="hide-completed-units" title="Toggle completed unit visibility">
+	<button id="hide-completed-units" class="tooltip-button" title="Show/hide completed units">
 		Toggle ✅
 	</button>
-	<button id="hide-locked-units" title="Toggle locked unit visibility">
+	<button id="hide-locked-units" class="tooltip-button" title="Show/hide locked units">
 		Toggle ❓
 	</button>
 	<span style="font-size: 80%; font-style: italic;">
@@ -52,12 +52,13 @@
 			{% if row.is_visible %}
 			<a class="emoji-link" style="font-size: 80%" title="Download PDF" href="{% view_problems row.unit %}">💾</a>
 			<a class="emoji-link" title="Copy LaTeX" href="{% view_tex row.unit %}">📋</a>
-			<a class="emoji-link" title="Add suggestion" href="{% url "suggest-new" student.id row.unit.id %}">💡</a>
+			<a class="emoji-link" style="text-shadow: 1px black;" title="Add suggestion" href="{% url "suggest-new" student.id row.unit.id %}">💡</a>
 			{% endif %}
 			{% if row.is_visible %}
-			<a class="emoji-link" title="File uploads" href="{% url "uploads" student.id row.unit.id %}">
-				📂 {{ row.num_uploads|default:"0" }}
-			</a>
+			{% spaceless %}
+			<a class="emoji-link" title="File uploads" href="{% url "uploads" student.id row.unit.id %}">📂
+				<sup style="text-shadow: none;">{{ row.num_uploads|default:"0" }}</sup></a>
+			{% endspaceless %}
 			{% endif %}
 			<a class="emoji-link" title="Wiki" href="{{ row.unit.group.get_wiki_link }}" />🎮</a>
 			{% if row.sols_label %}
