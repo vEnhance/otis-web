@@ -24,7 +24,9 @@
 	</tr>
 </table>
 
+{% if student or request.user.is_staff %}
 <hr />
+{% endif %}
 
 {% if student %}
 <p><b><a href="{% url "portal" student.id %}">{{ student.name }}</a></b></p>
