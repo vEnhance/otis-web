@@ -1,4 +1,5 @@
 import reversion
+from django.core.validators import RegexValidator
 from django.db import models
 from django.urls import reverse_lazy
 
@@ -10,7 +11,12 @@ class Problem(models.Model):
 	puid = models.CharField(
 		max_length=24,
 		help_text="Unique problem identifier, as printed in OTIS handout.",
-		unique=True
+		unique=True,
+		validators=[
+			RegexValidator(
+				regex=r'[A-Z0-9]+', message="Only uppercase letters and digits appear in PUID's."
+			)
+		],
 	)
 	aops_url = models.URLField(
 		max_length=128, help_text="URL to problem on AoPS. Include HTTPS.", blank=True
