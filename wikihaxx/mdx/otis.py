@@ -45,6 +45,7 @@ class OTISPreprocessor(markdown.preprocessors.Preprocessor):
 
 				if tag_name == 'problem':
 					puid = tag_arg.upper()
+					assert puid is not None
 
 					# Get data from ARCH
 					try:
@@ -133,7 +134,11 @@ class OTISPreprocessor(markdown.preprocessors.Preprocessor):
 			):
 				statement_path = Path(settings.PATH_STATEMENT_ON_DISK) / (puid + '.tex')
 				if statement_path.exists() and statement_path.is_file():
-					output.append(statement_path.read_text())
+					statement = statement_path.read_text()
+					statement = statement.replace('\\', '\\' * 2)
+					statement = statement.replace(r'*', r'\*')
+					statement = statement.replace(r'_', r'\_')
+					output.append(statement)
 				else:
 					output.append(r'*Could not find the problem {puid}*')
 			else:
