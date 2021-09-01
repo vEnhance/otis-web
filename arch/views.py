@@ -16,7 +16,7 @@ from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from reversion.views import RevisionMixin
 from roster.models import Student
 
-from arch.forms import ProblemSelectForm, ProblemUpdateFormWithReason
+from arch.forms import ProblemSelectForm, ProblemUpdateForm
 
 from .forms import HintUpdateFormWithReason
 from .models import Hint, Problem
@@ -98,12 +98,8 @@ class HintUpdate(HintObjectView, ExistStudentRequiredMixin, RevisionMixin, Updat
 class ProblemUpdate(ProblemObjectView, ExistStudentRequiredMixin, RevisionMixin, UpdateView):
 	context_object_name = "problem"
 	model = Problem
-	form_class = ProblemUpdateFormWithReason
+	form_class = ProblemUpdateForm
 	object: ClassVar[Problem] = Problem()
-
-	def form_valid(self, form: BaseModelForm) -> HttpResponse:
-		reversion.set_comment(form.cleaned_data['reason'] or form.cleaned_data['description'])
-		return super().form_valid(form)
 
 	def get_context_data(self, **kwargs: Any):
 		context = super().get_context_data(**kwargs)
@@ -153,10 +149,7 @@ class ProblemDelete(ProblemObjectView, ExistStudentRequiredMixin, RevisionMixin,
 # this is actually the index page as well :P bit of a hack I guess...
 class ProblemCreate(ExistStudentRequiredMixin, RevisionMixin, CreateView):
 	context_object_name = "problem"
-	fields = (
-		'puid',
-		'description',
-	)
+	fields = ('puid', )
 	model = Problem
 
 	def get_context_data(self, **kwargs: Any):
@@ -173,7 +166,7 @@ def lookup(request: HttpRequest):
 	if request.method == 'POST':
 		form = ProblemSelectForm(request.POST)
 		assert form.is_valid()
-		problem = form.cleaned_data['lookup_problem']
+		problem = form.cleaned_data['problem']
 		return HttpResponseRedirect(problem.get_absolute_url())
 	else:
 		return HttpResponseRedirect(reverse_lazy('arch-index', ))

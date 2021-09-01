@@ -12,17 +12,6 @@ class Problem(models.Model):
 		help_text="Unique problem identifier, as printed in OTIS handout.",
 		unique=True
 	)
-	source = models.CharField(
-		max_length=64,
-		help_text=r"Human-readable source such as 'TSTST 2020/3'. "
-		r"If in doubt on formatting, follow what is written on the handout.",
-		blank=True
-	)
-	description = models.CharField(
-		max_length=255,
-		help_text=r"Short description of problem, e.g. 'Quirky triangles.'. "
-		r"Use sentence case. Used to assist in searching."
-	)
 	aops_url = models.URLField(
 		max_length=128, help_text="URL to problem on AoPS. Include HTTPS.", blank=True
 	)
@@ -32,9 +21,6 @@ class Problem(models.Model):
 
 	def get_absolute_url(self):
 		return reverse_lazy("hint-list", args=(self.puid, ))
-
-	def get_source(self) -> str:
-		return self.source or "(no source)"
 
 	class Meta:
 		ordering = ('puid', )

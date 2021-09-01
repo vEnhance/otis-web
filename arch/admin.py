@@ -15,14 +15,8 @@ class ProblemAdmin(VersionAdmin):
 	list_display = (
 		'id',
 		'puid',
-		'source',
-		'description',
 	)
-	search_fields = (
-		'puid',
-		'source',
-		'description',
-	)
+	search_fields = ('puid', )
 	list_per_page = 100
 	inlines = (HintInline, )
 

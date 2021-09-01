@@ -43,26 +43,9 @@ To be written
 {% block scripts %}
 <script type="text/javascript">
 	$(document).ready(function() {
-		$("#id_lookup_problem").children("option").each(function() {
-			if (!($(this).attr('value'))) {
-				return;
-			}
-			const value = $(this).attr('value'); // is a PID
-			const source = $(this).attr('data-source');
-			const description = $(this).attr('data-description');
-			if (source) {
-				$(this).replaceWith(
-					`<optgroup label="${source}">` +
-					`<option value="${value}">[${value}] ${description}</option>` +
-					`</optgroup>`
-				);
-			} else {
-				$(this).html(`<option value="${value}">[${value}] ${description}</option>`);
-			}
-		});
-		$("#id_lookup_problem").chosen({
+		$("#id_problem").chosen({
 			placeholder_text: "...",
-			width: "99%",
+			width: "90%",
 			search_contains: true,
 		});
 	});
