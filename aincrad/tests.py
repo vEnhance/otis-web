@@ -1,5 +1,6 @@
 from hashlib import sha256
 
+from arch.models import Hint
 from core.factories import UnitFactory
 from dashboard.factories import PSetFactory
 from django.test.utils import override_settings
@@ -91,7 +92,6 @@ class TestVenueQAPI(OTISTestCase):
 				'action': 'add_hints',
 				'puid': '18SLA7',
 				'content': 'get',
-				'number': 20
 			}
 		)
 		self.assertPost20X(
@@ -99,7 +99,6 @@ class TestVenueQAPI(OTISTestCase):
 				'action': 'add_hints',
 				'puid': '18SLA7',
 				'content': 'gud',
-				'number': 50
 			}
 		)
 
@@ -107,3 +106,5 @@ class TestVenueQAPI(OTISTestCase):
 		self.assert20X(resp)
 		out = resp.json()
 		self.assertEqual(len(out['hints']), 2)
+		self.assertTrue(Hint.objects.filter(number=0, content='get').exists())
+		self.assertTrue(Hint.objects.filter(number=10, content='gud').exists())

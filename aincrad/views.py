@@ -182,13 +182,17 @@ def problems_handler(action: str, request: HttpRequest) -> JsonResponse:
 	elif action == 'add_hints':
 		problem = get_object_or_404(Problem, puid=puid)
 		content = request.POST['content']
-		number = request.POST['number']
-		keywords = request.POST.get('keywords', '')
-		if Hint.objects.filter(problem=problem, number=number).exists():
-			return JsonResponse({'result': 'already exists'}, status=400)
-		else:
-			Hint.objects.create(problem=problem, number=number, content=content, keywords=keywords)
-			return JsonResponse({'result': 'success'})
+		existing_hint_numbers = set(
+			Hint.objects.filter(problem=problem).values_list('number', flat=True)
+		)
+		number = 0
+		while number in existing_hint_numbers:
+			number += 10
+		keywords = "imported from discord"
+		hint = Hint.objects.create(
+			problem=problem, number=number, content=content, keywords=keywords
+		)
+		return JsonResponse({'pk': hint.pk})
 	else:
 		raise NotImplementedError(puid)
 
