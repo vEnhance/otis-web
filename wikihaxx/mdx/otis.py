@@ -132,12 +132,16 @@ class OTISPreprocessor(markdown.preprocessors.Preprocessor):
 				line.strip() == "[statement]" and puid is not None and
 				settings.PATH_STATEMENT_ON_DISK is not None
 			):
-				statement_path = Path(settings.PATH_STATEMENT_ON_DISK) / (puid + '.tex')
+				statement_path = Path(settings.PATH_STATEMENT_ON_DISK) / (puid + '.html')
 				if statement_path.exists() and statement_path.is_file():
 					statement = statement_path.read_text()
-					statement = statement.replace('\\', '\\' * 2)
-					statement = statement.replace(r'*', r'\*')
-					statement = statement.replace(r'_', r'\_')
+					statement = statement.replace('\\', '\\\\')
+					statement = statement.replace('[', '\\[')
+					statement = statement.replace(']', '\\]')
+					statement = statement.replace('(', '\\(')
+					statement = statement.replace(')', '\\)')
+					statement = statement.replace('_', '\\_')
+					statement = statement.replace('*', '\\*')
 					output.append(statement)
 				else:
 					output.append(r'*Could not find the problem {puid}*')
