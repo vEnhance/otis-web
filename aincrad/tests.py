@@ -79,3 +79,31 @@ class TestVenueQAPI(OTISTestCase):
 		self.assertAlmostEqual(invoice_alice.total_paid, 250)
 		self.assertAlmostEqual(invoice_bob.adjustment, 0)
 		self.assertAlmostEqual(invoice_bob.total_paid, 480)
+
+	def test_problem(self):
+		resp = self.post('api', data={'action': 'get_hints', 'puid': '18SLA7'})
+		self.assert20X(resp)
+		out = resp.json()
+		self.assertEqual(len(out['hints']), 0)
+
+		self.assertPost20X(
+			'api', data={
+				'action': 'add_hints',
+				'puid': '18SLA7',
+				'content': 'get',
+				'number': 20
+			}
+		)
+		self.assertPost20X(
+			'api', data={
+				'action': 'add_hints',
+				'puid': '18SLA7',
+				'content': 'gud',
+				'number': 50
+			}
+		)
+
+		resp = self.post('api', data={'action': 'get_hints', 'puid': '18SLA7'})
+		self.assert20X(resp)
+		out = resp.json()
+		self.assertEqual(len(out['hints']), 2)

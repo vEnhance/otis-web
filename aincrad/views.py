@@ -2,6 +2,7 @@ from hashlib import sha256
 from typing import Any, Dict
 
 from allauth.socialaccount.models import SocialAccount
+from arch.models import Hint, Problem
 from core.models import Unit
 from dashboard.models import ProblemSuggestion, PSet
 from django.conf import settings
@@ -173,7 +174,23 @@ def discord_handler(action: str, request: HttpRequest) -> JsonResponse:
 
 def problems_handler(action: str, request: HttpRequest) -> JsonResponse:
 	puid = request.POST['puid'].upper()
-	raise NotImplementedError(puid)
+	if action == 'get_hints':
+		problem, _ = Problem.objects.get_or_create(puid=puid)
+		return JsonResponse(
+			{'hints': list(Hint.objects.filter(problem=problem).values('keywords', 'id', 'number'))}
+		)
+	elif action == 'add_hints':
+		problem = get_object_or_404(Problem, puid=puid)
+		content = request.POST['content']
+		number = request.POST['number']
+		keywords = request.POST.get('keywords', '')
+		if Hint.objects.filter(problem=problem, number=number).exists():
+			return JsonResponse({'result': 'already exists'}, status=400)
+		else:
+			Hint.objects.create(problem=problem, number=number, content=content, keywords=keywords)
+			return JsonResponse({'result': 'success'})
+	else:
+		raise NotImplementedError(puid)
 
 
 def invoice_handler(action: str, request: HttpRequest) -> JsonResponse:
@@ -214,7 +231,7 @@ def api(request: HttpRequest) -> JsonResponse:
 		return venueq_handler(action, request)
 	elif action in ('register', ):
 		return discord_handler(action, request)
-	elif action in ('hints', 'create', 'add'):
+	elif action in ('get_hints', 'add_hints'):
 		return problems_handler(action, request)
 	elif action in ('invoice', ):
 		return invoice_handler(action, request)
