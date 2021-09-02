@@ -1,6 +1,6 @@
 {% extends 'layout.html' %}
 {% load static %}
-{% block title %}Hint {{ hint.number }} for {{ hint.problem.get_source }}{% endblock %}
+{% block title %}Hint {{ hint.number }} for {{ hint.problem }}{% endblock %}
 
 {% block layout-content %}
 <p>Here is your hint:</p>
@@ -10,7 +10,7 @@
 
 <ul>
 	<li><a href="{{ hint.problem.get_absolute_url }}">
-			Back to {{ hint.problem.get_source }}</a>
+			Back to {{ hint.problem }}</a>
 </ul>
 <hr />
 <ul>

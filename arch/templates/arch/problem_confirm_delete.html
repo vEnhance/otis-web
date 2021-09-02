@@ -1,12 +1,10 @@
 {% extends 'layout.html' %}
-{% block title %}Delete Problem{% endblock %}
+{% block title %}Delete {{ problem }}{% endblock %}
 {% block layout-content %}
 {% include "generic-delete.html" %}
 <hr />
 <a href="{% url "hint-list" problem.puid %}">&lt;&lt; Go back to problem</a>
 <ul>
-	<li>{{ problem.get_source }}</li>
-	<li>{{ problem.description }} </li>
 	<li><b>{{ problem.hint_set.count }} hints</b></li>
 </ul>
 {% endblock %}

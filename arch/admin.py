@@ -32,7 +32,6 @@ class HintAdmin(VersionAdmin):
 	)
 	search_fields = (
 		'number',
-		'problem__source',
 		'keywords',
 		'content',
 	)
