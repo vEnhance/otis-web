@@ -85,7 +85,7 @@ class Hint(models.Model):
 		)
 
 	def __str__(self):
-		return f"Hint {self.number} for {self.problem}"
+		return f"Hint {self.number}% for {self.problem}"
 
 	def puid(self) -> str:
 		return self.problem.puid
