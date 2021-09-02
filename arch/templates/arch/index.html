@@ -39,7 +39,19 @@ We hope you enjoy your visit.
 
 <h2>Discord integration</h2>
 
-To be written
+<ul>
+	<li>In any channel, type <code>/grab 20IMO6</code>
+		to pull the problem statement and a link to the ARCH entry.
+		This works with any problem identifier.</li>
+	<li>If you're not in a thread, you can omit the <code>/grab</code>
+		and this will still work.</li>
+	<li>To add a hint for the currently discussed problem,
+		just use <code>/hint [type content]</code>.
+		Evil Chin will output a link to the newly created hint,
+		where you can (if you choose) change the number and keywords.
+		(By default, Evil Chin selects the smallest unused multiple of 10 for the number.)
+	</li>
+</ul>
 {% endblock %}
 
 {% block scripts %}
