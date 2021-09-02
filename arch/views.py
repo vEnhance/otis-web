@@ -77,6 +77,11 @@ class HintDetail(HintObjectView, ExistStudentRequiredMixin, DetailView):
 	model = Hint
 
 
+class HintDetailByPK(ExistStudentRequiredMixin, DetailView):
+	context_object_name = "hint"
+	model = Hint
+
+
 class HintUpdate(HintObjectView, ExistStudentRequiredMixin, RevisionMixin, UpdateView):
 	context_object_name = "hint"
 	model = Hint
