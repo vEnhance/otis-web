@@ -1,9 +1,10 @@
 from core.factories import UnitFactory, UnitGroupFactory, UserFactory
+from dashboard.factories import PSetFactory
 from django.shortcuts import get_object_or_404
 from otisweb.tests import OTISTestCase
 
 from roster.factories import AssistantFactory, InvoiceFactory, StudentFactory
-from roster.models import Student
+from roster.models import Student, UnitInquiry
 
 from .views import get_checksum
 
@@ -162,14 +163,32 @@ class RosterTest(OTISTestCase):
 		self.assertEqual(alice.curriculum.count(), 8)
 		self.assertEqual(alice.unlocked_units.count(), 5)
 
-		for i in range(5, 7):
-			self.assertContains(
-				self.post("inquiry", alice.pk, data={
-					'unit': units[i].pk,
-					"action_type": "UNLOCK",
-				}), "Petition automatically approved"
-			)
-
+		self.assertContains(
+			self.post("inquiry", alice.pk, data={
+				'unit': units[5].pk,
+				"action_type": "UNLOCK",
+			}), "Petition automatically approved"
+		)
+		self.assertEqual(alice.curriculum.count(), 9)
+		self.assertEqual(alice.unlocked_units.count(), 6)
+		self.assertContains(
+			self.post("inquiry", alice.pk, data={
+				'unit': units[6].pk,
+				"action_type": "UNLOCK",
+			}), "abnormally large number of petitions"
+		)
+		self.assertEqual(
+			UnitInquiry.objects.filter(student=alice, action_type="UNLOCK").count(), 16
+		)
+		self.assertEqual(alice.curriculum.count(), 9)
+		self.assertEqual(alice.unlocked_units.count(), 6)
+		PSetFactory.create(student=alice, approved=True)
+		self.assertContains(
+			self.post("inquiry", alice.pk, data={
+				'unit': units[6].pk,
+				"action_type": "UNLOCK",
+			}), "Petition automatically approved"
+		)
 		self.assertEqual(alice.curriculum.count(), 10)
 		self.assertEqual(alice.unlocked_units.count(), 7)
 

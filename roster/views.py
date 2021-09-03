@@ -263,23 +263,27 @@ def inquiry(request: HttpRequest, student_id: int) -> HttpResponse:
 					action_type="UNLOCK", status="NEW"
 				).count() + student.unlocked_units.count()
 
-				# auto-acceptance criteria
-				auto_accept_criteria = (inquiry.action_type == "APPEND")
-				auto_accept_criteria |= (inquiry.action_type == "DROP")
-				auto_accept_criteria |= num_past_unlock_inquiries <= 6 and unlocked_count < 9
-				auto_accept_criteria |= (
-					inquiry.action_type == "UNLOCK" and unlocked_count < 9 and
-					current_inquiries.filter(action_type="DROP", status="ACC", unit=inquiry.unit).exists()
-					and not current_inquiries.filter(action_type="APPEND", unit=inquiry.unit).exists()
-				)
-				auto_accept_criteria |= request.user.is_staff
-
 				# auto reject criteria
 				auto_reject_criteria = inquiry.action_type == "UNLOCK" and unlocked_count > 9
 
 				# auto hold criteria
 				num_psets = PSet.objects.filter(student=student).count()
 				auto_hold_criteria = (num_past_unlock_inquiries > (15 + 10 * num_psets))
+
+				# auto-acceptance criteria
+				auto_accept_criteria = (inquiry.action_type == "APPEND")
+				auto_accept_criteria |= (inquiry.action_type == "DROP")
+				auto_accept_criteria |= (
+					num_past_unlock_inquiries <= 6 and unlocked_count < 9 and
+					(not auto_hold_criteria and not auto_reject_criteria)
+				)
+				auto_accept_criteria |= (
+					inquiry.action_type == "UNLOCK" and
+					current_inquiries.filter(action_type="DROP", status="ACC", unit=inquiry.unit).exists()
+					and not current_inquiries.filter(action_type="APPEND", unit=inquiry.unit).exists() and
+					not auto_hold_criteria and not auto_reject_criteria
+				)
+				auto_accept_criteria |= request.user.is_staff
 
 				if auto_accept_criteria:
 					inquiry.run_accept()
