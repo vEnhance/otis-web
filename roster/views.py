@@ -268,18 +268,29 @@ def inquiry(request: HttpRequest, student_id: int) -> HttpResponse:
 				auto_accept_criteria |= (inquiry.action_type == "DROP")
 				auto_accept_criteria |= num_past_unlock_inquiries <= 6 and unlocked_count < 9
 				auto_accept_criteria |= (
-					num_past_unlock_inquiries < 25 and inquiry.action_type == "UNLOCK" and
-					unlocked_count < 9 and
+					inquiry.action_type == "UNLOCK" and unlocked_count < 9 and
 					current_inquiries.filter(action_type="DROP", status="ACC", unit=inquiry.unit).exists()
+					and not current_inquiries.filter(action_type="APPEND", unit=inquiry.unit).exists()
 				)
 				auto_accept_criteria |= request.user.is_staff
 
 				# auto reject criteria
 				auto_reject_criteria = inquiry.action_type == "UNLOCK" and unlocked_count > 9
 
+				# auto hold criteria
+				num_psets = PSet.objects.filter(student=student).count()
+				auto_hold_criteria = (num_past_unlock_inquiries < (15 + 10 * num_psets))
+
 				if auto_accept_criteria:
 					inquiry.run_accept()
 					messages.success(request, "Inquiry automatically approved.")
+				elif auto_hold_criteria:
+					inquiry.status = "HOLD"
+					inquiry.save()
+					messages.warning(
+						request, "You have submitted an abnormally large number of inquiries " +
+						"so you should contact Evan specially to explain why."
+					)
 				elif auto_reject_criteria:
 					inquiry.status = "REJ"
 					inquiry.save()
