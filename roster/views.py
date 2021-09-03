@@ -279,7 +279,7 @@ def inquiry(request: HttpRequest, student_id: int) -> HttpResponse:
 
 				# auto hold criteria
 				num_psets = PSet.objects.filter(student=student).count()
-				auto_hold_criteria = (num_past_unlock_inquiries < (15 + 10 * num_psets))
+				auto_hold_criteria = (num_past_unlock_inquiries > (15 + 10 * num_psets))
 
 				if auto_accept_criteria:
 					inquiry.run_accept()
