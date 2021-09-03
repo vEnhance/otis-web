@@ -252,7 +252,7 @@ def inquiry(request: HttpRequest, student_id: int) -> HttpResponse:
 				status="NEW",
 			).exists():
 				messages.warning(
-					request, "The same inquiry already was "
+					request, "The same petition already was "
 					"submitted within the last 90 seconds."
 				)
 			else:
@@ -283,12 +283,12 @@ def inquiry(request: HttpRequest, student_id: int) -> HttpResponse:
 
 				if auto_accept_criteria:
 					inquiry.run_accept()
-					messages.success(request, "Inquiry automatically approved.")
+					messages.success(request, "Petition automatically approved.")
 				elif auto_hold_criteria:
 					inquiry.status = "HOLD"
 					inquiry.save()
 					messages.warning(
-						request, "You have submitted an abnormally large number of inquiries " +
+						request, "You have submitted an abnormally large number of petitions " +
 						"so you should contact Evan specially to explain why."
 					)
 				elif auto_reject_criteria:
@@ -298,7 +298,7 @@ def inquiry(request: HttpRequest, student_id: int) -> HttpResponse:
 						request, "You can't have more than 9 unfinished units unlocked at once."
 					)
 				else:
-					messages.success(request, "Inquiry submitted, should be approved soon!")
+					messages.success(request, "Petition submitted, wait for it!")
 	else:
 		form = InquiryForm()
 	context['form'] = form

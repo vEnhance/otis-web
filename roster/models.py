@@ -390,7 +390,7 @@ class UnitInquiry(models.Model):
 			("HOLD", "On hold"),
 		),
 		default="NEW",
-		help_text="The current status of the inquiry."
+		help_text="The current status of the petition."
 	)
 	explanation = models.TextField(
 		max_length=300, blank=True, help_text="Short explanation for this request (if needed)."

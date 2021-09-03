@@ -21,21 +21,21 @@
 </script>
 {% endblock %}
 
-{% block title %}Unit inquiry{% endblock %}
+{% block title %}Unit petition{% endblock %}
 
 {% block layout-content %}
-<p>A <b>unit inquiry</b> lets you make requests
+<p>A <b>unit petition</b> lets you make requests
 	for changes to your set of units.
-	Here you can open new inquiries
+	Here you can open new petitions
 	and see the status of previous ones.</p>
-<p>I try to respond to inquiries somewhat regularly,
+<p>I try to respond to petitions somewhat regularly,
 	but if I don't get to yours for a few days,
 	please send me a reminder.</p>
 
-<h2>New inquiry</h2>
-{% include "generic-form.html" with submit_name="Inquire" %}
+<h2>New petition</h2>
+{% include "generic-form.html" with submit_name="Send" %}
 
-<h2>Current inquiries</h2>
+<h2>Current petitions</h2>
 <table class="table">
 	<thead class="thead-dark">
 		<tr>
@@ -90,11 +90,11 @@
 	</li>
 	<li><b>Add for later</b>:
 		The unit is added to the list, but not unlocked.
-		Inquiries of this form are approved automatically.
+		Petitions of this form are approved automatically.
 	</li>
 	<li><b>Drop</b>:
 		This removes a unit entirely from your list.
-		Inquiries of this form are approved automatically.
+		Petitions of this form are approved automatically.
 		(Be careful what you wish for!)
 		Note that this does not automatically "replace" the dropped unit.
 	</li>
