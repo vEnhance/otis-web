@@ -7,3 +7,15 @@
 	so if for some reason you need to rewind some edits,
 	please contact a staff member for assistance.</p>
 {% endblock %}
+
+{% block scripts %}
+<script type="text/javascript">
+	$(document).ready(function() {
+		$("#id_problem").chosen({
+			placeholder_text: "...",
+			width: "90%",
+			search_contains: true,
+		});
+	});
+</script>
+{% endblock %}

@@ -9,6 +9,7 @@ class HintUpdateFormWithReason(forms.ModelForm):
 	class Meta:
 		model = Hint
 		fields = (
+			'problem',
 			'number',
 			'keywords',
 			'content',
