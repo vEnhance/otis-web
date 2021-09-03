@@ -185,14 +185,17 @@ def problems_handler(action: str, request: HttpRequest) -> JsonResponse:
 		existing_hint_numbers = set(
 			Hint.objects.filter(problem=problem).values_list('number', flat=True)
 		)
-		number = 0
-		while number in existing_hint_numbers:
-			number += 10
-		keywords = "imported from discord"
+		if 'number' in request.POST:
+			number = int(request.POST['number'])
+		else:
+			number = 0
+			while number in existing_hint_numbers:
+				number += 10
+		keywords = request.POST.get('keywords', "imported from discord")
 		hint = Hint.objects.create(
 			problem=problem, number=number, content=content, keywords=keywords
 		)
-		return JsonResponse({'pk': hint.pk})
+		return JsonResponse({'pk': hint.pk, 'number': number})
 	else:
 		raise NotImplementedError(puid)
 
