@@ -32,6 +32,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 from django.views.generic.edit import UpdateView
+from dwhandler import ACTION_LOG_LEVEL
 from mailchimp3 import MailChimp
 from mailchimp3.mailchimpclient import MailChimpError
 
@@ -366,7 +367,7 @@ def register(request: HttpRequest) -> HttpResponse:
 				mailchimp_subscribe(request.user)
 				messages.success(request, message="Submitted! Sit tight.")
 				logging.log(
-					settings.ACTION_LOG_LEVEL,
+					ACTION_LOG_LEVEL,
 					f'New registration from {request.user.first_name} {request.user.last_name}'
 				)
 				return HttpResponseRedirect(reverse("index"))

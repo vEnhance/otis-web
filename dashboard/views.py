@@ -26,6 +26,7 @@ from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
+from dwhandler import SUCCESS_LOG_LEVEL, VERBOSE_LOG_LEVEL
 from exams.models import ExamAttempt, PracticeExam
 from mailchimp3 import MailChimp
 from roster.models import Student, StudentRegistration
@@ -203,7 +204,7 @@ def stats(request: HttpRequest, student_id: int) -> HttpResponse:
 				except Achievement.DoesNotExist:
 					messages.error(request, "You entered an invalid code.")
 				else:
-					logging.log(settings.SUCCESS_LOG_LEVEL, f"{student.name} obtained {achievement}")
+					logging.log(SUCCESS_LOG_LEVEL, f"{student.name} obtained {achievement}")
 					AchievementUnlock.objects.create(user=student.user, achievement=achievement)
 					context['obtained_achievement'] = achievement
 			form = DiamondsForm()
@@ -320,7 +321,7 @@ def submit_pset(request: HttpRequest, student_id: int) -> HttpResponse:
 				request, "The problem set is submitted successfully "
 				"and is pending review!"
 			)
-			logging.log(settings.VERBOSE_LOG_LEVEL, f"{student} submitted for {pset.unit}")
+			logging.log(VERBOSE_LOG_LEVEL, f"{student} submitted for {pset.unit}")
 
 	# TODO more stats
 	context = {

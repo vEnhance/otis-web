@@ -8,11 +8,11 @@ import sys
 from pathlib import Path
 from typing import Any, Dict
 
-import discordLogging
+import dwhandler
 import import_export.tmp_storages
 from dotenv import load_dotenv
 
-assert discordLogging
+assert dwhandler is not None
 
 BASE_DIR = Path(__file__).parent.parent.absolute()
 ENV_PATH = BASE_DIR / '.env'
@@ -230,13 +230,6 @@ def filter_useless_404(record: logging.LogRecord) -> bool:
 	return ret
 
 
-VERBOSE_LOG_LEVEL = 15
-SUCCESS_LOG_LEVEL = 25
-ACTION_LOG_LEVEL = 35
-logging.addLevelName(VERBOSE_LOG_LEVEL, "VERBOSE")
-logging.addLevelName(SUCCESS_LOG_LEVEL, "SUCCESS")
-logging.addLevelName(ACTION_LOG_LEVEL, "ACTION")
-
 LOGGING = {
 	'version': 1,
 	'disable_existing_loggers': False,
@@ -273,7 +266,7 @@ LOGGING = {
 				},
 			'discord':
 				{
-					'class': 'discordLogging.DiscordHandler',
+					'class': 'dwhandler.DiscordWebhookHandler',
 					'level': 'VERBOSE',
 					'filters': ['require_debug_false', 'filter_useless_404'],
 				}
@@ -308,4 +301,4 @@ LOGGING = {
 		},
 }
 if TESTING:
-	logging.disable(ACTION_LOG_LEVEL)
+	logging.disable(dwhandler.ACTION_LOG_LEVEL)
