@@ -108,14 +108,14 @@ class RosterTest(OTISTestCase):
 					"action_type": "UNLOCK",
 				}
 			)
-			self.assertContains(resp, "Inquiry automatically approved")
+			self.assertContains(resp, "Petition automatically approved")
 		self.assertEqual(alice.curriculum.count(), 6)
 		self.assertEqual(alice.unlocked_units.count(), 6)
 		self.assertContains(
 			self.post("inquiry", alice.pk, data={
 				'unit': units[19].pk,
 				"action_type": "UNLOCK",
-			}), "should be approved soon!"
+			}), "Petition submitted, wait for it!"
 		)
 		self.assertEqual(alice.curriculum.count(), 6)
 		self.assertEqual(alice.unlocked_units.count(), 6)
@@ -126,7 +126,7 @@ class RosterTest(OTISTestCase):
 				self.post("inquiry", alice.pk, data={
 					'unit': units[i].pk,
 					"action_type": "UNLOCK",
-				}), "Inquiry automatically approved"
+				}), "Petition automatically approved"
 			)
 		self.assertEqual(alice.curriculum.count(), 10)
 		self.assertEqual(alice.unlocked_units.count(), 10)
@@ -147,7 +147,7 @@ class RosterTest(OTISTestCase):
 				self.post("inquiry", alice.pk, data={
 					'unit': units[i].pk,
 					"action_type": "APPEND",
-				}), "Inquiry automatically approved"
+				}), "Petition automatically approved"
 			)
 		self.assertEqual(alice.curriculum.count(), 13)
 		self.assertEqual(alice.unlocked_units.count(), 10)
@@ -157,7 +157,7 @@ class RosterTest(OTISTestCase):
 				self.post("inquiry", alice.pk, data={
 					'unit': units[i].pk,
 					"action_type": "DROP",
-				}), "Inquiry automatically approved"
+				}), "Petition automatically approved"
 			)
 		self.assertEqual(alice.curriculum.count(), 8)
 		self.assertEqual(alice.unlocked_units.count(), 5)
@@ -167,7 +167,7 @@ class RosterTest(OTISTestCase):
 				self.post("inquiry", alice.pk, data={
 					'unit': units[i].pk,
 					"action_type": "UNLOCK",
-				}), "Inquiry automatically approved"
+				}), "Petition automatically approved"
 			)
 
 		self.assertEqual(alice.curriculum.count(), 10)
