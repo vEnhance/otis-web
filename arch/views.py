@@ -101,6 +101,25 @@ class HintUpdate(HintObjectView, ExistStudentRequiredMixin, RevisionMixin, Updat
 		return self.object.get_absolute_url()
 
 
+class HintUpdateByPK(ExistStudentRequiredMixin, RevisionMixin, UpdateView):
+	context_object_name = "hint"
+	model = Hint
+	form_class = HintUpdateFormWithReason
+	object: ClassVar[Hint] = Hint()
+
+	def form_valid(self, form: BaseModelForm) -> HttpResponse:
+		reversion.set_comment(form.cleaned_data['reason'] or form.cleaned_data['content'])
+		return super().form_valid(form)
+
+	def get_context_data(self, **kwargs: Any) -> ContextType:
+		context = super().get_context_data(**kwargs)
+		context['problem'] = self.object.problem
+		return context
+
+	def get_success_url(self):
+		return self.object.get_absolute_url()
+
+
 class ProblemUpdate(ProblemObjectView, ExistStudentRequiredMixin, RevisionMixin, UpdateView):
 	context_object_name = "problem"
 	model = Problem
