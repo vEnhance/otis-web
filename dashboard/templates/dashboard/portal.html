@@ -113,6 +113,8 @@
 </ol>
 <hr />
 {% else %}
+
+{% if request.user.profile and request.user.profile.show_bars %}
 <h1>Level {{ level_number }} &mdash;
 	<a href="{% url "stats" student.id %}">🏅{{ level_name }}</a></h1>
 
@@ -124,6 +126,10 @@
 		{% include "dashboard/meters/small.html" with meter=meters.diamonds %}
 	</div>
 </div>
+{% else %}
+<h1>Welcome back</h1>
+<p>You are logged in as <code>{{ request.user.username }}</code>.</p>
+{% endif %}
 
 <div class="text-center">
 	<a href="{% url "stats" student.id %}" style="margin: 0 auto; width: 120px;" class="btn btn-primary text-white" role="button">View stats</a>
