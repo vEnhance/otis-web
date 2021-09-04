@@ -6,7 +6,7 @@ from factory.django import DjangoModelFactory
 from factory.fuzzy import FuzzyChoice
 from otisweb.tests import UniqueFaker
 
-from core.models import Semester, Unit, UnitGroup
+from core.models import Semester, Unit, UnitGroup, UserProfile
 
 User = get_user_model()
 
@@ -49,3 +49,10 @@ class SemesterFactory(DjangoModelFactory):
 	name = Sequence(lambda n: f"Year {n + 1}")
 	active = True
 	exam_family = 'Waltz'
+
+
+class UserProfileFactory(DjangoModelFactory):
+	class Meta:
+		model = UserProfile
+
+	user = SubFactory(UserFactory)
