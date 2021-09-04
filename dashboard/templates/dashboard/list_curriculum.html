@@ -32,7 +32,7 @@
 			{% endif %}
 		{% elif not row.is_visible %}
 			unit-locked
-			{% if request.user.profile and not request.user.profile.show_completed_by_default %}
+			{% if request.user.profile and not request.user.profile.show_locked_by_default %}
 				unit-locked-hidden
 			{% endif %}
 		{% endif %}
