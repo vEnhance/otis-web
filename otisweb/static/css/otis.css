@@ -65,7 +65,7 @@ table.table tr.subjectG:nth-child(odd) {
 table.table tr.subjectC:nth-child(odd) {
 	background-color: #aaddff;
 }
-table.table tr.subjectA:nth-child(odd), /* vvvv */
+table.table tr.subjectA:nth-child(odd),
 table.table tr.subjectF:nth-child(odd) {
 	background-color: #ffaaaa;
 }
@@ -82,7 +82,7 @@ table.table tr.subjectG:nth-child(even) {
 table.table tr.subjectC:nth-child(even) {
 	background-color: #a5d5f5;
 }
-table.table tr.subjectA:nth-child(even), /* vvvv */
+table.table tr.subjectA:nth-child(even),
 table.table tr.subjectF:nth-child(even) {
 	background-color: #f5a5a5;
 }
@@ -139,4 +139,12 @@ a.emoji-link {
 
 a.emoji-link:hover {
 	text-shadow: 0 0 5px #ff0;
+}
+
+table.curriculum tr.unit-locked-hidden {
+	display: none;
+}
+
+table.curriculum tr.unit-completed-hidden {
+	display: none;
 }
