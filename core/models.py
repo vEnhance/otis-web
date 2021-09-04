@@ -1,10 +1,12 @@
 from __future__ import unicode_literals
 
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.urls import reverse, reverse_lazy
 from django.utils.text import slugify
 from positions import PositionField
 
+User = get_user_model()
 # Create your models here.
 
 
@@ -168,3 +170,33 @@ class Unit(models.Model):
 
 	def get_absolute_url(self):
 		return reverse("view-problems", args=(self.pk, ))
+
+
+class UserProfile(models.Model):
+	user = models.OneToOneField(
+		User,
+		on_delete=models.CASCADE,
+		help_text="The user these preferences belong to",
+		related_name="profile",
+	)
+
+	show_bars = models.BooleanField(
+		verbose_name="Level bars",
+		help_text="Displays the level bars on the main portal",
+		default=True
+	)
+
+	show_completed_by_default = models.BooleanField(
+		verbose_name="Show completed",
+		help_text="Displays completed units on the main portal by default",
+		default=True
+	)
+
+	show_locked_by_default = models.BooleanField(
+		verbose_name="Show locked",
+		help_text="Displays locked units on the main portal by default",
+		default=True
+	)
+
+	def __str__(self) -> str:
+		return f"Prefs for {self.user.username}"

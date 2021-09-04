@@ -2,6 +2,8 @@ from django.contrib import admin
 from import_export import fields, resources, widgets
 from import_export.admin import ImportExportModelAdmin
 
+from core.models import UserProfile
+
 from .models import Semester, Unit, UnitGroup
 
 # Register your models here.
@@ -106,10 +108,14 @@ class UnitGroupIEResource(resources.ModelResource):
 @admin.register(UnitGroup)
 class UnitGroupAdmin(ImportExportModelAdmin):
 	list_display = (
+		'pk',
 		'name',
 		'subject',
-		'id',
 		'description',
+	)
+	list_display_links = (
+		'pk',
+		'name',
 	)
 	search_fields = (
 		'name',
@@ -120,3 +126,16 @@ class UnitGroupAdmin(ImportExportModelAdmin):
 	list_per_page = 150
 	list_max_show_all = 400
 	inlines = (UnitInline, )
+
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+	list_display = (
+		'pk',
+		'user',
+	)
+	search_fields = (
+		'user__first_name',
+		'user__last_name',
+		'user__username',
+	)
