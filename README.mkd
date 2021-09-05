@@ -19,27 +19,30 @@ up a local server on a standard Unix environment.
 	`git clone https://github.com/USERNAME/otis-web`.
 	Replace `USERNAME` with your username if you're forking;
 	otherwise, replace with `vEnhance`.
-3. You probably want to create a new virtual environment
+3. Run `git submodule --init --recursive` in order to pull the `dwhandler` submodule.
+	If this is done correctly, the folder `dwhandler` should be nonempty and
+	a file called `__init__.py` which defines `class DiscordWebhookHandler`.
+4. You probably want to create a new virtual environment
 	to avoid polluting your system with all the dependencies.
 	If you've used `conda` or `virtualenv` or similar before, you know the drill.
 	Otherwise, [read through the steps here][venv]
 	to create a wrapper for OTIS-WEB.
-3. If things are working,
+5. If things are working,
 	you should be able to run in the virtual environment
 	and then run `pip install poetry`.
 	This enables you to use the `poetry` command;
 	verify this by checking `poetry --help` produces a help message.
-4. Once you have `poetry`, hit `poetry install`.
+6. Once you have `poetry`, hit `poetry install`.
 	This will install a lot of Python into your virtual environment.
-5. If everything is working, `python manage.py check` should
+7. If everything is working, `python manage.py check` should
 	run with no errors.
-6. Run `python manage.py migrate` to create the local database.
-7. Run `python manage.py createsuperuser` to create an admin user.
-8. Run `python manage.py runserver`.
+8. Run `python manage.py migrate` to create the local database.
+9. Run `python manage.py createsuperuser` to create an admin user.
+10. Run `python manage.py runserver`.
 	The command will spin up a continuously running server.
-9. Point your browser to `http://127.0.0.1:8000`.
+11. Point your browser to `http://127.0.0.1:8000`.
 	You should be able to log in with the user you defined in step 7.
-10. The website is functional now, but it is a bit bare-bones.
+12. The website is functional now, but it is a bit bare-bones.
 	To populate it with some test data, you can optionally run
 	the command `python manage.py loaddata otisweb/fixtures/testdata.yaml`.
 
