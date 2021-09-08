@@ -1,7 +1,10 @@
 from __future__ import unicode_literals
 
+from typing import Callable
+
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.db.models.manager import BaseManager
 from django.urls import reverse, reverse_lazy
 from django.utils.text import slugify
 from positions import PositionField
@@ -78,6 +81,10 @@ class Semester(models.Model):
 class UnitGroup(models.Model):
 	"""Represents an entire group of units with the same name,
 	differing only in difficulty and version"""
+	objects: BaseManager['UnitGroup']
+	unit_set: BaseManager['Unit']
+	get_subject_display: Callable[[], str]
+
 	name = models.CharField(
 		max_length=255, unique=True, help_text="The display name for the handout, like 'Weird Geo'"
 	)

@@ -21,6 +21,7 @@ from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http import HttpResponse, HttpResponseRedirect  # NOQA
 from django.http.request import HttpRequest
+from django.http.response import HttpResponseBase
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
@@ -222,7 +223,7 @@ def stats(request: HttpRequest, student_id: int) -> HttpResponse:
 	return render(request, "dashboard/stats.html", context)
 
 
-class AchievementList(LoginRequiredMixin, ListView):
+class AchievementList(LoginRequiredMixin, ListView[Achievement]):
 	template_name = 'dashboard/diamond_list.html'
 
 	def get_queryset(self) -> QuerySet[Achievement]:
@@ -237,11 +238,11 @@ class AchievementList(LoginRequiredMixin, ListView):
 		).order_by('-obtained', '-num_found')
 
 
-class FoundList(LoginRequiredMixin, StaffuserRequiredMixin, ListView):
+class FoundList(LoginRequiredMixin, StaffuserRequiredMixin, ListView[Achievement]):
 	raise_exception = True
 	template_name = 'dashboard/found_list.html'
 
-	def get_queryset(self) -> QuerySet[AchievementUnlock]:
+	def get_queryset(self) -> QuerySet[Achievement]:
 		self.achievement = get_object_or_404(Achievement, pk=self.kwargs['pk'])
 		return AchievementUnlock.objects.filter(
 			achievement=self.achievement,
@@ -342,7 +343,7 @@ def submit_pset(request: HttpRequest, student_id: int) -> HttpResponse:
 @login_required
 def uploads(request: HttpRequest, student_id: int, unit_id: int) -> HttpResponse:
 	student = get_student_by_id(request, student_id)
-	unit = get_object_or_404(Unit.objects, id=unit_id)
+	unit = get_object_or_404(Unit, id=unit_id)
 	uploads = UploadedFile.objects.filter(benefactor=student, unit=unit)
 	if not student.check_unit_unlocked(unit) and not uploads.exists():
 		raise PermissionDenied("This unit is not unlocked yet")
@@ -419,7 +420,7 @@ def past(request: HttpRequest, semester: Semester = None):
 	return render(request, "dashboard/stulist.html", context)
 
 
-class UpdateFile(LoginRequiredMixin, UpdateView):
+class UpdateFile(LoginRequiredMixin, UpdateView[UploadedFile, BaseModelForm[UploadedFile]]):
 	model = UploadedFile
 	fields = (
 		'category',
@@ -469,12 +470,14 @@ def idlewarn(request: HttpRequest) -> HttpResponse:
 	newest = newest_qset.order_by('-created_at').values('created_at')[:1]
 
 	students = annotate_multiple_students(get_visible_students(request.user).filter(legit=True))
-	context['students'] = students.annotate(latest_pset=Subquery(newest)).order_by('latest_pset')
+	students = students.annotate(latest_pset=Subquery(newest))  # type: ignore
+	students = students.order_by('latest_pset')
+	context['students'] = students
 
 	return render(request, "dashboard/idlewarn.html", context)
 
 
-class DownloadList(LoginRequiredMixin, ListView):
+class DownloadList(LoginRequiredMixin, ListView[SemesterDownloadFile]):
 	template_name = 'dashboard/download_list.html'
 
 	def get_queryset(self) -> QuerySet[SemesterDownloadFile]:
@@ -482,12 +485,12 @@ class DownloadList(LoginRequiredMixin, ListView):
 		return SemesterDownloadFile.objects.filter(semester=student.semester)
 
 
-class PSetDetail(LoginRequiredMixin, DetailView):
+class PSetDetail(LoginRequiredMixin, DetailView[PSet]):
 	template_name = 'dashboard/pset_detail.html'
 	model = PSet
 	object_name = 'pset'
 
-	def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+	def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
 		pset = self.get_object()
 		assert isinstance(pset, PSet)
 		if not can_view(request, pset.student):
@@ -495,7 +498,9 @@ class PSetDetail(LoginRequiredMixin, DetailView):
 		return super(DetailView, self).dispatch(request, *args, **kwargs)
 
 
-class ProblemSuggestionCreate(LoginRequiredMixin, CreateView):
+class ProblemSuggestionCreate(
+	LoginRequiredMixin, CreateView[ProblemSuggestion, BaseModelForm[ProblemSuggestion]]
+):
 	context_object_name = "problem_suggestion"
 	fields = (
 		'unit',
@@ -515,7 +520,7 @@ class ProblemSuggestionCreate(LoginRequiredMixin, CreateView):
 			initial['unit'] = self.kwargs['unit_id']
 		return initial
 
-	def form_valid(self, form: BaseModelForm):
+	def form_valid(self, form: BaseModelForm[ProblemSuggestion]):
 		if 'student_id' in self.kwargs:
 			form.instance.student = get_student_by_id(self.request, self.kwargs['student_id'])
 		else:
@@ -538,7 +543,9 @@ class ProblemSuggestionCreate(LoginRequiredMixin, CreateView):
 		return context
 
 
-class ProblemSuggestionUpdate(LoginRequiredMixin, UpdateView):
+class ProblemSuggestionUpdate(
+	LoginRequiredMixin, UpdateView[ProblemSuggestion, BaseModelForm[ProblemSuggestion]]
+):
 	context_object_name = "problem_suggestion"
 	fields = (
 		'unit',
@@ -556,7 +563,7 @@ class ProblemSuggestionUpdate(LoginRequiredMixin, UpdateView):
 	def get_success_url(self):
 		return reverse_lazy("suggest-update", kwargs=self.kwargs)
 
-	def form_valid(self, form: BaseModelForm):
+	def form_valid(self, form: BaseModelForm[ProblemSuggestion]):
 		messages.success(self.request, "Edits saved.")
 		return super().form_valid(form)
 
@@ -568,7 +575,7 @@ class ProblemSuggestionUpdate(LoginRequiredMixin, UpdateView):
 		return context
 
 
-class ProblemSuggestionList(LoginRequiredMixin, ListView):
+class ProblemSuggestionList(LoginRequiredMixin, ListView[ProblemSuggestion]):
 	context_object_name = "problem_suggestions"
 
 	def get_queryset(self):

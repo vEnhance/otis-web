@@ -8,7 +8,9 @@ from django.shortcuts import get_object_or_404
 from . import models
 
 
-def get_current_students(queryset: QuerySet[models.Student] = models.Student.objects):
+def get_current_students(queryset: QuerySet[models.Student] = None):
+	if queryset is None:
+		queryset = models.Student.objects.all()
 	return queryset.filter(semester__active=True)
 
 
@@ -39,7 +41,7 @@ def get_student_by_id(
 	"""Returns an ordered pair containing a Student object and
 	a boolean indicating whether editing is allowed (is instructor)."""
 
-	student = get_object_or_404(models.Student.objects, id=student_id)
+	student = get_object_or_404(models.Student, id=student_id)
 
 	if not isinstance(request.user, User):
 		raise PermissionDenied("Authentication is needed, how did you even get here?")
@@ -74,4 +76,4 @@ def can_edit(request: HttpRequest, student: models.Student) -> bool:
 
 
 def infer_student(request: HttpRequest) -> models.Student:
-	return get_object_or_404(models.Student.objects, semester__active=True, user=request.user)
+	return get_object_or_404(models.Student, semester__active=True, user=request.user)

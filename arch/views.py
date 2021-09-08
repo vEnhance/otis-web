@@ -58,7 +58,7 @@ class ProblemObjectView:
 		return get_object_or_404(queryset, puid=self.kwargs['puid'])
 
 
-class HintList(ExistStudentRequiredMixin, ListView):
+class HintList(ExistStudentRequiredMixin, ListView[Hint]):
 	context_object_name = "hint_list"
 
 	def get_queryset(self):
@@ -72,23 +72,26 @@ class HintList(ExistStudentRequiredMixin, ListView):
 		return context
 
 
-class HintDetail(HintObjectView, ExistStudentRequiredMixin, DetailView):
+class HintDetail(HintObjectView, ExistStudentRequiredMixin, DetailView[Hint]):
 	context_object_name = "hint"
 	model = Hint
 
 
-class HintDetailByPK(ExistStudentRequiredMixin, DetailView):
+class HintDetailByPK(ExistStudentRequiredMixin, DetailView[Hint]):
 	context_object_name = "hint"
 	model = Hint
 
 
-class HintUpdate(HintObjectView, ExistStudentRequiredMixin, RevisionMixin, UpdateView):
+class HintUpdate(
+	HintObjectView, ExistStudentRequiredMixin, RevisionMixin,
+	UpdateView[Hint, HintUpdateFormWithReason]
+):
 	context_object_name = "hint"
 	model = Hint
 	form_class = HintUpdateFormWithReason
 	object: ClassVar[Hint] = Hint()
 
-	def form_valid(self, form: BaseModelForm) -> HttpResponse:
+	def form_valid(self, form: HintUpdateFormWithReason) -> HttpResponse:
 		reversion.set_comment(form.cleaned_data['reason'] or form.cleaned_data['content'])
 		return super().form_valid(form)
 
@@ -101,13 +104,15 @@ class HintUpdate(HintObjectView, ExistStudentRequiredMixin, RevisionMixin, Updat
 		return self.object.get_absolute_url()
 
 
-class HintUpdateByPK(ExistStudentRequiredMixin, RevisionMixin, UpdateView):
+class HintUpdateByPK(
+	ExistStudentRequiredMixin, RevisionMixin, UpdateView[Hint, HintUpdateFormWithReason]
+):
 	context_object_name = "hint"
 	model = Hint
 	form_class = HintUpdateFormWithReason
 	object: ClassVar[Hint] = Hint()
 
-	def form_valid(self, form: BaseModelForm) -> HttpResponse:
+	def form_valid(self, form: HintUpdateFormWithReason) -> HttpResponse:
 		reversion.set_comment(form.cleaned_data['reason'] or form.cleaned_data['content'])
 		return super().form_valid(form)
 
@@ -120,7 +125,10 @@ class HintUpdateByPK(ExistStudentRequiredMixin, RevisionMixin, UpdateView):
 		return self.object.get_absolute_url()
 
 
-class ProblemUpdate(ProblemObjectView, ExistStudentRequiredMixin, RevisionMixin, UpdateView):
+class ProblemUpdate(
+	ProblemObjectView, ExistStudentRequiredMixin, RevisionMixin,
+	UpdateView[Problem, BaseModelForm[Problem]]
+):
 	context_object_name = "problem"
 	model = Problem
 	fields = (
@@ -138,7 +146,9 @@ class ProblemUpdate(ProblemObjectView, ExistStudentRequiredMixin, RevisionMixin,
 		return self.object.get_absolute_url()  # type: ignore
 
 
-class HintCreate(ExistStudentRequiredMixin, RevisionMixin, CreateView):
+class HintCreate(
+	ExistStudentRequiredMixin, RevisionMixin, CreateView[Hint, BaseModelForm[Hint]]
+):
 	context_object_name = "hint"
 	fields = (
 		'problem',
@@ -174,7 +184,9 @@ class ProblemDelete(ProblemObjectView, ExistStudentRequiredMixin, RevisionMixin,
 
 
 # this is actually the index page as well :P bit of a hack I guess...
-class ProblemCreate(ExistStudentRequiredMixin, RevisionMixin, CreateView):
+class ProblemCreate(
+	ExistStudentRequiredMixin, RevisionMixin, CreateView[Problem, BaseModelForm[Problem]]
+):
 	context_object_name = "problem"
 	fields = ('puid', )
 	model = Problem

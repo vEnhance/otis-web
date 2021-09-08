@@ -26,6 +26,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
+from django.forms.models import BaseModelForm
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect  # NOQA
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -205,7 +206,9 @@ def master_schedule(request: HttpRequest) -> HttpResponse:
 	return render(request, "roster/master-schedule.html", context)
 
 
-class UpdateInvoice(LoginRequiredMixin, StaffuserRequiredMixin, UpdateView):
+class UpdateInvoice(
+	LoginRequiredMixin, StaffuserRequiredMixin, UpdateView[Invoice, BaseModelForm[Invoice]]
+):
 	model = Invoice
 	fields = (
 		'preps_taught',

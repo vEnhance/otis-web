@@ -6,7 +6,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import PermissionDenied
+from django.db.models.base import Model
 from django.db.models.query import QuerySet
+from django.forms.models import BaseModelForm
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.http.response import HttpResponseNotFound
 from django.shortcuts import get_object_or_404
@@ -23,7 +25,7 @@ from .utils import get_from_google_storage
 # Create your views here.
 
 
-class UnitGroupListView(ListView):
+class UnitGroupListView(ListView[UnitGroup]):
 	model = UnitGroup
 	queryset = UnitGroup.objects.all().order_by('subject', 'name').prefetch_related('unit_set')
 
@@ -85,7 +87,9 @@ def classroom(request: HttpRequest):
 		return HttpResponseNotFound('No classroom URL')
 
 
-class UserProfileUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
+class UserProfileUpdateView(
+	LoginRequiredMixin, SuccessMessageMixin, UpdateView[UserProfile, BaseModelForm[UserProfile]]
+):
 	model = UserProfile
 	fields = ('show_bars', 'show_completed_by_default', 'show_locked_by_default')
 	success_url = reverse_lazy("profile")
@@ -94,6 +98,6 @@ class UserProfileUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView)
 	def get_success_message(self, cleaned_data: Dict[str, Any]) -> str:
 		return f"Updated settings for {self.object.user.username}!"
 
-	def get_object(self, queryset: QuerySet[UserProfile] = None) -> UserProfile:
+	def get_object(self, queryset: QuerySet[Model] = None) -> UserProfile:
 		userprofile, _ = UserProfile.objects.get_or_create(user=self.request.user)
 		return userprofile

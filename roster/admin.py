@@ -4,6 +4,7 @@ from core.models import Semester, Unit
 from django.contrib import admin, messages
 from django.contrib.auth.models import User
 from django.db.models import F, FloatField, QuerySet
+from django.db.models.base import Model
 from django.db.models.functions import Cast
 from django.http import HttpRequest
 from import_export import fields, resources, widgets
@@ -100,7 +101,7 @@ class OwedFilter(admin.SimpleListFilter):
 	def lookups(self, request: HttpRequest, model_admin: 'InvoiceAdmin') -> List[Tuple[str, str]]:
 		return [("incomplete", "Incomplete"), ("paid", "Paid in full"), ("zero", "No payment")]
 
-	def queryset(self, request: HttpRequest, queryset: QuerySet[Invoice]):
+	def queryset(self, request: HttpRequest, queryset: QuerySet[Model]):
 		if self.value() is None:
 			return queryset
 		else:
