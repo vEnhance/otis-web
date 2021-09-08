@@ -8,9 +8,12 @@ import sys
 from pathlib import Path
 from typing import Any, Dict
 
+import django_stubs_ext
 import dwhandler
 import import_export.tmp_storages
 from dotenv import load_dotenv
+
+django_stubs_ext.monkeypatch()
 
 assert dwhandler is not None
 
