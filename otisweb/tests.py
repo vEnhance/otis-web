@@ -1,5 +1,4 @@
-from typing import Any, Dict
-from typing import Union
+from typing import Any, Dict, Union
 
 import factory
 from django.contrib.auth.models import User
@@ -26,19 +25,24 @@ class OTISTestCase(TestCase):
 	def assert20X(self, response: HttpResponse):
 		self.assertGreaterEqual(response.status_code, 200)
 		self.assertLess(response.status_code, 300)
+		return response
 
 	def assertOK(self, response: HttpResponse):
 		self.assertLess(response.status_code, 400)
+		return response
 
 	def assert40X(self, response: HttpResponse):
 		self.assertGreaterEqual(response.status_code, 400)
 		self.assertLess(response.status_code, 500)
+		return response
 
 	def assertDenied(self, response: HttpResponse):
 		self.assertEqual(response.status_code, 403)
+		return response
 
 	def assertNotFound(self, response: HttpResponse):
 		self.assertEqual(response.status_code, 404)
+		return response
 
 	def get(self, name: str, *args: Any):
 		return self.client.get(reverse_lazy(name, args=args), follow=True)
@@ -47,51 +51,59 @@ class OTISTestCase(TestCase):
 		return self.client.post(reverse_lazy(name, args=args), data=data, follow=True)
 
 	def assertGet20X(self, name: str, *args: Any):
-		self.assert20X(self.get(name, *args))
+		return self.assert20X(self.get(name, *args))
 
 	def assertGetOK(self, name: str, *args: Any):
-		self.assertOK(self.get(name, *args))
+		return self.assertOK(self.get(name, *args))
 
 	def assertGet40X(self, name: str, *args: Any):
-		self.assert40X(self.get(name, *args))
+		return self.assert40X(self.get(name, *args))
 
 	def assertGetDenied(self, name: str, *args: Any):
-		self.assertDenied(self.get(name, *args))
+		return self.assertDenied(self.get(name, *args))
 
 	def assertGetNotFound(self, name: str, *args: Any):
-		self.assertNotFound(self.get(name, *args))
+		return self.assertNotFound(self.get(name, *args))
 
 	def assertPost20X(self, name: str, *args: Any, data: Dict[str, Any]):
-		self.assert20X(self.post(name, *args, data=data))
+		return self.assert20X(self.post(name, *args, data=data))
 
 	def assertPostOK(self, name: str, *args: Any, data: Dict[str, Any]):
-		self.assertOK(self.post(name, *args, data=data))
+		return self.assertOK(self.post(name, *args, data=data))
 
 	def assertPost40X(self, name: str, *args: Any, data: Dict[str, Any]):
-		self.assert40X(self.post(name, *args, data=data))
+		return self.assert40X(self.post(name, *args, data=data))
 
 	def assertPostDenied(self, name: str, *args: Any, data: Dict[str, Any]):
-		self.assertDenied(self.post(name, *args, data=data))
+		return self.assertDenied(self.post(name, *args, data=data))
 
 	def assertPostNotFound(self, name: str, *args: Any, data: Dict[str, Any]):
-		self.assertNotFound(self.post(name, *args, data=data))
+		return self.assertNotFound(self.post(name, *args, data=data))
 
 	def login_name(self, username: str):
-		self.client.force_login(User.objects.get(username=username))
+		user = User.objects.get(username=username)
+		self.client.force_login(user)
+		return user
 
 	def login(self, obj: Union[str, models.Model]):
 		if isinstance(obj, str):
-			self.client.force_login(User.objects.get(username=obj))
+			return self.login_name(obj)
 		elif isinstance(obj, User):
 			self.client.force_login(obj)
+			return obj
 		elif hasattr(obj, 'user'):
-			self.client.force_login(getattr(obj, 'user'))
+			user = getattr(obj, 'user')
+			self.client.force_login(user)
+			return user
 
 	def assertGetBecomesLoginRedirect(self, name: str, *args: Any):
-		self.assertRedirects(
-			self.get(name, *args), '/accounts/login/?next=' + reverse_lazy(name, args=args)
-		)
+		redirectURL = '/accounts/login/?next=' + reverse_lazy(name, args=args)
+		resp = self.get(name, *args)
+		self.assertRedirects(resp, redirectURL)
+		return resp
 
 	def assertPostBecomesLoginRedirect(self, name: str, *args: Any, **kwargs: Any):
 		redirectURL = '/accounts/login?next=' + reverse_lazy(name, args=args)
-		self.assertRedirects(self.post(name, *args, **kwargs), redirectURL)
+		resp = self.post(name, *args, **kwargs)
+		self.assertRedirects(resp, redirectURL)
+		return resp
