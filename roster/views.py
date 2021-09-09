@@ -48,7 +48,7 @@ from .models import Invoice, RegistrationContainer, Student, StudentRegistration
 @login_required
 def curriculum(request: HttpRequest, student_id: int) -> HttpResponse:
 	student = get_student_by_id(request, student_id)
-	units = Unit.objects.all()
+	units = Unit.objects.filter(group__hidden=False)
 	original = student.curriculum.values_list('id', flat=True)
 
 	enabled = can_edit(request, student) or student.newborn

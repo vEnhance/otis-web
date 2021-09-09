@@ -27,7 +27,9 @@ from .utils import get_from_google_storage
 
 class UnitGroupListView(ListView[UnitGroup]):
 	model = UnitGroup
-	queryset = UnitGroup.objects.all().order_by('subject', 'name').prefetch_related('unit_set')
+	queryset = UnitGroup.objects.filter(
+		hidden=False,
+	).order_by('subject', 'name').prefetch_related('unit_set')
 
 
 def permitted(unit: Unit, request: HttpRequest, asking_solution: bool) -> bool:

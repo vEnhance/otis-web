@@ -112,6 +112,7 @@ class UnitGroupAdmin(ImportExportModelAdmin):
 		'name',
 		'subject',
 		'description',
+		'hidden',
 	)
 	list_display_links = (
 		'pk',
@@ -121,7 +122,7 @@ class UnitGroupAdmin(ImportExportModelAdmin):
 		'name',
 		'description',
 	)
-	list_filter = ('subject', )
+	list_filter = ('subject', 'hidden')
 	resource_class = UnitGroupIEResource
 	list_per_page = 150
 	list_max_show_all = 400

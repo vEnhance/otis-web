@@ -103,6 +103,9 @@ class UnitGroup(models.Model):
 	subject = models.CharField(
 		max_length=2, choices=SUBJECT_CHOICES, help_text="The subject for the unit"
 	)
+	hidden = models.BooleanField(
+		help_text="Whether this unit is hidden from students", default=False
+	)
 
 	def __str__(self) -> str:
 		return self.name

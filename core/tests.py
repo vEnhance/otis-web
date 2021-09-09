@@ -61,3 +61,10 @@ class TestCore(OTISTestCase):
 		semester.classroom_url = '/'
 		semester.save()
 		self.assertGetOK('classroom')
+
+	def test_hidden(self):
+		UnitFactory.create(group__name="VisibleUnit", group__hidden=False)
+		UnitFactory.create(group__name="HiddenUnit", group__hidden=True)
+		resp = self.assertGet20X('synopsis')
+		self.assertContains(resp, "VisibleUnit")
+		self.assertNotContains(resp, "HiddenUnit")
