@@ -1,12 +1,15 @@
 from typing import Any, Dict, Union
 
 import factory
+import factory.random
 from django.contrib.auth.models import User
 from django.db import models
 from django.http.response import HttpResponse
 from django.test import TestCase
 from django.test.client import Client
 from django.urls.base import reverse_lazy
+
+factory.random.reseed_random('otisweb')
 
 
 # waiting on https://github.com/FactoryBoy/factory_boy/pull/820 ...
