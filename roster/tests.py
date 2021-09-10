@@ -1,11 +1,11 @@
-from core.factories import UnitFactory, UnitGroupFactory, UserFactory
+from core.factories import UnitFactory, UnitGroupFactory, UserFactory  # NOQA
 from dashboard.factories import PSetFactory
 from django.shortcuts import get_object_or_404
 from otisweb.tests import OTISTestCase
+from roster.factories import AssistantFactory, InvoiceFactory, RegistrationContainerFactory, StudentFactory, StudentRegistrationFactory  # NOQA
+from roster.models import Student, StudentRegistration, UnitInquiry  # NOQA
 
-from roster.factories import AssistantFactory, InvoiceFactory, StudentFactory
-from roster.models import Student, UnitInquiry
-
+from .admin import build_students
 from .views import get_checksum
 
 
@@ -191,6 +191,24 @@ class RosterTest(OTISTestCase):
 		)
 		self.assertEqual(alice.curriculum.count(), 10)
 		self.assertEqual(alice.unlocked_units.count(), 7)
+
+	def test_create_student(self):
+		container = RegistrationContainerFactory.create(num_preps=2)
+
+		StudentRegistrationFactory.create(track='A', container=container)
+		StudentRegistrationFactory.create(track='B', container=container)
+		self.assertEqual(build_students(StudentRegistration.objects.all()), 2)
+		alice = Student.objects.get(track='A')
+		self.assertEqual(alice.invoice.total_owed, 1824)
+		bob = Student.objects.get(track='B')
+		self.assertEqual(bob.invoice.total_owed, 1152)
+
+		container.num_preps = 1
+		container.save()
+		StudentRegistrationFactory.create(track='C', container=container)
+		self.assertEqual(build_students(StudentRegistration.objects.all()), 1)
+		carol = Student.objects.get(track='C')
+		self.assertEqual(carol.invoice.total_owed, 240)
 
 
 # TODO tests for reg

@@ -258,6 +258,42 @@ class StudentRegistrationIEResource(RosterResource):
 		export_order = fields
 
 
+def build_students(queryset: QuerySet[StudentRegistration]) -> int:
+	students_to_create = []
+	invoices_to_create = []
+	queryset = queryset.filter(container__semester__active=True)
+	queryset = queryset.exclude(processed=True)
+	queryset = queryset.select_related('user', 'container', 'container__semester')
+
+	count = 0
+	n = 0
+	for registration in queryset:
+		students_to_create.append(
+			Student(
+				user=registration.user,
+				semester=registration.container.semester,
+				track=registration.track,
+			)
+		)
+		n = registration.container.num_preps
+		count += 1
+	Student.objects.bulk_create(students_to_create)
+	queryset.update(processed=True)
+
+	if n > 0:
+		for student in Student.objects.filter(invoice__isnull=True, semester__active=True):
+			if student.track == "A":
+				hours_taught = 8.4 * n
+			elif student.track == "B":
+				hours_taught = 4.2 * n
+			else:
+				hours_taught = 0
+			invoice = Invoice(student=student, preps_taught=n, hours_taught=hours_taught)
+			invoices_to_create.append(invoice)
+		Invoice.objects.bulk_create(invoices_to_create)
+	return count
+
+
 @admin.register(StudentRegistration)
 class StudentRegistrationAdmin(ImportExportModelAdmin):
 	list_display = (
@@ -287,20 +323,8 @@ class StudentRegistrationAdmin(ImportExportModelAdmin):
 	]
 
 	def create_student(self, request: HttpRequest, queryset: QuerySet[StudentRegistration]):
-		students_to_create = []
-		queryset = queryset.exclude(processed=True)
-		queryset = queryset.select_related('user', 'container', 'container__semester')
-		for registration in queryset:
-			students_to_create.append(
-				Student(
-					user=registration.user,
-					semester=registration.container.semester,
-					track=registration.track,
-				)
-			)
-		messages.success(request, message=f"Built {len(students_to_create)} students")
-		_ = Student.objects.bulk_create(students_to_create)
-		_ = queryset.update(processed=True)
+		num_built = build_students(queryset)
+		messages.success(request, message=f"Built {num_built} students")
 
 
 # INQUIRY
