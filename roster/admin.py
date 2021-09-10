@@ -307,6 +307,7 @@ class StudentRegistrationAdmin(ImportExportModelAdmin):
 	)
 	list_filter = (
 		'processed',
+		'container',
 		'track',
 		'gender',
 		'graduation_year',
