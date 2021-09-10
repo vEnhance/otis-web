@@ -14,7 +14,7 @@
 <ul>
 	<li>Unit: <a href="{% url "view-problems" pset.unit.pk %}">{{ pset.unit }}</a>
 		<ul>
-			<li><a href="{% url "view-problems" pset.unit.pk %}">Solutions</a></li>
+			<li><a href="{% url "view-solutions" pset.unit.pk %}">Solutions</a></li>
 		</ul>
 	</li>
 	<li>Submitted: {{ pset.upload.created_at }}</li>
