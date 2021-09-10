@@ -3,10 +3,7 @@
 {% block layout-content %}
 <p>Here are all the past suggestions that you provided.</p>
 {% for suggestion in problem_suggestions %}
-{% if suggestion.resolved %}
-<div class="alert alert-success">
-	{% else %}
-	<div class="alert alert-primary">
+<div class="alert {% if suggestion.resolved %}alert-success{% else %}alert-primary{% endif %}">
 		{% endif %}
 		<h3><a href="{% url "suggest-update" suggestion.id %}">
 				{% if suggestion.resolved %}
