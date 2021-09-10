@@ -274,6 +274,7 @@ class StudentRegistrationAdmin(ImportExportModelAdmin):
 		'track',
 		'gender',
 		'graduation_year',
+		'country',
 	)
 	list_display_links = (
 		'name',
