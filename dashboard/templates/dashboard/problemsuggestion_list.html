@@ -13,9 +13,6 @@
 				{% endif %}
 			</a></h3>
 		<p>{{ suggestion.statement }}</p>
-		{% if suggestion.reason %}
-		<p><b>Comments</b>: {{ suggestion.reason }}</p>
-		{% endif %}
 		<p><b>Date</b>: {{ suggestion.created_at }}</p>
 	</div>
 	{% endfor %}

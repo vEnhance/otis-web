@@ -195,8 +195,6 @@ class ProblemSuggestion(models.Model):
 	)
 
 	resolved = models.BooleanField(default=False, help_text="Whether staff has processed this.")
-	reason = models.TextField(blank=True, help_text="Staff notes on reviewing.")
-	# ^ TODO this may be obsoleted, in which case we can delete it
 	created_at = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self) -> str:

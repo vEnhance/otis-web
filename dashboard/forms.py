@@ -1,7 +1,7 @@
 from django import forms
 from django.core.validators import FileExtensionValidator
 
-from dashboard.models import ProblemSuggestion, PSet, UploadedFile
+from dashboard.models import PSet, UploadedFile
 
 
 class NewUploadForm(forms.ModelForm):
@@ -17,19 +17,6 @@ class NewUploadForm(forms.ModelForm):
 		help_texts = {
 			'content': "",
 		}
-
-
-class ResolveSuggestionForm(forms.ModelForm):
-	class Meta:
-		model = ProblemSuggestion
-		fields = ('reason', )
-		widgets = {
-			'reason': forms.Textarea(attrs={
-				'cols': 30,
-				'rows': 4
-			}),
-		}
-		help_texts = {'reason': ''}
 
 
 class PSetForm(forms.ModelForm):
