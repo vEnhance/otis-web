@@ -9,6 +9,9 @@
 	<button id="hide-locked-units" class="tooltip-button" title="Show/hide locked units">
 		Toggle ❓
 	</button>
+	&nbsp;
+	<a class="emoji-link" title="Settings" href="{% url "profile" %}">⚙️</a>
+	&nbsp;
 	<span style="font-size: 80%; font-style: italic;">
 		Mouse over icons for hints.
 	</span>
@@ -54,10 +57,12 @@
 			{% endif %}
 		</td>
 
-		<td class="code">{{ row.unit.position }} {{ row.unit.code }}</td>
+		<td class="code">{{ row.unit.position }}/{{ row.unit.code }}</td>
 
-		{# Handout/suggest #}
-		<td {% if row.is_current %}class="active" {% endif %}>
+		<td class="unit-name {% if row.is_current %}active{% endif %}"
+				{% if request.user.is_superuser %}title = "{{ row.unit.group.name }}
+				pk={{ row.unit.pk }}
+				group.pk={{ row.unit.group.pk }}"{% endif %}>
 			{{ row.unit.group.name }}
 		</td>
 		<td class="emojis">
