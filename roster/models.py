@@ -174,7 +174,7 @@ class Student(models.Model):
 		return self.curriculum.count()
 
 	def generate_curriculum_queryset(self) -> QuerySet[Unit]:
-		queryset = self.curriculum.all().annotate(
+		queryset = self.curriculum.all().select_related('group').annotate(
 			num_uploads=SubqueryAggregate(
 				'uploadedfile', filter=Q(benefactor__pk=self.id), aggregate=Count
 			)
