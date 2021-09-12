@@ -9,33 +9,76 @@
 {% block content %}
 {% get_providers as socialaccount_providers %}
 
-<h3>Log in</h3>
-<form class="login" method="POST" action="{% url 'account_login' %}">
-	{% csrf_token %}
-	{{ form|crispy }}
-	{% if redirect_field_value %}
-	<input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
-	{% endif %}
-	<button class="btn btn-success" type="submit">{% trans "Sign In" %}</button>
-</form>
-
-{% if socialaccount_providers %}
-<h3>New account</h3>
-<div class="socialaccount_ballot">
-	<ul class="socialaccount_providers">
-		{% include "socialaccount/snippets/provider_list.html" with process="login" %}
-	</ul>
+<div class="accordion" id="accordionLogin">
+	<div class="accordion-item">
+		<h2 class="accordion-header" id="headingSocialLogin">
+			<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSocialLogin" aria-expanded="false" aria-controls="collapseSocialLogin">
+				Login via social account
+			</button>
+		</h2>
+		<div id="collapseSocialLogin" class="accordion-collapse collapse show" aria-labelledby="headingSocialLogin" data-bs-parent="#accordionLogin">
+			<div class="accordion-body">
+				<p>Use the same option you used when registering.
+					(Do not use this to establish new connections or accounts!)</p>
+				<div class="socialaccount_ballot">
+					<ul class="socialaccount_providers">
+						{% include "socialaccount/snippets/provider_list.html" with process="login" %}
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="accordion-item">
+		<h2 class="accordion-header" id="headingUserPass">
+			<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUserPass" aria-expanded="true" aria-controls="collapseUserPass">
+				Login with username and password
+			</button>
+		</h2>
+		<div id="collapseUserPass" class="accordion-collapse collapse" aria-labelledby="headingUserPass" data-bs-parent="#accordionLogin">
+			<div class="accordion-body">
+				<form class="login" method="POST" action="{% url 'account_login' %}">
+					{% csrf_token %}
+					{{ form|crispy }}
+					{% if redirect_field_value %}
+					<input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+					{% endif %}
+					<button class="btn btn-success" type="submit">{% trans "Sign In" %}</button>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div class="accordion-item">
+		<h2 class="accordion-header" id="headingConnect">
+			<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseConnect" aria-expanded="false" aria-controls="collapseConnect">
+				I am a new student with no account yet!
+			</button>
+		</h2>
+		<div id="collapseConnect" class="accordion-collapse collapse" aria-labelledby="headingConnect" data-bs-parent="#accordionLogin">
+			<div class="accordion-body">
+				<p>Use this option if you are a newcoming OTIS student who is opening a brand new account for the first time.
+					(Returning students should use their old account.)
+				</p>
+				<div class="socialaccount_ballot">
+					<ul class="socialaccount_providers">
+						{% include "socialaccount/snippets/provider_list.html" with process="login" %}
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="accordion-item">
+		<h2 class="accordion-header" id="headingForgot">
+			<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseForgot" aria-expanded="false" aria-controls="collapseForgot">
+				Uh, I forgot all my passwords...
+			</button>
+		</h2>
+		<div id="collapseForgot" class="accordion-collapse collapse" aria-labelledby="headingForgot" data-bs-parent="#accordionLogin">
+			<div class="accordion-body">
+				Sucks to be you. Email Evan.
+			</div>
+		</div>
+	</div>
 </div>
 
-{% include "socialaccount/snippets/login_extra.html" %}
-<p>If you have <i>already</i> configured a connection to an existing account;
-	then these links will log you in rather than spawn a new account.</p>
-
-<div class="alert alert-warning">
-	If you are a <b>returning user</b> hoping to add a <b>new connection</b>,
-	then you should <b>NOT</b> use this page because it will create a new account.
-	You should log in first and then set the connection.
-</div>
-{% endif %}
 
 {% endblock %}
