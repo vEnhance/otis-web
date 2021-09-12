@@ -197,7 +197,7 @@ def problems_handler(action: str, request: HttpRequest) -> JsonResponse:
 		)
 		return JsonResponse({'pk': hint.pk, 'number': number})
 	else:
-		raise NotImplementedError(puid)
+		raise NotImplementedError(action)
 
 
 def invoice_handler(action: str, request: HttpRequest) -> JsonResponse:
