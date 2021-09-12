@@ -19,21 +19,26 @@
 	</a>
 	{% endfor %}
 </div>
+<hr />
 {% endif %}
 
 <h2>Submit new problem set</h2>
 
 {% include "generic-form.html" %}
 
+<hr />
+
 <h2>Approved submissions</h2>
 {% if approved_psets %}
-<div class="list-group">
+<table class="table">
 	{% for pset in approved_psets %}
-	<a href="{{pset.get_absolute_url}}" class="list-group-item list-group-item-action">
-		{{ pset.unit }}, submitted {{ pset.upload.created_at|naturaltime }}
-	</a>
+	<tr>
+		<td>{{pset.clubs}}♣</td>
+		<td><a href="{{pset.get_absolute_url}}">{{ pset.unit }}</td>
+		<td>{{ pset.upload.created_at|naturaltime }}</td>
+	</tr>
 	{% endfor %}
-</div>
+</table>
 {% else %}
 <p>You haven't submitted any problem sets yet this year.</p>
 {% endif %}
