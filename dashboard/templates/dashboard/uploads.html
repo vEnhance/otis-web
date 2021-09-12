@@ -1,37 +1,31 @@
 {% extends 'layout.html' %}
 {% block title %}{% if unit %}Uploads for {{ unit }}{% else %}Hidden Uploads{% endif %}{% endblock %}
 {% block layout-content %}
-{% if unit %}
-<p>These are the uploaded files for the unit <strong>{{ unit }}</strong>.
-	Instructors can upload transcripts here.
-	You can also find problem sets you submitted from this page.</p>
-<div class="alert alert-warning">
-	<h3 class="mt-0 alert-heading">For returners</h3>
-	<p>
-		You should usually NOT submit problem sets through this form.
-		Use the <a href="{% url  "submit-pset" student.id %}">submit unit</a> form instead.
-	</p>
-</div>
-{% endif %}
+<p>These are all your files associated with unit <strong>{{ unit }}</strong>,
+	such as problem set submissions and lecture note transcripts.</p>
 
 {% if files|length > 0 %}
 <ol>
 	{% for file in files %}
-	<li>
-		{% include "dashboard/show_file.html" %}
-	</li>
+	<li>{% include "dashboard/show_file.html" %}</li>
 	{% endfor %}
 </ol>
 {% else %}
 <p><i>Nothing here yet!</i></p>
 {% endif %}
 
-<h2>Upload</h2>
-To upload files to this unit (or any other), use the following form.
+<h2>Manual upload (mostly for staff use)</h2>
+To manually upload a new file related to this unit, use the following form.
 {% include "generic-form.html" with submit_name="Upload" %}
 
+<div class="alert alert-warning">
+	<p>
+		Students should NOT submit problem sets through this form.
+		Use the <a href="{% url  "submit-pset" student.id %}">submit unit</a> form instead.
+	</p>
+</div>
+
 <ul>
-	{# <li><a href="{% url "uploads" student.id 0 %}">Link to miscellaneous uploads</a></li> #}
 	<li><a href="{% url "portal" student.id %}">Back to portal</a></li>
 </ul>
 
