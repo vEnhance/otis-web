@@ -11,22 +11,37 @@
 	{% endfor %}
 </ol>
 {% else %}
-<p><i>Nothing here yet!</i></p>
-{% endif %}
-
-<h2>Manual upload (mostly for staff use)</h2>
-To manually upload a new file related to this unit, use the following form.
-{% include "generic-form.html" with submit_name="Upload" %}
-
-<div class="alert alert-warning">
-	<p>
-		Students should NOT submit problem sets through this form.
-		Use the <a href="{% url  "submit-pset" student.id %}">submit unit</a> form instead.
-	</p>
+<div class="alert alert-info">
+	<p>Nothing here yet!</p>
 </div>
+{% endif %}
 
 <ul>
 	<li><a href="{% url "portal" student.id %}">Back to portal</a></li>
 </ul>
+
+<hr />
+
+<div class="accordion accordion-flush" id="accordionFlushExample">
+	<div class="accordion-item">
+		<h2 class="accordion-header" id="flush-headingManual">
+			<button class="accordion-button collapsed text-muted" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseManual" aria-expanded="false" aria-controls="flush-collapseManual">
+				Manual upload (mostly for staff use)
+			</button>
+		</h2>
+		<div id="flush-collapseManual" class="accordion-collapse collapse" aria-labelledby="flush-headingManual" data-bs-parent="#accordionFlushExample">
+			<div class="accordion-body">
+				<p>To manually upload a new file related to this unit, use the following form.</p>
+				<div class="alert alert-warning">
+					<p>
+						Students should NOT submit problem sets through this form.
+						Use the <a href="{% url  "submit-pset" student.id %}">submit unit</a> form instead.
+					</p>
+				</div>
+				{% include "generic-form.html" with submit_name="Upload" %}
+			</div>
+		</div>
+	</div>
+</div>
 
 {% endblock %}
