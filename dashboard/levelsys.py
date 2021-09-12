@@ -4,7 +4,6 @@ from typing import Any, Dict, List
 from django.db.models.aggregates import Sum
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
-from django_stubs_ext import WithAnnotations
 from exams.models import ExamAttempt
 from roster.models import Student
 from sql_util.aggregates import SubqueryCount, SubquerySum
@@ -77,6 +76,8 @@ class Meter:
 
 
 def get_meters(student: Student) -> Dict[str, Any]:
+	"""Uses a bunch of expensive database queries to compute a student's levels and data,
+	returning the findings as a (TODO typed) dictionary."""
 	psets = PSet.objects.filter(student=student, approved=True, eligible=True)
 	pset_data = psets.aggregate(Sum('clubs'), Sum('hours'))
 	total_diamonds = AchievementUnlock.objects.filter(user=student.user).aggregate(
@@ -106,9 +107,7 @@ def get_meters(student: Student) -> Dict[str, Any]:
 	}
 
 
-def annotate_student_queryset_with_scores(
-	queryset: QuerySet[Student]
-) -> QuerySet[WithAnnotations[Student]]:
+def annotate_student_queryset_with_scores(queryset: QuerySet[Student]) -> QuerySet[Student]:
 	"""Helper function for constructing large lists of students
 	Selects all important information to prevent a bunch of SQL queries"""
 	return queryset.select_related('user', 'assistant', 'semester').annotate(
@@ -130,8 +129,7 @@ def get_student_rows(queryset: QuerySet[Student]) -> List[Dict[str, Any]]:
 
 	for student in annotate_student_queryset_with_scores(queryset):
 		row: Dict[str, Any] = {}
-		row['id'] = student.id
-		row['name'] = student.name
+		row['student'] = student
 		row['spades'] = (getattr(student, 'spades_quizzes', 0) or 0)
 		row['spades'] += (getattr(student, 'spades_quests', 0) or 0)
 		row['hearts'] = getattr(student, 'hearts', 0) or 0

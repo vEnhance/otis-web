@@ -27,8 +27,8 @@
 				<strong>Lv {{ row.level }}</strong>
 				<i>{{ row.level_name }}</i>
 			</td>
-			<td><a href="{% url "stats" row.id %}">
-					{{ row.name }}</a>
+			<td><a href="{% url "stats" row.student.id %}">
+					{{ row.student.name }}</a>
 			</td>
 			<td>{{ row.clubs }}</td>
 			<td>{{ row.hearts|floatformat:"0" }}</td>

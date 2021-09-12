@@ -2,7 +2,7 @@
 {% block layout-content %}
 {% load otis_extras %}
 
-{% if students|length > 0 %} {# if >0 student to list #}
+{% if rows|length > 0 %} {# if >0 student to list #}
 <p>Here are the participants to which you have access.</p>
 
 <table id="students" class="table tablesorter">
@@ -20,7 +20,8 @@
 		</tr>
 	</thead>
 	<tbody>
-		{% for student in students %}
+		{% for row in rows %}
+		{% with student=row.student %}
 		<tr> {# begin table row for this student #}
 			<td>{{ forloop.counter }}</td>
 			<td><a href="{% url "portal" student.id %}">
@@ -29,7 +30,7 @@
 			{% if stulist_show_semester %}
 			<td>{{ student.semester }}</td>
 			{% else %}
-			<td>{{ student|level }}</td>
+			<td>{{ row.level }}</td>
 			{% endif %}
 
 			<td>{{ student.get_track }}</td>
@@ -43,6 +44,7 @@
 				{%endif %}
 			</td>
 		</tr> {# end table row for this student #}
+		{% endwith %}
 		{% endfor %}
 	</tbody>
 </table>

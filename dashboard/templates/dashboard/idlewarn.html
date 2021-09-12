@@ -21,9 +21,10 @@
 	</thead>
 
 	<tbody>
-		{% for student in students %}
+		{% for row in rows %}
+		{% with student=row.student %}
 		<tr>
-			<td>{{ student|level }}</td>
+			<td>{{ row.level }}</td>
 			<td><a href="{% url "portal" student.id %}">
 					{{ student.name }}</a></td>
 			{% if student.latest_pset %}
@@ -35,6 +36,7 @@
 			<td>{{ student.get_track }}</td>
 			<td>{{ student.num_psets|default_if_none:0 }}</td>
 		</tr>
+		{% endwith %}
 		{% endfor %}
 	</tbody>
 </table>

@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import logging
 import os
 from datetime import datetime, timedelta
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 from braces.views import LoginRequiredMixin, StaffuserRequiredMixin
 from core.models import Semester, Unit
@@ -167,7 +167,7 @@ def leaderboard(request: AuthHttpRequest) -> HttpResponse:
 	rows.sort(
 		key=lambda row: (
 			-row['level'], -row['spades'], -row['hearts'], -row['clubs'], -row['diamonds'], row[
-				'name'].upper()
+				'student'].name.upper()
 		)
 	)
 	context: Dict[str, Any] = {}
@@ -263,11 +263,12 @@ def index(request: AuthHttpRequest) -> HttpResponse:
 	students = get_visible_students(request.user, current=True)
 	if len(students) == 1:  # unique match
 		return HttpResponseRedirect(reverse("portal", args=(students[0].id, )))
-	context: Dict[str, Any] = {}
-	context['title'] = "Current Semester Listing"
-	context['students'] = annotate_student_queryset_with_scores(students).order_by(
+	queryset = annotate_student_queryset_with_scores(students).order_by(
 		'track', 'user__first_name', 'user__last_name'
 	)
+	context: Dict[str, Any] = {}
+	context['title'] = "Current Semester Listing"
+	context['rows'] = get_student_rows(queryset)
 	context['stulist_show_semester'] = False
 	context['submitted_registration'] = StudentRegistration.objects.filter(
 		user=request.user, container__semester__active=True
@@ -280,11 +281,12 @@ def past(request: AuthHttpRequest, semester: Semester = None):
 	students = get_visible_students(request.user, current=False)
 	if semester is not None:
 		students = students.filter(semester=semester)
+	queryset = annotate_student_queryset_with_scores(students).order_by(
+		'track', 'user__first_name', 'user__last_name'
+	)
 	context: Dict[str, Any] = {}
 	context['title'] = "Previous Semester Listing"
-	context['students'] = annotate_student_queryset_with_scores(students).order_by(
-		'-semester', 'user__first_name', 'user__last_name'
-	)
+	context['rows'] = get_student_rows(queryset)
 	context['stulist_show_semester'] = True
 	context['past'] = True
 	return render(request, "dashboard/stulist.html", context)
@@ -338,12 +340,12 @@ def idlewarn(request: AuthHttpRequest) -> HttpResponse:
 	newest_qset = UploadedFile.objects.filter(category='psets', benefactor=OuterRef('pk'))
 	newest = newest_qset.order_by('-created_at').values('created_at')[:1]
 
-	students = annotate_student_queryset_with_scores(
+	queryset = annotate_student_queryset_with_scores(
 		get_visible_students(request.user).filter(legit=True)
 	)
-	students = students.annotate(latest_pset=Subquery(newest))  # type: ignore
-	students = students.order_by('latest_pset')
-	context['students'] = students
+	queryset = queryset.annotate(latest_pset=Subquery(newest))  # type: ignore
+	queryset = queryset.order_by('latest_pset')
+	context['rows'] = get_student_rows(queryset)
 
 	return render(request, "dashboard/idlewarn.html", context)
 
