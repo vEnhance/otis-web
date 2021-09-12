@@ -1,6 +1,5 @@
 {% extends 'layout.html' %}
 {% load humanize %}
-{% block title %}Problem Sets{% endblock %}
 {% block layout-content %}
 
 <p><a href="{% url "portal" student.id %}">
@@ -9,6 +8,21 @@
 	If you have problems to suggest for this unit,
 	please use the <a href="{% url "suggest-new" student.id %}">problem suggestion form</a>.
 </div>
+
+{% if pending_psets %}
+<h2>Pending submissions</h2>
+<table class="table">
+	{% for pset in pending_psets %}
+	<tr>
+		<td>{{pset.clubs}}♣</td>
+		<td><a href="{{pset.get_absolute_url}}">{{ pset.unit }}</td>
+		<td>{{ pset.upload.created_at|naturaltime }}</td>
+		<td><a href="{% url "resubmit-pset" pset.pk %}">Edit</a></td>
+	</tr>
+	{% endfor %}
+</table>
+{% endif %}
+
 
 {% if pending_psets %}
 <h2>Pending submissions</h2>
@@ -36,6 +50,7 @@
 		<td>{{pset.clubs}}♣</td>
 		<td><a href="{{pset.get_absolute_url}}">{{ pset.unit }}</td>
 		<td>{{ pset.upload.created_at|naturaltime }}</td>
+		<td><a href="{% url "resubmit-pset" pset.pk %}">Resubmit</a></td>
 	</tr>
 	{% endfor %}
 </table>

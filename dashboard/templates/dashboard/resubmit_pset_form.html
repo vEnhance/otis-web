@@ -1,0 +1,20 @@
+{% extends 'layout.html' %}
+{% load humanize %}
+{% block layout-content %}
+
+<p><a href="{% url "portal" student.id %}">⬅️ Back to portal</a></p>
+<div class="alert alert-primary">
+	{% if pset.approved or pset.resubmitted %}
+	You are about to <em>resubmit</em> for the unit {{ pset.unit }}.
+	This will overwrite your previous submission,
+	and add it back to the queue of problem sets requiring a check-off.
+	{% else %}
+	This problem set hasn't been checked off yet,
+	so you can use this page to update your submission before
+	Evan or a different instructor gets to it.
+	{% endif %}
+</div>
+
+{% include "generic-form.html" %}
+
+{% endblock %}

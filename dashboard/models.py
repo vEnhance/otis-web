@@ -102,8 +102,12 @@ class SemesterDownloadFile(models.Model):
 
 
 class PSet(models.Model):
+	resubmitted = models.BooleanField(
+		help_text="Tracks if problem set resubmitted", default=False
+	)
 	approved = models.BooleanField(
-		help_text="Whether the problem set has been checked off", default=False
+		help_text="Whether the latest version of the problem set has been checked off",
+		default=False
 	)
 	student = models.ForeignKey(
 		Student, help_text="The student attached to this", on_delete=models.CASCADE

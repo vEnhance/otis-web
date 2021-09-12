@@ -35,10 +35,10 @@ from roster.models import Student, StudentRegistration
 from roster.utils import can_edit, can_view, get_student_by_id, get_visible_students, infer_student  # NOQA
 from sql_util.utils import SubqueryAggregate
 
-from dashboard.forms import DiamondsForm
+from dashboard.forms import DiamondsForm, PSetResubmitForm
 from dashboard.levelsys import get_student_rows
 
-from .forms import NewUploadForm, PSetForm
+from .forms import NewUploadForm, PSetSubmitForm
 from .levelsys import annotate_student_queryset_with_scores, get_meters
 from .models import Achievement, AchievementUnlock, Level, ProblemSuggestion, PSet, SemesterDownloadFile, UploadedFile  # NOQA
 
@@ -183,9 +183,9 @@ def leaderboard(request: AuthHttpRequest) -> HttpResponse:
 def submit_pset(request: HttpRequest, student_id: int) -> HttpResponse:
 	student = get_student_by_id(request, student_id)
 	if request.method == 'POST':
-		form = PSetForm(request.POST, request.FILES)
+		form = PSetSubmitForm(request.POST, request.FILES)
 	else:
-		form = PSetForm()
+		form = PSetSubmitForm()
 
 	form.fields['next_unit_to_unlock'].queryset = student.generate_curriculum_queryset().filter(
 		has_pset=False
@@ -194,7 +194,11 @@ def submit_pset(request: HttpRequest, student_id: int) -> HttpResponse:
 	if request.method == 'POST' and form.is_valid():
 		pset = form.save(commit=False)
 		if PSet.objects.filter(student=student, unit=pset.unit).exists():
-			messages.error(request, "You have already submitted for this unit.")
+			messages.error(
+				request, "You have already submitted for this unit. "
+				"If this is intentional, you should use the resubmit button "
+				"at the bottom of this page instead."
+			)
 		else:
 			f = UploadedFile(
 				benefactor=student,
@@ -213,8 +217,8 @@ def submit_pset(request: HttpRequest, student_id: int) -> HttpResponse:
 				"and is pending review!"
 			)
 			logging.log(VERBOSE_LOG_LEVEL, f"{student} submitted for {pset.unit}")
+			return HttpResponseRedirect(pset.get_absolute_url())
 
-	# TODO more stats
 	context = {
 		'title':
 			'Ready to submit?',
@@ -228,6 +232,42 @@ def submit_pset(request: HttpRequest, student_id: int) -> HttpResponse:
 			form,
 	}
 	return render(request, "dashboard/submit_pset_form.html", context)
+
+
+@login_required
+def resubmit_pset(request: HttpRequest, pk: int) -> HttpResponse:
+	pset = get_object_or_404(PSet, pk=pk)
+	student = pset.student
+	if not can_view(request, student):
+		raise PermissionDenied("You are missing privileges for this problem set")
+
+	if request.method == 'POST':
+		form = PSetResubmitForm(request.POST, request.FILES, instance=pset)
+	else:
+		form = PSetResubmitForm(instance=pset)
+
+	if request.method == 'POST' and form.is_valid():
+		pset = form.save(commit=False)
+		assert pset.upload is not None
+		pset.upload.content = form.cleaned_data['content']
+		pset.upload.save()
+		if pset.approved is True:
+			pset.approved = False
+			pset.resubmitted = True
+		pset.save()
+		messages.success(
+			request, "The problem set is submitted successfully "
+			"and is pending review!"
+		)
+		logging.log(VERBOSE_LOG_LEVEL, f"{student} re-submitted {pset.unit}")
+		return HttpResponseRedirect(pset.get_absolute_url())
+	context = {
+		'title': f'Resubmit {pset.unit}',
+		'student': student,
+		'pset': pset,
+		'form': form,
+	}
+	return render(request, "dashboard/resubmit_pset_form.html", context)
 
 
 @login_required

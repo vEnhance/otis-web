@@ -19,20 +19,45 @@ class NewUploadForm(forms.ModelForm):
 		}
 
 
-class PSetForm(forms.ModelForm):
+pset_file_validator = FileExtensionValidator(
+	allowed_extensions=['pdf', 'txt', 'tex', 'png', 'jpg']
+)
+
+
+class PSetSubmitForm(forms.ModelForm):
 	content = forms.FileField(
 		help_text="The file itself",
-		validators=[FileExtensionValidator(allowed_extensions=['pdf', 'txt', 'tex', 'png', 'jpg'])]
+		validators=[
+			pset_file_validator,
+		],
 	)
 
 	class Meta:
 		model = PSet
 		fields = (
 			'unit',
+			'clubs',
 			'hours',
 			'feedback',
-			'clubs',
+			'special_notes',
 			'next_unit_to_unlock',
+		)
+
+
+class PSetResubmitForm(forms.ModelForm):
+	content = forms.FileField(
+		help_text="The file itself",
+		validators=[
+			pset_file_validator,
+		],
+	)
+
+	class Meta:
+		model = PSet
+		fields = (
+			'clubs',
+			'hours',
+			'feedback',
 			'special_notes',
 		)
 

@@ -5,12 +5,19 @@
 {% if pset.approved %}
 <div class="alert alert-success">
 	This unit submission was approved.
+	If you haven't read the solutions yet,
+	you can <a href="{% url "resubmit-pset" pset.pk %}">resubmit this problem set</a>
+	if you find time do more problems.
 </div>
 {% else %}
 <div class="alert alert-primary">
-	This unit submission is still pending approval from your instructor.
+	This unit submission is pending approval from your instructor.
+	<a href="{% url "resubmit-pset" pset.pk %}">Edit your submission</a>
+	if you wish to make changes.
 </div>
 {% endif %}
+
+<h2>Details</h2>
 <ul>
 	<li>Unit: <a href="{% url "view-problems" pset.unit.pk %}">{{ pset.unit }}</a>
 		<ul>
