@@ -72,7 +72,7 @@ class LevelFactory(DjangoModelFactory):
 		model = Level
 
 	threshold = Sequence(lambda n: n + 1)
-	name = UniqueFaker('bs')
+	name = LazyAttribute(lambda o: f'Level {o.threshold}')
 
 
 class AchievementUnlockFactory(DjangoModelFactory):

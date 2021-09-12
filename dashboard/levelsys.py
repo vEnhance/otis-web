@@ -10,6 +10,9 @@ from sql_util.aggregates import SubqueryCount, SubquerySum
 
 from dashboard.models import AchievementUnlock, Level, PSet, QuestComplete
 
+BONUS_D_UNIT = 0.3
+BONUS_Z_UNIT = 0.5
+
 
 class Meter:
 	def __init__(
@@ -78,18 +81,32 @@ class Meter:
 def get_meters(student: Student) -> Dict[str, Any]:
 	"""Uses a bunch of expensive database queries to compute a student's levels and data,
 	returning the findings as a (TODO typed) dictionary."""
+
 	psets = PSet.objects.filter(student=student, approved=True, eligible=True)
-	pset_data = psets.aggregate(Sum('clubs'), Sum('hours'))
+	pset_data = psets.aggregate(
+		clubs_any=Sum('clubs'),
+		clubs_D=Sum('clubs', filter=Q(unit__code__startswith='D')),
+		clubs_Z=Sum('clubs', filter=Q(unit__code__startswith='Z')),
+		hearts=Sum('hours'),
+	)
+	total_clubs = (
+		(pset_data['clubs_any'] or 0) + (pset_data['clubs_D'] or 0) * BONUS_D_UNIT +
+		(pset_data['clubs_Z'] or 0) * BONUS_Z_UNIT
+	)
+	total_hearts = pset_data['hearts'] or 0
+
 	total_diamonds = AchievementUnlock.objects.filter(user=student.user).aggregate(
 		Sum('achievement__diamonds')
 	)['achievement__diamonds__sum'] or 0
+
 	quiz_data = ExamAttempt.objects.filter(student=student)
 	quest_data = QuestComplete.objects.filter(student=student)
 	total_spades = quiz_data.aggregate(Sum('score'))['score__sum'] or 0
 	total_spades += quest_data.aggregate(Sum('spades'))['spades__sum'] or 0
+
 	meters = {
-		'clubs': Meter.ClubMeter(pset_data['clubs__sum'] or 0),
-		'hearts': Meter.HeartMeter(int(pset_data['hours__sum'] or 0)),
+		'clubs': Meter.ClubMeter(int(total_clubs)),
+		'hearts': Meter.HeartMeter(int(total_hearts)),
 		'diamonds': Meter.DiamondMeter(total_diamonds),
 		'spades': Meter.SpadeMeter(total_spades),  # TODO input value
 	}
@@ -112,7 +129,13 @@ def annotate_student_queryset_with_scores(queryset: QuerySet[Student]) -> QueryS
 	Selects all important information to prevent a bunch of SQL queries"""
 	return queryset.select_related('user', 'assistant', 'semester').annotate(
 		num_psets=SubqueryCount('pset', filter=Q(approved=True, eligible=True)),
-		clubs=SubquerySum('pset__clubs', filter=Q(approved=True, eligible=True)),
+		clubs_any=SubquerySum('pset__clubs', filter=Q(approved=True, eligible=True)),
+		clubs_D=SubquerySum(
+			'pset__clubs', filter=Q(approved=True, eligible=True, unit__code__startswith='D')
+		),
+		clubs_Z=SubquerySum(
+			'pset__clubs', filter=Q(approved=True, eligible=True, unit__code__startswith='Z')
+		),
 		hearts=SubquerySum('pset__hours', filter=Q(approved=True, eligible=True)),
 		spades_quizzes=SubquerySum('examattempt__score'),
 		spades_quests=SubquerySum('questcomplete__spades'),
@@ -133,7 +156,9 @@ def get_student_rows(queryset: QuerySet[Student]) -> List[Dict[str, Any]]:
 		row['spades'] = (getattr(student, 'spades_quizzes', 0) or 0)
 		row['spades'] += (getattr(student, 'spades_quests', 0) or 0)
 		row['hearts'] = getattr(student, 'hearts', 0) or 0
-		row['clubs'] = getattr(student, 'clubs', 0) or 0
+		row['clubs'] = getattr(student, 'clubs_any', 0) or 0
+		row['clubs'] += BONUS_D_UNIT * (getattr(student, 'clubs_D', 0) or 0)
+		row['clubs'] += BONUS_Z_UNIT * (getattr(student, 'clubs_Z', 0) or 0)
 		row['diamonds'] = getattr(student, 'diamonds', 0) or 0
 		row['level'] = sum(int(row[k]**0.5) for k in ('spades', 'hearts', 'clubs', 'diamonds'))
 		if row['level'] > max_level:
