@@ -2,10 +2,12 @@
 {% load humanize %}
 {% block layout-content %}
 
-<p><a href="{% url "portal" student.id %}">⬅️ Back to portal</a></p>
+<p><a href="{{ pset.get_absolute_url }}">Return to problem set view</a></p>
+
 <div class="alert alert-primary">
 	{% if pset.approved or pset.resubmitted %}
 	You are about to <em>resubmit</em> for the unit {{ pset.unit }}.
+	(You might do this, for example, if you solve more problems later on.)
 	This will overwrite your previous submission,
 	and add it back to the queue of problem sets requiring a check-off.
 	{% else %}
