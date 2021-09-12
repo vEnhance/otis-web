@@ -1,7 +1,7 @@
 import os
 from io import StringIO
 
-from core.factories import UnitFactory
+from core.factories import UnitFactory, UserFactory
 from exams.factories import ExamAttemptFactory, ExamFactory
 from otisweb.tests import OTISTestCase
 from roster.factories import StudentFactory
@@ -183,6 +183,10 @@ class TestLevelSystem(OTISTestCase):
 		self.assertEqual(rows[3]['diamonds'], 0)
 		self.assertEqual(rows[3]['level'], 0)
 		self.assertEqual(rows[3]['level_name'], "No level")
+
+		admin = UserFactory.create(is_superuser=True)
+		self.login(admin)
+		self.assertGet20X('leaderboard')
 
 
 class TestSubmitPSet(OTISTestCase):
