@@ -10,6 +10,7 @@ from roster.models import Student
 from dashboard.factories import AchievementFactory, AchievementUnlockFactory, LevelFactory, PSetFactory, QuestCompleteFactory  # NOQA
 from dashboard.levelsys import get_student_rows
 from dashboard.models import PSet
+from dashboard.utils import get_units_to_submit, get_units_to_unlock
 from dashboard.views import annotate_student_queryset_with_scores, get_meters
 
 
@@ -333,3 +334,15 @@ class TestSubmitPSet(OTISTestCase):
 		self.assertContains(resp, 'This unit submission was approved')
 		self.assertContains(resp, '100♣')
 		self.assertContains(resp, '20.0♥')
+
+	def test_queryset(self):
+		units = UnitFactory.create_batch(size=20)
+		alice = StudentFactory.create()
+		alice.curriculum.set(units[0:18])
+		alice.unlocked_units.set(units[4:7])
+		for unit in units[0:4]:
+			PSetFactory.create(student=alice, unit=unit)
+		PSetFactory.create(student=alice, unit=units[4], approved=False)
+
+		self.assertEqual(get_units_to_submit(alice).count(), 2)
+		self.assertEqual(get_units_to_unlock(alice).count(), 11)

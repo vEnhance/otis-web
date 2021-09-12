@@ -18,6 +18,7 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Count, OuterRef, Subquery
 from django.db.models.expressions import Exists
 from django.db.models.query import QuerySet
+from django.db.models.query_utils import Q
 from django.forms.models import BaseModelForm
 from django.http import HttpResponse, HttpResponseRedirect
 from django.http.request import HttpRequest
@@ -37,6 +38,7 @@ from sql_util.utils import SubqueryAggregate
 
 from dashboard.forms import DiamondsForm, PSetResubmitForm
 from dashboard.levelsys import get_student_rows
+from dashboard.utils import get_units_to_submit, get_units_to_unlock
 
 from .forms import NewUploadForm, PSetSubmitForm
 from .levelsys import annotate_student_queryset_with_scores, get_meters
@@ -187,10 +189,8 @@ def submit_pset(request: HttpRequest, student_id: int) -> HttpResponse:
 	else:
 		form = PSetSubmitForm()
 
-	form.fields['next_unit_to_unlock'].queryset = student.generate_curriculum_queryset().filter(
-		has_pset=False
-	)
-	form.fields['unit'].queryset = student.unlocked_units.all()
+	form.fields['unit'].queryset = get_units_to_submit(student)
+	form.fields['next_unit_to_unlock'].queryset = get_units_to_unlock(student)
 	if request.method == 'POST' and form.is_valid():
 		pset = form.save(commit=False)
 		if PSet.objects.filter(student=student, unit=pset.unit).exists():
