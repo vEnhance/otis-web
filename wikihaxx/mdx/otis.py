@@ -1,6 +1,6 @@
 import re
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any, List
 
 import markdown
 import markdown.preprocessors
@@ -29,7 +29,7 @@ class OTISPreprocessor(markdown.preprocessors.Preprocessor):
 		output: List[str] = []
 		body: List[str] = []
 		active = False
-		puid: Optional[str] = None
+		puid: str = ''
 
 		for line in lines:
 			m_start = special_start_regex.match(line)
@@ -45,7 +45,6 @@ class OTISPreprocessor(markdown.preprocessors.Preprocessor):
 
 				if tag_name == 'problem':
 					puid = tag_arg.upper()
-					assert puid is not None
 
 					# Get data from ARCH
 					try:
@@ -128,10 +127,7 @@ class OTISPreprocessor(markdown.preprocessors.Preprocessor):
 					output.append('<td>' + parts[1].strip() + '</td>')
 					output.append('</tr>')
 
-			elif (
-				line.strip() == "[statement]" and puid is not None and
-				settings.PATH_STATEMENT_ON_DISK is not None
-			):
+			elif line.strip() == "[statement]" and settings.PATH_STATEMENT_ON_DISK is not None:
 				statement_path = Path(settings.PATH_STATEMENT_ON_DISK) / (puid + '.html')
 				if statement_path.exists() and statement_path.is_file():
 					statement = statement_path.read_text()
