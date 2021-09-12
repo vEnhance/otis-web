@@ -13,13 +13,13 @@
 	<div class="accordion-item">
 		<h2 class="accordion-header" id="headingSocialLogin">
 			<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSocialLogin" aria-expanded="false" aria-controls="collapseSocialLogin">
-				Login via social account
+				Login via existing social connection
 			</button>
 		</h2>
 		<div id="collapseSocialLogin" class="accordion-collapse collapse show" aria-labelledby="headingSocialLogin" data-bs-parent="#accordionLogin">
 			<div class="accordion-body">
 				<p>Use the same option you used when registering.
-					(Do not use this to establish new connections or accounts!)</p>
+					(Do not use this to establish new connections!)</p>
 				<div class="socialaccount_ballot">
 					<ul class="socialaccount_providers">
 						{% include "socialaccount/snippets/provider_list.html" with process="login" %}
