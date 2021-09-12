@@ -3,13 +3,10 @@
 from __future__ import unicode_literals
 
 import logging
-import os
-from datetime import datetime, timedelta
 from typing import Any, Dict
 
 from braces.views import LoginRequiredMixin, StaffuserRequiredMixin
 from core.models import Semester, Unit
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
@@ -24,13 +21,11 @@ from django.http.request import HttpRequest
 from django.http.response import HttpResponseBase
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
-from django.utils import timezone
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from dwhandler import SUCCESS_LOG_LEVEL, VERBOSE_LOG_LEVEL
 from exams.models import PracticeExam
-from mailchimp3 import MailChimp
-from otisweb.utils import AuthHttpRequest
+from otisweb.utils import AuthHttpRequest, get_mailchimp_campaigns
 from roster.models import Student, StudentRegistration
 from roster.utils import can_edit, can_view, get_student_by_id, get_visible_students, infer_student  # NOQA
 from sql_util.utils import SubqueryAggregate
@@ -53,20 +48,6 @@ def portal(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 		return HttpResponseRedirect(reverse_lazy('invoice', args=(student_id, )))
 	semester = student.semester
 
-	# mailchimp
-	if not settings.TESTING:
-		timestamp = (timezone.now() + timedelta(days=-28))
-		client = MailChimp(mc_api=os.getenv('MAILCHIMP_API_KEY'), mc_user='vEnhance')
-		mailchimp_campaign_data = client.campaigns.all(
-			get_all=True, status='sent', since_send_time=timestamp
-		)
-		if mailchimp_campaign_data is not None:
-			campaigns = mailchimp_campaign_data['campaigns']
-		else:
-			campaigns = []
-	else:
-		campaigns = []
-
 	context: Dict[str, Any] = {}
 	context['title'] = f"{student.name} ({semester.name})"
 	context['student'] = student
@@ -79,14 +60,7 @@ def portal(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 	context['quizzes'] = PracticeExam.objects.filter(
 		is_test=False, family=semester.exam_family, due_date__isnull=False
 	)
-	context['emails'] = [
-		{
-			'url': c['archive_url'],
-			'title': c['settings']['subject_line'],
-			'preview_text': c['settings']['preview_text'],
-			'timestamp': datetime.fromisoformat(c['send_time'])
-		} for c in campaigns
-	]
+	context['emails'] = get_mailchimp_campaigns(28)
 	context['num_sem_download'] = SemesterDownloadFile.objects.filter(semester=semester).count()
 	context.update(get_meters(student))
 	return render(request, "dashboard/portal.html", context)

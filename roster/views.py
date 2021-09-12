@@ -13,7 +13,6 @@ So e.g. "list students by most recent pset" goes under dashboard.
 import collections
 import datetime
 import logging
-import os
 from hashlib import pbkdf2_hmac
 from typing import Any, Dict, List, Optional
 
@@ -34,9 +33,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 from django.views.generic.edit import UpdateView
 from dwhandler import ACTION_LOG_LEVEL
-from mailchimp3 import MailChimp
-from mailchimp3.mailchimpclient import MailChimpError
-from otisweb.utils import AuthHttpRequest
+from otisweb.utils import AuthHttpRequest, mailchimp_subscribe
 from roster.utils import can_edit, get_current_students, get_student_by_id, infer_student  # NOQA
 
 from .forms import AdvanceForm, CurriculumForm, DecisionForm, InquiryForm, UserForm  # NOQA
@@ -319,22 +316,6 @@ def inquiry(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 	return render(request, 'roster/inquiry.html', context)
 
 
-def mailchimp_subscribe(user: User):
-	if settings.TESTING:
-		return
-	client = MailChimp(mc_api=os.getenv('MAILCHIMP_API_KEY'), mc_user='vEnhance')
-	client.lists.members.create(
-		os.getenv('MAILCHIMP_LIST_ID'), {
-			'email_address': user.email,
-			'status': 'subscribed',
-			'merge_fields': {
-				'FNAME': user.first_name,
-				'LNAME': user.last_name,
-			}
-		}
-	)
-
-
 @login_required
 def register(request: AuthHttpRequest) -> HttpResponse:
 	try:
@@ -365,7 +346,7 @@ def register(request: AuthHttpRequest) -> HttpResponse:
 				group, _ = Group.objects.get_or_create(name='Verified')
 				group.user_set.add(request.user)  # type: ignore
 				request.user.save()
-				mailchimp_subscribe(request.user)
+				mailchimp_subscribe(request)
 				messages.success(request, message="Submitted! Sit tight.")
 				logging.log(
 					ACTION_LOG_LEVEL,
@@ -402,21 +383,11 @@ def update_profile(request: AuthHttpRequest) -> HttpResponse:
 			user: User = form.save()
 			if old_email != new_email:
 				logging.info(
-					f"User {user.first_name} {user.last_name} added {new_email} "
+					f"User {user.first_name} {user.last_name} added {new_email} " +
 					f"(formerly {old_email})"
 				)
 				user.save()
-				try:
-					mailchimp_subscribe(user)
-					messages.info(
-						request, "Your updated email was added to the OTIS mailing list. "
-						"You may want to unsubscribe the old one."
-					)
-				except MailChimpError as e:
-					logging.error(f"Could not add {new_email} to MailChimp", exc_info=e)
-					messages.warning(
-						request, "The new email could not be added to MailChimp, maybe it exists already?"
-					)
+				mailchimp_subscribe(request)
 			else:
 				user.save()
 			messages.success(request, "Your information has been updated.")
