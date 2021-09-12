@@ -180,7 +180,7 @@ def problems_handler(action: str, request: HttpRequest) -> JsonResponse:
 			{'hints': list(Hint.objects.filter(problem=problem).values('keywords', 'id', 'number'))}
 		)
 	elif action == 'add_hints':
-		problem = get_object_or_404(Problem, puid=puid)
+		problem, _ = Problem.objects.get_or_create(puid=puid)
 		content = request.POST['content']
 		existing_hint_numbers = set(
 			Hint.objects.filter(problem=problem).values_list('number', flat=True)
