@@ -30,6 +30,7 @@ from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from dwhandler import SUCCESS_LOG_LEVEL, VERBOSE_LOG_LEVEL
 from exams.models import PracticeExam
 from mailchimp3 import MailChimp
+from otisweb.utils import AuthHttpRequest
 from roster.models import Student, StudentRegistration
 from roster.utils import can_edit, can_view, get_student_by_id, get_visible_students, infer_student  # NOQA
 from sql_util.utils import SubqueryAggregate
@@ -45,9 +46,8 @@ logger = logging.getLogger(__name__)
 
 
 @login_required
-def portal(request: HttpRequest, student_id: int) -> HttpResponse:
+def portal(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 	student = get_student_by_id(request, student_id, payment_exempt=True)
-	assert isinstance(request.user, User)
 	if not request.user.is_staff and student.is_delinquent:
 		return HttpResponseRedirect(reverse_lazy('invoice', args=(student_id, )))
 	semester = student.semester
@@ -92,9 +92,8 @@ def portal(request: HttpRequest, student_id: int) -> HttpResponse:
 
 
 @login_required
-def stats(request: HttpRequest, student_id: int) -> HttpResponse:
+def stats(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 	student = get_student_by_id(request, student_id)
-	assert isinstance(student.user, User)
 	context: Dict[str, Any] = {
 		'student': student,
 		'form': DiamondsForm(),
@@ -162,8 +161,7 @@ class FoundList(LoginRequiredMixin, StaffuserRequiredMixin, ListView[Achievement
 
 
 @staff_member_required
-def leaderboard(request: HttpRequest) -> HttpResponse:
-	assert isinstance(request.user, User)
+def leaderboard(request: AuthHttpRequest) -> HttpResponse:
 	students = Student.objects.filter(semester__active=True)
 	rows = get_student_rows(students)
 	rows.sort(
@@ -261,12 +259,10 @@ def uploads(request: HttpRequest, student_id: int, unit_id: int) -> HttpResponse
 
 
 @login_required
-def index(request: HttpRequest) -> HttpResponse:
-	assert isinstance(request.user, User)
+def index(request: AuthHttpRequest) -> HttpResponse:
 	students = get_visible_students(request.user, current=True)
 	if len(students) == 1:  # unique match
 		return HttpResponseRedirect(reverse("portal", args=(students[0].id, )))
-	assert isinstance(request.user, User)
 	context: Dict[str, Any] = {}
 	context['title'] = "Current Semester Listing"
 	context['students'] = annotate_student_queryset_with_scores(students).order_by(
@@ -280,8 +276,7 @@ def index(request: HttpRequest) -> HttpResponse:
 
 
 @login_required
-def past(request: HttpRequest, semester: Semester = None):
-	assert isinstance(request.user, User)
+def past(request: AuthHttpRequest, semester: Semester = None):
 	students = get_visible_students(request.user, current=False)
 	if semester is not None:
 		students = students.filter(semester=semester)
@@ -336,8 +331,7 @@ class DeleteFile(LoginRequiredMixin, DeleteView):
 
 
 @staff_member_required
-def idlewarn(request: HttpRequest) -> HttpResponse:
-	assert isinstance(request.user, User)
+def idlewarn(request: AuthHttpRequest) -> HttpResponse:
 	context: Dict[str, Any] = {}
 	context['title'] = 'Idle-warn'
 

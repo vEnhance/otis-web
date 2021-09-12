@@ -36,7 +36,7 @@ from django.views.generic.edit import UpdateView
 from dwhandler import ACTION_LOG_LEVEL
 from mailchimp3 import MailChimp
 from mailchimp3.mailchimpclient import MailChimpError
-
+from otisweb.utils import AuthHttpRequest
 from roster.utils import can_edit, get_current_students, get_student_by_id, infer_student  # NOQA
 
 from .forms import AdvanceForm, CurriculumForm, DecisionForm, InquiryForm, UserForm  # NOQA
@@ -226,8 +226,7 @@ class UpdateInvoice(
 
 # Inquiry views
 @login_required
-def inquiry(request: HttpRequest, student_id: int) -> HttpResponse:
-	assert isinstance(request.user, User)
+def inquiry(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 	student = get_student_by_id(request, student_id)
 	if not student.semester.active:
 		raise PermissionDenied(
@@ -337,14 +336,13 @@ def mailchimp_subscribe(user: User):
 
 
 @login_required
-def register(request: HttpRequest) -> HttpResponse:
+def register(request: AuthHttpRequest) -> HttpResponse:
 	try:
 		container = RegistrationContainer.objects.get(semester__active=True)
 	except (RegistrationContainer.DoesNotExist, RegistrationContainer.MultipleObjectsReturned):
 		return HttpResponse("There isn't a currently active OTIS semester.", status=503)
 
 	semester: Semester = container.semester
-	assert isinstance(request.user, User)
 	if StudentRegistration.objects.filter(user=request.user, container=container).exists():
 		messages.info(request, message="You have already submitted a decision form for this year!")
 		form = None
@@ -395,8 +393,7 @@ def register(request: HttpRequest) -> HttpResponse:
 
 
 @login_required
-def update_profile(request: HttpRequest) -> HttpResponse:
-	assert isinstance(request.user, User)
+def update_profile(request: AuthHttpRequest) -> HttpResponse:
 	old_email = request.user.email
 	if request.method == 'POST':
 		form = UserForm(request.POST, instance=request.user)
