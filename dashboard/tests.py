@@ -1,3 +1,7 @@
+import os
+from io import StringIO
+
+from core.factories import UnitFactory
 from exams.factories import ExamAttemptFactory, ExamFactory
 from otisweb.tests import OTISTestCase
 from roster.factories import StudentFactory
@@ -5,10 +9,11 @@ from roster.models import Student
 
 from dashboard.factories import AchievementFactory, AchievementUnlockFactory, LevelFactory, PSetFactory, QuestCompleteFactory  # NOQA
 from dashboard.levelsys import get_student_rows
+from dashboard.models import PSet
 from dashboard.views import annotate_student_queryset_with_scores, get_meters
 
 
-class TestDashboard(OTISTestCase):
+class TestLevelSystem(OTISTestCase):
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()
@@ -177,3 +182,154 @@ class TestDashboard(OTISTestCase):
 		self.assertEqual(rows[3]['diamonds'], 0)
 		self.assertEqual(rows[3]['level'], 0)
 		self.assertEqual(rows[3]['level_name'], "No level")
+
+
+class TestSubmitPSet(OTISTestCase):
+	def test_submit(self):
+		unit1 = UnitFactory.create(code='BMW')
+		unit2 = UnitFactory.create(code='DMX')
+		unit3 = UnitFactory.create(code='ZMY')
+		alice = StudentFactory.create()
+		self.login(alice)
+		alice.unlocked_units.add(unit1)
+		alice.curriculum.set([unit1, unit2, unit3])
+
+		# Alice should show initially as Level 0
+		resp = self.assertGet20X('stats', alice.pk)
+		self.assertContains(resp, 'Level 0')
+
+		# Alice submits a problem set
+		content1 = StringIO('Meow')
+		content1.name = 'content1.txt'
+		resp = self.assertPost20X(
+			'submit-pset',
+			alice.pk,
+			data={
+				'unit': unit1.pk,
+				'clubs': 13,
+				'hours': 37,
+				'feedback': 'hello',
+				'special_notes': 'meow',
+				'content': content1,
+				'next_unit_to_unlock': unit2.pk
+			}
+		)
+		self.assertContains(resp, '13♣')
+		self.assertContains(resp, '37.0♥')
+		self.assertContains(resp, 'This unit submission is pending approval')
+
+		# Alice should still be Level 0 though
+		resp = self.assertGet20X('stats', alice.pk)
+		self.assertContains(resp, 'Level 0')
+
+		# Check pset reflects this data
+		pset = PSet.objects.get(student=alice, unit=unit1)
+		self.assertEqual(pset.clubs, 13)
+		self.assertEqual(pset.hours, 37)
+		self.assertEqual(pset.feedback, 'hello')
+		self.assertEqual(pset.special_notes, 'meow')
+		self.assertEqual(os.path.basename(pset.upload.content.name), 'content1.txt')
+		self.assertFalse(pset.approved)
+		self.assertFalse(pset.resubmitted)
+
+		# Alice realizes she made a typo in hours and edits the problem set
+		content2 = StringIO('Purr')
+		content2.name = 'content2.txt'
+		resp = self.assertPost20X(
+			'resubmit-pset',
+			alice.pk,
+			data={
+				'unit': unit1.pk,
+				'clubs': 13,
+				'hours': 3.7,
+				'feedback': 'hello',
+				'special_notes': 'meow',
+				'content': content2,
+				'next_unit_to_unlock': unit2.pk
+			}
+		)
+		self.assertContains(resp, 'This unit submission is pending approval')
+		self.assertContains(resp, '13♣')
+		self.assertContains(resp, '3.7♥')
+
+		# Check the updated problem set object
+		pset = PSet.objects.get(student=alice, unit=unit1)
+		self.assertEqual(pset.clubs, 13)
+		self.assertEqual(pset.hours, 3.7)
+		self.assertEqual(pset.feedback, 'hello')
+		self.assertEqual(pset.special_notes, 'meow')
+		self.assertEqual(os.path.basename(pset.upload.content.name), 'content2.txt')
+		self.assertFalse(pset.approved)
+		self.assertFalse(pset.resubmitted)
+
+		# Alice should still be Level 0 though
+		resp = self.assertGet20X('stats', alice.pk)
+		self.assertContains(resp, 'Level 0')
+
+		# simulate approval
+		pset.approved = True
+		pset.save()
+		alice.unlocked_units.remove(unit1)
+		alice.unlocked_units.add(unit2)
+		alice.curriculum.set([unit1, unit2, unit3])
+
+		# check it shows up this way
+		resp = self.assertGet20X('pset', pset.pk)
+		self.assertContains(resp, 'This unit submission was approved')
+		self.assertContains(resp, '13♣')
+		self.assertContains(resp, '3.7♥')
+
+		# Alice should show as leveled up now
+		resp = self.assertGet20X('stats', alice.pk)
+		self.assertContains(resp, 'Level 4')
+
+		# now let's say Alice resubmits
+		content3 = StringIO('Rawr')
+		content3.name = 'content3.txt'
+		resp = self.assertPost20X(
+			'resubmit-pset',
+			alice.pk,
+			data={
+				'unit': unit1.pk,
+				'clubs': 100,
+				'hours': 20,
+				'feedback': 'hello',
+				'special_notes': 'meow',
+				'content': content3,
+				'next_unit_to_unlock': unit2.pk
+			}
+		)
+
+		# check it shows up this way
+		resp = self.assertGet20X('pset', pset.pk)
+		self.assertContains(resp, 'This unit submission is pending approval')
+		self.assertContains(resp, '100♣')
+		self.assertContains(resp, '20.0♥')
+
+		# Check the problem set
+		pset = PSet.objects.get(student=alice, unit=unit1)
+		self.assertEqual(pset.clubs, 100)
+		self.assertEqual(pset.hours, 20)
+		self.assertEqual(pset.feedback, 'hello')
+		self.assertEqual(pset.special_notes, 'meow')
+		self.assertEqual(os.path.basename(pset.upload.content.name), 'content3.txt')
+		self.assertFalse(pset.approved)
+		self.assertTrue(pset.resubmitted)
+
+		# Alice is now back to Level 0
+		resp = self.assertGet20X('stats', alice.pk)
+		self.assertContains(resp, 'Level 0')
+
+		# simulate approval
+		pset.approved = True
+		pset.save()
+
+		# Alice is now Level 14
+		resp = self.assertGet20X('stats', alice.pk)
+		self.assertContains(resp, 'Level 14')
+
+		# check it shows up this way
+		resp = self.assertGet20X('pset', pset.pk)
+		self.assertContains(resp, 'This unit submission was approved')
+		self.assertContains(resp, '100♣')
+		self.assertContains(resp, '20.0♥')
