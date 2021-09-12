@@ -166,8 +166,12 @@ def leaderboard(request: AuthHttpRequest) -> HttpResponse:
 	rows = get_student_rows(students)
 	rows.sort(
 		key=lambda row: (
-			-row['level'], -row['spades'], -row['hearts'], -row['clubs'], -row['diamonds'], row[
-				'student'].name.upper()
+			-row['level'],
+			-row['clubs'],
+			-row['hearts'],
+			-row['spades'],
+			-row['diamonds'],
+			-row['student'].name.upper(),
 		)
 	)
 	context: Dict[str, Any] = {}
