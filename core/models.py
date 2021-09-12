@@ -57,9 +57,6 @@ class Semester(models.Model):
 	gradescope_key = models.CharField(
 		max_length=10, blank=True, help_text="The entry code for GradeScope this semester."
 	)
-	classroom_url = models.CharField(
-		max_length=128, blank=True, help_text="The entry point for the meeting room."
-	)
 	social_url = models.CharField(
 		max_length=128, blank=True, help_text="The link to social platform for this year."
 	)

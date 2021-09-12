@@ -221,12 +221,6 @@
 		<td valign="top">
 			<h3>External sites</h3>
 			<ul>
-				{% if student.track == "A" or student.track == "B" %}
-				<li><a href="{% url "classroom" %}">1:1 meeting link</a>
-					(otis.evanchen.cc/core/classroom)
-				</li>
-				{% endif %}
-
 				<li><a href="https://www.gradescope.com">GradeScope</a>
 					{% if semester.gradescope_key %}
 					(entry key: {{ semester.gradescope_key }})

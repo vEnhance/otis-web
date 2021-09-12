@@ -54,14 +54,6 @@ class TestCore(OTISTestCase):
 		for v in ('view-problems', 'view-tex', 'view-solutions'):
 			self.assertGetDenied(v, u.pk)
 
-	def test_classroom_url_works(self):
-		semester = SemesterFactory.create()
-		self.login(UserFactory.create())
-		self.assertGet40X('classroom')
-		semester.classroom_url = '/'
-		semester.save()
-		self.assertGetOK('classroom')
-
 	def test_hidden(self):
 		UnitFactory.create(group__name="VisibleUnit", group__hidden=False)
 		UnitFactory.create(group__name="HiddenUnit", group__hidden=True)
