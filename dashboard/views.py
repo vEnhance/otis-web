@@ -15,11 +15,11 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
-from django.db.models import Count, OuterRef, Q, Subquery, Sum  # NOQA
+from django.db.models import Count, OuterRef, Subquery
 from django.db.models.expressions import Exists
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
-from django.http import HttpResponse, HttpResponseRedirect  # NOQA
+from django.http import HttpResponse, HttpResponseRedirect
 from django.http.request import HttpRequest
 from django.http.response import HttpResponseBase
 from django.shortcuts import get_object_or_404, render
@@ -28,113 +28,20 @@ from django.utils import timezone
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from dwhandler import SUCCESS_LOG_LEVEL, VERBOSE_LOG_LEVEL
-from exams.models import ExamAttempt, PracticeExam
+from exams.models import PracticeExam
 from mailchimp3 import MailChimp
 from roster.models import Student, StudentRegistration
 from roster.utils import can_edit, can_view, get_student_by_id, get_visible_students, infer_student  # NOQA
-from sql_util.aggregates import SubqueryCount, SubquerySum
 from sql_util.utils import SubqueryAggregate
 
 from dashboard.forms import DiamondsForm
+from dashboard.levelsys import get_student_rows
 
 from .forms import NewUploadForm, PSetForm
-from .models import Achievement, AchievementUnlock, Level, ProblemSuggestion, PSet, QuestComplete, SemesterDownloadFile, UploadedFile  # NOQA
+from .levelsys import annotate_student_queryset_with_scores, get_meters
+from .models import Achievement, AchievementUnlock, Level, ProblemSuggestion, PSet, SemesterDownloadFile, UploadedFile  # NOQA
 
 logger = logging.getLogger(__name__)
-
-
-class Meter:
-	def __init__(
-		self,
-		name: str,
-		emoji: str,
-		value: int,
-		unit: str,
-		color: str,
-		max_value: int,
-	):
-		self.name = name
-		self.emoji = emoji
-		self.value = value
-		self.unit = unit
-		self.color = color
-		self.max_value = max_value
-
-	@property
-	def level(self) -> int:
-		return int(self.value**0.5)
-
-	@property
-	def percent(self) -> int:
-		eps = 0.25
-		k = (self.value + eps * self.max_value) / ((1 + eps) * self.max_value)
-		return min(100, int(100 * k))
-
-	@property
-	def needed(self) -> int:
-		return (self.level + 1)**2 - self.value
-
-	@property
-	def thresh(self) -> int:
-		return (self.level + 1)**2
-
-	@property
-	def total(self):
-		return self.value
-
-	@staticmethod
-	def ClubMeter(value: int):
-		return Meter(
-			name="Dexterity", emoji="♣️", value=value, unit="♣", color='#007bff;', max_value=2500
-		)
-
-	@staticmethod
-	def HeartMeter(value: int):
-		return Meter(
-			name="Wisdom", emoji="🕰️", value=value, unit="♥", color='#198754', max_value=2500
-		)
-
-	@staticmethod
-	def SpadeMeter(value: int):
-		return Meter(
-			name="Strength", emoji="🏆", value=value, unit="♠", color='#ae610f', max_value=82
-		)
-
-	@staticmethod
-	def DiamondMeter(value: int):
-		return Meter(
-			name="Charisma", emoji="㊙️", value=value, unit="◆", color='#9c1421', max_value=50
-		)
-
-
-def get_meter_update(student: Student) -> Dict[str, Any]:
-	psets = PSet.objects.filter(student=student, approved=True, eligible=True)
-	pset_data = psets.aggregate(Sum('clubs'), Sum('hours'))
-	total_diamonds = AchievementUnlock.objects.filter(user=student.user).aggregate(
-		Sum('achievement__diamonds')
-	)['achievement__diamonds__sum'] or 0
-	quiz_data = ExamAttempt.objects.filter(student=student)
-	quest_data = QuestComplete.objects.filter(student=student)
-	total_spades = quiz_data.aggregate(Sum('score'))['score__sum'] or 0
-	total_spades += quest_data.aggregate(Sum('spades'))['spades__sum'] or 0
-	meters = {
-		'clubs': Meter.ClubMeter(pset_data['clubs__sum'] or 0),
-		'hearts': Meter.HeartMeter(int(pset_data['hours__sum'] or 0)),
-		'diamonds': Meter.DiamondMeter(total_diamonds),
-		'spades': Meter.SpadeMeter(total_spades),  # TODO input value
-	}
-	level_number = sum(meter.level for meter in meters.values())
-	level = Level.objects.filter(threshold__lte=level_number).order_by('-threshold').first()
-	level_name = level.name if level is not None else 'No Level'
-	return {
-		'psets': psets,
-		'pset_data': pset_data,
-		'quiz_data': quiz_data,
-		'quest_data': quest_data,
-		'meters': meters,
-		'level_number': level_number,
-		'level_name': level_name
-	}
 
 
 @login_required
@@ -180,7 +87,7 @@ def portal(request: HttpRequest, student_id: int) -> HttpResponse:
 		} for c in campaigns
 	]
 	context['num_sem_download'] = SemesterDownloadFile.objects.filter(semester=semester).count()
-	context.update(get_meter_update(student))
+	context.update(get_meters(student))
 	return render(request, "dashboard/portal.html", context)
 
 
@@ -215,7 +122,7 @@ def stats(request: HttpRequest, student_id: int) -> HttpResponse:
 		context['first_achievement'] = Achievement.objects.get(pk=1)
 	except Achievement.DoesNotExist:
 		pass
-	_meter_info = get_meter_update(student)
+	_meter_info = get_meters(student)
 	context.update(_meter_info)
 	level_number = _meter_info['level_number']
 	obtained_levels = Level.objects.filter(threshold__lte=level_number).order_by('-threshold')
@@ -258,26 +165,7 @@ class FoundList(LoginRequiredMixin, StaffuserRequiredMixin, ListView[Achievement
 def leaderboard(request: HttpRequest) -> HttpResponse:
 	assert isinstance(request.user, User)
 	students = Student.objects.filter(semester__active=True)
-	rows: List[Dict[str, Any]] = []
-	levels: Dict[int, str] = {level.threshold: level.name for level in Level.objects.all()}
-	if len(levels) == 0:
-		levels[0] = 'No level'
-	max_level = max(levels.keys())
-	for student in annotate_multiple_students(students):
-		row: Dict[str, Any] = {}
-		row['id'] = student.id
-		row['name'] = student.name
-		row['spades'] = (getattr(student, 'spades_quizzes', 0) or 0)
-		row['spades'] += (getattr(student, 'spades_quests', 0) or 0)
-		row['hearts'] = getattr(student, 'hearts', 0) or 0
-		row['clubs'] = getattr(student, 'clubs', 0) or 0
-		row['diamonds'] = getattr(student, 'diamonds', 0) or 0
-		row['level'] = sum(int(row[k]**0.5) for k in ('spades', 'hearts', 'clubs', 'diamonds'))
-		if row['level'] > max_level:
-			row['level_name'] = levels[max_level]
-		else:
-			row['level_name'] = levels.get(row['level'], "No level")
-		rows.append(row)
+	rows = get_student_rows(students)
 	rows.sort(
 		key=lambda row: (
 			-row['level'], -row['spades'], -row['hearts'], -row['clubs'], -row['diamonds'], row[
@@ -372,19 +260,6 @@ def uploads(request: HttpRequest, student_id: int, unit_id: int) -> HttpResponse
 	return render(request, "dashboard/uploads.html", context)
 
 
-def annotate_multiple_students(queryset: QuerySet[Student]) -> QuerySet[Student]:
-	"""Helper function for constructing large lists of students
-	Selects all important information to prevent a bunch of SQL queries"""
-	return queryset.select_related('user', 'assistant', 'semester').annotate(
-		num_psets=SubqueryCount('pset', filter=Q(approved=True, eligible=True)),
-		clubs=SubquerySum('pset__clubs', filter=Q(approved=True, eligible=True)),
-		hearts=SubquerySum('pset__hours', filter=Q(approved=True, eligible=True)),
-		spades_quizzes=SubquerySum('examattempt__score'),
-		spades_quests=SubquerySum('questcomplete__spades'),
-		diamonds=SubquerySum('user__achievementunlock__achievement__diamonds'),
-	)
-
-
 @login_required
 def index(request: HttpRequest) -> HttpResponse:
 	assert isinstance(request.user, User)
@@ -394,7 +269,7 @@ def index(request: HttpRequest) -> HttpResponse:
 	assert isinstance(request.user, User)
 	context: Dict[str, Any] = {}
 	context['title'] = "Current Semester Listing"
-	context['students'] = annotate_multiple_students(students).order_by(
+	context['students'] = annotate_student_queryset_with_scores(students).order_by(
 		'track', 'user__first_name', 'user__last_name'
 	)
 	context['stulist_show_semester'] = False
@@ -412,7 +287,7 @@ def past(request: HttpRequest, semester: Semester = None):
 		students = students.filter(semester=semester)
 	context: Dict[str, Any] = {}
 	context['title'] = "Previous Semester Listing"
-	context['students'] = annotate_multiple_students(students).order_by(
+	context['students'] = annotate_student_queryset_with_scores(students).order_by(
 		'-semester', 'user__first_name', 'user__last_name'
 	)
 	context['stulist_show_semester'] = True
@@ -469,7 +344,9 @@ def idlewarn(request: HttpRequest) -> HttpResponse:
 	newest_qset = UploadedFile.objects.filter(category='psets', benefactor=OuterRef('pk'))
 	newest = newest_qset.order_by('-created_at').values('created_at')[:1]
 
-	students = annotate_multiple_students(get_visible_students(request.user).filter(legit=True))
+	students = annotate_student_queryset_with_scores(
+		get_visible_students(request.user).filter(legit=True)
+	)
 	students = students.annotate(latest_pset=Subquery(newest))  # type: ignore
 	students = students.order_by('latest_pset')
 	context['students'] = students

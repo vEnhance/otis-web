@@ -5,7 +5,7 @@ from roster.models import Student
 
 from dashboard.factories import AchievementFactory, AchievementUnlockFactory, LevelFactory, PSetFactory, QuestCompleteFactory  # NOQA
 from dashboard.models import Level
-from dashboard.views import annotate_multiple_students, get_meter_update
+from dashboard.views import annotate_student_queryset_with_scores, get_meters
 
 
 class TestDashboard(OTISTestCase):
@@ -34,7 +34,7 @@ class TestDashboard(OTISTestCase):
 
 	def test_meter_update(self):
 		alice = self.setup_alice_example()
-		data = get_meter_update(alice)
+		data = get_meters(alice)
 		self.assertEqual(data['meters']['clubs'].level, 17)
 		self.assertEqual(data['meters']['clubs'].value, 300)
 		self.assertEqual(data['meters']['hearts'].level, 9)
@@ -105,7 +105,7 @@ class TestDashboard(OTISTestCase):
 		# make levels
 		LevelFactory.create_batch(size=36)
 
-		queryset = annotate_multiple_students(Student.objects.all())
+		queryset = annotate_student_queryset_with_scores(Student.objects.all())
 		alice = queryset.get(pk=alice.pk)
 		bob = queryset.get(pk=bob.pk)
 		carol = queryset.get(pk=carol.pk)
