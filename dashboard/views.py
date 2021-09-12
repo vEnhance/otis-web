@@ -172,7 +172,7 @@ def leaderboard(request: AuthHttpRequest) -> HttpResponse:
 			-row['hearts'],
 			-row['spades'],
 			-row['diamonds'],
-			-row['student'].name.upper(),
+			row['student'].name.upper(),
 		)
 	)
 	context: Dict[str, Any] = {}
