@@ -66,13 +66,13 @@ class Meter:
 	@staticmethod
 	def SpadeMeter(value: int):
 		return Meter(
-			name="Strength", emoji="🏆", value=value, unit="♠", color='#ae610f', max_value=82
+			name="Strength", emoji="🏆", value=value, unit="♠", color='#ae610f', max_value=125
 		)
 
 	@staticmethod
 	def DiamondMeter(value: int):
 		return Meter(
-			name="Charisma", emoji="㊙️", value=value, unit="◆", color='#9c1421', max_value=50
+			name="Charisma", emoji="㊙️", value=value, unit="◆", color='#9c1421', max_value=100
 		)
 
 
