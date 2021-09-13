@@ -6,7 +6,7 @@ import datetime
 import os
 from hashlib import sha256
 
-from core.models import Semester, Unit, UnitGroup
+from core.models import Semester, Unit
 from django.contrib.auth.models import User
 from django.core.validators import FileExtensionValidator, MaxValueValidator, MinValueValidator  # NOQA
 from django.db import models
@@ -270,27 +270,3 @@ class QuestComplete(models.Model):
 
 	def __str__(self) -> str:
 		return self.title + ' ' + self.timestamp.strftime('%c')
-
-
-class Boss(models.Model):
-	group = models.OneToOneField(
-		UnitGroup,
-		on_delete=models.CASCADE,
-		help_text="The unit group for the boss scene.",
-	)
-	level = models.PositiveSmallIntegerField(
-		help_text="The level where this boss becomes accessible"
-	)
-
-
-class BossBattle(models.Model):
-	created_at = models.DateTimeField(auto_now_add=True)
-	started_at = models.DateTimeField(auto_now_add=True)
-	boss = models.ForeignKey(Boss, on_delete=models.CASCADE)
-	student = models.ForeignKey(Student, on_delete=models.CASCADE)
-
-	class Meta:
-		unique_together = (
-			'boss',
-			'student',
-		)

@@ -1,6 +1,7 @@
 # Functions to compute student levels and whatnot
 from typing import Any, Dict, List, TypedDict, Union
 
+from core.models import Unit
 from django.db.models.aggregates import Sum
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
@@ -8,7 +9,7 @@ from exams.models import ExamAttempt
 from roster.models import Student
 from sql_util.aggregates import SubqueryCount, SubquerySum
 
-from dashboard.models import AchievementUnlock, Level, PSet, QuestComplete
+from dashboard.models import AchievementUnlock, Level, PSet, QuestComplete  # NOQA
 
 BONUS_D_UNIT = 0.3
 BONUS_Z_UNIT = 0.5
@@ -181,3 +182,13 @@ def get_student_rows(queryset: QuerySet[Student]) -> List[Dict[str, Any]]:
 			row['level_name'] = levels.get(row['level'], "No level")
 		rows.append(row)
 	return rows
+
+
+def check_level_up(student: Student) -> bool:
+	level_info = get_level_info(student)
+	level_number = level_info['level_number']
+	if level_number <= student.last_level_seen:
+		return False
+	bonuses = Unit.objects.filter(level__range=(student.last_level_seen + 1, level_number))
+	student.curriculum.add(*list(bonuses))
+	return True

@@ -35,7 +35,7 @@ from dashboard.levelsys import get_student_rows
 from dashboard.utils import get_units_to_submit, get_units_to_unlock
 
 from .forms import NewUploadForm, PSetSubmitForm
-from .levelsys import annotate_student_queryset_with_scores, get_level_info
+from .levelsys import annotate_student_queryset_with_scores, check_level_up, get_level_info  # NOQA
 from .models import Achievement, AchievementUnlock, Level, ProblemSuggestion, PSet, SemesterDownloadFile, UploadedFile  # NOQA
 
 logger = logging.getLogger(__name__)
@@ -47,6 +47,11 @@ def portal(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 	if not request.user.is_staff and student.is_delinquent:
 		return HttpResponseRedirect(reverse_lazy('invoice', args=(student_id, )))
 	semester = student.semester
+
+	level_info = get_level_info(student)
+	if request.user == student.user:
+		if check_level_up(student) is True:
+			messages.success(request, "You leveled up!")
 
 	context: Dict[str, Any] = {}
 	context['title'] = f"{student.name} ({semester.name})"
@@ -62,7 +67,7 @@ def portal(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 	)
 	context['emails'] = get_mailchimp_campaigns(28)
 	context['num_sem_download'] = SemesterDownloadFile.objects.filter(semester=semester).count()
-	context.update(level_data)
+	context.update(level_info)
 	return render(request, "dashboard/portal.html", context)
 
 
