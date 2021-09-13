@@ -6,7 +6,7 @@ import logging
 from typing import Any, Dict
 
 from braces.views import LoginRequiredMixin, StaffuserRequiredMixin
-from core.models import Semester, Unit
+from core.models import Semester, Unit, UserProfile
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
@@ -47,16 +47,20 @@ def portal(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 	if not request.user.is_staff and student.is_delinquent:
 		return HttpResponseRedirect(reverse_lazy('invoice', args=(student_id, )))
 	semester = student.semester
+	profile, _ = UserProfile.objects.get_or_create(user=request.user)
 
 	level_info = get_level_info(student)
 	if request.user == student.user:
-		if check_level_up(student) is True:
-			messages.success(request, "You leveled up!")
+		result = check_level_up(student)
+		if result is True and profile.show_bars is True:
+			lvl = level_info['level_number']
+			messages.success(request, f"You leveled up! You're now level {lvl}.")
 
 	context: Dict[str, Any] = {}
 	context['title'] = f"{student.name} ({semester.name})"
 	context['student'] = student
 	context['semester'] = semester
+	context['profile'] = profile
 	context['omniscient'] = can_edit(request, student)
 	context['curriculum'] = student.generate_curriculum_rows(omniscient=context['omniscient'])
 	context['tests'] = PracticeExam.objects.filter(

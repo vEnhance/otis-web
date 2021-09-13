@@ -193,4 +193,6 @@ def check_level_up(student: Student) -> bool:
 		reveal_at_level__range=(student.last_level_seen + 1, level_number)
 	)
 	student.curriculum.add(*list(bonuses))
+	student.last_level_seen = level_number
+	student.save()
 	return True

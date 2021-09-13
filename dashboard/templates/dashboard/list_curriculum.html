@@ -30,12 +30,12 @@
 	<tr class="subject{{ row.unit.group.subject }}
 		{% if row.is_approved %}
 			unit-completed
-			{% if request.user.profile and not request.user.profile.show_completed_by_default %}
+			{% if not request.user.profile.show_completed_by_default %}
 				unit-completed-hidden
 			{% endif %}
 		{% elif not row.is_visible %}
 			unit-locked
-			{% if request.user.profile and not request.user.profile.show_locked_by_default %}
+			{% if not request.user.profile.show_locked_by_default %}
 				unit-locked-hidden
 			{% endif %}
 		{% endif %}
@@ -59,10 +59,9 @@
 
 		<td class="code">{{ row.unit.position }}/{{ row.unit.code }}</td>
 
-		<td class="unit-name {% if row.is_current %}active{% endif %}"
-				{% if request.user.is_superuser %}title = "{{ row.unit.group.name }}
+		<td class="unit-name {% if row.is_current %}active{% endif %}" {% if request.user.is_superuser %}title="{{ row.unit.group.name }}
 				pk={{ row.unit.pk }}
-				group.pk={{ row.unit.group.pk }}"{% endif %}>
+				group.pk={{ row.unit.group.pk }}" {% endif %}>
 			{{ row.unit.group.name }}
 		</td>
 		<td class="emojis">

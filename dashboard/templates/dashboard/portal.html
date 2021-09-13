@@ -114,7 +114,7 @@
 <hr />
 {% else %}
 
-{% if not request.user.profile or request.user.profile.show_bars %}
+{% if profile.show_bars %}
 <h1>Level {{ level_number }} &mdash;
 	<a href="{% url "stats" student.id %}">🏅{{ level_name }}</a></h1>
 
@@ -152,12 +152,12 @@
 <h2>Recent announcements</h2>
 <p><a href="https://us5.campaign-archive.com/home/?u=5c818a0be2f35ee90344a471e&id=808c50e8c9">📢 See all announcements.</a></p>
 <ul>
-{% for email in emails %}
-<li class="mb-3">
-	<b><a href="{{email.url}}">{{email.title}}</a></b> | {{ email.timestamp|naturaltime }}<br />
-	<span class="text-muted">{{ email.summary }}</span>
-</li>
-{% endfor %}
+	{% for email in emails %}
+	<li class="mb-3">
+		<b><a href="{{email.url}}">{{email.title}}</a></b> | {{ email.timestamp|naturaltime }}<br />
+		<span class="text-muted">{{ email.summary }}</span>
+	</li>
+	{% endfor %}
 </ul>
 {% endif %}
 
