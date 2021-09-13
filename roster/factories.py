@@ -3,7 +3,6 @@ from django.contrib.auth import get_user_model
 from factory.declarations import LazyAttribute, SubFactory
 from factory.django import DjangoModelFactory
 from factory.faker import Faker
-
 from roster.models import Assistant, Invoice, RegistrationContainer, Student, StudentRegistration, UnitInquiry  # NOQA
 
 User = get_user_model()
@@ -25,6 +24,7 @@ class StudentFactory(DjangoModelFactory):
 	semester = SubFactory(SemesterFactory)
 	track = 'C'
 	newborn = False
+	last_level_seen = 0
 
 
 class InvoiceFactory(DjangoModelFactory):

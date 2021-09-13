@@ -113,6 +113,10 @@ class Student(models.Model):
 	)
 	newborn = models.BooleanField(default=True, help_text="Whether the student is newly created.")
 
+	last_level_seen = models.PositiveSmallIntegerField(
+		default=0, help_text="The last level the student was seen at."
+	)
+
 	id: int
 	invoice: 'Invoice'
 	unlisted_assistants: QuerySet['Assistant']
