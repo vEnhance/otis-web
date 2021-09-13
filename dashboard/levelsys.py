@@ -189,6 +189,8 @@ def check_level_up(student: Student) -> bool:
 	level_number = level_info['level_number']
 	if level_number <= student.last_level_seen:
 		return False
-	bonuses = Unit.objects.filter(level__range=(student.last_level_seen + 1, level_number))
+	bonuses = Unit.objects.filter(
+		reveal_at_level__range=(student.last_level_seen + 1, level_number)
+	)
 	student.curriculum.add(*list(bonuses))
 	return True
