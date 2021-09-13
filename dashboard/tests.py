@@ -11,7 +11,7 @@ from dashboard.factories import AchievementFactory, AchievementUnlockFactory, Le
 from dashboard.levelsys import get_student_rows
 from dashboard.models import PSet
 from dashboard.utils import get_units_to_submit, get_units_to_unlock
-from dashboard.views import annotate_student_queryset_with_scores, get_meters
+from dashboard.views import annotate_student_queryset_with_scores, get_level_info  # NOQA
 
 
 class TestLevelSystem(OTISTestCase):
@@ -44,7 +44,7 @@ class TestLevelSystem(OTISTestCase):
 
 	def test_meter_update(self):
 		alice = self.get_alice()
-		data = get_meters(alice)
+		data = get_level_info(alice)
 		self.assertEqual(data['meters']['clubs'].level, 22)
 		self.assertEqual(data['meters']['clubs'].value, 520)
 		self.assertEqual(data['meters']['hearts'].level, 9)

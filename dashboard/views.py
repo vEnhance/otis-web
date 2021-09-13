@@ -35,7 +35,7 @@ from dashboard.levelsys import get_student_rows
 from dashboard.utils import get_units_to_submit, get_units_to_unlock
 
 from .forms import NewUploadForm, PSetSubmitForm
-from .levelsys import annotate_student_queryset_with_scores, get_meters
+from .levelsys import annotate_student_queryset_with_scores, get_level_info
 from .models import Achievement, AchievementUnlock, Level, ProblemSuggestion, PSet, SemesterDownloadFile, UploadedFile  # NOQA
 
 logger = logging.getLogger(__name__)
@@ -62,7 +62,7 @@ def portal(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 	)
 	context['emails'] = get_mailchimp_campaigns(28)
 	context['num_sem_download'] = SemesterDownloadFile.objects.filter(semester=semester).count()
-	context.update(get_meters(student))
+	context.update(level_data)
 	return render(request, "dashboard/portal.html", context)
 
 
@@ -96,9 +96,9 @@ def stats(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 		context['first_achievement'] = Achievement.objects.get(pk=1)
 	except Achievement.DoesNotExist:
 		pass
-	_meter_info = get_meters(student)
-	context.update(_meter_info)
-	level_number = _meter_info['level_number']
+	level_info = get_level_info(student)
+	context.update(level_info)
+	level_number = level_info['level_number']
 	obtained_levels = Level.objects.filter(threshold__lte=level_number).order_by('-threshold')
 	context['obtained_levels'] = obtained_levels
 	return render(request, "dashboard/stats.html", context)

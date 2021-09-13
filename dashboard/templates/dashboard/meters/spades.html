@@ -10,7 +10,7 @@
 	<a href="https://github.com/vEnhance/otis-web/blob/main/CONTRIBUTING.mkd">GitHub</a>.
 </p>
 
-{% if quiz_data or quest_data %}
+{% if quiz_attempts or quest_completes %}
 <table class="table table-sm">
 	<thead class="table-dark">
 		<tr>
@@ -20,7 +20,7 @@
 		</tr>
 	</thead>
 	<tbody>
-		{% for quest in quest_data %}
+		{% for quest in quest_completes %}
 		<tr style="background-color: #ffff99;">
 			<td style="color:{{ meters.spades.color }};">
 				<b>
@@ -35,7 +35,7 @@
 			</td>
 		</tr>
 		{% endfor %}
-		{% for attempt in quiz_data %}
+		{% for attempt in quiz_attempts %}
 		<tr>
 			<td style="color:{{ meters.spades.color }};">
 				+{{ attempt.score }}{{ meters.spades.unit }}

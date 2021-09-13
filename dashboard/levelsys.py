@@ -1,5 +1,5 @@
 # Functions to compute student levels and whatnot
-from typing import Any, Dict, List
+from typing import Any, Dict, List, TypedDict, Union
 
 from django.db.models.aggregates import Sum
 from django.db.models.query import QuerySet
@@ -78,7 +78,20 @@ class Meter:
 		)
 
 
-def get_meters(student: Student) -> Dict[str, Any]:
+AggregateDict = Dict[str, Union[int, float]]
+
+
+class LevelInfoDict(TypedDict):
+	psets: QuerySet[PSet]
+	pset_data: AggregateDict
+	quiz_attempts: QuerySet[ExamAttempt]
+	quest_completes: QuerySet[QuestComplete]
+	meters: Any  # TODO
+	level_number: int
+	level_name: str
+
+
+def get_level_info(student: Student) -> LevelInfoDict:
 	"""Uses a bunch of expensive database queries to compute a student's levels and data,
 	returning the findings as a (TODO typed) dictionary."""
 
@@ -99,10 +112,10 @@ def get_meters(student: Student) -> Dict[str, Any]:
 		Sum('achievement__diamonds')
 	)['achievement__diamonds__sum'] or 0
 
-	quiz_data = ExamAttempt.objects.filter(student=student)
-	quest_data = QuestComplete.objects.filter(student=student)
-	total_spades = quiz_data.aggregate(Sum('score'))['score__sum'] or 0
-	total_spades += quest_data.aggregate(Sum('spades'))['spades__sum'] or 0
+	quiz_attempts = ExamAttempt.objects.filter(student=student)
+	quest_completes = QuestComplete.objects.filter(student=student)
+	total_spades = quiz_attempts.aggregate(Sum('score'))['score__sum'] or 0
+	total_spades += quest_completes.aggregate(Sum('spades'))['spades__sum'] or 0
 
 	meters = {
 		'clubs': Meter.ClubMeter(int(total_clubs)),
@@ -113,15 +126,16 @@ def get_meters(student: Student) -> Dict[str, Any]:
 	level_number = sum(meter.level for meter in meters.values())
 	level = Level.objects.filter(threshold__lte=level_number).order_by('-threshold').first()
 	level_name = level.name if level is not None else 'No Level'
-	return {
+	level_data: LevelInfoDict = {
 		'psets': psets,
 		'pset_data': pset_data,
-		'quiz_data': quiz_data,
-		'quest_data': quest_data,
+		'quiz_attempts': quiz_attempts,
+		'quest_completes': quest_completes,
 		'meters': meters,
 		'level_number': level_number,
 		'level_name': level_name
 	}
+	return level_data
 
 
 def annotate_student_queryset_with_scores(queryset: QuerySet[Student]) -> QuerySet[Student]:
