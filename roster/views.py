@@ -239,7 +239,7 @@ def inquiry(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 
 	# Create form for submitting new inquiries
 	if request.method == 'POST':
-		form = InquiryForm(request.POST)
+		form = InquiryForm(request.POST, student=student)
 		if form.is_valid():
 			inquiry = form.save(commit=False)
 			inquiry.student = student
@@ -304,7 +304,7 @@ def inquiry(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 				else:
 					messages.success(request, "Petition submitted, wait for it!")
 	else:
-		form = InquiryForm()
+		form = InquiryForm(student=student)
 	context['form'] = form
 
 	context['inquiries'] = UnitInquiry.objects.filter(student=student)

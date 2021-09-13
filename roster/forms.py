@@ -1,10 +1,10 @@
 import itertools
 from typing import Any
 
+from core.models import Unit
 from django import forms
 from django.contrib.auth.models import User
 from django.forms.forms import BaseForm
-
 from roster.models import Student, StudentRegistration, UnitInquiry  # NOQA
 
 
@@ -74,10 +74,13 @@ class AdvanceForm(forms.ModelForm):
 
 class InquiryForm(forms.ModelForm):
 	def __init__(self, *args: Any, **kwargs: Any):
+		student: Student = kwargs.pop('student')
 		super(InquiryForm, self).__init__(*args, **kwargs)
-		self.fields['unit'].queryset = self.fields['unit'].queryset.filter(
-			group__hidden=False
-		).order_by('group__name', 'code')
+		# TODO this breaks ordering, might want to fix
+		curriculum = student.curriculum.all().order_by()
+		queryset = Unit.objects.filter(group__hidden=False).order_by()
+		queryset = queryset.union(curriculum)
+		self.fields['unit'].queryset = queryset
 
 	class Meta:
 		model = UnitInquiry
