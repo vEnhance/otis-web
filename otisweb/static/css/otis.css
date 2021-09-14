@@ -93,11 +93,11 @@ table.table tr.subjectM:nth-child(even) {
 	background-color: #f5e575;
 }
 
-table.table tr.subjectU {
+table.table tr.subjectK {
 	background-color: #125252;
 	color: #efefef;
 }
-table.table tr.subjectU td.unit-name {
+table.table tr.subjectK td.unit-name {
 	font-family: Acme, "Open Sans", sans-serif;
 }
 
