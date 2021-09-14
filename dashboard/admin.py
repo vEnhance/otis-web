@@ -8,7 +8,7 @@ from django.http import HttpRequest
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
-from dashboard.models import QuestComplete
+from dashboard.models import BonusLevel, BonusLevelUnlock, QuestComplete
 
 from .models import Achievement, AchievementUnlock, Level, ProblemSuggestion, PSet, SemesterDownloadFile, UploadedFile  # NOQA
 
@@ -176,3 +176,18 @@ class QuestCompleteAdmin(admin.ModelAdmin):
 	list_display = ('pk', 'title', 'student', 'spades', 'timestamp')
 	autocomplete_fields = ('student', )
 	list_filter = ('student__semester', )
+
+
+@admin.register(BonusLevel)
+class BonusLevelAdmin(admin.ModelAdmin):
+	list_display = ('pk', 'group', 'level', 'active')
+	autocomplete_fields = ('group', )
+	list_filter = ('active', )
+	search_fields = ('group__name', )
+
+
+@admin.register(BonusLevelUnlock)
+class BonusLevelUnlockAdmin(admin.ModelAdmin):
+	list_display = ('pk', 'timestamp', 'student', 'bonus')
+	autocomplete_fields = ('student', 'bonus')
+	list_filter = ('student__semester__active', )

@@ -277,8 +277,14 @@ class BonusLevel(models.Model):
 	level = models.PositiveSmallIntegerField(help_text="Level to spawn at")
 	active = models.BooleanField(default=True)
 
+	def __str__(self) -> str:
+		return f"Lv. {self.level} Bonus ({'active' if self.active else 'inert'})"
+
 
 class BonusLevelUnlock(models.Model):
 	timestamp = models.DateTimeField(auto_now_add=True)
 	student = models.ForeignKey(Student, on_delete=models.CASCADE)
 	bonus = models.ForeignKey(BonusLevel, on_delete=models.CASCADE)
+
+	def __str__(self) -> str:
+		return self.timestamp.isoformat()
