@@ -8,6 +8,7 @@ from django.db.models.query_utils import Q
 from exams.models import ExamAttempt
 from roster.models import Student
 from sql_util.aggregates import SubqueryCount, SubquerySum
+from sql_util.utils import Exists
 
 from dashboard.models import AchievementUnlock, Level, PSet, QuestComplete  # NOQA
 
@@ -189,9 +190,9 @@ def check_level_up(student: Student) -> bool:
 	level_number = level_info['level_number']
 	if level_number <= student.last_level_seen:
 		return False
-	bonuses = Unit.objects.filter(
-		reveal_at_level__range=(student.last_level_seen + 1, level_number)
-	)
+	bonuses = Unit.objects.filter(reveal_at_level__lte=level_number).annotate(
+		petitioned=Exists('unitinquiry', filter=Q(student=student))
+	).exclude(petitioned=True)
 	student.curriculum.add(*list(bonuses))
 	student.last_level_seen = level_number
 	student.save()

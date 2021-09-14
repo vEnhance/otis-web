@@ -4,7 +4,7 @@ from io import StringIO
 from core.factories import UnitFactory, UserFactory
 from exams.factories import ExamAttemptFactory, ExamFactory
 from otisweb.tests import OTISTestCase
-from roster.factories import StudentFactory
+from roster.factories import StudentFactory, UnitInquiryFactory
 from roster.models import Student
 
 from dashboard.factories import AchievementFactory, AchievementUnlockFactory, LevelFactory, PSetFactory, QuestCompleteFactory  # NOQA
@@ -87,7 +87,7 @@ class TestLevelSystem(OTISTestCase):
 	def test_level_up(self):
 		alice = self.get_alice()
 		self.login(alice)
-		UnitFactory.create(group__name="Level 40 Bonus", reveal_at_level=40)
+		bonus = UnitFactory.create(group__name="Level 40 Bonus", reveal_at_level=40)
 
 		resp = self.assertGet20X('portal', alice.pk)
 		self.assertContains(resp, "You&#x27;re now level 37.")
@@ -106,6 +106,14 @@ class TestLevelSystem(OTISTestCase):
 		resp = self.assertGet20X('portal', alice.pk)
 		self.assertNotContains(resp, "You&#x27;re now level 40.")
 		self.assertContains(resp, "Level 40 Bonus")
+
+		QuestCompleteFactory.create(student=alice, spades=64)
+		UnitInquiryFactory.create(action_type="DROP", unit=bonus, student=alice)
+		alice.curriculum.remove(bonus)
+
+		resp = self.assertGet20X('portal', alice.pk)
+		self.assertContains(resp, "You&#x27;re now level 44.")
+		self.assertNotContains(resp, "Level 40 Bonus")
 
 	def test_multi_student_annotate(self):
 		alice = self.get_alice()
