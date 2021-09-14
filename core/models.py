@@ -96,6 +96,7 @@ class UnitGroup(models.Model):
 		("N", "Number Theory (Ravenclaw)"),
 		("F", "Functional Equations"),
 		("M", "Miscellaneous"),
+		("U", "Null"),
 	)
 	subject = models.CharField(
 		max_length=2, choices=SUBJECT_CHOICES, help_text="The subject for the unit"

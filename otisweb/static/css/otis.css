@@ -93,6 +93,14 @@ table.table tr.subjectM:nth-child(even) {
 	background-color: #f5e575;
 }
 
+table.table tr.subjectU {
+	background-color: #125252;
+	color: #efefef;
+}
+table.table tr.subjectU td.unit-name {
+	font-family: Acme, "Open Sans", sans-serif;
+}
+
 /* Unit selection */
 td.unit-select select {
 	width: 180px;
@@ -147,4 +155,14 @@ table.curriculum tr.unit-locked-hidden {
 
 table.curriculum tr.unit-completed-hidden {
 	display: none;
+}
+
+span.meter-name {
+	position: absolute;
+	left: 0;
+	text-align: left;
+	font-family: Acme, "Open Sans", sans-serif;
+}
+span.meter-header, strong.meter-def {
+	font-family: Acme, "Open Sans", sans-serif;
 }

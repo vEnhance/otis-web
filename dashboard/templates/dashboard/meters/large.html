@@ -1,7 +1,7 @@
 <div class="accordion-item">
 	<h2 class="accordion-header" id="heading{{ meter.name }}">
 		<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ meter.name }}" aria-expanded="false" aria-controls="collapse{{ meter.name }}">
-			<span style="color: {{ meter.color }};">
+			<span class="meter-header" style="color: {{ meter.color }};">
 				<span style="font-size: 150%;">{{ meter.level }}</span>
 				{{ meter.name }}
 			</span>
@@ -29,7 +29,7 @@
 				</span>
 			</div>
 			<p>
-				Your <strong style="color: {{meter.color}}">{{ meter.name }}</strong>
+				Your <strong class="meter-def" style="color: {{meter.color}}">{{ meter.name }}</strong>
 				will increase if you gain another
 				<strong style="color: {{meter.color}}">{{ meter.needed }}{{ meter.unit }}</strong>.
 			</p>
