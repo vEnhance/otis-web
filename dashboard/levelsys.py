@@ -1,8 +1,7 @@
 # Functions to compute student levels and whatnot
 from typing import Any, Dict, List, TypedDict, Union
 
-from core.models import Unit
-from django.db.models.aggregates import Sum
+from django.db.models.aggregates import Count, Sum
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
 from exams.models import ExamAttempt
@@ -10,7 +9,7 @@ from roster.models import Student
 from sql_util.aggregates import SubqueryCount, SubquerySum
 from sql_util.utils import Exists
 
-from dashboard.models import AchievementUnlock, Level, PSet, QuestComplete  # NOQA
+from dashboard.models import AchievementUnlock, BonusLevel, BonusLevelUnlock, Level, PSet, QuestComplete  # NOQA
 
 BONUS_D_UNIT = 0.3
 BONUS_Z_UNIT = 0.5
@@ -190,10 +189,31 @@ def check_level_up(student: Student) -> bool:
 	level_number = level_info['level_number']
 	if level_number <= student.last_level_seen:
 		return False
-	bonuses = Unit.objects.filter(reveal_at_level__lte=level_number).annotate(
-		petitioned=Exists('unitinquiry', filter=Q(student=student))
-	).exclude(petitioned=True)
-	student.curriculum.add(*list(bonuses))
+
+	bonuses = BonusLevel.objects.filter(active=True, level__lte=level_number)
+	bonuses = bonuses.annotate(gotten=Exists('bonuslevelunlock', filter=Q(student=student)))
+	bonuses = bonuses.exclude(gotten=True)
+
+	if bonuses.exists():
+		psets = PSet.objects.filter(student=student)
+		counts = psets.aggregate(
+			b=Count('pk', unique=True, filter=Q(unit__code__startswith='B')),
+			d=Count('pk', unique=True, filter=Q(unit__code__startswith='D')),
+			z=Count('pk', unique=True, filter=Q(unit__code__startswith='Z')),
+		)
+
+		for bonus in bonuses:
+			units = bonus.group.unit_set
+			if counts['z'] > counts['b'] + 0.1 * counts['d']:
+				unit = units.filter(code__startswith='Z').first()
+			elif counts['d'] > counts['b']:
+				unit = units.filter(code__startswith='D').first()
+			else:
+				unit = units.filter(code__startswith='B').first()
+			if unit is not None:
+				student.curriculum.add(unit)
+				BonusLevelUnlock.objects.create(bonus=bonus, student=student)
+
 	student.last_level_seen = level_number
 	student.save()
 	return True

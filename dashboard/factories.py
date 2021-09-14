@@ -1,4 +1,4 @@
-from core.factories import SemesterFactory, UnitFactory, UserFactory
+from core.factories import SemesterFactory, UnitFactory, UnitGroupFactory, UserFactory  # NOQA
 from django.contrib.auth import get_user_model
 from factory.declarations import LazyAttribute, Sequence, SubFactory
 from factory.django import DjangoModelFactory, FileField, ImageField
@@ -7,7 +7,7 @@ from factory.fuzzy import FuzzyChoice
 from otisweb.tests import UniqueFaker
 from roster.factories import StudentFactory
 
-from dashboard.models import Achievement, AchievementUnlock, Level, ProblemSuggestion, PSet, QuestComplete, SemesterDownloadFile, UploadedFile  # NOQA
+from dashboard.models import Achievement, AchievementUnlock, BonusLevel, BonusLevelUnlock, Level, ProblemSuggestion, PSet, QuestComplete, SemesterDownloadFile, UploadedFile  # NOQA
 
 User = get_user_model()
 
@@ -90,3 +90,19 @@ class QuestCompleteFactory(DjangoModelFactory):
 	student = SubFactory(StudentFactory)
 	title = Faker('job')
 	spades = FuzzyChoice(list(range(1, 10)))
+
+
+class BonusLevelFactory(DjangoModelFactory):
+	class Meta:
+		model = BonusLevel
+
+	level = 100
+	group = SubFactory(UnitGroupFactory)
+
+
+class BonusLevelUnlockFactory(DjangoModelFactory):
+	class Meta:
+		model = BonusLevelUnlock
+
+	student = SubFactory(StudentFactory)
+	level = SubFactory(BonusLevelFactory)

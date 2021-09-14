@@ -7,7 +7,7 @@ from otisweb.tests import OTISTestCase
 from roster.factories import StudentFactory, UnitInquiryFactory
 from roster.models import Student
 
-from dashboard.factories import AchievementFactory, AchievementUnlockFactory, LevelFactory, PSetFactory, QuestCompleteFactory  # NOQA
+from dashboard.factories import AchievementFactory, AchievementUnlockFactory, BonusLevelFactory, LevelFactory, PSetFactory, QuestCompleteFactory  # NOQA
 from dashboard.levelsys import get_student_rows
 from dashboard.models import PSet
 from dashboard.utils import get_units_to_submit, get_units_to_unlock
@@ -22,7 +22,7 @@ class TestLevelSystem(OTISTestCase):
 		PSetFactory.create(student=alice, clubs=120, hours=37, approved=True, unit__code='BGW')
 		PSetFactory.create(student=alice, clubs=100, hours=20, approved=True, unit__code='DMX')
 		PSetFactory.create(student=alice, clubs=180, hours=27, approved=True, unit__code='ZCY')
-		PSetFactory.create(student=alice, clubs=200, hours=87, approved=False, unit__code='HMR')
+		PSetFactory.create(student=alice, clubs=200, hours=87, approved=False, unit__code='ZMR')
 		AchievementUnlockFactory.create(
 			user=alice.user, achievement__diamonds=4, achievement__name="Feel the fours"
 		)
@@ -87,33 +87,33 @@ class TestLevelSystem(OTISTestCase):
 	def test_level_up(self):
 		alice = self.get_alice()
 		self.login(alice)
-		bonus = UnitFactory.create(group__name="Level 40 Bonus", reveal_at_level=40)
+		bonus = BonusLevelFactory.create(group__name="Level 40 Quest", level=40)
+		bonus_unit = UnitFactory.create(group=bonus.group, code='ZKU')
 
 		resp = self.assertGet20X('portal', alice.pk)
 		self.assertContains(resp, "You&#x27;re now level 37.")
-		self.assertNotContains(resp, "Level 40 Bonus")
+		self.assertNotContains(resp, "Level 40 Quest")
 
 		resp = self.assertGet20X('portal', alice.pk)
 		self.assertNotContains(resp, "You&#x27;re now level 37.")
-		self.assertNotContains(resp, "Level 40 Bonus")
+		self.assertNotContains(resp, "Level 40 Quest")
 
 		QuestCompleteFactory.create(student=alice, spades=24)
 
 		resp = self.assertGet20X('portal', alice.pk)
 		self.assertContains(resp, "You&#x27;re now level 40.")
-		self.assertContains(resp, "Level 40 Bonus")
+		self.assertContains(resp, "Level 40 Quest")
 
 		resp = self.assertGet20X('portal', alice.pk)
 		self.assertNotContains(resp, "You&#x27;re now level 40.")
-		self.assertContains(resp, "Level 40 Bonus")
+		self.assertContains(resp, "Level 40 Quest")
 
 		QuestCompleteFactory.create(student=alice, spades=64)
-		UnitInquiryFactory.create(action_type="DROP", unit=bonus, student=alice)
-		alice.curriculum.remove(bonus)
+		alice.curriculum.remove(bonus_unit)
 
 		resp = self.assertGet20X('portal', alice.pk)
 		self.assertContains(resp, "You&#x27;re now level 44.")
-		self.assertNotContains(resp, "Level 40 Bonus")
+		self.assertNotContains(resp, "Level 40 Quest")
 
 	def test_multi_student_annotate(self):
 		alice = self.get_alice()

@@ -6,7 +6,7 @@ import datetime
 import os
 from hashlib import sha256
 
-from core.models import Semester, Unit
+from core.models import Semester, Unit, UnitGroup
 from django.contrib.auth.models import User
 from django.core.validators import FileExtensionValidator, MaxValueValidator, MinValueValidator  # NOQA
 from django.db import models
@@ -270,3 +270,15 @@ class QuestComplete(models.Model):
 
 	def __str__(self) -> str:
 		return self.title + ' ' + self.timestamp.strftime('%c')
+
+
+class BonusLevel(models.Model):
+	group = models.OneToOneField(UnitGroup, on_delete=models.CASCADE)
+	level = models.PositiveSmallIntegerField(help_text="Level to spawn at")
+	active = models.BooleanField(default=True)
+
+
+class BonusLevelUnlock(models.Model):
+	timestamp = models.DateTimeField(auto_now_add=True)
+	student = models.ForeignKey(Student, on_delete=models.CASCADE)
+	bonus = models.ForeignKey(BonusLevel, on_delete=models.CASCADE)

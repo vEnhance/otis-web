@@ -152,11 +152,6 @@ class Unit(models.Model):
 		help_text="The version code for the handout, like 'ZGX'",
 	)
 	position = PositionField(help_text="The ordering of the relative handouts to each other.")
-	reveal_at_level = models.PositiveSmallIntegerField(
-		blank=True,
-		null=True,
-		help_text="If a number is specified here, the unit is added automatically at that level"
-	)
 
 	def __str__(self) -> str:
 		if self.group is not None:
