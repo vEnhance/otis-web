@@ -84,6 +84,29 @@ class TestLevelSystem(OTISTestCase):
 		self.assertContains(resp, 'Lucky number')
 		self.assertNotContains(resp, 'FAIL THIS TEST')
 
+	def test_level_up(self):
+		alice = self.get_alice()
+		self.login(alice)
+		UnitFactory.create(group__name="Level 40 Bonus", reveal_at_level=40)
+
+		resp = self.assertGet20X('portal', alice.pk)
+		self.assertContains(resp, "You&#x27;re now level 37.")
+		self.assertNotContains(resp, "Level 40 Bonus")
+
+		resp = self.assertGet20X('portal', alice.pk)
+		self.assertNotContains(resp, "You&#x27;re now level 37.")
+		self.assertNotContains(resp, "Level 40 Bonus")
+
+		QuestCompleteFactory.create(student=alice, spades=24)
+
+		resp = self.assertGet20X('portal', alice.pk)
+		self.assertContains(resp, "You&#x27;re now level 40.")
+		self.assertContains(resp, "Level 40 Bonus")
+
+		resp = self.assertGet20X('portal', alice.pk)
+		self.assertNotContains(resp, "You&#x27;re now level 40.")
+		self.assertContains(resp, "Level 40 Bonus")
+
 	def test_multi_student_annotate(self):
 		alice = self.get_alice()
 		bob = StudentFactory.create()
