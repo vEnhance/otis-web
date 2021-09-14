@@ -4,7 +4,7 @@ from io import StringIO
 from core.factories import UnitFactory, UserFactory
 from exams.factories import ExamAttemptFactory, ExamFactory
 from otisweb.tests import OTISTestCase
-from roster.factories import StudentFactory, UnitInquiryFactory
+from roster.factories import StudentFactory
 from roster.models import Student
 
 from dashboard.factories import AchievementFactory, AchievementUnlockFactory, BonusLevelFactory, LevelFactory, PSetFactory, QuestCompleteFactory  # NOQA
