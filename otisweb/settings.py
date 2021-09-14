@@ -6,7 +6,7 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, List
 
 import django_stubs_ext
 import dwhandler
@@ -227,14 +227,15 @@ WIKI_PLUGINS_METHODS = ('article_list', 'toc', 'meow')
 
 
 def filter_useless_404(record: logging.LogRecord) -> bool:
-	a: Tuple[str, ...] = tuple(record.args)  # type: ignore
-	ret = not (
-		len(a) == 2 and a[0] == 'Not Found' and ('wp-include' in a[1] or '.php' in a[1])
-	)  # type: ignore
-	ret &= not (
-		len(a) == 3 and a[1] == '404' and ('wp-include' in a[0] or '.php' in a[0])
-	)  # type: ignore
-	return ret
+	if record.args is None:
+		return True
+	a: List[str] = [str(s) for s in record.args]
+	if len(a) == 2:
+		return not (a[0] == 'Not Found' and ('wp-include' in a[1] or '.php' in a[1]))
+	elif len(a) == 3:
+		return not (a[1] == '404' and ('wp-include' in a[0] or '.php' in a[0]))
+	else:
+		return True
 
 
 LOGGING = {
