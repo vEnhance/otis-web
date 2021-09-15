@@ -162,7 +162,7 @@ def leaderboard(request: AuthHttpRequest) -> HttpResponse:
 	for row in rows:
 		if row['last_login'] is not None:
 			login_delta = timezone.now() - row['last_login']
-			row['hours_since_last_login'] = login_delta.total_seconds() / (3600 * 24)
+			row['days_since_last_login'] = login_delta.total_seconds() / (3600 * 24)
 		else:
 			login_delta = None
 	context: Dict[str, Any] = {}
