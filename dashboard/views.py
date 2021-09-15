@@ -21,6 +21,7 @@ from django.http.request import HttpRequest
 from django.http.response import HttpResponseBase
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from dwhandler import SUCCESS_LOG_LEVEL, VERBOSE_LOG_LEVEL
@@ -158,6 +159,12 @@ def leaderboard(request: AuthHttpRequest) -> HttpResponse:
 			row['student'].name.upper(),
 		)
 	)
+	for row in rows:
+		if row['last_login'] is not None:
+			login_delta = timezone.now() - row['last_login']
+			row['hours_since_last_login'] = login_delta.total_seconds() / (3600 * 24)
+		else:
+			login_delta = None
 	context: Dict[str, Any] = {}
 	context['rows'] = rows
 	return render(request, "dashboard/leaderboard.html", context)
