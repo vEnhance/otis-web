@@ -24,7 +24,8 @@
 		</div>
 	</div>
 	<div id="content" class="row">
-		<div class="col-12 col-md-9">
+		{% block main-content %}
+		<div class="{% block main-class %}col-12 col-md-9{% endblock %}">
 			<div id="main">
 				<div class="entry">
 					<h1 id="pagetitle">
@@ -46,11 +47,14 @@
 				<img src="{% static 'img/otis-logo-v2018.svg' %}" />
 			</div>
 		</div>
-		<div class="col-7 col-md-3">
+		{% endblock %}
+		{% block sidebar %}
+		<div class="{% block side-class %}col-7 col-md-3{% endblock %}">
 			<div id="side">
 				{% include "sidebar.html" %}
 			</div>
 		</div>
+		{% endblock %}
 	</div>
 </div>
 
