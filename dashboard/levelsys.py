@@ -176,6 +176,8 @@ def get_student_rows(queryset: QuerySet[Student]) -> List[Dict[str, Any]]:
 	max_level = max(levels.keys())
 
 	for student in annotate_student_queryset_with_scores(queryset):
+		if student.user is None:
+			continue
 		row: Dict[str, Any] = {}
 		row['student'] = student
 		row['spades'] = (getattr(student, 'spades_quizzes', 0) or 0)
@@ -186,6 +188,7 @@ def get_student_rows(queryset: QuerySet[Student]) -> List[Dict[str, Any]]:
 		row['clubs'] += BONUS_Z_UNIT * (getattr(student, 'clubs_Z', 0) or 0)
 		row['diamonds'] = getattr(student, 'diamonds', 0) or 0
 		row['level'] = sum(int(row[k]**0.5) for k in ('spades', 'hearts', 'clubs', 'diamonds'))
+		row['last_login'] = student.user.last_login
 		row['insanity'] = compute_insanity_rating(
 			getattr(student, 'pset_B_count'),
 			getattr(student, 'pset_D_count'),

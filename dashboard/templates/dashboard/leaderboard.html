@@ -19,6 +19,7 @@
 			<th class="text-end">♠️</th>
 			<th class="text-end">♦️</th>
 			<th class="text-end">Insanity</th>
+			<th class="text-end">Login</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -41,6 +42,7 @@
 			<td class="text-end">{{ row.spades }}</td>
 			<td class="text-end">{{ row.diamonds }}</td>
 			<td class="text-end">{{ row.insanity|stringformat:"+.2f" }}</td>
+			<td class="text-end">{{ row.last_login|naturaltime }}</td>
 		</tr> {# end table row for this row #}
 		{% endfor %}
 	</tbody>
