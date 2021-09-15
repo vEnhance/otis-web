@@ -6,17 +6,18 @@
 {% block side-class %}col-6 col-md-4{% endblock %}
 
 {% block layout-content %}
+<p>Big Brother is watching.</p>
 <table id="students" class="table tablesorter">
 	<thead>
 		<tr>
 			<th>Rk</th>
-			<th style="min-width:30%;">Level achieved</th>
-			<th style="min-width:30%">Name</th>
-			<th>♣️</th>
-			<th>♥️</th>
-			<th>♠️</th>
-			<th>♦️</th>
-			<th>Insanity</th>
+			<th colspan="2">Level achieved</th>
+			<th>Name</th>
+			<th class="text-end">♣️</th>
+			<th class="text-end">♥️</th>
+			<th class="text-end">♠️</th>
+			<th class="text-end">♦️</th>
+			<th class="text-end">Insanity</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -27,16 +28,18 @@
 			</td>
 			<td>
 				<strong>Lv {{ row.level }}</strong>
+			</td>
+			<td>
 				<i>{{ row.level_name }}</i>
 			</td>
 			<td><a href="{% url "stats" row.student.id %}">
 					{{ row.student.name }}</a>
 			</td>
-			<td>{{ row.clubs|floatformat:"0" }}</td>
-			<td>{{ row.hearts|floatformat:"0" }}</td>
-			<td>{{ row.spades }}</td>
-			<td>{{ row.diamonds }}</td>
-			<td>{{ row.insanity|floatformat:"0.2" }}</td>
+			<td class="text-end">{{ row.clubs|floatformat:"0" }}</td>
+			<td class="text-end">{{ row.hearts|floatformat:"0" }}</td>
+			<td class="text-end">{{ row.spades }}</td>
+			<td class="text-end">{{ row.diamonds }}</td>
+			<td class="text-end">{{ row.insanity|stringformat:"+.2f" }}</td>
 		</tr> {# end table row for this row #}
 		{% endfor %}
 	</tbody>

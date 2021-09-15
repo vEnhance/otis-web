@@ -42,28 +42,28 @@
 			<tr>
 				<td>Semesters</td>
 				<td>${{ invoice.prep_rate }} &times; {{ invoice.preps_taught }}</td>
-				<td class="text-right">{{ invoice.prep_total|floatformat:2 }}</td>
+				<td class="text-end">{{ invoice.prep_total|floatformat:2 }}</td>
 			</tr>
 			<tr>
 				<td>Hourly</td>
 				<td>${{ invoice.hour_rate }} &times; {{ invoice.hours_taught }}</td>
-				<td class="text-right">{{ invoice.hours_total|floatformat:2 }}</td>
+				<td class="text-end">{{ invoice.hours_total|floatformat:2 }}</td>
 			</tr>
 			<tr>
 				<td colspan="2">Extras</td>
-				<td class="text-right">{{ invoice.extras|stringformat:"+.2f" }}</td>
+				<td class="text-end">{{ invoice.extras|stringformat:"+.2f" }}</td>
 			</tr>
 			<tr>
 				<td colspan="2">Adjustment</td>
-				<td class="text-right">{{ invoice.adjustment|stringformat:"+.2f" }}</td>
+				<td class="text-end">{{ invoice.adjustment|stringformat:"+.2f" }}</td>
 			</tr>
 			<tr>
 				<td colspan="2">Total cost</td>
-				<td class="text-right">{{ invoice.total_cost }}</td>
+				<td class="text-end">{{ invoice.total_cost }}</td>
 			</tr>
 			<tr>
 				<td colspan="2">Total paid</td>
-				<td class="text-right">{{ invoice.total_paid }}</td>
+				<td class="text-end">{{ invoice.total_paid }}</td>
 			</tr>
 		</tbody>
 
@@ -71,9 +71,9 @@
 			<tr>
 				<th colspan="2">Total owed to Evan</th>
 				{% if invoice.total_owed <= 0 %}
-				<th class="text-success text-right">{{ invoice.total_owed }}</th>
+				<th class="text-success pull-right">{{ invoice.total_owed }}</th>
 				{% else %}
-				<th class="text-danger text-right">{{ invoice.total_owed }}</th>
+				<th class="text-danger pull-right">{{ invoice.total_owed }}</th>
 				{% endif %}
 			</tr>
 		</tfoot>
