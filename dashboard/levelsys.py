@@ -155,7 +155,17 @@ def annotate_student_queryset_with_scores(queryset: QuerySet[Student]) -> QueryS
 		spades_quizzes=SubquerySum('examattempt__score'),
 		spades_quests=SubquerySum('questcomplete__spades'),
 		diamonds=SubquerySum('user__achievementunlock__achievement__diamonds'),
+		pset_B_count=SubqueryCount('pset__pk', filter=Q(eligible=True, unit__code__startswith='B')),
+		pset_D_count=SubqueryCount('pset__pk', filter=Q(eligible=True, unit__code__startswith='D')),
+		pset_Z_count=SubqueryCount('pset__pk', filter=Q(eligible=True, unit__code__startswith='Z')),
 	)
+
+
+def compute_insanity_rating(b: int, d: int, z: int) -> float:
+	assert min(b, d, z) >= 0
+	if b == 0 and d == 0 and z == 0:
+		return 0
+	return (z - b) / (b + d + z)
 
 
 def get_student_rows(queryset: QuerySet[Student]) -> List[Dict[str, Any]]:
@@ -176,6 +186,11 @@ def get_student_rows(queryset: QuerySet[Student]) -> List[Dict[str, Any]]:
 		row['clubs'] += BONUS_Z_UNIT * (getattr(student, 'clubs_Z', 0) or 0)
 		row['diamonds'] = getattr(student, 'diamonds', 0) or 0
 		row['level'] = sum(int(row[k]**0.5) for k in ('spades', 'hearts', 'clubs', 'diamonds'))
+		row['insanity'] = compute_insanity_rating(
+			getattr(student, 'pset_B_count'),
+			getattr(student, 'pset_D_count'),
+			getattr(student, 'pset_Z_count'),
+		)
 		if row['level'] > max_level:
 			row['level_name'] = levels[max_level]
 		else:
@@ -201,15 +216,16 @@ def check_level_up(student: Student) -> bool:
 			d=Count('pk', unique=True, filter=Q(unit__code__startswith='D')),
 			z=Count('pk', unique=True, filter=Q(unit__code__startswith='Z')),
 		)
+		r = compute_insanity_rating(b=counts['b'], d=counts['d'], z=counts['z'])
 
 		for bonus in bonuses:
 			units = bonus.group.unit_set
-			if counts['z'] > counts['b'] + 0.1 * counts['d']:
+			if r >= 0.5:
 				unit = units.filter(code__startswith='Z').first()
-			elif counts['d'] > counts['b']:
-				unit = units.filter(code__startswith='D').first()
-			else:
+			elif r <= -0.5:
 				unit = units.filter(code__startswith='B').first()
+			else:
+				unit = units.filter(code__startswith='D').first()
 			if unit is not None:
 				student.curriculum.add(unit)
 				BonusLevelUnlock.objects.create(bonus=bonus, student=student)

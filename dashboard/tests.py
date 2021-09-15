@@ -88,7 +88,7 @@ class TestLevelSystem(OTISTestCase):
 		alice = self.get_alice()
 		self.login(alice)
 		bonus = BonusLevelFactory.create(group__name="Level 40 Quest", level=40)
-		bonus_unit = UnitFactory.create(group=bonus.group, code='ZKU')
+		bonus_unit = UnitFactory.create(group=bonus.group, code='DKU')
 
 		resp = self.assertGet20X('portal', alice.pk)
 		self.assertContains(resp, "You&#x27;re now level 37.")
@@ -122,7 +122,7 @@ class TestLevelSystem(OTISTestCase):
 		donald = StudentFactory.create()
 
 		# problem sets (clubs/hearts)
-		PSetFactory.create(student=bob, clubs=196, hours=64, approved=True, unit__code='BMW')
+		PSetFactory.create(student=bob, clubs=196, hours=64, approved=True, unit__code='DMW')
 		PSetFactory.create(student=bob, clubs=None, hours=None, approved=True, unit__code='ZMY')
 
 		# diamonds
@@ -159,7 +159,7 @@ class TestLevelSystem(OTISTestCase):
 
 		self.assertEqual(getattr(bob, 'num_psets'), 2)
 		self.assertEqual(getattr(bob, 'clubs_any'), 196)
-		self.assertEqual(getattr(bob, 'clubs_D'), None)
+		self.assertEqual(getattr(bob, 'clubs_D'), 196)
 		self.assertEqual(getattr(bob, 'clubs_Z'), None)
 		self.assertEqual(getattr(bob, 'hearts'), 64)
 		self.assertEqual(getattr(bob, 'spades_quizzes'), 3)
@@ -193,13 +193,15 @@ class TestLevelSystem(OTISTestCase):
 		self.assertEqual(rows[0]['diamonds'], 11)
 		self.assertEqual(rows[0]['level'], 37)
 		self.assertEqual(rows[0]['level_name'], 'Level 37')
+		self.assertAlmostEqual(rows[0]['insanity'], 0.25)
 
-		self.assertEqual(rows[1]['clubs'], 196)
+		self.assertAlmostEqual(rows[1]['clubs'], 254.8)
 		self.assertEqual(rows[1]['hearts'], 64)
 		self.assertEqual(rows[1]['spades'], 3)
 		self.assertEqual(rows[1]['diamonds'], 6)
-		self.assertEqual(rows[1]['level'], 25)
-		self.assertEqual(rows[1]['level_name'], 'Level 25')
+		self.assertEqual(rows[1]['level'], 26)
+		self.assertEqual(rows[1]['level_name'], 'Level 26')
+		self.assertAlmostEqual(rows[1]['insanity'], 0.5)
 
 		self.assertEqual(rows[2]['clubs'], 0)
 		self.assertEqual(rows[2]['hearts'], 0)
@@ -207,6 +209,7 @@ class TestLevelSystem(OTISTestCase):
 		self.assertEqual(rows[2]['diamonds'], 9)
 		self.assertEqual(rows[2]['level'], 6)
 		self.assertEqual(rows[2]['level_name'], 'Level 6')
+		self.assertAlmostEqual(rows[2]['insanity'], 0)
 
 		self.assertEqual(rows[3]['clubs'], 0)
 		self.assertEqual(rows[3]['hearts'], 0)
@@ -214,6 +217,7 @@ class TestLevelSystem(OTISTestCase):
 		self.assertEqual(rows[3]['diamonds'], 0)
 		self.assertEqual(rows[3]['level'], 0)
 		self.assertEqual(rows[3]['level_name'], "No level")
+		self.assertAlmostEqual(rows[3]['insanity'], 0)
 
 		admin = UserFactory.create(is_superuser=True)
 		self.login(admin)
