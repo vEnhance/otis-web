@@ -24,16 +24,16 @@
 		{% for row in rows %}
 		{% with student=row.student %}
 		<tr>
-			<td>{{ row.level }}</td>
+			<td>Lv. {{ row.level }}</td>
 			<td><a title="{{ student.name }}" href="{% url "portal" student.id %}" class="tooltip-link">
 					{{ student.user.email }}</a></td>
 			{% if student.latest_pset %}
-			<td>{{ row.days_since_last_pset|floatformat:2 }}</td>
+			<td class="text-end">{{ row.days_since_last_pset|floatformat:2 }} days</td>
 			{% else %}
 			<td>∞</td>
 			{% endif%}
-			<td>{{ row.days_since_last_login|floatformat:2 }}</td>
-			<td>{{ student.num_psets|default_if_none:0 }}</td>
+			<td class="text-end">{{ row.days_since_last_login|floatformat:2 }} days</td>
+			<td class="text-end">{{ student.num_psets|default_if_none:0 }}</td>
 		</tr>
 		{% endwith %}
 		{% endfor %}
