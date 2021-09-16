@@ -1,9 +1,11 @@
 # Functions to compute student levels and whatnot
+import logging
 from typing import Any, Dict, List, TypedDict, Union
 
 from django.db.models.aggregates import Count, Sum
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
+from dwhandler import SUCCESS_LOG_LEVEL
 from exams.models import ExamAttempt
 from roster.models import Student
 from sql_util.aggregates import SubqueryCount, SubquerySum
@@ -232,6 +234,7 @@ def check_level_up(student: Student) -> bool:
 			if unit is not None:
 				student.curriculum.add(unit)
 				BonusLevelUnlock.objects.create(bonus=bonus, student=student)
+				logging.log(SUCCESS_LOG_LEVEL, f"{student} obtained special unit {unit}")
 
 	student.last_level_seen = level_number
 	student.save()
