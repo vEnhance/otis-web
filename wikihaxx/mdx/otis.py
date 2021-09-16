@@ -140,7 +140,7 @@ class OTISPreprocessor(markdown.preprocessors.Preprocessor):
 					statement = statement.replace('*', '\\*')
 					output.append(statement)
 				else:
-					output.append(r'*Could not find the problem {puid}*')
+					output.append(f'*Could not find the problem {puid}*')
 			else:
 				output.append(line)
 		body += output
