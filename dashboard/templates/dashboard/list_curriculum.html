@@ -76,7 +76,7 @@
 				<sup style="text-shadow: none;">{{ row.num_uploads|default:"0" }}</sup></a>
 			{% endspaceless %}
 			{% endif %}
-			<a class="emoji-link" title="Wiki" href="{{ row.unit.group.get_wiki_link }}" />🎮</a>
+			<a class="emoji-link" title="Wiki" href="{% url "wiki-unitgroup" row.unit.group.pk %}" />🎮</a>
 			{% if row.sols_label %}
 			<a class="emoji-link" title="Download solutions" href="{% view_solutions row.unit %}">
 				{{ row.sols_label }}
