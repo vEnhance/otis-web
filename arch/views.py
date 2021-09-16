@@ -15,7 +15,6 @@ from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from reversion.views import RevisionMixin
 from roster.models import Student
-from wiki.models import Article, ArticleRevision, URLPath
 
 from arch.forms import ProblemSelectForm
 
@@ -211,29 +210,3 @@ def lookup(request: HttpRequest):
 		return HttpResponseRedirect(problem.get_absolute_url())
 	else:
 		return HttpResponseRedirect(reverse_lazy('arch-index', ))
-
-
-@login_required
-def open_wiki(request: HttpRequest, puid: str) -> HttpResponse:
-	try:
-		notable_problems = URLPath.get_by_path(path='notable-problems')
-	except URLPath.DoesNotExist:
-		raise Exception("Notable problems article doesn't exist")
-
-	try:
-		u = URLPath.get_by_path(path=f'notable-problems/{puid}')
-	except URLPath.DoesNotExist:
-		content = f'[problem {puid}]' + '\n' + '[/problem]' + '\n' * 2
-		content += f'This is automatically generated article for {puid}.' + '\n' * 2
-		content += '## Statement' + '\n'
-		content += '[statement]'
-		u = URLPath.create_urlpath(
-			parent=notable_problems,
-			slug=puid,
-			title=puid,
-			request=request,
-			content=content,
-		)
-		return HttpResponseRedirect(reverse_lazy('wiki:edit', kwargs={'path': u.path}))
-	else:
-		return HttpResponseRedirect(u.get_absolute_url())
