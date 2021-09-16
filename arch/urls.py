@@ -6,6 +6,7 @@ urlpatterns = [
 	path(r'lookup/', views.lookup, name='arch-lookup'),
 	path(r'pk/<int:pk>/', views.HintDetailByPK.as_view(), name='hint-detail-pk'),
 	path(r'pk/<int:pk>/edit/', views.HintUpdateByPK.as_view(), name='hint-update-pk'),
+	path(r'open-wiki/<str:puid>/', views.open_wiki, name='otis-open-wiki'),
 	path(r'<str:puid>/edit/', views.ProblemUpdate.as_view(), name='problem-update'),
 	path(r'<str:puid>/delete/', views.ProblemDelete.as_view(), name='problem-delete'),
 	path(r'<str:puid>/<int:number>/', views.HintDetail.as_view(), name='hint-detail'),
