@@ -234,4 +234,6 @@ def open_wiki(request: HttpRequest, puid: str) -> HttpResponse:
 			request=request,
 			content=content,
 		)
-	return HttpResponseRedirect(u.get_absolute_url())
+		return HttpResponseRedirect(reverse_lazy('wiki:edit', kwargs={'path': u.path}))
+	else:
+		return HttpResponseRedirect(u.get_absolute_url())
