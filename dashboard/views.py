@@ -21,7 +21,6 @@ from django.http.request import HttpRequest
 from django.http.response import HttpResponseBase
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
-from django.utils import timezone
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from dwhandler import SUCCESS_LOG_LEVEL, VERBOSE_LOG_LEVEL
@@ -33,7 +32,7 @@ from sql_util.utils import SubqueryAggregate
 
 from dashboard.forms import DiamondsForm, PSetResubmitForm
 from dashboard.levelsys import get_student_rows
-from dashboard.utils import get_units_to_submit, get_units_to_unlock
+from dashboard.utils import get_days_since, get_units_to_submit, get_units_to_unlock  # NOQA
 
 from .forms import NewUploadForm, PSetSubmitForm
 from .levelsys import annotate_student_queryset_with_scores, check_level_up, get_level_info  # NOQA
@@ -160,11 +159,7 @@ def leaderboard(request: AuthHttpRequest) -> HttpResponse:
 		)
 	)
 	for row in rows:
-		if row['last_login'] is not None:
-			login_delta = timezone.now() - row['last_login']
-			row['days_since_last_login'] = login_delta.total_seconds() / (3600 * 24)
-		else:
-			login_delta = None
+		row['days_since_last_login'] = get_days_since(row['last_login'])
 	context: Dict[str, Any] = {}
 	context['rows'] = rows
 	return render(request, "dashboard/leaderboard.html", context)
@@ -378,7 +373,12 @@ def idlewarn(request: AuthHttpRequest) -> HttpResponse:
 	)
 	queryset = queryset.annotate(latest_pset=Subquery(newest))  # type: ignore
 	queryset = queryset.order_by('latest_pset')
-	context['rows'] = get_student_rows(queryset)
+	rows = get_student_rows(queryset)
+	for row in rows:
+		row['days_since_last_login'] = get_days_since(row['last_login'])
+		row['days_since_last_pset'] = get_days_since(row['student'].latest_pset)
+
+	context['rows'] = rows
 
 	return render(request, "dashboard/idlewarn.html", context)
 

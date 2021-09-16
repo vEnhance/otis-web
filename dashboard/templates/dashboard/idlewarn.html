@@ -14,8 +14,8 @@
 		<tr>
 			<th>Lv</th>
 			<th>Name</th>
-			<th colspan="2">Latest PSet Date</th>
-			<th>Format</th>
+			<th>Last pset</th>
+			<th>Last login</th>
 			<th>Units</th>
 		</tr>
 	</thead>
@@ -25,15 +25,14 @@
 		{% with student=row.student %}
 		<tr>
 			<td>{{ row.level }}</td>
-			<td><a href="{% url "portal" student.id %}">
-					{{ student.name }}</a></td>
+			<td><a title="{{ student.name }}" href="{% url "portal" student.id %}" class="tooltip-link">
+					{{ student.user.email }}</a></td>
 			{% if student.latest_pset %}
-			<td>{{ student.latest_pset|date:"Y-m-d" }}</td>
-			<td>{{ student.latest_pset|date:"H:i" }}</td>
+			<td>{{ row.days_since_last_pset|floatformat:2 }}</td>
 			{% else %}
-			<td colspan="2"><i>None</i></td>
+			<td>∞</td>
 			{% endif%}
-			<td>{{ student.get_track }}</td>
+			<td>{{ row.days_since_last_login|floatformat:2 }}</td>
 			<td>{{ student.num_psets|default_if_none:0 }}</td>
 		</tr>
 		{% endwith %}
