@@ -317,7 +317,7 @@ class BonusLevelUnlock(models.Model):
 
 
 def palace_image_file_name(instance: 'PalaceCarving', filename: str) -> str:
-	return os.path.join('palace', f'{instance.pk:04d}{filename}')
+	return os.path.join('palace', filename)
 
 
 class PalaceCarving(models.Model):
