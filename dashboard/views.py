@@ -499,9 +499,7 @@ class ProblemSuggestionList(LoginRequiredMixin, ListView[ProblemSuggestion]):
 
 def assert_maxed_out_level_info(student: Student) -> LevelInfoDict:
 	level_info = get_level_info(student)
-	max_level = Level.objects.all().aggregate(max=Max('threshold'))
-	lvl = level_info['level_number']
-	if not lvl >= max_level['max']:
+	if not level_info['is_maxed']:
 		raise PermissionDenied("Insufficient level")
 	return level_info
 

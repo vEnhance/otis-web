@@ -2,7 +2,7 @@
 import logging
 from typing import Any, Dict, List, TypedDict, Union
 
-from django.db.models.aggregates import Count, Sum
+from django.db.models.aggregates import Count, Max, Sum
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
 from dwhandler import SUCCESS_LOG_LEVEL
@@ -99,6 +99,7 @@ class LevelInfoDict(TypedDict):
 	meters: FourMetersDict
 	level_number: int
 	level_name: str
+	is_maxed: bool
 
 
 def get_level_info(student: Student) -> LevelInfoDict:
@@ -136,6 +137,7 @@ def get_level_info(student: Student) -> LevelInfoDict:
 	level_number = sum(meter.level for meter in meters.values())  # type: ignore
 	level = Level.objects.filter(threshold__lte=level_number).order_by('-threshold').first()
 	level_name = level.name if level is not None else 'No Level'
+	max_level = Level.objects.all().aggregate(max=Max('threshold'))['max'] or 0
 	level_data: LevelInfoDict = {
 		'psets': psets,
 		'pset_data': pset_data,
@@ -143,7 +145,8 @@ def get_level_info(student: Student) -> LevelInfoDict:
 		'quest_completes': quest_completes,
 		'meters': meters,
 		'level_number': level_number,
-		'level_name': level_name
+		'level_name': level_name,
+		'is_maxed': level_number >= max_level,
 	}
 	return level_data
 

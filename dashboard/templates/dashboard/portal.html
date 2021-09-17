@@ -68,7 +68,7 @@
 	{{ semester.most_payment_deadline|date:"Y-m-d" }}
 	has passed, but your payment is incomplete.
 	{% endif %}
-	<a href="{% url "invoice" student.id %}" class="alert-link">Link to invoice.</a>
+	<a href="{% url 'invoice' student.id %}" class="alert-link">Link to invoice.</a>
 </div>
 {% endif %}
 
@@ -80,13 +80,13 @@
 <h1>Getting Started &mdash; Setup Instructions</h1>
 <p>Follow the three steps below to get everything working.</p>
 <ol>
-	<li>Read the <a href="{% static "info/unit-guide.pdf" %}">unit selection guide</a>
+	<li>Read the <a href="{% static 'info/unit-guide.pdf' %}">unit selection guide</a>
 		to give yourself ideas on which units you want to work on.
 	</li>
-	<li>Read the <a href="{% url "synopsis" %}">catalog</a>
+	<li>Read the <a href="{% url 'synopsis' %}">catalog</a>
 		for the list of all possible units.</a>
 	<li>Use the
-		<a href="{% url "currshow" student.id %}">selection form</a>
+		<a href="{% url 'currshow' student.id %}">selection form</a>
 		to input your initial choices for which units you want to do.
 		For full-year students,
 		I suggest to pick 15-20 units you are most interested in.
@@ -94,13 +94,13 @@
 		You can save this form multiple times;
 		the intermediate results will be shown below.
 
-		<a href="{% url "currshow" student.id %}" class="text-white btn btn-success" />
+		<a href="{% url 'currshow' student.id %}" class="text-white btn btn-success" />
 		Open selection form
 		</a>
 	</li>
 	<li>Once you are happy with your selection, you may
 		finalize your choices.
-		<form action="{% url "finalize" student.id %}" method="post">
+		<form action="{% url 'finalize' student.id %}" method="post">
 			{% csrf_token %}
 			<input type="submit" class="btn btn-warning" value="Finalize" />
 		</form>
@@ -116,7 +116,7 @@
 
 {% if profile.show_bars %}
 <h1>Level {{ level_number }} &mdash;
-	<a href="{% url "stats" student.id %}">🏅{{ level_name }}</a></h1>
+	<a href="{% url 'stats' student.id %}">🏅{{ level_name }}</a></h1>
 
 <div class="container">
 	<div class="row">
@@ -132,9 +132,13 @@
 {% endif %}
 
 <div class="text-center">
-	<a href="{% url "stats" student.id %}" style="margin: 0 auto; width: 120px;" class="btn btn-primary text-white" role="button">View stats</a>
+	<a href="{% url 'stats' student.id %}" style="margin: 0 auto; width: 120px;" class="btn btn-primary text-white" role="button">View stats</a>
 	&nbsp;
-	<a href="{% url "submit-pset" student.id %}" style="margin: 0 auto; width: 120px;" class="btn btn-success text-white" role="button">Submit unit</a>
+	{% if is_maxed %}
+	<a href="{% url 'palace-list' student.id %}" style="margin: 0 auto; width: 120px;" class="btn btn-danger text-white" role="button">Ruby palace</a>
+	&nbsp;
+	{% endif %}
+	<a href="{% url 'submit-pset' student.id %}" style="margin: 0 auto; width: 120px;" class="btn btn-success text-white" role="button">Submit unit</a>
 </div>
 {% endif %}
 
@@ -145,7 +149,7 @@
 	after instructor review, it becomes ✅.
 	(You can access solutions in the meantime.)
 	Units to work on are marked ▶️.
-	To change units, <a href="{% url "inquiry" student.id %}">submit a petition</a>.
+	To change units, <a href="{% url 'inquiry' student.id %}">submit a petition</a>.
 </p>
 
 {% if emails %}
@@ -168,16 +172,16 @@
 		<td valign="top" width="50%">
 			<h3>Academic</h3>
 			<ul>
-				<li><a href="{% url "inquiry" student.id %}">Unit petitions</a></li>
-				<li><a href="{% url "arch-index" %}">ARCH</a></li>
-				<li><a href="{% url "currshow" student.id %}">Class selection</a></li>
-				<li><a href="{% url "synopsis" %}">Unit catalog</a></li>
+				<li><a href="{% url 'inquiry' student.id %}">Unit petitions</a></li>
+				<li><a href="{% url 'arch-index' %}">ARCH</a></li>
+				<li><a href="{% url 'currshow' student.id %}">Class selection</a></li>
+				<li><a href="{% url 'synopsis' %}">Unit catalog</a></li>
 				{% if omniscient %}
-				<li> <a href="{% url "advance" student.id %}">Advance student</a> (instructor)</li>
+				<li> <a href="{% url 'advance' student.id %}">Advance student</a> (instructor)</li>
 				{% endif %}
-				<li><a href="{% url "suggest-list" student.id %}">
+				<li><a href="{% url 'suggest-list' student.id %}">
 						Show suggestions</a></li>
-				<li><a href="{% url "downloads" student.id %}">Semester downloads
+				<li><a href="{% url 'downloads' student.id %}">Semester downloads
 						({{ num_sem_download }})</a></li>
 			</ul>
 		</td>
@@ -185,7 +189,7 @@
 			<h3>Logistics</h3>
 			<ul>
 				{% if semester.show_invoices %}
-				<li><a href="{% url "invoice" student.id %}">Invoice</a></li>
+				<li><a href="{% url 'invoice' student.id %}">Invoice</a></li>
 				{% endif %}
 				{% if semester.active and student.meets_evan %}
 				<li>
@@ -200,7 +204,7 @@
 				</li>
 				{% endif %}
 				<li><a href="https://web.evanchen.cc/upload/otis-syllabus.pdf">Syllabus</a></li>
-				<li><a href="{% static "info/parent-info.pdf" %}">Payment info</a></li>
+				<li><a href="{% static 'info/parent-info.pdf' %}">Payment info</a></li>
 			</ul>
 		</td>
 	</tr>
@@ -208,13 +212,13 @@
 		<td valign="top">
 			<h3>Files</h3>
 			<ul>
-				<li><a href="{% static "info/blank.pdf" %}">
+				<li><a href="{% static 'info/blank.pdf' %}">
 						Olympiad answer sheets</a></li>
-				<li><a href="{% static "info/psychology.pdf" %}">
+				<li><a href="{% static 'info/psychology.pdf' %}">
 						Psychology</a> (test-taking strategies)</li>
-				<li><a href="{% static "info/unit-guide.pdf" %}">
+				<li><a href="{% static 'info/unit-guide.pdf' %}">
 						Unit selection guide</a></li>
-				<li><a href="{% static "info/mock-imo.pdf" %}">
+				<li><a href="{% static 'info/mock-imo.pdf' %}">
 						Extra mock IMO's (shortlist)</a></li>
 			</ul>
 		</td>
@@ -240,9 +244,9 @@
 
 {% if semester.active %}
 <h2>Mock olympiads (tests)</h2>
-{% include "dashboard/list_exam.html" with exams=tests %}
+{% include 'dashboard/list_exam.html' with exams=tests %}
 
-<p><a href="{% static "info/blank.pdf" %}">
+<p><a href="{% static 'info/blank.pdf' %}">
 		Link to olympiad answer sheets.</a>
 	Submit these to <a href="https://www.gradescope.com" target="_blank">GradeScope</a>,
 	unless otherwise specified.
@@ -252,10 +256,10 @@
 	read them right after completing a mock olympiad.
 	Obviously, don't open the solutions until you've submitted!
 	Before taking your first mock olympiad, I recommend reading the
-	<a href="{% static "info/psychology.pdf" %}">handout on olympiad strategy.</a></p>
+	<a href="{% static 'info/psychology.pdf' %}">handout on olympiad strategy.</a></p>
 
 <h2>Quizzes</h2>
-{% include "dashboard/list_exam.html" with exams=quizzes %}
+{% include 'dashboard/list_exam.html' with exams=quizzes %}
 
 {% else %}
 <p>This page from {{ semester }} is now archived.
