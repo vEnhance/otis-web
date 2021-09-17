@@ -225,7 +225,7 @@ class Achievement(models.Model):
 		unique=True,
 		null=True,
 		validators=[
-			RegexValidator(regex=r'[a-f0-9]{24}', message='24-char hex string'),
+			RegexValidator(regex=r'^[a-f0-9]{24}$', message='24-char hex string'),
 		],
 	)
 	name = models.CharField(max_length=128, help_text="Name of the achievement")
