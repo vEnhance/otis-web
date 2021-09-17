@@ -2,6 +2,8 @@
 {% block title %}Forging a diamond{% endblock %}
 
 {% block layout-content %}
+<p><a href="{% url 'palace-list' student.id %}">Back to Ruby Palace</a></p>
+<hr />
 {% include "generic-form.html" %}
 
 {% endblock %}

@@ -1,7 +1,9 @@
 {% extends 'layout.html' %}
-{% block title %}Leaving your record{% endblock %}
+{% block title %}Carving your entry{% endblock %}
 
 {% block layout-content %}
+<p><a href="{% url 'palace-list' student.id %}">Back to Ruby Palace</a></p>
+<hr />
 {% include "generic-form.html" %}
 
 {% endblock %}
