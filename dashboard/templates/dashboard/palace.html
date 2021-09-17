@@ -16,7 +16,7 @@
 </h2>
 <p><em>{{ carving.created_at }}</em></p>
 
-<p>{{carving.message}}</p>
+{{carving.message|linebreaks}}
 <hr />
 {% endfor %}
 
