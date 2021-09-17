@@ -1,0 +1,9 @@
+{% extends 'layout.html' %}
+{% block title %}The Ruby Palace{% endblock %}
+{% block layout-content %}
+
+{% for entry in palace_entries %}
+{{ entry }}
+{% endfor %}
+
+{% endblock %}

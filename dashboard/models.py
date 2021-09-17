@@ -7,11 +7,19 @@ import os
 from hashlib import sha256
 
 from core.models import Semester, Unit, UnitGroup
+from django.conf import settings
 from django.contrib.auth.models import User
-from django.core.validators import FileExtensionValidator, MaxValueValidator, MinValueValidator  # NOQA
+from django.core.exceptions import ValidationError
+from django.core.files.base import File
+from django.core.validators import FileExtensionValidator, MaxValueValidator, MinValueValidator, RegexValidator  # NOQA
 from django.db import models
 from django.urls import reverse_lazy
 from roster.models import Student
+
+
+def validate_at_most_1mb(f: File):
+	if f.size > 1024 * 1024:
+		raise ValidationError("At most 1MB allowed")
 
 
 def content_file_name(instance: 'UploadedFile', filename: str) -> str:
@@ -206,23 +214,40 @@ class ProblemSuggestion(models.Model):
 
 
 def achievement_image_file_name(instance: 'Achievement', filename: str) -> str:
-	h = sha256((instance.code + '_otis_' + str(instance.pk)).encode('ascii')).hexdigest()
+	kludge = (settings.SECRET_KEY or '') + '_otis_' + str(instance.pk)
+	h = sha256(kludge.encode('ascii')).hexdigest()
 	return os.path.join('badges', h + os.path.splitext(filename)[-1])
 
 
 class Achievement(models.Model):
-	code = models.CharField(max_length=96, unique=True)
+	code = models.CharField(
+		max_length=96,
+		unique=True,
+		null=True,
+		blank=True,
+		validators=[
+			RegexValidator(regex=r'[a-f0-9]{24}'),
+		],
+	)
 	name = models.CharField(max_length=128, help_text="Name of the achievement")
-	image = models.FileField(
+	image = models.ImageField(
 		upload_to=achievement_image_file_name,
 		help_text="Image for the obtained badge",
 		null=True,
-		blank=True
+		blank=True,
+		validators=[validate_at_most_1mb],
 	)
 	description = models.TextField(help_text="How to obtain this achievement")
 	active = models.BooleanField(help_text="Whether the code is active right now", default=True)
 	diamonds = models.SmallIntegerField(
 		default=1, help_text="Amount of diamonds for this achievement"
+	)
+	creator = models.ForeignKey(
+		Student,
+		on_delete=models.CASCADE,
+		null=True,
+		blank=True,
+		help_text="Student who owns this achievement"
 	)
 
 	def __str__(self) -> str:
@@ -288,3 +313,38 @@ class BonusLevelUnlock(models.Model):
 
 	def __str__(self) -> str:
 		return self.timestamp.isoformat()
+
+
+def palace_image_file_name(instance: 'PalaceEntry', filename: str) -> str:
+	return os.path.join('palace', f'{instance.pk:04d}{filename}')
+
+
+class PalaceEntry(models.Model):
+	student = models.OneToOneField(Student, on_delete=models.CASCADE)
+	display_name = models.CharField(
+		max_length=128,
+		help_text="How you would like your name to be displayed in the Ruby Palace."
+	)
+	message = models.TextField(
+		max_length=1024, help_text="You can write a message here", blank=True
+	)
+	hyperlink = models.URLField(help_text="An external link of your choice", blank=True)
+	visible = models.BooleanField(
+		help_text="Uncheck to hide your entry altogether (can change your mind later)",
+		default=True
+	)
+	created_at = models.DateTimeField(auto_now_add=True)
+	image = models.ImageField(
+		upload_to=achievement_image_file_name,
+		help_text=
+		"Optional small photo that will appear next to your entry, no more than 1 megabyte",
+		null=True,
+		blank=True,
+		validators=[validate_at_most_1mb],
+	)
+
+	def __str__(self) -> str:
+		return f"Palace entry for {self.display_name}"
+
+	def get_absolute_url(self):
+		return reverse_lazy("palace-list", args=(self.student.id, ))

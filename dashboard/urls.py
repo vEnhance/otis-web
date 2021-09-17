@@ -38,4 +38,7 @@ urlpatterns = [
 		name='suggest-list'
 	),
 	path(r'leaderboard/', views.leaderboard, name='leaderboard'),
+	path(r'palace/<int:student_id>/', views.PalaceList.as_view(), name='palace-list'),
+	path(r'carve/<int:student_id>/', views.PalaceUpdate.as_view(), name='palace-update'),
+	path(r'forge/<int:student_id>/', views.DiamondUpdate.as_view(), name='diamond-update'),
 ]
