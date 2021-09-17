@@ -16,7 +16,7 @@
 			<th>Level</th>
 			{% endif %}
 			<th>Track</th>
-			<th>Progress</th>
+			<th>Score</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -30,16 +30,16 @@
 			{% if stulist_show_semester %}
 			<td>{{ student.semester }}</td>
 			{% else %}
-			<td>{{ row.level }}</td>
+			<td class="text-end">Lv. {{ row.level }}</td>
 			{% endif %}
 
 			<td>{{ student.get_track }}</td>
-			<td>
+			<td class="text-end">
 				{% if student.legit %}
 				{% if student.newborn %}
 				&mdash;
 				{% else %}
-				{{ student.num_psets|default:0 }}
+				{{ student.num_psets|default:0 }} units
 				{% endif %}
 				{%endif %}
 			</td>
