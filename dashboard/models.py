@@ -321,7 +321,7 @@ def palace_image_file_name(instance: 'PalaceEntry', filename: str) -> str:
 
 
 class PalaceEntry(models.Model):
-	student = models.OneToOneField(Student, on_delete=models.CASCADE)
+	student = models.OneToOneField(Student, on_delete=models.CASCADE, null=True, blank=True)
 	display_name = models.CharField(
 		max_length=128,
 		help_text="How you would like your name to be displayed in the Ruby Palace."
