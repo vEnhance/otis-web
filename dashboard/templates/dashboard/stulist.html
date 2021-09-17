@@ -13,7 +13,7 @@
 			{% if stulist_show_semester %}
 			<th>Year</th>
 			{% else %}
-			<th class="text-end" style="min-width:3em;">Level</th>
+			<th class="text-end" style="min-width:4em;">Level</th>
 			{% endif %}
 			<th>Track</th>
 			<th class="text-end" style="min-width:4em;">Score</th>
@@ -30,7 +30,7 @@
 			{% if stulist_show_semester %}
 			<td>{{ student.semester }}</td>
 			{% else %}
-			<td class="text-end">Lv. {{ row.level }}</td>
+			<td class="text-end">Lv{{ row.level }}</td>
 			{% endif %}
 
 			<td>{{ student.get_track }}</td>
