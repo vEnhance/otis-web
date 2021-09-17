@@ -3,7 +3,27 @@
 {% block layout-content %}
 
 {% for entry in palace_entries %}
-{{ entry }}
+{% if entry.image %}
+<img width="96px" style="float: right;" src="{{ entry.image.url }}" />
+{% endif %}
+
+<h2>
+	{% if entry.hyperlink %}
+	<a href="{{ entry.hyperlink }}">{{ entry.display_name }}</a>
+	{% else %}
+	{{ entry.display_name }}
+	{% endif %}
+</h2>
+<p><em>{{ entry.created_at }}</em></p>
+
+<p>{{entry.message}}</p>
+<hr />
 {% endfor %}
+
+<div class="text-center">
+	<a href="{% url "palace-update" student.id %}" style="margin: 0 auto; width: 120px;" class="btn btn-primary text-white" role="button">Carve</a>
+	&nbsp;
+	<a href="{% url "diamond-update" student.id %}" style="margin: 0 auto; width: 120px;" class="btn btn-danger text-white" role="button">Forge</a>
+</div>
 
 {% endblock %}

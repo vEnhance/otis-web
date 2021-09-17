@@ -215,7 +215,7 @@ class ProblemSuggestion(models.Model):
 
 def achievement_image_file_name(instance: 'Achievement', filename: str) -> str:
 	kludge = (settings.SECRET_KEY or '') + '_otis_' + str(instance.pk)
-	h = sha256(kludge.encode('ascii')).hexdigest()
+	h = sha256(kludge.encode('ascii')).hexdigest()[0:18]
 	return os.path.join('badges', h + os.path.splitext(filename)[-1])
 
 
@@ -224,23 +224,24 @@ class Achievement(models.Model):
 		max_length=96,
 		unique=True,
 		null=True,
-		blank=True,
 		validators=[
-			RegexValidator(regex=r'[a-f0-9]{24}'),
+			RegexValidator(regex=r'[a-f0-9]{24}', message='24-char hex string'),
 		],
 	)
 	name = models.CharField(max_length=128, help_text="Name of the achievement")
 	image = models.ImageField(
 		upload_to=achievement_image_file_name,
-		help_text="Image for the obtained badge",
+		help_text="Image for the obtained achievement, at most 1MB.",
 		null=True,
 		blank=True,
 		validators=[validate_at_most_1mb],
 	)
-	description = models.TextField(help_text="How to obtain this achievement")
+	description = models.TextField(
+		help_text="Text shown beneath this achievement for students who obtain it."
+	)
 	active = models.BooleanField(help_text="Whether the code is active right now", default=True)
 	diamonds = models.SmallIntegerField(
-		default=1, help_text="Amount of diamonds for this achievement"
+		default=1, help_text="Number of diamonds for this achievement"
 	)
 	creator = models.ForeignKey(
 		Student,
@@ -335,7 +336,7 @@ class PalaceEntry(models.Model):
 	)
 	created_at = models.DateTimeField(auto_now_add=True)
 	image = models.ImageField(
-		upload_to=achievement_image_file_name,
+		upload_to=palace_image_file_name,
 		help_text=
 		"Optional small photo that will appear next to your entry, no more than 1 megabyte",
 		null=True,

@@ -11,6 +11,7 @@ from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count, Max, OuterRef, Subquery
 from django.db.models.expressions import Exists
@@ -31,7 +32,7 @@ from roster.utils import can_edit, can_view, get_student_by_id, get_visible_stud
 from sql_util.utils import SubqueryAggregate
 
 from dashboard.forms import DiamondsForm, PSetResubmitForm
-from dashboard.levelsys import get_student_rows
+from dashboard.levelsys import LevelInfoDict, get_student_rows
 from dashboard.models import PalaceEntry
 from dashboard.utils import get_days_since, get_units_to_submit, get_units_to_unlock  # NOQA
 
@@ -496,32 +497,40 @@ class ProblemSuggestionList(LoginRequiredMixin, ListView[ProblemSuggestion]):
 		return context
 
 
-def assert_maxed_out_and_get_level(student: Student) -> int:
+def assert_maxed_out_level_info(student: Student) -> LevelInfoDict:
 	level_info = get_level_info(student)
 	max_level = Level.objects.all().aggregate(max=Max('threshold'))
 	lvl = level_info['level_number']
 	if not lvl >= max_level['max']:
 		raise PermissionDenied("Insufficient level")
-	return lvl
+	return level_info
 
 
 class PalaceList(LoginRequiredMixin, ListView[PalaceEntry]):
 	model = PalaceEntry
-	context_object_name = "palance_entries"
+	context_object_name = "palace_entries"
 	template_name = 'dashboard/palace.html'
 
 	def get_queryset(self):
 		student = get_student_by_id(self.request, self.kwargs['student_id'])
-		assert_maxed_out_and_get_level(student)
+		assert_maxed_out_level_info(student)
 		self.student = student
-		return PalaceEntry.objects.filter(visible=True).exclude(display_name="")
+		queryset = PalaceEntry.objects.filter(visible=True)
+		queryset = queryset.exclude(display_name="")
+		queryset = queryset.order_by('created_at')
+		return queryset
 
 	def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
 		context = super().get_context_data(**kwargs)
+		context['student'] = self.student
 		return context
 
 
-class PalaceUpdate(LoginRequiredMixin, UpdateView[PalaceEntry, BaseModelForm[PalaceEntry]]):
+class PalaceUpdate(
+	LoginRequiredMixin,
+	SuccessMessageMixin,
+	UpdateView[PalaceEntry, BaseModelForm[PalaceEntry]],
+):
 	model = PalaceEntry
 	fields = (
 		'display_name',
@@ -531,18 +540,27 @@ class PalaceUpdate(LoginRequiredMixin, UpdateView[PalaceEntry, BaseModelForm[Pal
 		'image',
 	)
 	template_name = 'dashboard/palace_form.html'
+	success_message = "Edited palace entry successfully"
 
 	def get_object(self, *args: Any, **kwargs: Any) -> PalaceEntry:
 		student = get_student_by_id(self.request, self.kwargs['student_id'])
-		assert_maxed_out_and_get_level(student)
+		assert_maxed_out_level_info(student)
 		self.student = student
 		entry, is_created = PalaceEntry.objects.get_or_create(student=student)
 		if is_created is True:
 			entry.display_name = student.name
 		return entry
 
+	def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+		context = super().get_context_data(**kwargs)
+		context['student'] = self.student
+		return context
 
-class DiamondUpdate(LoginRequiredMixin, UpdateView[Achievement, BaseModelForm[Achievement]]):
+
+class DiamondUpdate(
+	LoginRequiredMixin,
+	UpdateView[Achievement, BaseModelForm[Achievement]],
+):
 	model = Achievement
 	fields = (
 		'code',
@@ -550,20 +568,31 @@ class DiamondUpdate(LoginRequiredMixin, UpdateView[Achievement, BaseModelForm[Ac
 		'image',
 		'description',
 	)
+	success_message = "Updated diamond successfully."
 
 	def get_object(self, *args: Any, **kwargs: Any) -> Achievement:
 		student = get_student_by_id(self.request, self.kwargs['student_id'])
 		if not student.semester.active:
 			raise PermissionDenied("The palace can't be edited through an inactive student")
-		assert_maxed_out_and_get_level(student)
+		assert_maxed_out_level_info(student)
 		self.student = student
 		achievement, _ = Achievement.objects.get_or_create(creator=student)
 		return achievement
 
 	def form_valid(self, form: BaseModelForm[Achievement]):
-		student = get_student_by_id(self.request, self.kwargs['student_id'])
-		if not student.semester.active:
-			raise PermissionDenied("The palace can't be edited through an inactive student")
-		form.instance.diamonds = assert_maxed_out_and_get_level(student)
-		form.instance.creator = student
+		level_info = assert_maxed_out_level_info(self.student)
+		form.instance.diamonds = level_info['meters']['diamonds'].level
+		form.instance.creator = self.student
+		messages.success(
+			self.request,
+			f"Successfully forged diamond worth {form.instance.diamonds}◆, your current charisma level.",
+		)
 		return super().form_valid(form)
+
+	def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+		context = super().get_context_data(**kwargs)
+		context['student'] = self.student
+		return context
+
+	def get_success_url(self):
+		return reverse_lazy("diamond-update", args=(self.student.id, ))
