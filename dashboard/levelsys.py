@@ -84,12 +84,19 @@ class Meter:
 AggregateDict = Dict[str, Union[int, float]]
 
 
+class FourMetersDict(TypedDict):
+	spades: Meter
+	clubs: Meter
+	diamonds: Meter
+	hearts: Meter
+
+
 class LevelInfoDict(TypedDict):
 	psets: QuerySet[PSet]
 	pset_data: AggregateDict
 	quiz_attempts: QuerySet[ExamAttempt]
 	quest_completes: QuerySet[QuestComplete]
-	meters: Any  # TODO
+	meters: FourMetersDict
 	level_number: int
 	level_name: str
 
@@ -120,13 +127,13 @@ def get_level_info(student: Student) -> LevelInfoDict:
 	total_spades = quiz_attempts.aggregate(Sum('score'))['score__sum'] or 0
 	total_spades += quest_completes.aggregate(Sum('spades'))['spades__sum'] or 0
 
-	meters = {
+	meters: FourMetersDict = {
 		'clubs': Meter.ClubMeter(int(total_clubs)),
 		'hearts': Meter.HeartMeter(int(total_hearts)),
 		'diamonds': Meter.DiamondMeter(total_diamonds),
-		'spades': Meter.SpadeMeter(total_spades),  # TODO input value
+		'spades': Meter.SpadeMeter(total_spades),
 	}
-	level_number = sum(meter.level for meter in meters.values())
+	level_number = sum(meter.level for meter in meters.values())  # type: ignore
 	level = Level.objects.filter(threshold__lte=level_number).order_by('-threshold').first()
 	level_name = level.name if level is not None else 'No Level'
 	level_data: LevelInfoDict = {
