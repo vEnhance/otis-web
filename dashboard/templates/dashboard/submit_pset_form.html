@@ -23,19 +23,6 @@
 </table>
 {% endif %}
 
-
-{% if pending_psets %}
-<h2>Pending submissions</h2>
-<div class="list-group">
-	{% for pset in pending_psets %}
-	<a href="{{pset.get_absolute_url}}" class="list-group-item list-group-item-action">
-		{{ pset.unit }}, submitted {{ pset.upload.created_at|naturaltime }}
-	</a>
-	{% endfor %}
-</div>
-<hr />
-{% endif %}
-
 <h2>Submit new problem set</h2>
 
 {% include "generic-form.html" %}

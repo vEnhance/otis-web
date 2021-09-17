@@ -18,34 +18,32 @@
 {% endif %}
 
 <h2>Details</h2>
-<ul>
-	<li>Unit: <a href="{% url "view-problems" pset.unit.pk %}">{{ pset.unit }}</a>
-		<ul>
-			<li><a href="{% url "view-solutions" pset.unit.pk %}">Solutions</a></li>
-		</ul>
-	</li>
-	<li>Submitted: {{ pset.upload.created_at }}</li>
-	<ul>
-		{% if pset.clubs is not None %}
-		<li>Clubs: {{ pset.clubs }}♣</li>
-		{% endif %}
-		{% if pset.hours is not None %}
-		<li>Hours: {{ pset.hours }}♥</li>
-		{% endif %}
-	</ul>
-	{% if pset.feedback %}
-	<li>Your comments: <div>
-			<code>{{ pset.feedback }}</code>
-		</div>
-	</li>
-	{% endif %}
-	{% if pset.special_notes %}
-	<li>Your special notes: <div>
-			<code>{{ pset.special_notes }}</code>
-		</div>
-	</li>
-	{% endif %}
-</ul>
+<table class="table">
+	<tr>
+		<th>{{ pset.unit }}</th>
+		<td>
+			<a href="{% url "view-problems" pset.unit.pk %}">Problems</a>
+			|
+			<a href="{% url "view-solutions" pset.unit.pk %}">Solutions</a>
+		</td>
+	</tr>
+	<tr>
+		<th>Timestamp</th>
+		<td>Submitted: {{ pset.upload.created_at }}</td>
+	</tr>
+	<td>{{ pset.clubs }}♣</td>
+	<td>{{ pset.hours }}♥</td>
+</table>
+
+{% if pset.feedback %}
+<h3>Your comments</h3>
+{{ pset.feedback|linebreaks }}
+{% endif %}
+
+{% if pset.special_notes %}
+<h3>Notes</h3>
+{{ pset.special_notes|linebreaks }}
+{% endif %}
 
 <p><a href="{{ pset.upload.url }}">Download your submission.</a></p>
 <iframe width="100%" height="200px" src="{{pset.upload.url}}"></iframe>
