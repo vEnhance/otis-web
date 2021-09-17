@@ -11,6 +11,7 @@ from dashboard.models import Achievement, AchievementUnlock, PSet
 from django.conf import settings
 from django.core.files.storage import default_storage
 from django.db.models.aggregates import Sum
+from django.db.models.query_utils import Q
 from roster.models import Student
 
 
@@ -87,7 +88,7 @@ class OTISPreprocessor(markdown.preprocessors.Preprocessor):
 						table_output.append(f'<tr><th>Description</th><td>{diamond.description}</td></tr>')
 				elif tag_name == 'unit':
 					try:
-						unitgroup = UnitGroup.objects.get(name__iexact=tag_arg)
+						unitgroup = UnitGroup.objects.get(Q(slug__iexact=tag_arg) | Q(name__iexact=tag_arg))
 					except UnitGroup.DoesNotExist:
 						table_output.append(f'<tr class="danger"><th>Name</th><td>{tag_arg}</td></tr>')
 					else:
