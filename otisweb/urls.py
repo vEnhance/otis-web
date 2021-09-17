@@ -41,5 +41,5 @@ if settings.DEBUG:
 	admin.site.site_title = 'otis@localhost'
 else:
 	admin.site.site_header = 'OTIS Headquarters'
-	admin.site.index_title = 'Control Room'
+	admin.site.index_title = 'GM Panel'
 	admin.site.site_title = 'OTIS HQ'
