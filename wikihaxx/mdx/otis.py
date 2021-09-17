@@ -112,7 +112,13 @@ class OTISPreprocessor(markdown.preprocessors.Preprocessor):
 						table_output.append(f'<tr><th>♣ earned</th><td>{clubs_given}</td></tr>')
 						table_output.append(f'<tr><th>♥ earned</th><td>{hearts_given}</td></tr>')
 
-						body.append(f'<div>{unitgroup.description}</div>')
+						body.append('<blockquote class="catalog-quote">')
+						body.append('<em>')
+						body.append(unitgroup.description)
+						body.append('</em>')
+						body.append('<br />')
+						body.append('— Evan')
+						body.append('</blockquote>')
 
 				output += table_output
 			elif m_end is not None:
