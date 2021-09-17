@@ -385,3 +385,23 @@ class TestSubmitPSet(OTISTestCase):
 
 		self.assertEqual(get_units_to_submit(alice).count(), 2)
 		self.assertEqual(get_units_to_unlock(alice).count(), 11)
+
+
+class TestPalace(OTISTestCase):
+	def test_palace(self):
+		alice = StudentFactory.create()
+		self.login(alice)
+		LevelFactory.reset_sequence()
+		LevelFactory.create_batch(size=5)
+
+		for i in range(0, 4):
+			AchievementUnlockFactory.create(user=alice.user, achievement__diamonds=2 * i + 1)
+			self.assertNotContains(self.get('portal', alice.pk), 'Ruby palace')
+			self.assert40X(self.get('palace-list', alice.pk))
+			self.assert40X(self.get('palace-update', alice.pk))
+			self.assert40X(self.get('diamond-update', alice.pk))
+		AchievementUnlockFactory.create(user=alice.user, achievement__diamonds=9)
+		self.assertContains(self.get('portal', alice.pk), 'Ruby palace')
+		self.assertGetOK('palace-list', alice.pk)
+		self.assertGetOK('palace-update', alice.pk)
+		self.assertGetOK('diamond-update', alice.pk)
