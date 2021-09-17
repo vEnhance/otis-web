@@ -2,28 +2,30 @@
 {% block title %}The Ruby Palace{% endblock %}
 {% block layout-content %}
 
-{% for entry in palace_entries %}
-{% if entry.image %}
-<img width="96px" style="float: right;" src="{{ entry.image.url }}" />
+{% for carving in palace_carvings %}
+{% if carving.image %}
+<img width="96px" style="float: right;" src="{{ carving.image.url }}" />
 {% endif %}
 
 <h2>
-	{% if entry.hyperlink %}
-	<a href="{{ entry.hyperlink }}">{{ entry.display_name }}</a>
+	{% if carving.hyperlink %}
+	<a href="{{ carving.hyperlink }}">{{ carving.display_name }}</a>
 	{% else %}
-	{{ entry.display_name }}
+	{{ carving.display_name }}
 	{% endif %}
 </h2>
-<p><em>{{ entry.created_at }}</em></p>
+<p><em>{{ carving.created_at }}</em></p>
 
-<p>{{entry.message}}</p>
+<p>{{carving.message}}</p>
 <hr />
 {% endfor %}
 
+{% if student %}
 <div class="text-center">
 	<a href="{% url "palace-update" student.id %}" style="margin: 0 auto; width: 120px;" class="btn btn-primary text-white" role="button">Carve</a>
 	&nbsp;
 	<a href="{% url "diamond-update" student.id %}" style="margin: 0 auto; width: 120px;" class="btn btn-danger text-white" role="button">Forge</a>
 </div>
+{% endif %}
 
 {% endblock %}

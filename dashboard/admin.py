@@ -8,7 +8,7 @@ from django.http import HttpRequest
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
-from dashboard.models import BonusLevel, BonusLevelUnlock, PalaceEntry, QuestComplete  # NOQA
+from dashboard.models import BonusLevel, BonusLevelUnlock, PalaceCarving, QuestComplete  # NOQA
 
 from .models import Achievement, AchievementUnlock, Level, ProblemSuggestion, PSet, SemesterDownloadFile, UploadedFile  # NOQA
 
@@ -193,8 +193,8 @@ class BonusLevelUnlockAdmin(admin.ModelAdmin):
 	list_filter = ('student__semester__active', )
 
 
-@admin.register(PalaceEntry)
-class PalaceEntryAdmin(admin.ModelAdmin):
+@admin.register(PalaceCarving)
+class PalaceCarvingAdmin(admin.ModelAdmin):
 	list_display = (
 		'display_name',
 		'message',

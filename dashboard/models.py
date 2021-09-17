@@ -316,11 +316,11 @@ class BonusLevelUnlock(models.Model):
 		return self.timestamp.isoformat()
 
 
-def palace_image_file_name(instance: 'PalaceEntry', filename: str) -> str:
+def palace_image_file_name(instance: 'PalaceCarving', filename: str) -> str:
 	return os.path.join('palace', f'{instance.pk:04d}{filename}')
 
 
-class PalaceEntry(models.Model):
+class PalaceCarving(models.Model):
 	student = models.OneToOneField(Student, on_delete=models.CASCADE, null=True, blank=True)
 	display_name = models.CharField(
 		max_length=128,
@@ -331,21 +331,21 @@ class PalaceEntry(models.Model):
 	)
 	hyperlink = models.URLField(help_text="An external link of your choice", blank=True)
 	visible = models.BooleanField(
-		help_text="Uncheck to hide your entry altogether (can change your mind later)",
+		help_text="Uncheck to hide your carving altogether (can change your mind later)",
 		default=True
 	)
 	created_at = models.DateTimeField(auto_now_add=True)
 	image = models.ImageField(
 		upload_to=palace_image_file_name,
 		help_text=
-		"Optional small photo that will appear next to your entry, no more than 1 megabyte",
+		"Optional small photo that will appear next to your carving, no more than 1 megabyte",
 		null=True,
 		blank=True,
 		validators=[validate_at_most_1mb],
 	)
 
 	def __str__(self) -> str:
-		return f"Palace entry for {self.display_name}"
+		return f"Palace carving for {self.display_name}"
 
 	def get_absolute_url(self):
 		return reverse_lazy("palace-list", args=(self.student.id, ))

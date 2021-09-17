@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import logging
 from typing import Any, Dict
 
-from braces.views import LoginRequiredMixin, StaffuserRequiredMixin
+from braces.views import LoginRequiredMixin, StaffuserRequiredMixin, SuperuserRequiredMixin  # NOQA
 from core.models import Semester, Unit, UserProfile
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
@@ -33,7 +33,7 @@ from sql_util.utils import SubqueryAggregate
 
 from dashboard.forms import DiamondsForm, PSetResubmitForm
 from dashboard.levelsys import LevelInfoDict, get_student_rows
-from dashboard.models import PalaceEntry
+from dashboard.models import PalaceCarving
 from dashboard.utils import get_days_since, get_units_to_submit, get_units_to_unlock  # NOQA
 
 from .forms import NewUploadForm, PSetSubmitForm
@@ -504,16 +504,16 @@ def assert_maxed_out_level_info(student: Student) -> LevelInfoDict:
 	return level_info
 
 
-class PalaceList(LoginRequiredMixin, ListView[PalaceEntry]):
-	model = PalaceEntry
-	context_object_name = "palace_entries"
+class PalaceList(LoginRequiredMixin, ListView[PalaceCarving]):
+	model = PalaceCarving
+	context_object_name = "palace_carvings"
 	template_name = 'dashboard/palace.html'
 
 	def get_queryset(self):
 		student = get_student_by_id(self.request, self.kwargs['student_id'])
 		assert_maxed_out_level_info(student)
 		self.student = student
-		queryset = PalaceEntry.objects.filter(visible=True)
+		queryset = PalaceCarving.objects.filter(visible=True)
 		queryset = queryset.exclude(display_name="")
 		queryset = queryset.order_by('created_at')
 		return queryset
@@ -524,12 +524,24 @@ class PalaceList(LoginRequiredMixin, ListView[PalaceEntry]):
 		return context
 
 
+class AdminPalaceList(SuperuserRequiredMixin, ListView[PalaceCarving]):
+	model = PalaceCarving
+	context_object_name = "palace_carvings"
+	template_name = 'dashboard/palace.html'
+
+	def get_queryset(self):
+		queryset = PalaceCarving.objects.filter(visible=True)
+		queryset = queryset.exclude(display_name="")
+		queryset = queryset.order_by('created_at')
+		return queryset
+
+
 class PalaceUpdate(
 	LoginRequiredMixin,
 	SuccessMessageMixin,
-	UpdateView[PalaceEntry, BaseModelForm[PalaceEntry]],
+	UpdateView[PalaceCarving, BaseModelForm[PalaceCarving]],
 ):
-	model = PalaceEntry
+	model = PalaceCarving
 	fields = (
 		'display_name',
 		'hyperlink',
@@ -538,16 +550,16 @@ class PalaceUpdate(
 		'image',
 	)
 	template_name = 'dashboard/palace_form.html'
-	success_message = "Edited palace entry successfully"
+	success_message = "Edited palace carving successfully"
 
-	def get_object(self, *args: Any, **kwargs: Any) -> PalaceEntry:
+	def get_object(self, *args: Any, **kwargs: Any) -> PalaceCarving:
 		student = get_student_by_id(self.request, self.kwargs['student_id'])
 		assert_maxed_out_level_info(student)
 		self.student = student
-		entry, is_created = PalaceEntry.objects.get_or_create(student=student)
+		carving, is_created = PalaceCarving.objects.get_or_create(student=student)
 		if is_created is True:
-			entry.display_name = student.name
-		return entry
+			carving.display_name = student.name
+		return carving
 
 	def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
 		context = super().get_context_data(**kwargs)
