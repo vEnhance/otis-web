@@ -211,6 +211,15 @@ def get_student_rows(queryset: QuerySet[Student]) -> List[Dict[str, Any]]:
 		else:
 			row['level_name'] = levels.get(row['level'], "No level")
 		rows.append(row)
+	rows.sort(
+		key=lambda row: (
+			row['student'].semester.pk,
+			not row['student'].legit,
+			row['student'].track,
+			row['student'].user.first_name,
+			row['student'].user.last_name,
+		)
+	)
 	return rows
 
 
