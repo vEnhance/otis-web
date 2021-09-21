@@ -44,7 +44,11 @@ def venueq_handler(action: str, request: HttpRequest) -> JsonResponse:
 			student.unlocked_units.remove(finished_unit)
 		return JsonResponse({'result': 'success'}, status=200)
 	elif action == 'approve_inquiries':
-		for inquiry in UnitInquiry.objects.filter(status="NEW", student__semester__active=True):
+		for inquiry in UnitInquiry.objects.filter(
+			status="NEW",
+			student__semester__active=True,
+			student__legit=True,
+		):
 			inquiry.run_accept()
 		return JsonResponse({'result': 'success'}, status=200)
 	elif action == 'mark_suggestion':
@@ -54,7 +58,9 @@ def venueq_handler(action: str, request: HttpRequest) -> JsonResponse:
 		return JsonResponse({'result': 'success'}, status=200)
 	elif action == 'init':
 		inquiries = UnitInquiry.objects.filter(
-			status="NEW", student__semester__active=True
+			status="NEW",
+			student__semester__active=True,
+			student__legit=True,
 		).annotate(
 			total_inquiry_count=SubqueryCount('student__unitinquiry'),
 			unlock_inquiry_count=SubqueryCount(
@@ -71,7 +77,11 @@ def venueq_handler(action: str, request: HttpRequest) -> JsonResponse:
 							'Problem sets',
 						'_children':
 							list(
-								PSet.objects.filter(approved=False, student__semester__active=True).values(
+								PSet.objects.filter(
+									approved=False,
+									student__semester__active=True,
+									student__legit=True,
+								).values(
 									'pk',
 									'approved',
 									'resubmitted',
