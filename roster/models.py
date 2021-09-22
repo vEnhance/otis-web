@@ -467,6 +467,7 @@ class StudentRegistration(models.Model):
 		"in case Evan needs to contact your parents or something."
 	)
 	track = models.CharField(
+		verbose_name="Proposed Track",
 		max_length=6,
 		choices=(
 			("C", "Correspondence"),
