@@ -318,6 +318,7 @@ class StudentRegistrationAdmin(ImportExportModelAdmin):
 		'track',
 	)
 	resource_class = StudentRegistrationIEResource
+	search_fields = ('user__first_name', 'user__last_name')
 
 	actions = [
 		'create_student',
