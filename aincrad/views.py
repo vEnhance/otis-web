@@ -188,9 +188,10 @@ def problems_handler(action: str, request: HttpRequest) -> JsonResponse:
 	puid = request.POST['puid'].upper()
 	if action == 'get_hints':
 		problem, _ = Problem.objects.get_or_create(puid=puid)
-		return JsonResponse(
-			{'hints': list(Hint.objects.filter(problem=problem).values('keywords', 'id', 'number'))}
+		hints = list(
+			Hint.objects.filter(problem=problem).values('keywords', 'id', 'number', 'content')
 		)
+		return JsonResponse({'hints': hints})
 	elif action == 'add_hints':
 		problem, _ = Problem.objects.get_or_create(puid=puid)
 		content = request.POST['content']
