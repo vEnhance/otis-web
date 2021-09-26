@@ -9,8 +9,7 @@ from django.core.exceptions import PermissionDenied
 from django.db.models.base import Model
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
-from django.http.response import HttpResponseNotFound
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.urls.base import reverse_lazy
 from django.views.generic.edit import UpdateView
@@ -19,7 +18,7 @@ from roster.models import Student
 
 from core.models import UserProfile
 
-from .models import Semester, Unit, UnitGroup
+from .models import Unit, UnitGroup
 from .utils import get_from_google_storage
 
 # Create your views here.
@@ -78,15 +77,6 @@ def unit_solutions(request: HttpRequest, pk: int) -> HttpResponse:
 		return get_from_google_storage(unit.solutions_pdf_filename)
 	else:
 		raise PermissionDenied(f"Can't view the solutions for {unit}")
-
-
-@login_required
-def classroom(request: HttpRequest):
-	semester = Semester.objects.get(active=True)
-	if semester.classroom_url:
-		return HttpResponseRedirect(semester.classroom_url)
-	else:
-		return HttpResponseNotFound('No classroom URL')
 
 
 class UserProfileUpdateView(
