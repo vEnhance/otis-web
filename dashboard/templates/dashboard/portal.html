@@ -142,6 +142,46 @@
 </div>
 {% endif %}
 
+{% if emails or downloads %}
+<hr />
+{% endif %}
+{% if emails %}
+<div class="alert alert-primary alert-dismissible">
+	<h2 class="alert-heading">
+		<span class="badge bg-danger">{{ emails|length }}</span>
+		New announcements!
+	</h2>
+	<ul>
+		{% for email in emails %}
+		<li class="mb-3">
+			<b><a class="alert-link" href="{{email.url}}">{{email.title}} 📧</a></b> | {{ email.timestamp|naturaltime }}<br />
+			<em class="text-muted">{{ email.summary }}</em>
+		</li>
+		{% endfor %}
+	</ul>
+	<button id="email_close" type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endif %}
+{% if downloads %}
+<div class="alert alert-secondary alert-dismissible">
+	<h2 class="alert-heading">
+		<span class="badge bg-danger">{{ downloads|length }}</span>
+		New posted files!
+	</h2>
+	<ul>
+		{% for dl in downloads %}
+		<li class="mb-3">
+			<b><a class="alert-link" href="{{dl.content.url}}">{{dl}} ⬇️</a></b> | {{ dl.created_at|naturaltime }}<br />
+			<em class="text-muted">{{ dl.description }}</em>
+		</li>
+		{% endfor %}
+	</ul>
+	<button id="email_close" type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endif %}
+
+<hr />
+
 <h2>Your units</h2>
 {% include "dashboard/list_curriculum.html" %}
 <p>
@@ -151,19 +191,6 @@
 	Units to work on are marked ▶️.
 	To change units, <a href="{% url 'inquiry' student.id %}">submit a petition</a>.
 </p>
-
-{% if emails %}
-<h2>Recent announcements</h2>
-<p><a href="https://us5.campaign-archive.com/home/?u=5c818a0be2f35ee90344a471e&id=808c50e8c9">📢 See all announcements.</a></p>
-<ul>
-	{% for email in emails %}
-	<li class="mb-3">
-		<b><a href="{{email.url}}">{{email.title}}</a></b> | {{ email.timestamp|naturaltime }}<br />
-		<span class="text-muted">{{ email.summary }}</span>
-	</li>
-	{% endfor %}
-</ul>
-{% endif %}
 
 <hr />
 <h2>Launchpad (places to go)</h2>
@@ -181,13 +208,18 @@
 				{% endif %}
 				<li><a href="{% url 'suggest-list' student.id %}">
 						Show suggestions</a></li>
-				<li><a href="{% url 'downloads' student.id %}">Semester downloads
-						({{ num_sem_download }})</a></li>
+				<li><a href="{% url 'downloads' student.id %}">
+						Posted files ({{ num_sem_downloads }})</a></li>
 			</ul>
 		</td>
 		<td valign="top" width="50%">
 			<h3>Logistics</h3>
 			<ul>
+				<li>
+					<a href="https://us5.campaign-archive.com/home/?u=5c818a0be2f35ee90344a471e&id=808c50e8c9">
+						Announcement emails
+					</a>
+				</li>
 				{% if semester.show_invoices %}
 				<li><a href="{% url 'invoice' student.id %}">Invoice</a></li>
 				{% endif %}

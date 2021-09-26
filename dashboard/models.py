@@ -95,7 +95,6 @@ class SemesterDownloadFile(models.Model):
 	content = models.FileField(
 		help_text="The file itself",
 		upload_to=download_file_name,
-		validators=[FileExtensionValidator(allowed_extensions=['pdf', 'txt', 'tex', 'png', 'jpg'])]
 	)
 	created_at = models.DateTimeField(auto_now_add=True)
 

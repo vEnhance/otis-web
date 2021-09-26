@@ -60,8 +60,7 @@ def portal(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 
 	context: Dict[str, Any] = {}
 	context['title'] = f"{student.name} ({semester.name})"
-	if student.user is not None and student.user.profile is not None:
-		context['last_seen'] = student.user.profile.last_seen
+	context['last_seen'] = profile.last_seen
 	context['student'] = student
 	context['semester'] = semester
 	context['profile'] = profile
@@ -73,8 +72,14 @@ def portal(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 	context['quizzes'] = PracticeExam.objects.filter(
 		is_test=False, family=semester.exam_family, due_date__isnull=False
 	)
-	context['emails'] = get_mailchimp_campaigns(28)
-	context['num_sem_download'] = SemesterDownloadFile.objects.filter(semester=semester).count()
+	context['emails'] = [
+		e for e in get_mailchimp_campaigns(28) if e['timestamp'] >= profile.last_email_dismiss
+	]
+	context['downloads'] = SemesterDownloadFile.objects.filter(
+		semester=semester, created_at__gte=profile.last_download_dismiss
+	)
+	context['num_sem_downloads'] = SemesterDownloadFile.objects.filter(semester=semester).count()
+
 	context.update(level_info)
 	return render(request, "dashboard/portal.html", context)
 
