@@ -194,5 +194,13 @@ class UserProfile(models.Model):
 		default=True
 	)
 
+	last_seen = models.DateTimeField(help_text="Last time user was seen at all")
+	last_announce_dismiss = models.DateTimeField(
+		help_text="Last time user dismissed the emails modal."
+	)
+	last_download_dismiss = models.DateTimeField(
+		help_text="Last time user dismissed the downloads modal."
+	)
+
 	def __str__(self) -> str:
 		return f"Prefs for {self.user.username}"
