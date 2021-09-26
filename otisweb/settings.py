@@ -98,6 +98,7 @@ MIDDLEWARE = [
 	'django.contrib.messages.middleware.MessageMiddleware',
 	'django.middleware.clickjacking.XFrameOptionsMiddleware',
 	'hijack.middleware.HijackUserMiddleware',
+	'core.middleware.LastSeenMiddleware',
 ]
 
 ROOT_URLCONF = 'otisweb.urls'
