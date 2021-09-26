@@ -36,7 +36,7 @@ class Meter:
 
 	@property
 	def level(self) -> int:
-		return int(self.value**0.5)
+		return int(max(0, self.value)**0.5)
 
 	@property
 	def percent(self) -> int:
@@ -199,7 +199,9 @@ def get_student_rows(queryset: QuerySet[Student]) -> List[Dict[str, Any]]:
 		row['clubs'] += BONUS_D_UNIT * (getattr(student, 'clubs_D', 0) or 0)
 		row['clubs'] += BONUS_Z_UNIT * (getattr(student, 'clubs_Z', 0) or 0)
 		row['diamonds'] = getattr(student, 'diamonds', 0) or 0
-		row['level'] = sum(int(row[k]**0.5) for k in ('spades', 'hearts', 'clubs', 'diamonds'))
+		row['level'] = sum(
+			int(max(row[k], 0)**0.5) for k in ('spades', 'hearts', 'clubs', 'diamonds')
+		)
 		row['last_login'] = student.user.last_login
 		row['insanity'] = compute_insanity_rating(
 			getattr(student, 'pset_B_count'),
