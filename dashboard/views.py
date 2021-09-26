@@ -60,6 +60,8 @@ def portal(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 
 	context: Dict[str, Any] = {}
 	context['title'] = f"{student.name} ({semester.name})"
+	if student.user is not None and student.user.profile is not None:
+		context['last_seen'] = student.user.profile.last_seen
 	context['student'] = student
 	context['semester'] = semester
 	context['profile'] = profile
@@ -161,7 +163,7 @@ def leaderboard(request: AuthHttpRequest) -> HttpResponse:
 		)
 	)
 	for row in rows:
-		row['days_since_last_login'] = get_days_since(row['last_login'])
+		row['days_since_last_seen'] = get_days_since(row['last_seen'])
 	context: Dict[str, Any] = {}
 	context['rows'] = rows
 	return render(request, "dashboard/leaderboard.html", context)
@@ -377,7 +379,7 @@ def idlewarn(request: AuthHttpRequest) -> HttpResponse:
 	queryset = queryset.order_by('latest_pset')
 	rows = get_student_rows(queryset)
 	for row in rows:
-		row['days_since_last_login'] = get_days_since(row['last_login'])
+		row['days_since_last_seen'] = get_days_since(row['last_seen'])
 		row['days_since_last_pset'] = get_days_since(row['student'].latest_pset)
 
 	context['rows'] = rows

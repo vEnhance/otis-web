@@ -13,7 +13,7 @@
 		<tr>
 			<td>{{ student.get_track_display }}</td>
 			<td><code>{{student.user.username}}</code></td>
-			<td>{{ student.user.last_login|naturaltime }}</td>
+			<td>{{ last_seen|naturaltime }}</td>
 		</tr>
 		<tr>
 			<td>{{ student.assistant.shortname|default:"No assistant" }}</td>

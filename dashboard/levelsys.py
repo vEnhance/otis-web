@@ -154,7 +154,7 @@ def get_level_info(student: Student) -> LevelInfoDict:
 def annotate_student_queryset_with_scores(queryset: QuerySet[Student]) -> QuerySet[Student]:
 	"""Helper function for constructing large lists of students
 	Selects all important information to prevent a bunch of SQL queries"""
-	return queryset.select_related('user', 'assistant', 'semester').annotate(
+	return queryset.select_related('user', 'profile', 'assistant', 'semester').annotate(
 		num_psets=SubqueryCount('pset', filter=Q(approved=True, eligible=True)),
 		clubs_any=SubquerySum('pset__clubs', filter=Q(approved=True, eligible=True)),
 		clubs_D=SubquerySum(
@@ -202,7 +202,7 @@ def get_student_rows(queryset: QuerySet[Student]) -> List[Dict[str, Any]]:
 		row['level'] = sum(
 			int(max(row[k], 0)**0.5) for k in ('spades', 'hearts', 'clubs', 'diamonds')
 		)
-		row['last_login'] = student.user.last_login
+		row['last_seen'] = getattr(student, 'profile').last_seen
 		row['insanity'] = compute_insanity_rating(
 			getattr(student, 'pset_B_count'),
 			getattr(student, 'pset_D_count'),
