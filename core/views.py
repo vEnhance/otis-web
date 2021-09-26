@@ -10,10 +10,14 @@ from django.db.models.base import Model
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http import HttpRequest, HttpResponse
+from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.urls.base import reverse_lazy
+from django.utils import timezone
+from django.views.decorators.http import require_POST
 from django.views.generic.edit import UpdateView
 from django.views.generic.list import ListView
+from otisweb.utils import AuthHttpRequest
 from roster.models import Student
 
 from core.models import UserProfile
@@ -93,3 +97,21 @@ class UserProfileUpdateView(
 	def get_object(self, queryset: QuerySet[Model] = None) -> UserProfile:
 		userprofile, _ = UserProfile.objects.get_or_create(user=self.request.user)
 		return userprofile
+
+
+@login_required
+@require_POST
+def dismiss_emails(request: AuthHttpRequest) -> JsonResponse:
+	profile = UserProfile.objects.get(user=request.user)
+	profile.last_email_dismiss = timezone.now()
+	profile.save()
+	return JsonResponse({'result': 'success'})
+
+
+@login_required
+@require_POST
+def dismiss_downloads(request: AuthHttpRequest) -> JsonResponse:
+	profile = UserProfile.objects.get(user=request.user)
+	profile.last_download_dismiss = timezone.now()
+	profile.save()
+	return JsonResponse({'result': 'success'})
