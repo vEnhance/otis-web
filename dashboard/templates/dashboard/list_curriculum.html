@@ -69,6 +69,8 @@
 			<a class="emoji-link" style="font-size: 80%" title="Download PDF" href="{% view_problems row.unit %}">💾</a>
 			<a class="emoji-link" title="Copy LaTeX" href="{% view_tex row.unit %}">📋</a>
 			<a class="emoji-link" style="text-shadow: 1px black;" title="Add suggestion" href="{% url "suggest-new" student.id row.unit.id %}">💡</a>
+			{% elif request.user.is_staff %}
+			<a href="{% view_problems row.unit %}">(PDF)</a>
 			{% endif %}
 			{% if row.is_visible %}
 			{% spaceless %}
@@ -81,8 +83,11 @@
 			<a class="emoji-link" title="Download solutions" href="{% view_solutions row.unit %}">
 				{{ row.sols_label }}
 			</a>
+			{% elif request.user.is_staff %}
+			<a href="{% view_solutions row.unit %}">㊙️</a>
 			{% else %}
 			<span style="visibility:hidden;">㊙️</span>
+			{# placeholder for spacing reasons #}
 			{% endif %}
 		</td>
 	</tr>
