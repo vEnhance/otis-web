@@ -7,7 +7,7 @@
 		<p>The following errors were thrown:</p>
 		<ul>
 			{% for err,val in form.non_field_errors.items %}
-			<li>{{ err }} : {{ val }}</li>
+			<li>{{ err }}: {{ val }}</li>
 			{% endfor %}
 		</ul>
 	</div>
@@ -20,7 +20,7 @@
 		<p>The following errors were thrown:</p>
 		<ul>
 			{% for err,val in form.errors.items %}
-			<li>{{ err }} : {{ val }}</li>
+			<li>{{ err }}: {{ val }}</li>
 			{% endfor %}
 		</ul>
 	</div>
