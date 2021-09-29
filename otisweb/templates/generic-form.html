@@ -2,19 +2,27 @@
 
 <form action="{{ target|default:request.path }}" method="post" enctype="multipart/form-data" class="form">
 	{% csrf_token %}
-
 	{% if form.non_field_errors %}
 	<div class="alert alert-danger" role="alert">
 		<p>The following errors were thrown:</p>
 		<ul>
-			{% for err in form.non_field_errors %}
-			<li>{{ err }}</li>
+			{% for err,val in form.non_field_errors.items %}
+			<li>{{ err }} : {{ val }}</li>
 			{% endfor %}
 		</ul>
 	</div>
+	{% elif "content" in form.errors %}
+	<div class="alert alert-danger" role="alert">
+		<p>There was an error with your submission. Please make sure that you file submission is a pdf, txt, tex, png, or jpg file, and it is no larger than 10 MB.</p>
+	</div>
 	{% elif form.errors %}
 	<div class="alert alert-danger" role="alert">
-		Some errors were thrown, please see below.
+		<p>The following errors were thrown:</p>
+		<ul>
+			{% for err,val in form.errors.items %}
+			<li>{{ err }} : {{ val }}</li>
+			{% endfor %}
+		</ul>
 	</div>
 	{% endif %}
 
