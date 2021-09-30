@@ -43,8 +43,7 @@ up a local server on a standard Unix environment.
 11. Point your browser to `http://127.0.0.1:8000`.
 	You should be able to log in with the user you defined in step 7.
 12. The website is functional now, but it is a bit bare-bones.
-	To populate it with some test data, you can optionally run
-	the command `python manage.py loaddata otisweb/fixtures/testdata.yaml`.
+	To populate it with some test data, use `http://127.0.0.1:8000/admin`.
 
 [venv]: https://djangocentral.com/how-to-a-create-virtual-environment-for-python/
 
