@@ -15,7 +15,6 @@ class PracticeExamIEResource(resources.ModelResource):
 			'family',
 			'is_test',
 			'number',
-			'pdf_url',
 			'id',
 			'start_date',
 			'due_date',
