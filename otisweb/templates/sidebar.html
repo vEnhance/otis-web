@@ -41,6 +41,7 @@
 	<li><a href="{% url "idlewarn" %}">Idle-warn</a></li>
 	<li><a href="{% url "master-schedule" %}">Curriculums</a></li>
 	{% if request.user.is_superuser %}
+	<li><a href="{% url "admin-spreadsheet" %}">Mega Sheet</a></li>
 	<li><a href="{% url "admin-palace-list" %}">Ruby Palace</a></li>
 	{% endif %}
 </ul>

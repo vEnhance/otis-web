@@ -365,6 +365,9 @@ class Invoice(models.Model):
 	def track(self) -> str:
 		return self.student.track
 
+	def get_absolute_url(self) -> str:
+		return reverse_lazy('invoice', args=(self.pk, ))
+
 
 class UnitInquiry(models.Model):
 	unit = models.ForeignKey(
@@ -456,6 +459,7 @@ class StudentRegistration(models.Model):
 		User,
 		help_text="The user to attach",
 		on_delete=models.CASCADE,
+		related_name='regs',
 	)
 	container = models.ForeignKey(
 		RegistrationContainer,

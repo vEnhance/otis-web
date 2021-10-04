@@ -85,6 +85,7 @@ class InvoiceIEResource(resources.ModelResource):
 			'student__track',
 			'student__user__first_name',
 			'student__user__last_name',
+			'student__user__email',
 			'preps_taught',
 			'hours_taught',
 			'adjustment',

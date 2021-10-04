@@ -18,6 +18,7 @@ urlpatterns = [
 	path(r'inquiry/<int:student_id>/', views.inquiry, name='inquiry'),
 	path(r'register/', views.register, name='register'),
 	path(r'profile/', views.update_profile, name='update-profile'),
+	path(r'spreadsheet/', views.spreadsheet, name='admin-spreadsheet'),
 	path(r'mystery_unlock/easier/', views.unlock_rest_of_mystery, kwargs={'delta': 1}),
 	path(r'mystery_unlock/harder/', views.unlock_rest_of_mystery, kwargs={'delta': 2}),
 ]

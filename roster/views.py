@@ -11,6 +11,7 @@ So e.g. "list students by most recent pset" goes under dashboard.
 """
 
 import collections
+import csv
 import datetime
 import logging
 from hashlib import pbkdf2_hmac
@@ -22,9 +23,12 @@ from dashboard.models import PSet
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test  # NOQA
 from django.contrib.auth.models import Group, User
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
+from django.db.models.expressions import F
+from django.db.models.fields import FloatField
+from django.db.models.functions.comparison import Cast
 from django.forms.models import BaseModelForm
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect  # NOQA
 from django.shortcuts import get_object_or_404, render
@@ -34,6 +38,7 @@ from django.views.decorators.http import require_POST
 from django.views.generic.edit import UpdateView
 from dwhandler import ACTION_LOG_LEVEL
 from otisweb.utils import AuthHttpRequest, mailchimp_subscribe
+
 from roster.utils import can_edit, get_current_students, get_student_by_id, infer_student  # NOQA
 
 from .forms import AdvanceForm, CurriculumForm, DecisionForm, InquiryForm, UserForm  # NOQA
@@ -416,3 +421,103 @@ def unlock_rest_of_mystery(request: HttpRequest, delta: int = 1) -> HttpResponse
 	student.curriculum.add(added_unit)
 	messages.success(request, f"Added the unit {added_unit}")
 	return HttpResponseRedirect('/')
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def spreadsheet(request: HttpRequest) -> HttpResponse:
+	queryset = Invoice.objects.filter(student__legit=True)
+	queryset = queryset.filter(student__semester__active=True)
+	queryset = queryset.select_related(
+		'student__user',
+		'student__semester',
+		'student__user__profile',
+	)
+	queryset = queryset.prefetch_related('student__user__regs')
+	queryset = queryset.annotate(
+		owed=Cast(
+			F("student__semester__prep_rate") * F("preps_taught") +
+			F("student__semester__hour_rate") * F("hours_taught") + F("adjustment") + F('extras') -
+			F("total_paid"), FloatField()
+		)
+	)
+	queryset = queryset.order_by('-owed')
+
+	response = HttpResponse(
+		content_type='text/csv',
+		headers={'Content-Disposition': 'attachment; filename="somefilename.csv"'},
+	)
+	writer = csv.writer(response)  # type: ignore
+	writer.writerow(
+		[
+			'Owed',
+			'Name',
+			'Track',
+			'Login',
+			'Gender',
+			'Year',
+			'Country',
+			'AoPS',
+			'Student email',
+			'Parent email',
+			'Preps',
+			'Hours',
+			'Adjustment',
+			'Extras',
+			'Total Paid',
+			'Forgive',
+		]
+	)
+
+	for invoice in queryset:
+		student = invoice.student
+		user = student.user
+		if user is None:
+			continue
+		delta = (timezone.now() - user.profile.last_seen)
+		days_since_last_seen = round(delta.total_seconds() / (3600 * 24), ndigits=2)
+
+		try:
+			reg = user.regs.get(container__semester__active=True)
+		except StudentRegistration.DoesNotExist:
+			writer.writerow(
+				[
+					invoice.owed,
+					student.name,
+					student.track,
+					days_since_last_seen,
+					"",
+					"",
+					"",
+					"",
+					user.email,
+					"",
+					invoice.preps_taught,
+					invoice.hours_taught,
+					invoice.adjustment,
+					invoice.extras,
+					invoice.total_paid,
+					invoice.forgive,
+				]
+			)
+		else:
+			writer.writerow(
+				[
+					invoice.owed,
+					student.name,
+					student.track,
+					days_since_last_seen,
+					reg.gender,
+					reg.graduation_year,
+					reg.country,
+					reg.aops_username,
+					user.email,
+					reg.parent_email,
+					invoice.preps_taught,
+					invoice.hours_taught,
+					invoice.adjustment,
+					invoice.extras,
+					invoice.total_paid,
+					invoice.forgive,
+				]
+			)
+	return response
