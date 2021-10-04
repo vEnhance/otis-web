@@ -440,17 +440,22 @@ def spreadsheet(request: HttpRequest) -> HttpResponse:
 			F("total_paid"), FloatField()
 		)
 	)
-	queryset = queryset.order_by('-owed')
+	queryset = queryset.annotate(
+		debt=Cast(F("owed") / (F("owed") + F("total_paid") + 1), FloatField())
+	)
+
+	queryset = queryset.order_by('debt')
+	timestamp = timezone.now().strftime('%Y-%m-%d-%H%M%S')
 
 	response = HttpResponse(
 		content_type='text/csv',
-		headers={'Content-Disposition': 'attachment; filename="somefilename.csv"'},
+		headers={'Content-Disposition': f'attachment; filename="otis-{timestamp}.csv"'},
 	)
 	writer = csv.writer(response)  # type: ignore
 	writer.writerow(
 		[
-			'Owed',
 			'Name',
+			'Debt',
 			'Track',
 			'Login',
 			'Gender',
@@ -459,6 +464,7 @@ def spreadsheet(request: HttpRequest) -> HttpResponse:
 			'AoPS',
 			'Student email',
 			'Parent email',
+			'Owed',
 			'Preps',
 			'Hours',
 			'Adjustment',
@@ -475,14 +481,15 @@ def spreadsheet(request: HttpRequest) -> HttpResponse:
 			continue
 		delta = (timezone.now() - user.profile.last_seen)
 		days_since_last_seen = round(delta.total_seconds() / (3600 * 24), ndigits=2)
+		debt_percent = round(invoice.debt * 100)
 
 		try:
 			reg = user.regs.get(container__semester__active=True)
 		except StudentRegistration.DoesNotExist:
 			writer.writerow(
 				[
-					invoice.owed,
 					student.name,
+					debt_percent,
 					student.track,
 					days_since_last_seen,
 					"",
@@ -491,6 +498,7 @@ def spreadsheet(request: HttpRequest) -> HttpResponse:
 					"",
 					user.email,
 					"",
+					invoice.owed,
 					invoice.preps_taught,
 					invoice.hours_taught,
 					invoice.adjustment,
@@ -502,8 +510,8 @@ def spreadsheet(request: HttpRequest) -> HttpResponse:
 		else:
 			writer.writerow(
 				[
-					invoice.owed,
 					student.name,
+					debt_percent,
 					student.track,
 					days_since_last_seen,
 					reg.gender,
@@ -512,6 +520,7 @@ def spreadsheet(request: HttpRequest) -> HttpResponse:
 					reg.aops_username,
 					user.email,
 					reg.parent_email,
+					invoice.owed,
 					invoice.preps_taught,
 					invoice.hours_taught,
 					invoice.adjustment,
