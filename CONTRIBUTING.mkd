@@ -26,7 +26,7 @@ you will actually want to create your own *fork* of OTIS-WEB.
 This is a bit counter-intuitive,
 but essentially the reason is that I own OTIS-WEB,
 so if you want to make edits of any sort,
-it has to be on a *copy* owned by you first --- that's a farok.
+it has to be on a *copy* owned by you first --- that's a fork.
 
 Follow the
 [fork instructions here](https://docs.github.com/en/get-started/quickstart/fork-a-repo).
