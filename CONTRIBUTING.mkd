@@ -68,7 +68,7 @@ which you can do in isolation while ignoring the other parts for now.
 ### Style
 
 Your code should conform to the style of the rest of the OTIS.
-The main irregular thing about this projcet is that
+The main irregular thing about this project is that
 it uses tabs for indentation. Sorry not sorry.
 
 The database uses the `yapf` for linting and formatting,
