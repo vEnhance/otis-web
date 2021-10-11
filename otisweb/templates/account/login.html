@@ -18,11 +18,11 @@
 <div class="accordion" id="accordionLogin">
 	<div class="accordion-item">
 		<h2 class="accordion-header" id="headingSocialLogin">
-			<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSocialLogin" aria-expanded="false" aria-controls="collapseSocialLogin">
+			<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSocialLogin" aria-expanded="true" aria-controls="collapseSocialLogin">
 				Login via existing social connection
 			</button>
 		</h2>
-		<div id="collapseSocialLogin" class="accordion-collapse collapse show" aria-labelledby="headingSocialLogin" data-bs-parent="#accordionLogin">
+		<div id="collapseSocialLogin" class="accordion-collapse collapse show" aria-labelledby="headingSocialLogin">
 			<div class="accordion-body">
 				<p>Use the same option you used when registering.
 					(Do not use this to establish new connections!)</p>
@@ -36,11 +36,11 @@
 	</div>
 	<div class="accordion-item">
 		<h2 class="accordion-header" id="headingUserPass">
-			<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUserPass" aria-expanded="true" aria-controls="collapseUserPass">
-				Login with username and password
+			<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUserPass" aria-expanded="true" aria-controls="collapseUserPass">
+				Login with existing username and password
 			</button>
 		</h2>
-		<div id="collapseUserPass" class="accordion-collapse collapse" aria-labelledby="headingUserPass" data-bs-parent="#accordionLogin">
+		<div id="collapseUserPass" class="accordion-collapse collapse show" aria-labelledby="headingUserPass">
 			<div class="accordion-body">
 				<form class="login" method="POST" action="{% url 'account_login' %}">
 					{% csrf_token %}
@@ -59,7 +59,7 @@
 				I am a new student with no account yet!
 			</button>
 		</h2>
-		<div id="collapseConnect" class="accordion-collapse collapse" aria-labelledby="headingConnect" data-bs-parent="#accordionLogin">
+		<div id="collapseConnect" class="accordion-collapse collapse" aria-labelledby="headingConnect">
 			<div class="accordion-body">
 				<p>Use this option if you are a newcoming OTIS student who is opening a brand new account for the first time.
 					(Returning students should use their old account.)
@@ -78,7 +78,7 @@
 				Uh, I forgot all my passwords...
 			</button>
 		</h2>
-		<div id="collapseForgot" class="accordion-collapse collapse" aria-labelledby="headingForgot" data-bs-parent="#accordionLogin">
+		<div id="collapseForgot" class="accordion-collapse collapse" aria-labelledby="headingForgot">
 			<div class="accordion-body">
 				Sucks to be you. Email Evan.
 			</div>
