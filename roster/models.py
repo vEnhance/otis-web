@@ -328,6 +328,9 @@ class Invoice(models.Model):
 	forgive = models.BooleanField(
 		default=False, help_text="When switched on, won't hard-lock delinquents."
 	)
+	forgive_memo = models.TextField(
+		blank=True, help_text="Internal note to self about why forgive=True."
+	)
 
 	def __str__(self):
 		return f"Invoice {self.pk or 0}"

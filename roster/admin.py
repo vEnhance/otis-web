@@ -92,6 +92,8 @@ class InvoiceIEResource(resources.ModelResource):
 			'extras',
 			'total_paid',
 			'student__semester__name',
+			'forgive',
+			'forgive_memo',
 		)
 
 
@@ -127,9 +129,7 @@ class InvoiceAdmin(ImportExportModelAdmin):
 		'student',
 		'track',
 		'total_owed',
-		'total_paid',
 		'total_cost',
-		'updated_at',
 		'forgive',
 	)
 	list_display_links = ('student', )
@@ -141,6 +141,7 @@ class InvoiceAdmin(ImportExportModelAdmin):
 	ordering = ('student', )
 	list_filter = (
 		OwedFilter,
+		'forgive',
 		'student__semester__active',
 		'student__semester',
 		'student__legit',
