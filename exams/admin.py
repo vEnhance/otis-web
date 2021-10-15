@@ -63,9 +63,16 @@ class ExamAttemptAdmin(ImportExportModelAdmin):
 		'student',
 		'score',
 		'submit_time',
+		'guess1',
+		'guess2',
+		'guess3',
+		'guess4',
+		'guess5',
 	)
 	list_filter = (
+		'student__semester__active',
 		'quiz',
+		'student__semester',
 		'quiz__family',
 	)
 	list_display_links = ('quiz', )
