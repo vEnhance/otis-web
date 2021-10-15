@@ -164,4 +164,4 @@ class ExamAttempt(models.Model):
 		return f'{self.student} tries {self.quiz}'
 
 	def get_absolute_url(self) -> str:
-		return reverse_lazy('show-exam', args=(self.student.pk, self.quiz.pk))
+		return reverse_lazy('quiz', args=(self.student.pk, self.quiz.pk))
