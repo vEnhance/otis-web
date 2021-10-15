@@ -195,6 +195,7 @@ class InvoiceInline(admin.StackedInline):
 		'adjustment',
 		'total_paid',
 		'forgive',
+		'forgive_reason',
 	)
 	readonly_fields = (
 		'student',
