@@ -99,14 +99,14 @@ class PSetAdmin(admin.ModelAdmin):
 class ProblemSuggestionAdmin(admin.ModelAdmin):
 	list_display = (
 		'id',
-		'student',
+		'user',
 		'source',
 		'description',
 		'resolved',
 	)
 	search_fields = (
-		'student__user__first_name',
-		'student__user__last_name',
+		'user__first_name',
+		'user__last_name',
 		'unit__group__name',
 		'source',
 		'description',
@@ -120,7 +120,7 @@ class ProblemSuggestionAdmin(admin.ModelAdmin):
 		'student__semester',
 	)
 	autocomplete_fields = (
-		'student',
+		'user',
 		'unit',
 	)
 	list_per_page = 50

@@ -183,6 +183,13 @@ class ProblemSuggestion(models.Model):
 	student = models.ForeignKey(
 		Student, on_delete=models.CASCADE, help_text="Student who suggested the problem."
 	)
+	user = models.ForeignKey(
+		User,
+		on_delete=models.CASCADE,
+		help_text="User who suggested the problem.",
+		null=True,
+		blank=True,
+	)
 	unit = models.ForeignKey(
 		Unit, on_delete=models.CASCADE, help_text="The unit to suggest the problem for."
 	)
