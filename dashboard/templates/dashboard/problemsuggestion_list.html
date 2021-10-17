@@ -1,7 +1,7 @@
 {% extends 'layout.html' %}
-{% block title %}Problem suggestions{% endblock %}
+{% block title %}Problem suggestions by {{ request.user }}{% endblock %}
 {% block layout-content %}
-<p>Here are all the past suggestions that you provided.</p>
+<p>Here are all the past suggestions that you ({{request.user}}) have provided.</p>
 {% for suggestion in problem_suggestions %}
 <div class="alert {% if suggestion.resolved %}alert-success{% else %}alert-primary{% endif %}">
 	<h3><a href="{% url "suggest-update" suggestion.id %}">

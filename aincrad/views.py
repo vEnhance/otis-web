@@ -128,9 +128,9 @@ def venueq_handler(action: str, request: HttpRequest) -> JsonResponse:
 								ProblemSuggestion.objects.filter(resolved=False).values(
 									'pk',
 									'created_at',
-									'student__user__first_name',
-									'student__user__last_name',
-									'student__user__email',
+									'user__first_name',
+									'user__last_name',
+									'user__email',
 									'source',
 									'description',
 									'statement',

@@ -436,10 +436,8 @@ class ProblemSuggestionCreate(
 		return initial
 
 	def form_valid(self, form: BaseModelForm[ProblemSuggestion]):
-		if 'student_id' in self.kwargs:
-			form.instance.student = get_student_by_id(self.request, self.kwargs['student_id'])
-		else:
-			form.instance.student = infer_student(self.request)
+		assert isinstance(self.request.user, User)
+		form.instance.user = self.request.user
 		messages.success(
 			self.request,
 			"Successfully submitted suggestion! Thanks much :) You can add more using the form below."
@@ -448,14 +446,6 @@ class ProblemSuggestionCreate(
 
 	def get_success_url(self):
 		return reverse_lazy("suggest-new", kwargs=self.kwargs)
-
-	def get_context_data(self, **kwargs: Any):
-		context = super().get_context_data(**kwargs)
-		if 'student_id' in self.kwargs:
-			context['student'] = get_student_by_id(self.request, self.kwargs['student_id'])
-		else:
-			context['student'] = infer_student(self.request)
-		return context
 
 
 class ProblemSuggestionUpdate(
@@ -484,9 +474,9 @@ class ProblemSuggestionUpdate(
 
 	def get_context_data(self, **kwargs: Any):
 		context = super().get_context_data(**kwargs)
-		context['student'] = self.object.student
-		if not can_view(self.request, self.object.student):
-			raise PermissionError("Logged-in user cannot view suggestions made by this student")
+		assert isinstance(self.request.user, User)
+		if self.request.user.is_staff or self.request.user == self.object.user:
+			raise PermissionError("Logged-in user cannot view this suggestions")
 		return context
 
 
@@ -494,14 +484,10 @@ class ProblemSuggestionList(LoginRequiredMixin, ListView[ProblemSuggestion]):
 	context_object_name = "problem_suggestions"
 
 	def get_queryset(self):
-		student = get_student_by_id(self.request, self.kwargs['student_id'])
-		self.student = student
-		return ProblemSuggestion.objects.filter(student=student).order_by('resolved', 'created_at')
-
-	def get_context_data(self, **kwargs: Any):
-		context = super().get_context_data(**kwargs)
-		context['student'] = self.student
-		return context
+		assert isinstance(self.request.user, User)
+		queryset = ProblemSuggestion.objects.filter(user=self.request.user)
+		queryset = queryset.order_by('resolved', 'created_at')
+		return queryset
 
 
 def assert_maxed_out_level_info(student: Student) -> LevelInfoDict:

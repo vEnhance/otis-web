@@ -20,23 +20,12 @@ urlpatterns = [
 	path(r'index/', views.index, name='index'),
 	path(r'suggest/new', views.ProblemSuggestionCreate.as_view(), name='suggest-new'),
 	path(
-		r'suggest/<int:student_id>/new/',
-		views.ProblemSuggestionCreate.as_view(),
-		name='suggest-new'
-	),
-	path(
-		r'suggest/<int:student_id>/<int:unit_id>/new/',
-		views.ProblemSuggestionCreate.as_view(),
-		name='suggest-new'
+		r'suggest/<int:unit_id>/new/', views.ProblemSuggestionCreate.as_view(), name='suggest-new'
 	),
 	path(
 		r'suggest/<int:pk>/edit/', views.ProblemSuggestionUpdate.as_view(), name='suggest-update'
 	),
-	path(
-		r'suggest/<int:student_id>/list/',
-		views.ProblemSuggestionList.as_view(),
-		name='suggest-list'
-	),
+	path(r'suggest/list/', views.ProblemSuggestionList.as_view(), name='suggest-list'),
 	path(r'leaderboard/', views.leaderboard, name='leaderboard'),
 	path(r'palace/<int:student_id>/', views.PalaceList.as_view(), name='palace-list'),
 	path(r'palace/evan/', views.AdminPalaceList.as_view(), name='admin-palace-list'),

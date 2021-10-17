@@ -117,7 +117,6 @@ class ProblemSuggestionAdmin(admin.ModelAdmin):
 	list_filter = (
 		'resolved',
 		'unit__group',
-		'student__semester',
 	)
 	autocomplete_fields = (
 		'user',

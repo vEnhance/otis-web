@@ -206,10 +206,8 @@
 				{% if omniscient %}
 				<li> <a href="{% url 'advance' student.id %}">Advance student</a> (instructor)</li>
 				{% endif %}
-				<li><a href="{% url 'suggest-list' student.id %}">
-						Show suggestions</a></li>
-				<li><a href="{% url 'downloads' student.id %}">
-						Posted files ({{ num_sem_downloads }})</a></li>
+				<li><a href="{% url 'suggest-list' %}">Show suggestions</a></li>
+				<li><a href="{% url 'downloads' student.id %}">Posted files ({{ num_sem_downloads }})</a></li>
 			</ul>
 		</td>
 		<td valign="top" width="50%">

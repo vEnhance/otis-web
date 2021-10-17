@@ -180,15 +180,10 @@ class PSet(models.Model):
 
 
 class ProblemSuggestion(models.Model):
-	student = models.ForeignKey(
-		Student, on_delete=models.CASCADE, help_text="Student who suggested the problem."
-	)
 	user = models.ForeignKey(
 		User,
 		on_delete=models.CASCADE,
 		help_text="User who suggested the problem.",
-		null=True,
-		blank=True,
 	)
 	unit = models.ForeignKey(
 		Unit, on_delete=models.CASCADE, help_text="The unit to suggest the problem for."
@@ -216,7 +211,7 @@ class ProblemSuggestion(models.Model):
 	created_at = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self) -> str:
-		return f"{self.student.name} suggested {self.source} for {self.unit.group}"
+		return f"{self.user.username} suggested {self.source} for {self.unit.group}"
 
 
 def achievement_image_file_name(instance: 'Achievement', filename: str) -> str:
