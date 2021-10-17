@@ -28,7 +28,7 @@ from dwhandler import SUCCESS_LOG_LEVEL, VERBOSE_LOG_LEVEL
 from exams.models import PracticeExam
 from otisweb.utils import AuthHttpRequest, get_mailchimp_campaigns
 from roster.models import Student, StudentRegistration
-from roster.utils import can_edit, can_view, get_student_by_id, get_visible_students, infer_student  # NOQA
+from roster.utils import can_edit, can_view, get_student_by_id, get_visible_students # NOQA
 from sql_util.utils import SubqueryAggregate
 
 from dashboard.forms import DiamondsForm, PSetResubmitForm
