@@ -28,7 +28,7 @@ from dwhandler import SUCCESS_LOG_LEVEL, VERBOSE_LOG_LEVEL
 from exams.models import PracticeExam
 from otisweb.utils import AuthHttpRequest, get_mailchimp_campaigns
 from roster.models import Student, StudentRegistration
-from roster.utils import can_edit, can_view, get_student_by_id, get_visible_students # NOQA
+from roster.utils import can_edit, can_view, get_student_by_id, get_visible_students  # NOQA
 from sql_util.utils import SubqueryAggregate
 
 from dashboard.forms import DiamondsForm, PSetResubmitForm
@@ -475,7 +475,7 @@ class ProblemSuggestionUpdate(
 	def get_context_data(self, **kwargs: Any):
 		context = super().get_context_data(**kwargs)
 		assert isinstance(self.request.user, User)
-		if self.request.user.is_staff or self.request.user == self.object.user:
+		if self.request.user.is_staff or self.request.user != self.object.user:
 			raise PermissionError("Logged-in user cannot view this suggestions")
 		return context
 
