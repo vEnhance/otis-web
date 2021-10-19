@@ -36,3 +36,13 @@ class Guess(models.Model):
 
 	def __str__(self) -> str:
 		return "Guessed {self.value} at {self.created_at}"
+
+	def get_score(self) -> float:
+		a = round(self.market.answer, ndigits=2)
+		b = round(self.value, ndigits=2)
+		assert a > 0 and b > 0
+		return min(a / b, b / a)
+
+	def set_score(self):
+		self.score = self.get_score()
+		self.save()
