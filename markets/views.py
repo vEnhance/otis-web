@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http.request import HttpRequest
-from django.http.response import HttpResponseBase, HttpResponseNotFound, HttpResponseRedirect  # NOQA
+from django.http.response import HttpResponseBase, HttpResponseForbidden, HttpResponseNotFound, HttpResponseRedirect  # NOQA
 from django.urls.base import reverse_lazy
 from django.utils import timezone
 from django.views.generic.edit import CreateView
@@ -85,6 +85,6 @@ class MarketResults(LoginRequiredMixin, ListView[Guess]):
 
 		if not self.market.start_date < timezone.now():
 			return HttpResponseNotFound()
-		#elif timezone.now() < self.market.end_date:
-		#	return HttpResponseForbidden("You can't view this market's results yet")
+		elif timezone.now() < self.market.end_date:
+			return HttpResponseForbidden("You can't view this market's results yet")
 		return super().dispatch(request, *args, **kwargs)
