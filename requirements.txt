@@ -167,6 +167,9 @@ factory-boy==3.2.0; python_version >= "3.6" \
 faker==8.16.0; python_version >= "3.6" \
     --hash=sha256:bb10913b9d3ac2aa37180f816c82040e81f9e0c32cb08445533f293cec8930bf \
     --hash=sha256:d70b375d0af0e4c3abd594003691a1055a96281a414884e623d27bccc7d781da
+freezegun==1.1.0; python_version >= "3.5" \
+    --hash=sha256:2ae695f7eb96c62529f03a038461afe3c692db3465e215355e1bb4b0ab408712 \
+    --hash=sha256:177f9dd59861d871e27a484c3332f35a6e3f5d14626f2bf91be37891f18927f3
 google-api-core==2.1.1; python_version >= "3.6" and python_full_version < "3.0.0" or python_version >= "3.6" and python_full_version >= "3.6.0" \
     --hash=sha256:646d9399c3c478fe475cfe523e84572ab31a340814ea977fb2774eca5a6549a2 \
     --hash=sha256:39ae7ca2208090c2942ebe1b38ca2928441a14b795c725717d38d7e30adb5fbf
