@@ -2,6 +2,7 @@ from typing import Any, Dict
 
 from braces.views import LoginRequiredMixin
 from django.contrib import messages
+from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import User
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
@@ -9,6 +10,7 @@ from django.http.request import HttpRequest
 from django.http.response import HttpResponseBase, HttpResponseForbidden, HttpResponseNotFound, HttpResponseRedirect  # NOQA
 from django.urls.base import reverse_lazy
 from django.utils import timezone
+from django.views.decorators.http import require_POST
 from django.views.generic.edit import CreateView
 from django.views.generic.list import ListView
 from otisweb.utils import AuthHttpRequest
@@ -47,7 +49,7 @@ class SubmitGuess(LoginRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]):
 
 		if not self.market.start_date < timezone.now():
 			return HttpResponseNotFound()
-		elif self.market.end_date > timezone.now():
+		elif self.market.end_date < timezone.now():
 			return HttpResponseRedirect(self.market.get_absolute_url())
 		try:
 			guess = Guess.objects.get(market=self.market, user=request.user)
@@ -75,6 +77,8 @@ class MarketResults(LoginRequiredMixin, ListView[Guess]):
 			context['guess'] = guess
 		except Guess.DoesNotExist:
 			pass
+		context['done'] = (timezone.now() > self.market.end_date)
+		assert context['done'] or self.request.user.is_superuser
 		return context
 
 	def get_queryset(self) -> QuerySet[Guess]:
@@ -82,34 +86,23 @@ class MarketResults(LoginRequiredMixin, ListView[Guess]):
 
 	def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
 		self.market = Market.objects.get(slug=kwargs.pop('slug'))
+		assert isinstance(request.user, User)
 
 		if not self.market.start_date < timezone.now():
 			return HttpResponseNotFound()
-		elif timezone.now() < self.market.end_date and not kwargs.get('admin'):
+		elif timezone.now() < self.market.end_date and not request.user.is_superuser:
 			return HttpResponseForbidden("You can't view this market's results yet")
 		return super().dispatch(request, *args, **kwargs)
 
 
-class AdminMarketResults(MarketResults):
-	def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
-		context = super().get_context_data(**kwargs)
-		context['admin'] = True
-		return context
-
-	def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
-		assert isinstance(request.user, User)
-		if not request.user.is_superuser:
-			return HttpResponseForbidden("This is the admin scoreboard you fool")
-		elif request.method == 'POST':
-			# recompute all stuff
-			slug = kwargs['slug']
-			guesses = list(Guess.objects.filter(market__slug=slug))
-			for guess in guesses:
-				guess.set_score()
-			Guess.objects.bulk_update(guesses, fields=('score', ), batch_size=50)
-			messages.success(
-				request, f"Successfully recomputed all {len(guesses)} scores for this market!"
-			)
-			return HttpResponseRedirect(reverse_lazy('market-admin', args=(slug, )))
-		kwargs['admin'] = True
-		return super().dispatch(request, *args, **kwargs)
+@user_passes_test(lambda u: u.is_superuser)
+@require_POST
+def recompute(request: AuthHttpRequest, slug: str):
+	guesses = list(Guess.objects.filter(market__slug=slug))
+	for guess in guesses:
+		guess.set_score()
+	Guess.objects.bulk_update(guesses, fields=('score', ), batch_size=50)
+	messages.success(
+		request, f"Successfully recomputed all {len(guesses)} scores for this market!"
+	)
+	return HttpResponseRedirect(reverse_lazy('market-results', args=(slug, )))

@@ -1,11 +1,13 @@
 {% extends "layout.html" %}
 {% block title %}{{ market.title }}{% endblock %}
 {% block layout-content %}
-{% if admin %}
+{% if request.user.is_superuser %}
+{% if not completed %}
 <div class="alert alert-warning">
 	You are viewing this market in admin mode.
 </div>
-<form action="{{request.path}}" method="post">
+{% endif %}
+<form action="{% url "market-recompute" market.slug %}" method="post">
 	{% csrf_token %}
 	<button type="submit" name="submit" class="btn btn-danger">
 		Recompute scores
