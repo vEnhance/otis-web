@@ -37,10 +37,7 @@ class Guess(models.Model):
 	created_at = models.DateTimeField(auto_now_add=True)
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
 	market = models.ForeignKey(Market, on_delete=models.CASCADE)
-	value = models.FloatField(
-		help_text="User's guess",
-		validators=[MinValueValidator(0.01, message="Need to enter a number at least 0.01.")]
-	)
+	value = models.FloatField(help_text="User's guess", validators=[MinValueValidator(0.000001)])
 	score = models.FloatField(
 		help_text="The score for the guess, computed by the backend.",
 		null=True,
@@ -64,8 +61,8 @@ class Guess(models.Model):
 		return f"Guessed {self.value} at {self.created_at}"
 
 	def get_score(self) -> float:
-		a = round(self.market.answer, ndigits=2)
-		b = round(self.value, ndigits=2)
+		a = round(self.market.answer, ndigits=6)
+		b = round(self.value, ndigits=6)
 		assert a > 0 and b > 0
 		return round(self.market.weight * min(a / b, b / a)**self.market.alpha, ndigits=2)
 

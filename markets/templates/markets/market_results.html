@@ -34,14 +34,14 @@
 <table class="table">
 	<tr class="table-dark">
 		<th style="width:2em;">#</th>
-		<th style="width:5em;">Guess</th>
+		<th style="width:9em;">Guess</th>
 		<th style="width:5em;">Score</th>
 		<th>Player</th>
 	</tr>
 	{% for g in guesses %}
 	<tr {% if guess.pk == g.pk %}class="table-primary" {% endif %}>
 		<th class="text-end">{{ forloop.counter }}</th>
-		<td class="text-end">{{ g.value }}</td>
+		<td class="text-end">{{ g.value|floatformat:".6f" }}</td>
 		<td class="text-end">
 			+{{ g.score|floatformat:".2f" }}♠
 		</td>
