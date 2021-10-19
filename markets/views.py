@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http.request import HttpRequest
-from django.http.response import HttpResponseBase, HttpResponseForbidden, HttpResponseNotFound, HttpResponseRedirect  # NOQA
+from django.http.response import HttpResponseBase, HttpResponseNotFound, HttpResponseRedirect  # NOQA
 from django.urls.base import reverse_lazy
 from django.utils import timezone
 from django.views.generic.edit import CreateView
@@ -69,6 +69,7 @@ class MarketResults(LoginRequiredMixin, ListView[Guess]):
 
 	def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
 		context = super().get_context_data(**kwargs)
+		context['market'] = self.market
 		try:
 			guess = Guess.objects.get(market=self.market, user=self.request.user)
 			context['guess'] = guess
@@ -77,7 +78,7 @@ class MarketResults(LoginRequiredMixin, ListView[Guess]):
 		return context
 
 	def get_queryset(self) -> QuerySet[Guess]:
-		return Guess.objects.filter(market=self.market)
+		return Guess.objects.filter(market=self.market).order_by('-score')
 
 	def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
 		self.market = Market.objects.get(slug=kwargs.pop('slug'))

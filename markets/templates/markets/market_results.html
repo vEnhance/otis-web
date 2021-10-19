@@ -1,11 +1,42 @@
 {% extends "layout.html" %}
+{% block title %}{{ market.title }}{% endblock %}
 {% block layout-content %}
-You scored {{ guess.score }}
+
+<div class="alert alert-dark">
+	{{ market.prompt|linebreaks }}
+</div>
+
+<p>The correct answer was <strong>{{ market.answer }}</strong>.</p>
+
+{% if guess %}
+<p>Your guess of {{ guess.value }} earned {{ guess.score }}♠.</p>
+{% endif %}
+
+<hr />
 
 <table class="table">
+	<tr class="table-dark">
+		<th style="width:2em;">#</th>
+		<th style="width:5em;">Guess</th>
+		<th style="width:5em;">Score</th>
+		<th>Player</th>
+	</tr>
 	{% for g in guesses %}
-	<tr>
-		<td>{{ g }}</td>
+	<tr {% if guess.pk == g.pk %}class="table-primary" {% endif %}>
+		<th class="text-end">{{ forloop.counter }}</th>
+		<td class="text-end">{{ g.value }}</td>
+		<td class="text-end">
+			+{{ g.score|floatformat:".2f" }}♠
+		</td>
+		<td>
+			{% if guess.pk == g.pk %}
+			<strong>{{ g.user.get_full_name }}</strong>
+			{% elif g.public %}
+			{{ g.user.get_full_name }}
+			{% else %}
+			&mdash;
+			{% endif %}
+		</td>
 	</tr>
 	{% endfor %}
 </table>

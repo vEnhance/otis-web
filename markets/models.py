@@ -57,7 +57,7 @@ class Guess(models.Model):
 		a = round(self.market.answer, ndigits=2)
 		b = round(self.value, ndigits=2)
 		assert a > 0 and b > 0
-		return min(a / b, b / a)**self.market.alpha
+		return round(min(a / b, b / a)**self.market.alpha, ndigits=2)
 
 	def set_score(self):
 		self.score = self.get_score()
