@@ -23,7 +23,7 @@ class Market(models.Model):
 	alpha = models.FloatField(
 		help_text="Exponent corresponding to harshness of the market, "
 		"used in the scoring function",
-		default=1
+		default=2
 	)
 
 	def __str__(self) -> str:
@@ -58,6 +58,7 @@ class Guess(models.Model):
 			'user',
 			'market',
 		)
+		verbose_name_plural = "Guesses"
 
 	def __str__(self) -> str:
 		return f"Guessed {self.value} at {self.created_at}"
