@@ -20,7 +20,7 @@ up a local server on a standard Unix environment.
 	Replace `USERNAME` with your username if you're forking;
 	otherwise, replace with `vEnhance`.
 3. Run `git submodule --init --recursive` in order to pull the `dwhandler` submodule.
-	If this is done correctly, the folder `dwhandler` should be nonempty and
+	If this is done correctly, the folder `dwhandler` should contain
 	a file called `__init__.py` which defines `class DiscordWebhookHandler`.
 4. You probably want to create a new virtual environment
 	to avoid polluting your system with all the dependencies.
