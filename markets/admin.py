@@ -45,3 +45,4 @@ class GuessAdmin(admin.ModelAdmin):
 		'user__last_name',
 		'market',
 	)
+	autocomplete_fields = ('market', )
