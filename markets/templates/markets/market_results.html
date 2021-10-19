@@ -1,6 +1,18 @@
 {% extends "layout.html" %}
 {% block title %}{{ market.title }}{% endblock %}
 {% block layout-content %}
+{% if admin %}
+<div class="alert alert-warning">
+	You are viewing this market in admin mode.
+</div>
+<form action="{{request.path}}" method="post">
+	{% csrf_token %}
+	<button type="submit" name="submit" class="btn btn-danger">
+		Recompute scores
+	</button>
+</form>
+<hr />
+{% endif %}
 
 <div class="alert alert-dark">
 	{{ market.prompt|linebreaks }}

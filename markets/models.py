@@ -30,7 +30,7 @@ class Market(models.Model):
 		return f'{self.title} ({self.slug})'
 
 	def get_absolute_url(self) -> str:
-		return reverse_lazy('market-results', args=(self.pk, ))
+		return reverse_lazy('market-results', args=(self.slug, ))
 
 
 class Guess(models.Model):

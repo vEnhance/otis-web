@@ -85,6 +85,31 @@ class MarketResults(LoginRequiredMixin, ListView[Guess]):
 
 		if not self.market.start_date < timezone.now():
 			return HttpResponseNotFound()
-		elif timezone.now() < self.market.end_date:
+		elif timezone.now() < self.market.end_date and not kwargs.get('admin'):
 			return HttpResponseForbidden("You can't view this market's results yet")
+		return super().dispatch(request, *args, **kwargs)
+
+
+class AdminMarketResults(MarketResults):
+	def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+		context = super().get_context_data(**kwargs)
+		context['admin'] = True
+		return context
+
+	def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
+		assert isinstance(request.user, User)
+		if not request.user.is_superuser:
+			return HttpResponseForbidden("This is the admin scoreboard you fool")
+		elif request.method == 'POST':
+			# recompute all stuff
+			slug = kwargs['slug']
+			guesses = list(Guess.objects.filter(market__slug=slug))
+			for guess in guesses:
+				guess.set_score()
+			Guess.objects.bulk_update(guesses, fields=('score', ), batch_size=50)
+			messages.success(
+				request, f"Successfully recomputed all {len(guesses)} scores for this market!"
+			)
+			return HttpResponseRedirect(reverse_lazy('market-admin', args=(slug, )))
+		kwargs['admin'] = True
 		return super().dispatch(request, *args, **kwargs)
