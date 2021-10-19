@@ -44,12 +44,13 @@ TESTING = len(sys.argv) > 1 and sys.argv[1] == 'test'
 # Application definition
 
 INSTALLED_APPS = [
+	'aincrad',
+	'arch',
 	'core',
 	'dashboard',
 	'exams',
+	'markets',
 	'roster',
-	'arch',
-	'aincrad',
 	'otisweb',
 	'django.contrib.admin',
 	'django.contrib.auth',
