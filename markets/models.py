@@ -41,7 +41,11 @@ class Guess(models.Model):
 		help_text="User's guess",
 		validators=[MinValueValidator(0.01, message="Need to enter a number at least 0.01.")]
 	)
-	score = models.FloatField(help_text="The score for the guess, computed by the backend.")
+	score = models.FloatField(
+		help_text="The score for the guess, computed by the backend.",
+		null=True,
+		blank=True,
+	)
 	public = models.BooleanField(
 		default=False,
 		help_text="If checked, will display your name "
