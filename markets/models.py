@@ -15,6 +15,9 @@ class Market(models.Model):
 	prompt = models.TextField(help_text="Full text of the question")
 	answer = models.FloatField(help_text="The answer to the question")
 
+	def __str__(self) -> str:
+		return f'{self.title} ({self.slug})'
+
 
 class Guess(models.Model):
 	created_at = models.DateTimeField(auto_now_add=True)
@@ -25,3 +28,11 @@ class Guess(models.Model):
 		validators=[MinValueValidator(0.01, message="Need to enter a number at least 0.01.")]
 	)
 	score = models.FloatField(help_text="The score for the guess, computed by the backend.")
+	public = models.BooleanField(
+		help_text="If checked, will display your name "
+		"next to your guess in the statistics, for bragging rights. "
+		"By default, this is off and your guess is recorded anonymously."
+	)
+
+	def __str__(self) -> str:
+		return "Guessed {self.value} at {self.created_at}"
