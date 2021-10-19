@@ -695,6 +695,8 @@ class StudentRegistration(models.Model):
 			'user',
 			'container',
 		)
+		verbose_name = "Unit petition"
+		verbose_name_plural = "Unit petitions"
 
 	def __str__(self) -> str:
 		return self.user.username
