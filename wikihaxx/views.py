@@ -16,10 +16,7 @@ def view_redirect(u: URLPath) -> HttpResponseRedirect:
 
 
 def wiki_redirect(u: URLPath) -> HttpResponseRedirect:
-	if 'automatically generated article' in u.article.current_revision.content:
-		return edit_redirect(u)
-	else:
-		return view_redirect(u)
+	return view_redirect(u)
 
 
 @login_required
