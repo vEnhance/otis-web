@@ -30,7 +30,7 @@ class Market(models.Model):
 		return f'{self.title} ({self.slug})'
 
 	def get_absolute_url(self) -> str:
-		return reverse_lazy('market-results', args=(self.slug, ))
+		return reverse_lazy('market-admin', args=(self.slug, ))
 
 
 class Guess(models.Model):
@@ -71,3 +71,6 @@ class Guess(models.Model):
 	def set_score(self):
 		self.score = self.get_score()
 		self.save()
+
+	def get_absolute_url(self) -> str:
+		return reverse_lazy('market-admin', args=(self.market.slug, ))
