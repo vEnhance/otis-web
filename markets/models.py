@@ -14,6 +14,11 @@ class Market(models.Model):
 	title = models.CharField(help_text="Title of the market", max_length=80)
 	prompt = models.TextField(help_text="Full text of the question")
 	answer = models.FloatField(help_text="The answer to the question")
+	alpha = models.FloatField(
+		help_text="Exponent corresponding to harshness of the market, "
+		" used in the scoring function",
+		default=2
+	)
 
 	def __str__(self) -> str:
 		return f'{self.title} ({self.slug})'
@@ -41,7 +46,7 @@ class Guess(models.Model):
 		a = round(self.market.answer, ndigits=2)
 		b = round(self.value, ndigits=2)
 		assert a > 0 and b > 0
-		return min(a / b, b / a)
+		return min(a / b, b / a)**self.market.alpha
 
 	def set_score(self):
 		self.score = self.get_score()
