@@ -1,4 +1,4 @@
-from core.factories import UserFactory
+from core.factories import SemesterFactory, UserFactory
 from factory.declarations import LazyAttribute, SubFactory
 from factory.django import DjangoModelFactory
 from factory.faker import Faker
@@ -12,16 +12,9 @@ class MarketFactory(DjangoModelFactory):
 	class Meta:
 		model = Market
 
-	start_date = Faker(
-		'date_time_this_century',
-		before_today=True,
-		after_today=False,
-	)
-	end_date = Faker(
-		'date_time_this_century',
-		before_today=False,
-		after_today=True,
-	)
+	semester = SubFactory(SemesterFactory)
+	start_date = Faker('past_datetime')
+	end_date = Faker('future_datetime')
 
 	slug = UniqueFaker('slug')
 	title = Faker('bs')
