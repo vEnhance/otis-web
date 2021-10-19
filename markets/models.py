@@ -2,6 +2,7 @@ from core.models import Semester
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.urls.base import reverse_lazy
 
 # Create your models here.
 
@@ -17,11 +18,14 @@ class Market(models.Model):
 	alpha = models.FloatField(
 		help_text="Exponent corresponding to harshness of the market, "
 		" used in the scoring function",
-		default=2
+		default=1
 	)
 
 	def __str__(self) -> str:
 		return f'{self.title} ({self.slug})'
+
+	def get_absolute_url(self) -> str:
+		return reverse_lazy('market-results', args=(self.pk, ))
 
 
 class Guess(models.Model):
@@ -40,8 +44,14 @@ class Guess(models.Model):
 		"By default, this is off and your guess is recorded anonymously."
 	)
 
+	class Meta:
+		unique_together = (
+			'user',
+			'market',
+		)
+
 	def __str__(self) -> str:
-		return "Guessed {self.value} at {self.created_at}"
+		return f"Guessed {self.value} at {self.created_at}"
 
 	def get_score(self) -> float:
 		a = round(self.market.answer, ndigits=2)

@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block layout-content %}
+You scored {{ guess.score }}
+
+<table class="table">
+	{% for g in guesses %}
+	<tr>
+		<td>{{ g }}</td>
+	</tr>
+	{% endfor %}
+</table>
+
+{% endblock %}
