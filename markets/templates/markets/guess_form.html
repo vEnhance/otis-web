@@ -1,10 +1,11 @@
 {% extends 'layout.html' %}
-{% block title %}{{ market.title }}{% endblock %}
+{% block title %}Market {{ market.slug }}{% endblock %}
 {% load humanize %}
 
 {% block layout-content %}
 <p><a href="{% url 'index' %}">Back to top</a></p>
 <div class="alert alert-dark">
+	<h2 class="alert-heading">{{ market.title }}</h2>
 	{{ market.prompt|linebreaks }}
 </div>
 <hr />
