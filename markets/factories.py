@@ -1,0 +1,39 @@
+from core.factories import UserFactory
+from factory.declarations import LazyAttribute, SubFactory
+from factory.django import DjangoModelFactory
+from factory.faker import Faker
+from factory.fuzzy import FuzzyDecimal
+from otisweb.tests import UniqueFaker
+
+from .models import Guess, Market
+
+
+class MarketFactory(DjangoModelFactory):
+	class Meta:
+		model = Market
+
+	start_date = Faker(
+		'date_time_this_century',
+		before_today=True,
+		after_today=False,
+	)
+	end_date = Faker(
+		'date_time_this_century',
+		before_today=False,
+		after_today=True,
+	)
+
+	slug = UniqueFaker('slug')
+	title = Faker('bs')
+	prompt = Faker('paragraph')
+	answer = FuzzyDecimal(10, 1000)
+
+
+class GuessFactory(DjangoModelFactory):
+	class Meta:
+		model = Guess
+
+	user = SubFactory(UserFactory)
+	market = SubFactory(MarketFactory)
+	guess = FuzzyDecimal(1, 10000)
+	score = LazyAttribute(lambda o: o.get_score())

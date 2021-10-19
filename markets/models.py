@@ -34,6 +34,7 @@ class Guess(models.Model):
 	)
 	score = models.FloatField(help_text="The score for the guess, computed by the backend.")
 	public = models.BooleanField(
+		default=False,
 		help_text="If checked, will display your name "
 		"next to your guess in the statistics, for bragging rights. "
 		"By default, this is off and your guess is recorded anonymously."
