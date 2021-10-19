@@ -18,6 +18,7 @@ urlpatterns = [
 	path(r'core/', include('core.urls')),
 	path(r'dash/', include('dashboard.urls')),
 	path(r'exams/', include('exams.urls')),
+	path(r'markets/', include('markets.urls')),
 	path(r'roster/', include('roster.urls')),
 	path(r'hijack/', include('hijack.urls')),
 	path(r'accounts/', include('allauth.urls')),
