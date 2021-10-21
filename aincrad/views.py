@@ -32,14 +32,8 @@ def venueq_handler(action: str, request: HttpRequest) -> JsonResponse:
 			# unlock the unit the student asked for
 			finished_unit = get_object_or_404(Unit, pk=request.POST['unit__pk'])
 			student = get_object_or_404(Student, pk=request.POST['student__pk'])
-			if 'next_unit_to_unlock__pk' not in request.POST:
-				unlockable_units = student.generate_curriculum_queryset().exclude(
-					has_pset=True
-				).exclude(id__in=student.unlocked_units.all())
-				target = unlockable_units.first()
-			else:
+			if 'next_unit_to_unlock__pk' in request.POST:
 				target = get_object_or_404(Unit, pk=request.POST['next_unit_to_unlock__pk'])
-			if target is not None:
 				student.unlocked_units.add(target)
 			student.unlocked_units.remove(finished_unit)
 		return JsonResponse({'result': 'success'}, status=200)

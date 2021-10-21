@@ -162,7 +162,7 @@ class PSet(models.Model):
 	)
 	next_unit_to_unlock = models.ForeignKey(
 		Unit,
-		help_text="The unit you want to work on next (leave blank for any)",
+		help_text="The unit you want to work on next (leave blank for none)",
 		on_delete=models.SET_NULL,
 		null=True,
 		blank=True,
