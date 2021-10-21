@@ -32,6 +32,8 @@ wheel = "^0.37.0"
 wiki = "^0.7.6"
 django-storages = {extras = ["google"], version = "^1.11.1", optional = true}
 Unidecode = "^1.2.0"
+freezegun = "^1.1.0"
+types-freezegun = "^1.1.2"
 
 [tool.poetry.dev-dependencies]
 coverage = {extras = ["toml"], version = "^5.5"}

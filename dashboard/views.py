@@ -381,12 +381,11 @@ def idlewarn(request: AuthHttpRequest) -> HttpResponse:
 		get_visible_students(request.user).filter(legit=True)
 	)
 	queryset = queryset.annotate(latest_pset=Subquery(newest))  # type: ignore
-	queryset = queryset.order_by('latest_pset')
 	rows = get_student_rows(queryset)
 	for row in rows:
 		row['days_since_last_seen'] = get_days_since(row['last_seen'])
 		row['days_since_last_pset'] = get_days_since(row['student'].latest_pset)
-
+	rows.sort(key=lambda row: -(row['days_since_last_pset'] or 1e9))
 	context['rows'] = rows
 
 	return render(request, "dashboard/idlewarn.html", context)

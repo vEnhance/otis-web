@@ -24,6 +24,15 @@
 </div>
 {% endif %}
 
+{% if not student.semester.active %}
+<div class="alert alert-dark">
+	<h3 class="alert-heading">This is a past semester</h3>
+	You are viewing the page for an archived semester of OTIS.
+	Some things should still work but if you are a current student,
+	please go instead to the portal for this semester!
+</div>
+{% endif %}
+
 {% if not student.payment_status|divisibleby:"4" %}
 <div class="alert
 	{% if student.payment_status == 1 or student.payment_status == 5 %}

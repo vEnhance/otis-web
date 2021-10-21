@@ -426,6 +426,8 @@ class UnitInquiry(models.Model):
 
 	class Meta:
 		ordering = ('-created_at', )
+		verbose_name = "Unit petition"
+		verbose_name_plural = "Unit petitions"
 
 
 def content_file_name(instance: 'StudentRegistration', filename: str) -> str:
