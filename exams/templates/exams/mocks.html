@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+{% load static %}
+
+{% block title %}OTIS Mock Olympiads{% endblock %}
+{% block layout-content %}
+<h2>Tests</h2>
+{% include 'dashboard/list_exam.html' with exams=tests %}
+
+<hr />
+
+<h2>Olympiad strategy handout</h2>
+<p><a href="{% static 'info/psychology.pdf' %}" class="btn btn-info" role="button">Handout on olympiad strategy</a></p>
+<p>Important reading. Please read this before taking the first mock olympiads!</p>
+
+<h2>Answer sheets</h2>
+<p><a href="{% static 'info/psychology.pdf' %}" class="btn btn-primary" role="button">Download answer sheets</a></p>
+
+<hr />
+
+<h2>Registering for GradeScope</h2>
+<p>You only need to do this once per year.</p>
+<ol>
+	<li>Open <a href="https://gradescope.com">gradescope.com</a>.</li>
+	<li>Create an account using your real name and any email.</li>
+	<li>When asked for a student ID,
+		type <strong>{{ student.pk }}</strong>.</li>
+	<li>After the account is created,
+		add the OTIS course using the entry key
+		<strong>{{ semester.gradescope_key }}</strong>.</li>
+</ol>
+
+<h2>Submitting to GradeScope</h2>
+<p>In brief:</p>
+<ol>
+	<li>The time limit is 4.5 hours.</li>
+	<li>Like a real olympiad, submit solutions on the
+		<a href="{% static 'info/blank.pdf' %}">answer sheets</a>.</li>
+	<li>Submit to <a href="https://gradescope.com">GradeScope</a>.
+		Be careful to submit the right papers to the right buckets
+		(you will only submit for three of five problems).</li>
+	<li>Please submit at least one page
+		for all three problems on your test.</li>
+</ol>
+<p>Check the syllabus for full details.</p>
+
+{% endblock %}

@@ -2,9 +2,10 @@ from typing import Any, Dict, Optional
 
 from core.utils import get_from_google_storage
 from django.contrib.auth.decorators import login_required
-from django.http import HttpRequest, HttpResponse
-from django.http.response import HttpResponseForbidden
+from django.http import HttpResponse
+from django.http.response import HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 from otisweb.utils import AuthHttpRequest
 from roster.utils import get_student_by_id, infer_student
 
@@ -113,3 +114,21 @@ def show_exam(request: AuthHttpRequest, student_id: int, pk: int) -> HttpRespons
 	if student.semester.exam_family != quiz.family:
 		return HttpResponseForbidden("Wrong year of practice exams")
 	return render(request, 'exams/quiz_detail.html', context)
+
+
+@login_required
+def mocks(request: AuthHttpRequest, student_id: int = None) -> HttpResponse:
+	if student_id is None:
+		student = infer_student(request)
+		return HttpResponseRedirect(reverse("mocks", args=(student.id, )))
+	student = get_student_by_id(request, student_id)
+	semester = student.semester
+	context = {
+		'student': student,
+		'semester': semester,
+		'tests': PracticeExam.objects.filter(
+			family=semester.exam_family,
+			is_test=True,
+		),
+	}
+	return render(request, 'exams/mocks.html', context)
