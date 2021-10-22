@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http.request import HttpRequest
-from django.http.response import HttpResponseBase, HttpResponseNotFound, HttpResponseRedirect  # NOQA
+from django.http.response import HttpResponseBase, HttpResponseForbidden, HttpResponseNotFound, HttpResponseRedirect  # NOQA
 from django.urls.base import reverse_lazy
 from django.utils import timezone
 from django.views.decorators.http import require_POST
@@ -129,7 +129,10 @@ class GuessView(LoginRequiredMixin, DetailView[Guess]):
 	context_object_name = "guess"
 
 	def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
-		market = self.get_object().market
+		guess = self.get_object()
+		market = guess.market
 		if market.has_ended:
 			return HttpResponseRedirect('market-results', args=(market.slug, ))
+		if guess.user != request.user and not getattr(request.user, 'is_superuser', False):
+			return HttpResponseForbidden("You cannot view this guess.")
 		return super().dispatch(request, *args, **kwargs)
