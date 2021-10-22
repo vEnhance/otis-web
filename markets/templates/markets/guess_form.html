@@ -3,7 +3,13 @@
 {% load humanize %}
 
 {% block layout-content %}
-<p><a href="{% url 'index' %}">Back to top</a></p>
+<p>
+	<a href="{% url 'index' %}">Back to top</a>
+	&nbsp;
+	{% if request.user.is_superuser %}
+	<a href="{% url 'market-results' market.slug %}" class="btn btn-outline-warning" role="button">Admin view</a>
+	{% endif %}
+</p>
 <div class="alert alert-dark">
 	<h2 class="alert-heading">{{ market.title }}</h2>
 	{{ market.prompt|linebreaks }}
