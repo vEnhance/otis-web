@@ -1,9 +1,11 @@
 from typing import Any, Dict, Optional
 
 from core.utils import get_from_google_storage
+from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
 from django.http.response import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render
+from otisweb.utils import AuthHttpRequest
 from roster.utils import get_student_by_id, infer_student
 
 from exams.calculator import expr_compute
@@ -14,9 +16,10 @@ from .models import ExamAttempt, PracticeExam
 # Create your views here.
 
 
-def pdf(request: HttpRequest, pk: int) -> HttpResponse:
+@login_required
+def pdf(request: AuthHttpRequest, pk: int) -> HttpResponse:
 	exam = get_object_or_404(PracticeExam, pk=pk)
-	if getattr(request.user, 'is_staff', True):
+	if request.user.is_staff:
 		return get_from_google_storage(exam.pdfname)
 
 	student = infer_student(request)
@@ -28,7 +31,8 @@ def pdf(request: HttpRequest, pk: int) -> HttpResponse:
 	return get_from_google_storage(exam.pdfname)
 
 
-def quiz(request: HttpRequest, student_id: int, pk: int) -> HttpResponse:
+@login_required
+def quiz(request: AuthHttpRequest, student_id: int, pk: int) -> HttpResponse:
 	student = get_student_by_id(request, student_id)
 	context: Dict[str, Any] = {}
 	quiz = get_object_or_404(PracticeExam, pk=pk)
@@ -99,9 +103,13 @@ def quiz(request: HttpRequest, student_id: int, pk: int) -> HttpResponse:
 	return render(request, 'exams/quiz.html', context)
 
 
-def show_exam(request: HttpRequest, student_id: int, pk: int) -> HttpResponse:
+@login_required
+def show_exam(request: AuthHttpRequest, student_id: int, pk: int) -> HttpResponse:
 	context: Dict[str, Any] = {}
 	quiz = get_object_or_404(PracticeExam, pk=pk)
 	if quiz.is_test:
 		return HttpResponseForbidden("You can only use this view for short-answer quizzes.")
+	student = get_student_by_id(request, student_id)
+	if student.semester.exam_family != quiz.family:
+		return HttpResponseForbidden("Wrong year of practice exams")
 	return render(request, 'exams/quiz_detail.html', context)
