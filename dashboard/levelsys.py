@@ -6,7 +6,6 @@ from typing import Any, Dict, List, Set, Tuple, TypedDict, Union
 from arch.models import Hint
 from core.models import UserProfile
 from django.db.models.aggregates import Count, Max, Sum
-from django.db.models.expressions import F, OuterRef
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
 from django.utils import timezone
@@ -171,10 +170,10 @@ def get_level_info(student: Student) -> LevelInfoDict:
 
 	total_spades = quiz_attempts.aggregate(Sum('score'))['score__sum'] or 0
 	total_spades += quest_completes.aggregate(Sum('spades'))['spades__sum'] or 0
-	total_spades += market_guesses.aggregate(Sum('score'))['score__sum'] or 0
+	# TODO total_spades += market_guesses.aggregate(Sum('score'))['score__sum'] or 0
 	total_spades += mock_completes.count() * 3
 	total_spades += len(suggested_units_set)
-	total_spades += hint_spades
+	# TODO total_spades += hint_spades
 
 	meters: FourMetersDict = {
 		'clubs': Meter.ClubMeter(int(total_clubs)),
