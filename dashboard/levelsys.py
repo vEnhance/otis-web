@@ -1,15 +1,19 @@
 # Functions to compute student levels and whatnot
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, TypedDict, Union
+from typing import Any, Dict, List, Set, Tuple, TypedDict, Union
 
+from arch.models import Hint
+from core.models import UserProfile
 from django.db.models.aggregates import Count, Max, Sum
+from django.db.models.expressions import F, OuterRef
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
 from django.utils import timezone
 from dwhandler import SUCCESS_LOG_LEVEL
 from exams.models import ExamAttempt, MockCompleted
 from markets.models import Guess
+from reversion.models import Version
 from roster.models import Student
 from sql_util.aggregates import SubqueryCount, SubquerySum
 from sql_util.utils import Exists
@@ -18,6 +22,8 @@ from dashboard.models import AchievementUnlock, BonusLevel, BonusLevelUnlock, Le
 
 BONUS_D_UNIT = 0.3
 BONUS_Z_UNIT = 0.5
+
+SuggestSet = Set[Tuple[int, str, str]]
 
 
 class Meter:
@@ -103,6 +109,20 @@ class LevelInfoDict(TypedDict):
 	level_number: int
 	level_name: str
 	is_maxed: bool
+	market_guesses: QuerySet[Guess]
+	hint_spades: int
+	suggest_set: SuggestSet
+	mock_completes: QuerySet[MockCompleted]
+
+
+def get_week_count(dates: List[datetime]) -> int:
+	seen: List[Tuple[int, int]] = []
+	for d in dates:
+		d = d.astimezone(tz=timezone.utc)
+		week_number = d.isocalendar()[1]
+		year = d.year
+		seen.append((year, week_number))
+	return len(set(seen))
 
 
 def get_level_info(student: Student) -> LevelInfoDict:
@@ -128,23 +148,33 @@ def get_level_info(student: Student) -> LevelInfoDict:
 
 	quiz_attempts = ExamAttempt.objects.filter(student=student)
 	quest_completes = QuestComplete.objects.filter(student=student)
-	mock_attempts = MockCompleted.objects.filter(student=student)
-	market_scores = Guess.objects.filter(
+	mock_completes = MockCompleted.objects.filter(student=student)
+	market_guesses = Guess.objects.filter(
 		user=student.user,
 		market__end_date__gt=timezone.now(),
 		market__semester=student.semester,
-	)
-	suggestions = ProblemSuggestion.objects.filter(
+	).select_related('market')
+	suggested_units_queryset = ProblemSuggestion.objects.filter(
 		user=student.user,
 		resolved=True,
 		eligible=True,
+	).values_list(
+		'unit__pk',
+		'unit__group__name',
+		'unit__code',
 	)
+	suggested_units_set: SuggestSet = set(suggested_units_queryset)
+	hints_written = Version.objects.get_for_model(Hint)  # type: ignore
+	hints_written = hints_written.filter(revision__user_id=student.user.id)
+	hints_written = hints_written.values_list('revision__date_created', flat=True)
+	hint_spades = get_week_count(list(hints_written))
 
 	total_spades = quiz_attempts.aggregate(Sum('score'))['score__sum'] or 0
 	total_spades += quest_completes.aggregate(Sum('spades'))['spades__sum'] or 0
-	total_spades += market_scores.aggregate(Sum('score'))['score__sum'] or 0
-	total_spades += mock_attempts.count() * 3
-	total_spades += len(set(suggestions.values_list('unit__pk', flat=True)))
+	total_spades += market_guesses.aggregate(Sum('score'))['score__sum'] or 0
+	total_spades += mock_completes.count() * 3
+	total_spades += len(suggested_units_set)
+	total_spades += hint_spades
 
 	meters: FourMetersDict = {
 		'clubs': Meter.ClubMeter(int(total_clubs)),
@@ -159,12 +189,17 @@ def get_level_info(student: Student) -> LevelInfoDict:
 	level_data: LevelInfoDict = {
 		'psets': psets,
 		'pset_data': pset_data,
-		'quiz_attempts': quiz_attempts,
-		'quest_completes': quest_completes,
 		'meters': meters,
 		'level_number': level_number,
 		'level_name': level_name,
 		'is_maxed': level_number >= max_level,
+		# spade properties
+		'quiz_attempts': quiz_attempts,
+		'quest_completes': quest_completes,
+		'market_guesses': market_guesses,
+		'mock_completes': mock_completes,
+		'suggest_set': suggested_units_set,
+		'hint_spades': hint_spades,
 	}
 	return level_data
 
@@ -182,12 +217,19 @@ def annotate_student_queryset_with_scores(queryset: QuerySet[Student]) -> QueryS
 			'pset__clubs', filter=Q(approved=True, eligible=True, unit__code__startswith='Z')
 		),
 		hearts=SubquerySum('pset__hours', filter=Q(approved=True, eligible=True)),
-		spades_quizzes=SubquerySum('examattempt__score'),
-		spades_quests=SubquerySum('questcomplete__spades'),
 		diamonds=SubquerySum('user__achievementunlock__achievement__diamonds'),
 		pset_B_count=SubqueryCount('pset__pk', filter=Q(eligible=True, unit__code__startswith='B')),
 		pset_D_count=SubqueryCount('pset__pk', filter=Q(eligible=True, unit__code__startswith='D')),
 		pset_Z_count=SubqueryCount('pset__pk', filter=Q(eligible=True, unit__code__startswith='Z')),
+		spades_quizzes=SubquerySum('examattempt__score'),
+		spades_quests=SubquerySum('questcomplete__spades'),
+		# markets not handled here
+		spades_count_mocks=SubqueryCount('mockcompleted'),
+		spades_suggestions=SubqueryCount(
+			'user__problemsuggestion__unit__pk',
+			filter=Q(resolved=True, eligible=True),
+		),
+		# hints definitely not handled here
 	)
 
 
@@ -206,12 +248,14 @@ def get_student_rows(queryset: QuerySet[Student]) -> List[Dict[str, Any]]:
 	max_level = max(levels.keys())
 
 	for student in annotate_student_queryset_with_scores(queryset):
-		if student.user is None:
-			continue
 		row: Dict[str, Any] = {}
 		row['student'] = student
 		row['spades'] = (getattr(student, 'spades_quizzes', 0) or 0)
 		row['spades'] += (getattr(student, 'spades_quests', 0) or 0)
+		# TODO markets
+		row['spades'] += (getattr(student, 'spades_count_mocks', 0) or 0) * 3
+		row['spades'] += (getattr(student, 'spades_suggestions', 0) or 0)
+		# TODO hints
 		row['hearts'] = getattr(student, 'hearts', 0) or 0
 		row['clubs'] = getattr(student, 'clubs_any', 0) or 0
 		row['clubs'] += BONUS_D_UNIT * (getattr(student, 'clubs_D', 0) or 0)
@@ -220,10 +264,9 @@ def get_student_rows(queryset: QuerySet[Student]) -> List[Dict[str, Any]]:
 		row['level'] = sum(
 			int(max(row[k], 0)**0.5) for k in ('spades', 'hearts', 'clubs', 'diamonds')
 		)
-		profile = student.user.profile
-		if profile is not None:
-			row['last_seen'] = profile.last_seen
-		else:
+		try:
+			row['last_seen'] = student.user.profile.last_seen
+		except UserProfile.DoesNotExist:
 			row['last_seen'] = datetime.fromtimestamp(0, tz=timezone.utc)
 		row['insanity'] = compute_insanity_rating(
 			getattr(student, 'pset_B_count'),
