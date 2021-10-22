@@ -18,7 +18,9 @@
 	{% for market in markets %}
 	<tr class="{% if not market.has_ended %}table-success{% endif %}">
 		<td>
-			<a href="{{ market.get_absolute_url }}">{{ market.slug }}</a>
+			<a href="{{ market.get_absolute_url }}">
+				<code>{{ market.slug }}</code>
+			</a>
 		</td>
 		<td>{{ market.weight|floatformat:".2f" }}</td>
 		<td>{{ market.alpha|floatformat:".2f" }}</td>

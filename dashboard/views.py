@@ -28,6 +28,7 @@ from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from dwhandler import SUCCESS_LOG_LEVEL, VERBOSE_LOG_LEVEL
 from exams.models import PracticeExam
+from markets.models import Market
 from otisweb.utils import AuthHttpRequest, get_mailchimp_campaigns
 from roster.models import Student, StudentRegistration
 from roster.utils import can_edit, can_view, get_student_by_id, get_visible_students  # NOQA
@@ -84,6 +85,7 @@ def portal(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 	).filter(
 		created_at__gte=timezone.now() - timedelta(days=14),
 	)
+	context['markets'] = Market.active.all()
 	context['num_sem_downloads'] = SemesterDownloadFile.objects.filter(semester=semester).count()
 
 	context.update(level_info)

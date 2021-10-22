@@ -258,7 +258,20 @@
 		</td>
 		<td valign="top" width="50%">
 			<h3>Markets</h3>
-			check back later!
+			<ul>
+				{% if markets %}
+				{% for market in markets %}
+				<li>Market
+					<a href="{{ market.get_absolute_url }}">
+						<code>
+							{{ market.slug }}
+						</code>
+					</a>
+				</li>
+				{% endfor %}
+				{% endif %}
+				<li>List of <a href="{% url "market-list" %}">all markets</a></li>
+			</ul>
 		</td>
 	</tr>
 </table>
