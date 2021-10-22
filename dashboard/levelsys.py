@@ -22,7 +22,7 @@ from dashboard.models import AchievementUnlock, BonusLevel, BonusLevelUnlock, Le
 BONUS_D_UNIT = 0.3
 BONUS_Z_UNIT = 0.5
 
-SuggestSet = Set[Tuple[int, str, str]]
+SuggestUnitSet = Set[Tuple[int, str, str]]
 
 
 class Meter:
@@ -110,7 +110,7 @@ class LevelInfoDict(TypedDict):
 	is_maxed: bool
 	market_guesses: QuerySet[Guess]
 	hint_spades: int
-	suggest_set: SuggestSet
+	suggest_unit_set: SuggestUnitSet
 	mock_completes: QuerySet[MockCompleted]
 
 
@@ -147,7 +147,7 @@ def get_level_info(student: Student) -> LevelInfoDict:
 
 	quiz_attempts = ExamAttempt.objects.filter(student=student)
 	quest_completes = QuestComplete.objects.filter(student=student)
-	mock_completes = MockCompleted.objects.filter(student=student)
+	mock_completes = MockCompleted.objects.filter(student=student).select_related('exam')
 	market_guesses = Guess.objects.filter(
 		user=student.user,
 		market__end_date__gt=timezone.now(),
@@ -162,7 +162,7 @@ def get_level_info(student: Student) -> LevelInfoDict:
 		'unit__group__name',
 		'unit__code',
 	)
-	suggested_units_set: SuggestSet = set(suggested_units_queryset)
+	suggest_units_set: SuggestUnitSet = set(suggested_units_queryset)
 	hints_written = Version.objects.get_for_model(Hint)  # type: ignore
 	hints_written = hints_written.filter(revision__user_id=student.user.id)
 	hints_written = hints_written.values_list('revision__date_created', flat=True)
@@ -172,7 +172,7 @@ def get_level_info(student: Student) -> LevelInfoDict:
 	total_spades += quest_completes.aggregate(Sum('spades'))['spades__sum'] or 0
 	# TODO total_spades += market_guesses.aggregate(Sum('score'))['score__sum'] or 0
 	total_spades += mock_completes.count() * 3
-	total_spades += len(suggested_units_set)
+	total_spades += len(suggest_units_set)
 	# TODO total_spades += hint_spades
 
 	meters: FourMetersDict = {
@@ -197,7 +197,7 @@ def get_level_info(student: Student) -> LevelInfoDict:
 		'quest_completes': quest_completes,
 		'market_guesses': market_guesses,
 		'mock_completes': mock_completes,
-		'suggest_set': suggested_units_set,
+		'suggest_unit_set': suggest_units_set,
 		'hint_spades': hint_spades,
 	}
 	return level_data

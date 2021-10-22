@@ -95,10 +95,12 @@ def portal(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 @login_required
 def stats(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 	student = get_student_by_id(request, student_id)
+	unlocks = AchievementUnlock.objects.filter(user=student.user)
+	unlocks = unlocks.select_related('achievement').order_by('-timestamp')
 	context: Dict[str, Any] = {
 		'student': student,
 		'form': DiamondsForm(),
-		'achievements': AchievementUnlock.objects.filter(user=student.user).order_by('-timestamp'),
+		'achievements': unlocks,
 	}
 	if request.method == 'POST':
 		assert student.user is not None
