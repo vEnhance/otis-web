@@ -2,9 +2,16 @@ from core.models import Semester
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models.query import QuerySet
 from django.urls.base import reverse_lazy
+from django.utils import timezone
 
 # Create your models here.
+
+
+class StartedMarketManager(models.Manager):
+	def get_queryset(self) -> QuerySet['Market']:
+		return super().get_queryset().filter(start_date__lte=timezone.now())
 
 
 class Market(models.Model):
@@ -26,11 +33,22 @@ class Market(models.Model):
 		default=2
 	)
 
+	objects = models.Manager()
+	started = StartedMarketManager()
+
 	def __str__(self) -> str:
 		return f'{self.title} ({self.slug})'
 
 	def get_absolute_url(self) -> str:
 		return reverse_lazy('market-results', args=(self.slug, ))
+
+	@property
+	def is_started(self) -> bool:
+		return timezone.now() >= self.start_date
+
+	@property
+	def has_ended(self) -> bool:
+		return timezone.now() >= self.end_date
 
 
 class Guess(models.Model):

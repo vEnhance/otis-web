@@ -4,9 +4,26 @@ from freezegun import freeze_time
 from otisweb.tests import OTISTestCase
 
 from markets.factories import MarketFactory
-from markets.models import Guess
+from markets.models import Guess, Market
 
 utc = timezone.utc
+
+
+class MarketModelTests(OTISTestCase):
+	def test_started_maanger(self):
+		MarketFactory.create(
+			start_date=timezone.datetime(2000, 1, 1, tzinfo=utc),
+			end_date=timezone.datetime(2000, 1, 3, tzinfo=utc),
+		)
+		MarketFactory.create(
+			start_date=timezone.datetime(2020, 1, 1, tzinfo=utc),
+			end_date=timezone.datetime(2020, 1, 3, tzinfo=utc),
+		)
+		MarketFactory.create(
+			start_date=timezone.datetime(2050, 1, 1, tzinfo=utc),
+			end_date=timezone.datetime(2050, 1, 3, tzinfo=utc),
+		)
+		self.assertEqual(Market.started.count(), 2)
 
 
 class MarketTests(OTISTestCase):
@@ -22,6 +39,24 @@ class MarketTests(OTISTestCase):
 			slug='guess-my-ssn'
 		)
 		UserFactory(username='alice')
+
+	def test_is_started(self):
+		market = Market.objects.get(slug='guess-my-ssn')
+		with freeze_time('2050-01-01', tz_offset=0):
+			self.assertFalse(market.is_started)
+		with freeze_time('2050-07-01', tz_offset=0):
+			self.assertTrue(market.is_started)
+		with freeze_time('2050-11-01', tz_offset=0):
+			self.assertTrue(market.is_started)
+
+	def test_has_ended(self):
+		market = Market.objects.get(slug='guess-my-ssn')
+		with freeze_time('2050-01-01', tz_offset=0):
+			self.assertFalse(market.has_ended)
+		with freeze_time('2050-07-01', tz_offset=0):
+			self.assertFalse(market.has_ended)
+		with freeze_time('2050-11-01', tz_offset=0):
+			self.assertTrue(market.has_ended)
 
 	def test_results_perms(self):
 		with freeze_time('2050-01-01', tz_offset=0):
