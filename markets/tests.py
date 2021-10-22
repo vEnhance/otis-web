@@ -10,27 +10,41 @@ utc = timezone.utc
 
 
 class MarketModelTests(OTISTestCase):
-	def test_managers(self):
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
 		MarketFactory.create(
 			start_date=timezone.datetime(2000, 1, 1, tzinfo=utc),
 			end_date=timezone.datetime(2000, 1, 3, tzinfo=utc),
+			title='Market One',
 			slug='one',
 		)
 		MarketFactory.create(
 			start_date=timezone.datetime(2020, 1, 1, tzinfo=utc),
 			end_date=timezone.datetime(2020, 1, 3, tzinfo=utc),
+			title='Market Two',
 			slug='two',
 		)
 		MarketFactory.create(
 			start_date=timezone.datetime(2050, 1, 1, tzinfo=utc),
 			end_date=timezone.datetime(2050, 1, 3, tzinfo=utc),
+			title='Market Three',
 			slug='three',
 		)
 
+	def test_managers(self):
 		with freeze_time('2020-01-02', tz_offset=0):
 			self.assertEqual(Market.started.count(), 2)
 			self.assertEqual(Market.active.count(), 1)
 			self.assertEqual(Market.active.get().slug, 'two')
+
+	def test_list(self):
+		with freeze_time('2020-01-02', tz_offset=0):
+			self.login(UserFactory.create())
+			response = self.get('market-list')
+			self.assertContains(response, 'Market One')
+			self.assertContains(response, 'Market Two')
+			self.assertNotContains(response, 'Market Three')
 
 
 class MarketTests(OTISTestCase):
@@ -47,14 +61,14 @@ class MarketTests(OTISTestCase):
 		)
 		UserFactory(username='alice')
 
-	def test_is_started(self):
+	def test_has_started(self):
 		market = Market.objects.get(slug='guess-my-ssn')
 		with freeze_time('2050-01-01', tz_offset=0):
-			self.assertFalse(market.is_started)
+			self.assertFalse(market.has_started)
 		with freeze_time('2050-07-01', tz_offset=0):
-			self.assertTrue(market.is_started)
+			self.assertTrue(market.has_started)
 		with freeze_time('2050-11-01', tz_offset=0):
-			self.assertTrue(market.is_started)
+			self.assertTrue(market.has_started)
 
 	def test_has_ended(self):
 		market = Market.objects.get(slug='guess-my-ssn')
@@ -71,7 +85,11 @@ class MarketTests(OTISTestCase):
 			self.assertGet40X('market-results', 'guess-my-ssn')
 		with freeze_time('2050-07-01', tz_offset=0):
 			self.login('alice')
-			self.assertGet40X('market-results', 'guess-my-ssn')
+			resp = self.assertGet20X('market-results', 'guess-my-ssn')
+			self.assertEqual(
+				resp.request['PATH_INFO'],
+				"/markets/guess/guess-my-ssn/",
+			)
 		with freeze_time('2050-11-01', tz_offset=0):
 			self.login('alice')
 			self.assertGet20X('market-results', 'guess-my-ssn')
@@ -83,12 +101,18 @@ class MarketTests(OTISTestCase):
 		with freeze_time('2050-07-01', tz_offset=0):
 			self.login('alice')
 			resp = self.assertGet20X('market-guess', 'guess-my-ssn')
+			self.assertEqual(
+				resp.request['PATH_INFO'],
+				"/markets/guess/guess-my-ssn/",
+			)
 			self.assertContains(resp, "Results are revealed")
 		with freeze_time('2050-11-01', tz_offset=0):
 			self.login('alice')
-			# should redirect to market-results
 			resp = self.assertGet20X('market-guess', 'guess-my-ssn')
-			self.assertContains(resp, "The correct answer was")
+			self.assertEqual(
+				resp.request['PATH_INFO'],
+				"/markets/results/guess-my-ssn/",
+			)
 
 	def test_guess_form(self):
 		with freeze_time('2050-07-01', tz_offset=0):

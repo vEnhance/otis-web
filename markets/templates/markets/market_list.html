@@ -1,0 +1,30 @@
+{% extends 'layout.html' %}
+{% load humanize %}
+{% block title %}Estimation markets{% endblock %}
+{% block layout-content %}
+
+<p>
+	Estimation markets are a side minigame that
+	offers spades for correctly guessing hidden values.
+</p>
+
+<table class="table">
+	<tr class="table-dark">
+		<th>Market</th>
+		<th>$w$</th>
+		<th>$\alpha$</th>
+		<th>Ending date</th>
+	</tr>
+	{% for market in markets %}
+	<tr class="{% if not market.has_ended %}table-success{% endif %}">
+		<td>
+			<a href="{{ market.get_absolute_url }}">{{ market.slug }}</a>
+		</td>
+		<td>{{ market.weight|floatformat:".2f" }}</td>
+		<td>{{ market.alpha|floatformat:".2f" }}</td>
+		<td>{{ market.end_date|naturaltime }}</td>
+	</tr>
+	{% endfor %}
+</table>
+
+{% endblock %}

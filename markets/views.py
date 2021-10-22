@@ -51,9 +51,9 @@ class SubmitGuess(LoginRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]):
 		if not isinstance(request.user, User):
 			return super().dispatch(request, *args, **kwargs)  # login required mixin
 
-		if not self.market.start_date < timezone.now():
+		if not self.market.has_started:
 			return HttpResponseNotFound()
-		elif self.market.end_date < timezone.now():
+		elif self.market.has_ended:
 			return HttpResponseRedirect(self.market.get_absolute_url())
 		try:
 			guess = Guess.objects.get(market=self.market, user=request.user)
@@ -93,10 +93,10 @@ class MarketResults(LoginRequiredMixin, ListView[Guess]):
 			return super().dispatch(request, *args, **kwargs)  # login required mixin
 		self.market = Market.objects.get(slug=kwargs.pop('slug'))
 
-		if not self.market.start_date < timezone.now():
+		if not self.market.has_started:
 			return HttpResponseNotFound()
-		elif timezone.now() < self.market.end_date and not request.user.is_superuser:
-			return HttpResponseForbidden("You can't view this market's results yet")
+		elif not self.market.has_ended and not request.user.is_superuser:
+			return HttpResponseRedirect(self.market.get_absolute_url())
 		return super().dispatch(request, *args, **kwargs)
 
 
@@ -111,3 +111,11 @@ def recompute(request: AuthHttpRequest, slug: str):
 		request, f"Successfully recomputed all {len(guesses)} scores for this market!"
 	)
 	return HttpResponseRedirect(reverse_lazy('market-results', args=(slug, )))
+
+
+class MarketList(LoginRequiredMixin, ListView[Market]):
+	model = Market
+	context_object_name = "markets"
+
+	def get_queryset(self) -> QuerySet[Market]:
+		return Market.started.order_by('-end_date')

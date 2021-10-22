@@ -2,14 +2,14 @@
 {% block title %}Market {{ market.slug }}{% endblock %}
 {% block layout-content %}
 {% if request.user.is_superuser %}
-{% if not completed %}
+{% if not market.has_ended %}
 <div class="alert alert-warning">
 	You are viewing this market in admin mode.
 </div>
 {% endif %}
 <form action="{% url "market-recompute" market.slug %}" method="post">
 	{% csrf_token %}
-	<button type="submit" name="submit" class="btn btn-danger">
+	<button type="submit" name="submit" class="btn btn-outline-danger">
 		Recompute scores
 	</button>
 </form>

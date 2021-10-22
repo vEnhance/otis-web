@@ -51,10 +51,13 @@ class Market(models.Model):
 		return f'{self.title} ({self.slug})'
 
 	def get_absolute_url(self) -> str:
-		return reverse_lazy('market-results', args=(self.slug, ))
+		if self.has_ended:
+			return reverse_lazy('market-results', args=(self.slug, ))
+		else:
+			return reverse_lazy('market-guess', args=(self.slug, ))
 
 	@property
-	def is_started(self) -> bool:
+	def has_started(self) -> bool:
 		return timezone.now() >= self.start_date
 
 	@property
