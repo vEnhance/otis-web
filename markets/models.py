@@ -11,7 +11,17 @@ from django.utils import timezone
 
 class StartedMarketManager(models.Manager):
 	def get_queryset(self) -> QuerySet['Market']:
-		return super().get_queryset().filter(start_date__lte=timezone.now())
+		now = timezone.now()
+		return super().get_queryset().filter(start_date__lte=now)
+
+
+class ActiveMarketManager(models.Manager):
+	def get_queryset(self) -> QuerySet['Market']:
+		now = timezone.now()
+		return super().get_queryset().filter(
+			start_date__lte=now,
+			end_date__gte=now,
+		)
 
 
 class Market(models.Model):
@@ -35,6 +45,7 @@ class Market(models.Model):
 
 	objects = models.Manager()
 	started = StartedMarketManager()
+	active = ActiveMarketManager()
 
 	def __str__(self) -> str:
 		return f'{self.title} ({self.slug})'

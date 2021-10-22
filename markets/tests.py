@@ -10,20 +10,27 @@ utc = timezone.utc
 
 
 class MarketModelTests(OTISTestCase):
-	def test_started_maanger(self):
+	def test_managers(self):
 		MarketFactory.create(
 			start_date=timezone.datetime(2000, 1, 1, tzinfo=utc),
 			end_date=timezone.datetime(2000, 1, 3, tzinfo=utc),
+			slug='one',
 		)
 		MarketFactory.create(
 			start_date=timezone.datetime(2020, 1, 1, tzinfo=utc),
 			end_date=timezone.datetime(2020, 1, 3, tzinfo=utc),
+			slug='two',
 		)
 		MarketFactory.create(
 			start_date=timezone.datetime(2050, 1, 1, tzinfo=utc),
 			end_date=timezone.datetime(2050, 1, 3, tzinfo=utc),
+			slug='three',
 		)
-		self.assertEqual(Market.started.count(), 2)
+
+		with freeze_time('2020-01-02', tz_offset=0):
+			self.assertEqual(Market.started.count(), 2)
+			self.assertEqual(Market.active.count(), 1)
+			self.assertEqual(Market.active.get().slug, 'two')
 
 
 class MarketTests(OTISTestCase):
