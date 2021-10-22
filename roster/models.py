@@ -59,11 +59,7 @@ class Student(models.Model):
 	endowed with the data of the curriculum of that student.
 	It also names the assistant of the student, if any."""
 	user = models.ForeignKey(
-		User,
-		blank=True,
-		null=True,
-		on_delete=models.CASCADE,
-		help_text="The Django Auth user attached to the student"
+		User, on_delete=models.CASCADE, help_text="The Django auth user attached to the student"
 	)
 	semester = models.ForeignKey(
 		Semester, on_delete=models.CASCADE, help_text="The semester for this student"
