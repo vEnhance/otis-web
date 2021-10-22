@@ -11,6 +11,7 @@ from django.http.response import HttpResponseBase, HttpResponseForbidden, HttpRe
 from django.urls.base import reverse_lazy
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView
 from django.views.generic.list import ListView
 from otisweb.utils import AuthHttpRequest
@@ -29,6 +30,7 @@ class SubmitGuess(LoginRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]):
 	)
 	request: AuthHttpRequest
 
+	object: Guess
 	market: Market
 
 	def form_valid(self, form: BaseModelForm[Guess]):
@@ -39,7 +41,7 @@ class SubmitGuess(LoginRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]):
 		return super().form_valid(form)
 
 	def get_success_url(self) -> str:
-		return reverse_lazy('index')
+		return reverse_lazy('market-pending', args=(self.object.pk, ))
 
 	def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
 		context = super().get_context_data(**kwargs)
@@ -61,7 +63,8 @@ class SubmitGuess(LoginRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]):
 			pass
 		else:
 			messages.error(request, f"You already submitted {guess.value} for this market.")
-			return HttpResponseRedirect(reverse_lazy('index'))
+			target_url = reverse_lazy('market-pending', args=(guess.pk, ))
+			return HttpResponseRedirect(target_url)
 
 		return super().dispatch(request, *args, **kwargs)
 
@@ -119,3 +122,14 @@ class MarketList(LoginRequiredMixin, ListView[Market]):
 
 	def get_queryset(self) -> QuerySet[Market]:
 		return Market.started.order_by('-end_date')
+
+
+class GuessView(LoginRequiredMixin, DetailView[Guess]):
+	model = Guess
+	context_object_name = "guess"
+
+	def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
+		market = self.get_object().market
+		if market.has_ended:
+			return HttpResponseRedirect('market-results', args=(market.slug, ))
+		return super().dispatch(request, *args, **kwargs)
