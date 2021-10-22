@@ -165,3 +165,15 @@ class ExamAttempt(models.Model):
 
 	def get_absolute_url(self) -> str:
 		return reverse_lazy('quiz', args=(self.student.pk, self.quiz.pk))
+
+
+class MockCompleted(models.Model):
+	student = models.ForeignKey(Student, on_delete=models.CASCADE)
+	exam = models.ForeignKey(PracticeExam, on_delete=models.CASCADE)
+
+	class Meta:
+		unique_together = (
+			'student',
+			'exam',
+		)
+		verbose_name_plural = 'Mock completions'

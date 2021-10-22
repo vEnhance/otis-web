@@ -2,7 +2,7 @@ from django.contrib import admin
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
-from .models import ExamAttempt, PracticeExam
+from .models import ExamAttempt, MockCompleted, PracticeExam
 
 # Register your models here.
 
@@ -76,3 +76,16 @@ class ExamAttemptAdmin(ImportExportModelAdmin):
 		'quiz__family',
 	)
 	list_display_links = ('quiz', )
+
+
+@admin.register(MockCompleted)
+class MockCompletedAdmin(admin.ModelAdmin):
+	list_display = (
+		'exam',
+		'student',
+	)
+	list_filter = (
+		'student__semester__active',
+		'exam',
+		'student__semester',
+	)

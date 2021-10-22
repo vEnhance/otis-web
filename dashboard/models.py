@@ -299,7 +299,8 @@ class QuestComplete(models.Model):
 		("PR", "Pull request"),
 		("BR", "Bug report"),
 		("WK", "Wiki bonus"),
-		("MO", "Mock exam"),
+		("US", "USEMO Score"),
+		("UG", "USEMO Grading"),
 		("MS", "Miscellaneous"),
 	)
 	category = models.CharField(

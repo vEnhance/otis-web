@@ -1,7 +1,8 @@
 from typing import Any, Dict, Optional
 
 from core.utils import get_from_google_storage
-from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponse
 from django.http.response import HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
@@ -11,8 +12,8 @@ from roster.utils import get_student_by_id, infer_student
 
 from exams.calculator import expr_compute
 
-from .forms import ExamAttemptForm
-from .models import ExamAttempt, PracticeExam
+from .forms import ExamAttemptForm, ParticipationPointsForm
+from .models import ExamAttempt, MockCompleted, PracticeExam
 
 # Create your views here.
 
@@ -132,3 +133,32 @@ def mocks(request: AuthHttpRequest, student_id: int = None) -> HttpResponse:
 		),
 	}
 	return render(request, 'exams/mocks.html', context)
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def participation_points(request: AuthHttpRequest) -> HttpResponse:
+	if request.method == 'POST':
+		form = ParticipationPointsForm(request.POST)
+		if form.is_valid():
+			pks = [
+				int(line) for line in form.cleaned_data['pks'].splitlines() if line.strip().isdigit()
+			]
+			existing_completes = MockCompleted.objects.filter(exam=form.cleaned_data['exam'])
+			bad_pks = set(existing_completes.values_list('student__pk', flat=True))
+			good_pks = [pk for pk in pks if pk not in bad_pks]
+
+			MockCompleted.objects.bulk_create(
+				[MockCompleted(student_id=pk, exam=form.cleaned_data['exam']) for pk in good_pks],
+				batch_size=25
+			)
+			messages.success(request, f"Created {len(good_pks)} completion database entries")
+			if len(pks) > len(good_pks):
+				messages.warning(
+					request, f"There were {len(pks)-len(good_pks)} students with existing entries"
+				)
+			form = ParticipationPointsForm()
+	else:
+		form = ParticipationPointsForm()
+
+	context = {'form': form}
+	return render(request, 'exams/participation_points.html', context)
