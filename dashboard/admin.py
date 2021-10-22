@@ -172,9 +172,19 @@ class AchievementUnlockAdmin(admin.ModelAdmin):
 
 @admin.register(QuestComplete)
 class QuestCompleteAdmin(admin.ModelAdmin):
-	list_display = ('pk', 'title', 'student', 'spades', 'timestamp')
+	list_display = (
+		'pk',
+		'title',
+		'student',
+		'spades',
+		'timestamp',
+		'category',
+	)
 	autocomplete_fields = ('student', )
-	list_filter = ('student__semester', )
+	list_filter = (
+		'student__semester',
+		'category',
+	)
 
 
 @admin.register(BonusLevel)

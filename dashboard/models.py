@@ -295,6 +295,19 @@ class QuestComplete(models.Model):
 		auto_now_add=True, help_text='The time the achievement was granted'
 	)
 
+	CATEGORY_CHOICES = (
+		("PR", "Pull request"),
+		("BR", "Bug report"),
+		("WK", "Wiki bonus"),
+		("MO", "Mock exam"),
+		("MS", "Miscellaneous"),
+	)
+	category = models.CharField(
+		max_length=4,
+		choices=CATEGORY_CHOICES,
+		default="MS",
+	)
+
 	def __str__(self) -> str:
 		return self.title + ' ' + self.timestamp.strftime('%c')
 
