@@ -208,6 +208,9 @@ class ProblemSuggestion(models.Model):
 	)
 
 	resolved = models.BooleanField(default=False, help_text="Whether staff has processed this.")
+	eligible = models.BooleanField(
+		default=True, help_text="Whether this suggestion is eligible for spades."
+	)
 	created_at = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self) -> str:
