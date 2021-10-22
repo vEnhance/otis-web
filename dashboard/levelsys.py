@@ -1,18 +1,20 @@
 # Functions to compute student levels and whatnot
 import logging
+from datetime import datetime
 from typing import Any, Dict, List, TypedDict, Union
 
-from core.models import UserProfile
 from django.db.models.aggregates import Count, Max, Sum
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
+from django.utils import timezone
 from dwhandler import SUCCESS_LOG_LEVEL
-from exams.models import ExamAttempt
+from exams.models import ExamAttempt, MockCompleted
+from markets.models import Guess
 from roster.models import Student
 from sql_util.aggregates import SubqueryCount, SubquerySum
 from sql_util.utils import Exists
 
-from dashboard.models import AchievementUnlock, BonusLevel, BonusLevelUnlock, Level, PSet, QuestComplete  # NOQA
+from dashboard.models import AchievementUnlock, BonusLevel, BonusLevelUnlock, Level, ProblemSuggestion, PSet, QuestComplete  # NOQA
 
 BONUS_D_UNIT = 0.3
 BONUS_Z_UNIT = 0.5
@@ -105,7 +107,7 @@ class LevelInfoDict(TypedDict):
 
 def get_level_info(student: Student) -> LevelInfoDict:
 	"""Uses a bunch of expensive database queries to compute a student's levels and data,
-	returning the findings as a (TODO typed) dictionary."""
+	returning the findings as a typed dictionary."""
 
 	psets = PSet.objects.filter(student=student, approved=True, eligible=True)
 	pset_data = psets.aggregate(
@@ -126,14 +128,29 @@ def get_level_info(student: Student) -> LevelInfoDict:
 
 	quiz_attempts = ExamAttempt.objects.filter(student=student)
 	quest_completes = QuestComplete.objects.filter(student=student)
+	mock_attempts = MockCompleted.objects.filter(student=student)
+	market_scores = Guess.objects.filter(
+		user=student.user,
+		market__end_date__gt=timezone.now(),
+		market__semester=student.semester,
+	)
+	suggestions = ProblemSuggestion.objects.filter(
+		user=student.user,
+		resolved=True,
+		eligible=True,
+	)
+
 	total_spades = quiz_attempts.aggregate(Sum('score'))['score__sum'] or 0
 	total_spades += quest_completes.aggregate(Sum('spades'))['spades__sum'] or 0
+	total_spades += market_scores.aggregate(Sum('score'))['score__sum'] or 0
+	total_spades += mock_attempts.count() * 3
+	total_spades += len(set(suggestions.values_list('unit__pk', flat=True)))
 
 	meters: FourMetersDict = {
 		'clubs': Meter.ClubMeter(int(total_clubs)),
 		'hearts': Meter.HeartMeter(int(total_hearts)),
 		'diamonds': Meter.DiamondMeter(total_diamonds),
-		'spades': Meter.SpadeMeter(total_spades),
+		'spades': Meter.SpadeMeter(int(total_spades)),
 	}
 	level_number = sum(meter.level for meter in meters.values())  # type: ignore
 	level = Level.objects.filter(threshold__lte=level_number).order_by('-threshold').first()
@@ -203,8 +220,11 @@ def get_student_rows(queryset: QuerySet[Student]) -> List[Dict[str, Any]]:
 		row['level'] = sum(
 			int(max(row[k], 0)**0.5) for k in ('spades', 'hearts', 'clubs', 'diamonds')
 		)
-		profile, _ = UserProfile.objects.get_or_create(user=student.user)
-		row['last_seen'] = profile.last_seen
+		profile = student.user.profile
+		if profile is not None:
+			row['last_seen'] = profile.last_seen
+		else:
+			row['last_seen'] = datetime.fromtimestamp(0, tz=timezone.utc)
 		row['insanity'] = compute_insanity_rating(
 			getattr(student, 'pset_B_count'),
 			getattr(student, 'pset_D_count'),
