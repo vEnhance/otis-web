@@ -89,7 +89,7 @@ class MarketResults(LoginRequiredMixin, ListView[Guess]):
 		return context
 
 	def get_queryset(self) -> QuerySet[Guess]:
-		return Guess.objects.filter(market=self.market).order_by('value')
+		return Guess.objects.filter(market=self.market).order_by('-value')
 
 	def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
 		if not isinstance(request.user, User):
