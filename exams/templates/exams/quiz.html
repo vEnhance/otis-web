@@ -16,11 +16,6 @@
 {% if attempt %}
 <hr />
 <h1>Score: {{ attempt.score }}</h1>
-<p>
-	Visit the
-	<a href="https://discord.com/channels/740366393022742618/750427216843767979/750428521133900247">Gateway</a>
-	section of the OTIS Discord to discuss the quizzes (and tests) with other students.
-</p>
 <div class="list-group row">
 	{% for row in rows %}
 	<div class="list-group-item" style="background-color:
@@ -37,6 +32,8 @@
 	</div>
 	{% endfor %}
 </div>
+{% include "exams/gateway.html" %}
+
 {% elif not quiz.overdue %}
 <h2>Instructions</h2>
 <ul>
