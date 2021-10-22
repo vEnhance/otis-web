@@ -48,7 +48,8 @@ class SubmitGuess(LoginRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]):
 
 	def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
 		self.market = Market.objects.get(slug=kwargs.pop('slug'))
-		assert isinstance(request.user, User)
+		if not isinstance(request.user, User):
+			return super().dispatch(request, *args, **kwargs)  # login required mixin
 
 		if not self.market.start_date < timezone.now():
 			return HttpResponseNotFound()
@@ -88,8 +89,9 @@ class MarketResults(LoginRequiredMixin, ListView[Guess]):
 		return Guess.objects.filter(market=self.market).order_by('value')
 
 	def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
+		if not isinstance(request.user, User):
+			return super().dispatch(request, *args, **kwargs)  # login required mixin
 		self.market = Market.objects.get(slug=kwargs.pop('slug'))
-		assert isinstance(request.user, User)
 
 		if not self.market.start_date < timezone.now():
 			return HttpResponseNotFound()
