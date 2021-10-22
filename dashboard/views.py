@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 import logging
+from datetime import timedelta
 from typing import Any, Dict
 
 from braces.views import LoginRequiredMixin, StaffuserRequiredMixin, SuperuserRequiredMixin  # NOQA
@@ -22,6 +23,7 @@ from django.http.request import HttpRequest
 from django.http.response import HttpResponseBase
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from dwhandler import SUCCESS_LOG_LEVEL, VERBOSE_LOG_LEVEL
@@ -50,6 +52,7 @@ def portal(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 		return HttpResponseRedirect(reverse_lazy('invoice', args=(student_id, )))
 	semester = student.semester
 	profile, _ = UserProfile.objects.get_or_create(user=request.user)
+	student_profile, _ = UserProfile.objects.get_or_create(user=student.user)
 
 	level_info = get_level_info(student)
 	if request.user == student.user:
@@ -60,7 +63,7 @@ def portal(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 
 	context: Dict[str, Any] = {}
 	context['title'] = f"{student.name} ({semester.name})"
-	context['last_seen'] = profile.last_seen
+	context['last_seen'] = student_profile.last_seen
 	context['student'] = student
 	context['semester'] = semester
 	context['profile'] = profile
@@ -73,10 +76,13 @@ def portal(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 		is_test=False, family=semester.exam_family, due_date__isnull=False
 	)
 	context['emails'] = [
-		e for e in get_mailchimp_campaigns(28) if e['timestamp'] >= profile.last_email_dismiss
+		e for e in get_mailchimp_campaigns(14) if e['timestamp'] >= profile.last_email_dismiss
 	]
 	context['downloads'] = SemesterDownloadFile.objects.filter(
-		semester=semester, created_at__gte=profile.last_download_dismiss
+		semester=semester,
+		created_at__gte=profile.last_download_dismiss,
+	).filter(
+		created_at__gte=timezone.now() - timedelta(days=14),
 	)
 	context['num_sem_downloads'] = SemesterDownloadFile.objects.filter(semester=semester).count()
 
@@ -93,6 +99,7 @@ def stats(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 		'achievements': AchievementUnlock.objects.filter(user=student.user).order_by('-timestamp'),
 	}
 	if request.method == 'POST':
+		assert student.user is not None
 		form = DiamondsForm(request.POST)
 		if form.is_valid():
 			code = form.cleaned_data['code']
@@ -137,11 +144,11 @@ class AchievementList(LoginRequiredMixin, ListView[Achievement]):
 		).order_by('-obtained', '-num_found')
 
 
-class FoundList(LoginRequiredMixin, StaffuserRequiredMixin, ListView[Achievement]):
+class FoundList(LoginRequiredMixin, StaffuserRequiredMixin, ListView[AchievementUnlock]):
 	raise_exception = True
 	template_name = 'dashboard/found_list.html'
 
-	def get_queryset(self) -> QuerySet[Achievement]:
+	def get_queryset(self) -> QuerySet[AchievementUnlock]:
 		self.achievement = get_object_or_404(Achievement, pk=self.kwargs['pk'])
 		return AchievementUnlock.objects.filter(
 			achievement=self.achievement,
