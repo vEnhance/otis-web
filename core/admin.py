@@ -134,6 +134,7 @@ class UserProfileAdmin(admin.ModelAdmin):
 	list_display = (
 		'pk',
 		'user',
+		'last_seen',
 		'show_bars',
 		'show_completed_by_default',
 		'show_locked_by_default',
