@@ -16,35 +16,32 @@ class MarketModelTests(OTISTestCase):
 		MarketFactory.create(
 			start_date=timezone.datetime(2000, 1, 1, tzinfo=utc),
 			end_date=timezone.datetime(2000, 1, 3, tzinfo=utc),
-			title='Market One',
-			slug='one',
+			slug='m-one',
 		)
 		MarketFactory.create(
 			start_date=timezone.datetime(2020, 1, 1, tzinfo=utc),
 			end_date=timezone.datetime(2020, 1, 3, tzinfo=utc),
-			title='Market Two',
-			slug='two',
+			slug='m-two',
 		)
 		MarketFactory.create(
 			start_date=timezone.datetime(2050, 1, 1, tzinfo=utc),
 			end_date=timezone.datetime(2050, 1, 3, tzinfo=utc),
-			title='Market Three',
-			slug='three',
+			slug='m-three',
 		)
 
 	def test_managers(self):
 		with freeze_time('2020-01-02', tz_offset=0):
 			self.assertEqual(Market.started.count(), 2)
 			self.assertEqual(Market.active.count(), 1)
-			self.assertEqual(Market.active.get().slug, 'two')
+			self.assertEqual(Market.active.get().slug, 'm-two')
 
 	def test_list(self):
 		with freeze_time('2020-01-02', tz_offset=0):
 			self.login(UserFactory.create())
 			response = self.get('market-list')
-			self.assertContains(response, 'Market One')
-			self.assertContains(response, 'Market Two')
-			self.assertNotContains(response, 'Market Three')
+			self.assertContains(response, 'm-one')
+			self.assertContains(response, 'm-two')
+			self.assertNotContains(response, 'm-three')
 
 
 class MarketTests(OTISTestCase):
