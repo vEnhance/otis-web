@@ -198,25 +198,26 @@
 	after instructor review, it becomes ✅.
 	(You can access solutions in the meantime.)
 	Units to work on are marked ▶️.
-	To change units, <a href="{% url 'inquiry' student.id %}">submit a petition</a>.
 </p>
+<div class="text-center">
+	<a href="{% url 'inquiry' student.id %}" class="btn btn-warning">Request units</a>
+	{% if omniscient %}
+	<a href="{% url 'advance' student.id %}" class="btn btn-dark">Advance student</a>
+	{% endif %}
+</div>
 
 <hr />
-<h2>Launchpad (places to go)</h2>
-<table class="table">
+<h2>Downloads</h2>
+<table width="100%">
 	<tr>
 		<td valign="top" width="50%">
 			<h3>Academic</h3>
 			<ul>
-				<li><a href="{% url 'inquiry' student.id %}">Unit petitions</a></li>
-				<li><a href="{% url 'arch-index' %}">ARCH</a></li>
+				<li><a href="{% url 'downloads' student.id %}">Posted files ({{ num_sem_downloads }})</a></li>
 				<li><a href="{% url 'currshow' student.id %}">Class selection</a></li>
 				<li><a href="{% url 'synopsis' %}">Unit catalog</a></li>
-				{% if omniscient %}
-				<li> <a href="{% url 'advance' student.id %}">Advance student</a> (instructor)</li>
-				{% endif %}
-				<li><a href="{% url 'suggest-list' %}">Show suggestions</a></li>
-				<li><a href="{% url 'downloads' student.id %}">Posted files ({{ num_sem_downloads }})</a></li>
+				<li><a href="{% static 'info/unit-guide.pdf' %}">Unit selection guide</a></li>
+				<li><a href="{% static 'info/mock-imo.pdf' %}">Extra mock IMO's (shortlist)</a></li>
 			</ul>
 		</td>
 		<td valign="top" width="50%">
@@ -247,37 +248,27 @@
 			</ul>
 		</td>
 	</tr>
-	<tr>
-		<td valign="top">
-			<h3>Files</h3>
-			<ul>
-				<li><a href="{% static 'info/blank.pdf' %}">
-						Olympiad answer sheets</a></li>
-				<li><a href="{% static 'info/psychology.pdf' %}">
-						Psychology</a> (test-taking strategies)</li>
-				<li><a href="{% static 'info/unit-guide.pdf' %}">
-						Unit selection guide</a></li>
-				<li><a href="{% static 'info/mock-imo.pdf' %}">
-						Extra mock IMO's (shortlist)</a></li>
-			</ul>
-		</td>
-		<td valign="top">
-			<h3>External sites</h3>
-			<ul>
-				<li><a href="https://www.gradescope.com">GradeScope</a>
-					{% if semester.gradescope_key %}
-					(entry key: {{ semester.gradescope_key }})
-					{% endif %}
-				</li>
+</table>
 
-				{% if semester.social_url %}
-				<li><a href="{{ semester.social_url }}">OTIS Discord</a></li>
-				{% endif %}
-			</ul>
+<hr />
+
+<h2>Social</h2>
+<table width="100%">
+	<tr>
+		<td valign="top" width="50%">
+			<h3>Discord</h3>
+			{% if semester.social_url %}
+			<a href="{{ semester.social_url }}" class="btn btn-info" role="button">Open Discord</a>
+			{% else %}
+			Nothing here yet!
+			{% endif %}
+		</td>
+		<td valign="top" width="50%">
+			<h3>Markets</h3>
+			check back later!
 		</td>
 	</tr>
 </table>
-
 
 <hr />
 
@@ -285,25 +276,16 @@
 <h2>Mock olympiads (tests)</h2>
 {% include 'dashboard/list_exam.html' with exams=tests %}
 
-<p><a href="{% static 'info/blank.pdf' %}">
-		Link to olympiad answer sheets.</a>
-	Submit these to <a href="https://www.gradescope.com" target="_blank">GradeScope</a>,
-	unless otherwise specified.
-	See the syllabus for full instructions.</p>
-
-<p>Solutions are available immediately here so that you can
-	read them right after completing a mock olympiad.
-	Obviously, don't open the solutions until you've submitted!
-	Before taking your first mock olympiad, I recommend reading the
-	<a href="{% static 'info/psychology.pdf' %}">handout on olympiad strategy.</a></p>
+<div class="text-center">
+	<a href="{% url 'mocks' student.id %}" class="btn btn-secondary" role="button">Mock Olympiad Submission</a>
+</div>
 
 <h2>Quizzes</h2>
 {% include 'dashboard/list_exam.html' with exams=quizzes %}
+<p>Click on a quiz above to open it. Quiz submissions are done directly on OTIS-WEB.</p>
 
 {% else %}
-<p>This page from {{ semester }} is now archived.
-	Thanks for playing.</p>
-
+<p>This page from {{ semester }} is now archived. Thanks for playing.</p>
 {% endif %}
 
 {% if semester.active %}
