@@ -23,7 +23,10 @@ from .models import Guess, Market
 class SubmitGuess(LoginRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]):
 	model = Guess
 	context_object_name = "guess"
-	fields = ('value', )
+	fields = (
+		'value',
+		'public',
+	)
 	request: AuthHttpRequest
 
 	market: Market
