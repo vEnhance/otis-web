@@ -455,6 +455,8 @@ def spreadsheet(request: HttpRequest) -> HttpResponse:
 	writer = csv.writer(response)  # type: ignore
 	writer.writerow(
 		[
+			'ID',
+			'Username',
 			'Name',
 			'Debt',
 			'Track',
@@ -489,6 +491,8 @@ def spreadsheet(request: HttpRequest) -> HttpResponse:
 		except StudentRegistration.DoesNotExist:
 			writer.writerow(
 				[
+					student.pk,
+					student.user.username if student.user is not None else '',
 					student.name,
 					debt_percent,
 					student.track,
@@ -511,6 +515,8 @@ def spreadsheet(request: HttpRequest) -> HttpResponse:
 		else:
 			writer.writerow(
 				[
+					student.pk,
+					student.user.username if student.user is not None else '',
 					student.name,
 					debt_percent,
 					student.track,
