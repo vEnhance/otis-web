@@ -132,7 +132,7 @@ class GuessView(LoginRequiredMixin, DetailView[Guess]):
 		guess = self.get_object()
 		market = guess.market
 		if market.has_ended:
-			return HttpResponseRedirect('market-results', args=(market.slug, ))
+			return HttpResponseRedirect(reverse_lazy('market-results', args=(market.slug, )))
 		if guess.user != request.user and not getattr(request.user, 'is_superuser', False):
 			return HttpResponseForbidden("You cannot view this guess.")
 		return super().dispatch(request, *args, **kwargs)
