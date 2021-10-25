@@ -35,7 +35,7 @@ class Market(models.Model):
 	weight = models.FloatField(
 		help_text="The max score to assign to the market, "
 		"used in the scoring function",
-		default=2
+		default=4
 	)
 	alpha = models.FloatField(
 		help_text="Exponent corresponding to harshness of the market, "
