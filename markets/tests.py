@@ -102,7 +102,7 @@ class MarketTests(OTISTestCase):
 				resp.request['PATH_INFO'],
 				"/markets/guess/guess-my-ssn/",
 			)
-			self.assertContains(resp, "Results are revealed")
+			self.assertContains(resp, "market main page")
 		with freeze_time('2050-11-01', tz_offset=0):
 			self.login('alice')
 			resp = self.assertGet20X('market-guess', 'guess-my-ssn')
@@ -115,7 +115,7 @@ class MarketTests(OTISTestCase):
 		with freeze_time('2050-07-01', tz_offset=0):
 			self.login('alice')
 			resp = self.assertGet20X('market-guess', 'guess-my-ssn')
-			self.assertContains(resp, "Results are revealed")
+			self.assertContains(resp, "market main page")
 			self.assertPost20X('market-guess', 'guess-my-ssn', data={'value': 100})
 
 			resp = self.assertGet20X('market-guess', 'guess-my-ssn')

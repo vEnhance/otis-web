@@ -24,13 +24,11 @@
 {% include "generic-form.html" %}
 
 <hr />
-<p>Your score (in ♠) for the market is given by
+<p>Your score (in ♠) for a market is given by
 	\[ w \cdot \left(\min\left\{\frac AB, \frac BA\right\}\right)^\alpha \]
 	where $A$ is the correct answer and $B$ is your guess,
 	with $(w,\alpha)$ specified by the market.
-	The values of $A$ and $B$ are rounded to $6$ decimal places.
-	It is required that $\min(A,B) &gt; 10^{-6}$.
-	Results are revealed after the market end time.
+	Visit the <a href="{% url "market-list" %}">market main page</a> for details.
 </p>
 
 {% endblock %}
