@@ -36,7 +36,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 from django.views.generic.edit import UpdateView
-from dwhandler import ACTION_LOG_LEVEL
+from dwhandler import ACTION_LOG_LEVEL, SUCCESS_LOG_LEVEL
 from otisweb.utils import AuthHttpRequest, mailchimp_subscribe
 
 from roster.utils import can_edit, get_current_students, get_student_by_id, infer_student  # NOQA
@@ -45,6 +45,8 @@ from .forms import AdvanceForm, CurriculumForm, DecisionForm, InquiryForm, UserF
 from .models import Invoice, RegistrationContainer, Student, StudentRegistration, UnitInquiry  # NOQA
 
 # Create your views here.
+
+logger = logging.getLogger(__name__)
 
 
 @login_required
@@ -354,9 +356,10 @@ def register(request: AuthHttpRequest) -> HttpResponse:
 				request.user.save()
 				mailchimp_subscribe(request)
 				messages.success(request, message="Submitted! Sit tight.")
-				logging.log(
+				logger.log(
 					ACTION_LOG_LEVEL,
-					f'New registration from {request.user.first_name} {request.user.last_name}'
+					f'New registration from {request.user.get_full_name()}',
+					extra={'request': request},
 				)
 				return HttpResponseRedirect(reverse("index"))
 	else:
@@ -388,9 +391,10 @@ def update_profile(request: AuthHttpRequest) -> HttpResponse:
 			new_email = form.cleaned_data['email']
 			user: User = form.save()
 			if old_email != new_email:
-				logging.info(
-					f"User {user.first_name} {user.last_name} added {new_email} " +
-					f"(formerly {old_email})"
+				logger.log(
+					SUCCESS_LOG_LEVEL,
+					f"User {user.get_full_name()} switched to {new_email}",
+					extra={'request': request}
 				)
 				user.save()
 				mailchimp_subscribe(request)

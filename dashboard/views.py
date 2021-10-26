@@ -114,9 +114,13 @@ def stats(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 					achievement = Achievement.objects.get(code__iexact=code)
 				except Achievement.DoesNotExist:
 					messages.error(request, "You entered an invalid code.")
-					logger.warn(f"Invalid code `{code}` guessed")
+					logger.warn(f"Invalid diamond code `{code}`", extra={'request': request})
 				else:
-					logger.log(SUCCESS_LOG_LEVEL, f"{student.name} obtained {achievement}")
+					logger.log(
+						SUCCESS_LOG_LEVEL,
+						f"{student.name} obtained {achievement}",
+						extra={'request': request}
+					)
 					AchievementUnlock.objects.create(user=student.user, achievement=achievement)
 					context['obtained_achievement'] = achievement
 			form = DiamondsForm()
@@ -221,7 +225,9 @@ def submit_pset(request: HttpRequest, student_id: int) -> HttpResponse:
 				request, "The problem set is submitted successfully "
 				"and is pending review!"
 			)
-			logger.log(VERBOSE_LOG_LEVEL, f"{student} submitted for {pset.unit}")
+			logger.log(
+				VERBOSE_LOG_LEVEL, f"{student} submitted for {pset.unit}", extra={'request': request}
+			)
 			return HttpResponseRedirect(pset.get_absolute_url())
 
 	context = {
@@ -264,7 +270,9 @@ def resubmit_pset(request: HttpRequest, pk: int) -> HttpResponse:
 			request, "The problem set is submitted successfully "
 			"and is pending review!"
 		)
-		logger.log(VERBOSE_LOG_LEVEL, f"{student} re-submitted {pset.unit}")
+		logger.log(
+			VERBOSE_LOG_LEVEL, f"{student} re-submitted {pset.unit}", extra={'request': request}
+		)
 		return HttpResponseRedirect(pset.get_absolute_url())
 	context = {
 		'title': f'Resubmit {pset.unit}',

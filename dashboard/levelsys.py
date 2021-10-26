@@ -24,6 +24,8 @@ BONUS_Z_UNIT = 0.5
 
 SuggestUnitSet = Set[Tuple[int, str, str]]
 
+logger = logging.getLogger(__name__)
+
 
 class Meter:
 	def __init__(
@@ -319,7 +321,7 @@ def check_level_up(student: Student) -> bool:
 			if unit is not None:
 				student.curriculum.add(unit)
 				BonusLevelUnlock.objects.create(bonus=bonus, student=student)
-				logging.log(SUCCESS_LOG_LEVEL, f"{student} obtained special unit {unit}")
+				logger.log(SUCCESS_LOG_LEVEL, f"{student} obtained special unit {unit}")
 
 	student.last_level_seen = level_number
 	student.save()

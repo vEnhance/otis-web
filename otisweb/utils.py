@@ -18,6 +18,8 @@ class AuthHttpRequest(HttpRequest):
 
 # ----------------------------------------------
 
+logger = logging.getLogger(__name__)
+
 
 class MailChimpDatum(TypedDict):
 	url: str
@@ -36,7 +38,7 @@ def get_client() -> MailChimp:
 def get_mailchimp_campaigns(days: int) -> List[MailChimpDatum]:
 	if API_KEY is None:
 		# TODO would eventually be good to find some way to fake this data for people not named Evan
-		logging.warning("Using fake mailchimp data")
+		logger.warning("Using fake mailchimp data")
 		example: MailChimpDatum = {
 			'url': 'http://www.example.com',
 			'title': 'Example email',
@@ -69,7 +71,7 @@ def get_mailchimp_campaigns(days: int) -> List[MailChimpDatum]:
 def mailchimp_subscribe(request: AuthHttpRequest):
 	user = request.user
 	if settings.TESTING or settings.DEBUG:
-		logging.warning(f"Not actually subscribing {user} since we're testing")
+		logger.warning(f"Not actually subscribing {user} since we're testing")
 		return
 	elif API_KEY is not None:
 		try:
@@ -89,7 +91,7 @@ def mailchimp_subscribe(request: AuthHttpRequest):
 				"contact point for OTIS announcements from Evan."
 			)
 		except MailChimpError as e:
-			logging.error(f"Could not add {user.email} to MailChimp", exc_info=e)
+			logger.error(f"Could not add {user.email} to MailChimp", exc_info=e)
 			messages.warning(
 				request,
 				"The email {user.email} could not be added to MailChimp, maybe it's subscribed already?"
