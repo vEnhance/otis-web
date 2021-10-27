@@ -48,6 +48,7 @@
 		<td>
 			{% if guess.pk == g.pk %}
 			<strong>{{ g.user.get_full_name }}</strong>
+			{% if not g.public %}(hidden){% endif %}
 			{% elif g.public or request.user.is_staff %}
 			{{ g.user.get_full_name }}
 			{% else %}
