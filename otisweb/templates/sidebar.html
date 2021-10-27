@@ -23,8 +23,8 @@
 		<td><a title="Markets" class="emoji-link" href="{% url "market-list" %}">🏪</a></td>
 	</tr>
 	<tr>
+		<td><a title="Diamonds" class="emoji-link" href="{% url "achievements-listing" %}" data-hex="496e737065637420456c6d21">♦️</a></td>
 		<td><a title="Logout" class="emoji-link" href="{% url "account_logout" %}">🚪</a></td>
-		<td></td>
 		<td></td>
 		<td></td>
 	</tr>
@@ -43,7 +43,6 @@
 <ul>
 	<li><a href="{% url "admin:index" %}">GM Panel</a></li>
 	<li><a href="{% url "leaderboard" %}">Leaderboard</a></li>
-	<li><a href="{% url "achievements-listing" %}">Achievements</a></li>
 	<li><a href="{% url "idlewarn" %}">Idle-warn</a></li>
 	<li><a href="{% url "master-schedule" %}">Curriculums</a></li>
 	{% if request.user.is_superuser %}
