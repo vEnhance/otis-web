@@ -41,9 +41,9 @@
 	{% for g in guesses %}
 	<tr {% if guess.pk == g.pk %}class="table-primary" {% endif %}>
 		<th class="text-end">{{ forloop.counter }}</th>
-		<td class="text-end">{{ g.value|floatformat:".6f" }}</td>
+		<td class="text-end">{{ g.value|floatformat:6 }}</td>
 		<td class="text-end">
-			+{{ g.score|floatformat:".2f" }}♠
+			+{{ g.score|floatformat:2 }}♠
 		</td>
 		<td>
 			{% if guess.pk == g.pk %}
