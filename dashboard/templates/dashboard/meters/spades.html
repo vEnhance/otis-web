@@ -60,7 +60,22 @@
 		</tr>
 		{% endfor %}
 
-		{# TODO markets #}
+		{% for guess in market_guesses %}
+		<tr style="background-color: #ffff99;">
+			<td style="color:{{ meters.spades.color }};">
+				<b>
+					+{{ guess.spades }}{{ meters.spades.unit }}
+				</b>
+			</td>
+			<td>
+				{{ guess.title }}
+			</td>
+			<td>
+				{{ guess.timestamp|naturaltime }}
+			</td>
+		</tr>
+		{% endfor %}
+
 
 		{% for mc in mock_completes %}
 		<tr>

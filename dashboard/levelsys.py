@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Set, Tuple, TypedDict, Union
 from arch.models import Hint
 from core.models import UserProfile
 from django.db.models.aggregates import Count, Max, Sum
+from django.db.models.expressions import OuterRef, Subquery
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
 from django.utils import timezone
@@ -172,7 +173,7 @@ def get_level_info(student: Student) -> LevelInfoDict:
 
 	total_spades = quiz_attempts.aggregate(Sum('score'))['score__sum'] or 0
 	total_spades += quest_completes.aggregate(Sum('spades'))['spades__sum'] or 0
-	# TODO total_spades += market_guesses.aggregate(Sum('score'))['score__sum'] or 0
+	total_spades += market_guesses.aggregate(Sum('score'))['score__sum'] or 0
 	total_spades += mock_completes.count() * 3
 	total_spades += len(suggest_units_set)
 	# TODO total_spades += hint_spades
@@ -208,6 +209,12 @@ def get_level_info(student: Student) -> LevelInfoDict:
 def annotate_student_queryset_with_scores(queryset: QuerySet[Student]) -> QuerySet[Student]:
 	"""Helper function for constructing large lists of students
 	Selects all important information to prevent a bunch of SQL queries"""
+	guess_subquery = Guess.objects.filter(
+		user=OuterRef('user'),
+		market__semester=OuterRef('semester'),
+		market__end_date__lt=timezone.now(),
+	).order_by().values('user', 'market__semester').annotate(total=Sum('score')).values('total')
+
 	return queryset.select_related('user', 'user__profile', 'assistant', 'semester').annotate(
 		num_psets=SubqueryCount('pset', filter=Q(approved=True, eligible=True)),
 		clubs_any=SubquerySum('pset__clubs', filter=Q(approved=True, eligible=True)),
@@ -224,7 +231,7 @@ def annotate_student_queryset_with_scores(queryset: QuerySet[Student]) -> QueryS
 		pset_Z_count=SubqueryCount('pset__pk', filter=Q(eligible=True, unit__code__startswith='Z')),
 		spades_quizzes=SubquerySum('examattempt__score'),
 		spades_quests=SubquerySum('questcomplete__spades'),
-		# markets not handled here
+		spades_markets=Subquery(guess_subquery),  # type: ignore
 		spades_count_mocks=SubqueryCount('mockcompleted'),
 		spades_suggestions=SubqueryCount(
 			'user__problemsuggestion__unit__pk',
@@ -256,6 +263,7 @@ def get_student_rows(queryset: QuerySet[Student]) -> List[Dict[str, Any]]:
 		# TODO markets
 		row['spades'] += (getattr(student, 'spades_count_mocks', 0) or 0) * 3
 		row['spades'] += (getattr(student, 'spades_suggestions', 0) or 0)
+		row['spades'] += (getattr(student, 'spades_markets', 0) or 0)
 		# TODO hints
 		row['hearts'] = getattr(student, 'hearts', 0) or 0
 		row['clubs'] = getattr(student, 'clubs_any', 0) or 0
