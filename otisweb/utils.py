@@ -49,9 +49,12 @@ def get_mailchimp_campaigns(days: int) -> List[MailChimpDatum]:
 	else:
 		client = get_client()
 		timestamp = (timezone.now() - datetime.timedelta(days=days))
-		mailchimp_campaign_data = client.campaigns.all(
-			get_all=True, status='sent', since_send_time=timestamp
-		)
+		try:
+			mailchimp_campaign_data = client.campaigns.all(
+				get_all=True, status='sent', since_send_time=timestamp
+			)
+		except MailChimpError:
+			return []
 		if mailchimp_campaign_data is not None:
 			campaigns = mailchimp_campaign_data['campaigns']
 			data: List[MailChimpDatum] = [
