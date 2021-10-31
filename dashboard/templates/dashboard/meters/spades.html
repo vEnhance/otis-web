@@ -64,14 +64,14 @@
 		<tr style="background-color: #ffff99;">
 			<td style="color:{{ meters.spades.color }};">
 				<b>
-					+{{ guess.spades }}{{ meters.spades.unit }}
+					+{{ guess.score }}{{ meters.spades.unit }}
 				</b>
 			</td>
 			<td>
-				{{ guess.title }}
+				<a href="{{ guess.market.get_absolute_url }}">{{ guess.market.slug }}</a>
 			</td>
 			<td>
-				{{ guess.timestamp|naturaltime }}
+				{{ guess.market.end_date|naturaltime }}
 			</td>
 		</tr>
 		{% endfor %}
