@@ -31,6 +31,9 @@ class Market(models.Model):
 	slug = models.SlugField(help_text="Slug for the market", unique=True)
 	title = models.CharField(help_text="Title of the market", max_length=80)
 	prompt = models.TextField(help_text="Full text of the question")
+	solution = models.TextField(
+		help_text="Comments that appear in the market results.", blank=True
+	)
 	answer = models.FloatField(help_text="The answer to the question")
 	weight = models.FloatField(
 		help_text="The max score to assign to the market, "

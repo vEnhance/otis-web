@@ -22,6 +22,7 @@
 </div>
 
 <p>The correct answer was <strong>{{ market.answer }}</strong>.</p>
+{{ market.solution|linebreaks }}
 
 {% if guess %}
 <p>Your guess of {{ guess.value }} earned {{ guess.score }}♠.</p>
