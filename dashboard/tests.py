@@ -241,27 +241,31 @@ class TestNewSpades(OTISTestCase):
 			semester=sem1,
 			start_date=datetime.datetime(2010, 1, 1, tzinfo=utc),
 			end_date=datetime.datetime(2010, 1, 5, tzinfo=utc),
+			weight=100,
 		)
 		market_pending = MarketFactory(
 			semester=sem2,
 			start_date=datetime.datetime(2020, 1, 1, tzinfo=utc),
 			end_date=datetime.datetime(2020, 1, 5, tzinfo=utc),
+			weight=100,
 		)
 		market_done1 = MarketFactory(
 			semester=sem2,
 			start_date=datetime.datetime(2019, 12, 1, tzinfo=utc),
 			end_date=datetime.datetime(2019, 12, 5, tzinfo=utc),
+			weight=100,
 		)
 		market_done2 = MarketFactory(
 			semester=sem2,
 			start_date=datetime.datetime(2019, 12, 1, tzinfo=utc),
 			end_date=datetime.datetime(2019, 12, 5, tzinfo=utc),
+			weight=100,
 		)
 
 		GuessFactory(market=market_old, user=alice, score=3.14)
 		GuessFactory(market=market_pending, user=alice, score=2.718)
-		GuessFactory(market=market_done1, user=alice, score=1.3)
-		GuessFactory(market=market_done2, user=alice, score=4.9)
+		GuessFactory(market=market_done1, user=alice, score=10.3)
+		GuessFactory(market=market_done2, user=alice, score=18.8)
 		GuessFactory(market=market_done1, score=3)
 		GuessFactory(market=market_done2, score=2)
 
@@ -272,10 +276,16 @@ class TestNewSpades(OTISTestCase):
 			self.assertEqual(len(rows), 2)
 			rows.sort(key=lambda row: row['student'].semester.pk)
 			self.assertEqual(rows[0]['spades'], 3.14)
-			self.assertEqual(rows[1]['spades'], 6.2)
+			self.assertEqual(rows[1]['spades'], 29.1)
 
-			self.assertEqual(get_level_info(rows[0]['student'])['total_spades'], 3.14)
-			self.assertEqual(get_level_info(rows[1]['student'])['total_spades'], 6.2)
+			self.assertEqual(
+				get_level_info(rows[0]['student'])['meters']['spades'].value,
+				3,
+			)
+			self.assertEqual(
+				get_level_info(rows[1]['student'])['meters']['spades'].value,
+				29,
+			)
 
 
 class TestSubmitPSet(OTISTestCase):
