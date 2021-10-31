@@ -28,5 +28,5 @@ class GuessFactory(DjangoModelFactory):
 
 	user = SubFactory(UserFactory)
 	market = SubFactory(MarketFactory)
-	guess = FuzzyDecimal(1, 10000)
+	value = FuzzyDecimal(1, 10000)
 	score = LazyAttribute(lambda o: o.get_score())
