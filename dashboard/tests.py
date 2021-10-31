@@ -274,6 +274,9 @@ class TestNewSpades(OTISTestCase):
 			self.assertEqual(rows[0]['spades'], 3.14)
 			self.assertEqual(rows[1]['spades'], 6.2)
 
+			self.assertEqual(get_level_info(rows[0]['student'])['total_spades'], 3.14)
+			self.assertEqual(get_level_info(rows[1]['student'])['total_spades'], 6.2)
+
 
 class TestSubmitPSet(OTISTestCase):
 	def test_submit(self):

@@ -153,7 +153,7 @@ def get_level_info(student: Student) -> LevelInfoDict:
 	mock_completes = MockCompleted.objects.filter(student=student).select_related('exam')
 	market_guesses = Guess.objects.filter(
 		user=student.user,
-		market__end_date__gt=timezone.now(),
+		market__end_date__lt=timezone.now(),
 		market__semester=student.semester,
 	).select_related('market')
 	suggested_units_queryset = ProblemSuggestion.objects.filter(
