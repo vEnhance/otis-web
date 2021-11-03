@@ -50,7 +50,7 @@ class OTISTestCase(TestCase):
 	def get(self, name: str, *args: Any):
 		return self.client.get(reverse_lazy(name, args=args), follow=True)
 
-	def post(self, name: str, *args: Any, data: Dict[str, Any]):
+	def post(self, name: str, *args: Any, data: Dict[str, Any] = {}):
 		return self.client.post(reverse_lazy(name, args=args), data=data, follow=True)
 
 	def assertGet20X(self, name: str, *args: Any):
@@ -68,19 +68,19 @@ class OTISTestCase(TestCase):
 	def assertGetNotFound(self, name: str, *args: Any):
 		return self.assertNotFound(self.get(name, *args))
 
-	def assertPost20X(self, name: str, *args: Any, data: Dict[str, Any]):
+	def assertPost20X(self, name: str, *args: Any, data: Dict[str, Any] = {}):
 		return self.assert20X(self.post(name, *args, data=data))
 
-	def assertPostOK(self, name: str, *args: Any, data: Dict[str, Any]):
+	def assertPostOK(self, name: str, *args: Any, data: Dict[str, Any] = {}):
 		return self.assertOK(self.post(name, *args, data=data))
 
-	def assertPost40X(self, name: str, *args: Any, data: Dict[str, Any]):
+	def assertPost40X(self, name: str, *args: Any, data: Dict[str, Any] = {}):
 		return self.assert40X(self.post(name, *args, data=data))
 
-	def assertPostDenied(self, name: str, *args: Any, data: Dict[str, Any]):
+	def assertPostDenied(self, name: str, *args: Any, data: Dict[str, Any] = {}):
 		return self.assertDenied(self.post(name, *args, data=data))
 
-	def assertPostNotFound(self, name: str, *args: Any, data: Dict[str, Any]):
+	def assertPostNotFound(self, name: str, *args: Any, data: Dict[str, Any] = {}):
 		return self.assertNotFound(self.post(name, *args, data=data))
 
 	def login_name(self, username: str):
