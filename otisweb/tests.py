@@ -50,8 +50,8 @@ class OTISTestCase(TestCase):
 	def get(self, name: str, *args: Any):
 		return self.client.get(reverse_lazy(name, args=args), follow=True)
 
-	def post(self, name: str, *args: Any, data: Dict[str, Any] = {}):
-		return self.client.post(reverse_lazy(name, args=args), data=data, follow=True)
+	def post(self, name: str, *args: Any, data: Dict[str, Any] = None):
+		return self.client.post(reverse_lazy(name, args=args), data=data or {}, follow=True)
 
 	def assertGet20X(self, name: str, *args: Any):
 		return self.assert20X(self.get(name, *args))
@@ -68,20 +68,20 @@ class OTISTestCase(TestCase):
 	def assertGetNotFound(self, name: str, *args: Any):
 		return self.assertNotFound(self.get(name, *args))
 
-	def assertPost20X(self, name: str, *args: Any, data: Dict[str, Any] = {}):
-		return self.assert20X(self.post(name, *args, data=data))
+	def assertPost20X(self, name: str, *args: Any, data: Dict[str, Any] = None):
+		return self.assert20X(self.post(name, *args, data=data or {}))
 
-	def assertPostOK(self, name: str, *args: Any, data: Dict[str, Any] = {}):
-		return self.assertOK(self.post(name, *args, data=data))
+	def assertPostOK(self, name: str, *args: Any, data: Dict[str, Any] = None):
+		return self.assertOK(self.post(name, *args, data=data or {}))
 
-	def assertPost40X(self, name: str, *args: Any, data: Dict[str, Any] = {}):
-		return self.assert40X(self.post(name, *args, data=data))
+	def assertPost40X(self, name: str, *args: Any, data: Dict[str, Any] = None):
+		return self.assert40X(self.post(name, *args, data=data or None))
 
-	def assertPostDenied(self, name: str, *args: Any, data: Dict[str, Any] = {}):
-		return self.assertDenied(self.post(name, *args, data=data))
+	def assertPostDenied(self, name: str, *args: Any, data: Dict[str, Any] = None):
+		return self.assertDenied(self.post(name, *args, data=data or {}))
 
-	def assertPostNotFound(self, name: str, *args: Any, data: Dict[str, Any] = {}):
-		return self.assertNotFound(self.post(name, *args, data=data))
+	def assertPostNotFound(self, name: str, *args: Any, data: Dict[str, Any] = None):
+		return self.assertNotFound(self.post(name, *args, data=data or {}))
 
 	def login_name(self, username: str):
 		user = User.objects.get(username=username)
