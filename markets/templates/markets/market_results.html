@@ -21,7 +21,12 @@
 	{{ market.prompt|linebreaks }}
 </div>
 
+{% if market.answer %}
 <p>The correct answer was <strong>{{ market.answer }}</strong>.</p>
+{% else %}
+<p>The correct answer for the market hasn't been set yet,
+	so none of the scores will show below.</p>
+{% endif %}
 {{ market.solution|linebreaks }}
 
 {% if guess %}

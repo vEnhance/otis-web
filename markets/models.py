@@ -1,3 +1,5 @@
+from typing import Optional
+
 from core.models import Semester
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
@@ -34,7 +36,7 @@ class Market(models.Model):
 	solution = models.TextField(
 		help_text="Comments that appear in the market results.", blank=True
 	)
-	answer = models.FloatField(help_text="The answer to the question")
+	answer = models.FloatField(help_text="The answer to the question", blank=True, null=True)
 	weight = models.FloatField(
 		help_text="The max score to assign to the market, "
 		"used in the scoring function",
@@ -95,11 +97,14 @@ class Guess(models.Model):
 	def __str__(self) -> str:
 		return f"Guessed {self.value} at {self.created_at}"
 
-	def get_score(self) -> float:
-		a = round(self.market.answer, ndigits=6)
-		b = round(self.value, ndigits=6)
-		assert a > 0 and b > 0
-		return round(self.market.weight * min(a / b, b / a)**self.market.alpha, ndigits=2)
+	def get_score(self) -> Optional[float]:
+		if self.market.answer is not None:
+			a = round(self.market.answer, ndigits=6)
+			b = round(self.value, ndigits=6)
+			assert a > 0 and b > 0
+			return round(self.market.weight * min(a / b, b / a)**self.market.alpha, ndigits=2)
+		else:
+			return None
 
 	def set_score(self):
 		self.score = self.get_score()

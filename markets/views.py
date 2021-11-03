@@ -103,8 +103,8 @@ class MarketResults(LoginRequiredMixin, ListView[Guess]):
 		return super().dispatch(request, *args, **kwargs)
 
 
-@user_passes_test(lambda u: u.is_superuser)
 @require_POST
+@user_passes_test(lambda u: u.is_superuser)
 def recompute(request: AuthHttpRequest, slug: str):
 	guesses = list(Guess.objects.filter(market__slug=slug))
 	for guess in guesses:
