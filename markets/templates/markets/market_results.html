@@ -1,8 +1,9 @@
 {% extends "layout.html" %}
 {% block title %}Market {{ market.slug }}{% endblock %}
 {% block layout-content %}
+
 {% if request.user.is_superuser %}
-{% if not market.has_ended %}
+{% if not market.has_ended or not market.answer %}
 <div class="alert alert-warning">
 	You are viewing this market in admin mode.
 </div>
@@ -20,22 +21,17 @@
 	<h2 class="alert-heading">{{ market.title }}</h2>
 	{{ market.prompt|linebreaks }}
 </div>
+<p>Market parameters: $w = {{ market.weight }}$, $\alpha = {{ market.alpha }}$.</p>
 
-{% if market.answer %}
-<p>The correct answer was <strong>{{ market.answer }}</strong>.</p>
-{% else %}
-<p>The correct answer for the market hasn't been set yet,
-	so none of the scores will show below.</p>
-{% endif %}
+{% if market.answer or request.user.is_superuser %}
+<p>The correct answer was <strong>{{ market.answer|default_if_none:"TBD" }}</strong>.</p>
 {{ market.solution|linebreaks }}
 
-{% if guess %}
-<p>Your guess of {{ guess.value }} earned {{ guess.score }}♠.</p>
+{% if guess and market.answer %}
+<p>Your guess of {{ guess.value }} earned {{ guess.score|default_if_none:"?" }}♠.</p>
 {% endif %}
 
 <hr />
-
-<p>Market parameters: $w = {{ market.weight }}$, $\alpha = {{ market.alpha }}$.</p>
 
 <table class="table">
 	<tr class="table-dark">
@@ -67,4 +63,8 @@
 	{% endfor %}
 </table>
 
+{% else %}
+<p>The correct answer for the market hasn't been chosen,
+	so results are not shown yet.</p>
+{% endif %}
 {% endblock %}
