@@ -51,7 +51,6 @@ class MarketTests(OTISTestCase):
 		MarketFactory(
 			start_date=timezone.datetime(2050, 5, 1, 0, 0, 0, tzinfo=utc),
 			end_date=timezone.datetime(2050, 9, 30, 23, 59, 59, tzinfo=utc),
-			answer=42,  # yes, my SSN is 42, get rekt
 			weight=2,
 			alpha=2,
 			slug='guess-my-ssn'
@@ -111,8 +110,11 @@ class MarketTests(OTISTestCase):
 				"/markets/results/guess-my-ssn/",
 			)
 
-	def test_guess_form(self):
+	def test_guess_form_with_answer(self):
 		with freeze_time('2050-07-01', tz_offset=0):
+			market = Market.objects.get(slug='guess-my-ssn')
+			market.answer = 42
+			market.save()
 			self.login('alice')
 			resp = self.assertGet20X('market-guess', 'guess-my-ssn')
 			self.assertContains(resp, "market main page")
@@ -120,6 +122,33 @@ class MarketTests(OTISTestCase):
 
 			resp = self.assertGet20X('market-guess', 'guess-my-ssn')
 			self.assertContains(resp, "You already submitted")
+
+			guess = Guess.objects.get(user__username='alice')
+			self.assertEqual(guess.value, 100)
+			self.assertAlmostEqual(guess.score, round((42 / 100)**2 * 2, ndigits=2))
+
+	def test_guess_form_without_answer(self):
+		with freeze_time('2050-07-01', tz_offset=0):
+			market = Market.objects.get(slug='guess-my-ssn')
+			self.login('alice')
+			resp = self.assertGet20X('market-guess', 'guess-my-ssn')
+			self.assertContains(resp, "market main page")
+			self.assertPost20X('market-guess', 'guess-my-ssn', data={'value': 100})
+
+			resp = self.assertGet20X('market-guess', 'guess-my-ssn')
+			self.assertContains(resp, "You already submitted")
+
+			guess = Guess.objects.get(user__username='alice')
+			self.assertEqual(guess.value, 100)
+			self.assertEqual(guess.score, None)
+
+			market.answer = 42
+			market.save()
+			self.assertPost40X('market-recompute', 'guess-my-ssn')
+
+			UserFactory.create(username='admin', is_staff=True, is_superuser=True)
+			self.login('admin')
+			self.assertPost20X('market-recompute', 'guess-my-ssn')
 
 			guess = Guess.objects.get(user__username='alice')
 			self.assertEqual(guess.value, 100)

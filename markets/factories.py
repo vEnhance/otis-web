@@ -19,7 +19,6 @@ class MarketFactory(DjangoModelFactory):
 	slug = UniqueFaker('slug')
 	title = Faker('bs')
 	prompt = Faker('paragraph')
-	answer = FuzzyDecimal(10, 1000)
 
 
 class GuessFactory(DjangoModelFactory):
