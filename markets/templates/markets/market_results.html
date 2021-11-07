@@ -1,15 +1,16 @@
 {% extends "layout.html" %}
 {% block title %}Market {{ market.slug }}{% endblock %}
 {% block layout-content %}
+
 {% if request.user.is_superuser %}
-{% if not completed %}
+{% if not market.has_ended or not market.answer %}
 <div class="alert alert-warning">
 	You are viewing this market in admin mode.
 </div>
 {% endif %}
 <form action="{% url "market-recompute" market.slug %}" method="post">
 	{% csrf_token %}
-	<button type="submit" name="submit" class="btn btn-danger">
+	<button type="submit" name="submit" class="btn btn-outline-danger">
 		Recompute scores
 	</button>
 </form>
@@ -20,16 +21,17 @@
 	<h2 class="alert-heading">{{ market.title }}</h2>
 	{{ market.prompt|linebreaks }}
 </div>
+<p>Market parameters: $w = {{ market.weight }}$, $\alpha = {{ market.alpha }}$.</p>
 
-<p>The correct answer was <strong>{{ market.answer }}</strong>.</p>
+{% if market.answer or request.user.is_superuser %}
+<p>The correct answer was <strong>{{ market.answer|default_if_none:"TBD" }}</strong>.</p>
+{{ market.solution|linebreaks }}
 
-{% if guess %}
-<p>Your guess of {{ guess.value }} earned {{ guess.score }}♠.</p>
+{% if guess and market.answer %}
+<p>Your guess of {{ guess.value }} earned {{ guess.score|default_if_none:"?" }}♠.</p>
 {% endif %}
 
 <hr />
-
-<p>Market parameters: $w = {{ market.weight }}$, $\alpha = {{ market.alpha }}$.</p>
 
 <table class="table">
 	<tr class="table-dark">
@@ -41,14 +43,17 @@
 	{% for g in guesses %}
 	<tr {% if guess.pk == g.pk %}class="table-primary" {% endif %}>
 		<th class="text-end">{{ forloop.counter }}</th>
-		<td class="text-end">{{ g.value|floatformat:".6f" }}</td>
+		<td class="text-end">{{ g.value|floatformat:6 }}</td>
 		<td class="text-end">
-			+{{ g.score|floatformat:".2f" }}♠
+			{% if g.score >= 0.01 %}
+			+{{ g.score|floatformat:2 }}♠
+			{% endif %}
 		</td>
 		<td>
 			{% if guess.pk == g.pk %}
 			<strong>{{ g.user.get_full_name }}</strong>
-			{% elif g.public %}
+			{% if not g.public %}(hidden){% endif %}
+			{% elif g.public or request.user.is_staff %}
 			{{ g.user.get_full_name }}
 			{% else %}
 			&mdash;
@@ -58,4 +63,8 @@
 	{% endfor %}
 </table>
 
+{% else %}
+<p>The correct answer for the market hasn't been chosen,
+	so results are not shown yet.</p>
+{% endif %}
 {% endblock %}

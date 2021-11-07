@@ -162,7 +162,7 @@ class PSet(models.Model):
 	)
 	next_unit_to_unlock = models.ForeignKey(
 		Unit,
-		help_text="The unit you want to work on next (leave blank for any)",
+		help_text="The unit you want to work on next (leave blank for none)",
 		on_delete=models.SET_NULL,
 		null=True,
 		blank=True,
@@ -208,6 +208,9 @@ class ProblemSuggestion(models.Model):
 	)
 
 	resolved = models.BooleanField(default=False, help_text="Whether staff has processed this.")
+	eligible = models.BooleanField(
+		default=True, help_text="Whether this suggestion is eligible for spades."
+	)
 	created_at = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self) -> str:
@@ -226,7 +229,7 @@ class Achievement(models.Model):
 		unique=True,
 		null=True,
 		validators=[
-			RegexValidator(regex=r'^[a-f0-9]{24}$', message='24-char hex string'),
+			RegexValidator(regex=r'^[a-f0-9]{24,25}$', message='24-25 char hex string'),
 		],
 	)
 	name = models.CharField(max_length=128, help_text="Name of the achievement")
@@ -293,6 +296,20 @@ class QuestComplete(models.Model):
 	spades = models.PositiveSmallIntegerField(help_text="The number of spades granted")
 	timestamp = models.DateTimeField(
 		auto_now_add=True, help_text='The time the achievement was granted'
+	)
+
+	CATEGORY_CHOICES = (
+		("PR", "Pull request"),
+		("BR", "Bug report"),
+		("WK", "Wiki bonus"),
+		("US", "USEMO Score"),
+		("UG", "USEMO Grading"),
+		("MS", "Miscellaneous"),
+	)
+	category = models.CharField(
+		max_length=4,
+		choices=CATEGORY_CHOICES,
+		default="MS",
 	)
 
 	def __str__(self) -> str:

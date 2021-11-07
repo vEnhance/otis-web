@@ -1,0 +1,53 @@
+{% extends 'layout.html' %}
+{% load humanize %}
+{% block title %}Estimation markets{% endblock %}
+{% block layout-content %}
+
+<p>
+	Estimation markets are a side minigame that
+	offers spades for correctly guessing hidden values.
+</p>
+
+<table class="table">
+	<tr class="table-dark">
+		<th>Market</th>
+		<th>$w$</th>
+		<th>$\alpha$</th>
+		<th>Ending date</th>
+	</tr>
+	{% for market in markets %}
+	<tr class="{% if not market.has_ended %}table-success{% endif %}">
+		<td>
+			<a href="{{ market.get_absolute_url }}">
+				<code>{{ market.slug }}</code>
+			</a>
+		</td>
+		<td>{{ market.weight|floatformat:".2f" }}</td>
+		<td>{{ market.alpha|floatformat:".2f" }}</td>
+		<td>{{ market.end_date|naturaltime }}</td>
+	</tr>
+	{% endfor %}
+</table>
+
+<hr />
+<h3>Market Rules</h3>
+<ol>
+	<li>Markets open every Friday at midnight Eastern time,
+		and close at the next Monday at 6am Eastern time.</li>
+	<li>Each market has a correct answer $A \in [10^{-6}, 10^6]$.
+		The value of $A$ may be rounded arbitrarily by the game master.
+		The precision will not exceed $6$ decimal places.
+	</li>
+	<li>The guess $B$ you submit must be a real number in the interval $[10^{-6}, 10^6]$.
+		Guesses will be rounded to $6$ decimal places.</li>
+	<li>If you submit a guess $B$, your score for the market (in ♠)
+		is given by the function
+		\[ w \cdot \left(\min\left\{\frac AB, \frac BA\right\}\right)^\alpha \]
+		where $w$ and $\alpha$ are two fixed parameters announced for the market.
+		(The default values are $w=4$ and $\alpha=2$.)
+	</li>
+	<li>You may only submit one guess. It is not possible to change your guess later.</li>
+	<li>Discussion, collusion, and other antics are permitted.</li>
+</ol>
+
+{% endblock %}

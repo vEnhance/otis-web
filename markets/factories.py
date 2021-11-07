@@ -19,7 +19,6 @@ class MarketFactory(DjangoModelFactory):
 	slug = UniqueFaker('slug')
 	title = Faker('bs')
 	prompt = Faker('paragraph')
-	answer = FuzzyDecimal(10, 1000)
 
 
 class GuessFactory(DjangoModelFactory):
@@ -28,5 +27,5 @@ class GuessFactory(DjangoModelFactory):
 
 	user = SubFactory(UserFactory)
 	market = SubFactory(MarketFactory)
-	guess = FuzzyDecimal(1, 10000)
+	value = FuzzyDecimal(1, 10000)
 	score = LazyAttribute(lambda o: o.get_score())

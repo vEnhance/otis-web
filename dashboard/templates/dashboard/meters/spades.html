@@ -3,14 +3,24 @@
 {% block meter-content %}
 <p>You gain
 	<span style="color:{{meters.spades.color}};">{{ meters.spades.unit }}</span>
-	by scoring points on quizzes and completing special quests.
-	Special quests include competing in or grading for the
-	<a href="https://web.evanchen.cc/usemo.html">USEMO</a>,
-	and contributing on
-	<a href="https://github.com/vEnhance/otis-web/blob/main/CONTRIBUTING.mkd">GitHub</a>.
+	by any of the following:
+	<ul>
+		<li>scoring points on <a href="{% url 'portal' student.id %}">short-answer quizzes</a>,</li>
+		<li>
+			completing special quests like
+			<a href="https://web.evanchen.cc/usemo.html">USEMO participation or grading</a> and
+			<a href="https://github.com/vEnhance/otis-web/blob/main/CONTRIBUTING.mkd">GitHub contributions</a>,
+		</li>
+		<li>participating in <a href="{% url 'market-list' %}">estimation markets</a>,
+		<li>submitting <a href="{% url 'mocks' student.id %}">mock olympiads</a> on time,
+			worth 3♠ each regardless of performance</li>
+		<li>contributing <a href="{% url 'suggest-new' %}">problem suggestions</a>,
+			worth 1♠ each for each distinct unit with an approved suggestion,</li>
+		<li>contributing hints to <a href="{% url 'arch-lookup' %}">ARCH</a>,
+			formula to be determined.</li>
+	</ul>
 </p>
 
-{% if quiz_attempts or quest_completes %}
 <table class="table table-sm">
 	<thead class="table-dark">
 		<tr>
@@ -20,6 +30,20 @@
 		</tr>
 	</thead>
 	<tbody>
+		{% for attempt in quiz_attempts %}
+		<tr>
+			<td style="color:{{ meters.spades.color }};">
+				+{{ attempt.score }}{{ meters.spades.unit }}
+			</td>
+			<td>
+				<a href="{% url "quiz" student.id attempt.quiz.pk %}">
+					{{ attempt.quiz }}
+				</a>
+			</td>
+			<td>{{ attempt.submit_time|naturaltime }}</td>
+		</tr>
+		{% endfor %}
+
 		{% for quest in quest_completes %}
 		<tr style="background-color: #ffff99;">
 			<td style="color:{{ meters.spades.color }};">
@@ -35,20 +59,55 @@
 			</td>
 		</tr>
 		{% endfor %}
-		{% for attempt in quiz_attempts %}
-		<tr>
+
+		{% for guess in market_guesses %}
+		<tr style="background-color: #ffff99;">
 			<td style="color:{{ meters.spades.color }};">
-				+{{ attempt.score }}{{ meters.spades.unit }}
+				<b>
+					+{{ guess.score }}{{ meters.spades.unit }}
+				</b>
 			</td>
 			<td>
-				<a href="{% url "quiz" student.id attempt.quiz.pk %}">
-					{{ attempt.quiz }}
-				</a>
+				<a href="{{ guess.market.get_absolute_url }}">{{ guess.market.slug }}</a>
 			</td>
-			<td>{{ attempt.submit_time|naturaltime }}</td>
+			<td>
+				{{ guess.market.end_date|naturaltime }}
+			</td>
 		</tr>
 		{% endfor %}
+
+
+		{% for mc in mock_completes %}
+		<tr>
+			<td style="color:{{ meters.spades.color }};">
+				<b>
+					+3{{ meters.spades.unit }}
+				</b>
+			</td>
+			<td>
+				{{ mc.exam.family }} {{ mc.exam.number }}
+			</td>
+			<td>
+				{{ mc.exam.due_date|default_if_none:"&mdash;" }}
+			</td>
+		</tr>
+		{% endfor %}
+		{% for u in suggest_unit_set %}
+		<tr>
+			<td style="color:{{ meters.spades.color }};">
+				<b>
+					+1{{ meters.spades.unit }}
+				</b>
+			</td>
+			<td>
+				{{ u.1 }} {{ u.2 }}
+			</td>
+			<td>
+			</td>
+		</tr>
+		{% endfor %}
+
+		{# TODO hints #}
 </table>
 </table>
-{% endif %}
 {% endblock %}
