@@ -69,6 +69,9 @@ class Market(models.Model):
 	def has_ended(self) -> bool:
 		return timezone.now() >= self.end_date
 
+	class Meta:
+		ordering = ('-end_date',)
+
 
 class Guess(models.Model):
 	created_at = models.DateTimeField(auto_now_add=True)
