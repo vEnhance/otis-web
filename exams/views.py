@@ -12,7 +12,7 @@ from roster.utils import get_student_by_id, infer_student
 
 from exams.calculator import expr_compute
 
-from .forms import ExamAttemptForm, ParticipationPointsForm
+from .forms import ExamAttemptForm, FeedbackForm, ParticipationPointsForm
 from .models import ExamAttempt, MockCompleted, PracticeExam
 
 # Create your views here.
@@ -99,10 +99,26 @@ def quiz(request: AuthHttpRequest, student_id: int, pk: int) -> HttpResponse:
 			if attempt.score != score:
 				attempt.score = score
 				attempt.save()
+			
+			if request.method == 'POST':
+				#get the feedback form
+				form = FeedbackForm(request.POST)
+				if form.is_valid():
+					feedback = form.save(commit=False)
+					feedback.attempt = attempt
+					feedback.save()
+
+					message = "Thank you for the feedback. Any issues will be addressed."
+					context['message'] = [message]
+				else:
+					message = "Please ensure the feedback field has been filled."
+					context['message'] = [{'message': message}]
+
+		allow_feedback = True
 
 	context['quiz'] = quiz
 	context['student'] = student
-	return render(request, 'exams/quiz.html', context)
+	return render(request, 'exams/quiz.html', context, allow_feedback=allow_feedback)
 
 
 @login_required

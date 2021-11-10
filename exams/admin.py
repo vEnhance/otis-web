@@ -2,7 +2,7 @@ from django.contrib import admin
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
-from .models import ExamAttempt, MockCompleted, PracticeExam
+from .models import ExamAttempt, Feedback, MockCompleted, PracticeExam, Feedback
 
 # Register your models here.
 
@@ -88,4 +88,12 @@ class MockCompletedAdmin(admin.ModelAdmin):
 		'student__semester__active',
 		'exam',
 		'student__semester',
+	)
+
+@admin.register(Feedback)
+class FeedbackAdmin(admin.ModelAdmin):
+	list_display = (
+		'exam',
+		'student',
+		'feedback',
 	)

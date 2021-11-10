@@ -177,3 +177,9 @@ class MockCompleted(models.Model):
 			'exam',
 		)
 		verbose_name_plural = 'Mock completions'
+
+class Feedback(models.Model):
+	student = models.ForeignKey(Student, on_delete=models.CASCADE)
+	exam = models.ForeignKey(PracticeExam, on_delete=models.CASCADE)
+	feedback = models.CharField(max_length=500, blank=True)
+	

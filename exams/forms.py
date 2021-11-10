@@ -2,7 +2,7 @@ from django import forms
 from django.core.validators import RegexValidator
 from django.forms import ModelForm
 
-from .models import ExamAttempt, PracticeExam
+from .models import ExamAttempt, Feedback, PracticeExam
 
 
 class ExamAttemptForm(ModelForm[ExamAttempt]):
@@ -20,3 +20,8 @@ class ParticipationPointsForm(forms.Form):
 			RegexValidator(r'[0-9\n]+'),
 		],
 	)
+
+class FeedbackForm(ModelForm[Feedback]):
+	class Meta:
+		fields = ('student', 'exam', 'feedback',)
+		model = Feedback
