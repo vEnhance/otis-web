@@ -56,7 +56,7 @@ class Market(models.Model):
 		return f'{self.title} ({self.slug})'
 
 	def get_absolute_url(self) -> str:
-		if self.has_ended:
+		if self.has_ended or not self.has_started:
 			return reverse_lazy('market-results', args=(self.slug, ))
 		else:
 			return reverse_lazy('market-guess', args=(self.slug, ))
@@ -68,6 +68,9 @@ class Market(models.Model):
 	@property
 	def has_ended(self) -> bool:
 		return timezone.now() >= self.end_date
+
+	class Meta:
+		ordering = ('-end_date',)
 
 
 class Guess(models.Model):
