@@ -30,6 +30,17 @@
 			<p><a target="_top" href="{{ row.url }}">View solution</a></p>
 		</div>
 	</div>
+	<div class="feedback">
+		{% if allow_feedback == "True" %}
+		<h3>Enter feedback here!</h3>
+			{% if message.message %}
+				<div class="alert alert" role="alert">
+					{{ message.message }}
+				</div>
+			{% endif %}
+			{% include "feedback_form.html" %}
+		{% endif %}
+	</div>
 	{% endfor %}
 </div>
 {% include "exams/gateway.html" %}
