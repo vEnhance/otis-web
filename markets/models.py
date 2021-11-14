@@ -44,7 +44,7 @@ class Market(models.Model):
 	)
 	alpha = models.FloatField(
 		help_text="Exponent corresponding to harshness of the market, "
-		"used in the scoring function",
+		"used in the scoring function; leave blank for special scoring.",
 		default=2,
 		null=True,
 		blank=True,
