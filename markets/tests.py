@@ -153,3 +153,33 @@ class MarketTests(OTISTestCase):
 			guess = Guess.objects.get(user__username='alice')
 			self.assertEqual(guess.value, 100)
 			self.assertAlmostEqual(guess.score, round((42 / 100)**2 * 2, ndigits=2))
+
+	def test_guess_form_without_alpha(self):
+		with freeze_time('2050-07-01', tz_offset=0):
+			market = Market.objects.get(slug='guess-my-ssn')
+			market.alpha = None
+			market.save()
+			self.login('alice')
+			resp = self.assertGet20X('market-guess', 'guess-my-ssn')
+			self.assertNotContains(resp, "market main page")  # because it's a special market
+			self.assertPost20X('market-guess', 'guess-my-ssn', data={'value': 100})
+
+			resp = self.assertGet20X('market-guess', 'guess-my-ssn')
+			self.assertContains(resp, "You already submitted")
+
+			guess = Guess.objects.get(user__username='alice')
+			self.assertEqual(guess.value, 100)
+			self.assertEqual(guess.score, None)
+
+			market.answer = 42
+			market.alpha = 3
+			market.save()
+			self.assertPost40X('market-recompute', 'guess-my-ssn')
+
+			UserFactory.create(username='admin', is_staff=True, is_superuser=True)
+			self.login('admin')
+			self.assertPost20X('market-recompute', 'guess-my-ssn')
+
+			guess = Guess.objects.get(user__username='alice')
+			self.assertEqual(guess.value, 100)
+			self.assertAlmostEqual(guess.score, round((42 / 100)**3 * 2, ndigits=2))
