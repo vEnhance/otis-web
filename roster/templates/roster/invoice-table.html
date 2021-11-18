@@ -1,4 +1,5 @@
 {% load static %}
+{% load otis_extras %}
 
 <div class="container">
 	<div class="row">
@@ -78,6 +79,18 @@
 					</tr>
 				</tfoot>
 			</table>
+		</div>
+	</div>
+	<div clss="container">
+		<div class="row">
+			<span class="col-xs-12 col-sm-6">
+				<h4>Evan's Regular Address</h4>
+				{{ "ADDRESS_WORK"|getenv }}
+			</span>
+			<span class="col-xs-12 col-sm-5">
+				<h4>Evan's Home Address</h4>
+				{{ "ADDRESS_HOME"|getenv }}
+			</span>
 		</div>
 	</div>
 </div>
