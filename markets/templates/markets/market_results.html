@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% load admin-urls %}
 {% block title %}Market {{ market.slug }}{% endblock %}
 {% block layout-content %}
 
@@ -14,6 +15,9 @@
 		Recompute scores
 	</button>
 </form>
+<a href="{% url  markets_market_change market.pk %}"  title="Edit in Admin" class="btn btn-link btn-outline-success">
+	Edit market
+</a>
 <hr />
 {% endif %}
 
@@ -24,7 +28,7 @@
 <p>Market parameters: $w = {{ market.weight }}${% if market.alpha is not None %}and $\alpha = {{ market.alpha }}${% endif %}.</p>
 
 {% if market.answer or request.user.is_superuser %}
-<p>The correct answer was <strong>{{ market.answer|default_if_none:"TBD" }}</strong>.</p>
+<p>The correct answer was <strong>{{ market.answer|default_if_none:"pending" }}</strong>.</p>
 {{ market.solution|linebreaks }}
 
 {% if guess and market.answer %}
@@ -52,9 +56,11 @@
 		<td>
 			{% if guess.pk == g.pk %}
 			<strong>{{ g.user.get_full_name }}</strong>
-			{% if not g.public %}(hidden){% endif %}
-			{% elif g.public or request.user.is_staff %}
-			{{ g.user.get_full_name }}
+			<span>
+				{% if not g.public %}(hidden){% endif %}
+				{% elif g.public or request.user.is_staff %}
+				{{ g.user.get_full_name }}
+			</span>
 			{% else %}
 			&mdash;
 			{% endif %}
@@ -63,8 +69,4 @@
 	{% endfor %}
 </table>
 
-{% else %}
-<p>The correct answer for the market hasn't been chosen,
-	so results are not shown yet.</p>
-{% endif %}
 {% endblock %}
