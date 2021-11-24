@@ -49,6 +49,7 @@ class Market(models.Model):
 		null=True,
 		blank=True,
 	)
+	show_answer = models.BooleanField(default=False)
 
 	objects = models.Manager()
 	started = StartedMarketManager()

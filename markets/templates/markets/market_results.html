@@ -27,47 +27,50 @@
 </div>
 <p>Market parameters: $w = {{ market.weight }}${% if market.alpha is not None %}and $\alpha = {{ market.alpha }}${% endif %}.</p>
 
-{% if market.answer or request.user.is_superuser %}
-<p>The correct answer was <strong>{{ market.answer|default_if_none:"pending" }}</strong>.</p>
+{% if market.show_answer or request.user.is_superuser %}
+<p>The correct answer is
+	<strong>{{ market.answer|default_if_none:"TBD" }}</strong>.</p>
 {{ market.solution|linebreaks }}
-
-{% if guess and market.answer %}
-<p>Your guess of {{ guess.value }} earned {{ guess.score|default_if_none:"?" }}♠.</p>
 {% endif %}
 
-<hr />
-
-<table class="table">
-	<tr class="table-dark">
-		<th style="width:2em;">#</th>
-		<th style="width:9em;">Guess</th>
-		<th style="width:5em;">Score</th>
-		<th>Player</th>
-	</tr>
-	{% for g in guesses %}
-	<tr {% if guess.pk == g.pk %}class="table-primary" {% endif %}>
-		<th class="text-end">{{ forloop.counter }}</th>
-		<td class="text-end">{{ g.value|floatformat:6 }}</td>
-		<td class="text-end">
-			{% if g.score >= 0.01 %}
-			+{{ g.score|floatformat:2 }}♠
-			{% endif %}
-		</td>
-		<td>
-			{% if guess.pk == g.pk %}
-			<strong>{{ g.user.get_full_name }}</strong>
-			<span>
-				{% if not g.public %}(hidden){% endif %}
-				{% elif g.public or request.user.is_staff %}
-				{{ g.user.get_full_name }}
-			</span>
-			{% else %}
-			&mdash;
-			{% endif %}
-		</td>
-	</tr>
-	{% endfor %}
-</table>
-
+{% if market.has_ended %}
+<div>
+	{% if guess and market.answer %}
+	<p>Your guess of {{ guess.value }} earned {{ guess.score|default_if_none:"?" }}♠.</p>
+	{% endif %}
+	<hr />
+	<table class="table">
+		<tr class="table-dark">
+			<th style="width:2em;">#</th>
+			<th style="width:9em;">Guess</th>
+			<th style="width:5em;">Score</th>
+			<th>Player</th>
+		</tr>
+		{% for g in guesses %}
+		<tr {% if guess.pk == g.pk %}class="table-primary" {% endif %}>
+			<th class="text-end">{{ forloop.counter }}</th>
+			<td class="text-end">{{ g.value|floatformat:6 }}</td>
+			<td class="text-end">
+				{% if g.score >= 0.01 %}
+				+{{ g.score|floatformat:2 }}♠
+				{% endif %}
+			</td>
+			<td>
+				{% if guess.pk == g.pk %}
+				<strong>{{ g.user.get_full_name }}</strong>
+				<span>
+					{% if not g.public %}(hidden){% endif %}
+					{% elif g.public or request.user.is_staff %}
+					{{ g.user.get_full_name }}
+				</span>
+				{% else %}
+				&mdash;
+				{% endif %}
+			</td>
+		</tr>
+		{% endfor %}
+	</table>
+</div>
 {% endif %}
+
 {% endblock %}
