@@ -1,33 +1,41 @@
 {% load static %}
 {% block content %}
 <div id="cert">
-<div style="text-align:center;">
-<h2>Certificate of completion</h2>
-<p>
-<img width="300px" src="https://storage.googleapis.com/otisweb-static/static/img/otis-logo-v2018.svg" />
-</p>
+	<div style="text-align:center;">
+		<p>
+			<img width="300px" src="https://storage.googleapis.com/otisweb-static/static/img/otis-logo-v2018.svg" />
+		</p>
+	<h2>{{ level_name }} (Level {{level_number}})</h2>
+	<h2>Certificate of achievement</h2>
 
-<p>This certificate indicates that the below student
-<h1 id="name">{{ student.name }}</h1>
-has participated in {{ student.semester }} of OTIS.</p>
+	<p>This certificate indicates that the below student
+	<h1 id="name">{{ student.name }}</h1>
+	has reached the above rank in {{ student.semester }} of OTIS.
+	Along with some for-fun side quests
+	and less-for-fun practice tests, {{ student.first_name}} also
+	spent over <strong>{{ hearts }} hours</strong> on practice problems
+	outside the classroom.
+	<hr />
+	<div style="text-align:center;">
+		<img width="200px" src="{% static 'img/sig-evan-4a.png' %}" />
+		<br />
+		<div style="margin:9px";>
+		<em>Evan Chen</em>, director of OTIS
+		</div>
+	</div>
+	<hr />
+	<div style="font-size:12pt;">
+		<p>This certificate (ID {{ student.id|stringformat:"07d" }})
+		was updated {% now "r" %}.</p>
+		<p>To verify this certificate digitally, use the URL:</p>
+		<tt>
+			<a href="{% url "certify" student.id checksum %}">
+				otis.evanchen.cc/{% url "certify" student.id checksum %}
+			</a>
+		</tt>
+	</div>
 </div>
 
-<hr />
-
-<p>During this academic year, {{ student.first_name }} recorded
-<strong>{{ hearts }} hours</strong> on the practice problems alone, not counting outside problems or exams.</p>
-
-<p>At the current moment, {{ student.first_name }} has achieved
-<strong>Level {{level_number}}</strong>,
-granting them the title of <strong>{{level_name}}</strong>.</p>
-</p>
-
-<div style="text-align:center;">
-	<img width="200px" src="{% static 'img/sig-evan-4a.jpg' %}" />
-</div>
-
-<p>This certificate was produced at {% now "r" %}.</p>
-</div>
 <style>
 #cert {
 	font-size: 16pt;
@@ -45,5 +53,4 @@ strong {
 	color: #aa0000;
 }
 </style>
-
 {% endblock %}

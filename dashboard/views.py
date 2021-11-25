@@ -632,5 +632,6 @@ def certify(request: HttpRequest, student_id: int, checksum: str = None):
 		'hearts': level_info['meters']['hearts'].value,
 		'level_number': level_info['level_number'],
 		'level_name': level_info['level_name'],
+		'checksum': student.get_checksum(settings.CERT_HASH_KEY),
 	}
 	return render(request, "dashboard/certify.html", context)
