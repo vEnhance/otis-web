@@ -1,16 +1,42 @@
 {% block content %}
+<div id="cert">
+<div style="text-align:center;">
 <h2>Certificate of completion</h2>
-
-<p>This certificate indicates that the below student
-<h3>{{ student.name }}</h3>
-has participated in {{ student.semester }} of OTIS.</p>
-
-<p>During this academic year, they recorded spending
-{{ hearts }} hours on the practice problems alone (not even counting outside problems or exams).
-At the current moment, the student has achieved
-Level {{level_number}},
-granting them the title of {{level_name}}.
+<p>
+<img width="300px" src="https://storage.googleapis.com/otisweb-static/static/img/otis-logo-v2018.svg" />
 </p>
 
+<p>This certificate indicates that the below student
+<h1 id="name">{{ student.name }}</h1>
+has participated in {{ student.semester }} of OTIS.</p>
+</div>
+
+<hr />
+
+<p>During this academic year, {{ student.firstname }} recorded
+<strong>{{ hearts }} hours</strong> on the practice problems alone (not even counting outside problems or exams).</p>
+
+<p>At the current moment, {{ student.firstname }} has achieved
+<strong>Level {{level_number}}</strong>,
+granting them the title of <strong>{{level_name}}</strong>.</p>
+</p>
+</div>
+<style>
+#cert {
+	font-size: 16pt;
+	margin: 30px 30px 30px 30px;
+	padding: 30px 30px 30px 30px;
+	width: 7.5in;
+	height: 10in;
+	border: 3px solid #aa0000;
+	background-color: rgb(254, 255, 238);
+}
+#name {
+	color: #aa0000;
+}
+strong {
+	color: #aa0000;
+}
+</style>
 
 {% endblock %}
