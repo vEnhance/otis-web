@@ -31,4 +31,5 @@ urlpatterns = [
 	path(r'palace/evan/', views.AdminPalaceList.as_view(), name='admin-palace-list'),
 	path(r'carve/<int:student_id>/', views.PalaceUpdate.as_view(), name='palace-update'),
 	path(r'forge/<int:student_id>/', views.DiamondUpdate.as_view(), name='diamond-update'),
+	path(r'certify/<int:student_id>/<str:checksum>/', views.certify, name='certify'),
 ]

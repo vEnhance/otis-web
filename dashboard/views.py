@@ -8,6 +8,7 @@ from typing import Any, Dict
 
 from braces.views import LoginRequiredMixin, StaffuserRequiredMixin, SuperuserRequiredMixin  # NOQA
 from core.models import Semester, Unit, UserProfile
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
@@ -618,3 +619,15 @@ class DiamondUpdate(
 
 	def get_success_url(self):
 		return reverse_lazy("diamond-update", args=(self.student.id, ))
+
+
+def certify(
+	request: HttpRequest,
+	student_id: int,
+	checksum: str,
+) -> HttpResponse:
+	student = get_object_or_404(Student, pk=student_id)
+	if not can_view(request, student):
+		raise PermissionDenied("Access denied")
+	context = {}
+	return render(request, "dashboard/certify.html", context)
