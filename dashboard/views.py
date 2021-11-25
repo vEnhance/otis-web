@@ -14,7 +14,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from django.db.models import Count, OuterRef, Subquery
 from django.db.models.expressions import Exists
 from django.db.models.query import QuerySet
@@ -621,16 +621,11 @@ class DiamondUpdate(
 		return reverse_lazy("diamond-update", args=(self.student.id, ))
 
 
-def certify(
-	request: HttpRequest,
-	student_id: int,
-	checksum: str,
-) -> HttpResponse:
+def certify(request: HttpRequest, student_id: int, checksum: str = None):
 	student = get_object_or_404(Student, pk=student_id)
 	if not can_view(request, student):
-		raise PermissionDenied("Access denied")
-	if student.get_hash_key() != checksum:
-		raise SuspiciousOperation("Wrong hash")
+		if student.get_checksum(settings.CERT_HASH_KEY) != checksum:
+			raise SuspiciousOperation("Wrong hash")
 	level_info = get_level_info(student)
 	context = {
 		'student': student,
