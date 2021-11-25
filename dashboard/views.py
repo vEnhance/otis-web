@@ -629,5 +629,13 @@ def certify(
 	student = get_object_or_404(Student, pk=student_id)
 	if not can_view(request, student):
 		raise PermissionDenied("Access denied")
-	context = {}
+	if student.get_hash_key() != checksum:
+		raise SuspiciousOperation("Wrong hash")
+	level_info = get_level_info(student)
+	context = {
+		'student': student,
+		'hearts': level_info['meters']['hearts'].value,
+		'level_number': level_info['level_number'],
+		'level_name': level_info['level_name'],
+	}
 	return render(request, "dashboard/certify.html", context)

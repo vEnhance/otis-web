@@ -124,6 +124,9 @@ class Student(models.Model):
 	def get_absolute_url(self):
 		return reverse_lazy('portal', args=(self.id, ))
 
+	def get_hash_key(self) -> str:
+		return settings.HASH + '|' + pow(3, self.pk, 65537)
+
 	@property
 	def first_name(self) -> str:
 		if self.user is None:
@@ -694,9 +697,6 @@ class StudentRegistration(models.Model):
 			'user',
 			'container',
 		)
-
-	def get_hash_key(self) -> str:
-		return settings.HASH + '|' + pow(3, self.pk, 65537)
 
 	def __str__(self) -> str:
 		return self.user.username

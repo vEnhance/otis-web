@@ -1,3 +1,16 @@
 {% block content %}
-you did otis
+<h2>Certificate of completion</h2>
+
+<p>This certificate indicates that the below student
+<h3>{{ student.name }}</h3>
+has participated in {{ student.semester }} of OTIS.</p>
+
+<p>During this academic year, they recorded spending
+{{ hearts }} hours on the practice problems alone (not even counting outside problems or exams).
+At the current moment, the student has achieved
+Level {{level_number}},
+granting them the title of {{level_name}}.
+</p>
+
+
 {% endblock %}
