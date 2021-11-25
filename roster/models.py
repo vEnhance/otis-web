@@ -7,7 +7,6 @@ from typing import Any, Callable, Dict, List
 
 from _pydecimal import Decimal
 from core.models import Semester, Unit
-from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import FileExtensionValidator

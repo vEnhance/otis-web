@@ -40,7 +40,8 @@ class OTISTestCase(TestCase):
 		return response
 
 	def assertDenied(self, response: HttpResponse):
-		self.assertEqual(response.status_code, 403)
+		if response.status_code != 400:
+			self.assertEqual(response.status_code, 403)
 		return response
 
 	def assertNotFound(self, response: HttpResponse):

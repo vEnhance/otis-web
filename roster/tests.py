@@ -1,12 +1,12 @@
 from core.factories import UnitFactory, UnitGroupFactory, UserFactory  # NOQA
 from dashboard.factories import PSetFactory
+from django.conf import settings
 from django.shortcuts import get_object_or_404
 from otisweb.tests import OTISTestCase
 from roster.factories import AssistantFactory, InvoiceFactory, RegistrationContainerFactory, StudentFactory, StudentRegistrationFactory  # NOQA
 from roster.models import Student, StudentRegistration, UnitInquiry  # NOQA
 
 from .admin import build_students
-from .views import get_checksum
 
 
 class RosterTest(OTISTestCase):
@@ -59,14 +59,16 @@ class RosterTest(OTISTestCase):
 		)
 		response = self.get('invoice')
 		self.assertContains(response, "752.00")
-		checksum = get_checksum(alice)
-		self.assertEqual(len(get_checksum(alice)), 36)
+		checksum = alice.get_checksum(settings.INVOICE_HASH_KEY)
+		self.assertEqual(len(checksum), 36)
 		self.assertContains(response, checksum)
 
 	def test_invoice_standalone(self):
 		alice = StudentFactory.create()
 		InvoiceFactory.create(student=alice)
-		self.assertGet20X('invoice-standalone', alice.pk, get_checksum(alice))
+		self.assertGet20X(
+			'invoice-standalone', alice.pk, alice.get_checksum(settings.INVOICE_HASH_KEY)
+		)
 		self.assertGetDenied('invoice-standalone', alice.pk, '?')
 		self.login(alice)
 		self.assertGetDenied('invoice-standalone', alice.pk, '?')
