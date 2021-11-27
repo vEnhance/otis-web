@@ -35,6 +35,7 @@ Unidecode = "^1.2.0"
 freezegun = "^1.1.0"
 types-freezegun = "^1.1.2"
 django-stubs-ext = "^0.3.1"
+django-qr-code = "^2.3.0"
 
 [tool.poetry.dev-dependencies]
 coverage = {extras = ["toml"], version = "^5.5"}

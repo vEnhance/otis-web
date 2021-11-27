@@ -23,7 +23,8 @@
 	in recognition of their dedication to tireless efforts
 	to become better problem solvers in an unforgiving world.
 	<div style="text-align:center;">
-		<img width="200px" src="{% static 'img/sig-evan-transp-4a.png' %}" />
+		{% qr_from_text target_url size="S" %}
+		<img height="44.4mm" src="{% static 'img/sig-evan-transp-4a.png' %}" />
 		<br />
 		<div style="margin:9px";>
 		<em>Evan Chen</em>, director of OTIS
@@ -35,10 +36,13 @@
 		was updated {% now "r" %}.</p>
 		<p>To verify this certificate digitally, use the URL:</p>
 		<tt>
-			<a href="{% url "certify" student.id checksum %}">
-				otis.evanchen.cc/{% url "certify" student.id checksum %}
+			<a href="{{request.path}} "certify" student.id checksum %}">
+				{{ request.get_host}}/{{request.path}}
 			</a>
 		</tt>
+	</div>
+
+	<div>
 	</div>
 </div>
 

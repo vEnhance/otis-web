@@ -78,6 +78,7 @@ INSTALLED_APPS = [
 	'mptt',
 	'sekizai',
 	'sorl.thumbnail',
+	'qr_code',
 	'wiki.apps.WikiConfig',
 	'wiki.plugins.editsection.apps.EditSectionConfig',
 	'wiki.plugins.images.apps.ImagesConfig',

@@ -628,10 +628,17 @@ def certify(request: HttpRequest, student_id: int, checksum: str = None):
 			raise SuspiciousOperation("Wrong hash")
 	level_info = get_level_info(student)
 	context = {
-		'student': student,
-		'hearts': level_info['meters']['hearts'].value,
-		'level_number': level_info['level_number'],
-		'level_name': level_info['level_name'],
-		'checksum': student.get_checksum(settings.CERT_HASH_KEY),
+		'student':
+			student,
+		'hearts':
+			level_info['meters']['hearts'].value,
+		'level_number':
+			level_info['level_number'],
+		'level_name':
+			level_info['level_name'],
+		'checksum':
+			student.get_checksum(settings.CERT_HASH_KEY),
+		'target_url':
+			request.get_host() + '/' + reverse_lazy('certify', args=(student.id, checksum))
 	}
 	return render(request, "dashboard/certify.html", context)

@@ -338,6 +338,18 @@ python-versions = "*"
 Django = "*"
 
 [[package]]
+name = "django-qr-code"
+version = "2.3.0"
+description = "An application that provides tools for displaying QR codes on your Django site."
+category = "main"
+optional = false
+python-versions = ">=3"
+
+[package.dependencies]
+django = ">=2.2"
+segno = "*"
+
+[[package]]
 name = "django-registration"
 version = "3.2"
 description = "An extensible user-registration application for Django"
@@ -1048,6 +1060,14 @@ python-versions = ">=3.6,<4"
 pyasn1 = ">=0.1.3"
 
 [[package]]
+name = "segno"
+version = "1.4.1"
+description = "QR Code and Micro QR Code generator for Python 2 and Python 3"
+category = "main"
+optional = false
+python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
+
+[[package]]
 name = "six"
 version = "1.16.0"
 description = "Python 2 and 3 compatibility utilities"
@@ -1276,7 +1296,7 @@ production = ["django-storages"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "77e2a1cd781689ce0cefca666d3af759b2e0b406d6a6fa397215c4f49f7c1967"
+content-hash = "3ed818a87e41c871fca6bdcbdcf2d6dce303bf3ab5be39d914d36f755fc57b17"
 
 [metadata.files]
 appnope = [
@@ -1513,6 +1533,10 @@ django-nyt = [
 ]
 django-positions = [
     {file = "django-positions-0.6.0.tar.gz", hash = "sha256:595d89b0ad9854c33d5a8eea9abe674e4decaeb593d6a96c5d39ac6820ee8efb"},
+]
+django-qr-code = [
+    {file = "django-qr-code-2.3.0.tar.gz", hash = "sha256:f870ac801c8610368106ddb69266bcd8efb19216ae7190fb378ecfd36d34c91d"},
+    {file = "django_qr_code-2.3.0-py3-none-any.whl", hash = "sha256:68e7dda8c3cfb449fe0847143bb648c894fc1da8fcf0a01ed50b79b001fcf985"},
 ]
 django-registration = [
     {file = "django-registration-3.2.tar.gz", hash = "sha256:2ea8c7d89a8760ccde41dfd335aa28ba89073d09aab5a0f5f3d7c8c148fcc518"},
@@ -1921,6 +1945,10 @@ requests-oauthlib = [
 rsa = [
     {file = "rsa-4.8-py3-none-any.whl", hash = "sha256:95c5d300c4e879ee69708c428ba566c59478fd653cc3a22243eeb8ed846950bb"},
     {file = "rsa-4.8.tar.gz", hash = "sha256:5c6bd9dc7a543b7fe4304a631f8a8a3b674e2bbfc49c2ae96200cdbe55df6b17"},
+]
+segno = [
+    {file = "segno-1.4.1-py2.py3-none-any.whl", hash = "sha256:79d1d7b9c893243411acd031682e0ece007fbd632885c6c650186871be572111"},
+    {file = "segno-1.4.1.tar.gz", hash = "sha256:b8e90823b7ab5249044d22f022291bb06e112104779d6339baf0997fad656c9a"},
 ]
 six = [
     {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
