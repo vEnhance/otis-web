@@ -23,7 +23,6 @@
 	in recognition of their dedication to tireless efforts
 	to become better problem solvers in an unforgiving world.
 	<div style="text-align:center;">
-		{% qr_from_text target_url size="S" %}
 		<img height="44.4mm" src="{% static 'img/sig-evan-transp-4a.png' %}" />
 		<br />
 		<div style="margin:9px";>
@@ -31,10 +30,14 @@
 		</div>
 	</div>
 	<hr />
+	<div style="float:left;">
+		{% qr_from_text target_url size="S" %}
+	</div>
 	<div style="font-size:12pt;">
 		<p>This certificate (ID {{ student.id|stringformat:"07d" }})
 		was updated {% now "r" %}.</p>
-		<p>To verify this certificate digitally, use the URL:</p>
+		<p>To verify this certificate digitally, scan the QR code
+		or use the URL below:</p>
 		<tt>
 			<a href="{{request.path}} "certify" student.id checksum %}">
 				{{ request.get_host}}/{{request.path}}

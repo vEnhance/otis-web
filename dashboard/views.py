@@ -639,6 +639,7 @@ def certify(request: HttpRequest, student_id: int, checksum: str = None):
 		'checksum':
 			student.get_checksum(settings.CERT_HASH_KEY),
 		'target_url':
-			request.get_host() + '/' + reverse_lazy('certify', args=(student.id, checksum))
+			f'{request.scheme}//{request.get_host()}' +
+			reverse_lazy('certify', args=(student.id, checksum))
 	}
 	return render(request, "dashboard/certify.html", context)
