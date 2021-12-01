@@ -178,6 +178,10 @@ class PSet(models.Model):
 	def get_absolute_url(self):
 		return reverse_lazy('pset', args=(self.pk, ))
 
+	class Meta:
+		verbose_name = "PSet submission"
+		verbose_name_plural = "PSet submissions"
+
 
 class ProblemSuggestion(models.Model):
 	user = models.ForeignKey(
