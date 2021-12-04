@@ -4,66 +4,68 @@
 <div id="cert">
 	<div style="text-align:center;">
 		<p>
-		<img width="300px" src="{% static 'img/otis-logo-v2018.svg' %}" />
+			<img width="300px" src="{% static 'img/otis-logo-v2018.svg' %}" />
 		</p>
-	<h2>Certificate of achievement</h2>
+		<h2>Certificate of achievement</h2>
 
-	<p>This certificate indicates that the below student
-	<h1 id="name">{{ student.name }}</h1>
-	has reached the above rank in {{ student.semester }} of OTIS.
-	Along with some for-fun side quests
-	and less-for-fun practice tests, {{ student.first_name}} also
-	spent <strong>{{ hearts }} hours</strong> on assigned problems
-	alone, not counting exams and other endeavors outside the classroom.
-	<hr />
-	<p>Therefore, the OTIS game master
-	hereby confers the title of
-	<h2>{{ level_name }} (Level {{level_number}})</h2>
-	to the above student,
-	in recognition of their dedication to tireless efforts
-	to become better problem solvers in an unforgiving world.
-	<div style="text-align:center;">
-		<img height="100px" src="{% static 'img/sig-evan-transp-4a.png' %}" />
-		<br />
-		<div style="margin:9px";>
-		<em>Evan Chen</em>, director of OTIS
-		</div>
-	</div>
-	<hr />
-	<div style="float:left;">
-		{% qr_from_text target_url size="S" %}
-	</div>
-	<div style="font-size:12pt;">
-		<p>This certificate (ID {{ student.id|stringformat:"07d" }})
-		was updated {% now "r" %}.</p>
-		<p>To verify this certificate digitally, scan the QR code
-		or use the URL below:</p>
-		<tt>
-			<a href="{{request.path}} "certify" student.id checksum %}">
-				{{ request.get_host}}/{{request.path}}
-			</a>
-		</tt>
+		<p>This certificate indicates that the below student
+			<h1 id="name">{{ student.name }}</h1>
+			has reached the above rank in {{ student.semester }} of OTIS.
+			Along with some for-fun side quests
+			and less-for-fun practice tests, {{ student.first_name}} also
+			spent <strong>{{ hearts }} hours</strong> on assigned problems
+			alone, not counting exams and other endeavors outside the classroom.
+			<hr />
+			<p>Therefore, the OTIS game master
+				hereby confers the title of
+				<h2>{{ level_name }} (Level {{level_number}})</h2>
+				to the above student,
+				in recognition of their dedication to tireless efforts
+				to become better problem solvers in an unforgiving world.
+				<div style="text-align:center;">
+					<img height="100px" src="{% static 'img/sig-evan-transp-4a.png' %}" />
+					<br />
+					<div style="margin:9px" ;>
+						<em>Evan Chen</em>, director of OTIS
+					</div>
+				</div>
+				<hr />
+				<div style="float:left;">
+					{% qr_from_text target_url size="S" %}
+				</div>
+				<div style="font-size:12pt;">
+					<p>This certificate (ID {{ student.id|stringformat:"07d" }})
+						was updated {% now "r" %}.</p>
+					<p>To verify this certificate digitally, scan the QR code
+						or use the URL below:</p>
+					<tt>
+						<a href="{{request.path}} " certify" student.id checksum %}">
+							{{ request.get_host}}{{request.path}}
+						</a>
+					</tt>
+				</div>
+
+				<div>
+				</div>
 	</div>
 
-	<div>
-	</div>
-</div>
+	<style>
+		#cert {
+			font-size: 14pt;
+			margin: 30px 30px 30px 30px;
+			padding: 30px 30px 30px 30px;
+			width: 7.5in;
+			height: 10in;
+			border: 3px solid #aa0000;
+			background-color: rgb(254, 255, 238);
+		}
 
-<style>
-#cert {
-	font-size: 14pt;
-	margin: 30px 30px 30px 30px;
-	padding: 30px 30px 30px 30px;
-	width: 7.5in;
-	height: 10in;
-	border: 3px solid #aa0000;
-	background-color: rgb(254, 255, 238);
-}
-#name {
-	color: #aa0000;
-}
-strong {
-	color: #aa0000;
-}
-</style>
-{% endblock %}
+		#name {
+			color: #aa0000;
+		}
+
+		strong {
+			color: #aa0000;
+		}
+	</style>
+	{% endblock %}
