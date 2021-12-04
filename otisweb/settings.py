@@ -50,6 +50,7 @@ INSTALLED_APPS = [
 	'dashboard',
 	'exams',
 	'markets',
+	'mouse',
 	'roster',
 	'otisweb',
 	'django.contrib.admin',
