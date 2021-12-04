@@ -36,16 +36,16 @@
 	{% endfor %}
 </ul>
 <script>
-        $(function(){     
-            var hash = location.hash;
-            if (hash == "#headingDexterity"
-                || hash == "#headingWisdom"
-                || hash == "#headingStrength"
-                || hash == "#headingCharisma"){
-                    var stat = hash.slice(8);
-                    console.log($(stat));
-                    $("#collapse" + stat).addClass("show");
-            }
-        });
+    $(function(){     
+        var hash = location.hash;
+        if (hash == "#headingDexterity"
+            || hash == "#headingWisdom"
+            || hash == "#headingStrength"
+            || hash == "#headingCharisma"){
+                var stat = hash.slice(8);
+                console.log($(stat));
+                $("#collapse" + stat).addClass("show");
+        }
+    });
 </script>
 {% endblock %}
