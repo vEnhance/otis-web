@@ -1,3 +1,6 @@
+import datetime
+from datetime import datetime
+
 from dashboard.models import QuestComplete
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test  # NOQA
@@ -9,6 +12,8 @@ from roster.models import Student
 from .forms import GraderForm, ScoreForm
 
 # Create your views here.
+
+YEAR = datetime.now().year
 
 
 @login_required
@@ -28,7 +33,7 @@ def usemo_score(request: HttpRequest) -> HttpResponse:
 					spades = int(line[line.rindex('\t') + 1:].strip())
 					if s.user.get_full_name().lower() == name.lower():
 						qcs.append(
-							QuestComplete(student=s, title="USEMO Points", category="US", spades=spades)
+							QuestComplete(student=s, title=f"USEMO {YEAR}", category="US", spades=spades)
 						)
 			QuestComplete.objects.bulk_create(qcs)
 			messages.success(request, f'Built {len(qcs)} records')
