@@ -19,12 +19,14 @@ def usemo_score(request: HttpRequest) -> HttpResponse:
 			students = Student.objects.filter(semester__active=True)
 			qcs = []
 			for s in students:
-				for line in form.text.splitlines():
+				for line in form.text.split('\n'):
 					name = line[:line.index('\t')].strip()
 					spades = int(line[line.rindex('\t') + 1:].strip())
 					if s.user.get_full_name.lower() == name:
-						qcs.append(QuestComplete(student=s, title="USEMO", category="US", spades=spades))
-			QuestComplete.bulk_create(qcs)
+						qcs.append(
+							QuestComplete(student=s, title="USEMO Points", category="US", spades=spades)
+						)
+			QuestComplete.objects.bulk_create(qcs)
 	else:
 		form = ScoreForm()
 
