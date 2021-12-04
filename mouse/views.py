@@ -44,7 +44,7 @@ def usemo_score(request: HttpRequest) -> HttpResponse:
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
-def usemo_grade(request: HttpRequest) -> HttpResponse:
+def usemo_grader(request: HttpRequest) -> HttpResponse:
 	if request.method == 'POST':
 		form = GraderForm(request.POST)
 		if form.is_valid():
