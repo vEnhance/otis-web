@@ -623,9 +623,14 @@ class DiamondUpdate(
 
 def certify(request: HttpRequest, student_id: int, checksum: str = None):
 	student = get_object_or_404(Student, pk=student_id)
-	if not can_view(request, student):
+	if request.user.is_authenticated:
+		if can_view(request, student) and checksum is None:
+			checksum = student.get_checksum(settings.CERT_HASH_KEY)
+			return HttpResponseRedirect(reverse_lazy('certify', args=(student.id, checksum)))
+	else:
 		if student.get_checksum(settings.CERT_HASH_KEY) != checksum:
 			raise SuspiciousOperation("Wrong hash")
+
 	level_info = get_level_info(student)
 	context = {
 		'student':
