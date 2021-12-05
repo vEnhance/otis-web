@@ -1,4 +1,3 @@
-import datetime
 from datetime import datetime
 
 from dashboard.models import QuestComplete
