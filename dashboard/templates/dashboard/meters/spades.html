@@ -64,7 +64,7 @@
 		<tr style="background-color: #ffff99;">
 			<td style="color:{{ meters.spades.color }};">
 				<b>
-					+{{ guess.score }}{{ meters.spades.unit }}
+					+{{ guess.score|floatformat:2 }}{{ meters.spades.unit }}
 				</b>
 			</td>
 			<td>
