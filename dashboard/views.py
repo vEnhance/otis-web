@@ -320,7 +320,9 @@ def uploads(request: HttpRequest, student_id: int, unit_id: int) -> HttpResponse
 def index(request: AuthHttpRequest) -> HttpResponse:
 	students = get_visible_students(request.user, current=True)
 	if len(students) == 1:  # unique match
-		return HttpResponseRedirect(reverse("portal", args=(students[0].id, )))
+		student = students.first()
+		assert student is not None
+		return HttpResponseRedirect(reverse("portal", args=(student.id, )))
 	queryset = annotate_student_queryset_with_scores(students).order_by(
 		'track', 'user__first_name', 'user__last_name'
 	)
