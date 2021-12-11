@@ -625,28 +625,29 @@ class DiamondUpdate(
 
 def certify(request: HttpRequest, student_id: int, checksum: str = None):
 	student = get_object_or_404(Student, pk=student_id)
-	if request.user.is_authenticated:
-		if can_view(request, student) and checksum is None:
+	if checksum is None:
+		if can_view(request, student):
 			checksum = student.get_checksum(settings.CERT_HASH_KEY)
 			return HttpResponseRedirect(reverse_lazy('certify', args=(student.id, checksum)))
+		else:
+			raise SuspiciousOperation("Not authorized to generate checksum")
+	elif checksum != student.get_checksum(settings.CERT_HASH_KEY):
+		raise SuspiciousOperation("Wrong hash")
 	else:
-		if student.get_checksum(settings.CERT_HASH_KEY) != checksum:
-			raise SuspiciousOperation("Wrong hash")
-
-	level_info = get_level_info(student)
-	context = {
-		'student':
-			student,
-		'hearts':
-			level_info['meters']['hearts'].value,
-		'level_number':
-			level_info['level_number'],
-		'level_name':
-			level_info['level_name'],
-		'checksum':
-			student.get_checksum(settings.CERT_HASH_KEY),
-		'target_url':
-			f'{request.scheme}//{request.get_host()}' +
-			reverse_lazy('certify', args=(student.id, checksum))
-	}
-	return render(request, "dashboard/certify.html", context)
+		level_info = get_level_info(student)
+		context = {
+			'student':
+				student,
+			'hearts':
+				level_info['meters']['hearts'].value,
+			'level_number':
+				level_info['level_number'],
+			'level_name':
+				level_info['level_name'],
+			'checksum':
+				student.get_checksum(settings.CERT_HASH_KEY),
+			'target_url':
+				f'{request.scheme}//{request.get_host()}' +
+				reverse_lazy('certify', args=(student.id, checksum))
+		}
+		return render(request, "dashboard/certify.html", context)
