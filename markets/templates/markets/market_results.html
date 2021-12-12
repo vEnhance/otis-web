@@ -34,7 +34,7 @@
 {{ market.solution|linebreaks }}
 {% endif %}
 
-{% if market.has_ended %}
+{% if market.has_ended or request.user.is_superuser %}
 <div>
 	{% if guess and market.answer %}
 	<p>Your guess of {{ guess.value }} earned {{ guess.score|default_if_none:"?" }}♠.</p>
