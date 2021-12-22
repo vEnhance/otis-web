@@ -19,7 +19,7 @@ class Problem(models.Model):
 		verbose_name="PUID",
 		validators=[
 			RegexValidator(
-				regex=r'[A-Z0-9]+', message="Only uppercase letters and digits appear in PUID's."
+				regex=r'^[A-Z0-9]+$', message="Only uppercase letters and digits appear in PUID's."
 			)
 		],
 	)

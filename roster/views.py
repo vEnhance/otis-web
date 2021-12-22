@@ -14,7 +14,6 @@ import collections
 import csv
 import datetime
 import logging
-from hashlib import pbkdf2_hmac
 from typing import Any, Dict, List, Optional
 
 from braces.views import LoginRequiredMixin, StaffuserRequiredMixin
@@ -25,7 +24,7 @@ from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required, user_passes_test  # NOQA
 from django.contrib.auth.models import Group, User
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, SuspiciousOperation
 from django.db.models.expressions import F
 from django.db.models.fields import FloatField
 from django.db.models.functions.comparison import Cast
@@ -132,16 +131,6 @@ def advance(request: HttpRequest, student_id: int) -> Any:
 	return render(request, "roster/advance.html", context)
 
 
-def get_checksum(student: Student) -> str:
-	key = settings.INVOICE_HASH_KEY
-	return pbkdf2_hmac(
-		'sha256', (key + str(student.id) + 'meow').encode('utf-8'),
-		b'salt is yummy so is sugar',
-		100000,
-		dklen=18
-	).hex()
-
-
 @login_required
 def invoice(request: HttpRequest, student_id: int = None) -> HttpResponse:
 	if student_id is None:
@@ -160,7 +149,7 @@ def invoice(request: HttpRequest, student_id: int = None) -> HttpResponse:
 		'title': "Invoice for " + student.name,
 		'student': student,
 		'invoice': invoice,
-		'checksum': get_checksum(student)
+		'checksum': student.get_checksum(settings.INVOICE_HASH_KEY)
 	}
 	# return HttpResponse("hi")
 	return render(request, "roster/invoice.html", context)
@@ -170,8 +159,8 @@ def invoice(request: HttpRequest, student_id: int = None) -> HttpResponse:
 def invoice_standalone(request: HttpRequest, student_id: int, checksum: str) -> HttpResponse:
 	student = Student.objects.get(id=student_id)
 
-	if checksum != get_checksum(student):
-		raise PermissionDenied("Bad hash provided")
+	if checksum != student.get_checksum(settings.INVOICE_HASH_KEY):
+		raise SuspiciousOperation("Bad hash provided")
 	try:
 		invoice = student.invoice
 	except ObjectDoesNotExist:

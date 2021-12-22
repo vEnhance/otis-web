@@ -44,6 +44,7 @@ class HintObjectView:
 	def get_object(self, queryset: QuerySet[Hint] = None) -> Hint:
 		if queryset is None:
 			queryset = self.get_queryset()  # type: ignore
+		assert queryset is not None
 		return get_object_or_404(
 			queryset, problem__puid=self.kwargs['puid'], number=self.kwargs['number']
 		)
@@ -55,6 +56,7 @@ class ProblemObjectView:
 	def get_object(self, queryset: QuerySet[Problem] = None) -> Problem:
 		if queryset is None:
 			queryset = self.get_queryset()  # type: ignore
+		assert queryset is not None
 		return get_object_or_404(queryset, puid=self.kwargs['puid'])
 
 

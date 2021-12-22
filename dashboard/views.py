@@ -8,12 +8,13 @@ from typing import Any, Dict
 
 from braces.views import LoginRequiredMixin, StaffuserRequiredMixin, SuperuserRequiredMixin  # NOQA
 from core.models import Semester, Unit, UserProfile
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from django.db.models import Count, OuterRef, Subquery
 from django.db.models.expressions import Exists
 from django.db.models.query import QuerySet
@@ -319,7 +320,9 @@ def uploads(request: HttpRequest, student_id: int, unit_id: int) -> HttpResponse
 def index(request: AuthHttpRequest) -> HttpResponse:
 	students = get_visible_students(request.user, current=True)
 	if len(students) == 1:  # unique match
-		return HttpResponseRedirect(reverse("portal", args=(students[0].id, )))
+		student = students.first()
+		assert student is not None
+		return HttpResponseRedirect(reverse("portal", args=(student.id, )))
 	queryset = annotate_student_queryset_with_scores(students).order_by(
 		'track', 'user__first_name', 'user__last_name'
 	)
@@ -618,3 +621,33 @@ class DiamondUpdate(
 
 	def get_success_url(self):
 		return reverse_lazy("diamond-update", args=(self.student.id, ))
+
+
+def certify(request: HttpRequest, student_id: int, checksum: str = None):
+	student = get_object_or_404(Student, pk=student_id)
+	if checksum is None:
+		if can_view(request, student):
+			checksum = student.get_checksum(settings.CERT_HASH_KEY)
+			return HttpResponseRedirect(reverse_lazy('certify', args=(student.id, checksum)))
+		else:
+			raise SuspiciousOperation("Not authorized to generate checksum")
+	elif checksum != student.get_checksum(settings.CERT_HASH_KEY):
+		raise SuspiciousOperation("Wrong hash")
+	else:
+		level_info = get_level_info(student)
+		context = {
+			'student':
+				student,
+			'hearts':
+				level_info['meters']['hearts'].value,
+			'level_number':
+				level_info['level_number'],
+			'level_name':
+				level_info['level_name'],
+			'checksum':
+				student.get_checksum(settings.CERT_HASH_KEY),
+			'target_url':
+				f'{request.scheme}//{request.get_host()}' +
+				reverse_lazy('certify', args=(student.id, checksum))
+		}
+		return render(request, "dashboard/certify.html", context)

@@ -50,6 +50,7 @@ INSTALLED_APPS = [
 	'dashboard',
 	'exams',
 	'markets',
+	'mouse',
 	'roster',
 	'otisweb',
 	'django.contrib.admin',
@@ -78,6 +79,7 @@ INSTALLED_APPS = [
 	'mptt',
 	'sekizai',
 	'sorl.thumbnail',
+	'qr_code',
 	'wiki.apps.WikiConfig',
 	'wiki.plugins.editsection.apps.EditSectionConfig',
 	'wiki.plugins.images.apps.ImagesConfig',
@@ -221,6 +223,7 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
 # Custom Evan keys
 INVOICE_HASH_KEY = os.getenv("INVOICE_HASH_KEY", "evan_chen_is_still_really_cool")
 STORAGE_HASH_KEY = os.getenv("STORAGE_HASH_KEY", "look_at_me_im_a_cute_kitten")
+CERT_HASH_KEY = os.getenv("CERT_HASH_KEY", "certified_by_god")
 API_TARGET_HASH = os.getenv(
 	"API_TARGET_HASH", '1c3592aa9241522fea1dd572c43c192a277e832dcd1ae63adfe069cb05624ead'
 )

@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+from hashlib import pbkdf2_hmac
 
 import os
 from datetime import timedelta
@@ -116,6 +117,14 @@ class Student(models.Model):
 	id: int
 	invoice: 'Invoice'
 	unlisted_assistants: QuerySet['Assistant']
+
+	def get_checksum(self, key: str) -> str:
+		return pbkdf2_hmac(
+			'sha256', (key + str(pow(3, self.id, 961748927)) + 'meow').encode('utf-8'),
+			b'salt is yummy so is sugar',
+			100000,
+			dklen=18
+		).hex()
 
 	def __str__(self):
 		return f"{self.name} ({self.semester})"

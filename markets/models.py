@@ -40,13 +40,16 @@ class Market(models.Model):
 	weight = models.FloatField(
 		help_text="The max score to assign to the market, "
 		"used in the scoring function",
-		default=4
+		default=4,
 	)
 	alpha = models.FloatField(
 		help_text="Exponent corresponding to harshness of the market, "
-		"used in the scoring function",
-		default=2
+		"used in the scoring function; leave blank for special scoring.",
+		default=2,
+		null=True,
+		blank=True,
 	)
+	show_answer = models.BooleanField(default=False)
 
 	objects = models.Manager()
 	started = StartedMarketManager()
@@ -70,7 +73,7 @@ class Market(models.Model):
 		return timezone.now() >= self.end_date
 
 	class Meta:
-		ordering = ('-end_date',)
+		ordering = ('-end_date', )
 
 
 class Guess(models.Model):
@@ -107,7 +110,7 @@ class Guess(models.Model):
 		return f"Guessed {self.value} at {self.created_at}"
 
 	def get_score(self) -> Optional[float]:
-		if self.market.answer is not None:
+		if self.market.answer is not None and self.market.alpha is not None:
 			a = round(self.market.answer, ndigits=6)
 			b = round(self.value, ndigits=6)
 			assert a > 0 and b > 0

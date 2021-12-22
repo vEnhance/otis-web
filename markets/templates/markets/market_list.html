@@ -23,7 +23,10 @@
 			</a>
 		</td>
 		<td>{{ market.weight|floatformat:".2f" }}</td>
-		<td>{{ market.alpha|floatformat:".2f" }}</td>
+		<td>{% if market.alpha is not None %}
+			{{ market.alpha|floatformat:".2f" }}
+			{% endif %}
+		</td>
 		<td>{{ market.end_date|naturaltime }}</td>
 	</tr>
 	{% endfor %}
@@ -40,11 +43,13 @@
 	</li>
 	<li>The guess $B$ you submit must be a real number in the interval $[10^{-6}, 10^6]$.
 		Guesses will be rounded to $6$ decimal places.</li>
-	<li>If you submit a guess $B$, your score for the market (in ♠)
+	<li>In a standard market,
+		if you submit a guess $B$, your score for the market (in ♠)
 		is given by the function
 		\[ w \cdot \left(\min\left\{\frac AB, \frac BA\right\}\right)^\alpha \]
 		where $w$ and $\alpha$ are two fixed parameters announced for the market.
 		(The default values are $w=4$ and $\alpha=2$.)
+		Some markets may have other rules.
 	</li>
 	<li>You may only submit one guess. It is not possible to change your guess later.</li>
 	<li>Discussion, collusion, and other antics are permitted.</li>

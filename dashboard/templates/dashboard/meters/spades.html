@@ -45,7 +45,7 @@
 		{% endfor %}
 
 		{% for quest in quest_completes %}
-		<tr style="background-color: #ffff99;">
+		<tr>
 			<td style="color:{{ meters.spades.color }};">
 				<b>
 					+{{ quest.spades }}{{ meters.spades.unit }}
@@ -61,10 +61,10 @@
 		{% endfor %}
 
 		{% for guess in market_guesses %}
-		<tr style="background-color: #ffff99;">
+		<tr>
 			<td style="color:{{ meters.spades.color }};">
 				<b>
-					+{{ guess.score }}{{ meters.spades.unit }}
+					+{{ guess.score|floatformat:2 }}{{ meters.spades.unit }}
 				</b>
 			</td>
 			<td>
