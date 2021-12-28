@@ -102,6 +102,8 @@ class ProblemSuggestionAdmin(admin.ModelAdmin):
 		'user',
 		'source',
 		'description',
+		'acknowledge',
+		'eligible',
 		'resolved',
 	)
 	search_fields = (
@@ -115,6 +117,7 @@ class ProblemSuggestionAdmin(admin.ModelAdmin):
 		'comments',
 	)
 	list_filter = (
+		'eligible',
 		'resolved',
 		'unit__group',
 	)
