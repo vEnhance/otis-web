@@ -127,6 +127,17 @@ class ProblemSuggestionAdmin(admin.ModelAdmin):
 	)
 	list_per_page = 50
 
+	def mark_eligible(self, request: HttpRequest, queryset: QuerySet[ProblemSuggestion]):
+		queryset.update(eligible=True)
+
+	def mark_uneligible(self, request: HttpRequest, queryset: QuerySet[ProblemSuggestion]):
+		queryset.update(eligible=False)
+
+	actions = [
+		'mark_eligible',
+		'mark_uneligible',
+	]
+
 
 class LevelIEResource(resources.ModelResource):
 	class Meta:
