@@ -105,6 +105,7 @@ class UnitGroup(models.Model):
 	hidden = models.BooleanField(
 		help_text="Whether this unit is hidden from students", default=False
 	)
+	artwork = models.ImageField(upload_to="artwork")
 
 	def __str__(self) -> str:
 		return self.name
