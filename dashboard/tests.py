@@ -1,12 +1,9 @@
-import datetime
 import os
 from io import StringIO
 
-from core.factories import SemesterFactory, UnitFactory, UserFactory
+from core.factories import UnitFactory, UserFactory
 from django.utils import timezone
 from exams.factories import ExamAttemptFactory, ExamFactory
-from freezegun import freeze_time
-from markets.factories import GuessFactory, MarketFactory
 from otisweb.tests import OTISTestCase
 from roster.factories import StudentFactory
 from roster.models import Student
@@ -228,64 +225,6 @@ class TestLevelSystem(OTISTestCase):
 		admin = UserFactory.create(is_superuser=True)
 		self.login(admin)
 		self.assertGet20X('leaderboard')
-
-
-class TestNewSpades(OTISTestCase):
-	def test_market_spades(self):
-		sem1 = SemesterFactory(active=False)
-		sem2 = SemesterFactory(active=True)
-		alice = UserFactory(username='alice')
-		StudentFactory(semester=sem1, user=alice)
-		StudentFactory(semester=sem2, user=alice)
-		market_old = MarketFactory(
-			semester=sem1,
-			start_date=datetime.datetime(2010, 1, 1, tzinfo=utc),
-			end_date=datetime.datetime(2010, 1, 5, tzinfo=utc),
-			weight=100,
-		)
-		market_pending = MarketFactory(
-			semester=sem2,
-			start_date=datetime.datetime(2020, 1, 1, tzinfo=utc),
-			end_date=datetime.datetime(2020, 1, 5, tzinfo=utc),
-			weight=100,
-		)
-		market_done1 = MarketFactory(
-			semester=sem2,
-			start_date=datetime.datetime(2019, 12, 1, tzinfo=utc),
-			end_date=datetime.datetime(2019, 12, 5, tzinfo=utc),
-			weight=100,
-		)
-		market_done2 = MarketFactory(
-			semester=sem2,
-			start_date=datetime.datetime(2019, 12, 1, tzinfo=utc),
-			end_date=datetime.datetime(2019, 12, 5, tzinfo=utc),
-			weight=100,
-		)
-
-		GuessFactory(market=market_old, user=alice, score=3.14)
-		GuessFactory(market=market_pending, user=alice, score=2.718)
-		GuessFactory(market=market_done1, user=alice, score=10.3)
-		GuessFactory(market=market_done2, user=alice, score=18.8)
-		GuessFactory(market=market_done1, score=3)
-		GuessFactory(market=market_done2, score=2)
-
-		with freeze_time('2020-01-02', tz_offset=0):
-			self.login('alice')
-			queryset = annotate_student_queryset_with_scores(Student.objects.all())
-			rows = get_student_rows(queryset)
-			self.assertEqual(len(rows), 2)
-			rows.sort(key=lambda row: row['student'].semester.pk)
-			self.assertEqual(rows[0]['spades'], 3.14)
-			self.assertEqual(rows[1]['spades'], 29.1)
-
-			self.assertEqual(
-				get_level_info(rows[0]['student'])['meters']['spades'].value,
-				3,
-			)
-			self.assertEqual(
-				get_level_info(rows[1]['student'])['meters']['spades'].value,
-				29,
-			)
 
 
 class TestSubmitPSet(OTISTestCase):

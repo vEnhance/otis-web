@@ -125,7 +125,8 @@
 
 {% if profile.show_bars %}
 <h1>Level {{ level_number }} &mdash;
-	<a href="{% url 'stats' student.id %}">🏅{{ level_name }}</a></h1>
+	<a href="{% url 'stats' student.id %}">🏅{{ level_name }}</a>
+</h1>
 
 <div class="container">
 	<div class="row">
@@ -200,12 +201,14 @@
 	Units to work on are marked ▶️.
 </p>
 
+{% if not student.newborn %}
 <div class="text-center">
 	<a href="{% url 'inquiry' student.id %}" class="btn btn-warning">Request units</a>
 	{% if omniscient %}
 	<a href="{% url 'advance' student.id %}" class="btn btn-dark">Advance student</a>
 	{% endif %}
 </div>
+{% endif %}
 
 <table width="100%">
 	<tr>

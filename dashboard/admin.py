@@ -102,6 +102,8 @@ class ProblemSuggestionAdmin(admin.ModelAdmin):
 		'user',
 		'source',
 		'description',
+		'acknowledge',
+		'eligible',
 		'resolved',
 	)
 	search_fields = (
@@ -115,6 +117,7 @@ class ProblemSuggestionAdmin(admin.ModelAdmin):
 		'comments',
 	)
 	list_filter = (
+		'eligible',
 		'resolved',
 		'unit__group',
 	)
@@ -123,6 +126,17 @@ class ProblemSuggestionAdmin(admin.ModelAdmin):
 		'unit',
 	)
 	list_per_page = 50
+
+	def mark_eligible(self, request: HttpRequest, queryset: QuerySet[ProblemSuggestion]):
+		queryset.update(eligible=True)
+
+	def mark_uneligible(self, request: HttpRequest, queryset: QuerySet[ProblemSuggestion]):
+		queryset.update(eligible=False)
+
+	actions = [
+		'mark_eligible',
+		'mark_uneligible',
+	]
 
 
 class LevelIEResource(resources.ModelResource):

@@ -48,7 +48,7 @@ def venueq_handler(action: str, request: HttpRequest) -> JsonResponse:
 	elif action == 'mark_suggestion':
 		suggestion = ProblemSuggestion.objects.get(pk=request.POST['pk'])
 		suggestion.resolved = True
-		suggestion.eligible = (request.POST['eligible'] is True)
+		suggestion.eligible = bool(request.POST['eligible'])
 		suggestion.save()
 		return JsonResponse({'result': 'success'}, status=200)
 	elif action == 'init':
