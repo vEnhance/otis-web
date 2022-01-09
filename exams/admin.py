@@ -89,11 +89,3 @@ class MockCompletedAdmin(admin.ModelAdmin):
 		'exam',
 		'student__semester',
 	)
-
-@admin.register(Feedback)
-class FeedbackAdmin(admin.ModelAdmin):
-	list_display = (
-		'exam',
-		'student',
-		'feedback',
-	)
