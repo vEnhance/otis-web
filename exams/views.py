@@ -12,7 +12,7 @@ from roster.utils import get_student_by_id, infer_student
 
 from exams.calculator import expr_compute
 
-from .forms import ExamAttemptForm, FeedbackForm, ParticipationPointsForm
+from .forms import ExamAttemptForm, ParticipationPointsForm
 from .models import ExamAttempt, MockCompleted, PracticeExam
 
 # Create your views here.
@@ -102,7 +102,7 @@ def quiz(request: AuthHttpRequest, student_id: int, pk: int) -> HttpResponse:
 
 	context['quiz'] = quiz
 	context['student'] = student
-	return render(request, 'exams/quiz.html', context, allow_feedback=allow_feedback)
+	return render(request, 'exams/quiz.html', context)
 
 
 @login_required
