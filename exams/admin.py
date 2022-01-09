@@ -2,7 +2,7 @@ from django.contrib import admin
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
-from .models import ExamAttempt, Feedback, MockCompleted, PracticeExam, Feedback
+from .models import ExamAttempt, Feedback, MockCompleted, PracticeExam
 
 # Register your models here.
 
