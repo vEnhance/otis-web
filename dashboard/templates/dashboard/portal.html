@@ -102,17 +102,19 @@
 		(If you're joining halfway through, start with 7-10 units.)
 		You can save this form multiple times;
 		the intermediate results will be shown below.
-
+		<br />
 		<a href="{% url 'currshow' student.id %}" class="text-white btn btn-success" />
 		Open selection form
 		</a>
 	</li>
 	<li>Once you are happy with your selection, you may
 		finalize your choices.
+		<br />
 		<form action="{% url 'finalize' student.id %}" method="post">
 			{% csrf_token %}
 			<input type="submit" class="btn btn-warning" value="Finalize" />
 		</form>
+		<br />
 		<i>Warning:</i> once you click this link,
 		your decision is complete and you cannot directly
 		make further changes.
