@@ -1,92 +1,146 @@
-{% extends 'layout.html' %}
-{% load crispy_forms_tags %}
-{% block title %}{{ quiz }}{% endblock %}
+from django.contrib import admin
+from import_export import fields, resources, widgets
+from import_export.admin import ImportExportModelAdmin
 
-{% block layout-content %}
-<p>
-	Welcome to <b>{{ quiz }}</b>!
-	{% if not finished and not quiz.overdue %}
-	<p>Submit on or before end-of-day {{ quiz.due_date }} server time (US).</p>
-	{% endif %}
-</p>
+from core.models import UserProfile
 
-<h2>Download problems</h2>
-<a href="{{quiz.get_absolute_url}}">Download problems file</a>
+from .models import Semester, Unit, UnitGroup
 
-{% if attempt %}
-<hr />
-<h1>Score: {{ attempt.score }}</h1>
-<div class="list-group row">
-	{% for row in rows %}
-	<div class="list-group-item" style="background-color:
-					{% if row.correct %}#e5ffe5{% else %}#ffe5e5{% endif %}" ;>
-		<div class="col-12 col-md-5" style="display:inline-block;">
-			{{ row.field|as_crispy_field }}
-		</div>
-		<div class="d-none d-md-inline-block col-md-1">
-		</div>
-		<div class="col-12 col-md-5" style="display:inline-block; vertical-align: top;">
-			<p>Answers: <b>{{ row.accepted }}</b></p>
-			<p><a target="_top" href="{{ row.url }}">View solution</a></p>
-		</div>
-	</div>
-	{% endfor %}
-</div>
-{% include "exams/gateway.html" %}
+# Register your models here.
 
-{% elif not quiz.overdue %}
-<h2>Instructions</h2>
-<ul>
-	<li>The quiz has five problems.
-		Your score is the number of correct answers.</li>
-	<li>You should enforce the <strong>45-minute time limit</strong> yourself; the website will not do so.
-		You don't need to count the time it takes to print or type in answers.
-	</li>
-	<li>
-		The answers should all be mathematical expressions.
-		You can use the functions <tt>+-*/^</tt> as well as <tt>sin()</tt>, <tt>cos()</tt>,
-		<tt>tan()</tt> (all in radians), and <tt>sqrt()</tt>.
-		The constants <tt>pi</tt> and <tt>e</tt> are also built in.
-		Multiplication <tt>*</tt> should be written out;
-		write <tt>3*sqrt(2)</tt> not <tt>3sqrt(2)</tt>.
-		Examples:
-		<ul>
-			<li><tt>1 - 1/10^6</tt> and <tt>999999/1000000</tt> are both accepted.
-			<li><tt>sin(pi/3) - sqrt(3)/2</tt> is accepted for <tt>0</tt>.
-			<li><tt>cos(pi/4)^2 + 1/2</tt> is accepted for <tt>1</tt>.
-		</ul>
-	</li>
-	<li>
-		Answers must lie in the interval $[-10^{100}, 10^{100}]$.
-	</li>
-	<li>
-		The intention is that you should take the test away without technology
-		and only input your answers after time expires.
-		Thus there is no partial submission; you must submit all answers at once.
-	</li>
-	<li>We recommend printing the test out and taking with pencil and paper.</li>
-</ul>
-<hr />
-<h1>Submit answers</h1>
-<p>Enter your responses below as expressions.</p>
-{% include "generic-form.html" %}
-<script type="text/javascript">
-	$("form.form")[0].onsubmit = function() {
-		return confirm('Are you ready to submit? This cannot be reversed.');
-	}
-</script>
-{% else %}
-<hr />
-<h2>Read solutions</h2>
-<p>The quiz deadline has passed, so you can't submit,
-	but you can read the solutions here.</p>
-<div class="list-group">
-	<a href="{{ quiz.url1 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}1</a>
-	<a href="{{ quiz.url2 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}2</a>
-	<a href="{{ quiz.url3 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}3</a>
-	<a href="{{ quiz.url4 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}4</a>
-	<a href="{{ quiz.url5 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}5</a>
-</div>
-{% endif %}
 
-{% endblock %}
+class SemesterResource(resources.ModelResource):
+	class Meta:
+		skip_unchanged = True
+		model = Semester
+		fields = (
+			'id',
+			'name',
+			'active',
+			'show_invoices',
+			'exam_family',
+		)
+
+
+@admin.register(Semester)
+class SemesterAdmin(ImportExportModelAdmin):
+	list_display = (
+		'name',
+		'id',
+		'active',
+		'show_invoices',
+		'exam_family',
+	)
+	search_fields = ('name', )
+	resource_class = SemesterResource
+
+
+class UnitIEResource(resources.ModelResource):
+	group_name = fields.Field(
+		column_name="group_name",
+		attribute="group",
+		widget=widgets.ForeignKeyWidget(UnitGroup, "name")
+	)
+
+	class Meta:
+		skip_unchanged = True
+		model = Unit
+		fields = (
+			'id',
+			'group_name',
+			'code',
+			'position',
+		)
+		export_order = (
+			'id',
+			'group_name',
+			'code',
+			'position',
+		)
+
+@admin.register(Unit)
+class UnitAdmin(ImportExportModelAdmin):
+	list_display = (
+		'group',
+		'code',
+		'id',
+		'list_display_position',
+	)
+	list_filter = ('group__subject', )
+	search_fields = ('group__name', 'code')
+	autocomplete_fields = ('group', )
+	ordering = ('position', )
+	resource_class = UnitIEResource
+	list_per_page = 150
+	list_max_show_all = 400
+
+
+class UnitInline(admin.TabularInline):
+	model = Unit  # type: ignore
+	fields = (
+		'code',
+		'position',
+	)
+	extra = 0
+
+
+class UnitGroupIEResource(resources.ModelResource):
+	class Meta:
+		skip_unchanged = True
+		model = UnitGroup
+		fields = (
+			'id',
+			'subject',
+			'name',
+			'slug',
+			'description',
+		)
+		export_order = (
+			'id',
+			'subject',
+			'name',
+			'slug',
+			'description',
+		)
+
+
+@admin.register(UnitGroup)
+class UnitGroupAdmin(ImportExportModelAdmin):
+	list_display = (
+		'pk',
+		'name',
+		'subject',
+		'description',
+		'hidden',
+		'artwork',
+	)
+	list_display_links = (
+		'pk',
+		'name',
+	)
+	search_fields = (
+		'name',
+		'description',
+	)
+	list_filter = ('subject', 'hidden')
+	resource_class = UnitGroupIEResource
+	list_per_page = 150
+	list_max_show_all = 400
+	inlines = (UnitInline, )
+
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+	list_display = (
+		'pk',
+		'user',
+		'last_seen',
+		'show_bars',
+		'show_completed_by_default',
+		'show_locked_by_default',
+	)
+	search_fields = (
+		'user__first_name',
+		'user__last_name',
+		'user__username',
+	)
