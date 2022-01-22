@@ -23,6 +23,9 @@
 <h2>{{ subject }}</h2>
 {% for unitgroup in item_list %}
 <p>
+	{% if unitgroup.image %}
+	<img src="{{ unitgroup.image.url }}" width="64px" style="float: right;" />
+	{% endif %}
 	<b class="text-info">
 		<a href="{{unitgroup.get_wiki_link}}">{{ unitgroup.name }}</a>
 	</b>
