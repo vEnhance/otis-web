@@ -151,7 +151,7 @@ def get_level_info(student: Student) -> LevelInfoDict:
 	quiz_attempts = ExamAttempt.objects.filter(student__user=student.user)
 	quest_completes = QuestComplete.objects.filter(student__user=student.user)
 	mock_completes = MockCompleted.objects.filter(student__user=student.user)\
-     .select_related('exam')
+      .select_related('exam')
 	market_guesses = Guess.objects.filter(
 		user=student.user,
 		market__end_date__lt=timezone.now(),
@@ -231,8 +231,8 @@ def annotate_student_queryset_with_scores(queryset: QuerySet[Student]) -> QueryS
 		pset_B_count=SubqueryCount('pset__pk', filter=Q(eligible=True, unit__code__startswith='B')),
 		pset_D_count=SubqueryCount('pset__pk', filter=Q(eligible=True, unit__code__startswith='D')),
 		pset_Z_count=SubqueryCount('pset__pk', filter=Q(eligible=True, unit__code__startswith='Z')),
-		spades_quizzes=SubquerySum('examattempt__score'),
-		spades_quests=SubquerySum('questcomplete__spades'),
+		spades_quizzes=SubquerySum('user__student__examattempt__score'),
+		spades_quests=SubquerySum('user__student__questcomplete__spades'),
 		spades_markets=Subquery(guess_subquery),  # type: ignore
 		spades_count_mocks=SubqueryCount('mockcompleted'),
 		spades_suggestions=SubqueryCount(
