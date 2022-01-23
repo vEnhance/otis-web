@@ -131,7 +131,7 @@ def get_level_info(student: Student) -> LevelInfoDict:
 	"""Uses a bunch of expensive database queries to compute a student's levels and data,
 	returning the findings as a typed dictionary."""
 
-	psets = PSet.objects.filter(student=student, approved=True, eligible=True)
+	psets = PSet.objects.filter(student__user=student.user, approved=True, eligible=True)
 	pset_data = psets.aggregate(
 		clubs_any=Sum('clubs'),
 		clubs_D=Sum('clubs', filter=Q(unit__code__startswith='D')),
@@ -216,15 +216,17 @@ def annotate_student_queryset_with_scores(queryset: QuerySet[Student]) -> QueryS
 	).order_by().values('user', 'market__semester').annotate(total=Sum('score')).values('total')
 
 	return queryset.select_related('user', 'user__profile', 'assistant', 'semester').annotate(
-		num_psets=SubqueryCount('pset', filter=Q(approved=True, eligible=True)),
-		clubs_any=SubquerySum('pset__clubs', filter=Q(approved=True, eligible=True)),
+		num_psets=SubqueryCount('user__student__pset', filter=Q(approved=True, eligible=True)),
+		clubs_any=SubquerySum('user__student__pset__clubs', filter=Q(approved=True, eligible=True)),
 		clubs_D=SubquerySum(
-			'pset__clubs', filter=Q(approved=True, eligible=True, unit__code__startswith='D')
+			'user__student__pset__clubs',
+			filter=Q(approved=True, eligible=True, unit__code__startswith='D')
 		),
 		clubs_Z=SubquerySum(
-			'pset__clubs', filter=Q(approved=True, eligible=True, unit__code__startswith='Z')
+			'user__student__pset__clubs',
+			filter=Q(approved=True, eligible=True, unit__code__startswith='Z')
 		),
-		hearts=SubquerySum('pset__hours', filter=Q(approved=True, eligible=True)),
+		hearts=SubquerySum('user__student__pset__hours', filter=Q(approved=True, eligible=True)),
 		diamonds=SubquerySum('user__achievementunlock__achievement__diamonds'),
 		pset_B_count=SubqueryCount('pset__pk', filter=Q(eligible=True, unit__code__startswith='B')),
 		pset_D_count=SubqueryCount('pset__pk', filter=Q(eligible=True, unit__code__startswith='D')),
