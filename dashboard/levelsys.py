@@ -151,7 +151,7 @@ def get_level_info(student: Student) -> LevelInfoDict:
 	quiz_attempts = ExamAttempt.objects.filter(student__user=student.user)
 	quest_completes = QuestComplete.objects.filter(student__user=student.user)
 	mock_completes = MockCompleted.objects.filter(student__user=student.user)\
-      .select_related('exam')
+       .select_related('exam')
 	market_guesses = Guess.objects.filter(
 		user=student.user,
 		market__end_date__lt=timezone.now(),
@@ -302,6 +302,8 @@ def get_student_rows(queryset: QuerySet[Student]) -> List[Dict[str, Any]]:
 
 
 def check_level_up(student: Student) -> bool:
+	if not student.semester.active:
+		return False
 	level_info = get_level_info(student)
 	level_number = level_info['level_number']
 	if level_number <= student.last_level_seen:
