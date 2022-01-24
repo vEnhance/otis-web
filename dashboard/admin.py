@@ -177,7 +177,6 @@ class AchievementAdmin(ImportExportModelAdmin):
 		'diamonds',
 		'active',
 		'description',
-		'image',
 		'creator',
 	)
 	search_fields = ('code', 'description')
