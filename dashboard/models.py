@@ -235,7 +235,7 @@ class Achievement(models.Model):
 		validators=[
 			RegexValidator(regex=r'^[a-f0-9]{24,25}$', message='24-25 char hex string'),
 		],
-	)
+	)  # e.g. 52656164546865436f646521
 	name = models.CharField(max_length=128, help_text="Name of the achievement")
 	image = models.ImageField(
 		upload_to=achievement_image_file_name,
