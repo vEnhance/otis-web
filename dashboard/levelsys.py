@@ -151,7 +151,7 @@ def get_level_info(student: Student) -> LevelInfoDict:
 	quiz_attempts = ExamAttempt.objects.filter(student__user=student.user)
 	quest_completes = QuestComplete.objects.filter(student__user=student.user)
 	mock_completes = MockCompleted.objects.filter(student__user=student.user)\
-       .select_related('exam')
+        .select_related('exam')
 	market_guesses = Guess.objects.filter(
 		user=student.user,
 		market__end_date__lt=timezone.now(),
@@ -310,7 +310,9 @@ def check_level_up(student: Student) -> bool:
 		return False
 
 	bonuses = BonusLevel.objects.filter(active=True, level__lte=level_number)
-	bonuses = bonuses.annotate(gotten=Exists('bonuslevelunlock', filter=Q(student=student)))
+	bonuses = bonuses.annotate(
+		gotten=Exists('bonuslevelunlock', filter=Q(student__user=student.user))
+	)
 	bonuses = bonuses.exclude(gotten=True)
 
 	if bonuses.exists():
