@@ -571,7 +571,7 @@ class PalaceUpdate(
 		student = get_student_by_id(self.request, self.kwargs['student_id'])
 		assert_maxed_out_level_info(student)
 		self.student = student
-		carving, is_created = PalaceCarving.objects.get_or_create(student=student)
+		carving, is_created = PalaceCarving.objects.get_or_create(user=student.user)
 		if is_created is True:
 			carving.display_name = student.name
 		return carving
@@ -580,6 +580,9 @@ class PalaceUpdate(
 		context = super().get_context_data(**kwargs)
 		context['student'] = self.student
 		return context
+
+	def get_success_url(self):
+		return reverse_lazy('palace-list', args=(self.student.id, ))
 
 
 class DiamondUpdate(
@@ -601,7 +604,7 @@ class DiamondUpdate(
 			raise PermissionDenied("The palace can't be edited through an inactive student")
 		assert_maxed_out_level_info(student)
 		self.student = student
-		achievement, _ = Achievement.objects.get_or_create(creator=student)
+		achievement, _ = Achievement.objects.get_or_create(creator=student.user)
 		return achievement
 
 	def form_valid(self, form: BaseModelForm[Achievement]):

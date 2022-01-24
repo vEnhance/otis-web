@@ -252,11 +252,11 @@ class Achievement(models.Model):
 		default=1, help_text="Number of diamonds for this achievement"
 	)
 	creator = models.ForeignKey(
-		Student,
+		User,
 		on_delete=models.CASCADE,
 		null=True,
 		blank=True,
-		help_text="Student who owns this achievement"
+		help_text="User who owns this achievement"
 	)
 
 	def __str__(self) -> str:
@@ -343,7 +343,7 @@ def palace_image_file_name(instance: 'PalaceCarving', filename: str) -> str:
 
 
 class PalaceCarving(models.Model):
-	student = models.OneToOneField(Student, on_delete=models.CASCADE, null=True, blank=True)
+	user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
 	display_name = models.CharField(
 		max_length=128,
 		help_text="How you would like your name to be displayed in the Ruby Palace."
@@ -368,6 +368,3 @@ class PalaceCarving(models.Model):
 
 	def __str__(self) -> str:
 		return f"Palace carving for {self.display_name}"
-
-	def get_absolute_url(self):
-		return reverse_lazy("palace-list", args=(self.student.id, ))
