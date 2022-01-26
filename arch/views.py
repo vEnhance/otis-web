@@ -1,13 +1,15 @@
 from typing import Any, ClassVar, Dict
 
 import reversion
+from core.utils import storage_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
+from django.core.files.storage import default_storage
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
-from django.http import HttpRequest, HttpResponseRedirect
+from django.http import Http404, HttpRequest, HttpResponseRedirect
 from django.http.response import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
@@ -212,3 +214,13 @@ def lookup(request: HttpRequest):
 		return HttpResponseRedirect(problem.get_absolute_url())
 	else:
 		return HttpResponseRedirect(reverse_lazy('arch-index', ))
+
+
+@login_required
+def view_solution(request: HttpRequest, puid: str):
+	solution_target_name = 'pdfs/' + storage_hash(puid) + '.tex'
+	if default_storage.exists(solution_target_name):
+		solution_url = default_storage.url(solution_target_name)
+		return HttpResponseRedirect(solution_url)
+	else:
+		raise Http404
