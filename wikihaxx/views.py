@@ -20,27 +20,6 @@ def wiki_redirect(u: URLPath) -> HttpResponseRedirect:
 
 
 @login_required
-def problem(request: HttpRequest, puid: str) -> HttpResponse:
-
-	try:
-		u = URLPath.get_by_path(path=f'notable-problems/{puid}')
-	except URLPath.DoesNotExist:
-		parent = URLPath.get_by_path(path='notable-problems')
-		content = f'[problem {puid}]' + '\n' + '[/problem]' + '\n' * 2
-		content += f'(This is an automatically generated article for {puid}. Please add some content!)' + '\n' * 2
-		content += '## Statement' + '\n'
-		content += '[statement]'
-		u = URLPath.create_urlpath(
-			parent=parent,
-			slug=puid,
-			title=puid,
-			request=request,
-			content=content,
-		)
-	return wiki_redirect(u)
-
-
-@login_required
 def unitgroup(request: HttpRequest, pk: int) -> HttpResponse:
 	group = UnitGroup.objects.get(pk=pk)
 

@@ -4,12 +4,9 @@ from typing import Any, List
 
 import markdown
 import markdown.preprocessors
-from arch.models import Problem
 from core.models import UnitGroup
-from core.utils import storage_hash
 from dashboard.models import Achievement, AchievementUnlock, PSet
 from django.conf import settings
-from django.core.files.storage import default_storage
 from django.db.models.aggregates import Sum
 from django.db.models.query_utils import Q
 from roster.models import Student
@@ -20,8 +17,8 @@ class OTISExtension(markdown.Extension):
 		md.preprocessors.add('otis-extras', OTISPreprocessor(md), '>html_block')
 
 
-special_start_regex = re.compile(r'\[(problem|diamond|unit|generic)([ a-zA-Z0-9]*)\]')
-special_end_regex = re.compile(r'\[/(problem|diamond|unit|generic)+\]')
+special_start_regex = re.compile(r'\[(diamond|unit|generic)([ a-zA-Z0-9]*)\]')
+special_end_regex = re.compile(r'\[/(diamond|unit|generic)+\]')
 
 
 class OTISPreprocessor(markdown.preprocessors.Preprocessor):
@@ -44,34 +41,7 @@ class OTISPreprocessor(markdown.preprocessors.Preprocessor):
 				tag_name = m_start.group(1)
 				tag_arg = m_start.group(2).strip()
 
-				if tag_name == 'problem':
-					puid = tag_arg.upper()
-
-					# Get data from ARCH
-					try:
-						problem = Problem.objects.get(puid=puid)
-					except Problem.DoesNotExist:
-						table_output.append(f'<tr class="danger"><th>PUID</th><td>{puid}</td></tr>')
-					else:
-						table_output.append(
-							f'<tr><th>ARCH</th><td><a href="{problem.get_absolute_url()}">' +
-							f'<span class="fa fa-link"></span>{puid}</a></td></tr>'
-						)
-						if problem.aops_url:
-							table_output.append(
-								f'<tr><th>AoPS</th><td><a href="{problem.aops_url}">Forum link</a></td></tr>'
-							)
-
-					# Link solution if possible
-					solution_target_name = 'pdfs/' + storage_hash(puid) + '.tex'
-					if default_storage.exists(solution_target_name):
-						solution_url = default_storage.url(solution_target_name)
-						table_output.append(
-							r'<tr><th>Solution</th><td>' +
-							f'<a href="{solution_url}"><span class="fa fa-link"></span>Download</a>' +
-							r'</td></tr>'
-						)
-				elif tag_name == 'diamond':
+				if tag_name == 'diamond':
 					try:
 						diamond = Achievement.objects.get(code__iexact=tag_arg)
 					except Achievement.DoesNotExist:
