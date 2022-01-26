@@ -7,7 +7,7 @@
 			<img width="150px" src="{% static 'img/otis-logo-v2018.svg' %}" /> <br />
 			<tt>web.evanchen.cc</tt>
 		</div>
-		<div class="col-8 col-md-6">
+		<div class="col-8">
 			<table class="table w-100">
 				<tr>
 					<th>Bill to</th>
@@ -29,7 +29,7 @@
 		</div>
 	</div>
 	<div class="row">
-		<div class="col-12 col-md-10">
+		<div class="col-12">
 			<table class="table w-100">
 				<tbody>
 					<thead class="table-dark">
@@ -81,16 +81,14 @@
 			</table>
 		</div>
 	</div>
-	<div clss="container">
-		<div class="row">
-			<span class="col-xs-12 col-sm-6">
-				<h4>Evan's Regular Address</h4>
-				{{ "ADDRESS_REGULAR"|getenv|linebreaks }}
-			</span>
-			<span class="col-xs-12 col-sm-5">
-				<h4>Evan's Home Address</h4>
-				{{ "ADDRESS_HOME"|getenv|linebreaks }}
-			</span>
-		</div>
+	<div class="row">
+		<span class="col-xs-12 col-sm-6">
+			<h4>Evan's Regular Address</h4>
+			{{ "ADDRESS_REGULAR"|getenv|linebreaks }}
+		</span>
+		<span class="col-xs-12 col-sm-6">
+			<h4>Evan's Home Address</h4>
+			{{ "ADDRESS_HOME"|getenv|linebreaks }}
+		</span>
 	</div>
 </div>
