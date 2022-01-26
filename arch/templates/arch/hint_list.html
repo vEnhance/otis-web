@@ -7,19 +7,11 @@
 {% spaceless %}
 <h1>{{ problem }}</h1>
 {% endspaceless %}
-<p>
-	<a href="{% url "view-solution" problem.puid %}">
-		Download solution
-	</a>
-</p>
-
 {% if statement %}
 <div class=" alert-secondary alert">
 	{{ statement|safe }}
 </div>
 {% endif %}
-
-<hr />
 
 {% if hint_list %}
 <p>The following hints are available for this problem.</p>
@@ -48,7 +40,10 @@
 	<a href="{% url "hint-create" problem.puid %}" class="btn btn-primary">Add hint</a>
 </div>
 
+<hr />
+
 <ul>
+	<li><a href="{% url "view-solution" problem.puid %}">Download solution</a></li>
 	<li><a href="{% url "problem-update" problem.puid %}">Edit problem</a></li>
 	<li><a href="{% url "problem-delete" problem.puid %}">Delete problem</a></li>
 </ul>
