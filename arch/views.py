@@ -135,10 +135,7 @@ class ProblemUpdate(
 ):
 	context_object_name = "problem"
 	model = Problem
-	fields = (
-		'puid',
-		'aops_url',
-	)
+	fields = ('puid', )
 
 	def get_context_data(self, **kwargs: Any):
 		context = super().get_context_data(**kwargs)

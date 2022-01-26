@@ -20,7 +20,7 @@ class HintUpdateFormWithReason(forms.ModelForm):
 class ProblemUpdateForm(forms.ModelForm):
 	class Meta:
 		model = Problem
-		fields = ('aops_url', )
+		fields = ('puid', )
 
 
 class ProblemSelectForm(forms.Form):

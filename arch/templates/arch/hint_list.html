@@ -5,11 +5,7 @@
 {% block layout-content %}
 
 {% spaceless %}
-<h1>{{ problem }}
-	{% if problem.aops_url %}
-	<a href="{{ problem.aops_url }}">(AOPS)</a>
-	{% endif %}
-</h1>
+<h1>{{ problem }}</h1>
 {% endspaceless %}
 <p>
 	<a href="{% url "view-solution" problem.puid %}">
