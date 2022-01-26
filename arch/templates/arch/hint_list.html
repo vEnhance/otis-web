@@ -48,9 +48,11 @@
 </i>
 {% endif %}
 
+<div class="text-center">
+	<a href="{% url "hint-create" problem.puid %}" class="btn btn-primary">Add hint</a>
+</div>
 
 <ul>
-	<li><a href="{% url "hint-create" problem.puid %}">Add hint</a></li>
 	<li><a href="{% url "problem-update" problem.puid %}">Edit problem</a></li>
 	<li><a href="{% url "problem-delete" problem.puid %}">Delete problem</a></li>
 </ul>
