@@ -24,7 +24,7 @@ from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required, user_passes_test  # NOQA
 from django.contrib.auth.models import Group, User
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, SuspiciousOperation
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, SuspiciousOperation  # NOQA
 from django.db.models.expressions import F
 from django.db.models.fields import FloatField
 from django.db.models.functions.comparison import Cast
@@ -226,6 +226,8 @@ def inquiry(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 		raise PermissionDenied(
 			"Not an active semester, so change petitions are no longer possible."
 		)
+	if not student.enabled:
+		raise PermissionDenied("Student account not enabled")
 	if student.newborn:
 		raise PermissionDenied(
 			"This form isn't enabled yet because you have not chosen your initial units."

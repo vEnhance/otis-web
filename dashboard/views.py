@@ -196,6 +196,9 @@ def submit_pset(request: HttpRequest, student_id: int) -> HttpResponse:
 	student = get_student_by_id(request, student_id)
 	if student.semester.active is False:
 		return HttpResponseForbidden("Not an active semester")
+	if student.enabled is False:
+		return HttpResponseForbidden("Not enabled")
+
 	if request.method == 'POST':
 		form = PSetSubmitForm(request.POST, request.FILES)
 	else:

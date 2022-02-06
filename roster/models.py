@@ -1,8 +1,8 @@
 from __future__ import unicode_literals
-from hashlib import pbkdf2_hmac
 
 import os
 from datetime import timedelta
+from hashlib import pbkdf2_hmac
 from typing import Any, Callable, Dict, List
 
 from _pydecimal import Decimal
@@ -109,6 +109,9 @@ class Student(models.Model):
 		"This will hide them from the master schedule, for example."
 	)
 	newborn = models.BooleanField(default=True, help_text="Whether the student is newly created.")
+	enabled = models.BooleanField(
+		default=True, help_text="Allow student to submit/request units."
+	)
 
 	last_level_seen = models.PositiveSmallIntegerField(
 		default=0, help_text="The last level the student was seen at."
