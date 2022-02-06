@@ -80,6 +80,15 @@
 	<a href="{% url 'invoice' student.id %}" class="alert-link">Link to invoice.</a>
 </div>
 {% endif %}
+{% if not student.enabled %}
+<div class="alert alert-danger">
+	<h1 class="alert-heading">
+		Disabled
+	</h1>
+	This student is currently disabled,
+	so some functionality won't work.
+</div>
+{% endif %}
 
 {% if student.newborn %}
 <p>Hello, {{ student.name }}!
@@ -150,7 +159,9 @@
 	<a href="{% url 'palace-list' student.id %}" style="margin: 0 auto; width: 120px;" class="btn btn-danger text-white" role="button">Ruby palace</a>
 	&nbsp;
 	{% endif %}
+	{% if student.enabled %}
 	<a href="{% url 'submit-pset' student.id %}" style="margin: 0 auto; width: 120px;" class="btn btn-success text-white" role="button">Submit unit</a>
+	{% endif %}
 </div>
 {% endif %}
 
@@ -203,7 +214,7 @@
 	Units to work on are marked ▶️.
 </p>
 
-{% if not student.newborn %}
+{% if not student.newborn and semester.active and student.enabled %}
 <div class="text-center">
 	<a href="{% url 'inquiry' student.id %}" class="btn btn-warning">Request units</a>
 	{% if omniscient %}
@@ -283,7 +294,7 @@
 
 <hr />
 
-{% if semester.active %}
+{% if semester.active and student.enabled %}
 <h2>Mock olympiads (tests)</h2>
 {% include 'dashboard/list_exam.html' with exams=tests %}
 
@@ -295,11 +306,11 @@
 {% include 'dashboard/list_exam.html' with exams=quizzes %}
 <p>Click on a quiz above to open it. Quiz submissions are done directly on OTIS-WEB.</p>
 
-{% else %}
+{% elif semester.active %}
 <p>This page from {{ semester }} is now archived. Thanks for playing.</p>
 {% endif %}
 
-{% if semester.active %}
+{% if semester.active and student.enabled %}
 <hr />
 <h2>Calendar</h2>
 <p> Be sure to check that the time zones display correctly!</p>

@@ -25,7 +25,11 @@
 		<tr> {# begin table row for this student #}
 			<td>{{ forloop.counter }}</td>
 			<td><a href="{% url "portal" student.id %}">
-					{{ student.name }}</a></td>
+					{{ student.name }}</a>
+				{% if not student.enabled %}
+				(disabled)
+				{% endif %}
+			</td>
 
 			{% if stulist_show_semester %}
 			<td>{{ student.semester }}</td>
@@ -66,7 +70,8 @@
 
 {% else %}
 <p>To register for this year,
-	<a href="{% url "register" %}">submit the decision form</a>.</p>
+	<a href="{% url "register" %}">submit the decision form</a>.
+</p>
 {% endif %}
 {% endif %}
 
