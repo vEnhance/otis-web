@@ -19,7 +19,7 @@ from django.db.models import Count, OuterRef, Subquery
 from django.db.models.expressions import Exists
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseForbidden, HttpResponseRedirect  # NOQA
 from django.http.request import HttpRequest
 from django.http.response import HttpResponseBase
 from django.shortcuts import get_object_or_404, render
@@ -194,6 +194,8 @@ def leaderboard(request: AuthHttpRequest) -> HttpResponse:
 @login_required
 def submit_pset(request: HttpRequest, student_id: int) -> HttpResponse:
 	student = get_student_by_id(request, student_id)
+	if student.semester.active is False:
+		return HttpResponseForbidden("Not an active semester")
 	if request.method == 'POST':
 		form = PSetSubmitForm(request.POST, request.FILES)
 	else:
