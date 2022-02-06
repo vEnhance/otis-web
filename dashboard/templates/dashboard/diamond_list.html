@@ -12,10 +12,13 @@
 				{% else %}
 				???
 				{% endif %}
+				{% if request.user.is_staff or achievement.obtained %}
+				{{ achievement.name }}
+				{% endif %}
 			</span>
 		</div>
 		{% if achievement.num_found > 0 %}
-		<span {% if not achievement.obtained %} style="filter: grayscale(100%) opacity(40%);" {% endif %}>
+		<span {% if not achievement.obtained and not request.user.is_staff %} style="filter: grayscale(100%) opacity(40%);" {% endif %}>
 			{% if achievement.image %}
 			<img width="64px" style="float: right;" src="{{ achievement.image.url }}" />
 			{% else %}
@@ -35,8 +38,8 @@
 		<span style="float: right; font-size:64px;">❓</span>
 		<p>Nobody has found this one yet!</p>
 		{% endif %}
-		{% if achievement.obtained %}
-		<p>You found this achievement already.</p>
+		{% if request.user.is_staff or achievement.obtained %}
+		<p><i>{{ achievement.description }}</i></p>
 		{% else %}
 		<p>You have not found this achievement yet.</p>
 		{% endif %}
