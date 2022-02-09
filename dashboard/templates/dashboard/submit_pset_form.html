@@ -14,7 +14,7 @@
 <table class="table">
 	{% for pset in pending_psets %}
 	<tr>
-		<td>{{pset.clubs}}♣</td>
+		<td>{% if pset.rejected %}<b>REJECTED</b>{% else %}{{pset.clubs}}♣{% endif %}</td>
 		<td><a href="{{pset.get_absolute_url}}">{{ pset.unit }}</td>
 		<td>{{ pset.upload.created_at|naturaltime }}</td>
 		<td><a href="{% url "resubmit-pset" pset.pk %}">Edit</a></td>
