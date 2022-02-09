@@ -40,7 +40,7 @@
 					{{ attempt.quiz }}
 				</a>
 			</td>
-			<td>{{ attempt.submit_time|naturaltime }}</td>
+			<td>{{ attempt.submit_time }}</td>
 		</tr>
 		{% endfor %}
 
@@ -55,7 +55,7 @@
 				{{ quest.title }}
 			</td>
 			<td>
-				{{ quest.timestamp|naturaltime }}
+				{{ quest.timestamp }}
 			</td>
 		</tr>
 		{% endfor %}
@@ -71,7 +71,7 @@
 				<a href="{{ guess.market.get_absolute_url }}">{{ guess.market.slug }}</a>
 			</td>
 			<td>
-				{{ guess.market.end_date|naturaltime }}
+				{{ guess.market.end_date }}
 			</td>
 		</tr>
 		{% endfor %}

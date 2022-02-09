@@ -16,7 +16,7 @@
 		<tr>
 			<td style="color:{{ meter.hearts.color }};">+{{ pset.hours }}{{ meters.hearts.unit }}</td>
 			<td><a href="{{ pset.get_absolute_url }}">{{ pset.unit }}</a></td>
-			<td>{{ pset.upload.created_at|naturaltime }}</td>
+			<td>{{ pset.upload.created_at }}</td>
 		</tr>
 		{% endfor %}
 </table>
