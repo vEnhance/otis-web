@@ -2,7 +2,12 @@
 {% block title %}Submission for {{ pset.upload.unit }}{% endblock %}
 {% block layout-content %}
 
-{% if pset.approved %}
+{% if pset.rejected %}
+<div class="alert alert-warning">
+	This unit submission was rejected.
+	You should <a href="{% url "resubmit-pset" pset.pk %}">resubmit it</a>.
+</div>
+{% elif pset.approved %}
 <div class="alert alert-success">
 	This unit submission was approved.
 	If you haven't read the solutions yet,

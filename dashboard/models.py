@@ -155,6 +155,9 @@ class PSet(models.Model):
 	eligible = models.BooleanField(
 		default=True, help_text="Whether to count this for leveling up"
 	)
+	rejected = models.BooleanField(
+		default=False, help_text="If a problem set is rejected and needs attention."
+	)
 	feedback = models.TextField(
 		verbose_name="Feedback on problem set, worth [1♣]",
 		help_text="Any other feedback about the problem set",
