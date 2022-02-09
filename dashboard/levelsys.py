@@ -151,7 +151,7 @@ def get_level_info(student: Student) -> LevelInfoDict:
 	quiz_attempts = ExamAttempt.objects.filter(student__user=student.user)
 	quest_completes = QuestComplete.objects.filter(student__user=student.user)
 	mock_completes = MockCompleted.objects.filter(student__user=student.user)\
-        .select_related('exam')
+           .select_related('exam')
 	market_guesses = Guess.objects.filter(
 		user=student.user,
 		market__end_date__lt=timezone.now(),
@@ -171,7 +171,7 @@ def get_level_info(student: Student) -> LevelInfoDict:
 	hints_written = hints_written.values_list('revision__date_created', flat=True)
 	hint_spades = get_week_count(list(hints_written))
 
-	total_spades = quiz_attempts.aggregate(Sum('score'))['score__sum'] or 0
+	total_spades = (quiz_attempts.aggregate(Sum('score'))['score__sum'] or 0) * 2
 	total_spades += quest_completes.aggregate(Sum('spades'))['spades__sum'] or 0
 	total_spades += market_guesses.aggregate(Sum('score'))['score__sum'] or 0
 	total_spades += mock_completes.count() * 3
@@ -260,7 +260,7 @@ def get_student_rows(queryset: QuerySet[Student]) -> List[Dict[str, Any]]:
 	for student in annotate_student_queryset_with_scores(queryset):
 		row: Dict[str, Any] = {}
 		row['student'] = student
-		row['spades'] = (getattr(student, 'spades_quizzes', 0) or 0)
+		row['spades'] = (getattr(student, 'spades_quizzes', 0) or 0) * 2
 		row['spades'] += (getattr(student, 'spades_quests', 0) or 0)
 		# TODO markets
 		row['spades'] += (getattr(student, 'spades_count_mocks', 0) or 0) * 3
