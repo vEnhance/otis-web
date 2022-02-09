@@ -53,6 +53,7 @@ class SemesterDownloadFileAdmin(admin.ModelAdmin):
 class PSetAdmin(admin.ModelAdmin):
 	list_display = (
 		'approved',
+		'rejected',
 		'student',
 		'unit',
 		'hours',
@@ -67,6 +68,7 @@ class PSetAdmin(admin.ModelAdmin):
 	)
 	list_filter = (
 		'approved',
+		'rejected',
 		'student__assistant',
 		'student__track',
 		'student__semester__active',
