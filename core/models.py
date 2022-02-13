@@ -126,27 +126,6 @@ class UnitGroup(models.Model):
 		elif self.subject == "K":
 			return "Secret"
 
-	@property
-	def get_wiki_link(self):
-		if self.subject == "A":
-			subj = "algebra"
-		elif self.subject == "C":
-			subj = "combinatorics"
-		elif self.subject == "G":
-			subj = "geometry"
-		elif self.subject == "N":
-			subj = "number-theory"
-		elif self.subject == "M":
-			subj = "miscellaneous"
-		elif self.subject == "F":
-			subj = "algebra"
-		elif self.subject == "K":
-			subj = "null"
-		else:
-			subj = ''
-		unit = self.name.replace(' ', '-').lower()
-		return f"/wiki/units/list-of-{subj}-units/{unit}"
-
 	class Meta:
 		ordering = ('name', )
 

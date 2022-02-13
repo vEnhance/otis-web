@@ -24,12 +24,13 @@
 {% for unitgroup in item_list %}
 <p>
 	<b class="text-info">
-		<a href="{{unitgroup.get_wiki_link}}">{{ unitgroup.name }}</a>
+		<a href="{% url "wiki-unitgroup" unitgroup.pk %}">{{ unitgroup.name }}</a>
 	</b>
 	[{{ unitgroup.get_subject_short_display }},
 	{% for unit in unitgroup.unit_set.all %} {{ unit.code }}{% endfor %}].
 	<br />
-	{{ unitgroup.description }}</p>
+	{{ unitgroup.description }}
+</p>
 {% endfor %}
 <hr />
 {% endfor %}
