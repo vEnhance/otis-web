@@ -3,23 +3,40 @@
 {% block meter-content %}
 <p>You gain
 	<span style="color:{{meters.spades.color}};">{{ meters.spades.unit }}</span>
-	by any of the following:
-<ul>
-	<li>scoring points on <a href="{% url 'portal' student.id %}">short-answer quizzes</a>, 2♠ for each correct answer,</li>
-	<li>
-		completing special quests like
-		<a href="https://web.evanchen.cc/usemo.html">USEMO participation or grading</a> and
-		<a href="https://github.com/vEnhance/otis-web/blob/main/CONTRIBUTING.mkd">GitHub contributions</a>,
-	</li>
-	<li>participating in <a href="{% url 'market-list' %}">estimation markets</a>,
-	<li>submitting <a href="{% url 'mocks' student.id %}">mock olympiads</a> on time,
-		worth 3♠ each regardless of performance</li>
-	<li>contributing <a href="{% url 'suggest-new' %}">problem suggestions</a>,
-		worth 1♠ each for each distinct unit with an approved suggestion,</li>
-	<li>contributing hints to <a href="{% url 'arch-lookup' %}">ARCH</a>,
-		formula to be determined.</li>
-</ul>
+	through a variety of ways.
+	Here are some of them:
 </p>
+<table class="table">
+	<tr>
+		<td><a href="{% url 'portal' student.id %}#quizzes">Short-answer quizzes</a></td>
+		<td>2♠ &times; score</td>
+	</tr>
+	<tr>
+		<td>Competing in <a href="https://web.evanchen.cc/usemo.html">USEMO</a> (USA only)</td>
+		<td>1♠ &times; score</td>
+	</tr>
+	<tr>
+		<td>Grading <a href="https://web.evanchen.cc/usemo.html">USEMO</a> (non-USA only)</td>
+		<td>15♠</td>
+	</tr>
+	<tr>
+		<td><a href="https://github.com/vEnhance/otis-web/blob/main/CONTRIBUTING.mkd">GitHub contributions</a></td>
+		<td>Varies</td>
+	</tr>
+	<tr>
+		<td><a href="{% url 'market-list' %}">Estimation markets</a></td>
+		<td>0♠ - 4♠</td>
+	</tr>
+	<tr>
+		<td>Submitting <a href="{% url 'mocks' student.id %}">mock olympiads</a> on time</td>
+		<td>3♠ each (regardless of score)</td>
+	</tr>
+	<tr>
+		<td><a href="{% url 'suggest-new' %}">Problem suggestions</a></td>
+		<td>1♠ for each distinct unit</td>
+	</tr>
+</table>
+<p>The above list is not exhaustive; spades can be awarded for other things too.</p>
 
 <table class="table table-sm">
 	<thead class="table-dark">
