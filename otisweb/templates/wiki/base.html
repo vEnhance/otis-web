@@ -8,26 +8,6 @@
 <a class="navbar-brand" href="{% url 'wiki:root' %}">
 	<img height="48px" src="{% static 'img/otis-logo-v2018.svg' %}" />
 </a>
-<script type="text/javascript">
-	MathJax = {
-		tex: {
-			inlineMath: [
-				['$', '$'],
-				['\\(', '\\)'],
-			],
-			displayMath: [
-				['\\[', '\\]']
-			],
-		},
-		ready: () => {}
-	};
-
-	window.MathJaxLoaded = new Promise((resolve) => {
-		$.getScript("https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js", () => resolve());
-	})
-</script>
-<script type="text/javascript" id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-</script>
 {% endblock %}
 
 {% block wiki_header_navlinks %}
@@ -58,7 +38,39 @@
 <hr />
 <style>
 	div.container {
-		max-width: 850px;
+		max-width: 1280px;
+	}
+
+	div.wiki-article,
+	#article-menu,
+	#article-breadcrumbs {
+		max-width: 768px;
+		margin: 0 auto;
+	}
+
+	#id_content {
+		height: 30em;
 	}
 </style>
+<script type="text/javascript">
+	MathJax = {
+		tex: {
+			inlineMath: [
+				['$', '$'],
+				['\\(', '\\)'],
+			],
+			displayMath: [
+				['\\[', '\\]']
+			],
+		},
+		ready: () => {}
+	};
+
+	window.MathJaxLoaded = new Promise((resolve) => {
+		$.getScript("https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js", () => resolve());
+	})
+</script>
+<script type="text/javascript" id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+
 {% endblock %}
