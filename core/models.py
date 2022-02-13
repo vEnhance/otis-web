@@ -142,6 +142,8 @@ class UnitGroup(models.Model):
 			subj = "algebra"
 		elif self.subject == "K":
 			subj = "null"
+		else:
+			subj = ''
 		unit = self.name.replace(' ', '-').lower()
 		return f"/wiki/units/list-of-{subj}-units/{unit}"
 
