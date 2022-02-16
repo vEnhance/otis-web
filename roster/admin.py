@@ -300,21 +300,19 @@ def build_students(queryset: QuerySet[StudentRegistration]) -> int:
 @admin.register(StudentRegistration)
 class StudentRegistrationAdmin(ImportExportModelAdmin):
 	list_display = (
+		'container',
 		'processed',
 		'name',
 		'track',
 		'about',
-		'country',
-		'aops_username',
 		'agreement_form',
 	)
 	list_filter = (
+		'container__semester',
 		'processed',
-		'container',
 		'track',
 		'gender',
 		'graduation_year',
-		'country',
 	)
 	list_display_links = (
 		'name',
