@@ -250,6 +250,7 @@ class Achievement(models.Model):
 	description = models.TextField(
 		help_text="Text shown beneath this achievement for students who obtain it."
 	)
+	solution = models.TextField(help_text="Internal note by Evan where the diamond is hidden")
 	active = models.BooleanField(help_text="Whether the code is active right now", default=True)
 	diamonds = models.SmallIntegerField(
 		default=1, help_text="Number of diamonds for this achievement"
