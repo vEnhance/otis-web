@@ -102,7 +102,10 @@ class OwedFilter(admin.SimpleListFilter):
 	parameter_name = 'has_owed'
 
 	def lookups(self, request: HttpRequest, model_admin: 'InvoiceAdmin') -> List[Tuple[str, str]]:
-		return [("incomplete", "Incomplete"), ("paid", "Paid in full"), ("zero", "No payment")]
+		return [
+			("incomplete", "Incomplete"), ("paid", "Paid in full"), ("excess", "Overpaid"),
+			("zero", "No payment")
+		]
 
 	def queryset(self, request: HttpRequest, queryset: QuerySet[Model]):
 		if self.value() is None:
@@ -119,6 +122,8 @@ class OwedFilter(admin.SimpleListFilter):
 				return queryset.filter(owed__gt=0)
 			elif self.value() == "paid":
 				return queryset.filter(owed__lte=0)
+			elif self.value() == "excess":
+				return queryset.filter(owed__lt=0)
 			elif self.value() == "zero":
 				return queryset.filter(owed__gt=0).filter(total_paid=0)
 
