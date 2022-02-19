@@ -168,6 +168,7 @@ class AchievementIEResource(resources.ModelResource):
 			'diamonds',
 			'active',
 			'description',
+			'solution',
 		)
 
 
