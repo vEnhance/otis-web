@@ -179,9 +179,10 @@ class AchievementAdmin(ImportExportModelAdmin):
 		'diamonds',
 		'active',
 		'description',
+		'solution',
 		'creator',
 	)
-	search_fields = ('code', 'description')
+	search_fields = ('code', 'description', 'solution')
 	list_filter = ('active', )
 	resource_class = AchievementIEResource
 
