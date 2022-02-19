@@ -93,7 +93,7 @@ class InvoiceIEResource(resources.ModelResource):
 			'total_paid',
 			'student__semester__name',
 			'forgive',
-			'forgive_memo',
+			'memo',
 		)
 
 
@@ -200,7 +200,7 @@ class InvoiceInline(admin.StackedInline):
 		'adjustment',
 		'total_paid',
 		'forgive',
-		'forgive_memo',
+		'memo',
 	)
 	readonly_fields = (
 		'student',

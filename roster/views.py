@@ -210,7 +210,7 @@ class UpdateInvoice(
 		'extras',
 		'total_paid',
 		'forgive',
-		'forgive_memo',
+		'memo',
 	)
 	object: Invoice
 
