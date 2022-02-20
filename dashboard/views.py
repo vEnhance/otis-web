@@ -268,11 +268,10 @@ def resubmit_pset(request: HttpRequest, pk: int) -> HttpResponse:
 		assert pset.upload is not None
 		pset.upload.content = form.cleaned_data['content']
 		pset.upload.save()
-		if pset.rejected is True:
-			pset.rejected = False
-		if pset.approved is True:
-			pset.approved = False
+		if pset.rejected or pset.approved:
 			pset.resubmitted = True
+		pset.rejected = False
+		pset.approved = False
 		pset.save()
 		messages.success(
 			request, "The problem set is submitted successfully "
