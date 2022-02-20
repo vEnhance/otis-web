@@ -86,13 +86,17 @@ class PSetAdmin(admin.ModelAdmin):
 				pset.student.unlocked_units.add(pset.next_unit_to_unlock)
 			if pset.unit is not None:
 				pset.student.unlocked_units.remove(pset.unit)
-		queryset.update(approved=True)
+		queryset.update(approved=True, rejected=False)
+
+	def approve_pset_without_unlock(self, request: HttpRequest, queryset: QuerySet[PSet]):
+		queryset.update(approved=True, rejected=False)
 
 	def reject_pset(self, request: HttpRequest, queryset: QuerySet[PSet]):
-		queryset.update(approved=False)
+		queryset.update(approved=False, rejected=True)
 
 	actions = [
 		'approve_pset',
+		'approve_pset_without_unlock',
 		'reject_pset',
 	]
 
