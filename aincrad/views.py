@@ -25,7 +25,6 @@ def venueq_handler(action: str, request: HttpRequest) -> JsonResponse:
 		# mark problem set as done
 		pset = get_object_or_404(PSet, pk=request.POST['pk'])
 		pset.approved = bool(request.POST['approved'])
-		pset.rejected = bool(request.POST['rejected'])
 		pset.clubs = request.POST.get('clubs', None)
 		pset.hours = request.POST.get('hours', None)
 		pset.save()
@@ -82,7 +81,6 @@ def venueq_handler(action: str, request: HttpRequest) -> JsonResponse:
 								).values(
 									'pk',
 									'approved',
-									'rejected',
 									'resubmitted',
 									'eligible',
 									'feedback',
