@@ -82,13 +82,11 @@
 		</div>
 	</div>
 	<div class="row">
-		<span class="col-xs-12 col-sm-6">
-			<h4>Evan's Regular Address</h4>
-			{{ "ADDRESS_REGULAR"|getenv|linebreaks }}
-		</span>
-		<span class="col-xs-12 col-sm-6">
-			<h4>Evan's Home Address</h4>
-			{{ "ADDRESS_HOME"|getenv|linebreaks }}
-		</span>
+		<a href="{{ "PARENT_INFO_URL"|getenv }}" class="btn btn-primary col-xs-12 col-sm-6">
+			Payment methods
+		</a>
+		<a href="//web.evanchen.cc/upload/otis-syllabus.pdf" class="btn btn-secondary col-xs-12 col-sm-6">
+			Course syllabus
+		</a>
 	</div>
 </div>
