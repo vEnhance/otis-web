@@ -146,11 +146,11 @@ class InvoiceAdmin(ImportExportModelAdmin):
 	ordering = ('student', )
 	list_filter = (
 		OwedFilter,
-		'forgive',
-		'student__semester__active',
-		'student__semester',
 		'student__legit',
+		'student__semester__active',
 		'student__track',
+		'forgive',
+		'student__semester',
 	)
 	resource_class = InvoiceIEResource
 
