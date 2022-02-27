@@ -4,14 +4,14 @@
 
 {% block layout-content %}
 
-<p><a href="{% url "arch-index" %}">⬅️  Back to ARCH index</a></p>
+<p><a href="{% url "arch-index" %}">⬅️ Back to ARCH index</a></p>
 <hr />
 {% spaceless %}
 <h1>{{ problem }}</h1>
 {% endspaceless %}
 {% if statement %}
 <div class=" alert-secondary alert">
-	{{ statement|safe }}
+	{{ statement|linebreaks }}
 </div>
 {% endif %}
 
