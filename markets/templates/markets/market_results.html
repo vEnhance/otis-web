@@ -30,7 +30,8 @@
 
 {% if market.show_answer or request.user.is_superuser %}
 <p>The correct answer is
-	<strong>{{ market.answer|default_if_none:"TBD" }}</strong>.</p>
+	<strong>{{ market.answer|default_if_none:"TBD" }}</strong>.
+</p>
 {{ market.solution|linebreaks }}
 {% endif %}
 
@@ -59,13 +60,11 @@
 			<td>
 				{% if guess.pk == g.pk %}
 				<strong>{{ g.user.get_full_name }}</strong>
-				<span>
-					{% if not g.public %}(hidden){% endif %}
-					{% elif g.public or request.user.is_staff %}
-					{{ g.user.get_full_name }}
-				</span>
+				{% elif g.public %}
+				{{ g.user.get_full_name }}
+				{% elif request.user.is_staff %}
+				<i>{{ g.user.get_full_name }}</i>
 				{% else %}
-				&mdash;
 				{% endif %}
 			</td>
 		</tr>
