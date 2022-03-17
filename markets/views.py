@@ -122,9 +122,17 @@ def recompute(request: AuthHttpRequest, slug: str):
 class MarketList(LoginRequiredMixin, ListView[Market]):
 	model = Market
 	context_object_name = "markets"
+	extra_context = {'past': False}
 
 	def get_queryset(self) -> QuerySet[Market]:
-		return Market.started.order_by('-end_date')
+		return Market.started.order_by('-end_date').filter(semester__active=True)
+
+
+class MarketListPast(MarketList):
+	extra_context = {'past': True}
+
+	def get_queryset(self) -> QuerySet[Market]:
+		return Market.started.order_by('-end_date').filter(semester__active=False)
 
 
 class GuessView(LoginRequiredMixin, DetailView[Guess]):

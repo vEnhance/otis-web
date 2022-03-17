@@ -3,10 +3,16 @@
 {% block title %}Estimation markets{% endblock %}
 {% block layout-content %}
 
+{% if past %}
+<p>
+	Below are results from the estimation markets in past years.
+</p>
+{% else %}
 <p>
 	Estimation markets are a side minigame that
 	offers spades for correctly guessing hidden values.
 </p>
+{% endif %}
 
 <table class="table">
 	<tr class="table-dark">
@@ -27,12 +33,22 @@
 			{{ market.alpha|floatformat:".2f" }}
 			{% endif %}
 		</td>
+		{% if past %}
+		<td>{{ market.end_date }}</td>
+		{% else %}
 		<td>{{ market.end_date|naturaltime }}</td>
+		{% endif %}
 	</tr>
 	{% endfor %}
 </table>
 
+{% if past %}
+<a href="{% url "market-list" %}">Show markets from this year</a>
+{% else %}
+<a href="{% url "market-list-past" %}">Show markets from past years.</a>
+
 <hr />
+
 <h3>Market Rules</h3>
 <ol>
 	<li>Markets open every Friday at midnight Eastern time,
@@ -54,5 +70,6 @@
 	<li>You may only submit one guess. It is not possible to change your guess later.</li>
 	<li>Discussion, collusion, and other antics are permitted.</li>
 </ol>
+{% endif %}
 
 {% endblock %}
