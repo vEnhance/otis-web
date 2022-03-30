@@ -1,10 +1,10 @@
 from core.factories import UnitFactory, UnitGroupFactory, UserFactory  # NOQA
-from dashboard.factories import PSetFactory
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from otisweb.tests import OTISTestCase
+
 from roster.factories import AssistantFactory, InvoiceFactory, RegistrationContainerFactory, StudentFactory, StudentRegistrationFactory  # NOQA
-from roster.models import Student, StudentRegistration, UnitInquiry  # NOQA
+from roster.models import Student, StudentRegistration
 
 from .admin import build_students
 
@@ -155,6 +155,14 @@ class RosterTest(OTISTestCase):
 		self.assertEqual(alice.curriculum.count(), 13)
 		self.assertEqual(alice.unlocked_units.count(), 10)
 
+		self.assertContains(
+			self.post("inquiry", alice.pk, data={
+				"unit": units[19].pk,
+				"action_type": "DROP"
+			}), "abnormally large"
+		)
+
+		self.login(firefly)
 		for i in range(5, 14):
 			self.assertContains(
 				self.post("inquiry", alice.pk, data={
@@ -173,26 +181,6 @@ class RosterTest(OTISTestCase):
 		)
 		self.assertEqual(alice.curriculum.count(), 9)
 		self.assertEqual(alice.unlocked_units.count(), 6)
-		self.assertContains(
-			self.post("inquiry", alice.pk, data={
-				'unit': units[6].pk,
-				"action_type": "UNLOCK",
-			}), "abnormally large number of petitions"
-		)
-		self.assertEqual(
-			UnitInquiry.objects.filter(student=alice, action_type="UNLOCK").count(), 16
-		)
-		self.assertEqual(alice.curriculum.count(), 9)
-		self.assertEqual(alice.unlocked_units.count(), 6)
-		PSetFactory.create(student=alice, approved=True)
-		self.assertContains(
-			self.post("inquiry", alice.pk, data={
-				'unit': units[6].pk,
-				"action_type": "UNLOCK",
-			}), "Petition automatically approved"
-		)
-		self.assertEqual(alice.curriculum.count(), 10)
-		self.assertEqual(alice.unlocked_units.count(), 7)
 
 	def test_create_student(self):
 		container = RegistrationContainerFactory.create(num_preps=2)

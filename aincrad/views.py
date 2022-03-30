@@ -107,6 +107,7 @@ def venueq_handler(action: str, request: HttpRequest) -> JsonResponse:
 							list(
 								inquiries.values(
 									'pk',
+									'action_type',
 									'unit__group__name',
 									'unit__code',
 									'student__user__first_name',

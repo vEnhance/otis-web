@@ -267,11 +267,10 @@ def inquiry(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 
 				# auto hold criteria
 				num_psets = PSet.objects.filter(student=student).count()
-				auto_hold_criteria = (num_past_unlock_inquiries > (15 + 10 * num_psets))
+				auto_hold_criteria = (num_past_unlock_inquiries > (10 + 3 * num_psets))
 
 				# auto-acceptance criteria
 				auto_accept_criteria = (inquiry.action_type == "APPEND")
-				auto_accept_criteria |= (inquiry.action_type == "DROP")
 				auto_accept_criteria |= (
 					num_past_unlock_inquiries <= 6 and unlocked_count < 9 and
 					(not auto_hold_criteria and not auto_reject_criteria)
@@ -282,9 +281,14 @@ def inquiry(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 					and not current_inquiries.filter(action_type="APPEND", unit=inquiry.unit).exists() and
 					not auto_hold_criteria and not auto_reject_criteria
 				)
-				auto_accept_criteria |= request.user.is_staff
 
-				if auto_accept_criteria:
+				if auto_reject_criteria and not request.user.is_staff:
+					inquiry.status = "REJ"
+					inquiry.save()
+					messages.error(
+						request, "You can't have more than 9 unfinished units unlocked at once."
+					)
+				elif auto_accept_criteria or request.user.is_staff:
 					inquiry.run_accept()
 					messages.success(request, "Petition automatically approved.")
 				elif auto_hold_criteria:
@@ -293,12 +297,6 @@ def inquiry(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 					messages.warning(
 						request, "You have submitted an abnormally large number of petitions " +
 						"so you should contact Evan specially to explain why."
-					)
-				elif auto_reject_criteria:
-					inquiry.status = "REJ"
-					inquiry.save()
-					messages.error(
-						request, "You can't have more than 9 unfinished units unlocked at once."
 					)
 				else:
 					messages.success(request, "Petition submitted, wait for it!")
