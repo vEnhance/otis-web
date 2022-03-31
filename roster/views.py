@@ -275,12 +275,6 @@ def inquiry(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 					num_past_unlock_inquiries <= 6 and unlocked_count < 9 and
 					(not auto_hold_criteria and not auto_reject_criteria)
 				)
-				auto_accept_criteria |= (
-					inquiry.action_type == "UNLOCK" and
-					current_inquiries.filter(action_type="DROP", status="ACC", unit=inquiry.unit).exists()
-					and not current_inquiries.filter(action_type="APPEND", unit=inquiry.unit).exists() and
-					not auto_hold_criteria and not auto_reject_criteria
-				)
 
 				if auto_reject_criteria and not request.user.is_staff:
 					inquiry.status = "REJ"
