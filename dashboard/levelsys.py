@@ -150,8 +150,8 @@ def get_level_info(student: Student) -> LevelInfoDict:
 
 	quiz_attempts = ExamAttempt.objects.filter(student__user=student.user)
 	quest_completes = QuestComplete.objects.filter(student__user=student.user)
-	mock_completes = MockCompleted.objects.filter(student__user=student.user)\
-           .select_related('exam')
+	mock_completes = MockCompleted.objects.filter(student__user=student.user)
+	mock_completes = mock_completes.select_related('exam')
 	market_guesses = Guess.objects.filter(
 		user=student.user,
 		market__end_date__lt=timezone.now(),
