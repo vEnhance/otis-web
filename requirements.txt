@@ -100,8 +100,8 @@ defusedxml==0.7.1; python_version >= "3.7" and python_full_version < "3.0.0" or 
 diff-match-patch==20200713; python_version >= "3.7" \
     --hash=sha256:da6f5a01aa586df23dfc89f3827e1cafbb5420be9d87769eeb079ddfd9477a18 \
     --hash=sha256:8bf9d9c4e059d917b5c6312bac0c137971a32815ddbda9c682b949f2986b4d34
-django-allauth==0.45.0 \
-    --hash=sha256:6d46be0e1480316ccd45476db3aefb39db70e038d2a543112d314b76bb999a4e
+django-allauth==0.50.0 \
+    --hash=sha256:ee3a174e249771caeb1d037e64b2704dd3c56cfec44f2058fae2214b224d35e8
 django-bootstrap-v5==1.0.11; python_version >= "3.6" and python_version < "4.0" \
     --hash=sha256:2d431308859ce3cab7729bb09c76039059cd5fbdd34484da82c4c7f8d49da3a2 \
     --hash=sha256:a207aa804938164c8450bbbef4faaba6d2093b3236000557a50f3bd44b53d268
