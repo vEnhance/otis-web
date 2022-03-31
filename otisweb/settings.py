@@ -30,7 +30,7 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
 CRISPY_TEMPLATE_PACK = 'bootstrap5'
 LOGIN_REDIRECT_URL = '/'
 
-PRODUCTION = bool(os.getenv('IS_PRODUCTION'))
+PRODUCTION = bool(int(os.getenv('IS_PRODUCTION') or 0))
 DEBUG = not PRODUCTION
 if PRODUCTION:
 	ALLOWED_HOSTS = ['otis.evanchen.cc', '.localhost', '127.0.0.1']
