@@ -10,9 +10,9 @@ repository = "https://github.com/vEnhance/otis-web"
 [tool.poetry.dependencies]
 python = "^3.9"
 Django = "^3.2.12"
-Faker = "^8.12.0"
+Faker = "^13.3.4"
 PyMySQL = "^1.0.2"
-crispy-bootstrap5 = "^0.4"
+crispy-bootstrap5 = "^0.6"
 django-allauth = "^0.50.0"
 django-bootstrap-v5 = "^1.0.5"
 django-braces = "^1.14.0"
@@ -24,27 +24,27 @@ django-positions = "^0.6.0"
 django-registration = "^3.2"
 django-reversion = "^4.0.0"
 django-sql-utils = "^0.6.1"
-django-stubs = "^1.9.0"
+django-stubs = "^1.10.1"
 factory-boy = "^3.2.0"
 mailchimp3 = "^3.0.15"
-python-dotenv = "^0.19.0"
+python-dotenv = "^0.20.0"
 wheel = "^0.37.0"
-wiki = "^0.7.6"
+wiki = "^0.8"
 django-storages = {extras = ["google"], version = "^1.11.1", optional = true}
 Unidecode = "^1.2.0"
 freezegun = "^1.1.0"
 types-freezegun = "^1.1.2"
-django-stubs-ext = "^0.3.1"
+django-stubs-ext = "^0.4.0"
 django-qr-code = "^2.3.0"
 
 [tool.poetry.dev-dependencies]
-coverage = {extras = ["toml"], version = "^5.5"}
-ipython = "^7.31.1"
+coverage = {extras = ["toml"], version = "^6.3.2"}
+ipython = "^8.2.0"
 jedi = "^0.18.0"
 pdbpp = "^0.10.3"
 pyflakes = "^2.3.1"
-types-Markdown = "^3.3.2"
-yapf = "^0.31.0"
+types-Markdown = "^3.3.6"
+yapf = "^0.32.0"
 
 [tool.poetry.extras]
 production = ["django-storages"]
