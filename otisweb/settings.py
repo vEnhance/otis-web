@@ -34,6 +34,9 @@ PRODUCTION = bool(os.getenv('IS_PRODUCTION'))
 DEBUG = not PRODUCTION
 if PRODUCTION:
 	ALLOWED_HOSTS = ['otis.evanchen.cc', '.localhost', '127.0.0.1']
+	CSRF_TRUSTED_ORIGINS = [
+		'https://otis.evanchen.cc',
+	]
 else:
 	INTERNAL_IPS = [
 		'127.0.0.1',
