@@ -159,7 +159,7 @@
 	<a href="{% url 'palace-list' student.id %}" style="margin: 0 auto; width: 120px;" class="btn btn-danger text-white" role="button">Ruby palace</a>
 	&nbsp;
 	{% endif %}
-	{% if student.enabled %}
+	{% if student.enabled and semester.active %}
 	<a href="{% url 'submit-pset' student.id %}" style="margin: 0 auto; width: 120px;" class="btn btn-success text-white" role="button">Submit unit</a>
 	{% endif %}
 </div>
