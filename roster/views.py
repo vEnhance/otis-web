@@ -226,6 +226,8 @@ def inquiry(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 		raise PermissionDenied(
 			"Not an active semester, so change petitions are no longer possible."
 		)
+	if student.is_delinquent:
+		raise PermissionDenied("Student is delinquent")
 	if not student.enabled:
 		raise PermissionDenied("Student account not enabled")
 	if student.newborn:
