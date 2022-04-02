@@ -242,7 +242,7 @@ class Student(models.Model):
 			else:
 				row['is_approved'] = getattr(unit, 'approved')
 
-			if row['is_submitted']:
+			if row['is_submitted'] or (row['is_visible'] and self.semester.active is False):
 				row['sols_label'] = "🗝️"
 			elif omniscient and row['is_visible']:
 				row['sols_label'] = "㊙️"
