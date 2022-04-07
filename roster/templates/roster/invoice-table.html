@@ -45,11 +45,13 @@
 						<td>${{ invoice.prep_rate }} &times; {{ invoice.preps_taught }}</td>
 						<td class="text-end">{{ invoice.prep_total|floatformat:2 }}</td>
 					</tr>
+					{% if invoice.hours_taught > 0 %}
 					<tr>
 						<td>Hourly</td>
 						<td>${{ invoice.hour_rate }} &times; {{ invoice.hours_taught }}</td>
 						<td class="text-end">{{ invoice.hours_total|floatformat:2 }}</td>
 					</tr>
+					{% endif %}
 					<tr>
 						<td colspan="2">Extras</td>
 						<td class="text-end">{{ invoice.extras|stringformat:"+.2f" }}</td>
