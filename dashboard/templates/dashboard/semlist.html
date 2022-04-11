@@ -10,7 +10,9 @@ List of years
 	<thead class="table-dark">
 		<tr>
 			<td>Year</td>
+			{% if request.user.is_superuser %}
 			<td>Students</td>
+			{% endif %}
 			<td>Active</td>
 		</tr>
 	</thead>
@@ -18,7 +20,9 @@ List of years
 		{% for semester in object_list %}
 		<tr>
 			<td><a href="{% url "past" semester.pk %}">{{ semester }}</a></td>
+			{% if request.user.is_superuser %}
 			<td>{{ semester.count }} students</td>
+			{% endif %}
 			<td>{% if semester.active %}Yes{% else %}No{% endif %}</td>
 		</tr>
 		{% endfor %}
