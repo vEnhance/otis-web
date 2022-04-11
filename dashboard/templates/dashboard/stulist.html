@@ -4,6 +4,9 @@
 
 {% if rows|length > 0 %} {# if >0 student to list #}
 <p>Here are the participants to which you have access.</p>
+{% if semester %}
+<p>The list is restricted to <b>{{ semester.name }}</b>.</p>
+{% endif %}
 
 <table id="students" class="table tablesorter">
 	<thead class="table-dark">
@@ -76,11 +79,16 @@
 {% endif %}
 
 {% if past %}
-<p>This page includes past years of OTIS too.</p>
-{% else %}
-<p>You can view <a href="{% url "past" %}">🕗 past semesters</a>
+{% if semester %}
+<p>You can view <a href="{% url "past" %}">🕗 all past years</a>
 	if you participated in OTIS before.</p>
+{% else %}
+<p>This page includes all years of OTIS.
+	You can also see <a href="{% url "semlist" %}">a listing of all years.</a>
+</p>
 {% endif %}
+{% endif %}
+
 {% endblock %}
 
 {% block scripts %}

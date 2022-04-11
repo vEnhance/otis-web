@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 import logging
 from datetime import timedelta
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from braces.views import LoginRequiredMixin, StaffuserRequiredMixin, SuperuserRequiredMixin  # NOQA
 from core.models import Semester, Unit, UserProfile
@@ -345,18 +345,25 @@ def index(request: AuthHttpRequest) -> HttpResponse:
 
 
 @login_required
-def past(request: AuthHttpRequest, semester: Semester = None):
+def past(request: AuthHttpRequest, semester_id: Optional[int] = None):
 	students = get_visible_students(request.user, current=False)
-	if semester is not None:
+	if semester_id is not None:
+		semester = Semester.objects.get(pk=semester_id)
 		students = students.filter(semester=semester)
+	else:
+		semester = None
 	queryset = annotate_student_queryset_with_scores(students).order_by(
 		'track', 'user__first_name', 'user__last_name'
 	)
 	context: Dict[str, Any] = {}
-	context['title'] = "Previous Semester Listing"
+	context['title'] = "Previous semester listing"
 	context['rows'] = get_student_rows(queryset)
-	context['stulist_show_semester'] = True
 	context['past'] = True
+	if semester is not None:
+		context['semester'] = semester
+		context['stulist_show_semester'] = False
+	else:
+		context['stulist_show_semester'] = True
 	return render(request, "dashboard/stulist.html", context)
 
 
