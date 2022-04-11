@@ -335,7 +335,7 @@ def index(request: AuthHttpRequest) -> HttpResponse:
 		'track', 'user__first_name', 'user__last_name'
 	)
 	context: Dict[str, Any] = {}
-	context['title'] = "Current Semester Listing"
+	context['title'] = "Current year listing"
 	context['rows'] = get_student_rows(queryset)
 	context['stulist_show_semester'] = False
 	context['submitted_registration'] = StudentRegistration.objects.filter(
@@ -356,7 +356,7 @@ def past(request: AuthHttpRequest, semester_id: Optional[int] = None):
 		'track', 'user__first_name', 'user__last_name'
 	)
 	context: Dict[str, Any] = {}
-	context['title'] = "Previous semester listing"
+	context['title'] = "Previous year listing"
 	context['rows'] = get_student_rows(queryset)
 	context['past'] = True
 	if semester is not None:
