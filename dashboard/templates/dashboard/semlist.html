@@ -1,0 +1,9 @@
+{% extends 'layout.html' %}
+{% block layout-content %}
+{% load otis_extras %}
+
+{% for semester in object_list %}
+<p>{{ semester }} {{semester.count}} </p>
+{% endfor %}
+
+{% endblock %}

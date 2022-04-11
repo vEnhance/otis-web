@@ -360,6 +360,16 @@ def past(request: AuthHttpRequest, semester: Semester = None):
 	return render(request, "dashboard/stulist.html", context)
 
 
+class SemesterList(LoginRequiredMixin, ListView[Semester]):
+	model = Semester
+	template_name = "dashboard/semlist.html"
+
+	def get_queryset(self) -> QuerySet[Semester]:
+		queryset = super(SemesterList, self).get_queryset()
+		queryset = queryset.annotate(count=Count('student'))
+		return queryset
+
+
 class UpdateFile(LoginRequiredMixin, UpdateView[UploadedFile, BaseModelForm[UploadedFile]]):
 	model = UploadedFile
 	fields = (

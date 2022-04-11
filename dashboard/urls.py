@@ -17,6 +17,7 @@ urlpatterns = [
 	path(r'pset/<int:pk>/', views.PSetDetail.as_view(), name='pset'),
 	path(r'past/', views.past, name='past'),
 	path(r'past/<int:semester>/', views.past, name='past'),
+	path(r'years/', views.SemesterList.as_view(), name='semlist'),
 	path(r'index/', views.index, name='index'),
 	path(r'suggest/new', views.ProblemSuggestionCreate.as_view(), name='suggest-new'),
 	path(
