@@ -2,7 +2,11 @@
 <table style="width: 100%; height:128px; font-size: 22px; text-shadow: 1px 0 0 #000, 0 -1px 0 #000, 0 1px 0 #000, -1px 0 0 #000;">
 	<tr>
 		<td><a title="Home" class="emoji-link" href="{% url "index" %}">🏠</a></td>
+		{% if request.user.is_superuser %}
+		<td><a title="Past" class="emoji-link" href="{% url "semlist" %}">🕗</a></td>
+		{% else %}
 		<td><a title="Past" class="emoji-link" href="{% url "past" %}">🕗</a></td>
+		{% endif %}
 		<td><a title="Linked accounts" class="emoji-link" href="{% url "socialaccount_connections" %}">🔐</a></td>
 		<td><a title="Display settings" class="emoji-link" href="{% url "profile" %}">⚙️</a></td>
 	</tr>
