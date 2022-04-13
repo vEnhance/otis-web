@@ -64,7 +64,9 @@ jobs:
     name: pyflakes
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
       - name: pyflakes-report
         uses: reviewdog/action-pyflakes@master
         with:
