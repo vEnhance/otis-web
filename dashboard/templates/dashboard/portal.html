@@ -248,13 +248,13 @@
 				{% endif %}
 				{% if semester.active and student.meets_evan %}
 				<li>
-					<a href="{{ semester.calendar_url_meets_evan }}" target="_blank">
+					<a href="{{ semester.calendar_url_meets_evan }}" target="_blank" rel="noreferrer">
 						OTIS calendar (meetings)</a>
 				</li>
 				{% endif %}
 				{% if semester.active %}
 				<li>
-					<a href="{{ semester.calendar_url_no_meets_evan }}" target="_blank">
+					<a href="{{ semester.calendar_url_no_meets_evan }}" target="_blank" rel="noreferrer">
 						OTIS calendar (no meetings)</a>
 				</li>
 				{% endif %}
@@ -318,12 +318,12 @@
 <ul>
 	{% if student.meets_evan %}
 	<li>
-		<a href="{{ semester.calendar_url_meets_evan }}" target="_blank">
+		<a href="{{ semester.calendar_url_meets_evan }}" target="_blank" rel="noreferrer">
 			OTIS calendar (meetings)</a>
 	</li>
 	{% endif %}
 	<li>
-		<a href="{{ semester.calendar_url_no_meets_evan }}" target="_blank">
+		<a href="{{ semester.calendar_url_no_meets_evan }}" target="_blank" rel="noreferrer">
 			OTIS calendar (no meetings)</a>
 	</li>
 </ul>

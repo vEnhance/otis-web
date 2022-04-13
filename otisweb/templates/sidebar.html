@@ -63,7 +63,7 @@
 {% if student and request.user.is_staff %}
 <ul>
 	<li>
-		<a target="_blank" href="mailto:{{student.user.email}}">Send email</a><br />
+		<a target="_blank" href="mailto:{{student.user.email}}" rel="noreferrer">Send email</a><br />
 	</li>
 	{% if request.user.is_superuser %}
 	<li><a href="{% url "admin:roster_student_change" student.id %}">Edit</a></li>
