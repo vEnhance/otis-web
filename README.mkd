@@ -33,7 +33,7 @@ up a local server on a standard Unix environment.
 	This enables you to use the `poetry` command;
 	verify this by checking `poetry --help` produces a help message.
 6. Once you have `poetry`, hit `poetry install`.
-	This will install a lot of Python into your virtual environment.
+	This will install a lot of Python packages into your virtual environment.
 7. If everything is working, `python manage.py check` should
 	run with no errors.
 8. Run `python manage.py migrate` to create the local database.
