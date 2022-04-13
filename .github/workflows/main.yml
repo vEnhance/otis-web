@@ -64,14 +64,17 @@ jobs:
     name: pyflakes
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
         with:
           submodules: recursive
-      - name: pyflakes-report
-        uses: reviewdog/action-pyflakes@master
-        with:
-          github_token: ${{ secrets.github_token }}
-          reporter: github-check # Change reporter.
+      - name: Setup Python
+        uses: actions/setup-python@v2
+      - name: Install PyFlakes
+        run: |
+          python -m pip install --upgrade pyflakes
+      - name: Run Pyflakes
+        run: |
+          pyflakes .
 
   yapf:
     name: yapf
