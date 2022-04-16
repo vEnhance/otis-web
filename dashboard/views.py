@@ -31,7 +31,7 @@ from dwhandler import SUCCESS_LOG_LEVEL, VERBOSE_LOG_LEVEL
 from exams.models import PracticeExam
 from markets.models import Market
 from otisweb.utils import AuthHttpRequest, get_mailchimp_campaigns
-from roster.models import Student, StudentRegistration
+from roster.models import RegistrationContainer, Student, StudentRegistration
 from roster.utils import can_edit, can_view, get_student_by_id, get_visible_students  # NOQA
 from sql_util.utils import SubqueryAggregate
 
@@ -340,6 +340,9 @@ def index(request: AuthHttpRequest) -> HttpResponse:
 	context['stulist_show_semester'] = False
 	context['submitted_registration'] = StudentRegistration.objects.filter(
 		user=request.user, container__semester__active=True
+	).exists()
+	context['exists_registration'] = RegistrationContainer.objects.filter(
+		semester__active=True,
 	).exists()
 	return render(request, "dashboard/stulist.html", context)
 

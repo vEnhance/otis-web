@@ -71,9 +71,14 @@
 	so you'll need to wait for it to be approved and activated.
 	Contact me if you think this is an error.</p>
 
-{% else %}
+{% elif exists_registration %}
 <p>To register for this year,
 	<a href="{% url "register" %}">submit the decision form</a>.
+</p>
+{% else %}
+<p>You can view <a href="{% url "past" %}">🕗 all past years</a>
+	if you participated in OTIS before.
+	(You can also click the clock icon at the right.)
 </p>
 {% endif %}
 {% endif %}
