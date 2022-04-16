@@ -53,6 +53,12 @@ def permitted(unit: Unit, request: HttpRequest, asking_solution: bool) -> bool:
 		user=request.user, unlocked_units=unit
 	).exists():
 		return True
+	elif Student.objects.filter(
+		user=request.user,
+		unlocked_units=unit,
+		semester__active=False,
+	).exists():
+		return True
 	return False
 
 
