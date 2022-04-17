@@ -42,6 +42,8 @@ def quiz(request: AuthHttpRequest, student_id: int, pk: int) -> HttpResponse:
 		return HttpResponseForbidden("You can't submit numerical answers to an olympiad exam.")
 	if not quiz.started:
 		return HttpResponseForbidden("You can't start this quiz")
+	if not student.enabled:
+		return HttpResponseForbidden("Your student account is disabled.")
 
 	if student.semester.exam_family != quiz.family:
 		return HttpResponseForbidden("You can't access this quiz.")
