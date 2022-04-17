@@ -29,6 +29,8 @@ def pdf(request: AuthHttpRequest, pk: int) -> HttpResponse:
 		return HttpResponseForbidden("Not ready to download this exam yet")
 	elif student.semester.exam_family != exam.family:
 		return HttpResponseForbidden("You can't access this quiz.")
+	elif not student.enabled:
+		return HttpResponseForbidden("Your student account is disabled.")
 
 	return get_from_google_storage(exam.pdfname)
 
@@ -116,6 +118,8 @@ def show_exam(request: AuthHttpRequest, student_id: int, pk: int) -> HttpRespons
 	student = get_student_by_id(request, student_id)
 	if student.semester.exam_family != quiz.family:
 		return HttpResponseForbidden("Wrong year of practice exams")
+	elif not student.enabled:
+		return HttpResponseForbidden("Student account not enabled")
 	return render(request, 'exams/quiz_detail.html', context)
 
 
@@ -126,6 +130,10 @@ def mocks(request: AuthHttpRequest, student_id: int = None) -> HttpResponse:
 		return HttpResponseRedirect(reverse("mocks", args=(student.id, )))
 	student = get_student_by_id(request, student_id)
 	semester = student.semester
+	if not semester.active:
+		return HttpResponseForbidden("Semester not active")
+	elif not student.enabled:
+		return HttpResponseForbidden("Student account not enabled")
 	context = {
 		'student': student,
 		'semester': semester,
