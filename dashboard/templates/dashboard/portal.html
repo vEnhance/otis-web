@@ -308,7 +308,7 @@
 {% include 'dashboard/list_exam.html' with exams=quizzes %}
 <p>Click on a quiz above to open it. Quiz submissions are done directly on OTIS-WEB.</p>
 
-{% elif semester.active %}
+{% elif not semester.active %}
 <p>This page from {{ semester }} is now archived. Thanks for playing.</p>
 {% endif %}
 
