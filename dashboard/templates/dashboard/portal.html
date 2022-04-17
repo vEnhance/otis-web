@@ -213,14 +213,14 @@
 	Units to work on are marked ▶️.
 </p>
 
-{% if not student.newborn and semester.active and student.enabled %}
 <div class="text-center">
+	{% if not student.newborn and semester.active and student.enabled %}
 	<a href="{% url 'inquiry' student.id %}" class="btn btn-warning">Request units</a>
+	{% endif %}
 	{% if omniscient %}
 	<a href="{% url 'advance' student.id %}" class="btn btn-dark">Edit units</a>
 	{% endif %}
 </div>
-{% endif %}
 
 <table width="100%">
 	<tr>
