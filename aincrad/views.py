@@ -159,10 +159,8 @@ def discord_handler(action: str, request: HttpRequest) -> JsonResponse:
 
 	social = queryset.get()  # get the social account for this; should never 404
 	user = social.user
-	student = Student.objects.filter(user=user, semester__active=True).first()
-	regform = StudentRegistration.objects.filter(
-		user=user, container__semester__active=True
-	).first()
+	student = Student.objects.filter(user=user).order_by('-pk').first()
+	regform = StudentRegistration.objects.filter(user=user).order_by('-pk').first()
 
 	if student is not None:
 		return JsonResponse(
