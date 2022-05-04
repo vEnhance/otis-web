@@ -159,7 +159,12 @@ def discord_handler(action: str, request: HttpRequest) -> JsonResponse:
 
 	social = queryset.get()  # get the social account for this; should never 404
 	user = social.user
-	student = Student.objects.filter(user=user).order_by('-pk').first()
+	student = Student.objects.filter(user=user, semester__active=True).first()
+	if student is None:
+		student = Student.objects.filter(user=user).order_by('-pk').first()
+		active = False
+	else:
+		active = True
 	regform = StudentRegistration.objects.filter(user=user).order_by('-pk').first()
 
 	if student is not None:
@@ -173,6 +178,7 @@ def discord_handler(action: str, request: HttpRequest) -> JsonResponse:
 				'gender': regform.gender if regform is not None else '?',
 				'country': regform.country if regform is not None else '???',
 				'num_years': Student.objects.filter(user=user).count(),
+				'active': active,
 			}
 		)
 	elif student is None and regform is not None:
