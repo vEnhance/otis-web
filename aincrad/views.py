@@ -172,7 +172,7 @@ def discord_handler(action: str, request: HttpRequest) -> JsonResponse:
 			{
 				'result': 'success',
 				'user': social.user.username,
-				'name': social.user.get_full_name(),
+				'name': student.name,
 				'uid': uid,
 				'track': student.track,
 				'gender': regform.gender if regform is not None else '?',
