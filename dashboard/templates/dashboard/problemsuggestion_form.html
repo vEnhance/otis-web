@@ -8,6 +8,11 @@
 <p>Thank you for suggesting problems for OTIS!
 	Your contributions are appreciated.</p>
 
+<p>One quick word of advice: if you are suggesting a problem
+	from a fairly well-known source (e.g. IMO Shortlist),
+	there is a decent chance Evan might have done the problem already
+	and placed it on some unit. So it might be worth double-checking first.</p>
+
 <p>Some legalese notes:</p>
 <ul>
 	<li><strong>You should submit a solution</strong>.
@@ -26,10 +31,14 @@
 		so you can also use it for whatever you want elsewhere.</li>
 </ul>
 
-<p>One quick word of advice: if you are suggesting a problem
-	from a fairly well-known source (e.g. IMO Shortlist),
-	there is a decent chance Evan might have done the problem already
-	and placed it on some unit. So it might be worth double-checking first.</p>
+<p>Some LaTeX notes for my convenience:</p>
+<ul>
+	<li><strong>Put newlines (i.e. hit enter) between sentences</strong>
+		so that lines are at most 80 characters long.
+		(Use two enter's for paragraph breaks.)</li>
+	<li>Display or use <tt>align*</tt> on long equations.</li>
+	<li>Use <tt class="mathjax_ignore">\[ ... \]</tt>, not double dollar signs.</li>
+</ul>
 
 {% load crispy_forms_tags %}
 <form action="{{ request.path }}" method="post" class="form">
