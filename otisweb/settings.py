@@ -55,6 +55,7 @@ INSTALLED_APPS = [
 	'markets',
 	'mouse',
 	'roster',
+	'payments',
 	'otisweb',
 	'django.contrib.admin',
 	'django.contrib.auth',
@@ -231,6 +232,9 @@ API_TARGET_HASH = os.getenv(
 	"API_TARGET_HASH", '1c3592aa9241522fea1dd572c43c192a277e832dcd1ae63adfe069cb05624ead'
 )
 PATH_STATEMENT_ON_DISK = os.getenv("PATH_STATEMENT_ON_DISK", None)
+
+STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY")
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
 
 WIKI_ACCOUNT_HANDLING = False
 WIKI_ACCOUNT_SIGNUP_ALLOWED = False

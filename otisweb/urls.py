@@ -21,6 +21,7 @@ urlpatterns = [
 	path(r'markets/', include('markets.urls')),
 	path(r'mouse/', include('mouse.urls')),
 	path(r'roster/', include('roster.urls')),
+	path(r'payments/', include('payments.urls')),
 	path(r'hijack/', include('hijack.urls')),
 	path(r'accounts/', include('allauth.urls')),
 	path(r'notifications/', include('django_nyt.urls')),
