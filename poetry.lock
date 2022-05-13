@@ -1177,6 +1177,17 @@ pure-eval = "*"
 tests = ["pytest", "typeguard", "pygments", "littleutils", "cython"]
 
 [[package]]
+name = "stripe"
+version = "3.0.0"
+description = "Python bindings for the Stripe API"
+category = "main"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+
+[package.dependencies]
+requests = {version = ">=2.20", markers = "python_version >= \"3.0\""}
+
+[[package]]
 name = "tablib"
 version = "3.2.1"
 description = "Format agnostic tabular data library (XLS, JSON, YAML, CSV)"
@@ -2046,6 +2057,10 @@ sqlparse = [
 stack-data = [
     {file = "stack_data-0.2.0-py3-none-any.whl", hash = "sha256:999762f9c3132308789affa03e9271bbbe947bf78311851f4d485d8402ed858e"},
     {file = "stack_data-0.2.0.tar.gz", hash = "sha256:45692d41bd633a9503a5195552df22b583caf16f0b27c4e58c98d88c8b648e12"},
+]
+stripe = [
+    {file = "stripe-3.0.0-py2.py3-none-any.whl", hash = "sha256:f87027ebdcb5b3f3cb3ca67cc1a14c5b44aacdacd081b8b50a6bf94e2bb86f13"},
+    {file = "stripe-3.0.0.tar.gz", hash = "sha256:feb400d70a0fbfa54df7e6376c8f9b87651ded977cd6a02ee32c661a607e259a"},
 ]
 tablib = [
     {file = "tablib-3.2.1-py3-none-any.whl", hash = "sha256:870d7e688f738531a14937a055e8bba404fbc388e77d4d500b2c904075d1019c"},
