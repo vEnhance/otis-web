@@ -8,4 +8,5 @@ urlpatterns = [
 	path(r'checkout/<int:quantity>/', views.checkout, name='payments-checkout'),
 	path(r'success/', views.success, name='payments-success'),
 	path(r'cancelled/', views.cancelled, name='payments-cancelled'),
+	path(r'webhook/', views.webhook, name='payments-webhook'),
 ]

@@ -47,6 +47,32 @@ def checkout(request: HttpRequest, quantity: int) -> HttpResponse:
 		return HttpResponseForbidden('Need to use request method GET')
 
 
+@csrf_exempt
+def webhook(request: HttpRequest) -> HttpResponse:
+	if request.method != 'POST':
+		return HttpResponseForbidden("Need to use request method POST")
+	stripe.api_key = settings.STRIPE_SECRET_KEY
+	endpoint_secret = settings.STRIPE_ENDPOINT_SECRET
+	payload = request.body
+	sig_header = request.META['HTTP_STRIPE_SIGNATURE']
+	event = None
+
+	try:
+		event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
+	except ValueError:
+		# Invalid payload
+		return HttpResponse(status=400)
+	except stripe.error.SignatureVerificationError:
+		# Invalid signature
+		return HttpResponse(status=400)
+
+	# Handle the checkout.session.completed event
+	if event['type'] == 'checkout.session.completed':
+		print("Payment was successful.")
+		# TODO: run some custom code here
+	return HttpResponse(status=200)
+
+
 def success(request: HttpRequest) -> HttpResponse:
 	return HttpResponse("Successful payment")
 
