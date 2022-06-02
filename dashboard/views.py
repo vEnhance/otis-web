@@ -206,8 +206,8 @@ def submit_pset(request: HttpRequest, student_id: int) -> HttpResponse:
 	else:
 		form = PSetSubmitForm()
 
-	form.fields['unit'].queryset = get_units_to_submit(student)
-	form.fields['next_unit_to_unlock'].queryset = get_units_to_unlock(student)
+	form.fields['unit'].queryset = get_units_to_submit(student)  # type: ignore
+	form.fields['next_unit_to_unlock'].queryset = get_units_to_unlock(student)  # type: ignore
 	if request.method == 'POST' and form.is_valid():
 		pset = form.save(commit=False)
 		if PSet.objects.filter(student=student, unit=pset.unit).exists():
@@ -376,8 +376,8 @@ class SemesterList(LoginRequiredMixin, ListView[Semester]):
 
 	def get_queryset(self) -> QuerySet[Semester]:
 		queryset = super(SemesterList, self).get_queryset()
-		queryset = queryset.annotate(count=Count('student'))
-		return queryset
+		queryset = queryset.annotate(count=Count('student'))  # type: ignore
+		return queryset  # type: ignore
 
 
 class UpdateFile(LoginRequiredMixin, UpdateView[UploadedFile, BaseModelForm[UploadedFile]]):

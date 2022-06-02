@@ -17,7 +17,7 @@ from django.urls import reverse_lazy
 from roster.models import Student
 
 
-def validate_at_most_1mb(f: File):
+def validate_at_most_1mb(f: File):  # type: ignore
 	if f.size > 1024 * 1024:
 		raise ValidationError("At most 1MB allowed")
 

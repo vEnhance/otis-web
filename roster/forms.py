@@ -6,6 +6,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.db.models.query_utils import Q
 from django.forms.forms import BaseForm
+
 from roster.models import Student, StudentRegistration, UnitInquiry  # NOQA
 
 
@@ -80,7 +81,7 @@ class InquiryForm(forms.ModelForm):
 		# TODO this breaks ordering, might want to fix
 		curriculum_pks = student.curriculum.all().values_list('pk', flat=True)
 		queryset = Unit.objects.filter(Q(group__hidden=False) | Q(pk__in=curriculum_pks))
-		self.fields['unit'].queryset = queryset
+		self.fields['unit'].queryset = queryset  # type: ignore
 
 	class Meta:
 		model = UnitInquiry
