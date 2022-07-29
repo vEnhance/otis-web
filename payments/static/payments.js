@@ -20,3 +20,9 @@ fetch("/payments/config/")
     });
   });
 });
+
+document.querySelector("#amount").addEventListener("keypress", function(e) {
+  if (e.key === "Enter") {
+    document.querySelector("#payButton").click();
+  }
+});
