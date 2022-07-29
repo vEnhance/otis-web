@@ -10,7 +10,19 @@
 	<li>This payment is for {{ invoice.student.semester }}.</li>
 	<li>You currently owe ${{ invoice.total_owed }}.</li>
 </ul>
-<button class="button is-primary" id="testButton">Test</button>
+<hr />
+<p>
+	<b>Amount to pay:</b>
+
+	<input
+		id="amount"
+		type="number"
+		min="0"
+		max="{{invoice.total_owed|floatformat:0}}"
+		value="{{invoice.total_owed|floatformat:0}}"
+		/>
+	<button class="button is-primary" id="payButton">Pay</button>
+</p>
 {% endif %}
 {% endblock %}
 

@@ -23,7 +23,7 @@ def stripe_config(request: HttpRequest) -> HttpResponse:
 
 
 @csrf_exempt
-def checkout(request: HttpRequest, quantity: int) -> HttpResponse:
+def checkout(request: HttpRequest, amount: int) -> HttpResponse:
 	stripe.api_key = settings.STRIPE_SECRET_KEY
 	domain_url = 'http://127.0.0.1:8000'
 	if request.method == 'GET':
@@ -35,10 +35,10 @@ def checkout(request: HttpRequest, quantity: int) -> HttpResponse:
 			mode='payment',
 			line_items=[
 				{
-					'name': 'OTIS Semester',
-					'quantity': quantity,
+					'name': 'OTIS Payment',
+					'quantity': 1,
 					'currency': 'usd',
-					'amount': 24000 * quantity,  # TODO fix this
+					'amount': amount * 100,
 				}
 			]
 		)
