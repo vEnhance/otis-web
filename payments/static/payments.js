@@ -8,7 +8,7 @@ fetch("/payments/config/")
   // Event handler
   document.querySelector("#payButton").addEventListener("click", () => {
     // Get Checkout Session ID
-    fetch("/payments/checkout/" + Math.round($("#amount").val()) + "/")
+    fetch("/payments/checkout/" + $("#invoice_id").val() + "/" + Math.round($("#amount").val()) + "/")
     .then((result) => { return result.json(); })
     .then((data) => {
       console.log(data);

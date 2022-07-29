@@ -23,7 +23,7 @@ def stripe_config(request: HttpRequest) -> HttpResponse:
 
 
 @csrf_exempt
-def checkout(request: HttpRequest, amount: int) -> HttpResponse:
+def checkout(request: HttpRequest, amount: int, invoice_id: int) -> HttpResponse:
 	stripe.api_key = settings.STRIPE_SECRET_KEY
 	if settings.PRODUCTION:
 		domain_url = 'https://otis.evanchen.cc'
@@ -31,7 +31,7 @@ def checkout(request: HttpRequest, amount: int) -> HttpResponse:
 		domain_url = 'http://127.0.0.1:8000'
 	if request.method == 'GET':
 		checkout_session = stripe.checkout.Session.create(
-			client_reference_id=request.user.id if request.user.is_authenticated else None,
+			client_reference_id=invoice_id,
 			success_url=domain_url + '/payments/success/',
 			cancel_url=domain_url + '/payments/cancelled/',
 			payment_method_types=['card'],
@@ -72,6 +72,7 @@ def webhook(request: HttpRequest) -> HttpResponse:
 	# Handle the checkout.session.completed event
 	if event['type'] == 'checkout.session.completed':
 		print("Payment was successful.")
+		print(event)
 		# TODO: run some custom code here
 	return HttpResponse(status=200)
 
