@@ -25,7 +25,10 @@ def stripe_config(request: HttpRequest) -> HttpResponse:
 @csrf_exempt
 def checkout(request: HttpRequest, amount: int) -> HttpResponse:
 	stripe.api_key = settings.STRIPE_SECRET_KEY
-	domain_url = 'http://127.0.0.1:8000'
+	if settings.PRODUCTION:
+		domain_url = 'https://otis.evanchen.cc'
+	else:
+		domain_url = 'http://127.0.0.1:8000'
 	if request.method == 'GET':
 		checkout_session = stripe.checkout.Session.create(
 			client_reference_id=request.user.id if request.user.is_authenticated else None,
