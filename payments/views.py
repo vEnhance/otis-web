@@ -4,6 +4,7 @@ from django.http.response import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from roster.models import Invoice
+import logging
 import stripe
 
 
@@ -58,15 +59,16 @@ def webhook(request: HttpRequest) -> HttpResponse:
 	endpoint_secret = settings.STRIPE_ENDPOINT_SECRET
 	payload = request.body
 	sig_header = request.META['HTTP_STRIPE_SIGNATURE']
-	event = None
 
 	try:
 		event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
-	except ValueError:
+	except ValueError as e:
 		# Invalid payload
+		logging.error(e)
 		return HttpResponse(status=400)
-	except stripe.error.SignatureVerificationError:
+	except stripe.error.SignatureVerificationError as e:
 		# Invalid signature
+		logging.error(e)
 		return HttpResponse(status=400)
 
 	# Handle the checkout.session.completed event
