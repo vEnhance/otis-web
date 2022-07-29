@@ -73,9 +73,13 @@ def webhook(request: HttpRequest) -> HttpResponse:
 
 	# Handle the checkout.session.completed event
 	if event['type'] == 'checkout.session.completed':
-		print("Payment was successful.")
-		print(event)
-		# TODO: run some custom code here
+		logging.debug("Payment was successful.")
+		logging.debug(event)
+		invoice_id = int(event['data']['object']['client_reference_id'])
+		amount = int(event['data']['object']['amount_total'] / 100)
+		invoice = Invoice.objects.get(id=invoice_id)
+		invoice.total_paid += amount
+		invoice.save()
 	return HttpResponse(status=200)
 
 
