@@ -4,6 +4,7 @@ from django.http.response import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from roster.models import Invoice
+from .models import PaymentLog
 import logging
 import stripe
 
@@ -80,6 +81,8 @@ def webhook(request: HttpRequest) -> HttpResponse:
 		invoice = Invoice.objects.get(id=invoice_id)
 		invoice.total_paid += amount
 		invoice.save()
+		payment_log = PaymentLog(amount = amount, invoice = invoice)
+		payment_log.save()
 	return HttpResponse(status=200)
 
 
