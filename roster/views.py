@@ -24,12 +24,12 @@ from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required, user_passes_test  # NOQA
 from django.contrib.auth.models import Group, User
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, SuspiciousOperation  # NOQA
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied # NOQA
 from django.db.models.expressions import F
 from django.db.models.fields import FloatField
 from django.db.models.functions.comparison import Cast
 from django.forms.models import BaseModelForm
-from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect  # NOQA
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect  # NOQA
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
@@ -41,7 +41,7 @@ from otisweb.utils import AuthHttpRequest, mailchimp_subscribe
 from roster.utils import can_edit, get_current_students, get_student_by_id, infer_student  # NOQA
 
 from .forms import AdvanceForm, CurriculumForm, DecisionForm, InquiryForm, UserForm  # NOQA
-from .models import Invoice, RegistrationContainer, Student, StudentRegistration, UnitInquiry  # NOQA
+from .models import Invoice, RegistrationContainer, StudentRegistration, UnitInquiry  # NOQA
 
 # Create your views here.
 
