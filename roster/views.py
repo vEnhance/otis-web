@@ -155,26 +155,6 @@ def invoice(request: HttpRequest, student_id: int = None) -> HttpResponse:
 	return render(request, "roster/invoice.html", context)
 
 
-# this is not gated
-def invoice_standalone(request: HttpRequest, student_id: int, checksum: str) -> HttpResponse:
-	student = Student.objects.get(id=student_id)
-
-	if checksum != student.get_checksum(settings.INVOICE_HASH_KEY):
-		raise SuspiciousOperation("Bad hash provided")
-	try:
-		invoice = student.invoice
-	except ObjectDoesNotExist:
-		raise Http404("No invoice exists for this student")
-	context = {
-		'title': "Invoice for " + student.name,
-		'student': student,
-		'invoice': invoice,
-		'checksum': checksum
-	}
-	# return HttpResponse("hi")
-	return render(request, "roster/invoice-standalone.html", context)
-
-
 @staff_member_required
 def master_schedule(request: HttpRequest) -> HttpResponse:
 	student_names_and_unit_ids = get_current_students().filter(

@@ -1,34 +1,49 @@
 {% extends 'layout.html' %}
 {% load static %}
 
-{% block title %}Payment{% endblock %}
-{% block layout-content %}
-{% if invoice %}
-<h1>Credit card payment</h1>
-<ul>
-	<li>You are about to make a payment for {{ invoice.student.name }}.</li>
-	<li>This payment is for {{ invoice.student.semester }}.</li>
-	<li>You currently owe ${{ invoice.total_owed }}.</li>
-</ul>
-<hr />
-<p>
-	<b>Amount to pay:</b>
+{% block css %}
+<style type="text/css">
+	body {
+		background-color: white !important;
+	}
 
-	<input
-		id="amount"
-		type="number"
-		min="0"
-		max="{{invoice.total_owed|floatformat:0}}"
-		value="{{invoice.total_owed|floatformat:0}}"
-		/>
-	<input
-		id="invoice_id"
-		type="hidden"
-		value="{{invoice.id}}"
-		/>
-	<button class="button is-primary" id="payButton">Pay</button>
-</p>
-{% endif %}
+	table.table {
+		border-collapse: collapse;
+	}
+</style>
+{% endblock %}
+
+{% block base-content %}
+<div class="container">
+	{% include "roster/invoice-table.html" %}
+
+	<p class="text-center">
+		<b class="fs-5">Amount to pay:</b>
+		<input
+			id="amount"
+			type="number"
+			min="0"
+			max="{{invoice.total_owed|floatformat:0}}"
+			value="{{invoice.total_owed|floatformat:0}}"
+			/>
+		<input
+			id="invoice_id"
+			type="hidden"
+			value="{{invoice.id}}"
+			/>
+		<button class="button is-primary btn btn-success" id="payButton">Pay</button>
+	</p>
+	<hr />
+	<p>
+		<small>
+			<p>Direct link to this invoice:<br />
+			<a href="{% url "payments-invoice" student.id checksum %}">
+				https://otis.evanchen.cc{% url "payments-invoice" student.id checksum %}
+			</a>
+			</p>
+		</small>
+	</p>
+</div>
 {% endblock %}
 
 {% block scripts %}

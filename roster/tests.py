@@ -67,11 +67,11 @@ class RosterTest(OTISTestCase):
 		alice = StudentFactory.create()
 		InvoiceFactory.create(student=alice)
 		self.assertGet20X(
-			'invoice-standalone', alice.pk, alice.get_checksum(settings.INVOICE_HASH_KEY)
+			'payments-invoice', alice.pk, alice.get_checksum(settings.INVOICE_HASH_KEY)
 		)
-		self.assertGetDenied('invoice-standalone', alice.pk, '?')
+		self.assertGetDenied('payments-invoice', alice.pk, '?')
 		self.login(alice)
-		self.assertGetDenied('invoice-standalone', alice.pk, '?')
+		self.assertGetDenied('payments-invoice', alice.pk, '?')
 
 	def test_master_schedule(self):
 		alice = StudentFactory.create()

@@ -8,11 +8,6 @@ urlpatterns = [
 	path(r'advance/<int:student_id>/', views.advance, name='advance'),
 	path(r'invoice/', views.invoice, name='invoice'),
 	path(r'invoice/<int:student_id>/', views.invoice, name='invoice'),
-	path(
-		r'invoice/<int:student_id>/<str:checksum>/',
-		views.invoice_standalone,
-		name='invoice-standalone'
-	),
 	path(r'master-schedule/', views.master_schedule, name='master-schedule'),
 	path(r'edit-invoice/<int:pk>/', views.UpdateInvoice.as_view(), name='edit-invoice'),
 	path(r'inquiry/<int:student_id>/', views.inquiry, name='inquiry'),

@@ -1,5 +1,6 @@
 {% extends 'layout.html' %}
 {% load static %}
+{% load otis_extras %}
 
 {% block layout-content %}
 
@@ -25,20 +26,24 @@
 	<a href="{% static "info/parent-info.pdf" %}">parent info</a>.
 	All quantities below are in US dollars (USD).</p>
 
-<p>Here is a link to a copy of the invoice that works without login
-	(so obviously, only send this to people you trust).
-	<center>
-		<a href="{% url "invoice-standalone" student.id checksum %}">
-			https://otis.evanchen.cc{% url "invoice-standalone" student.id checksum %}
-		</a>
-	</center>
-</p>
-
 <hr />
 
 {% if invoice %}
 <h1>Invoice</h1>
 {% include "roster/invoice-table.html" %}
+<p>Here is a link to a credit card payment page that works without login
+	(so obviously, only send this to people you trust).
+	<center>
+		<a href="{% url "payments-invoice" student.id checksum %}" class="btn btn-success col-xs-12 col-sm-6">
+			Make payment via credit card
+		</a>
+		<br />
+		<a href="{% url "payments-invoice" student.id checksum %}">
+			https://otis.evanchen.cc{% url "payments-invoice" student.id checksum %}
+		</a>
+	</center>
+</p>
+
 <hr />
 
 <p>This invoice was last updated on {{ invoice.updated_at }} server time.</p>

@@ -1,17 +1,30 @@
 from django.conf import settings
-from django.http import HttpRequest, HttpResponse, HttpResponseForbidden
+from django.core.exceptions import ObjectDoesNotExist, SuspiciousOperation  # NOQA
+from django.http import Http404, HttpRequest, HttpResponse, HttpResponseForbidden  # NOQA
 from django.http.response import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-from roster.models import Invoice
+from roster.models import Invoice, Student
 from .models import PaymentLog
 import logging
 import stripe
 
 
-def invoice(request: HttpRequest, invoice_id: int) -> HttpResponse:
-	invoice = Invoice.objects.get(pk=invoice_id)
-	context = {'invoice': invoice}
+def invoice(request: HttpRequest, student_id: int, checksum: str) -> HttpResponse:
+	student = Student.objects.get(id=student_id)
+
+	if checksum != student.get_checksum(settings.INVOICE_HASH_KEY):
+		raise SuspiciousOperation("Bad hash provided")
+	try:
+		invoice = student.invoice
+	except ObjectDoesNotExist:
+		raise Http404("No invoice exists for this student")
+	context = {
+		'title': "Payment for " + student.name,
+		'student': student,
+		'invoice': invoice,
+		'checksum': checksum
+	}
 	return render(request, "payments/invoice.html", context)
 
 
