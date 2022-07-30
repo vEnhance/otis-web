@@ -100,7 +100,7 @@ def webhook(request: HttpRequest) -> HttpResponse:
 
 
 def success(request: HttpRequest) -> HttpResponse:
-	return HttpResponse("Successful payment")
+	return render(request, "payments/success.html")
 
 
 def cancelled(request: HttpRequest) -> HttpResponse:
