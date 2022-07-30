@@ -63,16 +63,6 @@ class RosterTest(OTISTestCase):
 		self.assertEqual(len(checksum), 36)
 		self.assertContains(response, checksum)
 
-	def test_invoice_standalone(self):
-		alice = StudentFactory.create()
-		InvoiceFactory.create(student=alice)
-		self.assertGet20X(
-			'payments-invoice', alice.pk, alice.get_checksum(settings.INVOICE_HASH_KEY)
-		)
-		self.assertGetDenied('payments-invoice', alice.pk, '?')
-		self.login(alice)
-		self.assertGetDenied('payments-invoice', alice.pk, '?')
-
 	def test_master_schedule(self):
 		alice = StudentFactory.create()
 		units = UnitFactory.create_batch(30)
