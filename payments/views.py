@@ -39,6 +39,8 @@ def config(request: HttpRequest) -> HttpResponse:
 
 @csrf_exempt
 def checkout(request: HttpRequest, amount: int, invoice_id: int) -> HttpResponse:
+	if amount <= 0:
+		raise SuspiciousOperation("Need to enter a positive amount for payment...")
 	stripe.api_key = settings.STRIPE_SECRET_KEY
 	if settings.PRODUCTION:
 		domain_url = 'https://otis.evanchen.cc'
