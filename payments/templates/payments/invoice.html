@@ -1,20 +1,10 @@
 {% extends 'layout.html' %}
 {% load static %}
 
-{% block css %}
-<style type="text/css">
-	body {
-		background-color: white !important;
-	}
-
-	table.table {
-		border-collapse: collapse;
-	}
-</style>
-{% endblock %}
-
 {% block base-content %}
 <div class="container">
+	<hr />
+	<h1>Payment for {{student}}</h1>
 	{% include "roster/invoice-table.html" %}
 
 	<p class="text-center">
