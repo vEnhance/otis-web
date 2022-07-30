@@ -26,11 +26,6 @@
 	<a href="{% static "info/parent-info.pdf" %}">parent info</a>.
 	All quantities below are in US dollars (USD).</p>
 
-<hr />
-
-{% if invoice %}
-<h1>Invoice</h1>
-{% include "roster/invoice-table.html" %}
 <p>Here is a link to a credit card payment page that works without login
 	(so obviously, only send this to people you trust).
 	<center>
@@ -43,7 +38,11 @@
 		</a>
 	</center>
 </p>
+<hr />
 
+{% if invoice %}
+<h1>Invoice</h1>
+{% include "roster/invoice-table.html" %}
 <hr />
 
 <p>This invoice was last updated on {{ invoice.updated_at }} server time.</p>
