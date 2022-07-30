@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Pro-tip:
 # echo "./lint.sh" > .git/hooks/pre-commit
