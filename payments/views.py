@@ -16,7 +16,7 @@ def invoice(request: HttpRequest, invoice_id: int) -> HttpResponse:
 
 
 @csrf_exempt
-def stripe_config(request: HttpRequest) -> HttpResponse:
+def config(request: HttpRequest) -> HttpResponse:
 	if request.method == 'GET':
 		stripe_config = {'publicKey': settings.STRIPE_PUBLISHABLE_KEY}
 		return JsonResponse(stripe_config, safe=False)
