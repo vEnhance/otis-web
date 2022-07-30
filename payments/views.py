@@ -80,7 +80,7 @@ def webhook(request: HttpRequest) -> HttpResponse:
 		# Invalid payload
 		logging.error(e)
 		return HttpResponse(status=400)
-	except stripe.error.SignatureVerificationError as e:
+	except stripe.error.SignatureVerificationError as e:  # type: ignore
 		# Invalid signature
 		logging.error(e)
 		return HttpResponse(status=400)
@@ -94,7 +94,7 @@ def webhook(request: HttpRequest) -> HttpResponse:
 		invoice = Invoice.objects.get(id=invoice_id)
 		invoice.total_paid += amount
 		invoice.save()
-		payment_log = PaymentLog(amount = amount, invoice = invoice)
+		payment_log = PaymentLog(amount=amount, invoice=invoice)
 		payment_log.save()
 	return HttpResponse(status=200)
 
