@@ -96,9 +96,15 @@ class InquiryForm(forms.ModelForm):
 
 class DecisionForm(forms.ModelForm):
 	given_name = forms.CharField(
-		max_length=128, help_text="Your given (first) name, can be more than one"
+		label="First name (given name)",
+		max_length=128,
+		help_text="Your given (first) name, can be more than one",
 	)
-	surname = forms.CharField(max_length=128, help_text="Your family (last) name")
+	surname = forms.CharField(
+		label="Last name (surname)",
+		max_length=128,
+		help_text="Your family (last) name",
+	)
 	email_address = forms.EmailField(
 		label="Your email address (one you check)",
 		help_text="The email you want Evan to contact you with"
@@ -114,7 +120,6 @@ class DecisionForm(forms.ModelForm):
 		model = StudentRegistration
 		fields = (
 			'parent_email',
-			'track',
 			'gender',
 			'graduation_year',
 			'school_name',
