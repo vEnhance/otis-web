@@ -211,9 +211,8 @@ def annotate_student_queryset_with_scores(queryset: QuerySet[Student]) -> QueryS
 	Selects all important information to prevent a bunch of SQL queries"""
 	guess_subquery = Guess.objects.filter(
 		user=OuterRef('user'),
-		market__semester=OuterRef('semester'),
 		market__end_date__lt=timezone.now(),
-	).order_by().values('user', 'market__semester').annotate(total=Sum('score')).values('total')
+	).order_by().values('user').annotate(total=Sum('score')).values('total')
 
 	return queryset.select_related('user', 'user__profile', 'assistant', 'semester').annotate(
 		num_psets=SubqueryCount('user__student__pset', filter=Q(approved=True, eligible=True)),
