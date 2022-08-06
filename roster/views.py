@@ -306,7 +306,7 @@ def register(request: AuthHttpRequest) -> HttpResponse:
 			passcode = form.cleaned_data['passcode']
 			if passcode.lower() != container.passcode.lower():
 				messages.error(request, message="Wrong passcode")
-			elif form.cleaned_data['track'] not in container.allowed_tracks.split(','):
+			elif form.cleaned_data.get('track', 'C') not in container.allowed_tracks.split(','):
 				messages.error(request, message="That track is not currently accepting registrations.")
 			else:
 				registration = form.save(commit=False)

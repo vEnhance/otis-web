@@ -115,6 +115,10 @@ class DecisionForm(forms.ModelForm):
 		help_text="You should have gotten the passcode in your acceptance email.",
 		widget=forms.PasswordInput
 	)
+	gender = forms.ChoiceField(
+		choices=StudentRegistration.GENDER_CHOICES,
+		widget=forms.RadioSelect(),
+	)
 
 	class Meta:
 		model = StudentRegistration
