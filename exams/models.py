@@ -97,7 +97,8 @@ class PracticeExam(models.Model):
 		if self.is_test:
 			return f'{self.number:02d}'
 		else:
-			return string.ascii_uppercase[self.number - 1]
+			# https://github.com/microsoft/pyright/issues/3786
+			return string.ascii_uppercase[self.number - 1]  # type: ignore
 
 	@property
 	def overdue(self) -> bool:
