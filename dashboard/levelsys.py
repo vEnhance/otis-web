@@ -215,7 +215,7 @@ def annotate_student_queryset_with_scores(queryset: QuerySet[Student]) -> QueryS
 	).order_by().values('user').annotate(total=Sum('score')).values('total')
 
 	return queryset.select_related('user', 'user__profile', 'assistant', 'semester').annotate(
-		num_psets=SubqueryCount('user__student__pset', filter=Q(approved=True, eligible=True)),
+		num_psets=SubqueryCount('pset', filter=Q(approved=True, eligible=True)),
 		clubs_any=SubquerySum('user__student__pset__clubs', filter=Q(approved=True, eligible=True)),
 		clubs_D=SubquerySum(
 			'user__student__pset__clubs',
