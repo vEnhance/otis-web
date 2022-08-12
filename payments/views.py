@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist, SuspiciousOperation  # NOQA
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied  # NOQA
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseForbidden  # NOQA
 from django.http.response import JsonResponse
 from django.shortcuts import render
@@ -14,7 +14,7 @@ def invoice(request: HttpRequest, student_id: int, checksum: str) -> HttpRespons
 	student = Student.objects.get(id=student_id)
 
 	if checksum != student.get_checksum(settings.INVOICE_HASH_KEY):
-		raise SuspiciousOperation("Bad hash provided")
+		raise PermissionDenied("Bad hash provided")
 	try:
 		invoice = student.invoice
 	except ObjectDoesNotExist:
@@ -40,7 +40,7 @@ def config(request: HttpRequest) -> HttpResponse:
 @csrf_exempt
 def checkout(request: HttpRequest, amount: int, invoice_id: int) -> HttpResponse:
 	if amount <= 0:
-		raise SuspiciousOperation("Need to enter a positive amount for payment...")
+		raise PermissionDenied("Need to enter a positive amount for payment...")
 	stripe.api_key = settings.STRIPE_SECRET_KEY
 	if settings.PRODUCTION:
 		domain_url = 'https://otis.evanchen.cc'

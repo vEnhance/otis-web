@@ -14,7 +14,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
-from django.core.exceptions import PermissionDenied, SuspiciousOperation
+from django.core.exceptions import PermissionDenied
 from django.db.models import Count, OuterRef, Subquery
 from django.db.models.expressions import Exists
 from django.db.models.query import QuerySet
@@ -668,9 +668,9 @@ def certify(request: HttpRequest, student_id: int, checksum: str = None):
 			checksum = student.get_checksum(settings.CERT_HASH_KEY)
 			return HttpResponseRedirect(reverse_lazy('certify', args=(student.id, checksum)))
 		else:
-			raise SuspiciousOperation("Not authorized to generate checksum")
+			raise PermissionDenied("Not authorized to generate checksum")
 	elif checksum != student.get_checksum(settings.CERT_HASH_KEY):
-		raise SuspiciousOperation("Wrong hash")
+		raise PermissionDenied("Wrong hash")
 	else:
 		level_info = get_level_info(student)
 		context = {
