@@ -75,7 +75,7 @@
 <p>To register for this year,
 	<a href="{% url "register" %}">submit the decision form</a>.
 </p>
-{% else %}
+{% elif not past and semester %}
 <p>You can view <a href="{% url "past" %}">🕗 all past years</a>
 	if you participated in OTIS before.
 	(You can also click the clock icon at the right.)
