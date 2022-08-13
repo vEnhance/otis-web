@@ -37,10 +37,10 @@ types-freezegun = "^1.1.2"
 django-stubs-ext = "^0.4.0"
 django-qr-code = "^3.0.0"
 stripe = "^3.0.0"
+ipython = "^8.4.0"
 
 [tool.poetry.dev-dependencies]
 coverage = {extras = ["toml"], version = "^6.3.2"}
-ipython = "^8.2.0"
 jedi = "^0.18.0"
 pdbpp = "^0.10.3"
 pyflakes = "^2.3.1"
