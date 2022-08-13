@@ -236,7 +236,7 @@ class Achievement(models.Model):
 		unique=True,
 		null=True,
 		validators=[
-			RegexValidator(regex=r'^[a-f0-9]{24,25,26}$', message='24-26 char hex string'),
+			RegexValidator(regex=r'^[a-f0-9]{24,26}$', message='24-26 char hex string'),
 		],
 	)  # e.g. 52656164546865436f646521
 	name = models.CharField(max_length=128, help_text="Name of the achievement")
@@ -261,6 +261,11 @@ class Achievement(models.Model):
 		null=True,
 		blank=True,
 		help_text="User who owns this achievement"
+	)
+	always_show_image = models.BooleanField(
+		default=False,
+		help_text="If enabled, always show the achievement image.",
+		verbose_name='Reveal'
 	)
 
 	def __str__(self) -> str:

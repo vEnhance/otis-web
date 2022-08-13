@@ -17,7 +17,7 @@
 				{% endif %}
 			</span>
 		</div>
-		{% if achievement.num_found > 0 %}
+		{% if achievement.num_found > 0 or achievement.always_show_image %}
 		<span {% if not achievement.obtained and not request.user.is_staff %} style="filter: grayscale(100%) opacity(40%);" {% endif %}>
 			{% if achievement.image %}
 			<img width="64px" style="float: right;" src="{{ achievement.image.url }}" />
@@ -25,6 +25,7 @@
 			<div width="64px" style="float: right;">No image</div>
 			{% endif %}
 		</span>
+		{% if achievement.num_found > 0 %}
 		<p>Found by
 			{% if request.user.is_staff %}
 			<a href="{% url "found-listing" achievement.pk %}">
@@ -34,6 +35,9 @@
 			<b>{{ achievement.num_found }} user{{ achievement.num_found|pluralize }}</b>.
 			{% endif %}
 		</p>
+		{% else %}
+		<p>Nobody has found this one yet!</p>
+		{% endif %}
 		{% else %}
 		<span style="float: right; font-size:64px;">❓</span>
 		<p>Nobody has found this one yet!</p>
