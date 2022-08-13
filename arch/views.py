@@ -175,15 +175,6 @@ class HintDelete(HintObjectView, ExistStudentRequiredMixin, RevisionMixin, Delet
 		return reverse_lazy("hint-list", args=(self.object.problem.puid, ))
 
 
-class ProblemDelete(ProblemObjectView, ExistStudentRequiredMixin, RevisionMixin, DeleteView):
-	context_object_name = "problem"
-	model = Problem
-	object: ClassVar[Problem] = Problem()  # type: ignore
-
-	def get_success_url(self):
-		return reverse_lazy("arch-index")
-
-
 # this is actually the index page as well :P bit of a hack I guess...
 class ProblemCreate(
 	ExistStudentRequiredMixin, RevisionMixin, CreateView[Problem, BaseModelForm[Problem]]
