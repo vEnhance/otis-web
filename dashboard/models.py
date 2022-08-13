@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
+import random
 
 import datetime
 import os
@@ -225,9 +226,14 @@ class ProblemSuggestion(models.Model):
 
 
 def achievement_image_file_name(instance: 'Achievement', filename: str) -> str:
-	kludge = (settings.SECRET_KEY or '') + '_otis_' + str(instance.pk)
-	h = sha256(kludge.encode('ascii')).hexdigest()[0:18]
-	return os.path.join('badges', h + os.path.splitext(filename)[-1])
+	pk = instance.pk
+	if pk is None:
+		n = random.randrange(0, 2**64)
+		return os.path.join('badges', f'r{n:016x}' + os.path.splitext(filename)[-1])
+	else:
+		kludge = (settings.SECRET_KEY or '') + '_otis_diamond_' + str(pk)
+		h = sha256(kludge.encode('ascii')).hexdigest()[0:24]
+		return os.path.join('badges', f'{pk:04d}_{h}' + os.path.splitext(filename)[-1])
 
 
 class Achievement(models.Model):
