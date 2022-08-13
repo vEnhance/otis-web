@@ -481,7 +481,7 @@ class ProblemSuggestionCreate(
 
 	def get_form(self, *args: Any, **kwargs: Any) -> BaseModelForm[ProblemSuggestion]:
 		form = super(CreateView, self).get_form(*args, **kwargs)
-		form.fields['unit'].queryset = Unit.objects.filter(group__hidden=False)
+		form.fields['unit'].queryset = Unit.objects.filter(group__hidden=False)  # type: ignore
 		return form
 
 	def get_initial(self):
@@ -533,7 +533,7 @@ class ProblemSuggestionUpdate(
 		context = super().get_context_data(**kwargs)
 		assert isinstance(self.request.user, User)
 		if not (self.request.user.is_staff or self.request.user == self.object.user):
-			raise PermissionError("Logged-in user cannot view this suggestion")
+			raise PermissionDenied("Logged-in user cannot view this suggestion")
 		return context
 
 
