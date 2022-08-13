@@ -8,6 +8,7 @@ from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http.request import HttpRequest
 from django.http.response import HttpResponseBase, HttpResponseForbidden, HttpResponseNotFound, HttpResponseRedirect  # NOQA
+from django.shortcuts import get_object_or_404
 from django.urls.base import reverse_lazy
 from django.utils import timezone
 from django.views.decorators.http import require_POST
@@ -30,7 +31,7 @@ class SubmitGuess(LoginRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]):
 	)
 	request: AuthHttpRequest
 
-	object: Guess
+	object: Guess  # type: ignore
 	market: Market
 
 	def form_valid(self, form: BaseModelForm[Guess]):
@@ -49,7 +50,7 @@ class SubmitGuess(LoginRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]):
 		return context
 
 	def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
-		self.market = Market.objects.get(slug=kwargs.pop('slug'))
+		self.market = get_object_or_404(Market, slug=kwargs.pop('slug'))
 		if not isinstance(request.user, User):
 			return super().dispatch(request, *args, **kwargs)  # login required mixin
 
@@ -94,7 +95,7 @@ class MarketResults(LoginRequiredMixin, ListView[Guess]):
 	def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
 		if not isinstance(request.user, User):
 			return super().dispatch(request, *args, **kwargs)  # login required mixin
-		self.market = Market.objects.get(slug=kwargs.pop('slug'))
+		self.market = get_object_or_404(Market, slug=kwargs.pop('slug'))
 
 		if request.user.is_superuser:
 			return super().dispatch(request, *args, **kwargs)

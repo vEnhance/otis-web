@@ -2,7 +2,7 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied  # NOQA
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseForbidden  # NOQA
 from django.http.response import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.views.decorators.csrf import csrf_exempt
 from roster.models import Invoice, Student
 from .models import PaymentLog
@@ -11,7 +11,7 @@ import stripe
 
 
 def invoice(request: HttpRequest, student_id: int, checksum: str) -> HttpResponse:
-	student = Student.objects.get(id=student_id)
+	student = get_object_or_404(Student, id=student_id)
 
 	if checksum != student.get_checksum(settings.INVOICE_HASH_KEY):
 		raise PermissionDenied("Bad hash provided")

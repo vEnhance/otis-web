@@ -108,7 +108,7 @@ class UserProfileUpdateView(
 @login_required
 @require_POST
 def dismiss_emails(request: AuthHttpRequest) -> JsonResponse:
-	profile = UserProfile.objects.get(user=request.user)
+	profile = get_object_or_404(UserProfile, user=request.user)
 	profile.last_email_dismiss = timezone.now()
 	profile.save()
 	return JsonResponse({'result': 'success'})
@@ -117,7 +117,7 @@ def dismiss_emails(request: AuthHttpRequest) -> JsonResponse:
 @login_required
 @require_POST
 def dismiss_downloads(request: AuthHttpRequest) -> JsonResponse:
-	profile = UserProfile.objects.get(user=request.user)
+	profile = get_object_or_404(UserProfile, user=request.user)
 	profile.last_download_dismiss = timezone.now()
 	profile.save()
 	return JsonResponse({'result': 'success'})
