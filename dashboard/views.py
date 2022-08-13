@@ -351,7 +351,7 @@ def index(request: AuthHttpRequest) -> HttpResponse:
 def past(request: AuthHttpRequest, semester_id: Optional[int] = None):
 	students = get_visible_students(request.user, current=False)
 	if semester_id is not None:
-		semester = Semester.objects.get(pk=semester_id)
+		semester = get_object_or_404(Semester, pk=semester_id)
 		students = students.filter(semester=semester)
 	else:
 		semester = None
@@ -488,7 +488,8 @@ class ProblemSuggestionCreate(
 		initial = super().get_initial()
 		uid = self.kwargs.get('unit_id', None)
 		if uid is not None:
-			if Unit.objects.get(id=uid).group.hidden is False:
+			unit = get_object_or_404(Unit, id=uid)
+			if unit.group.hidden is False:
 				initial['unit'] = uid
 		return initial
 

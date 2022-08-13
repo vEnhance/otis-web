@@ -93,7 +93,7 @@ def webhook(request: HttpRequest) -> HttpResponse:
 		logging.debug(event)
 		invoice_id = int(event['data']['object']['client_reference_id'])
 		amount = int(event['data']['object']['amount_total'] / 100)
-		invoice = Invoice.objects.get(id=invoice_id)
+		invoice = get_object_or_404(Invoice, id=invoice_id)
 		invoice.total_paid += amount
 		invoice.save()
 		payment_log = PaymentLog(amount=amount, invoice=invoice)
