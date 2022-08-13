@@ -220,7 +220,7 @@ def problems_handler(action: str, request: HttpRequest) -> JsonResponse:
 
 def invoice_handler(action: str, request: HttpRequest) -> JsonResponse:
 	def sanitize(s: str, last: bool = False) -> str:
-		return unidecode(s).lower().split(' ', maxsplit=1)[-1 if last else 0]
+		return unidecode(s).lower().split(' ')[-1 if last else 0]
 
 	invoices = Invoice.objects.filter(student__semester__active=True)
 	invoices = invoices.select_related('student__user')
