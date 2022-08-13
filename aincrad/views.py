@@ -1,5 +1,5 @@
 from hashlib import sha256
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from allauth.socialaccount.models import SocialAccount
 from arch.models import Hint, Problem
@@ -8,6 +8,8 @@ from dashboard.models import ProblemSuggestion, PSet
 from django.conf import settings
 from django.core.exceptions import SuspiciousOperation
 from django.db.models.query_utils import Q
+from django.db.models.query import prefetch_related_objects
+from django.db.models.aggregates import Sum
 from django.http.request import HttpRequest
 from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -226,15 +228,27 @@ def invoice_handler(action: str, request: HttpRequest) -> JsonResponse:
 	data = request.POST.dict()
 	del data['token']
 	del data['action']
+	invoices_to_update: List[Invoice] = []
+
 	for inv in invoices:
 		if inv.student.user is not None:
 			first_name = sanitize(inv.student.user.first_name)
 			last_name = sanitize(inv.student.user.last_name, last=True)
+
 			for k in fields:
 				if (x := data.pop(f'{k}.{first_name}.{last_name}', None)) is not None:
 					assert isinstance(x, str)
 					setattr(inv, k, float(x))
-	Invoice.objects.bulk_update(invoices, fields, batch_size=25)
+
+					if inv not in invoices_to_update:
+						invoices_to_update.append(inv)
+	prefetch_related_objects(invoices_to_update, 'paymentlog_set')
+	for inv in invoices_to_update:
+		stripe_paid = inv.paymentlog_set.aggregate(s=Sum('amount'))['s']  # type: ignore
+		stripe_paid = stripe_paid or 0
+		inv.total_paid += stripe_paid
+
+	Invoice.objects.bulk_update(invoices_to_update, fields, batch_size=25)
 	return JsonResponse(data)
 
 
