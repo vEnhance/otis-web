@@ -153,6 +153,19 @@ class AchievementList(LoginRequiredMixin, ListView[Achievement]):
 			),
 		).order_by('-obtained', '-num_found')
 
+@login_required
+def achievement_leaderboard(request: AuthHttpRequest) -> HttpResponse:
+        students = Student.objects
+        rows = get_student_rows(students)
+        rows.sort(
+                key=lambda row: (
+                            -row['diamonds'],
+                            row['student'].name.upper(),
+                )
+        )
+        context: Dict[str, Any] = {}
+        context['rows'] = rows
+        return render(request, "dashboard/achievement_leaderboard.html", context)
 
 class FoundList(LoginRequiredMixin, StaffuserRequiredMixin, ListView[AchievementUnlock]):
 	raise_exception = True
@@ -699,3 +712,5 @@ def certify(request: HttpRequest, student_id: int, checksum: str = None):
 				reverse_lazy('certify', args=(student.id, checksum))
 		}
 		return render(request, "dashboard/certify.html", context)
+
+
