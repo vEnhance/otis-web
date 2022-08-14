@@ -1,7 +1,7 @@
 {% extends 'layout.html' %}
 {% block title %}Delete {{ problem }}{% endblock %}
 {% block layout-content %}
-{% include "generic-delete.html" %}
+{% include "generic_delete.html" %}
 <hr />
 <a href="{% url "hint-list" problem.puid %}">&lt;&lt; Go back to problem</a>
 <ul>

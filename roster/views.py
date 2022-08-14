@@ -176,7 +176,7 @@ def master_schedule(request: HttpRequest) -> HttpResponse:
 		chart.append(row)
 	semester = Semester.objects.get(active=True)
 	context = {'chart': chart, 'title': "Master Schedule", 'semester': semester}
-	return render(request, "roster/master-schedule.html", context)
+	return render(request, "roster/master_schedule.html", context)
 
 
 class UpdateInvoice(
