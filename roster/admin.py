@@ -305,9 +305,9 @@ def build_students(queryset: QuerySet[StudentRegistration]) -> int:
 @admin.register(StudentRegistration)
 class StudentRegistrationAdmin(ImportExportModelAdmin):
 	list_display = (
-		'container',
-		'processed',
 		'name',
+		'processed',
+		'container',
 		'track',
 		'about',
 		'agreement_form',
@@ -321,6 +321,7 @@ class StudentRegistrationAdmin(ImportExportModelAdmin):
 	)
 	list_display_links = (
 		'name',
+		'container',
 		'track',
 	)
 	resource_class = StudentRegistrationIEResource
