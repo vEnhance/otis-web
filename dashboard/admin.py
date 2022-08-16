@@ -131,6 +131,12 @@ class ProblemSuggestionAdmin(admin.ModelAdmin):
 		'user',
 		'unit',
 	)
+	list_display_links = (
+		'id',
+		'user',
+		'source',
+		'description',
+	)
 	list_per_page = 50
 
 	def mark_eligible(self, request: HttpRequest, queryset: QuerySet[ProblemSuggestion]):
