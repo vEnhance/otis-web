@@ -1,9 +1,9 @@
 appnope==0.1.3; sys_platform == "darwin" and python_version >= "3.8"
 asgiref==3.5.2; python_version >= "3.8" and python_version < "4.0"
-asttokens==2.0.7; python_version >= "3.8"
+asttokens==2.0.8; python_version >= "3.8"
 backcall==0.2.0; python_version >= "3.8"
 beautifulsoup4==4.11.1; python_version >= "3.6" and python_version < "4.0" and python_full_version >= "3.6.0"
-bleach==4.1.0; python_version >= "3.6"
+bleach==5.0.1; python_version >= "3.7"
 cachetools==5.2.0; python_version >= "3.7" and python_version < "4.0" and (python_version >= "3.7" and python_full_version < "3.0.0" or python_version >= "3.7" and python_full_version >= "3.6.0")
 certifi==2022.6.15; python_version >= "3.7" and python_version < "4" and (python_version >= "3.0" and python_full_version < "3.0.0" or python_full_version >= "3.4.0" and python_version >= "3.0")
 cffi==1.15.1; python_version >= "3.6"
@@ -15,12 +15,12 @@ cryptography==37.0.4; python_version >= "3.6"
 decorator==5.1.1; python_version >= "3.8"
 defusedxml==0.7.1; python_version >= "3.7" and python_full_version < "3.0.0" or python_version >= "3.7" and python_full_version >= "3.5.0"
 diff-match-patch==20200713; python_version >= "3.7"
-django-allauth==0.50.0
+django-allauth==0.51.0
 django-bootstrap-v5==1.0.11; python_version >= "3.6" and python_version < "4.0"
 django-braces==1.15.0
 django-classy-tags==3.0.1; python_version >= "3.8"
 django-crispy-forms==1.14.0; python_version >= "3.7"
-django-debug-toolbar==3.5.0; python_version >= "3.7"
+django-debug-toolbar==3.6.0; python_version >= "3.7"
 django-hijack==3.2.1
 django-import-export==2.8.0; python_version >= "3.7"
 django-js-asset==2.0.0; python_version >= "3.6"
@@ -33,13 +33,13 @@ django-reversion==5.0.2; python_version >= "3.7"
 django-sekizai==4.0.0; python_version >= "3.8"
 django-sql-utils==0.6.1
 django-storages==1.13.1; python_version >= "3.7"
-django-stubs-ext==0.4.0; python_version >= "3.6"
+django-stubs-ext==0.5.0; python_version >= "3.6"
 django-stubs==1.12.0; python_version >= "3.7"
 django==4.0.7; python_version >= "3.8"
 et-xmlfile==1.1.0; python_version >= "3.7"
-executing==0.9.1; python_version >= "3.8"
+executing==0.10.0; python_version >= "3.8"
 factory-boy==3.2.1; python_version >= "3.6"
-faker==13.16.0; python_version >= "3.6"
+faker==14.1.0; python_version >= "3.6"
 freezegun==1.2.2; python_version >= "3.6"
 google-api-core==2.8.2; python_version >= "3.7"
 google-auth==2.10.0; python_version >= "3.7" and python_full_version < "3.0.0" or python_version >= "3.7" and python_full_version >= "3.6.0"
@@ -55,13 +55,12 @@ jedi==0.18.1; python_version >= "3.6"
 mailchimp3==3.0.17
 markdown==3.3.7; python_version >= "3.6"
 markuppy==1.14; python_version >= "3.7"
-matplotlib-inline==0.1.3; python_version >= "3.8"
+matplotlib-inline==0.1.5; python_version >= "3.8"
 mypy-extensions==0.4.3; python_version >= "3.7"
 mypy==0.971; python_version >= "3.7"
 oauthlib==3.2.0; python_version >= "3.6" and python_full_version < "3.0.0" or python_full_version >= "3.4.0" and python_version >= "3.6"
 odfpy==1.4.1; python_version >= "3.7"
 openpyxl==3.0.10; python_version >= "3.7"
-packaging==21.3; python_version >= "3.6"
 parso==0.8.3; python_version >= "3.8"
 pexpect==4.8.0; sys_platform != "win32" and python_version >= "3.8"
 pickleshare==0.7.5; python_version >= "3.8"
@@ -74,10 +73,10 @@ pyasn1-modules==0.2.8; python_version >= "3.7" and python_full_version < "3.0.0"
 pyasn1==0.4.8; python_version >= "3.7" and python_full_version < "3.0.0" and python_version < "4" and (python_version >= "3.7" and python_full_version < "3.0.0" or python_version >= "3.7" and python_full_version >= "3.6.0") or python_version >= "3.7" and python_full_version >= "3.6.0" and python_version < "4" and (python_version >= "3.7" and python_full_version < "3.0.0" or python_version >= "3.7" and python_full_version >= "3.6.0")
 pycparser==2.21; python_version >= "3.6" and python_full_version < "3.0.0" or python_version >= "3.6" and python_full_version >= "3.4.0"
 pydantic==1.9.2; python_full_version >= "3.6.1" and python_version >= "3.7"
-pygments==2.12.0; python_version >= "3.8"
+pygments==2.13.0; python_version >= "3.8"
 pyjwt==2.4.0; python_version >= "3.6"
 pymysql==1.0.2; python_version >= "3.6"
-pyparsing==3.0.9; python_full_version >= "3.6.8" and python_version >= "3.6"
+pyparsing==3.0.9; python_full_version >= "3.6.8"
 python-dateutil==2.8.2; python_version >= "3.6" and python_full_version < "3.0.0" or python_full_version >= "3.3.0" and python_version >= "3.6"
 python-dotenv==0.20.0; python_version >= "3.5"
 python3-openid==3.2.0
@@ -91,9 +90,10 @@ six==1.16.0; python_version >= "3.8" and python_full_version < "3.0.0" or python
 sorl-thumbnail==12.8.0; python_version >= "3.6"
 soupsieve==2.3.2.post1; python_version >= "3.6" and python_version < "4.0" and python_full_version >= "3.6.0"
 sqlparse==0.4.2; python_version >= "3.8" and python_version < "4.0"
-stack-data==0.3.0; python_version >= "3.8"
-stripe==3.5.0; (python_version >= "2.7" and python_full_version < "3.0.0") or (python_full_version >= "3.4.0")
+stack-data==0.4.0; python_version >= "3.8"
+stripe==4.0.2; (python_version >= "2.7" and python_full_version < "3.0.0") or (python_full_version >= "3.4.0")
 tablib==3.2.1; python_version >= "3.7"
+tinycss2==1.1.1; python_version >= "3.7"
 tomli==2.0.1; python_version < "3.11" and python_version >= "3.7"
 traitlets==5.3.0; python_version >= "3.8"
 types-freezegun==1.1.10
@@ -104,8 +104,8 @@ tzdata==2022.2; sys_platform == "win32" and python_version >= "3.8" and python_v
 unidecode==1.3.4; python_version >= "3.5"
 urllib3==1.26.11; python_version >= "3.7" and python_full_version < "3.0.0" and python_version < "4" and (python_version >= "3.0" and python_full_version < "3.0.0" or python_full_version >= "3.4.0" and python_version >= "3.0") or python_full_version >= "3.6.0" and python_version < "4" and python_version >= "3.7" and (python_version >= "3.0" and python_full_version < "3.0.0" or python_full_version >= "3.4.0" and python_version >= "3.0")
 wcwidth==0.2.5; python_full_version >= "3.6.2" and python_version >= "3.8"
-webencodings==0.5.1; python_version >= "3.6"
-wiki==0.8.2
+webencodings==0.5.1; python_version >= "3.7"
+wiki==0.9
 xlrd==2.0.1; python_version >= "3.7" and python_full_version < "3.0.0" or python_version >= "3.7" and python_full_version >= "3.6.0"
 xlwt==1.3.0; python_version >= "3.7"
 zipp==3.8.1; python_version < "3.10" and python_version >= "3.7"

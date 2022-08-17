@@ -10,10 +10,10 @@ repository = "https://github.com/vEnhance/otis-web"
 [tool.poetry.dependencies]
 python = "^3.9"
 Django = "^4.0.7"
-Faker = "^13.3.4"
+Faker = "^14.1.0"
 PyMySQL = "^1.0.2"
 crispy-bootstrap5 = "^0.6"
-django-allauth = "^0.50.0"
+django-allauth = "^0.51.0"
 django-bootstrap-v5 = "^1.0.5"
 django-braces = "^1.14.0"
 django-crispy-forms = "^1.12.0"
@@ -29,23 +29,25 @@ factory-boy = "^3.2.0"
 mailchimp3 = "^3.0.15"
 python-dotenv = "^0.20.0"
 wheel = "^0.37.0"
-wiki = "^0.8"
+wiki = "^0.9"
 django-storages = {extras = ["google"], version = "^1.11.1", optional = true}
 Unidecode = "^1.2.0"
 freezegun = "^1.1.0"
 types-freezegun = "^1.1.2"
-django-stubs-ext = "^0.4.0"
+django-stubs-ext = "^0.5.0"
 django-qr-code = "^3.0.0"
-stripe = "^3.0.0"
+stripe = "^4.0.2"
 ipython = "^8.4.0"
+pyparsing = "^3.0.9"
 
 [tool.poetry.dev-dependencies]
-coverage = {extras = ["toml"], version = "^6.3.2"}
+coverage = {extras = ["toml"], version = "^6.4.3"}
 jedi = "^0.18.0"
 pdbpp = "^0.10.3"
 pyflakes = "^2.3.1"
 types-Markdown = "^3.3.6"
 yapf = "^0.32.0"
+pyright = "^1.1.267"
 
 [tool.poetry.extras]
 production = ["django-storages"]
