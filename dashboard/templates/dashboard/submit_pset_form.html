@@ -22,6 +22,7 @@
 	{% endfor %}
 </table>
 {% endif %}
+<p><a href="{% url "pset-queue-listing" %}">See queue of problem set submissions.</a></p>
 
 <h2>Submit new problem set</h2>
 {% include "generic_form.html" %}

@@ -170,6 +170,13 @@ class FoundList(LoginRequiredMixin, StaffuserRequiredMixin, ListView[Achievement
 		return context
 
 
+class PSetQueueList(LoginRequiredMixin, ListView[PSet]):
+	template_name = 'dashboard/pset_queue_list.html'
+
+	def get_queryset(self) -> QuerySet[PSet]:
+		return PSet.objects.filter(approved=False).order_by('pk')
+
+
 @staff_member_required
 def leaderboard(request: AuthHttpRequest) -> HttpResponse:
 	students = Student.objects.filter(semester__active=True)

@@ -1,0 +1,41 @@
+{% extends 'layout.html' %}
+{% block title %}Problem Set Submission Queue{% endblock %}
+{% block layout-content %}
+{% load otis_extras %}
+
+<p>Here are all the years of OTIS that are in the database.</p>
+<table class="table">
+	<thead class="table-dark">
+		<tr>
+			<td>#</td>
+			<td>Unit</td>
+			<td>Timestamp</td>
+			<td>ID</td>
+		</tr>
+	</thead>
+	<tbody>
+		{% for pset in object_list %}
+		<tr
+			{% if pset.student.user == request.user %}
+				class="table-warning fw-bold"
+			{% endif %}
+			>
+			<td>{{ forloop.counter }}</td>
+			{% if pset.student.user == request.user %}
+				<td><a href="{{ pset.get_absolute_url }}">{{ pset.unit }}</a></td>
+			{% else %}
+				<td>{{ pset.unit }}</td>
+			{% endif %}
+			<td>{{ pset.upload.created_at }}</td>
+			<td>{{ pset.pk }}</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
+<p>
+	You can also see a
+	<a href="{% url "past" %}">combined list of all students</a>.
+	(If you are a superuser, this will be quite long.)
+</p>
+
+{% endblock %}

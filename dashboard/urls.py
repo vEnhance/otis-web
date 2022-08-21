@@ -6,6 +6,7 @@ urlpatterns = [
 	path(r'portal/<int:student_id>/', views.portal, name='portal'),
 	path(r'conquer/<int:student_id>/', views.submit_pset, name='submit-pset'),
 	path(r'reconquer/<int:pk>/', views.resubmit_pset, name='resubmit-pset'),
+	path(r'queue/', views.PSetQueueList.as_view(), name='pset-queue-listing'),
 	path(r'stats/<int:student_id>/', views.stats, name='stats'),
 	path(r'achievements/', views.AchievementList.as_view(), name='achievements-listing'),
 	path(r'foundlist/<int:pk>/', views.FoundList.as_view(), name='found-listing'),
