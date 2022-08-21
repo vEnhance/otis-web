@@ -174,7 +174,9 @@ class PSetQueueList(LoginRequiredMixin, ListView[PSet]):
 	template_name = 'dashboard/pset_queue_list.html'
 
 	def get_queryset(self) -> QuerySet[PSet]:
-		return PSet.objects.filter(approved=False, unit__group__hidden=False).order_by('pk')
+		return PSet.objects.filter(
+			approved=False, unit__group__hidden=False, rejected=False
+		).order_by('pk')
 
 
 @staff_member_required
