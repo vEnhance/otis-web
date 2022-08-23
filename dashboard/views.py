@@ -169,10 +169,6 @@ class AchievementLeaderboard(
 
 	def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
 		context = super().get_context_data(**kwargs)
-		context['rows'] = self.get_queryset()
-		return context
-
-	def get_queryset(self) -> List[Dict[str, Any]]:
 		students = Student.objects
 		rows = get_student_rows(students)
 		rows.sort(
@@ -181,9 +177,10 @@ class AchievementLeaderboard(
 				row['student'].name.upper(),
 			)
 		)
-		return rows
+		context['rows'] = rows
+		return context
 
-	def get_object(self, queryset: QuerySet = None) -> Student:
+	def get_object(self, queryset: QuerySet[Student] = None) -> Student:
 		student = Student.objects.get(user=self.request.user)
 		return student
 
