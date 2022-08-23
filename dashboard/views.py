@@ -173,7 +173,7 @@ class AchievementLeaderboard(
 		return context
 
 	def get_queryset(self) -> List[Dict[str, Any]]:
-		students = Student.objects
+		students = Student.objects.filter(semester__active=True)
 		rows = get_student_rows(students)
 		rows.sort(
 			key=lambda row: (
