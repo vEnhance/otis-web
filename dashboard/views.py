@@ -183,7 +183,7 @@ class AchievementLeaderboard(
 		)
 		return rows
 
-	def get_object(self, queryset: QuerySet = None) -> Student:
+	def get_object(self, queryset: QuerySet[Student] = None) -> Student:
 		student = Student.objects.get(user=self.request.user)
 		return student
 
