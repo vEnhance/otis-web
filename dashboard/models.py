@@ -49,7 +49,8 @@ class UploadedFile(models.Model):
 		max_length=250, blank=True, help_text="Optional description of the file"
 	)
 	content = models.FileField(
-		help_text="The file itself",
+		verbose_name="Your submission",
+		help_text="Upload your write-ups as PDF, TeX, TXT, PNG, or JPG. At most one file.",
 		upload_to=content_file_name,
 		validators=[FileExtensionValidator(allowed_extensions=['pdf', 'txt', 'tex', 'png', 'jpg'])]
 	)
