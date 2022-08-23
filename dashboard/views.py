@@ -15,9 +15,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import PermissionDenied
-from django.db import IntegrityError
 from django.db.models import Count, OuterRef, Subquery
-from django.db.models.functions import Upper
 from django.db.models.expressions import Exists
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
@@ -28,7 +26,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.views.generic import DetailView, ListView
-from django.views.generic.edit import CreateView, DeleteView, FormView, UpdateView
+from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from dwhandler import SUCCESS_LOG_LEVEL, VERBOSE_LOG_LEVEL
 from exams.models import PracticeExam
 from markets.models import Market
