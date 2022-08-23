@@ -112,11 +112,6 @@ class Student(models.Model):
 	enabled = models.BooleanField(
 		default=True, help_text="Allow student to submit/request units."
 	)
-	public = models.BooleanField(
-		default=False, 
-		help_text="Whether student name appears on public leaderboards, "
-		"like the diamonds leaderboard."
-	)
 
 	last_level_seen = models.PositiveSmallIntegerField(
 		default=0, help_text="The last level the student was seen at."
