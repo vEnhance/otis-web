@@ -211,11 +211,6 @@ class UserProfile(models.Model):
 		default=datetime.fromtimestamp(0, tz=timezone.utc),
 	)
 
-	public = models.BooleanField(
-		default=False, 
-		help_text="Whether student name appears on public leaderboards, "
-		"like the diamonds leaderboard."
-	)
 
 	def __str__(self) -> str:
 		return f"Prefs for {self.user.username}"
