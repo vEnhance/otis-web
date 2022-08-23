@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 import logging
 from datetime import timedelta
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from braces.views import LoginRequiredMixin, StaffuserRequiredMixin, SuperuserRequiredMixin  # NOQA
 from core.models import Semester, Unit, UserProfile
@@ -15,7 +15,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import PermissionDenied
+from django.db import IntegrityError
 from django.db.models import Count, OuterRef, Subquery
+from django.db.models.functions import Upper
 from django.db.models.expressions import Exists
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
@@ -26,7 +28,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.views.generic import DetailView, ListView
-from django.views.generic.edit import CreateView, DeleteView, UpdateView
+from django.views.generic.edit import CreateView, DeleteView, FormView, UpdateView
 from dwhandler import SUCCESS_LOG_LEVEL, VERBOSE_LOG_LEVEL
 from exams.models import PracticeExam
 from markets.models import Market
@@ -153,19 +155,47 @@ class AchievementList(LoginRequiredMixin, ListView[Achievement]):
 			),
 		).order_by('-obtained', '-num_found')
 
-@login_required
-def achievement_leaderboard(request: AuthHttpRequest) -> HttpResponse:
-        students = Student.objects
-        rows = get_student_rows(students)
-        rows.sort(
-                key=lambda row: (
-                            -row['diamonds'],
-                            row['student'].name.upper(),
-                )
-        )
-        context: Dict[str, Any] = {}
-        context['rows'] = rows
-        return render(request, "dashboard/achievement_leaderboard.html", context)
+class AchievementLeaderboard(
+	LoginRequiredMixin, SuccessMessageMixin, UpdateView[Student, BaseModelForm[Student]]
+):
+	model = Student
+	fields = ('public', )
+	success_url = reverse_lazy('achievements-leaderboard')
+	object: Student
+	template_name = 'dashboard/achievement_leaderboard.html'
+
+	def form_valid(self, form: BaseModelForm[Student]):
+		messages.success(self.request, f"Updated settings for {self.object.user.username}!")
+		form.instance.user = self.request.user
+		return super().form_valid(form)
+
+	def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+		context = super().get_context_data(**kwargs)
+		context['rows'] = self.get_queryset()
+		return context
+
+	def get_queryset(self) -> List[Dict[str, Any]]:
+		students = Student.objects
+		rows = get_student_rows(students)
+		rows.sort(
+			key=lambda row: (
+				-row['diamonds'],
+				row['student'].name.upper(),
+			)
+		)
+		return rows
+
+	def get_object(self, queryset: QuerySet = None) -> Student:
+		student = Student.objects.get(user=self.request.user)
+		return student
+
+	def dispatch(self, request: AuthHttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
+		if request.user.is_staff:
+			return HttpResponseRedirect(reverse('leaderboard'))
+		else:
+			return super().dispatch(request, *args, **kwargs)
+	    
+
 
 class FoundList(LoginRequiredMixin, StaffuserRequiredMixin, ListView[AchievementUnlock]):
 	raise_exception = True

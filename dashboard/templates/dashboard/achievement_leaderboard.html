@@ -1,9 +1,9 @@
 {% extends 'layout.html' %}
 {% block title %}Diamonds Leaderboard{% endblock %}
-{% load otis_extras %}
 {% load humanize %}
 
 {% block layout-content %}
+
 <table id="students" class="table tablesorter">
 	<thead>
 		<tr class="table-dark">
@@ -19,13 +19,25 @@
 				<sup>{{ forloop.counter|ordinal }}</sup>
 			</td>
 			<td>
+                {% if row.student.public %}
 				{{ row.student.name }}
+                {% elif request.user.is_staff %}
+                <i>{{ row.student.name }}</i>
+                {% else %}
+                {% endif %}
 			</td>
 			<td class="text-end">{{ row.diamonds }}</td>
 		</tr> {# end table row for this row #}
 		{% endfor %}
 	</tbody>
 </table>
+
+{% if request.user.is_staff %}
+<p>Since you are a staff member, you are not on the leaderboard.</p>
+{% else %}
+{% include "generic_form.html" with submit_name="Update"%}
+{% endif %}
+
 {% endblock %}
 
 {% block scripts %}
