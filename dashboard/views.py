@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 import logging
 from datetime import timedelta
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from braces.views import LoginRequiredMixin, StaffuserRequiredMixin, SuperuserRequiredMixin  # NOQA
 from core.models import Semester, Unit, UserProfile
