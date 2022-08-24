@@ -87,6 +87,15 @@ if ! python manage.py check; then
 fi
 echo -e ""
 
+echo -e "\033[1;35mRunning mypy ...\033[0m"
+echo -e "---------------------------"
+if ! mypy --ignore-missing-imports $TO_CHECK; then
+	echo -e "$FAILED_HEADER mypy failed"
+	git rev-parse HEAD > $BAD_FILE
+	exit 1
+fi
+echo -e ""
+
 echo -e "\033[1;35mRunning pyright ...\033[0m"
 echo -e "---------------------------"
 if ! pyright; then
