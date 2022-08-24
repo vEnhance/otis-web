@@ -28,15 +28,21 @@ if [ -f $BAD_FILE ]; then
 	fi
 fi
 
-echo -e "\033[1;35mChecking against upstream ...\033[0m"
-echo -e "---------------------------"
-git fetch
-if [ "$(git rev-list --count HEAD..@\{u\})" -gt 0 ]; then
-	echo -e "$FAILED_HEADER Upstream is ahead of you"
-	git rev-parse HEAD > $BAD_FILE
-	exit 1
+if [ "$1" == "--force" ]; then
+	echo -e "\033[1;31m]$(git rev-parse HEAD)\033[0m not being compared to upstream"
+	echo -e "---------------------------"
+	echo -e ""
+else
+	echo -e "\033[1;35mChecking against upstream ...\033[0m"
+	echo -e "---------------------------"
+	git fetch
+	if [ "$(git rev-list --count HEAD..@\{u\})" -gt 0 ]; then
+		echo -e "$FAILED_HEADER Upstream is ahead of you"
+		git rev-parse HEAD > $BAD_FILE
+		exit 1
+	fi
+	echo -e ""
 fi
-echo -e ""
 
 echo -e "\033[1;35mRunning pyflakes ...\033[0m"
 echo -e "---------------------------"
