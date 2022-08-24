@@ -20,12 +20,11 @@
 				<sup>{{ forloop.counter|ordinal }}</sup>
 			</td>
 			<td>
-                {% if row.student.public %}
+				{% if row.student.public %}
 				{{ row.student.name }}
-                {% elif request.user.is_staff %}
-                <i>{{ row.student.name }}</i>
-                {% else %}
-                {% endif %}
+				{% elif request.user.is_staff %}
+				<i>{{ row.student.name }}</i>
+				{% endif %}
 			</td>
 			<td class="text-end">{{ row.diamonds }}</td>
 		</tr> {# end table row for this row #}

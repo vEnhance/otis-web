@@ -153,6 +153,7 @@ class AchievementList(LoginRequiredMixin, ListView[Achievement]):
 			),
 		).order_by('-obtained', '-num_found')
 
+
 class AchievementLeaderboard(
 	LoginRequiredMixin, SuccessMessageMixin, UpdateView[Student, BaseModelForm[Student]]
 ):
@@ -175,12 +176,10 @@ class AchievementLeaderboard(
 	def get_queryset(self) -> List[Dict[str, Any]]:
 		students = Student.objects.filter(semester__active=True)
 		rows = get_student_rows(students)
-		rows.sort(
-			key=lambda row: (
-				-row['diamonds'],
-				row['student'].name.upper(),
-			)
-		)
+		rows.sort(key=lambda row: (
+			-row['diamonds'],
+			row['student'].name.upper(),
+		))
 		return rows
 
 	def get_object(self, queryset: QuerySet[Student] = None) -> Student:
@@ -192,7 +191,6 @@ class AchievementLeaderboard(
 			return HttpResponseRedirect(reverse('leaderboard'))
 		else:
 			return super().dispatch(request, *args, **kwargs)
-	    
 
 
 class FoundList(LoginRequiredMixin, StaffuserRequiredMixin, ListView[AchievementUnlock]):
@@ -740,5 +738,3 @@ def certify(request: HttpRequest, student_id: int, checksum: str = None):
 				reverse_lazy('certify', args=(student.id, checksum))
 		}
 		return render(request, "dashboard/certify.html", context)
-
-
