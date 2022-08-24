@@ -1328,6 +1328,25 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "types-requests"
+version = "2.28.9"
+description = "Typing stubs for requests"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+types-urllib3 = "<1.27"
+
+[[package]]
+name = "types-urllib3"
+version = "1.26.23"
+description = "Typing stubs for urllib3"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "typing-extensions"
 version = "4.3.0"
 description = "Backported and Experimental Type Hints for Python 3.7+"
@@ -1460,7 +1479,7 @@ production = ["django-storages"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "9691b9164c6947941d20b1927ef1ab0ca73c6c97a18bc4b86e11f01a4df8f91e"
+content-hash = "7741a5f94f44da3efe8b9b085ba7e46141573a1e25749fbd529c24fe91b57300"
 
 [metadata.files]
 appnope = []
@@ -1573,6 +1592,8 @@ types-freezegun = []
 types-markdown = []
 types-pytz = []
 types-pyyaml = []
+types-requests = []
+types-urllib3 = []
 typing-extensions = []
 tzdata = []
 unidecode = []

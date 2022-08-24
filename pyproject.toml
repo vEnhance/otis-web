@@ -39,6 +39,7 @@ django-qr-code = "^3.0.0"
 stripe = "^4.0.2"
 ipython = "^8.4.0"
 pyparsing = "^3.0.9"
+types-requests = "^2.28.9"
 
 [tool.poetry.dev-dependencies]
 coverage = {extras = ["toml"], version = "^6.4.3"}
