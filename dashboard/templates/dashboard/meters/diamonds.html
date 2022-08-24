@@ -30,8 +30,8 @@
 {% if first_achievement %}
 <p>Don't know where to look?<br />
 	Here's one to start: <code>{{ first_achievement.code }}</code>.<br />
-	See also <a href="{% url "achievements-listing" %}">diamonds listing</a>
-    and <a href="{% url "achievements-leaderboard" %}">diamonds leaderboard</a>.
+	See also <a href="{% url "achievement-listing" %}">diamonds listing</a>
+    and <a href="{% url "achievement-leaderboard" %}">diamonds leaderboard</a>.
 </p>
 {% endif %}
 

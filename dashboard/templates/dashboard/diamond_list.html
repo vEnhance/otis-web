@@ -2,7 +2,7 @@
 {% block title %}Diamonds Listing{% endblock %}
 
 {% block layout-content %}
-<p>See also <a href="{% url "achievements-leaderboard" %}">diamond leaderboard</a>.
+<p>See also <a href="{% url "achievement-leaderboard" %}">diamond leaderboard</a>.
 <div class="list-group">
 	{% for achievement in achievement_list %}
 	<div class="list-group-item container" {% if achievement.obtained %} style="background-color: #ddffdd;" {% else %} style="background-color: #ffddff;" {% endif %}>

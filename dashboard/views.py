@@ -159,7 +159,7 @@ class AchievementLeaderboard(
 ):
 	model = Student
 	fields = ('public', )
-	success_url = reverse_lazy('achievements-leaderboard')
+	success_url = reverse_lazy('achievement-leaderboard')
 	object: Student
 	template_name = 'dashboard/achievement_leaderboard.html'
 

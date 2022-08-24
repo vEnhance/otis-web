@@ -8,11 +8,11 @@ urlpatterns = [
 	path(r'reconquer/<int:pk>/', views.resubmit_pset, name='resubmit-pset'),
 	path(r'queue/', views.PSetQueueList.as_view(), name='pset-queue-listing'),
 	path(r'stats/<int:student_id>/', views.stats, name='stats'),
-	path(r'achievements/', views.AchievementList.as_view(), name='achievements-listing'),
+	path(r'achievements/', views.AchievementList.as_view(), name='achievement-listing'),
 	path(
 		r'achievements/leaderboard',
 		views.AchievementLeaderboard.as_view(),
-		name='achievements-leaderboard'
+		name='achievement-leaderboard'
 	),
 	path(r'foundlist/<int:pk>/', views.FoundList.as_view(), name='found-listing'),
 	path(r'uploads/<int:student_id>/<int:unit_id>/', views.uploads, name='uploads'),
