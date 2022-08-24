@@ -180,7 +180,7 @@ class AchievementLeaderboard(
 			-row['diamonds'],
 			row['student'].name.upper(),
 		))
-		return rows
+		return rows[0:25]
 
 	def get_object(self, queryset: QuerySet[Student] = None) -> Student:
 		student = Student.objects.get(user=self.request.user)
