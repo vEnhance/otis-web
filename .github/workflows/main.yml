@@ -87,4 +87,4 @@ jobs:
         python -m pip install toml yapf
     - name: Run YAPF
       run: |
-        yapf $(git ls-files **.py | grep -v migrations)
+        yapf $(git ls-files '*.py' | grep -v migrations/ | grep -v /apps.py)
