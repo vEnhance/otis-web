@@ -1,7 +1,8 @@
-from typing import List, Tuple
+from typing import Any, List, Tuple
 
 from core.models import Semester, Unit
 from django.contrib import admin, messages
+from django.contrib.admin.options import ModelAdmin
 from django.contrib.auth.models import User
 from django.db.models import F, FloatField, QuerySet
 from django.db.models.base import Model
@@ -101,7 +102,11 @@ class OwedFilter(admin.SimpleListFilter):
 	title = 'remaining balance'
 	parameter_name = 'has_owed'
 
-	def lookups(self, request: HttpRequest, model_admin: 'InvoiceAdmin') -> List[Tuple[str, str]]:
+	def lookups(
+		self,
+		request: HttpRequest,
+		model_admin: ModelAdmin[Any],
+	) -> List[Tuple[str, str]]:
 		return [
 			("incomplete", "Incomplete"), ("paid", "Paid in full"), ("excess", "Overpaid"),
 			("zero", "No payment")
