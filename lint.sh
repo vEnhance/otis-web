@@ -8,6 +8,7 @@ FAILED_HEADER="\033[1;31mFAILED:\033[0m"
 BAD_FILE=/tmp/otisweb.bad
 GOOD_FILE=/tmp/otisweb.good
 
+TO_CHECK=$(git ls-files '*.py' | grep -v migrations/ | grep -v /apps.py)
 
 if [ -f $GOOD_FILE ]; then
 	if [ "$(git rev-parse HEAD)" == "$(cat $GOOD_FILE)" ]; then
@@ -68,9 +69,9 @@ echo -e ""
 
 echo -e "\033[1;35mLinting files with yapf ...\033[0m"
 echo -e "---------------------------"
-if ! yapf -d $(git ls-files **.py | grep -v migrations); then
+if ! yapf -d $TO_CHECK; then
 	echo -e "$FAILED_HEADER Some files that needed in-place edits, editing now..."
-	yapf --in-place $(git ls-files **.py | grep -v migrations)
+	yapf --in-place $TO_CHECK
 	echo -e "Better check your work!"
 	git rev-parse HEAD > $BAD_FILE
 	exit 1
