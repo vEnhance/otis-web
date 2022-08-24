@@ -36,7 +36,7 @@ from typing import Any, List, Optional, Union
 
 from pyparsing import CaselessKeyword, Forward, Group, Literal, Regex, Suppress, Token, Word, alphanums, alphas, delimitedList  # NOQA
 
-exprStack = []
+exprStack: Any = []
 
 
 def push_first(toks: List[Token]):
