@@ -59,6 +59,7 @@ class PSetResubmitForm(forms.ModelForm):
 			'hours',
 			'feedback',
 			'special_notes',
+			'next_unit_to_unlock',
 		)
 
 
