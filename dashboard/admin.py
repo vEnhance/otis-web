@@ -77,6 +77,7 @@ class PSetAdmin(admin.ModelAdmin):
 		'student__semester',
 	)
 	list_display_links = (
+		'pk',
 		'student',
 		'unit',
 	)
