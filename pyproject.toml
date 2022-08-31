@@ -48,7 +48,7 @@ jedi = "^0.18.0"
 pdbpp = "^0.10.3"
 pyflakes = "^2.3.1"
 yapf = "^0.32.0"
-pyright = "^1.1.267"
+pyright = "^1.1.269"
 
 [tool.poetry.extras]
 production = ["django-storages"]
