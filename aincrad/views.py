@@ -90,9 +90,10 @@ def venueq_handler(action: str, request: HttpRequest) -> JsonResponse:
 									'student__user__email',
 									'hours',
 									'clubs',
+									'unit__group__name',
 									'unit__group__slug',
 									'unit__code',
-									'next_unit_to_unlock__group__slug',
+									'next_unit_to_unlock__group__name',
 									'next_unit_to_unlock__code',
 									'upload__content',
 								)
