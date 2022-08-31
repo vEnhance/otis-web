@@ -3,13 +3,12 @@ from typing import Any, Dict, List
 
 from allauth.socialaccount.models import SocialAccount
 from arch.models import Hint, Problem
-from core.models import Unit
 from dashboard.models import ProblemSuggestion, PSet
 from django.conf import settings
 from django.core.exceptions import SuspiciousOperation
-from django.db.models.query_utils import Q
-from django.db.models.query import prefetch_related_objects
 from django.db.models.aggregates import Sum
+from django.db.models.query import prefetch_related_objects
+from django.db.models.query_utils import Q
 from django.http.request import HttpRequest
 from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -27,17 +26,16 @@ def venueq_handler(action: str, request: HttpRequest) -> JsonResponse:
 		# mark problem set as done
 		pset = get_object_or_404(PSet, pk=request.POST['pk'])
 		pset.approved = bool(request.POST['approved'])
+		pset.rejected = bool(request.POST['rejected'])
 		pset.clubs = request.POST.get('clubs', None)
 		pset.hours = request.POST.get('hours', None)
 		pset.save()
-		if pset.resubmitted is False:
+		if pset.approved is True and pset.resubmitted is False and pset.unit is not None:
 			# unlock the unit the student asked for
-			finished_unit = get_object_or_404(Unit, pk=request.POST['unit__pk'])
-			student = get_object_or_404(Student, pk=request.POST['student__pk'])
-			if 'next_unit_to_unlock__pk' in request.POST:
-				target = get_object_or_404(Unit, pk=request.POST['next_unit_to_unlock__pk'])
-				student.unlocked_units.add(target)
-			student.unlocked_units.remove(finished_unit)
+			if pset.next_unit_to_unlock is not None:
+				pset.student.unlocked_units.add(pset.next_unit_to_unlock)
+			# remove the old unit since it's done now
+			pset.student.unlocked_units.remove(pset.unit)
 		return JsonResponse({'result': 'success'}, status=200)
 	elif action == 'approve_inquiries':
 		for inquiry in UnitInquiry.objects.filter(
@@ -83,23 +81,19 @@ def venueq_handler(action: str, request: HttpRequest) -> JsonResponse:
 								).values(
 									'pk',
 									'approved',
+									'rejected',
 									'resubmitted',
-									'eligible',
 									'feedback',
 									'special_notes',
-									'student__pk',
 									'student__user__first_name',
 									'student__user__last_name',
 									'student__user__email',
 									'hours',
 									'clubs',
-									'unit__group__name',
 									'unit__group__slug',
 									'unit__code',
-									'unit__pk',
-									'next_unit_to_unlock__group__name',
+									'next_unit_to_unlock__group__slug',
 									'next_unit_to_unlock__code',
-									'next_unit_to_unlock__pk',
 									'upload__content',
 								)
 							)
