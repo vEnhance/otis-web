@@ -9,27 +9,28 @@ BAD_FILE=/tmp/otisweb.bad
 GOOD_FILE=/tmp/otisweb.good
 
 TO_CHECK=$(git ls-files '*.py' | grep -v migrations/ | grep -v /apps.py)
+COMMIT_ID=$(git rev-parse HEAD)
 
 if [ -f $GOOD_FILE ]; then
-	if [ "$(git rev-parse HEAD)" == "$(cat $GOOD_FILE)" ]; then
+	if [ "$COMMIT_ID" == "$(cat $GOOD_FILE)" ]; then
 		echo -e "-----------------------------------------------------------------------"
-		echo -e "\033[1;32m$(git rev-parse HEAD)\033[0m was marked all-OK, exiting..."
+		echo -e "\033[1;32m$COMMIT_ID\033[0m was marked all-OK, exiting..."
 		echo -e "-----------------------------------------------------------------------"
 		exit 0
 	fi
 fi
 
 if [ -f $BAD_FILE ]; then
-	if [ "$(git rev-parse HEAD)" == "$(cat $BAD_FILE)" ]; then
+	if [ "$COMMIT_ID" == "$(cat $BAD_FILE)" ]; then
 		echo -e "-----------------------------------------------------------------------"
-		echo -e "\033[1;33m$(git rev-parse HEAD)\033[0m was marked faulty, aborting..."
+		echo -e "\033[1;33m$COMMIT_ID\033[0m was marked faulty, aborting..."
 		echo -e "-----------------------------------------------------------------------"
 		exit 1
 	fi
 fi
 
 if [ "$1" == "--force" ]; then
-	echo -e "\033[1;31m]$(git rev-parse HEAD)\033[0m not being compared to upstream"
+	echo -e "\033[1;31m]$COMMIT_ID\033[0m not being compared to upstream"
 	echo -e "---------------------------"
 	echo -e ""
 else
@@ -38,7 +39,7 @@ else
 	git fetch
 	if [ "$(git rev-list --count HEAD..@\{u\})" -gt 0 ]; then
 		echo -e "$FAILED_HEADER Upstream is ahead of you"
-		git rev-parse HEAD > $BAD_FILE
+		echo $COMMIT_ID > $BAD_FILE
 		exit 1
 	fi
 	echo -e ""
@@ -48,7 +49,7 @@ echo -e "\033[1;35mRunning pyflakes ...\033[0m"
 echo -e "---------------------------"
 if ! pyflakes .; then
 	echo -e "$FAILED_HEADER pyflakes gave nonzero status"
-	git rev-parse HEAD > $BAD_FILE
+	echo $COMMIT_ID > $BAD_FILE
 	exit 1
 fi
 echo -e ""
@@ -58,7 +59,7 @@ echo -e "---------------------------"
 poetry export -E production > requirements.txt
 if ! git diff --exit-code requirements.txt; then
 	echo -e "$FAILED_HEADER You need to commit requirements.txt"
-	git rev-parse HEAD > $BAD_FILE
+	echo $COMMIT_ID > $BAD_FILE
 	exit 1
 fi
 echo -e ""
@@ -67,7 +68,7 @@ echo -e "\033[1;35mMaking migrations ...\033[0m"
 echo -e "---------------------------"
 if ! python manage.py makemigrations | grep "No changes detected"; then
 	echo -e "$FAILED_HEADER I think you forgot a migration!"
-	git rev-parse HEAD > $BAD_FILE
+	echo $COMMIT_ID > $BAD_FILE
 	exit 1
 fi
 python manage.py migrate
@@ -79,7 +80,7 @@ if ! yapf -d $TO_CHECK; then
 	echo -e "$FAILED_HEADER Some files that needed in-place edits, editing now..."
 	yapf --in-place $TO_CHECK
 	echo -e "Better check your work!"
-	git rev-parse HEAD > $BAD_FILE
+	echo $COMMIT_ID > $BAD_FILE
 	exit 1
 fi
 echo -e ""
@@ -88,7 +89,7 @@ echo -e "\033[1;35mRunning manage.py check ...\033[0m"
 echo -e "---------------------------"
 if ! python manage.py check; then
 	echo -e "$FAILED_HEADER python manage.py check failed"
-	git rev-parse HEAD > $BAD_FILE
+	echo $COMMIT_ID > $BAD_FILE
 	exit 1
 fi
 echo -e ""
@@ -97,7 +98,7 @@ echo -e "\033[1;35mRunning mypy ...\033[0m"
 echo -e "---------------------------"
 if ! mypy --ignore-missing-imports $TO_CHECK; then
 	echo -e "$FAILED_HEADER mypy failed"
-	git rev-parse HEAD > $BAD_FILE
+	echo $COMMIT_ID > $BAD_FILE
 	exit 1
 fi
 echo -e ""
@@ -106,7 +107,7 @@ echo -e "\033[1;35mRunning pyright ...\033[0m"
 echo -e "---------------------------"
 if ! pyright; then
 	echo -e "$FAILED_HEADER pyright failed"
-	git rev-parse HEAD > $BAD_FILE
+	echo $COMMIT_ID > $BAD_FILE
 	exit 1
 fi
 echo -e ""
@@ -115,7 +116,7 @@ echo -e "\033[1;35mRunning coverage/tests ...\033[0m"
 echo -e "---------------------------"
 if ! coverage run manage.py test; then
 	echo -e "$FAILED_HEADER Unit tests did not check out"
-	git rev-parse HEAD > $BAD_FILE
+	echo $COMMIT_ID > $BAD_FILE
 	exit 1
 fi
 echo -e ""
@@ -124,4 +125,5 @@ echo -e "Generating coverage report ..."
 coverage report --skip-empty --skip-covered
 
 echo -e "\033[1;32mAll checks passed\033[0m, saving this as a good commit"
-git rev-parse HEAD > $GOOD_FILE
+echo $COMMIT_ID > $GOOD_FILE
+exit 0
