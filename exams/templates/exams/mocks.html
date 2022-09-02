@@ -18,18 +18,21 @@
 <hr />
 
 <h2>Registering for GradeScope</h2>
-<p>You only need to do this once per year.</p>
+<p>For new students:</p>
 <ol>
-	<li>Open <a href="https://gradescope.com">gradescope.com</a>.</li>
-	<li>Create an account using your real name and any email.</li>
-	<li>When asked for a student ID,
-		type <strong>{{ student.pk }}</strong>.</li>
-	<li>After the account is created,
-		add the OTIS course using the entry key
-		<strong>{{ semester.gradescope_key }}</strong>.
+	<li>Open <a href="https://gradescope.com">gradescope.com</a>
+		and sign up as a <em>student</em>.</li>
+	<li>Use the entry key <strong>{{ semester.gradescope_key }}</strong>.
+	<li>For school, choose <strong>Massachusetts Institute of Technology</strong>.</li>
+	<li>Input your full name, with given name first and family name last.</li>
+	<li>Choose any email address that you want.
+		You'll get emails here notifying you when scores are available.</li>
+	<li>For student ID, type <strong>{{ student.pk }}</strong>.</li>
 	</li>
-	<li>You can enter anything you want for the school (e.g. MIT).</li>
 </ol>
+<p>If you are a returning student, you should be able to
+just log in to your old account and then use the entry code above.
+(But you can create another new account if you want, too.)</p>
 
 <h2>Submitting to GradeScope</h2>
 <p>In brief:</p>
