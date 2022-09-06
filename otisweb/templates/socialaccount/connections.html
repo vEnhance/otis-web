@@ -12,18 +12,27 @@
 
 <h3>Password</h3>
 {% if user.has_usable_password %}
-<p>You can <a href="{% url "account_set_password" %}">change your password</a>
+<p>You have a password set on your account,
+	but you can <a href="{% url "account_set_password" %}">change your password</a>
 	if you don't like the one you have.</p>
-<p>There is no possibility to reset it from here; that needs admin intervention.</p>
+<p><a href="{% url "account_set_password" %}" class="btn btn-secondary" role="button">Change password</a></p>
+<p>
+	It is <a href="https://en.wikipedia.org/wiki/Cryptographic_hash_function#Password_verification">impossible to look up forgotten passwords</a>,
+	but an admin can set a new password for you.
+</p>
 {% else %}
-<p>You have no password set at all.</p>
-<p>You can <a href="{% url "account_set_password" %}">set a password if you want</a>.</p>
+<p>There is <strong>no password</strong> set right now.
+	You may <a href="{% url "account_set_password" %}">set a password</a> now.
+	Please <a href="https://github.com/Hanabi-Live/hanabi-live/blob/main/docs/PASSWORDS.md">do not re-use old passwords</a>.
+</p>
+<p><a href="{% url "account_set_password" %}" class="btn btn-primary" role="button">Set password</a></p>
 {% endif %}
+
+<hr />
 
 <h3>Social Accounts</h3>
 {% if form.accounts %}
-<p>If you want to remove a connection,
-	you can select it here.</p>
+<p>If you want to remove a connection, you can select it here.</p>
 
 <form method="post" action="{% url 'socialaccount_connections' %}">
 	{% csrf_token %}
