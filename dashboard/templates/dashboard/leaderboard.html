@@ -31,12 +31,8 @@
 			<td>
 				<strong>Lv {{ row.level }}</strong>
 			</td>
-			<td>
-				<i>{{ row.level_name }}</i>
-			</td>
-			<td><a href="{% url "stats" row.student.id %}">
-					{{ row.student.name }}</a>
-			</td>
+			<td class="fst-italic">{{ row.level_name }}</td>
+			<td><a href="{% url "stats" row.student.id %}">{{ row.student.name }}</a></td>
 			<td class="text-end">{{ row.clubs|floatformat:"0" }}</td>
 			<td class="text-end">{{ row.hearts|floatformat:"0" }}</td>
 			<td class="text-end">{{ row.spades|floatformat:"0" }}</td>

@@ -4,7 +4,7 @@
 
 {% block layout-content %}
 
-<p><a href="{% url "arch-index" %}">⬅️  Back to ARCH index</a></p>
+<p><a href="{% url "arch-index" %}">⬅️ Back to ARCH index</a></p>
 <hr />
 {% spaceless %}
 <h1>{{ problem }}</h1>
@@ -31,11 +31,11 @@
 	for more personalized help!
 </p>
 {% else %}
-<p><i>There aren't any hints here yet.
-		If you've solved this problem,
-		please help future students by
-		<a href="{% url "hint-create" problem.puid %}">adding a hint</a></i>.</p>
-</i>
+<p class="fst-italic">
+	There aren't any hints here yet.
+	If you've solved this problem, please help future students by
+	<a href="{% url "hint-create" problem.puid %}">adding a hint</a>.
+</p>
 {% endif %}
 
 <div class="text-center">

@@ -12,7 +12,7 @@
 	&nbsp;
 	<a class="emoji-link" title="Settings" href="{% url "profile" %}">⚙️</a>
 	&nbsp;
-	<span style="font-size: 80%; font-style: italic;">
+	<span class="fs-6 fst-italic">
 		Mouse over icons for hints.
 	</span>
 </p>
@@ -94,6 +94,5 @@
 	{% endfor %}
 </table>
 {% else %}
-<i>No curriculum materials yet! Please check back later.</i>
-
+<p class="fst-italic">No curriculum materials yet! Please check back later.</p>
 {% endif %}

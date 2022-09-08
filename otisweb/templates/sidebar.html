@@ -44,7 +44,7 @@
 
 {% if student %}
 <p><b><a href="{% url "portal" student.id %}">{{ student.name }}</a></b></p>
-<p><i>{{ student.semester }}</i></p>
+<p class="fst-italic">{{ student.semester }}</p>
 {% endif %}
 
 {% if request.user.is_staff %}

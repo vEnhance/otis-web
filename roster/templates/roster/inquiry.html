@@ -40,15 +40,17 @@
 	<thead class="thead-dark">
 		<tr>
 			<th>Created</th>
-			<th>Status</th>
-			<th>Action</th>
 			<th>Unit</th>
+			<th>Action</th>
+			<th>Status</th>
 		</tr>
 	</thead>
 	<tbody>
 		{% for inquiry in inquiries %}
 		<tr>
 			<td>{{ inquiry.created_at|date:"Y-m-d" }}</td>
+			<th>{{ inquiry.unit }}</th>
+			<td>{{ inquiry.get_action_type_display }}</td>
 			<td>
 				{% if inquiry.status == "NEW" %}
 				Pending
@@ -60,14 +62,11 @@
 				<strong class="text-warning">On hold</strong>
 				{% endif %}
 			</td>
-			<td>{{ inquiry.get_action_type_display }}</td>
-			<td>{{ inquiry.unit }}</td>
 		</tr>
 		{% if inquiry.explanation %}
 		<tr>
 			<td></td>
-			<td></td>
-			<td colspan="3"><i>{{ inquiry.explanation }}</i></td>
+			<td colspan="3" class="fst-italic">{{ inquiry.explanation }}</td>
 		</tr>
 		{% endif %}
 		{% endfor %}
