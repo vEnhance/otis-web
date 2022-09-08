@@ -38,7 +38,7 @@ class JSONData(TypedDict):
 	number: int
 	keywords: str
 
-	entries: dict[str, float]
+	entries: Dict[str, float]
 
 
 def venueq_handler(action: str, data: JSONData) -> JsonResponse:
