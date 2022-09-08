@@ -79,7 +79,7 @@ class TestVenueQAPI(OTISTestCase):
 		PaymentLogFactory.create(invoice=invE, amount=1)
 
 	def test_init(self):
-		resp = self.post('api', data={'action': 'init', 'token': EXAMPLE_PASSWORD})
+		resp = self.post('api', json={'action': 'init', 'token': EXAMPLE_PASSWORD})
 		self.assert20X(resp)  # type: ignore
 		out = resp.json()
 		self.assertEqual(len(out['_children'][0]['_children']), 10)
@@ -109,22 +109,27 @@ class TestVenueQAPI(OTISTestCase):
 		self.assertEqual(inquiries[0]['total_inquiry_count'], 10)
 
 	def test_invoice(self):
-		data = {
-			'action': 'invoice',
-			'token': EXAMPLE_PASSWORD,
-			'adjustment.alice.aardvark': -240,
-			'adjustment.eve.edgeworth': -474,
-			'adjustment.l.lawliet': 1337,
-			'extras.alice.aardvark': 10,
-			'extras.david.darling': 10,
-			'extras.mihael.keehl': -9001,
-			'total_paid.alice.aardvark': 250,
-			'total_paid.bob.beta': 480,
-			'total_paid.carol.cutie': 110,
-			'total_paid.eve.edgeworth': 5,
-			'total_paid.nate.river': 1152
-		}
-		resp = self.post('api', data=data)
+		resp = self.post(
+			'api',
+			json={
+				'action': 'invoice',
+				'token': EXAMPLE_PASSWORD,
+				'entries':
+					{
+						'adjustment.alice.aardvark': -240,
+						'adjustment.eve.edgeworth': -474,
+						'adjustment.l.lawliet': 1337,
+						'extras.alice.aardvark': 10,
+						'extras.david.darling': 10,
+						'extras.mihael.keehl': -9001,
+						'total_paid.alice.aardvark': 250,
+						'total_paid.bob.beta': 480,
+						'total_paid.carol.cutie': 110,
+						'total_paid.eve.edgeworth': 5,
+						'total_paid.nate.river': 1152,
+					}
+			}
+		)
 		self.assert20X(resp)  # type: ignore
 
 		# check the response contains exactly missed entries
@@ -162,27 +167,27 @@ class TestVenueQAPI(OTISTestCase):
 		self.assertAlmostEqual(invoice_eve.total_paid, 6)
 
 	def test_problem(self):
-		resp = self.post('api', data={'action': 'get_hints', 'puid': '18SLA7'})
+		resp = self.post('api', json={'action': 'get_hints', 'puid': '18SLA7'})
 		self.assert20X(resp)  # type: ignore
 		out = resp.json()
 		self.assertEqual(len(out['hints']), 0)
 
 		self.assertPost20X(
-			'api', data={
+			'api', json={
 				'action': 'add_hints',
 				'puid': '18SLA7',
 				'content': 'get',
 			}
 		)
 		self.assertPost20X(
-			'api', data={
+			'api', json={
 				'action': 'add_hints',
 				'puid': '18SLA7',
 				'content': 'gud',
 			}
 		)
 
-		resp = self.post('api', data={'action': 'get_hints', 'puid': '18SLA7'})
+		resp = self.post('api', json={'action': 'get_hints', 'puid': '18SLA7'})
 		self.assert20X(resp)  # type: ignore
 		out = resp.json()
 		self.assertEqual(len(out['hints']), 2)

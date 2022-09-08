@@ -1,4 +1,5 @@
-from typing import Any, Dict, Union
+import json
+from typing import Any, Union
 
 import factory
 import factory.random
@@ -48,41 +49,47 @@ class OTISTestCase(TestCase):
 		self.assertEqual(response.status_code, 404)
 		return response
 
-	def get(self, name: str, *args: Any):
-		return self.client.get(reverse_lazy(name, args=args), follow=True)
+	def get(self, name: str, *args: Any, **kwargs: Any):
+		if (json_data := kwargs.pop('json', None)) is not None:
+			kwargs['content_type'] = 'application/json'
+			kwargs['data'] = json.dumps(json_data)
+		return self.client.get(reverse_lazy(name, args=args), follow=True, **kwargs)
 
-	def post(self, name: str, *args: Any, data: Dict[str, Any] = None):
-		return self.client.post(reverse_lazy(name, args=args), data=data or {}, follow=True)
+	def post(self, name: str, *args: Any, **kwargs: Any):
+		if (json_data := kwargs.pop('json', None)) is not None:
+			kwargs['content_type'] = 'application/json'
+			kwargs['data'] = json.dumps(json_data)
+		return self.client.post(reverse_lazy(name, args=args), follow=True, **kwargs)
 
-	def assertGet20X(self, name: str, *args: Any):
-		return self.assert20X(self.get(name, *args))
+	def assertGet20X(self, name: str, *args: Any, **kwargs: Any):
+		return self.assert20X(self.get(name, *args, **kwargs))  # type: ignore
 
-	def assertGetOK(self, name: str, *args: Any):
-		return self.assertOK(self.get(name, *args))
+	def assertGetOK(self, name: str, *args: Any, **kwargs: Any):
+		return self.assertOK(self.get(name, *args, **kwargs))  # type: ignore
 
-	def assertGet40X(self, name: str, *args: Any):
-		return self.assert40X(self.get(name, *args))
+	def assertGet40X(self, name: str, *args: Any, **kwargs: Any):
+		return self.assert40X(self.get(name, *args, **kwargs))  # type: ignore
 
-	def assertGetDenied(self, name: str, *args: Any):
-		return self.assertDenied(self.get(name, *args))
+	def assertGetDenied(self, name: str, *args: Any, **kwargs: Any):
+		return self.assertDenied(self.get(name, *args, **kwargs))  # type: ignore
 
-	def assertGetNotFound(self, name: str, *args: Any):
-		return self.assertNotFound(self.get(name, *args))
+	def assertGetNotFound(self, name: str, *args: Any, **kwargs: Any):
+		return self.assertNotFound(self.get(name, *args, **kwargs))  # type: ignore
 
-	def assertPost20X(self, name: str, *args: Any, data: Dict[str, Any] = None):
-		return self.assert20X(self.post(name, *args, data=data or {}))
+	def assertPost20X(self, name: str, *args: Any, **kwargs: Any):
+		return self.assert20X(self.post(name, *args, **kwargs))  # type: ignore
 
-	def assertPostOK(self, name: str, *args: Any, data: Dict[str, Any] = None):
-		return self.assertOK(self.post(name, *args, data=data or {}))
+	def assertPostOK(self, name: str, *args: Any, **kwargs: Any):
+		return self.assertOK(self.post(name, *args, **kwargs))  # type: ignore
 
-	def assertPost40X(self, name: str, *args: Any, data: Dict[str, Any] = None):
-		return self.assert40X(self.post(name, *args, data=data or None))
+	def assertPost40X(self, name: str, *args: Any, **kwargs: Any):
+		return self.assert40X(self.post(name, *args, **kwargs))  # type: ignore
 
-	def assertPostDenied(self, name: str, *args: Any, data: Dict[str, Any] = None):
-		return self.assertDenied(self.post(name, *args, data=data or {}))
+	def assertPostDenied(self, name: str, *args: Any, **kwargs: Any):
+		return self.assertDenied(self.post(name, *args, **kwargs))  # type: ignore
 
-	def assertPostNotFound(self, name: str, *args: Any, data: Dict[str, Any] = None):
-		return self.assertNotFound(self.post(name, *args, data=data or {}))
+	def assertPostNotFound(self, name: str, *args: Any, **kwargs: Any):
+		return self.assertNotFound(self.post(name, *args, **kwargs))  # type: ignore
 
 	def login_name(self, username: str):
 		user = User.objects.get(username=username)

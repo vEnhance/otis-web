@@ -1,5 +1,6 @@
+import json
 from hashlib import sha256
-from typing import Any, Dict, List
+from typing import Any, Dict, List, TypedDict
 
 from allauth.socialaccount.models import SocialAccount
 from arch.models import Hint, Problem
@@ -21,14 +22,33 @@ from unidecode import unidecode
 # Create your views here.
 
 
-def venueq_handler(action: str, request: HttpRequest) -> JsonResponse:
+class JSONData(TypedDict):
+	action: str
+	token: str
+
+	puid: str
+	uid: int
+	pk: int
+	approved: bool
+	rejected: bool
+	eligible: bool
+	clubs: int
+	hours: float
+	content: str
+	number: int
+	keywords: str
+
+	entries: dict[str, float]
+
+
+def venueq_handler(action: str, data: JSONData) -> JsonResponse:
 	if action == 'grade_problem_set':
 		# mark problem set as done
-		pset = get_object_or_404(PSet, pk=request.POST['pk'])
-		pset.approved = bool(request.POST['approved'])
-		pset.rejected = bool(request.POST['rejected'])
-		pset.clubs = request.POST.get('clubs', None)
-		pset.hours = request.POST.get('hours', None)
+		pset = get_object_or_404(PSet, pk=data['pk'])
+		pset.approved = data['approved']
+		pset.rejected = data['rejected']
+		pset.clubs = data.get('clubs', None)
+		pset.hours = data.get('hours', None)
 		pset.save()
 		if pset.approved is True and pset.resubmitted is False and pset.unit is not None:
 			# unlock the unit the student asked for
@@ -46,9 +66,9 @@ def venueq_handler(action: str, request: HttpRequest) -> JsonResponse:
 			inquiry.run_accept()
 		return JsonResponse({'result': 'success'}, status=200)
 	elif action == 'mark_suggestion':
-		suggestion = get_object_or_404(ProblemSuggestion, pk=request.POST['pk'])
+		suggestion = get_object_or_404(ProblemSuggestion, pk=data['pk'])
 		suggestion.resolved = True
-		suggestion.eligible = bool(request.POST['eligible'])
+		suggestion.eligible = data['eligible']
 		suggestion.save()
 		return JsonResponse({'result': 'success'}, status=200)
 	elif action == 'init':
@@ -62,7 +82,7 @@ def venueq_handler(action: str, request: HttpRequest) -> JsonResponse:
 				'student__unitinquiry', filter=Q(action_type="UNLOCK")
 			),
 		)
-		data: Dict[str, Any] = {
+		output_data: Dict[str, Any] = {
 			'_name':
 				'Root',
 			'_children':
@@ -153,15 +173,15 @@ def venueq_handler(action: str, request: HttpRequest) -> JsonResponse:
 					}
 				],
 		}
-		return JsonResponse(data, status=200)
+		return JsonResponse(output_data, status=200)
 	else:
 		raise Exception("No such command")
 
 
-def discord_handler(action: str, request: HttpRequest) -> JsonResponse:
+def discord_handler(action: str, data: JSONData) -> JsonResponse:
 	assert action == 'register'
 	# check whether social account exists
-	uid = int(request.POST['uid'])
+	uid = data['uid']
 	queryset = SocialAccount.objects.filter(uid=uid)
 	if not (n := len(queryset)) == 1:
 		return JsonResponse({'result': 'nonexistent', 'length': n})
@@ -196,8 +216,8 @@ def discord_handler(action: str, request: HttpRequest) -> JsonResponse:
 		return JsonResponse({'result': 'unregistered'})
 
 
-def problems_handler(action: str, request: HttpRequest) -> JsonResponse:
-	puid = request.POST['puid'].upper()
+def problems_handler(action: str, data: JSONData) -> JsonResponse:
+	puid = data['puid'].upper()
 	if action == 'get_hints':
 		problem, _ = Problem.objects.get_or_create(puid=puid)
 		hints = list(
@@ -206,17 +226,17 @@ def problems_handler(action: str, request: HttpRequest) -> JsonResponse:
 		return JsonResponse({'hints': hints})
 	elif action == 'add_hints':
 		problem, _ = Problem.objects.get_or_create(puid=puid)
-		content = request.POST['content']
+		content = data['content']
 		existing_hint_numbers = set(
 			Hint.objects.filter(problem=problem).values_list('number', flat=True)
 		)
-		if 'number' in request.POST:
-			number = int(request.POST['number'])
+		if 'number' in data:
+			number = data['number']
 		else:
 			number = 0
 			while number in existing_hint_numbers:
 				number += 10
-		keywords = request.POST.get('keywords', "imported from discord")
+		keywords = data.get('keywords', "imported from discord")
 		hint = Hint.objects.create(
 			problem=problem, number=number, content=content, keywords=keywords
 		)
@@ -225,16 +245,14 @@ def problems_handler(action: str, request: HttpRequest) -> JsonResponse:
 		raise NotImplementedError(action)
 
 
-def invoice_handler(action: str, request: HttpRequest) -> JsonResponse:
+def invoice_handler(action: str, data: JSONData) -> JsonResponse:
 	def sanitize(s: str, last: bool = False) -> str:
 		return unidecode(s).lower().split(' ')[-1 if last else 0]
 
 	invoices = Invoice.objects.filter(student__semester__active=True)
 	invoices = invoices.select_related('student__user')
 	fields = ('adjustment', 'extras', 'total_paid')
-	data = request.POST.dict()
-	del data['token']
-	del data['action']
+	entries = data['entries']
 	invoices_to_update: List[Invoice] = []
 
 	for inv in invoices:
@@ -243,8 +261,7 @@ def invoice_handler(action: str, request: HttpRequest) -> JsonResponse:
 			last_name = sanitize(inv.student.user.last_name, last=True)
 
 			for k in fields:
-				if (x := data.pop(f'{k}.{first_name}.{last_name}', None)) is not None:
-					assert isinstance(x, str)
+				if (x := entries.pop(f'{k}.{first_name}.{last_name}', None)) is not None:
 					setattr(inv, k, float(x))
 
 					if inv not in invoices_to_update:
@@ -256,29 +273,30 @@ def invoice_handler(action: str, request: HttpRequest) -> JsonResponse:
 		inv.total_paid += stripe_paid
 
 	Invoice.objects.bulk_update(invoices_to_update, fields, batch_size=25)
-	return JsonResponse(data)
+	return JsonResponse(entries)
 
 
 @csrf_exempt
 @require_POST
 def api(request: HttpRequest) -> JsonResponse:
-	action = request.POST.get('action', None)
+	data = json.loads(request.body)
+	action = data.get('action', None)
 	if action is None:
 		raise SuspiciousOperation('You need to provide an action, silly')
 	if settings.PRODUCTION:
-		token = request.POST.get('token')
+		token = data.get('token')
 		assert token is not None
 		if not sha256(token.encode('ascii')).hexdigest() == settings.API_TARGET_HASH:
 			return JsonResponse({'error': "☕"}, status=418)
 
 	if action in ('grade_problem_set', 'approve_inquiries', 'mark_suggestion', 'init'):
-		return venueq_handler(action, request)
+		return venueq_handler(action, data)
 	elif action in ('register', ):
-		return discord_handler(action, request)
+		return discord_handler(action, data)
 	elif action in ('get_hints', 'add_hints'):
-		return problems_handler(action, request)
+		return problems_handler(action, data)
 	elif action in ('invoice', ):
-		return invoice_handler(action, request)
+		return invoice_handler(action, data)
 	else:
 		return JsonResponse({'error': 'No such command'}, status=400)
 

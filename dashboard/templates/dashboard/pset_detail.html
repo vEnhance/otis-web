@@ -63,6 +63,7 @@
 		{{ pset.hours|default_if_none:0 }}♥
 	</td>
 	<td>
+		{{ pset.pk }}
 		{% if pset.approved %}
 		✅ Accepted
 		{% elif pset.rejected %}
