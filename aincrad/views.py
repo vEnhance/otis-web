@@ -78,6 +78,15 @@ def venueq_handler(action: str, request: HttpRequest) -> JsonResponse:
 									student__semester__active=True,
 									student__legit=True,
 									student__enabled=True,
+								).annotate(
+									num_approved_all=SubqueryCount(
+										'student__user__student__pset',
+										filter=Q(approved=True),
+									),
+									num_approved_current=SubqueryCount(
+										'student__pset',
+										filter=Q(approved=True),
+									),
 								).values(
 									'pk',
 									'approved',
@@ -96,6 +105,8 @@ def venueq_handler(action: str, request: HttpRequest) -> JsonResponse:
 									'next_unit_to_unlock__group__name',
 									'next_unit_to_unlock__code',
 									'upload__content',
+									'num_approved_all',
+									'num_approved_current',
 								)
 							)
 					}, {

@@ -1,7 +1,7 @@
 from hashlib import sha256
 
 from arch.models import Hint
-from core.factories import UnitFactory
+from core.factories import SemesterFactory, UnitFactory
 from dashboard.factories import PSetFactory
 from django.test.utils import override_settings
 from otisweb.tests import OTISTestCase
@@ -18,11 +18,25 @@ class TestVenueQAPI(OTISTestCase):
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()
-		alice = StudentFactory.create(user__first_name="Alice", user__last_name="Aardvárk")
-		bob = StudentFactory.create(user__first_name="Bôb B.", user__last_name="Bèta")
-		carol = StudentFactory.create(user__first_name="Carol", user__last_name="Cutie")
-		david = StudentFactory.create(user__first_name="David", user__last_name="Darling")
-		eve = StudentFactory.create(user__first_name="Eve", user__last_name="Edgeworth")
+		active_semester = SemesterFactory.create(name="New")
+		old_semester = SemesterFactory.create(name="Old", active=False)
+
+		alice = StudentFactory.create(
+			user__first_name="Alice", user__last_name="Aardvárk", semester=active_semester
+		)
+		bob = StudentFactory.create(
+			user__first_name="Bôb B.", user__last_name="Bèta", semester=active_semester
+		)
+		carol = StudentFactory.create(
+			user__first_name="Carol", user__last_name="Cutie", semester=active_semester
+		)
+		david = StudentFactory.create(
+			user__first_name="David", user__last_name="Darling", semester=active_semester
+		)
+		eve = StudentFactory.create(
+			user__first_name="Eve", user__last_name="Edgeworth", semester=active_semester
+		)
+		old_alice = StudentFactory.create(user=alice.user, semester=old_semester)
 
 		submitted_unit, requested_unit = UnitFactory.create_batch(2)
 		PSetFactory.create(
@@ -35,12 +49,15 @@ class TestVenueQAPI(OTISTestCase):
 			feedback="Meow",
 			special_notes="Purr",
 		)
+		PSetFactory.create_batch(2, student=bob, approved=False)
+		PSetFactory.create_batch(3, student=carol, approved=False)
 		PSetFactory.create_batch(7, student=alice, approved=True)
 		PSetFactory.create_batch(2, student=alice, approved=False, rejected=True)
 		PSetFactory.create_batch(4, student=alice, approved=False)
-		PSetFactory.create_batch(10, student=bob, approved=False)
 		PSetFactory.create_batch(3, approved=True)
-		PSetFactory.create_batch(11, student=carol, approved=False)
+		PSetFactory.create_batch(4, student=old_alice, approved=True)
+		PSetFactory.create_batch(2, student=old_alice, approved=False)
+
 		UnitInquiryFactory.create_batch(5, student=alice, action_type="UNLOCK", status="ACC")
 		UnitInquiryFactory.create_batch(2, student=alice, action_type="DROP", status="ACC")
 		UnitInquiryFactory.create_batch(3, student=alice, action_type="UNLOCK", status="NEW")
@@ -65,13 +82,26 @@ class TestVenueQAPI(OTISTestCase):
 		resp = self.post('api', data={'action': 'init', 'token': EXAMPLE_PASSWORD})
 		self.assert20X(resp)  # type: ignore
 		out = resp.json()
-		self.assertEqual(len(out['_children'][0]['_children']), 26)
-		pset = out['_children'][0]['_children'][0]
-		self.assertEqual(pset['approved'], False)
-		self.assertEqual(pset['clubs'], 120)
-		self.assertEqual(pset['hours'], 37)
-		self.assertEqual(pset['feedback'], 'Meow')
-		self.assertEqual(pset['special_notes'], 'Purr')
+		self.assertEqual(len(out['_children'][0]['_children']), 10)
+
+		pset_data = out['_children'][0]
+		self.assertEqual(pset_data['_name'], 'Problem sets')
+
+		pset0 = pset_data['_children'][0]
+		self.assertEqual(pset0['approved'], False)
+		self.assertEqual(pset0['clubs'], 120)
+		self.assertEqual(pset0['hours'], 37)
+		self.assertEqual(pset0['feedback'], 'Meow')
+		self.assertEqual(pset0['special_notes'], 'Purr')
+		self.assertEqual(pset0['student__user__first_name'], 'Alice')
+		self.assertEqual(pset0['num_approved_all'], 11)
+		self.assertEqual(pset0['num_approved_current'], 7)
+
+		pset1 = pset_data['_children'][1]
+		self.assertEqual(pset1['approved'], False)
+		self.assertEqual(pset1['student__user__first_name'], 'Bôb B.')
+		self.assertEqual(pset1['num_approved_all'], 0)
+		self.assertEqual(pset1['num_approved_current'], 0)
 
 		inquiries = out['_children'][1]['inquiries']
 		self.assertEqual(len(inquiries), 3)
