@@ -35,7 +35,12 @@ class TestVenueQAPI(OTISTestCase):
 			feedback="Meow",
 			special_notes="Purr",
 		)
-		PSetFactory.create(student=alice, approved=True)
+		PSetFactory.create_batch(7, student=alice, approved=True)
+		PSetFactory.create_batch(2, student=alice, approved=False, rejected=True)
+		PSetFactory.create_batch(4, student=alice, approved=False)
+		PSetFactory.create_batch(10, student=bob, approved=False)
+		PSetFactory.create_batch(3, approved=True)
+		PSetFactory.create_batch(11, student=carol, approved=False)
 		UnitInquiryFactory.create_batch(5, student=alice, action_type="UNLOCK", status="ACC")
 		UnitInquiryFactory.create_batch(2, student=alice, action_type="DROP", status="ACC")
 		UnitInquiryFactory.create_batch(3, student=alice, action_type="UNLOCK", status="NEW")
@@ -60,7 +65,7 @@ class TestVenueQAPI(OTISTestCase):
 		resp = self.post('api', data={'action': 'init', 'token': EXAMPLE_PASSWORD})
 		self.assert20X(resp)  # type: ignore
 		out = resp.json()
-		self.assertEqual(len(out['_children'][0]['_children']), 1)
+		self.assertEqual(len(out['_children'][0]['_children']), 26)
 		pset = out['_children'][0]['_children'][0]
 		self.assertEqual(pset['approved'], False)
 		self.assertEqual(pset['clubs'], 120)
