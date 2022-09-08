@@ -6,6 +6,7 @@ import datetime
 import os
 import random
 from hashlib import sha256
+from typing import Optional
 
 from core.models import Semester, Unit, UnitGroup
 from django.conf import settings
@@ -182,6 +183,13 @@ class PSet(models.Model):
 
 	def get_absolute_url(self):
 		return reverse_lazy('pset', args=(self.pk, ))
+
+	@property
+	def filename(self) -> Optional[str]:
+		if self.upload is not None:
+			return self.upload.filename
+		else:
+			return None
 
 	class Meta:
 		verbose_name = "PSet submission"
