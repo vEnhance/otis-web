@@ -58,20 +58,42 @@ class CurriculumForm(forms.Form):
 			n += 1
 
 
-class AdvanceForm(forms.ModelForm):
+class AdvanceUnitChoiceField(forms.ModelMultipleChoiceField):
 	def __init__(self, *args: Any, **kwargs: Any):
-		super(AdvanceForm, self).__init__(*args, **kwargs)
-		student = kwargs['instance']
-		self.fields['unlocked_units'] = forms.ModelMultipleChoiceField(
-			widget=forms.SelectMultiple(attrs={'class': 'chosen-select'}),
-			queryset=student.curriculum.all(),
-			help_text="The set of unlocked units.",
-			required=False
+		widget = kwargs.pop('widget', forms.SelectMultiple(attrs={'class': 'chosen-select'}))
+		required = kwargs.pop('required', False)
+		super(AdvanceUnitChoiceField, self).__init__(
+			*args, widget=widget, required=required, **kwargs
 		)
 
-	class Meta:
-		model = Student
-		fields = ('unlocked_units', )
+
+class AdvanceForm(forms.Form):
+	def __init__(self, *args: Any, **kwargs: Any):
+		student = kwargs.pop('student')
+		super(AdvanceForm, self).__init__(*args, **kwargs)
+
+		self.fields['units_to_unlock'] = AdvanceUnitChoiceField(
+			label="Open",
+			queryset=Unit.objects.order_by().difference(student.unlocked_units.order_by().all())
+			if len(args) == 0 else Unit.objects.all(),
+			help_text="Units to unlock.",
+		)
+		self.fields['units_to_add'] = AdvanceUnitChoiceField(
+			label="Add",
+			queryset=Unit.objects.order_by().difference(student.curriculum.order_by().all())
+			if len(args) == 0 else Unit.objects.all(),
+			help_text="Units to add without unlocking.",
+		)
+		self.fields['units_to_lock'] = AdvanceUnitChoiceField(
+			label="Lock",
+			queryset=student.unlocked_units.all() if len(args) == 0 else Unit.objects.all(),
+			help_text="Units to remove from unlocked set.",
+		)
+		self.fields['units_to_drop'] = AdvanceUnitChoiceField(
+			label="Drop",
+			queryset=student.curriculum.all() if len(args) == 0 else Unit.objects.all(),
+			help_text="Units to remove altogether.",
+		)
 
 
 class InquiryForm(forms.ModelForm):

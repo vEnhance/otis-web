@@ -108,14 +108,22 @@ def finalize(request: HttpRequest, student_id: int) -> HttpResponse:
 def advance(request: HttpRequest, student_id: int) -> Any:
 	student = get_student_by_id(request, student_id, requires_edit=True)
 	if request.method == 'POST':
-		form = AdvanceForm(request.POST, instance=student)
+		form = AdvanceForm(request.POST, student=student)
 		if form.is_valid():
-			form.save()
-			messages.success(request, "Successfully advanced student.")
+			data = form.cleaned_data
+			student.unlocked_units.add(*data['units_to_unlock'])
+			student.curriculum.add(*data['units_to_unlock'])
+			student.curriculum.add(*data['units_to_add'])
+			student.unlocked_units.remove(*data['units_to_lock'])
+			student.unlocked_units.remove(*data['units_to_drop'])
+			student.curriculum.remove(*data['units_to_drop'])
+			student.save()
+			messages.success(request, "Successfully updated student.")
+			form = AdvanceForm(student=student)
 			# uncomment the below if you want to load the portal again
 			# return HttpResponseRedirect(reverse("portal", args=(student_id,)))
 	else:
-		form = AdvanceForm(instance=student)
+		form = AdvanceForm(student=student)
 
 	context: Dict[str, Any] = {'title': "Advance " + student.name}
 	context['form'] = form
