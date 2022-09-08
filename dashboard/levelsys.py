@@ -132,7 +132,8 @@ def get_level_info(student: Student) -> LevelInfoDict:
 	returning the findings as a typed dictionary."""
 
 	psets = PSet.objects.filter(student__user=student.user, approved=True, eligible=True)
-	pset_data = psets.order_by('-upload__timestamp').aggregate(
+	psets = psets.order_by('-upload__timestamp')
+	pset_data = psets.aggregate(
 		clubs_any=Sum('clubs'),
 		clubs_D=Sum('clubs', filter=Q(unit__code__startswith='D')),
 		clubs_Z=Sum('clubs', filter=Q(unit__code__startswith='Z')),
@@ -145,7 +146,6 @@ def get_level_info(student: Student) -> LevelInfoDict:
 	total_hearts = pset_data['hearts'] or 0
 
 	diamond_qset = AchievementUnlock.objects.filter(user=student.user)
-	diamond_qset = diamond_qset.order_by('achievement__name')
 	total_diamonds = diamond_qset.aggregate(s=Sum('achievement__diamonds'))['s'] or 0
 
 	quiz_attempts = ExamAttempt.objects.filter(student__user=student.user)
