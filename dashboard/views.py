@@ -274,6 +274,7 @@ def resubmit_pset(request: HttpRequest, pk: int) -> HttpResponse:
 		form = PSetResubmitForm(request.POST, request.FILES, instance=pset)
 	else:
 		form = PSetResubmitForm(instance=pset)
+	form.fields['next_unit_to_unlock'].queryset = get_units_to_unlock(student)  # type: ignore
 
 	if request.method == 'POST' and form.is_valid():
 		pset = form.save(commit=False)
