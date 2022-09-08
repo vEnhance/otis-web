@@ -14,7 +14,7 @@
 <table class="table">
 	{% for pset in pending_psets %}
 	<tr>
-		<td>{% if pset.rejected %}<b>REJECTED</b>{% else %}{{pset.clubs}}♣{% endif %}</td>
+		<td>{% if pset.rejected %}<b>REJECTED</b>{% else %}{{pset.clubs|default_if_none:0}}♣{% endif %}</td>
 		<td><a href="{{pset.get_absolute_url}}">{{ pset.unit }}</td>
 		<td>{{ pset.upload.created_at|naturaltime }}</td>
 		<td><a href="{% url "resubmit-pset" pset.pk %}">Edit</a></td>
@@ -22,7 +22,7 @@
 	{% endfor %}
 </table>
 {% endif %}
-<p><a href="{% url "pset-queue-listing" %}">See queue of problem set submissions.</a></p>
+<p>See <a href="{% url "pset-queue-listing" %}">queue of problem set submissions</a> for a rough ETA.</p>
 
 <h2>Submit new problem set</h2>
 {% include "generic_form.html" %}
@@ -34,7 +34,7 @@
 <table class="table">
 	{% for pset in approved_psets %}
 	<tr>
-		<td>{{pset.clubs}}♣</td>
+		<td>{{pset.clubs|default_if_none:"0"}}♣</td>
 		<td><a href="{{pset.get_absolute_url}}">{{ pset.unit }}</td>
 		<td>{{ pset.upload.created_at|naturaltime }}</td>
 		<td><a href="{% url "resubmit-pset" pset.pk %}">Resubmit</a></td>

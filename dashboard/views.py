@@ -297,8 +297,15 @@ def resubmit_pset(request: HttpRequest, pk: int) -> HttpResponse:
 			VERBOSE_LOG_LEVEL, f"{student} re-submitted {pset.unit}", extra={'request': request}
 		)
 		return HttpResponseRedirect(pset.get_absolute_url())
+
+	if pset.rejected:
+		verb = 'Replace'
+	elif pset.approved:
+		verb = 'Add to'
+	else:
+		verb = 'Update'
 	context = {
-		'title': f'Resubmit {pset.unit}',
+		'title': f'{verb} {pset.filename or pset.pk}',
 		'student': student,
 		'pset': pset,
 		'form': form,
