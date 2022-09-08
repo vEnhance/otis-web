@@ -476,6 +476,11 @@ class PSetDetail(LoginRequiredMixin, DetailView[PSet]):
 			raise PermissionDenied("Can't view work by this student")
 		return super(DetailView, self).dispatch(request, *args, **kwargs)
 
+	def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+		context = super().get_context_data(**kwargs)
+		context['student'] = self.get_object().student
+		return context
+
 
 class ProblemSuggestionCreate(
 	LoginRequiredMixin, CreateView[ProblemSuggestion, BaseModelForm[ProblemSuggestion]]
