@@ -67,7 +67,7 @@
 		<td class="emojis">
 			{% if row.is_visible %}
 			<a class="emoji-link" style="font-size: 80%" title="Download PDF" href="{% view_problems row.unit %}">💾</a>
-			<a class="emoji-link" title="Copy LaTeX" href="{% view_tex row.unit %}">📋</a>
+			<a class="emoji-link" title="Download LaTeX template" href="{% view_tex row.unit %}">📋</a>
 			<a class="emoji-link" style="text-shadow: 1px black;" title="Add suggestion" href="{% url "suggest-new" row.unit.id %}">💡</a>
 			{% elif request.user.is_staff %}
 			<a href="{% view_problems row.unit %}">(PDF)</a>
