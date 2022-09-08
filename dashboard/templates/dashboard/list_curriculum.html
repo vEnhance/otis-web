@@ -1,7 +1,6 @@
 {% load otis_extras %}
 
 {% if curriculum %}
-
 <p>
 	<button id="hide-completed-units" class="tooltip-button" title="Show/hide completed units">
 		Toggle ✅
@@ -25,6 +24,7 @@
 	});
 </script>
 
+{% with profile=request.user|getprofile %}
 <table class="table curriculum">
 	{% for row in curriculum %}
 	<tr class="subject{{ row.unit.group.subject }}
@@ -93,6 +93,7 @@
 	</tr>
 	{% endfor %}
 </table>
+{% endwith %}
 {% else %}
 <p class="fst-italic">No curriculum materials yet! Please check back later.</p>
 {% endif %}

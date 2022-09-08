@@ -1,6 +1,7 @@
 {% extends 'layout.html' %}
 {% load static %}
 {% load humanize %}
+{% load otis_extras %}
 
 {% block layout-content %}
 {% if request.user.is_staff %}
@@ -133,23 +134,27 @@
 <hr />
 {% else %}
 
-{% if profile.show_bars %}
-<h1>Level {{ level_number }} &mdash;
-	<a href="{% url 'stats' student.id %}">🏅{{ level_name }}</a>
-</h1>
+{% with profile=request.user|getprofile %}
+<div class="greeting">
+	{% if profile.show_bars %}
+	<h1>Level {{ level_number }} &mdash;
+		<a href="{% url 'stats' student.id %}">🏅{{ level_name }}</a>
+	</h1>
 
-<div class="container">
-	<div class="row">
-		{% include "dashboard/meters/small.html" with meter=meters.clubs %}
-		{% include "dashboard/meters/small.html" with meter=meters.hearts %}
-		{% include "dashboard/meters/small.html" with meter=meters.spades %}
-		{% include "dashboard/meters/small.html" with meter=meters.diamonds %}
+	<div class="container">
+		<div class="row">
+			{% include "dashboard/meters/small.html" with meter=meters.clubs %}
+			{% include "dashboard/meters/small.html" with meter=meters.hearts %}
+			{% include "dashboard/meters/small.html" with meter=meters.spades %}
+			{% include "dashboard/meters/small.html" with meter=meters.diamonds %}
+		</div>
 	</div>
+	{% else %}
+	<h1>Welcome back</h1>
+	<p>You are logged in as <code>{{ request.user.username }}</code>.</p>
+	{% endif %}
 </div>
-{% else %}
-<h1>Welcome back</h1>
-<p>You are logged in as <code>{{ request.user.username }}</code>.</p>
-{% endif %}
+{% endwith %}
 
 <div class="text-center">
 	<a href="{% url 'stats' student.id %}" style="margin: 0 auto; width: 120px;" class="btn btn-primary text-white" role="button">View stats</a>

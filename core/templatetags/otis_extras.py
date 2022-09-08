@@ -1,8 +1,10 @@
 import os
+from typing import Optional
 
-from core.models import Unit
+from core.models import Unit, UserProfile
 from dashboard.levelsys import BONUS_D_UNIT, BONUS_Z_UNIT
 from django import template
+from django.contrib.auth.models import User
 from django.forms.boundfield import BoundField
 from django.urls import reverse
 
@@ -33,6 +35,14 @@ def display_initial_choice(field: BoundField):
 @register.filter(name='getenv')
 def getenv(s: str) -> str:
 	return os.getenv(s) or ''
+
+
+@register.filter(name='getprofile')
+def getprofile(user: User) -> Optional[UserProfile]:
+	try:
+		return UserProfile.objects.get(user=user)
+	except UserProfile.DoesNotExist:
+		return None
 
 
 @register.filter(name='clubs_multiplier')
