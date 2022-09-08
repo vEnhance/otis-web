@@ -288,7 +288,7 @@ class TestSubmitPSet(OTISTestCase):
 				'feedback': 'hello',
 				'special_notes': 'meow',
 				'content': content2,
-				'next_unit_to_unlock': unit2.pk
+				'next_unit_to_unlock': unit3.pk
 			}
 		)
 		self.assertContains(resp, 'This unit submission is pending approval')
