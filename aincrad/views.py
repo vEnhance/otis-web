@@ -279,7 +279,13 @@ def invoice_handler(action: str, data: JSONData) -> JsonResponse:
 @csrf_exempt
 @require_POST
 def api(request: HttpRequest) -> JsonResponse:
-	data = json.loads(request.body)
+	try:
+		data = json.loads(request.body)
+	except json.decoder.JSONDecodeError:
+		raise SuspiciousOperation('Not valid JSON')
+	if type(data) != type(JSONData()):  # type: ignore
+		raise SuspiciousOperation('Not valid JSON (needs a dict)')
+
 	action = data.get('action', None)
 	if action is None:
 		raise SuspiciousOperation('You need to provide an action, silly')
