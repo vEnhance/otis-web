@@ -132,7 +132,7 @@ class PSet(models.Model):
 		help_text="The associated upload file for this problem set",
 		on_delete=models.CASCADE,
 		null=True,
-		blank=False,
+		blank=True,
 	)
 	hours = models.FloatField(
 		help_text="Number of hours spent on this problem set",
