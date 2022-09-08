@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 import logging
+import random
 from datetime import timedelta
 from typing import Any, Dict, Optional
 
@@ -640,6 +641,8 @@ class DiamondUpdate(
 		'name',
 		'image',
 		'description',
+		'solution',
+		'always_show_image',
 	)
 	success_message = "Updated diamond successfully."
 
@@ -647,9 +650,15 @@ class DiamondUpdate(
 		student = get_student_by_id(self.request, self.kwargs['student_id'])
 		if not student.semester.active:
 			raise PermissionDenied("The palace can't be edited through an inactive student")
-		assert_maxed_out_level_info(student)
+		level_info = assert_maxed_out_level_info(student)
 		self.student = student
-		achievement, _ = Achievement.objects.get_or_create(creator=student.user)
+
+		achievement, is_new = Achievement.objects.get_or_create(creator=student.user)
+		if is_new is True:
+			achievement.code = ''.join(random.choice('0123456789abcdef') for _ in range(24))
+			achievement.diamonds = level_info['meters']['diamonds'].level
+			achievement.name = student.name
+			achievement.save()
 		return achievement
 
 	def form_valid(self, form: BaseModelForm[Achievement]):
