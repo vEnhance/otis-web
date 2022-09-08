@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
-import random
 
 import datetime
 import os
+import random
 from hashlib import sha256
 
 from core.models import Semester, Unit, UnitGroup
@@ -246,7 +246,10 @@ class Achievement(models.Model):
 			RegexValidator(regex=r'^[a-f0-9]{24,26}$', message='24-26 char hex string'),
 		],
 	)  # e.g. 52656164546865436f646521
-	name = models.CharField(max_length=128, help_text="Name of the achievement")
+	name = models.CharField(
+		max_length=128,
+		help_text="Name of the achievement",
+	)
 	image = models.ImageField(
 		upload_to=achievement_image_file_name,
 		help_text="Image for the obtained achievement, at most 1MB.",
@@ -255,12 +258,20 @@ class Achievement(models.Model):
 		validators=[validate_at_most_1mb],
 	)
 	description = models.TextField(
-		help_text="Text shown beneath this achievement for students who obtain it."
+		help_text="Text shown beneath this achievement for students who obtain it.",
+		blank=True,
 	)
-	solution = models.TextField(help_text="Internal note by Evan where the diamond is hidden")
-	active = models.BooleanField(help_text="Whether the code is active right now", default=True)
+	solution = models.TextField(
+		help_text="Description of where the diamond is hidden",
+		blank=True,
+	)
+	active = models.BooleanField(
+		help_text="Whether the code is active right now",
+		default=True,
+	)
 	diamonds = models.SmallIntegerField(
-		default=1, help_text="Number of diamonds for this achievement"
+		default=0,
+		help_text="Number of diamonds for this achievement",
 	)
 	creator = models.ForeignKey(
 		User,
@@ -271,7 +282,8 @@ class Achievement(models.Model):
 	)
 	always_show_image = models.BooleanField(
 		default=False,
-		help_text="If enabled, always show the achievement image.",
+		help_text=
+		"If enabled, always show the achievement image, even if no one earned the diamond yet.",
 		verbose_name='Reveal'
 	)
 
