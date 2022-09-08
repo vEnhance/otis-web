@@ -132,7 +132,7 @@ def get_level_info(student: Student) -> LevelInfoDict:
 	returning the findings as a typed dictionary."""
 
 	psets = PSet.objects.filter(student__user=student.user, approved=True, eligible=True)
-	pset_data = psets.aggregate(
+	pset_data = psets.order_by('-upload__timestamp').aggregate(
 		clubs_any=Sum('clubs'),
 		clubs_D=Sum('clubs', filter=Q(unit__code__startswith='D')),
 		clubs_Z=Sum('clubs', filter=Q(unit__code__startswith='Z')),
@@ -144,18 +144,21 @@ def get_level_info(student: Student) -> LevelInfoDict:
 	)
 	total_hearts = pset_data['hearts'] or 0
 
-	total_diamonds = AchievementUnlock.objects.filter(user=student.user).aggregate(
-		Sum('achievement__diamonds')
-	)['achievement__diamonds__sum'] or 0
+	diamond_qset = AchievementUnlock.objects.filter(user=student.user)
+	diamond_qset = diamond_qset.order_by('achievement__name')
+	total_diamonds = diamond_qset.aggregate(s=Sum('achievement__diamonds'))['s'] or 0
 
 	quiz_attempts = ExamAttempt.objects.filter(student__user=student.user)
+	quiz_attempts = quiz_attempts.order_by('quiz__family', 'quiz__number')
 	quest_completes = QuestComplete.objects.filter(student__user=student.user)
+	quest_completes = quest_completes.order_by('-timestamp')
 	mock_completes = MockCompleted.objects.filter(student__user=student.user)
 	mock_completes = mock_completes.select_related('exam')
+	mock_completes = mock_completes.order_by('exam__family', 'exam__number')
 	market_guesses = Guess.objects.filter(
 		user=student.user,
 		market__end_date__lt=timezone.now(),
-	).select_related('market')
+	).order_by('-market__end_date').select_related('market')
 	suggested_units_queryset = ProblemSuggestion.objects.filter(
 		user=student.user,
 		resolved=True,

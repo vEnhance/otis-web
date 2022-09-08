@@ -47,20 +47,6 @@
 		</tr>
 	</thead>
 	<tbody>
-		{% for attempt in quiz_attempts %}
-		<tr>
-			<td style="color:{{ meters.spades.color }};">
-				+{% widthratio attempt.score 1 2 %}{{ meters.spades.unit }}
-			</td>
-			<td>
-				<a href="{% url "quiz" student.id attempt.quiz.pk %}">
-					{{ attempt.quiz }}
-				</a>
-			</td>
-			<td>{{ attempt.submit_time }}</td>
-		</tr>
-		{% endfor %}
-
 		{% for quest in quest_completes %}
 		<tr>
 			<td style="color:{{ meters.spades.color }};">
@@ -77,22 +63,19 @@
 		</tr>
 		{% endfor %}
 
-		{% for guess in market_guesses %}
+		{% for attempt in quiz_attempts %}
 		<tr>
 			<td style="color:{{ meters.spades.color }};">
-				<b>
-					+{{ guess.score|floatformat:2 }}{{ meters.spades.unit }}
-				</b>
+				+{% widthratio attempt.score 1 2 %}{{ meters.spades.unit }}
 			</td>
 			<td>
-				<a href="{{ guess.market.get_absolute_url }}">{{ guess.market.slug }}</a>
+				<a href="{% url "quiz" student.id attempt.quiz.pk %}">
+					{{ attempt.quiz }}
+				</a>
 			</td>
-			<td>
-				{{ guess.market.end_date }}
-			</td>
+			<td>{{ attempt.submit_time }}</td>
 		</tr>
 		{% endfor %}
-
 
 		{% for mc in mock_completes %}
 		<tr>
@@ -124,6 +107,21 @@
 		</tr>
 		{% endfor %}
 
+		{% for guess in market_guesses %}
+		<tr>
+			<td style="color:{{ meters.spades.color }};">
+				<b>
+					+{{ guess.score|floatformat:2 }}{{ meters.spades.unit }}
+				</b>
+			</td>
+			<td>
+				<a href="{{ guess.market.get_absolute_url }}">{{ guess.market.slug }}</a>
+			</td>
+			<td>
+				{{ guess.market.end_date }}
+			</td>
+		</tr>
+		{% endfor %}
 		{# TODO hints #}
 </table>
 </table>
