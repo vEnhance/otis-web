@@ -234,6 +234,7 @@ class Student(models.Model):
 			row['number'] = n
 			row['num_uploads'] = getattr(unit, 'num_uploads', 0)
 
+			row['semester_active'] = self.semester.active
 			row['is_submitted'] = getattr(unit, 'has_pset', False)
 			row['is_current'] = unit.pk in unlocked_units_ids
 			row['is_visible'] = row['is_submitted'] or row['is_current']
