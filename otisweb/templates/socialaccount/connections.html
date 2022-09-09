@@ -6,6 +6,12 @@
 {% block content %}
 <ul>
 	<li>Your name is {{ user.first_name }} {{ user.last_name }}.</li>
+	<li>Your username is <strong><tt>{{ user.username }}</tt></strong>.
+		{% if form.accounts %}
+		But you don't need this username to sign in because
+		you have {{ form.accounts|length }} connections set up.
+		{% endif %}
+	</li>
 	<li>You registered with the email <strong><tt>{{ user.email }}</tt></strong>.</li>
 	<li>You can <a href="{% url "update-profile" %}">change your name or email</a>.</li>
 </ul>
