@@ -222,7 +222,8 @@ class AchievementUnlockAdmin(admin.ModelAdmin):
 	autocomplete_fields = ('user', )
 	search_fields = (
 		'user__username',
-		'achievement',
+		'achievement__name',
+		'achievement__code',
 	)
 
 
