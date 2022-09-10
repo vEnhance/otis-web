@@ -220,6 +220,10 @@ class AchievementUnlockAdmin(admin.ModelAdmin):
 	list_display = ('user', 'achievement', 'timestamp')
 	list_filter = ('achievement__active', )
 	autocomplete_fields = ('user', )
+	search_fields = (
+		'user',
+		'achievement',
+	)
 
 
 @admin.register(QuestComplete)
