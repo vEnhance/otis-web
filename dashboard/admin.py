@@ -262,7 +262,13 @@ class BonusLevelUnlockAdmin(admin.ModelAdmin):
 @admin.register(PalaceCarving)
 class PalaceCarvingAdmin(admin.ModelAdmin):
 	list_display = (
+		'pk',
 		'display_name',
+		'created_at',
 		'message',
+	)
+	list_display_links = (
+		'pk',
+		'display_name',
 		'created_at',
 	)
