@@ -627,7 +627,7 @@ class PalaceUpdate(
 		'image',
 	)
 	template_name = 'dashboard/palace_form.html'
-	success_message = "Edited palace carving successfully"
+	success_message = "Edited palace carving successfully!"
 
 	def get_object(self, *args: Any, **kwargs: Any) -> PalaceCarving:
 		student = get_student_by_id(self.request, self.kwargs['student_id'])
