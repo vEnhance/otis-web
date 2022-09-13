@@ -74,13 +74,13 @@ class AdvanceForm(forms.Form):
 
 		self.fields['units_to_unlock'] = AdvanceUnitChoiceField(
 			label="Open",
-			queryset=Unit.objects.order_by().difference(student.unlocked_units.order_by().all())
+			queryset=Unit.objects.exclude(pk__in=student.unlocked_units.values_list('pk'))
 			if len(args) == 0 else Unit.objects.all(),
 			help_text="Units to unlock.",
 		)
 		self.fields['units_to_add'] = AdvanceUnitChoiceField(
 			label="Add",
-			queryset=Unit.objects.order_by().difference(student.curriculum.order_by().all())
+			queryset=Unit.objects.exclude(pk__in=student.curriculum.values_list('pk'))
 			if len(args) == 0 else Unit.objects.all(),
 			help_text="Units to add without unlocking.",
 		)
