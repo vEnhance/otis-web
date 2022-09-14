@@ -141,6 +141,7 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
 									'unit__code',
 									'student__user__first_name',
 									'student__user__last_name',
+									'student__user__email',
 									'explanation',
 									'created_at',
 									'unlock_inquiry_count',
