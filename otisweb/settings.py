@@ -133,7 +133,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'otisweb.wsgi.application'
 
 # Database
-# https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
 if os.getenv("DATABASE_NAME"):
 	DATABASES: Dict[str, Any] = {
@@ -162,7 +161,6 @@ else:
 	}
 
 # Password validation
-# https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
 	{
@@ -191,7 +189,6 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 SOCIALACCOUNT_EMAIL_REQUIRED = True
 
 # Internationalization
-# https://docs.djangoproject.com/en/1.9/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'America/New_York'
@@ -200,7 +197,6 @@ USE_L10N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.9/howto/static-files/
 
 STATIC_ROOT = BASE_DIR / 'static/'
 MEDIA_ROOT = BASE_DIR / 'media/'
