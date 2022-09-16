@@ -1,5 +1,5 @@
 import json
-from typing import Any, Union
+from typing import TYPE_CHECKING, Any, Union
 
 import factory
 import factory.random
@@ -11,7 +11,10 @@ from django.urls.base import reverse_lazy
 
 factory.random.reseed_random('otisweb')
 
-from django.test.client import _MonkeyPatchedWSGIResponse  # type: ignore
+if TYPE_CHECKING:
+	from django.test.client import _MonkeyPatchedWSGIResponse  # type: ignore
+else:
+	_MonkeyPatchedWSGIResponse = Any
 
 
 # waiting on https://github.com/FactoryBoy/factory_boy/pull/820 ...
