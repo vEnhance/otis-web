@@ -28,6 +28,7 @@ from django.core.exceptions import ObjectDoesNotExist, PermissionDenied  # NOQA
 from django.db.models.expressions import F
 from django.db.models.fields import FloatField
 from django.db.models.functions.comparison import Cast
+from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect  # NOQA
 from django.shortcuts import get_object_or_404, render
@@ -35,13 +36,14 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 from django.views.generic.edit import UpdateView
+from django.views.generic.list import ListView
 from dwhandler import ACTION_LOG_LEVEL, SUCCESS_LOG_LEVEL
 from otisweb.utils import AuthHttpRequest, mailchimp_subscribe
 
 from roster.utils import can_edit, get_current_students, get_student_by_id, infer_student  # NOQA
 
 from .forms import AdvanceForm, CurriculumForm, DecisionForm, InquiryForm, UserForm  # NOQA
-from .models import Invoice, RegistrationContainer, StudentRegistration, UnitInquiry  # NOQA
+from .models import Invoice, RegistrationContainer, Student, StudentRegistration, UnitInquiry  # NOQA
 
 # Create your views here.
 
@@ -514,3 +516,15 @@ def spreadsheet(request: HttpRequest) -> HttpResponse:
 				]
 			)
 	return response
+
+
+class StudentAssistantList(StaffuserRequiredMixin, ListView[Student]):
+	model = Student
+	template_name = 'roster/student_assistant_list.html'
+	context_object_name = 'students'
+
+	def get_queryset(self) -> QuerySet[Student]:
+		qs = Student.objects.filter(assistant__isnull=False)
+		qs = qs.select_related('assistant', 'assistant__user')
+		qs = qs.order_by('assistant__shortname')
+		return qs

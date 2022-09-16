@@ -16,4 +16,5 @@ urlpatterns = [
 	path(r'spreadsheet/', views.spreadsheet, name='admin-spreadsheet'),
 	path(r'mystery_unlock/easier/', views.unlock_rest_of_mystery, kwargs={'delta': 1}),
 	path(r'mystery_unlock/harder/', views.unlock_rest_of_mystery, kwargs={'delta': 2}),
+	path(r'instructors/', views.StudentAssistantList.as_view(), name='instructors'),
 ]
