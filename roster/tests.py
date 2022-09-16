@@ -65,10 +65,10 @@ class RosterTest(OTISTestCase):
 
 	def test_master_schedule(self):
 		alice = StudentFactory.create()
-		units = UnitFactory.create_batch(30)
-		alice.curriculum.set(units[0:18])
+		units = UnitFactory.create_batch(10)
+		alice.curriculum.set(units[0:8])
 		self.login(UserFactory.create(is_staff=True))
-		self.assertContains(self.get('master-schedule'), text=alice.user.first_name, count=18)
+		self.assertContains(self.get('master-schedule'), text=alice.user.first_name, count=8)
 
 	def test_update_invoice(self):
 		firefly = AssistantFactory.create()
@@ -189,6 +189,24 @@ class RosterTest(OTISTestCase):
 		self.assertEqual(build_students(StudentRegistration.objects.all()), 1)
 		carol = Student.objects.get(track='C')
 		self.assertEqual(carol.invoice.total_owed, 240)
+
+	def test_student_assistant_list(self):
+		for i in range(1, 6):
+			asst = AssistantFactory.create(
+				user__first_name=f"F{i}",
+				user__last_name=f"L{i}",
+				user__email=f"user{i}@evanchen.cc",
+			)
+			StudentFactory.create_batch(i * i, user__first_name="GoodKid", assistant=asst)
+		StudentFactory.create(user__first_name="BadKid")
+		staff = UserFactory.create(is_staff=True)
+		self.login(staff)
+		resp = self.assertGet20X('instructors')
+		for i in range(1, 6):
+			self.assertContains(resp, f'"F{i} L{i}"')
+			self.assertContains(resp, f'user{i}@evanchen.cc')
+		self.assertContains(resp, "GoodKid", count=1 + 4 + 9 + 16 + 25)
+		self.assertNotContains(resp, "BadKid")
 
 
 # TODO tests for reg
