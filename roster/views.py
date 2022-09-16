@@ -524,7 +524,7 @@ class StudentAssistantList(StaffuserRequiredMixin, ListView[Student]):
 	context_object_name = 'students'
 
 	def get_queryset(self) -> QuerySet[Student]:
-		qs = Student.objects.filter(assistant__isnull=False)
-		qs = qs.select_related('assistant', 'assistant__user')
+		qs = Student.objects.filter(semester__active=True, assistant__isnull=False)
+		qs = qs.select_related('user', 'assistant', 'assistant__user')
 		qs = qs.order_by('assistant__shortname')
 		return qs

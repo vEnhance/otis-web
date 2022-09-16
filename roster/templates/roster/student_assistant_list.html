@@ -27,7 +27,7 @@
 		<td>
 			<ul>
 				{% for student in igroup.list %}
-				<li><a href="{{ student.get_absolute_url }}">{{ student }}</a></li>
+				<li><a href="{{ student.get_absolute_url }}">{{ student.name }}</a></li>
 				{% endfor %}
 			</ul>
 		</td>
