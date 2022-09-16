@@ -210,7 +210,7 @@
 <hr />
 
 <h2>Your units</h2>
-{% include "dashboard/list_curriculum.html" %}
+{% include "dashboard/curriculum_list.html" %}
 <p>
 	After submitting a problem set, the unit is marked ⏳;
 	after instructor review, it becomes ✅.
@@ -302,7 +302,7 @@
 
 {% if semester.active and student.enabled %}
 <h2>Mock olympiads (tests)</h2>
-{% include 'dashboard/list_exam.html' with exams=tests %}
+{% include 'dashboard/exam_list.html' with exams=tests %}
 
 {% if semester.active %}
 <div class="text-center">
@@ -311,7 +311,7 @@
 {% endif %}
 
 <h2 id="quizzes">Quizzes</h2>
-{% include 'dashboard/list_exam.html' with exams=quizzes %}
+{% include 'dashboard/exam_list.html' with exams=quizzes %}
 <p>Click on a quiz above to open it. Quiz submissions are done directly on OTIS-WEB.</p>
 
 {% elif not semester.active %}
