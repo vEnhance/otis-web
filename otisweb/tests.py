@@ -5,12 +5,13 @@ import factory
 import factory.random
 from django.contrib.auth.models import User
 from django.db import models
-from django.http.response import HttpResponse
 from django.test import TestCase
 from django.test.client import Client
 from django.urls.base import reverse_lazy
 
 factory.random.reseed_random('otisweb')
+
+from django.test.client import _MonkeyPatchedWSGIResponse  # type: ignore
 
 
 # waiting on https://github.com/FactoryBoy/factory_boy/pull/820 ...
@@ -26,30 +27,30 @@ class OTISTestCase(TestCase):
 	def setUp(self):
 		self.client = Client()
 
-	def assert20X(self, response: HttpResponse):
+	def assert20X(self, response: _MonkeyPatchedWSGIResponse):
 		self.assertGreaterEqual(response.status_code, 200)
 		self.assertLess(response.status_code, 300)
 		return response
 
-	def assertOK(self, response: HttpResponse):
+	def assertOK(self, response: _MonkeyPatchedWSGIResponse):
 		self.assertLess(response.status_code, 400)
 		return response
 
-	def assert40X(self, response: HttpResponse):
+	def assert40X(self, response: _MonkeyPatchedWSGIResponse):
 		self.assertGreaterEqual(response.status_code, 400)
 		self.assertLess(response.status_code, 500)
 		return response
 
-	def assertDenied(self, response: HttpResponse):
+	def assertDenied(self, response: _MonkeyPatchedWSGIResponse):
 		if response.status_code != 400:
 			self.assertEqual(response.status_code, 403)
 		return response
 
-	def assertNotFound(self, response: HttpResponse):
+	def assertNotFound(self, response: _MonkeyPatchedWSGIResponse):
 		self.assertEqual(response.status_code, 404)
 		return response
 
-	def get(self, name: str, *args: Any, **kwargs: Any):
+	def get(self, name: str, *args: Any, **kwargs: Any) -> _MonkeyPatchedWSGIResponse:
 		if (json_data := kwargs.pop('json', None)) is not None:
 			kwargs['content_type'] = 'application/json'
 			kwargs['data'] = json.dumps(json_data)
