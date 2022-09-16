@@ -238,6 +238,7 @@ class StudentAdmin(ImportExportModelAdmin):
 	)
 	autocomplete_fields = (
 		'user',
+		'assistant',
 		'curriculum',
 		'unlocked_units',
 	)
