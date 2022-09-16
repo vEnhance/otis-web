@@ -22,6 +22,12 @@ from unidecode import unidecode
 # Create your views here.
 
 
+class HintData(TypedDict):
+	content: str
+	number: int
+	keywords: str
+
+
 class JSONData(TypedDict):
 	action: str
 	token: str
@@ -34,9 +40,14 @@ class JSONData(TypedDict):
 	eligible: bool
 	clubs: int
 	hours: float
+
+	# keys for add single hint
 	content: str
 	number: int
 	keywords: str
+
+	# keys for add multiple hints
+	hints: List[HintData]
 
 	entries: Dict[str, float]
 
@@ -218,30 +229,38 @@ def discord_handler(action: str, data: JSONData) -> JsonResponse:
 
 
 def problems_handler(action: str, data: JSONData) -> JsonResponse:
+	if action not in (
+		'get_hints',
+		'add_hints',
+		'add_many_hints',
+	):
+		raise SuspiciousOperation('Invalid command')
 	puid = data['puid'].upper()
+	problem, _ = Problem.objects.get_or_create(puid=puid)
+
 	if action == 'get_hints':
-		problem, _ = Problem.objects.get_or_create(puid=puid)
-		hints = list(
-			Hint.objects.filter(problem=problem).values('keywords', 'id', 'number', 'content')
-		)
-		return JsonResponse({'hints': hints})
+		hints = Hint.objects.filter(problem=problem)
+		hint_values = hints.values('keywords', 'id', 'number', 'content')
+		return JsonResponse({'hints': list(hint_values)})
 	elif action == 'add_hints':
-		problem, _ = Problem.objects.get_or_create(puid=puid)
-		content = data['content']
-		existing_hint_numbers = set(
-			Hint.objects.filter(problem=problem).values_list('number', flat=True)
-		)
+		hints = Hint.objects.filter(problem=problem)
+		existing_hint_numbers = hints.values_list('number', flat=True)
 		if 'number' in data:
 			number = data['number']
 		else:
 			number = 0
 			while number in existing_hint_numbers:
 				number += 10
-		keywords = data.get('keywords', "imported from discord")
 		hint = Hint.objects.create(
-			problem=problem, number=number, content=content, keywords=keywords
+			problem=problem,
+			number=number,
+			content=data['content'],
+			keywords=data.get('keywords', "imported from discord"),
 		)
 		return JsonResponse({'pk': hint.pk, 'number': number})
+	elif action == 'add_many_hints':
+		created_hints = Hint.objects.bulk_create(Hint(problem=problem, **d) for d in data['hints'])
+		return JsonResponse({'pks': [h.pk for h in created_hints]})
 	else:
 		raise NotImplementedError(action)
 
@@ -300,7 +319,7 @@ def api(request: HttpRequest) -> JsonResponse:
 		return venueq_handler(action, data)
 	elif action in ('register', ):
 		return discord_handler(action, data)
-	elif action in ('get_hints', 'add_hints'):
+	elif action in ('get_hints', 'add_hints', 'add_many_hints'):
 		return problems_handler(action, data)
 	elif action in ('invoice', ):
 		return invoice_handler(action, data)

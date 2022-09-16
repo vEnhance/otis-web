@@ -14,7 +14,7 @@ TARGET_HASH = sha256(EXAMPLE_PASSWORD.encode('ascii')).hexdigest()
 
 
 @override_settings(API_TARGET_HASH=TARGET_HASH)
-class TestVenueQAPI(OTISTestCase):
+class TestAincrad(OTISTestCase):
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()
@@ -193,3 +193,40 @@ class TestVenueQAPI(OTISTestCase):
 		self.assertEqual(len(out['hints']), 2)
 		self.assertTrue(Hint.objects.filter(number=0, content='get').exists())
 		self.assertTrue(Hint.objects.filter(number=10, content='gud').exists())
+
+		resp = self.assertPost20X(
+			'api',
+			json={
+				'action':
+					'add_many_hints',
+				'puid':
+					'18SLA7',
+				'hints':
+					[
+						{
+							'number': 80,
+							'content': '80%',
+							'keywords': 'eighty',
+						},
+						{
+							'number': 90,
+							'content': '90%',
+							'keywords': 'ninety',
+						},
+						{
+							'number': 70,
+							'content': '70%',
+							'keywords': 'seventy',
+						},
+					],
+			}
+		)
+		out = resp.json()
+		self.assertEqual(len(out['pks']), 3)
+
+		resp = self.post('api', json={'action': 'get_hints', 'puid': '18SLA7'})
+		self.assert20X(resp)  # type: ignore
+		out = resp.json()
+		self.assertTrue(Hint.objects.filter(number=80, content='80%', keywords='eighty').exists())
+		self.assertTrue(Hint.objects.filter(number=70, content='70%', keywords='seventy').exists())
+		self.assertTrue(Hint.objects.filter(number=90, content='90%', keywords='ninety').exists())
