@@ -43,12 +43,12 @@ jobs:
       run: poetry install --no-interaction
 
       # --- tests ---
-    - name: Unit tests and coverage report
+    - name: Unit tests
       run: |
         source .venv/bin/activate
         python manage.py migrate
         coverage run manage.py test
-        coverage report -m --skip-empty --skip-covered
+        coverage lcov
     - name: mypy
       run: |
         source .venv/bin/activate
@@ -81,6 +81,12 @@ jobs:
         reviewdog_rc=$?
         echo '::endgroup::'
         exit $reviewdog_rc
+
+    - name: Coverage
+      uses: coverallsapp/github-action@master
+      if: steps.setup-python.outputs.python-version == '3.10'
+      with:
+        github-token: ${{ secrets.github_token }}
 
   style:
     name: "Style: pyflakes+yapf"
