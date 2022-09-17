@@ -83,7 +83,7 @@ jobs:
 
     - name: Coverage
       uses: coverallsapp/github-action@master
-      if: steps.setup-python.outputs.python-version == '3.10'
+      if: ${{ matrix.python-version }} == 3.10
       with:
         github-token: ${{ secrets.github_token }}
 
