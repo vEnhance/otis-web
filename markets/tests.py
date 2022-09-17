@@ -1,9 +1,10 @@
 from core.factories import UserFactory
+from django.urls.base import reverse_lazy
 from django.utils import timezone
 from freezegun import freeze_time
 from otisweb.tests import OTISTestCase
 
-from markets.factories import MarketFactory
+from markets.factories import GuessFactory, MarketFactory
 from markets.models import Guess, Market
 
 utc = timezone.utc
@@ -16,17 +17,17 @@ class MarketModelTests(OTISTestCase):
 		MarketFactory.create(
 			start_date=timezone.datetime(2000, 1, 1, tzinfo=utc),
 			end_date=timezone.datetime(2000, 1, 3, tzinfo=utc),
-			slug='m-one',
+			slug='m-one',  # ended a long time ago
 		)
 		MarketFactory.create(
 			start_date=timezone.datetime(2020, 1, 1, tzinfo=utc),
 			end_date=timezone.datetime(2020, 1, 3, tzinfo=utc),
-			slug='m-two',
+			slug='m-two',  # active
 		)
 		MarketFactory.create(
 			start_date=timezone.datetime(2050, 1, 1, tzinfo=utc),
 			end_date=timezone.datetime(2050, 1, 3, tzinfo=utc),
-			slug='m-three',
+			slug='m-three',  # future
 		)
 
 	def test_managers(self):
@@ -35,6 +36,19 @@ class MarketModelTests(OTISTestCase):
 			self.assertEqual(Market.active.count(), 1)
 			self.assertEqual(Market.active.get().slug, 'm-two')
 
+	def test_urls(self):
+		with freeze_time('2020-01-02', tz_offset=0):
+			m1 = Market.objects.get(slug='m-one')
+			m2 = Market.objects.get(slug='m-two')
+			m3 = Market.objects.get(slug='m-three')
+			g1 = GuessFactory.create(market=m1)
+			g2 = GuessFactory.create(market=m2)
+			g3 = GuessFactory.create(market=m3)
+
+			self.assertEqual(g1.get_absolute_url(), m1.get_absolute_url())
+			self.assertEqual(g3.get_absolute_url(), m3.get_absolute_url())
+			self.assertNotEqual(g2.get_absolute_url(), m2.get_absolute_url())
+
 	def test_list(self):
 		with freeze_time('2020-01-02', tz_offset=0):
 			self.login(UserFactory.create())
@@ -42,6 +56,10 @@ class MarketModelTests(OTISTestCase):
 			self.assertContains(response, 'm-one')
 			self.assertContains(response, 'm-two')
 			self.assertNotContains(response, 'm-three')
+
+	def test_model_str(self):
+		str(MarketFactory.create())
+		str(GuessFactory.create())
 
 
 class MarketTests(OTISTestCase):
@@ -81,10 +99,9 @@ class MarketTests(OTISTestCase):
 			self.assertGet40X('market-results', 'guess-my-ssn')
 		with freeze_time('2050-07-01', tz_offset=0):
 			self.login('alice')
-			resp = self.assertGet20X('market-results', 'guess-my-ssn')
-			self.assertEqual(
-				resp.request['PATH_INFO'],
-				"/markets/guess/guess-my-ssn/",
+			self.assertRedirects(
+				self.assertGet20X('market-results', 'guess-my-ssn'),
+				expected_url=reverse_lazy('market-guess', args=('guess-my-ssn', )),
 			)
 		with freeze_time('2050-11-01', tz_offset=0):
 			self.login('alice')

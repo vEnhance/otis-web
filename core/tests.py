@@ -3,6 +3,7 @@ from roster.factories import StudentFactory
 
 from core.factories import SemesterFactory, UnitFactory, UserFactory
 from core.models import Semester
+from core.utils import storage_hash
 
 
 class TestCore(OTISTestCase):
@@ -60,3 +61,7 @@ class TestCore(OTISTestCase):
 		resp = self.assertGet20X('synopsis')
 		self.assertContains(resp, "VisibleUnit")
 		self.assertNotContains(resp, "HiddenUnit")
+
+	def test_storage_hash(self):
+		self.assertRegex(storage_hash('meow'), r'[0-9a-z]{64}')
+		self.assertNotEqual(storage_hash('Serral'), storage_hash('Reynor'))

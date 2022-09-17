@@ -42,7 +42,7 @@ if settings.DEBUG:
 	admin.site.site_header = '127.0.0.1'
 	admin.site.index_title = 'Switchboard'
 	admin.site.site_title = 'otis@localhost'
-else:
+else:  # pragma: no cover
 	admin.site.site_header = 'OTIS Headquarters'
 	admin.site.index_title = 'GM Panel'
 	admin.site.site_title = 'OTIS HQ'

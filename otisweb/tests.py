@@ -12,7 +12,7 @@ from django.urls.base import reverse_lazy
 factory.random.reseed_random('otisweb')
 
 # OKAY TIME TO MONKEY PATCH THE MONKEY PATCH
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
 	from django.test.client import _MonkeyPatchedWSGIResponse as MonkeyPatchedWSGIResponse  # type: ignore  # NOQA
 else:
 	MonkeyPatchedWSGIResponse = Any
