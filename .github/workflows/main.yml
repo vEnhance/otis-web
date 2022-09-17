@@ -13,16 +13,16 @@ jobs:
     strategy:
       max-parallel: 5
       matrix:
-        python-version: ["3.8", "3.9", "3.10"]
+        python: ["3.8", "3.9", "3.10"]
 
     steps:
     - uses: actions/checkout@v2
       with:
         submodules: recursive
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python ${{ matrix.python }}
       uses: actions/setup-python@v2
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: ${{ matrix.python }}
 
       # --- dependency installation ---
     - name: Install Poetry
@@ -48,7 +48,7 @@ jobs:
         source .venv/bin/activate
         python manage.py migrate
         coverage run manage.py test
-        coverage lcov
+        coverage lcov -o coverage/lcov.info
     - name: mypy
       run: |
         source .venv/bin/activate
@@ -83,7 +83,7 @@ jobs:
 
     - name: Coverage
       uses: coverallsapp/github-action@master
-      if: ${{ matrix.python-version }} == 3.10
+      if: "matrix.python == 3.10"
       with:
         github-token: ${{ secrets.github_token }}
 
