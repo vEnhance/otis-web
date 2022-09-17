@@ -7,6 +7,16 @@ from django.urls.base import reverse
 from django.utils.text import slugify
 from wiki.models import URLPath
 
+WIKI_SUBJECT_CHART = {
+	'A': 'algebra',
+	'F': 'algebra',
+	'C': 'combinatorics',
+	'G': 'geometry',
+	'N': 'number-theory',
+	'M': 'miscellaneous',
+	'K': 'null',
+}
+
 
 def edit_redirect(u: URLPath) -> HttpResponseRedirect:
 	return HttpResponseRedirect(reverse('wiki:edit', kwargs={'path': u.path}))
@@ -24,21 +34,7 @@ def wiki_redirect(u: URLPath) -> HttpResponseRedirect:
 def unitgroup(request: HttpRequest, pk: int) -> HttpResponse:
 	group = get_object_or_404(UnitGroup, pk=pk)
 
-	if group.subject == "A" or group.subject == "F":
-		subject_name = 'algebra'
-	elif group.subject == "C":
-		subject_name = 'combinatorics'
-	elif group.subject == "G":
-		subject_name = 'geometry'
-	elif group.subject == "N":
-		subject_name = 'number-theory'
-	elif group.subject == "M":
-		subject_name = 'miscellaneous'
-	elif group.subject == "K":
-		subject_name = 'null'
-	else:
-		raise Exception(f"No subject for {group.name}.")
-
+	subject_name = WIKI_SUBJECT_CHART[group.subject]
 	slug = slugify(group.name)
 	try:
 		u = URLPath.get_by_path(path=f'/units/list-of-{subject_name}-units/{slug}')
