@@ -11,8 +11,7 @@
 	<thead>
 		<tr class="table-info">
 			<th style="min-width: 2em;">Rk</th>
-			<th style="min-width: 4em;">Lv</th>
-			<th style="min-width: 10em;">Level name</th>
+			<th style="min-width: 6em;">Lv</th>
 			<th style="min-width: 10em;">Name</th>
 			<th class="text-end">♣️</th>
 			<th class="text-end">♥️</th>
@@ -30,8 +29,8 @@
 			</td>
 			<td>
 				<strong>Lv {{ row.level }}</strong>
+				<sup class="fst-italic">{{ row.level_name }}</sup>
 			</td>
-			<td class="fst-italic">{{ row.level_name }}</td>
 			<td><a href="{% url "stats" row.student.id %}">{{ row.student.name }}</a></td>
 			<td class="text-end">{{ row.clubs|floatformat:"0" }}</td>
 			<td class="text-end">{{ row.hearts|floatformat:"0" }}</td>
