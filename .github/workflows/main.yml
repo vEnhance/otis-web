@@ -12,7 +12,7 @@ jobs:
     strategy:
       max-parallel: 1
       matrix:
-        python-version: [3.9]
+        python-version: ["3.8", "3.9", "3.10"]
 
     steps:
     - uses: actions/checkout@v2
@@ -22,21 +22,38 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        curl -sSL https://install.python-poetry.org | python3 -
-        poetry install
 
-    - name: Unit Tests
+      # --- dependency installation ---
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+    - name: Load cached venv if cache exists
+      id: cached-poetry-dependencies
+      uses: actions/cache@v2
+      with:
+        path: .venv
+        key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+    - name: Install dependencies if cache miss
+      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+      run: poetry install --no-interaction --no-root
+    - name: Install root project
+      run: poetry install --no-interaction
+
+      # --- tests ---
+    - name: Unit tests and coverage report
       run: |
+        source .venv/bin/activate
         python manage.py migrate
         coverage run manage.py test
         coverage report -m --skip-empty --skip-covered
-
-    - name: ReviewDog
+    - name: mypy
+      run: |
+        source .venv/bin/activate
+        mypy --ignore-missing-imports $(git ls-files '*.py' | grep -v migrations/ | grep -v /apps.py)
+    - name: pyright (via ReviewDog)
       env:
         REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
+        source .venv/bin/activate
         npm install pyright
         BASE_PATH="$(cd "$(dirname "$0")" && pwd)"
         cd "${GITHUB_WORKSPACE}/${INPUT_WORKDIR}" || exit 1
@@ -61,8 +78,8 @@ jobs:
         echo '::endgroup::'
         exit $reviewdog_rc
 
-  pyflakes:
-    name: pyflakes
+  style:
+    name: pyflakes and yapf
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -70,41 +87,17 @@ jobs:
           submodules: recursive
       - name: Setup Python
         uses: actions/setup-python@v2
-      - name: Install PyFlakes
+      - uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip
+          restore-keys: ${{ runner.os }}-pip
+      - name: Install PyFlakes + TOML + YAPF
         run: |
-          python -m pip install --upgrade pyflakes
+          python -m pip install --upgrade pyflakes toml yapf
       - name: Run Pyflakes
         run: |
           pyflakes .
-
-  yapf:
-    name: yapf
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Setup Python
-      uses: actions/setup-python@v2
-    - name: Install TOML and YAPF
-      run: |
-        python -m pip install toml yapf
-    - name: Run YAPF
-      run: |
-        yapf $(git ls-files '*.py' | grep -v migrations/ | grep -v /apps.py)
-
-  mypy:
-    name: mypy
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Setup Python
-      uses: actions/setup-python@v2
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-    - name: Install mypy
-      run: |
-        python -m pip install mypy
-    - name: Run mypy
-      run: |
-        mypy --ignore-missing-imports $(git ls-files '*.py' | grep -v migrations/ | grep -v /apps.py)
+      - name: Run YAPF
+        run: |
+          yapf $(git ls-files '*.py' | grep -v migrations/ | grep -v /apps.py)
