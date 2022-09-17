@@ -66,8 +66,14 @@ align_closing_bracket_with_visual_indent = false
 split_before_dot = true
 split_before_expression_after_opening_paren = true
 
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+skip_empty = true
+
 [tool.coverage.run]
 branch = true
+command_line = "manage.py test"
 omit = [
 	"*/site-packages/*",
 	"*/migrations/*",
