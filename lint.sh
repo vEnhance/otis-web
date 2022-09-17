@@ -54,16 +54,6 @@ if ! pyflakes .; then
 fi
 echo -e ""
 
-echo -e "\033[1;35mGenerating requirements.txt ...\033[0m"
-echo -e "---------------------------"
-poetry export -E production > requirements.txt
-if ! git diff --exit-code requirements.txt; then
-	echo -e "$FAILED_HEADER You need to commit requirements.txt"
-	echo $COMMIT_ID > $BAD_FILE
-	exit 1
-fi
-echo -e ""
-
 echo -e "\033[1;35mMaking migrations ...\033[0m"
 echo -e "---------------------------"
 if ! python manage.py makemigrations | grep "No changes detected"; then
