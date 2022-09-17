@@ -65,13 +65,29 @@ Don't sweat it too much.
 Most tasks only require you to change small parts of the code,
 which you can do in isolation while ignoring the other parts for now.
 
+## Writing tests
+
+You should write tests for any new functionality you add.
+Read the files called `*/tests.py` and do as the Romans do.
+
+It's not a bad idea to write the tests before the code.
+
+## Checks
+
+There's a script `./lint.sh` at the top directory which will run several
+automated checks against the current commit.
+You need to make sure your code passes all these checks;
+GitHub will run the same tests on any submitted code.
+
+Here are some details about what is checked:
+
 ### Style
 
 Your code should conform to the style of the rest of the OTIS.
 The main irregular thing about this project is that
 it uses tabs for indentation. Sorry not sorry.
 
-The database uses the `yapf` for linting and formatting,
+The codebase uses the `yapf` for linting and formatting,
 to ensure the uniformity of style across the repository.
 
 To preserve your sanity you may optionally configure
@@ -79,30 +95,34 @@ your editor to automatically apply `yapf` after each save:
 if you're using a sufficiently sophisticated editor,
 you can probably configure it to do so.
 
-### Semantic checking
+### Unit testing
+
+Running `python manage.py test` in the top directory will run Django's unit
+testing suite. This runs all the checks defined in `**/tests.py`.
+
+The `./lint.sh` will actually run `coverage run manage.py test` so it can then
+generate a [coverage report](https://coverage.readthedocs.io/en/6.4.4/) showing
+which lines of code were actually checked at some point by at least one unit
+test. The resulting percentage is a barometer on how far behind Evan is on
+writing tests for some of the older code.
+
+### Type checking
 
 If you're new to development, skip this section.
 I'll talk to you more about it later.
 
 The OTIS-WEB repository is heavily type-checked.
-We use `pyflakes` and `pyright` are to catch type errors and other issues.
-This means type annotations are usually required for function parameters
-or when initializing empty lists or dictionaries.
+We use `pyflakes`, `mypy` and `pyright` are to catch type errors and other
+issues. This means type annotations are usually required for function
+parameters or when initializing empty lists or dictionaries.
 
-You should be able to use `pyflakes` in pure Python.
+You should be able to use `pyflakes` and `mypy` in pure Python.
 To use `pyright`, you'll need to do a separate installation process:
 follow [the README](https://github.com/Microsoft/pyright#installation).
 
-If your editor supports lanugage server protcols,
+If your editor supports language server protocols,
 you should be able to catch these errors inline.
 If your editor doesn't, consider switching ;)
-
-### Tests
-
-You *must* write tests for any new functionality you add.
-Read the files called `*/tests.py` and do as the Romans do.
-
-It's not a bad idea to write the tests before the code.
 
 ## Submitting
 
@@ -115,11 +135,11 @@ Commit your changes to this fork,
 and then [submit a pull request](https://docs.github.com/en/github/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request).
 
 When you submit a pull request,
-GitHub will automatically run several checks on the code
-to make sure it conforms with style,
-has proper type annotations,
-and does not fail any of the written unit tests.
-If this is your first time doing this sort of thing,
+GitHub will automatically run several checks on the code;
+they are roughly the same checks described above,
+and the exact specification can be read in `.github/workflows/main.yml`
+If this is your first time doing this sort of thing
+(and you didn't run `./lint.sh` successfully)
 it's likely that at least one of these checks will fail.
 Don't freak out; I'll help you through getting the tests to pass.
 
@@ -127,8 +147,8 @@ Don't freak out; I'll help you through getting the tests to pass.
 
 ### Pre-commit hooks
 
-The script `./lint.sh` will run all tests.
-You might like to do something like
+A mentioned above, the script `./lint.sh` will run all tests.
+So you might like to do something like
 
 ```bash
 echo "./lint.sh" > .git/hooks/pre-commit
