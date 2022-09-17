@@ -18,7 +18,7 @@ class HaxxPlugin(BasePlugin):
 		'icon_class': 'fa-info-circle',
 		'template': 'wikihaxx/sidebar.html',
 		'form_class': None,
-		'get_form_kwargs': (lambda a: {})
+		'get_form_kwargs': (lambda a: {})  # pragma: no cover
 	}
 
 	markdown_extensions = [

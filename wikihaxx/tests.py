@@ -2,7 +2,7 @@ from core.factories import UnitFactory, UserFactory
 from otisweb.tests import OTISTestCase
 
 from .factories import URLPathFactory
-from .views import WIKI_SUBJECT_CHART
+from .views import WIKI_SUBJECT_CHART, edit_redirect, view_redirect, wiki_redirect  # NOQA
 
 
 class WikiTest(OTISTestCase):
@@ -20,9 +20,15 @@ class WikiTest(OTISTestCase):
 				slug=f"list-of-{subject}-units",
 			)
 
-	def test_views(self):
+	def test_unitgroup_views(self):
 		self.login(WikiTest.user)
 		for subject, slug in WIKI_SUBJECT_CHART.items():
 			unit = UnitFactory.create(group__subject=subject)
 			resp = self.assertGet20X('wiki-unitgroup', unit.pk)
 			self.assertContains(resp, f"list-of-{slug}-units")
+
+	def test_raw_views(self):
+		urlpath = URLPathFactory.create(article__owner=WikiTest.user)
+		edit_redirect(urlpath)
+		view_redirect(urlpath)
+		wiki_redirect(urlpath)

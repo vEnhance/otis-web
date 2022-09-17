@@ -23,7 +23,7 @@ class ArticleFactory(DjangoModelFactory):
 
 	@post_generation
 	def current_revision(self, create: bool, extracted: Any, **kwargs: Dict[str, Any]):
-		if create is True:
+		if create is True:  # pragma: no cover
 			self.current_revision = ArticleRevisionFactory(article=self)  # type: ignore
 
 
