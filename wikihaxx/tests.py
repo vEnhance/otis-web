@@ -21,6 +21,8 @@ Compute the total number of words exchanged.
 
 [diamond 000000000000000000007E57][/diamond]
 
+[diamond 100000000000000000007E57][/diamond]
+
 [generic]
 Name | Evan
 Sex | M
