@@ -1,4 +1,6 @@
-![OTIS-WEB status](https://github.com/vEnhance/otis-web/actions/workflows/main.yml/badge.svg)
+[<img src="https://img.shields.io/apm/l/atomic-design-ui.svg" alt="MIT License">](https://github.com/vEnhance/otis-web/blob/main/LICENSE.txt)
+[<img src="https://github.com/vEnhance/otis-web/actions/workflows/main.yml/badge.svg" alt="OTIS-WEB status">](https://github.com/vEnhance/otis-web/actions)
+[<img src="https://coveralls.io/repos/github/vEnhance/otis-web/badge.svg?branch=main" alt="Coverage status">](https://coveralls.io/github/vEnhance/otis-web?branch=main)
 
 # OTIS-WEB
 
@@ -29,7 +31,7 @@ up a local server on a standard Unix environment.
 	to create a wrapper for OTIS-WEB.
 5. If things are working,
 	you should be able to run in the virtual environment
-	and then run `pip install poetry`.
+	and then [install Poetry](https://python-poetry.org/docs/).
 	This enables you to use the `poetry` command;
 	verify this by checking `poetry --help` produces a help message.
 6. Once you have `poetry`, hit `poetry install`.
@@ -41,7 +43,7 @@ up a local server on a standard Unix environment.
 10. Run `python manage.py runserver`.
 	The command will spin up a continuously running server.
 11. Point your browser to `http://127.0.0.1:8000`.
-	You should be able to log in with the user you defined in step 7.
+	You should be able to log in with the user you defined in step 9.
 12. The website is functional now, but it is a bit bare-bones.
 	To populate it with some test data, use `http://127.0.0.1:8000/admin`.
 
