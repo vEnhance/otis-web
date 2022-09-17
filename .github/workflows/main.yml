@@ -58,7 +58,6 @@ jobs:
         REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         source .venv/bin/activate
-        npm install pyright
         BASE_PATH="$(cd "$(dirname "$0")" && pwd)"
         cd "${GITHUB_WORKSPACE}/${INPUT_WORKDIR}" || exit 1
         TEMP_PATH="$(mktemp -d)"
@@ -73,7 +72,7 @@ jobs:
         echo '::endgroup::'
 
         echo '::group::🔎 Running pyright with reviewdog 🐶 ...'
-        "$(npm bin)/pyright" --outputjson |
+        "$(npm bin)/pyright" $(git ls-files '*.py' | grep -v migrations ) --outputjson |
           python3 .github/workflows/pyright_to_rdjson.py  |
           reviewdog -f=rdjson -name="pyright-report" \
             -reporter="github-check" \
