@@ -1,12 +1,10 @@
 import re
-from pathlib import Path
 from typing import Any, List
 
 import markdown
 import markdown.preprocessors
 from core.models import UnitGroup
 from dashboard.models import Achievement, AchievementUnlock, PSet
-from django.conf import settings
 from django.db.models.aggregates import Sum
 from django.db.models.query_utils import Q
 from roster.models import Student
@@ -27,7 +25,6 @@ class OTISPreprocessor(markdown.preprocessors.Preprocessor):
 		output: List[str] = []
 		body: List[str] = []
 		active = False
-		puid: str = ''
 
 		for line in lines:
 			m_start = special_start_regex.match(line)
@@ -103,21 +100,6 @@ class OTISPreprocessor(markdown.preprocessors.Preprocessor):
 					output.append('<th>' + parts[0].strip() + '</th>')
 					output.append('<td>' + parts[1].strip() + '</td>')
 					output.append('</tr>')
-
-			elif line.strip() == "[statement]" and settings.PATH_STATEMENT_ON_DISK is not None:
-				statement_path = Path(settings.PATH_STATEMENT_ON_DISK) / (puid + '.html')
-				if statement_path.exists() and statement_path.is_file():
-					statement = statement_path.read_text()
-					statement = statement.replace('\\', '\\\\')
-					statement = statement.replace('[', '\\[')
-					statement = statement.replace(']', '\\]')
-					statement = statement.replace('(', '\\(')
-					statement = statement.replace(')', '\\)')
-					statement = statement.replace('_', '\\_')
-					statement = statement.replace('*', '\\*')
-					output.append(statement)
-				else:
-					output.append(f'*Could not find the problem {puid}*')
 			else:
 				output.append(line)
 		body += output
