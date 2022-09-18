@@ -244,7 +244,7 @@ def achievement_image_file_name(instance: 'Achievement', filename: str) -> str:
 		kludge = (settings.SECRET_KEY or '') + '_otis_diamond_' + str(pk)
 		h = sha256(kludge.encode('ascii')).hexdigest()[0:24]
 		basename = f'{pk:04d}_{h}'
-	if filename.startswith("UNIT_TESTING") and settings.DEBUG is True:
+	if filename.startswith("UNIT_TESTING") and settings.TESTING is True:
 		basename = "UNIT_TESTING_" + basename
 	return os.path.join('badges', basename + ext)
 

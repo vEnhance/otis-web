@@ -43,6 +43,8 @@ else:
 	]
 SITE_ID = 1
 TESTING = len(sys.argv) > 1 and sys.argv[1] == 'test'
+if TESTING:
+	assert DEBUG is True, "Don't run testing on production you big doofus"
 
 # Application definition
 
@@ -221,6 +223,8 @@ else:
 	STATIC_URL = '/static/'
 	MEDIA_URL = '/media/'
 	SECRET_KEY = 'evan_chen_is_really_cool'
+
+TESTING_NEEDS_MOCK_MEDIA = False  # true only for a few tests
 
 FILE_UPLOAD_HANDLERS = ('django.core.files.uploadhandler.MemoryFileUploadHandler', )
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB

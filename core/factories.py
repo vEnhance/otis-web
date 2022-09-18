@@ -1,12 +1,18 @@
 import random
+from typing import Any, Dict
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 from factory import Faker, LazyAttribute, Sequence, SubFactory
 from factory.django import DjangoModelFactory
 from factory.fuzzy import FuzzyChoice
+from factory.helpers import post_generation
 from otisweb.tests import UniqueFaker
 
 from core.models import Semester, Unit, UnitGroup, UserProfile
+from core.utils import storage_hash
 
 User = get_user_model()
 
@@ -40,6 +46,20 @@ class UnitFactory(DjangoModelFactory):
 	)
 	group = SubFactory(UnitGroupFactory)
 	position = Sequence(lambda n: n + 1)
+
+	@post_generation
+	def write_mock_media(self, create: bool, extracted: bool, **kwargs: Dict[str, Any]):
+		assert settings.TESTING is True
+		if settings.TESTING_NEEDS_MOCK_MEDIA is False:
+			return
+		u: Unit = self  # type: ignore
+		stuff_to_write = [
+			(u.problems_pdf_filename, b'Prob', ".pdf"),
+			(u.solutions_pdf_filename, b'Soln', ".pdf"),
+			(u.problems_tex_filename, b'TeX', ".tex"),
+		]
+		for (fname, content, ext) in stuff_to_write:
+			default_storage.save('pdfs/' + storage_hash(fname) + ext, ContentFile(content))
 
 
 class SemesterFactory(DjangoModelFactory):

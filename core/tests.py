@@ -1,3 +1,4 @@
+from django.test.utils import override_settings
 from otisweb.tests import OTISTestCase
 from roster.factories import StudentFactory
 
@@ -18,6 +19,7 @@ class TestCore(OTISTestCase):
 		self.assertGetBecomesLoginRedirect('view-solutions', 10)
 		self.assertGetBecomesLoginRedirect('view-tex', 10)
 
+	@override_settings(TESTING_NEEDS_MOCK_MEDIA=True)
 	def test_alice_core_views(self):
 		alice = StudentFactory.create()
 		units = UnitFactory.create_batch(4)
@@ -43,6 +45,7 @@ class TestCore(OTISTestCase):
 		self.assertGetDenied('view-tex', units[3].pk)
 		self.assertGetDenied('view-solutions', units[3].pk)
 
+	@override_settings(TESTING_NEEDS_MOCK_MEDIA=True)
 	def test_staff_core_views(self):
 		u = UnitFactory.create()
 		self.login(UserFactory.create(is_staff=True))

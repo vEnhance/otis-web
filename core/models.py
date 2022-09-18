@@ -158,15 +158,15 @@ class Unit(models.Model):
 
 	@property
 	def problems_pdf_filename(self) -> str:
-		return self.code + '-' + self.group.slug + '.pdf'
+		return f'{self.code}-{self.group.slug}.pdf'
 
 	@property
 	def solutions_pdf_filename(self) -> str:
-		return self.code + '-sol-' + self.group.slug + '.pdf'
+		return f'{self.code}-sol-{self.group.slug}.pdf'
 
 	@property
 	def problems_tex_filename(self) -> str:
-		return self.code + '-tex-' + self.group.slug + '.tex'
+		return f'{self.code}-tex-{self.group.slug}.tex'
 
 	def get_absolute_url(self):
 		return reverse("view-problems", args=(self.pk, ))
