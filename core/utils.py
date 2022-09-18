@@ -12,7 +12,7 @@ def storage_hash(value: str) -> str:
 	s = settings.STORAGE_HASH_KEY + '|' + value
 	h = sha256(s.encode('ascii')).hexdigest()
 	if settings.TESTING:
-		return f'UNIT_TESTING_{h}'
+		return f'TESTING_{h}'
 	else:
 		return h
 

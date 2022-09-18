@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TO_DELETE=$(ls media/badges/UNIT_TESTING_*.png media/psets/*/*/UNIT_TESTING_pset*.txt media/global/*/UNIT_TESTING_announcement*.txt media/pdfs/UNIT_TESTING_*.pdf 2> /dev/null)
+TO_DELETE=$(ls media/badges/TESTING_*.png media/psets/*/*/TESTING_pset*.txt media/global/*/TESTING_announcement*.txt media/pdfs/TESTING_*.pdf 2> /dev/null)
 
 if [ $(echo $TO_DELETE | wc --words) = 0 ]; then
 	echo "No files to delete"
