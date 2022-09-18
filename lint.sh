@@ -113,7 +113,7 @@ echo -e ""
 
 echo -e "Generating coverage report ..."
 coverage report -m --skip-empty --skip-covered
-coverage html -m --skip-empty --skip-covered
+coverage html --skip-empty --skip-covered
 
 echo -e "\033[1;32mAll checks passed\033[0m, saving this as a good commit"
 echo $COMMIT_ID > $GOOD_FILE
