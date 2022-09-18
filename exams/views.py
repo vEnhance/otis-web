@@ -110,20 +110,6 @@ def quiz(request: AuthHttpRequest, student_id: int, pk: int) -> HttpResponse:
 
 
 @login_required
-def show_exam(request: AuthHttpRequest, student_id: int, pk: int) -> HttpResponse:
-	context: Dict[str, Any] = {}
-	quiz = get_object_or_404(PracticeExam, pk=pk)
-	if quiz.is_test:
-		return HttpResponseForbidden("You can only use this view for short-answer quizzes.")
-	student = get_student_by_id(request, student_id)
-	if student.semester.exam_family != quiz.family:
-		return HttpResponseForbidden("Wrong year of practice exams")
-	elif not student.enabled:
-		return HttpResponseForbidden("Student account not enabled")
-	return render(request, 'exams/quiz_detail.html', context)
-
-
-@login_required
 def mocks(request: AuthHttpRequest, student_id: int = None) -> HttpResponse:
 	if student_id is None:
 		student = infer_student(request)
