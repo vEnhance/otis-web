@@ -7,7 +7,7 @@ from otisweb.tests import OTISTestCase
 from markets.factories import GuessFactory, MarketFactory
 from markets.models import Guess, Market
 
-utc = timezone.utc
+UTC = timezone.utc
 
 
 class MarketModelTests(OTISTestCase):
@@ -15,18 +15,18 @@ class MarketModelTests(OTISTestCase):
 	def setUpClass(cls):
 		super().setUpClass()
 		MarketFactory.create(
-			start_date=timezone.datetime(2000, 1, 1, tzinfo=utc),
-			end_date=timezone.datetime(2000, 1, 3, tzinfo=utc),
+			start_date=timezone.datetime(2000, 1, 1, tzinfo=UTC),
+			end_date=timezone.datetime(2000, 1, 3, tzinfo=UTC),
 			slug='m-one',  # ended a long time ago
 		)
 		MarketFactory.create(
-			start_date=timezone.datetime(2020, 1, 1, tzinfo=utc),
-			end_date=timezone.datetime(2020, 1, 3, tzinfo=utc),
+			start_date=timezone.datetime(2020, 1, 1, tzinfo=UTC),
+			end_date=timezone.datetime(2020, 1, 3, tzinfo=UTC),
 			slug='m-two',  # active
 		)
 		MarketFactory.create(
-			start_date=timezone.datetime(2050, 1, 1, tzinfo=utc),
-			end_date=timezone.datetime(2050, 1, 3, tzinfo=utc),
+			start_date=timezone.datetime(2050, 1, 1, tzinfo=UTC),
+			end_date=timezone.datetime(2050, 1, 3, tzinfo=UTC),
 			slug='m-three',  # future
 		)
 
@@ -67,8 +67,8 @@ class MarketTests(OTISTestCase):
 	def setUpClass(cls):
 		super().setUpClass()
 		MarketFactory(
-			start_date=timezone.datetime(2050, 5, 1, 0, 0, 0, tzinfo=utc),
-			end_date=timezone.datetime(2050, 9, 30, 23, 59, 59, tzinfo=utc),
+			start_date=timezone.datetime(2050, 5, 1, 0, 0, 0, tzinfo=UTC),
+			end_date=timezone.datetime(2050, 9, 30, 23, 59, 59, tzinfo=UTC),
 			weight=2,
 			alpha=2,
 			slug='guess-my-ssn'
