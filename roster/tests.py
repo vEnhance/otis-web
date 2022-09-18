@@ -20,10 +20,10 @@ class RosterTest(OTISTestCase):
 				UnitFactory.create(code=letter + unitgroup.subject[0] + 'W', group=unitgroup)
 
 		self.login(alice)
-		self.assertContains(self.get('currshow', alice.pk), text="you are not an instructor")
+		self.assertHas(self.get('currshow', alice.pk), text="you are not an instructor")
 
 		self.login(staff)
-		self.assertNotContains(self.get('currshow', alice.pk), text="you are not an instructor")
+		self.assertNotHas(self.get('currshow', alice.pk), text="you are not an instructor")
 
 		data = {
 			'group-0': [1, ],
@@ -36,13 +36,13 @@ class RosterTest(OTISTestCase):
 	def test_finalize(self):
 		alice = StudentFactory.create(newborn=True)
 		self.login(alice)
-		self.assertContains(
+		self.assertHas(
 			self.post('finalize', alice.pk, data={'submit': True}, follow=True),
 			'You should select some units'
 		)
 		units = UnitFactory.create_batch(20)
 		alice.curriculum.set(units)
-		self.assertContains(
+		self.assertHas(
 			self.post('finalize', alice.pk, data={}, follow=True),
 			'Your curriculum has been finalized!'
 		)
@@ -60,17 +60,17 @@ class RosterTest(OTISTestCase):
 			total_paid=400
 		)
 		response = self.get('invoice', follow=True)
-		self.assertContains(response, "752.00")
+		self.assertHas(response, "752.00")
 		checksum = alice.get_checksum(settings.INVOICE_HASH_KEY)
 		self.assertEqual(len(checksum), 36)
-		self.assertContains(response, checksum)
+		self.assertHas(response, checksum)
 
 	def test_master_schedule(self):
 		alice = StudentFactory.create()
 		units = UnitFactory.create_batch(10)
 		alice.curriculum.set(units[0:8])
 		self.login(UserFactory.create(is_staff=True))
-		self.assertContains(self.get('master-schedule'), text=alice.user.first_name, count=8)
+		self.assertHas(self.get('master-schedule'), text=alice.user.first_name, count=8)
 
 	def test_update_invoice(self):
 		firefly = AssistantFactory.create()
@@ -104,10 +104,10 @@ class RosterTest(OTISTestCase):
 					"action_type": "UNLOCK",
 				}
 			)
-			self.assertContains(resp, "Petition automatically approved")
+			self.assertHas(resp, "Petition automatically approved")
 		self.assertEqual(alice.curriculum.count(), 6)
 		self.assertEqual(alice.unlocked_units.count(), 6)
-		self.assertContains(
+		self.assertHas(
 			self.post("inquiry", alice.pk, data={
 				'unit': units[19].pk,
 				"action_type": "UNLOCK",
@@ -118,7 +118,7 @@ class RosterTest(OTISTestCase):
 
 		self.login(firefly)
 		for i in range(6, 10):
-			self.assertContains(
+			self.assertHas(
 				self.post("inquiry", alice.pk, data={
 					'unit': units[i].pk,
 					"action_type": "UNLOCK",
@@ -129,7 +129,7 @@ class RosterTest(OTISTestCase):
 
 		self.login(alice)
 		for i in range(11, 14):
-			self.assertContains(
+			self.assertHas(
 				self.post("inquiry", alice.pk, data={
 					'unit': units[i].pk,
 					"action_type": "UNLOCK",
@@ -139,7 +139,7 @@ class RosterTest(OTISTestCase):
 		self.assertEqual(alice.unlocked_units.count(), 10)
 
 		for i in range(15, 18):
-			self.assertContains(
+			self.assertHas(
 				self.post("inquiry", alice.pk, data={
 					'unit': units[i].pk,
 					"action_type": "APPEND",
@@ -148,7 +148,7 @@ class RosterTest(OTISTestCase):
 		self.assertEqual(alice.curriculum.count(), 13)
 		self.assertEqual(alice.unlocked_units.count(), 10)
 
-		self.assertContains(
+		self.assertHas(
 			self.post("inquiry", alice.pk, data={
 				"unit": units[19].pk,
 				"action_type": "DROP"
@@ -157,7 +157,7 @@ class RosterTest(OTISTestCase):
 
 		self.login(firefly)
 		for i in range(5, 14):
-			self.assertContains(
+			self.assertHas(
 				self.post("inquiry", alice.pk, data={
 					'unit': units[i].pk,
 					"action_type": "DROP",
@@ -166,7 +166,7 @@ class RosterTest(OTISTestCase):
 		self.assertEqual(alice.curriculum.count(), 8)
 		self.assertEqual(alice.unlocked_units.count(), 5)
 
-		self.assertContains(
+		self.assertHas(
 			self.post("inquiry", alice.pk, data={
 				'unit': units[5].pk,
 				"action_type": "UNLOCK",
@@ -206,10 +206,10 @@ class RosterTest(OTISTestCase):
 		self.login(staff)
 		resp = self.assertGet20X('instructors')
 		for i in range(1, 6):
-			self.assertContains(resp, f'"F{i} L{i}"')
-			self.assertContains(resp, f'user{i}@evanchen.cc')
-		self.assertContains(resp, "GoodKid", count=1 + 4 + 9 + 16 + 25)
-		self.assertNotContains(resp, "BadKid")
+			self.assertHas(resp, f'"F{i} L{i}"')
+			self.assertHas(resp, f'user{i}@evanchen.cc')
+		self.assertHas(resp, "GoodKid", count=1 + 4 + 9 + 16 + 25)
+		self.assertNotHas(resp, "BadKid")
 
 
 # TODO tests for reg

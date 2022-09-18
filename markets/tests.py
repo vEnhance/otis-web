@@ -52,9 +52,9 @@ class MarketModelTests(OTISTestCase):
 		with freeze_time('2020-01-02', tz_offset=0):
 			self.login(UserFactory.create())
 			response = self.get('market-list')
-			self.assertContains(response, 'm-one')
-			self.assertContains(response, 'm-two')
-			self.assertNotContains(response, 'm-three')
+			self.assertHas(response, 'm-one')
+			self.assertHas(response, 'm-two')
+			self.assertNotHas(response, 'm-three')
 
 	def test_model_str(self):
 		str(MarketFactory.create())
@@ -114,7 +114,7 @@ class MarketTests(OTISTestCase):
 		with freeze_time('2050-07-01', tz_offset=0):
 			self.login('alice')
 			resp = self.assertGet20X('market-guess', 'guess-my-ssn')
-			self.assertContains(resp, "market main page")
+			self.assertHas(resp, "market main page")
 		with freeze_time('2050-11-01', tz_offset=0):
 			self.login('alice')
 			self.assertGetRedirects(
@@ -128,11 +128,11 @@ class MarketTests(OTISTestCase):
 			market.save()
 			self.login('alice')
 			resp = self.assertGet20X('market-guess', 'guess-my-ssn')
-			self.assertContains(resp, "market main page")
+			self.assertHas(resp, "market main page")
 			self.assertPost20X('market-guess', 'guess-my-ssn', data={'value': 100}, follow=True)
 
 			resp = self.assertGet20X('market-guess', 'guess-my-ssn', follow=True)
-			self.assertContains(resp, "You already submitted")
+			self.assertHas(resp, "You already submitted")
 
 			guess = Guess.objects.get(user__username='alice')
 			self.assertEqual(guess.value, 100)
@@ -143,11 +143,11 @@ class MarketTests(OTISTestCase):
 			market = Market.objects.get(slug='guess-my-ssn')
 			self.login('alice')
 			resp = self.assertGet20X('market-guess', 'guess-my-ssn')
-			self.assertContains(resp, "market main page")
+			self.assertHas(resp, "market main page")
 			self.assertPost20X('market-guess', 'guess-my-ssn', data={'value': 100}, follow=True)
 
 			resp = self.assertGet20X('market-guess', 'guess-my-ssn', follow=True)
-			self.assertContains(resp, "You already submitted")
+			self.assertHas(resp, "You already submitted")
 
 			guess = Guess.objects.get(user__username='alice')
 			self.assertEqual(guess.value, 100)
@@ -176,11 +176,11 @@ class MarketTests(OTISTestCase):
 			market.save()
 			self.login('alice')
 			resp = self.assertGet20X('market-guess', 'guess-my-ssn')
-			self.assertNotContains(resp, "market main page")  # because it's a special market
+			self.assertNotHas(resp, "market main page")  # because it's a special market
 			self.assertPost20X('market-guess', 'guess-my-ssn', data={'value': 100}, follow=True)
 
 			resp = self.assertGet20X('market-guess', 'guess-my-ssn', follow=True)
-			self.assertContains(resp, "You already submitted")
+			self.assertHas(resp, "You already submitted")
 
 			guess = Guess.objects.get(user__username='alice')
 			self.assertEqual(guess.value, 100)

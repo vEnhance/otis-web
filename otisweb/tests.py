@@ -69,6 +69,15 @@ class OTISTestCase(TestCase):
 		else:
 			return response
 
+	def assertNotHas(self, response: MonkeyResponseType, text: Union[bytes, str], **kwargs: Any):
+		try:
+			self.assertNotContains(response, text, **kwargs, msg_prefix=self.debug_short(response))
+		except AssertionError as e:
+			self.debug_dump(response)
+			raise e
+		else:
+			return response
+
 	def assertResponse20X(self, response: MonkeyResponseType):
 		try:
 			self.assertGreaterEqual(response.status_code, 200, self.debug_short(response))

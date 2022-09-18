@@ -62,8 +62,8 @@ class TestCore(OTISTestCase):
 		UnitFactory.create(group__name="VisibleUnit", group__hidden=False)
 		UnitFactory.create(group__name="HiddenUnit", group__hidden=True)
 		resp = self.assertGet20X('synopsis')
-		self.assertContains(resp, "VisibleUnit")
-		self.assertNotContains(resp, "HiddenUnit")
+		self.assertHas(resp, "VisibleUnit")
+		self.assertNotHas(resp, "HiddenUnit")
 
 	def test_storage_hash(self):
 		self.assertRegex(storage_hash('meow'), r'[0-9a-z]{64}')

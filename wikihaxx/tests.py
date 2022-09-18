@@ -62,7 +62,7 @@ class WikiTest(OTISTestCase):
 		for subject, slug in WIKI_SUBJECT_CHART.items():
 			unit = UnitFactory.create(group__subject=subject)
 			resp = self.assertGet20X('wiki-unitgroup', unit.pk, follow=True)
-			self.assertContains(resp, f"list-of-{slug}-units")
+			self.assertHas(resp, f"list-of-{slug}-units")
 
 	def test_raw_views(self):
 		urlpath = URLPathFactory.create(article__owner=WikiTest.user)

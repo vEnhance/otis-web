@@ -63,11 +63,11 @@ class TestLevelSystem(OTISTestCase):
 		alice = self.get_alice()
 		self.login(alice)
 		resp = self.get('portal', alice.pk)
-		self.assertContains(resp, 'Level 38')
-		self.assertContains(resp, '520♣')
-		self.assertContains(resp, '84♥')
-		self.assertContains(resp, '11◆')
-		self.assertContains(resp, '19♠')
+		self.assertHas(resp, 'Level 38')
+		self.assertHas(resp, '520♣')
+		self.assertHas(resp, '84♥')
+		self.assertHas(resp, '11◆')
+		self.assertHas(resp, '19♠')
 
 	def test_stats_page(self):
 		alice = self.get_alice()
@@ -77,15 +77,15 @@ class TestLevelSystem(OTISTestCase):
 		QuestCompleteFactory.create(student=bob, title="FAIL THIS TEST")
 
 		resp = self.get('stats', alice.pk)
-		self.assertContains(resp, 'Level 38')
-		self.assertContains(resp, '520♣')
-		self.assertContains(resp, '84♥')
-		self.assertContains(resp, '11◆')
-		self.assertContains(resp, '19♠')
-		self.assertContains(resp, 'Feel the fours')
-		self.assertContains(resp, 'Not problem six')
-		self.assertContains(resp, 'Lucky number')
-		self.assertNotContains(resp, 'FAIL THIS TEST')
+		self.assertHas(resp, 'Level 38')
+		self.assertHas(resp, '520♣')
+		self.assertHas(resp, '84♥')
+		self.assertHas(resp, '11◆')
+		self.assertHas(resp, '19♠')
+		self.assertHas(resp, 'Feel the fours')
+		self.assertHas(resp, 'Not problem six')
+		self.assertHas(resp, 'Lucky number')
+		self.assertNotHas(resp, 'FAIL THIS TEST')
 
 	def test_level_up(self):
 		alice = self.get_alice()
@@ -94,29 +94,29 @@ class TestLevelSystem(OTISTestCase):
 		bonus_unit = UnitFactory.create(group=bonus.group, code='DKU')
 
 		resp = self.assertGet20X('portal', alice.pk)
-		self.assertContains(resp, "You&#x27;re now level 38.")
-		self.assertNotContains(resp, "Level 40 Quest")
+		self.assertHas(resp, "You&#x27;re now level 38.")
+		self.assertNotHas(resp, "Level 40 Quest")
 
 		resp = self.assertGet20X('portal', alice.pk)
-		self.assertNotContains(resp, "You&#x27;re now level 38.")
-		self.assertNotContains(resp, "Level 40 Quest")
+		self.assertNotHas(resp, "You&#x27;re now level 38.")
+		self.assertNotHas(resp, "Level 40 Quest")
 
 		QuestCompleteFactory.create(student=alice, spades=24)
 
 		resp = self.assertGet20X('portal', alice.pk)
-		self.assertContains(resp, "You&#x27;re now level 40.")
-		self.assertContains(resp, "Level 40 Quest")
+		self.assertHas(resp, "You&#x27;re now level 40.")
+		self.assertHas(resp, "Level 40 Quest")
 
 		resp = self.assertGet20X('portal', alice.pk)
-		self.assertNotContains(resp, "You&#x27;re now level 40.")
-		self.assertContains(resp, "Level 40 Quest")
+		self.assertNotHas(resp, "You&#x27;re now level 40.")
+		self.assertHas(resp, "Level 40 Quest")
 
 		QuestCompleteFactory.create(student=alice, spades=64)
 		alice.curriculum.remove(bonus_unit)
 
 		resp = self.assertGet20X('portal', alice.pk)
-		self.assertContains(resp, "You&#x27;re now level 44.")
-		self.assertNotContains(resp, "Level 40 Quest")
+		self.assertHas(resp, "You&#x27;re now level 44.")
+		self.assertNotHas(resp, "Level 40 Quest")
 
 	def test_multi_student_annotate(self):
 		alice = self.get_alice()
@@ -239,7 +239,7 @@ class TestSubmitPSet(OTISTestCase):
 
 		# Alice should show initially as Level 0
 		resp = self.assertGet20X('stats', alice.pk)
-		self.assertContains(resp, 'Level 0')
+		self.assertHas(resp, 'Level 0')
 
 		# Alice submits a problem set
 		content1 = StringIO('Meow')
@@ -258,13 +258,13 @@ class TestSubmitPSet(OTISTestCase):
 			},
 			follow=True
 		)
-		self.assertContains(resp, '13♣')
-		self.assertContains(resp, '37.0♥')
-		self.assertContains(resp, 'This unit submission is pending approval')
+		self.assertHas(resp, '13♣')
+		self.assertHas(resp, '37.0♥')
+		self.assertHas(resp, 'This unit submission is pending approval')
 
 		# Alice should still be Level 0 though
 		resp = self.assertGet20X('stats', alice.pk)
-		self.assertContains(resp, 'Level 0')
+		self.assertHas(resp, 'Level 0')
 
 		# Check pset reflects this data
 		pset = PSet.objects.get(student=alice, unit=unit1)
@@ -293,9 +293,9 @@ class TestSubmitPSet(OTISTestCase):
 			},
 			follow=True
 		)
-		self.assertContains(resp, 'This unit submission is pending approval')
-		self.assertContains(resp, '13♣')
-		self.assertContains(resp, '3.7♥')
+		self.assertHas(resp, 'This unit submission is pending approval')
+		self.assertHas(resp, '13♣')
+		self.assertHas(resp, '3.7♥')
 
 		# Check the updated problem set object
 		pset = PSet.objects.get(student=alice, unit=unit1)
@@ -309,7 +309,7 @@ class TestSubmitPSet(OTISTestCase):
 
 		# Alice should still be Level 0 though
 		resp = self.assertGet20X('stats', alice.pk)
-		self.assertContains(resp, 'Level 0')
+		self.assertHas(resp, 'Level 0')
 
 		# simulate approval
 		pset.approved = True
@@ -320,13 +320,13 @@ class TestSubmitPSet(OTISTestCase):
 
 		# check it shows up this way
 		resp = self.assertGet20X('pset', pset.pk)
-		self.assertContains(resp, 'This unit submission was approved')
-		self.assertContains(resp, '13♣')
-		self.assertContains(resp, '3.7♥')
+		self.assertHas(resp, 'This unit submission was approved')
+		self.assertHas(resp, '13♣')
+		self.assertHas(resp, '3.7♥')
 
 		# Alice should show as leveled up now
 		resp = self.assertGet20X('stats', alice.pk)
-		self.assertContains(resp, 'Level 4')
+		self.assertHas(resp, 'Level 4')
 
 		# now let's say Alice resubmits
 		content3 = StringIO('Rawr')
@@ -348,9 +348,9 @@ class TestSubmitPSet(OTISTestCase):
 
 		# check it shows up this way
 		resp = self.assertGet20X('pset', pset.pk)
-		self.assertContains(resp, 'This unit submission is pending approval')
-		self.assertContains(resp, '100♣')
-		self.assertContains(resp, '20.0♥')
+		self.assertHas(resp, 'This unit submission is pending approval')
+		self.assertHas(resp, '100♣')
+		self.assertHas(resp, '20.0♥')
 
 		# Check the problem set
 		pset = PSet.objects.get(student=alice, unit=unit1)
@@ -364,7 +364,7 @@ class TestSubmitPSet(OTISTestCase):
 
 		# Alice is now back to Level 0
 		resp = self.assertGet20X('stats', alice.pk)
-		self.assertContains(resp, 'Level 0')
+		self.assertHas(resp, 'Level 0')
 
 		# simulate approval
 		pset.approved = True
@@ -372,13 +372,13 @@ class TestSubmitPSet(OTISTestCase):
 
 		# Alice is now Level 14
 		resp = self.assertGet20X('stats', alice.pk)
-		self.assertContains(resp, 'Level 14')
+		self.assertHas(resp, 'Level 14')
 
 		# check it shows up this way
 		resp = self.assertGet20X('pset', pset.pk)
-		self.assertContains(resp, 'This unit submission was approved')
-		self.assertContains(resp, '100♣')
-		self.assertContains(resp, '20.0♥')
+		self.assertHas(resp, 'This unit submission was approved')
+		self.assertHas(resp, '100♣')
+		self.assertHas(resp, '20.0♥')
 
 	def test_queryset(self):
 		units = UnitFactory.create_batch(size=20)
@@ -402,12 +402,12 @@ class TestPalace(OTISTestCase):
 
 		for i in range(0, 4):
 			AchievementUnlockFactory.create(user=alice.user, achievement__diamonds=2 * i + 1)
-			self.assertNotContains(self.get('portal', alice.pk), 'Ruby palace')
+			self.assertNotHas(self.get('portal', alice.pk), 'Ruby palace')
 			self.assertGet40X('palace-list', alice.pk, follow=True)
 			self.assertGet40X('palace-update', alice.pk, follow=True)
 			self.assertGet40X('diamond-update', alice.pk, follow=True)
 		AchievementUnlockFactory.create(user=alice.user, achievement__diamonds=9)
-		self.assertContains(self.get('portal', alice.pk), 'Ruby palace')
+		self.assertHas(self.get('portal', alice.pk), 'Ruby palace')
 		self.assertGetOK('palace-list', alice.pk)
 		self.assertGetOK('palace-update', alice.pk)
 		self.assertGetOK('diamond-update', alice.pk)
