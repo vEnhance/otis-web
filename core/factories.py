@@ -69,6 +69,8 @@ class SemesterFactory(DjangoModelFactory):
 	name = Sequence(lambda n: f"Year {n + 1}")
 	active = True
 	exam_family = 'Waltz'
+	gradescope_key = 'ABCDEF'
+	social_url = 'https://instagram.com/evanchen.cc/'
 
 
 class UserProfileFactory(DjangoModelFactory):

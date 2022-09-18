@@ -1,9 +1,13 @@
 import json
+import logging
 import pprint
-from typing import TYPE_CHECKING, Any, Union
+from datetime import datetime
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Dict, Union
 
 import factory
 import factory.random
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
 from django.test import TestCase
@@ -29,36 +33,89 @@ class UniqueFaker(factory.Faker):
 		return subfaker.unique.format(self.provider, **params)
 
 
-def resp_debug_info(response: MonkeyResponseType) -> str:
-	return '\n' + pprint.pformat(response.__dict__)
-
-
 class OTISTestCase(TestCase):
 	def setUp(self):
 		self.client = Client()
 
+	def debug_short(self, response: MonkeyResponseType) -> str:
+		d: Dict[str, Any] = {}
+		for key in ('headers', 'json', 'redirect_chain', 'request', 'wsgi_request'):
+			d[key] = getattr(response, key, None)
+		return '\n' + pprint.pformat(d, compact=False, depth=3) + '\n'
+
+	def debug_dump(self, response: MonkeyResponseType) -> None:
+		timestamp = datetime.utcnow().strftime('%d_%b_%Y_%H%M%S')
+		html_path = Path(f"/tmp/{settings.WSGI_APPLICATION}.tests/{timestamp}.html")
+		txt_path = Path(f"/tmp/{settings.WSGI_APPLICATION}.tests/{timestamp}.txt")
+
+		try:
+			html_path.parent.mkdir(exist_ok=True)
+		except PermissionError:
+			pass
+		else:
+			if len(response.content) > 0:
+				logging.info(f"Wrote to {html_path}")
+				html_path.write_bytes(response.content)
+				txt_path.write_text(pprint.pformat(response.__dict__, depth=3))
+
+	def assertHas(
+		self, response: MonkeyResponseType, text: Union[bytes, int, str], **kwargs: Any
+	):
+		try:
+			self.assertContains(response, text, **kwargs, msg_prefix=self.debug_short(response))
+		except AssertionError as e:
+			self.debug_dump(response)
+			raise e
+		else:
+			return response
+
 	def assertResponse20X(self, response: MonkeyResponseType):
-		self.assertGreaterEqual(response.status_code, 200, resp_debug_info(response))
-		self.assertLess(response.status_code, 300, resp_debug_info(response))
-		return response
+		try:
+			self.assertGreaterEqual(response.status_code, 200, self.debug_short(response))
+			self.assertLess(response.status_code, 300, self.debug_short(response))
+		except AssertionError as e:
+			self.debug_dump(response)
+			raise e
+		else:
+			return response
 
 	def assertResponseOK(self, response: MonkeyResponseType):
-		self.assertLess(response.status_code, 400, resp_debug_info(response))
-		return response
+		try:
+			self.assertLess(response.status_code, 400, self.debug_short(response))
+		except AssertionError as e:
+			self.debug_dump(response)
+			raise e
+		else:
+			return response
 
 	def assertResponse40X(self, response: MonkeyResponseType):
-		self.assertGreaterEqual(response.status_code, 400, resp_debug_info(response))
-		self.assertLess(response.status_code, 500, resp_debug_info(response))
-		return response
+		try:
+			self.assertGreaterEqual(response.status_code, 400, self.debug_short(response))
+			self.assertLess(response.status_code, 500, self.debug_short(response))
+		except AssertionError as e:
+			self.debug_dump(response)
+			raise e
+		else:
+			return response
 
 	def assertResponseDenied(self, response: MonkeyResponseType):
-		if response.status_code != 400:
-			self.assertEqual(response.status_code, 403, resp_debug_info(response))
-		return response
+		try:
+			if response.status_code != 400:
+				self.assertEqual(response.status_code, 403, self.debug_short(response))
+		except AssertionError as e:
+			self.debug_dump(response)
+			raise e
+		else:
+			return response
 
 	def assertResponseNotFound(self, response: MonkeyResponseType):
-		self.assertEqual(response.status_code, 404, resp_debug_info(response))
-		return response
+		try:
+			self.assertEqual(response.status_code, 404, self.debug_short(response))
+		except AssertionError as e:
+			self.debug_dump(response)
+			raise e
+		else:
+			return response
 
 	def get(self, name: str, *args: Any, **kwargs: Any):
 		if (json_data := kwargs.pop('json', None)) is not None:
@@ -96,7 +153,7 @@ class OTISTestCase(TestCase):
 			resp,
 			expected_url=target,
 			target_status_code=200,
-			msg_prefix=resp_debug_info(resp),
+			msg_prefix=self.debug_short(resp),
 		)
 		return resp
 
@@ -121,7 +178,7 @@ class OTISTestCase(TestCase):
 			resp,
 			expected_url=target,
 			target_status_code=200,
-			msg_prefix=resp_debug_info(resp),
+			msg_prefix=self.debug_short(resp),
 		)
 		return resp
 

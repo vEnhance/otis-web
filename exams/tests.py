@@ -1,4 +1,5 @@
 from core.factories import UserFactory
+from django.contrib.auth.models import User
 from django.test.utils import override_settings
 from django.utils import timezone
 from freezegun import freeze_time
@@ -6,7 +7,8 @@ from otisweb.tests import OTISTestCase
 from roster.factories import StudentFactory
 
 from exams.calculator import expr_compute
-from exams.factories import TestFactory
+from exams.factories import QuizFactory, TestFactory
+from exams.models import ExamAttempt, PracticeExam
 
 UTC = timezone.utc
 
@@ -29,37 +31,50 @@ class ArithmeticTest(OTISTestCase):
 
 
 class ExamTest(OTISTestCase):
-	@override_settings(TESTING_NEEDS_MOCK_MEDIA=True)
-	def test_pdf(self):
-		alice = StudentFactory.create(semester__exam_family='Waltz')
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		StudentFactory.create(user__username="alice", semester__exam_family='Waltz')
+		StudentFactory.create(
+			user__username="disabled", enabled=False, semester__exam_family='Waltz'
+		)
 
-		exam_waltz = TestFactory.create(
-			start_date=timezone.datetime(2020, 1, 1, tzinfo=UTC),
-			due_date=timezone.datetime(2020, 12, 31, tzinfo=UTC),
-			family="Waltz",
+		with override_settings(TESTING_NEEDS_MOCK_MEDIA=True):
+			for factory in (TestFactory, QuizFactory):
+				for family in ("Waltz", "Foxtrot"):
+					factory.create(
+						start_date=timezone.datetime(2020, 1, 1, tzinfo=UTC),
+						due_date=timezone.datetime(2020, 12, 31, tzinfo=UTC),
+						family=family,
+						number=1,
+					)
+		PracticeExam.objects.filter(is_test=False).update(
+			answer1=1000,
+			answer2=2000,
+			answer3=3000,
+			answer4=4000,
+			answer5=5000,
 		)
-		exam_foxtrot = TestFactory.create(
-			start_date=timezone.datetime(2020, 1, 1, tzinfo=UTC),
-			due_date=timezone.datetime(2020, 12, 31, tzinfo=UTC),
-			family="Foxtrot"
-		)
+
+	def test_exam_pdf(self):
+		exam_waltz = PracticeExam.objects.get(family="Waltz", is_test=True)
+		exam_foxtrot = PracticeExam.objects.get(family="Foxtrot", is_test=True)
 
 		with freeze_time('2018-01-01', tz_offset=0):
-			self.login(alice)
+			self.login('alice')
 			self.assertGetDenied('exam-pdf', exam_waltz.pk)
 			self.assertGetDenied('exam-pdf', exam_foxtrot.pk)
 		with freeze_time('2020-06-05', tz_offset=0):
-			self.login(alice)
+			self.login('alice')
 			self.assertGet20X('exam-pdf', exam_waltz.pk)
 			self.assertGetDenied('exam-pdf', exam_foxtrot.pk)
 		with freeze_time('2022-12-31', tz_offset=0):
-			self.login(alice)
+			self.login('alice')
 			self.assertGet20X('exam-pdf', exam_waltz.pk)
 			self.assertGetDenied('exam-pdf', exam_foxtrot.pk)
 
-		bob = StudentFactory.create(semester__exam_family='Waltz', enabled=False)
 		with freeze_time('2020-06-05', tz_offset=0):
-			self.login(bob)
+			self.login('disabled')
 			self.assertGetDenied('exam-pdf', exam_waltz.pk)
 			self.assertGetDenied('exam-pdf', exam_foxtrot.pk)
 
@@ -72,7 +87,79 @@ class ExamTest(OTISTestCase):
 			self.login(staff)
 			self.assertGet20X('exam-pdf', exam_waltz.pk)
 			self.assertGet20X('exam-pdf', exam_foxtrot.pk)
-		with freeze_time('2040-12-31', tz_offset=0):
+		with freeze_time('2022-12-31', tz_offset=0):
 			self.login(staff)
 			self.assertGet20X('exam-pdf', exam_waltz.pk)
 			self.assertGet20X('exam-pdf', exam_foxtrot.pk)
+
+	def test_quiz(self):
+		alice = User.objects.get(username='alice')
+		quiz_waltz = PracticeExam.objects.get(family="Waltz", is_test=False)
+		quiz_foxtrot = PracticeExam.objects.get(family="Foxtrot", is_test=False)
+		test_waltz = PracticeExam.objects.get(family="Waltz", is_test=True)
+		test_foxtrot = PracticeExam.objects.get(family="Foxtrot", is_test=True)
+
+		with freeze_time('2018-01-01', tz_offset=0):
+			self.login('alice')
+			self.assertGetDenied('quiz', alice.pk, quiz_waltz.pk)
+			self.assertGetDenied('quiz', alice.pk, test_waltz.pk)
+			self.assertGetDenied('quiz', alice.pk, test_foxtrot.pk)
+			self.assertGetDenied('quiz', alice.pk, quiz_foxtrot.pk)
+		with freeze_time('2020-06-05', tz_offset=0):
+			self.login('disabled')
+			self.assertGetDenied('quiz', User.objects.get(username='disabled').pk, quiz_waltz.pk)
+			self.login('alice')
+			self.assertGetDenied('quiz', alice.pk, test_waltz.pk)
+			self.assertGetDenied('quiz', alice.pk, test_foxtrot.pk)
+			self.assertGetDenied('quiz', alice.pk, quiz_foxtrot.pk)
+
+			# OK, now actually take a quiz, lol
+			resp_before_submit = self.assertGet20X('quiz', alice.pk, quiz_waltz.pk)
+			self.assertHas(resp_before_submit, "Submit answers")
+			resp_after_submit = self.assertPost20X(
+				'quiz',
+				alice.pk,
+				quiz_waltz.pk,
+				data={
+					'guess1': 1337,
+					'guess2': 2016,
+					'guess3': 3000,
+					'guess4': 4000,
+				}
+			)
+			self.assertHas(resp_after_submit, "1337", count=1)
+			self.assertHas(resp_after_submit, "2020", count=1)
+			self.assertHas(resp_after_submit, "1000", count=1)
+			self.assertHas(resp_after_submit, "2000", count=1)
+			self.assertHas(resp_after_submit, "3000", count=2)
+			self.assertHas(resp_after_submit, "4000", count=2)
+			self.assertHas(resp_after_submit, "5000", count=1)
+			self.assertPost40X(
+				'quiz',
+				alice.pk,
+				quiz_waltz.pk,
+				data={
+					'answer1': 1337,
+					'answer2': 2016,
+					'answer3': 3000,
+					'answer4': 4000,
+				}
+			)
+			a = ExamAttempt.objects.get(student__user__username='alice')
+			self.assertEqual(a.score, 2)
+			self.assertEqual(a.guess1, "1337")
+			self.assertEqual(a.guess2, "2016")
+			self.assertEqual(a.guess3, "3000")
+			self.assertEqual(a.guess4, "4000")
+			self.assertEqual(a.guess5, "")
+
+		with freeze_time('2022-12-31', tz_offset=0):
+			self.login('alice')
+
+	def test_mocks(self):
+		self.login('disabled')
+		self.assertGetDenied('mocks', follow=True)
+
+		self.login('alice')
+		resp = self.assertGet20X('mocks', follow=True)
+		self.assertHas(resp, 'Waltz Test 01')
