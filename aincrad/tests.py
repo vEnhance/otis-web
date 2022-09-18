@@ -80,7 +80,7 @@ class TestAincrad(OTISTestCase):
 
 	def test_init(self):
 		resp = self.post('api', json={'action': 'init', 'token': EXAMPLE_PASSWORD})
-		self.assert20X(resp)  # type: ignore
+		self.assertResponse20X(resp)
 		out = resp.json()
 		self.assertEqual(len(out['_children'][0]['_children']), 10)
 
@@ -130,7 +130,7 @@ class TestAincrad(OTISTestCase):
 					}
 			}
 		)
-		self.assert20X(resp)  # type: ignore
+		self.assertResponse20X(resp)
 
 		# check the response contains exactly missed entries
 		out = resp.json()
@@ -168,7 +168,7 @@ class TestAincrad(OTISTestCase):
 
 	def test_problem(self):
 		resp = self.post('api', json={'action': 'get_hints', 'puid': '18SLA7'})
-		self.assert20X(resp)  # type: ignore
+		self.assertResponse20X(resp)
 		out = resp.json()
 		self.assertEqual(len(out['hints']), 0)
 
@@ -188,7 +188,7 @@ class TestAincrad(OTISTestCase):
 		)
 
 		resp = self.post('api', json={'action': 'get_hints', 'puid': '18SLA7'})
-		self.assert20X(resp)  # type: ignore
+		self.assertResponse20X(resp)
 		out = resp.json()
 		self.assertEqual(len(out['hints']), 2)
 		self.assertTrue(Hint.objects.filter(number=0, content='get').exists())
@@ -225,7 +225,7 @@ class TestAincrad(OTISTestCase):
 		self.assertEqual(len(out['pks']), 3)
 
 		resp = self.post('api', json={'action': 'get_hints', 'puid': '18SLA7'})
-		self.assert20X(resp)  # type: ignore
+		self.assertResponse20X(resp)
 		out = resp.json()
 		self.assertTrue(Hint.objects.filter(number=80, content='80%', keywords='eighty').exists())
 		self.assertTrue(Hint.objects.filter(number=70, content='70%', keywords='seventy').exists())

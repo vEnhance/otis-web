@@ -37,12 +37,14 @@ class RosterTest(OTISTestCase):
 		alice = StudentFactory.create(newborn=True)
 		self.login(alice)
 		self.assertContains(
-			self.post('finalize', alice.pk, data={'submit': True}), 'You should select some units'
+			self.post('finalize', alice.pk, data={'submit': True}, follow=True),
+			'You should select some units'
 		)
 		units = UnitFactory.create_batch(20)
 		alice.curriculum.set(units)
 		self.assertContains(
-			self.post('finalize', alice.pk, data={}), 'Your curriculum has been finalized!'
+			self.post('finalize', alice.pk, data={}, follow=True),
+			'Your curriculum has been finalized!'
 		)
 		self.assertEqual(alice.unlocked_units.count(), 3)
 
@@ -57,7 +59,7 @@ class RosterTest(OTISTestCase):
 			extras=100,
 			total_paid=400
 		)
-		response = self.get('invoice')
+		response = self.get('invoice', follow=True)
 		self.assertContains(response, "752.00")
 		checksum = alice.get_checksum(settings.INVOICE_HASH_KEY)
 		self.assertEqual(len(checksum), 36)
@@ -73,12 +75,13 @@ class RosterTest(OTISTestCase):
 	def test_update_invoice(self):
 		firefly = AssistantFactory.create()
 		alice = StudentFactory.create(assistant=firefly)
-		InvoiceFactory.create(student=alice)
+		invoice = InvoiceFactory.create(student=alice)
 		self.login(firefly)
 		self.assertGet20X('edit-invoice', alice.pk)
-		self.assertPost20X(
+		self.assertPostRedirects(
+			self.url('invoice', invoice.pk),
 			'edit-invoice',
-			alice.pk,
+			invoice.pk,
 			data={
 				'preps_taught': 2,
 				'hours_taught': 8.4,
@@ -86,7 +89,7 @@ class RosterTest(OTISTestCase):
 				'extras': 0,
 				'total_paid': 1152,
 				'forgive': False
-			}
+			},
 		)
 
 	def test_inquiry(self):

@@ -3,7 +3,7 @@ from io import StringIO
 
 from core.factories import UnitFactory, UserFactory
 from django.utils import timezone
-from exams.factories import ExamAttemptFactory, ExamFactory
+from exams.factories import ExamAttemptFactory, TestFactory
 from otisweb.tests import OTISTestCase
 from roster.factories import StudentFactory
 from roster.models import Student
@@ -136,7 +136,7 @@ class TestLevelSystem(OTISTestCase):
 		AchievementUnlockFactory.create(user=bob.user, achievement=a2)
 
 		# spades
-		exam = ExamFactory.create()
+		exam = TestFactory.create()
 		ExamAttemptFactory.create(student=bob, score=3, quiz=exam)
 		ExamAttemptFactory.create(student=carol, score=4, quiz=exam)
 		ExamAttemptFactory.create(student=carol, score=2)
@@ -222,7 +222,7 @@ class TestLevelSystem(OTISTestCase):
 		self.assertEqual(rows[3]['level_name'], "No level")
 		self.assertAlmostEqual(rows[3]['insanity'], 0)
 
-		admin = UserFactory.create(is_superuser=True)
+		admin = UserFactory.create(is_staff=True, is_superuser=True)
 		self.login(admin)
 		self.assertGet20X('leaderboard')
 
@@ -255,7 +255,8 @@ class TestSubmitPSet(OTISTestCase):
 				'special_notes': 'meow',
 				'content': content1,
 				'next_unit_to_unlock': unit2.pk
-			}
+			},
+			follow=True
 		)
 		self.assertContains(resp, '13♣')
 		self.assertContains(resp, '37.0♥')
@@ -289,7 +290,8 @@ class TestSubmitPSet(OTISTestCase):
 				'special_notes': 'meow',
 				'content': content2,
 				'next_unit_to_unlock': unit3.pk
-			}
+			},
+			follow=True
 		)
 		self.assertContains(resp, 'This unit submission is pending approval')
 		self.assertContains(resp, '13♣')
@@ -340,7 +342,8 @@ class TestSubmitPSet(OTISTestCase):
 				'special_notes': 'meow',
 				'content': content3,
 				'next_unit_to_unlock': unit2.pk
-			}
+			},
+			follow=True
 		)
 
 		# check it shows up this way
@@ -400,9 +403,9 @@ class TestPalace(OTISTestCase):
 		for i in range(0, 4):
 			AchievementUnlockFactory.create(user=alice.user, achievement__diamonds=2 * i + 1)
 			self.assertNotContains(self.get('portal', alice.pk), 'Ruby palace')
-			self.assert40X(self.get('palace-list', alice.pk))
-			self.assert40X(self.get('palace-update', alice.pk))
-			self.assert40X(self.get('diamond-update', alice.pk))
+			self.assertGet40X('palace-list', alice.pk, follow=True)
+			self.assertGet40X('palace-update', alice.pk, follow=True)
+			self.assertGet40X('diamond-update', alice.pk, follow=True)
 		AchievementUnlockFactory.create(user=alice.user, achievement__diamonds=9)
 		self.assertContains(self.get('portal', alice.pk), 'Ruby palace')
 		self.assertGetOK('palace-list', alice.pk)

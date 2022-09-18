@@ -1,5 +1,6 @@
 import json
-from typing import TYPE_CHECKING, Any, Union
+import pprint
+from typing import TYPE_CHECKING, Any, Tuple, Union
 
 import factory
 import factory.random
@@ -13,9 +14,10 @@ factory.random.reseed_random('otisweb')
 
 # OKAY TIME TO MONKEY PATCH THE MONKEY PATCH
 if TYPE_CHECKING:  # pragma: no cover
-	from django.test.client import _MonkeyPatchedWSGIResponse as MonkeyPatchedWSGIResponse  # type: ignore  # NOQA
+	from django.test.client import _MonkeyPatchedWSGIResponse  # type: ignore  # NOQA
+	MonkeyResponseType = _MonkeyPatchedWSGIResponse
 else:
-	MonkeyPatchedWSGIResponse = Any
+	MonkeyResponseType = Any
 
 
 # waiting on https://github.com/FactoryBoy/factory_boy/pull/820 ...
@@ -27,74 +29,101 @@ class UniqueFaker(factory.Faker):
 		return subfaker.unique.format(self.provider, **params)
 
 
+def resp_debug_info(response: MonkeyResponseType) -> str:
+	return '\n' + pprint.pformat(response.__dict__)
+
+
 class OTISTestCase(TestCase):
 	def setUp(self):
 		self.client = Client()
 
-	def assert20X(self, response: MonkeyPatchedWSGIResponse):
-		self.assertGreaterEqual(response.status_code, 200)
-		self.assertLess(response.status_code, 300)
+	def assertResponse20X(self, response: MonkeyResponseType):
+		self.assertGreaterEqual(response.status_code, 200, resp_debug_info(response))
+		self.assertLess(response.status_code, 300, resp_debug_info(response))
 		return response
 
-	def assertOK(self, response: MonkeyPatchedWSGIResponse):
-		self.assertLess(response.status_code, 400)
+	def assertResponseOK(self, response: MonkeyResponseType):
+		self.assertLess(response.status_code, 400, resp_debug_info(response))
 		return response
 
-	def assert40X(self, response: MonkeyPatchedWSGIResponse):
-		self.assertGreaterEqual(response.status_code, 400)
-		self.assertLess(response.status_code, 500)
+	def assertResponse40X(self, response: MonkeyResponseType):
+		self.assertGreaterEqual(response.status_code, 400, resp_debug_info(response))
+		self.assertLess(response.status_code, 500, resp_debug_info(response))
 		return response
 
-	def assertDenied(self, response: MonkeyPatchedWSGIResponse):
+	def assertResponseDenied(self, response: MonkeyResponseType):
 		if response.status_code != 400:
-			self.assertEqual(response.status_code, 403)
+			self.assertEqual(response.status_code, 403, resp_debug_info(response))
 		return response
 
-	def assertNotFound(self, response: MonkeyPatchedWSGIResponse):
-		self.assertEqual(response.status_code, 404)
+	def assertResponseNotFound(self, response: MonkeyResponseType):
+		self.assertEqual(response.status_code, 404, resp_debug_info(response))
 		return response
 
 	def get(self, name: str, *args: Any, **kwargs: Any):
 		if (json_data := kwargs.pop('json', None)) is not None:
 			kwargs['content_type'] = 'application/json'
 			kwargs['data'] = json.dumps(json_data)
-		return self.client.get(reverse_lazy(name, args=args), follow=True, **kwargs)
+		return self.client.get(reverse_lazy(name, args=args), **kwargs)
 
 	def post(self, name: str, *args: Any, **kwargs: Any):
 		if (json_data := kwargs.pop('json', None)) is not None:
 			kwargs['content_type'] = 'application/json'
 			kwargs['data'] = json.dumps(json_data)
-		return self.client.post(reverse_lazy(name, args=args), follow=True, **kwargs)
+		return self.client.post(reverse_lazy(name, args=args), **kwargs)
+
+	def url(self, name: str, *args: Any):
+		return reverse_lazy(name, args=args)
 
 	def assertGet20X(self, name: str, *args: Any, **kwargs: Any):
-		return self.assert20X(self.get(name, *args, **kwargs))
+		return self.assertResponse20X(self.get(name, *args, **kwargs))
 
 	def assertGetOK(self, name: str, *args: Any, **kwargs: Any):
-		return self.assertOK(self.get(name, *args, **kwargs))
+		return self.assertResponseOK(self.get(name, *args, **kwargs))
 
 	def assertGet40X(self, name: str, *args: Any, **kwargs: Any):
-		return self.assert40X(self.get(name, *args, **kwargs))
+		return self.assertResponse40X(self.get(name, *args, **kwargs))
 
 	def assertGetDenied(self, name: str, *args: Any, **kwargs: Any):
-		return self.assertDenied(self.get(name, *args, **kwargs))
+		return self.assertResponseDenied(self.get(name, *args, **kwargs))
 
 	def assertGetNotFound(self, name: str, *args: Any, **kwargs: Any):
-		return self.assertNotFound(self.get(name, *args, **kwargs))
+		return self.assertResponseNotFound(self.get(name, *args, **kwargs))
+
+	def assertGetRedirects(self, target: str, name: str, *args: Any, **kwargs: Any):
+		resp = self.get(name, *args, **kwargs)
+		self.assertRedirects(
+			resp,
+			expected_url=target,
+			target_status_code=200,
+			msg_prefix=resp_debug_info(resp),
+		)
+		return resp
 
 	def assertPost20X(self, name: str, *args: Any, **kwargs: Any):
-		return self.assert20X(self.post(name, *args, **kwargs))
+		return self.assertResponse20X(self.post(name, *args, **kwargs))
 
 	def assertPostOK(self, name: str, *args: Any, **kwargs: Any):
-		return self.assertOK(self.post(name, *args, **kwargs))
+		return self.assertResponseOK(self.post(name, *args, **kwargs))
 
 	def assertPost40X(self, name: str, *args: Any, **kwargs: Any):
-		return self.assert40X(self.post(name, *args, **kwargs))
+		return self.assertResponse40X(self.post(name, *args, **kwargs))
 
 	def assertPostDenied(self, name: str, *args: Any, **kwargs: Any):
-		return self.assertDenied(self.post(name, *args, **kwargs))
+		return self.assertResponseDenied(self.post(name, *args, **kwargs))
 
 	def assertPostNotFound(self, name: str, *args: Any, **kwargs: Any):
-		return self.assertNotFound(self.post(name, *args, **kwargs))
+		return self.assertResponseNotFound(self.post(name, *args, **kwargs))
+
+	def assertPostRedirects(self, target: str, name: str, *args: Any, **kwargs: Any):
+		resp = self.post(name, *args, **kwargs)
+		self.assertRedirects(
+			resp,
+			expected_url=target,
+			target_status_code=200,
+			msg_prefix=resp_debug_info(resp),
+		)
+		return resp
 
 	def login_name(self, username: str):
 		user = User.objects.get(username=username)

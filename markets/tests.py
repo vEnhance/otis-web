@@ -1,5 +1,4 @@
 from core.factories import UserFactory
-from django.urls.base import reverse_lazy
 from django.utils import timezone
 from freezegun import freeze_time
 from otisweb.tests import OTISTestCase
@@ -99,9 +98,10 @@ class MarketTests(OTISTestCase):
 			self.assertGet40X('market-results', 'guess-my-ssn')
 		with freeze_time('2050-07-01', tz_offset=0):
 			self.login('alice')
-			self.assertRedirects(
-				self.assertGet20X('market-results', 'guess-my-ssn'),
-				expected_url=reverse_lazy('market-guess', args=('guess-my-ssn', )),
+			self.assertGetRedirects(
+				self.url('market-guess', 'guess-my-ssn'),
+				'market-results',
+				'guess-my-ssn',
 			)
 		with freeze_time('2050-11-01', tz_offset=0):
 			self.login('alice')
@@ -114,17 +114,11 @@ class MarketTests(OTISTestCase):
 		with freeze_time('2050-07-01', tz_offset=0):
 			self.login('alice')
 			resp = self.assertGet20X('market-guess', 'guess-my-ssn')
-			self.assertEqual(
-				resp.request['PATH_INFO'],
-				"/markets/guess/guess-my-ssn/",
-			)
 			self.assertContains(resp, "market main page")
 		with freeze_time('2050-11-01', tz_offset=0):
 			self.login('alice')
-			resp = self.assertGet20X('market-guess', 'guess-my-ssn')
-			self.assertEqual(
-				resp.request['PATH_INFO'],
-				"/markets/results/guess-my-ssn/",
+			self.assertGetRedirects(
+				self.url('market-results', 'guess-my-ssn'), 'market-guess', 'guess-my-ssn'
 			)
 
 	def test_guess_form_with_answer(self):
@@ -135,9 +129,9 @@ class MarketTests(OTISTestCase):
 			self.login('alice')
 			resp = self.assertGet20X('market-guess', 'guess-my-ssn')
 			self.assertContains(resp, "market main page")
-			self.assertPost20X('market-guess', 'guess-my-ssn', data={'value': 100})
+			self.assertPost20X('market-guess', 'guess-my-ssn', data={'value': 100}, follow=True)
 
-			resp = self.assertGet20X('market-guess', 'guess-my-ssn')
+			resp = self.assertGet20X('market-guess', 'guess-my-ssn', follow=True)
 			self.assertContains(resp, "You already submitted")
 
 			guess = Guess.objects.get(user__username='alice')
@@ -150,9 +144,9 @@ class MarketTests(OTISTestCase):
 			self.login('alice')
 			resp = self.assertGet20X('market-guess', 'guess-my-ssn')
 			self.assertContains(resp, "market main page")
-			self.assertPost20X('market-guess', 'guess-my-ssn', data={'value': 100})
+			self.assertPost20X('market-guess', 'guess-my-ssn', data={'value': 100}, follow=True)
 
-			resp = self.assertGet20X('market-guess', 'guess-my-ssn')
+			resp = self.assertGet20X('market-guess', 'guess-my-ssn', follow=True)
 			self.assertContains(resp, "You already submitted")
 
 			guess = Guess.objects.get(user__username='alice')
@@ -161,11 +155,15 @@ class MarketTests(OTISTestCase):
 
 			market.answer = 42
 			market.save()
-			self.assertPost40X('market-recompute', 'guess-my-ssn')
+			self.assertPost40X('market-recompute', 'guess-my-ssn', follow=True)
 
 			UserFactory.create(username='admin', is_staff=True, is_superuser=True)
 			self.login('admin')
-			self.assertPost20X('market-recompute', 'guess-my-ssn')
+			self.assertPostRedirects(
+				self.url('market-results', 'guess-my-ssn'),
+				'market-recompute',
+				'guess-my-ssn',
+			)
 
 			guess = Guess.objects.get(user__username='alice')
 			self.assertEqual(guess.value, 100)
@@ -179,9 +177,9 @@ class MarketTests(OTISTestCase):
 			self.login('alice')
 			resp = self.assertGet20X('market-guess', 'guess-my-ssn')
 			self.assertNotContains(resp, "market main page")  # because it's a special market
-			self.assertPost20X('market-guess', 'guess-my-ssn', data={'value': 100})
+			self.assertPost20X('market-guess', 'guess-my-ssn', data={'value': 100}, follow=True)
 
-			resp = self.assertGet20X('market-guess', 'guess-my-ssn')
+			resp = self.assertGet20X('market-guess', 'guess-my-ssn', follow=True)
 			self.assertContains(resp, "You already submitted")
 
 			guess = Guess.objects.get(user__username='alice')
@@ -191,11 +189,15 @@ class MarketTests(OTISTestCase):
 			market.answer = 42
 			market.alpha = 3
 			market.save()
-			self.assertPost40X('market-recompute', 'guess-my-ssn')
+			self.assertPost40X('market-recompute', 'guess-my-ssn', follow=True)
 
 			UserFactory.create(username='admin', is_staff=True, is_superuser=True)
 			self.login('admin')
-			self.assertPost20X('market-recompute', 'guess-my-ssn')
+			self.assertPostRedirects(
+				self.url('market-results', 'guess-my-ssn'),
+				'market-recompute',
+				'guess-my-ssn',
+			)
 
 			guess = Guess.objects.get(user__username='alice')
 			self.assertEqual(guess.value, 100)
