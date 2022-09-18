@@ -1,12 +1,9 @@
-from typing import Any, Dict
-
 from core.factories import SemesterFactory, UserFactory
 from django.utils.timezone import utc
-from factory.declarations import SubFactory
+from factory.declarations import PostGenerationMethodCall, SubFactory
 from factory.django import DjangoModelFactory
 from factory.faker import Faker
 from factory.fuzzy import FuzzyDecimal
-from factory.helpers import post_generation
 from otisweb.tests import UniqueFaker
 
 from .models import Guess, Market
@@ -33,6 +30,4 @@ class GuessFactory(DjangoModelFactory):
 	market = SubFactory(MarketFactory)
 	value = FuzzyDecimal(1, 10000)
 
-	@post_generation
-	def score(self, create: bool, extracted: Any, **kwargs: Dict[str, Any]):
-		self.score = self.get_score()  # type: ignore
+	postgen_set_score = PostGenerationMethodCall("set_score")

@@ -22,9 +22,9 @@ class ArticleFactory(DjangoModelFactory):
 		model = Article
 
 	@post_generation
-	def current_revision(self, create: bool, extracted: Any, **kwargs: Dict[str, Any]):
-		if create is True:  # pragma: no cover
-			self.current_revision = ArticleRevisionFactory(article=self)  # type: ignore
+	def set_current_revision(self, create: bool, extracted: Any, **kwargs: Dict[str, Any]):
+		a: Article = self  # type: ignore
+		a.current_revision = ArticleRevisionFactory(article=a)
 
 
 class URLPathFactory(DjangoModelFactory):
