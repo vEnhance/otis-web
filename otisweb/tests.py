@@ -1,6 +1,6 @@
 import json
 import pprint
-from typing import TYPE_CHECKING, Any, Union
+from typing import TYPE_CHECKING, Any, Tuple, Union
 
 import factory
 import factory.random
