@@ -19,7 +19,7 @@ class UploadedFileFactory(DjangoModelFactory):
 	benefactor = SubFactory(StudentFactory)
 	owner = LazyAttribute(lambda o: o.benefactor.user)
 	category = 'psets'
-	content = FileField(filename='pset.txt')
+	content = FileField(filename='UNIT_TESTING_pset.txt')
 	unit = SubFactory(UnitFactory)
 
 
@@ -28,7 +28,7 @@ class SemesterDownloadFileFactory(DjangoModelFactory):
 		model = SemesterDownloadFile
 
 	semester = SubFactory(SemesterFactory)
-	content = FileField(filename='announcement.txt')
+	content = FileField(filename='UNIT_TESTING_announcement.txt')
 
 
 class PSetFactory(DjangoModelFactory):
@@ -63,7 +63,7 @@ class AchievementFactory(DjangoModelFactory):
 
 	code = UniqueFaker('bban')
 	name = Faker('job')
-	image = ImageField(filename='achievement_icon.png')
+	image = ImageField(filename='UNIT_TESTING_achievement_icon.png')
 	description = UniqueFaker('sentence')
 
 

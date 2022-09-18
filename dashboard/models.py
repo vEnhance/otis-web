@@ -236,13 +236,17 @@ class ProblemSuggestion(models.Model):
 
 def achievement_image_file_name(instance: 'Achievement', filename: str) -> str:
 	pk = instance.pk
+	ext = os.path.splitext(filename)[-1]
 	if pk is None:
 		n = random.randrange(0, 2**64)
-		return os.path.join('badges', f'r{n:016x}' + os.path.splitext(filename)[-1])
+		basename = f'r{n:016x}'
 	else:
 		kludge = (settings.SECRET_KEY or '') + '_otis_diamond_' + str(pk)
 		h = sha256(kludge.encode('ascii')).hexdigest()[0:24]
-		return os.path.join('badges', f'{pk:04d}_{h}' + os.path.splitext(filename)[-1])
+		basename = f'{pk:04d}_{h}'
+	if filename.startswith("UNIT_TESTING") and settings.DEBUG is True:
+		basename = "UNIT_TESTING_" + basename
+	return os.path.join('badges', basename + ext)
 
 
 class Achievement(models.Model):
