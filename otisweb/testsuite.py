@@ -218,3 +218,15 @@ class OTISTestCase(TestCase):
 		resp = self.post(name, *args, **kwargs)
 		self.assertRedirects(resp, redirectURL)
 		return resp
+
+	def assertGetBecomesStaffRedirect(self, name: str, *args: Any):
+		redirectURL = '/admin/login/?next=' + reverse_lazy(name, args=args)
+		resp = self.get(name, *args)
+		self.assertRedirects(resp, redirectURL)
+		return resp
+
+	def assertPostBecomesStaffRedirect(self, name: str, *args: Any, **kwargs: Any):
+		redirectURL = '/admin/login/?next=' + reverse_lazy(name, args=args)
+		resp = self.post(name, *args, **kwargs)
+		self.assertRedirects(resp, redirectURL)
+		return resp

@@ -155,7 +155,7 @@ class MarketTests(OTISTestCase):
 
 			market.answer = 42
 			market.save()
-			self.assertPost40X('market-recompute', 'guess-my-ssn', follow=True)
+			self.assertPostBecomesStaffRedirect('market-recompute', 'guess-my-ssn', follow=True)
 
 			UserFactory.create(username='admin', is_staff=True, is_superuser=True)
 			self.login('admin')
@@ -189,7 +189,7 @@ class MarketTests(OTISTestCase):
 			market.answer = 42
 			market.alpha = 3
 			market.save()
-			self.assertPost40X('market-recompute', 'guess-my-ssn', follow=True)
+			self.assertPostBecomesStaffRedirect('market-recompute', 'guess-my-ssn', follow=True)
 
 			UserFactory.create(username='admin', is_staff=True, is_superuser=True)
 			self.login('admin')

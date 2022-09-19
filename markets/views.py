@@ -2,7 +2,6 @@ from typing import Any, Dict
 
 from braces.views import LoginRequiredMixin
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db.models.query import QuerySet
@@ -16,6 +15,7 @@ from django.views.decorators.http import require_POST
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView
 from django.views.generic.list import ListView
+from otisweb.decorators import admin_required
 from otisweb.utils import AuthHttpRequest
 
 from .models import Guess, Market
@@ -110,7 +110,7 @@ class MarketResults(LoginRequiredMixin, ListView[Guess]):
 
 
 @require_POST
-@user_passes_test(lambda u: u.is_superuser)
+@admin_required
 def recompute(request: AuthHttpRequest, slug: str):
 	guesses = list(Guess.objects.filter(market__slug=slug))
 	for guess in guesses:

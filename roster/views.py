@@ -22,7 +22,7 @@ from dashboard.models import PSet
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth.decorators import login_required, user_passes_test  # NOQA
+from django.contrib.auth.decorators import login_required  # NOQA
 from django.contrib.auth.models import Group, User
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied  # NOQA
 from django.db.models.expressions import F
@@ -38,6 +38,7 @@ from django.views.decorators.http import require_POST
 from django.views.generic.edit import UpdateView
 from django.views.generic.list import ListView
 from dwhandler import ACTION_LOG_LEVEL, SUCCESS_LOG_LEVEL
+from otisweb.decorators import admin_required
 from otisweb.utils import AuthHttpRequest, mailchimp_subscribe
 
 from roster.utils import can_edit, get_current_students, get_student_by_id, infer_student  # NOQA
@@ -403,7 +404,7 @@ def unlock_rest_of_mystery(request: HttpRequest, delta: int = 1) -> HttpResponse
 	return HttpResponseRedirect('/')
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@admin_required
 def spreadsheet(request: HttpRequest) -> HttpResponse:
 	queryset = Invoice.objects.filter(student__legit=True)
 	queryset = queryset.filter(student__semester__active=True)

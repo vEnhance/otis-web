@@ -2,10 +2,10 @@ from datetime import datetime
 
 from dashboard.models import QuestComplete
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required, user_passes_test  # NOQA
 from django.http.request import HttpRequest
 from django.http.response import HttpResponse
 from django.shortcuts import render
+from otisweb.decorators import admin_required
 from roster.models import Student
 
 from .forms import GraderForm, ScoreForm
@@ -15,8 +15,7 @@ from .forms import GraderForm, ScoreForm
 YEAR = datetime.now().year
 
 
-@login_required
-@user_passes_test(lambda u: u.is_superuser)
+@admin_required
 def usemo_score(request: HttpRequest) -> HttpResponse:
 	if request.method == 'POST':
 		form = ScoreForm(request.POST)
@@ -46,8 +45,7 @@ def usemo_score(request: HttpRequest) -> HttpResponse:
 	return render(request, "mouse/form.html", context)
 
 
-@login_required
-@user_passes_test(lambda u: u.is_superuser)
+@admin_required
 def usemo_grader(request: HttpRequest) -> HttpResponse:
 	if request.method == 'POST':
 		form = GraderForm(request.POST)

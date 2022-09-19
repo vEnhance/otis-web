@@ -2,11 +2,12 @@ from typing import Any, Dict, Optional
 
 from core.utils import get_from_google_storage
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.http.response import HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
+from otisweb.decorators import admin_required
 from otisweb.utils import AuthHttpRequest
 from roster.utils import get_student_by_id, infer_student
 
@@ -133,7 +134,7 @@ def mocks(request: AuthHttpRequest, student_id: int = None) -> HttpResponse:
 	return render(request, 'exams/mocks.html', context)
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@admin_required
 def participation_points(request: AuthHttpRequest) -> HttpResponse:
 	if request.method == 'POST':
 		form = ParticipationPointsForm(request.POST)
