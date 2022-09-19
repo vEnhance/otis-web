@@ -51,6 +51,7 @@ pdbpp = "^0.10.3"
 pyflakes = "^2.3.1"
 pyright = "^1.1.270"
 yapf = "^0.32.0"
+tblib = "^1.7.0"
 
 [tool.yapf]
 based_on_style = "facebook"
