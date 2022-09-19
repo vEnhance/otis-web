@@ -5,8 +5,8 @@
 # chmod +x .git/hooks/pre-commit
 
 FAILED_HEADER="\033[1;31mFAILED:\033[0m"
-BAD_FILE=/tmp/otisweb.bad
-GOOD_FILE=/tmp/otisweb.good
+BAD_FILE="/tmp/${PWD##*/}.bad"
+GOOD_FILE="/tmp/${PWD##*/}.good"
 
 TO_CHECK=$(git ls-files '*.py' | grep -v migrations/ | grep -v /apps.py)
 COMMIT_ID=$(git rev-parse HEAD)
