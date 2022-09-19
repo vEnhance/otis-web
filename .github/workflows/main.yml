@@ -47,7 +47,7 @@ jobs:
       run: |
         source .venv/bin/activate
         python manage.py migrate
-        coverage run manage.py test
+        coverage run manage.py test --parallel
         coverage lcov -o coverage/lcov.info
     - name: mypy
       run: |

@@ -104,7 +104,7 @@ echo -e ""
 
 echo -e "\033[1;35mRunning coverage/tests ...\033[0m"
 echo -e "---------------------------"
-if ! coverage run manage.py test; then
+if ! coverage run manage.py test --parallel; then
 	echo -e "$FAILED_HEADER Unit tests did not check out"
 	echo $COMMIT_ID > $BAD_FILE
 	exit 1
