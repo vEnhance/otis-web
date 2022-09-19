@@ -1,10 +1,10 @@
-from core.factories import UserFactory
-from django.contrib.auth.models import User
+from core.factories import SemesterFactory, UserFactory
 from django.test.utils import override_settings
 from django.utils import timezone
 from freezegun import freeze_time
 from otisweb.testsuite import OTISTestCase
 from roster.factories import StudentFactory
+from roster.models import Student
 
 from exams.calculator import expr_compute
 from exams.factories import QuizFactory, TestFactory
@@ -34,10 +34,11 @@ class ExamTest(OTISTestCase):
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()
-		StudentFactory.create(user__username="alice", semester__exam_family='Waltz')
-		StudentFactory.create(
-			user__username="disabled", enabled=False, semester__exam_family='Waltz'
-		)
+		semester = SemesterFactory(active=True, exam_family='Waltz')
+		semester_old = SemesterFactory(active=False, exam_family='Waltz')
+		cls.alice = StudentFactory.create(user__username="alice", semester=semester)
+		cls.bob = StudentFactory.create(user__username="bob", semester=semester_old)
+		cls.dead = StudentFactory.create(user__username="dead", enabled=False, semester=semester)
 
 		with override_settings(TESTING_NEEDS_MOCK_MEDIA=True):
 			for factory in (TestFactory, QuizFactory):
@@ -74,7 +75,7 @@ class ExamTest(OTISTestCase):
 			self.assertGetDenied('exam-pdf', exam_foxtrot.pk)
 
 		with freeze_time('2020-06-05', tz_offset=0):
-			self.login('disabled')
+			self.login('dead')
 			self.assertGetDenied('exam-pdf', exam_waltz.pk)
 			self.assertGetDenied('exam-pdf', exam_foxtrot.pk)
 
@@ -93,7 +94,6 @@ class ExamTest(OTISTestCase):
 			self.assertGet20X('exam-pdf', exam_foxtrot.pk)
 
 	def test_quiz(self):
-		alice = User.objects.get(username='alice')
 		quiz_waltz = PracticeExam.objects.get(family="Waltz", is_test=False)
 		quiz_foxtrot = PracticeExam.objects.get(family="Foxtrot", is_test=False)
 		test_waltz = PracticeExam.objects.get(family="Waltz", is_test=True)
@@ -101,65 +101,85 @@ class ExamTest(OTISTestCase):
 
 		with freeze_time('2018-01-01', tz_offset=0):
 			self.login('alice')
-			self.assertGetDenied('quiz', alice.pk, quiz_waltz.pk)
-			self.assertGetDenied('quiz', alice.pk, test_waltz.pk)
-			self.assertGetDenied('quiz', alice.pk, test_foxtrot.pk)
-			self.assertGetDenied('quiz', alice.pk, quiz_foxtrot.pk)
+			self.assertGetDenied('quiz', ExamTest.alice.pk, quiz_waltz.pk)
+			self.assertGetDenied('quiz', ExamTest.alice.pk, test_waltz.pk)
+			self.assertGetDenied('quiz', ExamTest.alice.pk, test_foxtrot.pk)
+			self.assertGetDenied('quiz', ExamTest.alice.pk, quiz_foxtrot.pk)
 		with freeze_time('2020-06-05', tz_offset=0):
-			self.login('disabled')
-			self.assertGetDenied('quiz', User.objects.get(username='disabled').pk, quiz_waltz.pk)
+			self.login('dead')
+			self.assertGetDenied('quiz', Student.objects.get(user__username='dead').pk, quiz_waltz.pk)
 			self.login('alice')
-			self.assertGetDenied('quiz', alice.pk, test_waltz.pk)
-			self.assertGetDenied('quiz', alice.pk, test_foxtrot.pk)
-			self.assertGetDenied('quiz', alice.pk, quiz_foxtrot.pk)
+			self.assertGetDenied('quiz', ExamTest.alice.pk, test_waltz.pk)
+			self.assertGetDenied('quiz', ExamTest.alice.pk, test_foxtrot.pk)
+			self.assertGetDenied('quiz', ExamTest.alice.pk, quiz_foxtrot.pk)
 
 			# OK, now actually take a quiz, lol
-			resp_before_submit = self.assertGet20X('quiz', alice.pk, quiz_waltz.pk)
+			resp_before_submit = self.assertGet20X('quiz', ExamTest.alice.pk, quiz_waltz.pk)
 			self.assertHas(resp_before_submit, "Submit answers")
-			resp_after_submit = self.assertPost20X(
+
+			# submit quiz improperly
+			resp_after_improper = self.assertPost20X(
 				'quiz',
-				alice.pk,
+				ExamTest.alice.pk,
 				quiz_waltz.pk,
 				data={
-					'guess1': 1337,
-					'guess2': 2016,
-					'guess3': 3000,
-					'guess4': 4000,
+					'guess1': r'$@#%$@#\^__meow__^%&*(==',
+					'guess2': '2000',
+				}
+			)
+			self.assertHas(resp_after_improper, "Submit answers")
+
+			# submit quiz properly
+			resp_after_submit = self.assertPost20X(
+				'quiz',
+				ExamTest.alice.pk,
+				quiz_waltz.pk,
+				data={
+					'guess1': '1337',
+					'guess2': '2000',
+					'guess3': '30+100',  # pretend it's a typo or 30 x 100 I guess
+					'guess4': '2^5*5^3',
 				}
 			)
 			self.assertHas(resp_after_submit, "1337", count=1)
-			self.assertHas(resp_after_submit, "2020", count=1)
 			self.assertHas(resp_after_submit, "1000", count=1)
-			self.assertHas(resp_after_submit, "2000", count=1)
-			self.assertHas(resp_after_submit, "3000", count=2)
-			self.assertHas(resp_after_submit, "4000", count=2)
+			self.assertHas(resp_after_submit, "2000", count=2)
+			self.assertHas(resp_after_submit, "30+100", count=1)
+			self.assertHas(resp_after_submit, "3000", count=1)
+			self.assertHas(resp_after_submit, "2^5*5^3", count=1)
+			self.assertHas(resp_after_submit, "4000", count=1)
 			self.assertHas(resp_after_submit, "5000", count=1)
-			self.assertPost40X(
-				'quiz',
-				alice.pk,
-				quiz_waltz.pk,
-				data={
-					'answer1': 1337,
-					'answer2': 2016,
-					'answer3': 3000,
-					'answer4': 4000,
-				}
-			)
+			self.assertNotHas(resp_after_submit, "Submit answers")
+
 			a = ExamAttempt.objects.get(student__user__username='alice')
 			self.assertEqual(a.score, 2)
 			self.assertEqual(a.guess1, "1337")
-			self.assertEqual(a.guess2, "2016")
-			self.assertEqual(a.guess3, "3000")
-			self.assertEqual(a.guess4, "4000")
+			self.assertEqual(a.guess2, "2000")
+			self.assertEqual(a.guess3, "30+100")
+			self.assertEqual(a.guess4, "2^5*5^3")
 			self.assertEqual(a.guess5, "")
+			self.assertPost40X(
+				'quiz', ExamTest.alice.pk, quiz_waltz.pk, data={
+					'guess1': '7*191',
+				}
+			)
+
+			bob = Student.objects.get(user__username='bob')
+			self.login('bob')
+			self.assertPost40X('quiz', bob.pk, quiz_waltz.pk, data={'answer1': 1337})
 
 		with freeze_time('2022-12-31', tz_offset=0):
+			a.delete()  # make sure we can't resubmit
 			self.login('alice')
+			self.assertPost40X('quiz', ExamTest.alice.pk, quiz_waltz.pk, data={'answer1': 1337})
 
 	def test_mocks(self):
-		self.login('disabled')
-		self.assertGetDenied('mocks', follow=True)
-
 		self.login('alice')
 		resp = self.assertGet20X('mocks', follow=True)
 		self.assertHas(resp, 'Waltz Test 01')
+
+		self.login('bob')
+		self.assertGet40X('mocks', follow=True)
+
+		self.login('dead')
+		self.assertGetDenied('mocks', follow=True)

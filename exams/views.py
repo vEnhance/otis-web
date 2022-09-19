@@ -57,6 +57,8 @@ def quiz(request: AuthHttpRequest, student_id: int, pk: int) -> HttpResponse:
 		if request.method == 'POST':
 			if quiz.overdue:
 				return HttpResponseForbidden("You can't submit this quiz since the deadline passed.")
+			if student.semester.active is False:
+				return HttpResponseForbidden("You can't submit quizzes for archived semesters.")
 			form = ExamAttemptForm(request.POST)
 			if form.is_valid():
 				attempt = form.save(commit=False)
