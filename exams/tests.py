@@ -237,7 +237,6 @@ class ExamTest(OTISTestCase):
 		)
 		self.assertEqual(MockCompleted.objects.all().count(), 0)
 
-		print(pks)
 		resp1 = self.assertPostOK(
 			'participation-points', data={
 				'exam': test_waltz.pk,
