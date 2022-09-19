@@ -24,17 +24,17 @@
 		{% else %}
 		<td><a title="Invoice" class="emoji-link" href="{% url "invoice" %}">💵</a></td>
 		{% endif %}
-		<td><a title="Markets" class="emoji-link" href="{% url "market-list" %}">🏪</a></td>
+		<td><a title="Markets" class="emoji-link" href="{% url "market-list" %}">📈</a></td>
 	</tr>
 	<tr>
 		<td><a title="Diamonds" class="emoji-link" href="{% url "achievements-listing" %}" data-hex="496e737065637420456c6d21">💎</a></td>
-		<td><a title="Logout" class="emoji-link" href="{% url "account_logout" %}">🚪</a></td>
 		{% if student %}
 		<td><a title="Certificate" class="emoji-link" href="{% url "certify" student.id %}">🎓</a></td>
 		{% else %}
-		<td></td>
+		<td><a title="Certificate" class="emoji-link" href="{% url "certify" %}">🎓</a></td>
 		{% endif %}
-		<td></td>
+		<td><a title="PSet Queue" class="emoji-link" href="{% url "pset-queue-listing" %}">🛂</a></td>
+		<td><a title="Logout" class="emoji-link" href="{% url "account_logout" %}">🚪</a></td>
 	</tr>
 </table>
 
