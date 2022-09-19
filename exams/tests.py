@@ -8,7 +8,7 @@ from roster.models import Student
 
 from exams.calculator import expr_compute
 from exams.factories import QuizFactory, TestFactory
-from exams.models import ExamAttempt, PracticeExam
+from exams.models import ExamAttempt, MockCompleted, PracticeExam
 
 UTC = timezone.utc
 
@@ -34,24 +34,24 @@ class ExamTest(OTISTestCase):
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()
-		semester = SemesterFactory(active=True, exam_family='Waltz')
-		semester_old = SemesterFactory(active=False, exam_family='Waltz')
+		cls.semester = SemesterFactory(active=True, exam_family='Waltz')
+		cls.semester_old = SemesterFactory(active=False, exam_family='Waltz')
 		cls.alice = StudentFactory.create(
 			user__username="alice",
-			semester=semester,
+			semester=cls.semester,
 			user__first_name="Alice",
 			user__last_name="Aardvark",
 		)
 		cls.bob = StudentFactory.create(
 			user__username="bob",
-			semester=semester_old,
+			semester=cls.semester_old,
 			user__first_name="Bob",
 			user__last_name="Beta",
 		)
 		cls.dead = StudentFactory.create(
 			user__username="dead",
 			enabled=False,
-			semester=semester,
+			semester=cls.semester,
 			user__first_name="Dead",
 			user__last_name="Derp",
 		)
@@ -205,3 +205,55 @@ class ExamTest(OTISTestCase):
 
 		self.login('dead')
 		self.assertGetDenied('mocks', follow=True)
+
+	def test_participation_points(self):
+		test_waltz = PracticeExam.objects.get(family="Waltz", is_test=True)
+		quiz_waltz = PracticeExam.objects.get(family="Waltz", is_test=False)
+		# first check that plebians can't login
+		self.assertGetBecomesStaffRedirect('participation-points')
+		self.assertPostBecomesStaffRedirect('participation-points')
+		self.login('alice')
+		self.assertGetBecomesStaffRedirect('participation-points')
+		self.assertPostBecomesStaffRedirect('participation-points')
+
+		admin = UserFactory.create(is_staff=True, is_superuser=True)
+		self.login(admin)
+		students = StudentFactory.create_batch(10, semester=ExamTest.semester)
+		pks = [str(s.pk) for s in students]
+
+		self.assertGetOK('participation-points')
+		# invalid post
+		self.assertHas(
+			self.assertPostOK('participation-points', data={'pks': '9001'}),
+			"This field is required",
+		)
+		self.assertEqual(MockCompleted.objects.all().count(), 0)
+		self.assertHas(
+			self.assertPostOK('participation-points', data={
+				'exam': quiz_waltz.pk,
+				'pks': '9001'
+			}),
+			"Select a valid choice",
+		)
+		self.assertEqual(MockCompleted.objects.all().count(), 0)
+
+		print(pks)
+		resp1 = self.assertPostOK(
+			'participation-points', data={
+				'exam': test_waltz.pk,
+				'pks': '\n'.join(pks[0:4])
+			}
+		)
+		self.assertHas(resp1, "Created 4 completion database entries")
+		self.assertNotHas(resp1, "with existing entries")
+		self.assertEqual(MockCompleted.objects.all().count(), 4)
+
+		resp2 = self.assertPostOK(
+			'participation-points', data={
+				'exam': test_waltz.pk,
+				'pks': '\n'.join(pks[2:7])
+			}
+		)
+		self.assertHas(resp2, "Created 3 completion database entries")
+		self.assertHas(resp2, "There were 2 students with existing entries")
+		self.assertEqual(MockCompleted.objects.all().count(), 7)
