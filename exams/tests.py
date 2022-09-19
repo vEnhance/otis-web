@@ -36,9 +36,25 @@ class ExamTest(OTISTestCase):
 		super().setUpClass()
 		semester = SemesterFactory(active=True, exam_family='Waltz')
 		semester_old = SemesterFactory(active=False, exam_family='Waltz')
-		cls.alice = StudentFactory.create(user__username="alice", semester=semester)
-		cls.bob = StudentFactory.create(user__username="bob", semester=semester_old)
-		cls.dead = StudentFactory.create(user__username="dead", enabled=False, semester=semester)
+		cls.alice = StudentFactory.create(
+			user__username="alice",
+			semester=semester,
+			user__first_name="Alice",
+			user__last_name="Aardvark",
+		)
+		cls.bob = StudentFactory.create(
+			user__username="bob",
+			semester=semester_old,
+			user__first_name="Bob",
+			user__last_name="Beta",
+		)
+		cls.dead = StudentFactory.create(
+			user__username="dead",
+			enabled=False,
+			semester=semester,
+			user__first_name="Dead",
+			user__last_name="Derp",
+		)
 
 		with override_settings(TESTING_NEEDS_MOCK_MEDIA=True):
 			for factory in (TestFactory, QuizFactory):
@@ -151,6 +167,7 @@ class ExamTest(OTISTestCase):
 			self.assertHas(resp_after_submit, "5000", count=1)
 			self.assertNotHas(resp_after_submit, "Submit answers")
 
+			# verify that the attempt is saved properly
 			a = ExamAttempt.objects.get(student__user__username='alice')
 			self.assertEqual(a.score, 2)
 			self.assertEqual(a.guess1, "1337")
@@ -158,20 +175,25 @@ class ExamTest(OTISTestCase):
 			self.assertEqual(a.guess3, "30+100")
 			self.assertEqual(a.guess4, "2^5*5^3")
 			self.assertEqual(a.guess5, "")
-			self.assertPost40X(
-				'quiz', ExamTest.alice.pk, quiz_waltz.pk, data={
-					'guess1': '7*191',
-				}
+
+			# refresh the page
+			resp_after_refresh = self.assertGetOK('quiz', ExamTest.alice.pk, quiz_waltz.pk)
+			self.assertHTMLEqual(
+				resp_after_submit.content.decode(),
+				resp_after_refresh.content.decode(),
 			)
+
+			# Try to resubmit the quiz (despite existing submission); should fail
+			self.assertPostDenied('quiz', ExamTest.alice.pk, quiz_waltz.pk, data={'guess1': '7*191'})
 
 			bob = Student.objects.get(user__username='bob')
 			self.login('bob')
-			self.assertPost40X('quiz', bob.pk, quiz_waltz.pk, data={'answer1': 1337})
+			self.assertPostDenied('quiz', bob.pk, quiz_waltz.pk, data={'answer1': 1337})
 
 		with freeze_time('2022-12-31', tz_offset=0):
 			a.delete()  # make sure we can't resubmit
 			self.login('alice')
-			self.assertPost40X('quiz', ExamTest.alice.pk, quiz_waltz.pk, data={'answer1': 1337})
+			self.assertPostDenied('quiz', ExamTest.alice.pk, quiz_waltz.pk, data={'answer1': 1337})
 
 	def test_mocks(self):
 		self.login('alice')
@@ -179,7 +201,7 @@ class ExamTest(OTISTestCase):
 		self.assertHas(resp, 'Waltz Test 01')
 
 		self.login('bob')
-		self.assertGet40X('mocks', follow=True)
+		self.assertGetDenied('mocks', ExamTest.bob.pk, follow=True)
 
 		self.login('dead')
 		self.assertGetDenied('mocks', follow=True)
