@@ -33,7 +33,7 @@ from exams.models import PracticeExam
 from markets.models import Market
 from otisweb.utils import AuthHttpRequest, get_mailchimp_campaigns
 from roster.models import RegistrationContainer, Student, StudentRegistration
-from roster.utils import can_edit, can_view, get_student_by_id, get_visible_students  # NOQA
+from roster.utils import can_edit, can_view, get_student_by_id, get_visible_students, infer_student  # NOQA
 from sql_util.utils import SubqueryAggregate
 
 from dashboard.forms import DiamondsForm, PSetResubmitForm
@@ -696,8 +696,11 @@ class DiamondUpdate(
 		return reverse_lazy("diamond-update", args=(self.student.id, ))
 
 
-def certify(request: HttpRequest, student_id: int, checksum: str = None):
-	student = get_object_or_404(Student, pk=student_id)
+def certify(request: HttpRequest, student_id: int = None, checksum: str = None):
+	if student_id is None:
+		student = infer_student(request)
+	else:
+		student = get_object_or_404(Student, pk=student_id)
 	if checksum is None:
 		if can_view(request, student):
 			checksum = student.get_checksum(settings.CERT_HASH_KEY)
