@@ -9,7 +9,7 @@ from factory import Faker, LazyAttribute, Sequence, SubFactory
 from factory.django import DjangoModelFactory
 from factory.fuzzy import FuzzyChoice
 from factory.helpers import post_generation
-from otisweb.tests import UniqueFaker
+from otisweb.testsuite import UniqueFaker
 
 from core.models import Semester, Unit, UnitGroup, UserProfile
 from core.utils import storage_hash

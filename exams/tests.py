@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.test.utils import override_settings
 from django.utils import timezone
 from freezegun import freeze_time
-from otisweb.tests import OTISTestCase
+from otisweb.testsuite import OTISTestCase
 from roster.factories import StudentFactory
 
 from exams.calculator import expr_compute

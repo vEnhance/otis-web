@@ -1,5 +1,5 @@
 from django.conf import settings
-from otisweb.tests import OTISTestCase
+from otisweb.testsuite import OTISTestCase
 from roster.factories import InvoiceFactory, StudentFactory
 
 

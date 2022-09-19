@@ -1,5 +1,5 @@
 from django.test.utils import override_settings
-from otisweb.tests import OTISTestCase
+from otisweb.testsuite import OTISTestCase
 from roster.factories import StudentFactory
 
 from core.factories import SemesterFactory, UnitFactory, UserFactory

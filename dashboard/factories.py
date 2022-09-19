@@ -4,7 +4,7 @@ from factory.declarations import LazyAttribute, Sequence, SubFactory
 from factory.django import DjangoModelFactory, FileField, ImageField
 from factory.faker import Faker
 from factory.fuzzy import FuzzyChoice
-from otisweb.tests import UniqueFaker
+from otisweb.testsuite import UniqueFaker
 from roster.factories import StudentFactory
 
 from dashboard.models import Achievement, AchievementUnlock, BonusLevel, BonusLevelUnlock, Level, ProblemSuggestion, PSet, QuestComplete, SemesterDownloadFile, UploadedFile  # NOQA

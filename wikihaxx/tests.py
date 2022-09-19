@@ -1,6 +1,6 @@
 from core.factories import UnitFactory, UserFactory
 from dashboard.factories import AchievementFactory
-from otisweb.tests import OTISTestCase
+from otisweb.testsuite import OTISTestCase
 
 from wikihaxx.mdx.otis import OTISPreprocessor
 

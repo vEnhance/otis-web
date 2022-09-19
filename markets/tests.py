@@ -1,7 +1,7 @@
 from core.factories import UserFactory
 from django.utils import timezone
 from freezegun import freeze_time
-from otisweb.tests import OTISTestCase
+from otisweb.testsuite import OTISTestCase
 
 from markets.factories import GuessFactory, MarketFactory
 from markets.models import Guess, Market

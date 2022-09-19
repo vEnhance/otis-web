@@ -1,7 +1,7 @@
 from core.factories import UnitFactory, UnitGroupFactory, UserFactory  # NOQA
 from django.conf import settings
 from django.shortcuts import get_object_or_404
-from otisweb.tests import OTISTestCase
+from otisweb.testsuite import OTISTestCase
 
 from roster.factories import AssistantFactory, InvoiceFactory, RegistrationContainerFactory, StudentFactory, StudentRegistrationFactory  # NOQA
 from roster.models import Student, StudentRegistration

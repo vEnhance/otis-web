@@ -4,7 +4,7 @@ from io import StringIO
 from core.factories import UnitFactory, UserFactory
 from django.utils import timezone
 from exams.factories import ExamAttemptFactory, TestFactory
-from otisweb.tests import OTISTestCase
+from otisweb.testsuite import OTISTestCase
 from roster.factories import StudentFactory
 from roster.models import Student
 

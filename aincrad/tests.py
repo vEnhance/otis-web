@@ -4,7 +4,7 @@ from arch.models import Hint
 from core.factories import SemesterFactory, UnitFactory
 from dashboard.factories import PSetFactory
 from django.test.utils import override_settings
-from otisweb.tests import OTISTestCase
+from otisweb.testsuite import OTISTestCase
 from payments.factories import PaymentLogFactory
 from roster.factories import InvoiceFactory, StudentFactory, UnitInquiryFactory
 from roster.models import Invoice
