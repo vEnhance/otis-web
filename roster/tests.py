@@ -66,7 +66,7 @@ class RosterTest(OTISTestCase):
 		self.assertHas(response, checksum)
 
 	def test_master_schedule(self):
-		alice = StudentFactory.create()
+		alice = StudentFactory.create(user__first_name="Adalhaidis")
 		units = UnitFactory.create_batch(10)
 		alice.curriculum.set(units[0:8])
 		self.login(UserFactory.create(is_staff=True))
