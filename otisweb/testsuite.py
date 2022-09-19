@@ -214,7 +214,7 @@ class OTISTestCase(TestCase):
 		return resp
 
 	def assertPostBecomesLoginRedirect(self, name: str, *args: Any, **kwargs: Any):
-		redirectURL = '/accounts/login?next=' + reverse_lazy(name, args=args)
+		redirectURL = '/accounts/login/?next=' + reverse_lazy(name, args=args)
 		resp = self.post(name, *args, **kwargs)
 		self.assertRedirects(resp, redirectURL)
 		return resp
