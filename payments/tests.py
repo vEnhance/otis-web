@@ -1,9 +1,9 @@
 from django.conf import settings
-from otisweb.testsuite import OTISTestCase
+from evans_django_tools.testsuite import EvanTestCase
 from roster.factories import InvoiceFactory, StudentFactory
 
 
-class PaymentTest(OTISTestCase):
+class PaymentTest(EvanTestCase):
 	def test_invoice_standalone(self):
 		alice = StudentFactory.create()
 		invoice = InvoiceFactory.create(student=alice)

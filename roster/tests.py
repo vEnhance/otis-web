@@ -1,7 +1,7 @@
 from core.factories import UnitFactory, UnitGroupFactory, UserFactory  # NOQA
 from django.conf import settings
 from django.shortcuts import get_object_or_404
-from otisweb.testsuite import OTISTestCase
+from evans_django_tools.testsuite import EvanTestCase
 
 from roster.factories import AssistantFactory, InvoiceFactory, RegistrationContainerFactory, StudentFactory, StudentRegistrationFactory  # NOQA
 from roster.models import Student, StudentRegistration
@@ -9,7 +9,7 @@ from roster.models import Student, StudentRegistration
 from .admin import build_students
 
 
-class RosterTest(OTISTestCase):
+class RosterTest(EvanTestCase):
 	def test_curriculum(self):
 		staff = AssistantFactory.create()
 		alice = StudentFactory.create(assistant=staff)

@@ -28,7 +28,7 @@ from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
-from dwhandler import SUCCESS_LOG_LEVEL, VERBOSE_LOG_LEVEL
+from evans_django_tools import SUCCESS_LOG_LEVEL, VERBOSE_LOG_LEVEL
 from exams.models import PracticeExam
 from markets.models import Market
 from otisweb.utils import AuthHttpRequest, get_mailchimp_campaigns

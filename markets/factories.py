@@ -4,7 +4,7 @@ from factory.declarations import PostGenerationMethodCall, SubFactory
 from factory.django import DjangoModelFactory
 from factory.faker import Faker
 from factory.fuzzy import FuzzyDecimal
-from otisweb.testsuite import UniqueFaker
+from evans_django_tools.testsuite import UniqueFaker
 
 from .models import Guess, Market
 

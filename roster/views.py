@@ -37,7 +37,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 from django.views.generic.edit import UpdateView
 from django.views.generic.list import ListView
-from dwhandler import ACTION_LOG_LEVEL, SUCCESS_LOG_LEVEL
+from evans_django_tools import ACTION_LOG_LEVEL, SUCCESS_LOG_LEVEL
 from otisweb.decorators import admin_required
 from otisweb.utils import AuthHttpRequest, mailchimp_subscribe
 

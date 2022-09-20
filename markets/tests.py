@@ -1,7 +1,7 @@
 from core.factories import UserFactory
 from django.utils import timezone
 from freezegun import freeze_time
-from otisweb.testsuite import OTISTestCase
+from evans_django_tools.testsuite import EvanTestCase
 
 from markets.factories import GuessFactory, MarketFactory
 from markets.models import Guess, Market
@@ -9,7 +9,7 @@ from markets.models import Guess, Market
 UTC = timezone.utc
 
 
-class MarketModelTests(OTISTestCase):
+class MarketModelTests(EvanTestCase):
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()
@@ -61,7 +61,7 @@ class MarketModelTests(OTISTestCase):
 		str(GuessFactory.create())
 
 
-class MarketTests(OTISTestCase):
+class MarketTests(EvanTestCase):
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()

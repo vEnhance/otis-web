@@ -1,5 +1,5 @@
 from django.test.utils import override_settings
-from otisweb.testsuite import OTISTestCase
+from evans_django_tools.testsuite import EvanTestCase
 from roster.factories import StudentFactory
 
 from core.factories import SemesterFactory, UnitFactory, UserFactory
@@ -7,7 +7,7 @@ from core.models import Semester
 from core.utils import storage_hash
 
 
-class TestCore(OTISTestCase):
+class TestCore(EvanTestCase):
 	def test_semester_url(self):
 		SemesterFactory.create_batch(5)
 		for sem in Semester.objects.all():

@@ -2,7 +2,7 @@ from core.factories import SemesterFactory, UserFactory
 from django.test.utils import override_settings
 from django.utils import timezone
 from freezegun import freeze_time
-from otisweb.testsuite import OTISTestCase
+from evans_django_tools.testsuite import EvanTestCase
 from roster.factories import StudentFactory
 from roster.models import Student
 
@@ -13,7 +13,7 @@ from exams.models import ExamAttempt, MockCompleted, PracticeExam
 UTC = timezone.utc
 
 
-class ArithmeticTest(OTISTestCase):
+class ArithmeticTest(EvanTestCase):
 	def checkCalculator(self, expr: str, out: float):
 		v = expr_compute(expr)
 		assert v is not None
@@ -30,7 +30,7 @@ class ArithmeticTest(OTISTestCase):
 		pass
 
 
-class ExamTest(OTISTestCase):
+class ExamTest(EvanTestCase):
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()

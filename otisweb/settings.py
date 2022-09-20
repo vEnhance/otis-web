@@ -9,13 +9,13 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 import django_stubs_ext
-import dwhandler
+import evans_django_tools
 import import_export.tmp_storages
 from dotenv import load_dotenv
 
 django_stubs_ext.monkeypatch()
 
-assert dwhandler is not None
+assert evans_django_tools is not None
 
 BASE_DIR = Path(__file__).parent.parent.absolute()
 ENV_PATH = BASE_DIR / '.env'
@@ -295,7 +295,7 @@ LOGGING = {
 				},
 			'discord':
 				{
-					'class': 'dwhandler.DiscordWebhookHandler',
+					'class': 'evans_django_tools.DiscordWebhookHandler',
 					'level': 'VERBOSE',
 					'filters': ['require_debug_false', 'filter_useless_404'],
 				}
@@ -330,4 +330,4 @@ LOGGING = {
 		},
 }
 if TESTING:
-	logging.disable(dwhandler.ACTION_LOG_LEVEL)
+	logging.disable(evans_django_tools.ACTION_LOG_LEVEL)

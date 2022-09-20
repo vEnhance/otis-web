@@ -4,7 +4,7 @@ from arch.models import Hint
 from core.factories import SemesterFactory, UnitFactory
 from dashboard.factories import PSetFactory
 from django.test.utils import override_settings
-from otisweb.testsuite import OTISTestCase
+from evans_django_tools.testsuite import EvanTestCase
 from payments.factories import PaymentLogFactory
 from roster.factories import InvoiceFactory, StudentFactory, UnitInquiryFactory
 from roster.models import Invoice
@@ -14,7 +14,7 @@ TARGET_HASH = sha256(EXAMPLE_PASSWORD.encode('ascii')).hexdigest()
 
 
 @override_settings(API_TARGET_HASH=TARGET_HASH)
-class TestAincrad(OTISTestCase):
+class TestAincrad(EvanTestCase):
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()

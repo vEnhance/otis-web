@@ -10,7 +10,7 @@ from django.db.models.expressions import OuterRef, Subquery
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
 from django.utils import timezone
-from dwhandler import SUCCESS_LOG_LEVEL
+from evans_django_tools import SUCCESS_LOG_LEVEL
 from exams.models import ExamAttempt, MockCompleted
 from markets.models import Guess
 from reversion.models import Version

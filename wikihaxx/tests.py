@@ -1,6 +1,6 @@
 from core.factories import UnitFactory, UserFactory
 from dashboard.factories import AchievementFactory
-from otisweb.testsuite import OTISTestCase
+from evans_django_tools.testsuite import EvanTestCase
 
 from wikihaxx.mdx.otis import OTISPreprocessor
 
@@ -42,7 +42,7 @@ YouTube | vEnhance
 """
 
 
-class WikiTest(OTISTestCase):
+class WikiTest(EvanTestCase):
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()

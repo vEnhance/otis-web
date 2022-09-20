@@ -4,7 +4,7 @@ from io import StringIO
 from core.factories import UnitFactory, UserFactory
 from django.utils import timezone
 from exams.factories import ExamAttemptFactory, TestFactory
-from otisweb.testsuite import OTISTestCase
+from evans_django_tools.testsuite import EvanTestCase
 from roster.factories import StudentFactory
 from roster.models import Student
 
@@ -17,7 +17,7 @@ from dashboard.views import annotate_student_queryset_with_scores, get_level_inf
 utc = timezone.utc
 
 
-class TestLevelSystem(OTISTestCase):
+class TestLevelSystem(EvanTestCase):
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()
@@ -227,7 +227,7 @@ class TestLevelSystem(OTISTestCase):
 		self.assertGet20X('leaderboard')
 
 
-class TestSubmitPSet(OTISTestCase):
+class TestSubmitPSet(EvanTestCase):
 	def test_submit(self):
 		unit1 = UnitFactory.create(code='BMW')
 		unit2 = UnitFactory.create(code='DMX')
@@ -393,7 +393,7 @@ class TestSubmitPSet(OTISTestCase):
 		self.assertEqual(get_units_to_unlock(alice).count(), 11)
 
 
-class TestPalace(OTISTestCase):
+class TestPalace(EvanTestCase):
 	def test_palace(self):
 		alice = StudentFactory.create()
 		self.login(alice)
