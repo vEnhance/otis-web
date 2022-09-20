@@ -5,7 +5,7 @@ from .models import Hint, Problem
 
 
 class HintInline(admin.TabularInline):
-	model = Hint  # type: ignore
+	model = Hint
 	fields = ('number', 'keywords', 'content')
 	extra = 0
 

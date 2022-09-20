@@ -77,7 +77,7 @@ class UnitAdmin(ImportExportModelAdmin):
 
 
 class UnitInline(admin.TabularInline):
-	model = Unit  # type: ignore
+	model = Unit
 	fields = (
 		'code',
 		'position',
