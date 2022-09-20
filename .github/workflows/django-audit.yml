@@ -7,5 +7,5 @@ on:
     branches: [ '*' ]
 
 jobs:
-  call-django-audit:
+  audit:
     uses: vEnhance/evans_django_tools/.github/workflows/django-audit.yml@main
