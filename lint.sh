@@ -45,6 +45,15 @@ else
 	echo -e ""
 fi
 
+echo -e "\033[1;35mRunning manage.py check ...\033[0m"
+echo -e "---------------------------"
+if ! python manage.py check; then
+	echo -e "$FAILED_HEADER python manage.py check failed"
+	echo $COMMIT_ID > $BAD_FILE
+	exit 1
+fi
+echo -e ""
+
 echo -e "\033[1;35mRunning pyflakes ...\033[0m"
 echo -e "---------------------------"
 if ! pyflakes .; then
@@ -70,15 +79,6 @@ if ! yapf -d $TO_CHECK; then
 	echo -e "$FAILED_HEADER Some files that needed in-place edits, editing now..."
 	yapf --in-place $TO_CHECK
 	echo -e "Better check your work!"
-	echo $COMMIT_ID > $BAD_FILE
-	exit 1
-fi
-echo -e ""
-
-echo -e "\033[1;35mRunning manage.py check ...\033[0m"
-echo -e "---------------------------"
-if ! python manage.py check; then
-	echo -e "$FAILED_HEADER python manage.py check failed"
 	echo $COMMIT_ID > $BAD_FILE
 	exit 1
 fi
