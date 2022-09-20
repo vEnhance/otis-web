@@ -1,1 +1,0 @@
-../../evans_django_tools/workflows/pyright_to_rdjson.py

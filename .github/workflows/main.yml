@@ -1,1 +1,3 @@
-../../evans_django_tools/workflows/main.yml
+jobs:
+  call-main:
+    uses: vEnhance/evans_django_tools/workflows/main.yml

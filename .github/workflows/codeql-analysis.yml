@@ -1,1 +1,3 @@
-../../evans_django_tools/workflows/codeql-analysis.yml
+jobs:
+  call-codeql:
+    uses: vEnhance/evans_django_tools/workflows/codeql-analysis.yml
