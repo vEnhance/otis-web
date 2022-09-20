@@ -1,0 +1,11 @@
+name: Django Audit
+
+on:
+  push:
+    branches: [ '*' ]
+  pull_request:
+    branches: [ '*' ]
+
+jobs:
+  call-django-audit:
+    uses: vEnhance/evans_django_tools/.github/workflows/django-audit.yml@main
