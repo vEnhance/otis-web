@@ -20,10 +20,14 @@
 				class="table-warning fw-bold"
 			{% endif %}
 			>
-			<td>{{ forloop.counter }}</td>
-			{% if request.user.is_superuser %}
-				<td><a href="{% url "admin:dashboard_pset_change" pset.id %}">{{ pset.unit }}</a></td>
-			{% elif pset.student.user == request.user %}
+			<td>
+				{% if request.user.is_staff %}
+					<a href="{% url "admin:dashboard_pset_change" pset.id %}">{{ forloop.counter }}</a>
+				{% else %}
+					{{ forloop.counter }}
+				{% endif %}
+			</td>
+			{% if pset.student.user == request.user or request.user.is_staff %}
 				<td><a href="{{ pset.get_absolute_url }}">{{ pset.unit }}</a></td>
 			{% else %}
 				<td>{{ pset.unit }}</td>
