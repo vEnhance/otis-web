@@ -1,1 +1,0 @@
-evans_django_tools/lint.sh

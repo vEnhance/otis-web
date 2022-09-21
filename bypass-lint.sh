@@ -1,1 +1,0 @@
-evans_django_tools/bypass-lint.sh
