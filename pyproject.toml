@@ -53,12 +53,6 @@ types-freezegun = "^1.1.2"
 types-requests = "^2.28.9"
 yapf = "^0.32.0"
 
-[tool.poetry.group.server]
-optional = true
-
-[tool.poetry.group.server.dependencies]
-poetry = "^1.2.1"
-
 [tool.yapf]
 based_on_style = "facebook"
 column_limit = 96
