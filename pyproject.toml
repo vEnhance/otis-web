@@ -28,6 +28,7 @@ django-storages = {extras = ["google"], version = "^1.11.1"}
 django-stubs = "^1.10.1"
 django-stubs-ext = "^0.5.0"
 django-qr-code = "^3.0.0"
+ipython = "^8.4.0"
 mailchimp3 = "^3.0.15"
 pyparsing = "^3.0.9"
 python-dotenv = "^0.21.0"
@@ -41,7 +42,6 @@ Faker = "^14.1.0"
 coverage = {extras = ["toml"], version = "^6.4.3"}
 factory-boy = "^3.2.0"
 freezegun = "^1.1.0"
-ipython = "^8.4.0"
 jedi = "^0.18.0"
 pdbpp = "^0.10.3"
 pyflakes = "^2.3.1"
@@ -52,6 +52,12 @@ types-Markdown = "^3.3.6"
 types-freezegun = "^1.1.2"
 types-requests = "^2.28.9"
 yapf = "^0.32.0"
+
+[tool.poetry.group.server]
+optional = true
+
+[tool.poetry.group.server.dependencies]
+poetry = "^1.2.1"
 
 [tool.yapf]
 based_on_style = "facebook"
