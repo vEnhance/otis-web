@@ -9,32 +9,22 @@
 
 	<p class="text-center">
 		<b class="fs-5">Amount to pay:</b>
-		<input
-			id="amount"
-			type="number"
-			min="0"
-			max="{{invoice.total_owed|floatformat:0}}"
-			value="{{invoice.total_owed|floatformat:0}}"
-			/>
-		<input
-			id="invoice_id"
-			type="hidden"
-			value="{{invoice.id}}"
-			/>
+		<input id="amount" type="number" min="0" max="{{invoice.total_owed|floatformat:0}}" value="{{invoice.total_owed|floatformat:0}}" />
+		<input id="invoice_id" type="hidden" value="{{invoice.id}}" />
 		<button class="button is-primary btn btn-success" id="payButton">Pay</button>
 	</p>
 	<p>
-	If you don't want to pay by credit card, see
-	<a href="{% static "info/parent-info.pdf" %}">parent info</a> (section 4.2)
-	for alternative methods.
+		If you don't want to pay by credit/debit card, see
+		<a href="{% static "info/parent-info.pdf" %}">parent info</a> (section 4.2)
+		for alternative methods.
 	</p>
 	<hr />
 	<p>
 		<small>
 			<p>Direct link to this invoice:<br />
-			<a href="{% url "payments-invoice" student.id checksum %}">
-				https://otis.evanchen.cc{% url "payments-invoice" student.id checksum %}
-			</a>
+				<a href="{% url "payments-invoice" student.id checksum %}">
+					https://otis.evanchen.cc{% url "payments-invoice" student.id checksum %}
+				</a>
 			</p>
 		</small>
 	</p>
