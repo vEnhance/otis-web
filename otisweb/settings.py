@@ -201,7 +201,7 @@ USE_TZ = True
 DATETIME_FORMAT = 'd M Y H:i'
 DATE_FORMAT = 'd M Y'
 TIME_FORMAT = 'H:i'
-SHORT_DATE_FORMAT = 'd M Y'
+SHORT_DATE_FORMAT = 'Y-m-d'  # ISO 8601
 
 # Static files (CSS, JavaScript, Images)
 

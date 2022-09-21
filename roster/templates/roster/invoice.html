@@ -53,10 +53,10 @@
 <p>As a reminder, the payment deadlines are:</p>
 <ul>
 	{% if student.semester.first_payment_deadline %}
-	<li>{{ student.semester.first_payment_deadline|date:"F j, Y" }}</li>
+	<li>{{ student.semester.first_payment_deadline|date }}</li>
 	{% endif %}
 	{% if student.semester.most_payment_deadline %}
-	<li>{{ student.semester.most_payment_deadline|date:"F j, Y" }}</li>
+	<li>{{ student.semester.most_payment_deadline|date }}</li>
 	{% endif %}
 </ul>
 {% endif %}

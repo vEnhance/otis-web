@@ -54,27 +54,27 @@
 	</h1>
 	{% if student.payment_status == 1 %}
 	As a quick reminder, the payment deadline
-	{{ semester.first_payment_deadline|date:"Y-m-d" }}
+	{{ semester.first_payment_deadline|date }}
 	is coming soon.
 	{% elif student.payment_status == 2 %}
 	The payment deadline
-	{{ semester.first_payment_deadline|date:"Y-m-d" }}
+	{{ semester.first_payment_deadline|date }}
 	has passed, but no payment was received.
 	{% elif student.payment_status == 3 %}
 	More than a week since the deadline
-	{{ semester.first_payment_deadline|date:"Y-m-d" }}
+	{{ semester.first_payment_deadline|date }}
 	has passed, but no payment is recorded.
 	{% elif student.payment_status == 5 %}
 	As a quick reminder, the deadline
-	{{ semester.most_payment_deadline|date:"Y-m-d" }}
+	{{ semester.most_payment_deadline|date }}
 	for full payment is coming soon.
 	{% elif student.payment_status == 6 %}
 	The payment deadline
-	{{ semester.most_payment_deadline|date:"Y-m-d" }}
+	{{ semester.most_payment_deadline|date }}
 	has passed, but your payment is incomplete!
 	{% elif student.payment_status == 7 %}
 	More than a week since the deadline
-	{{ semester.most_payment_deadline|date:"Y-m-d" }}
+	{{ semester.most_payment_deadline|date }}
 	has passed, but your payment is incomplete.
 	{% endif %}
 	<a href="{% url 'invoice' student.id %}" class="alert-link">Link to invoice.</a>

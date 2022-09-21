@@ -32,11 +32,11 @@
 		</td>
 
 		{% if exam.overdue %}
-		<td>Ended {{ exam.due_date|date:"DATE_FORMAT" }}</td>
+		<td>Ended {{ exam.due_date|date }}</td>
 		{% elif exam.started %}
-		<td>Due {{ exam.due_date|date:"DATE_FORMAT" }}</td>
+		<td>Due {{ exam.due_date|date }}</td>
 		{% else %}
-		<td>Open {{ exam.start_date|date:"DATE_FORMAT" }} &ndash; {{ exam.due_date|date:"DATE_FORMAT" }}</td>
+		<td>Open {{ exam.start_date|date }} &ndash; {{ exam.due_date|date }}</td>
 		{% endif %}
 	</tr>
 	{% endfor %}
