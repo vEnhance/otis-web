@@ -29,7 +29,6 @@
 {% else %}
 <p>There is <strong>no password</strong> set right now.
 	You may <a href="{% url "account_set_password" %}">set a password</a> now.
-	Please <a href="https://github.com/Hanabi-Live/hanabi-live/blob/main/docs/PASSWORDS.md">do not re-use old passwords</a>.
 </p>
 <p><a href="{% url "account_set_password" %}" class="btn btn-primary" role="button">Set password</a></p>
 {% endif %}
