@@ -15,7 +15,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from django.db.models import Count, OuterRef, Subquery
 from django.db.models.expressions import Exists
 from django.db.models.query import QuerySet
@@ -144,7 +144,8 @@ class AchievementList(LoginRequiredMixin, ListView[Achievement]):
 	template_name = 'dashboard/diamond_list.html'
 
 	def get_queryset(self) -> QuerySet[Achievement]:
-		assert isinstance(self.request.user, User)
+		if not isinstance(self.request.user, User):
+			raise PermissionDenied("Please log in")
 		return Achievement.objects.filter(active=True).annotate(
 			num_found=SubqueryAggregate('achievementunlock', aggregate=Count),
 			obtained=Exists(
@@ -281,7 +282,8 @@ def resubmit_pset(request: HttpRequest, pk: int) -> HttpResponse:
 
 	if request.method == 'POST' and form.is_valid():
 		pset = form.save(commit=False)
-		assert pset.upload is not None
+		if pset.upload is None:
+			raise SuspiciousOperation("There was no uploaded file")
 		pset.upload.content = form.cleaned_data['content']
 		pset.upload.save()
 		if pset.approved:
@@ -422,7 +424,6 @@ class UpdateFile(LoginRequiredMixin, UpdateView[UploadedFile, BaseModelForm[Uplo
 
 	def get_object(self, *args: Any, **kwargs: Any) -> UploadedFile:
 		obj = super(UpdateFile, self).get_object(*args, **kwargs)
-		assert isinstance(obj, UploadedFile)
 		is_staff = getattr(self.request.user, 'is_staff', False)
 		if obj.owner != self.request.user and is_staff is False:
 			raise PermissionDenied("Not authorized to update this file")
@@ -435,7 +436,6 @@ class DeleteFile(LoginRequiredMixin, DeleteView):
 
 	def get_object(self, *args: Any, **kwargs: Any) -> UploadedFile:
 		obj = super(DeleteFile, self).get_object(*args, **kwargs)
-		assert isinstance(obj, UploadedFile)
 		if not obj.owner == self.request.user and getattr(self.request.user, 'is_staff', False):
 			raise PermissionDenied("Not authorized to delete this file")
 		return obj
@@ -478,7 +478,6 @@ class PSetDetail(LoginRequiredMixin, DetailView[PSet]):
 
 	def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
 		pset = self.get_object()
-		assert isinstance(pset, PSet)
 		if not can_view(request, pset.student):
 			raise PermissionDenied("Can't view work by this student")
 		return super(DetailView, self).dispatch(request, *args, **kwargs)
@@ -520,7 +519,8 @@ class ProblemSuggestionCreate(
 		return initial
 
 	def form_valid(self, form: BaseModelForm[ProblemSuggestion]):
-		assert isinstance(self.request.user, User)
+		if not isinstance(self.request.user, User):
+			raise PermissionDenied("Please log in")
 		form.instance.user = self.request.user
 		messages.success(
 			self.request,
@@ -558,7 +558,8 @@ class ProblemSuggestionUpdate(
 
 	def get_context_data(self, **kwargs: Any):
 		context = super().get_context_data(**kwargs)
-		assert isinstance(self.request.user, User)
+		if not isinstance(self.request.user, User):
+			raise PermissionDenied("Please log in.")
 		if not (self.request.user.is_staff or self.request.user == self.object.user):
 			raise PermissionDenied("Logged-in user cannot view this suggestion")
 		return context
@@ -568,7 +569,8 @@ class ProblemSuggestionList(LoginRequiredMixin, ListView[ProblemSuggestion]):
 	context_object_name = "problem_suggestions"
 
 	def get_queryset(self):
-		assert isinstance(self.request.user, User)
+		if not isinstance(self.request.user, User):
+			raise PermissionDenied("Please log in.")
 		queryset = ProblemSuggestion.objects.filter(user=self.request.user)
 		queryset = queryset.order_by('resolved', 'created_at')
 		return queryset
