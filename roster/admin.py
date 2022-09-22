@@ -216,20 +216,24 @@ class InvoiceInline(admin.StackedInline):
 @admin.register(Student)
 class StudentAdmin(ImportExportModelAdmin):
 	list_display = (
-		'name',
-		'user',
 		'id',
+		'name',
 		'semester',
+		'enabled',
 		'legit',
-		'track',
+	)
+	list_display_links = (
+		'id',
+		'name',
+		'semester',
 	)
 	list_filter = (
-		'assistant',
 		'semester__active',
-		'semester',
 		'legit',
-		'track',
+		'enabled',
 		'newborn',
+		'semester',
+		'track',
 	)
 	search_fields = (
 		'user__first_name',
