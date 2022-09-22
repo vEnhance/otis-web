@@ -72,6 +72,13 @@ class Student(models.Model):
 		on_delete=models.SET_NULL,
 		help_text="The assistant for this student, if any"
 	)
+	reg = models.OneToOneField(
+		'StudentRegistration',
+		blank=True,
+		null=True,
+		on_delete=models.SET_NULL,
+		help_text="Link to the registration forms for the student"
+	)
 
 	curriculum = models.ManyToManyField(
 		Unit,

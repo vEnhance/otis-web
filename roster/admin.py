@@ -287,6 +287,7 @@ def build_students(queryset: QuerySet[StudentRegistration]) -> int:
 				user=registration.user,
 				semester=registration.container.semester,
 				track=registration.track,
+				reg=registration,
 			)
 		)
 		n = registration.container.num_preps
