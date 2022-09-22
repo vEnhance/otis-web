@@ -1,4 +1,4 @@
-name: Django Audit
+name: CI
 
 on:
   push:
