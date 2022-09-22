@@ -1,3 +1,4 @@
+from django.shortcuts import redirect
 from django.urls import path
 
 from . import views
@@ -8,13 +9,15 @@ urlpatterns = [
 	path(r'advance/<int:student_id>/', views.advance, name='advance'),
 	path(r'invoice/', views.invoice, name='invoice'),
 	path(r'invoice/<int:student_id>/', views.invoice, name='invoice'),
-	path(r'master_schedule/', views.master_schedule, name='master-schedule'),
+	path(r'master-schedule/', views.master_schedule, name='master-schedule'),
 	path(r'edit-invoice/<int:pk>/', views.UpdateInvoice.as_view(), name='edit-invoice'),
 	path(r'inquiry/<int:student_id>/', views.inquiry, name='inquiry'),
 	path(r'register/', views.register, name='register'),
 	path(r'profile/', views.update_profile, name='update-profile'),
 	path(r'mega-sheet/', views.mega_sheet, name='mega-sheet'),
-	path(r'mystery_unlock/easier/', views.unlock_rest_of_mystery, kwargs={'delta': 1}),
-	path(r'mystery_unlock/harder/', views.unlock_rest_of_mystery, kwargs={'delta': 2}),
+	path(r'mystery_unlock/easier/', lambda request: redirect('../../mystery-unlock/easier/')),
+	path(r'mystery_unlock/harder/', lambda request: redirect('../../mystery-unlock/harder/')),
+	path(r'mystery-unlock/easier/', views.unlock_rest_of_mystery, kwargs={'delta': 1}),
+	path(r'mystery-unlock/harder/', views.unlock_rest_of_mystery, kwargs={'delta': 2}),
 	path(r'instructors/', views.StudentAssistantList.as_view(), name='instructors'),
 ]
