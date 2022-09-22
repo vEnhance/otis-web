@@ -529,3 +529,25 @@ class StudentAssistantList(StaffuserRequiredMixin, ListView[Student]):
 		qs = qs.select_related('user', 'assistant', 'assistant__user')
 		qs = qs.order_by('assistant__shortname', 'user__first_name', 'user__last_name')
 		return qs
+
+	def get_context_data(self, **kwargs: Any):
+		context = super().get_context_data(**kwargs)
+		qs1 = Student.objects.filter(semester__active=True, assistant__isnull=False)
+		qs1 = qs1.select_related('assistant__user')
+		pks1 = qs1.values_list('assistant__user__pk', flat=True)
+		group, _ = Group.objects.get_or_create(name="Active Staff")
+		qs2: QuerySet[User] = group.user_set.all()  # type: ignore
+		pks2 = qs2.values_list('pk', flat=True)
+		context['needs_sync'] = (set(pks1) != set(pks2))
+		return context
+
+	def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+		if not isinstance(request.user, User) or not request.user.is_superuser:
+			raise PermissionDenied("Need admin rights to run this POST request.")
+		group, _ = Group.objects.get_or_create(name="Active Staff")
+		qs = Student.objects.filter(semester__active=True, assistant__isnull=False)
+		qs = qs.select_related('assistant__user')
+		pks = qs.values_list('assistant__user__pk', flat=True)
+		group.user_set.set(pks)  # type: ignore
+		messages.success(request, "Synced active staff group!")
+		return super().get(request, *args, **kwargs)

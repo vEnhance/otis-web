@@ -1,5 +1,7 @@
 from core.factories import UnitFactory, UnitGroupFactory, UserFactory  # NOQA
 from django.conf import settings
+from django.contrib.auth.models import Group, User
+from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404
 from evans_django_tools.testsuite import EvanTestCase
 
@@ -199,6 +201,7 @@ class RosterTest(EvanTestCase):
 				user__first_name=f"F{i}",
 				user__last_name=f"L{i}",
 				user__email=f"user{i}@evanchen.cc",
+				shortname=f"Short{i}",
 			)
 			StudentFactory.create_batch(i * i, user__first_name="GoodKid", assistant=asst)
 		StudentFactory.create(user__first_name="BadKid")
@@ -209,7 +212,27 @@ class RosterTest(EvanTestCase):
 			self.assertHas(resp, f'"F{i} L{i}"')
 			self.assertHas(resp, f'user{i}@evanchen.cc')
 		self.assertHas(resp, "GoodKid", count=1 + 4 + 9 + 16 + 25)
+		self.assertHas(resp, r'&lt;user5@evanchen.cc&gt;')
 		self.assertNotHas(resp, "BadKid")
+		self.assertNotHas(resp, "out of sync")  # only admins can see the sync button
+
+		admin = UserFactory.create(is_staff=True, is_superuser=True)
+		self.login(admin)
+		resp = self.assertGet20X('instructors')
+		self.assertHas(resp, "out of sync")
+
+		group = Group.objects.get(name="Active Staff")
+		qs: QuerySet[User] = group.user_set.all()  # type: ignore
+		self.assertEqual(qs.count(), 0)
+
+		resp = self.assertPostOK('instructors')
+		self.assertEqual(qs.count(), 5)
+		self.assertNotHas(resp, "out of sync")
+		resp = self.assertGetOK('instructors')
+		self.assertNotHas(resp, "out of sync")
+
+		self.login(staff)
+		self.assertPost40X('instructors')  # staff can't post
 
 
 # TODO tests for reg

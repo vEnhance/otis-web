@@ -4,7 +4,23 @@
 {% block layout-content %}
 {% regroup students by assistant as instructor_list %}
 
+{% if needs_sync and request.user.is_superuser %}
+<div class="alert alert-warning">
+	The "Active Staff" group is out of sync
+	with the list of actual instructors.
+	Click below to fix this.
+	<form action="{% url "instructors" %}" method="post">
+		{% csrf_token %}
+		<p class="text-center">
+			<input type="submit" class="btn btn-warning" value="Sync" />
+		</p>
+	</form>
+</div>
+<hr />
+{% endif %}
+
 <h2>List of instructors</h2>
+
 <table class="table">
 	<tr>
 		<th>Name</th>
