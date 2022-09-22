@@ -405,15 +405,15 @@ def unlock_rest_of_mystery(request: HttpRequest, delta: int = 1) -> HttpResponse
 
 
 @admin_required
-def spreadsheet(request: HttpRequest) -> HttpResponse:
+def mega_sheet(request: HttpRequest) -> HttpResponse:
 	queryset = Invoice.objects.filter(student__legit=True)
 	queryset = queryset.filter(student__semester__active=True)
 	queryset = queryset.select_related(
 		'student__user',
+		'student__reg',
 		'student__semester',
 		'student__user__profile',
 	)
-	queryset = queryset.prefetch_related('student__user__regs')
 	queryset = queryset.annotate(
 		owed=Cast(
 			F("student__semester__prep_rate") * F("preps_taught") +
@@ -428,22 +428,30 @@ def spreadsheet(request: HttpRequest) -> HttpResponse:
 	queryset = queryset.order_by('debt')
 	timestamp = timezone.now().strftime('%Y-%m-%d-%H%M%S')
 
+	if settings.TESTING is True:
+		where = "test"
+	elif settings.DEBUG is True:
+		where = "debug"
+	else:
+		where = "prod"
+	filename = f"otis-{where}-{timestamp}.csv"
+
 	response = HttpResponse(
 		content_type='text/csv',
-		headers={'Content-Disposition': f'attachment; filename="otis-{timestamp}.csv"'},
+		headers={'Content-Disposition': f'attachment; filename="{filename}"'},
 	)
-	writer = csv.writer(response)  # type: ignore
+	writer = csv.writer(response)
 	writer.writerow(
 		[
 			'ID',
 			'Username',
 			'Name',
 			'Debt',
-			'Enabled'
+			'Enabled',
 			'Track',
-			'Login',
+			'Last login (days)',
+			'Grade',
 			'Gender',
-			'Year',
 			'Country',
 			'AoPS',
 			'Student email',
@@ -467,9 +475,7 @@ def spreadsheet(request: HttpRequest) -> HttpResponse:
 		days_since_last_seen = round(delta.total_seconds() / (3600 * 24), ndigits=2)
 		debt_percent = round(invoice.debt, ndigits=2)
 
-		try:
-			reg = user.regs.get(container__semester__active=True)
-		except StudentRegistration.DoesNotExist:
+		if student.reg is None:
 			writer.writerow(
 				[
 					student.pk,
@@ -479,6 +485,7 @@ def spreadsheet(request: HttpRequest) -> HttpResponse:
 					"Enabled" if student.enabled else "Disabled",
 					student.track,
 					days_since_last_seen,
+					"",
 					"",
 					"",
 					"",
@@ -504,12 +511,12 @@ def spreadsheet(request: HttpRequest) -> HttpResponse:
 					"Enabled" if student.enabled else "Disabled",
 					student.track,
 					days_since_last_seen,
-					reg.gender,
-					reg.graduation_year,
-					reg.country,
-					reg.aops_username,
+					student.reg.grade,
+					student.reg.get_gender_display(),
+					student.reg.country,
+					student.reg.aops_username,
 					user.email,
-					reg.parent_email,
+					student.reg.parent_email,
 					invoice.owed,
 					invoice.preps_taught,
 					invoice.hours_taught,
