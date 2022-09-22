@@ -68,6 +68,7 @@ def portal(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 	context['title'] = f"{student.name} ({semester.name})"
 	context['last_seen'] = student_profile.last_seen
 	context['student'] = student
+	context['reg'] = student.reg
 	context['semester'] = semester
 	context['profile'] = profile
 	context['omniscient'] = can_edit(request, student)

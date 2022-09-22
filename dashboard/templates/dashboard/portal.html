@@ -12,14 +12,16 @@
 	<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 	<table class="table">
 		<tr>
-			<td>{{ student.get_track_display }}</td>
-			<td><code>{{student.user.username}}</code></td>
-			<td>{{ last_seen|naturaltime }}</td>
+			<td><tt>{{student.user.username}}</tt></td>
+			<td><code>{{student.user.email}}</code></td>
 		</tr>
 		<tr>
-			<td>{{ student.assistant.shortname|default:"No assistant" }}</td>
-			<td><code>{{student.user.email}}</code></td>
+			<td>{{ last_seen|naturaltime }}</td>
 			<td><code>{{ linked.discord.0.get_provider_account|default:"No Discord" }}</code></td>
+		</tr>
+		<tr>
+			<td>{{ reg.country }} ({{ reg.grade }}{{ reg.gender }})</td>
+			<td><code>{{ reg.aops_username|default:"No AoPS" }}</code></td>
 		</tr>
 	</table>
 </div>
