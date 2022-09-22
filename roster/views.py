@@ -422,7 +422,7 @@ def spreadsheet(request: HttpRequest) -> HttpResponse:
 		)
 	)
 	queryset = queryset.annotate(
-		debt=Cast(F("owed") / (F("owed") + F("total_paid") + 1), FloatField())
+		debt=Cast(F("owed") / (F("owed") + F("total_paid") + 1e-8), FloatField())
 	)
 
 	queryset = queryset.order_by('debt')
@@ -439,6 +439,7 @@ def spreadsheet(request: HttpRequest) -> HttpResponse:
 			'Username',
 			'Name',
 			'Debt',
+			'Enabled'
 			'Track',
 			'Login',
 			'Gender',
@@ -464,7 +465,7 @@ def spreadsheet(request: HttpRequest) -> HttpResponse:
 			continue
 		delta = (timezone.now() - user.profile.last_seen)
 		days_since_last_seen = round(delta.total_seconds() / (3600 * 24), ndigits=2)
-		debt_percent = round(invoice.debt * 100)
+		debt_percent = round(invoice.debt, ndigits=2)
 
 		try:
 			reg = user.regs.get(container__semester__active=True)
@@ -475,6 +476,7 @@ def spreadsheet(request: HttpRequest) -> HttpResponse:
 					student.user.username if student.user is not None else '',
 					student.name,
 					debt_percent,
+					"Enabled" if student.enabled else "Disabled",
 					student.track,
 					days_since_last_seen,
 					"",
@@ -499,6 +501,7 @@ def spreadsheet(request: HttpRequest) -> HttpResponse:
 					student.user.username if student.user is not None else '',
 					student.name,
 					debt_percent,
+					"Enabled" if student.enabled else "Disabled",
 					student.track,
 					days_since_last_seen,
 					reg.gender,
