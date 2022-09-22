@@ -471,61 +471,35 @@ def mega_sheet(request: HttpRequest) -> HttpResponse:
 		user = student.user
 		if user is None:
 			continue
+		reg = student.reg
 		delta = (timezone.now() - user.profile.last_seen)
 		days_since_last_seen = round(delta.total_seconds() / (3600 * 24), ndigits=2)
-		debt_percent = round(invoice.debt, ndigits=2)
 
-		if student.reg is None:
-			writer.writerow(
-				[
-					student.pk,
-					student.user.username if student.user is not None else '',
-					student.name,
-					debt_percent,
-					"Enabled" if student.enabled else "Disabled",
-					student.track,
-					days_since_last_seen,
-					"",
-					"",
-					"",
-					"",
-					"",
-					user.email,
-					"",
-					invoice.owed,
-					invoice.preps_taught,
-					invoice.hours_taught,
-					invoice.adjustment,
-					invoice.extras,
-					invoice.total_paid,
-					invoice.forgive,
-				]
-			)
-		else:
-			writer.writerow(
-				[
-					student.pk,
-					student.user.username if student.user is not None else '',
-					student.name,
-					debt_percent,
-					"Enabled" if student.enabled else "Disabled",
-					student.track,
-					days_since_last_seen,
-					student.reg.grade,
-					student.reg.get_gender_display(),
-					student.reg.country,
-					student.reg.aops_username,
-					user.email,
-					student.reg.parent_email,
-					invoice.owed,
-					invoice.preps_taught,
-					invoice.hours_taught,
-					invoice.adjustment,
-					invoice.extras,
-					invoice.total_paid,
-					invoice.forgive,
-				]
-			)
+		writer.writerow(
+			[
+				student.pk,
+				user.username,
+				student.name,
+				round(invoice.debt, ndigits=2),
+				"Enabled" if student.enabled else "Disabled",
+				student.track,
+				days_since_last_seen,
+				reg.grade if reg is not None else '',
+				reg.get_gender_display() if reg is not None else '',
+				reg.country if reg is not None else '',
+				reg.aops_username if reg is not None else '',
+				user.email,
+				reg.parent_email if reg is not None else '',
+				invoice.owed,
+				invoice.preps_taught,
+				invoice.hours_taught,
+				invoice.adjustment,
+				invoice.extras,
+				invoice.total_paid,
+				invoice.forgive,
+			]
+		)
+
 	return response
 
 
