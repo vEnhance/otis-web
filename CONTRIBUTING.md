@@ -36,7 +36,7 @@ that you can edit however you want.
 
 ### Installation
 
-Follow the [README](README.mkd) instructions.
+Follow the [README](README.md) instructions.
 
 ### Claiming tasks
 

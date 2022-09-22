@@ -60,6 +60,6 @@ Submit an [issue on GitHub](https://github.com/vEnhance/otis-web/issues).
 
 For OTIS students: pull requests welcome!
 If you think the website can be improved in some way, feel free to implement it.
-See [contributing guidelines](.github/CONTRIBUTING.mkd).
+See [contributing guidelines](.github/CONTRIBUTING.md).
 
 `526561645265616452656164`

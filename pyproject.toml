@@ -4,7 +4,7 @@ version = "1.9.0"
 description = "OTIS-WEB Course Management System"
 authors = ["Evan Chen <evan@evanchen.cc>"]
 license = "MIT"
-readme = "README.mkd"
+readme = "README.md"
 repository = "https://github.com/vEnhance/otis-web"
 
 [tool.poetry.dependencies]
