@@ -13,6 +13,7 @@ from django.db.models.query_utils import Q
 from django.http.request import HttpRequest
 from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from roster.models import Invoice, Student, StudentRegistration, UnitInquiry
@@ -171,6 +172,7 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
 		return JsonResponse({'result': 'success'}, status=200)
 	elif action == 'init':
 		output_data: Dict[str, Any] = {}
+		output_data['timestamp'] = str(timezone.now())
 		output_data['_name'] = 'Root'
 		output_data['_children'] = [
 			{

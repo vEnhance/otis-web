@@ -84,7 +84,8 @@ class TestAincrad(EvanTestCase):
 		out = resp.json()
 		self.assertEqual(out['_name'], 'Root')
 		self.assertEqual(len(out['_children'][0]['_children']), 10)
-		self.assertEqual(len(out.keys()), 2)
+		self.assertTrue('timestamp' in out)
+		self.assertEqual(len(out.keys()), 3)
 
 		pset_data = out['_children'][0]
 		self.assertEqual(pset_data['_name'], 'Problem sets')
