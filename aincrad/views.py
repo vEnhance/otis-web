@@ -68,7 +68,8 @@ PSET_VENUEQ_INIT_QUERYSET = PSet.objects.filter(
 		'student__pset',
 		filter=Q(approved=True),
 	),
-).values(
+)
+PSET_VENUEQ_INIT_KEYS = (
 	'pk',
 	'approved',
 	'rejected',
@@ -102,7 +103,8 @@ INQUIRY_VENUEQ_INIT_QUERYSET = UnitInquiry.objects.filter(
 ).annotate(
 	total_inquiry_count=SubqueryCount('student__unitinquiry'),
 	unlock_inquiry_count=SubqueryCount('student__unitinquiry', filter=Q(action_type="UNLOCK")),
-).values(
+)
+INQUIRY_VENUEQ_INIT_KEYS = (
 	'pk',
 	'action_type',
 	'unit__group__name',
@@ -121,7 +123,8 @@ INQUIRY_VENUEQ_INIT_QUERYSET = UnitInquiry.objects.filter(
 	'student__reg__graduation_year',
 )
 
-SUGGESTION_VENUEQ_INIT_QUERYSET = ProblemSuggestion.objects.filter(resolved=False).values(
+SUGGESTION_VENUEQ_INIT_QUERYSET = ProblemSuggestion.objects.filter(resolved=False)
+SUGGESTION_VENUEQ_INIT_KEYS = (
 	'pk',
 	'eligible',
 	'created_at',
@@ -177,13 +180,13 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
 		output_data['_children'] = [
 			{
 				'_name': 'Problem sets',
-				'_children': list(PSET_VENUEQ_INIT_QUERYSET)
+				'_children': list(PSET_VENUEQ_INIT_QUERYSET.values(*PSET_VENUEQ_INIT_KEYS))
 			}, {
 				'_name': 'Inquiries',
-				'inquiries': list(INQUIRY_VENUEQ_INIT_QUERYSET)
+				'inquiries': list(INQUIRY_VENUEQ_INIT_QUERYSET.values(*INQUIRY_VENUEQ_INIT_KEYS))
 			}, {
 				'_name': 'Suggestions',
-				'_children': list(SUGGESTION_VENUEQ_INIT_QUERYSET)
+				'_children': list(SUGGESTION_VENUEQ_INIT_QUERYSET.values(*SUGGESTION_VENUEQ_INIT_KEYS))
 			}
 		]
 		return JsonResponse(output_data, status=200)
