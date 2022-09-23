@@ -52,6 +52,83 @@ class JSONData(TypedDict):
 	entries: Dict[str, float]
 
 
+PSET_VENUEQ_INIT_QUERYSET = PSet.objects.filter(
+	approved=False,
+	rejected=False,
+	student__semester__active=True,
+	student__legit=True,
+	student__enabled=True,
+).annotate(
+	num_approved_all=SubqueryCount(
+		'student__user__student__pset',
+		filter=Q(approved=True),
+	),
+	num_approved_current=SubqueryCount(
+		'student__pset',
+		filter=Q(approved=True),
+	),
+).values(
+	'pk',
+	'approved',
+	'rejected',
+	'resubmitted',
+	'feedback',
+	'special_notes',
+	'student__user__first_name',
+	'student__user__last_name',
+	'student__user__email',
+	'hours',
+	'clubs',
+	'unit__group__name',
+	'unit__group__slug',
+	'unit__code',
+	'next_unit_to_unlock__group__name',
+	'next_unit_to_unlock__code',
+	'upload__content',
+	'num_approved_all',
+	'num_approved_current',
+)
+
+INQUIRY_VENUEQ_INIT_QUERYSET = UnitInquiry.objects.filter(
+	status="NEW",
+	student__semester__active=True,
+	student__legit=True,
+).annotate(
+	total_inquiry_count=SubqueryCount('student__unitinquiry'),
+	unlock_inquiry_count=SubqueryCount('student__unitinquiry', filter=Q(action_type="UNLOCK")),
+).values(
+	'pk',
+	'action_type',
+	'unit__group__name',
+	'unit__code',
+	'student__user__first_name',
+	'student__user__last_name',
+	'student__user__email',
+	'explanation',
+	'created_at',
+	'unlock_inquiry_count',
+	'total_inquiry_count',
+)
+
+SUGGESTION_VENUEQ_INIT_QUERYSET = ProblemSuggestion.objects.filter(resolved=False).values(
+	'pk',
+	'eligible',
+	'created_at',
+	'user__first_name',
+	'user__last_name',
+	'user__email',
+	'source',
+	'description',
+	'statement',
+	'solution',
+	'comments',
+	'acknowledge',
+	'weight',
+	'unit__group__name',
+	'unit__code',
+)
+
+
 def venueq_handler(action: str, data: JSONData) -> JsonResponse:
 	if action == 'grade_problem_set':
 		# mark problem set as done
@@ -83,108 +160,20 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
 		suggestion.save()
 		return JsonResponse({'result': 'success'}, status=200)
 	elif action == 'init':
-		inquiries = UnitInquiry.objects.filter(
-			status="NEW",
-			student__semester__active=True,
-			student__legit=True,
-		).annotate(
-			total_inquiry_count=SubqueryCount('student__unitinquiry'),
-			unlock_inquiry_count=SubqueryCount(
-				'student__unitinquiry', filter=Q(action_type="UNLOCK")
-			),
-		)
-		output_data: Dict[str, Any] = {
-			'_name':
-				'Root',
-			'_children':
-				[
-					{
-						'_name':
-							'Problem sets',
-						'_children':
-							list(
-								PSet.objects.filter(
-									approved=False,
-									rejected=False,
-									student__semester__active=True,
-									student__legit=True,
-									student__enabled=True,
-								).annotate(
-									num_approved_all=SubqueryCount(
-										'student__user__student__pset',
-										filter=Q(approved=True),
-									),
-									num_approved_current=SubqueryCount(
-										'student__pset',
-										filter=Q(approved=True),
-									),
-								).values(
-									'pk',
-									'approved',
-									'rejected',
-									'resubmitted',
-									'feedback',
-									'special_notes',
-									'student__user__first_name',
-									'student__user__last_name',
-									'student__user__email',
-									'hours',
-									'clubs',
-									'unit__group__name',
-									'unit__group__slug',
-									'unit__code',
-									'next_unit_to_unlock__group__name',
-									'next_unit_to_unlock__code',
-									'upload__content',
-									'num_approved_all',
-									'num_approved_current',
-								)
-							)
-					}, {
-						'_name':
-							'Inquiries',
-						'inquiries':
-							list(
-								inquiries.values(
-									'pk',
-									'action_type',
-									'unit__group__name',
-									'unit__code',
-									'student__user__first_name',
-									'student__user__last_name',
-									'student__user__email',
-									'explanation',
-									'created_at',
-									'unlock_inquiry_count',
-									'total_inquiry_count',
-								)
-							),
-					}, {
-						'_name':
-							'Suggestions',
-						'_children':
-							list(
-								ProblemSuggestion.objects.filter(resolved=False).values(
-									'pk',
-									'eligible',
-									'created_at',
-									'user__first_name',
-									'user__last_name',
-									'user__email',
-									'source',
-									'description',
-									'statement',
-									'solution',
-									'comments',
-									'acknowledge',
-									'weight',
-									'unit__group__name',
-									'unit__code',
-								)
-							)
-					}
-				],
-		}
+		output_data: Dict[str, Any] = {}
+		output_data['name'] = 'Root'
+		output_data['_children'] = [
+			{
+				'_name': 'Problem sets',
+				'_children': list(PSET_VENUEQ_INIT_QUERYSET)
+			}, {
+				'_name': 'Inquiries',
+				'inquiries': list(INQUIRY_VENUEQ_INIT_QUERYSET)
+			}, {
+				'_name': 'Suggestions',
+				'_children': list(SUGGESTION_VENUEQ_INIT_QUERYSET)
+			}
+		]
 		return JsonResponse(output_data, status=200)
 	else:
 		raise Exception("No such command")
