@@ -87,6 +87,10 @@ PSET_VENUEQ_INIT_QUERYSET = PSet.objects.filter(
 	'upload__content',
 	'num_approved_all',
 	'num_approved_current',
+	'student__reg__country',
+	'student__reg__gender',
+	'student__reg__graduation_year',
+	'student__reg__aops_username',
 )
 
 INQUIRY_VENUEQ_INIT_QUERYSET = UnitInquiry.objects.filter(
@@ -108,6 +112,10 @@ INQUIRY_VENUEQ_INIT_QUERYSET = UnitInquiry.objects.filter(
 	'created_at',
 	'unlock_inquiry_count',
 	'total_inquiry_count',
+	'student__reg__country',
+	'student__reg__gender',
+	'student__reg__graduation_year',
+	'student__reg__aops_username',
 )
 
 SUGGESTION_VENUEQ_INIT_QUERYSET = ProblemSuggestion.objects.filter(resolved=False).values(
