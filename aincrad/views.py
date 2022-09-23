@@ -169,7 +169,7 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
 		return JsonResponse({'result': 'success'}, status=200)
 	elif action == 'init':
 		output_data: Dict[str, Any] = {}
-		output_data['name'] = 'Root'
+		output_data['_name'] = 'Root'
 		output_data['_children'] = [
 			{
 				'_name': 'Problem sets',

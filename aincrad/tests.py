@@ -82,7 +82,9 @@ class TestAincrad(EvanTestCase):
 		resp = self.post('api', json={'action': 'init', 'token': EXAMPLE_PASSWORD})
 		self.assertResponse20X(resp)
 		out = resp.json()
+		self.assertEqual(out['_name'], 'Root')
 		self.assertEqual(len(out['_children'][0]['_children']), 10)
+		self.assertEqual(len(out.keys()), 2)
 
 		pset_data = out['_children'][0]
 		self.assertEqual(pset_data['_name'], 'Problem sets')
