@@ -1,6 +1,8 @@
 {% extends 'layout.html' %}
 {% block title %}Create Hint{% endblock %}
 {% block layout-content %}
+<p class="text-muted">Back to <a href="{{ problem.get_absolute_url }}">{{ problem.puid }}</a>.</p>
+<hr />
 {% include "generic_form.html" %}
 <hr />
 <p>All edits are tracked by timestamp and username,
