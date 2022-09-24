@@ -11,7 +11,6 @@ from django.urls import reverse_lazy
 # Create your models here.
 @reversion.register()
 class Problem(models.Model):
-	id = models.AutoField(primary_key=True)
 	puid = models.CharField(
 		max_length=24,
 		help_text="Unique problem identifier, as printed in OTIS handout.",
@@ -44,7 +43,6 @@ class Problem(models.Model):
 
 @reversion.register()
 class Hint(models.Model):
-	id = models.AutoField(primary_key=True)
 	problem = models.ForeignKey(
 		Problem, on_delete=models.CASCADE, help_text=r"The container of the current hint."
 	)
