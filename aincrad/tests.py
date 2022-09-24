@@ -7,7 +7,7 @@ from django.test.utils import override_settings
 from evans_django_tools.testsuite import EvanTestCase
 from payments.factories import PaymentLogFactory
 from roster.factories import InvoiceFactory, StudentFactory, UnitInquiryFactory
-from roster.models import Invoice
+from roster.models import Invoice, Student
 
 EXAMPLE_PASSWORD = 'take just the first 24'
 TARGET_HASH = sha256(EXAMPLE_PASSWORD.encode('ascii')).hexdigest()
@@ -68,9 +68,9 @@ class TestAincrad(EvanTestCase):
 
 		InvoiceFactory.create(student=alice)
 		InvoiceFactory.create(student=bob)
-		invC = InvoiceFactory.create(student=carol)
-		invD = InvoiceFactory.create(student=david)
-		invE = InvoiceFactory.create(student=eve)
+		invC = InvoiceFactory.create(student=carol, total_paid=210)
+		invD = InvoiceFactory.create(student=david, total_paid=480)
+		invE = InvoiceFactory.create(student=eve, total_paid=1)
 		PaymentLogFactory.create(invoice=invC, amount=50)
 		PaymentLogFactory.create(invoice=invC, amount=70)
 		PaymentLogFactory.create(invoice=invC, amount=90)
@@ -112,35 +112,57 @@ class TestAincrad(EvanTestCase):
 		self.assertEqual(inquiries[0]['total_inquiry_count'], 10)
 
 	def test_invoice(self):
-		resp = self.post(
+		resp = self.assertPost20X(
 			'api',
 			json={
 				'action': 'invoice',
 				'token': EXAMPLE_PASSWORD,
+				'field': 'adjustment',
+				'entries': {
+					'alice.aardvark': -240,
+					'eve.edgeworth': -474,
+					'l.lawliet': 1337,
+				}
+			}
+		)
+		self.assertEqual(len(resp.json()), 1)
+		self.assertTrue('l.lawliet' in resp.json())
+
+		resp = self.assertPost20X(
+			'api',
+			json={
+				'action': 'invoice',
+				'token': EXAMPLE_PASSWORD,
+				'field': 'extras',
 				'entries':
 					{
-						'adjustment.alice.aardvark': -240,
-						'adjustment.eve.edgeworth': -474,
-						'adjustment.l.lawliet': 1337,
-						'extras.alice.aardvark': 10,
-						'extras.david.darling': 10,
-						'extras.mihael.keehl': -9001,
-						'total_paid.alice.aardvark': 250,
-						'total_paid.bob.beta': 480,
-						'total_paid.carol.cutie': 110,
-						'total_paid.eve.edgeworth': 5,
-						'total_paid.nate.river': 1152,
+						Student.objects.get(user__first_name="Alice", semester__active=True).pk: 10,
+						'david.darling': 10,
+						'mihael.keehl': -9001,
 					}
 			}
 		)
-		self.assertResponse20X(resp)
+		self.assertEqual(len(resp.json()), 1)
+		self.assertTrue('mihael.keehl' in resp.json())
 
-		# check the response contains exactly missed entries
-		out = resp.json()
-		self.assertEqual(len(out), 3)
-		self.assertTrue('adjustment.l.lawliet' in out)
-		self.assertTrue('extras.mihael.keehl' in out)
-		self.assertTrue('total_paid.nate.river' in out)
+		resp = self.assertPost20X(
+			'api',
+			json={
+				'action': 'invoice',
+				'token': EXAMPLE_PASSWORD,
+				'field': 'total_paid',
+				'entries':
+					{
+						'alice.aardvark': 250,
+						'bob.beta': 480,
+						Student.objects.get(user__first_name="Carol").pk: 110,
+						'eve.edgeworth': 5,
+						'nate.river': 1152,
+					}
+			}
+		)
+		self.assertEqual(len(resp.json()), 1)
+		self.assertTrue('nate.river' in resp.json())
 
 		# check the invoices are correct
 		invoice_alice = Invoice.objects.get(student__user__first_name="Alice")

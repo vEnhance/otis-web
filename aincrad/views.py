@@ -1,6 +1,6 @@
 import json
 from hashlib import sha256
-from typing import Any, Dict, List, TypedDict
+from typing import Any, Dict, List, Literal, TypedDict, Union
 
 from allauth.socialaccount.models import SocialAccount
 from arch.models import Hint, Problem
@@ -50,7 +50,9 @@ class JSONData(TypedDict):
 	# keys for add multiple hints
 	hints: List[HintData]
 
+	# invoice
 	entries: Dict[str, float]
+	field: Union[Literal['adjustment'], Literal['extras'], Literal['total_paid']]
 
 
 PSET_VENUEQ_INIT_QUERYSET = PSet.objects.filter(
@@ -275,7 +277,8 @@ def invoice_handler(action: str, data: JSONData) -> JsonResponse:
 
 	invoices = Invoice.objects.filter(student__semester__active=True)
 	invoices = invoices.select_related('student__user')
-	fields = ('adjustment', 'extras', 'total_paid')
+	field = data['field']
+	assert field in ('adjustment', 'extras', 'total_paid')
 	entries = data['entries']
 	invoices_to_update: List[Invoice] = []
 
@@ -283,19 +286,22 @@ def invoice_handler(action: str, data: JSONData) -> JsonResponse:
 		if inv.student.user is not None:
 			first_name = sanitize(inv.student.user.first_name)
 			last_name = sanitize(inv.student.user.last_name, last=True)
+			pk = inv.student.pk
 
-			for k in fields:
-				if (x := entries.pop(f'{k}.{first_name}.{last_name}', None)) is not None:
-					setattr(inv, k, float(x))
+			if (
+				x := entries.pop(f'{first_name}.{last_name}', entries.pop(str(pk), None))
+			) is not None:
+				setattr(inv, field, float(x))
+				if inv not in invoices_to_update:
+					invoices_to_update.append(inv)
 
-					if inv not in invoices_to_update:
-						invoices_to_update.append(inv)
-	prefetch_related_objects(invoices_to_update, 'paymentlog_set')
-	for inv in invoices_to_update:
-		stripe_paid = inv.paymentlog_set.aggregate(s=Sum('amount'))['s'] or 0  # type: ignore
-		inv.total_paid += stripe_paid
+	if field == 'total_paid':
+		prefetch_related_objects(invoices_to_update, 'paymentlog_set')
+		for inv in invoices_to_update:
+			stripe_paid = inv.paymentlog_set.aggregate(s=Sum('amount'))['s'] or 0  # type: ignore
+			inv.total_paid += stripe_paid
 
-	Invoice.objects.bulk_update(invoices_to_update, fields, batch_size=25)
+	Invoice.objects.bulk_update(invoices_to_update, (field, ), batch_size=25)
 	return JsonResponse(entries)
 
 
