@@ -248,6 +248,8 @@ WIKI_PLUGINS_METHODS = ('article_list', 'toc', 'meow')
 
 
 def filter_useless_404(record: logging.LogRecord) -> bool:
+	if hasattr(record, 'message') and record.message.startswith('OSError: write error'):
+		return False
 	if record.args is None:
 		return True
 	a: List[str] = [str(s) for s in record.args]
