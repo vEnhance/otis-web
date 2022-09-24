@@ -194,67 +194,127 @@ class TestAincrad(EvanTestCase):
 		self.assertAlmostEqual(invoice_eve.extras, 0)
 		self.assertAlmostEqual(invoice_eve.total_paid, 6)
 
-	def test_problem(self):
+	def test_get_add_hints(self):
 		resp = self.post('api', json={'action': 'get_hints', 'puid': '18SLA7'})
 		self.assertResponse20X(resp)
 		out = resp.json()
 		self.assertEqual(len(out['hints']), 0)
 
-		self.assertPost20X(
+		A7_Hints = Hint.objects.filter(problem__puid='18SLA7')
+
+		resp = self.assertPost20X(
 			'api', json={
 				'action': 'add_hints',
 				'puid': '18SLA7',
 				'content': 'get',
 			}
 		)
-		self.assertPost20X(
+		self.assertTrue('pk' in resp.json())
+		self.assertEqual(resp.json()['number'], 0)
+		resp = self.assertPost20X(
 			'api', json={
 				'action': 'add_hints',
 				'puid': '18SLA7',
 				'content': 'gud',
 			}
 		)
+		self.assertTrue('pk' in resp.json())
+		self.assertEqual(resp.json()['number'], 10)
 
 		resp = self.post('api', json={'action': 'get_hints', 'puid': '18SLA7'})
 		self.assertResponse20X(resp)
 		out = resp.json()
 		self.assertEqual(len(out['hints']), 2)
-		self.assertTrue(Hint.objects.filter(number=0, content='get').exists())
-		self.assertTrue(Hint.objects.filter(number=10, content='gud').exists())
+		self.assertTrue(A7_Hints.filter(number=0, content='get').exists())
+		self.assertTrue(A7_Hints.filter(number=10, content='gud').exists())
 
+		resp = self.assertPost20X(
+			'api',
+			json={
+				'action': 'add_many_hints',
+				'allow_delete_hints': False,
+				'puid': '18SLA7',
+				'new_hints':
+					[
+						{
+							'number': 80,
+							'content': '80%',
+							'keywords': 'eighty'
+						},
+						{
+							'number': 90,
+							'content': '90%',
+							'keywords': 'ninety'
+						},
+						{
+							'number': 70,
+							'content': '70%',
+							'keywords': 'seventy'
+						},
+					],
+				'old_hints': list(A7_Hints.values(
+					'keywords',
+					'pk',
+					'number',
+					'content',
+				)),
+			}
+		)
+		out = resp.json()
+		self.assertEqual(len(out['pks']), 3)
+		self.assertEqual(out['num_deletes'], 0)
+		self.assertTrue(A7_Hints.filter(number=80, content='80%', keywords='eighty').exists())
+		self.assertTrue(A7_Hints.filter(number=70, content='70%', keywords='seventy').exists())
+		self.assertTrue(A7_Hints.filter(number=90, content='90%', keywords='ninety').exists())
+
+		# try and fail to delete hints
+		self.assertPost40X(
+			'api',
+			json={
+				'action': 'add_many_hints',
+				'allow_delete_hints': False,
+				'puid': '18SLA7',
+				'new_hints': [],
+				'old_hints': [],
+			}
+		)
+
+		# OK, so at this point we have, what, 5 hints?
+		# alright let's edit some more
 		resp = self.assertPost20X(
 			'api',
 			json={
 				'action':
 					'add_many_hints',
+				'allow_delete_hints':
+					True,
 				'puid':
 					'18SLA7',
-				'hints':
+				'new_hints': [{
+					'number': 100,
+					'content': '100%',
+					'keywords': 'hundred'
+				}],
+				'old_hints':
 					[
 						{
-							'number': 80,
-							'content': '80%',
-							'keywords': 'eighty',
+							'pk': A7_Hints.get(number=80).pk,
+							'number': 85,
+							'content': 'Updated 85%',
+							'keywords': 'updated'
 						},
 						{
-							'number': 90,
-							'content': '90%',
-							'keywords': 'ninety',
-						},
-						{
-							'number': 70,
-							'content': '70%',
-							'keywords': 'seventy',
+							'pk': A7_Hints.get(number=90).pk,
+							'number': 95,
+							'content': 'Updated 95%',
+							'keywords': 'updated'
 						},
 					],
 			}
 		)
 		out = resp.json()
-		self.assertEqual(len(out['pks']), 3)
-
-		resp = self.post('api', json={'action': 'get_hints', 'puid': '18SLA7'})
-		self.assertResponse20X(resp)
-		out = resp.json()
-		self.assertTrue(Hint.objects.filter(number=80, content='80%', keywords='eighty').exists())
-		self.assertTrue(Hint.objects.filter(number=70, content='70%', keywords='seventy').exists())
-		self.assertTrue(Hint.objects.filter(number=90, content='90%', keywords='ninety').exists())
+		self.assertEqual(len(out['pks']), 1)
+		self.assertEqual(out['num_deletes'], 3)  # 0%, 10%, 70%
+		self.assertEqual(set(A7_Hints.values_list('number', flat=True)), set([85, 95, 100]))
+		self.assertEqual(A7_Hints.filter(keywords='updated').count(), 2)
+		self.assertEqual(A7_Hints.filter(keywords__startswith='Updated').count(), 2)

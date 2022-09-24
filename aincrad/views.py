@@ -7,7 +7,7 @@ from allauth.socialaccount.models import SocialAccount
 from arch.models import Hint, Problem
 from dashboard.models import ProblemSuggestion, PSet
 from django.conf import settings
-from django.core.exceptions import SuspiciousOperation
+from django.core.exceptions import BadRequest, SuspiciousOperation
 from django.db.models.aggregates import Sum
 from django.db.models.query import prefetch_related_objects
 from django.db.models.query_utils import Q
@@ -28,6 +28,7 @@ class HintData(TypedDict):
 	content: str
 	number: int
 	keywords: str
+	pk: int
 
 
 class JSONData(TypedDict):
@@ -49,7 +50,9 @@ class JSONData(TypedDict):
 	keywords: str
 
 	# keys for add multiple hints
-	hints: List[HintData]
+	old_hints: List[HintData]
+	new_hints: List[HintData]
+	allow_delete_hints: bool
 
 	# invoice
 	entries: Dict[str, float]
@@ -247,7 +250,7 @@ def problems_handler(action: str, data: JSONData) -> JsonResponse:
 
 	if action == 'get_hints':
 		hints = Hint.objects.filter(problem=problem)
-		hint_values = hints.values('keywords', 'id', 'number', 'content')
+		hint_values = hints.values('keywords', 'pk', 'number', 'content')
 		return JsonResponse({'hints': list(hint_values)})
 	elif action == 'add_hints':
 		hints = Hint.objects.filter(problem=problem)
@@ -266,8 +269,31 @@ def problems_handler(action: str, data: JSONData) -> JsonResponse:
 		)
 		return JsonResponse({'pk': hint.pk, 'number': number})
 	elif action == 'add_many_hints':
-		created_hints = Hint.objects.bulk_create(Hint(problem=problem, **d) for d in data['hints'])
-		return JsonResponse({'pks': [h.pk for h in created_hints]})
+		# update existing hints
+		num_deletes = 0
+		existing_hints = list(Hint.objects.all())
+		for h in existing_hints:
+			for d in data['old_hints']:
+				if d['pk'] == h.pk:
+					h.number = d['number']
+					h.keywords = d['keywords']
+					h.content = d['content']
+					break
+			else:
+				if data['allow_delete_hints'] is True:
+					h.delete()
+					num_deletes += 1
+				else:
+					raise BadRequest(f"Couldn't find hint with pk {h.pk}")
+		Hint.objects.bulk_update(
+			[h for h in existing_hints if h.pk is not None],
+			fields=('number', 'keywords', 'content'),
+		)
+		# create new hints
+		created_hints = Hint.objects.bulk_create(
+			Hint(problem=problem, **d) for d in data['new_hints']
+		)
+		return JsonResponse({'pks': [h.pk for h in created_hints], 'num_deletes': num_deletes})
 	else:
 		raise NotImplementedError(action)
 
