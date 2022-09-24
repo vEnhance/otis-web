@@ -425,7 +425,7 @@ def mega_sheet(request: HttpRequest) -> HttpResponse:
 		debt=Cast(F("owed") / (F("owed") + F("total_paid") + 1e-8), FloatField())
 	)
 
-	queryset = queryset.order_by('debt')
+	queryset = queryset.order_by('student__enabled', '-forgive', 'debt', 'student__first_name')
 	timestamp = timezone.now().strftime('%Y-%m-%d-%H%M%S')
 
 	if settings.TESTING is True:
