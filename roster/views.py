@@ -170,12 +170,17 @@ def invoice(request: HttpRequest, student_id: int = None) -> HttpResponse:
 def master_schedule(request: HttpRequest) -> HttpResponse:
 	student_names_and_unit_ids = get_current_students().filter(
 		legit=True
-	).values('user__first_name', 'user__last_name', 'curriculum')
-	unit_to_student_names = collections.defaultdict(list)
+	).values('pk', 'user__first_name', 'user__last_name', 'curriculum')
+	unit_to_student_dicts = collections.defaultdict(list)
 	for d in student_names_and_unit_ids:
 		# e.g. d = {'name': Student, 'curriculum': 30}
-		name = d['user__first_name'] + ' ' + d['user__last_name']
-		unit_to_student_names[d['curriculum']].append(name)
+		unit_to_student_dicts[d['curriculum']].append(
+			{
+				'short_name': d['user__first_name'] + ' ' + d['user__last_name'][0:1],
+				'full_name': d['user__first_name'] + ' ' + d['user__last_name'],
+				'pk': d['pk'],
+			}
+		)
 
 	chart: List[Dict[str, Any]] = []
 	unit_dicts = Unit.objects.order_by('position').values(
@@ -183,7 +188,7 @@ def master_schedule(request: HttpRequest) -> HttpResponse:
 	)
 	for unit_dict in unit_dicts:
 		row = dict(unit_dict)
-		row['students'] = unit_to_student_names[unit_dict['pk']]
+		row['student_dicts'] = unit_to_student_dicts[unit_dict['pk']]
 		chart.append(row)
 	semester = Semester.objects.get(active=True)
 	context = {'chart': chart, 'title': "Master Schedule", 'semester': semester}

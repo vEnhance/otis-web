@@ -5,11 +5,18 @@
 <table class="table">
 	{% for row in chart %}
 	<tr class="subject{{ row.group__subject }}">
-		<th>{{ row.position }}</th>
-		<td>{{ row.group__name }}</td>
-		<td>{{ row.code }}</td>
-		<td>{{ row.students|length }}</td>
-		<td style="font-size: 70%;">{{ row.students|join:", "}}</td>
+		<th class="text-end">{{ row.students|length }}</th>
+		<td>{{ row.group__name }}<sup class="text-superscript">{{ row.code }}</sup></td>
+		<td>
+			<span style="font-size:60%">
+				{% for s in row.student_dicts %}
+				<a class="tooltip-link" title="{{ s.full_name }}" href="{% url "portal" s.pk %}" style="color:black;">
+					{{ s.short_name }}</a>,
+				{% endfor %}
+			</span>
+		</td>
+
+	</tr>
 	</tr>
 	{% endfor %}
 </table>

@@ -156,6 +156,14 @@ class Student(models.Model):
 			return '???'
 		return self.user.last_name
 
+	def short_name(self) -> str:
+		if self.user is None:
+			return '???'
+		elif self.user.last_name != '':
+			return self.user.first_name + ' ' + self.user.last_name[0]
+		else:
+			return self.name
+
 	@property
 	def name(self) -> str:
 		if self.user:
