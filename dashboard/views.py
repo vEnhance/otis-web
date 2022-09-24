@@ -458,7 +458,14 @@ def idlewarn(request: AuthHttpRequest) -> HttpResponse:
 	for row in rows:
 		row['days_since_last_seen'] = get_days_since(row['last_seen'])
 		row['days_since_last_pset'] = get_days_since(row['student'].latest_pset)
-	rows.sort(key=lambda row: -(row['days_since_last_pset'] or 1e9))
+	rows.sort(
+		key=lambda row: (
+			not row['student'].newborn,
+			-(row['days_since_last_pset'] or 1e9),
+			-(row['days_since_last_seen'] or 1e9),
+			row['level'],
+		)
+	)
 	context['rows'] = rows
 
 	return render(request, "dashboard/idlewarn.html", context)

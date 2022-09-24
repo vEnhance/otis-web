@@ -23,22 +23,32 @@
 	<tbody>
 		{% for row in rows %}
 		{% with student=row.student %}
-		<tr>
+		<tr {% if student.newborn %}class="table-danger" {% endif %}>
 			<td>Lv. {{ row.level }}</td>
 			<td><a title="{{ student.name }}" href="{% url "portal" student.id %}" class="tooltip-link">
 					{{ student.user.email }}</a></td>
 			{% if student.latest_pset %}
 			<td class="text-end">{{ row.days_since_last_pset|floatformat:2 }} days</td>
 			{% else %}
-			<td>∞</td>
+			<td class="text-end">∞</td>
 			{% endif%}
+			{% if row.days_since_last_seen < 1000 %}
 			<td class="text-end">{{ row.days_since_last_seen|floatformat:2 }} days</td>
+			{% else %}
+			<td class="text-end">∞</td>
+			{% endif %}
 			<td class="text-end">{{ student.num_psets|default_if_none:0 }}</td>
 		</tr>
 		{% endwith %}
 		{% endfor %}
 	</tbody>
 </table>
+<p>Email addresses for copy-pasting:</p>
+<code>
+	{% for row in rows %}
+	"{{ row.student.name }}" &lt;{{ row.student.user.email }}&gt;,<br>
+	{% endfor %}
+</code>
 
 <p>This list was generated {% now "r" %}.</p>
 {% endblock %}
