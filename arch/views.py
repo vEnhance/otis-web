@@ -159,6 +159,11 @@ class HintCreate(
 	)
 	model = Hint
 
+	def get_context_data(self, **kwargs: Any):
+		context = super().get_context_data(**kwargs)
+		context['problem'] = Problem.objects.get(puid=self.kwargs['puid'])
+		return context
+
 	def get_initial(self):
 		initial = super(HintCreate, self).get_initial()
 		initial = initial.copy()
