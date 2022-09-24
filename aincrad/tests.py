@@ -1,5 +1,6 @@
 from hashlib import sha256
 
+from arch.factories import HintFactory
 from arch.models import Hint
 from core.factories import SemesterFactory, UnitFactory
 from dashboard.factories import PSetFactory
@@ -195,6 +196,8 @@ class TestAincrad(EvanTestCase):
 		self.assertAlmostEqual(invoice_eve.total_paid, 6)
 
 	def test_get_add_hints(self):
+		HintFactory.create_batch(10)
+
 		resp = self.post('api', json={'action': 'get_hints', 'puid': '18SLA7'})
 		self.assertResponse20X(resp)
 		out = resp.json()

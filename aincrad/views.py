@@ -271,7 +271,7 @@ def problems_handler(action: str, data: JSONData) -> JsonResponse:
 	elif action == 'add_many_hints':
 		# update existing hints
 		num_deletes = 0
-		existing_hints = list(Hint.objects.all())
+		existing_hints = list(Hint.objects.filter(problem=problem))
 		for h in existing_hints:
 			for d in data['old_hints']:
 				if d['pk'] == h.pk:
