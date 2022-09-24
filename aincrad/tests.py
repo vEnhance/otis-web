@@ -112,7 +112,7 @@ class TestAincrad(EvanTestCase):
 		self.assertEqual(inquiries[0]['total_inquiry_count'], 10)
 
 	def test_invoice(self):
-		resp = self.assertPost20X(
+		out = self.assertPost20X(
 			'api',
 			json={
 				'action': 'invoice',
@@ -124,11 +124,12 @@ class TestAincrad(EvanTestCase):
 					'l.lawliet': 1337,
 				}
 			}
-		)
-		self.assertEqual(len(resp.json()), 1)
-		self.assertTrue('l.lawliet' in resp.json())
+		).json()
+		self.assertEqual(out['updated_count'], 2)
+		self.assertEqual(len(out['entries_remaining']), 1)
+		self.assertTrue('l.lawliet' in out['entries_remaining'])
 
-		resp = self.assertPost20X(
+		out = self.assertPost20X(
 			'api',
 			json={
 				'action': 'invoice',
@@ -141,11 +142,12 @@ class TestAincrad(EvanTestCase):
 						'mihael.keehl': -9001,
 					}
 			}
-		)
-		self.assertEqual(len(resp.json()), 1)
-		self.assertTrue('mihael.keehl' in resp.json())
+		).json()
+		self.assertEqual(out['updated_count'], 2)
+		self.assertEqual(len(out['entries_remaining']), 1)
+		self.assertTrue('mihael.keehl' in out['entries_remaining'])
 
-		resp = self.assertPost20X(
+		out = self.assertPost20X(
 			'api',
 			json={
 				'action': 'invoice',
@@ -160,9 +162,10 @@ class TestAincrad(EvanTestCase):
 						'nate.river': 1152,
 					}
 			}
-		)
-		self.assertEqual(len(resp.json()), 1)
-		self.assertTrue('nate.river' in resp.json())
+		).json()
+		self.assertEqual(out['updated_count'], 4)
+		self.assertEqual(len(out['entries_remaining']), 1)
+		self.assertTrue('nate.river' in out['entries_remaining'])
 
 		# check the invoices are correct
 		invoice_alice = Invoice.objects.get(student__user__first_name="Alice")

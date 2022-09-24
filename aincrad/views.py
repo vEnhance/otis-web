@@ -302,7 +302,12 @@ def invoice_handler(action: str, data: JSONData) -> JsonResponse:
 			inv.total_paid += stripe_paid
 
 	Invoice.objects.bulk_update(invoices_to_update, (field, ), batch_size=25)
-	return JsonResponse(entries)
+	return JsonResponse(
+		{
+			'updated_count': len(invoices_to_update),
+			'entries_remaining': entries,
+		}
+	)
 
 
 @csrf_exempt
