@@ -7,7 +7,7 @@ from allauth.socialaccount.models import SocialAccount
 from arch.models import Hint, Problem
 from dashboard.models import ProblemSuggestion, PSet
 from django.conf import settings
-from django.core.exceptions import BadRequest, SuspiciousOperation
+from django.core.exceptions import SuspiciousOperation
 from django.db.models.aggregates import Sum
 from django.db.models.query import prefetch_related_objects
 from django.db.models.query_utils import Q
@@ -284,7 +284,7 @@ def problems_handler(action: str, data: JSONData) -> JsonResponse:
 					h.delete()
 					num_deletes += 1
 				else:
-					raise BadRequest(f"Couldn't find hint with pk {h.pk}")
+					return JsonResponse({'msg': f"Couldn't find hint with pk {h.pk}"}, status=400)
 		Hint.objects.bulk_update(
 			[h for h in existing_hints if h.pk is not None],
 			fields=('number', 'keywords', 'content'),
@@ -295,7 +295,7 @@ def problems_handler(action: str, data: JSONData) -> JsonResponse:
 		)
 		return JsonResponse({'pks': [h.pk for h in created_hints], 'num_deletes': num_deletes})
 	else:
-		raise NotImplementedError(action)
+		raise SuspiciousOperation("Action not implemented")
 
 
 def invoice_handler(action: str, data: JSONData) -> JsonResponse:
