@@ -292,8 +292,7 @@ def invoice_handler(action: str, data: JSONData) -> JsonResponse:
 						invoices_to_update.append(inv)
 	prefetch_related_objects(invoices_to_update, 'paymentlog_set')
 	for inv in invoices_to_update:
-		stripe_paid = inv.paymentlog_set.aggregate(s=Sum('amount'))['s']  # type: ignore
-		stripe_paid = stripe_paid or 0
+		stripe_paid = inv.paymentlog_set.aggregate(s=Sum('amount'))['s'] or 0  # type: ignore
 		inv.total_paid += stripe_paid
 
 	Invoice.objects.bulk_update(invoices_to_update, fields, batch_size=25)
