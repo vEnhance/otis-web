@@ -1,4 +1,5 @@
 import json
+from decimal import Decimal
 from hashlib import sha256
 from typing import Any, Dict, List, Literal, TypedDict, Union
 
@@ -291,8 +292,9 @@ def invoice_handler(action: str, data: JSONData) -> JsonResponse:
 			if (
 				x := entries.pop(f'{first_name}.{last_name}', entries.pop(str(pk), None))
 			) is not None:
-				setattr(inv, field, float(x))
-				if inv not in invoices_to_update:
+				amount = Decimal(x)
+				if abs(getattr(inv, field) - amount) > 0.0001:
+					setattr(inv, field, amount)
 					invoices_to_update.append(inv)
 
 	if field == 'total_paid':

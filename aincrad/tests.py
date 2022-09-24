@@ -66,7 +66,7 @@ class TestAincrad(EvanTestCase):
 		alice.curriculum.add(requested_unit)
 		alice.unlocked_units.add(submitted_unit)
 
-		InvoiceFactory.create(student=alice)
+		InvoiceFactory.create(student=alice, total_paid=250)
 		InvoiceFactory.create(student=bob)
 		invC = InvoiceFactory.create(student=carol, total_paid=210)
 		invD = InvoiceFactory.create(student=david, total_paid=480)
@@ -163,7 +163,7 @@ class TestAincrad(EvanTestCase):
 					}
 			}
 		).json()
-		self.assertEqual(out['updated_count'], 4)
+		self.assertEqual(out['updated_count'], 3)
 		self.assertEqual(len(out['entries_remaining']), 1)
 		self.assertTrue('nate.river' in out['entries_remaining'])
 
