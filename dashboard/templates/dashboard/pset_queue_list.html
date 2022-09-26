@@ -20,20 +20,22 @@
 				class="table-warning fw-bold"
 			{% endif %}
 			>
+			<th>{{ forloop.counter }}</th>
 			<td>
-				{% if request.user.is_staff %}
-					<a href="{% url "admin:dashboard_pset_change" pset.id %}">{{ forloop.counter }}</a>
+				{% if pset.student.user == request.user or request.user.is_staff %}
+					<a href="{{ pset.get_absolute_url }}">{{ pset.unit }}</a>
 				{% else %}
-					{{ forloop.counter }}
+					{{ pset.unit }}
 				{% endif %}
 			</td>
-			{% if pset.student.user == request.user or request.user.is_staff %}
-				<td><a href="{{ pset.get_absolute_url }}">{{ pset.unit }}</a></td>
-			{% else %}
-				<td>{{ pset.unit }}</td>
-			{% endif %}
 			<td>{{ pset.upload.created_at }}</td>
-			<td>{{ pset.pk }}</td>
+			<td>
+				{% if request.user.is_staff %}
+					<a href="{% url "admin:dashboard_pset_change" pset.pk %}">{{ pset.pk }}</a>
+				{% else %}
+					<a href="{% url "admin:dashboard_pset_change" pset.pk %}">{{ pset.pk }}</a>
+				{% endif %}
+			</td>
 		</tr>
 		{% endfor %}
 	</tbody>
