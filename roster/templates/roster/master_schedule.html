@@ -5,7 +5,7 @@
 <table class="table">
 	{% for row in chart %}
 	<tr class="subject{{ row.group__subject }}">
-		<th class="text-end">{{ row.students|length }}</th>
+		<th class="text-end">{{ row.student_dicts|length }}</th>
 		<td>{{ row.group__name }}<sup class="text-superscript">{{ row.code }}</sup></td>
 		<td>
 			<span style="font-size:60%">
