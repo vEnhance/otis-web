@@ -46,18 +46,18 @@ class TestAincrad(EvanTestCase):
 			next_unit_to_unlock=requested_unit,
 			clubs=120,
 			hours=37,
-			approved=False,
+			status='P',
 			feedback="Meow",
 			special_notes="Purr",
 		)
-		PSetFactory.create_batch(2, student=bob, approved=False)
-		PSetFactory.create_batch(3, student=carol, approved=False)
-		PSetFactory.create_batch(7, student=alice, approved=True)
-		PSetFactory.create_batch(2, student=alice, approved=False, rejected=True)
-		PSetFactory.create_batch(4, student=alice, approved=False)
-		PSetFactory.create_batch(3, approved=True)
-		PSetFactory.create_batch(4, student=old_alice, approved=True)
-		PSetFactory.create_batch(2, student=old_alice, approved=False)
+		PSetFactory.create_batch(2, student=bob, status='P')
+		PSetFactory.create_batch(3, student=carol, status='P')
+		PSetFactory.create_batch(7, student=alice, status='A')
+		PSetFactory.create_batch(2, student=alice, status='R')
+		PSetFactory.create_batch(4, student=alice, status='P')
+		PSetFactory.create_batch(3, status='A')
+		PSetFactory.create_batch(4, student=old_alice, status='A')
+		PSetFactory.create_batch(2, student=old_alice, status='P')
 
 		UnitInquiryFactory.create_batch(5, student=alice, action_type="UNLOCK", status="ACC")
 		UnitInquiryFactory.create_batch(2, student=alice, action_type="DROP", status="ACC")
@@ -92,20 +92,20 @@ class TestAincrad(EvanTestCase):
 		self.assertEqual(pset_data['_name'], 'Problem sets')
 
 		pset0 = pset_data['_children'][0]
-		self.assertEqual(pset0['approved'], False)
+		self.assertEqual(pset0['status'], 'P')
 		self.assertEqual(pset0['clubs'], 120)
 		self.assertEqual(pset0['hours'], 37)
 		self.assertEqual(pset0['feedback'], 'Meow')
 		self.assertEqual(pset0['special_notes'], 'Purr')
 		self.assertEqual(pset0['student__user__first_name'], 'Alice')
-		self.assertEqual(pset0['num_approved_all'], 11)
-		self.assertEqual(pset0['num_approved_current'], 7)
+		self.assertEqual(pset0['num_accepted_all'], 11)
+		self.assertEqual(pset0['num_accepted_current'], 7)
 
 		pset1 = pset_data['_children'][1]
-		self.assertEqual(pset1['approved'], False)
+		self.assertEqual(pset1['status'], 'P')
 		self.assertEqual(pset1['student__user__first_name'], 'Bôb B.')
-		self.assertEqual(pset1['num_approved_all'], 0)
-		self.assertEqual(pset1['num_approved_current'], 0)
+		self.assertEqual(pset1['num_accepted_all'], 0)
+		self.assertEqual(pset1['num_accepted_current'], 0)
 
 		inquiries = out['_children'][1]['inquiries']
 		self.assertEqual(len(inquiries), 3)

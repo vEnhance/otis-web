@@ -3,8 +3,8 @@ from io import StringIO
 
 from core.factories import UnitFactory, UserFactory
 from django.utils import timezone
-from exams.factories import ExamAttemptFactory, TestFactory
 from evans_django_tools.testsuite import EvanTestCase
+from exams.factories import ExamAttemptFactory, TestFactory
 from roster.factories import StudentFactory
 from roster.models import Student
 
@@ -22,10 +22,10 @@ class TestLevelSystem(EvanTestCase):
 	def setUpClass(cls):
 		super().setUpClass()
 		alice = StudentFactory.create(user__first_name="Alice", user__last_name="Aardvark")
-		PSetFactory.create(student=alice, clubs=120, hours=37, approved=True, unit__code='BGW')
-		PSetFactory.create(student=alice, clubs=100, hours=20, approved=True, unit__code='DMX')
-		PSetFactory.create(student=alice, clubs=180, hours=27, approved=True, unit__code='ZCY')
-		PSetFactory.create(student=alice, clubs=200, hours=87, approved=False, unit__code='ZMR')
+		PSetFactory.create(student=alice, clubs=120, hours=37, status='A', unit__code='BGW')
+		PSetFactory.create(student=alice, clubs=100, hours=20, status='A', unit__code='DMX')
+		PSetFactory.create(student=alice, clubs=180, hours=27, status='A', unit__code='ZCY')
+		PSetFactory.create(student=alice, clubs=200, hours=87, status='P', unit__code='ZMR')
 		AchievementUnlockFactory.create(
 			user=alice.user, achievement__diamonds=4, achievement__name="Feel the fours"
 		)
@@ -125,8 +125,8 @@ class TestLevelSystem(EvanTestCase):
 		donald = StudentFactory.create()
 
 		# problem sets (clubs/hearts)
-		PSetFactory.create(student=bob, clubs=196, hours=64, approved=True, unit__code='DMW')
-		PSetFactory.create(student=bob, clubs=None, hours=None, approved=True, unit__code='ZMY')
+		PSetFactory.create(student=bob, clubs=196, hours=64, status='A', unit__code='DMW')
+		PSetFactory.create(student=bob, clubs=None, hours=None, status='A', unit__code='ZMY')
 
 		# diamonds
 		a1 = AchievementFactory.create(diamonds=3)
@@ -260,7 +260,7 @@ class TestSubmitPSet(EvanTestCase):
 		)
 		self.assertHas(resp, '13♣')
 		self.assertHas(resp, '37.0♥')
-		self.assertHas(resp, 'This unit submission is pending approval')
+		self.assertHas(resp, 'This unit submission is pending review')
 
 		# Alice should still be Level 0 though
 		resp = self.assertGet20X('stats', alice.pk)
@@ -273,7 +273,7 @@ class TestSubmitPSet(EvanTestCase):
 		self.assertEqual(pset.feedback, 'hello')
 		self.assertEqual(pset.special_notes, 'meow')
 		self.assertEqual(os.path.basename(pset.upload.content.name), 'content1.txt')
-		self.assertFalse(pset.approved)
+		self.assertFalse(pset.accepted)
 		self.assertFalse(pset.resubmitted)
 
 		# Alice realizes she made a typo in hours and edits the problem set
@@ -293,7 +293,7 @@ class TestSubmitPSet(EvanTestCase):
 			},
 			follow=True
 		)
-		self.assertHas(resp, 'This unit submission is pending approval')
+		self.assertHas(resp, 'This unit submission is pending review')
 		self.assertHas(resp, '13♣')
 		self.assertHas(resp, '3.7♥')
 
@@ -304,15 +304,15 @@ class TestSubmitPSet(EvanTestCase):
 		self.assertEqual(pset.feedback, 'hello')
 		self.assertEqual(pset.special_notes, 'meow')
 		self.assertEqual(os.path.basename(pset.upload.content.name), 'content2.txt')
-		self.assertFalse(pset.approved)
+		self.assertFalse(pset.accepted)
 		self.assertFalse(pset.resubmitted)
 
 		# Alice should still be Level 0 though
 		resp = self.assertGet20X('stats', alice.pk)
 		self.assertHas(resp, 'Level 0')
 
-		# simulate approval
-		pset.approved = True
+		# simulate acceptance
+		pset.status = 'A'
 		pset.save()
 		alice.unlocked_units.remove(unit1)
 		alice.unlocked_units.add(unit2)
@@ -320,7 +320,7 @@ class TestSubmitPSet(EvanTestCase):
 
 		# check it shows up this way
 		resp = self.assertGet20X('pset', pset.pk)
-		self.assertHas(resp, 'This unit submission was approved')
+		self.assertHas(resp, 'This unit submission was accepted')
 		self.assertHas(resp, '13♣')
 		self.assertHas(resp, '3.7♥')
 
@@ -348,7 +348,7 @@ class TestSubmitPSet(EvanTestCase):
 
 		# check it shows up this way
 		resp = self.assertGet20X('pset', pset.pk)
-		self.assertHas(resp, 'This unit submission is pending approval')
+		self.assertHas(resp, 'This unit submission is pending review')
 		self.assertHas(resp, '100♣')
 		self.assertHas(resp, '20.0♥')
 
@@ -359,15 +359,15 @@ class TestSubmitPSet(EvanTestCase):
 		self.assertEqual(pset.feedback, 'hello')
 		self.assertEqual(pset.special_notes, 'meow')
 		self.assertEqual(os.path.basename(pset.upload.content.name), 'content3.txt')
-		self.assertFalse(pset.approved)
+		self.assertFalse(pset.accepted)
 		self.assertTrue(pset.resubmitted)
 
 		# Alice is now back to Level 0
 		resp = self.assertGet20X('stats', alice.pk)
 		self.assertHas(resp, 'Level 0')
 
-		# simulate approval
-		pset.approved = True
+		# simulate acceptance
+		pset.status = 'A'
 		pset.save()
 
 		# Alice is now Level 14
@@ -376,7 +376,7 @@ class TestSubmitPSet(EvanTestCase):
 
 		# check it shows up this way
 		resp = self.assertGet20X('pset', pset.pk)
-		self.assertHas(resp, 'This unit submission was approved')
+		self.assertHas(resp, 'This unit submission was accepted')
 		self.assertHas(resp, '100♣')
 		self.assertHas(resp, '20.0♥')
 
@@ -387,7 +387,7 @@ class TestSubmitPSet(EvanTestCase):
 		alice.unlocked_units.set(units[4:7])
 		for unit in units[0:4]:
 			PSetFactory.create(student=alice, unit=unit)
-		PSetFactory.create(student=alice, unit=units[4], approved=False)
+		PSetFactory.create(student=alice, unit=units[4], status='P')
 
 		self.assertEqual(get_units_to_submit(alice).count(), 2)
 		self.assertEqual(get_units_to_unlock(alice).count(), 11)

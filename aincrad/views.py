@@ -38,8 +38,7 @@ class JSONData(TypedDict):
 	puid: str
 	uid: int
 	pk: int
-	approved: bool
-	rejected: bool
+	status: str
 	eligible: bool
 	clubs: int
 	hours: float
@@ -60,26 +59,23 @@ class JSONData(TypedDict):
 
 
 PSET_VENUEQ_INIT_QUERYSET = PSet.objects.filter(
-	approved=False,
-	rejected=False,
+	status__in=('PA', 'PR', 'P'),
 	student__semester__active=True,
 	student__legit=True,
 	student__enabled=True,
 ).annotate(
-	num_approved_all=SubqueryCount(
+	num_accepted_all=SubqueryCount(
 		'student__user__student__pset',
-		filter=Q(approved=True),
+		filter=Q(status='A'),
 	),
-	num_approved_current=SubqueryCount(
+	num_accepted_current=SubqueryCount(
 		'student__pset',
-		filter=Q(approved=True),
+		filter=Q(status='A'),
 	),
 )
 PSET_VENUEQ_INIT_KEYS = (
 	'pk',
-	'approved',
-	'rejected',
-	'resubmitted',
+	'status',
 	'feedback',
 	'special_notes',
 	'student__user__first_name',
@@ -93,8 +89,8 @@ PSET_VENUEQ_INIT_KEYS = (
 	'next_unit_to_unlock__group__name',
 	'next_unit_to_unlock__code',
 	'upload__content',
-	'num_approved_all',
-	'num_approved_current',
+	'num_accepted_all',
+	'num_accepted_current',
 	'student__reg__aops_username',
 	'student__reg__container__end_year',
 	'student__reg__country',
@@ -153,12 +149,12 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
 	if action == 'grade_problem_set':
 		# mark problem set as done
 		pset = get_object_or_404(PSet, pk=data['pk'])
-		pset.approved = data['approved']
-		pset.rejected = data['rejected']
+		original_status = pset.status
+		pset.status = data['status']
 		pset.clubs = data.get('clubs', None)
 		pset.hours = data.get('hours', None)
 		pset.save()
-		if pset.approved is True and pset.resubmitted is False and pset.unit is not None:
+		if pset.status == 'A' and original_status in ('P', 'PR') and pset.unit is not None:
 			# unlock the unit the student asked for
 			if pset.next_unit_to_unlock is not None:
 				pset.student.unlocked_units.add(pset.next_unit_to_unlock)

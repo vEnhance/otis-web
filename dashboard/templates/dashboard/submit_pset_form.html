@@ -9,12 +9,12 @@
 	please use the <a href="{% url "suggest-new" %}">problem suggestion form</a>.
 </div>
 
-{% if pending_psets %}
+{% if unaccepted_psets %}
 <h2>Pending submissions</h2>
 <table class="table">
-	{% for pset in pending_psets %}
+	{% for pset in unaccepted_psets %}
 	<tr>
-		<td>{% if pset.rejected %}<b>REJECTED</b>{% else %}{{pset.clubs|default_if_none:0}}♣{% endif %}</td>
+		<td>{% if pset.status == "R" or pset.status == "PR" %}<b>REJECTED</b>{% else %}{{pset.clubs|default_if_none:0}}♣{% endif %}</td>
 		<td><a href="{{pset.get_absolute_url}}">{{ pset.unit }}</td>
 		<td>{{ pset.upload.created_at|naturaltime }}</td>
 		<td><a href="{% url "resubmit-pset" pset.pk %}">Edit</a></td>
@@ -29,10 +29,10 @@
 
 <hr />
 
-<h2>Approved submissions</h2>
-{% if approved_psets %}
+<h2>Accepted submissions</h2>
+{% if accepted_psets %}
 <table class="table">
-	{% for pset in approved_psets %}
+	{% for pset in accepted_psets %}
 	<tr>
 		<td>{{pset.clubs|default_if_none:"0"}}♣</td>
 		<td><a href="{{pset.get_absolute_url}}">{{ pset.unit }}</td>

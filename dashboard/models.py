@@ -125,13 +125,6 @@ class PSet(models.Model):
 		),
 		default="P"
 	)
-	resubmitted = models.BooleanField(
-		help_text="Tracks if problem set resubmitted", default=False
-	)
-	approved = models.BooleanField(
-		help_text="Whether the latest version of the problem set has been checked off",
-		default=False
-	)
 	student = models.ForeignKey(
 		Student, help_text="The student attached to this", on_delete=models.CASCADE
 	)
@@ -165,9 +158,6 @@ class PSet(models.Model):
 	eligible = models.BooleanField(
 		default=True, help_text="Whether to count this for leveling up"
 	)
-	rejected = models.BooleanField(
-		default=False, help_text="If a problem set is rejected and needs attention."
-	)
 	feedback = models.TextField(
 		verbose_name="Feedback on problem set, worth [1♣]",
 		help_text="Any other feedback about the problem set",
@@ -197,6 +187,18 @@ class PSet(models.Model):
 			return self.upload.filename
 		else:
 			return None
+
+	@property
+	def accepted(self) -> bool:
+		return self.status == 'A'
+
+	@property
+	def rejected(self) -> bool:
+		return self.status == 'R'
+
+	@property
+	def resubmitted(self) -> bool:
+		return self.status in ('PA', 'PR')
 
 	class Meta:
 		verbose_name = "PSet submission"

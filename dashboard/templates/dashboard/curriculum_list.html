@@ -28,7 +28,7 @@
 <table class="table curriculum">
 	{% for row in curriculum %}
 	<tr class="subject{{ row.unit.group.subject }}
-		{% if row.is_approved %}
+		{% if row.is_accepted %}
 			unit-completed
 			{% if not profile.show_completed_by_default %}
 				unit-completed-hidden
@@ -42,7 +42,9 @@
 		">
 		<td class="number">
 			{{ row.number }}
-			{% if row.is_approved %}
+			{% if row.is_rejected %}
+			<span title="Rejected unit">🚫</span>
+			{% elif row.is_accepted %}
 			<span title="Completed unit">✅</span>
 			{% elif row.is_submitted and not row.semester_active %}
 			<span title="Completed unit">✅</span>
@@ -65,6 +67,7 @@
 			{{ row.unit.group.name }}
 		</td>
 		<td class="emojis">
+			{% spaceless %}
 			{% if row.is_visible %}
 			<a class="emoji-link" style="font-size: 80%" title="Download PDF" href="{% view_problems row.unit %}">💾</a>
 			<a class="emoji-link" title="Download LaTeX template" href="{% view_tex row.unit %}">📋</a>
@@ -73,22 +76,21 @@
 			<a href="{% view_problems row.unit %}">(PDF)</a>
 			{% endif %}
 			{% if row.is_visible %}
-			{% spaceless %}
 			<a class="emoji-link" title="File uploads" href="{% url "uploads" student.id row.unit.id %}">📂
 				<sup style="text-shadow: none;">{{ row.num_uploads|default:"0" }}</sup></a>
-			{% endspaceless %}
 			{% endif %}
 			<a class="emoji-link" title="Wiki" href="{% url "wiki-unitgroup" row.unit.group.pk %}" />🎮</a>
-			{% if row.sols_label %}
-			<a class="emoji-link" title="Download solutions" href="{% view_solutions row.unit %}">
-				{{ row.sols_label }}
-			</a>
+			{# solutions logic #}
+			{% if row.is_submitted %}
+			<a class="emoji-link" title="Download solutions" href="{% view_solutions row.unit %}">🗝️</a>
+			{% elif row.is_visible and not row.semester_active %}
+			<a class="emoji-link" title="Download solutions" href="{% view_solutions row.unit %}">🗝️</a>
 			{% elif request.user.is_staff %}
-			<a href="{% view_solutions row.unit %}">㊙️</a>
+			<a class="emoji-link" title="Download solutions" href="{% view_solutions row.unit %}">㊙️</a>
 			{% else %}
-			<span style="visibility:hidden;">㊙️</span>
-			{# placeholder for spacing reasons #}
+			<span style="visibility:hidden;">㊙️</span> {# placeholder for spacing reasons #}
 			{% endif %}
+			{% endspaceless %}
 		</td>
 	</tr>
 	{% endfor %}

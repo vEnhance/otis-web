@@ -53,8 +53,7 @@ class SemesterDownloadFileAdmin(admin.ModelAdmin):
 class PSetAdmin(admin.ModelAdmin):
 	list_display = (
 		'pk',
-		'approved',
-		'rejected',
+		'status',
 		'student',
 		'unit',
 		'hours',
@@ -69,8 +68,7 @@ class PSetAdmin(admin.ModelAdmin):
 		'special_notes',
 	)
 	list_filter = (
-		'approved',
-		'rejected',
+		'status',
 		'student__assistant',
 		'student__track',
 		'student__semester__active',
@@ -83,23 +81,23 @@ class PSetAdmin(admin.ModelAdmin):
 	)
 	list_per_page = 30
 
-	def approve_pset(self, request: HttpRequest, queryset: QuerySet[PSet]):
+	def accept_pset(self, request: HttpRequest, queryset: QuerySet[PSet]):
 		for pset in queryset:
 			if pset.next_unit_to_unlock is not None:
 				pset.student.unlocked_units.add(pset.next_unit_to_unlock)
 			if pset.unit is not None:
 				pset.student.unlocked_units.remove(pset.unit)
-		queryset.update(approved=True, rejected=False)
+		queryset.update(status='A')
 
-	def approve_pset_without_unlock(self, request: HttpRequest, queryset: QuerySet[PSet]):
-		queryset.update(approved=True, rejected=False)
+	def accept_pset_without_unlock(self, request: HttpRequest, queryset: QuerySet[PSet]):
+		queryset.update(status='A')
 
 	def reject_pset(self, request: HttpRequest, queryset: QuerySet[PSet]):
-		queryset.update(approved=False, rejected=True)
+		queryset.update(status='R')
 
 	actions = [
-		'approve_pset',
-		'approve_pset_without_unlock',
+		'accept_pset',
+		'accept_pset_without_unlock',
 		'reject_pset',
 	]
 

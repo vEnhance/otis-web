@@ -19,12 +19,12 @@
 </p>
 
 <p>
-	{% if pset.approved or pset.resubmitted %}
+	{% if not pset.resubmitted %}
 	You are about to <strong>resubmit</strong> {{ pset.unit.group }}.
 	This will overwrite your previous submission,
 	and add it back to the queue of problem sets requiring attention.
 	{% else %}
-	This problem set hasn't been checked off yet,
+	This problem set hasn't been processed yet,
 	so you can use this page to update your submission before
 	Evan or a different instructor gets to it.
 	{% endif %}

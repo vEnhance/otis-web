@@ -72,7 +72,7 @@ def portal(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 	context['semester'] = semester
 	context['profile'] = profile
 	context['omniscient'] = can_edit(request, student)
-	context['curriculum'] = student.generate_curriculum_rows(omniscient=context['omniscient'])
+	context['curriculum'] = student.generate_curriculum_rows()
 	context['tests'] = PracticeExam.objects.filter(
 		is_test=True, family=semester.exam_family, due_date__isnull=False
 	)
@@ -178,7 +178,7 @@ class PSetQueueList(LoginRequiredMixin, ListView[PSet]):
 
 	def get_queryset(self) -> QuerySet[PSet]:
 		return PSet.objects.filter(
-			approved=False, unit__group__hidden=False, rejected=False
+			status__in=('P', 'PA', 'PR'), unit__group__hidden=False
 		).order_by('pk')
 
 
@@ -250,17 +250,13 @@ def submit_pset(request: HttpRequest, student_id: int) -> HttpResponse:
 			)
 			return HttpResponseRedirect(pset.get_absolute_url())
 
+	psets = PSet.objects.filter(student=student).order_by('-upload__created_at')
 	context = {
-		'title':
-			'Ready to submit?',
-		'student':
-			student,
-		'pending_psets':
-			PSet.objects.filter(student=student, approved=False).order_by('-upload__created_at'),
-		'approved_psets':
-			PSet.objects.filter(student=student, approved=True).order_by('-upload__created_at'),
-		'form':
-			form,
+		'title': 'Ready to submit?',
+		'student': student,
+		'unaccepted_psets': psets.exclude(status='A'),
+		'accepted_psets': psets.filter(status='A'),
+		'form': form,
 	}
 	return render(request, "dashboard/submit_pset_form.html", context)
 
@@ -272,11 +268,19 @@ def resubmit_pset(request: HttpRequest, pk: int) -> HttpResponse:
 	if not can_view(request, student):
 		raise PermissionDenied("You are missing privileges for this problem set")
 
+	if pset.status == 'R':
+		verb = 'Replace'
+	elif pset.status == 'A':
+		verb = 'Add to'
+	else:
+		assert pset.status in ('PA', 'PR', 'P')
+		verb = 'Update'
+
 	if request.method == 'POST':
 		form = PSetResubmitForm(request.POST, request.FILES, instance=pset)
 	else:
 		form = PSetResubmitForm(instance=pset)
-	if pset.approved is True or pset.resubmitted is True:
+	if pset.status in ('A', 'PA'):
 		form.fields.pop('next_unit_to_unlock')
 	else:
 		form.fields['next_unit_to_unlock'].queryset = get_units_to_unlock(student)  # type: ignore
@@ -287,10 +291,10 @@ def resubmit_pset(request: HttpRequest, pk: int) -> HttpResponse:
 			raise SuspiciousOperation("There was no uploaded file")
 		pset.upload.content = form.cleaned_data['content']
 		pset.upload.save()
-		if pset.approved:
-			pset.resubmitted = True
-		pset.rejected = False
-		pset.approved = False
+		if pset.rejected:
+			pset.status = 'PR'
+		elif pset.accepted:
+			pset.status = 'PA'
 		pset.save()
 		messages.success(
 			request, "The problem set is submitted successfully "
@@ -301,12 +305,6 @@ def resubmit_pset(request: HttpRequest, pk: int) -> HttpResponse:
 		)
 		return HttpResponseRedirect(pset.get_absolute_url())
 
-	if pset.rejected:
-		verb = 'Replace'
-	elif pset.approved:
-		verb = 'Add to'
-	else:
-		verb = 'Update'
 	context = {
 		'title': f'{verb} {pset.filename or pset.pk}',
 		'student': student,

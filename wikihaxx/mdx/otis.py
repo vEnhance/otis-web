@@ -60,7 +60,9 @@ class OTISPreprocessor(markdown.preprocessors.Preprocessor):
 						table_output.append(f'<tr class="danger"><th>Name</th><td>{tag_arg}</td></tr>')
 					else:
 						num_taking = Student.objects.filter(curriculum__group=unitgroup).count()
-						num_psets = PSet.objects.filter(unit__group=unitgroup, approved=True).count()
+						num_psets = PSet.objects.filter(
+							unit__group=unitgroup, status__in=('A', 'PA')
+						).count()
 						clubs_given = PSet.objects.filter(
 							unit__group=unitgroup,
 						).aggregate(Sum('clubs'))['clubs__sum'] or 0

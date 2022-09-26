@@ -1,10 +1,10 @@
 from core.factories import SemesterFactory, UnitFactory, UnitGroupFactory, UserFactory  # NOQA
 from django.contrib.auth import get_user_model
+from evans_django_tools.testsuite import UniqueFaker
 from factory.declarations import LazyAttribute, Sequence, SubFactory
 from factory.django import DjangoModelFactory, FileField, ImageField
 from factory.faker import Faker
 from factory.fuzzy import FuzzyChoice
-from evans_django_tools.testsuite import UniqueFaker
 from roster.factories import StudentFactory
 
 from dashboard.models import Achievement, AchievementUnlock, BonusLevel, BonusLevelUnlock, Level, ProblemSuggestion, PSet, QuestComplete, SemesterDownloadFile, UploadedFile  # NOQA
@@ -41,7 +41,7 @@ class PSetFactory(DjangoModelFactory):
 		lambda o: UploadedFileFactory.create(benefactor=o.student, unit=o.unit)
 	)
 	next_unit_to_unlock = SubFactory(UnitFactory)
-	approved = True
+	status = 'A'
 
 
 class ProblemSuggestionFactory(DjangoModelFactory):

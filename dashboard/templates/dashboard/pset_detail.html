@@ -11,25 +11,25 @@
 	This unit submission was rejected.
 	You should <a href="{% url "resubmit-pset" pset.pk %}">replace it</a>.
 </div>
-{% elif pset.approved %}
+{% elif pset.accepted %}
 <div class="alert alert-success">
-	This unit submission was approved.
+	This unit submission was accepted.
 	If you haven't read the solutions yet,
 	you can <a href="{% url "resubmit-pset" pset.pk %}">submit additional problems</a>
 	if you find time.
 </div>
 {% else %}
 <div class="alert alert-primary">
-	This unit submission is pending approval from your instructor.
+	This unit submission is pending review from Evan.
 	<a href="{% url "resubmit-pset" pset.pk %}">Update it</a>
 	if you wish to make changes.
 </div>
 {% endif %}
 <p class="text-center">
-	<a href="{% url "resubmit-pset" pset.pk %}" class="btn {% if pset.rejected %}btn-success{% elif pset.approved %}btn-warning{% else %}btn-primary{% endif %}">
+	<a href="{% url "resubmit-pset" pset.pk %}" class="btn {% if pset.rejected %}btn-success{% elif pset.accepted %}btn-warning{% else %}btn-primary{% endif %}">
 		{% if pset.rejected %}
 		Replace problem set
-		{% elif pset.approved %}
+		{% elif pset.accepted %}
 		Submit additional problems
 		{% else %}
 		Update submission
@@ -67,7 +67,7 @@
 	</td>
 	<td>
 		{{ pset.pk }}
-		{% if pset.approved %}
+		{% if pset.accepted %}
 		✅ Accepted
 		{% elif pset.rejected %}
 		❌ Rejected

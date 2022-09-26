@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import os
 from datetime import timedelta
 from hashlib import pbkdf2_hmac
-from typing import Any, Callable, Dict, List
+from typing import Callable, List, TypedDict
 
 from _pydecimal import Decimal
 from core.models import Semester, Unit
@@ -18,6 +18,21 @@ from django.utils.timezone import localtime
 from sql_util.aggregates import Exists, SubqueryAggregate
 
 from .country_abbrevs import COUNTRY_CHOICES
+
+
+class CurriculumRowTypeDict(TypedDict, total=False):
+	unit: Unit
+	number: int
+	num_uploads: int
+	semester_active: bool
+
+	is_submitted: bool
+	is_current: bool
+	is_visible: bool
+	is_accepted: bool
+	is_rejected: bool
+
+	sols_label: str
 
 
 class Assistant(models.Model):
@@ -218,7 +233,8 @@ class Student(models.Model):
 		else:
 			return queryset.annotate(
 				has_pset=Exists('pset', filter=Q(student=self)),
-				approved=Exists('pset', filter=Q(student=self, approved=True))
+				accepted=Exists('pset', filter=Q(student=self, status='A')),
+				rejected=Exists('pset', filter=Q(student=self, status='R')),
 			)
 
 	def has_submitted_pset(self, unit: Unit) -> bool:
@@ -239,14 +255,14 @@ class Student(models.Model):
 		else:
 			return False
 
-	def generate_curriculum_rows(self, omniscient: bool) -> List[Dict[str, Any]]:
+	def generate_curriculum_rows(self) -> List[CurriculumRowTypeDict]:
 		curriculum = self.generate_curriculum_queryset().order_by('position')
 		unlocked_units_ids = self.unlocked_units.values_list('id', flat=True)
 
 		rows = []
 		for i, unit in enumerate(curriculum):
 			n = i + 1
-			row: Dict[str, Any] = {}
+			row: CurriculumRowTypeDict = {}
 			row['unit'] = unit
 			row['number'] = n
 			row['num_uploads'] = getattr(unit, 'num_uploads', 0)
@@ -256,16 +272,11 @@ class Student(models.Model):
 			row['is_current'] = unit.pk in unlocked_units_ids
 			row['is_visible'] = row['is_submitted'] or row['is_current']
 			if self.semester.uses_legacy_pset_system is True:
-				row['is_approved'] = row['is_submitted'] and not row['is_current']
+				row['is_accepted'] = row['is_submitted'] and not row['is_current']
+				row['is_rejected'] = False
 			else:
-				row['is_approved'] = getattr(unit, 'approved')
-
-			if row['is_submitted'] or (row['is_visible'] and self.semester.active is False):
-				row['sols_label'] = "🗝️"
-			elif omniscient and row['is_visible']:
-				row['sols_label'] = "㊙️"
-			else:
-				row['sols_label'] = None  # solutions not shown
+				row['is_accepted'] = getattr(unit, 'accepted')
+				row['is_rejected'] = getattr(unit, 'rejected')
 			rows.append(row)
 		return rows
 

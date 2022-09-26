@@ -132,7 +132,7 @@ def advance(request: HttpRequest, student_id: int) -> Any:
 	context['form'] = form
 	context['student'] = student
 	context['omniscient'] = can_edit(request, student)
-	context['curriculum'] = student.generate_curriculum_rows(omniscient=context['omniscient'])
+	context['curriculum'] = student.generate_curriculum_rows()
 	if student.semester.uses_legacy_pset_system:
 		uploads = student.uploadedfile_set  # type: ignore
 		context['num_psets'] = uploads.filter(category='psets').values('unit').distinct().count()
