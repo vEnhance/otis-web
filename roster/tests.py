@@ -106,7 +106,7 @@ class RosterTest(EvanTestCase):
 					"action_type": "UNLOCK",
 				}
 			)
-			self.assertHas(resp, "Petition automatically approved")
+			self.assertHas(resp, "Petition automatically processed")
 		self.assertEqual(alice.curriculum.count(), 6)
 		self.assertEqual(alice.unlocked_units.count(), 6)
 		self.assertHas(
@@ -124,7 +124,7 @@ class RosterTest(EvanTestCase):
 				self.post("inquiry", alice.pk, data={
 					'unit': units[i].pk,
 					"action_type": "UNLOCK",
-				}), "Petition automatically approved"
+				}), "Petition automatically processed"
 			)
 		self.assertEqual(alice.curriculum.count(), 10)
 		self.assertEqual(alice.unlocked_units.count(), 10)
@@ -145,7 +145,7 @@ class RosterTest(EvanTestCase):
 				self.post("inquiry", alice.pk, data={
 					'unit': units[i].pk,
 					"action_type": "APPEND",
-				}), "Petition automatically approved"
+				}), "Petition automatically processed"
 			)
 		self.assertEqual(alice.curriculum.count(), 13)
 		self.assertEqual(alice.unlocked_units.count(), 10)
@@ -163,7 +163,7 @@ class RosterTest(EvanTestCase):
 				self.post("inquiry", alice.pk, data={
 					'unit': units[i].pk,
 					"action_type": "DROP",
-				}), "Petition automatically approved"
+				}), "Petition automatically processed"
 			)
 		self.assertEqual(alice.curriculum.count(), 8)
 		self.assertEqual(alice.unlocked_units.count(), 5)
@@ -172,7 +172,7 @@ class RosterTest(EvanTestCase):
 			self.post("inquiry", alice.pk, data={
 				'unit': units[5].pk,
 				"action_type": "UNLOCK",
-			}), "Petition automatically approved"
+			}), "Petition automatically processed"
 		)
 		self.assertEqual(alice.curriculum.count(), 9)
 		self.assertEqual(alice.unlocked_units.count(), 6)

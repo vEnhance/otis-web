@@ -282,7 +282,7 @@ def inquiry(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 					)
 				elif auto_accept_criteria or request.user.is_staff:
 					inquiry.run_accept()
-					messages.success(request, "Petition automatically approved.")
+					messages.success(request, "Petition automatically processed.")
 				elif auto_hold_criteria:
 					inquiry.status = "HOLD"
 					inquiry.save()
@@ -298,9 +298,7 @@ def inquiry(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 
 	context['inquiries'] = UnitInquiry.objects.filter(student=student)
 	context['student'] = student
-	context['curriculum'] = student.generate_curriculum_rows(
-		omniscient=can_edit(request, student)
-	)
+	context['curriculum'] = student.generate_curriculum_rows()
 
 	return render(request, 'roster/inquiry.html', context)
 

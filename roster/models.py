@@ -418,7 +418,7 @@ class UnitInquiry(models.Model):
 	status = models.CharField(
 		max_length=5,
 		choices=(
-			("ACC", "Approved"),
+			("ACC", "Accepted"),
 			("REJ", "Rejected"),
 			("NEW", "Pending"),
 			("HOLD", "On hold"),

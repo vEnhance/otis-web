@@ -165,7 +165,7 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
 			# remove the old unit since it's done now
 			pset.student.unlocked_units.remove(pset.unit)
 		return JsonResponse({'result': 'success'}, status=200)
-	elif action == 'approve_inquiries':
+	elif action == 'accept_inquiries':
 		for inquiry in UnitInquiry.objects.filter(
 			status="NEW",
 			student__semester__active=True,
@@ -357,7 +357,7 @@ def api(request: HttpRequest) -> JsonResponse:
 		if not sha256(token.encode('ascii')).hexdigest() == settings.API_TARGET_HASH:
 			return JsonResponse({'error': "☕"}, status=418)
 
-	if action in ('grade_problem_set', 'approve_inquiries', 'mark_suggestion', 'init'):
+	if action in ('grade_problem_set', 'accept_inquiries', 'mark_suggestion', 'init'):
 		return venueq_handler(action, data)
 	elif action in ('register', ):
 		return discord_handler(action, data)

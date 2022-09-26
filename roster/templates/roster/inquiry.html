@@ -55,7 +55,7 @@
 				{% if inquiry.status == "NEW" %}
 				Pending
 				{% elif inquiry.status == "ACC" %}
-				<strong class="text-success">Approved</strong>
+				<strong class="text-success">Accepted</strong>
 				{% elif inquiry.status == "REJ" %}
 				<strong class="text-danger">Rejected</strong>
 				{% elif inquiry.status == "HOLD" %}
@@ -84,12 +84,12 @@
 		The unit is added if it wasn't there already,
 		and moreover the unit is automatically unlocked.
 
-		The first few petitions of this type are automatically approved;
-		the rest are approved manually.
+		The first few petitions of this type are automatically processed;
+		the rest require manual review from Evan.
 	</li>
 	<li><b>Add for later</b>:
 		The unit is added to the list, but not unlocked.
-		Petitions of this form are approved automatically.
+		Petitions of this form are processed automatically.
 	</li>
 	<li><b>Drop</b>:
 		This removes a unit entirely from your list.
