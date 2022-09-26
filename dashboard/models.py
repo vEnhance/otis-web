@@ -34,8 +34,10 @@ def content_file_name(instance: 'UploadedFile', filename: str) -> str:
 class UploadedFile(models.Model):
 	"""An uploaded file, for example a transcript or homework solutions."""
 	CHOICES = (
-		("psets", "PSet Submission"), ("scripts", "Transcript"), ("notes", "Notes / Comments"),
-		("misc", "Miscellaneous")
+		("psets", "PSet Submission"),
+		("scripts", "Transcript"),
+		("notes", "Notes / Comments"),
+		("misc", "Miscellaneous"),
 	)
 	benefactor = models.ForeignKey(
 		Student, on_delete=models.CASCADE, help_text="The student for which this file is meant"
@@ -140,20 +142,14 @@ class PSet(models.Model):
 		verbose_name="Hours spent (estimate)",
 		null=True,
 		blank=True,
-		validators=[
-			MinValueValidator(0),
-			MaxValueValidator(200),
-		],
+		validators=[MinValueValidator(0), MaxValueValidator(200)],
 	)
 	clubs = models.IntegerField(
 		help_text="Total number of clubs that you solved (including 1♣ if feedback written)",
 		verbose_name="Total ♣ earned",
 		null=True,
 		blank=True,
-		validators=[
-			MinValueValidator(0),
-			MaxValueValidator(200),
-		]
+		validators=[MinValueValidator(0), MaxValueValidator(200)],
 	)
 	eligible = models.BooleanField(
 		default=True, help_text="Whether to count this for leveling up"
