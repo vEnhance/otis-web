@@ -13,7 +13,7 @@ from django.urls import reverse_lazy
 class Problem(models.Model):
 	puid = models.CharField(
 		max_length=24,
-		help_text="Unique problem identifier, as printed in OTIS handout.",
+		help_text="Problem identifier, as printed in OTIS. Capital letters and digits only.",
 		unique=True,
 		verbose_name="PUID",
 		validators=[
