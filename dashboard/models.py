@@ -114,6 +114,17 @@ class SemesterDownloadFile(models.Model):
 
 
 class PSet(models.Model):
+	status = models.CharField(
+		max_length=4,
+		choices=(
+			("A", "Accepted"),
+			("R", "Rejected"),
+			("PA", "Pending (prev accepted)"),
+			("PR", "Pending (prev rejected)"),
+			("P", "Pending (new)"),
+		),
+		default="P"
+	)
 	resubmitted = models.BooleanField(
 		help_text="Tracks if problem set resubmitted", default=False
 	)
