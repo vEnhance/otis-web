@@ -7,16 +7,16 @@
 <table class="table">
 	<thead class="table-dark">
 		<tr>
-			<td>#</td>
+			<td class="text-end">#</td>
 			<td>Unit</td>
 			<td>Timestamp</td>
-			<td>ID</td>
+			<td class="text-end">ID</td>
 		</tr>
 	</thead>
 	<tbody>
 		{% for pset in object_list %}
 		<tr {% if pset.student.user == request.user %} class="table-warning fw-bold" {% endif %}>
-			<th>{{ forloop.counter }}</th>
+			<th class="text-end">{{ forloop.counter }}.</th>
 			<td>
 				{% if pset.student.user == request.user or request.user.is_staff %}
 				<a href="{{ pset.get_absolute_url }}">{{ pset.unit }}</a>
@@ -25,7 +25,7 @@
 				{% endif %}
 			</td>
 			<td>{{ pset.upload.created_at }}</td>
-			<td>
+			<td class="text-end">
 				{% if request.user.is_staff %}
 				<a href="{% url "admin:dashboard_pset_change" pset.pk %}">{{ pset.pk }}</a>
 				{% else %}
