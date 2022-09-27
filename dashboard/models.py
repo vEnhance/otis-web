@@ -142,15 +142,15 @@ class PSet(models.Model):
 		blank=True,
 	)
 	hours = models.FloatField(
-		help_text="Number of hours spent on this problem set",
-		verbose_name="Hours spent (estimate)",
+		help_text="Number of hours (♥) spent on this problem set",
+		verbose_name="♥ Hours spent (estimate)",
 		null=True,
 		blank=True,
 		validators=[MinValueValidator(0), MaxValueValidator(200)],
 	)
 	clubs = models.IntegerField(
-		help_text="Total number of clubs that you solved (including 1♣ if feedback written)",
-		verbose_name="Total ♣ earned",
+		help_text="Total number of clubs (♣) that you solved, including 1♣ for feedback",
+		verbose_name="♣ Clubs earned",
 		null=True,
 		blank=True,
 		validators=[MinValueValidator(0), MaxValueValidator(200)],
@@ -195,6 +195,10 @@ class PSet(models.Model):
 	@property
 	def rejected(self) -> bool:
 		return self.status == 'R'
+
+	@property
+	def pending(self) -> bool:
+		return not (self.accepted or self.rejected)
 
 	@property
 	def resubmitted(self) -> bool:

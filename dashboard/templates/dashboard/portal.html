@@ -160,14 +160,13 @@
 
 <div class="text-center">
 	<a href="{% url 'stats' student.id %}" style="margin: 0 auto; width: 120px;" class="btn btn-primary text-white" role="button">View stats</a>
-	&nbsp;
-	{% if is_maxed %}
-	<a href="{% url 'palace-list' student.id %}" style="margin: 0 auto; width: 120px;" class="btn btn-danger text-white" role="button">Ruby palace</a>
-	&nbsp;
 	{% endif %}
 	{% if student.enabled and semester.active %}
 	<a href="{% url 'submit-pset' student.id %}" style="margin: 0 auto; width: 120px;" class="btn btn-success text-white" role="button">Submit unit</a>
 	{% endif %}
+	<a href="{% url 'student-pset-list' student.id %}" style="margin: 0 auto; width: 120px;" class="btn btn-secondary text-white" role="button">Past work</a>
+	{% if is_maxed %}
+	<a href="{% url 'palace-list' student.id %}" style="margin: 0 auto; width: 120px;" class="btn btn-danger text-white" role="button">Ruby palace</a>
 </div>
 {% endif %}
 
@@ -241,6 +240,7 @@
 				<li><a href="{% static 'info/unit-guide.pdf' %}">Unit selection guide</a></li>
 				<li><a href="{% static 'info/mock-imo.pdf' %}">Extra mock IMO's (shortlist)</a></li>
 				<li><a href="{% static 'info/psychology.pdf' %}">Handout on olympiad strategy</a></li>
+				<li><a href="https://web.evanchen.cc/handouts/LaTeXPetPeeve/LaTeXPetPeeve.pdf">LaTeX pet peeves</a></li>
 			</ul>
 		</td>
 		<td valign="top" width="50%">

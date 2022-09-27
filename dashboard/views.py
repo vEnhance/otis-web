@@ -257,10 +257,33 @@ def submit_pset(request: HttpRequest, student_id: int) -> HttpResponse:
 		'title': 'Ready to submit?',
 		'student': student,
 		'unaccepted_psets': psets.exclude(status='A'),
-		'accepted_psets': psets.filter(status='A'),
 		'form': form,
 	}
 	return render(request, "dashboard/submit_pset_form.html", context)
+
+
+class StudentPSetList(LoginRequiredMixin, ListView[PSet]):
+	template_name = 'dashboard/student_pset_list.html'
+
+	def get_queryset(self) -> QuerySet[PSet]:
+		return PSet.objects.filter(student=self.student).order_by('-upload__created_at')
+
+	def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+		context = super().get_context_data(**kwargs)
+		context['student'] = self.student
+		return context
+
+	def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
+		if not isinstance(request.user, User):
+			return super().dispatch(request, *args, **kwargs)  # login required mixin
+
+		self.student = get_object_or_404(Student, pk=kwargs.pop('student_id'))
+		if not can_view(request, self.student):
+			raise PermissionDenied("You do not have permission to view this student's problem sets")
+		if self.student.is_delinquent:
+			raise PermissionDenied("Student is delinquent")
+
+		return super().dispatch(request, *args, **kwargs)
 
 
 @login_required

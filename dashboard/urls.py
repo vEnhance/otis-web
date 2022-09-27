@@ -16,6 +16,7 @@ urlpatterns = [
 	path(r'idlewarn/', views.idlewarn, name='idlewarn'),
 	path(r'downloads/<int:pk>/', views.DownloadList.as_view(), name='downloads'),
 	path(r'pset/<int:pk>/', views.PSetDetail.as_view(), name='pset'),
+	path(r'sent/<int:student_id>/', views.StudentPSetList.as_view(), name='student-pset-list'),
 	path(r'past/', views.past, name='past'),
 	path(r'past/<int:semester_id>/', views.past, name='past'),
 	path(r'years/', views.SemesterList.as_view(), name='semlist'),
