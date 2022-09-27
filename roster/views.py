@@ -394,10 +394,10 @@ def unlock_rest_of_mystery(request: HttpRequest, delta: int = 1) -> HttpResponse
 	try:
 		mystery = student.unlocked_units.get(group__name="Mystery")
 	except Unit.DoesNotExist:
-		s = "You don't have the Mystery unit unlocked!"
-		s += "\n"
-		s += f"You are currently {student}"
-		return HttpResponse(s, status=403)
+		return HttpResponse(
+			f"You don't have the Mystery unit unlocked!\nYou are currently {student}",
+			status=403,
+		)
 	added_unit = get_object_or_404(Unit, position=mystery.position + delta)
 	student.unlocked_units.remove(mystery)
 	student.curriculum.remove(mystery)
