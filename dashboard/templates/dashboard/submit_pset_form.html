@@ -9,9 +9,11 @@
 {% if unaccepted_psets %}
 <table class="table">
 	{% for pset in unaccepted_psets %}
-	<tr>
+	<tr {% if pset.status == "R" %}class="table-danger" {% endif %}>
 		<td>{% if pset.status == "R" or pset.status == "PR" %}<b>REJECTED</b>{% else %}{{pset.clubs|default_if_none:0}}♣{% endif %}</td>
-		<td><a href="{{pset.get_absolute_url}}">{{ pset.unit }}</td>
+		<td><a href="{{pset.get_absolute_url}}">
+				{{ pset.unit.group.name }}<sup>{{ pset.unit.code }}</sup>
+		</td>
 		<td>{{ pset.upload.created_at|naturaltime }}</td>
 		<td><a href="{% url "resubmit-pset" pset.pk %}">Edit</a></td>
 	</tr>
