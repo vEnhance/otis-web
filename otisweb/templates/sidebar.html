@@ -44,7 +44,12 @@
 
 {% if student %}
 <p><b><a href="{% url "portal" student.id %}">{{ student.name }}</a></b></p>
-<p class="fst-italic">{{ student.semester }}</p>
+<p class="fst-italic">
+	<small>
+		{{ student.semester }}
+		({{student.semester.start_year}}-{{student.semester.end_year}})
+	</small>
+</p>
 {% endif %}
 
 {% if request.user.is_staff %}

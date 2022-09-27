@@ -70,6 +70,10 @@ class Semester(models.Model):
 		blank=True, help_text="Link to calendar for students without meetings with Evan"
 	)
 
+	@property
+	def start_year(self) -> int:
+		return self.end_year - 1
+
 	def __str__(self) -> str:
 		return self.name
 
