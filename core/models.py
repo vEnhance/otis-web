@@ -74,6 +74,10 @@ class Semester(models.Model):
 	def start_year(self) -> int:
 		return self.end_year - 1
 
+	@property
+	def years(self) -> str:
+		return f'{self.start_year}-{self.end_year}'
+
 	def __str__(self) -> str:
 		return self.name
 

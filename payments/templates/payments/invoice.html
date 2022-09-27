@@ -7,6 +7,16 @@
 	<h1>Payment for {{student}}</h1>
 	{% include "roster/invoice_table.html" %}
 
+	{% if not invoice.student.semester.acitve %}
+	<div class="alert alert-danger" role="alert">
+		<h2 class="alert-title">You are viewing the invoice for a past year!</h2>
+		This is the invoice for
+		<b>{{ invoice.student.semester.years }}</b>.
+		If you are trying to pay for the current year then you should
+		<a class="alert-link" href="{% url "invoice" %}">go to the current year's invoice</a>.
+	</div>
+	{% endif %}
+
 	<p class="text-center">
 		<b class="fs-5">Amount to pay:</b>
 		<input id="amount" type="number" min="0" max="{{invoice.total_owed|floatformat:0}}" value="{{invoice.total_owed|floatformat:0}}" />
