@@ -167,8 +167,8 @@
 	<a href="{% url 'student-pset-list' student.id %}" style="margin: 0 auto; width: 120px;" class="btn btn-secondary text-white" role="button">Past work</a>
 	{% if is_maxed %}
 	<a href="{% url 'palace-list' student.id %}" style="margin: 0 auto; width: 120px;" class="btn btn-danger text-white" role="button">Ruby palace</a>
+	{% endif %}
 </div>
-{% endif %}
 
 {% if downloads or emails %}
 <br>

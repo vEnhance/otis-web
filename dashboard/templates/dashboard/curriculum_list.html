@@ -67,7 +67,6 @@
 			{{ row.unit.group.name }}
 		</td>
 		<td class="emojis">
-			{% spaceless %}
 			{% if row.is_visible %}
 			<a class="emoji-link" style="font-size: 80%" title="Download PDF" href="{% view_problems row.unit %}">💾</a>
 			<a class="emoji-link" title="Download LaTeX template" href="{% view_tex row.unit %}">📋</a>
@@ -75,10 +74,12 @@
 			{% elif request.user.is_staff %}
 			<a href="{% view_problems row.unit %}">(PDF)</a>
 			{% endif %}
+			{% spaceless %}
 			{% if row.is_visible %}
 			<a class="emoji-link" title="File uploads" href="{% url "uploads" student.id row.unit.id %}">📂
 				<sup style="text-shadow: none;">{{ row.num_uploads|default:"0" }}</sup></a>
 			{% endif %}
+			{% endspaceless %}
 			<a class="emoji-link" title="Wiki" href="{% url "wiki-unitgroup" row.unit.group.pk %}" />🎮</a>
 			{# solutions logic #}
 			{% if row.is_submitted %}
@@ -90,7 +91,6 @@
 			{% else %}
 			<span style="visibility:hidden;">㊙️</span> {# placeholder for spacing reasons #}
 			{% endif %}
-			{% endspaceless %}
 		</td>
 	</tr>
 	{% endfor %}
