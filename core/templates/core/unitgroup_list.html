@@ -21,17 +21,18 @@
 
 {% for subject, item_list in grouped_unit_list %}
 <h2>{{ subject }}</h2>
-{% for unitgroup in item_list %}
-<p>
-	<b class="text-info">
-		<a href="{% url "wiki-unitgroup" unitgroup.pk %}">{{ unitgroup.name }}</a>
-	</b>
-	[{{ unitgroup.get_subject_short_display }},
-	{% for unit in unitgroup.unit_set.all %} {{ unit.code }}{% endfor %}].
-	<br />
-	{{ unitgroup.description }}
-</p>
-{% endfor %}
+<ul>
+	{% for unitgroup in item_list %}
+	<li>
+		<b class="text-info">
+			<a href="{% url "wiki-unitgroup" unitgroup.pk %}">{{ unitgroup.name }}</a>
+		</b>
+		<span class="text-dark">&mdash; {{ unitgroup.get_subject_short_display }},
+			{% for unit in unitgroup.unit_set.all %} {{ unit.code }}{% endfor %}</span>
+		<p class="text-secondary">{{ unitgroup.description }}</p>
+	</li>
+	{% endfor %}
+</ul>
 <hr />
 {% endfor %}
 {% endblock %}
