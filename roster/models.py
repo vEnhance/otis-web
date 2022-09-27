@@ -477,7 +477,6 @@ class RegistrationContainer(models.Model):
 		help_text="Controls the settings for registering for a semester",
 		on_delete=models.CASCADE,
 	)
-	end_year = models.IntegerField(help_text="The year in which OTIS will end")
 	passcode = models.CharField(
 		max_length=128, help_text="The passcode for that year's registration"
 	)
@@ -581,7 +580,7 @@ class StudentRegistration(models.Model):
 		if self.graduation_year == 0:
 			return 13
 		else:
-			return 12 - (self.graduation_year - self.container.end_year)
+			return 12 - (self.graduation_year - self.container.semester.end_year)
 
 	@property
 	def about(self):

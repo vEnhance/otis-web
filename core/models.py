@@ -54,6 +54,7 @@ class Semester(models.Model):
 	most_payment_deadline = models.DateTimeField(
 		null=True, blank=True, help_text="Deadline for two-thirds of the payment."
 	)
+	end_year = models.IntegerField(help_text="The year in which OTIS will end")
 
 	gradescope_key = models.CharField(
 		max_length=10, blank=True, help_text="The entry code for GradeScope this semester."

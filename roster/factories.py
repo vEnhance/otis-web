@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from factory.declarations import LazyAttribute, SubFactory
 from factory.django import DjangoModelFactory
 from factory.faker import Faker
+
 from roster.models import Assistant, Invoice, RegistrationContainer, Student, StudentRegistration, UnitInquiry  # NOQA
 
 User = get_user_model()
@@ -49,7 +50,6 @@ class RegistrationContainerFactory(DjangoModelFactory):
 	class Meta:
 		model = RegistrationContainer
 
-	end_year = 2025
 	semester = SubFactory(SemesterFactory)
 	passcode = Faker('color_name')
 	allowed_tracks = 'C,'

@@ -5,11 +5,11 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
+from evans_django_tools.testsuite import UniqueFaker
 from factory import Faker, LazyAttribute, Sequence, SubFactory
 from factory.django import DjangoModelFactory
 from factory.fuzzy import FuzzyChoice
 from factory.helpers import post_generation
-from evans_django_tools.testsuite import UniqueFaker
 
 from core.models import Semester, Unit, UnitGroup, UserProfile
 from core.utils import storage_hash
@@ -71,6 +71,7 @@ class SemesterFactory(DjangoModelFactory):
 	exam_family = 'Waltz'
 	gradescope_key = 'ABCDEF'
 	social_url = 'https://instagram.com/evanchen.cc/'
+	end_year = 2025
 
 
 class UserProfileFactory(DjangoModelFactory):
