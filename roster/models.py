@@ -368,7 +368,7 @@ class Invoice(models.Model):
 	memo = models.TextField(blank=True, help_text="Internal note to self.")
 
 	def __str__(self):
-		return f"Invoice {self.pk or 0}"
+		return f"{self.pk or 0} ({self.total_paid}/{self.total_cost})"
 
 	@property
 	def prep_rate(self) -> int:
