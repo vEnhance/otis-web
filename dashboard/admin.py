@@ -62,6 +62,7 @@ class PSetAdmin(admin.ModelAdmin):
 	search_fields = (
 		'pk',
 		'unit__group__name',
+		'unit__code',
 		'student__user__first_name',
 		'student__user__last_name',
 		'feedback',
@@ -69,13 +70,11 @@ class PSetAdmin(admin.ModelAdmin):
 	)
 	list_filter = (
 		'status',
-		'student__assistant',
-		'student__track',
-		'student__semester__active',
 		'student__semester',
 	)
 	list_display_links = (
 		'pk',
+		'status',
 		'student',
 		'unit',
 	)
