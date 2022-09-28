@@ -211,7 +211,7 @@ class RosterTest(EvanTestCase):
 		for i in range(1, 6):
 			self.assertHas(resp, f'"F{i} L{i}"')
 			self.assertHas(resp, f'user{i}@evanchen.cc')
-		self.assertHas(resp, "GoodKid", count=1 + 4 + 9 + 16 + 25)
+		self.assertHas(resp, "GoodKid", count=2 * (1 + 4 + 9 + 16 + 25))
 		self.assertHas(resp, r'&lt;user5@evanchen.cc&gt;')
 		self.assertNotHas(resp, "BadKid")
 		self.assertNotHas(resp, "out of sync")  # only admins can see the sync button

@@ -57,8 +57,18 @@
 	{% for igroup in instructor_list %}
 	{% with instructor=igroup.grouper %}
 	"{{ instructor.name }}"
-	&lt;{{ instructor.user.email }}&gt;{% if not forloop.last %},{% endif %}
+	&lt;{{ instructor.user.email }}&gt;,<br />
 	{% endwith %}
+	{% endfor %}
+</code>
+
+<h2>Student emails (for copy-pasting)</h2>
+<code>
+	{% for igroup in instructor_list %}
+	{% for student in igroup.list %}
+	"{{ student.name }}"
+	&lt;{{ student.user.email }}&gt;,<br />
+	{% endfor %}
 	{% endfor %}
 </code>
 
