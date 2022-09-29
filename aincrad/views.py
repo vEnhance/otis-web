@@ -78,6 +78,7 @@ PSET_VENUEQ_INIT_KEYS = (
 	'status',
 	'feedback',
 	'special_notes',
+	'student__pk',
 	'student__user__first_name',
 	'student__user__last_name',
 	'student__user__email',
