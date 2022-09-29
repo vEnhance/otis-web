@@ -65,7 +65,7 @@ class TestLevelSystem(EvanTestCase):
 		resp = self.get('portal', alice.pk)
 		self.assertHas(resp, 'Level 38')
 		self.assertHas(resp, '520♣')
-		self.assertHas(resp, '84♥')
+		self.assertHas(resp, '84.0♥')
 		self.assertHas(resp, '11◆')
 		self.assertHas(resp, '19♠')
 
@@ -79,7 +79,7 @@ class TestLevelSystem(EvanTestCase):
 		resp = self.get('stats', alice.pk)
 		self.assertHas(resp, 'Level 38')
 		self.assertHas(resp, '520♣')
-		self.assertHas(resp, '84♥')
+		self.assertHas(resp, '84.0♥')
 		self.assertHas(resp, '11◆')
 		self.assertHas(resp, '19♠')
 		self.assertHas(resp, 'Feel the fours')

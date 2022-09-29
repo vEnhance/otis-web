@@ -33,7 +33,7 @@ class Meter:
 		self,
 		name: str,
 		emoji: str,
-		value: int,
+		value: Union[float, int],
 		unit: str,
 		color: str,
 		max_value: int,
@@ -51,7 +51,7 @@ class Meter:
 
 	@property
 	def percent(self) -> int:
-		eps = 0.40 # Make sure text fits in the bar
+		eps = 0.40  # Make sure text fits in the bar
 		k = (self.value + eps * self.max_value) / ((1 + eps) * self.max_value)
 		return min(100, int(100 * k))
 
@@ -74,13 +74,13 @@ class Meter:
 		)
 
 	@staticmethod
-	def HeartMeter(value: int):
+	def HeartMeter(value: float):
 		return Meter(
 			name="Wisdom", emoji="🕰️", value=value, unit="♥", color='#198754', max_value=2500
 		)
 
 	@staticmethod
-	def SpadeMeter(value: int):
+	def SpadeMeter(value: float):
 		return Meter(
 			name="Strength", emoji="🏆", value=value, unit="♠", color='#ae610f', max_value=125
 		)
@@ -182,9 +182,9 @@ def get_level_info(student: Student) -> LevelInfoDict:
 	# TODO total_spades += hint_spades
 
 	meters: FourMetersDict = {
-		'clubs': Meter.ClubMeter(round(total_clubs, 2)),
+		'clubs': Meter.ClubMeter(int(total_clubs)),
 		'hearts': Meter.HeartMeter(round(total_hearts, 2)),
-		'diamonds': Meter.DiamondMeter(total_diamonds),
+		'diamonds': Meter.DiamondMeter(int(total_diamonds)),
 		'spades': Meter.SpadeMeter(round(total_spades, 1)),
 	}
 	level_number = sum(meter.level for meter in meters.values())  # type: ignore
