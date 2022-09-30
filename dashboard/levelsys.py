@@ -33,7 +33,7 @@ class Meter:
 		self,
 		name: str,
 		emoji: str,
-		value: int,
+		value: Union[float, int],
 		unit: str,
 		color: str,
 		max_value: int,
@@ -51,13 +51,13 @@ class Meter:
 
 	@property
 	def percent(self) -> int:
-		eps = 0.25
+		eps = 0.40  # Make sure text fits in the bar
 		k = (self.value + eps * self.max_value) / ((1 + eps) * self.max_value)
 		return min(100, int(100 * k))
 
 	@property
-	def needed(self) -> int:
-		return (self.level + 1)**2 - self.value
+	def needed(self) -> float:
+		return round((self.level + 1)**2 - self.value, 2)
 
 	@property
 	def thresh(self) -> int:
@@ -74,13 +74,13 @@ class Meter:
 		)
 
 	@staticmethod
-	def HeartMeter(value: int):
+	def HeartMeter(value: float):
 		return Meter(
 			name="Wisdom", emoji="🕰️", value=value, unit="♥", color='#198754', max_value=2500
 		)
 
 	@staticmethod
-	def SpadeMeter(value: int):
+	def SpadeMeter(value: float):
 		return Meter(
 			name="Strength", emoji="🏆", value=value, unit="♠", color='#ae610f', max_value=125
 		)
@@ -183,9 +183,9 @@ def get_level_info(student: Student) -> LevelInfoDict:
 
 	meters: FourMetersDict = {
 		'clubs': Meter.ClubMeter(int(total_clubs)),
-		'hearts': Meter.HeartMeter(int(total_hearts)),
-		'diamonds': Meter.DiamondMeter(total_diamonds),
-		'spades': Meter.SpadeMeter(int(total_spades)),
+		'hearts': Meter.HeartMeter(round(total_hearts, 2)),
+		'diamonds': Meter.DiamondMeter(int(total_diamonds)),
+		'spades': Meter.SpadeMeter(round(total_spades, 1)),
 	}
 	level_number = sum(meter.level for meter in meters.values())  # type: ignore
 	level = Level.objects.filter(threshold__lte=level_number).order_by('-threshold').first()

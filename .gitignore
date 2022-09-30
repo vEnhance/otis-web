@@ -13,3 +13,4 @@ evanchen-cc-*.json
 env
 htmlcov/*
 .coverage
+.vscode/
