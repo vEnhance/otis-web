@@ -75,7 +75,10 @@ class ExamAttemptAdmin(ImportExportModelAdmin):
 		'student__semester',
 		'quiz__family',
 	)
-	list_display_links = ('quiz', )
+	list_display_links = (
+		'quiz',
+		'student',
+	)
 
 
 @admin.register(MockCompleted)
