@@ -20,7 +20,9 @@
 	<tr>
 		<td>{{ unlock.timestamp }}</td>
 		<td><code>{{unlock.user|truncatechars:"18"}}</code></td>
-		<td>{{ unlock.user.get_full_name }}</td>
+		<td><a href="{% url "username-lookup" unlock.user.username %}">
+				{{ unlock.user.get_full_name }}
+			</a></td>
 	</tr>
 	{% endfor %}
 </table>

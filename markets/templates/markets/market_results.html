@@ -66,10 +66,10 @@
 			<td>
 				{% if guess.pk == g.pk %}
 				<strong>{{ g.user.get_full_name }}</strong>
+				{% elif request.user.is_superuser %}
+				<a href="{% url "username-lookup" g.user.username %}" {% if not g.public %}class="text-muted" {% endif %}>{{ g.user.get_full_name }}</a>
 				{% elif g.public %}
 				{{ g.user.get_full_name }}
-				{% elif request.user.is_staff %}
-				<i>{{ g.user.get_full_name }}</i>
 				{% else %}
 				{% endif %}
 			</td>

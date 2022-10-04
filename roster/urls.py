@@ -4,6 +4,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+	path(r'user/<str:username>/', views.username_lookup, name='username-lookup'),
 	path(r'curriculum/<int:student_id>/', views.curriculum, name='currshow'),
 	path(r'finalize/<int:student_id>/', views.finalize, name='finalize'),
 	path(r'advance/<int:student_id>/', views.advance, name='advance'),
