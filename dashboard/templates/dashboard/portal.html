@@ -224,7 +224,7 @@
 	{% if not student.newborn and semester.active and student.enabled %}
 	<a href="{% url 'inquiry' student.id %}" class="btn btn-warning">Request units</a>
 	{% endif %}
-	{% if omniscient %}
+	{% if request.user.is_staff %}
 	<a href="{% url 'advance' student.id %}" class="btn btn-dark">Edit units</a>
 	{% endif %}
 </div>

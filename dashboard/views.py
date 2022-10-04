@@ -33,7 +33,7 @@ from exams.models import PracticeExam
 from markets.models import Market
 from otisweb.utils import AuthHttpRequest, get_mailchimp_campaigns
 from roster.models import RegistrationContainer, Student, StudentRegistration
-from roster.utils import can_edit, can_view, get_student_by_id, get_visible_students, infer_student  # NOQA
+from roster.utils import can_view, get_student_by_id, get_visible_students, infer_student  # NOQA
 from sql_util.utils import SubqueryAggregate
 
 from dashboard.forms import DiamondsForm, PSetResubmitForm
@@ -71,7 +71,6 @@ def portal(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 	context['reg'] = student.reg
 	context['semester'] = semester
 	context['profile'] = profile
-	context['omniscient'] = can_edit(request, student)
 	context['curriculum'] = student.generate_curriculum_rows()
 	context['tests'] = PracticeExam.objects.filter(
 		is_test=True, family=semester.exam_family, due_date__isnull=False
