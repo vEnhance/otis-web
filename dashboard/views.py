@@ -70,7 +70,11 @@ def portal(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 	context['student'] = student
 	context['reg'] = student.reg
 	context['semester'] = semester
+	context['history'] = Student.objects.filter(
+		user=student.user
+	).order_by('semester__end_year').values('pk', 'semester__end_year')
 	context['profile'] = profile
+
 	context['curriculum'] = student.generate_curriculum_rows()
 	context['tests'] = PracticeExam.objects.filter(
 		is_test=True, family=semester.exam_family, due_date__isnull=False
