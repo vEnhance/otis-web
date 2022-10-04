@@ -19,7 +19,7 @@
 	{% for unlock in object_list %}
 	<tr>
 		<td>{{ unlock.timestamp }}</td>
-		<td><code>{{unlock.user}}</code></td>
+		<td><code>{{unlock.user|truncatechars:"18"}}</code></td>
 		<td>{{ unlock.user.get_full_name }}</td>
 	</tr>
 	{% endfor %}
