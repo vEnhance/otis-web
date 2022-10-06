@@ -41,19 +41,6 @@ class PracticeExam(models.Model):
 		help_text="The number of the assignment (e.g. Test 8, Quiz D) "
 	)
 
-	class Meta:
-		ordering = ('family', '-is_test', 'number')
-		unique_together = ('family', 'is_test', 'number')
-
-	def __str__(self) -> str:
-		if self.is_test:
-			return self.family + " Test " + self.get_number_display()
-		else:
-			return self.family + " Quiz " + self.get_number_display()
-
-	def get_absolute_url(self) -> str:
-		return reverse('exam-pdf', args=(self.pk, ))
-
 	# For quizzes only
 	answer1 = models.CharField(max_length=64, validators=[expr_validator_multiple], blank=True)
 	answer2 = models.CharField(max_length=64, validators=[expr_validator_multiple], blank=True)
@@ -90,6 +77,19 @@ class PracticeExam(models.Model):
 	due_date = models.DateField(
 		null=True, blank=True, help_text="When the assignment should be due."
 	)
+
+	class Meta:
+		ordering = ('family', '-is_test', 'number')
+		unique_together = ('family', 'is_test', 'number')
+
+	def __str__(self) -> str:
+		if self.is_test:
+			return self.family + " Test " + self.get_number_display()
+		else:
+			return self.family + " Quiz " + self.get_number_display()
+
+	def get_absolute_url(self) -> str:
+		return reverse('exam-pdf', args=(self.pk, ))
 
 	@property
 	def pdfname(self) -> str:
