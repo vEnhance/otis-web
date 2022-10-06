@@ -13,7 +13,7 @@ from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.db.models import Count, Q
 from django.db.models.query import QuerySet
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils.timezone import localtime
 from sql_util.aggregates import Exists, SubqueryAggregate
 
@@ -50,6 +50,12 @@ class Assistant(models.Model):
 		help_text="A list of students this assistant can see but which is not listed visibly."
 	)
 
+	class Meta:
+		ordering = ('shortname', )
+
+	def __str__(self) -> str:
+		return self.shortname
+
 	@property
 	def first_name(self) -> str:
 		return self.user.first_name
@@ -62,20 +68,20 @@ class Assistant(models.Model):
 	def name(self) -> str:
 		return self.user.get_full_name()
 
-	def __str__(self) -> str:
-		return self.shortname
-
 	def student_count(self) -> int:
 		return self.student_set.count()  # type: ignore
-
-	class Meta:
-		ordering = ('shortname', )
 
 
 class Student(models.Model):
 	"""This is really a pair of a user and a semester (with a display name),
 	endowed with the data of the curriculum of that student.
 	It also names the assistant of the student, if any."""
+
+	id: int
+	invoice: 'Invoice'
+	unlisted_assistants: QuerySet['Assistant']
+	get_track_display: Callable[[], str]
+
 	user = models.ForeignKey(
 		User, on_delete=models.CASCADE, help_text="The Django auth user attached to the student"
 	)
@@ -141,9 +147,18 @@ class Student(models.Model):
 		default=0, help_text="The last level the student was seen at."
 	)
 
-	id: int
-	invoice: 'Invoice'
-	unlisted_assistants: QuerySet['Assistant']
+	class Meta:
+		unique_together = (
+			'user',
+			'semester',
+		)
+		ordering = ('semester', '-legit', 'track', 'user__first_name', 'user__last_name')
+
+	def __str__(self):
+		return self.name
+
+	def get_absolute_url(self):
+		return reverse('portal', args=(self.id, ))
 
 	def get_checksum(self, key: str) -> str:
 		return pbkdf2_hmac(
@@ -152,12 +167,6 @@ class Student(models.Model):
 			100000,
 			dklen=18
 		).hex()
-
-	def __str__(self):
-		return self.name
-
-	def get_absolute_url(self):
-		return reverse_lazy('portal', args=(self.id, ))
 
 	@property
 	def first_name(self) -> str:
@@ -171,6 +180,7 @@ class Student(models.Model):
 			return '???'
 		return self.user.last_name
 
+	@property
 	def short_name(self) -> str:
 		if self.user is None:
 			return '???'
@@ -186,21 +196,12 @@ class Student(models.Model):
 		else:
 			return "?"
 
-	get_track_display: Callable[[], str]
-
 	@property
 	def get_track(self) -> str:
 		if self.assistant is None:
 			return self.get_track_display()
 		else:
 			return self.get_track_display() + " + " + self.assistant.shortname
-
-	class Meta:
-		unique_together = (
-			'user',
-			'semester',
-		)
-		ordering = ('semester', '-legit', 'track', 'user__first_name', 'user__last_name')
 
 	@property
 	def meets_evan(self) -> bool:
@@ -370,6 +371,9 @@ class Invoice(models.Model):
 	def __str__(self):
 		return f"{self.pk or 0} ({self.total_paid}/{self.total_cost})"
 
+	def get_absolute_url(self) -> str:
+		return reverse_lazy('invoice', args=(self.pk, ))
+
 	@property
 	def prep_rate(self) -> int:
 		return self.student.semester.prep_rate
@@ -402,9 +406,6 @@ class Invoice(models.Model):
 	@property
 	def track(self) -> str:
 		return self.student.track
-
-	def get_absolute_url(self) -> str:
-		return reverse_lazy('invoice', args=(self.pk, ))
 
 
 class UnitInquiry(models.Model):
@@ -441,6 +442,14 @@ class UnitInquiry(models.Model):
 		max_length=300, blank=True, help_text="Short explanation for this request (if needed)."
 	)
 
+	class Meta:
+		ordering = ('-created_at', )
+		verbose_name = "Unit petition"
+		verbose_name_plural = "Unit petitions"
+
+	def __str__(self) -> str:
+		return self.action_type + " " + str(self.unit)
+
 	def run_accept(self):
 		unit = self.unit
 		if self.action_type == "UNLOCK":
@@ -455,14 +464,6 @@ class UnitInquiry(models.Model):
 			raise ValueError(f"No action {self.action_type}")
 		self.status = "ACC"
 		self.save()
-
-	def __str__(self) -> str:
-		return self.action_type + " " + str(self.unit)
-
-	class Meta:
-		ordering = ('-created_at', )
-		verbose_name = "Unit petition"
-		verbose_name_plural = "Unit petitions"
 
 
 def content_file_name(instance: 'StudentRegistration', filename: str) -> str:
@@ -559,7 +560,7 @@ class StudentRegistration(models.Model):
 
 	agreement_form = models.FileField(
 		null=True,
-		blank=False,
+		# blank=False,
 		help_text="Signed agreement form, as a single PDF",
 		upload_to=content_file_name,
 		validators=[FileExtensionValidator(allowed_extensions=[
@@ -570,21 +571,6 @@ class StudentRegistration(models.Model):
 		help_text="Whether Evan has dealt with this kid yet", default=False
 	)
 	country = models.CharField(max_length=6, choices=COUNTRY_CHOICES, default="USA")
-
-	@property
-	def name(self) -> str:
-		return self.user.first_name + ' ' + self.user.last_name
-
-	@property
-	def grade(self) -> int:
-		if self.graduation_year == 0:
-			return 13
-		else:
-			return 12 - (self.graduation_year - self.container.semester.end_year)
-
-	@property
-	def about(self):
-		return f"{self.grade}{self.gender or 'U'}"
 
 	class Meta:
 		unique_together = (
@@ -604,3 +590,18 @@ class StudentRegistration(models.Model):
 		else:
 			print(student.get_absolute_url())
 			return student.get_absolute_url()
+
+	@property
+	def name(self) -> str:
+		return self.user.first_name + ' ' + self.user.last_name
+
+	@property
+	def grade(self) -> int:
+		if self.graduation_year == 0:
+			return 13
+		else:
+			return 12 - (self.graduation_year - self.container.semester.end_year)
+
+	@property
+	def about(self):
+		return f"{self.grade}{self.gender or 'U'}"

@@ -15,7 +15,7 @@ from django.core.exceptions import ValidationError
 from django.core.files.base import File
 from django.core.validators import FileExtensionValidator, MaxValueValidator, MinValueValidator, RegexValidator  # NOQA
 from django.db import models
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from roster.models import Student
 
 
@@ -66,8 +66,14 @@ class UploadedFile(models.Model):
 	)
 	created_at = models.DateTimeField(auto_now_add=True)
 
+	class Meta:
+		ordering = ('-created_at', )
+
 	def __str__(self):
 		return self.filename
+
+	def get_absolute_url(self):
+		return self.url
 
 	@property
 	def filename(self):
@@ -76,12 +82,6 @@ class UploadedFile(models.Model):
 	@property
 	def url(self):
 		return self.content.url
-
-	class Meta:
-		ordering = ('-created_at', )
-
-	def get_absolute_url(self):
-		return self.url
 
 
 def download_file_name(instance: 'SemesterDownloadFile', filename: str) -> str:
@@ -103,11 +103,11 @@ class SemesterDownloadFile(models.Model):
 	)
 	created_at = models.DateTimeField(auto_now_add=True)
 
-	def __str__(self):
-		return os.path.basename(self.content.name)
-
 	class Meta:
 		ordering = ('-created_at', )
+
+	def __str__(self):
+		return os.path.basename(self.content.name)
 
 	def get_absolute_url(self):
 		return self.content.url
@@ -175,11 +175,15 @@ class PSet(models.Model):
 		help_text="If there's anything you need to say before we proceed", blank=True
 	)
 
+	class Meta:
+		verbose_name = "PSet submission"
+		verbose_name_plural = "PSet submissions"
+
 	def __str__(self):
 		return f'{self.student.name} submits {self.unit}'
 
 	def get_absolute_url(self):
-		return reverse_lazy('pset', args=(self.pk, ))
+		return reverse('pset', args=(self.pk, ))
 
 	@property
 	def filename(self) -> Optional[str]:
@@ -203,10 +207,6 @@ class PSet(models.Model):
 	@property
 	def resubmitted(self) -> bool:
 		return self.status in ('PA', 'PR')
-
-	class Meta:
-		verbose_name = "PSet submission"
-		verbose_name_plural = "PSet submissions"
 
 
 class ProblemSuggestion(models.Model):
@@ -335,14 +335,14 @@ class AchievementUnlock(models.Model):
 		auto_now_add=True, help_text='The time the achievement was granted'
 	)
 
-	def __str__(self) -> str:
-		return self.timestamp.strftime('%c')
-
 	class Meta:
 		unique_together = (
 			'user',
 			'achievement',
 		)
+
+	def __str__(self) -> str:
+		return self.timestamp.strftime('%c')
 
 
 class QuestComplete(models.Model):

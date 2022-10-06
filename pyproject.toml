@@ -148,4 +148,4 @@ requires = ["poetry-core>=1.2.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.codereviewdoctor]
-disable = ["tall-model", "missing-related-name", "checking-settings-debug",]
+disable = ["tall-model", "missing-related-name", "checking-settings-debug", "nullable-string-field"]

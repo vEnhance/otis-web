@@ -17,10 +17,10 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterUniqueTogether(
             name='assistant',
-            unique_together=set([('user', 'semester')]),
+            unique_together={('user', 'semester')},
         ),
         migrations.AlterUniqueTogether(
             name='student',
-            unique_together=set([('user', 'semester')]),
+            unique_together={('user', 'semester')},
         ),
     ]

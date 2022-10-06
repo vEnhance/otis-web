@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='unit',
-            unique_together=set([('group', 'code')]),
+            unique_together={('group', 'code')},
         ),
         migrations.RemoveField(
             model_name='unit',

@@ -6,7 +6,7 @@ from typing import Callable
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models.manager import BaseManager
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 from django.utils import timezone
 from positions import PositionField
 
@@ -70,6 +70,12 @@ class Semester(models.Model):
 		blank=True, help_text="Link to calendar for students without meetings with Evan"
 	)
 
+	def __str__(self) -> str:
+		return self.name
+
+	def get_absolute_url(self):
+		return reverse("past", args=(self.pk, ))
+
 	@property
 	def start_year(self) -> int:
 		return self.end_year - 1
@@ -77,12 +83,6 @@ class Semester(models.Model):
 	@property
 	def years(self) -> str:
 		return f'{self.start_year}-{self.end_year}'
-
-	def __str__(self) -> str:
-		return self.name
-
-	def get_absolute_url(self):
-		return reverse_lazy("past", args=(self.pk, ))
 
 
 class UnitGroup(models.Model):
@@ -115,6 +115,9 @@ class UnitGroup(models.Model):
 		help_text="Whether this unit is hidden from students", default=False
 	)
 
+	class Meta:
+		ordering = ('name', )
+
 	def __str__(self) -> str:
 		return self.name
 
@@ -135,9 +138,6 @@ class UnitGroup(models.Model):
 		elif self.subject == "K":
 			return "Secret"
 
-	class Meta:
-		ordering = ('name', )
-
 
 class Unit(models.Model):
 	"""Represents a PDF of a unit, with problems and solutions"""
@@ -152,14 +152,17 @@ class Unit(models.Model):
 	)
 	position = PositionField(help_text="The ordering of the relative handouts to each other.")
 
+	class Meta:
+		unique_together = ('group', 'code')
+		ordering = ('position', )
+
 	def __str__(self) -> str:
 		if self.group is not None:
 			return self.group.name + " [" + self.code + "]"
 		return "-" + " [" + self.code + "]"
 
-	class Meta:
-		unique_together = ('group', 'code')
-		ordering = ('position', )
+	def get_absolute_url(self):
+		return reverse("view-problems", args=(self.pk, ))
 
 	@property
 	def list_display_position(self):
@@ -176,9 +179,6 @@ class Unit(models.Model):
 	@property
 	def problems_tex_filename(self) -> str:
 		return f'{self.code}-tex-{self.group.slug}.tex'
-
-	def get_absolute_url(self):
-		return reverse("view-problems", args=(self.pk, ))
 
 
 class UserProfile(models.Model):

@@ -52,7 +52,7 @@ logger = logging.getLogger(__name__)
 def portal(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 	student = get_student_by_id(request, student_id, payment_exempt=True)
 	if not request.user.is_staff and student.is_delinquent:
-		return HttpResponseRedirect(reverse_lazy('invoice', args=(student_id, )))
+		return HttpResponseRedirect(reverse('invoice', args=(student_id, )))
 	semester = student.semester
 	profile, _ = UserProfile.objects.get_or_create(user=request.user)
 	student_profile, _ = UserProfile.objects.get_or_create(user=student.user)
@@ -425,7 +425,7 @@ class SemesterList(LoginRequiredMixin, ListView[Semester]):
 	template_name = "dashboard/semlist.html"
 
 	def get_queryset(self) -> QuerySet[Semester]:
-		queryset = super(SemesterList, self).get_queryset()
+		queryset = super().get_queryset()
 		queryset = queryset.annotate(count=Count('student'))  # type: ignore
 		return queryset  # type: ignore
 
@@ -450,7 +450,7 @@ class UpdateFile(LoginRequiredMixin, UpdateView[UploadedFile, BaseModelForm[Uplo
 		)
 
 	def get_object(self, *args: Any, **kwargs: Any) -> UploadedFile:
-		obj = super(UpdateFile, self).get_object(*args, **kwargs)
+		obj = super().get_object(*args, **kwargs)
 		is_staff = getattr(self.request.user, 'is_staff', False)
 		if obj.owner != self.request.user and is_staff is False:
 			raise PermissionDenied("Not authorized to update this file")
@@ -462,7 +462,7 @@ class DeleteFile(LoginRequiredMixin, DeleteView):
 	success_url = reverse_lazy("index")
 
 	def get_object(self, *args: Any, **kwargs: Any) -> UploadedFile:
-		obj = super(DeleteFile, self).get_object(*args, **kwargs)
+		obj = super().get_object(*args, **kwargs)
 		if not obj.owner == self.request.user and getattr(self.request.user, 'is_staff', False):
 			raise PermissionDenied("Not authorized to delete this file")
 		return obj
@@ -563,7 +563,7 @@ class ProblemSuggestionCreate(
 		return super().form_valid(form)
 
 	def get_success_url(self):
-		return reverse_lazy("suggest-new", kwargs=self.kwargs)
+		return reverse("suggest-new", kwargs=self.kwargs)
 
 
 class ProblemSuggestionUpdate(
@@ -584,7 +584,7 @@ class ProblemSuggestionUpdate(
 	object: ProblemSuggestion
 
 	def get_success_url(self):
-		return reverse_lazy("suggest-update", kwargs=self.kwargs)
+		return reverse("suggest-update", kwargs=self.kwargs)
 
 	def form_valid(self, form: BaseModelForm[ProblemSuggestion]):
 		messages.success(self.request, "Edits saved.")
@@ -680,7 +680,7 @@ class PalaceUpdate(
 		return context
 
 	def get_success_url(self):
-		return reverse_lazy('palace-list', args=(self.student.id, ))
+		return reverse('palace-list', args=(self.student.id, ))
 
 
 class DiamondUpdate(
@@ -729,7 +729,7 @@ class DiamondUpdate(
 		return context
 
 	def get_success_url(self):
-		return reverse_lazy("diamond-update", args=(self.student.id, ))
+		return reverse("diamond-update", args=(self.student.id, ))
 
 
 def certify(request: HttpRequest, student_id: int = None, checksum: str = None):
@@ -740,7 +740,7 @@ def certify(request: HttpRequest, student_id: int = None, checksum: str = None):
 	if checksum is None:
 		if can_view(request, student):
 			checksum = student.get_checksum(settings.CERT_HASH_KEY)
-			return HttpResponseRedirect(reverse_lazy('certify', args=(student.id, checksum)))
+			return HttpResponseRedirect(reverse('certify', args=(student.id, checksum)))
 		else:
 			raise PermissionDenied("Not authorized to generate checksum")
 	elif checksum != student.get_checksum(settings.CERT_HASH_KEY):
@@ -760,6 +760,6 @@ def certify(request: HttpRequest, student_id: int = None, checksum: str = None):
 				student.get_checksum(settings.CERT_HASH_KEY),
 			'target_url':
 				f'{request.scheme}//{request.get_host()}' +
-				reverse_lazy('certify', args=(student.id, checksum))
+				reverse('certify', args=(student.id, checksum))
 		}
 		return render(request, "dashboard/certify.html", context)

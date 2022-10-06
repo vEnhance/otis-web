@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models.query import QuerySet
-from django.urls.base import reverse_lazy
+from django.urls.base import reverse
 from django.utils import timezone
 
 # Create your models here.
@@ -55,16 +55,19 @@ class Market(models.Model):
 	started = StartedMarketManager()
 	active = ActiveMarketManager()
 
+	class Meta:
+		ordering = ('-end_date', )
+
 	def __str__(self) -> str:
 		return f'{self.title} ({self.slug})'
 
 	def get_absolute_url(self) -> str:
 		if self.has_ended:
-			return reverse_lazy('market-results', args=(self.slug, ))
+			return reverse('market-results', args=(self.slug, ))
 		elif self.has_started:
-			return reverse_lazy('market-guess', args=(self.slug, ))
+			return reverse('market-guess', args=(self.slug, ))
 		else:
-			return reverse_lazy('market-results', args=(self.slug, ))  # only works for superuser
+			return reverse('market-results', args=(self.slug, ))  # only works for superuser
 
 	@property
 	def has_started(self) -> bool:
@@ -73,9 +76,6 @@ class Market(models.Model):
 	@property
 	def has_ended(self) -> bool:
 		return timezone.now() >= self.end_date
-
-	class Meta:
-		ordering = ('-end_date', )
 
 
 class Guess(models.Model):
@@ -111,6 +111,9 @@ class Guess(models.Model):
 	def __str__(self) -> str:
 		return f"Guessed {self.value} at {self.created_at}"
 
+	def get_absolute_url(self) -> str:
+		return reverse('market-results', args=(self.market.slug, ))
+
 	def get_score(self) -> Optional[float]:
 		if self.market.answer is not None and self.market.alpha is not None:
 			a = round(self.market.answer, ndigits=6)
@@ -125,6 +128,3 @@ class Guess(models.Model):
 		if score is not None:
 			self.score = score
 			self.save()
-
-	def get_absolute_url(self) -> str:
-		return reverse_lazy('market-results', args=(self.market.slug, ))

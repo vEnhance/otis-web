@@ -1,8 +1,8 @@
 from core.factories import SemesterFactory, UserFactory
 from django.test.utils import override_settings
 from django.utils import timezone
-from freezegun import freeze_time
 from evans_django_tools.testsuite import EvanTestCase
+from freezegun import freeze_time
 from roster.factories import StudentFactory
 from roster.models import Student
 
@@ -17,7 +17,7 @@ class ArithmeticTest(EvanTestCase):
 	def checkCalculator(self, expr: str, out: float):
 		v = expr_compute(expr)
 		assert v is not None
-		self.assertAlmostEquals(v, out)
+		self.assertAlmostEqual(v, out)
 
 	def test_arithmetic(self):
 		self.checkCalculator('1/3^4', 1 / 81)

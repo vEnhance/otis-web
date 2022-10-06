@@ -30,6 +30,6 @@ class Migration(migrations.Migration):
             field=models.SlugField(default=None, help_text='The slug for the filename for this unit group', max_length=80, null=True),
         ),
         migrations.RunPython(
-            code=set_slug
+            code=set_slug, reverse_code=migrations.RunPython.noop,
         )
     ]

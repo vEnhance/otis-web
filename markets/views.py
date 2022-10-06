@@ -9,7 +9,7 @@ from django.forms.models import BaseModelForm
 from django.http.request import HttpRequest
 from django.http.response import HttpResponseBase, HttpResponseForbidden, HttpResponseNotFound, HttpResponseRedirect  # NOQA
 from django.shortcuts import get_object_or_404
-from django.urls.base import reverse_lazy
+from django.urls.base import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 from django.views.generic.detail import DetailView
@@ -43,7 +43,7 @@ class SubmitGuess(LoginRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]):
 		return super().form_valid(form)
 
 	def get_success_url(self) -> str:
-		return reverse_lazy('market-pending', args=(self.object.pk, ))
+		return reverse('market-pending', args=(self.object.pk, ))
 
 	def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
 		context = super().get_context_data(**kwargs)
@@ -65,7 +65,7 @@ class SubmitGuess(LoginRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]):
 			pass
 		else:
 			messages.error(request, f"You already submitted {guess.value} for this market.")
-			target_url = reverse_lazy('market-pending', args=(guess.pk, ))
+			target_url = reverse('market-pending', args=(guess.pk, ))
 			return HttpResponseRedirect(target_url)
 
 		return super().dispatch(request, *args, **kwargs)
@@ -112,14 +112,14 @@ class MarketResults(LoginRequiredMixin, ListView[Guess]):
 @require_POST
 @admin_required
 def recompute(request: AuthHttpRequest, slug: str):
-	guesses = list(Guess.objects.filter(market__slug=slug))
+	guesses = Guess.objects.filter(market__slug=slug)
 	for guess in guesses:
 		guess.set_score()
 	Guess.objects.bulk_update(guesses, fields=('score', ), batch_size=50)
 	messages.success(
-		request, f"Successfully recomputed all {len(guesses)} scores for this market!"
+		request, f"Successfully recomputed all {guesses.count()} scores for this market!"
 	)
-	return HttpResponseRedirect(reverse_lazy('market-results', args=(slug, )))
+	return HttpResponseRedirect(reverse('market-results', args=(slug, )))
 
 
 class MarketList(LoginRequiredMixin, ListView[Market]):
@@ -146,7 +146,7 @@ class GuessView(LoginRequiredMixin, DetailView[Guess]):
 		guess = self.get_object()
 		market = guess.market
 		if market.has_ended:
-			return HttpResponseRedirect(reverse_lazy('market-results', args=(market.slug, )))
+			return HttpResponseRedirect(reverse('market-results', args=(market.slug, )))
 		if guess.user != request.user and not getattr(request.user, 'is_superuser', False):
 			return HttpResponseForbidden("You cannot view this guess.")
 		return super().dispatch(request, *args, **kwargs)
