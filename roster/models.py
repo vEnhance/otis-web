@@ -13,7 +13,7 @@ from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.db.models import Count, Q
 from django.db.models.query import QuerySet
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 from django.utils.timezone import localtime
 from sql_util.aggregates import Exists, SubqueryAggregate
 
@@ -372,7 +372,7 @@ class Invoice(models.Model):
 		return f"{self.pk or 0} ({self.total_paid}/{self.total_cost})"
 
 	def get_absolute_url(self) -> str:
-		return reverse_lazy('invoice', args=(self.pk, ))
+		return reverse('invoice', args=(self.pk, ))
 
 	@property
 	def prep_rate(self) -> int:

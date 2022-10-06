@@ -153,6 +153,8 @@ class ExamAttempt(models.Model):
 		]
 	)
 	submit_time = models.DateTimeField(help_text="When the quiz was submitted", auto_now_add=True)
+	student_id: int
+	quiz_id: int
 
 	class Meta:
 		unique_together = (
@@ -164,7 +166,7 @@ class ExamAttempt(models.Model):
 		return f'{self.student} tries {self.quiz}'
 
 	def get_absolute_url(self) -> str:
-		return reverse('quiz', args=(self.student.pk, self.quiz.pk))
+		return reverse('quiz', args=(self.student_id, self.quiz_id))
 
 
 class MockCompleted(models.Model):
