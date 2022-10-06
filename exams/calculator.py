@@ -155,7 +155,7 @@ def evaluate_stack(s: List[Any]) -> Union[int, float]:
 		args = reversed([evaluate_stack(s) for _ in range(num_args)])
 		return fn[op](*args)
 	elif op[0].isalpha():
-		raise Exception("invalid identifier '%s'" % op)
+		raise Exception(f"invalid identifier {op}")
 	else:
 		# try to evaluate as int first, then as float if int fails
 		try:

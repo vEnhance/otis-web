@@ -6,7 +6,7 @@ import string
 from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 from django.db import models
-from django.urls.base import reverse_lazy
+from django.urls.base import reverse
 from roster.models import Student
 
 from exams.calculator import expr_compute
@@ -40,12 +40,6 @@ class PracticeExam(models.Model):
 	number = models.PositiveSmallIntegerField(
 		help_text="The number of the assignment (e.g. Test 8, Quiz D) "
 	)
-
-	def __str__(self) -> str:
-		if self.is_test:
-			return self.family + " Test " + self.get_number_display()
-		else:
-			return self.family + " Quiz " + self.get_number_display()
 
 	# For quizzes only
 	answer1 = models.CharField(max_length=64, validators=[expr_validator_multiple], blank=True)
@@ -88,6 +82,15 @@ class PracticeExam(models.Model):
 		ordering = ('family', '-is_test', 'number')
 		unique_together = ('family', 'is_test', 'number')
 
+	def __str__(self) -> str:
+		if self.is_test:
+			return self.family + " Test " + self.get_number_display()
+		else:
+			return self.family + " Quiz " + self.get_number_display()
+
+	def get_absolute_url(self) -> str:
+		return reverse('exam-pdf', args=(self.pk, ))
+
 	@property
 	def pdfname(self) -> str:
 		kind = 'Exam' if self.is_test else 'Quiz'
@@ -112,9 +115,6 @@ class PracticeExam(models.Model):
 	@property
 	def current(self) -> bool:
 		return self.started and not self.overdue
-
-	def get_absolute_url(self) -> str:
-		return reverse_lazy('exam-pdf', args=(self.pk, ))
 
 
 class ExamAttempt(models.Model):
@@ -153,6 +153,8 @@ class ExamAttempt(models.Model):
 		]
 	)
 	submit_time = models.DateTimeField(help_text="When the quiz was submitted", auto_now_add=True)
+	student_id: int
+	quiz_id: int
 
 	class Meta:
 		unique_together = (
@@ -164,7 +166,7 @@ class ExamAttempt(models.Model):
 		return f'{self.student} tries {self.quiz}'
 
 	def get_absolute_url(self) -> str:
-		return reverse_lazy('quiz', args=(self.student.pk, self.quiz.pk))
+		return reverse('quiz', args=(self.student_id, self.quiz_id))
 
 
 class MockCompleted(models.Model):

@@ -36,7 +36,7 @@ class CurriculumForm(forms.Form):
 		original = kwargs.pop('original', [])
 		enabled = kwargs.pop('enabled', False)
 
-		super(CurriculumForm, self).__init__(*args, **kwargs)
+		super().__init__(*args, **kwargs)
 
 		n = 0
 		for name, group_iter in itertools.groupby(units, lambda u: u.group.name):
@@ -62,15 +62,13 @@ class AdvanceUnitChoiceField(forms.ModelMultipleChoiceField):
 	def __init__(self, *args: Any, **kwargs: Any):
 		widget = kwargs.pop('widget', forms.SelectMultiple(attrs={'class': 'chosen-select'}))
 		required = kwargs.pop('required', False)
-		super(AdvanceUnitChoiceField, self).__init__(
-			*args, widget=widget, required=required, **kwargs
-		)
+		super().__init__(*args, widget=widget, required=required, **kwargs)
 
 
 class AdvanceForm(forms.Form):
 	def __init__(self, *args: Any, **kwargs: Any):
 		student = kwargs.pop('student')
-		super(AdvanceForm, self).__init__(*args, **kwargs)
+		super().__init__(*args, **kwargs)
 
 		self.fields['units_to_unlock'] = AdvanceUnitChoiceField(
 			label="Open",
@@ -99,7 +97,7 @@ class AdvanceForm(forms.Form):
 class InquiryForm(forms.ModelForm):
 	def __init__(self, *args: Any, **kwargs: Any):
 		student: Student = kwargs.pop('student')
-		super(InquiryForm, self).__init__(*args, **kwargs)
+		super().__init__(*args, **kwargs)
 		# TODO this breaks ordering, might want to fix
 		curriculum_pks = student.curriculum.all().values_list('pk', flat=True)
 		queryset = Unit.objects.filter(Q(group__hidden=False) | Q(pk__in=curriculum_pks))

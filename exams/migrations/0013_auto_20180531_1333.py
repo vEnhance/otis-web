@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterUniqueTogether(
             name='practiceexam',
-            unique_together=set([('family', 'is_test', 'number')]),
+            unique_together={('family', 'is_test', 'number')},
         ),
     ]

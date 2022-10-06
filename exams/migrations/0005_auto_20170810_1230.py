@@ -20,6 +20,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='assignment',
-            unique_together=set([('semester', 'name')]),
+            unique_together={('semester', 'name')},
         ),
     ]

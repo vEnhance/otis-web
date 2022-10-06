@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='assistant',
-            unique_together=set([]),
+            unique_together=set(),
         ),
         migrations.RemoveField(
             model_name='assistant',

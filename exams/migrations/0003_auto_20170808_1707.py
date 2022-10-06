@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterUniqueTogether(
             name='mockolympiad',
-            unique_together=set([('family', 'number')]),
+            unique_together={('family', 'number')},
         ),
     ]

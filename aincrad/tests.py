@@ -85,7 +85,7 @@ class TestAincrad(EvanTestCase):
 		out = resp.json()
 		self.assertEqual(out['_name'], 'Root')
 		self.assertEqual(len(out['_children'][0]['_children']), 10)
-		self.assertTrue('timestamp' in out)
+		self.assertIn('timestamp', out)
 		self.assertEqual(len(out.keys()), 3)
 
 		pset_data = out['_children'][0]
@@ -128,7 +128,7 @@ class TestAincrad(EvanTestCase):
 		).json()
 		self.assertEqual(out['updated_count'], 2)
 		self.assertEqual(len(out['entries_remaining']), 1)
-		self.assertTrue('l.lawliet' in out['entries_remaining'])
+		self.assertIn('l.lawliet', out['entries_remaining'])
 
 		out = self.assertPost20X(
 			'api',
@@ -146,7 +146,7 @@ class TestAincrad(EvanTestCase):
 		).json()
 		self.assertEqual(out['updated_count'], 2)
 		self.assertEqual(len(out['entries_remaining']), 1)
-		self.assertTrue('mihael.keehl' in out['entries_remaining'])
+		self.assertIn('mihael.keehl', out['entries_remaining'])
 
 		out = self.assertPost20X(
 			'api',
@@ -166,7 +166,7 @@ class TestAincrad(EvanTestCase):
 		).json()
 		self.assertEqual(out['updated_count'], 3)
 		self.assertEqual(len(out['entries_remaining']), 1)
-		self.assertTrue('nate.river' in out['entries_remaining'])
+		self.assertIn('nate.river', out['entries_remaining'])
 
 		# check the invoices are correct
 		invoice_alice = Invoice.objects.get(student__user__first_name="Alice")
@@ -212,7 +212,7 @@ class TestAincrad(EvanTestCase):
 				'content': 'get',
 			}
 		)
-		self.assertTrue('pk' in resp.json())
+		self.assertIn('pk', resp.json())
 		self.assertEqual(resp.json()['number'], 0)
 		resp = self.assertPost20X(
 			'api', json={
@@ -221,7 +221,7 @@ class TestAincrad(EvanTestCase):
 				'content': 'gud',
 			}
 		)
-		self.assertTrue('pk' in resp.json())
+		self.assertIn('pk', resp.json())
 		self.assertEqual(resp.json()['number'], 10)
 
 		resp = self.post('api', json={'action': 'get_hints', 'puid': '18SLA7'})
@@ -318,6 +318,6 @@ class TestAincrad(EvanTestCase):
 		out = resp.json()
 		self.assertEqual(len(out['pks']), 1)
 		self.assertEqual(out['num_deletes'], 3)  # 0%, 10%, 70%
-		self.assertEqual(set(A7_Hints.values_list('number', flat=True)), set([85, 95, 100]))
+		self.assertEqual(set(A7_Hints.values_list('number', flat=True)), {85, 95, 100})
 		self.assertEqual(A7_Hints.filter(keywords='updated').count(), 2)
 		self.assertEqual(A7_Hints.filter(keywords__startswith='Updated').count(), 2)

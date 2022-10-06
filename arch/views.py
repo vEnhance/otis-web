@@ -12,7 +12,7 @@ from django.forms.models import BaseModelForm
 from django.http import Http404, HttpRequest, HttpResponseRedirect
 from django.http.response import HttpResponse
 from django.shortcuts import get_object_or_404
-from django.urls import reverse_lazy
+from django.urls import reverse
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from reversion.views import RevisionMixin
@@ -165,7 +165,7 @@ class HintCreate(
 		return context
 
 	def get_initial(self):
-		initial = super(HintCreate, self).get_initial()
+		initial = super().get_initial()
 		initial = initial.copy()
 		initial['problem'] = Problem.objects.get(puid=self.kwargs['puid'])
 		return initial
@@ -177,7 +177,7 @@ class HintDelete(HintObjectView, ExistStudentRequiredMixin, RevisionMixin, Delet
 	object: ClassVar[Hint] = Hint()  # type: ignore
 
 	def get_success_url(self):
-		return reverse_lazy("hint-list", args=(self.object.problem.puid, ))
+		return reverse("hint-list", args=(self.object.problem.puid, ))
 
 
 # this is actually the index page as well :P bit of a hack I guess...
@@ -194,7 +194,7 @@ class ProblemCreate(
 		context['lookup_form'] = ProblemSelectForm()
 		context['num_problems'] = Problem.objects.all().count()
 		context['num_hints'] = Hint.objects.all().count()
-		context['lookup_url'] = reverse_lazy('arch-lookup', )
+		context['lookup_url'] = reverse('arch-lookup', )
 		return context
 
 
@@ -206,7 +206,7 @@ def lookup(request: HttpRequest):
 		problem = form.cleaned_data['problem']
 		return HttpResponseRedirect(problem.get_absolute_url())
 	else:
-		return HttpResponseRedirect(reverse_lazy('arch-index', ))
+		return HttpResponseRedirect(reverse('arch-index', ))
 
 
 @login_required

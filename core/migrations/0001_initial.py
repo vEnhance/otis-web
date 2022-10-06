@@ -35,6 +35,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='handout',
-            unique_together=set([('name', 'code')]),
+            unique_together={('name', 'code')},
         ),
     ]
