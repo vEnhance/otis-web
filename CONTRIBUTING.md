@@ -15,7 +15,7 @@ and work with you as you pick things up.
 If you're totally new to development world,
 it's probably a good idea to learn how a bunch of tools work.
 [There's a nice series by MIT](https://missing.csail.mit.edu/) to this end.
-You'll likely want to go thorugh the first six of the 2020 lectures,
+You'll likely want to go through the first six of the 2020 lectures,
 except possibly for the third one about Vim.
 (I'm a die-hard Vim user myself, but I think it's too much to learn at once; pick up Vim later.)
 
