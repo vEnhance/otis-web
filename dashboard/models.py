@@ -15,7 +15,7 @@ from django.core.exceptions import ValidationError
 from django.core.files.base import File
 from django.core.validators import FileExtensionValidator, MaxValueValidator, MinValueValidator, RegexValidator  # NOQA
 from django.db import models
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 from roster.models import Student
 
 
