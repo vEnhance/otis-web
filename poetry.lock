@@ -121,6 +121,26 @@ python-versions = ">=3.6.0"
 unicode_backport = ["unicodedata2"]
 
 [[package]]
+name = "codespell"
+version = "2.3.0.dev0"
+description = "Codespell"
+category = "dev"
+optional = false
+python-versions = ">=3.7"
+develop = false
+
+[package.extras]
+dev = ["check-manifest", "flake8", "pytest", "pytest-cov", "pytest-dependency", "tomli"]
+hard-encoding-detection = ["chardet"]
+toml = ["tomli"]
+
+[package.source]
+type = "git"
+url = "https://github.com/codespell-project/codespell.git"
+reference = "fd1d5c0"
+resolved_reference = "fd1d5c0d8dd5d8072d0422ce4f05b6202aa89ba0"
+
+[[package]]
 name = "colorama"
 version = "0.4.5"
 description = "Cross-platform colored terminal text."
@@ -1554,7 +1574,7 @@ testing = ["func-timeout", "jaraco.itertools", "pytest (>=6)", "pytest-black (>=
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8, <4.0"
-content-hash = "b10287682e9118edc7db02e766fe1330a07bf59920c2cec4764c71b4058c7b47"
+content-hash = "cc271089188c62d46638e200678ad7637e21401490df435d6f19a1da3769560e"
 
 [metadata.files]
 appnope = [
@@ -1677,6 +1697,7 @@ charset-normalizer = [
     {file = "charset-normalizer-2.1.1.tar.gz", hash = "sha256:5a3d016c7c547f69d6f81fb0db9449ce888b418b5b9952cc5e6e66843e9dd845"},
     {file = "charset_normalizer-2.1.1-py3-none-any.whl", hash = "sha256:83e9a75d1911279afd89352c68b45348559d1fc0506b054b346651b5e7fee29f"},
 ]
+codespell = []
 colorama = [
     {file = "colorama-0.4.5-py2.py3-none-any.whl", hash = "sha256:854bf444933e37f5824ae7bfc1e98d5bce2ebe4160d46b5edf346a89358e99da"},
     {file = "colorama-0.4.5.tar.gz", hash = "sha256:e6c6b4334fc50988a639d9b98aa429a0b57da6e17b9a44f0451f930b6967b7a4"},

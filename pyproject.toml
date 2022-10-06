@@ -39,6 +39,8 @@ wiki = "^0.9"
 
 [tool.poetry.group.dev.dependencies]
 Faker = "^15.0.0"
+# TODO: update codespell once v2.3.0 is published
+codespell = {git = "https://github.com/codespell-project/codespell.git", rev = "fd1d5c0"}
 coverage = {extras = ["toml"], version = "^6.4.3"}
 factory-boy = "^3.2.0"
 freezegun = "^1.1.0"
@@ -149,3 +151,8 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.codereviewdoctor]
 disable = ["tall-model", "missing-related-name", "checking-settings-debug", "nullable-string-field"]
+
+[tool.codespell]
+skip = "roster/country_abbrevs.py,arch/migrations/0013_auto_20210603_2343.py,roster/migrations/0060_studentregistration_country.py"
+count = ""
+quiet-level = 3
