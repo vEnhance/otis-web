@@ -18,22 +18,18 @@ up a local server on a standard Unix environment.
 
 0. [Fork the repository first](https://docs.github.com/en/get-started/quickstart/fork-a-repo)
 	if you're planning on submitting a pull request later.
-1. Install the following standard tools: `python` (version 3.9), `pip`, `gcc`, `git`.
+1. Install the following standard tools: `python` (version 3.10), `pip`, `git`.
 	(For each tool, search "[name of thing to install] [your OS]" on the web.)
 2. Clone this repository:
 	`git clone https://github.com/USERNAME/otis-web`.
 	Replace `USERNAME` with your username if you're forking;
 	otherwise, replace with `vEnhance`.
-3. Run `git submodule --init --recursive` in order to pull the `dwhandler` submodule.
-	If this is done correctly, the folder `dwhandler` should contain
-	a file called `__init__.py` which defines `class DiscordWebhookHandler`.
+3. Run `git submodule --init --recursive` in order to pull the `evans_django_tools` submodule.
 4. You probably want to create a new virtual environment
 	to avoid polluting your system with all the dependencies.
 	If you've used `conda` or `virtualenv` or similar before, you know the drill.
-	Otherwise, [read through the steps here][venv]
-	to create a wrapper for OTIS-WEB.
-5. If things are working,
-	you should be able to run in the virtual environment
+	Otherwise, [read through the steps here][venv] to create a wrapper for OTIS-WEB.
+5. If things are working, you should be able to run in the virtual environment
 	and then [install Poetry](https://python-poetry.org/docs/).
 	This enables you to use the `poetry` command;
 	verify this by checking `poetry --help` produces a help message.
