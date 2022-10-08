@@ -11,7 +11,6 @@ So e.g. "list students by most recent pset" goes under dashboard.
 """
 
 import collections
-import csv
 import datetime
 import logging
 from typing import Any, Dict, List, Optional
@@ -41,6 +40,7 @@ from django.views.generic.list import ListView
 from evans_django_tools import ACTION_LOG_LEVEL, SUCCESS_LOG_LEVEL
 from otisweb.decorators import admin_required
 from otisweb.utils import AuthHttpRequest, mailchimp_subscribe
+from prettytable import PrettyTable
 
 from roster.utils import can_edit, get_current_students, get_student_by_id, infer_student  # NOQA
 
@@ -417,7 +417,7 @@ def unlock_rest_of_mystery(request: HttpRequest, delta: int = 1) -> HttpResponse
 
 
 @admin_required
-def mega_sheet(request: HttpRequest) -> HttpResponse:
+def giga_chart(request: HttpRequest, format_as: str) -> HttpResponse:
 	queryset = Invoice.objects.filter(student__legit=True)
 	queryset = queryset.filter(student__semester__active=True)
 	queryset = queryset.select_related(
@@ -446,37 +446,29 @@ def mega_sheet(request: HttpRequest) -> HttpResponse:
 		where = "debug"
 	else:
 		where = "prod"
-	filename = f"otis-{where}-{timestamp}.csv"
-
-	response = HttpResponse(
-		content_type='text/csv',
-		headers={'Content-Disposition': f'attachment; filename="{filename}"'},
-	)
-	writer = csv.writer(response)
-	writer.writerow(
-		[
-			'ID',
-			'Username',
-			'Name',
-			'Debt',
-			'Enabled',
-			'Track',
-			'Last login (days)',
-			'Grade',
-			'Gender',
-			'Country',
-			'AoPS',
-			'Student email',
-			'Parent email',
-			'Owed',
-			'Preps',
-			'Hours',
-			'Adjustment',
-			'Extras',
-			'Total Paid',
-			'Forgive',
-		]
-	)
+	rows = []
+	header_row = [
+		'ID',
+		'Username',
+		'Name',
+		'Enabled',
+		'Debt%',
+		# 'Track',
+		'Last login (days)',
+		'Grade',
+		'Gender',
+		'Country',
+		'AoPS',
+		'Student email',
+		'Parent email',
+		'Owed',
+		# 'Preps',
+		# 'Hours',
+		'Adjustment',
+		'Extras',
+		'Total Paid',
+		'Forgive',
+	]  # header row
 
 	for invoice in queryset:
 		student = invoice.student
@@ -487,14 +479,14 @@ def mega_sheet(request: HttpRequest) -> HttpResponse:
 		delta = (timezone.now() - user.profile.last_seen)
 		days_since_last_seen = round(delta.total_seconds() / (3600 * 24), ndigits=2)
 
-		writer.writerow(
+		rows.append(
 			[
 				student.pk,
 				user.username,
 				student.name,
-				round(invoice.debt, ndigits=2),
 				"Enabled" if student.enabled else "Disabled",
-				student.track,
+				f'{invoice.debt:.2f}',
+				# student.track,
 				days_since_last_seen,
 				reg.grade if reg is not None else '',
 				reg.get_gender_display() if reg is not None else '',
@@ -502,15 +494,36 @@ def mega_sheet(request: HttpRequest) -> HttpResponse:
 				reg.aops_username if reg is not None else '',
 				user.email,
 				reg.parent_email if reg is not None else '',
-				invoice.owed,
-				invoice.preps_taught,
-				invoice.hours_taught,
-				invoice.adjustment,
-				invoice.extras,
-				invoice.total_paid,
+				round(invoice.owed),
+				# invoice.preps_taught,
+				# invoice.hours_taught,
+				round(invoice.adjustment),
+				round(invoice.extras),
+				round(invoice.total_paid),
 				invoice.forgive,
 			]
 		)
+
+	pt = PrettyTable()
+	pt.field_names = header_row
+	title = f"OTIS Gigi-Chart ({where}) generated {timestamp}"
+	for row in rows:
+		pt.add_row(row)
+
+	format_as = format_as.lower()
+	if format_as == 'csv':
+		filename = f"otis-{where}-{timestamp}.csv"
+		response = HttpResponse(
+			content=pt.get_csv_string(),
+			content_type='text/csv',
+			headers={'Content-Disposition': f'attachment; filename="{filename}"'},
+		)
+	elif format_as == 'plain':
+		response = HttpResponse(pt.get_string(title=title))
+	elif format_as == 'html':
+		response = HttpResponse(pt.get_html_string(title=title))
+	else:
+		raise NotImplementedError(f"Format {format_as} not implemented yet")
 
 	return response
 

@@ -15,7 +15,7 @@ urlpatterns = [
 	path(r'inquiry/<int:student_id>/', views.inquiry, name='inquiry'),
 	path(r'register/', views.register, name='register'),
 	path(r'profile/', views.update_profile, name='update-profile'),
-	path(r'mega-sheet/', views.mega_sheet, name='mega-sheet'),
+	path(r'giga-chart/<str:format_as>/', views.giga_chart, name='giga-chart'),
 	path(r'mystery_unlock/easier/', lambda request: redirect('../../mystery-unlock/easier/')),
 	path(r'mystery_unlock/harder/', lambda request: redirect('../../mystery-unlock/harder/')),
 	path(r'mystery-unlock/easier/', views.unlock_rest_of_mystery, kwargs={'delta': 1}),
