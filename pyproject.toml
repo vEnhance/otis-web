@@ -36,6 +36,7 @@ setuptools = "^65.3.0"
 stripe = "^4.0.2"
 wheel = "^0.37.0"
 wiki = "^0.9"
+prettytable = "^3.4.1"
 
 [tool.poetry.group.dev.dependencies]
 Faker = "^15.0.0"
