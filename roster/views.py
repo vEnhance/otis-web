@@ -484,18 +484,14 @@ def giga_chart(request: HttpRequest, format_as: str) -> HttpResponse:
 		days_since_last_seen = round(delta.total_seconds() / (3600 * 24), ndigits=2)
 		socials: Manager[SocialAccount] = student.user.socialaccount_set  # type:ignore
 
-		discord_social_account = socials.filter(provider__iexact="Discord").first()
-		if discord_social_account is not None:
-			discord_dict = discord_social_account.extra_data
-			discord = f"{discord_dict['username']}#{discord_dict['discriminator']}"
-		else:
-			discord = ''
-
 		rows.append(
 			[
 				student.pk,
 				user.username,
-				discord,
+				'; '.join(
+					f"{d.extra_data['username']}#{d.extra_data['discriminator']}"
+					for d in socials.filter(provider__iexact="Discord")
+				),
 				student.name,
 				"Enabled" if student.enabled else "Disabled",
 				f'{invoice.debt:.2f}',
