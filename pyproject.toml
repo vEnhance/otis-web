@@ -79,6 +79,7 @@ command_line = "manage.py test"
 omit = [
 	"*/site-packages/*",
 	"*/migrations/*",
+	"evans_django_tools/*",
 	"manage.py",
 ]
 
