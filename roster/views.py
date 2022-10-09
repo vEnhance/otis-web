@@ -483,13 +483,13 @@ def giga_chart(request: HttpRequest, format_as: str) -> HttpResponse:
 		delta = (timezone.now() - user.profile.last_seen)
 		days_since_last_seen = round(delta.total_seconds() / (3600 * 24), ndigits=2)
 		socials: Manager[SocialAccount] = student.user.socialaccount_set  # type:ignore
-		try:
-			discord_social_account = socials.get(provider__iexact="Discord")
-		except SocialAccount.DoesNotExist:
-			discord = ''
-		else:
+
+		discord_social_account = socials.filter(provider__iexact="Discord").first()
+		if discord_social_account is not None:
 			discord_dict = discord_social_account.extra_data
 			discord = f"{discord_dict['username']}#{discord_dict['discriminator']}"
+		else:
+			discord = ''
 
 		rows.append(
 			[
