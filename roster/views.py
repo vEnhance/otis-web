@@ -15,6 +15,7 @@ import datetime
 import logging
 from typing import Any, Dict, List, Optional
 
+from allauth.socialaccount.models import SocialAccount
 from braces.views import LoginRequiredMixin, StaffuserRequiredMixin
 from core.models import Semester, Unit
 from dashboard.models import PSet
@@ -27,6 +28,7 @@ from django.core.exceptions import ObjectDoesNotExist, PermissionDenied  # NOQA
 from django.db.models.expressions import F
 from django.db.models.fields import FloatField
 from django.db.models.functions.comparison import Cast
+from django.db.models.manager import Manager
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect  # NOQA
@@ -426,6 +428,7 @@ def giga_chart(request: HttpRequest, format_as: str) -> HttpResponse:
 		'student__semester',
 		'student__user__profile',
 	)
+	queryset = queryset.prefetch_related('student__user__socialaccount_set')
 	queryset = queryset.annotate(
 		owed=Cast(
 			F("student__semester__prep_rate") * F("preps_taught") +
@@ -450,6 +453,7 @@ def giga_chart(request: HttpRequest, format_as: str) -> HttpResponse:
 	header_row = [
 		'ID',
 		'Username',
+		'Discord',
 		'Name',
 		'Enabled',
 		'Debt%',
@@ -478,11 +482,20 @@ def giga_chart(request: HttpRequest, format_as: str) -> HttpResponse:
 		reg = student.reg
 		delta = (timezone.now() - user.profile.last_seen)
 		days_since_last_seen = round(delta.total_seconds() / (3600 * 24), ndigits=2)
+		socials: Manager[SocialAccount] = student.user.socialaccount_set  # type:ignore
+		try:
+			discord_social_account = socials.get(provider__iexact="Discord")
+		except SocialAccount.DoesNotExist:
+			discord = ''
+		else:
+			discord_dict = discord_social_account.extra_data
+			discord = f"{discord_dict['username']}#{discord_dict['discriminator']}"
 
 		rows.append(
 			[
 				student.pk,
 				user.username,
+				discord,
 				student.name,
 				"Enabled" if student.enabled else "Disabled",
 				f'{invoice.debt:.2f}',
