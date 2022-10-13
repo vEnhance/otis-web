@@ -35,7 +35,7 @@
 </div>
 {% endif %}
 
-{% if not student.payment_status|divisibleby:"4" %}
+{% if student.enabled and not student.payment_status|divisibleby:"4" %}
 <div class="alert
 	{% if student.payment_status == 1 or student.payment_status == 5 %}
 		alert-info

@@ -51,7 +51,7 @@ logger = logging.getLogger(__name__)
 @login_required
 def portal(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 	student = get_student_by_id(request, student_id, payment_exempt=True)
-	if not request.user.is_staff and student.is_delinquent:
+	if not request.user.is_staff and student.is_delinquent and not student.enabled:
 		return HttpResponseRedirect(reverse('invoice', args=(student_id, )))
 	semester = student.semester
 	profile, _ = UserProfile.objects.get_or_create(user=request.user)
