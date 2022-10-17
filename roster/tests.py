@@ -101,19 +101,27 @@ class RosterTest(EvanTestCase):
 		self.login(alice)
 		for i in range(6):
 			resp = self.post(
-				"inquiry", alice.pk, data={
+				"inquiry",
+				alice.pk,
+				data={
 					'unit': units[i].pk,
-					"action_type": "UNLOCK",
+					'action_type': 'UNLOCK',
+					'explanation': 'hi',
 				}
 			)
 			self.assertHas(resp, "Petition automatically processed")
 		self.assertEqual(alice.curriculum.count(), 6)
 		self.assertEqual(alice.unlocked_units.count(), 6)
 		self.assertHas(
-			self.post("inquiry", alice.pk, data={
-				'unit': units[19].pk,
-				"action_type": "UNLOCK",
-			}), "Petition submitted, wait for it!"
+			self.post(
+				"inquiry",
+				alice.pk,
+				data={
+					'unit': units[19].pk,
+					"action_type": "UNLOCK",
+					'explanation': 'hi',
+				}
+			), "Petition submitted, wait for it!"
 		)
 		self.assertEqual(alice.curriculum.count(), 6)
 		self.assertEqual(alice.unlocked_units.count(), 6)
@@ -121,10 +129,15 @@ class RosterTest(EvanTestCase):
 		self.login(firefly)
 		for i in range(6, 10):
 			self.assertHas(
-				self.post("inquiry", alice.pk, data={
-					'unit': units[i].pk,
-					"action_type": "UNLOCK",
-				}), "Petition automatically processed"
+				self.post(
+					"inquiry",
+					alice.pk,
+					data={
+						'unit': units[i].pk,
+						"action_type": "UNLOCK",
+						'explanation': 'hi',
+					}
+				), "Petition automatically processed"
 			)
 		self.assertEqual(alice.curriculum.count(), 10)
 		self.assertEqual(alice.unlocked_units.count(), 10)
@@ -132,47 +145,72 @@ class RosterTest(EvanTestCase):
 		self.login(alice)
 		for i in range(11, 14):
 			self.assertHas(
-				self.post("inquiry", alice.pk, data={
-					'unit': units[i].pk,
-					"action_type": "UNLOCK",
-				}), "more than 9 unfinished"
+				self.post(
+					"inquiry",
+					alice.pk,
+					data={
+						'unit': units[i].pk,
+						"action_type": "UNLOCK",
+						'explanation': 'hi',
+					}
+				), "more than 9 unfinished"
 			)
 		self.assertEqual(alice.curriculum.count(), 10)
 		self.assertEqual(alice.unlocked_units.count(), 10)
 
 		for i in range(15, 18):
 			self.assertHas(
-				self.post("inquiry", alice.pk, data={
-					'unit': units[i].pk,
-					"action_type": "APPEND",
-				}), "Petition automatically processed"
+				self.post(
+					"inquiry",
+					alice.pk,
+					data={
+						'unit': units[i].pk,
+						"action_type": "APPEND",
+						'explanation': 'hi',
+					}
+				), "Petition automatically processed"
 			)
 		self.assertEqual(alice.curriculum.count(), 13)
 		self.assertEqual(alice.unlocked_units.count(), 10)
 
 		self.assertHas(
-			self.post("inquiry", alice.pk, data={
-				"unit": units[19].pk,
-				"action_type": "DROP"
-			}), "abnormally large"
+			self.post(
+				"inquiry",
+				alice.pk,
+				data={
+					"unit": units[19].pk,
+					"action_type": "DROP",
+					'explanation': 'hi',
+				}
+			), "abnormally large"
 		)
 
 		self.login(firefly)
 		for i in range(5, 14):
 			self.assertHas(
-				self.post("inquiry", alice.pk, data={
-					'unit': units[i].pk,
-					"action_type": "DROP",
-				}), "Petition automatically processed"
+				self.post(
+					"inquiry",
+					alice.pk,
+					data={
+						'unit': units[i].pk,
+						"action_type": "DROP",
+						'explanation': 'hi',
+					}
+				), "Petition automatically processed"
 			)
 		self.assertEqual(alice.curriculum.count(), 8)
 		self.assertEqual(alice.unlocked_units.count(), 5)
 
 		self.assertHas(
-			self.post("inquiry", alice.pk, data={
-				'unit': units[5].pk,
-				"action_type": "UNLOCK",
-			}), "Petition automatically processed"
+			self.post(
+				"inquiry",
+				alice.pk,
+				data={
+					'unit': units[5].pk,
+					"action_type": "UNLOCK",
+					'explanation': 'hi',
+				}
+			), "Petition automatically processed"
 		)
 		self.assertEqual(alice.curriculum.count(), 9)
 		self.assertEqual(alice.unlocked_units.count(), 6)
