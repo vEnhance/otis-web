@@ -4,7 +4,6 @@ from braces.views import LoginRequiredMixin
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
-from django.db.models.aggregates import Max
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http.request import HttpRequest
@@ -131,14 +130,22 @@ class MarketList(LoginRequiredMixin, ListView[Market]):
 	extra_context = {'past': False}
 
 	def get_queryset(self) -> QuerySet[Market]:
-		return Market.started.order_by('-end_date').filter(semester__active=True)
+		if getattr(self.request.user, 'is_staff', False) is True:
+			markets = Market.objects
+		else:
+			markets = Market.started
+		return markets.order_by('-end_date').filter(semester__active=True)
 
 
 class MarketListPast(MarketList):
 	extra_context = {'past': True}
 
 	def get_queryset(self) -> QuerySet[Market]:
-		return Market.started.order_by('-end_date').filter(semester__active=False)
+		if getattr(self.request.user, 'is_staff', False) is True:
+			markets = Market.objects
+		else:
+			markets = Market.started
+		return markets.order_by('-end_date').filter(semester__active=False)
 
 
 class GuessView(LoginRequiredMixin, DetailView[Guess]):
