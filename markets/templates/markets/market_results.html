@@ -34,7 +34,8 @@
 	</span>
 	{% if best_guess.score %}
 	<p>
-		The best guess was <strong>{{ best_guess.value }}</strong> which earned {{ best_guess.score }}♠.
+		The best guess was <strong>{{ best_guess.value|floatformat:6 }}</strong>
+		which earned {{ best_guess.score }}♠.
 	</p>
 	{% endif %}
 </div>
@@ -43,7 +44,8 @@
 {% if market.has_ended or request.user.is_superuser %}
 <div>
 	{% if guess and market.answer %}
-	<p>Your guess of {{ guess.value }} earned {{ guess.score|default_if_none:"?" }}♠.</p>
+	<p>Your guess of {{ guess.value|floatformat:6 }}
+		earned {{ guess.score|default_if_none:"?" }}♠.</p>
 	{% endif %}
 	<table class="table">
 		<tr class="table-dark">
