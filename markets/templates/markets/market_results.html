@@ -32,6 +32,11 @@
 	<span class="fst-italic">
 		{{ market.solution|linebreaks }}
 	</span>
+	{% if best_guess.score %}
+	<p>
+		The best guess was <strong>{{ best_guess.value }}</strong> which earned {{ best_guess.score }}♠.
+	</p>
+	{% endif %}
 </div>
 {% endif %}
 
@@ -48,7 +53,7 @@
 			<th>Player</th>
 		</tr>
 		{% for g in guesses %}
-		<tr {% if guess.pk == g.pk %}class="table-primary" {% endif %}>
+		<tr {% if g.score >= best_guess.score %}class="table-success fw-bold" {% elif guess.pk == g.pk %}class="table-primary" {% endif %}>
 			<th class="text-end">{{ forloop.counter }}</th>
 			<td class="text-end">
 				{% if request.user.is_staff %}
