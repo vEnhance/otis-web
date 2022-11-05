@@ -42,7 +42,7 @@ prettytable = "^3.4.1"
 # TODO: Faker: need to wait until https://github.com/joke2k/faker/pull/1662 resolves
 Faker = "=15.1.1"
 # TODO: update codespell once v2.3.0 is published
-codespell = {git = "https://github.com/codespell-project/codespell.git", rev = "fd1d5c0"}
+codespell = "^2.2.2"
 coverage = {extras = ["toml"], version = "^6.4.3"}
 factory-boy = "^3.2.0"
 freezegun = "^1.1.0"

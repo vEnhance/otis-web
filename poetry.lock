@@ -122,23 +122,16 @@ unicode-backport = ["unicodedata2"]
 
 [[package]]
 name = "codespell"
-version = "2.3.0.dev0"
+version = "2.2.2"
 description = "Codespell"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
-develop = false
 
 [package.extras]
 dev = ["check-manifest", "flake8", "pytest", "pytest-cov", "pytest-dependency", "tomli"]
 hard-encoding-detection = ["chardet"]
 toml = ["tomli"]
-
-[package.source]
-type = "git"
-url = "https://github.com/codespell-project/codespell.git"
-reference = "fd1d5c0"
-resolved_reference = "fd1d5c0d8dd5d8072d0422ce4f05b6202aa89ba0"
 
 [[package]]
 name = "colorama"
@@ -1580,7 +1573,7 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8, <4.0"
-content-hash = "baffad47fba1eb64a960f2cfb84ee17a058eb3a413f1f96fadb94cfb3625e127"
+content-hash = "7478c5ce56a6f3190a3d99c634863f1e37109d2a9436fc1426e527159f5e73d4"
 
 [metadata.files]
 appnope = [
@@ -1703,7 +1696,10 @@ charset-normalizer = [
     {file = "charset-normalizer-2.1.1.tar.gz", hash = "sha256:5a3d016c7c547f69d6f81fb0db9449ce888b418b5b9952cc5e6e66843e9dd845"},
     {file = "charset_normalizer-2.1.1-py3-none-any.whl", hash = "sha256:83e9a75d1911279afd89352c68b45348559d1fc0506b054b346651b5e7fee29f"},
 ]
-codespell = []
+codespell = [
+    {file = "codespell-2.2.2-py3-none-any.whl", hash = "sha256:87dfcd9bdc9b3cb8b067b37f0af22044d7a84e28174adfc8eaa203056b7f9ecc"},
+    {file = "codespell-2.2.2.tar.gz", hash = "sha256:c4d00c02b5a2a55661f00d5b4b3b5a710fa803ced9a9d7e45438268b099c319c"},
+]
 colorama = [
     {file = "colorama-0.4.6-py2.py3-none-any.whl", hash = "sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6"},
     {file = "colorama-0.4.6.tar.gz", hash = "sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44"},
