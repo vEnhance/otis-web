@@ -79,14 +79,18 @@
 	</td>
 </table>
 
-{% if pset.feedback %}
 <h3>Your comments</h3>
+{% if pset.feedback %}
 {{ pset.feedback|linebreaks }}
+{% else %}
+<p class="fst-italic">No comments submitted.</p>
 {% endif %}
 
-{% if pset.special_notes %}
 <h3>Notes</h3>
+{% if pset.special_notes %}
 {{ pset.special_notes|linebreaks }}
+{% else %}
+<p class="fst-italic">No special notes included.</p>
 {% endif %}
 
 {% if pset.upload %}
@@ -99,7 +103,7 @@
 	{% if ".pdf" in pset.upload.url or ".jpg" in pset.upload.url or ".png" in pset.upload.url %}
 	<iframe width="100%" height="200px" src="{{pset.upload.url}}"></iframe>
 	{% else %}
-	<p>No preview available for <code>{{ pset.filename }}</code>.</p>
+	<p class="fst-italic">No preview available for <code>{{ pset.filename }}</code>.</p>
 	{% endif %}
 </div>
 {% endif %}
