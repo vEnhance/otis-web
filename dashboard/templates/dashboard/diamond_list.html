@@ -2,6 +2,10 @@
 {% block title %}Achievements Listing{% endblock %}
 
 {% block layout-content %}
+<p class="fst-italic">
+	To cash in an achievement, got your dashboard and open the Charisma meter.
+</p>
+
 <div class="list-group">
 	{% for achievement in achievement_list %}
 	<div class="list-group-item container" {% if achievement.obtained %} style="background-color: #ddffdd;" {% else %} style="background-color: #ffddff;" {% endif %}>
