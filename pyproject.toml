@@ -39,7 +39,8 @@ wiki = "^0.9"
 prettytable = "^3.4.1"
 
 [tool.poetry.group.dev.dependencies]
-Faker = "^15.0.0"
+# TODO: Faker: need to wait until https://github.com/joke2k/faker/pull/1662 resolves
+Faker = "=15.1.1"
 # TODO: update codespell once v2.3.0 is published
 codespell = {git = "https://github.com/codespell-project/codespell.git", rev = "fd1d5c0"}
 coverage = {extras = ["toml"], version = "^6.4.3"}
