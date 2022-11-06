@@ -42,11 +42,11 @@ class PracticeExam(models.Model):
 	)
 
 	# For quizzes only
-	answer1 = models.CharField(max_length=64, validators=[expr_validator_multiple], blank=True)
-	answer2 = models.CharField(max_length=64, validators=[expr_validator_multiple], blank=True)
-	answer3 = models.CharField(max_length=64, validators=[expr_validator_multiple], blank=True)
-	answer4 = models.CharField(max_length=64, validators=[expr_validator_multiple], blank=True)
-	answer5 = models.CharField(max_length=64, validators=[expr_validator_multiple], blank=True)
+	answer1 = models.CharField(max_length=128, validators=[expr_validator_multiple], blank=True)
+	answer2 = models.CharField(max_length=128, validators=[expr_validator_multiple], blank=True)
+	answer3 = models.CharField(max_length=128, validators=[expr_validator_multiple], blank=True)
+	answer4 = models.CharField(max_length=128, validators=[expr_validator_multiple], blank=True)
+	answer5 = models.CharField(max_length=128, validators=[expr_validator_multiple], blank=True)
 	url1 = models.CharField(
 		max_length=128, blank=True, validators=[
 			URLValidator(),
@@ -128,27 +128,42 @@ class ExamAttempt(models.Model):
 		Student, on_delete=models.CASCADE, help_text="The student taking the exam"
 	)
 	guess1 = models.CharField(
-		max_length=18, blank=True, verbose_name="Problem 1 response", validators=[
+		max_length=128,
+		blank=True,
+		verbose_name="Problem 1 response",
+		validators=[
 			expr_validator,
 		]
 	)
 	guess2 = models.CharField(
-		max_length=18, blank=True, verbose_name="Problem 2 response", validators=[
+		max_length=128,
+		blank=True,
+		verbose_name="Problem 2 response",
+		validators=[
 			expr_validator,
 		]
 	)
 	guess3 = models.CharField(
-		max_length=18, blank=True, verbose_name="Problem 3 response", validators=[
+		max_length=128,
+		blank=True,
+		verbose_name="Problem 3 response",
+		validators=[
 			expr_validator,
 		]
 	)
 	guess4 = models.CharField(
-		max_length=18, blank=True, verbose_name="Problem 4 response", validators=[
+		max_length=128,
+		blank=True,
+		verbose_name="Problem 4 response",
+		validators=[
 			expr_validator,
 		]
 	)
 	guess5 = models.CharField(
-		max_length=18, blank=True, verbose_name="Problem 5 response", validators=[
+		max_length=128,
+		blank=True,
+		verbose_name="Problem 5 response",
+		validators=[
 			expr_validator,
 		]
 	)
