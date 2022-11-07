@@ -17,34 +17,34 @@ up a local server on a standard Unix environment.
 ### Standard Unix environment
 
 0. [Fork the repository first](https://docs.github.com/en/get-started/quickstart/fork-a-repo)
-	if you're planning on submitting a pull request later.
+   if you're planning on submitting a pull request later.
 1. Install the following standard tools: `python` (version 3.10), `pip`, `git`.
-	(For each tool, search "[name of thing to install] [your OS]" on the web.)
+   (For each tool, search "[name of thing to install] [your OS]" on the web.)
 2. Clone this repository:
-	`git clone https://github.com/USERNAME/otis-web`.
-	Replace `USERNAME` with your username if you're forking;
-	otherwise, replace with `vEnhance`.
+   `git clone https://github.com/USERNAME/otis-web`.
+   Replace `USERNAME` with your username if you're forking;
+   otherwise, replace with `vEnhance`.
 3. Run `git submodule --init --recursive` in order to pull the `evans_django_tools` submodule.
 4. You probably want to create a new virtual environment
-	to avoid polluting your system with all the dependencies.
-	If you've used `conda` or `virtualenv` or similar before, you know the drill.
-	Otherwise, [read through the steps here][venv] to create a wrapper for OTIS-WEB.
+   to avoid polluting your system with all the dependencies.
+   If you've used `conda` or `virtualenv` or similar before, you know the drill.
+   Otherwise, [read through the steps here][venv] to create a wrapper for OTIS-WEB.
 5. If things are working, you should be able to run in the virtual environment
-	and then [install Poetry](https://python-poetry.org/docs/).
-	This enables you to use the `poetry` command;
-	verify this by checking `poetry --help` produces a help message.
+   and then [install Poetry](https://python-poetry.org/docs/).
+   This enables you to use the `poetry` command;
+   verify this by checking `poetry --help` produces a help message.
 6. Once you have `poetry`, hit `poetry install`.
-	This will install a lot of Python packages into your virtual environment.
+   This will install a lot of Python packages into your virtual environment.
 7. If everything is working, `python manage.py check` should
-	run with no errors.
+   run with no errors.
 8. Run `python manage.py migrate` to create the local database.
 9. Run `python manage.py createsuperuser` to create an admin user.
 10. Run `python manage.py runserver`.
-	The command will spin up a continuously running server.
+    The command will spin up a continuously running server.
 11. Point your browser to `http://127.0.0.1:8000`.
-	You should be able to log in with the user you defined in step 9.
+    You should be able to log in with the user you defined in step 9.
 12. The website is functional now, but it is a bit bare-bones.
-	To populate it with some test data, use `http://127.0.0.1:8000/admin`.
+    To populate it with some test data, use `http://127.0.0.1:8000/admin`.
 
 [venv]: https://djangocentral.com/how-to-a-create-virtual-environment-for-python/
 

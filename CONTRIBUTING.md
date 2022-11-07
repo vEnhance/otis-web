@@ -22,11 +22,11 @@ except possibly for the third one about Vim.
 ### Fork
 
 Before you get started,
-you will actually want to create your own *fork* of OTIS-WEB.
+you will actually want to create your own _fork_ of OTIS-WEB.
 This is a bit counter-intuitive,
 but essentially the reason is that I own OTIS-WEB,
 so if you want to make edits of any sort,
-it has to be on a *copy* owned by you first --- that's a fork.
+it has to be on a _copy_ owned by you first --- that's a fork.
 
 Follow the
 [fork instructions here](https://docs.github.com/en/get-started/quickstart/fork-a-repo).
@@ -44,10 +44,10 @@ If you haven't already, create a free account on [GitHub](https://github.com/).
 
 The list of things to-do is sorted with two different views:
 
-* The [Projects](https://github.com/vEnhance/otis-web/projects?query=is%3Aopen+sort%3Acreated-asc)
-	view shows the set of tasks to do sorted by bounty.
-* The [issues page](https://github.com/vEnhance/otis-web/issues)
-	lists all the issues, including those with no bounty set yet.
+- The [Projects](https://github.com/vEnhance/otis-web/projects?query=is%3Aopen+sort%3Acreated-asc)
+  view shows the set of tasks to do sorted by bounty.
+- The [issues page](https://github.com/vEnhance/otis-web/issues)
+  lists all the issues, including those with no bounty set yet.
 
 To claim a task, you should go to the corresponding
 and leave a comment that you'd like to work on it.
