@@ -2,8 +2,8 @@
 [<img src="https://github.com/vEnhance/otis-web/actions/workflows/ci.yml/badge.svg" alt="OTIS-WEB status">](https://github.com/vEnhance/otis-web/actions)
 [<img src="https://github.com/vEnhance/otis-web/actions/workflows/codeql-analysis.yml/badge.svg" alt="OTIS-WEB status">](https://github.com/vEnhance/otis-web/actions)
 [<img src="https://coveralls.io/repos/github/vEnhance/otis-web/badge.svg?branch=main" alt="Coverage status">](https://coveralls.io/github/vEnhance/otis-web?branch=main)
-
-<img src="https://img.shields.io/github/stars/vEnhance/otis-web" alt="Stars"> <img src="https://img.shields.io/github/forks/vEnhance/otis-web" alt="Forks">
+<img src="https://img.shields.io/github/forks/vEnhance/otis-web" alt="Forks">
+<img src="https://img.shields.io/github/stars/vEnhance/otis-web" alt="Stars">
 
 # OTIS-WEB
 
