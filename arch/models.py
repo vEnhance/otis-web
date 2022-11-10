@@ -8,6 +8,15 @@ from django.db import models
 from django.urls import reverse
 
 
+def get_disk_statement_from_puid(puid: str) -> Optional[str]:
+	if settings.PATH_STATEMENT_ON_DISK is None:
+		return None
+	statement_path = Path(settings.PATH_STATEMENT_ON_DISK) / (puid + '.html')
+	if statement_path.exists() and statement_path.is_file():
+		return statement_path.read_text()
+	return None
+
+
 # Create your models here.
 @reversion.register()
 class Problem(models.Model):
@@ -33,12 +42,7 @@ class Problem(models.Model):
 		return reverse("hint-list", args=(self.puid, ))
 
 	def get_statement(self) -> Optional[str]:
-		if settings.PATH_STATEMENT_ON_DISK is None:
-			return None
-		statement_path = Path(settings.PATH_STATEMENT_ON_DISK) / (self.puid + '.html')
-		if statement_path.exists() and statement_path.is_file():
-			return statement_path.read_text()
-		return None
+		return get_disk_statement_from_puid(self.puid)
 
 
 @reversion.register()
