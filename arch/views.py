@@ -5,6 +5,7 @@ from core.utils import storage_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
+from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.core.files.storage import default_storage
 from django.db.models.query import QuerySet
@@ -19,6 +20,7 @@ from reversion.views import RevisionMixin
 from roster.models import Student
 
 from arch.forms import ProblemSelectForm
+from arch.models import get_disk_statement_from_puid
 
 from .forms import HintUpdateFormWithReason
 from .models import Hint, Problem
@@ -64,12 +66,31 @@ class ProblemObjectView:
 
 class HintList(ExistStudentRequiredMixin, ListView[Hint]):
 	context_object_name = "hint_list"
+	problem: Problem
+
+	def setup(self, request: HttpRequest, *args: Any, **kwargs: Any):
+		super().setup(request, *args, **kwargs)
+		puid = kwargs['puid']
+		puid = puid.upper()
+		print("PUID:", puid)
+		try:
+			self.problem = Problem.objects.get(puid=puid)
+		except Problem.DoesNotExist:
+			statement_exists_on_disk = get_disk_statement_from_puid(puid) is not None
+			print(get_disk_statement_from_puid(puid))
+			if kwargs['create_if_missing'] is True and statement_exists_on_disk:
+				self.problem = Problem(puid=puid)
+				self.problem.save()
+				messages.info(request, f"Created previously nonexistent problem {puid}")
+			elif statement_exists_on_disk:
+				raise Http404("Need to log in to add create problems from /arch/.../otis")
+			else:
+				raise Http404(f"Couldn't find {puid} in database or disk")
 
 	def get_queryset(self):
-		self.problem = get_object_or_404(Problem, **self.kwargs)
-		return Hint.objects.filter(problem=self.problem).order_by('number')
+		return Hint.objects.filter(problem__puid=self.kwargs['puid']).order_by('number')
 
-	def get_context_data(self, **kwargs: Dict[Any, Any]):
+	def get_context_data(self, **kwargs: Dict[str, Any]):
 		context = super().get_context_data(**kwargs)
 		context['problem'] = self.problem
 		context['statement'] = self.problem.get_statement()

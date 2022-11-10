@@ -11,7 +11,18 @@ urlpatterns = [
 	path(r'<str:puid>/add/', views.HintCreate.as_view(), name='hint-create'),
 	path(r'<str:puid>/<int:number>/edit/', views.HintUpdate.as_view(), name='hint-update'),
 	path(r'<str:puid>/<int:number>/delete/', views.HintDelete.as_view(), name='hint-delete'),
-	path(r'<str:puid>/', views.HintList.as_view(), name='hint-list'),
+	path(
+		r'<str:puid>/',
+		views.HintList.as_view(),
+		name='hint-list',
+		kwargs={'create_if_missing': False}
+	),
+	path(
+		r'<str:puid>/otis/',
+		views.HintList.as_view(),
+		name='hint-list',
+		kwargs={'create_if_missing': True}
+	),
 	path(r'<str:puid>/solution', views.view_solution, name='view-solution'),
 	path(r'', views.ProblemCreate.as_view(), name='arch-index'),
 ]
