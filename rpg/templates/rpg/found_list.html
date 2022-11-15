@@ -1,4 +1,4 @@
-{% extends 'layout.html' %}
+{% extends "layout.html" %}
 {% block title %}{{ achievement.name }} found by...{% endblock %}
 {% block layout-content %}
   {% if achievement.image %}<img width="96px" style="float: right;" src="{{ achievement.image.url }}" />{% endif %}
