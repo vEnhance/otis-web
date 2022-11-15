@@ -21,6 +21,7 @@ urlpatterns = [
 	path(r'markets/', include('markets.urls')),
 	path(r'mouse/', include('mouse.urls')),
 	path(r'roster/', include('roster.urls')),
+	path(r'rpg/', include('rpg.urls')),
 	path(r'payments/', include('payments.urls')),
 	path(r'suggestions/', include('suggestions.urls')),
 	# ------
