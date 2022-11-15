@@ -1,5 +1,6 @@
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.models import User
 
 
 def admin_required( # type: ignore
@@ -12,7 +13,7 @@ def admin_required( # type: ignore
     member, redirecting to the login page if necessary.
     """
 	actual_decorator = user_passes_test(
-		lambda u: u.is_active and u.is_staff and u.is_superuser,
+		lambda u: isinstance(u, User) and u.is_active and u.is_staff and u.is_superuser,
 		login_url=login_url,
 		redirect_field_name=redirect_field_name,
 	)
