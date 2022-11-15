@@ -29,15 +29,15 @@
 {% if market.show_answer or request.user.is_superuser %}
 <div class="alert alert-info">
 	<h2 class="alert-heading">Answer: <strong>{{ market.answer|default_if_none:"TBD" }}</strong></h2>
-	<span class="fst-italic">
-		{{ market.solution|safe }}
-	</span>
 	{% if best_guess.score %}
-	<p>
+	<p class="fst-italic">
 		The best guess was <strong>{{ best_guess.value|floatformat:6 }}</strong>
 		which earned {{ best_guess.score }}♠.
 	</p>
 	{% endif %}
+	<span class="fst-italic">
+		{{ market.solution|safe }}
+	</span>
 </div>
 {% endif %}
 
