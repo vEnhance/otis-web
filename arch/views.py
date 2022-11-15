@@ -1,11 +1,11 @@
-from typing import Any, ClassVar, Dict
+from typing import Any, ClassVar, Dict, Optional
 
 import reversion
 from core.utils import storage_hash
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
-from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.core.files.storage import default_storage
 from django.db.models.query import QuerySet
@@ -45,7 +45,7 @@ class ExistStudentRequiredMixin(LoginRequiredMixin):
 class HintObjectView:
 	kwargs: ClassVar[Dict[str, Any]] = {}
 
-	def get_object(self, queryset: QuerySet[Hint] = None) -> Hint:
+	def get_object(self, queryset: Optional[QuerySet[Hint]] = None) -> Hint:
 		if queryset is None:
 			queryset = self.get_queryset()  # type: ignore
 		assert queryset is not None
@@ -57,7 +57,7 @@ class HintObjectView:
 class ProblemObjectView:
 	kwargs: ClassVar[Dict[str, Any]] = {}
 
-	def get_object(self, queryset: QuerySet[Problem] = None) -> Problem:
+	def get_object(self, queryset: Optional[QuerySet[Problem]] = None) -> Problem:
 		if queryset is None:
 			queryset = self.get_queryset()  # type: ignore
 		assert queryset is not None

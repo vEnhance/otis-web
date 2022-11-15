@@ -1,4 +1,4 @@
-from typing import Any, List, Tuple
+from typing import Any, List, Optional, Tuple
 
 from core.models import Semester, Unit
 from django.contrib import admin, messages
@@ -53,7 +53,8 @@ class StudentInline(admin.TabularInline):
 	extra = 0
 	show_change_link = True
 
-	def has_delete_permission(self, request: HttpRequest, obj: Student = None) -> bool:
+	def has_delete_permission(self, request: HttpRequest, obj: Optional[Student] = None) -> bool:
+		del request, obj
 		return False
 
 
@@ -107,12 +108,14 @@ class OwedFilter(admin.SimpleListFilter):
 		request: HttpRequest,
 		model_admin: ModelAdmin[Any],
 	) -> List[Tuple[str, str]]:
+		del request, model_admin
 		return [
 			("incomplete", "Incomplete"), ("paid", "Paid in full"), ("excess", "Overpaid"),
 			("zero", "No payment")
 		]
 
 	def queryset(self, request: HttpRequest, queryset: QuerySet[Model]):
+		del request
 		if self.value() is None:
 			return queryset
 		else:
@@ -377,16 +380,20 @@ class UnitInquiryAdmin(admin.ModelAdmin):
 	actions = ['hold_inquiry', 'reject_inquiry', 'accept_inquiry', 'reset_inquiry']
 
 	def hold_inquiry(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
+		del request
 		queryset.update(status='HOLD')
 
 	def reject_inquiry(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
+		del request
 		queryset.update(status='REJ')
 
 	def accept_inquiry(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
+		del request
 		for inquiry in queryset:
 			inquiry.run_accept()
 
 	def reset_inquiry(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
+		del request
 		queryset.update(status='NEW')
 
 

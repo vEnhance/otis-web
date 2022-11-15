@@ -113,7 +113,7 @@ def quiz(request: AuthHttpRequest, student_id: int, pk: int) -> HttpResponse:
 
 
 @login_required
-def mocks(request: AuthHttpRequest, student_id: int = None) -> HttpResponse:
+def mocks(request: AuthHttpRequest, student_id: Optional[int] = None) -> HttpResponse:
 	if student_id is None:
 		student = infer_student(request)
 		return HttpResponseRedirect(reverse("mocks", args=(student.id, )))

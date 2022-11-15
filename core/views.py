@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from braces.views import LoginRequiredMixin
 from dashboard.models import PSet, UploadedFile
@@ -100,7 +100,7 @@ class UserProfileUpdateView(
 	def get_success_message(self, cleaned_data: Dict[str, Any]) -> str:
 		return f"Updated settings for {self.object.user.username}!"
 
-	def get_object(self, queryset: QuerySet[Model] = None) -> UserProfile:
+	def get_object(self, queryset: Optional[QuerySet[Model]] = None) -> UserProfile:
 		userprofile, _ = UserProfile.objects.get_or_create(user=self.request.user)
 		return userprofile
 

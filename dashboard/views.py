@@ -90,7 +90,11 @@ def portal(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 	return render(request, "dashboard/portal.html", context)
 
 
-def certify(request: HttpRequest, student_id: int = None, checksum: str = None):
+def certify(
+	request: HttpRequest,
+	student_id: Optional[int] = None,
+	checksum: Optional[str] = None,
+):
 	if student_id is None:
 		student = infer_student(request)
 	else:

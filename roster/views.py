@@ -154,7 +154,7 @@ def advance(request: HttpRequest, student_id: int) -> Any:
 
 
 @login_required
-def invoice(request: HttpRequest, student_id: int = None) -> HttpResponse:
+def invoice(request: HttpRequest, student_id: Optional[int] = None) -> HttpResponse:
 	if student_id is None:
 		student = infer_student(request)
 		return HttpResponseRedirect(reverse("invoice", args=(student.id, )))

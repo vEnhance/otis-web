@@ -1,3 +1,5 @@
+from typing import Optional
+
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
@@ -5,10 +7,12 @@ from django.db.models.query import QuerySet
 from django.http.request import HttpRequest
 from django.shortcuts import get_object_or_404
 
+from roster.models import Student
+
 from . import models
 
 
-def get_current_students(queryset: QuerySet[models.Student] = None):
+def get_current_students(queryset: Optional[QuerySet[Student]] = None) -> QuerySet[Student]:
 	if queryset is None:
 		queryset = models.Student.objects.all()
 	return queryset.filter(semester__active=True)
@@ -26,7 +30,7 @@ def get_visible_from_queryset(user: User, queryset: QuerySet[models.Student]):
 
 def get_visible_students(user: User, current: bool = True):
 	if current:
-		queryset = get_current_students()
+		queryset: QuerySet = get_current_students()
 	else:
 		queryset = models.Student.objects.all()
 	return get_visible_from_queryset(user, queryset)

@@ -12,13 +12,13 @@ from django.utils import timezone
 
 
 class StartedMarketManager(models.Manager):
-	def get_queryset(self) -> QuerySet['Market']:
+	def get_queryset(self) -> QuerySet:
 		now = timezone.now()
 		return super().get_queryset().filter(start_date__lte=now)
 
 
 class ActiveMarketManager(models.Manager):
-	def get_queryset(self) -> QuerySet['Market']:
+	def get_queryset(self) -> QuerySet:
 		now = timezone.now()
 		return super().get_queryset().filter(
 			start_date__lte=now,
