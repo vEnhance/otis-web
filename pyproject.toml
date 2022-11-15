@@ -160,3 +160,7 @@ disable = ["tall-model", "missing-related-name", "checking-settings-debug", "nul
 skip = "roster/country_abbrevs.py,arch/migrations/0013_auto_20210603_2343.py,roster/migrations/0060_studentregistration_country.py"
 count = ""
 quiet-level = 3
+
+[tool.djlint]
+profile = "django"
+indent = 2
