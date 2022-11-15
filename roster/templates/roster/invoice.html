@@ -2,82 +2,82 @@
 {% load static %}
 {% load otis_extras %}
 {% block layout-content %}
-    {% if student.is_payment_locked %}
-        <div class="alert alert-danger" role="alert">
-            <h2 class="alert-heading">Overdue payment</h2>
-            Your current payment is more than one week overdue.
-            Please remit payment to continue using OTIS-WEB.
-        </div>
-    {% endif %}
-    {% if not invoice.student.semester.active %}
-        <div class="alert alert-danger" role="alert">
-            <h2 class="alert-title">You are viewing the invoice for a past year!</h2>
-            This is the invoice for
-            <b>{{ invoice.student.semester.years }}</b>.
-            If you are trying to pay for the current year then you should
-            <a class="alert-link" href="{% url "invoice" %}">go to the current year's invoice</a>.
-        </div>
-    {% elif not invoice.student.semester.show_invoices %}
-        <div class="alert alert-info" role="alert">
-            <h2 class="alert-title">Preliminary invoice only</h2>
-            Invoices are not ready for distribution yet.
-            You can view this page if you want, but it's a work-in-progress.
-        </div>
-    {% endif %}
-    <p>
-        Payment information linked can be found in the OTIS
-        <a href="//web.evanchen.cc/upload/otis-syllabus.pdf">syllabus</a>
-        and in more detail in the
-        <a href="{% static "info/parent-info.pdf" %}">parent info</a>.
-        All quantities below are in US dollars (USD).
-    </p>
-    <p>
-        Here is a link to a payment page that works without login
-        (so obviously, only send this to people you trust).
-        <center>
-            {% if invoice.student.semester.active %}
-                <a href="{% url "payments-invoice" student.id checksum %}"
-                   class="btn btn-success col-xs-12 col-sm-6">
-                    Make payment via card
-                </a>
-                <br />
-            {% endif %}
-            <a href="{% url "payments-invoice" student.id checksum %}">
-                https://otis.evanchen.cc{% url "payments-invoice" student.id checksum %}
-            </a>
-        </center>
-    </p>
+  {% if student.is_payment_locked %}
+    <div class="alert alert-danger" role="alert">
+      <h2 class="alert-heading">Overdue payment</h2>
+      Your current payment is more than one week overdue.
+      Please remit payment to continue using OTIS-WEB.
+    </div>
+  {% endif %}
+  {% if not invoice.student.semester.active %}
+    <div class="alert alert-danger" role="alert">
+      <h2 class="alert-title">You are viewing the invoice for a past year!</h2>
+      This is the invoice for
+      <b>{{ invoice.student.semester.years }}</b>.
+      If you are trying to pay for the current year then you should
+      <a class="alert-link" href="{% url "invoice" %}">go to the current year's invoice</a>.
+    </div>
+  {% elif not invoice.student.semester.show_invoices %}
+    <div class="alert alert-info" role="alert">
+      <h2 class="alert-title">Preliminary invoice only</h2>
+      Invoices are not ready for distribution yet.
+      You can view this page if you want, but it's a work-in-progress.
+    </div>
+  {% endif %}
+  <p>
+    Payment information linked can be found in the OTIS
+    <a href="//web.evanchen.cc/upload/otis-syllabus.pdf">syllabus</a>
+    and in more detail in the
+    <a href="{% static "info/parent-info.pdf" %}">parent info</a>.
+    All quantities below are in US dollars (USD).
+  </p>
+  <p>
+    Here is a link to a payment page that works without login
+    (so obviously, only send this to people you trust).
+    <center>
+      {% if invoice.student.semester.active %}
+        <a href="{% url "payments-invoice" student.id checksum %}"
+           class="btn btn-success col-xs-12 col-sm-6">
+          Make payment via card
+        </a>
+        <br />
+      {% endif %}
+      <a href="{% url "payments-invoice" student.id checksum %}">
+        https://otis.evanchen.cc{% url "payments-invoice" student.id checksum %}
+      </a>
+    </center>
+  </p>
+  <hr />
+  {% if invoice %}
+    {% include "roster/invoice_table.html" %}
     <hr />
-    {% if invoice %}
-        {% include "roster/invoice_table.html" %}
-        <hr />
-        <p>This invoice was last updated on {{ invoice.updated_at }} server time.</p>
-        <p>
-            Please contact me if you think there are any errors
-            (I make mistakes every year!).
-        </p>
-        {% if student.semester.first_payment_deadline or student.semester.most_payment_deadline %}
-            <p>As a reminder, the payment deadlines are:</p>
-            <ul>
-                {% if student.semester.first_payment_deadline %}<li>{{ student.semester.first_payment_deadline|date }}</li>{% endif %}
-                {% if student.semester.most_payment_deadline %}<li>{{ student.semester.most_payment_deadline|date }}</li>{% endif %}
-            </ul>
-        {% endif %}
-        <p>
-            If you have an assistant instructor,
-            that payment should be done separately.
-        </p>
-        {% if request.user.is_staff %}
-            <ul>
-                <li>
-                    (Staff) <a href="{% url "edit-invoice" invoice.id %}">Edit invoice</a>
-                </li>
-            </ul>
-        {% endif %}
-    {% else %}
-        <p>
-            <b>No invoice is currently available.</b>
-        </p>
+    <p>This invoice was last updated on {{ invoice.updated_at }} server time.</p>
+    <p>
+      Please contact me if you think there are any errors
+      (I make mistakes every year!).
+    </p>
+    {% if student.semester.first_payment_deadline or student.semester.most_payment_deadline %}
+      <p>As a reminder, the payment deadlines are:</p>
+      <ul>
+        {% if student.semester.first_payment_deadline %}<li>{{ student.semester.first_payment_deadline|date }}</li>{% endif %}
+        {% if student.semester.most_payment_deadline %}<li>{{ student.semester.most_payment_deadline|date }}</li>{% endif %}
+      </ul>
     {% endif %}
-    {% include 'dashboard/back_link.html' %}
+    <p>
+      If you have an assistant instructor,
+      that payment should be done separately.
+    </p>
+    {% if request.user.is_staff %}
+      <ul>
+        <li>
+          (Staff) <a href="{% url "edit-invoice" invoice.id %}">Edit invoice</a>
+        </li>
+      </ul>
+    {% endif %}
+  {% else %}
+    <p>
+      <b>No invoice is currently available.</b>
+    </p>
+  {% endif %}
+  {% include 'dashboard/back_link.html' %}
 {% endblock %}

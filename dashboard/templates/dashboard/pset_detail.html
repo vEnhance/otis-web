@@ -1,108 +1,108 @@
 {% extends 'layout.html' %}
 {% block title %}Submission for {{ pset.unit }}{% endblock %}
 {% block layout-content %}
-    <p>
-        Back to <a href="{% url "submit-pset" student.pk %}">submission page</a>.
-    </p>
-    {% if pset.rejected %}
-        <div class="alert alert-warning">
-            This unit submission was rejected.
-            You should <a href="{% url "resubmit-pset" pset.pk %}">replace it</a>.
-        </div>
-    {% elif pset.accepted %}
-        <div class="alert alert-success">
-            This unit submission was accepted.
-            If you haven't read the solutions yet,
-            you can <a href="{% url "resubmit-pset" pset.pk %}">submit additional problems</a>
-            if you find time.
-        </div>
-    {% else %}
-        <div class="alert alert-primary">
-            This unit submission is pending review from Evan.
-            <a href="{% url "resubmit-pset" pset.pk %}">Update it</a>
-            if you wish to make changes.
-        </div>
+  <p>
+    Back to <a href="{% url "submit-pset" student.pk %}">submission page</a>.
+  </p>
+  {% if pset.rejected %}
+    <div class="alert alert-warning">
+      This unit submission was rejected.
+      You should <a href="{% url "resubmit-pset" pset.pk %}">replace it</a>.
+    </div>
+  {% elif pset.accepted %}
+    <div class="alert alert-success">
+      This unit submission was accepted.
+      If you haven't read the solutions yet,
+      you can <a href="{% url "resubmit-pset" pset.pk %}">submit additional problems</a>
+      if you find time.
+    </div>
+  {% else %}
+    <div class="alert alert-primary">
+      This unit submission is pending review from Evan.
+      <a href="{% url "resubmit-pset" pset.pk %}">Update it</a>
+      if you wish to make changes.
+    </div>
+  {% endif %}
+  <p class="text-center">
+    <a href="{% url "resubmit-pset" pset.pk %}"
+       class="btn {% if pset.rejected %}btn-success{% elif pset.accepted %}btn-warning{% else %}btn-primary{% endif %}">
+      {% if pset.rejected %}
+        Replace problem set
+      {% elif pset.accepted %}
+        Submit additional problems
+      {% else %}
+        Update submission
+      {% endif %}
+    </a>
+    {% if request.user.is_staff %}
+      <a href="{% url "admin:dashboard_pset_change" pset.id %}"
+         class="btn btn-dark">Staff edit</a>
     {% endif %}
-    <p class="text-center">
-        <a href="{% url "resubmit-pset" pset.pk %}"
-           class="btn {% if pset.rejected %}btn-success{% elif pset.accepted %}btn-warning{% else %}btn-primary{% endif %}">
-            {% if pset.rejected %}
-                Replace problem set
-            {% elif pset.accepted %}
-                Submit additional problems
-            {% else %}
-                Update submission
-            {% endif %}
-        </a>
-        {% if request.user.is_staff %}
-            <a href="{% url "admin:dashboard_pset_change" pset.id %}"
-               class="btn btn-dark">Staff edit</a>
-        {% endif %}
-    </p>
-    <hr />
-    <h2>Details</h2>
-    <table class="table">
-        <tr>
-            <th>{{ pset.unit }}</th>
-            <td>
-                <a href="{% url "view-problems" pset.unit.pk %}">Problems</a>
-                |
-                <a href="{% url "view-solutions" pset.unit.pk %}">Solutions</a>
-            </td>
-        </tr>
-        {% if pset.upload %}
-            <tr>
-                <td>
-                    <tt>{{ pset.filename }}</tt>
-                </td>
-                <td>{{ pset.upload.created_at }}</td>
-            </tr>
-        {% else %}
-            <tr>
-                <td class="fst-italic">No uploaded file.</td>
-            </tr>
-        {% endif %}
-        <td>
-            {{ pset.clubs|default_if_none:0 }}♣
-            {{ pset.hours|default_if_none:0 }}♥
-        </td>
-        <td>
-            {{ pset.pk }}
-            {% if pset.accepted %}
-                ✅ Accepted
-            {% elif pset.rejected %}
-                ❌ Rejected
-            {% elif pset.resubmitted %}
-                🔁 Resubmitted
-            {% else %}
-                ⏳ Pending
-            {% endif %}
-        </td>
-    </table>
-    <h3>Your comments</h3>
-    {% if pset.feedback %}
-        {{ pset.feedback|linebreaks }}
-    {% else %}
-        <p class="fst-italic">No comments submitted.</p>
-    {% endif %}
-    <h3>Notes</h3>
-    {% if pset.special_notes %}
-        {{ pset.special_notes|linebreaks }}
-    {% else %}
-        <p class="fst-italic">No special notes included.</p>
-    {% endif %}
+  </p>
+  <hr />
+  <h2>Details</h2>
+  <table class="table">
+    <tr>
+      <th>{{ pset.unit }}</th>
+      <td>
+        <a href="{% url "view-problems" pset.unit.pk %}">Problems</a>
+        |
+        <a href="{% url "view-solutions" pset.unit.pk %}">Solutions</a>
+      </td>
+    </tr>
     {% if pset.upload %}
-        <p class="text-center">
-            <a href="{{ pset.upload.url }}" class="btn btn-primary">Download submission</a>
-        </p>
-        <div>
-            {% if ".pdf" in pset.upload.url or ".jpg" in pset.upload.url or ".png" in pset.upload.url %}
-                <iframe width="100%" height="200px" src="{{ pset.upload.url }}"></iframe>
-            {% else %}
-                <p class="fst-italic">
-                    No preview available for <code>{{ pset.filename }}</code>.
-                </p>
-            {% endif %}
-        </div>
+      <tr>
+        <td>
+          <tt>{{ pset.filename }}</tt>
+        </td>
+        <td>{{ pset.upload.created_at }}</td>
+      </tr>
+    {% else %}
+      <tr>
+        <td class="fst-italic">No uploaded file.</td>
+      </tr>
     {% endif %}
+    <td>
+      {{ pset.clubs|default_if_none:0 }}♣
+      {{ pset.hours|default_if_none:0 }}♥
+    </td>
+    <td>
+      {{ pset.pk }}
+      {% if pset.accepted %}
+        ✅ Accepted
+      {% elif pset.rejected %}
+        ❌ Rejected
+      {% elif pset.resubmitted %}
+        🔁 Resubmitted
+      {% else %}
+        ⏳ Pending
+      {% endif %}
+    </td>
+  </table>
+  <h3>Your comments</h3>
+  {% if pset.feedback %}
+    {{ pset.feedback|linebreaks }}
+  {% else %}
+    <p class="fst-italic">No comments submitted.</p>
+  {% endif %}
+  <h3>Notes</h3>
+  {% if pset.special_notes %}
+    {{ pset.special_notes|linebreaks }}
+  {% else %}
+    <p class="fst-italic">No special notes included.</p>
+  {% endif %}
+  {% if pset.upload %}
+    <p class="text-center">
+      <a href="{{ pset.upload.url }}" class="btn btn-primary">Download submission</a>
+    </p>
+    <div>
+      {% if ".pdf" in pset.upload.url or ".jpg" in pset.upload.url or ".png" in pset.upload.url %}
+        <iframe width="100%" height="200px" src="{{ pset.upload.url }}"></iframe>
+      {% else %}
+        <p class="fst-italic">
+          No preview available for <code>{{ pset.filename }}</code>.
+        </p>
+      {% endif %}
+    </div>
+  {% endif %}
 {% endblock %}

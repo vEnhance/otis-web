@@ -1,195 +1,195 @@
 {% if request.user.is_authenticated %}
-    <table style="width: 100%;
-                  height:128px;
-                  font-size: 22px;
-                  text-shadow: 1px 0 0 #000, 0 -1px 0 #000, 0 1px 0 #000, -1px 0 0 #000">
-        <tr>
-            <td>
-                <a title="Home" class="emoji-link" href="{% url "index" %}">🏠</a>
-            </td>
-            {% if request.user.is_superuser %}
-                <td>
-                    <a title="Past" class="emoji-link" href="{% url "semlist" %}">🕗</a>
-                </td>
-            {% else %}
-                <td>
-                    <a title="Past" class="emoji-link" href="{% url "past" %}">🕗</a>
-                </td>
-            {% endif %}
-            <td>
-                <a title="Linked accounts"
-                   class="emoji-link"
-                   href="{% url "socialaccount_connections" %}">🔐</a>
-            </td>
-            <td>
-                <a title="Display settings"
-                   class="emoji-link"
-                   href="{% url "profile" %}">⚙️</a>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <a title="ARCH" class="emoji-link" href="{% url "arch-index" %}">🗼</a>
-            </td>
-            <td>
-                <a title="Suggest" class="emoji-link" href="{% url "suggest-new" %}">💡</a>
-            </td>
-            <td>
-                <a title="Wiki" class="emoji-link" href="{% url "wiki:root" %}">🎮</a>
-            </td>
-            <td>
-                <a title="GitHub"
-                   class="emoji-link"
-                   href="https://github.com/vEnhance/otis-web/">🖥️</a>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <a title="Announcements"
-                   class="emoji-link"
-                   href="https://us5.campaign-archive.com/home/?u=5c818a0be2f35ee90344a471e&id=808c50e8c9">📢</a>
-            </td>
-            <td>
-                <a title="Catalog" class="emoji-link" href="{% url "synopsis" %}">🗃️</a>
-            </td>
-            {% if student %}
-                <td>
-                    <a title="Invoice"
-                       class="emoji-link"
-                       href="{% url "invoice" student.id %}">💵</a>
-                </td>
-            {% else %}
-                <td>
-                    <a title="Invoice" class="emoji-link" href="{% url "invoice" %}">💵</a>
-                </td>
-            {% endif %}
-            <td>
-                <a title="Markets" class="emoji-link" href="{% url "market-list" %}">📈</a>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <a title="Diamonds"
-                   class="emoji-link"
-                   href="{% url "achievements-listing" %}"
-                   data-hex="496e737065637420456c6d21">💎</a>
-            </td>
-            {% if student %}
-                <td>
-                    <a title="Certificate"
-                       class="emoji-link"
-                       href="{% url "certify" student.id %}">🎓</a>
-                </td>
-            {% else %}
-                <td>
-                    <a title="Certificate" class="emoji-link" href="{% url "certify" %}">🎓</a>
-                </td>
-            {% endif %}
-            <td>
-                <a title="PSet Queue"
-                   class="emoji-link"
-                   href="{% url "pset-queue-listing" %}">🛂</a>
-            </td>
-            <td>
-                <a title="Logout" class="emoji-link" href="{% url "account_logout" %}">🚪</a>
-            </td>
-        </tr>
-    </table>
-    {% if student or request.user.is_staff %}<hr />{% endif %}
-    {% if student %}
-        <p>
-            <b><a href="{% url "portal" student.id %}">{{ student.name }}</a></b>
-        </p>
-        <p class="fst-italic">
-            <small>{{ student.semester }} ({{ student.semester.years }})</small>
-        </p>
-    {% endif %}
-    {% if request.user.is_staff %}
+  <table style="width: 100%;
+                height:128px;
+                font-size: 22px;
+                text-shadow: 1px 0 0 #000, 0 -1px 0 #000, 0 1px 0 #000, -1px 0 0 #000">
+    <tr>
+      <td>
+        <a title="Home" class="emoji-link" href="{% url "index" %}">🏠</a>
+      </td>
+      {% if request.user.is_superuser %}
+        <td>
+          <a title="Past" class="emoji-link" href="{% url "semlist" %}">🕗</a>
+        </td>
+      {% else %}
+        <td>
+          <a title="Past" class="emoji-link" href="{% url "past" %}">🕗</a>
+        </td>
+      {% endif %}
+      <td>
+        <a title="Linked accounts"
+           class="emoji-link"
+           href="{% url "socialaccount_connections" %}">🔐</a>
+      </td>
+      <td>
+        <a title="Display settings"
+           class="emoji-link"
+           href="{% url "profile" %}">⚙️</a>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a title="ARCH" class="emoji-link" href="{% url "arch-index" %}">🗼</a>
+      </td>
+      <td>
+        <a title="Suggest" class="emoji-link" href="{% url "suggest-new" %}">💡</a>
+      </td>
+      <td>
+        <a title="Wiki" class="emoji-link" href="{% url "wiki:root" %}">🎮</a>
+      </td>
+      <td>
+        <a title="GitHub"
+           class="emoji-link"
+           href="https://github.com/vEnhance/otis-web/">🖥️</a>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a title="Announcements"
+           class="emoji-link"
+           href="https://us5.campaign-archive.com/home/?u=5c818a0be2f35ee90344a471e&id=808c50e8c9">📢</a>
+      </td>
+      <td>
+        <a title="Catalog" class="emoji-link" href="{% url "synopsis" %}">🗃️</a>
+      </td>
+      {% if student %}
+        <td>
+          <a title="Invoice"
+             class="emoji-link"
+             href="{% url "invoice" student.id %}">💵</a>
+        </td>
+      {% else %}
+        <td>
+          <a title="Invoice" class="emoji-link" href="{% url "invoice" %}">💵</a>
+        </td>
+      {% endif %}
+      <td>
+        <a title="Markets" class="emoji-link" href="{% url "market-list" %}">📈</a>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a title="Diamonds"
+           class="emoji-link"
+           href="{% url "achievements-listing" %}"
+           data-hex="496e737065637420456c6d21">💎</a>
+      </td>
+      {% if student %}
+        <td>
+          <a title="Certificate"
+             class="emoji-link"
+             href="{% url "certify" student.id %}">🎓</a>
+        </td>
+      {% else %}
+        <td>
+          <a title="Certificate" class="emoji-link" href="{% url "certify" %}">🎓</a>
+        </td>
+      {% endif %}
+      <td>
+        <a title="PSet Queue"
+           class="emoji-link"
+           href="{% url "pset-queue-listing" %}">🛂</a>
+      </td>
+      <td>
+        <a title="Logout" class="emoji-link" href="{% url "account_logout" %}">🚪</a>
+      </td>
+    </tr>
+  </table>
+  {% if student or request.user.is_staff %}<hr />{% endif %}
+  {% if student %}
+    <p>
+      <b><a href="{% url "portal" student.id %}">{{ student.name }}</a></b>
+    </p>
+    <p class="fst-italic">
+      <small>{{ student.semester }} ({{ student.semester.years }})</small>
+    </p>
+  {% endif %}
+  {% if request.user.is_staff %}
+    <ul>
+      <li>
+        <a href="{% url "admin:index" %}">GM Panel</a>
+      </li>
+      <li>
+        <a href="{% url "leaderboard" %}">Leaderboard</a>
+      </li>
+      <li>
+        <a href="{% url "idlewarn" %}">Idle-warn</a>
+      </li>
+      <li>
+        <a href="{% url "instructors" %}">Instructors</a>
+      </li>
+      <li>
+        <a href="{% url "master-schedule" %}">M Schedule</a>
+      </li>
+      {% if request.user.is_superuser %}
+        <li>
+          <a href="{% url "admin-palace-list" %}">Ruby Palace</a>
+        </li>
+        <li>
+          Giga Chart
+        </li>
         <ul>
-            <li>
-                <a href="{% url "admin:index" %}">GM Panel</a>
-            </li>
-            <li>
-                <a href="{% url "leaderboard" %}">Leaderboard</a>
-            </li>
-            <li>
-                <a href="{% url "idlewarn" %}">Idle-warn</a>
-            </li>
-            <li>
-                <a href="{% url "instructors" %}">Instructors</a>
-            </li>
-            <li>
-                <a href="{% url "master-schedule" %}">M Schedule</a>
-            </li>
-            {% if request.user.is_superuser %}
-                <li>
-                    <a href="{% url "admin-palace-list" %}">Ruby Palace</a>
-                </li>
-                <li>
-                    Giga Chart
-                </li>
-                <ul>
-                    <li>
-                        <a href="{% url "giga-chart" "csv" %}">CSV</a>
-                    </li>
-                    <li>
-                        <a href="{% url "giga-chart" "plain" %}">Plain</a>
-                    </li>
-                    <li>
-                        <a href="{% url "giga-chart" "html" %}">HTML</a>
-                    </li>
-                </ul>
-            {% endif %}
+          <li>
+            <a href="{% url "giga-chart" "csv" %}">CSV</a>
+          </li>
+          <li>
+            <a href="{% url "giga-chart" "plain" %}">Plain</a>
+          </li>
+          <li>
+            <a href="{% url "giga-chart" "html" %}">HTML</a>
+          </li>
         </ul>
-    {% endif %}
-    {% if student and request.user.is_staff %}
-        <ul>
-            <li>
-                <a target="_blank"
-                   href="mailto:{{ student.user.email }}"
-                   rel="noreferrer">Send email</a>
-                <br />
-            </li>
-            {% if request.user.is_superuser %}
-                <li>
-                    <a href="{% url "admin:roster_student_change" student.id %}">Edit</a>
-                </li>
-                {% if student.user %}
-                    {# Hijack student account #}
-                    <li>
-                        <form action="{% url 'hijack:acquire' %}" method="post">
-                            {% csrf_token %}
-                            <input type="hidden" name="user_pk" value="{{ student.user.pk }}" />
-                            <input type="hidden" name="next" value="{{ request.path }}" />
-                            <button class="pseudo-button" type="submit">
-                                Hijack
-                            </button>
-                        </form>
-                    </li>
-                {% endif %}
-                {% if student.assistant %}
-                    {# Hijack assistant account #}
-                    <li>
-                        <form action="{% url 'hijack:acquire' %}" method="post">
-                            {% csrf_token %}
-                            <input type="hidden" name="user_pk" value="{{ student.assistant.user.pk }}" />
-                            <input type="hidden" name="next" value="{{ request.path }}" />
-                            <button class="pseudo-button" type="submit">
-                                Hijack {{ student.assistant.shortname }}
-                            </button>
-                        </form>
-                    </li>
-                {% endif %}
-            </ul>
+      {% endif %}
+    </ul>
+  {% endif %}
+  {% if student and request.user.is_staff %}
+    <ul>
+      <li>
+        <a target="_blank"
+           href="mailto:{{ student.user.email }}"
+           rel="noreferrer">Send email</a>
+        <br />
+      </li>
+      {% if request.user.is_superuser %}
+        <li>
+          <a href="{% url "admin:roster_student_change" student.id %}">Edit</a>
+        </li>
+        {% if student.user %}
+          {# Hijack student account #}
+          <li>
+            <form action="{% url 'hijack:acquire' %}" method="post">
+              {% csrf_token %}
+              <input type="hidden" name="user_pk" value="{{ student.user.pk }}" />
+              <input type="hidden" name="next" value="{{ request.path }}" />
+              <button class="pseudo-button" type="submit">
+                Hijack
+              </button>
+            </form>
+          </li>
         {% endif %}
+        {% if student.assistant %}
+          {# Hijack assistant account #}
+          <li>
+            <form action="{% url 'hijack:acquire' %}" method="post">
+              {% csrf_token %}
+              <input type="hidden" name="user_pk" value="{{ student.assistant.user.pk }}" />
+              <input type="hidden" name="next" value="{{ request.path }}" />
+              <button class="pseudo-button" type="submit">
+                Hijack {{ student.assistant.shortname }}
+              </button>
+            </form>
+          </li>
+        {% endif %}
+      </ul>
     {% endif %}
+  {% endif %}
 {% else %}
-    <p>
-        You are not logged in.
-    </p>
-    <p>
-        <a href="{% url "account_login" %}">Log in now.</a>
-    </p>
+  <p>
+    You are not logged in.
+  </p>
+  <p>
+    <a href="{% url "account_login" %}">Log in now.</a>
+  </p>
 {% endif %}
 <!--
 	vim: ft=htmldjango

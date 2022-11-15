@@ -2,47 +2,47 @@
 {% load static %}
 {% block title %}ARCH hints for {{ problem }}{% endblock %}
 {% block layout-content %}
+  <p>
+    <a href="{% url "arch-index" %}">⬅️ Back to ARCH index</a>
+  </p>
+  <hr />
+  {% spaceless %}
+    <h1>{{ problem }}</h1>
+  {% endspaceless %}
+  {% if statement %}<div class=" alert-secondary alert">{{ statement|safe }}</div>{% endif %}
+  {% if hint_list %}
+    <p>The following hints are available for this problem.</p>
+    {% for hint in hint_list %}
+      <a href="{% url "hint-detail" hint.puid hint.number %}">
+        <div class="alert alert-primary">
+          <h2>Hint {{ hint.number }}%</h2>
+          {% if hint.keywords %}<i>Keywords</i>: {{ hint.keywords }}{% endif %}
+        </div>
+      </a>
+    {% endfor %}
     <p>
-        <a href="{% url "arch-index" %}">⬅️ Back to ARCH index</a>
+      Some of the hints may be pretty oblique
+      or not apply to you.
+      Remember, you can always ask the OTIS Discord or Evan
+      for more personalized help!
     </p>
-    <hr />
-    {% spaceless %}
-        <h1>{{ problem }}</h1>
-    {% endspaceless %}
-    {% if statement %}<div class=" alert-secondary alert">{{ statement|safe }}</div>{% endif %}
-    {% if hint_list %}
-        <p>The following hints are available for this problem.</p>
-        {% for hint in hint_list %}
-            <a href="{% url "hint-detail" hint.puid hint.number %}">
-                <div class="alert alert-primary">
-                    <h2>Hint {{ hint.number }}%</h2>
-                    {% if hint.keywords %}<i>Keywords</i>: {{ hint.keywords }}{% endif %}
-                </div>
-            </a>
-        {% endfor %}
-        <p>
-            Some of the hints may be pretty oblique
-            or not apply to you.
-            Remember, you can always ask the OTIS Discord or Evan
-            for more personalized help!
-        </p>
-    {% else %}
-        <p class="fst-italic">
-            There aren't any hints here yet.
-            If you've solved this problem, please help future students by
-            <a href="{% url "hint-create" problem.puid %}">adding a hint</a>.
-        </p>
-    {% endif %}
-    <div class="text-center">
-        <a href="{% url "hint-create" problem.puid %}" class="btn btn-primary">Add hint</a>
-    </div>
-    <hr />
-    <ul>
-        <li>
-            <a href="{% url "view-solution" problem.puid %}">Download solution</a>
-        </li>
-        <li>
-            <a href="{% url "problem-update" problem.puid %}">Edit problem</a>
-        </li>
-    </ul>
+  {% else %}
+    <p class="fst-italic">
+      There aren't any hints here yet.
+      If you've solved this problem, please help future students by
+      <a href="{% url "hint-create" problem.puid %}">adding a hint</a>.
+    </p>
+  {% endif %}
+  <div class="text-center">
+    <a href="{% url "hint-create" problem.puid %}" class="btn btn-primary">Add hint</a>
+  </div>
+  <hr />
+  <ul>
+    <li>
+      <a href="{% url "view-solution" problem.puid %}">Download solution</a>
+    </li>
+    <li>
+      <a href="{% url "problem-update" problem.puid %}">Edit problem</a>
+    </li>
+  </ul>
 {% endblock %}

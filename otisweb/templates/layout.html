@@ -2,54 +2,54 @@
 {% load static %}
 {% load bootstrap5 %}
 {% block base-content %}
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-12">
-                <div id="header">
-                    <a href="/">
-                        <h1 id="sitetitle">OTIS-WEB</h1>
-                    </a>
-                </div>
-            </div>
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-12">
+        <div id="header">
+          <a href="/">
+            <h1 id="sitetitle">OTIS-WEB</h1>
+          </a>
         </div>
-        <div class="row">
-            <div class="col-7 offset-5 col-md-5 offset-md-7">
-                <div id="email_box">
-                    {% if request.user.is_authenticated %}
-                        👋, <b>{{ request.user }}</b>.
-                    {% else %}
-                        Not logged in.
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-        <div id="content" class="row">
-            {% block main-content %}
-                <div class="{% block main-class %}col-12 col-md-9{% endblock %}">
-                    <div id="main">
-                        <div class="entry">
-                            <h1 id="pagetitle">
-                                {% block title %}{{ title }}{% endblock %}
-                            </h1>
-                            <div class="entrywrap">
-                                {% bootstrap_messages %}
-                                {% block layout-content %}{{ content }}{% endblock %}
-                            </div>
-                        </div>
-                        <div>
-                            <a class="text-muted" href="https://github.com/vEnhance/otis-web/issues">Report issue or feature request</a>
-                        </div>
-                    </div>
-                    <div id="logo">
-                        <img src="{% static 'img/otis-logo-v2022.svg' %}" />
-                    </div>
-                </div>
-            {% endblock %}
-            {% block sidebar %}
-                <div class="{% block side-class %}col-7 col-md-3{% endblock %}">
-                    <div id="side">{% include "sidebar.html" %}</div>
-                </div>
-            {% endblock %}
-        </div>
+      </div>
     </div>
+    <div class="row">
+      <div class="col-7 offset-5 col-md-5 offset-md-7">
+        <div id="email_box">
+          {% if request.user.is_authenticated %}
+            👋, <b>{{ request.user }}</b>.
+          {% else %}
+            Not logged in.
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div id="content" class="row">
+      {% block main-content %}
+        <div class="{% block main-class %}col-12 col-md-9{% endblock %}">
+          <div id="main">
+            <div class="entry">
+              <h1 id="pagetitle">
+                {% block title %}{{ title }}{% endblock %}
+              </h1>
+              <div class="entrywrap">
+                {% bootstrap_messages %}
+                {% block layout-content %}{{ content }}{% endblock %}
+              </div>
+            </div>
+            <div>
+              <a class="text-muted" href="https://github.com/vEnhance/otis-web/issues">Report issue or feature request</a>
+            </div>
+          </div>
+          <div id="logo">
+            <img src="{% static 'img/otis-logo-v2022.svg' %}" />
+          </div>
+        </div>
+      {% endblock %}
+      {% block sidebar %}
+        <div class="{% block side-class %}col-7 col-md-3{% endblock %}">
+          <div id="side">{% include "sidebar.html" %}</div>
+        </div>
+      {% endblock %}
+    </div>
+  </div>
 {% endblock %}

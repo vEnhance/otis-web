@@ -3,436 +3,436 @@
 {% load humanize %}
 {% load otis_extras %}
 {% block layout-content %}
-    {% if request.user.is_staff %}
-        <div class="alert alert-secondary pb-0 alert-dismissible fade show">
-            {% load account socialaccount %}
-            {% get_social_accounts student.user as linked %}
-            <button type="button"
-                    class="btn-close"
-                    data-bs-dismiss="alert"
-                    aria-label="Close"></button>
-            <table class="table">
-                <tr>
-                    <td>
-                        <tt>{{ student.user.username }}</tt>
-                    </td>
-                    <td>
-                        <code>{{ student.user.email }}</code>
-                    </td>
-                </tr>
-                <tr>
-                    <td>{{ last_seen|naturaltime }}</td>
-                    <td>
-                        <code>{{ linked.discord.0.get_provider_account|default:"No Discord" }}</code>
-                    </td>
-                </tr>
-                <tr>
-                    <td>{{ reg.country }} ({{ reg.grade }}{{ reg.gender }})</td>
-                    <td>
-                        <code>{{ reg.aops_username|default:"No AoPS" }}</code>
-                    </td>
-                </tr>
-            </table>
-        </div>
-    {% endif %}
-    {% if not student.semester.active %}
-        <div class="alert alert-dark">
-            <h3 class="alert-heading">Course completed</h3>
-            You are viewing the page for an archived year of OTIS ({{ student.semester.years }}).
-            Most things are now read-only.
-        </div>
-    {% endif %}
-    {% if student.enabled and not student.payment_status|divisibleby:"4" %}
-        <div class="alert {% if student.payment_status == 1 or student.payment_status == 5 %} alert-info {% elif student.payment_status == 2 or student.payment_status == 6 %} alert-warning {% elif student.payment_status == 3 or student.payment_status == 7 %} alert-danger {% endif %} ">
-            <h1 class="alert-heading">
-                {% if student.payment_status == 1 or student.payment_status == 5 %}
-                    Payment reminder
-                {% elif student.payment_status == 2 or student.payment_status == 3 %}
-                    Payment due
-                {% else %}
-                    Payment overdue
-                {% endif %}
-            </h1>
-            {% if student.payment_status == 1 %}
-                As a quick reminder, the payment deadline
-                {{ semester.first_payment_deadline|date }}
-                is coming soon.
-            {% elif student.payment_status == 2 %}
-                The payment deadline
-                {{ semester.first_payment_deadline|date }}
-                has passed, but no payment was received.
-            {% elif student.payment_status == 3 %}
-                More than a week since the deadline
-                {{ semester.first_payment_deadline|date }}
-                has passed, but no payment is recorded.
-            {% elif student.payment_status == 5 %}
-                As a quick reminder, the deadline
-                {{ semester.most_payment_deadline|date }}
-                for full payment is coming soon.
-            {% elif student.payment_status == 6 %}
-                The payment deadline
-                {{ semester.most_payment_deadline|date }}
-                has passed, but your payment is incomplete!
-            {% elif student.payment_status == 7 %}
-                More than a week since the deadline
-                {{ semester.most_payment_deadline|date }}
-                has passed, but your payment is incomplete.
-            {% endif %}
-            <a href="{% url 'invoice' student.id %}" class="alert-link">Link to invoice.</a>
-        </div>
-    {% endif %}
-    {% if not student.enabled %}
-        <div class="alert alert-danger">
-            <h1 class="alert-heading">Disabled</h1>
-            This student is currently disabled,
-            so some functionality won't work.
-        </div>
-    {% endif %}
-    {% if student.newborn %}
-        <p>
-            Hello, {{ student.name }}!
-            Welcome to OTIS.
-            You are participating in {{ semester.name }}.
-        </p>
-        <p>Let's get you set up by picking your units!</p>
-        <h1>Getting Started &mdash; Setup Instructions</h1>
-        <p>Follow the three steps below to get everything working.</p>
-        <ol>
-            <li>
-                Read the <a href="{% static 'info/unit-guide.pdf' %}">unit selection guide</a>
-                to give yourself ideas on which units you want to work on.
-            </li>
-            <li>
-                Read the <a href="{% url 'synopsis' %}">catalog</a>
-            for the list of all possible units.</a>
-            <li>
-                Use the
-                <a href="{% url 'currshow' student.id %}">selection form</a>
-                to input your initial choices for which units you want to do.
-                For full-year students,
-                I suggest to pick 15-20 units you are most interested in.
-                (If you're joining halfway through, start with 7-10 units.)
-                You can save this form multiple times;
-                the intermediate results will be shown below.
-                <br />
-                <a href="{% url 'currshow' student.id %}"
-                   class="text-white btn btn-success"/>Open selection form</a>
-            </li>
-            <li>
-                Once you are happy with your selection, you may
-                finalize your choices.
-                <br />
-                <form action="{% url 'finalize' student.id %}" method="post">
-                    {% csrf_token %}
-                    <input type="submit" class="btn btn-warning" value="Finalize" />
-                </form>
-                <br />
-                <i>Warning:</i> once you click this link,
-                your decision is complete and you cannot directly
-                make further changes.
-                However, the <b>unit petition</b> system (linked below) becomes enabled,
-                and you can make requests for changes there.
-            </li>
-        </ol>
-        <hr />
-    {% else %}
-        {% with profile=request.user|getprofile %}
-            <div class="greeting">
-                {% if profile.show_bars %}
-                    <h1>
-                        Level {{ level_number }} &mdash;
-                        <a href="{% url 'stats' student.id %}">🏅{{ level_name }}</a>
-                    </h1>
-                    <div class="container">
-                        <div class="row">
-                            {% include "rpg/meters/small.html" with meter=meters.clubs %}
-                            {% include "rpg/meters/small.html" with meter=meters.hearts %}
-                            {% include "rpg/meters/small.html" with meter=meters.spades %}
-                            {% include "rpg/meters/small.html" with meter=meters.diamonds %}
-                        </div>
-                    </div>
-                {% else %}
-                    <h1>Welcome back</h1>
-                    <p>
-                        You are logged in as <code>{{ request.user.username }}</code>.
-                    </p>
-                {% endif %}
-            </div>
-        {% endwith %}
-    {% endif %}
-    <div class="text-center">
-        <a href="{% url 'stats' student.id %}"
-           style="margin: 0 auto;
-                  width: 120px"
-           class="btn btn-primary text-white"
-           role="button">View stats</a>
-        {% if student.enabled and semester.active %}
-            <a href="{% url 'submit-pset' student.id %}"
-               style="margin: 0 auto;
-                      width: 120px"
-               class="btn btn-success text-white"
-               role="button">Submit unit</a>
-        {% endif %}
-        <a href="{% url 'student-pset-list' student.id %}"
-           style="margin: 0 auto;
-                  width: 120px"
-           class="btn btn-secondary text-white"
-           role="button">Past work</a>
-        {% if is_maxed %}
-            <a href="{% url 'palace-list' student.id %}"
-               style="margin: 0 auto;
-                      width: 120px"
-               class="btn btn-danger text-white"
-               role="button">Ruby palace</a>
-        {% endif %}
+  {% if request.user.is_staff %}
+    <div class="alert alert-secondary pb-0 alert-dismissible fade show">
+      {% load account socialaccount %}
+      {% get_social_accounts student.user as linked %}
+      <button type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+              aria-label="Close"></button>
+      <table class="table">
+        <tr>
+          <td>
+            <tt>{{ student.user.username }}</tt>
+          </td>
+          <td>
+            <code>{{ student.user.email }}</code>
+          </td>
+        </tr>
+        <tr>
+          <td>{{ last_seen|naturaltime }}</td>
+          <td>
+            <code>{{ linked.discord.0.get_provider_account|default:"No Discord" }}</code>
+          </td>
+        </tr>
+        <tr>
+          <td>{{ reg.country }} ({{ reg.grade }}{{ reg.gender }})</td>
+          <td>
+            <code>{{ reg.aops_username|default:"No AoPS" }}</code>
+          </td>
+        </tr>
+      </table>
     </div>
-    {% if downloads or emails %}<br>{% endif %}
-    {% if emails %}
-        <div class="alert alert-primary alert-dismissible">
-            <h2 class="alert-heading">
-                <span class="badge bg-danger">{{ emails|length }}</span>
-                New announcements!
-            </h2>
-            <ul>
-                {% for email in emails %}
-                    <li class="mb-3">
-                        <b><a class="alert-link" href="{{ email.url }}">{{ email.title }} 📧</a></b> | {{ email.timestamp|naturaltime }}
-                        <br />
-                        <em class="text-muted">{{ email.summary }}</em>
-                    </li>
-                {% endfor %}
-            </ul>
-            <button id="dismiss_emails"
-                    type="button"
-                    class="btn-close"
-                    data-bs-dismiss="alert"
-                    aria-label="Close"></button>
-        </div>
-    {% endif %}
-    {% if downloads %}
-        <div class="alert alert-secondary alert-dismissible">
-            <h2 class="alert-heading">
-                <span class="badge bg-danger">{{ downloads|length }}</span>
-                New posted files!
-            </h2>
-            <ul>
-                {% for dl in downloads %}
-                    <li class="mb-3">
-                        <b><a class="alert-link" href="{{ dl.content.url }}">{{ dl }} ⬇️</a></b> | {{ dl.created_at|naturaltime }}
-                        <br />
-                        <em class="text-muted">{{ dl.description }}</em>
-                    </li>
-                {% endfor %}
-            </ul>
-            <button id="dismiss_downloads"
-                    type="button"
-                    class="btn-close"
-                    data-bs-dismiss="alert"
-                    aria-label="Close">
-            </button>
-        </div>
-    {% endif %}
-    <hr />
-    <div class="float-end btn-group" role="group">
-        {% for x in history %}
-            {% if x.pk == student.pk %}
-                <span class="btn btn-sm btn-primary active">
-                    {{ x.semester__end_year }}
-                </span>
-            {% else %}
-                <a href="{% url "portal" x.pk %}"
-                   class="btn btn-sm btn-outline-secondary">
-                    {{ x.semester__end_year }}
-                </a>
-            {% endif %}
-        {% endfor %}
+  {% endif %}
+  {% if not student.semester.active %}
+    <div class="alert alert-dark">
+      <h3 class="alert-heading">Course completed</h3>
+      You are viewing the page for an archived year of OTIS ({{ student.semester.years }}).
+      Most things are now read-only.
     </div>
-    <h2>
-        Your units
-    </h2>
-    {% include "dashboard/curriculum_list.html" %}
+  {% endif %}
+  {% if student.enabled and not student.payment_status|divisibleby:"4" %}
+    <div class="alert {% if student.payment_status == 1 or student.payment_status == 5 %} alert-info {% elif student.payment_status == 2 or student.payment_status == 6 %} alert-warning {% elif student.payment_status == 3 or student.payment_status == 7 %} alert-danger {% endif %} ">
+      <h1 class="alert-heading">
+        {% if student.payment_status == 1 or student.payment_status == 5 %}
+          Payment reminder
+        {% elif student.payment_status == 2 or student.payment_status == 3 %}
+          Payment due
+        {% else %}
+          Payment overdue
+        {% endif %}
+      </h1>
+      {% if student.payment_status == 1 %}
+        As a quick reminder, the payment deadline
+        {{ semester.first_payment_deadline|date }}
+        is coming soon.
+      {% elif student.payment_status == 2 %}
+        The payment deadline
+        {{ semester.first_payment_deadline|date }}
+        has passed, but no payment was received.
+      {% elif student.payment_status == 3 %}
+        More than a week since the deadline
+        {{ semester.first_payment_deadline|date }}
+        has passed, but no payment is recorded.
+      {% elif student.payment_status == 5 %}
+        As a quick reminder, the deadline
+        {{ semester.most_payment_deadline|date }}
+        for full payment is coming soon.
+      {% elif student.payment_status == 6 %}
+        The payment deadline
+        {{ semester.most_payment_deadline|date }}
+        has passed, but your payment is incomplete!
+      {% elif student.payment_status == 7 %}
+        More than a week since the deadline
+        {{ semester.most_payment_deadline|date }}
+        has passed, but your payment is incomplete.
+      {% endif %}
+      <a href="{% url 'invoice' student.id %}" class="alert-link">Link to invoice.</a>
+    </div>
+  {% endif %}
+  {% if not student.enabled %}
+    <div class="alert alert-danger">
+      <h1 class="alert-heading">Disabled</h1>
+      This student is currently disabled,
+      so some functionality won't work.
+    </div>
+  {% endif %}
+  {% if student.newborn %}
     <p>
-        After submitting a problem set, the unit is marked ⏳;
-        after instructor review, it becomes ✅.
-        (You can access solutions in the meantime.)
-        Units to work on are marked ▶️.
-        See also <a href="{% url "pset-queue-listing" %}">submission queue</a>.
+      Hello, {{ student.name }}!
+      Welcome to OTIS.
+      You are participating in {{ semester.name }}.
     </p>
-    <div class="text-center">
-        {% if not student.newborn and semester.active and student.enabled %}
-            <a href="{% url 'inquiry' student.id %}" class="btn btn-warning">Request units</a>
-        {% endif %}
-        {% if request.user.is_staff %}
-            <a href="{% url 'advance' student.id %}" class="btn btn-dark">Edit units</a>
-        {% endif %}
-    </div>
-    <table width="100%">
-        <tr>
-            <td valign="top" width="50%">
-                <h3>
-                    Academic
-                </h3>
-                <ul>
-                    <li>
-                        <a href="{% url 'downloads' student.id %}">Posted files ({{ num_sem_downloads }})</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'currshow' student.id %}">Class selection</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'synopsis' %}">Unit catalog</a>
-                    </li>
-                    <li>
-                        <a href="{% static 'info/unit-guide.pdf' %}">Unit selection guide</a>
-                    </li>
-                    <li>
-                        <a href="{% static 'info/mock-imo.pdf' %}">Extra mock IMO's (shortlist)</a>
-                    </li>
-                    <li>
-                        <a href="{% static 'info/psychology.pdf' %}">Handout on olympiad strategy</a>
-                    </li>
-                    <li>
-                        <a href="https://web.evanchen.cc/handouts/LaTeXPetPeeve/LaTeXPetPeeve.pdf">LaTeX pet peeves</a>
-                    </li>
-                </ul>
-            </td>
-            <td valign="top" width="50%">
-                <h3>
-                    Logistics
-                </h3>
-                <ul>
-                    <li>
-                        <a href="https://us5.campaign-archive.com/home/?u=5c818a0be2f35ee90344a471e&id=808c50e8c9">
-                            Announcement emails
-                        </a>
-                    </li>
-                    {% if semester.show_invoices %}
-                        <li>
-                            <a href="{% url 'invoice' student.id %}">Invoice</a>
-                        </li>
-                    {% endif %}
-                    {% if semester.active and student.meets_evan %}
-                        <li>
-                            <a href="{{ semester.calendar_url_meets_evan }}"
-                               target="_blank"
-                               rel="noreferrer">
-                            OTIS calendar (meetings)</a>
-                        </li>
-                    {% endif %}
-                    {% if semester.active %}
-                        <li>
-                            <a href="{{ semester.calendar_url_no_meets_evan }}"
-                               target="_blank"
-                               rel="noreferrer">
-                            OTIS calendar (no meetings)</a>
-                        </li>
-                    {% endif %}
-                    <li>
-                        <a href="https://web.evanchen.cc/upload/otis-syllabus.pdf">Syllabus</a>
-                    </li>
-                    <li>
-                        <a href="{% static 'info/parent-info.pdf' %}">Payment info</a>
-                    </li>
-                </ul>
-            </td>
-        </tr>
-        <tr>
-            <td valign="top" width="50%">
-                <h3>
-                    Discord
-                </h3>
-                {% if semester.social_url %}
-                    <a href="{{ semester.social_url }}" class="btn btn-info" role="button">Open Discord</a>
-                {% else %}
-                    Nothing here yet!
-                {% endif %}
-            </td>
-            <td valign="top" width="50%">
-                <h3>
-                    Markets
-                </h3>
-                <ul>
-                    {% if markets %}
-                        {% for market in markets %}
-                            <li>
-                                Market
-                                <a href="{{ market.get_absolute_url }}">
-                                    <code>
-                                        {{ market.slug }}
-                                    </code>
-                                </a>
-                            </li>
-                        {% endfor %}
-                    {% endif %}
-                    <li>
-                        List of <a href="{% url "market-list" %}">all markets</a>
-                    </li>
-                </ul>
-            </td>
-        </tr>
-    </table>
+    <p>Let's get you set up by picking your units!</p>
+    <h1>Getting Started &mdash; Setup Instructions</h1>
+    <p>Follow the three steps below to get everything working.</p>
+    <ol>
+      <li>
+        Read the <a href="{% static 'info/unit-guide.pdf' %}">unit selection guide</a>
+        to give yourself ideas on which units you want to work on.
+      </li>
+      <li>
+        Read the <a href="{% url 'synopsis' %}">catalog</a>
+      for the list of all possible units.</a>
+      <li>
+        Use the
+        <a href="{% url 'currshow' student.id %}">selection form</a>
+        to input your initial choices for which units you want to do.
+        For full-year students,
+        I suggest to pick 15-20 units you are most interested in.
+        (If you're joining halfway through, start with 7-10 units.)
+        You can save this form multiple times;
+        the intermediate results will be shown below.
+        <br />
+        <a href="{% url 'currshow' student.id %}"
+           class="text-white btn btn-success"/>Open selection form</a>
+      </li>
+      <li>
+        Once you are happy with your selection, you may
+        finalize your choices.
+        <br />
+        <form action="{% url 'finalize' student.id %}" method="post">
+          {% csrf_token %}
+          <input type="submit" class="btn btn-warning" value="Finalize" />
+        </form>
+        <br />
+        <i>Warning:</i> once you click this link,
+        your decision is complete and you cannot directly
+        make further changes.
+        However, the <b>unit petition</b> system (linked below) becomes enabled,
+        and you can make requests for changes there.
+      </li>
+    </ol>
     <hr />
-    {% if semester.active and student.enabled %}
-        <h2>
-            Mock olympiads (tests)
-        </h2>
-        {% include 'dashboard/exam_list.html' with exams=tests %}
-        {% if semester.active %}
-            <div class="text-center">
-                <a href="{% url 'mocks' student.id %}"
-                   class="btn btn-secondary"
-                   role="button">Mock Olympiad Submission</a>
+  {% else %}
+    {% with profile=request.user|getprofile %}
+      <div class="greeting">
+        {% if profile.show_bars %}
+          <h1>
+            Level {{ level_number }} &mdash;
+            <a href="{% url 'stats' student.id %}">🏅{{ level_name }}</a>
+          </h1>
+          <div class="container">
+            <div class="row">
+              {% include "rpg/meters/small.html" with meter=meters.clubs %}
+              {% include "rpg/meters/small.html" with meter=meters.hearts %}
+              {% include "rpg/meters/small.html" with meter=meters.spades %}
+              {% include "rpg/meters/small.html" with meter=meters.diamonds %}
             </div>
+          </div>
+        {% else %}
+          <h1>Welcome back</h1>
+          <p>
+            You are logged in as <code>{{ request.user.username }}</code>.
+          </p>
         {% endif %}
-        <h2 id="quizzes">
-            Quizzes
-        </h2>
-        {% include 'dashboard/exam_list.html' with exams=quizzes %}
-        <p>
-            Click on a quiz above to open it. Quiz submissions are done directly on OTIS-WEB.
-        </p>
-    {% elif not semester.active %}
-        <p>
-            This page from {{ semester }} is now archived. Thanks for playing.
-        </p>
+      </div>
+    {% endwith %}
+  {% endif %}
+  <div class="text-center">
+    <a href="{% url 'stats' student.id %}"
+       style="margin: 0 auto;
+              width: 120px"
+       class="btn btn-primary text-white"
+       role="button">View stats</a>
+    {% if student.enabled and semester.active %}
+      <a href="{% url 'submit-pset' student.id %}"
+         style="margin: 0 auto;
+                width: 120px"
+         class="btn btn-success text-white"
+         role="button">Submit unit</a>
     {% endif %}
-    {% if semester.active and student.enabled %}
-        <hr />
-        <h2>
-            Calendar
-        </h2>
-        <p>
-            Be sure to check that the time zones display correctly!
-        </p>
-        <p>
-            You can also open these in a new window:
-        </p>
+    <a href="{% url 'student-pset-list' student.id %}"
+       style="margin: 0 auto;
+              width: 120px"
+       class="btn btn-secondary text-white"
+       role="button">Past work</a>
+    {% if is_maxed %}
+      <a href="{% url 'palace-list' student.id %}"
+         style="margin: 0 auto;
+                width: 120px"
+         class="btn btn-danger text-white"
+         role="button">Ruby palace</a>
+    {% endif %}
+  </div>
+  {% if downloads or emails %}<br>{% endif %}
+  {% if emails %}
+    <div class="alert alert-primary alert-dismissible">
+      <h2 class="alert-heading">
+        <span class="badge bg-danger">{{ emails|length }}</span>
+        New announcements!
+      </h2>
+      <ul>
+        {% for email in emails %}
+          <li class="mb-3">
+            <b><a class="alert-link" href="{{ email.url }}">{{ email.title }} 📧</a></b> | {{ email.timestamp|naturaltime }}
+            <br />
+            <em class="text-muted">{{ email.summary }}</em>
+          </li>
+        {% endfor %}
+      </ul>
+      <button id="dismiss_emails"
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+              aria-label="Close"></button>
+    </div>
+  {% endif %}
+  {% if downloads %}
+    <div class="alert alert-secondary alert-dismissible">
+      <h2 class="alert-heading">
+        <span class="badge bg-danger">{{ downloads|length }}</span>
+        New posted files!
+      </h2>
+      <ul>
+        {% for dl in downloads %}
+          <li class="mb-3">
+            <b><a class="alert-link" href="{{ dl.content.url }}">{{ dl }} ⬇️</a></b> | {{ dl.created_at|naturaltime }}
+            <br />
+            <em class="text-muted">{{ dl.description }}</em>
+          </li>
+        {% endfor %}
+      </ul>
+      <button id="dismiss_downloads"
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+              aria-label="Close">
+      </button>
+    </div>
+  {% endif %}
+  <hr />
+  <div class="float-end btn-group" role="group">
+    {% for x in history %}
+      {% if x.pk == student.pk %}
+        <span class="btn btn-sm btn-primary active">
+          {{ x.semester__end_year }}
+        </span>
+      {% else %}
+        <a href="{% url "portal" x.pk %}"
+           class="btn btn-sm btn-outline-secondary">
+          {{ x.semester__end_year }}
+        </a>
+      {% endif %}
+    {% endfor %}
+  </div>
+  <h2>
+    Your units
+  </h2>
+  {% include "dashboard/curriculum_list.html" %}
+  <p>
+    After submitting a problem set, the unit is marked ⏳;
+    after instructor review, it becomes ✅.
+    (You can access solutions in the meantime.)
+    Units to work on are marked ▶️.
+    See also <a href="{% url "pset-queue-listing" %}">submission queue</a>.
+  </p>
+  <div class="text-center">
+    {% if not student.newborn and semester.active and student.enabled %}
+      <a href="{% url 'inquiry' student.id %}" class="btn btn-warning">Request units</a>
+    {% endif %}
+    {% if request.user.is_staff %}
+      <a href="{% url 'advance' student.id %}" class="btn btn-dark">Edit units</a>
+    {% endif %}
+  </div>
+  <table width="100%">
+    <tr>
+      <td valign="top" width="50%">
+        <h3>
+          Academic
+        </h3>
         <ul>
-            {% if student.meets_evan %}
-                <li>
-                    <a href="{{ semester.calendar_url_meets_evan }}"
-                       target="_blank"
-                       rel="noreferrer">
-                    OTIS calendar (meetings)</a>
-                </li>
-            {% endif %}
-            <li>
-                <a href="{{ semester.calendar_url_no_meets_evan }}"
-                   target="_blank"
-                   rel="noreferrer">
-                OTIS calendar (no meetings)</a>
-            </li>
+          <li>
+            <a href="{% url 'downloads' student.id %}">Posted files ({{ num_sem_downloads }})</a>
+          </li>
+          <li>
+            <a href="{% url 'currshow' student.id %}">Class selection</a>
+          </li>
+          <li>
+            <a href="{% url 'synopsis' %}">Unit catalog</a>
+          </li>
+          <li>
+            <a href="{% static 'info/unit-guide.pdf' %}">Unit selection guide</a>
+          </li>
+          <li>
+            <a href="{% static 'info/mock-imo.pdf' %}">Extra mock IMO's (shortlist)</a>
+          </li>
+          <li>
+            <a href="{% static 'info/psychology.pdf' %}">Handout on olympiad strategy</a>
+          </li>
+          <li>
+            <a href="https://web.evanchen.cc/handouts/LaTeXPetPeeve/LaTeXPetPeeve.pdf">LaTeX pet peeves</a>
+          </li>
         </ul>
-        <iframe src="{{ student.calendar_url }}"
-                style="border-width:0"
-                width="520"
-                height="600"
-                frameborder="0"
-                scrolling="no"></iframe>
+      </td>
+      <td valign="top" width="50%">
+        <h3>
+          Logistics
+        </h3>
+        <ul>
+          <li>
+            <a href="https://us5.campaign-archive.com/home/?u=5c818a0be2f35ee90344a471e&id=808c50e8c9">
+              Announcement emails
+            </a>
+          </li>
+          {% if semester.show_invoices %}
+            <li>
+              <a href="{% url 'invoice' student.id %}">Invoice</a>
+            </li>
+          {% endif %}
+          {% if semester.active and student.meets_evan %}
+            <li>
+              <a href="{{ semester.calendar_url_meets_evan }}"
+                 target="_blank"
+                 rel="noreferrer">
+              OTIS calendar (meetings)</a>
+            </li>
+          {% endif %}
+          {% if semester.active %}
+            <li>
+              <a href="{{ semester.calendar_url_no_meets_evan }}"
+                 target="_blank"
+                 rel="noreferrer">
+              OTIS calendar (no meetings)</a>
+            </li>
+          {% endif %}
+          <li>
+            <a href="https://web.evanchen.cc/upload/otis-syllabus.pdf">Syllabus</a>
+          </li>
+          <li>
+            <a href="{% static 'info/parent-info.pdf' %}">Payment info</a>
+          </li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top" width="50%">
+        <h3>
+          Discord
+        </h3>
+        {% if semester.social_url %}
+          <a href="{{ semester.social_url }}" class="btn btn-info" role="button">Open Discord</a>
+        {% else %}
+          Nothing here yet!
+        {% endif %}
+      </td>
+      <td valign="top" width="50%">
+        <h3>
+          Markets
+        </h3>
+        <ul>
+          {% if markets %}
+            {% for market in markets %}
+              <li>
+                Market
+                <a href="{{ market.get_absolute_url }}">
+                  <code>
+                    {{ market.slug }}
+                  </code>
+                </a>
+              </li>
+            {% endfor %}
+          {% endif %}
+          <li>
+            List of <a href="{% url "market-list" %}">all markets</a>
+          </li>
+        </ul>
+      </td>
+    </tr>
+  </table>
+  <hr />
+  {% if semester.active and student.enabled %}
+    <h2>
+      Mock olympiads (tests)
+    </h2>
+    {% include 'dashboard/exam_list.html' with exams=tests %}
+    {% if semester.active %}
+      <div class="text-center">
+        <a href="{% url 'mocks' student.id %}"
+           class="btn btn-secondary"
+           role="button">Mock Olympiad Submission</a>
+      </div>
     {% endif %}
+    <h2 id="quizzes">
+      Quizzes
+    </h2>
+    {% include 'dashboard/exam_list.html' with exams=quizzes %}
+    <p>
+      Click on a quiz above to open it. Quiz submissions are done directly on OTIS-WEB.
+    </p>
+  {% elif not semester.active %}
+    <p>
+      This page from {{ semester }} is now archived. Thanks for playing.
+    </p>
+  {% endif %}
+  {% if semester.active and student.enabled %}
+    <hr />
+    <h2>
+      Calendar
+    </h2>
+    <p>
+      Be sure to check that the time zones display correctly!
+    </p>
+    <p>
+      You can also open these in a new window:
+    </p>
+    <ul>
+      {% if student.meets_evan %}
+        <li>
+          <a href="{{ semester.calendar_url_meets_evan }}"
+             target="_blank"
+             rel="noreferrer">
+          OTIS calendar (meetings)</a>
+        </li>
+      {% endif %}
+      <li>
+        <a href="{{ semester.calendar_url_no_meets_evan }}"
+           target="_blank"
+           rel="noreferrer">
+        OTIS calendar (no meetings)</a>
+      </li>
+    </ul>
+    <iframe src="{{ student.calendar_url }}"
+            style="border-width:0"
+            width="520"
+            height="600"
+            frameborder="0"
+            scrolling="no"></iframe>
+  {% endif %}
 {% endblock %}
 {% block scripts %}
-    <script type="text/javascript">
+  <script type="text/javascript">
 	$(() => {
 		// https://docs.djangoproject.com/en/3.2/ref/csrf/
 		function getCookie(name) {
@@ -474,5 +474,5 @@
 			ajaxCall("{% url 'dismiss-downloads' %}");
 		});
 	});
-    </script>
+  </script>
 {% endblock %}

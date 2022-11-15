@@ -1,58 +1,58 @@
 {% extends 'layout.html' %}
 {% block title %}Arch{% endblock %}
 {% block layout-content %}
-    Welcome to <strong>ARCH</strong>,
-    the Automated Repository of Canned Hints.
-    We hope you enjoy your visit.
-    <hr />
-    <div class="container row">
-        <div class="col-6">
-            <h2>Find problem</h2>
-            <div class="mathjax_ignore">
-                {% include "generic_form.html" with form=lookup_form target=lookup_url submit_name="Lookup" btn_class="btn-primary" %}
-            </div>
-        </div>
-        <div class="col-6">
-            <h2>New problem</h2>
-            {% include "generic_form.html" with submit_name="Create" %}
-        </div>
+  Welcome to <strong>ARCH</strong>,
+  the Automated Repository of Canned Hints.
+  We hope you enjoy your visit.
+  <hr />
+  <div class="container row">
+    <div class="col-6">
+      <h2>Find problem</h2>
+      <div class="mathjax_ignore">
+        {% include "generic_form.html" with form=lookup_form target=lookup_url submit_name="Lookup" btn_class="btn-primary" %}
+      </div>
     </div>
-    <hr />
-    <h2>Statistics</h2>
-    <p>
-        As of {% now "D, d M Y" %}, ARCH has
-        <ul>
-            <li>{{ num_problems }} problems written</li>
-            <li>{{ num_hints }} hints written</li>
-        </ul>
-        Add more hints to make ARCH more useful to other students!
-    </p>
-    <hr />
-    <h2>Discord integration</h2>
+    <div class="col-6">
+      <h2>New problem</h2>
+      {% include "generic_form.html" with submit_name="Create" %}
+    </div>
+  </div>
+  <hr />
+  <h2>Statistics</h2>
+  <p>
+    As of {% now "D, d M Y" %}, ARCH has
     <ul>
-        <li>
-            In any channel, type <code>/grab 20IMO6</code>
-            to pull the problem statement and a link to the ARCH entry.
-            This works with any problem identifier.
-        </li>
-        <li>
-            If you're not in a thread, you can omit the <code>/grab</code>
-            and this will still work.
-        </li>
-        <li>
-            Use <code>/active</code> to display the currently discussed problem.
-        </li>
-        <li>
-            To add a hint for the currently discussed problem,
-            just use <code>/hint [type content]</code>.
-            Evil Chin will output a link to the newly created hint,
-            where you can (if you choose) change the number and keywords.
-            (By default, Evil Chin selects the smallest unused multiple of 10 for the number.)
-        </li>
+      <li>{{ num_problems }} problems written</li>
+      <li>{{ num_hints }} hints written</li>
     </ul>
+    Add more hints to make ARCH more useful to other students!
+  </p>
+  <hr />
+  <h2>Discord integration</h2>
+  <ul>
+    <li>
+      In any channel, type <code>/grab 20IMO6</code>
+      to pull the problem statement and a link to the ARCH entry.
+      This works with any problem identifier.
+    </li>
+    <li>
+      If you're not in a thread, you can omit the <code>/grab</code>
+      and this will still work.
+    </li>
+    <li>
+      Use <code>/active</code> to display the currently discussed problem.
+    </li>
+    <li>
+      To add a hint for the currently discussed problem,
+      just use <code>/hint [type content]</code>.
+      Evil Chin will output a link to the newly created hint,
+      where you can (if you choose) change the number and keywords.
+      (By default, Evil Chin selects the smallest unused multiple of 10 for the number.)
+    </li>
+  </ul>
 {% endblock %}
 {% block scripts %}
-    <script type="text/javascript">
+  <script type="text/javascript">
 	$(document).ready(function() {
 		$("#id_problem").chosen({
 			placeholder_text: "...",
@@ -64,5 +64,5 @@
 			$("#id_puid").val(s);
 		});
 	});
-    </script>
+  </script>
 {% endblock %}

@@ -3,31 +3,31 @@
 {% load i18n %}
 {% block wiki_site_title %}- OTIS Fandom{% endblock %}
 {% block wiki_header_branding %}
-    <a class="navbar-brand" href="{% url 'wiki:root' %}">
-        <img height="48px" src="{% static 'img/otis-logo-v2022.svg' %}" />
-    </a>
+  <a class="navbar-brand" href="{% url 'wiki:root' %}">
+    <img height="48px" src="{% static 'img/otis-logo-v2022.svg' %}" />
+  </a>
 {% endblock %}
 {% block wiki_header_navlinks %}
-    <ul class="navbar-nav mr-auto">
-        <li class="nav-item">
-            <a class="nav-link" href="/wiki/otis">About</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="/wiki/units">Units</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="/wiki/yearbook">Yearbook</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="/">{% trans "Exit" %}</a>
-        </li>
-    </ul>
+  <ul class="navbar-nav mr-auto">
+    <li class="nav-item">
+      <a class="nav-link" href="/wiki/otis">About</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="/wiki/units">Units</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="/wiki/yearbook">Yearbook</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="/">{% trans "Exit" %}</a>
+    </li>
+  </ul>
 {% endblock %}
 {# TODO this is gross #}
 {% block wiki_footer_logo %}
-    <div class="text-muted">
-    <a href="{% url 'wiki:globalhistory' %}"><span class="fa fa-clock"></span>
-    Recent edits
+  <div class="text-muted">
+  <a href="{% url 'wiki:globalhistory' %}"><span class="fa fa-clock"></span>
+  Recent edits
 </a>
 </div>
 <hr />

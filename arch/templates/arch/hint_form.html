@@ -1,35 +1,35 @@
 {% extends 'layout.html' %}
 {% block title %}Create Hint{% endblock %}
 {% block layout-content %}
-    <p class="text-muted">
-        Back to <a href="{{ problem.get_absolute_url }}">{{ problem.puid }}</a>.
-    </p>
-    <hr />
-    <div class="alert alert-info">
-        <h2 class="alert-heading">Advice for writing hints</h2>
-        <p>
-            Hints should get solvers un-stuck.
-            If someone reads all the hints on ARCH and still cannot finish,
-            then the hints didn't do their job.
-            So, try to be pretty generous, rather than subtle.
-        </p>
-        <p>
-            In particular, <strong>prefer explicit instructions over vague pointers</strong>:
-            for example, instead of writing just "use generating functions", prefer
-            "construct a generating function $F(X)$ such that the coefficients of $F(X)^2$
-            match the left-hand sum".
-        </p>
-    </div>
-    {% include "generic_form.html" %}
-    <hr />
+  <p class="text-muted">
+    Back to <a href="{{ problem.get_absolute_url }}">{{ problem.puid }}</a>.
+  </p>
+  <hr />
+  <div class="alert alert-info">
+    <h2 class="alert-heading">Advice for writing hints</h2>
     <p>
-        All edits are tracked by timestamp and username,
-        so if for some reason you need to rewind some edits,
-        please contact a staff member for assistance.
+      Hints should get solvers un-stuck.
+      If someone reads all the hints on ARCH and still cannot finish,
+      then the hints didn't do their job.
+      So, try to be pretty generous, rather than subtle.
     </p>
+    <p>
+      In particular, <strong>prefer explicit instructions over vague pointers</strong>:
+      for example, instead of writing just "use generating functions", prefer
+      "construct a generating function $F(X)$ such that the coefficients of $F(X)^2$
+      match the left-hand sum".
+    </p>
+  </div>
+  {% include "generic_form.html" %}
+  <hr />
+  <p>
+    All edits are tracked by timestamp and username,
+    so if for some reason you need to rewind some edits,
+    please contact a staff member for assistance.
+  </p>
 {% endblock %}
 {% block scripts %}
-    <script type="text/javascript">
+  <script type="text/javascript">
 	$(document).ready(function() {
 		$("#id_problem").chosen({
 			placeholder_text: "...",
@@ -37,5 +37,5 @@
 			search_contains: true,
 		});
 	});
-    </script>
+  </script>
 {% endblock %}

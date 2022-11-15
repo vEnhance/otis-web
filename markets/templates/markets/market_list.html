@@ -2,71 +2,71 @@
 {% load humanize %}
 {% block title %}Estimation markets{% endblock %}
 {% block layout-content %}
-    {% if past %}
-        <p>Below are results from the estimation markets in past years.</p>
-    {% else %}
-        <p>
-            Estimation markets are a side minigame that
-            offers spades for correctly guessing hidden values.
-        </p>
-    {% endif %}
-    <table class="table">
-        <tr class="table-dark">
-            <th>Market</th>
-            <th>$w$</th>
-            <th>$\alpha$</th>
-            <th>Ending date</th>
-        </tr>
-        {% for market in markets %}
-            <tr class="{% if not market.has_started %}table-warning{% elif not market.has_ended %}table-success{% endif %}">
-                <td>
-                    <a href="{{ market.get_absolute_url }}">
-                        <code>{{ market.slug }}</code>
-                    </a>
-                </td>
-                <td>{{ market.weight|floatformat:".2f" }}</td>
-                <td>
-                    {% if market.alpha is not None %}{{ market.alpha|floatformat:".2f" }}{% endif %}
-                </td>
-                {% if past %}
-                    <td>{{ market.end_date }}</td>
-                {% else %}
-                    <td>{{ market.end_date|naturaltime }}</td>
-                {% endif %}
-            </tr>
-        {% endfor %}
-    </table>
-    {% if past %}
-        <a href="{% url "market-list" %}">Show markets from this year</a>
-    {% else %}
-        <a href="{% url "market-list-past" %}">Show markets from past years.</a>
-        <hr />
-        <h3>Market Rules</h3>
-        <ol>
-            <li>
-                Markets open every Friday at midnight Eastern time,
-                and close at the next Monday at 6am Eastern time.
-            </li>
-            <li>
-                Each market has a correct answer $A \in [10^{-6}, 10^6]$.
-                The value of $A$ may be rounded arbitrarily by the game master.
-                The precision will not exceed $6$ decimal places.
-            </li>
-            <li>
-                The guess $B$ you submit must be a real number in the interval $[10^{-6}, 10^6]$.
-                Guesses will be rounded to $6$ decimal places.
-            </li>
-            <li>
-                In a standard market,
-                if you submit a guess $B$, your score for the market (in ♠)
-                is given by the function
-                \[ w \cdot \left(\min\left\{\frac AB, \frac BA\right\}\right)^\alpha \]
-                where $w$ and $\alpha$ are two fixed parameters announced for the market.
-                (The default values are $w=4$ and $\alpha=2$.)
-                Some markets may have other rules.
-            </li>
-            <li>You may only submit one guess. It is not possible to change your guess later.</li>
-            <li>Discussion, collusion, and other antics are permitted.</li>
-        </ol>
-    {% endif %}
+  {% if past %}
+    <p>Below are results from the estimation markets in past years.</p>
+  {% else %}
+    <p>
+      Estimation markets are a side minigame that
+      offers spades for correctly guessing hidden values.
+    </p>
+  {% endif %}
+  <table class="table">
+    <tr class="table-dark">
+      <th>Market</th>
+      <th>$w$</th>
+      <th>$\alpha$</th>
+      <th>Ending date</th>
+    </tr>
+    {% for market in markets %}
+      <tr class="{% if not market.has_started %}table-warning{% elif not market.has_ended %}table-success{% endif %}">
+        <td>
+          <a href="{{ market.get_absolute_url }}">
+            <code>{{ market.slug }}</code>
+          </a>
+        </td>
+        <td>{{ market.weight|floatformat:".2f" }}</td>
+        <td>
+          {% if market.alpha is not None %}{{ market.alpha|floatformat:".2f" }}{% endif %}
+        </td>
+        {% if past %}
+          <td>{{ market.end_date }}</td>
+        {% else %}
+          <td>{{ market.end_date|naturaltime }}</td>
+        {% endif %}
+      </tr>
+    {% endfor %}
+  </table>
+  {% if past %}
+    <a href="{% url "market-list" %}">Show markets from this year</a>
+  {% else %}
+    <a href="{% url "market-list-past" %}">Show markets from past years.</a>
+    <hr />
+    <h3>Market Rules</h3>
+    <ol>
+      <li>
+        Markets open every Friday at midnight Eastern time,
+        and close at the next Monday at 6am Eastern time.
+      </li>
+      <li>
+        Each market has a correct answer $A \in [10^{-6}, 10^6]$.
+        The value of $A$ may be rounded arbitrarily by the game master.
+        The precision will not exceed $6$ decimal places.
+      </li>
+      <li>
+        The guess $B$ you submit must be a real number in the interval $[10^{-6}, 10^6]$.
+        Guesses will be rounded to $6$ decimal places.
+      </li>
+      <li>
+        In a standard market,
+        if you submit a guess $B$, your score for the market (in ♠)
+        is given by the function
+        \[ w \cdot \left(\min\left\{\frac AB, \frac BA\right\}\right)^\alpha \]
+        where $w$ and $\alpha$ are two fixed parameters announced for the market.
+        (The default values are $w=4$ and $\alpha=2$.)
+        Some markets may have other rules.
+      </li>
+      <li>You may only submit one guess. It is not possible to change your guess later.</li>
+      <li>Discussion, collusion, and other antics are permitted.</li>
+    </ol>
+  {% endif %}
 {% endblock %}

@@ -2,99 +2,99 @@
 {% load crispy_forms_tags %}
 {% block title %}{{ quiz }}{% endblock %}
 {% block layout-content %}
-    <p>
-        Welcome to <b>{{ quiz }}</b>!
-        {% if not finished and not quiz.overdue %}
-            <p>Submit on or before end-of-day {{ quiz.due_date }} server time (US).</p>
-        {% endif %}
-    </p>
-    <h2>Download problems</h2>
-    <a href="{{ quiz.get_absolute_url }}">Download problems file</a>
-    {% if attempt %}
-        <hr />
-        <h1>Score: {{ attempt.score }}</h1>
-        <div class="list-group row">
-            {% for row in rows %}
-                <div class="list-group-item"
-                     style="background-color: {% if row.correct %}#e5ffe5{% else %}#ffe5e5{% endif %}">
-                    <div class="col-12 col-md-5" style="display:inline-block;">{{ row.field|as_crispy_field }}</div>
-                    <div class="d-none d-md-inline-block col-md-1"></div>
-                    <div class="col-12 col-md-5"
-                         style="display:inline-block;
-                                vertical-align: top">
-                        <p>
-                            Answers: <b>{{ row.accepted }}</b>
-                        </p>
-                        <p>
-                            <a target="_top" href="{{ row.url }}">View solution</a>
-                        </p>
-                    </div>
-                </div>
-            {% endfor %}
+  <p>
+    Welcome to <b>{{ quiz }}</b>!
+    {% if not finished and not quiz.overdue %}
+      <p>Submit on or before end-of-day {{ quiz.due_date }} server time (US).</p>
+    {% endif %}
+  </p>
+  <h2>Download problems</h2>
+  <a href="{{ quiz.get_absolute_url }}">Download problems file</a>
+  {% if attempt %}
+    <hr />
+    <h1>Score: {{ attempt.score }}</h1>
+    <div class="list-group row">
+      {% for row in rows %}
+        <div class="list-group-item"
+             style="background-color: {% if row.correct %}#e5ffe5{% else %}#ffe5e5{% endif %}">
+          <div class="col-12 col-md-5" style="display:inline-block;">{{ row.field|as_crispy_field }}</div>
+          <div class="d-none d-md-inline-block col-md-1"></div>
+          <div class="col-12 col-md-5"
+               style="display:inline-block;
+                      vertical-align: top">
+            <p>
+              Answers: <b>{{ row.accepted }}</b>
+            </p>
+            <p>
+              <a target="_top" href="{{ row.url }}">View solution</a>
+            </p>
+          </div>
         </div>
-        {% include "exams/gateway.html" %}
-    {% elif not quiz.overdue %}
-        <h2>Instructions</h2>
+      {% endfor %}
+    </div>
+    {% include "exams/gateway.html" %}
+  {% elif not quiz.overdue %}
+    <h2>Instructions</h2>
+    <ul>
+      <li>
+        The quiz has five problems.
+        Your score is the number of correct answers.
+      </li>
+      <li>
+        You should enforce the <strong>45-minute time limit</strong> yourself; the website will not do so.
+        You don't need to count the time it takes to print or type in answers.
+      </li>
+      <li>
+        The answers should all be mathematical expressions.
+        You can use the functions <tt>+-*/^</tt> as well as <tt>sin()</tt>, <tt>cos()</tt>,
+        <tt>tan()</tt> (all in radians), and <tt>sqrt()</tt>.
+        The constants <tt>pi</tt> and <tt>e</tt> are also built in.
+        Multiplication <tt>*</tt> should be written out;
+        write <tt>3*sqrt(2)</tt> not <tt>3sqrt(2)</tt>.
+        Examples:
         <ul>
+          <li>
+            <tt>1 - 1/10^6</tt> and <tt>999999/1000000</tt> are both accepted.
             <li>
-                The quiz has five problems.
-                Your score is the number of correct answers.
+              <tt>sin(pi/3) - sqrt(3)/2</tt> is accepted for <tt>0</tt>.
+              <li>
+                <tt>cos(pi/4)^2 + 1/2</tt> is accepted for <tt>1</tt>.
+              </ul>
             </li>
             <li>
-                You should enforce the <strong>45-minute time limit</strong> yourself; the website will not do so.
-                You don't need to count the time it takes to print or type in answers.
+              The intention is that you should take the test away without technology
+              and only input your answers after time expires.
+              Thus there is no partial submission; you must submit all answers at once.
             </li>
-            <li>
-                The answers should all be mathematical expressions.
-                You can use the functions <tt>+-*/^</tt> as well as <tt>sin()</tt>, <tt>cos()</tt>,
-                <tt>tan()</tt> (all in radians), and <tt>sqrt()</tt>.
-                The constants <tt>pi</tt> and <tt>e</tt> are also built in.
-                Multiplication <tt>*</tt> should be written out;
-                write <tt>3*sqrt(2)</tt> not <tt>3sqrt(2)</tt>.
-                Examples:
-                <ul>
-                    <li>
-                        <tt>1 - 1/10^6</tt> and <tt>999999/1000000</tt> are both accepted.
-                        <li>
-                            <tt>sin(pi/3) - sqrt(3)/2</tt> is accepted for <tt>0</tt>.
-                            <li>
-                                <tt>cos(pi/4)^2 + 1/2</tt> is accepted for <tt>1</tt>.
-                            </ul>
-                        </li>
-                        <li>
-                            The intention is that you should take the test away without technology
-                            and only input your answers after time expires.
-                            Thus there is no partial submission; you must submit all answers at once.
-                        </li>
-                        <li>We recommend printing the test out and taking with pencil and paper.</li>
-                    </ul>
-                    <hr />
-                    <h1>Submit answers</h1>
-                    <p>Enter your responses below as expressions.</p>
-                    {% include "generic_form.html" %}
-                    <script type="text/javascript">
+            <li>We recommend printing the test out and taking with pencil and paper.</li>
+          </ul>
+          <hr />
+          <h1>Submit answers</h1>
+          <p>Enter your responses below as expressions.</p>
+          {% include "generic_form.html" %}
+          <script type="text/javascript">
 	$("form.form")[0].onsubmit = function() {
 		return confirm('Are you ready to submit? This cannot be reversed.');
 	}
-                    </script>
-                {% else %}
-                    <hr />
-                    <h2>Read solutions</h2>
-                    <p>
-                        The quiz deadline has passed, so you can't submit,
-                        but you can read the solutions here.
-                    </p>
-                    <div class="list-group">
-                        <a href="{{ quiz.url1 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}1</a>
-                        <a href="{{ quiz.url2 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}2</a>
-                        <a href="{{ quiz.url3 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}3</a>
-                        <a href="{{ quiz.url4 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}4</a>
-                        <a href="{{ quiz.url5 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}5</a>
-                    </div>
-                {% endif %}
-            {% endblock %}
-            {% block scripts %}
-                <script type="text/javascript">
+          </script>
+        {% else %}
+          <hr />
+          <h2>Read solutions</h2>
+          <p>
+            The quiz deadline has passed, so you can't submit,
+            but you can read the solutions here.
+          </p>
+          <div class="list-group">
+            <a href="{{ quiz.url1 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}1</a>
+            <a href="{{ quiz.url2 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}2</a>
+            <a href="{{ quiz.url3 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}3</a>
+            <a href="{{ quiz.url4 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}4</a>
+            <a href="{{ quiz.url5 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}5</a>
+          </div>
+        {% endif %}
+      {% endblock %}
+      {% block scripts %}
+        <script type="text/javascript">
 	$(document).ready(function() {
 		for (let i = 1; i <= 5; ++i) {
 			const elm_id = "#id_guess" + i;
@@ -104,5 +104,5 @@
 			});
 		}
 	});
-                </script>
-            {% endblock %}
+        </script>
+      {% endblock %}

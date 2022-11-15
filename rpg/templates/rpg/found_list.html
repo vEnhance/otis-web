@@ -1,30 +1,30 @@
 {% extends 'layout.html' %}
 {% block title %}{{ achievement.name }} found by...{% endblock %}
 {% block layout-content %}
-    {% if achievement.image %}<img width="96px" style="float: right;" src="{{ achievement.image.url }}" />{% endif %}
-    <h2>{{ achievement.name }} ({{ achievement.diamonds }}♦️)</h2>
-    {% if request.user.is_superuser %}
-        <p>
-            <code>{{ achievement.code }}</code>
-        </p>
-    {% endif %}
-    <p class="fst-italic">{{ achievement.description }}</p>
-    <table class="table">
-        <tr>
-            <th>Time</th>
-            <th>Username</th>
-            <th>Name</th>
-        </tr>
-        {% for unlock in object_list %}
-            <tr>
-                <td>{{ unlock.timestamp }}</td>
-                <td>
-                    <code>{{ unlock.user|truncatechars:"18" }}</code>
-                </td>
-                <td>
-                    <a href="{% url "username-lookup" unlock.user.username %}">{{ unlock.user.get_full_name }}</a>
-                </td>
-            </tr>
-        {% endfor %}
-    </table>
+  {% if achievement.image %}<img width="96px" style="float: right;" src="{{ achievement.image.url }}" />{% endif %}
+  <h2>{{ achievement.name }} ({{ achievement.diamonds }}♦️)</h2>
+  {% if request.user.is_superuser %}
+    <p>
+      <code>{{ achievement.code }}</code>
+    </p>
+  {% endif %}
+  <p class="fst-italic">{{ achievement.description }}</p>
+  <table class="table">
+    <tr>
+      <th>Time</th>
+      <th>Username</th>
+      <th>Name</th>
+    </tr>
+    {% for unlock in object_list %}
+      <tr>
+        <td>{{ unlock.timestamp }}</td>
+        <td>
+          <code>{{ unlock.user|truncatechars:"18" }}</code>
+        </td>
+        <td>
+          <a href="{% url "username-lookup" unlock.user.username %}">{{ unlock.user.get_full_name }}</a>
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
 {% endblock %}

@@ -1,49 +1,49 @@
 {% extends 'layout.html' %}
 {% load static %}
 {% block base-content %}
-    <div class="container">
-        <hr />
-        <h1>Payment for {{ student }}</h1>
-        {% include "roster/invoice_table.html" %}
-        {% if not invoice.student.semester.active %}
-            <div class="alert alert-danger" role="alert">
-                <h2 class="alert-title">You are viewing the invoice for a past year!</h2>
-                This is the invoice for
-                <b>{{ invoice.student.semester.years }}</b>.
-                If you are trying to pay for the current year then you should
-                <a class="alert-link" href="{% url "invoice" %}">go to the current year's invoice</a>.
-            </div>
-        {% endif %}
-        <p class="text-center">
-            <b class="fs-5">Amount to pay:</b>
-            <input id="amount"
-                   type="number"
-                   min="0"
-                   max="{{ invoice.total_owed|floatformat:0 }}"
-                   value="{{ invoice.total_owed|floatformat:0 }}"/>
-            <input id="invoice_id" type="hidden" value="{{ invoice.id }}" />
-            <button class="button is-primary btn btn-success" id="payButton">Pay</button>
-        </p>
+  <div class="container">
+    <hr />
+    <h1>Payment for {{ student }}</h1>
+    {% include "roster/invoice_table.html" %}
+    {% if not invoice.student.semester.active %}
+      <div class="alert alert-danger" role="alert">
+        <h2 class="alert-title">You are viewing the invoice for a past year!</h2>
+        This is the invoice for
+        <b>{{ invoice.student.semester.years }}</b>.
+        If you are trying to pay for the current year then you should
+        <a class="alert-link" href="{% url "invoice" %}">go to the current year's invoice</a>.
+      </div>
+    {% endif %}
+    <p class="text-center">
+      <b class="fs-5">Amount to pay:</b>
+      <input id="amount"
+             type="number"
+             min="0"
+             max="{{ invoice.total_owed|floatformat:0 }}"
+             value="{{ invoice.total_owed|floatformat:0 }}"/>
+      <input id="invoice_id" type="hidden" value="{{ invoice.id }}" />
+      <button class="button is-primary btn btn-success" id="payButton">Pay</button>
+    </p>
+    <p>
+      If you don't want to pay by credit/debit card, see
+      <a href="{% static "info/parent-info.pdf" %}">parent info</a> (section 4.2)
+      for alternative methods.
+    </p>
+    <hr />
+    <p>
+      <small>
         <p>
-            If you don't want to pay by credit/debit card, see
-            <a href="{% static "info/parent-info.pdf" %}">parent info</a> (section 4.2)
-            for alternative methods.
+          Direct link to this invoice:
+          <br />
+          <a href="{% url "payments-invoice" student.id checksum %}">
+            https://otis.evanchen.cc{% url "payments-invoice" student.id checksum %}
+          </a>
         </p>
-        <hr />
-        <p>
-            <small>
-                <p>
-                    Direct link to this invoice:
-                    <br />
-                    <a href="{% url "payments-invoice" student.id checksum %}">
-                        https://otis.evanchen.cc{% url "payments-invoice" student.id checksum %}
-                    </a>
-                </p>
-            </small>
-        </p>
-    </div>
+      </small>
+    </p>
+  </div>
 {% endblock %}
 {% block scripts %}
-    <script src="https://js.stripe.com/v3/"></script>
-    <script src="{% static 'payments.js' %}"></script>
+  <script src="https://js.stripe.com/v3/"></script>
+  <script src="{% static 'payments.js' %}"></script>
 {% endblock %}

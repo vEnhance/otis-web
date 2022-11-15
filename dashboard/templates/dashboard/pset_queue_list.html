@@ -1,38 +1,38 @@
 {% extends 'layout.html' %}
 {% block title %}Problem Set Submission Queue{% endblock %}
 {% block layout-content %}
-    {% load otis_extras %}
-    <p>Here are all the problem sets that haven't been checked yet.</p>
-    <table class="table">
-        <thead class="table-dark">
-            <tr>
-                <td class="text-end">#</td>
-                <td>Unit</td>
-                <td>Timestamp</td>
-                <td class="text-end">ID</td>
-            </tr>
-        </thead>
-        <tbody>
-            {% for pset in object_list %}
-                <tr {% if pset.student.user == request.user %} class="table-warning fw-bold"{% endif %}>
-                    <th class="text-end">{{ forloop.counter }}.</th>
-                    <td>
-                        {% if pset.student.user == request.user or request.user.is_staff %}
-                            <a href="{{ pset.get_absolute_url }}">{{ pset.unit.group.name }}<sup>{{ pset.unit.code }}</sup></a>
-                        {% else %}
-                            {{ pset.unit.group.name }}<sup>{{ pset.unit.code }}</sup>
-                        {% endif %}
-                    </td>
-                    <td>{{ pset.upload.created_at }}</td>
-                    <td class="text-end">
-                        {% if request.user.is_staff %}
-                            <a href="{% url "admin:dashboard_pset_change" pset.pk %}">{{ pset.pk }}</a>
-                        {% else %}
-                            {{ pset.pk }}
-                        {% endif %}
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+  {% load otis_extras %}
+  <p>Here are all the problem sets that haven't been checked yet.</p>
+  <table class="table">
+    <thead class="table-dark">
+      <tr>
+        <td class="text-end">#</td>
+        <td>Unit</td>
+        <td>Timestamp</td>
+        <td class="text-end">ID</td>
+      </tr>
+    </thead>
+    <tbody>
+      {% for pset in object_list %}
+        <tr {% if pset.student.user == request.user %} class="table-warning fw-bold"{% endif %}>
+          <th class="text-end">{{ forloop.counter }}.</th>
+          <td>
+            {% if pset.student.user == request.user or request.user.is_staff %}
+              <a href="{{ pset.get_absolute_url }}">{{ pset.unit.group.name }}<sup>{{ pset.unit.code }}</sup></a>
+            {% else %}
+              {{ pset.unit.group.name }}<sup>{{ pset.unit.code }}</sup>
+            {% endif %}
+          </td>
+          <td>{{ pset.upload.created_at }}</td>
+          <td class="text-end">
+            {% if request.user.is_staff %}
+              <a href="{% url "admin:dashboard_pset_change" pset.pk %}">{{ pset.pk }}</a>
+            {% else %}
+              {{ pset.pk }}
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 {% endblock %}

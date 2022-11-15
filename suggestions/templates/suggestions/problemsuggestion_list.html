@@ -1,22 +1,22 @@
 {% extends 'layout.html' %}
 {% block title %}Problem suggestions by {{ request.user }}{% endblock %}
 {% block layout-content %}
-    <p>Here are all the past suggestions that you ({{ request.user }}) have provided.</p>
-    {% for suggestion in problem_suggestions %}
-        <div class="alert {% if suggestion.resolved %}alert-success{% else %}alert-primary{% endif %}">
-            <h3>
-                <a href="{% url "suggest-update" suggestion.id %}">
-                    {% if suggestion.resolved %}
-                        Resolved {{ suggestion.source }} for {{ suggestion.unit.group }}
-                    {% else %}
-                        You suggested {{ suggestion.source }} for {{ suggestion.unit.group }}
-                    {% endif %}
-                </a>
-            </h3>
-            <p>{{ suggestion.statement }}</p>
-            <p>
-                <b>Date</b>: {{ suggestion.created_at }}
-            </p>
-        </div>
-    {% endfor %}
+  <p>Here are all the past suggestions that you ({{ request.user }}) have provided.</p>
+  {% for suggestion in problem_suggestions %}
+    <div class="alert {% if suggestion.resolved %}alert-success{% else %}alert-primary{% endif %}">
+      <h3>
+        <a href="{% url "suggest-update" suggestion.id %}">
+          {% if suggestion.resolved %}
+            Resolved {{ suggestion.source }} for {{ suggestion.unit.group }}
+          {% else %}
+            You suggested {{ suggestion.source }} for {{ suggestion.unit.group }}
+          {% endif %}
+        </a>
+      </h3>
+      <p>{{ suggestion.statement }}</p>
+      <p>
+        <b>Date</b>: {{ suggestion.created_at }}
+      </p>
+    </div>
+  {% endfor %}
 {% endblock %}
