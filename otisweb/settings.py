@@ -58,7 +58,10 @@ INSTALLED_APPS = [
 	'mouse',
 	'roster',
 	'payments',
+	'suggestions',
+	# ------------
 	'otisweb',
+	# ------------
 	'django.contrib.admin',
 	'django.contrib.auth',
 	'django.contrib.contenttypes',

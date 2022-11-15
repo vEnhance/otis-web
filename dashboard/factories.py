@@ -7,7 +7,7 @@ from factory.faker import Faker
 from factory.fuzzy import FuzzyChoice
 from roster.factories import StudentFactory
 
-from dashboard.models import Achievement, AchievementUnlock, BonusLevel, BonusLevelUnlock, Level, ProblemSuggestion, PSet, QuestComplete, SemesterDownloadFile, UploadedFile  # NOQA
+from dashboard.models import Achievement, AchievementUnlock, BonusLevel, BonusLevelUnlock, Level, PSet, QuestComplete, SemesterDownloadFile, UploadedFile  # NOQA
 
 User = get_user_model()
 
@@ -42,19 +42,6 @@ class PSetFactory(DjangoModelFactory):
 	)
 	next_unit_to_unlock = SubFactory(UnitFactory)
 	status = 'A'
-
-
-class ProblemSuggestionFactory(DjangoModelFactory):
-	class Meta:
-		model = ProblemSuggestion
-
-	user = SubFactory(UserFactory)
-	unit = SubFactory(UnitFactory)
-	weight = FuzzyChoice([2, 3, 5, 9])
-	source = UniqueFaker('company')
-	description = Faker('text')
-	statement = Faker('sentence')
-	solution = Faker('paragraph')
 
 
 class AchievementFactory(DjangoModelFactory):

@@ -27,7 +27,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.views.generic import DetailView, ListView
-from django.views.generic.edit import CreateView, DeleteView, UpdateView
+from django.views.generic.edit import DeleteView, UpdateView
 from evans_django_tools import SUCCESS_LOG_LEVEL, VERBOSE_LOG_LEVEL
 from exams.models import PracticeExam
 from markets.models import Market
@@ -43,7 +43,7 @@ from dashboard.utils import get_days_since, get_units_to_submit, get_units_to_un
 
 from .forms import NewUploadForm, PSetSubmitForm
 from .levelsys import annotate_student_queryset_with_scores, check_level_up, get_level_info  # NOQA
-from .models import Achievement, AchievementUnlock, Level, ProblemSuggestion, PSet, SemesterDownloadFile, UploadedFile  # NOQA
+from .models import Achievement, AchievementUnlock, Level, PSet, SemesterDownloadFile, UploadedFile  # NOQA
 
 logger = logging.getLogger(__name__)
 
@@ -520,94 +520,6 @@ class PSetDetail(LoginRequiredMixin, DetailView[PSet]):
 		context = super().get_context_data(**kwargs)
 		context['student'] = self.get_object().student
 		return context
-
-
-class ProblemSuggestionCreate(
-	LoginRequiredMixin, CreateView[ProblemSuggestion, BaseModelForm[ProblemSuggestion]]
-):
-	context_object_name = "problem_suggestion"
-	fields = (
-		'unit',
-		'weight',
-		'source',
-		'description',
-		'statement',
-		'solution',
-		'comments',
-		'acknowledge',
-	)
-	model = ProblemSuggestion
-
-	def get_form(self, *args: Any, **kwargs: Any) -> BaseModelForm[ProblemSuggestion]:
-		form = super(CreateView, self).get_form(*args, **kwargs)
-		form.fields['unit'].queryset = Unit.objects.filter(group__hidden=False)  # type: ignore
-		return form
-
-	def get_initial(self):
-		initial = super().get_initial()
-		uid = self.kwargs.get('unit_id', None)
-		if uid is not None:
-			unit = get_object_or_404(Unit, id=uid)
-			if unit.group.hidden is False:
-				initial['unit'] = uid
-		return initial
-
-	def form_valid(self, form: BaseModelForm[ProblemSuggestion]):
-		if not isinstance(self.request.user, User):
-			raise PermissionDenied("Please log in")
-		form.instance.user = self.request.user
-		messages.success(
-			self.request,
-			"Successfully submitted suggestion! Thanks much :) You can add more using the form below."
-		)
-		return super().form_valid(form)
-
-	def get_success_url(self):
-		return reverse("suggest-new", kwargs=self.kwargs)
-
-
-class ProblemSuggestionUpdate(
-	LoginRequiredMixin, UpdateView[ProblemSuggestion, BaseModelForm[ProblemSuggestion]]
-):
-	context_object_name = "problem_suggestion"
-	fields = (
-		'unit',
-		'weight',
-		'source',
-		'description',
-		'statement',
-		'solution',
-		'comments',
-		'acknowledge',
-	)
-	model = ProblemSuggestion
-	object: ProblemSuggestion
-
-	def get_success_url(self):
-		return reverse("suggest-update", kwargs=self.kwargs)
-
-	def form_valid(self, form: BaseModelForm[ProblemSuggestion]):
-		messages.success(self.request, "Edits saved.")
-		return super().form_valid(form)
-
-	def get_context_data(self, **kwargs: Any):
-		context = super().get_context_data(**kwargs)
-		if not isinstance(self.request.user, User):
-			raise PermissionDenied("Please log in.")
-		if not (self.request.user.is_staff or self.request.user == self.object.user):
-			raise PermissionDenied("Logged-in user cannot view this suggestion")
-		return context
-
-
-class ProblemSuggestionList(LoginRequiredMixin, ListView[ProblemSuggestion]):
-	context_object_name = "problem_suggestions"
-
-	def get_queryset(self):
-		if not isinstance(self.request.user, User):
-			raise PermissionDenied("Please log in.")
-		queryset = ProblemSuggestion.objects.filter(user=self.request.user)
-		queryset = queryset.order_by('resolved', 'created_at')
-		return queryset
 
 
 def assert_maxed_out_level_info(student: Student) -> LevelInfoDict:

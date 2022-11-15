@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Literal, TypedDict, Union
 
 from allauth.socialaccount.models import SocialAccount
 from arch.models import Hint, Problem
-from dashboard.models import ProblemSuggestion, PSet
+from dashboard.models import PSet
 from django.conf import settings
 from django.core.exceptions import SuspiciousOperation
 from django.db.models.aggregates import Sum
@@ -19,6 +19,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from roster.models import Invoice, Student, StudentRegistration, UnitInquiry
 from sql_util.aggregates import SubqueryCount
+from suggestions.models import ProblemSuggestion
 from unidecode import unidecode
 
 # Create your views here.

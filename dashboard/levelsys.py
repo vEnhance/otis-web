@@ -18,7 +18,8 @@ from roster.models import Student
 from sql_util.aggregates import SubqueryCount, SubquerySum
 from sql_util.utils import Exists
 
-from dashboard.models import AchievementUnlock, BonusLevel, BonusLevelUnlock, Level, ProblemSuggestion, PSet, QuestComplete  # NOQA
+from dashboard.models import AchievementUnlock, BonusLevel, BonusLevelUnlock, Level, PSet, QuestComplete  # NOQA
+from suggestions.models import ProblemSuggestion
 
 BONUS_D_UNIT = 0.3
 BONUS_Z_UNIT = 0.5
