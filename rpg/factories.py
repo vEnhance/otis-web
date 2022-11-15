@@ -6,7 +6,7 @@ from factory.faker import Faker
 from factory.fuzzy import FuzzyChoice
 from roster.factories import StudentFactory
 
-from .models import Achievement, AchievementUnlock, BonusLevel, BonusLevelUnlock, Level, PSet, QuestComplete  # NOQA
+from .models import Achievement, AchievementUnlock, BonusLevel, BonusLevelUnlock, Level, QuestComplete  # NOQA
 
 
 class AchievementFactory(DjangoModelFactory):

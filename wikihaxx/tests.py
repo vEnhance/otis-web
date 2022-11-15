@@ -1,6 +1,6 @@
 from core.factories import UnitFactory, UserFactory
-from dashboard.factories import AchievementFactory
 from evans_django_tools.testsuite import EvanTestCase
+from rpg.factories import AchievementFactory
 
 from wikihaxx.mdx.otis import OTISPreprocessor
 
