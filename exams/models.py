@@ -14,7 +14,8 @@ from exams.calculator import expr_compute
 
 def expr_validator(value: str):
 	try:
-		_ = float(expr_compute(value) or 0)
+		x = float(expr_compute(value) or 0)
+		assert abs(x) < 1e10000
 	except OverflowError:
 		raise ValidationError(r'This result has absolute value too large to parse.')
 	except Exception:
