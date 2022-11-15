@@ -1,13 +1,10 @@
-from core.factories import SemesterFactory, UnitFactory, UnitGroupFactory, UserFactory  # NOQA
+from core.factories import SemesterFactory, UnitFactory  # NOQA
 from django.contrib.auth import get_user_model
-from evans_django_tools.testsuite import UniqueFaker
-from factory.declarations import LazyAttribute, Sequence, SubFactory
-from factory.django import DjangoModelFactory, FileField, ImageField
-from factory.faker import Faker
-from factory.fuzzy import FuzzyChoice
+from factory.declarations import LazyAttribute, SubFactory
+from factory.django import DjangoModelFactory, FileField
 from roster.factories import StudentFactory
 
-from dashboard.models import Achievement, AchievementUnlock, BonusLevel, BonusLevelUnlock, Level, PSet, QuestComplete, SemesterDownloadFile, UploadedFile  # NOQA
+from .models import PSet, SemesterDownloadFile, UploadedFile  # NOQA
 
 User = get_user_model()
 
@@ -42,54 +39,3 @@ class PSetFactory(DjangoModelFactory):
 	)
 	next_unit_to_unlock = SubFactory(UnitFactory)
 	status = 'A'
-
-
-class AchievementFactory(DjangoModelFactory):
-	class Meta:
-		model = Achievement
-
-	code = UniqueFaker('bban')
-	name = Faker('job')
-	image = ImageField(filename='TESTING_achievement_icon.png')
-	description = UniqueFaker('sentence')
-
-
-class LevelFactory(DjangoModelFactory):
-	class Meta:
-		model = Level
-
-	threshold = Sequence(lambda n: n + 1)
-	name = LazyAttribute(lambda o: f'Level {o.threshold}')
-
-
-class AchievementUnlockFactory(DjangoModelFactory):
-	class Meta:
-		model = AchievementUnlock
-
-	user = SubFactory(UserFactory)
-	achievement = SubFactory(AchievementFactory)
-
-
-class QuestCompleteFactory(DjangoModelFactory):
-	class Meta:
-		model = QuestComplete
-
-	student = SubFactory(StudentFactory)
-	title = Faker('job')
-	spades = FuzzyChoice(list(range(1, 10)))
-
-
-class BonusLevelFactory(DjangoModelFactory):
-	class Meta:
-		model = BonusLevel
-
-	level = 100
-	group = SubFactory(UnitGroupFactory)
-
-
-class BonusLevelUnlockFactory(DjangoModelFactory):
-	class Meta:
-		model = BonusLevelUnlock
-
-	student = SubFactory(StudentFactory)
-	level = SubFactory(BonusLevelFactory)

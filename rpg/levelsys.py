@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Set, Tuple, TypedDict, Union
 
 from arch.models import Hint
 from core.models import UserProfile
+from dashboard.models import PSet
 from django.db.models.aggregates import Count, Max, Sum
 from django.db.models.expressions import OuterRef, Subquery
 from django.db.models.query import QuerySet
@@ -17,9 +18,9 @@ from reversion.models import Version
 from roster.models import Student
 from sql_util.aggregates import SubqueryCount, SubquerySum
 from sql_util.utils import Exists
-
-from dashboard.models import AchievementUnlock, BonusLevel, BonusLevelUnlock, Level, PSet, QuestComplete  # NOQA
 from suggestions.models import ProblemSuggestion
+
+from .models import AchievementUnlock, BonusLevel, BonusLevelUnlock, Level, QuestComplete  # NOQA
 
 BONUS_D_UNIT = 0.3
 BONUS_Z_UNIT = 0.5

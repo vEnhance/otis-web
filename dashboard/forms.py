@@ -61,7 +61,3 @@ class PSetResubmitForm(forms.ModelForm):
 			'special_notes',
 			'next_unit_to_unlock',
 		)
-
-
-class DiamondsForm(forms.Form):
-	code = forms.CharField(label="", max_length=64, required=True)

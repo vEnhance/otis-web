@@ -57,6 +57,7 @@ INSTALLED_APPS = [
 	'markets',
 	'mouse',
 	'roster',
+	'rpg',
 	'payments',
 	'suggestions',
 	# ------------

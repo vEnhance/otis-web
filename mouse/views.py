@@ -1,12 +1,12 @@
 from datetime import datetime
 
-from dashboard.models import QuestComplete
 from django.contrib import messages
 from django.http.request import HttpRequest
 from django.http.response import HttpResponse
 from django.shortcuts import render
 from otisweb.decorators import admin_required
 from roster.models import Student
+from rpg.models import QuestComplete
 
 from .forms import GraderForm, ScoreForm
 

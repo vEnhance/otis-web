@@ -3,21 +3,18 @@
 from __future__ import unicode_literals
 
 import logging
-import random
 from datetime import timedelta
 from typing import Any, Dict, Optional
 
-from braces.views import LoginRequiredMixin, StaffuserRequiredMixin, SuperuserRequiredMixin  # NOQA
+from braces.views import LoginRequiredMixin
 from core.models import Semester, Unit, UserProfile
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from django.db.models import Count, OuterRef, Subquery
-from django.db.models.expressions import Exists
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http import HttpResponse, HttpResponseRedirect
@@ -28,22 +25,17 @@ from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import DeleteView, UpdateView
-from evans_django_tools import SUCCESS_LOG_LEVEL, VERBOSE_LOG_LEVEL
+from evans_django_tools import VERBOSE_LOG_LEVEL
 from exams.models import PracticeExam
 from markets.models import Market
 from otisweb.utils import AuthHttpRequest, get_mailchimp_campaigns
 from roster.models import RegistrationContainer, Student, StudentRegistration
 from roster.utils import can_view, get_student_by_id, get_visible_students, infer_student  # NOQA
-from sql_util.utils import SubqueryAggregate
+from rpg.levelsys import annotate_student_queryset_with_scores, check_level_up, get_level_info, get_student_rows  # NOQA
 
-from dashboard.forms import DiamondsForm, PSetResubmitForm
-from dashboard.levelsys import LevelInfoDict, get_student_rows
-from dashboard.models import PalaceCarving
+from dashboard.forms import NewUploadForm, PSetResubmitForm, PSetSubmitForm
+from dashboard.models import PSet, SemesterDownloadFile, UploadedFile  # NOQA
 from dashboard.utils import get_days_since, get_units_to_submit, get_units_to_unlock  # NOQA
-
-from .forms import NewUploadForm, PSetSubmitForm
-from .levelsys import annotate_student_queryset_with_scores, check_level_up, get_level_info  # NOQA
-from .models import Achievement, AchievementUnlock, Level, PSet, SemesterDownloadFile, UploadedFile  # NOQA
 
 logger = logging.getLogger(__name__)
 
@@ -98,82 +90,37 @@ def portal(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 	return render(request, "dashboard/portal.html", context)
 
 
-@login_required
-def stats(request: AuthHttpRequest, student_id: int) -> HttpResponse:
-	student = get_student_by_id(request, student_id)
-	unlocks = AchievementUnlock.objects.filter(user=student.user).order_by('achievement__name')
-	unlocks = unlocks.select_related('achievement')
-	context: Dict[str, Any] = {
-		'student': student,
-		'form': DiamondsForm(),
-		'achievements': unlocks,
-	}
-	if request.method == 'POST':
-		assert student.user is not None
-		form = DiamondsForm(request.POST)
-		if form.is_valid():
-			code = form.cleaned_data['code']
-			if AchievementUnlock.objects.filter(user=student.user, achievement__code=code).exists():
-				messages.warning(request, "You already earned this achievement!")
-			else:
-				try:
-					achievement = Achievement.objects.get(code__iexact=code)
-				except Achievement.DoesNotExist:
-					messages.error(request, "You entered an invalid code.")
-					logger.warn(f"Invalid diamond code `{code}`", extra={'request': request})
-				else:
-					logger.log(
-						SUCCESS_LOG_LEVEL,
-						f"{student.name} obtained {achievement}",
-						extra={'request': request}
-					)
-					AchievementUnlock.objects.create(user=student.user, achievement=achievement)
-					context['obtained_achievement'] = achievement
-			form = DiamondsForm()
+def certify(request: HttpRequest, student_id: int = None, checksum: str = None):
+	if student_id is None:
+		student = infer_student(request)
 	else:
-		form = DiamondsForm()
-	try:
-		context['first_achievement'] = Achievement.objects.get(pk=1)
-	except Achievement.DoesNotExist:
-		pass
-	level_info = get_level_info(student)
-	context.update(level_info)
-	level_number = level_info['level_number']
-	obtained_levels = Level.objects.filter(threshold__lte=level_number).order_by('-threshold')
-	context['obtained_levels'] = obtained_levels
-	return render(request, "dashboard/stats.html", context)
-
-
-class AchievementList(LoginRequiredMixin, ListView[Achievement]):
-	template_name = 'dashboard/diamond_list.html'
-
-	def get_queryset(self) -> QuerySet[Achievement]:
-		if not isinstance(self.request.user, User):
-			raise PermissionDenied("Please log in")
-		return Achievement.objects.filter(active=True).annotate(
-			num_found=SubqueryAggregate('achievementunlock', aggregate=Count),
-			obtained=Exists(
-				Achievement.objects.filter(
-					pk=OuterRef('pk'), achievementunlock__user=self.request.user
-				)
-			),
-		).order_by('-obtained', '-num_found')
-
-
-class FoundList(LoginRequiredMixin, StaffuserRequiredMixin, ListView[AchievementUnlock]):
-	raise_exception = True
-	template_name = 'dashboard/found_list.html'
-
-	def get_queryset(self) -> QuerySet[AchievementUnlock]:
-		self.achievement = get_object_or_404(Achievement, pk=self.kwargs['pk'])
-		return AchievementUnlock.objects.filter(
-			achievement=self.achievement,
-		).select_related('user').order_by('-timestamp')
-
-	def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
-		context = super().get_context_data(**kwargs)
-		context['achievement'] = self.achievement
-		return context
+		student = get_object_or_404(Student, pk=student_id)
+	if checksum is None:
+		if can_view(request, student):
+			checksum = student.get_checksum(settings.CERT_HASH_KEY)
+			return HttpResponseRedirect(reverse('certify', args=(student.id, checksum)))
+		else:
+			raise PermissionDenied("Not authorized to generate checksum")
+	elif checksum != student.get_checksum(settings.CERT_HASH_KEY):
+		raise PermissionDenied("Wrong hash")
+	else:
+		level_info = get_level_info(student)
+		context = {
+			'student':
+				student,
+			'hearts':
+				level_info['meters']['hearts'].value,
+			'level_number':
+				level_info['level_number'],
+			'level_name':
+				level_info['level_name'],
+			'checksum':
+				student.get_checksum(settings.CERT_HASH_KEY),
+			'target_url':
+				f'{request.scheme}//{request.get_host()}' +
+				reverse('certify', args=(student.id, checksum))
+		}
+		return render(request, "dashboard/certify.html", context)
 
 
 class PSetQueueList(LoginRequiredMixin, ListView[PSet]):
@@ -185,27 +132,6 @@ class PSetQueueList(LoginRequiredMixin, ListView[PSet]):
 			unit__group__hidden=False,
 			student__semester__active=True,
 		).order_by('pk')
-
-
-@staff_member_required
-def leaderboard(request: AuthHttpRequest) -> HttpResponse:
-	students = Student.objects.filter(semester__active=True)
-	rows = get_student_rows(students)
-	rows.sort(
-		key=lambda row: (
-			-row['level'],
-			-row['clubs'],
-			-row['hearts'],
-			-row['spades'],
-			-row['diamonds'],
-			row['student'].name.upper(),
-		)
-	)
-	for row in rows:
-		row['days_since_last_seen'] = get_days_since(row['last_seen'])
-	context: Dict[str, Any] = {}
-	context['rows'] = rows
-	return render(request, "dashboard/leaderboard.html", context)
 
 
 @login_required
@@ -520,158 +446,3 @@ class PSetDetail(LoginRequiredMixin, DetailView[PSet]):
 		context = super().get_context_data(**kwargs)
 		context['student'] = self.get_object().student
 		return context
-
-
-def assert_maxed_out_level_info(student: Student) -> LevelInfoDict:
-	level_info = get_level_info(student)
-	if not level_info['is_maxed']:
-		raise PermissionDenied("Insufficient level")
-	return level_info
-
-
-class PalaceList(LoginRequiredMixin, ListView[PalaceCarving]):
-	model = PalaceCarving
-	context_object_name = "palace_carvings"
-	template_name = 'dashboard/palace.html'
-
-	def get_queryset(self):
-		student = get_student_by_id(self.request, self.kwargs['student_id'])
-		assert_maxed_out_level_info(student)
-		self.student = student
-		queryset = PalaceCarving.objects.filter(visible=True)
-		queryset = queryset.exclude(display_name="")
-		queryset = queryset.order_by('created_at')
-		return queryset
-
-	def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
-		context = super().get_context_data(**kwargs)
-		context['student'] = self.student
-		return context
-
-
-class AdminPalaceList(SuperuserRequiredMixin, ListView[PalaceCarving]):
-	model = PalaceCarving
-	context_object_name = "palace_carvings"
-	template_name = 'dashboard/palace.html'
-
-	def get_queryset(self):
-		queryset = PalaceCarving.objects.filter(visible=True)
-		queryset = queryset.exclude(display_name="")
-		queryset = queryset.order_by('created_at')
-		return queryset
-
-
-class PalaceUpdate(
-	LoginRequiredMixin,
-	SuccessMessageMixin,
-	UpdateView[PalaceCarving, BaseModelForm[PalaceCarving]],
-):
-	model = PalaceCarving
-	fields = (
-		'display_name',
-		'hyperlink',
-		'message',
-		'visible',
-		'image',
-	)
-	template_name = 'dashboard/palace_form.html'
-	success_message = "Edited palace carving successfully!"
-
-	def get_object(self, *args: Any, **kwargs: Any) -> PalaceCarving:
-		student = get_student_by_id(self.request, self.kwargs['student_id'])
-		assert_maxed_out_level_info(student)
-		self.student = student
-		carving, is_created = PalaceCarving.objects.get_or_create(user=student.user)
-		if is_created is True:
-			carving.display_name = student.name
-		return carving
-
-	def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
-		context = super().get_context_data(**kwargs)
-		context['student'] = self.student
-		return context
-
-	def get_success_url(self):
-		return reverse('palace-list', args=(self.student.id, ))
-
-
-class DiamondUpdate(
-	LoginRequiredMixin,
-	UpdateView[Achievement, BaseModelForm[Achievement]],
-):
-	model = Achievement
-	fields = (
-		'code',
-		'name',
-		'image',
-		'description',
-		'solution',
-		'always_show_image',
-	)
-	success_message = "Updated diamond successfully."
-
-	def get_object(self, *args: Any, **kwargs: Any) -> Achievement:
-		student = get_student_by_id(self.request, self.kwargs['student_id'])
-		if not student.semester.active:
-			raise PermissionDenied("The palace can't be edited through an inactive student")
-		level_info = assert_maxed_out_level_info(student)
-		self.student = student
-
-		achievement, is_new = Achievement.objects.get_or_create(creator=student.user)
-		if is_new is True:
-			achievement.code = ''.join(random.choice('0123456789abcdef') for _ in range(24))
-			achievement.diamonds = level_info['meters']['diamonds'].level
-			achievement.name = student.name
-			achievement.save()
-		return achievement
-
-	def form_valid(self, form: BaseModelForm[Achievement]):
-		level_info = assert_maxed_out_level_info(self.student)
-		form.instance.diamonds = level_info['meters']['diamonds'].level
-		form.instance.creator = self.student.user
-		messages.success(
-			self.request,
-			f"Successfully forged diamond worth {form.instance.diamonds}◆, your current charisma level.",
-		)
-		return super().form_valid(form)
-
-	def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
-		context = super().get_context_data(**kwargs)
-		context['student'] = self.student
-		return context
-
-	def get_success_url(self):
-		return reverse("diamond-update", args=(self.student.id, ))
-
-
-def certify(request: HttpRequest, student_id: int = None, checksum: str = None):
-	if student_id is None:
-		student = infer_student(request)
-	else:
-		student = get_object_or_404(Student, pk=student_id)
-	if checksum is None:
-		if can_view(request, student):
-			checksum = student.get_checksum(settings.CERT_HASH_KEY)
-			return HttpResponseRedirect(reverse('certify', args=(student.id, checksum)))
-		else:
-			raise PermissionDenied("Not authorized to generate checksum")
-	elif checksum != student.get_checksum(settings.CERT_HASH_KEY):
-		raise PermissionDenied("Wrong hash")
-	else:
-		level_info = get_level_info(student)
-		context = {
-			'student':
-				student,
-			'hearts':
-				level_info['meters']['hearts'].value,
-			'level_number':
-				level_info['level_number'],
-			'level_name':
-				level_info['level_name'],
-			'checksum':
-				student.get_checksum(settings.CERT_HASH_KEY),
-			'target_url':
-				f'{request.scheme}//{request.get_host()}' +
-				reverse('certify', args=(student.id, checksum))
-		}
-		return render(request, "dashboard/certify.html", context)

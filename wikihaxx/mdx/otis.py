@@ -4,10 +4,11 @@ from typing import Any, List
 import markdown
 import markdown.preprocessors
 from core.models import UnitGroup
-from dashboard.models import Achievement, AchievementUnlock, PSet
+from dashboard.models import PSet
 from django.db.models.aggregates import Sum
 from django.db.models.query_utils import Q
 from roster.models import Student
+from rpg.models import Achievement, AchievementUnlock
 
 
 class OTISExtension(markdown.Extension):
