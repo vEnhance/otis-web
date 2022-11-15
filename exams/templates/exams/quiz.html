@@ -6,8 +6,8 @@
 <p>
 	Welcome to <b>{{ quiz }}</b>!
 	{% if not finished and not quiz.overdue %}
-	<p>Submit on or before end-of-day {{ quiz.due_date }} server time (US).</p>
-	{% endif %}
+<p>Submit on or before end-of-day {{ quiz.due_date }} server time (US).</p>
+{% endif %}
 </p>
 
 <h2>Download problems</h2>
@@ -55,9 +55,6 @@
 			<li><tt>sin(pi/3) - sqrt(3)/2</tt> is accepted for <tt>0</tt>.
 			<li><tt>cos(pi/4)^2 + 1/2</tt> is accepted for <tt>1</tt>.
 		</ul>
-	</li>
-	<li>
-		Answers must lie in the interval $[-10^{100}, 10^{100}]$.
 	</li>
 	<li>
 		The intention is that you should take the test away without technology
