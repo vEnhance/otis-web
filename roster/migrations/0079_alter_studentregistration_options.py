@@ -12,6 +12,9 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterModelOptions(
             name='studentregistration',
-            options={'verbose_name': 'Unit petition', 'verbose_name_plural': 'Unit petitions'},
+            options={
+                'verbose_name': 'Unit petition',
+                'verbose_name_plural': 'Unit petitions'
+            },
         ),
     ]

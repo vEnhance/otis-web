@@ -14,6 +14,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='pset',
             name='upload',
-            field=models.ForeignKey(blank=True, help_text='The associated upload file for this problem set', null=True, on_delete=django.db.models.deletion.CASCADE, to='dashboard.uploadedfile'),
+            field=models.ForeignKey(
+                blank=True,
+                help_text='The associated upload file for this problem set',
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to='dashboard.uploadedfile'),
         ),
     ]

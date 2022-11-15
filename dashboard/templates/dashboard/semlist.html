@@ -1,37 +1,37 @@
 {% extends 'layout.html' %}
-{% block title %}
-List of years
-{% endblock %}
+{% block title %}List of years{% endblock %}
 {% block layout-content %}
-{% load otis_extras %}
-
-<p>Here are all the years of OTIS that are in the database.</p>
-<table class="table">
-	<thead class="table-dark">
-		<tr>
-			<td>Year</td>
-			{% if request.user.is_superuser %}
-			<td>Students</td>
-			{% endif %}
-			<td>Active</td>
-		</tr>
-	</thead>
-	<tbody>
-		{% for semester in object_list %}
-		<tr>
-			<td><a href="{% url "past" semester.pk %}">{{ semester }}</a></td>
-			{% if request.user.is_superuser %}
-			<td>{{ semester.count }} students</td>
-			{% endif %}
-			<td>{% if semester.active %}Yes{% else %}No{% endif %}</td>
-		</tr>
-		{% endfor %}
-	</tbody>
-</table>
-<p>
-	You can also see a
-	<a href="{% url "past" %}">combined list of all students</a>.
-	(If you are a superuser, this will be quite long.)
-</p>
-
+    {% load otis_extras %}
+    <p>Here are all the years of OTIS that are in the database.</p>
+    <table class="table">
+        <thead class="table-dark">
+            <tr>
+                <td>Year</td>
+                {% if request.user.is_superuser %}<td>Students</td>{% endif %}
+                <td>Active</td>
+            </tr>
+        </thead>
+        <tbody>
+            {% for semester in object_list %}
+                <tr>
+                    <td>
+                        <a href="{% url "past" semester.pk %}">{{ semester }}</a>
+                    </td>
+                    {% if request.user.is_superuser %}<td>{{ semester.count }} students</td>{% endif %}
+                    <td>
+                        {% if semester.active %}
+                            Yes
+                        {% else %}
+                            No
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <p>
+        You can also see a
+        <a href="{% url "past" %}">combined list of all students</a>.
+        (If you are a superuser, this will be quite long.)
+    </p>
 {% endblock %}

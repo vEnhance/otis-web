@@ -13,6 +13,10 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='problemsuggestion',
             name='acknowledge',
-            field=models.BooleanField(default=True, help_text='Acknowledge me for this contribution. (Uncheck for an anonymous contribution.)'),
+            field=models.BooleanField(
+                default=True,
+                help_text=
+                'Acknowledge me for this contribution. (Uncheck for an anonymous contribution.)'
+            ),
         ),
     ]

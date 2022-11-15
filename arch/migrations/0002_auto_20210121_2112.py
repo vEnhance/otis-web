@@ -24,10 +24,26 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Problem',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('source', models.CharField(blank=True, help_text='The source of the problem, such as `TSTST 2020/3`.If in doubt on formatting, follow what is written on the handout.', max_length=255)),
-                ('description', models.CharField(help_text='A short description of the problem, e.g. `Quirky triangles.`. Most important if the problem does not have a source given. Use sentence case.', max_length=255)),
-                ('group', models.ForeignKey(help_text='The unit to which this problem belongs.', on_delete=django.db.models.deletion.CASCADE, to='core.UnitGroup')),
+                ('id',
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False,
+                        verbose_name='ID')),
+                ('source',
+                    models.CharField(
+                        blank=True,
+                        help_text=
+                        'The source of the problem, such as `TSTST 2020/3`.If in doubt on formatting, follow what is written on the handout.',
+                        max_length=255)),
+                ('description',
+                    models.CharField(
+                        help_text=
+                        'A short description of the problem, e.g. `Quirky triangles.`. Most important if the problem does not have a source given. Use sentence case.',
+                        max_length=255)),
+                ('group',
+                    models.ForeignKey(
+                        help_text='The unit to which this problem belongs.',
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to='core.UnitGroup')),
             ],
             options={
                 'ordering': ('source', 'description'),
@@ -36,7 +52,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='hint',
             name='problem',
-            field=models.ForeignKey(default=None, help_text='The container of the current hint.', on_delete=django.db.models.deletion.CASCADE, to='arch.Problem'),
+            field=models.ForeignKey(
+                default=None,
+                help_text='The container of the current hint.',
+                on_delete=django.db.models.deletion.CASCADE,
+                to='arch.Problem'),
             preserve_default=False,
         ),
         migrations.AlterUniqueTogether(

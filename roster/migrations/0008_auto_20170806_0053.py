@@ -17,11 +17,21 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='student',
             name='user',
-            field=models.ForeignKey(blank=True, help_text='The Django Auth user attached to the student', null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(
+                blank=True,
+                help_text='The Django Auth user attached to the student',
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to=settings.AUTH_USER_MODEL),
         ),
         migrations.AlterField(
             model_name='ta',
             name='user',
-            field=models.ForeignKey(blank=True, help_text='The Django Auth user attached to the TA', null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(
+                blank=True,
+                help_text='The Django Auth user attached to the TA',
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to=settings.AUTH_USER_MODEL),
         ),
     ]

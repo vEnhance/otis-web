@@ -10,13 +10,14 @@ from .models import ProblemSuggestion
 
 
 class ProblemSuggestionFactory(DjangoModelFactory):
-	class Meta:
-		model = ProblemSuggestion
 
-	user = SubFactory(UserFactory)
-	unit = SubFactory(UnitFactory)
-	weight = FuzzyChoice([2, 3, 5, 9])
-	source = UniqueFaker('company')
-	description = Faker('text')
-	statement = Faker('sentence')
-	solution = Faker('paragraph')
+    class Meta:
+        model = ProblemSuggestion
+
+    user = SubFactory(UserFactory)
+    unit = SubFactory(UnitFactory)
+    weight = FuzzyChoice([2, 3, 5, 9])
+    source = UniqueFaker('company')
+    description = Faker('text')
+    statement = Faker('sentence')
+    solution = Faker('paragraph')

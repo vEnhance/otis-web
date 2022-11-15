@@ -15,27 +15,53 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='UnitInquiry',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id',
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False,
+                        verbose_name='ID')),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('action_type', models.CharField(choices=[('DROP', 'Drop unit'), ('JUMP', 'Mark current (and add)'), ('ADD', 'Add unit')], max_length=10)),
-                ('status', models.CharField(choices=[('ACC', 'Approved'), ('REJ', 'Rejected'), ('NEW', 'Pending'), ('HOLD', 'On hold')], default='NEW', max_length=5)),
-                ('explanation', models.TextField(blank=True, help_text='Short explanation for this request (if needed).', max_length=300)),
+                ('action_type',
+                    models.CharField(
+                        choices=[('DROP', 'Drop unit'), ('JUMP', 'Mark current (and add)'),
+                                    ('ADD', 'Add unit')],
+                        max_length=10)),
+                ('status',
+                    models.CharField(
+                        choices=[('ACC', 'Approved'), ('REJ', 'Rejected'), ('NEW', 'Pending'),
+                                    ('HOLD', 'On hold')],
+                        default='NEW',
+                        max_length=5)),
+                ('explanation',
+                    models.TextField(
+                        blank=True,
+                        help_text='Short explanation for this request (if needed).',
+                        max_length=300)),
             ],
         ),
         migrations.AlterField(
             model_name='student',
             name='track',
-            field=models.CharField(choices=[('A', 'Weekly'), ('B', 'Biweekly'), ('C', 'Corr.'), ('E', 'Ext.'), ('G', 'Grad'), ('N', 'N.A.')], help_text='The track that the student is enrolled in for this semester.', max_length=5),
+            field=models.CharField(
+                choices=[('A', 'Weekly'), ('B', 'Biweekly'), ('C', 'Corr.'), ('E', 'Ext.'),
+                            ('G', 'Grad'), ('N', 'N.A.')],
+                help_text='The track that the student is enrolled in for this semester.',
+                max_length=5),
         ),
         migrations.AddField(
             model_name='unitinquiry',
             name='student',
-            field=models.ForeignKey(help_text='The student making the request', on_delete=django.db.models.deletion.CASCADE, to='roster.Student'),
+            field=models.ForeignKey(
+                help_text='The student making the request',
+                on_delete=django.db.models.deletion.CASCADE,
+                to='roster.Student'),
         ),
         migrations.AddField(
             model_name='unitinquiry',
             name='unit',
-            field=models.ForeignKey(help_text='The unit being requested.', on_delete=django.db.models.deletion.CASCADE, to='core.Unit'),
+            field=models.ForeignKey(
+                help_text='The unit being requested.',
+                on_delete=django.db.models.deletion.CASCADE,
+                to='core.Unit'),
         ),
     ]

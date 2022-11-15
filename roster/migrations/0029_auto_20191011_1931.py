@@ -13,6 +13,9 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='unitinquiry',
             name='action_type',
-            field=models.CharField(choices=[('DROP', 'Drop'), ('JUMP', 'Unlock'), ('ADD', 'Add later')], help_text='Describe the action you want to make.', max_length=10),
+            field=models.CharField(
+                choices=[('DROP', 'Drop'), ('JUMP', 'Unlock'), ('ADD', 'Add later')],
+                help_text='Describe the action you want to make.',
+                max_length=10),
         ),
     ]

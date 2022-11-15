@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='invoice',
             name='adjustment',
-            field=models.DecimalField(decimal_places=2, default=0, help_text='Adjustment to the cost.', max_digits=8),
+            field=models.DecimalField(
+                decimal_places=2, default=0, help_text='Adjustment to the cost.', max_digits=8),
         ),
     ]

@@ -17,6 +17,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='student',
             name='usemo_score',
-            field=models.SmallIntegerField(blank=True, help_text='The USEMO score for this year', null=True),
+            field=models.SmallIntegerField(
+                blank=True, help_text='The USEMO score for this year', null=True),
         ),
     ]

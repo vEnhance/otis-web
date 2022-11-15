@@ -1,53 +1,52 @@
 {% extends 'layout.html' %}
 {% block title %}Your Problem Set Submissions{% endblock %}
 {% block layout-content %}
-{% load otis_extras %}
-
-<p>
-	Showing problem sets for
-	<a href="{{ student.get_absolute_url }}">{{ student.name }}</a>
-	in {{ student.semester }}.
-</p>
-<table class="table">
-	<thead class="table-dark">
-		<tr>
-			<td class="text-end">#</td>
-			<td class="text-center">Stat</td>
-			<td>Unit</td>
-			<td class="text-end">♣</td>
-			<td class="text-end">♥</td>
-			<td>Timestamp</td>
-		</tr>
-	</thead>
-	<tbody>
-		{% for pset in object_list %}
-		<tr {% if pset.pending %} class="table-info" {% elif pset.rejected %} class="table-danger" {% endif %}>
-			<td class="text-end">
-				{% if request.user.is_staff %}
-				<a href="{% url "admin:dashboard_pset_change" pset.pk %}">{{ pset.pk }}</a>
-				{% else %}
-				{{ pset.pk }}
-				{% endif %}
-			</td>
-			<td class="text-center">
-				{% if pset.rejected %}
-				<span title="Rejected">🚫</span>
-				{% elif pset.accepted %}
-				<span title="Completed">✅</span>
-				{% else %}
-				<span title="Unit pending review">⏳</span>
-				{% endif %}
-			</td>
-			<td>
-				<a href="{{ pset.get_absolute_url }}">
-					{{ pset.unit.group }}<sup>{{ pset.unit.code }}</sup>
-				</a>
-			</td>
-			<td class="text-end">{{ pset.clubs|default_if_none:"" }}</td>
-			<td class="text-end">{{ pset.hours|default_if_none:"" }}</td>
-			<td>{{ pset.upload.created_at }}</td>
-		</tr>
-		{% endfor %}
-	</tbody>
-</table>
+    {% load otis_extras %}
+    <p>
+        Showing problem sets for
+        <a href="{{ student.get_absolute_url }}">{{ student.name }}</a>
+        in {{ student.semester }}.
+    </p>
+    <table class="table">
+        <thead class="table-dark">
+            <tr>
+                <td class="text-end">#</td>
+                <td class="text-center">Stat</td>
+                <td>Unit</td>
+                <td class="text-end">♣</td>
+                <td class="text-end">♥</td>
+                <td>Timestamp</td>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pset in object_list %}
+                <tr {% if pset.pending %} class="table-info" {% elif pset.rejected %} class="table-danger" {% endif %}>
+                    <td class="text-end">
+                        {% if request.user.is_staff %}
+                            <a href="{% url "admin:dashboard_pset_change" pset.pk %}">{{ pset.pk }}</a>
+                        {% else %}
+                            {{ pset.pk }}
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        {% if pset.rejected %}
+                            <span title="Rejected">🚫</span>
+                        {% elif pset.accepted %}
+                            <span title="Completed">✅</span>
+                        {% else %}
+                            <span title="Unit pending review">⏳</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ pset.get_absolute_url }}">
+                            {{ pset.unit.group }}<sup>{{ pset.unit.code }}</sup>
+                        </a>
+                    </td>
+                    <td class="text-end">{{ pset.clubs|default_if_none:"" }}</td>
+                    <td class="text-end">{{ pset.hours|default_if_none:"" }}</td>
+                    <td>{{ pset.upload.created_at }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {% endblock %}

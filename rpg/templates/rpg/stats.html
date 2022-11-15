@@ -3,39 +3,38 @@
 {% load static %}
 {% block title %}Your Stats{% endblock %}
 {% block layout-content %}
-
-<h1>{{ student.name }} &mdash; {{ level_name }}</h1>
-
-{% if obtained_achievement %}
-<div class="alert alert-success">
-	<h2 class="alert-heading">Achievement unlocked! 🎉</h2>
-	You earned the achievement <b>"{{ obtained_achievement.name }}"</b>
-	<hr />
-</div>
-{% endif %}
-
-<p>You have reached <b>Level {{ level_number }}</b>,
-	granting you the title of <b>{{ level_name }}</b>.</p>
-<p>Your level is defined as the sum of the four statistics below.
-	Each statistic has value $\lfloor \sqrt{n} \rfloor$
-	where $n$ is the number of points amassed towards that statistic.</p>
-
-<div class="accordion" id="accordion">
-	{% include "rpg/meters/clubs.html" with meter=meters.clubs %}
-	{% include "rpg/meters/hearts.html" with meter=meters.hearts %}
-	{% include "rpg/meters/spades.html" with meter=meters.spades %}
-	{% include "rpg/meters/diamonds.html" with meter=meters.diamonds %}
-</div>
-
-<h3>Previous levels</h3>
-<ul class="list-group">
-	{% for level in obtained_levels %}
-	<li class="list-group-item">
-		<strong>Level {{ level.threshold }}</strong> {{ level.name }}
-	</li>
-	{% endfor %}
-</ul>
-<script>
+    <h1>{{ student.name }} &mdash; {{ level_name }}</h1>
+    {% if obtained_achievement %}
+        <div class="alert alert-success">
+            <h2 class="alert-heading">Achievement unlocked! 🎉</h2>
+            You earned the achievement <b>"{{ obtained_achievement.name }}"</b>
+            <hr />
+        </div>
+    {% endif %}
+    <p>
+        You have reached <b>Level {{ level_number }}</b>,
+        granting you the title of <b>{{ level_name }}</b>.
+    </p>
+    <p>
+        Your level is defined as the sum of the four statistics below.
+        Each statistic has value $\lfloor \sqrt{n} \rfloor$
+        where $n$ is the number of points amassed towards that statistic.
+    </p>
+    <div class="accordion" id="accordion">
+        {% include "rpg/meters/clubs.html" with meter=meters.clubs %}
+        {% include "rpg/meters/hearts.html" with meter=meters.hearts %}
+        {% include "rpg/meters/spades.html" with meter=meters.spades %}
+        {% include "rpg/meters/diamonds.html" with meter=meters.diamonds %}
+    </div>
+    <h3>Previous levels</h3>
+    <ul class="list-group">
+        {% for level in obtained_levels %}
+            <li class="list-group-item">
+                <strong>Level {{ level.threshold }}</strong> {{ level.name }}
+            </li>
+        {% endfor %}
+    </ul>
+    <script>
     $(function(){     
         var hash = location.hash;
         if (hash == "#headingDexterity"
@@ -46,5 +45,5 @@
                 $("#collapse" + stat).addClass("show");
         }
     });
-</script>
+    </script>
 {% endblock %}

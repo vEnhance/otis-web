@@ -26,11 +26,15 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='market',
             name='prompt',
-            field=markdownfield.models.MarkdownField(help_text='Full text of the question', rendered_field='prompt_rendered'),
+            field=markdownfield.models.MarkdownField(
+                help_text='Full text of the question', rendered_field='prompt_rendered'),
         ),
         migrations.AlterField(
             model_name='market',
             name='solution',
-            field=markdownfield.models.MarkdownField(blank=True, help_text='Comments that appear in the market results.', rendered_field='solution_rendered'),
+            field=markdownfield.models.MarkdownField(
+                blank=True,
+                help_text='Comments that appear in the market results.',
+                rendered_field='solution_rendered'),
         ),
     ]

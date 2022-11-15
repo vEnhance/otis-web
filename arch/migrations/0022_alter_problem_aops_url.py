@@ -13,6 +13,10 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='problem',
             name='aops_url',
-            field=models.URLField(blank=True, help_text='URL to problem on AoPS. Include HTTPS.', max_length=128, verbose_name='AoPS URL'),
+            field=models.URLField(
+                blank=True,
+                help_text='URL to problem on AoPS. Include HTTPS.',
+                max_length=128,
+                verbose_name='AoPS URL'),
         ),
     ]

@@ -3,6 +3,4 @@
 {% block title %}HTTP 400 Bad Request{% endblock %}
 {% block emoji %}🤦{% endblock %}
 {% load otis_extras %}
-{% block extra %}
-<tt>{{ "HTTP_400_NOTES"|getenv }}</tt>
-{% endblock %}
+{% block extra %}<tt>{{ "HTTP_400_NOTES"|getenv }}</tt>{% endblock %}

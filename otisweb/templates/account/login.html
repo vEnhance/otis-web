@@ -1,89 +1,116 @@
 {% extends "account/base.html" %}
 {% load crispy_forms_tags %}
-
 {% load i18n %}
 {% load account socialaccount %}
-
-{% block head_title %}{% trans "Log In" %}{% endblock %}
-
+{% block head_title %}
+    {% trans "Log In" %}
+{% endblock %}
 {% block content %}
-{% get_providers as socialaccount_providers %}
-
-<p>
-	<em>Come meet me in the Ruby Palace~</em>
-</p>
-
-<div class="accordion" id="accordionLogin">
-	<div class="accordion-item">
-		<h2 class="accordion-header" id="headingSocialLogin">
-			<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSocialLogin" aria-expanded="true" aria-controls="collapseSocialLogin">
-				Login via existing social connection
-			</button>
-		</h2>
-		<div id="collapseSocialLogin" class="accordion-collapse collapse show" aria-labelledby="headingSocialLogin">
-			<div class="accordion-body">
-				<p>Use an already existing connection (not for new connections).</p>
-				<div class="socialaccount_ballot">
-					<ul class="socialaccount_providers">
-						{% include "socialaccount/snippets/provider_list.html" with process="login" %}
-					</ul>
-				</div>
-			</div>
-		</div>
-	</div>
-	<div class="accordion-item">
-		<h2 class="accordion-header" id="headingUserPass">
-			<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUserPass" aria-expanded="true" aria-controls="collapseUserPass">
-				Login with existing username and password
-			</button>
-		</h2>
-		<div id="collapseUserPass" class="accordion-collapse collapse show" aria-labelledby="headingUserPass">
-			<div class="accordion-body">
-				<form class="login" method="POST" action="{% url 'account_login' %}">
-					{% csrf_token %}
-					{{ form|crispy }}
-					{% if redirect_field_value %}
-					<input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
-					{% endif %}
-					<button class="btn btn-success" type="submit">{% trans "Sign In" %}</button>
-				</form>
-			</div>
-		</div>
-	</div>
-	<div class="accordion-item">
-		<h2 class="accordion-header" id="headingConnect">
-			<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseConnect" aria-expanded="false" aria-controls="collapseConnect">
-				I am a new student with no account yet!
-			</button>
-		</h2>
-		<div id="collapseConnect" class="accordion-collapse collapse" aria-labelledby="headingConnect">
-			<div class="accordion-body">
-				<p>Use this option if you are a newcoming OTIS student who is opening a brand new account for the first time.
-					(Returning students should use their old account.)</p>
-				<p>Select an option below to link your account to OTIS-WEB.</p>
-				<div class="socialaccount_ballot">
-					<ul class="socialaccount_providers">
-						{% include "socialaccount/snippets/provider_list.html" with process="login" %}
-					</ul>
-				</div>
-				<p>Alternatively,
-				<a href="{% url "account_signup" %}">create a username and password</a>.</p>
-			</div>
-		</div>
-	</div>
-	<div class="accordion-item">
-		<h2 class="accordion-header" id="headingForgot">
-			<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseForgot" aria-expanded="false" aria-controls="collapseForgot">
-				Uh, I forgot all my passwords...
-			</button>
-		</h2>
-		<div id="collapseForgot" class="accordion-collapse collapse" aria-labelledby="headingForgot">
-			<div class="accordion-body">
-				Sucks to be you. Email Evan.
-			</div>
-		</div>
-	</div>
-</div>
-
-
+    {% get_providers as socialaccount_providers %}
+    <p>
+        <em>Come meet me in the Ruby Palace~</em>
+    </p>
+    <div class="accordion" id="accordionLogin">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingSocialLogin">
+                <button class="accordion-button"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#collapseSocialLogin"
+                        aria-expanded="true"
+                        aria-controls="collapseSocialLogin">
+                    Login via existing social connection
+                </button>
+            </h2>
+            <div id="collapseSocialLogin"
+                 class="accordion-collapse collapse show"
+                 aria-labelledby="headingSocialLogin">
+                <div class="accordion-body">
+                    <p>Use an already existing connection (not for new connections).</p>
+                    <div class="socialaccount_ballot">
+                        <ul class="socialaccount_providers">
+                            {% include "socialaccount/snippets/provider_list.html" with process="login" %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingUserPass">
+                <button class="accordion-button"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#collapseUserPass"
+                        aria-expanded="true"
+                        aria-controls="collapseUserPass">
+                    Login with existing username and password
+                </button>
+            </h2>
+            <div id="collapseUserPass"
+                 class="accordion-collapse collapse show"
+                 aria-labelledby="headingUserPass">
+                <div class="accordion-body">
+                    <form class="login" method="POST" action="{% url 'account_login' %}">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        {% if redirect_field_value %}
+                            <input type="hidden"
+                                   name="{{ redirect_field_name }}"
+                                   value="{{ redirect_field_value }}"/>
+                        {% endif %}
+                        <button class="btn btn-success" type="submit">{% trans "Sign In" %}</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingConnect">
+                <button class="accordion-button collapsed"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#collapseConnect"
+                        aria-expanded="false"
+                        aria-controls="collapseConnect">
+                    I am a new student with no account yet!
+                </button>
+            </h2>
+            <div id="collapseConnect"
+                 class="accordion-collapse collapse"
+                 aria-labelledby="headingConnect">
+                <div class="accordion-body">
+                    <p>
+                        Use this option if you are a newcoming OTIS student who is opening a brand new account for the first time.
+                        (Returning students should use their old account.)
+                    </p>
+                    <p>Select an option below to link your account to OTIS-WEB.</p>
+                    <div class="socialaccount_ballot">
+                        <ul class="socialaccount_providers">
+                            {% include "socialaccount/snippets/provider_list.html" with process="login" %}
+                        </ul>
+                    </div>
+                    <p>
+                        Alternatively,
+                        <a href="{% url "account_signup" %}">create a username and password</a>.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingForgot">
+                <button class="accordion-button collapsed"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#collapseForgot"
+                        aria-expanded="false"
+                        aria-controls="collapseForgot">
+                    Uh, I forgot all my passwords...
+                </button>
+            </h2>
+            <div id="collapseForgot"
+                 class="accordion-collapse collapse"
+                 aria-labelledby="headingForgot">
+                <div class="accordion-body">Sucks to be you. Email Evan.</div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

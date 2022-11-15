@@ -15,7 +15,10 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='assistant',
             name='shortname',
-            field=models.CharField(default='??', help_text='Initials or short name for this Assistant', max_length=10),
+            field=models.CharField(
+                default='??',
+                help_text='Initials or short name for this Assistant',
+                max_length=10),
             preserve_default=False,
         ),
     ]

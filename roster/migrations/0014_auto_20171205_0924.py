@@ -15,6 +15,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='invoice',
             name='amount_owed',
-            field=models.DecimalField(blank=True, decimal_places=2, default=0, help_text='Amount currently owed.', max_digits=8, null=True),
+            field=models.DecimalField(
+                blank=True,
+                decimal_places=2,
+                default=0,
+                help_text='Amount currently owed.',
+                max_digits=8,
+                null=True),
         ),
     ]

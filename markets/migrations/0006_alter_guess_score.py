@@ -13,6 +13,9 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='guess',
             name='score',
-            field=models.FloatField(blank=True, help_text='The score for the guess, computed by the backend.', null=True),
+            field=models.FloatField(
+                blank=True,
+                help_text='The score for the guess, computed by the backend.',
+                null=True),
         ),
     ]

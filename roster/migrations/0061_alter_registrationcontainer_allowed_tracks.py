@@ -13,6 +13,9 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='registrationcontainer',
             name='allowed_tracks',
-            field=models.CharField(blank=True, help_text='A comma separated list of allowed tracks students can register for', max_length=256),
+            field=models.CharField(
+                blank=True,
+                help_text='A comma separated list of allowed tracks students can register for',
+                max_length=256),
         ),
     ]

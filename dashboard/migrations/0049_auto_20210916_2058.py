@@ -13,12 +13,18 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='palaceentry',
             name='visible',
-            field=models.BooleanField(default=True, help_text='Uncheck this box to hide your entry altogether (you can change your mind later)'),
+            field=models.BooleanField(
+                default=True,
+                help_text=
+                'Uncheck this box to hide your entry altogether (you can change your mind later)'
+            ),
         ),
         migrations.AlterField(
             model_name='palaceentry',
             name='display_name',
-            field=models.CharField(help_text='How you would like your name to be displayed in the Ruby Palace.', max_length=128),
+            field=models.CharField(
+                help_text='How you would like your name to be displayed in the Ruby Palace.',
+                max_length=128),
         ),
         migrations.AlterField(
             model_name='palaceentry',

@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='registrationcontainer',
             name='num_preps',
-            field=models.PositiveSmallIntegerField(default=2, help_text='Number of preps to bill for'),
+            field=models.PositiveSmallIntegerField(
+                default=2, help_text='Number of preps to bill for'),
         ),
     ]

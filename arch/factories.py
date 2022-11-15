@@ -7,17 +7,19 @@ from .models import Hint, Problem
 
 
 class ProblemFactory(DjangoModelFactory):
-	class Meta:
-		model = Problem
 
-	puid = UniqueFaker('pystr')
+    class Meta:
+        model = Problem
+
+    puid = UniqueFaker('pystr')
 
 
 class HintFactory(DjangoModelFactory):
-	class Meta:
-		model = Hint
 
-	problem = SubFactory(ProblemFactory)
-	number = Sequence(lambda n: n)
-	keywords = Faker('job')
-	content = Faker('sentence')
+    class Meta:
+        model = Hint
+
+    problem = SubFactory(ProblemFactory)
+    number = Sequence(lambda n: n)
+    keywords = Faker('job')
+    content = Faker('sentence')

@@ -14,6 +14,13 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='achievement',
             name='code',
-            field=models.CharField(max_length=96, null=True, unique=True, validators=[django.core.validators.RegexValidator(message='24-char hex string', regex='^[a-f0-9]{24}$')]),
+            field=models.CharField(
+                max_length=96,
+                null=True,
+                unique=True,
+                validators=[
+                    django.core.validators.RegexValidator(
+                        message='24-char hex string', regex='^[a-f0-9]{24}$')
+                ]),
         ),
     ]

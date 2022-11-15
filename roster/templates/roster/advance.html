@@ -1,8 +1,7 @@
 {% extends 'layout.html' %}
 {% load static %}
-
 {% block css %}
-<style type="text/css">
+    <style type="text/css">
 	ul.chosen-choices {
 		border: 2px solid #aaa;
 	}
@@ -15,29 +14,24 @@
 		min-width: 3em;
 		font-weight: bold;
 	}
-</style>
+    </style>
 {% endblock %}
-
 {% block scripts %}
-<script type="text/javascript">
+    <script type="text/javascript">
 	$(document).ready(function() {
 		$("select.chosen-select").chosen({
 			placeholder_text: "...",
 			width: "300",
 		});
 	});
-</script>
+    </script>
 {% endblock %}
-
 {% block layout-content %}
-<p>Use this form to manually adjust the unlocked units for this student.</p>
-
-<h3>Unlocked units</h3>
-{% include "generic_form.html" with submit_name="Save" %}
-
-<h3>Existing curriculum</h3>
-<p>For your reference, here is the existing curriculum.</p>
-{% include 'dashboard/curriculum_list.html' %}
-
-{% include 'dashboard/back_link.html' %}
+    <p>Use this form to manually adjust the unlocked units for this student.</p>
+    <h3>Unlocked units</h3>
+    {% include "generic_form.html" with submit_name="Save" %}
+    <h3>Existing curriculum</h3>
+    <p>For your reference, here is the existing curriculum.</p>
+    {% include 'dashboard/curriculum_list.html' %}
+    {% include 'dashboard/back_link.html' %}
 {% endblock %}

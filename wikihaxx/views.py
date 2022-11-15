@@ -8,48 +8,46 @@ from django.utils.text import slugify
 from wiki.models import URLPath
 
 WIKI_SUBJECT_CHART = {
-	'A': 'algebra',
-	'F': 'algebra',
-	'C': 'combinatorics',
-	'G': 'geometry',
-	'N': 'number-theory',
-	'M': 'miscellaneous',
-	'K': 'null',
+    'A': 'algebra',
+    'F': 'algebra',
+    'C': 'combinatorics',
+    'G': 'geometry',
+    'N': 'number-theory',
+    'M': 'miscellaneous',
+    'K': 'null',
 }
 
 
 def edit_redirect(u: URLPath) -> HttpResponseRedirect:
-	return HttpResponseRedirect(reverse('wiki:edit', kwargs={'path': u.path}))
+    return HttpResponseRedirect(reverse('wiki:edit', kwargs={'path': u.path}))
 
 
 def view_redirect(u: URLPath) -> HttpResponseRedirect:
-	return HttpResponseRedirect(u.get_absolute_url())
+    return HttpResponseRedirect(u.get_absolute_url())
 
 
 def wiki_redirect(u: URLPath) -> HttpResponseRedirect:
-	return view_redirect(u)
+    return view_redirect(u)
 
 
 @login_required
 def unitgroup(request: HttpRequest, pk: int) -> HttpResponse:
-	group = get_object_or_404(UnitGroup, pk=pk)
+    group = get_object_or_404(UnitGroup, pk=pk)
 
-	subject_name = WIKI_SUBJECT_CHART[group.subject]
-	slug = slugify(group.name)
-	try:
-		u = URLPath.get_by_path(path=f'/units/list-of-{subject_name}-units/{slug}')
-	except URLPath.DoesNotExist:
-		parent = URLPath.get_by_path(path=f'/units/list-of-{subject_name}-units/')
-		content = (
-			f'[unit {group.slug}]\n[/unit]\n\n'
-			f'(This is an automatically generated article for {group.name}.'
-			'Please add some content!)\n\n'
-		)
-		u = URLPath.create_urlpath(
-			parent=parent,
-			slug=slug,
-			title=group.name,
-			request=request,
-			content=content,
-		)
-	return wiki_redirect(u)
+    subject_name = WIKI_SUBJECT_CHART[group.subject]
+    slug = slugify(group.name)
+    try:
+        u = URLPath.get_by_path(path=f'/units/list-of-{subject_name}-units/{slug}')
+    except URLPath.DoesNotExist:
+        parent = URLPath.get_by_path(path=f'/units/list-of-{subject_name}-units/')
+        content = (f'[unit {group.slug}]\n[/unit]\n\n'
+                    f'(This is an automatically generated article for {group.name}.'
+                    'Please add some content!)\n\n')
+        u = URLPath.create_urlpath(
+            parent=parent,
+            slug=slug,
+            title=group.name,
+            request=request,
+            content=content,
+        )
+    return wiki_redirect(u)

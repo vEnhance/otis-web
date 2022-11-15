@@ -16,10 +16,23 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='AchievementUnlock',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('timestamp', models.DateTimeField(auto_now_add=True, help_text='The time the achievement was granted')),
-                ('achievement', models.ForeignKey(help_text='The achievement that was obtained', on_delete=django.db.models.deletion.CASCADE, to='dashboard.achievement')),
-                ('user', models.ForeignKey(help_text='The user who unlocked the achievement', on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('id',
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False,
+                        verbose_name='ID')),
+                ('timestamp',
+                    models.DateTimeField(
+                        auto_now_add=True, help_text='The time the achievement was granted')),
+                ('achievement',
+                    models.ForeignKey(
+                        help_text='The achievement that was obtained',
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to='dashboard.achievement')),
+                ('user',
+                    models.ForeignKey(
+                        help_text='The user who unlocked the achievement',
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL)),
             ],
         ),
     ]

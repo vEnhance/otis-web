@@ -1,75 +1,70 @@
 {% extends 'layout.html' %}
 {% block title %}Instructor list{% endblock %}
-
 {% block layout-content %}
-{% regroup students by assistant as instructor_list %}
-
-{% if needs_sync and request.user.is_superuser %}
-<div class="alert alert-warning">
-	The "Active Staff" group is out of sync
-	with the list of actual instructors.
-	Click below to fix this.
-	<form action="{% url "instructors" %}" method="post">
-		{% csrf_token %}
-		<p class="text-center">
-			<input type="submit" class="btn btn-warning" value="Sync" />
-		</p>
-	</form>
-</div>
-<hr />
-{% endif %}
-
-<h2>List of instructors</h2>
-
-<table class="table">
-	<tr>
-		<th>Name</th>
-		<th>Email</th>
-		<th>Students</th>
-	</tr>
-	{% for igroup in instructor_list %}
-	{% with instructor=igroup.grouper %}
-	<tr>
-		<td>
-			<a href="{% url "admin:roster_assistant_change" instructor.pk %}">
-				{{ instructor.name }}
-			</a>
-			<br>
-			{{ instructor.shortname }}
-		</td>
-		<td>
-			<code>{{ instructor.user.email|urlize }}</code>
-		</td>
-		<td>
-			<ul>
-				{% for student in igroup.list %}
-				<li><a href="{{ student.get_absolute_url }}">{{ student.name }}</a></li>
-				{% endfor %}
-			</ul>
-		</td>
-	</tr>
-	{% endwith %}
-	{% endfor %}
-</table>
-
-<h2>Instructor emails (for copy-pasting)</h2>
-<code>
-	{% for igroup in instructor_list %}
-	{% with instructor=igroup.grouper %}
-	"{{ instructor.name }}"
-	&lt;{{ instructor.user.email }}&gt;,<br />
-	{% endwith %}
-	{% endfor %}
-</code>
-
-<h2>Student emails (for copy-pasting)</h2>
-<code>
-	{% for igroup in instructor_list %}
-	{% for student in igroup.list %}
-	"{{ student.name }}"
-	&lt;{{ student.user.email }}&gt;,<br />
-	{% endfor %}
-	{% endfor %}
-</code>
-
+    {% regroup students by assistant as instructor_list %}
+    {% if needs_sync and request.user.is_superuser %}
+        <div class="alert alert-warning">
+            The "Active Staff" group is out of sync
+            with the list of actual instructors.
+            Click below to fix this.
+            <form action="{% url "instructors" %}" method="post">
+                {% csrf_token %}
+                <p class="text-center">
+                    <input type="submit" class="btn btn-warning" value="Sync" />
+                </p>
+            </form>
+        </div>
+        <hr />
+    {% endif %}
+    <h2>List of instructors</h2>
+    <table class="table">
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Students</th>
+        </tr>
+        {% for igroup in instructor_list %}
+            {% with instructor=igroup.grouper %}
+                <tr>
+                    <td>
+                        <a href="{% url "admin:roster_assistant_change" instructor.pk %}">{{ instructor.name }}</a>
+                        <br>
+                        {{ instructor.shortname }}
+                    </td>
+                    <td>
+                        <code>{{ instructor.user.email|urlize }}</code>
+                    </td>
+                    <td>
+                        <ul>
+                            {% for student in igroup.list %}
+                                <li>
+                                    <a href="{{ student.get_absolute_url }}">{{ student.name }}</a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                </tr>
+            {% endwith %}
+        {% endfor %}
+    </table>
+    <h2>Instructor emails (for copy-pasting)</h2>
+    <code>
+        {% for igroup in instructor_list %}
+            {% with instructor=igroup.grouper %}
+                "{{ instructor.name }}"
+                &lt;{{ instructor.user.email }}&gt;,
+                <br />
+            {% endwith %}
+        {% endfor %}
+    </code>
+    <h2>Student emails (for copy-pasting)</h2>
+    <code>
+        {% for igroup in instructor_list %}
+            {% for student in igroup.list %}
+                "{{ student.name }}"
+                &lt;{{ student.user.email }}&gt;,
+                <br />
+            {% endfor %}
+        {% endfor %}
+    </code>
 {% endblock %}

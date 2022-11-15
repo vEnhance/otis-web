@@ -1,54 +1,56 @@
 {% extends 'layout.html' %}
 {% load static %}
 {% load otis_extras %}
-
 {% block layout-content %}
-<p>This is <i>Idle-Warn</i>,
-	where you can find a list of students
-	who have yet to submit the first problem set,
-	or have not submitted a problem set for a while.
-	Be gentle! Don't be the bad guy.</p>
-
-<table class="table">
-	<thead class="table-dark">
-		<tr>
-			<th>Lv</th>
-			<th>Name</th>
-			<th>Last pset</th>
-			<th>Last login</th>
-			<th>Units</th>
-		</tr>
-	</thead>
-
-	<tbody>
-		{% for row in rows %}
-		{% with student=row.student %}
-		<tr {% if student.newborn %}class="table-danger" {% endif %}>
-			<td>Lv. {{ row.level }}</td>
-			<td><a title="{{ student.name }}" href="{% url "portal" student.id %}" class="tooltip-link">
-					{{ student.user.email }}</a></td>
-			{% if student.latest_pset %}
-			<td class="text-end">{{ row.days_since_last_pset|floatformat:2 }} days</td>
-			{% else %}
-			<td class="text-end">∞</td>
-			{% endif%}
-			{% if row.days_since_last_seen < 1000 %}
-			<td class="text-end">{{ row.days_since_last_seen|floatformat:2 }} days</td>
-			{% else %}
-			<td class="text-end">∞</td>
-			{% endif %}
-			<td class="text-end">{{ student.num_psets|default_if_none:0 }}</td>
-		</tr>
-		{% endwith %}
-		{% endfor %}
-	</tbody>
-</table>
-<p>Email addresses for copy-pasting:</p>
-<code>
-	{% for row in rows %}
-	"{{ row.student.name }}" &lt;{{ row.student.user.email }}&gt;,<br>
-	{% endfor %}
-</code>
-
-<p>This list was generated {% now "r" %}.</p>
+    <p>
+        This is <i>Idle-Warn</i>,
+        where you can find a list of students
+        who have yet to submit the first problem set,
+        or have not submitted a problem set for a while.
+        Be gentle! Don't be the bad guy.
+    </p>
+    <table class="table">
+        <thead class="table-dark">
+            <tr>
+                <th>Lv</th>
+                <th>Name</th>
+                <th>Last pset</th>
+                <th>Last login</th>
+                <th>Units</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+                {% with student=row.student %}
+                    <tr {% if student.newborn %}class="table-danger"{% endif %}>
+                        <td>Lv. {{ row.level }}</td>
+                        <td>
+                            <a title="{{ student.name }}"
+                               href="{% url "portal" student.id %}"
+                               class="tooltip-link">{{ student.user.email }}</a>
+                        </td>
+                        {% if student.latest_pset %}
+                            <td class="text-end">{{ row.days_since_last_pset|floatformat:2 }} days</td>
+                        {% else %}
+                            <td class="text-end">∞</td>
+                        {% endif %}
+                        {% if row.days_since_last_seen < 1000 %}
+                            <td class="text-end">{{ row.days_since_last_seen|floatformat:2 }} days</td>
+                        {% else %}
+                            <td class="text-end">∞</td>
+                        {% endif %}
+                        <td class="text-end">{{ student.num_psets|default_if_none:0 }}</td>
+                    </tr>
+                {% endwith %}
+            {% endfor %}
+        </tbody>
+    </table>
+    <p>Email addresses for copy-pasting:</p>
+    <code>
+        {% for row in rows %}
+            "{{ row.student.name }}" &lt;{{ row.student.user.email }}&gt;,
+            <br>
+        {% endfor %}
+    </code>
+    <p>This list was generated {% now "r" %}.</p>
 {% endblock %}

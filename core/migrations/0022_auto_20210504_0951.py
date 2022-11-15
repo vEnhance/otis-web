@@ -13,11 +13,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='semester',
             name='first_payment_deadline',
-            field=models.DateTimeField(blank=True, help_text='Deadline for nonzero payment.', null=True),
+            field=models.DateTimeField(
+                blank=True, help_text='Deadline for nonzero payment.', null=True),
         ),
         migrations.AddField(
             model_name='semester',
             name='most_payment_deadline',
-            field=models.DateTimeField(blank=True, help_text='Deadline for two-thirds of the payment.', null=True),
+            field=models.DateTimeField(
+                blank=True, help_text='Deadline for two-thirds of the payment.', null=True),
         ),
     ]

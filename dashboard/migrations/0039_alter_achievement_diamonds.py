@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='achievement',
             name='diamonds',
-            field=models.SmallIntegerField(default=1, help_text='Amount of diamonds for this achievement'),
+            field=models.SmallIntegerField(
+                default=1, help_text='Amount of diamonds for this achievement'),
         ),
     ]

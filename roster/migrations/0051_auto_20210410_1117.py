@@ -13,11 +13,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='student',
             name='email',
-            field=models.EmailField(blank=True, help_text='Student email address.', max_length=254),
+            field=models.EmailField(
+                blank=True, help_text='Student email address.', max_length=254),
         ),
         migrations.AddField(
             model_name='student',
             name='parent_email',
-            field=models.EmailField(blank=True, help_text='Parent email address.', max_length=254),
+            field=models.EmailField(
+                blank=True, help_text='Parent email address.', max_length=254),
         ),
     ]

@@ -13,6 +13,10 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='unit',
             name='reveal_at_level',
-            field=models.PositiveSmallIntegerField(blank=True, help_text='If a number is specified here, the unit is added automatically at that level', null=True),
+            field=models.PositiveSmallIntegerField(
+                blank=True,
+                help_text=
+                'If a number is specified here, the unit is added automatically at that level',
+                null=True),
         ),
     ]

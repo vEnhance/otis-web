@@ -14,11 +14,23 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='student',
             name='assistant',
-            field=models.ForeignKey(blank=True, help_text='The assistant for this student, if any', null=True, on_delete=django.db.models.deletion.SET_NULL, to='roster.Assistant'),
+            field=models.ForeignKey(
+                blank=True,
+                help_text='The assistant for this student, if any',
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to='roster.Assistant'),
         ),
         migrations.AlterField(
             model_name='student',
             name='pointer_current_unit',
-            field=models.ForeignKey(blank=True, help_text='If set, the counter will skip ahead so that the student is working on this unit instead.', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='pointer_unit', to='core.Unit'),
+            field=models.ForeignKey(
+                blank=True,
+                help_text=
+                'If set, the counter will skip ahead so that the student is working on this unit instead.',
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name='pointer_unit',
+                to='core.Unit'),
         ),
     ]

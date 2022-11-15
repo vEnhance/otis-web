@@ -10,24 +10,26 @@ from .models import Guess, Market
 
 
 class MarketFactory(DjangoModelFactory):
-	class Meta:
-		model = Market
 
-	semester = SubFactory(SemesterFactory)
-	start_date = Faker('past_datetime', tzinfo=utc)
-	end_date = Faker('future_datetime', tzinfo=utc)
+    class Meta:
+        model = Market
 
-	slug = UniqueFaker('slug')
-	title = Faker('bs')
-	prompt = Faker('paragraph')
+    semester = SubFactory(SemesterFactory)
+    start_date = Faker('past_datetime', tzinfo=utc)
+    end_date = Faker('future_datetime', tzinfo=utc)
+
+    slug = UniqueFaker('slug')
+    title = Faker('bs')
+    prompt = Faker('paragraph')
 
 
 class GuessFactory(DjangoModelFactory):
-	class Meta:
-		model = Guess
 
-	user = SubFactory(UserFactory)
-	market = SubFactory(MarketFactory)
-	value = FuzzyDecimal(1, 10000)
+    class Meta:
+        model = Guess
 
-	postgen_set_score = PostGenerationMethodCall("set_score")
+    user = SubFactory(UserFactory)
+    market = SubFactory(MarketFactory)
+    value = FuzzyDecimal(1, 10000)
+
+    postgen_set_score = PostGenerationMethodCall("set_score")

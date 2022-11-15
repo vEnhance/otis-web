@@ -14,6 +14,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='student',
             name='achievements',
-            field=models.ManyToManyField(help_text='Codes that this student has obtained', to='dashboard.AchievementCode'),
+            field=models.ManyToManyField(
+                help_text='Codes that this student has obtained',
+                to='dashboard.AchievementCode'),
         ),
     ]

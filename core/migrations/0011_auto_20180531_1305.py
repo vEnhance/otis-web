@@ -15,11 +15,19 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='semester',
             name='exam_family',
-            field=models.CharField(choices=[('Waltz', 'Waltz'), ('Foxtrot', 'Foxtrot'), ('', '--')], default='', help_text='The family of practice exams to display.', max_length=10),
+            field=models.CharField(
+                choices=[('Waltz', 'Waltz'), ('Foxtrot', 'Foxtrot'), ('', '--')],
+                default='',
+                help_text='The family of practice exams to display.',
+                max_length=10),
         ),
         migrations.AlterField(
             model_name='semester',
             name='active',
-            field=models.BooleanField(default=False, help_text='Whether the semester is currently active (there should thus be at most one active semester).'),
+            field=models.BooleanField(
+                default=False,
+                help_text=
+                'Whether the semester is currently active (there should thus be at most one active semester).'
+            ),
         ),
     ]

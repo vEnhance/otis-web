@@ -15,6 +15,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='uploadedfile',
             name='description',
-            field=models.CharField(blank=True, help_text='Optional description of the file', max_length=250),
+            field=models.CharField(
+                blank=True, help_text='Optional description of the file', max_length=250),
         ),
     ]

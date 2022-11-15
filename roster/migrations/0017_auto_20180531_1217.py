@@ -19,12 +19,20 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='student',
             name='classification',
-            field=models.CharField(choices=[('A', 'Weekly'), ('B', 'Biweekly'), ('C', 'Correspondence'), ('N', 'Not applicable')], default='B', max_length=5),
+            field=models.CharField(
+                choices=[('A', 'Weekly'), ('B', 'Biweekly'), ('C', 'Correspondence'),
+                            ('N', 'Not applicable')],
+                default='B',
+                max_length=5),
             preserve_default=False,
         ),
         migrations.AlterField(
             model_name='student',
             name='legit',
-            field=models.BooleanField(default=True, help_text='Whether this student is still active. Set to false for dummy accounts and the like. This will hide them from the master schedule, for example.'),
+            field=models.BooleanField(
+                default=True,
+                help_text=
+                'Whether this student is still active. Set to false for dummy accounts and the like. This will hide them from the master schedule, for example.'
+            ),
         ),
     ]

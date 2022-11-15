@@ -1,31 +1,34 @@
 {% extends 'layout.html' %}
 {% block title %}The Ruby Palace{% endblock %}
 {% block layout-content %}
-
-{% for carving in palace_carvings %}
-{% if carving.image %}
-<img width="96px" style="float: right;" src="{{ carving.image.url }}" />
-{% endif %}
-
-<h2>
-	{% if carving.hyperlink %}
-	<a href="{{ carving.hyperlink }}">{{ carving.display_name }}</a>
-	{% else %}
-	{{ carving.display_name }}
-	{% endif %}
-</h2>
-<p><em>{{ carving.created_at }}</em></p>
-
-{{carving.message|linebreaks}}
-<hr />
-{% endfor %}
-
-{% if student %}
-<div class="text-center">
-	<a href="{% url "palace-update" student.id %}" style="margin: 0 auto; width: 120px;" class="btn btn-primary text-white" role="button">Carve</a>
-	&nbsp;
-	<a href="{% url "diamond-update" student.id %}" style="margin: 0 auto; width: 120px;" class="btn btn-danger text-white" role="button">Forge</a>
-</div>
-{% endif %}
-
+    {% for carving in palace_carvings %}
+        {% if carving.image %}<img width="96px" style="float: right;" src="{{ carving.image.url }}" />{% endif %}
+        <h2>
+            {% if carving.hyperlink %}
+                <a href="{{ carving.hyperlink }}">{{ carving.display_name }}</a>
+            {% else %}
+                {{ carving.display_name }}
+            {% endif %}
+        </h2>
+        <p>
+            <em>{{ carving.created_at }}</em>
+        </p>
+        {{ carving.message|linebreaks }}
+        <hr />
+    {% endfor %}
+    {% if student %}
+        <div class="text-center">
+            <a href="{% url "palace-update" student.id %}"
+               style="margin: 0 auto;
+                      width: 120px"
+               class="btn btn-primary text-white"
+               role="button">Carve</a>
+            &nbsp;
+            <a href="{% url "diamond-update" student.id %}"
+               style="margin: 0 auto;
+                      width: 120px"
+               class="btn btn-danger text-white"
+               role="button">Forge</a>
+        </div>
+    {% endif %}
 {% endblock %}

@@ -13,6 +13,10 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='student',
             name='track',
-            field=models.CharField(choices=[('A', 'Weekly'), ('B', 'Biweekly'), ('C', 'Corr.'), ('E', 'Ext.'), ('G', 'Grad'), ('N', 'N.A.'), ('P', 'Phantom')], help_text='The track that the student is enrolled in for this semester.', max_length=5),
+            field=models.CharField(
+                choices=[('A', 'Weekly'), ('B', 'Biweekly'), ('C', 'Corr.'), ('E', 'Ext.'),
+                            ('G', 'Grad'), ('N', 'N.A.'), ('P', 'Phantom')],
+                help_text='The track that the student is enrolled in for this semester.',
+                max_length=5),
         ),
     ]

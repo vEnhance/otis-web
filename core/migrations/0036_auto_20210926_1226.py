@@ -15,16 +15,22 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='userprofile',
             name='last_announce_dismiss',
-            field=models.DateTimeField(default=datetime.datetime(1970, 1, 1, 0, 0, tzinfo=utc), help_text='Last time user dismissed the emails modal.'),
+            field=models.DateTimeField(
+                default=datetime.datetime(1970, 1, 1, 0, 0, tzinfo=utc),
+                help_text='Last time user dismissed the emails modal.'),
         ),
         migrations.AddField(
             model_name='userprofile',
             name='last_download_dismiss',
-            field=models.DateTimeField(default=datetime.datetime(1970, 1, 1, 0, 0, tzinfo=utc), help_text='Last time user dismissed the downloads modal.'),
+            field=models.DateTimeField(
+                default=datetime.datetime(1970, 1, 1, 0, 0, tzinfo=utc),
+                help_text='Last time user dismissed the downloads modal.'),
         ),
         migrations.AddField(
             model_name='userprofile',
             name='last_seen',
-            field=models.DateTimeField(default=datetime.datetime(1970, 1, 1, 0, 0, tzinfo=utc), help_text='Last time user was seen at all'),
+            field=models.DateTimeField(
+                default=datetime.datetime(1970, 1, 1, 0, 0, tzinfo=utc),
+                help_text='Last time user was seen at all'),
         ),
     ]

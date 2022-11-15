@@ -14,20 +14,36 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Level',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('number', models.IntegerField(help_text='The number of the level', unique=True)),
-                ('name', models.CharField(help_text='The name of the level', max_length=128, unique=True)),
+                ('id',
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False,
+                        verbose_name='ID')),
+                ('number',
+                    models.IntegerField(help_text='The number of the level', unique=True)),
+                ('name',
+                    models.CharField(
+                        help_text='The name of the level', max_length=128, unique=True)),
             ],
         ),
         migrations.CreateModel(
             name='AchievementCode',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id',
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False,
+                        verbose_name='ID')),
                 ('code', models.CharField(max_length=96, unique=True)),
-                ('image', models.FileField(blank=True, help_text='Image for the obtained badge', null=True, upload_to='badges')),
+                ('image',
+                    models.FileField(
+                        blank=True,
+                        help_text='Image for the obtained badge',
+                        null=True,
+                        upload_to='badges')),
                 ('description', models.TextField(help_text='How to obtain this achievement')),
-                ('active', models.BooleanField(help_text='Whether the code is active right now')),
-                ('earned', models.ManyToManyField(related_name='achievements', to='roster.Student')),
+                ('active',
+                    models.BooleanField(help_text='Whether the code is active right now')),
+                ('earned',
+                    models.ManyToManyField(related_name='achievements', to='roster.Student')),
             ],
         ),
     ]

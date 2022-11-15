@@ -18,16 +18,28 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='student',
             name='extra_units',
-            field=models.ManyToManyField(blank=True, help_text='A list of units that the student can access out-of-order relative to their curriculum.', related_name='extra_units', to='core.Unit'),
+            field=models.ManyToManyField(
+                blank=True,
+                help_text=
+                'A list of units that the student can access out-of-order relative to their curriculum.',
+                related_name='extra_units',
+                to='core.Unit'),
         ),
         migrations.AlterField(
             model_name='student',
             name='curriculum',
-            field=models.ManyToManyField(blank=True, help_text='The choice of units that this student will work on', related_name='curriculum', to='core.Unit'),
+            field=models.ManyToManyField(
+                blank=True,
+                help_text='The choice of units that this student will work on',
+                related_name='curriculum',
+                to='core.Unit'),
         ),
         migrations.AlterField(
             model_name='unitinquiry',
             name='action_type',
-            field=models.CharField(choices=[('DROP', 'Drop'), ('ADD', 'Add')], help_text='Describe the action you want to make.', max_length=10),
+            field=models.CharField(
+                choices=[('DROP', 'Drop'), ('ADD', 'Add')],
+                help_text='Describe the action you want to make.',
+                max_length=10),
         ),
     ]

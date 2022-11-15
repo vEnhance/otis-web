@@ -20,8 +20,10 @@ def unlock_stuff(apps, scheme_editor):
                 for unit in curriculum[0:n] if not unit.has_pset]
         student.unlocked_units.add(*to_unlock)
 
+
 def do_nothing(apps, scheme_editor):
-	pass
+    pass
+
 
 class Migration(migrations.Migration):
 
@@ -31,7 +33,7 @@ class Migration(migrations.Migration):
         ('dashboard', '0014_semesterdownloadfile'),
     ]
 
-    operations = [
-        migrations.RunPython(unlock_stuff, do_nothing)
-    ]
+    operations = [migrations.RunPython(unlock_stuff, do_nothing)]
+
+
 # vim: expandtab

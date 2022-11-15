@@ -13,11 +13,14 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='pset',
             name='resubmitted',
-            field=models.BooleanField(default=False, help_text='Tracks if problem set resubmitted'),
+            field=models.BooleanField(
+                default=False, help_text='Tracks if problem set resubmitted'),
         ),
         migrations.AlterField(
             model_name='pset',
             name='approved',
-            field=models.BooleanField(default=False, help_text='Whether the latest version of the problem set has been checked off'),
+            field=models.BooleanField(
+                default=False,
+                help_text='Whether the latest version of the problem set has been checked off'),
         ),
     ]

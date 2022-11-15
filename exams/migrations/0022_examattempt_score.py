@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='examattempt',
             name='score',
-            field=models.SmallIntegerField(blank=True, help_text='The number of correct answers', null=True),
+            field=models.SmallIntegerField(
+                blank=True, help_text='The number of correct answers', null=True),
         ),
     ]

@@ -14,26 +14,41 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='examattempt',
             name='guess1',
-            field=models.CharField(max_length=18, validators=[exams.models.expr_validator], verbose_name='Problem 1 response'),
+            field=models.CharField(
+                max_length=18,
+                validators=[exams.models.expr_validator],
+                verbose_name='Problem 1 response'),
         ),
         migrations.AlterField(
             model_name='examattempt',
             name='guess2',
-            field=models.CharField(max_length=18, validators=[exams.models.expr_validator], verbose_name='Problem 2 response'),
+            field=models.CharField(
+                max_length=18,
+                validators=[exams.models.expr_validator],
+                verbose_name='Problem 2 response'),
         ),
         migrations.AlterField(
             model_name='examattempt',
             name='guess3',
-            field=models.CharField(max_length=18, validators=[exams.models.expr_validator], verbose_name='Problem 3 response'),
+            field=models.CharField(
+                max_length=18,
+                validators=[exams.models.expr_validator],
+                verbose_name='Problem 3 response'),
         ),
         migrations.AlterField(
             model_name='examattempt',
             name='guess4',
-            field=models.CharField(max_length=18, validators=[exams.models.expr_validator], verbose_name='Problem 4 response'),
+            field=models.CharField(
+                max_length=18,
+                validators=[exams.models.expr_validator],
+                verbose_name='Problem 4 response'),
         ),
         migrations.AlterField(
             model_name='examattempt',
             name='guess5',
-            field=models.CharField(max_length=18, validators=[exams.models.expr_validator], verbose_name='Problem 5 response'),
+            field=models.CharField(
+                max_length=18,
+                validators=[exams.models.expr_validator],
+                verbose_name='Problem 5 response'),
         ),
     ]

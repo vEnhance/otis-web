@@ -15,6 +15,10 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='assignment',
             name='due_date',
-            field=models.DateField(blank=True, help_text='When the assignment should be due. Leave blank if not active this semester.', null=True),
+            field=models.DateField(
+                blank=True,
+                help_text=
+                'When the assignment should be due. Leave blank if not active this semester.',
+                null=True),
         ),
     ]

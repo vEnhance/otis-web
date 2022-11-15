@@ -17,12 +17,19 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='ta',
             name='semester',
-            field=models.ForeignKey(default=None, help_text='The semester for this TA', on_delete=django.db.models.deletion.CASCADE, to='core.Semester'),
+            field=models.ForeignKey(
+                default=None,
+                help_text='The semester for this TA',
+                on_delete=django.db.models.deletion.CASCADE,
+                to='core.Semester'),
             preserve_default=False,
         ),
         migrations.AlterField(
             model_name='student',
             name='curriculum',
-            field=models.ManyToManyField(blank=True, help_text='The choice of units that this student will work on', to='core.Unit'),
+            field=models.ManyToManyField(
+                blank=True,
+                help_text='The choice of units that this student will work on',
+                to='core.Unit'),
         ),
     ]

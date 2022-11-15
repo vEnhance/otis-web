@@ -13,11 +13,15 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='psetsubmission',
             name='feedback',
-            field=models.TextField(blank=True, help_text='Any other feedback about the problem set', verbose_name='Feedback on problem set, worth [1♣]'),
+            field=models.TextField(
+                blank=True,
+                help_text='Any other feedback about the problem set',
+                verbose_name='Feedback on problem set, worth [1♣]'),
         ),
         migrations.AlterField(
             model_name='psetsubmission',
             name='special_notes',
-            field=models.TextField(blank=True, help_text="If there's anything you need to say before we proceed"),
+            field=models.TextField(
+                blank=True, help_text="If there's anything you need to say before we proceed"),
         ),
     ]

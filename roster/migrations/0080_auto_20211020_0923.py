@@ -16,6 +16,10 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterModelOptions(
             name='unitinquiry',
-            options={'ordering': ('-created_at',), 'verbose_name': 'Unit petition', 'verbose_name_plural': 'Unit petitions'},
+            options={
+                'ordering': ('-created_at',),
+                'verbose_name': 'Unit petition',
+                'verbose_name_plural': 'Unit petitions'
+            },
         ),
     ]

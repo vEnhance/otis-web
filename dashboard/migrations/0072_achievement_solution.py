@@ -13,7 +13,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='achievement',
             name='solution',
-            field=models.TextField(default='', help_text='Internal note by Evan where the diamond is hidden'),
+            field=models.TextField(
+                default='', help_text='Internal note by Evan where the diamond is hidden'),
             preserve_default=False,
         ),
     ]

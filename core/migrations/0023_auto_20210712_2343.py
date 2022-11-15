@@ -9,6 +9,7 @@ def set_slug(apps, scheme_editor):
         ug.slug = ug.name.lower().replace(' ', '')
         ug.save()
 
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -27,9 +28,14 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='unitgroup',
             name='slug',
-            field=models.SlugField(default=None, help_text='The slug for the filename for this unit group', max_length=80, null=True),
+            field=models.SlugField(
+                default=None,
+                help_text='The slug for the filename for this unit group',
+                max_length=80,
+                null=True),
         ),
         migrations.RunPython(
-            code=set_slug, reverse_code=migrations.RunPython.noop,
+            code=set_slug,
+            reverse_code=migrations.RunPython.noop,
         )
     ]

@@ -14,16 +14,29 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='assistant',
             name='unlisted_students',
-            field=models.ManyToManyField(blank=True, help_text='A list of students this assistant can see but which is not listed visibly.', related_name='unlisted_assistants', to='roster.Student'),
+            field=models.ManyToManyField(
+                blank=True,
+                help_text=
+                'A list of students this assistant can see but which is not listed visibly.',
+                related_name='unlisted_assistants',
+                to='roster.Student'),
         ),
         migrations.AlterField(
             model_name='student',
             name='curriculum',
-            field=models.ManyToManyField(blank=True, help_text='The choice of units that this student will work on', related_name='students_taking', to='core.Unit'),
+            field=models.ManyToManyField(
+                blank=True,
+                help_text='The choice of units that this student will work on',
+                related_name='students_taking',
+                to='core.Unit'),
         ),
         migrations.AlterField(
             model_name='student',
             name='unlocked_units',
-            field=models.ManyToManyField(blank=True, help_text='A list of units that the student may work on.', related_name='students_unlocked', to='core.Unit'),
+            field=models.ManyToManyField(
+                blank=True,
+                help_text='A list of units that the student may work on.',
+                related_name='students_unlocked',
+                to='core.Unit'),
         ),
     ]

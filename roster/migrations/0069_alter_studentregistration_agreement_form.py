@@ -15,6 +15,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='studentregistration',
             name='agreement_form',
-            field=models.FileField(help_text='Signed agreement form, as a single PDF', null=True, upload_to=roster.models.content_file_name, validators=[django.core.validators.FileExtensionValidator(allowed_extensions=['pdf'])]),
+            field=models.FileField(
+                help_text='Signed agreement form, as a single PDF',
+                null=True,
+                upload_to=roster.models.content_file_name,
+                validators=[
+                    django.core.validators.FileExtensionValidator(allowed_extensions=['pdf'])
+                ]),
         ),
     ]

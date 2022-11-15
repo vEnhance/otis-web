@@ -3,6 +3,7 @@
 from django.db import migrations
 from typing import Any
 
+
 def convert_bools_to_status(apps: Any, scheme_editor: Any):
     PSet = apps.get_model('dashboard', 'PSet')
     PSet.objects.filter(approved=False, rejected=False, resubmitted=False).update(status="P")
@@ -14,6 +15,7 @@ def convert_bools_to_status(apps: Any, scheme_editor: Any):
     PSet.objects.filter(approved=True, rejected=True, resubmitted=False).update(status="R")
     PSet.objects.filter(approved=True, rejected=True, resubmitted=True).update(status="PR")
 
+
 def convert_status_to_bools(apps: Any, scheme_editor: Any):
     PSet = apps.get_model('dashboard', 'PSet')
     PSet.objects.filter(status="P").update(approved=False, rejected=False, resubmitted=False)
@@ -22,12 +24,11 @@ def convert_status_to_bools(apps: Any, scheme_editor: Any):
     PSet.objects.filter(status="A").update(approved=True, rejected=False, resubmitted=False)
     PSet.objects.filter(status="R").update(approved=False, rejected=True, resubmitted=False)
 
+
 class Migration(migrations.Migration):
 
     dependencies = [
         ('dashboard', '0077_pset_status'),
     ]
 
-    operations = [
-            migrations.RunPython(convert_bools_to_status, convert_status_to_bools)
-    ]
+    operations = [migrations.RunPython(convert_bools_to_status, convert_status_to_bools)]

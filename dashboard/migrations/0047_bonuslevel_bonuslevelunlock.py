@@ -16,19 +16,32 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='BonusLevel',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id',
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False,
+                        verbose_name='ID')),
                 ('level', models.PositiveSmallIntegerField(help_text='Level to spawn at')),
                 ('active', models.BooleanField(default=True)),
-                ('group', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='core.unitgroup')),
+                ('group',
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE, to='core.unitgroup')),
             ],
         ),
         migrations.CreateModel(
             name='BonusLevelUnlock',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id',
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False,
+                        verbose_name='ID')),
                 ('timestamp', models.DateTimeField(auto_now_add=True)),
-                ('bonus', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='dashboard.bonuslevel')),
-                ('student', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='roster.student')),
+                ('bonus',
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to='dashboard.bonuslevel')),
+                ('student',
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to='roster.student')),
             ],
         ),
     ]

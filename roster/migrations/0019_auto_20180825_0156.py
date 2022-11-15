@@ -29,13 +29,22 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='assistant',
             name='user',
-            field=models.OneToOneField(default=1, help_text='The Django Auth user attached to the Assistant.', on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            field=models.OneToOneField(
+                default=1,
+                help_text='The Django Auth user attached to the Assistant.',
+                on_delete=django.db.models.deletion.CASCADE,
+                to=settings.AUTH_USER_MODEL),
             preserve_default=False,
         ),
         migrations.AlterField(
             model_name='student',
             name='assistant',
-            field=models.ForeignKey(blank=True, help_text='The assistant for this student, if any', null=True, on_delete=django.db.models.deletion.CASCADE, to='roster.Assistant'),
+            field=models.ForeignKey(
+                blank=True,
+                help_text='The assistant for this student, if any',
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to='roster.Assistant'),
         ),
         migrations.AlterUniqueTogether(
             name='assistant',

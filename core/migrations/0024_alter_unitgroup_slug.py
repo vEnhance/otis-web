@@ -13,6 +13,9 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='unitgroup',
             name='slug',
-            field=models.SlugField(help_text='The slug for the filename for this unit group', max_length=80, unique=True),
+            field=models.SlugField(
+                help_text='The slug for the filename for this unit group',
+                max_length=80,
+                unique=True),
         ),
     ]

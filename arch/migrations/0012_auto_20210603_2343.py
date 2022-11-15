@@ -13,7 +13,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='problem',
             name='puid',
-            field=models.CharField(default='_', help_text='Unique problem identifier.', max_length=24),
+            field=models.CharField(
+                default='_', help_text='Unique problem identifier.', max_length=24),
             preserve_default=False,
         ),
         migrations.AlterField(

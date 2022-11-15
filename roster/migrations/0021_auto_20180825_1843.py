@@ -14,6 +14,9 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterModelOptions(
             name='student',
-            options={'ordering': ('semester', '-legit', 'track', 'user__first_name', 'user__last_name')},
+            options={
+                'ordering':
+                    ('semester', '-legit', 'track', 'user__first_name', 'user__last_name')
+            },
         ),
     ]

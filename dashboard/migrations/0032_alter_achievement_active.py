@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='achievement',
             name='active',
-            field=models.BooleanField(default=True, help_text='Whether the code is active right now'),
+            field=models.BooleanField(
+                default=True, help_text='Whether the code is active right now'),
         ),
     ]

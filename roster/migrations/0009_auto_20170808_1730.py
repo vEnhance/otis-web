@@ -19,22 +19,36 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='assistant',
             name='name',
-            field=models.CharField(help_text='The display name for this Assistant (e.g. a nickname)', max_length=80),
+            field=models.CharField(
+                help_text='The display name for this Assistant (e.g. a nickname)',
+                max_length=80),
         ),
         migrations.AlterField(
             model_name='assistant',
             name='semester',
-            field=models.ForeignKey(help_text='The semester for this Assistant', on_delete=django.db.models.deletion.CASCADE, to='core.Semester'),
+            field=models.ForeignKey(
+                help_text='The semester for this Assistant',
+                on_delete=django.db.models.deletion.CASCADE,
+                to='core.Semester'),
         ),
         migrations.AlterField(
             model_name='assistant',
             name='user',
-            field=models.ForeignKey(blank=True, help_text='The Django Auth user attached to the Assistant', null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(
+                blank=True,
+                help_text='The Django Auth user attached to the Assistant',
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to=settings.AUTH_USER_MODEL),
         ),
         migrations.AlterField(
             model_name='student',
             name='assistant',
-            field=models.ForeignKey(blank=True, help_text='The Assistant for this student, if any', null=True, on_delete=django.db.models.deletion.CASCADE, to='roster.Assistant'),
+            field=models.ForeignKey(
+                blank=True,
+                help_text='The Assistant for this student, if any',
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to='roster.Assistant'),
         ),
-
     ]

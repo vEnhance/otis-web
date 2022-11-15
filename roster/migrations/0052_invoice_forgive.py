@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='invoice',
             name='forgive',
-            field=models.BooleanField(default=False, help_text="When switched on, won't hard-lock delinquents."),
+            field=models.BooleanField(
+                default=False, help_text="When switched on, won't hard-lock delinquents."),
         ),
     ]

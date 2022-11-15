@@ -2,31 +2,32 @@
 {% load humanize %}
 {% load otis_extras %}
 {% block meter-content %}
-<p>You gain {{ meters.clubs.unit }} by solving problems on units.</p>
-{% if psets %}
-<table class="table table-sm">
-	<thead class="table-dark">
-		<tr>
-			<th width="10%">{{ meters.clubs.unit }}</th>
-			<th width="10%" </th>
-			<th width="40%">Unit</th>
-			<th width="40%">Timestamp</th>
-		</tr>
-	</thead>
-	<tbody>
-		{% for pset in psets %}
-		<tr>
-			<td style="color:{{ meter.clubs.color }};">+{{ pset.clubs }}{{ meters.clubs.unit }}</td>
-			<td style="color:{{ meter.clubs.color }};">
-				{{ pset.unit|clubs_multiplier }}
-			</td>
-			<td><a href="{{ pset.get_absolute_url }}">{{ pset.unit }}</a></td>
-			<td>{{ pset.upload.created_at }}</td>
-		</tr>
-		{% endfor %}
-</table>
-</table>
-{% else %}
-<p>You haven't submitted any units yet.</p>
-{% endif  %}
+    <p>You gain {{ meters.clubs.unit }} by solving problems on units.</p>
+    {% if psets %}
+        <table class="table table-sm">
+            <thead class="table-dark">
+                <tr>
+                    <th width="10%">{{ meters.clubs.unit }}</th>
+                    <th width="10%"
+                    </th>
+                    <th width="40%">Unit</th>
+                    <th width="40%">Timestamp</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pset in psets %}
+                    <tr>
+                        <td style="color:{{ meter.clubs.color }};">+{{ pset.clubs }}{{ meters.clubs.unit }}</td>
+                        <td style="color:{{ meter.clubs.color }};">{{ pset.unit|clubs_multiplier }}</td>
+                        <td>
+                            <a href="{{ pset.get_absolute_url }}">{{ pset.unit }}</a>
+                        </td>
+                        <td>{{ pset.upload.created_at }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </table>
+    {% else %}
+        <p>You haven't submitted any units yet.</p>
+    {% endif  %}
 {% endblock %}

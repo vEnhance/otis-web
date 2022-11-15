@@ -13,11 +13,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='achievementcode',
             name='diamonds',
-            field=models.PositiveSmallIntegerField(default=1, help_text='Amount of diamonds for this achievement'),
+            field=models.PositiveSmallIntegerField(
+                default=1, help_text='Amount of diamonds for this achievement'),
         ),
         migrations.AddField(
             model_name='psetsubmission',
             name='eligible',
-            field=models.BooleanField(default=True, help_text='Whether to count this for leveling up'),
+            field=models.BooleanField(
+                default=True, help_text='Whether to count this for leveling up'),
         ),
     ]

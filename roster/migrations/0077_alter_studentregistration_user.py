@@ -16,6 +16,10 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='studentregistration',
             name='user',
-            field=models.ForeignKey(help_text='The user to attach', on_delete=django.db.models.deletion.CASCADE, related_name='regs', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(
+                help_text='The user to attach',
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='regs',
+                to=settings.AUTH_USER_MODEL),
         ),
     ]

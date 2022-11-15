@@ -15,12 +15,15 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='student',
             name='last_level_seen',
-            field=models.PositiveSmallIntegerField(default=0, help_text='The last level the student was seen at.'),
+            field=models.PositiveSmallIntegerField(
+                default=0, help_text='The last level the student was seen at.'),
         ),
         migrations.AddField(
             model_name='student',
             name='last_level_time',
-            field=models.DateTimeField(default=datetime.datetime(2021, 9, 13, 21, 11, 32, 475557, tzinfo=utc), help_text="The last time the student's level was updated"),
+            field=models.DateTimeField(
+                default=datetime.datetime(2021, 9, 13, 21, 11, 32, 475557, tzinfo=utc),
+                help_text="The last time the student's level was updated"),
             preserve_default=False,
         ),
     ]

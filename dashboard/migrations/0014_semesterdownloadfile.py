@@ -18,11 +18,28 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='SemesterDownloadFile',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('description', models.CharField(blank=True, help_text='Optional description of the file', max_length=250)),
-                ('content', models.FileField(help_text='The file itself', upload_to=dashboard.models.download_file_name, validators=[django.core.validators.FileExtensionValidator(allowed_extensions=['pdf', 'txt', 'tex', 'png', 'jpg'])])),
+                ('id',
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False,
+                        verbose_name='ID')),
+                ('description',
+                    models.CharField(
+                        blank=True, help_text='Optional description of the file',
+                        max_length=250)),
+                ('content',
+                    models.FileField(
+                        help_text='The file itself',
+                        upload_to=dashboard.models.download_file_name,
+                        validators=[
+                            django.core.validators.FileExtensionValidator(
+                                allowed_extensions=['pdf', 'txt', 'tex', 'png', 'jpg'])
+                        ])),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('semester', models.ForeignKey(help_text='The semester to which the file is associated', on_delete=django.db.models.deletion.CASCADE, to='core.Semester')),
+                ('semester',
+                    models.ForeignKey(
+                        help_text='The semester to which the file is associated',
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to='core.Semester')),
             ],
             options={
                 'ordering': ('-created_at',),

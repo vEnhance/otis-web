@@ -14,6 +14,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='uploadedfile',
             name='unit',
-            field=models.ForeignKey(blank=True, help_text='The unit for which this file is associated', null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.Unit'),
+            field=models.ForeignKey(
+                blank=True,
+                help_text='The unit for which this file is associated',
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to='core.Unit'),
         ),
     ]

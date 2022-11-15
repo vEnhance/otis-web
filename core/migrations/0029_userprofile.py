@@ -16,11 +16,31 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='UserProfile',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('show_bars', models.BooleanField(default=True, help_text='Displays the level bars on the main portal', verbose_name='Level bars')),
-                ('show_completed_by_default', models.BooleanField(default=True, help_text='Displays completed units on the main portal by default', verbose_name='Show completed')),
-                ('show_locked_by_default', models.BooleanField(default=True, help_text='Displays locked units on the main portal by default', verbose_name='Show locked')),
-                ('user', models.OneToOneField(help_text='The user these preferences belong to', on_delete=django.db.models.deletion.CASCADE, related_name='profile', to=settings.AUTH_USER_MODEL)),
+                ('id',
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False,
+                        verbose_name='ID')),
+                ('show_bars',
+                    models.BooleanField(
+                        default=True,
+                        help_text='Displays the level bars on the main portal',
+                        verbose_name='Level bars')),
+                ('show_completed_by_default',
+                    models.BooleanField(
+                        default=True,
+                        help_text='Displays completed units on the main portal by default',
+                        verbose_name='Show completed')),
+                ('show_locked_by_default',
+                    models.BooleanField(
+                        default=True,
+                        help_text='Displays locked units on the main portal by default',
+                        verbose_name='Show locked')),
+                ('user',
+                    models.OneToOneField(
+                        help_text='The user these preferences belong to',
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name='profile',
+                        to=settings.AUTH_USER_MODEL)),
             ],
         ),
     ]

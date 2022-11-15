@@ -1,11 +1,9 @@
 {% extends 'layout.html' %}
 {% load static %}
-
 {% block title %}Name and email{% endblock %}
-
 {% block layout-content %}
-{% include "generic_form.html" %}
-<p>
-	<a class="emoji-link" href="{% url "socialaccount_connections" %}">Back to 🔐Account Settings</a>
-</p>
+    {% include "generic_form.html" %}
+    <p>
+        <a class="emoji-link" href="{% url "socialaccount_connections" %}">Back to 🔐Account Settings</a>
+    </p>
 {% endblock %}

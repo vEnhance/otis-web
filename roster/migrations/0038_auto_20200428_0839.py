@@ -14,6 +14,10 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='student',
             name='unlocked_units',
-            field=models.ManyToManyField(blank=True, help_text='A list of units that the student may work on.', related_name='unlocked_units', to='core.Unit'),
+            field=models.ManyToManyField(
+                blank=True,
+                help_text='A list of units that the student may work on.',
+                related_name='unlocked_units',
+                to='core.Unit'),
         ),
     ]

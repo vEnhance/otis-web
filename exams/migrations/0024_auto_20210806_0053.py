@@ -13,31 +13,36 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='examattempt',
             name='guess1',
-            field=models.CharField(default='', max_length=36, verbose_name='Problem 1 response'),
+            field=models.CharField(
+                default='', max_length=36, verbose_name='Problem 1 response'),
             preserve_default=False,
         ),
         migrations.AlterField(
             model_name='examattempt',
             name='guess2',
-            field=models.CharField(default='', max_length=36, verbose_name='Problem 2 response'),
+            field=models.CharField(
+                default='', max_length=36, verbose_name='Problem 2 response'),
             preserve_default=False,
         ),
         migrations.AlterField(
             model_name='examattempt',
             name='guess3',
-            field=models.CharField(default='', max_length=36, verbose_name='Problem 3 response'),
+            field=models.CharField(
+                default='', max_length=36, verbose_name='Problem 3 response'),
             preserve_default=False,
         ),
         migrations.AlterField(
             model_name='examattempt',
             name='guess4',
-            field=models.CharField(default='', max_length=36, verbose_name='Problem 4 response'),
+            field=models.CharField(
+                default='', max_length=36, verbose_name='Problem 4 response'),
             preserve_default=False,
         ),
         migrations.AlterField(
             model_name='examattempt',
             name='guess5',
-            field=models.CharField(default='', max_length=36, verbose_name='Problem 5 response'),
+            field=models.CharField(
+                default='', max_length=36, verbose_name='Problem 5 response'),
             preserve_default=False,
         ),
     ]

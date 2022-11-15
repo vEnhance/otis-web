@@ -16,21 +16,36 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='achievement',
             name='creator',
-            field=models.ForeignKey(blank=True, help_text='Student who owns this achievement', null=True, on_delete=django.db.models.deletion.CASCADE, to='roster.student'),
+            field=models.ForeignKey(
+                blank=True,
+                help_text='Student who owns this achievement',
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to='roster.student'),
         ),
         migrations.AlterField(
             model_name='achievement',
             name='code',
-            field=models.CharField(blank=True, max_length=96, null=True, unique=True, validators=[django.core.validators.RegexValidator(regex='[a-f0-9]{24}')]),
+            field=models.CharField(
+                blank=True,
+                max_length=96,
+                null=True,
+                unique=True,
+                validators=[django.core.validators.RegexValidator(regex='[a-f0-9]{24}')]),
         ),
         migrations.CreateModel(
             name='PalaceEntry',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id',
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False,
+                        verbose_name='ID')),
                 ('display_name', models.CharField(max_length=128)),
                 ('message', models.TextField()),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('student', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='roster.student')),
+                ('student',
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE, to='roster.student')),
             ],
         ),
     ]

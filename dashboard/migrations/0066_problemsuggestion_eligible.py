@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='problemsuggestion',
             name='eligible',
-            field=models.BooleanField(default=True, help_text='Whether this suggestion is eligible for spades.'),
+            field=models.BooleanField(
+                default=True, help_text='Whether this suggestion is eligible for spades.'),
         ),
     ]

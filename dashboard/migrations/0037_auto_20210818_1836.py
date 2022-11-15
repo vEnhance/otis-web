@@ -4,20 +4,20 @@ from django.db import migrations
 
 
 def make_achievement(apps, schema_editor):
-	Student = apps.get_model('roster', 'Student')
-	AchievementUnlock = apps.get_model('dashboard', 'AchievementUnlock')
-	students = Student.objects.prefetch_related('achievements')
-	to_create = []
-	for s in students:
-		for a in s.achievements.all():
-			to_create.append(AchievementUnlock(user=s.user, achievement=a))
-	AchievementUnlock.objects.bulk_create(to_create)
+    Student = apps.get_model('roster', 'Student')
+    AchievementUnlock = apps.get_model('dashboard', 'AchievementUnlock')
+    students = Student.objects.prefetch_related('achievements')
+    to_create = []
+    for s in students:
+        for a in s.achievements.all():
+            to_create.append(AchievementUnlock(user=s.user, achievement=a))
+    AchievementUnlock.objects.bulk_create(to_create)
 
 
 class Migration(migrations.Migration):
 
-	dependencies = [
-		('dashboard', '0036_achievementunlock'),
-	]
+    dependencies = [
+        ('dashboard', '0036_achievementunlock'),
+    ]
 
-	operations = [migrations.RunPython(make_achievement, migrations.RunPython.noop)]
+    operations = [migrations.RunPython(make_achievement, migrations.RunPython.noop)]

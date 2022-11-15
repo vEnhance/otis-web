@@ -13,7 +13,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='student',
             name='newborn',
-            field=models.BooleanField(default=False, help_text='Whether the student is newly created.'),
+            field=models.BooleanField(
+                default=False, help_text='Whether the student is newly created.'),
             preserve_default=False,
         ),
     ]

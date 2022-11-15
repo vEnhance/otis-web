@@ -17,6 +17,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='assistant',
             name='shortname',
-            field=models.CharField(help_text='Initials or short name for this Assistant', max_length=18),
+            field=models.CharField(
+                help_text='Initials or short name for this Assistant', max_length=18),
         ),
     ]

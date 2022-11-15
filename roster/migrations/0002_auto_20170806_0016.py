@@ -18,13 +18,25 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='TA',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('user', models.ForeignKey(help_text='The Django Auth user attached to the student', on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('id',
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False,
+                        verbose_name='ID')),
+                ('user',
+                    models.ForeignKey(
+                        help_text='The Django Auth user attached to the student',
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.AddField(
             model_name='student',
             name='assistant',
-            field=models.ForeignKey(blank=True, help_text='The TA for this student, if any', null=True, on_delete=django.db.models.deletion.CASCADE, to='roster.TA'),
+            field=models.ForeignKey(
+                blank=True,
+                help_text='The TA for this student, if any',
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to='roster.TA'),
         ),
     ]

@@ -21,11 +21,22 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='student',
             name='pointer_current_unit',
-            field=models.ForeignKey(blank=True, help_text='If set, the counter will skip ahead so that the student is working on this unit instead.', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='pointer_unit', to='core.Unit'),
+            field=models.ForeignKey(
+                blank=True,
+                help_text=
+                'If set, the counter will skip ahead so that the student is working on this unit instead.',
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='pointer_unit',
+                to='core.Unit'),
         ),
         migrations.AlterField(
             model_name='student',
             name='current_unit_index',
-            field=models.SmallIntegerField(default=0, help_text='If this is equal to k, then the student has completed the first k units of his/her curriculum and by default is working on the (k+1)st unit.'),
+            field=models.SmallIntegerField(
+                default=0,
+                help_text=
+                'If this is equal to k, then the student has completed the first k units of his/her curriculum and by default is working on the (k+1)st unit.'
+            ),
         ),
     ]

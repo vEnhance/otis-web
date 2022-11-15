@@ -13,6 +13,9 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='semester',
             name='zoom_room_url',
-            field=models.CharField(blank=True, help_text='The entry point for the Zoom meeting room.', max_length=128),
+            field=models.CharField(
+                blank=True,
+                help_text='The entry point for the Zoom meeting room.',
+                max_length=128),
         ),
     ]

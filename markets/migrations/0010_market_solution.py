@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='market',
             name='solution',
-            field=models.TextField(blank=True, help_text='Comments that appear in the market results.'),
+            field=models.TextField(
+                blank=True, help_text='Comments that appear in the market results.'),
         ),
     ]

@@ -13,11 +13,18 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='market',
             name='weight',
-            field=models.FloatField(default=2, help_text='The max score to assign to the market, used in the scoring function'),
+            field=models.FloatField(
+                default=2,
+                help_text='The max score to assign to the market, used in the scoring function'
+            ),
         ),
         migrations.AlterField(
             model_name='market',
             name='alpha',
-            field=models.FloatField(default=1, help_text='Exponent corresponding to harshness of the market, used in the scoring function'),
+            field=models.FloatField(
+                default=1,
+                help_text=
+                'Exponent corresponding to harshness of the market, used in the scoring function'
+            ),
         ),
     ]

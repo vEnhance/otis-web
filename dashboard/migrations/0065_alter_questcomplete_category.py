@@ -13,6 +13,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='questcomplete',
             name='category',
-            field=models.CharField(choices=[('PR', 'Pull request'), ('BR', 'Bug report'), ('WK', 'Wiki bonus'), ('US', 'USEMO Score'), ('UG', 'USEMO Grading'), ('MS', 'Miscellaneous')], default='MS', max_length=4),
+            field=models.CharField(
+                choices=[('PR', 'Pull request'), ('BR', 'Bug report'), ('WK', 'Wiki bonus'),
+                            ('US', 'USEMO Score'), ('UG', 'USEMO Grading'),
+                            ('MS', 'Miscellaneous')],
+                default='MS',
+                max_length=4),
         ),
     ]

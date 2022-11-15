@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='market',
             name='answer',
-            field=models.FloatField(blank=True, help_text='The answer to the question', null=True),
+            field=models.FloatField(
+                blank=True, help_text='The answer to the question', null=True),
         ),
     ]

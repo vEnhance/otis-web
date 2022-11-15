@@ -17,7 +17,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='assignment',
             name='due_date',
-            field=models.DateField(default=datetime.date(2017, 6, 3), help_text='When the assignment is due'),
+            field=models.DateField(
+                default=datetime.date(2017, 6, 3), help_text='When the assignment is due'),
             preserve_default=False,
         ),
     ]

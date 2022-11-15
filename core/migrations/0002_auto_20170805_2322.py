@@ -15,11 +15,13 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='handout',
             name='prob_url',
-            field=models.CharField(blank=True, help_text='The URL for the problems handout', max_length=255),
+            field=models.CharField(
+                blank=True, help_text='The URL for the problems handout', max_length=255),
         ),
         migrations.AlterField(
             model_name='handout',
             name='soln_url',
-            field=models.CharField(blank=True, help_text='The URL for the solutions handout', max_length=255),
+            field=models.CharField(
+                blank=True, help_text='The URL for the solutions handout', max_length=255),
         ),
     ]

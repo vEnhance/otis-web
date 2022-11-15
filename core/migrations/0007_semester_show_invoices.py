@@ -15,6 +15,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='semester',
             name='show_invoices',
-            field=models.BooleanField(default=False, help_text='Whether to display invoices for this semester.'),
+            field=models.BooleanField(
+                default=False, help_text='Whether to display invoices for this semester.'),
         ),
     ]

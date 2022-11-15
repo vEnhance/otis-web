@@ -14,11 +14,22 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='pset',
             name='clubs',
-            field=models.IntegerField(blank=True, help_text='Total number of clubs that you solved (including 1♣ if feedback written)', null=True, validators=[django.core.validators.MaxValueValidator(200)], verbose_name='Total ♣ earned'),
+            field=models.IntegerField(
+                blank=True,
+                help_text=
+                'Total number of clubs that you solved (including 1♣ if feedback written)',
+                null=True,
+                validators=[django.core.validators.MaxValueValidator(200)],
+                verbose_name='Total ♣ earned'),
         ),
         migrations.AlterField(
             model_name='pset',
             name='hours',
-            field=models.FloatField(blank=True, help_text='Number of hours spent on this problem set', null=True, validators=[django.core.validators.MaxValueValidator(200)], verbose_name='Hours spent (estimate)'),
+            field=models.FloatField(
+                blank=True,
+                help_text='Number of hours spent on this problem set',
+                null=True,
+                validators=[django.core.validators.MaxValueValidator(200)],
+                verbose_name='Hours spent (estimate)'),
         ),
     ]

@@ -13,7 +13,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='semester',
             name='uses_legacy_pset_system',
-            field=models.BooleanField(default=True, help_text='Whether the pset uses the old system of upload checking'),
+            field=models.BooleanField(
+                default=True,
+                help_text='Whether the pset uses the old system of upload checking'),
             preserve_default=False,
         ),
     ]

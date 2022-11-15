@@ -39,34 +39,40 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='examattempt',
             name='guess1',
-            field=models.IntegerField(blank=True, default=0, null=True, verbose_name='Problem 1 response'),
+            field=models.IntegerField(
+                blank=True, default=0, null=True, verbose_name='Problem 1 response'),
         ),
         migrations.AlterField(
             model_name='examattempt',
             name='guess2',
-            field=models.IntegerField(blank=True, default=0, null=True, verbose_name='Problem 2 response'),
+            field=models.IntegerField(
+                blank=True, default=0, null=True, verbose_name='Problem 2 response'),
         ),
         migrations.AlterField(
             model_name='examattempt',
             name='guess3',
-            field=models.IntegerField(blank=True, default=0, null=True, verbose_name='Problem 3 response'),
+            field=models.IntegerField(
+                blank=True, default=0, null=True, verbose_name='Problem 3 response'),
         ),
         migrations.AlterField(
             model_name='examattempt',
             name='guess4',
-            field=models.IntegerField(blank=True, default=0, null=True, verbose_name='Problem 4 response'),
+            field=models.IntegerField(
+                blank=True, default=0, null=True, verbose_name='Problem 4 response'),
         ),
         migrations.AlterField(
             model_name='examattempt',
             name='guess5',
-            field=models.IntegerField(blank=True, default=0, null=True, verbose_name='Problem 5 response'),
+            field=models.IntegerField(
+                blank=True, default=0, null=True, verbose_name='Problem 5 response'),
         ),
         migrations.AlterField(
             model_name='examattempt',
             name='quiz',
-            field=models.ForeignKey(help_text='The quiz being submitted for', on_delete=django.db.models.deletion.CASCADE, to='exams.practiceexam'),
+            field=models.ForeignKey(
+                help_text='The quiz being submitted for',
+                on_delete=django.db.models.deletion.CASCADE,
+                to='exams.practiceexam'),
         ),
-        migrations.DeleteModel(
-            name='Quiz',
-        ),
+        migrations.DeleteModel(name='Quiz',),
     ]

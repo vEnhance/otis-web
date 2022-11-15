@@ -15,12 +15,16 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='assignment',
             name='due_date',
-            field=models.DateField(blank=True, help_text='When the assignment is due. Leave blank if not active this semester.', null=True),
+            field=models.DateField(
+                blank=True,
+                help_text='When the assignment is due. Leave blank if not active this semester.',
+                null=True),
         ),
         migrations.AlterField(
             model_name='assignment',
             name='name',
-            field=models.CharField(help_text='Name / description of the assignment', max_length=80, unique=True),
+            field=models.CharField(
+                help_text='Name / description of the assignment', max_length=80, unique=True),
         ),
         migrations.AlterUniqueTogether(
             name='assignment',

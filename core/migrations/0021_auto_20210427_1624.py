@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='semester',
             name='classroom_url',
-            field=models.CharField(blank=True, help_text='The entry point for the meeting room.', max_length=128),
+            field=models.CharField(
+                blank=True, help_text='The entry point for the meeting room.', max_length=128),
         ),
     ]

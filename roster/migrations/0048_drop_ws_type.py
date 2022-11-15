@@ -7,6 +7,8 @@ def remove_winter(apps, scheme_editor):
     Student = apps.get_model('roster', 'Student')
     Student.objects.filter(track="CW").update(track="C")
     Student.objects.filter(track="BW").update(track="B")
+
+
 def do_nothing(apps, scheme_editor):
     pass
 
@@ -17,6 +19,4 @@ class Migration(migrations.Migration):
         ('roster', '0047_auto_20201114_1551'),
     ]
 
-    operations = [
-            migrations.RunPython(remove_winter, do_nothing)
-    ]
+    operations = [migrations.RunPython(remove_winter, do_nothing)]

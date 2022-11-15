@@ -1,114 +1,123 @@
 {% extends 'layout.html' %}
 {% block title %}Problem Suggestion{% endblock %}
 {% block layout-content %}
-
-<p><a href="{% url "suggest-list" %}">
-		⬅️ List all suggestions by you.</a></p>
-
-<p>Thank you for suggesting problems for OTIS!
-	Your contributions are appreciated.</p>
-
-<p>One quick word of advice: if you are suggesting a problem
-	from a fairly well-known source (e.g. IMO Shortlist),
-	there is a decent chance Evan might have done the problem already
-	and placed it on some unit. So it might be worth double-checking first.</p>
-
-<p>Some legalese notes:</p>
-<ul>
-	<li><strong>You should submit a solution</strong>.
-		If you don't, I might get to solving the problem eventually,
-		but let's be real, there's at least 200 problems on my
-		someone-told-me-to-do-it list.</li>
-	<li><strong>You cannot copy the wording of
-			someone else's solution</strong>, at least not without permission.
-		However, it's okay if the ideas in the solution are not your own,
-		or someone else found an isomorphic solution to yours.
-	</li>
-	<li>By submitting, you are granting Evan permission to use, edit, or adapt
-		anything you submit for OTIS,
-		or any other math-olympiad-related purposes.</li>
-	<li>On the other hand, you retain copyright/ownership of your writing,
-		so you can also use it for whatever you want elsewhere.</li>
-</ul>
-
-<p>Some LaTeX notes for my convenience:</p>
-<ul>
-	<li><strong>Put newlines (i.e. hit enter) between sentences</strong>
-		so that lines are at most 80 characters long.
-		(Use two enter's for paragraph breaks.)</li>
-	<li>Display or use <tt>align*</tt> on long equations.</li>
-	<li>Use <tt class="mathjax_ignore">\[ ... \]</tt>, not double dollar signs.</li>
-</ul>
-
-{% load crispy_forms_tags %}
-<form action="{{ request.path }}" method="post" class="form">
-	{% csrf_token %}
-
-	{% if form.non_field_errors %}
-	<div class="alert alert-danger" role="alert">
-		<p>The following errors were thrown:</p>
-		<ul>
-			{% for err in form.non_field_errors %}
-			<li>{{ err }}</li>
-			{% endfor %}
-		</ul>
-	</div>
-	{% endif %}
-
-	<table class="table form-table">
-		<tr>
-			<td> {{ form.weight|as_crispy_field }} </td>
-			<td> {{ form.unit|as_crispy_field }} </td>
-		</tr>
-		<tr>
-			<td colspan="2">{{ form.source|as_crispy_field }}</td>
-		</tr>
-		<tr>
-			<td colspan="2">{{ form.description|as_crispy_field }}</td>
-		</tr>
-		<tr>
-			<td colspan="2">{{ form.statement|as_crispy_field }}</td>
-		</tr>
-		<tr>
-			<td colspan="2">
-				<div id="statement_render"></div>
-			</td>
-		</tr>
-		<tr>
-			<td colspan="2">{{ form.solution|as_crispy_field }}</td>
-		</tr>
-		<tr>
-			<td colspan="2">
-				<div id="solution_render"></div>
-			</td>
-		</tr>
-		<tr>
-			<td colspan="2">{{ form.comments|as_crispy_field }}</td>
-		</tr>
-		<tr>
-			<td colspan="2">{{ form.acknowledge|as_crispy_field }}</td>
-		</tr>
-		<tr>
-			<td><button type="submit" class="btn btn-success">Submit</button></td>
-			<td>
-				<button id="render-toggle" class="btn btn-info">Disable instant TeX</button>
-			</td>
-		</tr>
-	</table>
-
-	{% endblock %}
-
-	{% block css %}
-	<style type="text/css">
+    <p>
+        <a href="{% url "suggest-list" %}">⬅️ List all suggestions by you.</a>
+    </p>
+    <p>
+        Thank you for suggesting problems for OTIS!
+        Your contributions are appreciated.
+    </p>
+    <p>
+        One quick word of advice: if you are suggesting a problem
+        from a fairly well-known source (e.g. IMO Shortlist),
+        there is a decent chance Evan might have done the problem already
+        and placed it on some unit. So it might be worth double-checking first.
+    </p>
+    <p>Some legalese notes:</p>
+    <ul>
+        <li>
+            <strong>You should submit a solution</strong>.
+            If you don't, I might get to solving the problem eventually,
+            but let's be real, there's at least 200 problems on my
+            someone-told-me-to-do-it list.
+        </li>
+        <li>
+            <strong>You cannot copy the wording of
+                someone else's solution</strong>, at least not without permission.
+                However, it's okay if the ideas in the solution are not your own,
+                or someone else found an isomorphic solution to yours.
+            </li>
+            <li>
+                By submitting, you are granting Evan permission to use, edit, or adapt
+                anything you submit for OTIS,
+                or any other math-olympiad-related purposes.
+            </li>
+            <li>
+                On the other hand, you retain copyright/ownership of your writing,
+                so you can also use it for whatever you want elsewhere.
+            </li>
+        </ul>
+        <p>Some LaTeX notes for my convenience:</p>
+        <ul>
+            <li>
+                <strong>Put newlines (i.e. hit enter) between sentences</strong>
+                so that lines are at most 80 characters long.
+                (Use two enter's for paragraph breaks.)
+            </li>
+            <li>
+                Display or use <tt>align*</tt> on long equations.
+            </li>
+            <li>
+                Use <tt class="mathjax_ignore">\[ ... \]</tt>, not double dollar signs.
+            </li>
+        </ul>
+        {% load crispy_forms_tags %}
+        <form action="{{ request.path }}" method="post" class="form">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger" role="alert">
+                    <p>The following errors were thrown:</p>
+                    <ul>
+                        {% for err in form.non_field_errors %}<li>{{ err }}</li>{% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+            <table class="table form-table">
+                <tr>
+                    <td>{{ form.weight|as_crispy_field }}</td>
+                    <td>{{ form.unit|as_crispy_field }}</td>
+                </tr>
+                <tr>
+                    <td colspan="2">{{ form.source|as_crispy_field }}</td>
+                </tr>
+                <tr>
+                    <td colspan="2">{{ form.description|as_crispy_field }}</td>
+                </tr>
+                <tr>
+                    <td colspan="2">{{ form.statement|as_crispy_field }}</td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <div id="statement_render"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">{{ form.solution|as_crispy_field }}</td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <div id="solution_render"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">{{ form.comments|as_crispy_field }}</td>
+                </tr>
+                <tr>
+                    <td colspan="2">{{ form.acknowledge|as_crispy_field }}</td>
+                </tr>
+                <tr>
+                    <td>
+                        <button type="submit" class="btn btn-success">Submit</button>
+                    </td>
+                    <td>
+                        <button id="render-toggle" class="btn btn-info">Disable instant TeX</button>
+                    </td>
+                </tr>
+            </table>
+        {% endblock %}
+        {% block css %}
+            <style type="text/css">
 		#solution_render,
 		#statement_render {
 			color: blue;
 			font-family: sans-serif;
 		}
-	</style>
-	{% endblock %}
-	{% block scripts %}
-	<script type="text/javascript">
+	
+            </style>
+        {% endblock %}
+        {% block scripts %}
+            <script type="text/javascript">
 		$(document).ready(function() {
 			$("#id_unit").chosen();
 			let autorender_enabled = true;
@@ -177,5 +186,6 @@
 				render_solution();
 			});
 		});
-	</script>
-	{% endblock %}
+	
+            </script>
+        {% endblock %}

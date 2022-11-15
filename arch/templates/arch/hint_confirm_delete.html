@@ -1,12 +1,14 @@
 {% extends 'layout.html' %}
-{% block title %}Delete {{ hint.number }}% Hint for {{ hint.problem }}{% endblock %}
+{% block title %}
+    Delete {{ hint.number }}% Hint for {{ hint.problem }}
+{% endblock %}
 {% block layout-content %}
-{% include "generic_delete.html" %}
-<hr />
-<a href="{{ hint.get_absolute_url }}">&lt;&lt; Go back to hint</a>
-<ul>
-	<li>{{ hint.problem }}</li>
-	<li>{{ hint.keywords }}</li>
-	<li>{{ hint.content }}</li>
-</ul>
+    {% include "generic_delete.html" %}
+    <hr />
+    <a href="{{ hint.get_absolute_url }}">&lt;&lt; Go back to hint</a>
+    <ul>
+        <li>{{ hint.problem }}</li>
+        <li>{{ hint.keywords }}</li>
+        <li>{{ hint.content }}</li>
+    </ul>
 {% endblock %}

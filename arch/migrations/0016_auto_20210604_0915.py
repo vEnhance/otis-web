@@ -13,21 +13,31 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='problem',
             name='aops_url',
-            field=models.URLField(blank=True, help_text='URL to problem on AoPS. Include HTTPS.', max_length=128),
+            field=models.URLField(
+                blank=True, help_text='URL to problem on AoPS. Include HTTPS.', max_length=128),
         ),
         migrations.AlterField(
             model_name='problem',
             name='description',
-            field=models.CharField(help_text="Short description of problem, e.g. 'Quirky triangles.'. Use sentence case. Used to assist in searching.", max_length=255),
+            field=models.CharField(
+                help_text=
+                "Short description of problem, e.g. 'Quirky triangles.'. Use sentence case. Used to assist in searching.",
+                max_length=255),
         ),
         migrations.AlterField(
             model_name='problem',
             name='puid',
-            field=models.CharField(help_text='Unique problem identifier, as printed in OTIS handout.', max_length=24),
+            field=models.CharField(
+                help_text='Unique problem identifier, as printed in OTIS handout.',
+                max_length=24),
         ),
         migrations.AlterField(
             model_name='problem',
             name='source',
-            field=models.CharField(blank=True, help_text="Human-readable source such as 'TSTST 2020/3'.If in doubt on formatting, follow what is written on the handout.", max_length=64),
+            field=models.CharField(
+                blank=True,
+                help_text=
+                "Human-readable source such as 'TSTST 2020/3'.If in doubt on formatting, follow what is written on the handout.",
+                max_length=64),
         ),
     ]

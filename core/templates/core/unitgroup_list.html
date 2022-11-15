@@ -1,38 +1,42 @@
 {% extends 'layout.html' %}
 {% block title %}Catalog{% endblock %}
-
 {% block layout-content %}
-<p>This list is sorted by olympiad category, then alphabetically by name.</p>
-<p>Each topic has one or more units which is designated
-	by a three-letter code.</p>
-<ul>
-	<li>The first letter of the code represents the difficulty.
-		B is the easiest (problems range from sub-IMO level to IMO2),
-		D is medium (problems span IMO range),
-		Z is harder (problems span IMO2 - IMO3).
-		There is some grey room in this department.</li>
-	<li>The second letter repeats the olympiad category.</li>
-	<li>The third letter is a version identifier (either W, X, or Y).
-		Many topics have multiple versions so they can be repeated in different years.</li>
-</ul>
-<p>This page was last updated {% now "r" %}.</p>
-
-{% regroup object_list by get_subject_display as grouped_unit_list %}
-
-{% for subject, item_list in grouped_unit_list %}
-<h2>{{ subject }}</h2>
-<ul>
-	{% for unitgroup in item_list %}
-	<li>
-		<b class="text-info">
-			<a href="{% url "wiki-unitgroup" unitgroup.pk %}">{{ unitgroup.name }}</a>
-		</b>
-		<span class="text-dark">&mdash; {{ unitgroup.get_subject_short_display }},
-			{% for unit in unitgroup.unit_set.all %} {{ unit.code }}{% endfor %}</span>
-		<p class="text-secondary">{{ unitgroup.description }}</p>
-	</li>
-	{% endfor %}
-</ul>
-<hr />
-{% endfor %}
+    <p>This list is sorted by olympiad category, then alphabetically by name.</p>
+    <p>
+        Each topic has one or more units which is designated
+        by a three-letter code.
+    </p>
+    <ul>
+        <li>
+            The first letter of the code represents the difficulty.
+            B is the easiest (problems range from sub-IMO level to IMO2),
+            D is medium (problems span IMO range),
+            Z is harder (problems span IMO2 - IMO3).
+            There is some grey room in this department.
+        </li>
+        <li>The second letter repeats the olympiad category.</li>
+        <li>
+            The third letter is a version identifier (either W, X, or Y).
+            Many topics have multiple versions so they can be repeated in different years.
+        </li>
+    </ul>
+    <p>This page was last updated {% now "r" %}.</p>
+    {% regroup object_list by get_subject_display as grouped_unit_list %}
+    {% for subject, item_list in grouped_unit_list %}
+        <h2>{{ subject }}</h2>
+        <ul>
+            {% for unitgroup in item_list %}
+                <li>
+                    <b class="text-info">
+                        <a href="{% url "wiki-unitgroup" unitgroup.pk %}">{{ unitgroup.name }}</a>
+                    </b>
+                    <span class="text-dark">&mdash; {{ unitgroup.get_subject_short_display }},
+                        {% for unit in unitgroup.unit_set.all %}{{ unit.code }}{% endfor %}
+                    </span>
+                    <p class="text-secondary">{{ unitgroup.description }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+        <hr />
+    {% endfor %}
 {% endblock %}

@@ -1,12 +1,10 @@
 {% extends 'layout.html' %}
 {% block title %}Arch: Update {{ problem }}{% endblock %}
 {% block layout-content %}
-
-<h1>Update {{ problem }}</h1>
-<p><a href="{{ problem.get_absolute_url }}">Back to problem.</a></p>
-
-<hr />
-
-{% include "generic_form.html" with submit_name="Update" %}
-
+    <h1>Update {{ problem }}</h1>
+    <p>
+        <a href="{{ problem.get_absolute_url }}">Back to problem.</a>
+    </p>
+    <hr />
+    {% include "generic_form.html" with submit_name="Update" %}
 {% endblock %}

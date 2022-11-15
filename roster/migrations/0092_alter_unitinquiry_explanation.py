@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='unitinquiry',
             name='explanation',
-            field=models.TextField(help_text='Short explanation for this request.', max_length=300),
+            field=models.TextField(
+                help_text='Short explanation for this request.', max_length=300),
         ),
     ]

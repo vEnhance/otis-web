@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='invoice',
             name='forgive_memo',
-            field=models.TextField(blank=True, help_text='Internal note to self about why forgive=True.'),
+            field=models.TextField(
+                blank=True, help_text='Internal note to self about why forgive=True.'),
         ),
     ]

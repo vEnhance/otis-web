@@ -13,6 +13,10 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='guess',
             name='public',
-            field=models.BooleanField(default=False, help_text='If checked, will display your name next to your guess in the statistics, for bragging rights. By default, this is off and your guess is recorded anonymously.'),
+            field=models.BooleanField(
+                default=False,
+                help_text=
+                'If checked, will display your name next to your guess in the statistics, for bragging rights. By default, this is off and your guess is recorded anonymously.'
+            ),
         ),
     ]

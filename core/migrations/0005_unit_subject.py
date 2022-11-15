@@ -15,7 +15,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='unit',
             name='subject',
-            field=models.CharField(choices=[('A', 'Algebra'), ('C', 'Combinatorics'), ('G', 'Geometry'), ('N', 'Number Theory'), ('F', 'Functional Equations'), ('M', 'Miscellaneous')], default='M', help_text='The subject for the unit', max_length=2),
+            field=models.CharField(
+                choices=[('A', 'Algebra'), ('C', 'Combinatorics'), ('G', 'Geometry'),
+                            ('N', 'Number Theory'), ('F', 'Functional Equations'),
+                            ('M', 'Miscellaneous')],
+                default='M',
+                help_text='The subject for the unit',
+                max_length=2),
             preserve_default=False,
         ),
     ]

@@ -14,6 +14,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='student',
             name='unlocked_units',
-            field=models.ManyToManyField(blank=True, help_text='A list of units that the student is actively working on. Once the student submits a problem set, delete it from this list to mark them as complete.', related_name='students_unlocked', to='core.Unit'),
+            field=models.ManyToManyField(
+                blank=True,
+                help_text=
+                'A list of units that the student is actively working on. Once the student submits a problem set, delete it from this list to mark them as complete.',
+                related_name='students_unlocked',
+                to='core.Unit'),
         ),
     ]

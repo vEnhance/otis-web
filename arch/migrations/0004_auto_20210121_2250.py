@@ -13,6 +13,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='hint',
             name='keywords',
-            field=models.CharField(blank=True, default='', help_text='A comma-separated list of keywords that a solver could look at to help them guess whether the hint is relevant or not. These are viewable immediately, so no spoilers here.', max_length=255),
+            field=models.CharField(
+                blank=True,
+                default='',
+                help_text=
+                'A comma-separated list of keywords that a solver could look at to help them guess whether the hint is relevant or not. These are viewable immediately, so no spoilers here.',
+                max_length=255),
         ),
     ]

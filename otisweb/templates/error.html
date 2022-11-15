@@ -1,9 +1,11 @@
 <html>
-
-<head>
-	<title>OTIS: HTTP {% block code %}{% endblock %}</title>
-	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Verdana">
-	<style>
+    <head>
+        <title>OTIS: HTTP
+            {% block code %}{% endblock %}
+        </title>
+        <link rel="stylesheet"
+              href="https://fonts.googleapis.com/css?family=Verdana">
+        <style>
 		body {
 			text-align: center;
 		}
@@ -11,19 +13,21 @@
 		h1 {
 			font-family: Verdana, Geneva, Tahoma, sans-serif;
 		}
-	</style>
-</head>
-
-<body>
-	<h1>{% block title %}{% endblock %}</h1>
-	<div style="font-size:120px;">{% block emoji %}{% endblock %}</div>
-	<p>
-		If you think you found a website bug, please
-		<a href="https://github.com/vEnhance/otis-web/issues">report this issue on GitHub</a>.
-	</p>
-	<hr />
-	{% block extra %}
-	{% endblock %}
-</body>
-
+	
+        </style>
+    </head>
+    <body>
+        <h1>
+            {% block title %}{% endblock %}
+        </h1>
+        <div style="font-size:120px;">
+            {% block emoji %}{% endblock %}
+        </div>
+        <p>
+            If you think you found a website bug, please
+            <a href="https://github.com/vEnhance/otis-web/issues">report this issue on GitHub</a>.
+        </p>
+        <hr />
+        {% block extra %}{% endblock %}
+    </body>
 </html>

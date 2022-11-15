@@ -13,6 +13,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='studentregistration',
             name='track',
-            field=models.CharField(choices=[('C', 'Correspondence'), ('B', 'Meeting with Evan'), ('E', 'Meeting with another instructor'), ('N', 'None of the above')], max_length=6, verbose_name='Proposed Track'),
+            field=models.CharField(
+                choices=[('C', 'Correspondence'), ('B', 'Meeting with Evan'),
+                            ('E', 'Meeting with another instructor'),
+                            ('N', 'None of the above')],
+                max_length=6,
+                verbose_name='Proposed Track'),
         ),
     ]

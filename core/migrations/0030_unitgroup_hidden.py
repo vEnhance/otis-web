@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='unitgroup',
             name='hidden',
-            field=models.BooleanField(default=False, help_text='Whether this unit is hidden from students'),
+            field=models.BooleanField(
+                default=False, help_text='Whether this unit is hidden from students'),
         ),
     ]

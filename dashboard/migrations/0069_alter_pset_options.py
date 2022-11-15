@@ -12,6 +12,9 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterModelOptions(
             name='pset',
-            options={'verbose_name': 'PSet submission', 'verbose_name_plural': 'PSet submissions'},
+            options={
+                'verbose_name': 'PSet submission',
+                'verbose_name_plural': 'PSet submissions'
+            },
         ),
     ]

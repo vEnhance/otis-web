@@ -25,11 +25,22 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='studentregistration',
             name='gender',
-            field=models.CharField(blank=True, choices=[('', 'Prefer not to say'), ('M', 'Male'), ('F', 'Female'), ('H', 'Nonbinary'), ('O', 'Other')], default='', help_text='If you are comfortable answering, specify which gender you most closely identify with.', max_length=2),
+            field=models.CharField(
+                blank=True,
+                choices=[('', 'Prefer not to say'), ('M', 'Male'), ('F', 'Female'),
+                            ('H', 'Nonbinary'), ('O', 'Other')],
+                default='',
+                help_text=
+                'If you are comfortable answering, specify which gender you most closely identify with.',
+                max_length=2),
         ),
         migrations.AlterField(
             model_name='studentregistration',
             name='track',
-            field=models.CharField(choices=[('C', 'Correspondence'), ('B', 'Meeting with Evan'), ('E', 'Meeting with another instructor'), ('N', 'None of the above')], max_length=6),
+            field=models.CharField(
+                choices=[('C', 'Correspondence'), ('B', 'Meeting with Evan'),
+                            ('E', 'Meeting with another instructor'),
+                            ('N', 'None of the above')],
+                max_length=6),
         ),
     ]

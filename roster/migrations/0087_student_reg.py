@@ -14,6 +14,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='student',
             name='reg',
-            field=models.OneToOneField(blank=True, help_text='Link to the registration forms for the student', null=True, on_delete=django.db.models.deletion.SET_NULL, to='roster.studentregistration'),
+            field=models.OneToOneField(
+                blank=True,
+                help_text='Link to the registration forms for the student',
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to='roster.studentregistration'),
         ),
     ]

@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='problemsuggestion',
             name='notified',
-            field=models.BooleanField(default=False, help_text="Whether student has received the staff's comments."),
+            field=models.BooleanField(
+                default=False, help_text="Whether student has received the staff's comments."),
         ),
     ]

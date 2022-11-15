@@ -1,46 +1,54 @@
 <div class="accordion-item">
-	<h2 class="accordion-header" id="heading{{ meter.name }}">
-		<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ meter.name }}" aria-expanded="false" aria-controls="collapse{{ meter.name }}">
-			<span class="meter-header" style="color: {{ meter.color }};">
-				<span style="font-size: 150%;">{{ meter.level }}</span>
-				{{ meter.name }}
-			</span>
-			<span class="badge bg-secondary" style="position:absolute; right:60px;">
-				Total {{meter.value}}{{meter.unit}}
-			</span>
-		</button>
-	</h2>
-	<div id="collapse{{ meter.name }}" class="accordion-collapse collapse" aria-labelledby="heading{{ meter.name }}">
-		<div class="accordion-body">
-			<div style="position: relative; padding: 5px 9px; height : 64px;" class="col-12">
-				<div style="font-size:32px; position: absolute; top: -6px; left: -8px;">
-					{{ meter.emoji }}
-				</div>
-				<div class="progress" style="height: 24px;">
-					<div class="progress-bar" style="width: {{ meter.percent }}%;
-									background-color: {{ meter.color }};
-									text-align: right;
-									padding-right: 4%;">
-						{{ meter.total }}{{ meter.unit }}
-					</div>
-				</div>
-				<span style="position:absolute; right: 5%; text-align: right;" class="text-muted">
-					/ {{ meter.thresh }}{{ meter.unit }}
-				</span>
-			</div>
-			<p>
-				Your <strong class="meter-def" style="color: {{meter.color}}">{{ meter.name }}</strong>
-				will increase if you gain another
-				<strong style="color: {{meter.color}}">{{ meter.needed }}{{ meter.unit }}</strong>.
-			</p>
-			<div>
-				{% block meter-content %}
-				{% endblock %}
-			</div>
-		</div>
-	</div>
+    <h2 class="accordion-header" id="heading{{ meter.name }}">
+        <button class="accordion-button collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapse{{ meter.name }}"
+                aria-expanded="false"
+                aria-controls="collapse{{ meter.name }}">
+            <span class="meter-header" style="color: {{ meter.color }};">
+                <span style="font-size: 150%;">{{ meter.level }}</span>
+                {{ meter.name }}
+            </span>
+            <span class="badge bg-secondary" style="position:absolute; right:60px;">Total {{ meter.value }}{{ meter.unit }}</span>
+        </button>
+    </h2>
+    <div id="collapse{{ meter.name }}"
+         class="accordion-collapse collapse"
+         aria-labelledby="heading{{ meter.name }}">
+        <div class="accordion-body">
+            <div style="position: relative;
+                        padding: 5px 9px;
+                        height : 64px"
+                 class="col-12">
+                <div style="font-size:32px; position: absolute; top: -6px; left: -8px;">{{ meter.emoji }}</div>
+                <div class="progress" style="height: 24px;">
+                    <div class="progress-bar"
+                         style="width: {{ meter.percent }}%;
+                                background-color: {{ meter.color }};
+                                text-align: right;
+                                padding-right: 4%">
+                        {{ meter.total }}{{ meter.unit }}
+                    </div>
+                </div>
+                <span style="position:absolute;
+                             right: 5%;
+                             text-align: right"
+                      class="text-muted">
+                    / {{ meter.thresh }}{{ meter.unit }}
+                </span>
+            </div>
+            <p>
+                Your <strong class="meter-def" style="color: {{ meter.color }}">{{ meter.name }}</strong>
+                will increase if you gain another
+                <strong style="color: {{ meter.color }}">{{ meter.needed }}{{ meter.unit }}</strong>.
+            </p>
+            <div>
+                {% block meter-content %}{% endblock %}
+            </div>
+        </div>
+    </div>
 </div>
-
 {% comment %}
 vim: ft=htmldjango
 {% endcomment %}

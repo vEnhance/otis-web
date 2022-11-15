@@ -13,6 +13,9 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='semester',
             name='social_url',
-            field=models.CharField(blank=True, help_text='The link to social platform for this year.', max_length=128),
+            field=models.CharField(
+                blank=True,
+                help_text='The link to social platform for this year.',
+                max_length=128),
         ),
     ]

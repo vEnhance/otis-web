@@ -14,11 +14,21 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='achievement',
             name='always_show_image',
-            field=models.BooleanField(default=False, help_text='If enabled, always show the achievement image.', verbose_name='Reveal'),
+            field=models.BooleanField(
+                default=False,
+                help_text='If enabled, always show the achievement image.',
+                verbose_name='Reveal'),
         ),
         migrations.AlterField(
             model_name='achievement',
             name='code',
-            field=models.CharField(max_length=96, null=True, unique=True, validators=[django.core.validators.RegexValidator(message='24-26 char hex string', regex='^[a-f0-9]{24,26}$')]),
+            field=models.CharField(
+                max_length=96,
+                null=True,
+                unique=True,
+                validators=[
+                    django.core.validators.RegexValidator(
+                        message='24-26 char hex string', regex='^[a-f0-9]{24,26}$')
+                ]),
         ),
     ]

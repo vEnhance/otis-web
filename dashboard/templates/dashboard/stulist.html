@@ -1,106 +1,108 @@
 {% extends 'layout.html' %}
 {% block layout-content %}
-{% load otis_extras %}
-
-{% if rows|length > 0 %} {# if >0 student to list #}
-<p>Here are the participants to which you have access.</p>
-{% if semester %}
-<p>The list is restricted to <b>{{ semester.name }}</b>.</p>
-{% endif %}
-
-<table id="students" class="table tablesorter">
-	<thead class="table-dark">
-		<tr>
-			<th>#</th>
-			<th>Name</th>
-			{% if stulist_show_semester %}
-			<th>Year</th>
-			{% else %}
-			<th class="text-end" style="min-width:4em;">Level</th>
-			{% endif %}
-			<th>Meets</th>
-			<th class="text-end" style="min-width:3em;">Score</th>
-		</tr>
-	</thead>
-	<tbody>
-		{% for row in rows %}
-		{% with student=row.student %}
-		<tr> {# begin table row for this student #}
-			<td>{{ forloop.counter }}</td>
-			<td><a href="{% url "portal" student.id %}">
-					{{ student.name }}</a>
-				{% if not student.enabled %}
-				(disabled)
-				{% endif %}
-			</td>
-
-			{% if stulist_show_semester %}
-			<td>{{ student.semester }}</td>
-			{% else %}
-			<td class="text-end">Lv{{ row.level }}</td>
-			{% endif %}
-
-			<td>{{ student.assistant.shortname }}</td>
-			<td class="text-end">
-				{% if student.legit %}
-				{% if student.newborn %}
-				&mdash;
-				{% else %}
-				{{ student.num_psets|default:0 }}u
-				{% endif %}
-				{%endif %}
-			</td>
-		</tr> {# end table row for this student #}
-		{% endwith %}
-		{% endfor %}
-	</tbody>
-</table>
-
-<p>This list was generated {% now "r" %}.
-	Have a nice day.</p>
-
-{% else %} {# if no students at all #}
-<p class="fst-italic">But nobody came.</p>
-<hr />
-<p>There isn't anything here yet.</p>
-{% if request.user.is_staff %}
-<p>You're a staff member, so if you're expecting to see something, contact Evan.</p>
-
-{% elif submitted_registration %}
-<p>You just recently registered,
-	so you'll need to wait for Evan to confirm your registration.
-	Contact me if you think this is an error.</p>
-
-{% elif exists_registration %}
-<p>To register for this year,
-	<a href="{% url "register" %}">submit the decision form</a>.
-</p>
-{% elif not past or not semester %}
-<p>You can view <a href="{% url "past" %}">🕗 all past years</a>
-	if you participated in OTIS before.
-	(You can also click the clock icon at the right.)
-</p>
-{% endif %}
-{% endif %}
-
-{% if past %}
-{% if semester %}
-<p>You can view <a href="{% url "past" %}">🕗 all past years</a>
-	if you participated in OTIS before.</p>
-{% else %}
-<p>This page includes all years of OTIS.
-	You can also see <a href="{% url "semlist" %}">a listing of all years.</a>
-</p>
-{% endif %}
-{% endif %}
-
+    {% load otis_extras %}
+    {% if rows|length > 0 %}
+        {# if >0 student to list #}
+        <p>Here are the participants to which you have access.</p>
+        {% if semester %}
+            <p>
+                The list is restricted to <b>{{ semester.name }}</b>.
+            </p>
+        {% endif %}
+        <table id="students" class="table tablesorter">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    {% if stulist_show_semester %}
+                        <th>Year</th>
+                    {% else %}
+                        <th class="text-end" style="min-width:4em;">Level</th>
+                    {% endif %}
+                    <th>Meets</th>
+                    <th class="text-end" style="min-width:3em;">Score</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                    {% with student=row.student %}
+                        <tr>
+                            {# begin table row for this student #}
+                            <td>{{ forloop.counter }}</td>
+                            <td>
+                                <a href="{% url "portal" student.id %}">{{ student.name }}</a>
+                                {% if not student.enabled %}(disabled){% endif %}
+                            </td>
+                            {% if stulist_show_semester %}
+                                <td>{{ student.semester }}</td>
+                            {% else %}
+                                <td class="text-end">Lv{{ row.level }}</td>
+                            {% endif %}
+                            <td>{{ student.assistant.shortname }}</td>
+                            <td class="text-end">
+                                {% if student.legit %}
+                                    {% if student.newborn %}
+                                        &mdash;
+                                    {% else %}
+                                        {{ student.num_psets|default:0 }}u
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {# end table row for this student #}
+                    {% endwith %}
+                {% endfor %}
+            </tbody>
+        </table>
+        <p>
+            This list was generated {% now "r" %}.
+            Have a nice day.
+        </p>
+    {% else %}
+        {# if no students at all #}
+        <p class="fst-italic">But nobody came.</p>
+        <hr />
+        <p>There isn't anything here yet.</p>
+        {% if request.user.is_staff %}
+            <p>You're a staff member, so if you're expecting to see something, contact Evan.</p>
+        {% elif submitted_registration %}
+            <p>
+                You just recently registered,
+                so you'll need to wait for Evan to confirm your registration.
+                Contact me if you think this is an error.
+            </p>
+        {% elif exists_registration %}
+            <p>
+                To register for this year,
+                <a href="{% url "register" %}">submit the decision form</a>.
+            </p>
+        {% elif not past or not semester %}
+            <p>
+                You can view <a href="{% url "past" %}">🕗 all past years</a>
+                if you participated in OTIS before.
+                (You can also click the clock icon at the right.)
+            </p>
+        {% endif %}
+    {% endif %}
+    {% if past %}
+        {% if semester %}
+            <p>
+                You can view <a href="{% url "past" %}">🕗 all past years</a>
+                if you participated in OTIS before.
+            </p>
+        {% else %}
+            <p>
+                This page includes all years of OTIS.
+                You can also see <a href="{% url "semlist" %}">a listing of all years.</a>
+            </p>
+        {% endif %}
+    {% endif %}
 {% endblock %}
-
 {% block scripts %}
-<script src="https://cdn.jsdelivr.net/npm/tablesorter@2.31.3/dist/js/jquery.tablesorter.combined.min.js" integrity="sha256-ounC3wWwZ9iBUyF8x1+X+REppGjK+p6/+w+ky1MGoMM=" crossorigin="anonymous"></script>
-<script type="text/javascript">
+    <script src="https://cdn.jsdelivr.net/npm/tablesorter@2.31.3/dist/js/jquery.tablesorter.combined.min.js" integrity="sha256-ounC3wWwZ9iBUyF8x1+X+REppGjK+p6/+w+ky1MGoMM=" crossorigin="anonymous"></script>
+    <script type="text/javascript">
 	$(() => {
 		$("#students").tablesorter();
 	});
-</script>
+    </script>
 {% endblock %}

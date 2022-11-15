@@ -13,7 +13,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='achievement',
             name='name',
-            field=models.CharField(default='', help_text='Name of the achievement', max_length=128),
+            field=models.CharField(
+                default='', help_text='Name of the achievement', max_length=128),
             preserve_default=False,
         ),
     ]

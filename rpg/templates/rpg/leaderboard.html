@@ -4,51 +4,53 @@
 {% load humanize %}
 {% block main-class %}col-12{% endblock %}
 {% block side-class %}col-6 col-md-4{% endblock %}
-
 {% block layout-content %}
-<p>Heathcliff is watching.</p>
-<table id="students" class="table tablesorter">
-	<thead>
-		<tr class="table-info">
-			<th style="min-width: 2em;">Rk</th>
-			<th style="min-width: 6em;">Lv</th>
-			<th style="min-width: 10em;">Name</th>
-			<th class="text-end">♣️</th>
-			<th class="text-end">♥️</th>
-			<th class="text-end">♠️</th>
-			<th class="text-end">♦️</th>
-			<th class="text-end">Insanity</th>
-			<th class="text-end">Login</th>
-		</tr>
-	</thead>
-	<tbody>
-		{% for row in rows %}
-		<tr> {# begin table row for this student #}
-			<td>
-				<sup>{{ forloop.counter|ordinal }}</sup>
-			</td>
-			<td>
-				<strong>Lv {{ row.level }}</strong>
-				<sup class="fst-italic">{{ row.level_name }}</sup>
-			</td>
-			<td><a href="{% url "stats" row.student.id %}">{{ row.student.name }}</a></td>
-			<td class="text-end">{{ row.clubs|floatformat:"0" }}</td>
-			<td class="text-end">{{ row.hearts|floatformat:"0" }}</td>
-			<td class="text-end">{{ row.spades|floatformat:"0" }}</td>
-			<td class="text-end">{{ row.diamonds }}</td>
-			<td class="text-end">{{ row.insanity|stringformat:"+.2f" }}</td>
-			<td class="text-end">{{ row.days_since_last_seen|stringformat:".2f" }}</td>
-		</tr> {# end table row for this row #}
-		{% endfor %}
-	</tbody>
-</table>
+    <p>Heathcliff is watching.</p>
+    <table id="students" class="table tablesorter">
+        <thead>
+            <tr class="table-info">
+                <th style="min-width: 2em;">Rk</th>
+                <th style="min-width: 6em;">Lv</th>
+                <th style="min-width: 10em;">Name</th>
+                <th class="text-end">♣️</th>
+                <th class="text-end">♥️</th>
+                <th class="text-end">♠️</th>
+                <th class="text-end">♦️</th>
+                <th class="text-end">Insanity</th>
+                <th class="text-end">Login</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+                <tr>
+                    {# begin table row for this student #}
+                    <td>
+                        <sup>{{ forloop.counter|ordinal }}</sup>
+                    </td>
+                    <td>
+                        <strong>Lv {{ row.level }}</strong>
+                        <sup class="fst-italic">{{ row.level_name }}</sup>
+                    </td>
+                    <td>
+                        <a href="{% url "stats" row.student.id %}">{{ row.student.name }}</a>
+                    </td>
+                    <td class="text-end">{{ row.clubs|floatformat:"0" }}</td>
+                    <td class="text-end">{{ row.hearts|floatformat:"0" }}</td>
+                    <td class="text-end">{{ row.spades|floatformat:"0" }}</td>
+                    <td class="text-end">{{ row.diamonds }}</td>
+                    <td class="text-end">{{ row.insanity|stringformat:"+.2f" }}</td>
+                    <td class="text-end">{{ row.days_since_last_seen|stringformat:".2f" }}</td>
+                </tr>
+                {# end table row for this row #}
+            {% endfor %}
+        </tbody>
+    </table>
 {% endblock %}
-
 {% block scripts %}
-<script src="https://cdn.jsdelivr.net/npm/tablesorter@2.31.3/dist/js/jquery.tablesorter.combined.min.js" integrity="sha256-ounC3wWwZ9iBUyF8x1+X+REppGjK+p6/+w+ky1MGoMM=" crossorigin="anonymous"></script>
-<script type="text/javascript">
+    <script src="https://cdn.jsdelivr.net/npm/tablesorter@2.31.3/dist/js/jquery.tablesorter.combined.min.js" integrity="sha256-ounC3wWwZ9iBUyF8x1+X+REppGjK+p6/+w+ky1MGoMM=" crossorigin="anonymous"></script>
+    <script type="text/javascript">
 	$(() => {
 		$("#students").tablesorter();
 	});
-</script>
+    </script>
 {% endblock %}

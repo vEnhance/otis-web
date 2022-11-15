@@ -1,36 +1,37 @@
 {% extends 'layout.html' %}
 {% block title %}Market {{ market.slug }}{% endblock %}
 {% load humanize %}
-
 {% block layout-content %}
-<p>
-	<a href="{% url 'index' %}">Back to top</a>
-	&nbsp;
-	{% if request.user.is_superuser %}
-	<a href="{% url 'market-results' market.slug %}" class="btn btn-outline-warning" role="button">Admin view</a>
-	{% endif %}
-</p>
-<div class="alert alert-dark">
-	<h2 class="alert-heading">{{ market.title }}</h2>
-	{{ market.prompt_rendered|safe }}
-</div>
-<hr />
-<ul>
-	<li>Started {{ market.start_date|naturaltime }} ({{ market.start_date }})</li>
-	<li>Ends <strong>{{ market.end_date|naturaltime }}</strong> ({{market.end_date}})</li>
-	<li>This market parameter is set at $w = {{ market.weight }}$ and $\alpha = {{ market.alpha }}$.</li>
-</ul>
-
-{% include "generic_form.html" %}
-
-{% if market.alpha %}
-<hr />
-<p>This is a standard market where your score (in ♠) for a market is given by
-	\[ w \cdot \left(\min\left\{\frac AB, \frac BA\right\}\right)^\alpha \]
-	where $A$ is the correct answer and $B$ is your guess,
-	with $(w,\alpha)$ specified by the market.
-	Visit the <a href="{% url "market-list" %}">market main page</a> for details.
-</p>
-{% endif %}
-
+    <p>
+        <a href="{% url 'index' %}">Back to top</a>
+        &nbsp;
+        {% if request.user.is_superuser %}
+            <a href="{% url 'market-results' market.slug %}"
+               class="btn btn-outline-warning"
+               role="button">Admin view</a>
+        {% endif %}
+    </p>
+    <div class="alert alert-dark">
+        <h2 class="alert-heading">{{ market.title }}</h2>
+        {{ market.prompt_rendered|safe }}
+    </div>
+    <hr />
+    <ul>
+        <li>Started {{ market.start_date|naturaltime }} ({{ market.start_date }})</li>
+        <li>
+            Ends <strong>{{ market.end_date|naturaltime }}</strong> ({{ market.end_date }})
+        </li>
+        <li>This market parameter is set at $w = {{ market.weight }}$ and $\alpha = {{ market.alpha }}$.</li>
+    </ul>
+    {% include "generic_form.html" %}
+    {% if market.alpha %}
+        <hr />
+        <p>
+            This is a standard market where your score (in ♠) for a market is given by
+            \[ w \cdot \left(\min\left\{\frac AB, \frac BA\right\}\right)^\alpha \]
+            where $A$ is the correct answer and $B$ is your guess,
+            with $(w,\alpha)$ specified by the market.
+            Visit the <a href="{% url "market-list" %}">market main page</a> for details.
+        </p>
+    {% endif %}
 {% endblock %}

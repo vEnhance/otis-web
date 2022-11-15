@@ -13,6 +13,9 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='problem',
             name='puid',
-            field=models.CharField(help_text='Unique problem identifier, as printed in OTIS handout.', max_length=24, unique=True),
+            field=models.CharField(
+                help_text='Unique problem identifier, as printed in OTIS handout.',
+                max_length=24,
+                unique=True),
         ),
     ]

@@ -15,11 +15,18 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='student',
             name='vision',
-            field=models.SmallIntegerField(default=3, help_text='How many units ahead of the most recently completed unit the student can see.'),
+            field=models.SmallIntegerField(
+                default=3,
+                help_text=
+                'How many units ahead of the most recently completed unit the student can see.'
+            ),
         ),
         migrations.AlterField(
             model_name='student',
             name='track',
-            field=models.CharField(choices=[('A', 'Weekly'), ('B', 'Biweekly'), ('C', 'Correspondence'), ('E', 'External'), ('G', 'Graduate'), ('N', 'Not applicable')], max_length=5),
+            field=models.CharField(
+                choices=[('A', 'Weekly'), ('B', 'Biweekly'), ('C', 'Correspondence'),
+                            ('E', 'External'), ('G', 'Graduate'), ('N', 'Not applicable')],
+                max_length=5),
         ),
     ]

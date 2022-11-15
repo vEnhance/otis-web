@@ -13,6 +13,9 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='market',
             name='weight',
-            field=models.FloatField(default=4, help_text='The max score to assign to the market, used in the scoring function'),
+            field=models.FloatField(
+                default=4,
+                help_text='The max score to assign to the market, used in the scoring function'
+            ),
         ),
     ]

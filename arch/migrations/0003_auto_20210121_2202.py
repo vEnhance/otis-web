@@ -13,11 +13,18 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='hint',
             name='keywords',
-            field=models.CharField(default='', help_text='A comma-separated list of keywords that a solver could look at to help them guess whether the hint is relevant or not. These are viewable immediately, so no spoilers here.', max_length=255),
+            field=models.CharField(
+                default='',
+                help_text=
+                'A comma-separated list of keywords that a solver could look at to help them guess whether the hint is relevant or not. These are viewable immediately, so no spoilers here.',
+                max_length=255),
         ),
         migrations.AlterField(
             model_name='hint',
             name='number',
-            field=models.PositiveIntegerField(help_text='A number from 0 to 100 used to indicate an ordering for the hints. Here a number 0 means a small nudge given to someone at the very start whereas 100 means a hint given to someone who was read all previous hints or is close to the end of the problem. Do your best to make up an extrapolation for everything in between. A good idea is to give a sequence of hints with nearby numbers, say 20/21/22, each of which elaborates on the previous hint.'),
+            field=models.PositiveIntegerField(
+                help_text=
+                'A number from 0 to 100 used to indicate an ordering for the hints. Here a number 0 means a small nudge given to someone at the very start whereas 100 means a hint given to someone who was read all previous hints or is close to the end of the problem. Do your best to make up an extrapolation for everything in between. A good idea is to give a sequence of hints with nearby numbers, say 20/21/22, each of which elaborates on the previous hint.'
+            ),
         ),
     ]

@@ -2,21 +2,24 @@
 {% load humanize %}
 {% block title %}Market {{ guess.market.slug }} submitted{% endblock %}
 {% block layout-content %}
-<div class="alert alert-dark">
-	<h2 class="alert-heading">{{ guess.market.title }}</h2>
-	{{ guess.market.prompt_rendered|safe }}
-</div>
-<p>
-	You submitted <strong>{{ guess.value }}</strong> for the market
-	<a href="{{ guess.market.get_absolute_url }}">
-		<code>{{ guess.market.slug }}</code>
-	</a>
-	which will close in {{ guess.market.end_date|naturaltime }}.
-</p>
-
-<hr />
-<ul>
-	<li><a href="{% url 'market-list' %}">List of all markets</a></li>
-	<li><a href="{% url 'index' %}">Back to homepage</a></li>
-</ul>
+    <div class="alert alert-dark">
+        <h2 class="alert-heading">{{ guess.market.title }}</h2>
+        {{ guess.market.prompt_rendered|safe }}
+    </div>
+    <p>
+        You submitted <strong>{{ guess.value }}</strong> for the market
+        <a href="{{ guess.market.get_absolute_url }}">
+            <code>{{ guess.market.slug }}</code>
+        </a>
+        which will close in {{ guess.market.end_date|naturaltime }}.
+    </p>
+    <hr />
+    <ul>
+        <li>
+            <a href="{% url 'market-list' %}">List of all markets</a>
+        </li>
+        <li>
+            <a href="{% url 'index' %}">Back to homepage</a>
+        </li>
+    </ul>
 {% endblock %}

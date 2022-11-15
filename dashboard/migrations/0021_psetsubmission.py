@@ -16,16 +16,52 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='PSetSubmission',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('approved', models.BooleanField(default=False, help_text='Whether the problem set has been checked off')),
-                ('hours', models.FloatField(help_text='Number of hours spent on this problem set', verbose_name='Total hours spent')),
-                ('clubs', models.IntegerField(help_text='Total number of clubs that you solved', verbose_name='Total ♣ earned')),
-                ('feedback', models.TextField(blank=True, help_text='Any other feedback about the problem set')),
-                ('special_notes', models.TextField(help_text="If there's anything you need to say before we proceed")),
-                ('next_unit_to_unlock', models.ForeignKey(blank=True, help_text='The unit you want to work on next (leave blank for any)', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='unblocking_submissions', to='core.unit')),
-                ('student', models.ForeignKey(help_text='The student attached to this', on_delete=django.db.models.deletion.CASCADE, to='roster.student')),
-                ('unit', models.ForeignKey(help_text='The unit you want to submit for', null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.unit')),
-                ('upload', models.ForeignKey(help_text='The associated upload file for this problem set', on_delete=django.db.models.deletion.CASCADE, to='dashboard.uploadedfile')),
+                ('id',
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False,
+                        verbose_name='ID')),
+                ('approved',
+                    models.BooleanField(
+                        default=False,
+                        help_text='Whether the problem set has been checked off')),
+                ('hours',
+                    models.FloatField(
+                        help_text='Number of hours spent on this problem set',
+                        verbose_name='Total hours spent')),
+                ('clubs',
+                    models.IntegerField(
+                        help_text='Total number of clubs that you solved',
+                        verbose_name='Total ♣ earned')),
+                ('feedback',
+                    models.TextField(
+                        blank=True, help_text='Any other feedback about the problem set')),
+                ('special_notes',
+                    models.TextField(
+                        help_text="If there's anything you need to say before we proceed")),
+                ('next_unit_to_unlock',
+                    models.ForeignKey(
+                        blank=True,
+                        help_text='The unit you want to work on next (leave blank for any)',
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name='unblocking_submissions',
+                        to='core.unit')),
+                ('student',
+                    models.ForeignKey(
+                        help_text='The student attached to this',
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to='roster.student')),
+                ('unit',
+                    models.ForeignKey(
+                        help_text='The unit you want to submit for',
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to='core.unit')),
+                ('upload',
+                    models.ForeignKey(
+                        help_text='The associated upload file for this problem set',
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to='dashboard.uploadedfile')),
             ],
         ),
     ]

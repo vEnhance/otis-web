@@ -14,6 +14,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='semesterdownloadfile',
             name='content',
-            field=models.FileField(help_text='The file itself', upload_to=dashboard.models.download_file_name),
+            field=models.FileField(
+                help_text='The file itself', upload_to=dashboard.models.download_file_name),
         ),
     ]

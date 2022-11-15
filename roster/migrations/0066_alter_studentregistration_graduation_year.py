@@ -13,6 +13,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='studentregistration',
             name='graduation_year',
-            field=models.IntegerField(choices=[(0, 'Already graduated high school'), (2021, 'Graduating in 2021'), (2022, 'Graduating in 2022'), (2023, 'Graduating in 2023'), (2024, 'Graduating in 2024'), (2025, 'Graduating in 2025'), (2026, 'Graduating in 2026'), (2027, 'Graduating in 2027'), (2028, 'Graduating in 2028'), (2029, 'Graduating in 2029')], help_text='Enter your expected graduation year'),
+            field=models.IntegerField(
+                choices=[(0, 'Already graduated high school'), (2021, 'Graduating in 2021'),
+                            (2022, 'Graduating in 2022'), (2023, 'Graduating in 2023'),
+                            (2024, 'Graduating in 2024'), (2025, 'Graduating in 2025'),
+                            (2026, 'Graduating in 2026'), (2027, 'Graduating in 2027'),
+                            (2028, 'Graduating in 2028'), (2029, 'Graduating in 2029')],
+                help_text='Enter your expected graduation year'),
         ),
     ]

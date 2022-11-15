@@ -13,11 +13,15 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='student',
             name='num_units_done',
-            field=models.SmallIntegerField(default=0, help_text="The number of completed units. This is set manually for Evan's book-keeping."),
+            field=models.SmallIntegerField(
+                default=0,
+                help_text=
+                "The number of completed units. This is set manually for Evan's book-keeping."),
         ),
         migrations.AlterField(
             model_name='student',
             name='vision',
-            field=models.SmallIntegerField(default=3, help_text='Deprecated and no longer in use. To be deleted.'),
+            field=models.SmallIntegerField(
+                default=3, help_text='Deprecated and no longer in use. To be deleted.'),
         ),
     ]

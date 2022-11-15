@@ -16,6 +16,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='uploadedfile',
             name='content',
-            field=models.FileField(help_text='The file itself', upload_to=dashboard.models.content_file_name, validators=[django.core.validators.FileExtensionValidator(allowed_extensions=['pdf', 'txt', 'tex', 'png', 'jpg'])]),
+            field=models.FileField(
+                help_text='The file itself',
+                upload_to=dashboard.models.content_file_name,
+                validators=[
+                    django.core.validators.FileExtensionValidator(
+                        allowed_extensions=['pdf', 'txt', 'tex', 'png', 'jpg'])
+                ]),
         ),
     ]

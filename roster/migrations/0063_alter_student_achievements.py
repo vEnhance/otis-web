@@ -14,6 +14,9 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='student',
             name='achievements',
-            field=models.ManyToManyField(blank=True, help_text='Codes that this student has obtained', to='dashboard.Achievement'),
+            field=models.ManyToManyField(
+                blank=True,
+                help_text='Codes that this student has obtained',
+                to='dashboard.Achievement'),
         ),
     ]

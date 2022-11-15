@@ -1,37 +1,32 @@
 {% extends 'layout.html' %}
 {% load humanize %}
 {% block layout-content %}
-
-<p><a href="{{ pset.get_absolute_url }}">Return to problem set view</a></p>
-<h2>{{ pset.unit }}</h2>
-<p>
-	Previous submission:
-	{% if pset.filename %}
-	<tt><a href="{{ pset.get_absolute_url }}">{{ pset.filename }}</a></tt>.
-	{% else %}
-	<a href="{{ pset.get_absolute_url }}">Submission #{{ pset.pk }}</a>.
-	{% endif %}
-</p>
-<p>
-	{% if pset.upload %}
-	Submitted {{ pset.upload.created_at }}.
-	{% endif %}
-</p>
-
-<p>
-	{% if not pset.resubmitted %}
-	You are about to <strong>resubmit</strong> {{ pset.unit.group }}.
-	This will overwrite your previous submission,
-	and add it back to the queue of problem sets requiring attention.
-	{% else %}
-	This problem set hasn't been processed yet,
-	so you can use this page to update your submission before
-	Evan or a different instructor gets to it.
-	{% endif %}
-</p>
-
-
-<hr />
-{% include "generic_form.html" %}
-
+    <p>
+        <a href="{{ pset.get_absolute_url }}">Return to problem set view</a>
+    </p>
+    <h2>{{ pset.unit }}</h2>
+    <p>
+        Previous submission:
+        {% if pset.filename %}
+            <tt><a href="{{ pset.get_absolute_url }}">{{ pset.filename }}</a></tt>.
+        {% else %}
+            <a href="{{ pset.get_absolute_url }}">Submission #{{ pset.pk }}</a>.
+        {% endif %}
+    </p>
+    <p>
+        {% if pset.upload %}Submitted {{ pset.upload.created_at }}.{% endif %}
+    </p>
+    <p>
+        {% if not pset.resubmitted %}
+            You are about to <strong>resubmit</strong> {{ pset.unit.group }}.
+            This will overwrite your previous submission,
+            and add it back to the queue of problem sets requiring attention.
+        {% else %}
+            This problem set hasn't been processed yet,
+            so you can use this page to update your submission before
+            Evan or a different instructor gets to it.
+        {% endif %}
+    </p>
+    <hr />
+    {% include "generic_form.html" %}
 {% endblock %}

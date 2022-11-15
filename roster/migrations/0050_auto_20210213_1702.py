@@ -13,11 +13,19 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='invoice',
             name='extras',
-            field=models.DecimalField(decimal_places=2, default=0, help_text='Additional payment, e.g. for T-shirts.', max_digits=8),
+            field=models.DecimalField(
+                decimal_places=2,
+                default=0,
+                help_text='Additional payment, e.g. for T-shirts.',
+                max_digits=8),
         ),
         migrations.AlterField(
             model_name='invoice',
             name='adjustment',
-            field=models.DecimalField(decimal_places=2, default=0, help_text='Adjustment to the cost, e.g. for financial aid.', max_digits=8),
+            field=models.DecimalField(
+                decimal_places=2,
+                default=0,
+                help_text='Adjustment to the cost, e.g. for financial aid.',
+                max_digits=8),
         ),
     ]

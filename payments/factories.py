@@ -5,8 +5,9 @@ from roster.factories import InvoiceFactory
 
 
 class PaymentLogFactory(DjangoModelFactory):
-	class Meta:
-		model = PaymentLog
 
-	invoice = SubFactory(InvoiceFactory)
-	amount = 0
+    class Meta:
+        model = PaymentLog
+
+    invoice = SubFactory(InvoiceFactory)
+    amount = 0

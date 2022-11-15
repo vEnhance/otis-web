@@ -15,6 +15,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='mockolympiad',
             name='start_date',
-            field=models.DateField(blank=True, help_text='When the assignment opens. Leave blank if not active this semester.', null=True),
+            field=models.DateField(
+                blank=True,
+                help_text='When the assignment opens. Leave blank if not active this semester.',
+                null=True),
         ),
     ]

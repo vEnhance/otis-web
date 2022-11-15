@@ -15,6 +15,10 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='student',
             name='legit',
-            field=models.BooleanField(default=True, help_text='Whether this student is real. Set to false for dummy accounts and the like. This will hide them from the master schedule, for example.'),
+            field=models.BooleanField(
+                default=True,
+                help_text=
+                'Whether this student is real. Set to false for dummy accounts and the like. This will hide them from the master schedule, for example.'
+            ),
         ),
     ]

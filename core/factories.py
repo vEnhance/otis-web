@@ -18,64 +18,68 @@ User = get_user_model()
 
 
 class UserFactory(DjangoModelFactory):
-	class Meta:
-		model = User
 
-	first_name = Faker('first_name_female', min_length=5)
-	last_name = Faker('last_name_female', min_length=5)
-	username = UniqueFaker('pystr', min_chars=30, max_chars=40, prefix='user_')
-	email = Faker('ascii_safe_email')
+    class Meta:
+        model = User
+
+    first_name = Faker('first_name_female', min_length=5)
+    last_name = Faker('last_name_female', min_length=5)
+    username = UniqueFaker('pystr', min_chars=30, max_chars=40, prefix='user_')
+    email = Faker('ascii_safe_email')
 
 
 class UnitGroupFactory(DjangoModelFactory):
-	class Meta:
-		model = UnitGroup
 
-	name = UniqueFaker('bs')
-	slug = UniqueFaker('slug')
-	description = Faker('catch_phrase')
-	subject = FuzzyChoice(UnitGroup.SUBJECT_CHOICES)
+    class Meta:
+        model = UnitGroup
+
+    name = UniqueFaker('bs')
+    slug = UniqueFaker('slug')
+    description = Faker('catch_phrase')
+    subject = FuzzyChoice(UnitGroup.SUBJECT_CHOICES)
 
 
 class UnitFactory(DjangoModelFactory):
-	class Meta:
-		model = Unit
 
-	code = LazyAttribute(
-		lambda o: random.choice('BDZ') + o.group.subject[0] + random.choice('WXY')
-	)
-	group = SubFactory(UnitGroupFactory)
-	position = Sequence(lambda n: n + 1)
+    class Meta:
+        model = Unit
 
-	@post_generation
-	def write_mock_media(self, create: bool, extracted: bool, **kwargs: Dict[str, Any]):
-		assert settings.TESTING is True
-		if settings.TESTING_NEEDS_MOCK_MEDIA is False:
-			return
-		u: Unit = self  # type: ignore
-		stuff_to_write = [
-			(u.problems_pdf_filename, b'Prob', ".pdf"),
-			(u.solutions_pdf_filename, b'Soln', ".pdf"),
-			(u.problems_tex_filename, b'TeX', ".tex"),
-		]
-		for (fname, content, ext) in stuff_to_write:
-			default_storage.save('pdfs/' + storage_hash(fname) + ext, ContentFile(content))
+    code = LazyAttribute(
+        lambda o: random.choice('BDZ') + o.group.subject[0] + random.choice('WXY'))
+    group = SubFactory(UnitGroupFactory)
+    position = Sequence(lambda n: n + 1)
+
+    @post_generation
+    def write_mock_media(self, create: bool, extracted: bool, **kwargs: Dict[str, Any]):
+        assert settings.TESTING is True
+        if settings.TESTING_NEEDS_MOCK_MEDIA is False:
+            return
+        u: Unit = self  # type: ignore
+        stuff_to_write = [
+            (u.problems_pdf_filename, b'Prob', ".pdf"),
+            (u.solutions_pdf_filename, b'Soln', ".pdf"),
+            (u.problems_tex_filename, b'TeX', ".tex"),
+        ]
+        for (fname, content, ext) in stuff_to_write:
+            default_storage.save('pdfs/' + storage_hash(fname) + ext, ContentFile(content))
 
 
 class SemesterFactory(DjangoModelFactory):
-	class Meta:
-		model = Semester
 
-	name = Sequence(lambda n: f"Year {n + 1}")
-	active = True
-	exam_family = 'Waltz'
-	gradescope_key = 'ABCDEF'
-	social_url = 'https://instagram.com/evanchen.cc/'
-	end_year = 2025
+    class Meta:
+        model = Semester
+
+    name = Sequence(lambda n: f"Year {n + 1}")
+    active = True
+    exam_family = 'Waltz'
+    gradescope_key = 'ABCDEF'
+    social_url = 'https://instagram.com/evanchen.cc/'
+    end_year = 2025
 
 
 class UserProfileFactory(DjangoModelFactory):
-	class Meta:
-		model = UserProfile
 
-	user = SubFactory(UserFactory)
+    class Meta:
+        model = UserProfile
+
+    user = SubFactory(UserFactory)

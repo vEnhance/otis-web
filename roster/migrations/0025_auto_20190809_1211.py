@@ -13,6 +13,9 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='student',
             name='track',
-            field=models.CharField(choices=[('A', 'Weekly'), ('B', 'Biweekly'), ('C', 'Corr.'), ('E', 'Ext.'), ('G', 'Grad'), ('N', 'Not applicable')], max_length=5),
+            field=models.CharField(
+                choices=[('A', 'Weekly'), ('B', 'Biweekly'), ('C', 'Corr.'), ('E', 'Ext.'),
+                            ('G', 'Grad'), ('N', 'Not applicable')],
+                max_length=5),
         ),
     ]

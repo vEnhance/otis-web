@@ -15,51 +15,96 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='practiceexam',
             name='url1',
-            field=models.CharField(blank=True, max_length=128, validators=[django.core.validators.URLValidator()]),
+            field=models.CharField(
+                blank=True, max_length=128, validators=[django.core.validators.URLValidator()]),
         ),
         migrations.AddField(
             model_name='practiceexam',
             name='url2',
-            field=models.CharField(blank=True, max_length=128, validators=[django.core.validators.URLValidator()]),
+            field=models.CharField(
+                blank=True, max_length=128, validators=[django.core.validators.URLValidator()]),
         ),
         migrations.AddField(
             model_name='practiceexam',
             name='url3',
-            field=models.CharField(blank=True, max_length=128, validators=[django.core.validators.URLValidator()]),
+            field=models.CharField(
+                blank=True, max_length=128, validators=[django.core.validators.URLValidator()]),
         ),
         migrations.AddField(
             model_name='practiceexam',
             name='url4',
-            field=models.CharField(blank=True, max_length=128, validators=[django.core.validators.URLValidator()]),
+            field=models.CharField(
+                blank=True, max_length=128, validators=[django.core.validators.URLValidator()]),
         ),
         migrations.AddField(
             model_name='practiceexam',
             name='url5',
-            field=models.CharField(blank=True, max_length=128, validators=[django.core.validators.URLValidator()]),
+            field=models.CharField(
+                blank=True, max_length=128, validators=[django.core.validators.URLValidator()]),
         ),
         migrations.AlterField(
             model_name='practiceexam',
             name='answer1',
-            field=models.CharField(blank=True, max_length=64, validators=[django.core.validators.RegexValidator(re.compile('^\\d+(?:,\\d+)*\\Z'), code='invalid', message='Enter only digits separated by commas.')]),
+            field=models.CharField(
+                blank=True,
+                max_length=64,
+                validators=[
+                    django.core.validators.RegexValidator(
+                        re.compile('^\\d+(?:,\\d+)*\\Z'),
+                        code='invalid',
+                        message='Enter only digits separated by commas.')
+                ]),
         ),
         migrations.AlterField(
             model_name='practiceexam',
             name='answer2',
-            field=models.CharField(blank=True, max_length=64, validators=[django.core.validators.RegexValidator(re.compile('^\\d+(?:,\\d+)*\\Z'), code='invalid', message='Enter only digits separated by commas.')]),
+            field=models.CharField(
+                blank=True,
+                max_length=64,
+                validators=[
+                    django.core.validators.RegexValidator(
+                        re.compile('^\\d+(?:,\\d+)*\\Z'),
+                        code='invalid',
+                        message='Enter only digits separated by commas.')
+                ]),
         ),
         migrations.AlterField(
             model_name='practiceexam',
             name='answer3',
-            field=models.CharField(blank=True, max_length=64, validators=[django.core.validators.RegexValidator(re.compile('^\\d+(?:,\\d+)*\\Z'), code='invalid', message='Enter only digits separated by commas.')]),
+            field=models.CharField(
+                blank=True,
+                max_length=64,
+                validators=[
+                    django.core.validators.RegexValidator(
+                        re.compile('^\\d+(?:,\\d+)*\\Z'),
+                        code='invalid',
+                        message='Enter only digits separated by commas.')
+                ]),
         ),
         migrations.AlterField(
             model_name='practiceexam',
             name='answer4',
-            field=models.CharField(blank=True, max_length=64, validators=[django.core.validators.RegexValidator(re.compile('^\\d+(?:,\\d+)*\\Z'), code='invalid', message='Enter only digits separated by commas.')]),
+            field=models.CharField(
+                blank=True,
+                max_length=64,
+                validators=[
+                    django.core.validators.RegexValidator(
+                        re.compile('^\\d+(?:,\\d+)*\\Z'),
+                        code='invalid',
+                        message='Enter only digits separated by commas.')
+                ]),
         ),
         migrations.AlterField(
             model_name='practiceexam',
             name='answer5',
-            field=models.CharField(blank=True, max_length=64, validators=[django.core.validators.RegexValidator(re.compile('^\\d+(?:,\\d+)*\\Z'), code='invalid', message='Enter only digits separated by commas.')]),
+            field=models.CharField(
+                blank=True,
+                max_length=64,
+                validators=[
+                    django.core.validators.RegexValidator(
+                        re.compile('^\\d+(?:,\\d+)*\\Z'),
+                        code='invalid',
+                        message='Enter only digits separated by commas.')
+                ]),
         ),
     ]

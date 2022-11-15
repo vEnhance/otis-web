@@ -1,102 +1,99 @@
 {% extends 'layout.html' %}
 {% load static %}
-
 {% block css %}
-<style type="text/css">
+    <style type="text/css">
 	a.chosen-single {
 		border: 2px solid #aaa;
 		background-color: #fff;
 		border-radius: 5px;
 	}
-</style>
+    </style>
 {% endblock %}
-
 {% block scripts %}
-<script type="text/javascript">
+    <script type="text/javascript">
 	$(document).ready(function() {
 		$("#id_unit").chosen({
 			placeholder_text: "...",
 		});
 	});
-</script>
+    </script>
 {% endblock %}
-
 {% block title %}Unit petition{% endblock %}
-
 {% block layout-content %}
-<p>A <b>unit petition</b> lets you make requests
-	for changes to your set of units.
-	Here you can open new petitions
-	and see the status of previous ones.</p>
-<p>I try to respond to petitions somewhat regularly,
-	but if I don't get to yours for a few days,
-	please send me a reminder.</p>
-
-<h2>New petition</h2>
-{% include "generic_form.html" with submit_name="Send" %}
-
-<h2>Current petitions</h2>
-<table class="table">
-	<thead class="thead-dark">
-		<tr>
-			<th>Created</th>
-			<th>Unit</th>
-			<th>Action</th>
-			<th>Status</th>
-		</tr>
-	</thead>
-	<tbody>
-		{% for inquiry in inquiries %}
-		<tr>
-			<td>{{ inquiry.created_at|date:"SHORT_DATE_FORMAT" }}</td>
-			<th>{{ inquiry.unit }}</th>
-			<td>{{ inquiry.get_action_type_display }}</td>
-			<td>
-				{% if inquiry.status == "NEW" %}
-				Pending
-				{% elif inquiry.status == "ACC" %}
-				<strong class="text-success">Accepted</strong>
-				{% elif inquiry.status == "REJ" %}
-				<strong class="text-danger">Rejected</strong>
-				{% elif inquiry.status == "HOLD" %}
-				<strong class="text-warning">On hold</strong>
-				{% endif %}
-			</td>
-		</tr>
-		{% if inquiry.explanation %}
-		<tr>
-			<td></td>
-			<td colspan="3" class="fst-italic">{{ inquiry.explanation }}</td>
-		</tr>
-		{% endif %}
-		{% endfor %}
-	</tbody>
-</table>
-
-<h2>Current units</h2>
-<p>For your reference, here is the existing curriculum.</p>
-{% include 'dashboard/curriculum_list.html' %}
-
-<h2>Instructions</h2>
-<p>There are currently three permitted actions.</p>
-<ul>
-	<li><b>Unlock</b>:
-		The unit is added if it wasn't there already,
-		and moreover the unit is automatically unlocked.
-
-		The first few petitions of this type are automatically processed;
-		the rest require manual review from Evan.
-	</li>
-	<li><b>Add for later</b>:
-		The unit is added to the list, but not unlocked.
-		Petitions of this form are processed automatically.
-	</li>
-	<li><b>Drop</b>:
-		This removes a unit entirely from your list.
-		(Be careful what you wish for!)
-		Note that this does not automatically "replace" the dropped unit.
-	</li>
-</ul>
-
-{% include 'dashboard/back_link.html' %}
+    <p>
+        A <b>unit petition</b> lets you make requests
+        for changes to your set of units.
+        Here you can open new petitions
+        and see the status of previous ones.
+    </p>
+    <p>
+        I try to respond to petitions somewhat regularly,
+        but if I don't get to yours for a few days,
+        please send me a reminder.
+    </p>
+    <h2>New petition</h2>
+    {% include "generic_form.html" with submit_name="Send" %}
+    <h2>Current petitions</h2>
+    <table class="table">
+        <thead class="thead-dark">
+            <tr>
+                <th>Created</th>
+                <th>Unit</th>
+                <th>Action</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for inquiry in inquiries %}
+                <tr>
+                    <td>{{ inquiry.created_at|date:"SHORT_DATE_FORMAT" }}</td>
+                    <th>{{ inquiry.unit }}</th>
+                    <td>{{ inquiry.get_action_type_display }}</td>
+                    <td>
+                        {% if inquiry.status == "NEW" %}
+                            Pending
+                        {% elif inquiry.status == "ACC" %}
+                            <strong class="text-success">Accepted</strong>
+                        {% elif inquiry.status == "REJ" %}
+                            <strong class="text-danger">Rejected</strong>
+                        {% elif inquiry.status == "HOLD" %}
+                            <strong class="text-warning">On hold</strong>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% if inquiry.explanation %}
+                    <tr>
+                        <td></td>
+                        <td colspan="3" class="fst-italic">{{ inquiry.explanation }}</td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+    <h2>Current units</h2>
+    <p>For your reference, here is the existing curriculum.</p>
+    {% include 'dashboard/curriculum_list.html' %}
+    <h2>Instructions</h2>
+    <p>There are currently three permitted actions.</p>
+    <ul>
+        <li>
+            <b>Unlock</b>:
+            The unit is added if it wasn't there already,
+            and moreover the unit is automatically unlocked.
+            The first few petitions of this type are automatically processed;
+            the rest require manual review from Evan.
+        </li>
+        <li>
+            <b>Add for later</b>:
+            The unit is added to the list, but not unlocked.
+            Petitions of this form are processed automatically.
+        </li>
+        <li>
+            <b>Drop</b>:
+            This removes a unit entirely from your list.
+            (Be careful what you wish for!)
+            Note that this does not automatically "replace" the dropped unit.
+        </li>
+    </ul>
+    {% include 'dashboard/back_link.html' %}
 {% endblock %}

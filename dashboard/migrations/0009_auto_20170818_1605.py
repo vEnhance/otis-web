@@ -17,11 +17,16 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='uploadedfile',
             name='category',
-            field=models.CharField(choices=[('psets', 'PSet Submission'), ('scripts', 'Transcript'), ('notes', 'Notes / Comments'), ('misc', 'Miscellaneous')], help_text='What kind of file this is', max_length=10),
+            field=models.CharField(
+                choices=[('psets', 'PSet Submission'), ('scripts', 'Transcript'),
+                            ('notes', 'Notes / Comments'), ('misc', 'Miscellaneous')],
+                help_text='What kind of file this is',
+                max_length=10),
         ),
         migrations.AlterField(
             model_name='uploadedfile',
             name='content',
-            field=models.FileField(help_text='The file itself', upload_to=dashboard.models.content_file_name),
+            field=models.FileField(
+                help_text='The file itself', upload_to=dashboard.models.content_file_name),
         ),
     ]

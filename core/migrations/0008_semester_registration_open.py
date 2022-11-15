@@ -15,6 +15,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='semester',
             name='registration_open',
-            field=models.BooleanField(default=False, help_text='Whether students can register for this semester yet.'),
+            field=models.BooleanField(
+                default=False,
+                help_text='Whether students can register for this semester yet.'),
         ),
     ]

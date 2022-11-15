@@ -13,11 +13,14 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='semester',
             name='calendar_url_meets_evan',
-            field=models.TextField(blank=True, help_text='Link to calendar for students with meetings with Evan'),
+            field=models.TextField(
+                blank=True, help_text='Link to calendar for students with meetings with Evan'),
         ),
         migrations.AddField(
             model_name='semester',
             name='calendar_url_no_meets_evan',
-            field=models.TextField(blank=True, help_text='Link to calendar for students without meetings with Evan'),
+            field=models.TextField(
+                blank=True,
+                help_text='Link to calendar for students without meetings with Evan'),
         ),
     ]

@@ -15,6 +15,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='palaceentry',
             name='image',
-            field=models.ImageField(blank=True, help_text='Optional small photo that will appear next to your entry', null=True, upload_to=rpg.models.achievement_image_file_name, validators=[dashboard.models.validate_at_most_1mb]),
+            field=models.ImageField(
+                blank=True,
+                help_text='Optional small photo that will appear next to your entry',
+                null=True,
+                upload_to=rpg.models.achievement_image_file_name,
+                validators=[dashboard.models.validate_at_most_1mb]),
         ),
     ]

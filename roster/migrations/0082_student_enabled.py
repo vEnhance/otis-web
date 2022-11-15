@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='student',
             name='enabled',
-            field=models.BooleanField(default=True, help_text='Allow student to submit/request units.'),
+            field=models.BooleanField(
+                default=True, help_text='Allow student to submit/request units.'),
         ),
     ]

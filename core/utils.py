@@ -9,25 +9,25 @@ logger = logging.getLogger(__name__)
 
 
 def storage_hash(value: str) -> str:
-	s = settings.STORAGE_HASH_KEY + '|' + value
-	h = sha256(s.encode('ascii')).hexdigest()
-	if settings.TESTING:
-		return f'TESTING_{h}'
-	else:
-		return h
+    s = settings.STORAGE_HASH_KEY + '|' + value
+    h = sha256(s.encode('ascii')).hexdigest()
+    if settings.TESTING:
+        return f'TESTING_{h}'
+    else:
+        return h
 
 
 def get_from_google_storage(filename: str):
-	ext = filename[-4:]
-	if not (ext == '.tex' or ext == '.pdf'):
-		return HttpResponseBadRequest('Bad filename extension')
-	try:
-		file = default_storage.open('pdfs/' + storage_hash(filename) + ext)
-	except FileNotFoundError:
-		errmsg = f"Unable to find {filename}."
-		logger.critical(errmsg)
-		return HttpResponseServerError(errmsg)
-	response = HttpResponse(content=file)
-	response['Content-Type'] = f'application/{ext}'
-	response['Content-Disposition'] = f'attachment; filename="{filename}"'
-	return response
+    ext = filename[-4:]
+    if not (ext == '.tex' or ext == '.pdf'):
+        return HttpResponseBadRequest('Bad filename extension')
+    try:
+        file = default_storage.open('pdfs/' + storage_hash(filename) + ext)
+    except FileNotFoundError:
+        errmsg = f"Unable to find {filename}."
+        logger.critical(errmsg)
+        return HttpResponseServerError(errmsg)
+    response = HttpResponse(content=file)
+    response['Content-Type'] = f'application/{ext}'
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    return response

@@ -20,6 +20,9 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='problemsuggestion',
             name='user',
-            field=models.ForeignKey(help_text='User who suggested the problem.', on_delete=django.db.models.deletion.CASCADE, to='auth.user'),
+            field=models.ForeignKey(
+                help_text='User who suggested the problem.',
+                on_delete=django.db.models.deletion.CASCADE,
+                to='auth.user'),
         ),
     ]

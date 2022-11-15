@@ -14,6 +14,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='guess',
             name='value',
-            field=models.FloatField(help_text="User's guess", validators=[django.core.validators.MinValueValidator(1e-06), django.core.validators.MaxValueValidator(1000000)]),
+            field=models.FloatField(
+                help_text="User's guess",
+                validators=[
+                    django.core.validators.MinValueValidator(1e-06),
+                    django.core.validators.MaxValueValidator(1000000)
+                ]),
         ),
     ]

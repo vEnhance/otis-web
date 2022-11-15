@@ -1,45 +1,38 @@
 <table class="table">
-	{% for exam in exams %}
-	<tr>
-		<td>
-			{% spaceless %}
-			{% if exam.overdue %}
-			☑️
-			{% elif exam.started %}
-			🟢
-			{% else %}
-			🔏
-			{% endif %}
-			{% endspaceless %}
-		</td>
-		<td>
-			{% if exam.is_test and exam.started %}
-			<a href="{{exam.get_absolute_url}}">
-				{{exam}}
-			</a>
-			{% elif not exam.is_test and exam.started %}
-			<a href="{% url "quiz" student.pk exam.pk %}">
-				{{exam}}
-			</a>
-			{% else %}
-			<span class="text-muted">
-				{{ exam }}
-				{% if request.user.is_staff %}
-				<a href="{{exam.get_absolute_url}}">🔍</a>
-				{% endif %}
-			</span>
-			{% endif %}
-		</td>
-
-		{% if exam.overdue %}
-		<td>Ended {{ exam.due_date|date }}</td>
-		{% elif exam.started %}
-		<td>Due {{ exam.due_date|date }}</td>
-		{% else %}
-		<td>Open {{ exam.start_date|date }} &ndash; {{ exam.due_date|date }}</td>
-		{% endif %}
-	</tr>
-	{% endfor %}
+    {% for exam in exams %}
+        <tr>
+            <td>
+                {% spaceless %}
+                    {% if exam.overdue %}
+                        ☑️
+                    {% elif exam.started %}
+                        🟢
+                    {% else %}
+                        🔏
+                    {% endif %}
+                {% endspaceless %}
+            </td>
+            <td>
+                {% if exam.is_test and exam.started %}
+                    <a href="{{ exam.get_absolute_url }}">{{ exam }}</a>
+                {% elif not exam.is_test and exam.started %}
+                    <a href="{% url "quiz" student.pk exam.pk %}">{{ exam }}</a>
+                {% else %}
+                    <span class="text-muted">
+                        {{ exam }}
+                        {% if request.user.is_staff %}<a href="{{ exam.get_absolute_url }}">🔍</a>{% endif %}
+                    </span>
+                {% endif %}
+            </td>
+            {% if exam.overdue %}
+                <td>Ended {{ exam.due_date|date }}</td>
+            {% elif exam.started %}
+                <td>Due {{ exam.due_date|date }}</td>
+            {% else %}
+                <td>Open {{ exam.start_date|date }} &ndash; {{ exam.due_date|date }}</td>
+            {% endif %}
+        </tr>
+    {% endfor %}
 </table>
 {% comment %}
 vim: ft=htmldjango

@@ -1,81 +1,61 @@
 {% extends 'layout.html' %}
 {% load static %}
 {% load otis_extras %}
-
 {% block scripts %}
-{% if enabled %}
-<script type="text/javascript">
+    {% if enabled %}
+        <script type="text/javascript">
 	$(document).ready(function() {
 		$("td.unit-select > select").chosen({
 			placeholder_text: "...",
 		});
 	});
-</script>
-{% endif %}
+        </script>
+    {% endif %}
 {% endblock %}
-
 {% block layout-content %}
-{% include 'dashboard/back_link.html' %}
-
-For a description of what these units are,
-see the <a href="{% url "synopsis" %}">unit catalog</a>.
-
-{% if form.errors %}
-<div class="alert alert-error">
-	<ul>
-		{% for field in form %}
-		{% if field.errors %}
-		<li>{{ field.label }}: {{ field.errors|striptags }}</li>
-		{% endif %}
-		{% endfor %}
-	</ul>
-</div>
-{% endif %}
-
-<form action="{{ request.path }}" method="post">
-	{% csrf_token %}
-
-	<table class="table form-table">
-		{% for hidden in form.hidden_fields %}
-		{{ hidden }}
-		{% endfor %}
-
-		{% if enabled %}
-		<tr>
-			<td>
-				<button type="submit" class="btn btn-sm btn-success">
-					{{ submit_name|default:"Submit" }}
-				</button>
-			</td>
-		</tr>
-		{% endif %}
-
-		{% for field in form.visible_fields %}
-		<tr class="subject{{ field.subject }}">
-			<td class="unit-select">
-				{% if enabled %}
-				{{ field }}
-				{% else %}
-				{{ field|display_initial_choice }}
-				{% endif %}
-			</td>
-			<th>{{ field.label }}</th>
-			<td>{{ field.help_text }}</td>
-		</tr>
-		{% endfor %}
-
-		{% if enabled %}
-		<tr>
-			<td>
-				<button type="submit" class="btn btn-small btn-success">
-					{{ submit_name|default:"Submit" }}
-				</button>
-			</td>
-		</tr>
-		{% endif %}
-
-	</table>
-
-</form>
-
+    {% include 'dashboard/back_link.html' %}
+    For a description of what these units are,
+    see the <a href="{% url "synopsis" %}">unit catalog</a>.
+    {% if form.errors %}
+        <div class="alert alert-error">
+            <ul>
+                {% for field in form %}
+                    {% if field.errors %}<li>{{ field.label }}: {{ field.errors|striptags }}</li>{% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+    <form action="{{ request.path }}" method="post">
+        {% csrf_token %}
+        <table class="table form-table">
+            {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+            {% if enabled %}
+                <tr>
+                    <td>
+                        <button type="submit" class="btn btn-sm btn-success">{{ submit_name|default:"Submit" }}</button>
+                    </td>
+                </tr>
+            {% endif %}
+            {% for field in form.visible_fields %}
+                <tr class="subject{{ field.subject }}">
+                    <td class="unit-select">
+                        {% if enabled %}
+                            {{ field }}
+                        {% else %}
+                            {{ field|display_initial_choice }}
+                        {% endif %}
+                    </td>
+                    <th>{{ field.label }}</th>
+                    <td>{{ field.help_text }}</td>
+                </tr>
+            {% endfor %}
+            {% if enabled %}
+                <tr>
+                    <td>
+                        <button type="submit" class="btn btn-small btn-success">{{ submit_name|default:"Submit" }}</button>
+                    </td>
+                </tr>
+            {% endif %}
+        </table>
+    </form>
 {% endblock %}

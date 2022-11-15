@@ -13,11 +13,20 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='unitinquiry',
             name='action_type',
-            field=models.CharField(choices=[('DROP', 'Drop unit'), ('JUMP', 'Mark current (and add)'), ('ADD', 'Add unit')], help_text='Describe the action you want to make.', max_length=10),
+            field=models.CharField(
+                choices=[('DROP', 'Drop unit'), ('JUMP', 'Mark current (and add)'),
+                            ('ADD', 'Add unit')],
+                help_text='Describe the action you want to make.',
+                max_length=10),
         ),
         migrations.AlterField(
             model_name='unitinquiry',
             name='status',
-            field=models.CharField(choices=[('ACC', 'Approved'), ('REJ', 'Rejected'), ('NEW', 'Pending'), ('HOLD', 'On hold')], default='NEW', help_text='The current status of the inquiry.', max_length=5),
+            field=models.CharField(
+                choices=[('ACC', 'Approved'), ('REJ', 'Rejected'), ('NEW', 'Pending'),
+                            ('HOLD', 'On hold')],
+                default='NEW',
+                help_text='The current status of the inquiry.',
+                max_length=5),
         ),
     ]

@@ -9,7 +9,10 @@ from django.db.models.expressions import OuterRef, Subquery
 def copy_year(apps: Any, scheme_editor: Any):
     Semester = apps.get_model('core', 'Semester')
     RegistrationContainer = apps.get_model('roster', 'RegistrationContainer')
-    Semester.objects.filter(registrationcontainer__isnull=False).update(end_year = Subquery(RegistrationContainer.objects.filter(semester=OuterRef('pk')).values('end_year')))
+    Semester.objects.filter(registrationcontainer__isnull=False).update(
+        end_year=Subquery(
+            RegistrationContainer.objects.filter(semester=OuterRef('pk')).values('end_year')))
+
 
 def do_nothing(apps: Any, scheme_editor: Any):
     pass
@@ -22,6 +25,4 @@ class Migration(migrations.Migration):
         ('core', '0038_semester_end_year'),
     ]
 
-    operations = [
-            migrations.RunPython(copy_year, do_nothing)
-    ]
+    operations = [migrations.RunPython(copy_year, do_nothing)]

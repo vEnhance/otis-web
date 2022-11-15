@@ -15,13 +15,19 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='student',
             name='name',
-            field=models.CharField(default='Nameless Student', help_text='The display name for this student (e.g. a nickname)', max_length=80),
+            field=models.CharField(
+                default='Nameless Student',
+                help_text='The display name for this student (e.g. a nickname)',
+                max_length=80),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='ta',
             name='name',
-            field=models.CharField(default='Nameless TA', help_text='The display name for this TA (e.g. a nickname)', max_length=80),
+            field=models.CharField(
+                default='Nameless TA',
+                help_text='The display name for this TA (e.g. a nickname)',
+                max_length=80),
             preserve_default=False,
         ),
     ]

@@ -13,6 +13,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='unitinquiry',
             name='status',
-            field=models.CharField(choices=[('ACC', 'Accepted'), ('REJ', 'Rejected'), ('NEW', 'Pending'), ('HOLD', 'On hold')], default='NEW', help_text='The current status of the petition.', max_length=5),
+            field=models.CharField(
+                choices=[('ACC', 'Accepted'), ('REJ', 'Rejected'), ('NEW', 'Pending'),
+                            ('HOLD', 'On hold')],
+                default='NEW',
+                help_text='The current status of the petition.',
+                max_length=5),
         ),
     ]

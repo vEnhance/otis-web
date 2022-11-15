@@ -15,6 +15,10 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='student',
             name='current_unit_index',
-            field=models.IntegerField(default=0, help_text='If this is equal to k, then the student has completed the first k units of his/her curriculum and is working on the (k+1)st unit'),
+            field=models.IntegerField(
+                default=0,
+                help_text=
+                'If this is equal to k, then the student has completed the first k units of his/her curriculum and is working on the (k+1)st unit'
+            ),
         ),
     ]

@@ -15,6 +15,10 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='uploadedfile',
             name='file_type',
-            field=models.CharField(choices=[('HMWK', 'PSet Submission'), ('TRNS', 'Transcript'), ('NOTE', 'Notes / Comments'), ('MISC', 'Miscellaneous')], help_text='What kind of file this is', max_length=10),
+            field=models.CharField(
+                choices=[('HMWK', 'PSet Submission'), ('TRNS', 'Transcript'),
+                            ('NOTE', 'Notes / Comments'), ('MISC', 'Miscellaneous')],
+                help_text='What kind of file this is',
+                max_length=10),
         ),
     ]

@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='pset',
             name='rejected',
-            field=models.BooleanField(default=False, help_text='If a problem set is rejected and needs attention.'),
+            field=models.BooleanField(
+                default=False, help_text='If a problem set is rejected and needs attention.'),
         ),
     ]

@@ -13,6 +13,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='market',
             name='alpha',
-            field=models.FloatField(blank=True, default=2, help_text='Exponent corresponding to harshness of the market, used in the scoring function; leave blank for special scoring.', null=True),
+            field=models.FloatField(
+                blank=True,
+                default=2,
+                help_text=
+                'Exponent corresponding to harshness of the market, used in the scoring function; leave blank for special scoring.',
+                null=True),
         ),
     ]

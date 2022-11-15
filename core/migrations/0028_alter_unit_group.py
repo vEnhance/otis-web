@@ -14,7 +14,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='unit',
             name='group',
-            field=models.ForeignKey(default=1, help_text='The group that this unit belongs to', on_delete=django.db.models.deletion.CASCADE, to='core.unitgroup'),
+            field=models.ForeignKey(
+                default=1,
+                help_text='The group that this unit belongs to',
+                on_delete=django.db.models.deletion.CASCADE,
+                to='core.unitgroup'),
             preserve_default=False,
         ),
     ]
