@@ -37,10 +37,12 @@ if PRODUCTION:
 	CSRF_TRUSTED_ORIGINS = [
 		'https://otis.evanchen.cc',
 	]
+	SITE_URL = 'https://otis.evanchen.cc/'
 else:
 	INTERNAL_IPS = [
 		'127.0.0.1',
 	]
+	SITE_URL = 'http://127.0.0.1'
 SITE_ID = 1
 TESTING = len(sys.argv) > 1 and sys.argv[1] == 'test'
 if TESTING:
@@ -54,6 +56,7 @@ INSTALLED_APPS = [
 	'core',
 	'dashboard',
 	'exams',
+	'markdownfield',
 	'markets',
 	'mouse',
 	'roster',

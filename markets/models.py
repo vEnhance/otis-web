@@ -7,6 +7,8 @@ from django.db import models
 from django.db.models.query import QuerySet
 from django.urls.base import reverse
 from django.utils import timezone
+from markdownfield.models import MarkdownField, RenderedMarkdownField
+from markdownfield.validators import VALIDATOR_STANDARD
 
 # Create your models here.
 
@@ -32,10 +34,21 @@ class Market(models.Model):
 	semester = models.ForeignKey(Semester, on_delete=models.CASCADE)
 	slug = models.SlugField(help_text="Slug for the market", unique=True)
 	title = models.CharField(help_text="Title of the market", max_length=80)
-	prompt = models.TextField(help_text="Full text of the question")
-	solution = models.TextField(
-		help_text="Comments that appear in the market results.", blank=True
+
+	prompt = MarkdownField(
+		rendered_field='prompt_rendered',
+		help_text="Full text of the question",
+		validator=VALIDATOR_STANDARD,
 	)
+	prompt_rendered = RenderedMarkdownField()
+	solution = MarkdownField(
+		rendered_field='solution_rendered',
+		help_text="Comments that appear in the market results.",
+		validator=VALIDATOR_STANDARD,
+		blank=True,
+	)
+	solution_rendered = RenderedMarkdownField()
+
 	answer = models.FloatField(help_text="The answer to the question", blank=True, null=True)
 	weight = models.FloatField(
 		help_text="The max score to assign to the market, "
