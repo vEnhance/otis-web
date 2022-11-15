@@ -85,5 +85,18 @@
 	<a href="{{ quiz.url5 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}5</a>
 </div>
 {% endif %}
+{% endblock %}
 
+{% block scripts %}
+<script type="text/javascript">
+	$(document).ready(function() {
+		for (let i = 1; i <= 5; ++i) {
+			const elm_id = "#id_guess" + i;
+			$(elm_id).bind('keyup', function(e) {
+				const s = $(elm_id).val().toLowerCase().replace(/[^0-9+\-*a-z()^/ ]/gi, '');
+				$(elm_id).val(s);
+			});
+		}
+	});
+</script>
 {% endblock %}
