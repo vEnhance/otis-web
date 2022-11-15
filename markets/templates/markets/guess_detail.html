@@ -4,7 +4,7 @@
 {% block layout-content %}
 <div class="alert alert-dark">
 	<h2 class="alert-heading">{{ guess.market.title }}</h2>
-	{{ guess.market.prompt|safe }}
+	{{ guess.market.prompt_rendered|safe }}
 </div>
 <p>
 	You submitted <strong>{{ guess.value }}</strong> for the market

@@ -23,7 +23,7 @@
 
 <div class="alert alert-dark">
 	<h2 class="alert-heading">{{ market.title }}</h2>
-	{{ market.prompt|safe }}
+	{{ market.prompt_rendered|safe }}
 </div>
 
 {% if market.show_answer or request.user.is_superuser %}
@@ -36,7 +36,7 @@
 	</p>
 	{% endif %}
 	<span class="fst-italic">
-		{{ market.solution|safe }}
+		{{ market.solution_rendered|safe }}
 	</span>
 </div>
 {% endif %}
