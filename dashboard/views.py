@@ -28,7 +28,7 @@ from django.views.generic.edit import DeleteView, UpdateView
 from evans_django_tools import VERBOSE_LOG_LEVEL
 from exams.models import PracticeExam
 from markets.models import Market
-from otisweb.utils import AuthHttpRequest, get_mailchimp_campaigns
+from otisweb.utils import AuthHttpRequest, get_days_since, get_mailchimp_campaigns  # NOQA
 from roster.models import RegistrationContainer, Student, StudentRegistration
 from roster.utils import can_view, get_student_by_id, get_visible_students, infer_student  # NOQA
 from rpg.levelsys import annotate_student_queryset_with_scores, check_level_up, get_level_info, get_student_rows  # NOQA
