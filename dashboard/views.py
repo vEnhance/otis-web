@@ -35,7 +35,7 @@ from rpg.levelsys import annotate_student_queryset_with_scores, check_level_up, 
 
 from dashboard.forms import NewUploadForm, PSetResubmitForm, PSetSubmitForm
 from dashboard.models import PSet, SemesterDownloadFile, UploadedFile  # NOQA
-from dashboard.utils import get_days_since, get_units_to_submit, get_units_to_unlock  # NOQA
+from dashboard.utils import get_units_to_submit, get_units_to_unlock  # NOQA
 
 logger = logging.getLogger(__name__)
 

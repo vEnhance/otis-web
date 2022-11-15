@@ -19,7 +19,7 @@ from django.urls import reverse
 from django.views.generic import ListView
 from django.views.generic.edit import UpdateView
 from evans_django_tools import SUCCESS_LOG_LEVEL
-from otisweb.utils import AuthHttpRequest
+from otisweb.utils import AuthHttpRequest, get_days_since
 from roster.models import Student
 from roster.utils import get_student_by_id
 from sql_util.utils import SubqueryAggregate

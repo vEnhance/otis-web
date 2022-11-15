@@ -103,7 +103,7 @@ def mailchimp_subscribe(request: AuthHttpRequest):
 		raise Exception("No API KEY provided in production!")
 
 
-def get_days_since(t: Optional[datetime]) -> Optional[float]:
+def get_days_since(t: Optional[datetime.datetime]) -> Optional[float]:
 	if t is None:
 		return None
 	return (timezone.now() - t).total_seconds() / (3600 * 24)
