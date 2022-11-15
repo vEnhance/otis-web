@@ -3,7 +3,6 @@ import random
 from typing import Any, Dict
 
 from braces.views import LoginRequiredMixin, StaffuserRequiredMixin, SuperuserRequiredMixin  # NOQA
-from dashboard.utils import get_days_since
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
@@ -77,11 +76,11 @@ def stats(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 	level_number = level_info['level_number']
 	obtained_levels = Level.objects.filter(threshold__lte=level_number).order_by('-threshold')
 	context['obtained_levels'] = obtained_levels
-	return render(request, "dashboard/stats.html", context)
+	return render(request, "rpg/stats.html", context)
 
 
 class AchievementList(LoginRequiredMixin, ListView[Achievement]):
-	template_name = 'dashboard/diamond_list.html'
+	template_name = 'rpg/diamond_list.html'
 
 	def get_queryset(self) -> QuerySet[Achievement]:
 		if not isinstance(self.request.user, User):
@@ -98,7 +97,7 @@ class AchievementList(LoginRequiredMixin, ListView[Achievement]):
 
 class FoundList(LoginRequiredMixin, StaffuserRequiredMixin, ListView[AchievementUnlock]):
 	raise_exception = True
-	template_name = 'dashboard/found_list.html'
+	template_name = 'rpg/found_list.html'
 
 	def get_queryset(self) -> QuerySet[AchievementUnlock]:
 		self.achievement = get_object_or_404(Achievement, pk=self.kwargs['pk'])
@@ -130,7 +129,7 @@ def leaderboard(request: AuthHttpRequest) -> HttpResponse:
 		row['days_since_last_seen'] = get_days_since(row['last_seen'])
 	context: Dict[str, Any] = {}
 	context['rows'] = rows
-	return render(request, "dashboard/leaderboard.html", context)
+	return render(request, "rpg/leaderboard.html", context)
 
 
 def assert_maxed_out_level_info(student: Student) -> LevelInfoDict:
@@ -143,7 +142,7 @@ def assert_maxed_out_level_info(student: Student) -> LevelInfoDict:
 class PalaceList(LoginRequiredMixin, ListView[PalaceCarving]):
 	model = PalaceCarving
 	context_object_name = "palace_carvings"
-	template_name = 'dashboard/palace.html'
+	template_name = 'rpg/palace.html'
 
 	def get_queryset(self):
 		student = get_student_by_id(self.request, self.kwargs['student_id'])
@@ -163,7 +162,7 @@ class PalaceList(LoginRequiredMixin, ListView[PalaceCarving]):
 class AdminPalaceList(SuperuserRequiredMixin, ListView[PalaceCarving]):
 	model = PalaceCarving
 	context_object_name = "palace_carvings"
-	template_name = 'dashboard/palace.html'
+	template_name = 'rpg/palace.html'
 
 	def get_queryset(self):
 		queryset = PalaceCarving.objects.filter(visible=True)
@@ -185,7 +184,7 @@ class PalaceUpdate(
 		'visible',
 		'image',
 	)
-	template_name = 'dashboard/palace_form.html'
+	template_name = 'rpg/palace_form.html'
 	success_message = "Edited palace carving successfully!"
 
 	def get_object(self, *args: Any, **kwargs: Any) -> PalaceCarving:

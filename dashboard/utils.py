@@ -1,10 +1,8 @@
-from datetime import datetime
-from typing import List, Optional
+from typing import List
 
 from core.models import Unit
 from django.db.models.expressions import Exists, OuterRef
 from django.db.models.query import QuerySet
-from django.utils import timezone
 from roster.models import Student
 
 from dashboard.models import PSet
@@ -31,9 +29,3 @@ def get_units_to_unlock(student: Student) -> QuerySet[Unit]:
 	queryset = queryset.annotate(has_pset=pset_subquery(student))
 	queryset = queryset.exclude(has_pset=True)
 	return queryset
-
-
-def get_days_since(t: Optional[datetime]) -> Optional[float]:
-	if t is None:
-		return None
-	return (timezone.now() - t).total_seconds() / (3600 * 24)

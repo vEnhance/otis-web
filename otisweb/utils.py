@@ -1,7 +1,7 @@
 import datetime
 import logging
 import os
-from typing import List, TypedDict
+from typing import List, Optional, TypedDict
 
 from django.conf import settings
 from django.contrib import messages
@@ -101,3 +101,9 @@ def mailchimp_subscribe(request: AuthHttpRequest):
 			)
 	else:
 		raise Exception("No API KEY provided in production!")
+
+
+def get_days_since(t: Optional[datetime]) -> Optional[float]:
+	if t is None:
+		return None
+	return (timezone.now() - t).total_seconds() / (3600 * 24)
