@@ -376,7 +376,7 @@
     <h2>
       Mock olympiads (tests)
     </h2>
-    {% include 'dashboard/exam_list.html' with exams=tests %}
+    {% include "dashboard/exam_list.html" with exams=tests %}
     {% if semester.active %}
       <div class="text-center">
         <a href="{% url 'mocks' student.id %}"
@@ -387,7 +387,7 @@
     <h2 id="quizzes">
       Quizzes
     </h2>
-    {% include 'dashboard/exam_list.html' with exams=quizzes %}
+    {% include "dashboard/exam_list.html" with exams=quizzes %}
     <p>
       Click on a quiz above to open it. Quiz submissions are done directly on OTIS-WEB.
     </p>
