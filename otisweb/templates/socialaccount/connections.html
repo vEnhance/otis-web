@@ -80,14 +80,14 @@
         {% endfor %}
       </table>
       <div>
-        <button class="btn btn-danger" type="submit">{% trans 'Remove' %}</button>
+        <button class="btn btn-danger" type="submit">{% trans "Remove" %}</button>
       </div>
     </form>
   {% else %}
-    <p>{% trans 'You currently have no social network accounts connected to this account.' %}</p>
+    <p>{% trans "You currently have no social network accounts connected to this account." %}</p>
   {% endif %}
   <hr />
-  <h3>{% trans 'Add a new connection' %}</h3>
+  <h3>{% trans "Add a new connection" %}</h3>
   <ul class="socialaccount_providers">
     {% include "socialaccount/snippets/provider_list.html" with process="connect" %}
   </ul>
