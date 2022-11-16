@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block title %}
   Delete {{ hint.number }}% Hint for {{ hint.problem }}
-{% endblock %}
+{% endblock title %}
 {% block layout-content %}
   {% include "generic_delete.html" %}
   <hr />
@@ -11,4 +11,4 @@
     <li>{{ hint.keywords }}</li>
     <li>{{ hint.content }}</li>
   </ul>
-{% endblock %}
+{% endblock layout-content %}

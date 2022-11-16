@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% block title %}{{ achievement.name }} found by...{% endblock %}
+{% block title %}{{ achievement.name }} found by...{% endblock title %}
 {% block layout-content %}
   {% if achievement.image %}<img width="96px" style="float: right;" src="{{ achievement.image.url }}" />{% endif %}
   <h2>{{ achievement.name }} ({{ achievement.diamonds }}♦️)</h2>
@@ -27,4 +27,4 @@
       </tr>
     {% endfor %}
   </table>
-{% endblock %}
+{% endblock layout-content %}

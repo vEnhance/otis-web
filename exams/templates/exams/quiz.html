@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% load crispy_forms_tags %}
-{% block title %}{{ quiz }}{% endblock %}
+{% block title %}{{ quiz }}{% endblock title %}
 {% block layout-content %}
   <p>
     Welcome to <b>{{ quiz }}</b>!
@@ -92,7 +92,7 @@
             <a href="{{ quiz.url5 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}5</a>
           </div>
         {% endif %}
-      {% endblock %}
+      {% endblock layout-content %}
       {% block scripts %}
         <script type="text/javascript">
 	$(document).ready(function() {
@@ -105,4 +105,4 @@
 		}
 	});
         </script>
-      {% endblock %}
+      {% endblock scripts %}

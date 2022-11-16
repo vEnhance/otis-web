@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% block title %}List of years{% endblock %}
+{% block title %}List of years{% endblock title %}
 {% block layout-content %}
   {% load otis_extras %}
   <p>Here are all the years of OTIS that are in the database.</p>
@@ -34,4 +34,4 @@
     <a href="{% url "past" %}">combined list of all students</a>.
     (If you are a superuser, this will be quite long.)
   </p>
-{% endblock %}
+{% endblock layout-content %}

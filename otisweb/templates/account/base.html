@@ -1,10 +1,13 @@
 {% extends "layout.html" %}
 {% block title %}
-  {% block head_title %}{% endblock %}
+  {% block head_title %}
+  {% endblock title %}
 {% endblock %}
 {% block layout-content %}
   {% block body %}
-    {% block content %}{% endblock %}
-  {% endblock %}
-  {% block extra_body %}{% endblock %}
-{% endblock %}
+    {% block content %}
+    {% endblock content %}
+  {% endblock body %}
+  {% block extra_body %}
+  {% endblock extra_body %}
+{% endblock layout_content %}

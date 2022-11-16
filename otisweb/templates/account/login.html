@@ -4,7 +4,7 @@
 {% load account socialaccount %}
 {% block head_title %}
   {% trans "Log In" %}
-{% endblock %}
+{% endblock head_title %}
 {% block content %}
   {% get_providers as socialaccount_providers %}
   <p>
@@ -113,4 +113,4 @@
       </div>
     </div>
   </div>
-{% endblock %}
+{% endblock content %}

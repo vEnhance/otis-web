@@ -8,7 +8,7 @@
 		border-radius: 5px;
 	}
   </style>
-{% endblock %}
+{% endblock css %}
 {% block scripts %}
   <script type="text/javascript">
 	$(document).ready(function() {
@@ -17,8 +17,8 @@
 		});
 	});
   </script>
-{% endblock %}
-{% block title %}Unit petition{% endblock %}
+{% endblock scripts %}
+{% block title %}Unit petition{% endblock title %}
 {% block layout-content %}
   <p>
     A <b>unit petition</b> lets you make requests
@@ -96,4 +96,4 @@
     </li>
   </ul>
   {% include 'dashboard/back_link.html' %}
-{% endblock %}
+{% endblock layout-content %}

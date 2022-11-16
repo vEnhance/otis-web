@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% block title %}Arch: Update {{ problem }}{% endblock %}
+{% block title %}Arch: Update {{ problem }}{% endblock title %}
 {% block layout-content %}
   <h1>Update {{ problem }}</h1>
   <p>
@@ -7,4 +7,4 @@
   </p>
   <hr />
   {% include "generic_form.html" with submit_name="Update" %}
-{% endblock %}
+{% endblock layout-content %}

@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% load humanize %}
 {% load static %}
-{% block title %}Your Stats{% endblock %}
+{% block title %}Your Stats{% endblock title %}
 {% block layout-content %}
   <h1>{{ student.name }} &mdash; {{ level_name }}</h1>
   {% if obtained_achievement %}
@@ -46,4 +46,4 @@
         }
     });
   </script>
-{% endblock %}
+{% endblock layout-content %}

@@ -1,7 +1,8 @@
 <html>
   <head>
     <title>OTIS: HTTP
-      {% block code %}{% endblock %}
+      {% block code %}
+      {% endblock code %}
     </title>
     <link rel="stylesheet"
           href="https://fonts.googleapis.com/css?family=Verdana">
@@ -13,21 +14,24 @@
 		h1 {
 			font-family: Verdana, Geneva, Tahoma, sans-serif;
 		}
-	
+
     </style>
   </head>
   <body>
     <h1>
-      {% block title %}{% endblock %}
+      {% block title %}
+      {% endblock title %}
     </h1>
     <div style="font-size:120px;">
-      {% block emoji %}{% endblock %}
+      {% block emoji %}
+      {% endblock emoji %}
     </div>
     <p>
       If you think you found a website bug, please
       <a href="https://github.com/vEnhance/otis-web/issues">report this issue on GitHub</a>.
     </p>
     <hr />
-    {% block extra %}{% endblock %}
+    {% block extra %}
+    {% endblock extra %}
   </body>
 </html>

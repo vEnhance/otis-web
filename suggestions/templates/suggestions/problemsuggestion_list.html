@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% block title %}Problem suggestions by {{ request.user }}{% endblock %}
+{% block title %}Problem suggestions by {{ request.user }}{% endblock title %}
 {% block layout-content %}
   <p>Here are all the past suggestions that you ({{ request.user }}) have provided.</p>
   {% for suggestion in problem_suggestions %}
@@ -19,4 +19,4 @@
       </p>
     </div>
   {% endfor %}
-{% endblock %}
+{% endblock layout-content %}

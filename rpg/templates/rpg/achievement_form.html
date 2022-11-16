@@ -1,9 +1,9 @@
 {% extends "layout.html" %}
-{% block title %}Forging a diamond{% endblock %}
+{% block title %}Forging a diamond{% endblock title %}
 {% block layout-content %}
   <p>
     <a href="{% url 'palace-list' student.id %}">Back to Ruby Palace</a>
   </p>
   <hr />
   {% include "generic_form.html" %}
-{% endblock %}
+{% endblock layout-content %}

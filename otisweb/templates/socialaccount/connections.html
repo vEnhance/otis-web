@@ -2,7 +2,7 @@
 {% load i18n %}
 {% block head_title %}
   {% trans "Account Connections" %}
-{% endblock %}
+{% endblock head_title %}
 {% block content %}
   <ul>
     <li>Your name is {{ user.first_name }} {{ user.last_name }}.</li>
@@ -92,4 +92,4 @@
     {% include "socialaccount/snippets/provider_list.html" with process="connect" %}
   </ul>
   {% include "socialaccount/snippets/login_extra.html" %}
-{% endblock %}
+{% endblock content %}

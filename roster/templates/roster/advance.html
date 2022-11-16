@@ -15,7 +15,7 @@
 		font-weight: bold;
 	}
   </style>
-{% endblock %}
+{% endblock css %}
 {% block scripts %}
   <script type="text/javascript">
 	$(document).ready(function() {
@@ -25,7 +25,7 @@
 		});
 	});
   </script>
-{% endblock %}
+{% endblock scripts %}
 {% block layout-content %}
   <p>Use this form to manually adjust the unlocked units for this student.</p>
   <h3>Unlocked units</h3>
@@ -34,4 +34,4 @@
   <p>For your reference, here is the existing curriculum.</p>
   {% include 'dashboard/curriculum_list.html' %}
   {% include 'dashboard/back_link.html' %}
-{% endblock %}
+{% endblock layout-content %}

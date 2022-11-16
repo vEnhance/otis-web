@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% load static %}
-{% block title %}ARCH hints for {{ problem }}{% endblock %}
+{% block title %}ARCH hints for {{ problem }}{% endblock title %}
 {% block layout-content %}
   <p>
     <a href="{% url "arch-index" %}">⬅️ Back to ARCH index</a>
@@ -45,4 +45,4 @@
       <a href="{% url "problem-update" problem.puid %}">Edit problem</a>
     </li>
   </ul>
-{% endblock %}
+{% endblock layout-content %}

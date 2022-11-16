@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% load admin_urls %}
-{% block title %}Market {{ market.slug }}{% endblock %}
+{% block title %}Market {{ market.slug }}{% endblock title %}
 {% block layout-content %}
   {% if request.user.is_superuser %}
     {% if not market.has_ended or not market.answer %}
@@ -84,4 +84,4 @@
       </p>
     </div>
   {% endif %}
-{% endblock %}
+{% endblock layout-content %}

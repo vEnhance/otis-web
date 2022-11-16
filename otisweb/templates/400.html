@@ -1,6 +1,6 @@
 {% extends 'error.html' %}
-{% block code %}400{% endblock %}
-{% block title %}HTTP 400 Bad Request{% endblock %}
-{% block emoji %}🤦{% endblock %}
+{% block code %}400{% endblock code %}
+{% block title %}HTTP 400 Bad Request{% endblock title %}
+{% block emoji %}🤦{% endblock emoji %}
 {% load otis_extras %}
-{% block extra %}<tt>{{ "HTTP_400_NOTES"|getenv }}</tt>{% endblock %}
+{% block extra %}<tt>{{ "HTTP_400_NOTES"|getenv }}</tt>{% endblock extra %}

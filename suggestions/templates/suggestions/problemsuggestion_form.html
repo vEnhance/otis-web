@@ -1,5 +1,7 @@
 {% extends "layout.html" %}
-{% block title %}Problem Suggestion{% endblock %}
+{% block title %}
+  Problem Suggestion
+{% endblock title %}
 {% block layout-content %}
   <p>
     <a href="{% url "suggest-list" %}">⬅️ List all suggestions by you.</a>
@@ -105,7 +107,7 @@
           </td>
         </tr>
       </table>
-    {% endblock %}
+    {% endblock layout-content %}
     {% block css %}
       <style type="text/css">
 		#solution_render,
@@ -113,9 +115,9 @@
 			color: blue;
 			font-family: sans-serif;
 		}
-	
+
       </style>
-    {% endblock %}
+    {% endblock css %}
     {% block scripts %}
       <script type="text/javascript">
 		$(document).ready(function() {
@@ -186,6 +188,6 @@
 				render_solution();
 			});
 		});
-	
+
       </script>
-    {% endblock %}
+    {% endblock scripts %}

@@ -1,12 +1,14 @@
 {% extends "wiki/base_site.html" %}
 {% load static %}
 {% load i18n %}
-{% block wiki_site_title %}- OTIS Fandom{% endblock %}
+{% block wiki_site_title %}
+  - OTIS Fandom
+{% endblock wiki_site_title %}
 {% block wiki_header_branding %}
   <a class="navbar-brand" href="{% url 'wiki:root' %}">
     <img height="48px" src="{% static 'img/otis-logo-v2022.svg' %}" />
   </a>
-{% endblock %}
+{% endblock wiki_header_branding %}
 {% block wiki_header_navlinks %}
   <ul class="navbar-nav mr-auto">
     <li class="nav-item">
@@ -67,4 +69,4 @@
 </script>
 <script type="text/javascript" id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
 </script>
-{% endblock %}
+{% endblock wiki_footer_logo %}

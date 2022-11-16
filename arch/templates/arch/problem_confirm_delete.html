@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% block title %}Delete {{ problem }}{% endblock %}
+{% block title %}Delete {{ problem }}{% endblock title %}
 {% block layout-content %}
   {% include "generic_delete.html" %}
   <hr />
@@ -9,4 +9,4 @@
       <b>{{ problem.hint_set.count }} hints</b>
     </li>
   </ul>
-{% endblock %}
+{% endblock layout-content %}

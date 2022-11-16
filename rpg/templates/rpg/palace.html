@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% block title %}The Ruby Palace{% endblock %}
+{% block title %}The Ruby Palace{% endblock title %}
 {% block layout-content %}
   {% for carving in palace_carvings %}
     {% if carving.image %}<img width="96px" style="float: right;" src="{{ carving.image.url }}" />{% endif %}
@@ -31,4 +31,4 @@
          role="button">Forge</a>
     </div>
   {% endif %}
-{% endblock %}
+{% endblock layout-content %}

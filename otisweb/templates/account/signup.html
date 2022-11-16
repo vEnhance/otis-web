@@ -3,7 +3,7 @@
 {% load i18n %}
 {% block head_title %}
   {% trans "Signup" %}
-{% endblock %}
+{% endblock head_title %}
 {% block content %}
   <p>
     {% blocktrans %}Already have an account? Then please <a href="{{ login_url }}">sign in</a>.{% endblocktrans %}
@@ -21,4 +21,4 @@
     {% endif %}
     <button type="submit" class="btn btn-secondary">{% trans "Sign Up" %} &raquo;</button>
   </form>
-{% endblock %}
+{% endblock content %}

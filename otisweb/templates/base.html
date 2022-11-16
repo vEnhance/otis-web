@@ -7,7 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>
-      {% block title %}{% endblock %}
+      {% block title %}{% endblock title %}
     &bullet; OTIS-WEB </title>
     {% load bootstrap5 %}
     {% bootstrap_css %}
@@ -42,7 +42,7 @@
 				}
 			});
 		});
-	
+
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -78,7 +78,7 @@
     <meta name="msapplication-config"
           content="//web.evanchen.cc/icons/browserconfig.xml">
     <meta name="theme-color" content="#ffffff">
-    {% block css %}{% endblock %}
+    {% block css %}{% endblock css %}
   </head>
   <body>
     {% if request.user.is_hijacked %}
@@ -93,10 +93,10 @@
 		body {
 			background-color: #caa;
 		}
-	
+
       </style>
     {% endif %}
-    {% block base-content %}{% endblock %}
-    {% block scripts %}{% endblock %}
+    {% block base-content %}{% endblock base-content %}
+    {% block scripts %}{% endblock scripts %}
   </body>
 </html>

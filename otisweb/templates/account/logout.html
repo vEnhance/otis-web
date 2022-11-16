@@ -2,7 +2,7 @@
 {% load i18n %}
 {% block head_title %}
   {% trans "Log out" %}
-{% endblock %}
+{% endblock head_title %}
 {% block content %}
   <p>{% trans 'Are you sure you want to log out?' %}</p>
   <form method="post" action="{% url 'account_logout' %}">
@@ -14,4 +14,4 @@
     {% endif %}
     <button type="submit">{% trans 'Log out' %}</button>
   </form>
-{% endblock %}
+{% endblock content %}

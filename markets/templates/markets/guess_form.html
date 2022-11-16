@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% block title %}Market {{ market.slug }}{% endblock %}
+{% block title %}Market {{ market.slug }}{% endblock title %}
 {% load humanize %}
 {% block layout-content %}
   <p>
@@ -34,4 +34,4 @@
       Visit the <a href="{% url "market-list" %}">market main page</a> for details.
     </p>
   {% endif %}
-{% endblock %}
+{% endblock layout-content %}

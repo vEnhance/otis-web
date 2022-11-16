@@ -3,7 +3,7 @@
 {% load i18n %}
 {% block head_title %}
   {% trans "Register" %}
-{% endblock %}
+{% endblock head_title %}
 {% block content %}
   <p>
     {% blocktrans with provider_name=account.get_provider.name site_name=site.name %}
@@ -45,4 +45,4 @@
     {% endif %}
     <button class="btn btn-primary" type="submit">{% trans "Register" %} &raquo;</button>
   </form>
-{% endblock %}
+{% endblock content %}

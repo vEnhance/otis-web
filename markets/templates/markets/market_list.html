@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% load humanize %}
-{% block title %}Estimation markets{% endblock %}
+{% block title %}Estimation markets{% endblock title %}
 {% block layout-content %}
   {% if past %}
     <p>Below are results from the estimation markets in past years.</p>
@@ -69,4 +69,4 @@
       <li>Discussion, collusion, and other antics are permitted.</li>
     </ol>
   {% endif %}
-{% endblock %}
+{% endblock layout-content %}
