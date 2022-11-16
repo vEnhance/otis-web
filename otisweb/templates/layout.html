@@ -24,9 +24,9 @@
       </div>
     </div>
     <div id="content" class="row">
-      {% block main-content %}
-        <div class="{% block main-class %}col-12 col-md-9{% endblock main-class %}">
-          <div id="main">
+      <div class="{% block main-class %}col-12 col-md-9{% endblock main-class %}">
+        <div id="main">
+          {% block main-content %}
             <div class="entry">
               <h1 id="pagetitle">
                 {% block title %}
@@ -40,16 +40,22 @@
                 {% endblock layout-content %}
               </div>
             </div>
-            <div>
-              <a class="text-muted" href="https://github.com/vEnhance/otis-web/issues">Report issue or feature request</a>
+            <div class="row">
+              <span class="col-8 text-start">
+                <a class="text-muted" href="https://github.com/vEnhance/otis-web/issues">Report issue or feature request</a>
+              </span>
+              <span class="col-4 text-end">
+                <img class="text-end"
+                     width="100px"
+                     src="{% static 'img/otis-logo-v2022.svg' %}"/>
+              </span>
             </div>
-          </div>
+          {% endblock main-content %}
         </div>
-      {% endblock main-content %}
-      <img src="{% static 'img/otis-logo-v2022.svg' %}" />
+      </div>
+      <div class="{% block side-class %}col-7 col-md-3{% endblock side-class %}">
+        <div id="side">{% include "sidebar.html" %}</div>
+      </div>
     </div>
-  </div>
-  <div class="{% block side-class %}col-7 col-md-3{% endblock side-class %}">
-    <div id="side">{% include "sidebar.html" %}</div>
   </div>
 {% endblock base-content %}
