@@ -1,71 +1,71 @@
 body {
-	line-height: 1.2;
+  line-height: 1.2;
 }
 
 .table-nonfluid {
-	width: auto !important;
+  width: auto !important;
 }
 
 p {
-	margin-top: 0.5rem;
-	margin-bottom: 0.5rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 table.table td,
 table.table th {
-	border: 0px;
-	border-top: none;
-	text-align: left;
-	padding: 2px 4px 2px 4px;
-	font-size: 15px;
+  border: 0px;
+  border-top: none;
+  text-align: left;
+  padding: 2px 4px 2px 4px;
+  font-size: 15px;
 }
 table.table tr:nth-child(odd) {
-	background-color: #e4e4e4;
+  background-color: #e4e4e4;
 }
 table.table tr:nth-child(even) {
-	background-color: #f5f5f5;
+  background-color: #f5f5f5;
 }
 
 div.helptext,
 span.helptext {
-	color: #555;
-	font-size: 70%;
+  color: #555;
+  font-size: 70%;
 }
 small.form-text.text-muted {
-	display: block;
+  display: block;
 }
 
 input {
-	padding: 4px;
+  padding: 4px;
 }
 
 button.pseudo-button {
-	background: none;
-	color: #bb0000;
-	border: none;
-	padding: 0;
-	margin: 0;
-	font: inherit;
-	cursor: pointer;
+  background: none;
+  color: #bb0000;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  cursor: pointer;
 }
 
 div.form-group > label {
-	display: block;
-	font-weight: bold;
-	font-family: Verdana, Geneva, sans-serif;
-	padding-right: 5px;
-	min-width: 6rem;
-	color: #331199;
+  display: block;
+  font-weight: bold;
+  font-family: Verdana, Geneva, sans-serif;
+  padding-right: 5px;
+  min-width: 6rem;
+  color: #331199;
 }
 div.form-group > label.requiredField {
-	color: #991111;
+  color: #991111;
 }
 table.table.form-table td {
-	padding-left: 12px;
-	padding-right: 12px;
-	padding-top: 9px;
+  padding-left: 12px;
+  padding-right: 12px;
+  padding-top: 9px;
 }
 
 textarea {
-	font-family: "Dejavu Sans Mono", monospace;
+  font-family: "Dejavu Sans Mono", monospace;
 }
