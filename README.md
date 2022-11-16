@@ -1,17 +1,17 @@
+[<img src="https://img.shields.io/github/languages/top/vEnhance/otis-web" alt="Top languages">](https://img.shields.io/github/languages/top/vEnhance/otis-web)
 [<img src="https://img.shields.io/github/license/vEnhance/otis-web" alt="MIT License">](https://github.com/vEnhance/otis-web/blob/main/LICENSE.txt)
-[<img src="https://github.com/vEnhance/otis-web/actions/workflows/ci.yml/badge.svg" alt="OTIS-WEB status">](https://github.com/vEnhance/otis-web/actions)
-[<img src="https://github.com/vEnhance/otis-web/actions/workflows/codeql-analysis.yml/badge.svg" alt="OTIS-WEB status">](https://github.com/vEnhance/otis-web/actions)
-[<img src="https://coveralls.io/repos/github/vEnhance/otis-web/badge.svg?branch=main" alt="Coverage status">](https://coveralls.io/github/vEnhance/otis-web?branch=main)
+[<img src="https://img.shields.io/github/last-commit/vEnhance/otis-web" alt="Last update">](https://img.shields.io/github/last-commit/vEnhance/otis-web)
 <img src="https://img.shields.io/github/forks/vEnhance/otis-web" alt="Forks">
 <img src="https://img.shields.io/github/stars/vEnhance/otis-web" alt="Stars">
+[<img src="https://github.com/vEnhance/otis-web/actions/workflows/ci.yml/badge.svg" alt="OTIS-WEB status">](https://github.com/vEnhance/otis-web/actions)
+[<img src="https://github.com/vEnhance/otis-web/actions/workflows/codeql-analysis.yml/badge.svg" alt="OTIS-WEB status">](https://github.com/vEnhance/otis-web/actions)
 
-[<img src="https://img.shields.io/github/languages/top/vEnhance/otis-web"
-alt="Top languages">](https://img.shields.io/github/languages/top/vEnhance/otis-web)
-[<img src="https://img.shields.io/github/last-commit/vEnhance/otis-web" alt="Last update">](https://img.shields.io/github/last-commit/vEnhance/otis-web)
-[<img src="https://img.shields.io/badge/html%20style-djlint-blue.svg" alt="HTML style: djlint">](https://www.djlint.com)
-[<img src="https://img.shields.io/badge/python%20style-yapf-blue.svg" alt="Python style: yapf">](https://github.com/google/yapf)
-
-# OTIS-WEB
+[<img src="https://img.shields.io/badge/html-djlint-blueviolet.svg" alt="HTML style: djlint">](https://www.djlint.com)
+[<img src="https://img.shields.io/badge/python-yapf-blueviolet.svg" alt="Python style: yapf">](https://github.com/google/yapf)
+[<img src="https://img.shields.io/badge/types-pyright-ff69b4.svg" alt="types: pyright">](https://github.com/PyCQA/pyflakes)
+[<img src="https://img.shields.io/badge/types-mypy-ff69b4.svg" alt="types: mypy">](http://mypy-lang.org/)
+[<img src="https://img.shields.io/badge/lint-pyflakes-ff69b4.svg" alt="lint: pyflakes">](https://github.com/PyCQA/pyflakes)
+[<img src="https://coveralls.io/repos/github/vEnhance/otis-web/badge.svg?branch=main" alt="Coverage status">](https://coveralls.io/github/vEnhance/otis-web?branch=main)# OTIS-WEB
 
 These are the source files for the internal website
 that I use to teach my course [OTIS](https://web.evanchen.cc/otis.html).
