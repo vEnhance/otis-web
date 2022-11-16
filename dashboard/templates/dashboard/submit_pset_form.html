@@ -19,51 +19,52 @@
           <td>
             <a href="{{ pset.get_absolute_url }}">
               {{ pset.unit.group.name }}<sup>{{ pset.unit.code }}</sup>
-            </td>
-            <td>{{ pset.upload.created_at|naturaltime }}</td>
-            <td>
-              <a href="{% url "resubmit-pset" pset.pk %}">Edit</a>
-            </td>
-          </tr>
-        {% endfor %}
-      </table>
-      <p>
-        See <a href="{% url "pset-queue-listing" %}">queue of problem set submissions</a> for a rough ETA.
-      </p>
-    {% else %}
-      <p>
-        You have no pending submissions,
-        but if you want to see how dead Evan is, you can view the
-        <a href="{% url "pset-queue-listing" %}">queue of problem set submissions</a> anyways.
-      </p>
-    {% endif %}
+            </a>
+          </td>
+          <td>{{ pset.upload.created_at|naturaltime }}</td>
+          <td>
+            <a href="{% url "resubmit-pset" pset.pk %}">Edit</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
     <p>
-      You can also see <a href="{% url "student-pset-list" student.pk %}">all your submissions.</a>
+      See <a href="{% url "pset-queue-listing" %}">queue of problem set submissions</a> for a rough ETA.
     </p>
-    <h2>Reminders</h2>
-    <ul>
-      <li>
-        Please remember to include the sources of problems when provided,
-        since the problem numbers may change over time.
-      </li>
-      <li>
-        If submitting with LaTeX (encouraged), see
-        <a href="https://web.evanchen.cc/handouts/LaTeXPetPeeve/LaTeXPetPeeve.pdf">Evan's pet peeves</a>.
-      </li>
-      <li>If submitting handwritten solutions, please write darkly!</li>
-    </ul>
-    <h2>Submit new problem set</h2>
-    {% include "generic_form.html" %}
-    <br />
-    <div class="alert alert-info">
-      If you have problems to suggest for this unit,
-      please use the <a href="{% url "suggest-new" %}">problem suggestion form</a>.
-    </div>
-  {% endblock layout-content %}
-  {% block scripts %}
-    <script type="text/javascript">
+  {% else %}
+    <p>
+      You have no pending submissions,
+      but if you want to see how dead Evan is, you can view the
+      <a href="{% url "pset-queue-listing" %}">queue of problem set submissions</a> anyways.
+    </p>
+  {% endif %}
+  <p>
+    You can also see <a href="{% url "student-pset-list" student.pk %}">all your submissions.</a>
+  </p>
+  <h2>Reminders</h2>
+  <ul>
+    <li>
+      Please remember to include the sources of problems when provided,
+      since the problem numbers may change over time.
+    </li>
+    <li>
+      If submitting with LaTeX (encouraged), see
+      <a href="https://web.evanchen.cc/handouts/LaTeXPetPeeve/LaTeXPetPeeve.pdf">Evan's pet peeves</a>.
+    </li>
+    <li>If submitting handwritten solutions, please write darkly!</li>
+  </ul>
+  <h2>Submit new problem set</h2>
+  {% include "generic_form.html" %}
+  <br />
+  <div class="alert alert-info">
+    If you have problems to suggest for this unit,
+    please use the <a href="{% url "suggest-new" %}">problem suggestion form</a>.
+  </div>
+{% endblock layout-content %}
+{% block scripts %}
+  <script type="text/javascript">
 	$(() => {
 		$("select").chosen();
 	});
-    </script>
-  {% endblock scripts %}
+  </script>
+{% endblock scripts %}
