@@ -13,40 +13,42 @@
         participated in {{ student.semester }} of OTIS,
         spending {{ hearts }} hours on a plethora of problems
         along with side quests and mock exams.
-        <hr />
-        <p>
-          Therefore, the OTIS game master
-          hereby confers the title of
-          <h2>{{ level_name }} (Level {{ level_number }})</h2>
-          to the above student,
-          in recognition of {{ student.first_name }}'s
-          dedication and tireless efforts
-          to become a better problem solver in an unforgiving world.
-          <div style="text-align:center;">
-            <img height="100px" src="{% static 'img/sig-evan-transp-4a.png' %}" />
-            <br />
-            <div style="margin:9px" ;>
-              <em>Evan Chen</em>, director of OTIS
-            </div>
-          </div>
-          <hr />
-          <div style="float:left;">{% qr_from_text target_url size="S" %}</div>
-          <div style="font-size:12pt;">
-            <p>
-              This certificate (ID {{ student.id|stringformat:"07d" }})
-              was updated {% now "r" %}.
-            </p>
-            <p>
-              To verify this certificate digitally, scan the QR code
-              or use the URL below:
-            </p>
-            <tt>
-              <a href="{{ request.path }} " certify" student.id checksum %}">{{ request.get_host }}{{ request.path }}</a>
-            </tt>
-          </div>
-          <div></div>
+      </p>
+      <hr />
+      <p>
+        Therefore, the OTIS game master
+        hereby confers the title of
+        <h2>{{ level_name }} (Level {{ level_number }})</h2>
+        to the above student,
+        in recognition of {{ student.first_name }}'s
+        dedication and tireless efforts
+        to become a better problem solver in an unforgiving world.
+      </p>
+      <div style="text-align:center;">
+        <img height="100px" src="{% static 'img/sig-evan-transp-4a.png' %}" />
+        <br />
+        <div style="margin:9px" ;>
+          <em>Evan Chen</em>, director of OTIS
         </div>
-        <style>
+      </div>
+      <hr />
+      <div style="float:left;">{% qr_from_text target_url size="S" %}</div>
+      <div style="font-size:12pt;">
+        <p>
+          This certificate (ID {{ student.id|stringformat:"07d" }})
+          was updated {% now "r" %}.
+        </p>
+        <p>
+          To verify this certificate digitally, scan the QR code
+          or use the URL below:
+        </p>
+        <tt>
+          <a href="{% url "certify" student.id checksum %}">{{ request.get_host }}{{ request.path }}</a>
+        </tt>
+      </div>
+      <div></div>
+    </div>
+    <style>
 		#cert {
 			font-size: 14pt;
 			margin: 30px 30px 30px 30px;
@@ -64,6 +66,6 @@
 		strong {
 			color: #aa0000;
 		}
-	
-        </style>
-      {% endblock layout-content %}
+
+    </style>
+  {% endblock layout-content %}

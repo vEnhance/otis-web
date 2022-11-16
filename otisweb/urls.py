@@ -36,7 +36,7 @@ urlpatterns = [
         TemplateView.as_view(template_name='robots.txt', content_type='text/plain'),
     ),
     path(r'favicon.ico', RedirectView.as_view(url="https://web.evanchen.cc/icons/favicon.ico")),
-    path(r'', RedirectView.as_view(pattern_name='index')),
+    path(r'', RedirectView.as_view(pattern_name='index'), name='top'),
 ] + static(
     settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)  # type: ignore
 
