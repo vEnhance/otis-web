@@ -6,7 +6,7 @@
     <div class="row align-items-center">
       <div class="col-12">
         <div id="header">
-          <a href="/">
+          <a href="{% url "top" %}">
             <h1 id="sitetitle">OTIS-WEB</h1>
           </a>
         </div>
@@ -44,16 +44,12 @@
               <a class="text-muted" href="https://github.com/vEnhance/otis-web/issues">Report issue or feature request</a>
             </div>
           </div>
-      {% endblock %}
-            <img src="{% static 'img/otis-logo-v2022.svg' %}" />
-          </div>
         </div>
-      {% endblock %}
-      {% endblock %}
-        <div class="{% block side-class %}col-7 col-md-3{% endblock side-class %}">
-          <div id="side">{% include "sidebar.html" %}</div>
-{% endblock %}
       {% endblock main-content %}
+      <img src="{% static 'img/otis-logo-v2022.svg' %}" />
     </div>
+  </div>
+  <div class="{% block side-class %}col-7 col-md-3{% endblock side-class %}">
+    <div id="side">{% include "sidebar.html" %}</div>
   </div>
 {% endblock base-content %}
