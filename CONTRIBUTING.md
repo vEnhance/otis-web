@@ -83,15 +83,15 @@ Here are some details about what is checked:
 
 ### Style
 
-Your code should conform to the style of the rest of the OTIS.
-The main irregular thing about this project is that
-it uses tabs for indentation. Sorry not sorry.
+Your code should conform to the style of the rest of the OTIS,
+which follows Google's standards.
 
-The codebase uses the `yapf` for linting and formatting,
-to ensure the uniformity of style across the repository.
+- The codebase uses `yapf` for linting and formatting of Python files,
+  to ensure the uniformity of style across the repository.
+- In addition, `djlint` is used to format the HTML templates.
 
 To preserve your sanity you may optionally configure
-your editor to automatically apply `yapf` after each save:
+your editor to automatically apply `yapf` and `djlint` after each save:
 if you're using a sufficiently sophisticated editor,
 you can probably configure it to do so.
 
