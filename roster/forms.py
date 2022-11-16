@@ -28,11 +28,11 @@ class UnitChoiceField(forms.TypedMultipleChoiceField):
 
 class CurriculumForm(forms.Form):
     """A form which takes a list of units
-	and puts together a form letting you pick a curriculum.
+    and puts together a form letting you pick a curriculum.
 
-	units: the list of units
-	original: a list of unit ID's
-	"""
+    units: the list of units
+    original: a list of unit ID's
+    """
 
     def __init__(self, *args: Any, **kwargs: Any):
         units = kwargs.pop('units')

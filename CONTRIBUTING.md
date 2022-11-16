@@ -168,10 +168,10 @@ manually run it. To spin up the image, run
 ```sh
 docker build -f Dockerfile.dev -t otis-web .
 docker run \
-	-v $(pwd):/app \ # This links your current edits into the docker
-	-p 8000:8000   \ # This maps ports. Change the first number if you wish.
-	-it            \ # Connect terminal stdin/stdout with docker
-	otis-web sh
+  -v $(pwd):/app \ # This links your current edits into the docker
+  -p 8000:8000   \ # This maps ports. Change the first number if you wish.
+  -it            \ # Connect terminal stdin/stdout with docker
+  otis-web sh
 ```
 
 Once in there, use `poetry run python ...` to run any python scripts. Also make sure

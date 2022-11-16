@@ -16,7 +16,7 @@ User = get_user_model()
 
 class Semester(models.Model):
     """Represents an academic semester/year/etc, e.g. "Fall 2017"
-	or "Year III"."""
+    or "Year III"."""
     name = models.CharField(
         max_length=255, help_text="Text description such as 'Year III'", unique=True)
     active = models.BooleanField(
@@ -74,7 +74,7 @@ class Semester(models.Model):
 
 class UnitGroup(models.Model):
     """Represents an entire group of units with the same name,
-	differing only in difficulty and version"""
+    differing only in difficulty and version"""
     objects: BaseManager['UnitGroup']
     unit_set: BaseManager['Unit']
     get_subject_display: Callable[[], str]

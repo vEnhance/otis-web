@@ -79,10 +79,10 @@ skip_empty = true
 branch = true
 command_line = "manage.py test"
 omit = [
-	"*/site-packages/*",
-	"*/migrations/*",
-	"evans_django_tools/*",
-	"manage.py",
+  "*/site-packages/*",
+  "*/migrations/*",
+  "evans_django_tools/*",
+  "manage.py",
 ]
 
 [tool.pyright]

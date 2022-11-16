@@ -42,7 +42,7 @@ def get_student_by_id(
     payment_exempt: bool = False,
 ) -> models.Student:
     """Returns an ordered pair containing a Student object and
-	a boolean indicating whether editing is allowed (is instructor)."""
+    a boolean indicating whether editing is allowed (is instructor)."""
 
     student = get_object_or_404(models.Student, id=student_id)
 

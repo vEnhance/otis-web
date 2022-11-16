@@ -73,8 +73,8 @@ class Assistant(models.Model):
 
 class Student(models.Model):
     """This is really a pair of a user and a semester (with a display name),
-	endowed with the data of the curriculum of that student.
-	It also names the assistant of the student, if any."""
+    endowed with the data of the curriculum of that student.
+    It also names the assistant of the student, if any."""
 
     id: int
     invoice: 'Invoice'
@@ -271,15 +271,15 @@ class Student(models.Model):
     @property
     def payment_status(self):
         """Returns one of several codes:
-			0: student is clear (no invoice exists or total owed is nonpositive)
-			1: remind of upcoming payment for initial deadline
-			2: warn of late payment for initial deadline
-			3: lock late payment for initial deadline
-			4: no warning yet, but student has something owed
-			5: remind of upcoming payment for primary deadline
-			6: warn of late payment for primary deadline
-			7: lock late payment for primary deadline
-			"""
+            0: student is clear (no invoice exists or total owed is nonpositive)
+            1: remind of upcoming payment for initial deadline
+            2: warn of late payment for initial deadline
+            3: lock late payment for initial deadline
+            4: no warning yet, but student has something owed
+            5: remind of upcoming payment for primary deadline
+            6: warn of late payment for primary deadline
+            7: lock late payment for primary deadline
+            """
         if self.semester.show_invoices is False:
             return 0
         try:

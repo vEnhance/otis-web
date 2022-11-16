@@ -129,7 +129,7 @@ def get_week_count(dates: List[datetime]) -> int:
 
 def get_level_info(student: Student) -> LevelInfoDict:
     """Uses a bunch of expensive database queries to compute a student's levels and data,
-	returning the findings as a typed dictionary."""
+    returning the findings as a typed dictionary."""
 
     psets = PSet.objects.filter(student__user=student.user, status='A', eligible=True)
     psets = psets.order_by('upload__timestamp')
@@ -209,7 +209,7 @@ def get_level_info(student: Student) -> LevelInfoDict:
 
 def annotate_student_queryset_with_scores(queryset: QuerySet[Student]) -> QuerySet[Student]:
     """Helper function for constructing large lists of students
-	Selects all important information to prevent a bunch of SQL queries"""
+    Selects all important information to prevent a bunch of SQL queries"""
     guess_subquery = Guess.objects.filter(
         user=OuterRef('user'),
         market__end_date__lt=timezone.now(),
