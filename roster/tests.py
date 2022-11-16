@@ -71,7 +71,9 @@ class RosterTest(EvanTestCase):
         alice.curriculum.set(units[0:8])
         self.login(UserFactory.create(is_staff=True))
         self.assertHas(
-            self.get('master-schedule'), text=f"{alice.user.first_name} A</a>,", count=8)
+            self.get('master-schedule'),
+            text=f'title="{alice.user.first_name} {alice.user.last_name}"',
+            count=8)
 
     def test_update_invoice(self):
         firefly = AssistantFactory.create()
