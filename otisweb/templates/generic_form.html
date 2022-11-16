@@ -6,27 +6,28 @@
   {% csrf_token %}
   {% if form.non_field_errors %}
     <div class="alert alert-danger" role="alert">
-      {% for err,val in form.non_field_errors.items %}<strong>{{ err|title }}</strong> {{ val }}{% endfor %}
-    </ul>
-  </div>
-{% elif form.errors %}
-  <div class="alert alert-danger" role="alert">
-    {% for err,val in form.errors.items %}
-      {% if err == "content" and "This field is required." in val %}
-        <strong>File upload</strong>
-        <ul>
-          <li>
-            There was an error with your file upload.
-            Please make sure that you file submission and is no larger than 10 MB.
-          </li>
-        </ul>
-      {% else %}
-        <strong>{{ err|title }}</strong> {{ val }}
-      {% endif %}
-    {% endfor %}
-  </div>
-{% endif %}
-{% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
-{% for field in form.visible_fields %}{{ field|as_crispy_field }}{% endfor %}
-<button type="submit" class="btn {{ btn_class|default:"btn-success" }}">{{ submit_name|default:"Submit" }}</button>
+      <ul>
+        {% for err,val in form.non_field_errors.items %}<strong>{{ err|title }}</strong> {{ val }}{% endfor %}
+      </ul>
+    </div>
+  {% elif form.errors %}
+    <div class="alert alert-danger" role="alert">
+      {% for err,val in form.errors.items %}
+        {% if err == "content" and "This field is required." in val %}
+          <strong>File upload</strong>
+          <ul>
+            <li>
+              There was an error with your file upload.
+              Please make sure that you file submission and is no larger than 10 MB.
+            </li>
+          </ul>
+        {% else %}
+          <strong>{{ err|title }}</strong> {{ val }}
+        {% endif %}
+      {% endfor %}
+    </div>
+  {% endif %}
+  {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+  {% for field in form.visible_fields %}{{ field|as_crispy_field }}{% endfor %}
+  <button type="submit" class="btn {{ btn_class|default:"btn-success" }}">{{ submit_name|default:"Submit" }}</button>
 </form>
