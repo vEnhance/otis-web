@@ -50,7 +50,7 @@
            class="accordion-collapse collapse show"
            aria-labelledby="headingUserPass">
         <div class="accordion-body">
-          <form class="login" method="POST" action="{% url 'account_login' %}">
+          <form class="login" method="post" action="{% url 'account_login' %}">
             {% csrf_token %}
             {{ form|crispy }}
             {% if redirect_field_value %}
