@@ -5,6 +5,12 @@
 <img src="https://img.shields.io/github/forks/vEnhance/otis-web" alt="Forks">
 <img src="https://img.shields.io/github/stars/vEnhance/otis-web" alt="Stars">
 
+[<img src="https://img.shields.io/github/languages/top/vEnhance/otis-web"
+alt="Top languages">](https://img.shields.io/github/languages/top/vEnhance/otis-web)
+[<img src="https://img.shields.io/github/last-commit/vEnhance/otis-web" alt="Last update">](https://img.shields.io/github/last-commit/vEnhance/otis-web)
+[<img src="https://img.shields.io/badge/html%20style-djlint-blue.svg" alt="HTML style: djlint">](https://www.djlint.com)
+[<img src="https://img.shields.io/badge/python%20style-yapf-blue.svg" alt="Python style: yapf">](https://github.com/google/yapf)
+
 # OTIS-WEB
 
 These are the source files for the internal website
