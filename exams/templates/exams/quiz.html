@@ -64,39 +64,41 @@
               <tt>cos(pi/4)^2 + 1/2</tt> is accepted for <tt>1</tt>.
             </ul>
           </li>
-          <li>
-            The intention is that you should take the test away without technology
-            and only input your answers after time expires.
-            Thus there is no partial submission; you must submit all answers at once.
-          </li>
-          <li>We recommend printing the test out and taking with pencil and paper.</li>
         </ul>
       </li>
+      <li>
+        The intention is that you should take the test away without technology
+        and only input your answers after time expires.
+        Thus there is no partial submission; you must submit all answers at once.
+      </li>
+      <li>We recommend printing the test out and taking with pencil and paper.</li>
     </ul>
-    <hr />
-    <h1>Submit answers</h1>
-    <p>Enter your responses below as expressions.</p>
-    {% include "generic_form.html" %}
-    <script type="text/javascript">
+  </li>
+</ul>
+<hr />
+<h1>Submit answers</h1>
+<p>Enter your responses below as expressions.</p>
+{% include "generic_form.html" %}
+<script type="text/javascript">
 	$("form.form")[0].onsubmit = function() {
 		return confirm('Are you ready to submit? This cannot be reversed.');
 	}
-    </script>
-  {% else %}
-    <hr />
-    <h2>Read solutions</h2>
-    <p>
-      The quiz deadline has passed, so you can't submit,
-      but you can read the solutions here.
-    </p>
-    <div class="list-group">
-      <a href="{{ quiz.url1 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}1</a>
-      <a href="{{ quiz.url2 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}2</a>
-      <a href="{{ quiz.url3 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}3</a>
-      <a href="{{ quiz.url4 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}4</a>
-      <a href="{{ quiz.url5 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}5</a>
-    </div>
-  {% endif %}
+</script>
+{% else %}
+<hr />
+<h2>Read solutions</h2>
+<p>
+  The quiz deadline has passed, so you can't submit,
+  but you can read the solutions here.
+</p>
+<div class="list-group">
+  <a href="{{ quiz.url1 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}1</a>
+  <a href="{{ quiz.url2 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}2</a>
+  <a href="{{ quiz.url3 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}3</a>
+  <a href="{{ quiz.url4 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}4</a>
+  <a href="{{ quiz.url5 }}" class="list-group-item list-group-item-action">Solution to {{ quiz }}5</a>
+</div>
+{% endif %}
 {% endblock layout-content %}
 {% block scripts %}
   <script type="text/javascript">

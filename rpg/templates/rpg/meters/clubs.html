@@ -8,8 +8,7 @@
       <thead class="table-dark">
         <tr>
           <th width="10%">{{ meters.clubs.unit }}</th>
-          <th width="10%"
-          </th>
+          <th width="10%"></th>
           <th width="40%">Unit</th>
           <th width="40%">Timestamp</th>
         </tr>
@@ -25,9 +24,9 @@
             <td>{{ pset.upload.created_at }}</td>
           </tr>
         {% endfor %}
-      </table>
+      </tbody>
     </table>
   {% else %}
     <p>You haven't submitted any units yet.</p>
-  {% endif  %}
+  {% endif %}
 {% endblock meter-content %}

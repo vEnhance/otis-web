@@ -17,11 +17,11 @@
                  title="{{ s.full_name }}"
                  href="{% url "portal" s.pk %}"
                  style="color:black">
-                {{ s.short_name }}</a>,
-              {% endfor %}
-            </span>
-          </td>
-        </tr>
+                {{ s.short_name }}
+              </a>,
+            {% endfor %}
+          </span>
+        </td>
       </tr>
     {% endfor %}
   </table>
