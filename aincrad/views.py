@@ -9,7 +9,7 @@ from dashboard.models import PSet
 from django.conf import settings
 from django.core.exceptions import SuspiciousOperation
 from django.db.models.aggregates import Sum
-from django.db.models.query import prefetch_related_objects
+from django.db.models.query import QuerySet, prefetch_related_objects
 from django.db.models.query_utils import Q
 from django.http.request import HttpRequest
 from django.http.response import JsonResponse
@@ -322,8 +322,8 @@ def invoice_handler(action: str, data: JSONData) -> JsonResponse:
     if field == 'total_paid':
         prefetch_related_objects(invoices_to_update, 'paymentlog_set')
         for inv in invoices_to_update:
-            stripe_paid = inv.paymentlog_set.aggregate(
-                s=Sum('amount'))['s'] or 0  # type: ignore
+            logs: QuerySet[Invoice] = inv.paymentlog_set  # type: ignore
+            stripe_paid: Union[Decimal, int] = logs.aggregate(s=Sum('amount'))['s'] or 0
             inv.total_paid += stripe_paid
 
     Invoice.objects.bulk_update(invoices_to_update, (field,), batch_size=25)
