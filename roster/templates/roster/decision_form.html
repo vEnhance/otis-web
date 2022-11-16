@@ -24,7 +24,7 @@
     {% include "generic_form.html" with submit_name="Register" %}
   {% else %}
     <p>
-      <a href="/">Go back</a>
+      <a href="{% url "top" %}">Go back</a>
     </p>
   {% endif %}
 {% endblock layout-content %}

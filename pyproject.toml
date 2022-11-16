@@ -164,4 +164,4 @@ quiet-level = 3
 [tool.djlint]
 profile = "django"
 indent = 2
-ignore = "H006,H013,H021"
+ignore = "D018,H006,H013,H021"
