@@ -1,7 +1,9 @@
 {% extends "layout.html" %}
 {% load humanize %}
 {% load static %}
-{% block title %}Your Stats{% endblock title %}
+{% block title %}
+  Your Stats
+{% endblock title %}
 {% block layout-content %}
   <h1>{{ student.name }} — {{ level_name }}</h1>
   {% if obtained_achievement %}
@@ -35,14 +37,14 @@
     {% endfor %}
   </ul>
   <script>
-    $(function(){     
+    $(function() {
         var hash = location.hash;
-        if (hash == "#headingDexterity"
-            || hash == "#headingWisdom"
-            || hash == "#headingStrength"
-            || hash == "#headingCharisma"){
-                var stat = hash.slice(8);
-                $("#collapse" + stat).addClass("show");
+        if (hash == "#headingDexterity" ||
+            hash == "#headingWisdom" ||
+            hash == "#headingStrength" ||
+            hash == "#headingCharisma") {
+            var stat = hash.slice(8);
+            $("#collapse" + stat).addClass("show");
         }
     });
   </script>

@@ -1,6 +1,14 @@
 {% extends "error.html" %}
-{% block code %}404{% endblock code %}
-{% block title %}HTTP 404 Not Found{% endblock title %}
-{% block emoji %}⁉️{% endblock emoji %}
+{% block code %}
+  404
+{% endblock code %}
+{% block title %}
+  HTTP 404 Not Found
+{% endblock title %}
+{% block emoji %}
+  ⁉️
+{% endblock emoji %}
 {% load otis_extras %}
-{% block extra %}<tt>{{ "HTTP_404_NOTES"|getenv }}</tt>{% endblock extra %}
+{% block extra %}
+  <tt>{{ "HTTP_404_NOTES"|getenv }}</tt>
+{% endblock extra %}

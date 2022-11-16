@@ -1,6 +1,8 @@
 {% extends "layout.html" %}
 {% load static %}
-{% block title %}OTIS Mock Olympiads{% endblock title %}
+{% block title %}
+  OTIS Mock Olympiads
+{% endblock title %}
 {% block layout-content %}
   <h2>Tests</h2>
   {% include "dashboard/exam_list.html" with exams=tests %}

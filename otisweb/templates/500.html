@@ -1,6 +1,14 @@
 {% extends "error.html" %}
-{% block code %}500{% endblock code %}
-{% block title %}HTTP 500 Internal Server Error{% endblock title %}
-{% block emoji %}❌{% endblock emoji %}
+{% block code %}
+  500
+{% endblock code %}
+{% block title %}
+  HTTP 500 Internal Server Error
+{% endblock title %}
+{% block emoji %}
+  ❌
+{% endblock emoji %}
 {% load otis_extras %}
-{% block extra %}<tt>{{ "HTTP_500_NOTES"|getenv }}</tt>{% endblock extra %}
+{% block extra %}
+  <tt>{{ "HTTP_500_NOTES"|getenv }}</tt>
+{% endblock extra %}

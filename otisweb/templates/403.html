@@ -1,6 +1,14 @@
 {% extends "error.html" %}
-{% block code %}403{% endblock code %}
-{% block title %}HTTP 403 Forbidden{% endblock title %}
-{% block emoji %}👿{% endblock emoji %}
+{% block code %}
+  403
+{% endblock code %}
+{% block title %}
+  HTTP 403 Forbidden
+{% endblock title %}
+{% block emoji %}
+  👿
+{% endblock emoji %}
 {% load otis_extras %}
-{% block extra %}<tt>{{ "HTTP_403_NOTES"|getenv }}</tt>{% endblock extra %}
+{% block extra %}
+  <tt>{{ "HTTP_403_NOTES"|getenv }}</tt>
+{% endblock extra %}

@@ -1,5 +1,7 @@
 {% extends "layout.html" %}
-{% block title %}Submission for {{ pset.unit }}{% endblock title %}
+{% block title %}
+  Submission for {{ pset.unit }}
+{% endblock title %}
 {% block layout-content %}
   <p>
     Back to <a href="{% url "submit-pset" student.pk %}">submission page</a>.

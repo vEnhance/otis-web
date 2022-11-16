@@ -1,6 +1,8 @@
 {% extends "layout.html" %}
 {% load humanize %}
-{% block title %}Market {{ guess.market.slug }} submitted{% endblock title %}
+{% block title %}
+  Market {{ guess.market.slug }} submitted
+{% endblock title %}
 {% block layout-content %}
   <div class="alert alert-dark">
     <h2 class="alert-heading">{{ guess.market.title }}</h2>

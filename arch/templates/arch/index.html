@@ -55,16 +55,16 @@
 {% endblock layout-content %}
 {% block scripts %}
   <script type="text/javascript">
-	$(document).ready(function() {
-		$("#id_problem").chosen({
-			placeholder_text: "...",
-			width: "90%",
-			search_contains: true,
-		});
-		$("#id_puid").bind('keyup', function(e) {
-			const s = $("#id_puid").val().toUpperCase().replace(/[^0-9A-Z]/gi, '');
-			$("#id_puid").val(s);
-		});
-	});
+    $(document).ready(function() {
+        $("#id_problem").chosen({
+            placeholder_text: "...",
+            width: "90%",
+            search_contains: true,
+        });
+        $("#id_puid").bind('keyup', function(e) {
+            const s = $("#id_puid").val().toUpperCase().replace(/[^0-9A-Z]/gi, '');
+            $("#id_puid").val(s);
+        });
+    });
   </script>
 {% endblock scripts %}

@@ -1,5 +1,7 @@
 {% extends "layout.html" %}
-{% block title %}Instructor list{% endblock title %}
+{% block title %}
+  Instructor list
+{% endblock title %}
 {% block layout-content %}
   {% regroup students by assistant as instructor_list %}
   {% if needs_sync and request.user.is_superuser %}

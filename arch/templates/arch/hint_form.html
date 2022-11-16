@@ -1,5 +1,7 @@
 {% extends "layout.html" %}
-{% block title %}Create Hint{% endblock title %}
+{% block title %}
+  Create Hint
+{% endblock title %}
 {% block layout-content %}
   <p class="text-muted">
     Back to <a href="{{ problem.get_absolute_url }}">{{ problem.puid }}</a>.
@@ -30,12 +32,12 @@
 {% endblock layout-content %}
 {% block scripts %}
   <script type="text/javascript">
-	$(document).ready(function() {
-		$("#id_problem").chosen({
-			placeholder_text: "...",
-			width: "90%",
-			search_contains: true,
-		});
-	});
+    $(document).ready(function() {
+        $("#id_problem").chosen({
+            placeholder_text: "...",
+            width: "90%",
+            search_contains: true,
+        });
+    });
   </script>
 {% endblock scripts %}
