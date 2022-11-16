@@ -12,13 +12,13 @@
       <td>
         <a href="{% url 'portal' student.id %}#quizzes">Short-answer quizzes</a>
       </td>
-      <td>2♠ &times; score</td>
+      <td>2♠ × score</td>
     </tr>
     <tr>
       <td>
         Competing in <a href="https://web.evanchen.cc/usemo.html">USEMO</a> (USA only)
       </td>
-      <td>1♠ &times; score</td>
+      <td>1♠ × score</td>
     </tr>
     <tr>
       <td>
@@ -89,7 +89,7 @@
             </b>
           </td>
           <td>{{ mc.exam.family }} {{ mc.exam.number }}</td>
-          <td>{{ mc.exam.due_date|default_if_none:"&mdash;" }}</td>
+          <td>{{ mc.exam.due_date|default_if_none:"—" }}</td>
         </tr>
       {% endfor %}
       {% for u in suggest_unit_set %}

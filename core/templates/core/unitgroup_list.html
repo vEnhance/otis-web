@@ -30,7 +30,7 @@
           <b class="text-info">
             <a href="{% url "wiki-unitgroup" unitgroup.pk %}">{{ unitgroup.name }}</a>
           </b>
-          <span class="text-dark">&mdash; {{ unitgroup.get_subject_short_display }},
+          <span class="text-dark">— {{ unitgroup.get_subject_short_display }},
             {% for unit in unitgroup.unit_set.all %}{{ unit.code }}{% endfor %}
           </span>
           <p class="text-secondary">{{ unitgroup.description }}</p>

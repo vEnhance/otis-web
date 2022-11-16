@@ -7,7 +7,7 @@
       <li>
         <p>
           <b><a href="{{ file.content.url }}">{{ file }}</a></b>
-          {% if file.description %}&mdash; {{ file.description }}{% endif %}
+          {% if file.description %}— {{ file.description }}{% endif %}
           <br />
           <small>Uploaded at {{ file.created_at|date:"r" }}.
             {% if request.user.is_superuser %}

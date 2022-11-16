@@ -29,7 +29,7 @@
       {% elif exam.started %}
         <td>Due {{ exam.due_date|date }}</td>
       {% else %}
-        <td>Open {{ exam.start_date|date }} &ndash; {{ exam.due_date|date }}</td>
+        <td>Open {{ exam.start_date|date }} – {{ exam.due_date|date }}</td>
       {% endif %}
     </tr>
   {% endfor %}

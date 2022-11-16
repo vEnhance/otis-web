@@ -1,6 +1,6 @@
 <p>
   <b><a href="{{ file.content.url }}">{{ file }}</a></b>
-  {% if file.description %}&mdash; {{ file.description }}{% endif %}
+  {% if file.description %}— {{ file.description }}{% endif %}
   <br />
   <small>Uploaded by <i>{{ file.owner }}</i> at
     {{ file.created_at|date:"r" }}.
