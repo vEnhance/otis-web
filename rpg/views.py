@@ -18,7 +18,6 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views.generic import ListView
 from django.views.generic.edit import UpdateView
-from evans_django_tools import SUCCESS_LOG_LEVEL
 from otisweb.utils import AuthHttpRequest, get_days_since
 from roster.models import Student
 from roster.utils import get_student_by_id
@@ -58,10 +57,8 @@ def stats(request: AuthHttpRequest, student_id: int) -> HttpResponse:
                     messages.error(request, "You entered an invalid code.")
                     logger.warn(f"Invalid diamond code `{code}`", extra={'request': request})
                 else:
-                    logger.log(
-                        SUCCESS_LOG_LEVEL,
-                        f"{student.name} obtained {achievement}",
-                        extra={'request': request})
+                    logger.info(
+                        f"{student.name} obtained {achievement}", extra={'request': request})
                     AchievementUnlock.objects.create(user=student.user, achievement=achievement)
                     context['obtained_achievement'] = achievement
             form = DiamondsForm()

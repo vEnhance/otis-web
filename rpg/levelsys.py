@@ -11,7 +11,7 @@ from django.db.models.expressions import OuterRef, Subquery
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
 from django.utils import timezone
-from evans_django_tools import SUCCESS_LOG_LEVEL
+from evans_django_tools import VERBOSE_LOG_LEVEL
 from exams.models import ExamAttempt, MockCompleted
 from markets.models import Guess
 from reversion.models import Version
@@ -333,7 +333,7 @@ def check_level_up(student: Student) -> bool:
             if unit is not None:
                 student.curriculum.add(unit)
                 BonusLevelUnlock.objects.create(bonus=bonus, student=student)
-                logger.log(SUCCESS_LOG_LEVEL, f"{student} obtained special unit {unit}")
+                logger.log(VERBOSE_LOG_LEVEL, f"{student} obtained special unit {unit}")
 
     student.last_level_seen = level_number
     student.save()
