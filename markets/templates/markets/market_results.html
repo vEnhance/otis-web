@@ -30,7 +30,7 @@
       </h2>
       {% if best_guess.score %}
         <p class="fst-italic">
-          The best guess was <strong>{{ best_guess.value|floatformat:6 }}</strong>
+          The best guess was <b>{{ best_guess.value|floatformat:6 }}</b>
           which earned {{ best_guess.score }}♠.
         </p>
       {% endif %}
