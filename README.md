@@ -22,7 +22,7 @@ up a local server on a standard Unix environment.
 
 ## Installation instructions
 
-### Standard Unix environment
+### Standard Linux environment
 
 0. [Fork the repository first](https://docs.github.com/en/get-started/quickstart/fork-a-repo)
    if you're planning on submitting a pull request later.
