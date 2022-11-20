@@ -11,7 +11,9 @@
 [<img src="https://img.shields.io/badge/types-pyright-ff69b4.svg" alt="types: pyright">](https://github.com/PyCQA/pyflakes)
 [<img src="https://img.shields.io/badge/types-mypy-ff69b4.svg" alt="types: mypy">](http://mypy-lang.org/)
 [<img src="https://img.shields.io/badge/lint-pyflakes-ff69b4.svg" alt="lint: pyflakes">](https://github.com/PyCQA/pyflakes)
-[<img src="https://coveralls.io/repos/github/vEnhance/otis-web/badge.svg?branch=main" alt="Coverage status">](https://coveralls.io/github/vEnhance/otis-web?branch=main)# OTIS-WEB
+[<img src="https://coveralls.io/repos/github/vEnhance/otis-web/badge.svg?branch=main" alt="Coverage status">](https://coveralls.io/github/vEnhance/otis-web?branch=main)
+
+# OTIS-WEB
 
 These are the source files for the internal website
 that I use to teach my course [OTIS](https://web.evanchen.cc/otis.html).
