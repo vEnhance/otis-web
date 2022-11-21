@@ -11,7 +11,15 @@
   {% spaceless %}
     <h1>{{ problem }}</h1>
   {% endspaceless %}
-  {% if statement %}<div class=" alert-secondary alert">{{ statement|safe }}</div>{% endif %}
+  {% if statement %}<div class="alert-secondary alert">{{ statement|safe }}</div>{% endif %}
+  {% if problem.hyperlink %}
+    <p class="text-center">
+      <a class="btn btn-secondary" href="{{ problem.hyperlink }}">
+        <tt>{{ problem.hyperlink|truncatechars:"80" }}</tt>
+      </a>
+    </p>
+  {% endif %}
+  <hr />
   {% if hint_list %}
     <p>The following hints are available for this problem.</p>
     {% for hint in hint_list %}
@@ -25,7 +33,9 @@
     <p>
       Some of the hints may be pretty oblique
       or not apply to you.
-      Remember, you can always ask the OTIS Discord or Evan
+      Remember, you can always
+      <a href="https://discord.com/channels/740366393022742618/1019651152385679491">ask the OTIS Discord</a>
+      or <a href="mailto:evan@evanchen.cc">email Evan (evan@evanchen.cc)</a>
       for more personalized help!
     </p>
   {% else %}

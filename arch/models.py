@@ -33,6 +33,7 @@ class Problem(models.Model):
                 message="Only uppercase letters and digits appear in PUID's.")
         ],
     )
+    hyperlink = models.URLField(help_text="An AoPS URL or similar", blank=True)
 
     class Meta:
         ordering = ('puid',)

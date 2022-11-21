@@ -149,7 +149,10 @@ class ProblemUpdate(ProblemObjectView, ExistStudentRequiredMixin, RevisionMixin,
                     UpdateView[Problem, BaseModelForm[Problem]]):
     context_object_name = "problem"
     model = Problem
-    fields = ('puid',)
+    fields = (
+        'puid',
+        'hyperlink',
+    )
 
     def get_context_data(self, **kwargs: Any):
         context = super().get_context_data(**kwargs)
@@ -197,7 +200,10 @@ class HintDelete(HintObjectView, ExistStudentRequiredMixin, RevisionMixin, Delet
 class ProblemCreate(ExistStudentRequiredMixin, RevisionMixin,
                     CreateView[Problem, BaseModelForm[Problem]]):
     context_object_name = "problem"
-    fields = ('puid',)
+    fields = (
+        'puid',
+        'hyperlink',
+    )
     model = Problem
     template_name = 'arch/index.html'
 
