@@ -49,12 +49,12 @@ class Semester(models.Model):
 
     gradescope_key = models.CharField(
         max_length=10, blank=True, help_text="The entry code for GradeScope this semester.")
-    social_url = models.CharField(
+    social_url = models.URLField(
         max_length=128, blank=True, help_text="The link to social platform for this year.")
 
-    calendar_url_meets_evan = models.TextField(
+    calendar_url_meets_evan = models.URLField(
         blank=True, help_text="Link to calendar for students with meetings with Evan")
-    calendar_url_no_meets_evan = models.TextField(
+    calendar_url_no_meets_evan = models.URLField(
         blank=True, help_text="Link to calendar for students without meetings with Evan")
 
     def __str__(self) -> str:

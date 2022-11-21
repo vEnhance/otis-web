@@ -46,26 +46,11 @@ class PracticeExam(models.Model):
     answer3 = models.CharField(max_length=128, validators=[expr_validator_multiple], blank=True)
     answer4 = models.CharField(max_length=128, validators=[expr_validator_multiple], blank=True)
     answer5 = models.CharField(max_length=128, validators=[expr_validator_multiple], blank=True)
-    url1 = models.CharField(
-        max_length=128, blank=True, validators=[
-            URLValidator(),
-        ])
-    url2 = models.CharField(
-        max_length=128, blank=True, validators=[
-            URLValidator(),
-        ])
-    url3 = models.CharField(
-        max_length=128, blank=True, validators=[
-            URLValidator(),
-        ])
-    url4 = models.CharField(
-        max_length=128, blank=True, validators=[
-            URLValidator(),
-        ])
-    url5 = models.CharField(
-        max_length=128, blank=True, validators=[
-            URLValidator(),
-        ])
+    url1 = models.URLField(max_length=128, blank=True, validators=[URLValidator()])
+    url2 = models.URLField(max_length=128, blank=True, validators=[URLValidator()])
+    url3 = models.URLField(max_length=128, blank=True, validators=[URLValidator()])
+    url4 = models.URLField(max_length=128, blank=True, validators=[URLValidator()])
+    url5 = models.URLField(max_length=128, blank=True, validators=[URLValidator()])
 
     start_date = models.DateField(null=True, blank=True, help_text="When the assignment opens.")
     due_date = models.DateField(
