@@ -53,9 +53,13 @@ class Semester(models.Model):
         max_length=128, blank=True, help_text="The link to social platform for this year.")
 
     calendar_url_meets_evan = models.URLField(
-        blank=True, help_text="Link to calendar for students with meetings with Evan")
+        blank=True,
+        help_text="Link to calendar for students with meetings with Evan",
+        max_length=1024)
     calendar_url_no_meets_evan = models.URLField(
-        blank=True, help_text="Link to calendar for students without meetings with Evan")
+        blank=True,
+        help_text="Link to calendar for students without meetings with Evan",
+        max_length=1024)
 
     def __str__(self) -> str:
         return self.name
