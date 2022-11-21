@@ -46,6 +46,8 @@ class TestCore(EvanTestCase):
         self.assertGetDenied('view-tex', units[3].pk)
         self.assertGetDenied('view-solutions', units[3].pk)
 
+        resp = self.assertGet30X('admin-unit-list')
+
     @override_settings(TESTING_NEEDS_MOCK_MEDIA=True)
     def test_staff_core_views(self):
         u = UnitFactory.create()
@@ -53,11 +55,18 @@ class TestCore(EvanTestCase):
         for v in ('view-problems', 'view-tex', 'view-solutions'):
             self.assertGet20X(v, u.pk)
 
+    def test_admin_unit_list(self):
+        self.login(UserFactory.create(is_staff=True, is_superuser=True))
+        UnitFactory.create(group__name='Grinding', group__subject='M')
+        resp = self.assertGet20X('admin-unit-list')
+        self.assertHas(resp, 'Grinding')
+
     def test_mallory_core_views(self):
         u = UnitFactory.create()
         self.login(UserFactory.create())
         for v in ('view-problems', 'view-tex', 'view-solutions'):
             self.assertGetDenied(v, u.pk)
+        self.assertGet30X('admin-unit-list')
 
     def test_hidden(self):
         UnitFactory.create(group__name="VisibleUnit", group__hidden=False)
