@@ -1,0 +1,67 @@
+{% extends "layout.html" %}
+{% block title %}
+  Unit Grid (Admin)
+{% endblock title %}
+{% load otis_extras %}
+{% load humanize %}
+{% block layout-content %}
+  <p>For your downloading pleasure.</p>
+  <table id="units" class="table tablesorter">
+    <thead>
+      <tr class="table-info">
+        <th>Position</th>
+        <th>Visible</th>
+        <th>Code</th>
+        <th>Subject</th>
+        <th>Unit name</th>
+        <th>Slug</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for unit in unit_list %}
+        <tr class="subject{{ unit.group.subject }}">
+          <td class="number">{{ unit.position }}</td>
+          <td>
+            {% if unit.visible %}
+              👀
+            {% else %}
+              🥷🏻
+            {% endif %}
+          </td>
+          <th class="code">{{ unit.code }}</th>
+          <td>{{ unit.group.get_subject_display }}</td>
+          <td>{{ unit.group.name }}</td>
+          <td class="code">{{ unit.group.slug }}</td>
+          <td class="emojis">
+            <a class="emoji-link"
+               style="font-size: 80%"
+               title="Download PDF"
+               href="{% view_problems unit %}">💾</a>
+            <a class="emoji-link"
+               title="Download LaTeX template"
+               href="{% view_tex unit %}">📋</a>
+            <a class="emoji-link"
+               title="Download solutions"
+               href="{% view_solutions unit %}">🗝️</a>
+            <a class="emoji-link"
+               style="text-shadow: 1px black"
+               title="Add suggestion"
+               href="{% url "suggest-new" unit.id %}">💡</a>
+            <a class="emoji-link"
+               title="Wiki"
+               href="{% url "wiki-unitgroup" unit.group.pk %}">🎮</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock layout-content %}
+{% block scripts %}
+  <script src="https://cdn.jsdelivr.net/npm/tablesorter@2.31.3/dist/js/jquery.tablesorter.combined.min.js" integrity="sha256-ounC3wWwZ9iBUyF8x1+X+REppGjK+p6/+w+ky1MGoMM=" crossorigin="anonymous"></script>
+  <script type="text/javascript">
+    $(() => {
+        $("#units").tablesorter();
+    });
+  </script>
+{% endblock scripts %}

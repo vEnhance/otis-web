@@ -121,6 +121,9 @@
       <li>
         <a href="{% url "master-schedule" %}">M Schedule</a>
       </li>
+      <li>
+        <a href="{% url "admin-unit-list" %}">Unit Grid</a>
+      </li>
       {% if request.user.is_superuser %}
         <li>
           <a href="{% url "admin-palace-list" %}">Ruby Palace</a>

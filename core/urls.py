@@ -4,6 +4,7 @@ from . import views
 
 urlpatterns = [
     path(r'synopsis/', views.UnitGroupListView.as_view(), name='synopsis'),
+    path(r'admin-unit-list/', views.AdminUnitListView.as_view(), name='admin-unit-list'),
     path(r'prefs/', views.UserProfileUpdateView.as_view(), name='profile'),
     path(r'unit/problems/<int:pk>/', views.unit_problems, name='view-problems'),
     path(r'unit/tex/<int:pk>/', views.unit_tex, name='view-tex'),

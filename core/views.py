@@ -1,6 +1,6 @@
 from typing import Any, Dict, Optional
 
-from braces.views import LoginRequiredMixin
+from braces.views import LoginRequiredMixin, SuperuserRequiredMixin
 from dashboard.models import PSet, UploadedFile
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import AnonymousUser
@@ -26,6 +26,13 @@ from .models import Unit, UnitGroup
 from .utils import get_from_google_storage
 
 # Create your views here.
+
+
+class AdminUnitListView(SuperuserRequiredMixin, ListView[Unit]):
+    model = Unit
+    queryset = Unit.objects.all()
+    template_name = 'core/admin_unit_list.html'
+    context_object_name = 'unit_list'
 
 
 class UnitGroupListView(ListView[UnitGroup]):
