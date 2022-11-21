@@ -46,7 +46,7 @@ class TestCore(EvanTestCase):
         self.assertGetDenied('view-tex', units[3].pk)
         self.assertGetDenied('view-solutions', units[3].pk)
 
-        resp = self.assertGet30X('admin-unit-list')
+        self.assertGet30X('admin-unit-list')
 
     @override_settings(TESTING_NEEDS_MOCK_MEDIA=True)
     def test_staff_core_views(self):
