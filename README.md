@@ -54,6 +54,16 @@ up a local server on a standard Unix environment.
 12. The website is functional now, but it is a bit bare-bones.
     To populate it with some test data, use `http://127.0.0.1:8000/admin`.
 
+Optional steps:
+
+- If you need to set up environment variables,
+  copy `env` to `.env` and uncomment the relevant lines.
+- If you want to test the Stripe stuff, a few more steps are needed.
+  Briefly: install the Stripe CLI.
+  Create some API keys and `stripe login`.
+  Add these API keys to `.env` (the three `STRIPE_*` variables).
+  Then run `stripe listen --forward-to localhost:8000/payments/webhook/`.
+
 [venv]: https://djangocentral.com/how-to-a-create-virtual-environment-for-python/
 
 ## Feature requests or bug reports
