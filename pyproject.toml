@@ -21,24 +21,24 @@ django-debug-toolbar = "^3.2.1"
 django-extensions = "^3.2.1"
 django-hijack = "^3.0.0"
 django-import-export = "^3.0.1"
+django-markdownfield = "^0.10.0"
 django-positions = "^0.6.0"
+django-qr-code = "^3.0.0"
 django-registration = "^3.2"
 django-reversion = "^5.0.0"
 django-sql-utils = "^0.6.1"
 django-storages = {extras = ["google"], version = "^1.11.1"}
 django-stubs = "^1.13.0"
 django-stubs-ext = "^0.7.0"
-django-qr-code = "^3.0.0"
 mailchimp3 = "^3.0.15"
 mysqlclient = "^2.1.1"
+prettytable = "^3.4.1"
 pyparsing = "^3.0.9"
 python-dotenv = "^0.21.0"
 setuptools = "^65.3.0"
 stripe = "^5.0.0"
 wheel = "^0.38.4"
 wiki = "^0.9"
-prettytable = "^3.4.1"
-django-markdownfield = "^0.10.0"
 
 [tool.poetry.group.dev.dependencies]
 # TODO: Faker: need to wait until https://github.com/joke2k/faker/pull/1662 resolves
@@ -46,6 +46,7 @@ Faker = "=15.1.1"
 # TODO: update codespell once v2.3.0 is published
 codespell = "^2.2.2"
 coverage = {extras = ["toml"], version = "^6.4.3"}
+djlint = "^1.19.7"
 factory-boy = "^3.2.0"
 freezegun = "^1.1.0"
 ipython = "^8.4.0"
@@ -59,7 +60,6 @@ types-Markdown = "^3.3.6"
 types-freezegun = "^1.1.2"
 types-requests = "^2.28.11.5"
 yapf = "^0.32.0"
-djlint = "^1.19.7"
 
 [tool.yapf]
 based_on_style = "google"
