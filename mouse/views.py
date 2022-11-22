@@ -32,7 +32,11 @@ def usemo_score(request: HttpRequest) -> HttpResponse:
                     if s.user.get_full_name().lower() == name.lower():
                         qcs.append(
                             QuestComplete(
-                                student=s, title=f"USEMO {YEAR}", category="US", spades=spades))
+                                student=s,
+                                title=f"USEMO {YEAR}",
+                                category="US",
+                                spades=spades,
+                            ))
             QuestComplete.objects.bulk_create(qcs)
             messages.success(request, f'Built {len(qcs)} records')
     else:
