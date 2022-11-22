@@ -551,10 +551,8 @@ class StudentRegistration(models.Model):
         try:
             student = Student.objects.get(user=self.user, semester=self.container.semester)
         except Student.DoesNotExist:
-            print(self.container.semester.get_absolute_url())
             return self.container.semester.get_absolute_url()
         else:
-            print(student.get_absolute_url())
             return student.get_absolute_url()
 
     @property

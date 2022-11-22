@@ -9,11 +9,9 @@ from django.urls import reverse
 
 
 def get_disk_statement_from_puid(puid: str) -> Optional[str]:
-    print(settings.PATH_STATEMENT_ON_DISK)
     if settings.PATH_STATEMENT_ON_DISK is None:
         return None
     statement_path = Path(settings.PATH_STATEMENT_ON_DISK) / (puid + '.html')
-    print(statement_path)
     if statement_path.exists() and statement_path.is_file():
         return statement_path.read_text()
     return None

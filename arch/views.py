@@ -70,12 +70,10 @@ class HintList(ExistStudentRequiredMixin, ListView[Hint]):
         super().setup(request, *args, **kwargs)
         puid = kwargs['puid']
         puid = puid.upper()
-        print("PUID:", puid)
         try:
             self.problem = Problem.objects.get(puid=puid)
         except Problem.DoesNotExist:
             statement_exists_on_disk = get_disk_statement_from_puid(puid) is not None
-            print(get_disk_statement_from_puid(puid))
             if kwargs['create_if_missing'] is True and statement_exists_on_disk:
                 self.problem = Problem(puid=puid)
                 self.problem.save()
