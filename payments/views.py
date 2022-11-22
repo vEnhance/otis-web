@@ -38,7 +38,8 @@ def config(request: HttpRequest) -> HttpResponse:
 
 
 @csrf_exempt
-def checkout(request: HttpRequest, amount: int, invoice_id: int) -> HttpResponse:
+def checkout(request: HttpRequest, invoice_id: int, amount: int) -> HttpResponse:
+    print(amount)
     if amount <= 0:
         raise PermissionDenied("Need to enter a positive amount for payment...")
     stripe.api_key = settings.STRIPE_SECRET_KEY
