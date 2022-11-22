@@ -39,7 +39,6 @@ def config(request: HttpRequest) -> HttpResponse:
 
 @csrf_exempt
 def checkout(request: HttpRequest, invoice_id: int, amount: int) -> HttpResponse:
-    print(amount)
     if amount <= 0:
         raise PermissionDenied("Need to enter a positive amount for payment...")
     stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -65,6 +64,13 @@ def checkout(request: HttpRequest, invoice_id: int, amount: int) -> HttpResponse
         return HttpResponseForbidden('Need to use request method GET')
 
 
+def process_payment(amount: int, invoice: Invoice):
+    invoice.total_paid += amount
+    invoice.save()
+    payment_log = PaymentLog(amount=amount, invoice=invoice)
+    payment_log.save()
+
+
 @csrf_exempt
 def webhook(request: HttpRequest) -> HttpResponse:
     if request.method != 'POST':
@@ -72,30 +78,30 @@ def webhook(request: HttpRequest) -> HttpResponse:
     stripe.api_key = settings.STRIPE_SECRET_KEY
     endpoint_secret = settings.STRIPE_ENDPOINT_SECRET
     payload = request.body
-    sig_header = request.META['HTTP_STRIPE_SIGNATURE']
+    if not 'HTTP_STRIPE_SIGNATURE' in request.META:
+        logging.error(f'No HTTP_STRIPE_SIGNATURE in request.META = {request.META}')
+        return HttpResponse(status=400)
+    sig_header: str = request.META['HTTP_STRIPE_SIGNATURE']
+    # logging.debug(payload)
 
     try:
         event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
     except ValueError as e:
         # Invalid payload
-        logging.error(e)
+        logging.error('Invalid payload for ' + str(e))
         return HttpResponse(status=400)
     except stripe.error.SignatureVerificationError as e:  # type: ignore
         # Invalid signature
-        logging.error(e)
+        logging.error('Invalid signature for ' + str(e))
         return HttpResponse(status=400)
 
     # Handle the checkout.session.completed event
+    logging.debug(event)
     if event['type'] == 'checkout.session.completed':
-        logging.debug("Payment was successful.")
-        logging.debug(event)
-        invoice_id = int(event['data']['object']['client_reference_id'])
-        amount = int(event['data']['object']['amount_total'] / 100)
-        invoice = get_object_or_404(Invoice, id=invoice_id)
-        invoice.total_paid += amount
-        invoice.save()
-        payment_log = PaymentLog(amount=amount, invoice=invoice)
-        payment_log.save()
+        process_payment(
+            amount=int(event['data']['object']['amount_total'] / 100),
+            invoice=get_object_or_404(
+                Invoice, id=int(event['data']['object']['client_reference_id'])))
     return HttpResponse(status=200)
 
 
