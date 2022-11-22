@@ -339,6 +339,17 @@ Django = ">=3.2.4"
 sqlparse = ">=0.2.0"
 
 [[package]]
+name = "django-extensions"
+version = "3.2.1"
+description = "Extensions for Django"
+category = "dev"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+Django = ">=3.2"
+
+[[package]]
 name = "django-hijack"
 version = "3.2.4"
 description = "django-hijack allows superusers to hijack (=login as) and work on behalf of another user."
@@ -1711,7 +1722,7 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8, <4.0"
-content-hash = "f1d1401e76ed40de17f779849d60865de0fa19c91d6538396af0fa3a277b9b78"
+content-hash = "5e9c03a53e5e8abd6003613266d9c181d1e4746f02887dfe9e75b08d947c4394"
 
 [metadata.files]
 appnope = [
@@ -1975,6 +1986,10 @@ django-crispy-forms = [
 django-debug-toolbar = [
     {file = "django-debug-toolbar-3.7.0.tar.gz", hash = "sha256:1e3acad24e3d351ba45c6fa2072e4164820307332a776b16c9f06d1f89503465"},
     {file = "django_debug_toolbar-3.7.0-py3-none-any.whl", hash = "sha256:80de23066b624d3970fd296cf02d61988e5d56c31aa0dc4a428970b46e2883a8"},
+]
+django-extensions = [
+    {file = "django-extensions-3.2.1.tar.gz", hash = "sha256:2a4f4d757be2563cd1ff7cfdf2e57468f5f931cc88b23cf82ca75717aae504a4"},
+    {file = "django_extensions-3.2.1-py3-none-any.whl", hash = "sha256:421464be390289513f86cb5e18eb43e5dc1de8b4c27ba9faa3b91261b0d67e09"},
 ]
 django-hijack = [
     {file = "django-hijack-3.2.4.tar.gz", hash = "sha256:33b6b0409bdd9f31509cc2b014fecbef95aea27aeffcc4f0c5ec9cb647b017e4"},
