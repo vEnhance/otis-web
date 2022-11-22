@@ -1,0 +1,40 @@
+# environment variables example file
+
+IS_PRODUCTION=0
+
+# STATIC_URL="https://storage.googleapis.com/otisweb-static/static/"
+# GS_BUCKET_NAME="otisweb-media"
+# MEDIA_URL="https://storage.googleapis.com/otisweb-media/"
+#
+# DATABASE_NAME=''
+# DATABASE_USER=""
+# DATABASE_PASSWORD=""
+# DATABASE_HOST=""
+# GS_ACCESS_KEY_ID="google storage access key id"
+# GS_SECRET_ACCESS_KEY="google storage secret access key"
+# GOOGLE_APPLICATION_CREDENTIALS="creds"
+# DJANGO_SECRET_KEY="django secret key"
+# INVOICE_HASH_KEY="invoice hash key"
+# STORAGE_HASH_KEY='storage hash key'
+
+# WEBHOOK_URL="discord webhook URL"
+# WEBHOOK_URL_SUCCESS="discord webhook URL"
+# WEBHOOK_URL_ERROR="discord webhook URL"
+# WEBHOOK_URL_CRITICAL="discord webhook URL"
+# WEBHOOK_URL_ACTION="discord webhook URL"
+
+# MAILCHIMP_API_KEY="mailchimp api key"
+# MAILCHIMP_LIST_ID="mailchimp list id"
+
+# PATH_STATEMENT_ON_DISK="/home/evan/Sync/otis-evil-data/"
+
+# ADDRESS_REGULAR="my boston address"
+# ADDRESS_HOME="my home address"
+
+# CERT_HASH_KEY="cert hash key"
+
+# STRIPE_PUBLISHABLE_KEY="pk_test_..."
+# STRIPE_SECRET_KEY="sk_test_..."
+# STRIPE_ENDPOINT_SECRET="whsec_..."
+
+# vim: ft=sh
