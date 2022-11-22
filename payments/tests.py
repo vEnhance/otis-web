@@ -37,8 +37,9 @@ class PaymentTest(EvanTestCase):
         self.assertPost40X('payments-checkout', pk, 240)
         self.assertGet40X('payments-checkout', pk, 0)  # amount >= 0
 
-        resp = self.assertGet20X('payments-checkout', pk, 480)
-        self.assertIn('sessionId', resp.json())
+        if settings.STRIPE_PUBLISHABLE_KEY:
+            resp = self.assertGet20X('payments-checkout', pk, 480)
+            self.assertIn('sessionId', resp.json())
 
     def test_process_payment(self):
         process_payment(300, PaymentTest.invoice)
