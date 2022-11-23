@@ -54,9 +54,16 @@ class AchievementAdmin(ImportExportModelAdmin):
 
 @admin.register(AchievementUnlock)
 class AchievementUnlockAdmin(admin.ModelAdmin):
-    list_display = ('user', 'achievement', 'timestamp')
+    list_display = (
+        'user',
+        'achievement',
+        'timestamp',
+    )
     list_filter = ('achievement__active',)
-    autocomplete_fields = ('user',)
+    autocomplete_fields = (
+        'user',
+        'achievement',
+    )
     search_fields = (
         'user__username',
         'achievement__name',
@@ -83,7 +90,12 @@ class QuestCompleteAdmin(admin.ModelAdmin):
 
 @admin.register(BonusLevel)
 class BonusLevelAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'group', 'level', 'active')
+    list_display = (
+        'pk',
+        'group',
+        'level',
+        'active',
+    )
     autocomplete_fields = ('group',)
     list_filter = ('active',)
     search_fields = ('group__name',)
@@ -91,8 +103,16 @@ class BonusLevelAdmin(admin.ModelAdmin):
 
 @admin.register(BonusLevelUnlock)
 class BonusLevelUnlockAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'timestamp', 'student', 'bonus')
-    autocomplete_fields = ('student', 'bonus')
+    list_display = (
+        'pk',
+        'timestamp',
+        'student',
+        'bonus',
+    )
+    autocomplete_fields = (
+        'student',
+        'bonus',
+    )
     list_filter = ('student__semester__active',)
 
 
