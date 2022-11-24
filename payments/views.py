@@ -1,13 +1,20 @@
+import logging
+
+import stripe
 from django.conf import settings
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied  # NOQA
+from django.forms.models import BaseModelForm
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseForbidden  # NOQA
 from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.csrf import csrf_exempt
+from django.views.generic.detail import DetailView
+from django.views.generic.edit import UpdateView
+from django.urls import reverse
 from roster.models import Invoice, Student
-from .models import PaymentLog
-import logging
-import stripe
+
+from .models import PaymentLog, Worker
 
 
 def invoice(request: HttpRequest, student_id: int, checksum: str) -> HttpResponse:
@@ -111,3 +118,33 @@ def success(request: HttpRequest) -> HttpResponse:
 
 def cancelled(request: HttpRequest) -> HttpResponse:
     return HttpResponse("Cancelled payment")
+
+
+class WorkerDetail(LoginRequiredMixin, DetailView[Worker]):
+    model = Worker
+    context_object_name = 'worker'
+    template_name = 'payments/worker_detail.html'
+
+    def get_object(self):
+        worker, _ = Worker.objects.get_or_create(user=self.request.user)
+        return worker
+
+
+class WorkerUpdate(LoginRequiredMixin, UpdateView[Worker, BaseModelForm[Worker]]):
+    model = Worker
+    context_object_name = 'worker'
+    template_name = 'payments/worker_form.html'
+    fields = (
+        'payment_preference',
+        'notes',
+        'paypal_username',
+        'venmo_handle',
+        'zelle_info',
+    )
+
+    def get_object(self):
+        worker, _ = Worker.objects.get_or_create(user=self.request.user)
+        return worker
+
+    def get_success_url(self) -> str:
+        return reverse('worker-detail')

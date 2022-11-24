@@ -37,11 +37,14 @@ class Worker(models.Model):
         default='',
     )
 
-    paypal_username = models.CharField(max_length=128)
-    venmo_handle = models.CharField(max_length=128)
-    zelle_info = models.CharField(max_length=128)
+    paypal_username = models.CharField(max_length=128, blank=True)
+    venmo_handle = models.CharField(max_length=128, blank=True)
+    zelle_info = models.CharField(max_length=128, blank=True)
 
-    notes = models.TextField(help_text="Any notes on payment or whatever.")
+    notes = models.TextField(
+        help_text="Any notes on payment or whatever.",
+        blank=True,
+    )
 
     def __str__(self) -> str:
         return self.user.username
