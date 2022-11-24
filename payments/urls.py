@@ -8,4 +8,6 @@ urlpatterns = [
     path(r'success/', views.success, name='payments-success'),
     path(r'cancelled/', views.cancelled, name='payments-cancelled'),
     path(r'webhook/', views.webhook, name='payments-webhook'),
+    path(r'worker/view/', views.WorkerDetail.as_view(), name='worker-detail'),
+    path(r'worker/update/', views.WorkerUpdate.as_view(), name='worker-update'),
 ]

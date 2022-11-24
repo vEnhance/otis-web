@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% block title %}
+  Worker profile for {{ worker.user.username }}
+{% endblock title %}
+{% block layout-content %}
+  <p>{{ worker.user.get_full_name }} is working.</p>
+  <p>
+    They like <strong>{{ worker.get_payment_preference_display }}</strong>
+    as a payment method.
+  </p>
+  <ul>
+    <li>Venmo: {{ worker.venmo_handle|default:"None specified" }}</li>
+    <li>Paypal: {{ worker.paypal_username|default:"None specified" }}</li>
+  </ul>
+  <p>{{ worker.notes|linebreaks }}</p>
+  <p class="text-center">
+    <a href="{% url "worker-update" %}" class="btn btn-primary">Edit this page</a>
+  </p>
+{% endblock layout-content %}
