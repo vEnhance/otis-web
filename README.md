@@ -32,7 +32,8 @@ up a local server on a standard Unix environment.
    `git clone https://github.com/USERNAME/otis-web`.
    Replace `USERNAME` with your username if you're forking;
    otherwise, replace with `vEnhance`.
-3. Run `git submodule --init --recursive` in order to pull the `evans_django_tools` submodule.
+3. Run `git submodule update --init --recursive`
+   in order to pull the `evans_django_tools` submodule.
 4. You probably want to create a new virtual environment
    to avoid polluting your system with all the dependencies.
    If you've used `conda` or `virtualenv` or similar before, you know the drill.
