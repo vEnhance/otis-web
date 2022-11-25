@@ -102,16 +102,6 @@
       <small>{{ student.semester }} ({{ student.semester.years }})</small>
     </p>
   {% endif %}
-  <ul>
-    {% if student.semester.social_url %}
-      <li>
-        <a href="{{ student.semester.social_url }}">Open Discord</a>
-      </li>
-    {% endif %}
-    <li>
-      <a href="mailto:evan@evanchen.cc">Email Evan</a>
-    </li>
-  </ul>
   {% if request.user.is_staff %}
     <hr />
     <ul>
@@ -153,13 +143,24 @@
         </ul>
       {% endif %}
     </ul>
+  {% else %}
+    <ul>
+      {% if student.semester.social_url %}
+        <li>
+          <a href="{{ student.semester.social_url }}">Open Discord</a>
+        </li>
+      {% endif %}
+      <li>
+        <a target="_blank" href="mailto:evan@evanchen.cc" rel="noreferrer">Email Evan</a>
+      </li>
+    </ul>
   {% endif %}
   {% if student and request.user.is_staff %}
     <ul>
       <li>
         <a target="_blank"
            href="mailto:{{ student.user.email }}"
-           rel="noreferrer">Send email</a>
+           rel="noreferrer">Email student</a>
         <br />
       </li>
       {% if request.user.is_superuser %}
