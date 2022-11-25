@@ -93,8 +93,8 @@
       <td></td>
     </tr>
   </table>
-  {% if student or request.user.is_staff %}<hr />{% endif %}
   {% if student %}
+    <hr />
     <p>
       <b><a href="{% url "portal" student.id %}">{{ student.name }}</a></b>
     </p>
@@ -144,6 +144,7 @@
       {% endif %}
     </ul>
   {% else %}
+    {% if not student %}<hr />{% endif %}
     <ul>
       {% if student.semester.social_url %}
         <li>
