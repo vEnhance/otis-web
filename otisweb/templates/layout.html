@@ -17,6 +17,7 @@
         <div id="email_box">
           {% if request.user.is_authenticated %}
             👋, <b>{{ request.user }}</b>.
+            <a class="text-danger" title="Logout" href="{% url "account_logout" %}">(logout)</a>
           {% else %}
             Not logged in.
           {% endif %}
