@@ -137,6 +137,7 @@ SUGGESTION_VENUEQ_INIT_KEYS = (
     'user__email',
     'source',
     'description',
+    'hyperlink',
     'statement',
     'solution',
     'comments',

@@ -18,6 +18,8 @@ class ProblemSuggestion(models.Model):
     description = models.CharField(
         max_length=100,
         help_text="A one-line summary of problem, e.g. `Inequality with cube roots`.")
+    hyperlink = models.URLField(
+        help_text="A hyperlink if appropriate, e.g. AoPS thread.", blank=True)
     statement = models.TextField(help_text="Statement of the problem, in LaTeX.")
     solution = models.TextField(help_text="Solution to the problem, in LaTeX.")
     comments = models.TextField(help_text="Any extra comments.", blank=True)
