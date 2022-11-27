@@ -10,9 +10,7 @@
     <thead>
       <tr class="table-info">
         <th>Position</th>
-        <th>Visible</th>
         <th>Code</th>
-        <th>Subject</th>
         <th>Unit name</th>
         <th>Slug</th>
         <th>Actions</th>
@@ -22,15 +20,7 @@
       {% for unit in unit_list %}
         <tr class="subject{{ unit.group.subject }}">
           <td class="number">{{ unit.position }}</td>
-          <td>
-            {% if unit.visible %}
-              👀
-            {% else %}
-              🥷🏻
-            {% endif %}
-          </td>
           <th class="code">{{ unit.code }}</th>
-          <td>{{ unit.group.get_subject_display }}</td>
           <td>{{ unit.group.name }}</td>
           <td class="code">{{ unit.group.slug }}</td>
           <td class="emojis">
