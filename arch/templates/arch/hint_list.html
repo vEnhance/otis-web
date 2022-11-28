@@ -15,7 +15,7 @@
   {% if problem.hyperlink %}
     <p class="text-center">
       <a class="btn btn-secondary" href="{{ problem.hyperlink }}">
-        <tt>{{ problem.hyperlink|truncatechars:"40" }}</tt>
+        <tt>Visit AoPS</tt>
       </a>
     </p>
   {% endif %}
@@ -33,13 +33,10 @@
     <p>
       Some of the hints may be pretty oblique
       or not apply to you.
-      Remember, you can always ask the OTIS Discord
+      Remember, you can always
+      <a href="https://discord.com/channels/740366393022742618/1019651152385679491">ask the OTIS Discord</a>
       or <a href="mailto:evan@evanchen.cc">email Evan (evan@evanchen.cc)</a>
       for more personalized help!
-    </p>
-    <p class="text-center">
-      <a href="https://discord.com/channels/740366393022742618/1019651152385679491"
-         class="btn btn-primary">Open #math-discuss</a>
     </p>
   {% else %}
     <p>
@@ -59,7 +56,7 @@
     </p>
   {% endif %}
   <div class="text-center">
-    <a href="{% url "hint-create" problem.puid %}" class="btn btn-success">➕ Add hint</a>
+    <a href="{% url "hint-create" problem.puid %}" class="btn btn-primary">Add hint</a>
   </div>
   <hr />
   <ul>
