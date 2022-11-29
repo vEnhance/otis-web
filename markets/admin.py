@@ -10,7 +10,7 @@ class MarketAdmin(admin.ModelAdmin):
     list_display = (
         'slug',
         'title',
-        'prompt',
+        'prompt_truncated',
         'start_date',
         'end_date',
         'semester',
@@ -25,6 +25,11 @@ class MarketAdmin(admin.ModelAdmin):
         'prompt',
     )
 
+    @admin.display(description='Prompt')
+    def prompt_truncated(self, obj):
+        NUM_CHAR = 200
+        text = obj.prompt
+        return text[:200] + ("..." if len(text) > 200 else "")
 
 @admin.register(Guess)
 class GuessAdmin(admin.ModelAdmin):
