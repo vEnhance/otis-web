@@ -2,6 +2,7 @@ import logging
 from typing import Any
 
 import stripe
+from core.models import Semester
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -212,6 +213,11 @@ def job_claim(request: HttpRequest, pk: int) -> HttpResponse:
     else:
         job: Job = Job.objects.get(pk=pk)
         job.assignee = worker
+        try:
+            job.semester = Semester.objects.get(active=True)
+        except Semester.DoesNotExist:
+            pass
+
         job.save()
         messages.success(request, f"You have claimed task #{ job.pk }.")
         return HttpResponseRedirect(job.get_absolute_url())

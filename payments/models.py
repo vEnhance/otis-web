@@ -59,12 +59,6 @@ class JobFolder(models.Model):
         validator=VALIDATOR_STANDARD,
         blank=True)
     description_rendered = RenderedMarkdownField()
-    semester = models.ForeignKey(
-        Semester,
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-    )
 
     def __str__(self) -> str:
         return self.name
@@ -145,6 +139,12 @@ class Job(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    semester = models.ForeignKey(
+        Semester,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
 
     def __str__(self) -> str:
         return self.name
