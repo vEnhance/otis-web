@@ -1,8 +1,10 @@
+from core.factories import UserFactory
 from django.conf import settings
+from django.contrib.auth.models import User
 from evans_django_tools.testsuite import EvanTestCase
 from roster.factories import InvoiceFactory, StudentFactory
 
-from payments.models import PaymentLog
+from payments.models import PaymentLog, Worker
 
 from .views import process_payment
 
@@ -58,3 +60,65 @@ class PaymentTest(EvanTestCase):
 
     def test_cancelled(self):
         self.assertGet20X('payments-cancelled')
+
+
+class WorkerTest(EvanTestCase):
+
+    def test_worker(self):
+        alice: User = UserFactory.create(username='alice')
+        self.login(alice)
+
+        resp = self.assertPostOK(
+            'worker-update',
+            data={
+                'google_username': 'alice.aardvark',
+                'notes': 'hi there'
+            },
+            follow=True)
+        self.assertContains(resp, 'alice.aardvark')
+        self.assertContains(resp, 'hi there')
+        worker = Worker.objects.get(user__username='alice')
+        self.assertEqual(worker.google_username, 'alice.aardvark')
+        self.assertEqual(worker.notes, 'hi there')
+
+        resp = self.assertPostOK(
+            'worker-update',
+            data={
+                'google_username': 'alice.aardvark',
+                'venmo_handle': '@Alice-Aardvark-42',
+                'notes': 'hello again'
+            },
+            follow=True)
+        self.assertContains(resp, 'alice.aardvark')
+        self.assertContains(resp, 'hello again')
+
+        worker = Worker.objects.get(user__username='alice')
+        self.assertEqual(worker.google_username, 'alice.aardvark')
+        self.assertEqual(worker.venmo_handle, '@Alice-Aardvark-42')
+        self.assertEqual(worker.notes, 'hello again')
+
+        resp = self.assertPostOK(
+            'worker-update',
+            data={
+                'venmo_handle': 'AARDVARK',
+                'notes': 'this should fail due to validation errors'
+            },
+            follow=True)
+        self.assertContains(resp, "Enter a valid value.")
+        worker = Worker.objects.get(user__username='alice')
+        self.assertEqual(worker.google_username, 'alice.aardvark')
+        self.assertEqual(worker.venmo_handle, '@Alice-Aardvark-42')
+        self.assertEqual(worker.notes, 'hello again')
+
+        resp = self.assertPostOK(
+            'worker-update',
+            data={
+                'google_username': 'alice.aardvark@nowhere.net',
+                'notes': 'this should fail due to validation errors'
+            },
+            follow=True)
+        self.assertContains(resp, "Enter a valid value.")
+        worker = Worker.objects.get(user__username='alice')
+        self.assertEqual(worker.google_username, 'alice.aardvark')
+        self.assertEqual(worker.venmo_handle, '@Alice-Aardvark-42')
+        self.assertEqual(worker.notes, 'hello again')
