@@ -14,7 +14,7 @@ from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
 from django.forms.models import BaseModelForm
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseForbidden  # NOQA
-from django.http.response import HttpResponseForbidden, HttpResponseRedirect, JsonResponse  # NOQA
+from django.http.response import HttpResponseRedirect, JsonResponse  # NOQA
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
