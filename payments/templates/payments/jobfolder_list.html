@@ -29,9 +29,7 @@
   {% endif %}
   {% for jobfolder in jobfolders %}
     <hr />
-    <h2>
-      <a href="{{ jobfolder.get_absolute_url }}">{{ jobfolder.name }}</a>
-    </h2>
+    <h2>{{ jobfolder.name }}</h2>
     <p class="fst-italic">
       <a href="{{ jobfolder.get_absolute_url }}">
         <b>{{ jobfolder.num_open }}</b> open,
