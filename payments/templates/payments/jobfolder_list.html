@@ -25,6 +25,6 @@
         <b>{{ jobfolder.num_done }}</b> finished.
       </a>
     </p>
-    <p>{{ jobfolder.description }}</p>
+    <p>{{ jobfolder.description_rendered|safe }}</p>
   {% endfor %}
 {% endblock layout-content %}

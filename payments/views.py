@@ -142,7 +142,6 @@ class WorkerUpdate(LoginRequiredMixin, UpdateView[Worker, BaseModelForm[Worker]]
     context_object_name = 'worker'
     template_name = 'payments/worker_form.html'
     fields = (
-        'payment_preference',
         'notes',
         'paypal_username',
         'venmo_handle',
@@ -189,3 +188,17 @@ class JobList(LoginRequiredMixin, ListView[Job]):
 class JobDetail(LoginRequiredMixin, DetailView[Job]):
     model = Job
     context_object_name = 'job'
+
+
+class JobUpdate(LoginRequiredMixin, UpdateView[Job, BaseModelForm[Job]]):
+    model = Job
+    context_object_name = 'job'
+    template_name = 'payments/job_form.html'
+    fields = (
+        'worker_deliverable',
+        'worker_notes',
+        'payment_preference',
+    )
+
+    def get_success_url(self):
+        return self.object.get_absolute_url()

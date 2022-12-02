@@ -63,7 +63,7 @@ class JobAdmin(admin.ModelAdmin):
         'pk',
         'folder',
         'name',
-        'status',
+        'progress',
         'due_date',
         'assignee',
         'spades_bounty',
@@ -80,6 +80,6 @@ class JobAdmin(admin.ModelAdmin):
     )
     list_filter = (
         'folder',
-        'status',
+        'progress',
         'payment_preference',
     )

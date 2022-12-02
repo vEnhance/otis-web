@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
 from roster.models import Invoice
+from markdownfield.models import MarkdownField, RenderedMarkdownField
+from markdownfield.validators import VALIDATOR_STANDARD
 
 
 class PaymentLog(models.Model):
@@ -29,6 +31,9 @@ class Worker(models.Model):
     venmo_handle = models.CharField(max_length=128, blank=True)
     zelle_info = models.CharField(max_length=128, blank=True)
 
+    google_username = models.CharField(
+        max_length=128, blank=True, help_text="For e.g. sharing with Google Drive, etc.")
+
     notes = models.TextField(
         help_text="Any notes on payment or whatever.",
         blank=True,
@@ -42,7 +47,12 @@ class JobFolder(models.Model):
     name = models.CharField(max_length=80, help_text="A name for the folder")
     slug = models.SlugField(help_text="A slug for this job folder")
     visible = models.BooleanField(default=True, help_text="Whether to show this folder")
-    description = models.TextField(help_text="About this folder", blank=True)
+    description = MarkdownField(
+        rendered_field='description_rendered',
+        help_text="Instructions and so on for this folder.",
+        validator=VALIDATOR_STANDARD,
+        blank=True)
+    description_rendered = RenderedMarkdownField()
     semester = models.ForeignKey(
         Semester,
         on_delete=models.CASCADE,
@@ -58,10 +68,9 @@ class JobFolder(models.Model):
 
 
 class Job(models.Model):
-    STATUS_CHOICES = (
-        ("NEW", "Open"),
-        ("IP", "In progress"),
-        ("PRV", "Pending review"),
+    PROGRESS_CHOICES = (
+        ("NEW", "In Progress"),
+        ("RVW", "Reviewing"),
         ("OK", "Completed"),
     )
     PREF_CHOICES = (
@@ -78,10 +87,14 @@ class Job(models.Model):
         on_delete=models.CASCADE,
         help_text="This is the folder that the job goes under.")
     name = models.CharField(max_length=80, help_text="Name of job")
-    description = models.TextField(
-        help_text="A job description of what you should do",
-        blank=True,
-    )
+
+    description = MarkdownField(
+        rendered_field='description_rendered',
+        help_text="Instructions and so on for this particular job.",
+        validator=VALIDATOR_STANDARD,
+        blank=True)
+    description_rendered = RenderedMarkdownField()
+
     due_date = models.DateTimeField(
         help_text="When the job should be finished by",
         null=True,
@@ -97,10 +110,10 @@ class Job(models.Model):
         default=0,
     )
 
-    status = models.CharField(
+    progress = models.CharField(
         max_length=3,
         default='NEW',
-        choices=STATUS_CHOICES,
+        choices=PROGRESS_CHOICES,
         help_text='The current status of the job',
     )
     payment_preference = models.CharField(
@@ -114,15 +127,15 @@ class Job(models.Model):
         null=True,
         blank=True,
         on_delete=models.CASCADE,
-        help_text="The worker that is currently assigned.",
+        help_text="Who is currently assigned",
     )
     worker_deliverable = models.TextField(
         blank=True,
-        help_text="The worker can submit some deliverable here",
+        help_text="Enter the deliverable of the job here",
     )
     worker_notes = models.TextField(
         blank=True,
-        help_text="The worker can make some notes here",
+        help_text="Make any notes here",
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -132,3 +145,10 @@ class Job(models.Model):
 
     def get_absolute_url(self) -> str:
         return reverse('job-detail', args=(self.pk,))
+
+    @property
+    def status(self) -> str:
+        if self.assignee is None:
+            return "Open"
+        else:
+            return self.get_progress_display()  # type: ignore
