@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% block title %}
+  Job: {{ job.name }}
+{% endblock title %}
+{% block layout-content %}
+  <h2>Description</h2>
+  <p>{{ job.description }}</p>
+  <h2>Bounty</h2>
+  <ul>
+    <li>{{ job.spades_bounty }} ♠️</li>
+    <li>{{ job.usd_bounty }} 💲</li>
+    <li>Deadline: {{ job.deadline }}</li>
+  </ul>
+  <h2>Current status</h2>
+  <ul>
+    <li>Status: {{ job.get_status_display }}</li>
+    <li>Claimed by: {{ job.worker }}</li>
+  </ul>
+{% endblock layout-content %}

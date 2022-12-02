@@ -1,7 +1,26 @@
 {% extends 'layout.html' %}
-{% block title %}Jobs: {{ jobfolder }}{% endblock title %}
+{% block title %}
+  Jobs: {{ jobfolder }}
+{% endblock title %}
 {% block layout-content %}
-{% for job in jobs %}
-{{ job }}
-{% endfor %}
+  <table class="table striped-table">
+    <tr>
+      <th>Description</th>
+      <th>♠️</th>
+      <th>💲</th>
+      <th>Deadline</th>
+      <th>Status</th>
+    </tr>
+    {% for job in jobs %}
+      <tr>
+        <td>
+          <a href="{{ job.get_absolute_url }}">{{ job.name }}</a>
+        </td>
+        <td>{{ job.spades_bounty }}</td>
+        <td>{{ job.usd_bounty }}</td>
+        <td>{{ job.deadline|default:"—" }}</td>
+        <td>{{ job.get_status_display }}</td>
+      </tr>
+    {% endfor %}
+  </table>
 {% endblock layout-content %}

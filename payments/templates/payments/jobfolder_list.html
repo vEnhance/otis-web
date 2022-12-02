@@ -3,5 +3,28 @@
   Job Directory
 {% endblock title %}
 {% block layout-content %}
-  {% for jobfolder in jobfolders %}{{ jobfolder }}{% endfor %}
+  <p>
+    The following lists categories of tasks and the number
+    of available, claimed, and completed tasks in each category.
+  </p>
+  <p>
+    This page does <b>not</b> include OTIS-WEB programming tasks.
+    If you want to work on technical tasks, use the
+    <a href="https://github.com/vEnhance/otis-web/issues">GitHub issues tracker</a>.
+    Spade bounties for pull requests are listed there too.
+  </p>
+  {% for jobfolder in jobfolders %}
+    <hr />
+    <h2>
+      <a href="{{ jobfolder.get_absolute_url }}">{{ jobfolder.name }}</a>
+    </h2>
+    <p class="fst-italic">
+      <a href="{{ jobfolder.get_absolute_url }}">
+        <b>{{ jobfolder.num_open }}</b> open,
+        <b>{{ jobfolder.num_claimed }}</b> claimed,
+        <b>{{ jobfolder.num_done }}</b> finished.
+      </a>
+    </p>
+    <p>{{ jobfolder.description }}</p>
+  {% endfor %}
 {% endblock layout-content %}

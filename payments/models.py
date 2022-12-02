@@ -1,6 +1,7 @@
 from core.models import Semester
 from django.contrib.auth.models import User
 from django.db import models
+from django.urls import reverse
 from roster.models import Invoice
 
 
@@ -51,6 +52,9 @@ class JobFolder(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+    def get_absolute_url(self) -> str:
+        return reverse('job-list', args=(self.slug,))
 
 
 class Job(models.Model):
@@ -120,6 +124,11 @@ class Job(models.Model):
         blank=True,
         help_text="The worker can make some notes here",
     )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
         return self.name
+
+    def get_absolute_url(self) -> str:
+        return reverse('job-detail', args=(self.pk,))

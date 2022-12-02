@@ -163,7 +163,10 @@ class JobFolderList(LoginRequiredMixin, ListView[JobFolder]):
 
     def get_queryset(self) -> QuerySet[JobFolder]:
         return JobFolder.objects.filter(visible=True).annotate(
-            num_open=Count('job', filter=Q(job__status="NEW")))
+            num_open=Count('job', filter=Q(job__status="NEW")),
+            num_claimed=Count('job', filter=Q(job__status="IP")) +
+            Count('job', filter=Q(job__status="PRV")),
+            num_done=Count('job', filter=Q(job__status="OK")))
 
 
 class JobList(LoginRequiredMixin, ListView[Job]):
@@ -181,3 +184,8 @@ class JobList(LoginRequiredMixin, ListView[Job]):
         context = super().get_context_data(**kwargs)
         context['jobfolder'] = self.jobfolder
         return context
+
+
+class JobDetail(LoginRequiredMixin, DetailView[Job]):
+    model = Job
+    context_object_name = 'job'
