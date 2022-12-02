@@ -22,22 +22,41 @@ class PaymentLog(models.Model):
 
 
 class Worker(models.Model):
+    RE_EMAIL = r'(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)'
+    RE_PHONE = r'^[0-9()+-]+'
+    RE_AT_USER = r'@[-a-zA-Z0-9_]+'
+
     user = models.OneToOneField(
         User,
         related_name="workers",
         on_delete=models.CASCADE,
     )
 
-    paypal_username = models.CharField(max_length=128, blank=True)
-    venmo_handle = models.CharField(max_length=128, blank=True)
-    zelle_info = models.CharField(max_length=128, blank=True)
+    paypal_username = models.CharField(
+        max_length=128,
+        blank=True,
+        help_text="Input a @username, email, or mobile",
+        validators=[RegexValidator(f'^({RE_AT_USER}|{RE_EMAIL}|{RE_PHONE})$')],
+    )
+    venmo_handle = models.CharField(
+        max_length=128,
+        blank=True,
+        help_text="Must start with leading @",
+        validators=[RegexValidator(f'^{RE_AT_USER}$')],
+    )
+    zelle_info = models.CharField(
+        max_length=128,
+        blank=True,
+        help_text="Either email or mobile",
+        validators=[RegexValidator(f'^({RE_AT_USER}|{RE_PHONE})$')],
+    )
 
     google_username = models.CharField(
         max_length=128,
         blank=True,
         help_text="For e.g. sharing with Google Drive, etc. "
         "Do not include @gmail.com or @google.com.",
-        validators=[RegexValidator(r"[-a-zA-Z0-9_'.]+")],
+        validators=[RegexValidator(r"^[-a-zA-Z0-9_'.]+$")],
     )
 
     notes = models.TextField(
