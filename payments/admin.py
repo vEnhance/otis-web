@@ -1,6 +1,8 @@
 from django.contrib import admin
 
 from .models import PaymentLog, Worker, Job, JobFolder
+from import_export import resources
+from import_export.admin import ImportExportModelAdmin
 
 
 @admin.register(PaymentLog)
@@ -57,8 +59,24 @@ class JobFolderAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 
+class JobIEResource(resources.ModelResource):
+
+    class Meta:
+        skip_unchanged = True
+        model = Job
+        fields = (
+            'pk',
+            'name',
+            'status',
+            'folder',
+            'due_date',
+            'spades_bounty',
+            'usd_bounty',
+        )
+
+
 @admin.register(Job)
-class JobAdmin(admin.ModelAdmin):
+class JobAdmin(ImportExportModelAdmin):
     list_display = (
         'pk',
         'name',
