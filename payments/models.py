@@ -124,7 +124,9 @@ class Job(models.Model):
         help_text="How many spades the job is worth",
         default=0,
     )
-    usd_bounty = models.PositiveIntegerField(
+    usd_bounty = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
         help_text="How many US dollars the job is worth",
         default=0,
     )
