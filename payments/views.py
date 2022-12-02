@@ -175,9 +175,18 @@ class JobFolderList(LoginRequiredMixin, ListView[JobFolder]):
                     job__progress="NEW",
                 ) | Q(
                     job__assignee__isnull=False,
-                    job__progress="RVW",
+                    job__progress="SUB",
                 )),
-            num_done=Count('job', filter=Q(job__progress="OK")))
+            num_done=Count('job', filter=Q(job__progress="VFD")))
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        assert isinstance(self.request.user, User)
+        try:
+            context['worker'] = Worker.objects.get(user=self.request.user)
+        except Worker.DoesNotExist:
+            context['worker'] = None
+        return context
 
 
 class JobList(LoginRequiredMixin, ListView[Job]):
@@ -189,7 +198,12 @@ class JobList(LoginRequiredMixin, ListView[Job]):
         self.jobfolder = get_object_or_404(JobFolder, slug=self.kwargs['slug'])
 
     def get_queryset(self) -> QuerySet[Job]:
-        return Job.objects.filter(folder=self.jobfolder)
+        return Job.objects.filter(folder=self.jobfolder).annotate(
+            assignee_count=Count('assignee')).order_by(
+                'assignee_count',
+                'progress',
+                '-updated_at',
+            )
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)

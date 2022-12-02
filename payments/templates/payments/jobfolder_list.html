@@ -13,6 +13,20 @@
     <a href="https://github.com/vEnhance/otis-web/issues">GitHub issues tracker</a>.
     Spade bounties for pull requests are listed there too.
   </p>
+  {% if worker %}
+    <p>
+      You can update your <a href="{% url "worker-update" %}">worker profile</a>
+      if your payment details have changed.
+    </p>
+  {% else %}
+    <div class="alert alert-secondary">
+      <p>
+        You have no work profile yet.
+        You need to <a href="{% url "worker-update" %}">create one</a>
+        before you can work on any tasks.
+      </p>
+    </div>
+  {% endif %}
   {% for jobfolder in jobfolders %}
     <hr />
     <h2>

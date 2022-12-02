@@ -3,6 +3,13 @@
   Tasks in {{ jobfolder }}
 {% endblock title %}
 {% block layout-content %}
+  <p>
+    <a href="{% url "job-index" %}">Back to task folder list.</a>
+  </p>
+  <hr />
+  <h2>Instructions</h2>
+  <p>{{ jobfolder.description_rendered|safe }}</p>
+  <h2>Tasks</h2>
   <table class="table striped-table">
     <tr>
       <th>Title</th>

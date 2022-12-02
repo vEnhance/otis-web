@@ -90,7 +90,7 @@ class Job(models.Model):
     PROGRESS_CHOICES = (
         ("NEW", "In Progress"),
         ("SUB", "Submitted"),
-        ("OK", "Completed"),
+        ("VFD", "Completed"),
     )
     PREF_CHOICES = (
         ("", "Not specified"),
