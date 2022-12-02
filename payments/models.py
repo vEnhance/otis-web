@@ -39,7 +39,9 @@ class Worker(models.Model):
 
 class JobFolder(models.Model):
     name = models.CharField(max_length=80, help_text="A name for the folder")
+    slug = models.SlugField(help_text="A slug for this job folder")
     visible = models.BooleanField(default=True, help_text="Whether to show this folder")
+    description = models.TextField(help_text="About this folder", blank=True)
     semester = models.ForeignKey(
         Semester,
         on_delete=models.CASCADE,
@@ -67,34 +69,48 @@ class Job(models.Model):
         ("ZLL", "Zelle"),
     )
 
-    payment_preference = models.CharField(
-        max_length=3,
-        choices=PREF_CHOICES,
-        default='',
-    )
     folder = models.ForeignKey(
         JobFolder,
         on_delete=models.CASCADE,
         help_text="This is the folder that the job goes under.")
     name = models.CharField(max_length=80, help_text="Name of job")
-    description = models.TextField(help_text="A job description of what you should do")
-    due_date = models.DateTimeField(help_text="When the job should be finished by")
+    description = models.TextField(
+        help_text="A job description of what you should do",
+        blank=True,
+    )
+    due_date = models.DateTimeField(
+        help_text="When the job should be finished by",
+        null=True,
+        blank=True,
+    )
 
-    spades_bounty = models.PositiveIntegerField(help_text="How many spades the job is worth")
-    usd_bounty = models.PositiveIntegerField(help_text="How many US dollars the job is worth")
+    spades_bounty = models.PositiveIntegerField(
+        help_text="How many spades the job is worth",
+        default=0,
+    )
+    usd_bounty = models.PositiveIntegerField(
+        help_text="How many US dollars the job is worth",
+        default=0,
+    )
 
+    status = models.CharField(
+        max_length=3,
+        default='NEW',
+        choices=STATUS_CHOICES,
+        help_text='The current status of the job',
+    )
+    payment_preference = models.CharField(
+        max_length=3,
+        choices=PREF_CHOICES,
+        default='',
+        blank=True,
+    )
     assignee = models.ForeignKey(
         Worker,
         null=True,
         blank=True,
         on_delete=models.CASCADE,
         help_text="The worker that is currently assigned.",
-    )
-    status = models.CharField(
-        max_length=3,
-        default='NEW',
-        choices=STATUS_CHOICES,
-        help_text='The current status of the job',
     )
     worker_deliverable = models.TextField(
         blank=True,

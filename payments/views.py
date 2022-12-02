@@ -1,18 +1,25 @@
 import logging
+from typing import Any
 
 import stripe
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied  # NOQA
+from django.db.models.aggregates import Count
+from django.db.models.query import QuerySet
+from django.db.models.query_utils import Q
 from django.forms.models import BaseModelForm
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseForbidden  # NOQA
 from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView
-from django.urls import reverse
+from django.views.generic.list import ListView
 from roster.models import Invoice, Student
+
+from payments.models import Job, JobFolder
 
 from .models import PaymentLog, Worker
 
@@ -148,3 +155,29 @@ class WorkerUpdate(LoginRequiredMixin, UpdateView[Worker, BaseModelForm[Worker]]
 
     def get_success_url(self) -> str:
         return reverse('worker-detail')
+
+
+class JobFolderList(LoginRequiredMixin, ListView[JobFolder]):
+    model = JobFolder
+    context_object_name = 'jobfolders'
+
+    def get_queryset(self) -> QuerySet[JobFolder]:
+        return JobFolder.objects.filter(visible=True).annotate(
+            num_open=Count('job', filter=Q(job__status="NEW")))
+
+
+class JobList(LoginRequiredMixin, ListView[Job]):
+    model = Job
+    context_object_name = 'jobs'
+
+    def setup(self, request: HttpRequest, *args: Any, **kwargs: Any):
+        super().setup(request, *args, **kwargs)
+        self.jobfolder = get_object_or_404(JobFolder, slug=self.kwargs['slug'])
+
+    def get_queryset(self) -> QuerySet[Job]:
+        return Job.objects.filter(folder=self.jobfolder)
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context['jobfolder'] = self.jobfolder
+        return context

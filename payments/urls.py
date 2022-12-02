@@ -10,4 +10,6 @@ urlpatterns = [
     path(r'webhook/', views.webhook, name='payments-webhook'),
     path(r'worker/view/', views.WorkerDetail.as_view(), name='worker-detail'),
     path(r'worker/update/', views.WorkerUpdate.as_view(), name='worker-update'),
+    path(r'jobs/', views.JobFolderList.as_view(), name='job-index'),
+    path(r'jobs/<str:slug>/', views.JobList.as_view(), name='job-list'),
 ]

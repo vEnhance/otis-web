@@ -1,0 +1,7 @@
+{% extends 'layout.html' %}
+{% block title %}Jobs: {{ jobfolder }}{% endblock title %}
+{% block layout-content %}
+{% for job in jobs %}
+{{ job }}
+{% endfor %}
+{% endblock layout-content %}
