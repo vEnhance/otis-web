@@ -45,11 +45,13 @@ class JobFolderAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
         'name',
+        'visible',
     )
     list_display_links = (
         'pk',
         'name',
     )
+    list_filter = ('visible',)
     search_fields = ('name',)
 
 

@@ -39,6 +39,7 @@ class Worker(models.Model):
 
 class JobFolder(models.Model):
     name = models.CharField(max_length=80, help_text="A name for the folder")
+    visible = models.BooleanField(default=True, help_text="Whether to show this folder")
     semester = models.ForeignKey(
         Semester,
         on_delete=models.CASCADE,
