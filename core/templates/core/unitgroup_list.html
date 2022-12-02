@@ -22,30 +22,40 @@
       Many topics have multiple versions so they can be repeated in different years.
     </li>
   </ul>
-  <p>This page was last updated {% now "r" %}.</p>
+  <p>This page was printed on {% now "r" %}.</p>
+  <hr />
   {% regroup object_list by get_subject_display as grouped_unit_list %}
   {% for subject, item_list in grouped_unit_list %}
     <h2>{{ subject }}</h2>
-    {% for unitgroup in item_list %}
-      <div class="row">
-        <div class="col-3">
-          {% if unitgroup.artwork %}
-            <a href="{% url "wiki-unitgroup" unitgroup.pk %}">
-              <img width="100%" src="{{ unitgroup.artwork.url }}" />
-            </a>
-          {% endif %}
+    <div class="list-group">
+      {% for unitgroup in item_list %}
+        <div class="list-group-item container">
+          <div class="row">
+            <div class="col-3">
+              {% if unitgroup.artwork %}
+                <a href="{% url "wiki-unitgroup" unitgroup.pk %}">
+                  <img width="100%" src="{{ unitgroup.artwork.url }}" />
+                </a>
+              {% endif %}
+            </div>
+            <div class="col-9">
+              <b class="text-info">
+                <a href="{% url "wiki-unitgroup" unitgroup.pk %}">{{ unitgroup.name }}</a>
+              </b>
+              <span class="text-dark">— {{ unitgroup.get_subject_short_display }}:
+                {% for unit in unitgroup.unit_set.all %}
+                  {% if forloop.last %}
+                    {{ unit.code }}
+                  {% else %}
+                    {{ unit.code }},
+                  {% endif %}
+                {% endfor %}
+              </span>
+              <p class="text-secondary">{{ unitgroup.description }}</p>
+            </div>
+          </div>
         </div>
-        <div class="col-9">
-          <b class="text-info">
-            <a href="{% url "wiki-unitgroup" unitgroup.pk %}">{{ unitgroup.name }}</a>
-          </b>
-          <span class="text-dark">— {{ unitgroup.get_subject_short_display }}
-            {% for unit in unitgroup.unit_set.all %}, {{ unit.code }}{% endfor %}
-          </span>
-          <p class="text-secondary">{{ unitgroup.description }}</p>
-        </div>
-      </div>
-    {% endfor %}
-    <hr />
+      {% endfor %}
+    </div>
   {% endfor %}
 {% endblock layout-content %}
