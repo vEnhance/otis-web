@@ -177,7 +177,7 @@ class JobFolderList(LoginRequiredMixin, ListView[JobFolder]):
                     job__assignee__isnull=False,
                     job__progress="SUB",
                 )),
-            num_done=Count('job', filter=Q(job__progress="VFD")))
+            num_done=Count('job', filter=Q(job__progress="VFD"))).order_by('name')
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
