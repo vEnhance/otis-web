@@ -1,3 +1,4 @@
+from core.models import Semester
 from django.contrib.auth.models import User
 from django.db import models
 from roster.models import Invoice
@@ -17,24 +18,10 @@ class PaymentLog(models.Model):
 
 
 class Worker(models.Model):
-    PREF_CHOICES = (
-        ("", "Not specified"),
-        ("INV", "Invoice adjustment"),
-        ("PB", "Pro bono"),
-        ("PPL", "PayPal"),
-        ("VNM", "Venmo"),
-        ("ZLL", "Zelle"),
-    )
-
     user = models.OneToOneField(
         User,
         related_name="workers",
         on_delete=models.CASCADE,
-    )
-    payment_preference = models.CharField(
-        max_length=3,
-        choices=PREF_CHOICES,
-        default='',
     )
 
     paypal_username = models.CharField(max_length=128, blank=True)
@@ -52,6 +39,12 @@ class Worker(models.Model):
 
 class JobFolder(models.Model):
     name = models.CharField(max_length=80, help_text="A name for the folder")
+    semester = models.ForeignKey(
+        Semester,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
 
     def __str__(self) -> str:
         return self.name
@@ -63,6 +56,20 @@ class Job(models.Model):
         ("IP", "In progress"),
         ("PRV", "Pending review"),
         ("OK", "Completed"),
+    )
+    PREF_CHOICES = (
+        ("", "Not specified"),
+        ("INV", "Invoice adjustment"),
+        ("PB", "Pro bono"),
+        ("PPL", "PayPal"),
+        ("VNM", "Venmo"),
+        ("ZLL", "Zelle"),
+    )
+
+    payment_preference = models.CharField(
+        max_length=3,
+        choices=PREF_CHOICES,
+        default='',
     )
     folder = models.ForeignKey(
         JobFolder,

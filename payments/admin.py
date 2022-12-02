@@ -24,14 +24,12 @@ class WorkerAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
         'user',
-        'payment_preference',
         'notes',
     )
     list_display_links = (
         'pk',
         'user',
     )
-    list_filter = ('payment_preference',)
     search_fields = (
         'user__first_name',
         'user__last_name',
@@ -39,7 +37,6 @@ class WorkerAdmin(admin.ModelAdmin):
         'venmo_handle',
         'zelle_info',
     )
-    list_filter = ('payment_preference',)
     autocomplete_fields = ('user',)
 
 
@@ -80,4 +77,5 @@ class JobAdmin(admin.ModelAdmin):
     list_filter = (
         'folder',
         'status',
+        'payment_preference',
     )
