@@ -26,9 +26,16 @@
   {% regroup object_list by get_subject_display as grouped_unit_list %}
   {% for subject, item_list in grouped_unit_list %}
     <h2>{{ subject }}</h2>
-    <ul>
-      {% for unitgroup in item_list %}
-        <li>
+    {% for unitgroup in item_list %}
+      <div class="row">
+        <div class="col-3">
+          {% if unitgroup.artwork %}
+            <a href="{% url "wiki-unitgroup" unitgroup.pk %}">
+              <img width="100%" src="{{ unitgroup.artwork.url }}" />
+            </a>
+          {% endif %}
+        </div>
+        <div class="col-9">
           <b class="text-info">
             <a href="{% url "wiki-unitgroup" unitgroup.pk %}">{{ unitgroup.name }}</a>
           </b>
@@ -36,9 +43,9 @@
             {% for unit in unitgroup.unit_set.all %}, {{ unit.code }}{% endfor %}
           </span>
           <p class="text-secondary">{{ unitgroup.description }}</p>
-        </li>
-      {% endfor %}
-    </ul>
+        </div>
+      </div>
+    {% endfor %}
     <hr />
   {% endfor %}
 {% endblock layout-content %}

@@ -48,9 +48,9 @@ class OTISPreprocessor(markdown.preprocessors.Preprocessor):
                             '<tr class="danger"><th>Code</th><td>INVALID</td></tr>')
                     else:
                         if diamond.image:
-                            output.append(
-                                f'<div class="W-100 text-center"><img class="w-50" src="{diamond.image.url}" /></div>'
-                            )
+                            art_url = diamond.image.url
+                            output.append(f'<div class="W-100 text-center"><a href="{art_url}">'
+                                            f'<img class="w-100" src="{art_url}" /></a></div>')
                         table_output.append(f'<tr><th>Name</th><td>{diamond.name}</td></tr>')
                         table_output.append(
                             f'<tr><th>Value</th><td>{diamond.diamonds}◆</td></tr>')
@@ -75,6 +75,10 @@ class OTISPreprocessor(markdown.preprocessors.Preprocessor):
                         hearts_given = PSet.objects.filter(
                             unit__group=unitgroup,).aggregate(Sum('hours'))['hours__sum'] or 0
                         versions = ', '.join(u.code for u in unitgroup.unit_set.all())
+                        if unitgroup.artwork:
+                            art_url = unitgroup.artwork.url
+                            output.append(f'<div class="W-100 text-center"><a href="{art_url}">'
+                                            f'<img class="w-100" src="{art_url}" /></a></div>')
                         table_output.append(f'<tr><th>Name</th><td>{unitgroup.name}</td></tr>')
                         table_output.append(
                             f'<tr><th>Classification</th><td>{unitgroup.get_subject_display()}</td></tr>'

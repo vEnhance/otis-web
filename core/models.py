@@ -10,6 +10,8 @@ from django.urls import reverse
 from django.utils import timezone
 from positions import PositionField
 
+import os
+
 User = get_user_model()
 # Create your models here.
 
@@ -76,6 +78,11 @@ class Semester(models.Model):
         return f'{self.start_year}-{self.end_year}'
 
 
+def artwork_image_file_name(instance: 'UnitGroup', filename: str) -> str:
+    del instance
+    return os.path.join('artwork', filename)
+
+
 class UnitGroup(models.Model):
     """Represents an entire group of units with the same name,
     differing only in difficulty and version"""
@@ -89,6 +96,13 @@ class UnitGroup(models.Model):
         help_text="The display name for the handout, like 'Weird Geo'")
     slug = models.SlugField(
         max_length=80, help_text="The slug for the filename for this unit group", unique=True)
+    artwork = models.ImageField(
+        upload_to=artwork_image_file_name,
+        help_text="Artwork for this unit",
+        null=True,
+        blank=True,
+    )
+
     description = models.TextField(help_text="A description of what this unit is", blank=True)
     SUBJECT_CHOICES = (
         ("A", "Algebra (Hufflepuff)"),
