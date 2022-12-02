@@ -26,6 +26,7 @@ class WorkerAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
         'user',
+        'updated_at',
         'notes',
     )
     list_display_links = (
@@ -35,6 +36,7 @@ class WorkerAdmin(admin.ModelAdmin):
     search_fields = (
         'user__first_name',
         'user__last_name',
+        'google_username',
         'paypal_username',
         'venmo_handle',
         'zelle_info',

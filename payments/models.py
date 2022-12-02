@@ -63,6 +63,7 @@ class Worker(models.Model):
         help_text="Any notes on payment or whatever.",
         blank=True,
     )
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
         return self.user.username
