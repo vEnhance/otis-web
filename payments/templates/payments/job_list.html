@@ -12,14 +12,14 @@
       <th>Status</th>
     </tr>
     {% for job in jobs %}
-      <tr>
+      <tr {% if job.assignee.user == request.user %}class="table-success fw-bold"{% endif %}>
         <td>
           <a href="{{ job.get_absolute_url }}">{{ job.name }}</a>
         </td>
         <td>{{ job.spades_bounty }}</td>
         <td>{{ job.usd_bounty }}</td>
         <td>{{ job.deadline|default:"—" }}</td>
-        <td>{{ job.get_status_display }}</td>
+        <td>{{ job.status }}</td>
       </tr>
     {% endfor %}
   </table>

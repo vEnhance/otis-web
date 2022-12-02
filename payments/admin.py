@@ -61,9 +61,9 @@ class JobFolderAdmin(admin.ModelAdmin):
 class JobAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
-        'folder',
         'name',
-        'progress',
+        'status',
+        'folder',
         'due_date',
         'assignee',
         'spades_bounty',
@@ -71,7 +71,7 @@ class JobAdmin(admin.ModelAdmin):
     )
     list_display_links = (
         'pk',
-        'folder',
+        'status',
         'name',
     )
     search_fields = (
@@ -79,6 +79,7 @@ class JobAdmin(admin.ModelAdmin):
         'description',
     )
     list_filter = (
+        ('assignee', admin.EmptyFieldListFilter),
         'folder',
         'progress',
         'payment_preference',

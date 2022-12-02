@@ -3,22 +3,23 @@
   Job: {{ job.name }}
 {% endblock title %}
 {% block layout-content %}
-  {% if not job.assignee %}
-    <p class="text-center">
-      <form action="{% url "job-claim" job.pk %}" method="post">
-        {% csrf_token %}
+  {% if job.status == "Completed" %}
+    <div class="alert alert-primary">This task was completed.</div>
+  {% elif not job.assignee %}
+    <form action="{% url "job-claim" job.pk %}" method="post">
+      {% csrf_token %}
+      <p class="text-center">
         <input type="submit" class="btn btn-primary" value="Claim task"/>
-      </form>
-    </p>
+      </p>
+    </form>
+    <hr />
   {% elif job.assignee.user == request.user %}
     <p class="text-center">
       <a href="{% url "job-update" job.pk %}" class="btn btn-success">Submit task</a>
     </p>
+    <hr />
   {% else %}
-    <div class="alert alert-waring" role="alert">
-      This task is currently claimed
-      by {{ job.assignee.user }}.
-    </div>
+    <div class="alert alert-waring" role="alert">This task is currently claimed by {{ job.assignee.user }}.</div>
   {% endif %}
   <h2>Description</h2>
   <p>{{ job.description_rendered|safe|default:"No description provided." }}</p>
@@ -28,9 +29,8 @@
     <li>{{ job.usd_bounty }} 💲</li>
     <li>Deadline: {{ job.deadline }}</li>
   </ul>
-  <h2>Current status</h2>
+  <h2>Current status: {{ job.status }}</h2>
   <ul>
-    <li>Status: {{ job.get_status_display }}</li>
     {% if job.assignee %}
       <li>Claimed by: {{ job.assignee }}</li>
     {% else %}

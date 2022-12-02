@@ -3,14 +3,17 @@ from typing import Any
 
 import stripe
 from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied  # NOQA
 from django.db.models.aggregates import Count
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
 from django.forms.models import BaseModelForm
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseForbidden  # NOQA
-from django.http.response import JsonResponse
+from django.http.response import HttpResponseForbidden, HttpResponseRedirect, JsonResponse  # NOQA
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
@@ -142,10 +145,11 @@ class WorkerUpdate(LoginRequiredMixin, UpdateView[Worker, BaseModelForm[Worker]]
     context_object_name = 'worker'
     template_name = 'payments/worker_form.html'
     fields = (
-        'notes',
+        'google_username',
         'paypal_username',
         'venmo_handle',
         'zelle_info',
+        'notes',
     )
 
     def get_object(self):
@@ -162,10 +166,17 @@ class JobFolderList(LoginRequiredMixin, ListView[JobFolder]):
 
     def get_queryset(self) -> QuerySet[JobFolder]:
         return JobFolder.objects.filter(visible=True).annotate(
-            num_open=Count('job', filter=Q(job__status="NEW")),
-            num_claimed=Count('job', filter=Q(job__status="IP")) +
-            Count('job', filter=Q(job__status="PRV")),
-            num_done=Count('job', filter=Q(job__status="OK")))
+            num_open=Count('job', filter=Q(job__assignee__isnull=True)),
+            num_claimed=Count(
+                'job',
+                filter=Q(
+                    job__assignee__isnull=False,
+                    job__progress="NEW",
+                ) | Q(
+                    job__assignee__isnull=False,
+                    job__progress="RVW",
+                )),
+            num_done=Count('job', filter=Q(job__progress="OK")))
 
 
 class JobList(LoginRequiredMixin, ListView[Job]):
@@ -190,6 +201,22 @@ class JobDetail(LoginRequiredMixin, DetailView[Job]):
     context_object_name = 'job'
 
 
+@login_required
+def job_claim(request: HttpRequest, pk: int) -> HttpResponse:
+    assert isinstance(request.user, User)
+    try:
+        worker: Worker = Worker.objects.get(user=request.user)
+    except Worker.DoesNotExist:
+        messages.error(request, "You need to set up a work profile first")
+        return HttpResponseRedirect(reverse('worker-update'))
+    else:
+        job: Job = Job.objects.get(pk=pk)
+        job.assignee = worker
+        job.save()
+        messages.success(request, f"You have claimed task #{ job.pk }.")
+        return HttpResponseRedirect(job.get_absolute_url())
+
+
 class JobUpdate(LoginRequiredMixin, UpdateView[Job, BaseModelForm[Job]]):
     model = Job
     context_object_name = 'job'
@@ -199,6 +226,22 @@ class JobUpdate(LoginRequiredMixin, UpdateView[Job, BaseModelForm[Job]]):
         'worker_notes',
         'payment_preference',
     )
+
+    def post(self, *args: Any, **kwargs: Any):
+        response = super().post(*args, **kwargs)
+        job = self.object
+        if job.assignee is None:
+            raise PermissionDenied("Someone needs to claim this job first.")
+        elif self.request.user != job.assignee.user:
+            raise PermissionDenied("Can't submit for someone else's claim.")
+        elif job.status == "OK":
+            raise PermissionDenied("This job is already completed.")
+        return response
+
+    def form_valid(self, form: BaseModelForm[Job]):
+        self.object.progress = "SUB"
+        messages.success(self.request, "Successfully submitted.")
+        return super().form_valid(form)
 
     def get_success_url(self):
         return self.object.get_absolute_url()

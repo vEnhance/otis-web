@@ -1,10 +1,11 @@
 from core.models import Semester
 from django.contrib.auth.models import User
+from django.core.validators import RegexValidator
 from django.db import models
 from django.urls import reverse
-from roster.models import Invoice
 from markdownfield.models import MarkdownField, RenderedMarkdownField
 from markdownfield.validators import VALIDATOR_STANDARD
+from roster.models import Invoice
 
 
 class PaymentLog(models.Model):
@@ -32,7 +33,12 @@ class Worker(models.Model):
     zelle_info = models.CharField(max_length=128, blank=True)
 
     google_username = models.CharField(
-        max_length=128, blank=True, help_text="For e.g. sharing with Google Drive, etc.")
+        max_length=128,
+        blank=True,
+        help_text="For e.g. sharing with Google Drive, etc. "
+        "Do not include @gmail.com or @google.com.",
+        validators=[RegexValidator(r"[-a-zA-Z0-9_'.]+")],
+    )
 
     notes = models.TextField(
         help_text="Any notes on payment or whatever.",
@@ -70,7 +76,7 @@ class JobFolder(models.Model):
 class Job(models.Model):
     PROGRESS_CHOICES = (
         ("NEW", "In Progress"),
-        ("RVW", "Reviewing"),
+        ("SUB", "Submitted"),
         ("OK", "Completed"),
     )
     PREF_CHOICES = (

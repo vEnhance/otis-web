@@ -13,4 +13,6 @@ urlpatterns = [
     path(r'jobs/', views.JobFolderList.as_view(), name='job-index'),
     path(r'jobs/<str:slug>/', views.JobList.as_view(), name='job-list'),
     path(r'job/<int:pk>/', views.JobDetail.as_view(), name='job-detail'),
+    path(r'job/claim/<int:pk>/', views.job_claim, name='job-claim'),
+    path(r'job/submit/<int:pk>/', views.JobUpdate.as_view(), name='job-update'),
 ]
