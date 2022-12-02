@@ -75,6 +75,7 @@ Submit an [issue on GitHub](https://github.com/vEnhance/otis-web/issues).
 
 For OTIS students: pull requests welcome!
 If you think the website can be improved in some way, feel free to implement it.
-See [contributing guidelines](.github/CONTRIBUTING.md).
+See [contributing guidelines](CONTRIBUTING.md).
+It's OK if you don't have much code experience; I'm willing to guide you along.
 
 `526561645265616452656164`
