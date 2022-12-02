@@ -41,7 +41,7 @@ def unitgroup(request: HttpRequest, pk: int) -> HttpResponse:
     except URLPath.DoesNotExist:
         parent = URLPath.get_by_path(path=f'/units/list-of-{subject_name}-units/')
         content = (f'[unit {group.slug}]\n[/unit]\n\n'
-                    f'(This is an automatically generated article for {group.name}.'
+                    f'(This is an automatically generated article for {group.name}. '
                     'Please add some content!)\n\n')
         u = URLPath.create_urlpath(
             parent=parent,
