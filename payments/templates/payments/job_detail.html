@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block title %}
-  Job: {{ job.name }}
+  {{ job.folder.name }}: {{ job.name }}
 {% endblock title %}
 {% block layout-content %}
   {% if job.status == "Completed" %}
