@@ -8,6 +8,12 @@
     You are updating the work details for
     <strong>{{ request.user.username }}</strong>.
   </p>
+  <div class="alert alert-primary">
+    <h3 class="alert-heading">All fields are optional</h3>
+    You only need to fill in a field if it matters for you;
+    for example, you should leave "PayPal username" blank
+    unless you actually want to be paid via PayPal.
+  </div>
   <hr />
   {% include "generic_form.html" %}
 {% endblock layout-content %}
