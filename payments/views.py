@@ -147,10 +147,11 @@ class WorkerUpdate(LoginRequiredMixin, UpdateView[Worker, BaseModelForm[Worker]]
     template_name = 'payments/worker_form.html'
     fields = (
         'google_username',
+        'twitch_username',
+        'notes',
         'paypal_username',
         'venmo_handle',
         'zelle_info',
-        'notes',
     )
 
     def get_object(self):

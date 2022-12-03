@@ -37,6 +37,7 @@ class WorkerAdmin(admin.ModelAdmin):
         'user__first_name',
         'user__last_name',
         'google_username',
+        'twitch_username',
         'paypal_username',
         'venmo_handle',
         'zelle_info',

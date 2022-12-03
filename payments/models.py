@@ -58,6 +58,12 @@ class Worker(models.Model):
         "Do not include @gmail.com or @google.com.",
         validators=[RegexValidator(r"^[-a-zA-Z0-9_'.]+$")],
     )
+    twitch_username = models.CharField(
+        max_length=128,
+        blank=True,
+        help_text="Username on Twitch.tv",
+        validators=[RegexValidator(r"^[-a-zA-Z0-9_'.]+$")],
+    )
 
     notes = models.TextField(
         help_text="Any notes on payment or whatever.",
