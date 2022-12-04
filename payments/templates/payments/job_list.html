@@ -8,12 +8,7 @@
   </p>
   <hr />
   <h2>Instructions</h2>
-  <p>{{ jobfolder.description_rendered|safe }}</p>
-  {% if request.user.is_superuser %}
-    <p>
-      <a href="{% url "admin:payments_jobfolder_change" jobfolder.pk %}">Edit folder {{ jobfolder.pk }}</a>
-    </p>
-  {% endif %}
+  {% include "payments/show_jobfolder_info.html" %}
   <h2>Tasks</h2>
   <table class="table striped-table">
     <tr>

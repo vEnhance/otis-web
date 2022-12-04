@@ -1,0 +1,28 @@
+{% if jobfolder.description_rendered %}
+  {{ jobfolder.description_rendered|safe }}
+{% else %}
+  <p class="fst-italic">No description provided.</p>
+{% endif %}
+{% if jobfolder.max_pending != None or jobfolder.max_total != None %}
+  <ul>
+    {% if jobfolder.max_pending != None %}
+      <li>
+        Limited to at most
+        <strong>{{ jobfolder.max_pending }} unfinished tasks</strong> per person.
+      </li>
+    {% endif %}
+    {% if jobfolder.max_total != None %}
+      <li>
+        Limited to at most
+        <strong>{{ jobfolder.max_total }} total tasks</strong> per person.
+      </li>
+    {% endif %}
+  </ul>
+{% endif %}
+{% if request.user.is_superuser %}
+  <p>
+    <a href="{% url "admin:payments_jobfolder_change" jobfolder.pk %}">
+      ✏️ Edit folder (pk={{ jobfolder.pk }})
+    </a>
+  </p>
+{% endif %}
