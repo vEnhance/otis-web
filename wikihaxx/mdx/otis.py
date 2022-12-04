@@ -91,7 +91,8 @@ class OTISPreprocessor(markdown.preprocessors.Preprocessor):
                             f'<tr><th>Submissions</th><td>{num_psets}</td></tr>')
                         table_output.append(f'<tr><th>♣ earned</th><td>{clubs_given}</td></tr>')
                         table_output.append(
-                            f'<tr><th>♥ earned</th><td>{hearts_given}</td></tr>')
+                            f'<tr><th>♥ earned</th><td>{round(hearts_given,ndigits=2)}</td></tr>'
+                        )
 
                         body.append('<blockquote class="catalog-quote">')
                         body.append('<em>')
