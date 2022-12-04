@@ -38,5 +38,10 @@
       </a>
     </p>
     <p>{{ jobfolder.description_rendered|safe }}</p>
+    {% if request.user.is_superuser %}
+      <p>
+        <a href="{% url "admin:payments_jobfolder_change" jobfolder.pk %}">Edit this folder</a>
+      </p>
+    {% endif %}
   {% endfor %}
 {% endblock layout-content %}

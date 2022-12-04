@@ -23,6 +23,11 @@
   {% endif %}
   <h2>Description</h2>
   <p>{{ job.description_rendered|safe|default:"No description provided." }}</p>
+  {% if request.user.is_superuser %}
+    <p>
+      <a href="{% url "admin:payments_job_change" job.pk %}">Edit this job</a>
+    </p>
+  {% endif %}
   <h2>Bounty</h2>
   <ul>
     <li>{{ job.spades_bounty }} ♠️</li>

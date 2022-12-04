@@ -9,6 +9,11 @@
   <hr />
   <h2>Instructions</h2>
   <p>{{ jobfolder.description_rendered|safe }}</p>
+  {% if request.user.is_superuser %}
+    <p>
+      <a href="{% url "admin:payments_jobfolder_change" jobfolder.pk %}">Edit this folder</a>
+    </p>
+  {% endif %}
   <h2>Tasks</h2>
   <table class="table striped-table">
     <tr>
@@ -26,7 +31,13 @@
         <td>{{ job.spades_bounty }}</td>
         <td>{{ job.usd_bounty }}</td>
         <td>{{ job.deadline|default:"—" }}</td>
-        <td>{{ job.status }}</td>
+        <td>
+          {% if request.user.is_superuser %}
+            <a href="{% url "admin:payments_job_change" job.pk %}">{{ job.status }}</a>
+          {% else %}
+            {{ job.status }}
+          {% endif %}
+        </td>
       </tr>
     {% endfor %}
   </table>
