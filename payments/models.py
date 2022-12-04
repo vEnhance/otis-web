@@ -85,6 +85,17 @@ class JobFolder(models.Model):
         blank=True)
     description_rendered = RenderedMarkdownField()
 
+    max_pending = models.IntegerField(
+        null=True,
+        blank=True,
+        help_text="Maximum number of pending tasks that can be claimed "
+        "total by one person.")
+    max_total = models.IntegerField(
+        null=True,
+        blank=True,
+        help_text="Maximum number of tasks that can be claimed "
+        "total by one person, including completed ones.")
+
     def __str__(self) -> str:
         return self.name
 
