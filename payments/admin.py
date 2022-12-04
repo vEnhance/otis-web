@@ -52,6 +52,8 @@ class JobFolderAdmin(admin.ModelAdmin):
         'name',
         'slug',
         'visible',
+        'max_pending',
+        'max_total',
     )
     list_display_links = (
         'pk',
