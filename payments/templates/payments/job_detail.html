@@ -25,7 +25,7 @@
   <p>{{ job.description_rendered|safe|default:"No description provided." }}</p>
   {% if request.user.is_superuser %}
     <p>
-      <a href="{% url "admin:payments_job_change" job.pk %}">Edit this job</a>
+      <a href="{% url "admin:payments_job_change" job.pk %}">Edit job {{ job.pk }}</a>
     </p>
   {% endif %}
   <h2>Bounty</h2>
