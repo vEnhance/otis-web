@@ -51,12 +51,11 @@ class Worker(models.Model):
         validators=[RegexValidator(f'^({RE_AT_USER}|{RE_PHONE})$')],
     )
 
-    google_username = models.CharField(
+    gmail_address = models.CharField(
         max_length=128,
         blank=True,
-        help_text="For e.g. sharing with Google Drive, etc. "
-        "Do not include @gmail.com or @google.com.",
-        validators=[RegexValidator(r"^[-a-zA-Z0-9_'.]+$")],
+        help_text="Should be of the form username@gmail.com.",
+        validators=[RegexValidator(r"^[-a-zA-Z0-9_'.]+@gmail\.com$")],
     )
     twitch_username = models.CharField(
         max_length=128,

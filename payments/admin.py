@@ -36,7 +36,7 @@ class WorkerAdmin(admin.ModelAdmin):
     search_fields = (
         'user__first_name',
         'user__last_name',
-        'google_username',
+        'gmail_address',
         'twitch_username',
         'paypal_username',
         'venmo_handle',

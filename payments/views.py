@@ -146,7 +146,7 @@ class WorkerUpdate(LoginRequiredMixin, UpdateView[Worker, BaseModelForm[Worker]]
     context_object_name = 'worker'
     template_name = 'payments/worker_form.html'
     fields = (
-        'google_username',
+        'gmail_address',
         'twitch_username',
         'notes',
         'paypal_username',

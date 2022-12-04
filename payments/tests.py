@@ -71,20 +71,20 @@ class WorkerTest(EvanTestCase):
         resp = self.assertPostOK(
             'worker-update',
             data={
-                'google_username': 'alice.aardvark',
+                'gmail_address': 'alice.aardvark@gmail.com',
                 'notes': 'hi there'
             },
             follow=True)
-        self.assertContains(resp, 'alice.aardvark')
+        self.assertContains(resp, 'alice.aardvark@gmail.com')
         self.assertContains(resp, 'hi there')
         worker = Worker.objects.get(user__username='alice')
-        self.assertEqual(worker.google_username, 'alice.aardvark')
+        self.assertEqual(worker.gmail_address, 'alice.aardvark@gmail.com')
         self.assertEqual(worker.notes, 'hi there')
 
         resp = self.assertPostOK(
             'worker-update',
             data={
-                'google_username': 'alice.aardvark',
+                'gmail_address': 'alice.aardvark@gmail.com',
                 'venmo_handle': '@Alice-Aardvark-42',
                 'notes': 'hello again'
             },
@@ -93,7 +93,7 @@ class WorkerTest(EvanTestCase):
         self.assertContains(resp, 'hello again')
 
         worker = Worker.objects.get(user__username='alice')
-        self.assertEqual(worker.google_username, 'alice.aardvark')
+        self.assertEqual(worker.gmail_address, 'alice.aardvark@gmail.com')
         self.assertEqual(worker.venmo_handle, '@Alice-Aardvark-42')
         self.assertEqual(worker.notes, 'hello again')
 
@@ -106,19 +106,19 @@ class WorkerTest(EvanTestCase):
             follow=True)
         self.assertContains(resp, "Enter a valid value.")
         worker = Worker.objects.get(user__username='alice')
-        self.assertEqual(worker.google_username, 'alice.aardvark')
+        self.assertEqual(worker.gmail_address, 'alice.aardvark@gmail.com')
         self.assertEqual(worker.venmo_handle, '@Alice-Aardvark-42')
         self.assertEqual(worker.notes, 'hello again')
 
         resp = self.assertPostOK(
             'worker-update',
             data={
-                'google_username': 'alice.aardvark@nowhere.net',
+                'gmail_address': 'alice.aardvark',
                 'notes': 'this should fail due to validation errors'
             },
             follow=True)
         self.assertContains(resp, "Enter a valid value.")
         worker = Worker.objects.get(user__username='alice')
-        self.assertEqual(worker.google_username, 'alice.aardvark')
+        self.assertEqual(worker.gmail_address, 'alice.aardvark@gmail.com')
         self.assertEqual(worker.venmo_handle, '@Alice-Aardvark-42')
         self.assertEqual(worker.notes, 'hello again')
