@@ -4,7 +4,8 @@ from django.contrib.auth.models import User
 from evans_django_tools.testsuite import EvanTestCase
 from roster.factories import InvoiceFactory, StudentFactory
 
-from payments.models import PaymentLog, Worker
+from payments.factories import JobFactory, JobFolderFactory
+from payments.models import Job, PaymentLog, Worker
 
 from .views import process_payment
 
@@ -64,7 +65,7 @@ class PaymentTest(EvanTestCase):
 
 class WorkerTest(EvanTestCase):
 
-    def test_worker(self):
+    def test_worker(self) -> None:
         alice: User = UserFactory.create(username='alice')
         self.login(alice)
 
@@ -122,3 +123,40 @@ class WorkerTest(EvanTestCase):
         self.assertEqual(worker.gmail_address, 'alice.aardvark@gmail.com')
         self.assertEqual(worker.venmo_handle, '@Alice-Aardvark-42')
         self.assertEqual(worker.notes, 'hello again')
+
+    def test_claim_limits(self) -> None:
+        alice: User = UserFactory.create(username='alice')
+        self.login(alice)
+        self.assertPostOK('worker-update', data={'notes': 'hi'}, follow=True)
+
+        folder = JobFolderFactory.create(max_pending=3, max_total=5)
+        jobs = JobFactory.create_batch(10, folder=folder)
+
+        for i in range(0, 3):
+            self.assertContains(
+                self.assertPostOK('job-claim', jobs[i].pk, follow=True),
+                "You have successfully claimed",
+            )
+        for i in range(0, 3):
+            self.assertContains(
+                self.assertPostOK('job-claim', jobs[i].pk, follow=True),
+                "This task is already claimed",
+            )
+
+        self.assertContains(
+            self.assertPostOK('job-claim', jobs[3].pk, follow=True),
+            "maximum number of pending tasks",
+        )
+
+        for i in range(0, 3):
+            Job.objects.filter(pk__in=[jobs[i].pk for i in range(3)]).update(progress="VFD")
+
+        for i in range(3, 5):
+            self.assertContains(
+                self.assertPostOK('job-claim', jobs[i].pk, follow=True),
+                "You have successfully claimed",
+            )
+        self.assertContains(
+            self.assertPostOK('job-claim', jobs[5].pk, follow=True),
+            "maximum number of total tasks",
+        )

@@ -227,14 +227,29 @@ def job_claim(request: HttpRequest, pk: int) -> HttpResponse:
         return HttpResponseRedirect(reverse('worker-update'))
     else:
         job: Job = Job.objects.get(pk=pk)
-        job.assignee = worker
-        try:
-            job.semester = Semester.objects.get(active=True)
-        except Semester.DoesNotExist:
-            pass
+        jobfolder: JobFolder = job.folder
+        jobs_already_claimed = Job.objects.filter(folder=jobfolder, assignee=worker)
 
-        job.save()
-        messages.success(request, f"You have claimed task #{ job.pk }.")
+        if job.assignee is not None:
+            messages.error(request, "This task is already claimed.")
+        elif (jobfolder.max_pending is not None and
+                jobs_already_claimed.exclude(progress="VFD").count() >= jobfolder.max_pending):
+            messages.error(
+                request,
+                "You already reached the maximum number of pending tasks for this category.")
+        elif (jobfolder.max_total is not None and
+                jobs_already_claimed.count() >= jobfolder.max_total):
+            messages.error(
+                request,
+                "You already reached the maximum number of total tasks for this category.")
+        else:
+            job.assignee = worker
+            try:
+                job.semester = Semester.objects.get(active=True)
+            except Semester.DoesNotExist:
+                pass
+            job.save()
+            messages.success(request, f"You have successfully claimed task #{ job.pk }.")
         return HttpResponseRedirect(job.get_absolute_url())
 
 
@@ -255,7 +270,7 @@ class JobUpdate(LoginRequiredMixin, UpdateView[Job, BaseModelForm[Job]]):
             raise PermissionDenied("Someone needs to claim this job first.")
         elif self.request.user != job.assignee.user:
             raise PermissionDenied("Can't submit for someone else's claim.")
-        elif job.status == "OK":
+        elif job.status == "VFD":
             raise PermissionDenied("This job is already completed.")
         return response
 
