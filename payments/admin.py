@@ -89,6 +89,8 @@ class JobAdmin(ImportExportModelAdmin):
         'folder',
         'due_date',
         'assignee',
+        'assignee_name',
+        'assignee_email',
         'spades_bounty',
         'usd_bounty',
     )

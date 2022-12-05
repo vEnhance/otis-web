@@ -196,3 +196,17 @@ class Job(models.Model):
             return "Open"
         else:
             return self.get_progress_display()  # type: ignore
+
+    @property
+    def assignee_name(self) -> str:
+        if self.assignee is None:
+            return ""
+        else:
+            return self.assignee.user.get_full_name()
+
+    @property
+    def assignee_email(self) -> str:
+        if self.assignee is None:
+            return ""
+        else:
+            return self.assignee.user.email
