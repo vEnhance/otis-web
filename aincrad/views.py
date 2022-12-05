@@ -390,7 +390,13 @@ def api(request: HttpRequest) -> JsonResponse:
         if not sha256(token.encode('ascii')).hexdigest() == settings.API_TARGET_HASH:
             return JsonResponse({'error': "☕"}, status=418)
 
-    if action in ('grade_problem_set', 'accept_inquiries', 'mark_suggestion', 'init'):
+    if action in (
+        'grade_problem_set',
+        'accept_inquiries',
+        'mark_suggestion',
+        'triage_job',
+        'init',
+    ):
         return venueq_handler(action, data)
     elif action in ('register',):
         return discord_handler(action, data)
