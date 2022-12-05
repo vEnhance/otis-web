@@ -17,6 +17,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from payments.models import Job
 from roster.models import Invoice, Student, StudentRegistration, UnitInquiry
 from sql_util.aggregates import SubqueryCount
 from suggestions.models import ProblemSuggestion
@@ -57,6 +58,9 @@ class JSONData(TypedDict):
     # invoice
     entries: Dict[str, float]
     field: Union[Literal['adjustment'], Literal['extras'], Literal['total_paid']]
+
+    # jobs
+    progress: str
 
 
 PSET_VENUEQ_INIT_QUERYSET = PSet.objects.filter(
@@ -147,6 +151,26 @@ SUGGESTION_VENUEQ_INIT_KEYS = (
     'unit__code',
 )
 
+JOB_VENUEQ_INIT_QUERYSET = Job.objects.filter(progress='SUB')
+JOB_VENUEQ_INIT_KEYS = (
+    'pk',
+    'folder__name',
+    'name',
+    'progress',
+    'spades_bounty',
+    'usd_bounty',
+    'payment_preference',
+    'worker_deliverable',
+    'worker_notes',
+    'assignee__user__first_name',
+    'assignee__user__last_name',
+    'assignee__gmail_address',
+    'assignee__twitch_username',
+    'assignee__paypal_username',
+    'assignee__venmo_handle',
+    'assignee__zelle_info',
+)
+
 
 def venueq_handler(action: str, data: JSONData) -> JsonResponse:
     if action == 'grade_problem_set':
@@ -178,6 +202,14 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
         suggestion.eligible = data['eligible']
         suggestion.save()
         return JsonResponse({'result': 'success'}, status=200)
+    elif action == 'triage_job':
+        if data['progress'] != 'SUB':
+            job: Job = Job.objects.get(pk=data['pk'])
+            job.progress = data['progress']
+            job.save()
+            return JsonResponse({'result': 'success', 'changed': True}, status=200)
+        else:
+            return JsonResponse({'result': 'success', 'changed': False}, status=200)
     elif action == 'init':
         output_data: Dict[str, Any] = {}
         output_data['timestamp'] = str(timezone.now())
@@ -193,6 +225,9 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
               'Suggestions',
             '_children':
                 list(SUGGESTION_VENUEQ_INIT_QUERYSET.values(*SUGGESTION_VENUEQ_INIT_KEYS))
+        }, {
+            '_name': 'Jobs',
+            '_children': list(JOB_VENUEQ_INIT_QUERYSET.values(*JOB_VENUEQ_INIT_KEYS)),
         }]
         return JsonResponse(output_data, status=200)
     else:
@@ -296,6 +331,7 @@ def problems_handler(action: str, data: JSONData) -> JsonResponse:
 
 
 def invoice_handler(action: str, data: JSONData) -> JsonResponse:
+    del action
 
     def sanitize(s: str, last: bool = False) -> str:
         return unidecode(s).lower().split(' ')[-1 if last else 0]
