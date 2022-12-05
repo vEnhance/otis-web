@@ -162,6 +162,7 @@ JOB_VENUEQ_INIT_KEYS = (
     'payment_preference',
     'worker_deliverable',
     'worker_notes',
+    'assignee__user__email',
     'assignee__user__first_name',
     'assignee__user__last_name',
     'assignee__gmail_address',
