@@ -19,7 +19,7 @@
     </p>
     <hr />
   {% else %}
-    <div class="alert alert-waring" role="alert">This task is currently claimed by {{ job.assignee.user }}.</div>
+    <div class="alert alert-warning" role="alert">This task is currently claimed by {{ job.assignee.user }}.</div>
   {% endif %}
   <h2>Description</h2>
   <p>{{ job.description_rendered|safe|default:"No description provided." }}</p>
