@@ -105,7 +105,8 @@ class JobFolder(models.Model):
 
 class Job(models.Model):
     PROGRESS_CHOICES = (
-        ("NEW", "In Progress"),
+        ("NEW", "In progress"),
+        ("REV", "Revisions requested"),
         ("SUB", "Submitted"),
         ("VFD", "Completed"),
     )

@@ -177,6 +177,9 @@ class JobFolderList(LoginRequiredMixin, ListView[JobFolder]):
                 ) | Q(
                     job__assignee__isnull=False,
                     job__progress="SUB",
+                ) | Q(
+                    job__assignee__isnull=False,
+                    job__progress="REV",
                 )),
             num_done=Count('job', filter=Q(job__progress="VFD"))).order_by('name')
 
