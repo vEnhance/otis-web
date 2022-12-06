@@ -1,3 +1,4 @@
+from datetime import timedelta
 from typing import Any, List, Optional, Tuple
 
 from core.models import Semester, Unit
@@ -8,6 +9,7 @@ from django.db.models import F, FloatField, QuerySet
 from django.db.models.base import Model
 from django.db.models.functions import Cast
 from django.http import HttpRequest
+from django.utils import timezone
 from import_export import fields, resources, widgets
 from import_export.admin import ImportExportModelAdmin
 
@@ -308,6 +310,10 @@ def build_students(queryset: QuerySet[StudentRegistration]) -> int:
             else:
                 hours_taught = 0
             invoice = Invoice(student=student, preps_taught=n, hours_taught=hours_taught)
+            first_payment_deadline = student.semester.first_payment_deadline
+            if (first_payment_deadline is not None and timezone.now() <
+                (grace_deadline := first_payment_deadline + timedelta(days=7))):
+                invoice.forgive_date = grace_deadline
             invoices_to_create.append(invoice)
         Invoice.objects.bulk_create(invoices_to_create)
     return count
