@@ -211,7 +211,7 @@ class UpdateInvoice(LoginRequiredMixin, StaffuserRequiredMixin,
         'adjustment',
         'extras',
         'total_paid',
-        'forgive',
+        'forgive_date',
         'memo',
     )
     object: Invoice
@@ -429,7 +429,12 @@ def giga_chart(request: HttpRequest, format_as: str) -> HttpResponse:
     queryset = queryset.annotate(
         debt=Cast(F("owed") / (F("owed") + F("total_paid") + 1e-8), FloatField()))
 
-    queryset = queryset.order_by('student__enabled', '-forgive', 'debt', 'student__first_name')
+    queryset = queryset.order_by(
+        'student__enabled',
+        '-forgive_date',
+        'debt',
+        'student__first_name',
+    )
     timestamp = timezone.now().strftime('%Y-%m-%d-%H%M%S')
 
     if settings.TESTING is True:
@@ -495,7 +500,7 @@ def giga_chart(request: HttpRequest, format_as: str) -> HttpResponse:
             round(invoice.adjustment),
             round(invoice.extras),
             round(invoice.total_paid),
-            invoice.forgive,
+            invoice.forgive_date,
         ])
 
     pt = PrettyTable()

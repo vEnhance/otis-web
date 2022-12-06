@@ -14,7 +14,7 @@ from django.db import models
 from django.db.models import Count, Q
 from django.db.models.query import QuerySet
 from django.urls import reverse
-from django.utils.timezone import localtime
+from django.utils.timezone import localtime, now
 from sql_util.aggregates import Exists, SubqueryAggregate
 
 from .country_abbrevs import COUNTRY_CHOICES
@@ -317,8 +317,9 @@ class Student(models.Model):
         return self.payment_status % 4 == 3
 
     @property
-    def is_delinquent(self):
-        return self.is_payment_locked and self.invoice.forgive is False
+    def is_delinquent(self) -> bool:
+        return (self.is_payment_locked and
+                (self.invoice.forgive_date is None or now() > self.invoice.forgive_date))
 
 
 class Invoice(models.Model):
@@ -344,8 +345,11 @@ class Invoice(models.Model):
     total_paid = models.DecimalField(
         max_digits=8, decimal_places=2, default=0, help_text="Amount paid.")
     updated_at = models.DateTimeField(auto_now=True)
-    forgive = models.BooleanField(
-        default=False, help_text="When switched on, won't hard-lock delinquents.")
+    forgive_date = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="When switched on, won't hard lock delinquents before this date.",
+    )
     memo = models.TextField(blank=True, help_text="Internal note to self.")
 
     def __str__(self):
