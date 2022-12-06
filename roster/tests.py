@@ -1,12 +1,15 @@
-from core.factories import UnitFactory, UnitGroupFactory, UserFactory  # NOQA
+from core.factories import SemesterFactory, UnitFactory, UnitGroupFactory, UserFactory  # NOQA
+from core.models import Semester, Unit
 from django.conf import settings
 from django.contrib.auth.models import Group, User
 from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from evans_django_tools.testsuite import EvanTestCase
+from freezegun.api import freeze_time
 
 from roster.factories import AssistantFactory, InvoiceFactory, RegistrationContainerFactory, StudentFactory, StudentRegistrationFactory  # NOQA
-from roster.models import Student, StudentRegistration
+from roster.models import Invoice, Student, StudentRegistration
 
 from .admin import build_students
 
@@ -65,9 +68,99 @@ class RosterTest(EvanTestCase):
         self.assertEqual(len(checksum), 36)
         self.assertHas(response, checksum)
 
+    def test_delinquency(self) -> None:
+        semester: Semester = SemesterFactory.create(
+            show_invoices=True,
+            first_payment_deadline=timezone.datetime(2022, 9, 21, tzinfo=timezone.utc),
+            most_payment_deadline=timezone.datetime(2023, 1, 21, tzinfo=timezone.utc),
+        )
+
+        alice: Student = StudentFactory.create(semester=semester)
+
+        self.assertEqual(alice.payment_status, 0)  # because no invoice exists
+        invoice: Invoice = InvoiceFactory.create(
+            student=alice,
+            preps_taught=2,
+        )
+
+        # Alice has paid $0 so far
+        self.assertEqual(invoice.total_owed, 480)
+        with freeze_time('2022-09-05', tz_offset=0):
+            self.assertEqual(alice.payment_status, 4)
+            self.assertFalse(alice.is_payment_locked)
+            self.assertFalse(alice.is_delinquent)
+        with freeze_time('2022-09-17', tz_offset=0):
+            self.assertEqual(alice.payment_status, 1)
+            self.assertFalse(alice.is_payment_locked)
+            self.assertFalse(alice.is_delinquent)
+        with freeze_time('2022-09-25', tz_offset=0):
+            self.assertEqual(alice.payment_status, 2)
+            self.assertFalse(alice.is_payment_locked)
+            self.assertFalse(alice.is_delinquent)
+        with freeze_time('2022-10-15', tz_offset=0):
+            self.assertEqual(alice.payment_status, 3)
+            self.assertTrue(alice.is_payment_locked)
+            self.assertTrue(alice.is_delinquent)
+            invoice.forgive_date = timezone.datetime(2022, 10, 31, tzinfo=timezone.utc)
+            invoice.save()
+            self.assertFalse(alice.is_delinquent)
+        with freeze_time('2022-11-15', tz_offset=0):
+            self.assertEqual(alice.payment_status, 3)
+            self.assertTrue(alice.is_payment_locked)
+            self.assertTrue(alice.is_delinquent)
+
+        # Now suppose Alice makes the first payment
+        invoice.total_paid = 240
+        invoice.save()
+        self.assertEqual(invoice.total_owed, 240)
+        with freeze_time('2022-09-05', tz_offset=0):
+            self.assertEqual(alice.payment_status, 4)
+            self.assertFalse(alice.is_payment_locked)
+            self.assertFalse(alice.is_delinquent)
+        with freeze_time('2022-09-17', tz_offset=0):
+            self.assertEqual(alice.payment_status, 4)
+            self.assertFalse(alice.is_payment_locked)
+            self.assertFalse(alice.is_delinquent)
+        with freeze_time('2022-09-25', tz_offset=0):
+            self.assertEqual(alice.payment_status, 4)
+            self.assertFalse(alice.is_payment_locked)
+            self.assertFalse(alice.is_delinquent)
+        with freeze_time('2022-10-15', tz_offset=0):
+            self.assertEqual(alice.payment_status, 4)
+            self.assertFalse(alice.is_payment_locked)
+            self.assertFalse(alice.is_delinquent)
+        with freeze_time('2023-01-17', tz_offset=0):
+            self.assertEqual(alice.payment_status, 5)
+            self.assertFalse(alice.is_payment_locked)
+            self.assertFalse(alice.is_delinquent)
+        with freeze_time('2023-01-25', tz_offset=0):
+            self.assertEqual(alice.payment_status, 6)
+            self.assertFalse(alice.is_payment_locked)
+            self.assertFalse(alice.is_delinquent)
+        with freeze_time('2023-02-15', tz_offset=0):
+            self.assertEqual(alice.payment_status, 7)
+            self.assertTrue(alice.is_payment_locked)
+            self.assertTrue(alice.is_delinquent)
+            invoice.forgive_date = timezone.datetime(2023, 2, 28, tzinfo=timezone.utc)
+            invoice.save()
+            self.assertFalse(alice.is_delinquent)
+        with freeze_time('2023-06-05', tz_offset=0):
+            self.assertEqual(alice.payment_status, 7)
+            self.assertTrue(alice.is_payment_locked)
+            self.assertTrue(alice.is_delinquent)
+
+        # Now suppose Alice makes the last payment
+        invoice.total_paid = 480
+        invoice.save()
+        self.assertEqual(invoice.total_owed, 0)
+        with freeze_time('2023-02-15', tz_offset=0):
+            self.assertEqual(alice.payment_status, 0)
+            self.assertFalse(alice.is_payment_locked)
+            self.assertFalse(alice.is_delinquent)
+
     def test_master_schedule(self):
-        alice = StudentFactory.create(user__first_name="Adalhaidis", user__last_name="Ada")
-        units = UnitFactory.create_batch(10)
+        alice = StudentFactory.create(user__first_name="Ada", user__last_name="Adalhaidis")
+        units: list[Unit] = UnitFactory.create_batch(10)
         alice.curriculum.set(units[0:8])
         self.login(UserFactory.create(is_staff=True))
         self.assertHas(
