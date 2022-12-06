@@ -1,5 +1,5 @@
 from core.factories import SemesterFactory, UnitFactory, UnitGroupFactory, UserFactory  # NOQA
-from core.models import Semester, Unit
+from core.models import Semester, Unit, UnitGroup
 from django.conf import settings
 from django.contrib.auth.models import Group, User
 from django.db.models.query import QuerySet
@@ -9,18 +9,18 @@ from evans_django_tools.testsuite import EvanTestCase
 from freezegun.api import freeze_time
 
 from roster.factories import AssistantFactory, InvoiceFactory, RegistrationContainerFactory, StudentFactory, StudentRegistrationFactory  # NOQA
-from roster.models import Invoice, Student, StudentRegistration
+from roster.models import Assistant, Invoice, RegistrationContainer, Student, StudentRegistration  # NOQA
 
 from .admin import build_students
 
 
 class RosterTest(EvanTestCase):
 
-    def test_curriculum(self):
-        staff = AssistantFactory.create()
-        alice = StudentFactory.create(assistant=staff)
+    def test_curriculum(self) -> None:
+        staff: Assistant = AssistantFactory.create()
+        alice: Student = StudentFactory.create(assistant=staff)
 
-        unitgroups = UnitGroupFactory.create_batch(4)
+        unitgroups: list[UnitGroup] = UnitGroupFactory.create_batch(4)
         for unitgroup in unitgroups:
             for letter in 'BDZ':
                 UnitFactory.create(code=letter + unitgroup.subject[0] + 'W', group=unitgroup)
@@ -39,21 +39,21 @@ class RosterTest(EvanTestCase):
         self.post('currshow', alice.pk, data=data)
         self.assertEqual(len(get_object_or_404(Student, pk=alice.pk).curriculum.all()), 6)
 
-    def test_finalize(self):
-        alice = StudentFactory.create(newborn=True)
+    def test_finalize(self) -> None:
+        alice: Student = StudentFactory.create(newborn=True)
         self.login(alice)
         self.assertHas(
             self.post('finalize', alice.pk, data={'submit': True}, follow=True),
             'You should select some units')
-        units = UnitFactory.create_batch(20)
+        units: list[Unit] = UnitFactory.create_batch(20)
         alice.curriculum.set(units)
         self.assertHas(
             self.post('finalize', alice.pk, data={}, follow=True),
             'Your curriculum has been finalized!')
         self.assertEqual(alice.unlocked_units.count(), 3)
 
-    def test_invoice(self):
-        alice = StudentFactory.create(semester__show_invoices=True)
+    def test_invoice(self) -> None:
+        alice: Student = StudentFactory.create(semester__show_invoices=True)
         self.login(alice)
         InvoiceFactory.create(
             student=alice,
@@ -158,8 +158,9 @@ class RosterTest(EvanTestCase):
             self.assertFalse(alice.is_payment_locked)
             self.assertFalse(alice.is_delinquent)
 
-    def test_master_schedule(self):
-        alice = StudentFactory.create(user__first_name="Ada", user__last_name="Adalhaidis")
+    def test_master_schedule(self) -> None:
+        alice: Student = StudentFactory.create(
+            user__first_name="Ada", user__last_name="Adalhaidis")
         units: list[Unit] = UnitFactory.create_batch(10)
         alice.curriculum.set(units[0:8])
         self.login(UserFactory.create(is_staff=True))
@@ -168,10 +169,10 @@ class RosterTest(EvanTestCase):
             text=f'title="{alice.user.first_name} {alice.user.last_name}"',
             count=8)
 
-    def test_update_invoice(self):
-        firefly = AssistantFactory.create()
-        alice = StudentFactory.create(assistant=firefly)
-        invoice = InvoiceFactory.create(student=alice)
+    def test_update_invoice(self) -> None:
+        firefly: Assistant = AssistantFactory.create()
+        alice: Student = StudentFactory.create(assistant=firefly)
+        invoice: Invoice = InvoiceFactory.create(student=alice)
         self.login(firefly)
         self.assertGet20X('edit-invoice', alice.pk)
         self.assertPostRedirects(
@@ -187,10 +188,10 @@ class RosterTest(EvanTestCase):
             },
         )
 
-    def test_inquiry(self):
-        firefly = AssistantFactory.create()
-        alice = StudentFactory.create(assistant=firefly)
-        units = UnitFactory.create_batch(20)
+    def test_inquiry(self) -> None:
+        firefly: Assistant = AssistantFactory.create()
+        alice: Student = StudentFactory.create(assistant=firefly)
+        units: list[Unit] = UnitFactory.create_batch(20)
         self.login(alice)
         for i in range(6):
             resp = self.post(
@@ -293,27 +294,27 @@ class RosterTest(EvanTestCase):
         self.assertEqual(alice.curriculum.count(), 9)
         self.assertEqual(alice.unlocked_units.count(), 6)
 
-    def test_create_student(self):
-        container = RegistrationContainerFactory.create(num_preps=2)
+    def test_create_student(self) -> None:
+        container: RegistrationContainer = RegistrationContainerFactory.create(num_preps=2)
 
         StudentRegistrationFactory.create(track='A', container=container)
         StudentRegistrationFactory.create(track='B', container=container)
         self.assertEqual(build_students(StudentRegistration.objects.all()), 2)
-        alice = Student.objects.get(track='A')
+        alice: Student = Student.objects.get(track='A')
         self.assertEqual(alice.invoice.total_owed, 1824)
-        bob = Student.objects.get(track='B')
+        bob: Student = Student.objects.get(track='B')
         self.assertEqual(bob.invoice.total_owed, 1152)
 
         container.num_preps = 1
         container.save()
         StudentRegistrationFactory.create(track='C', container=container)
         self.assertEqual(build_students(StudentRegistration.objects.all()), 1)
-        carol = Student.objects.get(track='C')
+        carol: Student = Student.objects.get(track='C')
         self.assertEqual(carol.invoice.total_owed, 240)
 
-    def test_student_assistant_list(self):
+    def test_student_assistant_list(self) -> None:
         for i in range(1, 6):
-            asst = AssistantFactory.create(
+            asst: Assistant = AssistantFactory.create(
                 user__first_name=f"F{i}",
                 user__last_name=f"L{i}",
                 user__email=f"user{i}@evanchen.cc",
@@ -321,7 +322,7 @@ class RosterTest(EvanTestCase):
             )
             StudentFactory.create_batch(i * i, user__first_name="GoodKid", assistant=asst)
         StudentFactory.create(user__first_name="BadKid")
-        staff = UserFactory.create(is_staff=True)
+        staff: User = UserFactory.create(is_staff=True)
         self.login(staff)
         resp = self.assertGet20X('instructors')
         for i in range(1, 6):
@@ -332,7 +333,7 @@ class RosterTest(EvanTestCase):
         self.assertNotHas(resp, "BadKid")
         self.assertNotHas(resp, "out of sync")  # only admins can see the sync button
 
-        admin = UserFactory.create(is_staff=True, is_superuser=True)
+        admin: User = UserFactory.create(is_staff=True, is_superuser=True)
         self.login(admin)
         resp = self.assertGet20X('instructors')
         self.assertHas(resp, "out of sync")
