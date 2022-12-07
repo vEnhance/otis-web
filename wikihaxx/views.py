@@ -14,7 +14,7 @@ WIKI_SUBJECT_CHART = {
     'G': 'geometry',
     'N': 'number-theory',
     'M': 'miscellaneous',
-    'K': 'null',
+    'K': 'secret',
 }
 
 
