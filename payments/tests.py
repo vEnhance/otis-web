@@ -1,11 +1,15 @@
-from core.factories import UserFactory
+from decimal import Decimal
+
+from core.factories import SemesterFactory, UserFactory
+from core.models import Semester
 from django.conf import settings
 from django.contrib.auth.models import User
 from evans_django_tools.testsuite import EvanTestCase
 from roster.factories import InvoiceFactory, StudentFactory
+from roster.models import Student
 
-from payments.factories import JobFactory, JobFolderFactory
-from payments.models import Job, PaymentLog, Worker
+from payments.factories import JobFactory, JobFolderFactory, PaymentLogFactory, WorkerFactory  # NOQA
+from payments.models import Job, PaymentLog, Worker, get_semester_invoices_with_annotations  # NOQA
 
 from .views import process_payment
 
@@ -160,3 +164,78 @@ class WorkerTest(EvanTestCase):
             self.assertPostOK('job-claim', jobs[5].pk, follow=True),
             "maximum number of total tasks",
         )
+
+
+class InvoiceTest(EvanTestCase):
+
+    def test_semester_invoices(self) -> None:
+        semester: Semester = SemesterFactory.create(active=True)
+        alice: Student = StudentFactory.create(user__username='alice', semester=semester)
+        bob: Student = StudentFactory.create(user__username='bob', semester=semester)
+        carol: Student = StudentFactory.create(user__username='carol', semester=semester)
+        invoice_alice = InvoiceFactory.create(student=alice)
+        invoice_bob = InvoiceFactory.create(student=bob)
+        invoice_carol = InvoiceFactory.create(student=carol)
+        del invoice_carol
+
+        PaymentLogFactory.create(invoice=invoice_alice, amount=50)
+        PaymentLogFactory.create(invoice=invoice_bob, amount=70)
+        PaymentLogFactory.create(invoice=invoice_alice, amount=150)
+
+        worker_alice = WorkerFactory.create(user=alice.user)
+        worker_carol = WorkerFactory.create(user=carol.user)
+
+        JobFactory.create(
+            assignee=worker_alice,
+            progress="VFD",
+            payment_preference="INV",
+            usd_bounty=17.64,
+            semester=semester,
+        )
+        JobFactory.create(
+            assignee=worker_alice,
+            progress="VFD",
+            payment_preference="INV",
+            usd_bounty=40.96,
+            semester=semester,
+        )
+        JobFactory.create(
+            assignee=worker_alice,
+            progress="VFD",
+            payment_preference="PB",
+            usd_bounty=1000,
+            semester=semester,
+        )
+        JobFactory.create(
+            assignee=worker_alice,
+            progress="REV",
+            payment_preference="INV",
+            usd_bounty=1000,
+            semester=semester,
+        )
+        JobFactory.create(
+            assignee=worker_carol,
+            assignee__user=carol.user,
+            progress="VFD",
+            payment_preference="INV",
+            usd_bounty=130,
+            semester=semester,
+        )
+        JobFactory.create(
+            assignee=worker_carol,
+            assignee__user=carol.user,
+            progress="VFD",
+            payment_preference="INV",
+            usd_bounty=130,
+            # but create a random other semester for it
+        )
+
+        invoices = get_semester_invoices_with_annotations(semester)
+        self.assertEqual(invoices.get(student=alice).stripe_total, Decimal(200))  # type: ignore
+        self.assertEqual(
+            invoices.get(student=alice).job_total,  # type: ignore
+            Decimal('58.60'))
+        self.assertEqual(invoices.get(student=bob).stripe_total, Decimal(70))  # type: ignore
+        self.assertEqual(invoices.get(student=bob).job_total, Decimal(0))  # type: ignore
+        self.assertEqual(invoices.get(student=carol).stripe_total, Decimal(0))  # type: ignore
+        self.assertEqual(invoices.get(student=carol).job_total, Decimal(130))  # type: ignore

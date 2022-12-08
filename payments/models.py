@@ -1,11 +1,18 @@
+from decimal import Decimal
+
 from core.models import Semester
 from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
 from django.db import models
+from django.db.models.aggregates import Sum
+from django.db.models.expressions import OuterRef
+from django.db.models.functions.comparison import Coalesce
+from django.db.models.query import QuerySet
 from django.urls import reverse
 from markdownfield.models import MarkdownField, RenderedMarkdownField
 from markdownfield.validators import VALIDATOR_STANDARD
 from roster.models import Invoice
+from sql_util.aggregates import Subquery, SubquerySum
 
 
 class PaymentLog(models.Model):
@@ -211,3 +218,17 @@ class Job(models.Model):
             return ""
         else:
             return self.assignee.user.email
+
+
+def get_semester_invoices_with_annotations(semester: Semester) -> QuerySet[Invoice]:
+    job_subquery = Job.objects.filter(
+        assignee__user=OuterRef('student__user'),
+        semester=semester,
+        progress='VFD',
+        payment_preference='INV',
+    ).order_by().values('assignee__user').annotate(total=Sum('usd_bounty')).values('total')
+
+    return Invoice.objects.filter(student__semester=semester).annotate(
+        stripe_total=Coalesce(SubquerySum('paymentlog__amount'), 0),
+        job_total=Coalesce(Subquery(job_subquery), Decimal(0)),
+    )
