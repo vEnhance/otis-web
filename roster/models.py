@@ -383,11 +383,11 @@ class Invoice(models.Model):
     @property
     def total_cost(self) -> Decimal:
         return (self.prep_rate * self.preps_taught + self.hour_rate * self.hours_taught +
-                self.extras + self.adjustment - self.credits)
+                self.extras + self.adjustment)
 
     @property
     def total_owed(self) -> Decimal:
-        return self.total_cost - self.total_paid
+        return self.total_cost - (self.total_paid + self.credits)
 
     @property
     def cleared(self) -> bool:
