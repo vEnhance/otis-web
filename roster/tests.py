@@ -59,7 +59,8 @@ class RosterTest(EvanTestCase):
             student=alice,
             preps_taught=2,
             hours_taught=8.4,
-            adjustment=-100,
+            adjustment=-30,
+            credits=70,
             extras=100,
             total_paid=400)
         response = self.get('invoice', follow=True)

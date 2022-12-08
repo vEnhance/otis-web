@@ -425,7 +425,7 @@ def giga_chart(request: HttpRequest, format_as: str) -> HttpResponse:
         owed=Cast(
             F("student__semester__prep_rate") * F("preps_taught") +
             F("student__semester__hour_rate") * F("hours_taught") + F("adjustment") +
-            F('extras') - F("total_paid"), FloatField()))
+            F('extras') - F("total_paid") - F("credits"), FloatField()))
     queryset = queryset.annotate(
         debt=Cast(F("owed") / (F("owed") + F("total_paid") + 1e-8), FloatField()))
 
@@ -463,6 +463,7 @@ def giga_chart(request: HttpRequest, format_as: str) -> HttpResponse:
         # 'Preps',
         # 'Hours',
         'Adjustment',
+        'Credits',
         'Extras',
         'Total Paid',
         'Forgive',
@@ -498,6 +499,7 @@ def giga_chart(request: HttpRequest, format_as: str) -> HttpResponse:
             # invoice.preps_taught,
             # invoice.hours_taught,
             round(invoice.adjustment),
+            round(invoice.credits),
             round(invoice.extras),
             round(invoice.total_paid),
             invoice.forgive_date,

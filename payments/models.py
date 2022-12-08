@@ -119,7 +119,7 @@ class Job(models.Model):
     )
     PREF_CHOICES = (
         ("", "Not specified"),
-        ("INV", "Invoice adjustment"),
+        ("INV", "Invoice credits"),
         ("PB", "Pro bono"),
         ("PPL", "PayPal"),
         ("VNM", "Venmo"),

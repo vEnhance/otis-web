@@ -96,6 +96,7 @@ class InvoiceIEResource(resources.ModelResource):
             'preps_taught',
             'hours_taught',
             'adjustment',
+            'credits',
             'extras',
             'total_paid',
             'student__semester__name',
@@ -126,7 +127,7 @@ class OwedFilter(admin.SimpleListFilter):
                 owed=Cast(
                     F("student__semester__prep_rate") * F("preps_taught") +
                     F("student__semester__hour_rate") * F("hours_taught") + F("adjustment") +
-                    F('extras') - F("total_paid"), FloatField()))
+                    F('extras') - F("total_paid") - F("credits"), FloatField()))
             if self.value() == "incomplete":
                 return queryset.filter(owed__gt=0)
             elif self.value() == "paid":
@@ -205,6 +206,7 @@ class InvoiceInline(admin.StackedInline):
         'hours_taught',
         'extras',
         'adjustment',
+        'credits',
         'total_paid',
         'forgive_date',
         'memo',

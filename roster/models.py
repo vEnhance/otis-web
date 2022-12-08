@@ -337,6 +337,12 @@ class Invoice(models.Model):
         decimal_places=2,
         default=0,
         help_text="Adjustment to the cost, e.g. for financial aid.")
+    credits = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        default=0,
+        help_text="Credit earned via internships",
+    )
     extras = models.DecimalField(
         max_digits=8,
         decimal_places=2,
@@ -376,7 +382,8 @@ class Invoice(models.Model):
 
     @property
     def total_cost(self) -> Decimal:
-        return self.prep_rate * self.preps_taught + self.hour_rate * self.hours_taught + self.extras + self.adjustment
+        return (self.prep_rate * self.preps_taught + self.hour_rate * self.hours_taught +
+                self.extras + self.adjustment - self.credits)
 
     @property
     def total_owed(self) -> Decimal:
