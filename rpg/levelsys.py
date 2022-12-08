@@ -14,6 +14,7 @@ from django.utils import timezone
 from evans_django_tools import VERBOSE_LOG_LEVEL
 from exams.models import ExamAttempt, MockCompleted
 from markets.models import Guess
+from payments.models import Job
 from reversion.models import Version
 from roster.models import Student
 from sql_util.aggregates import SubqueryCount, SubquerySum
@@ -115,6 +116,7 @@ class LevelInfoDict(TypedDict):
     hint_spades: int
     suggest_unit_set: SuggestUnitSet
     mock_completes: QuerySet[MockCompleted]
+    completed_jobs: QuerySet[Job]
 
 
 def get_week_count(dates: List[datetime]) -> int:
@@ -146,6 +148,7 @@ def get_level_info(student: Student) -> LevelInfoDict:
     diamond_qset = AchievementUnlock.objects.filter(user=student.user)
     total_diamonds = diamond_qset.aggregate(s=Sum('achievement__diamonds'))['s'] or 0
 
+    # a billion unrelated spades items lol
     quiz_attempts = ExamAttempt.objects.filter(student__user=student.user)
     quiz_attempts = quiz_attempts.order_by('quiz__family', 'quiz__number')
     quest_completes = QuestComplete.objects.filter(student__user=student.user)
@@ -171,10 +174,13 @@ def get_level_info(student: Student) -> LevelInfoDict:
     hints_written = hints_written.filter(revision__user_id=student.user.id)
     hints_written = hints_written.values_list('revision__date_created', flat=True)
     hint_spades = get_week_count(list(hints_written))
+    completed_jobs = Job.objects.filter(
+        assignee__user=student.user, progress='VFD').select_related('folder')
 
-    total_spades = (quiz_attempts.aggregate(Sum('score'))['score__sum'] or 0) * 2
-    total_spades += quest_completes.aggregate(Sum('spades'))['spades__sum'] or 0
-    total_spades += market_guesses.aggregate(Sum('score'))['score__sum'] or 0
+    total_spades = (quiz_attempts.aggregate(total=Sum('score'))['total'] or 0) * 2
+    total_spades += quest_completes.aggregate(total=Sum('spades'))['total'] or 0
+    total_spades += market_guesses.aggregate(total=Sum('score'))['total'] or 0
+    total_spades += completed_jobs.aggregate(total=Sum('spades_bounty'))['total'] or 0
     total_spades += mock_completes.count() * 3
     total_spades += len(suggest_units_set)
     # TODO total_spades += hint_spades
@@ -203,6 +209,7 @@ def get_level_info(student: Student) -> LevelInfoDict:
         'mock_completes': mock_completes,
         'suggest_unit_set': suggest_units_set,
         'hint_spades': hint_spades,
+        'completed_jobs': completed_jobs,
     }
     return level_data
 
@@ -225,14 +232,23 @@ def annotate_student_queryset_with_scores(queryset: QuerySet[Student]) -> QueryS
         clubs_Z=SubquerySum(
             'user__student__pset__clubs',
             filter=Q(status='A', eligible=True, unit__code__startswith='Z')),
-        hearts=SubquerySum('user__student__pset__hours', filter=Q(status='A', eligible=True)),
+        hearts=SubquerySum(
+            'user__student__pset__hours',
+            filter=Q(status='A', eligible=True),
+        ),
         diamonds=SubquerySum('user__achievementunlock__achievement__diamonds'),
         pset_B_count=SubqueryCount(
-            'pset__pk', filter=Q(eligible=True, unit__code__startswith='B')),
+            'pset__pk',
+            filter=Q(eligible=True, unit__code__startswith='B'),
+        ),
         pset_D_count=SubqueryCount(
-            'pset__pk', filter=Q(eligible=True, unit__code__startswith='D')),
+            'pset__pk',
+            filter=Q(eligible=True, unit__code__startswith='D'),
+        ),
         pset_Z_count=SubqueryCount(
-            'pset__pk', filter=Q(eligible=True, unit__code__startswith='Z')),
+            'pset__pk',
+            filter=Q(eligible=True, unit__code__startswith='Z'),
+        ),
         spades_quizzes=SubquerySum('user__student__examattempt__score'),
         spades_quests=SubquerySum('user__student__questcomplete__spades'),
         spades_markets=Subquery(guess_subquery),  # type: ignore
@@ -240,6 +256,10 @@ def annotate_student_queryset_with_scores(queryset: QuerySet[Student]) -> QueryS
         spades_suggestions=SubqueryCount(
             'user__problemsuggestion__unit__pk',
             filter=Q(resolved=True, eligible=True),
+        ),
+        spades_jobs=SubquerySum(
+            'user__workers__job__spades_bounty',
+            filter=Q(progress='VFD'),
         ),
         # hints definitely not handled here
     )
@@ -264,10 +284,10 @@ def get_student_rows(queryset: QuerySet[Student]) -> List[Dict[str, Any]]:
         row['student'] = student
         row['spades'] = (getattr(student, 'spades_quizzes', 0) or 0) * 2
         row['spades'] += (getattr(student, 'spades_quests', 0) or 0)
-        # TODO markets
         row['spades'] += (getattr(student, 'spades_count_mocks', 0) or 0) * 3
         row['spades'] += (getattr(student, 'spades_suggestions', 0) or 0)
         row['spades'] += (getattr(student, 'spades_markets', 0) or 0)
+        row['spades'] += (getattr(student, 'spades_jobs', 0) or 0)
         # TODO hints
         row['hearts'] = getattr(student, 'hearts', 0) or 0
         row['clubs'] = getattr(student, 'clubs_any', 0) or 0

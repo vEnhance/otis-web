@@ -50,6 +50,12 @@
       </td>
       <td>1♠ for each distinct unit</td>
     </tr>
+    <tr>
+      <td>
+        <a href="{% url 'job-index' %}">Internships</a>
+      </td>
+      <td>Varies</td>
+    </tr>
   </table>
   <p>The above list is not exhaustive; spades can be awarded for other things too.</p>
   <table class="table table-sm">
@@ -88,8 +94,12 @@
               +3{{ meters.spades.unit }}
             </b>
           </td>
-          <td>{{ mc.exam.family }} {{ mc.exam.number }}</td>
-          <td>{{ mc.exam.due_date|default_if_none:"—" }}</td>
+          <td>
+            {{ mc.exam.family }} {{ mc.exam.number }}
+          </td>
+          <td>
+            {{ mc.exam.due_date|default_if_none:"—" }}
+          </td>
         </tr>
       {% endfor %}
       {% for u in suggest_unit_set %}
@@ -115,6 +125,21 @@
           </td>
           <td>
             <a href="{{ guess.market.get_absolute_url }}">{{ guess.market.slug }}</a>
+          </td>
+          <td>
+            {{ guess.market.end_date }}
+          </td>
+        </tr>
+      {% endfor %}
+      {% for job in completed_jobs %}
+        <tr>
+          <td style="color:{{ meters.spades.color }};">
+            <b>
+              +{{ job.spades_bounty }}{{ meters.spades.unit }}
+            </b>
+          </td>
+          <td>
+            <a href="{{ job.get_absolute_url }}">{{ job.name }} ({{ job.folder.name }})</a>
           </td>
           <td>
             {{ guess.market.end_date }}

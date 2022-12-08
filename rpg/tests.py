@@ -3,6 +3,7 @@ from dashboard.factories import PSetFactory
 from django.utils import timezone
 from evans_django_tools.testsuite import EvanTestCase
 from exams.factories import ExamAttemptFactory, TestFactory
+from payments.factories import JobFactory, WorkerFactory
 from roster.factories import StudentFactory
 from roster.models import Student
 
@@ -136,6 +137,16 @@ class TestLevelSystem(EvanTestCase):
         ExamAttemptFactory.create(student=carol, score=2)
         QuestCompleteFactory.create(student=carol, spades=5)
 
+        worker_alice = WorkerFactory.create(user=alice.user)
+        JobFactory.create(
+            assignee=worker_alice, spades_bounty=2, progress='VFD', semester=alice.semester)
+        JobFactory.create(assignee=worker_alice, spades_bounty=5, progress='VFD')
+        JobFactory.create(assignee=worker_alice, spades_bounty=9, progress='REV')
+        worker_bob = WorkerFactory.create(user=bob.user)
+        JobFactory.create(assignee=worker_bob, spades_bounty=4, progress='VFD')
+        worker_donald = WorkerFactory.create(user=donald.user)
+        JobFactory.create(assignee=worker_donald, spades_bounty=4, progress='NEW')
+
         # make levels
         LevelFactory.create_batch(size=36)
 
@@ -152,6 +163,7 @@ class TestLevelSystem(EvanTestCase):
         self.assertEqual(getattr(alice, 'hearts'), 84)
         self.assertEqual(getattr(alice, 'spades_quizzes'), 7)
         self.assertEqual(getattr(alice, 'spades_quests'), 5)
+        self.assertEqual(getattr(alice, 'spades_jobs'), 7)
         self.assertEqual(getattr(alice, 'diamonds'), 11)
 
         self.assertEqual(getattr(bob, 'num_psets'), 2)
@@ -161,6 +173,7 @@ class TestLevelSystem(EvanTestCase):
         self.assertEqual(getattr(bob, 'hearts'), 64)
         self.assertEqual(getattr(bob, 'spades_quizzes'), 3)
         self.assertEqual(getattr(bob, 'spades_quests'), None)
+        self.assertEqual(getattr(bob, 'spades_jobs'), 4)
         self.assertEqual(getattr(bob, 'diamonds'), 6)
 
         self.assertEqual(getattr(carol, 'num_psets'), 0)
@@ -170,6 +183,7 @@ class TestLevelSystem(EvanTestCase):
         self.assertEqual(getattr(carol, 'hearts'), None)
         self.assertEqual(getattr(carol, 'spades_quizzes'), 6)
         self.assertEqual(getattr(carol, 'spades_quests'), 5)
+        self.assertEqual(getattr(carol, 'spades_jobs'), None)
         self.assertEqual(getattr(carol, 'diamonds'), 9)
 
         self.assertEqual(getattr(donald, 'num_psets'), 0)
@@ -179,6 +193,7 @@ class TestLevelSystem(EvanTestCase):
         self.assertEqual(getattr(donald, 'hearts'), None)
         self.assertEqual(getattr(donald, 'spades_quizzes'), None)
         self.assertEqual(getattr(donald, 'spades_quests'), None)
+        self.assertEqual(getattr(donald, 'spades_jobs'), None)
         self.assertEqual(getattr(donald, 'diamonds'), None)
 
         rows = get_student_rows(queryset)
@@ -186,18 +201,18 @@ class TestLevelSystem(EvanTestCase):
 
         self.assertEqual(rows[0]['clubs'], 520)
         self.assertEqual(rows[0]['hearts'], 84)
-        self.assertEqual(rows[0]['spades'], 19)
+        self.assertEqual(rows[0]['spades'], 26)
         self.assertEqual(rows[0]['diamonds'], 11)
-        self.assertEqual(rows[0]['level'], 38)
-        self.assertEqual(rows[0]['level_name'], 'Level 38')
+        self.assertEqual(rows[0]['level'], 39)
+        self.assertEqual(rows[0]['level_name'], 'Level 39')
         self.assertAlmostEqual(rows[0]['insanity'], 0.25)
 
         self.assertAlmostEqual(rows[1]['clubs'], 254.8)
         self.assertEqual(rows[1]['hearts'], 64)
-        self.assertEqual(rows[1]['spades'], 6)
+        self.assertEqual(rows[1]['spades'], 10)
         self.assertEqual(rows[1]['diamonds'], 6)
-        self.assertEqual(rows[1]['level'], 27)
-        self.assertEqual(rows[1]['level_name'], 'Level 27')
+        self.assertEqual(rows[1]['level'], 28)
+        self.assertEqual(rows[1]['level_name'], 'Level 28')
         self.assertAlmostEqual(rows[1]['insanity'], 0.5)
 
         self.assertEqual(rows[2]['clubs'], 0)
