@@ -142,7 +142,7 @@
             <a href="{{ job.get_absolute_url }}">{{ job.name }} ({{ job.folder.name }})</a>
           </td>
           <td>
-            {{ guess.market.end_date }}
+            {{ job.updated_at }}
           </td>
         </tr>
       {% endfor %}
