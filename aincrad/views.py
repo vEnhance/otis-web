@@ -1,4 +1,5 @@
 import json
+import logging
 from decimal import Decimal
 from hashlib import sha256
 from typing import Any, Dict, List, Literal, TypedDict, Union
@@ -209,6 +210,18 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
             job: Job = Job.objects.get(pk=data['pk'])
             job.progress = data['progress']
             job.save()
+            if data['progress'] == 'VFD' and job.payment_preference == 'INV':
+                assert job.assignee is not None
+                assert job.semester is not None
+                try:
+                    invoice = Invoice.objects.get(
+                        student__semester=job.semester, student__user=job.assignee.user)
+                except Invoice.DoesNotExist:
+                    logging.warn(
+                        f"Could not get invoice for {job.assignee.user} and {job.semester}")
+                else:
+                    invoice.credits += job.usd_bounty
+                    invoice.save()
             return JsonResponse({'result': 'success', 'changed': True}, status=200)
         else:
             return JsonResponse({'result': 'success', 'changed': False}, status=200)
