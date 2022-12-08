@@ -61,10 +61,12 @@
             <td colspan="2">Adjustment</td>
             <td class="text-end">{{ invoice.adjustment|stringformat:"+.2f" }}</td>
           </tr>
-          <tr>
+          <th>
             <td colspan="2">Total cost</td>
             <td class="text-end">{{ invoice.total_cost }}</td>
-          </tr>
+          </th>
+        </tbody>
+        <tfoot>
           <tr>
             <td colspan="2">Total paid</td>
             <td class="text-end">{{ invoice.total_paid }}</td>
@@ -73,8 +75,6 @@
             <td colspan="2">Credits</td>
             <td class="text-end">{{ invoice.credits|stringformat:"+.2f" }}</td>
           </tr>
-        </tbody>
-        <tfoot>
           <tr class="{% if invoice.total_owed > 0 %}table-warning{% else %}table-info{% endif %}">
             <th colspan="2">Total owed to Evan</th>
             {% if invoice.total_owed <= 0 %}
