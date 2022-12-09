@@ -22,6 +22,8 @@ up a local server on a standard Unix environment.
 
 ## Installation instructions
 
+Video tutorial: https://youtu.be/W27XcqeXp20
+
 ### Standard Linux environment
 
 0. [Fork the repository first](https://docs.github.com/en/get-started/quickstart/fork-a-repo)
