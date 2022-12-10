@@ -109,3 +109,4 @@ class JobAdmin(ImportExportModelAdmin):
         'progress',
         'payment_preference',
     )
+    autocomplete_fields = ('assignee',)
