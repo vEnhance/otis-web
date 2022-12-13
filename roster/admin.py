@@ -313,8 +313,8 @@ def build_students(queryset: QuerySet[StudentRegistration]) -> int:
                 hours_taught = 0
             invoice = Invoice(student=student, preps_taught=n, hours_taught=hours_taught)
             first_payment_deadline = student.semester.first_payment_deadline
-            if (first_payment_deadline is not None and timezone.now() >=
-                (grace_deadline := first_payment_deadline + timedelta(days=7))):
+            if (first_payment_deadline is not None and first_payment_deadline <=
+                (grace_deadline := timezone.now() + timedelta(days=7))):
                 invoice.forgive_date = grace_deadline
             invoices_to_create.append(invoice)
         Invoice.objects.bulk_create(invoices_to_create)
