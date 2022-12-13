@@ -86,6 +86,11 @@ class QuestCompleteAdmin(admin.ModelAdmin):
         'student__semester',
         'category',
     )
+    list_display_links = (
+        'pk',
+        'title',
+        'student',
+    )
 
 
 @admin.register(BonusLevel)
