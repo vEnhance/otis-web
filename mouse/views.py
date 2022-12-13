@@ -61,7 +61,9 @@ def usemo_grader(request: HttpRequest) -> HttpResponse:
                     line = line.strip()
                     if not line:
                         continue
-                    name = line[:line.index('\t')].strip()
+                    if '\t' in line:
+                        line = line[:line.index('\t')]
+                    name = line.strip()
                     if s.user.get_full_name().lower() == name.lower():
                         qcs.append(
                             QuestComplete(
