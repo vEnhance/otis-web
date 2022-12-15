@@ -37,20 +37,30 @@
       On the other hand, you retain copyright/ownership of your writing,
       so you can also use it for whatever you want elsewhere.
     </li>
-    <li>
-      <strong>You must follow the LaTeX style guide</strong> available at
-      <a href="https://web.evanchen.cc/latex-style-guide.html">https://web.evanchen.cc/latex-style-guide.html</a>.
-      Submissions that don't follow the style guide will be returned
-      with revisions requested until these requirements are met.
-    </li>
-    <li>
-      What you see is just a rough preview for your own convenience.
-      Evan will eventually get the underlying source code;
-      so what shows up in the preview doesn't matter.
-      You should not do any hacks to try and get the preview to
-      render the way you want.
-    </li>
   </ul>
+  <div class="alert alert-info">
+    <h3 class="alert-heading">LaTeX notes</h3>
+    <ul>
+      <li>
+        <strong>You must follow the LaTeX style guide</strong> available at
+        <a href="https://web.evanchen.cc/latex-style-guide.html">https://web.evanchen.cc/latex-style-guide.html</a>.
+        Submissions that don't follow the style guide will be returned
+        with revisions requested until these requirements are met.
+      </li>
+      <li>
+        <p>
+          What you see is just a rough preview for your own convenience.
+          Evan will eventually get the underlying source code;
+          so what shows up in the preview doesn't matter.
+        </p>
+        <p>
+          <strong>Do NOT do hacks - the preview.</strong>
+          For example, just type <code>\emph{...}</code> for italics,
+          do not hack it with <code>$\emph{...}$</code>.
+        </p>
+      </li>
+    </ul>
+  </div>
   {% load crispy_forms_tags %}
   <form action="{{ request.path }}" method="post" class="form">
     {% csrf_token %}
