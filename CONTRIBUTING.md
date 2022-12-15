@@ -14,7 +14,6 @@ If you prefer videos to text, see:
 
 https://youtu.be/W27XcqeXp20
 
-
 ## Getting started
 
 ### Pre-reading
