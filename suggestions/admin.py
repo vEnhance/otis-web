@@ -11,10 +11,10 @@ class ProblemSuggestionAdmin(admin.ModelAdmin):
         'id',
         'user',
         'source',
+        'status',
         'description',
         'acknowledge',
         'eligible',
-        'status',
     )
     search_fields = (
         'user__first_name',
