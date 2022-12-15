@@ -173,15 +173,15 @@ class JobFolderList(LoginRequiredMixin, ListView[JobFolder]):
                 'job',
                 filter=Q(
                     job__assignee__isnull=False,
-                    job__progress="NEW",
+                    job__progress="JOB_NEW",
                 ) | Q(
                     job__assignee__isnull=False,
-                    job__progress="SUB",
+                    job__progress="JOB_SUB",
                 ) | Q(
                     job__assignee__isnull=False,
-                    job__progress="REV",
+                    job__progress="JOB_REV",
                 )),
-            num_done=Count('job', filter=Q(job__progress="VFD"))).order_by('name')
+            num_done=Count('job', filter=Q(job__progress="JOB_VFD"))).order_by('name')
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
@@ -235,8 +235,9 @@ def job_claim(request: HttpRequest, pk: int) -> HttpResponse:
 
         if job.assignee is not None:
             messages.error(request, "This task is already claimed.")
-        elif (jobfolder.max_pending is not None and
-                jobs_already_claimed.exclude(progress="VFD").count() >= jobfolder.max_pending):
+        elif (
+            jobfolder.max_pending is not None and
+            jobs_already_claimed.exclude(progress="JOB_VFD").count() >= jobfolder.max_pending):
             messages.error(
                 request,
                 "You already reached the maximum number of pending tasks for this category.")
@@ -273,12 +274,12 @@ class JobUpdate(LoginRequiredMixin, UpdateView[Job, BaseModelForm[Job]]):
             raise PermissionDenied("Someone needs to claim this job first.")
         elif self.request.user != job.assignee.user:
             raise PermissionDenied("Can't submit for someone else's claim.")
-        elif job.status == "VFD":
+        elif job.status == "JOB_VFD":
             raise PermissionDenied("This job is already completed.")
         return response
 
     def form_valid(self, form: BaseModelForm[Job]):
-        self.object.progress = "SUB"
+        self.object.progress = "JOB_SUB"
         messages.success(self.request, "Successfully submitted.")
         return super().form_valid(form)
 

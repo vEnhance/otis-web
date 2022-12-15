@@ -55,9 +55,12 @@ class TestAincrad(EvanTestCase):
         PSetFactory.create_batch(4, student=old_alice, status='A')
         PSetFactory.create_batch(2, student=old_alice, status='P')
 
-        UnitInquiryFactory.create_batch(5, student=alice, action_type="UNLOCK", status="ACC")
-        UnitInquiryFactory.create_batch(2, student=alice, action_type="DROP", status="ACC")
-        UnitInquiryFactory.create_batch(3, student=alice, action_type="UNLOCK", status="NEW")
+        UnitInquiryFactory.create_batch(
+            5, student=alice, action_type="INQ_ACT_UNLOCK", status="INQ_ACC")
+        UnitInquiryFactory.create_batch(
+            2, student=alice, action_type="INQ_ACT_DROP", status="INQ_ACC")
+        UnitInquiryFactory.create_batch(
+            3, student=alice, action_type="INQ_ACT_UNLOCK", status="INQ_NEW")
 
         alice.curriculum.add(submitted_unit)
         alice.curriculum.add(requested_unit)

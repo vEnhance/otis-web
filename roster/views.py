@@ -250,7 +250,7 @@ def inquiry(request: AuthHttpRequest, student_id: int) -> HttpResponse:
                 student=student,
                 action_type=inquiry.action_type,
                 created_at__gte=timezone.now() - datetime.timedelta(seconds=90),
-                status="NEW",
+                status="INQ_NEW",
             ).exists():
                 messages.warning(
                     request, "The same petition already was "
@@ -259,26 +259,26 @@ def inquiry(request: AuthHttpRequest, student_id: int) -> HttpResponse:
                 inquiry.save()
 
                 num_past_unlock_inquiries = current_inquiries.filter(
-                    action_type="UNLOCK").count()
+                    action_type="INQ_ACT_UNLOCK").count()
                 unlocked_count = current_inquiries.filter(
-                    action_type="UNLOCK",
-                    status="NEW").count() + student.unlocked_units.count()
+                    action_type="INQ_ACT_UNLOCK",
+                    status="INQ_NEW").count() + student.unlocked_units.count()
 
                 # auto reject criteria
-                auto_reject_criteria = inquiry.action_type == "UNLOCK" and unlocked_count > 9
+                auto_reject_criteria = inquiry.action_type == "INQ_ACT_UNLOCK" and unlocked_count > 9
 
                 # auto hold criteria
                 num_psets = PSet.objects.filter(student=student).count()
                 auto_hold_criteria = (num_past_unlock_inquiries > (10 + 1.5 * num_psets))
 
                 # auto-acceptance criteria
-                auto_accept_criteria = (inquiry.action_type == "APPEND")
+                auto_accept_criteria = (inquiry.action_type == "INQ_ACT_APPEND")
                 auto_accept_criteria |= (
                     num_past_unlock_inquiries <= 6 and unlocked_count < 9 and
                     (not auto_hold_criteria and not auto_reject_criteria))
 
                 if auto_reject_criteria and not request.user.is_staff:
-                    inquiry.status = "REJ"
+                    inquiry.status = "INQ_REJ"
                     inquiry.save()
                     messages.error(
                         request,
@@ -287,7 +287,7 @@ def inquiry(request: AuthHttpRequest, student_id: int) -> HttpResponse:
                     inquiry.run_accept()
                     messages.success(request, "Petition automatically processed.")
                 elif auto_hold_criteria:
-                    inquiry.status = "HOLD"
+                    inquiry.status = "INQ_HOLD"
                     inquiry.save()
                     messages.warning(
                         request, "You have submitted an abnormally large number of petitions " +

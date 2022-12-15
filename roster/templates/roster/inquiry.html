@@ -52,13 +52,13 @@
           <th>{{ inquiry.unit }}</th>
           <td>{{ inquiry.get_action_type_display }}</td>
           <td>
-            {% if inquiry.status == "NEW" %}
+            {% if inquiry.status == "INQ_NEW" %}
               Pending
-            {% elif inquiry.status == "ACC" %}
+            {% elif inquiry.status == "INQ_ACC" %}
               <strong class="text-success">Accepted</strong>
-            {% elif inquiry.status == "REJ" %}
+            {% elif inquiry.status == "INQ_REJ" %}
               <strong class="text-danger">Rejected</strong>
-            {% elif inquiry.status == "HOLD" %}
+            {% elif inquiry.status == "INQ_HOLD" %}
               <strong class="text-warning">On hold</strong>
             {% endif %}
           </td>

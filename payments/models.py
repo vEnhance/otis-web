@@ -112,18 +112,18 @@ class JobFolder(models.Model):
 
 class Job(models.Model):
     PROGRESS_CHOICES = (
-        ("NEW", "In progress"),
-        ("REV", "Revisions requested"),
-        ("SUB", "Submitted"),
-        ("VFD", "Completed"),
+        ("JOB_NEW", "In progress"),
+        ("JOB_REV", "Revisions requested"),
+        ("JOB_SUB", "Submitted"),
+        ("JOB_VFD", "Completed"),
     )
     PREF_CHOICES = (
-        ("", "Not specified"),
-        ("INV", "Invoice credits"),
-        ("PB", "Pro bono"),
-        ("PPL", "PayPal"),
-        ("VNM", "Venmo"),
-        ("ZLL", "Zelle"),
+        ("PREF_NONE", "Not specified"),
+        ("PREF_INVCRD", "Invoice credits"),
+        ("PREF_PROBONO", "Pro bono"),
+        ("PREF_PAYPAL", "PayPal"),
+        ("PREF_VENMO", "Venmo"),
+        ("PREF_ZELLE", "Zelle"),
     )
 
     folder = models.ForeignKey(
@@ -157,13 +157,13 @@ class Job(models.Model):
     )
 
     progress = models.CharField(
-        max_length=3,
-        default='NEW',
+        max_length=8,
+        default='JOB_NEW',
         choices=PROGRESS_CHOICES,
         help_text='The current status of the job',
     )
     payment_preference = models.CharField(
-        max_length=3,
+        max_length=15,
         choices=PREF_CHOICES,
         default='',
         blank=True,
@@ -224,8 +224,8 @@ def get_semester_invoices_with_annotations(semester: Semester) -> QuerySet[Invoi
     job_subquery = Job.objects.filter(
         assignee__user=OuterRef('student__user'),
         semester=semester,
-        progress='VFD',
-        payment_preference='INV',
+        progress='JOB_VFD',
+        payment_preference='PREF_INVCRD',
     ).order_by().values('assignee__user').annotate(total=Sum('usd_bounty')).values('total')
 
     return Invoice.objects.filter(student__semester=semester).annotate(

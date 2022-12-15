@@ -386,11 +386,11 @@ class UnitInquiryAdmin(admin.ModelAdmin):
 
     def hold_inquiry(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
         del request
-        queryset.update(status='HOLD')
+        queryset.update(status='INQ_HOLD')
 
     def reject_inquiry(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
         del request
-        queryset.update(status='REJ')
+        queryset.update(status='INQ_REJ')
 
     def accept_inquiry(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
         del request
@@ -399,7 +399,7 @@ class UnitInquiryAdmin(admin.ModelAdmin):
 
     def reset_inquiry(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
         del request
-        queryset.update(status='NEW')
+        queryset.update(status='INQ_NEW')
 
 
 # REGISTRATION

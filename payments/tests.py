@@ -153,7 +153,7 @@ class WorkerTest(EvanTestCase):
         )
 
         for i in range(0, 3):
-            Job.objects.filter(pk__in=[jobs[i].pk for i in range(3)]).update(progress="VFD")
+            Job.objects.filter(pk__in=[jobs[i].pk for i in range(3)]).update(progress="JOB_VFD")
 
         for i in range(3, 5):
             self.assertContains(
@@ -187,45 +187,45 @@ class InvoiceTest(EvanTestCase):
 
         JobFactory.create(
             assignee=worker_alice,
-            progress="VFD",
-            payment_preference="INV",
+            progress="JOB_VFD",
+            payment_preference="PREF_INVCRD",
             usd_bounty=17.64,
             semester=semester,
         )
         JobFactory.create(
             assignee=worker_alice,
-            progress="VFD",
-            payment_preference="INV",
+            progress="JOB_VFD",
+            payment_preference="PREF_INVCRD",
             usd_bounty=40.96,
             semester=semester,
         )
         JobFactory.create(
             assignee=worker_alice,
-            progress="VFD",
-            payment_preference="PB",
+            progress="JOB_VFD",
+            payment_preference="PREF_PROBONO",
             usd_bounty=1000,
             semester=semester,
         )
         JobFactory.create(
             assignee=worker_alice,
-            progress="REV",
-            payment_preference="INV",
+            progress="JOB_REV",
+            payment_preference="PREF_INVCRD",
             usd_bounty=1000,
             semester=semester,
         )
         JobFactory.create(
             assignee=worker_carol,
             assignee__user=carol.user,
-            progress="VFD",
-            payment_preference="INV",
+            progress="JOB_VFD",
+            payment_preference="PREF_INVCRD",
             usd_bounty=130,
             semester=semester,
         )
         JobFactory.create(
             assignee=worker_carol,
             assignee__user=carol.user,
-            progress="VFD",
-            payment_preference="INV",
+            progress="JOB_VFD",
+            payment_preference="PREF_INVCRD",
             usd_bounty=130,
             # but create a random other semester for it
         )

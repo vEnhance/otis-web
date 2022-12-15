@@ -175,7 +175,7 @@ def get_level_info(student: Student) -> LevelInfoDict:
     hints_written = hints_written.values_list('revision__date_created', flat=True)
     hint_spades = get_week_count(list(hints_written))
     completed_jobs = Job.objects.filter(
-        assignee__user=student.user, progress='VFD').select_related('folder')
+        assignee__user=student.user, progress='JOB_VFD').select_related('folder')
 
     total_spades = (quiz_attempts.aggregate(total=Sum('score'))['total'] or 0) * 2
     total_spades += quest_completes.aggregate(total=Sum('spades'))['total'] or 0
@@ -259,7 +259,7 @@ def annotate_student_queryset_with_scores(queryset: QuerySet[Student]) -> QueryS
         ),
         spades_jobs=SubquerySum(
             'user__workers__job__spades_bounty',
-            filter=Q(progress='VFD'),
+            filter=Q(progress='JOB_VFD'),
         ),
         # hints definitely not handled here
     )

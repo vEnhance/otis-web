@@ -106,12 +106,15 @@ PSET_VENUEQ_INIT_KEYS = (
 )
 
 INQUIRY_VENUEQ_INIT_QUERYSET = UnitInquiry.objects.filter(
-    status="NEW",
+    status="INQ_NEW",
     student__semester__active=True,
     student__legit=True,
 ).annotate(
     total_inquiry_count=SubqueryCount('student__unitinquiry'),
-    unlock_inquiry_count=SubqueryCount('student__unitinquiry', filter=Q(action_type="UNLOCK")),
+    unlock_inquiry_count=SubqueryCount(
+        'student__unitinquiry',
+        filter=Q(action_type="INQ_ACT_UNLOCK"),
+    ),
 )
 INQUIRY_VENUEQ_INIT_KEYS = (
     'pk',
@@ -153,7 +156,7 @@ SUGGESTION_VENUEQ_INIT_KEYS = (
     'unit__code',
 )
 
-JOB_VENUEQ_INIT_QUERYSET = Job.objects.filter(progress='SUB')
+JOB_VENUEQ_INIT_QUERYSET = Job.objects.filter(progress='JOB_SUB')
 JOB_VENUEQ_INIT_KEYS = (
     'pk',
     'folder__name',
@@ -194,7 +197,7 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
         return JsonResponse({'result': 'success'}, status=200)
     elif action == 'accept_inquiries':
         for inquiry in UnitInquiry.objects.filter(
-            status="NEW",
+            status="INQ_NEW",
             student__semester__active=True,
             student__legit=True,
         ):
@@ -207,11 +210,11 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
         suggestion.save()
         return JsonResponse({'result': 'success'}, status=200)
     elif action == 'triage_job':
-        if data['progress'] != 'SUB':
+        if data['progress'] != 'JOB_SUB':
             job: Job = Job.objects.get(pk=data['pk'])
             job.progress = data['progress']
             job.save()
-            if data['progress'] == 'VFD' and job.payment_preference == 'INV':
+            if data['progress'] == 'JOB_VFD' and job.payment_preference == 'PREF_INVCRD':
                 assert job.assignee is not None
                 assert job.semester is not None
                 try:

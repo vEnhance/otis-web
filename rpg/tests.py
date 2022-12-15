@@ -139,13 +139,13 @@ class TestLevelSystem(EvanTestCase):
 
         worker_alice = WorkerFactory.create(user=alice.user)
         JobFactory.create(
-            assignee=worker_alice, spades_bounty=2, progress='VFD', semester=alice.semester)
-        JobFactory.create(assignee=worker_alice, spades_bounty=5, progress='VFD')
-        JobFactory.create(assignee=worker_alice, spades_bounty=9, progress='REV')
+            assignee=worker_alice, spades_bounty=2, progress='JOB_VFD', semester=alice.semester)
+        JobFactory.create(assignee=worker_alice, spades_bounty=5, progress='JOB_VFD')
+        JobFactory.create(assignee=worker_alice, spades_bounty=9, progress='JOB_REV')
         worker_bob = WorkerFactory.create(user=bob.user)
-        JobFactory.create(assignee=worker_bob, spades_bounty=4, progress='VFD')
+        JobFactory.create(assignee=worker_bob, spades_bounty=4, progress='JOB_VFD')
         worker_donald = WorkerFactory.create(user=donald.user)
-        JobFactory.create(assignee=worker_donald, spades_bounty=4, progress='NEW')
+        JobFactory.create(assignee=worker_donald, spades_bounty=4, progress='JOB_NEW')
 
         # make levels
         LevelFactory.create_batch(size=36)

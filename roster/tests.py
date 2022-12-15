@@ -200,7 +200,7 @@ class RosterTest(EvanTestCase):
                 alice.pk,
                 data={
                     'unit': units[i].pk,
-                    'action_type': 'UNLOCK',
+                    'action_type': 'INQ_ACT_UNLOCK',
                     'explanation': 'hi',
                 })
             self.assertHas(resp, "Petition automatically processed")
@@ -212,7 +212,7 @@ class RosterTest(EvanTestCase):
                 alice.pk,
                 data={
                     'unit': units[19].pk,
-                    "action_type": "UNLOCK",
+                    "action_type": "INQ_ACT_UNLOCK",
                     'explanation': 'hi',
                 }), "Petition submitted, wait for it!")
         self.assertEqual(alice.curriculum.count(), 6)
@@ -226,7 +226,7 @@ class RosterTest(EvanTestCase):
                     alice.pk,
                     data={
                         'unit': units[i].pk,
-                        "action_type": "UNLOCK",
+                        "action_type": "INQ_ACT_UNLOCK",
                         'explanation': 'hi',
                     }), "Petition automatically processed")
         self.assertEqual(alice.curriculum.count(), 10)
@@ -240,7 +240,7 @@ class RosterTest(EvanTestCase):
                     alice.pk,
                     data={
                         'unit': units[i].pk,
-                        "action_type": "UNLOCK",
+                        "action_type": "INQ_ACT_UNLOCK",
                         'explanation': 'hi',
                     }), "more than 9 unfinished")
         self.assertEqual(alice.curriculum.count(), 10)
@@ -253,7 +253,7 @@ class RosterTest(EvanTestCase):
                     alice.pk,
                     data={
                         'unit': units[i].pk,
-                        "action_type": "APPEND",
+                        "action_type": "INQ_ACT_APPEND",
                         'explanation': 'hi',
                     }), "Petition automatically processed")
         self.assertEqual(alice.curriculum.count(), 13)
@@ -265,7 +265,7 @@ class RosterTest(EvanTestCase):
                 alice.pk,
                 data={
                     "unit": units[19].pk,
-                    "action_type": "DROP",
+                    "action_type": "INQ_ACT_DROP",
                     'explanation': 'hi',
                 }), "abnormally large")
 
@@ -277,7 +277,7 @@ class RosterTest(EvanTestCase):
                     alice.pk,
                     data={
                         'unit': units[i].pk,
-                        "action_type": "DROP",
+                        "action_type": "INQ_ACT_DROP",
                         'explanation': 'hi',
                     }), "Petition automatically processed")
         self.assertEqual(alice.curriculum.count(), 8)
@@ -289,7 +289,7 @@ class RosterTest(EvanTestCase):
                 alice.pk,
                 data={
                     'unit': units[5].pk,
-                    "action_type": "UNLOCK",
+                    "action_type": "INQ_ACT_UNLOCK",
                     'explanation': 'hi',
                 }), "Petition automatically processed")
         self.assertEqual(alice.curriculum.count(), 9)

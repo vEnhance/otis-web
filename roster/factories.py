@@ -46,7 +46,7 @@ class UnitInquiryFactory(DjangoModelFactory):
 
     student = SubFactory(StudentFactory)
     unit = SubFactory(UnitFactory)
-    action_type = "UNLOCK"
+    action_type = "INQ_ACT_UNLOCK"
     explanation = Faker('sentence')
 
 

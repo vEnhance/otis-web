@@ -408,22 +408,22 @@ class UnitInquiry(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     action_type = models.CharField(
-        max_length=10,
+        max_length=15,
         choices=(
-            ("UNLOCK", "Unlock now"),
-            ("APPEND", "Add for later"),
-            ("DROP", "Drop"),
+            ("INQ_ACT_UNLOCK", "Unlock now"),
+            ("INQ_ACT_APPEND", "Add for later"),
+            ("INQ_ACT_DROP", "Drop"),
         ),
         help_text="Describe the action you want to make.")
     status = models.CharField(
-        max_length=5,
+        max_length=10,
         choices=(
-            ("ACC", "Accepted"),
-            ("REJ", "Rejected"),
-            ("NEW", "Pending"),
-            ("HOLD", "On hold"),
+            ("INQ_ACC", "Accepted"),
+            ("INQ_REJ", "Rejected"),
+            ("INQ_NEW", "Pending"),
+            ("INQ_HOLD", "On hold"),
         ),
-        default="NEW",
+        default="INQ_NEW",
         help_text="The current status of the petition.")
     explanation = models.TextField(
         max_length=300, help_text="Short explanation for this request.")
@@ -438,17 +438,17 @@ class UnitInquiry(models.Model):
 
     def run_accept(self):
         unit = self.unit
-        if self.action_type == "UNLOCK":
+        if self.action_type == "INQ_ACT_UNLOCK":
             self.student.curriculum.add(unit)
             self.student.unlocked_units.add(unit)
-        elif self.action_type == "APPEND":
+        elif self.action_type == "INQ_ACT_APPEND":
             self.student.curriculum.add(unit)
-        elif self.action_type == "DROP":
+        elif self.action_type == "INQ_ACT_DROP":
             self.student.curriculum.remove(unit)
             self.student.unlocked_units.remove(unit)
         else:
             raise ValueError(f"No action {self.action_type}")
-        self.status = "ACC"
+        self.status = "INQ_ACC"
         self.save()
 
 
