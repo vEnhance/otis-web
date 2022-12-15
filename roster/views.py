@@ -486,7 +486,7 @@ def giga_chart(request: HttpRequest, format_as: str) -> HttpResponse:
                         for d in socials.filter(provider__iexact="Discord")),
             student.name,
             "Enabled" if student.enabled else "Disabled",
-            f'{invoice.debt:.2f}',
+            f'{invoice.debt:.2f}',  # type: ignore
             # student.track,
             days_since_last_seen,
             reg.grade if reg is not None else '',
@@ -495,7 +495,7 @@ def giga_chart(request: HttpRequest, format_as: str) -> HttpResponse:
             reg.aops_username if reg is not None else '',
             user.email,
             reg.parent_email if reg is not None else '',
-            round(invoice.owed),
+            round(invoice.total_owed),
             # invoice.preps_taught,
             # invoice.hours_taught,
             round(invoice.adjustment),
