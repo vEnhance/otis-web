@@ -22,8 +22,8 @@ class ProblemSuggestionCreate(LoginRequiredMixin,
         'unit',
         'weight',
         'source',
-        'description',
         'hyperlink',
+        'description',
         'statement',
         'solution',
         'comments',
@@ -67,8 +67,8 @@ class ProblemSuggestionUpdate(LoginRequiredMixin,
         'unit',
         'weight',
         'source',
-        'description',
         'hyperlink',
+        'description',
         'statement',
         'solution',
         'comments',
@@ -81,6 +81,7 @@ class ProblemSuggestionUpdate(LoginRequiredMixin,
         return reverse("suggest-update", kwargs=self.kwargs)
 
     def form_valid(self, form: BaseModelForm[ProblemSuggestion]):
+        self.object.status = "SUGG_NEW"
         messages.success(self.request, "Edits saved.")
         return super().form_valid(form)
 
