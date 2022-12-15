@@ -8,6 +8,13 @@ so consequently I want to be welcoming of people who are learning the ropes.
 Don't feel shy! I am happy to help you get up to speed
 and work with you as you pick things up.
 
+## Video tutorial
+
+If you prefer videos to text, see:
+
+https://youtu.be/W27XcqeXp20
+
+
 ## Getting started
 
 ### Pre-reading
