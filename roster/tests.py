@@ -1,3 +1,5 @@
+from typing import List
+
 from core.factories import SemesterFactory, UnitFactory, UnitGroupFactory, UserFactory  # NOQA
 from core.models import Semester, Unit, UnitGroup
 from django.conf import settings
@@ -20,7 +22,7 @@ class RosterTest(EvanTestCase):
         staff: Assistant = AssistantFactory.create()
         alice: Student = StudentFactory.create(assistant=staff)
 
-        unitgroups: list[UnitGroup] = UnitGroupFactory.create_batch(4)
+        unitgroups: List[UnitGroup] = UnitGroupFactory.create_batch(4)
         for unitgroup in unitgroups:
             for letter in 'BDZ':
                 UnitFactory.create(code=letter + unitgroup.subject[0] + 'W', group=unitgroup)
@@ -45,7 +47,7 @@ class RosterTest(EvanTestCase):
         self.assertHas(
             self.post('finalize', alice.pk, data={'submit': True}, follow=True),
             'You should select some units')
-        units: list[Unit] = UnitFactory.create_batch(20)
+        units: List[Unit] = UnitFactory.create_batch(20)
         alice.curriculum.set(units)
         self.assertHas(
             self.post('finalize', alice.pk, data={}, follow=True),
@@ -162,7 +164,7 @@ class RosterTest(EvanTestCase):
     def test_master_schedule(self) -> None:
         alice: Student = StudentFactory.create(
             user__first_name="Ada", user__last_name="Adalhaidis")
-        units: list[Unit] = UnitFactory.create_batch(10)
+        units: List[Unit] = UnitFactory.create_batch(10)
         alice.curriculum.set(units[0:8])
         self.login(UserFactory.create(is_staff=True))
         self.assertHas(
@@ -192,7 +194,7 @@ class RosterTest(EvanTestCase):
     def test_inquiry(self) -> None:
         firefly: Assistant = AssistantFactory.create()
         alice: Student = StudentFactory.create(assistant=firefly)
-        units: list[Unit] = UnitFactory.create_batch(20)
+        units: List[Unit] = UnitFactory.create_batch(20)
         self.login(alice)
         for i in range(6):
             resp = self.post(
