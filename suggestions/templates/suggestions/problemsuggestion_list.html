@@ -5,19 +5,27 @@
 {% block layout-content %}
   <p>Here are all the past suggestions that you ({{ request.user }}) have provided.</p>
   {% for suggestion in problem_suggestions %}
-    <div class="alert {% if suggestion.resolved %}alert-success{% else %}alert-primary{% endif %}">
+    <div class="alert {% if suggestion.status == "SUGG_EDIT" %} alert-warning {% elif suggestion.status == "SUGG_NEW" %} alert-primary {% elif suggestion.status == "SUGG_NOK" or suggestion.status == "SUGG_OK" %} alert-success {% elif suggestion.status == "SUGG_REJ" %} alert-secondary {% endif %}">
       <h3>
         <a href="{% url "suggest-update" suggestion.id %}">
-          {% if suggestion.resolved %}
-            Resolved {{ suggestion.source }} for {{ suggestion.unit.group }}
-          {% else %}
-            You suggested {{ suggestion.source }} for {{ suggestion.unit.group }}
+          {{ suggestion.source }}:
+          {% if suggestion.status == "SUGG_EDIT" %}
+            EDITS REQUESTED
+          {% elif suggestion.status == "SUGG_NEW" %}
+            Pending
+          {% elif suggestion.status == "SUGG_NOK" or suggestion.status == "SUGG_OK" %}
+            Approved
+          {% elif suggestion.status == "SUGG_REJ" %}
+            Rejected
           {% endif %}
         </a>
       </h3>
       <p>{{ suggestion.statement }}</p>
       <p>
         <b>Date</b>: {{ suggestion.created_at }}
+      </p>
+      <p>
+        <b>Unit</b>: {{ suggestion.unit }}, {{ suggestion.weight }}♣
       </p>
     </div>
   {% endfor %}

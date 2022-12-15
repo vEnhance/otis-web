@@ -4,6 +4,14 @@ from django.db import models
 
 
 class ProblemSuggestion(models.Model):
+    STATUS_CHOICES = (
+        ("SUGG_EDIT", "Edits requested"),
+        ("SUGG_NEW", "Pending"),
+        ("SUGG_NOK", "Nice rejection"),  # processed but given spades, not used though
+        ("SUGG_OK", "Accepted"),
+        ("SUGG_REJ", "Rejected"),
+    )
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -28,7 +36,13 @@ class ProblemSuggestion(models.Model):
         "(Uncheck for an anonymous contribution.)",
         default=True)
 
-    resolved = models.BooleanField(default=False, help_text="Whether staff has processed this.")
+    status = models.CharField(
+        max_length=10,
+        default='SUGG_NEW',
+        choices=STATUS_CHOICES,
+        help_text='The current status of the suggestion',
+    )
+
     eligible = models.BooleanField(
         default=True, help_text="Whether this suggestion is eligible for spades.")
     created_at = models.DateTimeField(auto_now_add=True)

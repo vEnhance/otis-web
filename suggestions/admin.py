@@ -14,7 +14,7 @@ class ProblemSuggestionAdmin(admin.ModelAdmin):
         'description',
         'acknowledge',
         'eligible',
-        'resolved',
+        'status',
     )
     search_fields = (
         'user__first_name',
@@ -28,7 +28,7 @@ class ProblemSuggestionAdmin(admin.ModelAdmin):
     )
     list_filter = (
         'eligible',
-        'resolved',
+        'status',
         'unit__group',
     )
     autocomplete_fields = (

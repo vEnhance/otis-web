@@ -132,9 +132,10 @@ INQUIRY_VENUEQ_INIT_KEYS = (
     'student__reg__graduation_year',
 )
 
-SUGGESTION_VENUEQ_INIT_QUERYSET = ProblemSuggestion.objects.filter(resolved=False)
+SUGGESTION_VENUEQ_INIT_QUERYSET = ProblemSuggestion.objects.filter(status='SUGG_NEW')
 SUGGESTION_VENUEQ_INIT_KEYS = (
     'pk',
+    'status',
     'eligible',
     'created_at',
     'user__first_name',
@@ -201,7 +202,7 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
         return JsonResponse({'result': 'success'}, status=200)
     elif action == 'mark_suggestion':
         suggestion = get_object_or_404(ProblemSuggestion, pk=data['pk'])
-        suggestion.resolved = True
+        suggestion.status = data['status']
         suggestion.eligible = data['eligible']
         suggestion.save()
         return JsonResponse({'result': 'success'}, status=200)

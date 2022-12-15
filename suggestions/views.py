@@ -100,7 +100,7 @@ class ProblemSuggestionList(LoginRequiredMixin, ListView[ProblemSuggestion]):
         if not isinstance(self.request.user, User):
             raise PermissionDenied("Please log in.")
         queryset = ProblemSuggestion.objects.filter(user=self.request.user)
-        queryset = queryset.order_by('resolved', 'created_at')
+        queryset = queryset.order_by('status', 'created_at')
         return queryset
 
 

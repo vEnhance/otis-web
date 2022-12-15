@@ -162,7 +162,7 @@ def get_level_info(student: Student) -> LevelInfoDict:
     ).order_by('-market__end_date').select_related('market')
     suggested_units_queryset = ProblemSuggestion.objects.filter(
         user=student.user,
-        resolved=True,
+        status__in=('SUGG_NOK', 'SUGG_OK'),
         eligible=True,
     ).values_list(
         'unit__pk',
@@ -255,7 +255,7 @@ def annotate_student_queryset_with_scores(queryset: QuerySet[Student]) -> QueryS
         spades_count_mocks=SubqueryCount('user__student__mockcompleted'),
         spades_suggestions=SubqueryCount(
             'user__problemsuggestion__unit__pk',
-            filter=Q(resolved=True, eligible=True),
+            filter=Q(status__in=("SUGG_NOK", "SUGG_OK"), eligible=True),
         ),
         spades_jobs=SubquerySum(
             'user__workers__job__spades_bounty',
