@@ -1,0 +1,42 @@
+<table class="table">
+  <tr>
+    <th>Name</th>
+    <td>{{ worker.user.get_full_name }}</td>
+  </tr>
+  <tr>
+    <th>Standard email</th>
+    <td>
+      <a href="mailto:{{ worker.user.email }}"><tt>{{ worker.user.email }}</tt></a>
+    </td>
+  </tr>
+  <tr>
+    <th>Google</th>
+    <td>
+      <code>{{ worker.gmail_address|default:"None specified" }}</code>
+    </td>
+  </tr>
+  <tr>
+    <th>Twitch</th>
+    <td>
+      <code>{{ worker.twitch_username|default:"None specified" }}</code>
+    </td>
+  </tr>
+  <tr>
+    <th>Paypal</th>
+    <td>
+      <code>{{ worker.paypal_username|default:"None specified" }}</code>
+    </td>
+  </tr>
+  <tr>
+    <th>Venmo</th>
+    <td>
+      <code>{{ worker.venmo_handle|default:"None specified" }}</code>
+    </td>
+  </tr>
+  <tr>
+    <th>Zelle</th>
+    <td>
+      <code>{{ worker.zelle_info|default:"None specified" }}</code>
+    </td>
+  </tr>
+</table>
