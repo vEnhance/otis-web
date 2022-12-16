@@ -102,6 +102,9 @@ class JobAdmin(ImportExportModelAdmin):
     search_fields = (
         'name',
         'description',
+        'assignee__user__first_name',
+        'assignee__user__last_name',
+        'assignee__user__username',
     )
     list_filter = (
         ('assignee', admin.EmptyFieldListFilter),
