@@ -85,12 +85,11 @@ class JobAdmin(ImportExportModelAdmin):
     list_display = (
         'pk',
         'name',
-        'status',
         'folder',
-        'due_date',
+        'status',
+        'updated_at',
         'assignee',
         'assignee_name',
-        'assignee_email',
         'spades_bounty',
         'usd_bounty',
     )

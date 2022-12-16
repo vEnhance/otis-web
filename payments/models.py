@@ -139,17 +139,13 @@ class Job(models.Model):
         blank=True)
     description_rendered = RenderedMarkdownField()
 
-    due_date = models.DateTimeField(
-        help_text="When the job should be finished by",
-        null=True,
-        blank=True,
-    )
-
     spades_bounty = models.PositiveIntegerField(
+        verbose_name='♠',
         help_text="How many spades the job is worth",
         default=0,
     )
     usd_bounty = models.DecimalField(
+        verbose_name='$',
         max_digits=8,
         decimal_places=2,
         help_text="How many US dollars the job is worth",
