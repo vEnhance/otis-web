@@ -165,6 +165,7 @@ JOB_VENUEQ_INIT_KEYS = (
     'spades_bounty',
     'usd_bounty',
     'payment_preference',
+    'hours_estimate',
     'worker_deliverable',
     'worker_notes',
     'assignee__user__email',

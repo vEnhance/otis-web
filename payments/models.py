@@ -158,6 +158,17 @@ class Job(models.Model):
         choices=PROGRESS_CHOICES,
         help_text='The current status of the job',
     )
+    hours_estimate = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        help_text="Optional estimate for how number of hours this took. "
+        "Has no effect on your payment, but useful for me to know "
+        "to make sure I'm not underpaying people broadly speaking. "
+        "Decimal numbers are allowed.",
+        null=True,
+        blank=True,
+    )
+
     payment_preference = models.CharField(
         max_length=15,
         choices=PREF_CHOICES,
@@ -171,6 +182,7 @@ class Job(models.Model):
         on_delete=models.CASCADE,
         help_text="Who is currently assigned",
     )
+
     worker_deliverable = models.TextField(
         blank=True,
         help_text="Enter the deliverable of the job here",

@@ -262,9 +262,10 @@ class JobUpdate(LoginRequiredMixin, UpdateView[Job, BaseModelForm[Job]]):
     context_object_name = 'job'
     template_name = 'payments/job_form.html'
     fields = (
+        'payment_preference',
+        'hours_estimate',
         'worker_deliverable',
         'worker_notes',
-        'payment_preference',
     )
 
     def post(self, *args: Any, **kwargs: Any):
