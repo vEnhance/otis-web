@@ -77,6 +77,10 @@ class JobIEResource(resources.ModelResource):
             'due_date',
             'spades_bounty',
             'usd_bounty',
+            'assignee',
+            'assignee__user__first_name',
+            'assignee__user__last_name',
+            'assignee__user__email',
         )
 
 
