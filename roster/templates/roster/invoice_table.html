@@ -61,10 +61,10 @@
             <td colspan="2">Adjustment</td>
             <td class="text-end">{{ invoice.adjustment|stringformat:"+.2f" }}</td>
           </tr>
-          <th>
-            <td colspan="2">Total cost</td>
-            <td class="text-end">{{ invoice.total_cost }}</td>
-          </th>
+          <tr>
+            <th colspan="2">Total cost</th>
+            <th class="text-end">{{ invoice.total_cost }}</th>
+          </tr>
         </tbody>
         <tfoot>
           <tr>
