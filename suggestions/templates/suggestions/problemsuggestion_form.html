@@ -2,6 +2,9 @@
 {% block title %}
   Problem Suggestion
 {% endblock title %}
+{% block main-class %}
+  col-12
+{% endblock main-class %}
 {% block layout-content %}
   <p>
     <a href="{% url "suggest-list" %}">⬅️ List all suggestions by you.</a>
@@ -38,11 +41,11 @@
       so you can also use it for whatever you want elsewhere.
     </li>
   </ul>
-  <div class="alert alert-info">
+  <div class="alert alert-secondary">
     <h3 class="alert-heading">LaTeX notes</h3>
     <ul>
       <li>
-        <strong>You must follow the LaTeX style guide</strong> available at
+        <strong>You must follow the LaTeX style guide</strong>:
         <a href="https://web.evanchen.cc/latex-style-guide.html">https://web.evanchen.cc/latex-style-guide.html</a>.
         Submissions that don't follow the style guide will be returned
         with revisions requested until these requirements are met.
@@ -91,6 +94,13 @@
       </tr>
       <tr>
         <td colspan="2">
+          <div id="statement_warning" class="alert alert-danger">
+            <h1 class="alert-heading">Line length exceeded in statement!</h1>
+            As specified in
+            <a href="https://web.evanchen.cc/latex-style-guide.html">LaTeX guidelines #1</a>,
+            lines MUST be wrapped to be at most 100 characters long,
+            and SHOULD be wrapped to at most 80 characters long.
+          </div>
           <div id="statement_render"></div>
         </td>
       </tr>
@@ -99,6 +109,13 @@
       </tr>
       <tr>
         <td colspan="2">
+          <div id="solution_warning" class="alert alert-danger">
+            <h1 class="alert-heading">Line length exceeded in solution!</h1>
+            As specified in
+            <a href="https://web.evanchen.cc/latex-style-guide.html">LaTeX guidelines #1</a>,
+            lines MUST be wrapped to be at most 100 characters long,
+            and SHOULD be wrapped to at most 80 characters long.
+          </div>
           <div id="solution_render"></div>
         </td>
       </tr>
@@ -113,7 +130,9 @@
           <button type="submit" class="btn btn-success">Submit</button>
         </td>
         <td>
-          <button id="render-toggle" class="btn btn-info">Disable instant TeX</button>
+          <button id="render-toggle" class="btn btn-info">
+            Disable instant TeX
+          </button>
         </td>
       </tr>
     </table>
@@ -125,6 +144,12 @@
     #statement_render {
         color: blue;
         font-family: sans-serif;
+    }
+
+    #id_statement,
+    #id_solution {
+        font-size: 10pt;
+        white-space: pre;
     }
   </style>
 {% endblock css %}
@@ -163,29 +188,46 @@
             render_solution();
         });
 
+        function checkLineLength(s) {
+            lines = s.split("\n");
+            for (let i in lines) {
+                console.log(lines[i]);
+                if (lines[i].length > 100) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         $("#id_statement").on("input", (e) => {
+            $("#statement_warning").toggle(!checkLineLength(e.target.value));
             if (!autorender_enabled || !render_enabled) return;
             $("#statement_render").text(e.target.value);
             MathJax.typesetPromise([document.querySelector("#statement_render")]);
         });
 
         $("#id_solution").on("input", (e) => {
+            $("#solution_warning").toggle(!checkLineLength(e.target.value));
             if (!autorender_enabled || !render_enabled) return;
             $("#solution_render").text(e.target.value);
             MathJax.typesetPromise([document.querySelector("#solution_render")]);
         });
 
         function render_statement() {
+            const s = $("#id_statement").val();
+            $("#statement_warning").toggle(!checkLineLength(s));
             if (!render_enabled) return;
             if (!mathjaxLoaded) console.warn("MathJax has not finished loading yet.");
-            $("#statement_render").text($("#id_statement").val());
+            $("#statement_render").text(s);
             MathJax.typeset([document.querySelector("#statement_render")]);
         }
 
         function render_solution() {
+            const s = $("#id_solution").val();
+            $("#solution_warning").toggle(!checkLineLength(s));
             if (!render_enabled) return;
             if (!mathjaxLoaded) console.warn("MathJax has not finished loading yet.");
-            $("#solution_render").text($("#id_solution").val());
+            $("#solution_render").text(s);
             MathJax.typeset([document.querySelector("#solution_render")]);
         }
 
