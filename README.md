@@ -7,7 +7,7 @@
 [<img src="https://github.com/vEnhance/otis-web/actions/workflows/codeql-analysis.yml/badge.svg" alt="OTIS-WEB status">](https://github.com/vEnhance/otis-web/actions)
 
 [<img src="https://img.shields.io/badge/html-djlint-blueviolet.svg" alt="HTML style: djlint">](https://www.djlint.com)
-[<img src="https://img.shields.io/badge/python-yapf-blueviolet.svg" alt="Python style: yapf">](https://github.com/google/yapf)
+[<img src="https://img.shields.io/badge/python%20style-black-000000.svg" alt="Python style: black">](https://github.com/psf/black)
 [<img src="https://img.shields.io/badge/types-pyright-ff69b4.svg" alt="types: pyright">](https://github.com/PyCQA/pyflakes)
 [<img src="https://img.shields.io/badge/types-mypy-ff69b4.svg" alt="types: mypy">](http://mypy-lang.org/)
 [<img src="https://img.shields.io/badge/lint-pyflakes-ff69b4.svg" alt="lint: pyflakes">](https://github.com/PyCQA/pyflakes)

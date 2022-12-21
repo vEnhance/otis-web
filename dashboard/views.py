@@ -151,7 +151,7 @@ def submit_pset(request: HttpRequest, student_id: int) -> HttpResponse:
         form = PSetSubmitForm()
 
     form.fields['unit'].queryset = get_units_to_submit(student)  # type: ignore
-    form.fields['next_unit_to_unlock'].queryset = get_units_to_unlock(student)  # type: ignore # yapf: disable
+    form.fields['next_unit_to_unlock'].queryset = get_units_to_unlock(student)  # type: ignore
     if request.method == 'POST' and form.is_valid():
         pset = form.save(commit=False)
         if PSet.objects.filter(student=student, unit=pset.unit).exists():
@@ -238,7 +238,7 @@ def resubmit_pset(request: HttpRequest, pk: int) -> HttpResponse:
     if pset.status in ('A', 'PA'):
         form.fields.pop('next_unit_to_unlock')
     else:
-        form.fields['next_unit_to_unlock'].queryset = get_units_to_unlock(student)  # type: ignore # yapf: disable
+        form.fields['next_unit_to_unlock'].queryset = get_units_to_unlock(student)  # type: ignore
 
     if request.method == 'POST' and form.is_valid():
         pset = form.save(commit=False)
