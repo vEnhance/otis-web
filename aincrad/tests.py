@@ -232,7 +232,7 @@ class TestAincrad(EvanTestCase):
             json={
                 "action": "add_hints",
                 "puid": "18SLA7",
-                "content": "gud",
+                "content": "good",
             },
         )
         self.assertIn("pk", resp.json())
@@ -243,7 +243,7 @@ class TestAincrad(EvanTestCase):
         out = resp.json()
         self.assertEqual(len(out["hints"]), 2)
         self.assertTrue(A7_Hints.filter(number=0, content="get").exists())
-        self.assertTrue(A7_Hints.filter(number=10, content="gud").exists())
+        self.assertTrue(A7_Hints.filter(number=10, content="good").exists())
 
         resp = self.assertPost20X(
             "api",
