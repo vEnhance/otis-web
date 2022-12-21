@@ -9,7 +9,6 @@ from payments.models import Job, JobFolder, PaymentLog, Worker
 
 
 class PaymentLogFactory(DjangoModelFactory):
-
     class Meta:
         model = PaymentLog
 
@@ -18,16 +17,14 @@ class PaymentLogFactory(DjangoModelFactory):
 
 
 class JobFolderFactory(DjangoModelFactory):
-
     class Meta:
         model = JobFolder
 
-    name = Faker('sentence')
-    slug = UniqueFaker('slug')
+    name = Faker("sentence")
+    slug = UniqueFaker("slug")
 
 
 class WorkerFactory(DjangoModelFactory):
-
     class Meta:
         model = Worker
 
@@ -35,9 +32,8 @@ class WorkerFactory(DjangoModelFactory):
 
 
 class JobFactory(DjangoModelFactory):
-
     class Meta:
         model = Job
 
-    name = Faker('job')
+    name = Faker("job")
     folder = SubFactory(JobFolderFactory)

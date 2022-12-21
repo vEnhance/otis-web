@@ -8,15 +8,15 @@ from roster.models import Student
 
 
 class Command(BaseCommand):
-    help = 'Replaces all instances of unit X with unit Y'
+    help = "Replaces all instances of unit X with unit Y"
 
     def add_arguments(self, parser: ArgumentParser):
-        parser.add_argument('source', type=int, help="ID of source unit")
-        parser.add_argument('dest', type=int, help="ID of destination unit")
+        parser.add_argument("source", type=int, help="ID of source unit")
+        parser.add_argument("dest", type=int, help="ID of destination unit")
 
     def handle(self, *args: Any, **options: Any):
-        source_id = options.pop('source')
-        dest_id = options.pop('dest')
+        source_id = options.pop("source")
+        dest_id = options.pop("dest")
         print(f"Deleting {Unit.objects.get(id=source_id)}")
         print(f"Replacing with {Unit.objects.get(id=dest_id)}")
 
@@ -29,7 +29,7 @@ class Command(BaseCommand):
             f"This will affect {s1.count()} students with the unit, of which {s2.count()} have it unlocked."
         )
 
-        if input("Are you sure? ").strip().lower() != 'y':
+        if input("Are you sure? ").strip().lower() != "y":
             return
 
         u.update(unit=dest_id)

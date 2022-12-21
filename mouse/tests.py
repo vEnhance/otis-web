@@ -12,12 +12,11 @@ Carol Cutie"""
 
 
 class MouseTests(EvanTestCase):
-
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        UserFactory.create(username='alice')
-        UserFactory.create(username='evan', is_staff=True, is_superuser=True)
+        UserFactory.create(username="alice")
+        UserFactory.create(username="evan", is_staff=True, is_superuser=True)
 
         StudentFactory.create(
             user__first_name="Alice",
@@ -36,37 +35,39 @@ class MouseTests(EvanTestCase):
         )
 
     def test_usemo_score(self):
-        self.assertGetBecomesStaffRedirect('usemo-score')
-        self.login('alice')
-        self.assertGetBecomesStaffRedirect('usemo-grader')
-        self.login('evan')
-        self.assertGet20X('usemo-grader')
+        self.assertGetBecomesStaffRedirect("usemo-score")
+        self.login("alice")
+        self.assertGetBecomesStaffRedirect("usemo-grader")
+        self.login("evan")
+        self.assertGet20X("usemo-grader")
 
         resp = self.assertPost20X(
-            'usemo-score',
-            data={'text': USEMO_SCORE_TEST_DATA},
+            "usemo-score",
+            data={"text": USEMO_SCORE_TEST_DATA},
         )
 
-        spades_list = QuestComplete.objects\
-                .filter(category="US").values_list('spades', flat=True)
+        spades_list = QuestComplete.objects.filter(category="US").values_list(
+            "spades", flat=True
+        )
         self.assertEqual(len(spades_list), 3)
         self.assertEqual(set(spades_list), {14, 37, 42})
-        self.assertHas(resp, 'Built 3 records')
+        self.assertHas(resp, "Built 3 records")
 
     def test_usemo_grading(self):
-        self.assertGetBecomesStaffRedirect('usemo-grader')
-        self.login('alice')
-        self.assertGetBecomesStaffRedirect('usemo-grader')
-        self.login('evan')
-        self.assertGet20X('usemo-grader')
+        self.assertGetBecomesStaffRedirect("usemo-grader")
+        self.login("alice")
+        self.assertGetBecomesStaffRedirect("usemo-grader")
+        self.login("evan")
+        self.assertGet20X("usemo-grader")
 
         resp = self.assertPost20X(
-            'usemo-grader',
-            data={'text': USEMO_SCORE_TEST_DATA},
+            "usemo-grader",
+            data={"text": USEMO_SCORE_TEST_DATA},
         )
 
-        spades_list = QuestComplete.objects\
-                .filter(category="UG").values_list('spades', flat=True)
-        self.assertHas(resp, 'Built 3 records')
+        spades_list = QuestComplete.objects.filter(category="UG").values_list(
+            "spades", flat=True
+        )
+        self.assertHas(resp, "Built 3 records")
         self.assertEqual(len(spades_list), 3)
         self.assertEqual(set(spades_list), {15})

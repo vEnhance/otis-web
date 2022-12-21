@@ -31,18 +31,23 @@ from .utils import get_from_google_storage
 class AdminUnitListView(SuperuserRequiredMixin, ListView[Unit]):
     model = Unit
     queryset = Unit.objects.all()
-    template_name = 'core/admin_unit_list.html'
-    context_object_name = 'unit_list'
+    template_name = "core/admin_unit_list.html"
+    context_object_name = "unit_list"
 
 
 class UnitGroupListView(ListView[UnitGroup]):
     model = UnitGroup
-    queryset = UnitGroup.objects.filter(
-        hidden=False,).order_by('subject', 'name').prefetch_related('unit_set')
+    queryset = (
+        UnitGroup.objects.filter(
+            hidden=False,
+        )
+        .order_by("subject", "name")
+        .prefetch_related("unit_set")
+    )
 
 
 def permitted(unit: Unit, request: HttpRequest, asking_solution: bool) -> bool:
-    if getattr(request.user, 'is_staff', False):
+    if getattr(request.user, "is_staff", False):
         return True
     elif isinstance(request.user, AnonymousUser):
         return False
@@ -51,11 +56,14 @@ def permitted(unit: Unit, request: HttpRequest, asking_solution: bool) -> bool:
     elif UploadedFile.objects.filter(
         benefactor__semester__uses_legacy_pset_system=True,
         benefactor__user=request.user,
-        category='psets',
-        unit=unit).exists():
+        category="psets",
+        unit=unit,
+    ).exists():
         return True
-    elif asking_solution is False and Student.objects.filter(
-        user=request.user, unlocked_units=unit).exists():
+    elif (
+        asking_solution is False
+        and Student.objects.filter(user=request.user, unlocked_units=unit).exists()
+    ):
         return True
     elif Student.objects.filter(
         user=request.user,
@@ -93,10 +101,13 @@ def unit_solutions(request: HttpRequest, pk: int) -> HttpResponse:
         raise PermissionDenied(f"Can't view the solutions for {unit}")
 
 
-class UserProfileUpdateView(LoginRequiredMixin, SuccessMessageMixin,
-                            UpdateView[UserProfile, BaseModelForm[UserProfile]]):
+class UserProfileUpdateView(
+    LoginRequiredMixin,
+    SuccessMessageMixin,
+    UpdateView[UserProfile, BaseModelForm[UserProfile]],
+):
     model = UserProfile
-    fields = ('show_bars', 'show_completed_by_default', 'show_locked_by_default')
+    fields = ("show_bars", "show_completed_by_default", "show_locked_by_default")
     success_url = reverse_lazy("profile")
     object: UserProfile
 
@@ -114,7 +125,7 @@ def dismiss_emails(request: AuthHttpRequest) -> JsonResponse:
     profile = get_object_or_404(UserProfile, user=request.user)
     profile.last_email_dismiss = timezone.now()
     profile.save()
-    return JsonResponse({'result': 'success'})
+    return JsonResponse({"result": "success"})
 
 
 @login_required
@@ -123,4 +134,4 @@ def dismiss_downloads(request: AuthHttpRequest) -> JsonResponse:
     profile = get_object_or_404(UserProfile, user=request.user)
     profile.last_download_dismiss = timezone.now()
     profile.save()
-    return JsonResponse({'result': 'success'})
+    return JsonResponse({"result": "success"})

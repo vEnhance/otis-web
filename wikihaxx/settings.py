@@ -1,2 +1,2 @@
-SLUG = 'haxx'
-APP_LABEL = 'wiki'
+SLUG = "haxx"
+APP_LABEL = "wiki"

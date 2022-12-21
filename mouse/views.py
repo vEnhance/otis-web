@@ -17,18 +17,18 @@ YEAR = datetime.now().year
 
 @admin_required
 def usemo_score(request: HttpRequest) -> HttpResponse:
-    if request.method == 'POST':
+    if request.method == "POST":
         form = ScoreForm(request.POST)
         if form.is_valid():
             students = Student.objects.filter(semester__active=True)
             qcs = []
             for s in students:
-                for line in form.cleaned_data['text'].splitlines():
+                for line in form.cleaned_data["text"].splitlines():
                     line = line.strip()
                     if not line:
                         continue
-                    name = line[:line.index('\t')].strip()
-                    spades = int(line[line.rindex('\t') + 1:].strip())
+                    name = line[: line.index("\t")].strip()
+                    spades = int(line[line.rindex("\t") + 1 :].strip())
                     if s.user.get_full_name().lower() == name.lower():
                         qcs.append(
                             QuestComplete(
@@ -36,45 +36,51 @@ def usemo_score(request: HttpRequest) -> HttpResponse:
                                 title=f"USEMO {YEAR}",
                                 category="US",
                                 spades=spades,
-                            ))
+                            )
+                        )
             QuestComplete.objects.bulk_create(qcs)
-            messages.success(request, f'Built {len(qcs)} records')
+            messages.success(request, f"Built {len(qcs)} records")
     else:
         form = ScoreForm()
 
     context = {
-        'title': 'USEMO Score Upload',
-        'form': form,
+        "title": "USEMO Score Upload",
+        "form": form,
     }
     return render(request, "mouse/form.html", context)
 
 
 @admin_required
 def usemo_grader(request: HttpRequest) -> HttpResponse:
-    if request.method == 'POST':
+    if request.method == "POST":
         form = GraderForm(request.POST)
         if form.is_valid():
             students = Student.objects.filter(semester__active=True)
             qcs = []
             for s in students:
-                for line in form.cleaned_data['text'].splitlines():
+                for line in form.cleaned_data["text"].splitlines():
                     line = line.strip()
                     if not line:
                         continue
-                    if '\t' in line:
-                        line = line[:line.index('\t')]
+                    if "\t" in line:
+                        line = line[: line.index("\t")]
                     name = line.strip()
                     if s.user.get_full_name().lower() == name.lower():
                         qcs.append(
                             QuestComplete(
-                                student=s, title="USEMO Points", category="UG", spades=15))
+                                student=s,
+                                title="USEMO Points",
+                                category="UG",
+                                spades=15,
+                            )
+                        )
             QuestComplete.objects.bulk_create(qcs)
-            messages.success(request, f'Built {len(qcs)} records')
+            messages.success(request, f"Built {len(qcs)} records")
     else:
         form = GraderForm()
 
     context = {
-        'title': 'USEMO Grader Bounty',
-        'form': form,
+        "title": "USEMO Grader Bounty",
+        "form": form,
     }
     return render(request, "mouse/form.html", context)

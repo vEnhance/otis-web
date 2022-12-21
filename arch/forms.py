@@ -4,24 +4,25 @@ from .models import Hint, Problem
 
 
 class HintUpdateFormWithReason(forms.ModelForm):
-    reason = forms.CharField(max_length=255, help_text="Reason for editing.", required=False)
+    reason = forms.CharField(
+        max_length=255, help_text="Reason for editing.", required=False
+    )
 
     class Meta:
         model = Hint
         fields = (
-            'problem',
-            'number',
-            'keywords',
-            'content',
-            'reason',
+            "problem",
+            "number",
+            "keywords",
+            "content",
+            "reason",
         )
 
 
 class ProblemUpdateForm(forms.ModelForm):
-
     class Meta:
         model = Problem
-        fields = ('puid',)
+        fields = ("puid",)
 
 
 class ProblemSelectForm(forms.Form):

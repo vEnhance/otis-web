@@ -14,44 +14,50 @@ from markdownfield.validators import VALIDATOR_STANDARD
 
 
 class StartedMarketManager(models.Manager):
-
     def get_queryset(self) -> QuerySet:
         now = timezone.now()
         return super().get_queryset().filter(start_date__lte=now)
 
 
 class ActiveMarketManager(models.Manager):
-
     def get_queryset(self) -> QuerySet:
         now = timezone.now()
-        return super().get_queryset().filter(
-            start_date__lte=now,
-            end_date__gte=now,
+        return (
+            super()
+            .get_queryset()
+            .filter(
+                start_date__lte=now,
+                end_date__gte=now,
+            )
         )
 
 
 class Market(models.Model):
-    start_date = models.DateTimeField(help_text="When the market becomes visible to players")
+    start_date = models.DateTimeField(
+        help_text="When the market becomes visible to players"
+    )
     end_date = models.DateTimeField(help_text="When the market closes")
     semester = models.ForeignKey(Semester, on_delete=models.CASCADE)
     slug = models.SlugField(help_text="Slug for the market", unique=True)
     title = models.CharField(help_text="Title of the market", max_length=80)
 
     prompt = MarkdownField(
-        rendered_field='prompt_rendered',
+        rendered_field="prompt_rendered",
         help_text="Full text of the question",
         validator=VALIDATOR_STANDARD,
     )
     prompt_rendered = RenderedMarkdownField()
     solution = MarkdownField(
-        rendered_field='solution_rendered',
+        rendered_field="solution_rendered",
         help_text="Comments that appear in the market results.",
         validator=VALIDATOR_STANDARD,
         blank=True,
     )
     solution_rendered = RenderedMarkdownField()
 
-    answer = models.FloatField(help_text="The answer to the question", blank=True, null=True)
+    answer = models.FloatField(
+        help_text="The answer to the question", blank=True, null=True
+    )
     weight = models.FloatField(
         help_text="The max score to assign to the market, "
         "used in the scoring function",
@@ -71,18 +77,20 @@ class Market(models.Model):
     active = ActiveMarketManager()
 
     class Meta:
-        ordering = ('-end_date',)
+        ordering = ("-end_date",)
 
     def __str__(self) -> str:
-        return f'{self.title} ({self.slug})'
+        return f"{self.title} ({self.slug})"
 
     def get_absolute_url(self) -> str:
         if self.has_ended:
-            return reverse('market-results', args=(self.slug,))
+            return reverse("market-results", args=(self.slug,))
         elif self.has_started:
-            return reverse('market-guess', args=(self.slug,))
+            return reverse("market-guess", args=(self.slug,))
         else:
-            return reverse('market-results', args=(self.slug,))  # only works for superuser
+            return reverse(
+                "market-results", args=(self.slug,)
+            )  # only works for superuser
 
     @property
     def has_started(self) -> bool:
@@ -113,12 +121,13 @@ class Guess(models.Model):
         default=False,
         help_text="If checked, will display your name "
         "next to your guess in the statistics, for bragging rights. "
-        "By default, this is off and your guess is recorded anonymously.")
+        "By default, this is off and your guess is recorded anonymously.",
+    )
 
     class Meta:
         unique_together = (
-            'user',
-            'market',
+            "user",
+            "market",
         )
         verbose_name_plural = "Guesses"
 
@@ -126,14 +135,16 @@ class Guess(models.Model):
         return f"Guessed {self.value} at {self.created_at}"
 
     def get_absolute_url(self) -> str:
-        return reverse('market-results', args=(self.market.slug,))
+        return reverse("market-results", args=(self.market.slug,))
 
     def get_score(self) -> Optional[float]:
         if self.market.answer is not None and self.market.alpha is not None:
             a = round(self.market.answer, ndigits=6)
             b = round(self.value, ndigits=6)
             assert a > 0 and b > 0
-            return round(self.market.weight * min(a / b, b / a)**self.market.alpha, ndigits=2)
+            return round(
+                self.market.weight * min(a / b, b / a) ** self.market.alpha, ndigits=2
+            )
         else:
             return None
 

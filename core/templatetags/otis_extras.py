@@ -26,18 +26,18 @@ def view_tex(unit: Unit):
     return reverse("view-tex", args=(unit.pk,))
 
 
-@register.filter(name='display_initial_choice')
+@register.filter(name="display_initial_choice")
 def display_initial_choice(field: BoundField):
     choices = field.field._choices  # type: ignore
-    return ' '.join([ucode for (uid, ucode) in choices if uid in field.initial])
+    return " ".join([ucode for (uid, ucode) in choices if uid in field.initial])
 
 
-@register.filter(name='getenv')
+@register.filter(name="getenv")
 def getenv(s: str) -> str:
-    return os.getenv(s) or ''
+    return os.getenv(s) or ""
 
 
-@register.filter(name='getprofile')
+@register.filter(name="getprofile")
 def getprofile(user: User) -> Optional[UserProfile]:
     try:
         return UserProfile.objects.get(user=user)
@@ -45,11 +45,11 @@ def getprofile(user: User) -> Optional[UserProfile]:
         return None
 
 
-@register.filter(name='clubs_multiplier')
+@register.filter(name="clubs_multiplier")
 def clubs_multiplier(u: Unit) -> str:
-    if u.code[0] == 'D':
-        return f'(×{1+BONUS_D_UNIT})'
-    elif u.code[0] == 'Z':
-        return f'(×{1+BONUS_Z_UNIT})'
+    if u.code[0] == "D":
+        return f"(×{1+BONUS_D_UNIT})"
+    elif u.code[0] == "Z":
+        return f"(×{1+BONUS_Z_UNIT})"
     else:
-        return ''
+        return ""

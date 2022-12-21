@@ -8,7 +8,6 @@ from .models import UserProfile
 
 
 class LastSeenMiddleware:
-
     def __init__(self, get_response: Callable[[HttpRequest], HttpResponse]):
         self.get_response = get_response
 

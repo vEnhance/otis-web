@@ -17,14 +17,14 @@ def expr_validator(value: str):
         x = float(expr_compute(value) or 0)
         assert abs(x) < 1e10000
     except OverflowError:
-        raise ValidationError(r'This result has absolute value too large to parse.')
+        raise ValidationError(r"This result has absolute value too large to parse.")
     except Exception:
-        raise ValidationError('Could not evaluate this expression, please fix it')
+        raise ValidationError("Could not evaluate this expression, please fix it")
 
 
 def expr_validator_multiple(value: str):
-    if value != '':
-        for v in value.split(','):
+    if value != "":
+        for v in value.split(","):
             expr_validator(v)
 
 
@@ -35,30 +35,45 @@ class PracticeExam(models.Model):
             ("Waltz", "Waltz"),
             ("Foxtrot", "Foxtrot"),
         ),
-        help_text="The family that the exam comes from.")
+        help_text="The family that the exam comes from.",
+    )
     is_test = models.BooleanField(help_text="Whether this is a quiz or test")
     number = models.PositiveSmallIntegerField(
-        help_text="The number of the assignment (e.g. Test 8, Quiz D) ")
+        help_text="The number of the assignment (e.g. Test 8, Quiz D) "
+    )
 
     # For quizzes only
-    answer1 = models.CharField(max_length=128, validators=[expr_validator_multiple], blank=True)
-    answer2 = models.CharField(max_length=128, validators=[expr_validator_multiple], blank=True)
-    answer3 = models.CharField(max_length=128, validators=[expr_validator_multiple], blank=True)
-    answer4 = models.CharField(max_length=128, validators=[expr_validator_multiple], blank=True)
-    answer5 = models.CharField(max_length=128, validators=[expr_validator_multiple], blank=True)
+    answer1 = models.CharField(
+        max_length=128, validators=[expr_validator_multiple], blank=True
+    )
+    answer2 = models.CharField(
+        max_length=128, validators=[expr_validator_multiple], blank=True
+    )
+    answer3 = models.CharField(
+        max_length=128, validators=[expr_validator_multiple], blank=True
+    )
+    answer4 = models.CharField(
+        max_length=128, validators=[expr_validator_multiple], blank=True
+    )
+    answer5 = models.CharField(
+        max_length=128, validators=[expr_validator_multiple], blank=True
+    )
     url1 = models.URLField(max_length=128, blank=True, validators=[URLValidator()])
     url2 = models.URLField(max_length=128, blank=True, validators=[URLValidator()])
     url3 = models.URLField(max_length=128, blank=True, validators=[URLValidator()])
     url4 = models.URLField(max_length=128, blank=True, validators=[URLValidator()])
     url5 = models.URLField(max_length=128, blank=True, validators=[URLValidator()])
 
-    start_date = models.DateField(null=True, blank=True, help_text="When the assignment opens.")
+    start_date = models.DateField(
+        null=True, blank=True, help_text="When the assignment opens."
+    )
     due_date = models.DateField(
-        null=True, blank=True, help_text="When the assignment should be due.")
+        null=True, blank=True, help_text="When the assignment should be due."
+    )
 
     class Meta:
-        ordering = ('family', '-is_test', 'number')
-        unique_together = ('family', 'is_test', 'number')
+        ordering = ("family", "-is_test", "number")
+        unique_together = ("family", "is_test", "number")
 
     def __str__(self) -> str:
         if self.is_test:
@@ -67,16 +82,16 @@ class PracticeExam(models.Model):
             return self.family + " Quiz " + self.get_number_display()
 
     def get_absolute_url(self) -> str:
-        return reverse('exam-pdf', args=(self.pk,))
+        return reverse("exam-pdf", args=(self.pk,))
 
     @property
     def pdfname(self) -> str:
-        kind = 'Exam' if self.is_test else 'Quiz'
-        return f'{kind}-{self.family}-{self.get_number_display()}.pdf'
+        kind = "Exam" if self.is_test else "Quiz"
+        return f"{kind}-{self.family}-{self.get_number_display()}.pdf"
 
     def get_number_display(self) -> str:
         if self.is_test:
-            return f'{self.number:02d}'
+            return f"{self.number:02d}"
         else:
             return string.ascii_uppercase[self.number - 1]
 
@@ -88,7 +103,7 @@ class PracticeExam(models.Model):
     def started(self) -> bool:
         if self.start_date is None:
             return True
-        return (self.start_date <= datetime.date.today())
+        return self.start_date <= datetime.date.today()
 
     @property
     def current(self) -> bool:
@@ -97,62 +112,71 @@ class PracticeExam(models.Model):
 
 class ExamAttempt(models.Model):
     quiz = models.ForeignKey(
-        PracticeExam, on_delete=models.CASCADE, help_text="The quiz being submitted for")
+        PracticeExam, on_delete=models.CASCADE, help_text="The quiz being submitted for"
+    )
     score = models.SmallIntegerField(
-        null=True, blank=True, help_text="The number of correct answers")
+        null=True, blank=True, help_text="The number of correct answers"
+    )
     student = models.ForeignKey(
-        Student, on_delete=models.CASCADE, help_text="The student taking the exam")
+        Student, on_delete=models.CASCADE, help_text="The student taking the exam"
+    )
     guess1 = models.CharField(
         max_length=128,
         blank=True,
         verbose_name="Problem 1 response",
         validators=[
             expr_validator,
-        ])
+        ],
+    )
     guess2 = models.CharField(
         max_length=128,
         blank=True,
         verbose_name="Problem 2 response",
         validators=[
             expr_validator,
-        ])
+        ],
+    )
     guess3 = models.CharField(
         max_length=128,
         blank=True,
         verbose_name="Problem 3 response",
         validators=[
             expr_validator,
-        ])
+        ],
+    )
     guess4 = models.CharField(
         max_length=128,
         blank=True,
         verbose_name="Problem 4 response",
         validators=[
             expr_validator,
-        ])
+        ],
+    )
     guess5 = models.CharField(
         max_length=128,
         blank=True,
         verbose_name="Problem 5 response",
         validators=[
             expr_validator,
-        ])
+        ],
+    )
     submit_time = models.DateTimeField(
-        help_text="When the quiz was submitted", auto_now_add=True)
+        help_text="When the quiz was submitted", auto_now_add=True
+    )
     student_id: int
     quiz_id: int
 
     class Meta:
         unique_together = (
-            'quiz',
-            'student',
+            "quiz",
+            "student",
         )
 
     def __str__(self) -> str:
-        return f'{self.student} tries {self.quiz}'
+        return f"{self.student} tries {self.quiz}"
 
     def get_absolute_url(self) -> str:
-        return reverse('quiz', args=(self.student_id, self.quiz_id))
+        return reverse("quiz", args=(self.student_id, self.quiz_id))
 
 
 class MockCompleted(models.Model):
@@ -161,7 +185,7 @@ class MockCompleted(models.Model):
 
     class Meta:
         unique_together = (
-            'student',
-            'exam',
+            "student",
+            "exam",
         )
-        verbose_name_plural = 'Mock completions'
+        verbose_name_plural = "Mock completions"

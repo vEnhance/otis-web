@@ -10,7 +10,11 @@ from core.models import Semester, Unit
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.files.base import File
-from django.core.validators import FileExtensionValidator, MaxValueValidator, MinValueValidator  # NOQA
+from django.core.validators import (
+    FileExtensionValidator,
+    MaxValueValidator,
+    MinValueValidator,
+)  # NOQA
 from django.db import models
 from django.urls import reverse
 from roster.models import Student
@@ -21,14 +25,19 @@ def validate_at_most_1mb(f: File):  # type: ignore
         raise ValidationError("At most 1MB allowed")
 
 
-def content_file_name(instance: 'UploadedFile', filename: str) -> str:
+def content_file_name(instance: "UploadedFile", filename: str) -> str:
     now = datetime.datetime.now()
-    return os.path.join(instance.category, instance.owner.username,
-                        now.strftime("%Y-%m-%d-%H%M%S"), filename)
+    return os.path.join(
+        instance.category,
+        instance.owner.username,
+        now.strftime("%Y-%m-%d-%H%M%S"),
+        filename,
+    )
 
 
 class UploadedFile(models.Model):
     """An uploaded file, for example a transcript or homework solutions."""
+
     CHOICES = (
         ("psets", "PSet Submission"),
         ("scripts", "Transcript"),
@@ -36,30 +45,40 @@ class UploadedFile(models.Model):
         ("misc", "Miscellaneous"),
     )
     benefactor = models.ForeignKey(
-        Student, on_delete=models.CASCADE, help_text="The student for which this file is meant")
+        Student,
+        on_delete=models.CASCADE,
+        help_text="The student for which this file is meant",
+    )
     owner = models.ForeignKey(
-        User, on_delete=models.CASCADE, help_text="The user who uploaded the file")
+        User, on_delete=models.CASCADE, help_text="The user who uploaded the file"
+    )
     category = models.CharField(
-        max_length=10, choices=CHOICES, help_text="What kind of file this is")
+        max_length=10, choices=CHOICES, help_text="What kind of file this is"
+    )
     description = models.CharField(
-        max_length=250, blank=True, help_text="Optional description of the file")
+        max_length=250, blank=True, help_text="Optional description of the file"
+    )
     content = models.FileField(
         verbose_name="Your submission",
         help_text="Upload your write-ups as PDF, TeX, TXT, PNG, or JPG. At most one file.",
         upload_to=content_file_name,
         validators=[
-            FileExtensionValidator(allowed_extensions=['pdf', 'txt', 'tex', 'png', 'jpg'])
-        ])
+            FileExtensionValidator(
+                allowed_extensions=["pdf", "txt", "tex", "png", "jpg"]
+            )
+        ],
+    )
     unit = models.ForeignKey(
         Unit,
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        help_text="The unit for which this file is associated")
+        help_text="The unit for which this file is associated",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ('-created_at',)
+        ordering = ("-created_at",)
 
     def __str__(self):
         return self.filename
@@ -76,7 +95,7 @@ class UploadedFile(models.Model):
         return self.content.url
 
 
-def download_file_name(instance: 'SemesterDownloadFile', filename: str) -> str:
+def download_file_name(instance: "SemesterDownloadFile", filename: str) -> str:
     return os.path.join("global", str(instance.semester.id), filename)
 
 
@@ -84,9 +103,11 @@ class SemesterDownloadFile(models.Model):
     semester = models.ForeignKey(
         Semester,
         on_delete=models.CASCADE,
-        help_text="The semester to which the file is associated")
+        help_text="The semester to which the file is associated",
+    )
     description = models.CharField(
-        max_length=250, blank=True, help_text="Optional description of the file")
+        max_length=250, blank=True, help_text="Optional description of the file"
+    )
     content = models.FileField(
         help_text="The file itself",
         upload_to=download_file_name,
@@ -94,7 +115,7 @@ class SemesterDownloadFile(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ('-created_at',)
+        ordering = ("-created_at",)
 
     def __str__(self):
         return os.path.basename(self.content.name)
@@ -113,9 +134,11 @@ class PSet(models.Model):
             ("PR", "Pending (prev rejected)"),
             ("P", "Pending (new)"),
         ),
-        default="P")
+        default="P",
+    )
     student = models.ForeignKey(
-        Student, help_text="The student attached to this", on_delete=models.CASCADE)
+        Student, help_text="The student attached to this", on_delete=models.CASCADE
+    )
     unit = models.ForeignKey(
         Unit,
         help_text="The unit you want to submit for",
@@ -144,31 +167,34 @@ class PSet(models.Model):
         validators=[MinValueValidator(0), MaxValueValidator(200)],
     )
     eligible = models.BooleanField(
-        default=True, help_text="Whether to count this for leveling up")
+        default=True, help_text="Whether to count this for leveling up"
+    )
     feedback = models.TextField(
         verbose_name="Feedback on problem set, worth [1♣]",
         help_text="Any other feedback about the problem set",
-        blank=True)
+        blank=True,
+    )
     next_unit_to_unlock = models.ForeignKey(
         Unit,
         help_text="The unit you want to work on next (leave blank for none)",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='unblocking_psets',
+        related_name="unblocking_psets",
     )
     special_notes = models.TextField(
-        help_text="If there's anything you need to say before we proceed", blank=True)
+        help_text="If there's anything you need to say before we proceed", blank=True
+    )
 
     class Meta:
         verbose_name = "PSet submission"
         verbose_name_plural = "PSet submissions"
 
     def __str__(self):
-        return f'{self.student.name} submits {self.unit}'
+        return f"{self.student.name} submits {self.unit}"
 
     def get_absolute_url(self):
-        return reverse('pset', args=(self.pk,))
+        return reverse("pset", args=(self.pk,))
 
     @property
     def filename(self) -> Optional[str]:
@@ -179,11 +205,11 @@ class PSet(models.Model):
 
     @property
     def accepted(self) -> bool:
-        return self.status == 'A'
+        return self.status == "A"
 
     @property
     def rejected(self) -> bool:
-        return self.status == 'R'
+        return self.status == "R"
 
     @property
     def pending(self) -> bool:
@@ -191,4 +217,4 @@ class PSet(models.Model):
 
     @property
     def resubmitted(self) -> bool:
-        return self.status in ('PA', 'PR')
+        return self.status in ("PA", "PR")

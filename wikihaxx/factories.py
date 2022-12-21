@@ -10,27 +10,26 @@ from wiki.models.article import Article, ArticleRevision
 
 
 class ArticleRevisionFactory(DjangoModelFactory):
-
     class Meta:
         model = ArticleRevision
 
-    title = Faker('text')
-    content = Faker('paragraph')
+    title = Faker("text")
+    content = Faker("paragraph")
 
 
 class ArticleFactory(DjangoModelFactory):
-
     class Meta:
         model = Article
 
     @post_generation
-    def set_current_revision(self, create: bool, extracted: Any, **kwargs: Dict[str, Any]):
+    def set_current_revision(
+        self, create: bool, extracted: Any, **kwargs: Dict[str, Any]
+    ):
         a: Article = self  # type: ignore
         a.current_revision = ArticleRevisionFactory(article=a)
 
 
 class URLPathFactory(DjangoModelFactory):
-
     class Meta:
         model = URLPath
 

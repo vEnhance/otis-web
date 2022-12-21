@@ -14,11 +14,10 @@ from exams.models import ExamAttempt, PracticeExam
 
 
 class TestFactory(DjangoModelFactory):
-
     class Meta:
         model = PracticeExam
 
-    family = 'Waltz'
+    family = "Waltz"
     number = Sequence(lambda n: n + 1)
     is_test = True
 
@@ -29,27 +28,27 @@ class TestFactory(DjangoModelFactory):
             return
 
         exam: PracticeExam = self  # type: ignore
-        default_storage.save('pdfs/' + storage_hash(exam.pdfname) + '.pdf',
-                                ContentFile(b'exam'))
+        default_storage.save(
+            "pdfs/" + storage_hash(exam.pdfname) + ".pdf", ContentFile(b"exam")
+        )
 
 
 class QuizFactory(TestFactory):
     is_test = False
-    answer1 = Faker('random_number', digits=3)
-    answer2 = Faker('random_number', digits=3)
-    answer3 = Faker('random_number', digits=3)
-    answer4 = Faker('random_number', digits=3)
-    answer5 = Faker('random_number', digits=3)
+    answer1 = Faker("random_number", digits=3)
+    answer2 = Faker("random_number", digits=3)
+    answer3 = Faker("random_number", digits=3)
+    answer4 = Faker("random_number", digits=3)
+    answer5 = Faker("random_number", digits=3)
 
-    url1 = 'http://example.com/1/'
-    url2 = 'http://example.com/2/'
-    url3 = 'http://example.com/3/'
-    url4 = 'http://example.com/4/'
-    url5 = 'http://example.com/5/'
+    url1 = "http://example.com/1/"
+    url2 = "http://example.com/2/"
+    url3 = "http://example.com/3/"
+    url4 = "http://example.com/4/"
+    url5 = "http://example.com/5/"
 
 
 class ExamAttemptFactory(DjangoModelFactory):
-
     class Meta:
         model = ExamAttempt
 

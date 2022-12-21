@@ -34,7 +34,19 @@ import math
 import operator
 from typing import Any, List, Optional, Union
 
-from pyparsing import CaselessKeyword, Forward, Group, Literal, Regex, Suppress, Token, Word, alphanums, alphas, delimitedList  # NOQA
+from pyparsing import (
+    CaselessKeyword,
+    Forward,
+    Group,
+    Literal,
+    Regex,
+    Suppress,
+    Token,
+    Word,
+    alphanums,
+    alphas,
+    delimitedList,
+)  # NOQA
 
 exprStack: Any = []
 
@@ -96,20 +108,21 @@ def BNF() -> Any:
         assert g is not None
         atom = (
             addop[...]  # type: ignore
-            + (
-                g.setParseAction(push_first) | Group(lpar + expr + rpar)  # type: ignore
-            )).setParseAction(push_unary_minus)  # type: ignore
+            + (g.setParseAction(push_first) | Group(lpar + expr + rpar))  # type: ignore
+        ).setParseAction(
+            push_unary_minus
+        )  # type: ignore
 
         # by defining exponentiation as "atom [ ^ factor ]..." instead of "atom [ ^ atom ]...", we get right-to-left
         # exponents, instead of left-to-right that is, 2^3^2 = 2^(3^2), not (2^3)^2.
         factor = Forward()
         factor <<= atom + (expop + factor).setParseAction(push_first)[...]  # type: ignore
-        term = factor + (
-            multop +  # type: ignore
-            factor).setParseAction(push_first)[...]  # type: ignore
-        expr <<= term + (
-            addop +  # type: ignore
-            term).setParseAction(push_first)[...]  # type: ignore
+        term = (
+            factor + (multop + factor).setParseAction(push_first)[...]  # type: ignore
+        )  # type: ignore
+        expr <<= (
+            term + (addop + term).setParseAction(push_first)[...]  # type: ignore
+        )  # type: ignore
         bnf = expr
     return bnf
 
@@ -162,7 +175,7 @@ def evaluate_stack(s: List[Any]) -> Union[int, float]:
 
 
 def expr_compute(s: str) -> Optional[float]:
-    if s == '':
+    if s == "":
         return None
     exprStack[:] = []
     BNF().parseString(s, parseAll=True)

@@ -6,31 +6,35 @@ from factory.faker import Faker
 from factory.fuzzy import FuzzyChoice
 from roster.factories import StudentFactory
 
-from .models import Achievement, AchievementUnlock, BonusLevel, BonusLevelUnlock, Level, QuestComplete  # NOQA
+from .models import (
+    Achievement,
+    AchievementUnlock,
+    BonusLevel,
+    BonusLevelUnlock,
+    Level,
+    QuestComplete,
+)  # NOQA
 
 
 class AchievementFactory(DjangoModelFactory):
-
     class Meta:
         model = Achievement
 
-    code = UniqueFaker('bban')
-    name = Faker('job')
-    image = ImageField(filename='TESTING_achievement_icon.png')
-    description = UniqueFaker('sentence')
+    code = UniqueFaker("bban")
+    name = Faker("job")
+    image = ImageField(filename="TESTING_achievement_icon.png")
+    description = UniqueFaker("sentence")
 
 
 class LevelFactory(DjangoModelFactory):
-
     class Meta:
         model = Level
 
     threshold = Sequence(lambda n: n + 1)
-    name = LazyAttribute(lambda o: f'Level {o.threshold}')
+    name = LazyAttribute(lambda o: f"Level {o.threshold}")
 
 
 class AchievementUnlockFactory(DjangoModelFactory):
-
     class Meta:
         model = AchievementUnlock
 
@@ -39,17 +43,15 @@ class AchievementUnlockFactory(DjangoModelFactory):
 
 
 class QuestCompleteFactory(DjangoModelFactory):
-
     class Meta:
         model = QuestComplete
 
     student = SubFactory(StudentFactory)
-    title = Faker('job')
+    title = Faker("job")
     spades = FuzzyChoice(list(range(1, 10)))
 
 
 class BonusLevelFactory(DjangoModelFactory):
-
     class Meta:
         model = BonusLevel
 
@@ -58,7 +60,6 @@ class BonusLevelFactory(DjangoModelFactory):
 
 
 class BonusLevelUnlockFactory(DjangoModelFactory):
-
     class Meta:
         model = BonusLevelUnlock
 

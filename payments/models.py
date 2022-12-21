@@ -25,13 +25,13 @@ class PaymentLog(models.Model):
     )
 
     def __str__(self) -> str:
-        return self.created_at.strftime('%c')
+        return self.created_at.strftime("%c")
 
 
 class Worker(models.Model):
-    RE_EMAIL = r'(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)'
-    RE_PHONE = r'^[0-9()+-]+'
-    RE_AT_USER = r'@[-a-zA-Z0-9_]+'
+    RE_EMAIL = r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"
+    RE_PHONE = r"^[0-9()+-]+"
+    RE_AT_USER = r"@[-a-zA-Z0-9_]+"
 
     user = models.OneToOneField(
         User,
@@ -43,19 +43,19 @@ class Worker(models.Model):
         max_length=128,
         blank=True,
         help_text="Input a @username, email, or mobile",
-        validators=[RegexValidator(f'^({RE_AT_USER}|{RE_EMAIL}|{RE_PHONE})$')],
+        validators=[RegexValidator(f"^({RE_AT_USER}|{RE_EMAIL}|{RE_PHONE})$")],
     )
     venmo_handle = models.CharField(
         max_length=128,
         blank=True,
         help_text="Must start with leading @",
-        validators=[RegexValidator(f'^{RE_AT_USER}$')],
+        validators=[RegexValidator(f"^{RE_AT_USER}$")],
     )
     zelle_info = models.CharField(
         max_length=128,
         blank=True,
         help_text="Either email or mobile",
-        validators=[RegexValidator(f'^({RE_AT_USER}|{RE_PHONE})$')],
+        validators=[RegexValidator(f"^({RE_AT_USER}|{RE_PHONE})$")],
     )
 
     gmail_address = models.CharField(
@@ -86,28 +86,31 @@ class JobFolder(models.Model):
     slug = models.SlugField(help_text="A slug for this job folder")
     visible = models.BooleanField(default=True, help_text="Whether to show this folder")
     description = MarkdownField(
-        rendered_field='description_rendered',
+        rendered_field="description_rendered",
         help_text="Instructions and so on for this folder.",
         validator=VALIDATOR_STANDARD,
-        blank=True)
+        blank=True,
+    )
     description_rendered = RenderedMarkdownField()
 
     max_pending = models.IntegerField(
         null=True,
         blank=True,
         help_text="Maximum number of pending tasks that can be claimed "
-        "total by one person.")
+        "total by one person.",
+    )
     max_total = models.IntegerField(
         null=True,
         blank=True,
         help_text="Maximum number of tasks that can be claimed "
-        "total by one person, including completed ones.")
+        "total by one person, including completed ones.",
+    )
 
     def __str__(self) -> str:
         return self.name
 
     def get_absolute_url(self) -> str:
-        return reverse('job-list', args=(self.slug,))
+        return reverse("job-list", args=(self.slug,))
 
 
 class Job(models.Model):
@@ -129,23 +132,25 @@ class Job(models.Model):
     folder = models.ForeignKey(
         JobFolder,
         on_delete=models.CASCADE,
-        help_text="This is the folder that the job goes under.")
+        help_text="This is the folder that the job goes under.",
+    )
     name = models.CharField(max_length=80, help_text="Name of job")
 
     description = MarkdownField(
-        rendered_field='description_rendered',
+        rendered_field="description_rendered",
         help_text="Instructions and so on for this particular job.",
         validator=VALIDATOR_STANDARD,
-        blank=True)
+        blank=True,
+    )
     description_rendered = RenderedMarkdownField()
 
     spades_bounty = models.PositiveIntegerField(
-        verbose_name='♠',
+        verbose_name="♠",
         help_text="How many spades the job is worth",
         default=0,
     )
     usd_bounty = models.DecimalField(
-        verbose_name='$',
+        verbose_name="$",
         max_digits=8,
         decimal_places=2,
         help_text="How many US dollars the job is worth",
@@ -154,9 +159,9 @@ class Job(models.Model):
 
     progress = models.CharField(
         max_length=8,
-        default='JOB_NEW',
+        default="JOB_NEW",
         choices=PROGRESS_CHOICES,
-        help_text='The current status of the job',
+        help_text="The current status of the job",
     )
     hours_estimate = models.DecimalField(
         max_digits=6,
@@ -172,7 +177,7 @@ class Job(models.Model):
     payment_preference = models.CharField(
         max_length=15,
         choices=PREF_CHOICES,
-        default='',
+        default="",
         blank=True,
     )
     assignee = models.ForeignKey(
@@ -204,7 +209,7 @@ class Job(models.Model):
         return self.name
 
     def get_absolute_url(self) -> str:
-        return reverse('job-detail', args=(self.pk,))
+        return reverse("job-detail", args=(self.pk,))
 
     @property
     def status(self) -> str:
@@ -229,14 +234,20 @@ class Job(models.Model):
 
 
 def get_semester_invoices_with_annotations(semester: Semester) -> QuerySet[Invoice]:
-    job_subquery = Job.objects.filter(
-        assignee__user=OuterRef('student__user'),
-        semester=semester,
-        progress='JOB_VFD',
-        payment_preference='PREF_INVCRD',
-    ).order_by().values('assignee__user').annotate(total=Sum('usd_bounty')).values('total')
+    job_subquery = (
+        Job.objects.filter(
+            assignee__user=OuterRef("student__user"),
+            semester=semester,
+            progress="JOB_VFD",
+            payment_preference="PREF_INVCRD",
+        )
+        .order_by()
+        .values("assignee__user")
+        .annotate(total=Sum("usd_bounty"))
+        .values("total")
+    )
 
     return Invoice.objects.filter(student__semester=semester).annotate(
-        stripe_total=Coalesce(SubquerySum('paymentlog__amount'), 0),
+        stripe_total=Coalesce(SubquerySum("paymentlog__amount"), 0),
         job_total=Coalesce(Subquery(job_subquery), Decimal(0)),
     )

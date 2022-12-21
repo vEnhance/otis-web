@@ -5,23 +5,20 @@ from dashboard.models import PSet, UploadedFile
 
 
 class NewUploadForm(forms.ModelForm):
-
     class Meta:
         model = UploadedFile
-        fields = ('category', 'content', 'description')
+        fields = ("category", "content", "description")
         widgets = {
-            'description': forms.Textarea(attrs={
-                'cols': 40,
-                'rows': 2
-            }),
+            "description": forms.Textarea(attrs={"cols": 40, "rows": 2}),
         }
         help_texts = {
-            'content': "",
+            "content": "",
         }
 
 
 pset_file_validator = FileExtensionValidator(
-    allowed_extensions=['pdf', 'txt', 'tex', 'png', 'jpg'])
+    allowed_extensions=["pdf", "txt", "tex", "png", "jpg"]
+)
 
 
 class PSetSubmitForm(forms.ModelForm):
@@ -35,12 +32,12 @@ class PSetSubmitForm(forms.ModelForm):
     class Meta:
         model = PSet
         fields = (
-            'unit',
-            'clubs',
-            'hours',
-            'feedback',
-            'special_notes',
-            'next_unit_to_unlock',
+            "unit",
+            "clubs",
+            "hours",
+            "feedback",
+            "special_notes",
+            "next_unit_to_unlock",
         )
 
 
@@ -55,9 +52,9 @@ class PSetResubmitForm(forms.ModelForm):
     class Meta:
         model = PSet
         fields = (
-            'clubs',
-            'hours',
-            'feedback',
-            'special_notes',
-            'next_unit_to_unlock',
+            "clubs",
+            "hours",
+            "feedback",
+            "special_notes",
+            "next_unit_to_unlock",
         )

@@ -5,7 +5,7 @@ from django.core.management.base import BaseCommand
 
 
 class Command(BaseCommand):
-    help = 'Try logging'
+    help = "Try logging"
 
     def handle(self, *args: Any, **options: Any):
         """Try logging a message"""

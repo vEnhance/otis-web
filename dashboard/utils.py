@@ -9,11 +9,11 @@ from dashboard.models import PSet
 
 
 def pset_subquery(student: Student) -> Exists:
-    return Exists(PSet.objects.filter(unit=OuterRef('pk'), student=student))
+    return Exists(PSet.objects.filter(unit=OuterRef("pk"), student=student))
 
 
 def unlocked_unit_ids(student: Student) -> List[int]:
-    return list(student.unlocked_units.all().values_list('pk', flat=True))
+    return list(student.unlocked_units.all().values_list("pk", flat=True))
 
 
 def get_units_to_submit(student: Student) -> QuerySet[Unit]:

@@ -5,7 +5,12 @@ from rpg.factories import AchievementFactory
 from wikihaxx.mdx.otis import OTISPreprocessor
 
 from .factories import URLPathFactory
-from .views import WIKI_SUBJECT_CHART, edit_redirect, view_redirect, wiki_redirect  # NOQA
+from .views import (
+    WIKI_SUBJECT_CHART,
+    edit_redirect,
+    view_redirect,
+    wiki_redirect,
+)  # NOQA
 
 wiki_sample_bbcode = r"""Hello!
 
@@ -43,14 +48,14 @@ YouTube | vEnhance
 
 
 class WikiTest(EvanTestCase):
-
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
         cls.user = UserFactory.create(is_staff=True, is_superuser=True)
         root_url = URLPathFactory.create(article__owner=cls.user)
         units_url = URLPathFactory.create(
-            article__owner=cls.user, parent=root_url, slug='units')
+            article__owner=cls.user, parent=root_url, slug="units"
+        )
 
         for subject in set(WIKI_SUBJECT_CHART.values()):
             URLPathFactory.create(
@@ -63,7 +68,7 @@ class WikiTest(EvanTestCase):
         self.login(WikiTest.user)
         for subject, slug in WIKI_SUBJECT_CHART.items():
             unit = UnitFactory.create(group__subject=subject)
-            resp = self.assertGet20X('wiki-unitgroup', unit.pk, follow=True)
+            resp = self.assertGet20X("wiki-unitgroup", unit.pk, follow=True)
             self.assertHas(resp, f"list-of-{slug}-units")
 
     def test_raw_views(self):
@@ -75,31 +80,34 @@ class WikiTest(EvanTestCase):
     def test_preprocessor(self):
         UnitFactory.create(
             group__name="Example Unit",
-            group__slug='example',
-            group__subject='M',
-            code='DMW',
+            group__slug="example",
+            group__subject="M",
+            code="DMW",
         )
         AchievementFactory.create(
-            code='000000000000000000007E57',
+            code="000000000000000000007E57",
             name="Test Diamond",
-            description='Hi.',
+            description="Hi.",
         )
         AchievementFactory.create(
-            code='100000000000000000007E57',
+            code="100000000000000000007E57",
             name="Test Diamond with no Image",
-            description='This is to appease coverage branch',
-            image=None)
+            description="This is to appease coverage branch",
+            image=None,
+        )
 
         p = OTISPreprocessor()
         reply = p.run(wiki_sample_bbcode.splitlines())
         self.assertIn(r'Alice says, "you are a doofus".', reply)
         self.assertIn(r'Bob says, "no you".', reply)
         self.assertIn(r'<tr class="danger"><th>Code</th><td>INVALID</td></tr>', reply)
-        self.assertIn(r'<tr><th>Name</th><td>Test Diamond</td></tr>', reply)
-        self.assertIn(r'<tr><th>Description</th><td>Hi.</td></tr>', reply)
-        self.assertIn(r'<td>@evanchen.cc</td>', reply)
-        self.assertIn(r'<tr class="danger"><th>Name</th><td>nonexistent</td></tr>', reply)
-        self.assertIn(r'<tr><th>Name</th><td>Example Unit</td></tr>', reply)
-        self.assertIn(r'<tr><th>Classification</th><td>Miscellaneous</td></tr>', reply)
-        self.assertIn(r'<tr><th>Slug</th><td>example</td></tr>', reply)
-        self.assertIn(r'<tr><th>Versions</th><td>DMW</td></tr>', reply)
+        self.assertIn(r"<tr><th>Name</th><td>Test Diamond</td></tr>", reply)
+        self.assertIn(r"<tr><th>Description</th><td>Hi.</td></tr>", reply)
+        self.assertIn(r"<td>@evanchen.cc</td>", reply)
+        self.assertIn(
+            r'<tr class="danger"><th>Name</th><td>nonexistent</td></tr>', reply
+        )
+        self.assertIn(r"<tr><th>Name</th><td>Example Unit</td></tr>", reply)
+        self.assertIn(r"<tr><th>Classification</th><td>Miscellaneous</td></tr>", reply)
+        self.assertIn(r"<tr><th>Slug</th><td>example</td></tr>", reply)
+        self.assertIn(r"<tr><th>Versions</th><td>DMW</td></tr>", reply)

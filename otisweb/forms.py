@@ -12,11 +12,11 @@ class OTISUserRegistrationForm(forms.Form):
             data = self.cleaned_data
             changed = False
 
-            if 'first_name' in data:
-                user.first_name = data['first_name']
+            if "first_name" in data:
+                user.first_name = data["first_name"]
                 changed = True
-            if 'last_name' in data:
-                user.last_name = data['last_name']
+            if "last_name" in data:
+                user.last_name = data["last_name"]
                 changed = True
 
             if changed is True:

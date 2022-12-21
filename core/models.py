@@ -19,12 +19,15 @@ User = get_user_model()
 class Semester(models.Model):
     """Represents an academic semester/year/etc, e.g. "Fall 2017"
     or "Year III"."""
+
     name = models.CharField(
-        max_length=255, help_text="Text description such as 'Year III'", unique=True)
+        max_length=255, help_text="Text description such as 'Year III'", unique=True
+    )
     active = models.BooleanField(
         default=False,
         help_text="Whether the semester is currently active "
-        "(there should thus be at most one active semester).")
+        "(there should thus be at most one active semester).",
+    )
     exam_family = models.CharField(
         max_length=10,
         choices=(
@@ -33,35 +36,51 @@ class Semester(models.Model):
             ("", "--"),
         ),
         default="",
-        help_text="The family of practice exams to display.")
+        help_text="The family of practice exams to display.",
+    )
     uses_legacy_pset_system = models.BooleanField(
-        help_text="Whether the pset uses the old system of upload checking", default=False)
+        help_text="Whether the pset uses the old system of upload checking",
+        default=False,
+    )
 
     show_invoices = models.BooleanField(
-        default=False, help_text="Whether to display invoices for this semester.")
+        default=False, help_text="Whether to display invoices for this semester."
+    )
     prep_rate = models.PositiveSmallIntegerField(
-        default=240, help_text="The prep rate for the semester.")
+        default=240, help_text="The prep rate for the semester."
+    )
     hour_rate = models.PositiveSmallIntegerField(
-        default=80, help_text="The hourly rate for the semester.")
+        default=80, help_text="The hourly rate for the semester."
+    )
     first_payment_deadline = models.DateTimeField(
-        null=True, blank=True, help_text="Deadline for nonzero payment.")
+        null=True, blank=True, help_text="Deadline for nonzero payment."
+    )
     most_payment_deadline = models.DateTimeField(
-        null=True, blank=True, help_text="Deadline for two-thirds of the payment.")
+        null=True, blank=True, help_text="Deadline for two-thirds of the payment."
+    )
     end_year = models.IntegerField(help_text="The year in which OTIS will end")
 
     gradescope_key = models.CharField(
-        max_length=10, blank=True, help_text="The entry code for GradeScope this semester.")
+        max_length=10,
+        blank=True,
+        help_text="The entry code for GradeScope this semester.",
+    )
     social_url = models.URLField(
-        max_length=128, blank=True, help_text="The link to social platform for this year.")
+        max_length=128,
+        blank=True,
+        help_text="The link to social platform for this year.",
+    )
 
     calendar_url_meets_evan = models.URLField(
         blank=True,
         help_text="Link to calendar for students with meetings with Evan",
-        max_length=1024)
+        max_length=1024,
+    )
     calendar_url_no_meets_evan = models.URLField(
         blank=True,
         help_text="Link to calendar for students without meetings with Evan",
-        max_length=1024)
+        max_length=1024,
+    )
 
     def __str__(self) -> str:
         return self.name
@@ -75,27 +94,32 @@ class Semester(models.Model):
 
     @property
     def years(self) -> str:
-        return f'{self.start_year}-{self.end_year}'
+        return f"{self.start_year}-{self.end_year}"
 
 
-def artwork_image_file_name(instance: 'UnitGroup', filename: str) -> str:
+def artwork_image_file_name(instance: "UnitGroup", filename: str) -> str:
     del instance
-    return os.path.join('artwork', filename)
+    return os.path.join("artwork", filename)
 
 
 class UnitGroup(models.Model):
     """Represents an entire group of units with the same name,
     differing only in difficulty and version"""
-    objects: BaseManager['UnitGroup']
-    unit_set: BaseManager['Unit']
+
+    objects: BaseManager["UnitGroup"]
+    unit_set: BaseManager["Unit"]
     get_subject_display: Callable[[], str]
 
     name = models.CharField(
         max_length=255,
         unique=True,
-        help_text="The display name for the handout, like 'Weird Geo'")
+        help_text="The display name for the handout, like 'Weird Geo'",
+    )
     slug = models.SlugField(
-        max_length=80, help_text="The slug for the filename for this unit group", unique=True)
+        max_length=80,
+        help_text="The slug for the filename for this unit group",
+        unique=True,
+    )
     artwork = models.ImageField(
         upload_to=artwork_image_file_name,
         help_text="Artwork for this unit",
@@ -103,7 +127,9 @@ class UnitGroup(models.Model):
         blank=True,
     )
 
-    description = models.TextField(help_text="A description of what this unit is", blank=True)
+    description = models.TextField(
+        help_text="A description of what this unit is", blank=True
+    )
     SUBJECT_CHOICES = (
         ("A", "Algebra (Hufflepuff)"),
         ("C", "Combinatorics (Gryffindor)"),
@@ -114,12 +140,14 @@ class UnitGroup(models.Model):
         ("K", "Secret"),
     )
     subject = models.CharField(
-        max_length=2, choices=SUBJECT_CHOICES, help_text="The subject for the unit")
+        max_length=2, choices=SUBJECT_CHOICES, help_text="The subject for the unit"
+    )
     hidden = models.BooleanField(
-        help_text="Whether this unit is hidden from students", default=False)
+        help_text="Whether this unit is hidden from students", default=False
+    )
 
     class Meta:
-        ordering = ('name',)
+        ordering = ("name",)
 
     def __str__(self) -> str:
         return self.name
@@ -144,6 +172,7 @@ class UnitGroup(models.Model):
 
 class Unit(models.Model):
     """Represents a PDF of a unit, with problems and solutions"""
+
     group = models.ForeignKey(
         UnitGroup,
         on_delete=models.CASCADE,
@@ -153,11 +182,13 @@ class Unit(models.Model):
         max_length=255,
         help_text="The version code for the handout, like 'ZGX'",
     )
-    position = PositionField(help_text="The ordering of the relative handouts to each other.")
+    position = PositionField(
+        help_text="The ordering of the relative handouts to each other."
+    )
 
     class Meta:
-        unique_together = ('group', 'code')
-        ordering = ('position',)
+        unique_together = ("group", "code")
+        ordering = ("position",)
 
     def __str__(self) -> str:
         if self.group is not None:
@@ -173,15 +204,15 @@ class Unit(models.Model):
 
     @property
     def problems_pdf_filename(self) -> str:
-        return f'{self.code}-{self.group.slug}.pdf'
+        return f"{self.code}-{self.group.slug}.pdf"
 
     @property
     def solutions_pdf_filename(self) -> str:
-        return f'{self.code}-sol-{self.group.slug}.pdf'
+        return f"{self.code}-sol-{self.group.slug}.pdf"
 
     @property
     def problems_tex_filename(self) -> str:
-        return f'{self.code}-tex-{self.group.slug}.tex'
+        return f"{self.code}-tex-{self.group.slug}.tex"
 
 
 class UserProfile(models.Model):
@@ -195,17 +226,20 @@ class UserProfile(models.Model):
     show_bars = models.BooleanField(
         verbose_name="Level bars",
         help_text="Displays the level bars on the main portal",
-        default=True)
+        default=True,
+    )
 
     show_completed_by_default = models.BooleanField(
         verbose_name="Show completed",
         help_text="Displays completed units on the main portal by default",
-        default=True)
+        default=True,
+    )
 
     show_locked_by_default = models.BooleanField(
         verbose_name="Show locked",
         help_text="Displays locked units on the main portal by default",
-        default=True)
+        default=True,
+    )
 
     last_seen = models.DateTimeField(
         help_text="Last time user was seen at all",

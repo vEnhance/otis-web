@@ -10,21 +10,19 @@ from .models import Guess, Market
 
 
 class MarketFactory(DjangoModelFactory):
-
     class Meta:
         model = Market
 
     semester = SubFactory(SemesterFactory)
-    start_date = Faker('past_datetime', tzinfo=utc)
-    end_date = Faker('future_datetime', tzinfo=utc)
+    start_date = Faker("past_datetime", tzinfo=utc)
+    end_date = Faker("future_datetime", tzinfo=utc)
 
-    slug = UniqueFaker('slug')
-    title = Faker('bs')
-    prompt = Faker('paragraph')
+    slug = UniqueFaker("slug")
+    title = Faker("bs")
+    prompt = Faker("paragraph")
 
 
 class GuessFactory(DjangoModelFactory):
-
     class Meta:
         model = Guess
 

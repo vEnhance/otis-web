@@ -14,35 +14,35 @@ from django.views.generic.list import ListView
 from .models import ProblemSuggestion
 
 
-class ProblemSuggestionCreate(LoginRequiredMixin,
-                                CreateView[ProblemSuggestion,
-                                            BaseModelForm[ProblemSuggestion]]):
+class ProblemSuggestionCreate(
+    LoginRequiredMixin, CreateView[ProblemSuggestion, BaseModelForm[ProblemSuggestion]]
+):
     context_object_name = "problem_suggestion"
     fields = (
-        'unit',
-        'weight',
-        'source',
-        'hyperlink',
-        'description',
-        'statement',
-        'solution',
-        'comments',
-        'acknowledge',
+        "unit",
+        "weight",
+        "source",
+        "hyperlink",
+        "description",
+        "statement",
+        "solution",
+        "comments",
+        "acknowledge",
     )
     model = ProblemSuggestion
 
     def get_form(self, *args: Any, **kwargs: Any) -> BaseModelForm[ProblemSuggestion]:
         form = super(CreateView, self).get_form(*args, **kwargs)
-        form.fields['unit'].queryset = Unit.objects.filter(group__hidden=False)  # type: ignore
+        form.fields["unit"].queryset = Unit.objects.filter(group__hidden=False)  # type: ignore
         return form
 
     def get_initial(self):
         initial = super().get_initial()
-        uid = self.kwargs.get('unit_id', None)
+        uid = self.kwargs.get("unit_id", None)
         if uid is not None:
             unit = get_object_or_404(Unit, id=uid)
             if unit.group.hidden is False:
-                initial['unit'] = uid
+                initial["unit"] = uid
         return initial
 
     def form_valid(self, form: BaseModelForm[ProblemSuggestion]):
@@ -51,7 +51,7 @@ class ProblemSuggestionCreate(LoginRequiredMixin,
         form.instance.user = self.request.user
         messages.success(
             self.request,
-            "Successfully submitted suggestion! Thanks much :) You can add more using the form below."
+            "Successfully submitted suggestion! Thanks much :) You can add more using the form below.",
         )
         return super().form_valid(form)
 
@@ -59,20 +59,20 @@ class ProblemSuggestionCreate(LoginRequiredMixin,
         return reverse("suggest-new", kwargs=self.kwargs)
 
 
-class ProblemSuggestionUpdate(LoginRequiredMixin,
-                                UpdateView[ProblemSuggestion,
-                                            BaseModelForm[ProblemSuggestion]]):
+class ProblemSuggestionUpdate(
+    LoginRequiredMixin, UpdateView[ProblemSuggestion, BaseModelForm[ProblemSuggestion]]
+):
     context_object_name = "problem_suggestion"
     fields = (
-        'unit',
-        'weight',
-        'source',
-        'hyperlink',
-        'description',
-        'statement',
-        'solution',
-        'comments',
-        'acknowledge',
+        "unit",
+        "weight",
+        "source",
+        "hyperlink",
+        "description",
+        "statement",
+        "solution",
+        "comments",
+        "acknowledge",
     )
     model = ProblemSuggestion
     object: ProblemSuggestion
@@ -101,7 +101,7 @@ class ProblemSuggestionList(LoginRequiredMixin, ListView[ProblemSuggestion]):
         if not isinstance(self.request.user, User):
             raise PermissionDenied("Please log in.")
         queryset = ProblemSuggestion.objects.filter(user=self.request.user)
-        queryset = queryset.order_by('status', 'created_at')
+        queryset = queryset.order_by("status", "created_at")
         return queryset
 
 

@@ -14,11 +14,11 @@ class HaxxPlugin(BasePlugin):
     slug = settings.SLUG
 
     sidebar: Dict[str, Any] = {
-        'headline': _('OTIS'),
-        'icon_class': 'fa-info-circle',
-        'template': 'wikihaxx/sidebar.html',
-        'form_class': None,
-        'get_form_kwargs': (lambda a: {})  # pragma: no cover
+        "headline": _("OTIS"),
+        "icon_class": "fa-info-circle",
+        "template": "wikihaxx/sidebar.html",
+        "form_class": None,
+        "get_form_kwargs": (lambda a: {}),  # pragma: no cover
     }
 
     markdown_extensions = [

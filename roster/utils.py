@@ -12,7 +12,9 @@ from roster.models import Student
 from . import models
 
 
-def get_current_students(queryset: Optional[QuerySet[Student]] = None) -> QuerySet[Student]:
+def get_current_students(
+    queryset: Optional[QuerySet[Student]] = None,
+) -> QuerySet[Student]:
     if queryset is None:
         queryset = models.Student.objects.all()
     return queryset.filter(semester__active=True)
@@ -24,7 +26,8 @@ def get_visible_from_queryset(user: User, queryset: QuerySet[models.Student]):
         return queryset
     else:
         return queryset.filter(
-            Q(user=user) | Q(assistant__user=user) | Q(unlisted_assistants__user=user))
+            Q(user=user) | Q(assistant__user=user) | Q(unlisted_assistants__user=user)
+        )
 
 
 def get_visible_students(user: User, current: bool = True):
@@ -50,7 +53,9 @@ def get_student_by_id(
         raise PermissionDenied("Authentication is needed, how did you even get here?")
 
     if payment_exempt is False and student.is_delinquent and not request.user.is_staff:
-        raise PermissionDenied("Payment needs to be processed before this page can be used")
+        raise PermissionDenied(
+            "Payment needs to be processed before this page can be used"
+        )
 
     is_instructor = can_edit(request, student)
     if requires_edit is True and not is_instructor:
@@ -73,8 +78,9 @@ def can_edit(request: HttpRequest, student: models.Student) -> bool:
     if request.user.is_superuser:
         return True
     return request.user.is_staff and (
-        (student.assistant is not None and student.assistant.user == request.user) or
-        (student.unlisted_assistants.filter(user=request.user).exists()))
+        (student.assistant is not None and student.assistant.user == request.user)
+        or (student.unlisted_assistants.filter(user=request.user).exists())
+    )
 
 
 def infer_student(request: HttpRequest) -> models.Student:
