@@ -8,7 +8,7 @@ RUN apk add build-base sqlite openssl-dev libffi-dev tiff-dev jpeg-dev \
     harfbuzz-dev fribidi-dev libimagequant-dev libxcb-dev libpng-dev git
 
 ENV CRYPTOGRAPHY_DONT_BUILD_RUST=1
-RUN pip install poetry yapf toml
+RUN pip install poetry black toml
 
 WORKDIR /app
 
