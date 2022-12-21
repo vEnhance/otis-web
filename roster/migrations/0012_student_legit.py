@@ -8,17 +8,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0011_auto_20170813_1207'),
+        ("roster", "0011_auto_20170813_1207"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='student',
-            name='legit',
+            model_name="student",
+            name="legit",
             field=models.BooleanField(
                 default=True,
-                help_text=
-                'Whether this student is real. Set to false for dummy accounts and the like. This will hide them from the master schedule, for example.'
+                help_text="Whether this student is real. Set to false for dummy accounts and the like. This will hide them from the master schedule, for example.",
             ),
         ),
     ]

@@ -6,16 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('arch', '0008_auto_20210122_1155'),
+        ("arch", "0008_auto_20210122_1155"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='problem',
-            name='aops_url',
+            model_name="problem",
+            name="aops_url",
             field=models.URLField(
                 blank=True,
-                help_text='Hyperlink to problem on Art of Problem Solving. Include HTTPS.',
-                max_length=128),
+                help_text="Hyperlink to problem on Art of Problem Solving. Include HTTPS.",
+                max_length=128,
+            ),
         ),
     ]

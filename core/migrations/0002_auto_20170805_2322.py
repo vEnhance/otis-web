@@ -8,20 +8,24 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0001_initial'),
+        ("core", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='handout',
-            name='prob_url',
+            model_name="handout",
+            name="prob_url",
             field=models.CharField(
-                blank=True, help_text='The URL for the problems handout', max_length=255),
+                blank=True, help_text="The URL for the problems handout", max_length=255
+            ),
         ),
         migrations.AlterField(
-            model_name='handout',
-            name='soln_url',
+            model_name="handout",
+            name="soln_url",
             field=models.CharField(
-                blank=True, help_text='The URL for the solutions handout', max_length=255),
+                blank=True,
+                help_text="The URL for the solutions handout",
+                max_length=255,
+            ),
         ),
     ]

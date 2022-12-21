@@ -8,17 +8,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('exams', '0010_auto_20170818_2303'),
+        ("exams", "0010_auto_20170818_2303"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='assignment',
-            name='due_date',
+            model_name="assignment",
+            name="due_date",
             field=models.DateField(
                 blank=True,
-                help_text=
-                'When the assignment should be due. Leave blank if not active this semester.',
-                null=True),
+                help_text="When the assignment should be due. Leave blank if not active this semester.",
+                null=True,
+            ),
         ),
     ]

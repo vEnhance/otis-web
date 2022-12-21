@@ -6,21 +6,20 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('markets', '0006_alter_guess_score'),
+        ("markets", "0006_alter_guess_score"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='guess',
-            options={'verbose_name_plural': 'Guesses'},
+            name="guess",
+            options={"verbose_name_plural": "Guesses"},
         ),
         migrations.AlterField(
-            model_name='market',
-            name='alpha',
+            model_name="market",
+            name="alpha",
             field=models.FloatField(
                 default=2,
-                help_text=
-                'Exponent corresponding to harshness of the market, used in the scoring function'
+                help_text="Exponent corresponding to harshness of the market, used in the scoring function",
             ),
         ),
     ]

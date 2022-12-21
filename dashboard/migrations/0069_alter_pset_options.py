@@ -6,15 +6,15 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dashboard', '0068_alter_achievement_code'),
+        ("dashboard", "0068_alter_achievement_code"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='pset',
+            name="pset",
             options={
-                'verbose_name': 'PSet submission',
-                'verbose_name_plural': 'PSet submissions'
+                "verbose_name": "PSet submission",
+                "verbose_name_plural": "PSet submissions",
             },
         ),
     ]

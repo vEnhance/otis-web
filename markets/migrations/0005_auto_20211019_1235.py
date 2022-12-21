@@ -6,25 +6,24 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('markets', '0004_auto_20211019_1219'),
+        ("markets", "0004_auto_20211019_1219"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='market',
-            name='weight',
+            model_name="market",
+            name="weight",
             field=models.FloatField(
                 default=2,
-                help_text='The max score to assign to the market, used in the scoring function'
+                help_text="The max score to assign to the market, used in the scoring function",
             ),
         ),
         migrations.AlterField(
-            model_name='market',
-            name='alpha',
+            model_name="market",
+            name="alpha",
             field=models.FloatField(
                 default=1,
-                help_text=
-                'Exponent corresponding to harshness of the market, used in the scoring function'
+                help_text="Exponent corresponding to harshness of the market, used in the scoring function",
             ),
         ),
     ]

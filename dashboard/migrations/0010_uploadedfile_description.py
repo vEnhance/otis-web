@@ -8,14 +8,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dashboard', '0009_auto_20170818_1605'),
+        ("dashboard", "0009_auto_20170818_1605"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='uploadedfile',
-            name='description',
+            model_name="uploadedfile",
+            name="description",
             field=models.CharField(
-                blank=True, help_text='Optional description of the file', max_length=250),
+                blank=True, help_text="Optional description of the file", max_length=250
+            ),
         ),
     ]

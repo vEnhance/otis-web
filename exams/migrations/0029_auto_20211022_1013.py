@@ -6,18 +6,18 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0080_auto_20211020_0923'),
-        ('exams', '0028_mockcompleted'),
+        ("roster", "0080_auto_20211020_0923"),
+        ("exams", "0028_mockcompleted"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='mockcompleted',
-            old_name='test',
-            new_name='exam',
+            model_name="mockcompleted",
+            old_name="test",
+            new_name="exam",
         ),
         migrations.AlterUniqueTogether(
-            name='mockcompleted',
-            unique_together={('student', 'exam')},
+            name="mockcompleted",
+            unique_together={("student", "exam")},
         ),
     ]

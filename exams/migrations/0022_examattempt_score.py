@@ -6,14 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('exams', '0021_auto_20210805_1404'),
+        ("exams", "0021_auto_20210805_1404"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='examattempt',
-            name='score',
+            model_name="examattempt",
+            name="score",
             field=models.SmallIntegerField(
-                blank=True, help_text='The number of correct answers', null=True),
+                blank=True, help_text="The number of correct answers", null=True
+            ),
         ),
     ]

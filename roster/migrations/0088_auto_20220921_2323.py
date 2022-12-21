@@ -5,23 +5,23 @@ from django.db.models.expressions import Exists, OuterRef, Subquery
 
 
 def link_student_regforms(apps, scheme_editor):
-    Student = apps.get_model('roster', 'Student')
-    Reg = apps.get_model('roster', 'StudentRegistration')
+    Student = apps.get_model("roster", "Student")
+    Reg = apps.get_model("roster", "StudentRegistration")
     query = Reg.objects.filter(
-        user=OuterRef('user'),
-        container__semester=OuterRef('semester'),
+        user=OuterRef("user"),
+        container__semester=OuterRef("semester"),
     )
-    Student.objects.filter(Exists(query)).update(reg=Subquery(query.values('pk')))
+    Student.objects.filter(Exists(query)).update(reg=Subquery(query.values("pk")))
 
 
 def unlink_student_regforms(apps, scheme_editor):
-    Student = apps.get_model('roster', 'Student')
+    Student = apps.get_model("roster", "Student")
     Student.objects.all().update(reg=None)
 
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('roster', '0087_student_reg'),
+        ("roster", "0087_student_reg"),
     ]
 
     operations = [migrations.RunPython(link_student_regforms, unlink_student_regforms)]

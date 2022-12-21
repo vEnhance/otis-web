@@ -6,14 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0020_auto_20210427_1624'),
+        ("core", "0020_auto_20210427_1624"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='semester',
-            name='classroom_url',
+            model_name="semester",
+            name="classroom_url",
             field=models.CharField(
-                blank=True, help_text='The entry point for the meeting room.', max_length=128),
+                blank=True,
+                help_text="The entry point for the meeting room.",
+                max_length=128,
+            ),
         ),
     ]

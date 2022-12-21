@@ -7,18 +7,19 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0075_remove_student_last_level_time'),
-        ('dashboard', '0053_auto_20210916_2210'),
+        ("roster", "0075_remove_student_last_level_time"),
+        ("dashboard", "0053_auto_20210916_2210"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='palaceentry',
-            name='student',
+            model_name="palaceentry",
+            name="student",
             field=models.OneToOneField(
                 blank=True,
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
-                to='roster.student'),
+                to="roster.student",
+            ),
         ),
     ]

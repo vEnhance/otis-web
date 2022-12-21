@@ -6,16 +6,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('markets', '0008_alter_guess_value'),
+        ("markets", "0008_alter_guess_value"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='market',
-            name='weight',
+            model_name="market",
+            name="weight",
             field=models.FloatField(
                 default=4,
-                help_text='The max score to assign to the market, used in the scoring function'
+                help_text="The max score to assign to the market, used in the scoring function",
             ),
         ),
     ]

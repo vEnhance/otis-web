@@ -6,18 +6,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0071_remove_student_usemo_score'),
+        ("roster", "0071_remove_student_usemo_score"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='unitinquiry',
-            name='status',
+            model_name="unitinquiry",
+            name="status",
             field=models.CharField(
-                choices=[('ACC', 'Approved'), ('REJ', 'Rejected'), ('NEW', 'Pending'),
-                            ('HOLD', 'On hold')],
-                default='NEW',
-                help_text='The current status of the petition.',
-                max_length=5),
+                choices=[
+                    ("ACC", "Approved"),
+                    ("REJ", "Rejected"),
+                    ("NEW", "Pending"),
+                    ("HOLD", "On hold"),
+                ],
+                default="NEW",
+                help_text="The current status of the petition.",
+                max_length=5,
+            ),
         ),
     ]

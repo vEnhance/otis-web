@@ -8,12 +8,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('exams', '0002_assignment_due_date'),
+        ("exams", "0002_assignment_due_date"),
     ]
 
     operations = [
         migrations.AlterUniqueTogether(
-            name='mockolympiad',
-            unique_together={('family', 'number')},
+            name="mockolympiad",
+            unique_together={("family", "number")},
         ),
     ]

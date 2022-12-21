@@ -8,17 +8,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0019_auto_20180825_0156'),
+        ("roster", "0019_auto_20180825_0156"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='assistant',
-            name='shortname',
+            model_name="assistant",
+            name="shortname",
             field=models.CharField(
-                default='??',
-                help_text='Initials or short name for this Assistant',
-                max_length=10),
+                default="??",
+                help_text="Initials or short name for this Assistant",
+                max_length=10,
+            ),
             preserve_default=False,
         ),
     ]

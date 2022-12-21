@@ -9,17 +9,18 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('roster', '0076_alter_studentregistration_track'),
+        ("roster", "0076_alter_studentregistration_track"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='studentregistration',
-            name='user',
+            model_name="studentregistration",
+            name="user",
             field=models.ForeignKey(
-                help_text='The user to attach',
+                help_text="The user to attach",
                 on_delete=django.db.models.deletion.CASCADE,
-                related_name='regs',
-                to=settings.AUTH_USER_MODEL),
+                related_name="regs",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

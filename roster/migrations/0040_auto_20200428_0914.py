@@ -6,22 +6,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0039_unlock_units'),
+        ("roster", "0039_unlock_units"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='student',
-            name='num_units_done',
+            model_name="student",
+            name="num_units_done",
             field=models.SmallIntegerField(
                 default=0,
-                help_text=
-                "The number of completed units. This is set manually for Evan's book-keeping."),
+                help_text="The number of completed units. This is set manually for Evan's book-keeping.",
+            ),
         ),
         migrations.AlterField(
-            model_name='student',
-            name='vision',
+            model_name="student",
+            name="vision",
             field=models.SmallIntegerField(
-                default=3, help_text='Deprecated and no longer in use. To be deleted.'),
+                default=3, help_text="Deprecated and no longer in use. To be deleted."
+            ),
         ),
     ]

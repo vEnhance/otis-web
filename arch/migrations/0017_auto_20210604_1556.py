@@ -6,16 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('arch', '0016_auto_20210604_0915'),
+        ("arch", "0016_auto_20210604_0915"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='problem',
-            name='puid',
+            model_name="problem",
+            name="puid",
             field=models.CharField(
-                help_text='Unique problem identifier, as printed in OTIS handout.',
+                help_text="Unique problem identifier, as printed in OTIS handout.",
                 max_length=24,
-                unique=True),
+                unique=True,
+            ),
         ),
     ]

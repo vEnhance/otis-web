@@ -9,18 +9,18 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0005_unit_subject'),
+        ("core", "0005_unit_subject"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('roster', '0009_auto_20170808_1730'),
+        ("roster", "0009_auto_20170808_1730"),
     ]
 
     operations = [
         migrations.AlterUniqueTogether(
-            name='assistant',
-            unique_together={('user', 'semester')},
+            name="assistant",
+            unique_together={("user", "semester")},
         ),
         migrations.AlterUniqueTogether(
-            name='student',
-            unique_together={('user', 'semester')},
+            name="student",
+            unique_together={("user", "semester")},
         ),
     ]

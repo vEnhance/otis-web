@@ -6,13 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('suggestions', '0001_initial'),
+        ("suggestions", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='problemsuggestion',
-            name='hyperlink',
-            field=models.URLField(blank=True, help_text='A hyperlink if appropriate, e.g. AoPS thread.'),
+            model_name="problemsuggestion",
+            name="hyperlink",
+            field=models.URLField(
+                blank=True, help_text="A hyperlink if appropriate, e.g. AoPS thread."
+            ),
         ),
     ]

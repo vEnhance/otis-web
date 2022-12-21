@@ -6,16 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0025_remove_semester_registration_open'),
+        ("core", "0025_remove_semester_registration_open"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='semester',
-            name='uses_legacy_pset_system',
+            model_name="semester",
+            name="uses_legacy_pset_system",
             field=models.BooleanField(
                 default=True,
-                help_text='Whether the pset uses the old system of upload checking'),
+                help_text="Whether the pset uses the old system of upload checking",
+            ),
             preserve_default=False,
         ),
     ]

@@ -6,17 +6,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dashboard', '0063_alter_pset_next_unit_to_unlock'),
+        ("dashboard", "0063_alter_pset_next_unit_to_unlock"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='questcomplete',
-            name='category',
+            model_name="questcomplete",
+            name="category",
             field=models.CharField(
-                choices=[('PR', 'Pull request'), ('BR', 'Bug report'), ('WK', 'Wiki bonus'),
-                            ('MO', 'Mock exam'), ('MS', 'Miscellaneous')],
-                default='MS',
-                max_length=4),
+                choices=[
+                    ("PR", "Pull request"),
+                    ("BR", "Bug report"),
+                    ("WK", "Wiki bonus"),
+                    ("MO", "Mock exam"),
+                    ("MS", "Miscellaneous"),
+                ],
+                default="MS",
+                max_length=4,
+            ),
         ),
     ]

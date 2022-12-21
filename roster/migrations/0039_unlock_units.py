@@ -5,19 +5,22 @@ from django.db.models import Exists, OuterRef
 
 
 def unlock_stuff(apps, scheme_editor):
-    Student = apps.get_model('roster', 'Student')
-    UploadedFile = apps.get_model('dashboard', 'UploadedFile')
+    Student = apps.get_model("roster", "Student")
+    UploadedFile = apps.get_model("dashboard", "UploadedFile")
     for student in Student.objects.all():
-        curriculum = student.curriculum.all().annotate(
-                has_pset = Exists(
+        curriculum = (
+            student.curriculum.all()
+            .annotate(
+                has_pset=Exists(
                     UploadedFile.objects.filter(
-                        unit=OuterRef('pk'),
-                        benefactor=student.id,
-                        category='psets')))\
-                .order_by('-has_pset', 'position')
+                        unit=OuterRef("pk"), benefactor=student.id, category="psets"
+                    )
+                )
+            )
+            .order_by("-has_pset", "position")
+        )
         n = student.num_units_done + student.vision
-        to_unlock = [unit \
-                for unit in curriculum[0:n] if not unit.has_pset]
+        to_unlock = [unit for unit in curriculum[0:n] if not unit.has_pset]
         student.unlocked_units.add(*to_unlock)
 
 
@@ -28,9 +31,9 @@ def do_nothing(apps, scheme_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0038_auto_20200428_0839'),
-        ('core', '0015_auto_20200314_1453'),
-        ('dashboard', '0014_semesterdownloadfile'),
+        ("roster", "0038_auto_20200428_0839"),
+        ("core", "0015_auto_20200314_1453"),
+        ("dashboard", "0014_semesterdownloadfile"),
     ]
 
     operations = [migrations.RunPython(unlock_stuff, do_nothing)]

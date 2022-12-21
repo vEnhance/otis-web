@@ -8,13 +8,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dashboard', '0007_auto_20170813_1138'),
+        ("dashboard", "0007_auto_20170813_1138"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='uploadedfile',
-            name='content',
-            field=models.FileField(help_text='The file itself', upload_to=''),
+            model_name="uploadedfile",
+            name="content",
+            field=models.FileField(help_text="The file itself", upload_to=""),
         ),
     ]

@@ -6,19 +6,25 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0033_remove_unit_reveal_at_level'),
+        ("core", "0033_remove_unit_reveal_at_level"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='unitgroup',
-            name='subject',
+            model_name="unitgroup",
+            name="subject",
             field=models.CharField(
-                choices=[('A', 'Algebra (Hufflepuff)'), ('C', 'Combinatorics (Gryffindor)'),
-                            ('G', 'Geometry (Slytherin)'), ('N', 'Number Theory (Ravenclaw)'),
-                            ('F', 'Functional Equations'), ('M', 'Miscellaneous'),
-                            ('U', 'Null')],
-                help_text='The subject for the unit',
-                max_length=2),
+                choices=[
+                    ("A", "Algebra (Hufflepuff)"),
+                    ("C", "Combinatorics (Gryffindor)"),
+                    ("G", "Geometry (Slytherin)"),
+                    ("N", "Number Theory (Ravenclaw)"),
+                    ("F", "Functional Equations"),
+                    ("M", "Miscellaneous"),
+                    ("U", "Null"),
+                ],
+                help_text="The subject for the unit",
+                max_length=2,
+            ),
         ),
     ]

@@ -6,15 +6,15 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0078_invoice_forgive_memo'),
+        ("roster", "0078_invoice_forgive_memo"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='studentregistration',
+            name="studentregistration",
             options={
-                'verbose_name': 'Unit petition',
-                'verbose_name_plural': 'Unit petitions'
+                "verbose_name": "Unit petition",
+                "verbose_name_plural": "Unit petitions",
             },
         ),
     ]

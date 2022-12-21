@@ -6,14 +6,14 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0061_alter_registrationcontainer_allowed_tracks'),
-        ('core', '0027_alter_semester_uses_legacy_pset_system'),
-        ('dashboard', '0026_rename_number_level_threshold'),
+        ("roster", "0061_alter_registrationcontainer_allowed_tracks"),
+        ("core", "0027_alter_semester_uses_legacy_pset_system"),
+        ("dashboard", "0026_rename_number_level_threshold"),
     ]
 
     operations = [
         migrations.RenameModel(
-            old_name='PSetSubmission',
-            new_name='PSet',
+            old_name="PSetSubmission",
+            new_name="PSet",
         ),
     ]

@@ -8,15 +8,20 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0020_assistant_shortname'),
+        ("roster", "0020_assistant_shortname"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='student',
+            name="student",
             options={
-                'ordering':
-                    ('semester', '-legit', 'track', 'user__first_name', 'user__last_name')
+                "ordering": (
+                    "semester",
+                    "-legit",
+                    "track",
+                    "user__first_name",
+                    "user__last_name",
+                )
             },
         ),
     ]

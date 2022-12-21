@@ -7,15 +7,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('markets', '0007_auto_20211019_1627'),
+        ("markets", "0007_auto_20211019_1627"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='guess',
-            name='value',
+            model_name="guess",
+            name="value",
             field=models.FloatField(
                 help_text="User's guess",
-                validators=[django.core.validators.MinValueValidator(1e-06)]),
+                validators=[django.core.validators.MinValueValidator(1e-06)],
+            ),
         ),
     ]

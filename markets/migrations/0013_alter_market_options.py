@@ -6,12 +6,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('markets', '0012_alter_guess_value'),
+        ("markets", "0012_alter_guess_value"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='market',
-            options={'ordering': ('-end_date',)},
+            name="market",
+            options={"ordering": ("-end_date",)},
         ),
     ]

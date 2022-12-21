@@ -4,7 +4,7 @@ from django.db import migrations
 
 
 def gender_update(apps, scheme_editor):
-    Regs = apps.get_model('roster', 'StudentRegistration')
+    Regs = apps.get_model("roster", "StudentRegistration")
     Regs.objects.filter(gender="").update(gender="U")
 
 
@@ -14,7 +14,7 @@ def do_nothing(apps, scheme_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('roster', '0085_alter_studentregistration_gender_and_more'),
+        ("roster", "0085_alter_studentregistration_gender_and_more"),
     ]
 
     operations = [migrations.RunPython(gender_update, do_nothing)]

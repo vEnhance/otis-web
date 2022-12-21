@@ -7,21 +7,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dashboard', '0028_alter_pset_next_unit_to_unlock'),
+        ("dashboard", "0028_alter_pset_next_unit_to_unlock"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='achievementcode',
-            name='earned',
+            model_name="achievementcode",
+            name="earned",
         ),
         migrations.AlterField(
-            model_name='achievementcode',
-            name='image',
+            model_name="achievementcode",
+            name="image",
             field=models.FileField(
                 blank=True,
-                help_text='Image for the obtained badge',
+                help_text="Image for the obtained badge",
                 null=True,
-                upload_to=rpg.models.achievement_image_file_name),
+                upload_to=rpg.models.achievement_image_file_name,
+            ),
         ),
     ]

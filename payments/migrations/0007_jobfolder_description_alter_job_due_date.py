@@ -6,18 +6,20 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('payments', '0006_jobfolder_slug'),
+        ("payments", "0006_jobfolder_slug"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='jobfolder',
-            name='description',
-            field=models.TextField(blank=True, help_text='About this folder'),
+            model_name="jobfolder",
+            name="description",
+            field=models.TextField(blank=True, help_text="About this folder"),
         ),
         migrations.AlterField(
-            model_name='job',
-            name='due_date',
-            field=models.DateTimeField(blank=True, help_text='When the job should be finished by', null=True),
+            model_name="job",
+            name="due_date",
+            field=models.DateTimeField(
+                blank=True, help_text="When the job should be finished by", null=True
+            ),
         ),
     ]

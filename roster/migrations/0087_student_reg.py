@@ -7,18 +7,19 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0086_auto_20220805_1803'),
+        ("roster", "0086_auto_20220805_1803"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='student',
-            name='reg',
+            model_name="student",
+            name="reg",
             field=models.OneToOneField(
                 blank=True,
-                help_text='Link to the registration forms for the student',
+                help_text="Link to the registration forms for the student",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
-                to='roster.studentregistration'),
+                to="roster.studentregistration",
+            ),
         ),
     ]

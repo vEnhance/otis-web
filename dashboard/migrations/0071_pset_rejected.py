@@ -6,14 +6,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dashboard', '0070_auto_20220124_1249'),
+        ("dashboard", "0070_auto_20220124_1249"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='pset',
-            name='rejected',
+            model_name="pset",
+            name="rejected",
             field=models.BooleanField(
-                default=False, help_text='If a problem set is rejected and needs attention.'),
+                default=False,
+                help_text="If a problem set is rejected and needs attention.",
+            ),
         ),
     ]

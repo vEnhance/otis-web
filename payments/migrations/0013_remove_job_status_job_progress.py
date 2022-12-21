@@ -6,17 +6,26 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('payments', '0012_job_description_rendered_and_more'),
+        ("payments", "0012_job_description_rendered_and_more"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='job',
-            name='status',
+            model_name="job",
+            name="status",
         ),
         migrations.AddField(
-            model_name='job',
-            name='progress',
-            field=models.CharField(choices=[('NEW', 'In Progress'), ('RVW', 'Reviewing'), ('OK', 'Completed')], default='NEW', help_text='The current status of the job', max_length=3),
+            model_name="job",
+            name="progress",
+            field=models.CharField(
+                choices=[
+                    ("NEW", "In Progress"),
+                    ("RVW", "Reviewing"),
+                    ("OK", "Completed"),
+                ],
+                default="NEW",
+                help_text="The current status of the job",
+                max_length=3,
+            ),
         ),
     ]

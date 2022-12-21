@@ -6,14 +6,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0037_rename_last_announce_dismiss_userprofile_last_email_dismiss'),
+        ("core", "0037_rename_last_announce_dismiss_userprofile_last_email_dismiss"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='semester',
-            name='end_year',
-            field=models.IntegerField(default=0, help_text='The year in which OTIS will end'),
+            model_name="semester",
+            name="end_year",
+            field=models.IntegerField(
+                default=0, help_text="The year in which OTIS will end"
+            ),
             preserve_default=False,
         ),
     ]

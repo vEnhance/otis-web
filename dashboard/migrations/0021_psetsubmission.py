@@ -7,61 +7,93 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0061_alter_registrationcontainer_allowed_tracks'),
-        ('core', '0024_alter_unitgroup_slug'),
-        ('dashboard', '0020_problemsuggestion_notified'),
+        ("roster", "0061_alter_registrationcontainer_allowed_tracks"),
+        ("core", "0024_alter_unitgroup_slug"),
+        ("dashboard", "0020_problemsuggestion_notified"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='PSetSubmission',
+            name="PSetSubmission",
             fields=[
-                ('id',
+                (
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False,
-                        verbose_name='ID')),
-                ('approved',
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "approved",
                     models.BooleanField(
                         default=False,
-                        help_text='Whether the problem set has been checked off')),
-                ('hours',
+                        help_text="Whether the problem set has been checked off",
+                    ),
+                ),
+                (
+                    "hours",
                     models.FloatField(
-                        help_text='Number of hours spent on this problem set',
-                        verbose_name='Total hours spent')),
-                ('clubs',
+                        help_text="Number of hours spent on this problem set",
+                        verbose_name="Total hours spent",
+                    ),
+                ),
+                (
+                    "clubs",
                     models.IntegerField(
-                        help_text='Total number of clubs that you solved',
-                        verbose_name='Total ♣ earned')),
-                ('feedback',
+                        help_text="Total number of clubs that you solved",
+                        verbose_name="Total ♣ earned",
+                    ),
+                ),
+                (
+                    "feedback",
                     models.TextField(
-                        blank=True, help_text='Any other feedback about the problem set')),
-                ('special_notes',
+                        blank=True, help_text="Any other feedback about the problem set"
+                    ),
+                ),
+                (
+                    "special_notes",
                     models.TextField(
-                        help_text="If there's anything you need to say before we proceed")),
-                ('next_unit_to_unlock',
+                        help_text="If there's anything you need to say before we proceed"
+                    ),
+                ),
+                (
+                    "next_unit_to_unlock",
                     models.ForeignKey(
                         blank=True,
-                        help_text='The unit you want to work on next (leave blank for any)',
+                        help_text="The unit you want to work on next (leave blank for any)",
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
-                        related_name='unblocking_submissions',
-                        to='core.unit')),
-                ('student',
+                        related_name="unblocking_submissions",
+                        to="core.unit",
+                    ),
+                ),
+                (
+                    "student",
                     models.ForeignKey(
-                        help_text='The student attached to this',
+                        help_text="The student attached to this",
                         on_delete=django.db.models.deletion.CASCADE,
-                        to='roster.student')),
-                ('unit',
+                        to="roster.student",
+                    ),
+                ),
+                (
+                    "unit",
                     models.ForeignKey(
-                        help_text='The unit you want to submit for',
+                        help_text="The unit you want to submit for",
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
-                        to='core.unit')),
-                ('upload',
+                        to="core.unit",
+                    ),
+                ),
+                (
+                    "upload",
                     models.ForeignKey(
-                        help_text='The associated upload file for this problem set',
+                        help_text="The associated upload file for this problem set",
                         on_delete=django.db.models.deletion.CASCADE,
-                        to='dashboard.uploadedfile')),
+                        to="dashboard.uploadedfile",
+                    ),
+                ),
             ],
         ),
     ]

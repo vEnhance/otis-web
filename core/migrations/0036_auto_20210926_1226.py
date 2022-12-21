@@ -8,29 +8,32 @@ from django.utils.timezone import utc
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0035_alter_unitgroup_subject'),
+        ("core", "0035_alter_unitgroup_subject"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='userprofile',
-            name='last_announce_dismiss',
+            model_name="userprofile",
+            name="last_announce_dismiss",
             field=models.DateTimeField(
                 default=datetime.datetime(1970, 1, 1, 0, 0, tzinfo=utc),
-                help_text='Last time user dismissed the emails modal.'),
+                help_text="Last time user dismissed the emails modal.",
+            ),
         ),
         migrations.AddField(
-            model_name='userprofile',
-            name='last_download_dismiss',
+            model_name="userprofile",
+            name="last_download_dismiss",
             field=models.DateTimeField(
                 default=datetime.datetime(1970, 1, 1, 0, 0, tzinfo=utc),
-                help_text='Last time user dismissed the downloads modal.'),
+                help_text="Last time user dismissed the downloads modal.",
+            ),
         ),
         migrations.AddField(
-            model_name='userprofile',
-            name='last_seen',
+            model_name="userprofile",
+            name="last_seen",
             field=models.DateTimeField(
                 default=datetime.datetime(1970, 1, 1, 0, 0, tzinfo=utc),
-                help_text='Last time user was seen at all'),
+                help_text="Last time user was seen at all",
+            ),
         ),
     ]

@@ -6,13 +6,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('suggestions', '0003_remove_problemsuggestion_resolved_and_more'),
+        ("suggestions", "0003_remove_problemsuggestion_resolved_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='problemsuggestion',
-            name='hyperlink',
-            field=models.URLField(blank=True, help_text='A hyperlink if appropriate, e.g. AoPS thread. Required if the problem is on AoPS.'),
+            model_name="problemsuggestion",
+            name="hyperlink",
+            field=models.URLField(
+                blank=True,
+                help_text="A hyperlink if appropriate, e.g. AoPS thread. Required if the problem is on AoPS.",
+            ),
         ),
     ]

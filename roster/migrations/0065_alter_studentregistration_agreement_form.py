@@ -8,20 +8,23 @@ import roster.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0064_auto_20210805_1551'),
+        ("roster", "0064_auto_20210805_1551"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='studentregistration',
-            name='agreement_form',
+            model_name="studentregistration",
+            name="agreement_form",
             field=models.FileField(
-                default='MISSING',
-                help_text='Signed agreement form, as a single PDF',
+                default="MISSING",
+                help_text="Signed agreement form, as a single PDF",
                 upload_to=roster.models.content_file_name,
                 validators=[
-                    django.core.validators.FileExtensionValidator(allowed_extensions=['pdf'])
-                ]),
+                    django.core.validators.FileExtensionValidator(
+                        allowed_extensions=["pdf"]
+                    )
+                ],
+            ),
             preserve_default=False,
         ),
     ]

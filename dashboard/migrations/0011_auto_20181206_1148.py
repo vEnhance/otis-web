@@ -11,19 +11,21 @@ import dashboard.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dashboard', '0010_uploadedfile_description'),
+        ("dashboard", "0010_uploadedfile_description"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='uploadedfile',
-            name='content',
+            model_name="uploadedfile",
+            name="content",
             field=models.FileField(
-                help_text='The file itself',
+                help_text="The file itself",
                 upload_to=dashboard.models.content_file_name,
                 validators=[
                     django.core.validators.FileExtensionValidator(
-                        allowed_extensions=['pdf', 'txt', 'tex'])
-                ]),
+                        allowed_extensions=["pdf", "txt", "tex"]
+                    )
+                ],
+            ),
         ),
     ]

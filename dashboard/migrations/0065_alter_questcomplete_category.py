@@ -6,18 +6,24 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dashboard', '0064_questcomplete_category'),
+        ("dashboard", "0064_questcomplete_category"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='questcomplete',
-            name='category',
+            model_name="questcomplete",
+            name="category",
             field=models.CharField(
-                choices=[('PR', 'Pull request'), ('BR', 'Bug report'), ('WK', 'Wiki bonus'),
-                            ('US', 'USEMO Score'), ('UG', 'USEMO Grading'),
-                            ('MS', 'Miscellaneous')],
-                default='MS',
-                max_length=4),
+                choices=[
+                    ("PR", "Pull request"),
+                    ("BR", "Bug report"),
+                    ("WK", "Wiki bonus"),
+                    ("US", "USEMO Score"),
+                    ("UG", "USEMO Grading"),
+                    ("MS", "Miscellaneous"),
+                ],
+                default="MS",
+                max_length=4,
+            ),
         ),
     ]

@@ -9,14 +9,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dashboard', '0004_auto_20170813_1040'),
+        ("dashboard", "0004_auto_20170813_1040"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='uploadedfile',
-            name='created_at',
-            field=models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now),
+            model_name="uploadedfile",
+            name="created_at",
+            field=models.DateTimeField(
+                auto_now_add=True, default=django.utils.timezone.now
+            ),
             preserve_default=False,
         ),
     ]

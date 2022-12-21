@@ -6,13 +6,13 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dashboard', '0025_auto_20210802_2344'),
+        ("dashboard", "0025_auto_20210802_2344"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='level',
-            old_name='number',
-            new_name='threshold',
+            model_name="level",
+            old_name="number",
+            new_name="threshold",
         ),
     ]

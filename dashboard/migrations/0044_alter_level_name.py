@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dashboard', '0043_alter_achievementunlock_unique_together'),
+        ("dashboard", "0043_alter_achievementunlock_unique_together"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='level',
-            name='name',
-            field=models.CharField(help_text='The name of the level', max_length=128),
+            model_name="level",
+            name="name",
+            field=models.CharField(help_text="The name of the level", max_length=128),
         ),
     ]

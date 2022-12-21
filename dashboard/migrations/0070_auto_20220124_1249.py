@@ -9,31 +9,33 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('dashboard', '0069_alter_pset_options'),
+        ("dashboard", "0069_alter_pset_options"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='palacecarving',
-            name='student',
+            model_name="palacecarving",
+            name="student",
         ),
         migrations.AddField(
-            model_name='palacecarving',
-            name='user',
+            model_name="palacecarving",
+            name="user",
             field=models.OneToOneField(
                 blank=True,
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
-                to=settings.AUTH_USER_MODEL),
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AlterField(
-            model_name='achievement',
-            name='creator',
+            model_name="achievement",
+            name="creator",
             field=models.ForeignKey(
                 blank=True,
-                help_text='User who owns this achievement',
+                help_text="User who owns this achievement",
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
-                to=settings.AUTH_USER_MODEL),
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

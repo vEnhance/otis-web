@@ -6,21 +6,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0057_auto_20210727_1634'),
+        ("roster", "0057_auto_20210727_1634"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='registrationcontainer',
-            name='enabled',
+            model_name="registrationcontainer",
+            name="enabled",
         ),
         migrations.AddField(
-            model_name='registrationcontainer',
-            name='allowed_tracks',
+            model_name="registrationcontainer",
+            name="allowed_tracks",
             field=models.CharField(
-                default='B,C,E,N',
-                help_text='A comma separated list of allowed tracks students can register for',
-                max_length=256),
+                default="B,C,E,N",
+                help_text="A comma separated list of allowed tracks students can register for",
+                max_length=256,
+            ),
             preserve_default=False,
         ),
     ]

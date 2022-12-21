@@ -6,17 +6,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('markets', '0002_market_alpha'),
+        ("markets", "0002_market_alpha"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='guess',
-            name='public',
+            model_name="guess",
+            name="public",
             field=models.BooleanField(
                 default=False,
-                help_text=
-                'If checked, will display your name next to your guess in the statistics, for bragging rights. By default, this is off and your guess is recorded anonymously.'
+                help_text="If checked, will display your name next to your guess in the statistics, for bragging rights. By default, this is off and your guess is recorded anonymously.",
             ),
         ),
     ]

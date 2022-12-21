@@ -13,31 +13,45 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('core', '0003_auto_20170806_0009'),
+        ("core", "0003_auto_20170806_0009"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Student',
+            name="Student",
             fields=[
-                ('id',
+                (
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False,
-                        verbose_name='ID')),
-                ('curriculum',
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "curriculum",
                     models.ManyToManyField(
-                        help_text='The choice of units that this student will work on',
-                        to='core.Unit')),
-                ('semester',
+                        help_text="The choice of units that this student will work on",
+                        to="core.Unit",
+                    ),
+                ),
+                (
+                    "semester",
                     models.ForeignKey(
-                        help_text='The semester for this student',
+                        help_text="The semester for this student",
                         on_delete=django.db.models.deletion.CASCADE,
-                        to='core.Semester')),
-                ('user',
+                        to="core.Semester",
+                    ),
+                ),
+                (
+                    "user",
                     models.ForeignKey(
-                        help_text='The Django Auth user attached to the student',
+                        help_text="The Django Auth user attached to the student",
                         on_delete=django.db.models.deletion.CASCADE,
-                        to=settings.AUTH_USER_MODEL)),
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]

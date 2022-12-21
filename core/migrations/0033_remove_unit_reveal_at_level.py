@@ -6,12 +6,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0032_unit_reveal_at_level'),
+        ("core", "0032_unit_reveal_at_level"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='unit',
-            name='reveal_at_level',
+            model_name="unit",
+            name="reveal_at_level",
         ),
     ]

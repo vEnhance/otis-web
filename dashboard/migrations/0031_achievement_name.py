@@ -6,15 +6,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dashboard', '0030_rename_achievementcode_achievement'),
+        ("dashboard", "0030_rename_achievementcode_achievement"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='achievement',
-            name='name',
+            model_name="achievement",
+            name="name",
             field=models.CharField(
-                default='', help_text='Name of the achievement', max_length=128),
+                default="", help_text="Name of the achievement", max_length=128
+            ),
             preserve_default=False,
         ),
     ]

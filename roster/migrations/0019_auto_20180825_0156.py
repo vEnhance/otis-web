@@ -10,52 +10,54 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0018_auto_20180531_1222'),
+        ("roster", "0018_auto_20180531_1222"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='assistant',
+            name="assistant",
             options={},
         ),
         migrations.AlterModelOptions(
-            name='student',
-            options={'ordering': ('semester', '-legit', 'track')},
+            name="student",
+            options={"ordering": ("semester", "-legit", "track")},
         ),
         migrations.RemoveField(
-            model_name='student',
-            name='name',
+            model_name="student",
+            name="name",
         ),
         migrations.AlterField(
-            model_name='assistant',
-            name='user',
+            model_name="assistant",
+            name="user",
             field=models.OneToOneField(
                 default=1,
-                help_text='The Django Auth user attached to the Assistant.',
+                help_text="The Django Auth user attached to the Assistant.",
                 on_delete=django.db.models.deletion.CASCADE,
-                to=settings.AUTH_USER_MODEL),
+                to=settings.AUTH_USER_MODEL,
+            ),
             preserve_default=False,
         ),
         migrations.AlterField(
-            model_name='student',
-            name='assistant',
+            model_name="student",
+            name="assistant",
             field=models.ForeignKey(
                 blank=True,
-                help_text='The assistant for this student, if any',
+                help_text="The assistant for this student, if any",
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
-                to='roster.Assistant'),
+                to="roster.Assistant",
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='assistant',
+            name="assistant",
             unique_together=set(),
         ),
         migrations.RemoveField(
-            model_name='assistant',
-            name='name',
+            model_name="assistant",
+            name="name",
         ),
         migrations.RemoveField(
-            model_name='assistant',
-            name='semester',
+            model_name="assistant",
+            name="semester",
         ),
     ]

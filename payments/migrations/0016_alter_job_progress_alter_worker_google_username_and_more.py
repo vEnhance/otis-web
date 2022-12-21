@@ -7,33 +7,72 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('payments', '0015_remove_jobfolder_semester_job_semester'),
+        ("payments", "0015_remove_jobfolder_semester_job_semester"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='job',
-            name='progress',
-            field=models.CharField(choices=[('NEW', 'In Progress'), ('SUB', 'Submitted'), ('VFD', 'Completed')], default='NEW', help_text='The current status of the job', max_length=3),
+            model_name="job",
+            name="progress",
+            field=models.CharField(
+                choices=[
+                    ("NEW", "In Progress"),
+                    ("SUB", "Submitted"),
+                    ("VFD", "Completed"),
+                ],
+                default="NEW",
+                help_text="The current status of the job",
+                max_length=3,
+            ),
         ),
         migrations.AlterField(
-            model_name='worker',
-            name='google_username',
-            field=models.CharField(blank=True, help_text='For e.g. sharing with Google Drive, etc. Do not include @gmail.com or @google.com.', max_length=128, validators=[django.core.validators.RegexValidator("^[-a-zA-Z0-9_'.]+$")]),
+            model_name="worker",
+            name="google_username",
+            field=models.CharField(
+                blank=True,
+                help_text="For e.g. sharing with Google Drive, etc. Do not include @gmail.com or @google.com.",
+                max_length=128,
+                validators=[
+                    django.core.validators.RegexValidator("^[-a-zA-Z0-9_'.]+$")
+                ],
+            ),
         ),
         migrations.AlterField(
-            model_name='worker',
-            name='paypal_username',
-            field=models.CharField(blank=True, help_text='Input a @username, email, or mobile', max_length=128, validators=[django.core.validators.RegexValidator('^(@[-a-zA-Z0-9_]+|(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$)|^[0-9()+-]+)$')]),
+            model_name="worker",
+            name="paypal_username",
+            field=models.CharField(
+                blank=True,
+                help_text="Input a @username, email, or mobile",
+                max_length=128,
+                validators=[
+                    django.core.validators.RegexValidator(
+                        "^(@[-a-zA-Z0-9_]+|(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$)|^[0-9()+-]+)$"
+                    )
+                ],
+            ),
         ),
         migrations.AlterField(
-            model_name='worker',
-            name='venmo_handle',
-            field=models.CharField(blank=True, help_text='Must start with leading @', max_length=128, validators=[django.core.validators.RegexValidator('^@[-a-zA-Z0-9_]+$')]),
+            model_name="worker",
+            name="venmo_handle",
+            field=models.CharField(
+                blank=True,
+                help_text="Must start with leading @",
+                max_length=128,
+                validators=[django.core.validators.RegexValidator("^@[-a-zA-Z0-9_]+$")],
+            ),
         ),
         migrations.AlterField(
-            model_name='worker',
-            name='zelle_info',
-            field=models.CharField(blank=True, help_text='Either email or mobile', max_length=128, validators=[django.core.validators.RegexValidator('^(@[-a-zA-Z0-9_]+|^[0-9()+-]+)$')]),
+            model_name="worker",
+            name="zelle_info",
+            field=models.CharField(
+                blank=True,
+                help_text="Either email or mobile",
+                max_length=128,
+                validators=[
+                    django.core.validators.RegexValidator(
+                        "^(@[-a-zA-Z0-9_]+|^[0-9()+-]+)$"
+                    )
+                ],
+            ),
         ),
     ]

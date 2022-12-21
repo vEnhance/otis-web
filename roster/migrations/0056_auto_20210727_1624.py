@@ -6,24 +6,28 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0055_auto_20210727_1609'),
+        ("roster", "0055_auto_20210727_1609"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='studentregistration',
-            name='name',
+            model_name="studentregistration",
+            name="name",
         ),
         migrations.AddField(
-            model_name='studentregistration',
-            name='first_name',
-            field=models.CharField(default='', help_text='Your first name', max_length=1282),
+            model_name="studentregistration",
+            name="first_name",
+            field=models.CharField(
+                default="", help_text="Your first name", max_length=1282
+            ),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='studentregistration',
-            name='last_name',
-            field=models.CharField(default='', help_text='Your last name', max_length=128),
+            model_name="studentregistration",
+            name="last_name",
+            field=models.CharField(
+                default="", help_text="Your last name", max_length=128
+            ),
             preserve_default=False,
         ),
     ]

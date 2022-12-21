@@ -7,17 +7,18 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dashboard', '0037_auto_20210818_1836'),
+        ("dashboard", "0037_auto_20210818_1836"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='pset',
-            name='upload',
+            model_name="pset",
+            name="upload",
             field=models.ForeignKey(
-                help_text='The associated upload file for this problem set',
+                help_text="The associated upload file for this problem set",
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
-                to='dashboard.uploadedfile'),
+                to="dashboard.uploadedfile",
+            ),
         ),
     ]

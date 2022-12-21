@@ -6,43 +6,49 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0012_auto_20190322_0810'),
+        ("core", "0012_auto_20190322_0810"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='semester',
-            name='facebook_url',
+            model_name="semester",
+            name="facebook_url",
             field=models.CharField(
                 blank=True,
-                help_text='The link to the Facebook group for this year.',
-                max_length=128),
+                help_text="The link to the Facebook group for this year.",
+                max_length=128,
+            ),
         ),
         migrations.AddField(
-            model_name='semester',
-            name='gradescope_key',
+            model_name="semester",
+            name="gradescope_key",
             field=models.CharField(
                 blank=True,
-                help_text='The entry code for GradeScope this semester.',
-                max_length=10),
+                help_text="The entry code for GradeScope this semester.",
+                max_length=10,
+            ),
         ),
         migrations.AddField(
-            model_name='semester',
-            name='hour_rate',
+            model_name="semester",
+            name="hour_rate",
             field=models.PositiveSmallIntegerField(
-                default=80, help_text='The hourly rate for the semester.'),
+                default=80, help_text="The hourly rate for the semester."
+            ),
         ),
         migrations.AddField(
-            model_name='semester',
-            name='prep_rate',
+            model_name="semester",
+            name="prep_rate",
             field=models.PositiveSmallIntegerField(
-                default=240, help_text='The prep rate for the semester.'),
+                default=240, help_text="The prep rate for the semester."
+            ),
         ),
         migrations.AddField(
-            model_name='semester',
-            name='zoom_room_id',
+            model_name="semester",
+            name="zoom_room_id",
             field=models.CharField(
-                blank=True, help_text='The entry point for the Zoom meeting room.',
-                max_length=32),
+                blank=True,
+                help_text="The entry point for the Zoom meeting room.",
+                max_length=32,
+            ),
         ),
     ]

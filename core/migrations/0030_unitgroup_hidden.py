@@ -6,14 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0029_userprofile'),
+        ("core", "0029_userprofile"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='unitgroup',
-            name='hidden',
+            model_name="unitgroup",
+            name="hidden",
             field=models.BooleanField(
-                default=False, help_text='Whether this unit is hidden from students'),
+                default=False, help_text="Whether this unit is hidden from students"
+            ),
         ),
     ]

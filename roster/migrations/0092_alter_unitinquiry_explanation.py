@@ -6,14 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0091_remove_registrationcontainer_end_year'),
+        ("roster", "0091_remove_registrationcontainer_end_year"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='unitinquiry',
-            name='explanation',
+            model_name="unitinquiry",
+            name="explanation",
             field=models.TextField(
-                help_text='Short explanation for this request.', max_length=300),
+                help_text="Short explanation for this request.", max_length=300
+            ),
         ),
     ]

@@ -9,18 +9,19 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('roster', '0080_auto_20211020_0923'),
+        ("roster", "0080_auto_20211020_0923"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='student',
-            name='user',
+            model_name="student",
+            name="user",
             field=models.ForeignKey(
                 default=1,
-                help_text='The Django auth user attached to the student',
+                help_text="The Django auth user attached to the student",
                 on_delete=django.db.models.deletion.CASCADE,
-                to='auth.user'),
+                to="auth.user",
+            ),
             preserve_default=False,
         ),
     ]

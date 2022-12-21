@@ -6,14 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dashboard', '0031_achievement_name'),
+        ("dashboard", "0031_achievement_name"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='achievement',
-            name='active',
+            model_name="achievement",
+            name="active",
             field=models.BooleanField(
-                default=True, help_text='Whether the code is active right now'),
+                default=True, help_text="Whether the code is active right now"
+            ),
         ),
     ]

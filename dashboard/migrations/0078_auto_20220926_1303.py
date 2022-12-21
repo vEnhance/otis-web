@@ -5,30 +5,58 @@ from typing import Any
 
 
 def convert_bools_to_status(apps: Any, scheme_editor: Any):
-    PSet = apps.get_model('dashboard', 'PSet')
-    PSet.objects.filter(approved=False, rejected=False, resubmitted=False).update(status="P")
-    PSet.objects.filter(approved=False, rejected=False, resubmitted=True).update(status="P")
-    PSet.objects.filter(approved=False, rejected=True, resubmitted=False).update(status="R")
-    PSet.objects.filter(approved=False, rejected=True, resubmitted=True).update(status="PR")
-    PSet.objects.filter(approved=True, rejected=False, resubmitted=False).update(status="A")
-    PSet.objects.filter(approved=True, rejected=False, resubmitted=True).update(status="PA")
-    PSet.objects.filter(approved=True, rejected=True, resubmitted=False).update(status="R")
-    PSet.objects.filter(approved=True, rejected=True, resubmitted=True).update(status="PR")
+    PSet = apps.get_model("dashboard", "PSet")
+    PSet.objects.filter(approved=False, rejected=False, resubmitted=False).update(
+        status="P"
+    )
+    PSet.objects.filter(approved=False, rejected=False, resubmitted=True).update(
+        status="P"
+    )
+    PSet.objects.filter(approved=False, rejected=True, resubmitted=False).update(
+        status="R"
+    )
+    PSet.objects.filter(approved=False, rejected=True, resubmitted=True).update(
+        status="PR"
+    )
+    PSet.objects.filter(approved=True, rejected=False, resubmitted=False).update(
+        status="A"
+    )
+    PSet.objects.filter(approved=True, rejected=False, resubmitted=True).update(
+        status="PA"
+    )
+    PSet.objects.filter(approved=True, rejected=True, resubmitted=False).update(
+        status="R"
+    )
+    PSet.objects.filter(approved=True, rejected=True, resubmitted=True).update(
+        status="PR"
+    )
 
 
 def convert_status_to_bools(apps: Any, scheme_editor: Any):
-    PSet = apps.get_model('dashboard', 'PSet')
-    PSet.objects.filter(status="P").update(approved=False, rejected=False, resubmitted=False)
-    PSet.objects.filter(status="PA").update(approved=True, rejected=False, resubmitted=True)
-    PSet.objects.filter(status="PR").update(approved=False, rejected=True, resubmitted=True)
-    PSet.objects.filter(status="A").update(approved=True, rejected=False, resubmitted=False)
-    PSet.objects.filter(status="R").update(approved=False, rejected=True, resubmitted=False)
+    PSet = apps.get_model("dashboard", "PSet")
+    PSet.objects.filter(status="P").update(
+        approved=False, rejected=False, resubmitted=False
+    )
+    PSet.objects.filter(status="PA").update(
+        approved=True, rejected=False, resubmitted=True
+    )
+    PSet.objects.filter(status="PR").update(
+        approved=False, rejected=True, resubmitted=True
+    )
+    PSet.objects.filter(status="A").update(
+        approved=True, rejected=False, resubmitted=False
+    )
+    PSet.objects.filter(status="R").update(
+        approved=False, rejected=True, resubmitted=False
+    )
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dashboard', '0077_pset_status'),
+        ("dashboard", "0077_pset_status"),
     ]
 
-    operations = [migrations.RunPython(convert_bools_to_status, convert_status_to_bools)]
+    operations = [
+        migrations.RunPython(convert_bools_to_status, convert_status_to_bools)
+    ]

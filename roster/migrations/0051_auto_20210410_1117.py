@@ -6,20 +6,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0050_auto_20210213_1702'),
+        ("roster", "0050_auto_20210213_1702"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='student',
-            name='email',
+            model_name="student",
+            name="email",
             field=models.EmailField(
-                blank=True, help_text='Student email address.', max_length=254),
+                blank=True, help_text="Student email address.", max_length=254
+            ),
         ),
         migrations.AddField(
-            model_name='student',
-            name='parent_email',
+            model_name="student",
+            name="parent_email",
             field=models.EmailField(
-                blank=True, help_text='Parent email address.', max_length=254),
+                blank=True, help_text="Parent email address.", max_length=254
+            ),
         ),
     ]

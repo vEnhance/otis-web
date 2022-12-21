@@ -6,14 +6,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dashboard', '0065_alter_questcomplete_category'),
+        ("dashboard", "0065_alter_questcomplete_category"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='problemsuggestion',
-            name='eligible',
+            model_name="problemsuggestion",
+            name="eligible",
             field=models.BooleanField(
-                default=True, help_text='Whether this suggestion is eligible for spades.'),
+                default=True,
+                help_text="Whether this suggestion is eligible for spades.",
+            ),
         ),
     ]

@@ -6,17 +6,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dashboard', '0017_auto_20210130_1306'),
+        ("dashboard", "0017_auto_20210130_1306"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='problemsuggestion',
-            name='acknowledge',
+            model_name="problemsuggestion",
+            name="acknowledge",
             field=models.BooleanField(
                 default=True,
-                help_text=
-                'Acknowledge me for this contribution. (Uncheck for an anonymous contribution.)'
+                help_text="Acknowledge me for this contribution. (Uncheck for an anonymous contribution.)",
             ),
         ),
     ]

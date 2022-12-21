@@ -7,23 +7,24 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('arch', '0025_alter_hint_id_alter_problem_id'),
+        ("arch", "0025_alter_hint_id_alter_problem_id"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='problem',
-            name='puid',
+            model_name="problem",
+            name="puid",
             field=models.CharField(
-                help_text=
-                'Problem identifier, as printed in OTIS. Capital letters and digits only.',
+                help_text="Problem identifier, as printed in OTIS. Capital letters and digits only.",
                 max_length=24,
                 unique=True,
                 validators=[
                     django.core.validators.RegexValidator(
                         message="Only uppercase letters and digits appear in PUID's.",
-                        regex='^[A-Z0-9]+$')
+                        regex="^[A-Z0-9]+$",
+                    )
                 ],
-                verbose_name='PUID'),
+                verbose_name="PUID",
+            ),
         ),
     ]

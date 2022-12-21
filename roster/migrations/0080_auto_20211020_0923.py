@@ -6,20 +6,20 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0079_alter_studentregistration_options'),
+        ("roster", "0079_alter_studentregistration_options"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='studentregistration',
+            name="studentregistration",
             options={},
         ),
         migrations.AlterModelOptions(
-            name='unitinquiry',
+            name="unitinquiry",
             options={
-                'ordering': ('-created_at',),
-                'verbose_name': 'Unit petition',
-                'verbose_name_plural': 'Unit petitions'
+                "ordering": ("-created_at",),
+                "verbose_name": "Unit petition",
+                "verbose_name_plural": "Unit petitions",
             },
         ),
     ]

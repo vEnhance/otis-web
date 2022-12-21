@@ -8,21 +8,21 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('exams', '0003_auto_20170808_1707'),
+        ("exams", "0003_auto_20170808_1707"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='assignment',
-            name='olympiad',
+            model_name="assignment",
+            name="olympiad",
         ),
         migrations.AddField(
-            model_name='mockolympiad',
-            name='due_date',
+            model_name="mockolympiad",
+            name="due_date",
             field=models.DateField(
                 blank=True,
-                help_text=
-                'When the assignment should be due. Leave blank if not active this semester.',
-                null=True),
+                help_text="When the assignment should be due. Leave blank if not active this semester.",
+                null=True,
+            ),
         ),
     ]

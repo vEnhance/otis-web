@@ -8,21 +8,20 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('markets', '0003_alter_guess_public'),
+        ("markets", "0003_alter_guess_public"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='market',
-            name='alpha',
+            model_name="market",
+            name="alpha",
             field=models.FloatField(
                 default=1,
-                help_text=
-                'Exponent corresponding to harshness of the market,  used in the scoring function'
+                help_text="Exponent corresponding to harshness of the market,  used in the scoring function",
             ),
         ),
         migrations.AlterUniqueTogether(
-            name='guess',
-            unique_together={('user', 'market')},
+            name="guess",
+            unique_together={("user", "market")},
         ),
     ]

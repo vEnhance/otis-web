@@ -6,16 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0023_auto_20210712_2343'),
+        ("core", "0023_auto_20210712_2343"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='unitgroup',
-            name='slug',
+            model_name="unitgroup",
+            name="slug",
             field=models.SlugField(
-                help_text='The slug for the filename for this unit group',
+                help_text="The slug for the filename for this unit group",
                 max_length=80,
-                unique=True),
+                unique=True,
+            ),
         ),
     ]

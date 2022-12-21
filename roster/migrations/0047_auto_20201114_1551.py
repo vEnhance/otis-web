@@ -6,19 +6,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0018_auto_20200908_1307'),
-        ('roster', '0046_invoice_adjustment'),
+        ("core", "0018_auto_20200908_1307"),
+        ("roster", "0046_invoice_adjustment"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='student',
-            name='unlocked_units',
+            model_name="student",
+            name="unlocked_units",
             field=models.ManyToManyField(
                 blank=True,
-                help_text=
-                'A list of units that the student is actively working on. Once the student submits a problem set, delete it from this list to mark them as complete.',
-                related_name='students_unlocked',
-                to='core.Unit'),
+                help_text="A list of units that the student is actively working on. Once the student submits a problem set, delete it from this list to mark them as complete.",
+                related_name="students_unlocked",
+                to="core.Unit",
+            ),
         ),
     ]

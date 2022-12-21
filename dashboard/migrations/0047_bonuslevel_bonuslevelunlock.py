@@ -7,41 +7,63 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0075_remove_student_last_level_time'),
-        ('core', '0033_remove_unit_reveal_at_level'),
-        ('dashboard', '0046_auto_20210912_1122'),
+        ("roster", "0075_remove_student_last_level_time"),
+        ("core", "0033_remove_unit_reveal_at_level"),
+        ("dashboard", "0046_auto_20210912_1122"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='BonusLevel',
+            name="BonusLevel",
             fields=[
-                ('id',
+                (
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False,
-                        verbose_name='ID')),
-                ('level', models.PositiveSmallIntegerField(help_text='Level to spawn at')),
-                ('active', models.BooleanField(default=True)),
-                ('group',
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "level",
+                    models.PositiveSmallIntegerField(help_text="Level to spawn at"),
+                ),
+                ("active", models.BooleanField(default=True)),
+                (
+                    "group",
                     models.OneToOneField(
-                        on_delete=django.db.models.deletion.CASCADE, to='core.unitgroup')),
+                        on_delete=django.db.models.deletion.CASCADE, to="core.unitgroup"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='BonusLevelUnlock',
+            name="BonusLevelUnlock",
             fields=[
-                ('id',
+                (
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False,
-                        verbose_name='ID')),
-                ('timestamp', models.DateTimeField(auto_now_add=True)),
-                ('bonus',
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("timestamp", models.DateTimeField(auto_now_add=True)),
+                (
+                    "bonus",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        to='dashboard.bonuslevel')),
-                ('student',
+                        to="dashboard.bonuslevel",
+                    ),
+                ),
+                (
+                    "student",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, to='roster.student')),
+                        on_delete=django.db.models.deletion.CASCADE, to="roster.student"
+                    ),
+                ),
             ],
         ),
     ]

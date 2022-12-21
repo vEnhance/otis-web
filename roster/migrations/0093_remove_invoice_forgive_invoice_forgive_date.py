@@ -6,17 +6,21 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0092_alter_unitinquiry_explanation'),
+        ("roster", "0092_alter_unitinquiry_explanation"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='invoice',
-            name='forgive',
+            model_name="invoice",
+            name="forgive",
         ),
         migrations.AddField(
-            model_name='invoice',
-            name='forgive_date',
-            field=models.DateTimeField(blank=True, help_text="When switched on, won't hard lock delinquents before this date.", null=True),
+            model_name="invoice",
+            name="forgive_date",
+            field=models.DateTimeField(
+                blank=True,
+                help_text="When switched on, won't hard lock delinquents before this date.",
+                null=True,
+            ),
         ),
     ]

@@ -6,14 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0077_alter_studentregistration_user'),
+        ("roster", "0077_alter_studentregistration_user"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='invoice',
-            name='forgive_memo',
+            model_name="invoice",
+            name="forgive_memo",
             field=models.TextField(
-                blank=True, help_text='Internal note to self about why forgive=True.'),
+                blank=True, help_text="Internal note to self about why forgive=True."
+            ),
         ),
     ]

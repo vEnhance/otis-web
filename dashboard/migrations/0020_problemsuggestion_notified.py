@@ -6,14 +6,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dashboard', '0019_auto_20210130_2059'),
+        ("dashboard", "0019_auto_20210130_2059"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='problemsuggestion',
-            name='notified',
+            model_name="problemsuggestion",
+            name="notified",
             field=models.BooleanField(
-                default=False, help_text="Whether student has received the staff's comments."),
+                default=False,
+                help_text="Whether student has received the staff's comments.",
+            ),
         ),
     ]

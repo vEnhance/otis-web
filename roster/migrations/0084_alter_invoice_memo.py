@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0083_rename_forgive_memo_invoice_memo'),
+        ("roster", "0083_rename_forgive_memo_invoice_memo"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='invoice',
-            name='memo',
-            field=models.TextField(blank=True, help_text='Internal note to self.'),
+            model_name="invoice",
+            name="memo",
+            field=models.TextField(blank=True, help_text="Internal note to self."),
         ),
     ]

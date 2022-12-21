@@ -8,15 +8,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0007_semester_show_invoices'),
+        ("core", "0007_semester_show_invoices"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='semester',
-            name='registration_open',
+            model_name="semester",
+            name="registration_open",
             field=models.BooleanField(
                 default=False,
-                help_text='Whether students can register for this semester yet.'),
+                help_text="Whether students can register for this semester yet.",
+            ),
         ),
     ]

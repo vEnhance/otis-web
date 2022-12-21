@@ -7,20 +7,21 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0037_rename_last_announce_dismiss_userprofile_last_email_dismiss'),
-        ('dashboard', '0062_auto_20211017_1819'),
+        ("core", "0037_rename_last_announce_dismiss_userprofile_last_email_dismiss"),
+        ("dashboard", "0062_auto_20211017_1819"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='pset',
-            name='next_unit_to_unlock',
+            model_name="pset",
+            name="next_unit_to_unlock",
             field=models.ForeignKey(
                 blank=True,
-                help_text='The unit you want to work on next (leave blank for none)',
+                help_text="The unit you want to work on next (leave blank for none)",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
-                related_name='unblocking_psets',
-                to='core.unit'),
+                related_name="unblocking_psets",
+                to="core.unit",
+            ),
         ),
     ]

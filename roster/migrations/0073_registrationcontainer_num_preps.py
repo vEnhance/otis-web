@@ -6,14 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0072_alter_unitinquiry_status'),
+        ("roster", "0072_alter_unitinquiry_status"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='registrationcontainer',
-            name='num_preps',
+            model_name="registrationcontainer",
+            name="num_preps",
             field=models.PositiveSmallIntegerField(
-                default=2, help_text='Number of preps to bill for'),
+                default=2, help_text="Number of preps to bill for"
+            ),
         ),
     ]

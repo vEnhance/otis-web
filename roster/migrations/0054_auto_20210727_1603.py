@@ -11,42 +11,51 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('roster', '0053_registrationcontainer_studentregistration'),
+        ("roster", "0053_registrationcontainer_studentregistration"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='studentregistration',
-            name='processed',
+            model_name="studentregistration",
+            name="processed",
             field=models.BooleanField(
-                default=False, help_text='Whether Evan has dealt with this kid yet'),
+                default=False, help_text="Whether Evan has dealt with this kid yet"
+            ),
         ),
         migrations.AlterField(
-            model_name='studentregistration',
-            name='agreement_form',
+            model_name="studentregistration",
+            name="agreement_form",
             field=models.FileField(
                 blank=True,
-                help_text='Signed agreement form, as a single PDF',
+                help_text="Signed agreement form, as a single PDF",
                 null=True,
                 upload_to=roster.models.content_file_name,
                 validators=[
-                    django.core.validators.FileExtensionValidator(allowed_extensions=['pdf'])
-                ]),
+                    django.core.validators.FileExtensionValidator(
+                        allowed_extensions=["pdf"]
+                    )
+                ],
+            ),
         ),
         migrations.AlterField(
-            model_name='studentregistration',
-            name='gender',
+            model_name="studentregistration",
+            name="gender",
             field=models.CharField(
                 blank=True,
-                choices=[('M', 'Male'), ('F', 'Female'), ('H', 'Nonbinary'), ('O', 'Other'),
-                            ('', 'Prefer not to say')],
-                default='',
-                help_text=
-                'If you are comfortable answering, specify which gender you most closely identify with.',
-                max_length=2),
+                choices=[
+                    ("M", "Male"),
+                    ("F", "Female"),
+                    ("H", "Nonbinary"),
+                    ("O", "Other"),
+                    ("", "Prefer not to say"),
+                ],
+                default="",
+                help_text="If you are comfortable answering, specify which gender you most closely identify with.",
+                max_length=2,
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='studentregistration',
-            unique_together={('user', 'container')},
+            name="studentregistration",
+            unique_together={("user", "container")},
         ),
     ]

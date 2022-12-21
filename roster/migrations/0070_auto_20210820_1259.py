@@ -6,18 +6,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0069_alter_studentregistration_agreement_form'),
+        ("roster", "0069_alter_studentregistration_agreement_form"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='assistant',
-            options={'ordering': ('shortname',)},
+            name="assistant",
+            options={"ordering": ("shortname",)},
         ),
         migrations.AlterField(
-            model_name='assistant',
-            name='shortname',
+            model_name="assistant",
+            name="shortname",
             field=models.CharField(
-                help_text='Initials or short name for this Assistant', max_length=18),
+                help_text="Initials or short name for this Assistant", max_length=18
+            ),
         ),
     ]

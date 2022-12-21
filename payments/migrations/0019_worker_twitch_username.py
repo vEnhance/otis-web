@@ -7,13 +7,20 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('payments', '0018_worker_updated_at'),
+        ("payments", "0018_worker_updated_at"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='worker',
-            name='twitch_username',
-            field=models.CharField(blank=True, help_text='Username on Twitch.tv', max_length=128, validators=[django.core.validators.RegexValidator("^[-a-zA-Z0-9_'.]+$")]),
+            model_name="worker",
+            name="twitch_username",
+            field=models.CharField(
+                blank=True,
+                help_text="Username on Twitch.tv",
+                max_length=128,
+                validators=[
+                    django.core.validators.RegexValidator("^[-a-zA-Z0-9_'.]+$")
+                ],
+            ),
         ),
     ]

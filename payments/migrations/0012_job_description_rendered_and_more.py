@@ -8,50 +8,70 @@ import markdownfield.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('payments', '0011_job_created_at_job_updated_at'),
+        ("payments", "0011_job_created_at_job_updated_at"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='job',
-            name='description_rendered',
-            field=markdownfield.models.RenderedMarkdownField(default=''),
+            model_name="job",
+            name="description_rendered",
+            field=markdownfield.models.RenderedMarkdownField(default=""),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='jobfolder',
-            name='description_rendered',
-            field=markdownfield.models.RenderedMarkdownField(default=''),
+            model_name="jobfolder",
+            name="description_rendered",
+            field=markdownfield.models.RenderedMarkdownField(default=""),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='worker',
-            name='google_username',
-            field=models.CharField(blank=True, help_text='For e.g. sharing with Google Drive, etc.', max_length=128),
+            model_name="worker",
+            name="google_username",
+            field=models.CharField(
+                blank=True,
+                help_text="For e.g. sharing with Google Drive, etc.",
+                max_length=128,
+            ),
         ),
         migrations.AlterField(
-            model_name='job',
-            name='assignee',
-            field=models.ForeignKey(blank=True, help_text='Who is currently assigned', null=True, on_delete=django.db.models.deletion.CASCADE, to='payments.worker'),
+            model_name="job",
+            name="assignee",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Who is currently assigned",
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="payments.worker",
+            ),
         ),
         migrations.AlterField(
-            model_name='job',
-            name='description',
-            field=markdownfield.models.MarkdownField(blank=True, help_text='Instructions and so on for this particular job.', rendered_field='description_rendered'),
+            model_name="job",
+            name="description",
+            field=markdownfield.models.MarkdownField(
+                blank=True,
+                help_text="Instructions and so on for this particular job.",
+                rendered_field="description_rendered",
+            ),
         ),
         migrations.AlterField(
-            model_name='job',
-            name='worker_deliverable',
-            field=models.TextField(blank=True, help_text='Enter the deliverable of the job here'),
+            model_name="job",
+            name="worker_deliverable",
+            field=models.TextField(
+                blank=True, help_text="Enter the deliverable of the job here"
+            ),
         ),
         migrations.AlterField(
-            model_name='job',
-            name='worker_notes',
-            field=models.TextField(blank=True, help_text='Make any notes here'),
+            model_name="job",
+            name="worker_notes",
+            field=models.TextField(blank=True, help_text="Make any notes here"),
         ),
         migrations.AlterField(
-            model_name='jobfolder',
-            name='description',
-            field=markdownfield.models.MarkdownField(blank=True, help_text='Instructions and so on for this folder.', rendered_field='description_rendered'),
+            model_name="jobfolder",
+            name="description",
+            field=markdownfield.models.MarkdownField(
+                blank=True,
+                help_text="Instructions and so on for this folder.",
+                rendered_field="description_rendered",
+            ),
         ),
     ]

@@ -8,12 +8,12 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('dashboard', '0042_questcomplete'),
+        ("dashboard", "0042_questcomplete"),
     ]
 
     operations = [
         migrations.AlterUniqueTogether(
-            name='achievementunlock',
-            unique_together={('user', 'achievement')},
+            name="achievementunlock",
+            unique_together={("user", "achievement")},
         ),
     ]

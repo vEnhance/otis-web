@@ -6,25 +6,26 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('arch', '0011_auto_20210314_1217'),
+        ("arch", "0011_auto_20210314_1217"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='problem',
-            name='puid',
+            model_name="problem",
+            name="puid",
             field=models.CharField(
-                default='_', help_text='Unique problem identifier.', max_length=24),
+                default="_", help_text="Unique problem identifier.", max_length=24
+            ),
             preserve_default=False,
         ),
         migrations.AlterField(
-            model_name='hint',
-            name='id',
+            model_name="hint",
+            name="id",
             field=models.AutoField(primary_key=True, serialize=False),
         ),
         migrations.AlterField(
-            model_name='problem',
-            name='id',
+            model_name="problem",
+            name="id",
             field=models.AutoField(primary_key=True, serialize=False),
         ),
     ]

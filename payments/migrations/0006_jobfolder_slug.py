@@ -7,14 +7,17 @@ import django.utils.timezone
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('payments', '0005_jobfolder_visible'),
+        ("payments", "0005_jobfolder_visible"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='jobfolder',
-            name='slug',
-            field=models.SlugField(default=django.utils.timezone.now, help_text='A slug for this job folder'),
+            model_name="jobfolder",
+            name="slug",
+            field=models.SlugField(
+                default=django.utils.timezone.now,
+                help_text="A slug for this job folder",
+            ),
             preserve_default=False,
         ),
     ]

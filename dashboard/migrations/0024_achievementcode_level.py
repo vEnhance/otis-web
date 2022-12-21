@@ -6,44 +6,75 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0061_alter_registrationcontainer_allowed_tracks'),
-        ('dashboard', '0023_auto_20210802_1917'),
+        ("roster", "0061_alter_registrationcontainer_allowed_tracks"),
+        ("dashboard", "0023_auto_20210802_1917"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Level',
+            name="Level",
             fields=[
-                ('id',
+                (
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False,
-                        verbose_name='ID')),
-                ('number',
-                    models.IntegerField(help_text='The number of the level', unique=True)),
-                ('name',
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "number",
+                    models.IntegerField(
+                        help_text="The number of the level", unique=True
+                    ),
+                ),
+                (
+                    "name",
                     models.CharField(
-                        help_text='The name of the level', max_length=128, unique=True)),
+                        help_text="The name of the level", max_length=128, unique=True
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='AchievementCode',
+            name="AchievementCode",
             fields=[
-                ('id',
+                (
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False,
-                        verbose_name='ID')),
-                ('code', models.CharField(max_length=96, unique=True)),
-                ('image',
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("code", models.CharField(max_length=96, unique=True)),
+                (
+                    "image",
                     models.FileField(
                         blank=True,
-                        help_text='Image for the obtained badge',
+                        help_text="Image for the obtained badge",
                         null=True,
-                        upload_to='badges')),
-                ('description', models.TextField(help_text='How to obtain this achievement')),
-                ('active',
-                    models.BooleanField(help_text='Whether the code is active right now')),
-                ('earned',
-                    models.ManyToManyField(related_name='achievements', to='roster.Student')),
+                        upload_to="badges",
+                    ),
+                ),
+                (
+                    "description",
+                    models.TextField(help_text="How to obtain this achievement"),
+                ),
+                (
+                    "active",
+                    models.BooleanField(
+                        help_text="Whether the code is active right now"
+                    ),
+                ),
+                (
+                    "earned",
+                    models.ManyToManyField(
+                        related_name="achievements", to="roster.Student"
+                    ),
+                ),
             ],
         ),
     ]

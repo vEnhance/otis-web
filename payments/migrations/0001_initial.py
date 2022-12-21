@@ -9,24 +9,32 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('roster', '0084_alter_invoice_memo'),
+        ("roster", "0084_alter_invoice_memo"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='PaymentLog',
+            name="PaymentLog",
             fields=[
-                ('id',
+                (
+                    "id",
                     models.BigAutoField(
-                        auto_created=True, primary_key=True, serialize=False,
-                        verbose_name='ID')),
-                ('amount', models.IntegerField(help_text='Amount paid')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('invoice',
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("amount", models.IntegerField(help_text="Amount paid")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "invoice",
                     models.ForeignKey(
-                        help_text='The invoice this contributes towards',
+                        help_text="The invoice this contributes towards",
                         on_delete=django.db.models.deletion.CASCADE,
-                        to='roster.invoice')),
+                        to="roster.invoice",
+                    ),
+                ),
             ],
         ),
     ]

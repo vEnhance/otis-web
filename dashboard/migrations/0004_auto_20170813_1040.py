@@ -8,17 +8,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dashboard', '0003_auto_20170810_2209'),
+        ("dashboard", "0003_auto_20170810_2209"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='uploadedfile',
-            name='file_type',
+            model_name="uploadedfile",
+            name="file_type",
             field=models.CharField(
-                choices=[('HMWK', 'PSet Submission'), ('TRNS', 'Transcript'),
-                            ('NOTE', 'Notes / Comments'), ('MISC', 'Miscellaneous')],
-                help_text='What kind of file this is',
-                max_length=10),
+                choices=[
+                    ("HMWK", "PSet Submission"),
+                    ("TRNS", "Transcript"),
+                    ("NOTE", "Notes / Comments"),
+                    ("MISC", "Miscellaneous"),
+                ],
+                help_text="What kind of file this is",
+                max_length=10,
+            ),
         ),
     ]

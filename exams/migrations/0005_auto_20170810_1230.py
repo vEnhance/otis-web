@@ -8,19 +8,20 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0005_unit_subject'),
-        ('exams', '0004_auto_20170810_1223'),
+        ("core", "0005_unit_subject"),
+        ("exams", "0004_auto_20170810_1223"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='assignment',
-            name='name',
+            model_name="assignment",
+            name="name",
             field=models.CharField(
-                help_text='Name / description of the assignment', max_length=80),
+                help_text="Name / description of the assignment", max_length=80
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='assignment',
-            unique_together={('semester', 'name')},
+            name="assignment",
+            unique_together={("semester", "name")},
         ),
     ]

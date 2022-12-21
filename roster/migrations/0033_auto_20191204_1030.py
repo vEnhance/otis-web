@@ -6,14 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0032_student_newborn'),
+        ("roster", "0032_student_newborn"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='student',
-            name='newborn',
+            model_name="student",
+            name="newborn",
             field=models.BooleanField(
-                default=True, help_text='Whether the student is newly created.'),
+                default=True, help_text="Whether the student is newly created."
+            ),
         ),
     ]

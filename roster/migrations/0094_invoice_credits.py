@@ -6,13 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0093_remove_invoice_forgive_invoice_forgive_date'),
+        ("roster", "0093_remove_invoice_forgive_invoice_forgive_date"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='invoice',
-            name='credits',
-            field=models.DecimalField(decimal_places=2, default=0, help_text='Credit earned via internships', max_digits=8),
+            model_name="invoice",
+            name="credits",
+            field=models.DecimalField(
+                decimal_places=2,
+                default=0,
+                help_text="Credit earned via internships",
+                max_digits=8,
+            ),
         ),
     ]

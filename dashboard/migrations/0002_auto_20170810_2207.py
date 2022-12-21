@@ -8,13 +8,13 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dashboard', '0001_initial'),
+        ("dashboard", "0001_initial"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='uploadedfile',
-            old_name='content',
-            new_name='file_content',
+            model_name="uploadedfile",
+            old_name="content",
+            new_name="file_content",
         ),
     ]

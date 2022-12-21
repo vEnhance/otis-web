@@ -6,14 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('markets', '0009_alter_market_weight'),
+        ("markets", "0009_alter_market_weight"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='market',
-            name='solution',
+            model_name="market",
+            name="solution",
             field=models.TextField(
-                blank=True, help_text='Comments that appear in the market results.'),
+                blank=True, help_text="Comments that appear in the market results."
+            ),
         ),
     ]

@@ -6,17 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0031_remove_semester_classroom_url'),
+        ("core", "0031_remove_semester_classroom_url"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='unit',
-            name='reveal_at_level',
+            model_name="unit",
+            name="reveal_at_level",
             field=models.PositiveSmallIntegerField(
                 blank=True,
-                help_text=
-                'If a number is specified here, the unit is added automatically at that level',
-                null=True),
+                help_text="If a number is specified here, the unit is added automatically at that level",
+                null=True,
+            ),
         ),
     ]

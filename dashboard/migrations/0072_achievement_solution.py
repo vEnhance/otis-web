@@ -6,15 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dashboard', '0071_pset_rejected'),
+        ("dashboard", "0071_pset_rejected"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='achievement',
-            name='solution',
+            model_name="achievement",
+            name="solution",
             field=models.TextField(
-                default='', help_text='Internal note by Evan where the diamond is hidden'),
+                default="",
+                help_text="Internal note by Evan where the diamond is hidden",
+            ),
             preserve_default=False,
         ),
     ]

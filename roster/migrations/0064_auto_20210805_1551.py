@@ -6,18 +6,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0063_alter_student_achievements'),
+        ("roster", "0063_alter_student_achievements"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='student',
-            name='vision',
+            model_name="student",
+            name="vision",
         ),
         migrations.AddField(
-            model_name='student',
-            name='usemo_score',
+            model_name="student",
+            name="usemo_score",
             field=models.SmallIntegerField(
-                blank=True, help_text='The USEMO score for this year', null=True),
+                blank=True, help_text="The USEMO score for this year", null=True
+            ),
         ),
     ]

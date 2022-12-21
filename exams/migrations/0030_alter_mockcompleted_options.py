@@ -6,12 +6,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('exams', '0029_auto_20211022_1013'),
+        ("exams", "0029_auto_20211022_1013"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='mockcompleted',
-            options={'verbose_name_plural': 'Mock completions'},
+            name="mockcompleted",
+            options={"verbose_name_plural": "Mock completions"},
         ),
     ]

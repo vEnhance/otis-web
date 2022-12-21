@@ -6,36 +6,39 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dashboard', '0074_alter_uploadedfile_content'),
+        ("dashboard", "0074_alter_uploadedfile_content"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='achievement',
-            name='always_show_image',
+            model_name="achievement",
+            name="always_show_image",
             field=models.BooleanField(
                 default=False,
-                help_text=
-                'If enabled, always show the achievement image, even if no one earned the diamond yet.',
-                verbose_name='Reveal'),
+                help_text="If enabled, always show the achievement image, even if no one earned the diamond yet.",
+                verbose_name="Reveal",
+            ),
         ),
         migrations.AlterField(
-            model_name='achievement',
-            name='description',
+            model_name="achievement",
+            name="description",
             field=models.TextField(
                 blank=True,
-                help_text='Text shown beneath this achievement for students who obtain it.'),
+                help_text="Text shown beneath this achievement for students who obtain it.",
+            ),
         ),
         migrations.AlterField(
-            model_name='achievement',
-            name='diamonds',
+            model_name="achievement",
+            name="diamonds",
             field=models.SmallIntegerField(
-                default=0, help_text='Number of diamonds for this achievement'),
+                default=0, help_text="Number of diamonds for this achievement"
+            ),
         ),
         migrations.AlterField(
-            model_name='achievement',
-            name='solution',
+            model_name="achievement",
+            name="solution",
             field=models.TextField(
-                blank=True, help_text='Description of where the diamond is hidden'),
+                blank=True, help_text="Description of where the diamond is hidden"
+            ),
         ),
     ]

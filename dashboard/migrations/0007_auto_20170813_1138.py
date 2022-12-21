@@ -8,22 +8,22 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dashboard', '0006_auto_20170813_1057'),
+        ("dashboard", "0006_auto_20170813_1057"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='uploadedfile',
-            old_name='file_type',
-            new_name='category',
+            model_name="uploadedfile",
+            old_name="file_type",
+            new_name="category",
         ),
         migrations.RenameField(
-            model_name='uploadedfile',
-            old_name='file_content',
-            new_name='content',
+            model_name="uploadedfile",
+            old_name="file_content",
+            new_name="content",
         ),
         migrations.RemoveField(
-            model_name='uploadedfile',
-            name='description',
+            model_name="uploadedfile",
+            name="description",
         ),
     ]

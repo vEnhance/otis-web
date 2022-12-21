@@ -10,28 +10,30 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0007_auto_20170806_0044'),
+        ("roster", "0007_auto_20170806_0044"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='student',
-            name='user',
+            model_name="student",
+            name="user",
             field=models.ForeignKey(
                 blank=True,
-                help_text='The Django Auth user attached to the student',
+                help_text="The Django Auth user attached to the student",
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
-                to=settings.AUTH_USER_MODEL),
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AlterField(
-            model_name='ta',
-            name='user',
+            model_name="ta",
+            name="user",
             field=models.ForeignKey(
                 blank=True,
-                help_text='The Django Auth user attached to the TA',
+                help_text="The Django Auth user attached to the TA",
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
-                to=settings.AUTH_USER_MODEL),
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

@@ -6,21 +6,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dashboard', '0045_remove_problemsuggestion_reason'),
+        ("dashboard", "0045_remove_problemsuggestion_reason"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='pset',
-            name='resubmitted',
+            model_name="pset",
+            name="resubmitted",
             field=models.BooleanField(
-                default=False, help_text='Tracks if problem set resubmitted'),
+                default=False, help_text="Tracks if problem set resubmitted"
+            ),
         ),
         migrations.AlterField(
-            model_name='pset',
-            name='approved',
+            model_name="pset",
+            name="approved",
             field=models.BooleanField(
                 default=False,
-                help_text='Whether the latest version of the problem set has been checked off'),
+                help_text="Whether the latest version of the problem set has been checked off",
+            ),
         ),
     ]

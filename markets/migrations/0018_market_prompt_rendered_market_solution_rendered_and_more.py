@@ -7,34 +7,36 @@ import markdownfield.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('markets', '0017_alter_market_show_answer'),
+        ("markets", "0017_alter_market_show_answer"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='market',
-            name='prompt_rendered',
-            field=markdownfield.models.RenderedMarkdownField(default=''),
+            model_name="market",
+            name="prompt_rendered",
+            field=markdownfield.models.RenderedMarkdownField(default=""),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='market',
-            name='solution_rendered',
-            field=markdownfield.models.RenderedMarkdownField(default=''),
+            model_name="market",
+            name="solution_rendered",
+            field=markdownfield.models.RenderedMarkdownField(default=""),
             preserve_default=False,
         ),
         migrations.AlterField(
-            model_name='market',
-            name='prompt',
+            model_name="market",
+            name="prompt",
             field=markdownfield.models.MarkdownField(
-                help_text='Full text of the question', rendered_field='prompt_rendered'),
+                help_text="Full text of the question", rendered_field="prompt_rendered"
+            ),
         ),
         migrations.AlterField(
-            model_name='market',
-            name='solution',
+            model_name="market",
+            name="solution",
             field=markdownfield.models.MarkdownField(
                 blank=True,
-                help_text='Comments that appear in the market results.',
-                rendered_field='solution_rendered'),
+                help_text="Comments that appear in the market results.",
+                rendered_field="solution_rendered",
+            ),
         ),
     ]

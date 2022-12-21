@@ -19,7 +19,7 @@ PREF_CHOICES = (
 
 
 def update_fields(apps: Any, scheme_editor: Any):
-    Job = apps.get_model('payments', 'job')
+    Job = apps.get_model("payments", "job")
     for x, y in PROGRESS_CHOICES:
         Job.objects.filter(progress=x).update(progress=y)
     for x, y in PREF_CHOICES:
@@ -27,7 +27,7 @@ def update_fields(apps: Any, scheme_editor: Any):
 
 
 def revert_fields(apps: Any, scheme_editor: Any):
-    Job = apps.get_model('payments', 'job')
+    Job = apps.get_model("payments", "job")
     for y, x in PROGRESS_CHOICES:
         Job.objects.filter(progress=x).update(progress=y)
     for y, x in PREF_CHOICES:
@@ -37,30 +37,41 @@ def revert_fields(apps: Any, scheme_editor: Any):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('payments', '0023_alter_job_payment_preference'),
+        ("payments", "0023_alter_job_payment_preference"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='job',
-            name='payment_preference',
+            model_name="job",
+            name="payment_preference",
             field=models.CharField(
                 blank=True,
-                choices=[('PREF_NONE', 'Not specified'), ('PREF_INVCRD', 'Invoice credits'),
-                            ('PREF_PROBONO', 'Pro bono'), ('PREF_PAYPAL', 'PayPal'),
-                            ('PREF_VENMO', 'Venmo'), ('PREF_ZELLE', 'Zelle')],
-                default='',
-                max_length=15),
+                choices=[
+                    ("PREF_NONE", "Not specified"),
+                    ("PREF_INVCRD", "Invoice credits"),
+                    ("PREF_PROBONO", "Pro bono"),
+                    ("PREF_PAYPAL", "PayPal"),
+                    ("PREF_VENMO", "Venmo"),
+                    ("PREF_ZELLE", "Zelle"),
+                ],
+                default="",
+                max_length=15,
+            ),
         ),
         migrations.AlterField(
-            model_name='job',
-            name='progress',
+            model_name="job",
+            name="progress",
             field=models.CharField(
-                choices=[('JOB_NEW', 'In progress'), ('JOB_REV', 'Revisions requested'),
-                            ('JOB_SUB', 'Submitted'), ('JOB_VFD', 'Completed')],
-                default='JOB_NEW',
-                help_text='The current status of the job',
-                max_length=8),
+                choices=[
+                    ("JOB_NEW", "In progress"),
+                    ("JOB_REV", "Revisions requested"),
+                    ("JOB_SUB", "Submitted"),
+                    ("JOB_VFD", "Completed"),
+                ],
+                default="JOB_NEW",
+                help_text="The current status of the job",
+                max_length=8,
+            ),
         ),
         migrations.RunPython(update_fields, revert_fields),
     ]

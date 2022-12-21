@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('arch', '0026_alter_problem_puid'),
+        ("arch", "0026_alter_problem_puid"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='problem',
-            name='hyperlink',
-            field=models.URLField(blank=True, help_text='An AoPS URL or similar'),
+            model_name="problem",
+            name="hyperlink",
+            field=models.URLField(blank=True, help_text="An AoPS URL or similar"),
         ),
     ]

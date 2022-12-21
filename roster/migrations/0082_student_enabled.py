@@ -6,14 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0081_alter_student_user'),
+        ("roster", "0081_alter_student_user"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='student',
-            name='enabled',
+            model_name="student",
+            name="enabled",
             field=models.BooleanField(
-                default=True, help_text='Allow student to submit/request units.'),
+                default=True, help_text="Allow student to submit/request units."
+            ),
         ),
     ]

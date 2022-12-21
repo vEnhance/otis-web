@@ -17,7 +17,7 @@ STATUS_CHOICES = (
 
 
 def update_fields(apps: Any, scheme_editor: Any):
-    UnitInquiry = apps.get_model('roster', 'unitinquiry')
+    UnitInquiry = apps.get_model("roster", "unitinquiry")
     for x, y in ACTION_CHOICES:
         UnitInquiry.objects.filter(action_type=x).update(action_type=y)
     for x, y in STATUS_CHOICES:
@@ -25,7 +25,7 @@ def update_fields(apps: Any, scheme_editor: Any):
 
 
 def revert_fields(apps: Any, scheme_editor: Any):
-    UnitInquiry = apps.get_model('roster', 'unitinquiry')
+    UnitInquiry = apps.get_model("roster", "unitinquiry")
     for y, x in ACTION_CHOICES:
         UnitInquiry.objects.filter(action_type=x).update(action_type=y)
     for y, x in STATUS_CHOICES:
@@ -35,28 +35,37 @@ def revert_fields(apps: Any, scheme_editor: Any):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0094_invoice_credits'),
+        ("roster", "0094_invoice_credits"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='unitinquiry',
-            name='action_type',
+            model_name="unitinquiry",
+            name="action_type",
             field=models.CharField(
-                choices=[('INQ_ACT_UNLOCK', 'Unlock now'), ('INQ_ACT_APPEND', 'Add for later'),
-                            ('INQ_ACT_DROP', 'Drop')],
-                help_text='Describe the action you want to make.',
-                max_length=15),
+                choices=[
+                    ("INQ_ACT_UNLOCK", "Unlock now"),
+                    ("INQ_ACT_APPEND", "Add for later"),
+                    ("INQ_ACT_DROP", "Drop"),
+                ],
+                help_text="Describe the action you want to make.",
+                max_length=15,
+            ),
         ),
         migrations.AlterField(
-            model_name='unitinquiry',
-            name='status',
+            model_name="unitinquiry",
+            name="status",
             field=models.CharField(
-                choices=[('INQ_ACC', 'Accepted'), ('INQ_REJ', 'Rejected'),
-                            ('INQ_NEW', 'Pending'), ('INQ_HOLD', 'On hold')],
-                default='INQ_NEW',
-                help_text='The current status of the petition.',
-                max_length=10),
+                choices=[
+                    ("INQ_ACC", "Accepted"),
+                    ("INQ_REJ", "Rejected"),
+                    ("INQ_NEW", "Pending"),
+                    ("INQ_HOLD", "On hold"),
+                ],
+                default="INQ_NEW",
+                help_text="The current status of the petition.",
+                max_length=10,
+            ),
         ),
         migrations.RunPython(update_fields, revert_fields),
     ]

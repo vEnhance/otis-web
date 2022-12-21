@@ -6,12 +6,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('arch', '0023_alter_problem_puid'),
+        ("arch", "0023_alter_problem_puid"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='problem',
-            name='aops_url',
+            model_name="problem",
+            name="aops_url",
         ),
     ]

@@ -6,17 +6,21 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0043_auto_20200428_0954'),
+        ("roster", "0043_auto_20200428_0954"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='unitinquiry',
-            name='action_type',
+            model_name="unitinquiry",
+            name="action_type",
             field=models.CharField(
-                choices=[('UNLOCK', 'Unlock now'), ('APPEND', 'Add for later'),
-                            ('DROP', 'Drop')],
-                help_text='Describe the action you want to make.',
-                max_length=10),
+                choices=[
+                    ("UNLOCK", "Unlock now"),
+                    ("APPEND", "Add for later"),
+                    ("DROP", "Drop"),
+                ],
+                help_text="Describe the action you want to make.",
+                max_length=10,
+            ),
         ),
     ]

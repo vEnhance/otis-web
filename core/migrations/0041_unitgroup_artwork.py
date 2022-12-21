@@ -7,13 +7,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0040_alter_calendar_urls_again'),
+        ("core", "0040_alter_calendar_urls_again"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='unitgroup',
-            name='artwork',
-            field=models.ImageField(blank=True, help_text='Artwork for this unit', null=True, upload_to=core.models.artwork_image_file_name),
+            model_name="unitgroup",
+            name="artwork",
+            field=models.ImageField(
+                blank=True,
+                help_text="Artwork for this unit",
+                null=True,
+                upload_to=core.models.artwork_image_file_name,
+            ),
         ),
     ]

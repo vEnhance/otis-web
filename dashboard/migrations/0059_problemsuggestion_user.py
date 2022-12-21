@@ -9,17 +9,18 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('dashboard', '0058_alter_semesterdownloadfile_content'),
+        ("dashboard", "0058_alter_semesterdownloadfile_content"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='problemsuggestion',
-            name='user',
+            model_name="problemsuggestion",
+            name="user",
             field=models.ForeignKey(
-                help_text='User who suggested the problem.',
+                help_text="User who suggested the problem.",
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
-                to=settings.AUTH_USER_MODEL),
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

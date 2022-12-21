@@ -6,18 +6,28 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('payments', '0024_alter_job_payment_preference_alter_job_progress'),
+        ("payments", "0024_alter_job_payment_preference_alter_job_progress"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='job',
-            name='spades_bounty',
-            field=models.PositiveIntegerField(default=0, help_text='How many spades the job is worth', verbose_name='♠'),
+            model_name="job",
+            name="spades_bounty",
+            field=models.PositiveIntegerField(
+                default=0,
+                help_text="How many spades the job is worth",
+                verbose_name="♠",
+            ),
         ),
         migrations.AlterField(
-            model_name='job',
-            name='usd_bounty',
-            field=models.DecimalField(decimal_places=2, default=0, help_text='How many US dollars the job is worth', max_digits=8, verbose_name='$'),
+            model_name="job",
+            name="usd_bounty",
+            field=models.DecimalField(
+                decimal_places=2,
+                default=0,
+                help_text="How many US dollars the job is worth",
+                max_digits=8,
+                verbose_name="$",
+            ),
         ),
     ]

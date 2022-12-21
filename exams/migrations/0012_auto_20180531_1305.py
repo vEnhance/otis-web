@@ -8,42 +8,71 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('exams', '0011_auto_20171006_0926'),
+        ("exams", "0011_auto_20171006_0926"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='PracticeExam',
+            name="PracticeExam",
             fields=[
-                ('id',
+                (
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False,
-                        verbose_name='ID')),
-                ('family',
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "family",
                     models.CharField(
-                        choices=[('Waltz', 'Waltz'), ('Foxtrot', 'Foxtrot')],
-                        help_text='The family that the exam comes from.',
-                        max_length=10)),
-                ('is_test', models.BooleanField(help_text='Whether this is a quiz or test')),
-                ('number',
+                        choices=[("Waltz", "Waltz"), ("Foxtrot", "Foxtrot")],
+                        help_text="The family that the exam comes from.",
+                        max_length=10,
+                    ),
+                ),
+                (
+                    "is_test",
+                    models.BooleanField(help_text="Whether this is a quiz or test"),
+                ),
+                (
+                    "number",
                     models.PositiveSmallIntegerField(
-                        help_text='The number of the assignment (e.g. Test 8, Quiz D) ')),
-                ('pdf_url',
+                        help_text="The number of the assignment (e.g. Test 8, Quiz D) "
+                    ),
+                ),
+                (
+                    "pdf_url",
                     models.CharField(
                         blank=True,
-                        help_text='The URL for the external final for this exam.',
-                        max_length=120)),
-                ('start_date',
+                        help_text="The URL for the external final for this exam.",
+                        max_length=120,
+                    ),
+                ),
+                (
+                    "start_date",
                     models.DateField(
-                        blank=True, help_text='When the assignment opens.', null=True)),
-                ('due_date',
+                        blank=True, help_text="When the assignment opens.", null=True
+                    ),
+                ),
+                (
+                    "due_date",
                     models.DateField(
-                        blank=True, help_text='When the assignment should be due.', null=True)),
+                        blank=True,
+                        help_text="When the assignment should be due.",
+                        null=True,
+                    ),
+                ),
             ],
             options={
-                'ordering': ('family', 'is_test', 'number'),
+                "ordering": ("family", "is_test", "number"),
             },
         ),
-        migrations.DeleteModel(name='Assignment',),
-        migrations.DeleteModel(name='MockOlympiad',),
+        migrations.DeleteModel(
+            name="Assignment",
+        ),
+        migrations.DeleteModel(
+            name="MockOlympiad",
+        ),
     ]

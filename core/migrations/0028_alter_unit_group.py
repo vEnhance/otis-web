@@ -7,18 +7,19 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0027_alter_semester_uses_legacy_pset_system'),
+        ("core", "0027_alter_semester_uses_legacy_pset_system"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='unit',
-            name='group',
+            model_name="unit",
+            name="group",
             field=models.ForeignKey(
                 default=1,
-                help_text='The group that this unit belongs to',
+                help_text="The group that this unit belongs to",
                 on_delete=django.db.models.deletion.CASCADE,
-                to='core.unitgroup'),
+                to="core.unitgroup",
+            ),
             preserve_default=False,
         ),
     ]

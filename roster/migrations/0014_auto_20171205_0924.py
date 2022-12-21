@@ -8,19 +8,20 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0013_invoice'),
+        ("roster", "0013_invoice"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='invoice',
-            name='amount_owed',
+            model_name="invoice",
+            name="amount_owed",
             field=models.DecimalField(
                 blank=True,
                 decimal_places=2,
                 default=0,
-                help_text='Amount currently owed.',
+                help_text="Amount currently owed.",
                 max_digits=8,
-                null=True),
+                null=True,
+            ),
         ),
     ]

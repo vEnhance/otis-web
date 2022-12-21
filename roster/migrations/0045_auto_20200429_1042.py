@@ -6,37 +6,39 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0015_auto_20200314_1453'),
-        ('roster', '0044_auto_20200428_1004'),
+        ("core", "0015_auto_20200314_1453"),
+        ("roster", "0044_auto_20200428_1004"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='assistant',
-            name='unlisted_students',
+            model_name="assistant",
+            name="unlisted_students",
             field=models.ManyToManyField(
                 blank=True,
-                help_text=
-                'A list of students this assistant can see but which is not listed visibly.',
-                related_name='unlisted_assistants',
-                to='roster.Student'),
+                help_text="A list of students this assistant can see but which is not listed visibly.",
+                related_name="unlisted_assistants",
+                to="roster.Student",
+            ),
         ),
         migrations.AlterField(
-            model_name='student',
-            name='curriculum',
+            model_name="student",
+            name="curriculum",
             field=models.ManyToManyField(
                 blank=True,
-                help_text='The choice of units that this student will work on',
-                related_name='students_taking',
-                to='core.Unit'),
+                help_text="The choice of units that this student will work on",
+                related_name="students_taking",
+                to="core.Unit",
+            ),
         ),
         migrations.AlterField(
-            model_name='student',
-            name='unlocked_units',
+            model_name="student",
+            name="unlocked_units",
             field=models.ManyToManyField(
                 blank=True,
-                help_text='A list of units that the student may work on.',
-                related_name='students_unlocked',
-                to='core.Unit'),
+                help_text="A list of units that the student may work on.",
+                related_name="students_unlocked",
+                to="core.Unit",
+            ),
         ),
     ]

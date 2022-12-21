@@ -6,16 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0016_auto_20200810_1725'),
+        ("core", "0016_auto_20200810_1725"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='semester',
-            name='social_url',
+            model_name="semester",
+            name="social_url",
             field=models.CharField(
                 blank=True,
-                help_text='The link to social platform for this year.',
-                max_length=128),
+                help_text="The link to social platform for this year.",
+                max_length=128,
+            ),
         ),
     ]

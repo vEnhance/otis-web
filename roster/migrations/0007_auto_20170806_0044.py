@@ -9,27 +9,29 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0003_auto_20170806_0009'),
-        ('roster', '0006_auto_20170806_0035'),
+        ("core", "0003_auto_20170806_0009"),
+        ("roster", "0006_auto_20170806_0035"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='ta',
-            name='semester',
+            model_name="ta",
+            name="semester",
             field=models.ForeignKey(
                 default=None,
-                help_text='The semester for this TA',
+                help_text="The semester for this TA",
                 on_delete=django.db.models.deletion.CASCADE,
-                to='core.Semester'),
+                to="core.Semester",
+            ),
             preserve_default=False,
         ),
         migrations.AlterField(
-            model_name='student',
-            name='curriculum',
+            model_name="student",
+            name="curriculum",
             field=models.ManyToManyField(
                 blank=True,
-                help_text='The choice of units that this student will work on',
-                to='core.Unit'),
+                help_text="The choice of units that this student will work on",
+                to="core.Unit",
+            ),
         ),
     ]

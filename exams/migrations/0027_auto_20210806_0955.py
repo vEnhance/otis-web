@@ -7,83 +7,103 @@ import exams.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('exams', '0026_auto_20210806_0126'),
+        ("exams", "0026_auto_20210806_0126"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='examattempt',
-            name='guess1',
+            model_name="examattempt",
+            name="guess1",
             field=models.CharField(
                 blank=True,
                 max_length=18,
                 validators=[exams.models.expr_validator],
-                verbose_name='Problem 1 response'),
+                verbose_name="Problem 1 response",
+            ),
         ),
         migrations.AlterField(
-            model_name='examattempt',
-            name='guess2',
+            model_name="examattempt",
+            name="guess2",
             field=models.CharField(
                 blank=True,
                 max_length=18,
                 validators=[exams.models.expr_validator],
-                verbose_name='Problem 2 response'),
+                verbose_name="Problem 2 response",
+            ),
         ),
         migrations.AlterField(
-            model_name='examattempt',
-            name='guess3',
+            model_name="examattempt",
+            name="guess3",
             field=models.CharField(
                 blank=True,
                 max_length=18,
                 validators=[exams.models.expr_validator],
-                verbose_name='Problem 3 response'),
+                verbose_name="Problem 3 response",
+            ),
         ),
         migrations.AlterField(
-            model_name='examattempt',
-            name='guess4',
+            model_name="examattempt",
+            name="guess4",
             field=models.CharField(
                 blank=True,
                 max_length=18,
                 validators=[exams.models.expr_validator],
-                verbose_name='Problem 4 response'),
+                verbose_name="Problem 4 response",
+            ),
         ),
         migrations.AlterField(
-            model_name='examattempt',
-            name='guess5',
+            model_name="examattempt",
+            name="guess5",
             field=models.CharField(
                 blank=True,
                 max_length=18,
                 validators=[exams.models.expr_validator],
-                verbose_name='Problem 5 response'),
+                verbose_name="Problem 5 response",
+            ),
         ),
         migrations.AlterField(
-            model_name='practiceexam',
-            name='answer1',
+            model_name="practiceexam",
+            name="answer1",
             field=models.CharField(
-                blank=True, max_length=64, validators=[exams.models.expr_validator_multiple]),
+                blank=True,
+                max_length=64,
+                validators=[exams.models.expr_validator_multiple],
+            ),
         ),
         migrations.AlterField(
-            model_name='practiceexam',
-            name='answer2',
+            model_name="practiceexam",
+            name="answer2",
             field=models.CharField(
-                blank=True, max_length=64, validators=[exams.models.expr_validator_multiple]),
+                blank=True,
+                max_length=64,
+                validators=[exams.models.expr_validator_multiple],
+            ),
         ),
         migrations.AlterField(
-            model_name='practiceexam',
-            name='answer3',
+            model_name="practiceexam",
+            name="answer3",
             field=models.CharField(
-                blank=True, max_length=64, validators=[exams.models.expr_validator_multiple]),
+                blank=True,
+                max_length=64,
+                validators=[exams.models.expr_validator_multiple],
+            ),
         ),
         migrations.AlterField(
-            model_name='practiceexam',
-            name='answer4',
+            model_name="practiceexam",
+            name="answer4",
             field=models.CharField(
-                blank=True, max_length=64, validators=[exams.models.expr_validator_multiple]),
+                blank=True,
+                max_length=64,
+                validators=[exams.models.expr_validator_multiple],
+            ),
         ),
         migrations.AlterField(
-            model_name='practiceexam',
-            name='answer5',
+            model_name="practiceexam",
+            name="answer5",
             field=models.CharField(
-                blank=True, max_length=64, validators=[exams.models.expr_validator_multiple]),
+                blank=True,
+                max_length=64,
+                validators=[exams.models.expr_validator_multiple],
+            ),
         ),
     ]

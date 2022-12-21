@@ -8,22 +8,24 @@ from django.utils.timezone import utc
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0073_registrationcontainer_num_preps'),
+        ("roster", "0073_registrationcontainer_num_preps"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='student',
-            name='last_level_seen',
+            model_name="student",
+            name="last_level_seen",
             field=models.PositiveSmallIntegerField(
-                default=0, help_text='The last level the student was seen at.'),
+                default=0, help_text="The last level the student was seen at."
+            ),
         ),
         migrations.AddField(
-            model_name='student',
-            name='last_level_time',
+            model_name="student",
+            name="last_level_time",
             field=models.DateTimeField(
                 default=datetime.datetime(2021, 9, 13, 21, 11, 32, 475557, tzinfo=utc),
-                help_text="The last time the student's level was updated"),
+                help_text="The last time the student's level was updated",
+            ),
             preserve_default=False,
         ),
     ]

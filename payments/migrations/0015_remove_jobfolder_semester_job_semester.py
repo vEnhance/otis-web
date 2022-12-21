@@ -7,18 +7,23 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0040_alter_calendar_urls_again'),
-        ('payments', '0014_alter_job_progress_alter_worker_google_username'),
+        ("core", "0040_alter_calendar_urls_again"),
+        ("payments", "0014_alter_job_progress_alter_worker_google_username"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='jobfolder',
-            name='semester',
+            model_name="jobfolder",
+            name="semester",
         ),
         migrations.AddField(
-            model_name='job',
-            name='semester',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='core.semester'),
+            model_name="job",
+            name="semester",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="core.semester",
+            ),
         ),
     ]

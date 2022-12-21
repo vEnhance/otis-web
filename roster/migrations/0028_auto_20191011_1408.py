@@ -6,27 +6,36 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0027_auto_20191011_1232'),
+        ("roster", "0027_auto_20191011_1232"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='unitinquiry',
-            name='action_type',
+            model_name="unitinquiry",
+            name="action_type",
             field=models.CharField(
-                choices=[('DROP', 'Drop unit'), ('JUMP', 'Mark current (and add)'),
-                            ('ADD', 'Add unit')],
-                help_text='Describe the action you want to make.',
-                max_length=10),
+                choices=[
+                    ("DROP", "Drop unit"),
+                    ("JUMP", "Mark current (and add)"),
+                    ("ADD", "Add unit"),
+                ],
+                help_text="Describe the action you want to make.",
+                max_length=10,
+            ),
         ),
         migrations.AlterField(
-            model_name='unitinquiry',
-            name='status',
+            model_name="unitinquiry",
+            name="status",
             field=models.CharField(
-                choices=[('ACC', 'Approved'), ('REJ', 'Rejected'), ('NEW', 'Pending'),
-                            ('HOLD', 'On hold')],
-                default='NEW',
-                help_text='The current status of the inquiry.',
-                max_length=5),
+                choices=[
+                    ("ACC", "Approved"),
+                    ("REJ", "Rejected"),
+                    ("NEW", "Pending"),
+                    ("HOLD", "On hold"),
+                ],
+                default="NEW",
+                help_text="The current status of the inquiry.",
+                max_length=5,
+            ),
         ),
     ]

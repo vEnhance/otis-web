@@ -7,18 +7,19 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dashboard', '0075_alter_achievement_always_show_image_and_more'),
+        ("dashboard", "0075_alter_achievement_always_show_image_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='pset',
-            name='upload',
+            model_name="pset",
+            name="upload",
             field=models.ForeignKey(
                 blank=True,
-                help_text='The associated upload file for this problem set',
+                help_text="The associated upload file for this problem set",
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
-                to='dashboard.uploadedfile'),
+                to="dashboard.uploadedfile",
+            ),
         ),
     ]

@@ -6,14 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dashboard', '0038_alter_pset_upload'),
+        ("dashboard", "0038_alter_pset_upload"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='achievement',
-            name='diamonds',
+            model_name="achievement",
+            name="diamonds",
             field=models.SmallIntegerField(
-                default=1, help_text='Amount of diamonds for this achievement'),
+                default=1, help_text="Amount of diamonds for this achievement"
+            ),
         ),
     ]

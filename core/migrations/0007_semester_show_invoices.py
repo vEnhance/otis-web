@@ -8,14 +8,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0006_auto_20171205_0903'),
+        ("core", "0006_auto_20171205_0903"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='semester',
-            name='show_invoices',
+            model_name="semester",
+            name="show_invoices",
             field=models.BooleanField(
-                default=False, help_text='Whether to display invoices for this semester.'),
+                default=False,
+                help_text="Whether to display invoices for this semester.",
+            ),
         ),
     ]

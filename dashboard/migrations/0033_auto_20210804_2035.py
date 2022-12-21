@@ -6,33 +6,36 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dashboard', '0032_alter_achievement_active'),
+        ("dashboard", "0032_alter_achievement_active"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='pset',
-            name='instructor_comments',
+            model_name="pset",
+            name="instructor_comments",
             field=models.TextField(
-                blank=True, help_text='Any comment from the instructor about the submission'),
+                blank=True,
+                help_text="Any comment from the instructor about the submission",
+            ),
         ),
         migrations.AlterField(
-            model_name='pset',
-            name='clubs',
+            model_name="pset",
+            name="clubs",
             field=models.IntegerField(
                 blank=True,
-                help_text=
-                'Total number of clubs that you solved (including 1♣ if feedback written)',
+                help_text="Total number of clubs that you solved (including 1♣ if feedback written)",
                 null=True,
-                verbose_name='Total ♣ earned'),
+                verbose_name="Total ♣ earned",
+            ),
         ),
         migrations.AlterField(
-            model_name='pset',
-            name='hours',
+            model_name="pset",
+            name="hours",
             field=models.FloatField(
                 blank=True,
-                help_text='Number of hours spent on this problem set',
+                help_text="Number of hours spent on this problem set",
                 null=True,
-                verbose_name='Hours spent (estimate)'),
+                verbose_name="Hours spent (estimate)",
+            ),
         ),
     ]

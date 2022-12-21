@@ -6,30 +6,39 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0084_alter_invoice_memo'),
+        ("roster", "0084_alter_invoice_memo"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='studentregistration',
-            name='gender',
+            model_name="studentregistration",
+            name="gender",
             field=models.CharField(
-                choices=[('M', 'Male'), ('F', 'Female'), ('H', 'Nonbinary'), ('O', 'Other'),
-                            ('U', 'Prefer not to say')],
-                default='',
-                help_text=
-                'If you are comfortable answering, specify which gender you most closely identify with.',
-                max_length=2),
+                choices=[
+                    ("M", "Male"),
+                    ("F", "Female"),
+                    ("H", "Nonbinary"),
+                    ("O", "Other"),
+                    ("U", "Prefer not to say"),
+                ],
+                default="",
+                help_text="If you are comfortable answering, specify which gender you most closely identify with.",
+                max_length=2,
+            ),
         ),
         migrations.AlterField(
-            model_name='studentregistration',
-            name='track',
+            model_name="studentregistration",
+            name="track",
             field=models.CharField(
-                choices=[('C', 'Correspondence'), ('B', 'Meeting with Evan'),
-                            ('E', 'Meeting with another instructor'),
-                            ('N', 'None of the above')],
-                default='C',
+                choices=[
+                    ("C", "Correspondence"),
+                    ("B", "Meeting with Evan"),
+                    ("E", "Meeting with another instructor"),
+                    ("N", "None of the above"),
+                ],
+                default="C",
                 max_length=6,
-                verbose_name='Proposed Track'),
+                verbose_name="Proposed Track",
+            ),
         ),
     ]

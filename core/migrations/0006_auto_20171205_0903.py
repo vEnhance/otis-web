@@ -8,14 +8,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0005_unit_subject'),
+        ("core", "0005_unit_subject"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='semester',
-            name='name',
+            model_name="semester",
+            name="name",
             field=models.CharField(
-                help_text="Text description such as 'Year III'", max_length=255, unique=True),
+                help_text="Text description such as 'Year III'",
+                max_length=255,
+                unique=True,
+            ),
         ),
     ]

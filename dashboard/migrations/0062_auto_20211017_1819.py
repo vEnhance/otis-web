@@ -9,20 +9,21 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('dashboard', '0061_alter_problemsuggestion_user'),
+        ("dashboard", "0061_alter_problemsuggestion_user"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='problemsuggestion',
-            name='student',
+            model_name="problemsuggestion",
+            name="student",
         ),
         migrations.AlterField(
-            model_name='problemsuggestion',
-            name='user',
+            model_name="problemsuggestion",
+            name="user",
             field=models.ForeignKey(
-                help_text='User who suggested the problem.',
+                help_text="User who suggested the problem.",
                 on_delete=django.db.models.deletion.CASCADE,
-                to='auth.user'),
+                to="auth.user",
+            ),
         ),
     ]

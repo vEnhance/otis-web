@@ -7,14 +7,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dashboard', '0057_alter_achievement_code'),
+        ("dashboard", "0057_alter_achievement_code"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='semesterdownloadfile',
-            name='content',
+            model_name="semesterdownloadfile",
+            name="content",
             field=models.FileField(
-                help_text='The file itself', upload_to=dashboard.models.download_file_name),
+                help_text="The file itself",
+                upload_to=dashboard.models.download_file_name,
+            ),
         ),
     ]

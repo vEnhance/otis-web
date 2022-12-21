@@ -7,33 +7,53 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('exams', '0031_alter_examattempt_guess1_alter_examattempt_guess2_and_more'),
+        ("exams", "0031_alter_examattempt_guess1_alter_examattempt_guess2_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='practiceexam',
-            name='url1',
-            field=models.URLField(blank=True, max_length=128, validators=[django.core.validators.URLValidator()]),
+            model_name="practiceexam",
+            name="url1",
+            field=models.URLField(
+                blank=True,
+                max_length=128,
+                validators=[django.core.validators.URLValidator()],
+            ),
         ),
         migrations.AlterField(
-            model_name='practiceexam',
-            name='url2',
-            field=models.URLField(blank=True, max_length=128, validators=[django.core.validators.URLValidator()]),
+            model_name="practiceexam",
+            name="url2",
+            field=models.URLField(
+                blank=True,
+                max_length=128,
+                validators=[django.core.validators.URLValidator()],
+            ),
         ),
         migrations.AlterField(
-            model_name='practiceexam',
-            name='url3',
-            field=models.URLField(blank=True, max_length=128, validators=[django.core.validators.URLValidator()]),
+            model_name="practiceexam",
+            name="url3",
+            field=models.URLField(
+                blank=True,
+                max_length=128,
+                validators=[django.core.validators.URLValidator()],
+            ),
         ),
         migrations.AlterField(
-            model_name='practiceexam',
-            name='url4',
-            field=models.URLField(blank=True, max_length=128, validators=[django.core.validators.URLValidator()]),
+            model_name="practiceexam",
+            name="url4",
+            field=models.URLField(
+                blank=True,
+                max_length=128,
+                validators=[django.core.validators.URLValidator()],
+            ),
         ),
         migrations.AlterField(
-            model_name='practiceexam',
-            name='url5',
-            field=models.URLField(blank=True, max_length=128, validators=[django.core.validators.URLValidator()]),
+            model_name="practiceexam",
+            name="url5",
+            field=models.URLField(
+                blank=True,
+                max_length=128,
+                validators=[django.core.validators.URLValidator()],
+            ),
         ),
     ]

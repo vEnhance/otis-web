@@ -6,14 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('markets', '0010_market_solution'),
+        ("markets", "0010_market_solution"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='market',
-            name='answer',
+            model_name="market",
+            name="answer",
             field=models.FloatField(
-                blank=True, help_text='The answer to the question', null=True),
+                blank=True, help_text="The answer to the question", null=True
+            ),
         ),
     ]

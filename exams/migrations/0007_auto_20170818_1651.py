@@ -8,30 +8,34 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('exams', '0006_auto_20170810_1237'),
+        ("exams", "0006_auto_20170810_1237"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='assignment',
-            name='due_date',
+            model_name="assignment",
+            name="due_date",
             field=models.DateField(
                 blank=True,
-                help_text='When the assignment is due. Leave blank if not active this semester.',
-                null=True),
+                help_text="When the assignment is due. Leave blank if not active this semester.",
+                null=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='assignment',
-            name='name',
+            model_name="assignment",
+            name="name",
             field=models.CharField(
-                help_text='Name / description of the assignment', max_length=80, unique=True),
+                help_text="Name / description of the assignment",
+                max_length=80,
+                unique=True,
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='assignment',
+            name="assignment",
             unique_together=set(),
         ),
         migrations.RemoveField(
-            model_name='assignment',
-            name='semester',
+            model_name="assignment",
+            name="semester",
         ),
     ]

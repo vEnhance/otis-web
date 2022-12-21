@@ -6,17 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dashboard', '0033_auto_20210804_2035'),
-        ('roster', '0062_student_achievements'),
+        ("dashboard", "0033_auto_20210804_2035"),
+        ("roster", "0062_student_achievements"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='student',
-            name='achievements',
+            model_name="student",
+            name="achievements",
             field=models.ManyToManyField(
                 blank=True,
-                help_text='Codes that this student has obtained',
-                to='dashboard.Achievement'),
+                help_text="Codes that this student has obtained",
+                to="dashboard.Achievement",
+            ),
         ),
     ]

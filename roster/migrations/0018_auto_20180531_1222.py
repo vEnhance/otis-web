@@ -8,17 +8,17 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0017_auto_20180531_1217'),
+        ("roster", "0017_auto_20180531_1217"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='student',
-            options={'ordering': ('semester', '-legit', 'track', 'name')},
+            name="student",
+            options={"ordering": ("semester", "-legit", "track", "name")},
         ),
         migrations.RenameField(
-            model_name='student',
-            old_name='classification',
-            new_name='track',
+            model_name="student",
+            old_name="classification",
+            new_name="track",
         ),
     ]

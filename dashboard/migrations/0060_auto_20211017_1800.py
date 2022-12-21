@@ -4,14 +4,14 @@ from django.db import migrations
 
 
 def refactor_suggestion(apps, schema_editor):
-    suggestions = apps.get_model('dashboard', 'ProblemSuggestion')
-    for s in suggestions.objects.all().select_related('student__user'):
+    suggestions = apps.get_model("dashboard", "ProblemSuggestion")
+    for s in suggestions.objects.all().select_related("student__user"):
         s.user = s.student.user
         s.save()
 
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('dashboard', '0059_problemsuggestion_user'),
+        ("dashboard", "0059_problemsuggestion_user"),
     ]
     operations = [migrations.RunPython(refactor_suggestion, migrations.RunPython.noop)]

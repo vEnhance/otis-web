@@ -6,18 +6,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('roster', '0075_remove_student_last_level_time'),
+        ("roster", "0075_remove_student_last_level_time"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='studentregistration',
-            name='track',
+            model_name="studentregistration",
+            name="track",
             field=models.CharField(
-                choices=[('C', 'Correspondence'), ('B', 'Meeting with Evan'),
-                            ('E', 'Meeting with another instructor'),
-                            ('N', 'None of the above')],
+                choices=[
+                    ("C", "Correspondence"),
+                    ("B", "Meeting with Evan"),
+                    ("E", "Meeting with another instructor"),
+                    ("N", "None of the above"),
+                ],
                 max_length=6,
-                verbose_name='Proposed Track'),
+                verbose_name="Proposed Track",
+            ),
         ),
     ]
