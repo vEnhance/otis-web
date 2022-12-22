@@ -620,6 +620,7 @@ class StudentRegistration(models.Model):
     processed = models.BooleanField(
         help_text="Whether Evan has dealt with this kid yet", default=False
     )
+    created_at = models.DateTimeField(auto_now_add=True)
     country = models.CharField(max_length=6, choices=COUNTRY_CHOICES, default="USA")
 
     class Meta:
