@@ -55,6 +55,7 @@ class AchievementAdmin(ImportExportModelAdmin):
     list_filter = (
         "active",
         "always_show_image",
+        ("creator", admin.EmptyFieldListFilter),
     )
     resource_class = AchievementIEResource
 
