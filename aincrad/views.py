@@ -325,7 +325,12 @@ def problems_handler(action: str, data: JSONData) -> JsonResponse:
     if action == "get_hints":
         hints = Hint.objects.filter(problem=problem)
         hint_values = hints.values("keywords", "pk", "number", "content")
-        return JsonResponse({"hints": list(hint_values)})
+        return JsonResponse(
+            {
+                "hints": list(hint_values),
+                "hyperlink": problem.hyperlink,
+            }
+        )
     elif action == "add_hints":
         hints = Hint.objects.filter(problem=problem)
         existing_hint_numbers = hints.values_list("number", flat=True)
