@@ -64,8 +64,14 @@
   <hr />
   <ul>
     <li>
-      <a href="{% url "view-solution" problem.puid %}">Download solution</a>
+      <a href="{% url "view-solution" problem.puid %}">Download OTIS solution
+      (TeX)</a>
     </li>
+    {% if problem.hyperlink %}
+      <li>
+        <a href="{{ problem.hyperlink }}">View original thread</a>
+      </li>
+    {% endif %}
     <li>
       <a href="{% url "problem-update" problem.puid %}">Edit problem</a>
     </li>
