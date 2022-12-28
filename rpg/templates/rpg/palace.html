@@ -4,18 +4,25 @@
 {% endblock title %}
 {% block layout-content %}
   {% for carving in palace_carvings %}
-    {% if carving.image %}<img width="96px" style="float: right;" src="{{ carving.image.url }}" />{% endif %}
-    <h2>
-      {% if carving.hyperlink %}
-        <a href="{{ carving.hyperlink }}">{{ carving.display_name }}</a>
-      {% else %}
-        {{ carving.display_name }}
+    <div style="min-height:96px;">
+      {% if carving.image %}
+        <img width="96px"
+             style="max-height:96px;
+                    float: right"
+             src="{{ carving.image.url }}"/>
       {% endif %}
-    </h2>
-    <p>
-      <em>{{ carving.created_at }}</em>
-    </p>
-    {{ carving.message|linebreaks }}
+      <h2>
+        {% if carving.hyperlink %}
+          <a href="{{ carving.hyperlink }}">{{ carving.display_name }}</a>
+        {% else %}
+          {{ carving.display_name }}
+        {% endif %}
+      </h2>
+      <p>
+        <em>{{ carving.created_at }}</em>
+      </p>
+      {{ carving.message|linebreaks }}
+    </div>
     <hr />
   {% endfor %}
   {% if student %}
