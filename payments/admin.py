@@ -73,7 +73,7 @@ class JobIEResource(resources.ModelResource):
             "name",
             "status",
             "folder",
-            "due_date",
+            "updated_at",
             "spades_bounty",
             "usd_bounty",
             "assignee",
