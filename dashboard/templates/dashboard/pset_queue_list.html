@@ -23,9 +23,9 @@
               <a href="{{ pset.get_absolute_url }}">{{ pset.unit.group.name }}<sup>{{ pset.unit.code }}</sup></a>
             {% else %}
               {% if pset.unit.group.hidden %}
-                {{ pset.unit.group.name }}<sup>{{ pset.unit.code }}</sup>
-              {% else %}
                 Redacted<sup>❓</sup>
+              {% else %}
+                {{ pset.unit.group.name }}<sup>{{ pset.unit.code }}</sup>
               {% endif %}
             {% endif %}
           </td>
