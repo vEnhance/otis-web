@@ -147,7 +147,6 @@ class PSetQueueList(LoginRequiredMixin, ListView[PSet]):
     def get_queryset(self) -> QuerySet[PSet]:
         return PSet.objects.filter(
             status__in=("P", "PA", "PR"),
-            unit__group__hidden=False,
             student__semester__active=True,
         ).order_by("pk")
 
