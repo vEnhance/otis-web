@@ -103,6 +103,3 @@ class ProblemSuggestionList(LoginRequiredMixin, ListView[ProblemSuggestion]):
         queryset = ProblemSuggestion.objects.filter(user=self.request.user)
         queryset = queryset.order_by("status", "created_at")
         return queryset
-
-
-# Create your views here.
