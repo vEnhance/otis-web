@@ -36,16 +36,27 @@ Video tutorial: https://youtu.be/W27XcqeXp20
    otherwise, replace with `vEnhance`.
 3. Run `git submodule update --init --recursive`
    in order to pull the `evans_django_tools` submodule.
-4. You probably want to create a new virtual environment
-   to avoid polluting your system with all the dependencies.
-   If you've used `conda` or `virtualenv` or similar before, you know the drill.
-   Otherwise, [read through the steps here][venv] to create a wrapper for OTIS-WEB.
-5. If things are working, you should be able to run in the virtual environment
-   and then [install Poetry](https://python-poetry.org/docs/).
+4. [Install Poetry](https://python-poetry.org/docs/).
    This enables you to use the `poetry` command;
    verify this by checking `poetry --help` produces a help message.
-6. Once you have `poetry`, hit `poetry install`.
-   This will install a lot of Python packages into your virtual environment.
+5. Once you have `poetry`, hit `poetry install`.
+   This will automatically create a
+   Python virtual environment and install stuff inside it.
+
+   (If you are an expert familiar with Python virtual environments
+   and want to use your own rather than Poetry's auto-created one,
+   then you can do so by activating an environment before running
+   `poetry install`.)
+
+6. If it isn't already activated,
+   [activate the Python virtual environment][activate]
+   that was created in the previous step.
+   The easiest way to do so is to run `poetry shell`.
+
+   (_Note_: you have to do this step every time you start working on the
+   project. That is, always run `poetry shell` before doing any work, or
+   for experts, activate the virtual environment using your preferred method.)
+
 7. If everything is working, `python manage.py check` should
    run with no errors.
 8. Run `python manage.py migrate` to create the local database.
@@ -56,6 +67,8 @@ Video tutorial: https://youtu.be/W27XcqeXp20
     You should be able to log in with the user you defined in step 9.
 12. The website is functional now, but it is a bit bare-bones.
     To populate it with some test data, use `http://127.0.0.1:8000/admin`.
+
+[activate]: https://python-poetry.org/docs/basic-usage/#activating-the-virtual-environment
 
 Optional steps:
 
