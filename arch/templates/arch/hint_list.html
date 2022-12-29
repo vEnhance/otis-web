@@ -15,7 +15,7 @@
   {% if problem.hyperlink %}
     <p class="text-center">
       <a class="btn btn-secondary" href="{{ problem.hyperlink }}">
-        <tt>{{ problem.hyperlink|truncatechars:"40" }}</tt>
+        <tt>🌏 {{ problem.hyperlink|truncatechars:"40" }}</tt>
       </a>
     </p>
   {% endif %}
@@ -37,48 +37,27 @@
       or <a href="mailto:evan@evanchen.cc">email Evan (evan@evanchen.cc)</a>
       for more personalized help!
     </p>
-    <p class="text-center">
-      <a href="https://discord.com/channels/740366393022742618/1019651152385679491"
-         class="btn btn-primary">Open #math-discuss</a>
-    </p>
   {% else %}
     <p>
       There aren't any hints here yet.
-      You'd probably have better luck asking on Discord:
-    </p>
-    <p class="text-center">
-      <a href="https://discord.com/channels/740366393022742618/1019651152385679491"
-         class="btn btn-primary">Open #math-discuss</a>
-    </p>
-    <p>
+      You'd probably have better luck asking on Discord.
       Or, you can also <a href="mailto:evan@evanchen.cc">email Evan</a>.
     </p>
     <p>
-      If you've solved this problem, please help future students by
+      If you've solved this, please help future students by
       <a href="{% url "hint-create" problem.puid %}">adding a hint</a>.
     </p>
   {% endif %}
   <div class="text-center">
-    <a href="{% url "hint-create" problem.puid %}" class="btn btn-success">➕ Add hint</a>
-  </div>
-  <hr />
-  <ul>
-    <li>
-      <a href="{% url "view-solution" problem.puid %}">Download OTIS solution
-      (TeX)</a>
-    </li>
-    {% if problem.hyperlink %}
-      <li>
-        <a href="{{ problem.hyperlink }}">View original thread</a>
-      </li>
-    {% endif %}
-    <li>
-      <a href="{% url "problem-update" problem.puid %}">Edit problem</a>
-    </li>
+    <a href="https://discord.com/channels/740366393022742618/1019651152385679491"
+       class="btn btn-primary">💬 #math-discuss</a>
+    <a href="{% url "hint-create" problem.puid %}" class="btn btn-success">🆕 Add hint</a>
+    <a href="{% url "view-solution" problem.puid %}" class="btn btn-info">📜 Solution (TeX)</a>
     {% if request.user.is_staff %}
-      <li>
-        <a href="{% url "admin:arch_problem_change" problem.pk %}">Admin edit</a>
-      </li>
+      <a href="{% url "admin:arch_problem_change" problem.pk %}"
+         class="btn btn-dark">✏️ Edit</a>
+    {% else %}
+      <a href="{% url "problem-update" problem.puid %}" class="btn btn-dark">✏️ Edit</a>
     {% endif %}
-  </ul>
+  </div>
 {% endblock layout-content %}
