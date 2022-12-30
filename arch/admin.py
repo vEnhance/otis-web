@@ -12,7 +12,7 @@ class HintInline(admin.TabularInline):
     extra = 0
 
 
-class PracticeExamIEResource(resources.ModelResource):
+class ProblemIEResource(resources.ModelResource):
     class Meta:
         skip_unchanged = True
         model = Problem
@@ -21,6 +21,7 @@ class PracticeExamIEResource(resources.ModelResource):
             "puid",
             "hyperlink",
         )
+        export_order = fields
 
 
 @admin.register(Problem)
@@ -38,6 +39,7 @@ class ProblemAdmin(ImportExportModelAdmin):
     search_fields = ("puid",)
     list_per_page = 100
     inlines = (HintInline,)
+    resource_class = ProblemIEResource
 
 
 @admin.register(Hint)

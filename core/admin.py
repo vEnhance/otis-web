@@ -20,6 +20,7 @@ class SemesterResource(resources.ModelResource):
             "show_invoices",
             "exam_family",
         )
+        export_order = fields
 
 
 @admin.register(Semester)
@@ -51,12 +52,7 @@ class UnitIEResource(resources.ModelResource):
             "code",
             "position",
         )
-        export_order = (
-            "id",
-            "group_name",
-            "code",
-            "position",
-        )
+        export_order = fields
 
 
 @admin.register(Unit)
@@ -99,6 +95,7 @@ class UnitGroupIEResource(resources.ModelResource):
             "artwork_thumb_md",
             "artwork_thumb_sm",
         )
+        export_order = fields
 
 
 @admin.register(UnitGroup)

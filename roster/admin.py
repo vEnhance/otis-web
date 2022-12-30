@@ -43,6 +43,7 @@ class AssistantIEResource(RosterResource):
             "user__first_name",
             "user__last_name",
         )
+        export_order = fields
 
 
 class StudentInline(admin.TabularInline):
@@ -109,6 +110,7 @@ class InvoiceIEResource(resources.ModelResource):
             "forgive_date",
             "memo",
         )
+        export_order = fields
 
 
 class OwedFilter(admin.SimpleListFilter):

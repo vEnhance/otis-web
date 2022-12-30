@@ -81,6 +81,7 @@ class JobIEResource(resources.ModelResource):
             "assignee__user__last_name",
             "assignee__user__email",
         )
+        export_order = fields
 
 
 @admin.register(Job)

@@ -29,6 +29,7 @@ class PracticeExamIEResource(resources.ModelResource):
             "url4",
             "url5",
         )
+        export_order = fields
 
 
 @admin.register(PracticeExam)
