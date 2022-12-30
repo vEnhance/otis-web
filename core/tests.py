@@ -70,7 +70,7 @@ class TestCore(EvanTestCase):
     def test_hidden(self):
         UnitFactory.create(group__name="VisibleUnit", group__hidden=False)
         UnitFactory.create(group__name="HiddenUnit", group__hidden=True)
-        resp = self.assertGet20X("synopsis")
+        resp = self.assertGet20X("catalog")
         self.assertHas(resp, "VisibleUnit")
         self.assertNotHas(resp, "HiddenUnit")
 

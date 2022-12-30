@@ -1,9 +1,14 @@
 from django.urls import path
+from django.views.generic.base import RedirectView
 
 from . import views
 
 urlpatterns = [
-    path(r"synopsis/", views.UnitGroupListView.as_view(), name="synopsis"),
+    path(
+        r"synopsis/",  # legacy URL
+        RedirectView.as_view(pattern_name="catalog", permanent=True),
+    ),
+    path(r"catalog/", views.UnitGroupListView.as_view(), name="catalog"),
     path(
         r"admin-unit-list/", views.AdminUnitListView.as_view(), name="admin-unit-list"
     ),
