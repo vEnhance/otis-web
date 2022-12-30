@@ -110,7 +110,6 @@ INQUIRY_VENUEQ_INIT_QUERYSET = UnitInquiry.objects.filter(
     student__semester__active=True,
     student__legit=True,
 ).annotate(
-    total_inquiry_count=SubqueryCount("student__unitinquiry"),
     unlock_inquiry_count=SubqueryCount(
         "student__unitinquiry",
         filter=Q(action_type="INQ_ACT_UNLOCK"),
@@ -127,12 +126,6 @@ INQUIRY_VENUEQ_INIT_KEYS = (
     "explanation",
     "created_at",
     "unlock_inquiry_count",
-    "total_inquiry_count",
-    "student__reg__aops_username",
-    "student__reg__container__semester__end_year",
-    "student__reg__country",
-    "student__reg__gender",
-    "student__reg__graduation_year",
 )
 
 SUGGESTION_VENUEQ_INIT_QUERYSET = ProblemSuggestion.objects.filter(status="SUGG_NEW")

@@ -122,7 +122,6 @@ class TestAincrad(EvanTestCase):
         inquiries = out["_children"][1]["inquiries"]
         self.assertEqual(len(inquiries), 3)
         self.assertEqual(inquiries[0]["unlock_inquiry_count"], 8)
-        self.assertEqual(inquiries[0]["total_inquiry_count"], 10)
 
     def test_invoice(self):
         out = self.assertPost20X(
