@@ -9,17 +9,17 @@ repository = "https://github.com/vEnhance/otis-web"
 
 [tool.poetry.dependencies]
 python = ">=3.10, <4.0"
-Django = "^4.0.7"
+Django = "^4.1.4"
 PyMySQL = "^1.0.2"
 Unidecode = "^1.2.0"
 crispy-bootstrap5 = "^0.7"
-django-allauth = "^0.51.0"
+django-allauth = "^0.52.0"
 django-bootstrap-v5 = "^1.0.5"
 django-braces = "^1.14.0"
 django-crispy-forms = "^1.12.0"
 django-debug-toolbar = "^3.2.1"
 django-extensions = "^3.2.1"
-django-hijack = "^3.0.0"
+django-hijack = "^3.2.6"
 django-import-export = "^3.0.1"
 django-markdownfield = "^0.10.0"
 django-positions = "^0.6.0"
@@ -38,27 +38,27 @@ python-dotenv = "^0.21.0"
 setuptools = "^65.3.0"
 stripe = "^5.0.0"
 wheel = "^0.38.4"
-wiki = "^0.9"
+wiki = {git = "https://github.com/django-wiki/django-wiki.git", rev = "9c1bea0" }
 
 [tool.poetry.group.dev.dependencies]
 # TODO: Faker: need to wait until https://github.com/joke2k/faker/pull/1662 resolves
 Faker = "=15.1.1"
 # TODO: update codespell once v2.3.0 is published
 codespell = "^2.2.2"
-coverage = {extras = ["toml"], version = "^6.4.3"}
-djlint = "^1.19.7"
+coverage = {extras = ["toml"], version = "^7.0.1"}
+djlint = "^1.19.10"
 factory-boy = "^3.2.0"
 freezegun = "^1.1.0"
 ipython = "^8.4.0"
 jedi = "^0.18.0"
 pdbpp = "^0.10.3"
 pyflakes = "^3.0.1"
-pyright = "^1.1.280"
+pyright = "^1.1.286"
 tblib = "^1.7.0"
 toml = "^0.10.2"
 types-Markdown = "^3.3.6"
 types-freezegun = "^1.1.2"
-types-requests = "^2.28.11.5"
+types-requests = "^2.28.11.7"
 werkzeug = "^2.2.2"
 black = "^22.12.0"
 
@@ -71,9 +71,9 @@ skip_empty = true
 branch = true
 command_line = "manage.py test"
 omit = [
-  "*/site-packages/*",
+  "**/site-packages/**",
   "*/migrations/*",
-  "evans_django_tools/*",
+  "evans_django_tools/**",
   "manage.py",
   "*/admin.py",
 ]
