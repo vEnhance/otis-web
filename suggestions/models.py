@@ -56,6 +56,7 @@ class ProblemSuggestion(models.Model):
         default=True, help_text="Whether this suggestion is eligible for spades."
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = "dashboard_problemsuggestion"  # historical babbage

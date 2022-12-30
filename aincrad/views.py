@@ -141,6 +141,7 @@ SUGGESTION_VENUEQ_INIT_KEYS = (
     "status",
     "eligible",
     "created_at",
+    "updated_at",
     "user__first_name",
     "user__last_name",
     "user__email",
