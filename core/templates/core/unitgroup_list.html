@@ -32,9 +32,9 @@
         <div class="list-group-item container">
           <div class="row">
             <div class="col-3">
-              {% if unitgroup.artwork %}
+              {% if unitgroup.artwork_thumb_sm %}
                 <a href="{% url "wiki-unitgroup" unitgroup.pk %}">
-                  <img width="100%" src="{{ unitgroup.artwork.url }}" />
+                  <img width="100%" src="{{ unitgroup.artwork_thumb_sm.url }}" />
                 </a>
               {% endif %}
             </div>

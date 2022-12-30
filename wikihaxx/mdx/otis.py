@@ -102,9 +102,13 @@ class OTISPreprocessor(markdown.preprocessors.Preprocessor):
                         versions = ", ".join(u.code for u in unitgroup.unit_set.all())
                         if unitgroup.artwork:
                             art_url = unitgroup.artwork.url
+                            if unitgroup.artwork_thumb_md:
+                                art_src = unitgroup.artwork_thumb_md.url
+                            else:
+                                art_src = art_url
                             output.append(
-                                f'<div class="W-100 text-center"><a href="{art_url}">'
-                                f'<img class="w-100" src="{art_url}" /></a></div>'
+                                f'<div class="w-100 text-center"><a href="{art_url}">'
+                                f'<img class="w-100" src="{art_src}" /></a></div>'
                             )
                         table_output.append(
                             f"<tr><th>Name</th><td>{unitgroup.name}</td></tr>"
