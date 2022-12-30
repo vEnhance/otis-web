@@ -17,7 +17,7 @@ class PracticeExamIEResource(resources.ModelResource):
         skip_unchanged = True
         model = Problem
         fields = (
-            "id",
+            "pk",
             "puid",
             "hyperlink",
         )
@@ -26,12 +26,12 @@ class PracticeExamIEResource(resources.ModelResource):
 @admin.register(Problem)
 class ProblemAdmin(ImportExportModelAdmin):
     list_display = (
-        "id",
+        "pk",
         "puid",
         "hyperlink",
     )
     list_display_links = (
-        "id",
+        "pk",
         "puid",
     )
 
@@ -43,7 +43,7 @@ class ProblemAdmin(ImportExportModelAdmin):
 @admin.register(Hint)
 class HintAdmin(VersionAdmin):
     list_display = (
-        "id",
+        "pk",
         "problem",
         "number",
         "keywords",

@@ -37,7 +37,7 @@ class AssistantIEResource(RosterResource):
         skip_unchanged = True
         model = Assistant
         fields = (
-            "id",
+            "pk",
             "user_name",
             "shortname",
             "user__first_name",
@@ -72,7 +72,7 @@ class StudentInline(admin.TabularInline):
 @admin.register(Assistant)
 class AssistantAdmin(ImportExportModelAdmin):
     list_display = (
-        "id",
+        "pk",
         "name",
         "shortname",
         "user",
@@ -93,7 +93,7 @@ class InvoiceIEResource(resources.ModelResource):
         skip_unchanged = True
         model = Invoice
         fields = (
-            "id",
+            "pk",
             "student",
             "student__track",
             "student__user__first_name",
@@ -198,7 +198,7 @@ class StudentIEResource(RosterResource):
         skip_unchanged = True
         model = Student
         fields = (
-            "id",
+            "pk",
             "user__first_name",
             "user__last_name",
             "user__email",
@@ -231,21 +231,21 @@ class InvoiceInline(admin.StackedInline):
     )
     readonly_fields = (
         "student",
-        "id",
+        "pk",
     )
 
 
 @admin.register(Student)
 class StudentAdmin(ImportExportModelAdmin):
     list_display = (
-        "id",
+        "pk",
         "name",
         "semester",
         "enabled",
         "legit",
     )
     list_display_links = (
-        "id",
+        "pk",
         "name",
         "semester",
     )
@@ -280,7 +280,7 @@ class StudentRegistrationIEResource(RosterResource):
     class Meta:
         model = StudentRegistration
         fields = (
-            "id",
+            "pk",
             "user__first_name",
             "user__last_name",
             "user__email",
@@ -384,7 +384,7 @@ class StudentRegistrationAdmin(ImportExportModelAdmin):
 @admin.register(UnitInquiry)
 class UnitInquiryAdmin(admin.ModelAdmin):
     list_display = (
-        "id",
+        "pk",
         "status",
         "action_type",
         "unit",
@@ -401,7 +401,7 @@ class UnitInquiryAdmin(admin.ModelAdmin):
         "student__user__last_name",
         "student__user__username",
     )
-    list_display_links = ("id",)
+    list_display_links = ("pk",)
     autocomplete_fields = (
         "unit",
         "student",
@@ -431,12 +431,12 @@ class UnitInquiryAdmin(admin.ModelAdmin):
 @admin.register(RegistrationContainer)
 class RegistrationContainerAdmin(admin.ModelAdmin):
     list_display = (
-        "id",
+        "pk",
         "semester",
         "passcode",
         "allowed_tracks",
     )
     list_display_links = (
-        "id",
+        "pk",
         "semester",
     )

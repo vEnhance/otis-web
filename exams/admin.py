@@ -15,7 +15,7 @@ class PracticeExamIEResource(resources.ModelResource):
             "family",
             "is_test",
             "number",
-            "id",
+            "pk",
             "start_date",
             "due_date",
             "answer1",
@@ -39,7 +39,7 @@ class PracticeExamAdmin(ImportExportModelAdmin):
         "is_test",
         "start_date",
         "due_date",
-        "id",
+        "pk",
     )
     list_filter = (
         "family",

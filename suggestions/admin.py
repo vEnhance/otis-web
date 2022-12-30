@@ -8,7 +8,7 @@ from .models import ProblemSuggestion
 @admin.register(ProblemSuggestion)
 class ProblemSuggestionAdmin(admin.ModelAdmin):
     list_display = (
-        "id",
+        "pk",
         "user",
         "source",
         "status",
@@ -36,7 +36,7 @@ class ProblemSuggestionAdmin(admin.ModelAdmin):
         "unit",
     )
     list_display_links = (
-        "id",
+        "pk",
         "user",
         "source",
         "description",

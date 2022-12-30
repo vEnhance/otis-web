@@ -14,7 +14,7 @@ class SemesterResource(resources.ModelResource):
         skip_unchanged = True
         model = Semester
         fields = (
-            "id",
+            "pk",
             "name",
             "active",
             "show_invoices",
@@ -26,7 +26,7 @@ class SemesterResource(resources.ModelResource):
 class SemesterAdmin(ImportExportModelAdmin):
     list_display = (
         "name",
-        "id",
+        "pk",
         "active",
         "show_invoices",
         "exam_family",
@@ -46,13 +46,13 @@ class UnitIEResource(resources.ModelResource):
         skip_unchanged = True
         model = Unit
         fields = (
-            "id",
+            "pk",
             "group_name",
             "code",
             "position",
         )
         export_order = (
-            "id",
+            "pk",
             "group_name",
             "code",
             "position",
@@ -64,7 +64,7 @@ class UnitAdmin(ImportExportModelAdmin):
     list_display = (
         "group",
         "code",
-        "id",
+        "pk",
         "list_display_position",
     )
     list_filter = ("group__subject",)
@@ -90,7 +90,7 @@ class UnitGroupIEResource(resources.ModelResource):
         skip_unchanged = True
         model = UnitGroup
         fields = (
-            "id",
+            "pk",
             "subject",
             "name",
             "slug",

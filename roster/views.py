@@ -86,7 +86,7 @@ def username_lookup(request: HttpRequest, username: str) -> HttpResponse:
 def curriculum(request: HttpRequest, student_id: int) -> HttpResponse:
     student = get_student_by_id(request, student_id)
     units = Unit.objects.filter(group__hidden=False)
-    original = student.curriculum.values_list("id", flat=True)
+    original = student.curriculum.values_list("pk", flat=True)
 
     enabled = can_edit(request, student) or student.newborn
     if request.method == "POST" and enabled:
@@ -529,7 +529,7 @@ def giga_chart(request: HttpRequest, format_as: str) -> HttpResponse:
         where = "prod"
     rows = []
     header_row = [
-        "ID",
+        "pk",
         "Username",
         "Discord",
         "Name",

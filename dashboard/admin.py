@@ -12,7 +12,7 @@ from .models import PSet, SemesterDownloadFile, UploadedFile  # NOQA
 @admin.register(UploadedFile)
 class UploadedFileAdmin(admin.ModelAdmin):
     list_display = (
-        "id",
+        "pk",
         "content",
         "created_at",
         "description",
@@ -34,7 +34,7 @@ class UploadedFileAdmin(admin.ModelAdmin):
 @admin.register(SemesterDownloadFile)
 class SemesterDownloadFileAdmin(admin.ModelAdmin):
     list_display = (
-        "id",
+        "pk",
         "semester",
         "content",
         "created_at",
