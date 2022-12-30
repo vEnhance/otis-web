@@ -37,7 +37,7 @@ class AssistantIEResource(RosterResource):
         skip_unchanged = True
         model = Assistant
         fields = (
-            "pk",
+            "id",
             "user_name",
             "shortname",
             "user__first_name",
@@ -93,7 +93,7 @@ class InvoiceIEResource(resources.ModelResource):
         skip_unchanged = True
         model = Invoice
         fields = (
-            "pk",
+            "id",
             "student",
             "student__track",
             "student__user__first_name",
@@ -198,7 +198,7 @@ class StudentIEResource(RosterResource):
         skip_unchanged = True
         model = Student
         fields = (
-            "pk",
+            "id",
             "user__first_name",
             "user__last_name",
             "user__email",
@@ -280,7 +280,7 @@ class StudentRegistrationIEResource(RosterResource):
     class Meta:
         model = StudentRegistration
         fields = (
-            "pk",
+            "id",
             "user__first_name",
             "user__last_name",
             "user__email",

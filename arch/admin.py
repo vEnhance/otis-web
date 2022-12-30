@@ -17,7 +17,7 @@ class PracticeExamIEResource(resources.ModelResource):
         skip_unchanged = True
         model = Problem
         fields = (
-            "pk",
+            "id",
             "puid",
             "hyperlink",
         )

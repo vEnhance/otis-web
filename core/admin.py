@@ -14,7 +14,7 @@ class SemesterResource(resources.ModelResource):
         skip_unchanged = True
         model = Semester
         fields = (
-            "pk",
+            "id",
             "name",
             "active",
             "show_invoices",
@@ -46,13 +46,13 @@ class UnitIEResource(resources.ModelResource):
         skip_unchanged = True
         model = Unit
         fields = (
-            "pk",
+            "id",
             "group_name",
             "code",
             "position",
         )
         export_order = (
-            "pk",
+            "id",
             "group_name",
             "code",
             "position",
@@ -90,7 +90,7 @@ class UnitGroupIEResource(resources.ModelResource):
         skip_unchanged = True
         model = UnitGroup
         fields = (
-            "pk",
+            "id",
             "subject",
             "name",
             "slug",

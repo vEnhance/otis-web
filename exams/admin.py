@@ -12,10 +12,10 @@ class PracticeExamIEResource(resources.ModelResource):
         skip_unchanged = True
         model = PracticeExam
         fields = (
+            "id",
             "family",
             "is_test",
             "number",
-            "pk",
             "start_date",
             "due_date",
             "answer1",
@@ -57,7 +57,7 @@ class PracticeExamAdmin(ImportExportModelAdmin):
 
 
 @admin.register(ExamAttempt)
-class ExamAttemptAdmin(ImportExportModelAdmin):
+class ExamAttemptAdmin(admin.ModelAdmin):
     list_display = (
         "quiz",
         "student",

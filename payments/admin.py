@@ -69,7 +69,7 @@ class JobIEResource(resources.ModelResource):
         skip_unchanged = True
         model = Job
         fields = (
-            "pk",
+            "id",
             "name",
             "status",
             "folder",

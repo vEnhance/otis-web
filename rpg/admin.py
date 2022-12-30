@@ -148,7 +148,11 @@ class LevelIEResource(resources.ModelResource):
     class Meta:
         skip_unchanged = True
         model = Level
-        fields = ("pk", "threshold", "name")
+        fields = (
+            "id",
+            "threshold",
+            "name",
+        )
 
 
 @admin.register(Level)
