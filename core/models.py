@@ -102,6 +102,16 @@ def artwork_image_file_name(instance: "UnitGroup", filename: str) -> str:
     return os.path.join("artwork", filename)
 
 
+def artwork_thumb_md_file_name(instance: "UnitGroup", filename: str) -> str:
+    del instance
+    return os.path.join("artwork-thumb-md", filename)
+
+
+def artwork_thumb_sm_file_name(instance: "UnitGroup", filename: str) -> str:
+    del instance
+    return os.path.join("artwork-thumb-sm", filename)
+
+
 class UnitGroup(models.Model):
     """Represents an entire group of units with the same name,
     differing only in difficulty and version"""
@@ -122,6 +132,18 @@ class UnitGroup(models.Model):
     )
     artwork = models.ImageField(
         upload_to=artwork_image_file_name,
+        help_text="Artwork for this unit",
+        null=True,
+        blank=True,
+    )
+    artwork_thumb_md = models.ImageField(
+        upload_to=artwork_thumb_md_file_name,
+        help_text="Artwork for this unit",
+        null=True,
+        blank=True,
+    )
+    artwork_thumb_sm = models.ImageField(
+        upload_to=artwork_thumb_md_file_name,
         help_text="Artwork for this unit",
         null=True,
         blank=True,

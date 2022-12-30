@@ -95,13 +95,9 @@ class UnitGroupIEResource(resources.ModelResource):
             "name",
             "slug",
             "description",
-        )
-        export_order = (
-            "id",
-            "subject",
-            "name",
-            "slug",
-            "description",
+            "artwork",
+            "artwork_thumb_md",
+            "artwork_thumb_sm",
         )
 
 
