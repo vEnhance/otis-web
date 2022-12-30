@@ -119,11 +119,11 @@ If you're new to development, skip this section.
 I'll talk to you more about it later.
 
 The OTIS-WEB repository is heavily type-checked.
-We use `pyflakes`, `mypy` and `pyright` are to catch type errors and other
+We use `pyflakes` and `pyright` are to catch type errors and other
 issues. This means type annotations are usually required for function
 parameters or when initializing empty lists or dictionaries.
 
-You should be able to use `pyflakes` and `mypy` in pure Python.
+You should be able to use `pyflakes` in pure Python.
 To use `pyright`, you'll need to do a separate installation process:
 follow [the README](https://github.com/Microsoft/pyright#installation).
 
