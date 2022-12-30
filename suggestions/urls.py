@@ -5,7 +5,7 @@ from . import views
 urlpatterns = [
     path(r"new/", views.ProblemSuggestionCreate.as_view(), name="suggest-new"),
     path(
-        r"new/<int:unit_id>",
+        r"new/<int:unit_pk>",
         views.ProblemSuggestionCreate.as_view(),
         name="suggest-new",
     ),

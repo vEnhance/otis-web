@@ -36,7 +36,7 @@ from otisweb.utils import (
 from roster.models import RegistrationContainer, Student, StudentRegistration
 from roster.utils import (
     can_view,
-    get_student_by_id,
+    get_student_by_pk,
     get_visible_students,
     infer_student,
 )  # NOQA
@@ -55,10 +55,10 @@ logger = logging.getLogger(__name__)
 
 
 @login_required
-def portal(request: AuthHttpRequest, student_id: int) -> HttpResponse:
-    student = get_student_by_id(request, student_id, payment_exempt=True)
+def portal(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
+    student = get_student_by_pk(request, student_pk, payment_exempt=True)
     if not request.user.is_staff and student.is_delinquent and not student.enabled:
-        return HttpResponseRedirect(reverse("invoice", args=(student_id,)))
+        return HttpResponseRedirect(reverse("invoice", args=(student_pk,)))
     semester = student.semester
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
     student_profile, _ = UserProfile.objects.get_or_create(user=student.user)
@@ -112,17 +112,17 @@ def portal(request: AuthHttpRequest, student_id: int) -> HttpResponse:
 
 def certify(
     request: HttpRequest,
-    student_id: Optional[int] = None,
+    student_pk: Optional[int] = None,
     checksum: Optional[str] = None,
 ):
-    if student_id is None:
+    if student_pk is None:
         student = infer_student(request)
     else:
-        student = get_object_or_404(Student, pk=student_id)
+        student = get_object_or_404(Student, pk=student_pk)
     if checksum is None:
         if can_view(request, student):
             checksum = student.get_checksum(settings.CERT_HASH_KEY)
-            return HttpResponseRedirect(reverse("certify", args=(student.id, checksum)))
+            return HttpResponseRedirect(reverse("certify", args=(student.pk, checksum)))
         else:
             raise PermissionDenied("Not authorized to generate checksum")
     elif checksum != student.get_checksum(settings.CERT_HASH_KEY):
@@ -136,7 +136,7 @@ def certify(
             "level_name": level_info["level_name"],
             "checksum": student.get_checksum(settings.CERT_HASH_KEY),
             "target_url": f"{request.scheme}//{request.get_host()}"
-            + reverse("certify", args=(student.id, checksum)),
+            + reverse("certify", args=(student.pk, checksum)),
         }
         return render(request, "dashboard/certify.html", context)
 
@@ -152,8 +152,8 @@ class PSetQueueList(LoginRequiredMixin, ListView[PSet]):
 
 
 @login_required
-def submit_pset(request: HttpRequest, student_id: int) -> HttpResponse:
-    student = get_student_by_id(request, student_id)
+def submit_pset(request: HttpRequest, student_pk: int) -> HttpResponse:
+    student = get_student_by_pk(request, student_pk)
     if student.semester.active is False:
         raise PermissionDenied("Not an active semester")
     if student.enabled is False:
@@ -228,7 +228,7 @@ class StudentPSetList(LoginRequiredMixin, ListView[PSet]):
         if not isinstance(request.user, User):
             return super().dispatch(request, *args, **kwargs)  # login required mixin
 
-        self.student = get_object_or_404(Student, pk=kwargs.pop("student_id"))
+        self.student = get_object_or_404(Student, pk=kwargs.pop("student_pk"))
         if not can_view(request, self.student):
             raise PermissionDenied(
                 "You do not have permission to view this student's problem sets"
@@ -295,9 +295,9 @@ def resubmit_pset(request: HttpRequest, pk: int) -> HttpResponse:
 
 
 @login_required
-def uploads(request: HttpRequest, student_id: int, unit_id: int) -> HttpResponse:
-    student = get_student_by_id(request, student_id)
-    unit = get_object_or_404(Unit, id=unit_id)
+def uploads(request: HttpRequest, student_pk: int, unit_pk: int) -> HttpResponse:
+    student = get_student_by_pk(request, student_pk)
+    unit = get_object_or_404(Unit, pk=unit_pk)
     uploads = UploadedFile.objects.filter(benefactor=student, unit=unit)
     if not student.check_unit_unlocked(unit) and not uploads.exists():
         raise PermissionDenied("This unit is not unlocked yet")
@@ -332,7 +332,7 @@ def index(request: AuthHttpRequest) -> HttpResponse:
     if len(students) == 1:  # unique match
         student = students.first()
         assert student is not None
-        return HttpResponseRedirect(reverse("portal", args=(student.id,)))
+        return HttpResponseRedirect(reverse("portal", args=(student.pk,)))
     queryset = annotate_student_queryset_with_scores(students).order_by(
         "track", "user__first_name", "user__last_name"
     )
@@ -350,10 +350,10 @@ def index(request: AuthHttpRequest) -> HttpResponse:
 
 
 @login_required
-def past(request: AuthHttpRequest, semester_id: Optional[int] = None):
+def past(request: AuthHttpRequest, semester_pk: Optional[int] = None):
     students = get_visible_students(request.user, current=False)
-    if semester_id is not None:
-        semester = get_object_or_404(Semester, pk=semester_id)
+    if semester_pk is not None:
+        semester = get_object_or_404(Semester, pk=semester_pk)
         students = students.filter(semester=semester)
     else:
         semester = None
@@ -394,13 +394,13 @@ class UpdateFile(
     object: UploadedFile
 
     def get_success_url(self):
-        stu_id = self.object.benefactor.id
-        unit_id = self.object.unit.id if self.object.unit is not None else 0
+        stu_pk = self.object.benefactor.pk
+        unit_pk = self.object.unit.pk if self.object.unit is not None else 0
         return reverse(
             "uploads",
             args=(
-                stu_id,
-                unit_id,
+                stu_pk,
+                unit_pk,
             ),
         )
 
@@ -460,7 +460,7 @@ class DownloadList(LoginRequiredMixin, ListView[SemesterDownloadFile]):
     template_name = "dashboard/download_list.html"
 
     def get_queryset(self) -> QuerySet[SemesterDownloadFile]:
-        student = get_student_by_id(self.request, self.kwargs["pk"])
+        student = get_student_by_pk(self.request, self.kwargs["pk"])
         return SemesterDownloadFile.objects.filter(semester=student.semester)
 
 

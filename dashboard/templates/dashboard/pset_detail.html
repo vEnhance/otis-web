@@ -37,7 +37,7 @@
       {% endif %}
     </a>
     {% if request.user.is_staff %}
-      <a href="{% url "admin:dashboard_pset_change" pset.id %}"
+      <a href="{% url "admin:dashboard_pset_change" pset.pk %}"
          class="btn btn-dark">Staff edit</a>
     {% endif %}
   </p>

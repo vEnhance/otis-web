@@ -7,7 +7,7 @@
   {% for suggestion in problem_suggestions %}
     <div class="alert {% if suggestion.status == "SUGG_EDIT" %} alert-warning {% elif suggestion.status == "SUGG_NEW" %} alert-primary {% elif suggestion.status == "SUGG_NOK" or suggestion.status == "SUGG_OK" %} alert-success {% elif suggestion.status == "SUGG_REJ" %} alert-secondary {% endif %}">
       <h3>
-        <a href="{% url "suggest-update" suggestion.id %}">
+        <a href="{% url "suggest-update" suggestion.pk %}">
           {{ suggestion.source }}:
           {% if suggestion.status == "SUGG_EDIT" %}
             EDITS REQUESTED

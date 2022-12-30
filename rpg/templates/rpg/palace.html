@@ -27,13 +27,13 @@
   {% endfor %}
   {% if student %}
     <div class="text-center">
-      <a href="{% url "palace-update" student.id %}"
+      <a href="{% url "palace-update" student.pk %}"
          style="margin: 0 auto;
                 width: 120px"
          class="btn btn-primary text-white"
          role="button">Carve</a>
       &nbsp;
-      <a href="{% url "diamond-update" student.id %}"
+      <a href="{% url "diamond-update" student.pk %}"
          style="margin: 0 auto;
                 width: 120px"
          class="btn btn-danger text-white"

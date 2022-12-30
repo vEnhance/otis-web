@@ -26,7 +26,7 @@
             <td>Lv. {{ row.level }}</td>
             <td>
               <a title="{{ student.name }}"
-                 href="{% url "portal" student.id %}"
+                 href="{% url "portal" student.pk %}"
                  class="tooltip-link">{{ student.user.email }}</a>
             </td>
             {% if student.latest_pset %}

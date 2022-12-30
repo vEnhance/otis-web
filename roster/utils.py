@@ -38,16 +38,16 @@ def get_visible_students(user: User, current: bool = True):
     return get_visible_from_queryset(user, queryset)
 
 
-def get_student_by_id(
+def get_student_by_pk(
     request: HttpRequest,
-    student_id: int,
+    student_pk: int,
     requires_edit: bool = False,
     payment_exempt: bool = False,
 ) -> models.Student:
     """Returns an ordered pair containing a Student object and
     a boolean indicating whether editing is allowed (is instructor)."""
 
-    student = get_object_or_404(models.Student, id=student_id)
+    student = get_object_or_404(models.Student, pk=student_pk)
 
     if not isinstance(request.user, User):
         raise PermissionDenied("Authentication is needed, how did you even get here?")

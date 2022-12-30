@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from otisweb.decorators import admin_required
 from otisweb.utils import AuthHttpRequest
-from roster.utils import get_student_by_id, infer_student
+from roster.utils import get_student_by_pk, infer_student
 
 from exams.calculator import expr_compute
 
@@ -37,8 +37,8 @@ def pdf(request: AuthHttpRequest, pk: int) -> HttpResponse:
 
 
 @login_required
-def quiz(request: AuthHttpRequest, student_id: int, pk: int) -> HttpResponse:
-    student = get_student_by_id(request, student_id)
+def quiz(request: AuthHttpRequest, student_pk: int, pk: int) -> HttpResponse:
+    student = get_student_by_pk(request, student_pk)
     context: Dict[str, Any] = {}
     quiz = get_object_or_404(PracticeExam, pk=pk)
     if quiz.is_test:
@@ -121,11 +121,11 @@ def quiz(request: AuthHttpRequest, student_id: int, pk: int) -> HttpResponse:
 
 
 @login_required
-def mocks(request: AuthHttpRequest, student_id: Optional[int] = None) -> HttpResponse:
-    if student_id is None:
+def mocks(request: AuthHttpRequest, student_pk: Optional[int] = None) -> HttpResponse:
+    if student_pk is None:
         student = infer_student(request)
-        return HttpResponseRedirect(reverse("mocks", args=(student.id,)))
-    student = get_student_by_id(request, student_id)
+        return HttpResponseRedirect(reverse("mocks", args=(student.pk,)))
+    student = get_student_by_pk(request, student_pk)
     semester = student.semester
     if not semester.active:
         return HttpResponseForbidden("Semester not active")

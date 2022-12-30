@@ -30,7 +30,7 @@
               {# begin table row for this student #}
               <td>{{ forloop.counter }}</td>
               <td>
-                <a href="{% url "portal" student.id %}">{{ student.name }}</a>
+                <a href="{% url "portal" student.pk %}">{{ student.name }}</a>
                 {% if not student.enabled %}(disabled){% endif %}
               </td>
               {% if stulist_show_semester %}

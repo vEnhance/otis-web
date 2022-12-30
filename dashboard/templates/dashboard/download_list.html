@@ -13,7 +13,7 @@
           <br />
           <small>Uploaded at {{ file.created_at|date:"r" }}.
             {% if request.user.is_superuser %}
-              <a href="{% url "admin:dashboard_semesterdownloadfile_change" file.id %}">(edit)</a>
+              <a href="{% url "admin:dashboard_semesterdownloadfile_change" file.pk %}">(edit)</a>
             {% endif %}
           </small>
         </p>

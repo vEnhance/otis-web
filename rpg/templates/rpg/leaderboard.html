@@ -38,7 +38,7 @@
             <sup class="fst-italic">{{ row.level_name }}</sup>
           </td>
           <td>
-            <a href="{% url "stats" row.student.id %}">{{ row.student.name }}</a>
+            <a href="{% url "stats" row.student.pk %}">{{ row.student.name }}</a>
           </td>
           <td class="text-end">{{ row.clubs|floatformat:"0" }}</td>
           <td class="text-end">{{ row.hearts|floatformat:"0" }}</td>

@@ -80,7 +80,7 @@ class Student(models.Model):
     endowed with the data of the curriculum of that student.
     It also names the assistant of the student, if any."""
 
-    id: int
+    pk: int
     invoice: "Invoice"
     unlisted_assistants: QuerySet["Assistant"]
     get_track_display: Callable[[], str]
@@ -171,12 +171,12 @@ class Student(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return reverse("portal", args=(self.id,))
+        return reverse("portal", args=(self.pk,))
 
     def get_checksum(self, key: str) -> str:
         return pbkdf2_hmac(
             "sha256",
-            (key + str(pow(3, self.id, 961748927)) + "meow").encode("utf-8"),
+            (key + str(pow(3, self.pk, 961748927)) + "meow").encode("utf-8"),
             b"salt is yummy so is sugar",
             100000,
             dklen=18,
@@ -238,7 +238,7 @@ class Student(models.Model):
             .select_related("group")
             .annotate(
                 num_uploads=SubqueryAggregate(
-                    "uploadedfile", filter=Q(benefactor__pk=self.id), aggregate=Count
+                    "uploadedfile", filter=Q(benefactor__pk=self.pk), aggregate=Count
                 )
             )
         )
@@ -246,7 +246,7 @@ class Student(models.Model):
             return queryset.annotate(
                 has_pset=Exists(
                     "uploadedfile",
-                    filter=Q(benefactor__pk=self.id, category="psets"),
+                    filter=Q(benefactor__pk=self.pk, category="psets"),
                 )
             )
         else:
@@ -278,7 +278,7 @@ class Student(models.Model):
 
     def generate_curriculum_rows(self) -> List[CurriculumRowTypeDict]:
         curriculum = self.generate_curriculum_queryset().order_by("position")
-        unlocked_units_ids = self.unlocked_units.values_list("id", flat=True)
+        unlocked_units_pks = self.unlocked_units.values_list("pk", flat=True)
 
         rows = []
         for i, unit in enumerate(curriculum):
@@ -290,7 +290,7 @@ class Student(models.Model):
 
             row["semester_active"] = self.semester.active
             row["is_submitted"] = getattr(unit, "has_pset", False)
-            row["is_current"] = unit.pk in unlocked_units_ids
+            row["is_current"] = unit.pk in unlocked_units_pks
             row["is_visible"] = row["is_submitted"] or row["is_current"]
             if self.semester.uses_legacy_pset_system is True:
                 row["is_accepted"] = row["is_submitted"] and not row["is_current"]
@@ -512,7 +512,7 @@ class UnitInquiry(models.Model):
 
 def content_file_name(instance: "StudentRegistration", filename: str) -> str:
     return os.path.join(
-        "agreement", str(instance.container.id), instance.user.username + "_" + filename
+        "agreement", str(instance.container.pk), instance.user.username + "_" + filename
     )
 
 

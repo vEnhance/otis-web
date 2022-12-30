@@ -35,7 +35,7 @@
       <div style="float:left;">{% qr_from_text target_url size="S" %}</div>
       <div style="font-size:12pt;">
         <p>
-          This certificate (ID {{ student.id|stringformat:"07d" }})
+          This certificate (ID {{ student.pk|stringformat:"07d" }})
           was updated {% now "r" %}.
         </p>
         <p>
@@ -43,7 +43,7 @@
           or use the URL below:
         </p>
         <tt>
-          <a href="{% url "certify" student.id checksum %}">{{ request.get_host }}{{ request.path }}</a>
+          <a href="{% url "certify" student.pk checksum %}">{{ request.get_host }}{{ request.path }}</a>
         </tt>
       </div>
     </div>

@@ -24,7 +24,7 @@ from django.views.generic import ListView
 from django.views.generic.edit import UpdateView
 from otisweb.utils import AuthHttpRequest, get_days_since
 from roster.models import Student
-from roster.utils import get_student_by_id
+from roster.utils import get_student_by_pk
 from sql_util.utils import SubqueryAggregate
 
 from .forms import DiamondsForm
@@ -37,8 +37,8 @@ logger = logging.getLogger(__name__)
 
 
 @login_required
-def stats(request: AuthHttpRequest, student_id: int) -> HttpResponse:
-    student = get_student_by_id(request, student_id)
+def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
+    student = get_student_by_pk(request, student_pk)
     unlocks = AchievementUnlock.objects.filter(user=student.user).order_by(
         "achievement__name"
     )
@@ -167,7 +167,7 @@ class PalaceList(LoginRequiredMixin, ListView[PalaceCarving]):
     template_name = "rpg/palace.html"
 
     def get_queryset(self):
-        student = get_student_by_id(self.request, self.kwargs["student_id"])
+        student = get_student_by_pk(self.request, self.kwargs["student_pk"])
         assert_maxed_out_level_info(student)
         self.student = student
         queryset = PalaceCarving.objects.filter(visible=True)
@@ -210,7 +210,7 @@ class PalaceUpdate(
     success_message = "Edited palace carving successfully!"
 
     def get_object(self, *args: Any, **kwargs: Any) -> PalaceCarving:
-        student = get_student_by_id(self.request, self.kwargs["student_id"])
+        student = get_student_by_pk(self.request, self.kwargs["student_pk"])
         assert_maxed_out_level_info(student)
         self.student = student
         carving, is_created = PalaceCarving.objects.get_or_create(user=student.user)
@@ -224,7 +224,7 @@ class PalaceUpdate(
         return context
 
     def get_success_url(self):
-        return reverse("palace-list", args=(self.student.id,))
+        return reverse("palace-list", args=(self.student.pk,))
 
 
 class DiamondUpdate(
@@ -243,7 +243,7 @@ class DiamondUpdate(
     success_message = "Updated diamond successfully."
 
     def get_object(self, *args: Any, **kwargs: Any) -> Achievement:
-        student = get_student_by_id(self.request, self.kwargs["student_id"])
+        student = get_student_by_pk(self.request, self.kwargs["student_pk"])
         if not student.semester.active:
             raise PermissionDenied(
                 "The palace can't be edited through an inactive student"
@@ -277,4 +277,4 @@ class DiamondUpdate(
         return context
 
     def get_success_url(self):
-        return reverse("diamond-update", args=(self.student.id,))
+        return reverse("diamond-update", args=(self.student.pk,))

@@ -206,7 +206,7 @@ def get_level_info(student: Student) -> LevelInfoDict:
     )
     suggest_units_set: SuggestUnitSet = set(suggested_units_queryset)
     hints_written = Version.objects.get_for_model(Hint)  # type: ignore
-    hints_written = hints_written.filter(revision__user_id=student.user.id)
+    hints_written = hints_written.filter(revision__user_id=student.user.pk)
     hints_written = hints_written.values_list("revision__date_created", flat=True)
     hint_spades = get_week_count(list(hints_written))
     completed_jobs = Job.objects.filter(

@@ -56,7 +56,7 @@
         <td>
           <a title="Invoice"
              class="emoji-link"
-             href="{% url "invoice" student.id %}">💵</a>
+             href="{% url "invoice" student.pk %}">💵</a>
         </td>
       {% else %}
         <td>
@@ -78,7 +78,7 @@
         <td>
           <a title="Certificate"
              class="emoji-link"
-             href="{% url "certify" student.id %}">🎓</a>
+             href="{% url "certify" student.pk %}">🎓</a>
         </td>
       {% else %}
         <td>
@@ -98,7 +98,7 @@
   {% if student %}
     <hr />
     <p>
-      <b><a href="{% url "portal" student.id %}">{{ student.name }}</a></b>
+      <b><a href="{% url "portal" student.pk %}">{{ student.name }}</a></b>
     </p>
     <p class="fst-italic">
       <small>{{ student.semester }} ({{ student.semester.years }})</small>
@@ -168,7 +168,7 @@
       </li>
       {% if request.user.is_superuser %}
         <li>
-          <a href="{% url "admin:roster_student_change" student.id %}">Edit</a>
+          <a href="{% url "admin:roster_student_change" student.pk %}">Edit</a>
         </li>
         {% if student.user %}
           {# Hijack student account #}

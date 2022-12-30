@@ -29,7 +29,7 @@ class CurriculumForm(forms.Form):
     and puts together a form letting you pick a curriculum.
 
     units: the list of units
-    original: a list of unit ID's
+    original: a list of unit PK's
     """
 
     def __init__(self, *args: Any, **kwargs: Any):
@@ -43,18 +43,18 @@ class CurriculumForm(forms.Form):
         for name, group_iter in itertools.groupby(units, lambda u: u.group.name):
             group = list(group_iter)
             field_name = "group-" + str(n)
-            chosen_units = [unit for unit in group if unit.id in original]
+            chosen_units = [unit for unit in group if unit.pk in original]
 
             form_kwargs = {}
             form_kwargs["label"] = name
-            form_kwargs["choices"] = tuple((unit.id, unit.code) for unit in group)
+            form_kwargs["choices"] = tuple((unit.pk, unit.code) for unit in group)
             form_kwargs["help_text"] = " ".join([unit.code for unit in group])
             form_kwargs["required"] = False
             form_kwargs["label_suffix"] = "aoeu"  # wait why is this here again
             form_kwargs["coerce"] = int
             form_kwargs["empty_value"] = None
             form_kwargs["disabled"] = not enabled
-            form_kwargs["initial"] = [unit.id for unit in chosen_units]
+            form_kwargs["initial"] = [unit.pk for unit in chosen_units]
             self.fields[field_name] = UnitChoiceField(**form_kwargs)
             n += 1
 

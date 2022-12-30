@@ -78,7 +78,7 @@
         {{ semester.most_payment_deadline|date }}
         has passed, but your payment is incomplete.
       {% endif %}
-      <a href="{% url 'invoice' student.id %}" class="alert-link">Link to invoice.</a>
+      <a href="{% url 'invoice' student.pk %}" class="alert-link">Link to invoice.</a>
     </div>
   {% endif %}
   {% if not student.enabled %}
@@ -108,7 +108,7 @@
       </li>
       <li>
         Use the
-        <a href="{% url 'currshow' student.id %}">selection form</a>
+        <a href="{% url 'currshow' student.pk %}">selection form</a>
         to input your initial choices for which units you want to do.
         For full-year students,
         I suggest to pick 15-20 units you are most interested in.
@@ -116,14 +116,14 @@
         You can save this form multiple times;
         the intermediate results will be shown below.
         <br />
-        <a href="{% url 'currshow' student.id %}"
+        <a href="{% url 'currshow' student.pk %}"
            class="text-white btn btn-success">Open selection form</a>
       </li>
       <li>
         Once you are happy with your selection, you may
         finalize your choices.
         <br />
-        <form action="{% url 'finalize' student.id %}" method="post">
+        <form action="{% url 'finalize' student.pk %}" method="post">
           {% csrf_token %}
           <input type="submit" class="btn btn-warning" value="Finalize" />
         </form>
@@ -142,7 +142,7 @@
         {% if profile.show_bars %}
           <h1>
             Level {{ level_number }} —
-            <a href="{% url 'stats' student.id %}">🏅{{ level_name }}</a>
+            <a href="{% url 'stats' student.pk %}">🏅{{ level_name }}</a>
           </h1>
           <div class="container">
             <div class="row">
@@ -162,25 +162,25 @@
     {% endwith %}
   {% endif %}
   <div class="text-center">
-    <a href="{% url 'stats' student.id %}"
+    <a href="{% url 'stats' student.pk %}"
        style="margin: 0 auto;
               width: 120px"
        class="btn btn-primary text-white"
        role="button">View stats</a>
     {% if student.enabled and semester.active %}
-      <a href="{% url 'submit-pset' student.id %}"
+      <a href="{% url 'submit-pset' student.pk %}"
          style="margin: 0 auto;
                 width: 120px"
          class="btn btn-success text-white"
          role="button">Submit unit</a>
     {% endif %}
-    <a href="{% url 'student-pset-list' student.id %}"
+    <a href="{% url 'student-pset-list' student.pk %}"
        style="margin: 0 auto;
               width: 120px"
        class="btn btn-secondary text-white"
        role="button">Past work</a>
     {% if is_maxed %}
-      <a href="{% url 'palace-list' student.id %}"
+      <a href="{% url 'palace-list' student.pk %}"
          style="margin: 0 auto;
                 width: 120px"
          class="btn btn-danger text-white"
@@ -261,10 +261,10 @@
   </p>
   <div class="text-center">
     {% if not student.newborn and semester.active and student.enabled %}
-      <a href="{% url 'inquiry' student.id %}" class="btn btn-warning">Request units</a>
+      <a href="{% url 'inquiry' student.pk %}" class="btn btn-warning">Request units</a>
     {% endif %}
     {% if request.user.is_staff %}
-      <a href="{% url 'advance' student.id %}" class="btn btn-dark">Edit units</a>
+      <a href="{% url 'advance' student.pk %}" class="btn btn-dark">Edit units</a>
     {% endif %}
   </div>
   <table width="100%">
@@ -275,10 +275,10 @@
         </h3>
         <ul>
           <li>
-            <a href="{% url 'downloads' student.id %}">Posted files ({{ num_sem_downloads }})</a>
+            <a href="{% url 'downloads' student.pk %}">Posted files ({{ num_sem_downloads }})</a>
           </li>
           <li>
-            <a href="{% url 'currshow' student.id %}">Class selection</a>
+            <a href="{% url 'currshow' student.pk %}">Class selection</a>
           </li>
           <li>
             <a href="{% url 'catalog' %}">Unit catalog</a>
@@ -309,7 +309,7 @@
           </li>
           {% if semester.show_invoices %}
             <li>
-              <a href="{% url 'invoice' student.id %}">Invoice</a>
+              <a href="{% url 'invoice' student.pk %}">Invoice</a>
             </li>
           {% endif %}
           {% if semester.active and student.meets_evan %}
@@ -380,7 +380,7 @@
     {% include "dashboard/exam_list.html" with exams=tests %}
     {% if semester.active %}
       <div class="text-center">
-        <a href="{% url 'mocks' student.id %}"
+        <a href="{% url 'mocks' student.pk %}"
            class="btn btn-secondary"
            role="button">Mock Olympiad Submission</a>
       </div>

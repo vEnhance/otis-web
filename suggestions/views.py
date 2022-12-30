@@ -38,9 +38,9 @@ class ProblemSuggestionCreate(
 
     def get_initial(self):
         initial = super().get_initial()
-        uid = self.kwargs.get("unit_id", None)
+        uid = self.kwargs.get("unit_pk", None)
         if uid is not None:
-            unit = get_object_or_404(Unit, id=uid)
+            unit = get_object_or_404(Unit, pk=uid)
             if unit.group.hidden is False:
                 initial["unit"] = uid
         return initial

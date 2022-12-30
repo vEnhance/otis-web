@@ -59,7 +59,7 @@
               <a class="emoji-link"
                  style="text-shadow: 1px black"
                  title="Add suggestion"
-                 href="{% url "suggest-new" row.unit.id %}">💡</a>
+                 href="{% url "suggest-new" row.unit.pk %}">💡</a>
             {% elif request.user.is_staff %}
               <a href="{% view_problems row.unit %}">(PDF)</a>
             {% endif %}
@@ -67,7 +67,7 @@
               {% if row.is_visible %}
                 <a class="emoji-link"
                    title="File uploads"
-                   href="{% url "uploads" student.id row.unit.id %}">📂
+                   href="{% url "uploads" student.pk row.unit.pk %}">📂
                   <sup style="text-shadow: none;">{{ row.num_uploads|default:"0" }}</sup></a>
               {% endif %}
             {% endspaceless %}

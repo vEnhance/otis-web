@@ -33,8 +33,8 @@ from payments.models import Job, JobFolder
 from .models import PaymentLog, Worker
 
 
-def invoice(request: HttpRequest, student_id: int, checksum: str) -> HttpResponse:
-    student = get_object_or_404(Student, id=student_id)
+def invoice(request: HttpRequest, student_pk: int, checksum: str) -> HttpResponse:
+    student = get_object_or_404(Student, pk=student_pk)
 
     if checksum != student.get_checksum(settings.INVOICE_HASH_KEY):
         raise PermissionDenied("Bad hash provided")
@@ -61,7 +61,7 @@ def config(request: HttpRequest) -> HttpResponse:
 
 
 @csrf_exempt
-def checkout(request: HttpRequest, invoice_id: int, amount: int) -> HttpResponse:
+def checkout(request: HttpRequest, invoice_pk: int, amount: int) -> HttpResponse:
     if amount <= 0:
         raise PermissionDenied("Need to enter a positive amount for payment...")
     stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -71,7 +71,7 @@ def checkout(request: HttpRequest, invoice_id: int, amount: int) -> HttpResponse
         domain_url = "http://127.0.0.1:8000"
     if request.method == "GET":
         checkout_session = stripe.checkout.Session.create(
-            client_reference_id=invoice_id,
+            client_reference_id=invoice_pk,
             success_url=domain_url + "/payments/success/",
             cancel_url=domain_url + "/payments/cancelled/",
             payment_method_types=["card"],
@@ -127,7 +127,7 @@ def webhook(request: HttpRequest) -> HttpResponse:
         process_payment(
             amount=int(event["data"]["object"]["amount_total"] / 100),
             invoice=get_object_or_404(
-                Invoice, id=int(event["data"]["object"]["client_reference_id"])
+                Invoice, pk=int(event["data"]["object"]["client_reference_id"])
             ),
         )
     return HttpResponse(status=200)

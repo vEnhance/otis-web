@@ -10,7 +10,7 @@
   <table class="table">
     <tr>
       <td>
-        <a href="{% url 'portal' student.id %}#quizzes">Short-answer quizzes</a>
+        <a href="{% url 'portal' student.pk %}#quizzes">Short-answer quizzes</a>
       </td>
       <td>2♠ × score</td>
     </tr>
@@ -40,7 +40,7 @@
     </tr>
     <tr>
       <td>
-        Submitting <a href="{% url 'mocks' student.id %}">mock olympiads</a> on time
+        Submitting <a href="{% url 'mocks' student.pk %}">mock olympiads</a> on time
       </td>
       <td>3♠ each (regardless of score)</td>
     </tr>
@@ -82,7 +82,7 @@
         <tr>
           <td style="color:{{ meters.spades.color }};">+{% widthratio attempt.score 1 2 %}{{ meters.spades.unit }}</td>
           <td>
-            <a href="{% url "quiz" student.id attempt.quiz.pk %}">{{ attempt.quiz }}</a>
+            <a href="{% url "quiz" student.pk attempt.quiz.pk %}">{{ attempt.quiz }}</a>
           </td>
           <td>{{ attempt.submit_time }}</td>
         </tr>

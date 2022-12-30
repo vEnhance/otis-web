@@ -47,7 +47,7 @@ from prettytable import PrettyTable
 from roster.utils import (
     can_edit,
     get_current_students,
-    get_student_by_id,
+    get_student_by_pk,
     infer_student,
 )  # NOQA
 
@@ -83,8 +83,8 @@ def username_lookup(request: HttpRequest, username: str) -> HttpResponse:
 
 
 @login_required
-def curriculum(request: HttpRequest, student_id: int) -> HttpResponse:
-    student = get_student_by_id(request, student_id)
+def curriculum(request: HttpRequest, student_pk: int) -> HttpResponse:
+    student = get_student_by_pk(request, student_pk)
     units = Unit.objects.filter(group__hidden=False)
     original = student.curriculum.values_list("pk", flat=True)
 
@@ -122,9 +122,9 @@ def curriculum(request: HttpRequest, student_id: int) -> HttpResponse:
 
 @login_required
 @require_POST
-def finalize(request: HttpRequest, student_id: int) -> HttpResponse:
+def finalize(request: HttpRequest, student_pk: int) -> HttpResponse:
     # Removes a newborn status, thus activating everything
-    student = get_student_by_id(request, student_id)
+    student = get_student_by_pk(request, student_pk)
     if student.curriculum.count() > 0:
         student.newborn = False
         first_units = student.curriculum.all()[0:3]
@@ -142,12 +142,12 @@ def finalize(request: HttpRequest, student_id: int) -> HttpResponse:
             "You didn't select any units. "
             "You should select some units before using this link.",
         )
-    return HttpResponseRedirect(reverse("portal", args=(student_id,)))
+    return HttpResponseRedirect(reverse("portal", args=(student_pk,)))
 
 
 @login_required
-def advance(request: HttpRequest, student_id: int) -> Any:
-    student = get_student_by_id(request, student_id, requires_edit=True)
+def advance(request: HttpRequest, student_pk: int) -> Any:
+    student = get_student_by_pk(request, student_pk, requires_edit=True)
     if request.method == "POST":
         form = AdvanceForm(request.POST, student=student)
         if form.is_valid():
@@ -162,7 +162,7 @@ def advance(request: HttpRequest, student_id: int) -> Any:
             messages.success(request, "Successfully updated student.")
             form = AdvanceForm(student=student)
             # uncomment the below if you want to load the portal again
-            # return HttpResponseRedirect(reverse("portal", args=(student_id,)))
+            # return HttpResponseRedirect(reverse("portal", args=(student_pk,)))
     else:
         form = AdvanceForm(student=student)
 
@@ -182,13 +182,13 @@ def advance(request: HttpRequest, student_id: int) -> Any:
 
 
 @login_required
-def invoice(request: HttpRequest, student_id: Optional[int] = None) -> HttpResponse:
-    if student_id is None:
+def invoice(request: HttpRequest, student_pk: Optional[int] = None) -> HttpResponse:
+    if student_pk is None:
         student = infer_student(request)
-        return HttpResponseRedirect(reverse("invoice", args=(student.id,)))
+        return HttpResponseRedirect(reverse("invoice", args=(student.pk,)))
 
-    # Now assume student_id is not None
-    student = get_student_by_id(request, student_id, payment_exempt=True)
+    # Now assume student_pk is not None
+    student = get_student_by_pk(request, student_pk, payment_exempt=True)
 
     try:
         invoice: Optional[Invoice] = student.invoice
@@ -207,13 +207,13 @@ def invoice(request: HttpRequest, student_id: Optional[int] = None) -> HttpRespo
 
 @staff_member_required
 def master_schedule(request: HttpRequest) -> HttpResponse:
-    student_names_and_unit_ids = (
+    student_names_and_unit_pks = (
         get_current_students()
         .filter(legit=True)
         .values("pk", "user__first_name", "user__last_name", "curriculum")
     )
     unit_to_student_dicts = collections.defaultdict(list)
-    for d in student_names_and_unit_ids:
+    for d in student_names_and_unit_pks:
         # e.g. d = {'name': Student, 'curriculum': 30}
         unit_to_student_dicts[d["curriculum"]].append(
             {
@@ -254,13 +254,13 @@ class UpdateInvoice(
     object: Invoice
 
     def get_success_url(self):
-        return reverse("invoice", args=(self.object.student.id,))
+        return reverse("invoice", args=(self.object.student.pk,))
 
 
 # Inquiry views
 @login_required
-def inquiry(request: AuthHttpRequest, student_id: int) -> HttpResponse:
-    student = get_student_by_id(request, student_id)
+def inquiry(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
+    student = get_student_by_pk(request, student_pk)
     if not student.semester.active:
         raise PermissionDenied(
             "Not an active semester, so change petitions are no longer possible."
@@ -414,7 +414,7 @@ def register(request: AuthHttpRequest) -> HttpResponse:
                 StudentRegistration.objects.filter(
                     user=request.user,
                 )
-                .order_by("-id")
+                .order_by("-pk")
                 .first()
             )
             if most_recent_reg is not None:

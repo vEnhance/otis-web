@@ -2,7 +2,7 @@
 {% load humanize %}
 {% block layout-content %}
   <p>
-    <a href="{% url "portal" student.id %}">⬅️ Back to portal</a>
+    <a href="{% url "portal" student.pk %}">⬅️ Back to portal</a>
   </p>
   <h2>Pending submissions</h2>
   {% if unaccepted_psets %}

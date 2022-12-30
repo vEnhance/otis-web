@@ -96,7 +96,7 @@ class UploadedFile(models.Model):
 
 
 def download_file_name(instance: "SemesterDownloadFile", filename: str) -> str:
-    return os.path.join("global", str(instance.semester.id), filename)
+    return os.path.join("global", str(instance.semester.pk), filename)
 
 
 class SemesterDownloadFile(models.Model):
