@@ -13,60 +13,46 @@
     Thank you for suggesting problems for OTIS!
     Your contributions are appreciated.
   </p>
-  <p>
-    One quick word of advice: if you are suggesting a problem
-    from a fairly well-known source (e.g. IMO Shortlist),
-    there is a decent chance Evan might have done the problem already
-    and placed it on some unit. So it might be worth double-checking first.
-  </p>
-  <div class="alert alert-secondary">
-    <h3 class="alert-heading">Copyright information about solutions</h3>
-    <ul>
-      <li>
-        <strong>You must submit a solution</strong>.
-        If you don't, I might get to solving the problem eventually,
-        but let's be real, there's at least 200 problems on my
-        someone-told-me-to-do-it list.
-      </li>
-      <li>
-        <strong>You MUST NOT copy the wording of someone else's solution</strong>,
-        at least not without permission.
-        However, it's okay if the ideas in the solution are not your own,
-        or someone else found an isomorphic solution to yours.
-      </li>
-      <li>
-        By submitting, you are granting Evan permission to use, edit, or adapt
-        anything you submit for OTIS,
-        or any other math-olympiad-related purposes.
-        On the other hand, you retain copyright/ownership of your writing,
-        so you can also use it for whatever you want elsewhere.
-      </li>
-    </ul>
-  </div>
-  <div class="alert alert-secondary">
-    <h3 class="alert-heading">LaTeX notes</h3>
-    <ul>
-      <li>
-        <strong>You must follow the LaTeX style guide</strong>:
-        <a href="https://web.evanchen.cc/latex-style-guide.html">https://web.evanchen.cc/latex-style-guide.html</a>.
-        Submissions that don't follow the style guide will be returned
-        with revisions requested until these requirements are met.
-      </li>
-      <li>
+  {% if suggestion %}
+    <div class="alert {% if suggestion.status == "SUGG_EDIT" %} alert-warning {% elif suggestion.status == "SUGG_NEW" %} alert-primary {% elif suggestion.status == "SUGG_NOK" or suggestion.status == "SUGG_OK" %} alert-success {% elif suggestion.status == "SUGG_REJ" %} alert-secondary {% endif %}">
+      {% if suggestion.status == "SUGG_EDIT" %}
         <p>
-          What you see is just a rough preview for your own convenience.
-          Evan will eventually get the underlying source code;
-          so what shows up in the preview doesn't matter.
+          ✏️ This suggestion currently has <b>edits requested</b>.
         </p>
         <p>
-          <strong>Do NOT do hacks just for the preview.</strong>
-          For example, just type <code>\emph{...}</code> for italics,
-          do not hack it with <code>$\emph{...}$</code>.
+          You may want to re-read
+          <a href="#instructions">the instructions at the bottom</a>.
         </p>
-      </li>
-    </ul>
-  </div>
+      {% elif suggestion.status == "SUGG_NEW" %}
+        <p>
+          ⏳ This suggestion has been submitted and is <b>pending
+          approval</b>.
+        </p>
+      {% elif suggestion.status == "SUGG_NOK" or suggestion.status == "SUGG_OK" %}
+        <p>
+          💜 This suggestion has been <b>accepted</b>! Thank you.
+        </p>
+      {% elif suggestion.status == "SUGG_REJ" %}
+        <p>❌ This suggestion was not accepted. Thanks anyway.</p>
+      {% endif %}
+    </div>
+  {% else %}
+    <div class="alert alert-warning">
+      <p>
+        Read <a href="#instructions">the instructions at the bottom</a>
+        if you haven't seen them already!
+        There are a lot of specific formatting requirements.
+      </p>
+      <p>
+        Also: if you are suggesting a problem
+        from a fairly well-known source (e.g. IMO Shortlist),
+        there is a decent chance Evan might have done the problem already;
+        double-check first.
+      </p>
+    </div>
+  {% endif %}
   {% load crispy_forms_tags %}
+  <h2>Submission form</h2>
   <form action="{{ request.path }}" method="post" class="form">
     {% csrf_token %}
     {% if form.non_field_errors %}
@@ -132,12 +118,60 @@
           <button type="submit" class="btn btn-success">Submit</button>
         </td>
         <td>
-          <button id="render-toggle" class="btn btn-info">
-            Disable instant TeX
-          </button>
+          <button id="render-toggle" class="btn btn-info">Disable instant TeX</button>
         </td>
       </tr>
     </table>
+    <h2 id="instructions">Submission requirements</h2>
+    <div class="alert alert-secondary">
+      <h3 class="alert-heading">Copyright information about solutions</h3>
+      <ul>
+        <li>
+          <strong>You must submit a solution</strong>.
+          If you don't, I might get to solving the problem eventually,
+          but let's be real, there's at least 200 problems on my
+          someone-told-me-to-do-it list.
+        </li>
+        <li>
+          <strong>You MUST NOT copy the wording of someone else's solution</strong>,
+          at least not without permission.
+          However, it's okay if the ideas in the solution are not your own,
+          or someone else found an isomorphic solution to yours.
+        </li>
+        <li>
+          By submitting, you are granting Evan permission to use, edit, or adapt
+          anything you submit for OTIS,
+          or any other math-olympiad-related purposes.
+          On the other hand, you retain copyright/ownership of your writing,
+          so you can also use it for whatever you want elsewhere.
+        </li>
+      </ul>
+    </div>
+    <div class="alert alert-secondary">
+      <h3 class="alert-heading">
+        LaTeX notes
+      </h3>
+      <ul>
+        <li>
+          <strong>You must follow the LaTeX style guide</strong>:
+          <a href="https://web.evanchen.cc/latex-style-guide.html">https://web.evanchen.cc/latex-style-guide.html</a>.
+          Submissions that don't follow the style guide will be returned
+          with revisions requested until these requirements are met.
+        </li>
+        <li>
+          <p>
+            What you see is just a rough preview for your own convenience.
+            Evan will eventually get the underlying source code;
+            so what shows up in the preview doesn't matter.
+          </p>
+          <p>
+            <strong>Do NOT do hacks just for the preview.</strong>
+            For example, just type <code>\emph{...}</code> for italics,
+            do not hack it with <code>$\emph{...}$</code>.
+          </p>
+        </li>
+      </ul>
+    </div>
   </form>
 {% endblock layout-content %}
 {% block css %}

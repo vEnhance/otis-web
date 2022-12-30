@@ -62,7 +62,7 @@ class ProblemSuggestionCreate(
 class ProblemSuggestionUpdate(
     LoginRequiredMixin, UpdateView[ProblemSuggestion, BaseModelForm[ProblemSuggestion]]
 ):
-    context_object_name = "problem_suggestion"
+    context_object_name = "suggestion"
     fields = (
         "unit",
         "weight",
