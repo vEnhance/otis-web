@@ -196,6 +196,11 @@ class Job(models.Model):
         blank=True,
         help_text="Make any notes here",
     )
+
+    admin_notes = models.TextField(
+        blank=True,
+        help_text="Evan can make internal notes here",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     semester = models.ForeignKey(
@@ -233,6 +238,10 @@ class Job(models.Model):
             return ""
         else:
             return self.assignee.user.email
+
+    @property
+    def flagged(self) -> str:
+        return self.admin_notes != ""
 
 
 def get_semester_invoices_with_annotations(semester: Semester) -> QuerySet[Invoice]:

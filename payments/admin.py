@@ -94,6 +94,7 @@ class JobAdmin(ImportExportModelAdmin):
         "updated_at",
         "assignee",
         "assignee_name",
+        "flagged",
         "spades_bounty",
         "usd_bounty",
     )
@@ -111,6 +112,7 @@ class JobAdmin(ImportExportModelAdmin):
     )
     list_filter = (
         ("assignee", admin.EmptyFieldListFilter),
+        ("admin_notes", admin.EmptyFieldListFilter),
         "folder",
         "progress",
         "payment_preference",
