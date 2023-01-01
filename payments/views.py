@@ -341,7 +341,8 @@ class InactiveWorkerList(SuperuserRequiredMixin, ListView[Worker]):
         )
         queryset = queryset.annotate(
             latest_update=SubqueryMin(
-                "job__updated_at", filter=Q(folder=folder) and ~Q(progress="JOB_NEW")
+                "job__updated_at",
+                filter=Q(progress__in=("JOB_REV", "JOB_SUB", "JOB_VFD"), folder=folder),
             ),
             oldest_undone=SubqueryMin(
                 "job__updated_at", filter=Q(progress="JOB_NEW", folder=folder)
