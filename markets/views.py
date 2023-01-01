@@ -172,10 +172,8 @@ class MarketSpades(LoginRequiredMixin, ListView[Guess]):
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
         guesses = self.get_queryset()
-        if guesses is not None:
+        if guesses.exists():
             context.update(guesses.aggregate(total=Sum("score"), avg=Avg("score")))
-        else:
-            context["no_guesses"] = True
         return context
 
     def get_queryset(self) -> QuerySet[Guess]:
@@ -184,8 +182,8 @@ class MarketSpades(LoginRequiredMixin, ListView[Guess]):
                 user=self.request.user,
                 market__end_date__lt=timezone.now(),
             )
-            .order_by("-market__end_date")
             .select_related("market")
+            .order_by("-market__end_date")
         )
 
 
