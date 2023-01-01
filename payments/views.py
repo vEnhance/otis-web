@@ -349,6 +349,7 @@ class InactiveWorkerList(SuperuserRequiredMixin, ListView[Worker]):
             num_completed=SubqueryCount(
                 "job", filter=Q(progress="JOB_VFD", folder=folder)
             ),
+            num_total=SubqueryCount("job", filter=Q(folder=folder)),
         )
         queryset = queryset.order_by("latest_update", "oldest_undone")
         queryset = queryset.select_related("user")

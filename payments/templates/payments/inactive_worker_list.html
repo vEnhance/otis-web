@@ -14,7 +14,8 @@
         <th>Email</th>
         <th>Latest activity</th>
         <th>Oldest undone</th>
-        <th>Num done</th>
+        <th>Done</th>
+        <th>Total</th>
       </tr>
     </thead>
     <tbody>
@@ -24,7 +25,8 @@
           <td>{{ worker.user.email }}</td>
           <td>{{ worker.latest_update }}</td>
           <td>{{ worker.oldest_undone }}</td>
-          <td>{{ worker.num_completed }}</td>
+          <td class="text-end">{{ worker.num_completed }}</td>
+          <td class="text-end">{{ worker.num_total }}</td>
         </tr>
       {% endfor %}
     </tbody>

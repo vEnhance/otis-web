@@ -251,6 +251,10 @@ class WorkerTest(EvanTestCase):
             a.num_completed,  # type: ignore
             1,
         )
+        self.assertEqual(
+            a.num_total,  # type: ignore
+            4,
+        )
 
         b = queryset.get(user=bob.user)
         self.assertIsNone(
@@ -263,6 +267,10 @@ class WorkerTest(EvanTestCase):
         self.assertEqual(
             b.num_completed,  # type: ignore
             0,
+        )
+        self.assertEqual(
+            b.num_total,  # type: ignore
+            2,
         )
 
 
