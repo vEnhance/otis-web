@@ -75,6 +75,10 @@ class PSetAdmin(admin.ModelAdmin):
         "unit",
     )
     list_per_page = 30
+    autocomplete_fields = (
+        "student",
+        "unit",
+    )
 
     def accept_pset(self, request: HttpRequest, queryset: QuerySet[PSet]):
         del request
