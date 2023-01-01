@@ -11,7 +11,6 @@
     <thead>
       <tr>
         <th>Name</th>
-        <th>Email</th>
         <th>Latest activity</th>
         <th>Oldest undone</th>
         <th>Done</th>
@@ -21,8 +20,9 @@
     <tbody>
       {% for worker in workers %}
         <tr>
-          <td>{{ worker.user.get_full_name }}</td>
-          <td>{{ worker.user.email }}</td>
+          <td>
+            <a href="mailto:{{ worker.user.email }}">{{ worker.user.get_full_name }}</a>
+          </td>
           <td>{{ worker.latest_update }}</td>
           <td>{{ worker.oldest_undone }}</td>
           <td class="text-end">{{ worker.num_completed }}</td>
@@ -33,6 +33,9 @@
   </table>
   <h3>Emails for copy-pasting</h3>
   <code>
-    {% for worker in workers %}"{{ worker.user.get_full_name }}" &lt;{{ worker.user.email }}&gt;{% endfor %}
+    {% for worker in workers %}
+      "{{ worker.user.get_full_name }}" &lt;{{ worker.user.email }}&gt;,
+      <br />
+    {% endfor %}
   </code>
 {% endblock layout-content %}
