@@ -115,7 +115,7 @@ class JobFolder(models.Model):
 
 class Job(models.Model):
     PROGRESS_CHOICES = (
-        ("JOB_NEW", "In progress"),
+        ("JOB_NEW", "Not submitted"),
         ("JOB_REV", "Revisions requested"),
         ("JOB_SUB", "Submitted"),
         ("JOB_VFD", "Completed"),
@@ -215,6 +215,8 @@ class Job(models.Model):
     def status(self) -> str:
         if self.assignee is None:
             return "Open"
+        elif self.progress == "JOB_NEW":
+            return "In progress"
         else:
             return self.get_progress_display()  # type: ignore
 
