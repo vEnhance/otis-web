@@ -6,6 +6,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils import timezone
 from evans_django_tools.testsuite import EvanTestCase
+from freezegun.api import freeze_time
 from roster.factories import InvoiceFactory, StudentFactory
 from roster.models import Student
 
@@ -183,7 +184,6 @@ class WorkerTest(EvanTestCase):
 
     def test_inactive_worker_list(self) -> None:
         folder = JobFolderFactory.create(slug="art")
-        jobs: list[Job] = []
 
         alice = WorkerFactory.create(
             user__first_name="Alice",
@@ -202,23 +202,18 @@ class WorkerTest(EvanTestCase):
         )
 
         to_pass_as_kwargs = [
-            {"assignee": alice, "progress": "JOB_VFD"},
-            {"assignee": alice, "progress": "JOB_REV"},
-            {"assignee": alice, "progress": "JOB_NEW"},
-            {"assignee": alice, "progress": "JOB_NEW"},
-            {"assignee": bob, "progress": "JOB_NEW"},
-            {"assignee": bob, "progress": "JOB_NEW"},
-            {"assignee": carol, "progress": "JOB_VFD"},
-            {"assignee": carol, "progress": "JOB_VFD"},
+            {"assignee": alice, "progress": "JOB_VFD"},  # Jan 1
+            {"assignee": alice, "progress": "JOB_REV"},  # Jan 2
+            {"assignee": alice, "progress": "JOB_NEW"},  # Jan 3
+            {"assignee": alice, "progress": "JOB_NEW"},  # Jan 4
+            {"assignee": bob, "progress": "JOB_NEW"},  # Jan 5
+            {"assignee": bob, "progress": "JOB_NEW"},  # Jan 6
+            {"assignee": carol, "progress": "JOB_VFD"},  # Jan 7
+            {"assignee": carol, "progress": "JOB_VFD"},  # Jan 8
         ]
         for i, kwargs in enumerate(to_pass_as_kwargs):
-            jobs.append(
-                JobFactory.create(
-                    updated_at=timezone.datetime(2022, 1, i + 1, 0, 0, 0, tzinfo=UTC),
-                    folder=folder,
-                    **kwargs
-                )
-            )
+            with freeze_time(f"2023-01-{i+1:02d}", tz_offset=0):
+                JobFactory.create(folder=folder, **kwargs)
 
         # first make sure staff protection works
         self.assertGet30X("job-inactive", "art")
@@ -239,39 +234,16 @@ class WorkerTest(EvanTestCase):
         self.assertEqual(queryset.count(), 2)
 
         a = queryset.get(user=alice.user)
-        self.assertEqual(
-            a.latest_update.day,  # type: ignore
-            jobs[1].updated_at.day,
-        )
-        self.assertEqual(
-            a.oldest_undone.day,  # type: ignore
-            jobs[2].updated_at.day,
-        )
-        self.assertEqual(
-            a.num_completed,  # type: ignore
-            1,
-        )
-        self.assertEqual(
-            a.num_total,  # type: ignore
-            4,
-        )
+        self.assertEqual(a.latest_update.day, 2)  # type: ignore
+        self.assertEqual(a.oldest_undone.day, 3)  # type: ignore
+        self.assertEqual(a.num_completed, 1)  # type: ignore
+        self.assertEqual(a.num_total, 4)  # type: ignore
 
         b = queryset.get(user=bob.user)
-        self.assertIsNone(
-            b.latest_update,  # type: ignore
-        )
-        self.assertEqual(
-            b.oldest_undone.day,  # type: ignore
-            jobs[4].updated_at.day,
-        )
-        self.assertEqual(
-            b.num_completed,  # type: ignore
-            0,
-        )
-        self.assertEqual(
-            b.num_total,  # type: ignore
-            2,
-        )
+        self.assertIsNone(b.latest_update)  # type: ignore
+        self.assertEqual(b.oldest_undone.day, 5)  # type: ignore
+        self.assertEqual(b.num_completed, 0)  # type: ignore
+        self.assertEqual(b.num_total, 2)  # type: ignore
 
 
 class InvoiceTest(EvanTestCase):
