@@ -28,7 +28,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView
 from django.views.generic.list import ListView
 from roster.models import Invoice, Student
-from sql_util.aggregates import SubqueryCount, SubqueryMin
+from sql_util.aggregates import SubqueryCount, SubqueryMax, SubqueryMin
 from sql_util.utils import Exists
 
 from payments.models import Job, JobFolder
@@ -340,7 +340,7 @@ class InactiveWorkerList(SuperuserRequiredMixin, ListView[Worker]):
             Exists("job", filter=Q(progress="JOB_NEW", folder=folder))
         )
         queryset = queryset.annotate(
-            latest_update=SubqueryMin(
+            latest_update=SubqueryMax(
                 "job__updated_at",
                 filter=Q(progress__in=("JOB_REV", "JOB_SUB", "JOB_VFD"), folder=folder),
             ),
