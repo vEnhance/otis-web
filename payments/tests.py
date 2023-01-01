@@ -4,6 +4,7 @@ from core.factories import SemesterFactory, UserFactory
 from core.models import Semester
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.utils import timezone
 from evans_django_tools.testsuite import EvanTestCase
 from roster.factories import InvoiceFactory, StudentFactory
 from roster.models import Student
@@ -20,8 +21,11 @@ from payments.models import (
     Worker,
     get_semester_invoices_with_annotations,
 )  # NOQA
+from payments.views import InactiveWorkerList
 
 from .views import process_payment
+
+UTC = timezone.utc
 
 
 class PaymentTest(EvanTestCase):
@@ -175,6 +179,90 @@ class WorkerTest(EvanTestCase):
         self.assertContains(
             self.assertPostOK("job-claim", jobs[5].pk, follow=True),
             "maximum number of total tasks",
+        )
+
+    def test_inactive_worker_list(self) -> None:
+        folder = JobFolderFactory.create(slug="art")
+        jobs: list[Job] = []
+
+        alice = WorkerFactory.create(
+            user__first_name="Alice",
+            user__last_name="Aardvark",
+            user__email="alice@example.com",
+        )
+        bob = WorkerFactory.create(
+            user__first_name="Bob",
+            user__last_name="Beta",
+            user__email="bob@example.com",
+        )
+        carol = WorkerFactory.create(
+            user__first_name="Carol",
+            user__last_name="Cutie",
+            user__email="carol@example.com",
+        )
+
+        to_pass_as_kwargs = [
+            {"assignee": alice, "progress": "JOB_VFD"},
+            {"assignee": alice, "progress": "JOB_REV"},
+            {"assignee": alice, "progress": "JOB_NEW"},
+            {"assignee": alice, "progress": "JOB_NEW"},
+            {"assignee": bob, "progress": "JOB_NEW"},
+            {"assignee": bob, "progress": "JOB_NEW"},
+            {"assignee": carol, "progress": "JOB_VFD"},
+            {"assignee": carol, "progress": "JOB_VFD"},
+        ]
+        for i, kwargs in enumerate(to_pass_as_kwargs):
+            jobs.append(
+                JobFactory.create(
+                    updated_at=timezone.datetime(2022, 1, i + 1, 0, 0, 0, tzinfo=UTC),
+                    folder=folder,
+                    **kwargs
+                )
+            )
+
+        # first make sure staff protection works
+        self.assertGet30X("job-inactive", "art")
+        self.login(alice.user)
+        self.assertGet30X("job-inactive", "art")
+
+        # now actually log in and load the details
+        admin = UserFactory.create(is_staff=True, is_superuser=True)
+        self.login(admin)
+        resp = self.assertGet20X("job-inactive", "art")
+        self.assertContains(resp, "Alice Aardvark")
+        self.assertContains(resp, "Bob Beta")
+        self.assertNotContains(resp, "Carol Cutie")
+
+        view = self.setupViewGet(InactiveWorkerList, "job-inactive", "art")
+        assert isinstance(view, InactiveWorkerList)
+        queryset = view.get_queryset()
+        self.assertEqual(queryset.count(), 2)
+
+        a = queryset.get(user=alice.user)
+        self.assertEqual(
+            a.latest_update.day,  # type: ignore
+            jobs[1].updated_at.day,
+        )
+        self.assertEqual(
+            a.oldest_undone.day,  # type: ignore
+            jobs[2].updated_at.day,
+        )
+        self.assertEqual(
+            a.num_completed,  # type: ignore
+            1,
+        )
+
+        b = queryset.get(user=bob.user)
+        self.assertIsNone(
+            b.latest_update,  # type: ignore
+        )
+        self.assertEqual(
+            b.oldest_undone.day,  # type: ignore
+            jobs[4].updated_at.day,
+        )
+        self.assertEqual(
+            b.num_completed,  # type: ignore
+            0,
         )
 
 

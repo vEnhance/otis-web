@@ -6,6 +6,12 @@
   <p>
     <a href="{% url "job-index" %}">Back to full internship list.</a>
   </p>
+  {% if request.user.is_superuser %}
+    <p>
+      You can also see
+      <a href="{% url "job-inactive" jobfolder.slug %}">inactive jobs</a>.
+    </p>
+  {% endif %}
   <hr />
   <h2>Instructions</h2>
   {% include "payments/show_jobfolder_info.html" %}

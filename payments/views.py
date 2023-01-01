@@ -2,6 +2,7 @@ import logging
 from typing import Any, Dict
 
 import stripe
+from braces.views import SuperuserRequiredMixin
 from core.models import Semester
 from django.conf import settings
 from django.contrib import messages
@@ -27,6 +28,8 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView
 from django.views.generic.list import ListView
 from roster.models import Invoice, Student
+from sql_util.aggregates import SubqueryCount, SubqueryMin
+from sql_util.utils import Exists
 
 from payments.models import Job, JobFolder
 
@@ -315,3 +318,39 @@ class JobUpdate(LoginRequiredMixin, UpdateView[Job, BaseModelForm[Job]]):
 
     def get_success_url(self):
         return self.object.get_absolute_url()
+
+
+class InactiveWorkerList(SuperuserRequiredMixin, ListView[Worker]):
+    model = Worker
+    context_object_name = "workers"
+    template_name: str = "payments/inactive_worker_list.html"
+
+    def setup(self, request: HttpRequest, *args: Any, **kwargs: Any):
+        super().setup(request, *args, **kwargs)
+        self.jobfolder = get_object_or_404(JobFolder, slug=self.kwargs["slug"])
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["jobfolder"] = self.jobfolder
+        return context
+
+    def get_queryset(self) -> QuerySet[Worker]:
+        folder = self.jobfolder
+        queryset = Worker.objects.filter(
+            Exists("job", filter=Q(progress="JOB_NEW", folder=folder))
+        )
+        queryset = queryset.annotate(
+            latest_update=SubqueryMin(
+                "job__updated_at", filter=Q(folder=folder) and ~Q(progress="JOB_NEW")
+            ),
+            oldest_undone=SubqueryMin(
+                "job__updated_at", filter=Q(progress="JOB_NEW", folder=folder)
+            ),
+            num_completed=SubqueryCount(
+                "job", filter=Q(progress="JOB_VFD", folder=folder)
+            ),
+        )
+        queryset = queryset.order_by("latest_update", "oldest_undone")
+        queryset = queryset.select_related("user")
+
+        return queryset

@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% block title %}
+  Stale tasks in {{ jobfolder }}
+{% endblock title %}
+{% block layout-content %}
+  <p>
+    <a href="{% url "job-list" jobfolder.slug %}">Back to list of tasks.</a>
+  </p>
+  <h3>Activity table</h3>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Latest activity</th>
+        <th>Oldest undone</th>
+        <th>Num done</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for worker in workers %}
+        <tr>
+          <td>{{ worker.user.get_full_name }}</td>
+          <td>{{ worker.user.email }}</td>
+          <td>{{ worker.latest_update }}</td>
+          <td>{{ worker.oldest_undone }}</td>
+          <td>{{ worker.num_completed }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <h3>Emails for copy-pasting</h3>
+  <code>
+    {% for worker in workers %}"{{ worker.user.get_full_name }}" &lt;{{ worker.user.email }}&gt;{% endfor %}
+  </code>
+{% endblock layout-content %}

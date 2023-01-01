@@ -23,4 +23,7 @@ urlpatterns = [
     path(r"job/<int:pk>/", views.JobDetail.as_view(), name="job-detail"),
     path(r"job/claim/<int:pk>/", views.job_claim, name="job-claim"),
     path(r"job/submit/<int:pk>/", views.JobUpdate.as_view(), name="job-update"),
+    path(
+        r"inactive/<str:slug>/", views.InactiveWorkerList.as_view(), name="job-inactive"
+    ),
 ]
