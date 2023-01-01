@@ -11,10 +11,9 @@
     <thead>
       <tr>
         <th>Name</th>
-        <th>Latest activity</th>
-        <th>Oldest undone</th>
-        <th>Done</th>
-        <th>Total</th>
+        <th>Last seen</th>
+        <th>Claimed</th>
+        <th colspan="2">M/N</th>
       </tr>
     </thead>
     <tbody>
@@ -23,8 +22,8 @@
           <td>
             <a href="mailto:{{ worker.user.email }}">{{ worker.user.get_full_name }}</a>
           </td>
-          <td>{{ worker.latest_update }}</td>
-          <td>{{ worker.oldest_undone }}</td>
+          <td>{{ worker.latest_update|date }}</td>
+          <td>{{ worker.oldest_undone|date }}</td>
           <td class="text-end">{{ worker.num_completed }}</td>
           <td class="text-end">{{ worker.num_total }}</td>
         </tr>
