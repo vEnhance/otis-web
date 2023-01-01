@@ -86,11 +86,16 @@ class JobIEResource(resources.ModelResource):
 
 @admin.register(Job)
 class JobAdmin(ImportExportModelAdmin):
+    def flagged(self, obj: Job) -> bool:
+        return obj.admin_notes != ""
+
+    flagged.boolean = True
+
     list_display = (
         "pk",
         "name",
         "folder",
-        "status",
+        "progress",
         "updated_at",
         "assignee",
         "assignee_name",
@@ -100,8 +105,9 @@ class JobAdmin(ImportExportModelAdmin):
     )
     list_display_links = (
         "pk",
-        "status",
         "name",
+        "folder",
+        "progress",
     )
     search_fields = (
         "name",

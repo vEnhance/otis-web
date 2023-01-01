@@ -239,10 +239,6 @@ class Job(models.Model):
         else:
             return self.assignee.user.email
 
-    @property
-    def flagged(self) -> str:
-        return self.admin_notes != ""
-
 
 def get_semester_invoices_with_annotations(semester: Semester) -> QuerySet[Invoice]:
     job_subquery = (
