@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+{% block title %}
+  Spades from Markets
+{% endblock title %}
+{% block layout-content %}
+  {% if no_guesses %}
+    <p>You have not completed any markets yet.</p>
+  {% else %}
+    <p>Below are all the markets you have participated in.</p>
+    <table class="table">
+      <tr class="table-dark">
+        <th>Market</th>
+        <th>Score</th>
+        <th>Ending date</th>
+      </tr>
+      {% for g in guesses %}
+        <tr>
+          <td>
+            <a href="{{ g.market.get_absolute_url }}">
+              <code>{{ g.market.slug }}</code>
+            </a>
+          </td>
+          <td>+{{ g.score|floatformat:2 }}♠</td>
+          <td>{{ g.market.end_date }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+    <p>You have earned a total of {{ total|floatformat:2 }}♠ across {{ guesses.count }} markets.</p>
+    <p>Average spades per market: {{ avg|floatformat:2 }}</p>
+  {% endif %}
+  <p>
+    <a href="{% url "market-list" %}">Show markets from this year</a>
+  </p>
+  <a href="{% url "market-list-past" %}">Show markets from past years</a>
+{% endblock layout-content %}

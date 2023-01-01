@@ -4,6 +4,7 @@ from braces.views import LoginRequiredMixin
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
+from django.db.models import Avg, Sum
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http.request import HttpRequest
@@ -160,6 +161,32 @@ class MarketListPast(MarketList):
         else:
             markets = Market.started
         return markets.order_by("-end_date").filter(semester__active=False)
+
+
+class MarketSpades(LoginRequiredMixin, ListView[Guess]):
+    model = Guess
+    context_object_name = "guesses"
+    request: AuthHttpRequest
+    template_name = "markets/market_spades.html"
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        guesses = self.get_queryset()
+        if guesses is not None:
+            context.update(guesses.aggregate(total=Sum("score"), avg=Avg("score")))
+        else:
+            context["no_guesses"] = True
+        return context
+
+    def get_queryset(self) -> QuerySet[Guess]:
+        return (
+            Guess.objects.filter(
+                user=self.request.user,
+                market__end_date__lt=timezone.now(),
+            )
+            .order_by("-market__end_date")
+            .select_related("market")
+        )
 
 
 class GuessView(LoginRequiredMixin, DetailView[Guess]):

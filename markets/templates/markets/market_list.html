@@ -38,10 +38,13 @@
       </tr>
     {% endfor %}
   </table>
+  <p>
+    <a href="{% url "market-spades" %}">Spades earned from all markets</a>
+  </p>
   {% if past %}
     <a href="{% url "market-list" %}">Show markets from this year</a>
   {% else %}
-    <a href="{% url "market-list-past" %}">Show markets from past years.</a>
+    <a href="{% url "market-list-past" %}">Show markets from past years</a>
     <hr />
     <h3>Market Rules</h3>
     <ol>
