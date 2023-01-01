@@ -1,9 +1,9 @@
 {% extends "layout.html" %}
 {% block title %}
-  Spades from Markets
+  Your historical market results
 {% endblock title %}
 {% block layout-content %}
-  {% if no_guesses %}
+  {% if not guesses %}
     <p>You have not completed any markets yet.</p>
   {% else %}
     <p>Below are all the markets you have participated in.</p>
