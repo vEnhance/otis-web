@@ -468,6 +468,7 @@ class UnitInquiry(models.Model):
             ("INQ_ACT_UNLOCK", "Unlock now"),
             ("INQ_ACT_APPEND", "Add for later"),
             ("INQ_ACT_DROP", "Drop"),
+            ("INQ_ACT_LOCK", "Lock (Drop + Add for later)"),
         ),
         help_text="Describe the action you want to make.",
     )
@@ -503,6 +504,8 @@ class UnitInquiry(models.Model):
             self.student.curriculum.add(unit)
         elif self.action_type == "INQ_ACT_DROP":
             self.student.curriculum.remove(unit)
+            self.student.unlocked_units.remove(unit)
+        elif self.action_type == "INQ_ACT_LOCK":
             self.student.unlocked_units.remove(unit)
         else:
             raise ValueError(f"No action {self.action_type}")
