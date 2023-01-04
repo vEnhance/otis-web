@@ -214,3 +214,21 @@ class MarketTests(EvanTestCase):
             guess = Guess.objects.get(user__username="alice")
             self.assertEqual(guess.value, 100)
             self.assertAlmostEqual(guess.score, round((42 / 100) ** 3 * 2, ndigits=2))
+
+    def test_spades_view(self):
+        market = Market.objects.get(slug="guess-my-ssn")
+        market.answer = 42
+        market.save()
+        with freeze_time("2050-07-01", tz_offset=0):
+            self.login("alice")
+            self.assertPost20X(
+                "market-guess", "guess-my-ssn", data={"value": 100}, follow=True
+            )
+            resp = self.assertGet20X("market-spades")
+            self.assertHas(resp, "You have not completed")
+        with freeze_time("2050-11-01", tz_offset=0):
+            self.login("alice")
+            resp = self.assertGet20X("market-spades")
+            self.assertAlmostEqual(
+                resp.context["avg"], round((42 / 100) ** 2 * 2, ndigits=2)
+            )
