@@ -70,12 +70,14 @@ class JobIEResource(resources.ModelResource):
         model = Job
         fields = (
             "id",
-            "name",
-            "status",
             "folder",
+            "name",
+            "description",
+            "progress",
             "updated_at",
             "spades_bounty",
             "usd_bounty",
+            "hours_estimate",
             "assignee",
             "assignee__user__first_name",
             "assignee__user__last_name",
@@ -124,3 +126,5 @@ class JobAdmin(ImportExportModelAdmin):
         "payment_preference",
     )
     autocomplete_fields = ("assignee",)
+
+    resource_class = JobIEResource
