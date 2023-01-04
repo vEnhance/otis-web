@@ -168,7 +168,7 @@ class Student(models.Model):
         )
 
     def __str__(self):
-        return self.name
+        return f"{self.name} ({self.pk})"
 
     def get_absolute_url(self):
         return reverse("portal", args=(self.pk,))
