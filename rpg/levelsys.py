@@ -106,7 +106,7 @@ class Meter:
             value=value,
             unit="♠",
             color="#ae610f",
-            max_value=125,
+            max_value=169,
         )
 
     @staticmethod
@@ -117,7 +117,7 @@ class Meter:
             value=value,
             unit="◆",
             color="#9c1421",
-            max_value=100,
+            max_value=121,
         )
 
 
