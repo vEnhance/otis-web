@@ -15,7 +15,6 @@
       <th>Title</th>
       <th>♠️</th>
       <th>💲</th>
-      <th>Deadline</th>
       <th>Status</th>
     </tr>
     {% for job in jobs %}
@@ -25,7 +24,6 @@
         </td>
         <td>{{ job.spades_bounty }}</td>
         <td>{{ job.usd_bounty }}</td>
-        <td>{{ job.deadline|default:"—" }}</td>
         <td>
           {% if request.user.is_superuser %}
             <a href="{% url "admin:payments_job_change" job.pk %}">{{ job.status }}</a>
