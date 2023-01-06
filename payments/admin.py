@@ -1,8 +1,10 @@
 from django.contrib import admin
-
-from .models import PaymentLog, Worker, Job, JobFolder
+from django.db.models.query import QuerySet
+from django.http.request import HttpRequest
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
+
+from .models import Job, JobFolder, PaymentLog, Worker
 
 
 @admin.register(PaymentLog)
@@ -128,3 +130,11 @@ class JobAdmin(ImportExportModelAdmin):
     autocomplete_fields = ("assignee",)
 
     resource_class = JobIEResource
+
+    actions = [
+        "unassign_job",
+    ]
+
+    def unassign_job(self, request: HttpRequest, queryset: QuerySet[Job]):
+        del request
+        queryset.update(progress="JOB_NEW", assignee=None)
