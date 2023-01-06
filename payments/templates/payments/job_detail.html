@@ -45,11 +45,6 @@
     {% endif %}
     <li>Created at: {{ job.created_at }}</li>
     <li>Last updated: {{ job.updated_at }}</li>
-    {% if request.user.is_superuser %}
-      <li>
-        <a href="{% url "admin:payments_job_change" job.pk %}">Admin edit Job #{{ job.pk }}</a>
-      </li>
-    {% endif %}
   </ul>
   {% if job.assignee and request.user.is_staff %}
     <h2>Assignee info</h2>
