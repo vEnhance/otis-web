@@ -28,6 +28,8 @@ class WorkerAdmin(admin.ModelAdmin):
     list_display = (
         "pk",
         "user",
+        "full_name",
+        "email",
         "updated_at",
         "notes",
     )
@@ -38,6 +40,7 @@ class WorkerAdmin(admin.ModelAdmin):
     search_fields = (
         "user__first_name",
         "user__last_name",
+        "user__email",
         "gmail_address",
         "twitch_username",
         "paypal_username",
@@ -103,6 +106,7 @@ class JobAdmin(ImportExportModelAdmin):
         "updated_at",
         "assignee",
         "assignee_name",
+        "assignee_email",
         "flagged",
         "spades_bounty",
         "usd_bounty",

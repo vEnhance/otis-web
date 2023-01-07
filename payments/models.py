@@ -80,6 +80,14 @@ class Worker(models.Model):
     def __str__(self) -> str:
         return self.user.username
 
+    @property
+    def full_name(self) -> str:
+        return self.user.get_full_name()
+
+    @property
+    def email(self) -> str:
+        return self.user.email
+
 
 class JobFolder(models.Model):
     name = models.CharField(max_length=80, help_text="A name for the folder")
