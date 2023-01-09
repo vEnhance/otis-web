@@ -9,7 +9,7 @@ repository = "https://github.com/vEnhance/otis-web"
 
 [tool.poetry.dependencies]
 python = ">=3.10, <4.0"
-Django = "^4.1.4"
+Django = "^4.1.5"
 PyMySQL = "^1.0.2"
 Unidecode = "^1.2.0"
 crispy-bootstrap5 = "^0.7"
@@ -46,15 +46,15 @@ Faker = "=15.1.1"
 # TODO: update codespell once v2.3.0 is published
 black = "^22.12.0"
 codespell = "^2.2.2"
-coverage = {extras = ["toml"], version = "^7.0.1"}
-djlint = "^1.19.10"
+coverage = {extras = ["toml"], version = "^7.0.4"}
+djlint = "^1.19.11"
 factory-boy = "^3.2.0"
 freezegun = "^1.1.0"
 ipython = "^8.4.0"
 jedi = "^0.18.0"
 pdbpp = "^0.10.3"
 pyflakes = "^3.0.1"
-pyright = "^1.1.286"
+pyright = "^1.1.287"
 tblib = "^1.7.0"
 toml = "^0.10.2"
 types-Markdown = "^3.3.6"
