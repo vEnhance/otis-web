@@ -260,6 +260,7 @@ class StudentAdmin(ImportExportModelAdmin):
         "track",
     )
     search_fields = (
+        "pk",
         "user__first_name",
         "user__last_name",
         "user__username",
