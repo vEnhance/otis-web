@@ -153,9 +153,6 @@ class UnitGroup(models.Model):
         help_text="Name of the artist for the unit artwork.",
         blank=True,
     )
-    artist_show = models.BooleanField(
-        default=True, help_text="Whether the artist name should be visible"
-    )
 
     description = models.TextField(
         help_text="A description of what this unit is", blank=True

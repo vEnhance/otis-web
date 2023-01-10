@@ -95,7 +95,6 @@ class UnitGroupIEResource(resources.ModelResource):
             "artwork_thumb_md",
             "artwork_thumb_sm",
             "artist_name",
-            "artist_show",
         )
         export_order = fields
 
