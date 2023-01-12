@@ -23,7 +23,6 @@ class AchievementIEResource(resources.ModelResource):
             "code",
             "name",
             "diamonds",
-            "active",
             "description",
             "solution",
         )
@@ -35,7 +34,6 @@ class AchievementAdmin(ImportExportModelAdmin):
         "code",
         "name",
         "diamonds",
-        "active",
         "always_show_image",
         "description",
         "solution",
@@ -53,7 +51,6 @@ class AchievementAdmin(ImportExportModelAdmin):
         "solution",
     )
     list_filter = (
-        "active",
         "always_show_image",
         ("creator", admin.EmptyFieldListFilter),
     )
@@ -67,7 +64,6 @@ class AchievementUnlockAdmin(admin.ModelAdmin):
         "achievement",
         "timestamp",
     )
-    list_filter = ("achievement__active",)
     autocomplete_fields = (
         "user",
         "achievement",
@@ -107,10 +103,8 @@ class BonusLevelAdmin(admin.ModelAdmin):
         "pk",
         "group",
         "level",
-        "active",
     )
     autocomplete_fields = ("group",)
-    list_filter = ("active",)
     search_fields = ("group__name",)
 
 

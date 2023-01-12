@@ -385,7 +385,7 @@ def check_level_up(student: Student) -> bool:
     if level_number <= student.last_level_seen:
         return False
 
-    bonuses = BonusLevel.objects.filter(active=True, level__lte=level_number)
+    bonuses = BonusLevel.objects.filter(level__lte=level_number)
     bonuses = bonuses.annotate(
         gotten=Exists("bonuslevelunlock", filter=Q(student__user=student.user))
     )

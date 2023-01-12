@@ -56,10 +56,6 @@ class Achievement(models.Model):
         help_text="Description of where the diamond is hidden",
         blank=True,
     )
-    active = models.BooleanField(
-        help_text="Whether the code is active right now",
-        default=True,
-    )
     diamonds = models.SmallIntegerField(
         default=0,
         help_text="Number of diamonds for this achievement",
@@ -155,13 +151,12 @@ class QuestComplete(models.Model):
 class BonusLevel(models.Model):
     group = models.OneToOneField(UnitGroup, on_delete=models.CASCADE)
     level = models.PositiveSmallIntegerField(help_text="Level to spawn at")
-    active = models.BooleanField(default=True)
 
     class Meta:
         db_table = "dashboard_bonuslevel"
 
     def __str__(self) -> str:
-        return f"Lv. {self.level} Bonus ({'active' if self.active else 'inert'})"
+        return f"Lv. {self.level} Bonus"
 
 
 class BonusLevelUnlock(models.Model):
