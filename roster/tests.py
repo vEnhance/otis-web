@@ -351,10 +351,12 @@ class RosterTest(EvanTestCase):
     def test_create_student(self) -> None:
         semester: Semester = SemesterFactory.create(
             show_invoices=True,
-            one_semester_date = timezone.datetime(2023, 12, 25, tzinfo=timezone.utc),
+            one_semester_date=timezone.datetime(2023, 12, 25, tzinfo=timezone.utc),
         )
 
-        container: RegistrationContainer = RegistrationContainerFactory.create(semester=semester)
+        container: RegistrationContainer = RegistrationContainerFactory.create(
+            semester=semester
+        )
         # Suppose there are two semesters left
         with freeze_time("2023-08-01", tz_offset=0):
             StudentRegistrationFactory.create(track="A", container=container)

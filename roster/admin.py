@@ -322,7 +322,7 @@ def build_students(queryset: QuerySet[StudentRegistration]) -> int:
 
         semester_date = registration.container.semester.one_semester_date
 
-        if (semester_date is not None and timezone.now() > semester_date):
+        if semester_date is not None and timezone.now() > semester_date:
             n = 1
         else:
             n = 2
