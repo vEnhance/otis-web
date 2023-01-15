@@ -319,7 +319,14 @@ def build_students(queryset: QuerySet[StudentRegistration]) -> int:
                 reg=registration,
             )
         )
-        n = registration.container.num_preps
+
+        semester_date = registration.container.semester.one_semester_date
+
+        if (semester_date is not None and timezone.now() > semester_date):
+            n = 1
+        else:
+            n = 2
+
         count += 1
     Student.objects.bulk_create(students_to_create)
     queryset.update(processed=True)

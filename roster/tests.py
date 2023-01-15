@@ -349,24 +349,28 @@ class RosterTest(EvanTestCase):
         self.assertEqual(alice.unlocked_units.count(), 6)
 
     def test_create_student(self) -> None:
-        container: RegistrationContainer = RegistrationContainerFactory.create(
-            num_preps=2
+        semester: Semester = SemesterFactory.create(
+            show_invoices=True,
+            one_semester_date = timezone.datetime(2023, 12, 25, tzinfo=timezone.utc),
         )
 
-        StudentRegistrationFactory.create(track="A", container=container)
-        StudentRegistrationFactory.create(track="B", container=container)
-        self.assertEqual(build_students(StudentRegistration.objects.all()), 2)
-        alice: Student = Student.objects.get(track="A")
-        self.assertEqual(alice.invoice.total_owed, 1824)
-        bob: Student = Student.objects.get(track="B")
-        self.assertEqual(bob.invoice.total_owed, 1152)
+        container: RegistrationContainer = RegistrationContainerFactory.create(semester=semester)
+        # Suppose there are two semesters left
+        with freeze_time("2023-08-01", tz_offset=0):
+            StudentRegistrationFactory.create(track="A", container=container)
+            StudentRegistrationFactory.create(track="B", container=container)
+            self.assertEqual(build_students(StudentRegistration.objects.all()), 2)
+            alice: Student = Student.objects.get(track="A")
+            self.assertEqual(alice.invoice.total_owed, 1824)
+            bob: Student = Student.objects.get(track="B")
+            self.assertEqual(bob.invoice.total_owed, 1152)
 
-        container.num_preps = 1
-        container.save()
-        StudentRegistrationFactory.create(track="C", container=container)
-        self.assertEqual(build_students(StudentRegistration.objects.all()), 1)
-        carol: Student = Student.objects.get(track="C")
-        self.assertEqual(carol.invoice.total_owed, 240)
+        # Now suppose the first semester has finished
+        with freeze_time("2024-01-01", tz_offset=0):
+            StudentRegistrationFactory.create(track="C", container=container)
+            self.assertEqual(build_students(StudentRegistration.objects.all()), 1)
+            carol: Student = Student.objects.get(track="C")
+            self.assertEqual(carol.invoice.total_owed, 240)
 
     def test_student_assistant_list(self) -> None:
         for i in range(1, 6):
