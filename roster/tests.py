@@ -350,7 +350,6 @@ class RosterTest(EvanTestCase):
 
     def test_create_student(self) -> None:
         semester: Semester = SemesterFactory.create(
-            show_invoices=True,
             one_semester_date=timezone.datetime(2023, 12, 25, tzinfo=timezone.utc),
         )
 
