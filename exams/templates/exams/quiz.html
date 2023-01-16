@@ -7,7 +7,14 @@
   <p>
     Welcome to <b>{{ quiz }}</b>!
     {% if not finished and not quiz.overdue %}
-      <p>Submit on or before end-of-day {{ quiz.due_date }} server time (US).</p>
+      {% if quiz.was_extended %}
+        <p>
+          Submit on or before end-of-day {{ quiz.deadline }}
+          (deadline was extended) server time.
+        </p>
+      {% else %}
+        <p>Submit on or before end-of-day {{ quiz.deadline }} server time.</p>
+      {% endif %}
     {% endif %}
   </p>
   <h2>Download problems</h2>

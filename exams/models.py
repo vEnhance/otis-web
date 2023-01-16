@@ -100,6 +100,21 @@ class PracticeExam(models.Model):
         return (self.due_date is not None) and (self.due_date < datetime.date.today())
 
     @property
+    def deadline(self) -> datetime.datetime | None:
+        if self.was_extended:
+            return self.due_date
+        else:
+            return self.due_date + datetime.timedelta(days=-7)
+
+    @property
+    def was_extended(self) -> bool:
+        return (
+            self.due_date is not None
+            and self.is_test is False
+            and datetime.date.today() >= self.due_date + datetime.timedelta(days=-9)
+        )
+
+    @property
     def started(self) -> bool:
         if self.start_date is None:
             return True
