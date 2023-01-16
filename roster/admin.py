@@ -410,22 +410,22 @@ class UnitInquiryAdmin(admin.ModelAdmin):
         "student",
     )
 
-    actions = ["hold_inquiry", "reject_inquiry", "accept_inquiry", "reset_inquiry"]
+    actions = ["hold_petition", "reject_petition", "accept_petition", "reset_petition"]
 
-    def hold_inquiry(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
+    def hold_petition(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
         del request
         queryset.update(status="INQ_HOLD")
 
-    def reject_inquiry(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
+    def reject_petition(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
         del request
         queryset.update(status="INQ_REJ")
 
-    def accept_inquiry(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
+    def accept_petition(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
         del request
         for inquiry in queryset:
             inquiry.run_accept()
 
-    def reset_inquiry(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
+    def reset_petition(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
         del request
         queryset.update(status="INQ_NEW")
 
