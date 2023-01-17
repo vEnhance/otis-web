@@ -50,7 +50,7 @@ class UnitArtworkListView(ListView[UnitGroup]):
     model = UnitGroup
     queryset = (
         UnitGroup.objects.filter(hidden=False)
-        .exclude(artwork__exact="")
+        .exclude(artist_name__exact="")
         .order_by("name")
     )
     template_name = "core/artwork_list.html"
