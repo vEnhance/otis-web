@@ -6,12 +6,6 @@
   <p>
     <a href="{% url "job-index" %}">Back to full internship list.</a>
   </p>
-  {% if request.user.is_superuser %}
-    <p>
-      You can also see
-      <a href="{% url "job-inactive" jobfolder.slug %}">inactive jobs</a>.
-    </p>
-  {% endif %}
   <hr />
   <h2>Instructions</h2>
   {% include "payments/show_jobfolder_info.html" %}
@@ -21,7 +15,6 @@
       <th>Title</th>
       <th>♠️</th>
       <th>💲</th>
-      <th>Deadline</th>
       <th>Status</th>
     </tr>
     {% for job in jobs %}
@@ -31,7 +24,6 @@
         </td>
         <td>{{ job.spades_bounty }}</td>
         <td>{{ job.usd_bounty }}</td>
-        <td>{{ job.deadline|default:"—" }}</td>
         <td>
           {% if request.user.is_superuser %}
             <a href="{% url "admin:payments_job_change" job.pk %}">{{ job.status }}</a>

@@ -316,7 +316,9 @@ def inquiry(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
 
                 # auto hold criteria
                 num_psets = PSet.objects.filter(student=student).count()
-                auto_hold_criteria = num_past_unlock_inquiries > (10 + 1.5 * num_psets)
+                auto_hold_criteria = num_past_unlock_inquiries > (
+                    10 + 1.5 * num_psets**1.2
+                )
 
                 # auto-acceptance criteria
                 auto_accept_criteria = inquiry.action_type == "INQ_ACT_APPEND"

@@ -58,6 +58,11 @@ class Semester(models.Model):
     most_payment_deadline = models.DateTimeField(
         null=True, blank=True, help_text="Deadline for two-thirds of the payment."
     )
+    one_semester_date = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Date after which invoices are only charged for one semester.",
+    )
     end_year = models.IntegerField(help_text="The year in which OTIS will end")
 
     gradescope_key = models.CharField(
@@ -146,6 +151,11 @@ class UnitGroup(models.Model):
         upload_to=artwork_thumb_md_file_name,
         help_text="Artwork for this unit",
         null=True,
+        blank=True,
+    )
+    artist_name = models.CharField(
+        max_length=64,
+        help_text="Name of the artist for the unit artwork.",
         blank=True,
     )
 

@@ -168,7 +168,7 @@ class Student(models.Model):
         )
 
     def __str__(self):
-        return self.name
+        return f"{self.name} ({self.pk})"
 
     def get_absolute_url(self):
         return reverse("portal", args=(self.pk,))
@@ -527,9 +527,6 @@ class RegistrationContainer(models.Model):
     )
     passcode = models.CharField(
         max_length=128, help_text="The passcode for that year's registration"
-    )
-    num_preps = models.PositiveSmallIntegerField(
-        default=2, help_text="Number of preps to bill for"
     )
     allowed_tracks = models.CharField(
         max_length=256,

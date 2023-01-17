@@ -94,6 +94,7 @@ class UnitGroupIEResource(resources.ModelResource):
             "artwork",
             "artwork_thumb_md",
             "artwork_thumb_sm",
+            "artist_name",
         )
         export_order = fields
 
@@ -106,6 +107,7 @@ class UnitGroupAdmin(ImportExportModelAdmin):
         "subject",
         "description",
         "hidden",
+        "artist_name",
     )
     list_display_links = (
         "pk",

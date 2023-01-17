@@ -98,7 +98,7 @@ class AchievementList(LoginRequiredMixin, ListView[Achievement]):
         if not isinstance(self.request.user, User):
             raise PermissionDenied("Please log in")
         return (
-            Achievement.objects.filter(active=True)
+            Achievement.objects.all()
             .annotate(
                 num_found=SubqueryAggregate("achievementunlock", aggregate=Count),
                 obtained=Exists(

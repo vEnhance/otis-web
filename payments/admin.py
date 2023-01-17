@@ -1,8 +1,10 @@
 from django.contrib import admin
-
-from .models import PaymentLog, Worker, Job, JobFolder
+from django.db.models.query import QuerySet
+from django.http.request import HttpRequest
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
+
+from .models import Job, JobFolder, PaymentLog, Worker
 
 
 @admin.register(PaymentLog)
@@ -26,6 +28,8 @@ class WorkerAdmin(admin.ModelAdmin):
     list_display = (
         "pk",
         "user",
+        "full_name",
+        "email",
         "updated_at",
         "notes",
     )
@@ -36,6 +40,7 @@ class WorkerAdmin(admin.ModelAdmin):
     search_fields = (
         "user__first_name",
         "user__last_name",
+        "user__email",
         "gmail_address",
         "twitch_username",
         "paypal_username",
@@ -70,12 +75,14 @@ class JobIEResource(resources.ModelResource):
         model = Job
         fields = (
             "id",
-            "name",
-            "status",
             "folder",
+            "name",
+            "description",
+            "progress",
             "updated_at",
             "spades_bounty",
             "usd_bounty",
+            "hours_estimate",
             "assignee",
             "assignee__user__first_name",
             "assignee__user__last_name",
@@ -99,6 +106,7 @@ class JobAdmin(ImportExportModelAdmin):
         "updated_at",
         "assignee",
         "assignee_name",
+        "assignee_email",
         "flagged",
         "spades_bounty",
         "usd_bounty",
@@ -124,3 +132,13 @@ class JobAdmin(ImportExportModelAdmin):
         "payment_preference",
     )
     autocomplete_fields = ("assignee",)
+
+    resource_class = JobIEResource
+
+    actions = [
+        "unassign_job",
+    ]
+
+    def unassign_job(self, request: HttpRequest, queryset: QuerySet[Job]):
+        del request
+        queryset.update(progress="JOB_NEW", assignee=None)

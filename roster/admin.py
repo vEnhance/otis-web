@@ -260,6 +260,7 @@ class StudentAdmin(ImportExportModelAdmin):
         "track",
     )
     search_fields = (
+        "pk",
         "user__first_name",
         "user__last_name",
         "user__username",
@@ -318,7 +319,14 @@ def build_students(queryset: QuerySet[StudentRegistration]) -> int:
                 reg=registration,
             )
         )
-        n = registration.container.num_preps
+
+        semester_date = registration.container.semester.one_semester_date
+
+        if semester_date is not None and timezone.now() > semester_date:
+            n = 1
+        else:
+            n = 2
+
         count += 1
     Student.objects.bulk_create(students_to_create)
     queryset.update(processed=True)
@@ -409,22 +417,22 @@ class UnitInquiryAdmin(admin.ModelAdmin):
         "student",
     )
 
-    actions = ["hold_inquiry", "reject_inquiry", "accept_inquiry", "reset_inquiry"]
+    actions = ["hold_petition", "reject_petition", "accept_petition", "reset_petition"]
 
-    def hold_inquiry(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
+    def hold_petition(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
         del request
         queryset.update(status="INQ_HOLD")
 
-    def reject_inquiry(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
+    def reject_petition(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
         del request
         queryset.update(status="INQ_REJ")
 
-    def accept_inquiry(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
+    def accept_petition(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
         del request
         for inquiry in queryset:
             inquiry.run_accept()
 
-    def reset_inquiry(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
+    def reset_petition(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
         del request
         queryset.update(status="INQ_NEW")
 
