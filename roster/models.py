@@ -304,6 +304,9 @@ class Student(models.Model):
     @property
     def payment_status(self):
         """Returns one of several codes:
+        -3: remind of upcoming payment for grace deadline
+        -2: warn of late payment for grace deadline
+        -1: lock late payment for grace deadline
         0: student is clear (no invoice exists or total owed is nonpositive)
         1: remind of upcoming payment for initial deadline
         2: warn of late payment for initial deadline
@@ -325,6 +328,17 @@ class Student(models.Model):
             return 0
 
         now = localtime()
+
+        if self.invoice.forgive_date is not None:
+            d = self.invoice.forgive_date - now
+            if d < timedelta(days=-7):
+                return -1
+            elif d < timedelta(days=0):
+                return -2
+            elif d < timedelta(days=7):
+                return -3
+            else:
+                return 4
 
         if self.semester.first_payment_deadline is not None and invoice.total_paid <= 0:
             d = self.semester.first_payment_deadline - now
@@ -349,14 +363,8 @@ class Student(models.Model):
         return 4
 
     @property
-    def is_payment_locked(self):
-        return self.payment_status % 4 == 3
-
-    @property
     def is_delinquent(self) -> bool:
-        return self.is_payment_locked and (
-            self.invoice.forgive_date is None or now() > self.invoice.forgive_date
-        )
+        return self.payment_status % 4 == 3
 
 
 class Invoice(models.Model):

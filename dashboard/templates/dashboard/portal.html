@@ -43,26 +43,39 @@
     </div>
   {% endif %}
   {% if student.enabled and not student.payment_status|divisibleby:"4" %}
-    <div class="alert {% if student.payment_status == 1 or student.payment_status == 5 %} alert-info {% elif student.payment_status == 2 or student.payment_status == 6 %} alert-warning {% elif student.payment_status == 3 or student.payment_status == 7 %} alert-danger {% endif %} ">
+    <div class="alert {% if student.payment_status == -3 or student.payment_status == 1 or student.payment_status == 5 %} alert-info {% elif student.payment_status == -2 or student.payment_status == 2 or student.payment_status == 6 %} alert-warning {% elif student.payment_status == -1 or student.payment_status == 3 or student.payment_status == 7 %} alert-danger {% endif %} ">
       <h1 class="alert-heading">
-        {% if student.payment_status == 1 or student.payment_status == 5 %}
+        {% if student.payment_status == -3 or student.payment_status == 1 or student.payment_status == 5 %}
           Payment reminder
-        {% elif student.payment_status == 2 or student.payment_status == 3 %}
+        {% elif student.payment_status == -2 or student.payment_status == 2 or student.payment_status == 6 %}
           Payment due
         {% else %}
           Payment overdue
         {% endif %}
       </h1>
-      {% if student.payment_status == 1 %}
-        As a quick reminder, the payment deadline
+
+      {% if student.payment_status == -3 %}
+        As a quick reminder, the grace deadline
+        {{ invoice.forgive_date|date }}
+        for full payment is coming soon.
+      {% elif student.payment_status == -2 %}
+        The grace payment deadline
+        {{ invoice.forgive_date|date }}
+        has passed, but your payment is incomplete.
+      {% elif student.payment_status == -1 %}
+        More than a week since the grace deadline
+        {{ invoice.forgive_date|date }}
+        has passed, but your payment is incomplete!
+      {% elif student.payment_status == 1 %}
+        As a quick reminder, the first payment deadline
         {{ semester.first_payment_deadline|date }}
         is coming soon.
       {% elif student.payment_status == 2 %}
-        The payment deadline
+        The first payment deadline
         {{ semester.first_payment_deadline|date }}
         has passed, but no payment was received.
       {% elif student.payment_status == 3 %}
-        More than a week since the deadline
+        More than a week since the first payment deadline
         {{ semester.first_payment_deadline|date }}
         has passed, but no payment is recorded.
       {% elif student.payment_status == 5 %}
@@ -72,11 +85,11 @@
       {% elif student.payment_status == 6 %}
         The payment deadline
         {{ semester.most_payment_deadline|date }}
-        has passed, but your payment is incomplete!
+        has passed, but your payment is incomplete.
       {% elif student.payment_status == 7 %}
         More than a week since the deadline
         {{ semester.most_payment_deadline|date }}
-        has passed, but your payment is incomplete.
+        has passed, but your payment is incomplete!
       {% endif %}
       <a href="{% url 'invoice' student.pk %}" class="alert-link">Link to invoice.</a>
     </div>
