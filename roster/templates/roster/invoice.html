@@ -58,7 +58,7 @@
     </p>
     
     {% if invoice.forgive_date %}
-      <p>As a reminder, the grace payment deadlines are:</p>
+      <p>As a reminder, the grace payment deadline are:</p>
       <ul>
         {% if invoice.forgive_date %}<li>{{ invoice.forgive_date|date }}</li>{% endif %}
       </ul>
