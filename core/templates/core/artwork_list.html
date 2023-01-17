@@ -1,0 +1,62 @@
+{% extends "layout.html" %}
+{% block title %}
+  Art gallery
+{% endblock title %}
+{% block main-class %}
+  col-12
+{% endblock main-class %}
+{% block side-class %}
+  col-7 col-md-3
+{% endblock side-class %}
+{% block css %}
+  <style type="text/css">
+    @keyframes glow-yellow {
+        from {
+            box-shadow: 0px 0px 35px #bbbb33
+        }
+
+        to {
+            box-shadow: 0px 0px 45px #eeeecc
+        }
+    }
+
+    a.artwork>img {
+        object-fit: cover;
+        box-shadow: 0px 0px 15px #6666dd;
+    }
+
+    a.artwork:hover>img {
+        animation-name: glow-yellow;
+        animation-duration: 2s;
+        transform: scale(1.05);
+    }
+  </style>
+{% endblock css %}
+{% block layout-content %}
+  <p>
+    <a href="/">Back to home</a>.
+  </p>
+  {% for unitgroup in unitgroups %}
+    {% if forloop.counter0|divisibleby:"3" %}
+      <div class="row mb-4">
+      {% endif %}
+      <div class="col-4">
+        <div class="card">
+          <div class="card-body">
+            <h4 class="card-title">
+              <a href="{% url "wiki-unitgroup" unitgroup.pk %}">{{ unitgroup.name }}</a>
+            </h4>
+            <a class="artwork" href="{{ unitgroup.artwork.url }}" target="_blank">
+              <img src="{{ unitgroup.artwork_thumb_md.url }}"
+                   alt="Artwork for {{ unitgroup.name }}"/>
+            </a>
+          </div>
+          <div class="card-footer fst-italic">{{ unitgroup.artist_name }}</div>
+        </div>
+      </div>
+      {# and end the loop... #}
+      {% if forloop.last or forloop.counter|divisibleby:"3" %}
+      </div>
+    {% endif %}
+  {% endfor %}
+{% endblock layout-content %}
