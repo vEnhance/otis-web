@@ -105,10 +105,11 @@ class ProblemSuggestionList(LoginRequiredMixin, ListView[ProblemSuggestion]):
         queryset = queryset.order_by("status", "created_at")
         return queryset
 
+
 class SuggestionQueueList(LoginRequiredMixin, ListView[ProblemSuggestion]):
     template_name = "suggestions/suggestion_queue_list.html"
 
     def get_queryset(self) -> QuerySet[ProblemSuggestion]:
         return ProblemSuggestion.objects.filter(
-            status__in= ("SUGG_EDIT", "SUGG_NEW")
+            status__in=("SUGG_EDIT", "SUGG_NEW")
         ).order_by("pk")
