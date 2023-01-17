@@ -150,7 +150,6 @@ class PSetQueueList(LoginRequiredMixin, ListView[PSet]):
             student__semester__active=True,
         ).order_by("pk")
 
-
 @login_required
 def submit_pset(request: HttpRequest, student_pk: int) -> HttpResponse:
     student = get_student_by_pk(request, student_pk)

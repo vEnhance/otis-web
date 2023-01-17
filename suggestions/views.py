@@ -5,6 +5,7 @@ from core.models import Unit
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
+from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
@@ -103,3 +104,11 @@ class ProblemSuggestionList(LoginRequiredMixin, ListView[ProblemSuggestion]):
         queryset = ProblemSuggestion.objects.filter(user=self.request.user)
         queryset = queryset.order_by("status", "created_at")
         return queryset
+
+class SuggestionQueueList(LoginRequiredMixin, ListView[ProblemSuggestion]):
+    template_name = "suggestions/suggestion_queue_list.html"
+
+    def get_queryset(self) -> QuerySet[ProblemSuggestion]:
+        return ProblemSuggestion.objects.filter(
+            status__in= ("SUGG_EDIT", "SUGG_NEW")
+        ).order_by("pk")

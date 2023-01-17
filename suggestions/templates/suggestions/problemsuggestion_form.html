@@ -4,10 +4,10 @@
 {% endblock title %}
 {% block main-class %}
   col-12
-{% endblock main-class %}
+{% endblock main-class %}List all
 {% block layout-content %}
   <p>
-    <a href="{% url "suggest-list" %}">⬅️ List all suggestions by you.</a>
+    <a href="{% url "suggest-list" %}">⬅️ List all suggestions by you.</a> Also check out the <a href="{% url "suggestion-queue-listing" %}">submission queue</a>.
   </p>
   <p>
     Thank you for suggesting problems for OTIS!

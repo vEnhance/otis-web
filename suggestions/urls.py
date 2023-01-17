@@ -11,4 +11,5 @@ urlpatterns = [
     ),
     path(r"<int:pk>/", views.ProblemSuggestionUpdate.as_view(), name="suggest-update"),
     path(r"list/", views.ProblemSuggestionList.as_view(), name="suggest-list"),
+    path(r"queue/", views.SuggestionQueueList.as_view(), name="suggestion-queue-listing")
 ]
