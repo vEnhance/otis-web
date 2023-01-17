@@ -348,7 +348,9 @@ def build_students(queryset: QuerySet[StudentRegistration]) -> int:
             if first_payment_deadline is not None and first_payment_deadline <= (
                 grace_deadline := timezone.now() + timedelta(days=7)
             ):
-                invoice.forgive_date = max(grace_deadline, student.semester.most_payment_deadline)
+                invoice.forgive_date = max(
+                    grace_deadline, student.semester.most_payment_deadline
+                )
             invoices_to_create.append(invoice)
         Invoice.objects.bulk_create(invoices_to_create)
     return count

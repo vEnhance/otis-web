@@ -153,7 +153,7 @@ class RosterTest(EvanTestCase):
         with freeze_time("2023-02-15", tz_offset=0):
             self.assertEqual(alice.payment_status, 7)
             self.assertTrue(alice.is_delinquent)
-        
+
         # Now suppose Alice makes the last payment
         invoice.total_paid = 480
         invoice.save()
