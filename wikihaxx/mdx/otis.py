@@ -113,6 +113,10 @@ class OTISPreprocessor(markdown.preprocessors.Preprocessor):
                         table_output.append(
                             f"<tr><th>Name</th><td>{unitgroup.name}</td></tr>"
                         )
+                        if unitgroup.artist_name:
+                            table_output.append(
+                                f"<tr><th>Artist</th><td>{unitgroup.artist_name}</td></tr>"
+                            )
                         table_output.append(
                             f"<tr><th>Classification</th><td>{unitgroup.get_subject_display()}</td></tr>"
                         )
