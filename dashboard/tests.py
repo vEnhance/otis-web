@@ -3,7 +3,6 @@ from io import StringIO
 
 from core.factories import SemesterFactory, UnitFactory, UserFactory
 from django.conf import settings
-
 from django.utils import timezone
 from django.urls import reverse
 from evans_django_tools.testsuite import EvanTestCase
