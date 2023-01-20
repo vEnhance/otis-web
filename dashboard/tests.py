@@ -2,19 +2,21 @@ import os
 from io import StringIO
 
 from core.factories import UnitFactory
+from core.factories import SemesterFactory
 from django.utils import timezone
 from evans_django_tools.testsuite import EvanTestCase
 from roster.factories import StudentFactory
 
 from dashboard.factories import PSetFactory
 from dashboard.models import PSet
+from dashboard.models import UploadedFile
 from dashboard.utils import get_units_to_submit, get_units_to_unlock
 
 utc = timezone.utc
 
 
 class TestSubmitPSet(EvanTestCase):
-    def test_submit(self):
+    def test_submit(self) -> None:
         unit1 = UnitFactory.create(code="BMW")
         unit2 = UnitFactory.create(code="DMX")
         unit3 = UnitFactory.create(code="ZMY")
@@ -166,7 +168,7 @@ class TestSubmitPSet(EvanTestCase):
         self.assertHas(resp, "100♣")
         self.assertHas(resp, "20.0♥")
 
-    def test_queryset(self):
+    def test_queryset(self) -> None:
         units = UnitFactory.create_batch(size=20)
         alice = StudentFactory.create()
         alice.curriculum.set(units[0:18])
@@ -177,3 +179,68 @@ class TestSubmitPSet(EvanTestCase):
 
         self.assertEqual(get_units_to_submit(alice).count(), 2)
         self.assertEqual(get_units_to_unlock(alice).count(), 11)
+
+    def test_update_and_delete(self) -> None:
+        semester = SemesterFactory.create(active=True)
+        alice = StudentFactory.create(semester=semester)
+        self.login(alice)
+        unit = UnitFactory.create(code="BMW")
+        self.assertPostDenied("uploads", alice.pk, unit.pk, follow=True)
+        alice.curriculum.set([unit])
+        alice.unlocked_units.add(unit)
+
+        # upload a file
+        content = StringIO("Something")
+        content.name = "content.txt"
+        self.assertPost20X(
+            "uploads",
+            alice.pk,
+            unit.pk,
+            data={"category": "scripts", "content": content, "description": "woof"},
+            follow=True,
+        )
+        upload = UploadedFile.objects.get(benefactor=alice, unit=unit)
+
+        # make sure Eve can't do anything
+        eve = StudentFactory.create(semester=semester)
+        self.login(eve)
+        malicious_content = StringIO("Now with double the something!")
+        malicious_content.name = "malicous_content.txt"
+        self.assertPostDenied(
+            "edit-file",
+            upload.pk,
+            data={
+                "category": "scripts",
+                "content": malicious_content,
+                "description": "bark",
+            },
+            follow=True,
+        )
+        self.assertPostDenied(
+            "delete-file",
+            upload.pk,
+            data={
+                "category": "scripts",
+                "content": malicious_content,
+                "description": "bark",
+            },
+            follow=True,
+        )
+
+        self.login(alice)
+        new_content = StringIO("Look I solved another problem")
+        new_content.name = "new_content.txt"
+        self.assertPost20X(
+            "edit-file",
+            upload.pk,
+            data={
+                "category": "scripts",
+                "content": new_content,
+                "description": "meow",
+            },
+            follow=True,
+        )
+        upload.refresh_from_db()
+        self.assertEqual(upload.description, "meow")
+        self.assertPost20X("delete-file", upload.pk, follow=True)
+        self.assertFalse(UploadedFile.objects.filter(pk=upload.pk).exists())

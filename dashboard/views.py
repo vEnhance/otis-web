@@ -406,8 +406,8 @@ class UpdateFile(
 
     def get_object(self, *args: Any, **kwargs: Any) -> UploadedFile:
         obj = super().get_object(*args, **kwargs)
-        is_staff = getattr(self.request.user, "is_staff", False)
-        if obj.owner != self.request.user and is_staff is False:
+        assert isinstance(self.request.user, User)
+        if obj.owner != self.request.user and not self.request.user.is_staff:
             raise PermissionDenied("Not authorized to update this file")
         return obj
 
@@ -418,9 +418,8 @@ class DeleteFile(LoginRequiredMixin, DeleteView):
 
     def get_object(self, *args: Any, **kwargs: Any) -> UploadedFile:
         obj = super().get_object(*args, **kwargs)
-        if not obj.owner == self.request.user and getattr(
-            self.request.user, "is_staff", False
-        ):
+        assert isinstance(self.request.user, User)
+        if obj.owner != self.request.user and not self.request.user.is_staff:
             raise PermissionDenied("Not authorized to delete this file")
         return obj
 
