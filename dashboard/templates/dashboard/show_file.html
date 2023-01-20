@@ -5,8 +5,8 @@
   <small>Uploaded by <i>{{ file.owner }}</i> at
     {{ file.created_at|date:"r" }}.
     {% if file.owner.username == request.user.username or request.user.is_staff %}
-      <a href="{% url "editfile" file.pk %}">(edit)</a>
-      <a href="{% url "delfile" file.pk %}">(delete)</a>
+      <a href="{% url "edit-file" file.pk %}">(edit)</a>
+      <a href="{% url "delete-file" file.pk %}">(delete)</a>
     {% endif %}
   </small>
 </p>
