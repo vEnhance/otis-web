@@ -374,7 +374,7 @@ def past(request: AuthHttpRequest, semester_pk: Optional[int] = None):
 
 class SemesterList(LoginRequiredMixin, ListView[Semester]):
     model = Semester
-    template_name = "dashboard/semlist.html"
+    template_name = "dashboard/semester_list.html"
 
     def get_queryset(self) -> QuerySet[Semester]:
         queryset = super().get_queryset()

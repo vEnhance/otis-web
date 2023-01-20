@@ -20,7 +20,7 @@ urlpatterns = [
     ),
     path(r"past/", views.past, name="past"),
     path(r"past/<int:semester_pk>/", views.past, name="past"),
-    path(r"years/", views.SemesterList.as_view(), name="semlist"),
+    path(r"years/", views.SemesterList.as_view(), name="semester-list"),
     path(r"index/", views.index, name="index"),
     path(r"certify/", views.certify, name="certify"),
     path(r"certify/<int:student_pk>/", views.certify, name="certify"),
