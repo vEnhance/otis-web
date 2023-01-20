@@ -393,9 +393,9 @@ class UpdateFile(
     )
     object: UploadedFile
 
-    def get_success_url(self):
-        stu_pk = self.object.benefactor.pk
-        unit_pk = self.object.unit.pk if self.object.unit is not None else 0
+    def get_success_url(self) -> str:
+        stu_pk: int = self.object.benefactor.pk
+        unit_pk: int = self.object.unit.pk if self.object.unit is not None else 0
         return reverse(
             "uploads",
             args=(
