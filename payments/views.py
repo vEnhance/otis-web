@@ -108,7 +108,8 @@ def webhook(request: HttpRequest) -> HttpResponse:
     endpoint_secret = settings.STRIPE_ENDPOINT_SECRET
     payload = request.body
     if not "HTTP_STRIPE_SIGNATURE" in request.META:
-        logging.error(f"No HTTP_STRIPE_SIGNATURE in request.META = {request.META}")
+        if settings.PRODUCTION:
+            logging.error(f"No HTTP_STRIPE_SIGNATURE in request.META = {request.META}")
         return HttpResponse(status=400)
     sig_header: str = request.META["HTTP_STRIPE_SIGNATURE"]
     # logging.debug(payload)
@@ -117,11 +118,13 @@ def webhook(request: HttpRequest) -> HttpResponse:
         event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
     except ValueError as e:
         # Invalid payload
-        logging.error("Invalid payload for " + str(e))
+        if settings.PRODUCTION:
+            logging.error("Invalid payload for " + str(e))
         return HttpResponse(status=400)
     except stripe.error.SignatureVerificationError as e:  # type: ignore
         # Invalid signature
-        logging.error("Invalid signature for " + str(e))
+        if settings.PRODUCTION:
+            logging.error("Invalid signature for " + str(e))
         return HttpResponse(status=400)
 
     # Handle the checkout.session.completed event
