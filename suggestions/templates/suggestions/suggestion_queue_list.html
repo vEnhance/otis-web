@@ -17,7 +17,7 @@
       </tr>
     </thead>
     <tbody>
-      {% for suggestion in object_list %}
+      {% for suggestion in suggestions %}
         {% if suggestion.acknowledge or request.user.is_staff or suggestion.user == request.user %}
         <tr {% if suggestion.user == request.user %} class="table-warning fw-bold"{% endif %}>
           <th class="text-end">{{ forloop.counter }}.</th>

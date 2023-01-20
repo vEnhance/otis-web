@@ -108,6 +108,7 @@ class ProblemSuggestionList(LoginRequiredMixin, ListView[ProblemSuggestion]):
 
 class SuggestionQueueList(LoginRequiredMixin, ListView[ProblemSuggestion]):
     template_name = "suggestions/suggestion_queue_list.html"
+    context_object_name = "suggestions"
 
     def get_queryset(self) -> QuerySet[ProblemSuggestion]:
         return ProblemSuggestion.objects.filter(
