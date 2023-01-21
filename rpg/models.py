@@ -130,6 +130,7 @@ class QuestComplete(models.Model):
     CATEGORY_CHOICES = (
         ("PR", "Pull request"),
         ("BR", "Bug report"),
+        ("VD", "Vulnerability disclosure"),
         ("WK", "Wiki bonus"),
         ("US", "USEMO Score"),
         ("UG", "USEMO Grading"),

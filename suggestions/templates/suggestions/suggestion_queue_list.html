@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+{% block title %}
+  Suggestion Submission Queue
+{% endblock title %}
+{% block layout-content %}
+  {% load otis_extras %}
+  <p>Here are all the suggestion sets that haven't been checked yet.</p>
+  <table class="table">
+    <thead class="table-dark">
+      <tr>
+        <td class="text-end">#</td>
+        <td>Suggestion</td>
+        <td>Weight</td>
+        <td>Unit</td>
+        <td>Timestamp</td>
+        <td class="text-end">PK</td>
+      </tr>
+    </thead>
+    <tbody>
+      {% for suggestion in suggestions %}
+        {% if suggestion.acknowledge or request.user.is_staff or suggestion.user == request.user %}
+        <tr {% if suggestion.user == request.user %} class="table-warning fw-bold"{% endif %}>
+          <th class="text-end">{{ forloop.counter }}.</th>
+          <td>
+            {% if suggestion.user == request.user or request.user.is_staff %}
+                <a href="{{ suggestion.get_absolute_url }}">{{ suggestion.description }}</a>
+            {% else %}
+                {{ suggestion.description }}
+            {% endif %}
+          </td>
+          <td>{{ suggestion.weight }}♣</td>
+          <td>
+            {% if suggestion.user == request.user or request.user.is_staff %}
+                {{ suggestion.unit.group.name }}<sup>{{ suggestion.unit.code }}</sup>
+            {% else %}
+              {% if suggestion.unit.group.hidden %}
+                Redacted<sup>❓</sup>
+              {% else %}
+                {{ suggestion.unit.group.name }}<sup>{{ suggestion.unit.code }}</sup>
+              {% endif %}
+            {% endif %}
+          </td>
+          <td>{{ suggestion.created_at }}</td>
+          <td class="text-end">
+                {% if request.user.is_staff %}
+                    <a href="{% url "admin:suggestions_problemsuggestion_change" suggestion.pk %}">{{ suggestion.pk }}</a>
+                {% else %}
+                    {{ suggestion.pk }}
+                {% endif %}
+          </td>
+        </tr>
+        {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock layout-content %}

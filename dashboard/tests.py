@@ -3,6 +3,7 @@ from io import StringIO
 
 from core.factories import SemesterFactory, UnitFactory, UserFactory
 from django.conf import settings
+
 from django.utils import timezone
 from django.urls import reverse
 from evans_django_tools.testsuite import EvanTestCase
@@ -48,8 +49,6 @@ class TestPortal(EvanTestCase):
         semester = SemesterFactory.create(exam_family="Waltz")
         alice = StudentFactory.create(semester=semester)
         self.login(alice)
-
-        # TODO test invoice redirect check
 
         # A bunch of context things to check
 
@@ -449,44 +448,70 @@ class TestPSet(EvanTestCase):
 
         self.assertFalse(UploadedFile.objects.filter(pk=pk).exists())
 
-    def test_file_operation_permissions(self):
-        semester = SemesterFactory.create()
+    def test_update_and_delete(self) -> None:
+        semester = SemesterFactory.create(active=True)
         alice = StudentFactory.create(semester=semester)
         self.login(alice)
         unit = UnitFactory.create(code="BMW")
-
-        self.assertPostDenied("uploads", alice.pk, unit.pk)
-
+        self.assertPostDenied("uploads", alice.pk, unit.pk, follow=True)
         alice.curriculum.set([unit])
         alice.unlocked_units.add(unit)
 
+        # upload a file
         content = StringIO("Something")
         content.name = "content.txt"
-
-        # upload a file
         self.assertPost20X(
             "uploads",
             alice.pk,
             unit.pk,
             data={"category": "scripts", "content": content, "description": "woof"},
+            follow=True,
         )
+        upload = UploadedFile.objects.get(benefactor=alice, unit=unit)
 
+        # make sure Eve can't do anything
         eve = StudentFactory.create(semester=semester)
         self.login(eve)
-
-        upload = UploadedFile.objects.filter(benefactor=alice, unit=unit).first()
-
-        content1 = StringIO("Now with double the something!")
-        content1.name = "content1.txt"
-        # modify the file
+        malicious_content = StringIO("Now with double the something!")
+        malicious_content.name = "malicous_content.txt"
         self.assertPostDenied(
-            "editfile",
+            "edit-file",
             upload.pk,
-            data={"category": "scripts", "content": content1, "description": "bark"},
+            data={
+                "category": "scripts",
+                "content": malicious_content,
+                "description": "bark",
+            },
+            follow=True,
+        )
+        self.assertPostDenied(
+            "delete-file",
+            upload.pk,
+            data={
+                "category": "scripts",
+                "content": malicious_content,
+                "description": "bark",
+            },
+            follow=True,
         )
 
-        # self.assertPostDenied("delfile", upload.pk)
-
+        self.login(alice)
+        new_content = StringIO("Look I solved another problem")
+        new_content.name = "new_content.txt"
+        self.assertPost20X(
+            "edit-file",
+            upload.pk,
+            data={
+                "category": "scripts",
+                "content": new_content,
+                "description": "meow",
+            },
+            follow=True,
+        )
+        upload.refresh_from_db()
+        self.assertEqual(upload.description, "meow")
+        self.assertPost20X("delete-file", upload.pk, follow=True)
+        self.assertFalse(UploadedFile.objects.filter(pk=upload.pk).exists())
 
 class TestList(EvanTestCase):
     def test_index(self):

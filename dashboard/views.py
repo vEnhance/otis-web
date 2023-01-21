@@ -374,7 +374,7 @@ def past(request: AuthHttpRequest, semester_pk: Optional[int] = None):
 
 class SemesterList(LoginRequiredMixin, ListView[Semester]):
     model = Semester
-    template_name = "dashboard/semlist.html"
+    template_name = "dashboard/semester_list.html"
 
     def get_queryset(self) -> QuerySet[Semester]:
         queryset = super().get_queryset()
@@ -393,9 +393,9 @@ class UpdateFile(
     )
     object: UploadedFile
 
-    def get_success_url(self):
-        stu_pk = self.object.benefactor.pk
-        unit_pk = self.object.unit.pk if self.object.unit is not None else 0
+    def get_success_url(self) -> str:
+        stu_pk: int = self.object.benefactor.pk
+        unit_pk: int = self.object.unit.pk if self.object.unit is not None else 0
         return reverse(
             "uploads",
             args=(
@@ -406,8 +406,8 @@ class UpdateFile(
 
     def get_object(self, *args: Any, **kwargs: Any) -> UploadedFile:
         obj = super().get_object(*args, **kwargs)
-        is_staff = getattr(self.request.user, "is_staff", False)
-        if obj.owner != self.request.user and is_staff is False:
+        assert isinstance(self.request.user, User)
+        if obj.owner != self.request.user and not self.request.user.is_staff:
             raise PermissionDenied("Not authorized to update this file")
         return obj
 
@@ -418,9 +418,8 @@ class DeleteFile(LoginRequiredMixin, DeleteView):
 
     def get_object(self, *args: Any, **kwargs: Any) -> UploadedFile:
         obj = super().get_object(*args, **kwargs)
-        if not obj.owner == self.request.user and getattr(
-            self.request.user, "is_staff", False
-        ):
+        assert isinstance(self.request.user, User)
+        if obj.owner != self.request.user and not self.request.user.is_staff:
             raise PermissionDenied("Not authorized to delete this file")
         return obj
 

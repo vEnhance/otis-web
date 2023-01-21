@@ -46,6 +46,22 @@ class UnitGroupListView(ListView[UnitGroup]):
     )
 
 
+class UnitArtworkListView(ListView[UnitGroup]):
+    model = UnitGroup
+    queryset = (
+        UnitGroup.objects.filter(hidden=False)
+        .exclude(artist_name__exact="")
+        .order_by("name")
+    )
+    template_name = "core/artwork_list.html"
+    context_object_name = "unitgroups"
+
+    def get_context_data(self, *args: Any, **kwargs: Any):
+        context = super().get_context_data(*args, **kwargs)
+        context["num_extra"] = (-self.queryset.count()) % 3  # type: ignore
+        return context
+
+
 def permitted(unit: Unit, request: HttpRequest, asking_solution: bool) -> bool:
     if getattr(request.user, "is_staff", False):
         return True
