@@ -1,22 +1,187 @@
 import os
 from io import StringIO
 
-from core.factories import UnitFactory
-from core.factories import SemesterFactory
-from django.utils import timezone
-from evans_django_tools.testsuite import EvanTestCase
-from roster.factories import StudentFactory
+from core.factories import SemesterFactory, UnitFactory, UserFactory
+from django.conf import settings
 
-from dashboard.factories import PSetFactory
-from dashboard.models import PSet
-from dashboard.models import UploadedFile
+from django.utils import timezone
+from django.urls import reverse
+from evans_django_tools.testsuite import EvanTestCase
+from freezegun import freeze_time
+from roster.factories import StudentFactory, InvoiceFactory, AssistantFactory
+
+from dashboard.factories import PSetFactory, SemesterDownloadFileFactory
+from dashboard.models import PSet, UploadedFile
 from dashboard.utils import get_units_to_submit, get_units_to_unlock
+
+from exams.factories import QuizFactory, TestFactory
+
+from markets.factories import MarketFactory
+
+from roster.factories import RegistrationContainerFactory, StudentRegistrationFactory
+
+from rpg.models import Level
+
+from otisweb.utils import get_mailchimp_campaigns
 
 utc = timezone.utc
 
 
-class TestSubmitPSet(EvanTestCase):
-    def test_submit(self) -> None:
+class TestPortal(EvanTestCase):
+    def test_portal_invoice_redirect(self):
+        semester = SemesterFactory.create(
+            show_invoices=True,
+            first_payment_deadline=timezone.datetime(2021, 7, 1, tzinfo=timezone.utc),
+        )
+        alice = StudentFactory.create(semester=semester)
+        self.login(alice)
+
+        alice.enabled = False
+        alice.save()
+        InvoiceFactory.create(student=alice)
+
+        with freeze_time("2021-07-30", tz_offset=0):
+            self.assertGetRedirects(
+                reverse("invoice", args=(alice.pk,)), "portal", alice.pk, follow=True
+            )
+
+    def test_portal(self):
+        semester = SemesterFactory.create(exam_family="Waltz")
+        alice = StudentFactory.create(semester=semester)
+        self.login(alice)
+
+        # A bunch of context things to check
+
+        unit = UnitFactory.create(code="BMX")
+        alice.curriculum.set([unit])
+        alice.unlocked_units.add(unit)
+
+        PSetFactory.create(student=alice, clubs=501, hours=0, status="A", unit=unit)
+
+        prevSemester = SemesterFactory.create(end_year=2020)
+        StudentFactory.create(user=alice.user, semester=prevSemester)
+
+        test = TestFactory.create(
+            start_date=timezone.datetime(2021, 1, 1, tzinfo=timezone.utc),
+            due_date=timezone.datetime(2021, 12, 31, tzinfo=timezone.utc),
+            family="Waltz",
+            number=1,
+        )
+
+        quiz = QuizFactory.create(
+            start_date=timezone.datetime(2021, 1, 1, tzinfo=timezone.utc),
+            due_date=timezone.datetime(2021, 12, 31, tzinfo=timezone.utc),
+            family="Waltz",
+            number=1,
+        )
+
+        market = MarketFactory.create(
+            start_date=timezone.datetime(2021, 1, 1, tzinfo=timezone.utc),
+            end_date=timezone.datetime(2021, 12, 31, tzinfo=timezone.utc),
+        )
+
+        download = SemesterDownloadFileFactory.create(
+            semester=semester,
+            created_at=timezone.datetime(2021, 6, 25, tzinfo=timezone.utc),
+        )
+
+        # assistant does not cause level up message
+        assistant = AssistantFactory.create()
+        alice.assistant = assistant
+        alice.save()
+        self.login(assistant)
+        with freeze_time("2021-06-30", tz_offset=0):
+            resp = self.assertGet20X("portal", alice.pk, follow=True)
+        messages = [m.message for m in resp.context["messages"]]
+        self.assertNotIn("You leveled up! You're now level 22.", messages)
+
+        self.login(alice)
+        with freeze_time("2021-06-30", tz_offset=0):
+            resp = self.assertGet20X("portal", alice.pk, follow=True)
+
+        messages = [m.message for m in resp.context["messages"]]
+        self.assertIn("You leveled up! You're now level 22.", messages)
+
+        self.assertHas(resp, f"{alice.name} ({alice.semester.name})")
+        self.assertHas(resp, 2020)
+        self.assertHas(resp, unit.code)
+        self.assertHas(resp, test)
+        self.assertHas(resp, quiz)
+        self.assertHas(resp, get_mailchimp_campaigns(14)[0]["summary"])
+        self.assertHas(resp, quiz)
+        self.assertHas(resp, download.content)
+        self.assertHas(resp, market.slug)
+        self.assertHas(resp, 501)
+
+
+# python manage.py test dashboard.tests.TestCertify
+class TestCertify(EvanTestCase):
+    def test_certify(self):
+        semester = SemesterFactory.create()
+        alice = StudentFactory.create(semester=semester)
+        self.login(alice)
+
+        unit = UnitFactory.create(code="BMX")
+        alice.curriculum.set([unit])
+        alice.unlocked_units.add(unit)
+
+        PSetFactory.create(student=alice, clubs=0, hours=1501, status="A", unit=unit)
+        Level.objects.create(name="Level Thirty Eight", threshold=38)
+
+        checksum = alice.get_checksum(settings.CERT_HASH_KEY)
+
+        resp = self.assertGetRedirects(
+            reverse(
+                "certify",
+                args=(
+                    alice.pk,
+                    checksum,
+                ),
+            ),
+            "certify",
+            follow=True,
+        )
+
+        self.assertHas(resp, 1501)
+        self.assertHas(resp, 38)
+        self.assertHas(resp, "Level Thirty Eight")
+
+        self.assertGetDenied("certify", alice.pk, "invalid")
+        self.assertGet20X("certify", alice.pk, checksum)
+
+        eve = StudentFactory.create(semester=semester)
+        self.login(eve)
+        self.assertGetDenied("certify", alice.pk)
+
+
+class TestPSet(EvanTestCase):
+    def test_submit_permissions(self):
+        # delinquent
+
+        semester = SemesterFactory.create(
+            show_invoices=True,
+            first_payment_deadline=timezone.datetime(2021, 7, 1, tzinfo=timezone.utc),
+        )
+        alice = StudentFactory.create(semester=semester)
+        self.login(alice)
+        InvoiceFactory.create(student=alice)
+
+        with freeze_time("2021-07-30", tz_offset=0):
+            self.assertGetDenied("submit-pset", alice.pk)
+
+        # unenabled
+        bob = StudentFactory.create(enabled=False)
+        self.login(bob)
+
+        self.assertGetDenied("submit-pset", bob.pk)
+
+        # inactive semester
+        carl = StudentFactory.create(semester=SemesterFactory.create(active=False))
+        self.login(carl)
+
+        self.assertGetDenied("submit-pset", carl.pk)
+
+    def test_submit(self):
         unit1 = UnitFactory.create(code="BMW")
         unit2 = UnitFactory.create(code="DMX")
         unit3 = UnitFactory.create(code="ZMY")
@@ -30,6 +195,9 @@ class TestSubmitPSet(EvanTestCase):
         self.assertHas(resp, "Level 0")
 
         # Alice submits a problem set
+        resp = self.assertGet20X("submit-pset", alice.pk)
+        self.assertHas(resp, "Ready to submit?")
+
         content1 = StringIO("Meow")
         content1.name = "content1.txt"
         resp = self.assertPost20X(
@@ -65,6 +233,9 @@ class TestSubmitPSet(EvanTestCase):
         self.assertFalse(pset.resubmitted)
 
         # Alice realizes she made a typo in hours and edits the problem set
+        resp = self.assertGet20X("resubmit-pset", alice.pk)
+        self.assertHas(resp, "content1.txt")
+
         content2 = StringIO("Purr")
         content2.name = "content2.txt"
         resp = self.assertPost20X(
@@ -168,7 +339,7 @@ class TestSubmitPSet(EvanTestCase):
         self.assertHas(resp, "100♣")
         self.assertHas(resp, "20.0♥")
 
-    def test_queryset(self) -> None:
+    def test_unit_query(self):
         units = UnitFactory.create_batch(size=20)
         alice = StudentFactory.create()
         alice.curriculum.set(units[0:18])
@@ -179,6 +350,103 @@ class TestSubmitPSet(EvanTestCase):
 
         self.assertEqual(get_units_to_submit(alice).count(), 2)
         self.assertEqual(get_units_to_unlock(alice).count(), 11)
+
+    def test_pset_list(self):
+        semester = SemesterFactory.create()
+        alice = StudentFactory.create(semester=semester)
+        self.login(alice)
+
+        eve = StudentFactory.create(semester=semester)
+
+        unit1 = UnitFactory.create(code="BMW")
+        unit2 = UnitFactory.create(code="ZMX")
+        unit3 = UnitFactory.create(code="DAY")
+
+        PSetFactory.create(student=alice, clubs=0, hours=0, status="A", unit=unit1)
+        PSetFactory.create(student=alice, clubs=0, hours=0, status="A", unit=unit2)
+        PSetFactory.create(student=eve, clubs=0, hours=0, status="A", unit=unit3)
+
+        resp = self.assertGet20X("student-pset-list", alice.pk)
+        self.assertHas(resp, unit1.code)
+        self.assertHas(resp, unit2.code)
+        self.assertNotHas(resp, unit3.code)
+
+    def test_pset_list_permission(self):
+        semester = SemesterFactory.create(
+            show_invoices=True,
+            first_payment_deadline=timezone.datetime(2021, 7, 1, tzinfo=timezone.utc),
+        )
+        alice = StudentFactory.create(semester=semester)
+        self.login(alice)
+        InvoiceFactory.create(student=alice)
+
+        with freeze_time("2021-07-30", tz_offset=0):
+            self.assertGetDenied("student-pset-list", alice.pk)
+
+        eve = StudentFactory.create(semester=semester)
+
+        self.login(eve)
+
+        self.assertGet20X("student-pset-list", eve.pk)
+        self.assertGetDenied("student-pset-list", alice.pk)
+
+    def test_file_operations(self):
+        semester = SemesterFactory.create()
+        alice = StudentFactory.create(semester=semester)
+        self.login(alice)
+        unit = UnitFactory.create(code="BMW")
+        alice.curriculum.set([unit])
+        alice.unlocked_units.add(unit)
+
+        content = StringIO("Something")
+        content.name = "content.txt"
+
+        # upload a file
+        resp = self.assertPost20X(
+            "uploads",
+            alice.pk,
+            unit.pk,
+            data={"category": "scripts", "content": content, "description": "woof"},
+        )
+
+        messages = [m.message for m in resp.context["messages"]]
+        self.assertIn("New file has been uploaded.", messages)
+
+        # invalid upload  ofa file
+        resp = self.assertPost20X(
+            "uploads",
+            alice.pk,
+            unit.pk,
+            data={"category": "invalid", "content": content, "description": "woof"},
+        )
+
+        messages = [m.message for m in resp.context["messages"]]
+        self.assertNotIn("New file has been uploaded.", messages)
+
+        upload = UploadedFile.objects.filter(benefactor=alice, unit=unit).first()
+
+        self.assertTrue(upload.unit == unit)
+        self.assertTrue(upload.owner == alice.user)
+
+        pk = upload.pk
+
+        content1 = StringIO("Now with double the something!")
+        content1.name = "content1.txt"
+        # modify the file
+        resp = self.assertPost20X(
+            "edit-file",
+            upload.pk,
+            data={"category": "scripts", "content": content1, "description": "bark"},
+            follow=True,
+        )
+
+        upload = UploadedFile.objects.filter(pk=pk).first()
+
+        self.assertTrue(upload.description == "bark")
+
+        resp = self.assertPost20X("delete-file", upload.pk, follow=True)
+
+        self.assertFalse(UploadedFile.objects.filter(pk=pk).exists())
 
     def test_update_and_delete(self) -> None:
         semester = SemesterFactory.create(active=True)
@@ -244,3 +512,141 @@ class TestSubmitPSet(EvanTestCase):
         self.assertEqual(upload.description, "meow")
         self.assertPost20X("delete-file", upload.pk, follow=True)
         self.assertFalse(UploadedFile.objects.filter(pk=upload.pk).exists())
+
+
+class TestList(EvanTestCase):
+    def test_index(self):
+        user = UserFactory.create()
+        self.login(user)
+
+        # 0 Students
+        resp = self.assertGet20X("index")
+
+        self.assertHas(resp, "But nobody came.")
+
+        # But now they are staff!
+        user.is_staff = True
+        user.save()
+        resp = self.assertGet20X("index")
+        self.assertHas(
+            resp,
+            "You're a staff member, so if you're expecting to see something, contact Evan.",
+        )
+        user.is_staff = False
+        user.save()
+
+        semester = SemesterFactory.create()
+        RegistrationContainerFactory.create(semester=semester)
+        resp = self.assertGet20X("index")
+        self.assertHas(resp, "To register for this year")
+
+        StudentRegistrationFactory.create(user=user)
+        resp = self.assertGet20X("index")
+        self.assertHas(
+            resp, "so you'll need to wait for Evan to confirm your registration"
+        )
+
+        alice = StudentFactory.create(user=user)
+        self.assertGetRedirects(
+            reverse("portal", args=(alice.pk,)), "index", follow=True
+        )
+
+        assistant = AssistantFactory.create()
+        alice.assistant = assistant
+        alice.save()
+        bob = StudentFactory.create(assistant=assistant)
+
+        self.login(assistant)
+        resp = self.assertGet20X("index")
+        self.assertHas(resp, bob.name)
+
+    def test_past(self):
+        prevSemester = SemesterFactory.create(active=False)
+        semester = SemesterFactory.create()
+        alice = StudentFactory.create(semester=semester)
+        self.login(alice)
+
+        prevAlice = StudentFactory.create(semester=prevSemester, user=alice.user)
+
+        resp = self.assertGet20X("past")
+        self.assertHas(resp, "Previous year listing")
+        self.assertHas(resp, prevSemester.name)
+        self.assertHas(resp, prevAlice.name)
+
+        unit = UnitFactory.create(code="BMX")
+        PSetFactory.create(
+            student=prevAlice, clubs=0, hours=1501, status="A", unit=unit
+        )
+
+        resp = self.assertGet20X("past", prevSemester.pk)
+        self.assertHas(resp, 38)
+        self.assertHas(resp, "Previous year listing")
+        self.assertHas(resp, prevSemester.name)
+        self.assertHas(resp, prevAlice.name)
+
+        assistant = AssistantFactory.create()
+        prevAlice.assistant = assistant
+        prevAlice.save()
+        bob = StudentFactory.create(assistant=assistant, semester=prevSemester)
+
+        self.login(assistant)
+        resp = self.assertGet20X("past", prevSemester.pk)
+        self.assertHas(resp, 38)
+        self.assertHas(resp, "Previous year listing")
+        self.assertHas(resp, prevSemester.name)
+        self.assertHas(resp, prevAlice.name)
+        self.assertHas(resp, bob.name)
+
+    def test_semester_list(self):
+        prevSemester = SemesterFactory.create(active=False)
+        semester = SemesterFactory.create()
+
+        user = UserFactory.create()
+        alice = StudentFactory.create(semester=semester, user=user)
+        self.login(alice)
+
+        resp = self.assertGet20X("semester-list")
+        self.assertHas(resp, prevSemester.name)
+        self.assertNotHas(resp, "<td>Students</td>")
+
+        user.is_superuser = True
+        user.save()
+
+        resp = self.assertGet20X("semester-list")
+        self.assertHas(resp, prevSemester.name)
+        self.assertHas(resp, "<td>Students</td>")
+
+    def test_idle_warn(self):
+        user = UserFactory.create()
+        user.is_staff = True
+        user.save()
+        self.login(user)
+
+        unit = UnitFactory.create(code="BMX")
+
+        alice = StudentFactory.create(assistant=AssistantFactory.create(user=user))
+
+        with freeze_time("2021-07-01", tz_offset=0):
+            PSetFactory.create(
+                student=alice, clubs=0, hours=1501, status="A", unit=unit
+            )
+
+        with freeze_time("2021-07-29", tz_offset=0):
+            resp = self.assertGet20X("idlewarn")
+
+        self.assertHas(resp, "Idle-warn")
+        self.assertHas(resp, "Lv. 38")
+        self.assertHas(resp, alice.user.email)
+        self.assertHas(resp, "28.00 days")
+
+    def test_download_list(self):
+        semester = SemesterFactory.create()
+        alice = StudentFactory.create(semester=semester)
+        self.login(alice)
+
+        download = SemesterDownloadFileFactory.create(semester=semester)
+
+        self.assertGet40X("downloads", alice.pk + 1)
+        resp = self.assertGet20X("downloads", alice.pk)
+
+        self.assertHas(resp, download.content)
