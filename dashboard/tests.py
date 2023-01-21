@@ -434,7 +434,7 @@ class TestPSet(EvanTestCase):
         content1.name = "content1.txt"
         # modify the file
         resp = self.assertPost20X(
-            "editfile",
+            "edit-file",
             upload.pk,
             data={"category": "scripts", "content": content1, "description": "bark"},
             follow=True,
@@ -444,7 +444,7 @@ class TestPSet(EvanTestCase):
 
         self.assertTrue(upload.description == "bark")
 
-        resp = self.assertPost20X("delfile", upload.pk, follow=True)
+        resp = self.assertPost20X("delete-file", upload.pk, follow=True)
 
         self.assertFalse(UploadedFile.objects.filter(pk=pk).exists())
 
@@ -512,6 +512,7 @@ class TestPSet(EvanTestCase):
         self.assertEqual(upload.description, "meow")
         self.assertPost20X("delete-file", upload.pk, follow=True)
         self.assertFalse(UploadedFile.objects.filter(pk=upload.pk).exists())
+
 
 class TestList(EvanTestCase):
     def test_index(self):
@@ -604,14 +605,14 @@ class TestList(EvanTestCase):
         alice = StudentFactory.create(semester=semester, user=user)
         self.login(alice)
 
-        resp = self.assertGet20X("semlist")
+        resp = self.assertGet20X("semester-list")
         self.assertHas(resp, prevSemester.name)
         self.assertNotHas(resp, "<td>Students</td>")
 
         user.is_superuser = True
         user.save()
 
-        resp = self.assertGet20X("semlist")
+        resp = self.assertGet20X("semester-list")
         self.assertHas(resp, prevSemester.name)
         self.assertHas(resp, "<td>Students</td>")
 
