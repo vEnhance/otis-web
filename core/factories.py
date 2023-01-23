@@ -1,20 +1,25 @@
 import random
-from typing import Any, Dict
+from typing import Any, Dict, Iterable
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from evans_django_tools.testsuite import UniqueFaker
-from factory import Faker, LazyAttribute, Sequence, SubFactory
+from factory import Faker, LazyAttribute, Sequence, SubFactory, post_generation
 from factory.django import DjangoModelFactory
 from factory.fuzzy import FuzzyChoice
-from factory.helpers import post_generation
 
 from core.models import Semester, Unit, UnitGroup, UserProfile
 from core.utils import storage_hash
 
 User = get_user_model()
+
+
+class GroupFactory(DjangoModelFactory):
+    class Meta:
+        model = Group
 
 
 class UserFactory(DjangoModelFactory):
@@ -25,6 +30,15 @@ class UserFactory(DjangoModelFactory):
     last_name = Faker("last_name_female", min_length=5)
     username = UniqueFaker("pystr", min_chars=30, max_chars=40, prefix="user_")
     email = Faker("ascii_safe_email")
+
+    @post_generation
+    def groups(self, create: bool, extracted: Iterable[Group], **kwargs: Any):
+        del kwargs
+        if not create or not extracted:
+            # Simple build, or nothing to add, do nothing.
+            return
+        # Add the iterable of groups using bulk addition
+        self.groups.add(*extracted)  # type: ignore
 
 
 class UnitGroupFactory(DjangoModelFactory):
