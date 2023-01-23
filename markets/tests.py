@@ -1,4 +1,4 @@
-from core.factories import UserFactory
+from core.factories import UserFactory, GroupFactory
 from django.utils import timezone
 from freezegun import freeze_time
 from evans_django_tools.testsuite import EvanTestCase
@@ -72,7 +72,8 @@ class MarketTests(EvanTestCase):
             alpha=2,
             slug="guess-my-ssn",
         )
-        UserFactory(username="alice")
+        verified_group = GroupFactory(name="Verified")
+        UserFactory(username="alice", groups=(verified_group,))
 
     def test_has_started(self):
         market = Market.objects.get(slug="guess-my-ssn")
@@ -121,6 +122,17 @@ class MarketTests(EvanTestCase):
                 self.url("market-results", "guess-my-ssn"),
                 "market-guess",
                 "guess-my-ssn",
+            )
+
+    def test_guess_form_gated_on_verified(self):
+        with freeze_time("2050-07-01", tz_offset=0):
+            market = Market.objects.get(slug="guess-my-ssn")
+            market.answer = 42
+            market.save()
+            UserFactory.create(username="eve")
+            self.login("eve")
+            self.assertPost40X(
+                "market-guess", "guess-my-ssn", data={"value": 100}, follow=True
             )
 
     def test_guess_form_with_answer(self):

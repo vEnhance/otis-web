@@ -64,6 +64,8 @@ class SubmitGuess(LoginRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]):
         self.market = get_object_or_404(Market, slug=kwargs.pop("slug"))
         if not isinstance(request.user, User):
             return super().dispatch(request, *args, **kwargs)  # login required mixin
+        if not request.user.groups.filter(name="Verified").exists():
+            raise PermissionDenied
 
         if not self.market.has_started:
             return HttpResponseNotFound()
