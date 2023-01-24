@@ -1,4 +1,3 @@
-from datetime import timedelta
 from typing import Any, List, Optional, Tuple
 
 from core.models import Semester, Unit

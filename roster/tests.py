@@ -175,7 +175,9 @@ class RosterTest(EvanTestCase):
             self.assertFalse(bob.is_delinquent)
 
         # Now he is affected
-        semester.first_payment_deadline = timezone.datetime(2023, 1, 28, tzinfo=timezone.utc)
+        semester.first_payment_deadline = timezone.datetime(
+            2023, 1, 28, tzinfo=timezone.utc
+        )
         semester.save()
 
         with freeze_time("2023-2-08", tz_offset=0):
@@ -189,14 +191,14 @@ class RosterTest(EvanTestCase):
             self.assertEqual(bob.payment_status, 4)
             self.assertFalse(bob.is_delinquent)
 
-        semester.most_payment_deadline = timezone.datetime(2023, 2, 21, tzinfo=timezone.utc)
+        semester.most_payment_deadline = timezone.datetime(
+            2023, 2, 21, tzinfo=timezone.utc
+        )
         semester.save()
 
         with freeze_time("2023-3-01", tz_offset=0):
             self.assertEqual(bob.payment_status, 7)
             self.assertTrue(bob.is_delinquent)
-
-        
 
     def test_master_schedule(self) -> None:
         alice: Student = StudentFactory.create(

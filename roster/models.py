@@ -14,7 +14,7 @@ from django.db import models
 from django.db.models import Count, Q
 from django.db.models.query import QuerySet
 from django.urls import reverse
-from django.utils.timezone import localtime, now
+from django.utils.timezone import localtime
 from sql_util.aggregates import Exists, SubqueryAggregate
 
 from .country_abbrevs import COUNTRY_CHOICES
@@ -328,7 +328,11 @@ class Student(models.Model):
 
         first_payment_deadline = self.semester.first_payment_deadline
 
-        if first_payment_deadline is not None and first_payment_deadline > invoice.created_at and invoice.total_paid <= 0:
+        if (
+            first_payment_deadline is not None
+            and first_payment_deadline > invoice.created_at
+            and invoice.total_paid <= 0
+        ):
             d = first_payment_deadline - now
             if d < timedelta(days=-7):
                 return 3
@@ -340,7 +344,8 @@ class Student(models.Model):
         most_payment_deadline = self.semester.most_payment_deadline
 
         if (
-            most_payment_deadline is not None and most_payment_deadline > invoice.created_at
+            most_payment_deadline is not None
+            and most_payment_deadline > invoice.created_at
             and invoice.total_paid < 2 * invoice.total_cost / 3
         ):
             d = most_payment_deadline - now
