@@ -107,7 +107,6 @@ class InvoiceIEResource(resources.ModelResource):
             "extras",
             "total_paid",
             "student__semester__name",
-            "forgive_date",
             "memo",
         )
         export_order = fields
@@ -163,7 +162,6 @@ class InvoiceAdmin(ImportExportModelAdmin):
         "track",
         "total_owed",
         "total_cost",
-        "forgive_date",
     )
     list_display_links = ("student",)
     search_fields = (
@@ -177,7 +175,6 @@ class InvoiceAdmin(ImportExportModelAdmin):
         "student__legit",
         "student__semester__active",
         "student__track",
-        ("forgive_date", admin.EmptyFieldListFilter),
         "student__semester",
     )
     resource_class = InvoiceIEResource
@@ -228,7 +225,6 @@ class InvoiceInline(admin.StackedInline):
         "adjustment",
         "credits",
         "total_paid",
-        "forgive_date",
         "memo",
     )
     readonly_fields = (
@@ -344,11 +340,7 @@ def build_students(queryset: QuerySet[StudentRegistration]) -> int:
             invoice = Invoice(
                 student=student, preps_taught=n, hours_taught=hours_taught
             )
-            first_payment_deadline = student.semester.first_payment_deadline
-            if first_payment_deadline is not None and first_payment_deadline <= (
-                grace_deadline := timezone.now() + timedelta(days=7)
-            ):
-                invoice.forgive_date = grace_deadline
+
             invoices_to_create.append(invoice)
         Invoice.objects.bulk_create(invoices_to_create)
     return count
