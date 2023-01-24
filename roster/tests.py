@@ -165,29 +165,27 @@ class RosterTest(EvanTestCase):
 
         bob: Student = StudentFactory.create(semester=semester)
 
-        with freeze_time("2022-12-25", tz_offset=0):
+        # Bob is unaffected by earlier payment dates
+        with freeze_time("2023-1-23", tz_offset=0):
             invoice2: Invoice = InvoiceFactory.create(
                 student=bob,
-                preps_taught=2,
+                preps_taught=1,
             )
-
-        # Bob is unaffected by earlier payment dates
-        with freeze_time("2022-12-26", tz_offset=0):
             self.assertEqual(bob.payment_status, 4)
             self.assertFalse(bob.is_delinquent)
 
         # Now he is affected
-        semester.first_payment_deadline = timezone.datetime(2023, 1, 21, tzinfo=timezone.utc)
+        semester.first_payment_deadline = timezone.datetime(2023, 1, 28, tzinfo=timezone.utc)
         semester.save()
 
-        with freeze_time("2023-2-01", tz_offset=0):
+        with freeze_time("2023-2-08", tz_offset=0):
             self.assertEqual(bob.payment_status, 3)
             self.assertTrue(bob.is_delinquent)
 
         invoice2.total_paid = 120
         invoice2.save()
 
-        with freeze_time("2023-2-01", tz_offset=0):
+        with freeze_time("2023-2-08", tz_offset=0):
             self.assertEqual(bob.payment_status, 4)
             self.assertFalse(bob.is_delinquent)
 

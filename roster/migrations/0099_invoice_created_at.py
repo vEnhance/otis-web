@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             model_name="invoice",
             name="created_at",
             field=models.DateTimeField(
-                auto_now_add=True, default=django.utils.timezone.now
+                auto_now_add=True, default=datetime.datetime(1970, 1, 1, 0, 0, tzinfo=utc),
             ),
             preserve_default=False,
         ),
