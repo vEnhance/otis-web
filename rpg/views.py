@@ -135,8 +135,6 @@ class AchievementCertifyList(LoginRequiredMixin, ListView[Achievement]):
         checksum = self.kwargs["checksum"]
         user = get_object_or_404(User, pk=viewed_pk)
 
-        self.viewing = True
-
         if checksum != get_achievement_checksum(viewed_pk, settings.CERT_HASH_KEY):
             raise PermissionDenied(
                 "Wrong or expired hash "
@@ -165,6 +163,8 @@ class AchievementCertifyList(LoginRequiredMixin, ListView[Achievement]):
         context = super().get_context_data(**kwargs)
 
         context["viewing"] = True
+        viewed_pk = self.kwargs["pk"]
+        context["other_user"] = get_object_or_404(User, pk=viewed_pk)
         return context
 
 

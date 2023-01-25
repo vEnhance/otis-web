@@ -1,16 +1,22 @@
 {% extends "layout.html" %}
 {% block title %}
-  Achievements Listing
+  {% if viewing %}
+    {{ other_user.username }}'s Achievements
+  {% else %}
+    Achievements Listing
+  {% endif %}
 {% endblock title %}
 {% block layout-content %}
   <p class="fst-italic">To cash in an achievement, go to your dashboard and open the Charisma meter.</p>
-  <p>
-    {% if viewing %}
-      You are viewing the diamonds of a student through checksum.
-    {% else %}
+  {% if viewing %}
+    <div class="alert alert-info">
+      You are viewing the diamonds of <b><tt>{{ other_user.username }}</tt></b> through checksum.
+    </div>
+  {% else %}
+    <p>
       To share your diamond information, share this <a href="{% url "achievements-certify" pk=pk checksum=checksum %}">URL</a>. This expires daily at server time.
-    {% endif %}
-  </p>
+    </p>
+  {% endif %}
   <div class="list-group">
     {% for achievement in achievement_list %}
       <div class="list-group-item container"
