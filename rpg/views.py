@@ -27,7 +27,7 @@ from django.views.generic.edit import UpdateView
 from hashlib import pbkdf2_hmac
 from otisweb.utils import AuthHttpRequest, get_days_since
 from roster.models import Student
-from roster.utils import get_student_by_pk
+from roster.utils import get_student_by_pk, infer_student
 from sql_util.utils import SubqueryAggregate
 
 from .forms import DiamondsForm
@@ -117,7 +117,7 @@ class AchievementList(LoginRequiredMixin, ListView[Achievement]):
     def get_context_data(self, **kwargs: Dict[str, Any]):
         context = super().get_context_data(**kwargs)
 
-        student = get_object_or_404(Student, user=self.request.user)
+        student = infer_student(self.request)
 
         context["checksum"] = get_achievement_checksum(
             student.pk, settings.CERT_HASH_KEY
