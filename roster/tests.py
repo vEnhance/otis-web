@@ -128,7 +128,12 @@ class RosterTest(EvanTestCase):
         with freeze_time("2022-10-15", tz_offset=0):
             self.assertEqual(alice.payment_status, 3)
             self.assertTrue(alice.is_delinquent)
-
+            invoice.forgive_date = timezone.datetime(2022, 10, 31, tzinfo=timezone.utc)
+            invoice.save()
+            self.assertFalse(alice.is_delinquent)
+        with freeze_time("2022-11-15", tz_offset=0):
+            self.assertEqual(alice.payment_status, 3)
+            self.assertTrue(alice.is_delinquent)
         # Now suppose Alice makes the first payment
         invoice.total_paid = 240
         invoice.save()
@@ -154,7 +159,12 @@ class RosterTest(EvanTestCase):
         with freeze_time("2023-02-15", tz_offset=0):
             self.assertEqual(alice.payment_status, 7)
             self.assertTrue(alice.is_delinquent)
-
+            invoice.forgive_date = timezone.datetime(2023, 2, 28, tzinfo=timezone.utc)
+            invoice.save()
+            self.assertFalse(alice.is_delinquent)
+        with freeze_time("2023-06-05", tz_offset=0):
+            self.assertEqual(alice.payment_status, 7)
+            self.assertTrue(alice.is_delinquent)
         # Now suppose Alice makes the last payment
         invoice.total_paid = 480
         invoice.save()
