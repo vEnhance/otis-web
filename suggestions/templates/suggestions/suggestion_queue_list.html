@@ -40,7 +40,7 @@
               {% endif %}
             {% endif %}
           </td>
-          <td>{{ suggestion.created_at }}</td>
+          <td>{{ suggestion.updated_at }}</td>
           <td class="text-end">
                 {% if request.user.is_staff %}
                     <a href="{% url "admin:suggestions_problemsuggestion_change" suggestion.pk %}">{{ suggestion.pk }}</a>
