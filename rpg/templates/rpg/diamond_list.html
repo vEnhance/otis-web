@@ -15,12 +15,12 @@
     {% for achievement in achievement_list %}
       <div class="list-group-item container"
           {% if viewing and not achievement.obtained and achievement.viewed_obtained %} 
-            style="background-color: #dfddf5;" 
+            style="background-color: #ffeddd;" 
           {% elif viewing and achievement.obtained and not achievement.viewed_obtained %}
             style="background-color: #defffc;" 
           {% elif achievement.obtained %} 
             style="background-color: #ddffdd;" 
-          {% elif achievement.creator %} 
+          {% elif not viewed and achievement.creator %} 
             style="background-color: #ddddff;"  
           {% else %} style="background-color: #ffddff;" {% endif %}>
         <div class="d-flex justify-content-between">
