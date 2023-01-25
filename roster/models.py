@@ -412,7 +412,7 @@ class Invoice(models.Model):
         blank=True,
         help_text="When switched on, won't hard lock delinquents before this date.",
     )
-    
+
     def __str__(self):
         return f"{self.pk or 0} ({self.total_paid}/{self.total_cost})"
 
