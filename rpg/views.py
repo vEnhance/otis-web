@@ -116,13 +116,10 @@ class AchievementList(LoginRequiredMixin, ListView[Achievement]):
 
     def get_context_data(self, **kwargs: Dict[str, Any]):
         context = super().get_context_data(**kwargs)
-
-        student = get_object_or_404(Student, user=self.request.user)
-
         context["checksum"] = get_achievement_checksum(
-            student.pk, settings.CERT_HASH_KEY
+            self.request.user.pk, settings.CERT_HASH_KEY
         )
-        context["pk"] = student.pk
+        context["pk"] = self.request.user.pk
         context["viewing"] = False
         return context
 
@@ -136,8 +133,7 @@ class AchievementCertifyList(LoginRequiredMixin, ListView[Achievement]):
 
         viewed_pk = self.kwargs["pk"]
         checksum = self.kwargs["checksum"]
-
-        student = get_object_or_404(Student, pk=viewed_pk)
+        user = get_object_or_404(User, pk=viewed_pk)
 
         self.viewing = True
 
@@ -158,7 +154,7 @@ class AchievementCertifyList(LoginRequiredMixin, ListView[Achievement]):
                 ),
                 viewed_obtained=Exists(
                     Achievement.objects.filter(
-                        pk=OuterRef("pk"), achievementunlock__user=student.user
+                        pk=OuterRef("pk"), achievementunlock__user=user
                     )
                 ),
             )
@@ -172,14 +168,14 @@ class AchievementCertifyList(LoginRequiredMixin, ListView[Achievement]):
         return context
 
 
-def get_achievement_checksum(student_pk: int, key: str) -> str:
+def get_achievement_checksum(user_pk: int, key: str) -> str:
     time = timezone.now()
 
     day = f"{time.year}-{time.month}-{time.day}"
 
     return pbkdf2_hmac(
         "sha256",
-        (key + str(pow(3, student_pk, 961748927)) + day + "eyes").encode("utf-8"),
+        (key + str(pow(3, user_pk, 961748927)) + day + "eyes").encode("utf-8"),
         b"salt is very yummy but sugar is more yummy",
         100000,
         dklen=18,
