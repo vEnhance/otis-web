@@ -12,7 +12,7 @@
   <div class="list-group">
     {% for achievement in achievement_list %}
       <div class="list-group-item container"
-           {% if viewing and not achievement.obtained and achievement.viewed_obtained %} style="background-color: #ffeddd;" {% elif viewing and achievement.obtained and not achievement.viewed_obtained %} style="background-color: #defffc;" {% elif achievement.obtained %} style="background-color: #ddffdd;" {% elif not viewed and achievement.creator %} style="background-color: #ddddff;" {% else %} style="background-color: #ffddff;" {% endif %}>
+           {% if viewing and not achievement.obtained and achievement.viewed_obtained %} style="background-color: #ffeddd;" {% elif viewing and achievement.obtained and not achievement.viewed_obtained %} style="background-color: #defffc;" {% elif achievement.obtained %} style="background-color: #ddffdd;" {% elif not viewing and achievement.creator %} style="background-color: #ddddff;" {% else %} style="background-color: #ffddff;" {% endif %}>
         <div class="d-flex justify-content-between">
           <span style="color: #9c1421;">
             {% if achievement.num_found > 0 %}
