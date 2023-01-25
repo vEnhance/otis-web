@@ -28,17 +28,18 @@ django-registration = "^3.2"
 django-reversion = "^5.0.0"
 django-sql-utils = "^0.6.1"
 django-storages = {extras = ["google"], version = "^1.11.1"}
-django-stubs = "^1.13.0"
+django-stubs = "^1.13.2"
 django-stubs-ext = "^0.7.0"
 mailchimp3 = "^3.0.15"
 mysqlclient = "^2.1.1"
 prettytable = "^3.4.1"
 pyparsing = "^3.0.9"
-python-dotenv = "^0.21.0"
+python-dotenv = "^0.21.1"
 setuptools = "^65.7.0"
 stripe = "^5.0.0"
 wheel = "^0.38.4"
-wiki = {git = "https://github.com/django-wiki/django-wiki.git", rev = "9c1bea0" }
+wiki = {git = "https://github.com/django-wiki/django-wiki.git", rev = "7981d6d"}
+bleach = {extras = ["css"], version=">=5,<6"} # manual until wiki 0.10 out
 
 [tool.poetry.group.dev.dependencies]
 # TODO: Faker: need to wait until https://github.com/joke2k/faker/pull/1662 resolves
@@ -46,15 +47,15 @@ Faker = "=15.1.1"
 # TODO: update codespell once v2.3.0 is published
 black = "^22.12.0"
 codespell = "^2.2.2"
-coverage = {extras = ["toml"], version = "^7.0.5"}
-djlint = "^1.19.11"
+coverage = {extras = ["toml"], version = "^7.1.0"}
+djlint = "^1.19.13"
 factory-boy = "^3.2.0"
 freezegun = "^1.1.0"
 ipython = "^8.4.0"
 jedi = "^0.18.0"
 pdbpp = "^0.10.3"
 pyflakes = "^3.0.1"
-pyright = "^1.1.290"
+pyright = "^1.1.291"
 tblib = "^1.7.0"
 toml = "^0.10.2"
 types-Markdown = "^3.3.6"
