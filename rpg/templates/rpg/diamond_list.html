@@ -4,11 +4,13 @@
 {% endblock title %}
 {% block layout-content %}
   <p class="fst-italic">To cash in an achievement, go to your dashboard and open the Charisma meter.</p>
-  {% if viewing %}
-    You are viewing the diamonds of a student through checksum.
-  {% else %}
-    To share your diamond information, share this <a href="{% url "achievements-certify" pk=pk checksum=checksum %}">url</a>. This expires daily at server time.
-  {% endif %}
+  <p>
+    {% if viewing %}
+      You are viewing the diamonds of a student through checksum.
+    {% else %}
+      To share your diamond information, share this <a href="{% url "achievements-certify" pk=pk checksum=checksum %}">URL</a>. This expires daily at server time.
+    {% endif %}
+  </p>
   <div class="list-group">
     {% for achievement in achievement_list %}
       <div class="list-group-item container"
