@@ -31,7 +31,7 @@ IS_PRODUCTION=0
 # ADDRESS_REGULAR="my boston address"
 # ADDRESS_HOME="my home address"
 
-CERT_HASH_KEY="cert hash key"
+# CERT_HASH_KEY="cert hash key"
 
 # STRIPE_PUBLISHABLE_KEY="pk_test_..."
 # STRIPE_SECRET_KEY="sk_test_..."
