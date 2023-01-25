@@ -248,6 +248,7 @@ class UpdateInvoice(
         "adjustment",
         "extras",
         "total_paid",
+        "forgive_date",
         "memo",
     )
     object: Invoice
@@ -516,6 +517,7 @@ def giga_chart(request: HttpRequest, format_as: str) -> HttpResponse:
 
     queryset = queryset.order_by(
         "student__enabled",
+        "-forgive_date",
         "debt",
         "student__first_name",
     )
@@ -589,6 +591,7 @@ def giga_chart(request: HttpRequest, format_as: str) -> HttpResponse:
                 round(invoice.credits),
                 round(invoice.extras),
                 round(invoice.total_paid),
+                invoice.forgive_date,
             ]
         )
 
