@@ -7,6 +7,11 @@ urlpatterns = [
     path(
         r"achievements/", views.AchievementList.as_view(), name="achievements-listing"
     ),
+    path(
+        r"achievements/<int:pk>/<str:checksum>/",
+        views.AchievementCertifyList.as_view(),
+        name="achievements-certify",
+    ),
     path(r"foundlist/<int:pk>/", views.FoundList.as_view(), name="found-listing"),
     path(r"leaderboard/", views.leaderboard, name="leaderboard"),
     path(r"palace/<int:student_pk>/", views.PalaceList.as_view(), name="palace-list"),

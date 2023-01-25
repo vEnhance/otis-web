@@ -4,10 +4,25 @@
 {% endblock title %}
 {% block layout-content %}
   <p class="fst-italic">To cash in an achievement, go to your dashboard and open the Charisma meter.</p>
+
+  {% if viewing %} 
+    You are viewing the diamonds of a student through checksum.
+  {% else %}
+    To share your diamond information, share this <a href="{% url "achievements-certify" pk=pk checksum=checksum %}">url</a>. This expires daily at server time.
+  {% endif %}
+
   <div class="list-group">
     {% for achievement in achievement_list %}
       <div class="list-group-item container"
-           {% if achievement.obtained %} style="background-color: #ddffdd;" {% elif achievement.creator %} style="background-color: #ddddff;"  {% else %} style="background-color: #ffddff;" {% endif %}>
+          {% if viewing and not achievement.obtained and achievement.viewed_obtained %} 
+            style="background-color: #dfddf5;" 
+          {% elif viewing and achievement.obtained and not achievement.viewed_obtained %}
+            style="background-color: #defffc;" 
+          {% elif achievement.obtained %} 
+            style="background-color: #ddffdd;" 
+          {% elif achievement.creator %} 
+            style="background-color: #ddddff;"  
+          {% else %} style="background-color: #ffddff;" {% endif %}>
         <div class="d-flex justify-content-between">
           <span style="color: #9c1421;">
             {% if achievement.num_found > 0 %}
@@ -19,7 +34,12 @@
           </span>
         </div>
         {% if achievement.num_found > 0 or achievement.always_show_image %}
-          <span {% if not achievement.obtained and not request.user.is_staff %} style="filter: grayscale(100%) opacity(40%);" {% endif %}>
+          <span 
+            {% if viewing and achievement.viewed_obtained %}
+            {% elif not achievement.obtained and not request.user.is_staff %} 
+              style="filter: grayscale(100%) opacity(40%);" 
+            {% endif %}
+          >
             {% if achievement.image %}
               <img width="64px" style="float: right;" src="{{ achievement.image.url }}" />
             {% else %}
@@ -29,7 +49,7 @@
           {% if achievement.num_found > 0 %}
             <p>
               Found by
-              {% if request.user.is_staff %}
+              {% if request.user.is_staff %} ??? 
                 <a href="{% url "found-listing" achievement.pk %}">
                   <b>{{ achievement.num_found }} user{{ achievement.num_found|pluralize }}</b>.
                 </a>
