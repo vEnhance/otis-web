@@ -14,7 +14,7 @@ from django.db import models
 from django.db.models import Count, Q
 from django.db.models.query import QuerySet
 from django.urls import reverse
-from django.utils.timezone import localtime
+from django.utils.timezone import localtime, now
 from sql_util.aggregates import Exists, SubqueryAggregate
 
 from .country_abbrevs import COUNTRY_CHOICES
