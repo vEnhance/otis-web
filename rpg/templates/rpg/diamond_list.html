@@ -37,7 +37,6 @@
             <p>
               Found by
               {% if request.user.is_staff %}
-                ???
                 <a href="{% url "found-listing" achievement.pk %}">
                   <b>{{ achievement.num_found }} user{{ achievement.num_found|pluralize }}</b>.
                 </a>
