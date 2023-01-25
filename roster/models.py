@@ -359,7 +359,9 @@ class Student(models.Model):
 
     @property
     def is_delinquent(self) -> bool:
-        return self.payment_status % 4 == 3
+        return self.payment_status % 4 == 3 and (
+            self.invoice.forgive_date is None or now() > self.invoice.forgive_date
+        )
 
 
 class Invoice(models.Model):
@@ -405,7 +407,12 @@ class Invoice(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     memo = models.TextField(blank=True, help_text="Internal note to self.")
-
+    forgive_date = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="When switched on, won't hard lock delinquents before this date.",
+    )
+    
     def __str__(self):
         return f"{self.pk or 0} ({self.total_paid}/{self.total_cost})"
 

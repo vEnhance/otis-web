@@ -106,6 +106,7 @@ class InvoiceIEResource(resources.ModelResource):
             "extras",
             "total_paid",
             "student__semester__name",
+            "forgive_date",
             "memo",
         )
         export_order = fields
@@ -161,6 +162,7 @@ class InvoiceAdmin(ImportExportModelAdmin):
         "track",
         "total_owed",
         "total_cost",
+        "forgive_date",
     )
     list_display_links = ("student",)
     search_fields = (
@@ -174,6 +176,7 @@ class InvoiceAdmin(ImportExportModelAdmin):
         "student__legit",
         "student__semester__active",
         "student__track",
+        ("forgive_date", admin.EmptyFieldListFilter),
         "student__semester",
     )
     resource_class = InvoiceIEResource
@@ -224,6 +227,7 @@ class InvoiceInline(admin.StackedInline):
         "adjustment",
         "credits",
         "total_paid",
+        "forgive_date",
         "memo",
     )
     readonly_fields = (
