@@ -113,4 +113,4 @@ class SuggestionQueueList(LoginRequiredMixin, ListView[ProblemSuggestion]):
     def get_queryset(self) -> QuerySet[ProblemSuggestion]:
         return ProblemSuggestion.objects.filter(
             status__in=("SUGG_EDIT", "SUGG_NEW")
-        ).order_by("pk")
+        ).order_by("updated_at")
