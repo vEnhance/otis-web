@@ -10,13 +10,25 @@
   <p class="fst-italic">To cash in an achievement, go to your dashboard and open the Charisma meter.</p>
   {% if viewing %}
     <div class="alert alert-info">
-      You are viewing the diamonds of <b><tt>{{ other_user.username }}</tt></b> through checksum.
+      You are viewing the diamonds of <b><tt>{{ other_user.username }}</tt></b> in comparison to your own.
     </div>
   {% else %}
     <p>
-      To share your diamond information, share this <a href="{% url "achievements-certify" pk=pk checksum=checksum %}">URL</a>. This expires daily at server time.
+      To share your diamond information, share this <a href="{% url "achievements-certify" pk=pk checksum=checksum %}">URL</a>. This expires daily on UTC time.
     </p>
   {% endif %}
+  <ul>
+    {% if viewing %}
+      <li><span style="color: #aaccaa;"><b>GREEN</b></span> diamonds are those that both have.</li>
+      <li><span style="color: #abccc9;"><b>BLUE</b></span> diamonds are those that <b><tt>{{ other_user.username }}</tt></b> has not unlocked while you have.</li>
+      <li><span style="color: #ccbaaa;"><b>ORANGE</b></span> diamonds are conversely those <b><tt>{{ other_user.username }}</tt></b> has that you don't.</li>
+      <li><span style="color: #ccaacc;"><b>RED</b></span> diamonds are those that neither have.</li>
+    {% else %}
+      <li><span style="color: #aaccaa;"><b>GREEN</b></span> diamonds are those that you have.</li>
+      <li><span style="color: #ccaacc;"><b>RED</b></span> diamonds are those that you don't have.</li>
+      <li><span style="color: #aaaacc;"><b>PURPLE</b></span> diamonds are those that you don't have, but are created by a student and might require steps not located in affiliated places.</li>
+    {% endif %}
+  </ul>
   <div class="list-group">
     {% for achievement in achievement_list %}
       <div class="list-group-item container"
