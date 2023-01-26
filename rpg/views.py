@@ -21,7 +21,6 @@ from django.forms.models import BaseModelForm
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
-from django.utils import timezone
 from django.views.generic import ListView
 from django.views.generic.edit import UpdateView
 from hashlib import pbkdf2_hmac
@@ -101,7 +100,7 @@ class AchievementList(LoginRequiredMixin, ListView[Achievement]):
         if not isinstance(self.request.user, User):
             raise PermissionDenied("Please log in")
 
-        return (
+        achievements = (
             Achievement.objects.all()
             .annotate(
                 num_found=SubqueryAggregate("achievementunlock", aggregate=Count),
@@ -114,10 +113,14 @@ class AchievementList(LoginRequiredMixin, ListView[Achievement]):
             .order_by("-obtained", "-num_found")
         )
 
+        self.amount = len(achievements.filter(obtained=True))
+
+        return achievements
+
     def get_context_data(self, **kwargs: Dict[str, Any]):
         context = super().get_context_data(**kwargs)
         context["checksum"] = get_achievement_checksum(
-            self.request.user.pk, settings.CERT_HASH_KEY
+            self.request.user.pk, self.amount, settings.CERT_HASH_KEY
         )
         context["pk"] = self.request.user.pk
         context["viewing"] = False
@@ -133,15 +136,10 @@ class AchievementCertifyList(LoginRequiredMixin, ListView[Achievement]):
 
         viewed_pk = self.kwargs["pk"]
         checksum = self.kwargs["checksum"]
+
         user = get_object_or_404(User, pk=viewed_pk)
 
-        if checksum != get_achievement_checksum(viewed_pk, settings.CERT_HASH_KEY):
-            raise PermissionDenied(
-                "Wrong or expired hash "
-                + get_achievement_checksum(viewed_pk, settings.CERT_HASH_KEY)
-            )
-
-        return (
+        achievements = (
             Achievement.objects.all()
             .annotate(
                 num_found=SubqueryAggregate("achievementunlock", aggregate=Count),
@@ -159,6 +157,15 @@ class AchievementCertifyList(LoginRequiredMixin, ListView[Achievement]):
             .order_by("-obtained", "-viewed_obtained", "-num_found")
         )
 
+        if checksum != get_achievement_checksum(
+            viewed_pk,
+            len(achievements.filter(viewed_obtained=True)),
+            settings.CERT_HASH_KEY,
+        ):
+            raise PermissionDenied("Wrong or expired hash ")
+
+        return achievements
+
     def get_context_data(self, **kwargs: Dict[str, Any]):
         context = super().get_context_data(**kwargs)
 
@@ -168,14 +175,12 @@ class AchievementCertifyList(LoginRequiredMixin, ListView[Achievement]):
         return context
 
 
-def get_achievement_checksum(user_pk: int, key: str) -> str:
-    time = timezone.now()
-
-    day = f"{time.year}-{time.month}-{time.day}"
-
+def get_achievement_checksum(user_pk: int, num: int, key: str) -> str:
     return pbkdf2_hmac(
         "sha256",
-        (key + str(pow(3, user_pk, 961748927)) + day + "eyes").encode("utf-8"),
+        (
+            key + str(pow(3, user_pk, 961748927)) + str(pow(3, num, 961748927)) + "eyes"
+        ).encode("utf-8"),
         b"salt is very yummy but sugar is more yummy",
         100000,
         dklen=18,
