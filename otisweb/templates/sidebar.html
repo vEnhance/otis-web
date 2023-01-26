@@ -108,6 +108,9 @@
     <p class="fst-italic">
       <small>{{ student.semester }} ({{ student.semester.years }})</small>
     </p>
+    <p class="fst-italic">
+      <small>Student ID: {{ student.pk }}</small>
+    </p>
   {% endif %}
   {% if request.user.is_staff %}
     <hr />
