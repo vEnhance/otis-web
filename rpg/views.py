@@ -178,7 +178,9 @@ class AchievementCertifyList(LoginRequiredMixin, ListView[Achievement]):
 def get_achievement_checksum(user_pk: int, num: int, key: str) -> str:
     return pbkdf2_hmac(
         "sha256",
-        (key + str(pow(3, user_pk, 961748927)) + str(pow(3, num, 961748927)) + "eyes").encode("utf-8"),
+        (
+            key + str(pow(3, user_pk, 961748927)) + str(pow(3, num, 961748927)) + "eyes"
+        ).encode("utf-8"),
         b"salt is very yummy but sugar is more yummy",
         100000,
         dklen=18,
