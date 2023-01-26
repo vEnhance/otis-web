@@ -156,7 +156,7 @@ class AchievementCertifyList(LoginRequiredMixin, ListView[Achievement]):
                     )
                 ),
             )
-            .order_by("-obtained", "-num_found")
+            .order_by("-obtained", "-viewed_obtained", "-num_found")
         )
 
     def get_context_data(self, **kwargs: Dict[str, Any]):
