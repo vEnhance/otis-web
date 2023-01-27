@@ -2,7 +2,21 @@
 
 import datetime
 from django.db import migrations, models
+from django.db.models.expressions import OuterRef, Subquery
 from django.utils.timezone import utc
+
+from typing import Any
+
+
+def set_invoice_created_at_by_student_reg(apps: Any, scheme_editor: Any):
+    Invoice = apps.get_model("roster", "Invoice")
+    Invoice.objects.filter(student__reg__isnull=False).update(
+        created_at=Subquery(
+            Invoice.objects.filter(pk=OuterRef("pk")).values(
+                "student__reg__created_at"
+            )[:1]
+        )
+    )
 
 
 class Migration(migrations.Migration):
@@ -20,5 +34,8 @@ class Migration(migrations.Migration):
                 default=datetime.datetime(1970, 1, 1, 0, 0, tzinfo=utc),
             ),
             preserve_default=False,
+        ),
+        migrations.RunPython(
+            set_invoice_created_at_by_student_reg, migrations.RunPython.noop
         ),
     ]
