@@ -51,7 +51,10 @@
   {% if invoice %}
     {% include "roster/invoice_table.html" %}
     <hr />
-    <p>This invoice was last updated on {{ invoice.updated_at }} server time.</p>
+    <p>
+      This invoice was last updated on {{ invoice.updated_at }} server time.
+      It was first created at {{ invoice.created_at }}.
+    </p>
     <p>
       Please contact me if you think there are any errors
       (I make mistakes every year!).
