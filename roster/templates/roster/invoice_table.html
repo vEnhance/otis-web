@@ -21,7 +21,11 @@
           </td>
         </tr>
         <tr>
-          <th>Date</th>
+          <th>Created</th>
+          <td>{{ invoice.created_at|date }}</td>
+        </tr>
+        <tr>
+          <th>Updated</th>
           <td>{{ invoice.updated_at|date }}</td>
         </tr>
         <tr>
@@ -73,10 +77,14 @@
           </tr>
           <tr>
             <td colspan="2">Credits</td>
-            <td class="text-end">{{ invoice.credits|stringformat:"+.2f" }}</td>
+            <td class="text-end">
+              {{ invoice.credits|stringformat:"+.2f" }}
+            </td>
           </tr>
           <tr class="{% if invoice.total_owed > 0 %}table-warning{% else %}table-info{% endif %}">
-            <th colspan="2">Total owed to Evan</th>
+            <th colspan="2">
+              Total owed to Evan
+            </th>
             {% if invoice.total_owed <= 0 %}
               <th class="text-success text-end">
                 {{ invoice.total_owed }}

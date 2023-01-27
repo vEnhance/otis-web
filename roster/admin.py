@@ -1,4 +1,3 @@
-from datetime import timedelta
 from typing import Any, List, Optional, Tuple
 
 from core.models import Semester, Unit
@@ -344,11 +343,7 @@ def build_students(queryset: QuerySet[StudentRegistration]) -> int:
             invoice = Invoice(
                 student=student, preps_taught=n, hours_taught=hours_taught
             )
-            first_payment_deadline = student.semester.first_payment_deadline
-            if first_payment_deadline is not None and first_payment_deadline <= (
-                grace_deadline := timezone.now() + timedelta(days=7)
-            ):
-                invoice.forgive_date = grace_deadline
+
             invoices_to_create.append(invoice)
         Invoice.objects.bulk_create(invoices_to_create)
     return count

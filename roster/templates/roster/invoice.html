@@ -2,7 +2,7 @@
 {% load static %}
 {% load otis_extras %}
 {% block layout-content %}
-  {% if student.is_payment_locked %}
+  {% if student.is_delinquent %}
     <div class="alert alert-danger" role="alert">
       <h2 class="alert-heading">Overdue payment</h2>
       Your current payment is more than one week overdue.
@@ -51,7 +51,10 @@
   {% if invoice %}
     {% include "roster/invoice_table.html" %}
     <hr />
-    <p>This invoice was last updated on {{ invoice.updated_at }} server time.</p>
+    <p>
+      This invoice was last updated on {{ invoice.updated_at }} server time.
+      It was first created at {{ invoice.created_at }}.
+    </p>
     <p>
       Please contact me if you think there are any errors
       (I make mistakes every year!).

@@ -326,8 +326,14 @@ class Student(models.Model):
 
         now = localtime()
 
-        if self.semester.first_payment_deadline is not None and invoice.total_paid <= 0:
-            d = self.semester.first_payment_deadline - now
+        first_payment_deadline = self.semester.first_payment_deadline
+
+        if (
+            first_payment_deadline is not None
+            and first_payment_deadline > invoice.created_at
+            and invoice.total_paid <= 0
+        ):
+            d = first_payment_deadline - now
             if d < timedelta(days=-7):
                 return 3
             elif d < timedelta(days=0):
@@ -335,11 +341,14 @@ class Student(models.Model):
             elif d < timedelta(days=7):
                 return 1
 
+        most_payment_deadline = self.semester.most_payment_deadline
+
         if (
-            self.semester.most_payment_deadline is not None
+            most_payment_deadline is not None
+            and most_payment_deadline > invoice.created_at
             and invoice.total_paid < 2 * invoice.total_cost / 3
         ):
-            d = self.semester.most_payment_deadline - now
+            d = most_payment_deadline - now
             if d < timedelta(days=-7):
                 return 7
             elif d < timedelta(days=0):
@@ -349,12 +358,8 @@ class Student(models.Model):
         return 4
 
     @property
-    def is_payment_locked(self):
-        return self.payment_status % 4 == 3
-
-    @property
     def is_delinquent(self) -> bool:
-        return self.is_payment_locked and (
+        return self.payment_status % 4 == 3 and (
             self.invoice.forgive_date is None or now() > self.invoice.forgive_date
         )
 
@@ -399,6 +404,7 @@ class Invoice(models.Model):
     total_paid = models.DecimalField(
         max_digits=8, decimal_places=2, default=0, help_text="Amount paid."
     )
+    created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     forgive_date = models.DateTimeField(
         null=True,

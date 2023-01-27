@@ -3,7 +3,6 @@ from io import StringIO
 
 from core.factories import SemesterFactory, UnitFactory, UserFactory
 from django.conf import settings
-
 from django.utils import timezone
 from django.urls import reverse
 from evans_django_tools.testsuite import EvanTestCase
@@ -38,7 +37,9 @@ class TestPortal(EvanTestCase):
 
         alice.enabled = False
         alice.save()
-        InvoiceFactory.create(student=alice)
+
+        with freeze_time("2021-06-20", tz_offset=0):
+            InvoiceFactory.create(student=alice)
 
         with freeze_time("2021-07-30", tz_offset=0):
             self.assertGetRedirects(
@@ -164,7 +165,9 @@ class TestPSet(EvanTestCase):
         )
         alice = StudentFactory.create(semester=semester)
         self.login(alice)
-        InvoiceFactory.create(student=alice)
+
+        with freeze_time("2021-06-20", tz_offset=0):
+            InvoiceFactory.create(student=alice)
 
         with freeze_time("2021-07-30", tz_offset=0):
             self.assertGetDenied("submit-pset", alice.pk)
@@ -378,7 +381,9 @@ class TestPSet(EvanTestCase):
         )
         alice = StudentFactory.create(semester=semester)
         self.login(alice)
-        InvoiceFactory.create(student=alice)
+
+        with freeze_time("2021-06-20", tz_offset=0):
+            InvoiceFactory.create(student=alice)
 
         with freeze_time("2021-07-30", tz_offset=0):
             self.assertGetDenied("student-pset-list", alice.pk)
