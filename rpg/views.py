@@ -72,7 +72,7 @@ def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
                         extra={"request": request},
                     )
                     context["already_achievement"] = achievement
-   
+
             form = DiamondsForm()
     else:
         form = DiamondsForm()
