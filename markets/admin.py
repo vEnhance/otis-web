@@ -34,6 +34,7 @@ class MarketAdmin(admin.ModelAdmin):
 
 @admin.register(Guess)
 class GuessAdmin(admin.ModelAdmin):
+    readonly_fields = ("created_at",)
     list_display = (
         "market",
         "value",

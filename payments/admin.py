@@ -9,6 +9,7 @@ from .models import Job, JobFolder, PaymentLog, Worker
 
 @admin.register(PaymentLog)
 class PaymentLogAdmin(admin.ModelAdmin):
+    readonly_fields = ("created_at",)
     list_display = (
         "invoice",
         "amount",
@@ -25,6 +26,7 @@ class PaymentLogAdmin(admin.ModelAdmin):
 
 @admin.register(Worker)
 class WorkerAdmin(admin.ModelAdmin):
+    readonly_fields = ("updated_at",)
     list_display = (
         "pk",
         "user",
@@ -97,6 +99,11 @@ class JobAdmin(ImportExportModelAdmin):
         return obj.admin_notes != ""
 
     flagged.boolean = True
+
+    readonly_fields = (
+        "created_at",
+        "updated_at",
+    )
 
     list_display = (
         "pk",

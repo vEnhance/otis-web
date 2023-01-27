@@ -59,6 +59,7 @@ class AchievementAdmin(ImportExportModelAdmin):
 
 @admin.register(AchievementUnlock)
 class AchievementUnlockAdmin(admin.ModelAdmin):
+    readonly_fields = ("timestamp",)
     list_display = (
         "user",
         "achievement",
@@ -77,6 +78,7 @@ class AchievementUnlockAdmin(admin.ModelAdmin):
 
 @admin.register(QuestComplete)
 class QuestCompleteAdmin(admin.ModelAdmin):
+    readonly_fields = ("timestamp",)
     list_display = (
         "pk",
         "title",
@@ -110,6 +112,7 @@ class BonusLevelAdmin(admin.ModelAdmin):
 
 @admin.register(BonusLevelUnlock)
 class BonusLevelUnlockAdmin(admin.ModelAdmin):
+    readonly_fields = ("timestamp",)
     list_display = (
         "pk",
         "timestamp",
@@ -125,6 +128,7 @@ class BonusLevelUnlockAdmin(admin.ModelAdmin):
 
 @admin.register(PalaceCarving)
 class PalaceCarvingAdmin(admin.ModelAdmin):
+    readonly_fields = ("created_at",)
     list_display = (
         "pk",
         "display_name",

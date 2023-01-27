@@ -157,6 +157,10 @@ class OwedFilter(admin.SimpleListFilter):
 
 @admin.register(Invoice)
 class InvoiceAdmin(ImportExportModelAdmin):
+    readonly_fields = (
+        "created_at",
+        "updated_at",
+    )
     list_display = (
         "student",
         "track",
@@ -351,6 +355,7 @@ def build_students(queryset: QuerySet[StudentRegistration]) -> int:
 
 @admin.register(StudentRegistration)
 class StudentRegistrationAdmin(ImportExportModelAdmin):
+    readonly_fields = ("created_at",)
     list_display = (
         "name",
         "processed",
@@ -388,6 +393,10 @@ class StudentRegistrationAdmin(ImportExportModelAdmin):
 # INQUIRY
 @admin.register(UnitInquiry)
 class UnitInquiryAdmin(admin.ModelAdmin):
+    readonly_fields = (
+        "created_at",
+        "updated_at",
+    )
     list_display = (
         "pk",
         "status",

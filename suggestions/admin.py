@@ -7,6 +7,10 @@ from .models import ProblemSuggestion
 
 @admin.register(ProblemSuggestion)
 class ProblemSuggestionAdmin(admin.ModelAdmin):
+    readonly_fields = (
+        "created_at",
+        "updated_at",
+    )
     list_display = (
         "pk",
         "user",

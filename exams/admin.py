@@ -59,6 +59,7 @@ class PracticeExamAdmin(ImportExportModelAdmin):
 
 @admin.register(ExamAttempt)
 class ExamAttemptAdmin(admin.ModelAdmin):
+    readonly_fields = ("submit_time",)
     list_display = (
         "quiz",
         "student",

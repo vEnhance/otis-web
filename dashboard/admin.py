@@ -11,6 +11,7 @@ from .models import PSet, SemesterDownloadFile, UploadedFile  # NOQA
 
 @admin.register(UploadedFile)
 class UploadedFileAdmin(admin.ModelAdmin):
+    readonly_fields = ("created_at",)
     list_display = (
         "pk",
         "content",
@@ -33,6 +34,7 @@ class UploadedFileAdmin(admin.ModelAdmin):
 
 @admin.register(SemesterDownloadFile)
 class SemesterDownloadFileAdmin(admin.ModelAdmin):
+    readonly_fields = ("created_at",)
     list_display = (
         "pk",
         "semester",
