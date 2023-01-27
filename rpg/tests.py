@@ -14,6 +14,7 @@ from rpg.factories import (
     LevelFactory,
     QuestCompleteFactory,
 )  # NOQA
+from rpg.models import AchievementUnlock
 from rpg.levelsys import (
     annotate_student_queryset_with_scores,
     get_level_info,
@@ -265,6 +266,64 @@ class TestLevelSystem(EvanTestCase):
         admin = UserFactory.create(is_staff=True, is_superuser=True)
         self.login(admin)
         self.assertGet20X("leaderboard")
+
+    def test_submit_diamond(self):
+        a1 = AchievementFactory.create(diamonds=3)
+        a2 = AchievementFactory.create(diamonds=3)
+        alice = self.get_alice()
+        self.login(alice.user)
+
+        # Submit a nonexistent code
+        resp = self.assertPost20X(
+            "stats", alice.pk, data={"code": "123456123456123456123456"}
+        )
+        self.assertContains(resp, "You entered an invalid code.")
+        self.assertFalse(
+            AchievementUnlock.objects.filter(achievement=a1, user=alice.user).exists()
+        )
+        self.assertFalse(
+            AchievementUnlock.objects.filter(achievement=a2, user=alice.user).exists()
+        )
+
+        # Submit a valid code for a1
+        resp = self.assertPost20X("stats", alice.pk, data={"code": a1.code})
+        self.assertContains(resp, "Achievement unlocked!")
+        self.assertTrue(
+            AchievementUnlock.objects.filter(achievement=a1, user=alice.user).exists()
+        )
+        self.assertFalse(
+            AchievementUnlock.objects.filter(achievement=a2, user=alice.user).exists()
+        )
+
+        # Submit a valid code for a1 that was obtained already
+        resp = self.assertPost20X("stats", alice.pk, data={"code": a1.code})
+        self.assertContains(resp, "Already unlocked!")
+        self.assertTrue(
+            AchievementUnlock.objects.filter(achievement=a1, user=alice.user).exists()
+        )
+        self.assertFalse(
+            AchievementUnlock.objects.filter(achievement=a2, user=alice.user).exists()
+        )
+
+        # Submit a valid code for a2
+        resp = self.assertPost20X("stats", alice.pk, data={"code": a2.code})
+        self.assertContains(resp, "Achievement unlocked!")
+        self.assertTrue(
+            AchievementUnlock.objects.filter(achievement=a1, user=alice.user).exists()
+        )
+        self.assertTrue(
+            AchievementUnlock.objects.filter(achievement=a2, user=alice.user).exists()
+        )
+
+        # Submit a valid code for a2 that was obtained already
+        resp = self.assertPost20X("stats", alice.pk, data={"code": a2.code})
+        self.assertContains(resp, "Already unlocked!")
+        self.assertTrue(
+            AchievementUnlock.objects.filter(achievement=a1, user=alice.user).exists()
+        )
+        self.assertTrue(
+            AchievementUnlock.objects.filter(achievement=a2, user=alice.user).exists()
+        )
 
 
 class TestPalace(EvanTestCase):
