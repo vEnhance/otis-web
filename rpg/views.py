@@ -55,27 +55,24 @@ def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
         form = DiamondsForm(request.POST)
         if form.is_valid():
             code = form.cleaned_data["code"]
-            if AchievementUnlock.objects.filter(
-                user=student.user, achievement__code=code
-            ).exists():
-                messages.warning(request, "You already earned this achievement!")
+
+            try:
+                achievement = Achievement.objects.get(code__iexact=code)
+            except Achievement.DoesNotExist:
+                messages.error(request, "You entered an invalid code.")
+                logger.warn(
+                    f"Invalid diamond code `{code}`", extra={"request": request}
+                )
             else:
-                try:
-                    achievement = Achievement.objects.get(code__iexact=code)
-                except Achievement.DoesNotExist:
-                    messages.error(request, "You entered an invalid code.")
+                if AchievementUnlock.objects.filter(
+                    user=student.user, achievement__code=code
+                ).exists():
                     logger.warn(
-                        f"Invalid diamond code `{code}`", extra={"request": request}
-                    )
-                else:
-                    logger.info(
-                        f"{student.name} obtained {achievement}",
+                        f"{student.name} has already obtained {achievement} before",
                         extra={"request": request},
                     )
-                    AchievementUnlock.objects.create(
-                        user=student.user, achievement=achievement
-                    )
-                    context["obtained_achievement"] = achievement
+                    context["already_achievement"] = achievement
+
             form = DiamondsForm()
     else:
         form = DiamondsForm()
