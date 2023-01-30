@@ -12,6 +12,14 @@
       offers spades for correctly guessing hidden values.
     </p>
   {% endif %}
+  {% if request.user.is_superuser %}
+    <p class="text-center">
+      <a href="{% url "market-new" %}"
+         title="New market"
+         class="btn btn-link btn-outline-primary">Create new market</a>
+    </p>
+    <hr />
+  {% endif %}
   <table class="table">
     <tr class="table-dark">
       <th>Market</th>
