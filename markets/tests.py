@@ -1,4 +1,5 @@
 from core.factories import UserFactory, GroupFactory
+from core.factories import SemesterFactory
 from django.utils import timezone
 from freezegun import freeze_time
 from evans_django_tools.testsuite import EvanTestCase
@@ -244,3 +245,88 @@ class MarketTests(EvanTestCase):
             self.assertAlmostEqual(
                 resp.context["avg"], round((42 / 100) ** 2 * 2, ndigits=2)
             )
+
+
+class CreateMarketTests(EvanTestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        SemesterFactory.create(active=True)
+
+    def test_create_market(self):
+        admin = UserFactory.create(is_staff=True, is_superuser=True)
+
+        with freeze_time("2050-01-01", tz_offset=0):
+            self.login(admin)
+
+            self.assertPost20X(
+                "market-new",
+                data={
+                    "slug": "market1",
+                    "title": "Market 1",
+                    "prompt_plain": "Prompt for market 1",
+                },
+                follow=True,
+            )
+            market1 = Market.objects.get(slug="market1")
+            self.assertEqual(market1.start_date.year, 2050)
+            self.assertEqual(market1.start_date.month, 1)
+            self.assertEqual(market1.start_date.day, 8)
+            self.assertEqual(market1.end_date.year, 2050)
+            self.assertEqual(market1.end_date.month, 1)
+            self.assertEqual(market1.end_date.day, 11)
+
+            self.assertPost20X(
+                "market-new",
+                data={
+                    "slug": "market2",
+                    "title": "Market 2",
+                    "prompt_plain": "Prompt for market 2",
+                },
+                follow=True,
+            )
+            market2 = Market.objects.get(slug="market2")
+            self.assertEqual(market2.start_date.year, 2050)
+            self.assertEqual(market2.start_date.month, 1)
+            self.assertEqual(market2.start_date.day, 15)
+            self.assertEqual(market2.end_date.year, 2050)
+            self.assertEqual(market2.end_date.month, 1)
+            self.assertEqual(market2.end_date.day, 18)
+
+        with freeze_time("2050-01-19", tz_offset=0):
+            self.login(admin)
+            self.assertPost20X(
+                "market-new",
+                data={
+                    "slug": "market3",
+                    "title": "Market 3",
+                    "prompt_plain": "Prompt for market 3",
+                },
+                follow=True,
+            )
+            market3 = Market.objects.get(slug="market3")
+            self.assertEqual(market3.start_date.year, 2050)
+            self.assertEqual(market3.start_date.month, 1)
+            self.assertEqual(market3.start_date.day, 22)
+            self.assertEqual(market3.end_date.year, 2050)
+            self.assertEqual(market3.end_date.month, 1)
+            self.assertEqual(market3.end_date.day, 25)
+
+        with freeze_time("2050-03-01", tz_offset=0):
+            self.login(admin)
+            self.assertPost20X(
+                "market-new",
+                data={
+                    "slug": "market4",
+                    "title": "Market 4",
+                    "prompt_plain": "Prompt for market 4",
+                },
+                follow=True,
+            )
+            market4 = Market.objects.get(slug="market4")
+            self.assertEqual(market4.start_date.year, 2050)
+            self.assertEqual(market4.start_date.month, 3)
+            self.assertEqual(market4.start_date.day, 1)
+            self.assertEqual(market4.end_date.year, 2050)
+            self.assertEqual(market4.end_date.month, 3)
+            self.assertEqual(market4.end_date.day, 4)

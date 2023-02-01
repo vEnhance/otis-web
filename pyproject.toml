@@ -28,7 +28,7 @@ django-registration = "^3.2"
 django-reversion = "^5.0.0"
 django-sql-utils = "^0.6.1"
 django-storages = {extras = ["google"], version = "^1.11.1"}
-django-stubs = "^1.13.2"
+django-stubs = "^1.14.0"
 django-stubs-ext = "^0.7.0"
 mailchimp3 = "^3.0.15"
 mysqlclient = "^2.1.1"
@@ -45,13 +45,13 @@ bleach = {extras = ["css"], version=">=5,<6"} # manual until wiki 0.10 out
 # TODO: Faker: need to wait until https://github.com/joke2k/faker/pull/1662 resolves
 Faker = "=15.1.1"
 # TODO: update codespell once v2.3.0 is published
-black = "^22.12.0"
+black = "^23.1.0"
 codespell = "^2.2.2"
 coverage = {extras = ["toml"], version = "^7.1.0"}
 djlint = "^1.19.13"
 factory-boy = "^3.2.0"
 freezegun = "^1.1.0"
-ipython = "^8.4.0"
+ipython = "^8.9.0"
 jedi = "^0.18.0"
 pdbpp = "^0.10.3"
 pyflakes = "^3.0.1"

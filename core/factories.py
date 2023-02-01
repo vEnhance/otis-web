@@ -72,7 +72,7 @@ class UnitFactory(DjangoModelFactory):
             (u.solutions_pdf_filename, b"Soln", ".pdf"),
             (u.problems_tex_filename, b"TeX", ".tex"),
         ]
-        for (fname, content, ext) in stuff_to_write:
+        for fname, content, ext in stuff_to_write:
             default_storage.save(
                 "pdfs/" + storage_hash(fname) + ext, ContentFile(content)
             )

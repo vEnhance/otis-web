@@ -1,10 +1,10 @@
 from typing import Any, Dict
 
-from braces.views import LoginRequiredMixin
+from braces.views import LoginRequiredMixin, SuperuserRequiredMixin
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
-from django.db.models import Avg, Sum
+from django.db.models import Avg, Sum, Max
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http.request import HttpRequest
@@ -21,8 +21,11 @@ from django.views.decorators.http import require_POST
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView
 from django.views.generic.list import ListView
+import datetime
 from otisweb.decorators import admin_required
 from otisweb.utils import AuthHttpRequest
+from core.models import Semester
+from markets.forms import MarketCreateForm
 
 from .models import Guess, Market
 
@@ -205,3 +208,44 @@ class GuessView(LoginRequiredMixin, DetailView[Guess]):
         ):
             return HttpResponseForbidden("You cannot view this guess.")
         return super().dispatch(request, *args, **kwargs)
+
+
+class MarketCreateView(
+    SuperuserRequiredMixin, CreateView[Market, BaseModelForm[Market]]
+):
+    model = Market
+    form_class = MarketCreateForm
+    object: Market
+
+    def form_valid(self, form: BaseModelForm[Market]):
+        messages.success(self.request, f"Created new market {form.instance.slug}.")
+
+        semester = Semester.objects.get(active=True)
+        form.instance.semester = semester
+        form.instance.prompt = form.cleaned_data["prompt_plain"]
+        form.instance.solution = form.cleaned_data["solution_plain"]
+
+        markets = Market.objects.filter(semester__active=True)
+        # fmt: off
+        max_start_date: datetime.datetime | None = markets.aggregate(a=Max("start_date"))["a"]
+        max_end_date: datetime.datetime | None = markets.aggregate(a=Max("end_date"))["a"]
+        # fmt: on
+
+        if max_start_date is None:
+            start_date = timezone.now() + timezone.timedelta(days=7)
+        else:
+            start_date = max(
+                timezone.now() + timezone.timedelta(hours=1),
+                max_start_date + timezone.timedelta(days=7),
+            )
+        form.instance.start_date = start_date
+        if max_end_date is None:
+            end_date = timezone.now() + timezone.timedelta(days=10)
+        else:
+            end_date = max(
+                timezone.now() + timezone.timedelta(days=3),
+                max_end_date + timezone.timedelta(days=7),
+            )
+        form.instance.end_date = end_date
+
+        return super().form_valid(form)

@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% block title %}
+  Create market (admin)
+{% endblock title %}
+{% load humanize %}
+{% block layout-content %}
+  <p>
+    This form lets you create a new market, scheduled one week after the most
+    recently created one.
+  </p>
+  <ul>
+    <li>
+      <a href="{% url "market-list" %}">Back to all markets list</a>
+    </li>
+    <li>
+      <a href="{% url "admin:markets_market_changelist" %}">Admin market list</a>
+    </li>
+  </ul>
+  {% include "generic_form.html" %}
+{% endblock layout-content %}

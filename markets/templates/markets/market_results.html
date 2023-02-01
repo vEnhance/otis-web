@@ -84,6 +84,10 @@
         {% if market.alpha is not None %}and $\alpha = {{ market.alpha }}${% endif %}
         .
       </p>
+      <ul>
+        <li>Market started: {{ market.start_date }}</li>
+        <li>Market ended: {{ market.end_date }}</li>
+      </ul>
     </div>
   {% endif %}
 {% endblock layout-content %}
