@@ -142,7 +142,7 @@ class Job(models.Model):
         on_delete=models.CASCADE,
         help_text="This is the folder that the job goes under.",
     )
-    name = models.CharField(max_length=80, help_text="Name of job")
+    name = models.CharField(max_length=160, help_text="Name of job")
 
     description = MarkdownField(
         rendered_field="description_rendered",

@@ -232,7 +232,7 @@ class JobList(LoginRequiredMixin, ListView[Job]):
             .order_by(
                 "assignee_count",
                 "progress",
-                "-updated_at",
+                "name",
             )
         )
 
