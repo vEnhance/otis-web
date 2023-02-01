@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from braces.views import LoginRequiredMixin
 from core.models import Unit
