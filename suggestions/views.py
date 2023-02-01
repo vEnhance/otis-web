@@ -93,7 +93,7 @@ class ProblemSuggestionUpdate(
             raise PermissionDenied("Please log in.")
         if not (self.request.user.is_staff or self.request.user == self.object.user):
             raise PermissionDenied("Logged-in user cannot view this suggestion")
-        
+
         context["pk"] = self.kwargs.get("pk", None)
         return context
         return context
