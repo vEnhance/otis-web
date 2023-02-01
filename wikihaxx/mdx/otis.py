@@ -88,13 +88,17 @@ class OTISPreprocessor(markdown.preprocessors.Preprocessor):
                             unit__group=unitgroup, status__in=("A", "PA")
                         ).count()
                         clubs_given = (
-                            PSet.objects.filter(unit__group=unitgroup,).aggregate(
+                            PSet.objects.filter(
+                                unit__group=unitgroup,
+                            ).aggregate(
                                 Sum("clubs")
                             )["clubs__sum"]
                             or 0
                         )
                         hearts_given = (
-                            PSet.objects.filter(unit__group=unitgroup,).aggregate(
+                            PSet.objects.filter(
+                                unit__group=unitgroup,
+                            ).aggregate(
                                 Sum("hours")
                             )["hours__sum"]
                             or 0
