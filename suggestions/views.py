@@ -9,7 +9,8 @@ from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
-from django.views.generic.edit import CreateView, UpdateView
+from django.urls.base import reverse_lazy
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 
 from .models import ProblemSuggestion
@@ -92,7 +93,23 @@ class ProblemSuggestionUpdate(
             raise PermissionDenied("Please log in.")
         if not (self.request.user.is_staff or self.request.user == self.object.user):
             raise PermissionDenied("Logged-in user cannot view this suggestion")
+
+        context["pk"] = self.kwargs.get("pk", None)
         return context
+
+
+class ProblemSuggestionDelete(LoginRequiredMixin, DeleteView):
+    model = ProblemSuggestion
+    success_url = reverse_lazy("suggest-new")
+
+    context_object_name = "suggestion"
+
+    def get_object(self, *args: Any, **kwargs: Any) -> ProblemSuggestion:
+        obj = super().get_object(*args, **kwargs)
+        assert isinstance(self.request.user, User)
+        if obj.user != self.request.user and not self.request.user.is_staff:
+            raise PermissionDenied("Not authorized to delete this file")
+        return obj
 
 
 class ProblemSuggestionList(LoginRequiredMixin, ListView[ProblemSuggestion]):

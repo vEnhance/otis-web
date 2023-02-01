@@ -430,6 +430,8 @@ class TestPSet(EvanTestCase):
 
         upload = UploadedFile.objects.filter(benefactor=alice, unit=unit).first()
 
+        assert upload is not None
+
         self.assertTrue(upload.unit == unit)
         self.assertTrue(upload.owner == alice.user)
 
@@ -446,6 +448,8 @@ class TestPSet(EvanTestCase):
         )
 
         upload = UploadedFile.objects.filter(pk=pk).first()
+
+        assert upload is not None
 
         self.assertTrue(upload.description == "bark")
 
