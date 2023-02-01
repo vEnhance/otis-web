@@ -96,7 +96,6 @@ class ProblemSuggestionUpdate(
 
         context["pk"] = self.kwargs.get("pk", None)
         return context
-        return context
 
 
 class ProblemSuggestionDelete(LoginRequiredMixin, DeleteView):
