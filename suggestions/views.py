@@ -102,6 +102,8 @@ class ProblemSuggestionDelete(LoginRequiredMixin, DeleteView):
     model = ProblemSuggestion
     success_url = reverse_lazy("suggest-new")
 
+    context_object_name = "suggestion"
+
     def get_object(self, *args: Any, **kwargs: Any) -> ProblemSuggestion:
         obj = super().get_object(*args, **kwargs)
         assert isinstance(self.request.user, User)

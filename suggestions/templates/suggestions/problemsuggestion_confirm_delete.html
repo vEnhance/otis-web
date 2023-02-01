@@ -4,4 +4,11 @@
 {% endblock title %}
 {% block layout-content %}
   {% include "generic_delete.html" %}
+  <hr />
+  <a href="{{ suggestion.get_absolute_url }}">&lt;&lt; Go back to suggestion</a>
+  <ul>
+    <li>Source: {{ suggestion.source }}</li>
+    <li>Unit: {{ suggestion.unit.group.name }}<sup>{{ suggestion.unit.code }}</sup></li>
+    <li>Hyperlink: {{ suggestion.hyperlink }}</sup></li>
+  </ul>
 {% endblock layout-content %}
