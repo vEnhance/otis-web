@@ -9,7 +9,7 @@ class HanabiContestAdmin(admin.ModelAdmin):
         "variant_name",
         "num_players",
         "num_suits",
-        "deadline",
+        "end_date",
         "processed",
     )
     list_display_links = (

@@ -22,18 +22,23 @@ class HanabiContest(models.Model):
     variant_name = models.CharField(
         max_length=64, help_text="The variant being played as a string."
     )
-    num_players = models.PositiveSmallIntegerField(help_text="The number of players.")
+    num_players = models.PositiveSmallIntegerField(
+        help_text="The number of players.",
+        default=3,
+    )
     num_suits = models.PositiveSmallIntegerField(
-        help_text="The number of suits.", default=5
+        help_text="The number of suits.",
+        default=5,
     )
     start_date = models.DateTimeField(help_text="When the contest becomes visible.")
-    deadline = models.DateTimeField(help_text="The deadline to play this seed.")
+    end_date = models.DateTimeField(help_text="The end_date to play this seed.")
     processed = models.BooleanField(
-        help_text="Whether the results have been processed", default=False
+        help_text="Whether the results have been processed",
+        default=False,
     )
 
     class Meta:
-        ordering = ("-deadline",)
+        ordering = ("-end_date",)
 
     def __str__(self) -> str:
         return f"Contest #{self.pk}: {self.variant_name}"
@@ -59,7 +64,7 @@ class HanabiContest(models.Model):
 
     @property
     def has_ended(self) -> bool:
-        return timezone.now() >= self.deadline
+        return timezone.now() >= self.end_date
 
 
 class HanabiReplay(models.Model):

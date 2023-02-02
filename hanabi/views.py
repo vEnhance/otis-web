@@ -31,7 +31,7 @@ class HanabiContestList(ListView[HanabiContest]):
         context = super().get_context_data(**kwargs)
         context["player"] = HanabiPlayer.objects.filter(user=self.request.user).first()
         context["active_contests"] = HanabiContest.objects.filter(
-            deadline__gt=timezone.now(),
+            end_date__gt=timezone.now(),
             start_date__lt=timezone.now(),
         )
         context["table_password"] = random.randrange(100, 1000)
