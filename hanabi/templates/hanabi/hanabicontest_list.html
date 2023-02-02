@@ -41,7 +41,8 @@
     <thead>
       <th>#</th>
       <th>Contest</th>
-      <th>Players</th>
+      <th>Status</th>
+      <th>#P</th>
       <th>Deadline</th>
     </thead>
     <tbody>
@@ -52,16 +53,22 @@
             <td>
               <a href="{{ contest.get_absolute_url }}">{{ contest.variant_name }}</a>
             </td>
+            <td>Completed</td>
+          {% elif not contest.has_ended %}
+            <td class="table-warning">{{ contest.variant_name }}</td>
+            <td class="table-warning">Ongoing</td>
           {% elif request.user.is_superuser %}
             <td class="table-primary">
               <strong>
                 <a href="{% url "hanabi-upload" contest.pk %}">{{ contest.variant_name }}</a>
               </strong>
             </td>
+            <td class="table-primary">Pending</td>
           {% else %}
-            <td class="table-warning">{{ contest.variant_name }}</td>
+            <td>{{ contest.variant_name }}</td>
+            <td>Pending</td>
           {% endif %}
-          <td>{{ contest.num_players }}</td>
+          <td>{{ contest.num_players }}p</td>
           <td>{{ contest.deadline }}</td>
         </tr>
       {% endfor %}
@@ -72,6 +79,9 @@
     <li>
       How to participate:
       <ul>
+        <li>
+          Gather a team with the correct number of players.
+        </li>
         <li>
           One player should create a table on hanab.live
           by clicking the "Start table" button above.
@@ -94,7 +104,9 @@
           Don't spectate or look at the results of the game seed
           before you have played.
         </li>
-        <li>Obviously, you may only play once per contest.</li>
+        <li>
+          Obviously, you may only play once per contest.
+        </li>
         <li>
           Each player must be a distinct human (no bots, etc.).
           They do not necessarily have to be in OTIS.
