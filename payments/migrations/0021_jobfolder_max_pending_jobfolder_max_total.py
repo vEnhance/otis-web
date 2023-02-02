@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("payments", "0020_remove_worker_google_username_worker_gmail_address"),
     ]

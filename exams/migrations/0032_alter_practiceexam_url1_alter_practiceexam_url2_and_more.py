@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("exams", "0031_alter_examattempt_guess1_alter_examattempt_guess2_and_more"),
     ]

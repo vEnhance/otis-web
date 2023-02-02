@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("roster", "0091_remove_registrationcontainer_end_year"),
     ]

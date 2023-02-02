@@ -6,7 +6,6 @@ import exams.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("exams", "0030_alter_mockcompleted_options"),
     ]

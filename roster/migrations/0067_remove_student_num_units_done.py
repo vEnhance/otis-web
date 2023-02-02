@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("roster", "0066_alter_studentregistration_graduation_year"),
     ]

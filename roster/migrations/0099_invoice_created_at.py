@@ -17,7 +17,6 @@ def set_invoice_created_at_by_student_reg(apps: Any, scheme_editor: Any):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("roster", "0098_alter_unitinquiry_action_type"),
     ]

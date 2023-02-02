@@ -36,7 +36,6 @@ def revert_fields(apps: Any, scheme_editor: Any):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("payments", "0023_alter_job_payment_preference"),
     ]

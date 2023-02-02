@@ -6,7 +6,6 @@ import dashboard.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("dashboard", "0057_alter_achievement_code"),
     ]

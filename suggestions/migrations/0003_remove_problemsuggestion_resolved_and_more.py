@@ -21,7 +21,6 @@ def unset_status(apps: Any, scheme_editor: Any):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("suggestions", "0002_problemsuggestion_hyperlink"),
     ]

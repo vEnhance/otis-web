@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("roster", "0065_alter_studentregistration_agreement_form"),
     ]

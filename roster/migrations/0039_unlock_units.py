@@ -29,7 +29,6 @@ def do_nothing(apps, scheme_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("roster", "0038_auto_20200428_0839"),
         ("core", "0015_auto_20200314_1453"),

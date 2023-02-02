@@ -7,7 +7,6 @@ import rpg.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("dashboard", "0049_auto_20210916_2058"),
     ]

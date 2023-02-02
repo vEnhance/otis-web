@@ -7,7 +7,6 @@ from django.utils.timezone import utc
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("roster", "0073_registrationcontainer_num_preps"),
     ]

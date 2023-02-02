@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("dashboard", "0080_alter_pset_clubs_alter_pset_hours"),
     ]

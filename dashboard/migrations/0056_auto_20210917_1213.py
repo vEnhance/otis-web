@@ -7,7 +7,6 @@ import rpg.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("dashboard", "0055_rename_palaceentry_palacecarving"),
     ]

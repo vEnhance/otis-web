@@ -15,7 +15,6 @@ def make_achievement(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("dashboard", "0036_achievementunlock"),
     ]

@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("roster", "0061_alter_registrationcontainer_allowed_tracks"),
         ("core", "0024_alter_unitgroup_slug"),

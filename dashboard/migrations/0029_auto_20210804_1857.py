@@ -6,7 +6,6 @@ import rpg.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("dashboard", "0028_alter_pset_next_unit_to_unlock"),
     ]

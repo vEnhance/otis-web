@@ -11,7 +11,6 @@ def set_slug(apps, scheme_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("core", "0022_auto_20210504_0951"),
     ]

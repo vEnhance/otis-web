@@ -8,7 +8,6 @@ import roster.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("core", "0024_alter_unitgroup_slug"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),

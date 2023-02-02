@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("dashboard", "0040_auto_20210820_0034"),
     ]

@@ -7,7 +7,6 @@ import roster.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("roster", "0064_auto_20210805_1551"),
     ]

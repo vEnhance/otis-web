@@ -7,7 +7,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("core", "0003_auto_20170806_0009"),
         ("roster", "0006_auto_20170806_0035"),

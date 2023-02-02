@@ -6,7 +6,6 @@ import core.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("core", "0042_alter_unitgroup_subject"),
     ]

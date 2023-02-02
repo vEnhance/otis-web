@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("roster", "0093_remove_invoice_forgive_invoice_forgive_date"),
     ]

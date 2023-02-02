@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("payments", "0021_jobfolder_max_pending_jobfolder_max_total"),
     ]

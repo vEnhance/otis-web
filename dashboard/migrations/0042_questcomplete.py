@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("roster", "0071_remove_student_usemo_score"),
         ("dashboard", "0041_remove_pset_instructor_comments"),

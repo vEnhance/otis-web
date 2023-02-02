@@ -7,7 +7,6 @@ import rpg.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("dashboard", "0051_alter_palaceentry_image"),
     ]

@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("core", "0043_unitgroup_artwork_thumb_md_and_more"),
     ]

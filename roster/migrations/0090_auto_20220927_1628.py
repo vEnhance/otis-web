@@ -23,7 +23,6 @@ def do_nothing(apps: Any, scheme_editor: Any):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("roster", "0089_alter_unitinquiry_status"),
         ("core", "0038_semester_end_year"),

@@ -34,7 +34,6 @@ def revert_fields(apps: Any, scheme_editor: Any):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("roster", "0094_invoice_credits"),
     ]

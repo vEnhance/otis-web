@@ -9,7 +9,6 @@ import dashboard.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("dashboard", "0010_uploadedfile_description"),
     ]

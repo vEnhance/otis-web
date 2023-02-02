@@ -6,7 +6,6 @@ import exams.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("exams", "0025_auto_20210806_0117"),
     ]

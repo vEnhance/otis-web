@@ -53,7 +53,6 @@ def convert_status_to_bools(apps: Any, scheme_editor: Any):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("dashboard", "0077_pset_status"),
     ]

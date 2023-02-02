@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("core", "0039_alter_semester_calendar_url_meets_evan_and_more"),
     ]

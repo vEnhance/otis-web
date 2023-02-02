@@ -7,7 +7,6 @@ import dashboard.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("dashboard", "0073_achievement_always_show_image_alter_achievement_code"),
     ]

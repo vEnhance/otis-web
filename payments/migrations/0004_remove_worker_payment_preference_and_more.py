@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("core", "0040_alter_calendar_urls_again"),
         ("payments", "0003_alter_worker_notes_alter_worker_paypal_username_and_more"),

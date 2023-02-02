@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("core", "0037_rename_last_announce_dismiss_userprofile_last_email_dismiss"),
         ("dashboard", "0062_auto_20211017_1819"),
