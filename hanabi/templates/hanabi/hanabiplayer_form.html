@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block title %}
+  Register hanab.live username
+{% endblock title %}
+{% load humanize %}
+{% block layout-content %}
+  <p>
+    You are setting the
+    <a href="https://hanab.live">hanab.live username</a> for
+    <strong>{{ request.user.username }}</strong>.
+  </p>
+  {% include "generic_form.html" %}
+{% endblock layout-content %}

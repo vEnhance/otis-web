@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+{% block title %}
+  Hanabi Contests
+{% endblock title %}
+{% block layout-content %}
+  <h2>Active Contests</h2>
+  {% for contest in active_contests %}
+    <h3>{{ contest.variant_name }}</h3>
+    <ul>
+      <li>Players: {{ contest.num_players }}</li>
+      <li>Deadline: {{ contest.deadline }} ({{ contest.deadline|timeuntil }})</li>
+    </ul>
+    <p class="text-center">
+      <a class="btn btn-link btn-success"
+         target="_blank"
+         href="{{ contest.create_table_url }}&password={{ table_password }}">
+        Start table
+      </a>
+      <br />
+      <b>Table password</b>: {{ table_password }}
+    </p>
+  {% empty %}
+    <p>No contests are active at this time.</p>
+  {% endfor %}
+  <hr />
+  <h2>All Contests</h2>
+  <table class="table striped-table">
+    <thead>
+      <th>#</th>
+      <th>Contest</th>
+      <th>Players</th>
+      <th>Deadline</th>
+      <th>Results</th>
+    </thead>
+    <tbody>
+      {% for contest in contests %}
+        <tr>
+          <td>{{ contest.pk }}</td>
+          <td>{{ contest.variant_name }}</td>
+          <td>{{ contest.num_players }}</td>
+          <td>{{ contest.deadline }}</td>
+          <td>
+            <a href="{{ contest.get_absolute_url }}">View results</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <hr />
+  <h2>Rules</h2>
+  <p>TO BE WRITTEN.</p>
+{% endblock layout-content %}

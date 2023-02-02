@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+{% block title %}
+  Hanabi {{ contest.pk }}: {{ contest.variant_name }}
+{% endblock title %}
+{% block layout-content %}
+  <p>
+    <a href="{% url "hanabi-contests" %}">Back to contest list</a>
+  </p>
+  <table class="table striped-table">
+    <thead>
+      <tr>
+        <th>Replay</th>
+        <th>Score</th>
+        <th>Turns</th>
+        <th>Spades</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for replay in replays %}
+        <tr>
+          <td>
+            <a href="{{ replay.get_absolute_url }}">{{ replay.replay_id }}</a>
+          </td>
+          <td>{{ replay.game_score }}</td>
+          <td>{{ replay.turn_count }}</td>
+          <td>{{ replay.spades_score }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock layout-content %}

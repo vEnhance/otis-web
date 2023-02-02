@@ -18,6 +18,7 @@ urlpatterns = [
     path(r"core/", include("core.urls")),
     path(r"dash/", include("dashboard.urls")),
     path(r"exams/", include("exams.urls")),
+    path(r"hanabi/", include("hanabi.urls")),
     path(r"markets/", include("markets.urls")),
     path(r"mouse/", include("mouse.urls")),
     path(r"roster/", include("roster.urls")),
