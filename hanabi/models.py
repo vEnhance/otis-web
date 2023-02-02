@@ -47,9 +47,9 @@ class HanabiContest(models.Model):
             {
                 "name": f"!seed {self.seed_name}",
                 "variantName": self.variant_name,
-                "deckPlays": False,
-                "emptyClues": False,
-                "detrimentalCharacters": False,
+                "timed": "true",
+                "timeBase": "120",
+                "timePerTurn": "20",
             }
         )
 
