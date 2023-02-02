@@ -56,7 +56,7 @@ INSTALLED_APPS = [
     "core",
     "dashboard",
     "exams",
-    "markdownfield",
+    "hanabi",
     "markets",
     "mouse",
     "roster",
@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     # ------------
     "otisweb",
     # ------------
+    "markdownfield",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
