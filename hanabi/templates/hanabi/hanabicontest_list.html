@@ -21,7 +21,12 @@
     <h2>{{ contest.variant_name }}</h2>
     <ul>
       <li>Players: {{ contest.num_players }}</li>
-      <li>Deadline: {{ contest.deadline }} ({{ contest.deadline|timeuntil }})</li>
+      <li>Deadline: {{ contest.end_date }} ({{ contest.end_date|timeuntil }})</li>
+      {% if request.user.is_superuser %}
+        <li>
+          <a href="{% url "admin:hanabi_hanabicontest_change" contest.pk %}">Admin edit</a>
+        </li>
+      {% endif %}
     </ul>
     <p class="text-center">
       <a class="btn btn-link btn-success"
@@ -69,12 +74,14 @@
             <td>Pending</td>
           {% endif %}
           <td>{{ contest.num_players }}p</td>
-          <td>{{ contest.deadline }}</td>
+          <td>{{ contest.end_date }}</td>
         </tr>
       {% endfor %}
     </tbody>
   </table>
-  <h1>Rules</h1>
+  <h1>
+    Rules
+  </h1>
   <ol>
     <li>
       How to participate:

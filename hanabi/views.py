@@ -8,11 +8,7 @@ from django.core.exceptions import PermissionDenied
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http.request import HttpRequest
-from django.http.response import (
-    HttpResponse,
-    HttpResponseBase,
-    HttpResponseRedirect,
-)  # NOQA
+from django.http.response import HttpResponse, HttpResponseBase, HttpResponseRedirect  # NOQA
 from django.shortcuts import get_object_or_404
 from django.urls.base import reverse
 from django.utils import timezone
@@ -27,9 +23,15 @@ class HanabiContestList(ListView[HanabiContest]):
     model = HanabiContest
     context_object_name = "contests"
 
+    def get_queryset(self) -> QuerySet[HanabiContest]:
+        return HanabiContest.objects.filter(start_date__lt=timezone.now())
+
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        context["player"] = HanabiPlayer.objects.filter(user=self.request.user).first()
+        if isinstance(self.request.user, User):
+            context["player"] = HanabiPlayer.objects.filter(
+                user=self.request.user
+            ).first()
         context["active_contests"] = HanabiContest.objects.filter(
             end_date__gt=timezone.now(),
             start_date__lt=timezone.now(),
