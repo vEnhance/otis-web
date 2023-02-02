@@ -93,7 +93,8 @@ Here are some details about what is checked:
 Your code should conform to the style of the rest of the OTIS,
 which follows Google's standards.
 
-- The codebase uses `black` for linting and formatting of Python files,
+- The codebase uses `isort` and `black`
+  for linting and formatting of Python files,
   to ensure the uniformity of style across the repository.
 - In addition, `djlint` is used to format the HTML templates.
 
