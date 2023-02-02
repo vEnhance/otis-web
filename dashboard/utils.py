@@ -1,11 +1,11 @@
 from typing import List
 
-from core.models import Unit
 from django.db.models.expressions import Exists, OuterRef
 from django.db.models.query import QuerySet
-from roster.models import Student
 
+from core.models import Unit
 from dashboard.models import PSet
+from roster.models import Student
 
 
 def pset_subquery(student: Student) -> Exists:

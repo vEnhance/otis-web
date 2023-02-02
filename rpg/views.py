@@ -1,12 +1,13 @@
 import logging
 import random
+from hashlib import pbkdf2_hmac
 from typing import Any, Dict
 
-from braces.views import (
+from braces.views import (  # NOQA
     LoginRequiredMixin,
     StaffuserRequiredMixin,
     SuperuserRequiredMixin,
-)  # NOQA
+)
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
@@ -23,11 +24,11 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views.generic import ListView
 from django.views.generic.edit import UpdateView
-from hashlib import pbkdf2_hmac
+from sql_util.utils import SubqueryAggregate
+
 from otisweb.utils import AuthHttpRequest, get_days_since
 from roster.models import Student
 from roster.utils import get_student_by_pk
-from sql_util.utils import SubqueryAggregate
 
 from .forms import DiamondsForm
 from .levelsys import LevelInfoDict, get_level_info, get_student_rows

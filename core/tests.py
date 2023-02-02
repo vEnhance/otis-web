@@ -1,10 +1,10 @@
 from django.test.utils import override_settings
-from evans_django_tools.testsuite import EvanTestCase
-from roster.factories import StudentFactory
 
 from core.factories import SemesterFactory, UnitFactory, UserFactory
 from core.models import Semester
 from core.utils import storage_hash
+from evans_django_tools.testsuite import EvanTestCase
+from roster.factories import StudentFactory
 
 
 class TestCore(EvanTestCase):

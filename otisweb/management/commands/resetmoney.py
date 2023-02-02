@@ -1,7 +1,8 @@
 from typing import Any
 
-import core.models
 from django.core.management.base import BaseCommand
+
+import core.models
 from payments.models import get_semester_invoices_with_annotations
 from roster.models import Invoice
 

@@ -1,6 +1,5 @@
 from typing import Any, Dict
 
-from core.utils import storage_hash
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
@@ -8,9 +7,10 @@ from factory.declarations import LazyAttribute, Sequence, SubFactory
 from factory.django import DjangoModelFactory
 from factory.faker import Faker
 from factory.helpers import post_generation
-from roster.factories import StudentFactory
 
+from core.utils import storage_hash
 from exams.models import ExamAttempt, PracticeExam
+from roster.factories import StudentFactory
 
 
 class TestFactory(DjangoModelFactory):

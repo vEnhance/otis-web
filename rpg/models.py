@@ -2,12 +2,13 @@ import os
 import random
 from hashlib import sha256
 
-from core.models import UnitGroup
-from dashboard.models import validate_at_most_1mb  # should be in core maybe?  # NOQA
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.validators import RegexValidator  # NOQA
 from django.db import models
+
+from core.models import UnitGroup
+from dashboard.models import validate_at_most_1mb  # should be in core maybe?  # NOQA
 from roster.models import Student
 
 # Create your models here.

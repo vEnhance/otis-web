@@ -3,11 +3,11 @@ from hashlib import sha256
 
 from django.conf import settings
 from django.core.files.storage import default_storage
-from django.http.response import (
+from django.http.response import (  # NOQA
     HttpResponse,
     HttpResponseBadRequest,
     HttpResponseServerError,
-)  # NOQA
+)
 
 logger = logging.getLogger(__name__)
 

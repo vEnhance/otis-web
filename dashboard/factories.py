@@ -1,7 +1,8 @@
-from core.factories import SemesterFactory, UnitFactory  # NOQA
 from django.contrib.auth import get_user_model
 from factory.declarations import LazyAttribute, SubFactory
 from factory.django import DjangoModelFactory, FileField
+
+from core.factories import SemesterFactory, UnitFactory  # NOQA
 from roster.factories import StudentFactory
 
 from .models import PSet, SemesterDownloadFile, UploadedFile  # NOQA

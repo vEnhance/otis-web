@@ -1,34 +1,34 @@
 from typing import List
 
-from core.factories import (
-    SemesterFactory,
-    UnitFactory,
-    UnitGroupFactory,
-    UserFactory,
-)  # NOQA
-from core.models import Semester, Unit, UnitGroup
 from django.conf import settings
 from django.contrib.auth.models import Group, User
 from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from evans_django_tools.testsuite import EvanTestCase
 from freezegun.api import freeze_time
 
-from roster.factories import (
+from core.factories import (  # NOQA
+    SemesterFactory,
+    UnitFactory,
+    UnitGroupFactory,
+    UserFactory,
+)
+from core.models import Semester, Unit, UnitGroup
+from evans_django_tools.testsuite import EvanTestCase
+from roster.factories import (  # NOQA
     AssistantFactory,
     InvoiceFactory,
     RegistrationContainerFactory,
     StudentFactory,
     StudentRegistrationFactory,
-)  # NOQA
-from roster.models import (
+)
+from roster.models import (  # NOQA
     Assistant,
     Invoice,
     RegistrationContainer,
     Student,
     StudentRegistration,
-)  # NOQA
+)
 
 from .admin import build_students
 

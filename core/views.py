@@ -1,7 +1,6 @@
 from typing import Any, Dict, Optional
 
 from braces.views import LoginRequiredMixin, SuperuserRequiredMixin
-from dashboard.models import PSet, UploadedFile
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.messages.views import SuccessMessageMixin
@@ -17,10 +16,11 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 from django.views.generic.edit import UpdateView
 from django.views.generic.list import ListView
-from otisweb.utils import AuthHttpRequest
-from roster.models import Student
 
 from core.models import UserProfile
+from dashboard.models import PSet, UploadedFile
+from otisweb.utils import AuthHttpRequest
+from roster.models import Student
 
 from .models import Unit, UnitGroup
 from .utils import get_from_google_storage

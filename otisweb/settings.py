@@ -9,9 +9,10 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 import django_stubs_ext
-import evans_django_tools
 import import_export.tmp_storages
 from dotenv import load_dotenv
+
+import evans_django_tools
 
 django_stubs_ext.monkeypatch()
 

@@ -2,7 +2,7 @@ from django.contrib import admin
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
-from .models import (
+from .models import (  # NOQA
     Achievement,
     AchievementUnlock,
     BonusLevel,
@@ -10,7 +10,7 @@ from .models import (
     Level,
     PalaceCarving,
     QuestComplete,
-)  # NOQA
+)
 
 # Register your models here.
 

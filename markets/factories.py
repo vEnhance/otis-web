@@ -1,9 +1,10 @@
-from core.factories import SemesterFactory, UserFactory
 from django.utils.timezone import utc
 from factory.declarations import PostGenerationMethodCall, SubFactory
 from factory.django import DjangoModelFactory
 from factory.faker import Faker
 from factory.fuzzy import FuzzyDecimal
+
+from core.factories import SemesterFactory, UserFactory
 from evans_django_tools.testsuite import UniqueFaker
 
 from .models import Guess, Market

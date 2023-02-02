@@ -1,10 +1,10 @@
-from evans_django_tools.testsuite import UniqueFaker
-from factory.django import DjangoModelFactory
 from factory.declarations import SubFactory
+from factory.django import DjangoModelFactory
 from factory.faker import Faker
 from factory.fuzzy import FuzzyChoice
-from core.factories import UserFactory
-from core.factories import UnitFactory
+
+from core.factories import UnitFactory, UserFactory
+from evans_django_tools.testsuite import UniqueFaker
 
 from .models import ProblemSuggestion
 

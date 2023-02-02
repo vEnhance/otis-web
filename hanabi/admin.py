@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import HanabiContest, HanabiPlayer, HanabiReplay, HanabiParticipation
+
+from .models import HanabiContest, HanabiParticipation, HanabiPlayer, HanabiReplay
 
 
 @admin.register(HanabiContest)

@@ -5,8 +5,6 @@ from hashlib import sha256
 from typing import Any, Dict, List, Literal, TypedDict, Union
 
 from allauth.socialaccount.models import SocialAccount
-from arch.models import Hint, Problem
-from dashboard.models import PSet
 from django.conf import settings
 from django.core.exceptions import SuspiciousOperation
 from django.db.models.aggregates import Sum
@@ -18,11 +16,14 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from sql_util.aggregates import SubqueryCount
+from unidecode import unidecode
+
+from arch.models import Hint, Problem
+from dashboard.models import PSet
 from payments.models import Job
 from roster.models import Invoice, Student, StudentRegistration, UnitInquiry
-from sql_util.aggregates import SubqueryCount
 from suggestions.models import ProblemSuggestion
-from unidecode import unidecode
 
 # Create your views here.
 

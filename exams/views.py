@@ -1,17 +1,17 @@
 from typing import Any, Dict, Optional
 
-from core.utils import get_from_google_storage
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.http.response import HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
+
+from core.utils import get_from_google_storage
+from exams.calculator import expr_compute
 from otisweb.decorators import admin_required
 from otisweb.utils import AuthHttpRequest
 from roster.utils import get_student_by_pk, infer_student
-
-from exams.calculator import expr_compute
 
 from .forms import ExamAttemptForm, ParticipationPointsForm
 from .models import ExamAttempt, MockCompleted, PracticeExam

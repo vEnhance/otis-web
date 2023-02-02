@@ -3,31 +3,32 @@ import logging
 from datetime import datetime
 from typing import Any, Dict, List, Set, Tuple, TypedDict, Union
 
-from arch.models import Hint
-from core.models import UserProfile
-from dashboard.models import PSet
 from django.db.models.aggregates import Count, Max, Sum
 from django.db.models.expressions import OuterRef, Subquery
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
 from django.utils import timezone
+from reversion.models import Version
+from sql_util.aggregates import SubqueryCount, SubquerySum
+from sql_util.utils import Exists
+
+from arch.models import Hint
+from core.models import UserProfile
+from dashboard.models import PSet
 from evans_django_tools import VERBOSE_LOG_LEVEL
 from exams.models import ExamAttempt, MockCompleted
 from markets.models import Guess
 from payments.models import Job
-from reversion.models import Version
 from roster.models import Student
-from sql_util.aggregates import SubqueryCount, SubquerySum
-from sql_util.utils import Exists
 from suggestions.models import ProblemSuggestion
 
-from .models import (
+from .models import (  # NOQA
     AchievementUnlock,
     BonusLevel,
     BonusLevelUnlock,
     Level,
     QuestComplete,
-)  # NOQA
+)
 
 BONUS_D_UNIT = 0.3
 BONUS_Z_UNIT = 0.5

@@ -7,7 +7,6 @@ from datetime import timedelta
 from typing import Any, Dict, Optional
 
 from braces.views import LoginRequiredMixin
-from core.models import Semester, Unit, UserProfile
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
@@ -25,31 +24,32 @@ from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import DeleteView, UpdateView
+
+from core.models import Semester, Unit, UserProfile
+from dashboard.forms import NewUploadForm, PSetResubmitForm, PSetSubmitForm
+from dashboard.models import PSet, SemesterDownloadFile, UploadedFile  # NOQA
+from dashboard.utils import get_units_to_submit, get_units_to_unlock  # NOQA
 from evans_django_tools import VERBOSE_LOG_LEVEL
 from exams.models import PracticeExam
 from markets.models import Market
-from otisweb.utils import (
+from otisweb.utils import (  # NOQA
     AuthHttpRequest,
     get_days_since,
     get_mailchimp_campaigns,
-)  # NOQA
+)
 from roster.models import RegistrationContainer, Student, StudentRegistration
-from roster.utils import (
+from roster.utils import (  # NOQA
     can_view,
     get_student_by_pk,
     get_visible_students,
     infer_student,
-)  # NOQA
-from rpg.levelsys import (
+)
+from rpg.levelsys import (  # NOQA
     annotate_student_queryset_with_scores,
     check_level_up,
     get_level_info,
     get_student_rows,
-)  # NOQA
-
-from dashboard.forms import NewUploadForm, PSetResubmitForm, PSetSubmitForm
-from dashboard.models import PSet, SemesterDownloadFile, UploadedFile  # NOQA
-from dashboard.utils import get_units_to_submit, get_units_to_unlock  # NOQA
+)
 
 logger = logging.getLogger(__name__)
 

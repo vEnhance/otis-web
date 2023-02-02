@@ -6,7 +6,6 @@ from hashlib import pbkdf2_hmac
 from typing import Callable, List, TypedDict
 
 from _pydecimal import Decimal
-from core.models import Semester, Unit
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import FileExtensionValidator
@@ -16,6 +15,8 @@ from django.db.models.query import QuerySet
 from django.urls import reverse
 from django.utils.timezone import localtime, now
 from sql_util.aggregates import Exists, SubqueryAggregate
+
+from core.models import Semester, Unit
 
 from .country_abbrevs import COUNTRY_CHOICES
 

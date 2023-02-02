@@ -1,7 +1,8 @@
-from evans_django_tools.testsuite import UniqueFaker
 from factory.declarations import Sequence, SubFactory
 from factory.django import DjangoModelFactory
 from factory.faker import Faker
+
+from evans_django_tools.testsuite import UniqueFaker
 
 from .models import Hint, Problem
 

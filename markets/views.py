@@ -1,19 +1,20 @@
+import datetime
 from typing import Any, Dict
 
 from braces.views import LoginRequiredMixin, SuperuserRequiredMixin
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
-from django.db.models import Avg, Sum, Max
+from django.db.models import Avg, Max, Sum
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http.request import HttpRequest
-from django.http.response import (
+from django.http.response import (  # NOQA
     HttpResponseBase,
     HttpResponseForbidden,
     HttpResponseNotFound,
     HttpResponseRedirect,
-)  # NOQA
+)
 from django.shortcuts import get_object_or_404
 from django.urls.base import reverse
 from django.utils import timezone
@@ -21,11 +22,11 @@ from django.views.decorators.http import require_POST
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView
 from django.views.generic.list import ListView
-import datetime
-from otisweb.decorators import admin_required
-from otisweb.utils import AuthHttpRequest
+
 from core.models import Semester
 from markets.forms import MarketCreateForm
+from otisweb.decorators import admin_required
+from otisweb.utils import AuthHttpRequest
 
 from .models import Guess, Market
 

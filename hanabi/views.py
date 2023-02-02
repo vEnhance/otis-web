@@ -8,19 +8,19 @@ from django.core.exceptions import PermissionDenied
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http.request import HttpRequest
-from django.http.response import (
+from django.http.response import (  # NOQA
     HttpResponse,
     HttpResponseBase,
     HttpResponseRedirect,
-)  # NOQA
+)
 from django.shortcuts import get_object_or_404
 from django.urls.base import reverse
 from django.utils import timezone
 from django.views.generic.edit import CreateView
 from django.views.generic.list import ListView
-from otisweb.decorators import admin_required
 
 from hanabi.models import HanabiContest, HanabiPlayer, HanabiReplay
+from otisweb.decorators import admin_required
 
 
 class HanabiContestList(ListView[HanabiContest]):

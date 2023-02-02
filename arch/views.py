@@ -1,7 +1,6 @@
 from typing import Any, ClassVar, Dict, Optional
 
 import reversion
-from core.utils import storage_hash
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -17,10 +16,11 @@ from django.urls import reverse
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from reversion.views import RevisionMixin
-from roster.models import Student
 
 from arch.forms import ProblemSelectForm
 from arch.models import get_disk_statement_from_puid
+from core.utils import storage_hash
+from roster.models import Student
 
 from .forms import HintUpdateFormWithReason
 from .models import Hint, Problem

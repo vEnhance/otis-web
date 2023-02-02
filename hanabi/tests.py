@@ -1,8 +1,8 @@
-from core.factories import GroupFactory, UserFactory
 from django.utils import timezone
-from evans_django_tools.testsuite import EvanTestCase
 from freezegun import freeze_time
 
+from core.factories import GroupFactory, UserFactory
+from evans_django_tools.testsuite import EvanTestCase
 from hanabi.factories import HanabiContestFactory
 from hanabi.models import HanabiContest, HanabiPlayer
 

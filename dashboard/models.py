@@ -6,17 +6,18 @@ import datetime
 import os
 from typing import Optional
 
-from core.models import Semester, Unit
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.files.base import File
-from django.core.validators import (
+from django.core.validators import (  # NOQA
     FileExtensionValidator,
     MaxValueValidator,
     MinValueValidator,
-)  # NOQA
+)
 from django.db import models
 from django.urls import reverse
+
+from core.models import Semester, Unit
 from roster.models import Student
 
 

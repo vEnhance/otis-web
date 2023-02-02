@@ -1,6 +1,5 @@
 from typing import Optional
 
-from core.models import Semester
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -9,6 +8,8 @@ from django.urls.base import reverse
 from django.utils import timezone
 from markdownfield.models import MarkdownField, RenderedMarkdownField
 from markdownfield.validators import VALIDATOR_STANDARD
+
+from core.models import Semester
 
 # Create your models here.
 

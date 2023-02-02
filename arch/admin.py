@@ -1,7 +1,7 @@
 from django.contrib import admin
-from reversion.admin import VersionAdmin
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
+from reversion.admin import VersionAdmin
 
 from .models import Hint, Problem
 

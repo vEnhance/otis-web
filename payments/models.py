@@ -1,6 +1,5 @@
 from decimal import Decimal
 
-from core.models import Semester
 from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
 from django.db import models
@@ -11,8 +10,10 @@ from django.db.models.query import QuerySet
 from django.urls import reverse
 from markdownfield.models import MarkdownField, RenderedMarkdownField
 from markdownfield.validators import VALIDATOR_STANDARD
-from roster.models import Invoice
 from sql_util.aggregates import Subquery, SubquerySum
+
+from core.models import Semester
+from roster.models import Invoice
 
 
 class PaymentLog(models.Model):

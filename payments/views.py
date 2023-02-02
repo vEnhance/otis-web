@@ -3,7 +3,6 @@ from typing import Any, Dict
 
 import stripe
 from braces.views import SuperuserRequiredMixin
-from core.models import Semester
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -14,12 +13,12 @@ from django.db.models.aggregates import Count
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
 from django.forms.models import BaseModelForm
-from django.http import (
+from django.http import (  # NOQA
     Http404,
     HttpRequest,
     HttpResponse,
     HttpResponseForbidden,
-)  # NOQA
+)
 from django.http.response import HttpResponseRedirect, JsonResponse  # NOQA
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -27,11 +26,12 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView
 from django.views.generic.list import ListView
-from roster.models import Invoice, Student
 from sql_util.aggregates import SubqueryCount, SubqueryMax, SubqueryMin
 from sql_util.utils import Exists
 
+from core.models import Semester
 from payments.models import Job, JobFolder
+from roster.models import Invoice, Student
 
 from .models import PaymentLog, Worker
 

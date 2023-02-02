@@ -1,25 +1,25 @@
+from django.utils import timezone
+
 from core.factories import UnitFactory, UserFactory
 from dashboard.factories import PSetFactory
-from django.utils import timezone
 from evans_django_tools.testsuite import EvanTestCase
 from exams.factories import ExamAttemptFactory, TestFactory
 from payments.factories import JobFactory, WorkerFactory
 from roster.factories import StudentFactory
 from roster.models import Student
-
-from rpg.factories import (
+from rpg.factories import (  # NOQA
     AchievementFactory,
     AchievementUnlockFactory,
     BonusLevelFactory,
     LevelFactory,
     QuestCompleteFactory,
-)  # NOQA
-from rpg.models import AchievementUnlock
-from rpg.levelsys import (
+)
+from rpg.levelsys import (  # NOQA
     annotate_student_queryset_with_scores,
     get_level_info,
     get_student_rows,
-)  # NOQA
+)
+from rpg.models import AchievementUnlock
 
 utc = timezone.utc
 

@@ -17,8 +17,6 @@ from typing import Any, Dict, List, Optional
 
 from allauth.socialaccount.models import SocialAccount
 from braces.views import LoginRequiredMixin, StaffuserRequiredMixin
-from core.models import Semester, Unit
-from dashboard.models import PSet
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
@@ -39,32 +37,34 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 from django.views.generic.edit import UpdateView
 from django.views.generic.list import ListView
+from prettytable import PrettyTable
+
+from core.models import Semester, Unit
+from dashboard.models import PSet
 from evans_django_tools import ACTION_LOG_LEVEL, SUCCESS_LOG_LEVEL
 from otisweb.decorators import admin_required
 from otisweb.utils import AuthHttpRequest, mailchimp_subscribe
-from prettytable import PrettyTable
-
-from roster.utils import (
+from roster.utils import (  # NOQA
     can_edit,
     get_current_students,
     get_student_by_pk,
     infer_student,
-)  # NOQA
+)
 
-from .forms import (
+from .forms import (  # NOQA
     AdvanceForm,
     CurriculumForm,
     DecisionForm,
     InquiryForm,
     UserForm,
-)  # NOQA
-from .models import (
+)
+from .models import (  # NOQA
     Invoice,
     RegistrationContainer,
     Student,
     StudentRegistration,
     UnitInquiry,
-)  # NOQA
+)
 
 # Create your views here.
 

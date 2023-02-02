@@ -1,6 +1,5 @@
 from typing import Any, List, Optional, Tuple
 
-from core.models import Semester, Unit
 from django.contrib import admin, messages
 from django.contrib.admin.options import ModelAdmin
 from django.contrib.auth.models import User
@@ -12,14 +11,16 @@ from django.utils import timezone
 from import_export import fields, resources, widgets
 from import_export.admin import ImportExportModelAdmin
 
-from .models import (
+from core.models import Semester, Unit
+
+from .models import (  # NOQA
     Assistant,
     Invoice,
     RegistrationContainer,
     Student,
     StudentRegistration,
     UnitInquiry,
-)  # NOQA
+)
 
 
 class RosterResource(resources.ModelResource):

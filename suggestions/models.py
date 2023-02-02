@@ -1,7 +1,8 @@
-from core.models import Unit
 from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
+
+from core.models import Unit
 
 
 class ProblemSuggestion(models.Model):

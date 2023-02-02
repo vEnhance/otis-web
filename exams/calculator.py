@@ -34,7 +34,7 @@ import math
 import operator
 from typing import Any, List, Optional, Union
 
-from pyparsing import (
+from pyparsing import (  # NOQA
     CaselessKeyword,
     Forward,
     Group,
@@ -46,7 +46,7 @@ from pyparsing import (
     alphanums,
     alphas,
     delimitedList,
-)  # NOQA
+)
 
 exprStack: Any = []
 

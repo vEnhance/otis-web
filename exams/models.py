@@ -7,9 +7,9 @@ from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 from django.db import models
 from django.urls.base import reverse
-from roster.models import Student
 
 from exams.calculator import expr_compute
+from roster.models import Student
 
 
 def expr_validator(value: str):

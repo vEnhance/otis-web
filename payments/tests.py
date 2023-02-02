@@ -1,28 +1,28 @@
 from decimal import Decimal
 
-from core.factories import SemesterFactory, UserFactory
-from core.models import Semester
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils import timezone
-from evans_django_tools.testsuite import EvanTestCase
 from freezegun.api import freeze_time
-from roster.factories import InvoiceFactory, StudentFactory
-from roster.models import Student
 
-from payments.factories import (
+from core.factories import SemesterFactory, UserFactory
+from core.models import Semester
+from evans_django_tools.testsuite import EvanTestCase
+from payments.factories import (  # NOQA
     JobFactory,
     JobFolderFactory,
     PaymentLogFactory,
     WorkerFactory,
-)  # NOQA
-from payments.models import (
+)
+from payments.models import (  # NOQA
     Job,
     PaymentLog,
     Worker,
     get_semester_invoices_with_annotations,
-)  # NOQA
+)
 from payments.views import InactiveWorkerList
+from roster.factories import InvoiceFactory, StudentFactory
+from roster.models import Student
 
 from .views import process_payment
 

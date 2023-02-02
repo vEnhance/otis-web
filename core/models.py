@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import os
 from datetime import datetime
 from typing import Callable
 
@@ -9,8 +10,6 @@ from django.db.models.manager import BaseManager
 from django.urls import reverse
 from django.utils import timezone
 from positions import PositionField
-
-import os
 
 User = get_user_model()
 # Create your models here.

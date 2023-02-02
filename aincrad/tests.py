@@ -1,10 +1,11 @@
 from hashlib import sha256
 
+from django.test.utils import override_settings
+
 from arch.factories import HintFactory
 from arch.models import Hint
 from core.factories import SemesterFactory, UnitFactory
 from dashboard.factories import PSetFactory
-from django.test.utils import override_settings
 from evans_django_tools.testsuite import EvanTestCase
 from payments.factories import PaymentLogFactory
 from roster.factories import InvoiceFactory, StudentFactory, UnitInquiryFactory

@@ -1,8 +1,8 @@
-from core.factories import UserFactory
-from evans_django_tools.testsuite import UniqueFaker
 from factory.declarations import SubFactory
 from factory.django import DjangoModelFactory
 
+from core.factories import UserFactory
+from evans_django_tools.testsuite import UniqueFaker
 from hanabi.models import HanabiContest, HanabiPlayer
 
 
