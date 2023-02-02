@@ -54,10 +54,12 @@
             </td>
           {% elif request.user.is_superuser %}
             <td class="table-primary">
-              <a href="{% url "hanabi-upload" contest.pk %}">{{ contest.variant_name }}</a>
+              <strong>
+                <a href="{% url "hanabi-upload" contest.pk %}">{{ contest.variant_name }}</a>
+              </strong>
             </td>
           {% else %}
-            <td>{{ contest.variant_name }}</td>
+            <td class="table-warning">{{ contest.variant_name }}</td>
           {% endif %}
           <td>{{ contest.num_players }}</td>
           <td>{{ contest.deadline }}</td>
@@ -65,7 +67,90 @@
       {% endfor %}
     </tbody>
   </table>
-  <hr />
   <h1>Rules</h1>
-  <p>TO BE WRITTEN.</p>
+  <ol>
+    <li>
+      How to participate:
+      <ul>
+        <li>
+          One player should create a table on hanab.live
+          by clicking the "Start table" button above.
+        </li>
+        <li>
+          The other players should join the table by typing
+          the table password (a randomly generated 3-digit number).
+        </li>
+        <li>
+          That's all you need to do.
+          Results are collected automatically later by the game master.
+        </li>
+      </ul>
+    </li>
+    <li>
+      We play with an honor system.
+      Please follow the rules of the game and common-sense sportsmanship:
+      <ul>
+        <li>
+          Don't spectate or look at the results of the game seed
+          before you have played.
+        </li>
+        <li>Obviously, you may only play once per contest.</li>
+        <li>
+          Each player must be a distinct human (no bots, etc.).
+          They do not necessarily have to be in OTIS.
+        </li>
+        <li>
+          No communication during the game.
+          We explicitly forbid reading into the length of time a turn takes.
+        </li>
+      </ul>
+    </li>
+    <li>
+      Games are timed.
+      The time controls are <strong>2:00+0:20</strong>,
+      the default timer settings.
+      There are no other special settings
+      (in particular, no bottom-deck blind plays).
+    </li>
+    <li>
+      You may use any convention system you like
+      (not necessary the <a href="https://hanabi.github.io">H-group system</a>).
+    </li>
+    <li>
+      You may refer to pre-written documentation during the game,
+      such as the H-group website or a dedicated Google Doc
+      (as long as the document is not updated mid-game by your team, of course).
+    </li>
+    <li>
+      Scoring for spades:
+      <ul>
+        <li>
+          Your <i>game score</i> is defined as the number of cards
+          played successfully, even if you strike out or terminate the game.
+        </li>
+        <li>
+          You earn
+          \[ 2 \cdot \left(
+          \frac{ \text{your game score} }
+          { 5 \cdot \text{number of suits} }
+          \right)^{ \text{number of suits} } \]
+          spades.
+          For example, if you score 23/25,
+          you earn $2 \cdot (23/25)^5 \approx 1.318$ spades.
+        </li>
+        <li>
+          In addition, you get +1 bonus spade if you have the
+          highest nonzero game score among all participating teams.
+        </li>
+        <li>
+          In addition, you get an additional +1 bonus spade if you have the
+          highest nonzero game score among all participating teams,
+          <i>and</i> the lowest turn count among such teams.
+        </li>
+      </ul>
+      Thus, the maximum possible spades per game is $2+1+1=4$.
+      Here, a "participating team" is any team that
+      has at least one OTIS student.
+    </li>
+  </ol>
 {% endblock layout-content %}
