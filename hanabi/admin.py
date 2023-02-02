@@ -10,7 +10,7 @@ class HanabiContestAdmin(admin.ModelAdmin):
         "num_players",
         "num_suits",
         "deadline",
-        "has_ended",
+        "processed",
     )
     list_display_links = (
         "pk",
@@ -60,7 +60,10 @@ class HanabiReplayAdmin(admin.ModelAdmin):
         "contest",
         "replay_id",
     )
-    list_filter = ("game_score",)
+    list_filter = (
+        "game_score",
+        "contest__processed",
+    )
     search_fields = (
         "pk",
         "contest__variant_name",
@@ -74,7 +77,12 @@ class HanabiParticipationAdmin(admin.ModelAdmin):
         "player",
         "replay",
     )
-    list_display_links = ("pk", "player", "replay")
+    list_display_links = (
+        "pk",
+        "player",
+        "replay",
+    )
+    list_filter = ("replay__contest__processed",)
     search_fields = (
         "player__hanab_username",
         "player__user__username",

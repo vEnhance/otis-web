@@ -1,3 +1,4 @@
+import random
 from typing import Any
 
 from django.contrib import messages
@@ -7,16 +8,19 @@ from django.core.exceptions import PermissionDenied
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http.request import HttpRequest
-from django.http.response import HttpResponseBase, HttpResponseRedirect
+from django.http.response import (
+    HttpResponse,
+    HttpResponseBase,
+    HttpResponseRedirect,
+)  # NOQA
 from django.shortcuts import get_object_or_404
 from django.urls.base import reverse
 from django.utils import timezone
 from django.views.generic.edit import CreateView
 from django.views.generic.list import ListView
+from otisweb.decorators import admin_required
 
 from hanabi.models import HanabiContest, HanabiPlayer, HanabiReplay
-
-import random
 
 
 class HanabiContestList(ListView[HanabiContest]):
@@ -27,7 +31,8 @@ class HanabiContestList(ListView[HanabiContest]):
         context = super().get_context_data(**kwargs)
         context["player"] = HanabiPlayer.objects.filter(user=self.request.user).first()
         context["active_contests"] = HanabiContest.objects.filter(
-            deadline__gt=timezone.now()
+            deadline__gt=timezone.now(),
+            start_date__lt=timezone.now(),
         )
         context["table_password"] = random.randrange(100, 1000)
         return context
@@ -52,7 +57,7 @@ class HanabiReplayList(ListView[HanabiReplay]):
         self, request: HttpRequest, *args: Any, **kwargs: Any
     ) -> HttpResponseBase:
         self.contest = get_object_or_404(HanabiContest, pk=kwargs.pop("pk"))
-        if not self.contest.has_ended and not getattr(
+        if not self.contest.processed and not getattr(
             self.request.user, "is_staff", False
         ):
             raise PermissionDenied("Too early to view results of Hanabi contest")
@@ -89,3 +94,9 @@ class HanabiPlayerCreateView(
             return HttpResponseRedirect(reverse("hanabi-contests"))
 
         return super().dispatch(request, *args, **kwargs)
+
+
+@admin_required
+def hanabi_upload(request: HttpRequest, pk: int) -> HttpResponse:
+    del pk
+    return HttpResponse("Not implemented yet, come back later")

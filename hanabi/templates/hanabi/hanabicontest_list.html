@@ -48,9 +48,17 @@
       {% for contest in contests %}
         <tr>
           <td>{{ contest.pk }}</td>
-          <td>
-            <a href="{{ contest.get_absolute_url }}">{{ contest.variant_name }}</a>
-          </td>
+          {% if contest.processed %}
+            <td>
+              <a href="{{ contest.get_absolute_url }}">{{ contest.variant_name }}</a>
+            </td>
+          {% elif request.user.is_superuser %}
+            <td class="table-primary">
+              <a href="{% url "hanabi-upload" contest.pk %}">{{ contest.variant_name }}</a>
+            </td>
+          {% else %}
+            <td>{{ contest.variant_name }}</td>
+          {% endif %}
           <td>{{ contest.num_players }}</td>
           <td>{{ contest.deadline }}</td>
         </tr>

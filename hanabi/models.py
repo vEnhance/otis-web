@@ -26,7 +26,11 @@ class HanabiContest(models.Model):
     num_suits = models.PositiveSmallIntegerField(
         help_text="The number of suits.", default=5
     )
+    start_date = models.DateTimeField(help_text="When the contest becomes visible.")
     deadline = models.DateTimeField(help_text="The deadline to play this seed.")
+    processed = models.BooleanField(
+        help_text="Whether the results have been processed", default=False
+    )
 
     class Meta:
         ordering = ("-deadline",)
