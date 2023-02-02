@@ -3,9 +3,22 @@
   Hanabi Contests
 {% endblock title %}
 {% block layout-content %}
-  <h2>Active Contests</h2>
+  {% if player %}
+    <p>
+      On hanab.live, you are registered as
+      <a href="https://hanab.live/scores/{{ player.hanab_username }}/">{{ player.hanab_username }}</a>.
+    </p>
+    <hr />
+  {% else %}
+    <div class="alert alert-warning">
+      You have no hanab.live username attached.
+      <a href="{% url "hanabi-register" %}" class="alert-link">Register one</a>
+      if you want to earn spades.
+    </div>
+  {% endif %}
+  <h1>Active Contests</h1>
   {% for contest in active_contests %}
-    <h3>{{ contest.variant_name }}</h3>
+    <h2>{{ contest.variant_name }}</h2>
     <ul>
       <li>Players: {{ contest.num_players }}</li>
       <li>Deadline: {{ contest.deadline }} ({{ contest.deadline|timeuntil }})</li>
@@ -23,30 +36,28 @@
     <p>No contests are active at this time.</p>
   {% endfor %}
   <hr />
-  <h2>All Contests</h2>
+  <h1>All Contests</h1>
   <table class="table striped-table">
     <thead>
       <th>#</th>
       <th>Contest</th>
       <th>Players</th>
       <th>Deadline</th>
-      <th>Results</th>
     </thead>
     <tbody>
       {% for contest in contests %}
         <tr>
           <td>{{ contest.pk }}</td>
-          <td>{{ contest.variant_name }}</td>
+          <td>
+            <a href="{{ contest.get_absolute_url }}">{{ contest.variant_name }}</a>
+          </td>
           <td>{{ contest.num_players }}</td>
           <td>{{ contest.deadline }}</td>
-          <td>
-            <a href="{{ contest.get_absolute_url }}">View results</a>
-          </td>
         </tr>
       {% endfor %}
     </tbody>
   </table>
   <hr />
-  <h2>Rules</h2>
+  <h1>Rules</h1>
   <p>TO BE WRITTEN.</p>
 {% endblock layout-content %}
