@@ -1,7 +1,7 @@
 import datetime
 from typing import Any
 
-from braces.views import LoginRequiredMixin, SuperuserRequiredMixin
+from braces.views import GroupRequiredMixin, LoginRequiredMixin, SuperuserRequiredMixin
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
@@ -33,7 +33,11 @@ from .models import Guess, Market
 # Create your views here.
 
 
-class SubmitGuess(LoginRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]):
+class SubmitGuess(
+    LoginRequiredMixin,
+    GroupRequiredMixin,
+    CreateView[Guess, BaseModelForm[Guess]],
+):
     model = Guess
     context_object_name = "guess"
     fields = (
@@ -41,6 +45,7 @@ class SubmitGuess(LoginRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]):
         "public",
     )
     request: AuthHttpRequest
+    group_required = "Verified"
 
     object: Guess  # type: ignore
     market: Market
@@ -68,8 +73,6 @@ class SubmitGuess(LoginRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]):
         self.market = get_object_or_404(Market, slug=kwargs.pop("slug"))
         if not isinstance(request.user, User):
             return super().dispatch(request, *args, **kwargs)  # login required mixin
-        if not request.user.groups.filter(name="Verified").exists():
-            raise PermissionDenied
 
         if not self.market.has_started:
             return HttpResponseNotFound()

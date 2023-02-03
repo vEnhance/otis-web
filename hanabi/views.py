@@ -1,6 +1,7 @@
 import random
 from typing import Any
 
+from braces.views import GroupRequiredMixin
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
@@ -71,10 +72,13 @@ class HanabiReplayList(ListView[HanabiReplay]):
 
 
 class HanabiPlayerCreateView(
-    LoginRequiredMixin, CreateView[HanabiPlayer, BaseModelForm[HanabiPlayer]]
+    LoginRequiredMixin,
+    GroupRequiredMixin,
+    CreateView[HanabiPlayer, BaseModelForm[HanabiPlayer]],
 ):
     model = HanabiPlayer
     fields = ("hanab_username",)
+    group_required = "Verified"
 
     def form_valid(self, form: BaseModelForm[HanabiPlayer]):
         assert isinstance(self.request.user, User)
@@ -92,8 +96,6 @@ class HanabiPlayerCreateView(
     ) -> HttpResponseBase:
         if not isinstance(request.user, User):
             return super().dispatch(request, *args, **kwargs)  # login required mixin
-        if not request.user.groups.filter(name="Verified").exists():
-            raise PermissionDenied
 
         if HanabiPlayer.objects.filter(user=request.user).exists():
             messages.error(request, "You already registered a hanab.live username.")
