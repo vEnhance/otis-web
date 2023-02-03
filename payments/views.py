@@ -2,7 +2,7 @@ import logging
 from typing import Any
 
 import stripe
-from braces.views import SuperuserRequiredMixin
+from braces.views import GroupRequiredMixin, SuperuserRequiredMixin
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -30,6 +30,7 @@ from sql_util.aggregates import SubqueryCount, SubqueryMax, SubqueryMin
 from sql_util.utils import Exists
 
 from core.models import Semester
+from otisweb.decorators import verified_required
 from payments.models import Job, JobFolder
 from roster.models import Invoice, Student
 
@@ -157,7 +158,7 @@ class WorkerDetail(LoginRequiredMixin, DetailView[Worker]):
         return worker
 
 
-class WorkerUpdate(LoginRequiredMixin, UpdateView[Worker, BaseModelForm[Worker]]):
+class WorkerUpdate(GroupRequiredMixin, UpdateView[Worker, BaseModelForm[Worker]]):
     model = Worker
     context_object_name = "worker"
     template_name = "payments/worker_form.html"
@@ -169,6 +170,7 @@ class WorkerUpdate(LoginRequiredMixin, UpdateView[Worker, BaseModelForm[Worker]]
         "venmo_handle",
         "zelle_info",
     )
+    group_required = "Verified"
 
     def get_object(self):
         worker, _ = Worker.objects.get_or_create(user=self.request.user)
@@ -178,9 +180,10 @@ class WorkerUpdate(LoginRequiredMixin, UpdateView[Worker, BaseModelForm[Worker]]
         return reverse("worker-detail")
 
 
-class JobFolderList(LoginRequiredMixin, ListView[JobFolder]):
+class JobFolderList(GroupRequiredMixin, ListView[JobFolder]):
     model = JobFolder
     context_object_name = "jobfolders"
+    group_required = "Verified"
 
     def get_queryset(self) -> QuerySet[JobFolder]:
         return (
@@ -217,9 +220,10 @@ class JobFolderList(LoginRequiredMixin, ListView[JobFolder]):
         return context
 
 
-class JobList(LoginRequiredMixin, ListView[Job]):
+class JobList(GroupRequiredMixin, ListView[Job]):
     model = Job
     context_object_name = "jobs"
+    group_required = "Verified"
 
     def setup(self, request: HttpRequest, *args: Any, **kwargs: Any):
         super().setup(request, *args, **kwargs)
@@ -242,12 +246,14 @@ class JobList(LoginRequiredMixin, ListView[Job]):
         return context
 
 
-class JobDetail(LoginRequiredMixin, DetailView[Job]):
+class JobDetail(GroupRequiredMixin, DetailView[Job]):
     model = Job
     context_object_name = "job"
+    group_required = "Verified"
 
 
 @login_required
+@verified_required
 def job_claim(request: HttpRequest, pk: int) -> HttpResponse:
     assert isinstance(request.user, User)
     try:
@@ -292,7 +298,7 @@ def job_claim(request: HttpRequest, pk: int) -> HttpResponse:
         return HttpResponseRedirect(job.get_absolute_url())
 
 
-class JobUpdate(LoginRequiredMixin, UpdateView[Job, BaseModelForm[Job]]):
+class JobUpdate(GroupRequiredMixin, UpdateView[Job, BaseModelForm[Job]]):
     model = Job
     context_object_name = "job"
     template_name = "payments/job_form.html"
@@ -302,6 +308,7 @@ class JobUpdate(LoginRequiredMixin, UpdateView[Job, BaseModelForm[Job]]):
         "worker_deliverable",
         "worker_notes",
     )
+    group_required = "Verified"
 
     def post(self, *args: Any, **kwargs: Any):
         response = super().post(*args, **kwargs)

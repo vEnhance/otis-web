@@ -3,7 +3,6 @@ from typing import Any
 
 from braces.views import GroupRequiredMixin
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db.models.query import QuerySet
@@ -72,9 +71,7 @@ class HanabiReplayList(ListView[HanabiReplay]):
 
 
 class HanabiPlayerCreateView(
-    LoginRequiredMixin,
-    GroupRequiredMixin,
-    CreateView[HanabiPlayer, BaseModelForm[HanabiPlayer]],
+    GroupRequiredMixin, CreateView[HanabiPlayer, BaseModelForm[HanabiPlayer]]
 ):
     model = HanabiPlayer
     fields = ("hanab_username",)

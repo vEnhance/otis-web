@@ -18,7 +18,6 @@ from .models import ProblemSuggestion
 
 
 class ProblemSuggestionCreate(
-    LoginRequiredMixin,
     GroupRequiredMixin,
     CreateView[ProblemSuggestion, BaseModelForm[ProblemSuggestion]],
 ):

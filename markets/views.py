@@ -33,11 +33,7 @@ from .models import Guess, Market
 # Create your views here.
 
 
-class SubmitGuess(
-    LoginRequiredMixin,
-    GroupRequiredMixin,
-    CreateView[Guess, BaseModelForm[Guess]],
-):
+class SubmitGuess(GroupRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]):
     model = Guess
     context_object_name = "guess"
     fields = (
