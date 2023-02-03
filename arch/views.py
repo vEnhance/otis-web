@@ -1,11 +1,9 @@
 from typing import Any, ClassVar, Optional
 
 import reversion
+from braces.views import GroupRequiredMixin
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.models import User
-from django.core.exceptions import PermissionDenied
 from django.core.files.storage import default_storage
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
@@ -20,29 +18,11 @@ from reversion.views import RevisionMixin
 from arch.forms import ProblemSelectForm
 from arch.models import get_disk_statement_from_puid
 from core.utils import storage_hash
-from roster.models import Student
 
 from .forms import HintUpdateFormWithReason
 from .models import Hint, Problem
 
 ContextType = dict[str, Any]
-
-
-class ExistStudentRequiredMixin(LoginRequiredMixin):
-    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any):
-        if not request.user.is_authenticated:
-            return super().dispatch(request, *args, **kwargs)
-        assert isinstance(request.user, User)
-        if (
-            not Student.objects.filter(user=request.user).exists()
-            and not request.user.is_staff
-        ):
-            raise PermissionDenied(
-                "You have to be enrolled in at least one semester "
-                "of OTIS to use the ARCH system"
-            )
-        else:
-            return super().dispatch(request, *args, **kwargs)
 
 
 class HintObjectView:
@@ -67,9 +47,10 @@ class ProblemObjectView:
         return get_object_or_404(queryset, puid=self.kwargs["puid"])
 
 
-class HintList(ExistStudentRequiredMixin, ListView[Hint]):
+class HintList(GroupRequiredMixin, ListView[Hint]):
     context_object_name = "hint_list"
     problem: Problem
+    group_required = "Verified"
 
     def setup(self, request: HttpRequest, *args: Any, **kwargs: Any):
         super().setup(request, *args, **kwargs)
@@ -98,19 +79,21 @@ class HintList(ExistStudentRequiredMixin, ListView[Hint]):
         return context
 
 
-class HintDetail(HintObjectView, ExistStudentRequiredMixin, DetailView[Hint]):
+class HintDetail(HintObjectView, GroupRequiredMixin, DetailView[Hint]):
     context_object_name = "hint"
     model = Hint
+    group_required = "Verified"
 
 
-class HintDetailByPK(ExistStudentRequiredMixin, DetailView[Hint]):
+class HintDetailByPK(GroupRequiredMixin, DetailView[Hint]):
     context_object_name = "hint"
     model = Hint
+    group_required = "Verified"
 
 
 class HintUpdate(
     HintObjectView,
-    ExistStudentRequiredMixin,
+    GroupRequiredMixin,
     RevisionMixin,
     UpdateView[Hint, HintUpdateFormWithReason],
 ):
@@ -118,6 +101,7 @@ class HintUpdate(
     model = Hint
     form_class = HintUpdateFormWithReason
     object: ClassVar[Hint] = Hint()  # type: ignore
+    group_required = "Verified"
 
     def form_valid(self, form: HintUpdateFormWithReason) -> HttpResponse:
         reversion.set_comment(
@@ -135,12 +119,13 @@ class HintUpdate(
 
 
 class HintUpdateByPK(
-    ExistStudentRequiredMixin, RevisionMixin, UpdateView[Hint, HintUpdateFormWithReason]
+    GroupRequiredMixin, RevisionMixin, UpdateView[Hint, HintUpdateFormWithReason]
 ):
     context_object_name = "hint"
     model = Hint
     form_class = HintUpdateFormWithReason
     object: ClassVar[Hint] = Hint()  # type: ignore
+    group_required = "Verified"
 
     def form_valid(self, form: HintUpdateFormWithReason) -> HttpResponse:
         reversion.set_comment(
@@ -159,7 +144,7 @@ class HintUpdateByPK(
 
 class ProblemUpdate(
     ProblemObjectView,
-    ExistStudentRequiredMixin,
+    GroupRequiredMixin,
     RevisionMixin,
     UpdateView[Problem, BaseModelForm[Problem]],
 ):
@@ -169,6 +154,7 @@ class ProblemUpdate(
         "puid",
         "hyperlink",
     )
+    group_required = "Verified"
 
     def get_context_data(self, **kwargs: Any):
         context = super().get_context_data(**kwargs)
@@ -181,7 +167,7 @@ class ProblemUpdate(
 
 
 class HintCreate(
-    ExistStudentRequiredMixin, RevisionMixin, CreateView[Hint, BaseModelForm[Hint]]
+    GroupRequiredMixin, RevisionMixin, CreateView[Hint, BaseModelForm[Hint]]
 ):
     context_object_name = "hint"
     fields = (
@@ -191,6 +177,7 @@ class HintCreate(
         "content",
     )
     model = Hint
+    group_required = "Verified"
 
     def get_context_data(self, **kwargs: Any):
         context = super().get_context_data(**kwargs)
@@ -204,10 +191,11 @@ class HintCreate(
         return initial
 
 
-class HintDelete(HintObjectView, ExistStudentRequiredMixin, RevisionMixin, DeleteView):
+class HintDelete(HintObjectView, GroupRequiredMixin, RevisionMixin, DeleteView):
     context_object_name = "hint"
     model = Hint
     object: ClassVar[Hint] = Hint()  # type: ignore
+    group_required = "Verified"
 
     def get_success_url(self):
         return reverse("hint-list", args=(self.object.problem.puid,))
@@ -215,7 +203,7 @@ class HintDelete(HintObjectView, ExistStudentRequiredMixin, RevisionMixin, Delet
 
 # this is actually the index page as well :P bit of a hack I guess...
 class ProblemCreate(
-    ExistStudentRequiredMixin,
+    GroupRequiredMixin,
     RevisionMixin,
     CreateView[Problem, BaseModelForm[Problem]],
 ):
@@ -226,6 +214,7 @@ class ProblemCreate(
     )
     model = Problem
     template_name = "arch/index.html"
+    group_required = "Verified"
 
     def get_context_data(self, **kwargs: Any):
         context = super().get_context_data(**kwargs)
