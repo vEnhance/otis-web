@@ -1,7 +1,6 @@
 import random
 from typing import Any
 
-from braces.views import GroupRequiredMixin
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
@@ -21,6 +20,7 @@ from django.views.generic.list import ListView
 
 from hanabi.models import HanabiContest, HanabiPlayer, HanabiReplay
 from otisweb.decorators import admin_required
+from otisweb.mixins import VerifiedRequiredMixin
 
 
 class HanabiContestList(ListView[HanabiContest]):
@@ -71,11 +71,10 @@ class HanabiReplayList(ListView[HanabiReplay]):
 
 
 class HanabiPlayerCreateView(
-    GroupRequiredMixin, CreateView[HanabiPlayer, BaseModelForm[HanabiPlayer]]
+    VerifiedRequiredMixin, CreateView[HanabiPlayer, BaseModelForm[HanabiPlayer]]
 ):
     model = HanabiPlayer
     fields = ("hanab_username",)
-    group_required = "Verified"
 
     def form_valid(self, form: BaseModelForm[HanabiPlayer]):
         assert isinstance(self.request.user, User)

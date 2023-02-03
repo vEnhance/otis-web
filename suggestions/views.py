@@ -1,6 +1,6 @@
 from typing import Any
 
-from braces.views import GroupRequiredMixin, LoginRequiredMixin
+from braces.views import LoginRequiredMixin
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
@@ -13,12 +13,13 @@ from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
 
 from core.models import Unit
+from otisweb.mixins import VerifiedRequiredMixin
 
 from .models import ProblemSuggestion
 
 
 class ProblemSuggestionCreate(
-    GroupRequiredMixin,
+    VerifiedRequiredMixin,
     CreateView[ProblemSuggestion, BaseModelForm[ProblemSuggestion]],
 ):
     context_object_name = "problem_suggestion"
@@ -34,7 +35,6 @@ class ProblemSuggestionCreate(
         "acknowledge",
     )
     model = ProblemSuggestion
-    group_required = "Verified"
 
     def get_form(self, *args: Any, **kwargs: Any) -> BaseModelForm[ProblemSuggestion]:
         form = super(CreateView, self).get_form(*args, **kwargs)

@@ -1,7 +1,7 @@
 import datetime
 from typing import Any
 
-from braces.views import GroupRequiredMixin, LoginRequiredMixin, SuperuserRequiredMixin
+from braces.views import LoginRequiredMixin, SuperuserRequiredMixin
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
@@ -26,6 +26,7 @@ from django.views.generic.list import ListView
 from core.models import Semester
 from markets.forms import MarketCreateForm
 from otisweb.decorators import admin_required
+from otisweb.mixins import VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest
 
 from .models import Guess, Market
@@ -33,7 +34,7 @@ from .models import Guess, Market
 # Create your views here.
 
 
-class SubmitGuess(GroupRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]):
+class SubmitGuess(VerifiedRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]):
     model = Guess
     context_object_name = "guess"
     fields = (
@@ -41,7 +42,6 @@ class SubmitGuess(GroupRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]):
         "public",
     )
     request: AuthHttpRequest
-    group_required = "Verified"
 
     object: Guess  # type: ignore
     market: Market
