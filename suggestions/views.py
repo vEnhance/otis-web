@@ -1,6 +1,6 @@
 from typing import Any
 
-from braces.views import LoginRequiredMixin
+from braces.views import GroupRequiredMixin, LoginRequiredMixin
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
@@ -18,7 +18,9 @@ from .models import ProblemSuggestion
 
 
 class ProblemSuggestionCreate(
-    LoginRequiredMixin, CreateView[ProblemSuggestion, BaseModelForm[ProblemSuggestion]]
+    LoginRequiredMixin,
+    GroupRequiredMixin,
+    CreateView[ProblemSuggestion, BaseModelForm[ProblemSuggestion]],
 ):
     context_object_name = "problem_suggestion"
     fields = (
@@ -33,6 +35,7 @@ class ProblemSuggestionCreate(
         "acknowledge",
     )
     model = ProblemSuggestion
+    group_required = "Verified"
 
     def get_form(self, *args: Any, **kwargs: Any) -> BaseModelForm[ProblemSuggestion]:
         form = super(CreateView, self).get_form(*args, **kwargs)
