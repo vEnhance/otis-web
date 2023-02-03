@@ -15,6 +15,10 @@
       <a href="{% url "hanabi-register" %}" class="alert-link">Register one</a>
       if you want to earn spades.
     </div>
+    <p class="text-center">
+      <a href="{% url "hanabi-register" %}" class="btn btn-link btn-primary">Register username</a>
+      <hr />
+    </p>
   {% endif %}
   <h1>Active Contests</h1>
   {% for contest in active_contests %}
@@ -74,7 +78,9 @@
             <td>Pending</td>
           {% endif %}
           <td>{{ contest.num_players }}p</td>
-          <td>{{ contest.end_date }}</td>
+          <td>
+            {{ contest.end_date }}
+          </td>
         </tr>
       {% endfor %}
     </tbody>
