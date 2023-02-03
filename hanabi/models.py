@@ -23,6 +23,7 @@ class HanabiPlayer(models.Model):
 
 
 class HanabiContest(models.Model):
+    variant_id = models.PositiveIntegerField(help_text="The variant ID on hanab.live")
     variant_name = models.CharField(
         max_length=64, help_text="The variant being played as a string."
     )
@@ -53,6 +54,14 @@ class HanabiContest(models.Model):
     @property
     def seed_name(self) -> str:
         return f"otis{self.pk}"
+
+    @property
+    def full_seed_name(self) -> str:
+        return f"p{self.num_players}v{self.variant_id}otis{self.pk}"
+
+    @property
+    def hanab_stats_page_url(self) -> str:
+        return f"https://hanab.live/seed/{self.full_seed_name}"
 
     @property
     def create_table_url(self) -> str:

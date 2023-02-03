@@ -14,6 +14,7 @@ class HanabiModelTests(EvanTestCase):
         contest: HanabiContest = HanabiContestFactory.create(
             pk=1,
             variant_name="Duck (5 Suits)",
+            variant_id=55,
             start_date=timezone.datetime(2050, 2, 1, tzinfo=UTC),
             end_date=timezone.datetime(2050, 2, 14, tzinfo=UTC),
         )
@@ -35,16 +36,19 @@ class HanabiViewTests(EvanTestCase):
     def test_contest_list(self) -> None:
         HanabiContestFactory.create(
             variant_name="Candy Corn Mix (5 Suits)",
+            variant_id=2016,
             start_date=timezone.datetime(2050, 10, 15, tzinfo=UTC),
             end_date=timezone.datetime(2050, 11, 15, tzinfo=UTC),
         )
         HanabiContestFactory.create(
             variant_name="Holiday Mix (5 Suits)",
+            variant_id=2018,
             start_date=timezone.datetime(2050, 12, 1, tzinfo=UTC),
             end_date=timezone.datetime(2050, 12, 31, tzinfo=UTC),
         )
         HanabiContestFactory.create(
             variant_name="Valentine Mix (5 Suits)",
+            variant_id=2069,
             start_date=timezone.datetime(2050, 2, 1, tzinfo=UTC),
             end_date=timezone.datetime(2050, 2, 28, tzinfo=UTC),
         )

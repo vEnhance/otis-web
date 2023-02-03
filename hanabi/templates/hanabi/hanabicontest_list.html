@@ -28,6 +28,9 @@
       <li>Deadline: {{ contest.end_date }} ({{ contest.end_date|timeuntil }})</li>
       {% if request.user.is_superuser %}
         <li>
+          <a href="{{ contest.hanab_stats_page_url }}">Seed statistics on hanab.live</a>
+        </li>
+        <li>
           <a href="{% url "admin:hanabi_hanabicontest_change" contest.pk %}">Admin edit</a>
         </li>
       {% endif %}
@@ -77,9 +80,17 @@
             <td>{{ contest.variant_name }}</td>
             <td>Pending</td>
           {% endif %}
-          <td>{{ contest.num_players }}p</td>
           <td>
-            {{ contest.end_date }}
+            {{ contest.num_players }}p
+          </td>
+          <td>
+            {% if contest.processed or request.user.is_superuser %}
+              <a href="{{ contest.hanab_stats_page_url }}">
+                {{ contest.end_date }}
+              </a>
+            {% else %}
+              {{ contest.end_date }}
+            {% endif %}
           </td>
         </tr>
       {% endfor %}
