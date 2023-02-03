@@ -201,10 +201,10 @@ class UnitGroup(models.Model):
             return "Secret"
 
     @property
-    def art_base_name(self) -> str | None:
+    def art_basename(self) -> str | None:
         if not self.artwork:
             return None
-        return self.artwork.path.split("/")[-1]
+        return os.path.basename(self.artwork.name)
 
 
 class Unit(models.Model):
