@@ -84,9 +84,7 @@ class HintList(ExistStudentRequiredMixin, ListView[Hint]):
                 self.problem.save()
                 messages.info(request, f"Created previously nonexistent problem {puid}")
             elif statement_exists_on_disk:
-                raise Http404(
-                    "Need to log in to add create problems from /arch/.../otis"
-                )
+                raise Http404("Need to log in to create problems")
             else:
                 raise Http404(f"Couldn't find {puid} in database or disk")
 
