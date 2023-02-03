@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from braces.views import LoginRequiredMixin, SuperuserRequiredMixin
 from django.contrib.auth.decorators import login_required
@@ -127,7 +127,7 @@ class UserProfileUpdateView(
     success_url = reverse_lazy("profile")
     object: UserProfile
 
-    def get_success_message(self, cleaned_data: Dict[str, Any]) -> str:
+    def get_success_message(self, cleaned_data: dict[str, Any]) -> str:
         return f"Updated settings for {self.object.user.username}!"
 
     def get_object(self, queryset: Optional[QuerySet[Model]] = None) -> UserProfile:

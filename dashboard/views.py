@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 import logging
 from datetime import timedelta
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from braces.views import LoginRequiredMixin
 from django.conf import settings
@@ -70,7 +70,7 @@ def portal(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
             lvl = level_info["level_number"]
             messages.success(request, f"You leveled up! You're now level {lvl}.")
 
-    context: Dict[str, Any] = {}
+    context: dict[str, Any] = {}
     context["title"] = f"{student.name} ({semester.name})"
     context["last_seen"] = student_profile.last_seen
     context["student"] = student
@@ -217,7 +217,7 @@ class StudentPSetList(LoginRequiredMixin, ListView[PSet]):
     def get_queryset(self) -> QuerySet[PSet]:
         return PSet.objects.filter(student=self.student).order_by("-upload__created_at")
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["student"] = self.student
         return context
@@ -316,7 +316,7 @@ def uploads(request: HttpRequest, student_pk: int, unit_pk: int) -> HttpResponse
     if form is None:
         form = NewUploadForm(initial={"unit": unit})
 
-    context: Dict[str, Any] = {}
+    context: dict[str, Any] = {}
     context["title"] = "File Uploads"
     context["student"] = student
     context["unit"] = unit
@@ -336,7 +336,7 @@ def index(request: AuthHttpRequest) -> HttpResponse:
     queryset = annotate_student_queryset_with_scores(students).order_by(
         "track", "user__first_name", "user__last_name"
     )
-    context: Dict[str, Any] = {}
+    context: dict[str, Any] = {}
     context["title"] = "Current year listing"
     context["rows"] = get_student_rows(queryset)
     context["stulist_show_semester"] = False
@@ -360,7 +360,7 @@ def past(request: AuthHttpRequest, semester_pk: Optional[int] = None):
     queryset = annotate_student_queryset_with_scores(students).order_by(
         "track", "user__first_name", "user__last_name"
     )
-    context: Dict[str, Any] = {}
+    context: dict[str, Any] = {}
     context["title"] = "Previous year listing"
     context["rows"] = get_student_rows(queryset)
     context["past"] = True
@@ -426,7 +426,7 @@ class DeleteFile(LoginRequiredMixin, DeleteView):
 
 @staff_member_required
 def idlewarn(request: AuthHttpRequest) -> HttpResponse:
-    context: Dict[str, Any] = {}
+    context: dict[str, Any] = {}
     context["title"] = "Idle-warn"
 
     newest_qset = UploadedFile.objects.filter(
@@ -476,7 +476,7 @@ class PSetDetail(LoginRequiredMixin, DetailView[PSet]):
             raise PermissionDenied("Can't view work by this student")
         return super(DetailView, self).dispatch(request, *args, **kwargs)
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["student"] = self.get_object().student
         return context

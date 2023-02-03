@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, Dict
+from typing import Any
 
 from braces.views import LoginRequiredMixin, SuperuserRequiredMixin
 from django.contrib import messages
@@ -57,7 +57,7 @@ class SubmitGuess(LoginRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]):
     def get_success_url(self) -> str:
         return reverse("market-pending", args=(self.object.pk,))
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["market"] = self.market
         return context
@@ -96,7 +96,7 @@ class MarketResults(LoginRequiredMixin, ListView[Guess]):
     market: Market
     template_name = "markets/market_results.html"
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["market"] = self.market
         try:
@@ -175,7 +175,7 @@ class MarketSpades(LoginRequiredMixin, ListView[Guess]):
     request: AuthHttpRequest
     template_name = "markets/market_spades.html"
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         guesses = self.get_queryset()
         if guesses.exists():

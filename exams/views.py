@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -39,7 +39,7 @@ def pdf(request: AuthHttpRequest, pk: int) -> HttpResponse:
 @login_required
 def quiz(request: AuthHttpRequest, student_pk: int, pk: int) -> HttpResponse:
     student = get_student_by_pk(request, student_pk)
-    context: Dict[str, Any] = {}
+    context: dict[str, Any] = {}
     quiz = get_object_or_404(PracticeExam, pk=pk)
     if quiz.is_test:
         return HttpResponseForbidden(

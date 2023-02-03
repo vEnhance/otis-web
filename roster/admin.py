@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, Tuple
+from typing import Any, Optional, Tuple
 
 from django.contrib import admin, messages
 from django.contrib.admin.options import ModelAdmin
@@ -121,7 +121,7 @@ class OwedFilter(admin.SimpleListFilter):
         self,
         request: HttpRequest,
         model_admin: ModelAdmin[Any],
-    ) -> List[Tuple[str, str]]:
+    ) -> list[Tuple[str, str]]:
         del request, model_admin
         return [
             ("incomplete", "Incomplete"),
@@ -195,7 +195,7 @@ class StudentIEResource(RosterResource):
         widget=widgets.ForeignKeyWidget(Semester, "name"),
     )
     unit_list = fields.Field(
-        column_name="Unit List",
+        column_name="Unit list",
         attribute="curriculum",
         widget=widgets.ManyToManyWidget(Unit, separator=";"),
     )

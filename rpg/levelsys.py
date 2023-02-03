@@ -1,7 +1,7 @@
 # Functions to compute student levels and whatnot
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Set, Tuple, TypedDict, Union
+from typing import Any, Set, Tuple, TypedDict, Union
 
 from django.db.models.aggregates import Count, Max, Sum
 from django.db.models.expressions import OuterRef, Subquery
@@ -122,7 +122,7 @@ class Meter:
         )
 
 
-AggregateDict = Dict[str, Union[int, float]]
+AggregateDict = dict[str, Union[int, float]]
 
 
 class FourMetersDict(TypedDict):
@@ -148,8 +148,8 @@ class LevelInfoDict(TypedDict):
     completed_jobs: QuerySet[Job]
 
 
-def get_week_count(dates: List[datetime]) -> int:
-    seen: List[Tuple[int, int]] = []
+def get_week_count(dates: list[datetime]) -> int:
+    seen: list[Tuple[int, int]] = []
     for d in dates:
         d = d.astimezone(tz=timezone.utc)
         week_number = d.isocalendar()[1]
@@ -324,9 +324,9 @@ def compute_insanity_rating(b: int, d: int, z: int) -> float:
     return (z - b) / (b + d + z)
 
 
-def get_student_rows(queryset: QuerySet[Student]) -> List[Dict[str, Any]]:
-    rows: List[Dict[str, Any]] = []
-    levels: Dict[int, str] = {
+def get_student_rows(queryset: QuerySet[Student]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    levels: dict[int, str] = {
         level.threshold: level.name for level in Level.objects.all()
     }
     if len(levels) == 0:
@@ -334,7 +334,7 @@ def get_student_rows(queryset: QuerySet[Student]) -> List[Dict[str, Any]]:
     max_level = max(levels.keys())
 
     for student in annotate_student_queryset_with_scores(queryset):
-        row: Dict[str, Any] = {}
+        row: dict[str, Any] = {}
         row["student"] = student
         row["spades"] = (getattr(student, "spades_quizzes", 0) or 0) * 2
         row["spades"] += getattr(student, "spades_quests", 0) or 0

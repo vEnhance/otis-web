@@ -32,7 +32,7 @@
 
 import math
 import operator
-from typing import Any, List, Optional, Union
+from typing import Any, Optional, Union
 
 from pyparsing import (  # NOQA
     CaselessKeyword,
@@ -51,11 +51,11 @@ from pyparsing import (  # NOQA
 exprStack: Any = []
 
 
-def push_first(toks: List[Token]):
+def push_first(toks: list[Token]):
     exprStack.append(toks[0])
 
 
-def push_unary_minus(toks: List[Token]):
+def push_unary_minus(toks: list[Token]):
     for t in toks:
         if t == "-":
             exprStack.append("unary -")
@@ -97,7 +97,7 @@ def BNF() -> Any:
         expr_list = delimitedList(Group(expr))
 
         # add parse action that replaces the function identifier with a (name, number of args) tuple
-        def insert_fn_argcount_tuple(t: List[Any]):
+        def insert_fn_argcount_tuple(t: list[Any]):
             fn = t.pop(0)
             num_args = len(t[0])
             t.insert(0, (fn, num_args))
@@ -143,7 +143,7 @@ fn = {
 }
 
 
-def evaluate_stack(s: List[Any]) -> Union[int, float]:
+def evaluate_stack(s: list[Any]) -> Union[int, float]:
     op, num_args = s.pop(), 0
     if isinstance(op, tuple):
         op, num_args = op

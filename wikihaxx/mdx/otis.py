@@ -1,5 +1,5 @@
 import re
-from typing import Any, List
+from typing import Any
 
 import markdown
 import markdown.preprocessors
@@ -23,9 +23,9 @@ special_end_regex = re.compile(r"\[/(diamond|unit|generic)+\]")
 
 class OTISPreprocessor(markdown.preprocessors.Preprocessor):
     # TODO implement cool stuff
-    def run(self, lines: List[str]) -> List[str]:
-        output: List[str] = []
-        body: List[str] = []
+    def run(self, lines: list[str]) -> list[str]:
+        output: list[str] = []
+        body: list[str] = []
         active = False
 
         for line in lines:
@@ -33,7 +33,7 @@ class OTISPreprocessor(markdown.preprocessors.Preprocessor):
             m_end = special_end_regex.match(line)
             if m_start is not None:
                 output.append(r'<div class="col-md-4 float-right">')
-                table_output: List[str] = []
+                table_output: list[str] = []
                 table_output.append(r"<table>")
                 table_output.append(r"<tbody>")
                 active = True

@@ -6,7 +6,7 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 import django_stubs_ext
 import import_export.tmp_storages
@@ -145,7 +145,7 @@ WSGI_APPLICATION = "otisweb.wsgi.application"
 # Database
 
 if os.getenv("DATABASE_NAME"):
-    DATABASES: Dict[str, Any] = {
+    DATABASES: dict[str, Any] = {
         "default": {
             "ENGINE": "django.db.backends.mysql",
             "NAME": os.getenv("DATABASE_NAME"),
@@ -259,7 +259,7 @@ def filter_useless_404(record: logging.LogRecord) -> bool:
         return False
     if record.args is None:
         return True
-    a: List[str] = [str(s) for s in record.args]
+    a: list[str] = [str(s) for s in record.args]
     if len(a) == 2:
         return not (a[0] == "Not Found" and ("wp-include" in a[1] or ".php" in a[1]))
     elif len(a) == 3:

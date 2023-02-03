@@ -1,5 +1,5 @@
 import random
-from typing import Any, Dict, Iterable
+from typing import Any, Iterable
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -62,7 +62,7 @@ class UnitFactory(DjangoModelFactory):
     position = Sequence(lambda n: n + 1)
 
     @post_generation
-    def write_mock_media(self, create: bool, extracted: bool, **kwargs: Dict[str, Any]):
+    def write_mock_media(self, create: bool, extracted: bool, **kwargs: dict[str, Any]):
         assert settings.TESTING is True
         if settings.TESTING_NEEDS_MOCK_MEDIA is False:
             return

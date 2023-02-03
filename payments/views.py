@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict
+from typing import Any
 
 import stripe
 from braces.views import SuperuserRequiredMixin
@@ -207,7 +207,7 @@ class JobFolderList(LoginRequiredMixin, ListView[JobFolder]):
             .order_by("name")
         )
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         assert isinstance(self.request.user, User)
         try:
@@ -236,7 +236,7 @@ class JobList(LoginRequiredMixin, ListView[Job]):
             )
         )
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["jobfolder"] = self.jobfolder
         return context
@@ -332,7 +332,7 @@ class InactiveWorkerList(SuperuserRequiredMixin, ListView[Worker]):
         super().setup(request, *args, **kwargs)
         self.jobfolder = get_object_or_404(JobFolder, slug=self.kwargs["slug"])
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["jobfolder"] = self.jobfolder
         return context

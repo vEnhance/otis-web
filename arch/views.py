@@ -1,4 +1,4 @@
-from typing import Any, ClassVar, Dict, Optional
+from typing import Any, ClassVar, Optional
 
 import reversion
 from django.contrib import messages
@@ -25,7 +25,7 @@ from roster.models import Student
 from .forms import HintUpdateFormWithReason
 from .models import Hint, Problem
 
-ContextType = Dict[str, Any]
+ContextType = dict[str, Any]
 
 
 class ExistStudentRequiredMixin(LoginRequiredMixin):
@@ -46,7 +46,7 @@ class ExistStudentRequiredMixin(LoginRequiredMixin):
 
 
 class HintObjectView:
-    kwargs: ClassVar[Dict[str, Any]] = {}
+    kwargs: ClassVar[dict[str, Any]] = {}
 
     def get_object(self, queryset: Optional[QuerySet[Hint]] = None) -> Hint:
         if queryset is None:
@@ -58,7 +58,7 @@ class HintObjectView:
 
 
 class ProblemObjectView:
-    kwargs: ClassVar[Dict[str, Any]] = {}
+    kwargs: ClassVar[dict[str, Any]] = {}
 
     def get_object(self, queryset: Optional[QuerySet[Problem]] = None) -> Problem:
         if queryset is None:
@@ -93,7 +93,7 @@ class HintList(ExistStudentRequiredMixin, ListView[Hint]):
     def get_queryset(self):
         return Hint.objects.filter(problem__puid=self.kwargs["puid"]).order_by("number")
 
-    def get_context_data(self, **kwargs: Dict[str, Any]):
+    def get_context_data(self, **kwargs: dict[str, Any]):
         context = super().get_context_data(**kwargs)
         context["problem"] = self.problem
         context["statement"] = self.problem.get_statement()

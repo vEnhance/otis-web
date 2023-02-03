@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import os
 from datetime import timedelta
 from hashlib import pbkdf2_hmac
-from typing import Callable, List, TypedDict
+from typing import Callable, TypedDict
 
 from _pydecimal import Decimal
 from django.contrib.auth.models import User
@@ -277,7 +277,7 @@ class Student(models.Model):
         else:
             return False
 
-    def generate_curriculum_rows(self) -> List[CurriculumRowTypeDict]:
+    def generate_curriculum_rows(self) -> list[CurriculumRowTypeDict]:
         curriculum = self.generate_curriculum_queryset().order_by("position")
         unlocked_units_pks = self.unlocked_units.values_list("pk", flat=True)
 

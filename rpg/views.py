@@ -1,7 +1,7 @@
 import logging
 import random
 from hashlib import pbkdf2_hmac
-from typing import Any, Dict
+from typing import Any
 
 from braces.views import (  # NOQA
     LoginRequiredMixin,
@@ -46,7 +46,7 @@ def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
         "achievement__name"
     )
     unlocks = unlocks.select_related("achievement")
-    context: Dict[str, Any] = {
+    context: dict[str, Any] = {
         "student": student,
         "form": DiamondsForm(),
         "achievements": unlocks,
@@ -127,7 +127,7 @@ class AchievementList(LoginRequiredMixin, ListView[Achievement]):
 
         return achievements
 
-    def get_context_data(self, **kwargs: Dict[str, Any]):
+    def get_context_data(self, **kwargs: dict[str, Any]):
         context = super().get_context_data(**kwargs)
         context["checksum"] = get_achievement_checksum(
             self.request.user.pk, self.amount, settings.CERT_HASH_KEY
@@ -176,7 +176,7 @@ class AchievementCertifyList(LoginRequiredMixin, ListView[Achievement]):
 
         return achievements
 
-    def get_context_data(self, **kwargs: Dict[str, Any]):
+    def get_context_data(self, **kwargs: dict[str, Any]):
         context = super().get_context_data(**kwargs)
 
         context["viewing"] = True
@@ -213,7 +213,7 @@ class FoundList(
             .order_by("-timestamp")
         )
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["achievement"] = self.achievement
         return context
@@ -235,7 +235,7 @@ def leaderboard(request: AuthHttpRequest) -> HttpResponse:
     )
     for row in rows:
         row["days_since_last_seen"] = get_days_since(row["last_seen"])
-    context: Dict[str, Any] = {}
+    context: dict[str, Any] = {}
     context["rows"] = rows
     return render(request, "rpg/leaderboard.html", context)
 
@@ -261,7 +261,7 @@ class PalaceList(LoginRequiredMixin, ListView[PalaceCarving]):
         queryset = queryset.order_by("created_at")
         return queryset
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["student"] = self.student
         return context
@@ -304,7 +304,7 @@ class PalaceUpdate(
             carving.display_name = student.name
         return carving
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["student"] = self.student
         return context
@@ -357,7 +357,7 @@ class DiamondUpdate(
         )
         return super().form_valid(form)
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["student"] = self.student
         return context

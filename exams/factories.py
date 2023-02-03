@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from django.conf import settings
 from django.core.files.base import ContentFile
@@ -22,7 +22,7 @@ class TestFactory(DjangoModelFactory):
     is_test = True
 
     @post_generation
-    def write_mock_media(self, create: bool, extracted: bool, **kwargs: Dict[str, Any]):
+    def write_mock_media(self, create: bool, extracted: bool, **kwargs: dict[str, Any]):
         assert settings.TESTING is True
         if settings.TESTING_NEEDS_MOCK_MEDIA is False:
             return

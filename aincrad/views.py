@@ -2,7 +2,7 @@ import json
 import logging
 from decimal import Decimal
 from hashlib import sha256
-from typing import Any, Dict, List, Literal, TypedDict, Union
+from typing import Any, Literal, TypedDict, Union
 
 from allauth.socialaccount.models import SocialAccount
 from django.conf import settings
@@ -53,12 +53,12 @@ class JSONData(TypedDict):
     keywords: str
 
     # keys for add multiple hints
-    old_hints: List[HintData]
-    new_hints: List[HintData]
+    old_hints: list[HintData]
+    new_hints: list[HintData]
     allow_delete_hints: bool
 
     # invoice
-    entries: Dict[str, float]
+    entries: dict[str, float]
     field: Union[Literal["adjustment"], Literal["extras"], Literal["total_paid"]]
 
     # jobs
@@ -238,7 +238,7 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
         else:
             return JsonResponse({"result": "success", "changed": False}, status=200)
     elif action == "init":
-        output_data: Dict[str, Any] = {}
+        output_data: dict[str, Any] = {}
         output_data["timestamp"] = str(timezone.now())
         output_data["_name"] = "Root"
         output_data["_children"] = [
@@ -390,7 +390,7 @@ def invoice_handler(action: str, data: JSONData) -> JsonResponse:
     field = data["field"]
     assert field in ("adjustment", "extras", "total_paid")
     entries = data["entries"]
-    invoices_to_update: List[Invoice] = []
+    invoices_to_update: list[Invoice] = []
 
     for inv in invoices:
         if inv.student.user is not None:

@@ -13,7 +13,7 @@ So e.g. "list students by most recent pset" goes under dashboard.
 import collections
 import datetime
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from allauth.socialaccount.models import SocialAccount
 from braces.views import LoginRequiredMixin, StaffuserRequiredMixin
@@ -166,7 +166,7 @@ def advance(request: HttpRequest, student_pk: int) -> Any:
     else:
         form = AdvanceForm(student=student)
 
-    context: Dict[str, Any] = {"title": "Advance " + student.name}
+    context: dict[str, Any] = {"title": "Advance " + student.name}
     context["form"] = form
     context["student"] = student
     context["curriculum"] = student.generate_curriculum_rows()
@@ -223,7 +223,7 @@ def master_schedule(request: HttpRequest) -> HttpResponse:
             }
         )
 
-    chart: List[Dict[str, Any]] = []
+    chart: list[dict[str, Any]] = []
     unit_dicts = Unit.objects.order_by("position").values(
         "position", "pk", "group__subject", "group__name", "code"
     )
@@ -274,7 +274,7 @@ def inquiry(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
             "This form isn't enabled yet because you have not chosen your initial units."
         )
 
-    context: Dict[str, Any] = {}
+    context: dict[str, Any] = {}
     current_inquiries = UnitInquiry.objects.filter(student=student)
 
     # Create form for submitting new inquiries
