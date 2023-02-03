@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="description" content="OTIS-WEB Internal Django Website" />
+    <meta name="keywords" content="otis" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OTIS Public Catalog</title>
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.min.js"
+            type="text/javascript"></script>
+    <style type="text/css">
+      a.artwork>img {
+          object-fit: cover;
+          box-shadow: 0px 0px 15px #6666dd;
+          margin: 5px 5px 5px 5px;
+      }
+
+      a.artwork:hover>img {
+          transform: scale(1.05);
+          box-shadow: 0px 0px 15px #aaaa77;
+      }
+    </style>
+    <link rel="stylesheet"
+          href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script type="text/javascript">
+      MathJax = {
+          tex: {
+              inlineMath: [
+                  ['$', '$', ],
+                  ['\\(', '\\)']
+              ],
+              displayMath: [
+                  ['\\[', '\\]']
+              ],
+          },
+          ready: () => {}
+      };
+
+      window.MathJaxLoaded = new Promise((resolve) => {
+          $.getScript("https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js", () => resolve());
+      })
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mate" />
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Verdana"/>
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Acme&display=swap"/>
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400&display=swap"/>
+    <link href="//web.evanchen.cc/css/simple-53544.css" rel="stylesheet" />
+    {# favicon #}
+    <link rel="apple-touch-icon"
+          sizes="180x180"
+          href="//web.evanchen.cc/icons/apple-touch-icon.png"/>
+    <link rel="icon"
+          type="image/png"
+          href="//web.evanchen.cc/icons/favicon-32x32.png"
+          sizes="32x32"/>
+    <link rel="icon"
+          type="image/png"
+          href="//web.evanchen.cc/icons/favicon-16x16.png"
+          sizes="16x16"/>
+    <link rel="manifest" href="//web.evanchen.cc/icons/manifest.json" />
+    <link rel="mask-icon"
+          href="//web.evanchen.cc/icons/safari-pinned-tab.svg"
+          color="#5bbad5"/>
+    <link rel="shortcut icon" href="//web.evanchen.cc/icons/favicon.ico" />
+    <meta name="msapplication-config"
+          content="//web.evanchen.cc/icons/browserconfig.xml"/>
+    <meta name="theme-color" content="#ffffff" />
+  </head>
+  <body>
+    <h1 style="font-size:30pt;">OTIS Public Catalog</h1>
+    <p>
+      This is the public-facing unit catalog for
+      <a href="//web.evanchen.cc/otis.html">OTIS</a>.
+      Last updated {% now "r" %}.
+    </p>
+    {% regroup object_list by get_subject_display as grouped_unit_list %}
+    {% for subject, item_list in grouped_unit_list %}
+      <hr />
+      <h2>{{ subject }}</h2>
+      <div class="list-group">
+        {% for unitgroup in item_list %}
+          <div class="list-group-item container">
+            <div class="row">
+              <div class="col-4">
+                {% if unitgroup.artwork_thumb_md %}
+                  <a class="artwork"
+                     href="https://web.evanchen.cc/otis{{ unitgroup.artwork.url }}">
+                    <img width="100%"
+                         src="https://web.evanchen.cc/otis{{ unitgroup.artwork_thumb_md.url }}"/>
+                  </a>
+                {% else %}
+                  <p class="text-center text-muted">
+                    <i>No image yet</i>
+                  </p>
+                {% endif %}
+              </div>
+              <div class="col-8">
+                <h3 class="text-dark">{{ unitgroup.name }}</h3>
+                {% if unitgroup.artist_name %}
+                  <p class="fst-italic fw-lighter text-success">Art contributed by {{ unitgroup.artist_name }}.</p>
+                {% endif %}
+                <p class="text-secondary">{{ unitgroup.description|linebreaks }}</p>
+                <p class="text-primary">
+                  Completed by {{ unitgroup.num_psets }}
+                  student{{ unitgroup.num_psets|pluralize }}.
+                </p>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+  </body>
+</html>

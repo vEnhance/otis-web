@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import PermissionDenied
+from django.db.models.aggregates import Count
 from django.db.models.base import Model
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
@@ -42,8 +43,22 @@ class UnitGroupListView(ListView[UnitGroup]):
             hidden=False,
         )
         .order_by("subject", "name")
+        .annotate(num_psets=Count("unit__pset"))
         .prefetch_related("unit_set")
     )
+
+
+class PublicCatalog(ListView[UnitGroup]):
+    model = UnitGroup
+    queryset = (
+        UnitGroup.objects.filter(
+            hidden=False,
+        )
+        .order_by("subject", "name")
+        .annotate(num_psets=Count("unit__pset"))
+    )
+
+    template_name = "core/catalog_printable.html"
 
 
 class UnitArtworkListView(ListView[UnitGroup]):
