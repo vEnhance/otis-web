@@ -92,11 +92,11 @@
           <div class="list-group-item container">
             <div class="row">
               <div class="col-4">
-                {% if unitgroup.art_basename %}
+                {% if unitgroup.artwork and unitgroup.artwork_thumb_md %}
                   <a class="artwork"
-                     href="https://web.evanchen.cc/otis/artwork/{{ unitgroup.art_basename }}">
-                    <img width="100%"
-                         src="https://web.evanchen.cc/otis/thumb/{{ unitgroup.art_basename }}"/>
+                     href="https://web.evanchen.cc/otis/artwork/{{ unitgroup.artwork_basename }}">
+                    <img width="226px"
+                         src="https://web.evanchen.cc/otis/thumb/{{ unitgroup.artwork_thumb_md_basename }}"/>
                   </a>
                 {% else %}
                   <p class="text-center text-muted">
