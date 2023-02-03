@@ -454,11 +454,10 @@ def api(request: HttpRequest) -> JsonResponse:
     action = data.get("action", None)
     if action is None:
         raise SuspiciousOperation("You need to provide an action, silly")
-    if settings.PRODUCTION:
-        token = data.get("token")
-        assert token is not None
-        if not sha256(token.encode("ascii")).hexdigest() == settings.API_TARGET_HASH:
-            return JsonResponse({"error": "☕"}, status=418)
+    token = data.get("token")
+    assert token is not None
+    if not sha256(token.encode("ascii")).hexdigest() == settings.API_TARGET_HASH:
+        return JsonResponse({"error": "☕"}, status=418)
 
     if action in (
         "grade_problem_set",
