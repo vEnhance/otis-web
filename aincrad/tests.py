@@ -2,8 +2,8 @@ from hashlib import sha256
 
 from django.test.utils import override_settings
 
-from arch.factories import HintFactory
-from arch.models import Hint
+from arch.factories import HintFactory, ProblemFactory
+from arch.models import Hint, Problem
 from core.factories import SemesterFactory, UnitFactory
 from dashboard.factories import PSetFactory
 from evans_django_tools.testsuite import EvanTestCase
@@ -324,3 +324,50 @@ class TestAincrad(EvanTestCase):
         self.assertEqual(set(A7_Hints.values_list("number", flat=True)), {85, 95, 100})
         self.assertEqual(A7_Hints.filter(keywords="updated").count(), 2)
         self.assertEqual(A7_Hints.filter(keywords__startswith="Updated").count(), 2)
+
+    def test_arch_url_update(self) -> None:
+        ProblemFactory.create(
+            puid="19USEMO1",
+            hyperlink="https://aops.com/community/p15412066",
+        )
+        ProblemFactory.create(
+            puid="19USEMO2",
+            hyperlink="https://aops.com/community/p15412166",
+        )
+        ProblemFactory.create(
+            puid="19USEMO3",
+            hyperlink="https://wrong.url.to.fix/",
+        )
+        ProblemFactory.create(
+            puid="19USEMO4",
+            hyperlink="https://aops.com/community/p15425708",
+        )
+        ProblemFactory.create(
+            puid="19USEMO5",
+            hyperlink="https://aops.com/community/p15425728",
+        )
+        ProblemFactory.create(
+            puid="19USEMO6",
+        )
+
+        resp = self.assertPost20X(
+            "api",
+            json={
+                "action": "arch_url_update",
+                "urls": {
+                    "19USEMO3": "https://aops.com/community/p15412083",
+                    "19USEMO5": "https://aops.com/community/p15425728",
+                    "19USEMO6": "https://aops.com/community/p15425714",
+                    "18SLA7": "https://aops.com/community/p12752777",
+                },
+            },
+        )
+        self.assertEqual(resp.json()["updated_count"], 2)
+        self.assertEqual(
+            Problem.objects.get(puid="19USEMO3").hyperlink,
+            "https://aops.com/community/p15412083",
+        )
+        self.assertEqual(
+            Problem.objects.get(puid="19USEMO6").hyperlink,
+            "https://aops.com/community/p15425714",
+        )

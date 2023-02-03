@@ -64,6 +64,9 @@ class JSONData(TypedDict):
     # jobs
     progress: str
 
+    # arch update urls
+    urls: dict[str, str]  # puid -> url
+
 
 PSET_VENUEQ_INIT_QUERYSET = PSet.objects.filter(
     status__in=("PA", "PR", "P"),
@@ -421,6 +424,23 @@ def invoice_handler(action: str, data: JSONData) -> JsonResponse:
     )
 
 
+def arch_url_handler(action: str, data: JSONData) -> JsonResponse:
+    del action
+    problems_to_update: list[Problem] = []
+    urls_map = data["urls"]
+    for problem in Problem.objects.all():
+        puid = problem.puid
+        if puid in urls_map and problem.hyperlink != urls_map[puid]:
+            problem.hyperlink = urls_map[puid]
+            problems_to_update.append(problem)
+    Problem.objects.bulk_update(
+        problems_to_update,
+        fields=("hyperlink",),
+        batch_size=25,
+    )
+    return JsonResponse({"updated_count": len(problems_to_update)})
+
+
 @csrf_exempt
 @require_POST
 def api(request: HttpRequest) -> JsonResponse:
@@ -454,6 +474,8 @@ def api(request: HttpRequest) -> JsonResponse:
         return problems_handler(action, data)
     elif action in ("invoice",):
         return invoice_handler(action, data)
+    elif action in ("arch_url_update"):
+        return arch_url_handler(action, data)
     else:
         return JsonResponse({"error": "No such command"}, status=400)
 
