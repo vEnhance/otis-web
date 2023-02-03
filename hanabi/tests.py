@@ -28,7 +28,7 @@ class HanabiModelTests(EvanTestCase):
             contest.create_table_url,
             r"https://hanab.live/create-table?name=%21seed+otis1"
             r"&variantName=Duck+%285+Suits%29"
-            r"&timed=true&timeBase=120&timePerTurn=20",
+            r"&timed=true&timeBase=180&timePerTurn=30",
         )
 
 

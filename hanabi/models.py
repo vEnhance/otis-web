@@ -70,8 +70,8 @@ class HanabiContest(models.Model):
                 "name": f"!seed {self.seed_name}",
                 "variantName": self.variant_name,
                 "timed": "true",
-                "timeBase": "120",
-                "timePerTurn": "20",
+                "timeBase": "180",
+                "timePerTurn": "30",
             }
         )
 
