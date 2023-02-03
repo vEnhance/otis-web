@@ -200,6 +200,12 @@ class UnitGroup(models.Model):
         elif self.subject == "K":
             return "Secret"
 
+    @property
+    def art_base_name(self) -> str | None:
+        if not self.artwork:
+            return None
+        return self.artwork.path.split("/")[-1]
+
 
 class Unit(models.Model):
     """Represents a PDF of a unit, with problems and solutions"""
