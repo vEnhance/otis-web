@@ -17,6 +17,10 @@ class HanabiPlayer(models.Model):
     def __str__(self) -> str:
         return self.hanab_username
 
+    @property
+    def name(self) -> str:
+        return self.user.get_full_name()
+
 
 class HanabiContest(models.Model):
     variant_name = models.CharField(

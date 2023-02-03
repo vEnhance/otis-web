@@ -33,6 +33,7 @@ class HanabiPlayerAdmin(admin.ModelAdmin):
     list_display = (
         "pk",
         "user",
+        "name",
         "hanab_username",
     )
     list_display_links = (
