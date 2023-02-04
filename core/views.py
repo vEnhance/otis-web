@@ -102,6 +102,12 @@ def permitted(unit: Unit, request: HttpRequest, asking_solution: bool) -> bool:
         semester__active=False,
     ).exists():
         return True
+    elif Student.objects.filter(
+        user=request.user,
+        unlocked_units=unit,
+        enabled=False,
+    ).exists():
+        return True
     return False
 
 
