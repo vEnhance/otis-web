@@ -57,7 +57,7 @@ class HanabiContest(models.Model):
 
     @property
     def full_seed_name(self) -> str:
-        return f"p{self.num_players}v{self.variant_id}otis{self.pk}"
+        return f"p{self.num_players}v{self.variant_id}sotis{self.pk}"
 
     @property
     def hanab_stats_page_url(self) -> str:
