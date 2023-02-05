@@ -1614,14 +1614,14 @@ reports = ["lxml"]
 
 [[package]]
 name = "mypy-extensions"
-version = "0.4.3"
-description = "Experimental type system extensions for programs checked with the mypy typechecker."
+version = "1.0.0"
+description = "Type system extensions for programs checked with the mypy type checker."
 category = "main"
 optional = false
-python-versions = "*"
+python-versions = ">=3.5"
 files = [
-    {file = "mypy_extensions-0.4.3-py2.py3-none-any.whl", hash = "sha256:090fedd75945a69ae91ce1303b5824f428daf5a028d2f6ab8a299250a846f15d"},
-    {file = "mypy_extensions-0.4.3.tar.gz", hash = "sha256:2d82818f5bb3e369420cb3c4060a7970edba416647068eb4c5343488a6c604a8"},
+    {file = "mypy_extensions-1.0.0-py3-none-any.whl", hash = "sha256:4392f6c0eb8a5668a69e23d168ffa70f0be9ccfd32b5cc2d26a34ae5b844552d"},
+    {file = "mypy_extensions-1.0.0.tar.gz", hash = "sha256:75dbf8955dc00442a438fc4d0666508a9a97b6bd41aa2f0ffe9d2f2725af0782"},
 ]
 
 [[package]]
@@ -2569,14 +2569,14 @@ tests = ["cython", "littleutils", "pygments", "pytest", "typeguard"]
 
 [[package]]
 name = "stripe"
-version = "5.0.0"
+version = "5.1.0"
 description = "Python bindings for the Stripe API"
 category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 files = [
-    {file = "stripe-5.0.0-py2.py3-none-any.whl", hash = "sha256:50f69a5fc9cd6f7629861b80ea70a3c6da0c76401ddc159474f2d45fab9215d6"},
-    {file = "stripe-5.0.0.tar.gz", hash = "sha256:bdc8c5ee8e6b53c4767bbe720752cedb8af91db46ad96e511edd0fb74964ac5d"},
+    {file = "stripe-5.1.0-py2.py3-none-any.whl", hash = "sha256:e25e5fe34afa9adda1b64be1852c3081d6b3f198fccd718fc9936dbcd2c175a7"},
+    {file = "stripe-5.1.0.tar.gz", hash = "sha256:f2d91d8e3daa4f385403c6cdbb6b38f5482b2de82b6e834a300b36352380e68e"},
 ]
 
 [package.dependencies]
@@ -2965,4 +2965,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10, <4.0"
-content-hash = "f14fd18742cb2650dd1901408bfdebbaa6160219e85b535d20a196a206761d51"
+content-hash = "e2f8e205a8188e2d91c195a4f2a107024ce2b662b284556f6f1fa2e045a22bf4"

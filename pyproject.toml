@@ -36,7 +36,7 @@ prettytable = "^3.4.1"
 pyparsing = "^3.0.9"
 python-dotenv = "^0.21.1"
 setuptools = "^65.7.0"
-stripe = "^5.0.0"
+stripe = "^5.1.0"
 wheel = "^0.38.4"
 wiki = {git = "https://github.com/django-wiki/django-wiki.git", rev = "7981d6d"}
 bleach = {extras = ["css"], version=">=5,<6"} # manual until wiki 0.10 out
