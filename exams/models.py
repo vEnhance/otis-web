@@ -101,7 +101,7 @@ class PracticeExam(models.Model):
 
     @property
     def deadline(self) -> datetime.datetime | None:
-        if self.is_test is False or self.was_extended:
+        if self.is_test is True or self.was_extended:
             return self.due_date
         else:
             return self.due_date + datetime.timedelta(days=-7)
