@@ -249,3 +249,6 @@ class MarketCreateView(
         form.instance.end_date = end_date
 
         return super().form_valid(form)
+
+    def get_success_url(self) -> str:
+        return reverse("market-list")
