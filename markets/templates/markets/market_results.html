@@ -4,6 +4,9 @@
   Market {{ market.slug }}
 {% endblock title %}
 {% block layout-content %}
+  <p>
+    <a href="{% url "market-list" %}">Back to market list.</a>
+  </p>
   {% if request.user.is_superuser %}
     {% if not market.has_ended or not market.answer %}
       <div class="alert alert-warning">You are viewing this market in admin mode.</div>
