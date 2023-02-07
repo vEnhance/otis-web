@@ -839,7 +839,7 @@ function runKatamari() {
       bgmusic = document.createElement("audio");
       bgmusic.id = "khbgmusic";
       bgmusic.loop = "loop";
-      bgmusic.src = "http://kathack.com/js/katamari.mp3";
+      bgmusic.src = "https://web.evanchen.cc/static/katamari.mp3";
       gameDiv.appendChild(bgmusic);
     }
     bgmusic.play();
