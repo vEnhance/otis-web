@@ -50,10 +50,10 @@ class Problem(models.Model):
         return get_disk_statement_from_puid(self.puid)
 
     @property
-    def niceness(self) -> float:
+    def niceness(self) -> Optional[float]:
         total: int = 0
 
-        votes = self.vote_set.all()
+        votes: models.QuerySet[Vote] = self.vote_set.all()
 
         if len(votes) > 0:
             for vote in votes:
@@ -63,7 +63,7 @@ class Problem(models.Model):
         else:
             return None
 
-        return round(total, 2)
+        return round(total / len(votes), 2)
 
 
 class Vote(models.Model):
@@ -81,7 +81,7 @@ class Vote(models.Model):
 
     niceness = models.FloatField(
         help_text="A student submitted number from 0 to 10 used to indicate the approximate niceness of a problem.",
-        validators=[MaxValueValidator(50)],
+        validators=[MaxValueValidator(10)],
     )
 
 
