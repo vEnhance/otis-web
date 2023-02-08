@@ -250,7 +250,7 @@ def view_solution(request: HttpRequest, puid: str):
         raise Http404
 
 class VoteCreate(
-    ExistStudentRequiredMixin,
+    VerifiedRequiredMixin,
     CreateView[Vote, VoteForm],
 ):
     context_object_name = "vote"
