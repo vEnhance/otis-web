@@ -30,6 +30,6 @@ class ProblemSelectForm(forms.Form):
 
 
 class VoteForm(forms.Form):
-    vote = forms.FloatField(
+    vote = forms.IntegerField(
         help_text="How nice you think this problem is, from 0 to 10."
     )

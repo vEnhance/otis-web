@@ -79,7 +79,7 @@ class Vote(models.Model):
         help_text="The container of the current vote.",
     )
 
-    niceness = models.FloatField(
+    niceness = models.PositiveIntegerField(
         help_text="A student submitted number from 0 to 10 used to indicate the approximate niceness of a problem.",
         validators=[MaxValueValidator(10)],
     )
