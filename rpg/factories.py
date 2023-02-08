@@ -1,19 +1,20 @@
-from core.factories import UnitGroupFactory, UserFactory  # NOQA
-from evans_django_tools.testsuite import UniqueFaker
 from factory.declarations import LazyAttribute, Sequence, SubFactory
 from factory.django import DjangoModelFactory, ImageField
 from factory.faker import Faker
 from factory.fuzzy import FuzzyChoice
+
+from core.factories import UnitGroupFactory, UserFactory  # NOQA
+from evans_django_tools.testsuite import UniqueFaker
 from roster.factories import StudentFactory
 
-from .models import (
+from .models import (  # NOQA
     Achievement,
     AchievementUnlock,
     BonusLevel,
     BonusLevelUnlock,
     Level,
     QuestComplete,
-)  # NOQA
+)
 
 
 class AchievementFactory(DjangoModelFactory):

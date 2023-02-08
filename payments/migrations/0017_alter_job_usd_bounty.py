@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("payments", "0016_alter_job_progress_alter_worker_google_username_and_more"),
     ]

@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("dashboard", "0079_remove_pset_approved_remove_pset_rejected_and_more"),
     ]

@@ -1,16 +1,15 @@
 from core.factories import UnitFactory, UserFactory
 from evans_django_tools.testsuite import EvanTestCase
 from rpg.factories import AchievementFactory
-
 from wikihaxx.mdx.otis import OTISPreprocessor
 
 from .factories import URLPathFactory
-from .views import (
+from .views import (  # NOQA
     WIKI_SUBJECT_CHART,
     edit_redirect,
     view_redirect,
     wiki_redirect,
-)  # NOQA
+)
 
 wiki_sample_bbcode = r"""Hello!
 

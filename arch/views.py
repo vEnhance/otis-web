@@ -1,14 +1,8 @@
-from typing import Any, ClassVar, Dict, Optional
-from django.forms import HiddenInput
+from typing import Any, ClassVar, Optional
 
 import reversion
-from aincrad.views import problems_handler
-from core.utils import storage_hash
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.models import User
-from django.core.exceptions import PermissionDenied
 from django.core.files.storage import default_storage
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
@@ -19,36 +13,20 @@ from django.urls import reverse
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from reversion.views import RevisionMixin
-from roster.models import Student
 
 from arch.forms import ProblemSelectForm
 from arch.models import get_disk_statement_from_puid
+from core.utils import storage_hash
+from otisweb.mixins import VerifiedRequiredMixin
 
 from .forms import HintUpdateFormWithReason, VoteForm
 from .models import Hint, Problem, Vote
 
-ContextType = Dict[str, Any]
-
-
-class ExistStudentRequiredMixin(LoginRequiredMixin):
-    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any):
-        if not request.user.is_authenticated:
-            return super().dispatch(request, *args, **kwargs)
-        assert isinstance(request.user, User)
-        if (
-            not Student.objects.filter(user=request.user).exists()
-            and not request.user.is_staff
-        ):
-            raise PermissionDenied(
-                "You have to be enrolled in at least one semester "
-                "of OTIS to use the ARCH system"
-            )
-        else:
-            return super().dispatch(request, *args, **kwargs)
+ContextType = dict[str, Any]
 
 
 class HintObjectView:
-    kwargs: ClassVar[Dict[str, Any]] = {}
+    kwargs: ClassVar[dict[str, Any]] = {}
 
     def get_object(self, queryset: Optional[QuerySet[Hint]] = None) -> Hint:
         if queryset is None:
@@ -60,7 +38,7 @@ class HintObjectView:
 
 
 class ProblemObjectView:
-    kwargs: ClassVar[Dict[str, Any]] = {}
+    kwargs: ClassVar[dict[str, Any]] = {}
 
     def get_object(self, queryset: Optional[QuerySet[Problem]] = None) -> Problem:
         if queryset is None:
@@ -69,7 +47,7 @@ class ProblemObjectView:
         return get_object_or_404(queryset, puid=self.kwargs["puid"])
 
 
-class HintList(ExistStudentRequiredMixin, ListView[Hint]):
+class HintList(VerifiedRequiredMixin, ListView[Hint]):
     context_object_name = "hint_list"
     problem: Problem
 
@@ -86,16 +64,14 @@ class HintList(ExistStudentRequiredMixin, ListView[Hint]):
                 self.problem.save()
                 messages.info(request, f"Created previously nonexistent problem {puid}")
             elif statement_exists_on_disk:
-                raise Http404(
-                    "Need to log in to add create problems from /arch/.../otis"
-                )
+                raise Http404("Need to log in to create problems")
             else:
                 raise Http404(f"Couldn't find {puid} in database or disk")
 
     def get_queryset(self):
         return Hint.objects.filter(problem__puid=self.kwargs["puid"]).order_by("number")
 
-    def get_context_data(self, **kwargs: Dict[str, Any]):
+    def get_context_data(self, **kwargs: dict[str, Any]):
         context = super().get_context_data(**kwargs)
         context["problem"] = self.problem
         context["statement"] = self.problem.get_statement()
@@ -109,19 +85,19 @@ class HintList(ExistStudentRequiredMixin, ListView[Hint]):
         return context
 
 
-class HintDetail(HintObjectView, ExistStudentRequiredMixin, DetailView[Hint]):
+class HintDetail(HintObjectView, VerifiedRequiredMixin, DetailView[Hint]):
     context_object_name = "hint"
     model = Hint
 
 
-class HintDetailByPK(ExistStudentRequiredMixin, DetailView[Hint]):
+class HintDetailByPK(VerifiedRequiredMixin, DetailView[Hint]):
     context_object_name = "hint"
     model = Hint
 
 
 class HintUpdate(
     HintObjectView,
-    ExistStudentRequiredMixin,
+    VerifiedRequiredMixin,
     RevisionMixin,
     UpdateView[Hint, HintUpdateFormWithReason],
 ):
@@ -146,7 +122,7 @@ class HintUpdate(
 
 
 class HintUpdateByPK(
-    ExistStudentRequiredMixin, RevisionMixin, UpdateView[Hint, HintUpdateFormWithReason]
+    VerifiedRequiredMixin, RevisionMixin, UpdateView[Hint, HintUpdateFormWithReason]
 ):
     context_object_name = "hint"
     model = Hint
@@ -170,7 +146,7 @@ class HintUpdateByPK(
 
 class ProblemUpdate(
     ProblemObjectView,
-    ExistStudentRequiredMixin,
+    VerifiedRequiredMixin,
     RevisionMixin,
     UpdateView[Problem, BaseModelForm[Problem]],
 ):
@@ -192,7 +168,7 @@ class ProblemUpdate(
 
 
 class HintCreate(
-    ExistStudentRequiredMixin, RevisionMixin, CreateView[Hint, BaseModelForm[Hint]]
+    VerifiedRequiredMixin, RevisionMixin, CreateView[Hint, BaseModelForm[Hint]]
 ):
     context_object_name = "hint"
     fields = (
@@ -215,7 +191,7 @@ class HintCreate(
         return initial
 
 
-class HintDelete(HintObjectView, ExistStudentRequiredMixin, RevisionMixin, DeleteView):
+class HintDelete(HintObjectView, VerifiedRequiredMixin, RevisionMixin, DeleteView):
     context_object_name = "hint"
     model = Hint
     object: ClassVar[Hint] = Hint()  # type: ignore
@@ -226,7 +202,7 @@ class HintDelete(HintObjectView, ExistStudentRequiredMixin, RevisionMixin, Delet
 
 # this is actually the index page as well :P bit of a hack I guess...
 class ProblemCreate(
-    ExistStudentRequiredMixin,
+    VerifiedRequiredMixin,
     RevisionMixin,
     CreateView[Problem, BaseModelForm[Problem]],
 ):

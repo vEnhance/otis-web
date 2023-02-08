@@ -1,18 +1,16 @@
-from typing import List
-
-from core.models import Unit
 from django.db.models.expressions import Exists, OuterRef
 from django.db.models.query import QuerySet
-from roster.models import Student
 
+from core.models import Unit
 from dashboard.models import PSet
+from roster.models import Student
 
 
 def pset_subquery(student: Student) -> Exists:
     return Exists(PSet.objects.filter(unit=OuterRef("pk"), student=student))
 
 
-def unlocked_unit_pks(student: Student) -> List[int]:
+def unlocked_unit_pks(student: Student) -> list[int]:
     return list(student.unlocked_units.all().values_list("pk", flat=True))
 
 

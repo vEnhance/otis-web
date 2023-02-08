@@ -1,10 +1,11 @@
 from hashlib import sha256
 
-from arch.factories import HintFactory
-from arch.models import Hint
+from django.test.utils import override_settings
+
+from arch.factories import HintFactory, ProblemFactory
+from arch.models import Hint, Problem
 from core.factories import SemesterFactory, UnitFactory
 from dashboard.factories import PSetFactory
-from django.test.utils import override_settings
 from evans_django_tools.testsuite import EvanTestCase
 from payments.factories import PaymentLogFactory
 from roster.factories import InvoiceFactory, StudentFactory, UnitInquiryFactory
@@ -91,9 +92,24 @@ class TestAincrad(EvanTestCase):
         PaymentLogFactory.create(invoice=invD, amount=120)
         PaymentLogFactory.create(invoice=invE, amount=1)
 
+    def test_failed_auth(self):
+        resp = self.assertPost40X(
+            "api",
+            json={
+                "action": "init",
+                "token": "this wrong password is not a puzzle",
+            },
+        )
+        self.assertEqual(resp.status_code, 418)
+
     def test_init(self):
-        resp = self.post("api", json={"action": "init", "token": EXAMPLE_PASSWORD})
-        self.assertResponse20X(resp)
+        resp = self.assertPost20X(
+            "api",
+            json={
+                "action": "init",
+                "token": EXAMPLE_PASSWORD,
+            },
+        )
         out = resp.json()
         self.assertEqual(out["_name"], "Root")
         self.assertEqual(len(out["_children"][0]["_children"]), 10)
@@ -209,8 +225,14 @@ class TestAincrad(EvanTestCase):
     def test_get_add_hints(self):
         HintFactory.create_batch(10)
 
-        resp = self.post("api", json={"action": "get_hints", "puid": "18SLA7"})
-        self.assertResponse20X(resp)
+        resp = self.assertPost20X(
+            "api",
+            json={
+                "action": "get_hints",
+                "puid": "18SLA7",
+                "token": EXAMPLE_PASSWORD,
+            },
+        )
         out = resp.json()
         self.assertEqual(len(out["hints"]), 0)
 
@@ -222,6 +244,7 @@ class TestAincrad(EvanTestCase):
                 "action": "add_hints",
                 "puid": "18SLA7",
                 "content": "get",
+                "token": EXAMPLE_PASSWORD,
             },
         )
         self.assertIn("pk", resp.json())
@@ -232,13 +255,20 @@ class TestAincrad(EvanTestCase):
                 "action": "add_hints",
                 "puid": "18SLA7",
                 "content": "good",
+                "token": EXAMPLE_PASSWORD,
             },
         )
         self.assertIn("pk", resp.json())
         self.assertEqual(resp.json()["number"], 10)
 
-        resp = self.post("api", json={"action": "get_hints", "puid": "18SLA7"})
-        self.assertResponse20X(resp)
+        resp = self.assertPost20X(
+            "api",
+            json={
+                "action": "get_hints",
+                "puid": "18SLA7",
+                "token": EXAMPLE_PASSWORD,
+            },
+        )
         out = resp.json()
         self.assertEqual(len(out["hints"]), 2)
         self.assertTrue(A7_Hints.filter(number=0, content="get").exists())
@@ -263,6 +293,7 @@ class TestAincrad(EvanTestCase):
                         "content",
                     )
                 ),
+                "token": EXAMPLE_PASSWORD,
             },
         )
         out = resp.json()
@@ -287,6 +318,7 @@ class TestAincrad(EvanTestCase):
                 "puid": "18SLA7",
                 "new_hints": [],
                 "old_hints": [],
+                "token": EXAMPLE_PASSWORD,
             },
         )
 
@@ -315,6 +347,7 @@ class TestAincrad(EvanTestCase):
                         "keywords": "updated",
                     },
                 ],
+                "token": EXAMPLE_PASSWORD,
             },
         )
         out = resp.json()
@@ -323,3 +356,51 @@ class TestAincrad(EvanTestCase):
         self.assertEqual(set(A7_Hints.values_list("number", flat=True)), {85, 95, 100})
         self.assertEqual(A7_Hints.filter(keywords="updated").count(), 2)
         self.assertEqual(A7_Hints.filter(keywords__startswith="Updated").count(), 2)
+
+    def test_arch_url_update(self) -> None:
+        ProblemFactory.create(
+            puid="19USEMO1",
+            hyperlink="https://aops.com/community/p15412066",
+        )
+        ProblemFactory.create(
+            puid="19USEMO2",
+            hyperlink="https://aops.com/community/p15412166",
+        )
+        ProblemFactory.create(
+            puid="19USEMO3",
+            hyperlink="https://wrong.url.to.fix/",
+        )
+        ProblemFactory.create(
+            puid="19USEMO4",
+            hyperlink="https://aops.com/community/p15425708",
+        )
+        ProblemFactory.create(
+            puid="19USEMO5",
+            hyperlink="https://aops.com/community/p15425728",
+        )
+        ProblemFactory.create(
+            puid="19USEMO6",
+        )
+
+        resp = self.assertPost20X(
+            "api",
+            json={
+                "action": "arch_url_update",
+                "urls": {
+                    "19USEMO3": "https://aops.com/community/p15412083",
+                    "19USEMO5": "https://aops.com/community/p15425728",
+                    "19USEMO6": "https://aops.com/community/p15425714",
+                    "18SLA7": "https://aops.com/community/p12752777",
+                },
+                "token": EXAMPLE_PASSWORD,
+            },
+        )
+        self.assertEqual(resp.json()["updated_count"], 2)
+        self.assertEqual(
+            Problem.objects.get(puid="19USEMO3").hyperlink,
+            "https://aops.com/community/p15412083",
+        )
+        self.assertEqual(
+            Problem.objects.get(puid="19USEMO6").hyperlink,
+            "https://aops.com/community/p15425714",
+        )

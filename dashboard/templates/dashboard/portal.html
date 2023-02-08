@@ -82,10 +82,9 @@
     </div>
   {% endif %}
   {% if not student.enabled %}
-    <div class="alert alert-danger">
-      <h1 class="alert-heading">Disabled</h1>
-      This student is currently disabled,
-      so some functionality won't work.
+    <div class="alert alert-secondary">
+      <h1 class="alert-heading">Inactive</h1>
+      This account is inactive; some functionality won't work.
     </div>
   {% endif %}
   {% if student.newborn %}

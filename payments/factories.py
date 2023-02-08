@@ -1,11 +1,11 @@
-from core.factories import UserFactory
-from evans_django_tools.testsuite import UniqueFaker
 from factory.declarations import SubFactory
 from factory.django import DjangoModelFactory
 from factory.faker import Faker
-from roster.factories import InvoiceFactory
 
+from core.factories import UserFactory
+from evans_django_tools.testsuite import UniqueFaker
 from payments.models import Job, JobFolder, PaymentLog, Worker
+from roster.factories import InvoiceFactory
 
 
 class PaymentLogFactory(DjangoModelFactory):

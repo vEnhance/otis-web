@@ -1,11 +1,12 @@
 import os
 from typing import Optional
 
-from core.models import Unit, UserProfile
 from django import template
 from django.contrib.auth.models import User
 from django.forms.boundfield import BoundField
 from django.urls import reverse
+
+from core.models import Unit, UserProfile
 from rpg.levelsys import BONUS_D_UNIT, BONUS_Z_UNIT
 
 register = template.Library()

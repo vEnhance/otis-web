@@ -1,28 +1,28 @@
 from decimal import Decimal
 
-from core.factories import SemesterFactory, UserFactory
-from core.models import Semester
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils import timezone
-from evans_django_tools.testsuite import EvanTestCase
 from freezegun.api import freeze_time
-from roster.factories import InvoiceFactory, StudentFactory
-from roster.models import Student
 
-from payments.factories import (
+from core.factories import GroupFactory, SemesterFactory, UserFactory
+from core.models import Semester
+from evans_django_tools.testsuite import EvanTestCase
+from payments.factories import (  # NOQA
     JobFactory,
     JobFolderFactory,
     PaymentLogFactory,
     WorkerFactory,
-)  # NOQA
-from payments.models import (
+)
+from payments.models import (  # NOQA
     Job,
     PaymentLog,
     Worker,
     get_semester_invoices_with_annotations,
-)  # NOQA
+)
 from payments.views import InactiveWorkerList
+from roster.factories import InvoiceFactory, StudentFactory
+from roster.models import Student
 
 from .views import process_payment
 
@@ -33,7 +33,11 @@ class PaymentTest(EvanTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.alice = StudentFactory.create(user__username="alice")
+        verified_group = GroupFactory(name="Verified")
+        cls.alice = StudentFactory.create(
+            user__username="alice",
+            user__groups=(verified_group,),
+        )
         cls.invoice = InvoiceFactory.create(student=cls.alice)
         cls.checksum = cls.alice.get_checksum(settings.INVOICE_HASH_KEY)
 
@@ -84,7 +88,8 @@ class PaymentTest(EvanTestCase):
 
 class WorkerTest(EvanTestCase):
     def test_worker(self) -> None:
-        alice: User = UserFactory.create(username="alice")
+        verified_group = GroupFactory(name="Verified")
+        alice: User = UserFactory.create(username="alice", groups=(verified_group,))
         self.login(alice)
 
         resp = self.assertPostOK(
@@ -144,7 +149,8 @@ class WorkerTest(EvanTestCase):
         self.assertEqual(worker.notes, "hello again")
 
     def test_claim_limits(self) -> None:
-        alice: User = UserFactory.create(username="alice")
+        verified_group = GroupFactory(name="Verified")
+        alice: User = UserFactory.create(username="alice", groups=(verified_group,))
         self.login(alice)
         self.assertPostOK("worker-update", data={"notes": "hi"}, follow=True)
 

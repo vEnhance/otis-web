@@ -2,11 +2,9 @@ import json
 import logging
 from decimal import Decimal
 from hashlib import sha256
-from typing import Any, Dict, List, Literal, TypedDict, Union
+from typing import Any, Literal, TypedDict, Union
 
 from allauth.socialaccount.models import SocialAccount
-from arch.models import Hint, Problem
-from dashboard.models import PSet
 from django.conf import settings
 from django.core.exceptions import SuspiciousOperation
 from django.db.models.aggregates import Sum
@@ -18,11 +16,14 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from sql_util.aggregates import SubqueryCount
+from unidecode import unidecode
+
+from arch.models import Hint, Problem
+from dashboard.models import PSet
 from payments.models import Job
 from roster.models import Invoice, Student, StudentRegistration, UnitInquiry
-from sql_util.aggregates import SubqueryCount
 from suggestions.models import ProblemSuggestion
-from unidecode import unidecode
 
 # Create your views here.
 
@@ -52,16 +53,19 @@ class JSONData(TypedDict):
     keywords: str
 
     # keys for add multiple hints
-    old_hints: List[HintData]
-    new_hints: List[HintData]
+    old_hints: list[HintData]
+    new_hints: list[HintData]
     allow_delete_hints: bool
 
     # invoice
-    entries: Dict[str, float]
+    entries: dict[str, float]
     field: Union[Literal["adjustment"], Literal["extras"], Literal["total_paid"]]
 
     # jobs
     progress: str
+
+    # arch update urls
+    urls: dict[str, str]  # puid -> url
 
 
 PSET_VENUEQ_INIT_QUERYSET = PSet.objects.filter(
@@ -234,7 +238,7 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
         else:
             return JsonResponse({"result": "success", "changed": False}, status=200)
     elif action == "init":
-        output_data: Dict[str, Any] = {}
+        output_data: dict[str, Any] = {}
         output_data["timestamp"] = str(timezone.now())
         output_data["_name"] = "Root"
         output_data["_children"] = [
@@ -386,7 +390,7 @@ def invoice_handler(action: str, data: JSONData) -> JsonResponse:
     field = data["field"]
     assert field in ("adjustment", "extras", "total_paid")
     entries = data["entries"]
-    invoices_to_update: List[Invoice] = []
+    invoices_to_update: list[Invoice] = []
 
     for inv in invoices:
         if inv.student.user is not None:
@@ -420,6 +424,23 @@ def invoice_handler(action: str, data: JSONData) -> JsonResponse:
     )
 
 
+def arch_url_handler(action: str, data: JSONData) -> JsonResponse:
+    del action
+    problems_to_update: list[Problem] = []
+    urls_map = data["urls"]
+    for problem in Problem.objects.all():
+        puid = problem.puid
+        if puid in urls_map and problem.hyperlink != urls_map[puid]:
+            problem.hyperlink = urls_map[puid]
+            problems_to_update.append(problem)
+    Problem.objects.bulk_update(
+        problems_to_update,
+        fields=("hyperlink",),
+        batch_size=25,
+    )
+    return JsonResponse({"updated_count": len(problems_to_update)})
+
+
 @csrf_exempt
 @require_POST
 def api(request: HttpRequest) -> JsonResponse:
@@ -433,11 +454,10 @@ def api(request: HttpRequest) -> JsonResponse:
     action = data.get("action", None)
     if action is None:
         raise SuspiciousOperation("You need to provide an action, silly")
-    if settings.PRODUCTION:
-        token = data.get("token")
-        assert token is not None
-        if not sha256(token.encode("ascii")).hexdigest() == settings.API_TARGET_HASH:
-            return JsonResponse({"error": "☕"}, status=418)
+    token = data.get("token")
+    assert token is not None
+    if not sha256(token.encode("ascii")).hexdigest() == settings.API_TARGET_HASH:
+        return JsonResponse({"error": "☕"}, status=418)
 
     if action in (
         "grade_problem_set",
@@ -453,6 +473,8 @@ def api(request: HttpRequest) -> JsonResponse:
         return problems_handler(action, data)
     elif action in ("invoice",):
         return invoice_handler(action, data)
+    elif action in ("arch_url_update"):
+        return arch_url_handler(action, data)
     else:
         return JsonResponse({"error": "No such command"}, status=400)
 

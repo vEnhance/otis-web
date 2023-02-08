@@ -1,12 +1,12 @@
 import itertools
 from typing import Any
 
-from core.models import Unit
 from django import forms
 from django.contrib.auth.models import User
 from django.db.models.query_utils import Q
 from django.forms.forms import BaseForm
 
+from core.models import Unit
 from roster.models import Student, StudentRegistration, UnitInquiry  # NOQA
 
 

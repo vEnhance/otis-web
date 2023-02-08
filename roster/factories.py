@@ -1,17 +1,17 @@
-from core.factories import SemesterFactory, UnitFactory, UserFactory
 from django.contrib.auth import get_user_model
 from factory.declarations import LazyAttribute, SubFactory
 from factory.django import DjangoModelFactory
 from factory.faker import Faker
 
-from roster.models import (
+from core.factories import SemesterFactory, UnitFactory, UserFactory
+from roster.models import (  # NOQA
     Assistant,
     Invoice,
     RegistrationContainer,
     Student,
     StudentRegistration,
     UnitInquiry,
-)  # NOQA
+)
 
 User = get_user_model()
 

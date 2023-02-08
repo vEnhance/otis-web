@@ -119,6 +119,10 @@
         </td>
         <td>
           <button id="render-toggle" class="btn btn-info">Disable instant TeX</button>
+          {% if pk %}
+            <a id="delete" href="{% url 'suggest-delete' pk %}" class="btn btn-link btn-warning" style="margin-left: 50px">Delete Suggestion
+            </a>
+          {% endif %}
         </td>
       </tr>
     </table>
@@ -224,6 +228,7 @@
             render_solution();
         });
 
+
         function checkLineLength(s) {
             lines = s.split("\n");
             for (let i in lines) {
@@ -234,7 +239,7 @@
             }
             return true;
         }
-
+        
         $("#id_statement").on("input", (e) => {
             $("#statement_warning").toggle(!checkLineLength(e.target.value));
             if (!autorender_enabled || !render_enabled) return;

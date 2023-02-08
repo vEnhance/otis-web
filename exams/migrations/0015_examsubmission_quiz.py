@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("roster", "0061_alter_registrationcontainer_allowed_tracks"),
         ("exams", "0014_auto_20180531_1423"),

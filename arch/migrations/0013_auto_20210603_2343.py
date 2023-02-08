@@ -254,7 +254,6 @@ def do_nothing(apps, scheme_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("arch", "0012_auto_20210603_2343"),
     ]

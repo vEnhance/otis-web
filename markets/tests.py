@@ -1,9 +1,8 @@
-from core.factories import UserFactory, GroupFactory
-from core.factories import SemesterFactory
 from django.utils import timezone
 from freezegun import freeze_time
-from evans_django_tools.testsuite import EvanTestCase
 
+from core.factories import GroupFactory, SemesterFactory, UserFactory
+from evans_django_tools.testsuite import EvanTestCase
 from markets.factories import GuessFactory, MarketFactory
 from markets.models import Guess, Market
 

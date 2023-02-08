@@ -9,7 +9,7 @@ repository = "https://github.com/vEnhance/otis-web"
 
 [tool.poetry.dependencies]
 python = ">=3.10, <4.0"
-Django = "^4.1.5"
+Django = "^4.1.6"
 PyMySQL = "^1.0.2"
 Unidecode = "^1.2.0"
 crispy-bootstrap5 = "^0.7"
@@ -36,7 +36,7 @@ prettytable = "^3.4.1"
 pyparsing = "^3.0.9"
 python-dotenv = "^0.21.1"
 setuptools = "^65.7.0"
-stripe = "^5.0.0"
+stripe = "^5.1.0"
 wheel = "^0.38.4"
 wiki = {git = "https://github.com/django-wiki/django-wiki.git", rev = "7981d6d"}
 bleach = {extras = ["css"], version=">=5,<6"} # manual until wiki 0.10 out
@@ -52,10 +52,11 @@ djlint = "^1.19.13"
 factory-boy = "^3.2.0"
 freezegun = "^1.1.0"
 ipython = "^8.9.0"
+isort = "^5.12.0"
 jedi = "^0.18.0"
 pdbpp = "^0.10.3"
 pyflakes = "^3.0.1"
-pyright = "^1.1.291"
+pyright = "^1.1.292"
 tblib = "^1.7.0"
 toml = "^0.10.2"
 types-Markdown = "^3.3.6"
@@ -161,3 +162,6 @@ indent = 2
 ignore = "D018,H006,H013,H021"
 format_css = true
 format_js = true
+
+[tool.isort]
+profile = "black"

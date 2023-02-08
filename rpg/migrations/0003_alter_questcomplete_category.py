@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("rpg", "0002_remove_achievement_active_remove_bonuslevel_active"),
     ]

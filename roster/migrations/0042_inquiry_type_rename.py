@@ -15,7 +15,6 @@ def change_to_add(apps, scheme_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("roster", "0041_auto_20200428_0950"),
     ]

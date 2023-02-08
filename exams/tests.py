@@ -1,14 +1,14 @@
-from core.factories import SemesterFactory, UserFactory
 from django.test.utils import override_settings
 from django.utils import timezone
-from evans_django_tools.testsuite import EvanTestCase
 from freezegun import freeze_time
-from roster.factories import StudentFactory
-from roster.models import Student
 
+from core.factories import SemesterFactory, UserFactory
+from evans_django_tools.testsuite import EvanTestCase
 from exams.calculator import expr_compute
 from exams.factories import QuizFactory, TestFactory
 from exams.models import ExamAttempt, MockCompleted, PracticeExam
+from roster.factories import StudentFactory
+from roster.models import Student
 
 UTC = timezone.utc
 

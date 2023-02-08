@@ -1,9 +1,10 @@
 from argparse import ArgumentParser
 from typing import Any
 
+from django.core.management.base import BaseCommand
+
 import core.models
 import roster.models
-from django.core.management.base import BaseCommand
 
 
 class Command(BaseCommand):

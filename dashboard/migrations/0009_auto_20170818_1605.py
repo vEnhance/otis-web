@@ -8,7 +8,6 @@ import dashboard.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("dashboard", "0008_auto_20170814_2138"),
     ]

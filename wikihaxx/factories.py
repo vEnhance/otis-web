@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from django.contrib.sites.models import Site
 from factory.declarations import SubFactory
@@ -23,7 +23,7 @@ class ArticleFactory(DjangoModelFactory):
 
     @post_generation
     def set_current_revision(
-        self, create: bool, extracted: Any, **kwargs: Dict[str, Any]
+        self, create: bool, extracted: Any, **kwargs: dict[str, Any]
     ):
         a: Article = self  # type: ignore
         a.current_revision = ArticleRevisionFactory(article=a)

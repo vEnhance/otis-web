@@ -2,11 +2,11 @@
 
 import django.core.validators
 from django.db import migrations, models
+
 import roster.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("roster", "0068_remove_student_achievements"),
     ]

@@ -1,11 +1,11 @@
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from braces.views import LoginRequiredMixin, SuperuserRequiredMixin
-from dashboard.models import PSet, UploadedFile
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import PermissionDenied
+from django.db.models.aggregates import Count
 from django.db.models.base import Model
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
@@ -17,10 +17,11 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 from django.views.generic.edit import UpdateView
 from django.views.generic.list import ListView
-from otisweb.utils import AuthHttpRequest
-from roster.models import Student
 
 from core.models import UserProfile
+from dashboard.models import PSet, UploadedFile
+from otisweb.utils import AuthHttpRequest
+from roster.models import Student
 
 from .models import Unit, UnitGroup
 from .utils import get_from_google_storage
@@ -42,8 +43,22 @@ class UnitGroupListView(ListView[UnitGroup]):
             hidden=False,
         )
         .order_by("subject", "name")
+        .annotate(num_psets=Count("unit__pset"))
         .prefetch_related("unit_set")
     )
+
+
+class PublicCatalog(ListView[UnitGroup]):
+    model = UnitGroup
+    queryset = (
+        UnitGroup.objects.filter(
+            hidden=False,
+        )
+        .order_by("subject", "name")
+        .annotate(num_psets=Count("unit__pset"))
+    )
+
+    template_name = "core/catalog_printable.html"
 
 
 class UnitArtworkListView(ListView[UnitGroup]):
@@ -87,6 +102,12 @@ def permitted(unit: Unit, request: HttpRequest, asking_solution: bool) -> bool:
         semester__active=False,
     ).exists():
         return True
+    elif Student.objects.filter(
+        user=request.user,
+        unlocked_units=unit,
+        enabled=False,
+    ).exists():
+        return True
     return False
 
 
@@ -127,7 +148,7 @@ class UserProfileUpdateView(
     success_url = reverse_lazy("profile")
     object: UserProfile
 
-    def get_success_message(self, cleaned_data: Dict[str, Any]) -> str:
+    def get_success_message(self, cleaned_data: dict[str, Any]) -> str:
         return f"Updated settings for {self.object.user.username}!"
 
     def get_object(self, queryset: Optional[QuerySet[Model]] = None) -> UserProfile:

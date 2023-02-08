@@ -1,7 +1,8 @@
-from core.models import Unit
 from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
+
+from core.models import Unit
 
 
 class ProblemSuggestion(models.Model):
@@ -62,7 +63,7 @@ class ProblemSuggestion(models.Model):
         db_table = "dashboard_problemsuggestion"  # historical babbage
 
     def __str__(self) -> str:
-        return f"{self.user.username} suggested {self.source} for {self.unit.group}"
+        return self.description
 
     def get_absolute_url(self) -> str:
         return reverse("suggest-update", args=(self.pk,))

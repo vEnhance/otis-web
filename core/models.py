@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import os
 from datetime import datetime
 from typing import Callable
 
@@ -9,8 +10,6 @@ from django.db.models.manager import BaseManager
 from django.urls import reverse
 from django.utils import timezone
 from positions import PositionField
-
-import os
 
 User = get_user_model()
 # Create your models here.
@@ -200,6 +199,18 @@ class UnitGroup(models.Model):
             return "Func eqn"
         elif self.subject == "K":
             return "Secret"
+
+    @property
+    def artwork_basename(self) -> str | None:
+        if not self.artwork:
+            return None
+        return os.path.basename(self.artwork.name)
+
+    @property
+    def artwork_thumb_md_basename(self) -> str | None:
+        if not self.artwork_thumb_md:
+            return None
+        return os.path.basename(self.artwork_thumb_md.name)
 
 
 class Unit(models.Model):

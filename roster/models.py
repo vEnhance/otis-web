@@ -3,10 +3,9 @@ from __future__ import unicode_literals
 import os
 from datetime import timedelta
 from hashlib import pbkdf2_hmac
-from typing import Callable, List, TypedDict
+from typing import Callable, TypedDict
 
 from _pydecimal import Decimal
-from core.models import Semester, Unit
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import FileExtensionValidator
@@ -17,6 +16,8 @@ from django.urls import reverse
 from django.utils.timezone import localtime, now
 from sql_util.aggregates import Exists, SubqueryAggregate
 
+from core.models import Semester, Unit
+
 from .country_abbrevs import COUNTRY_CHOICES
 
 
@@ -24,7 +25,7 @@ class CurriculumRowTypeDict(TypedDict, total=False):
     unit: Unit
     number: int
     num_uploads: int
-    semester_active: bool
+    student_still_active: bool
 
     is_submitted: bool
     is_current: bool
@@ -276,7 +277,7 @@ class Student(models.Model):
         else:
             return False
 
-    def generate_curriculum_rows(self) -> List[CurriculumRowTypeDict]:
+    def generate_curriculum_rows(self) -> list[CurriculumRowTypeDict]:
         curriculum = self.generate_curriculum_queryset().order_by("position")
         unlocked_units_pks = self.unlocked_units.values_list("pk", flat=True)
 
@@ -288,7 +289,7 @@ class Student(models.Model):
             row["number"] = n
             row["num_uploads"] = getattr(unit, "num_uploads", 0)
 
-            row["semester_active"] = self.semester.active
+            row["student_still_active"] = self.semester.active and self.enabled
             row["is_submitted"] = getattr(unit, "has_pset", False)
             row["is_current"] = unit.pk in unlocked_units_pks
             row["is_visible"] = row["is_submitted"] or row["is_current"]

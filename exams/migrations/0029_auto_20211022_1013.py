@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("roster", "0080_auto_20211020_0923"),
         ("exams", "0028_mockcompleted"),

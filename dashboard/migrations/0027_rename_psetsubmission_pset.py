@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("roster", "0061_alter_registrationcontainer_allowed_tracks"),
         ("core", "0027_alter_semester_uses_legacy_pset_system"),

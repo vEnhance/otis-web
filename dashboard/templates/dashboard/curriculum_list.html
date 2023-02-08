@@ -30,11 +30,11 @@
               <span title="Rejected unit">🚫</span>
             {% elif row.is_accepted %}
               <span title="Completed unit">✅</span>
-            {% elif row.is_submitted and not row.semester_active %}
+            {% elif row.is_submitted and not row.student_still_active %}
               <span title="Completed unit">✅</span>
             {% elif row.is_submitted %}
               <span title="Unit pending review">⏳</span>
-            {% elif row.is_current and row.semester_active %}
+            {% elif row.is_current and row.student_still_active %}
               <span title="Current unit">▶️</span>
             {% elif not row.is_visible %}
               <span title="Locked unit">❓</span>
@@ -79,7 +79,7 @@
               <a class="emoji-link"
                  title="Download solutions"
                  href="{% view_solutions row.unit %}">🗝️</a>
-            {% elif row.is_visible and not row.semester_active %}
+            {% elif row.is_visible and not row.student_still_active %}
               <a class="emoji-link"
                  title="Download solutions"
                  href="{% view_solutions row.unit %}">🗝️</a>

@@ -8,7 +8,6 @@ import roster.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ("roster", "0053_registrationcontainer_studentregistration"),

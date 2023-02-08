@@ -1,34 +1,32 @@
-from typing import List
-
-from core.factories import (
-    SemesterFactory,
-    UnitFactory,
-    UnitGroupFactory,
-    UserFactory,
-)  # NOQA
-from core.models import Semester, Unit, UnitGroup
 from django.conf import settings
 from django.contrib.auth.models import Group, User
 from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from evans_django_tools.testsuite import EvanTestCase
 from freezegun.api import freeze_time
 
-from roster.factories import (
+from core.factories import (  # NOQA
+    SemesterFactory,
+    UnitFactory,
+    UnitGroupFactory,
+    UserFactory,
+)
+from core.models import Semester, Unit, UnitGroup
+from evans_django_tools.testsuite import EvanTestCase
+from roster.factories import (  # NOQA
     AssistantFactory,
     InvoiceFactory,
     RegistrationContainerFactory,
     StudentFactory,
     StudentRegistrationFactory,
-)  # NOQA
-from roster.models import (
+)
+from roster.models import (  # NOQA
     Assistant,
     Invoice,
     RegistrationContainer,
     Student,
     StudentRegistration,
-)  # NOQA
+)
 
 from .admin import build_students
 
@@ -38,7 +36,7 @@ class RosterTest(EvanTestCase):
         staff: Assistant = AssistantFactory.create()
         alice: Student = StudentFactory.create(assistant=staff)
 
-        unitgroups: List[UnitGroup] = UnitGroupFactory.create_batch(4)
+        unitgroups: list[UnitGroup] = UnitGroupFactory.create_batch(4)
         for unitgroup in unitgroups:
             for letter in "BDZ":
                 UnitFactory.create(
@@ -72,7 +70,7 @@ class RosterTest(EvanTestCase):
             self.post("finalize", alice.pk, data={"submit": True}, follow=True),
             "You should select some units",
         )
-        units: List[Unit] = UnitFactory.create_batch(20)
+        units: list[Unit] = UnitFactory.create_batch(20)
         alice.curriculum.set(units)
         self.assertHas(
             self.post("finalize", alice.pk, data={}, follow=True),
@@ -214,7 +212,7 @@ class RosterTest(EvanTestCase):
         alice: Student = StudentFactory.create(
             user__first_name="Ada", user__last_name="Adalhaidis"
         )
-        units: List[Unit] = UnitFactory.create_batch(10)
+        units: list[Unit] = UnitFactory.create_batch(10)
         alice.curriculum.set(units[0:8])
         self.login(UserFactory.create(is_staff=True))
         self.assertHas(
@@ -245,7 +243,7 @@ class RosterTest(EvanTestCase):
     def test_inquiry(self) -> None:
         firefly: Assistant = AssistantFactory.create()
         alice: Student = StudentFactory.create(assistant=firefly)
-        units: List[Unit] = UnitFactory.create_batch(20)
+        units: list[Unit] = UnitFactory.create_batch(20)
         self.login(alice)
         for i in range(6):
             resp = self.post(

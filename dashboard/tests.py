@@ -1,27 +1,27 @@
 import os
 from io import StringIO
 
-from core.factories import SemesterFactory, UnitFactory, UserFactory
 from django.conf import settings
-from django.utils import timezone
 from django.urls import reverse
-from evans_django_tools.testsuite import EvanTestCase
+from django.utils import timezone
 from freezegun import freeze_time
-from roster.factories import StudentFactory, InvoiceFactory, AssistantFactory
 
+from core.factories import SemesterFactory, UnitFactory, UserFactory
 from dashboard.factories import PSetFactory, SemesterDownloadFileFactory
 from dashboard.models import PSet, UploadedFile
 from dashboard.utils import get_units_to_submit, get_units_to_unlock
-
+from evans_django_tools.testsuite import EvanTestCase
 from exams.factories import QuizFactory, TestFactory
-
 from markets.factories import MarketFactory
-
-from roster.factories import RegistrationContainerFactory, StudentRegistrationFactory
-
-from rpg.models import Level
-
 from otisweb.utils import get_mailchimp_campaigns
+from roster.factories import (
+    AssistantFactory,
+    InvoiceFactory,
+    RegistrationContainerFactory,
+    StudentFactory,
+    StudentRegistrationFactory,
+)
+from rpg.models import Level
 
 utc = timezone.utc
 
@@ -430,6 +430,8 @@ class TestPSet(EvanTestCase):
 
         upload = UploadedFile.objects.filter(benefactor=alice, unit=unit).first()
 
+        assert upload is not None
+
         self.assertTrue(upload.unit == unit)
         self.assertTrue(upload.owner == alice.user)
 
@@ -446,6 +448,8 @@ class TestPSet(EvanTestCase):
         )
 
         upload = UploadedFile.objects.filter(pk=pk).first()
+
+        assert upload is not None
 
         self.assertTrue(upload.description == "bark")
 

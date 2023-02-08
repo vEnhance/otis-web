@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("roster", "0061_alter_registrationcontainer_allowed_tracks"),
         ("dashboard", "0023_auto_20210802_1917"),

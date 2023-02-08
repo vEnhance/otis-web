@@ -1,6 +1,5 @@
-from typing import Any, Dict
+from typing import Any
 
-from core.utils import storage_hash
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
@@ -8,9 +7,10 @@ from factory.declarations import LazyAttribute, Sequence, SubFactory
 from factory.django import DjangoModelFactory
 from factory.faker import Faker
 from factory.helpers import post_generation
-from roster.factories import StudentFactory
 
+from core.utils import storage_hash
 from exams.models import ExamAttempt, PracticeExam
+from roster.factories import StudentFactory
 
 
 class TestFactory(DjangoModelFactory):
@@ -22,7 +22,7 @@ class TestFactory(DjangoModelFactory):
     is_test = True
 
     @post_generation
-    def write_mock_media(self, create: bool, extracted: bool, **kwargs: Dict[str, Any]):
+    def write_mock_media(self, create: bool, extracted: bool, **kwargs: dict[str, Any]):
         assert settings.TESTING is True
         if settings.TESTING_NEEDS_MOCK_MEDIA is False:
             return

@@ -1,10 +1,10 @@
 from django.test.utils import override_settings
-from evans_django_tools.testsuite import EvanTestCase
-from roster.factories import StudentFactory
 
 from core.factories import SemesterFactory, UnitFactory, UserFactory
 from core.models import Semester
 from core.utils import storage_hash
+from evans_django_tools.testsuite import EvanTestCase
+from roster.factories import StudentFactory
 
 
 class TestCore(EvanTestCase):
@@ -71,6 +71,9 @@ class TestCore(EvanTestCase):
         UnitFactory.create(group__name="VisibleUnit", group__hidden=False)
         UnitFactory.create(group__name="HiddenUnit", group__hidden=True)
         resp = self.assertGet20X("catalog")
+        self.assertHas(resp, "VisibleUnit")
+        self.assertNotHas(resp, "HiddenUnit")
+        resp = self.assertGet20X("catalog-public")
         self.assertHas(resp, "VisibleUnit")
         self.assertNotHas(resp, "HiddenUnit")
 

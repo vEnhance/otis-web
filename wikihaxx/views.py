@@ -1,4 +1,3 @@
-from core.models import UnitGroup
 from django.contrib.auth.decorators import login_required
 from django.http.request import HttpRequest
 from django.http.response import HttpResponse, HttpResponseRedirect
@@ -6,6 +5,8 @@ from django.shortcuts import get_object_or_404
 from django.urls.base import reverse
 from django.utils.text import slugify
 from wiki.models import URLPath
+
+from core.models import UnitGroup
 
 WIKI_SUBJECT_CHART = {
     "A": "algebra",

@@ -1,9 +1,8 @@
 import logging
-from typing import Any, Dict
+from typing import Any
 
 import stripe
 from braces.views import SuperuserRequiredMixin
-from core.models import Semester
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -14,12 +13,12 @@ from django.db.models.aggregates import Count
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
 from django.forms.models import BaseModelForm
-from django.http import (
+from django.http import (  # NOQA
     Http404,
     HttpRequest,
     HttpResponse,
     HttpResponseForbidden,
-)  # NOQA
+)
 from django.http.response import HttpResponseRedirect, JsonResponse  # NOQA
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -27,11 +26,14 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView
 from django.views.generic.list import ListView
-from roster.models import Invoice, Student
 from sql_util.aggregates import SubqueryCount, SubqueryMax, SubqueryMin
 from sql_util.utils import Exists
 
+from core.models import Semester
+from otisweb.decorators import verified_required
+from otisweb.mixins import VerifiedRequiredMixin
 from payments.models import Job, JobFolder
+from roster.models import Invoice, Student
 
 from .models import PaymentLog, Worker
 
@@ -157,7 +159,7 @@ class WorkerDetail(LoginRequiredMixin, DetailView[Worker]):
         return worker
 
 
-class WorkerUpdate(LoginRequiredMixin, UpdateView[Worker, BaseModelForm[Worker]]):
+class WorkerUpdate(VerifiedRequiredMixin, UpdateView[Worker, BaseModelForm[Worker]]):
     model = Worker
     context_object_name = "worker"
     template_name = "payments/worker_form.html"
@@ -178,7 +180,7 @@ class WorkerUpdate(LoginRequiredMixin, UpdateView[Worker, BaseModelForm[Worker]]
         return reverse("worker-detail")
 
 
-class JobFolderList(LoginRequiredMixin, ListView[JobFolder]):
+class JobFolderList(VerifiedRequiredMixin, ListView[JobFolder]):
     model = JobFolder
     context_object_name = "jobfolders"
 
@@ -207,7 +209,7 @@ class JobFolderList(LoginRequiredMixin, ListView[JobFolder]):
             .order_by("name")
         )
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         assert isinstance(self.request.user, User)
         try:
@@ -217,7 +219,7 @@ class JobFolderList(LoginRequiredMixin, ListView[JobFolder]):
         return context
 
 
-class JobList(LoginRequiredMixin, ListView[Job]):
+class JobList(VerifiedRequiredMixin, ListView[Job]):
     model = Job
     context_object_name = "jobs"
 
@@ -232,22 +234,23 @@ class JobList(LoginRequiredMixin, ListView[Job]):
             .order_by(
                 "assignee_count",
                 "progress",
-                "-updated_at",
+                "name",
             )
         )
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["jobfolder"] = self.jobfolder
         return context
 
 
-class JobDetail(LoginRequiredMixin, DetailView[Job]):
+class JobDetail(VerifiedRequiredMixin, DetailView[Job]):
     model = Job
     context_object_name = "job"
 
 
 @login_required
+@verified_required
 def job_claim(request: HttpRequest, pk: int) -> HttpResponse:
     assert isinstance(request.user, User)
     try:
@@ -292,7 +295,7 @@ def job_claim(request: HttpRequest, pk: int) -> HttpResponse:
         return HttpResponseRedirect(job.get_absolute_url())
 
 
-class JobUpdate(LoginRequiredMixin, UpdateView[Job, BaseModelForm[Job]]):
+class JobUpdate(VerifiedRequiredMixin, UpdateView[Job, BaseModelForm[Job]]):
     model = Job
     context_object_name = "job"
     template_name = "payments/job_form.html"
@@ -332,7 +335,7 @@ class InactiveWorkerList(SuperuserRequiredMixin, ListView[Worker]):
         super().setup(request, *args, **kwargs)
         self.jobfolder = get_object_or_404(JobFolder, slug=self.kwargs["slug"])
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["jobfolder"] = self.jobfolder
         return context

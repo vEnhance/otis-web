@@ -1,19 +1,20 @@
-from typing import Any, Dict
+import datetime
+from typing import Any
 
 from braces.views import LoginRequiredMixin, SuperuserRequiredMixin
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
-from django.db.models import Avg, Sum, Max
+from django.db.models import Avg, Max, Sum
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http.request import HttpRequest
-from django.http.response import (
+from django.http.response import (  # NOQA
     HttpResponseBase,
     HttpResponseForbidden,
     HttpResponseNotFound,
     HttpResponseRedirect,
-)  # NOQA
+)
 from django.shortcuts import get_object_or_404
 from django.urls.base import reverse
 from django.utils import timezone
@@ -21,18 +22,19 @@ from django.views.decorators.http import require_POST
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView
 from django.views.generic.list import ListView
-import datetime
-from otisweb.decorators import admin_required
-from otisweb.utils import AuthHttpRequest
+
 from core.models import Semester
 from markets.forms import MarketCreateForm
+from otisweb.decorators import admin_required
+from otisweb.mixins import VerifiedRequiredMixin
+from otisweb.utils import AuthHttpRequest
 
 from .models import Guess, Market
 
 # Create your views here.
 
 
-class SubmitGuess(LoginRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]):
+class SubmitGuess(VerifiedRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]):
     model = Guess
     context_object_name = "guess"
     fields = (
@@ -56,7 +58,7 @@ class SubmitGuess(LoginRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]):
     def get_success_url(self) -> str:
         return reverse("market-pending", args=(self.object.pk,))
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["market"] = self.market
         return context
@@ -67,8 +69,6 @@ class SubmitGuess(LoginRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]):
         self.market = get_object_or_404(Market, slug=kwargs.pop("slug"))
         if not isinstance(request.user, User):
             return super().dispatch(request, *args, **kwargs)  # login required mixin
-        if not request.user.groups.filter(name="Verified").exists():
-            raise PermissionDenied
 
         if not self.market.has_started:
             return HttpResponseNotFound()
@@ -95,7 +95,7 @@ class MarketResults(LoginRequiredMixin, ListView[Guess]):
     market: Market
     template_name = "markets/market_results.html"
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["market"] = self.market
         try:
@@ -174,7 +174,7 @@ class MarketSpades(LoginRequiredMixin, ListView[Guess]):
     request: AuthHttpRequest
     template_name = "markets/market_spades.html"
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         guesses = self.get_queryset()
         if guesses.exists():
@@ -249,3 +249,6 @@ class MarketCreateView(
         form.instance.end_date = end_date
 
         return super().form_valid(form)
+
+    def get_success_url(self) -> str:
+        return reverse("market-list")

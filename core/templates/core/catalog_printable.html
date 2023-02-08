@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="description" content="OTIS-WEB Course Catalog" />
+    <meta name="keywords" content="otis, evan chen, math olympiad" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OTIS Public Catalog</title>
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    {% include "headers/base-style.html" %}
+    {% include "headers/favicon.html" %}
+    {% include "headers/mathjax.html" %}
+    <style type="text/css">
+      a.artwork>img {
+          object-fit: cover;
+          box-shadow: 0px 0px 15px #6666dd;
+          margin: 5px 5px 5px 5px;
+      }
+
+      a.artwork:hover>img {
+          transform: scale(1.05);
+          box-shadow: 0px 0px 15px #aaaa77;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 style="font-size:30pt;">OTIS Public Catalog</h1>
+    <center>
+      <img src="https://web.evanchen.cc/static/otis-logo-v2022.svg" width="30%" />
+    </center>
+    <p>
+      This is the public-facing unit catalog for
+      <a href="//web.evanchen.cc/otis.html">OTIS</a>.
+      Last updated {% now "r" %}.
+    </p>
+    {% regroup object_list by get_subject_display as grouped_unit_list %}
+    {% for subject, item_list in grouped_unit_list %}
+      <hr />
+      <h2>{{ subject }}</h2>
+      <div class="list-group">
+        {% for unitgroup in item_list %}
+          <div class="list-group-item container">
+            <div class="row">
+              <div class="col-4">
+                {% if unitgroup.artwork and unitgroup.artwork_thumb_md %}
+                  <a class="artwork"
+                     href="https://web.evanchen.cc/otis/artwork/{{ unitgroup.artwork_basename }}">
+                    <img width="226px"
+                         src="https://web.evanchen.cc/otis/thumb/{{ unitgroup.artwork_thumb_md_basename }}"/>
+                  </a>
+                {% else %}
+                  <p class="text-center text-muted">
+                    <i>No image yet</i>
+                  </p>
+                {% endif %}
+              </div>
+              <div class="col-8">
+                <h3 class="text-dark">{{ unitgroup.name }}</h3>
+                {% if unitgroup.artist_name %}
+                  <p class="fst-italic fw-lighter text-success">Art contributed by {{ unitgroup.artist_name }}.</p>
+                {% endif %}
+                <p class="text-secondary">{{ unitgroup.description|linebreaks }}</p>
+                <p class="text-primary">
+                  Completed by {{ unitgroup.num_psets }}
+                  student{{ unitgroup.num_psets|pluralize }}.
+                </p>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+  </body>
+</html>

@@ -1,12 +1,13 @@
 import logging
 import random
-from typing import Any, Dict
+from hashlib import pbkdf2_hmac
+from typing import Any
 
-from braces.views import (
+from braces.views import (  # NOQA
     LoginRequiredMixin,
     StaffuserRequiredMixin,
     SuperuserRequiredMixin,
-)  # NOQA
+)
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
@@ -23,11 +24,11 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views.generic import ListView
 from django.views.generic.edit import UpdateView
-from hashlib import pbkdf2_hmac
+from sql_util.utils import SubqueryAggregate
+
 from otisweb.utils import AuthHttpRequest, get_days_since
 from roster.models import Student
 from roster.utils import get_student_by_pk
-from sql_util.utils import SubqueryAggregate
 
 from .forms import DiamondsForm
 from .levelsys import LevelInfoDict, get_level_info, get_student_rows
@@ -45,7 +46,7 @@ def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
         "achievement__name"
     )
     unlocks = unlocks.select_related("achievement")
-    context: Dict[str, Any] = {
+    context: dict[str, Any] = {
         "student": student,
         "form": DiamondsForm(),
         "achievements": unlocks,
@@ -126,7 +127,7 @@ class AchievementList(LoginRequiredMixin, ListView[Achievement]):
 
         return achievements
 
-    def get_context_data(self, **kwargs: Dict[str, Any]):
+    def get_context_data(self, **kwargs: dict[str, Any]):
         context = super().get_context_data(**kwargs)
         context["checksum"] = get_achievement_checksum(
             self.request.user.pk, self.amount, settings.CERT_HASH_KEY
@@ -175,7 +176,7 @@ class AchievementCertifyList(LoginRequiredMixin, ListView[Achievement]):
 
         return achievements
 
-    def get_context_data(self, **kwargs: Dict[str, Any]):
+    def get_context_data(self, **kwargs: dict[str, Any]):
         context = super().get_context_data(**kwargs)
 
         context["viewing"] = True
@@ -212,7 +213,7 @@ class FoundList(
             .order_by("-timestamp")
         )
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["achievement"] = self.achievement
         return context
@@ -234,7 +235,7 @@ def leaderboard(request: AuthHttpRequest) -> HttpResponse:
     )
     for row in rows:
         row["days_since_last_seen"] = get_days_since(row["last_seen"])
-    context: Dict[str, Any] = {}
+    context: dict[str, Any] = {}
     context["rows"] = rows
     return render(request, "rpg/leaderboard.html", context)
 
@@ -260,7 +261,7 @@ class PalaceList(LoginRequiredMixin, ListView[PalaceCarving]):
         queryset = queryset.order_by("created_at")
         return queryset
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["student"] = self.student
         return context
@@ -303,7 +304,7 @@ class PalaceUpdate(
             carving.display_name = student.name
         return carving
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["student"] = self.student
         return context
@@ -356,7 +357,7 @@ class DiamondUpdate(
         )
         return super().form_valid(form)
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["student"] = self.student
         return context

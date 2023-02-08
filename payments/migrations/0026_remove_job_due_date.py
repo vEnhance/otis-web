@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("payments", "0025_alter_job_spades_bounty_alter_job_usd_bounty"),
     ]

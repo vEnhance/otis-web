@@ -1,18 +1,18 @@
 import random
-from typing import Any, Dict, Iterable
+from typing import Any, Iterable
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
-from evans_django_tools.testsuite import UniqueFaker
 from factory import Faker, LazyAttribute, Sequence, SubFactory, post_generation
 from factory.django import DjangoModelFactory
 from factory.fuzzy import FuzzyChoice
 
 from core.models import Semester, Unit, UnitGroup, UserProfile
 from core.utils import storage_hash
+from evans_django_tools.testsuite import UniqueFaker
 
 User = get_user_model()
 
@@ -62,7 +62,7 @@ class UnitFactory(DjangoModelFactory):
     position = Sequence(lambda n: n + 1)
 
     @post_generation
-    def write_mock_media(self, create: bool, extracted: bool, **kwargs: Dict[str, Any]):
+    def write_mock_media(self, create: bool, extracted: bool, **kwargs: dict[str, Any]):
         assert settings.TESTING is True
         if settings.TESTING_NEEDS_MOCK_MEDIA is False:
             return

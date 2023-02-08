@@ -1,4 +1,5 @@
 from django.urls import path
+from django.views.generic.base import RedirectView
 
 from . import views
 
@@ -25,4 +26,5 @@ urlpatterns = [
     path(r"certify/", views.certify, name="certify"),
     path(r"certify/<int:student_pk>/", views.certify, name="certify"),
     path(r"certify/<int:student_pk>/<str:checksum>/", views.certify, name="certify"),
+    path(r"", RedirectView.as_view(pattern_name="index")),
 ]

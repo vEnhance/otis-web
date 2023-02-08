@@ -7,9 +7,9 @@ from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 from django.db import models
 from django.urls.base import reverse
-from roster.models import Student
 
 from exams.calculator import expr_compute
+from roster.models import Student
 
 
 def expr_validator(value: str):
@@ -101,7 +101,7 @@ class PracticeExam(models.Model):
 
     @property
     def deadline(self) -> datetime.datetime | None:
-        if self.is_test is False or self.was_extended:
+        if self.is_test is True or self.was_extended:
             return self.due_date
         else:
             return self.due_date + datetime.timedelta(days=-7)

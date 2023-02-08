@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("core", "0044_unitgroup_artist_name_unitgroup_artist_show"),
     ]
