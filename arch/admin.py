@@ -26,12 +26,7 @@ class ProblemIEResource(resources.ModelResource):
 
 @admin.register(Problem)
 class ProblemAdmin(ImportExportModelAdmin):
-    list_display = (
-        "pk",
-        "puid",
-        "hyperlink",
-        "mohs"
-    )
+    list_display = ("pk", "puid", "hyperlink", "mohs")
     list_display_links = (
         "pk",
         "puid",
@@ -60,6 +55,7 @@ class HintAdmin(VersionAdmin):
     autocomplete_fields = ("problem",)
     list_per_page = 30
 
+
 @admin.register(Vote)
 class VoteAdmin(VersionAdmin):
     list_display = (
@@ -67,6 +63,6 @@ class VoteAdmin(VersionAdmin):
         "user",
         "mohs",
     )
-    search_fields = ("problem__puid",)
+    search_fields = ("problem__puid", "user__username")
     autocomplete_fields = ("problem",)
     list_per_page = 30

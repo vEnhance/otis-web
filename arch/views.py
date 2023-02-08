@@ -75,7 +75,7 @@ class HintList(VerifiedRequiredMixin, ListView[Hint]):
         context = super().get_context_data(**kwargs)
         context["problem"] = self.problem
         context["statement"] = self.problem.get_statement()
-        
+
         vote = Vote.objects.filter(user=self.request.user, problem=self.problem).first()
 
         if vote is not None:
@@ -249,14 +249,13 @@ def view_solution(request: HttpRequest, puid: str):
     else:
         raise Http404
 
+
 class VoteCreate(
     VerifiedRequiredMixin,
     CreateView[Vote, VoteForm],
 ):
     context_object_name = "vote"
-    fields = (
-        "mohs",
-    )
+    fields = ("mohs",)
     model = Vote
     template_name = "arch/vote_form.html"
 
@@ -267,20 +266,24 @@ class VoteCreate(
         initial = initial.copy()
         initial["problem"] = self.problem
         return initial
-  
+
     def get_context_data(self, **kwargs: Any):
         context = super().get_context_data(**kwargs)
         context["problem"] = self.problem
 
-        context["voted"] = Vote.objects.filter(user=self.request.user, problem=self.problem).first()
+        context["voted"] = Vote.objects.filter(
+            user=self.request.user, problem=self.problem
+        ).first()
         return context
-  
+
     def form_valid(self, form: VoteForm):
         messages.success(
             self.request, f"You rated {self.problem.puid} as {form.instance.mohs}"
         )
 
-        voted = Vote.objects.filter(user=self.request.user, problem=self.problem).first()
+        voted = Vote.objects.filter(
+            user=self.request.user, problem=self.problem
+        ).first()
         if voted != None:
             voted.delete()
 
