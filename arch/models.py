@@ -3,10 +3,12 @@ from typing import Optional
 
 import reversion
 from django.conf import settings
-from django.core.validators import RegexValidator
+from django.contrib.auth import get_user_model
+from django.core.validators import RegexValidator, MaxValueValidator
 from django.db import models
 from django.urls import reverse
 
+User = get_user_model()
 
 def get_disk_statement_from_puid(puid: str) -> Optional[str]:
     if settings.PATH_STATEMENT_ON_DISK is None:
@@ -15,7 +17,6 @@ def get_disk_statement_from_puid(puid: str) -> Optional[str]:
     if statement_path.exists() and statement_path.is_file():
         return statement_path.read_text()
     return None
-
 
 # Create your models here.
 @reversion.register()
@@ -45,6 +46,41 @@ class Problem(models.Model):
 
     def get_statement(self) -> Optional[str]:
         return get_disk_statement_from_puid(self.puid)
+    
+    @property
+    def mohs(self) -> float:
+        total: int = 0
+
+        votes = self.vote_set.all()
+        
+        if len(votes) > 0:
+            for vote in votes:
+                total += vote.mohs
+
+            total /= len(votes)
+        else:
+            return None
+
+        return round(total, 2)
+
+
+class Vote(models.Model):
+    user = models.ForeignKey(
+        User,
+        help_text="User who voted for this problem.",
+        on_delete=models.CASCADE,
+    )
+
+    problem = models.ForeignKey(
+        Problem,
+        on_delete=models.CASCADE,
+        help_text="The container of the current vote.",
+    )
+
+    mohs = models.FloatField(
+        help_text="A number from 0 to 50 used to indicate the approximate MOHS of a problem.",
+        validators=[MaxValueValidator(50)]
+    )
 
 
 @reversion.register()

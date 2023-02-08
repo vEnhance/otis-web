@@ -52,12 +52,17 @@
     <a href="https://discord.com/channels/740366393022742618/1019651152385679491"
        class="btn btn-primary">💬 #math-discuss</a>
     <a href="{% url "hint-create" problem.puid %}" class="btn btn-success">🆕 Add hint</a>
-    <a href="{% url "view-solution" problem.puid %}" class="btn btn-info">📜 Solution (TeX)</a>
     {% if request.user.is_staff %}
       <a href="{% url "admin:arch_problem_change" problem.pk %}"
          class="btn btn-dark">✏️ Edit</a>
     {% else %}
       <a href="{% url "problem-update" problem.puid %}" class="btn btn-dark">✏️ Edit</a>
     {% endif %}
+  </div>
+  
+  <hr />
+  <div class="text-center">
+    <a href="{% url "view-solution" problem.puid %}" class="btn btn-info">📜 Solution (TeX)</a>
+    <a href="{% url "vote-create" problem.puid %}" class="btn btn-secondary">🗳 Rate</a>
   </div>
 {% endblock layout-content %}

@@ -3,7 +3,7 @@ from reversion.admin import VersionAdmin
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
-from .models import Hint, Problem
+from .models import Hint, Problem, Vote
 
 
 class HintInline(admin.TabularInline):
@@ -30,6 +30,7 @@ class ProblemAdmin(ImportExportModelAdmin):
         "pk",
         "puid",
         "hyperlink",
+        "mohs"
     )
     list_display_links = (
         "pk",
@@ -56,5 +57,16 @@ class HintAdmin(VersionAdmin):
         "keywords",
         "content",
     )
+    autocomplete_fields = ("problem",)
+    list_per_page = 30
+
+@admin.register(Vote)
+class VoteAdmin(VersionAdmin):
+    list_display = (
+        "problem",
+        "user",
+        "mohs",
+    )
+    search_fields = ("problem__puid",)
     autocomplete_fields = ("problem",)
     list_per_page = 30

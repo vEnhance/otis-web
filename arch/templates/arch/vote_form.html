@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+{% load static %}
+{% block title %}
+  Vote for {{ problem }}
+{% endblock title %}
+{% block layout-content %}
+  <p>
+    <a href="{% url "hint-list" problem.puid %}">⬅️ Back to {{ problem }}</a>
+  </p>
+  <hr />
+  {% spaceless %}
+    <h1>{{ problem }}</h1>
+  {% endspaceless %}
+  {% if statement %}<div class="alert-secondary alert">{{ statement|safe }}</div>{% endif %}
+  {% if problem.hyperlink %}
+    <p class="text-center">
+      <a class="btn btn-secondary" href="{{ problem.hyperlink }}">
+        <tt>🌏 {{ problem.hyperlink|truncatechars:"40" }}</tt>
+      </a>
+    </p>
+  {% endif %}
+  <hr />
+
+  {% if problem.mohs %}
+   <p>
+      This problem has been rated by OTIS students as having
+      an average mohs of {{ problem.mohs }}. Learn about mohs at <a href="https://web.evanchen.cc/upload/MOHS-hardness.pdf">here</a>.
+   </p>
+
+    <p>
+      {% if voted %}
+        You've already done so as well, but can change your rating below.
+      {% else %}
+        You too can rate the problem below.
+      {% endif%}
+    </p>
+
+  {% else %}
+    <p>This problem has not been rated yet! Be the first to vote:</p>
+  {% endif %}
+
+  {% include "generic_form.html" with submit_name="Vote" %}
+
+{% endblock layout-content %}
+{% block scripts %}
+  {% if voted %}
+    <script type="text/javascript">
+      $(document).ready(function() {
+          $("#id_mohs").attr("placeholder", {{ voted.mohs }});
+      });
+    </script>
+  {% endif %}
+{% endblock scripts %}

@@ -27,3 +27,7 @@ class ProblemUpdateForm(forms.ModelForm):
 
 class ProblemSelectForm(forms.Form):
     problem = forms.ModelChoiceField(queryset=Problem.objects.all())
+
+class VoteForm(forms.Form):
+    vote = forms.IntegerField(help_text="MOHS value you think this problem deserves.")
+    problem = forms.ModelChoiceField(queryset=Problem.objects.all())

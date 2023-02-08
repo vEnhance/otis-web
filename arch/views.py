@@ -1,6 +1,8 @@
 from typing import Any, ClassVar, Dict, Optional
+from django.forms import HiddenInput
 
 import reversion
+from aincrad.views import problems_handler
 from core.utils import storage_hash
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -22,8 +24,8 @@ from roster.models import Student
 from arch.forms import ProblemSelectForm
 from arch.models import get_disk_statement_from_puid
 
-from .forms import HintUpdateFormWithReason
-from .models import Hint, Problem
+from .forms import HintUpdateFormWithReason, VoteForm
+from .models import Hint, Problem, Vote
 
 ContextType = Dict[str, Any]
 
@@ -97,6 +99,13 @@ class HintList(ExistStudentRequiredMixin, ListView[Hint]):
         context = super().get_context_data(**kwargs)
         context["problem"] = self.problem
         context["statement"] = self.problem.get_statement()
+        
+        vote = Vote.objects.filter(user=self.request.user, problem=self.problem).first()
+
+        if vote is not None:
+            context["vote"] = vote.mohs
+
+        context["vote_form"] = VoteForm()
         return context
 
 
@@ -263,3 +272,46 @@ def view_solution(request: HttpRequest, puid: str):
         return HttpResponseRedirect(solution_url)
     else:
         raise Http404
+
+class VoteCreate(
+    ExistStudentRequiredMixin,
+    CreateView[Vote, VoteForm],
+):
+    context_object_name = "vote"
+    fields = (
+        "mohs",
+    )
+    model = Vote
+    template_name = "arch/vote_form.html"
+
+    def get_initial(self):
+        self.problem = Problem.objects.get(puid=self.kwargs["puid"])
+
+        initial = super().get_initial()
+        initial = initial.copy()
+        initial["problem"] = self.problem
+        return initial
+  
+    def get_context_data(self, **kwargs: Any):
+        context = super().get_context_data(**kwargs)
+        context["problem"] = self.problem
+
+        context["voted"] = Vote.objects.filter(user=self.request.user, problem=self.problem).first()
+        return context
+  
+    def form_valid(self, form: VoteForm):
+        messages.success(
+            self.request, f"You rated {self.problem.puid} as {form.instance.mohs}"
+        )
+
+        voted = Vote.objects.filter(user=self.request.user, problem=self.problem).first()
+        if voted != None:
+            voted.delete()
+
+        form.instance.problem = self.problem
+        form.instance.user = self.request.user
+
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return self.problem.get_absolute_url()
