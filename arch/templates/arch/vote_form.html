@@ -21,10 +21,10 @@
   {% endif %}
   <hr />
 
-  {% if problem.mohs %}
+  {% if problem.niceness %}
    <p>
-      This problem has been rated by OTIS students as having
-      an average mohs of {{ problem.mohs }}. Learn about mohs at <a href="https://web.evanchen.cc/upload/MOHS-hardness.pdf">here</a>.
+      On a scale of 1 to 10, this problem has been rated by OTIS students in terms of how nice it is as
+      {{ problem.niceness }}.
    </p>
 
     <p>
@@ -46,7 +46,7 @@
   {% if voted %}
     <script type="text/javascript">
       $(document).ready(function() {
-          $("#id_mohs").attr("placeholder", {{ voted.mohs }});
+          $("#id_niceness").attr("placeholder", {{ voted.niceness }});
       });
     </script>
   {% endif %}

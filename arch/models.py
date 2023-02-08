@@ -50,14 +50,14 @@ class Problem(models.Model):
         return get_disk_statement_from_puid(self.puid)
 
     @property
-    def mohs(self) -> float:
+    def niceness(self) -> float:
         total: int = 0
 
         votes = self.vote_set.all()
 
         if len(votes) > 0:
             for vote in votes:
-                total += vote.mohs
+                total += vote.niceness
 
             total /= len(votes)
         else:
@@ -79,8 +79,8 @@ class Vote(models.Model):
         help_text="The container of the current vote.",
     )
 
-    mohs = models.FloatField(
-        help_text="A number from 0 to 50 used to indicate the approximate MOHS of a problem.",
+    niceness = models.FloatField(
+        help_text="A student submitted number from 0 to 10 used to indicate the approximate niceness of a problem.",
         validators=[MaxValueValidator(50)],
     )
 

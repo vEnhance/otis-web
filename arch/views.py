@@ -79,7 +79,7 @@ class HintList(VerifiedRequiredMixin, ListView[Hint]):
         vote = Vote.objects.filter(user=self.request.user, problem=self.problem).first()
 
         if vote is not None:
-            context["vote"] = vote.mohs
+            context["vote"] = vote.niceness
 
         context["vote_form"] = VoteForm()
         return context
@@ -255,7 +255,7 @@ class VoteCreate(
     CreateView[Vote, VoteForm],
 ):
     context_object_name = "vote"
-    fields = ("mohs",)
+    fields = ("niceness",)
     model = Vote
     template_name = "arch/vote_form.html"
 
@@ -278,7 +278,7 @@ class VoteCreate(
 
     def form_valid(self, form: VoteForm):
         messages.success(
-            self.request, f"You rated {self.problem.puid} as {form.instance.mohs}"
+            self.request, f"You rated {self.problem.puid} as {form.instance.niceness}"
         )
 
         voted = Vote.objects.filter(
