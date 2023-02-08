@@ -4,7 +4,7 @@ from typing import Optional
 import reversion
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.validators import RegexValidator, MaxValueValidator
+from django.core.validators import MaxValueValidator, RegexValidator
 from django.db import models
 from django.urls import reverse
 
