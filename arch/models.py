@@ -58,8 +58,6 @@ class Problem(models.Model):
         if len(votes) > 0:
             for vote in votes:
                 total += vote.niceness
-
-            total /= len(votes)
         else:
             return None
 
