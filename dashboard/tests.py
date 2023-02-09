@@ -685,6 +685,8 @@ class TestLevelUpAndBonus(EvanTestCase):
         # the form shouldn't have anything in the queryset right now
         resp = self.assertGet20X("bonus-level-request", alice.pk, follow=True)
         self.assertEqual(resp.context["form"].fields["unit"].queryset.count(), 0)
+        messages = [m.message for m in resp.context["messages"]]
+        self.assertIn("There are no secret units you can request yet.", messages)
 
         # set Alice's level by adding a unit
         PSetFactory.create(
@@ -708,6 +710,8 @@ class TestLevelUpAndBonus(EvanTestCase):
 
         # now there should be six choices in the form
         resp = self.assertGet20X("bonus-level-request", alice.pk, follow=True)
+        messages = [m.message for m in resp.context["messages"]]
+        self.assertNotIn("There are no secret units you can request yet.", messages)
         queryset = resp.context["form"].fields["unit"].queryset
         self.assertEqual(queryset.count(), 6)
         self.assertQuerysetEqual(
@@ -728,5 +732,6 @@ class TestLevelUpAndBonus(EvanTestCase):
         )
         messages = [m.message for m in resp.context["messages"]]
         self.assertIn(f"Added bonus unit {desired_unit} for you.", messages)
+        self.assertNotIn("There are no secret units you can request yet.", messages)
         alice.refresh_from_db()
         self.assertTrue(alice.curriculum.filter(pk=desired_unit.pk).exists())
