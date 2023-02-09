@@ -1,3 +1,4 @@
+import logging
 from typing import Any, ClassVar, Optional
 
 import reversion
@@ -17,12 +18,15 @@ from reversion.views import RevisionMixin
 from arch.forms import ProblemSelectForm
 from arch.models import get_disk_statement_from_puid
 from core.utils import storage_hash
+from evans_django_tools import ACTION_LOG_LEVEL
 from otisweb.mixins import VerifiedRequiredMixin
 
 from .forms import HintUpdateFormWithReason, VoteForm
 from .models import Hint, Problem, Vote
 
 ContextType = dict[str, Any]
+
+logger = logging.getLogger(__name__)
 
 
 class HintObjectView:
@@ -162,6 +166,14 @@ class ProblemUpdate(
         context["num_problems"] = Problem.objects.all().count()
         context["num_hints"] = Hint.objects.all().count()
         return context
+
+    def form_valid(self, form: BaseModelForm[Problem]) -> HttpResponse:
+        logger.log(
+            ACTION_LOG_LEVEL,
+            f"{form.instance.puid} was updated; "
+            f"new hyperlink {form.instance.hyperlink}.",
+        )
+        return super().form_valid(form)
 
     def get_success_url(self) -> str:
         return self.object.get_absolute_url()  # type: ignore

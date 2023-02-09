@@ -1,6 +1,10 @@
+from typing import Any
+
 from django import forms
 from django.core.validators import FileExtensionValidator
+from django.forms.models import ModelChoiceField
 
+from core.models import Unit
 from dashboard.models import PSet, UploadedFile
 
 
@@ -58,3 +62,11 @@ class PSetResubmitForm(forms.ModelForm):
             "special_notes",
             "next_unit_to_unlock",
         )
+
+
+class BonusRequestForm(forms.Form):
+    def __init__(self, *args: Any, **kwargs: Any):
+        level: int = kwargs.pop("level")
+        super().__init__(*args, **kwargs)
+        queryset = Unit.objects.filter(group__bonuslevel__level__lte=level)
+        self.fields["unit"] = ModelChoiceField(queryset)

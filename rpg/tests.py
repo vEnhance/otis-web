@@ -337,12 +337,12 @@ class TestPalace(EvanTestCase):
             AchievementUnlockFactory.create(
                 user=alice.user, achievement__diamonds=2 * i + 1
             )
-            self.assertNotHas(self.get("portal", alice.pk), "Ruby palace")
+            self.assertNotHas(self.get("portal", alice.pk), "Ruby Palace")
             self.assertGet40X("palace-list", alice.pk, follow=True)
             self.assertGet40X("palace-update", alice.pk, follow=True)
             self.assertGet40X("diamond-update", alice.pk, follow=True)
         AchievementUnlockFactory.create(user=alice.user, achievement__diamonds=9)
-        self.assertHas(self.get("portal", alice.pk), "Ruby palace")
+        self.assertHas(self.get("portal", alice.pk), "Ruby Palace")
         self.assertGetOK("palace-list", alice.pk)
         self.assertGetOK("palace-update", alice.pk)
         self.assertGetOK("diamond-update", alice.pk)

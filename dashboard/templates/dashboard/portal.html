@@ -179,11 +179,10 @@
        class="btn btn-secondary text-white"
        role="button">Past work</a>
     {% if is_maxed %}
+      <br />
       <a href="{% url 'palace-list' student.pk %}"
-         style="margin: 0 auto;
-                width: 120px"
-         class="btn btn-danger text-white"
-         role="button">Ruby palace</a>
+         class="btn btn-danger text-white mx-auto my-2"
+         role="button">Ruby Palace</a>
     {% endif %}
   </div>
   {% if downloads or emails %}<br />{% endif %}
@@ -252,11 +251,11 @@
   </h2>
   {% include "dashboard/curriculum_list.html" %}
   <p>
-    After submitting a problem set, the unit is marked ⏳;
-    after instructor review, it becomes ✅.
-    (You can access solutions in the meantime.)
+    After submitting a unit, it's marked ⏳
+    and <a href="{% url "pset-queue-listing" %}">queued</a>;
+    once approved, it becomes ✅
+    (you can access solutions in the meantime).
     Units to work on are marked ▶️.
-    See also <a href="{% url "pset-queue-listing" %}">submission queue</a>.
   </p>
   <div class="text-center">
     {% if not student.newborn and semester.active and student.enabled %}
@@ -266,6 +265,12 @@
       <a href="{% url 'advance' student.pk %}" class="btn btn-dark">Edit units</a>
     {% endif %}
   </div>
+  {% if bonus_levels %}
+    <p>
+      You are also sufficiently high level to
+      <a href="{% url "bonus-level-request" student.pk %}">request secret units</a>.
+    </p>
+  {% endif %}
   <table width="100%">
     <tr>
       <td valign="top" width="50%">

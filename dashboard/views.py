@@ -26,7 +26,12 @@ from django.views.generic import DetailView, ListView
 from django.views.generic.edit import DeleteView, UpdateView
 
 from core.models import Semester, Unit, UserProfile
-from dashboard.forms import NewUploadForm, PSetResubmitForm, PSetSubmitForm
+from dashboard.forms import (
+    BonusRequestForm,
+    NewUploadForm,
+    PSetResubmitForm,
+    PSetSubmitForm,
+)
 from dashboard.models import PSet, SemesterDownloadFile, UploadedFile  # NOQA
 from dashboard.utils import get_units_to_submit, get_units_to_unlock  # NOQA
 from evans_django_tools import VERBOSE_LOG_LEVEL
@@ -324,6 +329,23 @@ def uploads(request: HttpRequest, student_pk: int, unit_pk: int) -> HttpResponse
     context["files"] = uploads
     # TODO form for adding new files
     return render(request, "dashboard/uploads.html", context)
+
+
+@login_required
+def bonus_level_request(request: HttpRequest, student_pk: int) -> HttpResponse:
+    student = get_student_by_pk(request, student_pk)
+    if request.method == "POST":
+        form = BonusRequestForm(request.POST, level=student.last_level_seen)
+        if form.is_valid():
+            new_unit = form.cleaned_data["unit"]
+            student.curriculum.add(new_unit)
+            messages.success(request, f"Added bonus unit {new_unit} for you.")
+    else:
+        form = BonusRequestForm(level=student.last_level_seen)
+    context: dict[str, Any] = {}
+    context["student"] = student
+    context["form"] = form
+    return render(request, "dashboard/bonus_level_request.html", context)
 
 
 @login_required

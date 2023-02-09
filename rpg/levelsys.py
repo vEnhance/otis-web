@@ -146,6 +146,7 @@ class LevelInfoDict(TypedDict):
     suggest_unit_set: SuggestUnitSet
     mock_completes: QuerySet[MockCompleted]
     completed_jobs: QuerySet[Job]
+    bonus_levels: QuerySet[BonusLevel]
 
 
 def get_week_count(dates: list[datetime]) -> int:
@@ -240,7 +241,8 @@ def get_level_info(student: Student) -> LevelInfoDict:
         "meters": meters,
         "level_number": level_number,
         "level_name": level_name,
-        "is_maxed": level_number >= max_level,
+        "is_maxed": (level_number >= max_level),
+        "bonus_levels": BonusLevel.objects.filter(level__lte=level_number),
         # spade properties
         "quiz_attempts": quiz_attempts,
         "quest_completes": quest_completes,

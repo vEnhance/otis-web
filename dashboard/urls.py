@@ -21,6 +21,11 @@ urlpatterns = [
     ),
     path(r"past/", views.past, name="past"),
     path(r"past/<int:semester_pk>/", views.past, name="past"),
+    path(
+        r"bonus/<int:student_pk>/",
+        views.bonus_level_request,
+        name="bonus-level-request",
+    ),
     path(r"years/", views.SemesterList.as_view(), name="semester-list"),
     path(r"index/", views.index, name="index"),
     path(r"certify/", views.certify, name="certify"),
