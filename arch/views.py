@@ -21,7 +21,7 @@ from core.utils import storage_hash
 from evans_django_tools import ACTION_LOG_LEVEL
 from otisweb.mixins import VerifiedRequiredMixin
 
-from .forms import HintUpdateFormWithReason, VoteForm
+from .forms import HintUpdateFormWithReason
 from .models import Hint, Problem, Vote
 
 ContextType = dict[str, Any]
@@ -84,8 +84,6 @@ class HintList(VerifiedRequiredMixin, ListView[Hint]):
 
         if vote is not None:
             context["vote"] = vote.niceness
-
-        context["vote_form"] = VoteForm()
         return context
 
 
@@ -264,7 +262,7 @@ def view_solution(request: HttpRequest, puid: str):
 
 class VoteCreate(
     VerifiedRequiredMixin,
-    CreateView[Vote, VoteForm],
+    CreateView[Vote, BaseModelForm[Vote]],
 ):
     context_object_name = "vote"
     fields = ("niceness",)
@@ -288,7 +286,7 @@ class VoteCreate(
         ).first()
         return context
 
-    def form_valid(self, form: VoteForm):
+    def form_valid(self, form: BaseModelForm[Vote]):
         messages.success(
             self.request, f"You rated {self.problem.puid} as {form.instance.niceness}"
         )
