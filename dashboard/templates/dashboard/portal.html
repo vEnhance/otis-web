@@ -179,11 +179,10 @@
        class="btn btn-secondary text-white"
        role="button">Past work</a>
     {% if is_maxed %}
+      <br />
       <a href="{% url 'palace-list' student.pk %}"
-         style="margin: 0 auto;
-                width: 120px"
-         class="btn btn-danger text-white"
-         role="button">Ruby palace</a>
+         class="btn btn-danger text-white mx-auto my-2"
+         role="button">Ruby Palace</a>
     {% endif %}
   </div>
   {% if downloads or emails %}<br />{% endif %}
