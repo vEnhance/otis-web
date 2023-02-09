@@ -6,6 +6,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, RegexValidator
 from django.db import models
+from django.db.models.manager import Manager
 from django.urls import reverse
 
 User = get_user_model()
@@ -36,6 +37,7 @@ class Problem(models.Model):
         ],
     )
     hyperlink = models.URLField(help_text="An AoPS URL or similar", blank=True)
+    vote_set: Manager["Vote"]
 
     class Meta:
         ordering = ("puid",)
@@ -51,17 +53,11 @@ class Problem(models.Model):
 
     @property
     def niceness(self) -> Optional[float]:
-        total: int = 0
-
         votes: models.QuerySet[Vote] = self.vote_set.all()
-
         if len(votes) > 0:
-            for vote in votes:
-                total += vote.niceness
+            return round(sum(vote.niceness for vote in votes) / len(votes), 2)
         else:
             return None
-
-        return round(total / len(votes), 2)
 
 
 class Vote(models.Model):
