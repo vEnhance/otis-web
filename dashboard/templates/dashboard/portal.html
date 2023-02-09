@@ -251,11 +251,11 @@
   </h2>
   {% include "dashboard/curriculum_list.html" %}
   <p>
-    After submitting a problem set, the unit is marked ⏳;
-    after instructor review, it becomes ✅.
-    (You can access solutions in the meantime.)
+    After submitting a unit, it's marked ⏳
+    and <a href="{% url "pset-queue-listing" %}">queued</a>;
+    once approved, it becomes ✅
+    (you can access solutions in the meantime).
     Units to work on are marked ▶️.
-    See also <a href="{% url "pset-queue-listing" %}">submission queue</a>.
   </p>
   <div class="text-center">
     {% if not student.newborn and semester.active and student.enabled %}
