@@ -20,34 +20,24 @@
     </p>
   {% endif %}
   <hr />
-
-  {% if problem.niceness %}
-   <p>
-      On a scale of 1 to 10, this problem has been rated by OTIS students in terms of how nice it is as
-      {{ problem.niceness }}.
-   </p>
-
+  <h2>Voting form</h2>
+  {% if num_existing_votes %}
     <p>
-      {% if voted %}
+      On a scale of 0 to 10,
+      this problem has been rated by
+      {{ num_existing_votes }} student{{ num_existing_votes|pluralize }}
+      as <strong>{{ problem.niceness }}</strong>.
+    </p>
+    <p>
+      {% if existing_vote %}
         You've already done so as well, but can change your rating below.
+        (You previously rated as {{ existing_vote.niceness }}.)
       {% else %}
         You too can rate the problem below.
       {% endif %}
     </p>
-
   {% else %}
     <p>This problem has not been rated yet! Be the first to vote:</p>
   {% endif %}
-
   {% include "generic_form.html" with submit_name="Vote" %}
-
 {% endblock layout-content %}
-{% block scripts %}
-  {% if voted %}
-    <script type="text/javascript">
-      $(document).ready(function() {
-          $("#id_niceness").attr("placeholder", {{ voted.niceness }});
-      });
-    </script>
-  {% endif %}
-{% endblock scripts %}

@@ -269,38 +269,40 @@ class VoteCreate(
     model = Vote
     template_name = "arch/vote_form.html"
 
-    def get_initial(self):
-        self.problem = Problem.objects.get(puid=self.kwargs["puid"])
+    def setup(self, request: HttpRequest, *args: Any, **kwargs: Any):
+        puid = kwargs.pop("puid")
+        super().setup(request, *args, **kwargs)
+        self.problem = Problem.objects.get(puid=puid)
+        self.existing_vote = Vote.objects.filter(
+            user=self.request.user, problem=self.problem
+        ).first()
 
-        initial = super().get_initial()
-        initial = initial.copy()
-        initial["problem"] = self.problem
-        return initial
+    def get_form(self) -> BaseModelForm[Vote]:
+        form = super().get_form()
+        if self.existing_vote is not None:
+            form.fields["niceness"].widget.attrs[
+                "placeholder"
+            ] = self.existing_vote.niceness
+        return form
 
     def get_context_data(self, **kwargs: Any):
         context = super().get_context_data(**kwargs)
         context["problem"] = self.problem
-
-        context["voted"] = Vote.objects.filter(
-            user=self.request.user, problem=self.problem
-        ).first()
+        context["num_existing_votes"] = self.problem.vote_set.count()
+        context["existing_vote"] = self.existing_vote
         return context
 
     def form_valid(self, form: BaseModelForm[Vote]):
-        messages.success(
-            self.request, f"You rated {self.problem.puid} as {form.instance.niceness}"
-        )
-
-        voted = Vote.objects.filter(
-            user=self.request.user, problem=self.problem
-        ).first()
-        if voted != None:
-            voted.delete()
-
+        # delete existing vote
+        Vote.objects.filter(user=self.request.user, problem=self.problem).delete()
         form.instance.problem = self.problem
         form.instance.user = self.request.user
-
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        messages.success(
+            self.request,
+            f"You rated {self.problem.puid} as {form.instance.niceness}.",
+        )
+        return response
 
     def get_success_url(self):
         return self.problem.get_absolute_url()
