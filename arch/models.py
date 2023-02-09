@@ -3,9 +3,13 @@ from typing import Optional
 
 import reversion
 from django.conf import settings
-from django.core.validators import RegexValidator
+from django.contrib.auth import get_user_model
+from django.core.validators import MaxValueValidator, RegexValidator
 from django.db import models
+from django.db.models.manager import Manager
 from django.urls import reverse
+
+User = get_user_model()
 
 
 def get_disk_statement_from_puid(puid: str) -> Optional[str]:
@@ -33,6 +37,7 @@ class Problem(models.Model):
         ],
     )
     hyperlink = models.URLField(help_text="An AoPS URL or similar", blank=True)
+    vote_set: Manager["Vote"]
 
     class Meta:
         ordering = ("puid",)
@@ -45,6 +50,34 @@ class Problem(models.Model):
 
     def get_statement(self) -> Optional[str]:
         return get_disk_statement_from_puid(self.puid)
+
+    @property
+    def niceness(self) -> Optional[float]:
+        votes: models.QuerySet[Vote] = self.vote_set.all()
+        if len(votes) > 0:
+            return round(sum(vote.niceness for vote in votes) / len(votes), 2)
+        else:
+            return None
+
+
+class Vote(models.Model):
+    user = models.ForeignKey(
+        User,
+        help_text="User who voted for this problem.",
+        on_delete=models.CASCADE,
+    )
+    problem = models.ForeignKey(
+        Problem,
+        on_delete=models.CASCADE,
+        help_text="The container of the current vote.",
+    )
+    niceness = models.PositiveIntegerField(
+        help_text="A student submitted number from 0 to 10 used to indicate "
+        "the approximate niceness of a problem.",
+        validators=[MaxValueValidator(10)],
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 
 @reversion.register()
