@@ -6,7 +6,8 @@ from django.urls import reverse
 from django.utils import timezone
 from freezegun import freeze_time
 
-from core.factories import SemesterFactory, UnitFactory, UserFactory
+from core.factories import SemesterFactory, UnitFactory, UnitGroupFactory, UserFactory
+from core.models import Unit
 from dashboard.factories import PSetFactory, SemesterDownloadFileFactory
 from dashboard.models import PSet, UploadedFile
 from dashboard.utils import get_units_to_submit, get_units_to_unlock
@@ -21,6 +22,7 @@ from roster.factories import (
     StudentFactory,
     StudentRegistrationFactory,
 )
+from rpg.factories import BonusLevelFactory
 from rpg.models import Level
 
 utc = timezone.utc
@@ -659,3 +661,72 @@ class TestList(EvanTestCase):
         resp = self.assertGet20X("downloads", alice.pk)
 
         self.assertHas(resp, download.content)
+
+
+class TestLevelUpAndBonus(EvanTestCase):
+    def test_level_up_and_bonus(self) -> None:
+        semester = SemesterFactory.create()
+        alice = StudentFactory.create(semester=semester)
+        self.login(alice)
+
+        secret4 = UnitGroupFactory.create(name="Level 4", subject="K", hidden=True)
+        secret9 = UnitGroupFactory.create(name="Level 9", subject="K", hidden=True)
+        secret16 = UnitGroupFactory.create(name="Level 16", subject="K", hidden=True)
+        for group in (secret4, secret9, secret16):
+            for code in ("BKV", "DKV", "ZKV"):
+                UnitFactory.create(code=code, group=group)
+        BonusLevelFactory.create(level=4, group=secret4)
+        BonusLevelFactory.create(level=9, group=secret9)
+        BonusLevelFactory.create(level=16, group=secret16)
+
+        resp = self.assertGet20X("portal", alice.pk, follow=True)
+        self.assertNotHas(resp, "request secret units")
+
+        # the form shouldn't have anything in the queryset right now
+        resp = self.assertGet20X("bonus-level-request", alice.pk, follow=True)
+        self.assertEqual(resp.context["form"].fields["unit"].queryset.count(), 0)
+
+        # set Alice's level by adding a unit
+        PSetFactory.create(
+            student=alice,
+            clubs=13,
+            hours=37,
+            status="A",
+            unit__code="BCY",
+        )
+        resp = self.assertGet20X("portal", alice.pk, follow=True)
+        self.assertHas(resp, "request secret units")
+
+        # make sure the level up does its job
+        messages = [m.message for m in resp.context["messages"]]
+        self.assertIn("You leveled up! You're now level 9.", messages)
+        alice.refresh_from_db()
+        self.assertEqual(alice.last_level_seen, 9)
+        self.assertEqual(alice.curriculum.all().count(), 2)
+        self.assertEqual(alice.curriculum.all()[0].code, "BKV")
+        self.assertEqual(alice.curriculum.all()[1].code, "BKV")
+
+        # now there should be six choices in the form
+        resp = self.assertGet20X("bonus-level-request", alice.pk, follow=True)
+        queryset = resp.context["form"].fields["unit"].queryset
+        self.assertEqual(queryset.count(), 6)
+        self.assertQuerysetEqual(
+            queryset,
+            Unit.objects.filter(group__in=(secret4, secret9)),
+            ordered=False,
+        )
+
+        # let's submit one and make sure it works
+        desired_unit = Unit.objects.get(group=secret9, code="DKV")
+        self.assertTrue(queryset.filter(pk=desired_unit.pk).exists())
+        self.assertFalse(alice.curriculum.filter(pk=desired_unit.pk).exists())
+        resp = self.assertPost20X(
+            "bonus-level-request",
+            alice.pk,
+            data={"unit": desired_unit.pk},
+            follow=True,
+        )
+        messages = [m.message for m in resp.context["messages"]]
+        self.assertIn(f"Added bonus unit {desired_unit} for you.", messages)
+        alice.refresh_from_db()
+        self.assertTrue(alice.curriculum.filter(pk=desired_unit.pk).exists())

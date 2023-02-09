@@ -265,6 +265,12 @@
       <a href="{% url 'advance' student.pk %}" class="btn btn-dark">Edit units</a>
     {% endif %}
   </div>
+  {% if bonus_levels %}
+    <p>
+      You are also sufficiently high level to
+      <a href="{% url "bonus-level-request" student.pk %}">request secret units</a>.
+    </p>
+  {% endif %}
   <table width="100%">
     <tr>
       <td valign="top" width="50%">
