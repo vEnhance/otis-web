@@ -66,17 +66,18 @@ class Vote(models.Model):
         help_text="User who voted for this problem.",
         on_delete=models.CASCADE,
     )
-
     problem = models.ForeignKey(
         Problem,
         on_delete=models.CASCADE,
         help_text="The container of the current vote.",
     )
-
     niceness = models.PositiveIntegerField(
-        help_text="A student submitted number from 0 to 10 used to indicate the approximate niceness of a problem.",
+        help_text="A student submitted number from 0 to 10 used to indicate "
+        "the approximate niceness of a problem.",
         validators=[MaxValueValidator(10)],
     )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 
 @reversion.register()

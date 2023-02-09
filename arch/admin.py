@@ -58,6 +58,7 @@ class HintAdmin(VersionAdmin):
 
 @admin.register(Vote)
 class VoteAdmin(VersionAdmin):
+    readonly_fields = ("created_at", "updated_at")
     list_display = (
         "problem",
         "user",
