@@ -3,7 +3,9 @@ from typing import Any, ClassVar, Optional
 
 import reversion
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.core.files.storage import default_storage
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
@@ -23,6 +25,8 @@ from otisweb.mixins import VerifiedRequiredMixin
 
 from .forms import HintUpdateFormWithReason
 from .models import Hint, Problem, Vote
+
+User = get_user_model()
 
 ContextType = dict[str, Any]
 
@@ -270,11 +274,13 @@ class VoteCreate(
     template_name = "arch/vote_form.html"
 
     def setup(self, request: HttpRequest, *args: Any, **kwargs: Any):
+        if not isinstance(request.user, User):
+            raise PermissionDenied("Need to log in")
         puid = kwargs.pop("puid")
         super().setup(request, *args, **kwargs)
         self.problem = Problem.objects.get(puid=puid)
         self.existing_vote = Vote.objects.filter(
-            user=self.request.user, problem=self.problem
+            user=request.user, problem=self.problem
         ).first()
 
     def get_form(self) -> BaseModelForm[Vote]:
