@@ -3,4 +3,4 @@ from braces.views import GroupRequiredMixin
 
 class VerifiedRequiredMixin(GroupRequiredMixin):
     group_required = "Verified"
-    raise_exception = True
+    raise_exception = False

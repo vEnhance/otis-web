@@ -42,6 +42,7 @@ class SubmitGuess(VerifiedRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]
         "public",
     )
     request: AuthHttpRequest
+    raise_exception = True
 
     object: Guess  # type: ignore
     market: Market

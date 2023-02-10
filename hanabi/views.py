@@ -75,6 +75,7 @@ class HanabiPlayerCreateView(
 ):
     model = HanabiPlayer
     fields = ("hanab_username",)
+    raise_exception = True
 
     def form_valid(self, form: BaseModelForm[HanabiPlayer]):
         assert isinstance(self.request.user, User)
