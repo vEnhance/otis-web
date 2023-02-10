@@ -1,6 +1,5 @@
 body {
   background-color: #ddeeee;
-  font-family: "Open Sans", sans-serif;
 }
 
 #header {
@@ -35,7 +34,6 @@ h2 {
 
 h3 {
   font-weight: normal;
-  font-family: "Trebuchet MS", sans-serif;
   margin-top: 16px;
 }
 
@@ -98,7 +96,7 @@ table.table tr.subjectK {
   color: #efefef;
 }
 table.table tr.subjectK td.unit-name {
-  font-family: Acme, "Open Sans", sans-serif;
+  font-family: Acme, sans-serif;
 }
 
 /* Unit selection */
@@ -131,7 +129,6 @@ table.curriculum td.code {
 
 table.curriculum td.active {
   font-weight: 700;
-  font-family: "Trebuchet MS", sans-serif;
   font-size: 13px;
 }
 
@@ -161,9 +158,9 @@ span.meter-name {
   position: absolute;
   left: 0;
   text-align: left;
-  font-family: Acme, "Open Sans", sans-serif;
+  font-family: Acme, sans-serif;
 }
 span.meter-header,
 strong.meter-def {
-  font-family: Acme, "Open Sans", sans-serif;
+  font-family: Acme, sans-serif;
 }
