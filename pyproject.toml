@@ -51,7 +51,7 @@ coverage = {extras = ["toml"], version = "^7.1.0"}
 djlint = "^1.19.14"
 factory-boy = "^3.2.0"
 freezegun = "^1.1.0"
-ipython = "^8.9.0"
+ipython = "^8.10.0"
 isort = "^5.12.0"
 jedi = "^0.18.0"
 pdbpp = "^0.10.3"
