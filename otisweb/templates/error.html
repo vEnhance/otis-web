@@ -14,7 +14,8 @@
           text-align: center;
       }
 
-      h1 {
+      h1,
+      h2 {
           font-family: Verdana, Geneva, Tahoma, sans-serif;
       }
 
@@ -28,6 +29,10 @@
       {% block title %}
       {% endblock title %}
     </h1>
+    <div id="message">
+      {% block message %}
+      {% endblock message %}
+    </div>
     <div id="emoji">
       {% block emoji %}
       {% endblock emoji %}
