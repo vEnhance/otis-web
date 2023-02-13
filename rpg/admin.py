@@ -18,7 +18,7 @@ from .models import (  # NOQA
 class AchievementIEResource(resources.ModelResource):
     class Meta:
         skip_unchanged = True
-        model = Level
+        model = Achievement
         fields = (
             "code",
             "name",
