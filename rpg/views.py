@@ -35,8 +35,6 @@ from .forms import DiamondsForm
 from .levelsys import LevelInfoDict, get_level_info, get_student_rows
 from .models import Achievement, AchievementUnlock, Level, PalaceCarving
 
-# Create your views here.
-
 logger = logging.getLogger(__name__)
 
 
