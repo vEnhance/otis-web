@@ -1,6 +1,6 @@
 from django.utils import timezone
 
-from core.factories import UnitFactory, UserFactory
+from core.factories import GroupFactory, UnitFactory, UserFactory
 from dashboard.factories import PSetFactory
 from evans_django_tools.testsuite import EvanTestCase
 from exams.factories import ExamAttemptFactory, TestFactory
@@ -28,8 +28,11 @@ class TestLevelSystem(EvanTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        verified_group = GroupFactory(name="Verified")
         alice = StudentFactory.create(
-            user__first_name="Alice", user__last_name="Aardvark"
+            user__first_name="Alice",
+            user__last_name="Aardvark",
+            user__groups=(verified_group,),
         )
         PSetFactory.create(
             student=alice, clubs=120, hours=37, status="A", unit__code="BGW"
@@ -267,7 +270,7 @@ class TestLevelSystem(EvanTestCase):
         self.login(admin)
         self.assertGet20X("leaderboard")
 
-    def test_submit_diamond(self):
+    def test_submit_diamond_and_read_solution(self):
         a1 = AchievementFactory.create(diamonds=3)
         a2 = AchievementFactory.create(diamonds=3)
         alice = self.get_alice()
@@ -284,6 +287,8 @@ class TestLevelSystem(EvanTestCase):
         self.assertFalse(
             AchievementUnlock.objects.filter(achievement=a2, user=alice.user).exists()
         )
+        self.assertGet40X("diamond-solution", a1.pk)
+        self.assertGet40X("diamond-solution", a2.pk)
 
         # Submit a valid code for a1
         resp = self.assertPost20X("stats", alice.pk, data={"code": a1.code})
@@ -294,6 +299,8 @@ class TestLevelSystem(EvanTestCase):
         self.assertFalse(
             AchievementUnlock.objects.filter(achievement=a2, user=alice.user).exists()
         )
+        self.assertGet20X("diamond-solution", a1.pk)
+        self.assertGet40X("diamond-solution", a2.pk)
 
         # Submit a valid code for a1 that was obtained already
         resp = self.assertPost20X("stats", alice.pk, data={"code": a1.code})
@@ -304,6 +311,8 @@ class TestLevelSystem(EvanTestCase):
         self.assertFalse(
             AchievementUnlock.objects.filter(achievement=a2, user=alice.user).exists()
         )
+        self.assertGet20X("diamond-solution", a1.pk)
+        self.assertGet40X("diamond-solution", a2.pk)
 
         # Submit a valid code for a2
         resp = self.assertPost20X("stats", alice.pk, data={"code": a2.code})
@@ -314,6 +323,8 @@ class TestLevelSystem(EvanTestCase):
         self.assertTrue(
             AchievementUnlock.objects.filter(achievement=a2, user=alice.user).exists()
         )
+        self.assertGet20X("diamond-solution", a1.pk)
+        self.assertGet20X("diamond-solution", a2.pk)
 
         # Submit a valid code for a2 that was obtained already
         resp = self.assertPost20X("stats", alice.pk, data={"code": a2.code})
@@ -324,6 +335,8 @@ class TestLevelSystem(EvanTestCase):
         self.assertTrue(
             AchievementUnlock.objects.filter(achievement=a2, user=alice.user).exists()
         )
+        self.assertGet20X("diamond-solution", a1.pk)
+        self.assertGet20X("diamond-solution", a2.pk)
 
 
 class TestPalace(EvanTestCase):
