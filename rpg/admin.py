@@ -20,6 +20,7 @@ class AchievementIEResource(resources.ModelResource):
         skip_unchanged = True
         model = Achievement
         fields = (
+            "id",
             "code",
             "name",
             "diamonds",
