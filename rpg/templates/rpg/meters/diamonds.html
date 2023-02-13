@@ -17,11 +17,15 @@
             <strong>{{ aunlock.achievement.name }}</strong>
             <span style="color: {{ meters.diamonds.color }};">{{ aunlock.achievement.diamonds }}{{ meters.diamonds.unit }}</span>
           </div>
-          {% if aunlock.achievement.image %}
-            <img width="64px"
-                 style="float: right"
-                 src="{{ aunlock.achievement.image.url }}"/>
-          {% endif %}
+          <a href="{% url "diamond-solution" aunlock.achievement.pk %}">
+            {% if aunlock.achievement.image %}
+              <img width="64px"
+                   style="float: right"
+                   src="{{ aunlock.achievement.image.url }}"/>
+            {% else %}
+              <div width="64px" style="float: right">Solution</div>
+            {% endif %}
+          </a>
           <p>{{ aunlock.achievement.description }}</p>
         </div>
       {% endfor %}
