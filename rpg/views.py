@@ -26,6 +26,7 @@ from django.views.generic import ListView
 from django.views.generic.edit import UpdateView
 from sql_util.utils import SubqueryAggregate
 
+from evans_django_tools import SUCCESS_LOG_LEVEL
 from otisweb.utils import AuthHttpRequest, get_days_since
 from roster.models import Student
 from roster.utils import get_student_by_pk
@@ -74,6 +75,11 @@ def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
                         request,
                         r"Achievement unlocked! 🎉"
                         f"You earned the achievement {achievement.name}.",
+                    )
+                    logger.log(
+                        SUCCESS_LOG_LEVEL,
+                        f"{student.name} just obtained {achievement}!",
+                        extra={"request": request},
                     )
                 else:
                     logger.warn(
