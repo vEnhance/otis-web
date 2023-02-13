@@ -3,19 +3,17 @@
   Solution to {{ achievement.name }}
 {% endblock title %}
 {% block layout-content %}
-  <div>
+  <div class="overflow-auto">
     {% if achievement.image %}<img width="96px" style="float: right;" src="{{ achievement.image.url }}" />{% endif %}
     <h2>{{ achievement.name }} ({{ achievement.diamonds }}♦️)</h2>
     <p class="fst-italic">{{ achievement.description }}</p>
   </div>
-  <hr />
-  <div class="alert alert-success">
+  <div class="my-3 alert alert-success">
     <h4 class="alert-heading">
       Answer: <strong>{{ achievement.code }}</strong>
     </h4>
     {{ achievement.solution|linebreaks }}
   </div>
-  <hr />
   <ul>
     {% if request.user.is_superuser %}
       <li>
