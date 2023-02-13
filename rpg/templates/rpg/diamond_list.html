@@ -67,11 +67,13 @@
         </div>
         {% if achievement.num_found > 0 or achievement.always_show_image %}
           <span {% if viewing and achievement.viewed_obtained %} {% elif not achievement.obtained and not request.user.is_staff %} style="filter: grayscale(100%) opacity(40%);" {% endif %}>
-            {% if achievement.image %}
-              <img width="64px" style="float: right;" src="{{ achievement.image.url }}" />
-            {% else %}
-              <div width="64px" style="float: right;">No image</div>
-            {% endif %}
+            <a href="{% url "diamond-solution" achievement.pk %}">
+              {% if achievement.image %}
+                <img width="64px" style="float: right;" src="{{ achievement.image.url }}" />
+              {% else %}
+                <div width="64px" style="float: right;">View solution</div>
+              {% endif %}
+            </a>
           </span>
           {% if achievement.num_found > 0 %}
             <p>
