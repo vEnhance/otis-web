@@ -20,13 +20,16 @@ from django.db.models.expressions import Exists
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http import HttpResponse
+from django.http.response import HttpResponseBase
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views.generic import ListView
+from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView
 from sql_util.utils import SubqueryAggregate
 
 from evans_django_tools import SUCCESS_LOG_LEVEL
+from otisweb.mixins import VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest, get_days_since
 from roster.models import Student
 from roster.utils import get_student_by_pk
@@ -139,6 +142,27 @@ class AchievementList(LoginRequiredMixin, ListView[Achievement]):
         context["pk"] = self.request.user.pk
         context["viewing"] = False
         return context
+
+
+class AchievementDetail(VerifiedRequiredMixin, DetailView[Achievement]):
+    template_name = "rpg/diamond_solution.html"
+    model = Achievement
+    context_object_name = "achievement"
+
+    def dispatch(self, *args: Any, **kwargs: Any) -> HttpResponseBase:
+        achievement = self.get_object()
+        assert isinstance(self.request.user, User)
+        if AchievementUnlock.objects.filter(
+            user=self.request.user, achievement=achievement
+        ).exists():
+            pass
+        elif self.request.user.is_superuser:
+            messages.warning(
+                self.request, "You can only see this page since you are admin."
+            )
+        else:
+            raise PermissionDenied("You haven't found this yet")
+        return super().dispatch(*args, **kwargs)
 
 
 class AchievementCertifyList(LoginRequiredMixin, ListView[Achievement]):

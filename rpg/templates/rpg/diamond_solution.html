@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+{% block title %}
+  Solution to {{ achievement.name }}
+{% endblock title %}
+{% block layout-content %}
+  {% if achievement.image %}<img width="96px" style="float: right;" src="{{ achievement.image.url }}" />{% endif %}
+  <h2>{{ achievement.name }} ({{ achievement.diamonds }}♦️)</h2>
+  <p class="fst-italic">{{ achievement.description }}</p>
+  <div class="alert alert-success">
+    <h4 class="alert-heading">
+      Answer: <strong>{{ achievement.code }}</strong>
+    </h4>
+    {{ achievement.solution|linebreaks }}
+  </div>
+  <hr />
+  <ul>
+    <li>
+      <a href="{% url "found-listing" achievement.pk %}">Return to found list</a>
+    </li>
+    <li>
+      <a href="{% url "achievements-listing" %}">List all diamonds</a>
+    </li>
+  </ul>
+{% endblock layout-content %}
