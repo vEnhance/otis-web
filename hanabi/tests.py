@@ -30,6 +30,10 @@ class HanabiModelTests(EvanTestCase):
             r"&variantName=Duck+%285+Suits%29"
             r"&timed=true&timeBase=180&timePerTurn=30",
         )
+        self.assertEqual(
+            contest.hanab_stats_page_url, "https://hanab.live/seed/p3v55sotis1"
+        )
+        self.assertEqual(contest.max_score, 25)
 
         replay = HanabiReplayFactory.create(contest=contest, game_score=23)
         self.assertAlmostEqual(replay.get_base_spades(), 1.3181630464)

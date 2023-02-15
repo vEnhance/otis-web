@@ -79,6 +79,10 @@ class HanabiContest(models.Model):
     def has_ended(self) -> bool:
         return timezone.now() >= self.end_date
 
+    @property
+    def max_score(self) -> int:
+        return 5 * self.num_suits
+
 
 class HanabiReplay(models.Model):
     contest = models.ForeignKey(HanabiContest, on_delete=models.CASCADE)

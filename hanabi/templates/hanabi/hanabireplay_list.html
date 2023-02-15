@@ -6,6 +6,16 @@
   <p>
     <a href="{% url "hanabi-contests" %}">Back to contest list</a>
   </p>
+  <p>
+    These are the results for
+    Hanabi Contest #{{ contest.pk }}: {{ contest.variant_name }}.
+    The maximum possible game score is {{ contest.max_score }}.
+  </p>
+  <p>
+    You can also see
+    <a href="{{ contest.hanab_stats_page_url }}">{{ contest.hanab_stats_page_url }}</a>
+    for all the results of the seed on the hanab.live server.
+  </p>
   <table class="table striped-table">
     <thead>
       <tr>
@@ -21,9 +31,9 @@
           <td>
             <a href="{{ replay.get_absolute_url }}">{{ replay.replay_id }}</a>
           </td>
-          <td>{{ replay.game_score }}</td>
+          <td>{{ replay.game_score }} / {{ contest.max_score }}</td>
           <td>{{ replay.turn_count }}</td>
-          <td>{{ replay.spades_score }}</td>
+          <td>+{{ replay.spades_score|floatformat:2 }} ♠</td>
         </tr>
       {% endfor %}
     </tbody>
