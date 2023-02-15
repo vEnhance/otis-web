@@ -45,6 +45,7 @@ class HanabiPlayerAdmin(admin.ModelAdmin):
         "user__username",
         "hanab_username",
     )
+    autocomplete_fields = ("user",)
 
 
 @admin.register(HanabiReplay)
@@ -70,6 +71,7 @@ class HanabiReplayAdmin(admin.ModelAdmin):
         "pk",
         "contest__variant_name",
     )
+    autocomplete_fields = ("contest",)
 
 
 @admin.register(HanabiParticipation)
@@ -90,6 +92,7 @@ class HanabiParticipationAdmin(admin.ModelAdmin):
         "player__user__username",
         "replay__contest__variant_name",
     )
-
-
-# Register your models here.
+    autocomplete_fields = (
+        "player",
+        "replay",
+    )
