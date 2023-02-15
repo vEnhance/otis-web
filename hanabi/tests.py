@@ -3,7 +3,7 @@ from freezegun import freeze_time
 
 from core.factories import GroupFactory, UserFactory
 from evans_django_tools.testsuite import EvanTestCase
-from hanabi.factories import HanabiContestFactory
+from hanabi.factories import HanabiContestFactory, HanabiReplayFactory
 from hanabi.models import HanabiContest, HanabiPlayer
 
 UTC = timezone.utc
@@ -30,6 +30,9 @@ class HanabiModelTests(EvanTestCase):
             r"&variantName=Duck+%285+Suits%29"
             r"&timed=true&timeBase=180&timePerTurn=30",
         )
+
+        replay = HanabiReplayFactory.create(contest=contest, game_score=23)
+        self.assertAlmostEqual(replay.get_base_spades(), 1.3181630464)
 
 
 class HanabiViewTests(EvanTestCase):

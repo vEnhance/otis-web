@@ -21,6 +21,7 @@ from unidecode import unidecode
 
 from arch.models import Hint, Problem
 from dashboard.models import PSet
+from hanabi.models import HanabiContest, HanabiParticipation, HanabiPlayer, HanabiReplay
 from payments.models import Job
 from roster.models import Invoice, Student, StudentRegistration, UnitInquiry
 from suggestions.models import ProblemSuggestion
@@ -33,6 +34,13 @@ class HintData(TypedDict):
     number: int
     keywords: str
     pk: int
+
+
+class ReplayData(TypedDict):
+    game_score: int
+    turn_count: int
+    replay_id: int
+    players: list[str]
 
 
 class JSONData(TypedDict):
@@ -66,6 +74,10 @@ class JSONData(TypedDict):
 
     # arch update urls
     urls: dict[str, str]  # puid -> url
+
+    # hanabi
+    num_suits: int
+    replays: list[ReplayData]
 
 
 PSET_VENUEQ_INIT_QUERYSET = PSet.objects.filter(
@@ -441,6 +453,94 @@ def arch_url_handler(action: str, data: JSONData) -> JsonResponse:
     return JsonResponse({"updated_count": len(problems_to_update)})
 
 
+def hanabi_handler(action: str, data: JSONData) -> JsonResponse:
+    del action
+    contest = HanabiContest.objects.get(pk=data["pk"])
+
+    name_to_pk_dict: dict[str, int] = {}
+    eligible_players: list[str] = []
+    for d in HanabiPlayer.objects.all().values("pk", "hanab_username"):
+        eligible_players.append(d["hanab_username"])
+        name_to_pk_dict[d["hanab_username"]] = d["pk"]
+    name_to_replay_id_dict: dict[str, int] = {}
+
+    # Create the hanabi replay objects
+    replays: list[HanabiReplay] = []
+
+    # first, compute the set of eligible players after disqualifications
+    for replay_json in data["replays"]:
+        for name in replay_json["players"]:
+            if name in eligible_players:
+                if name in name_to_replay_id_dict:
+                    # Disqualify the player
+                    del name_to_replay_id_dict[name]
+                    eligible_players.remove(name)
+                else:
+                    name_to_replay_id_dict[name] = replay_json["replay_id"]
+
+    for replay_json in data["replays"]:
+        if not any(name in eligible_players for name in replay_json["players"]):
+            continue
+        game_score = replay_json["game_score"]
+        replay = HanabiReplay(
+            contest=contest,
+            replay_id=replay_json["replay_id"],
+            game_score=game_score,
+            turn_count=replay_json["turn_count"],
+        )
+        replay.spades_score = replay.get_base_spades()
+
+        replays.append(replay)
+    assert len(replays) > 0
+
+    # Compute the max score
+    max_score = max(r.game_score for r in replays)
+    best_turn_count_with_max_score = min(
+        r.turn_count for r in replays if r.game_score == max_score
+    )
+
+    # Award bonus spades
+    for replay in replays:
+        if replay.game_score == max_score:
+            replay.spades_score += 1
+            if replay.turn_count == best_turn_count_with_max_score:
+                replay.spades_score += 1
+
+    # Create the replay objects
+    HanabiReplay.objects.bulk_create(replays, batch_size=25)
+
+    # ... and re-grab them
+    created_replay_data = HanabiReplay.objects.filter(contest=contest).values(
+        "pk", "replay_id", "game_score", "turn_count", "spades_score"
+    )
+    replay_id_to_pk_dict = {
+        replay_json["replay_id"]: replay_json["pk"]
+        for replay_json in created_replay_data
+    }
+
+    # Create the participation objects
+    participations: list[HanabiParticipation] = []
+    for name, replay_id in name_to_replay_id_dict.items():
+        participations.append(
+            HanabiParticipation(
+                player_id=name_to_pk_dict[name],
+                replay_id=replay_id_to_pk_dict[replay_id],
+            )
+        )
+    HanabiParticipation.objects.bulk_create(participations, batch_size=25)
+
+    # Finally, mark the contest as processed
+    contest.processed = True
+    contest.save()
+
+    return JsonResponse(
+        {
+            "replays": list(created_replay_data),
+            "names": name_to_replay_id_dict,
+        }
+    )
+
+
 @csrf_exempt
 @require_POST
 def api(request: HttpRequest) -> JsonResponse:
@@ -478,6 +578,8 @@ def api(request: HttpRequest) -> JsonResponse:
         return invoice_handler(action, data)
     elif action in ("arch_url_update"):
         return arch_url_handler(action, data)
+    elif action in ("hanabi_results"):
+        return hanabi_handler(action, data)
     else:
         return JsonResponse({"error": "No such command"}, status=400)
 

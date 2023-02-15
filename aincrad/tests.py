@@ -7,6 +7,8 @@ from arch.models import Hint, Problem
 from core.factories import SemesterFactory, UnitFactory
 from dashboard.factories import PSetFactory
 from evans_django_tools.testsuite import EvanTestCase
+from hanabi.factories import HanabiContestFactory, HanabiPlayerFactory
+from hanabi.models import HanabiParticipation, HanabiReplay
 from payments.factories import PaymentLogFactory
 from roster.factories import InvoiceFactory, StudentFactory, UnitInquiryFactory
 from roster.models import Invoice, Student
@@ -404,3 +406,135 @@ class TestAincrad(EvanTestCase):
             Problem.objects.get(puid="19USEMO6").hyperlink,
             "https://aops.com/community/p15425714",
         )
+
+    def test_hanabi_contest(self) -> None:
+        HANABI_PLAYERS = (
+            "alsodqed",
+            "anotherplayer1",
+            "dqed",
+            "dupe1",
+            "dupe2",
+            "dupe3",
+            "player1",
+            "player2",
+            "player3",
+            "runnerup1",
+            "runnerup2",
+            "winner1",
+            "winner2",
+            "winner3",
+        )
+        for u in HANABI_PLAYERS:
+            HanabiPlayerFactory.create(hanab_username=u)
+        contest = HanabiContestFactory.create(
+            variant_id=1,
+            variant_name="4 Suits",
+            num_suits=4,
+        )
+
+        resp = self.assertPost20X(
+            "api",
+            json={
+                "action": "hanabi_results",
+                "pk": contest.pk,
+                "replays": [
+                    {
+                        "players": ["winner1", "winner2", "winner3"],
+                        "turn_count": 42,
+                        "game_score": 20,
+                        "replay_id": 812,
+                    },
+                    {
+                        "players": ["runnerup1", "runnerup2", "dqed"],
+                        "turn_count": 44,
+                        "game_score": 20,
+                        "replay_id": 811,
+                    },
+                    {
+                        "players": ["player3", "player2", "player1"],
+                        "turn_count": 45,
+                        "game_score": 15,
+                        "replay_id": 271,
+                    },
+                    {
+                        "players": ["dupe1", "dupe2", "dupe3"],
+                        "turn_count": 46,
+                        "game_score": 13,
+                        "replay_id": 920989,
+                    },
+                    {
+                        "players": ["dupe1", "dupe2", "dupe3"],
+                        "turn_count": 46,
+                        "game_score": 12,
+                        "replay_id": 920982,
+                    },
+                    {
+                        "players": ["alsodqed", "anotherplayer1", "dqed"],
+                        "turn_count": 8,
+                        "game_score": 1,
+                        "replay_id": 798,
+                    },
+                    {
+                        "players": ["dupe1", "dupe2", "dupe3"],
+                        "turn_count": 28,
+                        "game_score": 7,
+                        "replay_id": 920998,
+                    },
+                    {
+                        "players": ["dupe2", "alsodqed", "dupe3"],
+                        "turn_count": 43,
+                        "game_score": 11,
+                        "replay_id": 921020,
+                    },
+                ],
+                "token": EXAMPLE_PASSWORD,
+            },
+        )
+        self.assertEqual(
+            {r["replay_id"] for r in resp.json()["replays"]},
+            {798, 811, 812, 271},
+        )
+        self.assertEqual(len(resp.json()["names"]), 9)
+        self.assertAlmostEqual(
+            HanabiReplay.objects.get(replay_id=812).spades_score, 4.0
+        )
+        self.assertAlmostEqual(
+            HanabiReplay.objects.get(replay_id=811).spades_score, 3.0
+        )
+        self.assertAlmostEqual(
+            HanabiReplay.objects.get(replay_id=271).spades_score, 0.6328125
+        )
+        self.assertEqual(HanabiParticipation.objects.all().count(), 9)
+        self.assertEqual(
+            HanabiParticipation.objects.filter(replay__replay_id=812).count(), 3
+        )
+        self.assertEqual(
+            HanabiParticipation.objects.filter(replay__replay_id=811).count(), 2
+        )
+        self.assertEqual(
+            HanabiParticipation.objects.filter(replay__replay_id=271).count(), 3
+        )
+        self.assertEqual(
+            HanabiParticipation.objects.filter(replay__replay_id=798).count(), 1
+        )
+        self.assertEqual(
+            set(
+                HanabiParticipation.objects.all().values_list(
+                    "player__hanab_username", flat=True
+                )
+            ),
+            {
+                "anotherplayer1",
+                "player1",
+                "player2",
+                "player3",
+                "runnerup1",
+                "runnerup2",
+                "winner1",
+                "winner2",
+                "winner3",
+            },
+        )
+
+        contest.refresh_from_db()
+        self.assertTrue(contest.processed)

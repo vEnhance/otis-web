@@ -98,6 +98,10 @@ class HanabiReplay(models.Model):
     def get_absolute_url(self) -> str:
         return f"https://hanab.live/replay/{self.replay_id}"
 
+    def get_base_spades(self) -> float:
+        num_suits = self.contest.num_suits
+        return 2 * (self.game_score / (5 * num_suits)) ** num_suits
+
 
 class HanabiParticipation(models.Model):
     player = models.ForeignKey(HanabiPlayer, on_delete=models.CASCADE)
