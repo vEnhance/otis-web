@@ -88,7 +88,9 @@ class HanabiReplay(models.Model):
     )
     game_score = models.PositiveIntegerField(help_text="The game score.")
     turn_count = models.PositiveIntegerField(help_text="The number of turns elapsed.")
-    spades_score = models.FloatField(help_text="The number of spades obtained.")
+    spades_score = models.FloatField(
+        help_text="The number of spades obtained.", null=True, blank=True
+    )
 
     def __str__(self) -> str:
         return f"Replay #{self.replay_id}"
