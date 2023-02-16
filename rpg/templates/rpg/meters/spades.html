@@ -151,7 +151,7 @@
         <tr>
           <td style="color:{{ meters.spades.color }};">
             <b>
-              +{{ replay.spades_score }}{{ meters.spades.unit }}
+              +{{ replay.spades_score|floatformat:2 }}{{ meters.spades.unit }}
             </b>
           </td>
           <td>
