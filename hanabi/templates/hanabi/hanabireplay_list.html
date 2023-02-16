@@ -27,7 +27,7 @@
     </thead>
     <tbody>
       {% for replay in replays %}
-        <tr>
+        <tr {% if replay == own_replay %}class="table-success fw-bold"{% endif %}>
           <td>
             <a href="{{ replay.get_absolute_url }}">{{ replay.replay_id }}</a>
           </td>
