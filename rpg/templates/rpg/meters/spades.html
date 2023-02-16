@@ -147,6 +147,21 @@
         </tr>
       {% endfor %}
       {# TODO hints #}
+      {% for replay in hanabi_replays %}
+        <tr>
+          <td style="color:{{ meters.spades.color }};">
+            <b>
+              +{{ replay.spades_score }}{{ meters.spades.unit }}
+            </b>
+          </td>
+          <td>
+            <a href="{{ replay.contest.get_absolute_url }}">{{ replay.contest }}</a>
+          </td>
+          <td>
+            {{ replay.contest.end_date }}
+          </td>
+        </tr>
+      {% endfor %}
     </tbody>
   </table>
 {% endblock meter-content %}
