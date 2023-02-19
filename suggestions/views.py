@@ -131,6 +131,6 @@ class SuggestionQueueList(LoginRequiredMixin, ListView[ProblemSuggestion]):
     context_object_name = "suggestions"
 
     def get_queryset(self) -> QuerySet[ProblemSuggestion]:
-        return ProblemSuggestion.objects.filter(
-            status__in=("SUGG_EDIT", "SUGG_NEW")
-        ).order_by("updated_at")
+        return ProblemSuggestion.objects.filter(status="SUGG_NEW").order_by(
+            "updated_at"
+        )
