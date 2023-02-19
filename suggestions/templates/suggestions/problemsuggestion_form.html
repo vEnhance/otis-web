@@ -239,7 +239,7 @@
             }
             return true;
         }
-        
+
         $("#id_statement").on("input", (e) => {
             $("#statement_warning").toggle(!checkLineLength(e.target.value));
             if (!autorender_enabled || !render_enabled) return;
