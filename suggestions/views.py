@@ -51,8 +51,6 @@ class ProblemSuggestionCreate(
         return initial
 
     def form_valid(self, form: BaseModelForm[ProblemSuggestion]):
-        if not isinstance(self.request.user, User):
-            raise PermissionDenied("Please log in")
         form.instance.user = self.request.user
         messages.success(
             self.request,
@@ -92,8 +90,6 @@ class ProblemSuggestionUpdate(
 
     def get_context_data(self, **kwargs: Any):
         context = super().get_context_data(**kwargs)
-        if not isinstance(self.request.user, User):
-            raise PermissionDenied("Please log in.")
         if not (self.request.user.is_staff or self.request.user == self.object.user):
             raise PermissionDenied("Logged-in user cannot view this suggestion")
 
@@ -119,8 +115,6 @@ class ProblemSuggestionList(LoginRequiredMixin, ListView[ProblemSuggestion]):
     context_object_name = "problem_suggestions"
 
     def get_queryset(self):
-        if not isinstance(self.request.user, User):
-            raise PermissionDenied("Please log in.")
         queryset = ProblemSuggestion.objects.filter(user=self.request.user)
         queryset = queryset.order_by("status", "created_at")
         return queryset
