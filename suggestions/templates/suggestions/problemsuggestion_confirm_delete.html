@@ -8,7 +8,9 @@
   <a href="{{ suggestion.get_absolute_url }}">&lt;&lt; Go back to suggestion</a>
   <ul>
     <li>Source: {{ suggestion.source }}</li>
-    <li>Unit: {{ suggestion.unit.group.name }}<sup>{{ suggestion.unit.code }}</sup></li>
+    <li>
+      Unit: {{ suggestion.unit.group.name }}<sup>{{ suggestion.unit.code }}</sup>
+    </li>
     <li>Hyperlink: {{ suggestion.hyperlink }}</li>
   </ul>
 {% endblock layout-content %}

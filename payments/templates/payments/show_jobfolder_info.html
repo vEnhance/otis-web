@@ -3,7 +3,6 @@
 {% else %}
   <p class="fst-italic">No description provided.</p>
 {% endif %}
-
 {% if jobfolder.max_pending != None %}
   <p>
     Limited to at most
@@ -16,23 +15,16 @@
     <strong>{{ jobfolder.max_total }} total tasks</strong> per person.
   </p>
 {% endif %}
-
 {% if request.user.is_superuser %}
-<div class="alert alert-secondary">
-  <p>
-    <a href="{% url "job-list" jobfolder.slug %}">
-      🪟 View folder
-    </a>
-  </p>
-  <p>
-    <a href="{% url "admin:payments_jobfolder_change" jobfolder.pk %}">
-      ✏️ Edit folder (pk={{ jobfolder.pk }})
-    </a>
-  </p>
-  <p>
-    <a href="{% url "job-inactive" jobfolder.slug %}">
-      😡 Show inactive workers
-    </a>
-  </p>
-</div>
+  <div class="alert alert-secondary">
+    <p>
+      <a href="{% url "job-list" jobfolder.slug %}">🪟 View folder</a>
+    </p>
+    <p>
+      <a href="{% url "admin:payments_jobfolder_change" jobfolder.pk %}">✏️ Edit folder (pk={{ jobfolder.pk }})</a>
+    </p>
+    <p>
+      <a href="{% url "job-inactive" jobfolder.slug %}">😡 Show inactive workers</a>
+    </p>
+  </div>
 {% endif %}

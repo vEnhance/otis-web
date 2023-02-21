@@ -25,13 +25,15 @@
         </tr>
       {% endfor %}
     </table>
-    <p>You have earned a total of <b>{{ total|floatformat:2 }}♠</b> across {{ guesses.count }} markets.</p>
+    <p>
+      You have earned a total of <b>{{ total|floatformat:2 }}♠</b> across {{ guesses.count }} markets.
+    </p>
     <p>Average spades per market: {{ avg|floatformat:2 }}♠.</p>
   {% endif %}
   <p>
     <a href="{% url "market-list" %}">Show markets from this year</a>
   </p>
   <p>
-  <a href="{% url "market-list-past" %}">Show markets from past years</a>
+    <a href="{% url "market-list-past" %}">Show markets from past years</a>
   </p>
 {% endblock layout-content %}
