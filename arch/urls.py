@@ -26,7 +26,7 @@ urlpatterns = [
     path(
         r"<str:puid>/otis/",
         views.HintList.as_view(),
-        name="hint-list",
+        name="hint-list-check",
         kwargs={"create_if_missing": True},
     ),
     path(r"<str:puid>/solution", views.view_solution, name="view-solution"),

@@ -5,7 +5,6 @@ import reversion
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied
 from django.core.files.storage import default_storage
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
@@ -84,10 +83,6 @@ class HintList(VerifiedRequiredMixin, ListView[Hint]):
         context["problem"] = self.problem
         context["statement"] = self.problem.get_statement()
 
-        vote = Vote.objects.filter(user=self.request.user, problem=self.problem).first()
-
-        if vote is not None:
-            context["vote"] = vote.niceness
         return context
 
 
@@ -274,8 +269,6 @@ class VoteCreate(
     template_name = "arch/vote_form.html"
 
     def setup(self, request: HttpRequest, *args: Any, **kwargs: Any):
-        if not isinstance(request.user, User):
-            raise PermissionDenied("Need to log in")
         puid = kwargs.pop("puid")
         super().setup(request, *args, **kwargs)
         self.problem = get_object_or_404(Problem, puid=puid)
