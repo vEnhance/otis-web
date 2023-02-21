@@ -169,6 +169,7 @@ class ProblemUpdate(
             logger.log(
                 ACTION_LOG_LEVEL,
                 f"{form.instance.puid} linked to {form.instance.hyperlink}.",
+                extra={"request": self.request},
             )
         return super().form_valid(form)
 
