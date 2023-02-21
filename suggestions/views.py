@@ -90,6 +90,7 @@ class ProblemSuggestionUpdate(
 
     def get_context_data(self, **kwargs: Any):
         context = super().get_context_data(**kwargs)
+        assert isinstance(self.request.user, User)
         if not (self.request.user.is_staff or self.request.user == self.object.user):
             raise PermissionDenied("Logged-in user cannot view this suggestion")
 
