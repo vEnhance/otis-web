@@ -165,11 +165,11 @@ class ProblemUpdate(
         return context
 
     def form_valid(self, form: BaseModelForm[Problem]) -> HttpResponse:
-        logger.log(
-            ACTION_LOG_LEVEL,
-            f"{form.instance.puid} was updated; "
-            f"new hyperlink {form.instance.hyperlink}.",
-        )
+        if form.instance.hyperlink:
+            logger.log(
+                ACTION_LOG_LEVEL,
+                f"{form.instance.puid} linked to {form.instance.hyperlink}.",
+            )
         return super().form_valid(form)
 
     def get_success_url(self) -> str:
