@@ -43,7 +43,7 @@
         <td>{{ job.usd_bounty }}</td>
         <td>
           {% if request.user.is_superuser %}
-            <a href="{% url "admin:payments_job_change" job.pk %}">{{ job.assignee }}</a>
+            <a href="{% url "admin:payments_job_change" job.pk %}">{{ job.assignee.user.get_full_name }}</a>
           {% else %}
             {{ job.status }}
           {% endif %}
