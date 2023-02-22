@@ -27,7 +27,7 @@
       <tr {% if job.assignee.user == request.user %}class="table-success fw-bold"{% endif %}>
         <td>
           {% if job.progress == "JOB_VFD" %}
-            ☑️
+            ✅
           {% elif job.progress == "JOB_REV" %}
             🔁
           {% elif job.progress == "JOB_SUB" %}
@@ -35,7 +35,7 @@
           {% elif job.progress == "JOB_NEW" and job.assignee %}
             ⛔
           {% else %}
-            🟢
+            🌟
           {% endif %}
           <a href="{{ job.get_absolute_url }}">{{ job.name }}</a>
         </td>
@@ -53,10 +53,10 @@
   </table>
   <h2>Legend</h2>
   <ul class="list-unstyled">
-    <li>☑️  Completed</li>
+    <li>✅ Completed</li>
     <li>🔁 Revisions requested</li>
     <li>📤 Submitted</li>
     <li>⛔ In progress</li>
-    <li>🟢 Unclaimed</li>
+    <li>🌟 Unclaimed</li>
   </ul>
 {% endblock layout-content %}
