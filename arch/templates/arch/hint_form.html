@@ -57,8 +57,8 @@
         d = document.createElement('div');
         $(d).attr('id', 'content_render')
             .html('')
-            .appendTo(parent) //main div
-
+            .appendTo(parent);
+          
         function checkLineLength(s) {
             lines = s.split("\n");
             for (let i in lines) {
