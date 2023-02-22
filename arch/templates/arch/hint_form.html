@@ -43,7 +43,6 @@
     }
   </style>
 {% endblock css %}
-
 {% block scripts %}
   <script type="text/javascript">
     $(document).ready(function() {
@@ -58,7 +57,7 @@
         $(d).attr('id', 'content_render')
             .html('')
             .appendTo(parent);
-          
+
         function checkLineLength(s) {
             lines = s.split("\n");
             for (let i in lines) {
@@ -71,7 +70,7 @@
         }
 
         $("#id_content").on("input", (e) => {
-          render_content(true);
+            render_content(true);
         });
 
         function render_content(enabled) {
