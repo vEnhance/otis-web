@@ -247,37 +247,31 @@
         }
 
         $("#id_statement").on("input", (e) => {
-            $("#statement_warning").toggle(!checkLineLength(e.target.value));
-            if (!autorender_enabled || !render_enabled) return;
-            $("#statement_render").text(e.target.value);
-            MathJax.typesetPromise([document.querySelector("#statement_render")]);
+            render_statement(autorender_enabled && render_enabled);
         });
 
         $("#id_solution").on("input", (e) => {
-            $("#solution_warning").toggle(!checkLineLength(e.target.value));
-            if (!autorender_enabled || !render_enabled) return;
-            $("#solution_render").text(e.target.value);
-            MathJax.typesetPromise([document.querySelector("#solution_render")]);
+            render_solution(autorender_enabled && render_enabled);
         });
 
-        function render_statement() {
+        function render_statement(enabled) {
             const s = $("#id_statement").val();
             $("#statement_warning").toggle(!checkLineLength(s));
-            if (!render_enabled) return;
+            if (!enabled) return;
             $("#statement_render").text(s);
             MathJax.typeset([document.querySelector("#statement_render")]);
         }
 
-        function render_solution() {
+        function render_solution(enabled) {
             const s = $("#id_solution").val();
             $("#solution_warning").toggle(!checkLineLength(s));
-            if (!render_enabled) return;
+            if (!enabled) return;
             $("#solution_render").text(s);
             MathJax.typeset([document.querySelector("#solution_render")]);
         }
 
-        $("#id_statement").blur(render_statement);
-        $("#id_solution").blur(render_solution);
+        $("#id_statement").blur(render_statement(render_enabled));
+        $("#id_solution").blur(render_solution(render_enabled));
 
         $("#statement_warning").toggle(!checkLineLength($("#id_statement").val()));
         $("#solution_warning").toggle(!checkLineLength($("#id_solution").val()));
