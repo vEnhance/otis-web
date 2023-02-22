@@ -233,19 +233,19 @@ class MarketCreateView(
         # fmt: on
 
         if max_start_date is None:
-            start_date = timezone.now() + timezone.timedelta(days=7)
+            start_date = timezone.now() + datetime.timedelta(days=7)
         else:
             start_date = max(
-                timezone.now() + timezone.timedelta(hours=1),
-                max_start_date + timezone.timedelta(days=7),
+                timezone.now() + datetime.timedelta(hours=1),
+                max_start_date + datetime.timedelta(days=7),
             )
         form.instance.start_date = start_date
         if max_end_date is None:
-            end_date = timezone.now() + timezone.timedelta(days=10)
+            end_date = timezone.now() + datetime.timedelta(days=10)
         else:
             end_date = max(
-                timezone.now() + timezone.timedelta(days=3),
-                max_end_date + timezone.timedelta(days=7),
+                timezone.now() + datetime.timedelta(days=3),
+                max_end_date + datetime.timedelta(days=7),
             )
         form.instance.end_date = end_date
 
