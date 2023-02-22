@@ -241,7 +241,7 @@ class WorkerTest(EvanTestCase):
 
         a = queryset.get(user=alice.user)
         self.assertEqual(a.latest_update.day, 4)  # type: ignore
-        self.assertEqual(a.oldest_undone.day, 3)  # type: ignore
+        self.assertEqual(a.oldest_undone.day, 2)  # type: ignore
         self.assertEqual(a.num_completed, 1)  # type: ignore
         self.assertEqual(a.num_total, 4)  # type: ignore
 

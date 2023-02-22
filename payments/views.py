@@ -342,16 +342,20 @@ class InactiveWorkerList(SuperuserRequiredMixin, ListView[Worker]):
 
     def get_queryset(self) -> QuerySet[Worker]:
         folder = self.jobfolder
+        STATUSES = ("JOB_NEW", "JOB_REV")
+
         queryset = Worker.objects.filter(
-            Exists("job", filter=Q(progress="JOB_NEW", folder=folder))
+            Exists("job", filter=Q(progress__in=STATUSES, folder=folder))
         )
         queryset = queryset.annotate(
             latest_update=SubqueryMax("job__updated_at", filter=Q(folder=folder)),
             oldest_undone=SubqueryMin(
-                "job__updated_at", filter=Q(progress="JOB_NEW", folder=folder)
+                "job__updated_at",
+                filter=Q(progress__in=STATUSES, folder=folder),
             ),
             num_completed=SubqueryCount(
-                "job", filter=Q(progress="JOB_VFD", folder=folder)
+                "job",
+                filter=Q(progress="JOB_VFD", folder=folder),
             ),
             num_total=SubqueryCount("job", filter=Q(folder=folder)),
         )
