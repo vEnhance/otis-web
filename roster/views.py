@@ -451,16 +451,15 @@ def update_profile(request: AuthHttpRequest) -> HttpResponse:
         if form.is_valid():
             new_email = form.cleaned_data["email"]
             user: User = form.save()
+            user.save()
             if old_email != new_email:
                 logger.log(
                     SUCCESS_LOG_LEVEL,
                     f"User {user.get_full_name()} switched to {new_email}",
                     extra={"request": request},
                 )
-                user.save()
                 mailchimp_subscribe(request)
-            else:
-                user.save()
+
             messages.success(request, "Your information has been updated.")
     else:
         form = UserForm(instance=request.user)
