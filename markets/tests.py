@@ -1,3 +1,5 @@
+import datetime
+
 from django.utils import timezone
 from freezegun import freeze_time
 
@@ -14,18 +16,18 @@ class MarketModelTests(EvanTestCase):
     def setUpClass(cls):
         super().setUpClass()
         MarketFactory.create(
-            start_date=timezone.datetime(2000, 1, 1, tzinfo=UTC),
-            end_date=timezone.datetime(2000, 1, 3, tzinfo=UTC),
+            start_date=datetime.datetime(2000, 1, 1, tzinfo=UTC),
+            end_date=datetime.datetime(2000, 1, 3, tzinfo=UTC),
             slug="m-one",  # ended a long time ago
         )
         MarketFactory.create(
-            start_date=timezone.datetime(2020, 1, 1, tzinfo=UTC),
-            end_date=timezone.datetime(2020, 1, 3, tzinfo=UTC),
+            start_date=datetime.datetime(2020, 1, 1, tzinfo=UTC),
+            end_date=datetime.datetime(2020, 1, 3, tzinfo=UTC),
             slug="m-two",  # active
         )
         MarketFactory.create(
-            start_date=timezone.datetime(2050, 1, 1, tzinfo=UTC),
-            end_date=timezone.datetime(2050, 1, 3, tzinfo=UTC),
+            start_date=datetime.datetime(2050, 1, 1, tzinfo=UTC),
+            end_date=datetime.datetime(2050, 1, 3, tzinfo=UTC),
             slug="m-three",  # future
         )
 
@@ -66,8 +68,8 @@ class MarketTests(EvanTestCase):
     def setUpClass(cls):
         super().setUpClass()
         MarketFactory(
-            start_date=timezone.datetime(2050, 5, 1, 0, 0, 0, tzinfo=UTC),
-            end_date=timezone.datetime(2050, 9, 30, 23, 59, 59, tzinfo=UTC),
+            start_date=datetime.datetime(2050, 5, 1, 0, 0, 0, tzinfo=UTC),
+            end_date=datetime.datetime(2050, 9, 30, 23, 59, 59, tzinfo=UTC),
             weight=2,
             alpha=2,
             slug="guess-my-ssn",

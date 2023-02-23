@@ -1,3 +1,4 @@
+import datetime
 import os
 from io import StringIO
 
@@ -32,7 +33,7 @@ class TestPortal(EvanTestCase):
     def test_portal_invoice_redirect(self):
         semester = SemesterFactory.create(
             show_invoices=True,
-            first_payment_deadline=timezone.datetime(2021, 7, 1, tzinfo=timezone.utc),
+            first_payment_deadline=datetime.datetime(2021, 7, 1, tzinfo=timezone.utc),
         )
         alice = StudentFactory.create(semester=semester)
         self.login(alice)
@@ -65,27 +66,27 @@ class TestPortal(EvanTestCase):
         StudentFactory.create(user=alice.user, semester=prevSemester)
 
         test = TestFactory.create(
-            start_date=timezone.datetime(2021, 1, 1, tzinfo=timezone.utc),
-            due_date=timezone.datetime(2021, 12, 31, tzinfo=timezone.utc),
+            start_date=datetime.datetime(2021, 1, 1, tzinfo=timezone.utc),
+            due_date=datetime.datetime(2021, 12, 31, tzinfo=timezone.utc),
             family="Waltz",
             number=1,
         )
 
         quiz = QuizFactory.create(
-            start_date=timezone.datetime(2021, 1, 1, tzinfo=timezone.utc),
-            due_date=timezone.datetime(2021, 12, 31, tzinfo=timezone.utc),
+            start_date=datetime.datetime(2021, 1, 1, tzinfo=timezone.utc),
+            due_date=datetime.datetime(2021, 12, 31, tzinfo=timezone.utc),
             family="Waltz",
             number=1,
         )
 
         market = MarketFactory.create(
-            start_date=timezone.datetime(2021, 1, 1, tzinfo=timezone.utc),
-            end_date=timezone.datetime(2021, 12, 31, tzinfo=timezone.utc),
+            start_date=datetime.datetime(2021, 1, 1, tzinfo=timezone.utc),
+            end_date=datetime.datetime(2021, 12, 31, tzinfo=timezone.utc),
         )
 
         download = SemesterDownloadFileFactory.create(
             semester=semester,
-            created_at=timezone.datetime(2021, 6, 25, tzinfo=timezone.utc),
+            created_at=datetime.datetime(2021, 6, 25, tzinfo=timezone.utc),
         )
 
         # assistant does not cause level up message
@@ -163,7 +164,7 @@ class TestPSet(EvanTestCase):
 
         semester = SemesterFactory.create(
             show_invoices=True,
-            first_payment_deadline=timezone.datetime(2021, 7, 1, tzinfo=timezone.utc),
+            first_payment_deadline=datetime.datetime(2021, 7, 1, tzinfo=timezone.utc),
         )
         alice = StudentFactory.create(semester=semester)
         self.login(alice)
@@ -379,7 +380,7 @@ class TestPSet(EvanTestCase):
     def test_pset_list_permission(self):
         semester = SemesterFactory.create(
             show_invoices=True,
-            first_payment_deadline=timezone.datetime(2021, 7, 1, tzinfo=timezone.utc),
+            first_payment_deadline=datetime.datetime(2021, 7, 1, tzinfo=timezone.utc),
         )
         alice = StudentFactory.create(semester=semester)
         self.login(alice)

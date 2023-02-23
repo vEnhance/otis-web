@@ -1,3 +1,5 @@
+import datetime
+
 from django.conf import settings
 from django.contrib.auth.models import Group, User
 from django.db.models.query import QuerySet
@@ -99,8 +101,8 @@ class RosterTest(EvanTestCase):
     def test_delinquency(self) -> None:
         semester: Semester = SemesterFactory.create(
             show_invoices=True,
-            first_payment_deadline=timezone.datetime(2022, 9, 21, tzinfo=timezone.utc),
-            most_payment_deadline=timezone.datetime(2023, 1, 21, tzinfo=timezone.utc),
+            first_payment_deadline=datetime.datetime(2022, 9, 21, tzinfo=timezone.utc),
+            most_payment_deadline=datetime.datetime(2023, 1, 21, tzinfo=timezone.utc),
         )
 
         alice: Student = StudentFactory.create(semester=semester)
@@ -126,7 +128,7 @@ class RosterTest(EvanTestCase):
         with freeze_time("2022-10-15", tz_offset=0):
             self.assertEqual(alice.payment_status, 3)
             self.assertTrue(alice.is_delinquent)
-            invoice.forgive_date = timezone.datetime(2022, 10, 31, tzinfo=timezone.utc)
+            invoice.forgive_date = datetime.datetime(2022, 10, 31, tzinfo=timezone.utc)
             invoice.save()
             self.assertFalse(alice.is_delinquent)
         with freeze_time("2022-11-15", tz_offset=0):
@@ -157,7 +159,7 @@ class RosterTest(EvanTestCase):
         with freeze_time("2023-02-15", tz_offset=0):
             self.assertEqual(alice.payment_status, 7)
             self.assertTrue(alice.is_delinquent)
-            invoice.forgive_date = timezone.datetime(2023, 2, 28, tzinfo=timezone.utc)
+            invoice.forgive_date = datetime.datetime(2023, 2, 28, tzinfo=timezone.utc)
             invoice.save()
             self.assertFalse(alice.is_delinquent)
         with freeze_time("2023-06-05", tz_offset=0):
@@ -183,7 +185,7 @@ class RosterTest(EvanTestCase):
             self.assertFalse(bob.is_delinquent)
 
         # Now he is affected
-        semester.first_payment_deadline = timezone.datetime(
+        semester.first_payment_deadline = datetime.datetime(
             2023, 1, 28, tzinfo=timezone.utc
         )
         semester.save()
@@ -199,7 +201,7 @@ class RosterTest(EvanTestCase):
             self.assertEqual(bob.payment_status, 4)
             self.assertFalse(bob.is_delinquent)
 
-        semester.most_payment_deadline = timezone.datetime(
+        semester.most_payment_deadline = datetime.datetime(
             2023, 2, 21, tzinfo=timezone.utc
         )
         semester.save()
@@ -370,7 +372,7 @@ class RosterTest(EvanTestCase):
 
     def test_create_student(self) -> None:
         semester: Semester = SemesterFactory.create(
-            one_semester_date=timezone.datetime(2023, 12, 25, tzinfo=timezone.utc),
+            one_semester_date=datetime.datetime(2023, 12, 25, tzinfo=timezone.utc),
         )
 
         container: RegistrationContainer = RegistrationContainerFactory.create(

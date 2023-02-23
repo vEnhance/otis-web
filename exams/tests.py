@@ -1,3 +1,5 @@
+import datetime
+
 from django.test.utils import override_settings
 from django.utils import timezone
 from freezegun import freeze_time
@@ -60,8 +62,8 @@ class ExamTest(EvanTestCase):
             for factory in (TestFactory, QuizFactory):
                 for family in ("Waltz", "Foxtrot"):
                     factory.create(
-                        start_date=timezone.datetime(2020, 1, 1, tzinfo=UTC),
-                        due_date=timezone.datetime(2020, 12, 31, tzinfo=UTC),
+                        start_date=datetime.datetime(2020, 1, 1, tzinfo=UTC),
+                        due_date=datetime.datetime(2020, 12, 31, tzinfo=UTC),
                         family=family,
                         number=1,
                     )
