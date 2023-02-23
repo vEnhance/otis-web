@@ -69,11 +69,9 @@ class RosterTest(EvanTestCase):
 
         messages = [m.message for m in resp.context["messages"]]
         self.assertIn(
-            f"Successfully saved curriculum of {len(values)} units.",
+            "Successfully saved curriculum of 6 units.",
             messages,
         )
-
-        
 
     def test_finalize(self) -> None:
         alice: Student = StudentFactory.create(newborn=True)
@@ -269,7 +267,7 @@ class RosterTest(EvanTestCase):
             )
             self.assertHas(resp, "Petition automatically processed")
 
-        self.assertGet20X("inquiry")
+        self.assertGet20X("inquiry", alice.pk)
 
         self.assertEqual(alice.curriculum.count(), 6)
         self.assertEqual(alice.unlocked_units.count(), 6)
@@ -383,6 +381,32 @@ class RosterTest(EvanTestCase):
         self.assertEqual(alice.curriculum.count(), 9)
         self.assertEqual(alice.unlocked_units.count(), 6)
 
+        bob: Student = StudentFactory.create(
+            semester=SemesterFactory.create(active=False)
+        )
+        self.login(bob)
+        self.assertGetDenied("inquiry", bob.pk)
+
+        carl: Student = StudentFactory.create(enabled=False)
+        self.login(carl)
+        self.assertGetDenied("inquiry", carl.pk)
+
+        dave: Student = StudentFactory.create(newborn=True)
+        self.login(dave)
+        self.assertGetDenied("inquiry", dave.pk)
+
+        invoice_semester = SemesterFactory.create(
+            show_invoices=True,
+            first_payment_deadline=datetime.datetime(2021, 7, 1, tzinfo=timezone.utc),
+        )
+        eve = StudentFactory.create(semester=invoice_semester)
+        self.login(eve)
+        with freeze_time("2021-06-20", tz_offset=0):
+            InvoiceFactory.create(student=eve)
+
+        with freeze_time("2021-07-30", tz_offset=0):
+            self.assertGetDenied("inquiry", eve.pk)
+
     def test_semester_switch(self) -> None:
         semester: Semester = SemesterFactory.create(
             one_semester_date=datetime.datetime(2023, 12, 25, tzinfo=timezone.utc),
@@ -450,18 +474,19 @@ class RosterTest(EvanTestCase):
         self.assertPost40X("instructors")  # staff can't post
 
     def test_username_lookup(self):
-        alice: Student = StudentFactory.create()
+        admin: User = UserFactory.create(is_superuser=True, is_staff=True)
         semester_old: Semester = SemesterFactory.create(end_year=2025)
         semester_new: Semester = SemesterFactory.create(end_year=2026)
         bob: User = UserFactory.create(username="bob")
         StudentFactory.create(user=bob, semester=semester_old)
         bob_new: Student = StudentFactory.create(user=bob, semester=semester_new)
 
-        self.login(alice)
+        self.login(admin)
+        self.assertGetNotFound("username-lookup", "carl")
+
         self.assertRedirects(
             self.get("username-lookup", "bob"),
             bob_new.get_absolute_url(),
-            target_status_code=403,
         )
 
     def test_advance(self):
@@ -482,23 +507,6 @@ class RosterTest(EvanTestCase):
         self.login(assist)
 
         self.assertGet20X("advance", alice.pk)
-
-        resp = self.assertPost20X(
-            "advance",
-            alice.pk,
-            data={
-                "units_to_unlock": [units[3].pk],
-                "units_to_add": [units[3].pk],
-                "units_to_lock": [units[3].pk],
-                "units_to_drop": [units[3].pk],
-            },
-            follow=True,
-        )
-        messages = [m.message for m in resp.context["messages"]]
-        self.assertNotIn(
-            "Successfully updated student.",
-            messages,
-        )
 
         resp = self.assertPost20X(
             "advance",
@@ -538,8 +546,18 @@ class RosterTest(EvanTestCase):
         self.assertEqual(resp.status_code, 503, self.debug_short(resp))
 
         container: RegistrationContainer = RegistrationContainerFactory.create(
-            semester=semester
+            semester=semester, allowed_tracks=""
         )
+
+        resp = self.assertGet20X("register")
+        messages = [m.message for m in resp.context["messages"]]
+        self.assertIn(
+            "The currently active semester isn't accepting registrations right now.",
+            messages,
+        )
+
+        container.allowed_tracks = "C,"
+        container.save()
 
         resp = self.assertGet20X("register")
         messages = [m.message for m in resp.context["messages"]]
@@ -578,9 +596,7 @@ class RosterTest(EvanTestCase):
         agreement2.name = "agreement.pdf"
 
         # invalid post fails
-        self.assertPost20X(
-            "register"
-        )
+        self.assertPost20X("register")
 
         resp = self.assertPost20X(
             "register",
