@@ -1,4 +1,5 @@
 import datetime
+from io import StringIO
 
 from django.conf import settings
 from django.contrib.auth.models import Group, User
@@ -12,6 +13,7 @@ from core.factories import (  # NOQA
     UnitFactory,
     UnitGroupFactory,
     UserFactory,
+    UserProfileFactory,
 )
 from core.models import Semester, Unit, UnitGroup
 from evans_django_tools.testsuite import EvanTestCase
@@ -60,10 +62,18 @@ class RosterTest(EvanTestCase):
             "group-1": [4, 6],
             "group-3": [10, 11, 12],
         }
-        self.post("currshow", alice.pk, data=data)
+        resp = self.post("currshow", alice.pk, data=data)
         self.assertEqual(
             len(get_object_or_404(Student, pk=alice.pk).curriculum.all()), 6
         )
+
+        messages = [m.message for m in resp.context["messages"]]
+        self.assertIn(
+            f"Successfully saved curriculum of {len(values)} units.",
+            messages,
+        )
+
+        
 
     def test_finalize(self) -> None:
         alice: Student = StudentFactory.create(newborn=True)
@@ -258,6 +268,9 @@ class RosterTest(EvanTestCase):
                 },
             )
             self.assertHas(resp, "Petition automatically processed")
+
+        self.assertGet20X("inquiry")
+
         self.assertEqual(alice.curriculum.count(), 6)
         self.assertEqual(alice.unlocked_units.count(), 6)
         self.assertHas(
@@ -370,7 +383,7 @@ class RosterTest(EvanTestCase):
         self.assertEqual(alice.curriculum.count(), 9)
         self.assertEqual(alice.unlocked_units.count(), 6)
 
-    def test_create_student(self) -> None:
+    def test_semester_switch(self) -> None:
         semester: Semester = SemesterFactory.create(
             one_semester_date=datetime.datetime(2023, 12, 25, tzinfo=timezone.utc),
         )
@@ -436,6 +449,263 @@ class RosterTest(EvanTestCase):
         self.login(staff)
         self.assertPost40X("instructors")  # staff can't post
 
+    def test_username_lookup(self):
+        alice: Student = StudentFactory.create()
+        semester_old: Semester = SemesterFactory.create(end_year=2025)
+        semester_new: Semester = SemesterFactory.create(end_year=2026)
+        bob: User = UserFactory.create(username="bob")
+        StudentFactory.create(user=bob, semester=semester_old)
+        bob_new: Student = StudentFactory.create(user=bob, semester=semester_new)
 
-# TODO tests for reg
-# TODO tests for update profile
+        self.login(alice)
+        self.assertRedirects(
+            self.get("username-lookup", "bob"),
+            bob_new.get_absolute_url(),
+            target_status_code=403,
+        )
+
+    def test_advance(self):
+        assist: Assistant = AssistantFactory.create()
+        alice: Student = StudentFactory.create(assistant=assist)
+
+        self.login(alice)
+
+        self.assertGetDenied("advance", alice.pk)
+
+        units: list[UnitGroup] = UnitFactory.create_batch(4)
+
+        # unlock 0, add 1, lock 2, drop 3
+
+        alice.curriculum.set(units[2:4])  # units 3 and 4
+        alice.unlocked_units.set([units[3]])
+
+        self.login(assist)
+
+        self.assertGet20X("advance", alice.pk)
+
+        resp = self.assertPost20X(
+            "advance",
+            alice.pk,
+            data={
+                "units_to_unlock": [units[3].pk],
+                "units_to_add": [units[3].pk],
+                "units_to_lock": [units[3].pk],
+                "units_to_drop": [units[3].pk],
+            },
+            follow=True,
+        )
+        messages = [m.message for m in resp.context["messages"]]
+        self.assertNotIn(
+            "Successfully updated student.",
+            messages,
+        )
+
+        resp = self.assertPost20X(
+            "advance",
+            alice.pk,
+            data={
+                "units_to_unlock": [units[0].pk],
+                "units_to_add": [units[1].pk],
+                "units_to_lock": [units[2].pk],
+                "units_to_drop": [units[3].pk],
+            },
+            follow=True,
+        )
+        messages = [m.message for m in resp.context["messages"]]
+        self.assertIn(
+            "Successfully updated student.",
+            messages,
+        )
+
+        alice.refresh_from_db()
+        self.assertTrue(alice.unlocked_units.contains(units[0]))
+        self.assertFalse(alice.unlocked_units.contains(units[1]))
+        self.assertFalse(alice.unlocked_units.contains(units[3]))
+
+        self.assertTrue(alice.curriculum.contains(units[0]))
+        self.assertTrue(alice.curriculum.contains(units[1]))
+        self.assertFalse(alice.unlocked_units.contains(units[2]))
+        self.assertTrue(alice.curriculum.contains(units[2]))
+        self.assertFalse(alice.curriculum.contains(units[3]))
+
+    def test_reg(self):
+        semester: Semester = SemesterFactory.create()
+
+        alice: User = UserFactory.create()
+        self.login(alice)
+        resp = self.get("register")
+
+        self.assertEqual(resp.status_code, 503, self.debug_short(resp))
+
+        container: RegistrationContainer = RegistrationContainerFactory.create(
+            semester=semester
+        )
+
+        resp = self.assertGet20X("register")
+        messages = [m.message for m in resp.context["messages"]]
+        self.assertNotIn(
+            "The currently active semester isn't accepting registrations right now.",
+            messages,
+        )
+
+        # make pdf
+        agreement = StringIO("agree!")
+        agreement.name = "agreement.pdf"
+
+        # incorrect password
+        resp = self.assertPost20X(
+            "register",
+            data={
+                "given_name": "First",
+                "surname": "Last",
+                "email_address": "myemail@example.com",
+                "passcode": container.passcode + "1",
+                "gender": "O",
+                "parent_email": "myemail@example.com",
+                "graduation_year": 0,
+                "school_name": "Generic School District",
+                "country": "USA",
+                "aops_username": "",
+                "agreement_form": agreement,
+            },
+            follow=True,
+        )
+        messages = [m.message for m in resp.context["messages"]]
+        self.assertIn("Wrong passcode", messages)
+
+        # for some reason the fike variable from earlier can't be reused
+        agreement2 = StringIO("agree!")
+        agreement2.name = "agreement.pdf"
+
+        # invalid post fails
+        self.assertPost20X(
+            "register"
+        )
+
+        resp = self.assertPost20X(
+            "register",
+            data={
+                "given_name": "First",
+                "surname": "Last",
+                "email_address": "myemail@example.com",
+                "passcode": container.passcode,
+                "gender": "O",
+                "parent_email": "myemail@example.com",
+                "graduation_year": 0,
+                "school_name": "Generic School District",
+                "country": "USA",
+                "aops_username": "",
+                "agreement_form": agreement2,
+            },
+            follow=True,
+        )
+
+        messages = [m.message for m in resp.context["messages"]]
+        self.assertIn("Submitted! Sit tight.", messages)
+        self.assertTrue(StudentRegistration.objects.filter(user=alice).exists())
+
+        resp = self.assertPost20X(
+            "register",
+            data={
+                "given_name": "First",
+                "surname": "Last",
+                "email_address": "myemail@example.com",
+                "passcode": container.passcode + "1",
+                "gender": "O",
+                "parent_email": "myemail@example.com",
+                "graduation_year": 0,
+                "school_name": "Generic School District",
+                "country": "USA",
+                "aops_username": "",
+                "agreement_form": agreement,
+            },
+            follow=True,
+        )
+
+        messages = [m.message for m in resp.context["messages"]]
+        self.assertIn(
+            "You have already submitted a decision form for this year!", messages
+        )
+
+    def test_update_profile(self):
+        alice: User = UserFactory.create()
+        self.login(alice)
+
+        self.assertGet20X("update-profile")
+
+        first_name = alice.first_name
+        last_name = alice.last_name
+        email = alice.email
+
+        resp = self.assertPost20X(
+            "update-profile",
+            data={
+                "first_name": "a" + first_name,
+                "last_name": "a" + last_name,
+                "email": "1" + email,
+            },
+        )
+
+        messages = [m.message for m in resp.context["messages"]]
+        self.assertIn("Your information has been updated.", messages)
+
+        alice.refresh_from_db()
+        self.assertTrue("a" + first_name == alice.first_name)
+        self.assertTrue("a" + last_name == alice.last_name)
+        self.assertTrue("1" + email == alice.email)
+
+    def test_mystery(self):
+        mysteryGroup: UnitGroup = UnitGroupFactory.create(name="Mystery")
+        mystery: Unit = UnitFactory(group=mysteryGroup)
+        added_unit: Unit = UnitFactory.create_batch(2)[1]  # next two units
+
+        alice: Student = StudentFactory.create()
+        self.login(alice)
+
+        self.assertResponseDenied(
+            self.client.get("/roster/mystery-unlock/easier/", follow=True)
+        )
+
+        alice.curriculum.set([mystery])
+        alice.unlocked_units.set([mystery])
+
+        self.assertResponse20X(
+            resp := self.client.get("/roster/mystery-unlock/harder/", follow=True)
+        )
+
+        self.assertFalse(alice.curriculum.contains(mystery))
+        self.assertFalse(alice.unlocked_units.contains(mystery))
+
+        self.assertTrue(alice.curriculum.contains(added_unit))
+        self.assertTrue(alice.unlocked_units.contains(added_unit))
+
+        messages = [m.message for m in resp.context["messages"]]
+        self.assertIn(f"Added the unit {added_unit}", messages)
+
+    def test_giga_chart(self):
+        semester: Semester = SemesterFactory.create(show_invoices=True)
+        students: list[Student] = [
+            StudentFactory.create(
+                reg=StudentRegistrationFactory.create(), semester=semester
+            )
+            for _ in range(0, 30)
+        ]
+
+        for student in students:
+            InvoiceFactory.create(student=student)
+            UserProfileFactory.create(user=student.user)
+
+        admin = UserFactory.create(username="admin", is_staff=True, is_superuser=True)
+        self.login(admin)
+
+        resp = self.assertGet20X("giga-chart", "csv", follow=True)
+
+        for format in ["plain", "html"]:
+            resp = self.assertGet20X("giga-chart", format, follow=True)
+            for student in students:
+                for property in [
+                    student.name,
+                    student.user.email,
+                    student.reg.parent_email,
+                ]:
+                    self.assertContains(resp, property)

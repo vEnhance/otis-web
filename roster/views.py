@@ -150,6 +150,7 @@ def advance(request: HttpRequest, student_pk: int) -> Any:
     student = get_student_by_pk(request, student_pk, requires_edit=True)
     if request.method == "POST":
         form = AdvanceForm(request.POST, student=student)
+
         if form.is_valid():
             data = form.cleaned_data
             student.unlocked_units.add(*data["units_to_unlock"])
@@ -383,13 +384,14 @@ def register(request: AuthHttpRequest) -> HttpResponse:
             passcode = form.cleaned_data["passcode"]
             if passcode.lower() != container.passcode.lower():
                 messages.error(request, message="Wrong passcode")
-            elif form.cleaned_data.get(
-                "track", "C"
-            ) not in container.allowed_tracks.split(","):
-                messages.error(
-                    request,
-                    message="That track is not currently accepting registrations.",
-                )
+            # Does not occur rn
+            # elif form.cleaned_data.get(
+            #    "track", "C"
+            # ) not in container.allowed_tracks.split(","):
+            #    messages.error(
+            #        request,
+            #        message="That track is not currently accepting registrations.",
+            #    )
             else:
                 registration = form.save(commit=False)
                 registration.container = container
@@ -451,16 +453,16 @@ def update_profile(request: AuthHttpRequest) -> HttpResponse:
         if form.is_valid():
             new_email = form.cleaned_data["email"]
             user: User = form.save()
+            user.save()
+
             if old_email != new_email:
                 logger.log(
                     SUCCESS_LOG_LEVEL,
                     f"User {user.get_full_name()} switched to {new_email}",
                     extra={"request": request},
                 )
-                user.save()
                 mailchimp_subscribe(request)
-            else:
-                user.save()
+
             messages.success(request, "Your information has been updated.")
     else:
         form = UserForm(instance=request.user)
