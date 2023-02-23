@@ -71,7 +71,7 @@ from .models import (  # NOQA
 logger = logging.getLogger(__name__)
 
 
-@login_required
+@staff_member_required
 def username_lookup(request: HttpRequest, username: str) -> HttpResponse:
     queryset = Student.objects.filter(user__username=username).order_by(
         "-semester__end_year"
