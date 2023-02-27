@@ -11,16 +11,42 @@
     <h2 class="alert-heading">Advice for writing hints</h2>
     <p>
       Hints should get solvers un-stuck.
-      If someone reads all the hints on ARCH and still cannot finish,
-      then the hints didn't do their job.
+      If someone isn't done after reading all the hints on ARCH, we've failed.
       So, try to be pretty generous, rather than subtle.
     </p>
     <p>
-      In particular, <strong>prefer explicit instructions over vague pointers</strong>:
-      for example, instead of writing just "use generating functions", prefer
-      "construct a generating function $F(X)$ such that the coefficients of $F(X)^2$
-      match the left-hand sum".
+      In particular, <strong>prefer explicit instructions over vague pointers</strong>.
+      Taking entire paragraphs from the solution is not only OK,
+      but much better than cryptic one-sentence puzzles. Examples:
     </p>
+    <ul>
+      <li>
+        <p>
+          <strong>Very bad</strong>:
+          "what technique is useful for sum-sets?".
+        </p>
+        <p>This is closer to an additional puzzle than a hint.</p>
+      </li>
+      <li>
+        <p>
+          <strong>Bad</strong>: "use generating functions".
+        </p>
+        <p>
+          This at least mentions the correct technique, but says nothing
+          about how to set it up or why it's relevant.
+        </p>
+      </li>
+      <li>
+        <p>
+          <strong>Better</strong>: "Construct a generating function $F(X)$
+          such that the coefficients of $F(X)^2$ match the left-hand sum".
+        </p>
+        <p>
+          This is an explicit instruction. The solver is unambiguously told
+          what the exact next step should be.
+        </p>
+      </li>
+    </ul>
   </div>
   {% include "generic_form.html" %}
   <hr />
