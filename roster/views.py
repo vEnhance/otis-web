@@ -611,10 +611,7 @@ def giga_chart(request: HttpRequest, format_as: str) -> HttpResponse:
     elif format_as == "plain":
         return HttpResponse(pt.get_string(title=title))
     elif format_as == "html":
-        context = { 
-            "title": title,
-            "table": pt.get_html_string()
-        }
+        context = {"title": title, "table": pt.get_html_string()}
         return render(request, "roster/gigachart.html", context)
     else:
         raise NotImplementedError(f"Format {format_as} not implemented yet")
