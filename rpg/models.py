@@ -84,6 +84,9 @@ class Achievement(models.Model):
 class Level(models.Model):
     threshold = models.IntegerField(unique=True, help_text="The number of the level")
     name = models.CharField(max_length=128, help_text="The name of the level")
+    alttext = models.TextField(
+        max_length=255, help_text="A memorable text that is displayed", blank=True
+    )
 
     class Meta:
         db_table = "dashboard_level"

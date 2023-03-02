@@ -26,6 +26,10 @@
     {% for level in obtained_levels %}
       <li class="list-group-item">
         <strong>Level {{ level.threshold }}</strong> {{ level.name }}
+        {% if level.alttext %}
+          <hr />
+          <p class="fst-italic" style="white-space:pre">{{ level.alttext }}</p>
+        {% endif %}
       </li>
     {% endfor %}
   </ul>
