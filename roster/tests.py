@@ -55,6 +55,24 @@ class RosterTest(EvanTestCase):
             self.get("currshow", alice.pk), text="you are not an instructor"
         )
 
+        invalid_data = {
+            "group-0": [
+                "invalid",
+            ],
+            "group-1": [4, 6],
+            "group-3": [10, 11, 12],
+        }
+        resp = self.post("currshow", alice.pk, data=invalid_data)
+        self.assertNotEqual(
+            len(get_object_or_404(Student, pk=alice.pk).curriculum.all()), 6
+        )
+
+        messages = [m.message for m in resp.context["messages"]]
+        self.assertNotIn(
+            "Successfully saved curriculum of 6 units.",
+            messages,
+        )
+
         data = {
             "group-0": [
                 1,
@@ -255,6 +273,18 @@ class RosterTest(EvanTestCase):
         alice: Student = StudentFactory.create(assistant=firefly)
         units: list[Unit] = UnitFactory.create_batch(20)
         self.login(alice)
+
+        invalid_resp = self.post(
+            "inquiry",
+            alice.pk,
+            data={
+                "unit": "invalid",
+                "action_type": "INQ_ACT_UNLOCK",
+                "explanation": "hi",
+            },
+        )
+        self.assertNotHas(invalid_resp, "Petition automatically processed")
+
         for i in range(6):
             resp = self.post(
                 "inquiry",
@@ -508,6 +538,23 @@ class RosterTest(EvanTestCase):
 
         self.assertGet20X("advance", alice.pk)
 
+        invalid_resp = self.assertPost20X(
+            "advance",
+            alice.pk,
+            data={
+                "units_to_unlock": ["invalid"],
+                "units_to_add": [units[1].pk],
+                "units_to_lock": [units[2].pk],
+                "units_to_drop": [units[3].pk],
+            },
+            follow=True,
+        )
+        messages = [m.message for m in invalid_resp.context["messages"]]
+        self.assertNotIn(
+            "Successfully updated student.",
+            messages,
+        )
+
         resp = self.assertPost20X(
             "advance",
             alice.pk,
@@ -558,6 +605,19 @@ class RosterTest(EvanTestCase):
 
         container.allowed_tracks = "C,"
         container.save()
+
+        resp = self.assertGet20X("register")
+        messages = [m.message for m in resp.context["messages"]]
+        self.assertNotIn(
+            "The currently active semester isn't accepting registrations right now.",
+            messages,
+        )
+
+        # test old reg
+        old_sem = SemesterFactory.create(active=False)
+        StudentRegistrationFactory.create(
+            user=alice, container=RegistrationContainerFactory.create(semester=old_sem)
+        )
 
         resp = self.assertGet20X("register")
         messages = [m.message for m in resp.context["messages"]]
@@ -652,6 +712,30 @@ class RosterTest(EvanTestCase):
         first_name = alice.first_name
         last_name = alice.last_name
         email = alice.email
+
+        invalid_resp = self.assertPost20X(
+            "update-profile",
+            data={
+                "first_name": "a" + first_name,
+                "last_name": "a" + last_name,
+                "email": "invalid_Email!!",
+            },
+        )
+
+        messages = [m.message for m in invalid_resp.context["messages"]]
+        self.assertNotIn("Your information has been updated.", messages)
+
+        same_email_resp = self.assertPost20X(
+            "update-profile",
+            data={
+                "first_name": "a" + first_name,
+                "last_name": "a" + last_name,
+                "email": email,
+            },
+        )
+
+        messages = [m.message for m in same_email_resp.context["messages"]]
+        self.assertIn("Your information has been updated.", messages)
 
         resp = self.assertPost20X(
             "update-profile",
