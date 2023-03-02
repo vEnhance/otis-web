@@ -596,26 +596,25 @@ def giga_chart(request: HttpRequest, format_as: str) -> HttpResponse:
 
     pt = PrettyTable()
     pt.field_names = header_row
-    title = f"OTIS Gigi-Chart ({where}) generated {timestamp}"
+    title = f"OTIS Giga-Chart ({where}) generated {timestamp}"
     for row in rows:
         pt.add_row(row)
 
     format_as = format_as.lower()
     if format_as == "csv":
         filename = f"otis-{where}-{timestamp}.csv"
-        response = HttpResponse(
+        return HttpResponse(
             content=pt.get_csv_string(),
             content_type="text/csv",
             headers={"Content-Disposition": f'attachment; filename="{filename}"'},
         )
     elif format_as == "plain":
-        response = HttpResponse(pt.get_string(title=title))
+        return HttpResponse(pt.get_string(title=title))
     elif format_as == "html":
-        response = HttpResponse(pt.get_html_string(title=title))
+        context = {"title": title, "table": pt.get_html_string()}
+        return render(request, "roster/gigachart.html", context)
     else:
         raise NotImplementedError(f"Format {format_as} not implemented yet")
-
-    return response
 
 
 class StudentAssistantList(StaffuserRequiredMixin, ListView[Student]):
