@@ -48,7 +48,7 @@ class UnitGroupFactory(DjangoModelFactory):
     name = UniqueFaker("bs")
     slug = UniqueFaker("slug")
     description = Faker("catch_phrase")
-    subject = FuzzyChoice(UnitGroup.SUBJECT_CHOICES)
+    subject = FuzzyChoice([subject[0] for subject in UnitGroup.SUBJECT_CHOICES])
 
 
 class UnitFactory(DjangoModelFactory):

@@ -25,6 +25,7 @@ class AchievementFactory(DjangoModelFactory):
     name = Faker("job")
     image = ImageField(filename="TESTING_achievement_icon.png")
     description = UniqueFaker("sentence")
+    solution = Faker("sentence")
 
 
 class LevelFactory(DjangoModelFactory):
@@ -33,6 +34,7 @@ class LevelFactory(DjangoModelFactory):
 
     threshold = Sequence(lambda n: n + 1)
     name = LazyAttribute(lambda o: f"Level {o.threshold}")
+    alttext = UniqueFaker("sentence")
 
 
 class AchievementUnlockFactory(DjangoModelFactory):
