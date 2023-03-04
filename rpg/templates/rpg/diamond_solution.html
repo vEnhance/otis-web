@@ -4,10 +4,16 @@
 {% endblock title %}
 {% block layout-content %}
   <div class="overflow-auto">
-    {% if achievement.image %}<img width="96px" class="float-end" src="{{ achievement.image.url }}" />{% endif %}
     <h2>{{ achievement.name }} ({{ achievement.diamonds }}♦️)</h2>
     <p class="fst-italic">{{ achievement.description }}</p>
   </div>
+  {% if achievement.image %}
+    <div class="text-center">
+      <a href="{{ achievement.image.url }}">
+        <img width="256px" src="{{ achievement.image.url }}" />
+      </a>
+    </div>
+  {% endif %}
   <div class="my-3 alert alert-success">
     <h4 class="alert-heading">
       Answer: <strong>{{ achievement.code }}</strong>
