@@ -7,8 +7,6 @@ from datetime import datetime, timedelta
 import django
 from django.conf import settings
 
-from markets.models import Market
-
 # hack to unindent following code
 if __name__ != "__main__":
     raise TypeError("Attempted to import command-line only script")
@@ -34,6 +32,7 @@ from dashboard.factories import PSetFactory, SemesterDownloadFileFactory
 from exams.factories import ExamAttemptFactory, QuizFactory, TestFactory
 from exams.models import PracticeExam
 from markets.factories import GuessFactory, MarketFactory
+from markets.models import Market
 from roster.factories import (
     AssistantFactory,
     InvoiceFactory,
@@ -126,6 +125,7 @@ def parse_args() -> argparse.Namespace:
 
 args = parse_args()
 
+
 # silly thing with slight bias for small numbers
 def randint_low(a: int, b: int) -> int:
     return (a + b) - round(math.sqrt(random.randint(a * a, b * b)))
@@ -152,7 +152,9 @@ def create_sem_independent(args, users):
         group: UnitGroup = UnitGroupFactory.create()
 
         # make codes unique
-        codes: list[str] = random.sample(unit_codes[group.subject[0]], randint_low(1, 9))
+        codes: list[str] = random.sample(
+            unit_codes[group.subject[0]], randint_low(1, 9)
+        )
 
         for code in codes:
             UnitFactory.create(code=code, group=group)
@@ -227,7 +229,9 @@ def create_sem_dependent(args, semester, users):
     SemesterDownloadFileFactory.create(semester=semester)
 
     # markets
-    markets: list[Market] = MarketFactory.create_batch(args.market_num, semester=semester)
+    markets: list[Market] = MarketFactory.create_batch(
+        args.market_num, semester=semester
+    )
 
     # randomly select a few units to be populated for students
     units = list(Unit.objects.all())
