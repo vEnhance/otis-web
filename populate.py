@@ -1,11 +1,11 @@
-from datetime import datetime
-from datetime import timedelta
-import os
+import argparse
 import math
+import os
 import random
+from datetime import datetime, timedelta
+
 import django
 from django.conf import settings
-import argparse
 
 # hack to unindent following code
 if __name__ != "__main__":
@@ -16,66 +16,121 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "otisweb.settings")
 django.setup()
 settings.TESTING = True
 
-from arch.factories import HintFactory, ProblemFactory, VoteFactory
-from arch.models import Problem
-
-from core.factories import SemesterFactory, UnitFactory, UnitGroupFactory, UserFactory, UserProfileFactory
-from dashboard.factories import PSetFactory
-from dashboard.factories import SemesterDownloadFileFactory
-
 from django.contrib.auth.models import Group
 
+from arch.factories import HintFactory, ProblemFactory, VoteFactory
+from arch.models import Problem
+from core.factories import (
+    SemesterFactory,
+    UnitFactory,
+    UnitGroupFactory,
+    UserFactory,
+    UserProfileFactory,
+)
+from core.models import Semester, Unit, UnitGroup
+from dashboard.factories import PSetFactory, SemesterDownloadFileFactory
 from exams.factories import ExamAttemptFactory, QuizFactory, TestFactory
 from exams.models import PracticeExam
-
 from markets.factories import GuessFactory, MarketFactory
-
-from rpg.factories import AchievementFactory, AchievementUnlockFactory, LevelFactory, QuestCompleteFactory
-
+from roster.factories import (
+    AssistantFactory,
+    InvoiceFactory,
+    RegistrationContainerFactory,
+    StudentFactory,
+    StudentRegistrationFactory,
+)
+from roster.models import Assistant, RegistrationContainer, Student
+from rpg.factories import (
+    AchievementFactory,
+    AchievementUnlockFactory,
+    LevelFactory,
+    QuestCompleteFactory,
+)
 from rpg.models import Achievement
-
-from core.models import Semester, Unit, UnitGroup
-from roster.factories import RegistrationContainerFactory, StudentFactory, StudentRegistrationFactory, InvoiceFactory, AssistantFactory
-from roster.models import RegistrationContainer, Student, Assistant
-
 from suggestions.factories import ProblemSuggestionFactory
 
+
 def parse_args():
-    parser = argparse.ArgumentParser(description='Populates the local django with some test data.')
-    parser.add_argument('-s', dest='stu_num',
-                        default=1000, metavar='INT', type=int,
-                        help='number of students')
-    parser.add_argument('-u', dest='unit_num',
-                        default=200, metavar='INT', type=int,
-                        help='number of unit groups')
-    parser.add_argument('-d', dest='achievement_num',
-                        default=10, metavar='INT', type=int,
-                        help='number of diamonds or achievements')
-    parser.add_argument('-l', dest='level_num',
-                        default=100, metavar='INT', type=int,
-                        help='number of levels')
-    parser.add_argument('-p', dest='arch_num',
-                        default=30, metavar='INT', type=int,
-                        help='number of arch problems')
-    parser.add_argument('-e', dest='exam_num',
-                        default=5, metavar='INT', type=int,
-                        help='number of tests and quizzes, respectively')
-    parser.add_argument('-a', dest='assistant_num',
-                        default=5, metavar='INT', type=int,
-                        help='number of assistants')
-    parser.add_argument('-m', dest='market_num',
-                        default=3, metavar='INT', type=int,
-                        help='number of markets')
+    parser = argparse.ArgumentParser(
+        description="Populates the local django with some test data."
+    )
+    parser.add_argument(
+        "-s",
+        dest="stu_num",
+        default=1000,
+        metavar="INT",
+        type=int,
+        help="number of students",
+    )
+    parser.add_argument(
+        "-u",
+        dest="unit_num",
+        default=200,
+        metavar="INT",
+        type=int,
+        help="number of unit groups",
+    )
+    parser.add_argument(
+        "-d",
+        dest="achievement_num",
+        default=10,
+        metavar="INT",
+        type=int,
+        help="number of diamonds or achievements",
+    )
+    parser.add_argument(
+        "-l",
+        dest="level_num",
+        default=100,
+        metavar="INT",
+        type=int,
+        help="number of levels",
+    )
+    parser.add_argument(
+        "-p",
+        dest="arch_num",
+        default=30,
+        metavar="INT",
+        type=int,
+        help="number of arch problems",
+    )
+    parser.add_argument(
+        "-e",
+        dest="exam_num",
+        default=5,
+        metavar="INT",
+        type=int,
+        help="number of tests and quizzes, respectively",
+    )
+    parser.add_argument(
+        "-a",
+        dest="assistant_num",
+        default=5,
+        metavar="INT",
+        type=int,
+        help="number of assistants",
+    )
+    parser.add_argument(
+        "-m",
+        dest="market_num",
+        default=3,
+        metavar="INT",
+        type=int,
+        help="number of markets",
+    )
 
     args = parser.parse_args()
 
     return args
 
+
 args = parse_args()
+
 
 # silly thing with slight bias for small numbers
 def randint_low(a, b):
     return (a + b) - round(math.sqrt(random.randint(a * a, b * b)))
+
 
 def generate_unit_code_map():
     unit_codes = {}
@@ -88,6 +143,7 @@ def generate_unit_code_map():
         unit_codes[choice] = codes
 
     return unit_codes
+
 
 def create_sem_independent(args, users):
     # units
@@ -115,12 +171,18 @@ def create_sem_independent(args, users):
         hint_percentages = random.sample(range(0, 101), hint_num)
 
         for percentage in hint_percentages:
-            HintFactory.create(number = percentage, problem=problem)
+            HintFactory.create(number=percentage, problem=problem)
 
     # exams
     for i in range(0, args.exam_num):
-        TestFactory.create(start_date=datetime.now(), due_date=(datetime.now() + timedelta(days=50 * i + 50)))
-        QuizFactory.create(start_date=datetime.now(), due_date=(datetime.now() + timedelta(days=50 * i + 50)))
+        TestFactory.create(
+            start_date=datetime.now(),
+            due_date=(datetime.now() + timedelta(days=50 * i + 50)),
+        )
+        QuizFactory.create(
+            start_date=datetime.now(),
+            due_date=(datetime.now() + timedelta(days=50 * i + 50)),
+        )
 
     # levels
     LevelFactory.create_batch(args.level_num)
@@ -136,10 +198,12 @@ def create_sem_independent(args, users):
 
         # achievement unlocks
         if args.achievement_num > 0:
-            stu_achievements = random.sample(achievements, randint_low(0, max_stu_achievements))
+            stu_achievements = random.sample(
+                achievements, randint_low(0, max_stu_achievements)
+            )
 
             for achievement in stu_achievements:
-                AchievementUnlockFactory.create(user=user,achievement=achievement)
+                AchievementUnlockFactory.create(user=user, achievement=achievement)
 
         # votes
         if args.arch_num > 0:
@@ -147,14 +211,17 @@ def create_sem_independent(args, users):
             stu_vote_problems = random.sample(problems, stu_vote_num)
 
             for problem in stu_vote_problems:
-                VoteFactory.create(user=user,problem=problem)
+                VoteFactory.create(user=user, problem=problem)
 
         # suggestions
         if random.random() < 0.24:
-            ProblemSuggestionFactory.create(user=user,unit=random.choice(units))
+            ProblemSuggestionFactory.create(user=user, unit=random.choice(units))
+
 
 def create_sem_dependent(args, semester, users):
-    container: RegistrationContainer = RegistrationContainerFactory.create(semester=semester)
+    container: RegistrationContainer = RegistrationContainerFactory.create(
+        semester=semester
+    )
 
     # students
     # download file
@@ -172,7 +239,11 @@ def create_sem_dependent(args, semester, users):
     min_stu_units = min(max_stu_units, 3)
 
     for user in users:
-        student: Student = StudentFactory.create(user=user, reg=StudentRegistrationFactory.create(container=container, processed=True), semester=semester)
+        student: Student = StudentFactory.create(
+            user=user,
+            reg=StudentRegistrationFactory.create(container=container, processed=True),
+            semester=semester,
+        )
         InvoiceFactory.create(student=student)
 
         # add a few units
@@ -197,18 +268,20 @@ def create_sem_dependent(args, semester, users):
                     PSetFactory.create(
                         student=student,
                         unit=stu_units[i],
-                        next_unit_to_unlock=stu_units[i+1],
+                        next_unit_to_unlock=stu_units[i + 1],
                         hours=random.randint(1, 54),
                         clubs=random.randint(30, 200),
-                        status=status
+                        status=status,
                     )
 
                     break
 
         # also quizzes
         if random.random() < 0.16:
-            ExamAttemptFactory.create(student=student,quiz=random.choice(quizzes),score=5)
-        
+            ExamAttemptFactory.create(
+                student=student, quiz=random.choice(quizzes), score=5
+            )
+
         # assign instructor
         if args.assistant_num > 0 and random.random() < 0.1:
             student.assistant = random.choice(assistants)
@@ -220,7 +293,7 @@ def create_sem_dependent(args, semester, users):
 
         # also markets
         if random.random() < 0.2:
-            GuessFactory.create(user=user,market=random.choice(markets))
+            GuessFactory.create(user=user, market=random.choice(markets))
 
 
 def init():
@@ -228,7 +301,7 @@ def init():
 
     # users
     users = UserFactory.create_batch(args.stu_num)
-    
+
     # assistants
     assistants = AssistantFactory.create_batch(args.assistant_num)
 
@@ -241,14 +314,18 @@ def init():
     current_year = datetime.now().year
     create_sem_independent(args, users)
     if len(old_users) > 0:
-        old_semester: Semester = SemesterFactory.create(show_invoices=False, active=False, end_year=current_year-1)
+        old_semester: Semester = SemesterFactory.create(
+            show_invoices=False, active=False, end_year=current_year - 1
+        )
 
         create_sem_dependent(args, old_semester, old_users)
-    
-    semester: Semester = SemesterFactory.create(show_invoices=True, end_year=current_year)
+
+    semester: Semester = SemesterFactory.create(
+        show_invoices=True, end_year=current_year
+    )
     create_sem_dependent(args, semester, users)
 
-
     # TODO hanabi?/payments?/bonus levels?
+
 
 init()
