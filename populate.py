@@ -7,6 +7,8 @@ from datetime import datetime, timedelta
 import django
 from django.conf import settings
 
+from markets.models import Market
+
 # hack to unindent following code
 if __name__ != "__main__":
     raise TypeError("Attempted to import command-line only script")
@@ -50,8 +52,8 @@ from rpg.models import Achievement
 from suggestions.factories import ProblemSuggestionFactory
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(
+def parse_args() -> argparse.Namespace:
+    parser: argparse.ArgumentParser = argparse.ArgumentParser(
         description="Populates the local django with some test data."
     )
     parser.add_argument(
@@ -119,21 +121,18 @@ def parse_args():
         help="number of markets",
     )
 
-    args = parser.parse_args()
-
-    return args
+    return parser.parse_args()
 
 
 args = parse_args()
 
-
 # silly thing with slight bias for small numbers
-def randint_low(a, b):
+def randint_low(a: int, b: int) -> int:
     return (a + b) - round(math.sqrt(random.randint(a * a, b * b)))
 
 
-def generate_unit_code_map():
-    unit_codes = {}
+def generate_unit_code_map() -> dict[str, list[str]]:
+    unit_codes: dict[str, list[str]] = {}
 
     for choice, _ in UnitGroup.SUBJECT_CHOICES:
         codes = []
@@ -147,13 +146,13 @@ def generate_unit_code_map():
 
 def create_sem_independent(args, users):
     # units
-    unit_codes = generate_unit_code_map()
+    unit_codes: dict[str, list[str]] = generate_unit_code_map()
 
     for i in range(0, args.unit_num):
         group: UnitGroup = UnitGroupFactory.create()
 
         # make codes unique
-        codes = random.sample(unit_codes[group.subject[0]], randint_low(1, 9))
+        codes: list[str] = random.sample(unit_codes[group.subject[0]], randint_low(1, 9))
 
         for code in codes:
             UnitFactory.create(code=code, group=group)
@@ -163,12 +162,12 @@ def create_sem_independent(args, users):
         AchievementFactory.create(diamonds=randint_low(1, 6))
 
     # arch problems and hints
-    problems = ProblemFactory.create_batch(args.arch_num)
+    problems: list[Problem] = ProblemFactory.create_batch(args.arch_num)
 
     for problem in problems:
         hint_num = randint_low(0, 10)
 
-        hint_percentages = random.sample(range(0, 101), hint_num)
+        hint_percentages: list[int] = random.sample(range(0, 101), hint_num)
 
         for percentage in hint_percentages:
             HintFactory.create(number=percentage, problem=problem)
@@ -188,10 +187,10 @@ def create_sem_independent(args, users):
     LevelFactory.create_batch(args.level_num)
 
     # users
-    units = list(Unit.objects.all())
-    achievements = list(Achievement.objects.all())
+    units: list[Unit] = list(Unit.objects.all())
+    achievements: list[Achievement] = list(Achievement.objects.all())
     max_stu_achievements = round(math.sqrt(len(achievements)))
-    problems = list(Problem.objects.all())
+    problems: list[Problem] = list(Problem.objects.all())
 
     for user in users:
         UserProfileFactory.create(user=user)
@@ -228,7 +227,7 @@ def create_sem_dependent(args, semester, users):
     SemesterDownloadFileFactory.create(semester=semester)
 
     # markets
-    markets = MarketFactory.create_batch(args.market_num, semester=semester)
+    markets: list[Market] = MarketFactory.create_batch(args.market_num, semester=semester)
 
     # randomly select a few units to be populated for students
     units = list(Unit.objects.all())
