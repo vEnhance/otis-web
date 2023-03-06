@@ -153,10 +153,7 @@ class ProblemUpdate(
 ):
     context_object_name = "problem"
     model = Problem
-    fields = (
-        "puid",
-        "hyperlink",
-    )
+    fields = ("hyperlink",)
 
     def get_context_data(self, **kwargs: Any):
         context = super().get_context_data(**kwargs)

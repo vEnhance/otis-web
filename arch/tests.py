@@ -64,28 +64,25 @@ class TestProblem(EvanTestCase):
 
         self.assertPost20X(
             "arch-index",
-            data={"puid": problem.puid, "hyperlink": "https://otis.evanchen.cc/"},
+            data={"puid": "SILLY", "hyperlink": "https://otis.evanchen.cc/"},
             follow=True,
         )
 
-        problem = Problem.objects.filter(puid=problem.puid).first()
+        problem = Problem.objects.get(puid="SILLY")
 
         self.assertPost20X(
             "problem-update",
             problem.puid,
-            data={"puid": "SILLIER", "hyperlink": "https://artofproblemsolving.com/"},
+            data={"hyperlink": "https://aops.com/"},
             follow=True,
         )
         self.assertContains(
-            self.assertGet20X(
-                "problem-update",
-                "SILLIER",
-            ),
-            "https://artofproblemsolving.com/",
+            self.assertGet20X("problem-update", "SILLY"),
+            "https://aops.com/",
         )
 
         problem.refresh_from_db()
-        self.assertTrue(problem.puid == "SILLIER")
+        self.assertTrue(problem.hyperlink == "https://aops.com/")
 
     def test_hint(self):
         verified_group = GroupFactory(name="Verified")
