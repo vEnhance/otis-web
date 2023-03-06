@@ -116,8 +116,7 @@ class TestProblem(EvanTestCase):
             follow=True,
         )
 
-        hint: Hint = Hint.objects.filter(problem=problem).first()
-
+        hint: Hint = Hint.objects.get(problem=problem)
         resp = self.assertGet20X("hint-detail", problem.puid, 31)
         self.assertContains(resp, hint.content)
 
