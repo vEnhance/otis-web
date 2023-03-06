@@ -65,7 +65,8 @@ Video tutorial: https://youtu.be/W27XcqeXp20
 11. Point your browser to `http://127.0.0.1:8000`.
     You should be able to log in with the user you defined in step 9.
 12. The website is functional now, but it is a bit bare-bones.
-    To populate it with some test data, use `http://127.0.0.1:8000/admin`.
+    To populate it with some test data, use `http://127.0.0.1:8000/admin`
+    or run `populate.py`.
 
 [activate]: https://python-poetry.org/docs/basic-usage/#activating-the-virtual-environment
 
