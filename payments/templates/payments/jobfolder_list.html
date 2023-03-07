@@ -56,7 +56,7 @@
             let item = `<p>`;
             item += `<strong><a href="${issue_url}">#${issue.number}</a></strong>. `;
             item += `${issue.title}`;
-            item += `${issue.labels.map(label => `<a href="${create_label_url(label)}"><sup style="color:#${label.color};">${label.name}</sup></a>`)}`;
+            item += issue.labels.map(label => `<a href="${create_label_url(label)}"><sup style="color:#${label.color};">${label.name}</sup></a>`).join(' ');
             item += `</p>`;
             $("#github-issues-list").append(item);
         });
