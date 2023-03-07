@@ -64,7 +64,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "-d",
         dest="achievement_num",
-        default=10,
+        default=25,
         metavar="INT",
         type=int,
         help="number of diamonds or achievements",
