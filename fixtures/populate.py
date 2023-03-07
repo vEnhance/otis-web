@@ -326,6 +326,8 @@ def create_sem_dependent(semester: Semester, users: list[User]):
     # Quest completes
     student_iter_data_for_quests: list[Student] = []
     for student in students:
+        if random.random() < 0.65:
+            continue
         for _ in range(random.randrange(1, 3)):
             student_iter_data_for_quests.append(student)
     print(f"Creating {len(student_iter_data_for_quests)} quest completes")
@@ -381,10 +383,15 @@ def init():
     create_sem_independent(users)
 
     old_semester: Semester = SemesterFactory.create(
-        show_invoices=False, active=False, end_year=current_year - 1
+        show_invoices=False,
+        active=False,
+        end_year=current_year - 1,
+        exam_family="Foxtrot",
     )
     current_semester: Semester = SemesterFactory.create(
-        show_invoices=True, end_year=current_year
+        show_invoices=True,
+        end_year=current_year,
+        exam_family="Waltz",
     )
 
     create_sem_dependent(old_semester, random.sample(users, int(0.6 * len(users))))
