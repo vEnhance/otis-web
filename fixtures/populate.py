@@ -16,18 +16,12 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "otisweb.settings")
 django.setup()
 settings.TESTING = True
 
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, User
 
 from arch.factories import HintFactory, ProblemFactory, VoteFactory
 from arch.models import Problem
-from core.factories import (
-    SemesterFactory,
-    UnitFactory,
-    UnitGroupFactory,
-    UserFactory,
-    UserProfileFactory,
-)
-from core.models import Semester, Unit, UnitGroup
+from core.factories import SemesterFactory, UserFactory, UserProfileFactory
+from core.models import Semester, Unit
 from dashboard.factories import PSetFactory, SemesterDownloadFileFactory
 from exams.factories import ExamAttemptFactory, QuizFactory, TestFactory
 from exams.models import PracticeExam
@@ -44,7 +38,6 @@ from roster.models import Assistant, RegistrationContainer, Student
 from rpg.factories import (
     AchievementFactory,
     AchievementUnlockFactory,
-    LevelFactory,
     QuestCompleteFactory,
 )
 from rpg.models import Achievement
@@ -64,28 +57,12 @@ def parse_args() -> argparse.Namespace:
         help="number of students",
     )
     parser.add_argument(
-        "-u",
-        dest="unit_num",
-        default=200,
-        metavar="INT",
-        type=int,
-        help="number of unit groups",
-    )
-    parser.add_argument(
         "-d",
         dest="achievement_num",
         default=10,
         metavar="INT",
         type=int,
         help="number of diamonds or achievements",
-    )
-    parser.add_argument(
-        "-l",
-        dest="level_num",
-        default=100,
-        metavar="INT",
-        type=int,
-        help="number of levels",
     )
     parser.add_argument(
         "-p",
@@ -131,34 +108,7 @@ def randint_low(a: int, b: int) -> int:
     return (a + b) - round(math.sqrt(random.randint(a * a, b * b)))
 
 
-def generate_unit_code_map() -> dict[str, list[str]]:
-    unit_codes: dict[str, list[str]] = {}
-
-    for choice, _ in UnitGroup.SUBJECT_CHOICES:
-        codes = []
-        for difficulty in ["B", "D", "Z"]:
-            for variant in ["W", "X", "Y"]:
-                codes.append(difficulty + choice + variant)
-        unit_codes[choice] = codes
-
-    return unit_codes
-
-
-def create_sem_independent(args, users):
-    # units
-    unit_codes: dict[str, list[str]] = generate_unit_code_map()
-
-    for i in range(0, args.unit_num):
-        group: UnitGroup = UnitGroupFactory.create()
-
-        # make codes unique
-        codes: list[str] = random.sample(
-            unit_codes[group.subject[0]], randint_low(1, 9)
-        )
-
-        for code in codes:
-            UnitFactory.create(code=code, group=group)
-
+def create_sem_independent(users: list[User]):
     # achievements - 24 digit collision is basically impossible
     for i in range(0, args.achievement_num):
         AchievementFactory.create(diamonds=randint_low(1, 6))
@@ -184,9 +134,6 @@ def create_sem_independent(args, users):
             start_date=datetime.now(),
             due_date=(datetime.now() + timedelta(days=50 * i + 50)),
         )
-
-    # levels
-    LevelFactory.create_batch(args.level_num)
 
     # users
     units: list[Unit] = list(Unit.objects.all())
@@ -219,7 +166,7 @@ def create_sem_independent(args, users):
             ProblemSuggestionFactory.create(user=user, unit=random.choice(units))
 
 
-def create_sem_dependent(args, semester, users):
+def create_sem_dependent(semester: Semester, users: list[User]):
     container: RegistrationContainer = RegistrationContainerFactory.create(
         semester=semester
     )
@@ -310,25 +257,23 @@ def init():
 
     group, _ = Group.objects.get_or_create(name="Active Staff")
     for assistant in assistants:
-        group.user_set.add(assistant.user)
+        group.user_set.add(assistant.user)  # type: ignore
 
     old_users = random.sample(users, randint_low(len(users) // 3, len(users) // 2))
 
     current_year = datetime.now().year
-    create_sem_independent(args, users)
+    create_sem_independent(users)
     if len(old_users) > 0:
         old_semester: Semester = SemesterFactory.create(
             show_invoices=False, active=False, end_year=current_year - 1
         )
 
-        create_sem_dependent(args, old_semester, old_users)
+        create_sem_dependent(old_semester, old_users)
 
     semester: Semester = SemesterFactory.create(
         show_invoices=True, end_year=current_year
     )
-    create_sem_dependent(args, semester, users)
-
-    # TODO hanabi?/payments?/bonus levels?
+    create_sem_dependent(semester, users)
 
 
 init()

@@ -1,0 +1,1217 @@
+[
+  {
+    "model": "core.unitgroup",
+    "pk": 1,
+    "fields": {
+      "name": "AIME Geo",
+      "slug": "aimegeo",
+      "artwork": "artwork/aimegeo.png",
+      "artwork_thumb_md": "artwork-thumb-md/aimegeo.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/aimegeo.png",
+      "artist_name": "Evan Chen",
+      "description": "Computational geometry problems, many taken from the tail end of the AIME. At the border of computational contests and olympiads.",
+      "subject": "G",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 2,
+    "fields": {
+      "name": "AIME Mods",
+      "slug": "aimemod",
+      "artwork": "artwork/aimemod.png",
+      "artwork_thumb_md": "artwork-thumb-md/aimemod.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/aimemod.png",
+      "artist_name": "Sambhu Ganesan",
+      "description": "Computational problems in modular arithmetic, again at the border of short-answer contests and olympiads.",
+      "subject": "N",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 3,
+    "fields": {
+      "name": "Classical Geo",
+      "slug": "classicgeo",
+      "artwork": "artwork/classicgeo.png",
+      "artwork_thumb_md": "artwork-thumb-md/classicgeo.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/classicgeo.png",
+      "artist_name": "Evan Chen",
+      "description": "Formerly known as \"American Geo\". This is a unit on geometry problems with a highly traditional or synthetic flavor, for example USAMO 2016/3 and USAMO 2017/3. These sorts of problems were popular on USA olympiads and team selection tests around 2016 and it is totally not my fault. A lot of these problems involve figuring out what certain points are, adding in new points that were not that already, and altogether slowly piecing together a master diagram that reveals the depth of a configuration.",
+      "subject": "G",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 4,
+    "fields": {
+      "name": "Analysis",
+      "slug": "analysis",
+      "artwork": "artwork/analysis.png",
+      "artwork_thumb_md": "artwork-thumb-md/analysis.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/analysis.png",
+      "artist_name": "Aditya Pahuja",
+      "description": "Problems involving some real analysis. This is a pretty technical lecture and will delve into the nuances of converge issues, absolute versus conditional convergence, using calculus properly, compact sets, and so on. Featuring the art of Lagrange multipliers.",
+      "subject": "A",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 5,
+    "fields": {
+      "name": "Anti Problems",
+      "slug": "antiprobs",
+      "artwork": "artwork/antiprobs.png",
+      "artwork_thumb_md": "artwork-thumb-md/antiprobs.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/antiprobs.png",
+      "artist_name": "Aaryan Vaishya",
+      "description": "A unit consisting entirely of troll \"anti-problems\" which are suitable for giving to your enemies.",
+      "subject": "M",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 6,
+    "fields": {
+      "name": "Arrows",
+      "slug": "arrows",
+      "artwork": "",
+      "artwork_thumb_md": "",
+      "artwork_thumb_sm": "",
+      "artist_name": "",
+      "description": "Some selected problems revolving around the idea that a function from a set to itself can be thought of as a directed graph with all outdegrees equal to 1. In particular, iterating such a function often involves looking at its cycle decomposition.",
+      "subject": "C",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 7,
+    "fields": {
+      "name": "Bary",
+      "slug": "bary",
+      "artwork": "artwork/bary.png",
+      "artwork_thumb_md": "artwork-thumb-md/bary.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/bary.png",
+      "artist_name": "Evan Chen",
+      "description": "Barycentric coordinates in olympiad geometry. A follow-up to Chapter 7 of EGMO.",
+      "subject": "G",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 8,
+    "fields": {
+      "name": "Combo Null",
+      "slug": "cns",
+      "artwork": "artwork/cns.png",
+      "artwork_thumb_md": "artwork-thumb-md/cns.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/cns.png",
+      "artist_name": "Arul Kolla",
+      "description": "A silly unit on using combinatorial nullstellensatz. Mostly for fun. It is actually a fairly easy (albeit technical) unit, and doesn't take long. This unit is only marked as Z-level because it is considered an advanced trick (in the sense it is more important to learn fundamentals first).",
+      "subject": "C",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 9,
+    "fields": {
+      "name": "Complex Nums",
+      "slug": "complex",
+      "artwork": "artwork/complex.png",
+      "artwork_thumb_md": "artwork-thumb-md/complex.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/complex.png",
+      "artist_name": "Evan Chen",
+      "description": "Complex numbers in olympiad geometry. A follow-up to Chapter 6 of EGMO.",
+      "subject": "G",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 10,
+    "fields": {
+      "name": "Courage",
+      "slug": "courage",
+      "artwork": "",
+      "artwork_thumb_md": "",
+      "artwork_thumb_sm": "",
+      "artist_name": "",
+      "description": "A difficult unit consisting of problems with deceptively short statements. A lot of the difficulty of these problems is setting up an entire framework to attack a simply stated problem. These setups are often more elaborate or detailed than in other problems.",
+      "subject": "M",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 11,
+    "fields": {
+      "name": "Expon NT",
+      "slug": "expnt",
+      "artwork": "artwork/expnt.png",
+      "artwork_thumb_md": "artwork-thumb-md/expnt.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/expnt.png",
+      "artist_name": "Owen Zhang",
+      "description": "Expressions of the form $a^n \\pm 1$, the bread and butter of olympiad number theory. Mods and orders, Fermat's Christmas theorem, lifting the exponent.",
+      "subject": "N",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 12,
+    "fields": {
+      "name": "Duluth",
+      "slug": "duluth",
+      "artwork": "artwork/duluth.png",
+      "artwork_thumb_md": "artwork-thumb-md/duluth.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/duluth.png",
+      "artist_name": "anonymous",
+      "description": "A short end-of-year unit containing open problems I solved at the Duluth REU.",
+      "subject": "M",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 13,
+    "fields": {
+      "name": "Elem Geo",
+      "slug": "elemgeo",
+      "artwork": "artwork/elemgeo.png",
+      "artwork_thumb_md": "artwork-thumb-md/elemgeo.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/elemgeo.png",
+      "artist_name": "Rishabh Mahale",
+      "description": "A unit featuring easy to medium geometry problems which can be solved using only the most basic tools: angle chasing, power of a point, homothety. It can be thought of as a follow-up to Part I of EGMO.",
+      "subject": "G",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 14,
+    "fields": {
+      "name": "Equality",
+      "slug": "equality",
+      "artwork": "artwork/equality.png",
+      "artwork_thumb_md": "artwork-thumb-md/equality.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/equality.png",
+      "artist_name": "Owen Zhang",
+      "description": "An important unit about taking advantage of the equality case in combinatorial problems in order to solve problems. Mandatory for newcomer students.",
+      "subject": "C",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 15,
+    "fields": {
+      "name": "Euclid Alg",
+      "slug": "euclid",
+      "artwork": "artwork/euclid.png",
+      "artwork_thumb_md": "artwork-thumb-md/euclid.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/euclid.png",
+      "artist_name": "Alex Zhao",
+      "description": "A unit about the idea that if $d$ divides $a$ and $b$, then $d$ divides any linear combination of $a$ and $b$. This intuition underlies Bezout's lemma, the Euclidean algorithm, and the division algorithm, as well as a techinque which I privately call remainder bounding. One very good example of a problem of this feeling is SL 2016 N4 (sort of the crown example of remainder bounding).",
+      "subject": "N",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 16,
+    "fields": {
+      "name": "Expected Value",
+      "slug": "evcomp",
+      "artwork": "artwork/evcomp.jpg",
+      "artwork_thumb_md": "artwork-thumb-md/evcomp.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/evcomp.png",
+      "artist_name": "Heyang Ni",
+      "description": "Computational problems involving probability, expected value (in particular linearity of expectation), and Markov chains (processes which move from state to state).",
+      "subject": "C",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 17,
+    "fields": {
+      "name": "Extremal Graph",
+      "slug": "extremegraph",
+      "artwork": "artwork/extremegraph.png",
+      "artwork_thumb_md": "artwork-thumb-md/extremegraph.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/extremegraph.png",
+      "artist_name": "Joel Gerlach",
+      "description": "A difficult unit on problems from extremal graph theory; finding graphs which maximize X under certain constructions. The most basic example is Turan's theorem, which maximizes the number of edges in a graph avoiding an r-clique. Global/local ideas as well as understanding of equality cases feature prominently. Most of the examples in this unit are more challenging.",
+      "subject": "C",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 18,
+    "fields": {
+      "name": "Free",
+      "slug": "free",
+      "artwork": "artwork/free.png",
+      "artwork_thumb_md": "artwork-thumb-md/free.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/free.png",
+      "artist_name": "Arul Kolla",
+      "description": "Problems for which you have a lot of room to make decisions; a lot of the problems in this unit are constructions, for example. You will feel like you are inventing mathematics, rather than discovering it (in contrast to the Rigid unit).",
+      "subject": "C",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 19,
+    "fields": {
+      "name": "Func Eqn",
+      "slug": "fneqn",
+      "artwork": "artwork/fneqn.png",
+      "artwork_thumb_md": "artwork-thumb-md/fneqn.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/fneqn.png",
+      "artist_name": "Emily Yu",
+      "description": "Functional equations, I guess.",
+      "subject": "F",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 20,
+    "fields": {
+      "name": "Gen Func",
+      "slug": "genfunc",
+      "artwork": "artwork/genfunc.jpg",
+      "artwork_thumb_md": "artwork-thumb-md/genfunc.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/genfunc.png",
+      "artist_name": "Filbert Wu",
+      "description": "Generating functions and their use in algebraic contexts (computing sums, featuring the so-called snake oil method). Of course, some combinatorial problems included as well.",
+      "subject": "A",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 21,
+    "fields": {
+      "name": "Global",
+      "slug": "global",
+      "artwork": "artwork/global.png",
+      "artwork_thumb_md": "artwork-thumb-md/global.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/global.png",
+      "artist_name": "Anthony Zou",
+      "description": "Linearity of expectation, switching the order of summation, what's often called pigeonhole principle, counting in two ways, ... turns out they're actually all more or less the same idea.",
+      "subject": "C",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 22,
+    "fields": {
+      "name": "Global and Local",
+      "slug": "globloc",
+      "artwork": "",
+      "artwork_thumb_md": "",
+      "artwork_thumb_sm": "",
+      "artist_name": "",
+      "description": "An accelerated version of both the global and local units (both done at once).",
+      "subject": "C",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 23,
+    "fields": {
+      "name": "Graph Theory",
+      "slug": "graph",
+      "artwork": "artwork/graph.png",
+      "artwork_thumb_md": "artwork-thumb-md/graph.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/graph.png",
+      "artist_name": "Owen Zhang",
+      "description": "Combinatorics practice with graphs.",
+      "subject": "C",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 24,
+    "fields": {
+      "name": "Grinding",
+      "slug": "grinding",
+      "artwork": "artwork/grinding.png",
+      "artwork_thumb_md": "artwork-thumb-md/grinding.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/grinding.png",
+      "artist_name": "Anthony Zou",
+      "description": "The worst olympiad problems you've ever seen. The name is a reference to the video game term in which you do the same thing over and over.",
+      "subject": "M",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 25,
+    "fields": {
+      "name": "Hall",
+      "slug": "hall",
+      "artwork": "",
+      "artwork_thumb_md": "",
+      "artwork_thumb_sm": "",
+      "artist_name": "",
+      "description": "Hall's marriage lemma.",
+      "subject": "C",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 26,
+    "fields": {
+      "name": "Hard Ineq",
+      "slug": "hardineq",
+      "artwork": "artwork/hardineq.png",
+      "artwork_thumb_md": "artwork-thumb-md/hardineq.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/hardineq.png",
+      "artist_name": "Isken Kenzhebaev",
+      "description": "A unit featuring some of the hardest gems from the golden age of inequalities.",
+      "subject": "A",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 27,
+    "fields": {
+      "name": "Harmonic",
+      "slug": "harmonic",
+      "artwork": "artwork/harmonic.jpg",
+      "artwork_thumb_md": "artwork-thumb-md/harmonic.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/harmonic.png",
+      "artist_name": "Nurtilek Duishobaev",
+      "description": "Your friendly projective geometry unit. Harmonic bundles, poles and polars, and so on. A follow-up to Chapter 9 of EGMO.",
+      "subject": "G",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 28,
+    "fields": {
+      "name": "Heavy NT",
+      "slug": "heavynumth",
+      "artwork": "artwork/heavynt.png",
+      "artwork_thumb_md": "artwork-thumb-md/heavynt.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/heavynt.png",
+      "artist_name": "Rohan Garg",
+      "description": "Heavy machinery in number theory: Vieta jumping, quadratic reciprocity, and some big-name theorems you may or may not have heard of.",
+      "subject": "N",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 29,
+    "fields": {
+      "name": "Homography",
+      "slug": "homography",
+      "artwork": "artwork/homography.png",
+      "artwork_thumb_md": "artwork-thumb-md/homography.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/homography.png",
+      "artist_name": "Nurtilek Duishobaev",
+      "description": "A less friendly and more abstract projective geometry unit, with an emphasis on projective transformations. Most of the theorems will be stated with respect to an arbitrary conic rather than a circle.",
+      "subject": "G",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 30,
+    "fields": {
+      "name": "Hyperbola",
+      "slug": "hyperbola",
+      "artwork": "artwork/hyperbola.png",
+      "artwork_thumb_md": "artwork-thumb-md/hyperbola.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/hyperbola.png",
+      "artist_name": "anonymous",
+      "description": "A silly (but difficult) unit on the theory of rectangular circumhyperbolas and the Poncelet point. For fun, if you really like hardcore projective geometry.",
+      "subject": "G",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 31,
+    "fields": {
+      "name": "Induction & Recursion I",
+      "slug": "induct1",
+      "artwork": "artwork/induct1.png",
+      "artwork_thumb_md": "artwork-thumb-md/induct1.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/induct1.png",
+      "artist_name": "Jiya Dani",
+      "description": "Problems which really use induction and recursion in a substantial way, i.e. the main idea of the problem really is about how (or whether) to induct. Features some AIME-style recursion calculations.",
+      "subject": "C",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 32,
+    "fields": {
+      "name": "Ineq Basic",
+      "slug": "ineqbasic",
+      "artwork": "artwork/ineqbasic.png",
+      "artwork_thumb_md": "artwork-thumb-md/ineqbasic.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/ineqbasic.png",
+      "artist_name": "Alan Cheng",
+      "description": "The basics of inequalities: AM-GM, homogenization, Cauchy/Holder.",
+      "subject": "A",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 33,
+    "fields": {
+      "name": "Ineq Func",
+      "slug": "ineqfunc",
+      "artwork": "artwork/ineqfunc.png",
+      "artwork_thumb_md": "artwork-thumb-md/ineqfunc.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/ineqfunc.png",
+      "artist_name": "Heyang Ni",
+      "description": "Techinques for inequalities of the form $f(x_1) + ... + f(x_n)$. Jensen, Karamata, tangent line trick. The $n-1$ equal value principle is deferred to Ineq Standard.",
+      "subject": "A",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 34,
+    "fields": {
+      "name": "Ineq Standard",
+      "slug": "ineqstandard",
+      "artwork": "artwork/ineqstandard.png",
+      "artwork_thumb_md": "artwork-thumb-md/ineqstandard.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/ineqstandard.png",
+      "artist_name": "Shrrivathsa Mahesh",
+      "description": "Inequalities which can be approached using all the standard methods. This is sort of a combination of Ineq Basic and Ineq Func.",
+      "subject": "A",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 35,
+    "fields": {
+      "name": "Int Polynom",
+      "slug": "intpoly",
+      "artwork": "",
+      "artwork_thumb_md": "",
+      "artwork_thumb_sm": "",
+      "artist_name": "",
+      "description": "A theoretical unit on the algebra and number theory of polynomials over $\\mathbb Z$, bordering into some algebraic number theory and Galois theory. Algebraic integers and irreducible polynomials feature prominently in this unit. The number theory in this unit goes deeper than that used in the Irreducible unit.",
+      "subject": "N",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 36,
+    "fields": {
+      "name": "Inversion and Spiral",
+      "slug": "kansas",
+      "artwork": "artwork/kansas.png",
+      "artwork_thumb_md": "artwork-thumb-md/kansas.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/kansas.png",
+      "artist_name": "Emily Yu",
+      "description": "A harder follow-up unit to chapters 8 and 10 of EGMO.",
+      "subject": "G",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 37,
+    "fields": {
+      "name": "Invert",
+      "slug": "invert",
+      "artwork": "artwork/invert.jpg",
+      "artwork_thumb_md": "artwork-thumb-md/invert.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/invert.png",
+      "artist_name": "Heyang Ni",
+      "description": "Inversion in olympiad geometry, following up chapter 8 of EGMO.",
+      "subject": "G",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 38,
+    "fields": {
+      "name": "Irreducible",
+      "slug": "irred",
+      "artwork": "artwork/irred.png",
+      "artwork_thumb_md": "artwork-thumb-md/irred.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/irred.png",
+      "artist_name": "Azat Madimarov",
+      "description": "Problems about showing polynomials are irreducible; these are rare in olympiads, but give you a lot of good intuition about how $\\mathbb{Z}[x]$ polynomials behave. Techniques that appear include working in $\\mathbb{F}_p[x]$, looking at the magnitude of complex roots a la Rouche, and other ad-hoc tricks. More olympiad algebra than the integer polynomials unit.",
+      "subject": "A",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 39,
+    "fields": {
+      "name": "Linear Algebra",
+      "slug": "linalg",
+      "artwork": "artwork/linalg.png",
+      "artwork_thumb_md": "artwork-thumb-md/linalg.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/linalg.png",
+      "artist_name": "Lum Jerliu",
+      "description": "Problems using linear algebra (rather than problems about linear algebra). Most of the problems here are combinatorial in nature as a result, and there is a mix of linear algebra over $\\mathbb R$ and linear algebra over $\\mathbb{F}_2$.",
+      "subject": "C",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 40,
+    "fields": {
+      "name": "Local",
+      "slug": "local",
+      "artwork": "artwork/local.png",
+      "artwork_thumb_md": "artwork-thumb-md/local.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/local.png",
+      "artist_name": "Emily Yu",
+      "description": "In contrast to the global unit, this unit is about problems starting from somewhere and perturbing it by a little bit. For example, in a greedy algorithm, if I want a set $S$ of size at least 100 with a certain property, I can imagine starting with $S$ empty and then grabbing things to add to $S$ while trying to avoid bad-ness (whatever that means for the current problem). It's then enough to prove I don't get stuck at any point. Most of the problems in this unit will have a similar algorithmic feeling.",
+      "subject": "C",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 41,
+    "fields": {
+      "name": "Monster FE",
+      "slug": "monster",
+      "artwork": "artwork/monster.png",
+      "artwork_thumb_md": "artwork-thumb-md/monster.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/monster.png",
+      "artist_name": "Owen Zhang",
+      "description": "The functional equations that don't bore me, because the solution isn't just $f(x) = x$ anymore! This follows up the Monsters handout on my website.",
+      "subject": "F",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 42,
+    "fields": {
+      "name": "Mystery",
+      "slug": "mystery",
+      "artwork": "artwork/mystery.png",
+      "artwork_thumb_md": "artwork-thumb-md/mystery.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/mystery.png",
+      "artist_name": "Alon Ragoler",
+      "description": "This one's a secret. It's a bit weird, but for this unit to work I have to start by not telling you what it's about.",
+      "subject": "C",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 43,
+    "fields": {
+      "name": "NT Construct",
+      "slug": "ntconstruct",
+      "artwork": "",
+      "artwork_thumb_md": "",
+      "artwork_thumb_sm": "",
+      "artist_name": "",
+      "description": "Construction problems in number theory. In some ways it's like the free unit because you get to make some decisions, but in other ways Z has a lot of structure that you might know things about, and you'll have to balance these two intuitions.",
+      "subject": "N",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 44,
+    "fields": {
+      "name": "Orders",
+      "slug": "orders",
+      "artwork": "artwork/orders.png",
+      "artwork_thumb_md": "artwork-thumb-md/orders.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/orders.png",
+      "artist_name": "Rohan Garg",
+      "description": "Orders modulo a prime, at the border of AIME and USA(J)MO but leaning a lot more towards the latter. Intended as an introduction into olympiad number theory.",
+      "subject": "N",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 45,
+    "fields": {
+      "name": "Prime Exponents",
+      "slug": "vp",
+      "artwork": "artwork/vp.png",
+      "artwork_thumb_md": "artwork-thumb-md/vp.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/vp.png",
+      "artist_name": "Heyang Ni",
+      "description": "The use of $\\nu_p$ in handling olympiad problems.",
+      "subject": "N",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 46,
+    "fields": {
+      "name": "Process",
+      "slug": "process",
+      "artwork": "artwork/process.png",
+      "artwork_thumb_md": "artwork-thumb-md/process.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/process.png",
+      "artist_name": "Owen Zhang",
+      "description": "This is about staring at a moving process (e.g. windmill) and trying to understand what is going on. (The most common thing people say here is monovariants or invariants, but that's only one example of a way you can understand a process.) In a lot of ways it's like the Rigid unit, except your data is way less concrete, and in some cases unobtainable, so you'll be applying the same intuition in a more hostile environment.",
+      "subject": "C",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 47,
+    "fields": {
+      "name": "Grids",
+      "slug": "grids",
+      "artwork": "artwork/grids.png",
+      "artwork_thumb_md": "artwork-thumb-md/grids.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/grids.png",
+      "artist_name": "Cecilia Sun",
+      "description": "A fun but difficult unit on combinatorics problems involving rectangular grids.",
+      "subject": "C",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 48,
+    "fields": {
+      "name": "Rigid",
+      "slug": "rigid",
+      "artwork": "artwork/rigid.png",
+      "artwork_thumb_md": "artwork-thumb-md/rigid.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/rigid.png",
+      "artist_name": "Arul Kolla",
+      "description": "This is one of my favorite units. It's about problems which involve taking a fixed structure, and trying to figure out as much as you can about it --- the task the problem asks you to actually prove becomes unimportant, almost like an answer extraction at the end. Rigid problems often have so few degrees of freedom that a lot of what you'll be doing is writing down a lot of concrete examples, and then trying to figure out what they have in common. You will feel like you are discovering mathematics, rather than inventing it (in contrast to the Free unit).",
+      "subject": "C",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 49,
+    "fields": {
+      "name": "Russian Combo",
+      "slug": "russian",
+      "artwork": "artwork/russian.png",
+      "artwork_thumb_md": "artwork-thumb-md/russian.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/russian.png",
+      "artist_name": "Cecilia Sun",
+      "description": "A fun unit involving combinatorics problems from Russia.",
+      "subject": "C",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 50,
+    "fields": {
+      "name": "Size in NT",
+      "slug": "sizent",
+      "artwork": "artwork/sizent.png",
+      "artwork_thumb_md": "artwork-thumb-md/sizent.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/sizent.png",
+      "artist_name": "Anurag Singh",
+      "description": "Using size as a way to handle number theory conditions, for example taking sufficiently large primes. On the border between olympiad algebra and olympiad number theory.",
+      "subject": "N",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 51,
+    "fields": {
+      "name": "Spiral",
+      "slug": "spiral",
+      "artwork": "artwork/spiral.png",
+      "artwork_thumb_md": "artwork-thumb-md/spiral.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/spiral.png",
+      "artist_name": "Lum Jerliu",
+      "description": "Spiral similarity and Miquel points, following up chapter 10 of EGMO.",
+      "subject": "G",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 52,
+    "fields": {
+      "name": "Sums",
+      "slug": "sums",
+      "artwork": "artwork/sums.png",
+      "artwork_thumb_md": "artwork-thumb-md/sums.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/sums.png",
+      "artist_name": "Jacopo Rizzo",
+      "description": "Practice with manipulating sums, and in particular switching the order of summation (or integration). Features generating functions and Snake Oil as well.",
+      "subject": "A",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 53,
+    "fields": {
+      "name": "Super Bary",
+      "slug": "superbary",
+      "artwork": "artwork/superbary.png",
+      "artwork_thumb_md": "artwork-thumb-md/superbary.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/superbary.png",
+      "artist_name": "Evan Chen",
+      "description": "A more difficult version of the barycentric coordinates unit.",
+      "subject": "G",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 54,
+    "fields": {
+      "name": "Super Complex",
+      "slug": "supercomplex",
+      "artwork": "artwork/supercomplex.png",
+      "artwork_thumb_md": "artwork-thumb-md/supercomplex.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/supercomplex.png",
+      "artist_name": "Evan Chen",
+      "description": "A more difficult version of the complex numbers unit.",
+      "subject": "G",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 55,
+    "fields": {
+      "name": "Super NT",
+      "slug": "supernumth",
+      "artwork": "artwork/supernumth.jpg",
+      "artwork_thumb_md": "artwork-thumb-md/supernumth.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/supernumth.png",
+      "artist_name": "Sambhu Ganesan",
+      "description": "Number theory practice for experts, combining problems from Exp and Heavy NT as well as some other sources.",
+      "subject": "N",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 56,
+    "fields": {
+      "name": "Symm Polynom",
+      "slug": "sympoly",
+      "artwork": "artwork/sympoly.png",
+      "artwork_thumb_md": "artwork-thumb-md/sympoly.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/sympoly.png",
+      "artist_name": "Rohan Dhillon",
+      "description": "Vieta formulas, Newton sums, and the fundamental theorem of symmetric polynomials. Involves some computational problems. In my opinion, this is probably the easiest unit.",
+      "subject": "A",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 57,
+    "fields": {
+      "name": "Tricky Ineq",
+      "slug": "trickineq",
+      "artwork": "artwork/trickineq.png",
+      "artwork_thumb_md": "artwork-thumb-md/trickineq.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/trickineq.png",
+      "artist_name": "Joel Gerlarch",
+      "description": "Harder inequality problems that don't succumb to the standard methods: it takes some more ingenuity to figure out how to approach these.",
+      "subject": "A",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 58,
+    "fields": {
+      "name": "Weird Geo",
+      "slug": "weirdgeo",
+      "artwork": "artwork/weirdgeo.png",
+      "artwork_thumb_md": "artwork-thumb-md/weirdgeo.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/weirdgeo.png",
+      "artist_name": "Emily Yu",
+      "description": "Those weird geometry problems that involve pentagons and hexagons and whatnot (see USAMO 2011/3 for example). Careful use of complex numbers and counting degrees of freedom are important for this unit.",
+      "subject": "G",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 59,
+    "fields": {
+      "name": "Putnam Analysis",
+      "slug": "putnamana",
+      "artwork": "artwork/putnamana.png",
+      "artwork_thumb_md": "artwork-thumb-md/putnamana.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/putnamana.png",
+      "artist_name": "Owen Zhang",
+      "description": "An extension of the Sums unit --- rather than just swapping infinite sums, we now get to enjoy swapping infinite integrals as well.",
+      "subject": "A",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 61,
+    "fields": {
+      "name": "Moving Points",
+      "slug": "movingpts",
+      "artwork": "artwork/movingpts.png",
+      "artwork_thumb_md": "artwork-thumb-md/movingpts.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/movingpts.png",
+      "artist_name": "Alan Cheng",
+      "description": "A technique involving animating points and considering resulting projective maps. This lecture was contributed by Anant Mudgal.",
+      "subject": "G",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 62,
+    "fields": {
+      "name": "Formulas",
+      "slug": "formulas",
+      "artwork": "artwork/formulas.png",
+      "artwork_thumb_md": "artwork-thumb-md/formulas.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/formulas.png",
+      "artist_name": "Alex Zhao",
+      "description": "Based on Yang Liu's class \"Write Down Formulas\" at MOP 2018. This unit consists of problems which involve manipulations of fairly involved formulas, such as combinatorial recursions or number theoretic power sums. Despite officially being algebra, there are just as many (maybe more) problems that would be classified as C or N.",
+      "subject": "A",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 63,
+    "fields": {
+      "name": "Wrapped Func Eqn",
+      "slug": "wrapfn",
+      "artwork": "artwork/wrapfn.png",
+      "artwork_thumb_md": "artwork-thumb-md/wrapfn.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/wrapfn.png",
+      "artist_name": "Lum Jerliu",
+      "description": "On real-valued functional equations in which all variables are \"wrapped\" by the function in some way.",
+      "subject": "F",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 64,
+    "fields": {
+      "name": "C8 Summit",
+      "slug": "c8summit",
+      "artwork": "artwork/c8summit.png",
+      "artwork_thumb_md": "artwork-thumb-md/c8summit.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/c8summit.png",
+      "artist_name": "Owen Zhang",
+      "description": "A challenging combinatorics unit to conclude the year, with difficult problems reviewing everything that has appeared earlier.",
+      "subject": "C",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 65,
+    "fields": {
+      "name": "Cyclotomic",
+      "slug": "cyclotomic",
+      "artwork": "artwork/cyclotomic.png",
+      "artwork_thumb_md": "artwork-thumb-md/cyclotomic.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/cyclotomic.png",
+      "artist_name": "Aaryan Vaishya",
+      "description": "Roots of unity. Using $e^{i \\theta} = \\cos(\\theta) + i \\sin(\\theta)$, and connecting them to trigonometry, etc. Features a ton of problems from Math Prize for Girls. Despite the name of the unit, cyclotomic polynomials themselves don't appear very often; the idea of roots of unity is much more prevalent.",
+      "subject": "A",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 66,
+    "fields": {
+      "name": "Entry Combo",
+      "slug": "entry",
+      "artwork": "artwork/entry.png",
+      "artwork_thumb_md": "artwork-thumb-md/entry.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/entry.png",
+      "artist_name": "Rohan Dhillon",
+      "description": "A beginner combinatorics unit, meant to help get people oriented with typical proof styles for olympiad problems. Induction, recursion, invariants, and algorithms.",
+      "subject": "C",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 67,
+    "fields": {
+      "name": "Hybrid Geo",
+      "slug": "hybrid",
+      "artwork": "artwork/hybrid.png",
+      "artwork_thumb_md": "artwork-thumb-md/hybrid.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/hybrid.png",
+      "artist_name": "Joel Gerlach",
+      "description": "Geometry problems that involve heavy use of trig/length, featuring a lot of geometric inequalities. Also a bit of combinatorial geometry mixed in.",
+      "subject": "G",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 68,
+    "fields": {
+      "name": "IOI",
+      "slug": "ioi",
+      "artwork": "artwork/ioi.png",
+      "artwork_thumb_md": "artwork-thumb-md/ioi.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/ioi.png",
+      "artist_name": "Soumitro Shovon Dwip",
+      "description": "Algorithmic problems which involve showing that it is possible to achieve some task (rather than finding invariants or proving impossibility). Features selected problems from the IOI, so some CS background is helpful but not necessary.",
+      "subject": "C",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 69,
+    "fields": {
+      "name": "Alg Manip",
+      "slug": "algmanip",
+      "artwork": "",
+      "artwork_thumb_md": "",
+      "artwork_thumb_sm": "",
+      "artist_name": "",
+      "description": "Problems that purely involve algebraic manipulations without some other context, e.g. solving rather arbitrary equations or systems of equations.",
+      "subject": "A",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 70,
+    "fields": {
+      "name": "Dummy Unit",
+      "slug": "dummy",
+      "artwork": "",
+      "artwork_thumb_md": "",
+      "artwork_thumb_sm": "",
+      "artist_name": "",
+      "description": "Not an actual unit; used internally as a canonical file for testing. If you unlock this unit, you will get a blank file. NOTHING TO SEE HERE MOVE ALONG.\r\n\r\nMore seriously you can use this to test the submission interface too if you are new to OTIS.",
+      "subject": "M",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 71,
+    "fields": {
+      "name": "Art School",
+      "slug": "artschool",
+      "artwork": "artwork/artschool.png",
+      "artwork_thumb_md": "artwork-thumb-md/artschool.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/artschool.png",
+      "artist_name": "Evan Chen",
+      "description": "This is a unit about building \"diagram intuition\": being able to take a geometry diagram (which may be good or bad) and trying to get a sense of which claims should or shouldn't be true.",
+      "subject": "G",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 72,
+    "fields": {
+      "name": "Real Polynom",
+      "slug": "realpoly",
+      "artwork": "artwork/realpoly.png",
+      "artwork_thumb_md": "artwork-thumb-md/realpoly.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/realpoly.png",
+      "artist_name": "Owen Zhang",
+      "description": "General polynomials unit, maintaining some distance from integer polynomials (though still overlapping slightly). Includes Vieta/Newton, multivariable polynomials, Lagrange interpolation, size arguments, differentiation.",
+      "subject": "A",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 73,
+    "fields": {
+      "name": "Config Geo",
+      "slug": "configgeo",
+      "artwork": "artwork/configgeo.png",
+      "artwork_thumb_md": "artwork-thumb-md/configgeo.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/configgeo.png",
+      "artist_name": "Evan Chen",
+      "description": "Formerly known as \"American Geo\". This is a unit on geometry problems with a highly traditional or synthetic flavor, for example USAMO 2016/3 and USAMO 2017/3. These sorts of problems were popular on the USA olympiads and team selection tests around 2016 and it is totally not my fault. These particular ones tend to use common or standard configurations as a base and build on top of them, as opposed to starting afresh.",
+      "subject": "G",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 74,
+    "fields": {
+      "name": "G6 Summit",
+      "slug": "g6summit",
+      "artwork": "artwork/g6summit.png",
+      "artwork_thumb_md": "artwork-thumb-md/g6summit.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/g6summit.png",
+      "artist_name": "Aditya Pahuja",
+      "description": "A challenging geometry unit to conclude the year, with difficult problems reviewing everything that has appeared earlier.",
+      "subject": "G",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 75,
+    "fields": {
+      "name": "N7 Summit",
+      "slug": "n7summit",
+      "artwork": "artwork/n7summit.png",
+      "artwork_thumb_md": "artwork-thumb-md/n7summit.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/n7summit.png",
+      "artist_name": "``Milk''",
+      "description": "A challenging number theory unit to conclude the year, with difficult problems reviewing everything that has appeared earlier.",
+      "subject": "N",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 76,
+    "fields": {
+      "name": "Misc NT",
+      "slug": "miscnt",
+      "artwork": "artwork/miscnt.png",
+      "artwork_thumb_md": "artwork-thumb-md/miscnt.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/miscnt.png",
+      "artist_name": "Emily Yu",
+      "description": "Miscellaneous number theory problems that didn't fit well in other units.",
+      "subject": "N",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 77,
+    "fields": {
+      "name": "Forest of Wandering (Lv 35)",
+      "slug": "forest",
+      "artwork": "",
+      "artwork_thumb_md": "",
+      "artwork_thumb_sm": "",
+      "artist_name": "",
+      "description": "Secret unit unlocked at Level 35.",
+      "subject": "K",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 78,
+    "fields": {
+      "name": "Hill of Memories (Lv 47)",
+      "slug": "hill",
+      "artwork": "",
+      "artwork_thumb_md": "",
+      "artwork_thumb_sm": "",
+      "artist_name": "",
+      "description": "Secret unit that appears once level 47 is reached.",
+      "subject": "K",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 79,
+    "fields": {
+      "name": "Insect Land (Lv 61)",
+      "slug": "selmburg",
+      "artwork": "",
+      "artwork_thumb_md": "",
+      "artwork_thumb_sm": "",
+      "artist_name": "",
+      "description": "Secret unit that appears at level 61.",
+      "subject": "K",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 80,
+    "fields": {
+      "name": "Collinia Colosseum (Lv 75)",
+      "slug": "collinia",
+      "artwork": "",
+      "artwork_thumb_md": "",
+      "artwork_thumb_sm": "",
+      "artist_name": "",
+      "description": "Secret unit that appears at level 75.",
+      "subject": "K",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 81,
+    "fields": {
+      "name": "Induction & Recursion II",
+      "slug": "induct2",
+      "artwork": "artwork/induct2.png",
+      "artwork_thumb_md": "artwork-thumb-md/induct2.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/induct2.png",
+      "artist_name": "Soumitro Shovon Dwip",
+      "description": "This is a duplicate of Induction I, but more difficult and with different artwork.",
+      "subject": "C",
+      "hidden": false
+    }
+  },
+  {
+    "model": "core.unitgroup",
+    "pk": 82,
+    "fields": {
+      "name": "Analytic NT",
+      "slug": "analyticnt",
+      "artwork": "artwork/analyticnt.jpg",
+      "artwork_thumb_md": "artwork-thumb-md/analyticnt.png",
+      "artwork_thumb_sm": "artwork-thumb-sm/analyticnt.png",
+      "artist_name": "Nurtilek Duishobaev",
+      "description": "Problems that involve asymptotic calculations in number theory, featuring some multiplicative number theory. Convolution method, and generally problems that require more technical estimates.",
+      "subject": "N",
+      "hidden": false
+    }
+  }
+]
