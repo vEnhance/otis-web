@@ -66,7 +66,7 @@ Video tutorial: https://youtu.be/W27XcqeXp20
     You should be able to log in with the user you defined in step 9.
 12. The website is functional now, but it is a bit bare-bones.
     To populate it with some test data, use `http://127.0.0.1:8000/admin`
-    or run `./fixtures/load-dummy-data.sh`.
+    or run `./fixtures/gen-dummy-data.sh`.
 
 [activate]: https://python-poetry.org/docs/basic-usage/#activating-the-virtual-environment
 
