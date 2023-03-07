@@ -83,10 +83,6 @@
             .html('')
             .appendTo(parent);
 
-        function checkLineLength(s) {
-            return !s.split("\n").some(e => e.length > 100); // amol stronk
-        }
-
         $("#id_content").on("input", (e) => {
             render_content(true);
         });
