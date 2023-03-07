@@ -116,7 +116,7 @@ def randint_low(a: int, b: int) -> int:
 def create_sem_independent(users: list[User]):
     # achievements - 24 digit collision is basically impossible
     print(f"Creating {args.achievement_num} achievements")
-    AchievementFactory.create_batch(args.achievement_num, diamonds=randint_low(1, 6))
+    AchievementFactory.create_batch(args.achievement_num, diamonds=FuzzyInteger(3, 7))
 
     # arch problems and hints
     print(f"Creating {args.arch_num} ARCH problems")
