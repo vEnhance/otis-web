@@ -9,26 +9,23 @@ fetch("/payments/config/")
     // new
     // Event handler
     document.querySelector("#payButton").addEventListener("click", () => {
-      // Get Checkout Session ID
-      fetch(
-        "/payments/checkout/" +
-          $("#invoice_id").val() +
-          "/" +
-          Math.round($("#amount").val()) +
-          "/"
-      )
-        .then((result) => {
-          return result.json();
-        })
-        .then((data) => {
-          console.log(data);
-          // Redirect to Stripe Checkout
-          return stripe.redirectToCheckout({ sessionId: data.sessionId });
-        })
-        .then((res) => {
-          console.log(res);
+      async () => {
+        // Get Checkout Session ID
+        let result = await fetch(
+          `/payments/checkout/${$("invoice_id").val()}/${Math.round(
+            $("#amount").val()
+          )}/`
+        );
+
+        let data = await result.json();
+        console.log(data);
+
+        let res = await stripe.redirectToCheckout({
+          sessionId: data.sessionId,
         });
-    });
+        console.log(res);
+      };
+    })();
   });
 
 document.querySelector("#amount").addEventListener("keypress", function (e) {
