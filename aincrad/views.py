@@ -556,10 +556,11 @@ def api(request: HttpRequest) -> JsonResponse:
         raise SuspiciousOperation("You need to provide an action, silly")
 
     token = data.get("token")
-    if (
-        token is None
-        or sha256(token.encode("ascii")).hexdigest() != settings.API_TARGET_HASH
-    ):
+    if token is None:
+        return JsonResponse({"error": "No token provided"}, status=401)
+    elif settings.API_TARGET_HASH is None:
+        return JsonResponse({"error": "Not accepting tokens right now"}, status=503)
+    elif sha256(token.encode("ascii")).hexdigest() != settings.API_TARGET_HASH:
         return JsonResponse({"error": "🧋"}, status=418)
 
     if action in (
