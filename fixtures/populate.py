@@ -30,7 +30,7 @@ from arch.factories import HintFactory, ProblemFactory, VoteFactory
 from arch.models import Problem
 from core.factories import SemesterFactory, UserFactory, UserProfileFactory
 from core.models import Semester, Unit
-from dashboard.factories import SemesterDownloadFileFactory
+from dashboard.factories import PSetFactory, SemesterDownloadFileFactory
 from dashboard.models import PSet
 from exams.factories import ExamAttemptFactory, QuizFactory, TestFactory
 from exams.models import PracticeExam
@@ -338,7 +338,7 @@ def create_sem_dependent(semester: Semester, users: list[User]):
                 else:
                     status = "A"
                 psets.append(
-                    PSet(
+                    PSetFactory.build(
                         student=student,
                         unit=stu_units[i],
                         next_unit_to_unlock=stu_units[i + 1],
