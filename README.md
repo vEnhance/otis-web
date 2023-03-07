@@ -90,11 +90,10 @@ Optional steps:
    `.env` and uncommenting them. Note that you should not have any spaces (it is
    fine to leave the values as it is, but if you want to change anything, just
    make sure there is no whitespace surrounding the `=`).
-3. Run `docker compose build`. _MAKE SURE THAT `db.sqlite3` IS DELETED AT THIS
-   POINT (OR IS NAMED SOMETHING ELSE)._ Wait for it to finish.
-4. To start the server, run `docker compose up`. To execute a command inside the
-   container, run `docker exec -it otis-web /bin/bash`. To stop the server, run
-   `docker compose down`.
+3. Run `docker compose build`. Wait for it to finish.
+4. To start the server, run `docker compose up -d`. To execute a command inside
+   the container, run `docker exec -it otis-web /bin/bash`. To stop the server,
+   run `docker compose down`.
 5. Follow steps 11 - 12 from above.
 
 Note: You may need to delete db.sqlite3 if you're not getting desired results,

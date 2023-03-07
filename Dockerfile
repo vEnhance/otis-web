@@ -13,9 +13,6 @@ RUN poetry install
 
 COPY . .
 
-RUN . ./.env
-
-RUN poetry run python manage.py migrate
-RUN poetry run python manage.py createsuperuser --no-input
+RUN SETUP=1 ./start.sh
 
 CMD ./start.sh
