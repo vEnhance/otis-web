@@ -84,14 +84,7 @@
             .appendTo(parent);
 
         function checkLineLength(s) {
-            lines = s.split("\n");
-            for (let i in lines) {
-                console.log(lines[i]);
-                if (lines[i].length > 100) {
-                    return false;
-                }
-            }
-            return true;
+            return !s.split("\n").some(e => e.length > 100); // amol stronk
         }
 
         $("#id_content").on("input", (e) => {
