@@ -29,7 +29,6 @@
     <h2>Evan's feedback</h2>
     {{ pset.comments|linebreaks }}
   {% endif %}
-
   <p class="text-center">
     <a href="{% url "resubmit-pset" pset.pk %}"
        class="btn {% if pset.rejected %}btn-success{% elif pset.accepted %}btn-warning{% else %}btn-primary{% endif %}">
