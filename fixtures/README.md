@@ -28,3 +28,5 @@ None of the data here is a puzzle or diamond.
 
 Also, everything in this folder is a total mess.
 Pull requests to make this less of a pile of sludge are most welcome.
+In particular, `create_batch` is $O(n)$,
+so we need to fix that to make this script not take freakin forever.
