@@ -38,6 +38,7 @@ from roster.factories import (
     AssistantFactory,
     InvoiceFactory,
     RegistrationContainerFactory,
+    StudentRegistrationFactory,
 )
 from roster.models import Assistant, RegistrationContainer, Student
 from rpg.factories import (
@@ -259,11 +260,17 @@ def create_sem_dependent(semester: Semester, users: list[User]):
     invoices = InvoiceFactory.create_batch(
         len(users),
         student__user=factory.Iterator(users),
-        student__reg__container=container,
-        student__reg__processed=True,
         student__semester=semester,
     )
     students = [invoice.student for invoice in invoices]
+
+    print(f"Creating {len(users)} registrations")
+    regs = StudentRegistrationFactory.create_batch(
+        len(users), container=container, processed=True
+    )
+    for i, reg in enumerate(regs):
+        students[i].reg = reg
+    Student.objects.bulk_update(students, fields=("reg",), batch_size=50)
 
     print("Populating curriculums and creating psets (this could take a while...)")
     psets: list[PSet] = []

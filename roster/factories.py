@@ -53,7 +53,6 @@ class StudentFactory(DjangoModelFactory):
 
     user = SubFactory(UserFactory)
     semester = SubFactory(SemesterFactory)
-    reg = SubFactory(StudentRegistrationFactory)
     track = "C"
     newborn = False
     last_level_seen = 0
