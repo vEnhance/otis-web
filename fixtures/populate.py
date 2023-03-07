@@ -38,6 +38,7 @@ from roster.factories import (
     AssistantFactory,
     InvoiceFactory,
     RegistrationContainerFactory,
+    StudentFactory,
     StudentRegistrationFactory,
 )
 from roster.models import Assistant, RegistrationContainer, Student
@@ -108,27 +109,30 @@ def parse_args() -> argparse.Namespace:
 
 args = parse_args()
 
+# create_batch doesn't optimize, so here's
+# some hacky code to use bulk_create
+def bulk_create(cls, size, **kwargs):
+    return cls._meta.model.objects.bulk_create(cls.build_batch(size, **kwargs))
 
 # silly thing with slight bias for small numbers
 def randint_low(a: int, b: int) -> int:
     return (a + b) - round(math.sqrt(random.randint(a * a, b * b)))
 
-
 def create_sem_independent(users: list[User]):
     # achievements - 24 digit collision is basically impossible
     print(f"Creating {args.achievement_num} achievements")
-    AchievementFactory.create_batch(args.achievement_num, diamonds=FuzzyInteger(3, 7))
+    bulk_create(AchievementFactory, args.achievement_num, diamonds=FuzzyInteger(3, 7))
 
     # arch problems and hints
     print(f"Creating {args.arch_num} ARCH problems")
-    problems = ProblemFactory.create_batch(args.arch_num)
+    problems = bulk_create(ProblemFactory, args.arch_num)
     hint_seq_data: list[tuple[Problem, int]] = []
     for problem in problems:
         hint_num = randint_low(0, 10)
         for percent in random.sample(range(0, 101), hint_num):
             hint_seq_data.append((problem, percent))
 
-    HintFactory.create_batch(
+    bulk_create(HintFactory, 
         len(hint_seq_data),
         problem=factory.Sequence(lambda i: hint_seq_data[i][0]),
         number=factory.Sequence(lambda i: hint_seq_data[i][1]),
@@ -136,7 +140,7 @@ def create_sem_independent(users: list[User]):
 
     # exams
     print(f"Creating {args.exam_num*4} exam objects")
-    TestFactory.create_batch(
+    bulk_create(TestFactory, 
         args.exam_num,
         family="Waltz",
         start_date=datetime.now(),
@@ -145,7 +149,7 @@ def create_sem_independent(users: list[User]):
         ),
         number=factory.Iterator(range(1, args.exam_num + 1)),
     )
-    QuizFactory.create_batch(
+    bulk_create(QuizFactory, 
         args.exam_num,
         family="Waltz",
         start_date=datetime.now(),
@@ -155,7 +159,7 @@ def create_sem_independent(users: list[User]):
         number=factory.Iterator(range(1, args.exam_num + 1)),
     )
     last_year = datetime.now() + timedelta(days=-365)
-    TestFactory.create_batch(
+    bulk_create(TestFactory, 
         args.exam_num,
         family="Foxtrot",
         start_date=last_year,
@@ -164,7 +168,7 @@ def create_sem_independent(users: list[User]):
         ),
         number=factory.Iterator(range(1, args.exam_num + 1)),
     )
-    QuizFactory.create_batch(
+    bulk_create(QuizFactory, 
         args.exam_num,
         family="Foxtrot",
         start_date=last_year,
@@ -180,7 +184,7 @@ def create_sem_independent(users: list[User]):
     max_stu_achievements = round(math.sqrt(len(achievements)))
     problems: list[Problem] = list(Problem.objects.all())
 
-    UserProfileFactory.create_batch(
+    bulk_create(UserProfileFactory, 
         len(users), user=factory.Sequence(lambda i: users[i])
     )
 
@@ -211,19 +215,19 @@ def create_sem_independent(users: list[User]):
             suggest_seq_data.append((user, random.choice(units)))
 
     print(f"Creating {len(achievement_seq_data)} achievement unlocks")
-    AchievementUnlockFactory.create_batch(
+    bulk_create(AchievementUnlockFactory, 
         len(achievement_seq_data),
         user=factory.Sequence(lambda i: achievement_seq_data[i][0]),
         achievement=factory.Sequence(lambda i: achievement_seq_data[i][1]),
     )
     print(f"Creating {len(vote_seq_data)} ARCH votes")
-    VoteFactory.create_batch(
+    bulk_create(VoteFactory, 
         len(vote_seq_data),
         user=factory.Sequence(lambda i: vote_seq_data[i][0]),
         problem=factory.Sequence(lambda i: vote_seq_data[i][1]),
     )
     print(f"Creating {len(suggest_seq_data)} problem suggestions")
-    ProblemSuggestionFactory.create_batch(
+    bulk_create(ProblemSuggestionFactory, 
         len(suggest_seq_data),
         user=factory.Sequence(lambda i: suggest_seq_data[i][0]),
         unit=factory.Sequence(lambda i: suggest_seq_data[i][1]),
@@ -239,7 +243,7 @@ def create_sem_dependent(semester: Semester, users: list[User]):
     SemesterDownloadFileFactory.create(semester=semester)
 
     # markets
-    markets: list[Market] = MarketFactory.create_batch(
+    markets: list[Market] = bulk_create(MarketFactory, 
         args.market_num, semester=semester
     )
 
@@ -257,16 +261,19 @@ def create_sem_dependent(semester: Semester, users: list[User]):
     min_stu_units = min(max_stu_units, 3)
 
     print(f"Creating {len(users)} students and their invoices")
-    invoices = InvoiceFactory.create_batch(
+    students = bulk_create(StudentFactory, 
         len(users),
-        student__user=factory.Iterator(users),
-        student__semester=semester,
+        semester=semester,
+        user=factory.Iterator(users),
     )
-    students = [invoice.student for invoice in invoices]
+    invoices = bulk_create(InvoiceFactory, 
+        len(users),
+        student=factory.Iterator(students),
+    )
 
     print(f"Creating {len(users)} registrations")
-    regs = StudentRegistrationFactory.create_batch(
-        len(users), container=container, processed=True
+    regs = bulk_create(StudentRegistrationFactory, 
+        len(users), container=container, processed=True, user=factory.Iterator(users),
     )
     for i, reg in enumerate(regs):
         students[i].reg = reg
@@ -275,14 +282,21 @@ def create_sem_dependent(semester: Semester, users: list[User]):
     print("Populating curriculums and creating psets (this could take a while...)")
     psets: list[PSet] = []
 
+    # https://stackoverflow.com/questions/6996176/how-to-create-an-object-for-a-django-model-with-a-many-to-many-field/10116452#10116452
+    CurriculumThroughModel = Student.curriculum.through
+    UnlockedThroughModel = Student.unlocked_units.through
+
+    curriculum_bulk = []
+    unlocked_units_bulk = []
+
     for student in students:
         # add a few units
         stu_curriculum_num = random.randint(1, max_stu_units)
         stu_unlocked_num = random.randint(1, stu_curriculum_num)
         stu_units = random.sample(units, stu_curriculum_num)
-
-        student.curriculum.set(stu_units)
-        student.unlocked_units.set(stu_units[:stu_unlocked_num])
+        
+        curriculum_bulk.extend([CurriculumThroughModel(student_id=student.pk, unit_id=unit.pk) for unit in stu_units])
+        unlocked_units_bulk.extend([UnlockedThroughModel(student_id=student.pk, unit_id=unit.pk) for unit in stu_units[:stu_unlocked_num]])
 
         if stu_curriculum_num > min_stu_units + 1:
             for i in range(min_stu_units, stu_curriculum_num - 1):
@@ -302,6 +316,11 @@ def create_sem_dependent(semester: Semester, users: list[User]):
                         status=status,
                     )
                 )
+
+    CurriculumThroughModel.objects.bulk_create(curriculum_bulk)
+    UnlockedThroughModel.objects.bulk_create(unlocked_units_bulk)
+
+
     print(f"Creating {len(psets)} problem sets")
     PSet.objects.bulk_create(psets, batch_size=50)
 
@@ -316,7 +335,7 @@ def create_sem_dependent(semester: Semester, users: list[User]):
                 student_iter_data_for_quizzes.append(student)
                 quiz_iter_data.append(quiz)
     print(f"Creating {len(student_iter_data_for_quizzes)} quiz submissions")
-    ExamAttemptFactory.create_batch(
+    bulk_create(ExamAttemptFactory, 
         len(student_iter_data_for_quizzes),
         student=factory.Iterator(student_iter_data_for_quizzes),
         quiz=factory.Iterator(quiz_iter_data),
@@ -331,7 +350,7 @@ def create_sem_dependent(semester: Semester, users: list[User]):
         for _ in range(random.randrange(1, 3)):
             student_iter_data_for_quests.append(student)
     print(f"Creating {len(student_iter_data_for_quests)} quest completes")
-    QuestCompleteFactory.create_batch(
+    bulk_create(QuestCompleteFactory, 
         len(student_iter_data_for_quests),
         student=factory.Iterator(student_iter_data_for_quests),
     )
@@ -347,7 +366,7 @@ def create_sem_dependent(semester: Semester, users: list[User]):
                 user_iter_data_for_markets.append(student.user)
                 market_iter_data.append(market)
     print(f"Creating {len(user_iter_data_for_markets)} guesses for markets")
-    GuessFactory.create_batch(
+    bulk_create(GuessFactory, 
         len(user_iter_data_for_markets),
         user=factory.Iterator(user_iter_data_for_markets),
         market=factory.Iterator(market_iter_data),
@@ -371,12 +390,14 @@ def init():
 
     print(f"Creating {args.stu_num} user accounts")
     # users
-    users = UserFactory.create_batch(args.stu_num, groups=(verified_group,))
+    users = bulk_create(UserFactory, args.stu_num, groups=(verified_group,))
 
     # assistants
     print(f"Creating {args.assistant_num} assistants")
-    AssistantFactory.create_batch(
-        args.assistant_num, user__groups=(verified_group, staff_group)
+    assistant_users = bulk_create(UserFactory, args.assistant_num, groups=(verified_group, staff_group))
+
+    bulk_create(
+        AssistantFactory, args.assistant_num, user=factory.Iterator(assistant_users)
     )
 
     current_year = datetime.now().year
