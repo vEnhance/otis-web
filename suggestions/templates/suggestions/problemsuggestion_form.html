@@ -36,9 +36,9 @@
         <p>❌ This suggestion was not accepted. Thanks anyway.</p>
       {% endif %}
     </div>
-    {% if suggestion.feedback %}
+    {% if suggestion.staff_comments %}
       <h2>Evan's feedback</h2>
-      {{ suggestion.feedback|linebreaks }}
+      {{ suggestion.staff_comments|linebreaks }}
     {% endif %}
   {% else %}
     <div class="alert alert-warning">

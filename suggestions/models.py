@@ -45,7 +45,7 @@ class ProblemSuggestion(models.Model):
         "(Uncheck for an anonymous contribution.)",
         default=True,
     )
-    feedback = models.TextField(
+    staff_comments = models.TextField(
         help_text="Comments by Evan on this suggestion",
         blank=True,
     )

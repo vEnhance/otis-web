@@ -25,9 +25,9 @@
       if you wish to make changes.
     </div>
   {% endif %}
-  {% if pset.comments %}
+  {% if pset.staff_comments %}
     <h2>Evan's feedback</h2>
-    {{ pset.comments|linebreaks }}
+    {{ pset.staff_comments|linebreaks }}
   {% endif %}
   <p class="text-center">
     <a href="{% url "resubmit-pset" pset.pk %}"
