@@ -28,7 +28,7 @@ class UserFactory(DjangoModelFactory):
 
     first_name = Faker("first_name_female", min_length=5)
     last_name = Faker("last_name_female", min_length=5)
-    username = UniqueFaker("pystr", min_chars=30, max_chars=40, prefix="user_")
+    username = UniqueFaker("pystr", min_chars=15, max_chars=25, prefix="user_")
     email = Faker("ascii_safe_email")
 
     @post_generation
