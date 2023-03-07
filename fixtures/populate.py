@@ -5,6 +5,7 @@ import math
 import os
 import random
 from datetime import datetime, timedelta
+from typing import Any
 
 import django
 from django.conf import settings
@@ -22,6 +23,7 @@ settings.TESTING = True
 
 import factory
 from django.contrib.auth.models import Group, User
+from factory.base import Factory
 from factory.fuzzy import FuzzyInteger
 
 from arch.factories import HintFactory, ProblemFactory, VoteFactory
@@ -41,7 +43,7 @@ from roster.factories import (
     StudentFactory,
     StudentRegistrationFactory,
 )
-from roster.models import Assistant, RegistrationContainer, Student
+from roster.models import Assistant, RegistrationContainer, Student, StudentRegistration
 from rpg.factories import (
     AchievementFactory,
     AchievementUnlockFactory,
@@ -112,8 +114,8 @@ args = parse_args()
 
 # create_batch doesn't optimize, so here's
 # some hacky code to use bulk_create
-def bulk_create(cls, size, **kwargs):
-    return cls._meta.model.objects.bulk_create(cls.build_batch(size, **kwargs))
+def fast_bulk_create(cls: type[Factory], size: int, **kwargs: Any) -> Any:
+    return cls._meta.model.objects.bulk_create(cls.build_batch(size, **kwargs))  # type: ignore
 
 
 # silly thing with slight bias for small numbers
@@ -124,18 +126,20 @@ def randint_low(a: int, b: int) -> int:
 def create_sem_independent(users: list[User]):
     # achievements - 24 digit collision is basically impossible
     print(f"Creating {args.achievement_num} achievements")
-    bulk_create(AchievementFactory, args.achievement_num, diamonds=FuzzyInteger(3, 7))
+    fast_bulk_create(
+        AchievementFactory, args.achievement_num, diamonds=FuzzyInteger(3, 7)
+    )
 
     # arch problems and hints
     print(f"Creating {args.arch_num} ARCH problems")
-    problems = bulk_create(ProblemFactory, args.arch_num)
+    problems: list[Problem] = fast_bulk_create(ProblemFactory, args.arch_num)
     hint_seq_data: list[tuple[Problem, int]] = []
     for problem in problems:
         hint_num = randint_low(0, 10)
         for percent in random.sample(range(0, 101), hint_num):
             hint_seq_data.append((problem, percent))
 
-    bulk_create(
+    fast_bulk_create(
         HintFactory,
         len(hint_seq_data),
         problem=factory.Sequence(lambda i: hint_seq_data[i][0]),
@@ -144,7 +148,7 @@ def create_sem_independent(users: list[User]):
 
     # exams
     print(f"Creating {args.exam_num*4} exam objects")
-    bulk_create(
+    fast_bulk_create(
         TestFactory,
         args.exam_num,
         family="Waltz",
@@ -154,7 +158,7 @@ def create_sem_independent(users: list[User]):
         ),
         number=factory.Iterator(range(1, args.exam_num + 1)),
     )
-    bulk_create(
+    fast_bulk_create(
         QuizFactory,
         args.exam_num,
         family="Waltz",
@@ -165,7 +169,7 @@ def create_sem_independent(users: list[User]):
         number=factory.Iterator(range(1, args.exam_num + 1)),
     )
     last_year = datetime.now() + timedelta(days=-365)
-    bulk_create(
+    fast_bulk_create(
         TestFactory,
         args.exam_num,
         family="Foxtrot",
@@ -175,7 +179,7 @@ def create_sem_independent(users: list[User]):
         ),
         number=factory.Iterator(range(1, args.exam_num + 1)),
     )
-    bulk_create(
+    fast_bulk_create(
         QuizFactory,
         args.exam_num,
         family="Foxtrot",
@@ -192,7 +196,7 @@ def create_sem_independent(users: list[User]):
     max_stu_achievements = round(math.sqrt(len(achievements)))
     problems: list[Problem] = list(Problem.objects.all())
 
-    bulk_create(
+    fast_bulk_create(
         UserProfileFactory, len(users), user=factory.Sequence(lambda i: users[i])
     )
 
@@ -223,21 +227,21 @@ def create_sem_independent(users: list[User]):
             suggest_seq_data.append((user, random.choice(units)))
 
     print(f"Creating {len(achievement_seq_data)} achievement unlocks")
-    bulk_create(
+    fast_bulk_create(
         AchievementUnlockFactory,
         len(achievement_seq_data),
         user=factory.Sequence(lambda i: achievement_seq_data[i][0]),
         achievement=factory.Sequence(lambda i: achievement_seq_data[i][1]),
     )
     print(f"Creating {len(vote_seq_data)} ARCH votes")
-    bulk_create(
+    fast_bulk_create(
         VoteFactory,
         len(vote_seq_data),
         user=factory.Sequence(lambda i: vote_seq_data[i][0]),
         problem=factory.Sequence(lambda i: vote_seq_data[i][1]),
     )
     print(f"Creating {len(suggest_seq_data)} problem suggestions")
-    bulk_create(
+    fast_bulk_create(
         ProblemSuggestionFactory,
         len(suggest_seq_data),
         user=factory.Sequence(lambda i: suggest_seq_data[i][0]),
@@ -254,7 +258,7 @@ def create_sem_dependent(semester: Semester, users: list[User]):
     SemesterDownloadFileFactory.create(semester=semester)
 
     # markets
-    markets: list[Market] = bulk_create(
+    markets: list[Market] = fast_bulk_create(
         MarketFactory, args.market_num, semester=semester
     )
 
@@ -272,20 +276,20 @@ def create_sem_dependent(semester: Semester, users: list[User]):
     min_stu_units = min(max_stu_units, 3)
 
     print(f"Creating {len(users)} students and their invoices")
-    students = bulk_create(
+    students: list[Student] = fast_bulk_create(
         StudentFactory,
         len(users),
         semester=semester,
         user=factory.Iterator(users),
     )
-    bulk_create(
+    fast_bulk_create(
         InvoiceFactory,
         len(users),
         student=factory.Iterator(students),
     )
 
     print(f"Creating {len(users)} registrations")
-    regs = bulk_create(
+    regs: list[StudentRegistration] = fast_bulk_create(
         StudentRegistrationFactory,
         len(users),
         container=container,
@@ -361,7 +365,7 @@ def create_sem_dependent(semester: Semester, users: list[User]):
                 student_iter_data_for_quizzes.append(student)
                 quiz_iter_data.append(quiz)
     print(f"Creating {len(student_iter_data_for_quizzes)} quiz submissions")
-    bulk_create(
+    fast_bulk_create(
         ExamAttemptFactory,
         len(student_iter_data_for_quizzes),
         student=factory.Iterator(student_iter_data_for_quizzes),
@@ -377,7 +381,7 @@ def create_sem_dependent(semester: Semester, users: list[User]):
         for _ in range(random.randrange(1, 3)):
             student_iter_data_for_quests.append(student)
     print(f"Creating {len(student_iter_data_for_quests)} quest completes")
-    bulk_create(
+    fast_bulk_create(
         QuestCompleteFactory,
         len(student_iter_data_for_quests),
         student=factory.Iterator(student_iter_data_for_quests),
@@ -394,7 +398,7 @@ def create_sem_dependent(semester: Semester, users: list[User]):
                 user_iter_data_for_markets.append(student.user)
                 market_iter_data.append(market)
     print(f"Creating {len(user_iter_data_for_markets)} guesses for markets")
-    bulk_create(
+    fast_bulk_create(
         GuessFactory,
         len(user_iter_data_for_markets),
         user=factory.Iterator(user_iter_data_for_markets),
@@ -419,15 +423,16 @@ def init():
 
     print(f"Creating {args.stu_num} user accounts")
     # users
-    users = bulk_create(UserFactory, args.stu_num, groups=(verified_group,))
+    users: list[User] = fast_bulk_create(
+        UserFactory, args.stu_num, groups=(verified_group,)
+    )
 
     # assistants
     print(f"Creating {args.assistant_num} assistants")
-    assistant_users = bulk_create(
+    assistant_users: list[User] = fast_bulk_create(
         UserFactory, args.assistant_num, groups=(verified_group, staff_group)
     )
-
-    bulk_create(
+    fast_bulk_create(
         AssistantFactory, args.assistant_num, user=factory.Iterator(assistant_users)
     )
 
