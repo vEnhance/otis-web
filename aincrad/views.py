@@ -54,6 +54,7 @@ class JSONData(TypedDict):
     eligible: bool
     clubs: int
     hours: float
+    feedback: str
 
     # keys for add single hint
     content: str
