@@ -1,0 +1,538 @@
+[
+  {
+    "model": "rpg.level",
+    "pk": 1,
+    "fields": { "threshold": 1, "name": "Starter", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 2,
+    "fields": { "threshold": 2, "name": "n00b", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 3,
+    "fields": { "threshold": 3, "name": "n000b", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 4,
+    "fields": { "threshold": 4, "name": "n0000b", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 5,
+    "fields": { "threshold": 5, "name": "n00000b", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 6,
+    "fields": { "threshold": 6, "name": "n000000b", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 7,
+    "fields": { "threshold": 7, "name": "n0000000b", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 8,
+    "fields": { "threshold": 8, "name": "n00000000b", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 9,
+    "fields": { "threshold": 9, "name": "n000000000b", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 10,
+    "fields": { "threshold": 10, "name": "Newbie", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 11,
+    "fields": { "threshold": 11, "name": "Newcomer", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 12,
+    "fields": { "threshold": 12, "name": "Tenderfoot", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 13,
+    "fields": { "threshold": 13, "name": "Arriver", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 14,
+    "fields": { "threshold": 14, "name": "Rookie", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 15,
+    "fields": { "threshold": 15, "name": "Recruit", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 16,
+    "fields": { "threshold": 16, "name": "Novice", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 17,
+    "fields": { "threshold": 17, "name": "Neophyte", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 18,
+    "fields": { "threshold": 18, "name": "Aspirant", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 19,
+    "fields": { "threshold": 19, "name": "Initiate", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 20,
+    "fields": { "threshold": 20, "name": "Disciple", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 21,
+    "fields": { "threshold": 21, "name": "Proselyte", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 22,
+    "fields": { "threshold": 22, "name": "Philosopher", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 23,
+    "fields": { "threshold": 23, "name": "Acolyte", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 24,
+    "fields": { "threshold": 24, "name": "Curate", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 25,
+    "fields": { "threshold": 25, "name": "Adept", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 26,
+    "fields": { "threshold": 26, "name": "Traveler", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 27,
+    "fields": { "threshold": 27, "name": "Rover", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 28,
+    "fields": { "threshold": 28, "name": "Surveyor", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 29,
+    "fields": { "threshold": 29, "name": "Voyager", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 30,
+    "fields": { "threshold": 30, "name": "Journeyer", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 31,
+    "fields": { "threshold": 31, "name": "Prober", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 32,
+    "fields": { "threshold": 32, "name": "Adventurer", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 33,
+    "fields": { "threshold": 33, "name": "Explorer", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 34,
+    "fields": { "threshold": 34, "name": "Discoverer", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 35,
+    "fields": { "threshold": 35, "name": "Pioneer", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 36,
+    "fields": { "threshold": 36, "name": "Engineer", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 37,
+    "fields": { "threshold": 37, "name": "Originator", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 38,
+    "fields": { "threshold": 38, "name": "Technician", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 39,
+    "fields": { "threshold": 39, "name": "Scientist", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 40,
+    "fields": { "threshold": 40, "name": "Veteran Scientist", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 41,
+    "fields": {
+      "threshold": 41,
+      "name": "Disciple of the Sciences",
+      "alttext": ""
+    }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 42,
+    "fields": {
+      "threshold": 42,
+      "name": "Scholar of the Sciences",
+      "alttext": ""
+    }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 43,
+    "fields": {
+      "threshold": 43,
+      "name": "Erudite of the Sciences",
+      "alttext": ""
+    }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 44,
+    "fields": {
+      "threshold": 44,
+      "name": "Expert of the Sciences",
+      "alttext": ""
+    }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 45,
+    "fields": {
+      "threshold": 45,
+      "name": "Master of the Sciences",
+      "alttext": ""
+    }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 46,
+    "fields": { "threshold": 46, "name": "Inventor", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 47,
+    "fields": { "threshold": 47, "name": "Innovator", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 48,
+    "fields": { "threshold": 48, "name": "Composer", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 49,
+    "fields": { "threshold": 49, "name": "Builder", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 50,
+    "fields": { "threshold": 50, "name": "Author", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 51,
+    "fields": { "threshold": 51, "name": "Craftsperson", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 52,
+    "fields": { "threshold": 52, "name": "Designer", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 53,
+    "fields": { "threshold": 53, "name": "Architect", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 54,
+    "fields": { "threshold": 54, "name": "Creator", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 55,
+    "fields": { "threshold": 55, "name": "Artisan", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 56,
+    "fields": { "threshold": 56, "name": "Artist", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 57,
+    "fields": { "threshold": 57, "name": "Disciple of the Arts", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 58,
+    "fields": { "threshold": 58, "name": "Scholar of the Arts", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 59,
+    "fields": { "threshold": 59, "name": "Erudite of the Arts", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 60,
+    "fields": { "threshold": 60, "name": "Expert of the Arts", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 61,
+    "fields": { "threshold": 61, "name": "Master of the Arts", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 62,
+    "fields": { "threshold": 62, "name": "Paladin", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 63,
+    "fields": { "threshold": 63, "name": "Sage", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 64,
+    "fields": { "threshold": 64, "name": "Strider", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 65,
+    "fields": { "threshold": 65, "name": "Sentinel", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 66,
+    "fields": { "threshold": 66, "name": "Ambassador", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 67,
+    "fields": { "threshold": 67, "name": "Guide", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 68,
+    "fields": { "threshold": 68, "name": "Pathfinder", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 69,
+    "fields": { "threshold": 69, "name": "Leader", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 70,
+    "fields": { "threshold": 70, "name": "Visionary", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 71,
+    "fields": { "threshold": 71, "name": "Evoker", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 72,
+    "fields": { "threshold": 72, "name": "Seer", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 73,
+    "fields": { "threshold": 73, "name": "Conjurer", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 74,
+    "fields": { "threshold": 74, "name": "Theurgist", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 75,
+    "fields": { "threshold": 75, "name": "Arcanist", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 76,
+    "fields": { "threshold": 76, "name": "Magician", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 77,
+    "fields": { "threshold": 77, "name": "Spellcaster", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 78,
+    "fields": { "threshold": 78, "name": "Sorcerer", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 79,
+    "fields": { "threshold": 79, "name": "Necromancer", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 80,
+    "fields": { "threshold": 80, "name": "Enchanter", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 81,
+    "fields": { "threshold": 81, "name": "Phantasmist", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 82,
+    "fields": { "threshold": 82, "name": "Apparitionist", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 83,
+    "fields": { "threshold": 83, "name": "Spellbinder", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 84,
+    "fields": { "threshold": 84, "name": "Illusionist", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 85,
+    "fields": { "threshold": 85, "name": "Superhuman", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 86,
+    "fields": { "threshold": 86, "name": "Demonlord", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 87,
+    "fields": {
+      "threshold": 87,
+      "name": "Disciple of the Unknown",
+      "alttext": ""
+    }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 88,
+    "fields": {
+      "threshold": 88,
+      "name": "Scholar of the Unknown",
+      "alttext": ""
+    }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 89,
+    "fields": {
+      "threshold": 89,
+      "name": "Erudite of the Unknown",
+      "alttext": ""
+    }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 90,
+    "fields": {
+      "threshold": 90,
+      "name": "Expert of the Unknown",
+      "alttext": ""
+    }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 91,
+    "fields": { "threshold": 91, "name": "Master of East Wind", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 92,
+    "fields": { "threshold": 92, "name": "Master of North Wind", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 93,
+    "fields": { "threshold": 93, "name": "Master of West Wind", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 94,
+    "fields": { "threshold": 94, "name": "Master of South Wind", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 95,
+    "fields": { "threshold": 95, "name": "Master of Spring", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 96,
+    "fields": { "threshold": 96, "name": "Master of Summer", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 97,
+    "fields": { "threshold": 97, "name": "Master of Autumn", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 98,
+    "fields": { "threshold": 98, "name": "Master of Winter", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 99,
+    "fields": { "threshold": 99, "name": "???", "alttext": "" }
+  },
+  {
+    "model": "rpg.level",
+    "pk": 100,
+    "fields": { "threshold": 100, "name": "Grand Master", "alttext": "" }
+  }
+]

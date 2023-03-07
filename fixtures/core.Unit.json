@@ -1,0 +1,697 @@
+[
+  {
+    "model": "core.unit",
+    "pk": 1,
+    "fields": { "group": 1, "code": "BGX", "position": 84 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 3,
+    "fields": { "group": 2, "code": "BNW", "position": 53 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 4,
+    "fields": { "group": 3, "code": "DGX", "position": 38 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 5,
+    "fields": { "group": 3, "code": "ZGX", "position": 39 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 6,
+    "fields": { "group": 73, "code": "ZGY", "position": 99 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 7,
+    "fields": { "group": 4, "code": "DAY", "position": 47 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 8,
+    "fields": { "group": 4, "code": "ZAY", "position": 48 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 9,
+    "fields": { "group": 7, "code": "BGW", "position": 43 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 10,
+    "fields": { "group": 7, "code": "DGW", "position": 44 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 11,
+    "fields": { "group": 7, "code": "DGX", "position": 83 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 13,
+    "fields": { "group": 8, "code": "ZCW", "position": 52 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 14,
+    "fields": { "group": 9, "code": "BGW", "position": 40 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 15,
+    "fields": { "group": 9, "code": "DGW", "position": 41 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 16,
+    "fields": { "group": 9, "code": "DGX", "position": 82 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 18,
+    "fields": { "group": 11, "code": "DNW", "position": 55 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 20,
+    "fields": { "group": 13, "code": "BGY", "position": 80 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 21,
+    "fields": { "group": 13, "code": "DGY", "position": 81 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 22,
+    "fields": { "group": 14, "code": "DCW", "position": 24 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 23,
+    "fields": { "group": 14, "code": "ZCW", "position": 25 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 25,
+    "fields": { "group": 15, "code": "DNY", "position": 33 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 26,
+    "fields": { "group": 16, "code": "BCW", "position": 9 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 27,
+    "fields": { "group": 17, "code": "ZCX", "position": 108 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 29,
+    "fields": { "group": 18, "code": "DCW", "position": 62 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 32,
+    "fields": { "group": 18, "code": "ZCX", "position": 63 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 33,
+    "fields": { "group": 19, "code": "BFW", "position": 18 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 34,
+    "fields": { "group": 19, "code": "DFW", "position": 17 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 35,
+    "fields": { "group": 19, "code": "DFX", "position": 93 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 37,
+    "fields": { "group": 19, "code": "ZFX", "position": 94 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 38,
+    "fields": { "group": 19, "code": "ZFW", "position": 92 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 39,
+    "fields": { "group": 20, "code": "BAX", "position": 26 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 40,
+    "fields": { "group": 21, "code": "BCW", "position": 10 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 41,
+    "fields": { "group": 21, "code": "DCW", "position": 11 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 42,
+    "fields": { "group": 21, "code": "DCX", "position": 12 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 43,
+    "fields": { "group": 23, "code": "DCX", "position": 103 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 45,
+    "fields": { "group": 24, "code": "DMY", "position": 68 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 46,
+    "fields": { "group": 24, "code": "ZMY", "position": 69 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 47,
+    "fields": { "group": 25, "code": "BCW", "position": 114 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 48,
+    "fields": { "group": 26, "code": "ZAY", "position": 91 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 49,
+    "fields": { "group": 27, "code": "DGW", "position": 1 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 50,
+    "fields": { "group": 27, "code": "DGX", "position": 2 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 53,
+    "fields": { "group": 28, "code": "DNW", "position": 56 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 55,
+    "fields": { "group": 29, "code": "ZGY", "position": 4 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 56,
+    "fields": { "group": 30, "code": "ZGX", "position": 51 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 57,
+    "fields": { "group": 31, "code": "BCX", "position": 21 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 60,
+    "fields": { "group": 81, "code": "DCY", "position": 22 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 61,
+    "fields": { "group": 32, "code": "BAW", "position": 29 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 62,
+    "fields": { "group": 33, "code": "BAW", "position": 88 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 64,
+    "fields": { "group": 36, "code": "ZGY", "position": 97 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 65,
+    "fields": { "group": 37, "code": "DGW", "position": 96 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 67,
+    "fields": { "group": 38, "code": "DAX", "position": 46 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 68,
+    "fields": { "group": 39, "code": "DCY", "position": 49 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 69,
+    "fields": { "group": 39, "code": "ZCY", "position": 50 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 70,
+    "fields": { "group": 40, "code": "DCW", "position": 13 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 71,
+    "fields": { "group": 40, "code": "DCX", "position": 14 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 73,
+    "fields": { "group": 41, "code": "DFW", "position": 19 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 74,
+    "fields": { "group": 41, "code": "ZFW", "position": 20 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 75,
+    "fields": { "group": 42, "code": "BCW", "position": 113 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 76,
+    "fields": { "group": 44, "code": "BNW", "position": 54 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 78,
+    "fields": { "group": 56, "code": "BAW", "position": 5 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 80,
+    "fields": { "group": 48, "code": "DCX", "position": 60 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 82,
+    "fields": { "group": 48, "code": "ZCX", "position": 61 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 83,
+    "fields": { "group": 49, "code": "DCX", "position": 121 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 84,
+    "fields": { "group": 51, "code": "DGW", "position": 95 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 86,
+    "fields": { "group": 52, "code": "BAX", "position": 27 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 87,
+    "fields": { "group": 52, "code": "DAX", "position": 28 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 88,
+    "fields": { "group": 53, "code": "ZGX", "position": 45 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 89,
+    "fields": { "group": 54, "code": "ZGX", "position": 42 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 90,
+    "fields": { "group": 55, "code": "ZNW", "position": 57 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 91,
+    "fields": { "group": 55, "code": "ZNX", "position": 58 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 92,
+    "fields": { "group": 57, "code": "DAX", "position": 89 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 93,
+    "fields": { "group": 46, "code": "DCY", "position": 64 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 94,
+    "fields": { "group": 46, "code": "ZCY", "position": 65 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 96,
+    "fields": { "group": 58, "code": "ZGX", "position": 87 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 98,
+    "fields": { "group": 22, "code": "ZCW", "position": 15 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 99,
+    "fields": { "group": 22, "code": "ZCX", "position": 16 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 100,
+    "fields": { "group": 43, "code": "DNY", "position": 70 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 101,
+    "fields": { "group": 43, "code": "ZNY", "position": 71 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 102,
+    "fields": { "group": 35, "code": "DNY", "position": 72 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 103,
+    "fields": { "group": 35, "code": "ZNY", "position": 73 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 104,
+    "fields": { "group": 34, "code": "DAX", "position": 30 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 105,
+    "fields": { "group": 12, "code": "ZMY", "position": 126 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 106,
+    "fields": { "group": 73, "code": "DGY", "position": 98 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 107,
+    "fields": { "group": 25, "code": "DCW", "position": 115 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 109,
+    "fields": { "group": 5, "code": "DMW", "position": 78 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 113,
+    "fields": { "group": 10, "code": "DMW", "position": 105 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 114,
+    "fields": { "group": 10, "code": "ZMW", "position": 106 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 115,
+    "fields": { "group": 50, "code": "DNW", "position": 76 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 116,
+    "fields": { "group": 58, "code": "DGX", "position": 86 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 118,
+    "fields": { "group": 26, "code": "ZAW", "position": 90 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 119,
+    "fields": { "group": 6, "code": "DCW", "position": 119 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 120,
+    "fields": { "group": 6, "code": "ZCW", "position": 120 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 121,
+    "fields": { "group": 13, "code": "BGW", "position": 34 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 122,
+    "fields": { "group": 45, "code": "BNW", "position": 31 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 123,
+    "fields": { "group": 47, "code": "ZCY", "position": 122 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 124,
+    "fields": { "group": 23, "code": "ZCX", "position": 104 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 125,
+    "fields": { "group": 13, "code": "DGW", "position": 35 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 126,
+    "fields": { "group": 59, "code": "ZAW", "position": 102 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 127,
+    "fields": { "group": 29, "code": "DGY", "position": 3 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 128,
+    "fields": { "group": 61, "code": "ZGW", "position": 116 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 129,
+    "fields": { "group": 62, "code": "DAW", "position": 109 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 130,
+    "fields": { "group": 62, "code": "ZAW", "position": 110 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 131,
+    "fields": { "group": 5, "code": "DMY", "position": 79 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 132,
+    "fields": { "group": 63, "code": "DFY", "position": 117 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 133,
+    "fields": { "group": 64, "code": "ZCW", "position": 125 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 134,
+    "fields": { "group": 45, "code": "DNW", "position": 32 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 135,
+    "fields": { "group": 14, "code": "BCW", "position": 23 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 136,
+    "fields": { "group": 48, "code": "BCX", "position": 59 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 137,
+    "fields": { "group": 65, "code": "BAY", "position": 6 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 138,
+    "fields": { "group": 66, "code": "BCY", "position": 8 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 139,
+    "fields": { "group": 68, "code": "DCY", "position": 66 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 140,
+    "fields": { "group": 68, "code": "ZCY", "position": 67 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 141,
+    "fields": { "group": 67, "code": "DGX", "position": 111 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 142,
+    "fields": { "group": 67, "code": "ZGX", "position": 112 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 143,
+    "fields": { "group": 69, "code": "DAY", "position": 101 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 144,
+    "fields": { "group": 69, "code": "BAY", "position": 100 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 145,
+    "fields": { "group": 17, "code": "DCX", "position": 107 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 146,
+    "fields": { "group": 70, "code": "BMW", "position": 0 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 147,
+    "fields": { "group": 71, "code": "DGX", "position": 36 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 148,
+    "fields": { "group": 72, "code": "DAW", "position": 74 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 149,
+    "fields": { "group": 72, "code": "ZAW", "position": 75 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 150,
+    "fields": { "group": 1, "code": "DGX", "position": 85 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 151,
+    "fields": { "group": 75, "code": "ZNY", "position": 124 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 152,
+    "fields": { "group": 74, "code": "ZGY", "position": 123 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 153,
+    "fields": { "group": 76, "code": "DNX", "position": 77 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 154,
+    "fields": { "group": 77, "code": "BKV", "position": 138 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 155,
+    "fields": { "group": 77, "code": "DKV", "position": 127 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 156,
+    "fields": { "group": 77, "code": "ZKV", "position": 128 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 157,
+    "fields": { "group": 78, "code": "BKV", "position": 129 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 158,
+    "fields": { "group": 78, "code": "DKV", "position": 130 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 159,
+    "fields": { "group": 78, "code": "ZKV", "position": 131 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 160,
+    "fields": { "group": 79, "code": "BKV", "position": 132 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 161,
+    "fields": { "group": 79, "code": "DKV", "position": 133 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 162,
+    "fields": { "group": 79, "code": "ZKV", "position": 134 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 163,
+    "fields": { "group": 80, "code": "BKV", "position": 135 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 164,
+    "fields": { "group": 80, "code": "DKV", "position": 136 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 165,
+    "fields": { "group": 80, "code": "ZKV", "position": 137 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 166,
+    "fields": { "group": 66, "code": "BCX", "position": 7 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 167,
+    "fields": { "group": 71, "code": "ZGY", "position": 37 }
+  },
+  {
+    "model": "core.unit",
+    "pk": 168,
+    "fields": { "group": 82, "code": "ZNW", "position": 118 }
+  }
+]

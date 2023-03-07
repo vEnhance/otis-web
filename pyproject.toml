@@ -78,6 +78,7 @@ omit = [
   "evans_django_tools/**",
   "manage.py",
   "*/admin.py",
+  "fixtures/gen-dummy-data.sh",
 ]
 
 [tool.pyright]
