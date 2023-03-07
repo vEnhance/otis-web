@@ -81,6 +81,26 @@ Optional steps:
 
 [venv]: https://djangocentral.com/how-to-a-create-virtual-environment-for-python/
 
+### Using Docker
+
+0. Follow steps 0 - 3 from the above tutorial.
+1. Make sure to install [Docker](https://www.docker.com/) and make sure you
+   download a version compatible with your computer.
+2. Set up the 3 environment variables at the bottom of `env` by copying them to
+   `.env` and uncommenting them. Note that you should not have any spaces (it is
+   fine to leave the values as it is, but if you want to change anything, just
+   make sure there is no whitespace surrounding the `=`).
+3. Run `docker compose build`. _MAKE SURE THAT `db.sqlite3` IS DELETED AT THIS
+   POINT (OR IS NAMED SOMETHING ELSE)._ Wait for it to finish.
+4. To start the server, run `docker compose up`. To execute a command inside the
+   container, run `docker exec -it otis-web /bin/bash`. To stop the server, run
+   `docker compose down`.
+5. Follow steps 11 - 12 from above.
+
+Note: You may need to delete db.sqlite3 if you're not getting desired results,
+as it serves as a cache. At this point, spinning up 2 separate containers with
+separate data stores is not supported.
+
 ## Feature requests or bug reports
 
 Submit an [issue on GitHub](https://github.com/vEnhance/otis-web/issues).

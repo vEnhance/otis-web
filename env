@@ -38,3 +38,12 @@ IS_PRODUCTION=0
 # STRIPE_ENDPOINT_SECRET="whsec_..."
 
 # vim: ft=sh
+
+
+# below are variables for DOCKER USE ONLY! They will not be useful unless you
+# use Docker (or you uses --no-input on `create superuser`, but if you're doing
+# that, I'll assume you know what you're doing).
+
+# DJANGO_SUPERUSER_PASSWORD=root
+# DJANGO_SUPERUSER_EMAIL=admin@email.com
+# DJANGO_SUPERUSER_USERNAME=root
