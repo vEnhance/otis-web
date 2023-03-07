@@ -1,3 +1,5 @@
+# TODO: this entire thing is a giant hack that could be really cleaned up
+
 import argparse
 import math
 import os
