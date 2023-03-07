@@ -186,6 +186,10 @@ class PSet(models.Model):
     special_notes = models.TextField(
         help_text="If there's anything you need to say before we proceed", blank=True
     )
+    comments = models.TextField(
+        help_text="Comments by Evan on this Unit Set",
+        blank=True,
+    )
 
     class Meta:
         verbose_name = "PSet submission"

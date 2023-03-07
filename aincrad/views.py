@@ -54,6 +54,7 @@ class JSONData(TypedDict):
     eligible: bool
     clubs: int
     hours: float
+    feedback: str
 
     # keys for add single hint
     content: str
@@ -198,6 +199,7 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
         pset.status = data["status"]
         pset.clubs = data.get("clubs", None)
         pset.hours = data.get("hours", None)
+        pset.comments = data.get("comments", None)
         pset.save()
         if (
             pset.status == "A"
@@ -222,6 +224,7 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
         suggestion = get_object_or_404(ProblemSuggestion, pk=data["pk"])
         suggestion.status = data["status"]
         suggestion.eligible = data["eligible"]
+        suggestion.feedback = data["feedback"]
         suggestion.save()
         return JsonResponse({"result": "success"}, status=200)
     elif action == "triage_job":

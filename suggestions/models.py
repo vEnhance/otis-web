@@ -45,6 +45,10 @@ class ProblemSuggestion(models.Model):
         "(Uncheck for an anonymous contribution.)",
         default=True,
     )
+    feedback = models.TextField(
+        help_text="Comments by Evan on this suggestion",
+        blank=True,
+    )
 
     status = models.CharField(
         max_length=10,
