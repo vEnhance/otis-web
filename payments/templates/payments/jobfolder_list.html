@@ -53,20 +53,11 @@
         sliceOfIssues.slice(0, 5).forEach(issue => {
             console.log(issue);
             let issue_url = `https://github.com/vEnhance/otis-web/issues/${issue.number}`;
-            let item = `
-                  <p>
-                    <strong>
-                      <a href="${issue_url}">#${issue.number}</a>
-                    </strong>. ${issue.title}
-                    
-                    ${issue.labels.map(label => `
-                      <a href="${create_label_url(label)}">
-                        <sup style="color:#${label.color};">
-                          ${label.name}
-                        </sup>
-                      </a>`)}
-                  </p>`;
-            console.log(item);
+            let item = `<p>`;
+            item += `<strong><a href="${issue_url}">#${issue.number}</a></strong>. `;
+            item += `${issue.title}`;
+            item += `${issue.labels.map(label => `<a href="${create_label_url(label)}"><sup style="color:#${label.color};">${label.name}</sup></a>`)}`;
+            item += `</p>`;
             $("#github-issues-list").append(item);
         });
     });
