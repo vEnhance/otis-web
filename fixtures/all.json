@@ -2403,7 +2403,7 @@
       "artwork_thumb_md": "artwork-thumb-md/euclid.png",
       "artwork_thumb_sm": "artwork-thumb-sm/euclid.png",
       "artist_name": "Alex Zhao",
-      "description": "A unit about the idea that if $d$ divides $a$ and $b$, then $d$ divides any linear combination of $a$ and $b$. This intuition underlies Bezout's lemma, the Euclidean algorithm, and the division algorithm, as well as a techinque which I privately call remainder bounding. One very good example of a problem of this feeling is SL 2016 N4 (sort of the crown example of remainder bounding).",
+      "description": "A unit about the idea that if $d$ divides $a$ and $b$, then $d$ divides any linear combination of $a$ and $b$. This intuition underlies Bezout's lemma, the Euclidean algorithm, and the division algorithm, as well as a technique which I privately call remainder bounding. One very good example of a problem of this feeling is SL 2016 N4 (sort of the crown example of remainder bounding).",
       "subject": "N",
       "hidden": false
     }
@@ -2673,7 +2673,7 @@
       "artwork_thumb_md": "artwork-thumb-md/ineqfunc.png",
       "artwork_thumb_sm": "artwork-thumb-sm/ineqfunc.png",
       "artist_name": "Heyang Ni",
-      "description": "Techinques for inequalities of the form $f(x_1) + ... + f(x_n)$. Jensen, Karamata, tangent line trick. The $n-1$ equal value principle is deferred to Ineq Standard.",
+      "description": "Techniques for inequalities of the form $f(x_1) + ... + f(x_n)$. Jensen, Karamata, tangent line trick. The $n-1$ equal value principle is deferred to Ineq Standard.",
       "subject": "A",
       "hidden": false
     }
