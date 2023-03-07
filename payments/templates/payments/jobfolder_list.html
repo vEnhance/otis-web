@@ -31,40 +31,35 @@
   <p>Here are a few random open issues.</p>
   <div id="github-issues-list"></div>
   <script type="text/javascript">
+    const create_label_url = (label) => {
+        let url = new URL('https://github.com/vEnhance/otis-web/issues');
+        url.searchParams.set('q', `is:issue is:open label:"${label.name}"`);
+        return url;
+    };
+
     // https://stackoverflow.com/a/26608674/4826845
-    $(document).ready(function() {
-        $.getJSON(
-            "https://api.github.com/repos/vEnhance/otis-web/issues?state=open",
-            function(allIssues) {
-                console.log(allIssues);
-                allIssues.sort(() => 0.5 - Math.random()); // random order
-                const sliceOfIssues = allIssues.slice(0, 5);
-                // ... only in JavaScript does .sort() assume strings huh
-                sliceOfIssues.sort((issue1, issue2) => issue1.number - issue2.number);
-                $.each(sliceOfIssues, function(i, issue) {
-                    if (i >= 5) return;
-                    console.log(issue);
-                    const issue_url = `https://github.com/vEnhance/otis-web/issues/${issue.number}`;
-                    let item = '<p>';
-                    item += `<strong><a href="${issue_url}">#${issue.number}</a></strong>.`;
-                    item += ' ';
-                    item += issue.title;
-                    $.each(issue.labels, function(j, label) {
-                        const label_url =
-                            'https://github.com/vEnhance/otis-web/issues?q=is%3Aissue+is%3Aopen+' +
-                            `label%3A"${label.name.replaceAll(" ", "+")}"`;
-                        item += ' ';
-                        item += `<a href='${label_url}'>`;
-                        item += `<sup style="color:#${label.color};">`;
-                        item += label.name;
-                        item += '</sup>';
-                        item += '</a>';
-                    });
-                    item += '</p>';
-                    console.log(item);
-                    $("#github-issues-list").append(item);
-                });
-            });
+    $(document).ready(async function() {
+        let result = await fetch(
+            "https://api.github.com/repos/vEnhance/otis-web/issues?state=open");
+        let allIssues = await result.json();
+
+        allIssues = allIssues.filter(issue => !issue.pull_request);
+        console.log(allIssues);
+        allIssues.sort(() => 0.5 - Math.random()); // random order
+        const sliceOfIssues = allIssues.slice(0, 5);
+
+        // ... only in JavaScript does .sort() assume strings huh
+        sliceOfIssues.sort((issue1, issue2) => issue1.number - issue2.number);
+        sliceOfIssues.slice(0, 5).forEach(issue => {
+            console.log(issue);
+            let issue_url = `https://github.com/vEnhance/otis-web/issues/${issue.number}`;
+            let item = `<p>`;
+            item += `<strong><a href="${issue_url}">#${issue.number}</a></strong>. `;
+            item += `${issue.title}`;
+            item += issue.labels.map(label => `<a href="${create_label_url(label)}"><sup style="color:#${label.color};">${label.name}</sup></a>`).join(' ');
+            item += `</p>`;
+            $("#github-issues-list").append(item);
+        });
     });
   </script>
   {% for jobfolder in jobfolders %}
