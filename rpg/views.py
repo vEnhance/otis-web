@@ -79,7 +79,7 @@ def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
                     )
                     logger.log(
                         SUCCESS_LOG_LEVEL,
-                        f"{student.name} just obtained {achievement}!",
+                        f"{student.name} just obtained `{achievement}`!",
                         extra={"request": request},
                     )
                 else:
