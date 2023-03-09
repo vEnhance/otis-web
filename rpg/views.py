@@ -377,11 +377,13 @@ class DiamondUpdate(
 
     def form_valid(self, form: BaseModelForm[Achievement]):
         level_info = assert_maxed_out_level_info(self.student)
-        form.instance.diamonds = level_info["meters"]["diamonds"].level
+        n = min(level_info["meters"]["diamonds"].level, 7)
+        form.instance.diamonds = n
         form.instance.creator = self.student.user
         messages.success(
             self.request,
-            f"Successfully forged diamond worth {form.instance.diamonds}◆, your current charisma level.",
+            f"Successfully forged diamond worth {n}◆, "
+            "which is your current charisma level (capped at 7).",
         )
         return super().form_valid(form)
 
