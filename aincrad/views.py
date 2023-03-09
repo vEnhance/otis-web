@@ -199,9 +199,10 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
         pset.status = data["status"]
         pset.clubs = data.get("clubs", None)
         pset.hours = data.get("hours", None)
-        if pset.staff_comments:
-            pset.staff_comments += "\n\n" + "-" * 40 + "\n\n"
-        pset.staff_comments += data.get("staff_comments", None)
+        if "staff_comments" in data:
+            if pset.staff_comments:
+                pset.staff_comments += "\n\n" + "-" * 40 + "\n\n"
+            pset.staff_comments += data["staff_comments"]
         pset.save()
         if (
             pset.status == "A"
@@ -226,9 +227,10 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
         suggestion = get_object_or_404(ProblemSuggestion, pk=data["pk"])
         suggestion.status = data["status"]
         suggestion.eligible = data["eligible"]
-        if suggestion.staff_comments:
-            suggestion.staff_comments += "\n\n" + "-" * 40 + "\n\n"
-        suggestion.staff_comments += data["staff_comments"]
+        if "staff_comments" in data:
+            if suggestion.staff_comments:
+                suggestion.staff_comments += "\n\n" + "-" * 40 + "\n\n"
+            suggestion.staff_comments += data["staff_comments"]
         suggestion.save()
         return JsonResponse({"result": "success"}, status=200)
     elif action == "triage_job":
