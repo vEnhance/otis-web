@@ -16,8 +16,6 @@ If you have an empty database, you can run
 `./fixtures/gen-dummy-data.sh`
 
 and it'll generate some dummy data dynamically to play with.
-Note that this takes multiple minutes on my machine,
-for reasons I can't figure out.
 
 In fact, `fixtures/all.json` is just a snapshot of one run of this script.
 That's probably just easier.
