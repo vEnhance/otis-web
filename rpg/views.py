@@ -151,18 +151,17 @@ class AchievementDetail(VerifiedRequiredMixin, DetailView[Achievement]):
 
     def dispatch(self, *args: Any, **kwargs: Any) -> HttpResponseBase:
         achievement = self.get_object()
+        ret = super().dispatch(*args, **kwargs)  # trigger verified required
         assert isinstance(self.request.user, User)
         if AchievementUnlock.objects.filter(
             user=self.request.user, achievement=achievement
         ).exists():
-            pass
+            return ret
         elif self.request.user.is_superuser:
-            messages.warning(
-                self.request, "You can only see this page since you are admin."
-            )
+            messages.warning(self.request, "Viewing as admin…")
+            return ret
         else:
             raise PermissionDenied("You haven't found this yet")
-        return super().dispatch(*args, **kwargs)
 
 
 class AchievementCertifyList(LoginRequiredMixin, ListView[Achievement]):
