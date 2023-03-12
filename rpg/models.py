@@ -71,9 +71,13 @@ class Achievement(models.Model):
     always_show_image = models.BooleanField(
         default=False,
         help_text="If enabled, always show the achievement image, even if no one earned the diamond yet.",
-        verbose_name="Reveal",
+        verbose_name="Show Image",
     )
-
+    show_solution = models.BooleanField(
+        default=True,
+        help_text="If enabled, the solution page for a diamond is available to those who have unlocked the diamond.",
+        verbose_name="Show Solution",
+    )
     class Meta:
         db_table = "dashboard_achievement"
 

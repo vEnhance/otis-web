@@ -26,6 +26,7 @@ class AchievementIEResource(resources.ModelResource):
             "diamonds",
             "description",
             "solution",
+            "show_solution"
         )
 
 
@@ -36,6 +37,7 @@ class AchievementAdmin(ImportExportModelAdmin):
         "name",
         "diamonds",
         "always_show_image",
+        "show_solution",
         "description",
         "solution",
         "creator",
@@ -53,6 +55,7 @@ class AchievementAdmin(ImportExportModelAdmin):
     )
     list_filter = (
         "always_show_image",
+        "show_solution",
         ("creator", admin.EmptyFieldListFilter),
     )
     resource_class = AchievementIEResource
