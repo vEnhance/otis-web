@@ -152,8 +152,9 @@ class AchievementDetail(VerifiedRequiredMixin, DetailView[Achievement]):
     def dispatch(self, *args: Any, **kwargs: Any) -> HttpResponseBase:
         achievement = self.get_object()
         ret = super().dispatch(*args, **kwargs)  # trigger verified required
-        assert isinstance(self.request.user, User)
-        if self.request.user == achievement.creator:
+        if not isinstance(self.request.user, User):
+            raise PermissionDenied("Log in first")
+        elif self.request.user == achievement.creator:
             return ret
         elif self.request.user.is_superuser:
             messages.warning(self.request, "Viewing as admin…")
