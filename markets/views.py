@@ -82,9 +82,10 @@ class SubmitGuess(VerifiedRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]
         except Guess.DoesNotExist:
             pass
         else:
-            messages.error(
-                request, f"You already submitted {guess.value} for this market."
-            )
+            if request.method == "POST":
+                messages.error(
+                    request, f"You already submitted {guess.value} for this market."
+                )
             target_url = reverse("market-pending", args=(guess.pk,))
             return HttpResponseRedirect(target_url)
 

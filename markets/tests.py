@@ -149,8 +149,11 @@ class MarketTests(EvanTestCase):
                 "market-guess", "guess-my-ssn", data={"value": 100}, follow=True
             )
 
-            resp = self.assertGet20X("market-guess", "guess-my-ssn", follow=True)
-            self.assertHas(resp, "You already submitted")
+            self.assertGet30X("market-guess", "guess-my-ssn")
+            resp = self.assertPost20X(
+                "market-guess", "guess-my-ssn", data={"value": 500}, follow=True
+            )
+            self.assertContains(resp, "You already submitted")
 
             guess = Guess.objects.get(user__username="alice")
             self.assertEqual(guess.value, 100)
@@ -165,9 +168,11 @@ class MarketTests(EvanTestCase):
             self.assertPost20X(
                 "market-guess", "guess-my-ssn", data={"value": 100}, follow=True
             )
-
-            resp = self.assertGet20X("market-guess", "guess-my-ssn", follow=True)
-            self.assertHas(resp, "You already submitted")
+            self.assertGet30X("market-guess", "guess-my-ssn")
+            resp = self.assertPost20X(
+                "market-guess", "guess-my-ssn", data={"value": 500}, follow=True
+            )
+            self.assertContains(resp, "You already submitted")
 
             guess = Guess.objects.get(user__username="alice")
             self.assertEqual(guess.value, 100)
@@ -203,8 +208,11 @@ class MarketTests(EvanTestCase):
                 "market-guess", "guess-my-ssn", data={"value": 100}, follow=True
             )
 
-            resp = self.assertGet20X("market-guess", "guess-my-ssn", follow=True)
-            self.assertHas(resp, "You already submitted")
+            self.assertGet30X("market-guess", "guess-my-ssn")
+            resp = self.assertPost20X(
+                "market-guess", "guess-my-ssn", data={"value": 500}, follow=True
+            )
+            self.assertContains(resp, "You already submitted")
 
             guess = Guess.objects.get(user__username="alice")
             self.assertEqual(guess.value, 100)
