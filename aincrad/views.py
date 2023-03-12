@@ -560,16 +560,15 @@ def api(request: HttpRequest) -> JsonResponse:
     if type(data) != type(JSONData()):  # type: ignore
         raise SuspiciousOperation("Not valid JSON (needs a dict)")
 
-    action = data.get("action", None)
-    if action is None:
+    if not "action" in data:
         raise SuspiciousOperation("You need to provide an action, silly")
+    action = data["action"]
 
-    token = data.get("token")
-    if token is None:
-        return JsonResponse({"error": "No token provided"}, status=401)
+    if not "token" in data:
+        raise SuspiciousOperation("No token provided")
     elif settings.API_TARGET_HASH is None:
         return JsonResponse({"error": "Not accepting tokens right now"}, status=503)
-    elif sha256(token.encode("ascii")).hexdigest() != settings.API_TARGET_HASH:
+    elif sha256(data["token"].encode("ascii")).hexdigest() != settings.API_TARGET_HASH:
         return JsonResponse({"error": "🧋"}, status=418)
 
     if action in (
