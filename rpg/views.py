@@ -153,15 +153,23 @@ class AchievementDetail(VerifiedRequiredMixin, DetailView[Achievement]):
         achievement = self.get_object()
         ret = super().dispatch(*args, **kwargs)  # trigger verified required
         assert isinstance(self.request.user, User)
-        if AchievementUnlock.objects.filter(
-            user=self.request.user, achievement=achievement
-        ).exists():
+        if self.request.user == achievement.creator:
             return ret
         elif self.request.user.is_superuser:
             messages.warning(self.request, "Viewing as admin…")
             return ret
         else:
-            raise PermissionDenied("You haven't found this yet")
+            if AchievementUnlock.objects.filter(
+                user=self.request.user, achievement=achievement
+            ).exists():
+                if not achievement.show_solution:
+                    raise PermissionDenied(
+                        "The solution page to this diamond is not public."
+                    )
+                else:
+                    return ret
+            else:
+                raise PermissionDenied("You haven't found this one yet.")
 
 
 class AchievementCertifyList(LoginRequiredMixin, ListView[Achievement]):
@@ -351,6 +359,7 @@ class DiamondUpdate(
         "image",
         "description",
         "solution",
+        "show_solution",
         "always_show_image",
     )
     success_message = "Updated diamond successfully."
