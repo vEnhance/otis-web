@@ -34,4 +34,26 @@
   </div>
   <hr />
   {% include "generic_form.html" %}
+  <hr />
+  <div class="alert alert-warning">
+    <h3 class="alert-heading">Warning for non-USA payments</h3>
+    <p>
+      If you are not from the United States and want payment,
+      then before accepting any tasks, please make sure that EITHER
+      <ul>
+        <li>
+          at least one of the payment methods here actually works for you
+          (this will vary by country), or
+        </li>
+        <li>
+          you have some other workaround, like a relative in the United States
+          who can receive the payment for you.
+        </li>
+      </ul>
+    </p>
+    <p>
+      If you cannot provide a valid and working payment method,
+      then you won't be able to receive any payment.
+    </p>
+  </div>
 {% endblock layout-content %}
