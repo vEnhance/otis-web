@@ -153,7 +153,7 @@ build-backend = "poetry.core.masonry.api"
 disable = ["tall-model", "missing-related-name", "checking-settings-debug", "nullable-string-field"]
 
 [tool.codespell]
-skip = "roster/country_abbrevs.py,arch/migrations/0013_auto_20210603_2343.py,roster/migrations/0060_studentregistration_country.py"
+skip = "roster/country_abbrevs.py,*/migrations/*.py,poetry.lock"
 count = ""
 quiet-level = 3
 
