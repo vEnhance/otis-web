@@ -78,6 +78,7 @@ class Achievement(models.Model):
         help_text="If enabled, the solution page for a diamond is available to those who have unlocked the diamond.",
         verbose_name="Show Solution",
     )
+
     class Meta:
         db_table = "dashboard_achievement"
 

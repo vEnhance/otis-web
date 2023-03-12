@@ -153,40 +153,24 @@ class AchievementDetail(VerifiedRequiredMixin, DetailView[Achievement]):
         achievement = self.get_object()
         ret = super().dispatch(*args, **kwargs)  # trigger verified required
         assert isinstance(self.request.user, User)
-<<<<<<< Updated upstream
-        if AchievementUnlock.objects.filter(
-            user=self.request.user, achievement=achievement
-        ).exists():
+        if self.request.user == achievement.creator:
             return ret
-||||||| Stash base
-        if AchievementUnlock.objects.filter(
-            user=self.request.user, achievement=achievement
-        ).exists():
-            pass
-=======
-
-        if achievement.creator == self.request.user:
-            pass
->>>>>>> Stashed changes
         elif self.request.user.is_superuser:
             messages.warning(self.request, "Viewing as admin…")
             return ret
         else:
-<<<<<<< Updated upstream
-            raise PermissionDenied("You haven't found this yet")
-||||||| Stash base
-            raise PermissionDenied("You haven't found this yet")
-        return super().dispatch(*args, **kwargs)
-=======
             if AchievementUnlock.objects.filter(
                 user=self.request.user, achievement=achievement
             ).exists():
-                if (not achievement.show_solution):
-                    raise PermissionDenied("The solution page to this diamond is not public.")
+                if not achievement.show_solution:
+                    raise PermissionDenied(
+                        "The solution page to this diamond is not public."
+                    )
+                else:
+                    return ret
             else:
                 raise PermissionDenied("You haven't found this one yet.")
-        return super().dispatch(*args, **kwargs)
->>>>>>> Stashed changes
+
 
 class AchievementCertifyList(LoginRequiredMixin, ListView[Achievement]):
     template_name = "rpg/diamond_list.html"

@@ -26,7 +26,7 @@ class AchievementIEResource(resources.ModelResource):
             "diamonds",
             "description",
             "solution",
-            "show_solution"
+            "show_solution",
         )
 
 
