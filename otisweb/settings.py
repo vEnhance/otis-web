@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     "hanabi",
     "markets",
     "mouse",
+    "opal",
     "roster",
     "rpg",
     "payments",
