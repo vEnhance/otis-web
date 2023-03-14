@@ -1,0 +1,54 @@
+\documentclass[12pt]{scrartcl}
+\newcommand{\thehuntnumber}{0}
+\newcommand{\thepuzzletitle}{Title of the Puzzle}
+
+%% DO NOT EDIT BELOW THIS LINE
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{graphicx}
+\usepackage{asymptote}
+\usepackage{lastpage}
+\usepackage[usenames,svgnames,dvipsnames]{xcolor}
+\usepackage[framemethod=TikZ]{mdframed}
+\usepackage[colorlinks]{hyperref}
+\usetikzlibrary{shadows}
+\mdfdefinestyle{mdpurplebox}{roundcorner=10pt,linewidth=1pt,
+  skipabove=12pt,skipbelow=12pt,innertopmargin=9pt,innerbottommargin=9pt,
+  linecolor=black,backgroundcolor=red!60!black,
+  shadow=true,shadowsize=12pt,shadowcolor=black!30,
+  frametitleaboveskip=4pt,frametitlebelowskip=4pt,frametitlebackgroundcolor=black,
+  frametitlefont=\bfseries\sffamily\color{white},frametitlerule=true}
+\newcommand{\makeheader}{\begin{mdframed}[style=mdpurplebox,
+  frametitle={$\diamondsuit$ OPAL Hunt \thehuntnumber}]
+  \centering\huge\sffamily\bfseries\color{white} \thepuzzletitle
+\end{mdframed}}
+\newenvironment{flavor}{\color{red!50!black}\sffamily\itshape}{}
+\newcommand{\hrulebar}{\bgroup\color{red!30!black}
+\par\hspace{\fill}\rule{0.95\linewidth}{.7pt}\hspace{\fill}
+\par\nointerlineskip \vspace{\baselineskip}\egroup}
+\newcommand{\puzzlestart}{\hrulebar\vspace{1em}}
+\usepackage{scrlayer-scrpage}
+\renewcommand{\headfont}{}
+\ihead{\textsl{\color{red!30!black} \thepuzzletitle}}
+\ohead{\textsl{\color{red!30!black} OPAL Hunt \thehuntnumber}}
+\ifoot{\url{https://otis.evanchen.cc/opal/}}
+\ofoot{\textsl{\color{red!30!black} Page \thepage\ of \pageref*{LastPage}}}
+\chead{}
+\cfoot{}
+%% DO NOT EDIT ABOVE THIS LINE
+
+\usepackage{lipsum}
+
+\begin{document}
+\makeheader
+\begin{flavor}
+  Enter flavor text here.
+  You can delete this part if your puzzle has no flavortext.
+\end{flavor}
+
+\puzzlestart
+
+Enter puzzle content here.
+
+\lipsum[1-8]
+
+\end{document}

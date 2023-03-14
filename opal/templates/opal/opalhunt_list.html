@@ -1,0 +1,81 @@
+{% extends "layout.html" %}
+{% load humanize %}
+{% block title %}
+  OTIS Puzzle Assembly Line
+{% endblock title %}
+{% block layout-content %}
+  <h1>List of hunts</h1>
+  {% for hunt in hunts %}
+    {% if not hunt.active %}
+      <p>
+        ‣
+        <b><a href="{{ hunt.get_absolute_url }}">{{ hunt }}</a></b>
+        (started {{ hunt.start_date }})
+      </p>
+    {% elif hunt.has_started %}
+      <div class="alert alert-success">
+        <h2 class="alert-heading">{{ hunt }} has started!</h2>
+        <a class="btn btn-link btn-primary" href="{{ hunt.get_absolute_url }}">Show puzzles</a>
+        <p>Event started {{ hunt.start_date|timesince }} ago.</p>
+      </div>
+    {% else %}
+      <div class="alert alert-info">
+        <h2 class="alert-heading">{{ hunt }} — {{ hunt.start_date }}</h2>
+        <ul>
+          <li>Starts in {{ hunt.start_date|timeuntil }}</li>
+          <li>Author signup deadline: {{ hunt.author_signup_deadline }}</li>
+          <li>Author draft deadline: {{ hunt.author_draft_deadline }}</li>
+          {% if hunt.author_signups_are_open and hunt.author_signup_url %}
+            <li>
+              <a href="{{ hunt.author_signup_url }}">Sign up to contribute a puzzle</a>
+            </li>
+          {% endif %}
+        </ul>
+      </div>
+    {% endif %}
+  {% endfor %}
+  <hr />
+  <h1>About</h1>
+  <p>
+    The <b>OTIS Puzzle Assembly Line</b>, or <b>OPAL</b>,
+    is a puzzle-potluck type event designed to help OTIS students
+    get experience with writing and solving puzzlehunt-style puzzles.
+    It's meant for beginners with little to no previous hunt experience.
+  </p>
+  <ul>
+    <li>
+      <a href="{% url "opal-authors" %}">Detailed instructions for authors</a>
+    </li>
+    <li>
+      <a href="{% url "opal-rules" %}">Detailed rules for solvers</a>
+    </li>
+  </ul>
+  <h2>So what is a puzzle hunt anyways?</h2>
+  <p>
+    Read
+    <a href="https://blog.vero.site/post/puzzlehunts">Brian Chen's introduction</a>!
+    Evan also has some stuff written on
+    <a href="https://web.evanchen.cc/puzzlehunt.html">https://web.evanchen.cc/puzzlehunt.html</a>.
+  </p>
+  <p>
+    In short, a puzzle gives you some data,
+    and you need to get an <i>answer</i> out of this data,
+    which for OPAL will be an alphanumeric string (case-insensitive).
+    Instructions are usually not provided,
+    and figuring out how to interpret the data is part of the puzzle.
+  </p>
+  <h2>How does OPAL work?</h2>
+  <p>In OPAL, any OTIS student can participate as a solver in the event.</p>
+  <p>
+    In addition, each student (potentially with co-authors)
+    can optionally <i>submit</i> up to one puzzle, hence the "potluck" description.
+    (So you essentially get one free answer.)
+    The deadlines to sign up to contribute a puzzle are shown above.
+  </p>
+  <p>
+    Each OPAL event consists of several feeder puzzles written by students,
+    plus one <i>meta-puzzle</i> set by the game master
+    that uses the answers to each of the feeders.
+    The answer to the meta-puzzle is guaranteed to be a 24-26 digit hex code.
+  </p>
+{% endblock layout-content %}

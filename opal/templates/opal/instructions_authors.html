@@ -1,0 +1,79 @@
+{% extends "layout.html" %}
+{% load humanize %}
+{% load static %}
+{% block title %}
+  OPAL: Author Instructions
+{% endblock title %}
+{% block layout-content %}
+  <p>
+    <a href="{% url "opal-index" %}">↩️  Back to OPAL index</a>
+  </p>
+  <h2>Instructions</h2>
+  <ol>
+    <li>
+      To join as an author, sign up using the provided link
+      before the signup deadline.
+      You may specify there whether you wish to be a solo author
+      or if you want to work with co-authors.
+    </li>
+    <li>
+      Within a few days of the deadline (hopefully),
+      Evan will assign you an answer.
+      You (and co-authors) need to write a puzzle
+      that gives that specific answer.
+      A deadline for a "first draft" of the puzzle is given,
+      and of course you need to have a final draft before the hunt begins.
+    </li>
+    <li>
+      Puzzles should be submitted in PDF format using the
+      <a href="{% static "opal-template.tex" %}">OPAL LaTeX template</a>.
+    </li>
+    <li>
+      Please <strong>talk to Evan</strong> as much as possible
+      during the writing process.
+      The whole point of this event is so that you can get feedback
+      on the puzzle-writing process and learn from these comments.
+    </li>
+    <li>
+      Solutions can be submitted in any format that's convenient to you.
+      In practice, "link to Google doc" seems to be the easiest.
+    </li>
+    <li>
+      Aim for easier puzzles, especially if you're writing for the first time.
+      OPAL is meant to be a beginner hunt.
+      Mystery-Hunt level puzzles are probably not going to be solved well.
+    </li>
+  </ol>
+  <h2>Advice</h2>
+  <ul>
+    <li>
+      If you're new to puzzle hunts,
+      you should look through (or better yet, try to solve!)
+      some past puzzle hunt puzzles to learn what you're signing up for.
+      There's a couple
+      <a href="https://web.evanchen.cc/puzzlehunt.html#new">beginner hunts</a>
+      listed on Evan's webpage.
+    </li>
+    <li>
+      Required reading:
+      <ul>
+        <li>
+          <a href="http://www.mit.edu/~dwilson/puzzles/puzzlewriting.html">David Wilson's puzzle-writing advice</a>
+          (2014)
+        </li>
+        <li>
+          <a href="https://blog.evanchen.cc/2021/02/18/some-puzzle-writing-thoughts-from-an-amateur/">
+            Evan's puzzle-writing advice
+          </a>
+          (2021)
+        </li>
+      </ul>
+    </li>
+    <li>
+      Talk to Evan as much as you possible.
+      Puzzle-writing is notoriously hard for beginners,
+      and you'll be better off getting as much advice as you can
+      on your specific drafts and ideas.
+    </li>
+  </ul>
+{% endblock layout-content %}

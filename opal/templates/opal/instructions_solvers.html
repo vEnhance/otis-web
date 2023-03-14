@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+{% load humanize %}
+{% block title %}
+  OPAL: Author Instructions
+{% endblock title %}
+{% block layout-content %}
+  <p>
+    <a href="{% url "opal-index" %}">↩️  Back to OPAL index</a>
+  </p>
+  <h2>Rules and format</h2>
+  <ol>
+    <li>
+      The hunt is open to any OTIS students and alums
+      through the OTIS-WEB account.
+    </li>
+    <li>
+      Each hunt will consist of several feeder puzzles,
+      plus one "meta-puzzle" that uses the answers to all the feeder puzzles.
+    </li>
+    <li>
+      The answer to each puzzle will be an alphanumeric string.
+      The answers are case-insensitive and whitespace-insensitive.
+    </li>
+    <li>
+      The answer to the final meta-puzzle will be a valid diamond code
+      and serves as the prize for completing the OPAL hunt.
+    </li>
+    <li>
+      There is no time limit to the hunt.
+      You can work on them whenever you want.
+    </li>
+    <li>Guess rate limits: TO BE DETERMINED</li>
+    <li>
+      There are no constraints on team sizes,
+      but the OPAL hunt is meant to be reasonably solvable by individuals.
+      We think you will have the most fun working in teams of 1-4 people,
+      but that's just a suggestion.
+    </li>
+  </ol>
+{% endblock layout-content %}
