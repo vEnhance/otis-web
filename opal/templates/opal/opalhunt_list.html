@@ -4,6 +4,14 @@
   OTIS Puzzle Assembly Line
 {% endblock title %}
 {% block layout-content %}
+  <p>
+    <i>Diamonds are forged under pressure.</i>
+  </p>
+  <p>
+    The <b>OTIS Puzzle Assembly Line</b>, or <b>OPAL</b>,
+    is a beginner-friendly puzzle-potluck type event designed to help OTIS students
+    get experience with writing and solving puzzlehunt-style puzzles.
+  </p>
   <h1>List of hunts</h1>
   {% for hunt in hunts %}
     {% if not hunt.active %}
@@ -36,12 +44,6 @@
   {% endfor %}
   <hr />
   <h1>About</h1>
-  <p>
-    The <b>OTIS Puzzle Assembly Line</b>, or <b>OPAL</b>,
-    is a puzzle-potluck type event designed to help OTIS students
-    get experience with writing and solving puzzlehunt-style puzzles.
-    It's meant for beginners with little to no previous hunt experience.
-  </p>
   <ul>
     <li>
       <a href="{% url "opal-authors" %}">Detailed instructions for authors</a>
