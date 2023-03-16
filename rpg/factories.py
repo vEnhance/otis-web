@@ -21,7 +21,7 @@ class AchievementFactory(DjangoModelFactory):
     class Meta:
         model = Achievement
 
-    code = UniqueFaker("bban")
+    code = UniqueFaker("hexify", text="^" * 24)
     name = Faker("job")
     image = ImageField(filename="TESTING_achievement_icon.png")
     description = UniqueFaker("sentence")
