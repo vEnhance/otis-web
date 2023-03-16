@@ -230,6 +230,7 @@ class FoundList(
 ):
     raise_exception = True
     template_name = "rpg/found_list.html"
+    context_object_name = "unlocks_list"
 
     def get_queryset(self) -> QuerySet[AchievementUnlock]:
         self.achievement = get_object_or_404(Achievement, pk=self.kwargs["pk"])

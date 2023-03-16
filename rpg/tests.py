@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.db.models.query import QuerySet
 from django.utils import timezone
 
 from core.factories import GroupFactory, UnitFactory, UserFactory
@@ -19,7 +21,8 @@ from rpg.levelsys import (  # NOQA
     get_level_info,
     get_student_rows,
 )
-from rpg.models import AchievementUnlock
+from rpg.models import Achievement, AchievementUnlock
+from rpg.views import get_achievement_checksum
 
 utc = timezone.utc
 
@@ -30,6 +33,7 @@ class TestLevelSystem(EvanTestCase):
         super().setUpClass()
         verified_group = GroupFactory(name="Verified")
         alice = StudentFactory.create(
+            user__username="alice",
             user__first_name="Alice",
             user__last_name="Aardvark",
             user__groups=(verified_group,),
@@ -337,6 +341,84 @@ class TestLevelSystem(EvanTestCase):
         )
         self.assertGet20X("diamond-solution", a1.pk)
         self.assertGet20X("diamond-solution", a2.pk)
+
+
+class TestAchievements(EvanTestCase):
+    def test_found_list(self):
+        alice = StudentFactory.create()
+        a1 = AchievementFactory.create()
+        a2 = AchievementFactory.create()
+        AchievementUnlockFactory.create(user=alice.user, achievement=a1)
+        AchievementUnlockFactory.create_batch(7, achievement=a1)
+        AchievementUnlockFactory.create_batch(3, achievement=a2)
+
+        # check students don't have access
+        self.login(alice.user)
+        self.assertGet40X("found-listing", a1.pk)
+        self.assertGet40X("found-listing", a1.pk)
+
+        # login as staff now and check
+        admin = UserFactory.create(is_staff=True, is_superuser=True)
+        self.login(admin)
+        resp = self.assertGet20X("found-listing", a1.pk)
+        self.assertEqual(resp.context["unlocks_list"].count(), 8)
+        resp = self.assertGet20X("found-listing", a2.pk)
+        self.assertEqual(resp.context["unlocks_list"].count(), 3)
+
+    def test_trader_list(self):
+        a1 = AchievementFactory.create(diamonds=1)
+        a2 = AchievementFactory.create(diamonds=2)
+        a3 = AchievementFactory.create(diamonds=3)
+        a4 = AchievementFactory.create(diamonds=4)
+        a5 = AchievementFactory.create(creator=UserFactory.create(), diamonds=5)
+        a6 = AchievementFactory.create(creator=UserFactory.create(), diamonds=6)
+
+        alice = StudentFactory.create()
+        bob = StudentFactory.create()
+
+        AchievementUnlockFactory.create(achievement=a1, user=alice.user)
+        AchievementUnlockFactory.create(achievement=a1, user=bob.user)
+        AchievementUnlockFactory.create(achievement=a2, user=alice.user)
+        AchievementUnlockFactory.create(achievement=a3, user=bob.user)
+        AchievementUnlockFactory.create(achievement=a5, user=alice.user)
+        AchievementUnlockFactory.create(achievement=a6, user=bob.user)
+
+        AchievementUnlockFactory.create_batch(10, achievement=a1)
+        AchievementUnlockFactory.create_batch(20, achievement=a2)
+        AchievementUnlockFactory.create_batch(30, achievement=a3)
+        AchievementUnlockFactory.create_batch(5, achievement=a4)
+
+        self.assertEqual(AchievementUnlock.objects.filter(user=alice.user).count(), 3)
+        self.login(bob.user)
+
+        wrong_checksum = get_achievement_checksum(
+            alice.user.pk, 2, settings.CERT_HASH_KEY
+        )
+        self.assertGet40X("achievements-certify", alice.user.pk, wrong_checksum)
+        checksum = get_achievement_checksum(alice.user.pk, 3, settings.CERT_HASH_KEY)
+
+        resp = self.assertGet20X("achievements-certify", alice.user.pk, checksum)
+        queryset: QuerySet[Achievement] = resp.context["achievement_list"]
+        self.assertEqual(queryset.count(), 4)
+
+        self.assertEqual(getattr(queryset.get(pk=a1.pk), "num_found"), 12)
+        self.assertEqual(getattr(queryset.get(pk=a1.pk), "obtained"), True)
+        self.assertEqual(getattr(queryset.get(pk=a1.pk), "viewed_obtained"), True)
+
+        self.assertEqual(getattr(queryset.get(pk=a2.pk), "num_found"), 21)
+        self.assertEqual(getattr(queryset.get(pk=a2.pk), "obtained"), False)
+        self.assertEqual(getattr(queryset.get(pk=a2.pk), "viewed_obtained"), True)
+
+        self.assertEqual(getattr(queryset.get(pk=a3.pk), "num_found"), 31)
+        self.assertEqual(getattr(queryset.get(pk=a3.pk), "obtained"), True)
+        self.assertEqual(getattr(queryset.get(pk=a3.pk), "viewed_obtained"), False)
+
+        self.assertEqual(getattr(queryset.get(pk=a4.pk), "num_found"), 5)
+        self.assertEqual(getattr(queryset.get(pk=a4.pk), "obtained"), False)
+        self.assertEqual(getattr(queryset.get(pk=a4.pk), "viewed_obtained"), False)
+
+        AchievementUnlockFactory.create(user=alice.user)
+        self.assertGet40X("achievements-certify", alice.user.pk, checksum)
 
 
 class TestPalace(EvanTestCase):
