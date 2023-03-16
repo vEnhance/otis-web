@@ -72,11 +72,12 @@ def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
                     achievement=achievement,
                 )
                 if is_new is True:
-                    messages.success(
-                        request,
-                        r"Achievement unlocked! 🎉"
-                        f"You earned the achievement {achievement.name}.",
-                    )
+                    msg = r"Achievement unlocked! 🎉 "
+                    msg += f"You earned the achievement {achievement.name}."
+                    if achievement.creator is not None:
+                        msg += " This was a user-created achievement code, "
+                        msg += "so please avoid sharing it with others."
+                    messages.success(request, msg)
                     logger.log(
                         SUCCESS_LOG_LEVEL,
                         f"{student.name} just obtained `{achievement}`!",
@@ -186,7 +187,7 @@ class AchievementCertifyList(LoginRequiredMixin, ListView[Achievement]):
         user = get_object_or_404(User, pk=viewed_pk)
 
         achievements = (
-            Achievement.objects.all()
+            Achievement.objects.filter(creator__isnull=True)
             .annotate(
                 num_found=SubqueryAggregate("achievementunlock", aggregate=Count),
                 obtained=Exists(

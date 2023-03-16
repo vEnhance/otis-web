@@ -7,6 +7,12 @@
     <h2>{{ achievement.name }} ({{ achievement.diamonds }}♦️)</h2>
     <p class="fst-italic">{{ achievement.description }}</p>
   </div>
+  {% if achievement.creator %}
+    <div class="alert alert-info my-2">
+      This is a user-created achievement code,
+      so <b>avoid sharing it</b>.
+    </div>
+  {% endif %}
   {% if achievement.image %}
     <div class="text-center">
       <a href="{{ achievement.image.url }}">
