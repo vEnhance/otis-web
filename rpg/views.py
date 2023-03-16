@@ -206,7 +206,7 @@ class AchievementCertifyList(LoginRequiredMixin, ListView[Achievement]):
 
         if checksum != get_achievement_checksum(
             viewed_pk,
-            len(achievements.filter(viewed_obtained=True)),
+            AchievementUnlock.objects.filter(user=user).count(),
             settings.CERT_HASH_KEY,
         ):
             raise PermissionDenied("Wrong or expired hash ")
