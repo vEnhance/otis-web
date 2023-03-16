@@ -15,8 +15,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import PermissionDenied
-from django.db.models import Count, OuterRef
-from django.db.models.expressions import Exists
+from django.db.models import OuterRef, Q
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http import HttpResponse
@@ -26,7 +25,7 @@ from django.urls import reverse
 from django.views.generic import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView
-from sql_util.utils import SubqueryAggregate
+from sql_util.utils import Exists, SubqueryCount
 
 from evans_django_tools import SUCCESS_LOG_LEVEL
 from otisweb.mixins import VerifiedRequiredMixin
@@ -121,7 +120,7 @@ class AchievementList(LoginRequiredMixin, ListView[Achievement]):
         achievements = (
             Achievement.objects.all()
             .annotate(
-                num_found=SubqueryAggregate("achievementunlock", aggregate=Count),
+                num_found=SubqueryCount("achievementunlock"),
                 obtained=Exists(
                     Achievement.objects.filter(
                         pk=OuterRef("pk"), achievementunlock__user=self.request.user
@@ -189,17 +188,9 @@ class AchievementCertifyList(LoginRequiredMixin, ListView[Achievement]):
         achievements = (
             Achievement.objects.filter(creator__isnull=True)
             .annotate(
-                num_found=SubqueryAggregate("achievementunlock", aggregate=Count),
-                obtained=Exists(
-                    Achievement.objects.filter(
-                        pk=OuterRef("pk"), achievementunlock__user=self.request.user
-                    )
-                ),
-                viewed_obtained=Exists(
-                    Achievement.objects.filter(
-                        pk=OuterRef("pk"), achievementunlock__user=user
-                    )
-                ),
+                num_found=SubqueryCount("achievementunlock"),
+                obtained=Exists("achievementunlock", filter=Q(user=self.request.user)),
+                viewed_obtained=Exists("achievementunlock", filter=Q(user=user)),
             )
             .order_by("-obtained", "-viewed_obtained", "-num_found")
         )
