@@ -355,7 +355,7 @@ class TestAchievements(EvanTestCase):
         # check students don't have access
         self.login(alice.user)
         self.assertGet40X("found-listing", a1.pk)
-        self.assertGet40X("found-listing", a1.pk)
+        self.assertGet40X("found-listing", a2.pk)
 
         # login as staff now and check
         admin = UserFactory.create(is_staff=True, is_superuser=True)
