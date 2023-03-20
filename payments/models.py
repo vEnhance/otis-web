@@ -56,7 +56,7 @@ class Worker(models.Model):
         max_length=128,
         blank=True,
         help_text="Either email or mobile",
-        validators=[RegexValidator(f"^({RE_AT_USER}|{RE_PHONE})$")],
+        validators=[RegexValidator(f"^({RE_AT_USER}|{RE_EMAIL}|{RE_PHONE})$")],
     )
 
     gmail_address = models.CharField(
