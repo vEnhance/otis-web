@@ -187,6 +187,7 @@ JOB_VENUEQ_INIT_KEYS = (
     "assignee__paypal_username",
     "assignee__venmo_handle",
     "assignee__zelle_info",
+    "assignee__notes",
     "updated_at",
 )
 
