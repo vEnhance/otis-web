@@ -25,7 +25,7 @@ fetch("/payments/config/")
         });
         console.log(res);
       };
-    })();
+    });
   });
 
 document.querySelector("#amount").addEventListener("keypress", function (e) {
