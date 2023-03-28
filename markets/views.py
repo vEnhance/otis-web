@@ -243,7 +243,7 @@ class MarketUpdateView(
     form_class = MarketUpdateForm
     object: Market
 
-    def get_object(self, *args: Any, **kwargs: Any) -> Market:
+    def get_object(self, *args: Any, **kwargs: Any) -> Market | None:
         market = None
 
         if "student_pk" in self.kwargs:
