@@ -269,7 +269,7 @@ class CreateMarketTests(EvanTestCase):
             self.login(admin)
 
             self.assertPost20X(
-                "market-new",
+                "market-update",
                 data={
                     "slug": "market1",
                     "title": "Market 1",
@@ -286,7 +286,7 @@ class CreateMarketTests(EvanTestCase):
             self.assertEqual(market1.end_date.day, 11)
 
             self.assertPost20X(
-                "market-new",
+                "market-update",
                 data={
                     "slug": "market2",
                     "title": "Market 2",
@@ -305,7 +305,7 @@ class CreateMarketTests(EvanTestCase):
         with freeze_time("2050-01-19", tz_offset=0):
             self.login(admin)
             self.assertPost20X(
-                "market-new",
+                "market-update",
                 data={
                     "slug": "market3",
                     "title": "Market 3",
@@ -324,7 +324,7 @@ class CreateMarketTests(EvanTestCase):
         with freeze_time("2050-03-01", tz_offset=0):
             self.login(admin)
             self.assertPost20X(
-                "market-new",
+                "market-update",
                 data={
                     "slug": "market4",
                     "title": "Market 4",

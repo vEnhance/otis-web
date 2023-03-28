@@ -1,7 +1,7 @@
 import datetime
 from typing import Any
 
-from braces.views import LoginRequiredMixin, SuperuserRequiredMixin
+from braces.views import LoginRequiredMixin
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
@@ -20,16 +20,19 @@ from django.http.response import (  # NOQA
 from django.shortcuts import get_object_or_404
 from django.urls.base import reverse
 from django.utils import timezone
+from django.utils.html import escape
 from django.views.decorators.http import require_POST
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import CreateView
+from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic.list import ListView
 
 from core.models import Semester
-from markets.forms import MarketCreateForm
+from markets.forms import MarketUpdateForm
 from otisweb.decorators import admin_required
 from otisweb.mixins import VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest
+from roster.utils import get_student_by_pk
+from rpg.views import assert_maxed_out_level_info
 
 from .models import Guess, Market
 
@@ -108,7 +111,11 @@ class MarketResults(LoginRequiredMixin, ListView[Guess]):
         except Guess.DoesNotExist:
             pass
         context["done"] = timezone.now() > self.market.end_date
-        if not (context["done"] or self.request.user.is_superuser):
+        if not (
+            context["done"]
+            or self.request.user.is_superuser
+            or self.market.creator == self.request.user
+        ):
             raise PermissionDenied("Can't view results of an unfinished market.")
         if (answer := self.market.answer) is not None:
             context["best_guess"] = (
@@ -134,6 +141,8 @@ class MarketResults(LoginRequiredMixin, ListView[Guess]):
         self.market = get_object_or_404(Market, slug=kwargs.pop("slug"))
 
         if request.user.is_superuser:
+            return super().dispatch(request, *args, **kwargs)
+        elif self.market.creator == self.request.user:
             return super().dispatch(request, *args, **kwargs)
         elif not self.market.has_started:
             return HttpResponseNotFound()
@@ -164,10 +173,12 @@ class MarketList(LoginRequiredMixin, ListView[Market]):
 
     def get_queryset(self) -> QuerySet[Market]:
         if getattr(self.request.user, "is_staff", False) is True:
-            markets = Market.objects
+            markets = Market.objects.filter(semester__active=True)
         else:
-            markets = Market.started
-        return markets.order_by("-end_date").filter(semester__active=True)
+            markets = Market.objects.filter(
+                creator=self.request.user
+            ) | Market.started.filter(semester__active=True)
+        return markets.order_by("-end_date")
 
 
 class MarketListPast(MarketList):
@@ -177,7 +188,9 @@ class MarketListPast(MarketList):
         if getattr(self.request.user, "is_staff", False) is True:
             markets = Market.objects
         else:
-            markets = Market.started
+            markets = Market.objects.filter(
+                creator=self.request.user
+            ) | Market.started.filter(semester__active=True)
         return markets.order_by("-end_date").filter(semester__active=False)
 
 
@@ -223,43 +236,124 @@ class GuessView(LoginRequiredMixin, DetailView[Guess]):
         return super().dispatch(request, *args, **kwargs)
 
 
-class MarketCreateView(
-    SuperuserRequiredMixin, CreateView[Market, BaseModelForm[Market]]
+class MarketUpdateView(
+    VerifiedRequiredMixin, UpdateView[Market, BaseModelForm[Market]]
 ):
     model = Market
-    form_class = MarketCreateForm
+    form_class = MarketUpdateForm
     object: Market
 
+    def get_object(self, *args: Any, **kwargs: Any) -> Market:
+        market = None
+
+        if "student_pk" in self.kwargs:
+            student = get_student_by_pk(self.request, self.kwargs["student_pk"])
+            if not student.semester.active:
+                raise PermissionDenied(
+                    "A market can't be edited or made through an inactive student"
+                )
+            assert_maxed_out_level_info(student)
+            market = Market.objects.filter(creator=student.user).first()
+
+            self.student = student
+        elif self.request.user.is_superuser:
+            pass  # acts as a new instance
+
+        if market == None:
+            markets = Market.objects.filter(semester__active=True)
+            # fmt: off
+            max_start_date: datetime.datetime | None = markets.aggregate(a=Max("start_date"))["a"]
+            max_end_date: datetime.datetime | None = markets.aggregate(a=Max("end_date"))["a"]
+            # fmt: on
+
+            if max_start_date is None:
+                start_date = timezone.now() + datetime.timedelta(days=7)
+            else:
+                start_date = max(
+                    timezone.now() + datetime.timedelta(hours=1),
+                    max_start_date + datetime.timedelta(days=7),
+                )
+            if max_end_date is None:
+                end_date = timezone.now() + datetime.timedelta(days=10)
+            else:
+                end_date = max(
+                    timezone.now() + datetime.timedelta(days=3),
+                    max_end_date + datetime.timedelta(days=7),
+                )
+
+            self.start_date = start_date
+            self.end_date = end_date
+            self.disable_answer = False
+            self.is_new = True
+        else:
+            self.start_date = market.start_date
+            self.end_date = market.end_date
+
+            self.disable_answer = (
+                self.end_date + datetime.timedelta(days=7) < timezone.now()
+            )
+            self.is_new = False
+
+        return market
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial = initial.copy()
+
+        if not self.is_new:
+            initial["prompt_plain"] = self.object.prompt
+            initial["solution_plain"] = self.object.solution
+        return initial
+
+    def get_form(self) -> BaseModelForm[Market]:
+        form = super().get_form()
+
+        if self.disable_answer:
+            form.fields["answer"].disabled = True
+
+        return form
+
+    def dispatch(
+        self, request: HttpRequest, *args: Any, **kwargs: Any
+    ) -> HttpResponseBase:
+        if request.user.is_superuser:
+            return super().dispatch(request, *args, **kwargs)
+        elif "student_pk" in self.kwargs:
+            return super().dispatch(request, *args, **kwargs)
+
+        return HttpResponseForbidden("You cannot create or update a market.")
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        if "student_pk" in self.kwargs:
+            context["ruby_pk"] = self.kwargs["student_pk"]
+
+        context["start_date"] = self.start_date
+        context["end_date"] = self.end_date
+
+        return context
+
     def form_valid(self, form: BaseModelForm[Market]):
-        messages.success(self.request, f"Created new market {form.instance.slug}.")
+        if self.is_new:
+            semester = Semester.objects.get(active=True)
+            form.instance.semester = semester
 
-        semester = Semester.objects.get(active=True)
-        form.instance.semester = semester
-        form.instance.prompt = form.cleaned_data["prompt_plain"]
-        form.instance.solution = form.cleaned_data["solution_plain"]
+            if "student_pk" in self.kwargs:
+                form.instance.creator = self.student.user
 
-        markets = Market.objects.filter(semester__active=True)
-        # fmt: off
-        max_start_date: datetime.datetime | None = markets.aggregate(a=Max("start_date"))["a"]
-        max_end_date: datetime.datetime | None = markets.aggregate(a=Max("end_date"))["a"]
-        # fmt: on
-
-        if max_start_date is None:
-            start_date = timezone.now() + datetime.timedelta(days=7)
+            messages.success(self.request, f"Created market {form.instance.slug}.")
         else:
-            start_date = max(
-                timezone.now() + datetime.timedelta(hours=1),
-                max_start_date + datetime.timedelta(days=7),
-            )
-        form.instance.start_date = start_date
-        if max_end_date is None:
-            end_date = timezone.now() + datetime.timedelta(days=10)
+            messages.success(self.request, f"Updated market {form.instance.slug}.")
+
+        if "student_pk" in self.kwargs:
+            form.instance.prompt = escape(form.cleaned_data["prompt_plain"])
+            form.instance.solution = escape(form.cleaned_data["solution_plain"])
         else:
-            end_date = max(
-                timezone.now() + datetime.timedelta(days=3),
-                max_end_date + datetime.timedelta(days=7),
-            )
-        form.instance.end_date = end_date
+            form.instance.prompt = form.cleaned_data["prompt_plain"]
+            form.instance.solution = form.cleaned_data["solution_plain"]
+
+        form.instance.start_date = self.start_date
+        form.instance.end_date = self.end_date
 
         return super().form_valid(form)
 

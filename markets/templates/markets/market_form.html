@@ -1,20 +1,41 @@
 {% extends "layout.html" %}
 {% block title %}
-  Create market (admin)
+  {% if ruby_pk %}
+    Invest in a Market
+  {% else %}
+    Create Market (admin)
+  {% endif %}
 {% endblock title %}
 {% load humanize %}
 {% block layout-content %}
+  {% if ruby_pk %}
+    <div class="alert alert-info">
+      <h3 class="alert-heading">Information</h3>
+      <p>
+        You can create only one market, so choose wisely.
+        You will have one week after a market finishes to
+        edit in the answer in the case of a market that
+        refers to guesses in the solution.
+      </p>
+    </div>
+  {% endif %}
   <p>
-    This form lets you create a new market, scheduled one week after the most
+    This form lets you create or update a market, scheduled one week after the most
     recently created one.
+  </p>
+  <p>
+    This market would start at {{ start_date }}
+    and end at {{ end_date }}.
   </p>
   <ul>
     <li>
       <a href="{% url "market-list" %}">Back to all markets list</a>
     </li>
-    <li>
-      <a href="{% url "admin:markets_market_changelist" %}">Admin market list</a>
-    </li>
+    {% if not ruby_pk %}
+      <li>
+        <a href="{% url "admin:markets_market_changelist" %}">Admin market list</a>
+      </li>
+    {% endif %}
   </ul>
   {% include "generic_form.html" %}
 {% endblock layout-content %}

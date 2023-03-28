@@ -72,6 +72,13 @@ class Market(models.Model):
         blank=True,
     )
     show_answer = models.BooleanField(default=True)
+    creator = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        help_text="User who owns this market",
+    )
 
     objects = models.Manager()
     started = StartedMarketManager()

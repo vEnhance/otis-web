@@ -3,7 +3,7 @@ from django import forms
 from .models import Market
 
 
-class MarketCreateForm(forms.ModelForm):
+class MarketUpdateForm(forms.ModelForm):
     prompt_plain = forms.CharField(widget=forms.Textarea)
     solution_plain = forms.CharField(widget=forms.Textarea, required=False)
 

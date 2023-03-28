@@ -14,5 +14,10 @@ urlpatterns = [
     path(
         r"", RedirectView.as_view(pattern_name="market-list"), name="market-recompute"
     ),
-    path(r"new-market/", views.MarketCreateView.as_view(), name="market-new"),
+    path(r"new-market/", views.MarketUpdateView.as_view(), name="market-update"),
+    path(
+        r"new-market/<int:student_pk>/",
+        views.MarketUpdateView.as_view(),
+        name="market-update-ruby",
+    ),
 ]

@@ -16,6 +16,10 @@
   <div class="alert alert-dark">
     <h2 class="alert-heading">{{ market.title }}</h2>
     {{ market.prompt_rendered|safe }}
+    {% if market.creator %}
+      <hr />
+      Prompt provided by <b><tt>{{ market.creator.username }}</tt></b>.
+    {% endif %}
   </div>
   <hr />
   <ul>
