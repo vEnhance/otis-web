@@ -256,7 +256,7 @@ class MarketUpdateView(
             market = Market.objects.filter(creator=student.user).first()
 
             self.student = student
-        elif self.request.user.is_superuser:
+        elif getattr(self.request.user, "is_superuser", False):
             pass  # acts as a new instance
 
         if market == None:
@@ -316,9 +316,7 @@ class MarketUpdateView(
     def dispatch(
         self, request: HttpRequest, *args: Any, **kwargs: Any
     ) -> HttpResponseBase:
-        if request.user.is_superuser:
-            return super().dispatch(request, *args, **kwargs)
-        elif "student_pk" in self.kwargs:
+        if getattr(request.user, "is_superuser", False) or "student_pk" in self.kwargs:
             return super().dispatch(request, *args, **kwargs)
 
         return HttpResponseForbidden("You cannot create or update a market.")
