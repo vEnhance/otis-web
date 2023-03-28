@@ -140,9 +140,7 @@ class MarketResults(LoginRequiredMixin, ListView[Guess]):
             return super().dispatch(request, *args, **kwargs)  # login required mixin
         self.market = get_object_or_404(Market, slug=kwargs.pop("slug"))
 
-        if request.user.is_superuser:
-            return super().dispatch(request, *args, **kwargs)
-        elif self.market.creator == self.request.user:
+        if request.user.is_superuser or self.market.creator == self.request.user:
             return super().dispatch(request, *args, **kwargs)
         elif not self.market.has_started:
             return HttpResponseNotFound()
