@@ -63,6 +63,14 @@
                 {% endif %}
                 <p class="text-secondary">{{ unitgroup.description|linebreaks }}</p>
                 <p class="text-primary">
+                  Versions offered:
+                  {% for unit in unitgroup.unit_set.all %}
+                    {% if forloop.last %}
+                      {{ unit.code }}.
+                    {% else %}
+                      {{ unit.code }},
+                    {% endif %}
+                  {% endfor %}
                   Completed by {{ unitgroup.num_psets }}
                   student{{ unitgroup.num_psets|pluralize }}.
                 </p>
