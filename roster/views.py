@@ -275,12 +275,18 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
 
     inquiry.save()
 
-    num_past_unlock_inquiries = current_inquiries.filter(
-        action_type="INQ_ACT_UNLOCK"
-    ).count()
+    # early auto accept criteria
+    if inquiry.action_type == "INQ_ACT_APPEND" or request.user.is_staff:
+        inquiry.run_accept()
+        messages.success(request, "Petition automatically processed.")
+        return
+
+    past_unlock_inquiries = current_inquiries.filter(action_type="INQ_ACT_UNLOCK")
+
+    num_past_unlock_inquiries = past_unlock_inquiries.count()
 
     unlocked_count = (
-        num_past_unlock_inquiries.filter(status="INQ_NEW").count()
+        past_unlock_inquiries.filter(status="INQ_NEW").count()
         + student.unlocked_units.count()
     )
 
@@ -289,7 +295,7 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
         inquiry.action_type == "INQ_ACT_UNLOCK" and unlocked_count > 9
     )
 
-    if auto_reject_criteria and not request.user.is_staff:
+    if auto_reject_criteria:
         inquiry.status = "INQ_REJ"
         inquiry.save()
         messages.error(
@@ -313,15 +319,14 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
         return
 
     # auto-acceptance criteria
-    auto_accept_criteria = inquiry.action_type == "INQ_ACT_APPEND"
-    auto_accept_criteria |= num_past_unlock_inquiries <= 6 and unlocked_count < 9
+    auto_accept_criteria = num_past_unlock_inquiries <= 6 and unlocked_count < 9
     # auto dropping locked units
     auto_accept_criteria |= (
         inquiry.action_type == "INQ_ACT_DROP"
         and not student.unlocked_units.contains(inquiry.unit)
     )
 
-    if auto_accept_criteria or request.user.is_staff:
+    if auto_accept_criteria:
         inquiry.run_accept()
         messages.success(request, "Petition automatically processed.")
         return
