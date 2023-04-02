@@ -269,8 +269,7 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
     ).exists():
         messages.warning(
             request,
-            "The same petition already was "
-            "submitted within the last 90 seconds.",
+            "The same petition already was " "submitted within the last 90 seconds.",
         )
         return
 
@@ -281,9 +280,7 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
     ).count()
 
     unlocked_count = (
-        num_past_unlock_inquiries.filter(
-            status="INQ_NEW"
-        ).count()
+        num_past_unlock_inquiries.filter(status="INQ_NEW").count()
         + student.unlocked_units.count()
     )
 
@@ -303,9 +300,7 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
 
     # auto hold criteria
     num_psets = PSet.objects.filter(student=student).count()
-    auto_hold_criteria = num_past_unlock_inquiries > (
-        10 + 1.5 * num_psets**1.2
-    )
+    auto_hold_criteria = num_past_unlock_inquiries > (10 + 1.5 * num_psets**1.2)
 
     if auto_hold_criteria:
         inquiry.status = "INQ_HOLD"
@@ -315,13 +310,11 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
             "You have submitted an abnormally large number of petitions "
             + "so you should contact Evan specially to explain why.",
         )
+        return
 
     # auto-acceptance criteria
     auto_accept_criteria = inquiry.action_type == "INQ_ACT_APPEND"
-    auto_accept_criteria |= (
-        num_past_unlock_inquiries <= 6
-        and unlocked_count < 9
-    )
+    auto_accept_criteria |= num_past_unlock_inquiries <= 6 and unlocked_count < 9
     # auto dropping locked units
     auto_accept_criteria |= (
         inquiry.action_type == "INQ_ACT_DROP"
@@ -331,8 +324,10 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
     if auto_accept_criteria or request.user.is_staff:
         inquiry.run_accept()
         messages.success(request, "Petition automatically processed.")
-    else:
-        messages.success(request, "Petition submitted, wait for it!")
+        return
+
+    messages.success(request, "Petition submitted, wait for it!")
+
 
 # Inquiry views
 @login_required
