@@ -261,9 +261,8 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
     current_inquiries = UnitInquiry.objects.filter(student=student)
     inquiry.student = student
     # check if exists already and created recently
-    if UnitInquiry.objects.filter(
+    if current_inquiries.filter(
         unit=inquiry.unit,
-        student=student,
         action_type=inquiry.action_type,
         created_at__gte=timezone.now() - datetime.timedelta(seconds=90),
         status="INQ_NEW",
@@ -273,62 +272,67 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
             "The same petition already was "
             "submitted within the last 90 seconds.",
         )
-    else:
-        inquiry.save()
+        return
 
-        num_past_unlock_inquiries = current_inquiries.filter(
-            action_type="INQ_ACT_UNLOCK"
+    inquiry.save()
+
+    num_past_unlock_inquiries = current_inquiries.filter(
+        action_type="INQ_ACT_UNLOCK"
+    ).count()
+
+    unlocked_count = (
+        num_past_unlock_inquiries.filter(
+            status="INQ_NEW"
         ).count()
-        unlocked_count = (
-            current_inquiries.filter(
-                action_type="INQ_ACT_UNLOCK", status="INQ_NEW"
-            ).count()
-            + student.unlocked_units.count()
+        + student.unlocked_units.count()
+    )
+
+    # auto reject criteria
+    auto_reject_criteria = (
+        inquiry.action_type == "INQ_ACT_UNLOCK" and unlocked_count > 9
+    )
+
+    if auto_reject_criteria and not request.user.is_staff:
+        inquiry.status = "INQ_REJ"
+        inquiry.save()
+        messages.error(
+            request,
+            "You can't have more than 9 unfinished units unlocked at once.",
+        )
+        return
+
+    # auto hold criteria
+    num_psets = PSet.objects.filter(student=student).count()
+    auto_hold_criteria = num_past_unlock_inquiries > (
+        10 + 1.5 * num_psets**1.2
+    )
+
+    if auto_hold_criteria:
+        inquiry.status = "INQ_HOLD"
+        inquiry.save()
+        messages.warning(
+            request,
+            "You have submitted an abnormally large number of petitions "
+            + "so you should contact Evan specially to explain why.",
         )
 
-        # auto reject criteria
-        auto_reject_criteria = (
-            inquiry.action_type == "INQ_ACT_UNLOCK" and unlocked_count > 9
-        )
+    # auto-acceptance criteria
+    auto_accept_criteria = inquiry.action_type == "INQ_ACT_APPEND"
+    auto_accept_criteria |= (
+        num_past_unlock_inquiries <= 6
+        and unlocked_count < 9
+    )
+    # auto dropping locked units
+    auto_accept_criteria |= (
+        inquiry.action_type == "INQ_ACT_DROP"
+        and not student.unlocked_units.contains(inquiry.unit)
+    )
 
-        # auto hold criteria
-        num_psets = PSet.objects.filter(student=student).count()
-        auto_hold_criteria = num_past_unlock_inquiries > (
-            10 + 1.5 * num_psets**1.2
-        )
-
-        # auto-acceptance criteria
-        auto_accept_criteria = inquiry.action_type == "INQ_ACT_APPEND" or inquiry.action_type == "INQ_ACT_LOCK"
-        auto_accept_criteria |= (
-            num_past_unlock_inquiries <= 6
-            and unlocked_count < 9
-            and (not auto_hold_criteria and not auto_reject_criteria)
-        )
-        # auto dropping locked units
-        auto_accept_criteria |= (
-            inquiry.action_type == "INQ_ACT_DROP"
-            and not student.unlocked_units.contains(inquiry.unit)
-        )
-        if auto_reject_criteria and not request.user.is_staff:
-            inquiry.status = "INQ_REJ"
-            inquiry.save()
-            messages.error(
-                request,
-                "You can't have more than 9 unfinished units unlocked at once.",
-            )
-        elif auto_accept_criteria or request.user.is_staff:
-            inquiry.run_accept()
-            messages.success(request, "Petition automatically processed.")
-        elif auto_hold_criteria:
-            inquiry.status = "INQ_HOLD"
-            inquiry.save()
-            messages.warning(
-                request,
-                "You have submitted an abnormally large number of petitions "
-                + "so you should contact Evan specially to explain why.",
-            )
-        else:
-            messages.success(request, "Petition submitted, wait for it!")
+    if auto_accept_criteria or request.user.is_staff:
+        inquiry.run_accept()
+        messages.success(request, "Petition automatically processed.")
+    else:
+        messages.success(request, "Petition submitted, wait for it!")
 
 # Inquiry views
 @login_required
