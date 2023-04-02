@@ -281,7 +281,7 @@ def inquiry(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
     if request.method == "POST":
         form = InquiryForm(request.POST, student=student)
         if form.is_valid():
-            inquiry = form.save(commit=False)
+            inquiry: UnitInquiry = form.save(commit=False)
             inquiry.student = student
             # check if exists already and created recently
             if UnitInquiry.objects.filter(
@@ -321,13 +321,17 @@ def inquiry(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
                 )
 
                 # auto-acceptance criteria
-                auto_accept_criteria = inquiry.action_type == "INQ_ACT_APPEND"
+                auto_accept_criteria = inquiry.action_type == "INQ_ACT_APPEND" or inquiry.action_type == "INQ_ACT_LOCK"
                 auto_accept_criteria |= (
                     num_past_unlock_inquiries <= 6
                     and unlocked_count < 9
                     and (not auto_hold_criteria and not auto_reject_criteria)
                 )
-
+                # auto dropping locked units
+                auto_accept_criteria |= (
+                    inquiry.action_type == "INQ_ACT_DROP"
+                    and not student.unlocked_units.contains(inquiry.unit)
+                )
                 if auto_reject_criteria and not request.user.is_staff:
                     inquiry.status = "INQ_REJ"
                     inquiry.save()
