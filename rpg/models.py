@@ -4,14 +4,12 @@ from hashlib import sha256
 
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.core.validators import RegexValidator  # NOQA
+from django.core.validators import RegexValidator
 from django.db import models
 
 from core.models import UnitGroup
-from dashboard.models import validate_at_most_1mb  # should be in core maybe?  # NOQA
+from dashboard.models import validate_at_most_1mb  # should be in core maybe?
 from roster.models import Student
-
-# Create your models here.
 
 
 def achievement_image_file_name(instance: "Achievement", filename: str) -> str:
@@ -35,7 +33,10 @@ class Achievement(models.Model):
         unique=True,
         null=True,
         validators=[
-            RegexValidator(regex=r"^[a-f0-9]{24,26}$", message="24-26 char hex string"),
+            RegexValidator(
+                regex=r"^[a-f0-9]{24,26}$",
+                message="24-26 char hex string",
+            ),
         ],
     )  # e.g. 52656164546865436f646521
     name = models.CharField(

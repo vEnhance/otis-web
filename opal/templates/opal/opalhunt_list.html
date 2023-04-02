@@ -22,15 +22,18 @@
       </p>
     {% elif hunt.has_started %}
       <div class="alert alert-success">
-        <h2 class="alert-heading">{{ hunt }} has started!</h2>
+        <h2 class="alert-heading">{{ hunt }}</h2>
         <a class="btn btn-link btn-primary" href="{{ hunt.get_absolute_url }}">Show puzzles</a>
-        <p>Event started {{ hunt.start_date|timesince }} ago.</p>
+        <p>Event started {{ hunt.start_date }} ({{ hunt.start_date|timesince }} ago).</p>
       </div>
     {% else %}
       <div class="alert alert-info">
-        <h2 class="alert-heading">{{ hunt }} — {{ hunt.start_date }}</h2>
+        <h2 class="alert-heading">{{ hunt }}</h2>
         <ul>
-          <li>Starts in {{ hunt.start_date|timeuntil }}</li>
+          <li>
+            Starts <strong>{{ hunt.start_date }}</strong>
+            (in {{ hunt.start_date|timeuntil }})
+          </li>
           <li>Author signup deadline: {{ hunt.author_signup_deadline }}</li>
           <li>Author draft deadline: {{ hunt.author_draft_deadline }}</li>
           {% if hunt.author_signups_are_open and hunt.author_signup_url %}

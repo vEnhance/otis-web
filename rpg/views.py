@@ -372,7 +372,7 @@ class DiamondUpdate(
             achievement.code = "".join(
                 random.choice("0123456789abcdef") for _ in range(24)
             )
-            achievement.diamonds = level_info["meters"]["diamonds"].level
+            achievement.diamonds = min(level_info["meters"]["diamonds"].level, 7)
             achievement.name = student.name
             achievement.save()
         return achievement

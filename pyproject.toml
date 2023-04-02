@@ -13,7 +13,7 @@ Django = "^4.1.7"
 PyMySQL = "^1.0.2"
 Unidecode = "^1.2.0"
 crispy-bootstrap5 = "^0.7"
-django-allauth = "^0.52.0"
+django-allauth = "^0.53.1"
 django-bootstrap-v5 = "^1.0.5"
 django-braces = "^1.14.0"
 django-crispy-forms = "^1.14.0"
@@ -28,8 +28,8 @@ django-registration = "^3.2"
 django-reversion = "^5.0.0"
 django-sql-utils = "^0.6.1"
 django-storages = {extras = ["google"], version = "^1.11.1"}
-django-stubs = "^1.14.0"
-django-stubs-ext = "^0.7.0"
+django-stubs = "^1.16.0"
+django-stubs-ext = "^0.8.0"
 mailchimp3 = "^3.0.15"
 mysqlclient = "^2.1.1"
 prettytable = "^3.4.1"
@@ -37,7 +37,7 @@ pyparsing = "^3.0.9"
 python-dotenv = "^1.0.0"
 setuptools = "^67.6.0"
 stripe = "^5.2.0"
-wheel = "^0.38.4"
+wheel = "^0.40.0"
 wiki = {git = "https://github.com/django-wiki/django-wiki.git", rev = "7981d6d"}
 bleach = {extras = ["css"], version=">=5,<6"} # manual until wiki 0.10 out
 
@@ -45,7 +45,7 @@ bleach = {extras = ["css"], version=">=5,<6"} # manual until wiki 0.10 out
 # TODO: Faker: need to wait until https://github.com/joke2k/faker/pull/1662 resolves
 Faker = "=15.1.1"
 # TODO: update codespell once v2.3.0 is published
-black = "^23.1.0"
+black = "^23.3.0"
 codespell = "^2.2.4"
 coverage = {extras = ["toml"], version = "^7.2.2"}
 djlint = "^1.19.15"
