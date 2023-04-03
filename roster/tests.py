@@ -411,6 +411,34 @@ class RosterTest(EvanTestCase):
         self.assertEqual(alice.curriculum.count(), 9)
         self.assertEqual(alice.unlocked_units.count(), 6)
 
+        self.login(firefly)
+        self.assertHas(
+            self.post(
+                "inquiry",
+                alice.pk,
+                data={
+                    "unit": units[4].pk,
+                    "action_type": "INQ_ACT_LOCK",
+                    "explanation": "hi",
+                },
+            ),
+            "Petition automatically processed",
+        )
+
+        self.login(alice)
+        self.assertHas(
+            self.post(
+                "inquiry",
+                alice.pk,
+                data={
+                    "unit": units[4].pk,
+                    "action_type": "INQ_ACT_DROP",
+                    "explanation": "hi",
+                },
+            ),
+            "Petition automatically processed",
+        )
+
         bob: Student = StudentFactory.create(
             semester=SemesterFactory.create(active=False)
         )
