@@ -317,6 +317,42 @@ class RosterTest(EvanTestCase):
         self.assertEqual(alice.unlocked_units.count(), 6)
 
         self.login(firefly)
+        self.assertHas(
+            self.post(
+                "inquiry",
+                alice.pk,
+                data={
+                    "unit": units[4].pk,
+                    "action_type": "INQ_ACT_LOCK",
+                    "explanation": "hi",
+                },
+            ),
+            "Petition automatically processed",
+        )
+
+        self.assertEqual(alice.curriculum.count(), 6)
+        self.assertEqual(alice.unlocked_units.count(), 5)
+
+        self.assertFalse(alice.unlocked_units.contains(units[4]))
+
+        self.login(alice)
+        self.assertHas(
+            self.post(
+                "inquiry",
+                alice.pk,
+                data={
+                    "unit": units[4].pk,
+                    "action_type": "INQ_ACT_DROP",
+                    "explanation": "hi",
+                },
+            ),
+            "Petition automatically processed",
+        )
+
+        self.assertEqual(alice.curriculum.count(), 5)
+        self.assertEqual(alice.unlocked_units.count(), 5)
+
+        self.login(firefly)
         for i in range(6, 10):
             self.assertHas(
                 self.post(
@@ -330,8 +366,8 @@ class RosterTest(EvanTestCase):
                 ),
                 "Petition automatically processed",
             )
-        self.assertEqual(alice.curriculum.count(), 10)
-        self.assertEqual(alice.unlocked_units.count(), 10)
+        self.assertEqual(alice.curriculum.count(), 9)
+        self.assertEqual(alice.unlocked_units.count(), 9)
 
         self.login(alice)
         for i in range(11, 14):
@@ -347,8 +383,8 @@ class RosterTest(EvanTestCase):
                 ),
                 "more than 9 unfinished",
             )
-        self.assertEqual(alice.curriculum.count(), 10)
-        self.assertEqual(alice.unlocked_units.count(), 10)
+        self.assertEqual(alice.curriculum.count(), 9)
+        self.assertEqual(alice.unlocked_units.count(), 9)
 
         for i in range(15, 18):
             self.assertHas(
@@ -363,8 +399,8 @@ class RosterTest(EvanTestCase):
                 ),
                 "Petition automatically processed",
             )
-        self.assertEqual(alice.curriculum.count(), 13)
-        self.assertEqual(alice.unlocked_units.count(), 10)
+        self.assertEqual(alice.curriculum.count(), 12)
+        self.assertEqual(alice.unlocked_units.count(), 9)
 
         self.assertHas(
             self.post(
@@ -393,8 +429,8 @@ class RosterTest(EvanTestCase):
                 ),
                 "Petition automatically processed",
             )
-        self.assertEqual(alice.curriculum.count(), 8)
-        self.assertEqual(alice.unlocked_units.count(), 5)
+        self.assertEqual(alice.curriculum.count(), 7)
+        self.assertEqual(alice.unlocked_units.count(), 4)
 
         self.assertHas(
             self.post(
@@ -408,36 +444,8 @@ class RosterTest(EvanTestCase):
             ),
             "Petition automatically processed",
         )
-        self.assertEqual(alice.curriculum.count(), 9)
-        self.assertEqual(alice.unlocked_units.count(), 6)
-
-        self.login(firefly)
-        self.assertHas(
-            self.post(
-                "inquiry",
-                alice.pk,
-                data={
-                    "unit": units[4].pk,
-                    "action_type": "INQ_ACT_LOCK",
-                    "explanation": "hi",
-                },
-            ),
-            "Petition automatically processed",
-        )
-
-        self.login(alice)
-        self.assertHas(
-            self.post(
-                "inquiry",
-                alice.pk,
-                data={
-                    "unit": units[4].pk,
-                    "action_type": "INQ_ACT_DROP",
-                    "explanation": "hi",
-                },
-            ),
-            "Petition automatically processed",
-        )
+        self.assertEqual(alice.curriculum.count(), 8)
+        self.assertEqual(alice.unlocked_units.count(), 5)
 
         bob: Student = StudentFactory.create(
             semester=SemesterFactory.create(active=False)
