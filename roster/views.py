@@ -269,7 +269,7 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
     ).exists():
         messages.warning(
             request,
-            "The same petition already was " "submitted within the last 90 seconds.",
+            "The same petition already was submitted within the last 90 seconds.",
         )
         return
 
