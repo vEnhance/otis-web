@@ -134,9 +134,34 @@ def certify(
         raise PermissionDenied("Wrong hash")
     else:
         level_info = get_level_info(student)
+        clubs = level_info["meters"]["clubs"].value
+        hearts = level_info["meters"]["hearts"].value
+        if hearts <= 3 and clubs <= 20:
+            letter_grade = "C"
+        elif hearts <= 10 and clubs <= 50:
+            letter_grade = "B"
+        else:
+            letter_grade = "A"
+
+        semesters = [s.semester for s in Student.objects.filter(user=student.user)]
+        assert len(semesters) > 0
+        if len(semesters) == 1:
+            years = f"{semesters[0].years} year"
+        elif len(semesters) == 2:
+            years = f"{semesters[0].years} and {semesters[1].years} years"
+        else:
+            years = (
+                ", ".join(s.years for s in semesters[:-1])
+                + " and "
+                + semesters[-1].years
+                + " years"
+            )
+
         context = {
             "student": student,
-            "hearts": level_info["meters"]["hearts"].value,
+            "years": years,
+            "hearts": hearts,
+            "letter_grade": letter_grade,
             "level_number": level_info["level_number"],
             "level_name": level_info["level_name"],
             "checksum": student.get_checksum(settings.CERT_HASH_KEY),
