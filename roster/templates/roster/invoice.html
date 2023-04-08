@@ -37,9 +37,7 @@
     <center>
       {% if invoice.student.semester.active %}
         <a href="{% url "payments-invoice" student.pk checksum %}"
-           class="btn btn-success col-xs-12 col-sm-6">
-          Make payment via card
-        </a>
+           class="btn btn-success col-xs-12 col-sm-6">Make payment via card</a>
         <br />
       {% endif %}
       <a href="{% url "payments-invoice" student.pk checksum %}">

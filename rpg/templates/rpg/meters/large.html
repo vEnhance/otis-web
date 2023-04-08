@@ -27,16 +27,12 @@
                style="width: {{ meter.percent }}%;
                       background-color: {{ meter.color }};
                       text-align: right;
-                      padding-right: 4%">
-            {{ meter.total }}{{ meter.unit }}
-          </div>
+                      padding-right: 4%">{{ meter.total }}{{ meter.unit }}</div>
         </div>
         <span style="position:absolute;
                      right: 5%;
                      text-align: right"
-              class="text-muted">
-          / {{ meter.thresh }}{{ meter.unit }}
-        </span>
+              class="text-muted">/ {{ meter.thresh }}{{ meter.unit }}</span>
       </div>
       <p>
         Your <strong class="meter-def" style="color: {{ meter.color }}">{{ meter.name }}</strong>

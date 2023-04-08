@@ -19,7 +19,7 @@
     <tbody>
       {% for suggestion in suggestions %}
         {% if suggestion.acknowledge or request.user.is_staff or suggestion.user == request.user %}
-          <tr {% if suggestion.user == request.user %} class="table-warning fw-bold"{% endif %}>
+          <tr {% if suggestion.user == request.user %}class="table-warning fw-bold"{% endif %}>
             <th class="text-end">{{ forloop.counter }}.</th>
             <td>
               {% if suggestion.user == request.user or request.user.is_staff %}

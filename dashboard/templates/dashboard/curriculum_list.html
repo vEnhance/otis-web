@@ -23,7 +23,7 @@
   {% with profile=request.user|getprofile %}
     <table class="table curriculum">
       {% for row in curriculum %}
-        <tr class="subject{{ row.unit.group.subject }} {% if row.is_accepted %} unit-completed {% if not profile.show_completed_by_default %} unit-completed-hidden{% endif %} {% elif not row.is_visible %} unit-locked {% if not profile.show_locked_by_default %} unit-locked-hidden{% endif %} {% endif %} ">
+        <tr class="subject{{ row.unit.group.subject }} {% if row.is_accepted %} unit-completed {% if not profile.show_completed_by_default %}unit-completed-hidden{% endif %} {% elif not row.is_visible %} unit-locked {% if not profile.show_locked_by_default %}unit-locked-hidden{% endif %} {% endif %} ">
           <td class="number">
             {{ row.number }}
             {% if row.is_rejected %}
