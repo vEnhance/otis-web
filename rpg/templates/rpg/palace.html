@@ -11,16 +11,13 @@
              style="max-height:96px"
              src="{{ carving.image.url }}"/>
       {% endif %}
-      <h2>
-        {% if carving.hyperlink %}
-          <a href="{{ carving.hyperlink }}">{{ carving.display_name }}</a>
-        {% else %}
-          {{ carving.display_name }}
-        {% endif %}
-      </h2>
-      <p>
-        <em>{{ carving.created_at }}</em>
-      </p>
+      <h2>{{ carving.display_name }}</h2>
+      {% if carving.hyperlink %}
+        <p>
+          <a href="{{ carving.hyperlink }}">{{ carving.hyperlink|truncatechars:"60" }}</a>
+        </p>
+      {% endif %}
+      <p class="fst-italic">{{ carving.created_at }}</p>
       {{ carving.message|linebreaks }}
     </div>
     <hr />
