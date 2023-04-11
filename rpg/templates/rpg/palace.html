@@ -14,7 +14,9 @@
       <h2>{{ carving.display_name }}</h2>
       {% if carving.hyperlink %}
         <p>
-          <a href="{{ carving.hyperlink }}">{{ carving.hyperlink|truncatechars:"60" }}</a>
+          <small>
+            <a href="{{ carving.hyperlink }}">{{ carving.hyperlink|truncatechars:"48" }}</a>
+          </small>
         </p>
       {% endif %}
       <p class="fst-italic">{{ carving.created_at }}</p>
