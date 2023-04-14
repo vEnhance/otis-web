@@ -64,7 +64,14 @@
   </script>
   {% for jobfolder in jobfolders %}
     <hr />
-    <h2>{{ jobfolder.name }}</h2>
+    {% if jobfolder.archived %}
+      <p>
+        <b>{{ jobfolder.name }}</b>
+        <span class="text-muted">(archived)</span>
+      </p>
+    {% else %}
+      <h2>{{ jobfolder.name }}</h2>
+    {% endif %}
     <p class="fst-italic">
       <a href="{{ jobfolder.get_absolute_url }}">
         <b>{{ jobfolder.num_open }}</b> open,
@@ -72,6 +79,8 @@
         <b>{{ jobfolder.num_done }}</b> finished.
       </a>
     </p>
-    {% include "payments/show_jobfolder_info.html" %}
+    {% if not jobfolder.archived %}
+      {% include "payments/show_jobfolder_info.html" %}
+    {% endif %}
   {% endfor %}
 {% endblock layout-content %}

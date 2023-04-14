@@ -94,6 +94,9 @@ class JobFolder(models.Model):
     name = models.CharField(max_length=80, help_text="A name for the folder")
     slug = models.SlugField(help_text="A slug for this job folder")
     visible = models.BooleanField(default=True, help_text="Whether to show this folder")
+    archived = models.BooleanField(
+        default=False, help_text="Set to True when this folder is all done."
+    )
     description = MarkdownField(
         rendered_field="description_rendered",
         help_text="Instructions and so on for this folder.",

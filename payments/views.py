@@ -206,7 +206,7 @@ class JobFolderList(VerifiedRequiredMixin, ListView[JobFolder]):
                 ),
                 num_done=Count("job", filter=Q(job__progress="JOB_VFD")),
             )
-            .order_by("name")
+            .order_by("archived", "name")
         )
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
