@@ -59,6 +59,7 @@ class JobFolderAdmin(admin.ModelAdmin):
         "name",
         "slug",
         "visible",
+        "archived",
         "max_pending",
         "max_total",
     )
@@ -67,7 +68,10 @@ class JobFolderAdmin(admin.ModelAdmin):
         "name",
         "slug",
     )
-    list_filter = ("visible",)
+    list_filter = (
+        "visible",
+        "archived",
+    )
     search_fields = ("name",)
 
 
