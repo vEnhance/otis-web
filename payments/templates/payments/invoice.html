@@ -20,7 +20,7 @@
              type="number"
              min="0"
              max="{{ invoice.total_owed|floatformat:0 }}"
-             value="{{ invoice.total_owed|floatformat:0 }}"/>
+             value="{{ invoice.total_owed|floatformat:0 }}" />
       <input id="invoice_id" type="hidden" value="{{ invoice.pk }}" />
       <button class="button is-primary btn btn-success" id="payButton">Pay</button>
     </p>
