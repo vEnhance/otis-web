@@ -78,14 +78,10 @@
             <td>{{ contest.variant_name }}</td>
             <td>Pending</td>
           {% endif %}
-          <td>
-            {{ contest.num_players }}p
-          </td>
+          <td>{{ contest.num_players }}p</td>
           <td>
             {% if contest.processed or request.user.is_superuser %}
-              <a href="{{ contest.hanab_stats_page_url }}">
-                {{ contest.end_date }}
-              </a>
+              <a href="{{ contest.hanab_stats_page_url }}">{{ contest.end_date }}</a>
             {% else %}
               {{ contest.end_date }}
             {% endif %}
@@ -94,17 +90,13 @@
       {% endfor %}
     </tbody>
   </table>
-  <h1>
-    Rules
-  </h1>
+  <h1>Rules</h1>
   <ol>
     <li>
       Each contest consists of a single game of Hanabi.
       How to participate:
       <ul>
-        <li>
-          Gather a team with the correct number of players.
-        </li>
+        <li>Gather a team with the correct number of players.</li>
         <li>
           One player should create a table on hanab.live
           by clicking the "Start table" button above.

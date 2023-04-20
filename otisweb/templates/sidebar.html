@@ -143,9 +143,7 @@
         <li>
           <a href="{% url "admin-palace-list" %}">Ruby Palace</a>
         </li>
-        <li>
-          Giga Chart
-        </li>
+        <li>Giga Chart</li>
         <ul>
           <li>
             <a href="{% url "giga-chart" "csv" %}">CSV</a>
@@ -191,9 +189,7 @@
               {% csrf_token %}
               <input type="hidden" name="user_pk" value="{{ student.user.pk }}" />
               <input type="hidden" name="next" value="{{ request.path }}" />
-              <button class="pseudo-button" type="submit">
-                Hijack
-              </button>
+              <button class="pseudo-button" type="submit">Hijack</button>
             </form>
           </li>
         {% endif %}
@@ -204,9 +200,7 @@
               {% csrf_token %}
               <input type="hidden" name="user_pk" value="{{ student.assistant.user.pk }}" />
               <input type="hidden" name="next" value="{{ request.path }}" />
-              <button class="pseudo-button" type="submit">
-                Hijack {{ student.assistant.shortname }}
-              </button>
+              <button class="pseudo-button" type="submit">Hijack {{ student.assistant.shortname }}</button>
             </form>
           </li>
         {% endif %}
@@ -214,9 +208,7 @@
     {% endif %}
   {% endif %}
 {% else %}
-  <p>
-    You are not logged in.
-  </p>
+  <p>You are not logged in.</p>
   <p>
     <a href="{% url "account_login" %}">Log in now.</a>
   </p>

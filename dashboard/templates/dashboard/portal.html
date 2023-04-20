@@ -227,28 +227,21 @@
               type="button"
               class="btn-close"
               data-bs-dismiss="alert"
-              aria-label="Close">
-      </button>
+              aria-label="Close"></button>
     </div>
   {% endif %}
   <hr />
   <div class="float-end btn-group" role="group">
     {% for x in history %}
       {% if x.pk == student.pk %}
-        <span class="btn btn-sm btn-primary active">
-          {{ x.semester__end_year }}
-        </span>
+        <span class="btn btn-sm btn-primary active">{{ x.semester__end_year }}</span>
       {% else %}
         <a href="{% url "portal" x.pk %}"
-           class="btn btn-sm btn-outline-secondary">
-          {{ x.semester__end_year }}
-        </a>
+           class="btn btn-sm btn-outline-secondary">{{ x.semester__end_year }}</a>
       {% endif %}
     {% endfor %}
   </div>
-  <h2>
-    Your units
-  </h2>
+  <h2>Your units</h2>
   {% include "dashboard/curriculum_list.html" %}
   <p>
     After submitting a unit, it's marked ⏳
@@ -274,9 +267,7 @@
   <table width="100%">
     <tr>
       <td valign="top" width="50%">
-        <h3>
-          Academic
-        </h3>
+        <h3>Academic</h3>
         <ul>
           <li>
             <a href="{% url 'downloads' student.pk %}">Posted files ({{ num_sem_downloads }})</a>
@@ -302,14 +293,10 @@
         </ul>
       </td>
       <td valign="top" width="50%">
-        <h3>
-          Logistics
-        </h3>
+        <h3>Logistics</h3>
         <ul>
           <li>
-            <a href="https://us5.campaign-archive.com/home/?u=5c818a0be2f35ee90344a471e&id=808c50e8c9">
-              Announcement emails
-            </a>
+            <a href="https://us5.campaign-archive.com/home/?u=5c818a0be2f35ee90344a471e&id=808c50e8c9">Announcement emails</a>
           </li>
           {% if semester.show_invoices %}
             <li>
@@ -320,16 +307,14 @@
             <li>
               <a href="{{ semester.calendar_url_meets_evan }}"
                  target="_blank"
-                 rel="noreferrer">
-              OTIS calendar (meetings)</a>
+                 rel="noreferrer">OTIS calendar (meetings)</a>
             </li>
           {% endif %}
           {% if semester.active %}
             <li>
               <a href="{{ semester.calendar_url_no_meets_evan }}"
                  target="_blank"
-                 rel="noreferrer">
-              OTIS calendar (no meetings)</a>
+                 rel="noreferrer">OTIS calendar (no meetings)</a>
             </li>
           {% endif %}
           <li>
@@ -343,9 +328,7 @@
     </tr>
     <tr>
       <td valign="top" width="50%">
-        <h3>
-          Discord
-        </h3>
+        <h3>Discord</h3>
         {% if semester.social_url %}
           <a href="{{ semester.social_url }}" class="btn btn-info" role="button">Open Discord</a>
         {% else %}
@@ -353,9 +336,7 @@
         {% endif %}
       </td>
       <td valign="top" width="50%">
-        <h3>
-          Markets
-        </h3>
+        <h3>Markets</h3>
         <ul>
           {% if markets %}
             {% for market in markets %}
@@ -378,9 +359,7 @@
   </table>
   <hr />
   {% if semester.active and student.enabled %}
-    <h2>
-      Mock olympiads (tests)
-    </h2>
+    <h2>Mock olympiads (tests)</h2>
     {% include "dashboard/exam_list.html" with exams=tests %}
     {% if semester.active %}
       <div class="text-center">
@@ -389,43 +368,29 @@
            role="button">Mock Olympiad Submission</a>
       </div>
     {% endif %}
-    <h2 id="quizzes">
-      Quizzes
-    </h2>
+    <h2 id="quizzes">Quizzes</h2>
     {% include "dashboard/exam_list.html" with exams=quizzes %}
-    <p>
-      Click on a quiz above to open it. Quiz submissions are done directly on OTIS-WEB.
-    </p>
+    <p>Click on a quiz above to open it. Quiz submissions are done directly on OTIS-WEB.</p>
   {% elif not semester.active %}
-    <p>
-      This page from {{ semester }} is now archived. Thanks for playing.
-    </p>
+    <p>This page from {{ semester }} is now archived. Thanks for playing.</p>
   {% endif %}
   {% if semester.active and student.enabled %}
     <hr />
-    <h2>
-      Calendar
-    </h2>
-    <p>
-      Be sure to check that the time zones display correctly!
-    </p>
-    <p>
-      You can also open these in a new window:
-    </p>
+    <h2>Calendar</h2>
+    <p>Be sure to check that the time zones display correctly!</p>
+    <p>You can also open these in a new window:</p>
     <ul>
       {% if student.meets_evan %}
         <li>
           <a href="{{ semester.calendar_url_meets_evan }}"
              target="_blank"
-             rel="noreferrer">
-          OTIS calendar (meetings)</a>
+             rel="noreferrer">OTIS calendar (meetings)</a>
         </li>
       {% endif %}
       <li>
         <a href="{{ semester.calendar_url_no_meets_evan }}"
            target="_blank"
-           rel="noreferrer">
-        OTIS calendar (no meetings)</a>
+           rel="noreferrer">OTIS calendar (no meetings)</a>
       </li>
     </ul>
     <iframe src="{{ student.calendar_url }}"

@@ -94,12 +94,8 @@
               +3{{ meters.spades.unit }}
             </b>
           </td>
-          <td>
-            {{ mc.exam.family }} {{ mc.exam.number }}
-          </td>
-          <td>
-            {{ mc.exam.due_date|default_if_none:"—" }}
-          </td>
+          <td>{{ mc.exam.family }} {{ mc.exam.number }}</td>
+          <td>{{ mc.exam.due_date|default_if_none:"—" }}</td>
         </tr>
       {% endfor %}
       {% for u in suggest_unit_set %}
@@ -109,11 +105,8 @@
               +1{{ meters.spades.unit }}
             </b>
           </td>
-          <td>
-            {{ u.1 }} {{ u.2 }}
-          </td>
-          <td>
-          </td>
+          <td>{{ u.1 }} {{ u.2 }}</td>
+          <td></td>
         </tr>
       {% endfor %}
       {% for guess in market_guesses %}
@@ -126,9 +119,7 @@
           <td>
             <a href="{{ guess.market.get_absolute_url }}">{{ guess.market.slug }}</a>
           </td>
-          <td>
-            {{ guess.market.end_date }}
-          </td>
+          <td>{{ guess.market.end_date }}</td>
         </tr>
       {% endfor %}
       {% for job in completed_jobs %}
@@ -141,9 +132,7 @@
           <td>
             <a href="{{ job.get_absolute_url }}">{{ job.name }} ({{ job.folder.name }})</a>
           </td>
-          <td>
-            {{ job.updated_at }}
-          </td>
+          <td>{{ job.updated_at }}</td>
         </tr>
       {% endfor %}
       {# TODO hints #}
@@ -157,9 +146,7 @@
           <td>
             <a href="{{ replay.contest.get_absolute_url }}">{{ replay.contest }}</a>
           </td>
-          <td>
-            {{ replay.contest.end_date }}
-          </td>
+          <td>{{ replay.contest.end_date }}</td>
         </tr>
       {% endfor %}
     </tbody>
