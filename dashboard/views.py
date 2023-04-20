@@ -361,6 +361,9 @@ def uploads(request: HttpRequest, student_pk: int, unit_pk: int) -> HttpResponse
 @login_required
 def bonus_level_request(request: HttpRequest, student_pk: int) -> HttpResponse:
     student = get_student_by_pk(request, student_pk)
+    if student.semester.active is False:
+        raise PermissionDenied("Not an active semester")
+
     level = student.last_level_seen
     if not Unit.objects.filter(group__bonuslevel__level__lte=level).exists():
         messages.error(request, "There are no secret units you can request yet.")
