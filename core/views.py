@@ -7,6 +7,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models.aggregates import Count
 from django.db.models.base import Model
+from django.db.models.expressions import Exists, OuterRef
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http import HttpRequest, HttpResponse
@@ -36,16 +37,34 @@ class AdminUnitListView(SuperuserRequiredMixin, ListView[Unit]):
     context_object_name = "unit_list"
 
 
+def pset_subquery(student: Student) -> Exists:
+    return Exists(
+        PSet.objects.filter(unit__group=OuterRef("pk"), student=student, status="A")
+    )
+
+
 class UnitGroupListView(ListView[UnitGroup]):
     model = UnitGroup
-    queryset = (
-        UnitGroup.objects.filter(
+
+    def get_queryset(self):
+        queryset = UnitGroup.objects.filter(
             hidden=False,
         )
-        .order_by("subject", "name")
-        .annotate(num_psets=Count("unit__pset"))
-        .prefetch_related("unit_set")
-    )
+        queryset = queryset.order_by("subject", "name")
+        queryset = queryset.annotate(num_psets=Count("unit__pset"))
+
+        if not isinstance(self.request.user, AnonymousUser):
+            latest: Student = (
+                Student.objects.filter(user=self.request.user)
+                .order_by("-semester__end_year")
+                .first()
+            )
+
+            if latest != None:
+                queryset = queryset.annotate(has_pset=pset_subquery(latest))
+            queryset = queryset.prefetch_related("unit_set")
+
+        return queryset
 
 
 class PublicCatalog(ListView[UnitGroup]):
