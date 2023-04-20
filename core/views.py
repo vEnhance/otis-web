@@ -54,7 +54,7 @@ class UnitGroupListView(ListView[UnitGroup]):
         queryset = queryset.annotate(num_psets=Count("unit__pset"))
 
         if not isinstance(self.request.user, AnonymousUser):
-            latest: Student = (
+            latest: (Student | None) = (
                 Student.objects.filter(user=self.request.user)
                 .order_by("-semester__end_year")
                 .first()
