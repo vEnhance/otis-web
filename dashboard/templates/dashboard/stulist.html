@@ -54,10 +54,7 @@
         {% endfor %}
       </tbody>
     </table>
-    <p>
-      This list was generated {% now "r" %}.
-      Have a nice day.
-    </p>
+    <p>It's {% now "r" %}. Have a nice day.</p>
   {% else %}
     {# if no students at all #}
     <p class="fst-italic">But nobody came.</p>
@@ -87,13 +84,12 @@
   {% if past %}
     {% if semester %}
       <p>
-        You can view <a href="{% url "past" %}">🕗 all past years</a>
-        if you participated in OTIS before.
+        You can view <a href="{% url "past" %}">🕗 all past years at once</a>.
       </p>
     {% else %}
       <p>
-        This page includes all years of OTIS.
-        You can also see <a href="{% url "semester-list" %}">a listing of all years.</a>
+        This page includes
+        <a href="{% url "semester-list" %}">all years of OTIS</a>.
       </p>
     {% endif %}
   {% endif %}
