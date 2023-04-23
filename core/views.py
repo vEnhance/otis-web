@@ -2,7 +2,7 @@ from typing import Any, Optional
 
 from braces.views import LoginRequiredMixin, SuperuserRequiredMixin
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import AnonymousUser, User
+from django.contrib.auth.models import AnonymousUser, AbstractBaseUser
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models.aggregates import Count
@@ -30,6 +30,7 @@ from .utils import get_from_google_storage
 
 # Create your views here.
 
+
 class AdminUnitListView(SuperuserRequiredMixin, ListView[Unit]):
     model = Unit
     queryset = Unit.objects.all()
@@ -37,7 +38,7 @@ class AdminUnitListView(SuperuserRequiredMixin, ListView[Unit]):
     context_object_name = "unit_list"
 
 
-def pset_subquery(user: User) -> Exists:
+def pset_subquery(user: AbstractBaseUser) -> Exists:
     return Exists("unit__pset", filter=Q(student__user=user, status="A"))
 
 
