@@ -40,7 +40,7 @@ class AdminUnitListView(SuperuserRequiredMixin, ListView[Unit]):
     context_object_name = "unit_list"
 
 
-def pset_subquery(user) -> Exists:
+def pset_subquery(user: User) -> Exists:
     return Exists("unit__pset", filter=Q(student__user=user, status="A"))
 
 
