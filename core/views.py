@@ -33,7 +33,6 @@ from .utils import get_from_google_storage
 User = get_user_model()
 
 
-
 class AdminUnitListView(SuperuserRequiredMixin, ListView[Unit]):
     model = Unit
     queryset = Unit.objects.all()
