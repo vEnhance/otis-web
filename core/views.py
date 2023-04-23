@@ -2,7 +2,7 @@ from typing import Any, Optional
 
 from braces.views import LoginRequiredMixin, SuperuserRequiredMixin
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import AbstractBaseUser, AnonymousUser
+from django.contrib.auth.models import AnonymousUser
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models.aggregates import Count
@@ -38,22 +38,21 @@ class AdminUnitListView(SuperuserRequiredMixin, ListView[Unit]):
     context_object_name = "unit_list"
 
 
-def pset_subquery(user: AbstractBaseUser) -> Exists:
-    return Exists("unit__pset", filter=Q(student__user=user, status="A"))
-
-
 class UnitGroupListView(ListView[UnitGroup]):
     model = UnitGroup
 
     def get_queryset(self):
-        queryset = UnitGroup.objects.filter(
-            hidden=False,
-        )
+        queryset = UnitGroup.objects.filter(hidden=False)
         queryset = queryset.order_by("subject", "name")
         queryset = queryset.annotate(num_psets=Count("unit__pset"))
 
         if not isinstance(self.request.user, AnonymousUser):
-            queryset = queryset.annotate(has_pset=pset_subquery(self.request.user))
+            queryset = queryset.annotate(
+                has_pset=Exists(
+                    "unit__pset",
+                    filter=Q(student__user=self.request.user, status="A"),
+                )
+            )
         queryset = queryset.prefetch_related("unit_set")
 
         return queryset
