@@ -37,9 +37,9 @@ class AdminUnitListView(SuperuserRequiredMixin, ListView[Unit]):
     context_object_name = "unit_list"
 
 
-def pset_subquery(student: Student) -> Exists:
+def pset_subquery(user) -> Exists:
     return Exists(
-        PSet.objects.filter(unit__group=OuterRef("pk"), student=student, status="A")
+        PSet.objects.filter(unit__group=OuterRef("pk"), student__user=user, status="A")
     )
 
 
@@ -54,15 +54,8 @@ class UnitGroupListView(ListView[UnitGroup]):
         queryset = queryset.annotate(num_psets=Count("unit__pset"))
 
         if not isinstance(self.request.user, AnonymousUser):
-            latest: (Student | None) = (
-                Student.objects.filter(user=self.request.user)
-                .order_by("-semester__end_year")
-                .first()
-            )
-
-            if latest != None:
-                queryset = queryset.annotate(has_pset=pset_subquery(latest))
-            queryset = queryset.prefetch_related("unit_set")
+            queryset = queryset.annotate(has_pset=pset_subquery(self.request.user))
+        queryset = queryset.prefetch_related("unit_set")
 
         return queryset
 
