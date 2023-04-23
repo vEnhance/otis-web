@@ -8,6 +8,7 @@ from django.core.exceptions import PermissionDenied
 from django.db.models.aggregates import Count
 from django.db.models.base import Model
 from django.db.models.query import QuerySet
+from django.db.models.query_utils import Q
 from django.forms.models import BaseModelForm
 from django.http import HttpRequest, HttpResponse
 from django.http.response import JsonResponse
@@ -17,6 +18,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 from django.views.generic.edit import UpdateView
 from django.views.generic.list import ListView
+from sql_util.utils import Exists
 
 from core.models import UserProfile
 from dashboard.models import PSet, UploadedFile
@@ -38,14 +40,22 @@ class AdminUnitListView(SuperuserRequiredMixin, ListView[Unit]):
 
 class UnitGroupListView(ListView[UnitGroup]):
     model = UnitGroup
-    queryset = (
-        UnitGroup.objects.filter(
-            hidden=False,
-        )
-        .order_by("subject", "name")
-        .annotate(num_psets=Count("unit__pset"))
-        .prefetch_related("unit_set")
-    )
+
+    def get_queryset(self):
+        queryset = UnitGroup.objects.filter(hidden=False)
+        queryset = queryset.order_by("subject", "name")
+        queryset = queryset.annotate(num_psets=Count("unit__pset"))
+
+        if not isinstance(self.request.user, AnonymousUser):
+            queryset = queryset.annotate(
+                has_pset=Exists(
+                    "unit__pset",
+                    filter=Q(student__user=self.request.user, status="A"),
+                )
+            )
+        queryset = queryset.prefetch_related("unit_set")
+
+        return queryset
 
 
 class PublicCatalog(ListView[UnitGroup]):

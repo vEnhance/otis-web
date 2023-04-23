@@ -47,6 +47,11 @@
               <b class="text-info">
                 <a href="{% url "wiki-unitgroup" unitgroup.pk %}">{{ unitgroup.name }}</a>
               </b>
+              {% if unitgroup.has_pset %}
+                <b class="text-success">
+                  (✓)
+                </b>
+              {% endif %}
               <span class="text-dark">— {{ unitgroup.get_subject_short_display }}:
                 {% for unit in unitgroup.unit_set.all %}
                   {% if forloop.last %}
