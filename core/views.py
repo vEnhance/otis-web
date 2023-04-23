@@ -1,6 +1,7 @@
 from typing import Any, Optional
 
 from braces.views import LoginRequiredMixin, SuperuserRequiredMixin
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.messages.views import SuccessMessageMixin
@@ -29,6 +30,8 @@ from .models import Unit, UnitGroup
 from .utils import get_from_google_storage
 
 # Create your views here.
+User = get_user_model()
+
 
 
 class AdminUnitListView(SuperuserRequiredMixin, ListView[Unit]):
