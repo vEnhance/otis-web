@@ -1,6 +1,7 @@
+from arch.views import User
 from core.factories import UnitFactory, UserFactory
 from evans_django_tools.testsuite import EvanTestCase
-from rpg.factories import AchievementFactory
+from rpg.factories import AchievementFactory, AchievementUnlockFactory
 from wikihaxx.mdx.otis import OTISPreprocessor
 
 from .factories import URLPathFactory
@@ -21,11 +22,11 @@ Compute the total number of words exchanged.
 
 (For students: the following two codes are for testing. They are not real diamonds.)
 
-[diamond 000000000000000000000000][/diamond]
+[diamond 1][/diamond]
 
-[diamond 000000000000000000007E57][/diamond]
+[diamond 3][/diamond]
 
-[diamond 100000000000000000007E57][/diamond]
+[diamond 4][/diamond]
 
 [generic]
 Name | Evan
@@ -83,7 +84,8 @@ class WikiTest(EvanTestCase):
             group__subject="M",
             code="DMW",
         )
-        AchievementFactory.create(
+        alice: User = UserFactory.create()
+        a1 = AchievementFactory.create(
             code="000000000000000000007E57",
             name="Test Diamond",
             description="Hi.",
@@ -94,12 +96,27 @@ class WikiTest(EvanTestCase):
             description="This is to appease coverage branch",
             image=None,
         )
+        a3 = AchievementFactory.create(
+            code="69000000000000000007E57",
+            name="Private Diamond",
+            description="Wow",
+            image=None,
+            creator=alice,
+        )
+
+        AchievementUnlockFactory.create(user=alice, achievement=a1)
+        AchievementUnlockFactory.create(user=alice, achievement=a3)
 
         p = OTISPreprocessor()
         reply = p.run(wiki_sample_bbcode.splitlines())
         self.assertIn(r'Alice says, "you are a doofus".', reply)
         self.assertIn(r'Bob says, "no you".', reply)
-        self.assertIn(r'<tr class="danger"><th>Code</th><td>INVALID</td></tr>', reply)
+        self.assertIn(
+            r'<tr class="danger"><th>Diamond</th><td>INVALID</td></tr>', reply
+        )
+        self.assertIn(
+            r'<tr class="danger"><th>Diamond</th><td>NOT ALLOWED</td></tr>', reply
+        )
         self.assertIn(r"<tr><th>Name</th><td>Test Diamond</td></tr>", reply)
         self.assertIn(r"<tr><th>Description</th><td>Hi.</td></tr>", reply)
         self.assertIn(r"<td>@evanchen.cc</td>", reply)

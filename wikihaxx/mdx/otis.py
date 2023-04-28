@@ -45,33 +45,42 @@ class OTISPreprocessor(markdown.preprocessors.Preprocessor):
                         diamond = Achievement.objects.get(pk=tag_arg)
                     except Achievement.DoesNotExist:
                         table_output.append(
-                            '<tr class="danger"><th>Code</th><td>INVALID</td></tr>'
+                            '<tr class="danger"><th>Diamond</th><td>INVALID</td></tr>'
                         )
                     else:
-                        if diamond.image:
-                            art_url = diamond.image.url
-                            output.append(
-                                f'<div class="W-100 text-center"><a href="{art_url}">'
-                                f'<img class="w-100" src="{art_url}" /></a></div>'
-                            )
-                        table_output.append(
-                            f"<tr><th>Name</th><td>{diamond.name}</td></tr>"
-                        )
-                        table_output.append(
-                            f"<tr><th>Value</th><td>{diamond.diamonds}◆</td></tr>"
-                        )
                         num_found = (
                             AchievementUnlock.objects.filter(
                                 achievement=diamond
                             ).count()
                             or 0
                         )
-                        table_output.append(
-                            f"<tr><th>Found by</th><td>{num_found}</td></tr>"
-                        )
-                        table_output.append(
-                            f"<tr><th>Description</th><td>{diamond.description}</td></tr>"
-                        )
+
+                        # check to make sure is not user diamond and
+
+                        if diamond.creator is None and num_found > 0:
+                            if diamond.image:
+                                art_url = diamond.image.url
+                                output.append(
+                                    f'<div class="W-100 text-center"><a href="{art_url}">'
+                                    f'<img class="w-100" src="{art_url}" /></a></div>'
+                                )
+                            table_output.append(
+                                f"<tr><th>Name</th><td>{diamond.name}</td></tr>"
+                            )
+                            table_output.append(
+                                f"<tr><th>Value</th><td>{diamond.diamonds}◆</td></tr>"
+                            )
+                            table_output.append(
+                                f"<tr><th>Found by</th><td>{num_found}</td></tr>"
+                            )
+                            table_output.append(
+                                f"<tr><th>Description</th><td>{diamond.description}</td></tr>"
+                            )
+                        else:
+                            table_output.append(
+                                '<tr class="danger"><th>Diamond</th><td>NOT ALLOWED</td></tr>'
+                            )
+
                 elif tag_name == "unit":
                     try:
                         unitgroup = UnitGroup.objects.get(
