@@ -32,6 +32,7 @@
               <td>
                 <a href="{% url "portal" student.pk %}">{{ student.name }}</a>
                 {% if not student.enabled %}(disabled){% endif %}
+                {% if student.newborn %}(newborn){% endif %}
               </td>
               {% if stulist_show_semester %}
                 <td>{{ student.semester }}</td>
