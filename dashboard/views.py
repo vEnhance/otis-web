@@ -152,10 +152,14 @@ def certify(
         else:
             years = (
                 ", ".join(s.years for s in semesters[:-1])
-                + " and "
+                + ", and "
                 + semesters[-1].years
                 + " years"
             )
+
+        unit_count = PSet.objects.filter(
+            student=student, status="A", eligible=True
+        ).count()
 
         context = {
             "student": student,
@@ -167,6 +171,7 @@ def certify(
             "checksum": student.get_checksum(settings.CERT_HASH_KEY),
             "target_url": f"{request.scheme}//{request.get_host()}"
             + reverse("certify", args=(student.pk, checksum)),
+            "unit_count": unit_count,
         }
         return render(request, "dashboard/certify.html", context)
 
