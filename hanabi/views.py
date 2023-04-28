@@ -52,10 +52,13 @@ class HanabiReplayList(ListView[HanabiReplay]):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["contest"] = self.contest
-        context["own_replay"] = HanabiReplay.objects.filter(
-            contest=self.contest,
-            hanabiparticipation__player__user=self.request.user,
-        ).first()
+        if isinstance(self.request.user, User):
+            context["own_replay"] = HanabiReplay.objects.filter(
+                contest=self.contest,
+                hanabiparticipation__player__user=self.request.user,
+            ).first()
+        else:
+            context["own_replay"] = None
         return context
 
     def get_queryset(self) -> QuerySet[HanabiReplay]:
