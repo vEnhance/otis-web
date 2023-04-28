@@ -42,7 +42,7 @@ class OTISPreprocessor(markdown.preprocessors.Preprocessor):
 
                 if tag_name == "diamond":
                     try:
-                        diamond = Achievement.objects.get(code__iexact=tag_arg)
+                        diamond = Achievement.objects.get(pk=tag_arg)
                     except Achievement.DoesNotExist:
                         table_output.append(
                             '<tr class="danger"><th>Code</th><td>INVALID</td></tr>'
