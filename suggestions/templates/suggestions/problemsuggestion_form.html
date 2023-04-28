@@ -215,6 +215,7 @@
                     .text("Turn off LaTeX");
             } else if (render_enabled) {
                 render_enabled = false;
+                autorender_enabled = false;
                 $("#render-toggle")
                     .addClass("btn-primary")
                     .removeClass("btn-danger")
@@ -236,13 +237,8 @@
             return !s.split("\n").some(e => e.length > 100); // amol stronk
         }
 
-        $("#id_statement").on("input", (e) => {
-            render_statement(autorender_enabled && render_enabled);
-        });
-
-        $("#id_solution").on("input", (e) => {
-            render_solution(autorender_enabled && render_enabled);
-        });
+        $("#statement_warning").toggle(!checkLineLength($("#id_statement").val()));
+        $("#solution_warning").toggle(!checkLineLength($("#id_solution").val()));
 
         function render_statement(enabled) {
             const s = $("#id_statement").val();
@@ -260,11 +256,17 @@
             MathJax.typeset([document.querySelector("#solution_render")]);
         }
 
+        $("#id_statement").on("input", (e) => {
+            render_statement(autorender_enabled);
+        });
+
+        $("#id_solution").on("input", (e) => {
+            render_solution(autorender_enabled);
+        });
+
         $("#id_statement").blur(render_statement(render_enabled));
         $("#id_solution").blur(render_solution(render_enabled));
 
-        $("#statement_warning").toggle(!checkLineLength($("#id_statement").val()));
-        $("#solution_warning").toggle(!checkLineLength($("#id_solution").val()));
     });
   </script>
 {% endblock scripts %}
