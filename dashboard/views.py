@@ -152,7 +152,7 @@ def certify(
         else:
             years = (
                 ", ".join(s.years for s in semesters[:-1])
-                + " and "
+                + ", and "
                 + semesters[-1].years
                 + " years"
             )
