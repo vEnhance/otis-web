@@ -55,8 +55,6 @@ class OTISPreprocessor(markdown.preprocessors.Preprocessor):
                             or 0
                         )
 
-                        # check to make sure is not user diamond and
-
                         if diamond.creator is None and num_found > 0:
                             if diamond.image:
                                 art_url = diamond.image.url
