@@ -2,20 +2,20 @@
 {% load static %}
 {% block css %}
   <style type="text/css">
-    a.chosen-single {
-        border: 2px solid #aaa;
-        background-color: #fff;
-        border-radius: 5px;
-    }
+      a.chosen-single {
+          border: 2px solid #aaa;
+          background-color: #fff;
+          border-radius: 5px;
+      }
   </style>
 {% endblock css %}
 {% block scripts %}
   <script type="text/javascript">
-    $(document).ready(function() {
-        $("#id_unit").chosen({
-            placeholder_text: "...",
-        });
-    });
+      $(document).ready(function() {
+          $("#id_unit").chosen({
+              placeholder_text: "...",
+          });
+      });
   </script>
 {% endblock scripts %}
 {% block title %}

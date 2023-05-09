@@ -2,28 +2,28 @@
 {% load static %}
 {% block css %}
   <style type="text/css">
-    ul.chosen-choices {
-        border: 2px solid #aaa;
-    }
+      ul.chosen-choices {
+          border: 2px solid #aaa;
+      }
 
-    .chosen-container-multi .chosen-choices li {
-        float: none;
-    }
+      .chosen-container-multi .chosen-choices li {
+          float: none;
+      }
 
-    label.form-label {
-        min-width: 3em;
-        font-weight: bold;
-    }
+      label.form-label {
+          min-width: 3em;
+          font-weight: bold;
+      }
   </style>
 {% endblock css %}
 {% block scripts %}
   <script type="text/javascript">
-    $(document).ready(function() {
-        $("select.chosen-select").chosen({
-            placeholder_text: "...",
-            width: "300",
-        });
-    });
+      $(document).ready(function() {
+          $("select.chosen-select").chosen({
+              placeholder_text: "...",
+              width: "300",
+          });
+      });
   </script>
 {% endblock scripts %}
 {% block layout-content %}

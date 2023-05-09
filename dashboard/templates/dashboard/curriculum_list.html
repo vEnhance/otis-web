@@ -13,12 +13,12 @@
     <span class="fs-6 fst-italic">Mouse over icons for hints.</span>
   </p>
   <script>
-    $("#hide-completed-units").click(function() {
-        $(".unit-completed").toggleClass("unit-completed-hidden");
-    });
-    $("#hide-locked-units").click(function() {
-        $(".unit-locked").toggleClass("unit-locked-hidden");
-    });
+      $("#hide-completed-units").click(function() {
+          $(".unit-completed").toggleClass("unit-completed-hidden");
+      });
+      $("#hide-locked-units").click(function() {
+          $(".unit-locked").toggleClass("unit-locked-hidden");
+      });
   </script>
   {% with profile=request.user|getprofile %}
     <table class="table curriculum">

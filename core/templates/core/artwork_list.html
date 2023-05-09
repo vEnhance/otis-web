@@ -10,26 +10,26 @@
 {% endblock side-class %}
 {% block css %}
   <style type="text/css">
-    @keyframes glow-yellow {
-        from {
-            box-shadow: 0px 0px 35px #bbbb33
-        }
+      @keyframes glow-yellow {
+          from {
+              box-shadow: 0px 0px 35px #bbbb33
+          }
 
-        to {
-            box-shadow: 0px 0px 45px #eeeecc
-        }
-    }
+          to {
+              box-shadow: 0px 0px 45px #eeeecc
+          }
+      }
 
-    a.artwork>img {
-        object-fit: cover;
-        box-shadow: 0px 0px 15px #6666dd;
-    }
+      a.artwork>img {
+          object-fit: cover;
+          box-shadow: 0px 0px 15px #6666dd;
+      }
 
-    a.artwork:hover>img {
-        animation-name: glow-yellow;
-        animation-duration: 2s;
-        transform: scale(1.05);
-    }
+      a.artwork:hover>img {
+          animation-name: glow-yellow;
+          animation-duration: 2s;
+          transform: scale(1.05);
+      }
   </style>
 {% endblock css %}
 {% block layout-content %}
@@ -37,9 +37,7 @@
     <a href="/">Back to home</a>.
   </p>
   {% for unitgroup in unitgroups %}
-    {% if forloop.counter0|divisibleby:"3" %}
-      <div class="row mb-4">
-      {% endif %}
+    {% if forloop.counter0|divisibleby:"3" %}<div class="row mb-4">{% endif %}
       <div class="col-12 col-md-4">
         <div class="card">
           <div class="card-body">
@@ -55,8 +53,6 @@
         </div>
       </div>
       {# and end the loop... #}
-      {% if forloop.last or forloop.counter|divisibleby:"3" %}
-      </div>
-    {% endif %}
+      {% if forloop.last or forloop.counter|divisibleby:"3" %}</div>{% endif %}
   {% endfor %}
 {% endblock layout-content %}

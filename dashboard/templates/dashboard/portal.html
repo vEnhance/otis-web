@@ -403,46 +403,46 @@
 {% endblock layout-content %}
 {% block scripts %}
   <script type="text/javascript">
-    $(() => {
-        // https://docs.djangoproject.com/en/3.2/ref/csrf/
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    // Does this cookie string begin with the name we want?
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-        const csrftoken = getCookie('csrftoken');
+      $(() => {
+          // https://docs.djangoproject.com/en/3.2/ref/csrf/
+          function getCookie(name) {
+              let cookieValue = null;
+              if (document.cookie && document.cookie !== '') {
+                  const cookies = document.cookie.split(';');
+                  for (let i = 0; i < cookies.length; i++) {
+                      const cookie = cookies[i].trim();
+                      // Does this cookie string begin with the name we want?
+                      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                          break;
+                      }
+                  }
+              }
+              return cookieValue;
+          }
+          const csrftoken = getCookie('csrftoken');
 
-        function ajaxCall(url) {
-            const request = new Request(url, {
-                headers: {
-                    'X-CSRFToken': csrftoken
-                }
-            });
-            fetch(request, {
-                method: 'POST',
-                mode: 'same-origin'
-            }).then(function(response) {
-                console.log(response);
-            });;
-        }
+          function ajaxCall(url) {
+              const request = new Request(url, {
+                  headers: {
+                      'X-CSRFToken': csrftoken
+                  }
+              });
+              fetch(request, {
+                  method: 'POST',
+                  mode: 'same-origin'
+              }).then(function(response) {
+                  console.log(response);
+              });;
+          }
 
-        $('#dismiss_emails').on('click', () => {
-            ajaxCall("{% url 'dismiss-emails' %}");
-        });
+          $('#dismiss_emails').on('click', () => {
+              ajaxCall("{% url 'dismiss-emails' %}");
+          });
 
-        $('#dismiss_downloads').on('click', () => {
-            ajaxCall("{% url 'dismiss-downloads' %}");
-        });
-    });
+          $('#dismiss_downloads').on('click', () => {
+              ajaxCall("{% url 'dismiss-downloads' %}");
+          });
+      });
   </script>
 {% endblock scripts %}

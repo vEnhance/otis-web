@@ -184,89 +184,89 @@
 {% endblock layout-content %}
 {% block css %}
   <style type="text/css">
-    #solution_render,
-    #statement_render {
-        color: blue;
-        font-family: sans-serif;
-    }
+      #solution_render,
+      #statement_render {
+          color: blue;
+          font-family: sans-serif;
+      }
 
-    #id_statement,
-    #id_solution {
-        font-size: 10pt;
-        white-space: pre;
-    }
+      #id_statement,
+      #id_solution {
+          font-size: 10pt;
+          white-space: pre;
+      }
   </style>
 {% endblock css %}
 {% block scripts %}
   <script type="text/javascript">
-    $(document).ready(function() {
-        $("#id_unit").chosen();
-        let autorender_enabled = true;
-        let render_enabled = true;
+      $(document).ready(function() {
+          $("#id_unit").chosen();
+          let autorender_enabled = true;
+          let render_enabled = true;
 
-        $("#render-toggle").click(function(e) {
-            e.preventDefault();
-            if (render_enabled && autorender_enabled) {
-                render_enabled = true;
-                autorender_enabled = false;
-                $("#render-toggle")
-                    .addClass("btn-danger")
-                    .removeClass("btn-info")
-                    .text("Turn off LaTeX");
-            } else if (render_enabled) {
-                render_enabled = false;
-                autorender_enabled = false;
-                $("#render-toggle")
-                    .addClass("btn-primary")
-                    .removeClass("btn-danger")
-                    .text("Enable instant-TeX");
-            } else {
-                render_enabled = true;
-                autorender_enabled = true;
-                $("#render-toggle")
-                    .addClass("btn-info")
-                    .removeClass("btn-primary")
-                    .text("Disable instant-TeX");
-            }
-            render_statement();
-            render_solution();
-        });
+          $("#render-toggle").click(function(e) {
+              e.preventDefault();
+              if (render_enabled && autorender_enabled) {
+                  render_enabled = true;
+                  autorender_enabled = false;
+                  $("#render-toggle")
+                      .addClass("btn-danger")
+                      .removeClass("btn-info")
+                      .text("Turn off LaTeX");
+              } else if (render_enabled) {
+                  render_enabled = false;
+                  autorender_enabled = false;
+                  $("#render-toggle")
+                      .addClass("btn-primary")
+                      .removeClass("btn-danger")
+                      .text("Enable instant-TeX");
+              } else {
+                  render_enabled = true;
+                  autorender_enabled = true;
+                  $("#render-toggle")
+                      .addClass("btn-info")
+                      .removeClass("btn-primary")
+                      .text("Disable instant-TeX");
+              }
+              render_statement();
+              render_solution();
+          });
 
 
-        function checkLineLength(s) {
-            return !s.split("\n").some(e => e.length > 100); // amol stronk
-        }
+          function checkLineLength(s) {
+              return !s.split("\n").some(e => e.length > 100); // amol stronk
+          }
 
-        $("#statement_warning").toggle(!checkLineLength($("#id_statement").val()));
-        $("#solution_warning").toggle(!checkLineLength($("#id_solution").val()));
+          $("#statement_warning").toggle(!checkLineLength($("#id_statement").val()));
+          $("#solution_warning").toggle(!checkLineLength($("#id_solution").val()));
 
-        function render_statement(enabled) {
-            const s = $("#id_statement").val();
-            $("#statement_warning").toggle(!checkLineLength(s));
-            if (!enabled) return;
-            $("#statement_render").text(s);
-            MathJax.typeset([document.querySelector("#statement_render")]);
-        }
+          function render_statement(enabled) {
+              const s = $("#id_statement").val();
+              $("#statement_warning").toggle(!checkLineLength(s));
+              if (!enabled) return;
+              $("#statement_render").text(s);
+              MathJax.typeset([document.querySelector("#statement_render")]);
+          }
 
-        function render_solution(enabled) {
-            const s = $("#id_solution").val();
-            $("#solution_warning").toggle(!checkLineLength(s));
-            if (!enabled) return;
-            $("#solution_render").text(s);
-            MathJax.typeset([document.querySelector("#solution_render")]);
-        }
+          function render_solution(enabled) {
+              const s = $("#id_solution").val();
+              $("#solution_warning").toggle(!checkLineLength(s));
+              if (!enabled) return;
+              $("#solution_render").text(s);
+              MathJax.typeset([document.querySelector("#solution_render")]);
+          }
 
-        $("#id_statement").on("input", (e) => {
-            render_statement(autorender_enabled);
-        });
+          $("#id_statement").on("input", (e) => {
+              render_statement(autorender_enabled);
+          });
 
-        $("#id_solution").on("input", (e) => {
-            render_solution(autorender_enabled);
-        });
+          $("#id_solution").on("input", (e) => {
+              render_solution(autorender_enabled);
+          });
 
-        $("#id_statement").blur(render_statement(render_enabled));
-        $("#id_solution").blur(render_solution(render_enabled));
+          $("#id_statement").blur(render_statement(render_enabled));
+          $("#id_solution").blur(render_solution(render_enabled));
 
-    });
+      });
   </script>
 {% endblock scripts %}

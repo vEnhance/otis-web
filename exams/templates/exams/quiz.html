@@ -87,9 +87,9 @@
 <p>Enter your responses below as expressions.</p>
 {% include "generic_form.html" %}
 <script type="text/javascript">
-  $("form.form")[0].onsubmit = function() {
-      return confirm('Are you ready to submit? This cannot be reversed.');
-  }
+    $("form.form")[0].onsubmit = function() {
+        return confirm('Are you ready to submit? This cannot be reversed.');
+    }
 </script>
 {% else %}
 <hr />
@@ -109,14 +109,14 @@
 {% endblock layout-content %}
 {% block scripts %}
   <script type="text/javascript">
-    $(document).ready(function() {
-        for (let i = 1; i <= 5; ++i) {
-            const elm_id = "#id_guess" + i;
-            $(elm_id).bind('keyup', function(e) {
-                const s = $(elm_id).val().toLowerCase().replace(/[^0-9+\-*a-z()^/ ]/gi, '');
-                $(elm_id).val(s);
-            });
-        }
-    });
+      $(document).ready(function() {
+          for (let i = 1; i <= 5; ++i) {
+              const elm_id = "#id_guess" + i;
+              $(elm_id).bind('keyup', function(e) {
+                  const s = $(elm_id).val().toLowerCase().replace(/[^0-9+\-*a-z()^/ ]/gi, '');
+                  $(elm_id).val(s);
+              });
+          }
+      });
   </script>
 {% endblock scripts %}

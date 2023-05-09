@@ -58,44 +58,44 @@
 {% endblock layout-content %}
 {% block css %}
   <style type="text/css">
-    #content_render {
-        color: blue;
-        font-family: sans-serif;
-    }
+      #content_render {
+          color: blue;
+          font-family: sans-serif;
+      }
 
-    #id_content {
-        font-size: 10pt;
-    }
+      #id_content {
+          font-size: 10pt;
+      }
   </style>
 {% endblock css %}
 {% block scripts %}
   <script type="text/javascript">
-    $(document).ready(function() {
-        $("#id_problem").chosen({
-            placeholder_text: "...",
-            width: "90%",
-            search_contains: true,
-        });
+      $(document).ready(function() {
+          $("#id_problem").chosen({
+              placeholder_text: "...",
+              width: "90%",
+              search_contains: true,
+          });
 
-        parent = $("#id_content").parent().get(0)
-        d = document.createElement('div');
-        $(d).attr('id', 'content_render')
-            .html('')
-            .appendTo(parent);
+          parent = $("#id_content").parent().get(0)
+          d = document.createElement('div');
+          $(d).attr('id', 'content_render')
+              .html('')
+              .appendTo(parent);
 
-        $("#id_content").on("input", (e) => {
-            render_content(true);
-        });
+          $("#id_content").on("input", (e) => {
+              render_content(true);
+          });
 
-        function render_content(enabled) {
-            const s = $("#id_content").val();
-            if (!enabled) return;
-            $("#content_render").text(s);
-            console.log(s);
-            MathJax.typeset([document.querySelector("#content_render")]);
-        }
+          function render_content(enabled) {
+              const s = $("#id_content").val();
+              if (!enabled) return;
+              $("#content_render").text(s);
+              console.log(s);
+              MathJax.typeset([document.querySelector("#content_render")]);
+          }
 
-        $("#id_content").blur(render_content(true));
-    });
+          $("#id_content").blur(render_content(true));
+      });
   </script>
 {% endblock scripts %}

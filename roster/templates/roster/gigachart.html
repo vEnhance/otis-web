@@ -19,16 +19,16 @@
     {{ table|safe }}
   </body>
   <script>
-    // hack: we pretend there's only one table
-    table = $('table');
+      // hack: we pretend there's only one table
+      table = $('table');
 
-    table.addClass("display", "cell-border", "compact");
+      table.addClass("display", "cell-border", "compact");
 
-    table.DataTable({
-        paging: false,
-        colReorder: true,
-        fixedColumns: true,
-        fixedHeader: true,
-    });
+      table.DataTable({
+          paging: false,
+          colReorder: true,
+          fixedColumns: true,
+          fixedHeader: true,
+      });
   </script>
 </html>
