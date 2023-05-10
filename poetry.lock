@@ -598,13 +598,13 @@ bcrypt = ["bcrypt"]
 
 [[package]]
 name = "django-allauth"
-version = "0.53.1"
+version = "0.54.0"
 description = "Integrated set of Django applications addressing authentication, registration, account management as well as 3rd party (social) account authentication."
 category = "main"
 optional = false
-python-versions = ">=3.5"
+python-versions = ">=3.7"
 files = [
-    {file = "django-allauth-0.53.1.tar.gz", hash = "sha256:1336f430d5797e7484dfddc6ddb1d5f61f04bb24a9519b64756847d089b2ffba"},
+    {file = "django-allauth-0.54.0.tar.gz", hash = "sha256:120e265f802b65738899c6cb627b827fde46a4d03067034c633f516c2adf3e3e"},
 ]
 
 [package.dependencies]
@@ -779,14 +779,14 @@ shortuuid = "*"
 
 [[package]]
 name = "django-mptt"
-version = "0.14.0"
+version = "0.13.4"
 description = "Utilities for implementing Modified Preorder Tree Traversal with your Django Models and working with trees of Model instances."
 category = "main"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "django-mptt-0.14.0.tar.gz", hash = "sha256:2c92a2b1614c53086278795ccf50580cf1f9b8564f3ff03055dd62bab5987711"},
-    {file = "django_mptt-0.14.0-py3-none-any.whl", hash = "sha256:d9a87433ab0e4f35247c6f6d5a93ace6990860a4ba8796f815d185f773b9acfc"},
+    {file = "django-mptt-0.13.4.tar.gz", hash = "sha256:80c9fb34df7796a4e5af0cb6b8ade3697555b1aa438bd07a01f32b3ab5202b63"},
+    {file = "django_mptt-0.13.4-py3-none-any.whl", hash = "sha256:75745b621ae31d97957ed924155a750dfa8cacd9543799ada2d713fd6bc3f5c7"},
 ]
 
 [package.dependencies]
@@ -797,18 +797,18 @@ tests = ["coverage", "mock-django"]
 
 [[package]]
 name = "django-nyt"
-version = "1.3"
+version = "1.2.4"
 description = "A pluggable notification system written for the Django framework."
 category = "main"
 optional = false
 python-versions = ">=3.5"
 files = [
-    {file = "django_nyt-1.3-py3-none-any.whl", hash = "sha256:aba75df76ec565f0d6a839f5765b41c06b3d4471f5bd5c95718397e11a33050b"},
-    {file = "django_nyt-1.3.tar.gz", hash = "sha256:a92b019281b5b993be567fe25072a83c6c00bd53753e2613b374ac1efa08c383"},
+    {file = "django-nyt-1.2.4.tar.gz", hash = "sha256:7e54b06edab779c35f8b636e0cb847c70f17bcdf7a11ad466228ce403e9f856e"},
+    {file = "django_nyt-1.2.4-py3-none-any.whl", hash = "sha256:49b500047b041dbbac403fe72b8fc1f597f68db7522d0c04011bc76bad79b959"},
 ]
 
 [package.dependencies]
-django = ">=2.2,<4.3"
+django = ">=2.2,<4.2"
 
 [[package]]
 name = "django-positions"
@@ -932,38 +932,38 @@ sftp = ["paramiko (>=1.10.0)"]
 
 [[package]]
 name = "django-stubs"
-version = "1.16.0"
+version = "4.2.0"
 description = "Mypy stubs for Django"
 category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "django-stubs-1.16.0.tar.gz", hash = "sha256:1bd96207576cd220221a0e615f0259f13d453d515a80f576c1246e0fb547f561"},
-    {file = "django_stubs-1.16.0-py3-none-any.whl", hash = "sha256:c95f948e2bfc565f3147e969ff361ef033841a0b8a51cac974a6cc6d0486732c"},
+    {file = "django-stubs-4.2.0.tar.gz", hash = "sha256:93baff824f0a056e71036b423b942a74f07b909e45e3fa38185b910f597c5c08"},
+    {file = "django_stubs-4.2.0-py3-none-any.whl", hash = "sha256:d2c671989efb3f7b0fa91e461909ad5a5a52155fe7fe6d1f2058cb88e3afb123"},
 ]
 
 [package.dependencies]
 django = "*"
-django-stubs-ext = ">=0.8.0"
+django-stubs-ext = ">=4.2.0"
 mypy = ">=0.980"
-tomli = "*"
+tomli = {version = "*", markers = "python_version < \"3.11\""}
 types-pytz = "*"
 types-PyYAML = "*"
 typing-extensions = "*"
 
 [package.extras]
-compatible-mypy = ["mypy (>=1.1.1,<1.2)"]
+compatible-mypy = ["mypy (>=1.2.0,<1.3)"]
 
 [[package]]
 name = "django-stubs-ext"
-version = "0.8.0"
+version = "4.2.0"
 description = "Monkey-patching and extensions for django-stubs"
 category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "django-stubs-ext-0.8.0.tar.gz", hash = "sha256:9a9ba9e2808737949de96a0fce8b054f12d38e461011d77ebc074ffe8c43dfcb"},
-    {file = "django_stubs_ext-0.8.0-py3-none-any.whl", hash = "sha256:a454d349d19c26d6c50c4c6dbc1e8af4a9cda4ce1dc4104e3dd4c0330510cc56"},
+    {file = "django-stubs-ext-4.2.0.tar.gz", hash = "sha256:7789f0caeca7152fef07ad6b94dec7310a05d0b8dab77f7979e19db0037b5127"},
+    {file = "django_stubs_ext-4.2.0-py3-none-any.whl", hash = "sha256:55b2e3077f883e0131a7596f8ff8b19f8fc3ca325a3318ccacf5331acb2601e4"},
 ]
 
 [package.dependencies]
@@ -2886,23 +2886,30 @@ test = ["pytest (>=6.0.0)"]
 
 [[package]]
 name = "wiki"
-version = "0.10b1"
+version = "0.9"
 description = "A wiki system written for the Django framework."
 category = "main"
 optional = false
-python-versions = ">=3.7"
+python-versions = "*"
 files = []
 develop = false
 
 [package.dependencies]
-bleach = {version = ">=5,<6", extras = ["css"]}
-django = ">=2.1,<4.2"
-django-mptt = ">=0.13,<0.15"
-django-nyt = ">=1.2.2"
+bleach = {version = ">=5", extras = ["css"]}
+Django = ">=2.1,<4.2"
+django-mptt = ">=0.13,<0.14"
+django-nyt = ">=1.2.2,<1.3"
 django-sekizai = ">=0.10"
-markdown = ">=3.3,<3.4"
-pillow = "*"
+Markdown = ">=3.3,<3.4"
+Pillow = "*"
 sorl-thumbnail = ">=12.8,<13"
+tinycss2 = "*"
+
+[package.extras]
+devel = ["black (>=22.3.0,<22.7)", "codecov", "coverage", "ddt", "django-functest (>=1.2,<1.5)", "flake8 (>=3.7,<5.1)", "pre-commit", "pytest (>=6.2.5,<7.2)", "pytest-cov", "pytest-django", "pytest-pythonpath"]
+test = ["codecov", "coverage", "ddt", "django-functest (>=1.2,<1.5)", "pytest (>=6.2.5,<7.2)", "pytest-cov", "pytest-django", "pytest-pythonpath"]
+testlint = ["black (>=22.3.0,<22.7)", "flake8 (>=3.7,<5.1)", "pre-commit"]
+transifex = ["transifex-client"]
 
 [package.source]
 type = "git"
@@ -2953,4 +2960,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10, <4.0"
-content-hash = "25e301ac54f69c04a9578cc7669cb2f08924cb96266729d1a672eec1e6fd8d2a"
+content-hash = "1698fbbf998f86d7616018efcc10af0433b27b7d3736862cde77155d6f0006df"
