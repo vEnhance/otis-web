@@ -448,19 +448,30 @@ def invoice_handler(action: str, data: JSONData) -> JsonResponse:
 
 def arch_url_handler(action: str, data: JSONData) -> JsonResponse:
     del action
-    problems_to_update: list[Problem] = []
     urls_map = data["urls"]
+    # update existing problem URL's
+    problems_to_update: list[Problem] = []
     for problem in Problem.objects.all():
         puid = problem.puid
-        if puid in urls_map and problem.hyperlink != urls_map[puid]:
-            problem.hyperlink = urls_map[puid]
+        if puid in urls_map and problem.hyperlink != (new_link := urls_map.pop(puid)):
+            problem.hyperlink = new_link
             problems_to_update.append(problem)
     Problem.objects.bulk_update(
         problems_to_update,
         fields=("hyperlink",),
         batch_size=25,
     )
-    return JsonResponse({"updated_count": len(problems_to_update)})
+    # create new problem objects for newfound problems
+    problems_to_create: list[Problem] = []
+    for puid, hyperlink in urls_map.items():
+        problems_to_create.append(Problem(puid=puid, hyperlink=hyperlink))
+    Problem.objects.bulk_create(problems_to_create)
+    return JsonResponse(
+        {
+            "updated_count": len(problems_to_update),
+            "created_count": len(problems_to_create),
+        }
+    )
 
 
 def hanabi_handler(action: str, data: JSONData) -> JsonResponse:

@@ -398,6 +398,7 @@ class TestAincrad(EvanTestCase):
             },
         )
         self.assertEqual(resp.json()["updated_count"], 2)
+        self.assertEqual(resp.json()["created_count"], 1)
         self.assertEqual(
             Problem.objects.get(puid="19USEMO3").hyperlink,
             "https://aops.com/community/p15412083",
@@ -405,6 +406,10 @@ class TestAincrad(EvanTestCase):
         self.assertEqual(
             Problem.objects.get(puid="19USEMO6").hyperlink,
             "https://aops.com/community/p15425714",
+        )
+        self.assertEqual(
+            Problem.objects.get(puid="18SLA7").hyperlink,
+            "https://aops.com/community/p12752777",
         )
 
     def test_hanabi_contest(self) -> None:
