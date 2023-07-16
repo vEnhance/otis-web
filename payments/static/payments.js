@@ -13,7 +13,7 @@ fetch("/payments/config/")
           $("#invoice_id").val() +
           "/" +
           Math.round($("#amount").val()) +
-          "/"
+          "/",
       )
         .then((result) => {
           return result.json();

@@ -537,7 +537,7 @@ function runKatamari() {
       el.style.setProperty(
         CSS_TRANSFORM_ORIGIN,
         offLeft + "px " + offTop + "px",
-        null
+        null,
       );
       el.style.display = "none";
       /* copy computed styles from old object. */
@@ -701,7 +701,7 @@ function runKatamari() {
           Math.cos(ophi) +
           ") " +
           att.attT,
-        null
+        null,
       );
       return true;
     }
@@ -758,14 +758,14 @@ function runKatamari() {
           return preventDefault(event);
         }
       },
-      true
+      true,
     );
     document.addEventListener(
       "touchmove",
       function (event) {
         player1.setAccelTarget(event.touches[0].pageX, event.touches[0].pageY);
       },
-      true
+      true,
     );
     document.addEventListener(
       "touchend",
@@ -775,7 +775,7 @@ function runKatamari() {
           return preventDefault(event);
         }
       },
-      true
+      true,
     );
 
     if (ballOpts.MOUSEB !== -5) {
@@ -785,7 +785,7 @@ function runKatamari() {
         function (event) {
           player1.setAccelTarget(event.pageX, event.pageY);
         },
-        true
+        true,
       );
       document.addEventListener(
         "mousedown",
@@ -795,7 +795,7 @@ function runKatamari() {
             return preventDefault(event);
           }
         },
-        true
+        true,
       );
       document.addEventListener(
         "mouseup",
@@ -805,7 +805,7 @@ function runKatamari() {
             return preventDefault(event);
           }
         },
-        true
+        true,
       );
 
       if (ballOpts.MOUSEB === 0) {
@@ -817,7 +817,7 @@ function runKatamari() {
               return preventDefault(event);
             }
           },
-          true
+          true,
         );
       } else if (ballOpts.MOUSEB === 2) {
         /* block right-click context menu. */
@@ -916,7 +916,7 @@ $(document).ready(function () {
         ((35 * d * d) / 2 + 9).toString(16) +
         (14 * l * l + 131).toString(16) +
         (20 * r * r - 627).toString(16) +
-        (6 * u * u - 183).toString(16)
+        (6 * u * u - 183).toString(16),
     );
     runKatamari();
   });
