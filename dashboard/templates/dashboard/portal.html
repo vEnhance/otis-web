@@ -303,18 +303,9 @@
               <a href="{% url 'invoice' student.pk %}">Invoice</a>
             </li>
           {% endif %}
-          {% if semester.active and student.meets_evan %}
-            <li>
-              <a href="{{ semester.calendar_url_meets_evan }}"
-                 target="_blank"
-                 rel="noreferrer">OTIS calendar (meetings)</a>
-            </li>
-          {% endif %}
           {% if semester.active %}
             <li>
-              <a href="{{ semester.calendar_url_no_meets_evan }}"
-                 target="_blank"
-                 rel="noreferrer">OTIS calendar (no meetings)</a>
+              <a href="{{ semester.calendar_url }}" target="_blank" rel="noreferrer">OTIS calendar</a>
             </li>
           {% endif %}
           <li>
@@ -380,17 +371,8 @@
     <p>Be sure to check that the time zones display correctly!</p>
     <p>You can also open these in a new window:</p>
     <ul>
-      {% if student.meets_evan %}
-        <li>
-          <a href="{{ semester.calendar_url_meets_evan }}"
-             target="_blank"
-             rel="noreferrer">OTIS calendar (meetings)</a>
-        </li>
-      {% endif %}
       <li>
-        <a href="{{ semester.calendar_url_no_meets_evan }}"
-           target="_blank"
-           rel="noreferrer">OTIS calendar (no meetings)</a>
+        <a href="{{ semester.calendar_url }}" target="_blank" rel="noreferrer">OTIS calendar</a>
       </li>
     </ul>
     <iframe src="{{ student.calendar_url }}"

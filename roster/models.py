@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import os
 from datetime import timedelta
 from hashlib import pbkdf2_hmac
-from typing import Callable, TypedDict
+from typing import TypedDict
 
 from _pydecimal import Decimal
 from django.contrib.auth.models import User
@@ -84,7 +84,6 @@ class Student(models.Model):
     pk: int
     invoice: "Invoice"
     unlisted_assistants: QuerySet["Assistant"]
-    get_track_display: Callable[[], str]
 
     user = models.ForeignKey(
         User,
@@ -124,20 +123,6 @@ class Student(models.Model):
         "delete it from this list to mark them as complete.",
     )
 
-    track = models.CharField(
-        max_length=5,
-        choices=(
-            ("A", "Weekly"),
-            ("B", "Biweekly"),
-            ("C", "Corr."),
-            ("E", "Ext."),
-            ("G", "Grad"),
-            ("N", "N.A."),
-            ("P", "Phantom"),
-        ),
-        help_text="The track that the student is enrolled in for this semester.",
-    )
-
     legit = models.BooleanField(
         default=True,
         help_text="Whether this student is still active. "
@@ -163,7 +148,6 @@ class Student(models.Model):
         ordering = (
             "semester",
             "-legit",
-            "track",
             "user__first_name",
             "user__last_name",
         )
@@ -212,22 +196,8 @@ class Student(models.Model):
             return "?"
 
     @property
-    def get_track(self) -> str:
-        if self.assistant is None:
-            return self.get_track_display()
-        else:
-            return self.get_track_display() + " + " + self.assistant.shortname
-
-    @property
-    def meets_evan(self) -> bool:
-        return (self.track == "A" or self.track == "B") and self.legit
-
-    @property
     def calendar_url(self) -> str:
-        if self.meets_evan:
-            return self.semester.calendar_url_meets_evan
-        else:
-            return self.semester.calendar_url_no_meets_evan
+        return self.semester.calendar_url
 
     @property
     def curriculum_length(self) -> int:
@@ -454,10 +424,6 @@ class Invoice(models.Model):
         """Whether or not the student owes anything"""
         return self.total_owed <= 0
 
-    @property
-    def track(self) -> str:
-        return self.student.track
-
 
 class UnitInquiry(models.Model):
     unit = models.ForeignKey(
@@ -535,11 +501,6 @@ class RegistrationContainer(models.Model):
     passcode = models.CharField(
         max_length=128, help_text="The passcode for that year's registration"
     )
-    allowed_tracks = models.CharField(
-        max_length=256,
-        help_text="A comma separated list of allowed tracks students can register for",
-        blank=True,
-    )
 
     def __str__(self):
         return str(self.semester)
@@ -567,17 +528,6 @@ class StudentRegistration(models.Model):
     parent_email = models.EmailField(
         help_text="An email address "
         "in case Evan needs to contact your parents or something."
-    )
-    track = models.CharField(
-        verbose_name="Proposed Track",
-        max_length=6,
-        choices=(
-            ("C", "Correspondence"),
-            ("B", "Meeting with Evan"),
-            ("E", "Meeting with another instructor"),
-            ("N", "None of the above"),
-        ),
-        default="C",
     )
     gender = models.CharField(
         max_length=2,

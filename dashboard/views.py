@@ -390,7 +390,7 @@ def index(request: AuthHttpRequest) -> HttpResponse:
         assert student is not None
         return HttpResponseRedirect(reverse("portal", args=(student.pk,)))
     queryset = annotate_student_queryset_with_scores(students).order_by(
-        "track", "user__first_name", "user__last_name"
+        "user__first_name", "user__last_name"
     )
     context: dict[str, Any] = {}
     context["title"] = "Current year listing"
@@ -414,7 +414,7 @@ def past(request: AuthHttpRequest, semester_pk: Optional[int] = None):
     else:
         semester = None
     queryset = annotate_student_queryset_with_scores(students).order_by(
-        "track", "user__first_name", "user__last_name"
+        "user__first_name", "user__last_name"
     )
     context: dict[str, Any] = {}
     context["title"] = "Previous year listing"

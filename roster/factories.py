@@ -31,7 +31,6 @@ class RegistrationContainerFactory(DjangoModelFactory):
 
     semester = SubFactory(SemesterFactory)
     passcode = Faker("color_name")
-    allowed_tracks = "C,"
 
 
 class StudentRegistrationFactory(DjangoModelFactory):
@@ -41,7 +40,6 @@ class StudentRegistrationFactory(DjangoModelFactory):
     user = SubFactory(UserFactory)
     container = SubFactory(RegistrationContainerFactory)
     parent_email = Faker("ascii_safe_email")
-    track = "C"
     gender = FuzzyChoice(("M", "F", "H"))
     graduation_year = FuzzyInteger(2021, 2029)
     school_name = Faker("city")
@@ -53,7 +51,6 @@ class StudentFactory(DjangoModelFactory):
 
     user = SubFactory(UserFactory)
     semester = SubFactory(SemesterFactory)
-    track = "C"
     newborn = False
     last_level_seen = 0
 

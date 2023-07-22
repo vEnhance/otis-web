@@ -75,14 +75,9 @@ class Semester(models.Model):
         help_text="The link to social platform for this year.",
     )
 
-    calendar_url_meets_evan = models.URLField(
+    calendar_url = models.URLField(
         blank=True,
-        help_text="Link to calendar for students with meetings with Evan",
-        max_length=1024,
-    )
-    calendar_url_no_meets_evan = models.URLField(
-        blank=True,
-        help_text="Link to calendar for students without meetings with Evan",
+        help_text="Link to calendar",
         max_length=1024,
     )
 

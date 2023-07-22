@@ -319,7 +319,6 @@ def discord_handler(action: str, data: JSONData) -> JsonResponse:
                 "user": social.user.username,
                 "name": student.name,
                 "uid": uid,
-                "track": student.track,
                 "gender": regform.gender if regform is not None else "?",
                 "country": regform.country if regform is not None else "???",
                 "num_years": Student.objects.filter(user=user).count(),

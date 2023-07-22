@@ -385,7 +385,6 @@ def get_student_rows(queryset: QuerySet[Student]) -> list[dict[str, Any]]:
         key=lambda row: (
             row["student"].semester.pk,
             not row["student"].legit,
-            row["student"].track,
             row["student"].user.first_name,
             row["student"].user.last_name,
         )

@@ -52,7 +52,6 @@ class StudentInline(admin.TabularInline):
     fields = (
         "name",
         "semester",
-        "track",
         "legit",
     )
     readonly_fields = (
@@ -96,7 +95,6 @@ class InvoiceIEResource(resources.ModelResource):
         fields = (
             "id",
             "student",
-            "student__track",
             "student__user__first_name",
             "student__user__last_name",
             "student__user__email",
@@ -164,7 +162,6 @@ class InvoiceAdmin(ImportExportModelAdmin):
     )
     list_display = (
         "student",
-        "track",
         "total_owed",
         "total_cost",
         "forgive_date",
@@ -180,7 +177,6 @@ class InvoiceAdmin(ImportExportModelAdmin):
         OwedFilter,
         "student__legit",
         "student__semester__active",
-        "student__track",
         ("forgive_date", admin.EmptyFieldListFilter),
         "student__semester",
     )
@@ -210,7 +206,6 @@ class StudentIEResource(RosterResource):
             "user__email",
             "semester_name",
             "user_name",
-            "track",
             "legit",
         )
         export_order = fields
@@ -261,7 +256,6 @@ class StudentAdmin(ImportExportModelAdmin):
         "enabled",
         "newborn",
         "semester",
-        "track",
     )
     search_fields = (
         "pk",
@@ -295,7 +289,6 @@ class StudentRegistrationIEResource(RosterResource):
             "container__semester__name",
             "processed",
             "parent_email",
-            "track",
             "country",
             "gender",
             "graduation_year",
@@ -319,7 +312,6 @@ def build_students(queryset: QuerySet[StudentRegistration]) -> int:
             Student(
                 user=registration.user,
                 semester=registration.container.semester,
-                track=registration.track,
                 reg=registration,
             )
         )
@@ -339,15 +331,7 @@ def build_students(queryset: QuerySet[StudentRegistration]) -> int:
         for student in Student.objects.filter(
             invoice__isnull=True, semester__active=True
         ):
-            if student.track == "A":
-                hours_taught = 8.4 * n
-            elif student.track == "B":
-                hours_taught = 4.2 * n
-            else:
-                hours_taught = 0
-            invoice = Invoice(
-                student=student, preps_taught=n, hours_taught=hours_taught
-            )
+            invoice = Invoice(student=student, preps_taught=n)
 
             invoices_to_create.append(invoice)
         Invoice.objects.bulk_create(invoices_to_create)
@@ -361,7 +345,6 @@ class StudentRegistrationAdmin(ImportExportModelAdmin):
         "name",
         "processed",
         "container",
-        "track",
         "about",
         "country",
         "agreement_form",
@@ -369,7 +352,6 @@ class StudentRegistrationAdmin(ImportExportModelAdmin):
     list_filter = (
         "container__semester",
         "processed",
-        "track",
         "gender",
         "graduation_year",
         "country",
@@ -377,7 +359,6 @@ class StudentRegistrationAdmin(ImportExportModelAdmin):
     list_display_links = (
         "name",
         "container",
-        "track",
     )
     resource_class = StudentRegistrationIEResource
     search_fields = ("user__first_name", "user__last_name")
@@ -451,7 +432,6 @@ class RegistrationContainerAdmin(admin.ModelAdmin):
         "pk",
         "semester",
         "passcode",
-        "allowed_tracks",
     )
     list_display_links = (
         "pk",

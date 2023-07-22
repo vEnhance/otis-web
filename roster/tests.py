@@ -483,19 +483,23 @@ class RosterTest(EvanTestCase):
         )
         # Suppose there are two semesters left
         with freeze_time("2023-08-01", tz_offset=0):
-            StudentRegistrationFactory.create(track="A", container=container)
-            StudentRegistrationFactory.create(track="B", container=container)
+            StudentRegistrationFactory.create(
+                container=container, user__username="alice"
+            )
+            StudentRegistrationFactory.create(container=container, user__username="bob")
             self.assertEqual(build_students(StudentRegistration.objects.all()), 2)
-            alice: Student = Student.objects.get(track="A")
-            self.assertEqual(alice.invoice.total_owed, 1824)
-            bob: Student = Student.objects.get(track="B")
-            self.assertEqual(bob.invoice.total_owed, 1152)
+            alice: Student = Student.objects.get(user__username="alice")
+            self.assertEqual(alice.invoice.total_owed, 480)
+            bob: Student = Student.objects.get(user__username="bob")
+            self.assertEqual(bob.invoice.total_owed, 480)
 
         # Now suppose the first semester has finished
         with freeze_time("2024-01-01", tz_offset=0):
-            StudentRegistrationFactory.create(track="C", container=container)
+            StudentRegistrationFactory.create(
+                container=container, user__username="carol"
+            )
             self.assertEqual(build_students(StudentRegistration.objects.all()), 1)
-            carol: Student = Student.objects.get(track="C")
+            carol: Student = Student.objects.get(user__username="carol")
             self.assertEqual(carol.invoice.total_owed, 240)
 
     def test_student_assistant_list(self) -> None:
@@ -629,25 +633,9 @@ class RosterTest(EvanTestCase):
         self.assertEqual(resp.status_code, 503, self.debug_short(resp))
 
         container: RegistrationContainer = RegistrationContainerFactory.create(
-            semester=semester, allowed_tracks=""
+            semester=semester
         )
-
         resp = self.assertGet20X("register")
-        messages = [m.message for m in resp.context["messages"]]
-        self.assertIn(
-            "The currently active semester isn't accepting registrations right now.",
-            messages,
-        )
-
-        container.allowed_tracks = "C,"
-        container.save()
-
-        resp = self.assertGet20X("register")
-        messages = [m.message for m in resp.context["messages"]]
-        self.assertNotIn(
-            "The currently active semester isn't accepting registrations right now.",
-            messages,
-        )
 
         # test old reg
         old_sem = SemesterFactory.create(active=False)

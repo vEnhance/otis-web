@@ -395,13 +395,6 @@ def register(request: AuthHttpRequest) -> HttpResponse:
             passcode = form.cleaned_data["passcode"]
             if passcode.lower() != container.passcode.lower():
                 messages.error(request, message="Wrong passcode")
-            elif form.cleaned_data.get(
-                "track", "C"
-            ) not in container.allowed_tracks.split(","):
-                messages.error(
-                    request,
-                    message="That track is not currently accepting registrations.",
-                )
             else:
                 registration = form.save(commit=False)
                 registration.container = container
@@ -422,31 +415,24 @@ def register(request: AuthHttpRequest) -> HttpResponse:
                 )
                 return HttpResponseRedirect(reverse("index"))
     else:
-        if container.allowed_tracks:
-            initial_data_dict = {}
-            most_recent_reg = (
-                StudentRegistration.objects.filter(
-                    user=request.user,
-                )
-                .order_by("-pk")
-                .first()
+        initial_data_dict = {}
+        most_recent_reg = (
+            StudentRegistration.objects.filter(
+                user=request.user,
             )
-            if most_recent_reg is not None:
-                for k in (
-                    "parent_email",
-                    "graduation_year",
-                    "school_name",
-                    "aops_username",
-                    "gender",
-                ):
-                    initial_data_dict[k] = getattr(most_recent_reg, k)
-            form = DecisionForm(initial=initial_data_dict)
-        else:
-            messages.warning(
-                request,
-                message="The currently active semester isn't accepting registrations right now.",
-            )
-            form = None
+            .order_by("-pk")
+            .first()
+        )
+        if most_recent_reg is not None:
+            for k in (
+                "parent_email",
+                "graduation_year",
+                "school_name",
+                "aops_username",
+                "gender",
+            ):
+                initial_data_dict[k] = getattr(most_recent_reg, k)
+        form = DecisionForm(initial=initial_data_dict)
     context = {
         "title": f"{semester} Decision Form",
         "form": form,
@@ -548,7 +534,6 @@ def giga_chart(request: HttpRequest, format_as: str) -> HttpResponse:
         "Name",
         "Enabled",
         "Debt%",
-        # 'Track',
         "Last login (days)",
         "Grade",
         "Gender",
@@ -587,7 +572,6 @@ def giga_chart(request: HttpRequest, format_as: str) -> HttpResponse:
                 student.name,
                 "Enabled" if student.enabled else "Disabled",
                 f"{invoice.debt:.2f}",  # type: ignore
-                # student.track,
                 days_since_last_seen,
                 reg.grade if reg is not None else "",
                 reg.get_gender_display() if reg is not None else "",
