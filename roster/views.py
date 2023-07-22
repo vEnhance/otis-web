@@ -379,7 +379,11 @@ def register(request: AuthHttpRequest) -> HttpResponse:
         RegistrationContainer.DoesNotExist,
         RegistrationContainer.MultipleObjectsReturned,
     ):
-        return HttpResponse("There isn't a currently active OTIS semester.", status=503)
+        messages.error(request, "Registration is not set up on the website yet.")
+        return HttpResponseRedirect(reverse("index"))
+    if not container.accepting_responses:
+        messages.error(request, "This semester isn't accepting registration yet.")
+        return HttpResponseRedirect(reverse("index"))
 
     semester: Semester = container.semester
     if StudentRegistration.objects.filter(

@@ -479,7 +479,8 @@ class RosterTest(EvanTestCase):
         )
 
         container: RegistrationContainer = RegistrationContainerFactory.create(
-            semester=semester
+            semester=semester,
+            accepting_responses=True,
         )
         # Suppose there are two semesters left
         with freeze_time("2023-08-01", tz_offset=0):
@@ -626,29 +627,35 @@ class RosterTest(EvanTestCase):
     def test_reg(self):
         semester: Semester = SemesterFactory.create()
 
+        # registration should redirect if there's no container yet
         alice: User = UserFactory.create()
         self.login(alice)
-        resp = self.get("register")
+        self.assertMessage(
+            self.assertGet20X("register", follow=True),
+            "Registration is not set up on the website yet.",
+        )
 
-        self.assertEqual(resp.status_code, 503, self.debug_short(resp))
-
+        # registration should redirect if there's no container yet
         container: RegistrationContainer = RegistrationContainerFactory.create(
             semester=semester
         )
-        resp = self.assertGet20X("register")
+        self.assertMessage(
+            self.assertGet20X("register", follow=True),
+            "This semester isn't accepting registration yet.",
+        )
 
-        # test old reg
+        # once accepting responses, the registration page should load
+        container.accepting_responses = True
+        container.save()
+        self.assertNoMessages(self.assertGet20X("register"))
+
+        # test reg from an old semester doesn't block registration
         old_sem = SemesterFactory.create(active=False)
         StudentRegistrationFactory.create(
             user=alice, container=RegistrationContainerFactory.create(semester=old_sem)
         )
 
-        resp = self.assertGet20X("register")
-        messages = [m.message for m in resp.context["messages"]]
-        self.assertNotIn(
-            "The currently active semester isn't accepting registrations right now.",
-            messages,
-        )
+        self.assertNoMessages(self.assertGet20X("register"))
 
         # make pdf
         agreement = StringIO("agree!")

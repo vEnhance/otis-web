@@ -501,6 +501,10 @@ class RegistrationContainer(models.Model):
     passcode = models.CharField(
         max_length=128, help_text="The passcode for that year's registration"
     )
+    accepting_responses = models.BooleanField(
+        default=False,
+        help_text="Whether responses for this year are being accepted or not.",
+    )
 
     def __str__(self):
         return str(self.semester)

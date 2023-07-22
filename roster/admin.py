@@ -432,6 +432,7 @@ class RegistrationContainerAdmin(admin.ModelAdmin):
         "pk",
         "semester",
         "passcode",
+        "accepting_responses",
     )
     list_display_links = (
         "pk",
