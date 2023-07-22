@@ -213,12 +213,17 @@ class TestProblem(EvanTestCase):
             problem.get_absolute_url(), "arch-lookup", data={"problem": problem.pk}
         )
 
+    @override_settings(TESTING_NEEDS_MOCK_MEDIA=True)
     def test_view_solution(self):
-        alice = UserFactory.create()
-        self.login(alice)
-
         problem: Problem = ProblemFactory.create()
+        # if not verified, getting the problem should redirect
+        eve = UserFactory.create()
+        self.login(eve)
+        self.assertGet30X("view-solution", problem.puid)
 
-        self.assertGet40X("view-solution", problem.puid)
-
-        # setting up default storage seems like a pain
+        # verified user should instead fail because default storage doesn't
+        # have the problem in question
+        verified_group = GroupFactory(name="Verified")
+        alice = UserFactory.create(groups=(verified_group,))
+        self.login(alice)
+        self.assertGet20X("view-solution", problem.puid)

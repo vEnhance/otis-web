@@ -29,7 +29,7 @@ urlpatterns = [
         name="hint-list-check",
         kwargs={"create_if_missing": True},
     ),
-    path(r"<str:puid>/solution", views.view_solution, name="view-solution"),
+    path(r"<str:puid>/solution/", views.view_solution, name="view-solution"),
     path(r"", views.ProblemCreate.as_view(), name="arch-index"),
     path(r"<str:puid>/vote/", views.VoteCreate.as_view(), name="vote-create"),
 ]

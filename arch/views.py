@@ -5,7 +5,6 @@ import reversion
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.core.files.storage import default_storage
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http import Http404, HttpRequest, HttpResponseRedirect
@@ -18,8 +17,9 @@ from reversion.views import RevisionMixin
 
 from arch.forms import ProblemSelectForm
 from arch.models import get_disk_statement_from_puid
-from core.utils import storage_hash
+from core.utils import get_from_google_storage
 from evans_django_tools import ACTION_LOG_LEVEL
+from otisweb.decorators import verified_required
 from otisweb.mixins import VerifiedRequiredMixin
 
 from .forms import HintUpdateFormWithReason
@@ -232,7 +232,7 @@ class ProblemCreate(
         return context
 
 
-@login_required
+@verified_required
 def lookup(request: HttpRequest):
     if request.method == "POST":
         form = ProblemSelectForm(request.POST)
@@ -248,13 +248,9 @@ def lookup(request: HttpRequest):
 
 
 @login_required
-def view_solution(request: HttpRequest, puid: str):
-    solution_target_name = "pdfs/" + storage_hash(puid) + ".tex"
-    if default_storage.exists(solution_target_name):
-        solution_url = default_storage.url(solution_target_name)
-        return HttpResponseRedirect(solution_url)
-    else:
-        raise Http404
+@verified_required
+def view_solution(request: HttpRequest, puid: str) -> HttpResponse:
+    return get_from_google_storage(puid + ".tex")
 
 
 class VoteCreate(
