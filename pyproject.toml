@@ -37,7 +37,7 @@ pyparsing = "^3.0.9"
 python-dotenv = "^1.0.0"
 setuptools = "^67.7.2"
 stripe = "^5.4.0"
-wheel = "^0.40.0"
+wheel = "^0.41.0"
 wiki = {git = "https://github.com/django-wiki/django-wiki.git", rev = "7981d6d"}
 bleach = {extras = ["css"], version=">=5,<6"} # manual until wiki 0.10 out
 
@@ -56,7 +56,7 @@ isort = "^5.12.0"
 jedi = "^0.18.0"
 pdbpp = "^0.10.3"
 pyflakes = "^3.0.1"
-pyright = "^1.1.304"
+pyright = "^1.1.318"
 tblib = "^1.7.0"
 toml = "^0.10.2"
 types-Markdown = "^3.4.2.5"
