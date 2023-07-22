@@ -9,8 +9,8 @@ def verified_required(  # type: ignore
     login_url: str | None = None,
 ):
     """
-    Decorator for views that checks that the user is logged in and is a staff
-    member, redirecting to the login page if necessary.
+    Decorator for views that checks that the user is logged in and is
+    in the Verified group, redirecting to the login page if necessary.
     """
     actual_decorator = user_passes_test(
         lambda u: isinstance(u, User) and u.groups.filter(name="Verified").exists(),
