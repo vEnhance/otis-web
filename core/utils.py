@@ -25,12 +25,15 @@ def get_from_google_storage(filename: str):
     ext = filename[-4:]
     if not (ext == ".tex" or ext == ".pdf"):
         return HttpResponseBadRequest("Bad filename extension")
+
+    path = "pdfs/" + storage_hash(filename) + ext
     try:
-        file = default_storage.open("pdfs/" + storage_hash(filename) + ext)
+        file = default_storage.open(path)
     except FileNotFoundError:
-        errmsg = f"Unable to find {filename}."
+        errmsg = f"Unable to find {path}."
         logger.critical(errmsg)
         return HttpResponseServerError(errmsg)
+
     response = HttpResponse(content=file)
     response["Content-Type"] = f"application/{ext}"
     response["Content-Disposition"] = f'attachment; filename="{filename}"'
