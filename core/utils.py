@@ -30,7 +30,7 @@ def get_from_google_storage(filename: str):
     try:
         file = default_storage.open(path)
     except FileNotFoundError:
-        errmsg = f"Unable to find {path}."
+        errmsg = f"Unable to find {filename} at {path}."
         logger.critical(errmsg)
         return HttpResponseServerError(errmsg)
 
