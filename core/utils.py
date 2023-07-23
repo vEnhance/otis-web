@@ -26,7 +26,7 @@ def get_from_google_storage(filename: str):
     if not (ext == ".tex" or ext == ".pdf"):
         return HttpResponseBadRequest("Bad filename extension")
 
-    path = "pdfs/" + storage_hash(filename) + ext
+    path = "protected/" + storage_hash(filename) + ext
     try:
         file = default_storage.open(path)
     except FileNotFoundError:

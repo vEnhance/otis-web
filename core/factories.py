@@ -74,7 +74,7 @@ class UnitFactory(DjangoModelFactory):
         ]
         for fname, content, ext in stuff_to_write:
             default_storage.save(
-                "pdfs/" + storage_hash(fname) + ext, ContentFile(content)
+                "protected/" + storage_hash(fname) + ext, ContentFile(content)
             )
 
 

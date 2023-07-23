@@ -32,7 +32,7 @@ class ProblemFactory(DjangoModelFactory):
         problem: Problem = self  # type: ignore
         filename = problem.puid + ".tex"
         default_storage.save(
-            "pdfs/" + storage_hash(filename) + ".tex",
+            "protected/" + storage_hash(filename) + ".tex",
             ContentFile(b"hi i'm a solution"),
         )
 

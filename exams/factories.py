@@ -29,7 +29,7 @@ class TestFactory(DjangoModelFactory):
 
         exam: PracticeExam = self  # type: ignore
         default_storage.save(
-            "pdfs/" + storage_hash(exam.pdfname) + ".pdf", ContentFile(b"exam")
+            "protected/" + storage_hash(exam.pdfname) + ".pdf", ContentFile(b"exam")
         )
 
 
