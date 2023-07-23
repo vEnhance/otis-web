@@ -15,13 +15,13 @@ from core.models import Semester
 
 
 class StartedMarketManager(models.Manager):
-    def get_queryset(self) -> QuerySet:
+    def get_queryset(self) -> QuerySet["Market"]:
         now = timezone.now()
         return super().get_queryset().filter(start_date__lte=now)
 
 
 class ActiveMarketManager(models.Manager):
-    def get_queryset(self) -> QuerySet:
+    def get_queryset(self) -> QuerySet["Market"]:
         now = timezone.now()
         return (
             super()
