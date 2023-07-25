@@ -67,7 +67,7 @@
             {% if row.is_visible %}
               <a title="Download PDF" href="{% view_problems row.unit %}">{{ row.number }}. {{ row.unit.group.name }}</a>
             {% else %}
-              {{ row.number }}. {{ row.unit.group.name }}
+              {{ row.number }}. {{ row.unit.group.name }} (locked)
             {% endif %}
           </td>
           <td class="emojis">
