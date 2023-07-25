@@ -266,16 +266,19 @@ class UserProfile(models.Model):
         help_text="Displays the level bars on the main portal",
         default=True,
     )
-
     show_completed_by_default = models.BooleanField(
         verbose_name="Show completed",
         help_text="Displays completed units on the main portal by default",
         default=True,
     )
-
     show_locked_by_default = models.BooleanField(
         verbose_name="Show locked",
         help_text="Displays locked units on the main portal by default",
+        default=True,
+    )
+    show_artwork_on_curriculum = models.BooleanField(
+        verbose_name="Show artwork",
+        help_text="Show the artwork on the curriculum table",
         default=True,
     )
 

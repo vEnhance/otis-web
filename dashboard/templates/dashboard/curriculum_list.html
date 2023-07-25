@@ -8,7 +8,7 @@
             class="tooltip-button"
             title="Show/hide locked units">Toggle ❓</button>
     &nbsp;
-    <a class="emoji-link" title="Settings" href="{% url "profile" %}">⚙️</a>
+    <a class="fs-4 emoji-link" title="Settings" href="{% url "profile" %}">⚙️</a>
     &nbsp;
     <span class="fs-6 fst-italic">Mouse over icons for hints.</span>
   </p>
@@ -44,20 +44,22 @@
           </td>
           <td class="code">
             {{ row.unit.position }}
-            <br />
+            {% if profile.show_artwork_on_curriculum %}<br />{% endif %}
             {{ row.unit.code }}
           </td>
-          <td class="thumbnail">
-            {% if row.unit.group.artwork_thumb_sm %}
-              {% if row.is_visible %}
-                <a title="Download PDF" href="{% view_problems row.unit %}">
+          {% if profile.show_artwork_on_curriculum %}
+            <td class="thumbnail">
+              {% if row.unit.group.artwork_thumb_sm %}
+                {% if row.is_visible %}
+                  <a title="Download PDF" href="{% view_problems row.unit %}">
+                    <img width="32" src="{{ row.unit.group.artwork_thumb_sm.url }}" />
+                  </a>
+                {% else %}
                   <img width="32" src="{{ row.unit.group.artwork_thumb_sm.url }}" />
-                </a>
-              {% else %}
-                <img width="32" src="{{ row.unit.group.artwork_thumb_sm.url }}" />
+                {% endif %}
               {% endif %}
-            {% endif %}
-          </td>
+            </td>
+          {% endif %}
           <td class="unit-name {% if row.is_current %}active{% endif %}"
               {% if request.user.is_superuser %}title="{{ row.unit.group.name }} pk={{ row.unit.pk }} group.pk={{ row.unit.group.pk }}" {% endif %}>
             {% if row.is_visible %}

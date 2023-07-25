@@ -154,7 +154,12 @@ class UserProfileUpdateView(
     UpdateView[UserProfile, BaseModelForm[UserProfile]],
 ):
     model = UserProfile
-    fields = ("show_bars", "show_completed_by_default", "show_locked_by_default")
+    fields = (
+        "show_bars",
+        "show_completed_by_default",
+        "show_locked_by_default",
+        "show_artwork_on_curriculum",
+    )
     success_url = reverse_lazy("profile")
     object: UserProfile
 
