@@ -52,7 +52,9 @@
               {% if row.unit.group.artwork_thumb_sm %}
                 {% if row.is_visible %}
                   <a title="Download PDF" href="{% view_problems row.unit %}">
-                    <img width="32" src="{{ row.unit.group.artwork_thumb_sm.url }}" />
+                    <img class="artwork"
+                         width="32"
+                         src="{{ row.unit.group.artwork_thumb_sm.url }}" />
                   </a>
                 {% else %}
                   <img width="32" src="{{ row.unit.group.artwork_thumb_sm.url }}" />

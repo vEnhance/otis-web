@@ -8,30 +8,6 @@
 {% block side-class %}
   col-7 col-md-3
 {% endblock side-class %}
-{% block css %}
-  <style type="text/css">
-      @keyframes glow-yellow {
-          from {
-              box-shadow: 0px 0px 35px #bbbb33
-          }
-
-          to {
-              box-shadow: 0px 0px 45px #eeeecc
-          }
-      }
-
-      a.artwork>img {
-          object-fit: cover;
-          box-shadow: 0px 0px 15px #6666dd;
-      }
-
-      a.artwork:hover>img {
-          animation-name: glow-yellow;
-          animation-duration: 2s;
-          transform: scale(1.05);
-      }
-  </style>
-{% endblock css %}
 {% block layout-content %}
   <p>
     <a href="/">Back to home</a>.
@@ -44,8 +20,9 @@
             <h4 class="card-title">
               <a href="{% url "wiki-unitgroup" unitgroup.pk %}">{{ unitgroup.name }}</a>
             </h4>
-            <a class="artwork" href="{{ unitgroup.artwork.url }}" target="_blank">
+            <a href="{{ unitgroup.artwork.url }}" target="_blank">
               <img src="{{ unitgroup.artwork_thumb_md.url }}"
+                   class="artwork"
                    alt="Artwork for {{ unitgroup.name }}" />
             </a>
           </div>

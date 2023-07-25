@@ -200,6 +200,26 @@ table.curriculum tr.unit-completed-hidden {
   display: none;
 }
 
+@keyframes glow-yellow {
+  from {
+    box-shadow: 0px 0px 35px #bbbb33;
+  }
+
+  to {
+    box-shadow: 0px 0px 45px #eeeecc;
+  }
+}
+
+div.card img.artwork {
+  object-fit: cover;
+  box-shadow: 0px 0px 15px #6666dd;
+}
+img.artwork:hover {
+  animation-name: glow-yellow;
+  animation-duration: 2s;
+  transform: scale(1.1);
+}
+
 span.meter-name {
   position: absolute;
   left: 0;
