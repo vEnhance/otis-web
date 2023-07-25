@@ -100,6 +100,13 @@ table.table tr.subjectK td.unit-name {
   font-family: Acme, sans-serif;
 }
 
+table.table tr.unit-locked:nth-child(even) {
+  background-color: #888888;
+}
+table.table tr.unit-locked:nth-child(even) {
+  background-color: #999999;
+}
+
 /* Unit selection */
 td.unit-select select {
   width: 180px;
@@ -107,35 +114,69 @@ td.unit-select select {
 }
 
 /* Curriculum */
+
 table.curriculum tr {
-  height: 28px;
+  min-height: 28px;
 }
 table.curriculum th,
 table.curriculum td {
   vertical-align: middle;
-  font-size: 14px;
+  font-size: 15px;
+  padding: 4px 4px 4px 4px;
+}
+
+table.curriculum td.status {
+  width: 18px;
+}
+table.curriculum td.code {
+  text-align: right;
+  font-family: Inconsolata, Consolas, monaco, monospace;
+  width: max-content;
+  font-size: 12px;
+  padding-left: 8px;
+  padding-right: 4px;
+}
+table.curriculum td.thumbnail {
+  width: 56px;
+  text-align: center;
+  margin: 0 auto;
+}
+
+table.curriculum tr.unit-locked td.thumbnail img {
+  filter: grayscale(100%) brightness(60%);
+}
+table.curriculum tr.unit-locked {
+  color: #444444;
+}
+table.curriculum tr.unit-locked td.unit-name {
+  font-style: italic;
 }
 
 table.curriculum td.number {
   text-align: right;
   font-size: 12px;
-  min-width: max-content;
+  width: 48px;
 }
-table.curriculum td.code {
+table.curriculum span.number {
   text-align: right;
   font-size: 12px;
-  font-family: Inconsolata, Consolas, monaco, monospace;
-  min-width: max-content;
+  width: 24px;
 }
 
+table.curriculum td.unit-name a {
+  color: black;
+}
+table.table tr.subjectK td.unit-name a {
+  color: #efefef;
+}
 table.curriculum td.active {
   font-weight: 700;
-  font-size: 13px;
 }
 
 table.curriculum td.emojis {
+  padding-bottom: 0px;
   text-align: right;
-  font-size: 17px;
+  font-size: 15px;
   min-width: max-content;
 }
 

@@ -24,8 +24,7 @@
     <table class="table curriculum">
       {% for row in curriculum %}
         <tr class="subject{{ row.unit.group.subject }} {% if row.is_accepted %} unit-completed {% if not profile.show_completed_by_default %}unit-completed-hidden{% endif %} {% elif not row.is_visible %} unit-locked {% if not profile.show_locked_by_default %}unit-locked-hidden{% endif %} {% endif %} ">
-          <td class="number">
-            {{ row.number }}
+          <td class="status">
             {% if row.is_rejected %}
               <span title="Rejected unit">🚫</span>
             {% elif row.is_accepted %}
@@ -35,24 +34,40 @@
             {% elif row.is_submitted %}
               <span title="Unit pending review">⏳</span>
             {% elif row.is_current and row.student_still_active %}
-              <span title="Current unit">▶️</span>
+              <span title="Current unit">🌠</span>
             {% elif not row.is_visible %}
               <span title="Locked unit">❓</span>
             {% else %}
-              <span title="Inactive unit">✖️</span>
+              <span title="Inactive unit">💤</span>
+            {% endif %}
+            <br />
+          </td>
+          <td class="code">
+            {{ row.unit.position }}
+            <br />
+            {{ row.unit.code }}
+          </td>
+          <td class="thumbnail">
+            {% if row.unit.group.artwork_thumb_sm %}
+              {% if row.is_visible %}
+                <a title="Download PDF" href="{% view_problems row.unit %}">
+                  <img width="32" src="{{ row.unit.group.artwork_thumb_sm.url }}" />
+                </a>
+              {% else %}
+                <img width="32" src="{{ row.unit.group.artwork_thumb_sm.url }}" />
+              {% endif %}
             {% endif %}
           </td>
-          <td class="code">{{ row.unit.position }}/{{ row.unit.code }}</td>
           <td class="unit-name {% if row.is_current %}active{% endif %}"
               {% if request.user.is_superuser %}title="{{ row.unit.group.name }} pk={{ row.unit.pk }} group.pk={{ row.unit.group.pk }}" {% endif %}>
-            {{ row.unit.group.name }}
+            {% if row.is_visible %}
+              <a title="Download PDF" href="{% view_problems row.unit %}">{{ row.number }}. {{ row.unit.group.name }}</a>
+            {% else %}
+              {{ row.number }}. {{ row.unit.group.name }}
+            {% endif %}
           </td>
           <td class="emojis">
             {% if row.is_visible %}
-              <a class="emoji-link"
-                 style="font-size: 80%"
-                 title="Download PDF"
-                 href="{% view_problems row.unit %}">💾</a>
               <a class="emoji-link"
                  title="Download LaTeX template"
                  href="{% view_tex row.unit %}">📋</a>
@@ -90,11 +105,12 @@
             {% else %}
               <span style="visibility:hidden;">㊙️</span> {# placeholder for spacing reasons #}
             {% endif %}
-          </td>
-        </tr>
-      {% endfor %}
-    </table>
-  {% endwith %}
+          </p>
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+{% endwith %}
 {% else %}
-  <p class="fst-italic">No curriculum materials yet! Please check back later.</p>
+<p class="fst-italic">No curriculum materials yet! Please check back later.</p>
 {% endif %}
