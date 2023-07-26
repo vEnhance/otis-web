@@ -4662,6 +4662,7 @@
     "fields": {
       "user": 1,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -4675,6 +4676,7 @@
     "fields": {
       "user": 2,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -4688,6 +4690,7 @@
     "fields": {
       "user": 3,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -4701,6 +4704,7 @@
     "fields": {
       "user": 4,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -4714,6 +4718,7 @@
     "fields": {
       "user": 5,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -4727,6 +4732,7 @@
     "fields": {
       "user": 6,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -4740,6 +4746,7 @@
     "fields": {
       "user": 7,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -4753,6 +4760,7 @@
     "fields": {
       "user": 8,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -4766,6 +4774,7 @@
     "fields": {
       "user": 9,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -4779,6 +4788,7 @@
     "fields": {
       "user": 10,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -4792,6 +4802,7 @@
     "fields": {
       "user": 11,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -4805,6 +4816,7 @@
     "fields": {
       "user": 12,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -4818,6 +4830,7 @@
     "fields": {
       "user": 13,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -4831,6 +4844,7 @@
     "fields": {
       "user": 14,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -4844,6 +4858,7 @@
     "fields": {
       "user": 15,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -4857,6 +4872,7 @@
     "fields": {
       "user": 16,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -4870,6 +4886,7 @@
     "fields": {
       "user": 17,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -4883,6 +4900,7 @@
     "fields": {
       "user": 18,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -4896,6 +4914,7 @@
     "fields": {
       "user": 19,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -4909,6 +4928,7 @@
     "fields": {
       "user": 20,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -4922,6 +4942,7 @@
     "fields": {
       "user": 21,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -4935,6 +4956,7 @@
     "fields": {
       "user": 22,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -4948,6 +4970,7 @@
     "fields": {
       "user": 23,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -4961,6 +4984,7 @@
     "fields": {
       "user": 24,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -4974,6 +4998,7 @@
     "fields": {
       "user": 25,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -4987,6 +5012,7 @@
     "fields": {
       "user": 26,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5000,6 +5026,7 @@
     "fields": {
       "user": 27,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5013,6 +5040,7 @@
     "fields": {
       "user": 28,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5026,6 +5054,7 @@
     "fields": {
       "user": 29,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5039,6 +5068,7 @@
     "fields": {
       "user": 30,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5052,6 +5082,7 @@
     "fields": {
       "user": 31,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5065,6 +5096,7 @@
     "fields": {
       "user": 32,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5078,6 +5110,7 @@
     "fields": {
       "user": 33,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5091,6 +5124,7 @@
     "fields": {
       "user": 34,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5104,6 +5138,7 @@
     "fields": {
       "user": 35,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5117,6 +5152,7 @@
     "fields": {
       "user": 36,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5130,6 +5166,7 @@
     "fields": {
       "user": 37,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5143,6 +5180,7 @@
     "fields": {
       "user": 38,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5156,6 +5194,7 @@
     "fields": {
       "user": 39,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5169,6 +5208,7 @@
     "fields": {
       "user": 40,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5182,6 +5222,7 @@
     "fields": {
       "user": 41,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5195,6 +5236,7 @@
     "fields": {
       "user": 42,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5208,6 +5250,7 @@
     "fields": {
       "user": 43,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5221,6 +5264,7 @@
     "fields": {
       "user": 44,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5234,6 +5278,7 @@
     "fields": {
       "user": 45,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5247,6 +5292,7 @@
     "fields": {
       "user": 46,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5260,6 +5306,7 @@
     "fields": {
       "user": 47,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5273,6 +5320,7 @@
     "fields": {
       "user": 48,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5286,6 +5334,7 @@
     "fields": {
       "user": 49,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5299,6 +5348,7 @@
     "fields": {
       "user": 50,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5312,6 +5362,7 @@
     "fields": {
       "user": 51,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5325,6 +5376,7 @@
     "fields": {
       "user": 52,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5338,6 +5390,7 @@
     "fields": {
       "user": 53,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5351,6 +5404,7 @@
     "fields": {
       "user": 54,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5364,6 +5418,7 @@
     "fields": {
       "user": 55,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5377,6 +5432,7 @@
     "fields": {
       "user": 56,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5390,6 +5446,7 @@
     "fields": {
       "user": 57,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5403,6 +5460,7 @@
     "fields": {
       "user": 58,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5416,6 +5474,7 @@
     "fields": {
       "user": 59,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5429,6 +5488,7 @@
     "fields": {
       "user": 60,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5442,6 +5502,7 @@
     "fields": {
       "user": 61,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5455,6 +5516,7 @@
     "fields": {
       "user": 62,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5468,6 +5530,7 @@
     "fields": {
       "user": 63,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5481,6 +5544,7 @@
     "fields": {
       "user": 64,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5494,6 +5558,7 @@
     "fields": {
       "user": 65,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5507,6 +5572,7 @@
     "fields": {
       "user": 66,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5520,6 +5586,7 @@
     "fields": {
       "user": 67,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5533,6 +5600,7 @@
     "fields": {
       "user": 68,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5546,6 +5614,7 @@
     "fields": {
       "user": 69,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5559,6 +5628,7 @@
     "fields": {
       "user": 70,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5572,6 +5642,7 @@
     "fields": {
       "user": 71,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5585,6 +5656,7 @@
     "fields": {
       "user": 72,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5598,6 +5670,7 @@
     "fields": {
       "user": 73,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5611,6 +5684,7 @@
     "fields": {
       "user": 74,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5624,6 +5698,7 @@
     "fields": {
       "user": 75,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5637,6 +5712,7 @@
     "fields": {
       "user": 76,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5650,6 +5726,7 @@
     "fields": {
       "user": 77,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5663,6 +5740,7 @@
     "fields": {
       "user": 78,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5676,6 +5754,7 @@
     "fields": {
       "user": 79,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5689,6 +5768,7 @@
     "fields": {
       "user": 80,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5702,6 +5782,7 @@
     "fields": {
       "user": 81,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5715,6 +5796,7 @@
     "fields": {
       "user": 82,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5728,6 +5810,7 @@
     "fields": {
       "user": 83,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5741,6 +5824,7 @@
     "fields": {
       "user": 84,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5754,6 +5838,7 @@
     "fields": {
       "user": 85,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5767,6 +5852,7 @@
     "fields": {
       "user": 86,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5780,6 +5866,7 @@
     "fields": {
       "user": 87,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5793,6 +5880,7 @@
     "fields": {
       "user": 88,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5806,6 +5894,7 @@
     "fields": {
       "user": 89,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5819,6 +5908,7 @@
     "fields": {
       "user": 90,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5832,6 +5922,7 @@
     "fields": {
       "user": 91,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5845,6 +5936,7 @@
     "fields": {
       "user": 92,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5858,6 +5950,7 @@
     "fields": {
       "user": 93,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5871,6 +5964,7 @@
     "fields": {
       "user": 94,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5884,6 +5978,7 @@
     "fields": {
       "user": 95,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5897,6 +5992,7 @@
     "fields": {
       "user": 96,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5910,6 +6006,7 @@
     "fields": {
       "user": 97,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5923,6 +6020,7 @@
     "fields": {
       "user": 98,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5936,6 +6034,7 @@
     "fields": {
       "user": 99,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -5949,6 +6048,7 @@
     "fields": {
       "user": 100,
       "show_bars": true,
+      "show_artwork_on_curriculum": true,
       "show_completed_by_default": true,
       "show_locked_by_default": true,
       "last_seen": "1970-01-01T00:00:00Z",
@@ -25043,7 +25143,7 @@
     "pk": 1,
     "fields": {
       "semester": 1,
-      "passcode": "WhiteSmoke",
+      "passcode": "WhiteSmoke"
     }
   },
   {
@@ -25051,7 +25151,7 @@
     "pk": 2,
     "fields": {
       "semester": 2,
-      "passcode": "MidnightBlue",
+      "passcode": "MidnightBlue"
     }
   },
   {
