@@ -31,7 +31,10 @@ from evans_django_tools import SUCCESS_LOG_LEVEL
 from otisweb.mixins import VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest, get_days_since
 from roster.models import Student
-from roster.utils import get_student_by_pk
+from roster.utils import (
+    get_student_by_pk,
+    infer_student,
+)
 
 from .forms import DiamondsForm
 from .levelsys import LevelInfoDict, get_level_info, get_student_rows
@@ -140,6 +143,10 @@ class AchievementList(LoginRequiredMixin, ListView[Achievement]):
             self.request.user.pk, self.amount, settings.CERT_HASH_KEY
         )
         context["pk"] = self.request.user.pk
+        try:
+            context["student_pk"] = infer_student(self.request).pk
+        except:
+            context["student_pk"] = -1
         context["viewing"] = False
         return context
 
