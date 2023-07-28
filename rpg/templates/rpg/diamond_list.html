@@ -7,7 +7,7 @@
   {% endif %}
 {% endblock title %}
 {% block layout-content %}
-  <p class="fst-italic">To cash in an achievement, go to your {% if student_pk != -1 %}<a href="{% url "heading-charisma" student_pk=student_pk %}#headingCharisma">dashboard</a>{% else %}dashboard{% endif %} and open the Charisma meter.</p>
+  <p class="fst-italic">To cash in an achievement, go to your {% if student_pk != None %}<a href="{% url "stats" student_pk=student_pk %}#headingCharisma">dashboard</a>{% else %}dashboard{% endif %} and open the Charisma meter.</p>
   {% if viewing %}
     <div class="alert alert-info">
       You are viewing the diamonds of <b><tt>{{ other_user.username }}</tt></b> in comparison to your own.

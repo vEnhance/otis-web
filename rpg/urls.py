@@ -27,7 +27,4 @@ urlpatterns = [
     path(
         r"forge/<int:student_pk>/", views.DiamondUpdate.as_view(), name="diamond-update"
     ),
-    path(
-        r"stats/<int:student_pk>/", views.stats, name="heading-charisma"
-    ),
 ]
