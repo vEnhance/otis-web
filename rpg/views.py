@@ -18,7 +18,7 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import OuterRef, Q
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
-from django.http import HttpResponse
+from django.http import Http404, HttpResponse
 from django.http.response import HttpResponseBase
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -31,7 +31,7 @@ from evans_django_tools import SUCCESS_LOG_LEVEL
 from otisweb.mixins import VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest, get_days_since
 from roster.models import Student
-from roster.utils import get_student_by_pk
+from roster.utils import get_student_by_pk, infer_student
 
 from .forms import DiamondsForm
 from .levelsys import LevelInfoDict, get_level_info, get_student_rows
@@ -140,6 +140,10 @@ class AchievementList(LoginRequiredMixin, ListView[Achievement]):
             self.request.user.pk, self.amount, settings.CERT_HASH_KEY
         )
         context["pk"] = self.request.user.pk
+        try:
+            context["student_pk"] = infer_student(self.request).pk
+        except Http404:
+            context["student_pk"] = None
         context["viewing"] = False
         return context
 
