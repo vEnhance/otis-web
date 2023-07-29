@@ -92,14 +92,6 @@ table.table tr.subjectM:nth-child(even) {
   background-color: #f5e575;
 }
 
-table.table tr.subjectK {
-  background-color: #125252;
-  color: #efefef;
-}
-table.table tr.subjectK td.unit-name {
-  font-family: Acme, sans-serif;
-}
-
 table.table tr.unit-locked:nth-child(even) {
   background-color: #888888;
 }
@@ -148,6 +140,22 @@ table.curriculum tr.unit-locked td.thumbnail img {
 table.curriculum tr.unit-locked {
   color: #444444;
 }
+table.table tr.subjectK.unit-locked {
+  background-color: #125252;
+  color: #efefef;
+}
+table.table tr.subjectK {
+  background-color: #125252;
+  color: #efefef;
+}
+table.table tr.subjectK td.unit-name {
+  font-family: Acme, sans-serif;
+  font-style: normal;
+}
+table.table tr.subjectK.unit-locked td.unit-name {
+  font-style: normal;
+}
+
 table.curriculum tr.unit-locked td.unit-name {
   font-style: italic;
 }
