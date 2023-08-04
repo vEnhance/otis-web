@@ -319,7 +319,7 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
         return
 
     # auto-acceptance criteria
-    auto_accept_criteria = num_past_unlock_inquiries <= 6 and unlocked_count < 9
+    auto_accept_criteria = num_past_unlock_inquiries <= 6 and unlocked_count <= 9
     # auto dropping locked units
     auto_accept_criteria |= (
         inquiry.action_type == "INQ_ACT_DROP"
