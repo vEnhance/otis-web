@@ -298,11 +298,13 @@
           <li>
             <a href="https://us5.campaign-archive.com/home/?u=5c818a0be2f35ee90344a471e&id=808c50e8c9">Announcement emails</a>
           </li>
-          {% if semester.show_invoices %}
-            <li>
+          <li>
+            {% if semester.show_invoices %}
               <a href="{% url 'invoice' student.pk %}">Invoice</a>
-            </li>
-          {% endif %}
+            {% else %}
+              <b>Invoice</b> not ready yet; check back later.
+            {% endif %}
+          </li>
           {% if semester.active %}
             <li>
               <a href="{{ semester.calendar_url }}" target="_blank" rel="noreferrer">OTIS calendar</a>
