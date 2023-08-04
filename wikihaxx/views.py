@@ -46,11 +46,11 @@ def unitgroup(request: HttpRequest, pk: int) -> HttpResponse:
             f"(This is an automatically generated article for {group.name}. "
             "Please add some content!)\n\n"
         )
-        u = URLPath.create_urlpath(
+        u: URLPath = URLPath.create_urlpath(
             parent=parent,
             slug=slug,
             title=group.name,
             request=request,
             content=content,
-        )
+        )  # type: ignore
     return wiki_redirect(u)
