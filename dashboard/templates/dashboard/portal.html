@@ -252,7 +252,7 @@
   </p>
   <div class="text-center">
     {% if not student.newborn and semester.active and student.enabled %}
-      <a href="{% url 'inquiry' student.pk %}" class="btn btn-warning">Request units</a>
+      <a href="{% url 'inquiry' student.pk %}" class="btn btn-warning">Manage units</a>
     {% endif %}
     {% if request.user.is_staff %}
       <a href="{% url 'advance' student.pk %}" class="btn btn-dark">Edit units</a>
