@@ -185,45 +185,61 @@
          role="button">Ruby Palace</a>
     {% endif %}
   </div>
-  {% if downloads or emails %}<br />{% endif %}
-  {% if emails %}
-    <div class="alert alert-primary alert-dismissible">
+  {# News report #}
+  {% if num_news > 0 %}
+    <div class="alert alert-primary alert-dismissible mt-3">
       <h2 class="alert-heading">
-        <span class="badge bg-danger">{{ emails|length }}</span>
-        New announcements!
+        News!
+        <span class="badge bg-danger">{{ num_news }}</span>
       </h2>
-      <ul>
-        {% for email in emails %}
-          <li class="mb-3">
-            <b><a class="alert-link" href="{{ email.url }}">{{ email.title }} 📧</a></b> | {{ email.timestamp|naturaltime }}
-            <br />
-            <em class="text-muted">{{ email.summary }}</em>
-          </li>
-        {% endfor %}
-      </ul>
-      <button id="dismiss_emails"
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="alert"
-              aria-label="Close"></button>
-    </div>
-  {% endif %}
-  {% if downloads %}
-    <div class="alert alert-secondary alert-dismissible">
-      <h2 class="alert-heading">
-        <span class="badge bg-danger">{{ downloads|length }}</span>
-        New posted files!
-      </h2>
-      <ul>
-        {% for dl in downloads %}
-          <li class="mb-3">
-            <b><a class="alert-link" href="{{ dl.content.url }}">{{ dl }} ⬇️</a></b> | {{ dl.created_at|naturaltime }}
-            <br />
-            <em class="text-muted">{{ dl.description }}</em>
-          </li>
-        {% endfor %}
-      </ul>
-      <button id="dismiss_downloads"
+      {% for email in news.emails %}
+        <p class="mt-3">
+          📢
+          <b><a class="alert-link" href="{{ email.url }}">{{ email.title }}</a></b>
+          | {{ email.timestamp|naturaltime }}
+          <br />
+          <em class="text-muted">New email: {{ email.summary }}</em>
+        </p>
+      {% endfor %}
+      {% for dl in news.downloads %}
+        <p class="mt-3">
+          💾
+          <b><a class="alert-link" href="{{ dl.content.url }}">{{ dl }}</a></b>
+          | {{ dl.created_at|naturaltime }}
+          <br />
+          <em class="text-muted">New file: {{ dl.description }}</em>
+        </p>
+      {% endfor %}
+      {% for market in news.markets %}
+        <p class="mt-3">
+          📈
+          <b><a class="alert-link" href="{{ market.get_absolute_url }}">{{ market.title }}</a></b>
+          | {{ market.start_date|naturaltime }}
+          <br />
+          <em class="text-muted">New market opened:
+          ends {{ market.end_date|naturaltime }}</em>
+        </p>
+      {% endfor %}
+      {% for hc in news.hanabis %}
+        <p class="mt-3">
+          🎇
+          <b><a class="alert-link" href="{% url "hanabi-contests" %}">{{ hc }}</a></b>
+          | {{ hc.start_date|naturaltime }}
+          <br />
+          <em class="text-muted">New Hanabi seed active:
+          ends {{ hc.end_date|naturaltime }}</em>
+        </p>
+      {% endfor %}
+      {% for hunt in news.opals %}
+        <p class="mt-3">
+          🧩
+          <b><a class="alert-link" href="{% url "opal-hunt-list" %}">{{ hunt.name }}</a></b>
+          | {{ hunt.start_date|naturaltime }}
+          <br />
+          <em class="text-muted">OPAL hunt active!</em>
+        </p>
+      {% endfor %}
+      <button id="dismiss_news"
               type="button"
               class="btn-close"
               data-bs-dismiss="alert"
@@ -302,7 +318,7 @@
             {% if semester.show_invoices %}
               <a href="{% url 'invoice' student.pk %}">Invoice</a>
             {% else %}
-              <b>Invoice</b> not ready yet; check back later.
+              Invoice not ready yet; check back later.
             {% endif %}
           </li>
           {% if semester.active %}
@@ -318,36 +334,12 @@
           </li>
         </ul>
       </td>
-    </tr>
-    <tr>
-      <td valign="top" width="50%">
-        <h3>Discord</h3>
-        {% if semester.social_url %}
-          <a href="{{ semester.social_url }}" class="btn btn-info" role="button">Open Discord</a>
-        {% else %}
-          Nothing here yet!
-        {% endif %}
-      </td>
-      <td valign="top" width="50%">
-        <h3>Markets</h3>
-        <ul>
-          {% if markets %}
-            {% for market in markets %}
-              <li>
-                Market
-                <a href="{{ market.get_absolute_url }}">
-                  <code>
-                    {{ market.slug }}
-                  </code>
-                </a>
-              </li>
-            {% endfor %}
-          {% endif %}
-          <li>
-            List of <a href="{% url "market-list" %}">all markets</a>
-          </li>
-        </ul>
-      </td>
+      <h3>Discord</h3>
+      {% if semester.social_url %}
+        <a href="{{ semester.social_url }}" class="btn btn-info" role="button">Open Discord</a>
+      {% else %}
+        Nothing here yet!
+      {% endif %}
     </tr>
   </table>
   <hr />
@@ -420,12 +412,8 @@
               });;
           }
 
-          $('#dismiss_emails').on('click', () => {
-              ajaxCall("{% url 'dismiss-emails' %}");
-          });
-
-          $('#dismiss_downloads').on('click', () => {
-              ajaxCall("{% url 'dismiss-downloads' %}");
+          $('#dismiss_news').on('click', () => {
+              ajaxCall("{% url 'dismiss-news' %}");
           });
       });
   </script>

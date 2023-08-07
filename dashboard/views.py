@@ -3,7 +3,6 @@
 from __future__ import unicode_literals
 
 import logging
-from datetime import timedelta
 from typing import Any, Optional
 
 from braces.views import LoginRequiredMixin
@@ -21,7 +20,6 @@ from django.http.request import HttpRequest
 from django.http.response import HttpResponseBase
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
-from django.utils import timezone
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import DeleteView, UpdateView
 
@@ -32,16 +30,11 @@ from dashboard.forms import (
     PSetResubmitForm,
     PSetSubmitForm,
 )
-from dashboard.models import PSet, SemesterDownloadFile, UploadedFile  # NOQA
-from dashboard.utils import get_units_to_submit, get_units_to_unlock  # NOQA
+from dashboard.models import PSet, SemesterDownloadFile, UploadedFile
+from dashboard.utils import get_news, get_units_to_submit, get_units_to_unlock
 from evans_django_tools import VERBOSE_LOG_LEVEL
 from exams.models import PracticeExam
-from markets.models import Market
-from otisweb.utils import (  # NOQA
-    AuthHttpRequest,
-    get_days_since,
-    get_mailchimp_campaigns,
-)
+from otisweb.utils import AuthHttpRequest, get_days_since
 from roster.models import RegistrationContainer, Student, StudentRegistration
 from roster.utils import (  # NOQA
     can_view,
@@ -95,21 +88,13 @@ def portal(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
     context["quizzes"] = PracticeExam.objects.filter(
         is_test=False, family=semester.exam_family, due_date__isnull=False
     )
-    context["emails"] = [
-        e
-        for e in get_mailchimp_campaigns(14)
-        if e["timestamp"] >= profile.last_email_dismiss
-    ]
-    context["downloads"] = SemesterDownloadFile.objects.filter(
-        semester=semester,
-        created_at__gte=profile.last_download_dismiss,
-    ).filter(
-        created_at__gte=timezone.now() - timedelta(days=14),
-    )
-    context["markets"] = Market.active.all()
     context["num_sem_downloads"] = SemesterDownloadFile.objects.filter(
         semester=semester
     ).count()
+
+    # notifications
+    context["news"] = get_news(profile)
+    context["num_news"] = sum(len(_) for _ in context["news"].values())  # type: ignore
 
     context.update(level_info)
     return render(request, "dashboard/portal.html", context)

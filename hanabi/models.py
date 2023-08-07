@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models.query import QuerySet
 from django.urls.base import reverse
 from django.utils import timezone
 from django.utils.http import urlencode
@@ -22,6 +23,19 @@ class HanabiPlayer(models.Model):
         return self.user.get_full_name()
 
 
+class ActiveHanabiContestManager(models.Manager):
+    def get_queryset(self) -> QuerySet["HanabiContest"]:
+        now = timezone.now()
+        return (
+            super()
+            .get_queryset()
+            .filter(
+                start_date__lte=now,
+                end_date__gte=now,
+            )
+        )
+
+
 class HanabiContest(models.Model):
     variant_id = models.PositiveIntegerField(help_text="The variant ID on hanab.live")
     variant_name = models.CharField(
@@ -41,6 +55,9 @@ class HanabiContest(models.Model):
         help_text="Whether the results have been processed",
         default=False,
     )
+
+    objects = models.Manager()
+    active = ActiveHanabiContestManager()
 
     class Meta:
         ordering = ("-end_date",)
