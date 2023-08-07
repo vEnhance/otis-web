@@ -43,7 +43,7 @@ def get_mailchimp_campaigns(days: int) -> list[MailChimpDatum]:
             "url": "http://www.example.com",
             "title": "Example email",
             "summary": "Why hello there",
-            "timestamp": timezone.now(),
+            "timestamp": timezone.now() + datetime.timedelta(hours=-2),
         }
         return [example]
     else:
