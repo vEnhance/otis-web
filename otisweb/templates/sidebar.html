@@ -192,7 +192,7 @@
               {% csrf_token %}
               <input type="hidden" name="user_pk" value="{{ student.user.pk }}" />
               <input type="hidden" name="next" value="{{ request.path }}" />
-              <button class="pseudo-button" type="submit">Hijack</button>
+              <button class="pseudo-button" type="submit">Hijack {{ student.user.first_name }}</button>
             </form>
           </li>
         {% endif %}
