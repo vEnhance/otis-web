@@ -430,7 +430,10 @@ def init():
     # assistants
     print(f"Creating {args.assistant_num} assistants")
     assistant_users: list[User] = fast_bulk_create(
-        UserFactory, args.assistant_num, groups=(verified_group, staff_group)
+        UserFactory,
+        args.assistant_num,
+        groups=(verified_group, staff_group),
+        is_staff=True,
     )
     fast_bulk_create(
         AssistantFactory, args.assistant_num, user=factory.Iterator(assistant_users)
