@@ -18,7 +18,7 @@
     </div>
     <hr />
   {% endif %}
-  <h2>List of instructors</h2>
+  <h1>List of instructors</h1>
   <table class="table">
     <tr>
       <th>Name</th>
@@ -49,7 +49,8 @@
       {% endwith %}
     {% endfor %}
   </table>
-  <h2>Instructor emails (for copy-pasting)</h2>
+  <hr />
+  <h1>Instructor emails (for copy-pasting)</h1>
   <code>
     {% for igroup in instructor_list %}
       {% with instructor=igroup.grouper %}
@@ -59,7 +60,8 @@
       {% endwith %}
     {% endfor %}
   </code>
-  <h2>Student emails (for copy-pasting)</h2>
+  <hr />
+  <h1>Student emails (for copy-pasting)</h1>
   <code>
     {% for igroup in instructor_list %}
       {% for student in igroup.list %}
