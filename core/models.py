@@ -286,12 +286,8 @@ class UserProfile(models.Model):
         help_text="Last time user was seen at all",
         default=datetime.fromtimestamp(0, tz=timezone.utc),
     )
-    last_email_dismiss = models.DateTimeField(
-        help_text="Last time user dismissed the emails modal.",
-        default=datetime.fromtimestamp(0, tz=timezone.utc),
-    )
-    last_download_dismiss = models.DateTimeField(
-        help_text="Last time user dismissed the downloads modal.",
+    last_notif_dismiss = models.DateTimeField(
+        help_text="Last time user dismissed the notifications modal.",
         default=datetime.fromtimestamp(0, tz=timezone.utc),
     )
 
