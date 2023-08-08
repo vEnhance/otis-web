@@ -70,7 +70,7 @@ class Meter:
             lvl = self.level
             prev_value = lvl**2
             current_gap = self.value - prev_value
-            total_gap = 2*lvl + 1
+            total_gap = 2 * lvl + 1
             k = (current_gap + eps * total_gap) / ((1 + eps) * total_gap)
         else:
             k = (self.value + eps * self.max_value) / ((1 + eps) * self.max_value)
