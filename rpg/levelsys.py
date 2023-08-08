@@ -89,7 +89,7 @@ class Meter:
         return self.value
 
     @staticmethod
-    def ClubMeter(value: int, np: bool):
+    def ClubMeter(value: int, dynamic_progress: bool):
         return Meter(
             name="Dexterity",
             emoji="♣️",
@@ -97,11 +97,11 @@ class Meter:
             unit="♣",
             color="#007bff;",
             max_value=2500,
-            dynamic_progress=np,
+            dynamic_progress=dynamic_progress,
         )
 
     @staticmethod
-    def HeartMeter(value: float, np: bool):
+    def HeartMeter(value: float, dynamic_progress: bool):
         return Meter(
             name="Wisdom",
             emoji="🕰️",
@@ -109,11 +109,11 @@ class Meter:
             unit="♥",
             color="#198754",
             max_value=2500,
-            dynamic_progress=np,
+            dynamic_progress=dynamic_progress,
         )
 
     @staticmethod
-    def SpadeMeter(value: float, np: bool):
+    def SpadeMeter(value: float, dynamic_progress: bool):
         return Meter(
             name="Strength",
             emoji="🏆",
@@ -121,11 +121,11 @@ class Meter:
             unit="♠",
             color="#ae610f",
             max_value=169,
-            dynamic_progress=np,
+            dynamic_progress=dynamic_progress,
         )
 
     @staticmethod
-    def DiamondMeter(value: int, np: bool):
+    def DiamondMeter(value: int, dynamic_progress: bool):
         return Meter(
             name="Charisma",
             emoji="㊙️",
@@ -133,7 +133,7 @@ class Meter:
             unit="◆",
             color="#9c1421",
             max_value=144,
-            dynamic_progress=np,
+            dynamic_progress=dynamic_progress,
         )
 
 
@@ -245,15 +245,15 @@ def get_level_info(student: Student) -> LevelInfoDict:
     total_spades += hanabi_replays.aggregate(total=Sum("spades_score"))["total"] or 0
 
     try:
-        np = (UserProfile.objects.get(user=student.user)).dynamic_progress
+        dynamic_progress = (UserProfile.objects.get(user=student.user)).dynamic_progress
     except UserProfile.DoesNotExist:
-        np = False
+        dynamic_progress = False
 
     meters: FourMetersDict = {
-        "clubs": Meter.ClubMeter(int(total_clubs), np),
-        "hearts": Meter.HeartMeter(round(total_hearts, 2), np),
-        "diamonds": Meter.DiamondMeter(int(total_diamonds), np),
-        "spades": Meter.SpadeMeter(round(total_spades, 1), np),
+        "clubs": Meter.ClubMeter(int(total_clubs), dynamic_progress),
+        "hearts": Meter.HeartMeter(round(total_hearts, 2), dynamic_progress),
+        "diamonds": Meter.DiamondMeter(int(total_diamonds), dynamic_progress),
+        "spades": Meter.SpadeMeter(round(total_spades, 1), dynamic_progress),
     }
     level_number = sum(meter.level for meter in meters.values())  # type: ignore
     level = (

@@ -284,7 +284,7 @@ class UserProfile(models.Model):
     dynamic_progress = models.BooleanField(
         verbose_name="Dynamic level meters progression",
         help_text="Level meters show progression towards the next value to level up rather than a fixed max value",
-        default=True,
+        default=False,
     )
 
     last_seen = models.DateTimeField(
