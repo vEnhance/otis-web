@@ -159,7 +159,7 @@ class UserProfileUpdateView(
         "show_completed_by_default",
         "show_locked_by_default",
         "show_artwork_on_curriculum",
-        "new_progress",
+        "dynamic_progress",
     )
     success_url = reverse_lazy("profile")
     object: UserProfile

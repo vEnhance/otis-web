@@ -48,7 +48,7 @@ class Meter:
         unit: str,
         color: str,
         max_value: int,
-        new_progress: bool = False,
+        dynamic_progress: bool = False,
     ):
         self.name = name
         self.emoji = emoji
@@ -56,7 +56,7 @@ class Meter:
         self.unit = unit
         self.color = color
         self.max_value = max_value
-        self.new_progress = new_progress
+        self.dynamic_progress = dynamic_progress
 
     @property
     def level(self) -> int:
@@ -65,16 +65,15 @@ class Meter:
     @property
     def percent(self) -> int:
         eps = 0.4  # Make sure text fits in the bar
-        if not self.new_progress:
-            k = (self.value + eps * self.max_value) / ((1 + eps) * self.max_value)
-        else:
+        if self.dynamic_progress:
             eps = 0.25  # Make progress more visually clear
             lvl = self.level
             prev_value = lvl**2
-            next_value = (lvl + 1) ** 2
-            k = ((self.value - prev_value) + eps * (next_value - prev_value)) / (
-                (1 + eps) * (next_value - prev_value)
-            )
+            current_gap = self.value - prev_value
+            total_gap = 2*lvl + 1
+            k = (current_gap + eps * total_gap) / ((1 + eps) * total_gap)
+        else:
+            k = (self.value + eps * self.max_value) / ((1 + eps) * self.max_value)
         return min(100, int(100 * k))
 
     @property
@@ -98,7 +97,7 @@ class Meter:
             unit="♣",
             color="#007bff;",
             max_value=2500,
-            new_progress=np,
+            dynamic_progress=np,
         )
 
     @staticmethod
@@ -110,7 +109,7 @@ class Meter:
             unit="♥",
             color="#198754",
             max_value=2500,
-            new_progress=np,
+            dynamic_progress=np,
         )
 
     @staticmethod
@@ -122,7 +121,7 @@ class Meter:
             unit="♠",
             color="#ae610f",
             max_value=169,
-            new_progress=np,
+            dynamic_progress=np,
         )
 
     @staticmethod
@@ -134,7 +133,7 @@ class Meter:
             unit="◆",
             color="#9c1421",
             max_value=121,
-            new_progress=np,
+            dynamic_progress=np,
         )
 
 
@@ -246,7 +245,7 @@ def get_level_info(student: Student) -> LevelInfoDict:
     total_spades += hanabi_replays.aggregate(total=Sum("spades_score"))["total"] or 0
 
     try:
-        np = (UserProfile.objects.get(user=student.user)).new_progress
+        np = (UserProfile.objects.get(user=student.user)).dynamic_progress
     except UserProfile.DoesNotExist:
         np = False
 

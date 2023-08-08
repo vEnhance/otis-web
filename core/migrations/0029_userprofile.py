@@ -49,11 +49,11 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "new_progress",
+                    "dynamic_progress",
                     models.BooleanField(
                         default=False,
                         help_text="Level meters show progression towards the next value to level up rather than a fixed max value",
-                        verbose_name="New level meters progression",
+                        verbose_name="Dynamic level meters progression",
                     ),
                 ),
                 (
