@@ -27,4 +27,5 @@ urlpatterns = [
     path(r"mystery-unlock/easier/", views.unlock_rest_of_mystery, kwargs={"delta": 1}),
     path(r"mystery-unlock/harder/", views.unlock_rest_of_mystery, kwargs={"delta": 2}),
     path(r"instructors/", views.StudentAssistantList.as_view(), name="instructors"),
+    path(r"link-assistant/", views.link_assistant, name="link-assistant"),
 ]

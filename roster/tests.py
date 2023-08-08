@@ -840,3 +840,22 @@ class RosterTest(EvanTestCase):
                     student.reg.parent_email,
                 ]:
                     self.assertContains(resp, property)
+
+    def test_link_assistant(self) -> None:
+        assistant = AssistantFactory.create()
+        assistant2 = AssistantFactory.create()
+        alice = StudentFactory.create()
+        StudentFactory.create()
+        StudentFactory.create(assistant=assistant)
+        StudentFactory.create(assistant=assistant2)
+
+        self.assertGetBecomesStaffRedirect("link-assistant")
+
+        self.login(assistant.user)
+        resp = self.assertGetOK("link-assistant")
+        self.assertEqual(len(resp.context["form"].fields["student"].queryset), 2)
+        self.assertPostOK("link-assistant", data={"student": alice.pk})
+        alice.refresh_from_db()
+        self.assertEqual(alice.assistant.pk, assistant.pk)
+        resp = self.assertGetOK("link-assistant")
+        self.assertEqual(len(resp.context["form"].fields["student"].queryset), 1)

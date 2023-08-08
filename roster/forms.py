@@ -165,3 +165,13 @@ class UserForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ("first_name", "last_name", "email")
+
+
+class LinkAssistantForm(forms.Form):
+    student = forms.ModelChoiceField(
+        queryset=Student.objects.filter(
+            semester__active=True,
+            assistant__isnull=True,
+        ),
+        label="Student to claim",
+    )
