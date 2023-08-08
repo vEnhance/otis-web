@@ -26,19 +26,18 @@
           href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css" />
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="{% static "k.js" %}"></script>
-
     {% if request.user|getconfig:"use_twemoji" %}
-      <script src="https://unpkg.com/twemoji@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
+      <script src="https://unpkg.com/twemoji@latest/dist/twemoji.min.js"
+              crossorigin="anonymous"></script>
       <style>
-        img.emoji {
-          height: 1em;
-          width: 1em;
-          margin: 0 .05em 0 .1em;
-          vertical-align: -0.1em;
-        }
+          img.emoji {
+              height: 1em;
+              width: 1em;
+              margin: 0 .05em 0 .1em;
+              vertical-align: -0.1em;
+          }
       </style>
     {% endif %}
-
     {% include "headers/base_style.html" %}
     {% include "headers/favicon.html" %}
     {% include "headers/mathjax.html" %}
@@ -68,8 +67,9 @@
     {% endblock scripts %}
     {% if request.user|getconfig:"use_twemoji" %}
       <script type="text/javascript">
-        twemoji.parse(document.body, {
-        base: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/' });
+          twemoji.parse(document.body, {
+              base: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/'
+          });
       </script>
     {% endif %}
   </body>

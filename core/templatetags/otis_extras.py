@@ -45,12 +45,14 @@ def getprofile(user: User) -> Optional[UserProfile]:
     except UserProfile.DoesNotExist:
         return None
 
+
 @register.filter(name="getconfig")
 def getconfig(user: User, config: str) -> bool:
     try:
         return getattr(UserProfile.objects.get(user=user), config)
     except UserProfile.DoesNotExist:
         return False
+
 
 @register.filter(name="clubs_multiplier")
 def clubs_multiplier(u: Unit) -> str:
