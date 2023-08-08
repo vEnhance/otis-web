@@ -34,7 +34,18 @@
             {{ instructor.shortname }}
           </td>
           <td>
-            <small><code>{{ instructor.user.email|urlize }}</code></small>
+            <small><code>{{ instructor.user.email|urlize }}</code>
+              {% if request.user.is_superuser %}
+                <br />
+                {# Hijack assistant account #}
+                <form action="{% url 'hijack:acquire' %}" method="post">
+                  {% csrf_token %}
+                  <input type="hidden" name="user_pk" value="{{ instructor.user.pk }}" />
+                  <input type="hidden" name="next" value="{{ request.path }}" />
+                  <button class="pseudo-button" type="submit">(Hijack)</button>
+                </form>
+              {% endif %}
+            </small>
           </td>
           <td>
             <ul>
