@@ -364,10 +364,6 @@ class DiamondUpdate(
 
     def get_object(self, *args: Any, **kwargs: Any) -> Achievement:
         student = get_student_by_pk(self.request, self.kwargs["student_pk"])
-        if not student.semester.active:
-            raise PermissionDenied(
-                "The palace can't be edited through an inactive student"
-            )
         level_info = assert_maxed_out_level_info(student)
         self.student = student
 
