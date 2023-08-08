@@ -544,7 +544,7 @@ class RosterTest(EvanTestCase):
         self.login(staff)
         self.assertPost40X("instructors")  # staff can't post
 
-    def test_username_lookup(self):
+    def test_username_lookup(self) -> None:
         admin: User = UserFactory.create(is_superuser=True, is_staff=True)
         semester_old: Semester = SemesterFactory.create(end_year=2025)
         semester_new: Semester = SemesterFactory.create(end_year=2026)
@@ -560,7 +560,7 @@ class RosterTest(EvanTestCase):
             bob_new.get_absolute_url(),
         )
 
-    def test_advance(self):
+    def test_advance(self) -> None:
         assist: Assistant = AssistantFactory.create()
         alice: Student = StudentFactory.create(assistant=assist)
 
@@ -624,7 +624,7 @@ class RosterTest(EvanTestCase):
         self.assertTrue(alice.curriculum.contains(units[2]))
         self.assertFalse(alice.curriculum.contains(units[3]))
 
-    def test_reg(self):
+    def test_reg(self) -> None:
         semester: Semester = SemesterFactory.create()
 
         # registration should redirect if there's no container yet
@@ -734,7 +734,7 @@ class RosterTest(EvanTestCase):
             "You have already submitted a decision form for this year!", messages
         )
 
-    def test_update_profile(self):
+    def test_update_profile(self) -> None:
         alice: User = UserFactory.create()
         self.login(alice)
 
@@ -785,9 +785,9 @@ class RosterTest(EvanTestCase):
         self.assertTrue("a" + last_name == alice.last_name)
         self.assertTrue("1" + email == alice.email)
 
-    def test_mystery(self):
+    def test_mystery(self) -> None:
         mysteryGroup: UnitGroup = UnitGroupFactory.create(name="Mystery")
-        mystery: Unit = UnitFactory(group=mysteryGroup)
+        mystery: Unit = UnitFactory(group=mysteryGroup)  # type: ignore
         added_unit: Unit = UnitFactory.create_batch(2)[1]  # next two units
 
         alice: Student = StudentFactory.create()
@@ -813,7 +813,7 @@ class RosterTest(EvanTestCase):
         messages = [m.message for m in resp.context["messages"]]
         self.assertIn(f"Added the unit {added_unit}", messages)
 
-    def test_giga_chart(self):
+    def test_giga_chart(self) -> None:
         semester: Semester = SemesterFactory.create(show_invoices=True)
         students: list[Student] = [
             StudentFactory.create(
