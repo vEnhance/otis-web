@@ -132,7 +132,7 @@ class Meter:
             value=value,
             unit="◆",
             color="#9c1421",
-            max_value=121,
+            max_value=144,
             dynamic_progress=np,
         )
 
