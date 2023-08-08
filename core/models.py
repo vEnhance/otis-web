@@ -281,6 +281,11 @@ class UserProfile(models.Model):
         help_text="Show the artwork on the curriculum table",
         default=True,
     )
+    new_progress = models.BooleanField(
+        verbose_name="New level meters progression",
+        help_text="Level meters show progression towards the next value to level up rather than a fixed max value",
+        default=True,
+    )
 
     last_seen = models.DateTimeField(
         help_text="Last time user was seen at all",

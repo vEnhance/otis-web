@@ -48,6 +48,7 @@ class Meter:
         unit: str,
         color: str,
         max_value: int,
+        new_progress: bool = False,
     ):
         self.name = name
         self.emoji = emoji
@@ -55,6 +56,7 @@ class Meter:
         self.unit = unit
         self.color = color
         self.max_value = max_value
+        self.new_progress = new_progress
 
     @property
     def level(self) -> int:
@@ -62,8 +64,17 @@ class Meter:
 
     @property
     def percent(self) -> int:
-        eps = 0.40  # Make sure text fits in the bar
-        k = (self.value + eps * self.max_value) / ((1 + eps) * self.max_value)
+        eps = 0.4  # Make sure text fits in the bar
+        if not self.new_progress:
+            k = (self.value + eps * self.max_value) / ((1 + eps) * self.max_value)
+        else:
+            eps = 0.25  # Make progress more visually clear
+            lvl = self.level
+            prev_value = lvl**2
+            next_value = (lvl + 1) ** 2
+            k = ((self.value - prev_value) + eps * (next_value - prev_value)) / (
+                (1 + eps) * (next_value - prev_value)
+            )
         return min(100, int(100 * k))
 
     @property
@@ -79,7 +90,7 @@ class Meter:
         return self.value
 
     @staticmethod
-    def ClubMeter(value: int):
+    def ClubMeter(value: int, np: bool):
         return Meter(
             name="Dexterity",
             emoji="♣️",
@@ -87,10 +98,11 @@ class Meter:
             unit="♣",
             color="#007bff;",
             max_value=2500,
+            new_progress=np,
         )
 
     @staticmethod
-    def HeartMeter(value: float):
+    def HeartMeter(value: float, np: bool):
         return Meter(
             name="Wisdom",
             emoji="🕰️",
@@ -98,10 +110,11 @@ class Meter:
             unit="♥",
             color="#198754",
             max_value=2500,
+            new_progress=np,
         )
 
     @staticmethod
-    def SpadeMeter(value: float):
+    def SpadeMeter(value: float, np: bool):
         return Meter(
             name="Strength",
             emoji="🏆",
@@ -109,10 +122,11 @@ class Meter:
             unit="♠",
             color="#ae610f",
             max_value=169,
+            new_progress=np,
         )
 
     @staticmethod
-    def DiamondMeter(value: int):
+    def DiamondMeter(value: int, np: bool):
         return Meter(
             name="Charisma",
             emoji="㊙️",
@@ -120,6 +134,7 @@ class Meter:
             unit="◆",
             color="#9c1421",
             max_value=121,
+            new_progress=np,
         )
 
 
@@ -230,11 +245,16 @@ def get_level_info(student: Student) -> LevelInfoDict:
     # TODO total_spades += hint_spades
     total_spades += hanabi_replays.aggregate(total=Sum("spades_score"))["total"] or 0
 
+    try:
+        np = (UserProfile.objects.get(user=student.user)).new_progress
+    except UserProfile.DoesNotExist:
+        np = False
+
     meters: FourMetersDict = {
-        "clubs": Meter.ClubMeter(int(total_clubs)),
-        "hearts": Meter.HeartMeter(round(total_hearts, 2)),
-        "diamonds": Meter.DiamondMeter(int(total_diamonds)),
-        "spades": Meter.SpadeMeter(round(total_spades, 1)),
+        "clubs": Meter.ClubMeter(int(total_clubs), np),
+        "hearts": Meter.HeartMeter(round(total_hearts, 2), np),
+        "diamonds": Meter.DiamondMeter(int(total_diamonds), np),
+        "spades": Meter.SpadeMeter(round(total_spades, 1), np),
     }
     level_number = sum(meter.level for meter in meters.values())  # type: ignore
     level = (
