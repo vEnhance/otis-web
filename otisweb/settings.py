@@ -205,9 +205,9 @@ USE_I18N = True
 USE_L10N = False
 USE_TZ = True
 
-DATETIME_FORMAT = "d M Y H:i"
+DATETIME_FORMAT = "d M Y H:i:s"
 DATE_FORMAT = "d M Y"
-TIME_FORMAT = "H:i"
+TIME_FORMAT = "H:i:s"
 SHORT_DATE_FORMAT = "Y-m-d"  # ISO 8601
 
 # Static files (CSS, JavaScript, Images)

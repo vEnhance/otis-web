@@ -25,7 +25,7 @@ def get_disk_statement_from_puid(puid: str) -> Optional[str]:
 @reversion.register()
 class Problem(models.Model):
     puid = models.CharField(
-        max_length=24,
+        max_length=20,
         help_text="Problem identifier, as printed in OTIS. Capital letters and digits only.",
         unique=True,
         verbose_name="PUID",

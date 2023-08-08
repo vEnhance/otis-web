@@ -44,6 +44,8 @@ from dashboard.models import PSet
 from evans_django_tools import ACTION_LOG_LEVEL, SUCCESS_LOG_LEVEL
 from otisweb.decorators import admin_required
 from otisweb.utils import AuthHttpRequest, mailchimp_subscribe
+from roster.forms import LinkAssistantForm
+from roster.models import Assistant
 from roster.utils import (  # NOQA
     can_edit,
     get_current_students,
@@ -319,7 +321,7 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
         return
 
     # auto-acceptance criteria
-    auto_accept_criteria = num_past_unlock_inquiries <= 6 and unlocked_count < 9
+    auto_accept_criteria = num_past_unlock_inquiries <= 6 and unlocked_count <= 9
     # auto dropping locked units
     auto_accept_criteria |= (
         inquiry.action_type == "INQ_ACT_DROP"
@@ -653,3 +655,34 @@ class StudentAssistantList(StaffuserRequiredMixin, ListView[Student]):
         group.user_set.set(pks)  # type: ignore
         messages.success(request, "Synced active staff group!")
         return super().get(request, *args, **kwargs)
+
+
+@staff_member_required
+def link_assistant(request: HttpRequest) -> HttpResponse:
+    assistant = get_object_or_404(Assistant, user=request.user)
+    # Create form for submitting new inquiries
+    if request.method == "POST":
+        form = LinkAssistantForm(request.POST)
+        if form.is_valid():
+            student: Student = form.cleaned_data["student"]
+            assert student.assistant is None
+            student.assistant = assistant
+            student.save()
+            messages.success(request, f"You were paired with student {student}.")
+            logger.log(
+                SUCCESS_LOG_LEVEL,
+                f"Assistant {assistant} was linked to {student}",
+                extra={"request": request},
+            )
+
+    else:
+        form = LinkAssistantForm()
+    context = {
+        "form": form,
+        "assistant": assistant,
+        "current_students": Student.objects.filter(
+            assistant=assistant, semester__active=True
+        ),
+    }
+
+    return render(request, "roster/link_assistant.html", context)

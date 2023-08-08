@@ -1,5 +1,19 @@
 from django.db import models
+from django.db.models.query import QuerySet
 from django.utils import timezone
+
+
+class LiveOpalHuntManager(models.Manager):
+    def get_queryset(self) -> QuerySet["OpalHunt"]:
+        now = timezone.now()
+        return (
+            super()
+            .get_queryset()
+            .filter(
+                start_date__lte=now,
+                active=True,
+            )
+        )
 
 
 class OpalHunt(models.Model):
@@ -24,6 +38,9 @@ class OpalHunt(models.Model):
         blank=True,
         help_text="Authors need to have drafts of their puzzles done by this date.",
     )
+
+    objects = models.Manager()
+    live = LiveOpalHuntManager()
 
     def __str__(self) -> str:
         return self.name

@@ -18,12 +18,20 @@
          title="Edit in Admin"
          class="btn btn-link btn-outline-success">Edit market</a>
     </form>
-    <hr />
   {% endif %}
   <div class="alert alert-dark">
     <h2 class="alert-heading">{{ market.title }}</h2>
     {{ market.prompt_rendered|safe }}
   </div>
+  <p>
+    Market parameters: $w = {{ market.weight }}$
+    {% if market.alpha is not None %}and $\alpha = {{ market.alpha }}${% endif %}
+    .
+  </p>
+  <ul>
+    <li>Market started: {{ market.start_date }}</li>
+    <li>Market ended: {{ market.end_date }}</li>
+  </ul>
   {% if market.show_answer or request.user.is_superuser %}
     <div class="alert alert-info">
       <h2 class="alert-heading">
@@ -80,15 +88,6 @@
           </tr>
         {% endfor %}
       </table>
-      <p>
-        Market parameters: $w = {{ market.weight }}$
-        {% if market.alpha is not None %}and $\alpha = {{ market.alpha }}${% endif %}
-        .
-      </p>
-      <ul>
-        <li>Market started: {{ market.start_date }}</li>
-        <li>Market ended: {{ market.end_date }}</li>
-      </ul>
     </div>
   {% endif %}
 {% endblock layout-content %}

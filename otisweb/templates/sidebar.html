@@ -111,15 +111,15 @@
     <p>
       <b><a href="{% url "portal" student.pk %}">{{ student.name }}</a></b>
     </p>
-    <p class="fst-italic">
-      <small>{{ student.semester }} ({{ student.semester.years }})</small>
-    </p>
-    <p class="fst-italic">
-      <small>Student ID: {{ student.pk }}</small>
-    </p>
+    <small>
+      <p class="fst-italic">{{ student.semester }} ({{ student.semester.years }})</p>
+      <p class="fst-italic">Student ID: {{ student.pk }}</p>
+      {% if student.assistant %}<p class="fst-italic">Instr: {{ student.assistant }}</p>{% endif %}
+    </small>
   {% endif %}
   {% if request.user.is_staff %}
     <hr />
+    <h3>Staff controls</h3>
     <ul>
       <li>
         <a href="{% url "admin:index" %}">GM Panel</a>
@@ -134,12 +134,18 @@
         <a href="{% url "instructors" %}">Instructors</a>
       </li>
       <li>
-        <a href="{% url "master-schedule" %}">M Schedule</a>
+        <a href="{% url "link-assistant" %}">Link student</a>
       </li>
       <li>
-        <a href="{% url "admin-unit-list" %}">Unit Grid</a>
+        <a href="{% url "master-schedule" %}">M Schedule</a>
       </li>
-      {% if request.user.is_superuser %}
+    </ul>
+    {% if request.user.is_superuser %}
+      <h3>Admin controls</h3>
+      <ul>
+        <li>
+          <a href="{% url "admin-unit-list" %}">Unit Grid</a>
+        </li>
         <li>
           <a href="{% url "admin-palace-list" %}">Ruby Palace</a>
         </li>
@@ -155,8 +161,8 @@
             <a href="{% url "giga-chart" "html" %}">HTML</a>
           </li>
         </ul>
-      {% endif %}
-    </ul>
+      </ul>
+    {% endif %}
   {% else %}
     {% if not student %}<hr />{% endif %}
     <ul>
@@ -189,7 +195,7 @@
               {% csrf_token %}
               <input type="hidden" name="user_pk" value="{{ student.user.pk }}" />
               <input type="hidden" name="next" value="{{ request.path }}" />
-              <button class="pseudo-button" type="submit">Hijack</button>
+              <button class="pseudo-button" type="submit">Hijack {{ student.user.first_name }}</button>
             </form>
           </li>
         {% endif %}

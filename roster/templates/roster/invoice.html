@@ -18,34 +18,36 @@
       <a class="alert-link" href="{% url "invoice" %}">go to the current year's invoice</a>.
     </div>
   {% elif not invoice.student.semester.show_invoices %}
-    <div class="alert alert-info" role="alert">
-      <h2 class="alert-title">Preliminary invoice only</h2>
+    <div class="alert alert-warning" role="alert">
+      <h2 class="alert-title">Preliminary invoice only!</h2>
       Invoices are not ready for distribution yet.
       You can view this page if you want, but it's a work-in-progress.
+      For example, financial aid awards may not be reflected here yet.
+      <br />
+      If you are sure you know what you are doing,
+      you can use
+      <a href="{% url "payments-invoice" student.pk checksum %}">this link</a>
+      to make the payment right now anyway.
     </div>
-  {% endif %}
-  <p>
-    Payment information linked can be found in the OTIS
-    <a href="https://web.evanchen.cc/upload/otis-syllabus.pdf">syllabus</a>
-    and in more detail in the
-    <a href="{% static "info/parent-info.pdf" %}">parent info</a>.
-    All quantities below are in US dollars (USD).
-  </p>
-  <p>
-    Here is a link to a payment page that works without login
-    (so obviously, only send this to people you trust).
-    <center>
-      {% if invoice.student.semester.active %}
+  {% else %}
+    <div class="alert alert-success" role="alert">
+      <h2 class="alert-title">Invoice ready for use!</h2>
+      You can pay by credit card using the following link:
+      <p class="text-center">
         <a href="{% url "payments-invoice" student.pk checksum %}"
            class="btn btn-success col-xs-12 col-sm-6">Make payment via card</a>
-        <br />
-      {% endif %}
-      <a href="{% url "payments-invoice" student.pk checksum %}">
-        https://otis.evanchen.cc{% url "payments-invoice" student.pk checksum %}
-      </a>
-    </center>
-  </p>
-  <hr />
+      </p>
+      See <a href="{% static "info/parent-info.pdf" %}">parent info</a>
+      for alternative payment methods.
+    </div>
+    <p>
+      Here is a link to a payment page that works without login
+      (so obviously, only send this to people you trust):
+      <a href="{% url "payments-invoice" student.pk checksum %}"
+         style="word-wrap:break-word">https://otis.evanchen.cc{% url "payments-invoice" student.pk checksum %}</a>
+    </p>
+    <hr />
+  {% endif %}
   {% if invoice %}
     {% include "roster/invoice_table.html" %}
     <hr />

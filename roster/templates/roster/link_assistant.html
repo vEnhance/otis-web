@@ -1,0 +1,59 @@
+{% extends "layout.html" %}
+{% load static %}
+{% block title %}
+  Link student
+{% endblock title %}
+{% block layout-content %}
+  <p>
+    You are <b>{{ assistant }}</b>.
+    Use the form below to finalize a claim on a student
+    and link your assistant account to their portal.
+  </p>
+  <hr />
+  {% include "generic_form.html" with submit_name="Link student" %}
+  <hr />
+  <h2>Your current students</h2>
+  {% if current_students %}
+    <p>
+      You are currently teaching <b>{{ current_students|length }} students</b>:
+    </p>
+    <ul>
+      {% for student in current_students %}
+        <li>
+          <a href="{{ student.get_absolute_url }}">{{ student }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>There were no students to display.</p>
+  {% endif %}
+  <h2>Detailed instructions</h2>
+  <p>
+    Once you have confirm that you are working with a student,
+    submit the form below to gain access to that student's portal.
+  </p>
+  <p>
+    The form above shows only students who have no instructor assigned.
+    Also, students need to complete a registration form before the appear
+    (so that they are registered to OTIS-WEB),
+    so any recently created students may not appear.
+  </p>
+  <p>
+    <strong>At the moment there is no functionality to de-link a student.</strong>
+    You have to contact Evan to have the student manually removed.
+    Thus, please be careful with the form above and try to not make mistakes.
+    Only submit the form once you have confirmed you are working with a student.
+  </p>
+  <p>
+    You can see the current
+    <a href="{% url "instructors" %}">instructor pairings</a>
+    here.
+  </p>
+{% endblock layout-content %}
+{% block scripts %}
+  <script type="text/javascript">
+      $(() => {
+          $("select").chosen();
+      });
+  </script>
+{% endblock scripts %}

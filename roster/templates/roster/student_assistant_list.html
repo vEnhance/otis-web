@@ -18,7 +18,12 @@
     </div>
     <hr />
   {% endif %}
-  <h2>List of instructors</h2>
+  <p>
+    To link additional students to yourself, use the
+    <a href="{% url "link-assistant" %}">link student</a> form.
+  </p>
+  <hr />
+  <h1>List of instructors</h1>
   <table class="table">
     <tr>
       <th>Name</th>
@@ -34,7 +39,18 @@
             {{ instructor.shortname }}
           </td>
           <td>
-            <small><code>{{ instructor.user.email|urlize }}</code></small>
+            <small><code>{{ instructor.user.email|urlize }}</code>
+              {% if request.user.is_superuser %}
+                <br />
+                {# Hijack assistant account #}
+                <form action="{% url 'hijack:acquire' %}" method="post">
+                  {% csrf_token %}
+                  <input type="hidden" name="user_pk" value="{{ instructor.user.pk }}" />
+                  <input type="hidden" name="next" value="{{ request.path }}" />
+                  <button class="pseudo-button" type="submit">(Hijack)</button>
+                </form>
+              {% endif %}
+            </small>
           </td>
           <td>
             <ul>
@@ -49,7 +65,8 @@
       {% endwith %}
     {% endfor %}
   </table>
-  <h2>Instructor emails (for copy-pasting)</h2>
+  <hr />
+  <h1>Instructor emails (for copy-pasting)</h1>
   <code>
     {% for igroup in instructor_list %}
       {% with instructor=igroup.grouper %}
@@ -59,7 +76,8 @@
       {% endwith %}
     {% endfor %}
   </code>
-  <h2>Student emails (for copy-pasting)</h2>
+  <hr />
+  <h1>Student emails (for copy-pasting)</h1>
   <code>
     {% for igroup in instructor_list %}
       {% for student in igroup.list %}
