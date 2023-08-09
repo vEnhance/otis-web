@@ -50,7 +50,7 @@ def getprofile(user: User) -> Optional[UserProfile]:
 def getconfig(user: User, config: str) -> bool:
     try:
         return getattr(UserProfile.objects.get(user=user), config)
-    except UserProfile.DoesNotExist:
+    except Exception:
         return False
 
 
