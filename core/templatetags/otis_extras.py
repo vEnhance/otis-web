@@ -2,7 +2,7 @@ import os
 from typing import Optional
 
 from django import template
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AnonymousUser, User
 from django.forms.boundfield import BoundField
 from django.urls import reverse
 
@@ -49,8 +49,16 @@ def getprofile(user: User) -> Optional[UserProfile]:
 @register.filter(name="getconfig")
 def getconfig(user: User, config: str) -> bool:
     try:
-        return getattr(UserProfile.objects.get(user=user), config)
-    except Exception:
+        if isinstance(user, AnonymousUser):
+            return False
+
+        profile: UserProfile = UserProfile.objects.get(user=user)
+
+        if not hasattr(profile, config):
+            return False
+
+        return getattr(profile, config)
+    except (AttributeError, UserProfile.DoesNotExist):
         return False
 
 
