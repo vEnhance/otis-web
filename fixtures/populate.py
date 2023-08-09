@@ -427,8 +427,7 @@ def init():
         UserFactory, args.stu_num, groups=(verified_group,)
     )
 
-    user_pks = User.objects.values_list("pk", flat=True)
-    verified_group.user_set.set(user_pks)  # type: ignore
+    verified_group.user_set.set([user.pk for user in users])  # type: ignore
 
     # assistants - technically O(n) but only 5 by default
     print(f"Creating {args.assistant_num} assistants")
