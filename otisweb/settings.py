@@ -303,12 +303,12 @@ LOGGING = {
     },
     "root": {
         "handlers": ["console", "discord"],
-        "level": "INFO",
+        "level": "VERBOSE",
     },
     "loggers": {
         "django": {
             "handlers": ["console", "discord"],
-            "level": "INFO",
+            "level": "VERBOSE",
             "propagate": False,
         },
         "django.db.backends": {
