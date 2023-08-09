@@ -291,7 +291,7 @@ class UserProfile(models.Model):
         help_text="Level meters show progression towards the next value to level up rather than a fixed max value",
         default=False,
     )
-    
+
     last_seen = models.DateTimeField(
         help_text="Last time user was seen at all",
         default=datetime.fromtimestamp(0, tz=timezone.utc),
