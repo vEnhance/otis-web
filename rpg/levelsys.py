@@ -66,7 +66,6 @@ class Meter:
     def percent(self) -> int:
         eps = 0.4  # Make sure text fits in the bar
         if self.dynamic_progress:
-            eps = 0.25  # Make progress more visually clear
             lvl = self.level
             prev_value = lvl**2
             current_gap = self.value - prev_value
