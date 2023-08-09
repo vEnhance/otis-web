@@ -48,18 +48,14 @@ def getprofile(user: User) -> Optional[UserProfile]:
 
 @register.filter(name="getconfig")
 def getconfig(user: User, config: str) -> bool:
-    try:
-        if isinstance(user, AnonymousUser):
-            return False
-
-        profile: UserProfile = UserProfile.objects.get(user=user)
-
-        if not hasattr(profile, config):
-            return False
-
-        return getattr(profile, config)
-    except (AttributeError, UserProfile.DoesNotExist):
+    if isinstance(user, AnonymousUser):
         return False
+    try:
+        profile: UserProfile = UserProfile.objects.get(user=user)
+    except UserProfile.DoesNotExist:
+        return False
+    else:
+        return getattr(profile, config)
 
 
 @register.filter(name="clubs_multiplier")
