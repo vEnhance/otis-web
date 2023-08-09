@@ -1,6 +1,5 @@
 import logging
 import random
-from hashlib import pbkdf2_hmac
 from typing import Any
 
 from braces.views import (  # NOQA
@@ -8,14 +7,13 @@ from braces.views import (  # NOQA
     StaffuserRequiredMixin,
     SuperuserRequiredMixin,
 )
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import PermissionDenied
-from django.db.models import OuterRef, Q
+from django.db.models import OuterRef
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http import Http404, HttpResponse
@@ -136,9 +134,6 @@ class AchievementList(LoginRequiredMixin, ListView[Achievement]):
 
     def get_context_data(self, **kwargs: dict[str, Any]):
         context = super().get_context_data(**kwargs)
-        context["checksum"] = get_achievement_checksum(
-            self.request.user.pk, self.amount, settings.CERT_HASH_KEY
-        )
         context["pk"] = self.request.user.pk
         try:
             context["student_pk"] = infer_student(self.request).pk
@@ -175,58 +170,6 @@ class AchievementDetail(VerifiedRequiredMixin, DetailView[Achievement]):
                     return ret
             else:
                 raise PermissionDenied("You haven't found this one yet.")
-
-
-class AchievementCertifyList(LoginRequiredMixin, ListView[Achievement]):
-    template_name = "rpg/diamond_list.html"
-
-    def get_queryset(self) -> QuerySet[Achievement]:
-        if not isinstance(self.request.user, User):
-            raise PermissionDenied("Please log in")
-
-        viewed_pk = self.kwargs["pk"]
-        checksum = self.kwargs["checksum"]
-
-        user = get_object_or_404(User, pk=viewed_pk)
-
-        achievements = (
-            Achievement.objects.filter(creator__isnull=True)
-            .annotate(
-                num_found=SubqueryCount("achievementunlock"),
-                obtained=Exists("achievementunlock", filter=Q(user=self.request.user)),
-                viewed_obtained=Exists("achievementunlock", filter=Q(user=user)),
-            )
-            .order_by("-obtained", "-viewed_obtained", "-num_found")
-        )
-
-        if checksum != get_achievement_checksum(
-            viewed_pk,
-            AchievementUnlock.objects.filter(user=user).count(),
-            settings.CERT_HASH_KEY,
-        ):
-            raise PermissionDenied("Wrong or expired hash ")
-
-        return achievements
-
-    def get_context_data(self, **kwargs: dict[str, Any]):
-        context = super().get_context_data(**kwargs)
-
-        context["viewing"] = True
-        viewed_pk = self.kwargs["pk"]
-        context["other_user"] = get_object_or_404(User, pk=viewed_pk)
-        return context
-
-
-def get_achievement_checksum(user_pk: int, num: int, key: str) -> str:
-    return pbkdf2_hmac(
-        "sha256",
-        (
-            key + str(pow(3, user_pk, 961748927)) + str(pow(3, num, 961748927)) + "eyes"
-        ).encode("utf-8"),
-        b"salt is very yummy but sugar is more yummy",
-        100000,
-        dklen=18,
-    ).hex()
 
 
 class FoundList(

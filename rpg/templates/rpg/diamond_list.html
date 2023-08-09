@@ -1,10 +1,6 @@
 {% extends "layout.html" %}
 {% block title %}
-  {% if viewing %}
-    {{ other_user.username }}'s Achievements
-  {% else %}
-    Achievements Listing
-  {% endif %}
+  Achievements Listing
 {% endblock title %}
 {% block layout-content %}
   <p class="fst-italic">
@@ -16,53 +12,25 @@
     {% endif %}
     and open the Charisma meter.
   </p>
-  {% if viewing %}
-    <div class="alert alert-info">
-      You are viewing the diamonds of <b><tt>{{ other_user.username }}</tt></b> in comparison to your own.
-    </div>
-  {% else %}
-    <p>
-      To share your diamond information, share this <a href="{% url "achievements-certify" pk=pk checksum=checksum %}">URL</a>. This link expires when you gain more diamonds.
-    </p>
-  {% endif %}
   <ul>
-    {% if viewing %}
-      <li>
-        <span style="background-color: #cceecc;"><b>GREEN</b></span> diamonds
-        are those that both you and <b><tt>{{ other_user.username }}</tt></b> have unlocked.
-      </li>
-      <li>
-        <span style="background-color: #cdeeeb;"><b>BLUE</b></span> diamonds
-        are those that they have not unlocked while you have.
-      </li>
-      <li>
-        <span style="background-color: #eedccc;"><b>ORANGE</b></span> diamonds
-        are conversely those they have unlocked that you don't.
-      </li>
-      <li>
-        <span style="background-color: #eeccee;"><b>RED</b></span> diamonds
-        are those that neither have.
-      </li>
-    {% else %}
-      <li>
-        <span style="background-color: #cceecc;"><b>GREEN</b></span> diamonds
-        are those that you have.
-      </li>
-      <li>
-        <span style="background-color: #eeccee;"><b>RED</b></span> diamonds
-        are those that you don't have.
-      </li>
-      <li>
-        <span style="background-color: #ccccee;"><b>PURPLE</b></span> diamonds
-        are those that you don't have, but are created by a student
-        and might require steps not located in affiliated places.
-      </li>
-    {% endif %}
+    <li>
+      <span style="background-color: #cceecc;"><b>GREEN</b></span> diamonds
+      are those that you have.
+    </li>
+    <li>
+      <span style="background-color: #eeccee;"><b>RED</b></span> diamonds
+      are those that you don't have.
+    </li>
+    <li>
+      <span style="background-color: #ccccee;"><b>PURPLE</b></span> diamonds
+      are those that you don't have, but are created by a student
+      and might require steps not located in affiliated places.
+    </li>
   </ul>
   <div class="list-group">
     {% for achievement in achievement_list %}
       <div class="list-group-item container"
-           {% if viewing and not achievement.obtained and achievement.viewed_obtained %} style="background-color: #ffeddd;" {% elif viewing and achievement.obtained and not achievement.viewed_obtained %} style="background-color: #defffc;" {% elif achievement.obtained %} style="background-color: #ddffdd;" {% elif not viewing and achievement.creator %} style="background-color: #ddddff;" {% else %} style="background-color: #ffddff;" {% endif %}>
+           style="background-color: {% if achievement.obtained %}#ddffdd{% elif achievement.creator %}#ddddff{% else %}#ffddff{% endif %}">
         <div class="d-flex justify-content-between">
           <span style="color: #9c1421;">
             {% if achievement.num_found > 0 %}
@@ -74,7 +42,7 @@
           </span>
         </div>
         {% if achievement.num_found > 0 or achievement.always_show_image %}
-          <span {% if viewing and achievement.viewed_obtained %} {% elif not achievement.obtained and not request.user.is_staff %} style="filter: grayscale(100%) opacity(40%);" {% endif %}>
+          <span {% if not achievement.obtained and not request.user.is_staff %} style="filter: grayscale(100%) opacity(40%);" {% endif %}>
             <a href="{% url "diamond-solution" achievement.pk %}">
               {% if achievement.image %}
                 <img width="64px" class="float-end" src="{{ achievement.image.url }}" />
