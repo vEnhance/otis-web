@@ -1,3 +1,4 @@
+{% load static %}
 {% if request.user.is_authenticated %}
   <table style="width: 100%;
                 height:160px;
@@ -119,7 +120,7 @@
   {% endif %}
   {% if request.user.is_staff %}
     <hr />
-    <h3>Staff controls</h3>
+    <h3>Staff panel</h3>
     <ul>
       <li>
         <a href="{% url "admin:index" %}">GM Panel</a>
@@ -131,13 +132,19 @@
         <a href="{% url "idlewarn" %}">Idle-warn</a>
       </li>
       <li>
-        <a href="{% url "instructors" %}">Instructors</a>
+        <a href="{% url "master-schedule" %}">M Schedule</a>
+      </li>
+    </ul>
+    <h3>Instructor info</h3>
+    <ul>
+      <li>
+        <a href="{% url "instructors" %}">Pairing roster</a>
       </li>
       <li>
         <a href="{% url "link-assistant" %}">Link student</a>
       </li>
       <li>
-        <a href="{% url "master-schedule" %}">M Schedule</a>
+        <a href="{% static 'info/instructor-expectations.pdf' %}">Expectations</a>
       </li>
     </ul>
     {% if request.user.is_superuser %}
