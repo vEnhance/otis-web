@@ -267,12 +267,20 @@ def filter_useless_404(record: logging.LogRecord) -> bool:
         return True
 
 
+def add_username(record: logging.LogRecord):
+    try:
+        record.username = record.request.user.username  # type: ignore
+    except AttributeError:
+        record.username = ""
+    return True
+
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
         "stream_format": {
-            "format": "[{levelname}] {asctime} {module} {name}\n{message}\n",
+            "format": "[{levelname}] {asctime} {module} {name} [{username}@{filename}:{lineno}]\n{message}\n",
             "style": "{",
         },
     },
@@ -287,18 +295,22 @@ LOGGING = {
         "require_debug_true": {
             "()": "django.utils.log.RequireDebugTrue",
         },
+        "add_username": {
+            "()": "django.utils.log.CallbackFilter",
+            "callback": add_username,
+        },
     },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
             "level": "VERBOSE",
             "formatter": "stream_format",
-            "filters": ["filter_useless_404"],
+            "filters": ["filter_useless_404", "add_username"],
         },
         "discord": {
             "class": "evans_django_tools.DiscordWebhookHandler",
             "level": "VERBOSE",
-            "filters": ["require_debug_false", "filter_useless_404"],
+            "filters": ["require_debug_false", "filter_useless_404", "add_username"],
         },
     },
     "root": {
