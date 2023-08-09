@@ -21,9 +21,11 @@
     </div>
   {% endif %}
   <div class="my-3 alert alert-success">
-    <h4 class="alert-heading">
-      Answer: <strong>{{ achievement.code }}</strong>
-    </h4>
+    {% if request.user.is_superuser %}
+      <h4 class="alert-heading">
+        Answer: <strong>{{ achievement.code }}</strong>
+      </h4>
+    {% endif %}
     {{ achievement.solution|linebreaks }}
   </div>
   <ul>

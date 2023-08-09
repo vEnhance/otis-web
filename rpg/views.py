@@ -159,17 +159,16 @@ class AchievementDetail(VerifiedRequiredMixin, DetailView[Achievement]):
             messages.warning(self.request, "Viewing as admin…")
             return ret
         else:
-            if AchievementUnlock.objects.filter(
+            if not AchievementUnlock.objects.filter(
                 user=self.request.user, achievement=achievement
             ).exists():
-                if not achievement.show_solution:
-                    raise PermissionDenied(
-                        "The solution page to this diamond is not public."
-                    )
-                else:
-                    return ret
-            else:
                 raise PermissionDenied("You haven't found this one yet.")
+            elif not achievement.show_solution:
+                raise PermissionDenied(
+                    "The solution page to this diamond is not public."
+                )
+            else:
+                return ret
 
 
 class FoundList(
