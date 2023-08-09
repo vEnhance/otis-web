@@ -423,14 +423,11 @@ def init():
 
     print(f"Creating {args.stu_num} user accounts")
     # users
-    users: list[User] = fast_bulk_create(
-        UserFactory, args.stu_num, groups=(verified_group,)
-    )
+    users: list[User] = UserFactory.create_batch(args.stu_num, groups=(verified_group,))
 
     # assistants
     print(f"Creating {args.assistant_num} assistants")
-    assistant_users: list[User] = fast_bulk_create(
-        UserFactory,
+    assistant_users: list[User] = UserFactory.create_batch(
         args.assistant_num,
         groups=(verified_group, staff_group),
         is_staff=True,
