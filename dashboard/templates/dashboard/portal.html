@@ -136,29 +136,27 @@
     </ol>
     <hr />
   {% else %}
-    {% with profile=request.user|getprofile %}
-      <div class="greeting">
-        {% if profile.show_bars %}
-          <h1>
-            Level {{ level_number }} —
-            <a href="{% url 'stats' student.pk %}">🏅{{ level_name }}</a>
-          </h1>
-          <div class="container">
-            <div class="row">
-              {% include "rpg/meters/small.html" with meter=meters.clubs %}
-              {% include "rpg/meters/small.html" with meter=meters.hearts %}
-              {% include "rpg/meters/small.html" with meter=meters.spades %}
-              {% include "rpg/meters/small.html" with meter=meters.diamonds %}
-            </div>
+    <div class="greeting">
+      {% if request.user|getconfig:"show_bars" %}
+        <h1>
+          Level {{ level_number }} —
+          <a href="{% url 'stats' student.pk %}">🏅{{ level_name }}</a>
+        </h1>
+        <div class="container">
+          <div class="row">
+            {% include "rpg/meters/small.html" with meter=meters.clubs %}
+            {% include "rpg/meters/small.html" with meter=meters.hearts %}
+            {% include "rpg/meters/small.html" with meter=meters.spades %}
+            {% include "rpg/meters/small.html" with meter=meters.diamonds %}
           </div>
-        {% else %}
-          <h1>Welcome back</h1>
-          <p>
-            You are logged in as <code>{{ request.user.username }}</code>.
-          </p>
-        {% endif %}
-      </div>
-    {% endwith %}
+        </div>
+      {% else %}
+        <h1>Welcome back</h1>
+        <p>
+          You are logged in as <code>{{ request.user.username }}</code>.
+        </p>
+      {% endif %}
+    </div>
   {% endif %}
   <div class="text-center">
     <a href="{% url 'stats' student.pk %}"
