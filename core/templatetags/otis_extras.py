@@ -57,5 +57,5 @@ def clubs_multiplier(u: Unit) -> str:
 
 
 @register.filter
-def dictitem(obj: dict, name: any):
+def dictitem(obj: dict[any, any], name: any) -> any:
     return obj.get(name, None)
