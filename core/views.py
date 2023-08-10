@@ -68,8 +68,6 @@ class UnitGroupListView(ListView[UnitGroup]):
             for group in queryset:
                 unit_groups[group.pk] = list(units_qs.filter(group=group))
 
-            print(unit_groups)
-
             self.unit_groups = unit_groups
 
 
@@ -83,13 +81,6 @@ class UnitGroupListView(ListView[UnitGroup]):
         context['unit_dict'] = self.unit_groups
 
         return context
-    
-    def add_stats():
-        
-
-
-
-        pass
 
 
 class PublicCatalog(ListView[UnitGroup]):

@@ -54,18 +54,14 @@
                 </b>
               {% endif %}
               <span class="text-dark">— {{ unitgroup.get_subject_short_display }}:
-                {% if unitgroup.has_pset %}
+                {% if unit_dict and unitgroup.has_pset %}
                   {% for unit in unit_dict|dictitem:unitgroup.pk %}
                     {% if unit.has_pset %}
-                      <b class="text-success">
-                        {{ unit.code }}{% if not forloop.last %},{% endif %}
-                      </b>
+                      <b class="text-primary">{{ unit.code }}</b>{% if not forloop.last %},{% endif %}
                     {% else %}
                       {{ unit.code }}{% if not forloop.last %},{% endif %}
                     {% endif %}
-
                   {% endfor %}
-
                 {% else%}
                   {% for unit in unitgroup.unit_set.all %}
                     {{ unit.code }}{% if not forloop.last %},{% endif %}
