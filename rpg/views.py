@@ -61,7 +61,8 @@ def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
             except Achievement.DoesNotExist:
                 messages.error(request, "You entered an invalid code. 😭")
                 logger.warn(
-                    f"Invalid diamond code `{code}`", extra={"request": request}
+                    f"Invalid diamond code `{code}` from {student.name}",
+                    extra={"request": request},
                 )
             else:
                 _, is_new = AchievementUnlock.objects.get_or_create(
@@ -81,7 +82,7 @@ def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
                         extra={"request": request},
                     )
                 else:
-                    logger.warn(
+                    logger.info(
                         f"{student.name} has already obtained {achievement} before",
                         extra={"request": request},
                     )
