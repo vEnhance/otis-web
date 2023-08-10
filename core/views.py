@@ -39,48 +39,27 @@ class AdminUnitListView(SuperuserRequiredMixin, ListView[Unit]):
     context_object_name = "unit_list"
 
 
-class UnitGroupListView(ListView[UnitGroup]):
-    model = UnitGroup
+class UnitGroupListView(ListView[Unit]):
+    model = Unit
+    context_object_name = "units"
 
     def get_queryset(self):
-        queryset = UnitGroup.objects.filter(hidden=False)
-        queryset = queryset.order_by("subject", "name")
-        queryset = queryset.annotate(num_psets=Count("unit__pset"))
+        queryset = Unit.objects.filter(group__hidden=False)
+        queryset = queryset.order_by("group__subject", "group__name", "code")
+        queryset = queryset.annotate(num_psets_in_group=Count("group__unit__pset"))
 
-        # redundant but whatever
         if not isinstance(self.request.user, AnonymousUser):
             queryset = queryset.annotate(
                 has_pset=Exists(
-                    "unit__pset",
-                    filter=Q(student__user=self.request.user, status="A"),
-                )
-            )
-
-            units_qs = Unit.objects.annotate(
-                has_pset=Exists(
                     "pset",
                     filter=Q(student__user=self.request.user, status="A"),
-                )
+                ),
+                has_pset_for_any_unit=Exists(
+                    "group__unit__pset",
+                    filter=Q(student__user=self.request.user, status="A"),
+                ),
             )
-
-            unit_groups: dict[str, list[Unit]] = dict()
-
-            for group in queryset:
-                unit_groups[group.pk] = list(units_qs.filter(group=group))
-
-            self.unit_groups = unit_groups
-
-        queryset = queryset.prefetch_related("unit_set")
-
         return queryset
-
-    def get_context_data(self, **kwargs: Any) -> ContextType:
-        context = super().get_context_data(**kwargs)
-
-        if not isinstance(self.request.user, AnonymousUser):
-            context["unit_dict"] = self.unit_groups
-
-        return context
 
 
 class PublicCatalog(ListView[UnitGroup]):
