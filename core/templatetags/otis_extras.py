@@ -1,5 +1,5 @@
 import os
-from typing import Optional
+from typing import Any, Optional
 
 from django import template
 from django.contrib.auth.models import User
@@ -57,5 +57,5 @@ def clubs_multiplier(u: Unit) -> str:
 
 
 @register.filter
-def dictitem(obj: dict[any, any], name: any) -> any:
+def dictitem(obj: dict[Any, Any], name: Any) -> Any:
     return obj.get(name, None)
