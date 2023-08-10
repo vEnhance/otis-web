@@ -13,22 +13,22 @@ register = template.Library()
 
 
 @register.simple_tag
-def view_problems(unit: Unit):
+def view_problems(unit: Unit) -> str:
     return reverse("view-problems", args=(unit.pk,))
 
 
 @register.simple_tag
-def view_solutions(unit: Unit):
+def view_solutions(unit: Unit) -> str:
     return reverse("view-solutions", args=(unit.pk,))
 
 
 @register.simple_tag
-def view_tex(unit: Unit):
+def view_tex(unit: Unit) -> str:
     return reverse("view-tex", args=(unit.pk,))
 
 
 @register.filter(name="display_initial_choice")
-def display_initial_choice(field: BoundField):
+def display_initial_choice(field: BoundField) -> str:
     choices = field.field._choices  # type: ignore
     return " ".join([ucode for (uid, ucode) in choices if uid in field.initial])
 
