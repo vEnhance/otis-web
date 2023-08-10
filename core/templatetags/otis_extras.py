@@ -54,8 +54,3 @@ def clubs_multiplier(u: Unit) -> str:
         return f"(×{1+BONUS_Z_UNIT})"
     else:
         return ""
-
-
-@register.filter
-def dictitem(obj: dict[Any, Any], name: Any) -> Any:
-    return obj.get(name, None)
