@@ -61,7 +61,9 @@
   </div>
   <hr />
   <div class="text-center">
-    <a href="{% url "view-solution" problem.puid %}" class="btn btn-info">📜 Solution (TeX)</a>
+    {% if statement %}
+      <a href="{% url "view-solution" problem.puid %}" class="btn btn-info">📜 Solution (TeX)</a>
+    {% endif %}
     <a href="{% url "vote-create" problem.puid %}" class="btn btn-secondary">🗳 Rate</a>
   </div>
 {% endblock layout-content %}
