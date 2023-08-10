@@ -427,10 +427,11 @@ def init():
         UserFactory, args.stu_num, groups=(verified_group,)
     )
 
-    # assistants
+    verified_group.user_set.set([user.pk for user in users])  # type: ignore
+
+    # assistants - technically O(n) but only 5 by default
     print(f"Creating {args.assistant_num} assistants")
-    assistant_users: list[User] = fast_bulk_create(
-        UserFactory,
+    assistant_users: list[User] = UserFactory.create_batch(
         args.assistant_num,
         groups=(verified_group, staff_group),
         is_staff=True,
