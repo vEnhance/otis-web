@@ -117,6 +117,9 @@
         <br />
         <a href="{% url 'currshow' student.pk %}"
            class="text-white btn btn-success">Open selection form</a>
+        <br />
+        Note that these initial 15-20 units are <b>just a plan</b>.
+        They can be easily edited later, and isn't a commitment.
       </li>
       <li>
         Once you are happy with your selection, you may
@@ -128,37 +131,35 @@
         </form>
         <br />
         <i>Warning:</i> once you click this link,
-        your decision is complete and you cannot directly
-        make further changes.
+        your decision is complete and you cannot directly make further changes.
         However, the <b>unit petition</b> system (linked below) becomes enabled,
         and you can request changes there.
+        Moreover, the <b>first three</b> of the units above will be unlocked.
       </li>
     </ol>
     <hr />
   {% else %}
-    {% with profile=request.user|getprofile %}
-      <div class="greeting">
-        {% if profile.show_bars %}
-          <h1>
-            Level {{ level_number }} —
-            <a href="{% url 'stats' student.pk %}">🏅{{ level_name }}</a>
-          </h1>
-          <div class="container">
-            <div class="row">
-              {% include "rpg/meters/small.html" with meter=meters.clubs %}
-              {% include "rpg/meters/small.html" with meter=meters.hearts %}
-              {% include "rpg/meters/small.html" with meter=meters.spades %}
-              {% include "rpg/meters/small.html" with meter=meters.diamonds %}
-            </div>
+    <div class="greeting">
+      {% if request.user|getconfig:"show_bars" %}
+        <h1>
+          Level {{ level_number }} —
+          <a href="{% url 'stats' student.pk %}">🏅{{ level_name }}</a>
+        </h1>
+        <div class="container">
+          <div class="row">
+            {% include "rpg/meters/small.html" with meter=meters.clubs %}
+            {% include "rpg/meters/small.html" with meter=meters.hearts %}
+            {% include "rpg/meters/small.html" with meter=meters.spades %}
+            {% include "rpg/meters/small.html" with meter=meters.diamonds %}
           </div>
-        {% else %}
-          <h1>Welcome back</h1>
-          <p>
-            You are logged in as <code>{{ request.user.username }}</code>.
-          </p>
-        {% endif %}
-      </div>
-    {% endwith %}
+        </div>
+      {% else %}
+        <h1>Welcome back</h1>
+        <p>
+          You are logged in as <code>{{ request.user.username }}</code>.
+        </p>
+      {% endif %}
+    </div>
   {% endif %}
   <div class="text-center">
     <a href="{% url 'stats' student.pk %}"

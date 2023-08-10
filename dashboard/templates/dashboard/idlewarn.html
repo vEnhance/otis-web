@@ -3,8 +3,7 @@
 {% load otis_extras %}
 {% block layout-content %}
   <p>
-    This is <i>Idle-Warn</i>,
-    where you can find a list of students
+    This is <i>Idle-Warn</i>, where you can find a list of students
     who have yet to submit the first problem set,
     or have not submitted a problem set for a while.
     Be gentle! Don't be the bad guy.
@@ -27,15 +26,21 @@
             <td>
               <a title="{{ student.name }}"
                  href="{% url "portal" student.pk %}"
-                 class="tooltip-link">{{ student.user.email }}</a>
+                 class="tooltip-link">
+                {% if student.user.email|length > 24 %}
+                  <small>{{ student.user.email }}</small>
+                {% else %}
+                  {{ student.user.email }}
+                {% endif %}
+              </a>
             </td>
             {% if student.latest_pset %}
-              <td class="text-end">{{ row.days_since_last_pset|floatformat:2 }} days</td>
+              <td class="text-end">{{ row.days_since_last_pset|floatformat:2 }}d</td>
             {% else %}
               <td class="text-end">∞</td>
             {% endif %}
             {% if row.days_since_last_seen < 1000 %}
-              <td class="text-end">{{ row.days_since_last_seen|floatformat:2 }} days</td>
+              <td class="text-end">{{ row.days_since_last_seen|floatformat:2 }}d</td>
             {% else %}
               <td class="text-end">∞</td>
             {% endif %}

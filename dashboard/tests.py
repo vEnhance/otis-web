@@ -649,7 +649,7 @@ class TestList(EvanTestCase):
         self.assertHas(resp, "Idle-warn")
         self.assertHas(resp, "Lv. 38")
         self.assertHas(resp, alice.user.email)
-        self.assertHas(resp, "28.00 days")
+        self.assertHas(resp, "28.00d")
 
     def test_download_list(self):
         semester = SemesterFactory.create()

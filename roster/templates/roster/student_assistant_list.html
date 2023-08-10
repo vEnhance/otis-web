@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% load static %}
 {% block title %}
   Instructor list
 {% endblock title %}
@@ -21,6 +22,8 @@
   <p>
     To link additional students to yourself, use the
     <a href="{% url "link-assistant" %}">link student</a> form.
+    See <a href="{% static 'instructor-expectations.pdf' %}">instructor expectations</a>
+    for details.
   </p>
   <hr />
   <h1>List of instructors</h1>

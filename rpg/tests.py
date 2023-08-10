@@ -1,5 +1,3 @@
-from django.conf import settings
-from django.db.models.query import QuerySet
 from django.utils import timezone
 
 from core.factories import GroupFactory, UnitFactory, UserFactory
@@ -21,8 +19,7 @@ from rpg.levelsys import (  # NOQA
     get_level_info,
     get_student_rows,
 )
-from rpg.models import Achievement, AchievementUnlock
-from rpg.views import get_achievement_checksum
+from rpg.models import AchievementUnlock
 
 utc = timezone.utc
 
@@ -390,35 +387,6 @@ class TestAchievements(EvanTestCase):
 
         self.assertEqual(AchievementUnlock.objects.filter(user=alice.user).count(), 3)
         self.login(bob.user)
-
-        wrong_checksum = get_achievement_checksum(
-            alice.user.pk, 2, settings.CERT_HASH_KEY
-        )
-        self.assertGet40X("achievements-certify", alice.user.pk, wrong_checksum)
-        checksum = get_achievement_checksum(alice.user.pk, 3, settings.CERT_HASH_KEY)
-
-        resp = self.assertGet20X("achievements-certify", alice.user.pk, checksum)
-        queryset: QuerySet[Achievement] = resp.context["achievement_list"]
-        self.assertEqual(queryset.count(), 4)
-
-        self.assertEqual(getattr(queryset.get(pk=a1.pk), "num_found"), 12)
-        self.assertEqual(getattr(queryset.get(pk=a1.pk), "obtained"), True)
-        self.assertEqual(getattr(queryset.get(pk=a1.pk), "viewed_obtained"), True)
-
-        self.assertEqual(getattr(queryset.get(pk=a2.pk), "num_found"), 21)
-        self.assertEqual(getattr(queryset.get(pk=a2.pk), "obtained"), False)
-        self.assertEqual(getattr(queryset.get(pk=a2.pk), "viewed_obtained"), True)
-
-        self.assertEqual(getattr(queryset.get(pk=a3.pk), "num_found"), 31)
-        self.assertEqual(getattr(queryset.get(pk=a3.pk), "obtained"), True)
-        self.assertEqual(getattr(queryset.get(pk=a3.pk), "viewed_obtained"), False)
-
-        self.assertEqual(getattr(queryset.get(pk=a4.pk), "num_found"), 5)
-        self.assertEqual(getattr(queryset.get(pk=a4.pk), "obtained"), False)
-        self.assertEqual(getattr(queryset.get(pk=a4.pk), "viewed_obtained"), False)
-
-        AchievementUnlockFactory.create(user=alice.user)
-        self.assertGet40X("achievements-certify", alice.user.pk, checksum)
 
 
 class TestPalace(EvanTestCase):
