@@ -63,19 +63,19 @@
               base: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/',
               callback: function(icon, options, variant) {
 
-                switch ( icon ) {
-                  case '2666': // ♦♠♥♣
-                  case '2660':      
-                  case '2665':
-                  case '2663':
-                  case '2665':
-                  case '1f570': // 🕰️㊙️🏆
-                  case '3299':
-                  case '1f3c6':
-                      return ''.concat(options.base, options.size, '/', icon, options.ext);
-                }
+                  switch (icon) {
+                      case '2666': // ♦♠♥♣
+                      case '2660':
+                      case '2665':
+                      case '2663':
+                      case '2665':
+                      case '1f570': // 🕰️㊙️🏆
+                      case '3299':
+                      case '1f3c6':
+                          return ''.concat(options.base, options.size, '/', icon, options.ext);
+                  }
 
-                return false;
+                  return false;
               }
           });
       </script>
