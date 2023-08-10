@@ -29,11 +29,12 @@
     which is prettier but less informative.
   </p>
   <hr />
-  {% regroup object_list by get_subject_display as grouped_unit_list %}
-  {% for subject, item_list in grouped_unit_list %}
+  {% regroup units by group as unitgroups_g_list %}
+  {% regroup unitgroups_g_list by grouper.get_subject_display as subject_g_list %}
+  {% for subject, groups_g_list in subject_g_list %}
     <h2>{{ subject }}</h2>
     <div class="list-group">
-      {% for unitgroup in item_list %}
+      {% for unitgroup, units in groups_g_list %}
         <div class="list-group-item container">
           <div class="row">
             <div class="col-3">
@@ -44,30 +45,31 @@
               {% endif %}
             </div>
             <div class="col-9">
-              <b class="text-info">
-                <a href="{% url "wiki-unitgroup" unitgroup.pk %}">{{ unitgroup.name }}</a>
-              </b>
-              {% if unitgroup.has_pset %}
-                <b class="text-success">
-                  (✓)
-                </b>
-              {% endif %}
-              <span class="text-dark">— {{ unitgroup.get_subject_short_display }}:
-                {% for unit in unitgroup.unit_set.all %}
-                  {% if forloop.last %}
-                    {{ unit.code }}
+              <h4>
+                {% if units.0.has_pset_for_any_unit %}
+                  <a href="{% url "wiki-unitgroup" unitgroup.pk %}"><span class="text-success">{{ unit.code }}{{ unitgroup.name }}</span></a>
+                {% else %}
+                  <a href="{% url "wiki-unitgroup" unitgroup.pk %}">{{ unitgroup.name }}</a>
+                {% endif %}
+              </h4>
+              <div>
+                {{ unitgroup.get_subject_short_display }}:
+                {% for unit in units %}
+                  {% if unit.has_pset %}
+                    <span class="text-success">{{ unit.code }}<sup>✓</sup></span>
                   {% else %}
-                    {{ unit.code }},
+                    <b class="text-dark">{{ unit.code }}</b>
                   {% endif %}
                 {% endfor %}
-              </span>
+              </div>
               {% if unitgroup.artist_name %}
                 <p class="fst-italic fw-lighter text-success">Art contributed by {{ unitgroup.artist_name }}.</p>
               {% endif %}
               <p class="text-secondary">{{ unitgroup.description }}</p>
               <p class="text-primary">
-                Completed by {{ unitgroup.num_psets }}
-                student{{ unitgroup.num_psets|pluralize }}.
+                {{ unit }}
+                Completed by {{ units.0.num_psets_in_group }}
+                student{{ units.0.num_psets_in_group|pluralize }}.
               </p>
             </div>
           </div>
