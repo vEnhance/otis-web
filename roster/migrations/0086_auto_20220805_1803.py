@@ -8,13 +8,11 @@ def gender_update(apps, scheme_editor):
     Regs.objects.filter(gender="").update(gender="U")
 
 
-def do_nothing(apps, scheme_editor):
-    pass
-
-
 class Migration(migrations.Migration):
     dependencies = [
         ("roster", "0085_alter_studentregistration_gender_and_more"),
     ]
 
-    operations = [migrations.RunPython(gender_update, do_nothing)]
+    operations = [
+        migrations.RunPython(gender_update, migrations.RunPython.noop, elidable=True)
+    ]

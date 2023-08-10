@@ -24,10 +24,6 @@ def unlock_stuff(apps, scheme_editor):
         student.unlocked_units.add(*to_unlock)
 
 
-def do_nothing(apps, scheme_editor):
-    pass
-
-
 class Migration(migrations.Migration):
     dependencies = [
         ("roster", "0038_auto_20200428_0839"),
@@ -35,7 +31,9 @@ class Migration(migrations.Migration):
         ("dashboard", "0014_semesterdownloadfile"),
     ]
 
-    operations = [migrations.RunPython(unlock_stuff, do_nothing)]
+    operations = [
+        migrations.RunPython(unlock_stuff, migrations.RunPython.noop, elidable=True)
+    ]
 
 
 # vim: expandtab

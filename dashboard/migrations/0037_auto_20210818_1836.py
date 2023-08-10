@@ -19,4 +19,6 @@ class Migration(migrations.Migration):
         ("dashboard", "0036_achievementunlock"),
     ]
 
-    operations = [migrations.RunPython(make_achievement, migrations.RunPython.noop)]
+    operations = [
+        migrations.RunPython(make_achievement, migrations.RunPython.noop, elidable=True)
+    ]

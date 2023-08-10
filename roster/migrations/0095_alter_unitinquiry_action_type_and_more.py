@@ -67,5 +67,5 @@ class Migration(migrations.Migration):
                 max_length=10,
             ),
         ),
-        migrations.RunPython(update_fields, revert_fields),
+        migrations.RunPython(update_fields, revert_fields, elidable=True),
     ]

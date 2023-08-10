@@ -45,6 +45,7 @@ class Migration(migrations.Migration):
         migrations.RunPython(
             set_status,
             unset_status,
+            elidable=True,
         ),
         migrations.RemoveField(
             model_name="problemsuggestion",

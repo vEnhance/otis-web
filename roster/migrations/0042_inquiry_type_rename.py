@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
         ("roster", "0041_auto_20200428_0950"),
     ]
 
-    operations = [migrations.RunPython(change_to_unlock, change_to_add)]
+    operations = [migrations.RunPython(change_to_unlock, change_to_add, elidable=True)]
 
 
 # vim: expandtab

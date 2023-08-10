@@ -9,13 +9,11 @@ def remove_winter(apps, scheme_editor):
     Student.objects.filter(track="BW").update(track="B")
 
 
-def do_nothing(apps, scheme_editor):
-    pass
-
-
 class Migration(migrations.Migration):
     dependencies = [
         ("roster", "0047_auto_20201114_1551"),
     ]
 
-    operations = [migrations.RunPython(remove_winter, do_nothing)]
+    operations = [
+        migrations.RunPython(remove_winter, migrations.RunPython.noop, elidable=True)
+    ]

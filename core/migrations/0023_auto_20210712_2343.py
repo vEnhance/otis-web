@@ -37,5 +37,6 @@ class Migration(migrations.Migration):
         migrations.RunPython(
             code=set_slug,
             reverse_code=migrations.RunPython.noop,
+            elidable=True,
         ),
     ]

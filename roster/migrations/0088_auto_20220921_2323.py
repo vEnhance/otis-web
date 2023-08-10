@@ -24,4 +24,8 @@ class Migration(migrations.Migration):
         ("roster", "0087_student_reg"),
     ]
 
-    operations = [migrations.RunPython(link_student_regforms, unlink_student_regforms)]
+    operations = [
+        migrations.RunPython(
+            link_student_regforms, unlink_student_regforms, elidable=True
+        )
+    ]

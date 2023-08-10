@@ -32,6 +32,8 @@ class Migration(migrations.Migration):
             preserve_default=False,
         ),
         migrations.RunPython(
-            set_invoice_created_at_by_student_reg, migrations.RunPython.noop
+            set_invoice_created_at_by_student_reg,
+            migrations.RunPython.noop,
+            elidable=True,
         ),
     ]

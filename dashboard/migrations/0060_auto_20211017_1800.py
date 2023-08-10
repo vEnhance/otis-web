@@ -14,4 +14,8 @@ class Migration(migrations.Migration):
     dependencies = [
         ("dashboard", "0059_problemsuggestion_user"),
     ]
-    operations = [migrations.RunPython(refactor_suggestion, migrations.RunPython.noop)]
+    operations = [
+        migrations.RunPython(
+            refactor_suggestion, migrations.RunPython.noop, elidable=True
+        )
+    ]

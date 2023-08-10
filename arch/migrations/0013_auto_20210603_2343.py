@@ -249,13 +249,11 @@ def set_puid(apps, scheme_editor):
         p.save()
 
 
-def do_nothing(apps, scheme_editor):
-    pass
-
-
 class Migration(migrations.Migration):
     dependencies = [
         ("arch", "0012_auto_20210603_2343"),
     ]
 
-    operations = [migrations.RunPython(set_puid, do_nothing)]
+    operations = [
+        migrations.RunPython(set_puid, migrations.RunPython.noop, elidable=True)
+    ]

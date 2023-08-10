@@ -58,5 +58,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(convert_bools_to_status, convert_status_to_bools)
+        migrations.RunPython(
+            convert_bools_to_status, convert_status_to_bools, elidable=True
+        )
     ]
