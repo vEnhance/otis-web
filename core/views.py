@@ -20,7 +20,6 @@ from django.views.generic.edit import UpdateView
 from django.views.generic.list import ListView
 from sql_util.utils import Exists
 
-from arch.views import ContextType
 from core.models import UserProfile
 from dashboard.models import PSet, UploadedFile
 from otisweb.utils import AuthHttpRequest
