@@ -23,7 +23,7 @@
     </li>
     <li>
       <span style="background-color: #ccccee;"><b>PURPLE</b></span> diamonds
-      are those that you don't have. Additionally, they are created by other 
+      are those that you don't have. Additionally, they are created by other
       students and can involve unorthodox steps.
     </li>
   </ul>
@@ -65,7 +65,6 @@
           <span class="float-end">❓</span>
           <p>Nobody has found this one yet!</p>
         {% endif %}
-        
         {% if request.user.is_staff or achievement.obtained %}
           <p class="fst-italic">{{ achievement.description }}</p>
         {% else %}
