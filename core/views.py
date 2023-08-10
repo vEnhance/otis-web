@@ -1,4 +1,5 @@
 from typing import Any, Optional
+from arch.views import ContextType
 
 from braces.views import LoginRequiredMixin, SuperuserRequiredMixin
 from django.contrib.auth.decorators import login_required
@@ -46,6 +47,7 @@ class UnitGroupListView(ListView[UnitGroup]):
         queryset = queryset.order_by("subject", "name")
         queryset = queryset.annotate(num_psets=Count("unit__pset"))
 
+        # redundant but whatever
         if not isinstance(self.request.user, AnonymousUser):
             queryset = queryset.annotate(
                 has_pset=Exists(
@@ -53,9 +55,41 @@ class UnitGroupListView(ListView[UnitGroup]):
                     filter=Q(student__user=self.request.user, status="A"),
                 )
             )
+
+            units_qs = Unit.objects.annotate(
+                has_pset=Exists(
+                    "pset",
+                    filter=Q(student__user=self.request.user, status="A"),
+                )
+            )
+            
+            unit_groups: dict[str, list[Unit]] = dict()
+
+            for group in queryset:
+                unit_groups[group.pk] = list(units_qs.filter(group=group))
+
+            print(unit_groups)
+
+            self.unit_groups = unit_groups
+
+
         queryset = queryset.prefetch_related("unit_set")
 
         return queryset
+    
+    def get_context_data(self, **kwargs: Any) -> ContextType:
+        context = super().get_context_data(**kwargs)
+
+        context['unit_dict'] = self.unit_groups
+
+        return context
+    
+    def add_stats():
+        
+
+
+
+        pass
 
 
 class PublicCatalog(ListView[UnitGroup]):

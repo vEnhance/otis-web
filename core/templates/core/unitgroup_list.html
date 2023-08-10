@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% load otis_extras %}
 {% block title %}
   Catalog
 {% endblock title %}
@@ -53,13 +54,23 @@
                 </b>
               {% endif %}
               <span class="text-dark">— {{ unitgroup.get_subject_short_display }}:
-                {% for unit in unitgroup.unit_set.all %}
-                  {% if forloop.last %}
-                    {{ unit.code }}
-                  {% else %}
-                    {{ unit.code }},
-                  {% endif %}
-                {% endfor %}
+                {% if unitgroup.has_pset %}
+                  {% for unit in unit_dict|dictitem:unitgroup.pk %}
+                    {% if unit.has_pset %}
+                      <b class="text-success">
+                        {{ unit.code }}{% if not forloop.last %},{% endif %}
+                      </b>
+                    {% else %}
+                      {{ unit.code }}{% if not forloop.last %},{% endif %}
+                    {% endif %}
+
+                  {% endfor %}
+
+                {% else%}
+                  {% for unit in unitgroup.unit_set.all %}
+                    {{ unit.code }}{% if not forloop.last %},{% endif %}
+                  {% endfor %}
+                {% endif %}
               </span>
               {% if unitgroup.artist_name %}
                 <p class="fst-italic fw-lighter text-success">Art contributed by {{ unitgroup.artist_name }}.</p>
