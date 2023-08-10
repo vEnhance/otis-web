@@ -1,5 +1,4 @@
 from typing import Any, Optional
-from arch.views import ContextType
 
 from braces.views import LoginRequiredMixin, SuperuserRequiredMixin
 from django.contrib.auth.decorators import login_required
@@ -21,6 +20,7 @@ from django.views.generic.edit import UpdateView
 from django.views.generic.list import ListView
 from sql_util.utils import Exists
 
+from arch.views import ContextType
 from core.models import UserProfile
 from dashboard.models import PSet, UploadedFile
 from otisweb.utils import AuthHttpRequest
@@ -62,7 +62,7 @@ class UnitGroupListView(ListView[UnitGroup]):
                     filter=Q(student__user=self.request.user, status="A"),
                 )
             )
-            
+
             unit_groups: dict[str, list[Unit]] = dict()
 
             for group in queryset:
@@ -70,15 +70,15 @@ class UnitGroupListView(ListView[UnitGroup]):
 
             self.unit_groups = unit_groups
 
-
         queryset = queryset.prefetch_related("unit_set")
 
         return queryset
-    
+
     def get_context_data(self, **kwargs: Any) -> ContextType:
         context = super().get_context_data(**kwargs)
 
-        context['unit_dict'] = self.unit_groups
+        if not isinstance(self.request.user, AnonymousUser):
+            context["unit_dict"] = self.unit_groups
 
         return context
 

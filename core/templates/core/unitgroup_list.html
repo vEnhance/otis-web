@@ -57,14 +57,26 @@
                 {% if unit_dict and unitgroup.has_pset %}
                   {% for unit in unit_dict|dictitem:unitgroup.pk %}
                     {% if unit.has_pset %}
-                      <b class="text-primary">{{ unit.code }}</b>{% if not forloop.last %},{% endif %}
+                      {% if forloop.last %}
+                        <b class="text-primary">{{ unit.code }}</b>,
+                      {% else %}
+                        <b class="text-primary">{{ unit.code }}</b>
+                      {% endif %}
                     {% else %}
-                      {{ unit.code }}{% if not forloop.last %},{% endif %}
+                      {% if forloop.last %}
+                        {{ unit.code }},
+                      {% else %}
+                        {{ unit.code }}
+                      {% endif %}
                     {% endif %}
                   {% endfor %}
-                {% else%}
+                {% else %}
                   {% for unit in unitgroup.unit_set.all %}
-                    {{ unit.code }}{% if not forloop.last %},{% endif %}
+                    {% if forloop.last %}
+                      {{ unit.code }},
+                    {% else %}
+                      {{ unit.code }}
+                    {% endif %}
                   {% endfor %}
                 {% endif %}
               </span>
