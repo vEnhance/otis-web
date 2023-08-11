@@ -269,19 +269,8 @@
   </p>
   {% if not student.newborn and semester.active and student.enabled %}
     <p>
-      You can request more units using the yellow
+      You can request more units via the
       <a href="#petitions">"Manage Units" button below</a>.
-    </p>
-  {% endif %}
-  <div class="text-center">
-    {% if request.user.is_staff %}
-      <a href="{% url 'advance' student.pk %}" class="btn btn-dark">Edit units</a>
-    {% endif %}
-  </div>
-  {% if bonus_levels and not student.newborn %}
-    <p>
-      You are sufficiently high level to
-      <a href="{% url "bonus-level-request" student.pk %}">request secret units</a>.
     </p>
   {% endif %}
   {% include "dashboard/curriculum_list.html" %}
