@@ -134,7 +134,8 @@
         your decision is complete and you cannot directly make further changes.
         However, the <b>unit petition</b> system (linked below) becomes enabled,
         and you can request changes there.
-        Moreover, the <b>first three</b> of the units above will be unlocked.
+        Moreover, the <b>first three</b> of the units above will be unlocked to start.
+        Use the "Manage Units" button to request more (up to 9 unlocked at once).
       </li>
     </ol>
     <hr />
@@ -259,7 +260,6 @@
     {% endfor %}
   </div>
   <h2>Your units</h2>
-  {% include "dashboard/curriculum_list.html" %}
   <p>
     After submitting a unit, it's marked ⏳
     and <a href="{% url "pset-queue-listing" %}">queued</a>;
@@ -267,21 +267,50 @@
     (you can access solutions in the meantime).
     Units to work on are marked 🌠.
   </p>
+  {% if not student.newborn and semester.active and student.enabled %}
+    <p>
+      You can request more units using the yellow
+      <a href="#petitions">"Manage Units" button below</a>.
+    </p>
+  {% endif %}
   <div class="text-center">
-    {% if not student.newborn and semester.active and student.enabled %}
-      <a href="{% url 'inquiry' student.pk %}" class="btn btn-warning">Manage units</a>
-    {% endif %}
     {% if request.user.is_staff %}
       <a href="{% url 'advance' student.pk %}" class="btn btn-dark">Edit units</a>
     {% endif %}
   </div>
-  {% if bonus_levels %}
+  {% if bonus_levels and not student.newborn %}
     <p>
-      You are also sufficiently high level to
+      You are sufficiently high level to
       <a href="{% url "bonus-level-request" student.pk %}">request secret units</a>.
     </p>
   {% endif %}
+  {% include "dashboard/curriculum_list.html" %}
   <table width="100%">
+    <tr>
+      <td valign="top" width="50%">
+        <h3>Discord</h3>
+        {% if semester.social_url %}
+          <a href="{{ semester.social_url }}" class="btn btn-info" role="button">Open Discord</a>
+        {% else %}
+          Nothing here yet!
+        {% endif %}
+      </td>
+      <td valign="top" width="50%">
+        <h3 id="petitions">Petitions</h3>
+        {% if not student.newborn and semester.active and student.enabled %}
+          <a href="{% url 'inquiry' student.pk %}" class="btn btn-warning">Manage units</a>
+        {% endif %}
+        {% if request.user.is_staff %}
+          <a href="{% url 'advance' student.pk %}" class="btn btn-dark">Edit units</a>
+        {% endif %}
+        {% if bonus_levels %}
+          <p>
+            You are also sufficiently high level to
+            <a href="{% url "bonus-level-request" student.pk %}">request secret units</a>.
+          </p>
+        {% endif %}
+      </td>
+    </tr>
     <tr>
       <td valign="top" width="50%">
         <h3>Academic</h3>
@@ -335,12 +364,6 @@
           </li>
         </ul>
       </td>
-      <h3>Discord</h3>
-      {% if semester.social_url %}
-        <a href="{{ semester.social_url }}" class="btn btn-info" role="button">Open Discord</a>
-      {% else %}
-        Nothing here yet!
-      {% endif %}
     </tr>
   </table>
   <hr />
