@@ -87,7 +87,7 @@ class TestLevelSystem(EvanTestCase):
         self.assertHas(resp, "Level 38")
         self.assertHas(resp, "520♣")
         self.assertHas(resp, "84.0♥")
-        self.assertHas(resp, "11◆")
+        self.assertHas(resp, "11♦")
         self.assertHas(resp, "19♠")
 
     def test_stats_page(self):
@@ -103,7 +103,7 @@ class TestLevelSystem(EvanTestCase):
         self.assertHas(resp, "Level 38")
         self.assertHas(resp, "520♣")
         self.assertHas(resp, "84.0♥")
-        self.assertHas(resp, "11◆")
+        self.assertHas(resp, "11♦")
         self.assertHas(resp, "19♠")
         self.assertHas(resp, "Feel the fours")
         self.assertHas(resp, "Not problem six")

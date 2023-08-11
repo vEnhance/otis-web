@@ -283,7 +283,7 @@ class UserProfile(models.Model):
     )
     use_twemoji = models.BooleanField(
         verbose_name="Use Twemoji",
-        help_text="Uses Twemoji for emojis instead of system emojis.",
+        help_text="If the size of the spades emoji on meters bar is too small, enabling this feature will use twemoji to attempt to fix that.",
         default=False,
     )
     dynamic_progress = models.BooleanField(

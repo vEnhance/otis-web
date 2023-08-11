@@ -66,7 +66,7 @@ class OTISPreprocessor(markdown.preprocessors.Preprocessor):
                                 f"<tr><th>Name</th><td>{diamond.name}</td></tr>"
                             )
                             table_output.append(
-                                f"<tr><th>Value</th><td>{diamond.diamonds}◆</td></tr>"
+                                f"<tr><th>Value</th><td>{diamond.diamonds}♦</td></tr>"
                             )
                             table_output.append(
                                 f"<tr><th>Found by</th><td>{num_found}</td></tr>"

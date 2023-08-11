@@ -327,7 +327,7 @@ class DiamondUpdate(
         form.instance.creator = self.student.user
         messages.success(
             self.request,
-            f"Successfully forged diamond worth {n}◆, "
+            f"Successfully forged diamond worth {n}♦, "
             "which is your current charisma level (capped at 7).",
         )
         return super().form_valid(form)
