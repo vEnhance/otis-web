@@ -9,7 +9,7 @@ repository = "https://github.com/vEnhance/otis-web"
 
 [tool.poetry.dependencies]
 python = ">=3.10, <4.0"
-Django = "^4.1.10"
+Django = "=4.1.10"
 PyMySQL = "^1.0.2"
 Unidecode = "^1.2.0"
 crispy-bootstrap5 = "^0.7"
@@ -38,8 +38,7 @@ python-dotenv = "^1.0.0"
 setuptools = "^68.0.0"
 stripe = "^5.4.0"
 wheel = "^0.41.0"
-wiki = {git = "https://github.com/django-wiki/django-wiki.git", rev = "7981d6d"}
-bleach = {extras = ["css"], version=">=5,<6"} # manual until wiki 0.10 out
+wiki = "^0.10"
 
 [tool.poetry.group.dev.dependencies]
 # TODO: Faker: need to wait until https://github.com/joke2k/faker/pull/1662 resolves

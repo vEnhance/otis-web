@@ -132,13 +132,13 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "bleach"
-version = "5.0.1"
+version = "6.0.0"
 description = "An easy safelist-based HTML-sanitizing tool."
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "bleach-5.0.1-py3-none-any.whl", hash = "sha256:085f7f33c15bd408dd9b17a4ad77c577db66d76203e5984b1bd59baeee948b2a"},
-    {file = "bleach-5.0.1.tar.gz", hash = "sha256:0d03255c47eb9bd2f26aa9bb7f2107732e7e8fe195ca2f64709fcf3b0a4a085c"},
+    {file = "bleach-6.0.0-py3-none-any.whl", hash = "sha256:33c16e3353dbd13028ab4799a0f89a83f113405c766e9c122df8a06f5b85b3f4"},
+    {file = "bleach-6.0.0.tar.gz", hash = "sha256:1a1a85c1595e07d8db14c5f09f09e6433502c51c595970edc090551f0db99414"},
 ]
 
 [package.dependencies]
@@ -148,7 +148,6 @@ webencodings = "*"
 
 [package.extras]
 css = ["tinycss2 (>=1.1.0,<1.2)"]
-dev = ["Sphinx (==4.3.2)", "black (==22.3.0)", "build (==0.8.0)", "flake8 (==4.0.1)", "hashin (==0.17.0)", "mypy (==0.961)", "pip-tools (==6.6.2)", "pytest (==7.1.2)", "tox (==3.25.0)", "twine (==4.0.1)", "wheel (==0.37.1)"]
 
 [[package]]
 name = "cachetools"
@@ -2835,16 +2834,18 @@ test = ["pytest (>=6.0.0)", "setuptools (>=65)"]
 
 [[package]]
 name = "wiki"
-version = "0.10b1"
+version = "0.10"
 description = "A wiki system written for the Django framework."
 optional = false
 python-versions = ">=3.7"
-files = []
-develop = false
+files = [
+    {file = "wiki-0.10-py3-none-any.whl", hash = "sha256:68602143d208877c1e7012a60dee32da853847ccb517e5187a7dda08d020d3a6"},
+    {file = "wiki-0.10.tar.gz", hash = "sha256:67020e57067be4a3d7fb3b2f587b56490741e44e7de01e320b3c7bc4853638f7"},
+]
 
 [package.dependencies]
-bleach = {version = ">=5,<6", extras = ["css"]}
-django = ">=2.1,<4.2"
+bleach = {version = ">=6,<7", extras = ["css"]}
+django = ">=2.2,<4.3"
 django-mptt = ">=0.13,<0.15"
 django-nyt = ">=1.2.2"
 django-sekizai = ">=0.10"
@@ -2852,11 +2853,8 @@ markdown = ">=3.3,<3.4"
 pillow = "*"
 sorl-thumbnail = ">=12.8,<13"
 
-[package.source]
-type = "git"
-url = "https://github.com/django-wiki/django-wiki.git"
-reference = "7981d6d"
-resolved_reference = "7981d6d88a33d3853ed68464f097423ce8d5d06a"
+[package.extras]
+docs = ["bleach (>=6,<7)", "django (>=3.1.13)", "sphinx (>=6,<8)", "sphinx-rtd-theme (==1.2.0)"]
 
 [[package]]
 name = "wmctrl"
@@ -2898,4 +2896,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10, <4.0"
-content-hash = "f9adcf132c673c99bd257b38747da9f38aba372c3ff0e3588ce974a066257d9a"
+content-hash = "1bf2b65290ebc353f9424f7598c7560bf479f504d3b914f9ffb096855531e9d6"
