@@ -178,6 +178,11 @@
           <a href="{{ student.semester.social_url }}">Open Discord</a>
         </li>
       {% endif %}
+      {% if not student.newborn and semester.active and student.enabled %}
+        <li>
+          <a href="{% url 'inquiry' student.pk %}">Manage units</a>
+        </li>
+      {% endif %}
       <li>
         <a target="_blank" href="mailto:evan@evanchen.cc" rel="noreferrer">Email Evan</a>
       </li>
