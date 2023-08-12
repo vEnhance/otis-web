@@ -274,6 +274,12 @@
         <a href="#petitions">"Manage Units" button below</a>.
       </p>
     {% endif %}
+    {% if not student.newborn %}
+      <p>
+        You can hide these instructions in
+        <a href="{% url "profile" %}">user settings</a>.
+      </p>
+    {% endif %}
   {% endif %}
   {% include "dashboard/curriculum_list.html" %}
   <table width="100%">
