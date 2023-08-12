@@ -261,13 +261,13 @@
   </div>
   <h2>Your units</h2>
   {% if request.user|getconfig:"unit_description" %}
-  <p>
-    After submitting a unit, it's marked ⏳
-    and <a href="{% url "pset-queue-listing" %}">queued</a>;
-    once approved, it becomes ✅
-    (you can access solutions in the meantime).
-    Units to work on are marked 🌠.
-  </p>
+    <p>
+      After submitting a unit, it's marked ⏳
+      and <a href="{% url "pset-queue-listing" %}">queued</a>;
+      once approved, it becomes ✅
+      (you can access solutions in the meantime).
+      Units to work on are marked 🌠.
+    </p>
   {% endif %}
   {% if not student.newborn and semester.active and student.enabled %}
     <p>
