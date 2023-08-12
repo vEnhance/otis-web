@@ -291,6 +291,11 @@ class UserProfile(models.Model):
         help_text="Level meters show progression towards the next value to level up rather than a fixed max value",
         default=False,
     )
+    show_portal_instructions = models.BooleanField(
+        verbose_name="Show portal instructions",
+        help_text="Show the instruction text above the units on the home page",
+        default=True,
+    )
 
     last_seen = models.DateTimeField(
         help_text="Last time user was seen at all",
