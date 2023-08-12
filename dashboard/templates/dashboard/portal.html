@@ -260,7 +260,7 @@
     {% endfor %}
   </div>
   <h2>Your units</h2>
-  {% if request.user|getconfig:"unit_description" %}
+  {% if request.user|getconfig:"show_portal_instructions" %}
     <p>
       After submitting a unit, it's marked ⏳
       and <a href="{% url "pset-queue-listing" %}">queued</a>;
