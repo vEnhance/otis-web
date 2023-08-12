@@ -522,7 +522,7 @@ def giga_chart(request: HttpRequest, format_as: str) -> HttpResponse:
         "student__enabled",
         "-forgive_date",
         "debt",
-        "student__first_name",
+        "student__user__first_name",
     )
     timestamp = timezone.now().strftime("%Y-%m-%d-%H%M%S")
 
@@ -610,8 +610,6 @@ def giga_chart(request: HttpRequest, format_as: str) -> HttpResponse:
             content_type="text/csv",
             headers={"Content-Disposition": f'attachment; filename="{filename}"'},
         )
-    elif format_as == "plain":
-        return HttpResponse(pt.get_string(title=title))
     elif format_as == "html":
         context = {"title": title, "table": pt.get_html_string()}
         return render(request, "roster/gigachart.html", context)
