@@ -47,22 +47,23 @@ class UnitGroupListView(ListView[Unit]):
         queryset = queryset.order_by("group__subject", "group__name", "code")
         queryset = queryset.annotate(num_psets_in_group=Count("group__unit__pset"))
 
-
         if not isinstance(self.request.user, AnonymousUser):
             queryset = queryset.annotate(
                 has_pset=Exists(
                     "pset",
                     filter=Q(student__user=self.request.user, status="A"),
                 ),
-                has_pset_for_any_unit=Exists( # rather cursed
+                has_pset_for_any_unit=Exists(  # rather cursed
                     "group__unit__pset",
                     filter=Q(student__user=self.request.user, status="A"),
-                )
+                ),
             )
 
-            student = Student.objects.filter(semester__active=True, user=self.request.user).first()
+            student = Student.objects.filter(
+                semester__active=True, user=self.request.user
+            ).first()
 
-            if (student):
+            if student:
                 queryset = queryset.annotate(
                     user_unlocked=Exists(
                         "students_unlocked",
