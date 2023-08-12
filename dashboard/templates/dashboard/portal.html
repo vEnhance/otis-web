@@ -268,12 +268,12 @@
       (you can access solutions in the meantime).
       Units to work on are marked 🌠.
     </p>
-  {% if not student.newborn and semester.active and student.enabled %}
-    <p>
-      You can request more units via the
-      <a href="#petitions">"Manage Units" button below</a>.
-    </p>
-  {% endif %}
+    {% if not student.newborn and semester.active and student.enabled %}
+      <p>
+        You can request more units via the
+        <a href="#petitions">"Manage Units" button below</a>.
+      </p>
+    {% endif %}
   {% endif %}
   {% include "dashboard/curriculum_list.html" %}
   <table width="100%">
