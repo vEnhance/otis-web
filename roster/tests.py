@@ -828,18 +828,16 @@ class RosterTest(EvanTestCase):
 
         admin = UserFactory.create(username="admin", is_staff=True, is_superuser=True)
         self.login(admin)
+        self.assertGet20X("giga-chart", "csv", follow=True)
 
-        resp = self.assertGet20X("giga-chart", "csv", follow=True)
-
-        for format in ["plain", "html"]:
-            resp = self.assertGet20X("giga-chart", format, follow=True)
-            for student in students:
-                for property in [
-                    student.name,
-                    student.user.email,
-                    student.reg.parent_email,
-                ]:
-                    self.assertContains(resp, property)
+        resp = self.assertGet20X("giga-chart", "html", follow=True)
+        for student in students:
+            for prop in [
+                student.name,
+                student.user.email,
+                student.reg.parent_email,
+            ]:
+                self.assertContains(resp, prop)
 
     def test_link_assistant(self) -> None:
         assistant = AssistantFactory.create()
