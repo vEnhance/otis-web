@@ -57,6 +57,10 @@
                 {% for unit in units %}
                   {% if unit.has_pset %}
                     <span class="text-success">{{ unit.code }}<sup>✓</sup></span>
+                  {% elif unit.user_unlocked %}
+                    <span class="text-primary">{{ unit.code }}<sup>⏲</sup></span>
+                  {% elif unit.user_taking %}
+                    <span class="text-secondary">{{ unit.code }}<sup>⧖</sup></span>
                   {% else %}
                     <b class="text-dark">{{ unit.code }}</b>
                   {% endif %}
