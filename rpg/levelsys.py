@@ -179,7 +179,7 @@ def get_level_info(student: Student) -> LevelInfoDict:
     returning the findings as a typed dictionary."""
 
     psets = PSet.objects.filter(student__user=student.user, status="A", eligible=True)
-    psets = psets.order_by("upload__timestamp")
+    psets = psets.order_by("upload__created_at")
     pset_data = psets.aggregate(
         clubs_any=Sum("clubs"),
         clubs_D=Sum("clubs", filter=Q(unit__code__startswith="D")),

@@ -522,7 +522,7 @@ def giga_chart(request: HttpRequest, format_as: str) -> HttpResponse:
         "student__enabled",
         "-forgive_date",
         "debt",
-        "student__first_name",
+        "student__user__first_name",
     )
     timestamp = timezone.now().strftime("%Y-%m-%d-%H%M%S")
 
