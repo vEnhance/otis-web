@@ -121,9 +121,7 @@ def permitted(unit: Unit, request: HttpRequest, asking_solution: bool) -> bool:
         return True
     elif (
         not asking_solution
-        and Student.objects.filter(
-            user=request.user, unlocked_units=unit
-        ).exists()
+        and Student.objects.filter(user=request.user, unlocked_units=unit).exists()
     ):
         return True
     elif Student.objects.filter(

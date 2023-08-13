@@ -49,11 +49,7 @@ def get_student_by_pk(
     if not isinstance(request.user, User):
         raise PermissionDenied("Authentication is needed, how did you even get here?")
 
-    if (
-        not payment_exempt
-        and student.is_delinquent
-        and not request.user.is_staff
-    ):
+    if not payment_exempt and student.is_delinquent and not request.user.is_staff:
         raise PermissionDenied(
             "Payment needs to be processed before this page can be used"
         )

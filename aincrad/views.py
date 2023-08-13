@@ -272,10 +272,7 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
         job: Job = Job.objects.get(pk=data["pk"])
         job.progress = data["progress"]
         job.save()
-        if (
-            data["progress"] == "JOB_VFD"
-            and job.payment_preference == "PREF_INVCRD"
-        ):
+        if data["progress"] == "JOB_VFD" and job.payment_preference == "PREF_INVCRD":
             assert job.assignee is not None
             assert job.semester is not None
             try:
@@ -461,8 +458,7 @@ def arch_url_handler(action: str, data: JSONData) -> JsonResponse:
         batch_size=25,
     )
     problems_to_create: list[Problem] = [
-        Problem(puid=puid, hyperlink=hyperlink)
-        for puid, hyperlink in urls_map.items()
+        Problem(puid=puid, hyperlink=hyperlink) for puid, hyperlink in urls_map.items()
     ]
     Problem.objects.bulk_create(problems_to_create)
     return JsonResponse(
@@ -499,9 +495,7 @@ def hanabi_handler(action: str, data: JSONData) -> JsonResponse:
                     name_to_replay_id_dict[name] = replay_json["replay_id"]
 
     for replay_json in data["replays"]:
-        if all(
-            name not in eligible_players for name in replay_json["players"]
-        ):
+        if all(name not in eligible_players for name in replay_json["players"]):
             continue
         game_score = replay_json["game_score"]
         replay = HanabiReplay(

@@ -38,7 +38,9 @@ class CurriculumForm(forms.Form):
 
         super().__init__(*args, **kwargs)
 
-        for n, (name, group_iter) in enumerate(itertools.groupby(units, lambda u: u.group.name)):
+        for n, (name, group_iter) in enumerate(
+            itertools.groupby(units, lambda u: u.group.name)
+        ):
             group = list(group_iter)
             field_name = f"group-{str(n)}"
             chosen_units = [unit for unit in group if unit.pk in original]
@@ -82,18 +84,14 @@ class AdvanceForm(forms.Form):
         )
         self.fields["units_to_add"] = AdvanceUnitChoiceField(
             label="Add",
-            queryset=Unit.objects.exclude(
-                pk__in=student.curriculum.values_list("pk")
-            )
+            queryset=Unit.objects.exclude(pk__in=student.curriculum.values_list("pk"))
             if not args
             else Unit.objects.all(),
             help_text="Units to add without unlocking.",
         )
         self.fields["units_to_lock"] = AdvanceUnitChoiceField(
             label="Lock",
-            queryset=student.unlocked_units.all()
-            if not args
-            else Unit.objects.all(),
+            queryset=student.unlocked_units.all() if not args else Unit.objects.all(),
             help_text="Units to remove from unlocked set.",
         )
         self.fields["units_to_drop"] = AdvanceUnitChoiceField(

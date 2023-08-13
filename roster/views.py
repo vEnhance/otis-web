@@ -221,12 +221,8 @@ def master_schedule(request: HttpRequest) -> HttpResponse:
         # e.g. d = {'name': Student, 'curriculum': 30}
         unit_to_student_dicts[d["curriculum"]].append(
             {
-                "short_name": d["user__first_name"]
-                + " "
-                + d["user__last_name"][:1],
-                "full_name": d["user__first_name"]
-                + " "
-                + d["user__last_name"],
+                "short_name": d["user__first_name"] + " " + d["user__last_name"][:1],
+                "full_name": d["user__first_name"] + " " + d["user__last_name"],
                 "pk": d["pk"],
             }
         )

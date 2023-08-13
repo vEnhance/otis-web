@@ -10,8 +10,7 @@ def make_achievement(apps, schema_editor):
     to_create = []
     for s in students:
         to_create.extend(
-            AchievementUnlock(user=s.user, achievement=a)
-            for a in s.achievements.all()
+            AchievementUnlock(user=s.user, achievement=a) for a in s.achievements.all()
         )
     AchievementUnlock.objects.bulk_create(to_create)
 

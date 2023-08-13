@@ -137,8 +137,7 @@ def create_sem_independent(users: list[User]):
     for problem in problems:
         hint_num = randint_low(0, 10)
         hint_seq_data.extend(
-            (problem, percent)
-            for percent in random.sample(range(0, 101), hint_num)
+            (problem, percent) for percent in random.sample(range(0, 101), hint_num)
         )
     fast_bulk_create(
         HintFactory,
