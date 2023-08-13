@@ -41,11 +41,13 @@ Video tutorial: https://youtu.be/W27XcqeXp20
 5. Once you have `poetry`, hit `poetry install`.
    This will automatically create a
    Python virtual environment and install stuff inside it.
-
    (If you are an expert familiar with Python virtual environments
    and want to use your own rather than Poetry's auto-created one,
-   then you can do so by activating an environment before running
-   `poetry install`.)
+   then activate said environment before running `poetry install`.)
+
+   (You may have to separately install certain packages for
+   [mysqlclient](https://github.com/PyMySQL/mysqlclient#install)
+   on certain systems.)
 
 6. If it isn't already activated,
    [activate the Python virtual environment][activate]
