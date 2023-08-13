@@ -193,7 +193,15 @@ JOB_VENUEQ_INIT_KEYS = (
 
 
 def venueq_handler(action: str, data: JSONData) -> JsonResponse:
-    if action == "grade_problem_set":
+    if action == "accept_inquiries":
+        for inquiry in UnitInquiry.objects.filter(
+            status="INQ_NEW",
+            student__semester__active=True,
+            student__legit=True,
+        ):
+            inquiry.run_accept()
+        return JsonResponse({"result": "success"}, status=200)
+    elif action == "grade_problem_set":
         # mark problem set as done
         pset = get_object_or_404(PSet, pk=data["pk"])
         original_status = pset.status
@@ -216,53 +224,11 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
             # remove the old unit since it's done now
             pset.student.unlocked_units.remove(pset.unit)
         return JsonResponse({"result": "success"}, status=200)
-    elif action == "accept_inquiries":
-        for inquiry in UnitInquiry.objects.filter(
-            status="INQ_NEW",
-            student__semester__active=True,
-            student__legit=True,
-        ):
-            inquiry.run_accept()
-        return JsonResponse({"result": "success"}, status=200)
-    elif action == "mark_suggestion":
-        suggestion = get_object_or_404(ProblemSuggestion, pk=data["pk"])
-        suggestion.status = data["status"]
-        suggestion.eligible = data["eligible"]
-        if "staff_comments" in data:
-            if suggestion.staff_comments:
-                suggestion.staff_comments += "\n\n" + "-" * 40 + "\n\n"
-            suggestion.staff_comments += data["staff_comments"]
-        suggestion.save()
-        return JsonResponse({"result": "success"}, status=200)
-    elif action == "triage_job":
-        if data["progress"] != "JOB_SUB":
-            job: Job = Job.objects.get(pk=data["pk"])
-            job.progress = data["progress"]
-            job.save()
-            if (
-                data["progress"] == "JOB_VFD"
-                and job.payment_preference == "PREF_INVCRD"
-            ):
-                assert job.assignee is not None
-                assert job.semester is not None
-                try:
-                    invoice = Invoice.objects.get(
-                        student__semester=job.semester, student__user=job.assignee.user
-                    )
-                except Invoice.DoesNotExist:
-                    logging.warn(
-                        f"Could not get invoice for {job.assignee.user} and {job.semester}"
-                    )
-                else:
-                    invoice.credits += job.usd_bounty
-                    invoice.save()
-            return JsonResponse({"result": "success", "changed": True}, status=200)
-        else:
-            return JsonResponse({"result": "success", "changed": False}, status=200)
     elif action == "init":
-        output_data: dict[str, Any] = {}
-        output_data["timestamp"] = str(timezone.now())
-        output_data["_name"] = "Root"
+        output_data: dict[str, Any] = {
+            "timestamp": str(timezone.now()),
+            "_name": "Root",
+        }
         output_data["_children"] = [
             {
                 "_name": "Problem sets",
@@ -290,6 +256,40 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
             },
         ]
         return JsonResponse(output_data, status=200)
+    elif action == "mark_suggestion":
+        suggestion = get_object_or_404(ProblemSuggestion, pk=data["pk"])
+        suggestion.status = data["status"]
+        suggestion.eligible = data["eligible"]
+        if "staff_comments" in data:
+            if suggestion.staff_comments:
+                suggestion.staff_comments += "\n\n" + "-" * 40 + "\n\n"
+            suggestion.staff_comments += data["staff_comments"]
+        suggestion.save()
+        return JsonResponse({"result": "success"}, status=200)
+    elif action == "triage_job":
+        if data["progress"] == "JOB_SUB":
+            return JsonResponse({"result": "success", "changed": False}, status=200)
+        job: Job = Job.objects.get(pk=data["pk"])
+        job.progress = data["progress"]
+        job.save()
+        if (
+            data["progress"] == "JOB_VFD"
+            and job.payment_preference == "PREF_INVCRD"
+        ):
+            assert job.assignee is not None
+            assert job.semester is not None
+            try:
+                invoice = Invoice.objects.get(
+                    student__semester=job.semester, student__user=job.assignee.user
+                )
+            except Invoice.DoesNotExist:
+                logging.warn(
+                    f"Could not get invoice for {job.assignee.user} and {job.semester}"
+                )
+            else:
+                invoice.credits += job.usd_bounty
+                invoice.save()
+        return JsonResponse({"result": "success", "changed": True}, status=200)
     else:
         raise Exception("No such command")
 
@@ -299,7 +299,7 @@ def discord_handler(action: str, data: JSONData) -> JsonResponse:
     # check whether social account exists
     uid = data["uid"]
     queryset = SocialAccount.objects.filter(uid=uid)
-    if not (n := len(queryset)) == 1:
+    if (n := len(queryset)) != 1:
         return JsonResponse({"result": "nonexistent", "length": n})
 
     social = queryset.get()  # get the social account for this; should never 404
@@ -325,7 +325,7 @@ def discord_handler(action: str, data: JSONData) -> JsonResponse:
                 "active": active,
             }
         )
-    elif student is None and regform is not None:
+    elif regform is not None:
         return JsonResponse({"result": "pending"})
     else:
         return JsonResponse({"result": "unregistered"})
@@ -460,10 +460,10 @@ def arch_url_handler(action: str, data: JSONData) -> JsonResponse:
         fields=("hyperlink",),
         batch_size=25,
     )
-    # create new problem objects for newfound problems
-    problems_to_create: list[Problem] = []
-    for puid, hyperlink in urls_map.items():
-        problems_to_create.append(Problem(puid=puid, hyperlink=hyperlink))
+    problems_to_create: list[Problem] = [
+        Problem(puid=puid, hyperlink=hyperlink)
+        for puid, hyperlink in urls_map.items()
+    ]
     Problem.objects.bulk_create(problems_to_create)
     return JsonResponse(
         {
@@ -499,7 +499,9 @@ def hanabi_handler(action: str, data: JSONData) -> JsonResponse:
                     name_to_replay_id_dict[name] = replay_json["replay_id"]
 
     for replay_json in data["replays"]:
-        if not any(name in eligible_players for name in replay_json["players"]):
+        if all(
+            name not in eligible_players for name in replay_json["players"]
+        ):
             continue
         game_score = replay_json["game_score"]
         replay = HanabiReplay(
@@ -511,7 +513,7 @@ def hanabi_handler(action: str, data: JSONData) -> JsonResponse:
         replay.spades_score = replay.get_base_spades()
 
         replays.append(replay)
-    assert len(replays) > 0
+    assert replays
 
     # Compute the max score
     max_score = max(r.game_score for r in replays)
@@ -538,15 +540,13 @@ def hanabi_handler(action: str, data: JSONData) -> JsonResponse:
         for replay_json in created_replay_data
     }
 
-    # Create the participation objects
-    participations: list[HanabiParticipation] = []
-    for name, replay_id in name_to_replay_id_dict.items():
-        participations.append(
-            HanabiParticipation(
-                player_id=name_to_pk_dict[name],
-                replay_id=replay_id_to_pk_dict[replay_id],
-            )
+    participations: list[HanabiParticipation] = [
+        HanabiParticipation(
+            player_id=name_to_pk_dict[name],
+            replay_id=replay_id_to_pk_dict[replay_id],
         )
+        for name, replay_id in name_to_replay_id_dict.items()
+    ]
     HanabiParticipation.objects.bulk_create(participations, batch_size=25)
 
     # Finally, mark the contest as processed
@@ -571,11 +571,11 @@ def api(request: HttpRequest) -> JsonResponse:
     if type(data) != type(JSONData()):  # type: ignore
         raise SuspiciousOperation("Not valid JSON (needs a dict)")
 
-    if not "action" in data:
+    if "action" not in data:
         raise SuspiciousOperation("You need to provide an action, silly")
     action = data["action"]
 
-    if not "token" in data:
+    if "token" not in data:
         raise SuspiciousOperation("No token provided")
     elif settings.API_TARGET_HASH is None:
         return JsonResponse({"error": "Not accepting tokens right now"}, status=503)

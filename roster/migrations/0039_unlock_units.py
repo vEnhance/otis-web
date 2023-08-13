@@ -20,7 +20,7 @@ def unlock_stuff(apps, scheme_editor):
             .order_by("-has_pset", "position")
         )
         n = student.num_units_done + student.vision
-        to_unlock = [unit for unit in curriculum[0:n] if not unit.has_pset]
+        to_unlock = [unit for unit in curriculum[:n] if not unit.has_pset]
         student.unlocked_units.add(*to_unlock)
 
 

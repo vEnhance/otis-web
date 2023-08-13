@@ -100,7 +100,7 @@ def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
     except Achievement.DoesNotExist:
         pass
     level_info = get_level_info(student)
-    context.update(level_info)
+    context |= level_info
     level_number = level_info["level_number"]
     obtained_levels = Level.objects.filter(threshold__lte=level_number).order_by(
         "-threshold"
@@ -211,8 +211,7 @@ def leaderboard(request: AuthHttpRequest) -> HttpResponse:
     )
     for row in rows:
         row["days_since_last_seen"] = get_days_since(row["last_seen"])
-    context: dict[str, Any] = {}
-    context["rows"] = rows
+    context: dict[str, Any] = {"rows": rows}
     return render(request, "rpg/leaderboard.html", context)
 
 

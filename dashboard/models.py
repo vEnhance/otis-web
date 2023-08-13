@@ -203,10 +203,7 @@ class PSet(models.Model):
 
     @property
     def filename(self) -> Optional[str]:
-        if self.upload is not None:
-            return self.upload.filename
-        else:
-            return None
+        return self.upload.filename if self.upload is not None else None
 
     @property
     def accepted(self) -> bool:

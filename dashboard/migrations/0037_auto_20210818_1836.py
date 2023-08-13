@@ -9,8 +9,10 @@ def make_achievement(apps, schema_editor):
     students = Student.objects.prefetch_related("achievements")
     to_create = []
     for s in students:
-        for a in s.achievements.all():
-            to_create.append(AchievementUnlock(user=s.user, achievement=a))
+        to_create.extend(
+            AchievementUnlock(user=s.user, achievement=a)
+            for a in s.achievements.all()
+        )
     AchievementUnlock.objects.bulk_create(to_create)
 
 

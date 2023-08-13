@@ -241,7 +241,7 @@ class RosterTest(EvanTestCase):
             user__first_name="Ada", user__last_name="Adalhaidis"
         )
         units: list[Unit] = UnitFactory.create_batch(10)
-        alice.curriculum.set(units[0:8])
+        alice.curriculum.set(units[:8])
         self.login(UserFactory.create(is_staff=True))
         self.assertHas(
             self.get("master-schedule"),
@@ -668,7 +668,7 @@ class RosterTest(EvanTestCase):
                 "given_name": "First",
                 "surname": "Last",
                 "email_address": "myemail@example.com",
-                "passcode": container.passcode + "1",
+                "passcode": f"{container.passcode}1",
                 "gender": "O",
                 "parent_email": "myemail@example.com",
                 "graduation_year": 0,
@@ -717,7 +717,7 @@ class RosterTest(EvanTestCase):
                 "given_name": "First",
                 "surname": "Last",
                 "email_address": "myemail@example.com",
-                "passcode": container.passcode + "1",
+                "passcode": f"{container.passcode}1",
                 "gender": "O",
                 "parent_email": "myemail@example.com",
                 "graduation_year": 0,
@@ -747,8 +747,8 @@ class RosterTest(EvanTestCase):
         invalid_resp = self.assertPost20X(
             "update-profile",
             data={
-                "first_name": "a" + first_name,
-                "last_name": "a" + last_name,
+                "first_name": f"a{first_name}",
+                "last_name": f"a{last_name}",
                 "email": "invalid_Email!!",
             },
         )
@@ -759,8 +759,8 @@ class RosterTest(EvanTestCase):
         same_email_resp = self.assertPost20X(
             "update-profile",
             data={
-                "first_name": "a" + first_name,
-                "last_name": "a" + last_name,
+                "first_name": f"a{first_name}",
+                "last_name": f"a{last_name}",
                 "email": email,
             },
         )
@@ -771,9 +771,9 @@ class RosterTest(EvanTestCase):
         resp = self.assertPost20X(
             "update-profile",
             data={
-                "first_name": "a" + first_name,
-                "last_name": "a" + last_name,
-                "email": "1" + email,
+                "first_name": f"a{first_name}",
+                "last_name": f"a{last_name}",
+                "email": f"1{email}",
             },
         )
 
@@ -781,9 +781,9 @@ class RosterTest(EvanTestCase):
         self.assertIn("Your information has been updated.", messages)
 
         alice.refresh_from_db()
-        self.assertTrue("a" + first_name == alice.first_name)
-        self.assertTrue("a" + last_name == alice.last_name)
-        self.assertTrue("1" + email == alice.email)
+        self.assertTrue(f"a{first_name}" == alice.first_name)
+        self.assertTrue(f"a{last_name}" == alice.last_name)
+        self.assertTrue(f"1{email}" == alice.email)
 
     def test_mystery(self) -> None:
         mysteryGroup: UnitGroup = UnitGroupFactory.create(name="Mystery")

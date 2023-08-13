@@ -85,7 +85,7 @@ def BNF() -> Any:
         e = CaselessKeyword("E")
         pi = CaselessKeyword("PI")
         fnumber = Regex(r"[+-]?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?")
-        ident = Word(alphas, alphanums + "_$")
+        ident = Word(alphas, f"{alphanums}_$")
 
         plus, minus, mult, div = map(Literal, "+-*/")
         lpar, rpar = map(Suppress, "()")
@@ -173,12 +173,11 @@ def evaluate_stack(s: list[Any]) -> Union[int, float]:
 
 
 def expr_compute(s: str) -> Optional[float]:
-    if s == "":
+    if not s:
         return None
     exprStack[:] = []
     BNF().parseString(s, parseAll=True)
-    val = evaluate_stack(exprStack[:])
-    return val
+    return evaluate_stack(exprStack[:])
 
 
 # flake8: noqa

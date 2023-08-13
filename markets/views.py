@@ -133,14 +133,16 @@ class MarketResults(LoginRequiredMixin, ListView[Guess]):
             return super().dispatch(request, *args, **kwargs)  # login required mixin
         self.market = get_object_or_404(Market, slug=kwargs.pop("slug"))
 
-        if request.user.is_superuser:
+        if (
+            request.user.is_superuser
+            or self.market.has_started
+            and self.market.has_ended
+        ):
             return super().dispatch(request, *args, **kwargs)
         elif not self.market.has_started:
             return HttpResponseNotFound()
-        elif not self.market.has_ended:
-            return HttpResponseRedirect(self.market.get_absolute_url())
         else:
-            return super().dispatch(request, *args, **kwargs)
+            return HttpResponseRedirect(self.market.get_absolute_url())
 
 
 @require_POST

@@ -30,9 +30,9 @@ class ProblemFactory(DjangoModelFactory):
         if settings.TESTING_NEEDS_MOCK_MEDIA is False:
             return
         problem: Problem = self  # type: ignore
-        filename = problem.puid + ".tex"
+        filename = f"{problem.puid}.tex"
         default_storage.save(
-            "protected/" + storage_hash(filename) + ".tex",
+            f"protected/{storage_hash(filename)}.tex",
             ContentFile(b"hi i'm a solution"),
         )
 

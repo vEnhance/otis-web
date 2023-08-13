@@ -2,6 +2,7 @@
 Django settings for otisweb project.
 """
 
+
 import logging
 import os
 import sys
@@ -47,7 +48,7 @@ else:
 SITE_ID = 1
 TESTING = len(sys.argv) > 1 and sys.argv[1] == "test"
 if TESTING:
-    assert DEBUG is True, "Don't run testing on production you big doofus"
+    assert DEBUG, "Don't run testing on production you big doofus"
 
 # Application definition
 
@@ -260,9 +261,9 @@ def filter_useless_404(record: logging.LogRecord) -> bool:
         return True
     a: list[str] = [str(s) for s in record.args]
     if len(a) == 2:
-        return not (a[0] == "Not Found" and ("wp-include" in a[1] or ".php" in a[1]))
+        return a[0] != "Not Found" or "wp-include" not in a[1] and ".php" not in a[1]
     elif len(a) == 3:
-        return not (a[1] == "404" and ("wp-include" in a[0] or ".php" in a[0]))
+        return a[1] != "404" or "wp-include" not in a[0] and ".php" not in a[0]
     else:
         return True
 

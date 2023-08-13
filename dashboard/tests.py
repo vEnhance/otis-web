@@ -348,9 +348,9 @@ class TestPSet(EvanTestCase):
     def test_unit_query(self):
         units = UnitFactory.create_batch(size=20)
         alice = StudentFactory.create()
-        alice.curriculum.set(units[0:18])
+        alice.curriculum.set(units[:18])
         alice.unlocked_units.set(units[4:7])
-        for unit in units[0:4]:
+        for unit in units[:4]:
             PSetFactory.create(student=alice, unit=unit)
         PSetFactory.create(student=alice, unit=units[4], status="P")
 

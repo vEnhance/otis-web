@@ -31,10 +31,7 @@ def get_visible_from_queryset(user: User, queryset: QuerySet[models.Student]):
 
 
 def get_visible_students(user: User, current: bool = True):
-    if current:
-        queryset: QuerySet = get_current_students()
-    else:
-        queryset = models.Student.objects.all()
+    queryset = get_current_students() if current else models.Student.objects.all()
     return get_visible_from_queryset(user, queryset)
 
 
@@ -52,13 +49,17 @@ def get_student_by_pk(
     if not isinstance(request.user, User):
         raise PermissionDenied("Authentication is needed, how did you even get here?")
 
-    if payment_exempt is False and student.is_delinquent and not request.user.is_staff:
+    if (
+        not payment_exempt
+        and student.is_delinquent
+        and not request.user.is_staff
+    ):
         raise PermissionDenied(
             "Payment needs to be processed before this page can be used"
         )
 
     is_instructor = can_edit(request, student)
-    if requires_edit is True and not is_instructor:
+    if requires_edit and not is_instructor:
         raise PermissionDenied("Staff member doesn't teach this student")
 
     if not can_view(request, student):

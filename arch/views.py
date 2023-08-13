@@ -234,17 +234,16 @@ class ProblemCreate(
 
 @verified_required
 def lookup(request: HttpRequest):
-    if request.method == "POST":
-        form = ProblemSelectForm(request.POST)
-        assert form.is_valid()
-        problem = form.cleaned_data["problem"]
-        return HttpResponseRedirect(problem.get_absolute_url())
-    else:
+    if request.method != "POST":
         return HttpResponseRedirect(
             reverse(
                 "arch-index",
             )
         )
+    form = ProblemSelectForm(request.POST)
+    assert form.is_valid()
+    problem = form.cleaned_data["problem"]
+    return HttpResponseRedirect(problem.get_absolute_url())
 
 
 @login_required
@@ -255,7 +254,7 @@ def view_solution(request: HttpRequest, puid: str) -> HttpResponse:
             f"The problem {puid} is not in the OTIS database, "
             "therefore no solution file could be retrieved."
         )
-    return get_from_google_storage(puid + ".tex")
+    return get_from_google_storage(f"{puid}.tex")
 
 
 class VoteCreate(
