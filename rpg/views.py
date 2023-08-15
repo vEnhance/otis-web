@@ -322,14 +322,10 @@ class DiamondUpdate(
 
     def form_valid(self, form: BaseModelForm[Achievement]):
         assert_maxed_out_level_info(self.student)
-        n = 3
+        n = 4
         form.instance.diamonds = n
         form.instance.creator = self.student.user
-        messages.success(
-            self.request,
-            f"Successfully forged diamond worth {n}♦, "
-            "which is your current charisma level (capped at 7).",
-        )
+        messages.success(self.request, f"Successfully forged diamond worth {n}♦.")
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
