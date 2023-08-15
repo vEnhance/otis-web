@@ -124,10 +124,6 @@ class TestPortal(EvanTestCase):
 
         # A bunch of context things to check
 
-        unit = UnitFactory.create(code="BMX")
-        alice.curriculum.set([unit])
-        alice.unlocked_units.add(unit)
-
         alice_profile = UserProfileFactory.create(user=alice.user)
         alice_profile.last_notif_dismiss = datetime.datetime(
             2021, 6, 1, tzinfo=timezone.utc
@@ -154,8 +150,6 @@ class TestPortal(EvanTestCase):
             start_date=datetime.datetime(2021, 6, 30, tzinfo=timezone.utc),
             active=True
         )
-
-        mail_chimp = get_mailchimp_campaigns(14)[0]
 
         with freeze_time("2021-07-01", tz_offset=0):
             news = get_news(alice_profile)
