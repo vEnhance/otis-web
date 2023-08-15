@@ -7,13 +7,20 @@ from django.urls import reverse
 from django.utils import timezone
 from freezegun import freeze_time
 
-from core.factories import SemesterFactory, UnitFactory, UnitGroupFactory, UserFactory, UserProfileFactory
+from core.factories import (
+    SemesterFactory,
+    UnitFactory,
+    UnitGroupFactory,
+    UserFactory,
+    UserProfileFactory,
+)
 from core.models import Unit
 from dashboard.factories import PSetFactory, SemesterDownloadFileFactory
 from dashboard.models import PSet, UploadedFile
 from dashboard.utils import get_units_to_submit, get_units_to_unlock
 from evans_django_tools.testsuite import EvanTestCase
 from exams.factories import QuizFactory, TestFactory
+from hanabi.factories import HanabiContestFactory
 from markets.factories import MarketFactory
 from opal.factories import OpalHuntFactory
 from otisweb.utils import get_mailchimp_campaigns
@@ -24,7 +31,6 @@ from roster.factories import (
     StudentFactory,
     StudentRegistrationFactory,
 )
-from hanabi.factories import HanabiContestFactory
 from rpg.factories import BonusLevelFactory
 from rpg.models import Level
 
@@ -65,7 +71,9 @@ class TestPortal(EvanTestCase):
         PSetFactory.create(student=alice, clubs=501, hours=0, status="A", unit=unit)
 
         alice_profile = UserProfileFactory.create(user=alice.user)
-        alice_profile.last_notif_dismiss = datetime.datetime(2021, 6, 1, tzinfo=timezone.utc)
+        alice_profile.last_notif_dismiss = datetime.datetime(
+            2021, 6, 1, tzinfo=timezone.utc
+        )
         alice_profile.save()
 
         prevSemester = SemesterFactory.create(end_year=2020)
@@ -99,7 +107,7 @@ class TestPortal(EvanTestCase):
 
         hanabi = HanabiContestFactory.create(
             start_date=datetime.datetime(2021, 6, 30, tzinfo=timezone.utc),
-            end_date=datetime.datetime(2021, 7, 18, tzinfo=timezone.utc)
+            end_date=datetime.datetime(2021, 7, 18, tzinfo=timezone.utc),
         )
 
         opal = OpalHuntFactory.create(
