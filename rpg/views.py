@@ -321,8 +321,8 @@ class DiamondUpdate(
         return achievement
 
     def form_valid(self, form: BaseModelForm[Achievement]):
-        level_info = assert_maxed_out_level_info(self.student)
-        n = min(level_info["meters"]["diamonds"].level, 7)
+        assert_maxed_out_level_info(self.student)
+        n = 5
         form.instance.diamonds = n
         form.instance.creator = self.student.user
         messages.success(
