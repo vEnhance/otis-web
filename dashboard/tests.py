@@ -23,7 +23,6 @@ from exams.factories import QuizFactory, TestFactory
 from hanabi.factories import HanabiContestFactory
 from markets.factories import MarketFactory
 from opal.factories import OpalHuntFactory
-from otisweb.utils import get_mailchimp_campaigns
 from roster.factories import (
     AssistantFactory,
     InvoiceFactory,
@@ -75,6 +74,9 @@ class TestPortal(EvanTestCase):
             2021, 6, 1, tzinfo=timezone.utc
         )
         alice_profile.save()
+
+        prevSemester = SemesterFactory.create(end_year=2020)
+        StudentFactory.create(user=alice.user, semester=prevSemester)
 
         test = TestFactory.create(
             start_date=datetime.datetime(2021, 6, 1, tzinfo=timezone.utc),
@@ -147,8 +149,7 @@ class TestPortal(EvanTestCase):
             )
 
         OpalHuntFactory.create(
-            start_date=datetime.datetime(2021, 6, 30, tzinfo=timezone.utc),
-            active=True
+            start_date=datetime.datetime(2021, 6, 30, tzinfo=timezone.utc), active=True
         )
 
         with freeze_time("2021-07-01", tz_offset=0):
@@ -185,8 +186,6 @@ class TestPortal(EvanTestCase):
         self.assertFalse(news["opals"])
 
 
-
-# python manage.py test dashboard.tests.TestCertify
 class TestCertify(EvanTestCase):
     def test_certify(self):
         semester = SemesterFactory.create()
