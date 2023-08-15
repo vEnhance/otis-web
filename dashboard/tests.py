@@ -17,7 +17,7 @@ from core.factories import (
 from core.models import Unit
 from dashboard.factories import PSetFactory, SemesterDownloadFileFactory
 from dashboard.models import PSet, UploadedFile
-from dashboard.utils import get_units_to_submit, get_units_to_unlock
+from dashboard.utils import get_news, get_units_to_submit, get_units_to_unlock
 from evans_django_tools.testsuite import EvanTestCase
 from exams.factories import QuizFactory, TestFactory
 from hanabi.factories import HanabiContestFactory
@@ -76,9 +76,6 @@ class TestPortal(EvanTestCase):
         )
         alice_profile.save()
 
-        prevSemester = SemesterFactory.create(end_year=2020)
-        StudentFactory.create(user=alice.user, semester=prevSemester)
-
         test = TestFactory.create(
             start_date=datetime.datetime(2021, 6, 1, tzinfo=timezone.utc),
             due_date=datetime.datetime(2021, 7, 31, tzinfo=timezone.utc),
@@ -93,27 +90,6 @@ class TestPortal(EvanTestCase):
             number=1,
         )
 
-        # News items
-
-        market = MarketFactory.create(
-            start_date=datetime.datetime(2021, 6, 30, tzinfo=timezone.utc),
-            end_date=datetime.datetime(2021, 7, 10, tzinfo=timezone.utc),
-        )
-
-        download = SemesterDownloadFileFactory.create(
-            semester=semester,
-            created_at=datetime.datetime(2021, 6, 25, tzinfo=timezone.utc),
-        )
-
-        hanabi = HanabiContestFactory.create(
-            start_date=datetime.datetime(2021, 6, 30, tzinfo=timezone.utc),
-            end_date=datetime.datetime(2021, 7, 18, tzinfo=timezone.utc),
-        )
-
-        opal = OpalHuntFactory.create(
-            start_date=datetime.datetime(2021, 6, 30, tzinfo=timezone.utc)
-        )
-
         # assistant does not cause level up message
         assistant = AssistantFactory.create()
         alice.assistant = assistant
@@ -124,8 +100,6 @@ class TestPortal(EvanTestCase):
         messages = [m.message for m in resp.context["messages"]]
         self.assertNotIn("You leveled up! You're now level 22.", messages)
 
-        # TODO - check user profile changes to see if they are working?
-
         self.login(alice)
         with freeze_time("2021-07-01", tz_offset=0):
             resp = self.assertGet20X("portal", alice.pk, follow=True)
@@ -133,31 +107,89 @@ class TestPortal(EvanTestCase):
         messages = [m.message for m in resp.context["messages"]]
         self.assertIn("You leveled up! You're now level 22.", messages)
 
+        # static stuff
         self.assertHas(resp, f"{alice.name} ({alice.semester.name})")
+        self.assertHas(resp, 501)
         self.assertHas(resp, 2020)
         self.assertHas(resp, unit.code)
         self.assertHas(resp, test)
         self.assertHas(resp, quiz)
 
-        mail_chimp = get_mailchimp_campaigns(0)[0]
-
-        # check for news notifications
-        self.assertHas(resp, mail_chimp["title"])
-        self.assertHas(resp, download.content)
-        self.assertHas(resp, market.title)
-        self.assertHas(resp, hanabi.variant_name)
-        self.assertHas(resp, opal.name)
-
-        self.assertHas(resp, f"New email: {mail_chimp['summary']}")
-        self.assertHas(resp, f"New file: {download.description}")
-        self.assertHas(resp, "New market opened:")
-        self.assertHas(resp, "New Hanabi seed active:")
-        self.assertHas(resp, "OPAL hunt active!")
-
-        # number of clubs
-        self.assertHas(resp, 501)
-
         # TODO check for whether meters are being rendered?
+
+    def test_get_news(self):
+        semester = SemesterFactory.create(exam_family="Waltz")
+        alice = StudentFactory.create(semester=semester)
+        self.login(alice)
+
+        # A bunch of context things to check
+
+        unit = UnitFactory.create(code="BMX")
+        alice.curriculum.set([unit])
+        alice.unlocked_units.add(unit)
+
+        alice_profile = UserProfileFactory.create(user=alice.user)
+        alice_profile.last_notif_dismiss = datetime.datetime(
+            2021, 6, 1, tzinfo=timezone.utc
+        )
+        alice_profile.save()
+
+        # News items
+        MarketFactory.create(
+            start_date=datetime.datetime(2021, 6, 30, tzinfo=timezone.utc),
+            end_date=datetime.datetime(2021, 7, 20, tzinfo=timezone.utc),
+        )
+
+        HanabiContestFactory.create(
+            start_date=datetime.datetime(2021, 6, 30, tzinfo=timezone.utc),
+            end_date=datetime.datetime(2021, 7, 25, tzinfo=timezone.utc),
+        )
+
+        with freeze_time("2021-07-01", tz_offset=0):
+            SemesterDownloadFileFactory.create(
+                semester=semester,
+            )
+
+        OpalHuntFactory.create(
+            start_date=datetime.datetime(2021, 6, 30, tzinfo=timezone.utc),
+            active=True
+        )
+
+        mail_chimp = get_mailchimp_campaigns(14)[0]
+
+        with freeze_time("2021-07-01", tz_offset=0):
+            news = get_news(alice_profile)
+
+        self.assertTrue(news["emails"])
+        self.assertTrue(news["downloads"])
+        self.assertTrue(news["markets"])
+        self.assertTrue(news["hanabis"])
+        self.assertTrue(news["opals"])
+
+        # check expiration
+
+        with freeze_time("2021-07-30", tz_offset=0):
+            news = get_news(alice_profile)
+
+        self.assertFalse(news["downloads"])
+        self.assertFalse(news["markets"])
+        self.assertFalse(news["hanabis"])
+
+        # alice dismisses stuff
+        alice_profile.last_notif_dismiss = datetime.datetime(
+            2021, 7, 2, tzinfo=timezone.utc
+        )
+        alice_profile.save()
+
+        with freeze_time("2021-07-02", tz_offset=0):
+            news = get_news(alice_profile)
+
+        self.assertFalse(news["emails"])
+        self.assertFalse(news["downloads"])
+        self.assertFalse(news["markets"])
+        self.assertFalse(news["hanabis"])
+        self.assertFalse(news["opals"])
+
 
 
 # python manage.py test dashboard.tests.TestCertify
