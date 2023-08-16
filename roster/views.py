@@ -249,6 +249,7 @@ class UpdateInvoice(
         "hours_taught",
         "adjustment",
         "extras",
+        "credits",
         "total_paid",
         "forgive_date",
         "memo",

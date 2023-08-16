@@ -265,6 +265,7 @@ class RosterTest(EvanTestCase):
                 "adjustment": 0,
                 "extras": 0,
                 "total_paid": 1152,
+                "credits": 0,
             },
         )
 
