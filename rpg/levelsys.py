@@ -351,9 +351,7 @@ def annotate_student_queryset_with_scores(
 
 def compute_insanity_rating(b: int, d: int, z: int) -> float:
     assert min(b, d, z) >= 0
-    if b == 0 and d == 0 and z == 0:
-        return 0
-    return (z - b) / (b + d + z)
+    return 0 if b == 0 and d == 0 and z == 0 else (z - b) / (b + d + z)
 
 
 def get_student_rows(queryset: QuerySet[Student]) -> list[dict[str, Any]]:
@@ -361,14 +359,15 @@ def get_student_rows(queryset: QuerySet[Student]) -> list[dict[str, Any]]:
     levels: dict[int, str] = {
         level.threshold: level.name for level in Level.objects.all()
     }
-    if len(levels) == 0:
+    if not levels:
         levels[0] = "No level"
     max_level = max(levels.keys())
 
     for student in annotate_student_queryset_with_scores(queryset):
-        row: dict[str, Any] = {}
-        row["student"] = student
-        row["spades"] = (getattr(student, "spades_quizzes", 0) or 0) * 2
+        row: dict[str, Any] = {
+            "student": student,
+            "spades": (getattr(student, "spades_quizzes", 0) or 0) * 2,
+        }
         row["spades"] += getattr(student, "spades_quests", 0) or 0
         row["spades"] += (getattr(student, "spades_count_mocks", 0) or 0) * 3
         row["spades"] += getattr(student, "spades_suggestions", 0) or 0

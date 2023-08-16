@@ -77,9 +77,9 @@ class PracticeExam(models.Model):
 
     def __str__(self) -> str:
         if self.is_test:
-            return self.family + " Test " + self.get_number_display()
+            return f"{self.family} Test {self.get_number_display()}"
         else:
-            return self.family + " Quiz " + self.get_number_display()
+            return f"{self.family} Quiz {self.get_number_display()}"
 
     def get_absolute_url(self) -> str:
         return reverse("exam-pdf", args=(self.pk,))

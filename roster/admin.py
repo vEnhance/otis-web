@@ -132,26 +132,25 @@ class OwedFilter(admin.SimpleListFilter):
         del request
         if self.value() is None:
             return queryset
-        else:
-            queryset = queryset.annotate(
-                owed=Cast(
-                    F("student__semester__prep_rate") * F("preps_taught")
-                    + F("student__semester__hour_rate") * F("hours_taught")
-                    + F("adjustment")
-                    + F("extras")
-                    - F("total_paid")
-                    - F("credits"),
-                    FloatField(),
-                )
+        queryset = queryset.annotate(
+            owed=Cast(
+                F("student__semester__prep_rate") * F("preps_taught")
+                + F("student__semester__hour_rate") * F("hours_taught")
+                + F("adjustment")
+                + F("extras")
+                - F("total_paid")
+                - F("credits"),
+                FloatField(),
             )
-            if self.value() == "incomplete":
-                return queryset.filter(owed__gt=0)
-            elif self.value() == "paid":
-                return queryset.filter(owed__lte=0)
-            elif self.value() == "excess":
-                return queryset.filter(owed__lt=0)
-            elif self.value() == "zero":
-                return queryset.filter(owed__gt=0).filter(total_paid=0)
+        )
+        if self.value() == "incomplete":
+            return queryset.filter(owed__gt=0)
+        elif self.value() == "paid":
+            return queryset.filter(owed__lte=0)
+        elif self.value() == "excess":
+            return queryset.filter(owed__lt=0)
+        elif self.value() == "zero":
+            return queryset.filter(owed__gt=0).filter(total_paid=0)
 
 
 @admin.register(Invoice)
@@ -300,7 +299,6 @@ class StudentRegistrationIEResource(RosterResource):
 
 def build_students(queryset: QuerySet[StudentRegistration]) -> int:
     students_to_create = []
-    invoices_to_create = []
     queryset = queryset.filter(container__semester__active=True)
     queryset = queryset.exclude(processed=True)
     queryset = queryset.select_related("user", "container", "container__semester")
@@ -318,16 +316,13 @@ def build_students(queryset: QuerySet[StudentRegistration]) -> int:
 
         semester_date = registration.container.semester.one_semester_date
 
-        if semester_date is not None and timezone.now() > semester_date:
-            n = 1
-        else:
-            n = 2
-
+        n = 1 if semester_date is not None and timezone.now() > semester_date else 2
         count += 1
     Student.objects.bulk_create(students_to_create)
     queryset.update(processed=True)
 
     if n > 0:
+        invoices_to_create = []
         for student in Student.objects.filter(
             invoice__isnull=True, semester__active=True
         ):

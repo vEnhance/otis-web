@@ -48,7 +48,7 @@ def invoice(request: HttpRequest, student_pk: int, checksum: str) -> HttpRespons
     except ObjectDoesNotExist:
         raise Http404("No invoice exists for this student")
     context = {
-        "title": "Payment for " + student.name,
+        "title": f"Payment for {student.name}",
         "student": student,
         "invoice": invoice,
         "checksum": checksum,
@@ -58,11 +58,10 @@ def invoice(request: HttpRequest, student_pk: int, checksum: str) -> HttpRespons
 
 @csrf_exempt
 def config(request: HttpRequest) -> HttpResponse:
-    if request.method == "GET":
-        stripe_config = {"publicKey": settings.STRIPE_PUBLISHABLE_KEY}
-        return JsonResponse(stripe_config, safe=False)
-    else:
+    if request.method != "GET":
         return HttpResponseForbidden("Need to use request method GET")
+    stripe_config = {"publicKey": settings.STRIPE_PUBLISHABLE_KEY}
+    return JsonResponse(stripe_config, safe=False)
 
 
 @csrf_exempt
@@ -70,15 +69,16 @@ def checkout(request: HttpRequest, invoice_pk: int, amount: int) -> HttpResponse
     if amount <= 0:
         raise PermissionDenied("Need to enter a positive amount for payment...")
     stripe.api_key = settings.STRIPE_SECRET_KEY
-    if settings.PRODUCTION:
-        domain_url = "https://otis.evanchen.cc"
-    else:
-        domain_url = "http://127.0.0.1:8000"
     if request.method == "GET":
+        domain_url = (
+            "https://otis.evanchen.cc"
+            if settings.PRODUCTION
+            else "http://127.0.0.1:8000"
+        )
         checkout_session = stripe.checkout.Session.create(
             client_reference_id=invoice_pk,
-            success_url=domain_url + "/payments/success/",
-            cancel_url=domain_url + "/payments/cancelled/",
+            success_url=f"{domain_url}/payments/success/",
+            cancel_url=f"{domain_url}/payments/cancelled/",
             payment_method_types=["card"],
             mode="payment",
             line_items=[
@@ -109,7 +109,7 @@ def webhook(request: HttpRequest) -> HttpResponse:
     stripe.api_key = settings.STRIPE_SECRET_KEY
     endpoint_secret = settings.STRIPE_ENDPOINT_SECRET
     payload = request.body
-    if not "HTTP_STRIPE_SIGNATURE" in request.META:
+    if "HTTP_STRIPE_SIGNATURE" not in request.META:
         if settings.PRODUCTION:
             logging.error(f"No HTTP_STRIPE_SIGNATURE in request.META = {request.META}")
         return HttpResponse(status=400)
@@ -121,12 +121,12 @@ def webhook(request: HttpRequest) -> HttpResponse:
     except ValueError as e:
         # Invalid payload
         if settings.PRODUCTION:
-            logging.error("Invalid payload for " + str(e))
+            logging.error(f"Invalid payload for {str(e)}")
         return HttpResponse(status=400)
     except stripe.error.SignatureVerificationError as e:  # type: ignore
         # Invalid signature
         if settings.PRODUCTION:
-            logging.error("Invalid signature for " + str(e))
+            logging.error(f"Invalid signature for {str(e)}")
         return HttpResponse(status=400)
 
     # Handle the checkout.session.completed event

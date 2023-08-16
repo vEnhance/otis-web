@@ -8,16 +8,17 @@ class OTISUserRegistrationForm(forms.Form):
     last_name = forms.CharField(required=False)
 
     def signup(self, request: HttpRequest, user: User):
-        if self.is_valid():
-            data = self.cleaned_data
-            changed = False
+        if not self.is_valid():
+            return
+        data = self.cleaned_data
+        changed = False
 
-            if "first_name" in data:
-                user.first_name = data["first_name"]
-                changed = True
-            if "last_name" in data:
-                user.last_name = data["last_name"]
-                changed = True
+        if "first_name" in data:
+            user.first_name = data["first_name"]
+            changed = True
+        if "last_name" in data:
+            user.last_name = data["last_name"]
+            changed = True
 
-            if changed is True:
-                user.save()
+        if changed:
+            user.save()

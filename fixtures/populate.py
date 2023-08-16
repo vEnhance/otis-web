@@ -120,7 +120,7 @@ def fast_bulk_create(cls: type[Factory], size: int, **kwargs: Any) -> Any:
 
 # silly thing with slight bias for small numbers
 def randint_low(a: int, b: int) -> int:
-    return (a + b) - round(math.sqrt(random.randint(a * a, b * b)))
+    return a + b - round(math.sqrt(random.randint(a**2, b**2)))
 
 
 def create_sem_independent(users: list[User]):
@@ -136,9 +136,9 @@ def create_sem_independent(users: list[User]):
     hint_seq_data: list[tuple[Problem, int]] = []
     for problem in problems:
         hint_num = randint_low(0, 10)
-        for percent in random.sample(range(0, 101), hint_num):
-            hint_seq_data.append((problem, percent))
-
+        hint_seq_data.extend(
+            (problem, percent) for percent in random.sample(range(0, 101), hint_num)
+        )
     fast_bulk_create(
         HintFactory,
         len(hint_seq_data),
@@ -333,10 +333,7 @@ def create_sem_dependent(semester: Semester, users: list[User]):
             for i in range(min_stu_units, stu_curriculum_num - 1):
                 if random.random() > 0.2:
                     continue
-                if random.random() > 0.9:
-                    status = "P"
-                else:
-                    status = "A"
+                status = "P" if random.random() > 0.9 else "A"
                 psets.append(
                     PSetFactory.build(
                         student=student,
@@ -378,8 +375,9 @@ def create_sem_dependent(semester: Semester, users: list[User]):
     for student in students:
         if random.random() < 0.65:
             continue
-        for _ in range(random.randrange(1, 3)):
-            student_iter_data_for_quests.append(student)
+        student_iter_data_for_quests.extend(
+            student for _ in range(random.randrange(1, 3))
+        )
     print(f"Creating {len(student_iter_data_for_quests)} quest completes")
     fast_bulk_create(
         QuestCompleteFactory,

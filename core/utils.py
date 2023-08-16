@@ -13,20 +13,17 @@ logger = logging.getLogger(__name__)
 
 
 def storage_hash(value: str) -> str:
-    s = settings.STORAGE_HASH_KEY + "|" + value
+    s = f"{settings.STORAGE_HASH_KEY}|{value}"
     h = sha256(s.encode("ascii")).hexdigest()
-    if settings.TESTING:
-        return f"TESTING_{h}"
-    else:
-        return h
+    return f"TESTING_{h}" if settings.TESTING else h
 
 
 def get_from_google_storage(filename: str):
     ext = filename[-4:]
-    if not (ext == ".tex" or ext == ".pdf"):
+    if ext not in [".tex", ".pdf"]:
         return HttpResponseBadRequest("Bad filename extension")
 
-    path = "protected/" + storage_hash(filename) + ext
+    path = f"protected/{storage_hash(filename)}{ext}"
     try:
         file = default_storage.open(path)
     except FileNotFoundError:

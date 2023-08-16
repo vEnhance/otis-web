@@ -59,11 +59,9 @@ class UnitGroupListView(ListView[Unit]):
                 ),
             )
 
-            student = Student.objects.filter(
+            if student := Student.objects.filter(
                 semester__active=True, user=self.request.user
-            ).first()
-
-            if student:
+            ).first():
                 queryset = queryset.annotate(
                     user_unlocked=Exists(
                         "students_unlocked",
@@ -122,7 +120,7 @@ def permitted(unit: Unit, request: HttpRequest, asking_solution: bool) -> bool:
     ).exists():
         return True
     elif (
-        asking_solution is False
+        not asking_solution
         and Student.objects.filter(user=request.user, unlocked_units=unit).exists()
     ):
         return True

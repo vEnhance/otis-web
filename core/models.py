@@ -197,9 +197,7 @@ class UnitGroup(models.Model):
 
     @property
     def artwork_basename(self) -> str | None:
-        if not self.artwork:
-            return None
-        return os.path.basename(self.artwork.name)
+        return None if not self.artwork else os.path.basename(self.artwork.name)
 
     @property
     def artwork_thumb_md_basename(self) -> str | None:
@@ -230,7 +228,7 @@ class Unit(models.Model):
 
     def __str__(self) -> str:
         if self.group is not None:
-            return self.group.name + " [" + self.code + "]"
+            return f"{self.group.name} [{self.code}]"
         return "-" + " [" + self.code + "]"
 
     def get_absolute_url(self):

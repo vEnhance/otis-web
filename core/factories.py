@@ -74,7 +74,7 @@ class UnitFactory(DjangoModelFactory):
         ]
         for fname, content, ext in stuff_to_write:
             default_storage.save(
-                "protected/" + storage_hash(fname) + ext, ContentFile(content)
+                f"protected/{storage_hash(fname)}{ext}", ContentFile(content)
             )
 
 

@@ -21,13 +21,12 @@ class Command(BaseCommand):
             semester=semester, invoice__isnull=True
         )
 
-        invoices = []
-        for s in students:
-            invoices.append(
-                roster.models.Invoice(
-                    student=s,
-                    preps_taught=options["preps"],
-                )
+        invoices = [
+            roster.models.Invoice(
+                student=s,
+                preps_taught=options["preps"],
             )
+            for s in students
+        ]
         print(f"Created {len(invoices)} invoices")
         roster.models.Invoice.objects.bulk_create(invoices)
