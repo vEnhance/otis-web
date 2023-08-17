@@ -132,7 +132,7 @@ class TestPortal(EvanTestCase):
         alice_profile.save()
 
         # News items
-        for y in (2020, 2021, 2022):
+        for y in (2020, 2020, 2020, 2021, 2022, 2022):
             MarketFactory.create(
                 start_date=datetime.datetime(y, 6, 30, tzinfo=timezone.utc),
                 end_date=datetime.datetime(y, 7, 20, tzinfo=timezone.utc),
@@ -184,8 +184,8 @@ class TestPortal(EvanTestCase):
             news = get_news(alice_profile)
             self.assertEqual(len(news["emails"]), 1)
             self.assertEqual(len(news["downloads"]), 1)
-            self.assertEqual(len(news["markets"]), 1)
-            self.assertEqual(len(news["hanabis"]), 1)
+            self.assertEqual(len(news["markets"]), 2)
+            self.assertEqual(len(news["hanabis"]), 2)
             self.assertEqual(len(news["opals"]), 0)
 
 
