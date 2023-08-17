@@ -25,20 +25,26 @@ Video tutorial: https://youtu.be/W27XcqeXp20
 
 ### Standard Linux environment
 
-0. [Fork the repository first](https://docs.github.com/en/get-started/quickstart/fork-a-repo)
-   if you're planning on submitting a pull request later.
+If you're just trying to get a local copy of the OTIS-WEB code
+and don't plan to submit any code back, then skip steps 0 and 4,
+and replace `YOUR_USERNAME` in step 2 with `vEnhance`.
+
+0. Create an account on GitHub if you haven't already, and
+   [fork the repository](https://docs.github.com/en/get-started/quickstart/fork-a-repo).
 1. Install the following standard tools: `python` (version 3.10), `pip`, `git`.
    (For each tool, search "[name of thing to install] [your OS]" on the web.)
-2. Clone this repository:
-   `git clone https://github.com/USERNAME/otis-web`.
-   Replace `USERNAME` with your username if you're forking;
-   otherwise, replace with `vEnhance`.
+2. Clone this repository using the command
+   `git clone https://github.com/YOUR_USERNAME/otis-web`.
 3. Run `git submodule update --init --recursive`
    in order to pull the `evans_django_tools` submodule.
-4. [Install Poetry](https://python-poetry.org/docs/).
+4. Type `git checkout -b feature` to checkout a new branch named `feature`;
+   this will make your life a bit easier than working on `main`.
+   If you already know what feature you're trying to implement,
+   you can use that, e.g. `git checkout -b add-bunny-pictures`.
+5. [Install Poetry](https://python-poetry.org/docs/).
    This enables you to use the `poetry` command;
    verify this by checking `poetry --help` produces a help message.
-5. Once you have `poetry`, hit `poetry install`.
+6. Once you have `poetry`, hit `poetry install`.
    This will automatically create a
    Python virtual environment and install stuff inside it.
    (If you are an expert familiar with Python virtual environments
@@ -49,7 +55,7 @@ Video tutorial: https://youtu.be/W27XcqeXp20
    [mysqlclient](https://github.com/PyMySQL/mysqlclient#install)
    on certain systems.)
 
-6. If it isn't already activated,
+7. If it isn't already activated,
    [activate the Python virtual environment][activate]
    that was created in the previous step.
    The easiest way to do so is to run `poetry shell`.
@@ -58,15 +64,15 @@ Video tutorial: https://youtu.be/W27XcqeXp20
    project. That is, always run `poetry shell` before doing any work, or
    for experts, activate the virtual environment using your preferred method.)
 
-7. If everything is working, `python manage.py check` should
+8. If everything is working, `python manage.py check` should
    run with no errors.
-8. Run `python manage.py migrate` to create the local database.
-9. Run `python manage.py createsuperuser` to create an admin user.
-10. Run `python manage.py runserver`.
+9. Run `python manage.py migrate` to create the local database.
+10. Run `python manage.py createsuperuser` to create an admin user.
+11. Run `python manage.py runserver`.
     The command will spin up a continuously running server.
-11. Point your browser to `http://127.0.0.1:8000`.
+12. Point your browser to `http://127.0.0.1:8000`.
     You should be able to log in with the user you defined in step 9.
-12. The website is functional now, but it is a bit bare-bones.
+13. The website is functional now, but it is a bit bare-bones.
     To populate it with some test data, use `http://127.0.0.1:8000/admin`
     or run `./fixtures/load-all.sh`.
 

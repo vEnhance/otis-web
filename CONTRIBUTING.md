@@ -130,7 +130,7 @@ follow [the README](https://github.com/Microsoft/pyright#installation).
 
 If your editor supports language server protocols,
 you should be able to catch these errors inline.
-If your editor doesn't, consider switching ;)
+If your editor doesn't, consider switching 😉
 
 ## Submitting
 
@@ -139,8 +139,13 @@ you should submit a pull request!
 
 If you followed the instructions earlier,
 you should have your own fork of OTIS-WEB.
-Commit your changes to this fork,
-and then [submit a pull request](https://docs.github.com/en/github/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request).
+Then:
+
+1. Ideally, create a new branch with a descriptive name if you haven't already,
+   e.g. if your pull request adds a bunch of pictures of bunnies, you might do
+   `git checkout -b add-bunny-pictures`.
+2. Commit your changes, and push them to your fork of the repository.
+3. [Submit a pull request](https://docs.github.com/en/github/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request).
 
 When you submit a pull request,
 GitHub will automatically run several checks on the code;
