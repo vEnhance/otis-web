@@ -7,4 +7,4 @@ class OpalHuntFactory(DjangoModelFactory):
     class Meta:
         model = OpalHunt
 
-    name = "Your Otis in April"
+    name = "Your OTIS in April"
