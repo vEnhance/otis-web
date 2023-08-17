@@ -276,6 +276,34 @@ class TestPSet(EvanTestCase):
         resp = self.assertGet20X("stats", alice.pk)
         self.assertHas(resp, "Level 0")
 
+        # update again, but this time change just the metadata
+        resp = self.assertPost20X(
+            "resubmit-pset",
+            alice.pk,
+            data={
+                "unit": unit1.pk,
+                "clubs": 13,
+                "hours": 3.7,
+                "feedback": "good day",
+                "special_notes": "purr",
+                "next_unit_to_unlock": unit3.pk,
+            },
+            follow=True,
+        )
+        self.assertHas(resp, "This unit submission is pending review")
+        self.assertHas(resp, "13♣")
+        self.assertHas(resp, "3.7♥")
+
+        # Check the updated problem set object
+        pset = PSet.objects.get(student=alice, unit=unit1)
+        self.assertEqual(pset.clubs, 13)
+        self.assertEqual(pset.hours, 3.7)
+        self.assertEqual(pset.feedback, "good day")
+        self.assertEqual(pset.special_notes, "purr")
+        self.assertEqual(os.path.basename(pset.upload.content.name), "content2.txt")
+        self.assertFalse(pset.accepted)
+        self.assertFalse(pset.resubmitted)
+
         # simulate acceptance
         pset.status = "A"
         pset.save()

@@ -11,7 +11,7 @@ from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.core.exceptions import PermissionDenied, SuspiciousOperation
+from django.core.exceptions import PermissionDenied
 from django.db.models import Count, OuterRef, Subquery
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
@@ -161,7 +161,7 @@ class PSetQueueList(LoginRequiredMixin, ListView[PSet]):
         return PSet.objects.filter(
             status__in=("P", "PA", "PR"),
             student__semester__active=True,
-        ).order_by("pk")
+        ).order_by("upload__created_at")
 
 
 @login_required
@@ -280,10 +280,22 @@ def resubmit_pset(request: HttpRequest, pk: int) -> HttpResponse:
 
     if request.method == "POST" and form.is_valid():
         pset = form.save(commit=False)
-        if pset.upload is None:
-            raise SuspiciousOperation("There was no uploaded file")
-        pset.upload.content = form.cleaned_data["content"]
-        pset.upload.save()
+        if not form.cleaned_data["content"]:
+            messages.info(
+                request, "No file was provided so only the metadata will be changed."
+            )
+        else:
+            f = UploadedFile(
+                benefactor=student,
+                owner=student.user,
+                category="psets",
+                description="",
+                content=form.cleaned_data["content"],
+                unit=pset.unit,
+            )
+            f.save()
+            pset.upload = f
+            pset.upload.save()
         if pset.rejected:
             pset.status = "PR"
         elif pset.accepted:
