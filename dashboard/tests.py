@@ -125,7 +125,6 @@ class TestPortal(EvanTestCase):
         self.login(alice)
 
         # A bunch of context things to check
-
         alice_profile = UserProfileFactory.create(user=alice.user)
         alice_profile.last_notif_dismiss = datetime.datetime(
             2021, 6, 1, tzinfo=timezone.utc
@@ -133,42 +132,38 @@ class TestPortal(EvanTestCase):
         alice_profile.save()
 
         # News items
-        MarketFactory.create(
-            start_date=datetime.datetime(2021, 6, 30, tzinfo=timezone.utc),
-            end_date=datetime.datetime(2021, 7, 20, tzinfo=timezone.utc),
-        )
-
-        HanabiContestFactory.create(
-            start_date=datetime.datetime(2021, 6, 30, tzinfo=timezone.utc),
-            end_date=datetime.datetime(2021, 7, 25, tzinfo=timezone.utc),
-        )
-
-        with freeze_time("2021-07-01", tz_offset=0):
-            SemesterDownloadFileFactory.create(
-                semester=semester,
+        for y in (2020, 2021, 2022):
+            MarketFactory.create(
+                start_date=datetime.datetime(y, 6, 30, tzinfo=timezone.utc),
+                end_date=datetime.datetime(y, 7, 20, tzinfo=timezone.utc),
+            )
+            HanabiContestFactory.create(
+                start_date=datetime.datetime(y, 6, 30, tzinfo=timezone.utc),
+                end_date=datetime.datetime(y, 7, 25, tzinfo=timezone.utc),
+            )
+            OpalHuntFactory.create(
+                start_date=datetime.datetime(2021, 6, 30, tzinfo=timezone.utc),
+                active=(y == 2021),
             )
 
-        OpalHuntFactory.create(
-            start_date=datetime.datetime(2021, 6, 30, tzinfo=timezone.utc), active=True
-        )
+        with freeze_time("2021-07-01", tz_offset=0):
+            SemesterDownloadFileFactory.create(semester=semester)
 
         with freeze_time("2021-07-01", tz_offset=0):
             news = get_news(alice_profile)
-
-        self.assertTrue(news["emails"])
-        self.assertTrue(news["downloads"])
-        self.assertTrue(news["markets"])
-        self.assertTrue(news["hanabis"])
-        self.assertTrue(news["opals"])
-
-        # check expiration
+            self.assertEqual(len(news["emails"]), 1)
+            self.assertEqual(len(news["downloads"]), 1)
+            self.assertEqual(len(news["markets"]), 1)
+            self.assertEqual(len(news["hanabis"]), 1)
+            self.assertEqual(len(news["opals"]), 1)
 
         with freeze_time("2021-07-30", tz_offset=0):
             news = get_news(alice_profile)
-
-        self.assertFalse(news["downloads"])
-        self.assertFalse(news["markets"])
-        self.assertFalse(news["hanabis"])
+            self.assertEqual(len(news["emails"]), 1)
+            self.assertEqual(len(news["downloads"]), 0)
+            self.assertEqual(len(news["markets"]), 0)
+            self.assertEqual(len(news["hanabis"]), 0)
+            self.assertEqual(len(news["opals"]), 1)
 
         # alice dismisses stuff
         alice_profile.last_notif_dismiss = datetime.datetime(
@@ -178,12 +173,20 @@ class TestPortal(EvanTestCase):
 
         with freeze_time("2021-07-02", tz_offset=0):
             news = get_news(alice_profile)
+            self.assertEqual(len(news["emails"]), 0)
+            self.assertEqual(len(news["downloads"]), 0)
+            self.assertEqual(len(news["markets"]), 0)
+            self.assertEqual(len(news["hanabis"]), 0)
+            self.assertEqual(len(news["opals"]), 0)
 
-        self.assertFalse(news["emails"])
-        self.assertFalse(news["downloads"])
-        self.assertFalse(news["markets"])
-        self.assertFalse(news["hanabis"])
-        self.assertFalse(news["opals"])
+        with freeze_time("2022-07-02", tz_offset=0):
+            SemesterDownloadFileFactory.create(semester=semester)
+            news = get_news(alice_profile)
+            self.assertEqual(len(news["emails"]), 1)
+            self.assertEqual(len(news["downloads"]), 1)
+            self.assertEqual(len(news["markets"]), 1)
+            self.assertEqual(len(news["hanabis"]), 1)
+            self.assertEqual(len(news["opals"]), 0)
 
 
 class TestCertify(EvanTestCase):
