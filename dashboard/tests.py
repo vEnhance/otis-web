@@ -7,15 +7,22 @@ from django.urls import reverse
 from django.utils import timezone
 from freezegun import freeze_time
 
-from core.factories import SemesterFactory, UnitFactory, UnitGroupFactory, UserFactory
+from core.factories import (
+    SemesterFactory,
+    UnitFactory,
+    UnitGroupFactory,
+    UserFactory,
+    UserProfileFactory,
+)
 from core.models import Unit
 from dashboard.factories import PSetFactory, SemesterDownloadFileFactory
 from dashboard.models import PSet, UploadedFile
-from dashboard.utils import get_units_to_submit, get_units_to_unlock
+from dashboard.utils import get_news, get_units_to_submit, get_units_to_unlock
 from evans_django_tools.testsuite import EvanTestCase
 from exams.factories import QuizFactory, TestFactory
+from hanabi.factories import HanabiContestFactory
 from markets.factories import MarketFactory
-from otisweb.utils import get_mailchimp_campaigns
+from opal.factories import OpalHuntFactory
 from roster.factories import (
     AssistantFactory,
     InvoiceFactory,
@@ -62,31 +69,27 @@ class TestPortal(EvanTestCase):
 
         PSetFactory.create(student=alice, clubs=501, hours=0, status="A", unit=unit)
 
+        alice_profile = UserProfileFactory.create(user=alice.user)
+        alice_profile.last_notif_dismiss = datetime.datetime(
+            2021, 6, 1, tzinfo=timezone.utc
+        )
+        alice_profile.save()
+
         prevSemester = SemesterFactory.create(end_year=2020)
         StudentFactory.create(user=alice.user, semester=prevSemester)
 
         test = TestFactory.create(
-            start_date=datetime.datetime(2021, 1, 1, tzinfo=timezone.utc),
-            due_date=datetime.datetime(2021, 12, 31, tzinfo=timezone.utc),
+            start_date=datetime.datetime(2021, 6, 1, tzinfo=timezone.utc),
+            due_date=datetime.datetime(2021, 7, 31, tzinfo=timezone.utc),
             family="Waltz",
             number=1,
         )
 
         quiz = QuizFactory.create(
-            start_date=datetime.datetime(2021, 1, 1, tzinfo=timezone.utc),
-            due_date=datetime.datetime(2021, 12, 31, tzinfo=timezone.utc),
+            start_date=datetime.datetime(2021, 6, 1, tzinfo=timezone.utc),
+            due_date=datetime.datetime(2021, 7, 31, tzinfo=timezone.utc),
             family="Waltz",
             number=1,
-        )
-
-        market = MarketFactory.create(
-            start_date=datetime.datetime(2021, 1, 1, tzinfo=timezone.utc),
-            end_date=datetime.datetime(2021, 12, 31, tzinfo=timezone.utc),
-        )
-
-        download = SemesterDownloadFileFactory.create(
-            semester=semester,
-            created_at=datetime.datetime(2021, 6, 25, tzinfo=timezone.utc),
         )
 
         # assistant does not cause level up message
@@ -94,31 +97,98 @@ class TestPortal(EvanTestCase):
         alice.assistant = assistant
         alice.save()
         self.login(assistant)
-        with freeze_time("2021-06-30", tz_offset=0):
+        with freeze_time("2021-07-01", tz_offset=0):
             resp = self.assertGet20X("portal", alice.pk, follow=True)
         messages = [m.message for m in resp.context["messages"]]
         self.assertNotIn("You leveled up! You're now level 22.", messages)
 
         self.login(alice)
-        with freeze_time("2021-06-30", tz_offset=0):
+        with freeze_time("2021-07-01", tz_offset=0):
             resp = self.assertGet20X("portal", alice.pk, follow=True)
 
         messages = [m.message for m in resp.context["messages"]]
         self.assertIn("You leveled up! You're now level 22.", messages)
 
+        # static stuff
         self.assertHas(resp, f"{alice.name} ({alice.semester.name})")
+        self.assertHas(resp, 501)
         self.assertHas(resp, 2020)
         self.assertHas(resp, unit.code)
         self.assertHas(resp, test)
         self.assertHas(resp, quiz)
-        self.assertHas(resp, get_mailchimp_campaigns(14)[0]["summary"])
-        self.assertHas(resp, quiz)
-        self.assertHas(resp, download.content)
-        self.assertHas(resp, market.slug)
-        self.assertHas(resp, 501)
+
+        # TODO check for whether meters are being rendered?
+
+    def test_get_news(self):
+        semester = SemesterFactory.create(exam_family="Waltz")
+        alice = StudentFactory.create(semester=semester)
+        self.login(alice)
+
+        # A bunch of context things to check
+        alice_profile = UserProfileFactory.create(user=alice.user)
+        alice_profile.last_notif_dismiss = datetime.datetime(
+            2021, 6, 1, tzinfo=timezone.utc
+        )
+        alice_profile.save()
+
+        # News items
+        for y in (2020, 2020, 2020, 2021, 2022, 2022):
+            MarketFactory.create(
+                start_date=datetime.datetime(y, 6, 30, tzinfo=timezone.utc),
+                end_date=datetime.datetime(y, 7, 20, tzinfo=timezone.utc),
+            )
+            HanabiContestFactory.create(
+                start_date=datetime.datetime(y, 6, 30, tzinfo=timezone.utc),
+                end_date=datetime.datetime(y, 7, 25, tzinfo=timezone.utc),
+            )
+            OpalHuntFactory.create(
+                start_date=datetime.datetime(2021, 6, 30, tzinfo=timezone.utc),
+                active=(y == 2021),
+            )
+
+        with freeze_time("2021-07-01", tz_offset=0):
+            SemesterDownloadFileFactory.create(semester=semester)
+
+        with freeze_time("2021-07-01", tz_offset=0):
+            news = get_news(alice_profile)
+            self.assertEqual(len(news["emails"]), 1)
+            self.assertEqual(len(news["downloads"]), 1)
+            self.assertEqual(len(news["markets"]), 1)
+            self.assertEqual(len(news["hanabis"]), 1)
+            self.assertEqual(len(news["opals"]), 1)
+
+        with freeze_time("2021-07-30", tz_offset=0):
+            news = get_news(alice_profile)
+            self.assertEqual(len(news["emails"]), 1)
+            self.assertEqual(len(news["downloads"]), 0)
+            self.assertEqual(len(news["markets"]), 0)
+            self.assertEqual(len(news["hanabis"]), 0)
+            self.assertEqual(len(news["opals"]), 1)
+
+        # alice dismisses stuff
+        alice_profile.last_notif_dismiss = datetime.datetime(
+            2021, 7, 2, tzinfo=timezone.utc
+        )
+        alice_profile.save()
+
+        with freeze_time("2021-07-02", tz_offset=0):
+            news = get_news(alice_profile)
+            self.assertEqual(len(news["emails"]), 0)
+            self.assertEqual(len(news["downloads"]), 0)
+            self.assertEqual(len(news["markets"]), 0)
+            self.assertEqual(len(news["hanabis"]), 0)
+            self.assertEqual(len(news["opals"]), 0)
+
+        with freeze_time("2022-07-02", tz_offset=0):
+            SemesterDownloadFileFactory.create(semester=semester)
+            news = get_news(alice_profile)
+            self.assertEqual(len(news["emails"]), 1)
+            self.assertEqual(len(news["downloads"]), 1)
+            self.assertEqual(len(news["markets"]), 2)
+            self.assertEqual(len(news["hanabis"]), 2)
+            self.assertEqual(len(news["opals"]), 0)
 
 
-# python manage.py test dashboard.tests.TestCertify
 class TestCertify(EvanTestCase):
     def test_certify(self):
         semester = SemesterFactory.create()

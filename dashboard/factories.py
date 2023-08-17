@@ -26,6 +26,7 @@ class SemesterDownloadFileFactory(DjangoModelFactory):
         model = SemesterDownloadFile
 
     semester = SubFactory(SemesterFactory)
+    description = "Announcement Description"
     content = FileField(filename="TESTING_announcement.txt")
 
 
