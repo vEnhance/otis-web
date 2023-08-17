@@ -56,34 +56,31 @@
         <a href="{% url "view-solutions" pset.unit.pk %}">Solutions</a>
       </td>
     </tr>
-    {% if pset.upload %}
-      <tr>
-        <td>
-          <tt>{{ pset.filename }}</tt>
-        </td>
+    <tr>
+      <td>#{{ pset.pk }}</td>
+      {% if pset.upload %}
         <td>{{ pset.upload.created_at }}</td>
-      </tr>
-    {% else %}
-      <tr>
-        <td class="fst-italic">No uploaded file.</td>
-      </tr>
-    {% endif %}
-    <td>
-      {{ pset.clubs|default_if_none:0 }}♣
-      {{ pset.hours|default_if_none:0 }}♥
-    </td>
-    <td>
-      {{ pset.pk }}
-      {% if pset.accepted %}
-        ✅ Accepted
-      {% elif pset.rejected %}
-        ❌ Rejected
-      {% elif pset.resubmitted %}
-        🔁 Resubmitted
       {% else %}
-        ⏳ Pending
+        <td class="fst-italic">No uploaded file.</td>
       {% endif %}
-    </td>
+    </tr>
+    <tr>
+      <td>
+        {{ pset.clubs|default_if_none:0 }}♣
+        {{ pset.hours|default_if_none:0 }}♥
+      </td>
+      <td>
+        {% if pset.accepted %}
+          ✅ Accepted
+        {% elif pset.rejected %}
+          ❌ Rejected
+        {% elif pset.resubmitted %}
+          🔁 Resubmitted
+        {% else %}
+          ⏳ Pending
+        {% endif %}
+      </td>
+    </tr>
   </table>
   <h3>Your comments</h3>
   {% if pset.feedback %}
