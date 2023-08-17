@@ -84,14 +84,10 @@ class Market(models.Model):
         return f"{self.title} ({self.slug})"
 
     def get_absolute_url(self) -> str:
-        if self.has_ended:
+        if self.has_ended or not self.has_started:
             return reverse("market-results", args=(self.slug,))
-        elif self.has_started:
-            return reverse("market-guess", args=(self.slug,))
         else:
-            return reverse(
-                "market-results", args=(self.slug,)
-            )  # only works for superuser
+            return reverse("market-guess", args=(self.slug,))
 
     @property
     def has_started(self) -> bool:
@@ -139,15 +135,14 @@ class Guess(models.Model):
         return reverse("market-results", args=(self.market.slug,))
 
     def get_score(self) -> Optional[float]:
-        if self.market.answer is not None and self.market.alpha is not None:
-            a = round(self.market.answer, ndigits=6)
-            b = round(self.value, ndigits=6)
-            assert a > 0 and b > 0
-            return round(
-                self.market.weight * min(a / b, b / a) ** self.market.alpha, ndigits=2
-            )
-        else:
+        if self.market.answer is None or self.market.alpha is None:
             return None
+        a = round(self.market.answer, ndigits=6)
+        b = round(self.value, ndigits=6)
+        assert a > 0 and b > 0
+        return round(
+            self.market.weight * min(a / b, b / a) ** self.market.alpha, ndigits=2
+        )
 
     def set_score(self):
         score = self.get_score()

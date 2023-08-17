@@ -55,21 +55,20 @@ def get_mailchimp_campaigns(days: int) -> list[MailChimpDatum]:
             )
         except MailChimpError:
             return []
-        if mailchimp_campaign_data is not None:
-            campaigns = mailchimp_campaign_data["campaigns"]
-            data: list[MailChimpDatum] = [
-                {
-                    "url": c["archive_url"],
-                    "title": c["settings"]["subject_line"],
-                    "summary": c["settings"]["preview_text"],
-                    "timestamp": datetime.datetime.fromisoformat(c["send_time"]),
-                }
-                for c in campaigns
-            ]
-            data.sort(key=lambda datum: datum["timestamp"], reverse=True)
-            return data
-        else:
+        if mailchimp_campaign_data is None:
             return []
+        campaigns = mailchimp_campaign_data["campaigns"]
+        data: list[MailChimpDatum] = [
+            {
+                "url": c["archive_url"],
+                "title": c["settings"]["subject_line"],
+                "summary": c["settings"]["preview_text"],
+                "timestamp": datetime.datetime.fromisoformat(c["send_time"]),
+            }
+            for c in campaigns
+        ]
+        data.sort(key=lambda datum: datum["timestamp"], reverse=True)
+        return data
 
 
 def mailchimp_subscribe(request: AuthHttpRequest):

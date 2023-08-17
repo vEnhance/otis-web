@@ -239,17 +239,11 @@ class Job(models.Model):
 
     @property
     def assignee_name(self) -> str:
-        if self.assignee is None:
-            return ""
-        else:
-            return self.assignee.user.get_full_name()
+        return "" if self.assignee is None else self.assignee.user.get_full_name()
 
     @property
     def assignee_email(self) -> str:
-        if self.assignee is None:
-            return ""
-        else:
-            return self.assignee.user.email
+        return "" if self.assignee is None else self.assignee.user.email
 
 
 def get_semester_invoices_with_annotations(semester: Semester) -> QuerySet[Invoice]:

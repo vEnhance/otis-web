@@ -33,9 +33,7 @@ class OTISPreprocessor(markdown.preprocessors.Preprocessor):
             m_end = special_end_regex.match(line)
             if m_start is not None:
                 output.append(r'<div class="col-md-4 float-right">')
-                table_output: list[str] = []
-                table_output.append(r"<table>")
-                table_output.append(r"<tbody>")
+                table_output: list[str] = ["<table>", "<tbody>"]
                 active = True
                 tag_name = m_start.group(1)
                 tag_arg = m_start.group(2).strip()
@@ -62,17 +60,13 @@ class OTISPreprocessor(markdown.preprocessors.Preprocessor):
                                     f'<div class="W-100 text-center"><a href="{art_url}">'
                                     f'<img class="w-100" src="{art_url}" /></a></div>'
                                 )
-                            table_output.append(
-                                f"<tr><th>Name</th><td>{diamond.name}</td></tr>"
-                            )
-                            table_output.append(
-                                f"<tr><th>Value</th><td>{diamond.diamonds}♦</td></tr>"
-                            )
-                            table_output.append(
-                                f"<tr><th>Found by</th><td>{num_found}</td></tr>"
-                            )
-                            table_output.append(
-                                f"<tr><th>Description</th><td>{diamond.description}</td></tr>"
+                            table_output.extend(
+                                (
+                                    f"<tr><th>Name</th><td>{diamond.name}</td></tr>",
+                                    f"<tr><th>Value</th><td>{diamond.diamonds}♦</td></tr>",
+                                    f"<tr><th>Found by</th><td>{num_found}</td></tr>",
+                                    f"<tr><th>Description</th><td>{diamond.description}</td></tr>",
+                                )
                             )
                         else:
                             table_output.append(
@@ -129,36 +123,28 @@ class OTISPreprocessor(markdown.preprocessors.Preprocessor):
                             table_output.append(
                                 f"<tr><th>Artist</th><td>{unitgroup.artist_name}</td></tr>"
                             )
-                        table_output.append(
-                            f"<tr><th>Classification</th><td>{unitgroup.get_subject_display()}</td></tr>"
+                        table_output.extend(
+                            (
+                                f"<tr><th>Classification</th><td>{unitgroup.get_subject_display()}</td></tr>",
+                                f"<tr><th>Slug</th><td>{unitgroup.slug}</td></tr>",
+                                f"<tr><th>Versions</th><td>{versions}</td></tr>",
+                                f"<tr><th>Participants</th><td>{num_taking}</td></tr>",
+                                f"<tr><th>Submissions</th><td>{num_psets}</td></tr>",
+                                f"<tr><th>♣ earned</th><td>{clubs_given}</td></tr>",
+                                f"<tr><th>♥ earned</th><td>{round(hearts_given, ndigits=2)}</td></tr>",
+                            )
                         )
-                        table_output.append(
-                            f"<tr><th>Slug</th><td>{unitgroup.slug}</td></tr>"
+                        body.extend(
+                            (
+                                '<blockquote class="catalog-quote">',
+                                "<em>",
+                                unitgroup.description,
+                                "</em>",
+                                "<br />",
+                                "— Evan",
+                                "</blockquote>",
+                            )
                         )
-                        table_output.append(
-                            f"<tr><th>Versions</th><td>{versions}</td></tr>"
-                        )
-                        table_output.append(
-                            f"<tr><th>Participants</th><td>{num_taking}</td></tr>"
-                        )
-                        table_output.append(
-                            f"<tr><th>Submissions</th><td>{num_psets}</td></tr>"
-                        )
-                        table_output.append(
-                            f"<tr><th>♣ earned</th><td>{clubs_given}</td></tr>"
-                        )
-                        table_output.append(
-                            f"<tr><th>♥ earned</th><td>{round(hearts_given,ndigits=2)}</td></tr>"
-                        )
-
-                        body.append('<blockquote class="catalog-quote">')
-                        body.append("<em>")
-                        body.append(unitgroup.description)
-                        body.append("</em>")
-                        body.append("<br />")
-                        body.append("— Evan")
-                        body.append("</blockquote>")
-
                 output += table_output
             elif m_end is not None:
                 output.append(r"</tbody>")
@@ -169,8 +155,8 @@ class OTISPreprocessor(markdown.preprocessors.Preprocessor):
                 parts = line.split(" | ")
                 if len(parts) == 2:
                     output.append("<tr>")
-                    output.append("<th>" + parts[0].strip() + "</th>")
-                    output.append("<td>" + parts[1].strip() + "</td>")
+                    output.append(f"<th>{parts[0].strip()}</th>")
+                    output.append(f"<td>{parts[1].strip()}</td>")
                     output.append("</tr>")
             else:
                 output.append(line)

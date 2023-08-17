@@ -250,7 +250,7 @@ class ExamTest(EvanTestCase):
 
         resp1 = self.assertPostOK(
             "participation-points",
-            data={"exam": test_waltz.pk, "pks": "\n".join(pks[0:4])},
+            data={"exam": test_waltz.pk, "pks": "\n".join(pks[:4])},
         )
         self.assertHas(resp1, "Created 4 completion database entries")
         self.assertNotHas(resp1, "with existing entries")

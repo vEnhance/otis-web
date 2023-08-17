@@ -260,18 +260,26 @@
     {% endfor %}
   </div>
   <h2>Your units</h2>
-  <p>
-    After submitting a unit, it's marked ⏳
-    and <a href="{% url "pset-queue-listing" %}">queued</a>;
-    once approved, it becomes ✅
-    (you can access solutions in the meantime).
-    Units to work on are marked 🌠.
-  </p>
-  {% if not student.newborn and semester.active and student.enabled %}
+  {% if request.user|getconfig:"show_portal_instructions" %}
     <p>
-      You can request more units via the
-      <a href="#petitions">"Manage Units" button below</a>.
+      After submitting a unit, it's marked ⏳
+      and <a href="{% url "pset-queue-listing" %}">queued</a>;
+      once approved, it becomes ✅
+      (you can access solutions in the meantime).
+      Units to work on are marked 🌠.
     </p>
+    {% if not student.newborn and semester.active and student.enabled %}
+      <p>
+        You can request more units via the
+        <a href="#petitions">"Manage Units" button below</a>.
+      </p>
+    {% endif %}
+    {% if not student.newborn %}
+      <p>
+        You can hide these instructions in
+        <a href="{% url "profile" %}">user settings</a>.
+      </p>
+    {% endif %}
   {% endif %}
   {% include "dashboard/curriculum_list.html" %}
   <table width="100%">

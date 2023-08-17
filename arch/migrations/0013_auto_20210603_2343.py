@@ -145,12 +145,12 @@ lookup = {
     "PUMaC Finals": "PUF",
 }
 for k, v in list(lookup.items()):
-    lookup[k + " MO"] = v + "MO"
-    lookup[k + " TST"] = v + "TST"
-    lookup[k + " RMM TST"] = v + "RST"
-    lookup[k + " EGMO TST"] = v + "EST"
-    lookup[k + " JBMO TST"] = v + "JST"
-    lookup[k + " TSTST"] = v + "TSTST"
+    lookup[f"{k} MO"] = f"{v}MO"
+    lookup[f"{k} TST"] = f"{v}TST"
+    lookup[f"{k} RMM TST"] = f"{v}RST"
+    lookup[f"{k} EGMO TST"] = f"{v}EST"
+    lookup[f"{k} JBMO TST"] = f"{v}JST"
+    lookup[f"{k} TSTST"] = f"{v}TSTST"
 
 lookup["ARML Local"] = "ARMLOC"
 lookup["Balkan"] = "BALK"
@@ -231,7 +231,7 @@ def inferPUID(source: str) -> str:
         return source
     else:
         # still too long, return some sort of hash
-        return "Z" + (hashlib.sha256(source.encode("ascii")).hexdigest())[0:7].upper()
+        return "Z" + (hashlib.sha256(source.encode("ascii")).hexdigest())[:7].upper()
 
 
 # ---------
@@ -242,10 +242,7 @@ from django.db import migrations
 def set_puid(apps, scheme_editor):
     Problem = apps.get_model("arch", "Problem")
     for p in Problem.objects.all():
-        if p.source:
-            p.puid = inferPUID(p.source)
-        else:
-            p.puid = inferPUID(p.description)
+        p.puid = inferPUID(p.source) if p.source else inferPUID(p.description)
         p.save()
 
 

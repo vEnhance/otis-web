@@ -27,7 +27,7 @@ def validate_at_most_1mb(f: File):  # type: ignore
 
 
 def content_file_name(instance: "UploadedFile", filename: str) -> str:
-    now = datetime.datetime.now()
+    now = datetime.datetime.utcnow()
     return os.path.join(
         instance.category,
         instance.owner.username,
@@ -203,10 +203,7 @@ class PSet(models.Model):
 
     @property
     def filename(self) -> Optional[str]:
-        if self.upload is not None:
-            return self.upload.filename
-        else:
-            return None
+        return self.upload.filename if self.upload is not None else None
 
     @property
     def accepted(self) -> bool:

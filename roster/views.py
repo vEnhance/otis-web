@@ -114,7 +114,7 @@ def curriculum(request: HttpRequest, student_pk: int) -> HttpResponse:
             )
 
     context = {
-        "title": "Units for " + student.name,
+        "title": f"Units for {student.name}",
         "student": student,
         "form": form,
         "enabled": enabled,
@@ -129,7 +129,7 @@ def finalize(request: HttpRequest, student_pk: int) -> HttpResponse:
     student = get_student_by_pk(request, student_pk)
     if student.curriculum.count() > 0:
         student.newborn = False
-        first_units = student.curriculum.all()[0:3]
+        first_units = student.curriculum.all()[:3]
         student.unlocked_units.set(first_units)
         student.save()
         messages.success(
@@ -168,10 +168,12 @@ def advance(request: HttpRequest, student_pk: int) -> Any:
     else:
         form = AdvanceForm(student=student)
 
-    context: dict[str, Any] = {"title": "Advance " + student.name}
-    context["form"] = form
-    context["student"] = student
-    context["curriculum"] = student.generate_curriculum_rows()
+    context: dict[str, Any] = {
+        "title": f"Advance {student.name}",
+        "form": form,
+        "student": student,
+        "curriculum": student.generate_curriculum_rows(),
+    }
     if student.semester.uses_legacy_pset_system:
         uploads = student.uploadedfile_set  # type: ignore
         context["num_psets"] = (
@@ -198,7 +200,7 @@ def invoice(request: HttpRequest, student_pk: Optional[int] = None) -> HttpRespo
         invoice = None
 
     context = {
-        "title": "Invoice for " + student.name,
+        "title": f"Invoice for {student.name}",
         "student": student,
         "invoice": invoice,
         "checksum": student.get_checksum(settings.INVOICE_HASH_KEY),
@@ -219,7 +221,7 @@ def master_schedule(request: HttpRequest) -> HttpResponse:
         # e.g. d = {'name': Student, 'curriculum': 30}
         unit_to_student_dicts[d["curriculum"]].append(
             {
-                "short_name": d["user__first_name"] + " " + d["user__last_name"][0:1],
+                "short_name": d["user__first_name"] + " " + d["user__last_name"][:1],
                 "full_name": d["user__first_name"] + " " + d["user__last_name"],
                 "pk": d["pk"],
             }
@@ -249,6 +251,7 @@ class UpdateInvoice(
         "hours_taught",
         "adjustment",
         "extras",
+        "credits",
         "total_paid",
         "forgive_date",
         "memo",
@@ -449,9 +452,9 @@ def register(request: AuthHttpRequest) -> HttpResponse:
 
 @login_required
 def update_profile(request: AuthHttpRequest) -> HttpResponse:
-    old_email = request.user.email
     if request.method == "POST":
         form = UserForm(request.POST, instance=request.user)
+        old_email = request.user.email
         if form.is_valid():
             new_email = form.cleaned_data["email"]
             user: User = form.save()
@@ -475,7 +478,7 @@ def update_profile(request: AuthHttpRequest) -> HttpResponse:
 @login_required
 def unlock_rest_of_mystery(request: HttpRequest, delta: int = 1) -> HttpResponse:
     student = infer_student(request)
-    assert delta == 1 or delta == 2
+    assert delta in {1, 2}
     try:
         mystery = student.unlocked_units.get(group__name="Mystery")
     except Unit.DoesNotExist:
@@ -522,7 +525,7 @@ def giga_chart(request: HttpRequest, format_as: str) -> HttpResponse:
         "student__enabled",
         "-forgive_date",
         "debt",
-        "student__first_name",
+        "student__user__first_name",
     )
     timestamp = timezone.now().strftime("%Y-%m-%d-%H%M%S")
 

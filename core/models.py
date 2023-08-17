@@ -197,9 +197,7 @@ class UnitGroup(models.Model):
 
     @property
     def artwork_basename(self) -> str | None:
-        if not self.artwork:
-            return None
-        return os.path.basename(self.artwork.name)
+        return None if not self.artwork else os.path.basename(self.artwork.name)
 
     @property
     def artwork_thumb_md_basename(self) -> str | None:
@@ -230,7 +228,7 @@ class Unit(models.Model):
 
     def __str__(self) -> str:
         if self.group is not None:
-            return self.group.name + " [" + self.code + "]"
+            return f"{self.group.name} [{self.code}]"
         return "-" + " [" + self.code + "]"
 
     def get_absolute_url(self):
@@ -290,6 +288,11 @@ class UserProfile(models.Model):
         verbose_name="Dynamic level meters progression",
         help_text="Level meters show progression towards the next value to level up rather than a fixed max value",
         default=False,
+    )
+    show_portal_instructions = models.BooleanField(
+        verbose_name="Show portal instructions",
+        help_text="Show the instruction text above the units on the home page",
+        default=True,
     )
 
     last_seen = models.DateTimeField(

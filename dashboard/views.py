@@ -11,7 +11,7 @@ from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.core.exceptions import PermissionDenied, SuspiciousOperation
+from django.core.exceptions import PermissionDenied
 from django.db.models import Count, OuterRef, Subquery
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
@@ -68,17 +68,16 @@ def portal(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
             lvl = level_info["level_number"]
             messages.success(request, f"You leveled up! You're now level {lvl}.")
 
-    context: dict[str, Any] = {}
-    context["title"] = f"{student.name} ({semester.name})"
-    context["last_seen"] = student_profile.last_seen
-    context["student"] = student
-    context["reg"] = student.reg
-    context["semester"] = semester
-    context["history"] = (
-        Student.objects.filter(user=student.user)
+    context: dict[str, Any] = {
+        "title": f"{student.name} ({semester.name})",
+        "last_seen": student_profile.last_seen,
+        "student": student,
+        "reg": student.reg,
+        "semester": semester,
+        "history": Student.objects.filter(user=student.user)
         .order_by("semester__end_year")
-        .values("pk", "semester__end_year")
-    )
+        .values("pk", "semester__end_year"),
+    }
     context["profile"] = profile
 
     context["curriculum"] = student.generate_curriculum_rows()
@@ -96,7 +95,7 @@ def portal(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
     context["news"] = get_news(profile)
     context["num_news"] = sum(len(_) for _ in context["news"].values())  # type: ignore
 
-    context.update(level_info)
+    context |= level_info
     return render(request, "dashboard/portal.html", context)
 
 
@@ -110,11 +109,10 @@ def certify(
     else:
         student = get_object_or_404(Student, pk=student_pk)
     if checksum is None:
-        if can_view(request, student):
-            checksum = student.get_checksum(settings.CERT_HASH_KEY)
-            return HttpResponseRedirect(reverse("certify", args=(student.pk, checksum)))
-        else:
+        if not can_view(request, student):
             raise PermissionDenied("Not authorized to generate checksum")
+        checksum = student.get_checksum(settings.CERT_HASH_KEY)
+        return HttpResponseRedirect(reverse("certify", args=(student.pk, checksum)))
     elif checksum != student.get_checksum(settings.CERT_HASH_KEY):
         raise PermissionDenied("Wrong hash")
     else:
@@ -129,7 +127,7 @@ def certify(
             letter_grade = "A"
 
         semesters = [s.semester for s in Student.objects.filter(user=student.user)]
-        assert len(semesters) > 0
+        assert semesters
         if len(semesters) == 1:
             years = f"{semesters[0].years} year"
         elif len(semesters) == 2:
@@ -163,7 +161,7 @@ class PSetQueueList(LoginRequiredMixin, ListView[PSet]):
         return PSet.objects.filter(
             status__in=("P", "PA", "PR"),
             student__semester__active=True,
-        ).order_by("pk")
+        ).order_by("upload__created_at")
 
 
 @login_required
@@ -282,10 +280,22 @@ def resubmit_pset(request: HttpRequest, pk: int) -> HttpResponse:
 
     if request.method == "POST" and form.is_valid():
         pset = form.save(commit=False)
-        if pset.upload is None:
-            raise SuspiciousOperation("There was no uploaded file")
-        pset.upload.content = form.cleaned_data["content"]
-        pset.upload.save()
+        if not form.cleaned_data["content"]:
+            messages.info(
+                request, "No file was provided so only the metadata will be changed."
+            )
+        else:
+            f = UploadedFile(
+                benefactor=student,
+                owner=student.user,
+                category="psets",
+                description="",
+                content=form.cleaned_data["content"],
+                unit=pset.unit,
+            )
+            f.save()
+            pset.upload = f
+            pset.upload.save()
         if pset.rejected:
             pset.status = "PR"
         elif pset.accepted:
@@ -333,12 +343,13 @@ def uploads(request: HttpRequest, student_pk: int, unit_pk: int) -> HttpResponse
     if form is None:
         form = NewUploadForm(initial={"unit": unit})
 
-    context: dict[str, Any] = {}
-    context["title"] = "File Uploads"
-    context["student"] = student
-    context["unit"] = unit
-    context["form"] = form
-    context["files"] = uploads
+    context: dict[str, Any] = {
+        "title": "File Uploads",
+        "student": student,
+        "unit": unit,
+        "form": form,
+        "files": uploads,
+    }
     # TODO form for adding new files
     return render(request, "dashboard/uploads.html", context)
 
@@ -361,9 +372,7 @@ def bonus_level_request(request: HttpRequest, student_pk: int) -> HttpResponse:
             messages.success(request, f"Added bonus unit {new_unit} for you.")
     else:
         form = BonusRequestForm(level=student.last_level_seen)
-    context: dict[str, Any] = {}
-    context["student"] = student
-    context["form"] = form
+    context: dict[str, Any] = {"student": student, "form": form}
     return render(request, "dashboard/bonus_level_request.html", context)
 
 
@@ -377,10 +386,11 @@ def index(request: AuthHttpRequest) -> HttpResponse:
     queryset = annotate_student_queryset_with_scores(students).order_by(
         "user__first_name", "user__last_name"
     )
-    context: dict[str, Any] = {}
-    context["title"] = "Current year listing"
-    context["rows"] = get_student_rows(queryset)
-    context["stulist_show_semester"] = False
+    context: dict[str, Any] = {
+        "title": "Current year listing",
+        "rows": get_student_rows(queryset),
+        "stulist_show_semester": False,
+    }
     context["submitted_registration"] = StudentRegistration.objects.filter(
         user=request.user, container__semester__active=True
     ).exists()
@@ -401,10 +411,11 @@ def past(request: AuthHttpRequest, semester_pk: Optional[int] = None):
     queryset = annotate_student_queryset_with_scores(students).order_by(
         "user__first_name", "user__last_name"
     )
-    context: dict[str, Any] = {}
-    context["title"] = "Previous year listing"
-    context["rows"] = get_student_rows(queryset)
-    context["past"] = True
+    context: dict[str, Any] = {
+        "title": "Previous year listing",
+        "rows": get_student_rows(queryset),
+        "past": True,
+    }
     if semester is not None:
         context["semester"] = semester
         context["stulist_show_semester"] = False
@@ -467,9 +478,7 @@ class DeleteFile(LoginRequiredMixin, DeleteView):
 
 @staff_member_required
 def idlewarn(request: AuthHttpRequest) -> HttpResponse:
-    context: dict[str, Any] = {}
-    context["title"] = "Idle-warn"
-
+    context: dict[str, Any] = {"title": "Idle-warn"}
     newest_qset = UploadedFile.objects.filter(
         category="psets", benefactor=OuterRef("pk")
     )

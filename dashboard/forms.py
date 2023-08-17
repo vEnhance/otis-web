@@ -51,6 +51,7 @@ class PSetResubmitForm(forms.ModelForm):
         validators=[
             pset_file_validator,
         ],
+        required=False,
     )
 
     class Meta:

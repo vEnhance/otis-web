@@ -100,7 +100,7 @@ def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
     except Achievement.DoesNotExist:
         pass
     level_info = get_level_info(student)
-    context.update(level_info)
+    context |= level_info
     level_number = level_info["level_number"]
     obtained_levels = Level.objects.filter(threshold__lte=level_number).order_by(
         "-threshold"
@@ -211,8 +211,7 @@ def leaderboard(request: AuthHttpRequest) -> HttpResponse:
     )
     for row in rows:
         row["days_since_last_seen"] = get_days_since(row["last_seen"])
-    context: dict[str, Any] = {}
-    context["rows"] = rows
+    context: dict[str, Any] = {"rows": rows}
     return render(request, "rpg/leaderboard.html", context)
 
 
@@ -321,15 +320,11 @@ class DiamondUpdate(
         return achievement
 
     def form_valid(self, form: BaseModelForm[Achievement]):
-        level_info = assert_maxed_out_level_info(self.student)
-        n = min(level_info["meters"]["diamonds"].level, 7)
+        assert_maxed_out_level_info(self.student)
+        n = 4
         form.instance.diamonds = n
         form.instance.creator = self.student.user
-        messages.success(
-            self.request,
-            f"Successfully forged diamond worth {n}♦, "
-            "which is your current charisma level (capped at 7).",
-        )
+        messages.success(self.request, f"Successfully forged diamond worth {n}♦.")
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:

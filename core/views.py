@@ -53,11 +53,26 @@ class UnitGroupListView(ListView[Unit]):
                     "pset",
                     filter=Q(student__user=self.request.user, status="A"),
                 ),
-                has_pset_for_any_unit=Exists(
+                has_pset_for_any_unit=Exists(  # rather cursed
                     "group__unit__pset",
                     filter=Q(student__user=self.request.user, status="A"),
                 ),
             )
+
+            if student := Student.objects.filter(
+                semester__active=True, user=self.request.user
+            ).first():
+                queryset = queryset.annotate(
+                    user_unlocked=Exists(
+                        "students_unlocked",
+                        filter=Q(student=student),
+                    ),
+                    user_taking=Exists(
+                        "students_taking",
+                        filter=Q(student=student),
+                    ),
+                )
+
         return queryset
 
 
@@ -105,7 +120,7 @@ def permitted(unit: Unit, request: HttpRequest, asking_solution: bool) -> bool:
     ).exists():
         return True
     elif (
-        asking_solution is False
+        not asking_solution
         and Student.objects.filter(user=request.user, unlocked_units=unit).exists()
     ):
         return True
@@ -164,6 +179,7 @@ class UserProfileUpdateView(
         "show_artwork_on_curriculum",
         "dynamic_progress",
         "use_twemoji",
+        "show_portal_instructions",
     )
     success_url = reverse_lazy("profile")
     object: UserProfile

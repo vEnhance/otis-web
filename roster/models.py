@@ -169,31 +169,24 @@ class Student(models.Model):
 
     @property
     def first_name(self) -> str:
-        if self.user is None:
-            return "???"
-        return self.user.first_name
+        return "???" if self.user is None else self.user.first_name
 
     @property
     def last_name(self) -> str:
-        if self.user is None:
-            return "???"
-        return self.user.last_name
+        return "???" if self.user is None else self.user.last_name
 
     @property
     def short_name(self) -> str:
         if self.user is None:
             return "???"
         elif self.user.last_name != "":
-            return self.user.first_name + " " + self.user.last_name[0]
+            return f"{self.user.first_name} {self.user.last_name[0]}"
         else:
             return self.name
 
     @property
     def name(self) -> str:
-        if self.user:
-            return self.user.get_full_name() or self.user.username
-        else:
-            return "?"
+        return self.user.get_full_name() or self.user.username if self.user else "?"
 
     @property
     def calendar_url(self) -> str:
@@ -254,14 +247,14 @@ class Student(models.Model):
         rows = []
         for i, unit in enumerate(curriculum):
             n = i + 1
-            row: CurriculumRowTypeDict = {}
-            row["unit"] = unit
-            row["number"] = n
-            row["num_uploads"] = getattr(unit, "num_uploads", 0)
-
-            row["student_still_active"] = self.semester.active and self.enabled
-            row["is_submitted"] = getattr(unit, "has_pset", False)
-            row["is_current"] = unit.pk in unlocked_units_pks
+            row: CurriculumRowTypeDict = {
+                "unit": unit,
+                "number": n,
+                "num_uploads": getattr(unit, "num_uploads", 0),
+                "student_still_active": self.semester.active and self.enabled,
+                "is_submitted": getattr(unit, "has_pset", False),
+                "is_current": unit.pk in unlocked_units_pks,
+            }
             row["is_visible"] = row["is_submitted"] or row["is_current"]
             if self.semester.uses_legacy_pset_system is True:
                 row["is_accepted"] = row["is_submitted"] and not row["is_current"]
@@ -466,7 +459,7 @@ class UnitInquiry(models.Model):
         verbose_name_plural = "Unit petitions"
 
     def __str__(self) -> str:
-        return self.action_type + " " + str(self.unit)
+        return f"{self.action_type} {str(self.unit)}"
 
     def run_accept(self):
         unit = self.unit
@@ -488,7 +481,9 @@ class UnitInquiry(models.Model):
 
 def content_file_name(instance: "StudentRegistration", filename: str) -> str:
     return os.path.join(
-        "agreement", str(instance.container.pk), instance.user.username + "_" + filename
+        "agreement",
+        str(instance.container.pk),
+        f"{instance.user.username}_{filename}",
     )
 
 
@@ -606,7 +601,7 @@ class StudentRegistration(models.Model):
 
     @property
     def name(self) -> str:
-        return self.user.first_name + " " + self.user.last_name
+        return f"{self.user.first_name} {self.user.last_name}"
 
     @property
     def grade(self) -> int:

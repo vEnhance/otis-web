@@ -15,8 +15,7 @@ class UnitChoiceBoundField(forms.BoundField):
     def subject(self) -> str:
         first_unit_pair = self.field.choices[0]  # type: ignore
         first_unit_code = first_unit_pair[1]
-        first_unit_subject = first_unit_code[1]  # second letter
-        return first_unit_subject
+        return first_unit_code[1]
 
 
 class UnitChoiceField(forms.TypedMultipleChoiceField):
@@ -39,24 +38,25 @@ class CurriculumForm(forms.Form):
 
         super().__init__(*args, **kwargs)
 
-        n = 0
-        for name, group_iter in itertools.groupby(units, lambda u: u.group.name):
+        for n, (name, group_iter) in enumerate(
+            itertools.groupby(units, lambda u: u.group.name)
+        ):
             group = list(group_iter)
-            field_name = "group-" + str(n)
+            field_name = f"group-{str(n)}"
             chosen_units = [unit for unit in group if unit.pk in original]
 
-            form_kwargs = {}
-            form_kwargs["label"] = name
-            form_kwargs["choices"] = tuple((unit.pk, unit.code) for unit in group)
-            form_kwargs["help_text"] = " ".join([unit.code for unit in group])
-            form_kwargs["required"] = False
-            form_kwargs["label_suffix"] = "aoeu"  # wait why is this here again
-            form_kwargs["coerce"] = int
-            form_kwargs["empty_value"] = None
-            form_kwargs["disabled"] = not enabled
-            form_kwargs["initial"] = [unit.pk for unit in chosen_units]
+            form_kwargs = {
+                "label": name,
+                "choices": tuple(((unit.pk, unit.code) for unit in group)),
+                "help_text": " ".join([unit.code for unit in group]),
+                "required": False,
+                "label_suffix": "aoeu",
+                "coerce": int,
+                "empty_value": None,
+                "disabled": not enabled,
+                "initial": [unit.pk for unit in chosen_units],
+            }
             self.fields[field_name] = UnitChoiceField(**form_kwargs)
-            n += 1
 
 
 class AdvanceUnitChoiceField(forms.ModelMultipleChoiceField):
@@ -78,27 +78,25 @@ class AdvanceForm(forms.Form):
             queryset=Unit.objects.exclude(
                 pk__in=student.unlocked_units.values_list("pk")
             )
-            if len(args) == 0
+            if not args
             else Unit.objects.all(),
             help_text="Units to unlock.",
         )
         self.fields["units_to_add"] = AdvanceUnitChoiceField(
             label="Add",
             queryset=Unit.objects.exclude(pk__in=student.curriculum.values_list("pk"))
-            if len(args) == 0
+            if not args
             else Unit.objects.all(),
             help_text="Units to add without unlocking.",
         )
         self.fields["units_to_lock"] = AdvanceUnitChoiceField(
             label="Lock",
-            queryset=student.unlocked_units.all()
-            if len(args) == 0
-            else Unit.objects.all(),
+            queryset=student.unlocked_units.all() if not args else Unit.objects.all(),
             help_text="Units to remove from unlocked set.",
         )
         self.fields["units_to_drop"] = AdvanceUnitChoiceField(
             label="Drop",
-            queryset=student.curriculum.all() if len(args) == 0 else Unit.objects.all(),
+            queryset=student.curriculum.all() if not args else Unit.objects.all(),
             help_text="Units to remove altogether.",
         )
 

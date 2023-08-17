@@ -20,10 +20,10 @@ def achievement_image_file_name(instance: "Achievement", filename: str) -> str:
         basename = f"r{n:016x}"
     else:
         kludge = (settings.SECRET_KEY or "") + "_otis_diamond_" + str(pk)
-        h = sha256(kludge.encode("ascii")).hexdigest()[0:24]
+        h = sha256(kludge.encode("ascii")).hexdigest()[:24]
         basename = f"{pk:04d}_{h}"
     if filename.startswith("TESTING") and settings.TESTING is True:
-        basename = "TESTING_" + basename
+        basename = f"TESTING_{basename}"
     return os.path.join("badges", basename + ext)
 
 
@@ -156,7 +156,7 @@ class QuestComplete(models.Model):
         db_table = "dashboard_questcomplete"
 
     def __str__(self) -> str:
-        return self.title + " " + self.timestamp.strftime("%c")
+        return f"{self.title} " + self.timestamp.strftime("%c")
 
 
 class BonusLevel(models.Model):
