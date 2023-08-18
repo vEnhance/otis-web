@@ -149,13 +149,17 @@ class DecisionForm(forms.ModelForm):
     class Meta:
         model = StudentRegistration
         fields = (
-            "parent_email",
+            "given_name",
+            "surname",
+            "email_address",
             "gender",
             "graduation_year",
             "school_name",
             "country",
             "aops_username",
             "agreement_form",
+            "passcode",
+            "parent_email",
         )
 
 
