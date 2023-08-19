@@ -51,9 +51,10 @@ and replace `YOUR_USERNAME` in step 2 with `vEnhance`.
    and want to use your own rather than Poetry's auto-created one,
    then activate said environment before running `poetry install`.)
 
-   (You may have to separately install certain packages for
-   [mysqlclient](https://github.com/PyMySQL/mysqlclient#install)
-   on certain systems.)
+   On some systems, `poetry install` could fail when trying to install
+   `mysqlclient`. You will have to separately install `pkg-config`
+   [mysql](https://github.com/PyMySQL/mysqlclient#install) in that case;
+   see that link for instructions, under the "Install" section.
 
 7. If it isn't already activated,
    [activate the Python virtual environment][activate]
