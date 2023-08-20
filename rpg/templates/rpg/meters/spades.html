@@ -61,9 +61,9 @@
   <table class="table table-sm">
     <thead class="table-dark">
       <tr>
-        <th width="16%">{{ meters.spades.unit }}</th>
-        <th width="42%">Description</th>
-        <th width="42%">Timestamp</th>
+        <th>{{ meters.spades.unit }}</th>
+        <th>Description</th>
+        <th>Timestamp</th>
       </tr>
     </thead>
     <tbody>
@@ -75,7 +75,7 @@
             </b>
           </td>
           <td>{{ quest.title }}</td>
-          <td>{{ quest.timestamp }}</td>
+          <td>{{ quest.timestamp|date }}</td>
         </tr>
       {% endfor %}
       {% for attempt in quiz_attempts %}
@@ -84,7 +84,7 @@
           <td>
             <a href="{% url "quiz" student.pk attempt.quiz.pk %}">{{ attempt.quiz }}</a>
           </td>
-          <td>{{ attempt.submit_time }}</td>
+          <td>{{ attempt.submit_time|date }}</td>
         </tr>
       {% endfor %}
       {% for mc in mock_completes %}
@@ -95,7 +95,7 @@
             </b>
           </td>
           <td>{{ mc.exam.family }} {{ mc.exam.number }}</td>
-          <td>{{ mc.exam.due_date|default_if_none:"—" }}</td>
+          <td>{{ mc.exam.due_date|date|default_if_none:"—" }}</td>
         </tr>
       {% endfor %}
       {% for u in suggest_unit_set %}
@@ -119,7 +119,7 @@
           <td>
             <a href="{{ guess.market.get_absolute_url }}">{{ guess.market.slug }}</a>
           </td>
-          <td>{{ guess.market.end_date }}</td>
+          <td>{{ guess.market.end_date|date }}</td>
         </tr>
       {% endfor %}
       {% for job in completed_jobs %}
@@ -132,7 +132,7 @@
           <td>
             <a href="{{ job.get_absolute_url }}">{{ job.name }} ({{ job.folder.name }})</a>
           </td>
-          <td>{{ job.updated_at }}</td>
+          <td>{{ job.updated_at|date }}</td>
         </tr>
       {% endfor %}
       {# TODO hints #}

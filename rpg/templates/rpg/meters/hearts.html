@@ -6,9 +6,9 @@
     <table class="table table-sm">
       <thead class="table-dark">
         <tr>
-          <th width="16%">{{ meters.hearts.unit }}</th>
-          <th width="42%">Unit</th>
-          <th width="42%">Timestamp</th>
+          <th>{{ meters.hearts.unit }}</th>
+          <th>Unit</th>
+          <th>Timestamp</th>
         </tr>
       </thead>
       <tbody>
@@ -18,7 +18,7 @@
             <td>
               <a href="{{ pset.get_absolute_url }}">{{ pset.unit }}</a>
             </td>
-            <td>{{ pset.upload.created_at }}</td>
+            <td>{{ pset.upload.created_at|date }}</td>
           </tr>
         {% endfor %}
       </tbody>

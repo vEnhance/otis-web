@@ -7,10 +7,10 @@
     <table class="table table-sm">
       <thead class="table-dark">
         <tr>
-          <th width="10%">{{ meters.clubs.unit }}</th>
-          <th width="10%"></th>
-          <th width="40%">Unit</th>
-          <th width="40%">Timestamp</th>
+          <th>{{ meters.clubs.unit }}</th>
+          <th></th>
+          <th>Unit</th>
+          <th>Timestamp</th>
         </tr>
       </thead>
       <tbody>
@@ -21,7 +21,7 @@
             <td>
               <a href="{{ pset.get_absolute_url }}">{{ pset.unit }}</a>
             </td>
-            <td>{{ pset.upload.created_at }}</td>
+            <td>{{ pset.upload.created_at|date }}</td>
           </tr>
         {% endfor %}
       </tbody>
