@@ -28,7 +28,7 @@ class HanabiContestList(ListView[HanabiContest]):
     context_object_name = "contests"
 
     def get_queryset(self) -> QuerySet[HanabiContest]:
-        return HanabiContest.objects.filter(start_date__lt=timezone.now())
+        return HanabiContest.upcoming.get_queryset()
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)

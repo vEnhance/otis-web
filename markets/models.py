@@ -11,6 +11,7 @@ from markdownfield.validators import VALIDATOR_STANDARD
 
 from core.models import Semester
 
+from datetime import timedelta
 # Create your models here.
 
 
@@ -31,6 +32,18 @@ class ActiveMarketManager(models.Manager):
                 end_date__gte=now,
             )
         )
+
+class UpcomingMarketManager(models.Manager):
+    def get_queryset(self) -> QuerySet["Market"]:
+        now = timezone.now()
+        return (
+            super()
+            .get_queryset()
+            .filter(
+                start_date__lte=now+timedelta(days=4)
+            )
+        )
+
 
 
 class Market(models.Model):
@@ -76,6 +89,7 @@ class Market(models.Model):
     objects = models.Manager()
     started = StartedMarketManager()
     active = ActiveMarketManager()
+    upcoming = UpcomingMarketManager()
 
     class Meta:
         ordering = ("-end_date",)
@@ -101,6 +115,9 @@ class Market(models.Model):
     def has_ended(self) -> bool:
         return timezone.now() >= self.end_date
 
+    @property
+    def is_upcoming(self) -> bool:
+        return timezone.now() < self.start_date and timezone.now()+timedelta(days=7) >= self.start_date
 
 class Guess(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
