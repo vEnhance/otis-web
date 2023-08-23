@@ -139,7 +139,6 @@ INQUIRY_VENUEQ_INIT_QUERYSET = UnitInquiry.objects.filter(
     ),
 )
 INQUIRY_VENUEQ_INIT_KEYS = (
-    "pk",
     "action_type",
     "unit__group__name",
     "unit__code",
@@ -202,7 +201,6 @@ REG_VENUEQ_INIT_QUERYSET = StudentRegistration.objects.filter(
     container__semester__active=True,
 )
 REG_VENUEQ_INIT_KEYS = (
-    "pk",
     "user__first_name",
     "user__last_name",
     "user__email",
