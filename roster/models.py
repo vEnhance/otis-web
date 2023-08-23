@@ -613,3 +613,39 @@ class StudentRegistration(models.Model):
     @property
     def about(self):
         return f"{self.grade}{self.gender or 'U'}"
+
+
+def build_students(queryset: QuerySet[StudentRegistration]) -> int:
+    students_to_create = []
+    queryset = queryset.filter(container__semester__active=True)
+    queryset = queryset.exclude(processed=True)
+    queryset = queryset.select_related("user", "container", "container__semester")
+
+    count = 0
+    n = 0
+    for registration in queryset:
+        students_to_create.append(
+            Student(
+                user=registration.user,
+                semester=registration.container.semester,
+                reg=registration,
+            )
+        )
+
+        semester_date = registration.container.semester.one_semester_date
+
+        n = 1 if semester_date is not None and now() > semester_date else 2
+        count += 1
+    Student.objects.bulk_create(students_to_create)
+    queryset.update(processed=True)
+
+    if n > 0:
+        invoices_to_create = []
+        for student in Student.objects.filter(
+            invoice__isnull=True, semester__active=True
+        ):
+            invoice = Invoice(student=student, preps_taught=n)
+
+            invoices_to_create.append(invoice)
+        Invoice.objects.bulk_create(invoices_to_create)
+    return count
