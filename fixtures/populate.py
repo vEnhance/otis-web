@@ -23,7 +23,6 @@ settings.TESTING = True
 
 import factory
 from django.contrib.auth.models import Group, User
-from django.utils import timezone
 from factory.base import Factory
 from factory.fuzzy import FuzzyInteger
 
@@ -54,6 +53,7 @@ from rpg.factories import (
 )
 from rpg.models import Achievement
 from suggestions.factories import ProblemSuggestionFactory
+
 
 def parse_args() -> argparse.Namespace:
     parser: argparse.ArgumentParser = argparse.ArgumentParser(
@@ -110,20 +110,25 @@ def parse_args() -> argparse.Namespace:
 
     return parser.parse_args()
 
+
 args = parse_args()
 
 ## Utils
+
 
 # create_batch doesn't optimize, so here's
 # some hacky code to use bulk_create
 def fast_bulk_create(cls: type[Factory], size: int, **kwargs: Any) -> Any:
     return cls._meta.model.objects.bulk_create(cls.build_batch(size, **kwargs))  # type: ignore
 
+
 # silly thing with slight bias for small numbers
 def randint_low(a: int, b: int) -> int:
     return a + b - round(math.sqrt(random.randint(a**2, b**2)))
 
+
 ## Creation
+
 
 # Creates models independent of a semester
 def create_sem_independent(users: list[User]):
@@ -251,11 +256,12 @@ def create_sem_independent(users: list[User]):
         unit=factory.Sequence(lambda i: suggest_seq_data[i][1]),
     )
 
-    print(f"Creating an Opal hunt")
+    print("Creating an Opal hunt")
     OpalHuntFactory.create()
-    
-    print(f"Creating a Hanabi contest")
+
+    print("Creating a Hanabi contest")
     HanabiContestFactory.create()
+
 
 # Creates models dependent on a smester
 def create_sem_dependent(semester: Semester, users: list[User]):
@@ -422,6 +428,7 @@ def create_sem_dependent(semester: Semester, users: list[User]):
         students_who_got_assistants, fields=("assistant",), batch_size=50
     )
 
+
 def init():
     args = parse_args()
     verified_group, _ = Group.objects.get_or_create(name="Verified")
@@ -463,5 +470,6 @@ def init():
 
     create_sem_dependent(old_semester, random.sample(users, int(0.6 * len(users))))
     create_sem_dependent(current_semester, random.sample(users, int(0.7 * len(users))))
+
 
 init()
