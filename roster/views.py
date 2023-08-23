@@ -41,7 +41,7 @@ from prettytable import PrettyTable
 
 from core.models import Semester, Unit
 from dashboard.models import PSet
-from evans_django_tools import ACTION_LOG_LEVEL, SUCCESS_LOG_LEVEL
+from evans_django_tools import SUCCESS_LOG_LEVEL
 from otisweb.decorators import admin_required
 from otisweb.utils import AuthHttpRequest, mailchimp_subscribe
 from roster.forms import LinkAssistantForm
@@ -417,11 +417,6 @@ def register(request: AuthHttpRequest) -> HttpResponse:
                 request.user.save()
                 mailchimp_subscribe(request)
                 messages.success(request, message="Submitted! Sit tight.")
-                logger.log(
-                    ACTION_LOG_LEVEL,
-                    f"New registration from {request.user.get_full_name()}",
-                    extra={"request": request},
-                )
                 return HttpResponseRedirect(reverse("index"))
     else:
         initial_data_dict = {}
