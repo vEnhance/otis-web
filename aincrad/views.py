@@ -250,9 +250,11 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
         ]
         return JsonResponse(output_data, status=200)
     elif action == "accept_inquiries":
+        n = 0
         for inquiry in INQUIRY_VENUEQ_INIT_QUERYSET:
             inquiry.run_accept()
-        return JsonResponse({"result": "success"}, status=200)
+            n += 1
+        return JsonResponse({"result": "success", "count": n}, status=200)
     elif action == "accept_registrations":
         num_students_built = build_students(REG_VENUEQ_INIT_QUERYSET)
         return JsonResponse(

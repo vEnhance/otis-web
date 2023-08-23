@@ -17,7 +17,7 @@ from roster.factories import (
     StudentRegistrationFactory,
     UnitInquiryFactory,
 )
-from roster.models import Invoice, Student
+from roster.models import Invoice, Student, UnitInquiry
 
 EXAMPLE_PASSWORD = "take just the first 24"
 TARGET_HASH = sha256(EXAMPLE_PASSWORD.encode("ascii")).hexdigest()
@@ -574,6 +574,18 @@ class TestAincrad(EvanTestCase):
 
         contest.refresh_from_db()
         self.assertTrue(contest.processed)
+
+    def test_accept_inquiries(self) -> None:
+        resp = self.assertPost20X(
+            "api",
+            json={
+                "action": "accept_inquiries",
+                "token": EXAMPLE_PASSWORD,
+            },
+        )
+        self.assertEqual(resp.json()["result"], "success")
+        self.assertEqual(resp.json()["count"], 3)
+        self.assertEqual(len(UnitInquiry.objects.filter(status="INQ_NEW")), 0)
 
     def test_accept_reg(self) -> None:
         n = len(Student.objects.all())
