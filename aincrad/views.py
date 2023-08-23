@@ -193,38 +193,7 @@ JOB_VENUEQ_INIT_KEYS = (
 
 
 def venueq_handler(action: str, data: JSONData) -> JsonResponse:
-    if action == "accept_inquiries":
-        for inquiry in UnitInquiry.objects.filter(
-            status="INQ_NEW",
-            student__semester__active=True,
-            student__legit=True,
-        ):
-            inquiry.run_accept()
-        return JsonResponse({"result": "success"}, status=200)
-    elif action == "grade_problem_set":
-        # mark problem set as done
-        pset = get_object_or_404(PSet, pk=data["pk"])
-        original_status = pset.status
-        pset.status = data["status"]
-        pset.clubs = data.get("clubs", None)
-        pset.hours = data.get("hours", None)
-        if "staff_comments" in data:
-            if pset.staff_comments:
-                pset.staff_comments += "\n\n" + "-" * 40 + "\n\n"
-            pset.staff_comments += data["staff_comments"]
-        pset.save()
-        if (
-            pset.status == "A"
-            and original_status in ("P", "PR")
-            and pset.unit is not None
-        ):
-            # unlock the unit the student asked for
-            if pset.next_unit_to_unlock is not None:
-                pset.student.unlocked_units.add(pset.next_unit_to_unlock)
-            # remove the old unit since it's done now
-            pset.student.unlocked_units.remove(pset.unit)
-        return JsonResponse({"result": "success"}, status=200)
-    elif action == "init":
+    if action == "init":
         output_data: dict[str, Any] = {
             "timestamp": str(timezone.now()),
             "_name": "Root",
@@ -256,6 +225,37 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
             },
         ]
         return JsonResponse(output_data, status=200)
+    elif action == "accept_inquiries":
+        for inquiry in UnitInquiry.objects.filter(
+            status="INQ_NEW",
+            student__semester__active=True,
+            student__legit=True,
+        ):
+            inquiry.run_accept()
+        return JsonResponse({"result": "success"}, status=200)
+    elif action == "grade_problem_set":
+        # mark problem set as done
+        pset = get_object_or_404(PSet, pk=data["pk"])
+        original_status = pset.status
+        pset.status = data["status"]
+        pset.clubs = data.get("clubs", None)
+        pset.hours = data.get("hours", None)
+        if "staff_comments" in data:
+            if pset.staff_comments:
+                pset.staff_comments += "\n\n" + "-" * 40 + "\n\n"
+            pset.staff_comments += data["staff_comments"]
+        pset.save()
+        if (
+            pset.status == "A"
+            and original_status in ("P", "PR")
+            and pset.unit is not None
+        ):
+            # unlock the unit the student asked for
+            if pset.next_unit_to_unlock is not None:
+                pset.student.unlocked_units.add(pset.next_unit_to_unlock)
+            # remove the old unit since it's done now
+            pset.student.unlocked_units.remove(pset.unit)
+        return JsonResponse({"result": "success"}, status=200)
     elif action == "mark_suggestion":
         suggestion = get_object_or_404(ProblemSuggestion, pk=data["pk"])
         suggestion.status = data["status"]
