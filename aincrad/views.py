@@ -226,11 +226,7 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
         ]
         return JsonResponse(output_data, status=200)
     elif action == "accept_inquiries":
-        for inquiry in UnitInquiry.objects.filter(
-            status="INQ_NEW",
-            student__semester__active=True,
-            student__legit=True,
-        ):
+        for inquiry in INQUIRY_VENUEQ_INIT_QUERYSET:
             inquiry.run_accept()
         return JsonResponse({"result": "success"}, status=200)
     elif action == "grade_problem_set":
