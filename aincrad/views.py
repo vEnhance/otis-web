@@ -23,7 +23,13 @@ from arch.models import Hint, Problem
 from dashboard.models import PSet
 from hanabi.models import HanabiContest, HanabiParticipation, HanabiPlayer, HanabiReplay
 from payments.models import Job
-from roster.models import Invoice, Student, StudentRegistration, UnitInquiry
+from roster.models import (
+    Invoice,
+    Student,
+    StudentRegistration,
+    UnitInquiry,
+    build_students,
+)
 from suggestions.models import ProblemSuggestion
 
 # Create your views here.
@@ -191,6 +197,18 @@ JOB_VENUEQ_INIT_KEYS = (
     "updated_at",
 )
 
+REG_VENUEQ_INIT_QUERYSET = StudentRegistration.objects.filter(
+    processed=False,
+    container__semester__active=True,
+)
+REG_VENUEQ_INIT_KEYS = (
+    "pk",
+    "user__first_name",
+    "user__last_name",
+    "user__email",
+    "created_at",
+)
+
 
 def venueq_handler(action: str, data: JSONData) -> JsonResponse:
     if action == "init":
@@ -223,12 +241,23 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
                     JOB_VENUEQ_INIT_QUERYSET.values(*JOB_VENUEQ_INIT_KEYS)
                 ),
             },
+            {
+                "_name": "Regs",
+                "registrations": list(
+                    REG_VENUEQ_INIT_QUERYSET.values(*REG_VENUEQ_INIT_KEYS)
+                ),
+            },
         ]
         return JsonResponse(output_data, status=200)
     elif action == "accept_inquiries":
         for inquiry in INQUIRY_VENUEQ_INIT_QUERYSET:
             inquiry.run_accept()
         return JsonResponse({"result": "success"}, status=200)
+    elif action == "accept_registrations":
+        num_students_built = build_students(REG_VENUEQ_INIT_QUERYSET)
+        return JsonResponse(
+            {"result": "success", "count": num_students_built}, status=200
+        )
     elif action == "grade_problem_set":
         # mark problem set as done
         pset = get_object_or_404(PSet, pk=data["pk"])
@@ -574,6 +603,7 @@ def api(request: HttpRequest) -> JsonResponse:
 
     if action in (
         "grade_problem_set",
+        "accept_registrations",
         "accept_inquiries",
         "mark_suggestion",
         "triage_job",

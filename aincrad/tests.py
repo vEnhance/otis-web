@@ -4,13 +4,19 @@ from django.test.utils import override_settings
 
 from arch.factories import HintFactory, ProblemFactory
 from arch.models import Hint, Problem
-from core.factories import SemesterFactory, UnitFactory
+from core.factories import SemesterFactory, UnitFactory, UserFactory
 from dashboard.factories import PSetFactory
 from evans_django_tools.testsuite import EvanTestCase
 from hanabi.factories import HanabiContestFactory, HanabiPlayerFactory
 from hanabi.models import HanabiParticipation, HanabiReplay
 from payments.factories import PaymentLogFactory
-from roster.factories import InvoiceFactory, StudentFactory, UnitInquiryFactory
+from roster.factories import (
+    InvoiceFactory,
+    RegistrationContainerFactory,
+    StudentFactory,
+    StudentRegistrationFactory,
+    UnitInquiryFactory,
+)
 from roster.models import Invoice, Student
 
 EXAMPLE_PASSWORD = "take just the first 24"
@@ -94,6 +100,26 @@ class TestAincrad(EvanTestCase):
         PaymentLogFactory.create(invoice=invD, amount=120)
         PaymentLogFactory.create(invoice=invE, amount=1)
 
+        regcontainer_active = RegistrationContainerFactory.create(
+            semester=active_semester
+        )
+        regcontainer_old = RegistrationContainerFactory.create(semester=old_semester)
+
+        for student in (alice, bob, carol, david, eve, old_alice):
+            StudentRegistrationFactory.create(
+                user=student.user,
+                container=(
+                    regcontainer_active
+                    if student.semester.active is True
+                    else regcontainer_old
+                ),
+                processed=True,
+            )
+        new_user = UserFactory.create(
+            username="frisk", first_name="Frank", last_name="Frisk"
+        )
+        StudentRegistrationFactory.create(user=new_user, processed=False)
+
     def test_failed_auth(self):
         resp = self.assertPost40X(
             "api",
@@ -140,6 +166,11 @@ class TestAincrad(EvanTestCase):
         inquiries = out["_children"][1]["inquiries"]
         self.assertEqual(len(inquiries), 3)
         self.assertEqual(inquiries[0]["unlock_inquiry_count"], 8)
+
+        regs = out["_children"][4]["registrations"]
+        self.assertEqual(len(regs), 1)
+        self.assertEqual(regs[0]["user__first_name"], "Frank")
+        self.assertEqual(regs[0]["user__last_name"], "Frisk")
 
     def test_invoice(self):
         out = self.assertPost20X(
@@ -543,3 +574,18 @@ class TestAincrad(EvanTestCase):
 
         contest.refresh_from_db()
         self.assertTrue(contest.processed)
+
+    def test_accept_reg(self) -> None:
+        n = len(Student.objects.all())
+        self.assertFalse(Student.objects.filter(user__username="frisk").exists())
+        resp = self.assertPost20X(
+            "api",
+            json={
+                "action": "accept_registrations",
+                "token": EXAMPLE_PASSWORD,
+            },
+        )
+        self.assertEqual(resp.json()["result"], "success")
+        self.assertEqual(resp.json()["count"], 1)
+        self.assertEqual(len(Student.objects.all()), n + 1)
+        self.assertTrue(Student.objects.filter(user__username="frisk").exists())
