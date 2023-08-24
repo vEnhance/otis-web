@@ -144,7 +144,8 @@
       {% if request.user|getconfig:"show_bars" %}
         <h1>
           Level {{ level_number }} —
-          <a href="{% url 'stats' student.pk %}">🏅{{ level_name }}</a>
+          <a href="{% url 'stats' student.pk %}">
+            <span class="emoji-text">🏅</span>{{ level_name }}</a>
         </h1>
         <div class="container">
           <div class="row">
@@ -196,7 +197,7 @@
       </h2>
       {% for email in news.emails %}
         <p class="mt-3">
-          📢
+          <span class="emoji-text">📢</span>
           <b><a class="alert-link" href="{{ email.url }}">{{ email.title }}</a></b>
           | {{ email.timestamp|naturaltime }}
           <br />
@@ -205,7 +206,7 @@
       {% endfor %}
       {% for dl in news.downloads %}
         <p class="mt-3">
-          💾
+          <span class="emoji-text">💾</span>
           <b><a class="alert-link" href="{{ dl.content.url }}">{{ dl }}</a></b>
           | {{ dl.created_at|naturaltime }}
           <br />
@@ -214,7 +215,7 @@
       {% endfor %}
       {% for market in news.markets %}
         <p class="mt-3">
-          📈
+          <span class="emoji-text">📈</span>
           <b><a class="alert-link" href="{{ market.get_absolute_url }}">{{ market.title }}</a></b>
           | {{ market.start_date|naturaltime }}
           <br />
@@ -224,7 +225,7 @@
       {% endfor %}
       {% for hc in news.hanabis %}
         <p class="mt-3">
-          🎇
+          <span class="emoji-text">🎇</span>
           <b><a class="alert-link" href="{% url "hanabi-contests" %}">{{ hc }}</a></b>
           | {{ hc.start_date|naturaltime }}
           <br />
@@ -234,7 +235,7 @@
       {% endfor %}
       {% for hunt in news.opals %}
         <p class="mt-3">
-          🧩
+          <span class="emoji-text">🧩</span>
           <b><a class="alert-link" href="{% url "opal-hunt-list" %}">{{ hunt.name }}</a></b>
           | {{ hunt.start_date|naturaltime }}
           <br />
@@ -262,11 +263,11 @@
   <h2>Your units</h2>
   {% if request.user|getconfig:"show_portal_instructions" %}
     <p>
-      After submitting a unit, it's marked ⏳
+      After submitting a unit, it's marked <span class="emoji-text">⏳</span>
       and <a href="{% url "pset-queue-listing" %}">queued</a>;
-      once approved, it becomes ✅
+      once approved, it becomes <span class="emoji-text">✅</span>
       (you can access solutions in the meantime).
-      Units to work on are marked 🌠.
+      Units to work on are marked <span class="emoji-text">🌠.</span>
     </p>
     {% if not student.newborn and semester.active and student.enabled %}
       <p>

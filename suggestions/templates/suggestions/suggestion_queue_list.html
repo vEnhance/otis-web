@@ -5,6 +5,12 @@
 {% block layout-content %}
   {% load otis_extras %}
   <p>Here are all the suggestion sets that haven't been checked yet.</p>
+  <p class="text-center">
+    <a class="btn btn-link btn-success" href="{% url "suggest-new" %}">
+      <span class="emoji-text">💡</span>
+      Submit new suggestion
+    </a>
+  </p>
   <table class="table">
     <thead class="table-dark">
       <tr>

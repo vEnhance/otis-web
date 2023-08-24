@@ -18,13 +18,19 @@
 {% if request.user.is_superuser %}
   <div class="alert alert-secondary">
     <p>
-      <a href="{% url "job-list" jobfolder.slug %}">🪟 View folder</a>
+      <a href="{% url "job-list" jobfolder.slug %}">
+        <span class="emoji-text">🪟</span> View folder
+      </a>
     </p>
     <p>
-      <a href="{% url "admin:payments_jobfolder_change" jobfolder.pk %}">✏️ Edit folder (pk={{ jobfolder.pk }})</a>
+      <a href="{% url "admin:payments_jobfolder_change" jobfolder.pk %}">
+        <span class="emoji-text">✏️</span> Edit folder (pk={{ jobfolder.pk }})
+      </a>
     </p>
     <p>
-      <a href="{% url "job-inactive" jobfolder.slug %}">😡 Show inactive workers</a>
+      <a href="{% url "job-inactive" jobfolder.slug %}">
+        <span class="emoji-text">😡</span> Show inactive workers
+      </a>
     </p>
   </div>
 {% endif %}
