@@ -5,7 +5,7 @@
 {% endblock title %}
 {% block layout-content %}
   <p>
-    <a href="{% url "arch-index" %}">⬅️ Back to ARCH index</a>
+    <a href="{% url "arch-index" %}"><span class="emoji-text">⬅️</span> Back to ARCH index</a>
   </p>
   <hr />
   {% spaceless %}
@@ -15,7 +15,7 @@
   {% if problem.hyperlink %}
     <p class="text-center">
       <a class="btn btn-secondary" href="{{ problem.hyperlink }}">
-        <tt>🌏 {{ problem.hyperlink|truncatechars:"40" }}</tt>
+        <tt><span class="emoji-text">🌏</span> {{ problem.hyperlink|truncatechars:"40" }}</tt>
       </a>
     </p>
   {% endif %}
@@ -50,20 +50,28 @@
   {% endif %}
   <div class="text-center">
     <a href="https://discord.com/channels/740366393022742618/1019651152385679491"
-       class="btn btn-primary">💬 #math-discuss</a>
-    <a href="{% url "hint-create" problem.puid %}" class="btn btn-success">🆕 Add hint</a>
+       class="btn btn-primary"><span class="emoji-text">💬</span> #math-discuss</a>
+    <a href="{% url "hint-create" problem.puid %}" class="btn btn-success">
+      <span class="emoji-text">🆕</span> Add hint
+    </a>
     {% if request.user.is_staff %}
       <a href="{% url "admin:arch_problem_change" problem.pk %}"
-         class="btn btn-dark">✏️ Edit</a>
+         class="btn btn-dark"><span class="emoji-text">✏️</span> Edit</a>
     {% else %}
-      <a href="{% url "problem-update" problem.puid %}" class="btn btn-dark">✏️ Edit</a>
+      <a href="{% url "problem-update" problem.puid %}" class="btn btn-dark">
+        <span class="emoji-text">✏️</span> Edit
+      </a>
     {% endif %}
   </div>
   <hr />
   <div class="text-center">
     {% if statement %}
-      <a href="{% url "view-solution" problem.puid %}" class="btn btn-info">📜 Solution (TeX)</a>
+      <a href="{% url "view-solution" problem.puid %}" class="btn btn-info">
+        <span class="emoji-text">📜</span> Solution (TeX)
+      </a>
     {% endif %}
-    <a href="{% url "vote-create" problem.puid %}" class="btn btn-secondary">🗳 Rate</a>
+    <a href="{% url "vote-create" problem.puid %}" class="btn btn-secondary">
+      <span class="emoji-text">🗳</span> Rate
+    </a>
   </div>
 {% endblock layout-content %}
