@@ -191,10 +191,37 @@ a.emoji-link {
     0 -1px 0 black,
     0 1px 0 black,
     -1px 0 0 black;
+  font-family:
+    Apple Color Emoji,
+    Segoe UI Emoji,
+    Noto Color Emoji,
+    Android Emoji,
+    EmojiSymbols,
+    EmojiOne Mozilla,
+    Twemoji Mozilla,
+    Segoe UI Symbol,
+    Noto Color Emoji Compat,
+    Noto Sans,
+    sans-serif;
 }
 
 a.emoji-link:hover {
   text-shadow: 0 0 5px #ff0;
+}
+
+span.emoji-text {
+  font-family:
+    Apple Color Emoji,
+    Segoe UI Emoji,
+    Noto Color Emoji,
+    Android Emoji,
+    EmojiSymbols,
+    EmojiOne Mozilla,
+    Twemoji Mozilla,
+    Segoe UI Symbol,
+    Noto Color Emoji Compat,
+    Noto Sans,
+    sans-serif;
 }
 
 table.curriculum tr.unit-locked-hidden {
