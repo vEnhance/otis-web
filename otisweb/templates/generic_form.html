@@ -6,8 +6,9 @@
   {% csrf_token %}
   {% if form.non_field_errors %}
     <div class="alert alert-danger" role="alert">
+      <strong>Errors</strong>
       <ul>
-        {% for err,val in form.non_field_errors.items %}<strong>{{ err|title }}</strong> {{ val }}{% endfor %}
+        {% for err in form.non_field_errors %}<li>{{ err }}</li>{% endfor %}
       </ul>
     </div>
   {% elif form.errors %}
