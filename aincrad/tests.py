@@ -142,7 +142,7 @@ class TestAincrad(EvanTestCase):
         self.assertEqual(out["_name"], "Root")
         self.assertEqual(len(out["_children"][0]["_children"]), 10)
         self.assertIn("timestamp", out)
-        self.assertEqual(len(out.keys()), 3)
+        self.assertEqual(len(out.keys()), 4)
 
         pset_data = out["_children"][0]
         self.assertEqual(pset_data["_name"], "Problem sets")

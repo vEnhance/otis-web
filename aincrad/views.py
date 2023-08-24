@@ -213,6 +213,7 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
         output_data: dict[str, Any] = {
             "timestamp": str(timezone.now()),
             "_name": "Root",
+            "result": "success",
         }
         output_data["_children"] = [
             {
@@ -252,12 +253,16 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
         for inquiry in INQUIRY_VENUEQ_INIT_QUERYSET:
             inquiry.run_accept()
             n += 1
-        return JsonResponse({"result": "success", "count": n}, status=200)
+        if n > 0:
+            return JsonResponse({"result": "success", "count": n}, status=200)
+        else:
+            return JsonResponse({"result": "failed", "count": 0}, status=400)
     elif action == "accept_registrations":
-        num_students_built = build_students(REG_VENUEQ_INIT_QUERYSET)
-        return JsonResponse(
-            {"result": "success", "count": num_students_built}, status=200
-        )
+        n = build_students(REG_VENUEQ_INIT_QUERYSET)
+        if n > 0:
+            return JsonResponse({"result": "success", "count": n}, status=200)
+        else:
+            return JsonResponse({"result": "failed", "count": 0}, status=400)
     elif action == "grade_problem_set":
         # mark problem set as done
         pset = get_object_or_404(PSet, pk=data["pk"])
