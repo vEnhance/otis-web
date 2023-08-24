@@ -196,6 +196,18 @@ class HintCreate(
         initial = initial.copy()
         initial["problem"] = Problem.objects.get(puid=self.kwargs["puid"])
         return initial
+    
+    def form_invalid(self, form):
+        logger.log(
+            ACTION_LOG_LEVEL,
+            form)
+        logger.log(
+            ACTION_LOG_LEVEL,
+            form.non_field_errors()
+        )
+
+        return super().form_invalid(form)
+
 
 
 class HintDelete(HintObjectView, VerifiedRequiredMixin, RevisionMixin, DeleteView):
