@@ -226,9 +226,7 @@ class ProblemCreate(
         context["lookup_form"] = ProblemSelectForm()
         context["num_problems"] = Problem.objects.all().count()
         context["num_hints"] = Hint.objects.all().count()
-        context["lookup_url"] = reverse(
-            "arch-lookup",
-        )
+        context["lookup_url"] = reverse("arch-lookup")
         return context
 
 
