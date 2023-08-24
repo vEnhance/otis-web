@@ -1,5 +1,9 @@
 # TODO: this entire thing is a giant hack that could be really cleaned up
 
+# hack to unindent following code
+if __name__ != "__main__":
+    raise TypeError("Attempted to import command-line only script")
+
 import argparse
 import math
 import os
@@ -11,10 +15,6 @@ import django
 from django.conf import settings
 
 random.seed("OTIS-WEB")
-
-# hack to unindent following code
-if __name__ != "__main__":
-    raise TypeError("Attempted to import command-line only script")
 
 # https://stackoverflow.com/questions/58780717/how-to-use-django-model-in-an-external-python-script-within-the-project
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "otisweb.settings")
@@ -34,8 +34,10 @@ from dashboard.factories import PSetFactory, SemesterDownloadFileFactory
 from dashboard.models import PSet
 from exams.factories import ExamAttemptFactory, QuizFactory, TestFactory
 from exams.models import PracticeExam
+from hanabi.factories import HanabiContestFactory
 from markets.factories import GuessFactory, MarketFactory
 from markets.models import Market
+from opal.factories import OpalHuntFactory
 from roster.factories import (
     AssistantFactory,
     InvoiceFactory,
@@ -111,6 +113,8 @@ def parse_args() -> argparse.Namespace:
 
 args = parse_args()
 
+## Utils
+
 
 # create_batch doesn't optimize, so here's
 # some hacky code to use bulk_create
@@ -123,6 +127,10 @@ def randint_low(a: int, b: int) -> int:
     return a + b - round(math.sqrt(random.randint(a**2, b**2)))
 
 
+## Creation
+
+
+# Creates models independent of a semester
 def create_sem_independent(users: list[User]):
     # achievements - 24 digit collision is basically impossible
     print(f"Creating {args.achievement_num} achievements")
@@ -248,7 +256,14 @@ def create_sem_independent(users: list[User]):
         unit=factory.Sequence(lambda i: suggest_seq_data[i][1]),
     )
 
+    print("Creating an Opal hunt")
+    OpalHuntFactory.create()
 
+    print("Creating a Hanabi contest")
+    HanabiContestFactory.create()
+
+
+# Creates models dependent on a smester
 def create_sem_dependent(semester: Semester, users: list[User]):
     container: RegistrationContainer = RegistrationContainerFactory.create(
         semester=semester
