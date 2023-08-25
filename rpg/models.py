@@ -79,6 +79,11 @@ class Achievement(models.Model):
         help_text="If enabled, the solution page for a diamond is available to those who have unlocked the diamond.",
         verbose_name="Show Solution",
     )
+    show_creator = models.BooleanField(
+        default=False,
+        help_text="If enabled, the creator of a diamond is shown on the diamond page.",
+        verbose_name="Show Creator",
+    )
 
     class Meta:
         db_table = "dashboard_achievement"

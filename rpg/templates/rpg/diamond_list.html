@@ -70,6 +70,9 @@
         {% else %}
           <p class="text-muted">You have not found this achievement yet.</p>
         {% endif %}
+        {% if achievement.creator and achievement.show_creator %}
+         <p class='text-secondary'>Forged by <i>{{ achievement.creator }}</i>.</p>
+        {% endif %}
       </div>
     {% endfor %}
   </div>
