@@ -250,7 +250,11 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
         return JsonResponse(output_data, status=200)
     elif action == "accept_inquiries":
         n = 0
-        for inquiry in INQUIRY_VENUEQ_INIT_QUERYSET:
+        for inquiry in UnitInquiry.objects.filter(
+            status="INQ_NEW",
+            student__semester__active=True,
+            student__legit=True,
+        ):
             inquiry.run_accept()
             n += 1
         if n > 0:
