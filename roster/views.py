@@ -41,7 +41,7 @@ from prettytable import PrettyTable
 
 from core.models import Semester, Unit
 from dashboard.models import PSet
-from evans_django_tools import SUCCESS_LOG_LEVEL
+from evans_django_tools import ACTION_LOG_LEVEL, SUCCESS_LOG_LEVEL
 from otisweb.decorators import admin_required
 from otisweb.utils import AuthHttpRequest, mailchimp_subscribe
 from roster.forms import LinkAssistantForm
@@ -666,7 +666,7 @@ def link_assistant(request: HttpRequest) -> HttpResponse:
             student.save()
             messages.success(request, f"You were paired with student {student}.")
             logger.log(
-                SUCCESS_LOG_LEVEL,
+                ACTION_LOG_LEVEL,
                 f"Assistant {assistant} was linked to {student}",
                 extra={"request": request},
             )
