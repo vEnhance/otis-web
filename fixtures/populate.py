@@ -62,7 +62,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "-s",
         dest="stu_num",
-        default=100,
+        default=25,
         metavar="INT",
         type=int,
         help="number of students",
@@ -70,7 +70,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "-d",
         dest="achievement_num",
-        default=25,
+        default=5,
         metavar="INT",
         type=int,
         help="number of diamonds or achievements",
@@ -78,7 +78,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "-p",
         dest="arch_num",
-        default=30,
+        default=3,
         metavar="INT",
         type=int,
         help="number of arch problems",
@@ -94,7 +94,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "-a",
         dest="assistant_num",
-        default=5,
+        default=2,
         metavar="INT",
         type=int,
         help="number of assistants",
@@ -221,14 +221,6 @@ def create_sem_independent(users: list[User]):
 
             for achievement in stu_achievements:
                 achievement_seq_data.append((user, achievement))
-
-        # votes
-        if args.arch_num > 0 and random.random() < 0.2:
-            stu_vote_num = random.randint(0, 5)
-            stu_vote_problems = random.sample(problems, stu_vote_num)
-
-            for problem in stu_vote_problems:
-                vote_seq_data.append((user, problem))
 
         # suggestions
         if random.random() < 0.24:
