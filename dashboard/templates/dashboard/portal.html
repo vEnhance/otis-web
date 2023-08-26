@@ -189,7 +189,7 @@
     {% endif %}
   </div>
   {# News report #}
-  {% if num_news > 0 %}
+  {% if num_news > 0 and not student.newborn %}
     <div class="alert alert-primary alert-dismissible mt-3">
       <h2 class="alert-heading">
         News!
