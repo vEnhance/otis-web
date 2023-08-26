@@ -170,12 +170,7 @@ class TestLevelSystem(EvanTestCase):
         QuestCompleteFactory.create(student=carol, spades=5)
 
         worker_alice = WorkerFactory.create(user=alice.user)
-        JobFactory.create(
-            assignee=worker_alice,
-            spades_bounty=2,
-            progress="JOB_VFD",
-            semester=alice.semester,
-        )
+        JobFactory.create(assignee=worker_alice, spades_bounty=2, progress="JOB_VFD")
         JobFactory.create(assignee=worker_alice, spades_bounty=5, progress="JOB_VFD")
         JobFactory.create(assignee=worker_alice, spades_bounty=9, progress="JOB_REV")
         worker_bob = WorkerFactory.create(user=bob.user)

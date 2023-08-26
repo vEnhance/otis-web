@@ -29,7 +29,6 @@ from django.views.generic.list import ListView
 from sql_util.aggregates import SubqueryCount, SubqueryMax, SubqueryMin
 from sql_util.utils import Exists
 
-from core.models import Semester
 from otisweb.decorators import verified_required
 from otisweb.mixins import VerifiedRequiredMixin
 from payments.models import Job, JobFolder
@@ -284,10 +283,6 @@ def job_claim(request: HttpRequest, pk: int) -> HttpResponse:
             )
         else:
             job.assignee = worker
-            try:
-                job.semester = Semester.objects.get(active=True)
-            except Semester.DoesNotExist:
-                pass
             job.save()
             messages.success(
                 request, f"You have successfully claimed task #{ job.pk }."

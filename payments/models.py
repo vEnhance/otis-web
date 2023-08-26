@@ -1,18 +1,10 @@
-from decimal import Decimal
-
 from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
 from django.db import models
-from django.db.models.aggregates import Sum
-from django.db.models.expressions import OuterRef
-from django.db.models.functions.comparison import Coalesce
-from django.db.models.query import QuerySet
 from django.urls import reverse
 from markdownfield.models import MarkdownField, RenderedMarkdownField
 from markdownfield.validators import VALIDATOR_STANDARD
-from sql_util.aggregates import Subquery, SubquerySum
 
-from core.models import Semester
 from roster.models import Invoice
 
 
@@ -215,12 +207,6 @@ class Job(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    semester = models.ForeignKey(
-        Semester,
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-    )
 
     def __str__(self) -> str:
         return self.name
@@ -244,23 +230,3 @@ class Job(models.Model):
     @property
     def assignee_email(self) -> str:
         return "" if self.assignee is None else self.assignee.user.email
-
-
-def get_semester_invoices_with_annotations(semester: Semester) -> QuerySet[Invoice]:
-    job_subquery = (
-        Job.objects.filter(
-            assignee__user=OuterRef("student__user"),
-            semester=semester,
-            progress="JOB_VFD",
-            payment_preference="PREF_INVCRD",
-        )
-        .order_by()
-        .values("assignee__user")
-        .annotate(total=Sum("usd_bounty"))
-        .values("total")
-    )
-
-    return Invoice.objects.filter(student__semester=semester).annotate(
-        stripe_total=Coalesce(SubquerySum("paymentlog__amount"), 0),
-        job_total=Coalesce(Subquery(job_subquery), Decimal(0)),
-    )

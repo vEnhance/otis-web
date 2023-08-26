@@ -308,15 +308,13 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
         job.save()
         if data["progress"] == "JOB_VFD" and job.payment_preference == "PREF_INVCRD":
             assert job.assignee is not None
-            assert job.semester is not None
             try:
                 invoice = Invoice.objects.get(
-                    student__semester=job.semester, student__user=job.assignee.user
+                    student__semester__active=True, student__user=job.assignee.user
                 )
             except Invoice.DoesNotExist:
-                logging.warn(
-                    f"Could not get invoice for {job.assignee.user} and {job.semester}"
-                )
+                logging.warn(f"Could not get invoice for {job.assignee.user}")
+                return JsonResponse({"result": "failed", "changed": False}, status=400)
             else:
                 invoice.credits += job.usd_bounty
                 invoice.save()
