@@ -60,6 +60,7 @@ def get_news(profile: UserProfile) -> NewsDict:
         ),
         "markets": Market.active.filter(
             start_date__gte=profile.last_notif_dismiss,
+            semester__active=True,
         ),
         "hanabis": HanabiContest.active.filter(
             start_date__gte=profile.last_notif_dismiss,
