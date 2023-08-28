@@ -64,16 +64,15 @@ class Meter:
 
     @property
     def percent(self) -> int:
-        value = max(self.value, 0)
         eps = 0.4  # Make sure text fits in the bar
         if self.dynamic_progress:
             lvl = self.level
             prev_value = lvl**2
-            current_gap = value - prev_value
+            current_gap = self.value - prev_value
             total_gap = 2 * lvl + 1
             k = (current_gap + eps * total_gap) / ((1 + eps) * total_gap)
         else:
-            k = (value + eps * self.max_value) / ((1 + eps) * self.max_value)
+            k = (self.value + eps * self.max_value) / ((1 + eps) * self.max_value)
         return min(100, int(100 * k))
 
     @property
