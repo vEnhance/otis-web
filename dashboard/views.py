@@ -471,7 +471,7 @@ class DeleteFile(LoginRequiredMixin, DeleteView):
     def get_object(self, *args: Any, **kwargs: Any) -> UploadedFile:
         obj = super().get_object(*args, **kwargs)
         assert isinstance(self.request.user, User)
-        if obj.owner != self.request.user and not self.request.user.is_staff:
+        if not self.request.user.is_staff:
             raise PermissionDenied("Not authorized to delete this file")
         return obj
 
