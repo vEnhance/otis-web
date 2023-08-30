@@ -25,7 +25,6 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView
 from sql_util.utils import Exists, SubqueryCount
 
-from evans_django_tools import SUCCESS_LOG_LEVEL
 from otisweb.mixins import VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest, get_days_since
 from roster.models import Student
@@ -60,7 +59,7 @@ def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
                 achievement = Achievement.objects.get(code__iexact=code)
             except Achievement.DoesNotExist:
                 messages.error(request, "You entered an invalid code. 😭")
-                logger.warn(
+                logger.info(
                     f"Invalid diamond code `{code}` from {student.name}",
                     extra={"request": request},
                 )
@@ -76,8 +75,7 @@ def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
                         msg += " This was a user-created achievement code, "
                         msg += "so please avoid sharing it with others."
                     messages.success(request, msg)
-                    logger.log(
-                        SUCCESS_LOG_LEVEL,
+                    logger.info(
                         f"{student.name} just obtained `{achievement}`!",
                         extra={"request": request},
                     )

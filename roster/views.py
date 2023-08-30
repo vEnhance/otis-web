@@ -41,7 +41,7 @@ from prettytable import PrettyTable
 
 from core.models import Semester, Unit
 from dashboard.models import PSet
-from evans_django_tools import ACTION_LOG_LEVEL, SUCCESS_LOG_LEVEL
+from evans_django_tools import SUCCESS_LOG_LEVEL
 from otisweb.decorators import admin_required
 from otisweb.utils import AuthHttpRequest, mailchimp_subscribe
 from roster.forms import LinkAssistantForm
@@ -456,8 +456,7 @@ def update_profile(request: AuthHttpRequest) -> HttpResponse:
             user: User = form.save()
             user.save()
             if old_email != user.email:
-                logger.log(
-                    SUCCESS_LOG_LEVEL,
+                logger.info(
                     f"User {user.get_full_name()} ({user.username}) updated their email "
                     f"from {user.email} (from {old_email})",
                     extra={"request": request},
@@ -465,7 +464,7 @@ def update_profile(request: AuthHttpRequest) -> HttpResponse:
                 mailchimp_subscribe(request)
             if old_first_name != user.first_name or old_last_name != user.last_name:
                 logger.log(
-                    ACTION_LOG_LEVEL,
+                    SUCCESS_LOG_LEVEL,
                     f"User {user.username} ({user.email}) changed their name "
                     f"to {user.first_name} {user.last_name }"
                     f"(previously {user.first_name} {user.last_name}.)",
@@ -676,7 +675,7 @@ def link_assistant(request: HttpRequest) -> HttpResponse:
             student.save()
             messages.success(request, f"You were paired with student {student}.")
             logger.log(
-                ACTION_LOG_LEVEL,
+                SUCCESS_LOG_LEVEL,
                 f"Assistant {assistant} was linked to {student}",
                 extra={"request": request},
             )
