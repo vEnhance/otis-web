@@ -121,6 +121,7 @@ PSET_VENUEQ_INIT_KEYS = (
     "upload__content",
     "num_accepted_all",
     "num_accepted_current",
+    "staff_comments",
     "student__reg__aops_username",
     "student__reg__container__semester__end_year",
     "student__reg__country",
