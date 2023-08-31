@@ -90,19 +90,15 @@ class OTISPreprocessor(markdown.preprocessors.Preprocessor):
                             unit__group=unitgroup, status__in=("A", "PA")
                         ).count()
                         clubs_given = (
-                            PSet.objects.filter(
-                                unit__group=unitgroup,
-                            ).aggregate(
-                                Sum("clubs")
-                            )["clubs__sum"]
+                            PSet.objects.filter(unit__group=unitgroup).aggregate(
+                                s=Sum("clubs")
+                            )["s"]
                             or 0
                         )
                         hearts_given = (
-                            PSet.objects.filter(
-                                unit__group=unitgroup,
-                            ).aggregate(
-                                Sum("hours")
-                            )["hours__sum"]
+                            PSet.objects.filter(unit__group=unitgroup).aggregate(
+                                s=Sum("hours")
+                            )["s"]
                             or 0
                         )
                         versions = ", ".join(u.code for u in unitgroup.unit_set.all())
