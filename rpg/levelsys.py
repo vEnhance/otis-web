@@ -156,7 +156,7 @@ class LevelInfoDict(TypedDict):
     level_name: str
     is_maxed: bool
     market_guesses: QuerySet[Guess]
-    hint_spades: int
+    # hint_spades: int
     suggest_unit_set: SuggestUnitSet
     mock_completes: QuerySet[MockCompleted]
     completed_jobs: QuerySet[Job]
@@ -178,70 +178,13 @@ def get_level_info(student: Student) -> LevelInfoDict:
     """Uses a bunch of expensive database queries to compute a student's levels and data,
     returning the findings as a typed dictionary."""
 
-    psets = PSet.objects.filter(student__user=student.user, status="A", eligible=True)
-    psets = psets.order_by("upload__created_at")
-    pset_data = psets.aggregate(
-        clubs_any=Sum("clubs"),
-        clubs_D=Sum("clubs", filter=Q(unit__code__startswith="D")),
-        clubs_Z=Sum("clubs", filter=Q(unit__code__startswith="Z")),
-        hearts=Sum("hours"),
-    )
-    total_clubs = (
-        (pset_data["clubs_any"] or 0)
-        + (pset_data["clubs_D"] or 0) * BONUS_D_UNIT
-        + (pset_data["clubs_Z"] or 0) * BONUS_Z_UNIT
-    )
-    total_hearts = pset_data["hearts"] or 0
+    level_data = LevelInfoDict()
 
-    diamond_qset = AchievementUnlock.objects.filter(user=student.user)
-    total_diamonds = diamond_qset.aggregate(s=Sum("achievement__diamonds"))["s"] or 0
+    total_clubs, total_hearts = get_clubs_hearts_stats(student, level_data)
 
-    # a billion unrelated spades items lol
-    quiz_attempts = ExamAttempt.objects.filter(student__user=student.user)
-    quiz_attempts = quiz_attempts.order_by("quiz__family", "quiz__number")
-    quest_completes = QuestComplete.objects.filter(student__user=student.user)
-    quest_completes = quest_completes.order_by("-timestamp")
-    mock_completes = MockCompleted.objects.filter(student__user=student.user)
-    mock_completes = mock_completes.select_related("exam")
-    mock_completes = mock_completes.order_by("exam__family", "exam__number")
-    market_guesses = (
-        Guess.objects.filter(
-            user=student.user,
-            market__end_date__lt=timezone.now(),
-        )
-        .order_by("-market__end_date")
-        .select_related("market")
-    )
-    suggested_units_queryset = ProblemSuggestion.objects.filter(
-        user=student.user,
-        status__in=("SUGG_NOK", "SUGG_OK"),
-        eligible=True,
-    ).values_list(
-        "unit__pk",
-        "unit__group__name",
-        "unit__code",
-    )
-    suggest_units_set: SuggestUnitSet = set(suggested_units_queryset)
-    hints_written = Version.objects.get_for_model(Hint)  # type: ignore
-    hints_written = hints_written.filter(revision__user_id=student.user.pk)
-    hints_written = hints_written.values_list("revision__date_created", flat=True)
-    hint_spades = get_week_count(list(hints_written))
-    completed_jobs = Job.objects.filter(
-        assignee__user=student.user, progress="JOB_VFD"
-    ).select_related("folder")
-    hanabi_replays = HanabiReplay.objects.filter(
-        contest__processed=True,
-        hanabiparticipation__player__user=student.user,
-    )
+    total_diamonds = get_diamond_stats(student)
 
-    total_spades = (quiz_attempts.aggregate(total=Sum("score"))["total"] or 0) * 2
-    total_spades += quest_completes.aggregate(total=Sum("spades"))["total"] or 0
-    total_spades += market_guesses.aggregate(total=Sum("score"))["total"] or 0
-    total_spades += completed_jobs.aggregate(total=Sum("spades_bounty"))["total"] or 0
-    total_spades += mock_completes.count() * 3
-    total_spades += len(suggest_units_set)
-    # TODO total_spades += hint_spades
-    total_spades += hanabi_replays.aggregate(total=Sum("spades_score"))["total"] or 0
+    total_spades = get_spade_stats(student, level_data)
 
     try:
         dynamic_progress = (UserProfile.objects.get(user=student.user)).dynamic_progress
@@ -260,26 +203,111 @@ def get_level_info(student: Student) -> LevelInfoDict:
     )
     level_name = level.name if level is not None else "No Level"
     max_level = Level.objects.all().aggregate(max=Max("threshold"))["max"] or 0
-    level_data: LevelInfoDict = {
-        "psets": psets,
-        "pset_data": pset_data,
-        "meters": meters,
-        "level_number": level_number,
-        "level_name": level_name,
-        "is_maxed": (level_number >= max_level),
-        "bonus_levels": BonusLevel.objects.filter(level__lte=level_number),
-        # spade properties
-        "quiz_attempts": quiz_attempts,
-        "quest_completes": quest_completes,
-        "market_guesses": market_guesses,
-        "mock_completes": mock_completes,
-        "suggest_unit_set": suggest_units_set,
-        "hint_spades": hint_spades,
-        "completed_jobs": completed_jobs,
-        "hanabi_replays": hanabi_replays,
-    }
+    
+    level_data["meters"] = meters
+    level_data["level_number"] = level_number
+    level_data["level_name"] = level_name
+    level_data["is_maxed"] = (level_number >= max_level)
+    level_data["bonus_levels"] = BonusLevel.objects.filter(level__lte=level_number)
+    
     return level_data
 
+
+def get_clubs_hearts_stats(student: Student, leveldict: LevelInfoDict = None) -> (int, int):
+    psets = PSet.objects.filter(student__user=student.user, status="A", eligible=True)
+    psets = psets.order_by("upload__created_at")
+    pset_data = psets.aggregate(
+        clubs_any=Sum("clubs"),
+        clubs_D=Sum("clubs", filter=Q(unit__code__startswith="D")),
+        clubs_Z=Sum("clubs", filter=Q(unit__code__startswith="Z")),
+        hearts=Sum("hours"),
+    )
+    total_clubs = (
+        (pset_data["clubs_any"] or 0)
+        + (pset_data["clubs_D"] or 0) * BONUS_D_UNIT
+        + (pset_data["clubs_Z"] or 0) * BONUS_Z_UNIT
+    )
+    total_hearts = pset_data["hearts"] or 0
+
+    if leveldict is not None:
+        leveldict["psets"] = psets
+        leveldict["pset_data"] = pset_data
+
+    return total_clubs, total_hearts
+
+def get_diamond_stats(student: Student) -> int:
+    diamond_qset = AchievementUnlock.objects.filter(user=student.user)
+    total_diamonds = diamond_qset.aggregate(s=Sum("achievement__diamonds"))["s"] or 0
+
+    return total_diamonds
+
+def get_spade_stats(student: Student, leveldict: LevelInfoDict = None) -> int:
+    total_spades = 0
+
+    # a billion unrelated spades items lol
+    quiz_attempts = ExamAttempt.objects.filter(student__user=student.user)
+    quiz_attempts = quiz_attempts.order_by("quiz__family", "quiz__number")
+    total_spades = (quiz_attempts.aggregate(total=Sum("score"))["total"] or 0) * 2
+
+    quest_completes = QuestComplete.objects.filter(student__user=student.user)
+    quest_completes = quest_completes.order_by("-timestamp")
+    total_spades += quest_completes.aggregate(total=Sum("spades"))["total"] or 0
+
+    mock_completes = MockCompleted.objects.filter(student__user=student.user)
+    mock_completes = mock_completes.select_related("exam")
+    mock_completes = mock_completes.order_by("exam__family", "exam__number")
+    total_spades += mock_completes.count() * 3
+
+    market_guesses = (
+        Guess.objects.filter(
+            user=student.user,
+            market__end_date__lt=timezone.now(),
+        )
+        .order_by("-market__end_date")
+        .select_related("market")
+    )
+    total_spades += market_guesses.aggregate(total=Sum("score"))["total"] or 0
+
+    suggested_units_queryset = ProblemSuggestion.objects.filter(
+        user=student.user,
+        status__in=("SUGG_NOK", "SUGG_OK"),
+        eligible=True,
+    ).values_list(
+        "unit__pk",
+        "unit__group__name",
+        "unit__code",
+    )
+    suggest_units_set: SuggestUnitSet = set(suggested_units_queryset)
+    total_spades += len(suggest_units_set)
+
+    # hints_written = Version.objects.get_for_model(Hint)  # type: ignore
+    # hints_written = hints_written.filter(revision__user_id=student.user.pk)
+    # hints_written = hints_written.values_list("revision__date_created", flat=True)
+    # hint_spades = get_week_count(list(hints_written))
+    # TODO total_spades += hint_spades
+
+    completed_jobs = Job.objects.filter(
+        assignee__user=student.user, progress="JOB_VFD"
+    ).select_related("folder")
+    total_spades += completed_jobs.aggregate(total=Sum("spades_bounty"))["total"] or 0
+
+    hanabi_replays = HanabiReplay.objects.filter(
+        contest__processed=True,
+        hanabiparticipation__player__user=student.user,
+    )
+    total_spades += hanabi_replays.aggregate(total=Sum("spades_score"))["total"] or 0
+
+    if leveldict is not None:
+        leveldict["quiz_attempts"] = quiz_attempts
+        leveldict["quest_completes"] = quest_completes
+        leveldict["market_guesses"] = market_guesses
+        leveldict["mock_completes"] = mock_completes
+        leveldict["suggest_unit_set"] = suggest_units_set
+        # leveldict["hint_spades"] = hint_spades
+        leveldict["completed_jobs"] = completed_jobs
+        leveldict["hanabi_replays"] = hanabi_replays
+
+    return total_spades
 
 def annotate_student_queryset_with_scores(
     queryset: QuerySet[Student],
