@@ -8,11 +8,9 @@ from django.db.models.expressions import OuterRef, Subquery
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
 from django.utils import timezone
-from reversion.models import Version
 from sql_util.aggregates import SubqueryCount, SubquerySum
 from sql_util.utils import Exists
 
-from arch.models import Hint
 from core.models import UserProfile
 from dashboard.models import PSet
 from evans_django_tools import VERBOSE_LOG_LEVEL
@@ -178,7 +176,7 @@ def get_level_info(student: Student) -> LevelInfoDict:
     """Uses a bunch of expensive database queries to compute a student's levels and data,
     returning the findings as a typed dictionary."""
 
-    level_data = LevelInfoDict()
+    level_data = LevelInfoDict()  # type: ignore
 
     total_clubs, total_hearts = get_clubs_hearts_stats(student, level_data)
 
@@ -203,17 +201,19 @@ def get_level_info(student: Student) -> LevelInfoDict:
     )
     level_name = level.name if level is not None else "No Level"
     max_level = Level.objects.all().aggregate(max=Max("threshold"))["max"] or 0
-    
+
     level_data["meters"] = meters
     level_data["level_number"] = level_number
     level_data["level_name"] = level_name
-    level_data["is_maxed"] = (level_number >= max_level)
+    level_data["is_maxed"] = level_number >= max_level
     level_data["bonus_levels"] = BonusLevel.objects.filter(level__lte=level_number)
-    
+
     return level_data
 
 
-def get_clubs_hearts_stats(student: Student, leveldict: LevelInfoDict = None) -> (int, int):
+def get_clubs_hearts_stats(
+    student: Student, leveldict: LevelInfoDict = None
+) -> Tuple[float, int]:
     psets = PSet.objects.filter(student__user=student.user, status="A", eligible=True)
     psets = psets.order_by("upload__created_at")
     pset_data = psets.aggregate(
@@ -222,12 +222,12 @@ def get_clubs_hearts_stats(student: Student, leveldict: LevelInfoDict = None) ->
         clubs_Z=Sum("clubs", filter=Q(unit__code__startswith="Z")),
         hearts=Sum("hours"),
     )
-    total_clubs = (
+    total_clubs: float = (
         (pset_data["clubs_any"] or 0)
         + (pset_data["clubs_D"] or 0) * BONUS_D_UNIT
         + (pset_data["clubs_Z"] or 0) * BONUS_Z_UNIT
     )
-    total_hearts = pset_data["hearts"] or 0
+    total_hearts: int = pset_data["hearts"] or 0
 
     if leveldict is not None:
         leveldict["psets"] = psets
@@ -235,11 +235,13 @@ def get_clubs_hearts_stats(student: Student, leveldict: LevelInfoDict = None) ->
 
     return total_clubs, total_hearts
 
+
 def get_diamond_stats(student: Student) -> int:
     diamond_qset = AchievementUnlock.objects.filter(user=student.user)
     total_diamonds = diamond_qset.aggregate(s=Sum("achievement__diamonds"))["s"] or 0
 
     return total_diamonds
+
 
 def get_spade_stats(student: Student, leveldict: LevelInfoDict = None) -> int:
     total_spades = 0
@@ -308,6 +310,7 @@ def get_spade_stats(student: Student, leveldict: LevelInfoDict = None) -> int:
         leveldict["hanabi_replays"] = hanabi_replays
 
     return total_spades
+
 
 def annotate_student_queryset_with_scores(
     queryset: QuerySet[Student],
