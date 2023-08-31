@@ -53,6 +53,7 @@ class JSONData(TypedDict):
     action: str
     token: str
 
+    arch_puid: str | None
     puid: str
     uid: int
     pk: int
@@ -301,6 +302,8 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
                 suggestion.staff_comments += "\n\n" + "-" * 40 + "\n\n"
             suggestion.staff_comments += data["staff_comments"]
         suggestion.save()
+        if suggestion.status == "SUGG_OK" and data["arch_puid"] is not None:
+            Problem.objects.create(puid=data["arch_puid"])
         return JsonResponse({"result": "success"}, status=200)
     elif action == "triage_job":
         if data["progress"] == "JOB_SUB":
