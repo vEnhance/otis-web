@@ -64,6 +64,9 @@
               <a href="{{ contest.get_absolute_url }}">{{ contest.variant_name }}</a>
             </td>
             <td>Completed</td>
+          {% elif contest.is_upcoming %}
+            <td class="table-primary">Starts in {{ contest.start_date }}</td>
+            <td class="table-primary">Upcoming</td>
           {% elif not contest.has_ended %}
             <td class="table-warning">{{ contest.variant_name }}</td>
             <td class="table-warning">Ongoing</td>

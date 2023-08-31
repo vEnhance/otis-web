@@ -1,3 +1,4 @@
+from datetime import timedelta
 from typing import Optional
 
 from django.contrib.auth.models import User
@@ -11,7 +12,6 @@ from markdownfield.validators import VALIDATOR_STANDARD
 
 from core.models import Semester
 
-from datetime import timedelta
 # Create your models here.
 
 
@@ -33,17 +33,11 @@ class ActiveMarketManager(models.Manager):
             )
         )
 
+
 class UpcomingMarketManager(models.Manager):
     def get_queryset(self) -> QuerySet["Market"]:
         now = timezone.now()
-        return (
-            super()
-            .get_queryset()
-            .filter(
-                start_date__lte=now+timedelta(days=4)
-            )
-        )
-
+        return super().get_queryset().filter(start_date__lte=now + timedelta(days=4))
 
 
 class Market(models.Model):
@@ -117,7 +111,8 @@ class Market(models.Model):
 
     @property
     def is_upcoming(self) -> bool:
-        return timezone.now() < self.start_date and timezone.now()+timedelta(days=7) >= self.start_date
+        return timezone.now() < self.start_date < timezone.now() + timedelta(days=7)
+
 
 class Guess(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)

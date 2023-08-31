@@ -1,11 +1,11 @@
+from datetime import timedelta
+
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.query import QuerySet
 from django.urls.base import reverse
 from django.utils import timezone
 from django.utils.http import urlencode
-
-from datetime import timedelta
 
 
 class HanabiPlayer(models.Model):
@@ -37,14 +37,15 @@ class ActiveHanabiContestManager(models.Manager):
             )
         )
 
+
 class UpcomingHanabiContestManager(models.Manager):
     def get_queryset(self) -> QuerySet["HanabiContest"]:
         now = timezone.now()
-        return(
+        return (
             super()
             .get_queryset()
             .filter(
-                start_date__lte=now+timedelta(days=30),
+                start_date__lte=now + timedelta(days=30),
             )
         )
 
