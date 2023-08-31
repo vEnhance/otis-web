@@ -171,6 +171,7 @@ SUGGESTION_VENUEQ_INIT_KEYS = (
     "weight",
     "unit__group__name",
     "unit__code",
+    "staff_comments",
 )
 
 JOB_VENUEQ_INIT_QUERYSET = Job.objects.filter(progress="JOB_SUB")
