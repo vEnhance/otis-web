@@ -63,7 +63,7 @@ def portal(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
 
     level_info = get_level_info(student)
     if request.user == student.user:
-        result = check_level_up(student)
+        result = check_level_up(student, level_info)
         if result is True and profile.show_bars is True:
             lvl = level_info["level_number"]
             messages.success(request, f"You leveled up! You're now level {lvl}.")

@@ -437,10 +437,9 @@ def get_student_rows(queryset: QuerySet[Student]) -> list[dict[str, Any]]:
     return rows
 
 
-def check_level_up(student: Student) -> bool:
+def check_level_up(student: Student, level_info: LevelInfoDict) -> bool:
     if not student.semester.active:
         return False
-    level_info = get_level_info(student)
     level_number = level_info["level_number"]
     if level_number <= student.last_level_seen:
         return False
