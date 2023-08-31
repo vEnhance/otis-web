@@ -26,7 +26,7 @@
       <th>Ending date</th>
     </tr>
     {% for market in markets %}
-      <tr class="{% if market.is_upcoming %}table-primary{% elif not market.has_started %}table-warning{% elif not market.has_ended %}table-success{% endif %}">
+      <tr class="{% if market.is_upcoming %}table-warning{% elif not market.has_started %}table-primary{% elif not market.has_ended %}table-success{% endif %}">
         {% if market.is_upcoming %}  
           <td>
             Starts {{ market.start_date }}

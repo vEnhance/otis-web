@@ -65,11 +65,11 @@
             </td>
             <td>Completed</td>
           {% elif contest.is_upcoming %}
-            <td class="table-primary">Starts in {{ contest.start_date }}</td>
-            <td class="table-primary">Upcoming</td>
+            <td class="table-warning">Starts in {{ contest.start_date }}</td>
+            <td class="table-warning">Upcoming</td>
           {% elif not contest.has_ended %}
-            <td class="table-warning">{{ contest.variant_name }}</td>
-            <td class="table-warning">Ongoing</td>
+            <td class="table-primary">{{ contest.variant_name }}</td>
+            <td class="table-primary">Ongoing</td>
           {% elif request.user.is_superuser %}
             <td class="table-primary">
               <strong>
