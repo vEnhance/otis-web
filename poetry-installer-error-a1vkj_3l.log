@@ -1,8 +1,0 @@
-dyld[87073]: Library not loaded: @loader_path/../Python
-  Referenced from: <3F2D0F69-E25A-3340-8B52-46400654C50E> /Users/ryansmacbook/Library/Application Support/pypoetry/venv/bin/python3.11
-  Reason: tried: '/Users/ryansmacbook/Library/Application Support/pypoetry/venv/bin/../Python' (no such file), '/usr/local/lib/Python' (no such file), '/usr/lib/Python' (no such file, not in dyld cache)
-
-Traceback:
-
-  File "<stdin>", line 923, in main
-  File "<stdin>", line 562, in run
