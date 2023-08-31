@@ -6,6 +6,8 @@
     {{ file.created_at|date:"r" }}.
     {% if file.owner.username == request.user.username or request.user.is_staff %}
       <a href="{% url "edit-file" file.pk %}">(edit)</a>
+    {% endif %}
+    {% if request.user.is_staff %}
       <a href="{% url "delete-file" file.pk %}">(delete)</a>
     {% endif %}
   </small>
