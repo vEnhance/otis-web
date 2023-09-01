@@ -310,7 +310,7 @@ class DiamondUpdate(
 
     def get_object(self, *args: Any, **kwargs: Any) -> Achievement:
         student = get_student_by_pk(self.request, self.kwargs["student_pk"])
-        level_info = assert_maxed_out_level_info(student)
+        assert_maxed_out_level_info(student)
         self.student = student
 
         achievement, is_new = Achievement.objects.get_or_create(creator=student.user)
