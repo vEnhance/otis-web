@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% load otis_extras %}
 {% block title %}
   Submission for {{ pset.unit }}
 {% endblock title %}
@@ -27,7 +28,7 @@
   {% endif %}
   {% if pset.staff_comments %}
     <h2>Evan's feedback</h2>
-    {{ pset.staff_comments|linebreaks }}
+    {{ pset.staff_comments|parbreaks }}
   {% endif %}
   <p class="text-center">
     <a href="{% url "resubmit-pset" pset.pk %}"
