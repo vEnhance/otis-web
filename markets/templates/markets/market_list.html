@@ -27,7 +27,7 @@
     </tr>
     {% for market in markets %}
       <tr class="{% if market.is_upcoming %}table-warning{% elif not market.has_started %}table-primary{% elif not market.has_ended %}table-success{% endif %}">
-        {% if market.is_upcoming %}
+        {% if market.is_upcoming and not request.user.is_staff %}
           <td>Starts {{ market.start_date }}</td>
         {% else %}
           <td>
