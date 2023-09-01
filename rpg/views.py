@@ -37,6 +37,8 @@ from .models import Achievement, AchievementUnlock, Level, PalaceCarving
 
 logger = logging.getLogger(__name__)
 
+RUBY_PALACE_DIAMOND_VALUE = 4
+
 
 @login_required
 def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
@@ -291,9 +293,6 @@ class PalaceUpdate(
         return reverse("palace-list", args=(self.student.pk,))
 
 
-n = 4
-
-
 class DiamondUpdate(
     LoginRequiredMixin,
     UpdateView[Achievement, BaseModelForm[Achievement]],
@@ -320,7 +319,7 @@ class DiamondUpdate(
             achievement.code = "".join(
                 random.choice("0123456789abcdef") for _ in range(24)
             )
-            achievement.diamonds = n
+            achievement.diamonds = RUBY_PALACE_DIAMOND_VALUE
             achievement.name = student.name
             achievement.save()
 
@@ -332,9 +331,12 @@ class DiamondUpdate(
 
     def form_valid(self, form: BaseModelForm[Achievement]):
         assert_maxed_out_level_info(self.student)
-        form.instance.diamonds = n
+        form.instance.diamonds = RUBY_PALACE_DIAMOND_VALUE
         form.instance.creator = self.student.user
-        messages.success(self.request, f"Successfully forged diamond worth {n}♦.")
+        messages.success(
+            self.request,
+            f"Successfully forged diamond worth {form.instance.diamonds}♦.",
+        )
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
