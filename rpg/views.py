@@ -290,7 +290,9 @@ class PalaceUpdate(
     def get_success_url(self):
         return reverse("palace-list", args=(self.student.pk,))
 
+
 n = 4
+
 
 class DiamondUpdate(
     LoginRequiredMixin,
