@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.query import QuerySet
@@ -36,6 +38,18 @@ class ActiveHanabiContestManager(models.Manager):
         )
 
 
+class UpcomingHanabiContestManager(models.Manager):
+    def get_queryset(self) -> QuerySet["HanabiContest"]:
+        now = timezone.now()
+        return (
+            super()
+            .get_queryset()
+            .filter(
+                start_date__lte=now + timedelta(days=30),
+            )
+        )
+
+
 class HanabiContest(models.Model):
     variant_id = models.PositiveIntegerField(help_text="The variant ID on hanab.live")
     variant_name = models.CharField(
@@ -58,6 +72,7 @@ class HanabiContest(models.Model):
 
     objects = models.Manager()
     active = ActiveHanabiContestManager()
+    upcoming = UpcomingHanabiContestManager()
 
     class Meta:
         ordering = ("-end_date",)
@@ -95,6 +110,10 @@ class HanabiContest(models.Model):
     @property
     def has_ended(self) -> bool:
         return timezone.now() >= self.end_date
+
+    @property
+    def is_upcoming(self) -> bool:
+        return timezone.now() <= self.start_date
 
     @property
     def max_score(self) -> int:
