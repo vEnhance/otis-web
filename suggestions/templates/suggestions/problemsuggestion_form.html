@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% load otis_extras %}
+{% load markdownify %}
 {% block title %}
   Problem Suggestion
 {% endblock title %}
@@ -39,7 +39,7 @@
     </div>
     {% if suggestion.staff_comments %}
       <h2>Evan's feedback</h2>
-      {{ suggestion.staff_comments|parbreaks }}
+      {{ suggestion.staff_comments|markdownify }}
     {% endif %}
   {% else %}
     <div class="alert alert-warning">

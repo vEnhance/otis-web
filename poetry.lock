@@ -765,6 +765,22 @@ markdown = "*"
 shortuuid = "*"
 
 [[package]]
+name = "django-markdownify"
+version = "0.9.3"
+description = "Markdown template filter for Django."
+optional = false
+python-versions = "*"
+files = [
+    {file = "django-markdownify-0.9.3.tar.gz", hash = "sha256:acf42614a418aef55535a66d4b3426b181cf8c8f990e265f453df900c3ad3d25"},
+    {file = "django_markdownify-0.9.3-py3-none-any.whl", hash = "sha256:df00291bc338400b9ef999402751fc12c30623d266b7c04e43336d27d0eadee6"},
+]
+
+[package.dependencies]
+bleach = {version = ">=5.0.0", extras = ["css"]}
+Django = "*"
+markdown = "*"
+
+[[package]]
 name = "django-mptt"
 version = "0.14.0"
 description = "Utilities for implementing Modified Preorder Tree Traversal with your Django Models and working with trees of Model instances."
@@ -2914,4 +2930,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10, <4.0"
-content-hash = "01c221d2917f7f56bd7dd5e1d12359a0b6f6c20e106b1f73737038141c93f22d"
+content-hash = "ae4226abcd1c333601cf184ecda94be993a93a7ba7cab54d164e94753fa073ca"

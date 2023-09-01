@@ -93,6 +93,7 @@ INSTALLED_APPS = [
     "hijack",
     "hijack.contrib.admin",
     "import_export",
+    "markdownify.apps.MarkdownifyConfig",
     "mptt",
     "qr_code",
     "reversion",
@@ -252,6 +253,24 @@ STRIPE_ENDPOINT_SECRET = os.getenv("STRIPE_ENDPOINT_SECRET")
 WIKI_ACCOUNT_HANDLING = False
 WIKI_ACCOUNT_SIGNUP_ALLOWED = False
 WIKI_PLUGINS_METHODS = ("article_list", "toc", "meow")
+
+MARKDOWNIFY = {
+    "default": {
+        "WHITELIST_TAGS": [
+            "a",
+            "b",
+            "blockquote",
+            "em",
+            "hr",
+            "i",
+            "li",
+            "ol",
+            "p",
+            "strong",
+            "ul",
+        ]
+    }
+}
 
 
 def filter_useless_404(record: logging.LogRecord) -> bool:
