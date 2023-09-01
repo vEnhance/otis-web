@@ -25,6 +25,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView
 from sql_util.utils import Exists, SubqueryCount
 
+from evans_django_tools import SUCCESS_LOG_LEVEL
 from otisweb.mixins import VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest, get_days_since
 from roster.models import Student
@@ -275,6 +276,10 @@ class PalaceUpdate(
         carving, is_created = PalaceCarving.objects.get_or_create(user=student.user)
         if is_created is True:
             carving.display_name = student.name
+        logging.log(
+            SUCCESS_LOG_LEVEL,
+            f"{student} {'created' if is_created else 'updated'} their carving in the Ruby Palace.",
+        )
         return carving
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
@@ -315,6 +320,11 @@ class DiamondUpdate(
             achievement.diamonds = min(level_info["meters"]["diamonds"].level, 7)
             achievement.name = student.name
             achievement.save()
+
+        logging.log(
+            SUCCESS_LOG_LEVEL,
+            f"{student} {'forged' if is_new else 'updated'} their diamond in the Ruby Palace.",
+        )
         return achievement
 
     def form_valid(self, form: BaseModelForm[Achievement]):
