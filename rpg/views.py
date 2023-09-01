@@ -290,6 +290,7 @@ class PalaceUpdate(
     def get_success_url(self):
         return reverse("palace-list", args=(self.student.pk,))
 
+n = 4
 
 class DiamondUpdate(
     LoginRequiredMixin,
@@ -317,7 +318,7 @@ class DiamondUpdate(
             achievement.code = "".join(
                 random.choice("0123456789abcdef") for _ in range(24)
             )
-            achievement.diamonds = min(level_info["meters"]["diamonds"].level, 7)
+            achievement.diamonds = n
             achievement.name = student.name
             achievement.save()
 
@@ -329,7 +330,6 @@ class DiamondUpdate(
 
     def form_valid(self, form: BaseModelForm[Achievement]):
         assert_maxed_out_level_info(self.student)
-        n = 4
         form.instance.diamonds = n
         form.instance.creator = self.student.user
         messages.success(self.request, f"Successfully forged diamond worth {n}♦.")
