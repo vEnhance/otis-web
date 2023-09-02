@@ -304,6 +304,7 @@ class DiamondUpdate(
         "image",
         "description",
         "solution",
+        "show_creator",
         "show_solution",
         "always_show_image",
     )
