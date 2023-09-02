@@ -73,7 +73,7 @@ class Meter:
             k = (current_gap + eps * total_gap) / ((1 + eps) * total_gap)
         else:
             k = (self.value + eps * self.max_value) / ((1 + eps) * self.max_value)
-        return min(100, int(100 * k))
+        return max(1, min(100, int(100 * k)))
 
     @property
     def needed(self) -> float:
