@@ -8,11 +8,9 @@ from django.db.models.expressions import OuterRef, Subquery
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
 from django.utils import timezone
-from reversion.models import Version
 from sql_util.aggregates import SubqueryCount, SubquerySum
 from sql_util.utils import Exists
 
-from arch.models import Hint
 from core.models import UserProfile
 from dashboard.models import PSet
 from evans_django_tools import VERBOSE_LOG_LEVEL
@@ -156,7 +154,6 @@ class LevelInfoDict(TypedDict):
     level_name: str
     is_maxed: bool
     market_guesses: QuerySet[Guess]
-    hint_spades: int
     suggest_unit_set: SuggestUnitSet
     mock_completes: QuerySet[MockCompleted]
     completed_jobs: QuerySet[Job]
@@ -222,10 +219,6 @@ def get_level_info(student: Student) -> LevelInfoDict:
         "unit__code",
     )
     suggest_units_set: SuggestUnitSet = set(suggested_units_queryset)
-    hints_written = Version.objects.get_for_model(Hint)  # type: ignore
-    hints_written = hints_written.filter(revision__user_id=student.user.pk)
-    hints_written = hints_written.values_list("revision__date_created", flat=True)
-    hint_spades = get_week_count(list(hints_written))
     completed_jobs = Job.objects.filter(
         assignee__user=student.user, progress="JOB_VFD"
     ).select_related("folder")
@@ -240,7 +233,6 @@ def get_level_info(student: Student) -> LevelInfoDict:
     total_spades += completed_jobs.aggregate(total=Sum("spades_bounty"))["total"] or 0
     total_spades += mock_completes.count() * 3
     total_spades += len(suggest_units_set)
-    # TODO total_spades += hint_spades
     total_spades += hanabi_replays.aggregate(total=Sum("spades_score"))["total"] or 0
 
     try:
@@ -274,7 +266,6 @@ def get_level_info(student: Student) -> LevelInfoDict:
         "market_guesses": market_guesses,
         "mock_completes": mock_completes,
         "suggest_unit_set": suggest_units_set,
-        "hint_spades": hint_spades,
         "completed_jobs": completed_jobs,
         "hanabi_replays": hanabi_replays,
     }
@@ -345,7 +336,6 @@ def annotate_student_queryset_with_scores(
             "user__hanabiplayer__hanabiparticipation__replay__spades_score",
             filter=Q(contest__processed=True),
         ),
-        # hints definitely not handled here
     )
 
 
@@ -374,7 +364,6 @@ def get_student_rows(queryset: QuerySet[Student]) -> list[dict[str, Any]]:
         row["spades"] += getattr(student, "spades_markets", 0) or 0
         row["spades"] += getattr(student, "spades_jobs", 0) or 0
         row["spades"] += getattr(student, "spades_hanabi", 0) or 0
-        # TODO hints
         row["hearts"] = getattr(student, "hearts", 0) or 0
         row["clubs"] = getattr(student, "clubs_any", 0) or 0
         row["clubs"] += BONUS_D_UNIT * (getattr(student, "clubs_D", 0) or 0)
