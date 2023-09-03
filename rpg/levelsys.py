@@ -298,7 +298,6 @@ def get_spade_stats(student: Student, leveldict: LevelInfoDict = None) -> int:
         leveldict["market_guesses"] = market_guesses
         leveldict["mock_completes"] = mock_completes
         leveldict["suggest_unit_set"] = suggest_units_set
-        # leveldict["hint_spades"] = hint_spades
         leveldict["completed_jobs"] = completed_jobs
         leveldict["hanabi_replays"] = hanabi_replays
 
