@@ -1,10 +1,16 @@
 import os
+import re
 from typing import Optional
 
 from django import template
 from django.contrib.auth.models import AnonymousUser, User
 from django.forms.boundfield import BoundField
+from django.template.defaultfilters import stringfilter
 from django.urls import reverse
+from django.utils.functional import keep_lazy_text
+from django.utils.html import escape
+from django.utils.safestring import SafeData, mark_safe
+from django.utils.text import normalize_newlines
 
 from core.models import Unit, UserProfile
 from rpg.levelsys import BONUS_D_UNIT, BONUS_Z_UNIT
@@ -66,3 +72,26 @@ def clubs_multiplier(u: Unit) -> str:
         return f"(×{1+BONUS_Z_UNIT})"
     else:
         return ""
+
+
+@keep_lazy_text
+def parbreaks(value: str, autoescape=False):
+    """Convert doubled paragraph breaks into <p>."""
+    value = normalize_newlines(value)
+    paras = re.split("\n{2,}", str(value))
+    if autoescape:
+        paras = [f"<p>{escape(p)}</p>" for p in paras]
+    else:
+        paras = [f"<p>{p}</p>" for p in paras]
+    return "\n\n".join(paras)
+
+
+@register.filter("parbreaks", is_safe=True, needs_autoescape=True)
+@stringfilter
+def parbreaks_filter(value: str, autoescape=True) -> str:
+    """
+    Replace paragraph breaks in plain text with appropriate HTML; a new line
+    followed by a blank line becomes a paragraph break (``</p>``).
+    """
+    autoescape = autoescape and not isinstance(value, SafeData)
+    return mark_safe(parbreaks(value, autoescape))

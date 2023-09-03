@@ -236,6 +236,14 @@ class RosterTest(EvanTestCase):
             self.assertEqual(bob.payment_status, 7)
             self.assertTrue(bob.is_delinquent)
 
+    def test_student_properties(self) -> None:
+        alice: Student = StudentFactory.create()
+        units: list[Unit] = UnitFactory.create_batch(10)
+        alice.curriculum.set(units[:7])
+        alice.unlocked_units.set(units[2:5])
+        self.assertEqual(alice.curriculum_length, 7)
+        self.assertEqual(alice.num_unlocked, 3)
+
     def test_master_schedule(self) -> None:
         alice: Student = StudentFactory.create(
             user__first_name="Ada", user__last_name="Adalhaidis"

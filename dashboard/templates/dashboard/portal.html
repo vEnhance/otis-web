@@ -271,8 +271,19 @@
     </p>
     {% if not student.newborn and semester.active and student.enabled %}
       <p>
-        You can request more units via the
-        <a href="#petitions">"Manage Units" button below</a>.
+        Currently, you have
+        <strong>{{ student.num_unlocked }} active units</strong>,
+        {% if student.num_unlocked < 9 %}
+          out of a maximum possible of 9.
+          You can request more units via the
+          <a href="#petitions">"Manage Units" button below</a>,
+          which lets you submit requests to unlock additional units
+          or drop existing ones.
+        {% else %}
+          which is the maximum possible.
+          You can use the <a href="#petitions">"Manage Units" button below</a>
+          to request further changes.
+        {% endif %}
       </p>
     {% endif %}
     {% if not student.newborn %}

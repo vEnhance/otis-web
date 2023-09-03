@@ -26,10 +26,14 @@
       <th>Ending date</th>
     </tr>
     {% for market in markets %}
-      <tr class="{% if not market.has_started %}table-warning{% elif not market.has_ended %}table-success{% endif %}">
-        <td>
-          <a href="{{ market.get_absolute_url }}">{{ market.title }}</a>
-        </td>
+      <tr class="{% if market.is_upcoming %}table-warning{% elif not market.has_started %}table-primary{% elif not market.has_ended %}table-success{% endif %}">
+        {% if market.is_upcoming and not request.user.is_staff %}
+          <td>Starts {{ market.start_date }}</td>
+        {% else %}
+          <td>
+            <a href="{{ market.get_absolute_url }}">{{ market.title }}</a>
+          </td>
+        {% endif %}
         {% if past %}
           <td>{{ market.end_date }}</td>
         {% else %}

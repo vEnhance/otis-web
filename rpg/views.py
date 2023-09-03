@@ -25,6 +25,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView
 from sql_util.utils import Exists, SubqueryCount
 
+from evans_django_tools import SUCCESS_LOG_LEVEL
 from otisweb.mixins import VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest, get_days_since
 from roster.models import Student
@@ -35,6 +36,8 @@ from .levelsys import LevelInfoDict, get_level_info, get_student_rows
 from .models import Achievement, AchievementUnlock, Level, PalaceCarving
 
 logger = logging.getLogger(__name__)
+
+RUBY_PALACE_DIAMOND_VALUE = 4
 
 
 @login_required
@@ -275,6 +278,10 @@ class PalaceUpdate(
         carving, is_created = PalaceCarving.objects.get_or_create(user=student.user)
         if is_created is True:
             carving.display_name = student.name
+        logging.log(
+            SUCCESS_LOG_LEVEL,
+            f"{student} {'created' if is_created else 'updated'} their carving in the Ruby Palace.",
+        )
         return carving
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
@@ -297,6 +304,7 @@ class DiamondUpdate(
         "image",
         "description",
         "solution",
+        "show_creator",
         "show_solution",
         "always_show_image",
     )
@@ -304,7 +312,7 @@ class DiamondUpdate(
 
     def get_object(self, *args: Any, **kwargs: Any) -> Achievement:
         student = get_student_by_pk(self.request, self.kwargs["student_pk"])
-        level_info = assert_maxed_out_level_info(student)
+        assert_maxed_out_level_info(student)
         self.student = student
 
         achievement, is_new = Achievement.objects.get_or_create(creator=student.user)
@@ -312,16 +320,23 @@ class DiamondUpdate(
             achievement.code = "".join(
                 random.choice("0123456789abcdef") for _ in range(24)
             )
-            achievement.diamonds = min(level_info["meters"]["diamonds"].level, 7)
+            achievement.diamonds = RUBY_PALACE_DIAMOND_VALUE
             achievement.name = student.name
             achievement.save()
+
+        logging.log(
+            SUCCESS_LOG_LEVEL,
+            f"{student} {'forged' if is_new else 'updated'} their diamond in the Ruby Palace.",
+        )
         return achievement
 
     def form_valid(self, form: BaseModelForm[Achievement]):
-        n = 4
-        form.instance.diamonds = n
+        form.instance.diamonds = RUBY_PALACE_DIAMOND_VALUE
         form.instance.creator = self.student.user
-        messages.success(self.request, f"Successfully forged diamond worth {n}♦.")
+        messages.success(
+            self.request,
+            f"Successfully forged diamond worth {form.instance.diamonds}♦.",
+        )
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
