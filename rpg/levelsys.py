@@ -154,7 +154,6 @@ class LevelInfoDict(TypedDict):
     level_name: str
     is_maxed: bool
     market_guesses: QuerySet[Guess]
-    # hint_spades: int
     suggest_unit_set: SuggestUnitSet
     mock_completes: QuerySet[MockCompleted]
     completed_jobs: QuerySet[Job]
@@ -281,13 +280,7 @@ def get_spade_stats(student: Student, leveldict: LevelInfoDict = None) -> int:
     )
     suggest_units_set: SuggestUnitSet = set(suggested_units_queryset)
     total_spades += len(suggest_units_set)
-
-    # hints_written = Version.objects.get_for_model(Hint)  # type: ignore
-    # hints_written = hints_written.filter(revision__user_id=student.user.pk)
-    # hints_written = hints_written.values_list("revision__date_created", flat=True)
-    # hint_spades = get_week_count(list(hints_written))
-    # TODO total_spades += hint_spades
-
+    
     completed_jobs = Job.objects.filter(
         assignee__user=student.user, progress="JOB_VFD"
     ).select_related("folder")
@@ -376,7 +369,6 @@ def annotate_student_queryset_with_scores(
             "user__hanabiplayer__hanabiparticipation__replay__spades_score",
             filter=Q(contest__processed=True),
         ),
-        # hints definitely not handled here
     )
 
 
@@ -405,7 +397,6 @@ def get_student_rows(queryset: QuerySet[Student]) -> list[dict[str, Any]]:
         row["spades"] += getattr(student, "spades_markets", 0) or 0
         row["spades"] += getattr(student, "spades_jobs", 0) or 0
         row["spades"] += getattr(student, "spades_hanabi", 0) or 0
-        # TODO hints
         row["hearts"] = getattr(student, "hearts", 0) or 0
         row["clubs"] = getattr(student, "clubs_any", 0) or 0
         row["clubs"] += BONUS_D_UNIT * (getattr(student, "clubs_D", 0) or 0)
