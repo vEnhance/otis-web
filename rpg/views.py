@@ -331,7 +331,6 @@ class DiamondUpdate(
         return achievement
 
     def form_valid(self, form: BaseModelForm[Achievement]):
-        assert_maxed_out_level_info(self.student)
         form.instance.diamonds = RUBY_PALACE_DIAMOND_VALUE
         form.instance.creator = self.student.user
         messages.success(
