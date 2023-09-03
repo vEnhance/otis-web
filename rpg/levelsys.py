@@ -280,7 +280,7 @@ def get_spade_stats(student: Student, leveldict: LevelInfoDict = None) -> int:
     )
     suggest_units_set: SuggestUnitSet = set(suggested_units_queryset)
     total_spades += len(suggest_units_set)
-    
+
     completed_jobs = Job.objects.filter(
         assignee__user=student.user, progress="JOB_VFD"
     ).select_related("folder")
