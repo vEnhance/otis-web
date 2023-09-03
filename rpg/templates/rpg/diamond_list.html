@@ -69,7 +69,7 @@
           <p class="fst-italic">{{ achievement.description }}</p>
           {% if achievement.creator and achievement.show_creator %}
             <p class='text-secondary'>
-              Forged by <i>{{ achievement.creator.get_display_name }}</i>.
+              Forged by <i>{{ achievement.creator.get_full_name }}</i>.
             </p>
           {% endif %}
         {% else %}
