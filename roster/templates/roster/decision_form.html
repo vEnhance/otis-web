@@ -24,7 +24,14 @@
     {% include "generic_form.html" with submit_name="Register" %}
   {% else %}
     <p>
-      <a href="{% url "top" %}">Go back</a>
+      <strong>You have submitted a decision form for this year.</strong>
+      No action is needed from you.
+    </p>
+    <p>
+      If it has been more than 48 hours and you still do not have access
+      to the portal for this year from the
+      <a href="{% url "top" %}">index page</a>,
+      please contact Evan to see what's going on.
     </p>
   {% endif %}
 {% endblock layout-content %}

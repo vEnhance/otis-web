@@ -37,6 +37,8 @@ from .models import Achievement, AchievementUnlock, Level, PalaceCarving
 
 logger = logging.getLogger(__name__)
 
+RUBY_PALACE_DIAMOND_VALUE = 4
+
 
 @login_required
 def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
@@ -60,7 +62,7 @@ def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
                 achievement = Achievement.objects.get(code__iexact=code)
             except Achievement.DoesNotExist:
                 messages.error(request, "You entered an invalid code. 😭")
-                logger.warn(
+                logger.info(
                     f"Invalid diamond code `{code}` from {student.name}",
                     extra={"request": request},
                 )
@@ -76,8 +78,7 @@ def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
                         msg += " This was a user-created achievement code, "
                         msg += "so please avoid sharing it with others."
                     messages.success(request, msg)
-                    logger.log(
-                        SUCCESS_LOG_LEVEL,
+                    logger.info(
                         f"{student.name} just obtained `{achievement}`!",
                         extra={"request": request},
                     )
@@ -277,6 +278,10 @@ class PalaceUpdate(
         carving, is_created = PalaceCarving.objects.get_or_create(user=student.user)
         if is_created is True:
             carving.display_name = student.name
+        logging.log(
+            SUCCESS_LOG_LEVEL,
+            f"{student} {'created' if is_created else 'updated'} their carving in the Ruby Palace.",
+        )
         return carving
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
@@ -299,6 +304,7 @@ class DiamondUpdate(
         "image",
         "description",
         "solution",
+        "show_creator",
         "show_solution",
         "always_show_image",
     )
@@ -306,7 +312,7 @@ class DiamondUpdate(
 
     def get_object(self, *args: Any, **kwargs: Any) -> Achievement:
         student = get_student_by_pk(self.request, self.kwargs["student_pk"])
-        level_info = assert_maxed_out_level_info(student)
+        assert_maxed_out_level_info(student)
         self.student = student
 
         achievement, is_new = Achievement.objects.get_or_create(creator=student.user)
@@ -314,17 +320,24 @@ class DiamondUpdate(
             achievement.code = "".join(
                 random.choice("0123456789abcdef") for _ in range(24)
             )
-            achievement.diamonds = min(level_info["meters"]["diamonds"].level, 7)
+            achievement.diamonds = RUBY_PALACE_DIAMOND_VALUE
             achievement.name = student.name
             achievement.save()
+
+        logging.log(
+            SUCCESS_LOG_LEVEL,
+            f"{student} {'forged' if is_new else 'updated'} their diamond in the Ruby Palace.",
+        )
         return achievement
 
     def form_valid(self, form: BaseModelForm[Achievement]):
         assert_maxed_out_level_info(self.student)
-        n = 4
-        form.instance.diamonds = n
+        form.instance.diamonds = RUBY_PALACE_DIAMOND_VALUE
         form.instance.creator = self.student.user
-        messages.success(self.request, f"Successfully forged diamond worth {n}♦.")
+        messages.success(
+            self.request,
+            f"Successfully forged diamond worth {form.instance.diamonds}♦.",
+        )
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:

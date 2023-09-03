@@ -1,11 +1,20 @@
 {% extends "layout.html" %}
 {% load static %}
 {% block title %}
-  Name and email
+  Change name and email
 {% endblock title %}
 {% block layout-content %}
+  <h2>Change name and email</h2>
+  <ul>
+    <li>Please use your real name. Otherwise it's confusing for Evan.</li>
+    <li>
+      If you update your email address, it will get subscribed to updates
+      from the OTIS mailing list.
+    </li>
+  </ul>
   {% include "generic_form.html" %}
   <p>
-    <a class="emoji-link" href="{% url "socialaccount_connections" %}">Back to 🔐Account Settings</a>
+    <a href="{% url "socialaccount_connections" %}">Back to
+      <span class="emoji-text">🔐</span>Account Settings</a>
   </p>
 {% endblock layout-content %}

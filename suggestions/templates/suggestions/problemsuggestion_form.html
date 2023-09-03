@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% load markdownify %}
 {% block title %}
   Problem Suggestion
 {% endblock title %}
@@ -38,7 +39,7 @@
     </div>
     {% if suggestion.staff_comments %}
       <h2>Evan's feedback</h2>
-      {{ suggestion.staff_comments|linebreaks }}
+      {{ suggestion.staff_comments|markdownify }}
     {% endif %}
   {% else %}
     <div class="alert alert-warning">

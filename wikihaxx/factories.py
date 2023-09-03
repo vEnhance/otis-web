@@ -34,4 +34,4 @@ class URLPathFactory(DjangoModelFactory):
         model = URLPath
 
     article = SubFactory(ArticleFactory)
-    site = Site.objects.get_current()
+    site = Site.objects.get_current()  # type: ignore

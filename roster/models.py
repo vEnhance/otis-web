@@ -196,6 +196,10 @@ class Student(models.Model):
     def curriculum_length(self) -> int:
         return self.curriculum.count()
 
+    @property
+    def num_unlocked(self) -> int:
+        return self.unlocked_units.count()
+
     def generate_curriculum_queryset(self) -> QuerySet[Unit]:
         queryset = (
             self.curriculum.all()

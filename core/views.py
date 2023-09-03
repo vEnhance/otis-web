@@ -45,7 +45,12 @@ class UnitGroupListView(ListView[Unit]):
     def get_queryset(self):
         queryset = Unit.objects.filter(group__hidden=False)
         queryset = queryset.order_by("group__subject", "group__name", "code")
-        queryset = queryset.annotate(num_psets_in_group=Count("group__unit__pset"))
+        queryset = queryset.annotate(
+            num_psets_in_group=Count(
+                "group__unit__pset",
+                filter=Q(group__unit__pset__status__in=("A", "PA")),
+            )
+        )
 
         if not isinstance(self.request.user, AnonymousUser):
             queryset = queryset.annotate(

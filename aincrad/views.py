@@ -53,6 +53,7 @@ class JSONData(TypedDict):
     action: str
     token: str
 
+    arch_puid: str | None
     puid: str
     uid: int
     pk: int
@@ -121,6 +122,7 @@ PSET_VENUEQ_INIT_KEYS = (
     "upload__content",
     "num_accepted_all",
     "num_accepted_current",
+    "staff_comments",
     "student__reg__aops_username",
     "student__reg__container__semester__end_year",
     "student__reg__country",
@@ -170,6 +172,7 @@ SUGGESTION_VENUEQ_INIT_KEYS = (
     "weight",
     "unit__group__name",
     "unit__code",
+    "staff_comments",
 )
 
 JOB_VENUEQ_INIT_QUERYSET = Job.objects.filter(progress="JOB_SUB")
@@ -279,6 +282,12 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
                 pset.staff_comments += "\n\n" + "-" * 40 + "\n\n"
             pset.staff_comments += data["staff_comments"]
         pset.save()
+        # mark other problem sets for this (student, unit) no longer eligible
+        if pset.status == "A" and pset.unit is not None:
+            PSet.objects.filter(
+                student__user=pset.student.user, unit=pset.unit
+            ).exclude(pk=pset.pk).update(eligible=False)
+        # Unlock
         if (
             pset.status == "A"
             and original_status in ("P", "PR")
@@ -299,6 +308,8 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
                 suggestion.staff_comments += "\n\n" + "-" * 40 + "\n\n"
             suggestion.staff_comments += data["staff_comments"]
         suggestion.save()
+        if suggestion.status == "SUGG_OK" and data["arch_puid"] is not None:
+            Problem.objects.create(puid=data["arch_puid"])
         return JsonResponse({"result": "success"}, status=200)
     elif action == "triage_job":
         if data["progress"] == "JOB_SUB":

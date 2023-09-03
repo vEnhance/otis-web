@@ -41,7 +41,7 @@ from prettytable import PrettyTable
 
 from core.models import Semester, Unit
 from dashboard.models import PSet
-from evans_django_tools import ACTION_LOG_LEVEL, SUCCESS_LOG_LEVEL
+from evans_django_tools import SUCCESS_LOG_LEVEL
 from otisweb.decorators import admin_required
 from otisweb.utils import AuthHttpRequest, mailchimp_subscribe
 from roster.forms import LinkAssistantForm
@@ -450,17 +450,26 @@ def update_profile(request: AuthHttpRequest) -> HttpResponse:
     if request.method == "POST":
         form = UserForm(request.POST, instance=request.user)
         old_email = request.user.email
+        old_first_name = request.user.first_name
+        old_last_name = request.user.last_name
         if form.is_valid():
-            new_email = form.cleaned_data["email"]
             user: User = form.save()
             user.save()
-            if old_email != new_email:
-                logger.log(
-                    SUCCESS_LOG_LEVEL,
-                    f"User {user.get_full_name()} switched to {new_email}",
+            if old_email != user.email:
+                logger.info(
+                    f"User {user.get_full_name()} ({user.username}) updated their email "
+                    f"from {user.email} (from {old_email})",
                     extra={"request": request},
                 )
                 mailchimp_subscribe(request)
+            if old_first_name != user.first_name or old_last_name != user.last_name:
+                logger.log(
+                    SUCCESS_LOG_LEVEL,
+                    f"User {user.username} ({user.email}) changed their name "
+                    f"to {user.first_name} {user.last_name }"
+                    f"(previously {user.first_name} {user.last_name}.)",
+                    extra={"request": request},
+                )
 
             messages.success(request, "Your information has been updated.")
     else:
@@ -666,7 +675,7 @@ def link_assistant(request: HttpRequest) -> HttpResponse:
             student.save()
             messages.success(request, f"You were paired with student {student}.")
             logger.log(
-                ACTION_LOG_LEVEL,
+                SUCCESS_LOG_LEVEL,
                 f"Assistant {assistant} was linked to {student}",
                 extra={"request": request},
             )

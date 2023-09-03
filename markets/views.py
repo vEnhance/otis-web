@@ -166,7 +166,7 @@ class MarketList(LoginRequiredMixin, ListView[Market]):
         if getattr(self.request.user, "is_staff", False) is True:
             markets = Market.objects
         else:
-            markets = Market.started
+            markets = Market.upcoming
         return markets.order_by("-end_date").filter(semester__active=True)
 
 

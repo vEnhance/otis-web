@@ -24,7 +24,7 @@ TARGET_HASH = sha256(EXAMPLE_PASSWORD.encode("ascii")).hexdigest()
 
 
 @override_settings(API_TARGET_HASH=TARGET_HASH)
-class TestAincrad(EvanTestCase):
+class TestAincradWithSetup(EvanTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -119,16 +119,6 @@ class TestAincrad(EvanTestCase):
             username="frisk", first_name="Frank", last_name="Frisk"
         )
         StudentRegistrationFactory.create(user=new_user, processed=False)
-
-    def test_failed_auth(self):
-        resp = self.assertPost40X(
-            "api",
-            json={
-                "action": "init",
-                "token": "this wrong password is not a puzzle",
-            },
-        )
-        self.assertEqual(resp.status_code, 418)
 
     def test_init(self):
         resp = self.assertPost20X(
@@ -254,6 +244,46 @@ class TestAincrad(EvanTestCase):
         self.assertAlmostEqual(invoice_eve.adjustment, -474)
         self.assertAlmostEqual(invoice_eve.extras, 0)
         self.assertAlmostEqual(invoice_eve.total_paid, 6)
+
+    def test_accept_inquiries(self) -> None:
+        resp = self.assertPost20X(
+            "api",
+            json={
+                "action": "accept_inquiries",
+                "token": EXAMPLE_PASSWORD,
+            },
+        )
+        self.assertEqual(resp.json()["result"], "success")
+        self.assertEqual(resp.json()["count"], 3)
+        self.assertEqual(len(UnitInquiry.objects.filter(status="INQ_NEW")), 0)
+
+    def test_accept_registrations(self) -> None:
+        n = len(Student.objects.all())
+        self.assertFalse(Student.objects.filter(user__username="frisk").exists())
+        resp = self.assertPost20X(
+            "api",
+            json={
+                "action": "accept_registrations",
+                "token": EXAMPLE_PASSWORD,
+            },
+        )
+        self.assertEqual(resp.json()["result"], "success")
+        self.assertEqual(resp.json()["count"], 1)
+        self.assertEqual(len(Student.objects.all()), n + 1)
+        self.assertTrue(Student.objects.filter(user__username="frisk").exists())
+
+
+@override_settings(API_TARGET_HASH=TARGET_HASH)
+class TestAincrad(EvanTestCase):
+    def test_failed_auth(self):
+        resp = self.assertPost40X(
+            "api",
+            json={
+                "action": "init",
+                "token": "this wrong password is not a puzzle",
+            },
+        )
+        self.assertEqual(resp.status_code, 418)
 
     def test_get_add_hints(self):
         HintFactory.create_batch(10)
@@ -575,29 +605,45 @@ class TestAincrad(EvanTestCase):
         contest.refresh_from_db()
         self.assertTrue(contest.processed)
 
-    def test_accept_inquiries(self) -> None:
-        resp = self.assertPost20X(
-            "api",
-            json={
-                "action": "accept_inquiries",
-                "token": EXAMPLE_PASSWORD,
-            },
-        )
-        self.assertEqual(resp.json()["result"], "success")
-        self.assertEqual(resp.json()["count"], 3)
-        self.assertEqual(len(UnitInquiry.objects.filter(status="INQ_NEW")), 0)
+    def test_grade_problem_set(self) -> None:
+        unit = UnitFactory.create()
+        alice_user = UserFactory.create()
 
-    def test_accept_reg(self) -> None:
-        n = len(Student.objects.all())
-        self.assertFalse(Student.objects.filter(user__username="frisk").exists())
+        pset1 = PSetFactory.create(
+            student__user=alice_user,
+            student__semester__active=False,
+            unit=unit,
+            eligible=False,
+            status="A",
+        )
+        pset2 = PSetFactory.create(
+            student__user=alice_user,
+            student__semester__active=False,
+            unit=unit,
+            eligible=True,
+            status="A",
+        )
+        pset3 = PSetFactory.create(student__user=alice_user, unit=unit, status="P")
+
         resp = self.assertPost20X(
             "api",
             json={
-                "action": "accept_registrations",
+                "pk": pset3.pk,
+                "action": "grade_problem_set",
                 "token": EXAMPLE_PASSWORD,
+                "status": "A",
+                "staff_comments": "Good job",
             },
         )
         self.assertEqual(resp.json()["result"], "success")
-        self.assertEqual(resp.json()["count"], 1)
-        self.assertEqual(len(Student.objects.all()), n + 1)
-        self.assertTrue(Student.objects.filter(user__username="frisk").exists())
+
+        pset1.refresh_from_db()
+        pset2.refresh_from_db()
+        pset3.refresh_from_db()
+        self.assertFalse(pset1.eligible)
+        self.assertFalse(pset2.eligible)
+        self.assertTrue(pset3.eligible)
+        self.assertEqual(pset1.status, "A")
+        self.assertEqual(pset2.status, "A")
+        self.assertEqual(pset3.status, "A")
+        self.assertEqual(pset3.staff_comments, "Good job")

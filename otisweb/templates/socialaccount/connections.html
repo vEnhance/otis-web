@@ -4,8 +4,8 @@
   {% trans "Account Connections" %}
 {% endblock head_title %}
 {% block content %}
+  <h3>Name and email</h3>
   <ul>
-    <li>Your name is {{ user.first_name }} {{ user.last_name }}.</li>
     <li>
       Your username is <strong><tt>{{ user.username }}</tt></strong>.
       {% if form.accounts %}
@@ -14,12 +14,16 @@
       {% endif %}
     </li>
     <li>
+      Your name is <strong>{{ user.first_name }} {{ user.last_name }}</strong>.
+    </li>
+    <li>
       You registered with the email <strong><tt>{{ user.email }}</tt></strong>.
     </li>
     <li>
       You can <a href="{% url "update-profile" %}">change your name or email</a>.
     </li>
   </ul>
+  <hr />
   <h3>Password</h3>
   {% if user.has_usable_password %}
     <p>

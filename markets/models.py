@@ -1,3 +1,4 @@
+from datetime import timedelta
 from typing import Optional
 
 from django.contrib.auth.models import User
@@ -31,6 +32,12 @@ class ActiveMarketManager(models.Manager):
                 end_date__gte=now,
             )
         )
+
+
+class UpcomingMarketManager(models.Manager):
+    def get_queryset(self) -> QuerySet["Market"]:
+        now = timezone.now()
+        return super().get_queryset().filter(start_date__lte=now + timedelta(days=4))
 
 
 class Market(models.Model):
@@ -76,6 +83,7 @@ class Market(models.Model):
     objects = models.Manager()
     started = StartedMarketManager()
     active = ActiveMarketManager()
+    upcoming = UpcomingMarketManager()
 
     class Meta:
         ordering = ("-end_date",)
@@ -96,6 +104,10 @@ class Market(models.Model):
     @property
     def has_ended(self) -> bool:
         return timezone.now() >= self.end_date
+
+    @property
+    def is_upcoming(self) -> bool:
+        return timezone.now() < self.start_date < timezone.now() + timedelta(days=7)
 
 
 class Guess(models.Model):

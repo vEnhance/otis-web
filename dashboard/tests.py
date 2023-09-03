@@ -549,13 +549,13 @@ class TestPSet(EvanTestCase):
         )
 
         upload = UploadedFile.objects.filter(pk=pk).first()
-
         assert upload is not None
-
         self.assertTrue(upload.description == "bark")
 
-        resp = self.assertPost20X("delete-file", upload.pk, follow=True)
-
+        self.assertPost40X("delete-file", upload.pk, follow=True)
+        self.assertTrue(UploadedFile.objects.filter(pk=pk).exists())
+        self.login(UserFactory.create(is_staff=True))
+        self.assertPost20X("delete-file", upload.pk, follow=True)
         self.assertFalse(UploadedFile.objects.filter(pk=pk).exists())
 
     def test_update_and_delete(self) -> None:
@@ -620,8 +620,6 @@ class TestPSet(EvanTestCase):
         )
         upload.refresh_from_db()
         self.assertEqual(upload.description, "meow")
-        self.assertPost20X("delete-file", upload.pk, follow=True)
-        self.assertFalse(UploadedFile.objects.filter(pk=upload.pk).exists())
 
 
 class TestList(EvanTestCase):
