@@ -257,7 +257,7 @@ class TestAincradWithSetup(EvanTestCase):
         self.assertEqual(resp.json()["count"], 3)
         self.assertEqual(len(UnitInquiry.objects.filter(status="INQ_NEW")), 0)
 
-    def test_accept_reg(self) -> None:
+    def test_accept_registrations(self) -> None:
         n = len(Student.objects.all())
         self.assertFalse(Student.objects.filter(user__username="frisk").exists())
         resp = self.assertPost20X(
@@ -606,5 +606,44 @@ class TestAincrad(EvanTestCase):
         self.assertTrue(contest.processed)
 
     def test_grade_problem_set(self) -> None:
-        # TODO
-        pass
+        unit = UnitFactory.create()
+        alice_user = UserFactory.create()
+
+        pset1 = PSetFactory.create(
+            student__user=alice_user,
+            student__semester__active=False,
+            unit=unit,
+            eligible=False,
+            status="A",
+        )
+        pset2 = PSetFactory.create(
+            student__user=alice_user,
+            student__semester__active=False,
+            unit=unit,
+            eligible=True,
+            status="A",
+        )
+        pset3 = PSetFactory.create(student__user=alice_user, unit=unit, status="P")
+
+        resp = self.assertPost20X(
+            "api",
+            json={
+                "pk": pset3.pk,
+                "action": "grade_problem_set",
+                "token": EXAMPLE_PASSWORD,
+                "status": "A",
+                "staff_comments": "Good job",
+            },
+        )
+        self.assertEqual(resp.json()["result"], "success")
+
+        pset1.refresh_from_db()
+        pset2.refresh_from_db()
+        pset3.refresh_from_db()
+        self.assertFalse(pset1.eligible)
+        self.assertFalse(pset2.eligible)
+        self.assertTrue(pset3.eligible)
+        self.assertEqual(pset1.status, "A")
+        self.assertEqual(pset2.status, "A")
+        self.assertEqual(pset3.status, "A")
+        self.assertEqual(pset3.staff_comments, "Good job")
