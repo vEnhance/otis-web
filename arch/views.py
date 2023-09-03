@@ -66,12 +66,10 @@ class HintList(VerifiedRequiredMixin, ListView[Hint]):
             self.problem = Problem.objects.get(puid=puid)
         except Problem.DoesNotExist:
             statement_exists_on_disk = get_disk_statement_from_puid(puid) is not None
-            if kwargs["create_if_missing"] is True and statement_exists_on_disk:
+            if statement_exists_on_disk:
                 self.problem = Problem(puid=puid)
                 self.problem.save()
                 messages.info(request, f"Created previously nonexistent problem {puid}")
-            elif statement_exists_on_disk:
-                raise Http404("Need to log in to create problems")
             else:
                 raise Http404(f"Couldn't find {puid} in database or disk")
 

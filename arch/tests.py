@@ -33,16 +33,11 @@ class TestProblem(EvanTestCase):
 
         self.assertGet40X(
             "hint-list",
-            disk_puid,
-        )
-
-        self.assertGet40X(
-            "hint-list",
-            "invalid-",
+            "invalid-disk",
         )
 
         resp = self.assertGet20X(
-            "hint-list-check",
+            "hint-list",
             disk_puid,
         )
 
