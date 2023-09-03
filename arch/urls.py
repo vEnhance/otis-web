@@ -1,6 +1,12 @@
 from django.urls import path
+from django.views.generic.base import RedirectView
 
 from . import views
+
+
+class HintListDeprecatedRedirectView(RedirectView):
+    pattern_name = "hint-list"
+
 
 urlpatterns = [
     path(r"lookup/", views.lookup, name="arch-lookup"),
@@ -24,8 +30,8 @@ urlpatterns = [
     ),
     path(
         r"<str:puid>/otis/",
-        views.HintList.as_view(),
-        name="hint-list-dep",
+        HintListDeprecatedRedirectView.as_view(),
+        name="hint-list-deprecated",
     ),
     path(r"<str:puid>/solution/", views.view_solution, name="view-solution"),
     path(r"", views.ProblemCreate.as_view(), name="arch-index"),
