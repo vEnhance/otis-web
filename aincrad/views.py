@@ -282,6 +282,12 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
                 pset.staff_comments += "\n\n" + "-" * 40 + "\n\n"
             pset.staff_comments += data["staff_comments"]
         pset.save()
+        # mark other problem sets for this (student, unit) no longer eligible
+        if pset.status == "A" and pset.unit is not None:
+            PSet.objects.filter(
+                student__user=pset.student.user, unit=pset.unit
+            ).exclude(pk=pset.pk).update(eligible=False)
+        # Unlock
         if (
             pset.status == "A"
             and original_status in ("P", "PR")
