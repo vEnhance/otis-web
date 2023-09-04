@@ -9,7 +9,30 @@
     <p>
       Your card was charged successfully and the
       payment is now pending from the credit/debit card company.
-      Please check back later, usually it only takes a few moments to process.
+      Please check back later, usually it only takes a few seconds to process.
+      Once the payment is processed, your
+      <a href="{% url "invoice" %}">invoice page</a>
+      will be automatically updated.
+      (There is no email confirmation, just check the link above.)
+    </p>
+    <p>
+      You will be redirected back to the invoice page in
+      <span id="num_seconds">10</span>
+      seconds.
     </p>
   </div>
 {% endblock base-content %}
+{% block scripts %}
+  <script type="text/javascript">
+      $(document).ready(function() {
+          setTimeout(function() {
+              window.location = "{% url 'invoice' %}";
+          }, 10000);
+          let t = 10;
+          setInterval(function() {
+              t--;
+              $("#num_seconds").html(t);
+          }, 1000);
+      });
+  </script>
+{% endblock scripts %}
