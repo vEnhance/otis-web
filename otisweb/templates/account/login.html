@@ -46,6 +46,14 @@
            class="accordion-collapse collapse show"
            aria-labelledby="headingUserPass">
         <div class="accordion-body">
+          <div class="alert alert-info">
+            The form here will only work if you chose a traditional
+            password after registering (which you can do by clicking the
+            <a href="https://otis.evanchen.cc/accounts/social/connections/">🔐</a>
+            icon in the sidebar when you are logged in).
+            If you signed up with Google/GitHub/Discord,
+            and didn't choose a password, you should use that to log in.
+          </div>
           <form class="login" method="post" action="{% url 'account_login' %}">
             {% csrf_token %}
             {{ form|crispy }}
