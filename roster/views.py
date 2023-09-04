@@ -466,8 +466,8 @@ def update_profile(request: AuthHttpRequest) -> HttpResponse:
                 logger.log(
                     SUCCESS_LOG_LEVEL,
                     f"User {user.username} ({user.email}) changed their name "
-                    f"to {user.first_name} {user.last_name }"
-                    f"(previously {user.first_name} {user.last_name}.)",
+                    f"to {user.first_name} {user.last_name} "
+                    f"(previously {old_first_name} {old_last_name}).",
                     extra={"request": request},
                 )
 
