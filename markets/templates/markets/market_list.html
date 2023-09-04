@@ -34,10 +34,12 @@
             <a href="{{ market.get_absolute_url }}">{{ market.title }}</a>
           </td>
         {% endif %}
-        {% if past %}
+        {% if market.has_ended %}
           <td>{{ market.end_date }}</td>
-        {% else %}
+        {% elif market.is_upcoming %}
           <td>{{ market.end_date|naturaltime }}</td>
+        {% else %}
+          <td>{{ market.end_date }}</td>
         {% endif %}
       </tr>
     {% endfor %}
