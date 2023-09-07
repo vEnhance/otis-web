@@ -1,0 +1,123 @@
+\documentclass[11pt]{scrartcl}
+\usepackage{otis}
+
+\begin{document}
+
+\title{Quality requirements for OTIS contributions}
+\maketitle
+
+\section*{Why are standards so high?}
+OTIS prides itself on extremely high standards for solutions on production.
+As the number of students has increased, so have the standards;
+e.g.\ a lot of old solutions written by Evan are missing or incomplete,
+or otherwise would not meet modern OTIS requirements.
+
+Dealing with these old crappy solutions has been a major sore point,
+and it has been a long and slow process to slowly improve them.
+Every badly written solution eventually leads to some student asking Evan
+what the heck is going on, and Evan having to rush to fix the solution.
+We are still paying off this ``quality debt'', years and years later.
+
+To prevent the further buildup of quality debt, we therefore are asking that
+\alert{all future contributions to OTIS are production quality}.
+That means a submission needs to be perfect before
+it will get added into the OTIS system,
+because we don't want our to-do list of things to clean up to get any longer.
+
+Without further ado, here are the requirements:
+
+\tableofcontents
+
+\newpage
+
+\section{Solutions must be complete and your own writing}
+\alert{You MUST NOT copy the wording of someone else's solution},
+at least not without permission.
+However, it's okay if the ideas in the solution are not your own,
+or someone else found an isomorphic solution to yours.
+
+You \alert{must write up a complete solution} to each problem.
+
+\alert{Links to AoPS are not acceptable as solutions},
+even links to posts written by yourself.
+You need to actually format the solution in \LaTeX\ properly and submit it.
+
+\section{Write out a full $7$-point solution}
+You must \alert{write out all details, like in a competition setting}.
+Do not include phrases like ``exercise to the reader'',
+``can be checked that'', etc.
+
+\section{Follow the \LaTeX\ style guide to a tee}
+Follow Evan's \LaTeX\ style guide (yes, I know it's long):
+\begin{center}
+  \Large
+  \url{https://web.evanchen.cc/latex-style-guide.html}.
+\end{center}
+In addition, make sure that you don't have any obvious syntax issues, for example:
+\begin{itemize}
+\ii Capitalize the first word of each sentence.
+Also, avoid starting any sentence in math mode.
+
+\ii Make sure you have a space after full stops (periods) and commas, but not before.
+
+\ii Use notation consistent with OTIS.
+\end{itemize}
+
+\section{Isolate claims and include paragraph breaks}
+\alert{Include paragraph breaks when appropriate}.
+Don't submit a solution that's a single multi-page paragraph.
+
+Separate claims/sub-lemmas using the \texttt{claim*} environment
+(from \texttt{evan.sty}), and their proofs with \texttt{proof}.
+For example, the code
+\begin{lstlisting}[language=TeX]
+\begin{claim*}
+  The function $f$ is injective.
+\end{claim*}
+\begin{proof}
+  If $f(a) = f(b)$, then consider $P(a,b)$ and do magic.
+\end{proof}
+\end{lstlisting}
+will produce
+\begin{claim*}
+  The function $f$ is injective.
+\end{claim*}
+\begin{proof}
+  If $f(a) = f(b)$, then consider $P(a,b)$ and do magic.
+\end{proof}
+
+\section{Include figures}
+You must \alert{include diagrams whenever relevant}
+for all solutions. This includes not only geometry problems,
+and any combinatorics problem for which a diagram makes sense ---
+for example, grid combinatorics should be illustrated,
+graph theory solutions should have graphs in them, etc.
+
+\alert{Diagrams should be drawn in Asymptote}.
+If you don't know how to use Asymptote,
+you'll either have to learn or ask someone to help draw for you.
+
+As a specific example, consider the USAMO 2022 solutions file:
+\begin{quote}
+  \url{https://web.evanchen.cc/exams/USAMO-2022-notes.pdf}
+\end{quote}
+Notice that
+\begin{itemize}
+  \ii USAMO 2022/1 is a grid combo problem, and the grid and operation are
+  actually drawn.
+  \ii USAMO 2022/2 is a quasi-geometry problem, and of course has a diagram.
+  \ii USAMO 2022/3 is a functional equation, and a diagram doesn't make sense here.
+  \ii USAMO 2022/4 is a Diophantine equation, and a diagram doesn't make sense here.
+  \ii USAMO 2022/5 doesn't have an Asymptote diagram,
+  but it instead has a table showing an example of a construction,
+  complete with careful alignment and red boldface showing a well-chosen example.
+  \ii USAMO 2022/6 is a graph theory problem and chock-full of figures
+  to show the extremely complicated algorithm.
+\end{itemize}
+
+As a general rule, if you needed to draw a picture when solving the problem,
+you should have diagrams in the solution.
+If you defined a procedure or coloring or labeling or whatever,
+and it would help to illustrate an example, you should do so.
+
+\end{document}

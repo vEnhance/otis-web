@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% load static %}
 {% load markdownify %}
 {% block title %}
   Problem Suggestion
@@ -46,13 +47,7 @@
       <p>
         Read <a href="#instructions">the instructions at the bottom</a>
         if you haven't seen them already!
-        There are a lot of specific formatting requirements.
-      </p>
-      <p>
-        Also: if you are suggesting a problem
-        from a fairly well-known source (e.g. IMO Shortlist),
-        there is a decent chance Evan might have done the problem already;
-        double-check first.
+        There are a lot of specific content and formatting requirements.
       </p>
     </div>
   {% endif %}
@@ -133,52 +128,20 @@
         </td>
       </tr>
     </table>
-    <h2 id="instructions">Submission requirements</h2>
     <div class="alert alert-secondary">
-      <h3 class="alert-heading">Copyright information about solutions</h3>
+      <h2 class="alert-heading">Submission requirements</h2>
       <ul>
         <li>
-          <strong>You must submit a complete solution</strong>.
-          If you don't, I might get to solving the problem eventually,
-          but let's be real, there's at least 200 problems on my
-          someone-told-me-to-do-it list.
-        </li>
-        <li>
-          <strong>You MUST NOT copy the wording of someone else's solution</strong>,
-          at least not without permission.
-          However, it's okay if the ideas in the solution are not your own,
-          or someone else found an isomorphic solution to yours.
-        </li>
-        <li>
-          By submitting, you are granting Evan permission to use, edit, or adapt
-          your entire submission, either for OTIS or any other
-          math-olympiad-related purposes.
-          On the other hand, you retain copyright/ownership of your writing,
-          so you can also use it for whatever you want elsewhere.
-        </li>
-      </ul>
-    </div>
-    <div class="alert alert-secondary">
-      <h3 class="alert-heading">Content requirements</h3>
-      <ul>
-        <li>
-          You should <strong>write out all details like in a competition</strong>.
-          If you leave "exercises to the reader", I will return the
-          submission with a request to finish the exercise.
-        </li>
-        <li>
-          <strong>You must follow the LaTeX style guide</strong>:
-          <a href="https://web.evanchen.cc/latex-style-guide.html">https://web.evanchen.cc/latex-style-guide.html</a>.
-          Submissions that don't follow the style guide will be returned
-          with revisions requested until these requirements are met.
-        </li>
-        <li>
-          Include necessary <strong>Asymptote diagrams</strong>,
-          especially for geometry.
-          (If you don't know how to make an Asymptote diagram,
-          you should either learn or ask a friend.)
-          Starting September 2023, this is a requirement, and submissions
-          that don't have a diagram will be returned for revisions.
+          <p>
+            You <strong>MUST follow all the production requirements</strong> included in the
+            <a href="{% static 'production-quality-reqs.pdf' %}">production quality requirements (PDF)</a>.
+            If you don't, your submission will simply be returned with
+            revisions requested.
+          </p>
+          <p>
+            This includes, among other things, following Evan's
+            <a href="https://web.evanchen.cc/latex-style-guide.html">LaTeX style requirements</a>.
+          </p>
         </li>
         <li>
           <p>
@@ -190,6 +153,30 @@
             <strong>Do NOT do hacks just for the preview.</strong>
             For example, just type <code>\emph{...}</code> for italics,
             do not hack it with <code>$\emph{...}$</code>.
+            Similarly, use <code>\begin{claim*} ... \end{claim*}</code> for
+            claims or <code>\begin{proof} ... \end{proof}</code> for proofs,
+            as stated in the requirements, even if they don't render correctly in the preview.
+          </p>
+          <p>
+            Repeat: <strong>get the code right</strong>. Ignore the preview.
+          </p>
+        </li>
+        <li>
+          <p>
+            If you are suggesting a problem from a fairly well-known source
+            (e.g. IMO Shortlist), there is a decent chance Evan might
+            have done the problem already; double-check first.
+          </p>
+        </li>
+        <li>
+          <p>
+            By submitting, you are granting Evan permission to use, edit, or adapt
+            your entire submission, either for OTIS or any other
+            math-olympiad-related purposes.
+          </p>
+          <p>
+            On the other hand, you retain copyright/ownership of your writing,
+            so you can also use it for whatever you want elsewhere.
           </p>
         </li>
       </ul>
