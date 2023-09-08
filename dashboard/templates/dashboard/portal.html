@@ -279,10 +279,18 @@
           <a href="#petitions">"Manage Units" button below</a>,
           which lets you submit requests to unlock additional units
           or drop existing ones.
-        {% else %}
+        {% elif student.num_unlocked == 9 %}
           which is the maximum possible.
           You can use the <a href="#petitions">"Manage Units" button below</a>
           to request further changes.
+        {% else %}
+          which is actually... not supposed to happen (the maximum is 9).
+          <span class="emoji-text">🤔</span>
+          <br />
+          This could occur if a staff member manually edits your unlocked units
+          and doesn't respect the maximum of 9.
+          Alternatively, if you think you've found a bug on the website, please
+          <a href="https://github.com/vEnhance/otis-web/issues">open a GitHub issue</a>.
         {% endif %}
       </p>
     {% endif %}
