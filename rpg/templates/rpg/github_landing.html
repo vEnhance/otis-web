@@ -75,7 +75,7 @@
       <li>
         <p>
           {% if v.spades %}<strong>{{ v.spades }}♠</strong> for{% endif %}
-          <a href="https://github.com/vEnhance/otis-web/commit/{{ v.commit_hash }}">{{ v.commit_hash }}</a>
+          <a href="{{ v.get_absolute_url }}">{{ v.commit_hash|truncatechars:7 }}</a>
           —
           {{ v.description }}
           <br />

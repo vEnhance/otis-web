@@ -248,3 +248,9 @@ class VulnerabilityRecord(models.Model):
             "timestamp",
             "commit_hash",
         )
+
+    def __str__(self) -> str:
+        return self.commit_hash
+
+    def get_absolute_url(self) -> str:
+        return f"https://github.com/vEnhance/otis-web/commit/{self.commit_hash}"

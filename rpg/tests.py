@@ -415,3 +415,5 @@ class TestGithubLanding(EvanTestCase):
             self.assertContains(resp, v.finder_name)
             self.assertContains(resp, v.description)
             self.assertContains(resp, v.commit_hash)
+            self.assertContains(resp, v.get_absolute_url())
+            self.assertTrue(v.get_absolute_url().endswith(v.commit_hash))
