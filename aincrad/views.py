@@ -293,11 +293,18 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
             and original_status in ("P", "PR")
             and pset.unit is not None
         ):
-            # unlock the unit the student asked for
-            if pset.next_unit_to_unlock is not None:
-                pset.student.unlocked_units.add(pset.next_unit_to_unlock)
             # remove the old unit since it's done now
             pset.student.unlocked_units.remove(pset.unit)
+            # unlock the unit the student asked for
+            if pset.next_unit_to_unlock is not None:
+                if pset.student.unlocked_units.count() < 9:
+                    pset.student.unlocked_units.add(pset.next_unit_to_unlock)
+                else:
+                    logging.error(
+                        f"{pset.student} somehow already has 9 units "
+                        f"after submitting {pset.unit} "
+                        f"and trying to unlock {pset.next_unit_to_unlock}."
+                    )
         return JsonResponse({"result": "success"}, status=200)
     elif action == "mark_suggestion":
         suggestion = get_object_or_404(ProblemSuggestion, pk=data["pk"])
