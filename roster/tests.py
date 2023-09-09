@@ -105,6 +105,7 @@ class RosterTest(EvanTestCase):
             "Your curriculum has been finalized!",
         )
         self.assertEqual(alice.unlocked_units.count(), 3)
+        self.assertPost40X("finalize", alice.pk, data={"submit": True}, follow=True)
 
     def test_invoice(self) -> None:
         alice: Student = StudentFactory.create(semester__show_invoices=True)
