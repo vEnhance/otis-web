@@ -13,6 +13,7 @@ from rpg.factories import (  # NOQA
     BonusLevelFactory,
     LevelFactory,
     QuestCompleteFactory,
+    VulnerabilityRecordFactory,
 )
 from rpg.levelsys import (  # NOQA
     annotate_student_queryset_with_scores,
@@ -404,3 +405,13 @@ class TestPalace(EvanTestCase):
         self.assertGetOK("palace-list", alice.pk)
         self.assertGetOK("palace-update", alice.pk)
         self.assertGetOK("diamond-update", alice.pk)
+
+
+class TestGithubLanding(EvanTestCase):
+    def test_github_landing(self):
+        vuls = VulnerabilityRecordFactory.create_batch(5)
+        resp = self.assertGet20X("github-landing")
+        for v in vuls:
+            self.assertContains(resp, v.finder_name)
+            self.assertContains(resp, v.description)
+            self.assertContains(resp, v.commit_hash)

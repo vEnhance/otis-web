@@ -2,6 +2,8 @@ from django.contrib import admin
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
+from rpg.models import VulnerabilityRecord
+
 from .models import (  # NOQA
     Achievement,
     AchievementUnlock,
@@ -165,3 +167,24 @@ class LevelAdmin(ImportExportModelAdmin):
     )
     search_fields = ("name",)
     resource_class = LevelIEResource
+
+
+@admin.register(VulnerabilityRecord)
+class VulnerabilityRecordAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "commit_hash",
+        "finder_name",
+        "timestamp",
+        "spades",
+    )
+    search_field = (
+        "commit_hash",
+        "finder_name",
+        "description",
+    )
+    list_display_links = (
+        "id",
+        "commit_hash",
+        "finder_name",
+    )

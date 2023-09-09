@@ -30,6 +30,7 @@ from otisweb.mixins import VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest, get_days_since
 from roster.models import Student
 from roster.utils import get_student_by_pk, infer_student
+from rpg.models import VulnerabilityRecord
 
 from .forms import DiamondsForm
 from .levelsys import LevelInfoDict, get_level_info, get_student_rows
@@ -346,3 +347,9 @@ class DiamondUpdate(
 
     def get_success_url(self):
         return reverse("diamond-update", args=(self.student.pk,))
+
+
+class GithubLandingView(ListView[VulnerabilityRecord]):
+    model = VulnerabilityRecord
+    template_name = "rpg/github_landing.html"
+    context_object_name = "vulnerabilities"

@@ -6,6 +6,7 @@ from factory.fuzzy import FuzzyChoice
 from core.factories import UnitGroupFactory, UserFactory  # NOQA
 from evans_django_tools.testsuite import UniqueFaker
 from roster.factories import StudentFactory
+from rpg.models import VulnerabilityRecord
 
 from .models import (  # NOQA
     Achievement,
@@ -68,3 +69,14 @@ class BonusLevelUnlockFactory(DjangoModelFactory):
 
     student = SubFactory(StudentFactory)
     level = SubFactory(BonusLevelFactory)
+
+
+class VulnerabilityRecordFactory(DjangoModelFactory):
+    class Meta:
+        model = VulnerabilityRecord
+
+    commit_hash = Faker("hexify", text="^" * 24)
+    timestamp = Faker("past_date")
+    description = Faker("sentence")
+    spades = 20
+    finder_name = Faker("first_name")

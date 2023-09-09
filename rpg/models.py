@@ -220,3 +220,31 @@ class PalaceCarving(models.Model):
 
     def __str__(self) -> str:
         return f"Palace carving for {self.display_name}"
+
+
+class VulnerabilityRecord(models.Model):
+    commit_hash = models.CharField(
+        max_length=64,
+        help_text="The hash of the commit fixing the issue.",
+        validators=[
+            RegexValidator(regex=r"[0-9a-f]+", message="Needs to be a hex hash")
+        ],
+    )
+    timestamp = models.DateField(help_text="Date to attach to the vulnerability.")
+    finder_name = models.CharField(
+        max_length=80,
+        blank=True,
+        help_text="Person to attribute",
+    )
+    description = models.TextField(
+        help_text="A description of what was fixed by this commit."
+    )
+    spades = models.PositiveSmallIntegerField(
+        null=True, blank=True, help_text="The number of spades awarded."
+    )
+
+    class Meta:
+        ordering = (
+            "timestamp",
+            "commit_hash",
+        )

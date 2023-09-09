@@ -1,0 +1,95 @@
+{% extends "layout.html" %}
+{% block title %}Hacking OTIS-WEB{% endblock %}
+{% block layout-content %}
+  <p>
+    The OTIS-WEB repository is open-source,
+    and you can see the entire <a href=" https://github.com/vEnhance/otis-web">source code on GitHub</a>.
+  </p>
+  <h2>Issue tracker</h2>
+  <p>
+    Submit feature requests and bug reports in the
+    <a href="https://github.com/vEnhance/otis-web/issues">issue tracker</a>.
+  </p>
+  <hr />
+  <h2>Contribute</h2>
+  <ul>
+    <li>
+      See the
+      <a href="https://github.com/vEnhance/otis-web/blob/main/CONTRIBUTING.md">contributing guidelines</a>
+      for an overview of the contribution process for OTIS-WEB.
+    </li>
+    <li>
+      See the
+      <a href="https://github.com/vEnhance/otis-web/#installation-instructions">README file</a>
+      for instructions on setting up a local copy of the OTIS-WEB repository.
+      Alternatively, see the
+      <a href="https://youtu.be/W27XcqeXp20">YouTube tutorial</a>.
+    </li>
+  </ul>
+  <p>
+    Here are a few random open issues if you want to pick one to work on.
+    (For beginners, look for the "good first issue" label.)
+  </p>
+  <div id="github-issues-list"></div>
+  <script type="text/javascript">
+      const create_label_url = (label) => {
+          let url = new URL('https://github.com/vEnhance/otis-web/issues');
+          url.searchParams.set('q', `is:issue is:open label:"${label.name}"`);
+          return url;
+      };
+
+      // https://stackoverflow.com/a/26608674/4826845
+      $(document).ready(async function() {
+          let result = await fetch(
+              "https://api.github.com/repos/vEnhance/otis-web/issues?state=open");
+          let allIssues = await result.json();
+
+          allIssues = allIssues.filter(issue => !issue.pull_request);
+          console.log(allIssues);
+          allIssues.sort(() => 0.5 - Math.random()); // random order
+          const sliceOfIssues = allIssues.slice(0, 5);
+
+          // ... only in JavaScript does .sort() assume strings huh
+          sliceOfIssues.sort((issue1, issue2) => issue1.number - issue2.number);
+          sliceOfIssues.slice(0, 5).forEach(issue => {
+              console.log(issue);
+              let issue_url = `https://github.com/vEnhance/otis-web/issues/${issue.number}`;
+              let item = `<p>`;
+              item += `<strong><a href="${issue_url}">#${issue.number}</a></strong>. `;
+              item += `${issue.title}`;
+              item += issue.labels.map(label => `<a href="${create_label_url(label)}"><sup style="color:#${label.color};">${label.name}</sup></a>`).join(' ');
+              item += `</p>`;
+              $("#github-issues-list").append(item);
+          });
+      });
+  </script>
+  <hr />
+  <h2>Vulnerabilities</h2>
+  <p>
+    Large spade bounties (often 10-50 spades) are awarded if you find a serious
+    vulnerability in the OTIS-WEB source code. Here are some past such
+    achievements.
+  </p>
+  <ul>
+    {% for v in vulnerabilities %}
+      <li>
+        <p>
+          {% if v.spades %}<strong>{{ v.spades }}♠</strong> for{% endif %}
+          <a href="https://github.com/vEnhance/otis-web/commit/{{ v.commit_hash }}">{{ v.commit_hash }}</a>
+          —
+          {{ v.description }}
+          <br />
+          {{ timestamp }}
+        </p>
+        <p class="text-muted">
+          {% if v.finder_name %}
+            Found by {{ v.finder_name }}. {{ v.timestamp }}.
+          {% else %}
+            {{ v.timestamp }}.
+          {% endif %}
+        </p>
+      </li>
+    {% endfor %}
+  </ul>
+</a>
+{% endblock %}
