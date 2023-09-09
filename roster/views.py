@@ -127,7 +127,9 @@ def curriculum(request: HttpRequest, student_pk: int) -> HttpResponse:
 def finalize(request: HttpRequest, student_pk: int) -> HttpResponse:
     # Removes a newborn status, thus activating everything
     student = get_student_by_pk(request, student_pk)
-    if student.curriculum.count() > 0:
+    if student.newborn is not True:
+        raise PermissionDenied("Not allowed to call finalize more than once.")
+    elif student.curriculum.count() > 0:
         student.newborn = False
         first_units = student.curriculum.all()[:3]
         student.unlocked_units.set(first_units)
