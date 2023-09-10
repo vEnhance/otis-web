@@ -69,6 +69,8 @@ class PSetAdmin(admin.ModelAdmin):
     list_filter = (
         "status",
         "student__semester",
+        "eligible",
+        "unit__group__subject",
     )
     list_display_links = (
         "pk",
