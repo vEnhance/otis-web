@@ -13,7 +13,7 @@
       <div id="arch_puid_chosen_form" class="mathjax_ignore">
         {% include "generic_form.html" with form=lookup_form target=lookup_url submit_name="Lookup" btn_class="btn-primary" %}
       </div>
-      <div id="arch_puid_mobile_form">
+      <div id="arch_puid_mobile_form" class="invisible">
         <p>
           <input id="arch_puid_mobile_input" />
         </p>
@@ -91,6 +91,7 @@
               $("#arch_puid_mobile_form").remove();
           } else {
               $("#arch_puid_chosen_form").remove();
+              $("#arch_puid_mobile_form").removeClass("invisible");
               $("#arch_puid_mobile_input").bind('blur', jumpToARCHPage);
               $("#arch_puid_mobile_submit").bind('click', jumpToARCHPage);
           }
