@@ -38,7 +38,7 @@ class HanabiModelTests(EvanTestCase):
         self.assertEqual(contest.max_score, 25)
 
         replay = HanabiReplayFactory.create(contest=contest, game_score=23)
-        self.assertAlmostEqual(replay.get_base_spades(), 1.3181630464)
+        self.assertAlmostEqual(replay.get_base_spades(), 2.86557184)
 
 
 class HanabiViewTests(EvanTestCase):

@@ -140,7 +140,7 @@ class HanabiReplay(models.Model):
 
     def get_base_spades(self) -> float:
         num_suits = self.contest.num_suits
-        return 2 * (self.game_score / (5 * num_suits)) ** num_suits
+        return 4 * (self.game_score / (5 * num_suits)) ** 4
 
 
 class HanabiParticipation(models.Model):

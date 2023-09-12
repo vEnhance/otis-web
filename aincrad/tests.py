@@ -562,13 +562,13 @@ class TestAincrad(EvanTestCase):
         )
         self.assertEqual(len(resp.json()["names"]), 9)
         self.assertAlmostEqual(
-            HanabiReplay.objects.get(replay_id=812).spades_score, 4.0
+            HanabiReplay.objects.get(replay_id=812).spades_score, 6.0
         )
         self.assertAlmostEqual(
-            HanabiReplay.objects.get(replay_id=811).spades_score, 3.0
+            HanabiReplay.objects.get(replay_id=811).spades_score, 5.0
         )
         self.assertAlmostEqual(
-            HanabiReplay.objects.get(replay_id=271).spades_score, 0.6328125
+            HanabiReplay.objects.get(replay_id=271).spades_score, 1.265625
         )
         self.assertEqual(HanabiParticipation.objects.all().count(), 9)
         self.assertEqual(
