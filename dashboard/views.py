@@ -205,7 +205,7 @@ def submit_pset(request: HttpRequest, student_pk: int) -> HttpResponse:
             pset.save()
             messages.success(
                 request,
-                "The problem set is submitted successfully " "and is pending review!",
+                "The problem set is submitted successfully and is pending review!",
             )
             logger.log(
                 VERBOSE_LOG_LEVEL,
