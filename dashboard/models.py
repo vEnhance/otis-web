@@ -194,6 +194,7 @@ class PSet(models.Model):
     class Meta:
         verbose_name = "PSet submission"
         verbose_name_plural = "PSet submissions"
+        unique_together = ("student", "unit")
 
     def __str__(self):
         return f"{self.student.name} submits {self.unit}"
