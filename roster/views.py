@@ -705,7 +705,7 @@ def discord_lookup(request: HttpRequest) -> HttpResponse:
             try:
                 sa = SocialAccount.objects.get(
                     provider="discord",
-                    extra_data__contains=[{"username": discord_handle}],
+                    extra_data__icontains=discord_handle,
                 )
             except SocialAccount.DoesNotExist:
                 messages.error(request, f"Could not find {discord_handle}.")
