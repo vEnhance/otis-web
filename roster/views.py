@@ -706,7 +706,7 @@ def discord_lookup(request: HttpRequest) -> HttpResponse:
             lookup: dict[SocialAccount, str] = {}
             for sa in SocialAccount.objects.filter(
                 provider="discord", extra_data__icontains=discord_handle
-            ).select_related("user")[:3]:
+            ).select_related("user")[:5]:
                 student = Student.objects.filter(user=sa.user).order_by("-pk").first()
                 if student is not None:
                     lookup[sa] = student.get_absolute_url()
