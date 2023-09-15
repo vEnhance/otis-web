@@ -1,6 +1,22 @@
 {% extends "layout.html" %}
 {% block title %}Discord Lookup{% endblock %}
 {% block layout-content %}
+  {% if lookup != None %}
+    <h2>Results</h2>
+    {% if lookup|length == 0 %}
+      <div class="alert alert-danger">No matches were found.</div>
+    {% else %}
+      <ul>
+        {% for sa,link in lookup.items %}
+          <li>
+            <a href="{{ link }}">{{ sa.user.get_full_name }}: {{ sa.extra_info.username }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    <hr />
+  {% endif %}
+  <h2>Lookup</h2>
   <p>Look up a student by Discord username.</p>
   {% include "generic_form.html" with submit_name="Search" %}
 {% endblock layout-content %}

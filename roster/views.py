@@ -698,33 +698,28 @@ def link_assistant(request: HttpRequest) -> HttpResponse:
 
 @admin_required
 def discord_lookup(request: HttpRequest) -> HttpResponse:
+    context = {}
     if request.method == "POST":
         form = DiscordLookupForm(request.POST)
         if form.is_valid():
             discord_handle = form.cleaned_data["discord_handle"]
-            try:
-                sa = SocialAccount.objects.get(
-                    provider="discord",
-                    extra_data__icontains=discord_handle,
-                )
-            except SocialAccount.DoesNotExist:
-                messages.error(request, f"Could not find {discord_handle}.")
-            except SocialAccount.MultipleObjectsReturned:
-                messages.error(
-                    request,
-                    f"Somehow found multiple social accounts for {discord_handle}.",
-                )
-            else:
-                user = sa.user
-                student = Student.objects.filter(user=user).order_by("-pk").first()
+            lookup: dict[SocialAccount, str] = {}
+            for sa in SocialAccount.objects.filter(
+                provider="discord", extra_data__icontains=discord_handle
+            ).select_related("user")[:3]:
+                student = Student.objects.filter(user=sa.user).order_by("-pk").first()
                 if student is not None:
-                    return HttpResponseRedirect(student.get_absolute_url())
+                    lookup[sa] = student.get_absolute_url()
                 else:
-                    return HttpResponseRedirect(
-                        reverse("admin:auth_user_change", args=(user.pk,))
-                    )
-
+                    lookup[sa] = reverse("admin:auth_user_change", args=(sa.user.pk,))
+            if len(lookup) == 1:
+                _, url = list(lookup.items())[0]
+                return HttpResponseRedirect(url)
+            context["lookup"] = lookup
+        else:
+            context["lookup"] = None
     else:
         form = DiscordLookupForm()
-    context = {"form": form}
+        context["lookup"] = None
+    context["form"] = form
     return render(request, "roster/discord_lookup.html", context)
