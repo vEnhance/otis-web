@@ -718,9 +718,9 @@ def discord_lookup(request: HttpRequest) -> HttpResponse:
                 user = sa.user
                 student = Student.objects.filter(user=user).order_by("-pk").first()
                 if student is not None:
-                    return HttpResponse(redirect_to=student.get_absolute_url())
+                    return HttpResponseRedirect(student.get_absolute_url())
                 else:
-                    return HttpResponse(
+                    return HttpResponseRedirect(
                         reverse("admin:auth_user_change", args=(user.pk,))
                     )
 
