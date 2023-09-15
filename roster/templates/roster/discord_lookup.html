@@ -9,7 +9,7 @@
       <ul>
         {% for sa,link in lookup.items %}
           <li>
-            <a href="{{ link }}">{{ sa.user.get_full_name }}: {{ sa.extra_info.username }}</a>
+            <a href="{{ link }}">{{ sa.user.get_full_name }}</a>: {{ sa.extra_info }}
           </li>
         {% endfor %}
       </ul>
