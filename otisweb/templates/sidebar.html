@@ -198,7 +198,10 @@
       </li>
       {% if request.user.is_superuser %}
         <li>
-          <a href="{% url "admin:roster_student_change" student.pk %}">Edit</a>
+          <a href="{% url "admin:auth_user_change" student.user.pk %}">Edit user</a>
+        </li>
+        <li>
+          <a href="{% url "admin:roster_student_change" student.pk %}">Edit student</a>
         </li>
         {% if student.user %}
           {# Hijack student account #}
