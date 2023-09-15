@@ -57,6 +57,7 @@ from .forms import (  # NOQA
     AdvanceForm,
     CurriculumForm,
     DecisionForm,
+    DiscordLookupForm,
     InquiryForm,
     UserForm,
 )
@@ -693,3 +694,37 @@ def link_assistant(request: HttpRequest) -> HttpResponse:
     }
 
     return render(request, "roster/link_assistant.html", context)
+
+
+@admin_required
+def discord_lookup(request: HttpRequest) -> HttpResponse:
+    if request.method == "POST":
+        form = DiscordLookupForm(request.POST)
+        if form.is_valid():
+            discord_handle = form.cleaned_data["discord_handle"]
+            try:
+                sa = SocialAccount.objects.get(
+                    provider="discord",
+                    extra_data__contains=[{"username": discord_handle}],
+                )
+            except SocialAccount.DoesNotExist:
+                messages.error(request, f"Could not find {discord_handle}.")
+            except SocialAccount.MultipleObjectsReturned:
+                messages.error(
+                    request,
+                    f"Somehow found multiple social accounts for {discord_handle}.",
+                )
+            else:
+                user = sa.user
+                student = Student.objects.filter(user=user).order_by("-pk").first()
+                if student is not None:
+                    return HttpResponse(redirect_to=student.get_absolute_url())
+                else:
+                    return HttpResponse(
+                        reverse("admin:auth_user_change", args=(user.pk,))
+                    )
+
+    else:
+        form = DiscordLookupForm()
+    context = {"form": form}
+    return render(request, "roster/discord_lookup.html", context)

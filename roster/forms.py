@@ -177,3 +177,7 @@ class LinkAssistantForm(forms.Form):
         ),
         label="Student to claim",
     )
+
+
+class DiscordLookupForm(forms.Form):
+    discord_handle = forms.CharField()
