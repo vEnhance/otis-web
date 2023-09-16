@@ -69,3 +69,10 @@ table.table.form-table td {
 textarea {
   font-family: "Dejavu Sans Mono", monospace;
 }
+
+label {
+  font-weight: 700;
+}
+label.requiredField {
+  color: #770000;
+}
