@@ -456,15 +456,15 @@ def update_profile(request: AuthHttpRequest) -> HttpResponse:
         old_first_name = request.user.first_name
         old_last_name = request.user.last_name
         if form.is_valid():
-            user: User = form.save()
-            user.save()
+            user: User = form.save(commit=False)
             if old_email != user.email:
-                logger.info(
+                mailchimp_subscribe(request)
+                logger.log(
+                    SUCCESS_LOG_LEVEL,
                     f"User {user.get_full_name()} ({user.username}) updated their email "
-                    f"from {user.email} (from {old_email})",
+                    f"to {user.email} (from {old_email})",
                     extra={"request": request},
                 )
-                mailchimp_subscribe(request)
             if old_first_name != user.first_name or old_last_name != user.last_name:
                 logger.log(
                     SUCCESS_LOG_LEVEL,
@@ -473,7 +473,7 @@ def update_profile(request: AuthHttpRequest) -> HttpResponse:
                     f"(previously {old_first_name} {old_last_name}).",
                     extra={"request": request},
                 )
-
+            user.save()
             messages.success(request, "Your information has been updated.")
     else:
         form = UserForm(instance=request.user)
