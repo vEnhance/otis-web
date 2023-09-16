@@ -76,33 +76,31 @@ def mailchimp_subscribe(request: AuthHttpRequest):
     if settings.TESTING or settings.DEBUG:
         logger.warning(f"Not actually subscribing {user} since we're testing")
         return
-    elif API_KEY is not None:
-        try:
-            client = MailChimp(mc_api=API_KEY, mc_user="vEnhance")
-            client.lists.members.create(
-                os.getenv("MAILCHIMP_LIST_ID"),
-                {
-                    "email_address": user.email,
-                    "status": "subscribed",
-                    "merge_fields": {
-                        "FNAME": user.first_name,
-                        "LNAME": user.last_name,
-                    },
+    assert API_KEY is not None, "No API KEY provided for MailChimp in production!"
+    try:
+        client = MailChimp(mc_api=API_KEY, mc_user="vEnhance")
+        client.lists.members.create(
+            os.getenv("MAILCHIMP_LIST_ID"),
+            {
+                "email_address": user.email,
+                "status": "subscribed",
+                "merge_fields": {
+                    "FNAME": user.first_name,
+                    "LNAME": user.last_name,
                 },
-            )
-            messages.success(
-                request,
-                f"The email {user.email} is now listed as the "
-                + "contact point for OTIS announcements from Evan.",
-            )
-        except MailChimpError as e:
-            logger.error(f"Could not add {user.email} to MailChimp", exc_info=e)
-            messages.warning(
-                request,
-                f"The email {user.email} could not be added to MailChimp, maybe it's subscribed already?",
-            )
-    else:
-        raise Exception("No API KEY provided in production!")
+            },
+        )
+        messages.success(
+            request,
+            f"The email {user.email} is now listed as the "
+            + "contact point for OTIS announcements from Evan.",
+        )
+    except MailChimpError as e:
+        logger.error(f"Could not add {user.email} to MailChimp", exc_info=e)
+        messages.warning(
+            request,
+            f"The email {user.email} could not be added to MailChimp, maybe it's subscribed already?",
+        )
 
 
 def get_days_since(t: Optional[datetime.datetime]) -> Optional[float]:
