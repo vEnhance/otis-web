@@ -199,7 +199,7 @@ class FoundList(
 
 @staff_member_required
 def leaderboard(request: AuthHttpRequest) -> HttpResponse:
-    students = Student.objects.filter(semester__active=True)
+    students = Student.objects.filter(semester__active=True, enabled=True, legit=True)
     rows = get_student_rows(students)
     rows.sort(
         key=lambda row: (
