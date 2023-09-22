@@ -319,6 +319,12 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
     if auto_hold_criteria:
         inquiry.status = "INQ_HOLD"
         inquiry.save()
+        logger.log(
+            SUCCESS_LOG_LEVEL,
+            f"Held {student}'s petition to {inquiry.action_type} {inquiry.unit} "
+            f"({num_psets} psets and {num_past_unlock_inquiries} unlock petitions).",
+            extra={"request": request},
+        )
         messages.warning(
             request,
             "You have submitted an abnormally large number of petitions "
