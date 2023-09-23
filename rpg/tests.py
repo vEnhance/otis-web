@@ -20,7 +20,7 @@ from rpg.levelsys import (  # NOQA
     get_level_info,
     get_student_rows,
 )
-from rpg.models import AchievementUnlock
+from rpg.models import Achievement, AchievementUnlock
 
 utc = timezone.utc
 
@@ -279,17 +279,19 @@ class TestLevelSystem(EvanTestCase):
         a3 = AchievementFactory.create(diamonds=3, creator=bob.user)
         self.login(alice.user)
 
+        def alice_has(a: Achievement):
+            return AchievementUnlock.objects.filter(
+                achievement=a, user=alice.user
+            ).exists()
+
         # Submit a nonexistent code
         resp = self.assertPost20X(
             "stats", alice.pk, data={"code": "123456123456123456123456"}
         )
         self.assertContains(resp, "You entered an invalid code.")
-        self.assertFalse(
-            AchievementUnlock.objects.filter(achievement=a1, user=alice.user).exists()
-        )
-        self.assertFalse(
-            AchievementUnlock.objects.filter(achievement=a2, user=alice.user).exists()
-        )
+        self.assertFalse(alice_has(a1))
+        self.assertFalse(alice_has(a2))
+        self.assertFalse(alice_has(a3))
         self.assertGet40X("diamond-solution", a1.pk)
         self.assertGet20X("diamond-solution", a2.pk)  # because Alice owns it
         self.assertGet40X("diamond-solution", a3.pk)
@@ -298,12 +300,9 @@ class TestLevelSystem(EvanTestCase):
         resp = self.assertPost20X("stats", alice.pk, data={"code": a1.code})
         self.assertContains(resp, "Achievement unlocked!")
         self.assertContains(resp, "Wowie!")
-        self.assertTrue(
-            AchievementUnlock.objects.filter(achievement=a1, user=alice.user).exists()
-        )
-        self.assertFalse(
-            AchievementUnlock.objects.filter(achievement=a2, user=alice.user).exists()
-        )
+        self.assertTrue(alice_has(a1))
+        self.assertFalse(alice_has(a2))
+        self.assertFalse(alice_has(a3))
         self.assertGet20X("diamond-solution", a1.pk)
         self.assertGet20X("diamond-solution", a2.pk)
         self.assertGet40X("diamond-solution", a3.pk)
@@ -311,12 +310,9 @@ class TestLevelSystem(EvanTestCase):
         # Submit a valid code for a1 that was obtained already
         resp = self.assertPost20X("stats", alice.pk, data={"code": a1.code})
         self.assertContains(resp, "Already unlocked!")
-        self.assertTrue(
-            AchievementUnlock.objects.filter(achievement=a1, user=alice.user).exists()
-        )
-        self.assertFalse(
-            AchievementUnlock.objects.filter(achievement=a2, user=alice.user).exists()
-        )
+        self.assertTrue(alice_has(a1))
+        self.assertFalse(alice_has(a2))
+        self.assertFalse(alice_has(a3))
         self.assertGet20X("diamond-solution", a1.pk)
         self.assertGet20X("diamond-solution", a2.pk)
         self.assertGet40X("diamond-solution", a3.pk)
@@ -325,12 +321,9 @@ class TestLevelSystem(EvanTestCase):
         resp = self.assertPost20X("stats", alice.pk, data={"code": a2.code})
         self.assertContains(resp, "Achievement unlocked!")
         self.assertNotContains(resp, "Wowie!")
-        self.assertTrue(
-            AchievementUnlock.objects.filter(achievement=a1, user=alice.user).exists()
-        )
-        self.assertTrue(
-            AchievementUnlock.objects.filter(achievement=a2, user=alice.user).exists()
-        )
+        self.assertTrue(alice_has(a1))
+        self.assertTrue(alice_has(a2))
+        self.assertFalse(alice_has(a3))
         self.assertGet20X("diamond-solution", a1.pk)
         self.assertGet20X("diamond-solution", a2.pk)
         self.assertGet40X("diamond-solution", a3.pk)
@@ -338,12 +331,9 @@ class TestLevelSystem(EvanTestCase):
         # Submit a valid code for a2 that was obtained already
         resp = self.assertPost20X("stats", alice.pk, data={"code": a2.code})
         self.assertContains(resp, "Already unlocked!")
-        self.assertTrue(
-            AchievementUnlock.objects.filter(achievement=a1, user=alice.user).exists()
-        )
-        self.assertTrue(
-            AchievementUnlock.objects.filter(achievement=a2, user=alice.user).exists()
-        )
+        self.assertTrue(alice_has(a1))
+        self.assertTrue(alice_has(a2))
+        self.assertFalse(alice_has(a3))
         self.assertGet20X("diamond-solution", a1.pk)
         self.assertGet20X("diamond-solution", a2.pk)
         self.assertGet40X("diamond-solution", a3.pk)
@@ -352,6 +342,9 @@ class TestLevelSystem(EvanTestCase):
         resp = self.assertPost20X("stats", alice.pk, data={"code": a3.code})
         self.assertContains(resp, "Achievement unlocked!")
         self.assertContains(resp, "Wowie!")
+        self.assertTrue(alice_has(a1))
+        self.assertTrue(alice_has(a2))
+        self.assertTrue(alice_has(a3))
         self.assertGet20X("diamond-solution", a1.pk)
         self.assertGet20X("diamond-solution", a2.pk)
         self.assertGet20X("diamond-solution", a3.pk)
