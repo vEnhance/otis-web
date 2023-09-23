@@ -17,7 +17,10 @@ class PaymentLog(models.Model):
         help_text="The invoice this contributes towards",
     )
     stripe_id = models.CharField(
-        max_length=120, blank=True, help_text="Stripe payment ID"
+        max_length=120,
+        blank=True,
+        help_text="Stripe payment intent identifier",
+        verbose_name="Stripe payment intent ID",
     )
 
     def __str__(self) -> str:
