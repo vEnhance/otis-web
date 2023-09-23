@@ -382,7 +382,7 @@ class Invoice(models.Model):
     memo = models.TextField(blank=True, help_text="Internal note to self.")
 
     def __str__(self):
-        return f"{self.pk or 0} ({self.total_paid}/{self.total_cost})"
+        return f"Student #{self.student.pk} ({self.total_paid}/{self.total_cost})"
 
     def get_absolute_url(self) -> str:
         return reverse("invoice", args=(self.pk,))
