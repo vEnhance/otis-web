@@ -14,6 +14,7 @@ class PaymentLogAdmin(admin.ModelAdmin):
         "invoice",
         "amount",
         "created_at",
+        "stripe_id",
     )
     list_filter = ("invoice__student__semester",)
     search_fields = (

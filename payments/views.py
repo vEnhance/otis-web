@@ -94,10 +94,10 @@ def checkout(request: HttpRequest, invoice_pk: int, amount: int) -> HttpResponse
         return HttpResponseForbidden("Need to use request method GET")
 
 
-def process_payment(amount: int, invoice: Invoice):
+def process_payment(amount: int, invoice: Invoice, stripe_id: str):
     invoice.total_paid += amount
     invoice.save()
-    payment_log = PaymentLog(amount=amount, invoice=invoice)
+    payment_log = PaymentLog(amount=amount, invoice=invoice, stripe_id=stripe_id)
     payment_log.save()
 
 
@@ -136,6 +136,7 @@ def webhook(request: HttpRequest) -> HttpResponse:
             invoice=get_object_or_404(
                 Invoice, pk=int(event["data"]["object"]["client_reference_id"])
             ),
+            stripe_id=event["data"]["object"]["payment_intent"],
         )
     return HttpResponse(status=200)
 

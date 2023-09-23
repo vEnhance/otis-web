@@ -54,7 +54,7 @@ class PaymentTest(EvanTestCase):
             self.assertIn("sessionId", resp.json())
 
     def test_process_payment(self):
-        process_payment(300, PaymentTest.invoice)
+        process_payment(300, PaymentTest.invoice, "pm_XXXXXXXX")
         self.assertEqual(PaymentTest.invoice.total_owed, 180)
         log = PaymentLog.objects.get()
         self.assertEqual(log.invoice.pk, PaymentTest.invoice.pk)

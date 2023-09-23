@@ -16,9 +16,12 @@ class PaymentLog(models.Model):
         on_delete=models.CASCADE,
         help_text="The invoice this contributes towards",
     )
+    stripe_id = models.CharField(
+        max_length=120, blank=True, help_text="Stripe payment ID"
+    )
 
     def __str__(self) -> str:
-        return self.created_at.strftime("%c")
+        return f'{self.created_at.strftime("%c")} {self.stripe_id or "?"}'
 
 
 class Worker(models.Model):
