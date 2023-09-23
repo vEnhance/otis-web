@@ -13,7 +13,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import PermissionDenied
-from django.db.models import OuterRef
+from django.db.models import F, OuterRef
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http import Http404, HttpResponse
@@ -68,6 +68,11 @@ def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
                     extra={"request": request},
                 )
             else:
+                is_first_obtain = (
+                    not AchievementUnlock.objects.filter(achievement=achievement)
+                    .exclude(achievement__creator=F("user"))
+                    .exists()
+                ) and not achievement.creator == student.user
                 _, is_new = AchievementUnlock.objects.get_or_create(
                     user=student.user,
                     achievement=achievement,
@@ -79,10 +84,17 @@ def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
                         msg += " This was a user-created achievement code, "
                         msg += "so please avoid sharing it with others."
                     messages.success(request, msg)
-                    logger.info(
-                        f"{student.name} just obtained `{achievement}`!",
-                        extra={"request": request},
-                    )
+                    if is_first_obtain:
+                        logger.log(
+                            SUCCESS_LOG_LEVEL,
+                            f"`{achievement}` newly found by {student.name}! Wow!",
+                            extra={"request": request},
+                        )
+                    else:
+                        logger.info(
+                            f"{student.name} just obtained `{achievement}`!",
+                            extra={"request": request},
+                        )
                 else:
                     logger.info(
                         f"{student.name} has already obtained {achievement} before",
