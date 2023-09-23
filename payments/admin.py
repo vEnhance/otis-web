@@ -20,6 +20,7 @@ class PaymentLogAdmin(admin.ModelAdmin):
         "invoice__student__user__first_name",
         "invoice__student__user__last_name",
         "invoice__student__user__username",
+        "invoice__student__pk",
     )
     autocomplete_fields = ("invoice",)
 
