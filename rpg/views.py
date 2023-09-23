@@ -79,22 +79,23 @@ def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
                 )
                 if is_new is True:
                     msg = r"Achievement unlocked! 🎉 "
-                    msg += f"You earned the achievement {achievement.name}."
-                    if achievement.creator is not None:
-                        msg += " This was a user-created achievement code, "
-                        msg += "so please avoid sharing it with others."
-                    messages.success(request, msg)
                     if is_first_obtain:
                         logger.log(
                             SUCCESS_LOG_LEVEL,
                             f"`{achievement}` newly found by {student.name}! Wow!",
                             extra={"request": request},
                         )
+                        msg += f"You're the first to find {achievement.name}! Wowie!"
                     else:
                         logger.info(
                             f"{student.name} just obtained `{achievement}`!",
                             extra={"request": request},
                         )
+                        msg += f"You earned the achievement {achievement.name}."
+                    if achievement.creator is not None:
+                        msg += " This was a user-created achievement code, "
+                        msg += "so please avoid sharing it with others."
+                    messages.success(request, msg)
                 else:
                     logger.info(
                         f"{student.name} has already obtained {achievement} before",

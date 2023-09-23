@@ -268,9 +268,15 @@ class TestLevelSystem(EvanTestCase):
         self.assertGet20X("leaderboard")
 
     def test_submit_diamond_and_read_solution(self):
-        a1 = AchievementFactory.create(diamonds=3)
-        a2 = AchievementFactory.create(diamonds=3)
         alice = self.get_alice()
+        bob = StudentFactory.create(
+            user__first_name="Bob",
+            user__last_name="Beta",
+            semester=alice.semester,
+        )
+        a1 = AchievementFactory.create(diamonds=1)
+        a2 = AchievementFactory.create(diamonds=2, creator=alice.user)
+        a3 = AchievementFactory.create(diamonds=3, creator=bob.user)
         self.login(alice.user)
 
         # Submit a nonexistent code
@@ -285,11 +291,13 @@ class TestLevelSystem(EvanTestCase):
             AchievementUnlock.objects.filter(achievement=a2, user=alice.user).exists()
         )
         self.assertGet40X("diamond-solution", a1.pk)
-        self.assertGet40X("diamond-solution", a2.pk)
+        self.assertGet20X("diamond-solution", a2.pk)  # because Alice owns it
+        self.assertGet40X("diamond-solution", a3.pk)
 
         # Submit a valid code for a1
         resp = self.assertPost20X("stats", alice.pk, data={"code": a1.code})
         self.assertContains(resp, "Achievement unlocked!")
+        self.assertContains(resp, "Wowie!")
         self.assertTrue(
             AchievementUnlock.objects.filter(achievement=a1, user=alice.user).exists()
         )
@@ -297,7 +305,8 @@ class TestLevelSystem(EvanTestCase):
             AchievementUnlock.objects.filter(achievement=a2, user=alice.user).exists()
         )
         self.assertGet20X("diamond-solution", a1.pk)
-        self.assertGet40X("diamond-solution", a2.pk)
+        self.assertGet20X("diamond-solution", a2.pk)
+        self.assertGet40X("diamond-solution", a3.pk)
 
         # Submit a valid code for a1 that was obtained already
         resp = self.assertPost20X("stats", alice.pk, data={"code": a1.code})
@@ -309,11 +318,13 @@ class TestLevelSystem(EvanTestCase):
             AchievementUnlock.objects.filter(achievement=a2, user=alice.user).exists()
         )
         self.assertGet20X("diamond-solution", a1.pk)
-        self.assertGet40X("diamond-solution", a2.pk)
+        self.assertGet20X("diamond-solution", a2.pk)
+        self.assertGet40X("diamond-solution", a3.pk)
 
         # Submit a valid code for a2
         resp = self.assertPost20X("stats", alice.pk, data={"code": a2.code})
         self.assertContains(resp, "Achievement unlocked!")
+        self.assertNotContains(resp, "Wowie!")
         self.assertTrue(
             AchievementUnlock.objects.filter(achievement=a1, user=alice.user).exists()
         )
@@ -322,6 +333,7 @@ class TestLevelSystem(EvanTestCase):
         )
         self.assertGet20X("diamond-solution", a1.pk)
         self.assertGet20X("diamond-solution", a2.pk)
+        self.assertGet40X("diamond-solution", a3.pk)
 
         # Submit a valid code for a2 that was obtained already
         resp = self.assertPost20X("stats", alice.pk, data={"code": a2.code})
@@ -334,6 +346,30 @@ class TestLevelSystem(EvanTestCase):
         )
         self.assertGet20X("diamond-solution", a1.pk)
         self.assertGet20X("diamond-solution", a2.pk)
+        self.assertGet40X("diamond-solution", a3.pk)
+
+        # Submit a valid code for a3
+        resp = self.assertPost20X("stats", alice.pk, data={"code": a3.code})
+        self.assertContains(resp, "Achievement unlocked!")
+        self.assertContains(resp, "Wowie!")
+        self.assertGet20X("diamond-solution", a1.pk)
+        self.assertGet20X("diamond-solution", a2.pk)
+        self.assertGet20X("diamond-solution", a3.pk)
+
+        # Test Bob, the owner of a3
+        self.login(bob.user)
+        # Bob submits a1
+        resp = self.assertPost20X("stats", bob.pk, data={"code": a1.code})
+        self.assertContains(resp, "Achievement unlocked!")
+        self.assertNotContains(resp, "Wowie!")
+        # Bob submits a2
+        resp = self.assertPost20X("stats", bob.pk, data={"code": a2.code})
+        self.assertContains(resp, "Achievement unlocked!")
+        self.assertContains(resp, "Wowie!")
+        # Bob submits a3
+        resp = self.assertPost20X("stats", bob.pk, data={"code": a3.code})
+        self.assertContains(resp, "Achievement unlocked!")
+        self.assertNotContains(resp, "Wowie!")
 
 
 class TestAchievements(EvanTestCase):
