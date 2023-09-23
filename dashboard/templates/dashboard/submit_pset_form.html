@@ -23,7 +23,13 @@
           </td>
           <td>{{ pset.upload.created_at|naturaltime }}</td>
           <td>
-            <a href="{% url "resubmit-pset" pset.pk %}">Edit</a>
+            <a href="{% url "resubmit-pset" pset.pk %}">
+              {% if pset.status == "R" %}
+                Resubmit
+              {% else %}
+                Edit
+              {% endif %}
+            </a>
           </td>
         </tr>
       {% endfor %}
