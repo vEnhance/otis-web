@@ -44,11 +44,6 @@
       <a href="{% url "pset-queue-listing" %}">queue of problem set submissions</a> anyways.
     </p>
   {% endif %}
-  <p>
-    You can also see
-    <a href="{% url "student-pset-list" student.pk %}">all your past submissions</a>
-    (and submit additional solutions to previous problem sets from there).
-  </p>
   <h2>Reminders</h2>
   <ul>
     <li>
@@ -62,6 +57,12 @@
     <li>If submitting handwritten solutions, please write darkly!</li>
   </ul>
   <h2>Submit new problem set</h2>
+  <div class="alert alert-info">
+    This form is for brand new problem set submissions.
+    If you are trying to update an existing submission,
+    you should find it on your your list of
+    <a href="{% url "student-pset-list" student.pk %}">past submissions</a>.
+  </div>
   {% include "generic_form.html" %}
   <br />
   <div class="alert alert-info">
