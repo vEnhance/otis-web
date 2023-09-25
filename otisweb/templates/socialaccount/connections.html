@@ -4,7 +4,7 @@
   {% trans "Account Connections" %}
 {% endblock head_title %}
 {% block content %}
-  <h3>Name and email</h3>
+  <h2>Name and email</h2>
   <ul>
     <li>
       Your username is <strong><tt>{{ user.username }}</tt></strong>.
@@ -24,7 +24,7 @@
     </li>
   </ul>
   <hr />
-  <h3>Password</h3>
+  <h2>Password</h2>
   {% if user.has_usable_password %}
     <p>
       You have a password set on your account,
@@ -52,9 +52,18 @@
     </p>
   {% endif %}
   <hr />
-  <h3>Social Accounts</h3>
+  <h2>{% trans "Add a new connection" %}</h2>
+  <p>
+    Note you can have multiple connections for a provider,
+    e.g. if you have multiple Google accounts, you can link the mall.
+  </p>
+  <ul class="socialaccount_providers">
+    {% include "socialaccount/snippets/provider_list.html" with process="connect" %}
+  </ul>
+  {% include "socialaccount/snippets/login_extra.html" %}
+  <hr />
+  <h2>Existing connections</h2>
   {% if form.accounts %}
-    <p>If you want to remove a connection, you can select it here.</p>
     <form method="post" action="{% url 'socialaccount_connections' %}">
       {% csrf_token %}
       {% if form.non_field_errors %}
@@ -83,17 +92,48 @@
           {% endwith %}
         {% endfor %}
       </table>
-      <div>
-        <button class="btn btn-danger" type="submit">{% trans "Remove" %}</button>
+      <div class="accordion">
+        <div class="accordion-item">
+          <div class="accordion-header" id="headingDelConn">
+            <button class="accordion-button collapsed"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseDelConn"
+                    aria-expanded="false"
+                    aria-controls="collapseDelConn">
+              <span class="text-muted">Delete selected connections…</span>
+            </button>
+          </div>
+          <div id="collapseDelConn"
+               class="accordion-collapse collapse"
+               aria-labelledby="headingDelConn">
+            <div class="accordion-body">
+              <div class="alert alert-danger">
+                <h2 class="alert-heading">Warning!</h2>
+                <p>
+                  Deleting connections is <b>strongly discouraged</b> because
+                  past experience gives examples of students who delete connections,
+                  then forget they did so and try to log in again,
+                  leading to duplicated accounts, nonsensical bug reports,
+                  unintentional lockouts, and a lot of extra work for Evan.
+                </p>
+              </div>
+              <p>
+                If you are really, really sure that you never, ever plan
+                to use a connection again, you can use the delete button below.
+              </p>
+              <p class="text-center">
+                <button class="btn btn-danger" type="submit">
+                  Delete connections.
+                  I promise I know what I'm doing.
+                </button>
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </form>
   {% else %}
     <p>{% trans "You currently have no social network accounts connected to this account." %}</p>
   {% endif %}
-  <hr />
-  <h3>{% trans "Add a new connection" %}</h3>
-  <ul class="socialaccount_providers">
-    {% include "socialaccount/snippets/provider_list.html" with process="connect" %}
-  </ul>
-  {% include "socialaccount/snippets/login_extra.html" %}
 {% endblock content %}
