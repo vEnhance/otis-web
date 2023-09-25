@@ -41,6 +41,10 @@ class OTISPreprocessor(markdown.preprocessors.Preprocessor):
                 if tag_name == "diamond":
                     try:
                         diamond = Achievement.objects.get(pk=tag_arg)
+                    except ValueError:
+                        table_output.append(
+                            '<tr class="danger"><th>Diamond</th><td>TYPE ERROR (not an integer)</td></tr>'
+                        )
                     except Achievement.DoesNotExist:
                         table_output.append(
                             '<tr class="danger"><th>Diamond</th><td>INVALID</td></tr>'
