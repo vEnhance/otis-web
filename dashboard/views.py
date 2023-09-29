@@ -172,7 +172,10 @@ def submit_pset(request: HttpRequest, student_pk: int) -> HttpResponse:
     if student.enabled is False:
         raise PermissionDenied("Not enabled")
     if student.is_delinquent:
-        raise PermissionDenied("Student is delinquent")
+        if isinstance(request.user, User) and request.user.is_staff:
+            messages.warning(request, "Student is delinquent")
+        else:
+            raise PermissionDenied("Student is delinquent")
 
     if request.method == "POST":
         form = PSetSubmitForm(request.POST, request.FILES)
@@ -247,8 +250,10 @@ class StudentPSetList(LoginRequiredMixin, ListView[PSet]):
                 "You do not have permission to view this student's problem sets"
             )
         if self.student.is_delinquent:
-            raise PermissionDenied("Student is delinquent")
-
+            if request.user.is_staff:
+                messages.warning(request, "Student is delinquent")
+            else:
+                raise PermissionDenied("Student is delinquent")
         return super().dispatch(request, *args, **kwargs)
 
 
