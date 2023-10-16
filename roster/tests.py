@@ -6,7 +6,6 @@ from django.contrib.auth.models import Group, User
 from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from dashboard.factories import PSetFactory
 from freezegun.api import freeze_time
 
 from core.factories import (  # NOQA
@@ -17,6 +16,7 @@ from core.factories import (  # NOQA
     UserProfileFactory,
 )
 from core.models import Semester, Unit, UnitGroup
+from dashboard.factories import PSetFactory
 from evans_django_tools.testsuite import EvanTestCase
 from roster.factories import (  # NOQA
     AssistantFactory,
@@ -459,7 +459,9 @@ class RosterTest(EvanTestCase):
         self.assertEqual(alice.unlocked_units.count(), 5)
 
         self.login(alice)
-        secret_group = UnitGroupFactory.create(name="Spooky Unit", subject="K", hidden=True)
+        secret_group = UnitGroupFactory.create(
+            name="Spooky Unit", subject="K", hidden=True
+        )
         secret_unit = UnitFactory.create(code="BKV", group=secret_group)
         alice.curriculum.add(secret_unit)
 
