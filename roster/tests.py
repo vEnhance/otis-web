@@ -6,6 +6,7 @@ from django.contrib.auth.models import Group, User
 from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from dashboard.factories import PSetFactory
 from freezegun.api import freeze_time
 
 from core.factories import (  # NOQA
@@ -456,6 +457,32 @@ class RosterTest(EvanTestCase):
         )
         self.assertEqual(alice.curriculum.count(), 8)
         self.assertEqual(alice.unlocked_units.count(), 5)
+
+        self.login(alice)
+        secret_group = UnitGroupFactory.create(name="Spooky Unit", subject="K", hidden=True)
+        secret_unit = UnitFactory.create(code="BKV", group=secret_group)
+        alice.curriculum.add(secret_unit)
+
+        # Alice hit the hold limit earlier
+        PSetFactory.create_batch(30, student=alice)
+
+        alice.save()
+
+        self.assertHas(
+            self.post(
+                "inquiry",
+                alice.pk,
+                data={
+                    "unit": secret_unit.pk,
+                    "action_type": "INQ_ACT_UNLOCK",
+                    "explanation": "its almost halloween and my family wants to host it at our house.",
+                },
+            ),
+            "Petition automatically processed",
+        )
+
+        self.assertEqual(alice.curriculum.count(), 9)
+        self.assertEqual(alice.unlocked_units.count(), 6)
 
         bob: Student = StudentFactory.create(
             semester=SemesterFactory.create(active=False)
