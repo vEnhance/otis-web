@@ -47,7 +47,7 @@ class TestLevelSystem(EvanTestCase):
         )
         PSetFactory.create(
             student=alice, clubs=200, hours=87, status="P", unit__difficulty="Z"
-        )        
+        )
         AchievementUnlockFactory.create(
             user=alice.user, achievement__diamonds=4, achievement__name="Feel the fours"
         )
@@ -149,8 +149,12 @@ class TestLevelSystem(EvanTestCase):
         donald = StudentFactory.create()
 
         # problem sets (clubs/hearts)
-        PSetFactory.create(student=bob, clubs=196, hours=64, status="A", unit__difficulty="D")
-        PSetFactory.create(student=bob, clubs=None, hours=None, status="A", unit__difficulty="Z")
+        PSetFactory.create(
+            student=bob, clubs=196, hours=64, status="A", unit__difficulty="D"
+        )
+        PSetFactory.create(
+            student=bob, clubs=None, hours=None, status="A", unit__difficulty="Z"
+        )
 
         # diamonds
         a1 = AchievementFactory.create(diamonds=3)

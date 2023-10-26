@@ -83,7 +83,7 @@ class WikiTest(EvanTestCase):
             group__slug="example",
             difficulty="D",
             group__subject="M",
-            version="W"
+            version="W",
         )
         alice: User = UserFactory.create()
         a1 = AchievementFactory.create(
