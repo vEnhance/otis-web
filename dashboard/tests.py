@@ -63,7 +63,7 @@ class TestPortal(EvanTestCase):
 
         # A bunch of context things to check
 
-        unit = UnitFactory.create()
+        unit = UnitFactory.create(difficulty="B")
         alice.curriculum.set([unit])
         alice.unlocked_units.add(unit)
 
@@ -258,9 +258,9 @@ class TestPSet(EvanTestCase):
         self.assertGetDenied("submit-pset", carl.pk)
 
     def test_submit(self):
-        unit1 = UnitFactory.create()
-        unit2 = UnitFactory.create()
-        unit3 = UnitFactory.create()
+        unit1 = UnitFactory.create(difficulty="B")
+        unit2 = UnitFactory.create(difficulty="D")
+        unit3 = UnitFactory.create(difficulty="Z")
         alice = StudentFactory.create()
         self.login(alice)
         alice.unlocked_units.add(unit1)
@@ -770,7 +770,7 @@ class TestLevelUpAndBonus(EvanTestCase):
         secret9 = UnitGroupFactory.create(name="Level 9", subject="K", hidden=True)
         secret16 = UnitGroupFactory.create(name="Level 16", subject="K", hidden=True)
         for group in (secret4, secret9, secret16):
-            for d in ("B", "D", "V"):
+            for d in ("B", "D", "Z"):
                 UnitFactory.create(difficulty=d, group=group, version="V")
         BonusLevelFactory.create(level=4, group=secret4)
         BonusLevelFactory.create(level=9, group=secret9)

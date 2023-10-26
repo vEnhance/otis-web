@@ -460,7 +460,7 @@ class RosterTest(EvanTestCase):
         secret_group = UnitGroupFactory.create(
             name="Spooky Unit", subject="K", hidden=True
         )
-        secret_unit = UnitFactory.create(code="BKV", group=secret_group)
+        secret_unit = UnitFactory.create(group__subject="K", group=secret_group)
         alice.curriculum.add(secret_unit)
 
         # Alice hit the hold limit earlier

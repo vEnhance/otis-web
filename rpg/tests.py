@@ -36,10 +36,18 @@ class TestLevelSystem(EvanTestCase):
             user__last_name="Aardvark",
             user__groups=(verified_group,),
         )
-        PSetFactory.create(student=alice, clubs=120, hours=37, status="A")
-        PSetFactory.create(student=alice, clubs=100, hours=20, status="A")
-        PSetFactory.create(student=alice, clubs=180, hours=27, status="A")
-        PSetFactory.create(student=alice, clubs=200, hours=87, status="P")
+        PSetFactory.create(
+            student=alice, clubs=120, hours=37, status="A", unit__difficulty="B"
+        )
+        PSetFactory.create(
+            student=alice, clubs=100, hours=20, status="A", unit__difficulty="D"
+        )
+        PSetFactory.create(
+            student=alice, clubs=180, hours=27, status="A", unit__difficulty="Z"
+        )
+        PSetFactory.create(
+            student=alice, clubs=200, hours=87, status="P", unit__difficulty="Z"
+        )        
         AchievementUnlockFactory.create(
             user=alice.user, achievement__diamonds=4, achievement__name="Feel the fours"
         )
@@ -107,7 +115,7 @@ class TestLevelSystem(EvanTestCase):
         alice = self.get_alice()
         self.login(alice)
         bonus = BonusLevelFactory.create(group__name="Level 40 Quest", level=40)
-        bonus_unit = UnitFactory.create(group=bonus.group)
+        bonus_unit = UnitFactory.create(group=bonus.group, difficulty="D")
 
         resp = self.assertGet20X("portal", alice.pk)
         self.assertHas(resp, "You&#x27;re now level 38.")
@@ -141,8 +149,8 @@ class TestLevelSystem(EvanTestCase):
         donald = StudentFactory.create()
 
         # problem sets (clubs/hearts)
-        PSetFactory.create(student=bob, clubs=196, hours=64, status="A")
-        PSetFactory.create(student=bob, clubs=None, hours=None, status="A")
+        PSetFactory.create(student=bob, clubs=196, hours=64, status="A", unit__difficulty="D")
+        PSetFactory.create(student=bob, clubs=None, hours=None, status="A", unit__difficulty="Z")
 
         # diamonds
         a1 = AchievementFactory.create(diamonds=3)
