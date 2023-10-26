@@ -272,7 +272,7 @@ class Unit(models.Model):
         return f"{self.code}-tex-{self.group.slug}.tex"
 
     @property
-    def code(self):
+    def code(self) -> str:
         return self.difficulty + self.group.subject + self.version
 
 
