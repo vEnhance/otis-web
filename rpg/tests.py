@@ -107,9 +107,7 @@ class TestLevelSystem(EvanTestCase):
         alice = self.get_alice()
         self.login(alice)
         bonus = BonusLevelFactory.create(group__name="Level 40 Quest", level=40)
-        bonus_unit = UnitFactory.create(
-            group=bonus.group
-        )  # why was this originally DKU?
+        bonus_unit = UnitFactory.create(group=bonus.group)
 
         resp = self.assertGet20X("portal", alice.pk)
         self.assertHas(resp, "You&#x27;re now level 38.")

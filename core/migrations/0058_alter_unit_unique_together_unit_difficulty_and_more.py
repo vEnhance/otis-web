@@ -2,6 +2,7 @@
 
 from django.db import migrations, models
 
+
 def set_difficulty_and_version(apps, schema_editor):
     # We can't import the Person model directly as it may be a newer
     # version than this migration expects. We use the historical version.
@@ -10,6 +11,7 @@ def set_difficulty_and_version(apps, schema_editor):
         unit.difficulty = unit.code[0]
         unit.version = unit.code[2]
         unit.save()
+
 
 class Migration(migrations.Migration):
     dependencies = [
