@@ -66,9 +66,9 @@ def getconfig(user: User, config: str) -> bool:
 
 @register.filter(name="clubs_multiplier")
 def clubs_multiplier(u: Unit) -> str:
-    if u.code[0] == "D":
+    if u.difficulty == "D":
         return f"(×{1+BONUS_D_UNIT})"
-    elif u.code[0] == "Z":
+    elif u.difficulty == "Z":
         return f"(×{1+BONUS_Z_UNIT})"
     else:
         return ""

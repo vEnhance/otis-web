@@ -60,7 +60,6 @@ class PSetAdmin(admin.ModelAdmin):
     search_fields = (
         "pk",
         "unit__group__name",
-        "unit__code",
         "student__user__first_name",
         "student__user__last_name",
         "feedback",

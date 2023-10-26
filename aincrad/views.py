@@ -116,9 +116,11 @@ PSET_VENUEQ_INIT_KEYS = (
     "clubs",
     "unit__group__name",
     "unit__group__slug",
-    "unit__code",
+    "unit__difficulty",
+    "unit__version",
     "next_unit_to_unlock__group__name",
-    "next_unit_to_unlock__code",
+    "next_unit_to_unlock__difficulty",
+    "next_unit_to_unlock__version",
     "upload__content",
     "num_accepted_all",
     "num_accepted_current",
@@ -143,7 +145,8 @@ INQUIRY_VENUEQ_INIT_QUERYSET = UnitInquiry.objects.filter(
 INQUIRY_VENUEQ_INIT_KEYS = (
     "action_type",
     "unit__group__name",
-    "unit__code",
+    "unit__difficulty",
+    "unit__version",
     "student__user__first_name",
     "student__user__last_name",
     "student__user__email",
@@ -171,7 +174,8 @@ SUGGESTION_VENUEQ_INIT_KEYS = (
     "acknowledge",
     "weight",
     "unit__group__name",
-    "unit__code",
+    "unit__difficulty",
+    "unit__version",
     "staff_comments",
 )
 

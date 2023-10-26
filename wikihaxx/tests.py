@@ -82,7 +82,6 @@ class WikiTest(EvanTestCase):
             group__name="Example Unit",
             group__slug="example",
             group__subject="M",
-            code="DMW",
         )
         alice: User = UserFactory.create()
         a1 = AchievementFactory.create(

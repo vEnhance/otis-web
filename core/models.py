@@ -214,16 +214,37 @@ class Unit(models.Model):
         on_delete=models.CASCADE,
         help_text="The group that this unit belongs to",
     )
-    code = models.CharField(
-        max_length=255,
-        help_text="The version code for the handout, like 'ZGX'",
+
+    DIFFICULTY_CHOICES = (
+        ("B", "Easy/Bet"),
+        ("D", "Medium/Dalet"),
+        ("Z", "Hard/Zayin"),
     )
+
+    VERSION_CHOICES = (
+        ("V", "V (Secret)"),
+        ("W", "W"),
+        ("X", "X"),
+        ("Y", "Y"),
+    )
+
+    difficulty = models.CharField(
+        max_length=2,
+        choices=DIFFICULTY_CHOICES,
+        help_text="The difficulty code for the handout, like B",
+    )
+    version = models.CharField(
+        max_length=2,
+        choices=VERSION_CHOICES,
+        help_text="The version code for the handout, like W",
+    )
+
     position = PositionField(
         help_text="The ordering of the relative handouts to each other."
     )
 
     class Meta:
-        unique_together = ("group", "code")
+        unique_together = ("group", "difficulty", "version")
         ordering = ("position",)
 
     def __str__(self) -> str:
@@ -249,6 +270,10 @@ class Unit(models.Model):
     @property
     def problems_tex_filename(self) -> str:
         return f"{self.code}-tex-{self.group.slug}.tex"
+
+    @property
+    def code(self):
+        return self.difficulty + self.group.subject + self.version
 
 
 class UserProfile(models.Model):

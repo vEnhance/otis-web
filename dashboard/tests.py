@@ -63,7 +63,7 @@ class TestPortal(EvanTestCase):
 
         # A bunch of context things to check
 
-        unit = UnitFactory.create(code="BMX")
+        unit = UnitFactory.create()
         alice.curriculum.set([unit])
         alice.unlocked_units.add(unit)
 
@@ -195,7 +195,7 @@ class TestCertify(EvanTestCase):
         alice = StudentFactory.create(semester=semester)
         self.login(alice)
 
-        unit = UnitFactory.create(code="BMX")
+        unit = UnitFactory.create()
         alice.curriculum.set([unit])
         alice.unlocked_units.add(unit)
 
@@ -258,9 +258,9 @@ class TestPSet(EvanTestCase):
         self.assertGetDenied("submit-pset", carl.pk)
 
     def test_submit(self):
-        unit1 = UnitFactory.create(code="BMW")
-        unit2 = UnitFactory.create(code="DMX")
-        unit3 = UnitFactory.create(code="ZMY")
+        unit1 = UnitFactory.create()
+        unit2 = UnitFactory.create()
+        unit3 = UnitFactory.create()
         alice = StudentFactory.create()
         self.login(alice)
         alice.unlocked_units.add(unit1)
@@ -462,9 +462,9 @@ class TestPSet(EvanTestCase):
 
         eve = StudentFactory.create(semester=semester)
 
-        unit1 = UnitFactory.create(code="BMW")
-        unit2 = UnitFactory.create(code="ZMX")
-        unit3 = UnitFactory.create(code="DAY")
+        unit1 = UnitFactory.create()
+        unit2 = UnitFactory.create()
+        unit3 = UnitFactory.create()
 
         PSetFactory.create(student=alice, clubs=0, hours=0, status="A", unit=unit1)
         PSetFactory.create(student=alice, clubs=0, hours=0, status="A", unit=unit2)
@@ -500,7 +500,7 @@ class TestPSet(EvanTestCase):
         semester = SemesterFactory.create()
         alice = StudentFactory.create(semester=semester)
         self.login(alice)
-        unit = UnitFactory.create(code="BMW")
+        unit = UnitFactory.create()
         alice.curriculum.set([unit])
         alice.unlocked_units.add(unit)
 
@@ -562,7 +562,7 @@ class TestPSet(EvanTestCase):
         semester = SemesterFactory.create(active=True)
         alice = StudentFactory.create(semester=semester)
         self.login(alice)
-        unit = UnitFactory.create(code="BMW")
+        unit = UnitFactory.create()
         self.assertPostDenied("uploads", alice.pk, unit.pk, follow=True)
         alice.curriculum.set([unit])
         alice.unlocked_units.add(unit)
@@ -681,7 +681,7 @@ class TestList(EvanTestCase):
         self.assertHas(resp, prevSemester.name)
         self.assertHas(resp, prevAlice.name)
 
-        unit = UnitFactory.create(code="BMX")
+        unit = UnitFactory.create()
         PSetFactory.create(
             student=prevAlice, clubs=0, hours=1501, status="A", unit=unit
         )
@@ -730,7 +730,7 @@ class TestList(EvanTestCase):
         user.save()
         self.login(user)
 
-        unit = UnitFactory.create(code="BMX")
+        unit = UnitFactory.create()
 
         alice = StudentFactory.create(assistant=AssistantFactory.create(user=user))
 
@@ -770,8 +770,8 @@ class TestLevelUpAndBonus(EvanTestCase):
         secret9 = UnitGroupFactory.create(name="Level 9", subject="K", hidden=True)
         secret16 = UnitGroupFactory.create(name="Level 16", subject="K", hidden=True)
         for group in (secret4, secret9, secret16):
-            for code in ("BKV", "DKV", "ZKV"):
-                UnitFactory.create(code=code, group=group)
+            for d in ("B", "D", "V"):
+                UnitFactory.create(difficulty=d, group=group, version="V")
         BonusLevelFactory.create(level=4, group=secret4)
         BonusLevelFactory.create(level=9, group=secret9)
         BonusLevelFactory.create(level=16, group=secret16)
@@ -791,7 +791,6 @@ class TestLevelUpAndBonus(EvanTestCase):
             clubs=13,
             hours=37,
             status="A",
-            unit__code="BCY",
         )
         resp = self.assertGet20X("portal", alice.pk, follow=True)
         self.assertHas(resp, "request secret units")
@@ -818,7 +817,7 @@ class TestLevelUpAndBonus(EvanTestCase):
         )
 
         # let's submit one and make sure it works
-        desired_unit = Unit.objects.get(group=secret9, code="DKV")
+        desired_unit = Unit.objects.get(group=secret9, difficulty="D", version="V")
         self.assertTrue(queryset.filter(pk=desired_unit.pk).exists())
         self.assertFalse(alice.curriculum.filter(pk=desired_unit.pk).exists())
         resp = self.assertPost20X(

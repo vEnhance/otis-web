@@ -232,7 +232,7 @@ def master_schedule(request: HttpRequest) -> HttpResponse:
 
     chart: list[dict[str, Any]] = []
     unit_dicts = Unit.objects.order_by("position").values(
-        "position", "pk", "group__subject", "group__name", "code"
+        "position", "pk", "group__subject", "group__name", "difficulty", "version"
     )
     for unit_dict in unit_dicts:
         row = dict(unit_dict)

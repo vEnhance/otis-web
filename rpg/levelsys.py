@@ -217,8 +217,8 @@ def get_clubs_hearts_stats(
     psets = psets.order_by("upload__created_at")
     pset_data = psets.aggregate(
         clubs_any=Sum("clubs"),
-        clubs_D=Sum("clubs", filter=Q(unit__code__startswith="D")),
-        clubs_Z=Sum("clubs", filter=Q(unit__code__startswith="Z")),
+        clubs_D=Sum("clubs", filter=Q(unit__difficulty="D")),
+        clubs_Z=Sum("clubs", filter=Q(unit__difficulty="Z")),
         hearts=Sum("hours"),
     )
     total_clubs: float = (
@@ -273,11 +273,7 @@ def get_spade_stats(student: Student, leveldict: LevelInfoDict = None) -> int:
         user=student.user,
         status__in=("SUGG_NOK", "SUGG_OK"),
         eligible=True,
-    ).values_list(
-        "unit__pk",
-        "unit__group__name",
-        "unit__code",
-    )
+    ).values_list("unit__pk", "unit__group__name", "unit__difficulty", "unit__version")
     suggest_units_set: SuggestUnitSet = set(suggested_units_queryset)
     total_spades += len(suggest_units_set)
 
@@ -329,11 +325,11 @@ def annotate_student_queryset_with_scores(
         ),
         clubs_D=SubquerySum(
             "user__student__pset__clubs",
-            filter=Q(status="A", eligible=True, unit__code__startswith="D"),
+            filter=Q(status="A", eligible=True, unit__difficulty="D"),
         ),
         clubs_Z=SubquerySum(
             "user__student__pset__clubs",
-            filter=Q(status="A", eligible=True, unit__code__startswith="Z"),
+            filter=Q(status="A", eligible=True, unit__difficulty="Z"),
         ),
         hearts=SubquerySum(
             "user__student__pset__hours",
@@ -342,15 +338,15 @@ def annotate_student_queryset_with_scores(
         diamonds=SubquerySum("user__achievementunlock__achievement__diamonds"),
         pset_B_count=SubqueryCount(
             "pset__pk",
-            filter=Q(eligible=True, unit__code__startswith="B"),
+            filter=Q(eligible=True, unit__difficulty="B"),
         ),
         pset_D_count=SubqueryCount(
             "pset__pk",
-            filter=Q(eligible=True, unit__code__startswith="D"),
+            filter=Q(eligible=True, unit__difficulty="D"),
         ),
         pset_Z_count=SubqueryCount(
             "pset__pk",
-            filter=Q(eligible=True, unit__code__startswith="Z"),
+            filter=Q(eligible=True, unit__difficulty="Z"),
         ),
         spades_quizzes=SubquerySum("user__student__examattempt__score"),
         spades_quests=SubquerySum("user__student__questcomplete__spades"),
@@ -446,20 +442,20 @@ def check_level_up(student: Student, level_info: LevelInfoDict) -> bool:
     if bonuses.exists():
         psets = PSet.objects.filter(student=student)
         counts = psets.aggregate(
-            b=Count("pk", unique=True, filter=Q(unit__code__startswith="B")),
-            d=Count("pk", unique=True, filter=Q(unit__code__startswith="D")),
-            z=Count("pk", unique=True, filter=Q(unit__code__startswith="Z")),
+            b=Count("pk", unique=True, filter=Q(unit__difficulty="B")),
+            d=Count("pk", unique=True, filter=Q(unit__difficulty="D")),
+            z=Count("pk", unique=True, filter=Q(unit__difficulty="Z")),
         )
         r = compute_insanity_rating(b=counts["b"], d=counts["d"], z=counts["z"])
 
         for bonus in bonuses:
             units = bonus.group.unit_set
             if r >= 0.5:
-                unit = units.filter(code__startswith="Z").first()
+                unit = units.filter(difficulty="Z").first()
             elif r <= -0.5:
-                unit = units.filter(code__startswith="B").first()
+                unit = units.filter(difficulty="B").first()
             else:
-                unit = units.filter(code__startswith="D").first()
+                unit = units.filter(difficulty="D").first()
             if unit is not None:
                 student.curriculum.add(unit)
                 BonusLevelUnlock.objects.create(bonus=bonus, student=student)

@@ -44,9 +44,7 @@ class RosterTest(EvanTestCase):
         unitgroups: list[UnitGroup] = UnitGroupFactory.create_batch(4)
         for unitgroup in unitgroups:
             for letter in "BDZ":
-                UnitFactory.create(
-                    code=letter + unitgroup.subject[0] + "W", group=unitgroup
-                )
+                UnitFactory.create(difficulty=letter, version="W", group=unitgroup)
 
         self.login(alice)
         self.assertHas(self.get("currshow", alice.pk), text="you are not an instructor")
