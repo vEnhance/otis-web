@@ -4,8 +4,6 @@ from django.db import migrations, models
 
 
 def set_difficulty_and_version(apps, schema_editor):
-    # We can't import the Person model directly as it may be a newer
-    # version than this migration expects. We use the historical version.
     Unit = apps.get_model("core", "unit")
     for unit in Unit.objects.all():
         unit.difficulty = unit.code[0]
