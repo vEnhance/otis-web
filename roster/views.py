@@ -341,15 +341,19 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
             num_past_unlock_inquiries <= 6 or unit.group.subject == "K"
         )
 
+        auto_accept_criteria |= Student.objects.filter(
+            user=student.user, curriculum__in=[unit]
+        ).exists()
+
         # check if its in previous years
         # kind of assumes there's only one active semester
-        if not auto_accept_criteria and not student.curriculum.contains(unit):
-            all_students = Student.objects.filter(user=student.user)
+        # if not auto_accept_criteria and not student.curriculum.contains(unit):
+        #    all_students = Student.objects.filter(user=student.user)
 
-            for student in all_students:
-                print("STUDENT")
-                auto_accept_criteria |= student.unlocked_units.contains(unit)
-                print(student.unlocked_units.contains(unit))
+        #    auto_accept_criteria =
+
+        #    for student in all_students:
+        #        auto_accept_criteria |= student.unlocked_units.contains(unit)
 
     elif inquiry.action_type == "INQ_ACT_DROP":
         # auto dropping locked units
