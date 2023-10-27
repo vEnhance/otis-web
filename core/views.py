@@ -185,6 +185,7 @@ class UserProfileUpdateView(
         "dynamic_progress",
         "use_twemoji",
         "show_portal_instructions",
+        "show_unit_petitions",
     )
     success_url = reverse_lazy("profile")
     object: UserProfile

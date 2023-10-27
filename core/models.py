@@ -294,6 +294,11 @@ class UserProfile(models.Model):
         help_text="Show the instruction text above the units on the home page",
         default=True,
     )
+    show_unit_petitions = models.BooleanField(
+        verbose_name="Show unit petitions",
+        help_text="Show previous unit petitions that you have requested. Useful to disable if you have far too many.",
+        default=True,
+    )
 
     last_seen = models.DateTimeField(
         help_text="Last time user was seen at all",
