@@ -197,6 +197,7 @@ class ExamAttempt(models.Model):
 class MockCompleted(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     exam = models.ForeignKey(PracticeExam, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = (

@@ -88,6 +88,7 @@ class MockCompletedAdmin(admin.ModelAdmin):
     list_display = (
         "exam",
         "student",
+        "created_at",
     )
     list_filter = (
         "student__semester__active",
