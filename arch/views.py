@@ -76,7 +76,7 @@ class HintList(VerifiedRequiredMixin, ListView[Hint]):
     def get_queryset(self):
         return Hint.objects.filter(problem__puid=self.kwargs["puid"]).order_by("number")
 
-    def get_context_data(self, **kwargs: dict[str, Any]):
+    def get_context_data(self, **kwargs: Any):
         context = super().get_context_data(**kwargs)
         context["problem"] = self.problem
         context["statement"] = self.problem.get_statement()

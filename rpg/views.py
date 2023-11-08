@@ -148,7 +148,7 @@ class AchievementList(LoginRequiredMixin, ListView[Achievement]):
 
         return achievements
 
-    def get_context_data(self, **kwargs: dict[str, Any]):
+    def get_context_data(self, **kwargs: Any):
         context = super().get_context_data(**kwargs)
         context["pk"] = self.request.user.pk
         try:
