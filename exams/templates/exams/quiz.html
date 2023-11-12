@@ -18,7 +18,10 @@
     {% endif %}
   </p>
   <h2>Download problems</h2>
-  <a href="{{ quiz.get_absolute_url }}">Download problems file</a>
+  <div class="alert alert-primary text-center">
+    <a href="{{ quiz.get_absolute_url }}" class="alert-link">⬇️
+    Download problems file</a>
+  </div>
   {% if attempt %}
     <hr />
     <h1>Score: {{ attempt.score }}</h1>
