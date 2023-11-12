@@ -30,7 +30,12 @@
     </li>
     <li>
       Find the button that says "Add Course", and then
-      use the entry key <strong>{{ semester.gradescope_key }}</strong>.
+      use the entry key
+      {% if student.legit %}
+        <strong>{{ semester.gradescope_key }}</strong>.
+      {% else %}
+        [redacted].
+      {% endif %}
     </li>
     <li>
       For school, choose <strong>Massachusetts Institute of Technology</strong>.
