@@ -1,3 +1,4 @@
+from core.factories import UserFactory
 from evans_django_tools.testsuite import EvanTestCase
 
 
@@ -17,3 +18,10 @@ class OTISRegistrationTest(EvanTestCase):
             follow=True,
         )
         self.login("alice")
+
+
+class OTISSocialPage(EvanTestCase):
+    def test_social(self):
+        UserFactory.create(username="evan")
+        self.login("evan")
+        self.assertGet20X("socialaccount_connections")
