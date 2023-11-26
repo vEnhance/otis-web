@@ -11,7 +11,7 @@
   {% endif %}
   {% if not invoice.student.semester.active %}
     <div class="alert alert-danger" role="alert">
-      <h2 class="alert-title">You are viewing the invoice for a past year!</h2>
+      <h2 class="alert-heading">You are viewing the invoice for a past year!</h2>
       This is the invoice for
       <b>{{ invoice.student.semester.years }}</b>.
       If you are trying to pay for the current year then you should
@@ -19,7 +19,7 @@
     </div>
   {% elif not invoice.student.semester.show_invoices %}
     <div class="alert alert-warning" role="alert">
-      <h2 class="alert-title">Preliminary invoice only!</h2>
+      <h2 class="alert-heading">Preliminary invoice only!</h2>
       Invoices are not ready for distribution yet.
       You can view this page if you want, but it's a work-in-progress.
       For example, financial aid awards may not be reflected here yet.
@@ -31,7 +31,7 @@
     </div>
   {% elif invoice.cleared %}
     <div class="alert alert-success" role="alert">
-      <h2 class="alert-title">Invoice paid in full</h2>
+      <h2 class="alert-heading">Invoice paid in full</h2>
       <p>
         <b>You currently do not owe anything</b>. Thank you!
       </p>
@@ -44,7 +44,7 @@
     </div>
   {% else %}
     <div class="alert alert-primary" role="alert">
-      <h2 class="alert-title">Invoice ready for use!</h2>
+      <h2 class="alert-heading">Invoice ready for use!</h2>
       You can pay by credit card using the following link:
       <p class="text-center">
         <a href="{% url "payments-invoice" student.pk checksum %}"
