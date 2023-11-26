@@ -91,4 +91,10 @@
       </table>
     </div>
   </div>
+  {% if invoice.memo %}
+    <div class="alert alert-info" role="alert">
+      <h3 class="alert-title">Memo</h3>
+      {{ invoice.memo }}
+    </div>
+  {% endif %}
 </div>
