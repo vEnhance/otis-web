@@ -379,7 +379,7 @@ class Invoice(models.Model):
         blank=True,
         help_text="When switched on, won't hard lock delinquents before this date.",
     )
-    memo = models.TextField(blank=True, help_text="Internal note to self.")
+    memo = models.TextField(blank=True, help_text="Any notes about this invoice.")
 
     def __str__(self):
         return f"Student #{self.student.pk} ({self.total_paid}/{self.total_cost})"
