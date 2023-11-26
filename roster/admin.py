@@ -177,6 +177,7 @@ class InvoiceAdmin(ImportExportModelAdmin):
         "student__legit",
         "student__semester__active",
         ("forgive_date", admin.EmptyFieldListFilter),
+        ("memo", admin.EmptyFieldListFilter),
         "student__semester",
     )
     resource_class = InvoiceIEResource
