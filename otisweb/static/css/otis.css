@@ -32,10 +32,19 @@ h1 {
 h2 {
   color: #8f008f;
 }
-
 h3 {
   font-weight: normal;
   margin-top: 16px;
+}
+
+h1.alert-heading,
+h2.alert-heading,
+h3.alert-heading,
+h4.alert-heading,
+h5.alert-heading,
+h6.alert-heading {
+  padding-top: 0px;
+  margin-top: 0px;
 }
 
 /* Reduce opacity effect */
