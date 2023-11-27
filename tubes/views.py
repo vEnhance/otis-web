@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.core.exceptions import PermissionDenied
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
 from django.http.request import HttpRequest
@@ -28,7 +29,9 @@ class TubeList(VerifiedRequiredMixin, ListView[Tube]):
 @verified_required
 def tube_join(request: HttpRequest, pk: int) -> HttpResponse:
     tube = get_object_or_404(Tube, pk=pk)
-    if JoinRecord.objects.filter(tube=tube, user=request.user).exists():
+    if not tube.is_active:
+        raise PermissionDenied("Cannot join inactive tube")
+    elif JoinRecord.objects.filter(tube=tube, user=request.user).exists():
         messages.error(request, "You already joined this.")
         return HttpResponseRedirect(reverse("tubes-list"))
     elif not tube.has_join_url:
