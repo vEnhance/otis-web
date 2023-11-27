@@ -13,7 +13,7 @@
           <a href="{{ tube.get_absolute_url }}">{{ tube.get_absolute_url }}</a>
         {% elif tube.has_join_url %}
           You have not yet joined.
-          <a href="{% url "tubes-join" tube.pk %}">Join this contest</a>
+          <a href="{% url "tube-join" tube.pk %}">Join this contest</a>
         {% else %}
           It is no longer possible to join this contest.
         {% endif %}
