@@ -35,9 +35,10 @@
     {% for tube in tube_list %}
       <li>
         <b>{{ tube }}</b>
+        {% if tube.joined %}(joined){% endif %}
         <br />
         {% if tube.joined %}
-          <a href="{{ tube.get_absolute_url }}">{{ tube.get_absolute_url }}</a>
+          Main link: <a href="{{ tube.get_absolute_url }}">{{ tube.get_absolute_url }}</a>
         {% elif tube.has_join_url %}
           You have not yet joined.
           <a href="{% url "tube-join" tube.pk %}">Join this contest</a>
