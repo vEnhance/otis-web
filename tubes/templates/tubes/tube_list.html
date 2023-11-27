@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+{% block title %}
+  OTIS Mock AIME
+{% endblock title %}
+{% block layout-content %}
+  <h2>Keep cooking</h2>
+  <ul>
+    {% for tube in tube_list %}
+      <li>
+        <b>{{ tube }}</b>
+        <br />
+        {% if tube.joined %}
+          <a href="{{ tube.get_absolute_url }}">{{ tube.get_absolute_url }}</a>
+        {% elif tube.has_join_url %}
+          You have not yet joined.
+          <a href="{% url "tubes-join" tube.pk %}">Join this contest</a>
+        {% else %}
+          It is no longer possible to join this contest.
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+  <h2>Instructions</h2>
+  <p>After joining above, you should be able to submit problems and testsolve proposals.</p>
+  <p>
+    There are five tiers of difficulty, and testsolvers get an amount of
+    time per problem when testsolving it based on the tier:
+  </p>
+  <ul>
+    <li>AIME 1-3: Solvers get 10 minutes</li>
+    <li>AIME 4-6: Solvers get 10 minutes</li>
+    <li>AIME 7-9: Solvers get 10 minutes</li>
+    <li>AIME 10-12: Solvers get 10 minutes</li>
+    <li>AIME 13-15: Solvers get 10 minutes</li>
+  </ul>
+  <p>
+    After you solve or give up on a proposal, you can read spoilers and comment
+    on the thread for the problem. You can also upvote the problem using the heart
+    icon to indicate that you like it.
+  </p>
+  <p>
+    Thanks to Howard Halim for writing the Probase code.
+    The source code for Probase can be found on
+    <a href="https://github.com/howard36/probase">Howard's GitHub</a>.
+    Please open bug reports or feature requests on that issue tracker.
+  </p>
+{% endblock layout-content %}
