@@ -13,7 +13,8 @@ def verified_required(  # type: ignore
     in the Verified group, redirecting to the login page if necessary.
     """
     actual_decorator = user_passes_test(
-        lambda u: isinstance(u, User) and u.groups.filter(name="Verified").exists(),
+        lambda u: isinstance(u, User)
+        and (u.groups.filter(name="Verified").exists() or u.is_staff),
         login_url=login_url,
         redirect_field_name=redirect_field_name,
     )
