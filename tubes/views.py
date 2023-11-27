@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.core.exceptions import PermissionDenied
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
@@ -17,6 +19,13 @@ class TubeList(VerifiedRequiredMixin, ListView[Tube]):
     model = Tube
     context_object_name = "tube_list"
     template_name = "tubes/tube_list.html"
+
+    def get_context_data(self, **kwargs: Any):
+        context = super().get_context_data(**kwargs)
+        context["is_new"] = not JoinRecord.objects.filter(
+            user=self.request.user
+        ).exists()
+        return context
 
     def get_queryset(self) -> QuerySet[Tube]:
         return Tube.objects.filter(status="TB_ACTIVE").annotate(
