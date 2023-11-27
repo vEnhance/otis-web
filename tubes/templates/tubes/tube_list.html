@@ -8,14 +8,18 @@
     If you've never used Probase before, you should first register
     your Google Account by going to the URL
     <div class="fs-3 text-center">
-      <a href="https://www.probase.app/c/otis-mock-aime"
+      <a href="https://www.probase.app/api/auth/signin?callbackUrl=%2F"
          target="_blank"
          rel="noopener">probase.app</a>
     </div>
     and following the setup instructions (click "Sign in with Google").
   </p>
   {% if is_new and tube_list %}
-    <p>Once you've done so, click the button below.</p>
+    <p>
+      Once you've done so, and you are logged in,
+      click the button below to get an invitation link to gain access.
+      (When you initially register an account, you won't be able to see anything.)
+    </p>
     <p class="text-center">
       <a class="btn btn-primary" id="finished-probase-reg">I've finished making an account.</a>
     </p>
