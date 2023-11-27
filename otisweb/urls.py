@@ -26,6 +26,7 @@ urlpatterns = [
     path(r"rpg/", include("rpg.urls")),
     path(r"payments/", include("payments.urls")),
     path(r"suggestions/", include("suggestions.urls")),
+    path(r"tubes/", include("tubes.urls")),
     # ------
     path(r"hijack/", include("hijack.urls")),
     path(r"accounts/", include("allauth.urls")),
