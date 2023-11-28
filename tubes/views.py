@@ -23,7 +23,7 @@ class TubeList(VerifiedRequiredMixin, ListView[Tube]):
     def get_context_data(self, **kwargs: Any):
         context = super().get_context_data(**kwargs)
         context["is_new"] = not JoinRecord.objects.filter(
-            user=self.request.user
+            user=self.request.user, success=True
         ).exists()
         return context
 
