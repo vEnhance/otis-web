@@ -29,3 +29,5 @@ class JoinRecordAdmin(admin.ModelAdmin):
 
     def mark_failed(self, request: HttpRequest, queryset: QuerySet[JoinRecord]):
         queryset.update(success=False)
+
+    actions = ["mark_failed"]
