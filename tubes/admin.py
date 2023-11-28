@@ -20,5 +20,6 @@ class TubeAdmin(admin.ModelAdmin):
 
 @admin.register(JoinRecord)
 class JoinRecordAdmin(admin.ModelAdmin):
-    list_display = ("pk", "tube", "user", "created_at")
+    list_display = ("pk", "tube", "user", "created_at", "success")
     list_display_links = ("pk", "tube", "user")
+    list_filter = ("success",)

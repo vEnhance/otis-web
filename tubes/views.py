@@ -29,7 +29,7 @@ class TubeList(VerifiedRequiredMixin, ListView[Tube]):
 
     def get_queryset(self) -> QuerySet[Tube]:
         return Tube.objects.filter(status="TB_ACTIVE").annotate(
-            joined=Exists("joinrecord", filter=Q(user=self.request.user))
+            joined=Exists("joinrecord", filter=Q(success=True, user=self.request.user))
         )
 
 
@@ -38,7 +38,7 @@ def tube_join(request: HttpRequest, pk: int) -> HttpResponse:
     tube = get_object_or_404(Tube, pk=pk)
     if not tube.status == "TB_ACTIVE":
         raise PermissionDenied("Cannot join inactive tube")
-    elif JoinRecord.objects.filter(tube=tube, user=request.user).exists():
+    elif JoinRecord.objects.filter(tube=tube, user=request.user, success=True).exists():
         raise PermissionDenied("You already joined this.")
     elif not tube.has_join_url:
         raise PermissionDenied("Joining not currently allowed.")

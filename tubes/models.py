@@ -37,6 +37,6 @@ class JoinRecord(models.Model):
         Tube, help_text="The tube the user joined.", on_delete=models.CASCADE
     )
     created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ("user", "tube")
+    success = models.BooleanField(
+        default=True, help_text="Set to False if things go wrong"
+    )
