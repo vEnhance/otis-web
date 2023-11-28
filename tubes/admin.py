@@ -16,6 +16,7 @@ class TubeAdmin(admin.ModelAdmin):
         "pk",
         "display_name",
     )
+    list_filter = ("status",)
 
 
 @admin.register(JoinRecord)
