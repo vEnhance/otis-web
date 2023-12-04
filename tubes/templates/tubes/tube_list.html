@@ -3,32 +3,22 @@
   OTIS Mock AIME
 {% endblock title %}
 {% block layout-content %}
-  <h2>Setup instructions</h2>
-  <p>
-    If you've never used Probase before, you should first register
-    your Google Account by going to the URL
-    <div class="text-center">
-      <a href="https://www.probase.app/api/auth/signin?callbackUrl=%2F"
-         target="_blank"
-         rel="noopener"
-         class="btn btn-primary">https://www.probase.app/api/auth/signin?callbackUrl=%2F</a>
-    </div>
-    and following the setup instructions (click "Sign in with Google").
-  </p>
-  <h2>Keep cooking</h2>
-  <ul id="tube-list" {% if is_new %}class="d-none"{% endif %}>
+  <h2>Active Contests</h2>
+  <ul id="tube-list">
     {% for tube in tube_list %}
-      <li>
-        <a href="{{ tube.get_absolute_url }}"><b>{{ tube }}</b></a>
-        {{ tube.description|linebreaks }}
-        {% if tube.accepting_signups %}
-          <a href="{% url "tube-join" tube.pk %}" target="_blank" rel="noopener">(Join)</a>
-        {% endif %}
-      </li>
+      {% if tube.accepting_signups %}
+        <li>
+          <a href="{% url "tube-join" tube.pk %}" target="_blank" rel="noopener"><b>{{ tube }}</b></a>
+          {{ tube.description|linebreaks }}
+        </li>
+      {% endif %}
     {% endfor %}
   </ul>
   <h2>Instructions</h2>
-  <p>After joining above, you should be able to submit problems and testsolve proposals.</p>
+  <p>
+    Click on the link above to access the problem proposals on Probase.
+    After joining, you can submit problems and participate in testsolving.
+  </p>
   <h3>Proposing</h3>
   <ul>
     <li>Use "Add Problem" once you're in the Probase collection.</li>
