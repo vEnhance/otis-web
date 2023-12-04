@@ -7,10 +7,10 @@
   <ul id="tube-list">
     {% for tube in tube_list %}
       {% if tube.accepting_signups %}
-      <li>
-        <a href="{% url "tube-join" tube.pk %}" target="_blank" rel="noopener"><b>{{ tube }}</b></a>
-        {{ tube.description|linebreaks }}
-      </li>
+        <li>
+          <a href="{% url "tube-join" tube.pk %}" target="_blank" rel="noopener"><b>{{ tube }}</b></a>
+          {{ tube.description|linebreaks }}
+        </li>
       {% endif %}
     {% endfor %}
   </ul>
