@@ -14,16 +14,17 @@ class Tube(models.Model):
     )
 
     display_name = models.CharField(max_length=128)
+    description = models.TextField(
+        help_text="A short description what this is about.", blank=True
+    )
     status = models.CharField(max_length=10, choices=STATUS_CHOICES)
     main_url = models.URLField(help_text="Main URL for viewing the proposals.")
-    join_url = models.URLField(help_text="URL for joining.", blank=True)
+    accepting_signups = models.BooleanField(
+        help_text="Whether to allow people to join", default=True
+    )
 
     def __str__(self) -> str:
         return self.display_name
-
-    @property
-    def has_join_url(self) -> bool:
-        return self.join_url != ""
 
     def get_absolute_url(self) -> str:
         return self.main_url
@@ -31,12 +32,14 @@ class Tube(models.Model):
 
 class JoinRecord(models.Model):
     user = models.ForeignKey(
-        User, help_text="The user who joined.", on_delete=models.CASCADE
+        User,
+        help_text="The user who joined.",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
     tube = models.ForeignKey(
         Tube, help_text="The tube the user joined.", on_delete=models.CASCADE
     )
-    created_at = models.DateTimeField(auto_now_add=True)
-    success = models.BooleanField(
-        default=True, help_text="Set to False if things go wrong"
-    )
+    activation_time = models.DateTimeField(null=True, blank=True)
+    invite_url = models.URLField(help_text="The URL for joining", blank=True)

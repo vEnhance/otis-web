@@ -10,40 +10,19 @@
     <div class="text-center">
       <a href="https://www.probase.app/api/auth/signin?callbackUrl=%2F"
          target="_blank"
-         rel="noopener">https://www.probase.app/api/auth/signin?callbackUrl=%2F</a>
+         rel="noopener"
+         class="btn btn-primary">https://www.probase.app/api/auth/signin?callbackUrl=%2F</a>
     </div>
     and following the setup instructions (click "Sign in with Google").
   </p>
-  {% if is_new and tube_list %}
-    <p>
-      Once you've done so, and you are logged in,
-      click the button below to get an invitation link to gain access.
-      (When you initially register an account, you won't be able to see anything.)
-    </p>
-    <p class="text-center">
-      <a class="btn btn-primary" id="finished-probase-reg">I've finished making an account.</a>
-    </p>
-  {% endif %}
   <h2>Keep cooking</h2>
-  {% if is_new %}
-    <div id="tube-warning" class="alert alert-secondary" role="alert">
-      You need to first create a Probase account
-      using the instructions above before trying to join anything.
-    </div>
-  {% endif %}
   <ul id="tube-list" {% if is_new %}class="d-none"{% endif %}>
     {% for tube in tube_list %}
       <li>
-        <b>{{ tube }}</b>
-        {% if tube.joined %}(joined){% endif %}
-        <br />
-        {% if tube.joined %}
-          Main link: <a href="{{ tube.get_absolute_url }}">{{ tube.get_absolute_url }}</a>
-        {% elif tube.has_join_url %}
-          You have not yet joined.
-          <a href="{% url "tube-join" tube.pk %}">Join this contest</a>
-        {% else %}
-          It is no longer possible to join this contest.
+        <a href="{{ tube.get_absolute_url }}"><b>{{ tube }}</b></a>
+        {{ tube.description|linebreaks }}
+        {% if tube.accepting_signups %}
+          <a href="{% url "tube-join" tube.pk %}" target="_blank" rel="noopener">(Join)</a>
         {% endif %}
       </li>
     {% endfor %}
@@ -86,23 +65,4 @@
     <a href="https://github.com/howard36/probase">Howard's GitHub</a>.
     Please open bug reports or feature requests on that issue tracker.
   </p>
-  <h2>Warning</h2>
-  <p>
-    The invitation URL's allow anyone with the link to join the collection.
-    (They look like <tt>probase.app/invite/RandomString/</tt>.)
-    Therefore, do <b>NOT</b> share invitation Probase URL's with outsiders.
-  </p>
 {% endblock layout-content %}
-{% block scripts %}
-  {% if is_new %}
-    <script type = "text/javascript">
-        $(document).ready(function() {
-            $("#finished-probase-reg").on('click', () => {
-                $("#tube-list").removeClass("d-none");
-                $("#finished-probase-reg").hide();
-                $("#tube-warning").hide();
-            });
-        });
-    </script>
-  {% endif %}
-{% endblock %}

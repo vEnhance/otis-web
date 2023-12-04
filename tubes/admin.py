@@ -1,6 +1,4 @@
 from django.contrib import admin
-from django.db.models.query import QuerySet
-from django.http.request import HttpRequest
 
 from .models import JoinRecord, Tube
 
@@ -12,22 +10,17 @@ class TubeAdmin(admin.ModelAdmin):
         "display_name",
         "status",
         "main_url",
-        "has_join_url",
+        "accepting_signups",
     )
     list_display_links = (
         "pk",
         "display_name",
     )
-    list_filter = ("status",)
+    list_filter = ("status", "accepting_signups")
 
 
 @admin.register(JoinRecord)
 class JoinRecordAdmin(admin.ModelAdmin):
-    list_display = ("pk", "tube", "user", "created_at", "success")
+    list_display = ("pk", "tube", "user", "activation_time")
     list_display_links = ("pk", "tube", "user")
-    list_filter = ("success",)
-
-    def mark_failed(self, request: HttpRequest, queryset: QuerySet[JoinRecord]):
-        queryset.update(success=False)
-
-    actions = ["mark_failed"]
+    list_filter = (("user", admin.EmptyFieldListFilter),)

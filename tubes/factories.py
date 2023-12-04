@@ -9,6 +9,6 @@ class TubeFactory(DjangoModelFactory):
         model = Tube
 
     display_name = Faker("company")
+    description = Faker("paragraph")
     status = "TB_ACTIVE"
     main_url = Faker("url")
-    join_url = Faker("url")
