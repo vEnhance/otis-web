@@ -1,4 +1,6 @@
 from django.contrib import admin
+from import_export import resources
+from import_export.admin import ImportExportModelAdmin
 
 from .models import JoinRecord, Tube
 
@@ -19,8 +21,22 @@ class TubeAdmin(admin.ModelAdmin):
     list_filter = ("status", "accepting_signups")
 
 
+class JoinRecordResource(resources.ModelResource):
+    class Meta:
+        skip_unchanged = True
+        model = JoinRecord
+        fields = (
+            "id",
+            "tube",
+            "activation_time",
+            "invite_url",
+        )
+        export_order = fields
+
+
 @admin.register(JoinRecord)
-class JoinRecordAdmin(admin.ModelAdmin):
+class JoinRecordAdmin(ImportExportModelAdmin):
     list_display = ("pk", "tube", "user", "activation_time")
     list_display_links = ("pk", "tube", "user")
     list_filter = (("user", admin.EmptyFieldListFilter),)
+    resource_class = JoinRecordResource
