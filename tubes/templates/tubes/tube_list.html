@@ -3,28 +3,15 @@
   OTIS Mock AIME
 {% endblock title %}
 {% block layout-content %}
-  <h2>Setup instructions</h2>
-  <p>
-    If you've never used Probase before, you should first register
-    your Google Account by going to the URL
-    <div class="text-center">
-      <a href="https://www.probase.app/api/auth/signin?callbackUrl=%2F"
-         target="_blank"
-         rel="noopener"
-         class="btn btn-primary">https://www.probase.app/api/auth/signin?callbackUrl=%2F</a>
-    </div>
-    and following the setup instructions (click "Sign in with Google").
-  </p>
-  <h2>Keep cooking</h2>
-  <ul id="tube-list" {% if is_new %}class="d-none"{% endif %}>
+  <h2>Active Contests</h2>
+  <ul id="tube-list">
     {% for tube in tube_list %}
+      {% if tube.accepting_signups %}
       <li>
-        <a href="{{ tube.get_absolute_url }}"><b>{{ tube }}</b></a>
+        <a href="{% url "tube-join" tube.pk %}" target="_blank" rel="noopener"><b>{{ tube }}</b></a>
         {{ tube.description|linebreaks }}
-        {% if tube.accepting_signups %}
-          <a href="{% url "tube-join" tube.pk %}" target="_blank" rel="noopener">(Join)</a>
-        {% endif %}
       </li>
+      {% endif %}
     {% endfor %}
   </ul>
   <h2>Instructions</h2>
