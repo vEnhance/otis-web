@@ -33,7 +33,7 @@ class TestProblem(EvanTestCase):
 
         self.assertGet40X(
             "hint-list",
-            "invalid-disk",
+            "NONEXISTENT",
         )
 
         resp = self.assertGet20X(
