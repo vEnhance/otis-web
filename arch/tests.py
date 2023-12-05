@@ -1,11 +1,12 @@
 import os
 
 from django.conf import settings
+from django.core.exceptions import SuspiciousOperation
 from django.test import override_settings
 from django.urls import reverse
 
 from arch.factories import ProblemFactory
-from arch.models import Hint, Problem, Vote
+from arch.models import Hint, Problem, Vote, validate_puid
 from core.factories import GroupFactory, UserFactory
 from evans_django_tools.testsuite import EvanTestCase
 
@@ -222,3 +223,11 @@ class TestProblem(EvanTestCase):
         alice = UserFactory.create(groups=(verified_group,))
         self.login(alice)
         self.assertGet20X("view-solution", problem.puid)
+
+    def test_validate_puid(self):
+        self.assertRaises(SuspiciousOperation, validate_puid, "✈✈✈")
+        self.assertRaises(SuspiciousOperation, validate_puid, "✈" * 1000)
+        self.assertRaises(SuspiciousOperation, validate_puid, "i'm a rock")
+        self.assertRaises(SuspiciousOperation, validate_puid, "A" * 1000)
+        validate_puid("15TWNQJ36")
+        validate_puid("A" * 24)
