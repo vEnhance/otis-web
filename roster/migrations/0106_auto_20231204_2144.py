@@ -12,7 +12,7 @@ def update_auto_field(apps: Any, scheme_editor: Any):
     UnitInquiry.objects.filter(
         status__in=("INQ_ACC", "INQ_REJ"),
         updated_at__lt=F("created_at") + timedelta(seconds=5),
-    )
+    ).update(was_auto_processed=True)
 
 
 class Migration(migrations.Migration):
