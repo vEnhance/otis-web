@@ -344,6 +344,7 @@ class UnitInquiryAdmin(admin.ModelAdmin):
     list_display = (
         "pk",
         "status",
+        "was_auto_processed",
         "action_type",
         "unit",
         "student",
@@ -351,6 +352,7 @@ class UnitInquiryAdmin(admin.ModelAdmin):
     )
     list_filter = (
         "status",
+        "was_auto_processed",
         "action_type",
         "student__assistant",
     )

@@ -456,6 +456,10 @@ class UnitInquiry(models.Model):
     explanation = models.TextField(
         max_length=300, help_text="Short explanation for this request."
     )
+    was_auto_processed = models.BooleanField(
+        default=False,
+        help_text="Whether the inquiry was automatically accepted or rejected by auto-criteria.",
+    )
 
     class Meta:
         ordering = ("-created_at",)

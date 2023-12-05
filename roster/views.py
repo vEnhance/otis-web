@@ -305,6 +305,7 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
 
     if auto_reject_criteria:
         inquiry.status = "INQ_REJ"
+        inquiry.was_auto_processed = True
         inquiry.save()
         messages.error(
             request,
@@ -346,6 +347,8 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
 
     if auto_accept_criteria:
         inquiry.run_accept()
+        inquiry.was_auto_processed = True
+        inquiry.save()
         messages.success(request, "Petition automatically processed.")
         return
 
