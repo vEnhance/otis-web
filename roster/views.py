@@ -286,6 +286,8 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
     # early auto accept criteria
     if inquiry.action_type == "INQ_ACT_APPEND" or request.user.is_staff:
         inquiry.run_accept()
+        inquiry.was_auto_processed = True
+        inquiry.save()
         messages.success(request, "Petition automatically processed.")
         return
 
