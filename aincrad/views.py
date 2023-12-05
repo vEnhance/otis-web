@@ -1,5 +1,6 @@
 import json
 import logging
+from datetime import timedelta
 from decimal import Decimal
 from hashlib import sha256
 from typing import Any, Literal, TypedDict, Union
@@ -31,8 +32,6 @@ from roster.models import (
     build_students,
 )
 from suggestions.models import ProblemSuggestion
-
-# Create your views here.
 
 
 class HintData(TypedDict):
@@ -151,6 +150,11 @@ INQUIRY_VENUEQ_INIT_KEYS = (
     "created_at",
     "unlock_inquiry_count",
 )
+INQUIRY_VENUEQ_AUTO_QUERYSET = UnitInquiry.objects.filter(
+    was_auto_processed=True,
+    created_at__gte=timezone.now() + timedelta(days=-2),
+)
+INQUIRY_VENUEQ_AUTO_KEYS = INQUIRY_VENUEQ_INIT_KEYS[:-1]
 
 SUGGESTION_VENUEQ_INIT_QUERYSET = ProblemSuggestion.objects.filter(status="SUGG_NEW")
 SUGGESTION_VENUEQ_INIT_KEYS = (
@@ -229,6 +233,9 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
                 "_name": "Inquiries",
                 "inquiries": list(
                     INQUIRY_VENUEQ_INIT_QUERYSET.values(*INQUIRY_VENUEQ_INIT_KEYS)
+                ),
+                "reading": list(
+                    INQUIRY_VENUEQ_AUTO_QUERYSET.values(*INQUIRY_VENUEQ_AUTO_KEYS)
                 ),
             },
             {
