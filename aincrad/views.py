@@ -154,7 +154,15 @@ INQUIRY_VENUEQ_AUTO_QUERYSET = UnitInquiry.objects.filter(
     was_auto_processed=True,
     created_at__gte=timezone.now() + timedelta(days=-2),
 )
-INQUIRY_VENUEQ_AUTO_KEYS = INQUIRY_VENUEQ_INIT_KEYS[:-1]
+INQUIRY_VENUEQ_AUTO_KEYS = (
+    "action_type",
+    "unit__group__name",
+    "unit__code",
+    "student__user__first_name",
+    "student__user__last_name",
+    "explanation",
+    "created_at",
+)
 
 SUGGESTION_VENUEQ_INIT_QUERYSET = ProblemSuggestion.objects.filter(status="SUGG_NEW")
 SUGGESTION_VENUEQ_INIT_KEYS = (
