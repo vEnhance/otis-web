@@ -459,6 +459,7 @@ class UnitInquiry(models.Model):
     was_auto_processed = models.BooleanField(
         default=False,
         help_text="Whether the inquiry was automatically accepted or rejected by auto-criteria.",
+        verbose_name="Auto",
     )
 
     class Meta:
