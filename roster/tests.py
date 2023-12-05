@@ -31,6 +31,7 @@ from roster.models import (  # NOQA
     RegistrationContainer,
     Student,
     StudentRegistration,
+    UnitInquiry,
 )
 
 from .admin import build_students
@@ -307,6 +308,11 @@ class RosterTest(EvanTestCase):
                 },
             )
             self.assertHas(resp, "Petition automatically processed")
+            inq = UnitInquiry.objects.get(
+                student=alice, unit=units[i].pk, action_type="INQ_ACT_UNLOCK"
+            )
+            self.assertTrue(inq.was_auto_processed)
+            self.assertEqual(inq.status, "INQ_ACC")
 
         self.assertGet20X("inquiry", alice.pk)
 
@@ -324,6 +330,12 @@ class RosterTest(EvanTestCase):
             ),
             "Petition submitted, wait for it!",
         )
+        inq = UnitInquiry.objects.get(
+            student=alice, unit=units[19].pk, action_type="INQ_ACT_UNLOCK"
+        )
+        self.assertFalse(inq.was_auto_processed)
+        self.assertEqual(inq.status, "INQ_NEW")
+
         self.assertEqual(alice.curriculum.count(), 6)
         self.assertEqual(alice.unlocked_units.count(), 6)
 
@@ -343,6 +355,11 @@ class RosterTest(EvanTestCase):
 
         self.assertEqual(alice.curriculum.count(), 6)
         self.assertEqual(alice.unlocked_units.count(), 5)
+        inq = UnitInquiry.objects.get(
+            student=alice, unit=units[4].pk, action_type="INQ_ACT_LOCK"
+        )
+        self.assertTrue(inq.was_auto_processed)
+        self.assertEqual(inq.status, "INQ_ACC")
 
         self.assertFalse(alice.unlocked_units.contains(units[4]))
 
@@ -359,6 +376,11 @@ class RosterTest(EvanTestCase):
             ),
             "Petition automatically processed",
         )
+        inq = UnitInquiry.objects.get(
+            student=alice, unit=units[4].pk, action_type="INQ_ACT_DROP"
+        )
+        self.assertTrue(inq.was_auto_processed)
+        self.assertEqual(inq.status, "INQ_ACC")
 
         self.assertEqual(alice.curriculum.count(), 5)
         self.assertEqual(alice.unlocked_units.count(), 5)
@@ -377,6 +399,11 @@ class RosterTest(EvanTestCase):
                 ),
                 "Petition automatically processed",
             )
+            inq = UnitInquiry.objects.get(
+                student=alice, unit=units[i].pk, action_type="INQ_ACT_UNLOCK"
+            )
+            self.assertTrue(inq.was_auto_processed)
+            self.assertEqual(inq.status, "INQ_ACC")
         self.assertEqual(alice.curriculum.count(), 9)
         self.assertEqual(alice.unlocked_units.count(), 9)
 
@@ -394,6 +421,11 @@ class RosterTest(EvanTestCase):
                 ),
                 "more than 9 unfinished",
             )
+            inq = UnitInquiry.objects.get(
+                student=alice, unit=units[i].pk, action_type="INQ_ACT_UNLOCK"
+            )
+            self.assertTrue(inq.was_auto_processed)
+            self.assertEqual(inq.status, "INQ_REJ")
         self.assertEqual(alice.curriculum.count(), 9)
         self.assertEqual(alice.unlocked_units.count(), 9)
 
@@ -410,6 +442,11 @@ class RosterTest(EvanTestCase):
                 ),
                 "Petition automatically processed",
             )
+            inq = UnitInquiry.objects.get(
+                student=alice, unit=units[i].pk, action_type="INQ_ACT_APPEND"
+            )
+            self.assertTrue(inq.was_auto_processed)
+            self.assertEqual(inq.status, "INQ_ACC")
         self.assertEqual(alice.curriculum.count(), 12)
         self.assertEqual(alice.unlocked_units.count(), 9)
 
@@ -425,6 +462,11 @@ class RosterTest(EvanTestCase):
             ),
             "abnormally large",
         )
+        inq = UnitInquiry.objects.get(
+            student=alice, unit=units[19].pk, action_type="INQ_ACT_DROP"
+        )
+        self.assertFalse(inq.was_auto_processed)
+        self.assertEqual(inq.status, "INQ_HOLD")
 
         self.login(firefly)
         for i in range(5, 14):
@@ -440,6 +482,11 @@ class RosterTest(EvanTestCase):
                 ),
                 "Petition automatically processed",
             )
+            inq = UnitInquiry.objects.get(
+                student=alice, unit=units[i].pk, action_type="INQ_ACT_DROP"
+            )
+            self.assertTrue(inq.was_auto_processed)
+            self.assertEqual(inq.status, "INQ_ACC")
         self.assertEqual(alice.curriculum.count(), 7)
         self.assertEqual(alice.unlocked_units.count(), 4)
 
@@ -450,13 +497,21 @@ class RosterTest(EvanTestCase):
                 data={
                     "unit": units[5].pk,
                     "action_type": "INQ_ACT_UNLOCK",
-                    "explanation": "hi",
+                    "explanation": "add back in",
                 },
             ),
             "Petition automatically processed",
         )
         self.assertEqual(alice.curriculum.count(), 8)
         self.assertEqual(alice.unlocked_units.count(), 5)
+        inq = UnitInquiry.objects.get(
+            student=alice,
+            unit=units[5].pk,
+            action_type="INQ_ACT_UNLOCK",
+            explanation="add back in",
+        )
+        self.assertTrue(inq.was_auto_processed)
+        self.assertEqual(inq.status, "INQ_ACC")
 
         self.login(alice)
         secret_group = UnitGroupFactory.create(
@@ -485,6 +540,11 @@ class RosterTest(EvanTestCase):
 
         self.assertEqual(alice.curriculum.count(), 9)
         self.assertEqual(alice.unlocked_units.count(), 6)
+        inq = UnitInquiry.objects.get(
+            student=alice, unit=secret_unit.pk, action_type="INQ_ACT_UNLOCK"
+        )
+        self.assertTrue(inq.was_auto_processed)
+        self.assertEqual(inq.status, "INQ_ACC")
 
         bob: Student = StudentFactory.create(
             semester=SemesterFactory.create(active=False)
