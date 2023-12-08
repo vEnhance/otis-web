@@ -244,6 +244,7 @@ class StudentAdmin(ImportExportModelAdmin):
         "semester",
         "enabled",
         "legit",
+        "last_level_seen",
     )
     list_display_links = (
         "pk",
