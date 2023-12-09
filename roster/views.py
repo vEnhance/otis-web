@@ -430,9 +430,6 @@ def register(request: AuthHttpRequest) -> HttpResponse:
                 request.user.first_name = form.cleaned_data["given_name"].strip()
                 request.user.last_name = form.cleaned_data["surname"].strip()
                 request.user.email = form.cleaned_data["email_address"]
-                group, _ = Group.objects.get_or_create(name="Verified")
-                group.user_set.add(request.user)  # type: ignore
-                request.user.save()
                 mailchimp_subscribe(request)
                 messages.success(request, message="Submitted! Sit tight.")
                 return HttpResponseRedirect(reverse("index"))

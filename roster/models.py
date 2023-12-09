@@ -648,6 +648,10 @@ def build_students(queryset: QuerySet[StudentRegistration]) -> int:
     Student.objects.bulk_create(students_to_create)
     queryset.update(processed=True)
 
+    # TODO: add all these users to Verified group
+    # group, _ = Group.objects.get_or_create(name="Verified")
+    # group.user_set.add(queryset.values("user__pk"))
+
     if n > 0:
         invoices_to_create = []
         for student in Student.objects.filter(
