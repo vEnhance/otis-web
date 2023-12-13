@@ -6,7 +6,7 @@ from hashlib import pbkdf2_hmac
 from typing import TypedDict
 
 from _pydecimal import Decimal
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Group, User
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import FileExtensionValidator
 from django.db import models
@@ -646,11 +646,11 @@ def build_students(queryset: QuerySet[StudentRegistration]) -> int:
         n = 1 if semester_date is not None and now() > semester_date else 2
         count += 1
     Student.objects.bulk_create(students_to_create)
-    queryset.update(processed=True)
 
-    # TODO: add all these users to Verified group
-    # group, _ = Group.objects.get_or_create(name="Verified")
-    # group.user_set.add(queryset.values("user__pk"))
+    group, _ = Group.objects.get_or_create(name="Verified")
+    group.user_set.add(*queryset.values_list("user__pk", flat=True))  # type: ignore
+
+    queryset.update(processed=True)
 
     if n > 0:
         invoices_to_create = []

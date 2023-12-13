@@ -1,5 +1,6 @@
 from hashlib import sha256
 
+from django.contrib.auth.models import User
 from django.test.utils import override_settings
 
 from arch.factories import HintFactory, ProblemFactory
@@ -259,6 +260,8 @@ class TestAincradWithSetup(EvanTestCase):
 
     def test_accept_registrations(self) -> None:
         n = len(Student.objects.all())
+        frisk = User.objects.get(username="frisk")
+        self.assertFalse(frisk.groups.filter(name="Verified").exists())
         self.assertFalse(Student.objects.filter(user__username="frisk").exists())
         resp = self.assertPost20X(
             "api",
@@ -271,6 +274,7 @@ class TestAincradWithSetup(EvanTestCase):
         self.assertEqual(resp.json()["count"], 1)
         self.assertEqual(len(Student.objects.all()), n + 1)
         self.assertTrue(Student.objects.filter(user__username="frisk").exists())
+        self.assertTrue(frisk.groups.filter(name="Verified").exists())
 
 
 @override_settings(API_TARGET_HASH=TARGET_HASH)
