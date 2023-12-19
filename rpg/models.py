@@ -223,7 +223,7 @@ class PalaceCarving(models.Model):
 
     @property
     def real_name(self) -> str:
-        return self.user.get_full_name()
+        return self.user.get_full_name() if self.user is not None else ""
 
 
 class VulnerabilityRecord(models.Model):
