@@ -111,6 +111,7 @@ PSET_VENUEQ_INIT_KEYS = (
     "student__user__first_name",
     "student__user__last_name",
     "student__user__email",
+    "student__last_level_seen",
     "hours",
     "clubs",
     "unit__group__name",
