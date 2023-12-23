@@ -93,7 +93,9 @@ def quiz(request: AuthHttpRequest, student_pk: int, pk: int) -> HttpResponse:
             guess_val = expr_compute(guess_str)
             accepted_str = getattr(quiz, f"answer{i}")
             accepted_vals = [expr_compute(_) for _ in accepted_str.split(",") if _]
-            if guess_val is not None:
+            if len(guess_str.replace(" ", "")) > 24:
+                correct = False
+            elif guess_val is not None:
                 correct = any(
                     v is not None and abs(guess_val - v) < 1e-12 for v in accepted_vals
                 )
