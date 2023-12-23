@@ -113,9 +113,9 @@ def quiz(request: AuthHttpRequest, student_pk: int, pk: int) -> HttpResponse:
             if correct:
                 score += 1
 
-            if attempt.score != score:
-                attempt.score = score
-                attempt.save()
+        if attempt.score is None:
+            attempt.score = score
+            attempt.save()
 
     context["quiz"] = quiz
     context["student"] = student

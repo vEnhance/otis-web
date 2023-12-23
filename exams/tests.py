@@ -159,7 +159,7 @@ class ExamTest(EvanTestCase):
                 data={
                     "guess1": "1337",
                     "guess2": "2000",
-                    "guess3": "30+100",  # pretend it's a typo or 30 x 100 I guess
+                    "guess3": "30+100",  # pretend it's a typo for 30 x 100 I guess
                     "guess4": "2^5*5^3",
                 },
             )
