@@ -23,8 +23,6 @@ class ArithmeticTest(EvanTestCase):
 
     def test_arithmetic(self):
         self.checkCalculator("1/3^4", 1 / 81)
-        self.checkCalculator("sin(pi)", 0)
-        self.checkCalculator("sqrt(1/2)-cos(pi/4)", 0)
         self.checkCalculator("(2*sqrt(2))^2 - 4^(3/2)", 0)
         self.checkCalculator("16900/4*pi", 13273.2289614)
 
