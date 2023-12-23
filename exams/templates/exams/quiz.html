@@ -67,19 +67,28 @@
         <ul>
           <li>
             <tt>1 - 1/10^6</tt>, <tt>0.999999</tt>,
-            and <tt>999999/1000000</tt> are both accepted.
+            and <tt>999999/1000000</tt> are all equivalent and accepted.
           </li>
           <li>
-            <tt>sqrt(8)</tt> and <tt>2*sqrt(2)</tt> are accepted.
+            <tt>5/sqrt(2)</tt>, <tt>sqrt(25/2)</tt>,
+            and <tt>5*sqrt(2)/2</tt> are all equivalent and accepted.
+          </li>
+          <li>
+            <tt>sqrt(27/20)</tt>, <tt>3/2*sqrt(3/5)</tt>,
+            and <tt>3*sqrt(15)/10</tt> are all equivalent and accepted.
           </li>
         </ul>
       </li>
       <li>
-        Note there is a <strong>24-character limit</strong>
-        on expressions that you enter, not including spaces.
-        If you submit an expression that exceeds the limit,
-        the grader will automatically mark it as incorrect.
+        You are limited to
+        <strong>at most four uses of the operands <tt>+-*/^</tt></strong>
+        and
+        <strong>at most 24 non-whitespace characters total</strong>.
         Thus, you should try to simplify your answer as much as possible.
+        The "obvious" simplest forms of all the answers will fit comfortably,
+        so this should not realistically cause any issues.
+        If you submit an expression that exceeds either limit,
+        the grader will automatically judge it as incorrect.
       </li>
       <li>
         The intention is that you should take the test away without technology
