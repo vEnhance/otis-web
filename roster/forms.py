@@ -124,12 +124,12 @@ class DecisionForm(forms.ModelForm):
     given_name = forms.CharField(
         label="First name (given name)",
         max_length=128,
-        help_text="Your given (first) name, can be more than one",
+        help_text="Your given (first) name, can be more than one. Please use a real name.",
     )
     surname = forms.CharField(
         label="Last name (surname)",
         max_length=128,
-        help_text="Your family (last) name",
+        help_text="Your family (last) name. Please use a real name.",
     )
     email_address = forms.EmailField(
         label="Your email address (one you check)",
