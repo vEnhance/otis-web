@@ -727,7 +727,7 @@ class RosterTest(EvanTestCase):
         semester: Semester = SemesterFactory.create()
 
         # registration should redirect if there's no container yet
-        alice: User = UserFactory.create()
+        alice: User = UserFactory.create(first_name="a", last_name="a", email="a@a.net")
         self.login(alice)
         self.assertMessage(
             self.assertGet20X("register", follow=True),
@@ -764,8 +764,8 @@ class RosterTest(EvanTestCase):
         resp = self.assertPost20X(
             "register",
             data={
-                "given_name": "First",
-                "surname": "Last",
+                "given_name": "Alice",
+                "surname": "Aardvark",
                 "email_address": "myemail@example.com",
                 "passcode": f"{container.passcode}1",
                 "gender": "O",
@@ -791,8 +791,8 @@ class RosterTest(EvanTestCase):
         resp = self.assertPost20X(
             "register",
             data={
-                "given_name": "First",
-                "surname": "Last",
+                "given_name": "Alice",
+                "surname": "Aardvark",
                 "email_address": "myemail@example.com",
                 "passcode": container.passcode,
                 "gender": "O",
@@ -809,14 +809,18 @@ class RosterTest(EvanTestCase):
         messages = [m.message for m in resp.context["messages"]]
         self.assertIn("Submitted! Sit tight.", messages)
         self.assertTrue(StudentRegistration.objects.filter(user=alice).exists())
+        alice.refresh_from_db()
+        self.assertEqual(alice.first_name, "Alice")
+        self.assertEqual(alice.last_name, "Aardvark")
+        self.assertEqual(alice.email, "myemail@example.com")
 
         resp = self.assertPost20X(
             "register",
             data={
-                "given_name": "First",
-                "surname": "Last",
+                "given_name": "Alice",
+                "surname": "Aardvark",
                 "email_address": "myemail@example.com",
-                "passcode": f"{container.passcode}1",
+                "passcode": container.passcode,
                 "gender": "O",
                 "parent_email": "myemail@example.com",
                 "graduation_year": 0,
