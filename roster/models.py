@@ -189,6 +189,10 @@ class Student(models.Model):
         return self.user.get_full_name() or self.user.username if self.user else "?"
 
     @property
+    def email(self) -> str:
+        return self.user.email if self.user else "?"
+
+    @property
     def calendar_url(self) -> str:
         return self.semester.calendar_url
 

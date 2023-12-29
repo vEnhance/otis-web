@@ -241,6 +241,7 @@ class StudentAdmin(ImportExportModelAdmin):
     list_display = (
         "pk",
         "name",
+        "email",
         "semester",
         "enabled",
         "legit",
