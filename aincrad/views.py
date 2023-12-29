@@ -380,6 +380,9 @@ def discord_handler(action: str, data: JSONData) -> JsonResponse:
     regform = StudentRegistration.objects.filter(user=user).order_by("-pk").first()
 
     if student is not None:
+        logging.info(
+            f"Student {student} /register'd with Discord ID {uid}, aka {social.user.username}",
+        )
         return JsonResponse(
             {
                 "result": "success",
