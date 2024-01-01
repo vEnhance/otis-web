@@ -121,6 +121,7 @@ def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
         "-threshold"
     )
     context["obtained_levels"] = obtained_levels
+    context["form"] = form
     return render(request, "rpg/stats.html", context)
 
 
