@@ -107,7 +107,6 @@ def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
                         f"You already earned the achievement {achievement.name}.",
                     )
 
-            form = DiamondsForm()
     else:
         form = DiamondsForm()
     try:
