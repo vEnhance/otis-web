@@ -9,5 +9,5 @@ class DiamondsForm(forms.Form):
         min_length=24,
         max_length=26,
         error_messages={"invalid": "This doesn't appear to be a hex code."},
-        widget=forms.TextInput(attrs={"pattern": "[a-fA-F]+"}),
+        widget=forms.TextInput(attrs={"pattern": "[a-fA-F0-9]+"}),
     )
