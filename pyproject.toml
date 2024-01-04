@@ -45,18 +45,16 @@ wiki = "^0.10"
 # TODO: Faker: need to wait until https://github.com/joke2k/faker/pull/1662 resolves
 Faker = "=15.1.1"
 # TODO: update codespell once v2.3.0 is published
-black = "^23.12.1"
 codespell = "^2.2.6"
 coverage = {extras = ["toml"], version = "^7.3.4"}
 djlint = "^1.34.1"
 factory-boy = "^3.2.0"
 freezegun = "^1.4.0"
 ipython = "^8.18.0"
-isort = "^5.13.2"
 jedi = "^0.19.0"
 pdbpp = "^0.10.3"
-pyflakes = "^3.0.1"
 pyright = "^1.1.342"
+ruff = "^0.1.11"
 tblib = "^3.0.0"
 toml = "^0.10.2"
 types-Markdown = "^3.5.0.3"
@@ -164,5 +162,5 @@ ignore = "D018,H006,H013,H021"
 format_css = true
 format_js = true
 
-[tool.isort]
-profile = "black"
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
