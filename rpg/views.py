@@ -60,7 +60,9 @@ def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
             code = form.cleaned_data["code"]
 
             try:
-                achievement = Achievement.objects.get(code__iexact=code)
+                achievement = Achievement.objects.exclude(code="").get(
+                    code__iexact=code
+                )
             except Achievement.DoesNotExist:
                 messages.error(request, "❌ You entered an invalid code.")
                 logger.info(

@@ -31,7 +31,7 @@ class Achievement(models.Model):
     code = models.CharField(
         max_length=96,
         unique=True,
-        null=True,
+        blank=True,
         validators=[
             RegexValidator(
                 regex=r"^[a-f0-9]{24,26}$",
