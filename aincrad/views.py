@@ -635,7 +635,7 @@ def api(request: HttpRequest) -> JsonResponse:
         data = json.loads(request.body)
     except json.decoder.JSONDecodeError:
         raise SuspiciousOperation("Not valid JSON")
-    if type(data) != type(JSONData()):  # type: ignore
+    if isinstance(data, type(JSONData)):
         raise SuspiciousOperation("Not valid JSON (needs a dict)")
 
     if "action" not in data:
