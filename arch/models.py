@@ -89,6 +89,9 @@ class Vote(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self) -> str:
+        return f"{self.user.username} vote for {self.problem}"
+
 
 @reversion.register()
 class Hint(models.Model):
