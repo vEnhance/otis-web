@@ -32,6 +32,11 @@ def get_from_google_storage(filename: str):
         return HttpResponseServerError(errmsg)
 
     response = HttpResponse(content=file)
-    response["Content-Type"] = f"application/{ext}"
-    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    if ext == ".pdf":
+        response["Content-Type"] = "application/pdf"
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    else:
+        response["Content-Type"] = "application/text"
+        response["Content-Disposition"] = "inline"
+
     return response
