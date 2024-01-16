@@ -27,6 +27,7 @@ if ENV_PATH.exists():
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 # Manually added settings
+SESSION_COOKIE_SECURE = True
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
