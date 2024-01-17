@@ -185,13 +185,11 @@
           function lencheck_statement() {
               const s = $("#id_statement").val();
               $("#statement_warning").toggle(!checkLineLength(s));
-              if (!enabled) return;
           }
 
           function lencheck_solution() {
               const s = $("#id_solution").val();
               $("#solution_warning").toggle(!checkLineLength(s));
-              if (!enabled) return;
           }
           $("#id_statement").blur(lencheck_statement);
           $("#id_solution").blur(lencheck_solution);
