@@ -31,7 +31,7 @@ def content_file_name(instance: "UploadedFile", filename: str) -> str:
     return os.path.join(
         instance.category,
         instance.owner.username,
-        now.strftime("%Y-%m-%d-%H%M%S"),
+        now.strftime(r"%Y-%m-%d-%H%M%S-%f"),
         filename,
     )
 
