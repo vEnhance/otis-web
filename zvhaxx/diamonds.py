@@ -73,7 +73,7 @@ class DiamondFinder(defaultdict):
                         **kwargs
                     )
 
-    def scanfile(self, file, include=None, exclude=None, relpath=None, tag=()):
+    def scanfile(self, file, include=None, exclude=None, relpath=None, silent=False, tag=()):
         """
         Scan a file for diamonds.
         Extensions can be set to a list of file extensions to check,
@@ -85,7 +85,7 @@ class DiamondFinder(defaultdict):
         tag = tag + (filetag,)
         # We need a patch when the encoding is not utf-8
         with open(file, mode='r', encoding='utf-8') as stream:
-            self.scanstream(stream, tag)
+            self.scanstream(stream, silent, tag)
 
     @staticmethod
     def check_extension(file, include=None, exclude=None):
@@ -106,17 +106,18 @@ class DiamondFinder(defaultdict):
                 return False
         return True
 
-    def scanstream(self, stream, tag=()):
+    def scanstream(self, stream, silent=False, tag=()):
         """Scan a text stream, such as a io.TextIOBase object."""
         count = 1
         while True:
             try:
                 line = stream.readline()
             except UnicodeDecodeError:
-                warnings.warn(
-                    f'Failed to decode line {count} of {tag}',
-                    UnicodeWarning
-                )
+                if not silent:
+                    warnings.warn(
+                        f'Failed to decode line {count} of {tag}',
+                        UnicodeWarning
+                    )
             else:
                 if not line:
                     break
@@ -160,8 +161,7 @@ otis_df = DiamondFinder(
 
 """
 >>> os.chdir('blah/blah/blah/') # contains otis-web
->>> otis_df.scandir('otis-web/', deep=True, exclude='.lock')
+>>> otis_df.scandir('otis-web/', deep=True, exclude='.lock', silent=True)
+>>> print(otis_df) # I got 4 legitimate diamonds and 14 charisma points doing this.
 ...
->>> print(otis_df)
-I got 4 legitimate diamonds and 14 charisma points doing this.
 """
