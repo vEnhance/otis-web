@@ -45,9 +45,6 @@ class TestPortal(EvanTestCase):
         alice = StudentFactory.create(semester=semester)
         self.login(alice)
 
-        alice.enabled = False
-        alice.save()
-
         with freeze_time("2021-06-20", tz_offset=0):
             InvoiceFactory.create(student=alice)
 
