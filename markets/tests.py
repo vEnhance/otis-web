@@ -1,10 +1,14 @@
 import datetime
 
+from django.contrib.admin.sites import AdminSite
+from django.http.request import HttpRequest
+from django.test.client import RequestFactory
 from django.utils import timezone
 from freezegun import freeze_time
 
 from core.factories import GroupFactory, SemesterFactory, UserFactory
 from evans_django_tools.testsuite import EvanTestCase
+from markets.admin import MarketAdmin
 from markets.factories import GuessFactory, MarketFactory
 from markets.models import Guess, Market
 
@@ -61,6 +65,30 @@ class MarketModelTests(EvanTestCase):
     def test_model_str(self):
         str(MarketFactory.create())
         str(GuessFactory.create())
+
+    def test_admin_action(self):
+        site = AdminSite()
+        admin = MarketAdmin(Market, site)
+        request: HttpRequest = RequestFactory().get("/")
+        qs = Market.objects.filter(slug="m-three")
+        admin.postpone_market(request, qs)
+        self.assertEqual(
+            qs.get().start_date,
+            datetime.datetime(2050, 1, 8, tzinfo=UTC),
+        )
+        self.assertEqual(
+            qs.get().end_date,
+            datetime.datetime(2050, 1, 10, tzinfo=UTC),
+        )
+        admin.hasten_market(request, qs)
+        self.assertEqual(
+            qs.get().start_date,
+            datetime.datetime(2050, 1, 1, tzinfo=UTC),
+        )
+        self.assertEqual(
+            qs.get().end_date,
+            datetime.datetime(2050, 1, 3, tzinfo=UTC),
+        )
 
 
 class MarketTests(EvanTestCase):

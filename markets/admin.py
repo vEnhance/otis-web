@@ -1,8 +1,11 @@
+from datetime import timedelta
+
 from django.contrib import admin
+from django.db.models import F
+from django.db.models.query import QuerySet
+from django.http.request import HttpRequest
 
 from .models import Guess, Market
-
-# Register your models here.
 
 
 @admin.register(Market)
@@ -30,6 +33,25 @@ class MarketAdmin(admin.ModelAdmin):
         NUM_CHAR = 200
         text = obj.prompt
         return text[:NUM_CHAR] + ("..." if len(text) > NUM_CHAR else "")
+
+    actions = [
+        "postpone_market",
+        "hasten_market",
+    ]
+
+    def shift_market(self, queryset: QuerySet[Market], num_days: int):
+        queryset.update(
+            start_date=F("start_date") + timedelta(days=num_days),
+            end_date=F("end_date") + timedelta(days=num_days),
+        )
+
+    @admin.action(description="Postpone market by one week")
+    def postpone_market(self, request: HttpRequest, queryset: QuerySet[Market]):
+        self.shift_market(queryset, num_days=7)
+
+    @admin.action(description="Move market one week earlier")
+    def hasten_market(self, request: HttpRequest, queryset: QuerySet[Market]):
+        self.shift_market(queryset, num_days=-7)
 
 
 @admin.register(Guess)
