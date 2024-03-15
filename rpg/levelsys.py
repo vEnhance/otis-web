@@ -352,6 +352,7 @@ def annotate_student_queryset_with_scores(
             "pset__pk",
             filter=Q(eligible=True, unit__code__startswith="Z"),
         ),
+        num_semesters=SubqueryCount("user__student"),
         spades_quizzes=SubquerySum("user__student__examattempt__score"),
         spades_quests=SubquerySum("user__student__questcomplete__spades"),
         spades_markets=Subquery(guess_subquery),  # type: ignore
