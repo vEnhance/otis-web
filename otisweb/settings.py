@@ -2,7 +2,6 @@
 Django settings for otisweb project.
 """
 
-
 import logging
 import os
 import sys
