@@ -44,7 +44,9 @@ class UnitGroupListView(ListView[Unit]):
 
     def get_queryset(self):
         queryset = Unit.objects.filter(group__hidden=False)
-        queryset = queryset.order_by("group__subject", "group__name", "code")
+        queryset = queryset.order_by(
+            "group__subject", "group__name", "difficulty", "version"
+        )
         queryset = queryset.annotate(
             num_psets_in_group=Count(
                 "group__unit__pset",

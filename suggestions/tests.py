@@ -13,7 +13,7 @@ class TestSuggestion(EvanTestCase):
 
         UnitGroupFactory()
         unitgroup: UnitGroup = UnitGroupFactory()
-        unit: Unit = UnitFactory.create(code=f"B{unitgroup.subject}W", group=unitgroup)
+        unit: Unit = UnitFactory.create(group=unitgroup)
 
         self.assertGetBecomesLoginRedirect("suggest-new", 10)
 

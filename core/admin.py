@@ -49,7 +49,8 @@ class UnitIEResource(resources.ModelResource):
         fields = (
             "id",
             "group_name",
-            "code",
+            "difficulty",
+            "version",
             "position",
         )
         export_order = fields
@@ -59,12 +60,13 @@ class UnitIEResource(resources.ModelResource):
 class UnitAdmin(ImportExportModelAdmin):
     list_display = (
         "group",
-        "code",
+        "difficulty",
+        "version",
         "pk",
         "list_display_position",
     )
     list_filter = ("group__subject",)
-    search_fields = ("group__name", "code")
+    search_fields = ("group__name",)
     autocomplete_fields = ("group",)
     ordering = ("position",)
     resource_class = UnitIEResource
@@ -75,7 +77,8 @@ class UnitAdmin(ImportExportModelAdmin):
 class UnitInline(admin.TabularInline):
     model = Unit
     fields = (
-        "code",
+        "difficulty",
+        "version",
         "position",
     )
     extra = 0

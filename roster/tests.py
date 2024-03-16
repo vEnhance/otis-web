@@ -45,9 +45,7 @@ class RosterTest(EvanTestCase):
         unitgroups: list[UnitGroup] = UnitGroupFactory.create_batch(4)
         for unitgroup in unitgroups:
             for letter in "BDZ":
-                UnitFactory.create(
-                    code=letter + unitgroup.subject[0] + "W", group=unitgroup
-                )
+                UnitFactory.create(difficulty=letter, version="W", group=unitgroup)
 
         self.login(alice)
         self.assertHas(self.get("currshow", alice.pk), text="you are not an instructor")
@@ -517,7 +515,7 @@ class RosterTest(EvanTestCase):
         secret_group = UnitGroupFactory.create(
             name="Spooky Unit", subject="K", hidden=True
         )
-        secret_unit = UnitFactory.create(code="BKV", group=secret_group)
+        secret_unit = UnitFactory.create(group__subject="K", group=secret_group)
         alice.curriculum.add(secret_unit)
 
         # Alice hit the hold limit earlier
