@@ -300,12 +300,8 @@ class Student(models.Model):
 
         first_payment_deadline = self.semester.first_payment_deadline
 
-        if (
-            first_payment_deadline is not None
-            and first_payment_deadline > invoice.created_at
-            and invoice.total_paid <= 0
-        ):
-            d = first_payment_deadline - now
+        if first_payment_deadline is not None and invoice.total_paid <= 0:
+            d = max(invoice.created_at, first_payment_deadline) - now
             if d < timedelta(days=-7):
                 return 3
             elif d < timedelta(days=0):
@@ -317,10 +313,9 @@ class Student(models.Model):
 
         if (
             most_payment_deadline is not None
-            and most_payment_deadline > invoice.created_at
             and invoice.total_paid < 2 * invoice.total_cost / 3
         ):
-            d = most_payment_deadline - now
+            d = max(invoice.created_at, most_payment_deadline) - now
             if d < timedelta(days=-7):
                 return 7
             elif d < timedelta(days=0):
