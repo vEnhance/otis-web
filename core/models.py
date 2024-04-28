@@ -164,6 +164,7 @@ class UnitGroup(models.Model):
         ("F", "Functional Equations"),
         ("M", "Miscellaneous"),
         ("K", "Secret"),
+        ("H", "Higher Math"),
     )
     subject = models.CharField(
         max_length=2, choices=SUBJECT_CHOICES, help_text="The subject for the unit"

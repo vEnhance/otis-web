@@ -83,6 +83,9 @@ table.table tr.subjectN:nth-child(odd) {
 table.table tr.subjectM:nth-child(odd) {
   background-color: #ffee77;
 }
+table.table tr.subjectH:nth-child(odd) {
+  background-color: #fcbffe;
+}
 
 table.table tr.subjectG:nth-child(even) {
   background-color: #a5f5a5;
@@ -99,6 +102,9 @@ table.table tr.subjectN:nth-child(even) {
 }
 table.table tr.subjectM:nth-child(even) {
   background-color: #f5e575;
+}
+table.table tr.subjectH:nth-child(even) {
+  background-color: #ecb3ef;
 }
 
 table.table tr.unit-locked {
