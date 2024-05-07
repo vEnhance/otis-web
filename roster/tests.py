@@ -306,6 +306,7 @@ class RosterTest(EvanTestCase):
                     "action_type": "INQ_ACT_UNLOCK",
                     "explanation": "hi",
                 },
+                follow=True,
             )
             self.assertHas(resp, "Petition automatically processed")
             inq = UnitInquiry.objects.get(
@@ -314,7 +315,7 @@ class RosterTest(EvanTestCase):
             self.assertTrue(inq.was_auto_processed)
             self.assertEqual(inq.status, "INQ_ACC")
 
-        self.assertGet20X("inquiry", alice.pk)
+        self.assertGet20X("inquiry", alice.pk, follow=True)
 
         self.assertEqual(alice.curriculum.count(), 6)
         self.assertEqual(alice.unlocked_units.count(), 6)
@@ -327,6 +328,7 @@ class RosterTest(EvanTestCase):
                     "action_type": "INQ_ACT_UNLOCK",
                     "explanation": "hi",
                 },
+                follow=True,
             ),
             "Petition submitted, wait for it!",
         )
@@ -349,6 +351,7 @@ class RosterTest(EvanTestCase):
                     "action_type": "INQ_ACT_LOCK",
                     "explanation": "hi",
                 },
+                follow=True,
             ),
             "Petition automatically processed",
         )
@@ -373,6 +376,7 @@ class RosterTest(EvanTestCase):
                     "action_type": "INQ_ACT_DROP",
                     "explanation": "hi",
                 },
+                follow=True,
             ),
             "Petition automatically processed",
         )
@@ -396,6 +400,7 @@ class RosterTest(EvanTestCase):
                         "action_type": "INQ_ACT_UNLOCK",
                         "explanation": "hi",
                     },
+                    follow=True,
                 ),
                 "Petition automatically processed",
             )
@@ -418,6 +423,7 @@ class RosterTest(EvanTestCase):
                         "action_type": "INQ_ACT_UNLOCK",
                         "explanation": "hi",
                     },
+                    follow=True,
                 ),
                 "more than 9 unfinished",
             )
@@ -439,6 +445,7 @@ class RosterTest(EvanTestCase):
                         "action_type": "INQ_ACT_APPEND",
                         "explanation": "hi",
                     },
+                    follow=True,
                 ),
                 "Petition automatically processed",
             )
@@ -459,6 +466,7 @@ class RosterTest(EvanTestCase):
                     "action_type": "INQ_ACT_DROP",
                     "explanation": "hi",
                 },
+                follow=True,
             ),
             "abnormally large",
         )
@@ -479,6 +487,7 @@ class RosterTest(EvanTestCase):
                         "action_type": "INQ_ACT_DROP",
                         "explanation": "hi",
                     },
+                    follow=True,
                 ),
                 "Petition automatically processed",
             )
@@ -499,6 +508,7 @@ class RosterTest(EvanTestCase):
                     "action_type": "INQ_ACT_UNLOCK",
                     "explanation": "add back in",
                 },
+                follow=True,
             ),
             "Petition automatically processed",
         )
@@ -534,6 +544,7 @@ class RosterTest(EvanTestCase):
                     "action_type": "INQ_ACT_UNLOCK",
                     "explanation": "its almost halloween and my family wants to host it at our house.",
                 },
+                follow=True,
             ),
             "Petition automatically processed",
         )

@@ -382,6 +382,7 @@ def inquiry(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
         if form.is_valid():
             inquiry: UnitInquiry = form.save(commit=False)
             handle_inquiry(request, inquiry, student)
+            return HttpResponseRedirect(reverse("inquiry", args=(student.pk,)))
 
     else:
         form = InquiryForm(student=student)
