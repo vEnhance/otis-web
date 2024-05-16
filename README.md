@@ -37,6 +37,7 @@ and replace `YOUR_USERNAME` in step 2 with `vEnhance`.
    `git clone https://github.com/YOUR_USERNAME/otis-web`.
 3. Run `git submodule update --init --recursive`
    in order to pull the `evans_django_tools` submodule.
+   This is an example of a change to the otis-web.
 4. Type `git checkout -b feature` to checkout a new branch named `feature`;
    this will make your life a bit easier than working on `main`.
    If you already know what feature you're trying to implement,
