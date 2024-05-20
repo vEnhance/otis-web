@@ -361,19 +361,19 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
 @login_required
 def inquiry(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
     student = get_student_by_pk(request, student_pk)
-    if not student.semester.active:
-        raise PermissionDenied(
-            "Not an active semester, so change petitions are no longer possible."
-        )
-    if student.is_delinquent:
-        raise PermissionDenied("Student is delinquent")
-    if not student.enabled:
-        raise PermissionDenied("Student account not enabled")
-    if student.newborn:
-        raise PermissionDenied(
-            "This form isn't enabled yet because you have not chosen your initial units."
-        )
-
+    if not request.user.is_staff:
+        if not student.semester.active:
+            raise PermissionDenied(
+                "Not an active semester, so change petitions are no longer possible."
+            )
+        if student.is_delinquent:
+            raise PermissionDenied("Student is delinquent")
+        if not student.enabled:
+            raise PermissionDenied("Student account not enabled")
+        if student.newborn:
+            raise PermissionDenied(
+                "This form isn't enabled yet because you have not chosen your initial units."
+            )
     context: dict[str, Any] = {}
 
     # Create form for submitting new inquiries
