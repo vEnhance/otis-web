@@ -74,13 +74,22 @@ class AdvanceForm(forms.Form):
         super().__init__(*args, **kwargs)
 
         self.fields["units_to_unlock"] = AdvanceUnitChoiceField(
+            label="Unlock",
+            queryset=student.curriculum.exclude(
+                pk__in=student.unlocked_units.values_list("pk")
+            )
+            if not args
+            else Unit.objects.all(),
+            help_text="Units to unlock, already in curriculum.",
+        )
+        self.fields["units_to_open"] = AdvanceUnitChoiceField(
             label="Open",
             queryset=Unit.objects.exclude(
                 pk__in=student.unlocked_units.values_list("pk")
             )
             if not args
             else Unit.objects.all(),
-            help_text="Units to unlock.",
+            help_text="Units to open (add and unlock).",
         )
         self.fields["units_to_add"] = AdvanceUnitChoiceField(
             label="Add",

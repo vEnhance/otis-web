@@ -158,6 +158,7 @@ def advance(request: HttpRequest, student_pk: int) -> Any:
         if form.is_valid():
             data = form.cleaned_data
             student.unlocked_units.add(*data["units_to_unlock"])
+            student.unlocked_units.add(*data["units_to_open"])
             student.curriculum.add(*data["units_to_unlock"])
             student.curriculum.add(*data["units_to_add"])
             student.unlocked_units.remove(*data["units_to_lock"])
