@@ -67,43 +67,57 @@ h6.alert-heading {
 }
 
 /* Subject colors */
-table.table tr.subjectG:nth-child(odd) {
+table.table tr.subjectG:nth-child(odd),
+table.table tr.subjectG:nth-child(odd) td {
   background-color: #aaffaa;
 }
-table.table tr.subjectC:nth-child(odd) {
+table.table tr.subjectC:nth-child(odd),
+table.table tr.subjectC:nth-child(odd) td {
   background-color: #aaddff;
 }
 table.table tr.subjectA:nth-child(odd),
-table.table tr.subjectF:nth-child(odd) {
+table.table tr.subjectA:nth-child(odd) td,
+table.table tr.subjectF:nth-child(odd),
+table.table tr.subjectF:nth-child(odd) td {
   background-color: #ffaaaa;
 }
-table.table tr.subjectN:nth-child(odd) {
+table.table tr.subjectN:nth-child(odd),
+table.table tr.subjectN:nth-child(odd) td {
   background-color: #eeeeee;
 }
-table.table tr.subjectM:nth-child(odd) {
+table.table tr.subjectM:nth-child(odd),
+table.table tr.subjectM:nth-child(odd) td {
   background-color: #ffee77;
 }
-table.table tr.subjectH:nth-child(odd) {
+table.table tr.subjectH:nth-child(odd),
+table.table tr.subjectH:nth-child(odd) td {
   background-color: #fcbffe;
 }
 
-table.table tr.subjectG:nth-child(even) {
+table.table tr.subjectG:nth-child(even),
+table.table tr.subjectG:nth-child(even) td {
   background-color: #a5f5a5;
 }
-table.table tr.subjectC:nth-child(even) {
+table.table tr.subjectC:nth-child(even),
+table.table tr.subjectC:nth-child(even) td {
   background-color: #a5d5f5;
 }
 table.table tr.subjectA:nth-child(even),
-table.table tr.subjectF:nth-child(even) {
+table.table tr.subjectA:nth-child(even) td,
+table.table tr.subjectF:nth-child(even),
+table.table tr.subjectF:nth-child(even) td {
   background-color: #f5a5a5;
 }
-table.table tr.subjectN:nth-child(even) {
+table.table tr.subjectN:nth-child(even),
+table.table tr.subjectN:nth-child(even) td {
   background-color: #dddddd;
 }
-table.table tr.subjectM:nth-child(even) {
+table.table tr.subjectM:nth-child(even),
+table.table tr.subjectM:nth-child(even) td {
   background-color: #f5e575;
 }
-table.table tr.subjectH:nth-child(even) {
+table.table tr.subjectH:nth-child(even),
+table.table tr.subjectH:nth-child(even) td {
   background-color: #ecb3ef;
 }
 

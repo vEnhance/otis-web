@@ -19,10 +19,12 @@ table.table th {
   padding: 2px 4px 2px 4px;
   font-size: 15px;
 }
-table.table tr:nth-child(odd) {
+table.table tr:nth-child(odd),
+table.table tr:nth-child(odd) td {
   background-color: #e4e4e4;
 }
-table.table tr:nth-child(even) {
+table.table tr:nth-child(even),
+table.table tr:nth-child(even) td {
   background-color: #f5f5f5;
 }
 
