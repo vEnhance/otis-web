@@ -7,6 +7,7 @@ from django.db.models.query_utils import Q
 from django.forms.forms import BaseForm
 
 from core.models import Unit
+from dashboard.models import PSet
 from roster.models import Student, StudentRegistration, UnitInquiry  # NOQA
 
 
@@ -77,6 +78,8 @@ class AdvanceForm(forms.Form):
             label="Unlock",
             queryset=student.curriculum.exclude(
                 pk__in=student.unlocked_units.values_list("pk")
+            ).exclude(
+                pk__in=PSet.objects.filter(student=student).values_list("unit__pk"),
             )
             if not args
             else Unit.objects.all(),
