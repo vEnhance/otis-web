@@ -1,6 +1,6 @@
 # Functions to compute student levels and whatnot
+import datetime
 import logging
-from datetime import datetime
 from typing import Any, Set, Tuple, TypedDict, Union
 
 from django.db.models.aggregates import Count, Max, Sum
@@ -161,10 +161,10 @@ class LevelInfoDict(TypedDict):
     hanabi_replays: QuerySet[HanabiReplay]
 
 
-def get_week_count(dates: list[datetime]) -> int:
+def get_week_count(dates: list[datetime.datetime]) -> int:
     seen: list[Tuple[int, int]] = []
     for d in dates:
-        d = d.astimezone(tz=timezone.utc)
+        d = d.astimezone(tz=datetime.timezone.utc)
         week_number = d.isocalendar()[1]
         year = d.year
         seen.append((year, week_number))
@@ -409,7 +409,9 @@ def get_student_rows(queryset: QuerySet[Student]) -> list[dict[str, Any]]:
         try:
             row["last_seen"] = student.user.profile.last_seen
         except UserProfile.DoesNotExist:
-            row["last_seen"] = datetime.fromtimestamp(0, tz=timezone.utc)
+            row["last_seen"] = datetime.datetime.fromtimestamp(
+                0, tz=datetime.timezone.utc
+            )
         row["insanity"] = compute_insanity_rating(
             getattr(student, "pset_B_count"),
             getattr(student, "pset_D_count"),

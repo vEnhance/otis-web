@@ -1,4 +1,5 @@
-from django.utils.timezone import utc
+import datetime
+
 from factory.django import DjangoModelFactory
 from factory.faker import Faker
 
@@ -10,4 +11,4 @@ class OpalHuntFactory(DjangoModelFactory):
         model = OpalHunt
 
     name = "Your Otis in April"
-    start_date = Faker("past_datetime", tzinfo=utc)
+    start_date = Faker("past_datetime", tzinfo=datetime.timezone.utc)

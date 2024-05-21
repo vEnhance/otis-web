@@ -1,4 +1,4 @@
-from django.utils import timezone
+import datetime
 
 from core.factories import GroupFactory, UnitFactory, UserFactory
 from dashboard.factories import PSetFactory
@@ -22,7 +22,7 @@ from rpg.levelsys import (  # NOQA
 )
 from rpg.models import Achievement, AchievementUnlock
 
-utc = timezone.utc
+UTC = datetime.timezone.utc
 
 
 class TestLevelSystem(EvanTestCase):

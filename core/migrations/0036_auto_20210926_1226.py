@@ -3,7 +3,6 @@
 import datetime
 
 from django.db import migrations, models
-from django.utils.timezone import utc
 
 
 class Migration(migrations.Migration):
@@ -16,7 +15,9 @@ class Migration(migrations.Migration):
             model_name="userprofile",
             name="last_announce_dismiss",
             field=models.DateTimeField(
-                default=datetime.datetime(1970, 1, 1, 0, 0, tzinfo=utc),
+                default=datetime.datetime(
+                    1970, 1, 1, 0, 0, tzinfo=datetime.timezone.utc
+                ),
                 help_text="Last time user dismissed the emails modal.",
             ),
         ),
@@ -24,7 +25,9 @@ class Migration(migrations.Migration):
             model_name="userprofile",
             name="last_download_dismiss",
             field=models.DateTimeField(
-                default=datetime.datetime(1970, 1, 1, 0, 0, tzinfo=utc),
+                default=datetime.datetime(
+                    1970, 1, 1, 0, 0, tzinfo=datetime.timezone.utc
+                ),
                 help_text="Last time user dismissed the downloads modal.",
             ),
         ),
@@ -32,7 +35,9 @@ class Migration(migrations.Migration):
             model_name="userprofile",
             name="last_seen",
             field=models.DateTimeField(
-                default=datetime.datetime(1970, 1, 1, 0, 0, tzinfo=utc),
+                default=datetime.datetime(
+                    1970, 1, 1, 0, 0, tzinfo=datetime.timezone.utc
+                ),
                 help_text="Last time user was seen at all",
             ),
         ),

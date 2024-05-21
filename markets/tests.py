@@ -3,7 +3,6 @@ import datetime
 from django.contrib.admin.sites import AdminSite
 from django.http.request import HttpRequest
 from django.test.client import RequestFactory
-from django.utils import timezone
 from freezegun import freeze_time
 
 from core.factories import GroupFactory, SemesterFactory, UserFactory
@@ -12,7 +11,7 @@ from markets.admin import MarketAdmin
 from markets.factories import GuessFactory, MarketFactory
 from markets.models import Guess, Market
 
-UTC = timezone.utc
+UTC = datetime.timezone.utc
 
 
 class MarketModelTests(EvanTestCase):
