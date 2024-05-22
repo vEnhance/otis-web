@@ -705,14 +705,14 @@ class TestList(EvanTestCase):
 
         resp = self.assertGet20X("semester-list")
         self.assertHas(resp, prevSemester.name)
-        self.assertNotHas(resp, "<td>Students</td>")
+        self.assertNotHas(resp, "<th>Students</th>")
 
         user.is_superuser = True
         user.save()
 
         resp = self.assertGet20X("semester-list")
         self.assertHas(resp, prevSemester.name)
-        self.assertHas(resp, "<td>Students</td>")
+        self.assertHas(resp, "<th>Students</th>")
 
     def test_idle_warn(self):
         user = UserFactory.create()
