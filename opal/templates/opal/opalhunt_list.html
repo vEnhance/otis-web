@@ -23,7 +23,7 @@
     {% elif hunt.has_started %}
       <div class="alert alert-success">
         <h2 class="alert-heading">{{ hunt }}</h2>
-        <a class="btn btn-link btn-primary" href="{{ hunt.get_absolute_url }}">Show puzzles</a>
+        <a class="btn btn-primary" href="{{ hunt.get_absolute_url }}">Show puzzles</a>
         <p>Event started {{ hunt.start_date }} ({{ hunt.start_date|timesince }} ago).</p>
       </div>
     {% else %}
