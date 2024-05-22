@@ -163,14 +163,17 @@ table.curriculum td.thumbnail {
 table.curriculum tr.unit-locked td.thumbnail img {
   filter: grayscale(100%);
 }
-table.curriculum tr.unit-locked {
+table.curriculum tr.unit-locked,
+table.curriculum tr.unit-locked td {
   color: #444444;
 }
-table.table tr.subjectK.unit-locked {
+table.table tr.subjectK.unit-locked,
+table.table tr.subjectK.unit-locked td {
   background-color: #125252;
   color: #efefef;
 }
-table.table tr.subjectK {
+table.table tr.subjectK,
+table.table tr.subjectK td {
   background-color: #125252;
   color: #efefef;
 }
