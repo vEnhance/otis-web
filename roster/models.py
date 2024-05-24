@@ -1,11 +1,11 @@
 from __future__ import unicode_literals
 
 import os
+from _pydecimal import Decimal
 from datetime import timedelta
 from hashlib import pbkdf2_hmac
 from typing import TypedDict
 
-from _pydecimal import Decimal
 from django.contrib.auth.models import Group, User
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import FileExtensionValidator
