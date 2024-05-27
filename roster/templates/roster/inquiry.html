@@ -36,7 +36,7 @@
   {% if request.user|getconfig:"show_unit_petitions" %}
     <h2>Current petitions</h2>
     <table class="table">
-      <thead class="thead-dark">
+      <thead class="table-dark">
         <tr>
           <th>Created</th>
           <th>Unit</th>
@@ -48,7 +48,9 @@
         {% for inquiry in inquiries %}
           <tr>
             <td title="{{ inquiry.created_at|date:"r" }}">{{ inquiry.created_at|date:"M d" }}</td>
-            <th>{{ inquiry.unit }}</th>
+            <td>
+              <strong>{{ inquiry.unit }}</strong>
+            </td>
             <td>{{ inquiry.get_action_type_display }}</td>
             <td>
               {% if inquiry.status == "INQ_NEW" %}
