@@ -147,7 +147,9 @@
     <div class="greeting">
       {% if request.user|getconfig:"show_bars" %}
         <h1>
-          Level {{ level_number }} —
+          Level {{ level_number }}
+          {% if meters.diamonds.imaginary_level %}+ {{ meters.diamonds.imaginary_level }}{% endif %}
+          —
           <a href="{% url 'stats' student.pk %}">
             <span class="emoji-text">🏅</span>{{ level_name }}</a>
         </h1>

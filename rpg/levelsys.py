@@ -61,6 +61,16 @@ class Meter:
         return int(max(0, self.value) ** 0.5)
 
     @property
+    def imaginary_level(self) -> str | None:
+        if self.value >= 0:
+            return None
+        x = int((-self.value) ** 0.5)
+        if x == 1:
+            return "i"
+        else:
+            return f"{x}i"
+
+    @property
     def percent(self) -> int:
         eps = 0.4  # Make sure text fits in the bar
         if self.dynamic_progress:
