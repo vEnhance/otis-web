@@ -12,16 +12,8 @@ from datetime import datetime, timedelta
 from typing import Any
 
 import django
-from django.conf import settings
-
-random.seed("OTIS-WEB")
-
-# https://stackoverflow.com/questions/58780717/how-to-use-django-model-in-an-external-python-script-within-the-project
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "otisweb.settings")
-django.setup()
-settings.TESTING = True
-
 import factory
+from django.conf import settings
 from django.contrib.auth.models import Group, User
 from factory.base import Factory
 from factory.fuzzy import FuzzyInteger
@@ -53,6 +45,13 @@ from rpg.factories import (
 )
 from rpg.models import Achievement
 from suggestions.factories import ProblemSuggestionFactory
+
+random.seed("OTIS-WEB")
+
+# https://stackoverflow.com/questions/58780717/how-to-use-django-model-in-an-external-python-script-within-the-project
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "otisweb.settings")
+django.setup()
+settings.TESTING = True
 
 
 def parse_args() -> argparse.Namespace:

@@ -31,7 +31,7 @@ class Achievement(models.Model):
     code = models.CharField(
         max_length=96,
         unique=True,
-        null=True,
+        blank=True,
         validators=[
             RegexValidator(
                 regex=r"^[a-f0-9]{24,26}$",
@@ -220,6 +220,10 @@ class PalaceCarving(models.Model):
 
     def __str__(self) -> str:
         return f"Palace carving for {self.display_name}"
+
+    @property
+    def real_name(self) -> str:
+        return self.user.get_full_name() if self.user is not None else ""
 
 
 class VulnerabilityRecord(models.Model):

@@ -138,6 +138,7 @@ class PalaceCarvingAdmin(admin.ModelAdmin):
     list_display = (
         "pk",
         "display_name",
+        "real_name",
         "created_at",
         "message",
     )

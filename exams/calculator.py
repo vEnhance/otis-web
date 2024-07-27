@@ -136,9 +136,6 @@ opn = {
 }
 
 fn = {
-    "sin": math.sin,
-    "cos": math.cos,
-    "tan": math.tan,
     "sqrt": math.sqrt,
 }
 

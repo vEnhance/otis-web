@@ -149,3 +149,6 @@ class HanabiParticipation(models.Model):
 
     class Meta:
         unique_together = ("player", "replay")
+
+    def __str__(self) -> str:
+        return f"{self.player.hanab_username} in #{self.replay.replay_id}"

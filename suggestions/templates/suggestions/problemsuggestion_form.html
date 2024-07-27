@@ -2,7 +2,7 @@
 {% load static %}
 {% load markdownify %}
 {% block title %}
-  Problem Suggestion
+  Problem suggestion
 {% endblock title %}
 {% block main-class %}
   col-12
@@ -89,7 +89,6 @@
             lines MUST be wrapped to be at most 100 characters long,
             and SHOULD be wrapped to at most 80 characters long.
           </div>
-          <div id="statement_render"></div>
         </td>
       </tr>
       <tr>
@@ -104,7 +103,6 @@
             lines MUST be wrapped to be at most 100 characters long,
             and SHOULD be wrapped to at most 80 characters long.
           </div>
-          <div id="solution_render"></div>
         </td>
       </tr>
       <tr>
@@ -118,18 +116,17 @@
           <button type="submit" class="btn btn-success">Submit</button>
         </td>
         <td>
-          <button id="render-toggle" class="btn btn-info">Disable instant TeX</button>
           {% if pk %}
             <a id="delete"
                href="{% url 'suggest-delete' pk %}"
-               class="btn btn-link btn-warning"
+               class="btn btn-warning"
                style="margin-left: 50px">Delete Suggestion</a>
           {% endif %}
         </td>
       </tr>
     </table>
     <div class="alert alert-secondary">
-      <h2 class="alert-heading">Submission requirements</h2>
+      <h2 id="instructions" class="alert-heading">Submission requirements</h2>
       <ul>
         <li>
           <p>
@@ -139,26 +136,9 @@
             revisions requested.
           </p>
           <p>
-            This includes, among other things, following Evan's
+            In particular, you must write your own solution (as described in
+            section 1 above) and also follow all the
             <a href="https://web.evanchen.cc/latex-style-guide.html">LaTeX style requirements</a>.
-          </p>
-        </li>
-        <li>
-          <p>
-            What you see is just a rough preview for your own convenience.
-            Evan will eventually get the underlying source code;
-            so what shows up in the preview doesn't matter.
-          </p>
-          <p>
-            <strong>Do NOT do hacks just for the preview.</strong>
-            For example, just type <code>\emph{...}</code> for italics,
-            do not hack it with <code>$\emph{...}$</code>.
-            Similarly, use <code>\begin{claim*} ... \end{claim*}</code> for
-            claims or <code>\begin{proof} ... \end{proof}</code> for proofs,
-            as stated in the requirements, even if they don't render correctly in the preview.
-          </p>
-          <p>
-            Repeat: <strong>get the code right</strong>. Ignore the preview.
           </p>
         </li>
         <li>
@@ -185,12 +165,6 @@
 {% endblock layout-content %}
 {% block css %}
   <style type="text/css">
-      #solution_render,
-      #statement_render {
-          color: blue;
-          font-family: sans-serif;
-      }
-
       #id_statement,
       #id_solution {
           font-size: 10pt;
@@ -202,71 +176,24 @@
   <script type="text/javascript">
       $(document).ready(function() {
           $("#id_unit").chosen();
-          let autorender_enabled = true;
-          let render_enabled = true;
-
-          $("#render-toggle").click(function(e) {
-              e.preventDefault();
-              if (render_enabled && autorender_enabled) {
-                  render_enabled = true;
-                  autorender_enabled = false;
-                  $("#render-toggle")
-                      .addClass("btn-danger")
-                      .removeClass("btn-info")
-                      .text("Turn off LaTeX");
-              } else if (render_enabled) {
-                  render_enabled = false;
-                  autorender_enabled = false;
-                  $("#render-toggle")
-                      .addClass("btn-primary")
-                      .removeClass("btn-danger")
-                      .text("Enable instant-TeX");
-              } else {
-                  render_enabled = true;
-                  autorender_enabled = true;
-                  $("#render-toggle")
-                      .addClass("btn-info")
-                      .removeClass("btn-primary")
-                      .text("Disable instant-TeX");
-              }
-              render_statement();
-              render_solution();
-          });
-
 
           function checkLineLength(s) {
               return !s.split("\n").some(e => e.length > 100); // amol stronk
           }
-
           $("#statement_warning").toggle(!checkLineLength($("#id_statement").val()));
           $("#solution_warning").toggle(!checkLineLength($("#id_solution").val()));
 
-          function render_statement(enabled) {
+          function lencheck_statement() {
               const s = $("#id_statement").val();
               $("#statement_warning").toggle(!checkLineLength(s));
-              if (!enabled) return;
-              $("#statement_render").text(s);
-              MathJax.typeset([document.querySelector("#statement_render")]);
           }
 
-          function render_solution(enabled) {
+          function lencheck_solution() {
               const s = $("#id_solution").val();
               $("#solution_warning").toggle(!checkLineLength(s));
-              if (!enabled) return;
-              $("#solution_render").text(s);
-              MathJax.typeset([document.querySelector("#solution_render")]);
           }
-
-          $("#id_statement").on("input", (e) => {
-              render_statement(autorender_enabled);
-          });
-
-          $("#id_solution").on("input", (e) => {
-              render_solution(autorender_enabled);
-          });
-
-          $("#id_statement").blur(render_statement(render_enabled));
-          $("#id_solution").blur(render_solution(render_enabled));
+          $("#id_statement").blur(lencheck_statement);
+          $("#id_solution").blur(lencheck_solution);
 
       });
   </script>

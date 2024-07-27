@@ -1,0 +1,87 @@
+{% extends "layout.html" %}
+{% block title %}
+  OTIS Mock AIME
+{% endblock title %}
+{% block layout-content %}
+  <h2>Active Contests</h2>
+  {% if tube_list %}
+    <ul id="tube-list">
+      {% for tube in tube_list %}
+        {% if tube.accepting_signups %}
+          <li>
+            <a href="{% url "tube-join" tube.pk %}" target="_blank" rel="noopener"><b>{{ tube }}</b></a>
+            {{ tube.description|linebreaks }}
+          </li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="alert alert-warning">There is nothing to show here yet.</div>
+  {% endif %}
+  <h2>Instructions</h2>
+  <p>
+    Click on the link above to access the problem proposals on Probase.
+    After joining, you can submit problems and participate in testsolving.
+  </p>
+  <h3>Proposing</h3>
+  <ul>
+    <li>Use "Add Problem" once you're in the Probase collection.</li>
+    <li>
+      Please make sure to provide a full solution and triple-check your answer
+      for accuracy to avoid frustration for the testsolvers.
+    </li>
+    <li>
+      Please use a <strong>descriptive title</strong> that doesn't
+      spoil the problem but gives an idea for what the problem is about.
+    </li>
+  </ul>
+  <h3>Solving</h3>
+  <p>
+    There are five tiers of difficulty, and testsolvers get an amount of
+    time per problem when testsolving it based on the tier:
+  </p>
+  <ul>
+    <li>AIME 1-3: Solvers get 10 minutes</li>
+    <li>AIME 4-6: Solvers get 15 minutes</li>
+    <li>AIME 7-9: Solvers get 20 minutes</li>
+    <li>AIME 10-12: Solvers get 25 minutes</li>
+    <li>AIME 13-15: Solvers get 30 minutes</li>
+  </ul>
+  <p>
+    After you solve or give up on a proposal, you can read spoilers and comment
+    on the thread for the problem. You can also upvote the problem using the heart
+    icon to indicate that you like it.
+  </p>
+  <h2>Selection process</h2>
+  <p>For now, final selection of problems and placements is done by Evan.</p>
+  <p>The selection of problems are based on the following criteria.</p>
+  <ul>
+    <li>
+      <strong>Popularity</strong>: as evidenced by comments, upvotes,
+      and Evan's own personal taste.
+    </li>
+    <li>
+      <strong>Solution write-up</strong>: if the solution needs a lot of
+      editing to be presentable (or worse, is just a sketch with no details),
+      then the problem is less likely to be chosen.
+    </li>
+    <li>
+      <strong>Solve rate</strong>: problems with too few correct testsolves
+      are less likely to be chosen.
+      We want problems that OTIS students can actually get right.
+    </li>
+  </ul>
+  <p>
+    Note that problem proposals submitted earlier gain an advantage
+    because there is more time for people to upvote it
+    and more opportunities for it to be testsolved.
+    Thus, submitting problems well before the deadline is advised.
+  </p>
+  <h2>Thanks</h2>
+  <p>
+    Thanks to Howard Halim for writing the Probase code.
+    The source code for Probase can be found on
+    <a href="https://github.com/howard36/probase">Howard's GitHub</a>.
+    Please open bug reports or feature requests on that issue tracker.
+  </p>
+{% endblock layout-content %}

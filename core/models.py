@@ -1,14 +1,13 @@
 from __future__ import unicode_literals
 
+import datetime
 import os
-from datetime import datetime
 from typing import Callable
 
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models.manager import BaseManager
 from django.urls import reverse
-from django.utils import timezone
 from positions import PositionField
 
 User = get_user_model()
@@ -164,6 +163,7 @@ class UnitGroup(models.Model):
         ("F", "Functional Equations"),
         ("M", "Miscellaneous"),
         ("K", "Secret"),
+        ("H", "Higher Math"),
     )
     subject = models.CharField(
         max_length=2, choices=SUBJECT_CHOICES, help_text="The subject for the unit"
@@ -294,14 +294,19 @@ class UserProfile(models.Model):
         help_text="Show the instruction text above the units on the home page",
         default=True,
     )
+    show_unit_petitions = models.BooleanField(
+        verbose_name="Show unit petitions",
+        help_text="Show previous unit petitions that you have requested. Useful to disable if you have far too many.",
+        default=True,
+    )
 
     last_seen = models.DateTimeField(
         help_text="Last time user was seen at all",
-        default=datetime.fromtimestamp(0, tz=timezone.utc),
+        default=datetime.datetime.fromtimestamp(0, tz=datetime.timezone.utc),
     )
     last_notif_dismiss = models.DateTimeField(
         help_text="Last time user dismissed the notifications modal.",
-        default=datetime.fromtimestamp(0, tz=timezone.utc),
+        default=datetime.datetime.fromtimestamp(0, tz=datetime.timezone.utc),
     )
 
     def __str__(self) -> str:

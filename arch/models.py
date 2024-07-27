@@ -1,9 +1,11 @@
+import string
 from pathlib import Path
 from typing import Optional
 
 import reversion
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.exceptions import SuspiciousOperation
 from django.core.validators import MaxValueValidator, RegexValidator
 from django.db import models
 from django.db.models.manager import Manager
@@ -12,7 +14,15 @@ from django.urls import reverse
 User = get_user_model()
 
 
+def validate_puid(puid: str) -> None:
+    if not all(_ in string.ascii_letters + string.digits for _ in puid):
+        raise SuspiciousOperation(f"The PUID {puid} contains illegal characters.")
+    elif len(puid) > 32:
+        raise SuspiciousOperation(f"The PUID {puid} is too long to be possible.")
+
+
 def get_disk_statement_from_puid(puid: str) -> Optional[str]:
+    validate_puid(puid)
     if settings.PATH_STATEMENT_ON_DISK is None:
         return None
     statement_path = Path(settings.PATH_STATEMENT_ON_DISK) / f"{puid}.html"
@@ -78,6 +88,9 @@ class Vote(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return f"{self.user.username} vote for {self.problem}"
 
 
 @reversion.register()

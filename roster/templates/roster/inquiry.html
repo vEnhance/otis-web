@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
 {% load static %}
+{% load otis_extras %}
 {% block css %}
   <style type="text/css">
       a.chosen-single {
@@ -23,55 +24,54 @@
 {% endblock title %}
 {% block layout-content %}
   <p>
-    A <b>unit petition</b> lets you make requests
-    for changes to your set of units.
-    Here you can open new petitions
-    and see the status of previous ones.
+    A <b>unit petition</b> lets you make requests for changes to your set of units.
+    Here you can open new petitions and see the status of previous ones.
   </p>
   <p>
     I try to respond to petitions somewhat regularly,
-    but if I don't get to yours for a few days,
-    please send me a reminder.
+    but if I don't get to yours for a few days, please send me a reminder.
   </p>
   <h2>New petition</h2>
   {% include "generic_form.html" with submit_name="Send" %}
-  <h2>Current petitions</h2>
-  <table class="table">
-    <thead class="thead-dark">
-      <tr>
-        <th>Created</th>
-        <th>Unit</th>
-        <th>Action</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for inquiry in inquiries %}
+  {% if request.user|getconfig:"show_unit_petitions" %}
+    <h2>Current petitions</h2>
+    <table class="table">
+      <thead class="table-dark">
         <tr>
-          <td>{{ inquiry.created_at|date:"SHORT_DATE_FORMAT" }}</td>
-          <th>{{ inquiry.unit }}</th>
-          <td>{{ inquiry.get_action_type_display }}</td>
-          <td>
-            {% if inquiry.status == "INQ_NEW" %}
-              Pending
-            {% elif inquiry.status == "INQ_ACC" %}
-              <strong class="text-success">Accepted</strong>
-            {% elif inquiry.status == "INQ_REJ" %}
-              <strong class="text-danger">Rejected</strong>
-            {% elif inquiry.status == "INQ_HOLD" %}
-              <strong class="text-warning">On hold</strong>
-            {% endif %}
-          </td>
+          <th>Created</th>
+          <th>Unit</th>
+          <th>Action</th>
+          <th>Status</th>
         </tr>
-        {% if inquiry.explanation %}
+      </thead>
+      <tbody>
+        {% for inquiry in inquiries %}
+          <tr>
+            <td title="{{ inquiry.created_at|date:"r" }}">{{ inquiry.created_at|date:"M d" }}</td>
+            <td>
+              <strong>{{ inquiry.unit }}</strong>
+            </td>
+            <td>{{ inquiry.get_action_type_display }}</td>
+            <td>
+              {% if inquiry.status == "INQ_NEW" %}
+                Pending
+              {% elif inquiry.status == "INQ_ACC" %}
+                <strong class="text-success">Accepted</strong>
+              {% elif inquiry.status == "INQ_REJ" %}
+                <strong class="text-danger">Rejected</strong>
+              {% elif inquiry.status == "INQ_HOLD" %}
+                <strong class="text-warning">On hold</strong>
+              {% endif %}
+            </td>
+          </tr>
           <tr>
             <td></td>
             <td colspan="3" class="fst-italic">{{ inquiry.explanation }}</td>
           </tr>
-        {% endif %}
-      {% endfor %}
-    </tbody>
-  </table>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
   <h2>Current units</h2>
   <p>For your reference, here is the existing curriculum.</p>
   {% include "dashboard/curriculum_list.html" %}

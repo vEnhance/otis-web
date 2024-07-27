@@ -47,7 +47,17 @@
           <div class="alert alert-warning">
             <p>
               Students should NOT submit problem sets through this form.
-              Use the <a href="{% url "submit-pset" student.pk %}">submit unit</a> form instead.
+              <ul>
+                <li>
+                  Use <a href="{% url "submit-pset" student.pk %}">submit unit</a>
+                  instead if you are submitting a unit for the first time this year.
+                </li>
+                <li>
+                  To resubmit units you already completed this year, find it in
+                  <a href="{% url "student-pset-list" student.pk %}">past submissions</a>
+                  and use "submit additional problems".
+                </li>
+              </ul>
             </p>
           </div>
           {% include "generic_form.html" with submit_name="Upload" %}

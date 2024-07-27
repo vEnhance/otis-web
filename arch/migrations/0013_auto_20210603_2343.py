@@ -5,6 +5,8 @@
 import hashlib
 import re
 
+from django.db import migrations
+
 lookup = {
     "Afghanistan": "AFG",
     "Albania": "ALB",
@@ -235,8 +237,6 @@ def inferPUID(source: str) -> str:
 
 
 # ---------
-
-from django.db import migrations
 
 
 def set_puid(apps, scheme_editor):

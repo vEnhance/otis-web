@@ -177,6 +177,7 @@ class InvoiceAdmin(ImportExportModelAdmin):
         "student__legit",
         "student__semester__active",
         ("forgive_date", admin.EmptyFieldListFilter),
+        ("memo", admin.EmptyFieldListFilter),
         "student__semester",
     )
     resource_class = InvoiceIEResource
@@ -240,9 +241,11 @@ class StudentAdmin(ImportExportModelAdmin):
     list_display = (
         "pk",
         "name",
+        "email",
         "semester",
         "enabled",
         "legit",
+        "last_level_seen",
     )
     list_display_links = (
         "pk",
@@ -343,6 +346,7 @@ class UnitInquiryAdmin(admin.ModelAdmin):
     list_display = (
         "pk",
         "status",
+        "was_auto_processed",
         "action_type",
         "unit",
         "student",
@@ -350,6 +354,7 @@ class UnitInquiryAdmin(admin.ModelAdmin):
     )
     list_filter = (
         "status",
+        "was_auto_processed",
         "action_type",
         "student__assistant",
     )

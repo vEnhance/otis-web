@@ -7,6 +7,7 @@ from django.db.models.query_utils import Q
 from django.forms.forms import BaseForm
 
 from core.models import Unit
+from dashboard.models import PSet
 from roster.models import Student, StudentRegistration, UnitInquiry  # NOQA
 
 
@@ -74,13 +75,24 @@ class AdvanceForm(forms.Form):
         super().__init__(*args, **kwargs)
 
         self.fields["units_to_unlock"] = AdvanceUnitChoiceField(
+            label="Unlock",
+            queryset=student.curriculum.exclude(
+                pk__in=student.unlocked_units.values_list("pk")
+            ).exclude(
+                pk__in=PSet.objects.filter(student=student).values_list("unit__pk"),
+            )
+            if not args
+            else Unit.objects.all(),
+            help_text="Units to unlock, already in curriculum.",
+        )
+        self.fields["units_to_open"] = AdvanceUnitChoiceField(
             label="Open",
             queryset=Unit.objects.exclude(
                 pk__in=student.unlocked_units.values_list("pk")
             )
             if not args
             else Unit.objects.all(),
-            help_text="Units to unlock.",
+            help_text="Units to open (add and unlock).",
         )
         self.fields["units_to_add"] = AdvanceUnitChoiceField(
             label="Add",
@@ -124,12 +136,12 @@ class DecisionForm(forms.ModelForm):
     given_name = forms.CharField(
         label="First name (given name)",
         max_length=128,
-        help_text="Your given (first) name, can be more than one",
+        help_text="Your given (first) name, can be more than one. Please use a real name.",
     )
     surname = forms.CharField(
         label="Last name (surname)",
         max_length=128,
-        help_text="Your family (last) name",
+        help_text="Your family (last) name. Please use a real name.",
     )
     email_address = forms.EmailField(
         label="Your email address (one you check)",

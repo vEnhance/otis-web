@@ -2,7 +2,6 @@
 Django settings for otisweb project.
 """
 
-
 import logging
 import os
 import sys
@@ -27,6 +26,8 @@ if ENV_PATH.exists():
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 # Manually added settings
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
@@ -66,6 +67,7 @@ INSTALLED_APPS = [
     "rpg",
     "payments",
     "suggestions",
+    "tubes",
     # ------------
     "otisweb",
     # ------------
@@ -78,16 +80,21 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.sites",
     "django.contrib.staticfiles",
-    "debug_toolbar",
+]
+
+if DEBUG is True and TESTING is False:
+    INSTALLED_APPS.append("debug_toolbar")
+
+INSTALLED_APPS += [
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.discord",
     "allauth.socialaccount.providers.github",
     "allauth.socialaccount.providers.google",
-    "bootstrap5",
     "crispy_bootstrap5",
     "crispy_forms",
+    "django_bootstrap5",
     "django_extensions",
     "django_nyt.apps.DjangoNytConfig",
     "hijack",
@@ -110,8 +117,12 @@ INSTALLED_APPS = [
     "wikihaxx",
 ]
 
-MIDDLEWARE = [
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
+if DEBUG is True and TESTING is False:
+    MIDDLEWARE = ["debug_toolbar.middleware.DebugToolbarMiddleware"]
+else:
+    MIDDLEWARE = []
+
+MIDDLEWARE += [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",

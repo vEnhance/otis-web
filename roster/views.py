@@ -158,7 +158,9 @@ def advance(request: HttpRequest, student_pk: int) -> Any:
         if form.is_valid():
             data = form.cleaned_data
             student.unlocked_units.add(*data["units_to_unlock"])
+            student.unlocked_units.add(*data["units_to_open"])
             student.curriculum.add(*data["units_to_unlock"])
+            student.curriculum.add(*data["units_to_open"])
             student.curriculum.add(*data["units_to_add"])
             student.unlocked_units.remove(*data["units_to_lock"])
             student.unlocked_units.remove(*data["units_to_drop"])
@@ -286,6 +288,8 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
     # early auto accept criteria
     if inquiry.action_type == "INQ_ACT_APPEND" or request.user.is_staff:
         inquiry.run_accept()
+        inquiry.was_auto_processed = True
+        inquiry.save()
         messages.success(request, "Petition automatically processed.")
         return
 
@@ -305,6 +309,7 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
 
     if auto_reject_criteria:
         inquiry.status = "INQ_REJ"
+        inquiry.was_auto_processed = True
         inquiry.save()
         messages.error(
             request,
@@ -353,6 +358,8 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
 
     if auto_accept_criteria:
         inquiry.run_accept()
+        inquiry.was_auto_processed = True
+        inquiry.save()
         messages.success(request, "Petition automatically processed.")
         return
 
@@ -363,19 +370,19 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
 @login_required
 def inquiry(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
     student = get_student_by_pk(request, student_pk)
-    if not student.semester.active:
-        raise PermissionDenied(
-            "Not an active semester, so change petitions are no longer possible."
-        )
-    if student.is_delinquent:
-        raise PermissionDenied("Student is delinquent")
-    if not student.enabled:
-        raise PermissionDenied("Student account not enabled")
-    if student.newborn:
-        raise PermissionDenied(
-            "This form isn't enabled yet because you have not chosen your initial units."
-        )
-
+    if not request.user.is_staff:
+        if not student.semester.active:
+            raise PermissionDenied(
+                "Not an active semester, so change petitions are no longer possible."
+            )
+        if student.is_delinquent:
+            raise PermissionDenied("Student is delinquent")
+        if not student.enabled:
+            raise PermissionDenied("Student account not enabled")
+        if student.newborn:
+            raise PermissionDenied(
+                "This form isn't enabled yet because you have not chosen your initial units."
+            )
     context: dict[str, Any] = {}
 
     # Create form for submitting new inquiries
@@ -384,6 +391,7 @@ def inquiry(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
         if form.is_valid():
             inquiry: UnitInquiry = form.save(commit=False)
             handle_inquiry(request, inquiry, student)
+            return HttpResponseRedirect(reverse("inquiry", args=(student.pk,)))
 
     else:
         form = InquiryForm(student=student)
@@ -432,8 +440,6 @@ def register(request: AuthHttpRequest) -> HttpResponse:
                 request.user.first_name = form.cleaned_data["given_name"].strip()
                 request.user.last_name = form.cleaned_data["surname"].strip()
                 request.user.email = form.cleaned_data["email_address"]
-                group, _ = Group.objects.get_or_create(name="Verified")
-                group.user_set.add(request.user)  # type: ignore
                 request.user.save()
                 mailchimp_subscribe(request)
                 messages.success(request, message="Submitted! Sit tight.")

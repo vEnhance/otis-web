@@ -178,8 +178,6 @@ class ExamAttempt(models.Model):
     submit_time = models.DateTimeField(
         help_text="When the quiz was submitted", auto_now_add=True
     )
-    student_pk: int
-    quiz_pk: int
 
     class Meta:
         unique_together = (
@@ -191,12 +189,13 @@ class ExamAttempt(models.Model):
         return f"{self.student} tries {self.quiz}"
 
     def get_absolute_url(self) -> str:
-        return reverse("quiz", args=(self.student_pk, self.quiz_pk))
+        return reverse("quiz", args=(self.student.pk, self.quiz.pk))
 
 
 class MockCompleted(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     exam = models.ForeignKey(PracticeExam, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = (
@@ -204,3 +203,6 @@ class MockCompleted(models.Model):
             "exam",
         )
         verbose_name_plural = "Mock completions"
+
+    def __str__(self) -> str:
+        return f"{self.student} takes {self.exam}"

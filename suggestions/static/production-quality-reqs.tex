@@ -120,4 +120,15 @@ you should have diagrams in the solution.
 If you defined a procedure or coloring or labeling or whatever,
 and it would help to illustrate an example, you should do so.
 
+The code for the diagram can use boilerplate from \texttt{evan.sty},
+but it should not depend on the nonstandard \texttt{olympiad.asy} or \texttt{cse5.asy}.
+In general, the diagram should be surrounded by center and asy, that is:
+\begin{lstlisting}[language=TeX]
+\begin{center}
+\begin{asy}
+  draw(unitcircle);
+\end{asy}
+\end{center}
+\end{lstlisting}
+
 \end{document}

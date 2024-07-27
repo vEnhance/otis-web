@@ -1,7 +1,6 @@
 import datetime
 
 from django.test.utils import override_settings
-from django.utils import timezone
 from freezegun import freeze_time
 
 from core.factories import SemesterFactory, UserFactory
@@ -12,7 +11,7 @@ from exams.models import ExamAttempt, MockCompleted, PracticeExam
 from roster.factories import StudentFactory
 from roster.models import Student
 
-UTC = timezone.utc
+UTC = datetime.timezone.utc
 
 
 class ArithmeticTest(EvanTestCase):
@@ -23,8 +22,6 @@ class ArithmeticTest(EvanTestCase):
 
     def test_arithmetic(self):
         self.checkCalculator("1/3^4", 1 / 81)
-        self.checkCalculator("sin(pi)", 0)
-        self.checkCalculator("sqrt(1/2)-cos(pi/4)", 0)
         self.checkCalculator("(2*sqrt(2))^2 - 4^(3/2)", 0)
         self.checkCalculator("16900/4*pi", 13273.2289614)
 
@@ -159,7 +156,7 @@ class ExamTest(EvanTestCase):
                 data={
                     "guess1": "1337",
                     "guess2": "2000",
-                    "guess3": "30+100",  # pretend it's a typo or 30 x 100 I guess
+                    "guess3": "30+100",  # pretend it's a typo for 30 x 100 I guess
                     "guess4": "2^5*5^3",
                 },
             )

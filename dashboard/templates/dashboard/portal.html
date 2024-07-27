@@ -24,12 +24,14 @@
           <td>{{ last_seen|naturaltime }}</td>
           <td>
             <code>{{ linked.discord.0.get_provider_account|default:"No Discord" }}</code>
+            on Discord
           </td>
         </tr>
         <tr>
           <td>{{ reg.country }} ({{ reg.grade }}{{ reg.gender }})</td>
           <td>
             <code>{{ reg.aops_username|default:"No AoPS" }}</code>
+            on AoPS
           </td>
         </tr>
       </table>
@@ -145,7 +147,9 @@
     <div class="greeting">
       {% if request.user|getconfig:"show_bars" %}
         <h1>
-          Level {{ level_number }} —
+          Level {{ level_number }}
+          {% if meters.diamonds.imaginary_level %}+ {{ meters.diamonds.imaginary_level }}{% endif %}
+          —
           <a href="{% url 'stats' student.pk %}">
             <span class="emoji-text">🏅</span>{{ level_name }}</a>
         </h1>
@@ -316,17 +320,25 @@
       </td>
       <td valign="top" width="50%">
         <h3 id="petitions">Petitions</h3>
-        {% if not student.newborn and semester.active and student.enabled %}
-          <a href="{% url 'inquiry' student.pk %}" class="btn btn-warning">Manage units</a>
-        {% endif %}
         {% if request.user.is_staff %}
+          <a href="{% url 'inquiry' student.pk %}" class="btn btn-warning">Manage units</a>
           <a href="{% url 'advance' student.pk %}" class="btn btn-dark">Edit units</a>
-        {% endif %}
-        {% if bonus_levels %}
-          <p>
-            You are also sufficiently high level to
-            <a href="{% url "bonus-level-request" student.pk %}">request secret units</a>.
-          </p>
+        {% else %}
+          {% if not student.enabled %}
+            <p class="text-muted fst-italic">Disabled.</p>
+          {% elif not semester.active %}
+            <p class="text-muted fst-italic">Course is archived.</p>
+          {% elif student.newborn %}
+            <p class="text-muted fst-italic">Pick units first!</p>
+          {% else %}
+            <a href="{% url 'inquiry' student.pk %}" class="btn btn-warning">Manage units</a>
+            {% if bonus_levels %}
+              <p>
+                You are also sufficiently high level to
+                <a href="{% url "bonus-level-request" student.pk %}">request secret units</a>.
+              </p>
+            {% endif %}
+          {% endif %}
         {% endif %}
       </td>
     </tr>

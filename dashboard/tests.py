@@ -4,7 +4,6 @@ from io import StringIO
 
 from django.conf import settings
 from django.urls import reverse
-from django.utils import timezone
 from freezegun import freeze_time
 
 from core.factories import (
@@ -33,20 +32,17 @@ from roster.factories import (
 from rpg.factories import BonusLevelFactory
 from rpg.models import Level
 
-utc = timezone.utc
+UTC = datetime.timezone.utc
 
 
 class TestPortal(EvanTestCase):
     def test_portal_invoice_redirect(self):
         semester = SemesterFactory.create(
             show_invoices=True,
-            first_payment_deadline=datetime.datetime(2021, 7, 1, tzinfo=timezone.utc),
+            first_payment_deadline=datetime.datetime(2021, 7, 1, tzinfo=UTC),
         )
         alice = StudentFactory.create(semester=semester)
         self.login(alice)
-
-        alice.enabled = False
-        alice.save()
 
         with freeze_time("2021-06-20", tz_offset=0):
             InvoiceFactory.create(student=alice)
@@ -70,24 +66,22 @@ class TestPortal(EvanTestCase):
         PSetFactory.create(student=alice, clubs=501, hours=0, status="A", unit=unit)
 
         alice_profile = UserProfileFactory.create(user=alice.user)
-        alice_profile.last_notif_dismiss = datetime.datetime(
-            2021, 6, 1, tzinfo=timezone.utc
-        )
+        alice_profile.last_notif_dismiss = datetime.datetime(2021, 6, 1, tzinfo=UTC)
         alice_profile.save()
 
         prevSemester = SemesterFactory.create(end_year=2020)
         StudentFactory.create(user=alice.user, semester=prevSemester)
 
         test = TestFactory.create(
-            start_date=datetime.datetime(2021, 6, 1, tzinfo=timezone.utc),
-            due_date=datetime.datetime(2021, 7, 31, tzinfo=timezone.utc),
+            start_date=datetime.datetime(2021, 6, 1, tzinfo=UTC),
+            due_date=datetime.datetime(2021, 7, 31, tzinfo=UTC),
             family="Waltz",
             number=1,
         )
 
         quiz = QuizFactory.create(
-            start_date=datetime.datetime(2021, 6, 1, tzinfo=timezone.utc),
-            due_date=datetime.datetime(2021, 7, 31, tzinfo=timezone.utc),
+            start_date=datetime.datetime(2021, 6, 1, tzinfo=UTC),
+            due_date=datetime.datetime(2021, 7, 31, tzinfo=UTC),
             family="Waltz",
             number=1,
         )
@@ -126,23 +120,21 @@ class TestPortal(EvanTestCase):
 
         # A bunch of context things to check
         alice_profile = UserProfileFactory.create(user=alice.user)
-        alice_profile.last_notif_dismiss = datetime.datetime(
-            2021, 6, 1, tzinfo=timezone.utc
-        )
+        alice_profile.last_notif_dismiss = datetime.datetime(2021, 6, 1, tzinfo=UTC)
         alice_profile.save()
 
         # News items
         for y in (2020, 2020, 2020, 2021, 2022, 2022):
             MarketFactory.create(
-                start_date=datetime.datetime(y, 6, 30, tzinfo=timezone.utc),
-                end_date=datetime.datetime(y, 7, 20, tzinfo=timezone.utc),
+                start_date=datetime.datetime(y, 6, 30, tzinfo=UTC),
+                end_date=datetime.datetime(y, 7, 20, tzinfo=UTC),
             )
             HanabiContestFactory.create(
-                start_date=datetime.datetime(y, 6, 30, tzinfo=timezone.utc),
-                end_date=datetime.datetime(y, 7, 25, tzinfo=timezone.utc),
+                start_date=datetime.datetime(y, 6, 30, tzinfo=UTC),
+                end_date=datetime.datetime(y, 7, 25, tzinfo=UTC),
             )
             OpalHuntFactory.create(
-                start_date=datetime.datetime(2021, 6, 30, tzinfo=timezone.utc),
+                start_date=datetime.datetime(2021, 6, 30, tzinfo=UTC),
                 active=(y == 2021),
             )
 
@@ -166,9 +158,7 @@ class TestPortal(EvanTestCase):
             self.assertEqual(len(news["opals"]), 1)
 
         # alice dismisses stuff
-        alice_profile.last_notif_dismiss = datetime.datetime(
-            2021, 7, 2, tzinfo=timezone.utc
-        )
+        alice_profile.last_notif_dismiss = datetime.datetime(2021, 7, 2, tzinfo=UTC)
         alice_profile.save()
 
         with freeze_time("2021-07-02", tz_offset=0):
@@ -234,7 +224,7 @@ class TestPSet(EvanTestCase):
 
         semester = SemesterFactory.create(
             show_invoices=True,
-            first_payment_deadline=datetime.datetime(2021, 7, 1, tzinfo=timezone.utc),
+            first_payment_deadline=datetime.datetime(2021, 7, 1, tzinfo=UTC),
         )
         alice = StudentFactory.create(semester=semester)
         self.login(alice)
@@ -478,7 +468,7 @@ class TestPSet(EvanTestCase):
     def test_pset_list_permission(self):
         semester = SemesterFactory.create(
             show_invoices=True,
-            first_payment_deadline=datetime.datetime(2021, 7, 1, tzinfo=timezone.utc),
+            first_payment_deadline=datetime.datetime(2021, 7, 1, tzinfo=UTC),
         )
         alice = StudentFactory.create(semester=semester)
         self.login(alice)
@@ -715,14 +705,14 @@ class TestList(EvanTestCase):
 
         resp = self.assertGet20X("semester-list")
         self.assertHas(resp, prevSemester.name)
-        self.assertNotHas(resp, "<td>Students</td>")
+        self.assertNotHas(resp, "<th>Students</th>")
 
         user.is_superuser = True
         user.save()
 
         resp = self.assertGet20X("semester-list")
         self.assertHas(resp, prevSemester.name)
-        self.assertHas(resp, "<td>Students</td>")
+        self.assertHas(resp, "<th>Students</th>")
 
     def test_idle_warn(self):
         user = UserFactory.create()

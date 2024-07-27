@@ -3,7 +3,6 @@
 import datetime
 
 from django.db import migrations, models
-from django.utils.timezone import utc
 
 
 class Migration(migrations.Migration):
@@ -23,7 +22,9 @@ class Migration(migrations.Migration):
             model_name="student",
             name="last_level_time",
             field=models.DateTimeField(
-                default=datetime.datetime(2021, 9, 13, 21, 11, 32, 475557, tzinfo=utc),
+                default=datetime.datetime(
+                    2021, 9, 13, 21, 11, 32, 475557, tzinfo=datetime.timezone.utc
+                ),
                 help_text="The last time the student's level was updated",
             ),
             preserve_default=False,

@@ -5,7 +5,6 @@ from django.conf import settings
 from django.contrib.auth.models import Group, User
 from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404
-from django.utils import timezone
 from freezegun.api import freeze_time
 
 from core.factories import (  # NOQA
@@ -31,9 +30,12 @@ from roster.models import (  # NOQA
     RegistrationContainer,
     Student,
     StudentRegistration,
+    UnitInquiry,
 )
 
 from .admin import build_students
+
+UTC = datetime.timezone.utc
 
 
 class RosterTest(EvanTestCase):
@@ -129,8 +131,8 @@ class RosterTest(EvanTestCase):
     def test_delinquency(self) -> None:
         semester: Semester = SemesterFactory.create(
             show_invoices=True,
-            first_payment_deadline=datetime.datetime(2022, 9, 21, tzinfo=timezone.utc),
-            most_payment_deadline=datetime.datetime(2023, 1, 21, tzinfo=timezone.utc),
+            first_payment_deadline=datetime.datetime(2022, 9, 21, tzinfo=UTC),
+            most_payment_deadline=datetime.datetime(2023, 1, 21, tzinfo=UTC),
         )
 
         alice: Student = StudentFactory.create(semester=semester)
@@ -156,7 +158,7 @@ class RosterTest(EvanTestCase):
         with freeze_time("2022-10-15", tz_offset=0):
             self.assertEqual(alice.payment_status, 3)
             self.assertTrue(alice.is_delinquent)
-            invoice.forgive_date = datetime.datetime(2022, 10, 31, tzinfo=timezone.utc)
+            invoice.forgive_date = datetime.datetime(2022, 10, 31, tzinfo=UTC)
             invoice.save()
             self.assertFalse(alice.is_delinquent)
         with freeze_time("2022-11-15", tz_offset=0):
@@ -187,7 +189,7 @@ class RosterTest(EvanTestCase):
         with freeze_time("2023-02-15", tz_offset=0):
             self.assertEqual(alice.payment_status, 7)
             self.assertTrue(alice.is_delinquent)
-            invoice.forgive_date = datetime.datetime(2023, 2, 28, tzinfo=timezone.utc)
+            invoice.forgive_date = datetime.datetime(2023, 2, 28, tzinfo=UTC)
             invoice.save()
             self.assertFalse(alice.is_delinquent)
         with freeze_time("2023-06-05", tz_offset=0):
@@ -203,19 +205,17 @@ class RosterTest(EvanTestCase):
 
         bob: Student = StudentFactory.create(semester=semester)
 
-        # Bob is unaffected by earlier payment dates
+        # Bob gets a bit of extra time to pay because he joined recently
         with freeze_time("2023-1-23", tz_offset=0):
             invoice2: Invoice = InvoiceFactory.create(
                 student=bob,
                 preps_taught=1,
             )
-            self.assertEqual(bob.payment_status, 4)
+            self.assertEqual(bob.payment_status, 1)
             self.assertFalse(bob.is_delinquent)
 
         # Now he is affected
-        semester.first_payment_deadline = datetime.datetime(
-            2023, 1, 28, tzinfo=timezone.utc
-        )
+        semester.first_payment_deadline = datetime.datetime(2023, 1, 28, tzinfo=UTC)
         semester.save()
 
         with freeze_time("2023-2-08", tz_offset=0):
@@ -226,12 +226,10 @@ class RosterTest(EvanTestCase):
         invoice2.save()
 
         with freeze_time("2023-2-08", tz_offset=0):
-            self.assertEqual(bob.payment_status, 4)
-            self.assertFalse(bob.is_delinquent)
+            self.assertEqual(bob.payment_status, 7)
+            self.assertTrue(bob.is_delinquent)
 
-        semester.most_payment_deadline = datetime.datetime(
-            2023, 2, 21, tzinfo=timezone.utc
-        )
+        semester.most_payment_deadline = datetime.datetime(2023, 2, 21, tzinfo=UTC)
         semester.save()
 
         with freeze_time("2023-3-01", tz_offset=0):
@@ -305,10 +303,16 @@ class RosterTest(EvanTestCase):
                     "action_type": "INQ_ACT_UNLOCK",
                     "explanation": "hi",
                 },
+                follow=True,
             )
             self.assertHas(resp, "Petition automatically processed")
+            inq = UnitInquiry.objects.get(
+                student=alice, unit=units[i].pk, action_type="INQ_ACT_UNLOCK"
+            )
+            self.assertTrue(inq.was_auto_processed)
+            self.assertEqual(inq.status, "INQ_ACC")
 
-        self.assertGet20X("inquiry", alice.pk)
+        self.assertGet20X("inquiry", alice.pk, follow=True)
 
         self.assertEqual(alice.curriculum.count(), 6)
         self.assertEqual(alice.unlocked_units.count(), 6)
@@ -321,9 +325,16 @@ class RosterTest(EvanTestCase):
                     "action_type": "INQ_ACT_UNLOCK",
                     "explanation": "hi",
                 },
+                follow=True,
             ),
             "Petition submitted, wait for it!",
         )
+        inq = UnitInquiry.objects.get(
+            student=alice, unit=units[19].pk, action_type="INQ_ACT_UNLOCK"
+        )
+        self.assertFalse(inq.was_auto_processed)
+        self.assertEqual(inq.status, "INQ_NEW")
+
         self.assertEqual(alice.curriculum.count(), 6)
         self.assertEqual(alice.unlocked_units.count(), 6)
 
@@ -337,12 +348,18 @@ class RosterTest(EvanTestCase):
                     "action_type": "INQ_ACT_LOCK",
                     "explanation": "hi",
                 },
+                follow=True,
             ),
             "Petition automatically processed",
         )
 
         self.assertEqual(alice.curriculum.count(), 6)
         self.assertEqual(alice.unlocked_units.count(), 5)
+        inq = UnitInquiry.objects.get(
+            student=alice, unit=units[4].pk, action_type="INQ_ACT_LOCK"
+        )
+        self.assertTrue(inq.was_auto_processed)
+        self.assertEqual(inq.status, "INQ_ACC")
 
         self.assertFalse(alice.unlocked_units.contains(units[4]))
 
@@ -356,9 +373,15 @@ class RosterTest(EvanTestCase):
                     "action_type": "INQ_ACT_DROP",
                     "explanation": "hi",
                 },
+                follow=True,
             ),
             "Petition automatically processed",
         )
+        inq = UnitInquiry.objects.get(
+            student=alice, unit=units[4].pk, action_type="INQ_ACT_DROP"
+        )
+        self.assertTrue(inq.was_auto_processed)
+        self.assertEqual(inq.status, "INQ_ACC")
 
         self.assertEqual(alice.curriculum.count(), 5)
         self.assertEqual(alice.unlocked_units.count(), 5)
@@ -374,9 +397,15 @@ class RosterTest(EvanTestCase):
                         "action_type": "INQ_ACT_UNLOCK",
                         "explanation": "hi",
                     },
+                    follow=True,
                 ),
                 "Petition automatically processed",
             )
+            inq = UnitInquiry.objects.get(
+                student=alice, unit=units[i].pk, action_type="INQ_ACT_UNLOCK"
+            )
+            self.assertTrue(inq.was_auto_processed)
+            self.assertEqual(inq.status, "INQ_ACC")
         self.assertEqual(alice.curriculum.count(), 9)
         self.assertEqual(alice.unlocked_units.count(), 9)
 
@@ -391,9 +420,15 @@ class RosterTest(EvanTestCase):
                         "action_type": "INQ_ACT_UNLOCK",
                         "explanation": "hi",
                     },
+                    follow=True,
                 ),
                 "more than 9 unfinished",
             )
+            inq = UnitInquiry.objects.get(
+                student=alice, unit=units[i].pk, action_type="INQ_ACT_UNLOCK"
+            )
+            self.assertTrue(inq.was_auto_processed)
+            self.assertEqual(inq.status, "INQ_REJ")
         self.assertEqual(alice.curriculum.count(), 9)
         self.assertEqual(alice.unlocked_units.count(), 9)
 
@@ -407,9 +442,15 @@ class RosterTest(EvanTestCase):
                         "action_type": "INQ_ACT_APPEND",
                         "explanation": "hi",
                     },
+                    follow=True,
                 ),
                 "Petition automatically processed",
             )
+            inq = UnitInquiry.objects.get(
+                student=alice, unit=units[i].pk, action_type="INQ_ACT_APPEND"
+            )
+            self.assertTrue(inq.was_auto_processed)
+            self.assertEqual(inq.status, "INQ_ACC")
         self.assertEqual(alice.curriculum.count(), 12)
         self.assertEqual(alice.unlocked_units.count(), 9)
 
@@ -422,9 +463,15 @@ class RosterTest(EvanTestCase):
                     "action_type": "INQ_ACT_DROP",
                     "explanation": "hi",
                 },
+                follow=True,
             ),
             "abnormally large",
         )
+        inq = UnitInquiry.objects.get(
+            student=alice, unit=units[19].pk, action_type="INQ_ACT_DROP"
+        )
+        self.assertFalse(inq.was_auto_processed)
+        self.assertEqual(inq.status, "INQ_HOLD")
 
         self.login(firefly)
         for i in range(5, 14):
@@ -437,9 +484,15 @@ class RosterTest(EvanTestCase):
                         "action_type": "INQ_ACT_DROP",
                         "explanation": "hi",
                     },
+                    follow=True,
                 ),
                 "Petition automatically processed",
             )
+            inq = UnitInquiry.objects.get(
+                student=alice, unit=units[i].pk, action_type="INQ_ACT_DROP"
+            )
+            self.assertTrue(inq.was_auto_processed)
+            self.assertEqual(inq.status, "INQ_ACC")
         self.assertEqual(alice.curriculum.count(), 7)
         self.assertEqual(alice.unlocked_units.count(), 4)
 
@@ -450,13 +503,22 @@ class RosterTest(EvanTestCase):
                 data={
                     "unit": units[5].pk,
                     "action_type": "INQ_ACT_UNLOCK",
-                    "explanation": "hi",
+                    "explanation": "add back in",
                 },
+                follow=True,
             ),
             "Petition automatically processed",
         )
         self.assertEqual(alice.curriculum.count(), 8)
         self.assertEqual(alice.unlocked_units.count(), 5)
+        inq = UnitInquiry.objects.get(
+            student=alice,
+            unit=units[5].pk,
+            action_type="INQ_ACT_UNLOCK",
+            explanation="add back in",
+        )
+        self.assertTrue(inq.was_auto_processed)
+        self.assertEqual(inq.status, "INQ_ACC")
 
         self.login(alice)
         secret_group = UnitGroupFactory.create(
@@ -479,12 +541,18 @@ class RosterTest(EvanTestCase):
                     "action_type": "INQ_ACT_UNLOCK",
                     "explanation": "its almost halloween and my family wants to host it at our house.",
                 },
+                follow=True,
             ),
             "Petition automatically processed",
         )
 
         self.assertEqual(alice.curriculum.count(), 9)
         self.assertEqual(alice.unlocked_units.count(), 6)
+        inq = UnitInquiry.objects.get(
+            student=alice, unit=secret_unit.pk, action_type="INQ_ACT_UNLOCK"
+        )
+        self.assertTrue(inq.was_auto_processed)
+        self.assertEqual(inq.status, "INQ_ACC")
 
         bob: Student = StudentFactory.create(
             semester=SemesterFactory.create(active=False)
@@ -502,7 +570,7 @@ class RosterTest(EvanTestCase):
 
         invoice_semester = SemesterFactory.create(
             show_invoices=True,
-            first_payment_deadline=datetime.datetime(2021, 7, 1, tzinfo=timezone.utc),
+            first_payment_deadline=datetime.datetime(2021, 7, 1, tzinfo=UTC),
         )
         eve = StudentFactory.create(semester=invoice_semester)
         self.login(eve)
@@ -514,7 +582,7 @@ class RosterTest(EvanTestCase):
 
     def test_semester_switch(self) -> None:
         semester: Semester = SemesterFactory.create(
-            one_semester_date=datetime.datetime(2023, 12, 25, tzinfo=timezone.utc),
+            one_semester_date=datetime.datetime(2023, 12, 25, tzinfo=UTC),
         )
 
         container: RegistrationContainer = RegistrationContainerFactory.create(
@@ -667,7 +735,7 @@ class RosterTest(EvanTestCase):
         semester: Semester = SemesterFactory.create()
 
         # registration should redirect if there's no container yet
-        alice: User = UserFactory.create()
+        alice: User = UserFactory.create(first_name="a", last_name="a", email="a@a.net")
         self.login(alice)
         self.assertMessage(
             self.assertGet20X("register", follow=True),
@@ -704,8 +772,8 @@ class RosterTest(EvanTestCase):
         resp = self.assertPost20X(
             "register",
             data={
-                "given_name": "First",
-                "surname": "Last",
+                "given_name": "Alice",
+                "surname": "Aardvark",
                 "email_address": "myemail@example.com",
                 "passcode": f"{container.passcode}1",
                 "gender": "O",
@@ -731,8 +799,8 @@ class RosterTest(EvanTestCase):
         resp = self.assertPost20X(
             "register",
             data={
-                "given_name": "First",
-                "surname": "Last",
+                "given_name": "Alice",
+                "surname": "Aardvark",
                 "email_address": "myemail@example.com",
                 "passcode": container.passcode,
                 "gender": "O",
@@ -749,14 +817,18 @@ class RosterTest(EvanTestCase):
         messages = [m.message for m in resp.context["messages"]]
         self.assertIn("Submitted! Sit tight.", messages)
         self.assertTrue(StudentRegistration.objects.filter(user=alice).exists())
+        alice.refresh_from_db()
+        self.assertEqual(alice.first_name, "Alice")
+        self.assertEqual(alice.last_name, "Aardvark")
+        self.assertEqual(alice.email, "myemail@example.com")
 
         resp = self.assertPost20X(
             "register",
             data={
-                "given_name": "First",
-                "surname": "Last",
+                "given_name": "Alice",
+                "surname": "Aardvark",
                 "email_address": "myemail@example.com",
-                "passcode": f"{container.passcode}1",
+                "passcode": container.passcode,
                 "gender": "O",
                 "parent_email": "myemail@example.com",
                 "graduation_year": 0,

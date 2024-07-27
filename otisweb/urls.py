@@ -26,6 +26,7 @@ urlpatterns = [
     path(r"rpg/", include("rpg.urls")),
     path(r"payments/", include("payments.urls")),
     path(r"suggestions/", include("suggestions.urls")),
+    path(r"tubes/", include("tubes.urls")),
     # ------
     path(r"hijack/", include("hijack.urls")),
     path(r"accounts/", include("allauth.urls")),
@@ -42,9 +43,7 @@ urlpatterns = [
         RedirectView.as_view(url="https://web.evanchen.cc/icons/favicon.ico"),
     ),
     path(r"", RedirectView.as_view(pattern_name="index"), name="top"),
-] + static(
-    settings.MEDIA_URL, document_root=settings.MEDIA_ROOT
-)  # type: ignore
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)  # type: ignore
 
 if settings.DEBUG:
     admin.site.site_header = "127.0.0.1"

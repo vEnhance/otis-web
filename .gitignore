@@ -13,3 +13,4 @@ evanchen-cc-*.json
 htmlcov/*
 .coverage
 .vscode/
+.ruff_cache/

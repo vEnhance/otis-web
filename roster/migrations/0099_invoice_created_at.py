@@ -4,7 +4,6 @@ import datetime
 from typing import Any
 
 from django.db import migrations, models
-from django.utils.timezone import utc
 
 
 def set_invoice_created_at_by_student_reg(apps: Any, scheme_editor: Any):
@@ -27,7 +26,9 @@ class Migration(migrations.Migration):
             name="created_at",
             field=models.DateTimeField(
                 auto_now_add=True,
-                default=datetime.datetime(1970, 1, 1, 0, 0, tzinfo=utc),
+                default=datetime.datetime(
+                    1970, 1, 1, 0, 0, tzinfo=datetime.timezone.utc
+                ),
             ),
             preserve_default=False,
         ),

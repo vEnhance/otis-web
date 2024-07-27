@@ -60,9 +60,11 @@ def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
             code = form.cleaned_data["code"]
 
             try:
-                achievement = Achievement.objects.get(code__iexact=code)
+                achievement = Achievement.objects.exclude(code="").get(
+                    code__iexact=code
+                )
             except Achievement.DoesNotExist:
-                messages.error(request, "You entered an invalid code. 😭")
+                messages.error(request, "❌ You entered an invalid code.")
                 logger.info(
                     f"Invalid diamond code `{code}` from {student.name}",
                     extra={"request": request},
@@ -78,7 +80,7 @@ def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
                     achievement=achievement,
                 )
                 if is_new is True:
-                    msg = r"Achievement unlocked! 🎉 "
+                    msg = r"🎉 Achievement unlocked! "
                     if is_first_obtain:
                         logger.log(
                             SUCCESS_LOG_LEVEL,
@@ -107,7 +109,6 @@ def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
                         f"You already earned the achievement {achievement.name}.",
                     )
 
-            form = DiamondsForm()
     else:
         form = DiamondsForm()
     try:
@@ -121,6 +122,7 @@ def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
         "-threshold"
     )
     context["obtained_levels"] = obtained_levels
+    context["form"] = form
     return render(request, "rpg/stats.html", context)
 
 
@@ -148,7 +150,7 @@ class AchievementList(LoginRequiredMixin, ListView[Achievement]):
 
         return achievements
 
-    def get_context_data(self, **kwargs: dict[str, Any]):
+    def get_context_data(self, **kwargs: Any):
         context = super().get_context_data(**kwargs)
         context["pk"] = self.request.user.pk
         try:

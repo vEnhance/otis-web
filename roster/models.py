@@ -1,12 +1,12 @@
 from __future__ import unicode_literals
 
 import os
+from _pydecimal import Decimal
 from datetime import timedelta
 from hashlib import pbkdf2_hmac
 from typing import TypedDict
 
-from _pydecimal import Decimal
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Group, User
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import FileExtensionValidator
 from django.db import models
@@ -189,6 +189,10 @@ class Student(models.Model):
         return self.user.get_full_name() or self.user.username if self.user else "?"
 
     @property
+    def email(self) -> str:
+        return self.user.email if self.user else "?"
+
+    @property
     def calendar_url(self) -> str:
         return self.semester.calendar_url
 
@@ -296,12 +300,8 @@ class Student(models.Model):
 
         first_payment_deadline = self.semester.first_payment_deadline
 
-        if (
-            first_payment_deadline is not None
-            and first_payment_deadline > invoice.created_at
-            and invoice.total_paid <= 0
-        ):
-            d = first_payment_deadline - now
+        if first_payment_deadline is not None and invoice.total_paid <= 0:
+            d = max(invoice.created_at, first_payment_deadline) - now
             if d < timedelta(days=-7):
                 return 3
             elif d < timedelta(days=0):
@@ -313,10 +313,9 @@ class Student(models.Model):
 
         if (
             most_payment_deadline is not None
-            and most_payment_deadline > invoice.created_at
             and invoice.total_paid < 2 * invoice.total_cost / 3
         ):
-            d = most_payment_deadline - now
+            d = max(invoice.created_at, most_payment_deadline) - now
             if d < timedelta(days=-7):
                 return 7
             elif d < timedelta(days=0):
@@ -379,7 +378,7 @@ class Invoice(models.Model):
         blank=True,
         help_text="When switched on, won't hard lock delinquents before this date.",
     )
-    memo = models.TextField(blank=True, help_text="Internal note to self.")
+    memo = models.TextField(blank=True, help_text="Any notes about this invoice.")
 
     def __str__(self):
         return f"Student #{self.student.pk} ({self.total_paid}/{self.total_cost})"
@@ -455,6 +454,11 @@ class UnitInquiry(models.Model):
     )
     explanation = models.TextField(
         max_length=300, help_text="Short explanation for this request."
+    )
+    was_auto_processed = models.BooleanField(
+        default=False,
+        help_text="Whether the inquiry was automatically accepted or rejected by auto-criteria.",
+        verbose_name="Auto",
     )
 
     class Meta:
@@ -641,6 +645,10 @@ def build_students(queryset: QuerySet[StudentRegistration]) -> int:
         n = 1 if semester_date is not None and now() > semester_date else 2
         count += 1
     Student.objects.bulk_create(students_to_create)
+
+    group, _ = Group.objects.get_or_create(name="Verified")
+    group.user_set.add(*queryset.values_list("user__pk", flat=True))  # type: ignore
+
     queryset.update(processed=True)
 
     if n > 0:
