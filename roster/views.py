@@ -349,7 +349,6 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
         auto_accept_criteria |= Student.objects.filter(
             user=student.user, curriculum__in=[unit]
         ).exists()
-
     elif inquiry.action_type == "INQ_ACT_DROP":
         # auto dropping locked units
         auto_accept_criteria = not student.unlocked_units.contains(unit)
