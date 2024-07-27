@@ -535,7 +535,7 @@ class RosterTest(EvanTestCase):
         alice.save()
 
         # secret unit should be autoprocessed!
-                secret_group = UnitGroupFactory.create(
+        secret_group = UnitGroupFactory.create(
             name="Spooky Unit", subject="K", hidden=True
         )
         secret_unit = UnitFactory.create(code="BKV", group=secret_group)
@@ -567,9 +567,7 @@ class RosterTest(EvanTestCase):
         inactive_alice = StudentFactory.create(
             semester=inactive_semester, user=alice.user
         )
-        old_group = UnitGroupFactory.create(
-            name="Last Year Unit", subject="A"
-        )
+        old_group = UnitGroupFactory.create(name="Last Year Unit", subject="A")
         old_unit = UnitFactory.create(code="BAW", group=old_group)
         inactive_alice.curriculum.add(old_unit)
         inactive_alice.unlocked_units.add(old_unit)

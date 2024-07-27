@@ -273,9 +273,9 @@ class VoteCreate(
     def get_form(self) -> BaseModelForm[Vote]:
         form = super().get_form()
         if self.existing_vote is not None:
-            form.fields["niceness"].widget.attrs["placeholder"] = (
-                self.existing_vote.niceness
-            )
+            form.fields["niceness"].widget.attrs[
+                "placeholder"
+            ] = self.existing_vote.niceness
         return form
 
     def get_context_data(self, **kwargs: Any):
