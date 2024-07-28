@@ -27,7 +27,7 @@ def validate_at_most_1mb(f: File):  # type: ignore
 
 
 def content_file_name(instance: "UploadedFile", filename: str) -> str:
-    now = datetime.datetime.utcnow()
+    now = datetime.datetime.now(datetime.timezone.utc)
     return os.path.join(
         instance.category,
         instance.owner.username,

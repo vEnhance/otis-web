@@ -1,6 +1,22 @@
+import os
+import string
+from typing import Any
+
+from django.contrib.auth.models import User
+from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.db.models.query import QuerySet
+from django.db.models.query_utils import Q
 from django.utils import timezone
+from sql_util.aggregates import Exists
+
+from rpg.models import Achievement
+
+ALLOWED_ANSWER_CHARACTERS = string.ascii_uppercase + string.digits
+
+
+def answerize(s: str) -> str:
+    return "".join(c for c in s.upper() if c in ALLOWED_ANSWER_CHARACTERS)
 
 
 class LiveOpalHuntManager(models.Manager):
@@ -14,6 +30,82 @@ class LiveOpalHuntManager(models.Manager):
                 active=True,
             )
         )
+
+
+class OpalAttempt(models.Model):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, help_text="The user making the attempt"
+    )
+    puzzle = models.ForeignKey(
+        "OpalPuzzle",
+        on_delete=models.CASCADE,
+        help_text="The puzzle being attempted",
+    )
+    is_correct = models.BooleanField(help_text="Whether the attempt was judged correct")
+    guess = models.CharField(max_length=128, help_text="The guess")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} guessed {self.guess} for tried {self.puzzle}"
+
+    def save(self, *args: Any, **kwargs: Any):
+        self.is_correct = self.puzzle.check_guess(self.guess)
+        super().save(*args, **kwargs)
+
+
+def puzzle_file_name(instance: "OpalPuzzle", filename: str) -> str:
+    del filename
+    return os.path.join(instance.hunt.slug, instance.slug + ".pdf")
+
+
+class OpalPuzzle(models.Model):
+    hunt = models.ForeignKey(
+        "OpalHunt",
+        on_delete=models.CASCADE,
+        help_text="The hunt this puzzle belongs to",
+    )
+    slug = models.SlugField(help_text="Slug for the puzzle")
+    title = models.CharField(max_length=128, help_text="Name of the puzzle")
+    answer = models.CharField(
+        max_length=128, help_text="Answer to the puzzle, as displayed"
+    )
+    num_to_unlock = models.PositiveSmallIntegerField(
+        default=0,
+        help_text="Number of solves needed before this OPAL puzzle is unlocked",
+    )
+    content = models.FileField(
+        upload_to=puzzle_file_name,
+        verbose_name="Puzzle file",
+        help_text="PDF of the puzzle you are uploading",
+        validators=[FileExtensionValidator(allowed_extensions=["pdf"])],
+        null=True,
+        blank=True,
+    )
+    achievement = models.ForeignKey(
+        Achievement,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        help_text="Achievement to be awarded if this puzzle is solved",
+    )
+
+    def __str__(self) -> str:
+        return self.slug
+
+    def can_view(self, user: User) -> bool:
+        return (
+            self.hunt.has_started and self.hunt.num_solves(user) >= self.num_to_unlock
+        )
+
+    def check_guess(self, guess: str) -> bool:
+        return answerize(self.answer) == answerize(guess)
+
+    def is_solved_by(self, user: User) -> int:
+        return OpalAttempt.objects.filter(
+            puzzle=self,
+            user=user,
+            is_correct=True,
+        ).exists()
 
 
 class OpalHunt(models.Model):
@@ -48,11 +140,28 @@ class OpalHunt(models.Model):
     def get_absolute_url(self) -> str:
         return "#"  # TO BE IMPLEMENTED
 
+    @property
     def has_started(self) -> bool:
         return timezone.now() >= self.start_date
 
+    @property
     def author_signups_are_open(self) -> bool:
         if self.author_signup_deadline is None:
             return bool(self.author_signup_url)
         else:
             return timezone.now() <= self.author_signup_deadline
+
+    def num_solves(self, user: User) -> int:
+        return (
+            OpalPuzzle.objects.filter(hunt=self)
+            .filter(
+                Exists(
+                    "opalattempt",
+                    filter=Q(
+                        user=user,
+                        is_correct=True,
+                    ),
+                )
+            )
+            .count()
+        )
