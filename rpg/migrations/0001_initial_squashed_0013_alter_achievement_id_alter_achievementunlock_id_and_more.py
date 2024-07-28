@@ -38,7 +38,7 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    models.AutoField(
+                    models.BigAutoField(
                         auto_created=True,
                         primary_key=True,
                         serialize=False,
@@ -131,16 +131,13 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={
-                "db_table": "dashboard_achievement",
-            },
         ),
         migrations.CreateModel(
             name="BonusLevel",
             fields=[
                 (
                     "id",
-                    models.AutoField(
+                    models.BigAutoField(
                         auto_created=True,
                         primary_key=True,
                         serialize=False,
@@ -158,16 +155,13 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={
-                "db_table": "dashboard_bonuslevel",
-            },
         ),
         migrations.CreateModel(
             name="AchievementUnlock",
             fields=[
                 (
                     "id",
-                    models.AutoField(
+                    models.BigAutoField(
                         auto_created=True,
                         primary_key=True,
                         serialize=False,
@@ -207,7 +201,7 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    models.AutoField(
+                    models.BigAutoField(
                         auto_created=True,
                         primary_key=True,
                         serialize=False,
@@ -228,16 +222,13 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={
-                "db_table": "dashboard_bonuslevelunlock",
-            },
         ),
         migrations.CreateModel(
             name="Level",
             fields=[
                 (
                     "id",
-                    models.AutoField(
+                    models.BigAutoField(
                         auto_created=True,
                         primary_key=True,
                         serialize=False,
@@ -263,16 +254,13 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={
-                "db_table": "dashboard_level",
-            },
         ),
         migrations.CreateModel(
             name="PalaceCarving",
             fields=[
                 (
                     "id",
-                    models.AutoField(
+                    models.BigAutoField(
                         auto_created=True,
                         primary_key=True,
                         serialize=False,
@@ -328,16 +316,13 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={
-                "db_table": "dashboard_palacecarving",
-            },
         ),
         migrations.CreateModel(
             name="QuestComplete",
             fields=[
                 (
                     "id",
-                    models.AutoField(
+                    models.BigAutoField(
                         auto_created=True,
                         primary_key=True,
                         serialize=False,
@@ -383,86 +368,6 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={
-                "db_table": "dashboard_questcomplete",
-            },
-        ),
-        migrations.AlterModelTable(
-            name="achievement",
-            table=None,
-        ),
-        migrations.AlterModelTable(
-            name="achievementunlock",
-            table=None,
-        ),
-        migrations.AlterModelTable(
-            name="bonuslevel",
-            table=None,
-        ),
-        migrations.AlterModelTable(
-            name="bonuslevelunlock",
-            table=None,
-        ),
-        migrations.AlterModelTable(
-            name="level",
-            table=None,
-        ),
-        migrations.AlterModelTable(
-            name="palacecarving",
-            table=None,
-        ),
-        migrations.AlterModelTable(
-            name="questcomplete",
-            table=None,
-        ),
-        migrations.AlterField(
-            model_name="achievement",
-            name="id",
-            field=models.BigAutoField(
-                auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
-            ),
-        ),
-        migrations.AlterField(
-            model_name="achievementunlock",
-            name="id",
-            field=models.BigAutoField(
-                auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
-            ),
-        ),
-        migrations.AlterField(
-            model_name="bonuslevel",
-            name="id",
-            field=models.BigAutoField(
-                auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
-            ),
-        ),
-        migrations.AlterField(
-            model_name="bonuslevelunlock",
-            name="id",
-            field=models.BigAutoField(
-                auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
-            ),
-        ),
-        migrations.AlterField(
-            model_name="level",
-            name="id",
-            field=models.BigAutoField(
-                auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
-            ),
-        ),
-        migrations.AlterField(
-            model_name="palacecarving",
-            name="id",
-            field=models.BigAutoField(
-                auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
-            ),
-        ),
-        migrations.AlterField(
-            model_name="questcomplete",
-            name="id",
-            field=models.BigAutoField(
-                auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
-            ),
         ),
         migrations.CreateModel(
             name="VulnerabilityRecord",
