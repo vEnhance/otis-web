@@ -10,6 +10,8 @@ from django.db.models.query_utils import Q
 from django.utils import timezone
 from sql_util.aggregates import Exists
 
+from rpg.models import Achievement
+
 ALLOWED_ANSWER_CHARACTERS = string.ascii_uppercase + string.digits
 
 
@@ -78,6 +80,13 @@ class OpalPuzzle(models.Model):
         validators=[FileExtensionValidator(allowed_extensions=["pdf"])],
         null=True,
         blank=True,
+    )
+    achievement = models.ForeignKey(
+        Achievement,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        help_text="Achievement to be awarded if this puzzle is solved",
     )
 
     def __str__(self) -> str:

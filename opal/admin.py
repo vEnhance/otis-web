@@ -32,11 +32,13 @@ class OpalPuzzleAdmin(admin.ModelAdmin):
         "answer",
         "num_to_unlock",
         "content",
+        "achievement",
     )
     list_display_links = ("pk", "slug", "title")
     list_filter = (
         "hunt",
         ("content", admin.EmptyFieldListFilter),
+        ("achievement", admin.EmptyFieldListFilter),
     )
     search_fields = ("hunt__name", "slug", "title")
 
