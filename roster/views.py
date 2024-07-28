@@ -337,15 +337,21 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
         )
         return
 
+    unit = inquiry.unit
+
     # auto accepting criteria for unlocking
     if inquiry.action_type == "INQ_ACT_UNLOCK" and unlocked_count <= 9:
         # when less than 6 past unlock (newbie) or a secret unit (currently uses subject to determine this)
         auto_accept_criteria = (
-            num_past_unlock_inquiries <= 6 or inquiry.unit.group.subject == "K"
+            num_past_unlock_inquiries <= 6 or unit.group.subject == "K"
         )
+
+        auto_accept_criteria |= Student.objects.filter(
+            user=student.user, curriculum__in=[unit]
+        ).exists()
     elif inquiry.action_type == "INQ_ACT_DROP":
         # auto dropping locked units
-        auto_accept_criteria = not student.unlocked_units.contains(inquiry.unit)
+        auto_accept_criteria = not student.unlocked_units.contains(unit)
     else:
         auto_accept_criteria = False
 

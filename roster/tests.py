@@ -283,6 +283,7 @@ class RosterTest(EvanTestCase):
         units: list[Unit] = UnitFactory.create_batch(20)
         self.login(alice)
 
+        # Check that an invalid unit is not processed
         invalid_resp = self.post(
             "inquiry",
             alice.pk,
@@ -294,6 +295,7 @@ class RosterTest(EvanTestCase):
         )
         self.assertNotHas(invalid_resp, "Petition automatically processed")
 
+        # Alice unlocks 6 units, should be autoprocessed.
         for i in range(6):
             resp = self.post(
                 "inquiry",
@@ -314,6 +316,8 @@ class RosterTest(EvanTestCase):
 
         self.assertGet20X("inquiry", alice.pk, follow=True)
 
+        # Now Alice has done 6 units, they shouldn't be able to get more
+        # (This differs from production behavior because production also gives you a dfeault three units)
         self.assertEqual(alice.curriculum.count(), 6)
         self.assertEqual(alice.unlocked_units.count(), 6)
         self.assertHas(
@@ -338,13 +342,14 @@ class RosterTest(EvanTestCase):
         self.assertEqual(alice.curriculum.count(), 6)
         self.assertEqual(alice.unlocked_units.count(), 6)
 
+        # We have our assistant lock a unit
         self.login(firefly)
         self.assertHas(
             self.post(
                 "inquiry",
                 alice.pk,
                 data={
-                    "unit": units[4].pk,
+                    "unit": units[3].pk,
                     "action_type": "INQ_ACT_LOCK",
                     "explanation": "hi",
                 },
@@ -352,24 +357,23 @@ class RosterTest(EvanTestCase):
             ),
             "Petition automatically processed",
         )
-
         self.assertEqual(alice.curriculum.count(), 6)
         self.assertEqual(alice.unlocked_units.count(), 5)
         inq = UnitInquiry.objects.get(
-            student=alice, unit=units[4].pk, action_type="INQ_ACT_LOCK"
+            student=alice, unit=units[3].pk, action_type="INQ_ACT_LOCK"
         )
         self.assertTrue(inq.was_auto_processed)
         self.assertEqual(inq.status, "INQ_ACC")
+        self.assertFalse(alice.unlocked_units.contains(units[3]))
 
-        self.assertFalse(alice.unlocked_units.contains(units[4]))
-
+        # Now dropping should be autoprocessed by Alice
         self.login(alice)
         self.assertHas(
             self.post(
                 "inquiry",
                 alice.pk,
                 data={
-                    "unit": units[4].pk,
+                    "unit": units[3].pk,
                     "action_type": "INQ_ACT_DROP",
                     "explanation": "hi",
                 },
@@ -378,7 +382,7 @@ class RosterTest(EvanTestCase):
             "Petition automatically processed",
         )
         inq = UnitInquiry.objects.get(
-            student=alice, unit=units[4].pk, action_type="INQ_ACT_DROP"
+            student=alice, unit=units[3].pk, action_type="INQ_ACT_DROP"
         )
         self.assertTrue(inq.was_auto_processed)
         self.assertEqual(inq.status, "INQ_ACC")
@@ -386,6 +390,7 @@ class RosterTest(EvanTestCase):
         self.assertEqual(alice.curriculum.count(), 5)
         self.assertEqual(alice.unlocked_units.count(), 5)
 
+        # We now give Alice some more units :o
         self.login(firefly)
         for i in range(6, 10):
             self.assertHas(
@@ -409,6 +414,7 @@ class RosterTest(EvanTestCase):
         self.assertEqual(alice.curriculum.count(), 9)
         self.assertEqual(alice.unlocked_units.count(), 9)
 
+        # Check that you can't unlock more units when you are already at nine
         self.login(alice)
         for i in range(11, 14):
             self.assertHas(
@@ -432,6 +438,7 @@ class RosterTest(EvanTestCase):
         self.assertEqual(alice.curriculum.count(), 9)
         self.assertEqual(alice.unlocked_units.count(), 9)
 
+        # appending should be autoprocessed
         for i in range(15, 18):
             self.assertHas(
                 self.post(
@@ -454,6 +461,7 @@ class RosterTest(EvanTestCase):
         self.assertEqual(alice.curriculum.count(), 12)
         self.assertEqual(alice.unlocked_units.count(), 9)
 
+        # check that petitions are now locked because of abnormally large count
         self.assertHas(
             self.post(
                 "inquiry",
@@ -473,8 +481,9 @@ class RosterTest(EvanTestCase):
         self.assertFalse(inq.was_auto_processed)
         self.assertEqual(inq.status, "INQ_HOLD")
 
+        # drop a bunch of units for alice
         self.login(firefly)
-        for i in range(5, 14):
+        for i in range(4, 14):
             self.assertHas(
                 self.post(
                     "inquiry",
@@ -493,8 +502,8 @@ class RosterTest(EvanTestCase):
             )
             self.assertTrue(inq.was_auto_processed)
             self.assertEqual(inq.status, "INQ_ACC")
-        self.assertEqual(alice.curriculum.count(), 7)
-        self.assertEqual(alice.unlocked_units.count(), 4)
+        self.assertEqual(alice.curriculum.count(), 6)
+        self.assertEqual(alice.unlocked_units.count(), 3)
 
         self.assertHas(
             self.post(
@@ -509,8 +518,8 @@ class RosterTest(EvanTestCase):
             ),
             "Petition automatically processed",
         )
-        self.assertEqual(alice.curriculum.count(), 8)
-        self.assertEqual(alice.unlocked_units.count(), 5)
+        self.assertEqual(alice.curriculum.count(), 7)
+        self.assertEqual(alice.unlocked_units.count(), 4)
         inq = UnitInquiry.objects.get(
             student=alice,
             unit=units[5].pk,
@@ -520,17 +529,17 @@ class RosterTest(EvanTestCase):
         self.assertTrue(inq.was_auto_processed)
         self.assertEqual(inq.status, "INQ_ACC")
 
+        # Alice hit the hold limit earlier, this just circumvents it.
         self.login(alice)
+        PSetFactory.create_batch(30, student=alice)
+        alice.save()
+
+        # secret unit should be autoprocessed!
         secret_group = UnitGroupFactory.create(
             name="Spooky Unit", subject="K", hidden=True
         )
         secret_unit = UnitFactory.create(code="BKV", group=secret_group)
         alice.curriculum.add(secret_unit)
-
-        # Alice hit the hold limit earlier
-        PSetFactory.create_batch(30, student=alice)
-
-        alice.save()
 
         self.assertHas(
             self.post(
@@ -545,14 +554,48 @@ class RosterTest(EvanTestCase):
             ),
             "Petition automatically processed",
         )
-
-        self.assertEqual(alice.curriculum.count(), 9)
-        self.assertEqual(alice.unlocked_units.count(), 6)
+        self.assertEqual(alice.curriculum.count(), 8)
+        self.assertEqual(alice.unlocked_units.count(), 5)
         inq = UnitInquiry.objects.get(
             student=alice, unit=secret_unit.pk, action_type="INQ_ACT_UNLOCK"
         )
         self.assertTrue(inq.was_auto_processed)
         self.assertEqual(inq.status, "INQ_ACC")
+
+        # check that autoprocessing old units works
+        inactive_semester = SemesterFactory.create(active=False)
+        inactive_alice = StudentFactory.create(
+            semester=inactive_semester, user=alice.user
+        )
+        old_group = UnitGroupFactory.create(name="Last Year Unit", subject="A")
+        old_unit = UnitFactory.create(code="BAW", group=old_group)
+        inactive_alice.curriculum.add(old_unit)
+        inactive_alice.unlocked_units.add(old_unit)
+        self.assertEqual(inactive_alice.curriculum.count(), 1)
+        self.assertEqual(inactive_alice.unlocked_units.count(), 1)
+        inactive_alice.save()
+        self.assertHas(
+            self.post(
+                "inquiry",
+                alice.pk,
+                data={
+                    "unit": old_unit.pk,
+                    "action_type": "INQ_ACT_UNLOCK",
+                    "explanation": "did last year.",
+                },
+                follow=True,
+            ),
+            "Petition automatically processed",
+        )
+        inq = UnitInquiry.objects.get(
+            student=alice, unit=old_unit.pk, action_type="INQ_ACT_UNLOCK"
+        )
+        self.assertTrue(inq.was_auto_processed)
+        self.assertEqual(inq.status, "INQ_ACC")
+        self.assertEqual(alice.curriculum.count(), 9)
+        self.assertEqual(alice.unlocked_units.count(), 6)
+
+        # test a bunch of fail conditions
 
         bob: Student = StudentFactory.create(
             semester=SemesterFactory.create(active=False)

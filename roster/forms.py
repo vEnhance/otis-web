@@ -76,29 +76,33 @@ class AdvanceForm(forms.Form):
 
         self.fields["units_to_unlock"] = AdvanceUnitChoiceField(
             label="Unlock",
-            queryset=student.curriculum.exclude(
-                pk__in=student.unlocked_units.values_list("pk")
-            ).exclude(
-                pk__in=PSet.objects.filter(student=student).values_list("unit__pk"),
-            )
-            if not args
-            else Unit.objects.all(),
+            queryset=(
+                student.curriculum.exclude(
+                    pk__in=student.unlocked_units.values_list("pk")
+                ).exclude(
+                    pk__in=PSet.objects.filter(student=student).values_list("unit__pk"),
+                )
+                if not args
+                else Unit.objects.all()
+            ),
             help_text="Units to unlock, already in curriculum.",
         )
         self.fields["units_to_open"] = AdvanceUnitChoiceField(
             label="Open",
-            queryset=Unit.objects.exclude(
-                pk__in=student.unlocked_units.values_list("pk")
-            )
-            if not args
-            else Unit.objects.all(),
+            queryset=(
+                Unit.objects.exclude(pk__in=student.unlocked_units.values_list("pk"))
+                if not args
+                else Unit.objects.all()
+            ),
             help_text="Units to open (add and unlock).",
         )
         self.fields["units_to_add"] = AdvanceUnitChoiceField(
             label="Add",
-            queryset=Unit.objects.exclude(pk__in=student.curriculum.values_list("pk"))
-            if not args
-            else Unit.objects.all(),
+            queryset=(
+                Unit.objects.exclude(pk__in=student.curriculum.values_list("pk"))
+                if not args
+                else Unit.objects.all()
+            ),
             help_text="Units to add without unlocking.",
         )
         self.fields["units_to_lock"] = AdvanceUnitChoiceField(
