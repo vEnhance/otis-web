@@ -13,8 +13,8 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("roster", "0092_alter_unitinquiry_explanation"),
-        ("core", "0038_semester_end_year"),
+        ("roster", "0001_squashed_0102_alter_studentregistration_agreement_form"),
+        ("core", "0001_squashed_0054_userprofile_use_twemoji"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

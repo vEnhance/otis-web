@@ -8,46 +8,11 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-    replaces = [
-        ("arch", "0001_initial"),
-        ("arch", "0002_auto_20210121_2112"),
-        ("arch", "0003_auto_20210121_2202"),
-        ("arch", "0004_auto_20210121_2250"),
-        ("arch", "0005_auto_20210122_0008"),
-        ("arch", "0006_auto_20210122_0021"),
-        ("arch", "0007_auto_20210122_0027"),
-        ("arch", "0008_auto_20210122_1155"),
-        ("arch", "0009_auto_20210122_1156"),
-        ("arch", "0010_auto_20210206_2200"),
-        ("arch", "0011_auto_20210314_1217"),
-        ("arch", "0012_auto_20210603_2343"),
-        ("arch", "0013_auto_20210603_2343"),
-        ("arch", "0014_remove_problem_group"),
-        ("arch", "0015_auto_20210604_0912"),
-        ("arch", "0016_auto_20210604_0915"),
-        ("arch", "0017_auto_20210604_1556"),
-        ("arch", "0018_auto_20210815_1731"),
-        ("arch", "0019_alter_problem_options"),
-        ("arch", "0020_auto_20210901_1835"),
-        ("arch", "0021_alter_problem_puid"),
-        ("arch", "0022_alter_problem_aops_url"),
-        ("arch", "0023_alter_problem_puid"),
-        ("arch", "0024_remove_problem_aops_url"),
-        ("arch", "0025_alter_hint_id_alter_problem_id"),
-        ("arch", "0026_alter_problem_puid"),
-        ("arch", "0027_problem_hyperlink"),
-        ("arch", "0028_vote"),
-        ("arch", "0029_alter_vote_niceness"),
-        ("arch", "0030_alter_vote_niceness"),
-        ("arch", "0031_vote_created_at_vote_updated_at"),
-        ("arch", "0032_alter_problem_puid"),
-    ]
-
     initial = True
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("core", "0018_auto_20200908_1307"),
+        ("core", "0001_squashed_0054_userprofile_use_twemoji"),
     ]
 
     operations = [

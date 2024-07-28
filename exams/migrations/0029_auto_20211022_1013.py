@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("roster", "0080_auto_20211020_0923"),
+        ("roster", "0001_squashed_0102_alter_studentregistration_agreement_form"),
         ("exams", "0028_mockcompleted"),
     ]
 
