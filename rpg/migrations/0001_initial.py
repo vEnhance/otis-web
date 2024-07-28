@@ -359,7 +359,6 @@ class Migration(migrations.Migration):
                 ),
             ],
             options={
-                "db_table": "dashboard_achievementunlock",
                 "unique_together": {("user", "achievement")},
             },
         ),
