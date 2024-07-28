@@ -85,9 +85,6 @@ class Achievement(models.Model):
         verbose_name="Show Creator",
     )
 
-    class Meta:
-        db_table = "dashboard_achievement"
-
     def __str__(self) -> str:
         return str(self.name)
 
@@ -98,9 +95,6 @@ class Level(models.Model):
     alttext = models.TextField(
         max_length=255, help_text="A memorable text that is displayed", blank=True
     )
-
-    class Meta:
-        db_table = "dashboard_level"
 
     def __str__(self):
         return f"Level {self.threshold}: {self.name}"
@@ -122,7 +116,6 @@ class AchievementUnlock(models.Model):
     )
 
     class Meta:
-        db_table = "dashboard_achievementunlock"
         unique_together = (
             "user",
             "achievement",
@@ -157,9 +150,6 @@ class QuestComplete(models.Model):
         default="MS",
     )
 
-    class Meta:
-        db_table = "dashboard_questcomplete"
-
     def __str__(self) -> str:
         return f"{self.title} " + self.timestamp.strftime("%c")
 
@@ -167,9 +157,6 @@ class QuestComplete(models.Model):
 class BonusLevel(models.Model):
     group = models.OneToOneField(UnitGroup, on_delete=models.CASCADE)
     level = models.PositiveSmallIntegerField(help_text="Level to spawn at")
-
-    class Meta:
-        db_table = "dashboard_bonuslevel"
 
     def __str__(self) -> str:
         return f"Lv. {self.level} Bonus"
@@ -179,9 +166,6 @@ class BonusLevelUnlock(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     bonus = models.ForeignKey(BonusLevel, on_delete=models.CASCADE)
-
-    class Meta:
-        db_table = "dashboard_bonuslevelunlock"
 
     def __str__(self) -> str:
         return self.timestamp.isoformat()
@@ -214,9 +198,6 @@ class PalaceCarving(models.Model):
         blank=True,
         validators=[validate_at_most_1mb],
     )
-
-    class Meta:
-        db_table = "dashboard_palacecarving"
 
     def __str__(self) -> str:
         return f"Palace carving for {self.display_name}"
