@@ -16,24 +16,36 @@
     <li>
       Each hunt will consist of several feeder puzzles,
       plus one "meta-puzzle" that uses the answers to all the feeder puzzles.
+      Successfully solving the meta-puzzle awards a special diamond
+      (that cannot normally be obtained by other means).
     </li>
     <li>
       The answer to each puzzle will be an alphanumeric string.
-      The answers are case-insensitive and whitespace-insensitive.
-    </li>
-    <li>
-      The answer to the final meta-puzzle also corresponds to
-      a valid diamond code in some way
-      and serves as the prize for completing the OPAL hunt.
+      The answers are case-insensitive,
+      and ignores non-alphanumeric characters.
+      <ul>
+        <li>
+          So, for example, if the answer to a puzzle is <code>ANSWER</code>
+          then <code>an$wer</code> and <code>answer123</code> will be incorrect
+          but <code>An😎Swer!!</code> would be graded as correct.
+        </li>
+      </ul>
     </li>
     <li>
       There is no time limit to the hunt.
-      You can work on them whenever you want.
+      You can work on it whenever you want.
+      <ul>
+        <li>
+          Consequently, because there is no "end date" for the OPAL hunt,
+          you should avoid publicly posting spoilers about the hunt,
+          for future generations of OTIS.
+        </li>
+      </ul>
     </li>
     <li>
       By default, you get up to 20 guesses per puzzle (may be different for some puzzles).
       After 20 incorrect answers, <a href="https://w.wiki/AnYb">permadeath</a>
-      occurs and you will be unable to submit new answers.
+      occurs and you will be unable to submit.
       (If you legitimately run out of guesses, you can try to ask Evan really nicely,
       but he may or may not actually grant your request depending on how egregious your guesses were.)
     </li>
