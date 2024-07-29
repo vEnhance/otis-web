@@ -27,10 +27,10 @@ class OpalPuzzleAdmin(admin.ModelAdmin):
     list_display = (
         "pk",
         "hunt",
+        "num_to_unlock",
         "slug",
         "title",
         "answer",
-        "num_to_unlock",
         "content",
         "achievement",
     )
@@ -45,10 +45,26 @@ class OpalPuzzleAdmin(admin.ModelAdmin):
 
 @admin.register(OpalAttempt)
 class OpalAttemptAdmin(admin.ModelAdmin):
-    list_display = ("pk", "puzzle", "user", "guess", "is_correct", "created_at")
+    list_display = (
+        "pk",
+        "created_at",
+        "puzzle",
+        "user",
+        "guess",
+        "is_correct",
+        "excused",
+    )
     list_display_links = (
         "pk",
         "puzzle",
+        "user",
+        "guess",
+        "created_at",
     )
-    list_filter = ("is_correct",)
+    list_filter = (
+        "is_correct",
+        "excused",
+        "puzzle__hunt",
+    )
     search_fields = ("pk",)
+    readonly_fields = ("created_at",)

@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+{% load humanize %}
+{% block title %}
+  {{ hunt.name }}
+{% endblock title %}
+{% block layout-content %}
+  <p>
+    The hunt <strong>{{ hunt.name }}</strong>
+    opened on {{ hunt.start_date }} ({{ hunt.start_date|timesince }} ago).
+  </p>
+  <p>
+    Good luck!
+    And read the <a href="{% url "opal-rules" %}">rules</a>
+    if you haven't already.
+  </p>
+  <h2>List of puzzles</h2>
+  <table class="table">
+    <tr class="table-dark">
+      <th>Puzzle name</th>
+      <th>Status</th>
+    </tr>
+    {% for puzzle in puzzles %}
+      <tr>
+        <td>
+          {% if puzzle.unlocked %}
+            {% if puzzle.is_metapuzzle %}
+              <b>
+                <a href="{{ puzzle.get_absolute_url }}">{{ puzzle.title }}</a> (meta)
+              </b>
+            {% else %}
+              <a href="{{ puzzle.get_absolute_url }}">{{ puzzle.title }}</a>
+            {% endif %}
+          {% else %}
+            <span class="text-secondary">???</span>
+          {% endif %}
+        </td>
+        {% if puzzle.solved %}
+          <td class="text-success">Solved!</td>
+        {% elif puzzle.unlocked %}
+          <td class="text-dark">Unlocked</td>
+        {% else %}
+          <td class="fst-italic text-secondary">Locked</td>
+        {% endif %}
+      </tr>
+    {% endfor %}
+  </table>
+{% endblock layout-content %}

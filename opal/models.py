@@ -7,6 +7,7 @@ from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
+from django.urls import reverse
 from django.utils import timezone
 from sql_util.aggregates import Exists
 
@@ -44,9 +45,13 @@ class OpalAttempt(models.Model):
     is_correct = models.BooleanField(help_text="Whether the attempt was judged correct")
     guess = models.CharField(max_length=128, help_text="The guess")
     created_at = models.DateTimeField(auto_now_add=True)
+    excused = models.BooleanField(
+        default=False,
+        help_text="Allows admins to maker a guess as not counting towards the guess limit.",
+    )
 
     def __str__(self):
-        return f"{self.user.username} guessed {self.guess} for tried {self.puzzle}"
+        return f"{self.user.username} guessed {self.guess} for {self.puzzle}"
 
     def save(self, *args: Any, **kwargs: Any):
         self.is_correct = self.puzzle.check_guess(self.guess)
@@ -91,9 +96,23 @@ class OpalPuzzle(models.Model):
     guess_limit = models.PositiveSmallIntegerField(
         default=20, help_text="Maximum number of guesses to allow"
     )
+    is_metapuzzle = models.BooleanField(
+        default=False, help_text="Whether this is a metapuzzle or not"
+    )
+
+    class Meta:
+        unique_together = ("hunt", "slug")
+        ordering = (
+            "hunt__start_date",
+            "num_to_unlock",
+            "title",
+        )
 
     def __str__(self) -> str:
         return self.slug
+
+    def get_absolute_url(self) -> str:
+        return reverse("opal-show-puzzle", args=(self.hunt.slug, self.slug))
 
     def can_view(self, user: User) -> bool:
         return (
@@ -113,7 +132,7 @@ class OpalPuzzle(models.Model):
 
 class OpalHunt(models.Model):
     name = models.CharField(max_length=128, help_text="Display name for this hunt")
-    slug = models.SlugField(max_length=32)
+    slug = models.SlugField(max_length=32, unique=True)
 
     active = models.BooleanField(
         help_text="Whether to highlight this hunt on the list.",
@@ -141,7 +160,7 @@ class OpalHunt(models.Model):
         return self.name
 
     def get_absolute_url(self) -> str:
-        return "#"  # TO BE IMPLEMENTED
+        return reverse("opal-puzzle-list", args=(self.slug,))
 
     @property
     def has_started(self) -> bool:

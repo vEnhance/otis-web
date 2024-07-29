@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+{% load humanize %}
+{% block title %}
+  {{ puzzle.title }}
+{% endblock title %}
+{% block layout-content %}
+  {% if puzzle.content %}
+    <ul>
+      <li>
+        <b><a href="{{ puzzle.content.url }}">Download puzzle as PDF</a></b>
+      </li>
+      <li>
+        Go back to <a href="{{ hunt.get_absolute_url }}">{{ hunt }}</a>.
+      </li>
+    </ul>
+  {% else %}
+    <p>
+      Go back to <a href="{{ hunt.get_absolute_url }}">{{ hunt }}</a>.
+    </p>
+    <div class="alert alert-warning">This puzzle isn't available yet for download.</div>
+  {% endif %}
+  {% if can_attempt %}
+    <hr />
+    {% include "generic_form.html" %}
+  {% elif solved %}
+    <div class="alert alert-success">
+      Congrats, you have solved this puzzle!
+      The correct answer is <tt>{{ puzzle.answer }}</tt>.
+    </div>
+  {% elif not solved %}
+    <div class="alert alert-danger">You have run out of guesses for this puzzle.</div>
+  {% endif %}
+  <hr />
+  <h3>Previous guesses</h3>
+  <p>You have used {{ attempts|length }} of your {{ puzzle.guess_limit }} guesses.</p>
+  <table class="table">
+    <tr class="table-dark">
+      <th>Guess</th>
+      <th>Verdict</th>
+      <th>Timestamp</th>
+    </tr>
+    {% for attempt in attempts %}
+      <tr>
+        <td>
+          <tt>{{ attempt.guess }}</tt>
+        </td>
+        {% if attempt.is_correct %}
+          <td class="text-success">Solved!</td>
+        {% else %}
+          <td class="text-danger">Incorrect</td>
+        {% endif %}
+        <td>{{ attempt.created_at }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+{% endblock layout-content %}
