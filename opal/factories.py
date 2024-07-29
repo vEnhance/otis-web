@@ -15,6 +15,7 @@ class OpalHuntFactory(DjangoModelFactory):
         model = OpalHunt
 
     name = "Your Otis in April"
+    slug = UniqueFaker("slug")
     start_date = Faker("past_datetime", tzinfo=datetime.timezone.utc)
 
 
