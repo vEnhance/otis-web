@@ -16,8 +16,8 @@
   <h2>List of puzzles</h2>
   <table class="table">
     <tr class="table-dark">
-      <th>Puzzle name</th>
-      <th>Status</th>
+      <th>Title</th>
+      <th>Answer</th>
     </tr>
     {% for puzzle in puzzles %}
       <tr>
@@ -35,9 +35,11 @@
           {% endif %}
         </td>
         {% if puzzle.solved %}
-          <td class="text-success">Solved!</td>
+          <td class="fw-bold">
+            Solved: <span class="text-success">{{ puzzle.answer }}</span>
+          </td>
         {% elif puzzle.unlocked %}
-          <td class="text-dark">Unlocked</td>
+          <td class="fst-italic text-dark">Unlocked</td>
         {% else %}
           <td class="fst-italic text-secondary">Locked</td>
         {% endif %}
