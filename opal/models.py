@@ -9,6 +9,8 @@ from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
 from django.urls import reverse
 from django.utils import timezone
+from markdownfield.models import MarkdownField, RenderedMarkdownField
+from markdownfield.validators import VALIDATOR_STANDARD
 from sql_util.aggregates import Exists
 
 from rpg.models import Achievement
@@ -152,6 +154,14 @@ class OpalHunt(models.Model):
         blank=True,
         help_text="Authors need to have drafts of their puzzles done by this date.",
     )
+
+    story_text = MarkdownField(
+        rendered_field="story_text_rendered",
+        help_text="Text to show on the round page.",
+        validator=VALIDATOR_STANDARD,
+        blank=True,
+    )
+    story_text_rendered = RenderedMarkdownField()
 
     objects = models.Manager()
     live = LiveOpalHuntManager()
