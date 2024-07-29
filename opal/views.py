@@ -34,7 +34,7 @@ class PuzzleList(VerifiedRequiredMixin, ListView[OpalPuzzle]):
         self.hunt = get_object_or_404(OpalHunt, slug=self.kwargs["slug"])
         if not self.hunt.has_started:
             if request.user.is_superuser:
-                messages.warning(request, "This hunt hasn't started yet")
+                messages.warning(request, "This hunt hasn't started yet. Admin view.")
             else:
                 raise PermissionDenied("This puzzle cannot be unlocked yet")
 

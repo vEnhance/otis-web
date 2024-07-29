@@ -52,6 +52,9 @@
           {% endif %}
           {% if request.user.is_superuser %}
             <li>
+              <a href="{{ hunt.get_absolute_url }}">(view as admin)</a>
+            </li>
+            <li>
               <a href="{% url "admin:opal_opalhunt_change" hunt.pk %}">(edit)</a>
             </li>
           {% endif %}
