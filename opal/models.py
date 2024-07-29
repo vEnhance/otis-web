@@ -88,6 +88,9 @@ class OpalPuzzle(models.Model):
         on_delete=models.SET_NULL,
         help_text="Achievement to be awarded if this puzzle is solved",
     )
+    guess_limit = models.PositiveSmallIntegerField(
+        default=20, help_text="Maximum number of guesses to allow"
+    )
 
     def __str__(self) -> str:
         return self.slug
