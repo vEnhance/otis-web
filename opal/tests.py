@@ -6,7 +6,7 @@ from core.factories import GroupFactory, UserFactory
 from evans_django_tools.testsuite import EvanTestCase
 from opal.factories import OpalAttemptFactory, OpalHuntFactory, OpalPuzzleFactory
 
-from .models import answerize
+from .models import answerize, puzzle_file_name
 
 UTC = datetime.timezone.utc
 
@@ -124,6 +124,13 @@ class TestOPALModels(EvanTestCase):
         )
         OpalHuntFactory.create().get_absolute_url()
         OpalPuzzleFactory.create().get_absolute_url()
+        str(OpalAttemptFactory.create())
+
+    def test_puzzle_filename(self):
+        puzzle = OpalPuzzleFactory.create(hunt__slug="hunt", slug="sudoku")
+        self.assertEqual(
+            puzzle_file_name(puzzle, "file_from_evans_laptop.pdf"), "hunt/sudoku.pdf"
+        )
 
     def test_author_signups(self):
         hunt = OpalHuntFactory.create(
@@ -159,6 +166,35 @@ class TestOPALModels(EvanTestCase):
         self.login(alice)
         resp = self.assertGet20X("opal-hunt-list")
         self.assertEqual(len(resp.context["hunts"]), 5)
+
+    def test_puzzle_list(self):
+        verified_group = GroupFactory(name="Verified")
+        alice = UserFactory.create(username="alice", groups=(verified_group,))
+        admin = UserFactory.create(
+            username="root", is_superuser=True, groups=(verified_group,)
+        )
+
+        hunt = OpalHuntFactory.create(
+            slug="hunt", start_date=datetime.datetime(2024, 8, 30, tzinfo=UTC)
+        )
+        OpalPuzzleFactory.create(title="Puzzle Unlocked 1", hunt=hunt, num_to_unlock=0)
+        OpalPuzzleFactory.create(title="Puzzle Unlocked 2", hunt=hunt, num_to_unlock=0)
+        OpalPuzzleFactory.create(title="Puzzle Unlocked 3", hunt=hunt, num_to_unlock=0)
+        OpalPuzzleFactory.create(title="Puzzle Locked", hunt=hunt, num_to_unlock=1)
+        OpalPuzzleFactory.create(title="Puzzle Locked", hunt=hunt, num_to_unlock=2)
+
+        with freeze_time("2024-08-25"):
+            self.login(alice)
+            self.assertGet40X("opal-puzzle-list", "hunt")
+            self.login(admin)
+            self.assertGet20X("opal-puzzle-list", "hunt")
+        with freeze_time("2024-09-25"):
+            self.login(alice)
+            resp = self.assertGet20X("opal-puzzle-list", "hunt")
+            self.assertContains(resp, "Puzzle Unlocked 1")
+            self.assertContains(resp, "Puzzle Unlocked 2")
+            self.assertContains(resp, "Puzzle Unlocked 3")
+            self.assertNotContains(resp, "Puzzle Locked")
 
     def test_hunt_progress(self):
         verified_group = GroupFactory(name="Verified")
@@ -275,3 +311,10 @@ class TestOPALModels(EvanTestCase):
             data={"guess": "two"},
             follow=True,
         )
+
+        # Meanwhile, admins should be omniscient
+        admin = UserFactory.create(
+            username="root", is_superuser=True, groups=(verified_group,)
+        )
+        self.login(admin)
+        self.assertGet20X("opal-show-puzzle", "hunt", "three")
