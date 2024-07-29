@@ -168,8 +168,10 @@ class OpalHunt(models.Model):
 
     @property
     def author_signups_are_open(self) -> bool:
-        if self.author_signup_deadline is None:
-            return bool(self.author_signup_url)
+        if not self.author_signup_url:
+            return False
+        elif self.author_signup_deadline is None:
+            return True
         else:
             return timezone.now() <= self.author_signup_deadline
 
