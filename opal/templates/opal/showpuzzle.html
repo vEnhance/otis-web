@@ -14,10 +14,13 @@
       </li>
     </ul>
   {% else %}
-    <p>
-      Go back to <a href="{{ hunt.get_absolute_url }}">{{ hunt }}</a>.
-    </p>
-    <div class="alert alert-warning">This puzzle isn't available yet for download.</div>
+    <div class="alert alert-danger">
+      <h3 class="alert-heading">PDF file for this puzzle not found</h3>
+      <p>If you think that's a mistake, contact Evan.</p>
+      <p>
+        Otherwise, go back to <a class="alert-link" href="{{ hunt.get_absolute_url }}">{{ hunt }}</a>.
+      </p>
+    </div>
   {% endif %}
   {% if can_attempt %}
     <hr />
