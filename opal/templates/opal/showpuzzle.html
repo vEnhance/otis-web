@@ -24,8 +24,10 @@
     {% include "generic_form.html" %}
   {% elif solved %}
     <div class="alert alert-success">
+      <h2 class="alert-heading">
+        Answer: <tt>{{ puzzle.answer }}</tt>
+      </h2>
       Congrats, you have solved this puzzle!
-      The correct answer is <tt>{{ puzzle.answer }}</tt>.
     </div>
   {% elif not solved %}
     <div class="alert alert-danger">You have run out of guesses for this puzzle.</div>
