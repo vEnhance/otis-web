@@ -11,6 +11,7 @@ from django.views.generic.list import ListView
 from otisweb.decorators import verified_required
 from otisweb.mixins import VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest
+from rpg.models import AchievementUnlock
 
 from .forms import AttemptForm
 from .models import OpalAttempt, OpalHunt, OpalPuzzle
@@ -78,7 +79,13 @@ def show_puzzle(request: AuthHttpRequest, hunt: str, slug: str) -> HttpResponse:
             )
             attempt.save()
             if attempt.is_correct:
-                messages.success(request, f"Correct answer to {puzzle.title}!")
+                solve_message = f"Correct answer to {puzzle.title}!"
+                if (achievement := puzzle.achievement) is not None:
+                    AchievementUnlock.objects.get_or_create(
+                        achievement=achievement, user=request.user
+                    )
+                    solve_message += f" Earned {achievement.diamonds}♦."
+                messages.success(request, solve_message)
             else:
                 messages.warning(request, f"Sorry, wrong answer to {puzzle.title}.")
             return HttpResponseRedirect(puzzle.get_absolute_url())

@@ -5,6 +5,8 @@ from freezegun.api import freeze_time
 from core.factories import GroupFactory, UserFactory
 from evans_django_tools.testsuite import EvanTestCase
 from opal.factories import OpalAttemptFactory, OpalHuntFactory, OpalPuzzleFactory
+from rpg.factories import AchievementFactory
+from rpg.models import AchievementUnlock
 
 from .models import answerize, puzzle_file_name
 
@@ -318,3 +320,21 @@ class TestOPALModels(EvanTestCase):
         )
         self.login(admin)
         self.assertGet20X("opal-show-puzzle", "hunt", "three")
+
+    def test_achievement_unlock(self):
+        verified_group = GroupFactory(name="Verified")
+        alice = UserFactory.create(username="alice", groups=(verified_group,))
+        ach = AchievementFactory.create(diamonds=3)
+        self.login(alice)
+        puzzle = OpalPuzzleFactory.create(achievement=ach)
+
+        self.assertPost20X(
+            "opal-show-puzzle",
+            puzzle.hunt.slug,
+            puzzle.slug,
+            data={"guess": puzzle.answer},
+            follow=True,
+        )
+        self.assertTrue(
+            AchievementUnlock.objects.filter(achievement=ach, user=alice).exists()
+        )
