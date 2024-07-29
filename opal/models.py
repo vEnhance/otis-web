@@ -187,3 +187,9 @@ class OpalHunt(models.Model):
             )
             .count()
         )
+
+    def get_queryset_for_user(self, user: User) -> QuerySet[OpalPuzzle]:
+        return OpalPuzzle.objects.filter(hunt=self).annotate(
+            unlocked=Q(num_to_unlock__lte=self.num_solves(user)),
+            solved=Exists("opalattempt", filter=Q(user=user, is_correct=True)),
+        )

@@ -3,13 +3,11 @@ from typing import Any
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
-from django.db.models import Q
 from django.db.models.query import QuerySet
 from django.http.request import HttpRequest
 from django.http.response import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.views.generic.list import ListView
-from sql_util.aggregates import Exists
 
 from otisweb.decorators import verified_required
 from otisweb.mixins import VerifiedRequiredMixin
@@ -40,13 +38,7 @@ class PuzzleList(VerifiedRequiredMixin, ListView[OpalPuzzle]):
 
     def get_queryset(self) -> QuerySet[OpalPuzzle]:
         assert isinstance(self.request.user, User)
-        n = self.hunt.num_solves(self.request.user)
-        return OpalPuzzle.objects.filter(hunt=self.hunt).annotate(
-            unlocked=Q(num_to_unlock__lte=n),
-            solved=Exists(
-                "opalattempt", filter=Q(user=self.request.user, is_correct=True)
-            ),
-        )
+        return self.hunt.get_queryset_for_user(self.request.user)
 
     def get_context_data(self, **kwargs: Any):
         context = super().get_context_data(**kwargs)
