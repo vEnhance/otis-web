@@ -46,13 +46,14 @@ class TestOPALModels(EvanTestCase):
         puzzle2 = OpalPuzzleFactory.create(answer="2", hunt=hunt, num_to_unlock=2)
         puzzle3 = OpalPuzzleFactory.create(answer="3", hunt=hunt, num_to_unlock=3)
 
-        with freeze_time("2024-08-01", tz_offset=0):
+        with freeze_time("2024-08-01"):
             self.assertFalse(hunt.has_started)
             self.assertFalse(puzzle0.can_view(alice))
             self.assertFalse(puzzle1.can_view(alice))
             self.assertFalse(puzzle2.can_view(alice))
             self.assertFalse(puzzle3.can_view(alice))
-        with freeze_time("2024-10-01", tz_offset=0):
+
+        with freeze_time("2024-10-01"):
             self.assertTrue(hunt.has_started)
 
             # Hunt just started
@@ -115,6 +116,49 @@ class TestOPALModels(EvanTestCase):
             self.assertFalse(puzzle2.can_view(bob))
             self.assertFalse(puzzle3.can_view(bob))
             self.assertEqual(hunt.num_solves(bob), 0)
+
+    def test_model_methods(self):
+        self.assertEqual(str(OpalPuzzleFactory.create(slug="meow")), "meow")
+        self.assertEqual(
+            str(OpalHuntFactory.create(name="Your OTIS in April")), "Your OTIS in April"
+        )
+        OpalHuntFactory.create().get_absolute_url()
+        OpalPuzzleFactory.create().get_absolute_url()
+
+    def test_author_signups(self):
+        hunt = OpalHuntFactory.create(
+            author_signup_deadline=None,
+            author_signup_url="https://example.org",
+        )
+        self.assertTrue(hunt.author_signups_are_open)
+        hunt.author_signup_url = ""
+        hunt.save()
+        self.assertFalse(hunt.author_signups_are_open)
+
+        hunt = OpalHuntFactory.create(
+            author_signup_deadline=datetime.datetime(2023, 3, 24, tzinfo=UTC),
+            author_signup_url="https://example.org",
+        )
+        with freeze_time("2023-03-01"):
+            self.assertTrue(hunt.author_signups_are_open)
+        with freeze_time("2023-03-30"):
+            self.assertFalse(hunt.author_signups_are_open)
+
+        hunt = OpalHuntFactory.create(
+            author_signup_deadline=datetime.datetime(2023, 3, 24, tzinfo=UTC),
+            author_signup_url="",
+        )
+        with freeze_time("2024-03-01"):
+            self.assertFalse(hunt.author_signups_are_open)
+        with freeze_time("2024-03-30"):
+            self.assertFalse(hunt.author_signups_are_open)
+
+    def test_hunt_list(self):
+        OpalHuntFactory.create_batch(5)
+        alice = UserFactory.create(username="alice")
+        self.login(alice)
+        resp = self.assertGet20X("opal-hunt-list")
+        self.assertEqual(len(resp.context["hunts"]), 5)
 
     def test_hunt_progress(self):
         verified_group = GroupFactory(name="Verified")
