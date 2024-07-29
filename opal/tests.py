@@ -2,7 +2,7 @@ import datetime
 
 from freezegun.api import freeze_time
 
-from core.factories import UserFactory
+from core.factories import GroupFactory, UserFactory
 from evans_django_tools.testsuite import EvanTestCase
 from opal.factories import OpalAttemptFactory, OpalHuntFactory, OpalPuzzleFactory
 
@@ -41,91 +41,193 @@ class TestOPALModels(EvanTestCase):
             slug="hunt",
             start_date=datetime.datetime(2024, 9, 1, tzinfo=UTC),
         )
-        puzzle_opening_0 = OpalPuzzleFactory.create(
-            answer="0", hunt=hunt, num_to_unlock=0
-        )
-        puzzle_opening_1 = OpalPuzzleFactory.create(
-            answer="1", hunt=hunt, num_to_unlock=0
-        )
-        puzzle_gated_2 = OpalPuzzleFactory.create(
-            answer="2", hunt=hunt, num_to_unlock=2
-        )
-        puzzle_gated_3 = OpalPuzzleFactory.create(
-            answer="3", hunt=hunt, num_to_unlock=3
-        )
+        puzzle0 = OpalPuzzleFactory.create(answer="0", hunt=hunt, num_to_unlock=0)
+        puzzle1 = OpalPuzzleFactory.create(answer="1", hunt=hunt, num_to_unlock=0)
+        puzzle2 = OpalPuzzleFactory.create(answer="2", hunt=hunt, num_to_unlock=2)
+        puzzle3 = OpalPuzzleFactory.create(answer="3", hunt=hunt, num_to_unlock=3)
 
         with freeze_time("2024-08-01", tz_offset=0):
             self.assertFalse(hunt.has_started)
-            self.assertFalse(puzzle_opening_0.can_view(alice))
-            self.assertFalse(puzzle_opening_1.can_view(alice))
-            self.assertFalse(puzzle_gated_2.can_view(alice))
-            self.assertFalse(puzzle_gated_3.can_view(alice))
+            self.assertFalse(puzzle0.can_view(alice))
+            self.assertFalse(puzzle1.can_view(alice))
+            self.assertFalse(puzzle2.can_view(alice))
+            self.assertFalse(puzzle3.can_view(alice))
         with freeze_time("2024-10-01", tz_offset=0):
             self.assertTrue(hunt.has_started)
 
             # Hunt just started
-            self.assertFalse(puzzle_opening_0.is_solved_by(alice))
-            self.assertFalse(puzzle_opening_1.is_solved_by(alice))
-            self.assertFalse(puzzle_gated_2.is_solved_by(alice))
-            self.assertFalse(puzzle_gated_3.is_solved_by(alice))
-            self.assertTrue(puzzle_opening_0.can_view(alice))
-            self.assertTrue(puzzle_opening_1.can_view(alice))
-            self.assertFalse(puzzle_gated_2.can_view(alice))
-            self.assertFalse(puzzle_gated_3.can_view(alice))
+            self.assertFalse(puzzle0.is_solved_by(alice))
+            self.assertFalse(puzzle1.is_solved_by(alice))
+            self.assertFalse(puzzle2.is_solved_by(alice))
+            self.assertFalse(puzzle3.is_solved_by(alice))
+            self.assertTrue(puzzle0.can_view(alice))
+            self.assertTrue(puzzle1.can_view(alice))
+            self.assertFalse(puzzle2.can_view(alice))
+            self.assertFalse(puzzle3.can_view(alice))
             self.assertEqual(hunt.num_solves(alice), 0)
 
             # Now let's solve puzzle 0 and send some wrong guesses for puzzle 1
-            OpalAttemptFactory.create(user=alice, puzzle=puzzle_opening_0, guess="0")
-            OpalAttemptFactory.create(
-                user=alice, puzzle=puzzle_opening_1, guess="whisky"
-            )
-            OpalAttemptFactory.create(
-                user=alice, puzzle=puzzle_opening_1, guess="tango"
-            )
-            OpalAttemptFactory.create(
-                user=alice, puzzle=puzzle_opening_1, guess="foxtrot"
-            )
-            self.assertTrue(puzzle_opening_0.is_solved_by(alice))
-            self.assertFalse(puzzle_opening_1.is_solved_by(alice))
-            self.assertFalse(puzzle_gated_2.is_solved_by(alice))
-            self.assertFalse(puzzle_gated_3.is_solved_by(alice))
-            self.assertTrue(puzzle_opening_0.can_view(alice))
-            self.assertTrue(puzzle_opening_1.can_view(alice))
-            self.assertFalse(puzzle_gated_2.can_view(alice))
-            self.assertFalse(puzzle_gated_3.can_view(alice))
+            OpalAttemptFactory.create(user=alice, puzzle=puzzle0, guess="0")
+            OpalAttemptFactory.create(user=alice, puzzle=puzzle1, guess="whisky")
+            OpalAttemptFactory.create(user=alice, puzzle=puzzle1, guess="tango")
+            OpalAttemptFactory.create(user=alice, puzzle=puzzle1, guess="foxtrot")
+            self.assertTrue(puzzle0.is_solved_by(alice))
+            self.assertFalse(puzzle1.is_solved_by(alice))
+            self.assertFalse(puzzle2.is_solved_by(alice))
+            self.assertFalse(puzzle3.is_solved_by(alice))
+            self.assertTrue(puzzle0.can_view(alice))
+            self.assertTrue(puzzle1.can_view(alice))
+            self.assertFalse(puzzle2.can_view(alice))
+            self.assertFalse(puzzle3.can_view(alice))
             self.assertEqual(hunt.num_solves(alice), 1)
 
             # Now let's solve puzzle 1
-            OpalAttemptFactory.create(user=alice, puzzle=puzzle_opening_1, guess="1")
-            self.assertTrue(puzzle_opening_0.is_solved_by(alice))
-            self.assertTrue(puzzle_opening_1.is_solved_by(alice))
-            self.assertFalse(puzzle_gated_2.is_solved_by(alice))
-            self.assertFalse(puzzle_gated_3.is_solved_by(alice))
-            self.assertTrue(puzzle_opening_0.can_view(alice))
-            self.assertTrue(puzzle_opening_1.can_view(alice))
-            self.assertTrue(puzzle_gated_2.can_view(alice))
-            self.assertFalse(puzzle_gated_3.can_view(alice))
+            OpalAttemptFactory.create(user=alice, puzzle=puzzle1, guess="1")
+            self.assertTrue(puzzle0.is_solved_by(alice))
+            self.assertTrue(puzzle1.is_solved_by(alice))
+            self.assertFalse(puzzle2.is_solved_by(alice))
+            self.assertFalse(puzzle3.is_solved_by(alice))
+            self.assertTrue(puzzle0.can_view(alice))
+            self.assertTrue(puzzle1.can_view(alice))
+            self.assertTrue(puzzle2.can_view(alice))
+            self.assertFalse(puzzle3.can_view(alice))
             self.assertEqual(hunt.num_solves(alice), 2)
 
             # Finish puzzle 2
-            OpalAttemptFactory.create(user=alice, puzzle=puzzle_gated_2, guess="2")
-            self.assertTrue(puzzle_opening_0.is_solved_by(alice))
-            self.assertTrue(puzzle_opening_1.is_solved_by(alice))
-            self.assertTrue(puzzle_gated_2.is_solved_by(alice))
-            self.assertFalse(puzzle_gated_3.is_solved_by(alice))
-            self.assertTrue(puzzle_opening_0.can_view(alice))
-            self.assertTrue(puzzle_opening_1.can_view(alice))
-            self.assertTrue(puzzle_gated_2.can_view(alice))
-            self.assertTrue(puzzle_gated_3.can_view(alice))
+            OpalAttemptFactory.create(user=alice, puzzle=puzzle2, guess="2")
+            self.assertTrue(puzzle0.is_solved_by(alice))
+            self.assertTrue(puzzle1.is_solved_by(alice))
+            self.assertTrue(puzzle2.is_solved_by(alice))
+            self.assertFalse(puzzle3.is_solved_by(alice))
+            self.assertTrue(puzzle0.can_view(alice))
+            self.assertTrue(puzzle1.can_view(alice))
+            self.assertTrue(puzzle2.can_view(alice))
+            self.assertTrue(puzzle3.can_view(alice))
             self.assertEqual(hunt.num_solves(alice), 3)
 
             # But Bob is still at the start
-            self.assertFalse(puzzle_opening_0.is_solved_by(bob))
-            self.assertFalse(puzzle_opening_1.is_solved_by(bob))
-            self.assertFalse(puzzle_gated_2.is_solved_by(bob))
-            self.assertFalse(puzzle_gated_3.is_solved_by(bob))
-            self.assertTrue(puzzle_opening_0.can_view(bob))
-            self.assertTrue(puzzle_opening_1.can_view(bob))
-            self.assertFalse(puzzle_gated_2.can_view(bob))
-            self.assertFalse(puzzle_gated_3.can_view(bob))
+            self.assertFalse(puzzle0.is_solved_by(bob))
+            self.assertFalse(puzzle1.is_solved_by(bob))
+            self.assertFalse(puzzle2.is_solved_by(bob))
+            self.assertFalse(puzzle3.is_solved_by(bob))
+            self.assertTrue(puzzle0.can_view(bob))
+            self.assertTrue(puzzle1.can_view(bob))
+            self.assertFalse(puzzle2.can_view(bob))
+            self.assertFalse(puzzle3.can_view(bob))
             self.assertEqual(hunt.num_solves(bob), 0)
+
+    def test_hunt_progress(self):
+        verified_group = GroupFactory(name="Verified")
+        alice = UserFactory.create(username="alice", groups=(verified_group,))
+        bob = UserFactory.create(username="bob", groups=(verified_group,))
+        self.login(alice)
+
+        # Make some old attempts to verify they don't contribute to the current hunt
+        OpalAttemptFactory.create_batch(15, user=alice, is_correct=False)
+        OpalAttemptFactory.create_batch(3, user=alice, is_correct=False)
+
+        hunt = OpalHuntFactory.create(slug="hunt")
+        puzzle0 = OpalPuzzleFactory.create(
+            slug="zero", answer="0", hunt=hunt, num_to_unlock=0, guess_limit=3
+        )
+        puzzle1 = OpalPuzzleFactory.create(
+            slug="one", answer="1", hunt=hunt, num_to_unlock=0, guess_limit=3
+        )
+        puzzle2 = OpalPuzzleFactory.create(
+            slug="two", answer="2", hunt=hunt, num_to_unlock=1, guess_limit=3
+        )
+        puzzle3 = OpalPuzzleFactory.create(
+            slug="three", answer="3", hunt=hunt, num_to_unlock=2, guess_limit=3
+        )
+
+        # Make sure Bob's attempts don't do anything
+        OpalAttemptFactory.create(user=bob, puzzle=puzzle0, guess="0")
+        OpalAttemptFactory.create(user=bob, puzzle=puzzle1, guess="1")
+        OpalAttemptFactory.create(user=bob, puzzle=puzzle2, guess="2")
+        OpalAttemptFactory.create(user=bob, puzzle=puzzle3, guess="3")
+
+        queryset = hunt.get_queryset_for_user(alice)
+        self.assertEqual(queryset.count(), 4)
+        self.assertTrue(queryset.get(pk=puzzle0.pk).unlocked)
+        self.assertTrue(queryset.get(pk=puzzle1.pk).unlocked)
+        self.assertFalse(queryset.get(pk=puzzle2.pk).unlocked)
+        self.assertFalse(queryset.get(pk=puzzle3.pk).unlocked)
+        self.assertFalse(queryset.get(pk=puzzle0.pk).solved)
+        self.assertFalse(queryset.get(pk=puzzle1.pk).solved)
+        self.assertFalse(queryset.get(pk=puzzle2.pk).solved)
+        self.assertFalse(queryset.get(pk=puzzle3.pk).solved)
+        self.assertGet20X("opal-show-puzzle", "hunt", "zero", follow=True)
+        self.assertGet20X("opal-show-puzzle", "hunt", "one", follow=True)
+        self.assertGet40X("opal-show-puzzle", "hunt", "two", follow=True)
+        self.assertGet40X("opal-show-puzzle", "hunt", "three", follow=True)
+
+        # Let's have Alice solve puzzle 0
+        resp = self.assertPostOK(
+            "opal-show-puzzle",
+            "hunt",
+            "zero",
+            data={"guess": "0"},
+            follow=True,
+        )
+        self.assertContains(resp, "Correct answer")
+        self.assertEqual(hunt.num_solves(alice), 1)
+        queryset = hunt.get_queryset_for_user(alice)
+        self.assertEqual(queryset.count(), 4)
+        self.assertTrue(queryset.get(pk=puzzle0.pk).unlocked)
+        self.assertTrue(queryset.get(pk=puzzle1.pk).unlocked)
+        self.assertTrue(queryset.get(pk=puzzle2.pk).unlocked)
+        self.assertFalse(queryset.get(pk=puzzle3.pk).unlocked)
+        self.assertTrue(queryset.get(pk=puzzle0.pk).solved)
+        self.assertFalse(queryset.get(pk=puzzle1.pk).solved)
+        self.assertFalse(queryset.get(pk=puzzle2.pk).solved)
+        self.assertFalse(queryset.get(pk=puzzle3.pk).solved)
+
+        # Let's have Alice fail to solve puzzle 1
+        for i, guess_word in enumerate(("nani", "da", "heck")):
+            resp = self.assertPostOK(
+                "opal-show-puzzle",
+                "hunt",
+                "one",
+                data={"guess": guess_word},
+                follow=True,
+            )
+            self.assertContains(resp, "Sorry")
+            self.assertFalse(resp.context["solved"])
+            self.assertEqual(resp.context["can_attempt"], i < 2)
+        resp = self.assertPost40X(
+            "opal-show-puzzle",
+            "hunt",
+            "one",
+            data={"guess": "oh no i'm locked out"},
+            follow=True,
+        )
+
+        # Let's have Alice solve puzzle 2
+        resp = self.assertPostOK(
+            "opal-show-puzzle",
+            "hunt",
+            "two",
+            data={"guess": "2"},
+            follow=True,
+        )
+        self.assertContains(resp, "Correct answer")
+        self.assertEqual(hunt.num_solves(alice), 2)
+        queryset = hunt.get_queryset_for_user(alice)
+        self.assertEqual(queryset.count(), 4)
+        self.assertTrue(queryset.get(pk=puzzle0.pk).unlocked)
+        self.assertTrue(queryset.get(pk=puzzle1.pk).unlocked)
+        self.assertTrue(queryset.get(pk=puzzle2.pk).unlocked)
+        self.assertTrue(queryset.get(pk=puzzle3.pk).unlocked)
+        self.assertTrue(queryset.get(pk=puzzle0.pk).solved)
+        self.assertFalse(queryset.get(pk=puzzle1.pk).solved)
+        self.assertTrue(queryset.get(pk=puzzle2.pk).solved)
+        self.assertFalse(queryset.get(pk=puzzle3.pk).solved)
+
+        # But Alice shouldn't be able to submit multiple correct answers
+        self.assertPost40X(
+            "opal-show-puzzle",
+            "hunt",
+            "two",
+            data={"guess": "two"},
+            follow=True,
+        )
