@@ -4,7 +4,6 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db.models.query import QuerySet
-from django.http.request import HttpRequest
 from django.http.response import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.views.generic.list import ListView
@@ -30,11 +29,14 @@ class PuzzleList(VerifiedRequiredMixin, ListView[OpalPuzzle]):
     model = OpalPuzzle
     context_object_name = "puzzles"
 
-    def setup(self, request: HttpRequest, *args: Any, **kwargs: Any):
+    def setup(self, request: AuthHttpRequest, *args: Any, **kwargs: Any):
         super().setup(request, *args, **kwargs)
         self.hunt = get_object_or_404(OpalHunt, slug=self.kwargs["slug"])
         if not self.hunt.has_started:
-            raise PermissionDenied("This hunt hasn't started yet.")
+            if request.user.is_superuser:
+                messages.warning(request, "This hunt hasn't started yet")
+            else:
+                raise PermissionDenied("This puzzle cannot be unlocked yet")
 
     def get_queryset(self) -> QuerySet[OpalPuzzle]:
         assert isinstance(self.request.user, User)
@@ -50,7 +52,12 @@ class PuzzleList(VerifiedRequiredMixin, ListView[OpalPuzzle]):
 def show_puzzle(request: AuthHttpRequest, hunt: str, slug: str) -> HttpResponse:
     puzzle = get_object_or_404(OpalPuzzle, hunt__slug=hunt, slug=slug)
     if not puzzle.can_view(request.user):
-        raise PermissionDenied("This puzzle cannot be unlocked yet")
+        if request.user.is_superuser:
+            messages.warning(
+                request, "Only letting you see this cuz you're an admin..."
+            )
+        else:
+            raise PermissionDenied("This puzzle cannot be unlocked yet")
 
     past_attempts = OpalAttempt.objects.filter(puzzle=puzzle, user=request.user)
     is_solved = past_attempts.filter(is_correct=True).exists()
