@@ -16,6 +16,7 @@ WIKI_SUBJECT_CHART = {
     "N": "number-theory",
     "M": "miscellaneous",
     "K": "secret",
+    "H": "higher-math",
 }
 
 
