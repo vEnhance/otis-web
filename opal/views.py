@@ -53,12 +53,12 @@ class PuzzleList(VerifiedRequiredMixin, ListView[OpalPuzzle]):
 def show_puzzle(request: AuthHttpRequest, hunt: str, slug: str) -> HttpResponse:
     puzzle = get_object_or_404(OpalPuzzle, hunt__slug=hunt, slug=slug)
     if not puzzle.can_view(request.user):
-        if request.user.is_superuser:
+        if not request.user.is_superuser:
+            raise PermissionDenied("This puzzle cannot be unlocked yet")
+        elif request.method != "POST":
             messages.warning(
                 request, "Only letting you see this cuz you're an admin..."
             )
-        else:
-            raise PermissionDenied("This puzzle cannot be unlocked yet")
 
     past_attempts = OpalAttempt.objects.filter(puzzle=puzzle, user=request.user)
     is_solved = past_attempts.filter(is_correct=True).exists()
