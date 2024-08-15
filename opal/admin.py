@@ -27,12 +27,13 @@ class OpalPuzzleAdmin(admin.ModelAdmin):
     list_display = (
         "pk",
         "title",
+        "slug",
         "answer",
         "hunt",
         "order",
         "num_to_unlock",
     )
-    list_display_links = ("pk", "title")
+    list_display_links = ("pk", "title", "slug")
     list_filter = (
         "hunt",
         ("content", admin.EmptyFieldListFilter),
