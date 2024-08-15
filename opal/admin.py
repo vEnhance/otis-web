@@ -27,6 +27,7 @@ class OpalPuzzleAdmin(admin.ModelAdmin):
     list_display = (
         "pk",
         "hunt",
+        "order",
         "num_to_unlock",
         "slug",
         "title",
