@@ -26,14 +26,11 @@ class OpalHuntAdmin(admin.ModelAdmin):
 class OpalPuzzleAdmin(admin.ModelAdmin):
     list_display = (
         "pk",
+        "title",
+        "answer",
         "hunt",
         "order",
         "num_to_unlock",
-        "slug",
-        "title",
-        "answer",
-        "content",
-        "achievement",
     )
     list_display_links = ("pk", "slug", "title")
     list_filter = (
