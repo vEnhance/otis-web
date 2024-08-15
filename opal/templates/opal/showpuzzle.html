@@ -6,14 +6,19 @@
 {% block layout-content %}
   {% if puzzle.credits %}<p class="fst-italic">{{ puzzle.credits }}</p>{% endif %}
   {% if puzzle.content %}
-    <ul>
-      <li>
-        <b><a href="{{ puzzle.content.url }}">Download puzzle as PDF</a></b>
-      </li>
-      <li>
-        Go back to <a href="{{ hunt.get_absolute_url }}">{{ hunt }}</a>.
-      </li>
-    </ul>
+    <div>
+      <a href="{{ puzzle.content.url }}"
+         title="Download as PDF"
+         class="btn btn-primary">Download PDF</a>
+      <a href="{{ hunt.get_absolute_url }}"
+         title="Download as PDF"
+         class="btn btn-secondary">Back to hunt</a>
+      {% if request.user.is_superuser %}
+        <a href="{% url "admin:opal_opalpuzzle_change" puzzle.pk %}"
+           title="Edit in admin"
+           class="btn btn-outline-dark">Edit in admin</a>
+      {% endif %}
+    </div>
   {% else %}
     <div class="alert alert-danger">
       <h3 class="alert-heading">PDF file for this puzzle not found</h3>
@@ -21,18 +26,17 @@
       <p>
         Otherwise, go back to <a class="alert-link" href="{{ hunt.get_absolute_url }}">{{ hunt }}</a>.
       </p>
+      {% if request.user.is_superuser %}
+        <p>
+          Or
+          <a href="{% url "admin:opal_opalpuzzle_change" puzzle.pk %}"
+             title="Edit in admin">edit in admin</a>.
+        </p>
+      {% endif %}
     </div>
   {% endif %}
-  {% if request.user.is_superuser %}
-    <div>
-      <a href="{% url "admin:opal_opalpuzzle_change" puzzle.pk %}"
-         title="Edit in admin"
-         class="btn btn-outline-dark">Edit in admin</a>
-    </div>
-    <br />
-  {% endif %}
+  <hr />
   {% if can_attempt %}
-    <hr />
     {% include "generic_form.html" %}
   {% elif solved %}
     <div class="alert alert-success">
