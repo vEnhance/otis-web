@@ -101,13 +101,19 @@ class OpalPuzzle(models.Model):
     is_metapuzzle = models.BooleanField(
         default=False, help_text="Whether this is a metapuzzle or not"
     )
+    credits = models.CharField(
+        max_length=128, help_text="Credits for the author of the puzzle.", blank=True
+    )
+    order = models.SmallIntegerField(
+        default=0, help_text="The order to display the puzzle in within the hunt."
+    )
 
     class Meta:
         unique_together = ("hunt", "slug")
         ordering = (
             "hunt__start_date",
+            "order",
             "num_to_unlock",
-            "title",
         )
 
     def __str__(self) -> str:

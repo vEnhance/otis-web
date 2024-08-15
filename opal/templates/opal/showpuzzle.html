@@ -4,6 +4,7 @@
   {{ puzzle.title }}
 {% endblock title %}
 {% block layout-content %}
+  {% if puzzle.credits %}<p class="fst-italic">{{ puzzle.credits }}</p>{% endif %}
   {% if puzzle.content %}
     <ul>
       <li>
@@ -21,6 +22,14 @@
         Otherwise, go back to <a class="alert-link" href="{{ hunt.get_absolute_url }}">{{ hunt }}</a>.
       </p>
     </div>
+  {% endif %}
+  {% if request.user.is_superuser %}
+    <div>
+      <a href="{% url "admin:opal_opalpuzzle_change" puzzle.pk %}"
+         title="Edit in admin"
+         class="btn btn-outline-dark">Edit in admin</a>
+    </div>
+    <br />
   {% endif %}
   {% if can_attempt %}
     <hr />
