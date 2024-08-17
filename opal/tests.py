@@ -1,4 +1,5 @@
 import datetime
+import re
 
 from freezegun.api import freeze_time
 
@@ -128,12 +129,12 @@ class TestOPALModels(EvanTestCase):
         OpalPuzzleFactory.create().get_absolute_url()
         str(OpalAttemptFactory.create())
 
-    def test_puzzle_filename(self):
+    def test_puzzle_upload(self):
         puzzle = OpalPuzzleFactory.create(hunt__slug="hunt", slug="sudoku")
         self.assertFalse(puzzle.is_uploaded)
-        self.assertEqual(
-            puzzle_file_name(puzzle, "file_from_evans_laptop.pdf"),
-            "opals/hunt/sudoku.pdf",
+        filename = puzzle_file_name(puzzle, "file_from_evans_laptop.pdf")
+        self.assertTrue(
+            re.match(r"opals\/hunt\/[a-z0-9]+\/sudoku.pdf", filename), filename
         )
 
     def test_author_signups(self):

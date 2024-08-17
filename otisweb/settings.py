@@ -254,6 +254,7 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
 INVOICE_HASH_KEY = os.getenv("INVOICE_HASH_KEY", "evan_chen_is_still_really_cool")
 STORAGE_HASH_KEY = os.getenv("STORAGE_HASH_KEY", "look_at_me_im_a_cute_kitten")
 CERT_HASH_KEY = os.getenv("CERT_HASH_KEY", "certified_by_god")
+OPAL_HASH_KEY = os.getenv("OPAL_HASH_KEY", "paradise_is_where_i_am")
 API_TARGET_HASH = os.getenv("API_TARGET_HASH")
 
 PATH_STATEMENT_ON_DISK = os.getenv("PATH_STATEMENT_ON_DISK")

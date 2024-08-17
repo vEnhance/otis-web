@@ -1,7 +1,9 @@
 import os
 import string
+from hashlib import pbkdf2_hmac
 from typing import Any
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.validators import FileExtensionValidator
 from django.db import models
@@ -62,7 +64,14 @@ class OpalAttempt(models.Model):
 
 def puzzle_file_name(instance: "OpalPuzzle", filename: str) -> str:
     del filename
-    return os.path.join("opals", instance.hunt.slug, instance.slug + ".pdf")
+    hexstring = pbkdf2_hmac(
+        "sha256",
+        (settings.OPAL_HASH_KEY + str(instance.pk)).encode("utf-8"),
+        b"salt is yummy so is sugar",
+        100000,
+        dklen=18,
+    ).hex()
+    return os.path.join("opals", instance.hunt.slug, hexstring, instance.slug + ".pdf")
 
 
 class OpalPuzzle(models.Model):
