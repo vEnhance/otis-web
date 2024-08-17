@@ -62,7 +62,7 @@ class OpalAttempt(models.Model):
 
 def puzzle_file_name(instance: "OpalPuzzle", filename: str) -> str:
     del filename
-    return os.path.join("opal", instance.hunt.slug, instance.slug + ".pdf")
+    return os.path.join("opals", instance.hunt.slug, instance.slug + ".pdf")
 
 
 class OpalPuzzle(models.Model):
@@ -71,8 +71,8 @@ class OpalPuzzle(models.Model):
         on_delete=models.CASCADE,
         help_text="The hunt this puzzle belongs to",
     )
-    slug = models.SlugField(help_text="Slug for the puzzle")
     title = models.CharField(max_length=128, help_text="Name of the puzzle")
+    slug = models.SlugField(help_text="Slug for the puzzle")
     answer = models.CharField(
         max_length=128, help_text="Answer to the puzzle, as displayed"
     )
@@ -125,6 +125,10 @@ class OpalPuzzle(models.Model):
 
     def get_absolute_url(self) -> str:
         return reverse("opal-show-puzzle", args=(self.hunt.slug, self.slug))
+
+    @property
+    def is_uploaded(self) -> bool:
+        return bool(self.content)
 
     def can_view(self, user: User) -> bool:
         return (

@@ -130,9 +130,10 @@ class TestOPALModels(EvanTestCase):
 
     def test_puzzle_filename(self):
         puzzle = OpalPuzzleFactory.create(hunt__slug="hunt", slug="sudoku")
+        self.assertFalse(puzzle.is_uploaded)
         self.assertEqual(
             puzzle_file_name(puzzle, "file_from_evans_laptop.pdf"),
-            "opal/hunt/sudoku.pdf",
+            "opals/hunt/sudoku.pdf",
         )
 
     def test_author_signups(self):

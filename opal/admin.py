@@ -28,6 +28,8 @@ class OpalPuzzleAdmin(admin.ModelAdmin):
         "pk",
         "title",
         "slug",
+        "is_uploaded",
+        "credits",
         "answer",
         "hunt",
         "order",
