@@ -62,7 +62,7 @@ class OpalAttempt(models.Model):
 
 def puzzle_file_name(instance: "OpalPuzzle", filename: str) -> str:
     del filename
-    return os.path.join(instance.hunt.slug, instance.slug + ".pdf")
+    return os.path.join("opal", instance.hunt.slug, instance.slug + ".pdf")
 
 
 class OpalPuzzle(models.Model):
