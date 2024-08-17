@@ -76,10 +76,18 @@ class OpalPuzzle(models.Model):
     answer = models.CharField(
         max_length=128, help_text="Answer to the puzzle, as displayed"
     )
+
+    order = models.SmallIntegerField(
+        default=0, help_text="The order to display the puzzle in within the hunt."
+    )
     num_to_unlock = models.PositiveSmallIntegerField(
         default=0,
         help_text="Number of solves needed before this OPAL puzzle is unlocked",
     )
+    credits = models.CharField(
+        max_length=128, help_text="Credits for the author of the puzzle.", blank=True
+    )
+
     content = models.FileField(
         upload_to=puzzle_file_name,
         verbose_name="Puzzle file",
@@ -88,24 +96,20 @@ class OpalPuzzle(models.Model):
         null=True,
         blank=True,
     )
-    achievement = models.ForeignKey(
-        Achievement,
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        help_text="Achievement to be awarded if this puzzle is solved",
-    )
+
     guess_limit = models.PositiveSmallIntegerField(
         default=20, help_text="Maximum number of guesses to allow"
     )
     is_metapuzzle = models.BooleanField(
         default=False, help_text="Whether this is a metapuzzle or not"
     )
-    credits = models.CharField(
-        max_length=128, help_text="Credits for the author of the puzzle.", blank=True
-    )
-    order = models.SmallIntegerField(
-        default=0, help_text="The order to display the puzzle in within the hunt."
+
+    achievement = models.ForeignKey(
+        Achievement,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        help_text="Achievement to be awarded if this puzzle is solved",
     )
 
     class Meta:
