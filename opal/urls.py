@@ -21,5 +21,10 @@ urlpatterns = [
         views.show_puzzle,
         name="opal-show-puzzle",
     ),
+    path(
+        r"guesses/<str:hunt>/<str:slug>/",
+        views.AttemptsList.as_view(),
+        name="opal-attempts-list",
+    ),
     path(r"", RedirectView.as_view(pattern_name="opal-hunt-list"), name="opal-index"),
 ]

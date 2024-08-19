@@ -1,5 +1,6 @@
 from typing import Any
 
+from braces.views import SuperuserRequiredMixin
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
@@ -47,6 +48,27 @@ class PuzzleList(VerifiedRequiredMixin, ListView[OpalPuzzle]):
         context = super().get_context_data(**kwargs)
         context["hunt"] = self.hunt
         return context
+
+
+class AttemptsList(SuperuserRequiredMixin, ListView[OpalAttempt]):
+    model = OpalAttempt
+    context_object_name = "attempts"
+
+    def setup(self, request: AuthHttpRequest, *args: Any, **kwargs: Any):
+        super().setup(request, *args, **kwargs)
+        self.puzzle = get_object_or_404(
+            OpalPuzzle, hunt__slug=self.kwargs["hunt"], slug=self.kwargs["slug"]
+        )
+
+    def get_context_data(self, **kwargs: Any):
+        context = super().get_context_data(**kwargs)
+        context["puzzle"] = self.puzzle
+        context["num_total"] = self.get_queryset().count()
+        context["num_correct"] = self.get_queryset().filter(is_correct=True).count()
+        return context
+
+    def get_queryset(self) -> QuerySet[OpalAttempt]:
+        return OpalAttempt.objects.filter(puzzle=self.puzzle).order_by("-created_at")
 
 
 @verified_required

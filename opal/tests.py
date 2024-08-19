@@ -20,14 +20,27 @@ class TestOPALModels(EvanTestCase):
         self.assertEqual(answerize("luminescent"), "LUMINESCENT")
         self.assertEqual(answerize("hindSight IS 20/20 🧐"), "HINDSIGHTIS2020")
 
-    def test_attempt_save(self):
-        puzzle = OpalPuzzleFactory(answer="Final Proposal")
+    def test_attempt_save_and_log(self):
+        puzzle = OpalPuzzleFactory(
+            hunt__slug="mh21", slug="clueless", answer="Final Proposal"
+        )
         attempt1 = OpalAttemptFactory.create(puzzle=puzzle, guess="FINALPROPOSAL")
         self.assertTrue(attempt1.is_correct)
         attempt2 = OpalAttemptFactory.create(puzzle=puzzle, guess="Final Proposal")
         self.assertTrue(attempt2.is_correct)
         attempt3 = OpalAttemptFactory.create(puzzle=puzzle, guess="final proposal 2")
         self.assertFalse(attempt3.is_correct)
+
+        self.assertEqual(puzzle.get_attempt_log_url, r"/opal/guesses/mh21/clueless/")
+
+        admin = UserFactory.create(username="admin", is_superuser=True)
+        self.login(admin)
+        resp = self.assertGetOK(
+            "opal-attempts-list", args=(puzzle.hunt.slug, puzzle.slug)
+        )
+        self.assertEqual(len(resp.context["attempts"]), 3)
+        self.assertEqual(len(resp.context["num_total"]), 3)
+        self.assertEqual(len(resp.context["num_correct"]), 2)
 
     def test_unlock_gating(self):
         alice = UserFactory.create(username="alice")

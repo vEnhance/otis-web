@@ -139,6 +139,10 @@ class OpalPuzzle(models.Model):
     def is_uploaded(self) -> bool:
         return bool(self.content)
 
+    @property
+    def get_attempt_log_url(self) -> str:
+        return reverse("opal-attempts-list", args=(self.hunt.slug, self.slug))
+
     def can_view(self, user: User) -> bool:
         return (
             self.hunt.has_started and self.hunt.num_solves(user) >= self.num_to_unlock

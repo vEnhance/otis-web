@@ -14,6 +14,9 @@
          title="Download as PDF"
          class="btn btn-secondary">Back to hunt</a>
       {% if request.user.is_superuser %}
+        <a href="{{ puzzle.get_attempt_log_url }}"
+           title="Guess log"
+           class="btn btn-info">Guess log</a>
         <a href="{% url "admin:opal_opalpuzzle_change" puzzle.pk %}"
            title="Edit in admin"
            class="btn btn-outline-dark">Edit in admin</a>
@@ -28,9 +31,11 @@
       </p>
       {% if request.user.is_superuser %}
         <p>
-          Or
+          Youc an also
           <a href="{% url "admin:opal_opalpuzzle_change" puzzle.pk %}"
-             title="Edit in admin">edit in admin</a>.
+             title="Edit in admin">edit in admin</a>
+          or
+          <a href="{{ puzzle.get_attempt_log_url }}">view attempts</a>.
         </p>
       {% endif %}
     </div>

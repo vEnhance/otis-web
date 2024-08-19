@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+{% block title %}
+  Answer log for {{ puzzle.title }}
+{% endblock title %}
+{% block layout-content %}
+  <p>
+    There were <b>{{ num_correct }} solves</b> and <b>{{ num_total }} guesses</b>.
+  </p>
+  <table class="table">
+    <tr class="table-dark">
+      <th>#</th>
+      <th>Timestamp</th>
+      <th>User</th>
+      <th>Guess</th>
+    </tr>
+    {% for attempt in attempts %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>
+          {% if attempt.is_correct %}
+            ✅
+          {% else %}
+            ✖️
+          {% endif %}
+          {{ attempt.created_at }}
+        </td>
+        <td>{{ attempt.user.get_full_name }}</td>
+        <td class="{% if attempt.is_correct %}text-success{% else %}text-danger{% endif %}">
+          <tt>{{ attempt.guess }}</tt>
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+{% endblock layout-content %}
