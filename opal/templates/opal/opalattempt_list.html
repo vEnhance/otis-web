@@ -2,6 +2,12 @@
 {% block title %}
   Answer log for {{ puzzle.title }}
 {% endblock title %}
+{% block main-class %}
+  col-12
+{% endblock main-class %}
+{% block side-class %}
+  col-6 col-md-4
+{% endblock side-class %}
 {% block layout-content %}
   <p>
     There were <b>{{ num_correct }} solves</b> and <b>{{ num_total }} guesses</b>.
