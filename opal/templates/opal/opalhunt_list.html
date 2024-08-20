@@ -22,6 +22,7 @@
         (started {{ hunt.start_date }})
         {% if request.user.is_superuser %}
           <a href="{% url "admin:opal_opalhunt_change" hunt.pk %}">(edit)</a>
+          <a href="{% url "opal-leaderboard" hunt.slug %}">(scoreboard)</a>
         {% endif %}
       </p>
     {% elif hunt.has_started %}
@@ -33,6 +34,9 @@
           {% endif %}
         </h2>
         <a class="btn btn-primary" href="{{ hunt.get_absolute_url }}">Show puzzles</a>
+        {% if request.user.is_superuser %}
+          <a class="btn btn-info" href="{% url "opal-leaderboard" hunt.slug %}">Leaderboard</a>
+        {% endif %}
         <p>Started {{ hunt.start_date }} ({{ hunt.start_date|timesince }} ago).</p>
       </div>
     {% else %}

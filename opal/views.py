@@ -4,12 +4,15 @@ from braces.views import SuperuserRequiredMixin
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
+from django.db.models import Q
+from django.db.models.aggregates import Max
 from django.db.models.query import QuerySet
 from django.http.response import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.views.generic.list import ListView
+from sql_util.utils import SubqueryCount
 
-from otisweb.decorators import verified_required
+from otisweb.decorators import admin_required, verified_required
 from otisweb.mixins import VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest
 from rpg.models import AchievementUnlock
@@ -69,6 +72,55 @@ class AttemptsList(SuperuserRequiredMixin, ListView[OpalAttempt]):
 
     def get_queryset(self) -> QuerySet[OpalAttempt]:
         return OpalAttempt.objects.filter(puzzle=self.puzzle).order_by("-created_at")
+
+
+# this is ugly af and untested but i'm getting dinner with my senpai in an hour
+@admin_required
+def leaderboard(request: AuthHttpRequest, slug: str) -> HttpResponse:
+    hunt = get_object_or_404(OpalHunt, slug=slug)
+    context: dict[str, Any] = {}
+    correct_attempts = OpalAttempt.objects.filter(
+        is_correct=True, puzzle__hunt=hunt
+    ).values("user__pk", "user__first_name", "user__last_name", "puzzle__order")
+    user_solve_record: dict[int, list] = {}
+    num_solves_dict: dict[int, int] = {}
+    realname_dict: dict[int, str] = {}
+    max_order = OpalPuzzle.objects.filter(hunt=hunt).aggregate(m=Max("order"))["m"]
+    for attempt_dict in correct_attempts:
+        user_pk: int = attempt_dict["user__pk"]
+        if user_pk not in realname_dict:
+            realname_dict[user_pk] = (
+                attempt_dict["user__first_name"] + " " + attempt_dict["user__last_name"]
+            )
+        if user_pk not in user_solve_record:
+            user_solve_record[user_pk] = [False] * max_order
+        if user_pk not in num_solves_dict:
+            num_solves_dict[user_pk] = 0
+        user_solve_record[user_pk][attempt_dict["puzzle__order"] - 1] = True
+        num_solves_dict[user_pk] += 1
+
+    context["hunt"] = hunt
+    context["puzzle_stats"] = (
+        OpalPuzzle.objects.filter(hunt=hunt)
+        .annotate(
+            num_solves=SubqueryCount("opalattempt", filter=Q(is_correct=True)),
+            num_total_attempts=SubqueryCount("opalattempt"),
+        )
+        .values("num_solves", "num_total_attempts", "title", "slug")
+    )
+    context["rows"] = [
+        {
+            "name": realname_dict[user_pk],
+            "num_solves": num_solves_dict[user_pk],
+            "emoji_string": "".join(
+                "✅" if r else "✖️" for r in user_solve_record[user_pk]
+            ),
+        }
+        for user_pk in sorted(
+            user_solve_record.keys(), key=lambda user_pk: -num_solves_dict[user_pk]
+        )
+    ]
+    return render(request, "opal/leaderboard.html", context)
 
 
 @verified_required

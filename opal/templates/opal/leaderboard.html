@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+{% block title %}
+  Leaderboard for {{ hunt.name }}
+{% endblock title %}
+{% block layout-content %}
+  <h2>Puzzle statistics</h2>
+  <table class="table">
+    <tr class="table-dark">
+      <th>Solves</th>
+      <th>#attempts</th>
+      <th>Puzzle</th>
+    </tr>
+    {% for puzzle in puzzle_stats %}
+      <tr>
+        <td class="text-end">
+          <b>{{ puzzle.num_solves }}</b>
+        </td>
+        <td class="text-end">{{ puzzle.num_total_attempts }}</td>
+        <td>
+          <a href="{% url "opal-attempts-list" hunt.slug puzzle.slug %}">{{ puzzle.title }}</a>
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+  <h2>Current leaderboard</h2>
+  <table class="table">
+    <tr class="table-dark">
+      <th>Score</th>
+      <th>User</th>
+      <th>Progress</th>
+    </tr>
+    {% for row in rows %}
+      <tr>
+        <td class="text-end">
+          <b>{{ row.num_solves }}</b>
+        </td>
+        <td>{{ row.name }}</td>
+        <td>{{ row.emoji_string }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+{% endblock layout-content %}
+{% comment %}
+vim: ft=htmldjango
+{% endcomment %}

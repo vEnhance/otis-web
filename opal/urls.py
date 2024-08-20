@@ -16,6 +16,7 @@ urlpatterns = [
     ),
     path(r"list/", views.HuntList.as_view(), name="opal-hunt-list"),
     path(r"puzzles/<str:slug>/", views.PuzzleList.as_view(), name="opal-puzzle-list"),
+    path(r"leaderboard/<str:slug>/", views.leaderboard, name="opal-leaderboard"),
     path(
         r"puzzle/<str:hunt>/<str:slug>/",
         views.show_puzzle,
