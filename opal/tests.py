@@ -35,12 +35,10 @@ class TestOPALModels(EvanTestCase):
 
         admin = UserFactory.create(username="admin", is_superuser=True)
         self.login(admin)
-        resp = self.assertGetOK(
-            "opal-attempts-list", args=(puzzle.hunt.slug, puzzle.slug)
-        )
+        resp = self.assertGetOK("opal-attempts-list", "mh21", "clueless")
         self.assertEqual(len(resp.context["attempts"]), 3)
-        self.assertEqual(len(resp.context["num_total"]), 3)
-        self.assertEqual(len(resp.context["num_correct"]), 2)
+        self.assertEqual(resp.context["num_total"], 3)
+        self.assertEqual(resp.context["num_correct"], 2)
 
     def test_unlock_gating(self):
         alice = UserFactory.create(username="alice")
