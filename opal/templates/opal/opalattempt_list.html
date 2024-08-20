@@ -9,6 +9,12 @@
   col-6 col-md-4
 {% endblock side-class %}
 {% block layout-content %}
+  {% if puzzle.credits %}<p class="fst-italic">{{ puzzle.credits }}</p>{% endif %}
+  <p>
+    <a class="btn btn-primary" href="{{ puzzle.get_absolute_url }}">Puzzle</a>
+    <a class="btn btn-info"
+       href="{% url "opal-leaderboard" puzzle.hunt.slug %}">Leaderboard</a>
+  </p>
   <p>
     There were <b>{{ num_correct }} solves</b> and <b>{{ num_total }} guesses</b>.
   </p>

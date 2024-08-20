@@ -16,7 +16,7 @@
       {% if request.user.is_superuser %}
         <a href="{{ puzzle.get_attempt_log_url }}"
            title="Guess log"
-           class="btn btn-info">Guess log</a>
+           class="btn btn-success">Guess log</a>
         <a href="{% url "admin:opal_opalpuzzle_change" puzzle.pk %}"
            title="Edit in admin"
            class="btn btn-outline-dark">Edit in admin</a>
