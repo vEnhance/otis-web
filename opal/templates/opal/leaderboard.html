@@ -46,7 +46,7 @@
         </td>
         <td>{{ row.name }}</td>
         <td>{{ row.emoji_string }}</td>
-        <td>{{ row.most_recent_solve }}</td>
+        <td>{{ row.most_recent_solve|date:"Y-m-d H:i" }}</td>
       </tr>
     {% endfor %}
   </table>
