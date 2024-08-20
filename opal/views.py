@@ -1,3 +1,4 @@
+import datetime
 from typing import Any
 
 from braces.views import SuperuserRequiredMixin
@@ -79,13 +80,18 @@ class AttemptsList(SuperuserRequiredMixin, ListView[OpalAttempt]):
 def leaderboard(request: AuthHttpRequest, slug: str) -> HttpResponse:
     hunt = get_object_or_404(OpalHunt, slug=slug)
     context: dict[str, Any] = {}
+    max_order = OpalPuzzle.objects.filter(hunt=hunt).aggregate(m=Max("order"))["m"]
+
     correct_attempts = OpalAttempt.objects.filter(
         is_correct=True, puzzle__hunt=hunt
-    ).values("user__pk", "user__first_name", "user__last_name", "puzzle__order")
+    ).values(
+        "user__pk", "user__first_name", "user__last_name", "puzzle__order", "created_at"
+    )
     user_solve_record: dict[int, list] = {}
     num_solves_dict: dict[int, int] = {}
     realname_dict: dict[int, str] = {}
-    max_order = OpalPuzzle.objects.filter(hunt=hunt).aggregate(m=Max("order"))["m"]
+    most_recent_solve_dict: dict[int, datetime.datetime] = {}
+
     for attempt_dict in correct_attempts:
         user_pk: int = attempt_dict["user__pk"]
         if user_pk not in realname_dict:
@@ -94,10 +100,16 @@ def leaderboard(request: AuthHttpRequest, slug: str) -> HttpResponse:
             )
         if user_pk not in user_solve_record:
             user_solve_record[user_pk] = [False] * max_order
+        user_solve_record[user_pk][attempt_dict["puzzle__order"] - 1] = True
         if user_pk not in num_solves_dict:
             num_solves_dict[user_pk] = 0
-        user_solve_record[user_pk][attempt_dict["puzzle__order"] - 1] = True
         num_solves_dict[user_pk] += 1
+        if user_pk not in most_recent_solve_dict:
+            most_recent_solve_dict[user_pk] = attempt_dict["created_at"]
+        else:
+            most_recent_solve_dict[user_pk] = max(
+                most_recent_solve_dict[user_pk], attempt_dict["created_at"]
+            )
 
     context["hunt"] = hunt
     context["puzzle_stats"] = (
@@ -112,12 +124,17 @@ def leaderboard(request: AuthHttpRequest, slug: str) -> HttpResponse:
         {
             "name": realname_dict[user_pk],
             "num_solves": num_solves_dict[user_pk],
+            "most_recent_solve": most_recent_solve_dict[user_pk],
             "emoji_string": "".join(
                 "✅" if r else "✖️" for r in user_solve_record[user_pk]
             ),
         }
         for user_pk in sorted(
-            user_solve_record.keys(), key=lambda user_pk: -num_solves_dict[user_pk]
+            user_solve_record.keys(),
+            key=lambda user_pk: (
+                -num_solves_dict[user_pk],
+                most_recent_solve_dict[user_pk],
+            ),
         )
     ]
     return render(request, "opal/leaderboard.html", context)

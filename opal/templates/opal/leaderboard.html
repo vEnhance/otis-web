@@ -28,6 +28,7 @@
       <th>Score</th>
       <th>User</th>
       <th>Progress</th>
+      <th>Last solve</th>
     </tr>
     {% for row in rows %}
       <tr>
@@ -36,6 +37,7 @@
         </td>
         <td>{{ row.name }}</td>
         <td>{{ row.emoji_string }}</td>
+        <td>{{ row.most_recent_solve }}</td>
       </tr>
     {% endfor %}
   </table>
