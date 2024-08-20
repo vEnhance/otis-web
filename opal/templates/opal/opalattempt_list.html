@@ -15,7 +15,9 @@
     </tr>
     {% for attempt in attempts %}
       <tr>
-        <td>{{ forloop.counter }}</td>
+        <td>
+          <a href="{% url "admin:opal_opalattempt_change" attempt.pk %}">{{ forloop.counter }}</a>
+        </td>
         <td>
           {% if attempt.is_correct %}
             ✅
@@ -26,7 +28,7 @@
         </td>
         <td>{{ attempt.user.get_full_name }}</td>
         <td class="{% if attempt.is_correct %}text-success{% else %}text-danger{% endif %}">
-          <tt>{{ attempt.guess }}</tt>
+          <tt>{{ attempt.guess|truncatechars:24 }}</tt>
         </td>
       </tr>
     {% endfor %}
