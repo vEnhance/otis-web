@@ -35,7 +35,7 @@
   {% include "generic_form.html" with submit_name="Send" %}
   {% if request.user|getconfig:"show_unit_petitions" %}
     <h2>Current petitions</h2>
-    <table class="table">
+    <table class="table table-striped">
       <thead class="table-dark">
         <tr>
           <th>Created</th>

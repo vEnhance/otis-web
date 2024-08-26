@@ -6,7 +6,7 @@
   </p>
   <h2>Pending submissions</h2>
   {% if unaccepted_psets %}
-    <table class="table">
+    <table class="table-striped">
       {% for pset in unaccepted_psets %}
         <tr {% if pset.status == "R" %}class="table-danger"{% endif %}>
           <td>
