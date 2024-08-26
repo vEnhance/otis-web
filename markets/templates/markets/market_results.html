@@ -63,7 +63,7 @@
         </tr>
         {% for g in guesses %}
           <tr {% if g.score >= best_guess.score %}class="table-success fw-bold" {% elif guess.pk == g.pk %}class="table-primary" {% endif %}>
-            <th class="text-end">{{ forloop.counter }}</th>
+            <td class="text-end">{{ forloop.counter }}</td>
             <td class="text-end">
               {% if request.user.is_staff %}
                 <a href="{% url "admin:markets_guess_change" g.pk %}">{{ g.value|floatformat:6 }}</a>
