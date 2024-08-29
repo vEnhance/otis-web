@@ -801,11 +801,11 @@ class TestLevelUpAndBonus(EvanTestCase):
         self.assertNotIn("There are no secret units you can request yet.", messages)
         queryset = resp.context["form"].fields["unit"].queryset
         self.assertEqual(queryset.count(), 6)
-        self.assertQuerysetEqual(
+        self.assertQuerySetEqual(
             queryset,
             Unit.objects.filter(group__in=(secret4, secret9)),
             ordered=False,
-        )
+        )  # type: ignore
 
         # let's submit one and make sure it works
         desired_unit = Unit.objects.get(group=secret9, code="DKV")

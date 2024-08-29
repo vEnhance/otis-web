@@ -117,7 +117,7 @@ args = parse_args()
 
 # create_batch doesn't optimize, so here's
 # some hacky code to use bulk_create
-def fast_bulk_create(cls: type[Factory], size: int, **kwargs: Any) -> Any:
+def fast_bulk_create(cls: type[Factory], size: int, **kwargs: Any) -> Any:  # type: ignore
     return cls._meta.model.objects.bulk_create(cls.build_batch(size, **kwargs))  # type: ignore
 
 
