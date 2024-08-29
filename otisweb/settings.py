@@ -230,7 +230,7 @@ STATIC_ROOT = BASE_DIR / "static/"
 MEDIA_ROOT = BASE_DIR / "media/"
 
 if PRODUCTION:
-    DEFAULT_FILE_STORAGE = "storages.backends.gcloud.GoogleCloudStorage"
+    STORAGES = {"default": {"BACKEND": "storages.backends.gcloud.GoogleCloudStorage"}}
     STATIC_URL = os.getenv("STATIC_URL")
     GS_BUCKET_NAME = os.getenv("GS_BUCKET_NAME")
     MEDIA_URL = os.getenv("MEDIA_URL")
