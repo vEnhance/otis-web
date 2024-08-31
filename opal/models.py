@@ -112,6 +112,7 @@ class OpalPuzzle(models.Model):
     is_metapuzzle = models.BooleanField(
         default=False, help_text="Whether this is a metapuzzle or not"
     )
+    errata = models.TextField(blank=True, help_text="For announcing errata")
 
     achievement = models.ForeignKey(
         Achievement,

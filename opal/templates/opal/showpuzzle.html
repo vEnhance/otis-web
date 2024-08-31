@@ -40,6 +40,13 @@
       {% endif %}
     </div>
   {% endif %}
+  {% if puzzle.errata %}
+    <hr />
+    <div class="alert alert-warning">
+      <h2 class="alert-heading">Errata</h2>
+      {{ puzzle.errata }}
+    </div>
+  {% endif %}
   <hr />
   {% if can_attempt %}
     {% include "generic_form.html" %}
