@@ -129,7 +129,7 @@ def leaderboard(request: AuthHttpRequest, slug: str) -> HttpResponse:
             num_solves=SubqueryCount("opalattempt", filter=Q(is_correct=True)),
             num_total_attempts=SubqueryCount("opalattempt"),
         )
-        .values("num_solves", "num_total_attempts", "title", "slug")
+        .values("num_solves", "num_total_attempts", "title", "slug", "order")
     )
 
     MAX_TIME_IN_FUTURE = datetime.datetime(
