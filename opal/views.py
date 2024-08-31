@@ -85,12 +85,18 @@ def leaderboard(request: AuthHttpRequest, slug: str) -> HttpResponse:
     correct_attempts = OpalAttempt.objects.filter(
         is_correct=True, puzzle__hunt=hunt
     ).values(
-        "user__pk", "user__first_name", "user__last_name", "puzzle__order", "created_at"
+        "user__pk",
+        "user__first_name",
+        "user__last_name",
+        "puzzle__order",
+        "created_at",
+        "puzzle__is_metapuzzle",
     )
     user_solve_record: dict[int, list] = {}
     num_solves_dict: dict[int, int] = {}
     realname_dict: dict[int, str] = {}
     most_recent_solve_dict: dict[int, datetime.datetime] = {}
+    meta_solved_time: dict[int, datetime.datetime] = {}
 
     for attempt_dict in correct_attempts:
         user_pk: int = attempt_dict["user__pk"]
@@ -101,15 +107,19 @@ def leaderboard(request: AuthHttpRequest, slug: str) -> HttpResponse:
         if user_pk not in user_solve_record:
             user_solve_record[user_pk] = [False] * max_order
         user_solve_record[user_pk][attempt_dict["puzzle__order"] - 1] = True
+
         if user_pk not in num_solves_dict:
             num_solves_dict[user_pk] = 0
         num_solves_dict[user_pk] += 1
+
         if user_pk not in most_recent_solve_dict:
             most_recent_solve_dict[user_pk] = attempt_dict["created_at"]
         else:
             most_recent_solve_dict[user_pk] = max(
                 most_recent_solve_dict[user_pk], attempt_dict["created_at"]
             )
+        if attempt_dict["puzzle__is_metapuzzle"]:
+            meta_solved_time[user_pk] = attempt_dict["created_at"]
 
     context["hunt"] = hunt
     context["puzzle_stats"] = (
@@ -120,11 +130,14 @@ def leaderboard(request: AuthHttpRequest, slug: str) -> HttpResponse:
         )
         .values("num_solves", "num_total_attempts", "title", "slug")
     )
+
+    MAX_TIME_IN_FUTURE = datetime.datetime(year=datetime.MAXYEAR, month=12, day=31)
     context["rows"] = [
         {
             "name": realname_dict[user_pk],
             "num_solves": num_solves_dict[user_pk],
             "most_recent_solve": most_recent_solve_dict[user_pk],
+            "meta_solved_time": meta_solved_time.get(user_pk, None),
             "emoji_string": "".join(
                 "✅" if r else "✖️" for r in user_solve_record[user_pk]
             ),
@@ -132,7 +145,8 @@ def leaderboard(request: AuthHttpRequest, slug: str) -> HttpResponse:
         for user_pk in sorted(
             user_solve_record.keys(),
             key=lambda user_pk: (
-                -num_solves_dict[user_pk],
+                meta_solved_time.get(user_pk, MAX_TIME_IN_FUTURE),
+                -num_solves_dict.get(user_pk, 0),
                 most_recent_solve_dict[user_pk],
             ),
         )

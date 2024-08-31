@@ -44,9 +44,18 @@
         <td class="text-end">
           <b>{{ row.num_solves }}</b>
         </td>
-        <td>{{ row.name }}</td>
+        <td>
+          {{ row.name|truncatechars:"28" }}
+          {% if row.meta_solved_time %}🎉{% endif %}
+        </td>
         <td>{{ row.emoji_string }}</td>
-        <td>{{ row.most_recent_solve|date:"Y-m-d H:i" }}</td>
+        <td>
+          {% if row.meta_solved_time %}
+            <b>{{ row.meta_solved_time|date:"Y-m-d H:i" }}</b>
+          {% else %}
+            {{ row.most_recent_solve|date:"Y-m-d H:i" }}
+          {% endif %}
+        </td>
       </tr>
     {% endfor %}
   </table>
