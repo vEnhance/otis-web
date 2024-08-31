@@ -10,6 +10,7 @@ from django.db.models.aggregates import Max
 from django.db.models.query import QuerySet
 from django.http.response import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 from django.views.generic.list import ListView
 from sql_util.utils import SubqueryCount
 
@@ -204,12 +205,15 @@ def show_puzzle(request: AuthHttpRequest, hunt: str, slug: str) -> HttpResponse:
             attempt.save()
             if attempt.is_correct:
                 solve_message = f"Correct answer to {puzzle.title}!"
+                messages.success(request, solve_message)
                 if (achievement := puzzle.achievement) is not None:
                     AchievementUnlock.objects.get_or_create(
                         achievement=achievement, user=request.user
                     )
                     solve_message += f" Earned {achievement.diamonds}♦."
-                messages.success(request, solve_message)
+                    return HttpResponseRedirect(
+                        reverse("opal-finish", args=(puzzle.hunt.slug, puzzle.slug))
+                    )
             else:
                 messages.warning(request, f"Sorry, wrong answer to {puzzle.title}.")
             return HttpResponseRedirect(puzzle.get_absolute_url())
