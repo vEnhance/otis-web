@@ -131,7 +131,12 @@ def leaderboard(request: AuthHttpRequest, slug: str) -> HttpResponse:
         .values("num_solves", "num_total_attempts", "title", "slug")
     )
 
-    MAX_TIME_IN_FUTURE = datetime.datetime(year=datetime.MAXYEAR, month=12, day=31)
+    MAX_TIME_IN_FUTURE = datetime.datetime(
+        year=datetime.MAXYEAR,
+        month=12,
+        day=31,
+        tzinfo=datetime.timezone.utc,
+    )
     context["rows"] = [
         {
             "name": realname_dict[user_pk],
