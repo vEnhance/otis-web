@@ -140,6 +140,7 @@ def leaderboard(request: AuthHttpRequest, slug: str) -> HttpResponse:
     context["rows"] = [
         {
             "name": realname_dict[user_pk],
+            "user_pk": user_pk,
             "num_solves": num_solves_dict[user_pk],
             "most_recent_solve": most_recent_solve_dict[user_pk],
             "meta_solved_time": meta_solved_time.get(user_pk, None),
@@ -157,6 +158,18 @@ def leaderboard(request: AuthHttpRequest, slug: str) -> HttpResponse:
         )
     ]
     return render(request, "opal/leaderboard.html", context)
+
+
+@admin_required
+def person_log(request: AuthHttpRequest, slug: str, user_pk: int) -> HttpResponse:
+    context: dict[str, Any] = {}
+    hunt = get_object_or_404(OpalHunt, slug=slug)
+    user = get_object_or_404(User, pk=user_pk)
+    context["hunt"] = hunt
+    context["attempts"] = OpalAttempt.objects.filter(
+        puzzle__hunt=hunt, user=user
+    ).order_by("-created_at")
+    return render(request, "opal/person_log.html", context)
 
 
 @verified_required

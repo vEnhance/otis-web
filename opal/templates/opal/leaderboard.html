@@ -44,7 +44,9 @@
         <td class="text-end">
           <b>{{ row.num_solves }}</b>
         </td>
-        <td>{{ row.name|truncatechars:"28" }}</td>
+        <td>
+          <a href="{% url "opal-person-log" hunt.slug row.user_pk %}">{{ row.name|truncatechars:"28" }}</a>
+        </td>
         <td>{{ row.emoji_string }}</td>
         <td>
           {% if row.meta_solved_time %}

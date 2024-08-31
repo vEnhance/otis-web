@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block title %}
-  Answer log for {{ puzzle.title }}
+  Activity log for {{ user.get_full_name }}
 {% endblock title %}
 {% block main-class %}
   col-12
@@ -9,20 +9,14 @@
   col-6 col-md-4
 {% endblock side-class %}
 {% block layout-content %}
-  {% if puzzle.credits %}<p class="fst-italic">{{ puzzle.credits }}</p>{% endif %}
   <p>
-    <a class="btn btn-primary" href="{{ puzzle.get_absolute_url }}">Puzzle</a>
-    <a class="btn btn-info"
-       href="{% url "opal-leaderboard" puzzle.hunt.slug %}">Leaderboard</a>
-  </p>
-  <p>
-    There were <b>{{ num_correct }} solves</b> and <b>{{ num_total }} guesses</b>.
+    <a class="btn btn-info" href="{% url "opal-leaderboard" hunt.slug %}">Leaderboard</a>
   </p>
   <table class="table table-striped">
     <tr class="table-dark">
       <th>#</th>
+      <th>Puzzle</th>
       <th>Timestamp</th>
-      <th>User</th>
       <th>Guess</th>
     </tr>
     {% for attempt in attempts %}
@@ -31,15 +25,15 @@
           <a href="{% url "admin:opal_opalattempt_change" attempt.pk %}">{{ forloop.counter }}</a>
         </td>
         <td>
+          <a href="{% url "opal-attempts-list" hunt.slug attempt.puzzle.slug %}">{{ attempt.puzzle.title }}</a>
+        </td>
+        <td>
           {% if attempt.is_correct %}
             ✅
           {% else %}
             ✖️
           {% endif %}
           {{ attempt.created_at|date:"Y-m-d H:i" }}
-        </td>
-        <td>
-          <a href="{% url "opal-person-log" puzzle.hunt.slug attempt.user.pk %}">{{ attempt.user.get_full_name|truncatechars:"24" }}</a>
         </td>
         <td class="{% if attempt.is_correct %}text-success{% else %}text-danger{% endif %}">
           <tt>{{ attempt.guess|truncatechars:24 }}</tt>

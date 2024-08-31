@@ -32,5 +32,10 @@ urlpatterns = [
         views.AttemptsList.as_view(),
         name="opal-attempts-list",
     ),
+    path(
+        r"person/<str:slug>/<int:user_pk>/",
+        views.person_log,
+        name="opal-person-log",
+    ),
     path(r"", RedirectView.as_view(pattern_name="opal-hunt-list"), name="opal-index"),
 ]
