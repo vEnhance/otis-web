@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block title %}
-  Activity log for {{ user.get_full_name }}
+  Activity log for {{ hunter.get_full_name }}
 {% endblock title %}
 {% block main-class %}
   col-12
@@ -11,6 +11,9 @@
 {% block layout-content %}
   <p>
     <a class="btn btn-info" href="{% url "opal-leaderboard" hunt.slug %}">Leaderboard</a>
+  </p>
+  <p>
+    This is the activity log for <b>{{ hunter.get_full_name }}</b>, aka <code>{{ hunter.username }}</code>.
   </p>
   <table class="table table-striped">
     <tr class="table-dark">

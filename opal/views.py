@@ -169,6 +169,7 @@ def person_log(request: AuthHttpRequest, slug: str, user_pk: int) -> HttpRespons
     context["attempts"] = OpalAttempt.objects.filter(
         puzzle__hunt=hunt, user=user
     ).order_by("-created_at")
+    context["hunter"] = user
     return render(request, "opal/person_log.html", context)
 
 
