@@ -40,14 +40,11 @@
       <th>Last solve</th>
     </tr>
     {% for row in rows %}
-      <tr>
+      <tr {% if row.meta_solved_time %}class="table-success"{% endif %}>
         <td class="text-end">
           <b>{{ row.num_solves }}</b>
         </td>
-        <td>
-          {{ row.name|truncatechars:"28" }}
-          {% if row.meta_solved_time %}🎉{% endif %}
-        </td>
+        <td>{{ row.name|truncatechars:"28" }}</td>
         <td>{{ row.emoji_string }}</td>
         <td>
           {% if row.meta_solved_time %}
