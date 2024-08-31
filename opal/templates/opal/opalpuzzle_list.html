@@ -9,6 +9,12 @@
     And read the <a href="{% url "opal-rules" %}">rules</a>
     if you haven't already.
   </p>
+  <p>
+    Hint requests can be sent to Evan's usual email, if you're stuck on anything.
+    If you do email a hint request, please include a viewable link to the
+    spreadsheet you're working on, so that I can see what you've tried
+    and also look for any mistakes.
+  </p>
   {% if request.user.is_superuser %}
     <p>
       <a href="{% url "opal-leaderboard" hunt.slug %}"
