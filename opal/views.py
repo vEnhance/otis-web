@@ -217,3 +217,17 @@ def show_puzzle(request: AuthHttpRequest, hunt: str, slug: str) -> HttpResponse:
     context["form"] = form
     context["can_attempt"] = can_attempt
     return render(request, "opal/showpuzzle.html", context)
+
+
+@verified_required
+def finish(request: AuthHttpRequest, hunt: str, slug: str) -> HttpResponse:
+    puzzle = get_object_or_404(OpalPuzzle, hunt__slug=hunt, slug=slug)
+    if puzzle.achievement is None:
+        raise PermissionDenied("This page is only for puzzles with diamonds.")
+    attempt = OpalAttempt.objects.get(puzzle=puzzle, user=request.user, is_correct=True)
+    context: dict[str, Any] = {}
+    context["puzzle"] = puzzle
+    context["hunt"] = puzzle.hunt
+    context["achievement"] = puzzle.achievement
+    context["attempt"] = attempt
+    return render(request, "opal/finish.html", context)

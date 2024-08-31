@@ -55,7 +55,10 @@
       <h2 class="alert-heading">
         Answer: <tt>{{ puzzle.answer }}</tt>
       </h2>
-      Congrats, you have solved this puzzle!
+      Congrats, you solved this puzzle!
+      {% if puzzle.achievement %}
+        <a href="{% url "opal-finish" hunt.slug puzzle.slug %}">It was worth {{ puzzle.achievement.diamonds }}♦️</a>.
+      {% endif %}
     </div>
   {% elif not solved %}
     <div class="alert alert-danger">You have run out of guesses for this puzzle.</div>

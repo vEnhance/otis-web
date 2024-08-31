@@ -23,6 +23,11 @@ urlpatterns = [
         name="opal-show-puzzle",
     ),
     path(
+        r"finish/<str:hunt>/<str:slug>/",
+        views.finish,
+        name="opal-finish",
+    ),
+    path(
         r"guesses/<str:hunt>/<str:slug>/",
         views.AttemptsList.as_view(),
         name="opal-attempts-list",
