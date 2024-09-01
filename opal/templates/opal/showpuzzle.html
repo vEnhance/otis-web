@@ -64,6 +64,19 @@
     <div class="alert alert-danger">You have run out of guesses for this puzzle.</div>
   {% endif %}
   <hr />
+  {% if show_hints and puzzle.hint_text_rendered %}
+    <h3>Hints</h3>
+    <p>
+      <a id="open_opal_hints" href="#">Click to reveal pre-written hints.</a>
+      Email Evan for more detailed hint requests
+      (if so, include a viewable link to your spreadsheet).
+    </p>
+    <div id="opal_hints" class="d-none">
+      <p>Highlight each hint to reveal it.</p>
+      {{ puzzle.hint_text_rendered|safe }}
+    </div>
+    <hr />
+  {% endif %}
   <h3>Previous guesses</h3>
   <p>You have used {{ attempts|length }} of your {{ puzzle.guess_limit }} guesses.</p>
   <table class="table table-striped">
@@ -87,3 +100,12 @@
     {% endfor %}
   </table>
 {% endblock layout-content %}
+{% block scripts %}
+  <script type="text/javascript">
+      $(() => {
+          $("#open_opal_hints").click(function() {
+              $("#opal_hints").toggleClass("d-none");
+          });
+      });
+  </script>
+{% endblock scripts %}

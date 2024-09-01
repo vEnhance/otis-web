@@ -11,6 +11,7 @@ from django.db.models.query import QuerySet
 from django.http.response import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
+from django.utils import timezone
 from django.views.generic.list import ListView
 from sql_util.utils import SubqueryCount
 
@@ -234,6 +235,7 @@ def show_puzzle(request: AuthHttpRequest, hunt: str, slug: str) -> HttpResponse:
     context["attempts"] = attempts
     context["form"] = form
     context["can_attempt"] = can_attempt
+    context["show_hints"] = timezone.now() >= puzzle.hunt.hints_released_date
     return render(request, "opal/showpuzzle.html", context)
 
 

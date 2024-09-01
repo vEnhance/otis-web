@@ -302,3 +302,12 @@ img.emoji {
   margin: 0 0.05em 0 0.1em;
   vertical-align: -0.1em;
 }
+
+#opal_hints li {
+  background-color: grey;
+  color: grey;
+}
+
+#opal_hints li:hover {
+  background-color: none;
+}

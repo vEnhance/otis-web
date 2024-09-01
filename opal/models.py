@@ -113,6 +113,13 @@ class OpalPuzzle(models.Model):
         default=False, help_text="Whether this is a metapuzzle or not"
     )
     errata = models.TextField(blank=True, help_text="For announcing errata")
+    hint_text = MarkdownField(
+        rendered_field="hint_text_rendered",
+        help_text="List of canned hints for this puzzle.",
+        validator=VALIDATOR_STANDARD,
+        blank=True,
+    )
+    hint_text_rendered = RenderedMarkdownField()
 
     achievement = models.ForeignKey(
         Achievement,
@@ -169,6 +176,7 @@ class OpalHunt(models.Model):
         default=True,
     )
     start_date = models.DateTimeField(help_text="When the hunt begins.")
+    hints_released_date = models.DateTimeField(help_text="When to start showing hints.")
 
     author_signup_url = models.URLField(
         blank=True,

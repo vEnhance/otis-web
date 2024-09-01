@@ -17,6 +17,7 @@ class OpalHuntFactory(DjangoModelFactory):
     name = "Your Otis in April"
     slug = UniqueFaker("slug")
     start_date = Faker("past_datetime", tzinfo=datetime.timezone.utc)
+    hints_released_date = Faker("future_datetime", tzinfo=datetime.timezone.utc)
 
 
 class OpalPuzzleFactory(DjangoModelFactory):
