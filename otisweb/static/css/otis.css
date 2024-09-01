@@ -307,7 +307,10 @@ img.emoji {
   background-color: grey;
   color: grey;
 }
-
-#opal_hints li:hover {
-  background-color: none;
+#opal_hints li code {
+  color: grey;
+}
+#opal_hints li a {
+  color: grey;
+  text-decoration: underline;
 }
