@@ -20,6 +20,7 @@ from evans_django_tools import SUCCESS_LOG_LEVEL
 from otisweb.decorators import admin_required, verified_required
 from otisweb.mixins import VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest
+from roster.models import Student
 from rpg.models import AchievementUnlock
 
 from .forms import AttemptForm
@@ -176,6 +177,9 @@ def person_log(request: AuthHttpRequest, slug: str, user_pk: int) -> HttpRespons
         puzzle__hunt=hunt, user=user
     ).order_by("-created_at")
     context["hunter"] = user
+    context["student"] = (
+        Student.objects.filter(user=user).order_by("-semester__end_year").first()
+    )
     return render(request, "opal/person_log.html", context)
 
 

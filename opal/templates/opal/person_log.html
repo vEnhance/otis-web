@@ -13,7 +13,13 @@
     <a class="btn btn-info" href="{% url "opal-leaderboard" hunt.slug %}">Leaderboard</a>
   </p>
   <p>
-    This is the activity log for <b>{{ hunter.get_full_name }}</b>, aka <code>{{ hunter.username }}</code>.
+    This is the activity log for
+    {% if student %}
+      <a href="{{ student.get_absolute_url }}"><b>{{ student }}</b></a>,
+    {% else %}
+      <b>{{ hunter.get_full_name }}</b>,
+    {% endif %}
+    aka <code>{{ hunter.username }}</code>.
   </p>
   <table class="table table-striped">
     <tr class="table-dark">
