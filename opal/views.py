@@ -1,4 +1,5 @@
 import datetime
+import logging
 from typing import Any
 
 from braces.views import SuperuserRequiredMixin
@@ -15,6 +16,7 @@ from django.utils import timezone
 from django.views.generic.list import ListView
 from sql_util.utils import SubqueryCount
 
+from evans_django_tools import SUCCESS_LOG_LEVEL
 from otisweb.decorators import admin_required, verified_required
 from otisweb.mixins import VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest
@@ -22,6 +24,8 @@ from rpg.models import AchievementUnlock
 
 from .forms import AttemptForm
 from .models import OpalAttempt, OpalHunt, OpalPuzzle
+
+logger = logging.getLogger(__name__)
 
 
 class HuntList(ListView[OpalHunt]):
@@ -212,6 +216,11 @@ def show_puzzle(request: AuthHttpRequest, hunt: str, slug: str) -> HttpResponse:
                         achievement=achievement, user=request.user
                     )
                     solve_message += f" Earned {achievement.diamonds}♦."
+                    logger.log(
+                        SUCCESS_LOG_LEVEL,
+                        f"{request.user} finished the OPAL puzzle {puzzle.title}!",
+                        extra={"request": request},
+                    )
                     return HttpResponseRedirect(
                         reverse("opal-finish", args=(puzzle.hunt.slug, puzzle.slug))
                     )
