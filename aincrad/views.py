@@ -632,11 +632,9 @@ def hanabi_handler(action: str, data: JSONData) -> JsonResponse:
 @require_POST
 def api(request: HttpRequest) -> JsonResponse:
     try:
-        data = json.loads(request.body)
+        data: JSONData = json.loads(request.body)
     except json.decoder.JSONDecodeError:
         raise SuspiciousOperation("Not valid JSON")
-    if isinstance(data, type(JSONData)):
-        raise SuspiciousOperation("Not valid JSON (needs a dict)")
 
     if "action" not in data:
         raise SuspiciousOperation("You need to provide an action, silly")
