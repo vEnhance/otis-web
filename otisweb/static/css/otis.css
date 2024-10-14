@@ -314,3 +314,8 @@ img.emoji {
   color: grey;
   text-decoration: underline;
 }
+
+/* TODO: ugly hack; I can't figure out how to remove this from template */
+#id_password_helptext {
+  display: none !important;
+}
