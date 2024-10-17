@@ -26,3 +26,12 @@
     </li>
   </ul>
 {% endblock layout-content %}
+{% block scripts %}
+  <script type="text/javascript">
+      document.body.addEventListener("keydown", function(event) {
+         if (event.key == "Escape") {
+            window.location.href = "{{hint.problem.get_absolute_url}}";
+         }
+      });
+  </script>
+{% endblock scripts %}
