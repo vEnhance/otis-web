@@ -2,7 +2,4 @@
 
 # If you aren't Evan, replace the bucket name...
 python manage.py collectstatic --noinput
-gsutil -m rsync -R static/ gs://otisweb-static/static
-
-# gsutil cors set cors.json gs://otisweb-static/
-# gsutil -m setmeta -R -h 'Cache-Control:private, max-age=0, no-transform' gs://otisweb-static/static/*
+gcloud storage rsync --recursive static/ gs://otisweb-static/static
