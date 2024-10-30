@@ -13,6 +13,13 @@ outputting matches with tags.
    
    ```bash
    python path/to/diamonds.py
+
+Alternatively, you can run this on a python shell:
+>>> os.chdir('blah/blah/blah/') # contains otis-web
+>>> otis_df.scandir('otis-web/', deep=True, exclude='.lock')
+...
+>>> print(otis_df)
+I got 4 legitimate diamonds and 14 charisma points doing this.
 """
 
 import os
@@ -31,7 +38,7 @@ class DiamondFinder(defaultdict):
         super().__init__(list)
 
     def __repr__(self):
-        return f'{__class__.__name__}({super(defaultdict, self).__repr__()})'
+        return f'{__class__.__name__}({super(defaultdict, self).__repr__()})' 
 
     def __str__(self):
         return '\n'.join(self.keys())
@@ -142,52 +149,49 @@ def main():
     """
     Main function to detect and scan the 'otis-web' directory for hidden 
     diamond patterns.
-
-    This function:
-    1. Configures parameters for the DiamondFinder class.
-    2. Automatically detects the 'otis-web' directory relative to the location 
-       of this script.
-    3. Initializes a DiamondFinder instance with specified character set and 
-       length constraints.
-    4. Scans the 'otis-web' directory recursively, excluding specified file 
-       types.
-    5. Prints the found diamonds along with their tags.
+    
+    Automatically detects the 'otis-web' directory by searching up from the 
+    script's location. Scans this directory recursively for diamonds, 
+    excluding specific file types and directories.
     """
     
-    # Configure the DiamondFinder parameters for characters and diamond length
-    chars = '0123456789abcdef'  # Characters considered part of a "diamond"
-    minlen = 24                 # Minimum length of a valid diamond pattern
-    maxlen = 26                 # Maximum length of a valid diamond pattern
-    notify_diamonds = True      # Flag to print diamonds as they are found
+    # Configure DiamondFinder parameters
+    chars = '0123456789abcdef'
+    minlen = 24
+    maxlen = 26
+    notify_diamonds = True
 
-    # Automatically detect the 'otis-web' directory based on the file's location
-    current_dir = pathlib.Path(__file__).resolve()  # Full path to this script
-    otis_web_dir = current_dir.parents[
-        current_dir.parts.index('otis-web')
-    ]  # Find 'otis-web'
+    # Locate 'otis-web' directory by searching upward from current script location
+    current_dir = pathlib.Path(__file__).resolve()
+    otis_web_dir = None
+    for parent in current_dir.parents:
+        if parent.name == 'otis-web':
+            otis_web_dir = parent
+            break
+    
+    if otis_web_dir is None:
+        raise FileNotFoundError("Could not locate 'otis-web' directory")
 
-    # Instantiate the DiamondFinder with the configured parameters
+    # Instantiate and use DiamondFinder to scan
     finder = DiamondFinder(chars, minlen, maxlen, notify_diamonds)
-
-    # Start scanning the detected 'otis-web' directory, including subdirectories
     print(f"Scanning directory: {otis_web_dir}")
-    finder.scandir(
-        otis_web_dir, deep=True, exclude='.lock'
-    )  # Exclude '.lock' files from scan
 
-    # Print a summary of all diamonds found
+    # Exclude specific file types and directories during scanning
+    finder.scandir(
+        otis_web_dir, 
+        deep=True, 
+        exclude=['.pdf', '.png', '.lock', '.pack', '.idx']
+    )
+
+    # Output results
+    print()
     print("Diamonds found:")
     print(finder)
+
+    # Print the number of unique diamonds found
+    print(f"\nTotal number of diamonds found: {len(finder)}")
+
 
 # Run the main function if this script is executed directly
 if __name__ == "__main__":
     main()
-
-
-"""
->>> os.chdir('blah/blah/blah/') # contains otis-web
->>> otis_df.scandir('otis-web/', deep=True, exclude='.lock')
-...
->>> print(otis_df)
-I got 4 legitimate diamonds and 14 charisma points doing this.
-"""
