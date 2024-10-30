@@ -1,6 +1,6 @@
 # Functions to compute student levels and whatnot
+import datetime
 import logging
-from datetime import datetime
 from typing import Any, Set, Tuple, TypedDict, Union
 
 from django.db.models.aggregates import Count, Max, Sum
@@ -59,6 +59,16 @@ class Meter:
     @property
     def level(self) -> int:
         return int(max(0, self.value) ** 0.5)
+
+    @property
+    def imaginary_level(self) -> str | None:
+        if self.value >= 0:
+            return None
+        x = int((-self.value) ** 0.5)
+        if x == 1:
+            return "i"
+        else:
+            return f"{x}i"
 
     @property
     def percent(self) -> int:
@@ -161,10 +171,10 @@ class LevelInfoDict(TypedDict):
     hanabi_replays: QuerySet[HanabiReplay]
 
 
-def get_week_count(dates: list[datetime]) -> int:
+def get_week_count(dates: list[datetime.datetime]) -> int:
     seen: list[Tuple[int, int]] = []
     for d in dates:
-        d = d.astimezone(tz=timezone.utc)
+        d = d.astimezone(tz=datetime.timezone.utc)
         week_number = d.isocalendar()[1]
         year = d.year
         seen.append((year, week_number))
@@ -352,6 +362,7 @@ def annotate_student_queryset_with_scores(
             "pset__pk",
             filter=Q(eligible=True, unit__code__startswith="Z"),
         ),
+        num_semesters=SubqueryCount("user__student"),
         spades_quizzes=SubquerySum("user__student__examattempt__score"),
         spades_quests=SubquerySum("user__student__questcomplete__spades"),
         spades_markets=Subquery(guess_subquery),  # type: ignore
@@ -408,7 +419,9 @@ def get_student_rows(queryset: QuerySet[Student]) -> list[dict[str, Any]]:
         try:
             row["last_seen"] = student.user.profile.last_seen
         except UserProfile.DoesNotExist:
-            row["last_seen"] = datetime.fromtimestamp(0, tz=timezone.utc)
+            row["last_seen"] = datetime.datetime.fromtimestamp(
+                0, tz=datetime.timezone.utc
+            )
         row["insanity"] = compute_insanity_rating(
             getattr(student, "pset_B_count"),
             getattr(student, "pset_D_count"),

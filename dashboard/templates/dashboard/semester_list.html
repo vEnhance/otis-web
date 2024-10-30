@@ -5,12 +5,12 @@
 {% block layout-content %}
   {% load otis_extras %}
   <p>Here are all the years of OTIS that are in the database.</p>
-  <table class="table">
+  <table class="table table-striped">
     <thead class="table-dark">
       <tr>
-        <td>Year</td>
-        {% if request.user.is_superuser %}<td>Students</td>{% endif %}
-        <td>Active</td>
+        <th>Year</th>
+        {% if request.user.is_superuser %}<th>Students</th>{% endif %}
+        <th>Active</th>
       </tr>
     </thead>
     <tbody>

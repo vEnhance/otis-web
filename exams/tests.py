@@ -1,7 +1,6 @@
 import datetime
 
 from django.test.utils import override_settings
-from django.utils import timezone
 from freezegun import freeze_time
 
 from core.factories import SemesterFactory, UserFactory
@@ -12,7 +11,7 @@ from exams.models import ExamAttempt, MockCompleted, PracticeExam
 from roster.factories import StudentFactory
 from roster.models import Student
 
-UTC = timezone.utc
+UTC = datetime.timezone.utc
 
 
 class ArithmeticTest(EvanTestCase):

@@ -7,7 +7,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0005_unit_subject"),
+        ("core", "0001_squashed_0054_userprofile_use_twemoji"),
         ("exams", "0004_auto_20170810_1223"),
     ]
 

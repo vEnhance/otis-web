@@ -1,11 +1,11 @@
 from __future__ import unicode_literals
 
 import os
+from _pydecimal import Decimal
 from datetime import timedelta
 from hashlib import pbkdf2_hmac
 from typing import TypedDict
 
-from _pydecimal import Decimal
 from django.contrib.auth.models import Group, User
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import FileExtensionValidator
@@ -300,12 +300,8 @@ class Student(models.Model):
 
         first_payment_deadline = self.semester.first_payment_deadline
 
-        if (
-            first_payment_deadline is not None
-            and first_payment_deadline > invoice.created_at
-            and invoice.total_paid <= 0
-        ):
-            d = first_payment_deadline - now
+        if first_payment_deadline is not None and invoice.total_paid <= 0:
+            d = max(invoice.created_at, first_payment_deadline) - now
             if d < timedelta(days=-7):
                 return 3
             elif d < timedelta(days=0):
@@ -317,10 +313,9 @@ class Student(models.Model):
 
         if (
             most_payment_deadline is not None
-            and most_payment_deadline > invoice.created_at
             and invoice.total_paid < 2 * invoice.total_cost / 3
         ):
-            d = most_payment_deadline - now
+            d = max(invoice.created_at, most_payment_deadline) - now
             if d < timedelta(days=-7):
                 return 7
             elif d < timedelta(days=0):
@@ -561,6 +556,24 @@ class StudentRegistration(models.Model):
             (2027, "Graduating in 2027"),
             (2028, "Graduating in 2028"),
             (2029, "Graduating in 2029"),
+            (2030, "Graduating in 2030"),
+            (2031, "Graduating in 2031"),
+            (2032, "Graduating in 2032"),
+            (2033, "Graduating in 2033"),
+            (2034, "Graduating in 2034"),
+            (2035, "Graduating in 2035"),
+            (2036, "Graduating in 2036"),
+            (2037, "Graduating in 2037"),
+            (2038, "Graduating in 2038"),
+            (2039, "Graduating in 2039"),
+            (2040, "Graduating in 2040"),
+            (2041, "Graduating in 2041"),
+            (2042, "Graduating in 2042"),
+            (2043, "Graduating in 2043"),
+            (2044, "Graduating in 2044"),
+            (2045, "Graduating in 2045"),
+            (2046, "Graduating in 2046"),
+            (2047, "Graduating in 2047"),
         ),
         help_text="Enter your expected graduation year",
     )

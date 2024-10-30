@@ -1,0 +1,69 @@
+{% extends "layout.html" %}
+{% load humanize %}
+{% block title %}
+  {{ hunt.name }}
+{% endblock title %}
+{% block layout-content %}
+  <p>
+    Good luck!
+    Read the <a href="{% url "opal-rules" %}">rules</a> if you haven't already.
+    And if you're new to puzzle hunts, you should probably skim
+    <a href="https://blog.vero.site/post/puzzlehunts">Brian Chen's intro guide</a>
+    and have a copy of some puzzle codes sheet on hand
+    (<a href="https://web.evanchen.cc/upload/EvanPuzzleCodings.pdf">here's mine</a>).
+  </p>
+  <p>
+    Hint requests can be sent to Evan's usual email, if you're stuck on anything.
+    If you do email a hint request, please include a viewable link to the
+    spreadsheet you're working on, so that I can see what you've tried
+    and also look for any mistakes.
+  </p>
+  {% if request.user.is_superuser %}
+    <p>
+      <a href="{% url "opal-leaderboard" hunt.slug %}"
+         title="Leaderboard"
+         class="btn btn-info">Leaderboard</a>
+      <a href="{% url "admin:opal_opalhunt_change" hunt.pk %}"
+         title="Edit in admin"
+         class="btn btn-outline-dark">Edit in admin</a>
+    </p>
+  {% endif %}
+  <hr />
+  {% if hunt.story_text %}
+    {{ hunt.story_text_rendered|safe }}
+    <hr />
+  {% endif %}
+  <h2>List of puzzles</h2>
+  <table class="table table-striped">
+    <tr class="table-dark">
+      <th>Title</th>
+      <th>Answer</th>
+    </tr>
+    {% for puzzle in puzzles %}
+      <tr>
+        <td>
+          {% if puzzle.unlocked %}
+            {% if puzzle.is_metapuzzle %}
+              <b>
+                <a href="{{ puzzle.get_absolute_url }}">{{ puzzle.title }}</a> (meta)
+              </b>
+            {% else %}
+              <a href="{{ puzzle.get_absolute_url }}">{{ puzzle.title }}</a>
+            {% endif %}
+          {% else %}
+            <span class="text-secondary">???</span>
+          {% endif %}
+        </td>
+        {% if puzzle.solved %}
+          <td class="fw-bold">
+            Solved: <span class="text-success">{{ puzzle.answer }}</span>
+          </td>
+        {% elif puzzle.unlocked %}
+          <td class="fst-italic text-dark">Unlocked</td>
+        {% else %}
+          <td class="fst-italic text-secondary">Locked</td>
+        {% endif %}
+      </tr>
+    {% endfor %}
+  </table>
+{% endblock layout-content %}

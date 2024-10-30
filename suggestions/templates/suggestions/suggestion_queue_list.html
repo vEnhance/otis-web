@@ -1,25 +1,25 @@
 {% extends "layout.html" %}
 {% block title %}
-  Suggestion Submission Queue
+  Suggestion submission queue
 {% endblock title %}
 {% block layout-content %}
   {% load otis_extras %}
   <p>Here are all the suggestion sets that haven't been checked yet.</p>
   <p class="text-center">
-    <a class="btn btn-link btn-success" href="{% url "suggest-new" %}">
+    <a class="btn btn-success" href="{% url "suggest-new" %}">
       <span class="emoji-text">💡</span>
       Submit new suggestion
     </a>
   </p>
-  <table class="table">
+  <table class="table table-striped">
     <thead class="table-dark">
       <tr>
-        <td class="text-end">#</td>
-        <td>Suggestion</td>
-        <td>Weight</td>
-        <td>Unit</td>
-        <td>Timestamp</td>
-        <td class="text-end">PK</td>
+        <th class="text-end">#</th>
+        <th>Suggestion</th>
+        <th>Weight</th>
+        <th>Unit</th>
+        <th>Timestamp</th>
+        <th class="text-end">PK</th>
       </tr>
     </thead>
     <tbody>

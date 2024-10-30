@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block title %}
-  Your Problem Set Submissions
+  Your problem set submissions
 {% endblock title %}
 {% block layout-content %}
   {% load otis_extras %}
@@ -9,15 +9,15 @@
     <a href="{{ student.get_absolute_url }}">{{ student.name }}</a>
     in {{ student.semester }}.
   </p>
-  <table class="table">
+  <table class="table table-striped">
     <thead class="table-dark">
       <tr>
-        <td class="text-end">#</td>
-        <td class="text-center">Stat</td>
-        <td>Unit</td>
-        <td class="text-end">♣</td>
-        <td class="text-end">♥</td>
-        <td>Timestamp</td>
+        <th class="text-end">#</th>
+        <th class="text-center">Stat</th>
+        <th>Unit</th>
+        <th class="text-end">♣</th>
+        <th class="text-end">♥</th>
+        <th>Timestamp</th>
       </tr>
     </thead>
     <tbody>

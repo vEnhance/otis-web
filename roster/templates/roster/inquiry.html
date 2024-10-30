@@ -24,22 +24,19 @@
 {% endblock title %}
 {% block layout-content %}
   <p>
-    A <b>unit petition</b> lets you make requests
-    for changes to your set of units.
-    Here you can open new petitions
-    and see the status of previous ones.
+    A <b>unit petition</b> lets you make requests for changes to your set of units.
+    Here you can open new petitions and see the status of previous ones.
   </p>
   <p>
     I try to respond to petitions somewhat regularly,
-    but if I don't get to yours for a few days,
-    please send me a reminder.
+    but if I don't get to yours for a few days, please send me a reminder.
   </p>
   <h2>New petition</h2>
   {% include "generic_form.html" with submit_name="Send" %}
   {% if request.user|getconfig:"show_unit_petitions" %}
     <h2>Current petitions</h2>
-    <table class="table">
-      <thead class="thead-dark">
+    <table class="table table-striped">
+      <thead class="table-dark">
         <tr>
           <th>Created</th>
           <th>Unit</th>
@@ -50,8 +47,10 @@
       <tbody>
         {% for inquiry in inquiries %}
           <tr>
-            <td>{{ inquiry.created_at|date:"SHORT_DATE_FORMAT" }}</td>
-            <th>{{ inquiry.unit }}</th>
+            <td title="{{ inquiry.created_at|date:"r" }}">{{ inquiry.created_at|date:"M d" }}</td>
+            <td>
+              <strong>{{ inquiry.unit }}</strong>
+            </td>
             <td>{{ inquiry.get_action_type_display }}</td>
             <td>
               {% if inquiry.status == "INQ_NEW" %}
@@ -65,12 +64,10 @@
               {% endif %}
             </td>
           </tr>
-          {% if inquiry.explanation %}
-            <tr>
-              <td></td>
-              <td colspan="3" class="fst-italic">{{ inquiry.explanation }}</td>
-            </tr>
-          {% endif %}
+          <tr>
+            <td></td>
+            <td colspan="3" class="fst-italic">{{ inquiry.explanation }}</td>
+          </tr>
         {% endfor %}
       </tbody>
     </table>

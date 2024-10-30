@@ -3,7 +3,7 @@
   <p>
     Showing the current enrollments for <b>{{ semester }}</b>.
   </p>
-  <table class="table">
+  <table class="table table-striped">
     {% for row in chart %}
       <tr class="subject{{ row.group__subject }}">
         <th class="text-end">{{ row.student_dicts|length }}</th>

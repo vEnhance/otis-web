@@ -9,47 +9,12 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-    replaces = [
-        ("payments", "0001_initial"),
-        ("payments", "0002_jobfolder_worker_job"),
-        ("payments", "0003_alter_worker_notes_alter_worker_paypal_username_and_more"),
-        ("payments", "0004_remove_worker_payment_preference_and_more"),
-        ("payments", "0005_jobfolder_visible"),
-        ("payments", "0006_jobfolder_slug"),
-        ("payments", "0007_jobfolder_description_alter_job_due_date"),
-        ("payments", "0008_alter_job_spades_bounty_alter_job_usd_bounty"),
-        ("payments", "0009_alter_job_description"),
-        ("payments", "0010_alter_job_payment_preference"),
-        ("payments", "0011_job_created_at_job_updated_at"),
-        ("payments", "0012_job_description_rendered_and_more"),
-        ("payments", "0013_remove_job_status_job_progress"),
-        ("payments", "0014_alter_job_progress_alter_worker_google_username"),
-        ("payments", "0015_remove_jobfolder_semester_job_semester"),
-        ("payments", "0016_alter_job_progress_alter_worker_google_username_and_more"),
-        ("payments", "0017_alter_job_usd_bounty"),
-        ("payments", "0018_worker_updated_at"),
-        ("payments", "0019_worker_twitch_username"),
-        ("payments", "0020_remove_worker_google_username_worker_gmail_address"),
-        ("payments", "0021_jobfolder_max_pending_jobfolder_max_total"),
-        ("payments", "0022_alter_job_progress"),
-        ("payments", "0023_alter_job_payment_preference"),
-        ("payments", "0024_alter_job_payment_preference_alter_job_progress"),
-        ("payments", "0025_alter_job_spades_bounty_alter_job_usd_bounty"),
-        ("payments", "0026_remove_job_due_date"),
-        ("payments", "0027_job_hours_estimate"),
-        ("payments", "0028_alter_job_progress"),
-        ("payments", "0029_job_admin_notes"),
-        ("payments", "0030_alter_job_name"),
-        ("payments", "0031_alter_worker_zelle_info"),
-        ("payments", "0032_jobfolder_archived"),
-    ]
-
     initial = True
 
     dependencies = [
-        ("roster", "0084_alter_invoice_memo"),
+        ("roster", "0001_squashed_0102_alter_studentregistration_agreement_form"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("core", "0040_alter_calendar_urls_again"),
+        ("core", "0001_squashed_0054_userprofile_use_twemoji"),
     ]
 
     operations = [

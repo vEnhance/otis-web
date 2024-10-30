@@ -107,7 +107,7 @@ class Market(models.Model):
 
     @property
     def is_upcoming(self) -> bool:
-        return timezone.now() < self.start_date < timezone.now() + timedelta(days=7)
+        return timezone.now() < self.start_date < timezone.now() + timedelta(days=4)
 
 
 class Guess(models.Model):

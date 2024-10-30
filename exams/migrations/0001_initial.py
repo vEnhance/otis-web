@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("core", "0002_auto_20170805_2322"),
+        ("core", "0001_squashed_0054_userprofile_use_twemoji"),
     ]
 
     operations = [

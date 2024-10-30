@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("roster", "0061_alter_registrationcontainer_allowed_tracks"),
+        ("roster", "0001_squashed_0102_alter_studentregistration_agreement_form"),
         ("exams", "0015_examsubmission_quiz"),
     ]
 

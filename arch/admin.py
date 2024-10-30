@@ -48,6 +48,7 @@ class HintAdmin(VersionAdmin):
         "content",
     )
     search_fields = (
+        "problem__puid",
         "number",
         "keywords",
         "content",

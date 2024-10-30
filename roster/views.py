@@ -158,7 +158,9 @@ def advance(request: HttpRequest, student_pk: int) -> Any:
         if form.is_valid():
             data = form.cleaned_data
             student.unlocked_units.add(*data["units_to_unlock"])
+            student.unlocked_units.add(*data["units_to_open"])
             student.curriculum.add(*data["units_to_unlock"])
+            student.curriculum.add(*data["units_to_open"])
             student.curriculum.add(*data["units_to_add"])
             student.unlocked_units.remove(*data["units_to_lock"])
             student.unlocked_units.remove(*data["units_to_drop"])
@@ -335,15 +337,21 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
         )
         return
 
+    unit = inquiry.unit
+
     # auto accepting criteria for unlocking
     if inquiry.action_type == "INQ_ACT_UNLOCK" and unlocked_count <= 9:
         # when less than 6 past unlock (newbie) or a secret unit (currently uses subject to determine this)
         auto_accept_criteria = (
-            num_past_unlock_inquiries <= 6 or inquiry.unit.group.subject == "K"
+            num_past_unlock_inquiries <= 6 or unit.group.subject == "K"
         )
+
+        auto_accept_criteria |= Student.objects.filter(
+            user=student.user, curriculum__in=[unit]
+        ).exists()
     elif inquiry.action_type == "INQ_ACT_DROP":
         # auto dropping locked units
-        auto_accept_criteria = not student.unlocked_units.contains(inquiry.unit)
+        auto_accept_criteria = not student.unlocked_units.contains(unit)
     else:
         auto_accept_criteria = False
 
@@ -361,19 +369,19 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
 @login_required
 def inquiry(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
     student = get_student_by_pk(request, student_pk)
-    if not student.semester.active:
-        raise PermissionDenied(
-            "Not an active semester, so change petitions are no longer possible."
-        )
-    if student.is_delinquent:
-        raise PermissionDenied("Student is delinquent")
-    if not student.enabled:
-        raise PermissionDenied("Student account not enabled")
-    if student.newborn:
-        raise PermissionDenied(
-            "This form isn't enabled yet because you have not chosen your initial units."
-        )
-
+    if not request.user.is_staff:
+        if not student.semester.active:
+            raise PermissionDenied(
+                "Not an active semester, so change petitions are no longer possible."
+            )
+        if student.is_delinquent:
+            raise PermissionDenied("Student is delinquent")
+        if not student.enabled:
+            raise PermissionDenied("Student account not enabled")
+        if student.newborn:
+            raise PermissionDenied(
+                "This form isn't enabled yet because you have not chosen your initial units."
+            )
     context: dict[str, Any] = {}
 
     # Create form for submitting new inquiries
@@ -382,6 +390,7 @@ def inquiry(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
         if form.is_valid():
             inquiry: UnitInquiry = form.save(commit=False)
             handle_inquiry(request, inquiry, student)
+            return HttpResponseRedirect(reverse("inquiry", args=(student.pk,)))
 
     else:
         form = InquiryForm(student=student)

@@ -4,16 +4,20 @@
 {% endblock title %}
 {% block layout-content %}
   <h2>Active Contests</h2>
-  <ul id="tube-list">
-    {% for tube in tube_list %}
-      {% if tube.accepting_signups %}
-        <li>
-          <a href="{% url "tube-join" tube.pk %}" target="_blank" rel="noopener"><b>{{ tube }}</b></a>
-          {{ tube.description|linebreaks }}
-        </li>
-      {% endif %}
-    {% endfor %}
-  </ul>
+  {% if tube_list %}
+    <ul id="tube-list">
+      {% for tube in tube_list %}
+        {% if tube.accepting_signups %}
+          <li>
+            <a href="{% url "tube-join" tube.pk %}" target="_blank" rel="noopener"><b>{{ tube }}</b></a>
+            {{ tube.description|linebreaks }}
+          </li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="alert alert-warning">There is nothing to show here yet.</div>
+  {% endif %}
   <h2>Instructions</h2>
   <p>
     Click on the link above to access the problem proposals on Probase.

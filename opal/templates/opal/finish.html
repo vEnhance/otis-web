@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% load humanize %}
+{% block title %}
+  {{ puzzle.title }} solved!
+{% endblock title %}
+{% block layout-content %}
+  <h1>Congrats! 🎉</h1>
+  <p>
+    At <b>{{ attempt.created_at }}</b>, you've correctly solved <b>{{ puzzle.title }}</b>.
+  </p>
+  <p>As a prize, you obtained the following achievement:</p>
+  <h2>{{ achievement.name }} ({{ achievement.diamonds }}♦️)</h2>
+  {% if achievement.image %}
+    <div class="text-center">
+      <a href="{{ achievement.image.url }}">
+        <img width="256px" src="{{ achievement.image.url }}" />
+      </a>
+    </div>
+  {% endif %}
+  <p class="fst-italic">{{ achievement.description }}</p>
+  <hr />
+  <p>We hope you enjoyed playing. See you next time!</p>
+  <p class="text-center">
+    <a href="{{ hunt.get_absolute_url }}" class="btn btn-primary">Back to hunt</a>
+    <a href="{{ puzzle.get_absolute_url }}" class="btn btn-secondary">Back to puzzle</a>
+  </p>
+{% endblock layout-content %}

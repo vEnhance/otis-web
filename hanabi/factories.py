@@ -1,4 +1,5 @@
-from django.utils.timezone import utc
+import datetime
+
 from factory.declarations import SubFactory
 from factory.django import DjangoModelFactory
 from factory.faker import Faker
@@ -15,8 +16,8 @@ class HanabiContestFactory(DjangoModelFactory):
 
     variant_id = 0
     variant_name = "No Variant (5 Suits)"
-    start_date = Faker("past_datetime", tzinfo=utc)
-    end_date = Faker("future_datetime", tzinfo=utc)
+    start_date = Faker("past_datetime", tzinfo=datetime.timezone.utc)
+    end_date = Faker("future_datetime", tzinfo=datetime.timezone.utc)
 
 
 class HanabiPlayerFactory(DjangoModelFactory):
