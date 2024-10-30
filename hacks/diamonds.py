@@ -15,10 +15,12 @@ outputting matches with tags.
    python path/to/diamonds.py
 
 Alternatively, you can run this on a python shell:
->>> os.chdir('blah/blah/blah/') # contains otis-web
->>> otis_df.scandir('otis-web/', deep=True, exclude='.lock')
+>>> from hacks.diamonds import DiamondFinder
+>>> otis_df = DiamondFinder(chars='0123456789abcdef', minlen=24, maxlen=26)
+>>> otis_df.scandir('blah/blah/blah/otis-web/', deep=True, exclude='.lock')
 ...
 >>> print(otis_df)
+
 I got 4 legitimate diamonds and 14 charisma points doing this.
 """
 
@@ -143,6 +145,7 @@ class DiamondFinder(defaultdict):
         if self.notify_diamonds:
             print(diamond, tag)
         self[diamond].append(tag)
+
 
 # Main function for scanning diamonds when running this file directly
 def main():
