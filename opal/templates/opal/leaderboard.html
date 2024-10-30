@@ -1,0 +1,66 @@
+{% extends "layout.html" %}
+{% block title %}
+  Leaderboard for {{ hunt.name }}
+{% endblock title %}
+{% block main-class %}
+  col-12
+{% endblock main-class %}
+{% block side-class %}
+  col-6 col-md-4
+{% endblock side-class %}
+{% block layout-content %}
+  <p>
+    <a class="btn btn-dark" href="{% url "opal-hunt-list" %}">Back to list of hunts</a>
+  </p>
+  <h2>Puzzle statistics</h2>
+  <table class="table table-striped">
+    <tr class="table-dark">
+      <th>Order</th>
+      <th>Solves</th>
+      <th>#attempts</th>
+      <th>Puzzle</th>
+    </tr>
+    {% for puzzle in puzzle_stats %}
+      <tr>
+        <td class="text-end">{{ puzzle.order }}</td>
+        <td class="text-end">
+          <b>{{ puzzle.num_solves }}</b>
+        </td>
+        <td class="text-end">{{ puzzle.num_total_attempts }}</td>
+        <td>
+          <a href="{% url "opal-attempts-list" hunt.slug puzzle.slug %}">{{ puzzle.title }}</a>
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+  <h2>Current leaderboard</h2>
+  <table class="table table-striped">
+    <tr class="table-dark">
+      <th>Score</th>
+      <th>User</th>
+      <th>Progress</th>
+      <th>Last solve</th>
+    </tr>
+    {% for row in rows %}
+      <tr {% if row.meta_solved_time %}class="table-success"{% endif %}>
+        <td class="text-end">
+          <b>{{ row.num_solves }}</b>
+        </td>
+        <td>
+          <a href="{% url "opal-person-log" hunt.slug row.user_pk %}">{{ row.name|truncatechars:"28" }}</a>
+        </td>
+        <td>{{ row.emoji_string }}</td>
+        <td>
+          {% if row.meta_solved_time %}
+            <b>{{ row.meta_solved_time|date:"Y-m-d H:i" }}</b>
+          {% else %}
+            {{ row.most_recent_solve|date:"Y-m-d H:i" }}
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+{% endblock layout-content %}
+{% comment %}
+vim: ft=htmldjango
+{% endcomment %}

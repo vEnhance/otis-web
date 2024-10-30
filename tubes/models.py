@@ -43,3 +43,6 @@ class JoinRecord(models.Model):
     )
     activation_time = models.DateTimeField(null=True, blank=True)
     invite_url = models.URLField(help_text="The URL for joining", blank=True)
+
+    def __str__(self) -> str:
+        return self.invite_url if self.invite_url else f"Join #{self.pk}"

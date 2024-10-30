@@ -1,6 +1,7 @@
+import datetime
+
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.utils import timezone
 from freezegun.api import freeze_time
 
 from core.factories import GroupFactory, UserFactory
@@ -12,7 +13,7 @@ from roster.factories import InvoiceFactory, StudentFactory
 
 from .views import process_payment
 
-UTC = timezone.utc
+UTC = datetime.timezone.utc
 
 
 class PaymentTest(EvanTestCase):

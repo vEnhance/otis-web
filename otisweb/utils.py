@@ -10,6 +10,7 @@ from django.http import HttpRequest
 from django.utils import timezone
 from mailchimp3 import MailChimp
 from mailchimp3.mailchimpclient import MailChimpError
+from requests.exceptions import ConnectionError
 
 
 class AuthHttpRequest(HttpRequest):
@@ -53,7 +54,7 @@ def get_mailchimp_campaigns(days: int) -> list[MailChimpDatum]:
             mailchimp_campaign_data = client.campaigns.all(
                 get_all=True, status="sent", since_send_time=timestamp
             )
-        except MailChimpError:
+        except (MailChimpError, ConnectionError):
             return []
         if mailchimp_campaign_data is None:
             return []
@@ -95,7 +96,7 @@ def mailchimp_subscribe(request: AuthHttpRequest):
             f"The email {user.email} is now listed as the "
             + "contact point for OTIS announcements from Evan.",
         )
-    except MailChimpError as e:
+    except (MailChimpError, ConnectionError) as e:
         logger.error(f"Could not add {user.email} to MailChimp", exc_info=e)
         messages.warning(
             request,

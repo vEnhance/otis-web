@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block title %}
-  Hanabi Contests
+  Hanabi contests
 {% endblock title %}
 {% block layout-content %}
   {% if player %}
@@ -16,7 +16,7 @@
       if you want to earn spades.
     </div>
     <p class="text-center">
-      <a href="{% url "hanabi-register" %}" class="btn btn-link btn-primary">Register username</a>
+      <a href="{% url "hanabi-register" %}" class="btn btn-primary">Register username</a>
       <hr />
     </p>
   {% endif %}
@@ -36,7 +36,7 @@
       {% endif %}
     </ul>
     <p class="text-center">
-      <a class="btn btn-link btn-success"
+      <a class="btn btn-success"
          target="_blank"
          href="{{ contest.create_table_url }}&password={{ table_password }}">Start table</a>
       <br />
@@ -47,7 +47,7 @@
   {% endfor %}
   <hr />
   <h1>All Contests</h1>
-  <table class="table striped-table">
+  <table class="table table-striped">
     <thead>
       <th>#</th>
       <th>Contest</th>

@@ -1,24 +1,24 @@
 {% extends "layout.html" %}
 {% load tz %}
 {% block title %}
-  Problem Set Submission Queue
+  Problem set submission queue
 {% endblock title %}
 {% block layout-content %}
   {% load otis_extras %}
   <p>Here are all the problem sets that haven't been checked yet.</p>
-  <table class="table">
+  <table class="table table-striped">
     <thead class="table-dark">
       <tr>
-        <td class="text-end">#</td>
-        <td>Unit</td>
-        <td>Timestamp (UTC)</td>
-        <td class="text-end">PK</td>
+        <th class="text-end">#</th>
+        <th>Unit</th>
+        <th>Timestamp (UTC)</th>
+        <th class="text-end">PK</th>
       </tr>
     </thead>
     <tbody>
       {% for pset in object_list %}
         <tr {% if pset.student.user == request.user %}class="table-warning fw-bold"{% endif %}>
-          <th class="text-end">{{ forloop.counter }}.</th>
+          <td class="text-end">{{ forloop.counter }}.</td>
           <td>
             {% if pset.student.user == request.user or request.user.is_staff %}
               <a href="{{ pset.get_absolute_url }}">{{ pset.unit.group.name }}<sup>{{ pset.unit.code }}</sup></a>

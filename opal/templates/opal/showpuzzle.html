@@ -1,0 +1,111 @@
+{% extends "layout.html" %}
+{% load humanize %}
+{% block title %}
+  {{ puzzle.title }}
+{% endblock title %}
+{% block layout-content %}
+  {% if puzzle.credits %}<p class="fst-italic">{{ puzzle.credits }}</p>{% endif %}
+  {% if puzzle.content %}
+    <div>
+      <a href="{{ puzzle.content.url }}"
+         title="Download as PDF"
+         class="btn btn-primary">Download PDF</a>
+      <a href="{{ hunt.get_absolute_url }}"
+         title="Download as PDF"
+         class="btn btn-secondary">Back to hunt</a>
+      {% if request.user.is_superuser %}
+        <a href="{{ puzzle.get_attempt_log_url }}"
+           title="Guess log"
+           class="btn btn-success">Guess log</a>
+        <a href="{% url "admin:opal_opalpuzzle_change" puzzle.pk %}"
+           title="Edit in admin"
+           class="btn btn-outline-dark">Edit in admin</a>
+      {% endif %}
+    </div>
+  {% else %}
+    <div class="alert alert-danger">
+      <h3 class="alert-heading">PDF file for this puzzle not found</h3>
+      <p>If you think that's a mistake, contact Evan.</p>
+      <p>
+        Otherwise, go back to <a class="alert-link" href="{{ hunt.get_absolute_url }}">{{ hunt }}</a>.
+      </p>
+      {% if request.user.is_superuser %}
+        <p>
+          Youc an also
+          <a href="{% url "admin:opal_opalpuzzle_change" puzzle.pk %}"
+             title="Edit in admin">edit in admin</a>
+          or
+          <a href="{{ puzzle.get_attempt_log_url }}">view attempts</a>.
+        </p>
+      {% endif %}
+    </div>
+  {% endif %}
+  {% if puzzle.errata %}
+    <hr />
+    <div class="alert alert-warning">
+      <h2 class="alert-heading">Updates and errata</h2>
+      {{ puzzle.errata }}
+    </div>
+  {% endif %}
+  <hr />
+  {% if can_attempt %}
+    {% include "generic_form.html" %}
+  {% elif solved %}
+    <div class="alert alert-success">
+      <h2 class="alert-heading">
+        Answer: <tt>{{ puzzle.answer }}</tt>
+      </h2>
+      Congrats, you solved this puzzle!
+      {% if puzzle.achievement %}
+        <a href="{% url "opal-finish" hunt.slug puzzle.slug %}">It was worth {{ puzzle.achievement.diamonds }}♦️</a>.
+      {% endif %}
+    </div>
+  {% elif not solved %}
+    <div class="alert alert-danger">You have run out of guesses for this puzzle.</div>
+  {% endif %}
+  <hr />
+  {% if show_hints and puzzle.hint_text_rendered %}
+    <h3>Hints</h3>
+    <p>
+      <a id="open_opal_hints" href="#">Click to reveal pre-written hints.</a>
+      Email Evan for more detailed hint requests
+      (if so, include a viewable link to your spreadsheet).
+    </p>
+    <div id="opal_hints" class="d-none">
+      <p>Highlight each hint to reveal it.</p>
+      {{ puzzle.hint_text_rendered|safe }}
+    </div>
+    <hr />
+  {% endif %}
+  <h3>Previous guesses</h3>
+  <p>You have used {{ attempts|length }} of your {{ puzzle.guess_limit }} guesses.</p>
+  <table class="table table-striped">
+    <tr class="table-dark">
+      <th>Guess</th>
+      <th>Verdict</th>
+      <th>Timestamp</th>
+    </tr>
+    {% for attempt in attempts %}
+      <tr>
+        <td>
+          <tt>{{ attempt.guess }}</tt>
+        </td>
+        {% if attempt.is_correct %}
+          <td class="text-success">Solved!</td>
+        {% else %}
+          <td class="text-danger">Incorrect</td>
+        {% endif %}
+        <td>{{ attempt.created_at }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+{% endblock layout-content %}
+{% block scripts %}
+  <script type="text/javascript">
+      $(() => {
+          $("#open_opal_hints").click(function() {
+              $("#opal_hints").toggleClass("d-none");
+          });
+      });
+  </script>
+{% endblock scripts %}

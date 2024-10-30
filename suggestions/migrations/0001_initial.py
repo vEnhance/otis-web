@@ -10,108 +10,97 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("core", "0038_semester_end_year"),
+        ("core", "0001_squashed_0054_userprofile_use_twemoji"),
     ]
 
     operations = [
-        migrations.SeparateDatabaseAndState(
-            state_operations=[
-                migrations.CreateModel(
-                    name="ProblemSuggestion",
-                    fields=[
-                        (
-                            "id",
-                            models.BigAutoField(
-                                auto_created=True,
-                                primary_key=True,
-                                serialize=False,
-                                verbose_name="ID",
-                            ),
-                        ),
-                        (
-                            "weight",
-                            models.PositiveSmallIntegerField(
-                                blank=True,
-                                choices=[(2, 2), (3, 3), (5, 5), (9, 9)],
-                                null=True,
-                            ),
-                        ),
-                        (
-                            "source",
-                            models.CharField(
-                                help_text="Source of the problem, e.g. `Shortlist 2018 A7`.",
-                                max_length=60,
-                            ),
-                        ),
-                        (
-                            "description",
-                            models.CharField(
-                                help_text="A one-line summary of problem, e.g. `Inequality with cube roots`.",
-                                max_length=100,
-                            ),
-                        ),
-                        (
-                            "statement",
-                            models.TextField(
-                                help_text="Statement of the problem, in LaTeX."
-                            ),
-                        ),
-                        (
-                            "solution",
-                            models.TextField(
-                                help_text="Solution to the problem, in LaTeX."
-                            ),
-                        ),
-                        (
-                            "comments",
-                            models.TextField(
-                                blank=True, help_text="Any extra comments."
-                            ),
-                        ),
-                        (
-                            "acknowledge",
-                            models.BooleanField(
-                                default=True,
-                                help_text="Acknowledge me for this contribution. (Uncheck for an anonymous contribution.)",
-                            ),
-                        ),
-                        (
-                            "resolved",
-                            models.BooleanField(
-                                default=False,
-                                help_text="Whether staff has processed this.",
-                            ),
-                        ),
-                        (
-                            "eligible",
-                            models.BooleanField(
-                                default=True,
-                                help_text="Whether this suggestion is eligible for spades.",
-                            ),
-                        ),
-                        ("created_at", models.DateTimeField(auto_now_add=True)),
-                        (
-                            "unit",
-                            models.ForeignKey(
-                                help_text="The unit to suggest the problem for.",
-                                on_delete=django.db.models.deletion.CASCADE,
-                                to="core.unit",
-                            ),
-                        ),
-                        (
-                            "user",
-                            models.ForeignKey(
-                                help_text="User who suggested the problem.",
-                                on_delete=django.db.models.deletion.CASCADE,
-                                to=settings.AUTH_USER_MODEL,
-                            ),
-                        ),
-                    ],
-                    options={
-                        "db_table": "dashboard_problemsuggestion",
-                    },
+        migrations.CreateModel(
+            name="ProblemSuggestion",
+            fields=[
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "weight",
+                    models.PositiveSmallIntegerField(
+                        blank=True,
+                        choices=[(2, 2), (3, 3), (5, 5), (9, 9)],
+                        null=True,
+                    ),
+                ),
+                (
+                    "source",
+                    models.CharField(
+                        help_text="Source of the problem, e.g. `Shortlist 2018 A7`.",
+                        max_length=60,
+                    ),
+                ),
+                (
+                    "description",
+                    models.CharField(
+                        help_text="A one-line summary of problem, e.g. `Inequality with cube roots`.",
+                        max_length=100,
+                    ),
+                ),
+                (
+                    "statement",
+                    models.TextField(help_text="Statement of the problem, in LaTeX."),
+                ),
+                (
+                    "solution",
+                    models.TextField(help_text="Solution to the problem, in LaTeX."),
+                ),
+                (
+                    "comments",
+                    models.TextField(blank=True, help_text="Any extra comments."),
+                ),
+                (
+                    "acknowledge",
+                    models.BooleanField(
+                        default=True,
+                        help_text="Acknowledge me for this contribution. (Uncheck for an anonymous contribution.)",
+                    ),
+                ),
+                (
+                    "resolved",
+                    models.BooleanField(
+                        default=False,
+                        help_text="Whether staff has processed this.",
+                    ),
+                ),
+                (
+                    "eligible",
+                    models.BooleanField(
+                        default=True,
+                        help_text="Whether this suggestion is eligible for spades.",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "unit",
+                    models.ForeignKey(
+                        help_text="The unit to suggest the problem for.",
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="core.unit",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        help_text="User who suggested the problem.",
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
                 ),
             ],
-            database_operations=[],
-        )
+            options={
+                "db_table": "dashboard_problemsuggestion",
+            },
+        ),
     ]

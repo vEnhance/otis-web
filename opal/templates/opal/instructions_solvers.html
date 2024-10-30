@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% load humanize %}
 {% block title %}
-  OPAL: Author Instructions
+  OPAL: Author instructions
 {% endblock title %}
 {% block layout-content %}
   <p>
@@ -16,26 +16,52 @@
     <li>
       Each hunt will consist of several feeder puzzles,
       plus one "meta-puzzle" that uses the answers to all the feeder puzzles.
+      Successfully solving the meta-puzzle awards a special diamond
+      (that cannot normally be obtained by other means).
     </li>
     <li>
       The answer to each puzzle will be an alphanumeric string.
-      The answers are case-insensitive and whitespace-insensitive.
-    </li>
-    <li>
-      The answer to the final meta-puzzle also corresponds to
-      a valid diamond code in some way
-      and serves as the prize for completing the OPAL hunt.
+      The answers are case-insensitive,
+      and ignores non-alphanumeric characters.
+      <ul>
+        <li>
+          So, for example, if the answer to a puzzle is <code>ANSWER</code>
+          then <code>an$wer</code> and <code>answer123</code> will be incorrect
+          but <code>An😎Swer!!</code> would be graded as correct.
+        </li>
+      </ul>
     </li>
     <li>
       There is no time limit to the hunt.
-      You can work on them whenever you want.
+      You can work on it whenever you want.
+      <ul>
+        <li>
+          Consequently, because there is no "end date" for the OPAL hunt,
+          you should avoid publicly posting spoilers about the hunt,
+          for future generations of OTIS.
+        </li>
+      </ul>
     </li>
-    <li>Guess rate limits: TO BE DETERMINED</li>
+    <li>
+      By default, you get up to 20 guesses per puzzle (may be different for some puzzles).
+      After 20 incorrect answers, <a href="https://w.wiki/AnYb">permadeath</a>
+      occurs and you will be unable to submit.
+      (If you legitimately run out of guesses, you can try to ask Evan really nicely,
+      but he may or may not actually grant your request depending on how egregious your guesses were.)
+    </li>
     <li>
       There are no constraints on team sizes,
       but the OPAL hunt is meant to be reasonably solvable by individuals.
       We think you will have the most fun working in teams of 1-4 people,
       but that's just a suggestion.
+      <ul>
+        <li>
+          You're welcome to hunt with friends outside of OTIS,
+          although only people with OTIS-WEB accounts will be able to
+          submit answers and progress through the hunt,
+          so you'll have to send them the puzzle PDF's separately.
+        </li>
+      </ul>
     </li>
     <li>
       This is a beginner event, so it is not meant to be competitive.

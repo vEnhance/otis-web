@@ -19,21 +19,25 @@
     </div>
   {% elif not invoice.student.semester.show_invoices %}
     <div class="alert alert-warning" role="alert">
-      <h2 class="alert-heading">Preliminary invoice only!</h2>
+      <h2 class="alert-heading">Invoices not ready yet!</h2>
       Invoices are not ready for distribution yet.
-      You can view this page if you want, but it's a work-in-progress.
-      For example, financial aid awards may not be reflected here yet.
+      For example, financial aid awards may not be entered onto the website yet.
+      Thus, the data on the server is not meant to be ready for use yet.
       <br />
-      If you are sure you know what you are doing,
-      you can use
+      If you are totally, 100% sure you know what you are doing,
+      and you <i>really</i> want to pay early, you can use
       <a href="{% url "payments-invoice" student.pk checksum %}">this link</a>
-      to make the payment right now anyway.
+      to make the payment right now.
+      But please don't do this unless you are absolutely confident
+      that you understand what is going on,
+      and that your invoice is totally up to date.
+      Otherwise, please wait until the invoices are finalized.
     </div>
   {% elif invoice.cleared %}
     <div class="alert alert-success" role="alert">
-      <h2 class="alert-heading">Invoice paid in full</h2>
+      <h1 class="alert-heading">Invoice paid in full 🎉</h1>
       <p>
-        <b>You currently do not owe anything</b>. Thank you!
+        ✅ <b>You currently do not owe anything</b>. Thank you!
       </p>
       <p>
         If you still need it for some reason, here was the
@@ -61,7 +65,7 @@
     </p>
     <hr />
   {% endif %}
-  {% if invoice %}
+  {% if invoice and invoice.student.semester.show_invoices %}
     {% include "roster/invoice_table.html" %}
     <hr />
     <p>

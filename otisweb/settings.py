@@ -2,7 +2,6 @@
 Django settings for otisweb project.
 """
 
-
 import logging
 import os
 import sys
@@ -27,6 +26,8 @@ if ENV_PATH.exists():
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 # Manually added settings
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
@@ -79,16 +80,21 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.sites",
     "django.contrib.staticfiles",
-    "debug_toolbar",
+]
+
+if DEBUG is True and TESTING is False:
+    INSTALLED_APPS.append("debug_toolbar")
+
+INSTALLED_APPS += [
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.discord",
     "allauth.socialaccount.providers.github",
     "allauth.socialaccount.providers.google",
-    "bootstrap5",
     "crispy_bootstrap5",
     "crispy_forms",
+    "django_bootstrap5",
     "django_extensions",
     "django_nyt.apps.DjangoNytConfig",
     "hijack",
@@ -111,8 +117,12 @@ INSTALLED_APPS = [
     "wikihaxx",
 ]
 
-MIDDLEWARE = [
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
+if DEBUG is True and TESTING is False:
+    MIDDLEWARE = ["debug_toolbar.middleware.DebugToolbarMiddleware"]
+else:
+    MIDDLEWARE = []
+
+MIDDLEWARE += [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -220,7 +230,12 @@ STATIC_ROOT = BASE_DIR / "static/"
 MEDIA_ROOT = BASE_DIR / "media/"
 
 if PRODUCTION:
-    DEFAULT_FILE_STORAGE = "storages.backends.gcloud.GoogleCloudStorage"
+    STORAGES = {
+        "default": {"BACKEND": "storages.backends.gcloud.GoogleCloudStorage"},
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
     STATIC_URL = os.getenv("STATIC_URL")
     GS_BUCKET_NAME = os.getenv("GS_BUCKET_NAME")
     MEDIA_URL = os.getenv("MEDIA_URL")
@@ -244,6 +259,7 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
 INVOICE_HASH_KEY = os.getenv("INVOICE_HASH_KEY", "evan_chen_is_still_really_cool")
 STORAGE_HASH_KEY = os.getenv("STORAGE_HASH_KEY", "look_at_me_im_a_cute_kitten")
 CERT_HASH_KEY = os.getenv("CERT_HASH_KEY", "certified_by_god")
+OPAL_HASH_KEY = os.getenv("OPAL_HASH_KEY", "paradise_is_where_i_am")
 API_TARGET_HASH = os.getenv("API_TARGET_HASH")
 
 PATH_STATEMENT_ON_DISK = os.getenv("PATH_STATEMENT_ON_DISK")

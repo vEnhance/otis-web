@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("core", "0037_rename_last_announce_dismiss_userprofile_last_email_dismiss"),
+        ("core", "0001_squashed_0054_userprofile_use_twemoji"),
     ]
 
     operations = [

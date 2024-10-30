@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block title %}
-  Hanabi Contest #{{ contest.pk }}: {{ contest.variant_name }}
+  Hanabi contest #{{ contest.pk }}: {{ contest.variant_name }}
 {% endblock title %}
 {% block layout-content %}
   <p>
@@ -16,7 +16,7 @@
     <a href="{{ contest.hanab_stats_page_url }}">{{ contest.hanab_stats_page_url }}</a>
     for all the results of the seed on the hanab.live server.
   </p>
-  <table class="table striped-table">
+  <table class="table table-striped">
     <thead>
       <tr>
         <th>Replay</th>

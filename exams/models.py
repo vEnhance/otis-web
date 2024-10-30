@@ -203,3 +203,6 @@ class MockCompleted(models.Model):
             "exam",
         )
         verbose_name_plural = "Mock completions"
+
+    def __str__(self) -> str:
+        return f"{self.student} takes {self.exam}"

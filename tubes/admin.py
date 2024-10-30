@@ -39,4 +39,5 @@ class JoinRecordAdmin(ImportExportModelAdmin):
     list_display = ("pk", "tube", "user", "activation_time")
     list_display_links = ("pk", "tube", "user")
     list_filter = (("user", admin.EmptyFieldListFilter),)
+    search_fields = ("user__username", "invite_url")
     resource_class = JoinRecordResource

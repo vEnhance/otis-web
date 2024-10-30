@@ -5,7 +5,6 @@ from django.conf import settings
 from django.contrib.auth.models import Group, User
 from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404
-from django.utils import timezone
 from freezegun.api import freeze_time
 
 from core.factories import (  # NOQA
@@ -35,6 +34,8 @@ from roster.models import (  # NOQA
 )
 
 from .admin import build_students
+
+UTC = datetime.timezone.utc
 
 
 class RosterTest(EvanTestCase):
@@ -130,8 +131,8 @@ class RosterTest(EvanTestCase):
     def test_delinquency(self) -> None:
         semester: Semester = SemesterFactory.create(
             show_invoices=True,
-            first_payment_deadline=datetime.datetime(2022, 9, 21, tzinfo=timezone.utc),
-            most_payment_deadline=datetime.datetime(2023, 1, 21, tzinfo=timezone.utc),
+            first_payment_deadline=datetime.datetime(2022, 9, 21, tzinfo=UTC),
+            most_payment_deadline=datetime.datetime(2023, 1, 21, tzinfo=UTC),
         )
 
         alice: Student = StudentFactory.create(semester=semester)
@@ -157,7 +158,7 @@ class RosterTest(EvanTestCase):
         with freeze_time("2022-10-15", tz_offset=0):
             self.assertEqual(alice.payment_status, 3)
             self.assertTrue(alice.is_delinquent)
-            invoice.forgive_date = datetime.datetime(2022, 10, 31, tzinfo=timezone.utc)
+            invoice.forgive_date = datetime.datetime(2022, 10, 31, tzinfo=UTC)
             invoice.save()
             self.assertFalse(alice.is_delinquent)
         with freeze_time("2022-11-15", tz_offset=0):
@@ -188,7 +189,7 @@ class RosterTest(EvanTestCase):
         with freeze_time("2023-02-15", tz_offset=0):
             self.assertEqual(alice.payment_status, 7)
             self.assertTrue(alice.is_delinquent)
-            invoice.forgive_date = datetime.datetime(2023, 2, 28, tzinfo=timezone.utc)
+            invoice.forgive_date = datetime.datetime(2023, 2, 28, tzinfo=UTC)
             invoice.save()
             self.assertFalse(alice.is_delinquent)
         with freeze_time("2023-06-05", tz_offset=0):
@@ -204,19 +205,17 @@ class RosterTest(EvanTestCase):
 
         bob: Student = StudentFactory.create(semester=semester)
 
-        # Bob is unaffected by earlier payment dates
+        # Bob gets a bit of extra time to pay because he joined recently
         with freeze_time("2023-1-23", tz_offset=0):
             invoice2: Invoice = InvoiceFactory.create(
                 student=bob,
                 preps_taught=1,
             )
-            self.assertEqual(bob.payment_status, 4)
+            self.assertEqual(bob.payment_status, 1)
             self.assertFalse(bob.is_delinquent)
 
         # Now he is affected
-        semester.first_payment_deadline = datetime.datetime(
-            2023, 1, 28, tzinfo=timezone.utc
-        )
+        semester.first_payment_deadline = datetime.datetime(2023, 1, 28, tzinfo=UTC)
         semester.save()
 
         with freeze_time("2023-2-08", tz_offset=0):
@@ -227,12 +226,10 @@ class RosterTest(EvanTestCase):
         invoice2.save()
 
         with freeze_time("2023-2-08", tz_offset=0):
-            self.assertEqual(bob.payment_status, 4)
-            self.assertFalse(bob.is_delinquent)
+            self.assertEqual(bob.payment_status, 7)
+            self.assertTrue(bob.is_delinquent)
 
-        semester.most_payment_deadline = datetime.datetime(
-            2023, 2, 21, tzinfo=timezone.utc
-        )
+        semester.most_payment_deadline = datetime.datetime(2023, 2, 21, tzinfo=UTC)
         semester.save()
 
         with freeze_time("2023-3-01", tz_offset=0):
@@ -286,6 +283,7 @@ class RosterTest(EvanTestCase):
         units: list[Unit] = UnitFactory.create_batch(20)
         self.login(alice)
 
+        # Check that an invalid unit is not processed
         invalid_resp = self.post(
             "inquiry",
             alice.pk,
@@ -297,6 +295,7 @@ class RosterTest(EvanTestCase):
         )
         self.assertNotHas(invalid_resp, "Petition automatically processed")
 
+        # Alice unlocks 6 units, should be autoprocessed.
         for i in range(6):
             resp = self.post(
                 "inquiry",
@@ -306,6 +305,7 @@ class RosterTest(EvanTestCase):
                     "action_type": "INQ_ACT_UNLOCK",
                     "explanation": "hi",
                 },
+                follow=True,
             )
             self.assertHas(resp, "Petition automatically processed")
             inq = UnitInquiry.objects.get(
@@ -314,8 +314,10 @@ class RosterTest(EvanTestCase):
             self.assertTrue(inq.was_auto_processed)
             self.assertEqual(inq.status, "INQ_ACC")
 
-        self.assertGet20X("inquiry", alice.pk)
+        self.assertGet20X("inquiry", alice.pk, follow=True)
 
+        # Now Alice has done 6 units, they shouldn't be able to get more
+        # (This differs from production behavior because production also gives you a dfeault three units)
         self.assertEqual(alice.curriculum.count(), 6)
         self.assertEqual(alice.unlocked_units.count(), 6)
         self.assertHas(
@@ -327,6 +329,7 @@ class RosterTest(EvanTestCase):
                     "action_type": "INQ_ACT_UNLOCK",
                     "explanation": "hi",
                 },
+                follow=True,
             ),
             "Petition submitted, wait for it!",
         )
@@ -339,45 +342,47 @@ class RosterTest(EvanTestCase):
         self.assertEqual(alice.curriculum.count(), 6)
         self.assertEqual(alice.unlocked_units.count(), 6)
 
+        # We have our assistant lock a unit
         self.login(firefly)
         self.assertHas(
             self.post(
                 "inquiry",
                 alice.pk,
                 data={
-                    "unit": units[4].pk,
+                    "unit": units[3].pk,
                     "action_type": "INQ_ACT_LOCK",
                     "explanation": "hi",
                 },
+                follow=True,
             ),
             "Petition automatically processed",
         )
-
         self.assertEqual(alice.curriculum.count(), 6)
         self.assertEqual(alice.unlocked_units.count(), 5)
         inq = UnitInquiry.objects.get(
-            student=alice, unit=units[4].pk, action_type="INQ_ACT_LOCK"
+            student=alice, unit=units[3].pk, action_type="INQ_ACT_LOCK"
         )
         self.assertTrue(inq.was_auto_processed)
         self.assertEqual(inq.status, "INQ_ACC")
+        self.assertFalse(alice.unlocked_units.contains(units[3]))
 
-        self.assertFalse(alice.unlocked_units.contains(units[4]))
-
+        # Now dropping should be autoprocessed by Alice
         self.login(alice)
         self.assertHas(
             self.post(
                 "inquiry",
                 alice.pk,
                 data={
-                    "unit": units[4].pk,
+                    "unit": units[3].pk,
                     "action_type": "INQ_ACT_DROP",
                     "explanation": "hi",
                 },
+                follow=True,
             ),
             "Petition automatically processed",
         )
         inq = UnitInquiry.objects.get(
-            student=alice, unit=units[4].pk, action_type="INQ_ACT_DROP"
+            student=alice, unit=units[3].pk, action_type="INQ_ACT_DROP"
         )
         self.assertTrue(inq.was_auto_processed)
         self.assertEqual(inq.status, "INQ_ACC")
@@ -385,6 +390,7 @@ class RosterTest(EvanTestCase):
         self.assertEqual(alice.curriculum.count(), 5)
         self.assertEqual(alice.unlocked_units.count(), 5)
 
+        # We now give Alice some more units :o
         self.login(firefly)
         for i in range(6, 10):
             self.assertHas(
@@ -396,6 +402,7 @@ class RosterTest(EvanTestCase):
                         "action_type": "INQ_ACT_UNLOCK",
                         "explanation": "hi",
                     },
+                    follow=True,
                 ),
                 "Petition automatically processed",
             )
@@ -407,6 +414,7 @@ class RosterTest(EvanTestCase):
         self.assertEqual(alice.curriculum.count(), 9)
         self.assertEqual(alice.unlocked_units.count(), 9)
 
+        # Check that you can't unlock more units when you are already at nine
         self.login(alice)
         for i in range(11, 14):
             self.assertHas(
@@ -418,6 +426,7 @@ class RosterTest(EvanTestCase):
                         "action_type": "INQ_ACT_UNLOCK",
                         "explanation": "hi",
                     },
+                    follow=True,
                 ),
                 "more than 9 unfinished",
             )
@@ -429,6 +438,7 @@ class RosterTest(EvanTestCase):
         self.assertEqual(alice.curriculum.count(), 9)
         self.assertEqual(alice.unlocked_units.count(), 9)
 
+        # appending should be autoprocessed
         for i in range(15, 18):
             self.assertHas(
                 self.post(
@@ -439,6 +449,7 @@ class RosterTest(EvanTestCase):
                         "action_type": "INQ_ACT_APPEND",
                         "explanation": "hi",
                     },
+                    follow=True,
                 ),
                 "Petition automatically processed",
             )
@@ -450,6 +461,7 @@ class RosterTest(EvanTestCase):
         self.assertEqual(alice.curriculum.count(), 12)
         self.assertEqual(alice.unlocked_units.count(), 9)
 
+        # check that petitions are now locked because of abnormally large count
         self.assertHas(
             self.post(
                 "inquiry",
@@ -459,6 +471,7 @@ class RosterTest(EvanTestCase):
                     "action_type": "INQ_ACT_DROP",
                     "explanation": "hi",
                 },
+                follow=True,
             ),
             "abnormally large",
         )
@@ -468,8 +481,9 @@ class RosterTest(EvanTestCase):
         self.assertFalse(inq.was_auto_processed)
         self.assertEqual(inq.status, "INQ_HOLD")
 
+        # drop a bunch of units for alice
         self.login(firefly)
-        for i in range(5, 14):
+        for i in range(4, 14):
             self.assertHas(
                 self.post(
                     "inquiry",
@@ -479,6 +493,7 @@ class RosterTest(EvanTestCase):
                         "action_type": "INQ_ACT_DROP",
                         "explanation": "hi",
                     },
+                    follow=True,
                 ),
                 "Petition automatically processed",
             )
@@ -487,8 +502,8 @@ class RosterTest(EvanTestCase):
             )
             self.assertTrue(inq.was_auto_processed)
             self.assertEqual(inq.status, "INQ_ACC")
-        self.assertEqual(alice.curriculum.count(), 7)
-        self.assertEqual(alice.unlocked_units.count(), 4)
+        self.assertEqual(alice.curriculum.count(), 6)
+        self.assertEqual(alice.unlocked_units.count(), 3)
 
         self.assertHas(
             self.post(
@@ -499,11 +514,12 @@ class RosterTest(EvanTestCase):
                     "action_type": "INQ_ACT_UNLOCK",
                     "explanation": "add back in",
                 },
+                follow=True,
             ),
             "Petition automatically processed",
         )
-        self.assertEqual(alice.curriculum.count(), 8)
-        self.assertEqual(alice.unlocked_units.count(), 5)
+        self.assertEqual(alice.curriculum.count(), 7)
+        self.assertEqual(alice.unlocked_units.count(), 4)
         inq = UnitInquiry.objects.get(
             student=alice,
             unit=units[5].pk,
@@ -513,17 +529,17 @@ class RosterTest(EvanTestCase):
         self.assertTrue(inq.was_auto_processed)
         self.assertEqual(inq.status, "INQ_ACC")
 
+        # Alice hit the hold limit earlier, this just circumvents it.
         self.login(alice)
+        PSetFactory.create_batch(30, student=alice)
+        alice.save()
+
+        # secret unit should be autoprocessed!
         secret_group = UnitGroupFactory.create(
             name="Spooky Unit", subject="K", hidden=True
         )
         secret_unit = UnitFactory.create(code="BKV", group=secret_group)
         alice.curriculum.add(secret_unit)
-
-        # Alice hit the hold limit earlier
-        PSetFactory.create_batch(30, student=alice)
-
-        alice.save()
 
         self.assertHas(
             self.post(
@@ -534,17 +550,52 @@ class RosterTest(EvanTestCase):
                     "action_type": "INQ_ACT_UNLOCK",
                     "explanation": "its almost halloween and my family wants to host it at our house.",
                 },
+                follow=True,
             ),
             "Petition automatically processed",
         )
-
-        self.assertEqual(alice.curriculum.count(), 9)
-        self.assertEqual(alice.unlocked_units.count(), 6)
+        self.assertEqual(alice.curriculum.count(), 8)
+        self.assertEqual(alice.unlocked_units.count(), 5)
         inq = UnitInquiry.objects.get(
             student=alice, unit=secret_unit.pk, action_type="INQ_ACT_UNLOCK"
         )
         self.assertTrue(inq.was_auto_processed)
         self.assertEqual(inq.status, "INQ_ACC")
+
+        # check that autoprocessing old units works
+        inactive_semester = SemesterFactory.create(active=False)
+        inactive_alice = StudentFactory.create(
+            semester=inactive_semester, user=alice.user
+        )
+        old_group = UnitGroupFactory.create(name="Last Year Unit", subject="A")
+        old_unit = UnitFactory.create(code="BAW", group=old_group)
+        inactive_alice.curriculum.add(old_unit)
+        inactive_alice.unlocked_units.add(old_unit)
+        self.assertEqual(inactive_alice.curriculum.count(), 1)
+        self.assertEqual(inactive_alice.unlocked_units.count(), 1)
+        inactive_alice.save()
+        self.assertHas(
+            self.post(
+                "inquiry",
+                alice.pk,
+                data={
+                    "unit": old_unit.pk,
+                    "action_type": "INQ_ACT_UNLOCK",
+                    "explanation": "did last year.",
+                },
+                follow=True,
+            ),
+            "Petition automatically processed",
+        )
+        inq = UnitInquiry.objects.get(
+            student=alice, unit=old_unit.pk, action_type="INQ_ACT_UNLOCK"
+        )
+        self.assertTrue(inq.was_auto_processed)
+        self.assertEqual(inq.status, "INQ_ACC")
+        self.assertEqual(alice.curriculum.count(), 9)
+        self.assertEqual(alice.unlocked_units.count(), 6)
+
+        # test a bunch of fail conditions
 
         bob: Student = StudentFactory.create(
             semester=SemesterFactory.create(active=False)
@@ -562,7 +613,7 @@ class RosterTest(EvanTestCase):
 
         invoice_semester = SemesterFactory.create(
             show_invoices=True,
-            first_payment_deadline=datetime.datetime(2021, 7, 1, tzinfo=timezone.utc),
+            first_payment_deadline=datetime.datetime(2021, 7, 1, tzinfo=UTC),
         )
         eve = StudentFactory.create(semester=invoice_semester)
         self.login(eve)
@@ -574,7 +625,7 @@ class RosterTest(EvanTestCase):
 
     def test_semester_switch(self) -> None:
         semester: Semester = SemesterFactory.create(
-            one_semester_date=datetime.datetime(2023, 12, 25, tzinfo=timezone.utc),
+            one_semester_date=datetime.datetime(2023, 12, 25, tzinfo=UTC),
         )
 
         container: RegistrationContainer = RegistrationContainerFactory.create(

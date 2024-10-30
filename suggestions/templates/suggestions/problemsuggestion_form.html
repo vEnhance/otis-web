@@ -2,7 +2,7 @@
 {% load static %}
 {% load markdownify %}
 {% block title %}
-  Problem Suggestion
+  Problem suggestion
 {% endblock title %}
 {% block main-class %}
   col-12
@@ -63,7 +63,7 @@
         </ul>
       </div>
     {% endif %}
-    <table class="table form-table">
+    <table class="table table-striped form-table">
       <tr>
         <td>{{ form.weight|as_crispy_field }}</td>
         <td>{{ form.unit|as_crispy_field }}</td>
@@ -119,7 +119,7 @@
           {% if pk %}
             <a id="delete"
                href="{% url 'suggest-delete' pk %}"
-               class="btn btn-link btn-warning"
+               class="btn btn-warning"
                style="margin-left: 50px">Delete Suggestion</a>
           {% endif %}
         </td>
@@ -136,7 +136,8 @@
             revisions requested.
           </p>
           <p>
-            This includes, among other things, following Evan's
+            In particular, you must write your own solution (as described in
+            section 1 above) and also follow all the
             <a href="https://web.evanchen.cc/latex-style-guide.html">LaTeX style requirements</a>.
           </p>
         </li>
@@ -185,13 +186,11 @@
           function lencheck_statement() {
               const s = $("#id_statement").val();
               $("#statement_warning").toggle(!checkLineLength(s));
-              if (!enabled) return;
           }
 
           function lencheck_solution() {
               const s = $("#id_solution").val();
               $("#solution_warning").toggle(!checkLineLength(s));
-              if (!enabled) return;
           }
           $("#id_statement").blur(lencheck_statement);
           $("#id_solution").blur(lencheck_solution);

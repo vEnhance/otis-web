@@ -89,7 +89,7 @@ def checkout(request: HttpRequest, invoice_pk: int, amount: int) -> HttpResponse
                 }
             ],
         )
-        return JsonResponse({"sessionId": checkout_session["id"]})
+        return JsonResponse({"sessionId": checkout_session["id"]})  # type: ignore
     else:
         return HttpResponseForbidden("Need to use request method GET")
 

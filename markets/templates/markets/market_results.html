@@ -16,7 +16,7 @@
       <button type="submit" name="submit" class="btn btn-outline-danger">Recompute scores</button>
       <a href="{% url "admin:markets_market_change" market.pk %}"
          title="Edit in Admin"
-         class="btn btn-link btn-outline-success">Edit market</a>
+         class="btn btn-outline-success">Edit market</a>
     </form>
   {% endif %}
   <div class="alert alert-dark">
@@ -54,7 +54,7 @@
           earned {{ guess.score|default_if_none:"?" }}♠.
         </p>
       {% endif %}
-      <table class="table">
+      <table class="table table-striped">
         <tr class="table-dark">
           <th style="width:2em;">#</th>
           <th style="width:9em;">Guess</th>
@@ -63,7 +63,7 @@
         </tr>
         {% for g in guesses %}
           <tr {% if g.score >= best_guess.score %}class="table-success fw-bold" {% elif guess.pk == g.pk %}class="table-primary" {% endif %}>
-            <th class="text-end">{{ forloop.counter }}</th>
+            <td class="text-end">{{ forloop.counter }}</td>
             <td class="text-end">
               {% if request.user.is_staff %}
                 <a href="{% url "admin:markets_guess_change" g.pk %}">{{ g.value|floatformat:6 }}</a>

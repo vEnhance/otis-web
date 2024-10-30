@@ -14,7 +14,7 @@ from rpg.models import Achievement, AchievementUnlock
 
 class OTISExtension(markdown.Extension):
     def extendMarkdown(self, md: Any):
-        md.preprocessors.add("otis-extras", OTISPreprocessor(md), ">html_block")
+        md.preprocessors.register(OTISPreprocessor(md), "otis-extras", 175)
 
 
 special_start_regex = re.compile(r"\[(diamond|unit|generic)([ a-zA-Z0-9]*)\]")
@@ -22,7 +22,6 @@ special_end_regex = re.compile(r"\[/(diamond|unit|generic)+\]")
 
 
 class OTISPreprocessor(markdown.preprocessors.Preprocessor):
-    # TODO implement cool stuff
     def run(self, lines: list[str]) -> list[str]:
         output: list[str] = []
         body: list[str] = []
