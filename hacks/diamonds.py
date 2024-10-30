@@ -1,4 +1,19 @@
-"""Finds hidden diamonds in raw plaintext"""
+"""
+DiamondFinder: Scans files for hidden "diamond" patterns.
+
+This script defines a `DiamondFinder` class to scan text files for character 
+sequences ("diamonds") matching given constraints on character set and length.
+When run, it automatically detects the `otis-web` directory (no matter where 
+the script is placed within `otis-web`) and recursively scans for diamonds, 
+outputting matches with tags.
+
+### Usage:
+1. Place this script anywhere within the `otis-web` directory.
+2. Run in the terminal:
+   
+   ```bash
+   python path/to/diamonds.py
+"""
 
 import os
 import io
