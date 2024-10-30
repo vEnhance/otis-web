@@ -124,23 +124,43 @@ class DiamondFinder(defaultdict):
 
 # Main function for scanning diamonds when running this file directly
 def main():
-    # Configure the DiamondFinder parameters
-    chars = '0123456789abcdef'
-    minlen = 24
-    maxlen = 26
-    notify_diamonds = True
+    """
+    Main function to detect and scan the 'otis-web' directory for hidden 
+    diamond patterns.
 
-    # Instantiate DiamondFinder
+    This function:
+    1. Configures parameters for the DiamondFinder class.
+    2. Automatically detects the 'otis-web' directory relative to the location 
+       of this script.
+    3. Initializes a DiamondFinder instance with specified character set and 
+       length constraints.
+    4. Scans the 'otis-web' directory recursively, excluding specified file 
+       types.
+    5. Prints the found diamonds along with their tags.
+    """
+    
+    # Configure the DiamondFinder parameters for characters and diamond length
+    chars = '0123456789abcdef'  # Characters considered part of a "diamond"
+    minlen = 24                 # Minimum length of a valid diamond pattern
+    maxlen = 26                 # Maximum length of a valid diamond pattern
+    notify_diamonds = True      # Flag to print diamonds as they are found
+
+    # Automatically detect the 'otis-web' directory based on the file's location
+    current_dir = pathlib.Path(__file__).resolve()  # Full path to this script
+    otis_web_dir = current_dir.parents[
+        current_dir.parts.index('otis-web')
+    ]  # Find 'otis-web'
+
+    # Instantiate the DiamondFinder with the configured parameters
     finder = DiamondFinder(chars, minlen, maxlen, notify_diamonds)
 
-    # Directory to scan - update as needed
-    directory = 'path/to/your/directory'
-    
-    # Start scanning the directory
-    print(f"Scanning directory: {directory}")
-    finder.scandir(directory, deep=True, exclude='.lock')
-    
-    # Print results
+    # Start scanning the detected 'otis-web' directory, including subdirectories
+    print(f"Scanning directory: {otis_web_dir}")
+    finder.scandir(
+        otis_web_dir, deep=True, exclude='.lock'
+    )  # Exclude '.lock' files from scan
+
+    # Print a summary of all diamonds found
     print("Diamonds found:")
     print(finder)
 
