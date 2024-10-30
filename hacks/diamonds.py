@@ -7,6 +7,9 @@ When run, it automatically detects the `otis-web` directory (no matter where
 the script is placed within `otis-web`) and recursively scans for diamonds, 
 outputting matches with tags.
 
+Simple RegEx that does this in GitHub search:
+>>> owner:vEnhance /[a-f0-9]{24,26}/
+
 ### Usage:
 1. Place this script anywhere within the `otis-web` directory.
 2. Run in the terminal:
