@@ -59,7 +59,7 @@ toml = "^0.10.2"
 types-Markdown = "^3.6.0.20240316"
 types-freezegun = "^1.1.2"
 types-requests = "^2.32.0.20240907"
-werkzeug = "^3.0.3"
+werkzeug = "^3.0.6"
 
 [tool.coverage.report]
 show_missing = true
