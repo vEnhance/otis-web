@@ -3,6 +3,16 @@
   Catalog
 {% endblock title %}
 {% block layout-content %}
+  <!-- Search Form -->
+  <form method="GET" action="{% url 'catalog' %}" class="mb-3">
+    <input type="text" name="q" placeholder="Search..." class="form-control" style="width: 100%; max-width: 600px;"/>
+  </form>
+  {% if not units.exists %}
+    <div class="alert alert-warning" role="alert">
+        No units found matching your search criteria.
+    </div>
+  {% endif %}
+
   <p>This list is sorted by olympiad category, then alphabetically by name.</p>
   <p>
     Each topic has one or more units which is designated

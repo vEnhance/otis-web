@@ -41,6 +41,7 @@ class AdminUnitListView(SuperuserRequiredMixin, ListView[Unit]):
 class UnitGroupListView(ListView[Unit]):
     model = Unit
     context_object_name = "units"
+    template_name = "core/unit_list.html"
 
     def get_queryset(self):
         queryset = Unit.objects.filter(group__hidden=False)
@@ -51,6 +52,14 @@ class UnitGroupListView(ListView[Unit]):
                 filter=Q(group__unit__pset__status__in=("A", "PA")),
             )
         )
+
+        # Search functionality
+        query = self.request.GET.get('q')
+        if query:
+            queryset = queryset.filter(
+                Q(group__name__icontains=query) |
+                Q(group__description__icontains=query)
+            )
 
         if not isinstance(self.request.user, AnonymousUser):
             queryset = queryset.annotate(
