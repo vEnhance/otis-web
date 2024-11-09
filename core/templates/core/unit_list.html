@@ -3,17 +3,7 @@
   Catalog
 {% endblock title %}
 {% block layout-content %}
-  <!-- Search Form -->
-  <form method="GET" action="{% url 'catalog' %}" class="mb-3">
-    <input type="text" name="q" placeholder="Search..." class="form-control" style="width: 100%; max-width: 600px;"/>
-  </form>
-  {% if not units.exists %}
-    <div class="alert alert-warning" role="alert">
-        No units found matching your search criteria.
-    </div>
-  {% endif %}
-
-  <p>This list is sorted by olympiad category, then alphabetically by name.</p>
+  {% include "core/unit_search_form.html" %}
   <p>
     Each topic has one or more units which is designated
     by a three-letter code.
@@ -57,7 +47,7 @@
   {% regroup units by group as unitgroups_g_list %}
   {% regroup unitgroups_g_list by grouper.get_subject_display as subject_g_list %}
   {% for subject, groups_g_list in subject_g_list %}
-    <h2>{{ subject }}</h2>
+    {% if group_by_category %}<h2>{{ subject }}</h2>{% endif %}
     <div class="list-group">
       {% for unitgroup, units in groups_g_list %}
         <div class="list-group-item container">
