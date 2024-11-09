@@ -11,7 +11,7 @@ class FilterForm(forms.Form):
     )
 
     category = forms.MultipleChoiceField(
-        choices=UnitGroup.SUBJECT_CHOICES,
+        choices=UnitGroup.SUBJECT_CHOICES_SHORT,
         widget=forms.CheckboxSelectMultiple(attrs={"class": "filter-form"}),
         required=False,
     )
