@@ -5,37 +5,37 @@ from .models import UnitGroup
 
 class FilterForm(forms.Form):
     difficulty = forms.MultipleChoiceField(
-        choices=[('B', 'B'), ('D', 'D'), ('Z', 'Z')],
-        widget=forms.CheckboxSelectMultiple(attrs={'class': 'filter-form'}),
-        required=False
+        choices=[("B", "B"), ("D", "D"), ("Z", "Z")],
+        widget=forms.CheckboxSelectMultiple(attrs={"class": "filter-form"}),
+        required=False,
     )
 
     category = forms.MultipleChoiceField(
         choices=UnitGroup.SUBJECT_CHOICES,
-        widget=forms.CheckboxSelectMultiple(attrs={'class': 'filter-form'}),
-        required=False
+        widget=forms.CheckboxSelectMultiple(attrs={"class": "filter-form"}),
+        required=False,
     )
 
     status = forms.MultipleChoiceField(
-        choices=[('✓', '✓'), ('⏲', '⏲'), ('⧖', '⧖')],
-        widget=forms.CheckboxSelectMultiple(attrs={'class': 'filter-form'}),
-        required=False
+        choices=[("✓", "✓"), ("⏲", "⏲"), ("⧖", "⧖")],
+        widget=forms.CheckboxSelectMultiple(attrs={"class": "filter-form"}),
+        required=False,
     )
 
     sort = forms.ChoiceField(
         choices=[
-            ('', 'A-Z'),
-            ('-num_psets_in_group', 'Number of completions (high to low)'),
-            ('num_psets_in_group', 'Number of completions (low to high)'),
-            ('position', 'Relative order (first to last)'),
-            ('-postion', 'Relative order (first to last)'),
+            ("", "A-Z"),
+            ("-num_psets_in_group", "Number of completions (high to low)"),
+            ("num_psets_in_group", "Number of completions (low to high)"),
+            ("position", "Relative order (first to last)"),
+            ("-postion", "Relative order (first to last)"),
         ],
         required=False,
-        initial='' # Sorts by A-Z
+        initial="",  # Sorts by A-Z
     )
 
     group_by_category = forms.BooleanField(
         required=False,
         initial=True,
-        widget=forms.CheckboxInput(attrs={'class': 'filter-form'})
+        widget=forms.CheckboxInput(attrs={"class": "filter-form"}),
     )

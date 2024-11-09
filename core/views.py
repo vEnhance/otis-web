@@ -51,8 +51,7 @@ class UnitGroupListView(ListView[Unit]):
         query = self.request.GET.get("q")
         if query:
             queryset = queryset.filter(
-                Q(group__name__icontains=query)
-                | Q(group__description__icontains=query)
+                Q(group__name__icontains=query) | Q(group__description__icontains=query)
             )
 
         queryset = queryset.annotate(
@@ -94,8 +93,7 @@ class UnitGroupListView(ListView[Unit]):
 
     def get_form(self) -> FilterForm:
         if self.request.GET and any(
-            field in self.request.GET
-            for field in FilterForm.base_fields.keys()
+            field in self.request.GET for field in FilterForm.base_fields.keys()
         ):
             form = FilterForm(self.request.GET)
         else:
@@ -104,9 +102,7 @@ class UnitGroupListView(ListView[Unit]):
         return form
 
     def filter_queryset_form(
-        self,
-        queryset: QuerySet[Unit],
-        form: FilterForm
+        self, queryset: QuerySet[Unit], form: FilterForm
     ) -> QuerySet[Unit]:
         if form.is_valid():
             # Filtering by difficulty
@@ -132,7 +128,9 @@ class UnitGroupListView(ListView[Unit]):
                 if "⏲" in statuses:
                     status_query |= Q(user_unlocked=True, has_pset=False)
                 if "⧖" in statuses:
-                    status_query |= Q(user_taking=True, user_unlocked=False, has_pset=False)
+                    status_query |= Q(
+                        user_taking=True, user_unlocked=False, has_pset=False
+                    )
                 queryset = queryset.filter(status_query)
 
             sort_option = form.cleaned_data.get("sort")
@@ -149,10 +147,7 @@ class UnitGroupListView(ListView[Unit]):
             sort_options.append("group__subject")
         if sort_option:
             sort_options.append(sort_option)
-        sort_options += [
-            "group__name",
-            "code"
-        ]
+        sort_options += ["group__name", "code"]
         queryset = queryset.order_by(*sort_options)
 
         return queryset
