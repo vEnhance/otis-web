@@ -25,8 +25,8 @@ from dashboard.models import PSet, UploadedFile
 from otisweb.utils import AuthHttpRequest
 from roster.models import Student
 
-from .models import Unit, UnitGroup
 from .forms import FilterForm
+from .models import Unit, UnitGroup
 from .utils import get_from_google_storage
 
 # Create your views here.
