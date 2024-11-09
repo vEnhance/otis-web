@@ -123,11 +123,11 @@ class UnitGroupListView(ListView[Unit]):
             statuses = form.cleaned_data.get("status")
             status_query = Q()  # Initialize an empty Q object
             if statuses:
-                if "✓" in statuses:
+                if "completed" in statuses:
                     status_query |= Q(has_pset=True)
-                if "⏲" in statuses:
+                if "unlocked" in statuses:
                     status_query |= Q(user_unlocked=True, has_pset=False)
-                if "⧖" in statuses:
+                if "locked" in statuses:
                     status_query |= Q(
                         user_taking=True, user_unlocked=False, has_pset=False
                     )

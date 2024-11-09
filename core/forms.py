@@ -17,7 +17,11 @@ class FilterForm(forms.Form):
     )
 
     status = forms.MultipleChoiceField(
-        choices=[("✓", "✓"), ("⏲", "⏲"), ("⧖", "⧖")],
+        choices=[
+            ("completed", "Done (✓)"),
+            ("unlocked", "Unlocked (⏲)"),
+            ("locked", "Locked (⧖)"),
+        ],
         widget=forms.CheckboxSelectMultiple(attrs={"class": "filter-form"}),
         required=False,
     )
