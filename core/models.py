@@ -179,23 +179,6 @@ class UnitGroup(models.Model):
         return self.name
 
     @property
-    def get_subject_short_display(self):
-        if self.subject == "A":
-            return "Algebra"
-        elif self.subject == "C":
-            return "Combo"
-        elif self.subject == "G":
-            return "Geom"
-        elif self.subject == "N":
-            return "Number theory"
-        elif self.subject == "M":
-            return "Misc"
-        elif self.subject == "F":
-            return "Func eqn"
-        elif self.subject == "K":
-            return "Secret"
-
-    @property
     def artwork_basename(self) -> str | None:
         return None if not self.artwork else os.path.basename(self.artwork.name)
 
