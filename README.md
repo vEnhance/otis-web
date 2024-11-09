@@ -76,6 +76,8 @@ and replace `YOUR_USERNAME` in step 2 with `vEnhance`.
 13. The website is functional now, but it is a bit bare-bones.
     To populate it with some test data, use `http://127.0.0.1:8000/admin`
     or run `./fixtures/load-all.sh`.
+    - To log in with the dummy accounts in the fixtures, it's easiest to log in
+      with the superuser account and then use the hijack feature.
 
 [activate]: https://python-poetry.org/docs/basic-usage/#activating-the-virtual-environment
 
