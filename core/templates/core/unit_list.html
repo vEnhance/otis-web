@@ -68,7 +68,6 @@
                 {% endif %}
               </h4>
               <div>
-                {{ unitgroup.get_subject_short_display }}:
                 {% for unit in units %}
                   {% if unit.has_pset %}
                     <span class="text-success">{{ unit.code }}<sup>✓</sup></span>
