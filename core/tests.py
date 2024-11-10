@@ -140,7 +140,6 @@ class TestCatalog(EvanTestCase):
             {"sort": "position", "category": "A"},
             ["ZAW", "DAX", "ZAX"]
         )
-        print("BUNTYYYYYY")
         self.assertCatalogEqual(
             {"sort": "-position", "difficulty": "Z"},
             ["ZAX", "ZAW"]
