@@ -93,10 +93,10 @@ class TestCatalog(EvanTestCase):
         ANALYSIS = UnitGroupFactory.create(name="Analysis", subject="A")
         SUMS = UnitGroupFactory.create(name="Sums", subject="A")
 
-        BMW = UnitFactory.create(code="BMW", position=1, group=GRINDING) # Completed
-        ZAW = UnitFactory.create(code="ZAW", position=2, group=ANALYSIS) # Locked
-        DAX = UnitFactory.create(code="DAX", position=3, group=SUMS) # Unlocked
-        ZAX = UnitFactory.create(code="ZAX", position=4, group=SUMS) # NA
+        BMW = UnitFactory.create(code="BMW", position=1, group=GRINDING)  # Completed
+        ZAW = UnitFactory.create(code="ZAW", position=2, group=ANALYSIS)  # Locked
+        DAX = UnitFactory.create(code="DAX", position=3, group=SUMS)  # Unlocked
+        ZAX = UnitFactory.create(code="ZAX", position=4, group=SUMS)  # NA
 
         dora = StudentFactory.create()
         dora.curriculum.set([BMW, DAX, ZAW])
@@ -104,7 +104,9 @@ class TestCatalog(EvanTestCase):
         PSetFactory.create(student=dora, unit=BMW, next_unit_to_unlock=ZAX)
         self.login(dora)
 
-    def assertCatalogEqual(self, query_params: dict[str, Any], expected_codes: list[str]):
+    def assertCatalogEqual(
+        self, query_params: dict[str, Any], expected_codes: list[str]
+    ):
         # Code is strictly not a unique field but fine for our purposes
         resp = self.assertGet20X("catalog", query_params=query_params)
         unit_codes = [unit.code for unit in resp.context["units"]]
@@ -116,61 +118,40 @@ class TestCatalog(EvanTestCase):
 
     def test_catalog_filters(self):
         # TODO: one thing this does not test is sorting by num completions
-        resp = self.assertCatalogEqual(
-            {},
-            ["ZAW", "DAX", "ZAX", "BMW"]
-        )
+        resp = self.assertCatalogEqual({}, ["ZAW", "DAX", "ZAX", "BMW"])
         self.assertTrue(resp.context["group_by_category"])
 
+        self.assertCatalogEqual({"status": ["completed", "locked"]}, ["ZAW", "BMW"])
+        self.assertCatalogEqual({"status": "unlocked"}, ["DAX"])
+        self.assertCatalogEqual({"difficulty": "Z"}, ["ZAW", "ZAX"])
+        self.assertCatalogEqual({"difficulty": "Z", "category": "A"}, ["ZAW", "ZAX"])
         self.assertCatalogEqual(
-            {"status": ["completed", "locked"]},
-            ["ZAW", "BMW"]
+            {"difficulty": "Z", "status": ["locked", "unlocked"]}, ["ZAW"]
         )
         self.assertCatalogEqual(
-            {"status": "unlocked"},
-            ["DAX"]
-        )
-        self.assertCatalogEqual(
-            {"difficulty": "Z"},
-            ["ZAW", "ZAX"]
-        )
-        self.assertCatalogEqual(
-            {"difficulty": "Z", "category": "A"},
-            ["ZAW", "ZAX"]
-        )
-        self.assertCatalogEqual(
-            {"difficulty": "Z", "status": ["locked", "unlocked"]},
-            ["ZAW"]
-        )
-        self.assertCatalogEqual(
-            {"difficulty": "Z", "category": "A", "status": "locked"},
-            ["ZAW"]
+            {"difficulty": "Z", "category": "A", "status": "locked"}, ["ZAW"]
         )
         self.assertCatalogEqual(
             {"sort": "", "status": ["completed", "unlocked", "locked"]},
-            ["ZAW", "BMW", "DAX"]
+            ["ZAW", "BMW", "DAX"],
         )
         self.assertCatalogEqual(
-            {"sort": "position", "category": "A"},
-            ["ZAW", "DAX", "ZAX"]
+            {"sort": "position", "category": "A"}, ["ZAW", "DAX", "ZAX"]
         )
         self.assertCatalogEqual(
-            {"sort": "-position", "difficulty": "Z"},
-            ["ZAX", "ZAW"]
+            {"sort": "-position", "difficulty": "Z"}, ["ZAX", "ZAW"]
         )
         self.assertCatalogEqual(
-            {"sort": "", "group_by_category": True},
-            ["ZAW", "DAX", "ZAX", "BMW"]
+            {"sort": "", "group_by_category": True}, ["ZAW", "DAX", "ZAX", "BMW"]
         )
         self.assertCatalogEqual(
             {"sort": "-position", "group_by_category": True},
-            ["ZAX", "DAX", "ZAW", "BMW"]
+            ["ZAX", "DAX", "ZAW", "BMW"],
         )
         self.assertCatalogEqual(
-            {"category": "A", "group_by_category": True},
-            ["ZAW", "DAX", "ZAX"]
+            {"category": "A", "group_by_category": True}, ["ZAW", "DAX", "ZAX"]
         )
         self.assertCatalogEqual(
             {"status": ["completed", "locked"], "group_by_category": True},
-            ["ZAW", "BMW"]
+            ["ZAW", "BMW"],
         )
