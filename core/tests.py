@@ -110,6 +110,9 @@ class TestCatalog(EvanTestCase):
         self.assertEqual(unit_codes, expected_codes)
         return resp
 
+    def test_catalog_search(self):
+        self.assertCatalogEqual({"q": "UMS"}, ["DAX", "ZAX"])
+
     def test_catalog_filters(self):
         # TODO: one thing this does not test is sorting by num completions
         resp = self.assertCatalogEqual(
