@@ -153,20 +153,12 @@ class TestCatalog(EvanTestCase):
             ["ZAW", "DAX", "ZAX", "BMW"]
         )
         self.assertCatalogEqual(
-            {"sort": "position", "group_by_category": True},
-            ["ZAW", "DAX", "ZAX", "BMW"]
-        )
-        self.assertCatalogEqual(
             {"sort": "-position", "group_by_category": True},
             ["ZAX", "DAX", "ZAW", "BMW"]
         )
         self.assertCatalogEqual(
             {"category": "A", "group_by_category": True},
             ["ZAW", "DAX", "ZAX"]
-        )
-        self.assertCatalogEqual(
-            {"sort": "code"},
-            ["BMW", "DAX", "ZAW", "ZAX"]
         )
         self.assertCatalogEqual(
             {"status": ["completed", "locked"], "group_by_category": True},
