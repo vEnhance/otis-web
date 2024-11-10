@@ -1,5 +1,6 @@
-from django.test.utils import override_settings
 from typing import Any
+
+from django.test.utils import override_settings
 
 from core.factories import SemesterFactory, UnitFactory, UnitGroupFactory, UserFactory
 from core.models import Semester
