@@ -1,7 +1,7 @@
 from django.test.utils import override_settings
 from typing import Any
 
-from core.factories import SemesterFactory, UnitFactory, UserFactory
+from core.factories import SemesterFactory, UnitFactory, UnitGroupFactory, UserFactory
 from core.models import Semester
 from core.utils import storage_hash
 from dashboard.factories import PSetFactory
@@ -88,10 +88,14 @@ class TestCatalog(EvanTestCase):
     def setUp(self):
         super().setUp()
 
-        BMW = UnitFactory.create(code="BMW", position=1, group__name="Grinding", group__subject="M") # Completed
-        ZAW = UnitFactory.create(code="ZAW", position=2, group__name="Analysis", group__subject="A") # Locked
-        DAX = UnitFactory.create(code="DAX", position=3, group__name="Sums", group__subject="A") # Unlocked
-        ZAX = UnitFactory.create(code="ZAX", position=4, group__name="Formulas", group__subject="A") # NA
+        GRINDING = UnitGroupFactory.create(name="Grinding", subject="M")
+        ANALYSIS = UnitGroupFactory.create(name="Analysis", subject="A")
+        SUMS = UnitGroupFactory.create(name="Sums", subject="A")
+
+        BMW = UnitFactory.create(code="BMW", position=1, group=GRINDING) # Completed
+        ZAW = UnitFactory.create(code="ZAW", position=2, group=ANALYSIS) # Locked
+        DAX = UnitFactory.create(code="DAX", position=3, group=SUMS) # Unlocked
+        ZAX = UnitFactory.create(code="ZAX", position=4, group=SUMS) # NA
 
         dora = StudentFactory.create()
         dora.curriculum.set([BMW, DAX, ZAW])
