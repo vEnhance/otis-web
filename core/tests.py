@@ -112,6 +112,12 @@ class TestCatalog(EvanTestCase):
 
     def test_catalog_filters(self):
         # TODO: one thing this does not test is sorting by num completions
+        resp = self.assertCatalogEqual(
+            {},
+            ["ZAW", "DAX", "ZAX", "BMW"]
+        )
+        self.assertTrue(resp.context["group_by_category"])
+
         self.assertCatalogEqual(
             {"status": ["completed", "locked"]},
             ["ZAW", "BMW"]
