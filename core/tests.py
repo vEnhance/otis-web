@@ -89,8 +89,8 @@ class TestCatalog(EvanTestCase):
         super().setUp()
 
         BMW = UnitFactory.create(code="BMW", position=1, group__name="Grinding", group__subject="M") # Completed
-        DAX = UnitFactory.create(code="DAX", position=3, group__name="Sums", group__subject="A") # Unlocked
         ZAW = UnitFactory.create(code="ZAW", position=2, group__name="Analysis", group__subject="A") # Locked
+        DAX = UnitFactory.create(code="DAX", position=3, group__name="Sums", group__subject="A") # Unlocked
         ZAX = UnitFactory.create(code="ZAX", position=4, group__name="Formulas", group__subject="A") # NA
 
         dora = StudentFactory.create()
@@ -140,6 +140,7 @@ class TestCatalog(EvanTestCase):
             {"sort": "position", "category": "A"},
             ["ZAW", "DAX", "ZAX"]
         )
+        print("BUNTYYYYYY")
         self.assertCatalogEqual(
             {"sort": "-position", "difficulty": "Z"},
             ["ZAX", "ZAW"]
