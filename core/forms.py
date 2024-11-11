@@ -32,7 +32,7 @@ class FilterForm(forms.Form):
             ("-num_psets_in_group", "Number of completions (high to low)"),
             ("num_psets_in_group", "Number of completions (low to high)"),
             ("position", "Relative order (first to last)"),
-            ("-position", "Relative order (first to last)"),
+            ("-position", "Relative order (last to first)"),
         ],
         required=False,
         initial="",  # Sorts by A-Z
