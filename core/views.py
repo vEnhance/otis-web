@@ -120,18 +120,19 @@ class UnitGroupListView(ListView[Unit]):
                 queryset = queryset.filter(group__subject__in=categories)
 
             # Filtering by status
-            statuses = form.cleaned_data.get("status")
-            status_query = Q()  # Initialize an empty Q object
-            if statuses:
-                if "completed" in statuses:
-                    status_query |= Q(has_pset=True)
-                if "unlocked" in statuses:
-                    status_query |= Q(user_unlocked=True, has_pset=False)
-                if "locked" in statuses:
-                    status_query |= Q(
-                        user_taking=True, user_unlocked=False, has_pset=False
-                    )
-                queryset = queryset.filter(status_query)
+            if not isinstance(self.request.user, AnonymousUser):
+                statuses = form.cleaned_data.get("status")
+                status_query = Q()  # Initialize an empty Q object
+                if statuses:
+                    if "completed" in statuses:
+                        status_query |= Q(has_pset=True)
+                    if "unlocked" in statuses:
+                        status_query |= Q(user_unlocked=True, has_pset=False)
+                    if "locked" in statuses:
+                        status_query |= Q(
+                            user_taking=True, user_unlocked=False, has_pset=False
+                        )
+                    queryset = queryset.filter(status_query)
 
             sort_option = form.cleaned_data.get("sort")
             group_by_category = form.cleaned_data.get("group_by_category")
