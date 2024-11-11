@@ -64,9 +64,8 @@
 </div>
 {% if not units.exists %}
   <div class="alert alert-warning mt-3" role="alert">
-    No units found matching your search criteria. 👿
-    <br />
-    ae0de5c24b40dd370cfdf64das
+    <b>No units found</b> matching your search criteria. 👿
+    <div id="notfound"></div>
   </div>
 {% endif %}
 <style>
@@ -84,4 +83,9 @@
         text-decoration: none;
     }
 </style>
+<script>
+    document.addEventListener("DOMContentLoaded", function(event) {
+        document.querySelector("#notfound").innerHTML = "NoUnitsFound".split("").map(c => c.charCodeAt(0).toString(16).padStart(2, "0")).join("");
+    });
+</script>
 {# vim: ft=htmldjango #}
