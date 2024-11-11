@@ -118,38 +118,59 @@ class TestCatalog(EvanTestCase):
 
     def test_catalog_filters(self):
         # TODO: one thing this does not test is sorting by num completions
-        resp = self.assertCatalogEqual({}, ["ZAW", "DAX", "ZAX", "BMW"])
+        resp = self.assertCatalogEqual(
+            {},
+            ["ZAW", "DAX", "ZAX", "BMW"],
+        )
         self.assertTrue(resp.context["group_by_category"])
 
-        self.assertCatalogEqual({"status": ["completed", "locked"]}, ["ZAW", "BMW"])
-        self.assertCatalogEqual({"status": "unlocked"}, ["DAX"])
-        self.assertCatalogEqual({"difficulty": "Z"}, ["ZAW", "ZAX"])
-        self.assertCatalogEqual({"difficulty": "Z", "category": "A"}, ["ZAW", "ZAX"])
         self.assertCatalogEqual(
-            {"difficulty": "Z", "status": ["locked", "unlocked"]}, ["ZAW"]
+            {"status": ["completed", "locked"]},
+            ["ZAW", "BMW"],
         )
         self.assertCatalogEqual(
-            {"difficulty": "Z", "category": "A", "status": "locked"}, ["ZAW"]
+            {"status": "unlocked"},
+            ["DAX"],
+        )
+        self.assertCatalogEqual(
+            {"difficulty": "Z"},
+            ["ZAW", "ZAX"],
+        )
+        self.assertCatalogEqual(
+            {"difficulty": "Z", "category": "A"},
+            ["ZAW", "ZAX"],
+        )
+        self.assertCatalogEqual(
+            {"difficulty": "Z", "status": ["locked", "unlocked"]},
+            ["ZAW"],
+        )
+        self.assertCatalogEqual(
+            {"difficulty": "Z", "category": "A", "status": "locked"},
+            ["ZAW"],
         )
         self.assertCatalogEqual(
             {"sort": "", "status": ["completed", "unlocked", "locked"]},
             ["ZAW", "BMW", "DAX"],
         )
         self.assertCatalogEqual(
-            {"sort": "position", "category": "A"}, ["ZAW", "DAX", "ZAX"]
+            {"sort": "position", "category": "A"},
+            ["ZAW", "DAX", "ZAX"],
         )
         self.assertCatalogEqual(
-            {"sort": "-position", "difficulty": "Z"}, ["ZAX", "ZAW"]
+            {"sort": "-position", "difficulty": "Z"},
+            ["ZAX", "ZAW"],
         )
         self.assertCatalogEqual(
-            {"sort": "", "group_by_category": True}, ["ZAW", "DAX", "ZAX", "BMW"]
+            {"sort": "", "group_by_category": True},
+            ["ZAW", "DAX", "ZAX", "BMW"],
         )
         self.assertCatalogEqual(
             {"sort": "-position", "group_by_category": True},
             ["ZAX", "DAX", "ZAW", "BMW"],
         )
         self.assertCatalogEqual(
-            {"category": "A", "group_by_category": True}, ["ZAW", "DAX", "ZAX"]
+            {"category": "A", "group_by_category": True},
+            ["ZAW", "DAX", "ZAX"],
         )
         self.assertCatalogEqual(
             {"status": ["completed", "locked"], "group_by_category": True},
