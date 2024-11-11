@@ -25,6 +25,7 @@ from dashboard.models import PSet, UploadedFile
 from otisweb.utils import AuthHttpRequest
 from roster.models import Student
 
+from .forms import FilterForm
 from .models import Unit, UnitGroup
 from .utils import get_from_google_storage
 
@@ -41,10 +42,18 @@ class AdminUnitListView(SuperuserRequiredMixin, ListView[Unit]):
 class UnitGroupListView(ListView[Unit]):
     model = Unit
     context_object_name = "units"
+    template_name = "core/unit_list.html"
 
     def get_queryset(self):
         queryset = Unit.objects.filter(group__hidden=False)
-        queryset = queryset.order_by("group__subject", "group__name", "code")
+
+        # Search functionality
+        query = self.request.GET.get("q")
+        if query:
+            queryset = queryset.filter(
+                Q(group__name__icontains=query) | Q(group__description__icontains=query)
+            )
+
         queryset = queryset.annotate(
             num_psets_in_group=Count(
                 "group__unit__pset",
@@ -78,7 +87,76 @@ class UnitGroupListView(ListView[Unit]):
                     ),
                 )
 
+        form = self.get_form()
+        queryset = self.filter_queryset_form(queryset, form)
         return queryset
+
+    def get_form(self) -> FilterForm:
+        if self.request.GET and any(
+            field in self.request.GET for field in FilterForm.base_fields.keys()
+        ):
+            form = FilterForm(self.request.GET)
+        else:
+            form = FilterForm()
+        self.form = form
+        return form
+
+    def filter_queryset_form(
+        self, queryset: QuerySet[Unit], form: FilterForm
+    ) -> QuerySet[Unit]:
+        if form.is_valid():
+            # Filtering by difficulty
+            difficulties = form.cleaned_data.get("difficulty")
+            if difficulties:
+                # Dynamically construct the query for the selected difficulties
+                difficulty_query = Q()
+                for difficulty in difficulties:
+                    difficulty_query |= Q(code__startswith=difficulty)
+                queryset = queryset.filter(difficulty_query)
+
+            # Filtering by category
+            categories = form.cleaned_data.get("category")
+            if categories:
+                queryset = queryset.filter(group__subject__in=categories)
+
+            # Filtering by status
+            statuses = form.cleaned_data.get("status")
+            status_query = Q()  # Initialize an empty Q object
+            if statuses:
+                if "completed" in statuses:
+                    status_query |= Q(has_pset=True)
+                if "unlocked" in statuses:
+                    status_query |= Q(user_unlocked=True, has_pset=False)
+                if "locked" in statuses:
+                    status_query |= Q(
+                        user_taking=True, user_unlocked=False, has_pset=False
+                    )
+                queryset = queryset.filter(status_query)
+
+            sort_option = form.cleaned_data.get("sort")
+            group_by_category = form.cleaned_data.get("group_by_category")
+        else:
+            # Unbound form, take initial values
+            sort_option = form["sort"].value()
+            group_by_category = form["group_by_category"].value()
+        self.group_by_category = group_by_category
+
+        # Sorting logic
+        sort_options = []
+        if group_by_category:
+            sort_options.append("group__subject")
+        if sort_option:
+            sort_options.append(sort_option)
+        sort_options += ["group__name", "code"]
+        queryset = queryset.order_by(*sort_options)
+
+        return queryset
+
+    def get_context_data(self, **kwargs: Any):
+        context = super().get_context_data(**kwargs)
+        context["form"] = self.form
+        context["group_by_category"] = self.group_by_category
+        return context
 
 
 class PublicCatalog(ListView[UnitGroup]):

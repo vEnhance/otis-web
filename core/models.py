@@ -155,6 +155,7 @@ class UnitGroup(models.Model):
     description = models.TextField(
         help_text="A description of what this unit is", blank=True
     )
+
     SUBJECT_CHOICES = (
         ("A", "Algebra (Hufflepuff)"),
         ("C", "Combinatorics (Gryffindor)"),
@@ -165,6 +166,17 @@ class UnitGroup(models.Model):
         ("K", "Secret"),
         ("H", "Higher Math"),
     )
+    SUBJECT_CHOICES_SHORT = (
+        ("A", "Algebra"),
+        ("C", "Combinatorics"),
+        ("G", "Geometry"),
+        ("N", "Number Theory"),
+        ("F", "Func Eqns"),
+        ("M", "Misc."),
+        ("K", "Secret"),
+        ("H", "Higher Math"),
+    )
+
     subject = models.CharField(
         max_length=2, choices=SUBJECT_CHOICES, help_text="The subject for the unit"
     )

@@ -1,0 +1,91 @@
+<!-- Search Form -->
+<form method="GET"
+      action="{% url 'catalog' %}"
+      class="mb-2"
+      id="searchForm">
+  <input type="text"
+         name="q"
+         placeholder="Search..."
+         class="form-control"
+         style="width: 100%;
+                max-width: 600px"
+         value="{{ request.GET.q }}" />
+</form>
+<!-- Filter and Sort Collapsible Dropdown -->
+<h2>
+  <button class="btn btn-outline-success"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#filterAndSort"
+          aria-expanded="{% if request.GET %}true{% else %}false{% endif %}"
+          aria-controls="filterAndSort">Filter and Sort ▼</button>
+</h2>
+<div class="collapse {% if request.GET %}show{% endif %}"
+     id="filterAndSort">
+  <form method="GET"
+        action="{% url 'catalog' %}"
+        class="mb-3 px-3"
+        id="filterForm">
+    <div class="row">
+      <div class="col-12 col-md-3 mb-2">
+        <h5 class="mb-2">
+          <strong>Difficulty</strong>
+        </h5>
+        {{ form.difficulty }}
+      </div>
+      <div class="col-12 col-md-5 mb-2">
+        <h5 class="mb-2">
+          <strong>Category</strong>
+        </h5>
+        {{ form.category }}
+      </div>
+      <div class="col-12 col-md-4 mb-2">
+        <h5 class="mb-2">
+          <strong>Status</strong>
+        </h5>
+        {{ form.status }}
+      </div>
+    </div>
+    <div class="row mt-2 mb-2">{{ form.sort }}</div>
+    <div class="w-100">
+      <div class="d-inline-block me-4 mb-2">
+        {{ form.group_by_category }}
+        <label class="form-check-label"
+               for="{{ form.group_by_category.id_for_label }}">Group units by category</label>
+      </div>
+      <div class="d-inline-block">
+        <a href="{% url 'catalog' %}"
+           id="resetButton"
+           class="btn btn-warning d-inline-block me-1">Clear Filters</a>
+        <button type="submit" class="btn btn-primary d-inline-block">Apply Filters</button>
+      </div>
+    </div>
+  </form>
+</div>
+{% if not units.exists %}
+  <div class="alert alert-warning mt-3" role="alert">
+    <b>No units found</b> matching your search criteria. 👿
+    <div id="notfound"></div>
+  </div>
+{% endif %}
+<style>
+    .filter-form {
+        display: inline-block;
+        margin-right: 10px;
+        vertical-align: middle;
+    }
+
+    #filterForm label {
+        font-weight: normal;
+    }
+
+    #resetButton:hover {
+        text-decoration: none;
+    }
+</style>
+<script>
+    document.addEventListener("DOMContentLoaded", function(event) {
+        document.querySelector("#notfound").innerHTML = "NoUnitsFound".split("").map(c => c.charCodeAt(0).toString(16).padStart(2, "0")).join("");
+    });
+</script>
+{# vim: ft=htmldjango #}

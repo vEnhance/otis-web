@@ -1,8 +1,11 @@
+from typing import Any
+
 from django.test.utils import override_settings
 
-from core.factories import SemesterFactory, UnitFactory, UserFactory
+from core.factories import SemesterFactory, UnitFactory, UnitGroupFactory, UserFactory
 from core.models import Semester
 from core.utils import storage_hash
+from dashboard.factories import PSetFactory
 from evans_django_tools.testsuite import EvanTestCase
 from roster.factories import StudentFactory
 
@@ -80,3 +83,96 @@ class TestCore(EvanTestCase):
     def test_storage_hash(self):
         self.assertRegex(storage_hash("meow"), r"[0-9a-z]{64}")
         self.assertNotEqual(storage_hash("Serral"), storage_hash("Reynor"))
+
+
+class TestCatalog(EvanTestCase):
+    def setUp(self):
+        super().setUp()
+
+        GRINDING = UnitGroupFactory.create(name="Grinding", subject="M")
+        ANALYSIS = UnitGroupFactory.create(name="Analysis", subject="A")
+        SUMS = UnitGroupFactory.create(name="Sums", subject="A")
+
+        BMW = UnitFactory.create(code="BMW", position=1, group=GRINDING)  # Completed
+        ZAW = UnitFactory.create(code="ZAW", position=2, group=ANALYSIS)  # Locked
+        DAX = UnitFactory.create(code="DAX", position=3, group=SUMS)  # Unlocked
+        ZAX = UnitFactory.create(code="ZAX", position=4, group=SUMS)  # NA
+
+        dora = StudentFactory.create()
+        dora.curriculum.set([BMW, DAX, ZAW])
+        dora.unlocked_units.set([BMW, DAX])
+        PSetFactory.create(student=dora, unit=BMW, next_unit_to_unlock=ZAX)
+        self.login(dora)
+
+    def assertCatalogEqual(
+        self, query_params: dict[str, Any], expected_codes: list[str]
+    ):
+        # Code is strictly not a unique field but fine for our purposes
+        resp = self.assertGet20X("catalog", query_params=query_params)
+        unit_codes = [unit.code for unit in resp.context["units"]]
+        self.assertEqual(unit_codes, expected_codes)
+        return resp
+
+    def test_catalog_search(self):
+        self.assertCatalogEqual({"q": "UMS"}, ["DAX", "ZAX"])
+
+    def test_catalog_filters(self):
+        # TODO: one thing this does not test is sorting by num completions
+        resp = self.assertCatalogEqual(
+            {},
+            ["ZAW", "DAX", "ZAX", "BMW"],
+        )
+        self.assertTrue(resp.context["group_by_category"])
+
+        self.assertCatalogEqual(
+            {"status": ["completed", "locked"]},
+            ["ZAW", "BMW"],
+        )
+        self.assertCatalogEqual(
+            {"status": "unlocked"},
+            ["DAX"],
+        )
+        self.assertCatalogEqual(
+            {"difficulty": "Z"},
+            ["ZAW", "ZAX"],
+        )
+        self.assertCatalogEqual(
+            {"difficulty": "Z", "category": "A"},
+            ["ZAW", "ZAX"],
+        )
+        self.assertCatalogEqual(
+            {"difficulty": "Z", "status": ["locked", "unlocked"]},
+            ["ZAW"],
+        )
+        self.assertCatalogEqual(
+            {"difficulty": "Z", "category": "A", "status": "locked"},
+            ["ZAW"],
+        )
+        self.assertCatalogEqual(
+            {"sort": "", "status": ["completed", "unlocked", "locked"]},
+            ["ZAW", "BMW", "DAX"],
+        )
+        self.assertCatalogEqual(
+            {"sort": "position", "category": "A"},
+            ["ZAW", "DAX", "ZAX"],
+        )
+        self.assertCatalogEqual(
+            {"sort": "-position", "difficulty": "Z"},
+            ["ZAX", "ZAW"],
+        )
+        self.assertCatalogEqual(
+            {"sort": "", "group_by_category": True},
+            ["ZAW", "DAX", "ZAX", "BMW"],
+        )
+        self.assertCatalogEqual(
+            {"sort": "-position", "group_by_category": True},
+            ["ZAX", "DAX", "ZAW", "BMW"],
+        )
+        self.assertCatalogEqual(
+            {"category": "A", "group_by_category": True},
+            ["ZAW", "DAX", "ZAX"],
+        )
+        self.assertCatalogEqual(
+            {"status": ["completed", "locked"], "group_by_category": True},
+            ["ZAW", "BMW"],
+        )
