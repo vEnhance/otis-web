@@ -25,7 +25,7 @@ from dashboard.models import PSet, UploadedFile
 from otisweb.utils import AuthHttpRequest
 from roster.models import Student
 
-from .forms import FilterForm
+from .forms import CatalogFilterForm
 from .models import Unit, UnitGroup
 from .utils import get_from_google_storage
 
@@ -91,18 +91,18 @@ class UnitGroupListView(ListView[Unit]):
         queryset = self.filter_queryset_form(queryset, form)
         return queryset
 
-    def get_form(self) -> FilterForm:
+    def get_form(self) -> CatalogFilterForm:
         if self.request.GET and any(
-            field in self.request.GET for field in FilterForm.base_fields.keys()
+            field in self.request.GET for field in CatalogFilterForm.base_fields.keys()
         ):
-            form = FilterForm(self.request.GET)
+            form = CatalogFilterForm(self.request.GET)
         else:
-            form = FilterForm()
+            form = CatalogFilterForm()
         self.form = form
         return form
 
     def filter_queryset_form(
-        self, queryset: QuerySet[Unit], form: FilterForm
+        self, queryset: QuerySet[Unit], form: CatalogFilterForm
     ) -> QuerySet[Unit]:
         if form.is_valid():
             # Filtering by difficulty
