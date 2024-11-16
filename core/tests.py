@@ -21,6 +21,7 @@ class TestCore(EvanTestCase):
         self.assertGetBecomesLoginRedirect("view-problems", 10)
         self.assertGetBecomesLoginRedirect("view-solutions", 10)
         self.assertGetBecomesLoginRedirect("view-tex", 10)
+        self.assertGetBecomesLoginRedirect("catalog")
 
     @override_settings(TESTING_NEEDS_MOCK_MEDIA=True)
     def test_alice_core_views(self):
@@ -71,6 +72,7 @@ class TestCore(EvanTestCase):
         self.assertGet30X("admin-unit-list")
 
     def test_hidden(self):
+        self.login(UserFactory.create())
         UnitFactory.create(group__name="VisibleUnit", group__hidden=False)
         UnitFactory.create(group__name="HiddenUnit", group__hidden=True)
         resp = self.assertGet20X("catalog")
@@ -185,7 +187,6 @@ class TestCatalog(EvanTestCase):
         Logged in user without active student account
         previously recieved a 500 error when fitering by status
         """
-        user = UserFactory.create()
-        self.login(user)
+        self.login(UserFactory.create())
         self.assertCatalogEmpty({"status": "unlocked"})
         self.assertCatalogEmpty({"status": "locked"})
