@@ -21,6 +21,7 @@ class TestCore(EvanTestCase):
         self.assertGetBecomesLoginRedirect("view-problems", 10)
         self.assertGetBecomesLoginRedirect("view-solutions", 10)
         self.assertGetBecomesLoginRedirect("view-tex", 10)
+        self.assertGetBecomesLoginRedirect("catalog")
 
     @override_settings(TESTING_NEEDS_MOCK_MEDIA=True)
     def test_alice_core_views(self):
@@ -71,6 +72,7 @@ class TestCore(EvanTestCase):
         self.assertGet30X("admin-unit-list")
 
     def test_hidden(self):
+        self.login(UserFactory.create())
         UnitFactory.create(group__name="VisibleUnit", group__hidden=False)
         UnitFactory.create(group__name="HiddenUnit", group__hidden=True)
         resp = self.assertGet20X("catalog")
@@ -112,6 +114,9 @@ class TestCatalog(EvanTestCase):
         unit_codes = [unit.code for unit in resp.context["units"]]
         self.assertEqual(unit_codes, expected_codes)
         return resp
+
+    def assertCatalogEmpty(self, query_params: dict[str, Any]):
+        return self.assertCatalogEqual(query_params, [])
 
     def test_catalog_search(self):
         self.assertCatalogEqual({"q": "UMS"}, ["DAX", "ZAX"])
@@ -176,3 +181,12 @@ class TestCatalog(EvanTestCase):
             {"status": ["completed", "locked"], "group_by_category": True},
             ["ZAW", "BMW"],
         )
+
+    def test_inactive_student(self):
+        """
+        Logged in user without active student account
+        previously received a 500 error when filtering by status
+        """
+        self.login(UserFactory.create())
+        self.assertCatalogEmpty({"status": "unlocked"})
+        self.assertCatalogEmpty({"status": "locked"})

@@ -7,6 +7,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models.aggregates import Count
 from django.db.models.base import Model
+from django.db.models.expressions import Value
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
 from django.forms.models import BaseModelForm
@@ -25,7 +26,7 @@ from dashboard.models import PSet, UploadedFile
 from otisweb.utils import AuthHttpRequest
 from roster.models import Student
 
-from .forms import FilterForm
+from .forms import CatalogFilterForm
 from .models import Unit, UnitGroup
 from .utils import get_from_google_storage
 
@@ -39,7 +40,7 @@ class AdminUnitListView(SuperuserRequiredMixin, ListView[Unit]):
     context_object_name = "unit_list"
 
 
-class UnitGroupListView(ListView[Unit]):
+class UnitGroupListView(LoginRequiredMixin, ListView[Unit]):
     model = Unit
     context_object_name = "units"
     template_name = "core/unit_list.html"
@@ -86,23 +87,27 @@ class UnitGroupListView(ListView[Unit]):
                         filter=Q(student=student),
                     ),
                 )
+            else:
+                queryset = queryset.annotate(
+                    user_unlocked=Value(False), user_taking=Value(False)
+                )
 
         form = self.get_form()
         queryset = self.filter_queryset_form(queryset, form)
         return queryset
 
-    def get_form(self) -> FilterForm:
+    def get_form(self) -> CatalogFilterForm:
         if self.request.GET and any(
-            field in self.request.GET for field in FilterForm.base_fields.keys()
+            field in self.request.GET for field in CatalogFilterForm.base_fields.keys()
         ):
-            form = FilterForm(self.request.GET)
+            form = CatalogFilterForm(self.request.GET)
         else:
-            form = FilterForm()
+            form = CatalogFilterForm()
         self.form = form
         return form
 
     def filter_queryset_form(
-        self, queryset: QuerySet[Unit], form: FilterForm
+        self, queryset: QuerySet[Unit], form: CatalogFilterForm
     ) -> QuerySet[Unit]:
         if form.is_valid():
             # Filtering by difficulty

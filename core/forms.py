@@ -3,7 +3,7 @@ from django import forms
 from .models import UnitGroup
 
 
-class FilterForm(forms.Form):
+class CatalogFilterForm(forms.Form):
     difficulty = forms.MultipleChoiceField(
         choices=[("B", "B"), ("D", "D"), ("Z", "Z")],
         widget=forms.CheckboxSelectMultiple(attrs={"class": "filter-form"}),
