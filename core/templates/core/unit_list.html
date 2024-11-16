@@ -62,7 +62,7 @@
             <div class="col-9">
               <h4>
                 {% if units.0.has_pset_for_any_unit %}
-                  <a href="{% url "wiki-unitgroup" unitgroup.pk %}"><span class="text-success">{{ unit.code }}{{ unitgroup.name }}</span></a>
+                  <a href="{% url "wiki-unitgroup" unitgroup.pk %}"><span class="text-success">{{ unitgroup.name }}</span></a>
                 {% else %}
                   <a href="{% url "wiki-unitgroup" unitgroup.pk %}">{{ unitgroup.name }}</a>
                 {% endif %}
