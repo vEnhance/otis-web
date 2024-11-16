@@ -7,6 +7,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models.aggregates import Count
 from django.db.models.base import Model
+from django.db.models.expressions import Value
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
 from django.forms.models import BaseModelForm
@@ -86,6 +87,10 @@ class UnitGroupListView(ListView[Unit]):
                         filter=Q(student=student),
                     ),
                 )
+            else:
+                queryset = queryset.annotate(
+                    user_unlocked=Value(False), user_taking=Value(False)
+                )
 
         form = self.get_form()
         queryset = self.filter_queryset_form(queryset, form)
@@ -93,7 +98,8 @@ class UnitGroupListView(ListView[Unit]):
 
     def get_form(self) -> CatalogFilterForm:
         if self.request.GET and any(
-            field in self.request.GET for field in CatalogFilterForm.base_fields.keys()
+            field in self.request.GET
+            for field in CatalogFilterForm.base_fields.keys()
         ):
             form = CatalogFilterForm(self.request.GET)
         else:
