@@ -98,8 +98,7 @@ class UnitGroupListView(LoginRequiredMixin, ListView[Unit]):
 
     def get_form(self) -> CatalogFilterForm:
         if self.request.GET and any(
-            field in self.request.GET
-            for field in CatalogFilterForm.base_fields.keys()
+            field in self.request.GET for field in CatalogFilterForm.base_fields.keys()
         ):
             form = CatalogFilterForm(self.request.GET)
         else:
