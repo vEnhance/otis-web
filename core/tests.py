@@ -113,6 +113,9 @@ class TestCatalog(EvanTestCase):
         self.assertEqual(unit_codes, expected_codes)
         return resp
 
+    def assertCatalogEmpty(self, query_params: dict[str, Any]):
+        return self.assertCatalogEqual(query_params, [])
+
     def test_catalog_search(self):
         self.assertCatalogEqual({"q": "UMS"}, ["DAX", "ZAX"])
 
@@ -176,3 +179,13 @@ class TestCatalog(EvanTestCase):
             {"status": ["completed", "locked"], "group_by_category": True},
             ["ZAW", "BMW"],
         )
+
+    def test_inactive_student(self):
+        """
+        Logged in user without active student account
+        previously recieved a 500 error when fitering by status
+        """
+        user = UserFactory.create()
+        self.login(user)
+        self.assertCatalogEmpty({"status": "unlocked"})
+        self.assertCatalogEmpty({"status": "locked"})
