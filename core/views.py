@@ -2,7 +2,6 @@ from typing import Any, Optional
 
 from braces.views import LoginRequiredMixin, SuperuserRequiredMixin
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import PermissionDenied
