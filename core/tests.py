@@ -185,7 +185,7 @@ class TestCatalog(EvanTestCase):
     def test_inactive_student(self):
         """
         Logged in user without active student account
-        previously recieved a 500 error when fitering by status
+        previously received a 500 error when filtering by status
         """
         self.login(UserFactory.create())
         self.assertCatalogEmpty({"status": "unlocked"})
