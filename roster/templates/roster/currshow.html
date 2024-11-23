@@ -45,7 +45,9 @@
               {{ field|display_initial_choice }}
             {% endif %}
           </td>
-          <th>{{ field.label }}</th>
+          <td>
+            <b>{{ field.label }}</b>
+          </td>
           <td>{{ field.help_text }}</td>
         </tr>
       {% endfor %}
