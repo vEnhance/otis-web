@@ -10,7 +10,7 @@ from django.http import HttpRequest
 from import_export import fields, resources, widgets
 from import_export.admin import ImportExportModelAdmin
 
-from core.models import Semester, Unit
+from core.models import Semester
 from roster.models import build_students
 
 from .models import (  # NOQA
@@ -189,11 +189,6 @@ class StudentIEResource(RosterResource):
         column_name="Semester Name",
         attribute="semester",
         widget=widgets.ForeignKeyWidget(Semester, "name"),
-    )
-    unit_list = fields.Field(
-        column_name="Unit list",
-        attribute="curriculum",
-        widget=widgets.ManyToManyWidget(Unit, separator=";"),
     )
 
     class Meta:
