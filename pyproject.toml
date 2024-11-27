@@ -43,7 +43,7 @@ wiki = "^0.11.1"
 
 [tool.poetry.group.dev.dependencies]
 # TODO: Faker: need to wait until https://github.com/joke2k/faker/pull/1662 resolves
-Faker = "=15.1.1"
+Faker = "^33.0.0"
 codespell = "^2.3.0"
 coverage = {extras = ["toml"], version = "^7.6.8"}
 djlint = "^1.35.2"
