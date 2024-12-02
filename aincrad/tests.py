@@ -138,21 +138,27 @@ class TestAincradWithSetup(EvanTestCase):
         pset_data = out["_children"][0]
         self.assertEqual(pset_data["_name"], "Problem sets")
 
-        pset0 = pset_data["_children"][0]
-        self.assertEqual(pset0["status"], "P")
-        self.assertEqual(pset0["clubs"], 120)
-        self.assertEqual(pset0["hours"], 37)
-        self.assertEqual(pset0["feedback"], "Meow")
-        self.assertEqual(pset0["special_notes"], "Purr")
-        self.assertEqual(pset0["student__user__first_name"], "Alice")
-        self.assertEqual(pset0["num_accepted_all"], 11)
-        self.assertEqual(pset0["num_accepted_current"], 7)
-
-        pset1 = pset_data["_children"][1]
-        self.assertEqual(pset1["status"], "P")
-        self.assertEqual(pset1["student__user__first_name"], "Bôb B.")
-        self.assertEqual(pset1["num_accepted_all"], 0)
-        self.assertEqual(pset1["num_accepted_current"], 0)
+        for pset in pset_data["_children"]:
+            if pset["feedback"] == "Meow":
+                self.assertEqual(pset["status"], "P")
+                self.assertEqual(pset["clubs"], 120)
+                self.assertEqual(pset["hours"], 37)
+                self.assertEqual(pset["feedback"], "Meow")
+                self.assertEqual(pset["special_notes"], "Purr")
+                self.assertEqual(pset["student__user__first_name"], "Alice")
+                self.assertEqual(pset["num_accepted_all"], 11)
+                self.assertEqual(pset["num_accepted_current"], 7)
+                break
+        else:
+            self.fail("Could not find Alice's pset0 in aincrad test")
+        for pset in pset_data["_children"]:
+            if pset["student__user__first_name"] == "Bôb B.":
+                self.assertEqual(pset["status"], "P")
+                self.assertEqual(pset["num_accepted_all"], 0)
+                self.assertEqual(pset["num_accepted_current"], 0)
+                break
+        else:
+            self.fail("Could not find a pset from Bôb B. in aincrad test")
 
         inquiries = out["_children"][1]["inquiries"]
         self.assertEqual(len(inquiries), 3)
