@@ -13,9 +13,9 @@ class ExamAttemptForm(ModelForm[ExamAttempt]):
 
 class ParticipationPointsForm(forms.Form):
     exam = forms.ModelChoiceField(PracticeExam.objects.filter(is_test=True))
-    pks = forms.CharField(
+    sids = forms.CharField(
         widget=forms.Textarea,
-        help_text="ID's to create stuff for, paste one per line",
+        help_text="Student ID's to create stuff for, paste one per line",
         validators=[
             RegexValidator(r"[0-9\n]+"),
         ],

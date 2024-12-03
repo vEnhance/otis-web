@@ -11,6 +11,7 @@ from core.utils import get_from_google_storage
 from exams.calculator import expr_compute
 from otisweb.decorators import admin_required
 from otisweb.utils import AuthHttpRequest
+from roster.models import Student
 from roster.utils import get_student_by_pk, infer_student
 
 from .forms import ExamAttemptForm, ParticipationPointsForm
@@ -151,11 +152,15 @@ def participation_points(request: AuthHttpRequest) -> HttpResponse:
     if request.method == "POST":
         form = ParticipationPointsForm(request.POST)
         if form.is_valid():
-            pks = [
+            sids = [
                 int(line)
-                for line in form.cleaned_data["pks"].splitlines()
+                for line in form.cleaned_data["sids"].splitlines()
                 if line.strip().isdigit()
             ]
+            # Look for students whose ID's match those in SID's and active
+            pks = Student.objects.filter(
+                semester__active=True, user__student__pk__in=sids
+            ).values_list("pk", flat=True)
             existing_completes = MockCompleted.objects.filter(
                 exam=form.cleaned_data["exam"]
             )

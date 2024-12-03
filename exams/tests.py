@@ -215,7 +215,7 @@ class ExamTest(EvanTestCase):
         self.login("dead")
         self.assertGetDenied("mocks", follow=True)
 
-    def test_participation_points(self):
+    def test_participation_points_with_one_semester(self):
         test_waltz = PracticeExam.objects.get(family="Waltz", is_test=True)
         quiz_waltz = PracticeExam.objects.get(family="Waltz", is_test=False)
         # first check that plebians can't login
@@ -233,13 +233,13 @@ class ExamTest(EvanTestCase):
         self.assertGetOK("participation-points")
         # invalid post
         self.assertHas(
-            self.assertPostOK("participation-points", data={"pks": "9001"}),
+            self.assertPostOK("participation-points", data={"sids": "9001"}),
             "This field is required",
         )
         self.assertEqual(MockCompleted.objects.all().count(), 0)
         self.assertHas(
             self.assertPostOK(
-                "participation-points", data={"exam": quiz_waltz.pk, "pks": "9001"}
+                "participation-points", data={"exam": quiz_waltz.pk, "sids": "9001"}
             ),
             "Select a valid choice",
         )
@@ -247,7 +247,7 @@ class ExamTest(EvanTestCase):
 
         resp1 = self.assertPostOK(
             "participation-points",
-            data={"exam": test_waltz.pk, "pks": "\n".join(pks[:4])},
+            data={"exam": test_waltz.pk, "sids": "\n".join(pks[:4])},
         )
         self.assertHas(resp1, "Created 4 completion database entries")
         self.assertNotHas(resp1, "with existing entries")
@@ -255,8 +255,29 @@ class ExamTest(EvanTestCase):
 
         resp2 = self.assertPostOK(
             "participation-points",
-            data={"exam": test_waltz.pk, "pks": "\n".join(pks[2:7])},
+            data={"exam": test_waltz.pk, "sids": "\n".join(pks[2:7])},
         )
         self.assertHas(resp2, "Created 3 completion database entries")
         self.assertHas(resp2, "There were 2 students with existing entries")
         self.assertEqual(MockCompleted.objects.all().count(), 7)
+
+    def test_participation_points_multi_semester(self):
+        test_waltz = PracticeExam.objects.get(family="Waltz", is_test=True)
+        admin = UserFactory.create(is_staff=True, is_superuser=True)
+        self.login(admin)
+        cathy = UserFactory.create(username="cathy")
+        cathy_student_old = StudentFactory.create(
+            user=cathy, semester=ExamTest.semester_old
+        )
+        cathy_student_new = StudentFactory.create(
+            user=cathy, semester=ExamTest.semester
+        )
+
+        resp = self.assertPostOK(
+            "participation-points",
+            data={"exam": test_waltz.pk, "sids": str(cathy_student_old.pk)},
+        )
+        self.assertHas(resp, "Created 1 completion database entries")
+        self.assertEqual(MockCompleted.objects.all().count(), 1)
+        mc = MockCompleted.objects.get()
+        self.assertEqual(mc.student.pk, cathy_student_new.pk)
