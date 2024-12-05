@@ -5,9 +5,7 @@ from braces.views import LoginRequiredMixin, SuperuserRequiredMixin
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
-from django.db.models import Avg, F, Max, Sum
-from django.db.models.expressions import ExpressionWrapper
-from django.db.models.fields import FloatField
+from django.db.models import Avg, Max, Sum
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http.request import HttpRequest
@@ -110,16 +108,9 @@ class MarketResults(LoginRequiredMixin, ListView[Guess]):
         context["done"] = timezone.now() > self.market.end_date
         if not (context["done"] or self.request.user.is_superuser):
             raise PermissionDenied("Can't view results of an unfinished market.")
-        if (answer := self.market.answer) is not None:
+        if self.market.answer is not None:
             context["best_guess"] = (
-                Guess.objects.filter(market=self.market)
-                .annotate(
-                    err=ExpressionWrapper(
-                        (answer - F("value")) ** 2, output_field=FloatField()
-                    ),
-                )
-                .order_by("err")
-                .first()
+                Guess.objects.filter(market=self.market).order_by("-score").first()
             )
         return context
 
