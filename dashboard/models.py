@@ -171,8 +171,8 @@ class PSet(models.Model):
         default=True, help_text="Whether to count this for leveling up"
     )
     feedback = models.TextField(
-        verbose_name="Feedback on problem set, worth [1♣]",
-        help_text="Any other feedback about the problem set",
+        verbose_name="Feedback on unit, worth [1♣]",
+        help_text="Any feedback about the unit",
         blank=True,
     )
     next_unit_to_unlock = models.ForeignKey(
