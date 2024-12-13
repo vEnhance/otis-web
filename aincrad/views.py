@@ -95,11 +95,11 @@ PSET_VENUEQ_INIT_QUERYSET = PSet.objects.filter(
 ).annotate(
     num_accepted_all=SubqueryCount(
         "student__user__student__pset",
-        filter=Q(status="A"),
+        filter=Q(status="A") & ~Q(unit__group__name="Dummy Unit"),
     ),
     num_accepted_current=SubqueryCount(
         "student__pset",
-        filter=Q(status="A"),
+        filter=Q(status="A") & ~Q(unit__group__name="Dummy Unit"),
     ),
 )
 PSET_VENUEQ_INIT_KEYS = (
