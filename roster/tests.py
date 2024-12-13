@@ -236,6 +236,47 @@ class RosterTest(EvanTestCase):
             self.assertEqual(bob.payment_status, 7)
             self.assertTrue(bob.is_delinquent)
 
+    def test_delinquency_for_joining_second_semester(self) -> None:
+        semester: Semester = SemesterFactory.create(
+            show_invoices=True,
+            first_payment_deadline=datetime.datetime(2022, 9, 21, tzinfo=UTC),
+            most_payment_deadline=datetime.datetime(2023, 1, 21, tzinfo=UTC),
+            one_semester_date=datetime.datetime(2022, 12, 30, tzinfo=UTC),
+        )
+
+        alice: Student = StudentFactory.create(semester=semester)
+        bob: Student = StudentFactory.create(semester=semester)
+        self.assertEqual(alice.payment_status, 0)  # because no invoice exists
+        self.assertEqual(bob.payment_status, 0)  # because no invoice exists
+        with freeze_time("2022-08-05", tz_offset=0):
+            InvoiceFactory.create(student=alice, preps_taught=2)
+        with freeze_time("2023-01-01", tz_offset=0):
+            InvoiceFactory.create(student=bob, preps_taught=1)
+
+        with freeze_time("2023-01-02", tz_offset=0):
+            self.assertEqual(alice.payment_status, 3)
+            self.assertTrue(alice.is_delinquent)
+            self.assertEqual(bob.payment_status, 4)
+            self.assertFalse(bob.is_delinquent)
+
+        with freeze_time("2023-01-20", tz_offset=0):
+            self.assertEqual(alice.payment_status, 3)
+            self.assertTrue(alice.is_delinquent)
+            self.assertEqual(bob.payment_status, 1)
+            self.assertFalse(bob.is_delinquent)
+
+        with freeze_time("2023-01-25", tz_offset=0):
+            self.assertEqual(alice.payment_status, 3)
+            self.assertTrue(alice.is_delinquent)
+            self.assertEqual(bob.payment_status, 2)
+            self.assertFalse(bob.is_delinquent)
+
+        with freeze_time("2023-01-30", tz_offset=0):
+            self.assertEqual(alice.payment_status, 3)
+            self.assertTrue(alice.is_delinquent)
+            self.assertEqual(bob.payment_status, 3)
+            self.assertTrue(bob.is_delinquent)
+
     def test_student_properties(self) -> None:
         alice: Student = StudentFactory.create()
         units: list[Unit] = UnitFactory.create_batch(10)

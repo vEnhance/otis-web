@@ -279,11 +279,11 @@ class Student(models.Model):
         0: student is clear (no invoice exists or total owed is nonpositive)
         1: remind of upcoming payment for initial deadline
         2: warn of late payment for initial deadline
-        3: lock late payment for initial deadline
+        3: lock late payment for initial deadline (more than 1 week past)
         4: no warning yet, but student has something owed
         5: remind of upcoming payment for primary deadline
         6: warn of late payment for primary deadline
-        7: lock late payment for primary deadline
+        7: lock late payment for primary deadline (more than 1 week past)
         """
         if self.semester.show_invoices is False:
             return 0
@@ -298,10 +298,17 @@ class Student(models.Model):
 
         now = localtime()
 
-        first_payment_deadline = self.semester.first_payment_deadline
+        if (
+            self.semester.one_semester_date is not None
+            and self.semester.most_payment_deadline
+            and invoice.created_at > self.semester.one_semester_date
+        ):
+            initial_payment_deadline = self.semester.most_payment_deadline
+        else:
+            initial_payment_deadline = self.semester.first_payment_deadline
 
-        if first_payment_deadline is not None and invoice.total_paid <= 0:
-            d = max(invoice.created_at, first_payment_deadline) - now
+        if initial_payment_deadline is not None and invoice.total_paid <= 0:
+            d = max(invoice.created_at, initial_payment_deadline) - now
             if d < timedelta(days=-7):
                 return 3
             elif d < timedelta(days=0):
@@ -310,7 +317,6 @@ class Student(models.Model):
                 return 1
 
         most_payment_deadline = self.semester.most_payment_deadline
-
         if (
             most_payment_deadline is not None
             and invoice.total_paid < 2 * invoice.total_cost / 3
