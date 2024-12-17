@@ -257,7 +257,12 @@ def finish(request: AuthHttpRequest, hunt: str, slug: str) -> HttpResponse:
     puzzle = get_object_or_404(OpalPuzzle, hunt__slug=hunt, slug=slug)
     if puzzle.achievement is None:
         raise PermissionDenied("This page is only for puzzles with diamonds.")
-    attempt = OpalAttempt.objects.get(puzzle=puzzle, user=request.user, is_correct=True)
+    try:
+        attempt = OpalAttempt.objects.get(
+            puzzle=puzzle, user=request.user, is_correct=True
+        )
+    except OpalAttempt.DoesNotExist:
+        raise PermissionDenied("You did not complete this puzzle.")
     context: dict[str, Any] = {}
     context["puzzle"] = puzzle
     context["hunt"] = puzzle.hunt
