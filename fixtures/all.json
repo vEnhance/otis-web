@@ -475,7 +475,7 @@
       "artist_name": "",
       "description": "Hall's marriage lemma.",
       "subject": "C",
-      "hidden": true
+      "hidden": false
     }
   },
   {
@@ -9331,6 +9331,38 @@
       "user": 22,
       "achievement": 2,
       "timestamp": "2023-08-26T06:41:08.407Z"
+    }
+  },
+  {
+    "model": "rpg.bonuslevel",
+    "pk": 1,
+    "fields": {
+      "group": 77,
+      "level": 35
+    }
+  },
+  {
+    "model": "rpg.bonuslevel",
+    "pk": 2,
+    "fields": {
+      "group": 78,
+      "level": 47
+    }
+  },
+  {
+    "model": "rpg.bonuslevel",
+    "pk": 3,
+    "fields": {
+      "group": 79,
+      "level": 61
+    }
+  },
+  {
+    "model": "rpg.bonuslevel",
+    "pk": 4,
+    "fields": {
+      "group": 80,
+      "level": 75
     }
   },
   {
