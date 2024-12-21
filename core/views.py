@@ -62,35 +62,34 @@ class UnitGroupListView(LoginRequiredMixin, ListView[Unit]):
             )
         )
 
-        if not isinstance(self.request.user, AnonymousUser):
+        queryset = queryset.annotate(
+            has_pset=Exists(
+                "pset",
+                filter=Q(student__user=self.request.user, status="A"),
+            ),
+            has_pset_for_any_unit=Exists(  # rather cursed
+                "group__unit__pset",
+                filter=Q(student__user=self.request.user, status="A"),
+            ),
+        )
+
+        if student := Student.objects.filter(
+            semester__active=True, user=self.request.user
+        ).first():
             queryset = queryset.annotate(
-                has_pset=Exists(
-                    "pset",
-                    filter=Q(student__user=self.request.user, status="A"),
+                user_unlocked=Exists(
+                    "students_unlocked",
+                    filter=Q(student=student),
                 ),
-                has_pset_for_any_unit=Exists(  # rather cursed
-                    "group__unit__pset",
-                    filter=Q(student__user=self.request.user, status="A"),
+                user_taking=Exists(
+                    "students_taking",
+                    filter=Q(student=student),
                 ),
             )
-
-            if student := Student.objects.filter(
-                semester__active=True, user=self.request.user
-            ).first():
-                queryset = queryset.annotate(
-                    user_unlocked=Exists(
-                        "students_unlocked",
-                        filter=Q(student=student),
-                    ),
-                    user_taking=Exists(
-                        "students_taking",
-                        filter=Q(student=student),
-                    ),
-                )
-            else:
-                queryset = queryset.annotate(
-                    user_unlocked=Value(False), user_taking=Value(False)
-                )
+        else:
+            queryset = queryset.annotate(
+                user_unlocked=Value(False), user_taking=Value(False)
+            )
 
         form = self.get_form()
         queryset = self.filter_queryset_form(queryset, form)
