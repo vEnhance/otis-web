@@ -1240,7 +1240,7 @@
       "artist_name": "",
       "description": "Secret unit unlocked at Level 35.",
       "subject": "K",
-      "hidden": false
+      "hidden": true
     }
   },
   {
@@ -1255,7 +1255,7 @@
       "artist_name": "",
       "description": "Secret unit that appears once level 47 is reached.",
       "subject": "K",
-      "hidden": false
+      "hidden": true
     }
   },
   {
@@ -1270,7 +1270,7 @@
       "artist_name": "",
       "description": "Secret unit that appears at level 61.",
       "subject": "K",
-      "hidden": false
+      "hidden": true
     }
   },
   {
@@ -1285,7 +1285,7 @@
       "artist_name": "",
       "description": "Secret unit that appears at level 75.",
       "subject": "K",
-      "hidden": false
+      "hidden": true
     }
   },
   {
