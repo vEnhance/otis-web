@@ -2,7 +2,7 @@ from typing import Any, Optional
 
 from braces.views import LoginRequiredMixin, SuperuserRequiredMixin
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import AnonymousUser
+from django.contrib.auth.models import AnonymousUser, User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models.aggregates import Count
@@ -46,7 +46,7 @@ class UnitGroupListView(LoginRequiredMixin, ListView[Unit]):
     template_name = "core/unit_list.html"
 
     def get_queryset(self):
-        user = self.request.user
+        assert isinstance(user := self.request.user, User)
         student = Student.objects.filter(user=user, semester__active=True).first()
         if student is None:
             student = Student.objects.filter(user=user).order_by("-pk").first()
