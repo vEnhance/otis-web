@@ -46,7 +46,14 @@ class UnitGroupListView(LoginRequiredMixin, ListView[Unit]):
     template_name = "core/unit_list.html"
 
     def get_queryset(self):
-        if student := Student.objects.filter(user=self.request.user).first():
+        student = Student.objects.filter(user=self.request.user, semester__active=True).first()
+        if student is None:
+            student = Student.objects.filter(user=self.request.user).order_by("-pk").first()
+            active = False
+        else:
+            active = True
+
+        if student:
             queryset = Unit.objects.exclude(
                 group__hidden=True,
                 group__bonuslevel__level__gt=student.last_level_seen
@@ -79,9 +86,7 @@ class UnitGroupListView(LoginRequiredMixin, ListView[Unit]):
             ),
         )
 
-        if student := Student.objects.filter(
-            semester__active=True, user=self.request.user
-        ).first():
+        if active:
             queryset = queryset.annotate(
                 user_unlocked=Exists(
                     "students_unlocked",
