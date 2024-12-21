@@ -56,8 +56,7 @@ class UnitGroupListView(LoginRequiredMixin, ListView[Unit]):
 
         if student:
             queryset = Unit.objects.exclude(
-                group__hidden=True,
-                group__bonuslevel__level__gt=student.last_level_seen
+                group__hidden=True, group__bonuslevel__level__gt=student.last_level_seen
             )
         elif user.is_staff:
             queryset = Unit.objects.all()
