@@ -46,7 +46,13 @@ class UnitGroupListView(LoginRequiredMixin, ListView[Unit]):
     template_name = "core/unit_list.html"
 
     def get_queryset(self):
-        queryset = Unit.objects.filter(group__hidden=False)
+        if student := Student.objects.filter(user=self.request.user).first():
+            queryset = Unit.objects.exclude(
+                group__hidden=True,
+                group__bonuslevel__level__gt=student.last_level_seen
+            )
+        else:
+            queryset = Unit.objects.filter(group__hidden=False)
 
         # Search functionality
         query = self.request.GET.get("q")
