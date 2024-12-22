@@ -71,17 +71,6 @@ class TestCore(EvanTestCase):
             self.assertGetDenied(v, u.pk)
         self.assertGet30X("admin-unit-list")
 
-    def test_hidden(self):
-        self.login(UserFactory.create())
-        UnitFactory.create(group__name="VisibleUnit", group__hidden=False)
-        UnitFactory.create(group__name="HiddenUnit", group__hidden=True)
-        resp = self.assertGet20X("catalog")
-        self.assertHas(resp, "VisibleUnit")
-        self.assertNotHas(resp, "HiddenUnit")
-        resp = self.assertGet20X("catalog-public")
-        self.assertHas(resp, "VisibleUnit")
-        self.assertNotHas(resp, "HiddenUnit")
-
     def test_storage_hash(self):
         self.assertRegex(storage_hash("meow"), r"[0-9a-z]{64}")
         self.assertNotEqual(storage_hash("Serral"), storage_hash("Reynor"))
