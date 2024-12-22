@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import AnonymousUser, User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import PermissionDenied
-from django.db.models.aggregates import Count
+from django.db.models.aggregates import Count, Max
 from django.db.models.base import Model
 from django.db.models.expressions import Value
 from django.db.models.query import QuerySet
@@ -47,21 +47,16 @@ class UnitGroupListView(LoginRequiredMixin, ListView[Unit]):
 
     def get_queryset(self):
         assert isinstance(user := self.request.user, User)
-        student = Student.objects.filter(user=user, semester__active=True).first()
-        if student is None:
-            student = Student.objects.filter(user=user).order_by("-pk").first()
-            active = False
-        else:
-            active = True
+        students = Student.objects.filter(user=user)
+        active_student = students.filter(semester__active=True).first()
+        level = students.aggregate(level=Max("last_level_seen")).get("level", 0)
 
-        if student:
-            queryset = Unit.objects.exclude(
-                group__hidden=True, group__bonuslevel__level__gt=student.last_level_seen
-            )
-        elif user.is_staff:
+        if user.is_staff:
             queryset = Unit.objects.all()
         else:
-            queryset = Unit.objects.filter(group__hidden=False)
+            queryset = Unit.objects.exclude(
+                group__hidden=True, group__bonuslevel__level__gt=level
+            )
 
         # Search functionality
         query = self.request.GET.get("q")
@@ -88,15 +83,15 @@ class UnitGroupListView(LoginRequiredMixin, ListView[Unit]):
             ),
         )
 
-        if active:
+        if active_student:
             queryset = queryset.annotate(
                 user_unlocked=Exists(
                     "students_unlocked",
-                    filter=Q(student=student),
+                    filter=Q(student=active_student),
                 ),
                 user_taking=Exists(
                     "students_taking",
-                    filter=Q(student=student),
+                    filter=Q(student=active_student),
                 ),
             )
         else:
