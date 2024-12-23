@@ -8,6 +8,7 @@ from core.utils import storage_hash
 from dashboard.factories import PSetFactory
 from evans_django_tools.testsuite import EvanTestCase
 from roster.factories import StudentFactory
+from rpg.factories import BonusLevelFactory
 
 
 class TestCore(EvanTestCase):
@@ -71,13 +72,10 @@ class TestCore(EvanTestCase):
             self.assertGetDenied(v, u.pk)
         self.assertGet30X("admin-unit-list")
 
-    def test_hidden(self):
+    def test_hidden_catalog_public(self):
         self.login(UserFactory.create())
         UnitFactory.create(group__name="VisibleUnit", group__hidden=False)
         UnitFactory.create(group__name="HiddenUnit", group__hidden=True)
-        resp = self.assertGet20X("catalog")
-        self.assertHas(resp, "VisibleUnit")
-        self.assertNotHas(resp, "HiddenUnit")
         resp = self.assertGet20X("catalog-public")
         self.assertHas(resp, "VisibleUnit")
         self.assertNotHas(resp, "HiddenUnit")
@@ -88,9 +86,21 @@ class TestCore(EvanTestCase):
 
 
 class TestCatalog(EvanTestCase):
-    def setUp(self):
-        super().setUp()
+    def assertCatalogEqual(
+        self, query_params: dict[str, Any], expected_codes: list[str]
+    ):
+        # Code is strictly not a unique field but fine for our purposes
+        resp = self.assertGet20X("catalog", query_params=query_params)
+        unit_codes = [unit.code for unit in resp.context["units"]]
+        self.assertEqual(unit_codes, expected_codes)
+        return resp
 
+    def assertCatalogEmpty(self, query_params: dict[str, Any]):
+        return self.assertCatalogEqual(query_params, [])
+
+    def test_filters(self):
+        # TODO: one thing this does not test is sorting by num completions
+        # TODO: clean this up
         GRINDING = UnitGroupFactory.create(name="Grinding", subject="M")
         ANALYSIS = UnitGroupFactory.create(name="Analysis", subject="A")
         SUMS = UnitGroupFactory.create(name="Sums", subject="A")
@@ -106,28 +116,13 @@ class TestCatalog(EvanTestCase):
         PSetFactory.create(student=dora, unit=BMW, next_unit_to_unlock=ZAX)
         self.login(dora)
 
-    def assertCatalogEqual(
-        self, query_params: dict[str, Any], expected_codes: list[str]
-    ):
-        # Code is strictly not a unique field but fine for our purposes
-        resp = self.assertGet20X("catalog", query_params=query_params)
-        unit_codes = [unit.code for unit in resp.context["units"]]
-        self.assertEqual(unit_codes, expected_codes)
-        return resp
-
-    def assertCatalogEmpty(self, query_params: dict[str, Any]):
-        return self.assertCatalogEqual(query_params, [])
-
-    def test_catalog_search(self):
-        self.assertCatalogEqual({"q": "UMS"}, ["DAX", "ZAX"])
-
-    def test_catalog_filters(self):
-        # TODO: one thing this does not test is sorting by num completions
         resp = self.assertCatalogEqual(
             {},
             ["ZAW", "DAX", "ZAX", "BMW"],
         )
         self.assertTrue(resp.context["group_by_category"])
+
+        self.assertCatalogEqual({"q": "UMS"}, ["DAX", "ZAX"])
 
         self.assertCatalogEqual(
             {"status": ["completed", "locked"]},
@@ -190,3 +185,19 @@ class TestCatalog(EvanTestCase):
         self.login(UserFactory.create())
         self.assertCatalogEmpty({"status": "unlocked"})
         self.assertCatalogEmpty({"status": "locked"})
+
+    def test_hidden_staff(self):
+        staff = UserFactory.create(is_staff=True)
+        UnitFactory.create(group__name="HiddenUnit", group__hidden=True)
+        self.login(staff)
+        resp = self.assertGet20X("catalog")
+        self.assertHas(resp, "HiddenUnit")
+
+    def test_hidden_student(self):
+        student = StudentFactory.create(last_level_seen=42)
+        LVL35 = UnitFactory.create(code="BKV", group__hidden=True)
+        LVL47 = UnitFactory.create(code="DKV", group__hidden=True)
+        BonusLevelFactory.create(level=35, group=LVL35.group)
+        BonusLevelFactory.create(level=47, group=LVL47.group)
+        self.login(student)
+        self.assertCatalogEqual({}, ["BKV"])

@@ -2,10 +2,10 @@ from typing import Any, Optional
 
 from braces.views import LoginRequiredMixin, SuperuserRequiredMixin
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import AnonymousUser
+from django.contrib.auth.models import AnonymousUser, User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import PermissionDenied
-from django.db.models.aggregates import Count
+from django.db.models.aggregates import Count, Max
 from django.db.models.base import Model
 from django.db.models.expressions import Value
 from django.db.models.query import QuerySet
@@ -46,7 +46,17 @@ class UnitGroupListView(LoginRequiredMixin, ListView[Unit]):
     template_name = "core/unit_list.html"
 
     def get_queryset(self):
-        queryset = Unit.objects.filter(group__hidden=False)
+        assert isinstance(user := self.request.user, User)
+        students = Student.objects.filter(user=user)
+        active_student = students.filter(semester__active=True).first()
+        level = students.aggregate(level=Max("last_level_seen"))["level"] or 0
+
+        if user.is_staff:
+            queryset = Unit.objects.all()
+        else:
+            queryset = Unit.objects.exclude(
+                group__hidden=True, group__bonuslevel__level__gt=level
+            )
 
         # Search functionality
         query = self.request.GET.get("q")
@@ -62,35 +72,32 @@ class UnitGroupListView(LoginRequiredMixin, ListView[Unit]):
             )
         )
 
-        if not isinstance(self.request.user, AnonymousUser):
+        queryset = queryset.annotate(
+            has_pset=Exists(
+                "pset",
+                filter=Q(student__user=self.request.user, status="A"),
+            ),
+            has_pset_for_any_unit=Exists(  # rather cursed
+                "group__unit__pset",
+                filter=Q(student__user=self.request.user, status="A"),
+            ),
+        )
+
+        if active_student:
             queryset = queryset.annotate(
-                has_pset=Exists(
-                    "pset",
-                    filter=Q(student__user=self.request.user, status="A"),
+                user_unlocked=Exists(
+                    "students_unlocked",
+                    filter=Q(student=active_student),
                 ),
-                has_pset_for_any_unit=Exists(  # rather cursed
-                    "group__unit__pset",
-                    filter=Q(student__user=self.request.user, status="A"),
+                user_taking=Exists(
+                    "students_taking",
+                    filter=Q(student=active_student),
                 ),
             )
-
-            if student := Student.objects.filter(
-                semester__active=True, user=self.request.user
-            ).first():
-                queryset = queryset.annotate(
-                    user_unlocked=Exists(
-                        "students_unlocked",
-                        filter=Q(student=student),
-                    ),
-                    user_taking=Exists(
-                        "students_taking",
-                        filter=Q(student=student),
-                    ),
-                )
-            else:
-                queryset = queryset.annotate(
-                    user_unlocked=Value(False), user_taking=Value(False)
-                )
+        else:
+            queryset = queryset.annotate(
+                user_unlocked=Value(False), user_taking=Value(False)
+            )
 
         form = self.get_form()
         queryset = self.filter_queryset_form(queryset, form)
