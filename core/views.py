@@ -49,7 +49,7 @@ class UnitGroupListView(LoginRequiredMixin, ListView[Unit]):
         assert isinstance(user := self.request.user, User)
         students = Student.objects.filter(user=user)
         active_student = students.filter(semester__active=True).first()
-        level = students.aggregate(level=Max("last_level_seen")).get("level", 0)
+        level = students.aggregate(level=Max("last_level_seen"))["level"] or 0
 
         if user.is_staff:
             queryset = Unit.objects.all()
