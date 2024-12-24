@@ -194,10 +194,23 @@ class TestCatalog(EvanTestCase):
         self.assertHas(resp, "HiddenUnit")
 
     def test_hidden_student(self):
+        student = StudentFactory.create()
+        student.curriculum.set(
+            [UnitFactory.create(code="BCW", group__hidden=True)]
+        )  # Hidden unit in curriculum
+        UnitFactory.create(
+            code="DAW", group__hidden=True
+        )  # Hidden unit not in curriculum
+        self.login(student)
+        self.assertCatalogEqual({}, ["BCW"])
+
+    def test_bonus_student(self):
         student = StudentFactory.create(last_level_seen=42)
-        LVL35 = UnitFactory.create(code="BKV", group__hidden=True)
-        LVL47 = UnitFactory.create(code="DKV", group__hidden=True)
-        BonusLevelFactory.create(level=35, group=LVL35.group)
-        BonusLevelFactory.create(level=47, group=LVL47.group)
+        BonusLevelFactory.create(
+            level=35, group=UnitFactory.create(code="BKV", group__hidden=True).group
+        )  # Unlocked bonus level
+        BonusLevelFactory.create(
+            level=47, group=UnitFactory.create(code="DKV", group__hidden=True).group
+        )  # Locked bonus level
         self.login(student)
         self.assertCatalogEqual({}, ["BKV"])

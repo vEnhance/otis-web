@@ -51,11 +51,19 @@ class UnitGroupListView(LoginRequiredMixin, ListView[Unit]):
         active_student = students.filter(semester__active=True).first()
         level = students.aggregate(level=Max("last_level_seen"))["level"] or 0
 
-        if user.is_staff:
-            queryset = Unit.objects.all()
-        else:
-            queryset = Unit.objects.exclude(
-                group__hidden=True, group__bonuslevel__level__gt=level
+        queryset = Unit.objects.all()
+        queryset = queryset.annotate(
+            in_curriculum_for_any_unit=Exists(
+                "group__unit__students_taking",
+                filter=Q(student__user=user),
+            )
+        )
+
+        if not user.is_staff:
+            queryset = queryset.filter(
+                Q(group__hidden=False)
+                | Q(in_curriculum_for_any_unit=True)
+                | Q(group__bonuslevel__level__lte=level)
             )
 
         # Search functionality
