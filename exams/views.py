@@ -180,7 +180,7 @@ def participation_points(request: AuthHttpRequest) -> HttpResponse:
             if len(pks) > len(good_pks):
                 messages.warning(
                     request,
-                    f"There were {len(pks)-len(good_pks)} students with existing entries",
+                    f"There were {len(pks) - len(good_pks)} students with existing entries",
                 )
             form = ParticipationPointsForm()
     else:

@@ -347,8 +347,7 @@ class Invoice(models.Model):
     )
     preps_taught = models.SmallIntegerField(
         default=0,
-        help_text="Number of semesters that development/preparation "
-        "costs are charged.",
+        help_text="Number of semesters that development/preparation costs are charged.",
     )
     hours_taught = models.DecimalField(
         max_digits=8,

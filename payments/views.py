@@ -285,9 +285,7 @@ def job_claim(request: HttpRequest, pk: int) -> HttpResponse:
         else:
             job.assignee = worker
             job.save()
-            messages.success(
-                request, f"You have successfully claimed task #{ job.pk }."
-            )
+            messages.success(request, f"You have successfully claimed task #{job.pk}.")
         return HttpResponseRedirect(job.get_absolute_url())
 
 

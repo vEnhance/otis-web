@@ -205,7 +205,7 @@ class WorkerTest(EvanTestCase):
             {"assignee": carol, "progress": "JOB_VFD"},  # Jan 8
         ]
         for i, kwargs in enumerate(to_pass_as_kwargs):
-            with freeze_time(f"2023-01-{i+1:02d}", tz_offset=0):
+            with freeze_time(f"2023-01-{i + 1:02d}", tz_offset=0):
                 JobFactory.create(folder=folder, **kwargs)
 
         # first make sure staff protection works

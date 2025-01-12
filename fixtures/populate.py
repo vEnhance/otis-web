@@ -154,7 +154,7 @@ def create_sem_independent(users: list[User]):
     )
 
     # exams
-    print(f"Creating {args.exam_num*4} exam objects")
+    print(f"Creating {args.exam_num * 4} exam objects")
     fast_bulk_create(
         TestFactory,
         args.exam_num,

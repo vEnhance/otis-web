@@ -67,8 +67,7 @@ class Market(models.Model):
         help_text="The answer to the question", blank=True, null=True
     )
     weight = models.FloatField(
-        help_text="The max score to assign to the market, "
-        "used in the scoring function",
+        help_text="The max score to assign to the market, used in the scoring function",
         default=4,
     )
     alpha = models.FloatField(

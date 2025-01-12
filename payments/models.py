@@ -24,7 +24,7 @@ class PaymentLog(models.Model):
     )
 
     def __str__(self) -> str:
-        return f'{self.created_at.strftime("%c")} {self.stripe_id or "?"}'
+        return f"{self.created_at.strftime('%c')} {self.stripe_id or '?'}"
 
 
 class Worker(models.Model):
