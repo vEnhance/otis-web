@@ -20,9 +20,9 @@
       {% for unit in unit_list %}
         <tr class="subject{{ unit.group.subject }}">
           <td class="number">{{ unit.position }}</td>
-          <td class="code">{{ unit.code }}</td>
+          <td class="font-monospace">{{ unit.code }}</td>
           <td>{{ unit.group.name }}</td>
-          <td class="code">{{ unit.group.slug }}</td>
+          <td class="font-monospace">{{ unit.group.slug }}</td>
           <td class="emojis">
             <a class="emoji-link"
                style="font-size: 80%"
