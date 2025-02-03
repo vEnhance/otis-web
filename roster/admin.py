@@ -27,7 +27,7 @@ class RosterResource(resources.ModelResource):
     user_name = fields.Field(
         column_name="User Name",
         attribute="user",
-        widget=widgets.ForeignKeyWidget(User, "username"),
+        widget=widgets.ForeignKeyWidget(User, "username"),  # type: ignore
     )
 
 
@@ -188,7 +188,7 @@ class StudentIEResource(RosterResource):
     semester_name = fields.Field(
         column_name="Semester Name",
         attribute="semester",
-        widget=widgets.ForeignKeyWidget(Semester, "name"),
+        widget=widgets.ForeignKeyWidget(Semester, "name"),  # type: ignore
     )
 
     class Meta:

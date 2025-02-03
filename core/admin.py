@@ -40,7 +40,7 @@ class UnitIEResource(resources.ModelResource):
     group_name = fields.Field(
         column_name="group_name",
         attribute="group",
-        widget=widgets.ForeignKeyWidget(UnitGroup, "name"),
+        widget=widgets.ForeignKeyWidget(UnitGroup, "name"),  # type: ignore
     )
 
     class Meta:
