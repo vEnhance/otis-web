@@ -6,9 +6,11 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
-from factory import Faker, LazyAttribute, Sequence, SubFactory, post_generation
+from factory.declarations import LazyAttribute, Sequence, SubFactory
 from factory.django import DjangoModelFactory
+from factory.faker import Faker
 from factory.fuzzy import FuzzyChoice
+from factory.helpers import post_generation
 
 from core.models import Semester, Unit, UnitGroup, UserProfile
 from core.utils import storage_hash

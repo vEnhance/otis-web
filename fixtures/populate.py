@@ -12,10 +12,10 @@ from datetime import datetime, timedelta
 from typing import Any
 
 import django
-import factory
 from django.conf import settings
 from django.contrib.auth.models import Group, User
 from factory.base import Factory
+from factory.declarations import Iterator, Sequence
 from factory.fuzzy import FuzzyInteger
 
 from arch.factories import HintFactory, ProblemFactory, VoteFactory
@@ -149,8 +149,8 @@ def create_sem_independent(users: list[User]):
     fast_bulk_create(
         HintFactory,
         len(hint_seq_data),
-        problem=factory.Sequence(lambda i: hint_seq_data[i][0]),
-        number=factory.Sequence(lambda i: hint_seq_data[i][1]),
+        problem=Sequence(lambda i: hint_seq_data[i][0]),
+        number=Sequence(lambda i: hint_seq_data[i][1]),
     )
 
     # exams
@@ -160,20 +160,20 @@ def create_sem_independent(users: list[User]):
         args.exam_num,
         family="Waltz",
         start_date=datetime.now(),
-        due_date=factory.Iterator(
+        due_date=Iterator(
             [datetime.now() + timedelta(days=50 * i + 50) for i in range(args.exam_num)]
         ),
-        number=factory.Iterator(range(1, args.exam_num + 1)),
+        number=Iterator(range(1, args.exam_num + 1)),
     )
     fast_bulk_create(
         QuizFactory,
         args.exam_num,
         family="Waltz",
         start_date=datetime.now(),
-        due_date=factory.Iterator(
+        due_date=Iterator(
             [datetime.now() + timedelta(days=50 * i + 50) for i in range(args.exam_num)]
         ),
-        number=factory.Iterator(range(1, args.exam_num + 1)),
+        number=Iterator(range(1, args.exam_num + 1)),
     )
     last_year = datetime.now() + timedelta(days=-365)
     fast_bulk_create(
@@ -181,20 +181,20 @@ def create_sem_independent(users: list[User]):
         args.exam_num,
         family="Foxtrot",
         start_date=last_year,
-        due_date=factory.Iterator(
+        due_date=Iterator(
             [last_year + timedelta(days=50 * i + 50) for i in range(args.exam_num)]
         ),
-        number=factory.Iterator(range(1, args.exam_num + 1)),
+        number=Iterator(range(1, args.exam_num + 1)),
     )
     fast_bulk_create(
         QuizFactory,
         args.exam_num,
         family="Foxtrot",
         start_date=last_year,
-        due_date=factory.Iterator(
+        due_date=Iterator(
             [last_year + timedelta(days=50 * i + 50) for i in range(args.exam_num)]
         ),
-        number=factory.Iterator(range(1, args.exam_num + 1)),
+        number=Iterator(range(1, args.exam_num + 1)),
     )
 
     # users
@@ -203,9 +203,7 @@ def create_sem_independent(users: list[User]):
     max_stu_achievements = round(math.sqrt(len(achievements)))
     problems: list[Problem] = list(Problem.objects.all())
 
-    fast_bulk_create(
-        UserProfileFactory, len(users), user=factory.Sequence(lambda i: users[i])
-    )
+    fast_bulk_create(UserProfileFactory, len(users), user=Sequence(lambda i: users[i]))
 
     achievement_seq_data: list[tuple[User, Achievement]] = []
     vote_seq_data: list[tuple[User, Problem]] = []
@@ -229,22 +227,22 @@ def create_sem_independent(users: list[User]):
     fast_bulk_create(
         AchievementUnlockFactory,
         len(achievement_seq_data),
-        user=factory.Sequence(lambda i: achievement_seq_data[i][0]),
-        achievement=factory.Sequence(lambda i: achievement_seq_data[i][1]),
+        user=Sequence(lambda i: achievement_seq_data[i][0]),
+        achievement=Sequence(lambda i: achievement_seq_data[i][1]),
     )
     print(f"Creating {len(vote_seq_data)} ARCH votes")
     fast_bulk_create(
         VoteFactory,
         len(vote_seq_data),
-        user=factory.Sequence(lambda i: vote_seq_data[i][0]),
-        problem=factory.Sequence(lambda i: vote_seq_data[i][1]),
+        user=Sequence(lambda i: vote_seq_data[i][0]),
+        problem=Sequence(lambda i: vote_seq_data[i][1]),
     )
     print(f"Creating {len(suggest_seq_data)} problem suggestions")
     fast_bulk_create(
         ProblemSuggestionFactory,
         len(suggest_seq_data),
-        user=factory.Sequence(lambda i: suggest_seq_data[i][0]),
-        unit=factory.Sequence(lambda i: suggest_seq_data[i][1]),
+        user=Sequence(lambda i: suggest_seq_data[i][0]),
+        unit=Sequence(lambda i: suggest_seq_data[i][1]),
     )
 
     print("Creating an Opal hunt")
@@ -286,12 +284,12 @@ def create_sem_dependent(semester: Semester, users: list[User]):
         StudentFactory,
         len(users),
         semester=semester,
-        user=factory.Iterator(users),
+        user=Iterator(users),
     )
     fast_bulk_create(
         InvoiceFactory,
         len(users),
-        student=factory.Iterator(students),
+        student=Iterator(students),
     )
 
     print(f"Creating {len(users)} registrations")
@@ -300,7 +298,7 @@ def create_sem_dependent(semester: Semester, users: list[User]):
         len(users),
         container=container,
         processed=True,
-        user=factory.Iterator(users),
+        user=Iterator(users),
     )
     for i, reg in enumerate(regs):
         students[i].reg = reg
@@ -371,8 +369,8 @@ def create_sem_dependent(semester: Semester, users: list[User]):
     fast_bulk_create(
         ExamAttemptFactory,
         len(student_iter_data_for_quizzes),
-        student=factory.Iterator(student_iter_data_for_quizzes),
-        quiz=factory.Iterator(quiz_iter_data),
+        student=Iterator(student_iter_data_for_quizzes),
+        quiz=Iterator(quiz_iter_data),
         score=FuzzyInteger(0, 5),
     )
 
@@ -388,7 +386,7 @@ def create_sem_dependent(semester: Semester, users: list[User]):
     fast_bulk_create(
         QuestCompleteFactory,
         len(student_iter_data_for_quests),
-        student=factory.Iterator(student_iter_data_for_quests),
+        student=Iterator(student_iter_data_for_quests),
     )
 
     # Markets
@@ -405,8 +403,8 @@ def create_sem_dependent(semester: Semester, users: list[User]):
     fast_bulk_create(
         GuessFactory,
         len(user_iter_data_for_markets),
-        user=factory.Iterator(user_iter_data_for_markets),
-        market=factory.Iterator(market_iter_data),
+        user=Iterator(user_iter_data_for_markets),
+        market=Iterator(market_iter_data),
     )
 
     students_who_got_assistants: list[Student] = []
@@ -441,7 +439,7 @@ def init():
         is_staff=True,
     )
     fast_bulk_create(
-        AssistantFactory, args.assistant_num, user=factory.Iterator(assistant_users)
+        AssistantFactory, args.assistant_num, user=Iterator(assistant_users)
     )
 
     current_year = datetime.now().year

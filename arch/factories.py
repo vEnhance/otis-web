@@ -3,11 +3,11 @@ from typing import Any
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
-from factory import post_generation
 from factory.declarations import Sequence, SubFactory
 from factory.django import DjangoModelFactory
 from factory.faker import Faker
 from factory.fuzzy import FuzzyInteger
+from factory.helpers import post_generation
 
 from core.factories import UserFactory
 from core.utils import storage_hash
