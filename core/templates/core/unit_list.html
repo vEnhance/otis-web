@@ -42,6 +42,8 @@
     You can also see the
     <a href="{% url "catalog-public" %}">public versions of the unit catalog</a>,
     which is prettier but less informative.
+    If you just want a list of all the units by number without descriptions,
+    check the <a href="{% url "sorted-unit-list" %}">one-line list</a>.
   </p>
   <hr />
   {% regroup units by group as unitgroups_g_list %}

@@ -59,6 +59,14 @@ class TestCore(EvanTestCase):
         for v in ("view-problems", "view-tex", "view-solutions"):
             self.assertGet20X(v, u.pk)
 
+    def test_sorted_unit_list(self):
+        self.login(UserFactory.create())
+        UnitFactory.create(group__name="VisibleUnit", group__hidden=False)
+        UnitFactory.create(group__name="HiddenUnit", group__hidden=True)
+        resp = self.assertGet20X("sorted-unit-list")
+        self.assertHas(resp, "VisibleUnit")
+        self.assertNotHas(resp, "HiddenUnit")
+
     def test_admin_unit_list(self):
         self.login(UserFactory.create(is_staff=True, is_superuser=True))
         UnitFactory.create(group__name="Grinding", group__subject="M")

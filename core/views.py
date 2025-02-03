@@ -40,6 +40,13 @@ class AdminUnitListView(SuperuserRequiredMixin, ListView[Unit]):
     context_object_name = "unit_list"
 
 
+class SortedUnitListView(LoginRequiredMixin, ListView[Unit]):
+    model = Unit
+    queryset = Unit.objects.filter(group__hidden=False)
+    template_name = "core/sorted_unit_list.html"
+    context_object_name = "unit_list"
+
+
 class UnitGroupListView(LoginRequiredMixin, ListView[Unit]):
     model = Unit
     context_object_name = "units"

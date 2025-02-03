@@ -11,6 +11,7 @@ urlpatterns = [
     path(r"catalog/", views.UnitGroupListView.as_view(), name="catalog"),
     path(r"catalog/public/", views.PublicCatalog.as_view(), name="catalog-public"),
     path(r"gallery/", views.UnitArtworkListView.as_view(), name="artwork-list"),
+    path(r"unit-list/", views.SortedUnitListView.as_view(), name="sorted-unit-list"),
     path(
         r"admin-unit-list/", views.AdminUnitListView.as_view(), name="admin-unit-list"
     ),

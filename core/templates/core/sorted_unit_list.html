@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+{% block title %}
+  One-line unit list
+{% endblock title %}
+{% load otis_extras %}
+{% load humanize %}
+{% block layout-content %}
+  <p>One-line list of all units in logical (OTIS) order.</p>
+  <table id="units" class="table table-striped tablesorter">
+    <thead>
+      <tr class="table-info">
+        <th>#</th>
+        <th>Code</th>
+        <th>Unit name</th>
+        <th>Slug</th>
+        <th>Act</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for unit in unit_list %}
+        <tr class="subject{{ unit.group.subject }}">
+          <td class="number">{{ unit.position }}</td>
+          <td class="font-monospace">{{ unit.code }}</td>
+          <td>{{ unit.group.name }}</td>
+          <td class="font-monospace">{{ unit.group.slug }}</td>
+          <td class="emojis">
+            <a class="emoji-link"
+               style="text-shadow: 1px black"
+               title="Add suggestion"
+               href="{% url "suggest-new" unit.pk %}">💡</a>
+            <a class="emoji-link"
+               title="Wiki"
+               href="{% url "wiki-unitgroup" unit.group.pk %}">🎮</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock layout-content %}
+{% block scripts %}
+  <script src="https://cdn.jsdelivr.net/npm/tablesorter@2.31.3/dist/js/jquery.tablesorter.combined.min.js"
+          integrity="sha256-ounC3wWwZ9iBUyF8x1+X+REppGjK+p6/+w+ky1MGoMM="
+          crossorigin="anonymous"></script>
+  <script type="text/javascript">
+      $(() => {
+          $("#units").tablesorter();
+      });
+  </script>
+{% endblock scripts %}
