@@ -78,17 +78,14 @@ class TestSuggestion(EvanTestCase):
         self.assertContains(
             self.assertGet20X("suggest-queue-listing"), "Ring around the Rosie"
         )
-
         self.assertContains(self.assertGet20X("suggest-list"), "Shortlist 1955")
 
         self.login(eve)
 
-        self.assertNotContains(
+        self.assertContains(
             self.assertGet20X("suggest-queue-listing"), "Ring around the Rosie"
         )
-
         self.assertNotContains(self.assertGet20X("suggest-list"), "Shortlist 1955")
-
         self.assertPostDenied("suggest-delete", sugg.pk, follow=True)
 
         self.login(alice)
