@@ -112,6 +112,15 @@ class Market(models.Model):
     def is_upcoming(self) -> bool:
         return timezone.now() < self.start_date < timezone.now() + timedelta(days=4)
 
+    @property
+    def pretty_answer(self) -> None | float | int:
+        if self.answer is None:
+            return None
+        elif self.int_guesses_only:
+            return int(self.answer)
+        else:
+            return self.answer
+
 
 class Guess(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -169,3 +178,17 @@ class Guess(models.Model):
         if score is not None:
             self.score = score
             self.save()
+
+    @property
+    def pretty_value(self) -> float | int:
+        if self.market.int_guesses_only:
+            return int(self.value)
+        else:
+            return self.value
+
+    @property
+    def results_value(self) -> str:
+        if self.market.int_guesses_only:
+            return f"{int(self.value):d}"
+        else:
+            return f"{self.value:.6f}"

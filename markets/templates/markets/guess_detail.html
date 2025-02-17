@@ -9,7 +9,7 @@
     {{ guess.market.prompt_rendered|safe }}
   </div>
   <p>
-    You submitted <strong>{{ guess.value }}</strong> for the market
+    You submitted <strong>{{ guess.pretty_value }}</strong> for the market
     <a href="{{ guess.market.get_absolute_url }}">
       <code>{{ guess.market.slug }}</code>
     </a>

@@ -35,11 +35,11 @@
   {% if market.show_answer or request.user.is_superuser %}
     <div class="alert alert-info">
       <h2 class="alert-heading">
-        Answer: <strong>{{ market.answer|default_if_none:"TBD" }}</strong>
+        Answer: <strong>{{ market.pretty_answer|default_if_none:"TBD" }}</strong>
       </h2>
       {% if best_guess.score %}
         <p class="fst-italic">
-          The best guess was <b>{{ best_guess.value|floatformat:6 }}</b>
+          The best guess was <b>{{ best_guess.pretty_value }}</b>
           which earned {{ best_guess.score }}♠.
         </p>
       {% endif %}
@@ -50,7 +50,7 @@
     <div>
       {% if guess and market.answer %}
         <p>
-          Your guess of {{ guess.value|floatformat:6 }}
+          Your guess of {{ guess.pretty_value }}
           earned {{ guess.score|default_if_none:"?" }}♠.
         </p>
       {% endif %}
@@ -66,9 +66,9 @@
             <td class="text-end">{{ forloop.counter }}</td>
             <td class="text-end">
               {% if request.user.is_staff %}
-                <a href="{% url "admin:markets_guess_change" g.pk %}">{{ g.value|floatformat:6 }}</a>
+                <a href="{% url "admin:markets_guess_change" g.pk %}">{{ g.results_value }}</a>
               {% else %}
-                {{ g.value|floatformat:6 }}
+                {{ g.results_value }}
               {% endif %}
             </td>
             <td class="text-end">
