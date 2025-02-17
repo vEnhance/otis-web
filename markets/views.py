@@ -47,12 +47,16 @@ class SubmitGuess(VerifiedRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]
     object: Guess  # type: ignore
     market: Market
 
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        form.instance.user = self.request.user
+        form.instance.market = self.market
+        return form
+
     def form_valid(self, form: BaseModelForm[Guess]):
         messages.success(
             self.request, f"You submitted a guess of {form.instance.value}"
         )
-        form.instance.user = self.request.user
-        form.instance.market = self.market
         form.instance.set_score()
         return super().form_valid(form)
 

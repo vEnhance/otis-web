@@ -2,6 +2,7 @@ from datetime import timedelta
 from typing import Optional
 
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models.query import QuerySet
@@ -78,6 +79,9 @@ class Market(models.Model):
         blank=True,
     )
     show_answer = models.BooleanField(default=True)
+    int_guesses_only = models.BooleanField(
+        help_text="Only allow integer guesses for this market.", default=False
+    )
 
     objects = models.Manager()
     started = StartedMarketManager()
@@ -144,6 +148,11 @@ class Guess(models.Model):
 
     def get_absolute_url(self) -> str:
         return reverse("market-results", args=(self.market.slug,))
+
+    def clean(self):
+        super().clean()
+        if self.market.int_guesses_only is True and not self.value.is_integer():
+            raise ValidationError({"value": "This market only allows integer guesses."})
 
     def get_score(self) -> Optional[float]:
         if self.market.answer is None or self.market.alpha is None:

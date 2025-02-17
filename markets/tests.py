@@ -100,6 +100,7 @@ class MarketTests(EvanTestCase):
             weight=2,
             alpha=2,
             slug="guess-my-ssn",
+            int_guesses_only=True,
         )
         verified_group = GroupFactory(name="Verified")
         UserFactory(username="alice", groups=(verified_group,))
@@ -169,13 +170,25 @@ class MarketTests(EvanTestCase):
             market = Market.objects.get(slug="guess-my-ssn")
             market.answer = 42
             market.save()
+
             self.login("alice")
+
+            # Guess a non-integer, shouldn't work
+            resp = self.assertGet20X("market-guess", "guess-my-ssn")
+            self.assertHas(resp, "market main page")
+            resp = self.assertPost20X(
+                "market-guess", "guess-my-ssn", data={"value": 13.37}, follow=True
+            )
+            self.assertContains(resp, "This market only allows integer guesses.")
+
+            # Guess an integer, should save
             resp = self.assertGet20X("market-guess", "guess-my-ssn")
             self.assertHas(resp, "market main page")
             self.assertPost20X(
                 "market-guess", "guess-my-ssn", data={"value": 100}, follow=True
             )
 
+            # Forbid more guesses
             self.assertGet30X("market-guess", "guess-my-ssn")
             resp = self.assertPost20X(
                 "market-guess", "guess-my-ssn", data={"value": 500}, follow=True

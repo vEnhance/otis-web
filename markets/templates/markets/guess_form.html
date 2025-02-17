@@ -24,6 +24,14 @@
       Ends <strong>{{ market.end_date|naturaltime }}</strong> ({{ market.end_date }})
     </li>
     <li>This market parameter is set at $w = {{ market.weight }}$ and $\alpha = {{ market.alpha }}$.</li>
+    <li>
+      {% if market.int_guesses_only %}
+        This market requires guesses to be <strong>positive integers</strong> up to $10^6$.
+      {% else %}
+        This market requires guesses to be <strong>real numbers</strong>
+        between $10^{-6}$ and $10^6$, written as decimals.
+      {% endif %}
+    </li>
   </ul>
   {% include "generic_form.html" %}
   {% if market.alpha %}

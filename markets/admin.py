@@ -14,6 +14,7 @@ class MarketAdmin(admin.ModelAdmin):
         "slug",
         "title",
         "prompt_truncated",
+        "int_guesses_only",
         "start_date",
         "end_date",
         "semester",
