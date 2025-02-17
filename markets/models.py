@@ -102,7 +102,11 @@ class Market(models.Model):
 
     def clean(self):
         super().clean()
-        if self.int_guesses_only is True and not self.answer.is_integer():
+        if (
+            self.int_guesses_only is True
+            and self.answer is not None
+            and not self.answer.is_integer()
+        ):
             raise ValidationError({"answer": "This market is integer-valued."})
 
     @property
