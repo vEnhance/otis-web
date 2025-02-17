@@ -100,6 +100,11 @@ class Market(models.Model):
         else:
             return reverse("market-guess", args=(self.slug,))
 
+    def clean(self):
+        super().clean()
+        if self.int_guesses_only is True and not self.answer.is_integer():
+            raise ValidationError({"answer": "This market is integer-valued."})
+
     @property
     def has_started(self) -> bool:
         return timezone.now() >= self.start_date
