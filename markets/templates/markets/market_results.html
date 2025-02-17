@@ -23,12 +23,19 @@
     <h2 class="alert-heading">{{ market.title }}</h2>
     {{ market.prompt_rendered|safe }}
   </div>
-  <p>
-    Market parameters: $w = {{ market.weight }}$
-    {% if market.alpha is not None %}and $\alpha = {{ market.alpha }}${% endif %}
-    .
-  </p>
   <ul>
+    <li>
+      Market parameters: $w = {{ market.weight }}$
+      {% if market.alpha is not None %}and $\alpha = {{ market.alpha }}${% endif %}
+      .
+    </li>
+    <li>
+      {% if market.int_guesses_only %}
+        This market requires guesses to be positive integers.
+      {% else %}
+        This market allows real number guesses.
+      {% endif %}
+    </li>
     <li>Market started: {{ market.start_date }}</li>
     <li>Market ended: {{ market.end_date }}</li>
   </ul>
