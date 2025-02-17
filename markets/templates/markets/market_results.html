@@ -25,9 +25,12 @@
   </div>
   <ul>
     <li>
-      Market parameters: $w = {{ market.weight }}$
-      {% if market.alpha is not None %}and $\alpha = {{ market.alpha }}${% endif %}
-      .
+      Market parameters:
+      {% if market.alpha is not None %}
+        $w = {{ market.weight }}$ and $\alpha = {{ market.alpha }}$.
+      {% else %}
+        $w = {{ market.weight }}$.
+      {% endif %}
     </li>
     <li>
       {% if market.int_guesses_only %}
