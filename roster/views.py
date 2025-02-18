@@ -319,7 +319,7 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
 
     # auto hold criteria
     num_psets = PSet.objects.filter(student=student).count()
-    auto_hold_criteria = num_past_unlock_inquiries > (10 + 1.5 * num_psets**1.2)
+    auto_hold_criteria = num_past_unlock_inquiries > (10 + 2.5 * num_psets**1.2)
 
     if auto_hold_criteria:
         inquiry.status = "INQ_HOLD"
