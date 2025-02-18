@@ -14,4 +14,5 @@ class MarketCreateForm(forms.ModelForm):
             "title",
             "answer",
             "show_answer",
+            "int_guesses_only",
         )
