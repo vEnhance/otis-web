@@ -7,11 +7,7 @@
             aria-expanded="false"
             aria-controls="collapse{{ meter.name }}">
       <span class="meter-header" style="color: {{ meter.color }};">
-        {% if meter.imaginary_level %}
-          <span style="font-size: 150%;">{{ meter.imaginary_level }}</span>
-        {% else %}
-          <span style="font-size: 150%;">{{ meter.level }}</span>
-        {% endif %}
+        <span style="font-size: 150%;">{{ meter.str_level }}</span>
         {{ meter.name }}
       </span>
       <span class="badge bg-secondary" style="position:absolute; right:60px;">Total {{ meter.value }}{{ meter.unit }}</span>

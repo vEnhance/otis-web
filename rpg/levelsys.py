@@ -61,9 +61,13 @@ class Meter:
         return int(max(0, self.value) ** 0.5)
 
     @property
-    def imaginary_level(self) -> str | None:
+    def im_level(self) -> int:
+        return int(max(0, -self.value) ** 0.5)
+
+    @property
+    def str_level(self) -> str | None:
         if self.value >= 0:
-            return None
+            return str(self.level)
         x = int((-self.value) ** 0.5)
         if x == 1:
             return "i"
@@ -161,6 +165,7 @@ class LevelInfoDict(TypedDict):
     quest_completes: QuerySet[QuestComplete]
     meters: FourMetersDict
     level_number: int
+    str_im_level: str
     level_name: str
     is_maxed: bool
     market_guesses: QuerySet[Guess]
@@ -204,6 +209,8 @@ def get_level_info(student: Student) -> LevelInfoDict:
         "diamonds": Meter.DiamondMeter(int(total_diamonds), dynamic_progress),
         "spades": Meter.SpadeMeter(round(total_spades, 1), dynamic_progress),
     }
+
+    # Real component of level
     level_number = sum(meter.level for meter in meters.values())  # type: ignore
     level = (
         Level.objects.filter(threshold__lte=level_number).order_by("-threshold").first()
@@ -211,11 +218,21 @@ def get_level_info(student: Student) -> LevelInfoDict:
     level_name = level.name if level is not None else "No Level"
     max_level = Level.objects.all().aggregate(max=Max("threshold"))["max"] or 0
 
+    # Imaginary component of level
+    im_level_number = sum(meter.im_level for meter in meters.values())  # type: ignore
+    if im_level_number == 0:
+        str_im_level = ""
+    elif im_level_number == 1:
+        str_im_level = "+ i"
+    else:
+        str_im_level = f"+ {im_level_number}i"
+
     level_data["meters"] = meters
     level_data["level_number"] = level_number
     level_data["level_name"] = level_name
     level_data["is_maxed"] = level_number >= max_level
     level_data["bonus_levels"] = BonusLevel.objects.filter(level__lte=level_number)
+    level_data["str_im_level"] = str_im_level
 
     return level_data
 

@@ -17,11 +17,7 @@
   </div>
   <div style="position: relative;">
     <span class="meter-name" style="color: {{ meter.color }};">
-      {% if meter.imaginary_level %}
-        <big style="font-weight: 900;">{{ meter.imaginary_level }}</big>
-      {% else %}
-        <big style="font-weight: 900;">{{ meter.level }}</big>
-      {% endif %}
+      <big style="font-weight: 900;">{{ meter.str_level }}</big>
       {{ meter.name }}
     </span>
     <span style="position:absolute; right: 0; text-align: right;">

@@ -130,7 +130,7 @@ class QuestComplete(models.Model):
         Student, on_delete=models.CASCADE, help_text="Student obtaining this reward"
     )
     title = models.CharField(max_length=160, help_text="A summary")
-    spades = models.PositiveSmallIntegerField(help_text="The number of spades granted")
+    spades = models.SmallIntegerField(help_text="The number of spades granted")
     timestamp = models.DateTimeField(
         auto_now_add=True, help_text="The time the achievement was granted"
     )
