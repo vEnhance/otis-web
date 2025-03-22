@@ -64,40 +64,50 @@
           earned {{ guess.score|default_if_none:"?" }}♠.
         </p>
       {% endif %}
-      <table class="table table-striped">
-        <tr class="table-dark">
-          <th style="width:2em;">#</th>
-          <th style="width:9em;">Guess</th>
-          <th style="width:5em;">Score</th>
-          <th>Player</th>
-        </tr>
-        {% for g in guesses %}
-          <tr {% if g.score >= best_guess.score %}class="table-success fw-bold" {% elif guess.pk == g.pk %}class="table-primary" {% endif %}>
-            <td class="text-end">{{ forloop.counter }}</td>
-            <td class="text-end">
-              {% if request.user.is_staff %}
-                <a href="{% url "admin:markets_guess_change" g.pk %}">{{ g.results_value }}</a>
-              {% else %}
-                {{ g.results_value }}
-              {% endif %}
-            </td>
-            <td class="text-end">
-              {% if g.score >= 0.01 %}+{{ g.score|floatformat:2 }}♠{% endif %}
-            </td>
-            <td>
-              {% if guess.pk == g.pk %}
-                <strong>{{ g.user.get_full_name }}</strong>
-              {% elif request.user.is_superuser %}
-                <a href="{% url "username-lookup" g.user.username %}"
-                   {% if not g.public %}class="text-muted"{% endif %}>{{ g.user.get_full_name }}</a>
-              {% elif g.public %}
-                {{ g.user.get_full_name }}
-              {% else %}
-              {% endif %}
-            </td>
+      {% if market.show_results or request.user.is_superuser %}
+        {% if not market.show_results %}
+          <div class="alert alert-warning">
+            You are viewing market results in admin mode.
+            They are not published yet.
+          </div>
+        {% endif %}
+        <table class="table table-striped">
+          <tr class="table-dark">
+            <th style="width:2em;">#</th>
+            <th style="width:9em;">Guess</th>
+            <th style="width:5em;">Score</th>
+            <th>Player</th>
           </tr>
-        {% endfor %}
-      </table>
+          {% for g in guesses %}
+            <tr {% if g.score >= best_guess.score %}class="table-success fw-bold" {% elif guess.pk == g.pk %}class="table-primary" {% endif %}>
+              <td class="text-end">{{ forloop.counter }}</td>
+              <td class="text-end">
+                {% if request.user.is_staff %}
+                  <a href="{% url "admin:markets_guess_change" g.pk %}">{{ g.results_value }}</a>
+                {% else %}
+                  {{ g.results_value }}
+                {% endif %}
+              </td>
+              <td class="text-end">
+                {% if g.score >= 0.01 %}+{{ g.score|floatformat:2 }}♠{% endif %}
+              </td>
+              <td>
+                {% if guess.pk == g.pk %}
+                  <strong>{{ g.user.get_full_name }}</strong>
+                {% elif request.user.is_superuser %}
+                  <a href="{% url "username-lookup" g.user.username %}"
+                     {% if not g.public %}class="text-muted"{% endif %}>{{ g.user.get_full_name }}</a>
+                {% elif g.public %}
+                  {{ g.user.get_full_name }}
+                {% else %}
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </table>
+      {% else %}
+        <p class="alert alert-warning">Full market results are not published yet.</p>
+      {% endif %}
     </div>
   {% endif %}
 {% endblock layout-content %}

@@ -79,6 +79,7 @@ class Market(models.Model):
         blank=True,
     )
     show_answer = models.BooleanField(default=True)
+    show_results = models.BooleanField(default=True)
     int_guesses_only = models.BooleanField(
         help_text="Only allow integer guesses for this market.", default=False
     )
