@@ -90,6 +90,7 @@
               </td>
               <td class="text-end">
                 {% if g.score >= 0.01 %}+{{ g.score|floatformat:2 }}♠{% endif %}
+                {% if g.score <= -0.01 %}{{ g.score|floatformat:2 }}♠{% endif %}
               </td>
               <td>
                 {% if guess.pk == g.pk %}
