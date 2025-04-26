@@ -358,7 +358,7 @@ class RosterTest(EvanTestCase):
         self.assertGet20X("inquiry", alice.pk, follow=True)
 
         # Now Alice has done 6 units, they shouldn't be able to get more
-        # (This differs from production behavior because production also gives you a dfeault three units)
+        # (This differs from production behavior because production also gives you a default three units)
         self.assertEqual(alice.curriculum.count(), 6)
         self.assertEqual(alice.unlocked_units.count(), 6)
         self.assertHas(
