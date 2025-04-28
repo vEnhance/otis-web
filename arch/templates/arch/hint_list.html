@@ -5,7 +5,7 @@
 {% endblock title %}
 {% block layout-content %}
   <p>
-    <a href="{% url "arch-index" %}"><span class="emoji-text">⬅️</span> Back to ARCH index</a>
+    <a href="{% url "arch-index" %}" id="backToArch"><span class="emoji-text">⬅️</span> Back to ARCH index</a>
   </p>
   <hr />
   {% spaceless %}
@@ -75,3 +75,15 @@
     </a>
   </div>
 {% endblock layout-content %}
+{% block scripts %}
+<script defer>
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            console.log('Escape pressed');
+            const link = document.getElementById('backToArch');
+            if (link) {
+                link.click();
+            }
+        }
+    });
+</script>
