@@ -208,6 +208,10 @@ def invoice(request: HttpRequest, student_pk: Optional[int] = None) -> HttpRespo
         "title": f"Invoice for {student.name}",
         "student": student,
         "invoice": invoice,
+        "render_as_past_year": (
+            student.semester.active is False
+            and Semester.objects.filter(active=True).exists()
+        ),
         "checksum": student.get_checksum(settings.INVOICE_HASH_KEY),
     }
     # return HttpResponse("hi")
