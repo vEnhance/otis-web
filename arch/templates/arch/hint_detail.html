@@ -6,7 +6,7 @@
 {% endblock title %}
 {% block layout-content %}
   <p>Here is your hint:</p>
-  <div class="alert alert-info" style="word-wrap: break-word;">{{ hint.content|parbreaks }}</div>
+  <div class="alert alert-info text-break">{{ hint.content|parbreaks }}</div>
   <ul>
     <li>
       <a href="{{ hint.problem.get_absolute_url }}">

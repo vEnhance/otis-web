@@ -61,7 +61,7 @@
       Here is a link to a payment page that works without login
       (so obviously, only send this to people you trust):
       <a href="{% url "payments-invoice" student.pk checksum %}"
-         style="word-wrap:break-word">https://otis.evanchen.cc{% url "payments-invoice" student.pk checksum %}</a>
+         class="text-break">https://otis.evanchen.cc{% url "payments-invoice" student.pk checksum %}</a>
     </p>
     <hr />
   {% endif %}
