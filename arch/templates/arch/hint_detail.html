@@ -28,10 +28,10 @@
 {% endblock layout-content %}
 {% block scripts %}
   <script type="text/javascript">
-      document.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape' || event.key === 'Esc') {
-          window.parent.location.href = document.referrer;
-        }
+      document.addEventListener('keydown', function(event) {
+          if (event.key === 'Escape' || event.key === 'Esc') {
+              window.parent.location.href = document.referrer;
+          }
       });
   </script>
 {% endblock scripts %}
