@@ -128,7 +128,7 @@
               {% endif %}
             </td>
             <td class="emojis">
-            {% if row.is_visible %}
+              {% if row.is_visible %}
                 <a class="emoji-link"
                    title="Download LaTeX template"
                    href="{% view_tex row.unit %}">📋</a>
@@ -147,7 +147,7 @@
                   <sup style="text-shadow: none;">{{ row.num_uploads|default:"0" }}</sup>
                 {% endif %}
               {% endspaceless %}
-               <a class="emoji-link"
+              <a class="emoji-link"
                  title="Wiki"
                  href="{% url "wiki-unitgroup" row.unit.group.pk %}">🎮</a>
               {# solutions logic #}
@@ -173,5 +173,5 @@
     </table>
   {% endwith %}
 {% else %}
-<p class="fst-italic">No curriculum materials yet! Please check back later.</p>
+  <p class="fst-italic">No curriculum materials yet! Please check back later.</p>
 {% endif %}
