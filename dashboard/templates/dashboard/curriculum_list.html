@@ -49,7 +49,8 @@
                         (a.classList.contains('subjectF') ? "F" : "") +
                         (a.classList.contains('subjectG') ? "G" : "") +
                         (a.classList.contains('subjectM') ? "M" : "") +
-                        (a.classList.contains('subjectN') ? "N" : "");
+                        (a.classList.contains('subjectN') ? "N" : "") +
+                        (a.classList.contains('subjectK') ? "Z" : "");
                     const A_locked = a.classList.contains('unit-locked');
 
                     const B = (b.classList.contains('subjectA') ? "A" : "") +
@@ -57,7 +58,8 @@
                         (b.classList.contains('subjectF') ? "F" : "") +
                         (b.classList.contains('subjectG') ? "G" : "") +
                         (b.classList.contains('subjectM') ? "M" : "") +
-                        (b.classList.contains('subjectN') ? "N" : "");
+                        (b.classList.contains('subjectN') ? "N" : "") +
+                        (b.classList.contains('subjectK') ? "Z" : "");
                     const B_locked = b.classList.contains('unit-locked');
 
                     return A < B ? -1 : A > B ? 1 : A_locked < B_locked ? -1 : A_locked > B_locked ? 1 : 0;
