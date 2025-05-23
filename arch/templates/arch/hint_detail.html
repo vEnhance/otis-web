@@ -28,19 +28,19 @@
 {% endblock layout-content %}
 {% block scripts %}
   <script type="text/javascript">
-    function getParentUrl(url) {
-      const parsed = new URL(url);
-      const segments = parsed.pathname.split('/').filter(Boolean);
-      segments.pop();
-      parsed.pathname = '/' + segments.join('/');
-      return parsed.toString();
-    }
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape' || event.key === 'Esc') {
-          const url = window.location.href;
-          const parentUrl = getParentUrl(url);
-          window.parent.location.href = parentUrl;
-        }
-    });
+      function getParentUrl(url) {
+          const parsed = new URL(url);
+          const segments = parsed.pathname.split('/').filter(Boolean);
+          segments.pop();
+          parsed.pathname = '/' + segments.join('/');
+          return parsed.toString();
+      }
+      document.addEventListener('keydown', function(event) {
+          if (event.key === 'Escape' || event.key === 'Esc') {
+              const url = window.location.href;
+              const parentUrl = getParentUrl(url);
+              window.parent.location.href = parentUrl;
+          }
+      });
   </script>
 {% endblock scripts %}
