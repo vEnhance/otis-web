@@ -10,6 +10,11 @@
             class="tooltip-button"
             title="Show/hide locked units">
       Toggle <span class="emoji-text">❓</span>
+    <button id="sort-by-subject"
+            class="tooltip-button"
+            title="Sort by subject"
+            style="margin-left: 4px">
+      Sort by subject <span class="emoji-text">📄</span>
     </button>
     &nbsp;
     <a class="fs-5 emoji-link" title="Settings" href="{% url "profile" %}">⚙️</a>
@@ -22,6 +27,53 @@
       });
       $("#hide-locked-units").click(function() {
           $(".unit-locked").toggleClass("unit-locked-hidden");
+      });
+
+      let sorted = false;
+      let originalOrder = [];
+      $("#sort-by-subject").click(function() {
+          const list = document.getElementsByClassName("curriculum")[0];
+          const tbody = list.querySelector("tbody");
+          const frag = document.createDocumentFragment();
+
+          let sortedList;
+
+          if (!sorted) {
+            // Store original order the first time
+            originalOrder = Array.from(tbody.querySelectorAll("tr"));
+
+            // Sort the items
+            sortedList = originalOrder.slice().sort((a, b) => {
+              const A = (a.classList.contains('subjectA') ? "A" : "") +
+                        (a.classList.contains('subjectC') ? "C" : "") +
+                        (a.classList.contains('subjectF') ? "F" : "") +
+                        (a.classList.contains('subjectG') ? "G" : "") +
+                        (a.classList.contains('subjectM') ? "M" : "") +
+                        (a.classList.contains('subjectN') ? "N" : "");
+              const A_locked = a.classList.contains('unit-locked');
+
+              const B = (b.classList.contains('subjectA') ? "A" : "") +
+                        (b.classList.contains('subjectC') ? "C" : "") +
+                        (b.classList.contains('subjectF') ? "F" : "") +
+                        (b.classList.contains('subjectG') ? "G" : "") +
+                        (b.classList.contains('subjectM') ? "M" : "") +
+                        (b.classList.contains('subjectN') ? "N" : "");
+              const B_locked = b.classList.contains('unit-locked');
+
+              return A < B ? -1 : A > B ? 1 : A_locked < B_locked ? -1 : A_locked > B_locked ? 1 : 0;
+            });
+
+            sorted = true;
+          } else {
+            sortedList = originalOrder;
+            sorted = false;
+          }
+
+          for (const row of sortedList) {
+            frag.appendChild(row);
+          }
+
+          tbody.appendChild(frag);
       });
   </script>
   {% with profile=request.user|getprofile %}
