@@ -1,21 +1,17 @@
 from typing import Any, Optional
 
-from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from django.http.response import HttpResponseForbidden, HttpResponseRedirect
+from django.http.response import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render
-from django.urls import reverse
 
 from core.utils import get_from_google_storage
 from exams.calculator import expr_compute
-from otisweb.decorators import admin_required
 from otisweb.utils import AuthHttpRequest
-from roster.models import Student
 from roster.utils import get_student_by_pk, infer_student
 
-from .forms import ExamAttemptForm, ParticipationPointsForm
-from .models import ExamAttempt, MockCompleted, PracticeExam
+from .forms import ExamAttemptForm
+from .models import ExamAttempt, PracticeExam
 
 # Create your views here.
 
@@ -123,68 +119,3 @@ def quiz(request: AuthHttpRequest, student_pk: int, pk: int) -> HttpResponse:
     context["quiz"] = quiz
     context["student"] = student
     return render(request, "exams/quiz.html", context)
-
-
-@login_required
-def mocks(request: AuthHttpRequest, student_pk: Optional[int] = None) -> HttpResponse:
-    if student_pk is None:
-        student = infer_student(request)
-        return HttpResponseRedirect(reverse("mocks", args=(student.pk,)))
-    student = get_student_by_pk(request, student_pk)
-    semester = student.semester
-    if not semester.active:
-        return HttpResponseForbidden("Semester not active")
-    elif not student.enabled:
-        return HttpResponseForbidden("Student account not enabled")
-    context = {
-        "student": student,
-        "semester": semester,
-        "tests": PracticeExam.objects.filter(
-            family=semester.exam_family,
-            is_test=True,
-        ),
-    }
-    return render(request, "exams/mocks.html", context)
-
-
-@admin_required
-def participation_points(request: AuthHttpRequest) -> HttpResponse:
-    if request.method == "POST":
-        form = ParticipationPointsForm(request.POST)
-        if form.is_valid():
-            sids = [
-                int(line)
-                for line in form.cleaned_data["sids"].splitlines()
-                if line.strip().isdigit()
-            ]
-            # Look for students whose ID's match those in SID's and active
-            pks = Student.objects.filter(
-                semester__active=True, user__student__pk__in=sids
-            ).values_list("pk", flat=True)
-            existing_completes = MockCompleted.objects.filter(
-                exam=form.cleaned_data["exam"]
-            )
-            bad_pks = set(existing_completes.values_list("student__pk", flat=True))
-            good_pks = [pk for pk in pks if pk not in bad_pks]
-
-            MockCompleted.objects.bulk_create(
-                [
-                    MockCompleted(student_id=pk, exam=form.cleaned_data["exam"])
-                    for pk in good_pks
-                ],
-                batch_size=25,
-            )
-            messages.success(
-                request, f"Created {len(good_pks)} completion database entries"
-            )
-            if len(pks) > len(good_pks):
-                messages.warning(
-                    request,
-                    f"There were {len(pks) - len(good_pks)} students with existing entries",
-                )
-            form = ParticipationPointsForm()
-    else:
-        form = ParticipationPointsForm()
-
-    context = {"form": form}
-    return render(request, "exams/participation_points.html", context)
