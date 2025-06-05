@@ -10,116 +10,165 @@
             class="tooltip-button"
             title="Show/hide locked units">
       Toggle <span class="emoji-text">❓</span>
-    </button>
-    &nbsp;
-    <a class="fs-5 emoji-link" title="Settings" href="{% url "profile" %}">⚙️</a>
-    &nbsp;
-    <span class="fs-6 fst-italic">Mouse over icons for hints.</span>
-  </p>
-  <script>
-      $("#hide-completed-units").click(function() {
-          $(".unit-completed").toggleClass("unit-completed-hidden");
-      });
-      $("#hide-locked-units").click(function() {
-          $(".unit-locked").toggleClass("unit-locked-hidden");
-      });
-  </script>
-  {% with profile=request.user|getprofile %}
-    <table class="table table-striped curriculum">
-      {% for row in curriculum %}
-        <tr class="subject{{ row.unit.group.subject }} {% if row.is_accepted %} unit-completed {% if not profile.show_completed_by_default %}unit-completed-hidden{% endif %} {% elif not row.is_visible %} unit-locked {% if not profile.show_locked_by_default %}unit-locked-hidden{% endif %} {% endif %} ">
-          <td class="status">
-            <span class="emoji-text">
-              {% if row.is_rejected %}
-                <span title="Rejected unit">🚫</span>
-              {% elif row.is_accepted %}
-                <span title="Completed unit">✅</span>
-              {% elif row.is_submitted and not row.student_still_active %}
-                <span title="Completed unit">✅</span>
-              {% elif row.is_submitted %}
-                <span title="Unit pending review">⏳</span>
-              {% elif row.is_current and row.student_still_active %}
-                <span title="Current unit">🌠</span>
-              {% elif not row.is_visible %}
-                <span title="Locked unit">❓</span>
-              {% else %}
-                <span title="Inactive unit">💤</span>
-              {% endif %}
-            </span>
-          </td>
-          <td class="code">
-            {{ row.unit.position }}
-            {% if profile.show_artwork_on_curriculum %}<br />{% endif %}
-            {{ row.unit.code }}
-          </td>
-          {% if profile.show_artwork_on_curriculum %}
-            <td class="thumbnail">
-              {% if row.unit.group.artwork_thumb_sm %}
-                {% if row.is_visible %}
-                  <a title="Download PDF" href="{% view_problems row.unit %}">
-                    <img class="artwork"
-                         width="32"
-                         src="{{ row.unit.group.artwork_thumb_sm.url }}" />
-                  </a>
+      <button id="sort-by-subject"
+              class="tooltip-button"
+              title="Sort by subject"
+              style="margin-left: 4px">Sort by subject</button>
+      <span class="fs-6 fst-italic" style="margin-left: 4px">Mouse over icons for hints.</span>
+    </p>
+    <script>
+        $("#hide-completed-units").click(function() {
+            $(".unit-completed").toggleClass("unit-completed-hidden");
+        });
+        $("#hide-locked-units").click(function() {
+            $(".unit-locked").toggleClass("unit-locked-hidden");
+        });
+
+        let sorted = false;
+        let originalOrder = [];
+        $("#sort-by-subject").click(function() {
+            const list = document.getElementsByClassName("curriculum")[0];
+            const tbody = list.querySelector("tbody");
+            const frag = document.createDocumentFragment();
+
+            let sortedList;
+
+            if (!sorted) {
+                // Store original order the first time
+                originalOrder = Array.from(tbody.querySelectorAll("tr"));
+
+                // Sort the items
+                sortedList = originalOrder.slice().sort((a, b) => {
+                    const A = (a.classList.contains('subjectA') ? "A" : "") +
+                        (a.classList.contains('subjectC') ? "C" : "") +
+                        (a.classList.contains('subjectF') ? "AF" : "") +
+                        (a.classList.contains('subjectG') ? "G" : "") +
+                        (a.classList.contains('subjectM') ? "M" : "") +
+                        (a.classList.contains('subjectN') ? "N" : "") +
+                        (a.classList.contains('subjectK') ? "Z" : "");
+                    const A_locked = a.classList.contains('unit-locked');
+
+                    const B = (b.classList.contains('subjectA') ? "A" : "") +
+                        (b.classList.contains('subjectC') ? "C" : "") +
+                        (b.classList.contains('subjectF') ? "AF" : "") +
+                        (b.classList.contains('subjectG') ? "G" : "") +
+                        (b.classList.contains('subjectM') ? "M" : "") +
+                        (b.classList.contains('subjectN') ? "N" : "") +
+                        (b.classList.contains('subjectK') ? "Z" : "");
+                    const B_locked = b.classList.contains('unit-locked');
+
+                    return A < B ? -1 : A > B ? 1 : A_locked < B_locked ? -1 : A_locked > B_locked ? 1 : 0;
+                });
+
+                sorted = true;
+            } else {
+                sortedList = originalOrder;
+                sorted = false;
+            }
+
+            for (const row of sortedList) {
+                frag.appendChild(row);
+            }
+
+            tbody.appendChild(frag);
+        });
+    </script>
+    {% with profile=request.user|getprofile %}
+      <table class="table table-striped curriculum">
+        {% for row in curriculum %}
+          <tr class="subject{{ row.unit.group.subject }} {% if row.is_accepted %} unit-completed {% if not profile.show_completed_by_default %}unit-completed-hidden{% endif %} {% elif not row.is_visible %} unit-locked {% if not profile.show_locked_by_default %}unit-locked-hidden{% endif %} {% endif %} ">
+            <td class="status">
+              <span class="emoji-text">
+                {% if row.is_rejected %}
+                  <span title="Rejected unit">🚫</span>
+                {% elif row.is_accepted %}
+                  <span title="Completed unit">✅</span>
+                {% elif row.is_submitted and not row.student_still_active %}
+                  <span title="Completed unit">✅</span>
+                {% elif row.is_submitted %}
+                  <span title="Unit pending review">⏳</span>
+                {% elif row.is_current and row.student_still_active %}
+                  <span title="Current unit">🌠</span>
+                {% elif not row.is_visible %}
+                  <span title="Locked unit">❓</span>
                 {% else %}
-                  <img width="32" src="{{ row.unit.group.artwork_thumb_sm.url }}" />
+                  <span title="Inactive unit">💤</span>
                 {% endif %}
+              </span>
+            </td>
+            <td class="code">
+              {{ row.unit.position }}
+              {% if profile.show_artwork_on_curriculum %}<br />{% endif %}
+              {{ row.unit.code }}
+            </td>
+            {% if profile.show_artwork_on_curriculum %}
+              <td class="thumbnail">
+                {% if row.unit.group.artwork_thumb_sm %}
+                  {% if row.is_visible %}
+                    <a title="Download PDF" href="{% view_problems row.unit %}">
+                      <img class="artwork"
+                           width="32"
+                           src="{{ row.unit.group.artwork_thumb_sm.url }}" />
+                    </a>
+                  {% else %}
+                    <img width="32" src="{{ row.unit.group.artwork_thumb_sm.url }}" />
+                  {% endif %}
+                {% endif %}
+              </td>
+            {% endif %}
+            <td class="unit-name {% if row.is_current %}active{% endif %}"
+                {% if request.user.is_superuser %}title="{{ row.unit.group.name }} pk={{ row.unit.pk }} group.pk={{ row.unit.group.pk }}" {% endif %}>
+              {% if row.is_visible %}
+                <a title="Download PDF" href="{% view_problems row.unit %}">{{ row.number }}. {{ row.unit.group.name }}</a>
+              {% else %}
+                {{ row.number }}. {{ row.unit.group.name }} (locked)
               {% endif %}
             </td>
-          {% endif %}
-          <td class="unit-name {% if row.is_current %}active{% endif %}"
-              {% if request.user.is_superuser %}title="{{ row.unit.group.name }} pk={{ row.unit.pk }} group.pk={{ row.unit.group.pk }}" {% endif %}>
-            {% if row.is_visible %}
-              <a title="Download PDF" href="{% view_problems row.unit %}">{{ row.number }}. {{ row.unit.group.name }}</a>
-            {% else %}
-              {{ row.number }}. {{ row.unit.group.name }} (locked)
-            {% endif %}
-          </td>
-          <td class="emojis">
-            {% if row.is_visible %}
-              <a class="emoji-link"
-                 title="Download LaTeX template"
-                 href="{% view_tex row.unit %}">📋</a>
-              <a class="emoji-link"
-                 style="text-shadow: 1px black"
-                 title="Add suggestion"
-                 href="{% url "suggest-new" row.unit.pk %}">💡</a>
-            {% elif request.user.is_staff %}
-              <a href="{% view_problems row.unit %}">(PDF)</a>
-            {% endif %}
-            {% spaceless %}
+            <td class="emojis">
               {% if row.is_visible %}
                 <a class="emoji-link"
-                   title="File uploads"
-                   href="{% url "uploads" student.pk row.unit.pk %}">📂</a>
-                <sup style="text-shadow: none;">{{ row.num_uploads|default:"0" }}</sup>
+                   title="Download LaTeX template"
+                   href="{% view_tex row.unit %}">📋</a>
+                <a class="emoji-link"
+                   style="text-shadow: 1px black"
+                   title="Add suggestion"
+                   href="{% url "suggest-new" row.unit.pk %}">💡</a>
+              {% elif request.user.is_staff %}
+                <a href="{% view_problems row.unit %}">(PDF)</a>
               {% endif %}
-            {% endspaceless %}
-            <a class="emoji-link"
-               title="Wiki"
-               href="{% url "wiki-unitgroup" row.unit.group.pk %}">🎮</a>
-            {# solutions logic #}
-            {% if row.is_submitted %}
+              {% spaceless %}
+                {% if row.is_visible %}
+                  <a class="emoji-link"
+                     title="File uploads"
+                     href="{% url "uploads" student.pk row.unit.pk %}">📂</a>
+                  <sup style="text-shadow: none;">{{ row.num_uploads|default:"0" }}</sup>
+                {% endif %}
+              {% endspaceless %}
               <a class="emoji-link"
-                 title="Download solutions"
-                 href="{% view_solutions row.unit %}">🗝️</a>
-            {% elif row.is_visible and not row.student_still_active %}
-              <a class="emoji-link"
-                 title="Download solutions"
-                 href="{% view_solutions row.unit %}">🗝️</a>
-            {% elif request.user.is_staff %}
-              <a class="emoji-link"
-                 title="Download solutions"
-                 href="{% view_solutions row.unit %}">㊙️</a>
-            {% else %}
-              <span style="visibility:hidden;">㊙️</span> {# placeholder for spacing reasons #}
-            {% endif %}
-          </p>
-        </td>
-      </tr>
-    {% endfor %}
-  </table>
-{% endwith %}
+                 title="Wiki"
+                 href="{% url "wiki-unitgroup" row.unit.group.pk %}">🎮</a>
+              {# solutions logic #}
+              {% if row.is_submitted %}
+                <a class="emoji-link"
+                   title="Download solutions"
+                   href="{% view_solutions row.unit %}">🗝️</a>
+              {% elif row.is_visible and not row.student_still_active %}
+                <a class="emoji-link"
+                   title="Download solutions"
+                   href="{% view_solutions row.unit %}">🗝️</a>
+              {% elif request.user.is_staff %}
+                <a class="emoji-link"
+                   title="Download solutions"
+                   href="{% view_solutions row.unit %}">㊙️</a>
+              {% else %}
+                <span style="visibility:hidden;">㊙️</span> {# placeholder for spacing reasons #}
+              {% endif %}
+            </p>
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% endwith %}
 {% else %}
-<p class="fst-italic">No curriculum materials yet! Please check back later.</p>
+  <p class="fst-italic">No curriculum materials yet! Please check back later.</p>
 {% endif %}
