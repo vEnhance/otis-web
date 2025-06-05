@@ -9,7 +9,7 @@
       Please remit payment to continue using OTIS-WEB.
     </div>
   {% endif %}
-  {% if not invoice.student.semester.active %}
+  {% if render_as_past_year %}
     <div class="alert alert-danger" role="alert">
       <h2 class="alert-heading">You are viewing the invoice for a past year!</h2>
       This is the invoice for
@@ -61,7 +61,7 @@
       Here is a link to a payment page that works without login
       (so obviously, only send this to people you trust):
       <a href="{% url "payments-invoice" student.pk checksum %}"
-         style="word-wrap:break-word">https://otis.evanchen.cc{% url "payments-invoice" student.pk checksum %}</a>
+         class="text-break">https://otis.evanchen.cc{% url "payments-invoice" student.pk checksum %}</a>
     </p>
     <hr />
   {% endif %}

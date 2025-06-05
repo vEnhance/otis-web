@@ -208,6 +208,10 @@ def invoice(request: HttpRequest, student_pk: Optional[int] = None) -> HttpRespo
         "title": f"Invoice for {student.name}",
         "student": student,
         "invoice": invoice,
+        "render_as_past_year": (
+            student.semester.active is False
+            and Semester.objects.filter(active=True).exists()
+        ),
         "checksum": student.get_checksum(settings.INVOICE_HASH_KEY),
     }
     # return HttpResponse("hi")
@@ -346,9 +350,11 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
             num_past_unlock_inquiries <= 6 or unit.group.subject == "K"
         )
 
-        auto_accept_criteria |= Student.objects.filter(
-            user=student.user, curriculum__in=[unit]
-        ).exists()
+        auto_accept_criteria |= (
+            Student.objects.filter(user=student.user, curriculum__in=[unit])
+            .exclude(pk=student.pk)
+            .exists()
+        )
     elif inquiry.action_type == "INQ_ACT_DROP":
         # auto dropping locked units
         auto_accept_criteria = not student.unlocked_units.contains(unit)

@@ -404,18 +404,17 @@
   </table>
   <hr />
   {% if semester.active and student.enabled %}
-    <h2>Mock olympiads (tests)</h2>
-    {% include "dashboard/exam_list.html" with exams=tests %}
-    {% if semester.active %}
-      <div class="text-center">
-        <a href="{% url 'mocks' student.pk %}"
-           class="btn btn-secondary"
-           role="button">Mock Olympiad Submission</a>
-      </div>
-    {% endif %}
     <h2 id="quizzes">Quizzes</h2>
     {% include "dashboard/exam_list.html" with exams=quizzes %}
     <p>Click on a quiz above to open it. Quiz submissions are done directly on OTIS-WEB.</p>
+    <h2>Mock olympiads</h2>
+    {% include "dashboard/exam_list.html" with exams=tests %}
+    <p>
+      Mock olympiads are not submitted now
+      (so the deadlines for mock olympiads are just suggestions).
+    </p>
+    <h2>Discussion</h2>
+    {% include "exams/gateway.html" %}
   {% elif not semester.active %}
     <p>This page from {{ semester }} is now archived. Thanks for playing.</p>
   {% endif %}
