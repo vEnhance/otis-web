@@ -7,7 +7,9 @@
     by finding metaphorical diamonds.
   </p>
   <h3>Found a diamond?</h3>
-  {% include "generic_form.html" with submit_name="♦️" %}
+  <div class="position-relative">
+    {% include "generic_form.html" with submit_name="♦️" %}
+  </div>
   <br />
   {% if achievements|length > 0 %}
     <div class="list-group">
@@ -43,4 +45,35 @@
       See also <a href="{% url "achievements-listing" %}">diamonds leaderboard</a>.
     </p>
   {% endif %}
+  {% block scripts %}
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const input = document.querySelector('input[type="text"]');
+        if (input) {
+          const wrapper = document.createElement('div');
+          wrapper.style.position = 'relative';
+          wrapper.style.display = 'inline-block';
+          wrapper.style.width = '100%';
+          
+          input.parentNode.insertBefore(wrapper, input);
+          wrapper.appendChild(input);
+          
+          const counter = document.createElement('div');
+          counter.id = 'char-counter';
+          counter.style.position = 'absolute';
+          counter.style.right = '10px';
+          counter.style.top = '50%';
+          counter.style.transform = 'translateY(-50%)';
+          counter.style.color = '#666';
+          counter.textContent = '0';
+          
+          wrapper.appendChild(counter);
+          
+          input.addEventListener('input', function() {
+            counter.textContent = this.value.length;
+          });
+        }
+      });
+    </script>
+  {% endblock scripts %}
 {% endblock meter-content %}
