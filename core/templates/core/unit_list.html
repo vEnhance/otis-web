@@ -57,8 +57,8 @@
             <div class="col-3">
               {% if unitgroup.artwork_thumb_sm %}
                 <a href="{% url "wiki-unitgroup" unitgroup.pk %}">
-                  <img width="100%" 
-                       src="{{ unitgroup.artwork_thumb_sm.url }}" 
+                  <img width="100%"
+                       src="{{ unitgroup.artwork_thumb_sm.url }}"
                        alt="Artwork for {{ unitgroup.name }}" />
                 </a>
               {% endif %}
@@ -109,7 +109,7 @@
           const students = document.getElementsByClassName("text-primary");
           const author = document.getElementsByClassName("fw-lighter");
           const contentColumns = document.querySelectorAll('.col-9');
-  
+
           for (let el of artwork) {
               if (el.style.display === "none") {
                   el.style.removeProperty("display");
@@ -137,7 +137,7 @@
               }
           }
       }
-  
+
       button.addEventListener('click', handleClick);
   </script>
 {% endblock scripts %}
