@@ -57,7 +57,7 @@
             <div class="col-3">
               {% if unitgroup.artwork_thumb_sm %}
                 <a href="{% url "wiki-unitgroup" unitgroup.pk %}">
-                  <img width="100%" src="{{ unitgroup.artwork_thumb_sm.url }}" />
+                  <img width="100%" src="{{ unitgroup.artwork_thumb_sm.url }}" alt="Artwork for {{ unitgroup.name }}" />
                 </a>
               {% endif %}
             </div>
@@ -98,3 +98,44 @@
     </div>
   {% endfor %}
 {% endblock layout-content %}
+{% block scripts %}
+  <script type="text/javascript">
+    const button = document.getElementById('toggle-compact');
+
+    function handleClick() {
+        const artwork = document.getElementsByClassName("col-3");
+        const students = document.getElementsByClassName("text-primary");
+        const author = document.getElementsByClassName("fw-lighter");
+        const contentColumns = document.querySelectorAll('.col-9');
+
+        for (let el of artwork) {
+            if (el.style.display === "none") {
+                el.style.removeProperty("display");
+                el.nextElementSibling.className = 'col-9';
+            } else {
+                el.style.display = "none";
+                el.nextElementSibling.className = 'col-12';
+            }
+        }
+        for (let el of students) {
+            if (el.textContent.trim() === "⏲") {
+                continue;
+            }
+            if (el.style.display === "none") {
+                el.style.removeProperty("display");
+            } else {
+                el.style.display = "none";
+            }
+        }
+        for (let el of author) {
+            if (el.style.display === "none") {
+                el.style.removeProperty("display");
+            } else {
+                el.style.display = "none";
+            }
+        }
+    }
+
+    button.addEventListener('click', handleClick);
+  </script>
+{% endblock scripts %}

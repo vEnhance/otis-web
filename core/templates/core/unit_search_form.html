@@ -12,13 +12,16 @@
          value="{{ request.GET.q }}" />
 </form>
 <!-- Filter and Sort Collapsible Dropdown -->
-<h2>
+<h2 style="display: flex;">
   <button class="btn btn-outline-success"
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#filterAndSort"
           aria-expanded="{% if form.is_valid %}true{% else %}false{% endif %}"
           aria-controls="filterAndSort">Filter and Sort ▼</button>
+  <div style="flex: 1; display: flex; justify-content: flex-end;">
+    <button class="btn btn-outline-success" id="toggle-compact">Toggle compact catalog</button>
+  </div>
 </h2>
 <div class="collapse {% if form.is_valid %}show{% endif %}"
      id="filterAndSort">
