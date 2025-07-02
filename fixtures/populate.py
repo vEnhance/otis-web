@@ -246,7 +246,7 @@ def create_sem_independent(users: list[User]):
     )
 
     print("Creating an Opal hunt")
-    OpalHuntFactory.create()
+    OpalHuntFactory.create(name="Your Otis in April", slug="your-otis-in-april")
 
     print("Creating a Hanabi contest")
     HanabiContestFactory.create()
