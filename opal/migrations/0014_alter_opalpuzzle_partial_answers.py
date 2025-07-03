@@ -4,15 +4,17 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('opal', '0013_opalattempt_is_close_opalpuzzle_partial_answers'),
+        ("opal", "0013_opalattempt_is_close_opalpuzzle_partial_answers"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='opalpuzzle',
-            name='partial_answers',
-            field=models.TextField(blank=True, default='', help_text='Comma-separated list of partial answers for the puzzle.'),
+            model_name="opalpuzzle",
+            name="partial_answers",
+            field=models.TextField(
+                blank=True,
+                default="",
+                help_text="Comma-separated list of partial answers for the puzzle.",
         ),
     ]
