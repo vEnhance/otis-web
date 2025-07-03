@@ -91,7 +91,9 @@ class OpalPuzzle(models.Model):
         max_length=128, help_text="Answer to the puzzle, as displayed"
     )
     partial_answers = models.TextField(
-        default="", help_text="Comma-separated list of partial answers for the puzzle.", blank=True
+        default="",
+        help_text="Comma-separated list of partial answers for the puzzle.",
+        blank=True,
     )
 
     order = models.SmallIntegerField(
