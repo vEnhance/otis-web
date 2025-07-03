@@ -166,9 +166,11 @@ class OpalPuzzle(models.Model):
 
     def check_guess(self, guess: str) -> bool:
         return answerize(self.answer) == answerize(guess)
-    
+
     def check_partial(self, guess: str) -> bool:
-        partials = [ans.strip() for ans in self.partial_answers.split(",") if ans.strip()]
+        partials = [
+            ans.strip() for ans in self.partial_answers.split(",") if ans.strip()
+        ]
         return any(answerize(ans) == answerize(guess) for ans in partials)
 
     def is_solved_by(self, user: User) -> int:
