@@ -6,18 +6,25 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('opal', '0012_opalhunt_hints_released_date_opalpuzzle_hint_text_and_more'),
+        ("opal", "0012_opalhunt_hints_released_date_opalpuzzle_hint_text_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='opalattempt',
-            name='is_close',
-            field=models.BooleanField(default=False, help_text='Whether the attempt was in a predefined list of partial answers'),
+            model_name="opalattempt",
+            name="is_close",
+            field=models.BooleanField(
+                default=False,
+                help_text="Whether the attempt was in a predefined list of partial answers",
+            ),
         ),
         migrations.AddField(
-            model_name='opalpuzzle',
-            name='partial_answers',
-            field=models.TextField(blank=True, default=0, help_text='Comma-separated list of partial answers for the puzzle.'),
+            model_name="opalpuzzle",
+            name="partial_answers",
+            field=models.TextField(
+                blank=True,
+                default="",
+                help_text="Comma-separated list of partial answers for the puzzle.",
+            ),
         ),
     ]
