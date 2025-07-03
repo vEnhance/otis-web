@@ -242,6 +242,10 @@ def show_puzzle(request: AuthHttpRequest, hunt: str, slug: str) -> HttpResponse:
     attempts = OpalAttempt.objects.filter(puzzle=puzzle, user=request.user).order_by(
         "-created_at"
     )
+    
+    non_excused_attempts = OpalAttempt.objects.filter(puzzle=puzzle, user=request.user, excused=False).order_by(
+        "-created_at"
+    )
 
     context: dict[str, Any] = {}
     context["puzzle"] = puzzle
@@ -251,6 +255,7 @@ def show_puzzle(request: AuthHttpRequest, hunt: str, slug: str) -> HttpResponse:
     context["form"] = form
     context["can_attempt"] = can_attempt
     context["show_hints"] = timezone.now() >= puzzle.hunt.hints_released_date
+    context["non_excused_attempts"] = non_excused_attempts
     return render(request, "opal/showpuzzle.html", context)
 
 
