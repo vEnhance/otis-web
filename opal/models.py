@@ -171,7 +171,9 @@ class OpalPuzzle(models.Model):
 
     def check_partial(self, guess: str) -> bool:
         partials = [
-            answer.strip() for answer in self.partial_answers.split(",") if answer.strip()
+            answer.strip()
+            for answer in self.partial_answers.split(",")
+            if answer.strip()
         ]
         return any(answerize(answer) == answerize(guess) for answer in partials)
 
