@@ -65,7 +65,7 @@ class OpalAttempt(models.Model):
         self.is_correct = self.puzzle.check_guess(self.guess)
         self.is_close = self.puzzle.check_partial(self.guess)
         if self.is_close:
-            self.excused=True
+            self.excused = True
         super().save(*args, **kwargs)
 
 
