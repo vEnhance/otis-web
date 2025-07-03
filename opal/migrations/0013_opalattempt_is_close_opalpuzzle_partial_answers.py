@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
             name="partial_answers",
             field=models.TextField(
                 blank=True,
-                default="",
+                default=0,
                 help_text="Comma-separated list of partial answers for the puzzle.",
             ),
         ),
