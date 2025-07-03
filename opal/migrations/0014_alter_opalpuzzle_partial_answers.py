@@ -14,7 +14,8 @@ class Migration(migrations.Migration):
             name="partial_answers",
             field=models.TextField(
                 blank=True,
-                default='',
-                help_text="Comma-separated list of partial answers for the puzzle."),
+                default="",
+                help_text="Comma-separated list of partial answers for the puzzle.",
+            ),
         ),
     ]
