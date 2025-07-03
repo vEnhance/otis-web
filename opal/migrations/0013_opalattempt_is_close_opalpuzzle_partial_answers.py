@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("opal", "0012_opalhunt_hints_released_date_opalpuzzle_hint_text_and_more"),
     ]
