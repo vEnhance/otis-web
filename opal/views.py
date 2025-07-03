@@ -228,6 +228,8 @@ def show_puzzle(request: AuthHttpRequest, hunt: str, slug: str) -> HttpResponse:
                     return HttpResponseRedirect(
                         reverse("opal-finish", args=(puzzle.hunt.slug, puzzle.slug))
                     )
+            elif attempt.is_close:
+                messages.warning(request, f"Keep going for {puzzle.title}...")
             else:
                 messages.warning(request, f"Sorry, wrong answer to {puzzle.title}.")
             return HttpResponseRedirect(puzzle.get_absolute_url())

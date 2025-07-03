@@ -47,6 +47,10 @@ class OpalAttempt(models.Model):
         help_text="The puzzle being attempted",
     )
     is_correct = models.BooleanField(help_text="Whether the attempt was judged correct")
+    is_close = models.BooleanField(
+        default=False,
+        help_text="Whether the attempt was in a predefined list of partial answers",
+    )
     guess = models.CharField(max_length=128, help_text="The guess")
     created_at = models.DateTimeField(auto_now_add=True)
     excused = models.BooleanField(
@@ -59,6 +63,7 @@ class OpalAttempt(models.Model):
 
     def save(self, *args: Any, **kwargs: Any):
         self.is_correct = self.puzzle.check_guess(self.guess)
+        self.is_close = self.puzzle.check_partial(self.guess)
         super().save(*args, **kwargs)
 
 
@@ -84,6 +89,9 @@ class OpalPuzzle(models.Model):
     slug = models.SlugField(help_text="Slug for the puzzle")
     answer = models.CharField(
         max_length=128, help_text="Answer to the puzzle, as displayed"
+    )
+    partial_answers = models.TextField(
+        default="", help_text="Comma-separated list of partial answers for the puzzle.", blank=True
     )
 
     order = models.SmallIntegerField(
@@ -158,6 +166,10 @@ class OpalPuzzle(models.Model):
 
     def check_guess(self, guess: str) -> bool:
         return answerize(self.answer) == answerize(guess)
+    
+    def check_partial(self, guess: str) -> bool:
+        partials = [ans.strip() for ans in self.partial_answers.split(",") if ans.strip()]
+        return any(answerize(ans) == answerize(guess) for ans in partials)
 
     def is_solved_by(self, user: User) -> int:
         return OpalAttempt.objects.filter(
