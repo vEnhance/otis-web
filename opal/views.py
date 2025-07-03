@@ -242,7 +242,7 @@ def show_puzzle(request: AuthHttpRequest, hunt: str, slug: str) -> HttpResponse:
     attempts = OpalAttempt.objects.filter(puzzle=puzzle, user=request.user).order_by(
         "-created_at"
     )
-    
+
     non_excused_attempts = OpalAttempt.objects.filter(
         puzzle=puzzle, user=request.user, excused=False
     ).order_by("-created_at")
