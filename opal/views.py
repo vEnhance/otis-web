@@ -196,13 +196,10 @@ def show_puzzle(request: AuthHttpRequest, hunt: str, slug: str) -> HttpResponse:
 
     past_attempts = OpalAttempt.objects.filter(puzzle=puzzle, user=request.user)
     is_solved = past_attempts.filter(is_correct=True).exists()
-    incorrect_attempts = OpalAttempt.objects.filter(puzzle=puzzle, user=request.user, excused=False, is_close=False).order_by(
-        "-created_at"
-    )
-    can_attempt = (
-        not is_solved
-        and incorrect_attempts.count() < puzzle.guess_limit
-    )
+    incorrect_attempts = OpalAttempt.objects.filter(
+        puzzle=puzzle, user=request.user, excused=False, is_close=False
+    ).order_by("-created_at")
+    can_attempt = not is_solved and incorrect_attempts.count() < puzzle.guess_limit
 
     if request.method == "POST":
         if not can_attempt:
