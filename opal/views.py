@@ -196,9 +196,12 @@ def show_puzzle(request: AuthHttpRequest, hunt: str, slug: str) -> HttpResponse:
 
     past_attempts = OpalAttempt.objects.filter(puzzle=puzzle, user=request.user)
     is_solved = past_attempts.filter(is_correct=True).exists()
+    incorrect_attempts = OpalAttempt.objects.filter(puzzle=puzzle, user=request.user, excused=False, is_close=False).order_by(
+        "-created_at"
+    )
     can_attempt = (
         not is_solved
-        and past_attempts.exclude(excused=True).count() < puzzle.guess_limit
+        and incorrect_attempts.count() < puzzle.guess_limit
     )
 
     if request.method == "POST":
@@ -242,10 +245,6 @@ def show_puzzle(request: AuthHttpRequest, hunt: str, slug: str) -> HttpResponse:
     attempts = OpalAttempt.objects.filter(puzzle=puzzle, user=request.user).order_by(
         "-created_at"
     )
-    
-    non_excused_attempts = OpalAttempt.objects.filter(puzzle=puzzle, user=request.user, excused=False).order_by(
-        "-created_at"
-    )
 
     context: dict[str, Any] = {}
     context["puzzle"] = puzzle
@@ -255,7 +254,7 @@ def show_puzzle(request: AuthHttpRequest, hunt: str, slug: str) -> HttpResponse:
     context["form"] = form
     context["can_attempt"] = can_attempt
     context["show_hints"] = timezone.now() >= puzzle.hunt.hints_released_date
-    context["non_excused_attempts"] = non_excused_attempts
+    context["incorrect_attempts"] = incorrect_attempts
     return render(request, "opal/showpuzzle.html", context)
 
 

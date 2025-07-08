@@ -64,8 +64,6 @@ class OpalAttempt(models.Model):
     def save(self, *args: Any, **kwargs: Any):
         self.is_correct = self.puzzle.check_guess(self.guess)
         self.is_close = self.puzzle.check_partial(self.guess)
-        if self.is_close:
-            self.excused=True
         super().save(*args, **kwargs)
 
 
@@ -94,7 +92,7 @@ class OpalPuzzle(models.Model):
     )
     partial_answers = models.TextField(
         default="",
-        help_text="Comma-separated list of partial answers for the puzzle.",
+        help_text="Newline-separated list of partial answers for the puzzle.",
         blank=True,
     )
 
@@ -172,12 +170,12 @@ class OpalPuzzle(models.Model):
         return answerize(self.answer) == answerize(guess)
 
     def check_partial(self, guess: str) -> bool:
-        partials = [
+        partial_answers = [
             answer.strip()
-            for answer in self.partial_answers.split(",")
+            for answer in self.partial_answers.splitlines()
             if answer.strip()
         ]
-        return any(answerize(answer) == answerize(guess) for answer in partials)
+        return any(answerize(answer) == answerize(guess) for answer in partial_answers)
 
     def is_solved_by(self, user: User) -> int:
         return OpalAttempt.objects.filter(

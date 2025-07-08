@@ -78,7 +78,7 @@
     <hr />
   {% endif %}
   <h3>Previous guesses</h3>
-  <p>You have used {{ non_excused_attempts|length }} of your {{ puzzle.guess_limit }} guesses.</p>
+  <p>You have used {{ incorrect_attempts|length }} of your {{ puzzle.guess_limit }} guesses.</p>
   <table class="table table-striped">
     <tr class="table-dark">
       <th>Guess</th>
