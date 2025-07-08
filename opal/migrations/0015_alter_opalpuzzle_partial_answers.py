@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             field=models.TextField(
                 blank=True,
                 default="",
-                help_text="Newline-separated list of partial answers for the puzzle."
+                help_text="Newline-separated list of partial answers for the puzzle.",
             ),
         ),
     ]
