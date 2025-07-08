@@ -1,3 +1,3 @@
-# Code of Conduct
+# Code of conduct
 
-1. Don't be a dick.
+1. Be kind.
