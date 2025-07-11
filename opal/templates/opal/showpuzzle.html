@@ -31,7 +31,7 @@
       </p>
       {% if request.user.is_superuser %}
         <p>
-          Youc an also
+          You can also
           <a href="{% url "admin:opal_opalpuzzle_change" puzzle.pk %}"
              title="Edit in admin">edit in admin</a>
           or
@@ -78,7 +78,7 @@
     <hr />
   {% endif %}
   <h3>Previous guesses</h3>
-  <p>You have used {{ attempts|length }} of your {{ puzzle.guess_limit }} guesses.</p>
+  <p>You have used {{ incorrect_attempts|length }} of your {{ puzzle.guess_limit }} guesses.</p>
   <table class="table table-striped">
     <tr class="table-dark">
       <th>Guess</th>
@@ -92,6 +92,10 @@
         </td>
         {% if attempt.is_correct %}
           <td class="text-success">Solved!</td>
+        {% elif attempt.is_close %}
+          <td>Keep going...</td>
+        {% elif attempt.excused %}
+          <td>Incorrect</td>
         {% else %}
           <td class="text-danger">Incorrect</td>
         {% endif %}

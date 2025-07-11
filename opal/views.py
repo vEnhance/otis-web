@@ -196,10 +196,14 @@ def show_puzzle(request: AuthHttpRequest, hunt: str, slug: str) -> HttpResponse:
 
     past_attempts = OpalAttempt.objects.filter(puzzle=puzzle, user=request.user)
     is_solved = past_attempts.filter(is_correct=True).exists()
-    can_attempt = (
-        not is_solved
-        and past_attempts.exclude(excused=True).count() < puzzle.guess_limit
-    )
+    incorrect_attempts = OpalAttempt.objects.filter(
+        puzzle=puzzle,
+        user=request.user,
+        excused=False,
+        is_close=False,
+        is_correct=False,
+    ).order_by("-created_at")
+    can_attempt = not is_solved and incorrect_attempts.count() < puzzle.guess_limit
 
     if request.method == "POST":
         if not can_attempt:
@@ -228,6 +232,8 @@ def show_puzzle(request: AuthHttpRequest, hunt: str, slug: str) -> HttpResponse:
                     return HttpResponseRedirect(
                         reverse("opal-finish", args=(puzzle.hunt.slug, puzzle.slug))
                     )
+            elif attempt.is_close:
+                messages.warning(request, f"Keep going for {puzzle.title}...")
             else:
                 messages.warning(request, f"Sorry, wrong answer to {puzzle.title}.")
             return HttpResponseRedirect(puzzle.get_absolute_url())
@@ -249,6 +255,7 @@ def show_puzzle(request: AuthHttpRequest, hunt: str, slug: str) -> HttpResponse:
     context["form"] = form
     context["can_attempt"] = can_attempt
     context["show_hints"] = timezone.now() >= puzzle.hunt.hints_released_date
+    context["incorrect_attempts"] = incorrect_attempts
     return render(request, "opal/showpuzzle.html", context)
 
 
