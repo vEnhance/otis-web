@@ -94,6 +94,8 @@
           <td class="text-success">Solved!</td>
         {% elif attempt.is_close %}
           <td>Keep going...</td>
+        {% elif attempt.excused %}
+          <td>Incorrect</td>
         {% else %}
           <td class="text-danger">Incorrect</td>
         {% endif %}
