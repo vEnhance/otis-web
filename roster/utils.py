@@ -4,9 +4,9 @@ from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.db.models.query import QuerySet
+from django.http import Http404
 from django.http.request import HttpRequest
 from django.shortcuts import get_object_or_404
-from django.http import Http404
 
 from roster.models import Student
 
