@@ -82,8 +82,12 @@ def can_edit(request: HttpRequest, student: models.Student) -> bool:
 
 
 def infer_student(request: HttpRequest) -> models.Student:
-    student = models.Student.objects.filter(user=request.user).order_by('-semester__end_year').first()
-    if (student is None):
+    student = (
+        models.Student.objects.filter(user=request.user)
+        .order_by("-semester__end_year")
+        .first()
+    )
+    if student is None:
         raise Http404("No Student matches the given query.")
     else:
         return student
