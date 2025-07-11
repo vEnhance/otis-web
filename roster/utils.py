@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.db.models.query import QuerySet
 from django.http.request import HttpRequest
 from django.shortcuts import get_object_or_404
+from django.http import Http404
 
 from roster.models import Student
 
@@ -81,6 +82,8 @@ def can_edit(request: HttpRequest, student: models.Student) -> bool:
 
 
 def infer_student(request: HttpRequest) -> models.Student:
-    return models.Student.objects.filter(user=request.user).order_by(
-        "-semester__end_year"
-    ).first() or get_object_or_404(models.Student, user=request.user)
+    student = models.Student.objects.filter(user=request.user).order_by('-semester__end_year').first()
+    if (student == None):
+        raise Http404("No Student matches the given query.")
+    else:
+        return student
