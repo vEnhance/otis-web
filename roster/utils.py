@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.db.models.query import QuerySet
+from django.http import Http404
 from django.http.request import HttpRequest
 from django.shortcuts import get_object_or_404
 
@@ -81,4 +82,12 @@ def can_edit(request: HttpRequest, student: models.Student) -> bool:
 
 
 def infer_student(request: HttpRequest) -> models.Student:
-    return get_object_or_404(models.Student, semester__active=True, user=request.user)
+    student = (
+        models.Student.objects.filter(user=request.user)
+        .order_by("-semester__end_year")
+        .first()
+    )
+    if student is None:
+        raise Http404("No Student matches the given query.")
+    else:
+        return student
