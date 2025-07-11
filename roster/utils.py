@@ -81,4 +81,4 @@ def can_edit(request: HttpRequest, student: models.Student) -> bool:
 
 
 def infer_student(request: HttpRequest) -> models.Student:
-    return get_object_or_404(models.Student, semester__active=True, user=request.user)
+    return models.Student.objects.filter(user=request.user).order_by('-semester__end_year').first() or get_object_or_404(models.Student, user=request.user)
