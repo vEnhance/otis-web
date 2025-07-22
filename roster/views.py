@@ -416,7 +416,7 @@ def cancel_inquiry(request: AuthHttpRequest, pk: int) -> HttpResponse:
     if inquiry.student.user != request.user and not request.user.is_staff:
         raise PermissionDenied("You are not authorized to cancel this inquiry.")
     if inquiry.status != "INQ_NEW":
-        return HttpResponse(status=403)
+        raise PermissionDenied
     inquiry.status = "INQ_CANC"
     inquiry.save()
     messages.success(request, "Inquiry successfully canceled.")

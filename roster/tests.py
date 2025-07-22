@@ -1053,7 +1053,7 @@ class RosterTest(EvanTestCase):
         resp = self.assertGetOK("link-assistant")
         self.assertEqual(len(resp.context["form"].fields["student"].queryset), 1)
 
-    def test_cancel_inquiry_sets_status_to_canceled(self):
+    def test_cancel_inquiry_sets_status_to_canceled(self) -> None:
         alice = StudentFactory.create()
         unit = UnitFactory.create()
         inquiry = UnitInquiry.objects.create(
@@ -1064,7 +1064,7 @@ class RosterTest(EvanTestCase):
             explanation="Please unlock",
         )
         self.login(alice)
-        resp = self.post(
+        resp = self.assertPost20X(
             "inquiry-cancel",
             inquiry.pk,
             follow=True,
@@ -1099,7 +1099,7 @@ class RosterTest(EvanTestCase):
         for status in ["INQ_ACC", "INQ_REJ", "INQ_HOLD", "INQ_CANC"]:
             alice = StudentFactory.create()
             unit = UnitFactory.create()
-            inquiry = UnitInquiry.objects.create(
+            UnitInquiry.objects.create(
                 student=alice,
                 unit=unit,
                 action_type="INQ_ACT_UNLOCK",
@@ -1122,6 +1122,6 @@ class RosterTest(EvanTestCase):
                 explanation="Test",
             )
             self.login(alice)
-            resp = self.post("inquiry-cancel", inquiry.pk, follow=True)
+            self.assertPost40X("inquiry-cancel", inquiry.pk, follow=True)
             inquiry.refresh_from_db()
             self.assertEqual(inquiry.status, status)
