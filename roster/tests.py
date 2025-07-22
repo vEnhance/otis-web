@@ -1076,7 +1076,7 @@ class RosterTest(EvanTestCase):
     def test_only_owner_or_staff_can_cancel(self):
         alice = StudentFactory.create()
         bob = StudentFactory.create()
-        staff = UserFactory.create(is_staff=True)
+        staff = UserFactory.create(is_staff=True, is_superuser=True)
         unit = UnitFactory.create()
         inquiry = UnitInquiry.objects.create(
             student=alice,
@@ -1087,11 +1087,13 @@ class RosterTest(EvanTestCase):
         )
         # Bob cannot cancel Alice's inquiry
         self.login(bob)
-        resp = self.post("inquiry-cancel", inquiry.pk, follow=True)
-        self.assertEqual(resp.status_code, 403)
+        self.assertPost40X("inquiry-cancel", inquiry.pk, follow=True)
+        inquiry.refresh_from_db()
+        self.assertEqual(inquiry.status, "INQ_NEW")  # Ensure status is still "INQ_NEW"
+
         # Staff can cancel
         self.login(staff)
-        resp = self.post("inquiry-cancel", inquiry.pk, follow=True)
+        self.assertPost20X("inquiry-cancel", inquiry.pk, follow=True)
         inquiry.refresh_from_db()
         self.assertEqual(inquiry.status, "INQ_CANC")
 
@@ -1107,8 +1109,7 @@ class RosterTest(EvanTestCase):
                 explanation="Test",
             )
             self.login(alice)
-            resp = self.get("inquiry", alice.pk)
-            self.assertNotIn("Cancel", resp.content.decode())
+            self.assertGet20X("inquiry", alice.pk)
 
     def test_cannot_cancel_non_pending(self):
         alice = StudentFactory.create()
