@@ -1099,7 +1099,7 @@ class RosterTest(EvanTestCase):
         for status in ["INQ_ACC", "INQ_REJ", "INQ_HOLD", "INQ_CANC"]:
             alice = StudentFactory.create()
             unit = UnitFactory.create()
-            inquiry = UnitInquiry.objects.create(
+            UnitInquiry.objects.create(
                 student=alice,
                 unit=unit,
                 action_type="INQ_ACT_UNLOCK",
@@ -1122,6 +1122,6 @@ class RosterTest(EvanTestCase):
                 explanation="Test",
             )
             self.login(alice)
-            resp = self.post("inquiry-cancel", inquiry.pk, follow=True)
+            self.post("inquiry-cancel", inquiry.pk, follow=True)
             inquiry.refresh_from_db()
             self.assertEqual(inquiry.status, status)
