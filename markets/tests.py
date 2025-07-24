@@ -51,13 +51,25 @@ class MarketModelTests(EvanTestCase):
             g3 = GuessFactory.create(market=m3)
 
             # Market always goes to results
-            self.assertEqual(m1.get_absolute_url(), reverse("market-results", args=(m1.slug,)))
-            self.assertEqual(m2.get_absolute_url(), reverse("market-results", args=(m2.slug,)))
-            self.assertEqual(m3.get_absolute_url(), reverse("market-results", args=(m3.slug,)))
+            self.assertEqual(
+                m1.get_absolute_url(), reverse("market-results", args=(m1.slug,))
+            )
+            self.assertEqual(
+                m2.get_absolute_url(), reverse("market-results", args=(m2.slug,))
+            )
+            self.assertEqual(
+                m3.get_absolute_url(), reverse("market-results", args=(m3.slug,))
+            )
             # Guess always goes to pending
-            self.assertEqual(g1.get_absolute_url(), reverse("market-pending", args=(g1.pk,)))
-            self.assertEqual(g2.get_absolute_url(), reverse("market-pending", args=(g2.pk,)))
-            self.assertEqual(g3.get_absolute_url(), reverse("market-pending", args=(g3.pk,)))
+            self.assertEqual(
+                g1.get_absolute_url(), reverse("market-pending", args=(g1.pk,))
+            )
+            self.assertEqual(
+                g2.get_absolute_url(), reverse("market-pending", args=(g2.pk,))
+            )
+            self.assertEqual(
+                g3.get_absolute_url(), reverse("market-pending", args=(g3.pk,))
+            )
 
     def test_list(self):
         with freeze_time("2020-01-02", tz_offset=0):
@@ -300,17 +312,22 @@ class MarketTests(EvanTestCase):
     def test_student_redirects_to_guess_or_pending(self):
         market = Market.objects.get(slug="guess-my-ssn")
         from django.contrib.auth.models import Group
+
         verified_group, _ = Group.objects.get_or_create(name="Verified")
         with freeze_time("2050-07-01", tz_offset=0):
             # Student with no guess: should redirect to guess form
             student = UserFactory.create(username="bob", groups=(verified_group,))
             self.login(student)
-            resp = self.client.get(self.url("market-results", "guess-my-ssn"), follow=True)
+            resp = self.client.get(
+                self.url("market-results", "guess-my-ssn"), follow=True
+            )
             self.assertRedirects(resp, self.url("market-guess", "guess-my-ssn"))
 
             # Student with guess: should redirect to pending
             GuessFactory.create(market=market, user=student, value=123)
-            resp = self.client.get(self.url("market-results", "guess-my-ssn"), follow=True)
+            resp = self.client.get(
+                self.url("market-results", "guess-my-ssn"), follow=True
+            )
             guess = Guess.objects.get(market=market, user=student)
             self.assertRedirects(resp, self.url("market-pending", guess.pk))
 
