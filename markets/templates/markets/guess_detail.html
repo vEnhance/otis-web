@@ -24,9 +24,15 @@
       <a href="{% url 'index' %}">Back to homepage</a>
     </li>
     {% if not guess.market.has_ended %}
-    <li style="position: absolute; right: 0; top: 0; list-style: none; margin: 0; padding: 0;">
-      <a href="{% url 'market-guess' guess.market.slug %}" class="btn btn-warning">Change your guess</a>
-    </li>
+      <li style="position: absolute;
+                 right: 0;
+                 top: 0;
+                 list-style: none;
+                 margin: 0;
+                 padding: 0;">
+        <a href="{% url 'market-guess' guess.market.slug %}"
+           class="btn btn-warning">Change your guess</a>
+      </li>
     {% endif %}
   </ul>
 {% endblock layout-content %}
