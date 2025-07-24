@@ -96,10 +96,7 @@ class Market(models.Model):
         return f"{self.title} ({self.slug})"
 
     def get_absolute_url(self) -> str:
-        if self.has_ended or not self.has_started:
-            return reverse("market-results", args=(self.slug,))
-        else:
-            return reverse("market-guess", args=(self.slug,))
+        return reverse("market-results", args=(self.slug,))
 
     def clean(self):
         super().clean()
@@ -166,7 +163,7 @@ class Guess(models.Model):
         return f"Guessed {self.value} at {self.created_at}"
 
     def get_absolute_url(self) -> str:
-        return reverse("market-results", args=(self.market.slug,))
+        return reverse("market-pending", args=(self.pk,))
 
     def clean(self):
         super().clean()

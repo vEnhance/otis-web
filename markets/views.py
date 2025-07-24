@@ -43,17 +43,17 @@ class SubmitGuess(VerifiedRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]
     )
     request: AuthHttpRequest
     raise_exception = True
-
-    object: Guess  # type: ignore
     market: Market
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
-        form.instance.user = self.request.user
         form.instance.market = self.market
+        form.instance.user = self.request.user
         return form
 
     def form_valid(self, form: BaseModelForm[Guess]):
+        form.instance.market = self.market
+        form.instance.user = self.request.user
         messages.success(
             self.request, f"You submitted a guess of {form.instance.value}"
         )
@@ -61,7 +61,13 @@ class SubmitGuess(VerifiedRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]
         return super().form_valid(form)
 
     def get_success_url(self) -> str:
-        return reverse("market-pending", args=(self.object.pk,))
+        if self.object is not None:
+            return reverse("market-pending", args=(self.object.pk,))
+        # fallback: get user's guess for market
+        guess = Guess.objects.filter(market=self.market, user=self.request.user).first()
+        if guess:
+            return reverse("market-pending", args=(guess.pk,))
+        return reverse("market-results", args=(self.market.slug,))
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
@@ -71,6 +77,7 @@ class SubmitGuess(VerifiedRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]
     def dispatch(
         self, request: HttpRequest, *args: Any, **kwargs: Any
     ) -> HttpResponseBase:
+        self.object = None
         self.market = get_object_or_404(Market, slug=kwargs.pop("slug"))
         if not isinstance(request.user, User):
             return super().dispatch(request, *args, **kwargs)  # login required mixin
@@ -85,11 +92,18 @@ class SubmitGuess(VerifiedRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]
             pass
         else:
             if request.method == "POST":
-                messages.error(
-                    request, f"You already submitted {guess.value} for this market."
-                )
-            target_url = reverse("market-pending", args=(guess.pk,))
-            return HttpResponseRedirect(target_url)
+                # Allow updating the guess if the market is open
+                form = self.get_form()
+                form.instance = guess
+                form.instance.market = self.market
+                form.instance.user = request.user
+                if form.is_valid():
+                    return self.form_valid(form)
+                else:
+                    return self.form_invalid(form)
+            else:
+                self.object = guess
+                return super().dispatch(request, *args, **kwargs)
 
         return super().dispatch(request, *args, **kwargs)
 
@@ -128,14 +142,17 @@ class MarketResults(LoginRequiredMixin, ListView[Guess]):
             return super().dispatch(request, *args, **kwargs)  # login required mixin
         self.market = get_object_or_404(Market, slug=kwargs.pop("slug"))
 
-        if request.user.is_superuser or (
-            self.market.has_started and self.market.has_ended
-        ):
-            return super().dispatch(request, *args, **kwargs)
-        elif not self.market.has_started:
+        if not self.market.has_started:
             return HttpResponseNotFound()
-        else:
-            return HttpResponseRedirect(self.market.get_absolute_url())
+
+        if self.market.has_started and not self.market.has_ended and not request.user.is_superuser:
+            try:
+                guess = Guess.objects.get(market=self.market, user=request.user)
+                return HttpResponseRedirect(reverse("market-pending", args=(guess.pk,)))
+            except Guess.DoesNotExist:
+                return HttpResponseRedirect(reverse("market-guess", args=(self.market.slug,)))
+
+        return super().dispatch(request, *args, **kwargs)
 
 
 @require_POST

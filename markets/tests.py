@@ -4,6 +4,7 @@ from django.contrib.admin.sites import AdminSite
 from django.http.request import HttpRequest
 from django.test.client import RequestFactory
 from freezegun import freeze_time
+from django.urls import reverse
 
 from core.factories import GroupFactory, SemesterFactory, UserFactory
 from evans_django_tools.testsuite import EvanTestCase
@@ -49,9 +50,14 @@ class MarketModelTests(EvanTestCase):
             g2 = GuessFactory.create(market=m2)
             g3 = GuessFactory.create(market=m3)
 
-            self.assertEqual(g1.get_absolute_url(), m1.get_absolute_url())
-            self.assertEqual(g3.get_absolute_url(), m3.get_absolute_url())
-            self.assertNotEqual(g2.get_absolute_url(), m2.get_absolute_url())
+            # Market always goes to results
+            self.assertEqual(m1.get_absolute_url(), reverse("market-results", args=(m1.slug,)))
+            self.assertEqual(m2.get_absolute_url(), reverse("market-results", args=(m2.slug,)))
+            self.assertEqual(m3.get_absolute_url(), reverse("market-results", args=(m3.slug,)))
+            # Guess always goes to pending
+            self.assertEqual(g1.get_absolute_url(), reverse("market-pending", args=(g1.pk,)))
+            self.assertEqual(g2.get_absolute_url(), reverse("market-pending", args=(g2.pk,)))
+            self.assertEqual(g3.get_absolute_url(), reverse("market-pending", args=(g3.pk,)))
 
     def test_list(self):
         with freeze_time("2020-01-02", tz_offset=0):
@@ -188,13 +194,7 @@ class MarketTests(EvanTestCase):
                 "market-guess", "guess-my-ssn", data={"value": 100}, follow=True
             )
 
-            # Forbid more guesses
-            self.assertGet30X("market-guess", "guess-my-ssn")
-            resp = self.assertPost20X(
-                "market-guess", "guess-my-ssn", data={"value": 500}, follow=True
-            )
-            self.assertContains(resp, "You already submitted")
-
+            self.assertGet20X("market-guess", "guess-my-ssn")
             guess = Guess.objects.get(user__username="alice")
             self.assertEqual(guess.value, 100)
             self.assertAlmostEqual(guess.score, round((42 / 100) ** 2 * 2, ndigits=2))
@@ -208,14 +208,15 @@ class MarketTests(EvanTestCase):
             self.assertPost20X(
                 "market-guess", "guess-my-ssn", data={"value": 100}, follow=True
             )
-            self.assertGet30X("market-guess", "guess-my-ssn")
+
+            self.assertGet20X("market-guess", "guess-my-ssn")
             resp = self.assertPost20X(
                 "market-guess", "guess-my-ssn", data={"value": 500}, follow=True
             )
-            self.assertContains(resp, "You already submitted")
+            self.assertHas(resp, "Change your guess")
 
             guess = Guess.objects.get(user__username="alice")
-            self.assertEqual(guess.value, 100)
+            self.assertEqual(guess.value, 500)
             self.assertEqual(guess.score, None)
 
             market.answer = 42
@@ -233,8 +234,8 @@ class MarketTests(EvanTestCase):
             )
 
             guess = Guess.objects.get(user__username="alice")
-            self.assertEqual(guess.value, 100)
-            self.assertAlmostEqual(guess.score, round((42 / 100) ** 2 * 2, ndigits=2))
+            self.assertEqual(guess.value, 500)
+            self.assertAlmostEqual(guess.score, round((42 / 500) ** 2 * 2, ndigits=2))
 
     def test_guess_form_without_alpha(self):
         with freeze_time("2050-07-01", tz_offset=0):
@@ -248,14 +249,15 @@ class MarketTests(EvanTestCase):
                 "market-guess", "guess-my-ssn", data={"value": 100}, follow=True
             )
 
-            self.assertGet30X("market-guess", "guess-my-ssn")
+            self.assertGet20X("market-guess", "guess-my-ssn")
             resp = self.assertPost20X(
                 "market-guess", "guess-my-ssn", data={"value": 500}, follow=True
             )
-            self.assertContains(resp, "You already submitted")
+            guess = Guess.objects.get(user__username="alice")
+            self.assertEqual(guess.value, 500)
 
             guess = Guess.objects.get(user__username="alice")
-            self.assertEqual(guess.value, 100)
+            self.assertEqual(guess.value, 500)
             self.assertEqual(guess.score, None)
 
             market.answer = 42
@@ -274,8 +276,8 @@ class MarketTests(EvanTestCase):
             )
 
             guess = Guess.objects.get(user__username="alice")
-            self.assertEqual(guess.value, 100)
-            self.assertAlmostEqual(guess.score, round((42 / 100) ** 3 * 2, ndigits=2))
+            self.assertEqual(guess.value, 500)
+            self.assertAlmostEqual(guess.score, round((42 / 500) ** 3 * 2, ndigits=2))
 
     def test_spades_view(self):
         market = Market.objects.get(slug="guess-my-ssn")
@@ -294,6 +296,32 @@ class MarketTests(EvanTestCase):
             self.assertAlmostEqual(
                 resp.context["avg"], round((42 / 100) ** 2 * 2, ndigits=2)
             )
+
+    def test_student_redirects_to_guess_or_pending(self):
+        market = Market.objects.get(slug="guess-my-ssn")
+        from django.contrib.auth.models import Group
+        verified_group, _ = Group.objects.get_or_create(name="Verified")
+        with freeze_time("2050-07-01", tz_offset=0):
+            # Student with no guess: should redirect to guess form
+            student = UserFactory.create(username="bob", groups=(verified_group,))
+            self.login(student)
+            resp = self.client.get(self.url("market-results", "guess-my-ssn"), follow=True)
+            self.assertRedirects(resp, self.url("market-guess", "guess-my-ssn"))
+
+            # Student with guess: should redirect to pending
+            GuessFactory.create(market=market, user=student, value=123)
+            resp = self.client.get(self.url("market-results", "guess-my-ssn"), follow=True)
+            guess = Guess.objects.get(market=market, user=student)
+            self.assertRedirects(resp, self.url("market-pending", guess.pk))
+
+    def test_admin_sees_results_page(self):
+        market = Market.objects.get(slug="guess-my-ssn")
+        admin = UserFactory.create(username="admin", is_staff=True, is_superuser=True)
+        with freeze_time("2050-07-01", tz_offset=0):
+            self.login(admin)
+            resp = self.client.get(self.url("market-results", "guess-my-ssn"))
+            self.assertEqual(resp.status_code, 200)
+            self.assertContains(resp, "Market guess-my-ssn")
 
 
 class CreateMarketTests(EvanTestCase):
