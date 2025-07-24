@@ -3,8 +3,8 @@ import datetime
 from django.contrib.admin.sites import AdminSite
 from django.http.request import HttpRequest
 from django.test.client import RequestFactory
-from freezegun import freeze_time
 from django.urls import reverse
+from freezegun import freeze_time
 
 from core.factories import GroupFactory, SemesterFactory, UserFactory
 from evans_django_tools.testsuite import EvanTestCase
@@ -315,7 +315,6 @@ class MarketTests(EvanTestCase):
             self.assertRedirects(resp, self.url("market-pending", guess.pk))
 
     def test_admin_sees_results_page(self):
-        market = Market.objects.get(slug="guess-my-ssn")
         admin = UserFactory.create(username="admin", is_staff=True, is_superuser=True)
         with freeze_time("2050-07-01", tz_offset=0):
             self.login(admin)
