@@ -8,6 +8,11 @@
           background-color: #fff;
           border-radius: 5px;
       }
+
+      .btn-xs {
+          padding: 0.1rem 0.25rem;
+          font-size: 0.75rem;
+      }
   </style>
 {% endblock css %}
 {% block scripts %}
@@ -42,6 +47,7 @@
           <th>Unit</th>
           <th>Action</th>
           <th>Status</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
@@ -59,14 +65,26 @@
                 <strong class="text-success">Accepted</strong>
               {% elif inquiry.status == "INQ_REJ" %}
                 <strong class="text-danger">Rejected</strong>
+              {% elif inquiry.status == "INQ_CANC" %}
+                <strong class="text-danger">Canceled</strong>
               {% elif inquiry.status == "INQ_HOLD" %}
                 <strong class="text-warning">On hold</strong>
+              {% endif %}
+            </td>
+            <td>
+              {% if inquiry.status == "INQ_NEW" %}
+                <form action="{% url 'inquiry-cancel' inquiry.pk %}" method="post">
+                  {% csrf_token %}
+                  <button class="btn btn-sm btn-danger btn-xs"
+                          type="submit"
+                          onclick="return confirm('Are you sure you want to cancel this petition?')">Cancel</button>
+                </form>
               {% endif %}
             </td>
           </tr>
           <tr>
             <td></td>
-            <td colspan="3" class="fst-italic">{{ inquiry.explanation }}</td>
+            <td colspan="4" class="fst-italic">{{ inquiry.explanation }}</td>
           </tr>
         {% endfor %}
       </tbody>

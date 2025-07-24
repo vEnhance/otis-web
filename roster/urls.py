@@ -13,6 +13,7 @@ urlpatterns = [
     path(r"master-schedule/", views.master_schedule, name="master-schedule"),
     path(r"edit-invoice/<int:pk>/", views.UpdateInvoice.as_view(), name="edit-invoice"),
     path(r"inquiry/<int:student_pk>/", views.inquiry, name="inquiry"),
+    path(r"inquiry/cancel/<int:pk>/", views.cancel_inquiry, name="inquiry-cancel"),
     path(r"register/", views.register, name="register"),
     path(r"profile/", views.update_profile, name="update-profile"),
     path(r"giga-chart/<str:format_as>/", views.giga_chart, name="giga-chart"),

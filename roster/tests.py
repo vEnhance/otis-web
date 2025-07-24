@@ -1052,3 +1052,77 @@ class RosterTest(EvanTestCase):
         self.assertEqual(alice.assistant.pk, assistant.pk)
         resp = self.assertGetOK("link-assistant")
         self.assertEqual(len(resp.context["form"].fields["student"].queryset), 1)
+
+    def test_cancel_inquiry_sets_status_to_canceled(self) -> None:
+        alice = StudentFactory.create()
+        unit = UnitFactory.create()
+        inquiry = UnitInquiry.objects.create(
+            student=alice,
+            unit=unit,
+            action_type="INQ_ACT_UNLOCK",
+            status="INQ_NEW",
+            explanation="Please unlock",
+        )
+        self.login(alice)
+        resp = self.assertPost20X(
+            "inquiry-cancel",
+            inquiry.pk,
+            follow=True,
+        )
+        inquiry.refresh_from_db()
+        self.assertEqual(inquiry.status, "INQ_CANC")
+        self.assertHas(resp, "Inquiry successfully canceled.")
+
+    def test_only_owner_or_staff_can_cancel(self):
+        alice = StudentFactory.create()
+        bob = StudentFactory.create()
+        staff = UserFactory.create(is_staff=True, is_superuser=True)
+        unit = UnitFactory.create()
+        inquiry = UnitInquiry.objects.create(
+            student=alice,
+            unit=unit,
+            action_type="INQ_ACT_UNLOCK",
+            status="INQ_NEW",
+            explanation="Please unlock",
+        )
+        # Bob cannot cancel Alice's inquiry
+        self.login(bob)
+        self.assertPost40X("inquiry-cancel", inquiry.pk, follow=True)
+        inquiry.refresh_from_db()
+        self.assertEqual(inquiry.status, "INQ_NEW")  # Ensure status is still "INQ_NEW"
+
+        # Staff can cancel
+        self.login(staff)
+        self.assertPost20X("inquiry-cancel", inquiry.pk, follow=True)
+        inquiry.refresh_from_db()
+        self.assertEqual(inquiry.status, "INQ_CANC")
+
+    def test_cancel_button_only_for_pending(self):
+        for status in ["INQ_ACC", "INQ_REJ", "INQ_HOLD", "INQ_CANC"]:
+            alice = StudentFactory.create()
+            unit = UnitFactory.create()
+            UnitInquiry.objects.create(
+                student=alice,
+                unit=unit,
+                action_type="INQ_ACT_UNLOCK",
+                status=status,
+                explanation="Test",
+            )
+            self.login(alice)
+            self.assertGet20X("inquiry", alice.pk)
+
+    def test_cannot_cancel_non_pending(self):
+        alice = StudentFactory.create()
+        unit = UnitFactory.create()
+        for status in ["INQ_ACC", "INQ_REJ", "INQ_HOLD", "INQ_CANC"]:
+            inquiry = UnitInquiry.objects.create(
+                student=alice,
+                unit=unit,
+                action_type="INQ_ACT_UNLOCK",
+                status=status,
+                explanation="Test",
+            )
+            self.login(alice)
+            self.assertPost40X("inquiry-cancel", inquiry.pk, follow=True)
+            inquiry.refresh_from_db()
+            self.assertEqual(inquiry.status, status)

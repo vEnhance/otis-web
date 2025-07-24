@@ -453,6 +453,7 @@ class UnitInquiry(models.Model):
             ("INQ_REJ", "Rejected"),
             ("INQ_NEW", "Pending"),
             ("INQ_HOLD", "On hold"),
+            ("INQ_CANC", "Canceled"),
         ),
         default="INQ_NEW",
         help_text="The current status of the petition.",

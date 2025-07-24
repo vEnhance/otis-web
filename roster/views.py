@@ -410,6 +410,20 @@ def inquiry(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
 
 
 @login_required
+@require_POST
+def cancel_inquiry(request: AuthHttpRequest, pk: int) -> HttpResponse:
+    inquiry = get_object_or_404(UnitInquiry, pk=pk)
+    if inquiry.student.user != request.user and not request.user.is_staff:
+        raise PermissionDenied("You are not authorized to cancel this inquiry.")
+    if inquiry.status != "INQ_NEW":
+        raise PermissionDenied
+    inquiry.status = "INQ_CANC"
+    inquiry.save()
+    messages.success(request, "Inquiry successfully canceled.")
+    return HttpResponseRedirect(reverse("inquiry", args=(inquiry.student.pk,)))
+
+
+@login_required
 def register(request: AuthHttpRequest) -> HttpResponse:
     try:
         container = RegistrationContainer.objects.get(semester__active=True)
