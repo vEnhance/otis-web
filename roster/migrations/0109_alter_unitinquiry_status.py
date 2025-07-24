@@ -4,15 +4,25 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('roster', '0108_alter_studentregistration_graduation_year'),
+        ("roster", "0108_alter_studentregistration_graduation_year"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='unitinquiry',
-            name='status',
-            field=models.CharField(choices=[('INQ_ACC', 'Accepted'), ('INQ_REJ', 'Rejected'), ('INQ_NEW', 'Pending'), ('INQ_HOLD', 'On hold'), ('INQ_CANC', 'Canceled')], default='INQ_NEW', help_text='The current status of the petition.', max_length=10),
+            model_name="unitinquiry",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("INQ_ACC", "Accepted"),
+                    ("INQ_REJ", "Rejected"),
+                    ("INQ_NEW", "Pending"),
+                    ("INQ_HOLD", "On hold"),
+                    ("INQ_CANC", "Canceled")
+                ],
+                default="INQ_NEW",
+                help_text="The current status of the petition.",
+                max_length=10,
+            ),
         ),
     ]
