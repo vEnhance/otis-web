@@ -145,12 +145,18 @@ class MarketResults(LoginRequiredMixin, ListView[Guess]):
         if not self.market.has_started:
             return HttpResponseNotFound()
 
-        if self.market.has_started and not self.market.has_ended and not request.user.is_superuser:
+        if (
+            self.market.has_started
+            and not self.market.has_ended
+            and not request.user.is_superuser
+        ):
             try:
                 guess = Guess.objects.get(market=self.market, user=request.user)
                 return HttpResponseRedirect(reverse("market-pending", args=(guess.pk,)))
             except Guess.DoesNotExist:
-                return HttpResponseRedirect(reverse("market-guess", args=(self.market.slug,)))
+                return HttpResponseRedirect(
+                    reverse("market-guess", args=(self.market.slug,))
+                )
 
         return super().dispatch(request, *args, **kwargs)
 
