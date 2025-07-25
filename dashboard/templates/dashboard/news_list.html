@@ -26,10 +26,11 @@
       {% if show_all %}
         <a href="{% url 'news-list' %}" class="btn btn-outline-primary py-2">Show only this year</a>
       {% else %}
-        <a href="{% url 'news-list' %}?all=1" class="btn btn-outline-primary py-2">Show all news</a>
+        <a href="{% url 'news-list' %}?all=1"
+           class="btn btn-outline-primary py-2">Show all news</a>
       {% endif %}
+    </div>
   </div>
-</div>
   <h2>Announcement Emails</h2>
   {% if news.emails %}
     {% for email in news.emails %}
