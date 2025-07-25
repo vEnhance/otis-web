@@ -554,8 +554,18 @@ def news_list(request: AuthHttpRequest) -> HttpResponse:
     if not show_all:
         if not semester_is_active:
             # No active semester, show nothing
-            news = {"emails": [], "downloads": [], "markets": [], "hanabis": [], "opals": []}
-            return render(request, "dashboard/news_list.html", {"news": news, "show_all": show_all, "semester_is_active": False})
+            news = {
+                "emails": [],
+                "downloads": [],
+                "markets": [],
+                "hanabis": [],
+                "opals": [],
+            }
+            return render(
+                request,
+                "dashboard/news_list.html",
+                {"news": news, "show_all": show_all, "semester_is_active": False},
+            )
         downloads = downloads.filter(semester__active=True)
         markets = markets.filter(semester__active=True)
         from datetime import datetime
