@@ -569,10 +569,15 @@ def news_list(request: AuthHttpRequest) -> HttpResponse:
         downloads = downloads.filter(semester__active=True)
         markets = markets.filter(semester__active=True)
         from datetime import datetime
+
         this_year = datetime.now().year
         hanabis = hanabis.filter(start_date__year=this_year)
         opals = opals.filter(start_date__year=this_year)
-        emails = [e for e in emails if e.get("timestamp") and getattr(e["timestamp"], "year", None) == this_year]
+        emails = [
+            e
+            for e in emails
+            if e.get("timestamp") and getattr(e["timestamp"], "year", None) == this_year
+        ]
 
     news = {
         "emails": emails,
@@ -581,4 +586,8 @@ def news_list(request: AuthHttpRequest) -> HttpResponse:
         "hanabis": hanabis,
         "opals": opals,
     }
-    return render(request, "dashboard/news_list.html", {"news": news, "show_all": show_all, "semester_is_active": semester_is_active})
+    return render(
+        request,
+        "dashboard/news_list.html",
+        {"news": news, "show_all": show_all, "semester_is_active": semester_is_active},
+    )
