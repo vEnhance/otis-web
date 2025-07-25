@@ -833,9 +833,15 @@ class TestNewsList(EvanTestCase):
         self.client.force_login(self.user)
 
     def test_news_list_active_semester(self):
-        # Create news items for this year
-        MarketFactory.create(semester=self.semester, start_date=datetime.datetime(2024, 6, 1, tzinfo=UTC), end_date=datetime.datetime(2024, 7, 1, tzinfo=UTC))
-        HanabiContestFactory.create(start_date=datetime.datetime(2024, 6, 1, tzinfo=UTC), end_date=datetime.datetime(2024, 7, 1, tzinfo=UTC))
+        MarketFactory.create(
+            semester=self.semester,
+            start_date=datetime.datetime(2024, 6, 1, tzinfo=UTC),
+            end_date=datetime.datetime(2024, 7, 1, tzinfo=UTC),
+        )
+        HanabiContestFactory.create(
+            start_date=datetime.datetime(2024, 6, 1, tzinfo=UTC),
+            end_date=datetime.datetime(2024, 7, 1, tzinfo=UTC),
+        )
         OpalHuntFactory.create(start_date=datetime.datetime(2024, 6, 1, tzinfo=UTC))
         SemesterDownloadFileFactory.create(semester=self.semester)
         resp = self.assertGet20X("news-list")
@@ -856,19 +862,18 @@ class TestNewsList(EvanTestCase):
         self.assertHas(resp, "Downloads")
 
     def test_news_list_all_news(self):
-        # Create news items for this year and a previous year
         MarketFactory.create(
             semester=self.semester,
             start_date=datetime.datetime(2024, 6, 1, tzinfo=UTC),
             end_date=datetime.datetime(2024, 7, 1, tzinfo=UTC),
-            title="Market 2024"
+            title="Market 2024",
         )
         old_semester = SemesterFactory.create(active=False, end_year=2023)
         MarketFactory.create(
             semester=old_semester,
             start_date=datetime.datetime(2023, 6, 1, tzinfo=UTC),
             end_date=datetime.datetime(2023, 7, 1, tzinfo=UTC),
-            title="Market 2023"
+            title="Market 2023",
         )
         url = reverse("news-list") + "?all=1"
         resp = self.client.get(url)
