@@ -1,0 +1,97 @@
+{% extends "layout.html" %}
+{% load humanize %}
+{% block title %}
+  Past News
+{% endblock title %}
+{% block layout-content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <div class="flex-grow-1">
+    {% if not semester_is_active and not show_all %}
+      <div class="alert alert-warning mb-0 px-3" style="padding-top: 12px; padding-bottom: 12px;">The current semester is not active.</div>
+    {% else %}
+      {% if show_all %}
+        <div class="alert alert-info mb-0 px-3" style="padding-top: 12px; padding-bottom: 12px;">Showing all news from all years.</div>
+      {% else %}
+        <div class="alert alert-info mb-0 px-3" style="padding-top: 12px; padding-bottom: 12px;">Showing only news from this year.</div>
+      {% endif %}
+    {% endif %}
+  </div>
+  <div class="ms-3">
+    {% if show_all %}
+      <a href="{% url 'news-list' %}" class="btn btn-outline-primary py-2">Show only this year</a>
+    {% else %}
+      <a href="{% url 'news-list' %}?all=1" class="btn btn-outline-primary py-2">Show all news</a>
+    {% endif %}
+  </div>
+</div>
+  <h2>Announcement Emails</h2>
+  {% if news.emails %}
+    {% for email in news.emails %}
+      <div class="alert alert-info">
+        <span class="emoji-text">📢</span>
+        <b><a class="alert-link" href="{{ email.url }}">{{ email.title }}</a></b>
+        | {{ email.timestamp|naturaltime }}
+        <br />
+        <em class="text-muted">{{ email.summary }}</em>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>No announcement emails found.</p>
+  {% endif %}
+  <h2>Downloads</h2>
+  {% if news.downloads %}
+    {% for dl in news.downloads %}
+      <div class="alert alert-secondary">
+        <span class="emoji-text">💾</span>
+        <b><a class="alert-link" href="{{ dl.content.url }}">{{ dl }}</a></b>
+        | {{ dl.created_at|naturaltime }}
+        <br />
+        <em class="text-muted">{{ dl.description }}</em>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>No downloads found.</p>
+  {% endif %}
+  <h2>Markets</h2>
+  {% if news.markets %}
+    {% for market in news.markets %}
+      <div class="alert alert-success">
+        <span class="emoji-text">📈</span>
+        <b><a class="alert-link" href="{{ market.get_absolute_url }}">{{ market.title }}</a></b>
+        | {{ market.start_date|naturaltime }}
+        <br />
+        <em class="text-muted">Ends {{ market.end_date|naturaltime }}</em>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>No markets found.</p>
+  {% endif %}
+  <h2>Hanabi Contests</h2>
+  {% if news.hanabis %}
+    {% for hc in news.hanabis %}
+      <div class="alert alert-warning">
+        <span class="emoji-text">🎇</span>
+        <b>{{ hc }}</b>
+        | {{ hc.start_date|naturaltime }}
+        <br />
+        <em class="text-muted">Ends {{ hc.end_date|naturaltime }}</em>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>No Hanabi contests found.</p>
+  {% endif %}
+  <h2>OPAL Hunts</h2>
+  {% if news.opals %}
+    {% for opal in news.opals %}
+      <div class="alert alert-primary">
+        <span class="emoji-text">🧩</span>
+        <b>{{ opal.name }}</b>
+        | {{ opal.start_date|naturaltime }}
+        <br />
+        <em class="text-muted">OPAL hunt active!</em>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>No OPAL hunts found.</p>
+  {% endif %}
+{% endblock layout-content %}

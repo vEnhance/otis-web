@@ -422,7 +422,13 @@
   {% elif not semester.active %}
     <p>This page from {{ semester }} is now archived. Thanks for playing.</p>
   {% endif %}
-  {% if semester.active and student.enabled %}
+  {% if student.enabled %}
+    <hr />
+    <h2>News</h2>
+    <p>Click on the button below to view all the past news items.</p>
+    <div class="d-flex justify-content-center">
+      <a class="btn btn-primary" href="{% url 'news-list' %}">View news</a>
+    </div>
     <hr />
     <h2>Calendar</h2>
     <p>Be sure to check that the time zones display correctly!</p>

@@ -32,4 +32,5 @@ urlpatterns = [
     path(r"certify/<int:student_pk>/", views.certify, name="certify"),
     path(r"certify/<int:student_pk>/<str:checksum>/", views.certify, name="certify"),
     path(r"", RedirectView.as_view(pattern_name="index")),
+    path(r"newslist/", views.news_list, name="news-list"),
 ]
