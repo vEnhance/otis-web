@@ -564,7 +564,7 @@ def news_list(request: AuthHttpRequest) -> HttpResponse:
             "dashboard/news_list.html",
             {"news": news, "semester_is_active": False},
         )
-    
+
     downloads = downloads.filter(semester__active=True)
     markets = markets.filter(semester__active=True)
     from datetime import datetime
