@@ -542,7 +542,6 @@ class PSetDetail(LoginRequiredMixin, DetailView[PSet]):
 
 @login_required
 def news_list(request: AuthHttpRequest) -> HttpResponse:
-    show_all = request.GET.get("all") == "1"
     emails = get_mailchimp_campaigns(1000)
     downloads = SemesterDownloadFile.objects.all()
     markets = Market.objects.all()
@@ -551,33 +550,33 @@ def news_list(request: AuthHttpRequest) -> HttpResponse:
     active_semesters = Semester.objects.filter(active=True)
     semester_is_active = active_semesters.exists()
 
-    if not show_all:
-        if not semester_is_active:
-            # No active semester, show nothing
-            news = {
-                "emails": [],
-                "downloads": [],
-                "markets": [],
-                "hanabis": [],
-                "opals": [],
-            }
-            return render(
-                request,
-                "dashboard/news_list.html",
-                {"news": news, "show_all": show_all, "semester_is_active": False},
-            )
-        downloads = downloads.filter(semester__active=True)
-        markets = markets.filter(semester__active=True)
-        from datetime import datetime
+    if not semester_is_active:
+        # No active semester, show nothing
+        news = {
+            "emails": [],
+            "downloads": [],
+            "markets": [],
+            "hanabis": [],
+            "opals": [],
+        }
+        return render(
+            request,
+            "dashboard/news_list.html",
+            {"news": news, "semester_is_active": False},
+        )
+    
+    downloads = downloads.filter(semester__active=True)
+    markets = markets.filter(semester__active=True)
+    from datetime import datetime
 
-        this_year = datetime.now().year
-        hanabis = hanabis.filter(start_date__year=this_year)
-        opals = opals.filter(start_date__year=this_year)
-        emails = [
-            e
-            for e in emails
-            if e.get("timestamp") and getattr(e["timestamp"], "year", None) == this_year
-        ]
+    this_year = datetime.now().year
+    hanabis = hanabis.filter(start_date__year=this_year)
+    opals = opals.filter(start_date__year=this_year)
+    emails = [
+        e
+        for e in emails
+        if e.get("timestamp") and getattr(e["timestamp"], "year", None) == this_year
+    ]
 
     news = {
         "emails": emails,
@@ -589,5 +588,5 @@ def news_list(request: AuthHttpRequest) -> HttpResponse:
     return render(
         request,
         "dashboard/news_list.html",
-        {"news": news, "show_all": show_all, "semester_is_active": semester_is_active},
+        {"news": news, "semester_is_active": semester_is_active},
     )

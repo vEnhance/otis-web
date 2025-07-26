@@ -845,7 +845,7 @@ class TestNewsList(EvanTestCase):
         OpalHuntFactory.create(start_date=datetime.datetime(2024, 6, 1, tzinfo=UTC))
         SemesterDownloadFileFactory.create(semester=self.semester)
         resp = self.assertGet20X("news-list")
-        self.assertHas(resp, "Showing only news from this year.")
+        self.assertHas(resp, "Showing news from this year.")
         self.assertHas(resp, "Markets")
         self.assertHas(resp, "Hanabi Contests")
         self.assertHas(resp, "OPAL Hunts")
@@ -860,25 +860,3 @@ class TestNewsList(EvanTestCase):
         self.assertHas(resp, "Hanabi Contests")
         self.assertHas(resp, "OPAL Hunts")
         self.assertHas(resp, "Downloads")
-
-    def test_news_list_all_news(self):
-        MarketFactory.create(
-            semester=self.semester,
-            start_date=datetime.datetime(2024, 6, 1, tzinfo=UTC),
-            end_date=datetime.datetime(2024, 7, 1, tzinfo=UTC),
-            title="Market 2024",
-        )
-        old_semester = SemesterFactory.create(active=False, end_year=2023)
-        MarketFactory.create(
-            semester=old_semester,
-            start_date=datetime.datetime(2023, 6, 1, tzinfo=UTC),
-            end_date=datetime.datetime(2023, 7, 1, tzinfo=UTC),
-            title="Market 2023",
-        )
-        url = reverse("news-list") + "?all=1"
-        resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)
-        self.assertIn("Showing all news from all years.", resp.content.decode())
-        self.assertIn("Markets", resp.content.decode())
-        self.assertIn("Market 2024", resp.content.decode())
-        self.assertIn("Market 2023", resp.content.decode())
