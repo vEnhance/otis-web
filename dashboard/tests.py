@@ -636,7 +636,7 @@ class TestList(EvanTestCase):
         semester = SemesterFactory.create()
         RegistrationContainerFactory.create(semester=semester)
         resp = self.assertGet20X("index")
-        self.assertHas(resp, "To register for this year")
+        self.assertHas(resp, "If you've already gotten your acceptance letter")
 
         StudentRegistrationFactory.create(user=user)
         resp = self.assertGet20X("index")

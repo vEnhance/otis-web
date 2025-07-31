@@ -399,6 +399,9 @@ def index(request: AuthHttpRequest) -> HttpResponse:
     context["submitted_registration"] = StudentRegistration.objects.filter(
         user=request.user, container__semester__active=True
     ).exists()
+    if context["submitted_registration"] is True:
+        profile, _ = UserProfile.objects.get_or_create(user=request.user)
+        context["subscribed_to_reg_email"] = profile.email_on_registration_processed
     context["exists_registration"] = RegistrationContainer.objects.filter(
         semester__active=True,
     ).exists()

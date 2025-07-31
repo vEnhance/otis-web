@@ -76,9 +76,32 @@
         Also contact Evan if it has been more than 48 hours
         and your registration hasn't been processed yet.
       </p>
+      <div class="alert alert-info">
+        <h2>
+          {% if subscribed_to_reg_email %}
+            Registration email notification enabled
+          {% else %}
+            Registration email notification disabled
+          {% endif %}
+        </h2>
+        <p>
+          {% if subscribed_to_reg_email %}
+            You are subscribed to registration updates,
+            so you'll get an email once Evan processes your registration.
+          {% else %}
+            Your current settings are such that you will <strong>not</strong>
+            be notified by email once your registration is processed.
+          {% endif %}
+        </p>
+        <p>
+          To change your email settings, go under
+          <a href="{% url "profile" %}">settings</a>
+          (or use the ⚙️ icon in the sidebar).
+        </p>
+      </div>
     {% elif exists_registration %}
       <p>
-        To register for this year,
+        If you've already gotten your acceptance letter, then you should
         <a href="{% url "register" %}">submit the decision form</a>.
       </p>
     {% elif not past or not semester %}
