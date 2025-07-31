@@ -822,3 +822,41 @@ class TestLevelUpAndBonus(EvanTestCase):
         self.assertNotIn("There are no secret units you can request yet.", messages)
         alice.refresh_from_db()
         self.assertTrue(alice.curriculum.filter(pk=desired_unit.pk).exists())
+
+
+class TestNewsList(EvanTestCase):
+    def setUp(self):
+        super().setUp()
+        self.semester = SemesterFactory.create(active=True, end_year=2024)
+        self.user = UserFactory.create()
+        self.profile = UserProfileFactory.create(user=self.user)
+        self.client.force_login(self.user)
+
+    def test_news_list_active_semester(self):
+        MarketFactory.create(
+            semester=self.semester,
+            start_date=datetime.datetime(2024, 6, 1, tzinfo=UTC),
+            end_date=datetime.datetime(2024, 7, 1, tzinfo=UTC),
+        )
+        HanabiContestFactory.create(
+            start_date=datetime.datetime(2024, 6, 1, tzinfo=UTC),
+            end_date=datetime.datetime(2024, 7, 1, tzinfo=UTC),
+        )
+        OpalHuntFactory.create(start_date=datetime.datetime(2024, 6, 1, tzinfo=UTC))
+        SemesterDownloadFileFactory.create(semester=self.semester)
+        resp = self.assertGet20X("news-list")
+        self.assertHas(resp, "Showing news from this year.")
+        self.assertHas(resp, "Markets")
+        self.assertHas(resp, "Hanabi Contests")
+        self.assertHas(resp, "OPAL Hunts")
+        self.assertHas(resp, "Downloads")
+
+    def test_news_list_inactive_semester(self):
+        self.semester.active = False
+        self.semester.save()
+        resp = self.assertGet20X("news-list")
+        self.assertHas(resp, "The current semester is not active.")
+        self.assertHas(resp, "Markets")
+        self.assertHas(resp, "Hanabi Contests")
+        self.assertHas(resp, "OPAL Hunts")
+        self.assertHas(resp, "Downloads")
