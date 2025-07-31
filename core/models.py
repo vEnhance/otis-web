@@ -295,6 +295,32 @@ class UserProfile(models.Model):
         default=True,
     )
 
+    email_on_announcement = models.BooleanField(
+        verbose_name="Receive emails for announcements",
+        help_text="Receive all-student announcements. If this is set to False, announcements will only appear on OTIS-WEB",
+        default=True,
+    )
+    email_on_inquiry_complete = models.BooleanField(
+        verbose_name="Receive email on petition processed",
+        help_text="Receive an email when your petition has been processed.",
+        default=False,
+    )
+    email_on_pset_complete = models.BooleanField(
+        verbose_name="Receive email on completed problem set",
+        help_text="Receive an email when your problem sets are checked off.",
+        default=True,
+    )
+    email_on_suggestion_processed = models.BooleanField(
+        verbose_name="Receive email on suggestion processed",
+        help_text="Receive an email when your problem suggestion status is updated.",
+        default=True,
+    )
+    email_on_registration_processed = models.BooleanField(
+        verbose_name="Receive email on registration",
+        help_text="Receive an email when your registration for the year is approved.",
+        default=False,
+    )
+
     last_seen = models.DateTimeField(
         help_text="Last time user was seen at all",
         default=datetime.datetime.fromtimestamp(0, tz=datetime.timezone.utc),

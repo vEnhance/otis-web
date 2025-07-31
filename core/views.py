@@ -284,14 +284,19 @@ class UserProfileUpdateView(
 ):
     model = UserProfile
     fields = (
+        "email_on_announcement",
+        "email_on_inquiry_complete",
+        "email_on_pset_complete",
+        "email_on_suggestion_processed",
+        "email_on_registration_processed",
         "show_bars",
         "show_completed_by_default",
         "show_locked_by_default",
         "show_artwork_on_curriculum",
         "dynamic_progress",
-        "use_twemoji",
         "show_portal_instructions",
         "show_unit_petitions",
+        "use_twemoji",
     )
     success_url = reverse_lazy("profile")
     object: UserProfile
@@ -302,6 +307,32 @@ class UserProfileUpdateView(
     def get_object(self, queryset: Optional[QuerySet[Model]] = None) -> UserProfile:
         userprofile, _ = UserProfile.objects.get_or_create(user=self.request.user)
         return userprofile
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        form = context["form"]
+
+        context["email_fields"] = (
+            form["email_on_announcement"],
+            form["email_on_pset_complete"],
+            form["email_on_suggestion_processed"],
+            form["email_on_inquiry_complete"],
+            form["email_on_registration_processed"],
+        )
+        context["display_fields"] = (
+            form["show_bars"],
+            form["show_completed_by_default"],
+            form["show_locked_by_default"],
+            form["show_artwork_on_curriculum"],
+            form["dynamic_progress"],
+        )
+        context["advanced_fields"] = (
+            form["show_portal_instructions"],
+            form["show_unit_petitions"],
+            form["use_twemoji"],
+        )
+
+        return context
 
 
 @login_required
