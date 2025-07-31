@@ -1,5 +1,6 @@
 import json
 import logging
+import string
 from datetime import timedelta
 from decimal import Decimal
 from hashlib import sha256
@@ -478,7 +479,11 @@ def invoice_handler(action: str, data: JSONData) -> JsonResponse:
     del action
 
     def sanitize(s: str, last: bool = False) -> str:
-        return unidecode(s).lower().split(" ")[-1 if last else 0]
+        return "".join(
+            c
+            for c in unidecode(s).lower().split(" ")[-1 if last else 0]
+            if c in string.ascii_lowercase
+        )
 
     invoices = Invoice.objects.filter(student__semester__active=True)
     invoices = invoices.select_related("student__user")
@@ -491,17 +496,15 @@ def invoice_handler(action: str, data: JSONData) -> JsonResponse:
         if inv.student.user is not None:
             first_name = sanitize(inv.student.user.first_name)
             last_name = sanitize(inv.student.user.last_name, last=True)
+            email = inv.student.user.email
             pk = inv.student.pk
-
-            if (
-                x := entries.pop(
-                    f"{first_name}.{last_name}", entries.pop(str(pk), None)
-                )
-            ) is not None:
-                amount = Decimal(x)
-                if abs(getattr(inv, field) - amount) > 0.0001:
-                    setattr(inv, field, amount)
-                    invoices_to_update.append(inv)
+            keys_to_try = (str(pk), email, f"{first_name}.{last_name}")
+            for k in keys_to_try:
+                if k in entries:
+                    amount = Decimal(entries.pop(k))
+                    if abs(getattr(inv, field) - amount) > 0.0001:
+                        setattr(inv, field, amount)
+                        invoices_to_update.append(inv)
 
     if field == "total_paid":
         prefetch_related_objects(invoices_to_update, "paymentlog_set")
