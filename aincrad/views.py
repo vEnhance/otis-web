@@ -128,6 +128,7 @@ PSET_VENUEQ_INIT_KEYS = (
     "student__reg__country",
     "student__reg__gender",
     "student__reg__graduation_year",
+    "student__user__profile__email_on_pset_complete",
 )
 
 INQUIRY_VENUEQ_INIT_QUERYSET = UnitInquiry.objects.filter(
@@ -150,6 +151,7 @@ INQUIRY_VENUEQ_INIT_KEYS = (
     "explanation",
     "created_at",
     "unlock_inquiry_count",
+    "student__user__profile__email_on_inquiry_complete",
 )
 INQUIRY_VENUEQ_AUTO_QUERYSET = UnitInquiry.objects.filter(
     was_auto_processed=True,
@@ -186,6 +188,7 @@ SUGGESTION_VENUEQ_INIT_KEYS = (
     "unit__group__name",
     "unit__code",
     "staff_comments",
+    "user__profile__email_on_suggestion_processed",
 )
 
 JOB_VENUEQ_INIT_QUERYSET = Job.objects.filter(progress="JOB_SUB")
@@ -221,6 +224,7 @@ REG_VENUEQ_INIT_KEYS = (
     "user__last_name",
     "user__email",
     "created_at",
+    "user__profile__email_on_registration_processed",
 )
 
 
