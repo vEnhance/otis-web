@@ -1,0 +1,24 @@
+{% if form.non_field_errors %}
+  <div class="alert alert-danger" role="alert">
+    <strong>Errors</strong>
+    <ul>
+      {% for err in form.non_field_errors %}<li>{{ err }}</li>{% endfor %}
+    </ul>
+  </div>
+{% elif form.errors %}
+  <div class="alert alert-danger" role="alert">
+    {% for err,val in form.errors.items %}
+      {% if err == "content" and "This field is required." in val %}
+        <strong>File upload</strong>
+        <ul>
+          <li>
+            There was an error with your file upload.
+            Please make sure that you file submission and is no larger than 10 MB.
+          </li>
+        </ul>
+      {% else %}
+        <strong>{{ err|title }}</strong> {{ val }}
+      {% endif %}
+    {% endfor %}
+  </div>
+{% endif %}
