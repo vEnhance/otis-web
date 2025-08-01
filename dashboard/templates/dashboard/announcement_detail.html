@@ -4,6 +4,15 @@
   {{ announcement.subject }}
 {% endblock title %}
 {% block layout-content %}
-  <p class="fst-italic text-end">{{ announcement.created_at }}</p>
+  <p class="text-muted">
+    {{ announcement.created_at }}
+    <a href="{% url "announcement-list" %}">Back to all announcements</a>.
+  </p>
   {{ announcement.content_rendered|safe }}
+  {% if request.user.is_superuser %}
+    <p>
+      <a class="btn btn-primary"
+         href="{% url "admin:dashboard_announcement_add" %}">Edit announcement</a>
+    </p>
+  {% endif %}
 {% endblock layout-content %}

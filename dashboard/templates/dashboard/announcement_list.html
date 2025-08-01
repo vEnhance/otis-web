@@ -4,22 +4,19 @@
   Announcements
 {% endblock title %}
 {% block layout-content %}
-  <table class="table table-striped">
-    <thead class="table-dark">
-      <tr>
-        <th>Subject</th>
-        <th>Time</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for announcement in announcements %}
-        <tr>
-          <td>
-            <a href="{{ announcement.get_absolute_url }}">{{ announcement.subject }}</a>
-          </td>
-          <td>{{ announcement.created_at|naturaltime }}</td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  {% if request.user.is_superuser %}
+    <p>
+      <a class="btn btn-primary"
+         href="{% url "admin:dashboard_announcement_add" %}">Add announcement</a>
+    </p>
+    <hr />
+  {% endif %}
+  <ul>
+    {% for announcement in announcements %}
+      <li>
+        <span class="fst-italic">{{ announcement.created_at|naturaltime }}</span> —
+        <a href="{{ announcement.get_absolute_url }}">{{ announcement.subject }}</a>
+      </li>
+    {% endfor %}
+  </ul>
 {% endblock layout-content %}
