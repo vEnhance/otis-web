@@ -216,7 +216,9 @@ class TestAincradWithSetup(EvanTestCase):
                 "entries": {
                     "alice.aardvark": 250,
                     "bob.beta": 480,
-                    Student.objects.get(user__first_name="Carol").pk: 110,
+                    Student.objects.get(
+                        user__first_name="Carol", user__last_name="Cutie"
+                    ).pk: 110,
                     "eve.edgeworth": 5,
                     "nate.river": 1152,
                 },
