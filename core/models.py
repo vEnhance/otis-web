@@ -114,7 +114,6 @@ class UnitGroup(models.Model):
     """Represents an entire group of units with the same name,
     differing only in difficulty and version"""
 
-    objects: BaseManager["UnitGroup"]
     unit_set: BaseManager["Unit"]
     get_subject_display: Callable[[], str]
 
