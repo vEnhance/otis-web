@@ -1,0 +1,9 @@
+{% extends "layout.html" %}
+{% load humanize %}
+{% block title %}
+  {{ announcement.subject }}
+{% endblock title %}
+{% block layout-content %}
+  <p class="fst-italic text-end">{{ announcement.created_at }}</p>
+  {{ announcement.content_rendered|safe }}
+{% endblock layout-content %}

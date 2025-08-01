@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% load humanize %}
+{% block title %}
+  Announcements
+{% endblock title %}
+{% block layout-content %}
+  <table class="table table-striped">
+    <thead class="table-dark">
+      <tr>
+        <th>Subject</th>
+        <th>Time</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for announcement in announcements %}
+        <tr>
+          <td>
+            <a href="{{ announcement.get_absolute_url }}">{{ announcement.subject }}</a>
+          </td>
+          <td>{{ announcement.created_at|naturaltime }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock layout-content %}

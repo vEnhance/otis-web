@@ -30,10 +30,11 @@ from dashboard.forms import (
     PSetResubmitForm,
     PSetSubmitForm,
 )
-from dashboard.models import PSet, SemesterDownloadFile, UploadedFile
+from dashboard.models import Announcement, PSet, SemesterDownloadFile, UploadedFile
 from dashboard.utils import get_news, get_units_to_submit, get_units_to_unlock
 from evans_django_tools import VERBOSE_LOG_LEVEL
 from exams.models import PracticeExam
+from otisweb.mixins import VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest, get_days_since
 from roster.models import RegistrationContainer, Student, StudentRegistration
 from roster.utils import (  # NOQA
@@ -519,6 +520,18 @@ class DownloadList(LoginRequiredMixin, ListView[SemesterDownloadFile]):
     def get_queryset(self) -> QuerySet[SemesterDownloadFile]:
         student = get_student_by_pk(self.request, self.kwargs["pk"])
         return SemesterDownloadFile.objects.filter(semester=student.semester)
+
+
+class AnnouncementList(VerifiedRequiredMixin, ListView[Announcement]):
+    template_name = "dashboard/announcement_list.html"
+    model = Announcement
+    context_object_name = "announcements"
+
+
+class AnnouncementDetail(VerifiedRequiredMixin, DetailView[Announcement]):
+    template_name = "dashboard/announcement_detail.html"
+    model = Announcement
+    object_name = "announcement"
 
 
 class PSetDetail(LoginRequiredMixin, DetailView[PSet]):

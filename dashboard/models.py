@@ -16,6 +16,8 @@ from django.core.validators import (  # NOQA
 )
 from django.db import models
 from django.urls import reverse
+from markdownfield.models import MarkdownField, RenderedMarkdownField
+from markdownfield.validators import VALIDATOR_STANDARD
 
 from core.models import Semester, Unit
 from roster.models import Student
@@ -123,6 +125,29 @@ class SemesterDownloadFile(models.Model):
 
     def get_absolute_url(self):
         return self.content.url
+
+
+class Announcement(models.Model):
+    subject = models.CharField(
+        max_length=255, help_text="Subject line for announcement"
+    )
+    slug = models.SlugField(help_text="Slug for the announcement URL", unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    content = MarkdownField(
+        rendered_field="content_rendered",
+        help_text="Content of the announcement",
+        validator=VALIDATOR_STANDARD,
+    )
+    content_rendered = RenderedMarkdownField()
+
+    class Meta:
+        ordering = ("-created_at",)
+
+    def __str__(self) -> str:
+        return self.subject
+
+    def get_absolute_url(self) -> str:
+        return reverse("announcement-detail", args=(self.slug,))
 
 
 class PSet(models.Model):

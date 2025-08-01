@@ -6,7 +6,28 @@ from django.contrib import admin
 from django.db.models import QuerySet
 from django.http import HttpRequest
 
-from .models import PSet, SemesterDownloadFile, UploadedFile  # NOQA
+from .models import Announcement, PSet, SemesterDownloadFile, UploadedFile  # NOQA
+
+
+@admin.register(Announcement)
+class AnnouncementAdmin(admin.ModelAdmin):
+    readonly_fields = ("created_at",)
+    list_display = (
+        "pk",
+        "slug",
+        "subject",
+        "created_at",
+    )
+    list_display_links = (
+        "pk",
+        "slug",
+        "subject",
+    )
+    search_fields = (
+        "slug",
+        "subject",
+        "content",
+    )
 
 
 @admin.register(UploadedFile)
