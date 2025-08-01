@@ -1,11 +1,13 @@
 from django.contrib.auth import get_user_model
 from factory.declarations import LazyAttribute, SubFactory
 from factory.django import DjangoModelFactory, FileField
+from factory.faker import Faker
 
 from core.factories import SemesterFactory, UnitFactory  # NOQA
+from evans_django_tools.testsuite import UniqueFaker
 from roster.factories import StudentFactory
 
-from .models import PSet, SemesterDownloadFile, UploadedFile  # NOQA
+from .models import Announcement, PSet, SemesterDownloadFile, UploadedFile  # NOQA
 
 User = get_user_model()
 
@@ -41,3 +43,12 @@ class PSetFactory(DjangoModelFactory):
     )
     next_unit_to_unlock = SubFactory(UnitFactory)
     status = "A"
+
+
+class AnnouncementFactory(DjangoModelFactory):
+    class Meta:
+        model = Announcement
+
+    subject = Faker("bs")
+    slug = UniqueFaker("slug")
+    content = Faker("paragraph")

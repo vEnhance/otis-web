@@ -7,6 +7,7 @@ from django.urls import reverse
 from freezegun import freeze_time
 
 from core.factories import (
+    GroupFactory,
     SemesterFactory,
     UnitFactory,
     UnitGroupFactory,
@@ -14,7 +15,11 @@ from core.factories import (
     UserProfileFactory,
 )
 from core.models import Unit
-from dashboard.factories import PSetFactory, SemesterDownloadFileFactory
+from dashboard.factories import (
+    AnnouncementFactory,
+    PSetFactory,
+    SemesterDownloadFileFactory,
+)
 from dashboard.models import PSet, UploadedFile
 from dashboard.utils import get_news, get_units_to_submit, get_units_to_unlock
 from evans_django_tools.testsuite import EvanTestCase
@@ -177,6 +182,29 @@ class TestPortal(EvanTestCase):
             self.assertEqual(len(news["markets"]), 2)
             self.assertEqual(len(news["hanabis"]), 2)
             self.assertEqual(len(news["opals"]), 0)
+
+
+class TestAnnounce(EvanTestCase):
+    def test_announcements(self):
+        AnnouncementFactory.create(slug="one", content="하나")
+        AnnouncementFactory.create(slug="two", content="둘")
+        AnnouncementFactory.create(slug="three", content="셋")
+
+        # First make sure nothing is accessible to outside world
+        mallory = UserFactory.create(username="mallory")
+        self.login(mallory)
+        self.assertGet30X("announcement-list")
+        self.assertGet30X("announcement-detail", "one")
+        self.assertGet30X("announcement-detail", "two")
+        self.assertGet30X("announcement-detail", "three")
+
+        verified_group = GroupFactory(name="Verified")
+        alice = UserFactory.create(username="alice", groups=(verified_group,))
+        self.login(alice)
+        self.assertContains(self.assertGet20X("announcement-list"), "one")
+        self.assertContains(self.assertGet20X("announcement-detail", "one"), "하나")
+        self.assertContains(self.assertGet20X("announcement-detail", "two"), "둘")
+        self.assertContains(self.assertGet20X("announcement-detail", "three"), "셋")
 
 
 class TestCertify(EvanTestCase):
@@ -803,9 +831,9 @@ class TestLevelUpAndBonus(EvanTestCase):
         self.assertEqual(queryset.count(), 6)
         self.assertQuerySetEqual(
             queryset,
-            Unit.objects.filter(group__in=(secret4, secret9)),
+            Unit.objects.filter(group__in=(secret4, secret9)),  # type: ignore
             ordered=False,
-        )  # type: ignore
+        )
 
         # let's submit one and make sure it works
         desired_unit = Unit.objects.get(group=secret9, code="DKV")
