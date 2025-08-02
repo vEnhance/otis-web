@@ -14,7 +14,7 @@
   {% if request.user.is_superuser %}
     <p>
       <a class="btn btn-primary"
-         href="{% url "admin:dashboard_announcement_add" %}">Edit announcement</a>
+         href="{% url "admin:dashboard_announcement_change" announcement.pk %}">Edit announcement</a>
     </p>
   {% endif %}
 {% endblock layout-content %}
