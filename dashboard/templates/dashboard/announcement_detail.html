@@ -8,7 +8,9 @@
     {{ announcement.created_at }}
     <a href="{% url "announcement-list" %}">Back to all announcements</a>.
   </p>
+  <hr />
   {{ announcement.content_rendered|safe }}
+  <hr />
   {% if request.user.is_superuser %}
     <p>
       <a class="btn btn-primary"
