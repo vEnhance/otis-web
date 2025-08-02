@@ -11,7 +11,7 @@ from django.db.models.expressions import Value
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
 from django.forms.models import BaseModelForm
-from django.http import HttpRequest, HttpResponse
+from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect
 from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.urls.base import reverse_lazy
@@ -21,8 +21,9 @@ from django.views.generic.edit import UpdateView
 from django.views.generic.list import ListView
 from sql_util.utils import Exists
 
-from core.models import UserProfile
+from core.models import Semester, UserProfile
 from dashboard.models import PSet, UploadedFile
+from otisweb.decorators import verified_required
 from otisweb.utils import AuthHttpRequest
 from roster.models import Student
 
@@ -342,3 +343,16 @@ def dismiss(request: AuthHttpRequest) -> JsonResponse:
     profile.last_notif_dismiss = timezone.now()
     profile.save()
     return JsonResponse({"result": "success"})
+
+
+@verified_required
+def calendar(request: AuthHttpRequest) -> HttpResponse:
+    del request
+    try:
+        semester = Semester.objects.get(active=True)
+    except Semester.DoesNotExist:
+        raise Http404("No active semester to show calendar for.")
+    if semester.calendar_url:
+        return HttpResponseRedirect(semester.calendar_url)
+    else:
+        raise Http404("No calendar URL provided for this semester.")
