@@ -29,4 +29,16 @@
   </p>
   <hr />
   {% include "generic_form.html" %}
+  <br />
+  <div class="alert alert-info">
+    If you have problems to suggest for this unit,
+    please use the <a href="{% url "suggest-new" %}">problem suggestion form</a>.
+  </div>
 {% endblock layout-content %}
+{% block scripts %}
+  <script type="text/javascript">
+      $(() => {
+          $("select").chosen();
+      });
+  </script>
+{% endblock scripts %}
