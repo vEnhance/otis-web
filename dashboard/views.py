@@ -30,13 +30,14 @@ from dashboard.forms import (
     PSetResubmitForm,
     PSetSubmitForm,
 )
-from dashboard.models import PSet, SemesterDownloadFile, UploadedFile
+from dashboard.models import Announcement, PSet, SemesterDownloadFile, UploadedFile
 from dashboard.utils import get_news, get_units_to_submit, get_units_to_unlock
 from evans_django_tools import VERBOSE_LOG_LEVEL
 from exams.models import PracticeExam
 from hanabi.models import HanabiContest
 from markets.models import Market
 from opal.models import OpalHunt
+from otisweb.mixins import VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest, get_days_since, get_mailchimp_campaigns
 from roster.models import RegistrationContainer, Student, StudentRegistration
 from roster.utils import (  # NOQA
@@ -402,6 +403,9 @@ def index(request: AuthHttpRequest) -> HttpResponse:
     context["submitted_registration"] = StudentRegistration.objects.filter(
         user=request.user, container__semester__active=True
     ).exists()
+    if context["submitted_registration"] is True:
+        profile, _ = UserProfile.objects.get_or_create(user=request.user)
+        context["subscribed_to_reg_email"] = profile.email_on_registration_processed
     context["exists_registration"] = RegistrationContainer.objects.filter(
         semester__active=True,
     ).exists()
@@ -519,6 +523,18 @@ class DownloadList(LoginRequiredMixin, ListView[SemesterDownloadFile]):
     def get_queryset(self) -> QuerySet[SemesterDownloadFile]:
         student = get_student_by_pk(self.request, self.kwargs["pk"])
         return SemesterDownloadFile.objects.filter(semester=student.semester)
+
+
+class AnnouncementList(VerifiedRequiredMixin, ListView[Announcement]):
+    template_name = "dashboard/announcement_list.html"
+    model = Announcement
+    context_object_name = "announcements"
+
+
+class AnnouncementDetail(VerifiedRequiredMixin, DetailView[Announcement]):
+    template_name = "dashboard/announcement_detail.html"
+    model = Announcement
+    object_name = "announcement"
 
 
 class PSetDetail(LoginRequiredMixin, DetailView[PSet]):

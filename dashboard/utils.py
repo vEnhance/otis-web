@@ -6,11 +6,10 @@ from django.db.models.query import QuerySet
 from django.utils import timezone
 
 from core.models import Unit, UserProfile
-from dashboard.models import PSet, SemesterDownloadFile
+from dashboard.models import Announcement, PSet, SemesterDownloadFile
 from hanabi.models import HanabiContest
 from markets.models import Market
 from opal.models import OpalHunt
-from otisweb.utils import MailChimpDatum, get_mailchimp_campaigns
 from roster.models import Student
 
 
@@ -38,7 +37,7 @@ def get_units_to_unlock(student: Student) -> QuerySet[Unit]:
 
 
 class NewsDict(TypedDict):
-    emails: list[MailChimpDatum]
+    announcements: QuerySet[Announcement]
     downloads: QuerySet[SemesterDownloadFile]
     markets: QuerySet[Market]
     hanabis: QuerySet[HanabiContest]
@@ -47,11 +46,9 @@ class NewsDict(TypedDict):
 
 def get_news(profile: UserProfile) -> NewsDict:
     return {
-        "emails": [
-            e
-            for e in get_mailchimp_campaigns(14)
-            if e["timestamp"] >= profile.last_notif_dismiss
-        ],
+        "announcements": Announcement.objects.filter(
+            created_at__gte=profile.last_notif_dismiss
+        ),
         "downloads": SemesterDownloadFile.objects.filter(
             semester__active=True,
             created_at__gte=profile.last_notif_dismiss,

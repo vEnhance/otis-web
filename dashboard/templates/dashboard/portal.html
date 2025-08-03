@@ -200,13 +200,12 @@
         News!
         <span class="badge bg-danger">{{ num_news }}</span>
       </h2>
-      {% for email in news.emails %}
+      {% for announcement in news.announcements %}
         <p class="mt-3">
           <span class="emoji-text">📢</span>
-          <b><a class="alert-link" href="{{ email.url }}">{{ email.title }}</a></b>
-          | {{ email.timestamp|naturaltime }}
+          <b><a class="alert-link" href="{{ announcement.get_absolute_url }}">{{ announcement.subject }}</a></b>
+          | {{ announcement.created_at|naturaltime }}
           <br />
-          <em class="text-muted">New email: {{ email.summary }}</em>
         </p>
       {% endfor %}
       {% for dl in news.downloads %}

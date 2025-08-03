@@ -51,6 +51,7 @@ class TestAincradWithSetup(EvanTestCase):
         eve = StudentFactory.create(
             user__first_name="Eve",
             user__last_name="Edgeworth",
+            user__email="edge@wor.th",
             semester=active_semester,
         )
         old_alice = StudentFactory.create(user=alice.user, semester=old_semester)
@@ -178,7 +179,7 @@ class TestAincradWithSetup(EvanTestCase):
                 "field": "adjustment",
                 "entries": {
                     "alice.aardvark": -240,
-                    "eve.edgeworth": -474,
+                    "edge@wor.th": -474,
                     "l.lawliet": 1337,
                 },
             },
@@ -215,7 +216,9 @@ class TestAincradWithSetup(EvanTestCase):
                 "entries": {
                     "alice.aardvark": 250,
                     "bob.beta": 480,
-                    Student.objects.get(user__first_name="Carol").pk: 110,
+                    Student.objects.get(
+                        user__first_name="Carol", user__last_name="Cutie"
+                    ).pk: 110,
                     "eve.edgeworth": 5,
                     "nate.river": 1152,
                 },

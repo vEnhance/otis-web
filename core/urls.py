@@ -20,4 +20,5 @@ urlpatterns = [
     path(r"unit/tex/<int:pk>/", views.unit_tex, name="view-tex"),
     path(r"unit/solutions/<int:pk>/", views.unit_solutions, name="view-solutions"),
     path(r"dismiss/news/", views.dismiss, name="dismiss-news"),
+    path(r"calendar/", views.calendar, name="calendar"),
 ]

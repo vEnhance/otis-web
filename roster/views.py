@@ -43,7 +43,7 @@ from core.models import Semester, Unit
 from dashboard.models import PSet
 from evans_django_tools import SUCCESS_LOG_LEVEL
 from otisweb.decorators import admin_required
-from otisweb.utils import AuthHttpRequest, mailchimp_subscribe
+from otisweb.utils import AuthHttpRequest
 from roster.forms import LinkAssistantForm
 from roster.models import Assistant
 from roster.utils import (  # NOQA
@@ -460,7 +460,6 @@ def register(request: AuthHttpRequest) -> HttpResponse:
                 request.user.last_name = form.cleaned_data["surname"].strip()
                 request.user.email = form.cleaned_data["email_address"]
                 request.user.save()
-                mailchimp_subscribe(request)
                 messages.success(request, message="Submitted! Sit tight.")
                 return HttpResponseRedirect(reverse("index"))
     else:
@@ -500,7 +499,6 @@ def update_profile(request: AuthHttpRequest) -> HttpResponse:
         if form.is_valid():
             user: User = form.save(commit=False)
             if old_email != user.email:
-                mailchimp_subscribe(request)
                 logger.log(
                     SUCCESS_LOG_LEVEL,
                     f"User {user.get_full_name()} ({user.username}) updated their email "

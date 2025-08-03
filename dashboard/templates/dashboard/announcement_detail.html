@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% load humanize %}
+{% block title %}
+  {{ announcement.subject }}
+{% endblock title %}
+{% block layout-content %}
+  <p class="text-muted">
+    📢
+    {{ announcement.created_at }}
+    <a href="{% url "announcement-list" %}">Back to all announcements</a>.
+  </p>
+  <hr />
+  {{ announcement.content_rendered|safe }}
+  <hr />
+  {% if request.user.is_superuser %}
+    <p>
+      <a class="btn btn-primary"
+         href="{% url "admin:dashboard_announcement_change" announcement.pk %}">Edit announcement</a>
+    </p>
+  {% endif %}
+{% endblock layout-content %}

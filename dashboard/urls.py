@@ -31,6 +31,12 @@ urlpatterns = [
     path(r"certify/", views.certify, name="certify"),
     path(r"certify/<int:student_pk>/", views.certify, name="certify"),
     path(r"certify/<int:student_pk>/<str:checksum>/", views.certify, name="certify"),
+    path(r"announce/", views.AnnouncementList.as_view(), name="announcement-list"),
+    path(
+        r"announce/<slug:slug>/",
+        views.AnnouncementDetail.as_view(),
+        name="announcement-detail",
+    ),
     path(r"", RedirectView.as_view(pattern_name="index")),
     path(r"newslist/", views.news_list, name="news-list"),
 ]

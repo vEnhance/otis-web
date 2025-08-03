@@ -2,7 +2,13 @@ from typing import Any
 
 from django.test.utils import override_settings
 
-from core.factories import SemesterFactory, UnitFactory, UnitGroupFactory, UserFactory
+from core.factories import (
+    GroupFactory,
+    SemesterFactory,
+    UnitFactory,
+    UnitGroupFactory,
+    UserFactory,
+)
 from core.models import Semester
 from core.utils import storage_hash
 from dashboard.factories import PSetFactory
@@ -91,6 +97,24 @@ class TestCore(EvanTestCase):
     def test_storage_hash(self):
         self.assertRegex(storage_hash("meow"), r"[0-9a-z]{64}")
         self.assertNotEqual(storage_hash("Serral"), storage_hash("Reynor"))
+
+    def test_calendar(self):
+        verified_group = GroupFactory(name="Verified")
+        alice = UserFactory.create(username="alice", groups=(verified_group,))
+        self.login(alice)
+
+        # no active semester, so this should 404
+        self.assertGet40X("calendar")
+
+        # still 404's since no calendar provided
+        sem = SemesterFactory.create(active=True)
+        self.assertGet40X("calendar")
+
+        # add a calendar URL, now it should work
+        sem.calendar_url = "https://www.example.org"
+        sem.save()
+        resp = self.assertGet30X("calendar")
+        self.assertEqual(resp.headers["Location"], "https://www.example.org")
 
 
 class TestCatalog(EvanTestCase):

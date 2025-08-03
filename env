@@ -23,9 +23,6 @@ IS_PRODUCTION=0
 # WEBHOOK_URL_CRITICAL="discord webhook URL"
 # WEBHOOK_URL_ACTION="discord webhook URL"
 
-# MAILCHIMP_API_KEY="mailchimp api key"
-# MAILCHIMP_LIST_ID="mailchimp list id"
-
 # PATH_STATEMENT_ON_DISK="/home/evan/Sync/otis-evil-data/"
 
 # ADDRESS_REGULAR="my boston address"

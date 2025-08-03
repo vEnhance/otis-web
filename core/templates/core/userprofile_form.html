@@ -1,7 +1,31 @@
 {% extends "layout.html" %}
+{% load crispy_forms_tags %}
 {% block title %}
   Update settings
 {% endblock title %}
 {% block layout-content %}
-  {% include "generic_form.html" with submit_name="Update" %}
-{% endblock layout-content %}
+  <form action="{{ target|default:request.path }}"
+        method="post"
+        enctype="multipart/form-data"
+        class="form">
+    {% csrf_token %}
+    {% include "generic_form_errors.html" %}
+    {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+    <div class="section">
+      <h1>Email settings</h1>
+      {% for field in email_fields %}{{ field|as_crispy_field }}{% endfor %}
+      <button type="submit" class="btn btn-success">Update settings</button>
+    </div>
+    <hr />
+    <div class="section">
+      <h1>Display settings</h1>
+      {% for field in display_fields %}{{ field|as_crispy_field }}{% endfor %}
+      <button type="submit" class="btn btn-success">Update settings</button>
+    </div>
+    <hr />
+    <div class="section">
+      <h1>Advanced settings</h1>
+      {% for field in advanced_fields %}{{ field|as_crispy_field }}{% endfor %}
+      <button type="submit" class="btn btn-success">Update settings</button>
+    </div>
+  {% endblock layout-content %}

@@ -11,7 +11,7 @@ from django.db.models.expressions import Value
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
 from django.forms.models import BaseModelForm
-from django.http import HttpRequest, HttpResponse
+from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect
 from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.urls.base import reverse_lazy
@@ -21,8 +21,9 @@ from django.views.generic.edit import UpdateView
 from django.views.generic.list import ListView
 from sql_util.utils import Exists
 
-from core.models import UserProfile
+from core.models import Semester, UserProfile
 from dashboard.models import PSet, UploadedFile
+from otisweb.decorators import verified_required
 from otisweb.utils import AuthHttpRequest
 from roster.models import Student
 
@@ -284,14 +285,19 @@ class UserProfileUpdateView(
 ):
     model = UserProfile
     fields = (
+        "email_on_announcement",
+        "email_on_inquiry_complete",
+        "email_on_pset_complete",
+        "email_on_suggestion_processed",
+        "email_on_registration_processed",
         "show_bars",
         "show_completed_by_default",
         "show_locked_by_default",
         "show_artwork_on_curriculum",
         "dynamic_progress",
-        "use_twemoji",
         "show_portal_instructions",
         "show_unit_petitions",
+        "use_twemoji",
     )
     success_url = reverse_lazy("profile")
     object: UserProfile
@@ -303,6 +309,32 @@ class UserProfileUpdateView(
         userprofile, _ = UserProfile.objects.get_or_create(user=self.request.user)
         return userprofile
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        form = context["form"]
+
+        context["email_fields"] = (
+            form["email_on_announcement"],
+            form["email_on_pset_complete"],
+            form["email_on_suggestion_processed"],
+            form["email_on_inquiry_complete"],
+            form["email_on_registration_processed"],
+        )
+        context["display_fields"] = (
+            form["show_bars"],
+            form["show_completed_by_default"],
+            form["show_locked_by_default"],
+            form["show_artwork_on_curriculum"],
+            form["dynamic_progress"],
+        )
+        context["advanced_fields"] = (
+            form["show_portal_instructions"],
+            form["show_unit_petitions"],
+            form["use_twemoji"],
+        )
+
+        return context
+
 
 @login_required
 @require_POST
@@ -311,3 +343,16 @@ def dismiss(request: AuthHttpRequest) -> JsonResponse:
     profile.last_notif_dismiss = timezone.now()
     profile.save()
     return JsonResponse({"result": "success"})
+
+
+@verified_required
+def calendar(request: AuthHttpRequest) -> HttpResponse:
+    del request
+    try:
+        semester = Semester.objects.get(active=True)
+    except Semester.DoesNotExist:
+        raise Http404("No active semester to show calendar for.")
+    if semester.calendar_url:
+        return HttpResponseRedirect(semester.calendar_url)
+    else:
+        raise Http404("No calendar URL provided for this semester.")

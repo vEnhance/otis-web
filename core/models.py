@@ -114,7 +114,6 @@ class UnitGroup(models.Model):
     """Represents an entire group of units with the same name,
     differing only in difficulty and version"""
 
-    objects: BaseManager["UnitGroup"]
     unit_set: BaseManager["Unit"]
     get_subject_display: Callable[[], str]
 
@@ -293,6 +292,32 @@ class UserProfile(models.Model):
         verbose_name="Show unit petitions",
         help_text="Show previous unit petitions that you have requested. Useful to disable if you have far too many.",
         default=True,
+    )
+
+    email_on_announcement = models.BooleanField(
+        verbose_name="Receive emails for announcements",
+        help_text="Receive all-student announcements. If this is set to False, announcements will only appear on OTIS-WEB",
+        default=True,
+    )
+    email_on_inquiry_complete = models.BooleanField(
+        verbose_name="Receive email on petition processed",
+        help_text="Receive an email when your petition has been processed.",
+        default=False,
+    )
+    email_on_pset_complete = models.BooleanField(
+        verbose_name="Receive email on completed problem set",
+        help_text="Receive an email when your problem sets are checked off.",
+        default=True,
+    )
+    email_on_suggestion_processed = models.BooleanField(
+        verbose_name="Receive email on suggestion processed",
+        help_text="Receive an email when your problem suggestion status is updated.",
+        default=True,
+    )
+    email_on_registration_processed = models.BooleanField(
+        verbose_name="Receive email on registration",
+        help_text="Receive an email when your registration for the year is approved.",
+        default=False,
     )
 
     last_seen = models.DateTimeField(

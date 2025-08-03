@@ -48,7 +48,7 @@
       <td>
         <a title="Announcements"
            class="emoji-link"
-           href="https://us5.campaign-archive.com/home/?u=5c818a0be2f35ee90344a471e&id=808c50e8c9">📢</a>
+           href="{% url "announcement-list" %}">📢</a>
       </td>
       <td>
         <a title="Catalog" class="emoji-link" href="{% url "catalog" %}">🗃️</a>
@@ -92,7 +92,10 @@
            href="{% url "pset-queue-listing" %}">🛂</a>
       </td>
       <td>
-        <a title="Internships" class="emoji-link" href="{% url "job-index" %}">👔</a>
+        <a title="Calendar"
+           class="emoji-link"
+           href="{% url "calendar" %}"
+           target="_blank">📆</a>
       </td>
     </tr>
     <tr>
