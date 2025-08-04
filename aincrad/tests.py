@@ -7,6 +7,7 @@ from arch.factories import HintFactory, ProblemFactory
 from arch.models import Hint, Problem
 from core.factories import SemesterFactory, UnitFactory, UserFactory
 from dashboard.factories import PSetFactory
+from dashboard.models import Announcement
 from evans_django_tools.testsuite import EvanTestCase
 from hanabi.factories import HanabiContestFactory, HanabiPlayerFactory
 from hanabi.models import HanabiParticipation, HanabiReplay
@@ -694,3 +695,59 @@ class TestAincrad(EvanTestCase):
         self.assertEqual(pset2.status, "A")
         self.assertEqual(pset3.status, "A")
         self.assertEqual(pset3.staff_comments, "Good job")
+
+    def test_announcement(self) -> None:
+        self.assertFalse(Announcement.objects.all().exists())
+
+        # Create a new announcement
+        resp = self.assertPost20X(
+            "api",
+            json={
+                "action": "announcement_write",
+                "slug": "testing",
+                "subject": "Testing 1",
+                "content": "This is a sample **announcement**.",
+                "token": EXAMPLE_PASSWORD,
+            },
+        )
+        self.assertEqual(resp.json()["is_new"], True)
+        self.assertEqual(Announcement.objects.all().count(), 1)
+        a = Announcement.objects.get(slug="testing")
+        self.assertEqual(a.subject, "Testing 1")
+        self.assertEqual(
+            a.content_rendered, "<p>This is a sample <strong>announcement</strong>.</p>"
+        )
+
+        # Update it
+        resp = self.assertPost20X(
+            "api",
+            json={
+                "action": "announcement_write",
+                "slug": "testing",
+                "subject": "Testing 2",
+                "content": "Another update.",
+                "token": EXAMPLE_PASSWORD,
+            },
+        )
+        self.assertEqual(resp.json()["is_new"], False)
+        self.assertEqual(Announcement.objects.all().count(), 1)
+        a = Announcement.objects.get(slug="testing")
+        self.assertEqual(a.subject, "Testing 2")
+        self.assertEqual(a.content_rendered, "<p>Another update.</p>")
+
+        # Create a third announcement
+        resp = self.assertPost20X(
+            "api",
+            json={
+                "action": "announcement_write",
+                "slug": "thinking",
+                "subject": "Deep in thought",
+                "content": "Couldn't be me!",
+                "token": EXAMPLE_PASSWORD,
+            },
+        )
+        self.assertEqual(resp.json()["is_new"], True)
+        self.assertEqual(Announcement.objects.all().count(), 2)
+        a = Announcement.objects.get(slug="thinking")
+        self.assertEqual(a.subject, "Deep in thought")
+        self.assertEqual(a.content_rendered, "<p>Couldn't be me!</p>")

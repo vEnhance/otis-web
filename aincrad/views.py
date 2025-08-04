@@ -22,7 +22,7 @@ from sql_util.aggregates import SubqueryCount
 from unidecode import unidecode
 
 from arch.models import Hint, Problem
-from dashboard.models import PSet
+from dashboard.models import Announcement, PSet
 from hanabi.models import HanabiContest, HanabiParticipation, HanabiPlayer, HanabiReplay
 from payments.models import Job
 from roster.models import (
@@ -86,6 +86,11 @@ class JSONData(TypedDict):
     # hanabi
     num_suits: int
     replays: list[ReplayData]
+
+    # announcement
+    slug: str
+    subject: str
+    content: str
 
 
 PSET_VENUEQ_INIT_QUERYSET = PSet.objects.filter(
@@ -652,6 +657,21 @@ def email_handler(action: str, data: JSONData) -> JsonResponse:
     )
 
 
+def announcement_handler(action: str, data: JSONData) -> JsonResponse:
+    del action
+    announcement, is_new = Announcement.objects.update_or_create(
+        slug=data["slug"],
+        defaults={
+            "content": data["content"],
+            "subject": data["subject"],
+        },
+    )
+    if is_new is False:
+        announcement.save()  # need to retrigger markdown render
+
+    return JsonResponse({"is_new": is_new})
+
+
 @csrf_exempt
 @require_POST
 def api(request: HttpRequest) -> JsonResponse:
@@ -692,6 +712,8 @@ def api(request: HttpRequest) -> JsonResponse:
         return hanabi_handler(action, data)
     elif action == "email_list":
         return email_handler(action, data)
+    elif action == "announcement_write":
+        return announcement_handler(action, data)
     else:
         return JsonResponse({"error": "No such command"}, status=400)
 
