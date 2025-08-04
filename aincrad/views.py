@@ -663,15 +663,15 @@ def api(request: HttpRequest) -> JsonResponse:
         "init",
     ):
         return venueq_handler(action, data)
-    elif action in ("register",):
+    elif action == "register":
         return discord_handler(action, data)
     elif action in ("get_hints", "add_hints", "add_many_hints"):
         return problems_handler(action, data)
-    elif action in ("invoice",):
+    elif action == "invoice":
         return invoice_handler(action, data)
-    elif action in ("arch_url_update"):
+    elif action == "arch_url_update":
         return arch_url_handler(action, data)
-    elif action in ("hanabi_results"):
+    elif action == "hanabi_results":
         return hanabi_handler(action, data)
     else:
         return JsonResponse({"error": "No such command"}, status=400)
