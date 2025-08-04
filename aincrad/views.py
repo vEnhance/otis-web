@@ -635,6 +635,23 @@ def hanabi_handler(action: str, data: JSONData) -> JsonResponse:
     )
 
 
+def email_handler(action: str, data: JSONData) -> JsonResponse:
+    del action
+    del data
+    return JsonResponse(
+        {
+            "students": list(
+                Student.objects.filter(semester__active=True).values(
+                    "user__first_name",
+                    "user__last_name",
+                    "user__username",
+                    "user__email",
+                )
+            )
+        }
+    )
+
+
 @csrf_exempt
 @require_POST
 def api(request: HttpRequest) -> JsonResponse:
@@ -673,6 +690,8 @@ def api(request: HttpRequest) -> JsonResponse:
         return arch_url_handler(action, data)
     elif action == "hanabi_results":
         return hanabi_handler(action, data)
+    elif action == "email_list":
+        return email_handler(action, data)
     else:
         return JsonResponse({"error": "No such command"}, status=400)
 
