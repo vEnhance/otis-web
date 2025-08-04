@@ -99,6 +99,7 @@ COUNTRY_CHOICES = (
     ("POL", "Poland (POL)"),
     ("POR", "Portugal (POR)"),
     ("PRI", "Puerto Rico (PRI)"),
+    ("PSE", "Palestine (PSE)"),
     ("ROU", "Romania (ROU)"),
     ("RUS", "Russian Federation (RUS)"),
     ("RWA", "Rwanda (RWA)"),
