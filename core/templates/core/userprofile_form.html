@@ -15,6 +15,12 @@
       <h1>Email settings</h1>
       {% for field in email_fields %}{{ field|as_crispy_field }}{% endfor %}
       <button type="submit" class="btn btn-success">Update settings</button>
+      <div class="alert alert-primary my-2">
+        <h3 class="alert-heading">Warning</h3>
+        If you mark any emails from OTIS as spam (even accidentally),
+        then Postmark will permanently block all future OTIS emails to you.
+        Please only sign up for updates you want.
+      </div>
     </div>
     <hr />
     <div class="section">
