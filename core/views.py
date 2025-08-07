@@ -21,7 +21,7 @@ from django.views.generic.edit import UpdateView
 from django.views.generic.list import ListView
 from sql_util.utils import Exists
 
-from core.models import Semester, UserProfile
+from core.models import EMAIL_PREFERENCE_FIELDS, Semester, UserProfile
 from dashboard.models import PSet, UploadedFile
 from otisweb.decorators import verified_required
 from otisweb.utils import AuthHttpRequest
@@ -313,13 +313,7 @@ class UserProfileUpdateView(
         context = super().get_context_data(**kwargs)
         form = context["form"]
 
-        context["email_fields"] = (
-            form["email_on_announcement"],
-            form["email_on_pset_complete"],
-            form["email_on_suggestion_processed"],
-            form["email_on_inquiry_complete"],
-            form["email_on_registration_processed"],
-        )
+        context["email_fields"] = (form[k] for k in EMAIL_PREFERENCE_FIELDS)
         context["display_fields"] = (
             form["show_bars"],
             form["show_completed_by_default"],

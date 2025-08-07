@@ -331,3 +331,12 @@ class UserProfile(models.Model):
 
     def __str__(self) -> str:
         return f"Prefs for {self.user.username}"
+
+
+EMAIL_PREFERENCE_FIELDS = (
+    "email_on_announcement",
+    "email_on_pset_complete",
+    "email_on_suggestion_processed",
+    "email_on_inquiry_complete",
+    "email_on_registration_processed",
+)

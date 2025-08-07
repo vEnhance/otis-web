@@ -14,7 +14,7 @@ from core.factories import (  # NOQA
     UserFactory,
     UserProfileFactory,
 )
-from core.models import Semester, Unit, UnitGroup
+from core.models import Semester, Unit, UnitGroup, UserProfile
 from dashboard.factories import PSetFactory
 from evans_django_tools.testsuite import EvanTestCase
 from roster.factories import (  # NOQA
@@ -867,6 +867,11 @@ class RosterTest(EvanTestCase):
                 "country": "USA",
                 "aops_username": "",
                 "agreement_form": agreement,
+                "email_on_announcement": False,
+                "email_on_pset_complete": True,
+                "email_on_suggestion_processed": False,
+                "email_on_inquiry_complete": False,
+                "email_on_registration_processed": False,
             },
             follow=True,
         )
@@ -894,6 +899,11 @@ class RosterTest(EvanTestCase):
                 "country": "USA",
                 "aops_username": "",
                 "agreement_form": agreement2,
+                "email_on_announcement": False,
+                "email_on_pset_complete": True,
+                "email_on_suggestion_processed": False,
+                "email_on_inquiry_complete": False,
+                "email_on_registration_processed": False,
             },
             follow=True,
         )
@@ -905,6 +915,13 @@ class RosterTest(EvanTestCase):
         self.assertEqual(alice.first_name, "Alice")
         self.assertEqual(alice.last_name, "Aardvark")
         self.assertEqual(alice.email, "myemail@example.com")
+
+        profile = UserProfile.objects.get(user=alice)
+        self.assertFalse(profile.email_on_announcement)
+        self.assertTrue(profile.email_on_pset_complete)
+        self.assertFalse(profile.email_on_suggestion_processed)
+        self.assertFalse(profile.email_on_inquiry_complete)
+        self.assertFalse(profile.email_on_registration_processed)
 
         resp = self.assertPost20X(
             "register",
@@ -920,6 +937,11 @@ class RosterTest(EvanTestCase):
                 "country": "USA",
                 "aops_username": "",
                 "agreement_form": agreement,
+                "email_on_announcement": False,
+                "email_on_pset_complete": True,
+                "email_on_suggestion_processed": False,
+                "email_on_inquiry_complete": False,
+                "email_on_registration_processed": False,
             },
             follow=True,
         )

@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.db.models.query_utils import Q
 from django.forms.forms import BaseForm
 
-from core.models import Unit
+from core.models import EMAIL_PREFERENCE_FIELDS, Unit
 from dashboard.models import PSet
 from roster.models import Student, StudentRegistration, UnitInquiry  # NOQA
 
@@ -162,6 +162,32 @@ class DecisionForm(forms.ModelForm):
         widget=forms.RadioSelect(),
     )
 
+    email_on_announcement = forms.BooleanField(
+        label="Receive emails for announcements",
+        help_text="Receive all-student announcements. If this is set to False, announcements will only appear on OTIS-WEB.",
+        required=False,
+    )
+    email_on_inquiry_complete = forms.BooleanField(
+        label="Receive email on petition processed",
+        help_text="Receive an email when your petition has been processed.",
+        required=False,
+    )
+    email_on_pset_complete = forms.BooleanField(
+        label="Receive email on completed problem set",
+        help_text="Receive an email when your problem sets are checked off.",
+        required=False,
+    )
+    email_on_suggestion_processed = forms.BooleanField(
+        label="Receive email on suggestion processed",
+        help_text="Receive an email when your problem suggestion status is updated.",
+        required=False,
+    )
+    email_on_registration_processed = forms.BooleanField(
+        label="Receive email on registration",
+        help_text="Receive an email when your registration for the year is approved.",
+        required=False,
+    )
+
     class Meta:
         model = StudentRegistration
         fields = (
@@ -176,7 +202,7 @@ class DecisionForm(forms.ModelForm):
             "agreement_form",
             "passcode",
             "parent_email",
-        )
+        ) + EMAIL_PREFERENCE_FIELDS
 
 
 class UserForm(forms.ModelForm):

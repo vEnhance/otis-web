@@ -39,7 +39,7 @@ from django.views.generic.edit import UpdateView
 from django.views.generic.list import ListView
 from prettytable import PrettyTable
 
-from core.models import Semester, Unit
+from core.models import EMAIL_PREFERENCE_FIELDS, Semester, Unit, UserProfile
 from dashboard.models import PSet
 from evans_django_tools import SUCCESS_LOG_LEVEL
 from otisweb.decorators import admin_required
@@ -460,6 +460,10 @@ def register(request: AuthHttpRequest) -> HttpResponse:
                 request.user.last_name = form.cleaned_data["surname"].strip()
                 request.user.email = form.cleaned_data["email_address"]
                 request.user.save()
+                UserProfile.objects.update_or_create(
+                    user=request.user,
+                    defaults={k: form.cleaned_data[k] for k in EMAIL_PREFERENCE_FIELDS},
+                )
                 messages.success(request, message="Submitted! Sit tight.")
                 return HttpResponseRedirect(reverse("index"))
     else:
@@ -480,6 +484,9 @@ def register(request: AuthHttpRequest) -> HttpResponse:
                 "gender",
             ):
                 initial_data_dict[k] = getattr(most_recent_reg, k)
+        profile, _ = UserProfile.objects.get_or_create(user=request.user)
+        for k in EMAIL_PREFERENCE_FIELDS:
+            initial_data_dict[k] = getattr(profile, k)
         form = DecisionForm(initial=initial_data_dict)
     context = {
         "title": f"{semester} Decision Form",
