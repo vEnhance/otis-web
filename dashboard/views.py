@@ -93,7 +93,7 @@ def portal(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
     ).count()
 
     # notifications
-    context["news"] = get_news(profile)
+    context["news"] = get_news(student)
     context["num_news"] = sum(len(_) for _ in context["news"].values())  # type: ignore
 
     context |= level_info

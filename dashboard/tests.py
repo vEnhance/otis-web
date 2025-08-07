@@ -124,9 +124,10 @@ class TestPortal(EvanTestCase):
         self.login(alice)
 
         # A bunch of context things to check
-        alice_profile = UserProfileFactory.create(user=alice.user)
-        alice_profile.last_notif_dismiss = datetime.datetime(2021, 6, 1, tzinfo=UTC)
-        alice_profile.save()
+        alice_profile = UserProfileFactory.create(
+            user=alice.user,
+            last_notif_dismiss=datetime.datetime(2021, 6, 1, tzinfo=UTC),
+        )
 
         # News items
         for y in (2020, 2020, 2020, 2021, 2022, 2022):
@@ -150,7 +151,7 @@ class TestPortal(EvanTestCase):
             SemesterDownloadFileFactory.create(semester=semester)
 
         with freeze_time("2021-07-01", tz_offset=0):
-            news = get_news(alice_profile)
+            news = get_news(alice)
             self.assertEqual(len(news["announcements"]), 1)
             self.assertEqual(len(news["downloads"]), 1)
             self.assertEqual(len(news["markets"]), 1)
@@ -158,7 +159,7 @@ class TestPortal(EvanTestCase):
             self.assertEqual(len(news["opals"]), 1)
 
         with freeze_time("2021-07-30", tz_offset=0):
-            news = get_news(alice_profile)
+            news = get_news(alice)
             self.assertEqual(len(news["announcements"]), 1)
             self.assertEqual(len(news["downloads"]), 0)
             self.assertEqual(len(news["markets"]), 0)
@@ -170,7 +171,7 @@ class TestPortal(EvanTestCase):
         alice_profile.save()
 
         with freeze_time("2021-07-02", tz_offset=0):
-            news = get_news(alice_profile)
+            news = get_news(alice)
             self.assertEqual(len(news["announcements"]), 0)
             self.assertEqual(len(news["downloads"]), 0)
             self.assertEqual(len(news["markets"]), 0)
@@ -179,7 +180,7 @@ class TestPortal(EvanTestCase):
 
         with freeze_time("2022-07-02", tz_offset=0):
             SemesterDownloadFileFactory.create(semester=semester)
-            news = get_news(alice_profile)
+            news = get_news(alice)
             self.assertEqual(len(news["announcements"]), 0)
             self.assertEqual(len(news["downloads"]), 1)
             self.assertEqual(len(news["markets"]), 2)
