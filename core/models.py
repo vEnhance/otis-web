@@ -255,22 +255,22 @@ class UserProfile(models.Model):
 
     show_bars = models.BooleanField(
         verbose_name="Level bars",
-        help_text="Displays the level bars on the main portal",
+        help_text="Displays the level bars on the main portal.",
         default=True,
     )
     show_completed_by_default = models.BooleanField(
         verbose_name="Show completed",
-        help_text="Displays completed units on the main portal by default",
+        help_text="Displays completed units on the main portal by default.",
         default=True,
     )
     show_locked_by_default = models.BooleanField(
         verbose_name="Show locked",
-        help_text="Displays locked units on the main portal by default",
+        help_text="Displays locked units on the main portal by default.",
         default=True,
     )
     show_artwork_on_curriculum = models.BooleanField(
         verbose_name="Show artwork",
-        help_text="Show the artwork on the curriculum table",
+        help_text="Show the artwork on the curriculum table.",
         default=True,
     )
     use_twemoji = models.BooleanField(
@@ -280,12 +280,12 @@ class UserProfile(models.Model):
     )
     dynamic_progress = models.BooleanField(
         verbose_name="Dynamic level meters progression",
-        help_text="Level meters show progression towards the next value to level up rather than a fixed max value",
+        help_text="Level meters show progression towards the next value to level up rather than a fixed max value.",
         default=False,
     )
     show_portal_instructions = models.BooleanField(
         verbose_name="Show portal instructions",
-        help_text="Show the instruction text above the units on the home page",
+        help_text="Show the instruction text above the units on the home page.",
         default=True,
     )
     show_unit_petitions = models.BooleanField(
@@ -296,7 +296,7 @@ class UserProfile(models.Model):
 
     email_on_announcement = models.BooleanField(
         verbose_name="Receive emails for announcements",
-        help_text="Receive all-student announcements. If this is set to False, announcements will only appear on OTIS-WEB",
+        help_text="Receive all-student announcements. If this is set to False, announcements will only appear on OTIS-WEB.",
         default=True,
     )
     email_on_inquiry_complete = models.BooleanField(
