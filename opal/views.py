@@ -63,8 +63,10 @@ class PuzzleList(VerifiedRequiredMixin, ListView[OpalPuzzle]):
         return self.hunt.get_queryset_for_user(self.request.user)
 
     def get_context_data(self, **kwargs: Any):
+        assert isinstance(self.request.user, User)
         context = super().get_context_data(**kwargs)
         context["hunt"] = self.hunt
+        context["has_early_access"] = has_early_access(self.request.user)
         return context
 
 

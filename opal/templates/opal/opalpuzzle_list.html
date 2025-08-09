@@ -42,7 +42,7 @@
     {% for puzzle in puzzles %}
       <tr>
         <td>
-          {% if puzzle.unlocked %}
+          {% if puzzle.unlocked or has_early_access %}
             {% if puzzle.is_metapuzzle %}
               <b>
                 <a href="{{ puzzle.get_absolute_url }}">{{ puzzle.title }}</a> (meta)
@@ -50,6 +50,7 @@
             {% else %}
               <a href="{{ puzzle.get_absolute_url }}">{{ puzzle.title }}</a>
             {% endif %}
+            {% if not puzzle.unlocked %}(unlocks at {{ puzzle.num_to_unlock }}){% endif %}
           {% else %}
             <span class="text-secondary">???</span>
           {% endif %}
