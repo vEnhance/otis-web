@@ -29,6 +29,10 @@ from .models import OpalAttempt, OpalHunt, OpalPuzzle
 logger = logging.getLogger(__name__)
 
 
+def has_early_access(u: User) -> bool:
+    return u.is_superuser or u.groups.filter(name="Testsolver").exists()
+
+
 class HuntList(ListView[OpalHunt]):
     model = OpalHunt
     context_object_name = "hunts"
@@ -46,8 +50,11 @@ class PuzzleList(VerifiedRequiredMixin, ListView[OpalPuzzle]):
         super().setup(request, *args, **kwargs)
         self.hunt = get_object_or_404(OpalHunt, slug=self.kwargs["slug"])
         if not self.hunt.has_started:
-            if request.user.is_superuser:
-                messages.warning(request, "This hunt hasn't started yet. Admin view.")
+            if has_early_access(request.user):
+                messages.warning(
+                    request,
+                    "This hunt hasn't started yet; this is an internal view for testsolvers and admins.",
+                )
             else:
                 raise PermissionDenied("This puzzle cannot be unlocked yet")
 
@@ -187,11 +194,12 @@ def person_log(request: AuthHttpRequest, slug: str, user_pk: int) -> HttpRespons
 def show_puzzle(request: AuthHttpRequest, hunt: str, slug: str) -> HttpResponse:
     puzzle = get_object_or_404(OpalPuzzle, hunt__slug=hunt, slug=slug)
     if not puzzle.can_view(request.user):
-        if not request.user.is_superuser:
+        if not has_early_access(request.user):
             raise PermissionDenied("This puzzle cannot be unlocked yet")
         elif request.method != "POST":
             messages.warning(
-                request, "Only letting you see this cuz you're an admin..."
+                request,
+                "Warning: this puzzle isn't unlocked yet. Showing for testsolvers and admins only.",
             )
 
     past_attempts = OpalAttempt.objects.filter(puzzle=puzzle, user=request.user)
