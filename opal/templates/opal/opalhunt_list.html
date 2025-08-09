@@ -54,10 +54,12 @@
               <a href="{{ hunt.author_signup_url }}">Sign up to contribute a puzzle</a>
             </li>
           {% endif %}
-          {% if request.user.is_superuser %}
+          {% if has_early_access %}
             <li>
-              <a href="{{ hunt.get_absolute_url }}">(view as admin)</a>
+              <a href="{{ hunt.get_absolute_url }}">(open as admin/testsolver)</a>
             </li>
+          {% endif %}
+          {% if request.user.is_superuser %}
             <li>
               <a href="{% url "admin:opal_opalhunt_change" hunt.pk %}">(edit)</a>
             </li>

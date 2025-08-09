@@ -40,6 +40,12 @@ class HuntList(ListView[OpalHunt]):
     def get_queryset(self) -> QuerySet[OpalHunt]:
         return OpalHunt.objects.all().order_by("-start_date")
 
+    def get_context_data(self, **kwargs: Any):
+        assert isinstance(self.request.user, User)
+        context = super().get_context_data(**kwargs)
+        context["has_early_access"] = has_early_access(self.request.user)
+        return context
+
 
 class PuzzleList(VerifiedRequiredMixin, ListView[OpalPuzzle]):
     hunt: OpalHunt
