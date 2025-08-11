@@ -7,19 +7,36 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0063_alter_userprofile_dynamic_progress_and_more'),
-        ('roster', '0111_alter_studentregistration_country'),
+        ("core", "0063_alter_userprofile_dynamic_progress_and_more"),
+        ("roster", "0111_alter_studentregistration_country"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='unitinquiry',
-            name='target_unit',
-            field=models.ForeignKey(blank=True, help_text='The unit to swap with (only used for swap actions).', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='swap_inquiries', to='core.unit'),
+            model_name="unitinquiry",
+            name="target_unit",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="The unit to swap with (only used for swap actions).",
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="swap_inquiries",
+                to="core.unit",
+            ),
         ),
         migrations.AlterField(
-            model_name='unitinquiry',
-            name='action_type',
-            field=models.CharField(choices=[('INQ_ACT_UNLOCK', 'Unlock now'), ('INQ_ACT_APPEND', 'Add for later'), ('INQ_ACT_DROP', 'Drop'), ('INQ_ACT_LOCK', 'Lock (Drop + Add for later)'), ('INQ_ACT_SWAP', 'Swap with another unit')], help_text='Describe the action you want to make.', max_length=15),
+            model_name="unitinquiry",
+            name="action_type",
+            field=models.CharField(
+                choices=[
+                    ('INQ_ACT_UNLOCK', 'Unlock now'),
+                    ('INQ_ACT_APPEND', 'Add for later'),
+                    ('INQ_ACT_DROP', 'Drop'),
+                    ('INQ_ACT_LOCK', 'Lock (Drop + Add for later)'),
+                    ('INQ_ACT_SWAP', 'Swap with another unit'),
+                ],
+                help_text='Describe the action you want to make.',
+                max_length=15,
+            ),
         ),
     ]
