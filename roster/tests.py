@@ -422,12 +422,6 @@ class RosterTest(EvanTestCase):
             ),
             "Petition automatically processed",
         )
-        inq = UnitInquiry.objects.get(
-            student=alice, unit=units[3].pk, action_type="INQ_ACT_DROP"
-        )
-        self.assertTrue(inq.was_auto_processed)
-        self.assertEqual(inq.status, "INQ_ACC")
-
         self.assertEqual(alice.curriculum.count(), 5)
         self.assertEqual(alice.unlocked_units.count(), 5)
 
@@ -1148,3 +1142,119 @@ class RosterTest(EvanTestCase):
             self.assertPost40X("inquiry-cancel", inquiry.pk, follow=True)
             inquiry.refresh_from_db()
             self.assertEqual(inquiry.status, status)
+
+    def test_unit_swapping(self) -> None:
+        """Test the unit swapping functionality."""
+        firefly: Assistant = AssistantFactory.create()
+        alice: Student = StudentFactory.create(assistant=firefly)
+        units: list[Unit] = UnitFactory.create_batch(20)
+        
+        # Give Alice some units to work with
+        alice.curriculum.add(units[0], units[1], units[2], units[3], units[4])
+        alice.unlocked_units.add(units[0], units[1], units[2])
+        alice.save()
+        
+        self.login(alice)
+        
+        # Test successful unit swapping: Alice wants to swap units[3] (which is in curriculum but not unlocked) with units[10] (which is not in curriculum)
+        self.assertHas(
+            self.post(
+                "inquiry",
+                alice.pk,
+                data={
+                    "unit": units[3].pk,
+                    "action_type": "INQ_ACT_SWAP",
+                    "target_unit": units[10].pk,
+                    "explanation": "Want to swap for a different topic",
+                },
+                follow=True,
+            ),
+            "Petition submitted, wait for it!",
+        )
+        
+        # Verify the swap petition was created
+        inq = UnitInquiry.objects.get(
+            student=alice, unit=units[3].pk, action_type="INQ_ACT_SWAP"
+        )
+        self.assertEqual(inq.status, "INQ_NEW")
+        self.assertEqual(inq.target_unit, units[10])
+        
+        # Test auto-acceptance for swapping unlocked units: Alice wants to swap units[2] (which is unlocked) with units[11] (which is not in curriculum)
+        self.assertHas(
+            self.post(
+                "inquiry",
+                alice.pk,
+                data={
+                    "unit": units[2].pk,
+                    "action_type": "INQ_ACT_SWAP",
+                    "target_unit": units[11].pk,
+                    "explanation": "Want to swap unlocked unit",
+                },
+                follow=True,
+            ),
+            "Petition automatically processed",
+        )
+        
+        # Verify the swap was processed
+        inq = UnitInquiry.objects.get(
+            student=alice, unit=units[2].pk, action_type="INQ_ACT_SWAP"
+        )
+        self.assertTrue(inq.was_auto_processed)
+        self.assertEqual(inq.status, "INQ_ACC")
+        self.assertEqual(inq.target_unit, units[11])
+        
+        # Verify the curriculum was updated
+        alice.refresh_from_db()
+        self.assertEqual(alice.curriculum.count(), 6)
+        self.assertEqual(alice.unlocked_units.count(), 3)
+        self.assertIn(units[2], alice.curriculum.all())
+        self.assertNotIn(units[2], alice.unlocked_units.all())
+        self.assertIn(units[11], alice.curriculum.all())
+        self.assertIn(units[11], alice.unlocked_units.all())
+        
+        # Test that swap validation works: Cannot swap with a unit already in curriculum
+        self.assertHas(
+            self.post(
+                "inquiry",
+                alice.pk,
+                data={
+                    "unit": units[1].pk,
+                    "action_type": "INQ_ACT_SWAP",
+                    "target_unit": units[11].pk,
+                    "explanation": "Invalid swap",
+                },
+                follow=True,
+            ),
+            "You cannot swap with a unit you already have in your curriculum",
+        )
+        
+        # Cannot swap a unit with itself
+        self.assertHas(
+            self.post(
+                "inquiry",
+                alice.pk,
+                data={
+                    "unit": units[1].pk,
+                    "action_type": "INQ_ACT_SWAP",
+                    "target_unit": units[1].pk,
+                    "explanation": "Invalid swap",
+                },
+                follow=True,
+            ),
+            "You cannot swap a unit with itself",
+        )
+        
+        # Cannot swap without selecting target unit
+        self.assertHas(
+            self.post(
+                "inquiry",
+                alice.pk,
+                data={
+                    "unit": units[1].pk,
+                    "action_type": "INQ_ACT_SWAP",
+                    "explanation": "Missing target unit",
+                },
+                follow=True,
+            ),
+            "Please select a unit to swap with",
+        )

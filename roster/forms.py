@@ -127,12 +127,18 @@ class InquiryForm(forms.ModelForm):
             Q(group__hidden=False) | Q(pk__in=curriculum_pks)
         )
         self.fields["unit"].queryset = queryset  # type: ignore
+        
+        target_queryset = Unit.objects.filter(group__hidden=False)
+        self.fields["target_unit"].queryset = target_queryset  # type: ignore
+        self.fields["target_unit"].required = False
+        self.fields["target_unit"].help_text = "Select the unit you want to swap with (only shown for swap actions)"
 
     class Meta:
         model = UnitInquiry
-        fields = ("unit", "action_type", "explanation")
+        fields = ("unit", "action_type", "target_unit", "explanation")
         widgets = {
             "explanation": forms.Textarea(attrs={"cols": 40, "rows": 3}),
+            "target_unit": forms.Select(attrs={"class": "form-control"}),
         }
 
 

@@ -344,6 +344,7 @@ class UnitInquiryAdmin(admin.ModelAdmin):
         "was_auto_processed",
         "action_type",
         "unit",
+        "target_unit",
         "student",
         "explanation",
     )
@@ -361,6 +362,7 @@ class UnitInquiryAdmin(admin.ModelAdmin):
     list_display_links = ("pk",)
     autocomplete_fields = (
         "unit",
+        "target_unit",
         "student",
     )
 

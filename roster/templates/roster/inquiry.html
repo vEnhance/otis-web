@@ -13,6 +13,10 @@
           padding: 0.1rem 0.25rem;
           font-size: 0.75rem;
       }
+      
+      #div_id_target_unit {
+          display: none;
+      }
   </style>
 {% endblock css %}
 {% block scripts %}
@@ -20,6 +24,30 @@
       $(document).ready(function() {
           $("#id_unit").chosen({
               placeholder_text: "...",
+          });
+          
+          function toggleTargetUnitField() {
+              var actionType = $("#id_action_type").val();
+              var targetUnitField = $("#div_id_target_unit");
+              
+              if (actionType === "INQ_ACT_SWAP") {
+                  targetUnitField.show();
+                  $("#id_target_unit").prop("required", true);
+                  if (!$("#id_target_unit").hasClass("chosen-select")) {
+                      $("#id_target_unit").chosen({
+                          placeholder_text: "Select unit to swap with...",
+                      });
+                  }
+              } else {
+                  targetUnitField.hide();
+                  $("#id_target_unit").prop("required", false);
+              }
+          }
+          
+          toggleTargetUnitField();
+          
+          $("#id_action_type").change(function() {
+              toggleTargetUnitField();
           });
       });
   </script>
@@ -56,6 +84,9 @@
             <td title="{{ inquiry.created_at|date:"r" }}">{{ inquiry.created_at|date:"M d" }}</td>
             <td>
               <strong>{{ inquiry.unit }}</strong>
+              {% if inquiry.action_type == "INQ_ACT_SWAP" and inquiry.target_unit %}
+                <br><small class="text-muted">↔ {{ inquiry.target_unit }}</small>
+              {% endif %}
             </td>
             <td>{{ inquiry.get_action_type_display }}</td>
             <td>
@@ -94,7 +125,7 @@
   <p>For your reference, here is the existing curriculum.</p>
   {% include "dashboard/curriculum_list.html" %}
   <h2>Instructions</h2>
-  <p>There are currently three permitted actions.</p>
+  <p>There are currently four permitted actions.</p>
   <ul>
     <li>
       <b>Unlock</b>:
@@ -113,6 +144,12 @@
       This removes a unit entirely from your list.
       (Be careful what you wish for!)
       Note that this does not automatically "replace" the dropped unit.
+    </li>
+    <li>
+      <b>Swap with another unit</b>:
+      This allows you to swap a current unit with another unit from the curriculum.
+      The current unit will be locked
+      and the new unit will be added to the curriculum and unlocked.
     </li>
   </ul>
   {% include "dashboard/back_link.html" %}
