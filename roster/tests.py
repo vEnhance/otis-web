@@ -1155,7 +1155,7 @@ class RosterTest(EvanTestCase):
         alice.save()
 
         self.login(alice)
-        
+
         # Test successful unit swapping: Alice wants to swap units[3] (which is in curriculum but not unlocked) with units[10] (which is not in curriculum)
         self.assertHas(
             self.post(
