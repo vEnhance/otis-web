@@ -358,7 +358,7 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
 
     # auto accepting criteria for unlocking
     if inquiry.action_type == "INQ_ACT_UNLOCK" and unlocked_count <= 9:
-        # when <6 past unlock (newbie) or a secret unit
+        # when less than 6 past unlock (newbie) or a secret unit (currently uses subject to determine this)
         auto_accept_criteria = (
             num_past_unlock_inquiries <= 6 or unit.group.subject == "K"
         )
