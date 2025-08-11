@@ -13,7 +13,7 @@
           padding: 0.1rem 0.25rem;
           font-size: 0.75rem;
       }
-      
+
       #div_id_target_unit {
           display: none;
       }
@@ -25,11 +25,11 @@
           $("#id_unit").chosen({
               placeholder_text: "...",
           });
-          
+
           function toggleTargetUnitField() {
               var actionType = $("#id_action_type").val();
               var targetUnitField = $("#div_id_target_unit");
-              
+
               if (actionType === "INQ_ACT_SWAP") {
                   targetUnitField.show();
                   $("#id_target_unit").prop("required", true);
@@ -43,9 +43,9 @@
                   $("#id_target_unit").prop("required", false);
               }
           }
-          
+
           toggleTargetUnitField();
-          
+
           $("#id_action_type").change(function() {
               toggleTargetUnitField();
           });
@@ -85,7 +85,8 @@
             <td>
               <strong>{{ inquiry.unit }}</strong>
               {% if inquiry.action_type == "INQ_ACT_SWAP" and inquiry.target_unit %}
-                <br><small class="text-muted">↔ {{ inquiry.target_unit }}</small>
+                <br>
+                <small class="text-muted">↔ {{ inquiry.target_unit }}</small>
               {% endif %}
             </td>
             <td>{{ inquiry.get_action_type_display }}</td>
