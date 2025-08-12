@@ -496,6 +496,7 @@ def invoice_handler(action: str, data: JSONData) -> JsonResponse:
     assert field in ("adjustment", "extras", "total_paid")
     entries = data["entries"]
     invoices_to_update: list[Invoice] = []
+    now = timezone.now()
 
     for inv in invoices:
         if inv.student.user is not None:
@@ -510,6 +511,7 @@ def invoice_handler(action: str, data: JSONData) -> JsonResponse:
                     if abs(getattr(inv, field) - amount) > 0.0001:
                         setattr(inv, field, amount)
                         invoices_to_update.append(inv)
+                        inv.updated_at = now
 
     if field == "total_paid":
         prefetch_related_objects(invoices_to_update, "paymentlog_set")
@@ -518,7 +520,9 @@ def invoice_handler(action: str, data: JSONData) -> JsonResponse:
             stripe_paid: Union[Decimal, int] = logs.aggregate(s=Sum("amount"))["s"] or 0
             inv.total_paid += stripe_paid
 
-    Invoice.objects.bulk_update(invoices_to_update, (field,), batch_size=25)
+    Invoice.objects.bulk_update(
+        invoices_to_update, (field, "updated_at"), batch_size=25
+    )
     return JsonResponse(
         {
             "updated_count": len(invoices_to_update),
