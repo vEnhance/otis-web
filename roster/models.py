@@ -443,8 +443,17 @@ class UnitInquiry(models.Model):
             ("INQ_ACT_APPEND", "Add for later"),
             ("INQ_ACT_DROP", "Drop"),
             ("INQ_ACT_LOCK", "Lock (Drop + Add for later)"),
+            ("INQ_ACT_SWAP", "Swap with another unit"),
         ),
         help_text="Describe the action you want to make.",
+    )
+    target_unit = models.ForeignKey(
+        Unit,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        help_text="The unit to swap with (only used for swap actions).",
+        related_name="swap_inquiries",
     )
     status = models.CharField(
         max_length=10,
@@ -473,6 +482,8 @@ class UnitInquiry(models.Model):
         verbose_name_plural = "Unit petitions"
 
     def __str__(self) -> str:
+        if self.action_type == "INQ_ACT_SWAP" and self.target_unit:
+            return f"Swap {str(self.unit)} with {str(self.target_unit)}"
         return f"{self.action_type} {str(self.unit)}"
 
     def run_accept(self):
@@ -487,6 +498,10 @@ class UnitInquiry(models.Model):
             self.student.unlocked_units.remove(unit)
         elif self.action_type == "INQ_ACT_LOCK":
             self.student.unlocked_units.remove(unit)
+        elif self.action_type == "INQ_ACT_SWAP" and self.target_unit:
+            self.student.unlocked_units.remove(unit)
+            self.student.curriculum.add(self.target_unit)
+            self.student.unlocked_units.add(self.target_unit)
         else:
             raise ValueError(f"No action {self.action_type}")
         self.status = "INQ_ACC"

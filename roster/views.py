@@ -274,6 +274,22 @@ class UpdateInvoice(
 def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Student):
     current_inquiries = UnitInquiry.objects.filter(student=student)
     inquiry.student = student
+
+    # Validate swap petitions
+    if inquiry.action_type == "INQ_ACT_SWAP":
+        if not inquiry.target_unit:
+            messages.error(request, "Please select a unit to swap with.")
+            return
+        if inquiry.unit == inquiry.target_unit:
+            messages.error(request, "You cannot swap a unit with itself.")
+            return
+        if inquiry.target_unit in student.curriculum.all():
+            messages.error(
+                request,
+                "You cannot swap with a unit you already have in your curriculum.",
+            )
+            return
+
     # check if exists already and created recently
     if current_inquiries.filter(
         unit=inquiry.unit,
@@ -358,6 +374,8 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
     elif inquiry.action_type == "INQ_ACT_DROP":
         # auto dropping locked units
         auto_accept_criteria = not student.unlocked_units.contains(unit)
+    elif inquiry.action_type == "INQ_ACT_SWAP":
+        auto_accept_criteria = student.unlocked_units.contains(unit)
     else:
         auto_accept_criteria = False
 
