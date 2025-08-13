@@ -217,6 +217,8 @@ class OpalHunt(models.Model):
     )
     story_text_rendered = RenderedMarkdownField()
 
+    thanks = models.TextField(help_text="Thanks to people who helped.", blank=True)
+
     objects = models.Manager()
     live = LiveOpalHuntManager()
 
