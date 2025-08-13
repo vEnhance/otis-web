@@ -650,7 +650,10 @@ def email_handler(action: str, data: JSONData) -> JsonResponse:
     return JsonResponse(
         {
             "students": list(
-                Student.objects.filter(semester__active=True).values(
+                Student.objects.filter(
+                    semester__active=True,
+                    user__profile__email_on_announcement=True,
+                ).values(
                     "user__first_name",
                     "user__last_name",
                     "user__username",

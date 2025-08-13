@@ -5,7 +5,7 @@ from django.test.utils import override_settings
 
 from arch.factories import HintFactory, ProblemFactory
 from arch.models import Hint, Problem
-from core.factories import SemesterFactory, UnitFactory, UserFactory
+from core.factories import SemesterFactory, UnitFactory, UserFactory, UserProfileFactory
 from dashboard.factories import PSetFactory
 from dashboard.models import Announcement
 from evans_django_tools.testsuite import EvanTestCase
@@ -68,6 +68,11 @@ class TestAincradWithSetup(EvanTestCase):
             user__email="edge@wor.th",
             semester=active_semester,
         )
+        UserProfileFactory.create(user=alice.user, email_on_announcement=True)
+        UserProfileFactory.create(user=bob.user, email_on_announcement=True)
+        UserProfileFactory.create(user=carol.user, email_on_announcement=True)
+        UserProfileFactory.create(user=david.user, email_on_announcement=False)
+        UserProfileFactory.create(user=eve.user, email_on_announcement=True)
         old_alice = StudentFactory.create(user=alice.user, semester=old_semester)
 
         submitted_unit, requested_unit = UnitFactory.create_batch(2)
@@ -308,12 +313,12 @@ class TestAincradWithSetup(EvanTestCase):
             },
         )
         students = resp.json()["students"]
-        self.assertEqual(len(students), 5)
+        self.assertEqual(len(students), 4)
         for s in students:
             if s["user__username"] == "eve":
                 self.assertEqual(s["user__email"], "edge@wor.th")
             else:
-                for x in ("alice", "bob", "carol", "david"):
+                for x in ("alice", "bob", "carol"):
                     if s["user__username"] == x:
                         self.assertEqual(s["user__email"], f"{x}@example.org")
                         break
