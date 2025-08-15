@@ -502,7 +502,7 @@ def invoice_handler(action: str, data: JSONData) -> JsonResponse:
         if inv.student.user is not None:
             first_name = sanitize(inv.student.user.first_name)
             last_name = sanitize(inv.student.user.last_name, last=True)
-            email = inv.student.user.email
+            email = inv.student.user.email.lower()
             pk = inv.student.pk
             keys_to_try = (str(pk), email, f"{first_name}.{last_name}")
             for k in keys_to_try:
