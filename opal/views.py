@@ -41,9 +41,12 @@ class HuntList(ListView[OpalHunt]):
         return OpalHunt.objects.all().order_by("-start_date")
 
     def get_context_data(self, **kwargs: Any):
-        assert isinstance(self.request.user, User)
         context = super().get_context_data(**kwargs)
-        context["has_early_access"] = has_early_access(self.request.user)
+        context["has_early_access"] = (
+            has_early_access(self.request.user)
+            if isinstance(self.request.user, User)
+            else False
+        )
         return context
 
 
