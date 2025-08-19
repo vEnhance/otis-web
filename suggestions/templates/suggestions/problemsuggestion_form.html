@@ -30,10 +30,12 @@
           ⏳ This suggestion has been submitted and is <b>pending
           approval</b>.
         </p>
-      {% elif suggestion.status == "SUGG_NOK" or suggestion.status == "SUGG_OK" %}
+      {% elif suggestion.status == "SUGG_OK" %}
         <p>
           💜 This suggestion has been <b>accepted</b>! Thank you.
         </p>
+      {% elif suggestion.status == "SUGG_NOK" %}
+        <p>This suggestion has been processed. No further action needed.</p>
       {% elif suggestion.status == "SUGG_REJ" %}
         <p>❌ This suggestion was not accepted. Thanks anyway.</p>
       {% endif %}

@@ -13,7 +13,9 @@
             EDITS REQUESTED
           {% elif suggestion.status == "SUGG_NEW" %}
             Pending
-          {% elif suggestion.status == "SUGG_NOK" or suggestion.status == "SUGG_OK" %}
+          {% elif suggestion.status == "SUGG_NOK" %}
+            Processed
+          {% elif suggestion.status == "SUGG_OK" %}
             Approved
           {% elif suggestion.status == "SUGG_REJ" %}
             Rejected
