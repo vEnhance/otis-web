@@ -149,7 +149,7 @@ def certify(
             "level_number": level_info["level_number"],
             "level_name": level_info["level_name"],
             "checksum": student.get_checksum(settings.CERT_HASH_KEY),
-            "target_url": f"{request.scheme}//{request.get_host()}"
+            "target_url": f"{request.scheme}://{request.get_host()}"
             + reverse("certify", args=(student.pk, checksum)),
         }
         return render(request, "dashboard/certify.html", context)
