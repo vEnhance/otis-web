@@ -22,7 +22,9 @@
   frametitle={$\diamondsuit$ OPAL Hunt \thehuntnumber}]
   \centering\huge\sffamily\bfseries\color{white} \thepuzzletitle
 \end{mdframed}}
-\newenvironment{flavor}{\color{red!50!black}\sffamily\itshape}{}
+\newenvironment{flavortext}%
+{\trivlist\nopagebreak\parindent0pt\item\relax\obeylines\color{red!50!black}\sffamily\itshape}%
+  {\par \nopagebreak\endtrivlist}
 \newcommand{\hrulebar}{\bgroup\color{red!30!black}
 \par\hspace{\fill}\rule{0.95\linewidth}{.7pt}\hspace{\fill}
 \par\nointerlineskip \vspace{\baselineskip}\egroup}
@@ -41,10 +43,10 @@
 
 \begin{document}
 \makeheader
-\begin{flavor}
+\begin{flavortext}
   Enter flavor text here.
   You can delete this part if your puzzle has no flavortext.
-\end{flavor}
+\end{flavortext}
 
 \puzzlestart
 
