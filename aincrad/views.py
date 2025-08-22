@@ -671,7 +671,13 @@ def opal_handler(action: str, data: JSONData) -> JsonResponse:
     return JsonResponse(
         {
             "puzzles": list(
-                OpalPuzzle.objects.all().values("pk", "hunt__slug", "slug", "content")
+                OpalPuzzle.objects.all().values(
+                    "pk",
+                    "hunt__slug",
+                    "slug",
+                    "content",
+                    "is_metapuzzle",
+                )
             )
         }
     )

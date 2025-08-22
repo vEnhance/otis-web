@@ -759,7 +759,9 @@ class TestAincrad(EvanTestCase):
         self.assertEqual(a.content_rendered, "<p>Couldn't be me!</p>")
 
     def test_opal_handler(self) -> None:
-        OpalPuzzleFactory.create(hunt__slug="teammate", slug="tetrogram")
+        OpalPuzzleFactory.create(
+            hunt__slug="teammate", slug="tetrogram", is_metapuzzle=True
+        )
         resp = self.assertPost20X(
             "api",
             json={
@@ -771,3 +773,4 @@ class TestAincrad(EvanTestCase):
         puzzle_json = resp.json()["puzzles"][0]
         self.assertEqual(puzzle_json["hunt__slug"], "teammate")
         self.assertEqual(puzzle_json["slug"], "tetrogram")
+        self.assertEqual(puzzle_json["is_metapuzzle"], True)
