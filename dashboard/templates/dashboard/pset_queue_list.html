@@ -30,7 +30,7 @@
               {% endif %}
             {% endif %}
           </td>
-          <td>{{ pset.upload.created_at|timezone:"UTC" }}</td>
+          <td>{{ pset.upload.created_at|timezone:"UTC"|date:"Y-m-d H:i" }}</td>
           <td class="text-end">
             {% if request.user.is_staff %}
               <a href="{% url "admin:dashboard_pset_change" pset.pk %}">{{ pset.pk }}</a>
