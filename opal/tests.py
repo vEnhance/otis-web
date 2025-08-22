@@ -1,6 +1,7 @@
 import datetime
 import re
 
+from django.core.exceptions import SuspiciousOperation
 from freezegun.api import freeze_time
 
 from core.factories import GroupFactory, UserFactory
@@ -143,7 +144,10 @@ class TestOPALModels(EvanTestCase):
     def test_puzzle_upload(self):
         puzzle = OpalPuzzleFactory.create(hunt__slug="hunt", slug="sudoku")
         self.assertFalse(puzzle.is_uploaded)
-        filename = puzzle_file_name(puzzle, "file_from_evans_laptop.pdf")
+        self.assertRaises(
+            SuspiciousOperation, puzzle_file_name, puzzle, "wrong_file.pdf"
+        )
+        filename = puzzle_file_name(puzzle, "sudoku.pdf")
         self.assertTrue(
             re.match(r"opals\/hunt\/[a-z0-9]+\/sudoku.pdf", filename), filename
         )

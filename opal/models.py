@@ -5,6 +5,7 @@ from typing import Any
 
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.exceptions import SuspiciousOperation
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.db.models.query import QuerySet
@@ -68,7 +69,8 @@ class OpalAttempt(models.Model):
 
 
 def puzzle_file_name(instance: "OpalPuzzle", filename: str) -> str:
-    del filename
+    if filename != instance.slug + ".pdf":
+        raise SuspiciousOperation(f"{filename} does not match {instance.slug}")
     hexstring = pbkdf2_hmac(
         "sha256",
         (settings.OPAL_HASH_KEY + str(instance.pk)).encode("utf-8"),
