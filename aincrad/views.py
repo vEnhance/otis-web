@@ -24,6 +24,7 @@ from unidecode import unidecode
 from arch.models import Hint, Problem
 from dashboard.models import Announcement, PSet
 from hanabi.models import HanabiContest, HanabiParticipation, HanabiPlayer, HanabiReplay
+from opal.models import OpalPuzzle
 from payments.models import Job
 from roster.models import (
     Invoice,
@@ -664,6 +665,18 @@ def email_handler(action: str, data: JSONData) -> JsonResponse:
     )
 
 
+def opal_handler(action: str, data: JSONData) -> JsonResponse:
+    del action
+    del data
+    return JsonResponse(
+        {
+            "puzzles": list(
+                OpalPuzzle.objects.all().values("pk", "hunt__slug", "slug", "content")
+            )
+        }
+    )
+
+
 def announcement_handler(action: str, data: JSONData) -> JsonResponse:
     del action
     announcement, is_new = Announcement.objects.update_or_create(
@@ -721,6 +734,8 @@ def api(request: HttpRequest) -> JsonResponse:
         return email_handler(action, data)
     elif action == "announcement_write":
         return announcement_handler(action, data)
+    elif action == "opal_list":
+        return opal_handler(action, data)
     else:
         return JsonResponse({"error": "No such command"}, status=400)
 

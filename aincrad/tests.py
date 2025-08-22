@@ -11,6 +11,7 @@ from dashboard.models import Announcement
 from evans_django_tools.testsuite import EvanTestCase
 from hanabi.factories import HanabiContestFactory, HanabiPlayerFactory
 from hanabi.models import HanabiParticipation, HanabiReplay
+from opal.factories import OpalPuzzleFactory
 from payments.factories import PaymentLogFactory
 from roster.factories import (
     InvoiceFactory,
@@ -756,3 +757,17 @@ class TestAincrad(EvanTestCase):
         a = Announcement.objects.get(slug="thinking")
         self.assertEqual(a.subject, "Deep in thought")
         self.assertEqual(a.content_rendered, "<p>Couldn't be me!</p>")
+
+    def test_opal_handler(self) -> None:
+        OpalPuzzleFactory.create(hunt__slug="teammate", slug="tetrogram")
+        resp = self.assertPost20X(
+            "api",
+            json={
+                "action": "opal_list",
+                "token": EXAMPLE_PASSWORD,
+            },
+        )
+        self.assertEqual(len(resp.json()["puzzles"]), 1)
+        puzzle_json = resp.json()["puzzles"][0]
+        self.assertEqual(puzzle_json["hunt__slug"], "teammate")
+        self.assertEqual(puzzle_json["slug"], "tetrogram")
