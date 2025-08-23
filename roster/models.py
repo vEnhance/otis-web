@@ -258,7 +258,7 @@ class Student(models.Model):
                     curriculum = curriculum.order_by("group__subject", "position")
                 else:
                     curriculum = curriculum.order_by("position")
-            except:
+            except Exception:
                 curriculum = curriculum.order_by("position")
         else:
             curriculum = curriculum.order_by("position")
