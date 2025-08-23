@@ -147,13 +147,9 @@ def leaderboard(request: AuthHttpRequest, slug: str) -> HttpResponse:
             meta_solved_time[user_pk] = attempt_dict["created_at"]
 
     context["hunt"] = hunt
-    context["puzzle_stats"] = (
-        OpalPuzzle.objects.filter(hunt=hunt)
-        .annotate(
-            num_solves=SubqueryCount("opalattempt", filter=Q(is_correct=True)),
-            num_total_attempts=SubqueryCount("opalattempt"),
-        )
-        .values("num_solves", "num_total_attempts", "title", "slug", "order")
+    context["puzzles"] = OpalPuzzle.objects.filter(hunt=hunt).annotate(
+        num_solves=SubqueryCount("opalattempt", filter=Q(is_correct=True)),
+        num_total_attempts=SubqueryCount("opalattempt"),
     )
 
     MAX_TIME_IN_FUTURE = datetime.datetime(

@@ -20,9 +20,15 @@
       <th>#attempts</th>
       <th>Puzzle</th>
     </tr>
-    {% for puzzle in puzzle_stats %}
+    {% for puzzle in puzzles %}
       <tr>
-        <td class="text-end">{{ puzzle.order }}</td>
+        <td class="text-end">
+          {% if puzzle.content %}
+            <a href="{{ puzzle.content.url }}">{{ puzzle.order }}</a>
+          {% else %}
+            {{ puzzle.order }}
+          {% endif %}
+        </td>
         <td class="text-end">
           <b>{{ puzzle.num_solves }}</b>
         </td>
