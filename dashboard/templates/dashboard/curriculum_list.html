@@ -26,12 +26,17 @@
 
         let sorted = false;
         let originalOrder = [];
-        
+
         // Check if user has auto-sort enabled
-        {% if profile.sort_units_by_subject %}
-            sorted = true;
-        {% endif %}
-        
+        {
+            %
+            if profile.sort_units_by_subject %
+        }
+        sorted = true;
+        {
+            % endif %
+        }
+
         $("#sort-by-subject").click(function() {
             const list = document.getElementsByClassName("curriculum")[0];
             const tbody = list.querySelector("tbody");
