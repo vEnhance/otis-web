@@ -4,7 +4,7 @@ import os
 from _pydecimal import Decimal
 from datetime import timedelta
 from hashlib import pbkdf2_hmac
-from typing import TypedDict, Optional, Any
+from typing import Any, Optional, TypedDict
 
 from django.contrib.auth.models import Group, User
 from django.core.exceptions import ObjectDoesNotExist
