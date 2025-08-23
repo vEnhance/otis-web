@@ -3,7 +3,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("core", "0063_alter_userprofile_dynamic_progress_and_more"),
     ]
