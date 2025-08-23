@@ -248,9 +248,11 @@ class Student(models.Model):
         else:
             return False
 
-    def generate_curriculum_rows(self, user: Optional[Any] = None) -> list[CurriculumRowTypeDict]:
+    def generate_curriculum_rows(
+        self, user: Optional[Any] = None
+    ) -> list[CurriculumRowTypeDict]:
         curriculum = self.generate_curriculum_queryset()
-        
+
         if user:
             try:
                 profile, _ = UserProfile.objects.get_or_create(user=user)
@@ -262,7 +264,7 @@ class Student(models.Model):
                 curriculum = curriculum.order_by("position")
         else:
             curriculum = curriculum.order_by("position")
-            
+
         unlocked_units_pks = self.unlocked_units.values_list("pk", flat=True)
 
         original_curriculum = self.generate_curriculum_queryset().order_by("position")
