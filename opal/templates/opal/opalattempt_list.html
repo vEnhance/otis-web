@@ -11,9 +11,10 @@
 {% block layout-content %}
   {% if puzzle.credits %}<p class="fst-italic">{{ puzzle.credits }}</p>{% endif %}
   <p>
-    <a class="btn btn-primary" href="{{ puzzle.get_absolute_url }}">Puzzle</a>
+    {% if puzzle.content %}<a class="btn btn-primary" href="{{ puzzle.content.url }}">Download PDF</a>{% endif %}
     <a class="btn btn-info"
-       href="{% url "opal-leaderboard" puzzle.hunt.slug %}">Leaderboard</a>
+       href="{% url "opal-leaderboard" puzzle.hunt.slug %}">Hunt leaderboard</a>
+    <a class="btn btn-secondary" href="{{ puzzle.get_absolute_url }}">Puzzle page</a>
   </p>
   <p>
     There were <b>{{ num_correct }} solves</b> and <b>{{ num_total }} guesses</b>.

@@ -17,16 +17,20 @@
     <tr class="table-dark">
       <th>Order</th>
       <th>Solves</th>
-      <th>#attempts</th>
       <th>Puzzle</th>
     </tr>
-    {% for puzzle in puzzle_stats %}
+    {% for puzzle in puzzles %}
       <tr>
-        <td class="text-end">{{ puzzle.order }}</td>
         <td class="text-end">
-          <b>{{ puzzle.num_solves }}</b>
+          {% if puzzle.content %}
+            <a href="{{ puzzle.content.url }}">{{ puzzle.order }} ({{ puzzle.num_to_unlock }}🔓)</a>
+          {% else %}
+            {{ puzzle.order }} ({{ puzzle.num_to_unlock }}🔓)
+          {% endif %}
         </td>
-        <td class="text-end">{{ puzzle.num_total_attempts }}</td>
+        <td class="text-end">
+          <b>{{ puzzle.num_solves }}</b> / {{ puzzle.num_total_attempts }}
+        </td>
         <td>
           <a href="{% url "opal-attempts-list" hunt.slug puzzle.slug %}">{{ puzzle.title }}</a>
         </td>
