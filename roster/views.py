@@ -177,7 +177,7 @@ def advance(request: HttpRequest, student_pk: int) -> Any:
         "title": f"Advance {student.name}",
         "form": form,
         "student": student,
-        "curriculum": student.generate_curriculum_rows(),
+        "curriculum": student.generate_curriculum_rows(request.user),
     }
     if student.semester.uses_legacy_pset_system:
         uploads = student.uploadedfile_set  # type: ignore
@@ -404,7 +404,7 @@ def inquiry(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
 
     context["inquiries"] = UnitInquiry.objects.filter(student=student)
     context["student"] = student
-    context["curriculum"] = student.generate_curriculum_rows()
+    context["curriculum"] = student.generate_curriculum_rows(request.user)
 
     return render(request, "roster/inquiry.html", context)
 
