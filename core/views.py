@@ -298,6 +298,7 @@ class UserProfileUpdateView(
         "show_portal_instructions",
         "show_unit_petitions",
         "use_twemoji",
+        "sort_units_by_subject",
     )
     success_url = reverse_lazy("profile")
     object: UserProfile
@@ -320,6 +321,7 @@ class UserProfileUpdateView(
             form["show_locked_by_default"],
             form["show_artwork_on_curriculum"],
             form["dynamic_progress"],
+            form["sort_units_by_subject"],
         )
         context["advanced_fields"] = (
             form["show_portal_instructions"],
