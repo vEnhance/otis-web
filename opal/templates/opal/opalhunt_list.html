@@ -56,10 +56,13 @@
           {% endif %}
           {% if has_early_access %}
             <li>
-              <a href="{{ hunt.get_absolute_url }}">(open as admin/testsolver)</a>
+              <a href="{{ hunt.get_absolute_url }}">(open testsolver)</a>
             </li>
           {% endif %}
           {% if request.user.is_superuser %}
+            <li>
+              <a href="{% url "admin:opal_opalhunt_change" hunt.pk %}">(leaderboard)</a>
+            </li>
             <li>
               <a href="{% url "admin:opal_opalhunt_change" hunt.pk %}">(edit)</a>
             </li>
