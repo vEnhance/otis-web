@@ -1158,3 +1158,122 @@ class RegTest(EvanTestCase):
             self.assertEqual(build_students(StudentRegistration.objects.all()), 1)
             carol: Student = Student.objects.get(user__username="carol")
             self.assertEqual(carol.invoice.total_owed, 240)
+
+
+class AdTest(EvanTestCase):
+    def test_ad_list_view_access(self) -> None:
+        user = UserFactory.create()
+        self.assertGet30X("ad-list")
+        verified_group, _ = Group.objects.get_or_create(name="Verified")
+        user.groups.add(verified_group)
+        self.login(user)
+        self.assertGet20X("ad-list")
+
+    def test_ad_list_only_shows_enabled(self) -> None:
+        user = UserFactory.create()
+        verified_group, _ = Group.objects.get_or_create(name="Verified")
+        user.groups.add(verified_group)
+
+        enabled_assistant: Assistant = AssistantFactory.create(
+            ad_enabled=True,
+            ad_url="https://example.com/enabled",
+            ad_email="enabled@example.com",
+            ad_blurb="I am alive.",
+        )
+        disabled_assistant: Assistant = AssistantFactory.create(
+            ad_enabled=False,
+            ad_url="https://example.com/disabled",
+            ad_email="disabled@example.com",
+            ad_blurb="I am not alive.",
+        )
+
+        self.login(user)
+        resp = self.assertGet20X("ad-list")
+
+        self.assertHas(resp, enabled_assistant.name)
+        self.assertHas(resp, "enabled@example.com")
+        self.assertHas(resp, "I am alive.")
+
+        self.assertNotHas(resp, disabled_assistant.name)
+        self.assertNotHas(resp, "disabled@example.com")
+        self.assertNotHas(resp, "I am not alive.")
+
+    def test_ad_update_view_access_control(self) -> None:
+        regular_user = UserFactory.create()
+        assistant_user = UserFactory.create(is_staff=True)
+        AssistantFactory.create(user=assistant_user)
+
+        self.assertGet30X("ad-update")
+
+        self.login(regular_user)
+        self.assertGet30X("ad-update")
+
+        self.login(assistant_user)
+        self.assertGet20X("ad-update")
+
+    def test_ad_update(self) -> None:
+        assistant_user = UserFactory.create(is_staff=True)
+        assistant: Assistant = AssistantFactory.create(
+            user=assistant_user,
+            ad_enabled=False,
+            ad_url="",
+            ad_email="",
+            ad_blurb="",
+        )
+
+        self.login(assistant_user)
+        verified_group, _ = Group.objects.get_or_create(name="Verified")
+        assistant_user.groups.add(verified_group)
+        self.assertGet20X("ad-list")
+
+        self.assertGet20X("ad-update")
+        resp = self.assertPost20X(
+            "ad-update",
+            data={
+                "ad_enabled": True,
+                "ad_url": "https://evanchen.cc/",
+                "ad_email": "overlord@evanchen.cc",
+                "ad_blurb": "I'm an ovie!",
+            },
+            follow=True,
+        )
+        messages = [m.message for m in resp.context["messages"]]
+        self.assertIn("Updated successfully.", messages)
+
+        assistant.refresh_from_db()
+        self.assertTrue(assistant.ad_enabled)
+        self.assertEqual(assistant.ad_url, "https://evanchen.cc/")
+        self.assertEqual(assistant.ad_email, "overlord@evanchen.cc")
+        self.assertEqual(assistant.ad_blurb, "I'm an ovie!")
+
+    def test_ad_update_unauthorized_assistant(self) -> None:
+        assistant1_user = UserFactory.create(is_staff=True)
+        assistant2_user = UserFactory.create(is_staff=True)
+        assistant1: Assistant = AssistantFactory.create(user=assistant1_user)
+        assistant2: Assistant = AssistantFactory.create(user=assistant2_user)
+
+        self.login(assistant1_user)
+        resp = self.get("ad-update")
+        self.assertEqual(resp.context["assistant"], assistant1)
+
+        self.login(assistant2_user)
+        resp = self.get("ad-update")
+        self.assertEqual(resp.context["assistant"], assistant2)
+
+    def test_ad_list_edit_link_visibility(self) -> None:
+        assistant_user = UserFactory.create(is_staff=True)
+        other_user = UserFactory.create()
+
+        verified_group, _ = Group.objects.get_or_create(name="Verified")
+        assistant_user.groups.add(verified_group)
+        other_user.groups.add(verified_group)
+
+        AssistantFactory.create(user=assistant_user, ad_enabled=True)
+
+        self.login(assistant_user)
+        resp = self.assertGet20X("ad-list")
+        self.assertHas(resp, "(edit)")
+
+        self.login(other_user)
+        resp = self.assertGet20X("ad-list")
+        self.assertNotHas(resp, "(edit)")
