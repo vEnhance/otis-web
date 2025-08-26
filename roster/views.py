@@ -782,6 +782,14 @@ class AdList(VerifiedRequiredMixin, ListView[Assistant]):
     def get_queryset(self) -> QuerySet[Assistant]:
         return Assistant.objects.filter(ad_enabled=True)
 
+    def get_context_data(self, **kwargs: Any):
+        context = super().get_context_data(**kwargs)
+        try:
+            context["current_assistant"] = Assistant.objects.get(user=self.request.user)
+        except Assistant.DoesNotExist:
+            context["current_assistant"] = None
+        return context
+
 
 class AdUpdate(StaffuserRequiredMixin, UpdateView[Assistant, BaseModelForm[Assistant]]):
     model = Assistant

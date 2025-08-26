@@ -8,6 +8,23 @@
     This page lists authorized instructors
     who have additionally agreed to be contacted with additional requests.
   </p>
+  {% if current_assistant %}
+    {% if current_assistant.ad_enabled %}
+      <p>
+        You can <a href="{% url "ad-update" %}">update your listing below</a> if you want.
+      </p>
+    {% else %}
+      <div class="alert alert-primary">
+        You are currently <strong>not</strong> on the listing below.
+        To add yourself, <a href="{% url "ad-update" %}">enable your entry</a>.
+      </div>
+    {% endif %}
+  {% elif request.user.is_staff %}
+    <p>
+      Although you are a staff member, you are not registered as an authorized instructor.
+      Contact Evan if you think that's a mistake.
+    </p>
+  {% endif %}
   {% for assistant in assistants %}
     <hr />
     <h2>

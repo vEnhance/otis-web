@@ -1198,6 +1198,18 @@ class AdTest(EvanTestCase):
         self.assertNotHas(resp, "disabled@example.com")
         self.assertNotHas(resp, "I am not alive.")
 
+        self.assertNotHas(resp, "update your listing")
+        self.assertNotHas(resp, "enable your entry")
+        self.assertNotHas(resp, "you are not registered as an authorized instructor")
+
+        random_staff = UserFactory.create(is_staff=True)
+        random_staff.groups.add(verified_group)
+        self.login(random_staff)
+        resp = self.assertGet20X("ad-list")
+        self.assertNotHas(resp, "update your listing")
+        self.assertNotHas(resp, "enable your entry")
+        self.assertHas(resp, "you are not registered as an authorized instructor")
+
     def test_ad_update_view_access_control(self) -> None:
         regular_user = UserFactory.create()
         assistant_user = UserFactory.create(is_staff=True)
@@ -1224,7 +1236,8 @@ class AdTest(EvanTestCase):
         self.login(assistant_user)
         verified_group, _ = Group.objects.get_or_create(name="Verified")
         assistant_user.groups.add(verified_group)
-        self.assertGet20X("ad-list")
+        resp = self.assertGet20X("ad-list")
+        self.assertHas(resp, "enable your entry")
 
         self.assertGet20X("ad-update")
         resp = self.assertPost20X(
@@ -1245,6 +1258,9 @@ class AdTest(EvanTestCase):
         self.assertEqual(assistant.ad_url, "https://evanchen.cc/")
         self.assertEqual(assistant.ad_email, "overlord@evanchen.cc")
         self.assertEqual(assistant.ad_blurb, "I'm an ovie!")
+
+        resp = self.assertGet20X("ad-list")
+        self.assertHas(resp, "update your listing below")
 
     def test_ad_update_unauthorized_assistant(self) -> None:
         assistant1_user = UserFactory.create(is_staff=True)
