@@ -30,4 +30,6 @@ urlpatterns = [
     path(r"instructors/", views.StudentAssistantList.as_view(), name="instructors"),
     path(r"link-assistant/", views.link_assistant, name="link-assistant"),
     path(r"discord-lookup/", views.discord_lookup, name="discord-lookup"),
+    path(r"ais/", views.AdList.as_view(), name="ad-list"),
+    path(r"advertise/", views.AdUpdate.as_view(), name="ad-update"),
 ]

@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% load static %}
+{% block title %}
+  Authorized instructor listing
+{% endblock title %}
+{% block layout-content %}
+  <p>
+    This page lists authorized instructors
+    who have additionally agreed to be contacted with additional requests.
+  </p>
+  {% for assistant in assistants %}
+    <hr />
+    <h2>
+      {{ assistant.name }}
+      {% if assistant.user == request.user %}
+        <a href="{% url "ad-update" %}">(edit)</a>
+      {% endif %}
+    </h2>
+    {% if assistant.ad_blurb %}<div>{{ assistant.ad_blurb|linebreaks }}</div>{% endif %}
+    <div class="font-monospace">
+      {% if assistant.ad_url %}
+        <p>
+          ⛺ <a href="{{ assistant.ad_url }}">{{ assistant.ad_url }}</a>
+        </p>
+      {% endif %}
+      {% if assistant.ad_url %}
+        <p>
+          📧 <a class="font-mono" href="{{ assistant.ad_email }}">{{ assistant.ad_email }}</a>
+        </p>
+      {% endif %}
+    </div>
+  {% endfor %}
+{% endblock layout-content %}

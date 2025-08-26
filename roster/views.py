@@ -43,6 +43,7 @@ from core.models import EMAIL_PREFERENCE_FIELDS, Semester, Unit, UserProfile
 from dashboard.models import PSet
 from evans_django_tools import SUCCESS_LOG_LEVEL
 from otisweb.decorators import admin_required
+from otisweb.mixins import VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest
 from roster.forms import LinkAssistantForm
 from roster.models import Assistant
@@ -770,3 +771,32 @@ def discord_lookup(request: HttpRequest) -> HttpResponse:
         context["lookup"] = None
     context["form"] = form
     return render(request, "roster/discord_lookup.html", context)
+
+
+class AdList(VerifiedRequiredMixin, ListView[Assistant]):
+    model = Assistant
+    template_name = "roster/ad_list.html"
+
+    context_object_name = "assistants"
+
+    def get_queryset(self) -> QuerySet[Assistant]:
+        return Assistant.objects.filter(ad_enabled=True)
+
+
+class AdUpdate(StaffuserRequiredMixin, UpdateView[Assistant, BaseModelForm[Assistant]]):
+    model = Assistant
+    template_name = "roster/ad_form.html"
+    context_object_name = "assistant"
+    fields = ("ad_enabled", "ad_url", "ad_email", "ad_blurb")
+
+    def get_object(self, *args: Any, **kwargs: Any) -> Assistant:
+        del args
+        del kwargs
+        return get_object_or_404(Assistant, user=self.request.user)
+
+    def form_valid(self, form: BaseModelForm[Assistant]):
+        messages.success(self.request, "Updated successfully.")
+        return super().form_valid(form)
+
+    def get_success_url(self) -> str:
+        return reverse("ad-list")
