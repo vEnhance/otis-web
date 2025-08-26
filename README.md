@@ -19,6 +19,10 @@ that I use to teach my course [OTIS](https://web.evanchen.cc/otis.html).
 It is pretty standard Django, so you should be able to spin
 up a local server on a standard Unix environment.
 
+The production server is hosted by
+[PythonAnywhere](https://www.pythonanywhere.com/),
+which is great.
+
 ## Installation instructions
 
 Video tutorial: https://youtu.be/W27XcqeXp20
