@@ -22,7 +22,7 @@ class TestOPALModels(EvanTestCase):
         self.assertEqual(answerize("hindSight IS 20/20 🧐"), "HINDSIGHTIS2020")
 
     def test_attempt_save_and_log(self):
-        puzzle = OpalPuzzleFactory(
+        puzzle = OpalPuzzleFactory.create(
             hunt__slug="mh21", slug="clueless", answer="Final Proposal"
         )
         attempt1 = OpalAttemptFactory.create(puzzle=puzzle, guess="FINALPROPOSAL")

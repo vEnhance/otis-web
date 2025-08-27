@@ -4,6 +4,7 @@ import string
 from datetime import timedelta
 from decimal import Decimal
 from hashlib import sha256
+from json.decoder import JSONDecodeError
 from typing import Any, Literal, TypedDict, Union
 
 from allauth.socialaccount.models import SocialAccount
@@ -362,7 +363,7 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
                     student__semester__active=True, student__user=job.assignee.user
                 )
             except Invoice.DoesNotExist:
-                logging.warn(f"Could not get invoice for {job.assignee.user}")
+                logging.warning(f"Could not get invoice for {job.assignee.user}")
                 return JsonResponse({"result": "failed", "changed": False}, status=400)
             else:
                 invoice.credits += job.usd_bounty
@@ -703,7 +704,7 @@ def announcement_handler(action: str, data: JSONData) -> JsonResponse:
 def api(request: HttpRequest) -> JsonResponse:
     try:
         data: JSONData = json.loads(request.body)
-    except json.decoder.JSONDecodeError:
+    except JSONDecodeError:
         raise SuspiciousOperation("Not valid JSON")
 
     if "action" not in data:

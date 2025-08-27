@@ -12,7 +12,7 @@ from .views import (
     wiki_redirect,
 )
 
-wiki_sample_bbcode = r"""Hello!
+WIKI_SAMPLE_BBCODE = r"""Hello!
 
 Alice says, "you are a doofus".
 
@@ -108,7 +108,7 @@ class WikiTest(EvanTestCase):
         AchievementUnlockFactory.create(user=alice, achievement=a3)
 
         p = OTISPreprocessor()
-        reply = p.run(wiki_sample_bbcode.splitlines())
+        reply = p.run(WIKI_SAMPLE_BBCODE.splitlines())
         self.assertIn(r'Alice says, "you are a doofus".', reply)
         self.assertIn(r'Bob says, "no you".', reply)
         self.assertIn(
