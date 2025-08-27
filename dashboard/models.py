@@ -9,7 +9,7 @@ from typing import Optional
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.files.base import File
-from django.core.validators import (  # NOQA
+from django.core.validators import (
     FileExtensionValidator,
     MaxValueValidator,
     MinValueValidator,

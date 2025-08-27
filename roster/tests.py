@@ -7,7 +7,7 @@ from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404
 from freezegun.api import freeze_time
 
-from core.factories import (  # NOQA
+from core.factories import (
     SemesterFactory,
     UnitFactory,
     UnitGroupFactory,
@@ -17,14 +17,14 @@ from core.factories import (  # NOQA
 from core.models import Semester, Unit, UnitGroup, UserProfile
 from dashboard.factories import PSetFactory
 from evans_django_tools.testsuite import EvanTestCase
-from roster.factories import (  # NOQA
+from roster.factories import (
     AssistantFactory,
     InvoiceFactory,
     RegistrationContainerFactory,
     StudentFactory,
     StudentRegistrationFactory,
 )
-from roster.models import (  # NOQA
+from roster.models import (
     Assistant,
     Invoice,
     RegistrationContainer,

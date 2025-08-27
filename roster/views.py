@@ -20,16 +20,16 @@ from braces.views import LoginRequiredMixin, StaffuserRequiredMixin
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth.decorators import login_required  # NOQA
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied  # NOQA
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.db.models.expressions import F
 from django.db.models.fields import FloatField
 from django.db.models.functions.comparison import Cast
 from django.db.models.manager import Manager
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect  # NOQA
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.http.response import Http404
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -47,14 +47,14 @@ from otisweb.mixins import VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest
 from roster.forms import LinkAssistantForm
 from roster.models import Assistant
-from roster.utils import (  # NOQA
+from roster.utils import (
     can_edit,
     get_current_students,
     get_student_by_pk,
     infer_student,
 )
 
-from .forms import (  # NOQA
+from .forms import (
     AdvanceForm,
     CurriculumForm,
     DecisionForm,
@@ -62,7 +62,7 @@ from .forms import (  # NOQA
     InquiryForm,
     UserForm,
 )
-from .models import (  # NOQA
+from .models import (
     Invoice,
     RegistrationContainer,
     Student,

@@ -5,7 +5,7 @@ from rpg.factories import AchievementFactory, AchievementUnlockFactory
 from wikihaxx.mdx.otis import OTISPreprocessor
 
 from .factories import URLPathFactory
-from .views import (  # NOQA
+from .views import (
     WIKI_SUBJECT_CHART,
     edit_redirect,
     view_redirect,

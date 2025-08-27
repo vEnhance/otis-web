@@ -8,7 +8,7 @@ from django.forms.forms import BaseForm
 
 from core.models import EMAIL_PREFERENCE_FIELDS, Unit
 from dashboard.models import PSet
-from roster.models import Student, StudentRegistration, UnitInquiry  # NOQA
+from roster.models import Student, StudentRegistration, UnitInquiry
 
 
 class UnitChoiceBoundField(forms.BoundField):

@@ -37,13 +37,13 @@ from exams.models import PracticeExam
 from otisweb.mixins import VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest, get_days_since
 from roster.models import RegistrationContainer, Student, StudentRegistration
-from roster.utils import (  # NOQA
+from roster.utils import (
     can_view,
     get_student_by_pk,
     get_visible_students,
     infer_student,
 )
-from rpg.levelsys import (  # NOQA
+from rpg.levelsys import (
     annotate_student_queryset_with_scores,
     check_level_up,
     get_level_info,

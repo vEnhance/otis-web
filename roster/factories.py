@@ -5,7 +5,7 @@ from factory.faker import Faker
 from factory.fuzzy import FuzzyChoice, FuzzyInteger
 
 from core.factories import SemesterFactory, UnitFactory, UserFactory
-from roster.models import (  # NOQA
+from roster.models import (
     Assistant,
     Invoice,
     RegistrationContainer,

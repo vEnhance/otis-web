@@ -2,7 +2,7 @@ import logging
 import random
 from typing import Any
 
-from braces.views import (  # NOQA
+from braces.views import (
     LoginRequiredMixin,
     StaffuserRequiredMixin,
     SuperuserRequiredMixin,

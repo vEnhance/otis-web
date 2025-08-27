@@ -34,7 +34,7 @@ import math
 import operator
 from typing import Any, Optional, Union
 
-from pyparsing import (  # NOQA
+from pyparsing import (
     CaselessKeyword,
     Forward,
     Group,
