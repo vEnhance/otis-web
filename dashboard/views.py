@@ -100,6 +100,7 @@ def portal(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
     return render(request, "dashboard/portal.html", context)
 
 
+@login_required
 def certify(
     request: HttpRequest,
     student_pk: Optional[int] = None,
