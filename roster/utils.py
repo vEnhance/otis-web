@@ -82,6 +82,9 @@ def can_edit(request: HttpRequest, student: models.Student) -> bool:
 
 
 def infer_student(request: HttpRequest) -> models.Student:
+    if not isinstance(request.user, User):
+        raise Http404("Not logged in, so cannot infer a student.")
+
     student = (
         models.Student.objects.filter(user=request.user)
         .order_by("-semester__end_year")
