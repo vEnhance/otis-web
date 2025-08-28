@@ -165,10 +165,11 @@ def leaderboard(request: AuthHttpRequest, slug: str) -> HttpResponse:
             "emoji_string": emoji_string,
         }
 
+    MAX_DATETIME = datetime.datetime.max.replace(tzinfo=datetime.timezone.utc)
     sorted_user_pks = sorted(
         user_solve_record.keys(),
         key=lambda user_pk: (
-            meta_solved_time.get(user_pk, datetime.datetime.max),
+            meta_solved_time.get(user_pk, MAX_DATETIME),
             -num_solves_dict.get(user_pk, 0),
             most_recent_solve_dict[user_pk],
         ),
