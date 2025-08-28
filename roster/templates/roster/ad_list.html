@@ -31,16 +31,24 @@
       {{ assistant.name }}
       {% if assistant.user == request.user %}
         <a href="{% url "ad-update" %}">(edit)</a>
+      {% elif request.user.is_superuser %}
+        <a href="{% url "admin:roster_assistant_change" assistant.pk %}">(admin edit)</a>
       {% endif %}
     </h2>
-    {% if assistant.ad_blurb %}<div>{{ assistant.ad_blurb|linebreaks }}</div>{% endif %}
+    {% if assistant.ad_blurb %}
+      <div>{{ assistant.ad_blurb|linebreaks }}</div>
+    {% else %}
+      <div class="text-muted">
+        <p>No description provided.</p>
+      </div>
+    {% endif %}
     <div class="font-monospace">
       {% if assistant.ad_url %}
         <p>
           ⛺ <a href="{{ assistant.ad_url }}">{{ assistant.ad_url }}</a>
         </p>
       {% endif %}
-      {% if assistant.ad_url %}
+      {% if assistant.ad_email %}
         <p>
           📧 <a class="font-mono" href="mailto:{{ assistant.ad_email }}">{{ assistant.ad_email }}</a>
         </p>
