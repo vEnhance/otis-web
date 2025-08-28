@@ -13,7 +13,7 @@ from import_export.admin import ImportExportModelAdmin
 from core.models import Semester
 from roster.models import build_students
 
-from .models import (  # NOQA
+from .models import (
     Assistant,
     Invoice,
     RegistrationContainer,

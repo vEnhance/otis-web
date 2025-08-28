@@ -3,12 +3,12 @@ from factory.django import DjangoModelFactory, ImageField
 from factory.faker import Faker
 from factory.fuzzy import FuzzyChoice
 
-from core.factories import UnitGroupFactory, UserFactory  # NOQA
+from core.factories import UnitGroupFactory, UserFactory
 from evans_django_tools.testsuite import UniqueFaker
 from roster.factories import StudentFactory
 from rpg.models import VulnerabilityRecord
 
-from .models import (  # NOQA
+from .models import (
     Achievement,
     AchievementUnlock,
     BonusLevel,

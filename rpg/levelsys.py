@@ -21,7 +21,7 @@ from payments.models import Job
 from roster.models import Student
 from suggestions.models import ProblemSuggestion
 
-from .models import (  # NOQA
+from .models import (
     AchievementUnlock,
     BonusLevel,
     BonusLevelUnlock,

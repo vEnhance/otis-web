@@ -6,7 +6,7 @@ from django.contrib import admin
 from django.db.models import QuerySet
 from django.http import HttpRequest
 
-from .models import Announcement, PSet, SemesterDownloadFile, UploadedFile  # NOQA
+from .models import Announcement, PSet, SemesterDownloadFile, UploadedFile
 
 
 @admin.register(Announcement)

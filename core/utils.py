@@ -3,7 +3,7 @@ from hashlib import sha256
 
 from django.conf import settings
 from django.core.files.storage import default_storage
-from django.http.response import (  # NOQA
+from django.http.response import (
     HttpResponse,
     HttpResponseBadRequest,
     HttpResponseServerError,

@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+{% load static %}
+{% block title %}Update public listing{% endblock %}
+{% block layout-content %}
+  <div class="alert alert-info">
+    You can use this form to update (or hide) the
+    <a href="{% url "ad-list" %}">public listing</a>
+    for {{ assistant.name }}.
+  </div>
+  {% include "generic_form.html" with submit_name="Update" %}
+{% endblock layout-content %}

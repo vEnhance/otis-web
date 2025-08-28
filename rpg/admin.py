@@ -4,7 +4,7 @@ from import_export.admin import ImportExportModelAdmin
 
 from rpg.models import VulnerabilityRecord
 
-from .models import (  # NOQA
+from .models import (
     Achievement,
     AchievementUnlock,
     BonusLevel,

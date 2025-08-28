@@ -8,18 +8,18 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied  # NOQA
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.db.models.aggregates import Count
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
 from django.forms.models import BaseModelForm
-from django.http import (  # NOQA
+from django.http import (
     Http404,
     HttpRequest,
     HttpResponse,
     HttpResponseForbidden,
 )
-from django.http.response import HttpResponseRedirect, JsonResponse  # NOQA
+from django.http.response import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt

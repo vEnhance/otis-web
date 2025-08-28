@@ -249,6 +249,9 @@ class TestCertify(EvanTestCase):
         self.login(eve)
         self.assertGetDenied("certify", alice.pk)
 
+    def test_certify_when_not_logged_in(self):
+        self.assertGet30X("certify")
+
 
 class TestPSet(EvanTestCase):
     def test_submit_permissions(self):

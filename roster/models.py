@@ -54,6 +54,23 @@ class Assistant(models.Model):
         help_text="A list of students this assistant can see but which is not listed visibly.",
     )
 
+    ad_enabled = models.BooleanField(
+        default=False,
+        help_text="Whether the assistant is advertising current availability.",
+    )
+    ad_url = models.URLField(
+        help_text="A URL the assistant can provide if desired.",
+        blank=True,
+    )
+    ad_email = models.EmailField(
+        help_text="An email the assistant can provide for contact.",
+        blank=True,
+    )
+    ad_blurb = models.TextField(
+        help_text="A text field the instructor can provide if desired.",
+        blank=True,
+    )
+
     class Meta:
         ordering = ("shortname",)
 

@@ -1,5 +1,5 @@
 import re
-from typing import Any
+from typing import Any, Sequence
 
 import markdown
 import markdown.preprocessors
@@ -22,7 +22,7 @@ special_end_regex = re.compile(r"\[/(diamond|unit|generic)+\]")
 
 
 class OTISPreprocessor(markdown.preprocessors.Preprocessor):
-    def run(self, lines: list[str]) -> list[str]:
+    def run(self, lines: Sequence[str]) -> list[str]:
         output: list[str] = []
         body: list[str] = []
         active = False

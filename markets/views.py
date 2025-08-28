@@ -9,7 +9,7 @@ from django.db.models import Avg, Max, Sum
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http.request import HttpRequest
-from django.http.response import (  # NOQA
+from django.http.response import (
     HttpResponseBase,
     HttpResponseForbidden,
     HttpResponseNotFound,

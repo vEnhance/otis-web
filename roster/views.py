@@ -20,16 +20,16 @@ from braces.views import LoginRequiredMixin, StaffuserRequiredMixin
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth.decorators import login_required  # NOQA
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied  # NOQA
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.db.models.expressions import F
 from django.db.models.fields import FloatField
 from django.db.models.functions.comparison import Cast
 from django.db.models.manager import Manager
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect  # NOQA
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.http.response import Http404
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -43,17 +43,18 @@ from core.models import EMAIL_PREFERENCE_FIELDS, Semester, Unit, UserProfile
 from dashboard.models import PSet
 from evans_django_tools import SUCCESS_LOG_LEVEL
 from otisweb.decorators import admin_required
+from otisweb.mixins import VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest
 from roster.forms import LinkAssistantForm
 from roster.models import Assistant
-from roster.utils import (  # NOQA
+from roster.utils import (
     can_edit,
     get_current_students,
     get_student_by_pk,
     infer_student,
 )
 
-from .forms import (  # NOQA
+from .forms import (
     AdvanceForm,
     CurriculumForm,
     DecisionForm,
@@ -61,7 +62,7 @@ from .forms import (  # NOQA
     InquiryForm,
     UserForm,
 )
-from .models import (  # NOQA
+from .models import (
     Invoice,
     RegistrationContainer,
     Student,
@@ -770,3 +771,40 @@ def discord_lookup(request: HttpRequest) -> HttpResponse:
         context["lookup"] = None
     context["form"] = form
     return render(request, "roster/discord_lookup.html", context)
+
+
+class AdList(VerifiedRequiredMixin, ListView[Assistant]):
+    model = Assistant
+    template_name = "roster/ad_list.html"
+
+    context_object_name = "assistants"
+
+    def get_queryset(self) -> QuerySet[Assistant]:
+        return Assistant.objects.filter(ad_enabled=True)
+
+    def get_context_data(self, **kwargs: Any):
+        context = super().get_context_data(**kwargs)
+        try:
+            context["current_assistant"] = Assistant.objects.get(user=self.request.user)
+        except Assistant.DoesNotExist:
+            context["current_assistant"] = None
+        return context
+
+
+class AdUpdate(StaffuserRequiredMixin, UpdateView[Assistant, BaseModelForm[Assistant]]):
+    model = Assistant
+    template_name = "roster/ad_form.html"
+    context_object_name = "assistant"
+    fields = ("ad_enabled", "ad_url", "ad_email", "ad_blurb")
+
+    def get_object(self, *args: Any, **kwargs: Any) -> Assistant:
+        del args
+        del kwargs
+        return get_object_or_404(Assistant, user=self.request.user)
+
+    def form_valid(self, form: BaseModelForm[Assistant]):
+        messages.success(self.request, "Updated successfully.")
+        return super().form_valid(form)
+
+    def get_success_url(self) -> str:
+        return reverse("ad-list")

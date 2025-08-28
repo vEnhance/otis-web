@@ -7,7 +7,7 @@ from exams.factories import ExamAttemptFactory, TestFactory
 from payments.factories import JobFactory, WorkerFactory
 from roster.factories import StudentFactory
 from roster.models import Student
-from rpg.factories import (  # NOQA
+from rpg.factories import (
     AchievementFactory,
     AchievementUnlockFactory,
     BonusLevelFactory,
@@ -15,7 +15,7 @@ from rpg.factories import (  # NOQA
     QuestCompleteFactory,
     VulnerabilityRecordFactory,
 )
-from rpg.levelsys import (  # NOQA
+from rpg.levelsys import (
     annotate_student_queryset_with_scores,
     get_level_info,
     get_student_rows,
