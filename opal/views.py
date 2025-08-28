@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 def has_early_access(u: User) -> bool:
-    return u.is_superuser or u.groups.filter(name="Testsolver").exists()
+    return u.is_staff or u.is_superuser or u.groups.filter(name="Testsolver").exists()
 
 
 class HuntList(ListView[OpalHunt]):
@@ -62,7 +62,7 @@ class PuzzleList(VerifiedRequiredMixin, ListView[OpalPuzzle]):
             if has_early_access(request.user):
                 messages.warning(
                     request,
-                    "This hunt hasn't started yet; this is an internal view for testsolvers and admins.",
+                    "This hunt hasn't started yet; this is an internal view for testsolvers and staff.",
                 )
             else:
                 raise PermissionDenied("This puzzle cannot be unlocked yet")
