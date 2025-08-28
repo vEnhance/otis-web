@@ -152,32 +152,28 @@ def leaderboard(request: AuthHttpRequest, slug: str) -> HttpResponse:
         num_total_attempts=SubqueryCount("opalattempt"),
     )
 
-    MAX_TIME_IN_FUTURE = datetime.datetime(
-        year=datetime.MAXYEAR,
-        month=12,
-        day=31,
-        tzinfo=datetime.timezone.utc,
-    )
-    context["rows"] = [
-        {
+    def get_row(user_pk: int) -> dict[str, Any]:
+        emoji_string = "".join("✅" if r else "✖️" for r in user_solve_record[user_pk])
+        if user_pk in meta_solved_time:
+            emoji_string = emoji_string[:-1] + "🎉"
+        return {
             "name": realname_dict[user_pk],
             "user_pk": user_pk,
             "num_solves": num_solves_dict[user_pk],
             "most_recent_solve": most_recent_solve_dict[user_pk],
             "meta_solved_time": meta_solved_time.get(user_pk, None),
-            "emoji_string": "".join(
-                "✅" if r else "✖️" for r in user_solve_record[user_pk]
-            ),
+            "emoji_string": emoji_string,
         }
-        for user_pk in sorted(
-            user_solve_record.keys(),
-            key=lambda user_pk: (
-                meta_solved_time.get(user_pk, MAX_TIME_IN_FUTURE),
-                -num_solves_dict.get(user_pk, 0),
-                most_recent_solve_dict[user_pk],
-            ),
-        )
-    ]
+
+    sorted_user_pks = sorted(
+        user_solve_record.keys(),
+        key=lambda user_pk: (
+            meta_solved_time.get(user_pk, datetime.datetime.max),
+            -num_solves_dict.get(user_pk, 0),
+            most_recent_solve_dict[user_pk],
+        ),
+    )
+    context["rows"] = [get_row(user_pk) for user_pk in sorted_user_pks]
     return render(request, "opal/leaderboard.html", context)
 
 
