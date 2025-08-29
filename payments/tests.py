@@ -209,9 +209,9 @@ class WorkerTest(EvanTestCase):
                 JobFactory.create(folder=folder, **kwargs)
 
         # first make sure staff protection works
-        self.assertGet30X("job-inactive", "art")
+        self.assertGet30X("job-inactive", "art")  # redirect anonymous
         self.login(alice.user)
-        self.assertGet30X("job-inactive", "art")
+        self.assertGet40X("job-inactive", "art")
 
         # now actually log in and load the details
         admin = UserFactory.create(is_staff=True, is_superuser=True)

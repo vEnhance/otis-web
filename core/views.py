@@ -1,6 +1,6 @@
 from typing import Any, Optional
 
-from braces.views import LoginRequiredMixin, SuperuserRequiredMixin
+from braces.views import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import AnonymousUser, User
 from django.contrib.messages.views import SuccessMessageMixin
@@ -24,6 +24,7 @@ from sql_util.utils import Exists
 from core.models import EMAIL_PREFERENCE_FIELDS, Semester, UserProfile
 from dashboard.models import PSet, UploadedFile
 from otisweb.decorators import verified_required
+from otisweb.mixins import AdminRequiredMixin
 from otisweb.utils import AuthHttpRequest
 from roster.models import Student
 
@@ -34,7 +35,7 @@ from .utils import get_from_google_storage
 # Create your views here.
 
 
-class AdminUnitListView(SuperuserRequiredMixin, ListView[Unit]):
+class AdminUnitListView(AdminRequiredMixin, ListView[Unit]):
     model = Unit
     queryset = Unit.objects.all()
     template_name = "core/admin_unit_list.html"

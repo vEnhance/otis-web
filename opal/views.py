@@ -2,7 +2,6 @@ import datetime
 import logging
 from typing import Any
 
-from braces.views import SuperuserRequiredMixin
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
@@ -18,7 +17,7 @@ from sql_util.utils import SubqueryCount
 
 from evans_django_tools import SUCCESS_LOG_LEVEL
 from otisweb.decorators import admin_required, verified_required
-from otisweb.mixins import VerifiedRequiredMixin
+from otisweb.mixins import AdminRequiredMixin, VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest
 from roster.models import Student
 from rpg.models import AchievementUnlock
@@ -79,7 +78,7 @@ class PuzzleList(VerifiedRequiredMixin, ListView[OpalPuzzle]):
         return context
 
 
-class AttemptsList(SuperuserRequiredMixin, ListView[OpalAttempt]):
+class AttemptsList(AdminRequiredMixin, ListView[OpalAttempt]):
     model = OpalAttempt
     context_object_name = "attempts"
 

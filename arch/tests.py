@@ -215,7 +215,7 @@ class TestProblem(EvanTestCase):
         # if not verified, getting the problem should redirect
         eve = UserFactory.create()
         self.login(eve)
-        self.assertGet30X("view-solution", problem.puid)
+        self.assertGet40X("view-solution", problem.puid)
 
         # verified user should instead fail because default storage doesn't
         # have the problem in question

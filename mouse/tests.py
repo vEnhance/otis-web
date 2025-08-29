@@ -35,11 +35,11 @@ class MouseTests(EvanTestCase):
         )
 
     def test_usemo_score(self):
-        self.assertGetBecomesStaffRedirect("usemo-score")
+        self.assertGet30X("usemo-score")  # anonymous redirected to login
         self.login("alice")
-        self.assertGetBecomesStaffRedirect("usemo-grader")
+        self.assertGet40X("usemo-score")
         self.login("evan")
-        self.assertGet20X("usemo-grader")
+        self.assertGet20X("usemo-score")
 
         resp = self.assertPost20X(
             "usemo-score",
@@ -54,9 +54,9 @@ class MouseTests(EvanTestCase):
         self.assertHas(resp, "Built 3 records")
 
     def test_usemo_grading(self):
-        self.assertGetBecomesStaffRedirect("usemo-grader")
+        self.assertGet30X("usemo-grader")  # anonymous redirected to login
         self.login("alice")
-        self.assertGetBecomesStaffRedirect("usemo-grader")
+        self.assertGet40X("usemo-grader")
         self.login("evan")
         self.assertGet20X("usemo-grader")
 

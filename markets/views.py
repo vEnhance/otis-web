@@ -1,7 +1,7 @@
 import datetime
 from typing import Any
 
-from braces.views import LoginRequiredMixin, SuperuserRequiredMixin
+from braces.views import LoginRequiredMixin
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
@@ -26,7 +26,7 @@ from django.views.generic.list import ListView
 from core.models import Semester
 from markets.forms import MarketCreateForm
 from otisweb.decorators import admin_required
-from otisweb.mixins import VerifiedRequiredMixin
+from otisweb.mixins import AdminRequiredMixin, VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest
 
 from .models import Guess, Market
@@ -218,9 +218,7 @@ class GuessView(LoginRequiredMixin, DetailView[Guess]):
         return super().dispatch(request, *args, **kwargs)
 
 
-class MarketCreateView(
-    SuperuserRequiredMixin, CreateView[Market, BaseModelForm[Market]]
-):
+class MarketCreateView(AdminRequiredMixin, CreateView[Market, BaseModelForm[Market]]):
     model = Market
     form_class = MarketCreateForm
     object: Market

@@ -56,7 +56,7 @@ class TestCore(EvanTestCase):
         self.assertGetDenied("view-tex", units[3].pk)
         self.assertGetDenied("view-solutions", units[3].pk)
 
-        self.assertGet30X("admin-unit-list")
+        self.assertGet40X("admin-unit-list")
 
     @override_settings(TESTING_NEEDS_MOCK_MEDIA=True)
     def test_staff_core_views(self):
@@ -84,7 +84,7 @@ class TestCore(EvanTestCase):
         self.login(UserFactory.create())
         for v in ("view-problems", "view-tex", "view-solutions"):
             self.assertGetDenied(v, u.pk)
-        self.assertGet30X("admin-unit-list")
+        self.assertGet40X("admin-unit-list")
 
     def test_hidden_catalog_public(self):
         self.login(UserFactory.create())

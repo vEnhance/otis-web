@@ -2,13 +2,8 @@ import logging
 import random
 from typing import Any
 
-from braces.views import (
-    LoginRequiredMixin,
-    StaffuserRequiredMixin,
-    SuperuserRequiredMixin,
-)
+from braces.views import LoginRequiredMixin
 from django.contrib import messages
-from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
@@ -26,7 +21,8 @@ from django.views.generic.edit import UpdateView
 from sql_util.utils import Exists, SubqueryCount
 
 from evans_django_tools import SUCCESS_LOG_LEVEL
-from otisweb.mixins import VerifiedRequiredMixin
+from otisweb.decorators import staff_required
+from otisweb.mixins import AdminRequiredMixin, StaffRequiredMixin, VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest, get_days_since
 from roster.models import Student
 from roster.utils import get_student_by_pk, infer_student
@@ -189,9 +185,7 @@ class AchievementDetail(VerifiedRequiredMixin, DetailView[Achievement]):
                 return ret
 
 
-class FoundList(
-    LoginRequiredMixin, StaffuserRequiredMixin, ListView[AchievementUnlock]
-):
+class FoundList(LoginRequiredMixin, StaffRequiredMixin, ListView[AchievementUnlock]):
     raise_exception = True
     template_name = "rpg/found_list.html"
     context_object_name = "unlocks_list"
@@ -212,7 +206,7 @@ class FoundList(
         return context
 
 
-@staff_member_required
+@staff_required
 def leaderboard(request: AuthHttpRequest) -> HttpResponse:
     students = Student.objects.filter(semester__active=True, enabled=True, legit=True)
     rows = get_student_rows(students)
@@ -259,7 +253,7 @@ class PalaceList(LoginRequiredMixin, ListView[PalaceCarving]):
         return context
 
 
-class AdminPalaceList(SuperuserRequiredMixin, ListView[PalaceCarving]):
+class AdminPalaceList(AdminRequiredMixin, ListView[PalaceCarving]):
     model = PalaceCarving
     context_object_name = "palace_carvings"
     template_name = "rpg/palace.html"

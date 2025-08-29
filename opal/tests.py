@@ -258,8 +258,8 @@ class TestOPALModels(EvanTestCase):
         self.assertFalse(queryset.get(pk=puzzle3.pk).solved)
         self.assertGet20X("opal-show-puzzle", "hunt", "zero", follow=True)
         self.assertGet20X("opal-show-puzzle", "hunt", "one", follow=True)
-        self.assertGet40X("opal-show-puzzle", "hunt", "two", follow=True)
-        self.assertGet40X("opal-show-puzzle", "hunt", "three", follow=True)
+        self.assertGet40X("opal-show-puzzle", "hunt", "two")
+        self.assertGet40X("opal-show-puzzle", "hunt", "three")
 
         # Let's have Alice solve puzzle 0
         resp = self.assertPostOK(

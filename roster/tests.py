@@ -275,7 +275,9 @@ class AssistantTest(EvanTestCase):
         StudentFactory.create(assistant=assistant)
         StudentFactory.create(assistant=assistant2)
 
-        self.assertGetBecomesStaffRedirect("link-assistant")
+        self.assertGet30X("link-assistant")  # anonymous redirects to login
+        self.login(UserFactory.create(is_staff=False))
+        self.assertGet40X("link-assistant")
 
         self.login(assistant.user)
         resp = self.assertGetOK("link-assistant")
@@ -357,7 +359,7 @@ class CurriculumTest(EvanTestCase):
             "Your curriculum has been finalized!",
         )
         self.assertEqual(alice.unlocked_units.count(), 3)
-        self.assertPost40X("finalize", alice.pk, data={"submit": True}, follow=True)
+        self.assertPost40X("finalize", alice.pk, data={"submit": True})
 
     def test_student_properties(self) -> None:
         alice: Student = StudentFactory.create()
@@ -762,7 +764,7 @@ class InquiryTest(EvanTestCase):
         )
         # Bob cannot cancel Alice's inquiry
         self.login(bob)
-        self.assertPost40X("inquiry-cancel", inquiry.pk, follow=True)
+        self.assertPost40X("inquiry-cancel", inquiry.pk)
         inquiry.refresh_from_db()
         self.assertEqual(inquiry.status, "INQ_NEW")  # Ensure status is still "INQ_NEW"
 
@@ -798,7 +800,7 @@ class InquiryTest(EvanTestCase):
                 explanation="Test",
             )
             self.login(alice)
-            self.assertPost40X("inquiry-cancel", inquiry.pk, follow=True)
+            self.assertPost40X("inquiry-cancel", inquiry.pk)
             inquiry.refresh_from_db()
             self.assertEqual(inquiry.status, status)
 
@@ -1163,10 +1165,11 @@ class RegTest(EvanTestCase):
 class AdTest(EvanTestCase):
     def test_ad_list_view_access(self) -> None:
         user = UserFactory.create()
-        self.assertGet30X("ad-list")
+        self.assertGet30X("ad-list")  # redirect anonymous
+        self.login(user)
+        self.assertGet40X("ad-list")
         verified_group, _ = Group.objects.get_or_create(name="Verified")
         user.groups.add(verified_group)
-        self.login(user)
         self.assertGet20X("ad-list")
 
     def test_ad_list_only_shows_enabled(self) -> None:
@@ -1215,10 +1218,10 @@ class AdTest(EvanTestCase):
         assistant_user = UserFactory.create(is_staff=True)
         AssistantFactory.create(user=assistant_user)
 
-        self.assertGet30X("ad-update")
+        self.assertGet30X("ad-update")  # anonymous redirects to login
 
         self.login(regular_user)
-        self.assertGet30X("ad-update")
+        self.assertGet40X("ad-update")
 
         self.login(assistant_user)
         self.assertGet20X("ad-update")

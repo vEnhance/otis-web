@@ -8,7 +8,6 @@ from typing import Any, Optional
 from braces.views import LoginRequiredMixin
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
@@ -34,6 +33,7 @@ from dashboard.models import Announcement, PSet, SemesterDownloadFile, UploadedF
 from dashboard.utils import get_news, get_units_to_submit, get_units_to_unlock
 from evans_django_tools import VERBOSE_LOG_LEVEL
 from exams.models import PracticeExam
+from otisweb.decorators import staff_required
 from otisweb.mixins import VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest, get_days_since
 from roster.models import RegistrationContainer, Student, StudentRegistration
@@ -486,7 +486,7 @@ class DeleteFile(LoginRequiredMixin, DeleteView):
         return obj
 
 
-@staff_member_required
+@staff_required
 def idlewarn(request: AuthHttpRequest) -> HttpResponse:
     context: dict[str, Any] = {"title": "Idle-warn"}
     newest_qset = UploadedFile.objects.filter(

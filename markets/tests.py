@@ -189,7 +189,7 @@ class MarketTests(EvanTestCase):
             )
 
             # Forbid more guesses
-            self.assertGet30X("market-guess", "guess-my-ssn")
+            self.assertGet30X("market-guess", "guess-my-ssn")  # redirects to DetailView
             resp = self.assertPost20X(
                 "market-guess", "guess-my-ssn", data={"value": 500}, follow=True
             )
@@ -208,7 +208,7 @@ class MarketTests(EvanTestCase):
             self.assertPost20X(
                 "market-guess", "guess-my-ssn", data={"value": 100}, follow=True
             )
-            self.assertGet30X("market-guess", "guess-my-ssn")
+            self.assertGet30X("market-guess", "guess-my-ssn")  # redirects to DetailView
             resp = self.assertPost20X(
                 "market-guess", "guess-my-ssn", data={"value": 500}, follow=True
             )
@@ -220,9 +220,7 @@ class MarketTests(EvanTestCase):
 
             market.answer = 42
             market.save()
-            self.assertPostBecomesStaffRedirect(
-                "market-recompute", "guess-my-ssn", follow=True
-            )
+            self.assertPost40X("market-recompute", "guess-my-ssn")
 
             UserFactory.create(username="admin", is_staff=True, is_superuser=True)
             self.login("admin")
@@ -248,7 +246,7 @@ class MarketTests(EvanTestCase):
                 "market-guess", "guess-my-ssn", data={"value": 100}, follow=True
             )
 
-            self.assertGet30X("market-guess", "guess-my-ssn")
+            self.assertGet30X("market-guess", "guess-my-ssn")  # redirects to DetailView
             resp = self.assertPost20X(
                 "market-guess", "guess-my-ssn", data={"value": 500}, follow=True
             )
@@ -261,9 +259,7 @@ class MarketTests(EvanTestCase):
             market.answer = 42
             market.alpha = 3
             market.save()
-            self.assertPostBecomesStaffRedirect(
-                "market-recompute", "guess-my-ssn", follow=True
-            )
+            self.assertPost40X("market-recompute", "guess-my-ssn")
 
             UserFactory.create(username="admin", is_staff=True, is_superuser=True)
             self.login("admin")
