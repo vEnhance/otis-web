@@ -1,11 +1,16 @@
-from typing import Callable
+from collections.abc import Awaitable
+from typing import Callable, TypeVar
 
-from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import AbstractBaseUser, AnonymousUser, User
 from django.core.exceptions import PermissionDenied
+from django.http.response import HttpResponseBase
 
 AnyUser = AbstractBaseUser | AnonymousUser
+
+_VIEW = TypeVar(
+    "_VIEW", bound=Callable[..., HttpResponseBase | Awaitable[HttpResponseBase]]
+)
 
 
 def auth_test(
@@ -23,11 +28,7 @@ def auth_test(
     return ret
 
 
-def verified_required(  # type: ignore
-    view_func=None,  # type: ignore
-    redirect_field_name=REDIRECT_FIELD_NAME,
-    login_url: str | None = None,
-):
+def verified_required(view_func: _VIEW) -> _VIEW:
     """
     Decorator for views that checks that the user is logged in and is in Verified group.
     Redirects anonymous users; 403 error otherwise.
@@ -37,17 +38,11 @@ def verified_required(  # type: ignore
             lambda u: u.groups.filter(name="Verified").exists() or u.is_staff,
             error_msg="Not in Verified group",
         ),
-        login_url=login_url,
-        redirect_field_name=redirect_field_name,
     )
-    return actual_decorator(view_func) if view_func else actual_decorator
+    return actual_decorator(view_func)
 
 
-def staff_required(  # type: ignore
-    view_func=None,  # type: ignore
-    redirect_field_name=REDIRECT_FIELD_NAME,
-    login_url="admin:login",
-):
+def staff_required(view_func: _VIEW) -> _VIEW:
     """
     Decorator for views that checks that the user is logged in and is staff.
     Redirects anonymous users; 403 error otherwise.
@@ -57,17 +52,11 @@ def staff_required(  # type: ignore
             lambda u: u.is_staff,
             error_msg="Not a staff member",
         ),
-        login_url=login_url,
-        redirect_field_name=redirect_field_name,
     )
-    return actual_decorator(view_func) if view_func else actual_decorator
+    return actual_decorator(view_func)
 
 
-def admin_required(  # type: ignore
-    view_func=None,  # type: ignore
-    redirect_field_name=REDIRECT_FIELD_NAME,
-    login_url="admin:login",
-):
+def admin_required(view_func: _VIEW) -> _VIEW:
     """
     Decorator for views that checks that the user is logged in and is an admin.
     Redirects anonymous users; 403 error otherwise.
@@ -77,7 +66,5 @@ def admin_required(  # type: ignore
             lambda u: u.is_staff and u.is_superuser,
             error_msg="Not an administrator",
         ),
-        login_url=login_url,
-        redirect_field_name=redirect_field_name,
     )
-    return actual_decorator(view_func) if view_func else actual_decorator
+    return actual_decorator(view_func)
