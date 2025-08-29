@@ -293,6 +293,11 @@ class UserProfile(models.Model):
         help_text="Show previous unit petitions that you have requested. Useful to disable if you have far too many.",
         default=True,
     )
+    sort_units_by_subject = models.BooleanField(
+        verbose_name="Sort units by subject",
+        help_text="Automatically sort units by subject in the dashboard curriculum view.",
+        default=False,
+    )
 
     email_on_announcement = models.BooleanField(
         verbose_name="Receive emails for announcements",
