@@ -211,7 +211,7 @@ class AssistantTest(EvanTestCase):
 
         self.assertGetDenied("advance", alice.pk)
 
-        units: list[UnitGroup] = UnitFactory.create_batch(4)
+        units: list[Unit] = UnitFactory.create_batch(4)
 
         # unlock 0, add 1, lock 2, drop 3
 
