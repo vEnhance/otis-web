@@ -4,7 +4,7 @@ from braces.views import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import AnonymousUser, User
 from django.contrib.messages.views import SuccessMessageMixin
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from django.db.models.aggregates import Count, Max
 from django.db.models.base import Model
 from django.db.models.expressions import Value
@@ -16,7 +16,6 @@ from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.urls.base import reverse_lazy
 from django.utils import timezone
-from django.views.decorators.http import require_POST
 from django.views.generic.edit import UpdateView
 from django.views.generic.list import ListView
 from sql_util.utils import Exists
@@ -332,8 +331,9 @@ class UserProfileUpdateView(
 
 
 @login_required
-@require_POST
 def dismiss(request: AuthHttpRequest) -> JsonResponse:
+    if not request.method == "POST":
+        raise SuspiciousOperation("Must use POST")
     profile = get_object_or_404(UserProfile, user=request.user)
     profile.last_notif_dismiss = timezone.now()
     profile.save()

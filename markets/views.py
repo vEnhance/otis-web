@@ -4,7 +4,7 @@ from typing import Any
 from braces.views import LoginRequiredMixin
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from django.db.models import Avg, Max, Sum
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
@@ -18,7 +18,6 @@ from django.http.response import (
 from django.shortcuts import get_object_or_404
 from django.urls.base import reverse
 from django.utils import timezone
-from django.views.decorators.http import require_POST
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView
 from django.views.generic.list import ListView
@@ -138,9 +137,10 @@ class MarketResults(LoginRequiredMixin, ListView[Guess]):
             return HttpResponseRedirect(self.market.get_absolute_url())
 
 
-@require_POST
 @admin_required
 def recompute(request: AuthHttpRequest, slug: str):
+    if not request.method == "POST":
+        raise SuspiciousOperation("Must use POST")
     guesses = Guess.objects.filter(market__slug=slug)
     for guess in guesses:
         guess.set_score()

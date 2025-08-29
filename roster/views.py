@@ -21,7 +21,11 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
+from django.core.exceptions import (
+    ObjectDoesNotExist,
+    PermissionDenied,
+    SuspiciousOperation,
+)
 from django.db.models.expressions import F
 from django.db.models.fields import FloatField
 from django.db.models.functions.comparison import Cast
@@ -33,7 +37,6 @@ from django.http.response import Http404
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
-from django.views.decorators.http import require_POST
 from django.views.generic.edit import UpdateView
 from django.views.generic.list import ListView
 from prettytable import PrettyTable
@@ -124,8 +127,9 @@ def curriculum(request: HttpRequest, student_pk: int) -> HttpResponse:
 
 
 @login_required
-@require_POST
 def finalize(request: HttpRequest, student_pk: int) -> HttpResponse:
+    if not request.method == "POST":
+        raise SuspiciousOperation("Must use POST")
     # Removes a newborn status, thus activating everything
     student = get_student_by_pk(request, student_pk)
     if student.newborn is not True:
@@ -410,7 +414,6 @@ def inquiry(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
 
 
 @login_required
-@require_POST
 def cancel_inquiry(request: AuthHttpRequest, pk: int) -> HttpResponse:
     inquiry = get_object_or_404(UnitInquiry, pk=pk)
     if inquiry.student.user != request.user and not request.user.is_staff:
