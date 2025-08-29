@@ -106,6 +106,7 @@ class HintUpdate(
     object: ClassVar[Hint] = Hint()  # type: ignore
 
     def form_valid(self, form: HintUpdateFormWithReason) -> HttpResponse:
+        assert hasattr(reversion, "set_comment")
         reversion.set_comment(
             form.cleaned_data["reason"] or form.cleaned_data["content"]
         )
@@ -129,6 +130,7 @@ class HintUpdateByPK(
     object: ClassVar[Hint] = Hint()  # type: ignore
 
     def form_valid(self, form: HintUpdateFormWithReason) -> HttpResponse:
+        assert hasattr(reversion, "set_comment")
         reversion.set_comment(
             form.cleaned_data["reason"] or form.cleaned_data["content"]
         )

@@ -105,7 +105,7 @@ class JobAdmin(ImportExportModelAdmin):
     def flagged(self, obj: Job) -> bool:
         return obj.admin_notes != ""
 
-    flagged.boolean = True
+    flagged.boolean = True  # type: ignore
 
     readonly_fields = (
         "created_at",
