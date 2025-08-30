@@ -356,3 +356,25 @@ class TestOPALModels(EvanTestCase):
         self.assertTrue(
             AchievementUnlock.objects.filter(achievement=ach, user=alice).exists()
         )
+
+    def test_hint_visibility(self):
+        verified_group = GroupFactory(name="Verified")
+        alice = UserFactory.create(username="alice", groups=(verified_group,))
+        self.login(alice)
+        puzzle = OpalPuzzleFactory.create(
+            slug="puzzle",
+            hunt__start_date=datetime.datetime(2025, 9, 5, tzinfo=UTC),
+            hunt__hints_released_date=datetime.datetime(2025, 9, 7, tzinfo=UTC),
+            hint_text="To solve the puzzle, use your brain.",
+            hint_text_rendered="<p>To solve the puzzle, use your brain.</p>",
+        )
+        with freeze_time("2025-09-04"):
+            self.assertGet40X("opal-show-puzzle", puzzle.hunt.slug, puzzle.slug)
+        with freeze_time("2025-09-06"):
+            resp = self.assertGet20X("opal-show-puzzle", puzzle.hunt.slug, puzzle.slug)
+            self.assertContains(resp, "will release")
+            self.assertNotContains(resp, "use your brain")
+        with freeze_time("2025-09-08"):
+            resp = self.assertGet20X("opal-show-puzzle", puzzle.hunt.slug, puzzle.slug)
+            self.assertNotContains(resp, "will release")
+            self.assertContains(resp, "use your brain")

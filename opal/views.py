@@ -265,7 +265,10 @@ def show_puzzle(request: AuthHttpRequest, hunt: str, slug: str) -> HttpResponse:
     context["attempts"] = attempts
     context["form"] = form
     context["can_attempt"] = can_attempt
-    context["show_hints"] = timezone.now() >= puzzle.hunt.hints_released_date
+    context["show_hints"] = (
+        timezone.now() >= puzzle.hunt.hints_released_date
+        or has_early_access(request.user)
+    )
     context["incorrect_attempts"] = incorrect_attempts
     return render(request, "opal/showpuzzle.html", context)
 

@@ -68,14 +68,21 @@
     <h3>Hints</h3>
     <p>
       <a id="open_opal_hints" href="#">Click to reveal pre-written hints.</a>
-      Email Evan for more detailed hint requests
-      (if so, include a viewable link to your spreadsheet).
+      Email Evan for more detailed hint requests.
+      If so, include a viewable link to your spreadsheet.
     </p>
     <div id="opal_hints" class="d-none">
       <p>Highlight each hint to reveal it.</p>
       {{ puzzle.hint_text_rendered|safe }}
     </div>
     <hr />
+  {% else %}
+    <h3>Hints</h3>
+    <p>Pre-written hints for this puzzle will release on {{ puzzle.hunt.hints_released_date }}.</p>
+    <p>
+      Even before then, you can email Evan for more detailed hint requests.
+      If so, include a viewable link to your spreadsheet.
+    </p>
   {% endif %}
   <h3>Previous guesses</h3>
   <p>You have used {{ incorrect_attempts|length }} of your {{ puzzle.guess_limit }} guesses.</p>
