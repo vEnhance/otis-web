@@ -1,4 +1,6 @@
 {% extends "layout.html" %}
+{% load account socialaccount %}
+{% get_social_accounts hunter as linked %}
 {% block title %}
   Activity log for {{ hunter.get_full_name }}
 {% endblock title %}
@@ -20,6 +22,11 @@
       <b>{{ hunter.get_full_name }}</b>,
     {% endif %}
     aka <code>{{ hunter.username }}</code>.
+    {% if linked.discord.0.get_provider_account %}
+      (Discord: <code>{{ linked.discord.0.get_provider_account }}</code>.)
+    {% else %}
+      (No Discord.)
+    {% endif %}
   </p>
   <table class="table table-striped">
     <tr class="table-dark">
