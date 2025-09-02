@@ -2,11 +2,14 @@ import datetime
 import logging
 from typing import Any
 
+import requests
+from allauth.socialaccount.models import SocialAccount
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.db.models.aggregates import Max
+from django.db.models.manager import Manager
 from django.db.models.query import QuerySet
 from django.http.response import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
@@ -193,6 +196,21 @@ def person_log(request: AuthHttpRequest, slug: str, user_pk: int) -> HttpRespons
     return render(request, "opal/person_log.html", context)
 
 
+def _discord_send_congratulations(request: AuthHttpRequest, hunt: OpalHunt):
+    if not hunt.discord_webhook_url:
+        return
+    socials: Manager[SocialAccount] = request.user.socialaccount_set  # type: ignore
+    discord = socials.filter(provider__iexact="Discord").first()
+    if discord is None:
+        return
+    discord_id = discord.extra_data["id"]
+    message = (
+        f":checkered_flag: <@{discord_id}> has finished! "
+        "You can @ping them to add them to this thread."
+    )
+    requests.post(url=hunt.discord_webhook_url, json={"content": message})
+
+
 @verified_required
 def show_puzzle(request: AuthHttpRequest, hunt: str, slug: str) -> HttpResponse:
     puzzle = get_object_or_404(OpalPuzzle, hunt__slug=hunt, slug=slug)
@@ -240,6 +258,7 @@ def show_puzzle(request: AuthHttpRequest, hunt: str, slug: str) -> HttpResponse:
                         f"{request.user} finished the OPAL puzzle {puzzle.title}!",
                         extra={"request": request},
                     )
+                    _discord_send_congratulations(request, puzzle.hunt)
                     return HttpResponseRedirect(
                         reverse("opal-finish", args=(puzzle.hunt.slug, puzzle.slug))
                     )

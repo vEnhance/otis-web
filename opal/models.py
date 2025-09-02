@@ -220,6 +220,10 @@ class OpalHunt(models.Model):
     story_text_rendered = RenderedMarkdownField()
 
     thanks = models.TextField(help_text="Thanks to people who helped.", blank=True)
+    discord_webhook_url = models.URLField(
+        help_text="Webhook to post to congratulating people who finish the hunt.",
+        blank=True,
+    )
 
     objects = models.Manager()
     live = LiveOpalHuntManager()
