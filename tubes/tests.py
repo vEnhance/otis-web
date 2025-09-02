@@ -14,11 +14,8 @@ class TubeTests(EvanTestCase):
         UserFactory.create(username="alice", groups=(verified_group,))
 
         self.login("mallory")
-        self.assertGet30X("tube-list")
-        resp = self.assertGet30X("tube-join", tube.pk)  # login redirect
-        self.assertTrue(
-            "/accounts/login" in getattr(resp, "url")
-        )  # TODO: seems scuffed af
+        self.assertGet40X("tube-list")
+        self.assertGet40X("tube-join", tube.pk)
         self.assertFalse(JoinRecord.objects.exists())
 
         # TODO update this to work with the new system
@@ -29,7 +26,7 @@ class TubeTests(EvanTestCase):
     #        self.assertContains(resp, tube.display_name)
     #        self.assertNotContains(resp, tube.main_url)
     #
-    #        resp = self.assertGet30X("tube-join", tube.pk)  # redirect to join URL
+    #        resp = self.assertGet40X("tube-join", tube.pk)  # redirect to join URL
     #        self.assertEqual(len(JoinRecord.objects.all()), 1)
     #
     #        resp = self.assertGet20X("tube-list")

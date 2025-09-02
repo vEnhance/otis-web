@@ -2,7 +2,6 @@ import logging
 from typing import Any
 
 import stripe
-from braces.views import SuperuserRequiredMixin
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -30,7 +29,7 @@ from sql_util.aggregates import SubqueryCount, SubqueryMax, SubqueryMin
 from sql_util.utils import Exists
 
 from otisweb.decorators import verified_required
-from otisweb.mixins import VerifiedRequiredMixin
+from otisweb.mixins import AdminRequiredMixin, VerifiedRequiredMixin
 from payments.models import Job, JobFolder
 from roster.models import Invoice, Student
 
@@ -320,7 +319,7 @@ class JobUpdate(VerifiedRequiredMixin, UpdateView[Job, BaseModelForm[Job]]):
         return self.object.get_absolute_url()
 
 
-class InactiveWorkerList(SuperuserRequiredMixin, ListView[Worker]):
+class InactiveWorkerList(AdminRequiredMixin, ListView[Worker]):
     model = Worker
     context_object_name = "workers"
     template_name: str = "payments/inactive_worker_list.html"

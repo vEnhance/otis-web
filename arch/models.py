@@ -1,6 +1,6 @@
 import string
 from pathlib import Path
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 import reversion
 from django.conf import settings
@@ -12,6 +12,9 @@ from django.db.models.manager import Manager
 from django.urls import reverse
 
 User = get_user_model()
+
+if TYPE_CHECKING:
+    assert hasattr(reversion, "register")
 
 
 def validate_puid(puid: str) -> None:

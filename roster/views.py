@@ -16,13 +16,16 @@ import logging
 from typing import Any, Optional
 
 from allauth.socialaccount.models import SocialAccount
-from braces.views import LoginRequiredMixin, StaffuserRequiredMixin
+from braces.views import LoginRequiredMixin
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
+from django.core.exceptions import (
+    ObjectDoesNotExist,
+    PermissionDenied,
+    SuspiciousOperation,
+)
 from django.db.models.expressions import F
 from django.db.models.fields import FloatField
 from django.db.models.functions.comparison import Cast
@@ -34,7 +37,6 @@ from django.http.response import Http404
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
-from django.views.decorators.http import require_POST
 from django.views.generic.edit import UpdateView
 from django.views.generic.list import ListView
 from prettytable import PrettyTable
@@ -42,8 +44,8 @@ from prettytable import PrettyTable
 from core.models import EMAIL_PREFERENCE_FIELDS, Semester, Unit, UserProfile
 from dashboard.models import PSet
 from evans_django_tools import SUCCESS_LOG_LEVEL
-from otisweb.decorators import admin_required
-from otisweb.mixins import VerifiedRequiredMixin
+from otisweb.decorators import admin_required, staff_required
+from otisweb.mixins import StaffRequiredMixin, VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest
 from roster.forms import LinkAssistantForm
 from roster.models import Assistant
@@ -75,7 +77,7 @@ from .models import (
 logger = logging.getLogger(__name__)
 
 
-@staff_member_required
+@staff_required
 def username_lookup(request: HttpRequest, username: str) -> HttpResponse:
     queryset = Student.objects.filter(user__username=username).order_by(
         "-semester__end_year"
@@ -125,8 +127,9 @@ def curriculum(request: HttpRequest, student_pk: int) -> HttpResponse:
 
 
 @login_required
-@require_POST
 def finalize(request: HttpRequest, student_pk: int) -> HttpResponse:
+    if not request.method == "POST":
+        raise SuspiciousOperation("Must use POST")
     # Removes a newborn status, thus activating everything
     student = get_student_by_pk(request, student_pk)
     if student.newborn is not True:
@@ -219,7 +222,7 @@ def invoice(request: HttpRequest, student_pk: Optional[int] = None) -> HttpRespo
     return render(request, "roster/invoice.html", context)
 
 
-@staff_member_required
+@staff_required
 def master_schedule(request: HttpRequest) -> HttpResponse:
     student_names_and_unit_pks = (
         get_current_students()
@@ -252,7 +255,7 @@ def master_schedule(request: HttpRequest) -> HttpResponse:
 
 class UpdateInvoice(
     LoginRequiredMixin,
-    StaffuserRequiredMixin,
+    StaffRequiredMixin,
     UpdateView[Invoice, BaseModelForm[Invoice]],
 ):
     model = Invoice
@@ -411,7 +414,6 @@ def inquiry(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
 
 
 @login_required
-@require_POST
 def cancel_inquiry(request: AuthHttpRequest, pk: int) -> HttpResponse:
     inquiry = get_object_or_404(UnitInquiry, pk=pk)
     if inquiry.student.user != request.user and not request.user.is_staff:
@@ -675,7 +677,7 @@ def giga_chart(request: HttpRequest, format_as: str) -> HttpResponse:
         raise NotImplementedError(f"Format {format_as} not implemented yet")
 
 
-class StudentAssistantList(StaffuserRequiredMixin, ListView[Student]):
+class StudentAssistantList(StaffRequiredMixin, ListView[Student]):
     model = Student
     template_name = "roster/student_assistant_list.html"
     context_object_name = "students"
@@ -713,7 +715,7 @@ class StudentAssistantList(StaffuserRequiredMixin, ListView[Student]):
         return super().get(request, *args, **kwargs)
 
 
-@staff_member_required
+@staff_required
 def link_assistant(request: HttpRequest) -> HttpResponse:
     assistant = get_object_or_404(Assistant, user=request.user)
     # Create form for submitting new inquiries
@@ -791,7 +793,7 @@ class AdList(VerifiedRequiredMixin, ListView[Assistant]):
         return context
 
 
-class AdUpdate(StaffuserRequiredMixin, UpdateView[Assistant, BaseModelForm[Assistant]]):
+class AdUpdate(StaffRequiredMixin, UpdateView[Assistant, BaseModelForm[Assistant]]):
     model = Assistant
     template_name = "roster/ad_form.html"
     context_object_name = "assistant"

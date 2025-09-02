@@ -1,10 +1,10 @@
 from typing import Any, Optional
 
-from braces.views import LoginRequiredMixin, SuperuserRequiredMixin
+from braces.views import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import AnonymousUser, User
 from django.contrib.messages.views import SuccessMessageMixin
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from django.db.models.aggregates import Count, Max
 from django.db.models.base import Model
 from django.db.models.expressions import Value
@@ -16,7 +16,6 @@ from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.urls.base import reverse_lazy
 from django.utils import timezone
-from django.views.decorators.http import require_POST
 from django.views.generic.edit import UpdateView
 from django.views.generic.list import ListView
 from sql_util.utils import Exists
@@ -24,6 +23,7 @@ from sql_util.utils import Exists
 from core.models import EMAIL_PREFERENCE_FIELDS, Semester, UserProfile
 from dashboard.models import PSet, UploadedFile
 from otisweb.decorators import verified_required
+from otisweb.mixins import AdminRequiredMixin
 from otisweb.utils import AuthHttpRequest
 from roster.models import Student
 
@@ -34,7 +34,7 @@ from .utils import get_from_google_storage
 # Create your views here.
 
 
-class AdminUnitListView(SuperuserRequiredMixin, ListView[Unit]):
+class AdminUnitListView(AdminRequiredMixin, ListView[Unit]):
     model = Unit
     queryset = Unit.objects.all()
     template_name = "core/admin_unit_list.html"
@@ -333,8 +333,9 @@ class UserProfileUpdateView(
 
 
 @login_required
-@require_POST
 def dismiss(request: AuthHttpRequest) -> JsonResponse:
+    if not request.method == "POST":
+        raise SuspiciousOperation("Must use POST")
     profile = get_object_or_404(UserProfile, user=request.user)
     profile.last_notif_dismiss = timezone.now()
     profile.save()

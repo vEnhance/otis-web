@@ -197,10 +197,10 @@ class TestAnnounce(EvanTestCase):
         # First make sure nothing is accessible to outside world
         mallory = UserFactory.create(username="mallory")
         self.login(mallory)
-        self.assertGet30X("announcement-list")
-        self.assertGet30X("announcement-detail", "one")
-        self.assertGet30X("announcement-detail", "two")
-        self.assertGet30X("announcement-detail", "three")
+        self.assertGet40X("announcement-list")
+        self.assertGet40X("announcement-detail", "one")
+        self.assertGet40X("announcement-detail", "two")
+        self.assertGet40X("announcement-detail", "three")
 
         verified_group = GroupFactory(name="Verified")
         alice = UserFactory.create(username="alice", groups=(verified_group,))
@@ -577,7 +577,7 @@ class TestPSet(EvanTestCase):
         assert upload is not None
         self.assertTrue(upload.description == "bark")
 
-        self.assertPost40X("delete-file", upload.pk, follow=True)
+        self.assertPost40X("delete-file", upload.pk)
         self.assertTrue(UploadedFile.objects.filter(pk=pk).exists())
         self.login(UserFactory.create(is_staff=True))
         self.assertPost20X("delete-file", upload.pk, follow=True)

@@ -2,7 +2,6 @@ import datetime
 import logging
 from typing import Any
 
-from braces.views import SuperuserRequiredMixin
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
@@ -18,7 +17,7 @@ from sql_util.utils import SubqueryCount
 
 from evans_django_tools import SUCCESS_LOG_LEVEL
 from otisweb.decorators import admin_required, verified_required
-from otisweb.mixins import VerifiedRequiredMixin
+from otisweb.mixins import AdminRequiredMixin, VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest
 from roster.models import Student
 from rpg.models import AchievementUnlock
@@ -30,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 
 def has_early_access(u: User) -> bool:
-    return u.is_superuser or u.groups.filter(name="Testsolver").exists()
+    return u.is_staff or u.is_superuser or u.groups.filter(name="Testsolver").exists()
 
 
 class HuntList(ListView[OpalHunt]):
@@ -62,7 +61,7 @@ class PuzzleList(VerifiedRequiredMixin, ListView[OpalPuzzle]):
             if has_early_access(request.user):
                 messages.warning(
                     request,
-                    "This hunt hasn't started yet; this is an internal view for testsolvers and admins.",
+                    "This hunt hasn't started yet; this is an internal view for testsolvers and staff.",
                 )
             else:
                 raise PermissionDenied("This puzzle cannot be unlocked yet")
@@ -79,7 +78,7 @@ class PuzzleList(VerifiedRequiredMixin, ListView[OpalPuzzle]):
         return context
 
 
-class AttemptsList(SuperuserRequiredMixin, ListView[OpalAttempt]):
+class AttemptsList(AdminRequiredMixin, ListView[OpalAttempt]):
     model = OpalAttempt
     context_object_name = "attempts"
 
@@ -152,32 +151,29 @@ def leaderboard(request: AuthHttpRequest, slug: str) -> HttpResponse:
         num_total_attempts=SubqueryCount("opalattempt"),
     )
 
-    MAX_TIME_IN_FUTURE = datetime.datetime(
-        year=datetime.MAXYEAR,
-        month=12,
-        day=31,
-        tzinfo=datetime.timezone.utc,
-    )
-    context["rows"] = [
-        {
+    def get_row(user_pk: int) -> dict[str, Any]:
+        emoji_string = "".join("✅" if r else "✖️" for r in user_solve_record[user_pk])
+        if user_pk in meta_solved_time:
+            emoji_string = emoji_string[:-1] + "🎉"
+        return {
             "name": realname_dict[user_pk],
             "user_pk": user_pk,
             "num_solves": num_solves_dict[user_pk],
             "most_recent_solve": most_recent_solve_dict[user_pk],
             "meta_solved_time": meta_solved_time.get(user_pk, None),
-            "emoji_string": "".join(
-                "✅" if r else "✖️" for r in user_solve_record[user_pk]
-            ),
+            "emoji_string": emoji_string,
         }
-        for user_pk in sorted(
-            user_solve_record.keys(),
-            key=lambda user_pk: (
-                meta_solved_time.get(user_pk, MAX_TIME_IN_FUTURE),
-                -num_solves_dict.get(user_pk, 0),
-                most_recent_solve_dict[user_pk],
-            ),
-        )
-    ]
+
+    MAX_DATETIME = datetime.datetime.max.replace(tzinfo=datetime.timezone.utc)
+    sorted_user_pks = sorted(
+        user_solve_record.keys(),
+        key=lambda user_pk: (
+            meta_solved_time.get(user_pk, MAX_DATETIME),
+            -num_solves_dict.get(user_pk, 0),
+            most_recent_solve_dict[user_pk],
+        ),
+    )
+    context["rows"] = [get_row(user_pk) for user_pk in sorted_user_pks]
     return render(request, "opal/leaderboard.html", context)
 
 
@@ -269,7 +265,10 @@ def show_puzzle(request: AuthHttpRequest, hunt: str, slug: str) -> HttpResponse:
     context["attempts"] = attempts
     context["form"] = form
     context["can_attempt"] = can_attempt
-    context["show_hints"] = timezone.now() >= puzzle.hunt.hints_released_date
+    context["show_hints"] = (
+        timezone.now() >= puzzle.hunt.hints_released_date
+        or has_early_access(request.user)
+    )
     context["incorrect_attempts"] = incorrect_attempts
     return render(request, "opal/showpuzzle.html", context)
 
