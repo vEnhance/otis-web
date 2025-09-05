@@ -46,7 +46,7 @@
       <th>Last solve</th>
     </tr>
     {% for row in rows %}
-      <tr {% if row.has_early_access %}class="table-secondary" {% elif row.meta_solved_time %} class="table-success" {% endif %}>
+      <tr {% if row.has_early_access %}class="table-primary" {% elif row.meta_solved_time %} class="table-success" {% endif %}>
         <td class="text-end">
           {% if row.has_early_access %}
             {{ row.num_solves }}
