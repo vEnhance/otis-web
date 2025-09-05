@@ -120,6 +120,7 @@ def leaderboard(request: AuthHttpRequest, slug: str) -> HttpResponse:
         "puzzle__is_metapuzzle",
     )
     user_solve_record: dict[int, list] = {}
+    user_early_record: dict[int, bool] = {}
     num_solves_dict: dict[int, int] = {}
     realname_dict: dict[int, str] = {}
     most_recent_solve_dict: dict[int, datetime.datetime] = {}
@@ -134,6 +135,10 @@ def leaderboard(request: AuthHttpRequest, slug: str) -> HttpResponse:
         if user_pk not in user_solve_record:
             user_solve_record[user_pk] = [False] * max_order
         user_solve_record[user_pk][attempt_dict["puzzle__order"] - 1] = True
+        if user_pk not in user_early_record:
+            user_early_record[user_pk] = False
+        if attempt_dict["created_at"] < hunt.start_date:
+            user_early_record[user_pk] = True
 
         if user_pk not in num_solves_dict:
             num_solves_dict[user_pk] = 0
@@ -155,9 +160,16 @@ def leaderboard(request: AuthHttpRequest, slug: str) -> HttpResponse:
     )
 
     def get_row(user_pk: int) -> dict[str, Any]:
-        emoji_string = "".join("✅" if r else "✖️" for r in user_solve_record[user_pk])
+        correct_emoji = "☑️" if user_early_record[user_pk] else "✅"
+        emoji_string = "".join(
+            correct_emoji if r else "✖️" for r in user_solve_record[user_pk]
+        )
         if user_pk in meta_solved_time:
-            emoji_string = emoji_string[:-1] + "🎉"
+            if user_early_record[user_pk]:
+                emoji_string = emoji_string[:-2] + "🆗"
+            else:
+                emoji_string = emoji_string[:-1] + "🈴"
+
         return {
             "name": realname_dict[user_pk],
             "user_pk": user_pk,
@@ -165,6 +177,7 @@ def leaderboard(request: AuthHttpRequest, slug: str) -> HttpResponse:
             "most_recent_solve": most_recent_solve_dict[user_pk],
             "meta_solved_time": meta_solved_time.get(user_pk, None),
             "emoji_string": emoji_string,
+            "has_early_access": user_early_record[user_pk],
         }
 
     MAX_DATETIME = datetime.datetime.max.replace(tzinfo=datetime.timezone.utc)
