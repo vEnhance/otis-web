@@ -228,6 +228,9 @@ class OpalHunt(models.Model):
     objects = models.Manager()
     live = LiveOpalHuntManager()
 
+    class Meta:
+        ordering = ("start_date",)
+
     def __str__(self) -> str:
         return self.name
 
