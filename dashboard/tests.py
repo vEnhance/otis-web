@@ -151,7 +151,7 @@ class TestPortal(EvanTestCase):
             SemesterDownloadFileFactory.create(semester=semester)
 
         with freeze_time("2021-07-01", tz_offset=0):
-            news = get_news(alice)
+            news = get_news(alice_profile, alice)
             self.assertEqual(len(news["announcements"]), 1)
             self.assertEqual(len(news["downloads"]), 1)
             self.assertEqual(len(news["markets"]), 1)
@@ -159,7 +159,7 @@ class TestPortal(EvanTestCase):
             self.assertEqual(len(news["opals"]), 1)
 
         with freeze_time("2021-07-30", tz_offset=0):
-            news = get_news(alice)
+            news = get_news(alice_profile, alice)
             self.assertEqual(len(news["announcements"]), 1)
             self.assertEqual(len(news["downloads"]), 0)
             self.assertEqual(len(news["markets"]), 0)
@@ -171,7 +171,7 @@ class TestPortal(EvanTestCase):
         alice_profile.save()
 
         with freeze_time("2021-07-02", tz_offset=0):
-            news = get_news(alice)
+            news = get_news(alice_profile, alice)
             self.assertEqual(len(news["announcements"]), 0)
             self.assertEqual(len(news["downloads"]), 0)
             self.assertEqual(len(news["markets"]), 0)
@@ -180,7 +180,7 @@ class TestPortal(EvanTestCase):
 
         with freeze_time("2022-07-02", tz_offset=0):
             SemesterDownloadFileFactory.create(semester=semester)
-            news = get_news(alice)
+            news = get_news(alice_profile, alice)
             self.assertEqual(len(news["announcements"]), 0)
             self.assertEqual(len(news["downloads"]), 1)
             self.assertEqual(len(news["markets"]), 2)

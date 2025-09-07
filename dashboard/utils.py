@@ -5,7 +5,7 @@ from django.db.models.expressions import Exists, OuterRef
 from django.db.models.query import QuerySet
 from django.utils import timezone
 
-from core.models import Unit
+from core.models import Unit, UserProfile
 from dashboard.models import Announcement, PSet, SemesterDownloadFile
 from hanabi.models import HanabiContest
 from markets.models import Market
@@ -44,8 +44,7 @@ class NewsDict(TypedDict):
     opals: QuerySet[OpalHunt]
 
 
-def get_news(student: Student) -> NewsDict:
-    profile = student.user.profile
+def get_news(profile: UserProfile, student: Student) -> NewsDict:
     return {
         "announcements": Announcement.objects.filter(
             created_at__gte=profile.last_notif_dismiss
