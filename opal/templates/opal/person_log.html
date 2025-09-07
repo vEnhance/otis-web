@@ -44,12 +44,14 @@
         <td>
           {% if attempt.is_correct %}
             ✅
+          {% elif attempt.is_close %}
+            ▶️
           {% else %}
             ✖️
           {% endif %}
           {{ attempt.created_at|date:"Y-m-d H:i" }}
         </td>
-        <td class="{% if attempt.is_correct %}text-success{% else %}text-danger{% endif %}">
+        <td class="{% if attempt.is_correct %}text-success{% elif attempt.is_close %}text-dark{% else %}text-danger{% endif %}">
           <tt>{{ attempt.guess|truncatechars:24 }}</tt>
         </td>
       </tr>
