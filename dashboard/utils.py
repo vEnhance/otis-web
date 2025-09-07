@@ -48,6 +48,8 @@ def get_news(profile: UserProfile, student: Student) -> NewsDict:
     return {
         "announcements": Announcement.objects.filter(
             created_at__gte=profile.last_notif_dismiss
+        ).filter(
+            created_at__gte=timezone.now() - timedelta(days=14),
         ),
         "downloads": SemesterDownloadFile.objects.filter(
             semester=student.semester,
@@ -64,5 +66,7 @@ def get_news(profile: UserProfile, student: Student) -> NewsDict:
         ),
         "opals": OpalHunt.live.filter(
             start_date__gte=profile.last_notif_dismiss,
+        ).filter(
+            start_date__gte=timezone.now() - timedelta(days=270),
         ),
     }

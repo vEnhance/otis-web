@@ -160,7 +160,7 @@ class TestPortal(EvanTestCase):
 
         with freeze_time("2021-07-30", tz_offset=0):
             news = get_news(alice_profile, alice)
-            self.assertEqual(len(news["announcements"]), 1)
+            self.assertEqual(len(news["announcements"]), 0)
             self.assertEqual(len(news["downloads"]), 0)
             self.assertEqual(len(news["markets"]), 0)
             self.assertEqual(len(news["hanabis"]), 0)
