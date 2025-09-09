@@ -9,7 +9,7 @@ repository = "https://github.com/vEnhance/otis-web"
 
 [tool.poetry.dependencies]
 python = ">=3.13, <4.0"
-Django = "^5.2.5"
+Django = "^5.2.6"
 PyMySQL = "^1.1.2"
 Unidecode = "^1.4.0"
 crispy-bootstrap5 = "^2024.2"
