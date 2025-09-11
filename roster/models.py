@@ -4,7 +4,7 @@ import os
 from _pydecimal import Decimal
 from datetime import timedelta
 from hashlib import pbkdf2_hmac
-from typing import TypedDict
+from typing import Any, Optional, TypedDict
 
 from django.contrib.auth.models import Group, User
 from django.core.exceptions import ObjectDoesNotExist
@@ -16,7 +16,7 @@ from django.urls import reverse
 from django.utils.timezone import localtime, now
 from sql_util.aggregates import Exists, SubqueryAggregate
 
-from core.models import Semester, Unit
+from core.models import Semester, Unit, UserProfile
 
 from .country_abbrevs import COUNTRY_CHOICES
 
@@ -265,16 +265,35 @@ class Student(models.Model):
         else:
             return False
 
-    def generate_curriculum_rows(self) -> list[CurriculumRowTypeDict]:
-        curriculum = self.generate_curriculum_queryset().order_by("position")
+    def generate_curriculum_rows(
+        self, user: Optional[Any] = None
+    ) -> list[CurriculumRowTypeDict]:
+        curriculum = self.generate_curriculum_queryset()
+
+        if user:
+            try:
+                profile, _ = UserProfile.objects.get_or_create(user=user)
+                if profile.sort_units_by_subject:
+                    curriculum = curriculum.order_by("group__subject", "position")
+                else:
+                    curriculum = curriculum.order_by("position")
+            except Exception:
+                curriculum = curriculum.order_by("position")
+        else:
+            curriculum = curriculum.order_by("position")
+
         unlocked_units_pks = self.unlocked_units.values_list("pk", flat=True)
 
+        original_curriculum = self.generate_curriculum_queryset().order_by("position")
+        original_numbering = {}
+        for i, unit in enumerate(original_curriculum):
+            original_numbering[unit.pk] = i + 1
+
         rows = []
-        for i, unit in enumerate(curriculum):
-            n = i + 1
+        for unit in curriculum:
             row: CurriculumRowTypeDict = {
                 "unit": unit,
-                "number": n,
+                "number": original_numbering[unit.pk],
                 "num_uploads": getattr(unit, "num_uploads", 0),
                 "student_still_active": self.semester.active and self.enabled,
                 "is_submitted": getattr(unit, "has_pset", False),

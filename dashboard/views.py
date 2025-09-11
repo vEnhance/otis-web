@@ -81,7 +81,7 @@ def portal(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
     }
     context["profile"] = profile
 
-    context["curriculum"] = student.generate_curriculum_rows()
+    context["curriculum"] = student.generate_curriculum_rows(request.user)
     context["tests"] = PracticeExam.objects.filter(
         is_test=True, family=semester.exam_family, due_date__isnull=False
     )
