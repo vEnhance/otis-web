@@ -199,12 +199,6 @@
   {% endif %}
   {% if student and request.user.is_staff %}
     <ul>
-      <li>
-        <a target="_blank"
-           href="mailto:{{ student.user.email }}"
-           rel="noreferrer">Email student</a>
-        <br />
-      </li>
       {% if request.user.is_superuser %}
         <li>
           <a href="{% url "admin:auth_user_change" student.user.pk %}">Edit user</a>
@@ -212,6 +206,16 @@
         <li>
           <a href="{% url "admin:roster_student_change" student.pk %}">Edit student</a>
         </li>
+        {% if student.reg %}
+          <li>
+            <a href="{% url "admin:roster_studentregistration_change" student.reg.pk %}">Edit reg</a>
+          </li>
+        {% endif %}
+        {% if student.user.profile %}
+          <li>
+            <a href="{% url "admin:core_userprofile_change" student.user.profile.pk %}">Edit profile</a>
+          </li>
+        {% endif %}
         {% if student.user %}
           {# Hijack student account #}
           <li>
@@ -234,8 +238,15 @@
             </form>
           </li>
         {% endif %}
-      </ul>
-    {% endif %}
+      {% else %}
+        <li>
+          <a target="_blank"
+             href="mailto:{{ student.user.email }}"
+             rel="noreferrer">Email student</a>
+          <br />
+        </li>
+      {% endif %}
+    </ul>
   {% endif %}
 {% else %}
   <p>You are not logged in.</p>
