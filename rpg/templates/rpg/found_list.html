@@ -14,17 +14,13 @@
   <table class="table table-striped">
     <tr>
       <th>Time</th>
-      <th>Username</th>
       <th>Name</th>
     </tr>
     {% for unlock in unlocks_list %}
       <tr>
-        <td>{{ unlock.timestamp }}</td>
+        <td>{{ unlock.timestamp|date:"Y-m-d H:i" }}</td>
         <td>
-          <code>{{ unlock.user|truncatechars:"18" }}</code>
-        </td>
-        <td>
-          <a href="{% url "username-lookup" unlock.user.username %}">{{ unlock.user.get_full_name }}</a>
+          <a href="{% url "username-lookup" unlock.user.username %}">{{ unlock.user.get_full_name|truncatechars:"40" }}</a>
         </td>
       </tr>
     {% endfor %}
