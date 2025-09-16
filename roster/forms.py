@@ -223,3 +223,7 @@ class LinkAssistantForm(forms.Form):
 
 class DiscordLookupForm(forms.Form):
     discord_handle = forms.CharField()
+
+
+class EmailLookupForm(forms.Form):
+    email = forms.EmailField()

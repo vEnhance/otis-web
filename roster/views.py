@@ -61,6 +61,7 @@ from .forms import (
     CurriculumForm,
     DecisionForm,
     DiscordLookupForm,
+    EmailLookupForm,
     InquiryForm,
     UserForm,
 )
@@ -744,6 +745,29 @@ def link_assistant(request: HttpRequest) -> HttpResponse:
     }
 
     return render(request, "roster/link_assistant.html", context)
+
+
+@admin_required
+def email_lookup(request: HttpRequest) -> HttpResponse:
+    context = {}
+    if request.method == "POST":
+        form = EmailLookupForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data["email"]
+            student = (
+                Student.objects.filter(user__email__iexact=email)
+                .order_by("-semester__end_year")
+                .first()
+            )
+            if student is None:
+                messages.warning(request, "No matches found")
+            else:
+                return HttpResponseRedirect(student.get_absolute_url())
+
+    else:
+        form = EmailLookupForm()
+    context["form"] = form
+    return render(request, "roster/email_lookup.html", context)
 
 
 @admin_required

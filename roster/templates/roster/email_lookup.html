@@ -1,0 +1,7 @@
+{% extends "layout.html" %}
+{% block title %}Email lookup{% endblock %}
+{% block layout-content %}
+  <h2>Email lookup</h2>
+  <p>Look up a student by email username.</p>
+  {% include "generic_form.html" with submit_name="Search" %}
+{% endblock layout-content %}
