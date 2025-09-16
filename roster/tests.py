@@ -55,6 +55,59 @@ class RosterGeneralTest(EvanTestCase):
             bob_new.get_absolute_url(),
         )
 
+    def test_email_lookup(self) -> None:
+        admin: User = UserFactory.create(is_superuser=True, is_staff=True)
+        regular_user: User = UserFactory.create()
+        semester_old: Semester = SemesterFactory.create(end_year=2025)
+        semester_new: Semester = SemesterFactory.create(end_year=2026)
+
+        # Create students with different emails and semesters
+        alice: User = UserFactory.create(email="alice@example.com")
+        StudentFactory.create(user=alice, semester=semester_old)
+        alice_new: Student = StudentFactory.create(user=alice, semester=semester_new)
+
+        bob: User = UserFactory.create(email="bob@example.com")
+        bob_student: Student = StudentFactory.create(user=bob, semester=semester_new)
+
+        # Test access control - anonymous user should be redirected
+        self.assertGet30X("email-lookup")
+
+        # Test access control - regular user should be denied
+        self.login(regular_user)
+        self.assertGet40X("email-lookup")
+
+        # Test GET request with admin user - should show form
+        self.login(admin)
+        resp = self.assertGet20X("email-lookup")
+        self.assertHas(resp, "Email lookup")
+
+        # Test POST with valid email that matches a student (should redirect)
+        self.assertRedirects(
+            self.post("email-lookup", data={"email": "alice@example.com"}),
+            alice_new.get_absolute_url(),
+        )
+
+        # Test POST with valid email but no matching student (should show warning)
+        resp = self.assertPost20X(
+            "email-lookup", data={"email": "nonexistent@example.com"}, follow=True
+        )
+        messages = [m.message for m in resp.context["messages"]]
+        self.assertIn("No matches found", messages)
+
+        # Test POST with invalid email format (form validation should catch it)
+        resp = self.assertPost20X(
+            "email-lookup",
+            data={"email": "invalid_email"},
+        )
+        # Form should be re-displayed with errors, no redirect should occur
+        self.assertHas(resp, "Email lookup")
+
+        # Test case insensitive matching
+        self.assertRedirects(
+            self.post("email-lookup", data={"email": "BOB@EXAMPLE.COM"}),
+            bob_student.get_absolute_url(),
+        )
+
     def test_update_profile(self) -> None:
         alice: User = UserFactory.create()
         self.login(alice)
