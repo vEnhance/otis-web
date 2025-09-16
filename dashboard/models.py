@@ -171,7 +171,7 @@ class PSet(models.Model):
         on_delete=models.SET_NULL,
         null=True,
     )
-    upload = models.ForeignKey(
+    upload = models.OneToOneField(
         UploadedFile,
         help_text="The associated upload file for this problem set",
         on_delete=models.CASCADE,
