@@ -295,6 +295,17 @@ class StudentRegistrationIEResource(RosterResource):
         export_order = fields
 
 
+class StudentRegistrationStudentInline(admin.StackedInline):
+    model = Student
+    fields = (
+        "semester",
+        "legit",
+        "newborn",
+        "enabled",
+        "last_level_seen",
+    )
+
+
 @admin.register(StudentRegistration)
 class StudentRegistrationAdmin(ImportExportModelAdmin):
     readonly_fields = ("created_at",)
@@ -319,6 +330,7 @@ class StudentRegistrationAdmin(ImportExportModelAdmin):
     )
     resource_class = StudentRegistrationIEResource
     search_fields = ("user__first_name", "user__last_name")
+    inlines = [StudentRegistrationStudentInline]
 
     actions = [
         "create_student",
