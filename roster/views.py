@@ -24,7 +24,6 @@ from django.contrib.auth.models import Group, User
 from django.core.exceptions import (
     ObjectDoesNotExist,
     PermissionDenied,
-    SuspiciousOperation,
 )
 from django.db.models.expressions import F
 from django.db.models.fields import FloatField
@@ -130,7 +129,7 @@ def curriculum(request: HttpRequest, student_pk: int) -> HttpResponse:
 @login_required
 def finalize(request: HttpRequest, student_pk: int) -> HttpResponse:
     if not request.method == "POST":
-        raise SuspiciousOperation("Must use POST")
+        raise PermissionDenied("Must use POST")
     # Removes a newborn status, thus activating everything
     student = get_student_by_pk(request, student_pk)
     if student.newborn is not True:

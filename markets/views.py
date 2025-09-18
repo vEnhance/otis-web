@@ -4,7 +4,7 @@ from typing import Any
 from braces.views import LoginRequiredMixin
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.core.exceptions import PermissionDenied, SuspiciousOperation
+from django.core.exceptions import PermissionDenied
 from django.db.models import Avg, Max, Sum
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
@@ -140,7 +140,7 @@ class MarketResults(LoginRequiredMixin, ListView[Guess]):
 @admin_required
 def recompute(request: AuthHttpRequest, slug: str):
     if not request.method == "POST":
-        raise SuspiciousOperation("Must use POST")
+        raise PermissionDenied("Must use POST")
     guesses = Guess.objects.filter(market__slug=slug)
     for guess in guesses:
         guess.set_score()

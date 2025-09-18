@@ -9,7 +9,7 @@ from typing import Any, Literal, TypedDict, Union
 
 from allauth.socialaccount.models import SocialAccount
 from django.conf import settings
-from django.core.exceptions import SuspiciousOperation
+from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from django.db.models.aggregates import Sum
 from django.db.models.query import QuerySet, prefetch_related_objects
 from django.db.models.query_utils import Q
@@ -708,7 +708,7 @@ def announcement_handler(action: str, data: JSONData) -> JsonResponse:
 @csrf_exempt
 def api(request: HttpRequest) -> JsonResponse:
     if not request.method == "POST":
-        raise SuspiciousOperation("Must use POST")
+        raise PermissionDenied("Must use POST")
     try:
         data: JSONData = json.loads(request.body)
     except JSONDecodeError:
