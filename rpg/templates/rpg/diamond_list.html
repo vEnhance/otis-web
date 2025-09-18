@@ -46,6 +46,8 @@
             <a href="{% url "diamond-solution" achievement.pk %}">
               {% if achievement.image %}
                 <img width="64px" class="float-end" src="{{ achievement.image.url }}" />
+              {% elif not achievement.obtained and not request.user.is_staff %}
+                <div width="64px" class="float-end">???</div>
               {% else %}
                 <div width="64px" class="float-end">View solution</div>
               {% endif %}
