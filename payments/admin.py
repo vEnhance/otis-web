@@ -9,7 +9,10 @@ from .models import Job, JobFolder, PaymentLog, Worker
 
 @admin.register(PaymentLog)
 class PaymentLogAdmin(admin.ModelAdmin):
-    readonly_fields = ("created_at",)
+    readonly_fields = (
+        "created_at",
+        "stripe_id",
+    )
     list_display = (
         "invoice",
         "amount",
