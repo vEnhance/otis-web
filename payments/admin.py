@@ -16,10 +16,14 @@ class PaymentLogAdmin(admin.ModelAdmin):
     list_display = (
         "invoice",
         "amount",
+        "refunded",
         "created_at",
         "stripe_id",
     )
-    list_filter = ("invoice__student__semester",)
+    list_filter = (
+        "invoice__student__semester",
+        "refunded",
+    )
     search_fields = (
         "invoice__student__user__first_name",
         "invoice__student__user__last_name",

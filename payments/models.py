@@ -22,6 +22,7 @@ class PaymentLog(models.Model):
         help_text="Stripe payment intent identifier",
         verbose_name="Stripe payment intent ID",
     )
+    refunded = models.BooleanField(default=False)
 
     def __str__(self) -> str:
         return f"{self.created_at.strftime('%c')} {self.stripe_id or '?'}"

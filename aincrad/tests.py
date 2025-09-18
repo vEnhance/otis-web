@@ -118,9 +118,11 @@ class TestAincradWithSetup(EvanTestCase):
         PaymentLogFactory.create(invoice=invC, amount=50)
         PaymentLogFactory.create(invoice=invC, amount=70)
         PaymentLogFactory.create(invoice=invC, amount=90)
+        PaymentLogFactory.create(invoice=invC, amount=9001, refunded=True)
         PaymentLogFactory.create(invoice=invD, amount=360)
         PaymentLogFactory.create(invoice=invD, amount=120)
         PaymentLogFactory.create(invoice=invE, amount=1)
+        PaymentLogFactory.create(invoice=invC, amount=9001, refunded=True)
 
         regcontainer_active = RegistrationContainerFactory.create(
             semester=active_semester

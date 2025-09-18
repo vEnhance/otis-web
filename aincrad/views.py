@@ -517,7 +517,7 @@ def invoice_handler(action: str, data: JSONData) -> JsonResponse:
     if field == "total_paid":
         prefetch_related_objects(invoices_to_update, "paymentlog_set")
         for inv in invoices_to_update:
-            logs: QuerySet[Invoice] = inv.paymentlog_set  # type: ignore
+            logs: QuerySet[Invoice] = inv.paymentlog_set.filter(refunded=False)  # type: ignore
             stripe_paid: Union[Decimal, int] = logs.aggregate(s=Sum("amount"))["s"] or 0
             inv.total_paid += stripe_paid
 
