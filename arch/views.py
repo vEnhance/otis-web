@@ -58,10 +58,13 @@ class HintList(VerifiedRequiredMixin, ListView[Hint]):
     context_object_name = "hint_list"
     problem: Problem
 
-    def setup(self, request: HttpRequest, *args: Any, **kwargs: Any):
-        super().setup(request, *args, **kwargs)
-        puid = kwargs["puid"]
-        puid = puid.upper()
+    def get_queryset(self):
+        return Hint.objects.filter(problem__puid=self.kwargs["puid"]).order_by("number")
+
+    def get_context_data(self, **kwargs: Any):
+        context = super().get_context_data(**kwargs)
+
+        puid = self.kwargs["puid"].upper()
         try:
             self.problem = Problem.objects.get(puid=puid)
         except Problem.DoesNotExist:
@@ -69,15 +72,12 @@ class HintList(VerifiedRequiredMixin, ListView[Hint]):
             if statement_exists_on_disk:
                 self.problem = Problem(puid=puid)
                 self.problem.save()
-                messages.info(request, f"Created previously nonexistent problem {puid}")
+                messages.info(
+                    self.request, f"Created previously nonexistent problem {puid}"
+                )
             else:
                 raise Http404(f"Couldn't find {puid} in database or disk")
 
-    def get_queryset(self):
-        return Hint.objects.filter(problem__puid=self.kwargs["puid"]).order_by("number")
-
-    def get_context_data(self, **kwargs: Any):
-        context = super().get_context_data(**kwargs)
         context["problem"] = self.problem
         context["statement"] = self.problem.get_statement()
 
