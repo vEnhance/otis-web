@@ -654,6 +654,7 @@ def email_handler(action: str, data: JSONData) -> JsonResponse:
                 Student.objects.filter(
                     semester__active=True,
                     user__profile__email_on_announcement=True,
+                    enabled=True,
                 ).values(
                     "user__first_name",
                     "user__last_name",
