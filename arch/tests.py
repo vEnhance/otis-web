@@ -1,7 +1,7 @@
 import os
 
 from django.conf import settings
-from django.core.exceptions import SuspiciousOperation
+from django.http import Http404
 from django.test import override_settings
 from django.urls import reverse
 
@@ -225,9 +225,9 @@ class TestProblem(EvanTestCase):
         self.assertGet20X("view-solution", problem.puid)
 
     def test_validate_puid(self):
-        self.assertRaises(SuspiciousOperation, validate_puid, "✈✈✈")
-        self.assertRaises(SuspiciousOperation, validate_puid, "✈" * 1000)
-        self.assertRaises(SuspiciousOperation, validate_puid, "i'm a rock")
-        self.assertRaises(SuspiciousOperation, validate_puid, "A" * 1000)
+        self.assertRaises(Http404, validate_puid, "✈✈✈")
+        self.assertRaises(Http404, validate_puid, "✈" * 1000)
+        self.assertRaises(Http404, validate_puid, "i'm a rock")
+        self.assertRaises(Http404, validate_puid, "A" * 1000)
         validate_puid("15TWNQJ36")
         validate_puid("A" * 24)

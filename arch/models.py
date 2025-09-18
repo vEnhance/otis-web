@@ -5,10 +5,10 @@ from typing import TYPE_CHECKING, Optional
 import reversion
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.exceptions import SuspiciousOperation
 from django.core.validators import MaxValueValidator, RegexValidator
 from django.db import models
 from django.db.models.manager import Manager
+from django.http import Http404
 from django.urls import reverse
 
 User = get_user_model()
@@ -19,9 +19,9 @@ if TYPE_CHECKING:
 
 def validate_puid(puid: str) -> None:
     if not all(_ in string.ascii_letters + string.digits for _ in puid):
-        raise SuspiciousOperation(f"The PUID {puid} contains illegal characters.")
+        raise Http404(f"The PUID {puid} contains illegal characters.")
     elif len(puid) > 32:
-        raise SuspiciousOperation(f"The PUID {puid} is too long to be possible.")
+        raise Http404(f"The PUID {puid} is too long to be possible.")
 
 
 def get_disk_statement_from_puid(puid: str) -> Optional[str]:
