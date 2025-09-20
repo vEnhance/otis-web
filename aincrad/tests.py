@@ -207,6 +207,10 @@ class TestAincradWithSetup(EvanTestCase):
             },
         ).json()
         self.assertEqual(out["updated_count"], 2)
+        self.assertCountEqual(
+            out["updated_names_list"],
+            ["Alice Aardvárk <alice@example.org>", "Eve Edgeworth <edge@wor.th>"],
+        )
         self.assertEqual(len(out["entries_remaining"]), 1)
         self.assertIn("l.lawliet", out["entries_remaining"])
 
@@ -226,6 +230,10 @@ class TestAincradWithSetup(EvanTestCase):
             },
         ).json()
         self.assertEqual(out["updated_count"], 2)
+        self.assertCountEqual(
+            out["updated_names_list"],
+            ["Alice Aardvárk <alice@example.org>", "David Darling <david@example.org>"],
+        )
         self.assertEqual(len(out["entries_remaining"]), 1)
         self.assertIn("mihael.keehl", out["entries_remaining"])
 
@@ -247,6 +255,14 @@ class TestAincradWithSetup(EvanTestCase):
             },
         ).json()
         self.assertEqual(out["updated_count"], 3)
+        self.assertCountEqual(
+            out["updated_names_list"],
+            [
+                "Bôb B. Bèta <bob@example.org>",
+                "Carol Cutie <carol@example.org>",
+                "Eve Edgeworth <edge@wor.th>",
+            ],
+        )
         self.assertEqual(len(out["entries_remaining"]), 1)
         self.assertIn("nate.river", out["entries_remaining"])
 

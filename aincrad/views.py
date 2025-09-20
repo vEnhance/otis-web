@@ -494,6 +494,7 @@ def invoice_handler(action: str, data: JSONData) -> JsonResponse:
     assert field in ("adjustment", "extras", "total_paid")
     entries = data["entries"]
     invoices_to_update: list[Invoice] = []
+    updated_names_list: list[str] = []
     now = timezone.now()
 
     for inv in invoices:
@@ -509,6 +510,9 @@ def invoice_handler(action: str, data: JSONData) -> JsonResponse:
                     if abs(getattr(inv, field) - amount) > 0.0001:
                         setattr(inv, field, amount)
                         invoices_to_update.append(inv)
+                        updated_names_list.append(
+                            f"{inv.student.user.first_name} {inv.student.user.last_name} <{email}>"
+                        )
                         inv.updated_at = now
 
     if field == "total_paid":
@@ -524,6 +528,7 @@ def invoice_handler(action: str, data: JSONData) -> JsonResponse:
     return JsonResponse(
         {
             "updated_count": len(invoices_to_update),
+            "updated_names_list": updated_names_list,
             "entries_remaining": entries,
         }
     )
