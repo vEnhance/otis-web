@@ -162,7 +162,6 @@ class PSetQueueList(LoginRequiredMixin, ListView[PSet]):
     def get_queryset(self) -> QuerySet[PSet]:
         return PSet.objects.filter(
             status__in=("P", "PA", "PR"),
-            student__semester__active=True,
         ).order_by("upload__created_at")
 
 
@@ -263,8 +262,6 @@ class StudentPSetList(LoginRequiredMixin, ListView[PSet]):
 def resubmit_pset(request: HttpRequest, pk: int) -> HttpResponse:
     pset = get_object_or_404(PSet, pk=pk)
     student = pset.student
-    if student.semester.active is False:
-        raise PermissionDenied("Not an active semester")
     if not can_view(request, student):
         raise PermissionDenied("You are missing privileges for this problem set")
 

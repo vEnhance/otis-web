@@ -96,7 +96,6 @@ class JSONData(TypedDict):
 
 PSET_VENUEQ_INIT_QUERYSET = PSet.objects.filter(
     status__in=("PA", "PR", "P"),
-    student__semester__active=True,
     student__legit=True,
     student__enabled=True,
 ).annotate(
@@ -140,7 +139,6 @@ PSET_VENUEQ_INIT_KEYS = (
 
 INQUIRY_VENUEQ_INIT_QUERYSET = UnitInquiry.objects.filter(
     status="INQ_NEW",
-    student__semester__active=True,
     student__legit=True,
 ).annotate(
     unlock_inquiry_count=SubqueryCount(
@@ -282,7 +280,6 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
         n = 0
         for inquiry in UnitInquiry.objects.filter(
             status="INQ_NEW",
-            student__semester__active=True,
             student__legit=True,
         ):
             inquiry.run_accept()
