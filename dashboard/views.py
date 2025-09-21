@@ -160,9 +160,7 @@ class PSetQueueList(LoginRequiredMixin, ListView[PSet]):
     template_name = "dashboard/pset_queue_list.html"
 
     def get_queryset(self) -> QuerySet[PSet]:
-        return PSet.objects.filter(
-            status__in=("P", "PA", "PR"),
-        ).order_by("upload__created_at")
+        return PSet.objects.filter(status__in=("P", "PA", "PR")).order_by("upload__created_at")
 
 
 @login_required
@@ -262,6 +260,9 @@ class StudentPSetList(LoginRequiredMixin, ListView[PSet]):
 def resubmit_pset(request: HttpRequest, pk: int) -> HttpResponse:
     pset = get_object_or_404(PSet, pk=pk)
     student = pset.student
+    current_semester = Semester.objects.filter(active=True).first()
+    if not current_semester or not Student.objects.filter(user=student.user, semester=current_semester).exists():
+        raise PermissionDenied("Not enrolled in an active semester")
     if not can_view(request, student):
         raise PermissionDenied("You are missing privileges for this problem set")
 
