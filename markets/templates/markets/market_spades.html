@@ -20,7 +20,10 @@
               <code>{{ g.market.slug }}</code>
             </a>
           </td>
-          <td>+{{ g.score|floatformat:2 }}♠</td>
+          <td>
+            {% if g.score >= 0.01 %}+{{ g.score|floatformat:2 }}♠{% endif %}
+            {% if g.score <= -0.01 %}{{ g.score|floatformat:2 }}♠{% endif %}
+          </td>
           <td>{{ g.market.end_date }}</td>
         </tr>
       {% endfor %}
