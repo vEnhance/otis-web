@@ -94,6 +94,39 @@ class TestCore(EvanTestCase):
         self.assertHas(resp, "VisibleUnit")
         self.assertNotHas(resp, "HiddenUnit")
 
+    def test_guest_authors_shown_in_catalog(self):
+        self.login(UserFactory.create())
+        ug = UnitGroupFactory.create(
+            name="Guest Algebra",
+            hidden=False,
+            subject="A",
+        )
+        # set guest metadata
+        ug.guest = True
+        ug.guest_authors = "Alice, Bob"
+        ug.save()
+        UnitFactory.create(group=ug, code="AAW", position=1)
+
+        resp = self.assertGet20X("catalog")
+        self.assertHas(resp, "Guest Algebra")
+        self.assertHas(resp, "Made by Alice, Bob")
+
+    def test_guest_authors_shown_in_public_catalog(self):
+        self.login(UserFactory.create())
+        ug = UnitGroupFactory.create(
+            name="Guest Geometry",
+            hidden=False,
+            subject="G",
+        )
+        ug.guest = True
+        ug.guest_authors = "Carol, Dave"
+        ug.save()
+        UnitFactory.create(group=ug, code="ZGX", position=1)
+
+        resp = self.assertGet20X("catalog-public")
+        self.assertHas(resp, "Guest Geometry")
+        self.assertHas(resp, "Made by Carol, Dave")
+
     def test_storage_hash(self):
         self.assertRegex(storage_hash("meow"), r"[0-9a-z]{64}")
         self.assertNotEqual(storage_hash("Serral"), storage_hash("Reynor"))

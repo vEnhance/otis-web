@@ -151,6 +151,17 @@ class UnitGroup(models.Model):
         blank=True,
     )
 
+    # Guest unit metadata
+    guest = models.BooleanField(
+        default=False,
+        help_text="Whether this unit is a guest unit.",
+    )
+    guest_authors = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="Comma-separated list of guest authors for this unit group.",
+    )
+
     description = models.TextField(
         help_text="A description of what this unit is", blank=True
     )

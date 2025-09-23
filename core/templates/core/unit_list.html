@@ -71,6 +71,9 @@
                   <a href="{% url "wiki-unitgroup" unitgroup.pk %}">{{ unitgroup.name }}</a>
                 {% endif %}
               </h4>
+              {% if unitgroup.guest and unitgroup.guest_authors %}
+                <p class="fst-italic fw-lighter text-info">Made by {{ unitgroup.guest_authors }}.</p>
+              {% endif %}
               <div>
                 {% for unit in units %}
                   {% if unit.has_pset %}
