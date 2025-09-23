@@ -154,7 +154,7 @@ class TestAincradWithSetup(EvanTestCase):
         )
         out = resp.json()
         self.assertEqual(out["_name"], "Root")
-        self.assertEqual(len(out["_children"][0]["_children"]), 10)
+        self.assertEqual(len(out["_children"][0]["_children"]), 12)
         self.assertIn("timestamp", out)
         self.assertEqual(len(out.keys()), 4)
 

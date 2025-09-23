@@ -96,7 +96,6 @@ class JSONData(TypedDict):
 
 PSET_VENUEQ_INIT_QUERYSET = PSet.objects.filter(
     status__in=("PA", "PR", "P"),
-    student__semester__active=True,
     student__legit=True,
     student__enabled=True,
 ).annotate(
