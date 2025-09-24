@@ -59,7 +59,7 @@
               <div class="col-8">
                 <h3 class="text-dark">{{ unitgroup.name }}</h3>
                 {% if unitgroup.guest and unitgroup.guest_authors %}
-                  <p class="fst-italic fw-lighter text-info">Made by {{ unitgroup.guest_authors }}.</p>
+                  <p class="fst-italic fw-lighter text-info">Guest unit contributed by {{ unitgroup.guest_authors }}.</p>
                 {% endif %}
                 {% if unitgroup.artist_name %}
                   <p class="fst-italic fw-lighter text-success">Art contributed by {{ unitgroup.artist_name }}.</p>
