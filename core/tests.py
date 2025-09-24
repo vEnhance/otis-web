@@ -109,7 +109,7 @@ class TestCore(EvanTestCase):
 
         resp = self.assertGet20X("catalog")
         self.assertHas(resp, "Guest Algebra")
-        self.assertHas(resp, "Made by Alice, Bob")
+        self.assertHas(resp, "contributed by Alice, Bob")
 
     def test_guest_authors_shown_in_public_catalog(self):
         self.login(UserFactory.create())
@@ -125,7 +125,7 @@ class TestCore(EvanTestCase):
 
         resp = self.assertGet20X("catalog-public")
         self.assertHas(resp, "Guest Geometry")
-        self.assertHas(resp, "Made by Carol, Dave")
+        self.assertHas(resp, "contributed by Carol, Dave")
 
     def test_storage_hash(self):
         self.assertRegex(storage_hash("meow"), r"[0-9a-z]{64}")
