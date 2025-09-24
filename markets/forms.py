@@ -10,8 +10,8 @@ class MarketCreateForm(forms.ModelForm):
     class Meta:
         model = Market
         fields = (
-            "slug",
             "title",
+            "slug",
             "answer",
             "show_answer",
             "int_guesses_only",
