@@ -84,12 +84,35 @@
       </tr>
       <tr>
         <td colspan="2">
-          <div id="statement_warning" class="alert alert-danger">
+          <div id="statement_line_length_warning"
+               class="alert alert-danger"
+               style="display:none">
             <h1 class="alert-heading">Line length exceeded in statement!</h1>
             As specified in
             <a href="https://web.evanchen.cc/latex-style-guide.html">LaTeX guidelines #1</a>,
             lines MUST be wrapped to be at most 100 characters long,
             and SHOULD be wrapped to at most 80 characters long.
+          </div>
+          <div id="statement_double_dollar_warning"
+               class="alert alert-danger"
+               style="display:none">
+            <h1 class="alert-heading">Double dollar signs detected in statement!</h1>
+            Use <code>\[ \]</code> instead of <code>$$</code> for display math.
+            See <a href="https://web.evanchen.cc/latex-style-guide.html">LaTeX style guide</a>.
+          </div>
+          <div id="statement_quadruple_backslash_warning"
+               class="alert alert-danger"
+               style="display:none">
+            <h1 class="alert-heading">Quadruple backslashes detected in statement!</h1>
+            Use proper line breaks instead of <code>\\\\</code>.
+            See <a href="https://web.evanchen.cc/latex-style-guide.html">LaTeX style guide</a>.
+          </div>
+          <div id="statement_adjacent_display_warning"
+               class="alert alert-danger"
+               style="display:none">
+            <h1 class="alert-heading">Adjacent display math detected in statement!</h1>
+            Use <code>align*</code> environment instead of adjacent <code>\[ \]</code> expressions.
+            See <a href="https://web.evanchen.cc/latex-style-guide.html">LaTeX style guide</a>.
           </div>
         </td>
       </tr>
@@ -98,12 +121,35 @@
       </tr>
       <tr>
         <td colspan="2">
-          <div id="solution_warning" class="alert alert-danger">
+          <div id="solution_line_length_warning"
+               class="alert alert-danger"
+               style="display:none">
             <h1 class="alert-heading">Line length exceeded in solution!</h1>
             As specified in
             <a href="https://web.evanchen.cc/latex-style-guide.html">LaTeX guidelines #1</a>,
             lines MUST be wrapped to be at most 100 characters long,
             and SHOULD be wrapped to at most 80 characters long.
+          </div>
+          <div id="solution_double_dollar_warning"
+               class="alert alert-danger"
+               style="display:none">
+            <h1 class="alert-heading">Double dollar signs detected in solution!</h1>
+            Use <code>\[ \]</code> instead of <code>$$</code> for display math.
+            See <a href="https://web.evanchen.cc/latex-style-guide.html">LaTeX style guide</a>.
+          </div>
+          <div id="solution_quadruple_backslash_warning"
+               class="alert alert-danger"
+               style="display:none">
+            <h1 class="alert-heading">Quadruple backslashes detected in solution!</h1>
+            Use proper line breaks instead of <code>\\\\</code>.
+            See <a href="https://web.evanchen.cc/latex-style-guide.html">LaTeX style guide</a>.
+          </div>
+          <div id="solution_adjacent_display_warning"
+               class="alert alert-danger"
+               style="display:none">
+            <h1 class="alert-heading">Adjacent display math detected in solution!</h1>
+            Use <code>align*</code> environment instead of adjacent <code>\[ \]</code> expressions.
+            See <a href="https://web.evanchen.cc/latex-style-guide.html">LaTeX style guide</a>.
           </div>
         </td>
       </tr>
@@ -141,6 +187,7 @@
             In particular, you must write your own solution (as described in
             section 1 above) and also follow all the
             <a href="https://web.evanchen.cc/latex-style-guide.html">LaTeX style requirements</a>.
+            OTIS-WEB can catch some of the LaTeX violations automatically, but not all.
           </p>
         </li>
         <li>
@@ -182,20 +229,39 @@
           function checkLineLength(s) {
               return !s.split("\n").some(e => e.length > 100); // amol stronk
           }
-          $("#statement_warning").toggle(!checkLineLength($("#id_statement").val()));
-          $("#solution_warning").toggle(!checkLineLength($("#id_solution").val()));
 
-          function lencheck_statement() {
+          function checkDoubleDollars(s) {
+              return !s.includes("$$");
+          }
+
+          function checkQuadrupleBackslashes(s) {
+              return !s.includes("\\\\\\\\");
+          }
+
+          function checkAdjacentDisplayMath(s) {
+              const pattern = /\\\]\s*\\\[/;
+              return !pattern.test(s);
+          }
+
+          function latexcheck_statement() {
               const s = $("#id_statement").val();
-              $("#statement_warning").toggle(!checkLineLength(s));
+              $("#statement_line_length_warning").toggle(!checkLineLength(s));
+              $("#statement_double_dollar_warning").toggle(!checkDoubleDollars(s));
+              $("#statement_quadruple_backslash_warning").toggle(!checkQuadrupleBackslashes(s));
+              $("#statement_adjacent_display_warning").toggle(!checkAdjacentDisplayMath(s));
           }
 
-          function lencheck_solution() {
+          function latexcheck_solution() {
               const s = $("#id_solution").val();
-              $("#solution_warning").toggle(!checkLineLength(s));
+              $("#solution_line_length_warning").toggle(!checkLineLength(s));
+              $("#solution_double_dollar_warning").toggle(!checkDoubleDollars(s));
+              $("#solution_quadruple_backslash_warning").toggle(!checkQuadrupleBackslashes(s));
+              $("#solution_adjacent_display_warning").toggle(!checkAdjacentDisplayMath(s));
           }
-          $("#id_statement").blur(lencheck_statement);
-          $("#id_solution").blur(lencheck_solution);
+          latexcheck_statement();
+          latexcheck_solution();
+          $("#id_statement").blur(latexcheck_statement);
+          $("#id_solution").blur(latexcheck_solution);
 
       });
   </script>
