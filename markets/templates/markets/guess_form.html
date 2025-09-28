@@ -36,8 +36,10 @@
   {% if existing_guess %}
     <div class="alert alert-info">
       <h5>Current Guess</h5>
-      <p>You currently have a guess of <strong>{{ existing_guess.pretty_value }}</strong> 
-         (submitted {{ existing_guess.created_at|naturaltime }}).</p>
+      <p>
+        You currently have a guess of <strong>{{ existing_guess.pretty_value }}</strong> 
+        (submitted {{ existing_guess.created_at|naturaltime }}).
+      </p>
       <p>You can update your guess by changing the values below and submitting again.</p>
     </div>
   {% endif %}

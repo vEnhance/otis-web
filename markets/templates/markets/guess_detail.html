@@ -17,7 +17,9 @@
   </p>
   {% if not guess.market.has_ended %}
     <div class="alert alert-warning">
-      <p>You can update your submission by <a href="{{ guess.market.get_absolute_url }}">visiting the market page</a> again.</p>
+      <p>
+        You can update your submission by <a href="{{ guess.market.get_absolute_url }}">visiting the market page</a> again.
+      </p>
     </div>
   {% endif %}
   <hr />
