@@ -51,14 +51,14 @@ class SubmitGuess(VerifiedRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]
         form = super().get_form(form_class)
         form.instance.user = self.request.user
         form.instance.market = self.market
-        
+
         # If there's an existing guess, pre-populate the form
         if self.existing_guess:
             form.initial = {
-                'value': self.existing_guess.value,
-                'public': self.existing_guess.public,
+                "value": self.existing_guess.value,
+                "public": self.existing_guess.public,
             }
-        
+
         return form
 
     def form_valid(self, form: BaseModelForm[Guess]):
