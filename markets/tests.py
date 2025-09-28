@@ -189,7 +189,9 @@ class MarketTests(EvanTestCase):
                 "market-guess", "guess-my-ssn", data={"value": 100}, follow=True
             )
 
-            self.assertGet20X("market-guess", "guess-my-ssn")  # shows form with current guess
+            self.assertGet20X(
+                "market-guess", "guess-my-ssn"
+            )  # shows form with current guess
             resp = self.assertPost20X(
                 "market-guess", "guess-my-ssn", data={"value": 500}, follow=True
             )
@@ -208,7 +210,9 @@ class MarketTests(EvanTestCase):
             self.assertPost20X(
                 "market-guess", "guess-my-ssn", data={"value": 100}, follow=True
             )
-            self.assertGet20X("market-guess", "guess-my-ssn")  # shows form with current guess
+            self.assertGet20X(
+                "market-guess", "guess-my-ssn"
+            )  # shows form with current guess
             resp = self.assertPost20X(
                 "market-guess", "guess-my-ssn", data={"value": 500}, follow=True
             )
@@ -246,7 +250,9 @@ class MarketTests(EvanTestCase):
                 "market-guess", "guess-my-ssn", data={"value": 100}, follow=True
             )
 
-            self.assertGet20X("market-guess", "guess-my-ssn")  # shows form with current guess
+            self.assertGet20X(
+                "market-guess", "guess-my-ssn"
+            )  # shows form with current guess
             resp = self.assertPost20X(
                 "market-guess", "guess-my-ssn", data={"value": 500}, follow=True
             )
@@ -282,7 +288,10 @@ class MarketTests(EvanTestCase):
             self.login("alice")
 
             resp = self.assertPost20X(
-                "market-guess", "guess-my-ssn", data={"value": 100, "public": True}, follow=True
+                "market-guess",
+                "guess-my-ssn",
+                data={"value": 100, "public": True},
+                follow=True,
             )
             self.assertContains(resp, "You submitted a guess of 100")
 
@@ -292,11 +301,16 @@ class MarketTests(EvanTestCase):
 
             # update guess
             resp = self.assertPost20X(
-                "market-guess", "guess-my-ssn", data={"value": 50, "public": False}, follow=True
+                "market-guess",
+                "guess-my-ssn",
+                data={"value": 50, "public": False},
+                follow=True,
             )
             self.assertContains(resp, "You updated your guess from 100.0 to 50.0")
 
-            latest_guess = Guess.get_latest_guess(User.objects.get(username="alice"), market)
+            latest_guess = Guess.get_latest_guess(
+                User.objects.get(username="alice"), market
+            )
             self.assertEqual(latest_guess.value, 50)
             self.assertFalse(latest_guess.public)
             self.assertTrue(latest_guess.is_latest)
@@ -340,7 +354,7 @@ class MarketTests(EvanTestCase):
         with freeze_time("2050-11-01", tz_offset=0):
             self.login("alice")
             resp = self.assertGet20X("market-results", "guess-my-ssn")
-            
+
             guesses_in_context = resp.context["guesses"]
             self.assertEqual(guesses_in_context.count(), 1)
             self.assertEqual(guesses_in_context.first().value, 25)
@@ -366,11 +380,11 @@ class MarketTests(EvanTestCase):
 
         with freeze_time("2050-11-01", tz_offset=0):
             self.login("alice")
-            
+
             resp = self.assertGet20X("market-spades")
-            
+
             a, b = 42, 25
-            expected_score = round(min(a/b, b/a) ** 2 * 2, ndigits=2)
+            expected_score = round(min(a / b, b / a) ** 2 * 2, ndigits=2)
             self.assertAlmostEqual(resp.context["avg"], expected_score)
 
     def test_repeated_submissions_recompute(self):
@@ -399,7 +413,9 @@ class MarketTests(EvanTestCase):
                 "guess-my-ssn",
             )
 
-            latest_guess = Guess.get_latest_guess(User.objects.get(username="alice"), market)
+            latest_guess = Guess.get_latest_guess(
+                User.objects.get(username="alice"), market
+            )
             expected_latest_score = round((30 / 50) ** 2 * 2, ndigits=2)
             self.assertAlmostEqual(latest_guess.score, expected_latest_score)
 

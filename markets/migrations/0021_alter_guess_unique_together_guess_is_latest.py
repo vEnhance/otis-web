@@ -6,17 +6,20 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('markets', '0020_market_show_results'),
+        ("markets", "0020_market_show_results"),
     ]
 
     operations = [
         migrations.AlterUniqueTogether(
-            name='guess',
+            name="guess",
             unique_together=set(),
         ),
         migrations.AddField(
-            model_name='guess',
-            name='is_latest',
-            field=models.BooleanField(default=True, help_text='Whether this is the latest guess for this user and market.'),
+            model_name="guess",
+            name="is_latest",
+            field=models.BooleanField(
+                default=True,
+                help_text="Whether this is the latest guess for this user and market.",
+            ),
         ),
     ]

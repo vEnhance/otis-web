@@ -208,9 +208,8 @@ class Guess(models.Model):
         return cls.objects.filter(user=user, market=market, is_latest=True).first()
 
     def set_as_latest(self):
-        Guess.objects.filter(
-            user=self.user, 
-            market=self.market
-        ).exclude(pk=self.pk).update(is_latest=False)
+        Guess.objects.filter(user=self.user, market=self.market).exclude(
+            pk=self.pk
+        ).update(is_latest=False)
         self.is_latest = True
         self.save()

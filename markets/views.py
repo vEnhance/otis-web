@@ -66,13 +66,14 @@ class SubmitGuess(VerifiedRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]
             self.existing_guess.is_latest = False
             self.existing_guess.save()
             messages.success(
-                self.request, f"You updated your guess from {self.existing_guess.value} to {form.instance.value}"
+                self.request,
+                f"You updated your guess from {self.existing_guess.value} to {form.instance.value}",
             )
         else:
             messages.success(
                 self.request, f"You submitted a guess of {form.instance.value}"
             )
-        
+
         form.instance.set_score()
         form.instance.set_as_latest()
         return super().form_valid(form)
@@ -97,7 +98,7 @@ class SubmitGuess(VerifiedRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]
             return HttpResponseNotFound()
         elif self.market.has_ended:
             return HttpResponseRedirect(self.market.get_absolute_url())
-        
+
         # Check for existing latest guess
         self.existing_guess = Guess.get_latest_guess(request.user, self.market)
 
@@ -124,12 +125,16 @@ class MarketResults(LoginRequiredMixin, ListView[Guess]):
             raise PermissionDenied("Can't view results of an unfinished market.")
         if self.market.answer is not None:
             context["best_guess"] = (
-                Guess.objects.filter(market=self.market, is_latest=True).order_by("-score").first()
+                Guess.objects.filter(market=self.market, is_latest=True)
+                .order_by("-score")
+                .first()
             )
         return context
 
     def get_queryset(self) -> QuerySet[Guess]:
-        return Guess.objects.filter(market=self.market, is_latest=True).order_by("-value")
+        return Guess.objects.filter(market=self.market, is_latest=True).order_by(
+            "-value"
+        )
 
     def dispatch(
         self, request: HttpRequest, *args: Any, **kwargs: Any
