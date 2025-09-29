@@ -154,12 +154,12 @@ class Guess(models.Model):
         "next to your guess in the statistics, for bragging rights. "
         "By default, this is off and your guess is recorded anonymously.",
     )
-    is_latest = models.BooleanField(
-        default=True,
-        help_text="Whether this is the latest guess for this user and market.",
-    )
 
     class Meta:
+        unique_together = (
+            "user",
+            "market",
+        )
         verbose_name_plural = "Guesses"
 
     def __str__(self) -> str:
@@ -202,14 +202,3 @@ class Guess(models.Model):
             return f"{int(self.value):d}"
         else:
             return f"{self.value:.6f}"
-
-    @classmethod
-    def get_latest_guess(cls, user: User, market: "Market") -> Optional["Guess"]:
-        return cls.objects.filter(user=user, market=market, is_latest=True).first()
-
-    def set_as_latest(self):
-        Guess.objects.filter(user=self.user, market=self.market).exclude(
-            pk=self.pk
-        ).update(is_latest=False)
-        self.is_latest = True
-        self.save()

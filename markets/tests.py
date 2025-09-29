@@ -197,7 +197,7 @@ class MarketTests(EvanTestCase):
             )
             self.assertContains(resp, "You updated your guess from 100.0 to 500.0")
 
-            guess = Guess.get_latest_guess(User.objects.get(username="alice"), market)
+            guess = Guess.objects.get(user__username="alice", market=market)
             self.assertEqual(guess.value, 500)
             self.assertAlmostEqual(guess.score, round((42 / 500) ** 2 * 2, ndigits=2))
 
@@ -218,7 +218,7 @@ class MarketTests(EvanTestCase):
             )
             self.assertContains(resp, "You updated your guess from 100.0 to 500.0")
 
-            guess = Guess.get_latest_guess(User.objects.get(username="alice"), market)
+            guess = Guess.objects.get(user__username="alice", market=market)
             self.assertEqual(guess.value, 500)
             self.assertEqual(guess.score, None)
 
@@ -234,7 +234,7 @@ class MarketTests(EvanTestCase):
                 "guess-my-ssn",
             )
 
-            guess = Guess.get_latest_guess(User.objects.get(username="alice"), market)
+            guess = Guess.objects.get(user__username="alice", market=market)
             self.assertEqual(guess.value, 500)
             self.assertAlmostEqual(guess.score, round((42 / 500) ** 2 * 2, ndigits=2))
 
@@ -258,7 +258,7 @@ class MarketTests(EvanTestCase):
             )
             self.assertContains(resp, "You updated your guess from 100.0 to 500.0")
 
-            guess = Guess.get_latest_guess(User.objects.get(username="alice"), market)
+            guess = Guess.objects.get(user__username="alice", market=market)
             self.assertEqual(guess.value, 500)
             self.assertEqual(guess.score, None)
 
@@ -275,7 +275,7 @@ class MarketTests(EvanTestCase):
                 "guess-my-ssn",
             )
 
-            guess = Guess.get_latest_guess(User.objects.get(username="alice"), market)
+            guess = Guess.objects.get(user__username="alice", market=market)
             self.assertEqual(guess.value, 500)
             self.assertAlmostEqual(guess.score, round((42 / 500) ** 3 * 2, ndigits=2))
 
@@ -308,30 +308,24 @@ class MarketTests(EvanTestCase):
             )
             self.assertContains(resp, "You updated your guess from 100.0 to 50.0")
 
-            latest_guess = Guess.get_latest_guess(
-                User.objects.get(username="alice"), market
-            )
-            self.assertEqual(latest_guess.value, 50)
-            self.assertFalse(latest_guess.public)
-            self.assertTrue(latest_guess.is_latest)
+            guess = Guess.objects.get(user__username="alice", market=market)
+            self.assertEqual(guess.value, 50)
+            self.assertFalse(guess.public)
 
-            old_guesses = Guess.objects.filter(
-                user__username="alice", market=market, is_latest=False
-            )
-            self.assertEqual(old_guesses.count(), 1)
-            self.assertEqual(old_guesses.first().value, 100)
-            self.assertTrue(old_guesses.first().public)
+            # Only one guess should exist (updated, not duplicated)
+            all_guesses = Guess.objects.filter(user__username="alice", market=market)
+            self.assertEqual(all_guesses.count(), 1)
 
             resp = self.assertPost20X(
                 "market-guess", "guess-my-ssn", data={"value": 25}, follow=True
             )
             self.assertContains(resp, "You updated your guess from 50.0 to 25.0")
 
+            guess.refresh_from_db()
+            self.assertEqual(guess.value, 25)
+            # Still only one guess
             all_guesses = Guess.objects.filter(user__username="alice", market=market)
-            self.assertEqual(all_guesses.count(), 3)
-            latest_guesses = all_guesses.filter(is_latest=True)
-            self.assertEqual(latest_guesses.count(), 1)
-            self.assertEqual(latest_guesses.first().value, 25)
+            self.assertEqual(all_guesses.count(), 1)
 
     def test_repeated_submissions_results_view(self):
         with freeze_time("2050-07-01", tz_offset=0):
@@ -413,17 +407,13 @@ class MarketTests(EvanTestCase):
                 "guess-my-ssn",
             )
 
-            latest_guess = Guess.get_latest_guess(
-                User.objects.get(username="alice"), market
-            )
-            expected_latest_score = round((30 / 50) ** 2 * 2, ndigits=2)
-            self.assertAlmostEqual(latest_guess.score, expected_latest_score)
+            guess = Guess.objects.get(user__username="alice", market=market)
+            expected_score = round((30 / 50) ** 2 * 2, ndigits=2)
+            self.assertAlmostEqual(guess.score, expected_score)
 
-            old_guess = Guess.objects.filter(
-                user__username="alice", market=market, is_latest=False
-            ).first()
-            expected_old_score = round((42 / 100) ** 2 * 2, ndigits=2)
-            self.assertAlmostEqual(old_guess.score, expected_old_score)
+            # Only one guess should exist (updated, not duplicated)
+            all_guesses = Guess.objects.filter(user__username="alice", market=market)
+            self.assertEqual(all_guesses.count(), 1)
 
     def test_spades_view(self):
         market = Market.objects.get(slug="guess-my-ssn")

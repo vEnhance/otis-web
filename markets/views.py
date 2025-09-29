@@ -63,20 +63,25 @@ class SubmitGuess(VerifiedRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]
 
     def form_valid(self, form: BaseModelForm[Guess]):
         if self.existing_guess:
-            self.existing_guess.is_latest = False
+            # Update existing guess
+            old_value = self.existing_guess.value
+            self.existing_guess.value = form.instance.value
+            self.existing_guess.public = form.instance.public
+            self.existing_guess.set_score()
             self.existing_guess.save()
             messages.success(
                 self.request,
-                f"You updated your guess from {self.existing_guess.value} to {form.instance.value}",
+                f"You updated your guess from {old_value} to {form.instance.value}",
             )
+            self.object = self.existing_guess
         else:
+            form.instance.set_score()
+            self.object = form.save()
             messages.success(
                 self.request, f"You submitted a guess of {form.instance.value}"
             )
 
-        form.instance.set_score()
-        form.instance.set_as_latest()
-        return super().form_valid(form)
+        return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self) -> str:
         return reverse("market-pending", args=(self.object.pk,))
@@ -99,8 +104,13 @@ class SubmitGuess(VerifiedRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]
         elif self.market.has_ended:
             return HttpResponseRedirect(self.market.get_absolute_url())
 
-        # Check for existing latest guess
-        self.existing_guess = Guess.get_latest_guess(request.user, self.market)
+        # Check for existing guess
+        try:
+            self.existing_guess = Guess.objects.get(
+                user=request.user, market=self.market
+            )
+        except Guess.DoesNotExist:
+            self.existing_guess = None
 
         return super().dispatch(request, *args, **kwargs)
 
@@ -116,7 +126,7 @@ class MarketResults(LoginRequiredMixin, ListView[Guess]):
         context = super().get_context_data(**kwargs)
         context["market"] = self.market
         try:
-            guess = Guess.get_latest_guess(self.request.user, self.market)
+            guess = Guess.objects.get(user=self.request.user, market=self.market)
             context["guess"] = guess
         except Guess.DoesNotExist:
             pass
@@ -125,16 +135,14 @@ class MarketResults(LoginRequiredMixin, ListView[Guess]):
             raise PermissionDenied("Can't view results of an unfinished market.")
         if self.market.answer is not None:
             context["best_guess"] = (
-                Guess.objects.filter(market=self.market, is_latest=True)
+                Guess.objects.filter(market=self.market)
                 .order_by("-score")
                 .first()
             )
         return context
 
     def get_queryset(self) -> QuerySet[Guess]:
-        return Guess.objects.filter(market=self.market, is_latest=True).order_by(
-            "-value"
-        )
+        return Guess.objects.filter(market=self.market).order_by("-value")
 
     def dispatch(
         self, request: HttpRequest, *args: Any, **kwargs: Any
@@ -157,13 +165,13 @@ class MarketResults(LoginRequiredMixin, ListView[Guess]):
 def recompute(request: AuthHttpRequest, slug: str):
     if not request.method == "POST":
         raise PermissionDenied("Must use POST")
-    guesses = Guess.objects.filter(market__slug=slug, is_latest=True)
+    guesses = Guess.objects.filter(market__slug=slug)
     for guess in guesses:
         guess.set_score()
     Guess.objects.bulk_update(guesses, fields=("score",), batch_size=50)
     messages.success(
         request,
-        f"Successfully recomputed all {guesses.count()} latest scores for this market!",
+        f"Successfully recomputed all {guesses.count()} scores for this market!",
     )
     return HttpResponseRedirect(reverse("market-results", args=(slug,)))
 
@@ -210,7 +218,6 @@ class MarketSpades(LoginRequiredMixin, ListView[Guess]):
             Guess.objects.filter(
                 user=self.request.user,
                 market__end_date__lt=timezone.now(),
-                is_latest=True,
             )
             .select_related("market")
             .order_by("-market__end_date")

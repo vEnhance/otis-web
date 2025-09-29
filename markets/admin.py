@@ -64,14 +64,12 @@ class GuessAdmin(admin.ModelAdmin):
         "created_at",
         "user",
         "public",
-        "is_latest",
         "score",
     )
     list_filter = (
         "market__semester__active",
         "market__semester",
         "public",
-        "is_latest",
     )
     search_fields = (
         "user__first_name",
