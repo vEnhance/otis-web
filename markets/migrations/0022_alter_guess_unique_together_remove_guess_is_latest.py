@@ -6,19 +6,27 @@ from django.db.models import Count
 
 
 def cleanup_duplicates(apps, schema_editor):
-    Guess = apps.get_model('markets', 'Guess')
+    Guess = apps.get_model("markets", "Guess")
     
-    duplicates = Guess.objects.values('user', 'market').annotate(count=Count('id')).filter(count__gt=1)
-    print(f'Found {len(duplicates)} duplicate user-market pairs')
+    duplicates = (
+        Guess.objects.values("user", "market")
+        .annotate(count=Count("id"))
+        .filter(count__gt=1)
+    )
+    print(f"Found {len(duplicates)} duplicate user-market pairs")
     
     for dup in duplicates:
-        user_id = dup['user']
-        market_id = dup['market']
-        guesses = Guess.objects.filter(user_id=user_id, market_id=market_id).order_by('id')
+        user_id = dup["user"]
+        market_id = dup["market"]
+        guesses = Guess.objects.filter(user_id=user_id, market_id=market_id).order_by(
+            "id"
+        )
         if guesses.count() > 1:
             to_keep = guesses.first()
             to_delete = guesses.exclude(id=to_keep.id)
-            print(f'Deleting {to_delete.count()} duplicate guesses for user {user_id}, market {market_id}')
+            print(
+                f"Deleting {to_delete.count()} duplicate guesses for user {user_id}, market {market_id}"
+            )
             to_delete.delete()
 
 

@@ -135,9 +135,7 @@ class MarketResults(LoginRequiredMixin, ListView[Guess]):
             raise PermissionDenied("Can't view results of an unfinished market.")
         if self.market.answer is not None:
             context["best_guess"] = (
-                Guess.objects.filter(market=self.market)
-                .order_by("-score")
-                .first()
+                Guess.objects.filter(market=self.market).order_by("-score").first()
             )
         return context
 
