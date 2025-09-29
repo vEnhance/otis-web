@@ -7,14 +7,14 @@ from django.db.models import Count
 
 def cleanup_duplicates(apps, schema_editor):
     Guess = apps.get_model("markets", "Guess")
-    
+
     duplicates = (
         Guess.objects.values("user", "market")
         .annotate(count=Count("id"))
         .filter(count__gt=1)
     )
     print(f"Found {len(duplicates)} duplicate user-market pairs")
-    
+
     for dup in duplicates:
         user_id = dup["user"]
         market_id = dup["market"]
