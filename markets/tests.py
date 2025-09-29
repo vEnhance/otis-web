@@ -1,7 +1,6 @@
 import datetime
 
 from django.contrib.admin.sites import AdminSite
-from django.contrib.auth.models import User
 from django.http.request import HttpRequest
 from django.test.client import RequestFactory
 from freezegun import freeze_time
