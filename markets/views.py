@@ -45,19 +45,43 @@ class SubmitGuess(VerifiedRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]
 
     object: Guess  # type: ignore
     market: Market
+    existing_guess: Guess | None = None
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
         form.instance.user = self.request.user
         form.instance.market = self.market
+
+        # If there's an existing guess, pre-populate the form
+        if self.existing_guess:
+            form.initial = {
+                "value": self.existing_guess.value,
+                "public": self.existing_guess.public,
+            }
+
         return form
 
     def form_valid(self, form: BaseModelForm[Guess]):
-        messages.success(
-            self.request, f"You submitted a guess of {form.instance.value}"
-        )
-        form.instance.set_score()
-        return super().form_valid(form)
+        if self.existing_guess:
+            # Update existing guess
+            old_value = self.existing_guess.value
+            self.existing_guess.value = form.instance.value
+            self.existing_guess.public = form.instance.public
+            self.existing_guess.set_score()
+            self.existing_guess.save()
+            messages.success(
+                self.request,
+                f"You updated your guess from {old_value} to {form.instance.value}",
+            )
+            self.object = self.existing_guess
+        else:
+            form.instance.set_score()
+            self.object = form.save()
+            messages.success(
+                self.request, f"You submitted a guess of {form.instance.value}"
+            )
+
+        return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self) -> str:
         return reverse("market-pending", args=(self.object.pk,))
@@ -65,6 +89,7 @@ class SubmitGuess(VerifiedRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["market"] = self.market
+        context["existing_guess"] = self.existing_guess
         return context
 
     def dispatch(
@@ -78,17 +103,14 @@ class SubmitGuess(VerifiedRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]
             return HttpResponseNotFound()
         elif self.market.has_ended:
             return HttpResponseRedirect(self.market.get_absolute_url())
+
+        # Check for existing guess
         try:
-            guess = Guess.objects.get(market=self.market, user=request.user)
+            self.existing_guess = Guess.objects.get(
+                user=request.user, market=self.market
+            )
         except Guess.DoesNotExist:
-            pass
-        else:
-            if request.method == "POST":
-                messages.error(
-                    request, f"You already submitted {guess.value} for this market."
-                )
-            target_url = reverse("market-pending", args=(guess.pk,))
-            return HttpResponseRedirect(target_url)
+            self.existing_guess = None
 
         return super().dispatch(request, *args, **kwargs)
 
@@ -104,7 +126,7 @@ class MarketResults(LoginRequiredMixin, ListView[Guess]):
         context = super().get_context_data(**kwargs)
         context["market"] = self.market
         try:
-            guess = Guess.objects.get(market=self.market, user=self.request.user)
+            guess = Guess.objects.get(user=self.request.user, market=self.market)
             context["guess"] = guess
         except Guess.DoesNotExist:
             pass

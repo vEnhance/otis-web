@@ -188,16 +188,17 @@ class MarketTests(EvanTestCase):
                 "market-guess", "guess-my-ssn", data={"value": 100}, follow=True
             )
 
-            # Forbid more guesses
-            self.assertGet30X("market-guess", "guess-my-ssn")  # redirects to DetailView
+            self.assertGet20X(
+                "market-guess", "guess-my-ssn"
+            )  # shows form with current guess
             resp = self.assertPost20X(
                 "market-guess", "guess-my-ssn", data={"value": 500}, follow=True
             )
-            self.assertContains(resp, "You already submitted")
+            self.assertContains(resp, "You updated your guess from 100.0 to 500.0")
 
-            guess = Guess.objects.get(user__username="alice")
-            self.assertEqual(guess.value, 100)
-            self.assertAlmostEqual(guess.score, round((42 / 100) ** 2 * 2, ndigits=2))
+            guess = Guess.objects.get(user__username="alice", market=market)
+            self.assertEqual(guess.value, 500)
+            self.assertAlmostEqual(guess.score, round((42 / 500) ** 2 * 2, ndigits=2))
 
     def test_guess_form_without_answer(self):
         with freeze_time("2050-07-01", tz_offset=0):
@@ -208,14 +209,16 @@ class MarketTests(EvanTestCase):
             self.assertPost20X(
                 "market-guess", "guess-my-ssn", data={"value": 100}, follow=True
             )
-            self.assertGet30X("market-guess", "guess-my-ssn")  # redirects to DetailView
+            self.assertGet20X(
+                "market-guess", "guess-my-ssn"
+            )  # shows form with current guess
             resp = self.assertPost20X(
                 "market-guess", "guess-my-ssn", data={"value": 500}, follow=True
             )
-            self.assertContains(resp, "You already submitted")
+            self.assertContains(resp, "You updated your guess from 100.0 to 500.0")
 
-            guess = Guess.objects.get(user__username="alice")
-            self.assertEqual(guess.value, 100)
+            guess = Guess.objects.get(user__username="alice", market=market)
+            self.assertEqual(guess.value, 500)
             self.assertEqual(guess.score, None)
 
             market.answer = 42
@@ -230,9 +233,9 @@ class MarketTests(EvanTestCase):
                 "guess-my-ssn",
             )
 
-            guess = Guess.objects.get(user__username="alice")
-            self.assertEqual(guess.value, 100)
-            self.assertAlmostEqual(guess.score, round((42 / 100) ** 2 * 2, ndigits=2))
+            guess = Guess.objects.get(user__username="alice", market=market)
+            self.assertEqual(guess.value, 500)
+            self.assertAlmostEqual(guess.score, round((42 / 500) ** 2 * 2, ndigits=2))
 
     def test_guess_form_without_alpha(self):
         with freeze_time("2050-07-01", tz_offset=0):
@@ -246,14 +249,16 @@ class MarketTests(EvanTestCase):
                 "market-guess", "guess-my-ssn", data={"value": 100}, follow=True
             )
 
-            self.assertGet30X("market-guess", "guess-my-ssn")  # redirects to DetailView
+            self.assertGet20X(
+                "market-guess", "guess-my-ssn"
+            )  # shows form with current guess
             resp = self.assertPost20X(
                 "market-guess", "guess-my-ssn", data={"value": 500}, follow=True
             )
-            self.assertContains(resp, "You already submitted")
+            self.assertContains(resp, "You updated your guess from 100.0 to 500.0")
 
-            guess = Guess.objects.get(user__username="alice")
-            self.assertEqual(guess.value, 100)
+            guess = Guess.objects.get(user__username="alice", market=market)
+            self.assertEqual(guess.value, 500)
             self.assertEqual(guess.score, None)
 
             market.answer = 42
@@ -269,9 +274,145 @@ class MarketTests(EvanTestCase):
                 "guess-my-ssn",
             )
 
-            guess = Guess.objects.get(user__username="alice")
-            self.assertEqual(guess.value, 100)
-            self.assertAlmostEqual(guess.score, round((42 / 100) ** 3 * 2, ndigits=2))
+            guess = Guess.objects.get(user__username="alice", market=market)
+            self.assertEqual(guess.value, 500)
+            self.assertAlmostEqual(guess.score, round((42 / 500) ** 3 * 2, ndigits=2))
+
+    def test_repeated_submissions(self):
+        with freeze_time("2050-07-01", tz_offset=0):
+            market = Market.objects.get(slug="guess-my-ssn")
+            market.answer = 42
+            market.save()
+
+            self.login("alice")
+
+            resp = self.assertPost20X(
+                "market-guess",
+                "guess-my-ssn",
+                data={"value": 100, "public": True},
+                follow=True,
+            )
+            self.assertContains(resp, "You submitted a guess of 100")
+
+            resp = self.assertGet20X("market-guess", "guess-my-ssn")
+            self.assertContains(resp, "Current Guess")
+            self.assertContains(resp, "100")
+
+            # update guess
+            resp = self.assertPost20X(
+                "market-guess",
+                "guess-my-ssn",
+                data={"value": 50, "public": False},
+                follow=True,
+            )
+            self.assertContains(resp, "You updated your guess from 100.0 to 50.0")
+
+            guess = Guess.objects.get(user__username="alice", market=market)
+            self.assertEqual(guess.value, 50)
+            self.assertFalse(guess.public)
+
+            # Only one guess should exist (updated, not duplicated)
+            all_guesses = Guess.objects.filter(user__username="alice", market=market)
+            self.assertEqual(all_guesses.count(), 1)
+
+            resp = self.assertPost20X(
+                "market-guess", "guess-my-ssn", data={"value": 25}, follow=True
+            )
+            self.assertContains(resp, "You updated your guess from 50.0 to 25.0")
+
+            guess.refresh_from_db()
+            self.assertEqual(guess.value, 25)
+            # Still only one guess
+            all_guesses = Guess.objects.filter(user__username="alice", market=market)
+            self.assertEqual(all_guesses.count(), 1)
+
+    def test_repeated_submissions_results_view(self):
+        with freeze_time("2050-07-01", tz_offset=0):
+            market = Market.objects.get(slug="guess-my-ssn")
+            market.answer = 42
+            market.save()
+
+            self.login("alice")
+
+            self.assertPost20X(
+                "market-guess", "guess-my-ssn", data={"value": 100}, follow=True
+            )
+            self.assertPost20X(
+                "market-guess", "guess-my-ssn", data={"value": 50}, follow=True
+            )
+            self.assertPost20X(
+                "market-guess", "guess-my-ssn", data={"value": 25}, follow=True
+            )
+
+        with freeze_time("2050-11-01", tz_offset=0):
+            self.login("alice")
+            resp = self.assertGet20X("market-results", "guess-my-ssn")
+
+            guesses_in_context = resp.context["guesses"]
+            self.assertEqual(guesses_in_context.count(), 1)
+            self.assertEqual(guesses_in_context.first().value, 25)
+
+    def test_repeated_submissions_spades_view(self):
+        with freeze_time("2050-07-01", tz_offset=0):
+            market = Market.objects.get(slug="guess-my-ssn")
+            market.answer = 42
+            market.save()
+
+            self.login("alice")
+
+            # Submit multiple guesses
+            self.assertPost20X(
+                "market-guess", "guess-my-ssn", data={"value": 100}, follow=True
+            )
+            self.assertPost20X(
+                "market-guess", "guess-my-ssn", data={"value": 50}, follow=True
+            )
+            self.assertPost20X(
+                "market-guess", "guess-my-ssn", data={"value": 25}, follow=True
+            )
+
+        with freeze_time("2050-11-01", tz_offset=0):
+            self.login("alice")
+
+            resp = self.assertGet20X("market-spades")
+
+            a, b = 42, 25
+            expected_score = round(min(a / b, b / a) ** 2 * 2, ndigits=2)
+            self.assertAlmostEqual(resp.context["avg"], expected_score)
+
+    def test_repeated_submissions_recompute(self):
+        with freeze_time("2050-07-01", tz_offset=0):
+            market = Market.objects.get(slug="guess-my-ssn")
+            market.answer = 42
+            market.save()
+
+            self.login("alice")
+
+            self.assertPost20X(
+                "market-guess", "guess-my-ssn", data={"value": 100}, follow=True
+            )
+            self.assertPost20X(
+                "market-guess", "guess-my-ssn", data={"value": 50}, follow=True
+            )
+
+            market.answer = 30
+            market.save()
+
+            UserFactory.create(username="admin", is_staff=True, is_superuser=True)
+            self.login("admin")
+            self.assertPostRedirects(
+                self.url("market-results", "guess-my-ssn"),
+                "market-recompute",
+                "guess-my-ssn",
+            )
+
+            guess = Guess.objects.get(user__username="alice", market=market)
+            expected_score = round((30 / 50) ** 2 * 2, ndigits=2)
+            self.assertAlmostEqual(guess.score, expected_score)
+
+            # Only one guess should exist (updated, not duplicated)
+            all_guesses = Guess.objects.filter(user__username="alice", market=market)
+            self.assertEqual(all_guesses.count(), 1)
 
     def test_spades_view(self):
         market = Market.objects.get(slug="guess-my-ssn")

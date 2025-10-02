@@ -64,6 +64,7 @@ class GuessAdmin(admin.ModelAdmin):
         "created_at",
         "user",
         "public",
+        "score",
     )
     list_filter = (
         "market__semester__active",
@@ -77,3 +78,7 @@ class GuessAdmin(admin.ModelAdmin):
         "market",
     )
     autocomplete_fields = ("market",)
+    ordering = ("-created_at",)
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet[Guess]:
+        return super().get_queryset(request).select_related("market", "user")
