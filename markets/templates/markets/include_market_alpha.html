@@ -1,0 +1,18 @@
+{% if market.alpha %}
+  <p>
+    This is a standard market where your score (in ♠) for a market is given by
+    \[ w \cdot \left(\min\left\{\frac AB, \frac BA\right\}\right)^\alpha \]
+    where $A$ is the correct answer and $B$ is your guess,
+    with $(w,\alpha)$ specified by the market.
+    Visit the <a href="{% url "market-list" %}">market main page</a> for details.
+  </p>
+  <p>This market parameter is set at $w = {{ market.weight }}$ and $\alpha = {{ market.alpha }}$.</p>
+{% endif %}
+<p>
+  {% if market.int_guesses_only %}
+    Guesses for this market are <i>positive integers</i> up to $10^6$.
+  {% else %}
+    Guesses for this market are <i>real numbers</i>
+    between $10^{-6}$ and $10^6$, written as decimals.
+  {% endif %}
+</p>

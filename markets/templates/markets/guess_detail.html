@@ -4,10 +4,7 @@
   Market {{ guess.market.slug }} submitted
 {% endblock title %}
 {% block layout-content %}
-  <div class="alert alert-dark">
-    <h2 class="alert-heading">{{ guess.market.title }}</h2>
-    {{ guess.market.prompt_rendered|safe }}
-  </div>
+  {% include "markets/include_market_prompt.html" with market=guess.market %}
   <p>
     You submitted <strong>{{ guess.pretty_value }}</strong> for the market
     <a href="{{ guess.market.get_absolute_url }}">

@@ -2,7 +2,6 @@
 {% block title %}
   Market {{ market.slug }}
 {% endblock title %}
-{% load humanize %}
 {% block layout-content %}
   <p>
     <a href="{% url 'index' %}">Back to top</a>
@@ -13,35 +12,9 @@
          role="button">Admin view</a>
     {% endif %}
   </p>
-  <div class="alert alert-dark">
-    <h2 class="alert-heading">{{ market.title }}</h2>
-    {{ market.prompt_rendered|safe }}
-  </div>
+  {% include "markets/include_market_prompt.html" %}
   <hr />
-  <ul>
-    <li>Started {{ market.start_date|naturaltime }} ({{ market.start_date }})</li>
-    <li>
-      Ends <strong>{{ market.end_date|naturaltime }}</strong> ({{ market.end_date }})
-    </li>
-    <li>This market parameter is set at $w = {{ market.weight }}$ and $\alpha = {{ market.alpha }}$.</li>
-    <li>
-      {% if market.int_guesses_only %}
-        This market requires guesses to be <strong>positive integers</strong> up to $10^6$.
-      {% else %}
-        This market requires guesses to be <strong>real numbers</strong>
-        between $10^{-6}$ and $10^6$, written as decimals.
-      {% endif %}
-    </li>
-  </ul>
   {% include "generic_form.html" %}
-  {% if market.alpha %}
-    <hr />
-    <p>
-      This is a standard market where your score (in ♠) for a market is given by
-      \[ w \cdot \left(\min\left\{\frac AB, \frac BA\right\}\right)^\alpha \]
-      where $A$ is the correct answer and $B$ is your guess,
-      with $(w,\alpha)$ specified by the market.
-      Visit the <a href="{% url "market-list" %}">market main page</a> for details.
-    </p>
-  {% endif %}
+  <hr />
+  {% include "markets/include_market_alpha.html" %}
 {% endblock layout-content %}
