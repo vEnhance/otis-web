@@ -47,49 +47,7 @@
     <a href="{% url "market-list" %}">Show markets from this year</a>
   {% else %}
     <a href="{% url "market-list-past" %}">Show markets from past years</a>
-    <hr />
-    <h3>Market Rules</h3>
-    <ol>
-      <li>
-        Markets generally open
-        <strong>every Friday at midnight Eastern time</strong>,
-        and <strong>close on the next Monday at 6am Eastern time</strong>.
-      </li>
-      <li>
-        Each market has a correct answer $A \in [10^{-6}, 10^6]$,
-        unless otherwise specified.
-        The value of $A$ may be rounded arbitrarily by the game master.
-        The precision will not exceed $6$ decimal places.
-      </li>
-      <li>
-        The guess $B$ you submit must be a real number in the interval $[10^{-6}, 10^6]$.
-        Guesses will be rounded to $6$ decimal places.
-        Some markets require that $B$ is an integer.
-      </li>
-      <li>
-        In a standard market,
-        if you submit a guess $B$, your score for the market (in ♠)
-        is given by the function
-        \[ w \cdot \left(\min\left\{\frac AB, \frac BA\right\}\right)^\alpha \]
-        where $w$ and $\alpha$ are two fixed parameters announced for the market.
-        (The default values are $w=4$ and $\alpha=2$.)
-        Some markets may have other rules.
-      </li>
-      <li>
-        You may only submit one guess per person per market.
-        Creating multiple accounts to OTIS-WEB to circumvent this is forbidden.
-        It is not possible to change your guess later.
-      </li>
-      <li>Discussion, collusion, and other antics are permitted.</li>
-      <li>
-        Participation in markets is available to any one who has
-        been an OTIS student or staff member at any point,
-        even if this is no longer the case.
-      </li>
-    </ol>
-    <p class="text-center">
-      <a href="https://discord.com/channels/740366393022742618/876582119156092948"
-         class="btn btn-primary">Discuss at #levels-market-rpg-etc</a>
-    </p>
   {% endif %}
+  <hr />
+  {% include "markets/components/market_rules.html" %}
 {% endblock layout-content %}
