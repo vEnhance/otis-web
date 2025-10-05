@@ -22,17 +22,17 @@ urlpatterns = [
     ),
     path(r"leaderboard/<slug:hunt_slug>/", views.leaderboard, name="opal-leaderboard"),
     path(
-        r"puzzle/<str:hunt>/<slug:puzzle_slug>/",
+        r"puzzle/<slug:hunt_slug>/<slug:puzzle_slug>/",
         views.show_puzzle,
         name="opal-show-puzzle",
     ),
     path(
-        r"finish/<str:hunt>/<slug:puzzle_slug>/",
+        r"finish/<slug:hunt_slug>/<slug:puzzle_slug>/",
         views.finish,
         name="opal-finish",
     ),
     path(
-        r"guesses/<str:hunt>/<slug:puzzle_slug>/",
+        r"guesses/<slug:hunt_slug>/<slug:puzzle_slug>/",
         views.AttemptsList.as_view(),
         name="opal-attempts-list",
     ),

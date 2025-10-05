@@ -88,7 +88,9 @@ class AttemptsList(AdminRequiredMixin, ListView[OpalAttempt]):
     def setup(self, request: AuthHttpRequest, *args: Any, **kwargs: Any):
         super().setup(request, *args, **kwargs)
         self.puzzle = get_object_or_404(
-            OpalPuzzle, hunt__slug=self.kwargs["hunt"], slug=self.kwargs["puzzle_slug"]
+            OpalPuzzle,
+            hunt__slug=self.kwargs["hunt_slug"],
+            slug=self.kwargs["puzzle_slug"],
         )
 
     def get_context_data(self, **kwargs: Any):
@@ -225,8 +227,10 @@ def _discord_send_congratulations(request: AuthHttpRequest, hunt: OpalHunt):
 
 
 @verified_required
-def show_puzzle(request: AuthHttpRequest, hunt: str, puzzle_slug: str) -> HttpResponse:
-    puzzle = get_object_or_404(OpalPuzzle, hunt__slug=hunt, slug=puzzle_slug)
+def show_puzzle(
+    request: AuthHttpRequest, hunt_slug: str, puzzle_slug: str
+) -> HttpResponse:
+    puzzle = get_object_or_404(OpalPuzzle, hunt__slug=hunt_slug, slug=puzzle_slug)
     if not puzzle.can_view(request.user):
         if not has_early_access(request.user):
             raise PermissionDenied("This puzzle cannot be unlocked yet")
@@ -306,8 +310,8 @@ def show_puzzle(request: AuthHttpRequest, hunt: str, puzzle_slug: str) -> HttpRe
 
 
 @verified_required
-def finish(request: AuthHttpRequest, hunt: str, puzzle_slug: str) -> HttpResponse:
-    puzzle = get_object_or_404(OpalPuzzle, hunt__slug=hunt, slug=puzzle_slug)
+def finish(request: AuthHttpRequest, hunt_slug: str, puzzle_slug: str) -> HttpResponse:
+    puzzle = get_object_or_404(OpalPuzzle, hunt__slug=hunt_slug, slug=puzzle_slug)
     if puzzle.achievement is None:
         raise PermissionDenied("This page is only for puzzles with diamonds.")
     try:
