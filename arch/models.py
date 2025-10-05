@@ -29,8 +29,9 @@ def get_disk_statement_from_puid(puid: str) -> Optional[str]:
     validate_puid(puid)
     if settings.PATH_STATEMENT_ON_DISK is None:
         return None
-    statement_path = Path(settings.PATH_STATEMENT_ON_DISK) / f"{puid}.html"
-    if not statement_path.parent == Path(settings.PATH_STATEMENT_ON_DISK):
+    base_path = Path(settings.PATH_STATEMENT_ON_DISK).resolve()
+    statement_path = (base_path / f"{puid}.html").resolve()
+    if statement_path.parent != base_path:
         raise SuspiciousOperation(f"oh this is really bad ur so screwed ({puid})")
     elif statement_path.exists() and statement_path.is_file():
         return statement_path.read_text()
