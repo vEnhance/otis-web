@@ -43,7 +43,6 @@ class SubmitGuess(VerifiedRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]
     request: AuthHttpRequest
     raise_exception = True
 
-    object: Guess  # type: ignore
     market: Market
 
     def get_form(self, form_class=None):
@@ -209,8 +208,6 @@ class UpdateGuess(VerifiedRequiredMixin, UpdateView[Guess, BaseModelForm[Guess]]
     )
     request: AuthHttpRequest
     raise_exception = True
-
-    object: Guess  # type: ignore
 
     def get_object(self):
         return get_object_or_404(
