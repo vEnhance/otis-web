@@ -11,6 +11,12 @@
         },
         ready: () => {},
     };
+    // https://github.com/mathjax/MathJax/issues/3426#issuecomment-3258826516
+    if (Object.hasOwn === undefined) {
+        Object.hasOwn = function(el, prop) {
+            return Object.prototype.hasOwnProperty.call(el, prop)
+        }
+    }
 </script>
 <script id="MathJax-script"
         defer
