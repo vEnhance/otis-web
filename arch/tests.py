@@ -32,15 +32,8 @@ class TestProblem(EvanTestCase):
         with open(problem_path, "w") as f:
             f.write("rock and roll")
 
-        self.assertGet40X(
-            "hint-list",
-            "NONEXISTENT",
-        )
-
-        resp = self.assertGet20X(
-            "hint-list",
-            disk_puid,
-        )
+        self.assertGet40X("hint-list", "NONEXISTENT")
+        resp = self.assertGet20X("hint-list", disk_puid)
 
         messages = [m.message for m in resp.context["messages"]]
         self.assertIn(f"Created previously nonexistent problem {disk_puid}", messages)
@@ -87,17 +80,11 @@ class TestProblem(EvanTestCase):
 
         problem: Problem = ProblemFactory.create()
 
-        self.assertGet20X(
-            "hint-list",
-            problem.puid,
-        )
+        self.assertGet20X("hint-list", problem.puid)
         self.assertGet40X("hint-detail", problem.pk, 31)
 
         self.assertContains(
-            self.assertGet20X(
-                "hint-create",
-                problem.puid,
-            ),
+            self.assertGet20X("hint-create", problem.puid),
             "Advice for writing hints",
         )
         self.assertPost20X(
@@ -119,11 +106,7 @@ class TestProblem(EvanTestCase):
         self.assertGet40X("hint-detail", problem.puid, 41)
         self.assertGet20X("hint-detail-pk", hint.pk)
         self.assertContains(
-            self.assertGet20X(
-                "hint-update",
-                problem.puid,
-                31,
-            ),
+            self.assertGet20X("hint-update", problem.puid, 31),
             hint.keywords,
         )
         self.assertPost20X(
@@ -144,10 +127,7 @@ class TestProblem(EvanTestCase):
         resp = self.assertGet20X("hint-detail", problem.puid, 41)
 
         self.assertContains(
-            self.assertGet20X(
-                "hint-update-pk",
-                hint.pk,
-            ),
+            self.assertGet20X("hint-update-pk", hint.pk),
             hint.keywords,
         )
         self.assertPost20X(
@@ -180,14 +160,8 @@ class TestProblem(EvanTestCase):
         self.assertGet20X("vote-create", problem.puid)
 
         resp = self.assertPost20X(
-            "vote-create",
-            problem.puid,
-            data={
-                "niceness": 4,
-            },
-            follow=True,
+            "vote-create", problem.puid, data={"niceness": 4}, follow=True
         )
-
         messages = [m.message for m in resp.context["messages"]]
         self.assertIn(f"You rated {problem.puid} as 4.", messages)
 
@@ -200,10 +174,7 @@ class TestProblem(EvanTestCase):
 
         problem: Problem = ProblemFactory.create()
 
-        self.assertGetRedirects(
-            reverse("arch-index"),
-            "arch-lookup",
-        )
+        self.assertGetRedirects(reverse("arch-index"), "arch-lookup")
 
         self.assertPostRedirects(
             problem.get_absolute_url(), "arch-lookup", data={"problem": problem.pk}
