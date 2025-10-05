@@ -38,7 +38,9 @@
   <div class="card">
     <b class="card-header">Plain text hint</b>
     <div class="card-body">
-      <pre class="card-text">{{ hint.content|parbreaks }}</pre>
+      <pre class="card-text"
+           style="white-space: pre-wrap;
+                  word-wrap: break-word">{{ hint.content|parbreaks }}</pre>
     </div>
   </div>
 {% endblock layout-content %}
