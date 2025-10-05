@@ -29,7 +29,7 @@ def get_from_google_storage(filename: str):
     except FileNotFoundError:
         errmsg = f"Unable to find {filename} at {path}."
         logger.critical(errmsg)
-        return HttpResponseServerError(errmsg)
+        return HttpResponseServerError("File not found")
 
     response = HttpResponse(content=file)
     if ext == ".pdf":
