@@ -4,7 +4,7 @@
       enctype="multipart/form-data"
       class="form">
   {% csrf_token %}
-  {% include "generic_form_errors.html" %}
+  {% include "otisweb/components/generic_form_errors.html" %}
   {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
   {% for field in form.visible_fields %}{{ field|as_crispy_field }}{% endfor %}
   <button type="submit" class="btn {{ btn_class|default:"btn-success" }}">{{ submit_name|default:"Submit" }}</button>

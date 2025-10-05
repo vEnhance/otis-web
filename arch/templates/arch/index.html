@@ -11,7 +11,7 @@
     <div class="col-6">
       <h2>Find problem</h2>
       <div id="arch_puid_chosen_form" class="mathjax_ignore">
-        {% include "generic_form.html" with form=lookup_form target=lookup_url submit_name="Lookup" btn_class="btn-primary" %}
+        {% include "otisweb/components/generic_form.html" with form=lookup_form target=lookup_url submit_name="Lookup" btn_class="btn-primary" %}
       </div>
       <div id="arch_puid_mobile_form" class="invisible">
         <p>
@@ -24,7 +24,7 @@
     </div>
     <div class="col-6">
       <h2>New problem</h2>
-      {% include "generic_form.html" with submit_name="Create" %}
+      {% include "otisweb/components/generic_form.html" with submit_name="Create" %}
     </div>
   </div>
   <hr />

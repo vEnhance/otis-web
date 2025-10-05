@@ -20,7 +20,7 @@
     </form>
     <br />
   {% endif %}
-  {% include "markets/include_market_prompt.html" %}
+  {% include "markets/components/market_prompt.html" %}
   {% if market.show_answer or request.user.is_superuser %}
     <br />
     <div class="alert alert-info">
@@ -91,5 +91,5 @@
       {% endif %}
     </div>
   {% endif %}
-  {% include "markets/include_market_alpha.html" %}
+  {% include "markets/components/market_alpha.html" %}
 {% endblock layout-content %}

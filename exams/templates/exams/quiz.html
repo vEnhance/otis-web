@@ -44,7 +44,7 @@
         </div>
       {% endfor %}
     </div>
-    {% include "exams/gateway.html" %}
+    {% include "exams/components/gateway.html" %}
   {% elif not quiz.overdue %}
     <h2>Instructions</h2>
     <ul>
@@ -100,7 +100,7 @@
     <hr />
     <h1>Submit answers</h1>
     <p>Enter your responses below as expressions.</p>
-    {% include "generic_form.html" %}
+    {% include "otisweb/components/generic_form.html" %}
     <script type="text/javascript">
         $("form.form")[0].onsubmit = function() {
             return confirm('Are you ready to submit? This cannot be reversed.');

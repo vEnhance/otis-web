@@ -66,7 +66,7 @@
     <hr />
   {% endif %}
   {% if invoice and invoice.student.semester.show_invoices %}
-    {% include "roster/invoice_table.html" %}
+    {% include "roster/components/invoice_table.html" %}
     <hr />
     <p>
       This invoice was last updated on {{ invoice.updated_at }} server time.
@@ -99,5 +99,5 @@
       <b>No invoice is currently available.</b>
     </p>
   {% endif %}
-  {% include "dashboard/back_link.html" %}
+  {% include "dashboard/components/back_link.html" %}
 {% endblock layout-content %}

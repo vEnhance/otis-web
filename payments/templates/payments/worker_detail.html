@@ -4,7 +4,7 @@
 {% endblock title %}
 {% block layout-content %}
   <p>This is the work profile for {{ worker.user.get_full_name }}.</p>
-  {% include "payments/worker_table.html" %}
+  {% include "payments/components/worker_table.html" %}
   <p>{{ worker.notes|linebreaks }}</p>
   <p class="text-center">
     <a href="{% url "worker-update" %}" class="btn btn-primary">Edit this</a>

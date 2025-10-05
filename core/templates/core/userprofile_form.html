@@ -9,7 +9,7 @@
         enctype="multipart/form-data"
         class="form">
     {% csrf_token %}
-    {% include "generic_form_errors.html" %}
+    {% include "otisweb/components/generic_form_errors.html" %}
     {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
     <div class="section">
       <h1>Email settings</h1>

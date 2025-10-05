@@ -14,7 +14,7 @@
   {% if files|length > 0 %}
     <ol>
       {% for file in files %}
-        <li>{% include "dashboard/show_file.html" %}</li>
+        <li>{% include "dashboard/components/file_item.html" %}</li>
       {% endfor %}
     </ol>
   {% else %}
@@ -61,7 +61,7 @@
                 </ul>
               </p>
             </div>
-            {% include "generic_form.html" with submit_name="Upload" %}
+            {% include "otisweb/components/generic_form.html" with submit_name="Upload" %}
           </div>
         </div>
       </div>

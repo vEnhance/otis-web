@@ -48,6 +48,6 @@
   </ul>
   {% if job.assignee and request.user.is_staff %}
     <h2>Assignee info</h2>
-    {% include "payments/worker_table.html" with worker=job.assignee %}
+    {% include "payments/components/worker_table.html" with worker=job.assignee %}
   {% endif %}
 {% endblock layout-content %}
