@@ -291,6 +291,145 @@ class MarketTests(EvanTestCase):
                 resp.context["avg"], round((42 / 100) ** 2 * 2, ndigits=2)
             )
 
+    def test_update_guess_perms(self):
+        """Test that update guess view respects permissions"""
+        with freeze_time("2050-01-01", tz_offset=0):
+            self.login("alice")
+            self.assertGet40X("market-guess-update", "guess-my-ssn")
+        with freeze_time("2050-07-01", tz_offset=0):
+            self.login("alice")
+            # Create a guess first
+            self.assertPost20X(
+                "market-guess", "guess-my-ssn", data={"value": 13}, follow=True
+            )
+            guess = Guess.objects.get(
+                market__slug="guess-my-ssn", user__username="alice"
+            )
+            self.assertEqual(guess.value, 13)
+            # Now we can update it
+            resp = self.assertGet20X("market-guess-update", "guess-my-ssn")
+            self.assertHas(resp, "market main page")
+            self.assertPost20X(
+                "market-guess-update",
+                "guess-my-ssn",
+                data={"value": 23},
+                follow=True,
+            )
+            guess.refresh_from_db()
+
+            self.assertEqual(guess.value, 23)
+
+        with freeze_time("2050-11-01", tz_offset=0):
+            self.login("alice")
+            self.assertGet40X(
+                "market-guess-update",
+                "guess-my-ssn",
+            )
+            self.assertPost40X(
+                "market-guess-update",
+                "guess-my-ssn",
+                data={"value": 10500000},
+                follow=True,
+            )
+            guess.refresh_from_db()
+            self.assertEqual(guess.value, 23)
+
+    def test_update_guess_form_with_answer(self):
+        """Test updating a guess with integer validation and score recalculation"""
+        with freeze_time("2050-07-01", tz_offset=0):
+            market = Market.objects.get(slug="guess-my-ssn")
+            market.answer = 42
+            market.save()
+
+            self.login("alice")
+
+            # Create initial guess
+            self.assertPost20X(
+                "market-guess", "guess-my-ssn", data={"value": 13}, follow=True
+            )
+
+            guess = Guess.objects.get(user__username="alice")
+            self.assertEqual(guess.value, 13)
+            self.assertAlmostEqual(guess.score, round((13 / 42) ** 2 * 2, ndigits=2))
+
+            # Try to update with a non-integer (should fail)
+            resp = self.assertGet20X("market-guess-update", "guess-my-ssn")
+            self.assertHas(resp, "market main page")
+            resp = self.assertPost20X(
+                "market-guess-update",
+                "guess-my-ssn",
+                data={"value": 13.37},
+                follow=True,
+            )
+            self.assertContains(resp, "This market only allows integer guesses.")
+
+            # Update with a valid integer
+            resp = self.assertPost20X(
+                "market-guess-update",
+                "guess-my-ssn",
+                data={"value": 23},
+                follow=True,
+            )
+            self.assertContains(resp, "You updated your guess to 23")
+
+            # Check that the guess was updated
+            guess = Guess.objects.get(user__username="alice")
+            self.assertEqual(guess.value, 23)
+            self.assertAlmostEqual(guess.score, round((23 / 42) ** 2 * 2, ndigits=2))
+
+    def test_update_guess_changes_public_flag(self):
+        """Test that updating a guess can change the public flag"""
+        with freeze_time("2050-07-01", tz_offset=0):
+            self.login("alice")
+
+            # Create initial guess with public=False (default)
+            self.assertPost20X(
+                "market-guess", "guess-my-ssn", data={"value": 100}, follow=True
+            )
+
+            guess = Guess.objects.get(user__username="alice")
+            self.assertEqual(guess.public, False)
+
+            # Update to make it public
+            self.assertPost20X(
+                "market-guess-update",
+                "guess-my-ssn",
+                data={"value": 13, "public": True},
+                follow=True,
+            )
+
+            guess = Guess.objects.get(user__username="alice")
+            self.assertEqual(guess.public, True)
+
+            # Update to make it private again
+            self.assertPost20X(
+                "market-guess-update",
+                "guess-my-ssn",
+                data={"value": 13, "public": False},
+                follow=True,
+            )
+
+            guess = Guess.objects.get(user__username="alice")
+            self.assertEqual(guess.public, False)
+
+    def test_update_guess_redirects_to_pending(self):
+        """Test that successful update redirects to pending view"""
+        with freeze_time("2050-07-01", tz_offset=0):
+            self.login("alice")
+
+            # Create initial guess
+            self.assertPost20X(
+                "market-guess", "guess-my-ssn", data={"value": 13}, follow=True
+            )
+
+            # Update and check redirect
+            self.assertPostRedirects(
+                self.url("market-pending", "guess-my-ssn"),
+                "market-guess-update",
+                "guess-my-ssn",
+                data={"value": 23},
+            )
+
 
 class CreateMarketTests(EvanTestCase):
     @classmethod

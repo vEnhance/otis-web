@@ -8,6 +8,11 @@ urlpatterns = [
         r"guess/<slug:market_slug>/", views.SubmitGuess.as_view(), name="market-guess"
     ),
     path(
+        r"update/<slug:market_slug>/",
+        views.UpdateGuess.as_view(),
+        name="market-guess-update",
+    ),
+    path(
         r"results/<slug:market_slug>/",
         views.MarketResults.as_view(),
         name="market-results",

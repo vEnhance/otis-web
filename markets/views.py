@@ -19,7 +19,7 @@ from django.shortcuts import get_object_or_404
 from django.urls.base import reverse
 from django.utils import timezone
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import CreateView
+from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic.list import ListView
 
 from core.models import Semester
@@ -198,6 +198,59 @@ class MarketSpades(LoginRequiredMixin, ListView[Guess]):
             .select_related("market")
             .order_by("-market__end_date")
         )
+
+
+class UpdateGuess(VerifiedRequiredMixin, UpdateView[Guess, BaseModelForm[Guess]]):
+    model = Guess
+    context_object_name = "guess"
+    fields = (
+        "value",
+        "public",
+    )
+    request: AuthHttpRequest
+    raise_exception = True
+
+    object: Guess  # type: ignore
+
+    def get_object(self):
+        return get_object_or_404(
+            Guess,
+            market=get_object_or_404(Market, slug=self.kwargs["market_slug"]),
+            user=self.request.user,
+        )
+
+    def form_valid(self, form: BaseModelForm[Guess]):
+        messages.success(
+            self.request, f"You updated your guess to {form.instance.value}"
+        )
+        form.instance.set_score()
+        return super().form_valid(form)
+
+    def get_success_url(self) -> str:
+        return reverse("market-pending", args=(self.object.market.slug,))
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["market"] = self.object.market
+        return context
+
+    def dispatch(
+        self, request: HttpRequest, *args: Any, **kwargs: Any
+    ) -> HttpResponseBase:
+        guess = self.get_object()
+        market = guess.market
+
+        if not isinstance(request.user, User):
+            return super().dispatch(request, *args, **kwargs)  # login required mixin
+
+        if not market.has_started:
+            return HttpResponseForbidden("This market hasn't started yet")
+        elif market.has_ended:
+            return HttpResponseForbidden("This market has already ended")
+        elif guess.user != request.user:
+            return HttpResponseForbidden("You cannot update this guess.")
+
+        return super().dispatch(request, *args, **kwargs)
 
 
 class GuessView(LoginRequiredMixin, DetailView[Guess]):

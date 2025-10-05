@@ -12,6 +12,11 @@
     </a>
     which will close in {{ guess.market.end_date|naturaltime }}.
   </p>
+  <p>
+    <a href="{% url 'market-guess-update' guess.market.slug %}"
+       class="btn btn-primary"
+       role="button">Update your guess</a>
+  </p>
   <hr />
   <ul>
     <li>
