@@ -28,10 +28,19 @@
       </ul>
     </div>
   </div>
-  <h3>Rendered</h3>
-  <div class="alert alert-info">{{ hint.content|parbreaks }}</div>
-  <h3>Plain text</h3>
-  <pre>{{ hint.content }}</pre>
+  <div class="card">
+    <b class="card-header">Rendered hint</b>
+    <div class="card-body">
+      <div class="card-text">{{ hint.content|parbreaks }}</div>
+    </div>
+  </div>
+  <br />
+  <div class="card">
+    <b class="card-header">Plain text hint</b>
+    <div class="card-body">
+      <pre class="card-text">{{ hint.content|parbreaks }}</pre>
+    </div>
+  </div>
 {% endblock layout-content %}
 {% block scripts %}
   <script type="text/javascript">
