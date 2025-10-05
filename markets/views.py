@@ -70,7 +70,7 @@ class SubmitGuess(VerifiedRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]
     def dispatch(
         self, request: HttpRequest, *args: Any, **kwargs: Any
     ) -> HttpResponseBase:
-        self.market = get_object_or_404(Market, slug=kwargs.pop("slug"))
+        self.market = get_object_or_404(Market, slug=kwargs.pop("market_slug"))
         if not isinstance(request.user, User):
             return super().dispatch(request, *args, **kwargs)  # login required mixin
 
@@ -125,7 +125,7 @@ class MarketResults(LoginRequiredMixin, ListView[Guess]):
     ) -> HttpResponseBase:
         if not isinstance(request.user, User):
             return super().dispatch(request, *args, **kwargs)  # login required mixin
-        self.market = get_object_or_404(Market, slug=kwargs.pop("slug"))
+        self.market = get_object_or_404(Market, slug=kwargs.pop("market_slug"))
 
         if request.user.is_superuser or (
             self.market.has_started and self.market.has_ended
@@ -138,10 +138,10 @@ class MarketResults(LoginRequiredMixin, ListView[Guess]):
 
 
 @admin_required
-def recompute(request: AuthHttpRequest, slug: str):
+def recompute(request: AuthHttpRequest, market_slug: str):
     if not request.method == "POST":
         raise PermissionDenied("Must use POST")
-    guesses = Guess.objects.filter(market__slug=slug)
+    guesses = Guess.objects.filter(market__slug=market_slug)
     for guess in guesses:
         guess.set_score()
     Guess.objects.bulk_update(guesses, fields=("score",), batch_size=50)
@@ -149,7 +149,7 @@ def recompute(request: AuthHttpRequest, slug: str):
         request,
         f"Successfully recomputed all {guesses.count()} scores for this market!",
     )
-    return HttpResponseRedirect(reverse("market-results", args=(slug,)))
+    return HttpResponseRedirect(reverse("market-results", args=(market_slug,)))
 
 
 class MarketList(LoginRequiredMixin, ListView[Market]):

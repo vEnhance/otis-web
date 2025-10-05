@@ -224,7 +224,9 @@ class JobList(VerifiedRequiredMixin, ListView[Job]):
 
     def setup(self, request: HttpRequest, *args: Any, **kwargs: Any):
         super().setup(request, *args, **kwargs)
-        self.jobfolder = get_object_or_404(JobFolder, slug=self.kwargs["slug"])
+        self.jobfolder = get_object_or_404(
+            JobFolder, slug=self.kwargs["jobfolder_slug"]
+        )
 
     def get_queryset(self) -> QuerySet[Job]:
         return (
@@ -326,7 +328,9 @@ class InactiveWorkerList(AdminRequiredMixin, ListView[Worker]):
 
     def setup(self, request: HttpRequest, *args: Any, **kwargs: Any):
         super().setup(request, *args, **kwargs)
-        self.jobfolder = get_object_or_404(JobFolder, slug=self.kwargs["slug"])
+        self.jobfolder = get_object_or_404(
+            JobFolder, slug=self.kwargs["jobfolder_slug"]
+        )
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)

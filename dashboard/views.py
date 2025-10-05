@@ -535,6 +535,7 @@ class AnnouncementList(VerifiedRequiredMixin, ListView[Announcement]):
 
 
 class AnnouncementDetail(VerifiedRequiredMixin, DetailView[Announcement]):
+    slug_url_kwarg = "announcement_slug"
     template_name = "dashboard/announcement_detail.html"
     model = Announcement
     object_name = "announcement"

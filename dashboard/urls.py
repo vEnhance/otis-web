@@ -33,7 +33,7 @@ urlpatterns = [
     path(r"certify/<int:student_pk>/<str:checksum>/", views.certify, name="certify"),
     path(r"announce/", views.AnnouncementList.as_view(), name="announcement-list"),
     path(
-        r"announce/<slug:slug>/",
+        r"announce/<slug:announcement_slug>/",
         views.AnnouncementDetail.as_view(),
         name="announcement-detail",
     ),
