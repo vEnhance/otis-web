@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Optional
 import reversion
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.exceptions import SuspiciousOperation
 from django.core.validators import MaxValueValidator, RegexValidator
 from django.db import models
 from django.db.models.manager import Manager
@@ -29,9 +30,12 @@ def get_disk_statement_from_puid(puid: str) -> Optional[str]:
     if settings.PATH_STATEMENT_ON_DISK is None:
         return None
     statement_path = Path(settings.PATH_STATEMENT_ON_DISK) / f"{puid}.html"
-    if statement_path.exists() and statement_path.is_file():
+    if not statement_path.parent == Path(settings.PATH_STATEMENT_ON_DISK):
+        raise SuspiciousOperation(f"oh this is really bad ur so screwed ({puid})")
+    elif statement_path.exists() and statement_path.is_file():
         return statement_path.read_text()
-    return None
+    else:
+        return None
 
 
 # Create your models here.
