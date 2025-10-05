@@ -5,26 +5,33 @@
   Hint {{ hint.number }}% for {{ hint.problem }}
 {% endblock title %}
 {% block layout-content %}
-  <p>Here is your hint:</p>
+  <div class="row">
+    <div class="col-6">
+      <ul>
+        <li>
+          <a href="{{ hint.problem.get_absolute_url }}">
+          Back to <b>{{ hint.problem }}</b></a>
+        </li>
+      </ul>
+    </div>
+    <div class="col-6">
+      <ul>
+        <li>
+          <a href=" {% url "hint-create" hint.puid %}">Add another hint</a>
+        </li>
+        <li>
+          <a href="{% url "hint-update" hint.puid hint.number %}">Update hint</a>
+        </li>
+        <li>
+          <a href="{% url "hint-delete" hint.puid hint.number %}">Delete hint</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <h3>Rendered</h3>
   <div class="alert alert-info">{{ hint.content|parbreaks }}</div>
-  <ul>
-    <li>
-      <a href="{{ hint.problem.get_absolute_url }}">
-      Back to <b>{{ hint.problem }}</b></a>
-    </li>
-  </ul>
-  <hr />
-  <ul>
-    <li>
-      <a href=" {% url "hint-create" hint.puid %}">Add another hint</a>
-    </li>
-    <li>
-      <a href="{% url "hint-update" hint.puid hint.number %}">Update hint</a>
-    </li>
-    <li>
-      <a href="{% url "hint-delete" hint.puid hint.number %}">Delete hint</a>
-    </li>
-  </ul>
+  <h3>Plain text</h3>
+  <pre>{{ hint.content }}</pre>
 {% endblock layout-content %}
 {% block scripts %}
   <script type="text/javascript">

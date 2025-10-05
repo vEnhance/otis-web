@@ -19,9 +19,7 @@
       </a>
     </p>
   {% endif %}
-  <hr />
   {% if hint_list %}
-    <p>The following hints are available for this problem.</p>
     {% for hint in hint_list %}
       <a href="{% url "hint-detail" hint.puid hint.number %}">
         <div class="alert alert-primary">
