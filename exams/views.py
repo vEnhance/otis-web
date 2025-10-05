@@ -1,8 +1,8 @@
 from typing import Any, Optional
 
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
-from django.http.response import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render
 
 from core.utils import get_from_google_storage
@@ -24,11 +24,11 @@ def pdf(request: AuthHttpRequest, pk: int) -> HttpResponse:
 
     student = infer_student(request)
     if not exam.started:
-        return HttpResponseForbidden("Not ready to download this exam yet")
+        raise PermissionDenied("Not ready to download this exam yet")
     elif student.semester.exam_family != exam.family:
-        return HttpResponseForbidden("You can't access this quiz.")
+        raise PermissionDenied("You can't access this quiz.")
     elif not student.enabled:
-        return HttpResponseForbidden("Your student account is disabled.")
+        raise PermissionDenied("Your student account is disabled.")
 
     return get_from_google_storage(exam.pdfname)
 
@@ -39,16 +39,16 @@ def quiz(request: AuthHttpRequest, student_pk: int, pk: int) -> HttpResponse:
     context: dict[str, Any] = {}
     quiz = get_object_or_404(PracticeExam, pk=pk)
     if quiz.is_test:
-        return HttpResponseForbidden(
+        raise PermissionDenied(
             "You can't submit numerical answers to an olympiad exam."
         )
     if not quiz.started:
-        return HttpResponseForbidden("You can't start this quiz")
+        raise PermissionDenied("You can't start this quiz")
     if not student.enabled:
-        return HttpResponseForbidden("Your student account is disabled.")
+        raise PermissionDenied("Your student account is disabled.")
 
     if student.semester.exam_family != quiz.family:
-        return HttpResponseForbidden("You can't access this quiz.")
+        raise PermissionDenied("You can't access this quiz.")
 
     attempt: Optional[ExamAttempt] = None
     try:
@@ -56,11 +56,11 @@ def quiz(request: AuthHttpRequest, student_pk: int, pk: int) -> HttpResponse:
     except ExamAttempt.DoesNotExist:
         if request.method == "POST":
             if quiz.overdue:
-                return HttpResponseForbidden(
+                raise PermissionDenied(
                     "You can't submit this quiz since the deadline passed."
                 )
             if student.semester.active is False:
-                return HttpResponseForbidden(
+                raise PermissionDenied(
                     "You can't submit quizzes for archived semesters."
                 )
             form = ExamAttemptForm(request.POST)
@@ -74,7 +74,7 @@ def quiz(request: AuthHttpRequest, student_pk: int, pk: int) -> HttpResponse:
         context["form"] = form
     else:
         if request.method == "POST":
-            return HttpResponseForbidden("You already submitted this quiz")
+            raise PermissionDenied("You already submitted this quiz")
 
     if attempt is not None:
         context["attempt"] = attempt

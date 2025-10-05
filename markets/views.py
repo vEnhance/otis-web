@@ -11,8 +11,6 @@ from django.forms.models import BaseModelForm
 from django.http.request import HttpRequest
 from django.http.response import (
     HttpResponseBase,
-    HttpResponseForbidden,
-    HttpResponseNotFound,
     HttpResponseRedirect,
 )
 from django.shortcuts import get_object_or_404
@@ -74,7 +72,7 @@ class SubmitGuess(VerifiedRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]
             return super().dispatch(request, *args, **kwargs)  # login required mixin
 
         if not self.market.has_started:
-            return HttpResponseNotFound()
+            raise PermissionDenied("Market hasn't started yet")
         elif self.market.has_ended:
             return HttpResponseRedirect(self.market.get_absolute_url())
         try:
@@ -131,7 +129,7 @@ class MarketResults(LoginRequiredMixin, ListView[Guess]):
         ):
             return super().dispatch(request, *args, **kwargs)
         elif not self.market.has_started:
-            return HttpResponseNotFound()
+            raise PermissionDenied("Market hasn't started yet")
         else:
             return HttpResponseRedirect(self.market.get_absolute_url())
 
@@ -241,11 +239,11 @@ class UpdateGuess(VerifiedRequiredMixin, UpdateView[Guess, BaseModelForm[Guess]]
             return super().dispatch(request, *args, **kwargs)  # login required mixin
 
         if not market.has_started:
-            return HttpResponseForbidden("This market hasn't started yet")
+            raise PermissionDenied("This market hasn't started yet")
         elif market.has_ended:
-            return HttpResponseForbidden("This market has already ended")
+            raise PermissionDenied("This market has already ended")
         elif guess.user != request.user:
-            return HttpResponseForbidden("You cannot update this guess.")
+            raise PermissionDenied("You cannot update this guess.")
 
         return super().dispatch(request, *args, **kwargs)
 
@@ -271,7 +269,7 @@ class GuessView(LoginRequiredMixin, DetailView[Guess]):
         if guess.user != request.user and not getattr(
             request.user, "is_superuser", False
         ):
-            return HttpResponseForbidden("You cannot view this guess.")
+            raise PermissionDenied("You cannot view this guess.")
         return super().dispatch(request, *args, **kwargs)
 
 

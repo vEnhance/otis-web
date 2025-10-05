@@ -212,17 +212,18 @@ class TestProblem(EvanTestCase):
     @override_settings(TESTING_NEEDS_MOCK_MEDIA=True)
     def test_view_solution(self):
         problem: Problem = ProblemFactory.create()
-        # if not verified, getting the problem should redirect
         eve = UserFactory.create()
         self.login(eve)
-        self.assertGet40X("view-solution", problem.puid)
+        resp = self.assertGet40X("view-solution", problem.puid)
+        self.assertEqual(resp.status_code, 403)
 
         # verified user should instead fail because default storage doesn't
         # have the problem in question
         verified_group = GroupFactory(name="Verified")
         alice = UserFactory.create(groups=(verified_group,))
         self.login(alice)
-        self.assertGet20X("view-solution", problem.puid)
+        resp = self.assertGet40X("view-solution", problem.puid)
+        self.assertEqual(resp.status_code, 404)
 
     def test_validate_puid(self):
         self.assertRaises(Http404, validate_puid, "✈✈✈")

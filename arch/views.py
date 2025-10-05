@@ -248,7 +248,7 @@ def lookup(request: HttpRequest):
 @verified_required
 def view_solution(request: HttpRequest, puid: str) -> HttpResponse:
     if get_disk_statement_from_puid(puid) is None:
-        return HttpResponse(
+        raise Http404(
             f"The problem {puid} is not in the OTIS database, "
             "therefore no solution file could be retrieved."
         )
