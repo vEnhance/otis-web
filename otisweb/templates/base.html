@@ -19,11 +19,12 @@
     {% bootstrap_javascript %}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.min.js"
-            type="text/javascript"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.css"
-          rel="stylesheet" />
+            integrity="sha384-f7i3wx95GUaq/1ED3jYQs30oXd4a1nL5q5TIA77QbZdDimOMAqtQte21IkV6Nt6k"
+            crossorigin="anonymous"></script>
     <link rel="stylesheet"
-          href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css" />
+          href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.css"
+          integrity="sha384-onzP0A1hYntgRfEeA/TnoI5RyILXmbm/LIj9rhayHajboFyIatoRQ2ppsA0tqRec"
+          crossorigin="anonymous">
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="{% static "k.js" %}"></script>
     {% if request.user|getconfig:"use_twemoji" %}
