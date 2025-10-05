@@ -172,8 +172,6 @@ def advance(request: HttpRequest, student_pk: int) -> Any:
             student.save()
             messages.success(request, "Successfully updated student.")
             form = AdvanceForm(student=student)
-            # uncomment the below if you want to load the portal again
-            # return HttpResponseRedirect(reverse("portal", args=(student_pk,)))
     else:
         form = AdvanceForm(student=student)
 
@@ -218,7 +216,6 @@ def invoice(request: HttpRequest, student_pk: Optional[int] = None) -> HttpRespo
         ),
         "checksum": student.get_checksum(settings.INVOICE_HASH_KEY),
     }
-    # return HttpResponse("hi")
     return render(request, "roster/invoice.html", context)
 
 
