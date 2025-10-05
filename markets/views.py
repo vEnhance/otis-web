@@ -60,7 +60,7 @@ class SubmitGuess(VerifiedRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]
         return super().form_valid(form)
 
     def get_success_url(self) -> str:
-        return reverse("market-pending", args=(self.object.pk,))
+        return reverse("market-pending", args=(self.market.slug,))
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
@@ -87,7 +87,7 @@ class SubmitGuess(VerifiedRequiredMixin, CreateView[Guess, BaseModelForm[Guess]]
                 messages.error(
                     request, f"You already submitted {guess.value} for this market."
                 )
-            target_url = reverse("market-pending", args=(guess.pk,))
+            target_url = reverse("market-pending", args=(self.market.slug,))
             return HttpResponseRedirect(target_url)
 
         return super().dispatch(request, *args, **kwargs)
@@ -203,6 +203,13 @@ class MarketSpades(LoginRequiredMixin, ListView[Guess]):
 class GuessView(LoginRequiredMixin, DetailView[Guess]):
     model = Guess
     context_object_name = "guess"
+
+    def get_object(self):
+        return get_object_or_404(
+            Guess,
+            market=get_object_or_404(Market, slug=self.kwargs["market_slug"]),
+            user=self.request.user,
+        )
 
     def dispatch(
         self, request: HttpRequest, *args: Any, **kwargs: Any

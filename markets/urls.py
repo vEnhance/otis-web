@@ -9,7 +9,9 @@ urlpatterns = [
     path(r"list/", views.MarketList.as_view(), name="market-list"),
     path(r"list/past/", views.MarketListPast.as_view(), name="market-list-past"),
     path(r"spades/", views.MarketSpades.as_view(), name="market-spades"),
-    path(r"pending/<int:pk>/", views.GuessView.as_view(), name="market-pending"),
+    path(
+        r"pending/<slug:market_slug>/", views.GuessView.as_view(), name="market-pending"
+    ),
     path(r"recompute/<slug:slug>/", views.recompute, name="market-recompute"),
     path(
         r"", RedirectView.as_view(pattern_name="market-list"), name="market-recompute"
