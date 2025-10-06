@@ -208,6 +208,8 @@ class UpdateGuess(VerifiedRequiredMixin, UpdateView[Guess, BaseModelForm[Guess]]
     raise_exception = True
 
     def get_object(self):
+        if not self.request.user.is_authenticated:
+            raise PermissionDenied("Need log in to access this view")
         return get_object_or_404(
             Guess,
             market=get_object_or_404(Market, slug=self.kwargs["market_slug"]),
@@ -253,6 +255,8 @@ class GuessView(LoginRequiredMixin, DetailView[Guess]):
     context_object_name = "guess"
 
     def get_object(self):
+        if not self.request.user.is_authenticated:
+            raise PermissionDenied("Need log in to access this view")
         return get_object_or_404(
             Guess,
             market=get_object_or_404(Market, slug=self.kwargs["market_slug"]),
