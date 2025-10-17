@@ -134,6 +134,7 @@ class UserProfileAdmin(admin.ModelAdmin):
         "show_completed_by_default",
         "show_locked_by_default",
         "dynamic_progress",
+        "no_hint_mode",
     )
     search_fields = (
         "user__first_name",

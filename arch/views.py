@@ -19,8 +19,8 @@ from arch.forms import ProblemSelectForm
 from arch.models import get_disk_statement_from_puid
 from core.utils import get_from_google_storage
 from evans_django_tools import ACTION_LOG_LEVEL
-from otisweb.decorators import verified_required
-from otisweb.mixins import VerifiedRequiredMixin
+from otisweb.decorators import verified_required, hints_allowed
+from otisweb.mixins import VerifiedRequiredMixin, HintsAllowedMixin
 
 from .forms import HintUpdateFormWithReason
 from .models import Hint, Problem, Vote
@@ -54,7 +54,7 @@ class ProblemObjectView:
         return get_object_or_404(queryset, puid=self.kwargs["puid"])
 
 
-class HintList(VerifiedRequiredMixin, ListView[Hint]):
+class HintList(HintsAllowedMixin, VerifiedRequiredMixin, ListView[Hint]):
     context_object_name = "hint_list"
     problem: Problem
 
@@ -84,18 +84,19 @@ class HintList(VerifiedRequiredMixin, ListView[Hint]):
         return context
 
 
-class HintDetail(HintObjectView, VerifiedRequiredMixin, DetailView[Hint]):
+class HintDetail(HintObjectView, HintsAllowedMixin, VerifiedRequiredMixin, DetailView[Hint]):
     context_object_name = "hint"
     model = Hint
 
 
-class HintDetailByPK(VerifiedRequiredMixin, DetailView[Hint]):
+class HintDetailByPK(HintsAllowedMixin, VerifiedRequiredMixin, DetailView[Hint]):
     context_object_name = "hint"
     model = Hint
 
 
 class HintUpdate(
     HintObjectView,
+    HintsAllowedMixin,
     VerifiedRequiredMixin,
     RevisionMixin,
     UpdateView[Hint, HintUpdateFormWithReason],
@@ -122,7 +123,7 @@ class HintUpdate(
 
 
 class HintUpdateByPK(
-    VerifiedRequiredMixin, RevisionMixin, UpdateView[Hint, HintUpdateFormWithReason]
+    HintsAllowedMixin, VerifiedRequiredMixin, RevisionMixin, UpdateView[Hint, HintUpdateFormWithReason]
 ):
     context_object_name = "hint"
     model = Hint
@@ -175,7 +176,7 @@ class ProblemUpdate(
 
 
 class HintCreate(
-    VerifiedRequiredMixin, RevisionMixin, CreateView[Hint, BaseModelForm[Hint]]
+    HintsAllowedMixin, VerifiedRequiredMixin, RevisionMixin, CreateView[Hint, BaseModelForm[Hint]]
 ):
     context_object_name = "hint"
     fields = (
@@ -198,7 +199,7 @@ class HintCreate(
         return initial
 
 
-class HintDelete(HintObjectView, VerifiedRequiredMixin, RevisionMixin, DeleteView):
+class HintDelete(HintObjectView, HintsAllowedMixin, VerifiedRequiredMixin, RevisionMixin, DeleteView):
     context_object_name = "hint"
     model = Hint
     object: ClassVar[Hint] = Hint()  # type: ignore
@@ -231,6 +232,7 @@ class ProblemCreate(
 
 
 @verified_required
+@hints_allowed
 def lookup(request: HttpRequest):
     if request.method != "POST":
         return HttpResponseRedirect(

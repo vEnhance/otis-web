@@ -7,7 +7,7 @@ from django.urls import reverse
 
 from arch.factories import ProblemFactory
 from arch.models import Hint, Problem, Vote, validate_puid
-from core.factories import GroupFactory, UserFactory
+from core.factories import GroupFactory, UserFactory, UserProfileFactory
 from evans_django_tools.testsuite import EvanTestCase
 
 
@@ -203,3 +203,67 @@ class TestProblem(EvanTestCase):
         self.assertRaises(Http404, validate_puid, "A" * 1000)
         validate_puid("15TWNQJ36")
         validate_puid("A" * 24)
+
+
+class TestNoHintMode(EvanTestCase):
+    def test_no_hint_mode_blocks_hint_access(self):
+        """Test that users with no_hint_mode enabled get 403 errors on hint views."""
+        verified_group = GroupFactory(name="Verified")
+        
+        # Create user with no_hint_mode enabled
+        user_with_no_hints = UserFactory.create(groups=(verified_group,))
+        UserProfileFactory.create(user=user_with_no_hints, no_hint_mode=True)
+        
+        # Create user with hints enabled (default)
+        user_with_hints = UserFactory.create(groups=(verified_group,))
+        UserProfileFactory.create(user=user_with_hints, no_hint_mode=False)
+        
+        # Create a problem for testing
+        problem = ProblemFactory.create()
+        
+        # Test hint list view
+        hint_list_url = reverse("hint-list", args=(problem.puid,))
+        
+        # User with no_hint_mode should get 403
+        self.login(user_with_no_hints)
+        response = self.client.get(hint_list_url)
+        self.assertEqual(response.status_code, 403)
+        
+        # User with hints enabled should get 200
+        self.login(user_with_hints)
+        response = self.client.get(hint_list_url)
+        self.assertEqual(response.status_code, 200)
+    
+    def test_no_hint_mode_blocks_hint_creation(self):
+        """Test that users with no_hint_mode cannot create hints."""
+        verified_group = GroupFactory(name="Verified")
+        
+        # Create user with no_hint_mode enabled
+        user_with_no_hints = UserFactory.create(groups=(verified_group,))
+        UserProfileFactory.create(user=user_with_no_hints, no_hint_mode=True)
+        
+        # Create a problem for testing
+        problem = ProblemFactory.create()
+        
+        # Test hint creation view
+        hint_create_url = reverse("hint-create", args=(problem.puid,))
+        
+        # User with no_hint_mode should get 403
+        self.login(user_with_no_hints)
+        response = self.client.get(hint_create_url)
+        self.assertEqual(response.status_code, 403)
+    
+    def test_user_can_toggle_no_hint_mode(self):
+        """Test that users can toggle the no_hint_mode setting themselves."""
+        verified_group = GroupFactory(name="Verified")
+        user = UserFactory.create(groups=(verified_group,))
+        UserProfileFactory.create(user=user, no_hint_mode=False)
+        
+        # Test that user can access preferences page
+        self.login(user)
+        response = self.client.get(reverse("profile"))
+        self.assertEqual(response.status_code, 200)
+        
+        # Test that the no_hint_mode field is present in the form
+        self.assertContains(response, "no_hint_mode")
+        self.assertContains(response, "No Hint Mode")

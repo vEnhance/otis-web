@@ -68,3 +68,17 @@ def admin_required(view_func: _VIEW) -> _VIEW:
         ),
     )
     return actual_decorator(view_func)
+
+
+def hints_allowed(view_func: _VIEW) -> _VIEW:
+    """
+    Decorator for views that checks that the user has hints enabled (no_hint_mode is False).
+    Returns 403 error if no_hint_mode is enabled.
+    """
+    actual_decorator = user_passes_test(
+        auth_test(
+            lambda u: not getattr(u.profile, 'no_hint_mode', False),
+            error_msg="Hints are disabled for this user",
+        ),
+    )
+    return actual_decorator(view_func)
