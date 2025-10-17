@@ -77,7 +77,7 @@ def hints_allowed(view_func: _VIEW) -> _VIEW:
     """
     actual_decorator = user_passes_test(
         auth_test(
-            lambda u: not getattr(u.profile, 'no_hint_mode', False),
+            lambda u: not (hasattr(u, 'profile') and getattr(u.profile, 'no_hint_mode', False)),
             error_msg="Hints are disabled for this user",
         ),
     )
