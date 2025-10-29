@@ -280,7 +280,7 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
         unit=inquiry.unit,
         action_type=inquiry.action_type,
         created_at__gte=timezone.now() - datetime.timedelta(seconds=90),
-        status="INQ_NEW",
+        status__in=("INQ_NEW", "INQ_ACC"),
     ).exists():
         messages.warning(
             request,

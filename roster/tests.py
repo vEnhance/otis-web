@@ -455,106 +455,10 @@ class InquiryTest(EvanTestCase):
         )
         self.assertNotHas(invalid_resp, "Petition automatically processed")
 
-        # Alice unlocks 6 units, should be autoprocessed.
-        for i in range(6):
-            resp = self.post(
-                "inquiry",
-                alice.pk,
-                data={
-                    "unit": units[i].pk,
-                    "action_type": "INQ_ACT_UNLOCK",
-                    "explanation": "hi",
-                },
-                follow=True,
-            )
-            self.assertHas(resp, "Petition automatically processed")
-            inq = UnitInquiry.objects.get(
-                student=alice, unit=units[i].pk, action_type="INQ_ACT_UNLOCK"
-            )
-            self.assertTrue(inq.was_auto_processed)
-            self.assertEqual(inq.status, "INQ_ACC")
-
-        self.assertGet20X("inquiry", alice.pk, follow=True)
-
-        # Now Alice has done 6 units, they shouldn't be able to get more
-        # (This differs from production behavior because production also gives you a default three units)
-        self.assertEqual(alice.curriculum.count(), 6)
-        self.assertEqual(alice.unlocked_units.count(), 6)
-        self.assertHas(
-            self.post(
-                "inquiry",
-                alice.pk,
-                data={
-                    "unit": units[19].pk,
-                    "action_type": "INQ_ACT_UNLOCK",
-                    "explanation": "hi",
-                },
-                follow=True,
-            ),
-            "Petition submitted, wait for it!",
-        )
-        inq = UnitInquiry.objects.get(
-            student=alice, unit=units[19].pk, action_type="INQ_ACT_UNLOCK"
-        )
-        self.assertFalse(inq.was_auto_processed)
-        self.assertEqual(inq.status, "INQ_NEW")
-
-        self.assertEqual(alice.curriculum.count(), 6)
-        self.assertEqual(alice.unlocked_units.count(), 6)
-
-        # We have our assistant lock a unit
-        self.login(firefly)
-        self.assertHas(
-            self.post(
-                "inquiry",
-                alice.pk,
-                data={
-                    "unit": units[3].pk,
-                    "action_type": "INQ_ACT_LOCK",
-                    "explanation": "hi",
-                },
-                follow=True,
-            ),
-            "Petition automatically processed",
-        )
-        self.assertEqual(alice.curriculum.count(), 6)
-        self.assertEqual(alice.unlocked_units.count(), 5)
-        inq = UnitInquiry.objects.get(
-            student=alice, unit=units[3].pk, action_type="INQ_ACT_LOCK"
-        )
-        self.assertTrue(inq.was_auto_processed)
-        self.assertEqual(inq.status, "INQ_ACC")
-        self.assertFalse(alice.unlocked_units.contains(units[3]))
-
-        # Now dropping should be autoprocessed by Alice
-        self.login(alice)
-        self.assertHas(
-            self.post(
-                "inquiry",
-                alice.pk,
-                data={
-                    "unit": units[3].pk,
-                    "action_type": "INQ_ACT_DROP",
-                    "explanation": "hi",
-                },
-                follow=True,
-            ),
-            "Petition automatically processed",
-        )
-        inq = UnitInquiry.objects.get(
-            student=alice, unit=units[3].pk, action_type="INQ_ACT_DROP"
-        )
-        self.assertTrue(inq.was_auto_processed)
-        self.assertEqual(inq.status, "INQ_ACC")
-
-        self.assertEqual(alice.curriculum.count(), 5)
-        self.assertEqual(alice.unlocked_units.count(), 5)
-
-        # We now give Alice some more units :o
-        self.login(firefly)
-        for i in range(6, 10):
-            self.assertHas(
-                self.post(
+        with freeze_time("2025-10-29", tz_offset=0):
+            # Alice unlocks 6 units, should be autoprocessed.
+            for i in range(6):
+                resp = self.post(
                     "inquiry",
                     alice.pk,
                     data={
@@ -563,93 +467,74 @@ class InquiryTest(EvanTestCase):
                         "explanation": "hi",
                     },
                     follow=True,
-                ),
-                "Petition automatically processed",
-            )
-            inq = UnitInquiry.objects.get(
-                student=alice, unit=units[i].pk, action_type="INQ_ACT_UNLOCK"
-            )
-            self.assertTrue(inq.was_auto_processed)
-            self.assertEqual(inq.status, "INQ_ACC")
-        self.assertEqual(alice.curriculum.count(), 9)
-        self.assertEqual(alice.unlocked_units.count(), 9)
+                )
+                self.assertHas(resp, "Petition automatically processed")
+                inq = UnitInquiry.objects.get(
+                    student=alice, unit=units[i].pk, action_type="INQ_ACT_UNLOCK"
+                )
+                self.assertTrue(inq.was_auto_processed)
+                self.assertEqual(inq.status, "INQ_ACC")
 
-        # Check that you can't unlock more units when you are already at nine
-        self.login(alice)
-        for i in range(11, 14):
+            self.assertGet20X("inquiry", alice.pk, follow=True)
+
+            # Now Alice has done 6 units, they shouldn't be able to get more
+            # (This differs from production behavior because production also gives you a default three units)
+            self.assertEqual(alice.curriculum.count(), 6)
+            self.assertEqual(alice.unlocked_units.count(), 6)
             self.assertHas(
                 self.post(
                     "inquiry",
                     alice.pk,
                     data={
-                        "unit": units[i].pk,
+                        "unit": units[19].pk,
                         "action_type": "INQ_ACT_UNLOCK",
                         "explanation": "hi",
                     },
                     follow=True,
                 ),
-                "more than 9 unfinished",
+                "Petition submitted, wait for it!",
             )
             inq = UnitInquiry.objects.get(
-                student=alice, unit=units[i].pk, action_type="INQ_ACT_UNLOCK"
+                student=alice, unit=units[19].pk, action_type="INQ_ACT_UNLOCK"
             )
-            self.assertTrue(inq.was_auto_processed)
-            self.assertEqual(inq.status, "INQ_REJ")
-        self.assertEqual(alice.curriculum.count(), 9)
-        self.assertEqual(alice.unlocked_units.count(), 9)
+            self.assertFalse(inq.was_auto_processed)
+            self.assertEqual(inq.status, "INQ_NEW")
 
-        # appending should be autoprocessed
-        for i in range(15, 18):
+            self.assertEqual(alice.curriculum.count(), 6)
+            self.assertEqual(alice.unlocked_units.count(), 6)
+
+            # We have our assistant lock a unit
+            self.login(firefly)
             self.assertHas(
                 self.post(
                     "inquiry",
                     alice.pk,
                     data={
-                        "unit": units[i].pk,
-                        "action_type": "INQ_ACT_APPEND",
+                        "unit": units[3].pk,
+                        "action_type": "INQ_ACT_LOCK",
                         "explanation": "hi",
                     },
                     follow=True,
                 ),
                 "Petition automatically processed",
             )
+            self.assertEqual(alice.curriculum.count(), 6)
+            self.assertEqual(alice.unlocked_units.count(), 5)
             inq = UnitInquiry.objects.get(
-                student=alice, unit=units[i].pk, action_type="INQ_ACT_APPEND"
+                student=alice, unit=units[3].pk, action_type="INQ_ACT_LOCK"
             )
             self.assertTrue(inq.was_auto_processed)
             self.assertEqual(inq.status, "INQ_ACC")
-        self.assertEqual(alice.curriculum.count(), 12)
-        self.assertEqual(alice.unlocked_units.count(), 9)
+            self.assertFalse(alice.unlocked_units.contains(units[3]))
 
-        # check that petitions are now locked because of abnormally large count
-        self.assertHas(
-            self.post(
-                "inquiry",
-                alice.pk,
-                data={
-                    "unit": units[19].pk,
-                    "action_type": "INQ_ACT_DROP",
-                    "explanation": "hi",
-                },
-                follow=True,
-            ),
-            "abnormally large",
-        )
-        inq = UnitInquiry.objects.get(
-            student=alice, unit=units[19].pk, action_type="INQ_ACT_DROP"
-        )
-        self.assertFalse(inq.was_auto_processed)
-        self.assertEqual(inq.status, "INQ_HOLD")
-
-        # drop a bunch of units for alice
-        self.login(firefly)
-        for i in range(4, 14):
+            # Now dropping should be autoprocessed by Alice
+            self.login(alice)
             self.assertHas(
                 self.post(
                     "inquiry",
                     alice.pk,
                     data={
-                        "unit": units[i].pk,
+                        "unit": units[3].pk,
                         "action_type": "INQ_ACT_DROP",
                         "explanation": "hi",
                     },
@@ -658,105 +543,222 @@ class InquiryTest(EvanTestCase):
                 "Petition automatically processed",
             )
             inq = UnitInquiry.objects.get(
-                student=alice, unit=units[i].pk, action_type="INQ_ACT_DROP"
+                student=alice, unit=units[3].pk, action_type="INQ_ACT_DROP"
             )
             self.assertTrue(inq.was_auto_processed)
             self.assertEqual(inq.status, "INQ_ACC")
-        self.assertEqual(alice.curriculum.count(), 6)
-        self.assertEqual(alice.unlocked_units.count(), 3)
 
-        self.assertHas(
-            self.post(
-                "inquiry",
-                alice.pk,
-                data={
-                    "unit": units[5].pk,
-                    "action_type": "INQ_ACT_UNLOCK",
-                    "explanation": "add back in",
-                },
-                follow=True,
-            ),
-            "Petition automatically processed",
-        )
-        self.assertEqual(alice.curriculum.count(), 7)
-        self.assertEqual(alice.unlocked_units.count(), 4)
-        inq = UnitInquiry.objects.get(
-            student=alice,
-            unit=units[5].pk,
-            action_type="INQ_ACT_UNLOCK",
-            explanation="add back in",
-        )
-        self.assertTrue(inq.was_auto_processed)
-        self.assertEqual(inq.status, "INQ_ACC")
+            self.assertEqual(alice.curriculum.count(), 5)
+            self.assertEqual(alice.unlocked_units.count(), 5)
 
-        # Alice hit the hold limit earlier, this just circumvents it.
-        self.login(alice)
-        PSetFactory.create_batch(30, student=alice)
-        alice.save()
+        with freeze_time("2025-10-30", tz_offset=0):
+            # We now give Alice some more units :o
+            self.login(firefly)
+            for i in range(6, 10):
+                self.assertHas(
+                    self.post(
+                        "inquiry",
+                        alice.pk,
+                        data={
+                            "unit": units[i].pk,
+                            "action_type": "INQ_ACT_UNLOCK",
+                            "explanation": "hi",
+                        },
+                        follow=True,
+                    ),
+                    "Petition automatically processed",
+                )
+                inq = UnitInquiry.objects.get(
+                    student=alice, unit=units[i].pk, action_type="INQ_ACT_UNLOCK"
+                )
+                self.assertTrue(inq.was_auto_processed)
+                self.assertEqual(inq.status, "INQ_ACC")
+            self.assertEqual(alice.curriculum.count(), 9)
+            self.assertEqual(alice.unlocked_units.count(), 9)
 
-        # secret unit should be autoprocessed!
-        secret_group = UnitGroupFactory.create(
-            name="Spooky Unit", subject="K", hidden=True
-        )
-        secret_unit = UnitFactory.create(code="BKV", group=secret_group)
-        alice.curriculum.add(secret_unit)
+            # Check that you can't unlock more units when you are already at nine
+            self.login(alice)
+            for i in range(11, 14):
+                self.assertHas(
+                    self.post(
+                        "inquiry",
+                        alice.pk,
+                        data={
+                            "unit": units[i].pk,
+                            "action_type": "INQ_ACT_UNLOCK",
+                            "explanation": "hi",
+                        },
+                        follow=True,
+                    ),
+                    "more than 9 unfinished",
+                )
+                inq = UnitInquiry.objects.get(
+                    student=alice, unit=units[i].pk, action_type="INQ_ACT_UNLOCK"
+                )
+                self.assertTrue(inq.was_auto_processed)
+                self.assertEqual(inq.status, "INQ_REJ")
+            self.assertEqual(alice.curriculum.count(), 9)
+            self.assertEqual(alice.unlocked_units.count(), 9)
 
-        self.assertHas(
-            self.post(
-                "inquiry",
-                alice.pk,
-                data={
-                    "unit": secret_unit.pk,
-                    "action_type": "INQ_ACT_UNLOCK",
-                    "explanation": "its almost halloween and my family wants to host it at our house.",
-                },
-                follow=True,
-            ),
-            "Petition automatically processed",
-        )
-        self.assertEqual(alice.curriculum.count(), 8)
-        self.assertEqual(alice.unlocked_units.count(), 5)
-        inq = UnitInquiry.objects.get(
-            student=alice, unit=secret_unit.pk, action_type="INQ_ACT_UNLOCK"
-        )
-        self.assertTrue(inq.was_auto_processed)
-        self.assertEqual(inq.status, "INQ_ACC")
+            # appending should be autoprocessed
+            for i in range(15, 18):
+                self.assertHas(
+                    self.post(
+                        "inquiry",
+                        alice.pk,
+                        data={
+                            "unit": units[i].pk,
+                            "action_type": "INQ_ACT_APPEND",
+                            "explanation": "hi",
+                        },
+                        follow=True,
+                    ),
+                    "Petition automatically processed",
+                )
+                inq = UnitInquiry.objects.get(
+                    student=alice, unit=units[i].pk, action_type="INQ_ACT_APPEND"
+                )
+                self.assertTrue(inq.was_auto_processed)
+                self.assertEqual(inq.status, "INQ_ACC")
+            self.assertEqual(alice.curriculum.count(), 12)
+            self.assertEqual(alice.unlocked_units.count(), 9)
 
-        # check that autoprocessing old units works
-        inactive_semester = SemesterFactory.create(active=False)
-        inactive_alice = StudentFactory.create(
-            semester=inactive_semester, user=alice.user
-        )
-        old_group = UnitGroupFactory.create(name="Last Year Unit", subject="A")
-        old_unit = UnitFactory.create(code="BAW", group=old_group)
-        inactive_alice.curriculum.add(old_unit)
-        inactive_alice.unlocked_units.add(old_unit)
-        self.assertEqual(inactive_alice.curriculum.count(), 1)
-        self.assertEqual(inactive_alice.unlocked_units.count(), 1)
-        inactive_alice.save()
-        self.assertHas(
-            self.post(
-                "inquiry",
-                alice.pk,
-                data={
-                    "unit": old_unit.pk,
-                    "action_type": "INQ_ACT_UNLOCK",
-                    "explanation": "did last year.",
-                },
-                follow=True,
-            ),
-            "Petition automatically processed",
-        )
-        inq = UnitInquiry.objects.get(
-            student=alice, unit=old_unit.pk, action_type="INQ_ACT_UNLOCK"
-        )
-        self.assertTrue(inq.was_auto_processed)
-        self.assertEqual(inq.status, "INQ_ACC")
-        self.assertEqual(alice.curriculum.count(), 9)
-        self.assertEqual(alice.unlocked_units.count(), 6)
+            # check that petitions are now locked because of abnormally large count
+            self.assertHas(
+                self.post(
+                    "inquiry",
+                    alice.pk,
+                    data={
+                        "unit": units[19].pk,
+                        "action_type": "INQ_ACT_DROP",
+                        "explanation": "hi",
+                    },
+                    follow=True,
+                ),
+                "abnormally large",
+            )
+            inq = UnitInquiry.objects.get(
+                student=alice, unit=units[19].pk, action_type="INQ_ACT_DROP"
+            )
+            self.assertFalse(inq.was_auto_processed)
+            self.assertEqual(inq.status, "INQ_HOLD")
+
+            # drop a bunch of units for alice
+            self.login(firefly)
+            for i in range(4, 14):
+                self.assertHas(
+                    self.post(
+                        "inquiry",
+                        alice.pk,
+                        data={
+                            "unit": units[i].pk,
+                            "action_type": "INQ_ACT_DROP",
+                            "explanation": "hi",
+                        },
+                        follow=True,
+                    ),
+                    "Petition automatically processed",
+                )
+                inq = UnitInquiry.objects.get(
+                    student=alice, unit=units[i].pk, action_type="INQ_ACT_DROP"
+                )
+                self.assertTrue(inq.was_auto_processed)
+                self.assertEqual(inq.status, "INQ_ACC")
+            self.assertEqual(alice.curriculum.count(), 6)
+            self.assertEqual(alice.unlocked_units.count(), 3)
+
+        with freeze_time("2025-10-31", tz_offset=0):
+            self.assertHas(
+                self.post(
+                    "inquiry",
+                    alice.pk,
+                    data={
+                        "unit": units[5].pk,
+                        "action_type": "INQ_ACT_UNLOCK",
+                        "explanation": "add back in",
+                    },
+                    follow=True,
+                ),
+                "Petition automatically processed",
+            )
+            self.assertEqual(alice.curriculum.count(), 7)
+            self.assertEqual(alice.unlocked_units.count(), 4)
+            inq = UnitInquiry.objects.get(
+                student=alice,
+                unit=units[5].pk,
+                action_type="INQ_ACT_UNLOCK",
+                explanation="add back in",
+            )
+            self.assertTrue(inq.was_auto_processed)
+            self.assertEqual(inq.status, "INQ_ACC")
+
+            # Alice hit the hold limit earlier, this just circumvents it.
+            self.login(alice)
+            PSetFactory.create_batch(30, student=alice)
+            alice.save()
+
+            # secret unit should be autoprocessed!
+            secret_group = UnitGroupFactory.create(
+                name="Spooky Unit", subject="K", hidden=True
+            )
+            secret_unit = UnitFactory.create(code="BKV", group=secret_group)
+            alice.curriculum.add(secret_unit)
+
+            self.assertHas(
+                self.post(
+                    "inquiry",
+                    alice.pk,
+                    data={
+                        "unit": secret_unit.pk,
+                        "action_type": "INQ_ACT_UNLOCK",
+                        "explanation": "its almost halloween and my family wants to host it at our house.",
+                    },
+                    follow=True,
+                ),
+                "Petition automatically processed",
+            )
+            self.assertEqual(alice.curriculum.count(), 8)
+            self.assertEqual(alice.unlocked_units.count(), 5)
+            inq = UnitInquiry.objects.get(
+                student=alice, unit=secret_unit.pk, action_type="INQ_ACT_UNLOCK"
+            )
+            self.assertTrue(inq.was_auto_processed)
+            self.assertEqual(inq.status, "INQ_ACC")
+
+            # check that autoprocessing old units works
+            inactive_semester = SemesterFactory.create(active=False)
+            inactive_alice = StudentFactory.create(
+                semester=inactive_semester, user=alice.user
+            )
+            old_group = UnitGroupFactory.create(name="Last Year Unit", subject="A")
+            old_unit = UnitFactory.create(code="BAW", group=old_group)
+            inactive_alice.curriculum.add(old_unit)
+            inactive_alice.unlocked_units.add(old_unit)
+            self.assertEqual(inactive_alice.curriculum.count(), 1)
+            self.assertEqual(inactive_alice.unlocked_units.count(), 1)
+            inactive_alice.save()
+            self.assertHas(
+                self.post(
+                    "inquiry",
+                    alice.pk,
+                    data={
+                        "unit": old_unit.pk,
+                        "action_type": "INQ_ACT_UNLOCK",
+                        "explanation": "did last year.",
+                    },
+                    follow=True,
+                ),
+                "Petition automatically processed",
+            )
+            inq = UnitInquiry.objects.get(
+                student=alice, unit=old_unit.pk, action_type="INQ_ACT_UNLOCK"
+            )
+            self.assertTrue(inq.was_auto_processed)
+            self.assertEqual(inq.status, "INQ_ACC")
+            self.assertEqual(alice.curriculum.count(), 9)
+            self.assertEqual(alice.unlocked_units.count(), 6)
 
         # test a bunch of fail conditions
-
         bob: Student = StudentFactory.create(
             semester=SemesterFactory.create(active=False)
         )
@@ -782,6 +784,38 @@ class InquiryTest(EvanTestCase):
 
         with freeze_time("2021-07-30", tz_offset=0):
             self.assertGetDenied("inquiry", eve.pk)
+
+    def test_inquiry_cant_rapid_fire(self) -> None:
+        with freeze_time("2025-10-31", tz_offset=0):
+            alice = StudentFactory.create()
+            unit = UnitFactory.create()
+            self.login(alice)
+            self.assertHas(
+                self.post(
+                    "inquiry",
+                    alice.pk,
+                    data={
+                        "unit": unit.pk,
+                        "action_type": "INQ_ACT_UNLOCK",
+                        "explanation": "unlock a unit",
+                    },
+                    follow=True,
+                ),
+                "Petition automatically processed",
+            )
+            self.assertHas(
+                self.post(
+                    "inquiry",
+                    alice.pk,
+                    data={
+                        "unit": unit.pk,
+                        "action_type": "INQ_ACT_UNLOCK",
+                        "explanation": "accidentally pressed again because trigger happy",
+                    },
+                    follow=True,
+                ),
+                "The same petition already was submitted within the last 90 seconds.",
+            )
 
     def test_cancel_inquiry_sets_status_to_canceled(self) -> None:
         alice = StudentFactory.create()
