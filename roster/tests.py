@@ -18,6 +18,7 @@ from core.models import Semester, Unit, UnitGroup, UserProfile
 from dashboard.factories import PSetFactory
 from evans_django_tools.testsuite import EvanTestCase
 from roster.factories import (
+    ApplyUUIDFactory,
     AssistantFactory,
     InvoiceFactory,
     RegistrationContainerFactory,
@@ -1145,7 +1146,7 @@ class RegTest(EvanTestCase):
         messages = [m.message for m in resp.context["messages"]]
         self.assertIn("Wrong passcode", messages)
 
-        # for some reason the fike variable from earlier can't be reused
+        # for some reason the fake variable from earlier can't be reused
         agreement2 = StringIO("agree!")
         agreement2.name = "agreement.pdf"
 
@@ -1247,6 +1248,179 @@ class RegTest(EvanTestCase):
             self.assertEqual(build_students(StudentRegistration.objects.all()), 1)
             carol: Student = Student.objects.get(user__username="carol")
             self.assertEqual(carol.invoice.total_owed, 240)
+
+    def test_reg_with_apply_uuid(self) -> None:
+        au = ApplyUUIDFactory.create(percent_aid=70)
+        semester: Semester = SemesterFactory.create()
+
+        # registration should redirect if there's no container yet
+        alice: User = UserFactory.create(first_name="a", last_name="a", email="a@a.net")
+        self.login(alice)
+        # registration should redirect if there's no container yet
+        container: RegistrationContainer = RegistrationContainerFactory.create(
+            semester=semester, accepting_responses=True
+        )
+        # make pdf
+        agreement = StringIO("i do!")
+        agreement.name = "agreement.pdf"
+
+        # incorrect password
+        resp = self.assertPost20X(
+            "register",
+            data={
+                "given_name": "Alice",
+                "surname": "Aardvark",
+                "email_address": "myemail@example.com",
+                "passcode": "MEOW",
+                "gender": "O",
+                "parent_email": "myemail@example.com",
+                "graduation_year": 0,
+                "school_name": "Generic School District",
+                "country": "USA",
+                "aops_username": "",
+                "agreement_form": agreement,
+                "email_on_announcement": False,
+                "email_on_pset_complete": True,
+                "email_on_suggestion_processed": False,
+                "email_on_inquiry_complete": False,
+                "email_on_registration_processed": False,
+            },
+            follow=True,
+        )
+        messages = [m.message for m in resp.context["messages"]]
+        self.assertIn("Wrong passcode", messages)
+
+        # for some reason the fake variable from earlier can't be reused
+        agreement2 = StringIO("i do too!")
+        agreement2.name = "agreement.pdf"
+
+        # invalid post fails
+        self.assertPost20X("register")
+
+        resp = self.assertPost20X(
+            "register",
+            data={
+                "given_name": "Alice",
+                "surname": "Aardvark",
+                "email_address": "myemail@example.com",
+                "passcode": au.uuid,
+                "gender": "O",
+                "parent_email": "myemail@example.com",
+                "graduation_year": 0,
+                "school_name": "Generic School District",
+                "country": "USA",
+                "aops_username": "",
+                "agreement_form": agreement2,
+                "email_on_announcement": False,
+                "email_on_pset_complete": True,
+                "email_on_suggestion_processed": False,
+                "email_on_inquiry_complete": False,
+                "email_on_registration_processed": False,
+            },
+            follow=True,
+        )
+
+        messages = [m.message for m in resp.context["messages"]]
+        self.assertIn("Submitted! Sit tight.", messages)
+        alice_reg = StudentRegistration.objects.get(user=alice)
+        alice.refresh_from_db()
+        self.assertEqual(alice.first_name, "Alice")
+        self.assertEqual(alice.last_name, "Aardvark")
+        self.assertEqual(alice.email, "myemail@example.com")
+        au.refresh_from_db()
+        self.assertEqual(au.reg, alice_reg)
+
+        # Bob shouldn't be able to steal Alice's passcode
+        bob: User = UserFactory.create(
+            first_name="Bob", last_name="Beta", email="b@b.net"
+        )
+        self.login(bob)
+
+        agreement3 = StringIO("i do three!")
+        agreement3.name = "agreement.pdf"
+        self.assertPost40X(
+            "register",
+            data={
+                "given_name": "Bob",
+                "surname": "Beta",
+                "email_address": "bob@example.com",
+                "passcode": au.uuid,
+                "gender": "O",
+                "parent_email": "bob@example.com",
+                "graduation_year": 0,
+                "school_name": "Generic School District",
+                "country": "USA",
+                "aops_username": "",
+                "agreement_form": agreement3,
+                "email_on_announcement": False,
+                "email_on_pset_complete": True,
+                "email_on_suggestion_processed": False,
+                "email_on_inquiry_complete": False,
+                "email_on_registration_processed": False,
+            },
+            follow=True,
+        )
+
+        agreement4 = StringIO("i do four!")
+        agreement4.name = "agreement.pdf"
+        # Let's generate an ApplyUUID for Bob too
+        au2 = ApplyUUIDFactory.create(percent_aid=0)
+        self.assertPost20X(
+            "register",
+            data={
+                "given_name": "Bob",
+                "surname": "Beta",
+                "email_address": "bob@example.com",
+                "passcode": au2.uuid,
+                "gender": "O",
+                "parent_email": "bob@example.com",
+                "graduation_year": 0,
+                "school_name": "Generic School District",
+                "country": "USA",
+                "aops_username": "",
+                "agreement_form": agreement4,
+                "email_on_announcement": False,
+                "email_on_pset_complete": True,
+                "email_on_suggestion_processed": False,
+                "email_on_inquiry_complete": False,
+                "email_on_registration_processed": False,
+            },
+            follow=True,
+        )
+
+        # Meanwhile, Carol just registers by passcode
+        agreement5 = StringIO("i do five!")
+        agreement5.name = "agreement.pdf"
+        carol: User = UserFactory.create(
+            first_name="Carol", last_name="Cutie", email="c@c.net"
+        )
+        self.login(carol)
+        self.assertPost20X(
+            "register",
+            data={
+                "given_name": "Carol",
+                "surname": "Cutie",
+                "email_address": "carol@example.com",
+                "passcode": container.passcode,
+                "gender": "O",
+                "parent_email": "carol@example.com",
+                "graduation_year": 0,
+                "school_name": "Generic School District",
+                "country": "USA",
+                "aops_username": "",
+                "agreement_form": agreement5,
+                "email_on_announcement": False,
+                "email_on_pset_complete": True,
+                "email_on_suggestion_processed": False,
+                "email_on_inquiry_complete": False,
+                "email_on_registration_processed": False,
+            },
+            follow=True,
+        )
+
+        build_students(StudentRegistration.objects.all())
+        self.assertEqual(Invoice.objects.get(student__user=alice).total_owed, 144)
+        self.assertEqual(Invoice.objects.get(student__user=bob).total_owed, 480)
 
 
 class AdTest(EvanTestCase):

@@ -6,6 +6,7 @@ from factory.fuzzy import FuzzyChoice, FuzzyInteger
 
 from core.factories import SemesterFactory, UnitFactory, UserFactory
 from roster.models import (
+    ApplyUUID,
     Assistant,
     Invoice,
     RegistrationContainer,
@@ -15,6 +16,13 @@ from roster.models import (
 )
 
 User = get_user_model()
+
+
+class ApplyUUIDFactory(DjangoModelFactory):
+    class Meta:
+        model = ApplyUUID
+
+    uuid = Faker("uuid4")
 
 
 class AssistantFactory(DjangoModelFactory):
