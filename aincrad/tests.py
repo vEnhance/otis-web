@@ -142,7 +142,9 @@ class TestAincradWithSetup(EvanTestCase):
         new_user = UserFactory.create(
             username="frisk", first_name="Frank", last_name="Frisk"
         )
-        StudentRegistrationFactory.create(user=new_user, processed=False)
+        StudentRegistrationFactory.create(
+            user=new_user, container=regcontainer_active, processed=False
+        )
 
     def test_init(self):
         resp = self.assertPost20X(
