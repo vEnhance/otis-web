@@ -666,24 +666,32 @@ class StudentRegistration(models.Model):
 
 def build_students(queryset: QuerySet[StudentRegistration]) -> int:
     students_to_create = []
-    queryset = queryset.filter(container__semester__active=True)
+    semester = Semester.objects.get(active=True)
+    container = RegistrationContainer.objects.get(semester=semester)
+    queryset = queryset.filter(container=container)
     queryset = queryset.exclude(processed=True)
-    queryset = queryset.select_related("user", "container", "container__semester")
+    queryset = queryset.select_related("user", "applyuuid")
+    finaid_awards: dict[int, int] = {}  # reg pk -> amount (>= 0)
+    semester_date = semester.one_semester_date
+    num_preps = 1 if semester_date is not None and now() > semester_date else 2
 
     count = 0
-    n = 0
     for registration in queryset:
         students_to_create.append(
             Student(
                 user=registration.user,
-                semester=registration.container.semester,
+                semester=semester,
                 reg=registration,
             )
         )
-
-        semester_date = registration.container.semester.one_semester_date
-
-        n = 1 if semester_date is not None and now() > semester_date else 2
+        try:
+            au: ApplyUUID = registration.applyuuid  # type: ignore
+        except ApplyUUID.DoesNotExist:
+            pass
+        else:
+            finaid_awards[registration.pk] = (
+                num_preps * semester.prep_rate * au.percent_aid / 100
+            )
         count += 1
     Student.objects.bulk_create(students_to_create)
 
@@ -692,13 +700,37 @@ def build_students(queryset: QuerySet[StudentRegistration]) -> int:
 
     queryset.update(processed=True)
 
-    if n > 0:
+    if count > 0:
         invoices_to_create = []
         for student in Student.objects.filter(
             invoice__isnull=True, semester__active=True
-        ):
-            invoice = Invoice(student=student, preps_taught=n)
-
+        ).select_related("reg"):
+            invoice = Invoice(
+                student=student,
+                preps_taught=num_preps,
+                adjustment=-finaid_awards.get(student.reg.pk, 0),
+            )
             invoices_to_create.append(invoice)
         Invoice.objects.bulk_create(invoices_to_create)
     return count
+
+
+class ApplyUUID(models.Model):
+    uuid = models.UUIDField(
+        help_text="The UUID for the accepted apply.evanchen.cc application.",
+        unique=True,
+    )
+    reg = models.OneToOneField(
+        StudentRegistration,
+        related_name="applyuuid",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        help_text="The student registration that cashed in this UUID.",
+    )
+    percent_aid = models.PositiveSmallIntegerField(
+        default=0, help_text="Percentage financial aid requested."
+    )
+
+    def __str__(self) -> str:
+        return str(self.uuid)

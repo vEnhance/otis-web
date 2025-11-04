@@ -14,6 +14,7 @@ from core.models import Semester
 from roster.models import build_students
 
 from .models import (
+    ApplyUUID,
     Assistant,
     Invoice,
     RegistrationContainer,
@@ -29,6 +30,31 @@ class RosterResource(resources.ModelResource):
         attribute="user",
         widget=widgets.ForeignKeyWidget(User, "username"),  # type: ignore
     )
+
+
+class ApplyUUIDIEResource:
+    class Meta:
+        skip_unchanged = True
+        model = ApplyUUID
+        fields = (
+            "uuid",
+            "percent_aid",
+        )
+
+
+@admin.register(ApplyUUID)
+class ApplyUUIDAdmin(ImportExportModelAdmin):
+    list_display = (
+        "pk",
+        "uuid",
+        "percent_aid",
+        "reg",
+    )
+    list_display_links = (
+        "pk",
+        "uuid",
+    )
+    resource_class = ApplyUUIDIEResource
 
 
 # ASSISTANT

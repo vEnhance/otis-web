@@ -30,6 +30,7 @@ from django.db.models.fields import FloatField
 from django.db.models.functions.comparison import Cast
 from django.db.models.manager import Manager
 from django.db.models.query import QuerySet
+from django.forms import ValidationError
 from django.forms.models import BaseModelForm
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.http.response import Http404
@@ -47,7 +48,7 @@ from otisweb.decorators import admin_required, staff_required
 from otisweb.mixins import StaffRequiredMixin, VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest
 from roster.forms import LinkAssistantForm
-from roster.models import Assistant
+from roster.models import ApplyUUID, Assistant
 from roster.utils import (
     can_edit,
     get_current_students,
@@ -449,13 +450,23 @@ def register(request: AuthHttpRequest) -> HttpResponse:
         form = DecisionForm(request.POST, request.FILES)
         if form.is_valid():
             passcode = form.cleaned_data["passcode"]
-            if passcode.lower() != container.passcode.lower():
+            try:
+                au = ApplyUUID.objects.get(uuid=passcode)
+                if au.reg is not None:
+                    raise PermissionDenied("This UUID was already used.")
+            except (ApplyUUID.DoesNotExist, ValidationError):
+                au = None
+
+            if au is None and passcode.lower() != container.passcode.lower():
                 messages.error(request, message="Wrong passcode")
             else:
                 registration = form.save(commit=False)
                 registration.container = container
                 registration.user = request.user
                 registration.save()
+                if au is not None:
+                    au.reg = registration
+                    au.save()
                 request.user.first_name = form.cleaned_data["given_name"].strip()
                 request.user.last_name = form.cleaned_data["surname"].strip()
                 request.user.email = form.cleaned_data["email_address"]
