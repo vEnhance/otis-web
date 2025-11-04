@@ -20,7 +20,7 @@ from roster.factories import (
     StudentRegistrationFactory,
     UnitInquiryFactory,
 )
-from roster.models import Invoice, Student, UnitInquiry
+from roster.models import ApplyUUID, Invoice, Student, UnitInquiry
 
 EXAMPLE_PASSWORD = "take just the first 24"
 TARGET_HASH = sha256(EXAMPLE_PASSWORD.encode("ascii")).hexdigest()
@@ -794,3 +794,20 @@ class TestAincrad(EvanTestCase):
         self.assertEqual(puzzle_json["hunt__slug"], "teammate")
         self.assertEqual(puzzle_json["slug"], "tetrogram")
         self.assertEqual(puzzle_json["is_metapuzzle"], True)
+
+    def test_apply_uuid_handler(self) -> None:
+        self.assertPost20X(
+            "api",
+            json={
+                "action": "apply_uuid",
+                "token": EXAMPLE_PASSWORD,
+                "uuid": "f81d4fae-7dec-11d0-a765-00a0c91e6bf6",  # no that's not a diamond
+                "percent_aid": 50,
+            },
+        )
+        self.assertEqual(
+            ApplyUUID.objects.filter(
+                uuid="f81d4fae-7dec-11d0-a765-00a0c91e6bf6", percent_aid=50
+            ).count(),
+            1,
+        )
