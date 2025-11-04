@@ -42,6 +42,23 @@ class ApplyUUIDIEResource:
         )
 
 
+class NeedsFinaidListFilter(admin.SimpleListFilter):
+    title = "Finaid status"
+    parameter_name = "needs_finaid"
+
+    def lookups(self, request, model_admin: ModelAdmin[Any]):
+        return [
+            ("0", "No finaid requested"),
+            ("1", "Finaid awarded"),
+        ]
+
+    def queryset(self, request, queryset: QuerySet[ApplyUUID]):
+        if self.value() == "0":
+            return queryset.filter(percent_aid=0)
+        elif self.value() == "1":
+            return queryset.exclude(percent_aid=0)
+
+
 @admin.register(ApplyUUID)
 class ApplyUUIDAdmin(ImportExportModelAdmin):
     list_display = (
@@ -54,6 +71,7 @@ class ApplyUUIDAdmin(ImportExportModelAdmin):
         "pk",
         "uuid",
     )
+    list_filter = (("reg", admin.EmptyFieldListFilter), NeedsFinaidListFilter)
     resource_class = ApplyUUIDIEResource
 
 
