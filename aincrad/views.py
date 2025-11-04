@@ -27,6 +27,7 @@ from hanabi.models import HanabiContest, HanabiParticipation, HanabiPlayer, Hana
 from opal.models import OpalPuzzle
 from payments.models import Job
 from roster.models import (
+    ApplyUUID,
     Invoice,
     Student,
     StudentRegistration,
@@ -92,6 +93,10 @@ class JSONData(TypedDict):
     slug: str
     subject: str
     content: str
+
+    # ApplyUUID
+    uuid: str
+    percent_aid: int
 
 
 PSET_VENUEQ_INIT_QUERYSET = PSet.objects.filter(
@@ -709,6 +714,12 @@ def announcement_handler(action: str, data: JSONData) -> JsonResponse:
     return JsonResponse({"is_new": is_new})
 
 
+def apply_handler(action: str, data: JSONData) -> JsonResponse:
+    del action
+    au = ApplyUUID.objects.create(uuid=data["uuid"], percent_aid=data["percent_aid"])
+    return JsonResponse({"pk": au.pk})
+
+
 @csrf_exempt
 def api(request: HttpRequest) -> JsonResponse:
     if not request.method == "POST":
@@ -754,6 +765,8 @@ def api(request: HttpRequest) -> JsonResponse:
         return announcement_handler(action, data)
     elif action == "opal_list":
         return opal_handler(action, data)
+    elif action == "apply_uuid":
+        return apply_handler(action, data)
     else:
         return JsonResponse({"error": "No such command"}, status=400)
 
