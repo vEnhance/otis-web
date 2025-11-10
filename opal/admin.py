@@ -53,6 +53,7 @@ class OpalAttemptAdmin(admin.ModelAdmin):
         "user",
         "guess",
         "is_correct",
+        "is_close",
         "excused",
     )
     list_display_links = (
