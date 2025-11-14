@@ -1,7 +1,7 @@
 db.sqlite3
 **.pyc
-static/*
-media/*
+/static
+/media
 otisweb/static/answersheets/*.aux
 otisweb/static/answersheets/*.fls
 otisweb/static/answersheets/*.fdb_latexmk
