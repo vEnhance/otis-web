@@ -8,4 +8,49 @@ on:
 
 jobs:
   audit:
-    uses: vEnhance/evans_django_tools/.github/workflows/django-audit.yml@main
+    name: ✨ Full CI Audit Workflow
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🧾 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: 📜 Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: latest
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: 💾 Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            venv-${{ runner.os }}-
+
+      - name: 📦 Install dependencies
+        run: poetry install --all-groups
+
+      - name: 🔍 Run checks
+        run: make check
+
+      - name: 🧪 Run tests
+        run: make test
+
+      - name: 🧼 Check formatting
+        run: make fmt
+
+      - name: 📈 Write coverage report
+        run: poetry run coverage lcov -o coverage/lcov.info
+
+      - name: Coverage
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.github_token }}
