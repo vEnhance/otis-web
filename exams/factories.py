@@ -13,9 +13,10 @@ from exams.models import ExamAttempt, PracticeExam
 from roster.factories import StudentFactory
 
 
-class TestFactory(DjangoModelFactory):
+class PracticeExamFactory(DjangoModelFactory):
     class Meta:
         model = PracticeExam
+        skip_postgeneration_save = True
 
     family = "Waltz"
     number = Sequence(lambda n: n + 1)
@@ -33,7 +34,7 @@ class TestFactory(DjangoModelFactory):
         )
 
 
-class QuizFactory(TestFactory):
+class QuizFactory(PracticeExamFactory):
     is_test = False
     answer1 = Faker("random_number", digits=3)
     answer2 = Faker("random_number", digits=3)

@@ -4,7 +4,7 @@ import pytest
 
 from core.factories import GroupFactory, UnitFactory, UserFactory
 from dashboard.factories import PSetFactory
-from exams.factories import ExamAttemptFactory, TestFactory
+from exams.factories import ExamAttemptFactory, PracticeExamFactory
 from payments.factories import JobFactory, WorkerFactory
 from roster.factories import StudentFactory
 from roster.models import Student
@@ -168,7 +168,7 @@ def test_multi_student_annotate(otis, alice_with_data):
     AchievementUnlockFactory.create(user=bob.user, achievement=a2)
 
     # spades
-    exam = TestFactory.create()
+    exam = PracticeExamFactory.create()
     ExamAttemptFactory.create(student=bob, score=3, quiz=exam)
     ExamAttemptFactory.create(student=carol, score=4, quiz=exam)
     ExamAttemptFactory.create(student=carol, score=2)

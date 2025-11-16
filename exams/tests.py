@@ -6,7 +6,7 @@ from freezegun import freeze_time
 
 from core.factories import SemesterFactory, UserFactory
 from exams.calculator import expr_compute
-from exams.factories import QuizFactory, TestFactory
+from exams.factories import PracticeExamFactory, QuizFactory
 from exams.models import ExamAttempt, PracticeExam
 from roster.factories import StudentFactory
 from roster.models import Student
@@ -57,7 +57,7 @@ def exam_setup():
     )
 
     with override_settings(TESTING_NEEDS_MOCK_MEDIA=True):
-        for factory in (TestFactory, QuizFactory):
+        for factory in (PracticeExamFactory, QuizFactory):
             for family in ("Waltz", "Foxtrot"):
                 factory.create(
                     start_date=datetime.datetime(2020, 1, 1, tzinfo=UTC),

@@ -27,6 +27,7 @@ class MarketFactory(DjangoModelFactory):
 class GuessFactory(DjangoModelFactory):
     class Meta:
         model = Guess
+        skip_postgeneration_save = True
 
     user = SubFactory(UserFactory)
     market = SubFactory(MarketFactory)

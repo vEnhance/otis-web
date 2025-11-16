@@ -24,7 +24,7 @@ from core.factories import SemesterFactory, UserFactory, UserProfileFactory
 from core.models import Semester, Unit
 from dashboard.factories import PSetFactory, SemesterDownloadFileFactory
 from dashboard.models import PSet
-from exams.factories import ExamAttemptFactory, QuizFactory, TestFactory
+from exams.factories import ExamAttemptFactory, PracticeExamFactory, QuizFactory
 from exams.models import PracticeExam
 from hanabi.factories import HanabiContestFactory
 from markets.factories import GuessFactory, MarketFactory
@@ -156,7 +156,7 @@ def create_sem_independent(users: list[User]):
     # exams
     print(f"Creating {args.exam_num * 4} exam objects")
     fast_bulk_create(
-        TestFactory,
+        PracticeExamFactory,
         args.exam_num,
         family="Waltz",
         start_date=datetime.now(),
@@ -177,7 +177,7 @@ def create_sem_independent(users: list[User]):
     )
     last_year = datetime.now() + timedelta(days=-365)
     fast_bulk_create(
-        TestFactory,
+        PracticeExamFactory,
         args.exam_num,
         family="Foxtrot",
         start_date=last_year,
