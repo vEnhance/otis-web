@@ -22,7 +22,7 @@
     </thead>
     <tbody>
       {% for pset in object_list %}
-        <tr {% if pset.pending %} class="table-info" {% elif pset.rejected %} class="table-danger" {% endif %}>
+        <tr class="{% if pset.pending %}table-info{% elif pset.rejected %}table-danger{% endif %}">
           <td class="text-end">
             {% if request.user.is_staff %}
               <a href="{% url "admin:dashboard_pset_change" pset.pk %}">{{ pset.pk }}</a>

@@ -68,49 +68,48 @@
             </li>
           {% endif %}
         </ul>
-      </ul>
-    </div>
-  {% endif %}
-{% endfor %}
-<hr />
-<h1>About</h1>
-<ul>
-  <li>
-    <a href="{% url "opal-authors" %}">Detailed instructions for authors</a>
-  </li>
-  <li>
-    <a href="{% url "opal-rules" %}">Detailed rules for solvers</a>
-  </li>
-</ul>
-<h2>So what is a puzzle hunt anyways?</h2>
-<p>
-  If you've never done a puzzle hunt before, you probably should at least skim
-  <a href="https://blog.vero.site/post/puzzlehunts">Brian Chen's introduction</a>
-  before you start
-  (so you know basic things like A=1, ..., Z=26, indexing into phrases,
-  alphabetical ordering, encodings, etc.).
-  You'll probably also want print out all the
-  <a href="https://web.evanchen.cc/upload/EvanPuzzleCodings.pdf">standard puzzle encodings</a>
-  so you can recognize them as they come up.
-</p>
-<p>
-  In short, a puzzle gives you some data,
-  and you need to get an <i>answer</i> out of this data,
-  which for OPAL will be an alphanumeric string (case-insensitive).
-  Instructions are usually not provided,
-  and figuring out how to interpret the data is part of the puzzle.
-</p>
-<h2>How does OPAL work?</h2>
-<p>In OPAL, any OTIS student can participate as a solver in the event.</p>
-<p>
-  In addition, each student (potentially with co-authors)
-  can optionally <i>submit</i> up to one puzzle, hence the "potluck" description.
-  (So you essentially get one free answer.)
-  The deadlines to sign up to contribute a puzzle are shown above.
-</p>
-<p>
-  Each OPAL event consists of several feeder puzzles written by students,
-  plus one <i>meta-puzzle</i> set by the game master
-  that uses the answers to each of the feeders.
-</p>
+      </div>
+    {% endif %}
+  {% endfor %}
+  <hr />
+  <h1>About</h1>
+  <ul>
+    <li>
+      <a href="{% url "opal-authors" %}">Detailed instructions for authors</a>
+    </li>
+    <li>
+      <a href="{% url "opal-rules" %}">Detailed rules for solvers</a>
+    </li>
+  </ul>
+  <h2>So what is a puzzle hunt anyways?</h2>
+  <p>
+    If you've never done a puzzle hunt before, you probably should at least skim
+    <a href="https://blog.vero.site/post/puzzlehunts">Brian Chen's introduction</a>
+    before you start
+    (so you know basic things like A=1, ..., Z=26, indexing into phrases,
+    alphabetical ordering, encodings, etc.).
+    You'll probably also want print out all the
+    <a href="https://web.evanchen.cc/upload/EvanPuzzleCodings.pdf">standard puzzle encodings</a>
+    so you can recognize them as they come up.
+  </p>
+  <p>
+    In short, a puzzle gives you some data,
+    and you need to get an <i>answer</i> out of this data,
+    which for OPAL will be an alphanumeric string (case-insensitive).
+    Instructions are usually not provided,
+    and figuring out how to interpret the data is part of the puzzle.
+  </p>
+  <h2>How does OPAL work?</h2>
+  <p>In OPAL, any OTIS student can participate as a solver in the event.</p>
+  <p>
+    In addition, each student (potentially with co-authors)
+    can optionally <i>submit</i> up to one puzzle, hence the "potluck" description.
+    (So you essentially get one free answer.)
+    The deadlines to sign up to contribute a puzzle are shown above.
+  </p>
+  <p>
+    Each OPAL event consists of several feeder puzzles written by students,
+    plus one <i>meta-puzzle</i> set by the game master
+    that uses the answers to each of the feeders.
+  </p>
 {% endblock layout-content %}

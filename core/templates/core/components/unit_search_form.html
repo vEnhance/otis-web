@@ -1,5 +1,5 @@
 <!-- Search Form -->
-<form method="GET"
+<form method="get"
       action="{% url 'catalog' %}"
       class="mb-2"
       id="searchForm">
@@ -25,7 +25,7 @@
 </h2>
 <div class="collapse {% if form.is_valid %}show{% endif %}"
      id="filterAndSort">
-  <form method="GET"
+  <form method="get"
         action="{% url 'catalog' %}"
         class="mb-3 px-3"
         id="filterForm">
