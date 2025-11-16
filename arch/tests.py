@@ -164,10 +164,10 @@ def test_lookup(otis):
 
     problem: Problem = ProblemFactory.create()
 
-    otis.get_redirects("arch-lookup", target=reverse("arch-index"))
+    otis.get_redirects(reverse("arch-index"), "arch-lookup")
 
     otis.post_redirects(
-        "arch-lookup", data={"problem": problem.pk}, target=problem.get_absolute_url()
+        problem.get_absolute_url(), "arch-lookup", data={"problem": problem.pk}
     )
 
 

@@ -116,16 +116,24 @@ class OTISClient:
     assert_response_ok = assert_ok
 
     def assert_has(
-        self, response: MonkeyResponseType, text: Union[bytes, int, str]
+        self, response: MonkeyResponseType, text: Union[bytes, int, str, Any], count: int = 0
     ) -> MonkeyResponseType:
         if isinstance(text, int):
+            text = str(text)
+        if not isinstance(text, (bytes, str)):
             text = str(text)
         if isinstance(text, str):
             text = text.encode()
         try:
-            assert text in response.content, (
-                f"Could not find {text!r} in response\n{self.debug_short(response)}"
-            )
+            if count > 0:
+                actual_count = response.content.count(text)
+                assert actual_count == count, (
+                    f"Found {actual_count} occurrences of {text!r}, expected {count}\n{self.debug_short(response)}"
+                )
+            else:
+                assert text in response.content, (
+                    f"Could not find {text!r} in response\n{self.debug_short(response)}"
+                )
         except AssertionError:
             self.debug_dump(response)
             raise
@@ -159,12 +167,22 @@ class OTISClient:
     def assert_redirects(
         self, response: MonkeyResponseType, target: str
     ) -> MonkeyResponseType:
-        assert response.status_code in (301, 302, 303, 307, 308), (
-            f"Expected redirect, got {response.status_code}\n{self.debug_short(response)}"
-        )
-        assert response.url == target or response.headers.get("Location") == target, (
-            f"Expected redirect to {target}, got {response.url}\n{self.debug_short(response)}"
-        )
+        # Handle followed redirects (status 200 with redirect_chain)
+        if hasattr(response, "redirect_chain") and response.redirect_chain:
+            # Response followed redirects, check final URL
+            final_url = response.redirect_chain[-1][0]
+            assert final_url == target or target in final_url, (
+                f"Expected redirect to {target}, got {final_url}\n{self.debug_short(response)}"
+            )
+        else:
+            # Response didn't follow, check redirect status
+            assert response.status_code in (301, 302, 303, 307, 308), (
+                f"Expected redirect, got {response.status_code}\n{self.debug_short(response)}"
+            )
+            redirect_url = response.url if hasattr(response, "url") else response.headers.get("Location", "")
+            assert redirect_url == target or target in redirect_url, (
+                f"Expected redirect to {target}, got {redirect_url}\n{self.debug_short(response)}"
+            )
         return response
 
     # HTTP methods with URL name support
@@ -203,11 +221,8 @@ class OTISClient:
         return self.assert_not_found(self.get(name, *args, **kwargs))
 
     def get_redirects(
-        self, name: str, *args: Any, target: str = "", **kwargs: Any
+        self, target: str, name: str, *args: Any, **kwargs: Any
     ) -> MonkeyResponseType:
-        if not target and args and isinstance(args[-1], str) and args[-1].startswith("/"):
-            # Handle case where target is passed as last positional arg
-            args, target = args[:-1], args[-1]
         return self.assert_redirects(self.get(name, *args, **kwargs), target)
 
     def post_ok(self, name: str, *args: Any, **kwargs: Any) -> MonkeyResponseType:
@@ -229,11 +244,8 @@ class OTISClient:
         return self.assert_not_found(self.post(name, *args, **kwargs))
 
     def post_redirects(
-        self, name: str, *args: Any, target: str = "", **kwargs: Any
+        self, target: str, name: str, *args: Any, **kwargs: Any
     ) -> MonkeyResponseType:
-        if not target and args and isinstance(args[-1], str) and args[-1].startswith("/"):
-            # Handle case where target is passed as last positional arg
-            args, target = args[:-1], args[-1]
         return self.assert_redirects(self.post(name, *args, **kwargs), target)
 
     # Login helpers

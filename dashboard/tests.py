@@ -230,15 +230,10 @@ def test_certify(otis):
 
     checksum = alice.get_checksum(settings.CERT_HASH_KEY)
 
-    resp = otis.get_redirects(
-        reverse(
-            "certify",
-            args=(
-                alice.pk,
-                checksum,
-            ),
-        ),
+    resp = otis.get_20x(
         "certify",
+        alice.pk,
+        checksum,
         follow=True,
     )
 

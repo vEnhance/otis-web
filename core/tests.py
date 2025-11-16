@@ -112,7 +112,8 @@ def test_hidden_catalog_public(otis):
 
 @pytest.mark.django_db
 def test_storage_hash():
-    assert re.match(r"[0-9a-z]{64}", storage_hash("meow"))
+    # In test mode, storage_hash returns "TESTING_" prefix
+    assert re.match(r"(TESTING_)?[0-9a-z]{64}", storage_hash("meow"))
     assert storage_hash("Serral") != storage_hash("Reynor")
 
 
