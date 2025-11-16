@@ -12,7 +12,9 @@ from core.factories import GroupFactory, UserFactory
 
 
 @pytest.mark.django_db
-@override_settings(PATH_STATEMENT_ON_DISK=os.path.join(settings.BASE_DIR, "test_static/"))
+@override_settings(
+    PATH_STATEMENT_ON_DISK=os.path.join(settings.BASE_DIR, "test_static/")
+)
 def test_disk_problem(otis):
     verified_group = GroupFactory(name="Verified")
     alice = UserFactory.create(groups=(verified_group,))
@@ -80,7 +82,9 @@ def test_hint(otis):
     otis.get_20x("hint-list", problem.puid)
     otis.get_40x("hint-detail", problem.pk, 31)
 
-    otis.assert_has(otis.get_20x("hint-create", problem.puid), "Advice for writing hints")
+    otis.assert_has(
+        otis.get_20x("hint-create", problem.puid), "Advice for writing hints"
+    )
     otis.post_20x(
         "hint-create",
         problem.puid,

@@ -116,7 +116,10 @@ class OTISClient:
     assert_response_ok = assert_ok
 
     def assert_has(
-        self, response: MonkeyResponseType, text: Union[bytes, int, str, Any], count: int = 0
+        self,
+        response: MonkeyResponseType,
+        text: Union[bytes, int, str, Any],
+        count: int = 0,
     ) -> MonkeyResponseType:
         if isinstance(text, int):
             text = str(text)
@@ -179,7 +182,11 @@ class OTISClient:
             assert response.status_code in (301, 302, 303, 307, 308), (
                 f"Expected redirect, got {response.status_code}\n{self.debug_short(response)}"
             )
-            redirect_url = response.url if hasattr(response, "url") else response.headers.get("Location", "")
+            redirect_url = (
+                response.url
+                if hasattr(response, "url")
+                else response.headers.get("Location", "")
+            )
             assert redirect_url == target or target in redirect_url, (
                 f"Expected redirect to {target}, got {redirect_url}\n{self.debug_short(response)}"
             )
@@ -240,7 +247,9 @@ class OTISClient:
     def post_denied(self, name: str, *args: Any, **kwargs: Any) -> MonkeyResponseType:
         return self.assert_denied(self.post(name, *args, **kwargs))
 
-    def post_not_found(self, name: str, *args: Any, **kwargs: Any) -> MonkeyResponseType:
+    def post_not_found(
+        self, name: str, *args: Any, **kwargs: Any
+    ) -> MonkeyResponseType:
         return self.assert_not_found(self.post(name, *args, **kwargs))
 
     def post_redirects(

@@ -171,9 +171,7 @@ def test_guess_form_gated_on_verified(otis, market_data):
         market.save()
         UserFactory.create(username="eve")
         otis.login("eve")
-        otis.post_40x(
-            "market-guess", "guess-my-ssn", data={"value": 100}, follow=True
-        )
+        otis.post_40x("market-guess", "guess-my-ssn", data={"value": 100}, follow=True)
 
 
 @pytest.mark.django_db
@@ -312,9 +310,7 @@ def test_update_guess_perms(otis, market_data):
         otis.login("alice")
         # Create a guess first
         otis.post_20x("market-guess", "guess-my-ssn", data={"value": 13}, follow=True)
-        guess = Guess.objects.get(
-            market__slug="guess-my-ssn", user__username="alice"
-        )
+        guess = Guess.objects.get(market__slug="guess-my-ssn", user__username="alice")
         assert guess.value == 13
         # Now we can update it
         resp = otis.get_20x("market-guess-update", "guess-my-ssn")

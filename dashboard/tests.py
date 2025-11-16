@@ -720,9 +720,7 @@ def test_past(otis):
     otis.assert_has(resp, prevAlice.name)
 
     unit = UnitFactory.create(code="BMX")
-    PSetFactory.create(
-        student=prevAlice, clubs=0, hours=1501, status="A", unit=unit
-    )
+    PSetFactory.create(student=prevAlice, clubs=0, hours=1501, status="A", unit=unit)
 
     resp = otis.get_20x("past", prevSemester.pk)
     otis.assert_has(resp, 38)
@@ -777,9 +775,7 @@ def test_idle_warn(otis):
     alice = StudentFactory.create(assistant=AssistantFactory.create(user=user))
 
     with freeze_time("2021-07-01", tz_offset=0):
-        PSetFactory.create(
-            student=alice, clubs=0, hours=1501, status="A", unit=unit
-        )
+        PSetFactory.create(student=alice, clubs=0, hours=1501, status="A", unit=unit)
 
     with freeze_time("2021-07-29", tz_offset=0):
         resp = otis.get_20x("idlewarn")

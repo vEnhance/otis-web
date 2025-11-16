@@ -741,7 +741,9 @@ def test_announcement(otis):
     assert Announcement.objects.all().count() == 1
     a = Announcement.objects.get(slug="testing")
     assert a.subject == "Testing 1"
-    assert a.content_rendered == "<p>This is a sample <strong>announcement</strong>.</p>"
+    assert (
+        a.content_rendered == "<p>This is a sample <strong>announcement</strong>.</p>"
+    )
 
     # Update it
     resp = otis.post_20x(

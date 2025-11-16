@@ -140,7 +140,9 @@ def test_unlock_gating():
 @pytest.mark.django_db
 def test_model_methods():
     assert str(OpalPuzzleFactory.create(slug="meow")) == "meow"
-    assert str(OpalHuntFactory.create(name="Your OTIS in April")) == "Your OTIS in April"
+    assert (
+        str(OpalHuntFactory.create(name="Your OTIS in April")) == "Your OTIS in April"
+    )
     OpalHuntFactory.create().get_absolute_url()
     OpalPuzzleFactory.create().get_absolute_url()
     str(OpalAttemptFactory.create())

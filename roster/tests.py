@@ -225,9 +225,7 @@ def test_student_assistant_list(otis) -> None:
             user__email=f"user{i}@evanchen.cc",
             shortname=f"Short{i}",
         )
-        StudentFactory.create_batch(
-            i * i, user__first_name="GoodKid", assistant=asst
-        )
+        StudentFactory.create_batch(i * i, user__first_name="GoodKid", assistant=asst)
     StudentFactory.create(user__first_name="BadKid")
     staff: User = UserFactory.create(is_staff=True)
     otis.login(staff)
@@ -755,9 +753,7 @@ def test_inquiry(otis) -> None:
         assert alice.unlocked_units.count() == 6
 
     # test a bunch of fail conditions
-    bob: Student = StudentFactory.create(
-        semester=SemesterFactory.create(active=False)
-    )
+    bob: Student = StudentFactory.create(semester=SemesterFactory.create(active=False))
     otis.login(bob)
     otis.get_denied("inquiry", bob.pk)
 
@@ -1241,9 +1237,7 @@ def test_semester_switch(otis) -> None:
     )
     # Suppose there are two semesters left
     with freeze_time("2023-08-01", tz_offset=0):
-        StudentRegistrationFactory.create(
-            container=container, user__username="alice"
-        )
+        StudentRegistrationFactory.create(container=container, user__username="alice")
         StudentRegistrationFactory.create(container=container, user__username="bob")
         assert build_students(StudentRegistration.objects.all()) == 2
         alice: Student = Student.objects.get(user__username="alice")
@@ -1253,9 +1247,7 @@ def test_semester_switch(otis) -> None:
 
     # Now suppose the first semester has finished
     with freeze_time("2024-01-01", tz_offset=0):
-        StudentRegistrationFactory.create(
-            container=container, user__username="carol"
-        )
+        StudentRegistrationFactory.create(container=container, user__username="carol")
         assert build_students(StudentRegistration.objects.all()) == 1
         carol: Student = Student.objects.get(user__username="carol")
         assert carol.invoice.total_owed == 240
@@ -1344,9 +1336,7 @@ def test_reg_with_apply_uuid(otis) -> None:
     assert au.reg == alice_reg
 
     # Bob shouldn't be able to steal Alice's passcode
-    bob: User = UserFactory.create(
-        first_name="Bob", last_name="Beta", email="b@b.net"
-    )
+    bob: User = UserFactory.create(first_name="Bob", last_name="Beta", email="b@b.net")
     otis.login(bob)
 
     agreement3 = StringIO("i do three!")

@@ -138,9 +138,7 @@ def test_calendar(otis):
 
 
 # Helper functions for catalog tests
-def assert_catalog_equal(
-    otis, query_params: dict[str, Any], expected_codes: list[str]
-):
+def assert_catalog_equal(otis, query_params: dict[str, Any], expected_codes: list[str]):
     # Code is strictly not a unique field but fine for our purposes
     resp = otis.get_20x("catalog", query_params=query_params)
     unit_codes = [unit.code for unit in resp.context["units"]]
@@ -273,9 +271,7 @@ def test_hidden_student(otis):
     student.curriculum.set(
         [UnitFactory.create(code="BCW", group__hidden=True)]
     )  # Hidden unit in curriculum
-    UnitFactory.create(
-        code="DAW", group__hidden=True
-    )  # Hidden unit not in curriculum
+    UnitFactory.create(code="DAW", group__hidden=True)  # Hidden unit not in curriculum
     otis.login(student)
     assert_catalog_equal(otis, {}, ["BCW"])
 

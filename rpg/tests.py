@@ -35,18 +35,10 @@ def alice_with_data():
         user__last_name="Aardvark",
         user__groups=(verified_group,),
     )
-    PSetFactory.create(
-        student=alice, clubs=120, hours=37, status="A", unit__code="BGW"
-    )
-    PSetFactory.create(
-        student=alice, clubs=100, hours=20, status="A", unit__code="DMX"
-    )
-    PSetFactory.create(
-        student=alice, clubs=180, hours=27, status="A", unit__code="ZCY"
-    )
-    PSetFactory.create(
-        student=alice, clubs=200, hours=87, status="P", unit__code="ZMR"
-    )
+    PSetFactory.create(student=alice, clubs=120, hours=37, status="A", unit__code="BGW")
+    PSetFactory.create(student=alice, clubs=100, hours=20, status="A", unit__code="DMX")
+    PSetFactory.create(student=alice, clubs=180, hours=27, status="A", unit__code="ZCY")
+    PSetFactory.create(student=alice, clubs=200, hours=87, status="P", unit__code="ZMR")
     AchievementUnlockFactory.create(
         user=alice.user, achievement__diamonds=4, achievement__name="Feel the fours"
     )
@@ -104,9 +96,7 @@ def test_stats_page(otis, alice_with_data):
     alice = get_alice()
     otis.login(alice)
     bob = StudentFactory.create()
-    AchievementUnlockFactory.create(
-        user=bob.user, achievement__name="FAIL THIS TEST"
-    )
+    AchievementUnlockFactory.create(user=bob.user, achievement__name="FAIL THIS TEST")
     QuestCompleteFactory.create(student=bob, title="FAIL THIS TEST")
 
     resp = otis.get("stats", alice.pk)
@@ -162,9 +152,7 @@ def test_multi_student_annotate(otis, alice_with_data):
     donald = StudentFactory.create()
 
     # problem sets (clubs/hearts)
-    PSetFactory.create(
-        student=bob, clubs=196, hours=64, status="A", unit__code="DMW"
-    )
+    PSetFactory.create(student=bob, clubs=196, hours=64, status="A", unit__code="DMW")
     PSetFactory.create(
         student=bob, clubs=None, hours=None, status="A", unit__code="ZMY"
     )
@@ -299,14 +287,10 @@ def test_submit_diamond_and_read_solution(otis, alice_with_data):
     otis.login(alice.user)
 
     def alice_has(a: Achievement):
-        return AchievementUnlock.objects.filter(
-            achievement=a, user=alice.user
-        ).exists()
+        return AchievementUnlock.objects.filter(achievement=a, user=alice.user).exists()
 
     # Submit a nonexistent code
-    resp = otis.post_20x(
-        "stats", alice.pk, data={"code": "123456123456123456123456"}
-    )
+    resp = otis.post_20x("stats", alice.pk, data={"code": "123456123456123456123456"})
     assert "You entered an invalid code." in resp.content.decode()
     assert not alice_has(a1)
     assert not alice_has(a2)
