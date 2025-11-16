@@ -25,7 +25,7 @@ def test_disk_problem(otis):
 
     problem_path = os.path.join(settings.PATH_STATEMENT_ON_DISK, f"{disk_puid}.html")
 
-    with open(problem_path, "w") as f:
+    with open(problem_path, "w", encoding="utf_8") as f:
         f.write("rock and roll")
 
     otis.get_40x("hint-list", "NONEXISTENT")
@@ -105,7 +105,7 @@ def test_hint(otis):
         problem.puid,
         31,
         data={
-            "problem": hint.problem.pk,
+            "problem": hint.problem_id,
             "number": 41,
             "keywords": hint.keywords,
             "content": hint.content,
@@ -122,7 +122,7 @@ def test_hint(otis):
         "hint-update-pk",
         hint.pk,
         data={
-            "problem": hint.problem.pk,
+            "problem": hint.problem_id,
             "number": 51,
             "keywords": hint.keywords,
             "content": hint.content,

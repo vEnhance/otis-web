@@ -156,19 +156,19 @@ def test_get_news(otis):
 
     with freeze_time("2021-07-01", tz_offset=0):
         news = get_news(alice_profile, alice)
-        assert len(news["announcements"]) == 1
-        assert len(news["downloads"]) == 1
+        assert news["announcements"].count() == 1
+        assert news["downloads"].count() == 1
         assert len(news["markets"]) == 1
-        assert len(news["hanabis"]) == 1
-        assert len(news["opals"]) == 1
+        assert news["hanabis"].count() == 1
+        assert news["opals"].count() == 1
 
     with freeze_time("2021-07-30", tz_offset=0):
         news = get_news(alice_profile, alice)
-        assert len(news["announcements"]) == 0
-        assert len(news["downloads"]) == 0
-        assert len(news["markets"]) == 0
-        assert len(news["hanabis"]) == 0
-        assert len(news["opals"]) == 1
+        assert not news["announcements"].exists()
+        assert not news["downloads"].exists()
+        assert not news["markets"].exists()
+        assert not news["hanabis"].exists()
+        assert news["opals"].count() == 1
 
     # alice dismisses stuff
     alice_profile.last_notif_dismiss = datetime.datetime(2021, 7, 2, tzinfo=UTC)
@@ -176,20 +176,20 @@ def test_get_news(otis):
 
     with freeze_time("2021-07-02", tz_offset=0):
         news = get_news(alice_profile, alice)
-        assert len(news["announcements"]) == 0
-        assert len(news["downloads"]) == 0
-        assert len(news["markets"]) == 0
-        assert len(news["hanabis"]) == 0
-        assert len(news["opals"]) == 0
+        assert not news["announcements"].exists()
+        assert not news["downloads"].exists()
+        assert not news["markets"].exists()
+        assert not news["hanabis"].exists()
+        assert not news["opals"].exists()
 
     with freeze_time("2022-07-02", tz_offset=0):
         SemesterDownloadFileFactory.create(semester=semester)
         news = get_news(alice_profile, alice)
-        assert len(news["announcements"]) == 0
+        assert not news["announcements"].exists()
         assert len(news["downloads"]) == 1
-        assert len(news["markets"]) == 2
-        assert len(news["hanabis"]) == 2
-        assert len(news["opals"]) == 0
+        assert news["markets"].count() == 2
+        assert news["hanabis"].count() == 2
+        assert not news["opals"].exists()
 
 
 @pytest.mark.django_db

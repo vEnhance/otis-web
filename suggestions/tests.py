@@ -52,13 +52,16 @@ def test_suggestions(otis):
         "suggest-update",
         sugg.pk,
         data={
-            "unit": sugg.unit.pk,
+            "unit": sugg.unit_id,
             "weight": sugg.weight,
             "source": sugg.source,
             "hyperlink": sugg.hyperlink,
             "description": sugg.description,
             "statement": sugg.statement,
-            "solution": "By Cauchy, solution must be of the form $f(x) = cx$, casework on $c$ gives the answer.",
+            "solution": (
+                "By Cauchy, solution must be of the form $f(x) = cx$, casework on $c$ gives"
+                " the answer."
+            ),
             "comments": sugg.comments,
             "acknowledge": False,
         },
