@@ -1,5 +1,5 @@
 from core.factories import GroupFactory, UserFactory
-from evans_django_tools.testsuite import EvanTestCase
+from otisweb_testsuite import EvanTestCase
 
 from .factories import TubeFactory
 from .models import JoinRecord

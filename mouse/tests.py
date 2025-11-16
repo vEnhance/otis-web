@@ -1,5 +1,5 @@
 from core.factories import UserFactory
-from evans_django_tools.testsuite import EvanTestCase
+from otisweb_testsuite import EvanTestCase
 from roster.factories import StudentFactory
 from rpg.models import QuestComplete
 

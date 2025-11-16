@@ -1,6 +1,6 @@
 from arch.views import User
 from core.factories import UnitFactory, UserFactory
-from evans_django_tools.testsuite import EvanTestCase
+from otisweb_testsuite import EvanTestCase
 from rpg.factories import AchievementFactory, AchievementUnlockFactory
 from wikihaxx.mdx.otis import OTISPreprocessor
 

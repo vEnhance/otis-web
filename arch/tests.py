@@ -8,7 +8,7 @@ from django.urls import reverse
 from arch.factories import ProblemFactory
 from arch.models import Hint, Problem, Vote, validate_puid
 from core.factories import GroupFactory, UserFactory
-from evans_django_tools.testsuite import EvanTestCase
+from otisweb_testsuite import EvanTestCase
 
 
 class TestProblem(EvanTestCase):

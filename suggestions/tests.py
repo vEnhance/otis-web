@@ -1,7 +1,7 @@
 from arch.models import User
 from core.factories import GroupFactory, UnitFactory, UnitGroupFactory, UserFactory
 from core.models import Unit, UnitGroup
-from evans_django_tools.testsuite import EvanTestCase
+from otisweb_testsuite import EvanTestCase
 from suggestions.models import ProblemSuggestion
 
 

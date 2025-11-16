@@ -49,6 +49,9 @@ factory-boy = "^3.3.3"
 freezegun = "^1.5.5"
 ipython = "^9.5.0"
 jedi = "^0.19.2"
+pytest = "^8.3.0"
+pytest-cov = "^6.0.0"
+pytest-django = "^4.9.0"
 pyright = "^1.1.404"
 ruff = "^0.12.11"
 tblib = "^3.1.0"
@@ -58,6 +61,12 @@ types-freezegun = "^1.1.2"
 types-requests = "^2.32.0.20250809"
 werkzeug = "^3.1.3"
 
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "otisweb.settings"
+python_files = ["tests.py", "test_*.py", "*_tests.py"]
+testpaths = ["."]
+addopts = "--reuse-db"
+
 [tool.coverage.report]
 show_missing = true
 skip_covered = true
@@ -65,11 +74,10 @@ skip_empty = true
 
 [tool.coverage.run]
 branch = true
-command_line = "manage.py test"
 omit = [
   "**/site-packages/**",
   "*/migrations/*",
-  "evans_django_tools/**",
+  "otisweb_testsuite/**",
   "manage.py",
   "*/admin.py",
   "fixtures/gen-dummy-data.sh",

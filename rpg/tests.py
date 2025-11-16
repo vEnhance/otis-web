@@ -2,7 +2,7 @@ import datetime
 
 from core.factories import GroupFactory, UnitFactory, UserFactory
 from dashboard.factories import PSetFactory
-from evans_django_tools.testsuite import EvanTestCase
+from otisweb_testsuite import EvanTestCase
 from exams.factories import ExamAttemptFactory, TestFactory
 from payments.factories import JobFactory, WorkerFactory
 from roster.factories import StudentFactory

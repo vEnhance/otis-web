@@ -3,7 +3,7 @@ import datetime
 from freezegun import freeze_time
 
 from core.factories import GroupFactory, UserFactory
-from evans_django_tools.testsuite import EvanTestCase
+from otisweb_testsuite import EvanTestCase
 from hanabi.factories import HanabiContestFactory, HanabiReplayFactory
 from hanabi.models import HanabiContest, HanabiPlayer
 

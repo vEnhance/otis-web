@@ -6,7 +6,7 @@ from factory.faker import Faker
 from factory.fuzzy import FuzzyDecimal
 
 from core.factories import SemesterFactory, UserFactory
-from evans_django_tools.testsuite import UniqueFaker
+from otisweb_testsuite import UniqueFaker
 
 from .models import Guess, Market
 

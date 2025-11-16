@@ -5,7 +5,7 @@ from django.core.exceptions import SuspiciousOperation
 from freezegun.api import freeze_time
 
 from core.factories import GroupFactory, UserFactory
-from evans_django_tools.testsuite import EvanTestCase
+from otisweb_testsuite import EvanTestCase
 from opal.factories import OpalAttemptFactory, OpalHuntFactory, OpalPuzzleFactory
 from rpg.factories import AchievementFactory
 from rpg.models import AchievementUnlock

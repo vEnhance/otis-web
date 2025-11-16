@@ -6,7 +6,7 @@ from django.test.client import RequestFactory
 from freezegun import freeze_time
 
 from core.factories import GroupFactory, SemesterFactory, UserFactory
-from evans_django_tools.testsuite import EvanTestCase
+from otisweb_testsuite import EvanTestCase
 from markets.admin import MarketAdmin
 from markets.factories import GuessFactory, MarketFactory
 from markets.models import Guess, Market

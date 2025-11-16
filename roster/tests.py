@@ -16,7 +16,7 @@ from core.factories import (
 )
 from core.models import Semester, Unit, UnitGroup, UserProfile
 from dashboard.factories import PSetFactory
-from evans_django_tools.testsuite import EvanTestCase
+from otisweb_testsuite import EvanTestCase
 from roster.factories import (
     ApplyUUIDFactory,
     AssistantFactory,

@@ -14,7 +14,7 @@ from factory.helpers import post_generation
 
 from core.models import Semester, Unit, UnitGroup, UserProfile
 from core.utils import storage_hash
-from evans_django_tools.testsuite import UniqueFaker
+from otisweb_testsuite import UniqueFaker
 
 User = get_user_model()
 

@@ -5,7 +5,7 @@ from factory.django import DjangoModelFactory
 from factory.faker import Faker
 
 from core.factories import UserFactory
-from evans_django_tools.testsuite import UniqueFaker
+from otisweb_testsuite import UniqueFaker
 
 from .models import OpalAttempt, OpalHunt, OpalPuzzle
 

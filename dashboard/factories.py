@@ -4,7 +4,7 @@ from factory.django import DjangoModelFactory, FileField
 from factory.faker import Faker
 
 from core.factories import SemesterFactory, UnitFactory
-from evans_django_tools.testsuite import UniqueFaker
+from otisweb_testsuite import UniqueFaker
 from roster.factories import StudentFactory
 
 from .models import Announcement, PSet, SemesterDownloadFile, UploadedFile

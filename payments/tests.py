@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from freezegun.api import freeze_time
 
 from core.factories import GroupFactory, UserFactory
-from evans_django_tools.testsuite import EvanTestCase
+from otisweb_testsuite import EvanTestCase
 from payments.factories import JobFactory, JobFolderFactory, WorkerFactory
 from payments.models import Job, PaymentLog, Worker
 from payments.views import InactiveWorkerList

@@ -1,7 +1,7 @@
 from typing import Any
 
 from django.contrib.sites.models import Site
-from factory.declarations import SubFactory
+from factory.declarations import LazyAttribute, SubFactory
 from factory.django import DjangoModelFactory
 from factory.faker import Faker
 from factory.helpers import post_generation
@@ -34,4 +34,4 @@ class URLPathFactory(DjangoModelFactory):
         model = URLPath
 
     article = SubFactory(ArticleFactory)
-    site = Site.objects.get_current()  # type: ignore
+    site = LazyAttribute(lambda _: Site.objects.get_current())  # type: ignore

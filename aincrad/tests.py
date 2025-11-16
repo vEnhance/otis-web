@@ -8,7 +8,7 @@ from arch.models import Hint, Problem
 from core.factories import SemesterFactory, UnitFactory, UserFactory, UserProfileFactory
 from dashboard.factories import PSetFactory
 from dashboard.models import Announcement
-from evans_django_tools.testsuite import EvanTestCase
+from otisweb_testsuite import EvanTestCase
 from hanabi.factories import HanabiContestFactory, HanabiPlayerFactory
 from hanabi.models import HanabiParticipation, HanabiReplay
 from opal.factories import OpalPuzzleFactory

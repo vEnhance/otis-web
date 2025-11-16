@@ -6,7 +6,7 @@ from factory.faker import Faker
 from factory.fuzzy import FuzzyInteger
 
 from core.factories import UserFactory
-from evans_django_tools.testsuite import UniqueFaker
+from otisweb_testsuite import UniqueFaker
 from hanabi.models import HanabiContest, HanabiParticipation, HanabiPlayer, HanabiReplay
 
 

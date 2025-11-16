@@ -22,7 +22,7 @@ from dashboard.factories import (
 )
 from dashboard.models import PSet, UploadedFile
 from dashboard.utils import get_news, get_units_to_submit, get_units_to_unlock
-from evans_django_tools.testsuite import EvanTestCase
+from otisweb_testsuite import EvanTestCase
 from exams.factories import QuizFactory, TestFactory
 from hanabi.factories import HanabiContestFactory
 from markets.factories import MarketFactory
