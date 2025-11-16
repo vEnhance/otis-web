@@ -311,7 +311,7 @@ def test_accept_inquiries(otis, aincrad_setup):
     )
     assert resp.json()["result"] == "success"
     assert resp.json()["count"] == 3
-    assert UnitInquiry.objects.filter(status="INQ_NEW").count() == 0
+    assert not UnitInquiry.objects.filter(status="INQ_NEW").exists()
 
 
 @pytest.mark.django_db
