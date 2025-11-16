@@ -1,4 +1,3 @@
-import pytest
 from django.conf import settings
 
 # Import and register the OTIS fixtures

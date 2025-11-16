@@ -84,7 +84,6 @@ def exam_setup():
 
 @pytest.mark.django_db
 def test_exam_pdf(otis, exam_setup):
-    alice = exam_setup["alice"]
     exam_waltz = PracticeExam.objects.get(family="Waltz", is_test=True)
     exam_foxtrot = PracticeExam.objects.get(family="Foxtrot", is_test=True)
 
