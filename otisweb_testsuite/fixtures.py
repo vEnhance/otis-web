@@ -107,6 +107,14 @@ class OTISClient:
             raise
         return response
 
+    # Aliases for backward compatibility
+    assert_response_20x = assert_20x
+    assert_response_30x = assert_30x
+    assert_response_40x = assert_40x
+    assert_response_denied = assert_denied
+    assert_response_not_found = assert_not_found
+    assert_response_ok = assert_ok
+
     def assert_has(
         self, response: MonkeyResponseType, text: Union[bytes, int, str]
     ) -> MonkeyResponseType:
@@ -195,8 +203,11 @@ class OTISClient:
         return self.assert_not_found(self.get(name, *args, **kwargs))
 
     def get_redirects(
-        self, name: str, *args: Any, target: str, **kwargs: Any
+        self, name: str, *args: Any, target: str = "", **kwargs: Any
     ) -> MonkeyResponseType:
+        if not target and args and isinstance(args[-1], str) and args[-1].startswith("/"):
+            # Handle case where target is passed as last positional arg
+            args, target = args[:-1], args[-1]
         return self.assert_redirects(self.get(name, *args, **kwargs), target)
 
     def post_ok(self, name: str, *args: Any, **kwargs: Any) -> MonkeyResponseType:
@@ -218,8 +229,11 @@ class OTISClient:
         return self.assert_not_found(self.post(name, *args, **kwargs))
 
     def post_redirects(
-        self, name: str, *args: Any, target: str, **kwargs: Any
+        self, name: str, *args: Any, target: str = "", **kwargs: Any
     ) -> MonkeyResponseType:
+        if not target and args and isinstance(args[-1], str) and args[-1].startswith("/"):
+            # Handle case where target is passed as last positional arg
+            args, target = args[:-1], args[-1]
         return self.assert_redirects(self.post(name, *args, **kwargs), target)
 
     # Login helpers
