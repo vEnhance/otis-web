@@ -35,7 +35,7 @@ and replace `YOUR_USERNAME` in step 2 with `vEnhance`.
 
 0. Create an account on GitHub if you haven't already, and
    [fork the repository](https://docs.github.com/en/get-started/quickstart/fork-a-repo).
-1. Install the following standard tools: `python` (version 3.10), `pip`, `git`.
+1. Install the following standard tools: `python` (version 3.13), `pip`, `git`, `make`.
    (For each tool, search "[name of thing to install] [your OS]" on the web.)
 2. Clone this repository using the command
    `git clone https://github.com/YOUR_USERNAME/otis-web`.
@@ -48,14 +48,14 @@ and replace `YOUR_USERNAME` in step 2 with `vEnhance`.
 5. [Install Poetry](https://python-poetry.org/docs/).
    This enables you to use the `poetry` command;
    verify this by checking `poetry --help` produces a help message.
-6. Once you have `poetry`, hit `poetry install`.
-   This will automatically create a
-   Python virtual environment and install stuff inside it.
+6. Once you have `poetry`, hit `make install`.
+   This will automatically create a Python virtual environment,
+   install all dependencies, and set up pre-commit hooks (via prek).
    (If you are an expert familiar with Python virtual environments
    and want to use your own rather than Poetry's auto-created one,
-   then activate said environment before running `poetry install`.)
+   then activate said environment before running `make install`.)
 
-   On some systems, `poetry install` could fail when trying to install
+   On some systems, installation could fail when trying to install
    `mysqlclient`. You will have to separately install `pkg-config`
    [mysql](https://github.com/PyMySQL/mysqlclient#install) in that case;
    see that link for instructions, under the "Install" section.
@@ -69,14 +69,13 @@ and replace `YOUR_USERNAME` in step 2 with `vEnhance`.
    project. That is, always run `poetry shell` before doing any work, or
    for experts, activate the virtual environment using your preferred method.)
 
-8. If everything is working, `python manage.py check` should
-   run with no errors.
-9. Run `python manage.py migrate` to create the local database.
-10. Run `python manage.py createsuperuser` to create an admin user.
-11. Run `python manage.py runserver`.
+8. If everything is working, `make check` should run with no errors.
+9. Run `make migrate` to create the local database.
+10. Run `make createsuperuser` to create an admin user.
+11. Run `make runserver`.
     The command will spin up a continuously running server.
 12. Point your browser to `http://127.0.0.1:8000`.
-    You should be able to log in with the user you defined in step 9.
+    You should be able to log in with the user you defined in step 10.
 13. The website is functional now, but it is a bit bare-bones.
     To populate it with some test data, use `http://127.0.0.1:8000/admin`
     or run `./fixtures/load-all.sh`.
@@ -87,6 +86,7 @@ and replace `YOUR_USERNAME` in step 2 with `vEnhance`.
 
 Optional steps:
 
+- Run `make help` to see all available development commands.
 - If you need to set up environment variables,
   copy `env` to `.env` and uncomment the relevant lines.
 - If you want to test the Stripe stuff, a few more steps are needed.
@@ -94,6 +94,8 @@ Optional steps:
   Create some API keys and `stripe login`.
   Add these API keys to `.env` (the three `STRIPE_*` variables).
   Then run `stripe listen --forward-to localhost:8000/payments/webhook/`.
+- Before committing code, run `make fmt` to format your code
+  (or let the pre-commit hooks handle it automatically).
 
 [venv]: https://djangocentral.com/how-to-a-create-virtual-environment-for-python/
 
