@@ -183,7 +183,7 @@ class OTISClient:
                 f"Expected redirect, got {response.status_code}\n{self.debug_short(response)}"
             )
             redirect_url = (
-                response.url
+                response.url  # type: ignore
                 if hasattr(response, "url")
                 else response.headers.get("Location", "")
             )
