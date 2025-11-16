@@ -4,7 +4,7 @@ from factory.faker import Faker
 from factory.fuzzy import FuzzyChoice
 
 from core.factories import UnitFactory, UserFactory
-from evans_django_tools.testsuite import UniqueFaker
+from otisweb_testsuite import UniqueFaker
 
 from .models import ProblemSuggestion
 

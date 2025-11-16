@@ -1,5 +1,6 @@
 import os
 
+import pytest
 from django.conf import settings
 from django.http import Http404
 from django.test import override_settings
@@ -8,198 +9,198 @@ from django.urls import reverse
 from arch.factories import ProblemFactory
 from arch.models import Hint, Problem, Vote, validate_puid
 from core.factories import GroupFactory, UserFactory
-from evans_django_tools.testsuite import EvanTestCase
 
 
-class TestProblem(EvanTestCase):
-    @override_settings(
-        PATH_STATEMENT_ON_DISK=os.path.join(settings.BASE_DIR, "test_static/")
+@pytest.mark.django_db
+@override_settings(
+    PATH_STATEMENT_ON_DISK=os.path.join(settings.BASE_DIR, "test_static/")
+)
+def test_disk_problem(otis):
+    verified_group = GroupFactory(name="Verified")
+    alice = UserFactory.create(groups=(verified_group,))
+    otis.login(alice)
+
+    disk_puid = "STUPID"
+
+    if not os.path.exists(settings.PATH_STATEMENT_ON_DISK):
+        os.makedirs(settings.PATH_STATEMENT_ON_DISK)
+
+    problem_path = os.path.join(settings.PATH_STATEMENT_ON_DISK, f"{disk_puid}.html")
+
+    with open(problem_path, "w", encoding="utf_8") as f:
+        f.write("rock and roll")
+
+    otis.get_40x("hint-list", "NONEXISTENT")
+    resp = otis.get_20x("hint-list", disk_puid)
+
+    messages = [m.message for m in resp.context["messages"]]
+    assert f"Created previously nonexistent problem {disk_puid}" in messages
+
+    otis.assert_has(resp, "rock and roll")
+
+    os.remove(problem_path)
+    if not os.listdir(settings.PATH_STATEMENT_ON_DISK):
+        os.rmdir(settings.PATH_STATEMENT_ON_DISK)
+
+
+@pytest.mark.django_db
+def test_problem(otis):
+    verified_group = GroupFactory(name="Verified")
+    alice = UserFactory.create(groups=(verified_group,))
+    otis.login(alice)
+
+    problem: Problem = ProblemFactory.create(puid="SILLY")
+
+    otis.post_20x(
+        "arch-index",
+        data={"puid": "SILLY", "hyperlink": "https://otis.evanchen.cc/"},
+        follow=True,
     )
-    def test_disk_problem(self):
-        verified_group = GroupFactory(name="Verified")
-        alice = UserFactory.create(groups=(verified_group,))
-        self.login(alice)
 
-        disk_puid = "STUPID"
+    problem = Problem.objects.get(puid="SILLY")
 
-        if not os.path.exists(settings.PATH_STATEMENT_ON_DISK):
-            os.makedirs(settings.PATH_STATEMENT_ON_DISK)
+    otis.post_20x(
+        "problem-update",
+        problem.puid,
+        data={"hyperlink": "https://aops.com/"},
+        follow=True,
+    )
+    otis.assert_has(otis.get_20x("problem-update", "SILLY"), "https://aops.com/")
 
-        problem_path = os.path.join(
-            settings.PATH_STATEMENT_ON_DISK, f"{disk_puid}.html"
-        )
+    problem.refresh_from_db()
+    assert problem.hyperlink == "https://aops.com/"
 
-        with open(problem_path, "w") as f:
-            f.write("rock and roll")
 
-        self.assertGet40X("hint-list", "NONEXISTENT")
-        resp = self.assertGet20X("hint-list", disk_puid)
+@pytest.mark.django_db
+def test_hint(otis):
+    verified_group = GroupFactory(name="Verified")
+    alice = UserFactory.create(groups=(verified_group,))
+    otis.login(alice)
 
-        messages = [m.message for m in resp.context["messages"]]
-        self.assertIn(f"Created previously nonexistent problem {disk_puid}", messages)
+    problem: Problem = ProblemFactory.create()
 
-        self.assertContains(resp, "rock and roll")
+    otis.get_20x("hint-list", problem.puid)
+    otis.get_40x("hint-detail", problem.pk, 31)
 
-        os.remove(problem_path)
-        if not os.listdir(settings.PATH_STATEMENT_ON_DISK):
-            os.rmdir(settings.PATH_STATEMENT_ON_DISK)
+    otis.assert_has(
+        otis.get_20x("hint-create", problem.puid), "Advice for writing hints"
+    )
+    otis.post_20x(
+        "hint-create",
+        problem.puid,
+        data={
+            "problem": problem.pk,
+            "number": 31,
+            "keywords": "keywords or something",
+            "content": "just solve it",
+        },
+        follow=True,
+    )
 
-    def test_problem(self):
-        verified_group = GroupFactory(name="Verified")
-        alice = UserFactory.create(groups=(verified_group,))
-        self.login(alice)
+    hint: Hint = Hint.objects.get(problem=problem)
+    resp = otis.get_20x("hint-detail", problem.puid, 31)
+    otis.assert_has(resp, hint.content)
 
-        problem: Problem = ProblemFactory.create(puid="SILLY")
+    otis.get_40x("hint-detail", problem.puid, 41)
+    otis.get_20x("hint-detail-pk", hint.pk)
+    otis.assert_has(otis.get_20x("hint-update", problem.puid, 31), hint.keywords)
+    otis.post_20x(
+        "hint-update",
+        problem.puid,
+        31,
+        data={
+            "problem": hint.problem_id,
+            "number": 41,
+            "keywords": hint.keywords,
+            "content": hint.content,
+            "reason": "Changed number",
+        },
+        follow=True,
+    )
 
-        self.assertPost20X(
-            "arch-index",
-            data={"puid": "SILLY", "hyperlink": "https://otis.evanchen.cc/"},
-            follow=True,
-        )
+    otis.get_40x("hint-detail", problem.puid, 31)
+    otis.get_20x("hint-detail", problem.puid, 41)
 
-        problem = Problem.objects.get(puid="SILLY")
+    otis.assert_has(otis.get_20x("hint-update-pk", hint.pk), hint.keywords)
+    otis.post_20x(
+        "hint-update-pk",
+        hint.pk,
+        data={
+            "problem": hint.problem_id,
+            "number": 51,
+            "keywords": hint.keywords,
+            "content": hint.content,
+            "reason": "Changed number again",
+        },
+        follow=True,
+    )
 
-        self.assertPost20X(
-            "problem-update",
-            problem.puid,
-            data={"hyperlink": "https://aops.com/"},
-            follow=True,
-        )
-        self.assertContains(
-            self.assertGet20X("problem-update", "SILLY"),
-            "https://aops.com/",
-        )
+    otis.get_40x("hint-detail", problem.puid, 41)
+    otis.get_20x("hint-detail", problem.puid, 51)
 
-        problem.refresh_from_db()
-        self.assertTrue(problem.hyperlink == "https://aops.com/")
+    otis.post_20x("hint-delete", problem.puid, 51, follow=True)
 
-    def test_hint(self):
-        verified_group = GroupFactory(name="Verified")
-        alice = UserFactory.create(groups=(verified_group,))
-        self.login(alice)
+    assert not Hint.objects.filter(problem=problem).exists()
 
-        problem: Problem = ProblemFactory.create()
 
-        self.assertGet20X("hint-list", problem.puid)
-        self.assertGet40X("hint-detail", problem.pk, 31)
+@pytest.mark.django_db
+def test_vote(otis):
+    verified_group = GroupFactory(name="Verified")
+    alice = UserFactory.create(groups=(verified_group,))
+    otis.login(alice)
 
-        self.assertContains(
-            self.assertGet20X("hint-create", problem.puid),
-            "Advice for writing hints",
-        )
-        self.assertPost20X(
-            "hint-create",
-            problem.puid,
-            data={
-                "problem": problem.pk,
-                "number": 31,
-                "keywords": "keywords or something",
-                "content": "just solve it",
-            },
-            follow=True,
-        )
+    problem: Problem = ProblemFactory.create()
 
-        hint: Hint = Hint.objects.get(problem=problem)
-        resp = self.assertGet20X("hint-detail", problem.puid, 31)
-        self.assertContains(resp, hint.content)
+    otis.get_20x("vote-create", problem.puid)
 
-        self.assertGet40X("hint-detail", problem.puid, 41)
-        self.assertGet20X("hint-detail-pk", hint.pk)
-        self.assertContains(
-            self.assertGet20X("hint-update", problem.puid, 31),
-            hint.keywords,
-        )
-        self.assertPost20X(
-            "hint-update",
-            problem.puid,
-            31,
-            data={
-                "problem": hint.problem.pk,
-                "number": 41,
-                "keywords": hint.keywords,
-                "content": hint.content,
-                "reason": "Changed number",
-            },
-            follow=True,
-        )
+    resp = otis.post_20x("vote-create", problem.puid, data={"niceness": 4}, follow=True)
+    messages = [m.message for m in resp.context["messages"]]
+    assert f"You rated {problem.puid} as 4." in messages
 
-        self.assertGet40X("hint-detail", problem.puid, 31)
-        resp = self.assertGet20X("hint-detail", problem.puid, 41)
+    assert Vote.objects.filter(problem__puid=problem.puid).exists()
 
-        self.assertContains(
-            self.assertGet20X("hint-update-pk", hint.pk),
-            hint.keywords,
-        )
-        self.assertPost20X(
-            "hint-update-pk",
-            hint.pk,
-            data={
-                "problem": hint.problem.pk,
-                "number": 51,
-                "keywords": hint.keywords,
-                "content": hint.content,
-                "reason": "Changed number again",
-            },
-            follow=True,
-        )
 
-        self.assertGet40X("hint-detail", problem.puid, 41)
-        self.assertGet20X("hint-detail", problem.puid, 51)
+@pytest.mark.django_db
+def test_lookup(otis):
+    verified_group = GroupFactory(name="Verified")
+    alice = UserFactory.create(groups=(verified_group,))
+    otis.login(alice)
 
-        self.assertPost20X("hint-delete", problem.puid, 51, follow=True)
+    problem: Problem = ProblemFactory.create()
 
-        self.assertFalse(Hint.objects.filter(problem=problem).exists())
+    otis.get_redirects(reverse("arch-index"), "arch-lookup")
 
-    def test_vote(self):
-        verified_group = GroupFactory(name="Verified")
-        alice = UserFactory.create(groups=(verified_group,))
-        self.login(alice)
+    otis.post_redirects(
+        problem.get_absolute_url(), "arch-lookup", data={"problem": problem.pk}
+    )
 
-        problem: Problem = ProblemFactory.create()
 
-        self.assertGet20X("vote-create", problem.puid)
+@pytest.mark.django_db
+@override_settings(TESTING_NEEDS_MOCK_MEDIA=True)
+def test_view_solution(otis):
+    problem: Problem = ProblemFactory.create()
+    eve = UserFactory.create()
+    otis.login(eve)
+    resp = otis.get_40x("view-solution", problem.puid)
+    assert resp.status_code == 403
 
-        resp = self.assertPost20X(
-            "vote-create", problem.puid, data={"niceness": 4}, follow=True
-        )
-        messages = [m.message for m in resp.context["messages"]]
-        self.assertIn(f"You rated {problem.puid} as 4.", messages)
+    # verified user should instead fail because default storage doesn't
+    # have the problem in question
+    verified_group = GroupFactory(name="Verified")
+    alice = UserFactory.create(groups=(verified_group,))
+    otis.login(alice)
+    resp = otis.get_40x("view-solution", problem.puid)
+    assert resp.status_code == 404
 
-        self.assertTrue(Vote.objects.filter(problem__puid=problem.puid).exists())
 
-    def test_lookup(self):
-        verified_group = GroupFactory(name="Verified")
-        alice = UserFactory.create(groups=(verified_group,))
-        self.login(alice)
-
-        problem: Problem = ProblemFactory.create()
-
-        self.assertGetRedirects(reverse("arch-index"), "arch-lookup")
-
-        self.assertPostRedirects(
-            problem.get_absolute_url(), "arch-lookup", data={"problem": problem.pk}
-        )
-
-    @override_settings(TESTING_NEEDS_MOCK_MEDIA=True)
-    def test_view_solution(self):
-        problem: Problem = ProblemFactory.create()
-        eve = UserFactory.create()
-        self.login(eve)
-        resp = self.assertGet40X("view-solution", problem.puid)
-        self.assertEqual(resp.status_code, 403)
-
-        # verified user should instead fail because default storage doesn't
-        # have the problem in question
-        verified_group = GroupFactory(name="Verified")
-        alice = UserFactory.create(groups=(verified_group,))
-        self.login(alice)
-        resp = self.assertGet40X("view-solution", problem.puid)
-        self.assertEqual(resp.status_code, 404)
-
-    def test_validate_puid(self):
-        self.assertRaises(Http404, validate_puid, "✈✈✈")
-        self.assertRaises(Http404, validate_puid, "✈" * 1000)
-        self.assertRaises(Http404, validate_puid, "i'm a rock")
-        self.assertRaises(Http404, validate_puid, "A" * 1000)
-        validate_puid("15TWNQJ36")
-        validate_puid("A" * 24)
+def test_validate_puid():
+    with pytest.raises(Http404):
+        validate_puid("✈✈✈")
+    with pytest.raises(Http404):
+        validate_puid("✈" * 1000)
+    with pytest.raises(Http404):
+        validate_puid("i'm a rock")
+    with pytest.raises(Http404):
+        validate_puid("A" * 1000)
+    validate_puid("15TWNQJ36")
+    validate_puid("A" * 24)

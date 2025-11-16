@@ -1,10 +1,10 @@
 import datetime
 
+import pytest
 from django.test.utils import override_settings
 from freezegun import freeze_time
 
 from core.factories import SemesterFactory, UserFactory
-from evans_django_tools.testsuite import EvanTestCase
 from exams.calculator import expr_compute
 from exams.factories import QuizFactory, TestFactory
 from exams.models import ExamAttempt, PracticeExam
@@ -14,192 +14,195 @@ from roster.models import Student
 UTC = datetime.timezone.utc
 
 
-class ArithmeticTest(EvanTestCase):
-    def checkCalculator(self, expr: str, out: float):
-        v = expr_compute(expr)
-        assert v is not None
-        self.assertAlmostEqual(v, out)
-
-    def test_arithmetic(self):
-        self.checkCalculator("1/3^4", 1 / 81)
-        self.checkCalculator("(2*sqrt(2))^2 - 4^(3/2)", 0)
-        self.checkCalculator("16900/4*pi", 13273.2289614)
-
-    def test_pdf(self):
-        pass
+def check_calculator(expr: str, out: float):
+    v = expr_compute(expr)
+    assert v is not None
+    assert v == pytest.approx(out)
 
 
-class ExamTest(EvanTestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.semester = SemesterFactory(active=True, exam_family="Waltz")
-        cls.semester_old = SemesterFactory(active=False, exam_family="Waltz")
-        cls.alice = StudentFactory.create(
-            user__username="alice",
-            semester=cls.semester,
-            user__first_name="Alice",
-            user__last_name="Aardvark",
+@pytest.mark.django_db
+def test_arithmetic():
+    check_calculator("1/3^4", 1 / 81)
+    check_calculator("(2*sqrt(2))^2 - 4^(3/2)", 0)
+    check_calculator("16900/4*pi", 13273.2289614)
+
+
+@pytest.mark.django_db
+def test_pdf():
+    pass
+
+
+@pytest.fixture
+def exam_setup():
+    semester = SemesterFactory(active=True, exam_family="Waltz")
+    semester_old = SemesterFactory(active=False, exam_family="Waltz")
+    alice = StudentFactory.create(
+        user__username="alice",
+        semester=semester,
+        user__first_name="Alice",
+        user__last_name="Aardvark",
+    )
+    bob = StudentFactory.create(
+        user__username="bob",
+        semester=semester_old,
+        user__first_name="Bob",
+        user__last_name="Beta",
+    )
+    dead = StudentFactory.create(
+        user__username="dead",
+        enabled=False,
+        semester=semester,
+        user__first_name="Dead",
+        user__last_name="Derp",
+    )
+
+    with override_settings(TESTING_NEEDS_MOCK_MEDIA=True):
+        for factory in (TestFactory, QuizFactory):
+            for family in ("Waltz", "Foxtrot"):
+                factory.create(
+                    start_date=datetime.datetime(2020, 1, 1, tzinfo=UTC),
+                    due_date=datetime.datetime(2020, 12, 31, tzinfo=UTC),
+                    family=family,
+                    number=1,
+                )
+    PracticeExam.objects.filter(is_test=False).update(
+        answer1=1000,
+        answer2=2000,
+        answer3=3000,
+        answer4=4000,
+        answer5=5000,
+    )
+
+    return {
+        "semester": semester,
+        "semester_old": semester_old,
+        "alice": alice,
+        "bob": bob,
+        "dead": dead,
+    }
+
+
+@pytest.mark.django_db
+def test_exam_pdf(otis, exam_setup):
+    exam_waltz = PracticeExam.objects.get(family="Waltz", is_test=True)
+    exam_foxtrot = PracticeExam.objects.get(family="Foxtrot", is_test=True)
+
+    with freeze_time("2018-01-01", tz_offset=0):
+        otis.login("alice")
+        otis.get_denied("exam-pdf", exam_waltz.pk)
+        otis.get_denied("exam-pdf", exam_foxtrot.pk)
+    with freeze_time("2020-06-05", tz_offset=0):
+        otis.login("alice")
+        otis.get_20x("exam-pdf", exam_waltz.pk)
+        otis.get_denied("exam-pdf", exam_foxtrot.pk)
+    with freeze_time("2022-12-31", tz_offset=0):
+        otis.login("alice")
+        otis.get_20x("exam-pdf", exam_waltz.pk)
+        otis.get_denied("exam-pdf", exam_foxtrot.pk)
+
+    with freeze_time("2020-06-05", tz_offset=0):
+        otis.login("dead")
+        otis.get_denied("exam-pdf", exam_waltz.pk)
+        otis.get_denied("exam-pdf", exam_foxtrot.pk)
+
+    staff = UserFactory.create(is_staff=True)
+    with freeze_time("2018-01-01", tz_offset=0):
+        otis.login(staff)
+        otis.get_20x("exam-pdf", exam_waltz.pk)
+        otis.get_20x("exam-pdf", exam_foxtrot.pk)
+    with freeze_time("2020-06-05", tz_offset=0):
+        otis.login(staff)
+        otis.get_20x("exam-pdf", exam_waltz.pk)
+        otis.get_20x("exam-pdf", exam_foxtrot.pk)
+    with freeze_time("2022-12-31", tz_offset=0):
+        otis.login(staff)
+        otis.get_20x("exam-pdf", exam_waltz.pk)
+        otis.get_20x("exam-pdf", exam_foxtrot.pk)
+
+
+@pytest.mark.django_db
+def test_quiz(otis, exam_setup):
+    alice = exam_setup["alice"]
+    quiz_waltz = PracticeExam.objects.get(family="Waltz", is_test=False)
+    quiz_foxtrot = PracticeExam.objects.get(family="Foxtrot", is_test=False)
+    test_waltz = PracticeExam.objects.get(family="Waltz", is_test=True)
+    test_foxtrot = PracticeExam.objects.get(family="Foxtrot", is_test=True)
+
+    with freeze_time("2018-01-01", tz_offset=0):
+        otis.login("alice")
+        otis.get_denied("quiz", alice.pk, quiz_waltz.pk)
+        otis.get_denied("quiz", alice.pk, test_waltz.pk)
+        otis.get_denied("quiz", alice.pk, test_foxtrot.pk)
+        otis.get_denied("quiz", alice.pk, quiz_foxtrot.pk)
+    with freeze_time("2020-06-05", tz_offset=0):
+        otis.login("dead")
+        otis.get_denied(
+            "quiz", Student.objects.get(user__username="dead").pk, quiz_waltz.pk
         )
-        cls.bob = StudentFactory.create(
-            user__username="bob",
-            semester=cls.semester_old,
-            user__first_name="Bob",
-            user__last_name="Beta",
+        otis.login("alice")
+        otis.get_denied("quiz", alice.pk, test_waltz.pk)
+        otis.get_denied("quiz", alice.pk, test_foxtrot.pk)
+        otis.get_denied("quiz", alice.pk, quiz_foxtrot.pk)
+
+        # OK, now actually take a quiz, lol
+        resp_before_submit = otis.get_20x("quiz", alice.pk, quiz_waltz.pk)
+        otis.assert_has(resp_before_submit, "Submit answers")
+
+        # submit quiz improperly
+        resp_after_improper = otis.post_20x(
+            "quiz",
+            alice.pk,
+            quiz_waltz.pk,
+            data={
+                "guess1": r"$@#%$@#\^__meow__^%&*(==",
+                "guess2": "2000",
+            },
         )
-        cls.dead = StudentFactory.create(
-            user__username="dead",
-            enabled=False,
-            semester=cls.semester,
-            user__first_name="Dead",
-            user__last_name="Derp",
+        otis.assert_has(resp_after_improper, "Submit answers")
+
+        # submit quiz properly
+        resp_after_submit = otis.post_20x(
+            "quiz",
+            alice.pk,
+            quiz_waltz.pk,
+            data={
+                "guess1": "1337",
+                "guess2": "2000",
+                "guess3": "30+100",  # pretend it's a typo for 30 x 100 I guess
+                "guess4": "2^5*5^3",
+            },
         )
+        otis.assert_has(resp_after_submit, "1337", count=1)
+        otis.assert_has(resp_after_submit, "1000", count=1)
+        otis.assert_has(resp_after_submit, "2000", count=2)
+        otis.assert_has(resp_after_submit, "30+100", count=1)
+        otis.assert_has(resp_after_submit, "3000", count=1)
+        otis.assert_has(resp_after_submit, "2^5*5^3", count=1)
+        otis.assert_has(resp_after_submit, "4000", count=1)
+        otis.assert_has(resp_after_submit, "5000", count=1)
+        otis.assert_not_has(resp_after_submit, "Submit answers")
 
-        with override_settings(TESTING_NEEDS_MOCK_MEDIA=True):
-            for factory in (TestFactory, QuizFactory):
-                for family in ("Waltz", "Foxtrot"):
-                    factory.create(
-                        start_date=datetime.datetime(2020, 1, 1, tzinfo=UTC),
-                        due_date=datetime.datetime(2020, 12, 31, tzinfo=UTC),
-                        family=family,
-                        number=1,
-                    )
-        PracticeExam.objects.filter(is_test=False).update(
-            answer1=1000,
-            answer2=2000,
-            answer3=3000,
-            answer4=4000,
-            answer5=5000,
-        )
+        # verify that the attempt is saved properly
+        a = ExamAttempt.objects.get(student__user__username="alice")
+        assert a.score == 2
+        assert a.guess1 == "1337"
+        assert a.guess2 == "2000"
+        assert a.guess3 == "30+100"
+        assert a.guess4 == "2^5*5^3"
+        assert a.guess5 == ""
 
-    def test_exam_pdf(self):
-        exam_waltz = PracticeExam.objects.get(family="Waltz", is_test=True)
-        exam_foxtrot = PracticeExam.objects.get(family="Foxtrot", is_test=True)
+        # refresh the page
+        resp_after_refresh = otis.get_ok("quiz", alice.pk, quiz_waltz.pk)
+        assert resp_after_submit.content.decode() == resp_after_refresh.content.decode()
 
-        with freeze_time("2018-01-01", tz_offset=0):
-            self.login("alice")
-            self.assertGetDenied("exam-pdf", exam_waltz.pk)
-            self.assertGetDenied("exam-pdf", exam_foxtrot.pk)
-        with freeze_time("2020-06-05", tz_offset=0):
-            self.login("alice")
-            self.assertGet20X("exam-pdf", exam_waltz.pk)
-            self.assertGetDenied("exam-pdf", exam_foxtrot.pk)
-        with freeze_time("2022-12-31", tz_offset=0):
-            self.login("alice")
-            self.assertGet20X("exam-pdf", exam_waltz.pk)
-            self.assertGetDenied("exam-pdf", exam_foxtrot.pk)
+        # Try to resubmit the quiz (despite existing submission); should fail
+        otis.post_denied("quiz", alice.pk, quiz_waltz.pk, data={"guess1": "7*191"})
 
-        with freeze_time("2020-06-05", tz_offset=0):
-            self.login("dead")
-            self.assertGetDenied("exam-pdf", exam_waltz.pk)
-            self.assertGetDenied("exam-pdf", exam_foxtrot.pk)
+        bob = Student.objects.get(user__username="bob")
+        otis.login("bob")
+        otis.post_denied("quiz", bob.pk, quiz_waltz.pk, data={"answer1": 1337})
 
-        staff = UserFactory.create(is_staff=True)
-        with freeze_time("2018-01-01", tz_offset=0):
-            self.login(staff)
-            self.assertGet20X("exam-pdf", exam_waltz.pk)
-            self.assertGet20X("exam-pdf", exam_foxtrot.pk)
-        with freeze_time("2020-06-05", tz_offset=0):
-            self.login(staff)
-            self.assertGet20X("exam-pdf", exam_waltz.pk)
-            self.assertGet20X("exam-pdf", exam_foxtrot.pk)
-        with freeze_time("2022-12-31", tz_offset=0):
-            self.login(staff)
-            self.assertGet20X("exam-pdf", exam_waltz.pk)
-            self.assertGet20X("exam-pdf", exam_foxtrot.pk)
-
-    def test_quiz(self):
-        quiz_waltz = PracticeExam.objects.get(family="Waltz", is_test=False)
-        quiz_foxtrot = PracticeExam.objects.get(family="Foxtrot", is_test=False)
-        test_waltz = PracticeExam.objects.get(family="Waltz", is_test=True)
-        test_foxtrot = PracticeExam.objects.get(family="Foxtrot", is_test=True)
-
-        with freeze_time("2018-01-01", tz_offset=0):
-            self.login("alice")
-            self.assertGetDenied("quiz", ExamTest.alice.pk, quiz_waltz.pk)
-            self.assertGetDenied("quiz", ExamTest.alice.pk, test_waltz.pk)
-            self.assertGetDenied("quiz", ExamTest.alice.pk, test_foxtrot.pk)
-            self.assertGetDenied("quiz", ExamTest.alice.pk, quiz_foxtrot.pk)
-        with freeze_time("2020-06-05", tz_offset=0):
-            self.login("dead")
-            self.assertGetDenied(
-                "quiz", Student.objects.get(user__username="dead").pk, quiz_waltz.pk
-            )
-            self.login("alice")
-            self.assertGetDenied("quiz", ExamTest.alice.pk, test_waltz.pk)
-            self.assertGetDenied("quiz", ExamTest.alice.pk, test_foxtrot.pk)
-            self.assertGetDenied("quiz", ExamTest.alice.pk, quiz_foxtrot.pk)
-
-            # OK, now actually take a quiz, lol
-            resp_before_submit = self.assertGet20X(
-                "quiz", ExamTest.alice.pk, quiz_waltz.pk
-            )
-            self.assertHas(resp_before_submit, "Submit answers")
-
-            # submit quiz improperly
-            resp_after_improper = self.assertPost20X(
-                "quiz",
-                ExamTest.alice.pk,
-                quiz_waltz.pk,
-                data={
-                    "guess1": r"$@#%$@#\^__meow__^%&*(==",
-                    "guess2": "2000",
-                },
-            )
-            self.assertHas(resp_after_improper, "Submit answers")
-
-            # submit quiz properly
-            resp_after_submit = self.assertPost20X(
-                "quiz",
-                ExamTest.alice.pk,
-                quiz_waltz.pk,
-                data={
-                    "guess1": "1337",
-                    "guess2": "2000",
-                    "guess3": "30+100",  # pretend it's a typo for 30 x 100 I guess
-                    "guess4": "2^5*5^3",
-                },
-            )
-            self.assertHas(resp_after_submit, "1337", count=1)
-            self.assertHas(resp_after_submit, "1000", count=1)
-            self.assertHas(resp_after_submit, "2000", count=2)
-            self.assertHas(resp_after_submit, "30+100", count=1)
-            self.assertHas(resp_after_submit, "3000", count=1)
-            self.assertHas(resp_after_submit, "2^5*5^3", count=1)
-            self.assertHas(resp_after_submit, "4000", count=1)
-            self.assertHas(resp_after_submit, "5000", count=1)
-            self.assertNotHas(resp_after_submit, "Submit answers")
-
-            # verify that the attempt is saved properly
-            a = ExamAttempt.objects.get(student__user__username="alice")
-            self.assertEqual(a.score, 2)
-            self.assertEqual(a.guess1, "1337")
-            self.assertEqual(a.guess2, "2000")
-            self.assertEqual(a.guess3, "30+100")
-            self.assertEqual(a.guess4, "2^5*5^3")
-            self.assertEqual(a.guess5, "")
-
-            # refresh the page
-            resp_after_refresh = self.assertGetOK(
-                "quiz", ExamTest.alice.pk, quiz_waltz.pk
-            )
-            self.assertHTMLEqual(
-                resp_after_submit.content.decode(),
-                resp_after_refresh.content.decode(),
-            )
-
-            # Try to resubmit the quiz (despite existing submission); should fail
-            self.assertPostDenied(
-                "quiz", ExamTest.alice.pk, quiz_waltz.pk, data={"guess1": "7*191"}
-            )
-
-            bob = Student.objects.get(user__username="bob")
-            self.login("bob")
-            self.assertPostDenied("quiz", bob.pk, quiz_waltz.pk, data={"answer1": 1337})
-
-        with freeze_time("2022-12-31", tz_offset=0):
-            a.delete()  # make sure we can't resubmit
-            self.login("alice")
-            self.assertPostDenied(
-                "quiz", ExamTest.alice.pk, quiz_waltz.pk, data={"answer1": 1337}
-            )
+    with freeze_time("2022-12-31", tz_offset=0):
+        a.delete()  # make sure we can't resubmit
+        otis.login("alice")
+        otis.post_denied("quiz", alice.pk, quiz_waltz.pk, data={"answer1": 1337})

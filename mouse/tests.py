@@ -1,5 +1,6 @@
+import pytest
+
 from core.factories import UserFactory
-from evans_django_tools.testsuite import EvanTestCase
 from roster.factories import StudentFactory
 from rpg.models import QuestComplete
 
@@ -11,63 +12,66 @@ Bob Beta
 Carol Cutie"""
 
 
-class MouseTests(EvanTestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        UserFactory.create(username="alice")
-        UserFactory.create(username="evan", is_staff=True, is_superuser=True)
+@pytest.fixture
+def mouse_setup(db):
+    """Setup common data for mouse tests."""
+    UserFactory.create(username="alice")
+    UserFactory.create(username="evan", is_staff=True, is_superuser=True)
 
-        StudentFactory.create(
-            user__first_name="Alice",
-            user__last_name="Aardvark",
-            semester__active=True,
-        )
-        StudentFactory.create(
-            user__first_name="Bob",
-            user__last_name="Beta",
-            semester__active=True,
-        )
-        StudentFactory.create(
-            user__first_name="Carol",
-            user__last_name="Cutie",
-            semester__active=True,
-        )
+    StudentFactory.create(
+        user__first_name="Alice",
+        user__last_name="Aardvark",
+        semester__active=True,
+    )
+    StudentFactory.create(
+        user__first_name="Bob",
+        user__last_name="Beta",
+        semester__active=True,
+    )
+    StudentFactory.create(
+        user__first_name="Carol",
+        user__last_name="Cutie",
+        semester__active=True,
+    )
 
-    def test_usemo_score(self):
-        self.assertGet30X("usemo-score")  # anonymous redirected to login
-        self.login("alice")
-        self.assertGet40X("usemo-score")
-        self.login("evan")
-        self.assertGet20X("usemo-score")
 
-        resp = self.assertPost20X(
-            "usemo-score",
-            data={"text": USEMO_SCORE_TEST_DATA},
-        )
+@pytest.mark.django_db
+def test_usemo_score(otis, mouse_setup):
+    otis.get_30x("usemo-score")  # anonymous redirected to login
+    otis.login("alice")
+    otis.get_40x("usemo-score")
+    otis.login("evan")
+    otis.get_20x("usemo-score")
 
-        spades_list = QuestComplete.objects.filter(category="US").values_list(
-            "spades", flat=True
-        )
-        self.assertEqual(len(spades_list), 3)
-        self.assertEqual(set(spades_list), {14, 37, 42})
-        self.assertHas(resp, "Built 3 records")
+    resp = otis.post_20x(
+        "usemo-score",
+        data={"text": USEMO_SCORE_TEST_DATA},
+    )
 
-    def test_usemo_grading(self):
-        self.assertGet30X("usemo-grader")  # anonymous redirected to login
-        self.login("alice")
-        self.assertGet40X("usemo-grader")
-        self.login("evan")
-        self.assertGet20X("usemo-grader")
+    spades_list = QuestComplete.objects.filter(category="US").values_list(
+        "spades", flat=True
+    )
+    assert len(spades_list) == 3
+    assert set(spades_list) == {14, 37, 42}
+    otis.assert_has(resp, "Built 3 records")
 
-        resp = self.assertPost20X(
-            "usemo-grader",
-            data={"text": USEMO_SCORE_TEST_DATA},
-        )
 
-        spades_list = QuestComplete.objects.filter(category="UG").values_list(
-            "spades", flat=True
-        )
-        self.assertHas(resp, "Built 3 records")
-        self.assertEqual(len(spades_list), 3)
-        self.assertEqual(set(spades_list), {15})
+@pytest.mark.django_db
+def test_usemo_grading(otis, mouse_setup):
+    otis.get_30x("usemo-grader")  # anonymous redirected to login
+    otis.login("alice")
+    otis.get_40x("usemo-grader")
+    otis.login("evan")
+    otis.get_20x("usemo-grader")
+
+    resp = otis.post_20x(
+        "usemo-grader",
+        data={"text": USEMO_SCORE_TEST_DATA},
+    )
+
+    spades_list = QuestComplete.objects.filter(category="UG").values_list(
+        "spades", flat=True
+    )
+    otis.assert_has(resp, "Built 3 records")
+    assert len(spades_list) == 3
+    assert set(spades_list) == {15}
