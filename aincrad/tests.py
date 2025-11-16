@@ -311,13 +311,13 @@ def test_accept_inquiries(otis, aincrad_setup):
     )
     assert resp.json()["result"] == "success"
     assert resp.json()["count"] == 3
-    assert len(UnitInquiry.objects.filter(status="INQ_NEW")) == 0
+    assert UnitInquiry.objects.filter(status="INQ_NEW").count() == 0
 
 
 @pytest.mark.django_db
 @override_settings(API_TARGET_HASH=TARGET_HASH)
 def test_accept_registrations(otis, aincrad_setup):
-    n = len(Student.objects.all())
+    n = Student.objects.count()
     frisk = User.objects.get(username="frisk")
     assert not frisk.groups.filter(name="Verified").exists()
     assert not Student.objects.filter(user__username="frisk").exists()
@@ -330,7 +330,7 @@ def test_accept_registrations(otis, aincrad_setup):
     )
     assert resp.json()["result"] == "success"
     assert resp.json()["count"] == 1
-    assert len(Student.objects.all()) == n + 1
+    assert Student.objects.count() == n + 1
     assert Student.objects.filter(user__username="frisk").exists()
     assert frisk.groups.filter(name="Verified").exists()
 

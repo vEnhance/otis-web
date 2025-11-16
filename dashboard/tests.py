@@ -158,7 +158,7 @@ def test_get_news(otis):
         news = get_news(alice_profile, alice)
         assert news["announcements"].count() == 1
         assert news["downloads"].count() == 1
-        assert len(news["markets"]) == 1
+        assert news["markets"].count() == 1
         assert news["hanabis"].count() == 1
         assert news["opals"].count() == 1
 
@@ -186,7 +186,7 @@ def test_get_news(otis):
         SemesterDownloadFileFactory.create(semester=semester)
         news = get_news(alice_profile, alice)
         assert not news["announcements"].exists()
-        assert len(news["downloads"]) == 1
+        assert news["downloads"].count() == 1
         assert news["markets"].count() == 2
         assert news["hanabis"].count() == 2
         assert not news["opals"].exists()

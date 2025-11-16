@@ -78,7 +78,7 @@ def test_process_payment(payment_test_data):
     process_payment(300, invoice, "pm_XXXXXXXX")
     assert invoice.total_owed == 180
     log = PaymentLog.objects.get()
-    assert log.invoice.pk == invoice.pk
+    assert log.invoice_id == invoice.pk
     assert log.amount == 300
 
 
