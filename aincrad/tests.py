@@ -121,9 +121,7 @@ def aincrad_setup(db):
     PaymentLogFactory.create(invoice=invE, amount=1)
     PaymentLogFactory.create(invoice=invC, amount=9001, refunded=True)
 
-    regcontainer_active = RegistrationContainerFactory.create(
-        semester=active_semester
-    )
+    regcontainer_active = RegistrationContainerFactory.create(semester=active_semester)
     regcontainer_old = RegistrationContainerFactory.create(semester=old_semester)
 
     for student in (alice, bob, carol, david, eve, old_alice):

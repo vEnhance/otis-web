@@ -26,9 +26,9 @@ def payment_test_data(db):
     invoice = InvoiceFactory.create(student=alice)
     checksum = alice.get_checksum(settings.INVOICE_HASH_KEY)
     return {
-    "alice": alice,
-    "invoice": invoice,
-    "checksum": checksum,
+        "alice": alice,
+        "invoice": invoice,
+        "checksum": checksum,
     }
 
 
