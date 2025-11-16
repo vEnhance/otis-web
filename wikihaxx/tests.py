@@ -49,24 +49,21 @@ YouTube | vEnhance
 
 
 @pytest.fixture
-def wiki_setup(django_db_blocker):
+def wiki_setup(db):
     """Setup wiki URLs for testing."""
-    with django_db_blocker.unblock():
-        pass  # Not needed for function-scoped fixtures
-    if True:
-        user = UserFactory.create(is_staff=True, is_superuser=True)
-        root_url = URLPathFactory.create(article__owner=user)
-        units_url = URLPathFactory.create(
-            article__owner=user, parent=root_url, slug="units"
-        )
+    user = UserFactory.create(is_staff=True, is_superuser=True)
+    root_url = URLPathFactory.create(article__owner=user)
+    units_url = URLPathFactory.create(
+        article__owner=user, parent=root_url, slug="units"
+    )
 
-        for subject in set(WIKI_SUBJECT_CHART.values()):
-            URLPathFactory.create(
-                article__owner=user,
-                parent=units_url,
-                slug=f"list-of-{subject}-units",
-            )
-        return user
+    for subject in set(WIKI_SUBJECT_CHART.values()):
+        URLPathFactory.create(
+            article__owner=user,
+            parent=units_url,
+            slug=f"list-of-{subject}-units",
+        )
+    return user
 
 
 @pytest.mark.django_db

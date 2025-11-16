@@ -15,25 +15,22 @@ UTC = datetime.timezone.utc
 
 
 @pytest.fixture
-def market_model_data(django_db_blocker):
-    with django_db_blocker.unblock():
-        pass  # Not needed for function-scoped fixtures
-    if True:
-        MarketFactory.create(
-            start_date=datetime.datetime(2000, 1, 1, tzinfo=UTC),
-            end_date=datetime.datetime(2000, 1, 3, tzinfo=UTC),
-            slug="m-one",  # ended a long time ago
-        )
-        MarketFactory.create(
-            start_date=datetime.datetime(2020, 1, 1, tzinfo=UTC),
-            end_date=datetime.datetime(2020, 1, 3, tzinfo=UTC),
-            slug="m-two",  # active
-        )
-        MarketFactory.create(
-            start_date=datetime.datetime(2050, 1, 1, tzinfo=UTC),
-            end_date=datetime.datetime(2050, 1, 3, tzinfo=UTC),
-            slug="m-three",  # future
-        )
+def market_model_data(db):
+    MarketFactory.create(
+        start_date=datetime.datetime(2000, 1, 1, tzinfo=UTC),
+        end_date=datetime.datetime(2000, 1, 3, tzinfo=UTC),
+        slug="m-one",  # ended a long time ago
+    )
+    MarketFactory.create(
+        start_date=datetime.datetime(2020, 1, 1, tzinfo=UTC),
+        end_date=datetime.datetime(2020, 1, 3, tzinfo=UTC),
+        slug="m-two",  # active
+    )
+    MarketFactory.create(
+        start_date=datetime.datetime(2050, 1, 1, tzinfo=UTC),
+        end_date=datetime.datetime(2050, 1, 3, tzinfo=UTC),
+        slug="m-three",  # future
+    )
 
 
 @pytest.mark.django_db
@@ -90,20 +87,17 @@ def test_admin_action(market_model_data):
 
 
 @pytest.fixture
-def market_data(django_db_blocker):
-    with django_db_blocker.unblock():
-        pass  # Not needed for function-scoped fixtures
-    if True:
-        MarketFactory(
-            start_date=datetime.datetime(2050, 5, 1, 0, 0, 0, tzinfo=UTC),
-            end_date=datetime.datetime(2050, 9, 30, 23, 59, 59, tzinfo=UTC),
-            weight=2,
-            alpha=2,
-            slug="guess-my-ssn",
-            int_guesses_only=True,
-        )
-        verified_group = GroupFactory(name="Verified")
-        UserFactory(username="alice", groups=(verified_group,))
+def market_data(db):
+    MarketFactory(
+        start_date=datetime.datetime(2050, 5, 1, 0, 0, 0, tzinfo=UTC),
+        end_date=datetime.datetime(2050, 9, 30, 23, 59, 59, tzinfo=UTC),
+        weight=2,
+        alpha=2,
+        slug="guess-my-ssn",
+        int_guesses_only=True,
+    )
+    verified_group = GroupFactory(name="Verified")
+    UserFactory(username="alice", groups=(verified_group,))
 
 
 @pytest.mark.django_db
@@ -438,11 +432,8 @@ def test_update_guess_redirects_to_pending(otis, market_data):
 
 
 @pytest.fixture
-def create_market_data(django_db_blocker):
-    with django_db_blocker.unblock():
-        pass  # Not needed for function-scoped fixtures
-    if True:
-        SemesterFactory.create(active=True)
+def create_market_data(db):
+    SemesterFactory.create(active=True)
 
 
 @pytest.mark.django_db

@@ -17,21 +17,18 @@ UTC = datetime.timezone.utc
 
 
 @pytest.fixture
-def payment_test_data(django_db_blocker):
-    with django_db_blocker.unblock():
-        pass  # Not needed for function-scoped fixtures
-    if True:
-        verified_group = GroupFactory(name="Verified")
-        alice = StudentFactory.create(
-            user__username="alice",
-            user__groups=(verified_group,),
-        )
-        invoice = InvoiceFactory.create(student=alice)
-        checksum = alice.get_checksum(settings.INVOICE_HASH_KEY)
+def payment_test_data(db):
+    verified_group = GroupFactory(name="Verified")
+    alice = StudentFactory.create(
+        user__username="alice",
+        user__groups=(verified_group,),
+    )
+    invoice = InvoiceFactory.create(student=alice)
+    checksum = alice.get_checksum(settings.INVOICE_HASH_KEY)
     return {
-        "alice": alice,
-        "invoice": invoice,
-        "checksum": checksum,
+    "alice": alice,
+    "invoice": invoice,
+    "checksum": checksum,
     }
 
 

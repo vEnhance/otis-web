@@ -27,7 +27,10 @@ UTC = datetime.timezone.utc
 
 
 @pytest.fixture
-def alice_with_data():
+def alice_with_data(db):
+    # Reset level factory sequence to ensure consistent threshold numbering
+    LevelFactory.reset_sequence(0)
+
     verified_group = GroupFactory(name="Verified")
     alice = StudentFactory.create(
         user__username="alice",

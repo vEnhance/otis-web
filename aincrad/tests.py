@@ -27,124 +27,121 @@ TARGET_HASH = sha256(EXAMPLE_PASSWORD.encode("ascii")).hexdigest()
 
 
 @pytest.fixture
-def aincrad_setup(django_db_blocker):
-    with django_db_blocker.unblock():
-        pass  # Not needed for function-scoped fixtures
-    if True:
-        active_semester = SemesterFactory.create(name="New")
-        old_semester = SemesterFactory.create(name="Old", active=False)
+def aincrad_setup(db):
+    active_semester = SemesterFactory.create(name="New")
+    old_semester = SemesterFactory.create(name="Old", active=False)
 
-        alice = StudentFactory.create(
-            user__first_name="Alice",
-            user__last_name="Aardvárk",
-            user__username="alice",
-            user__email="alice@example.org",
-            semester=active_semester,
-        )
-        bob = StudentFactory.create(
-            user__first_name="Bôb B.",
-            user__last_name="Bèta",
-            user__username="bob",
-            user__email="bob@example.org",
-            semester=active_semester,
-        )
-        carol = StudentFactory.create(
-            user__first_name="Carol",
-            user__last_name="Cutie",
-            user__username="carol",
-            user__email="carol@example.org",
-            semester=active_semester,
-        )
-        david = StudentFactory.create(
-            user__first_name="David",
-            user__last_name="Darling",
-            user__username="david",
-            user__email="david@example.org",
-            semester=active_semester,
-        )
-        eve = StudentFactory.create(
-            user__first_name="Eve",
-            user__last_name="Edgeworth",
-            user__username="eve",
-            user__email="edge@wor.th",
-            semester=active_semester,
-        )
-        UserProfileFactory.create(user=alice.user, email_on_announcement=True)
-        UserProfileFactory.create(user=bob.user, email_on_announcement=True)
-        UserProfileFactory.create(user=carol.user, email_on_announcement=True)
-        UserProfileFactory.create(user=david.user, email_on_announcement=False)
-        UserProfileFactory.create(user=eve.user, email_on_announcement=True)
-        old_alice = StudentFactory.create(user=alice.user, semester=old_semester)
+    alice = StudentFactory.create(
+        user__first_name="Alice",
+        user__last_name="Aardvárk",
+        user__username="alice",
+        user__email="alice@example.org",
+        semester=active_semester,
+    )
+    bob = StudentFactory.create(
+        user__first_name="Bôb B.",
+        user__last_name="Bèta",
+        user__username="bob",
+        user__email="bob@example.org",
+        semester=active_semester,
+    )
+    carol = StudentFactory.create(
+        user__first_name="Carol",
+        user__last_name="Cutie",
+        user__username="carol",
+        user__email="carol@example.org",
+        semester=active_semester,
+    )
+    david = StudentFactory.create(
+        user__first_name="David",
+        user__last_name="Darling",
+        user__username="david",
+        user__email="david@example.org",
+        semester=active_semester,
+    )
+    eve = StudentFactory.create(
+        user__first_name="Eve",
+        user__last_name="Edgeworth",
+        user__username="eve",
+        user__email="edge@wor.th",
+        semester=active_semester,
+    )
+    UserProfileFactory.create(user=alice.user, email_on_announcement=True)
+    UserProfileFactory.create(user=bob.user, email_on_announcement=True)
+    UserProfileFactory.create(user=carol.user, email_on_announcement=True)
+    UserProfileFactory.create(user=david.user, email_on_announcement=False)
+    UserProfileFactory.create(user=eve.user, email_on_announcement=True)
+    old_alice = StudentFactory.create(user=alice.user, semester=old_semester)
 
-        submitted_unit, requested_unit = UnitFactory.create_batch(2)
-        PSetFactory.create(
-            student=alice,
-            unit=submitted_unit,
-            next_unit_to_unlock=requested_unit,
-            clubs=120,
-            hours=37,
-            status="P",
-            feedback="Meow",
-            special_notes="Purr",
-        )
-        PSetFactory.create_batch(2, student=bob, status="P")
-        PSetFactory.create_batch(3, student=carol, status="P")
-        PSetFactory.create_batch(7, student=alice, status="A")
-        PSetFactory.create_batch(2, student=alice, status="R")
-        PSetFactory.create_batch(4, student=alice, status="P")
-        PSetFactory.create_batch(3, student=david, status="A")
-        PSetFactory.create_batch(4, student=old_alice, status="A")
-        PSetFactory.create_batch(2, student=old_alice, status="P")
+    submitted_unit, requested_unit = UnitFactory.create_batch(2)
+    PSetFactory.create(
+        student=alice,
+        unit=submitted_unit,
+        next_unit_to_unlock=requested_unit,
+        clubs=120,
+        hours=37,
+        status="P",
+        feedback="Meow",
+        special_notes="Purr",
+    )
+    PSetFactory.create_batch(2, student=bob, status="P")
+    PSetFactory.create_batch(3, student=carol, status="P")
+    PSetFactory.create_batch(7, student=alice, status="A")
+    PSetFactory.create_batch(2, student=alice, status="R")
+    PSetFactory.create_batch(4, student=alice, status="P")
+    PSetFactory.create_batch(3, student=david, status="A")
+    PSetFactory.create_batch(4, student=old_alice, status="A")
+    PSetFactory.create_batch(2, student=old_alice, status="P")
 
-        UnitInquiryFactory.create_batch(
-            5, student=alice, action_type="INQ_ACT_UNLOCK", status="INQ_ACC"
-        )
-        UnitInquiryFactory.create_batch(
-            2, student=alice, action_type="INQ_ACT_DROP", status="INQ_ACC"
-        )
-        UnitInquiryFactory.create_batch(
-            3, student=alice, action_type="INQ_ACT_UNLOCK", status="INQ_NEW"
-        )
+    UnitInquiryFactory.create_batch(
+        5, student=alice, action_type="INQ_ACT_UNLOCK", status="INQ_ACC"
+    )
+    UnitInquiryFactory.create_batch(
+        2, student=alice, action_type="INQ_ACT_DROP", status="INQ_ACC"
+    )
+    UnitInquiryFactory.create_batch(
+        3, student=alice, action_type="INQ_ACT_UNLOCK", status="INQ_NEW"
+    )
 
-        alice.curriculum.add(submitted_unit)
-        alice.curriculum.add(requested_unit)
-        alice.unlocked_units.add(submitted_unit)
+    alice.curriculum.add(submitted_unit)
+    alice.curriculum.add(requested_unit)
+    alice.unlocked_units.add(submitted_unit)
 
-        InvoiceFactory.create(student=alice, total_paid=250)
-        InvoiceFactory.create(student=bob)
-        invC = InvoiceFactory.create(student=carol, total_paid=210)
-        invD = InvoiceFactory.create(student=david, total_paid=480)
-        invE = InvoiceFactory.create(student=eve, total_paid=1)
-        PaymentLogFactory.create(invoice=invC, amount=50)
-        PaymentLogFactory.create(invoice=invC, amount=70)
-        PaymentLogFactory.create(invoice=invC, amount=90)
-        PaymentLogFactory.create(invoice=invC, amount=9001, refunded=True)
-        PaymentLogFactory.create(invoice=invD, amount=360)
-        PaymentLogFactory.create(invoice=invD, amount=120)
-        PaymentLogFactory.create(invoice=invE, amount=1)
-        PaymentLogFactory.create(invoice=invC, amount=9001, refunded=True)
+    InvoiceFactory.create(student=alice, total_paid=250)
+    InvoiceFactory.create(student=bob)
+    invC = InvoiceFactory.create(student=carol, total_paid=210)
+    invD = InvoiceFactory.create(student=david, total_paid=480)
+    invE = InvoiceFactory.create(student=eve, total_paid=1)
+    PaymentLogFactory.create(invoice=invC, amount=50)
+    PaymentLogFactory.create(invoice=invC, amount=70)
+    PaymentLogFactory.create(invoice=invC, amount=90)
+    PaymentLogFactory.create(invoice=invC, amount=9001, refunded=True)
+    PaymentLogFactory.create(invoice=invD, amount=360)
+    PaymentLogFactory.create(invoice=invD, amount=120)
+    PaymentLogFactory.create(invoice=invE, amount=1)
+    PaymentLogFactory.create(invoice=invC, amount=9001, refunded=True)
 
-        regcontainer_active = RegistrationContainerFactory.create(
-            semester=active_semester
-        )
-        regcontainer_old = RegistrationContainerFactory.create(semester=old_semester)
+    regcontainer_active = RegistrationContainerFactory.create(
+        semester=active_semester
+    )
+    regcontainer_old = RegistrationContainerFactory.create(semester=old_semester)
 
-        for student in (alice, bob, carol, david, eve, old_alice):
-            StudentRegistrationFactory.create(
-                user=student.user,
-                container=(
-                    regcontainer_active
-                    if student.semester.active is True
-                    else regcontainer_old
-                ),
-                processed=True,
-            )
-        new_user = UserFactory.create(
-            username="frisk", first_name="Frank", last_name="Frisk"
-        )
+    for student in (alice, bob, carol, david, eve, old_alice):
         StudentRegistrationFactory.create(
-            user=new_user, container=regcontainer_active, processed=False
+            user=student.user,
+            container=(
+                regcontainer_active
+                if student.semester.active is True
+                else regcontainer_old
+            ),
+            processed=True,
         )
+    new_user = UserFactory.create(
+        username="frisk", first_name="Frank", last_name="Frisk"
+    )
+    StudentRegistrationFactory.create(
+        user=new_user, container=regcontainer_active, processed=False
+    )
 
 
 @pytest.mark.django_db
