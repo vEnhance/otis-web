@@ -1,0 +1,37 @@
+{% extends "socialaccount/base.html" %}
+{% load i18n %}
+{% block head_title %}
+  {% trans "Sign In" %}
+{% endblock head_title %}
+{% block content %}
+  <div class="alert alert-info" role="alert">
+    <h2 class="alert-heading">Third-Party Authentication</h2>
+    <p>
+      You are about to sign in to OTIS using a third-party account from
+      <strong>{{ provider.name }}</strong>.
+    </p>
+  </div>
+  <p>
+    When you click the button below, you'll be redirected to {{ provider.name }}
+    to complete the authentication process.
+  </p>
+  <div class="alert alert-warning">
+    <p class="mb-0">
+      <strong>Important:</strong> If you already have an OTIS account,
+      make sure you're using an <em>existing</em> connection.
+      Creating a new connection with {{ provider.name }} might result in a duplicate account
+      if you haven't already linked it in your
+      <a href="{% url 'socialaccount_connections' %}" class="alert-link">🔐 account settings</a>.
+    </p>
+  </div>
+  <form method="post">
+    {% csrf_token %}
+    <div class="text-center">
+      <button class="btn btn-primary btn-lg" type="submit">Continue with {{ provider.name }} →</button>
+    </div>
+  </form>
+  <hr />
+  <p class="text-center">
+    <a href="{% url 'account_login' %}">← Back to login page</a>
+  </p>
+{% endblock content %}

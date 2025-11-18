@@ -1,0 +1,26 @@
+{% extends "socialaccount/base.html" %}
+{% load i18n %}
+{% block head_title %}
+  {% trans "Redirecting..." %}
+{% endblock head_title %}
+{% block content %}
+  <div class="alert alert-success" role="alert">
+    <h2 class="alert-heading">Authentication Successful!</h2>
+    <p>You've been authenticated successfully. Redirecting you now...</p>
+  </div>
+  <div class="text-center">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-3">
+      If you are not redirected automatically,
+      <a href="{{ redirect_to|default:"/" }}">click here</a>.
+    </p>
+  </div>
+  <script>
+      // Auto-redirect after 2 seconds if not already redirected
+      setTimeout(function() {
+          window.location.href = "{{ redirect_to|default:" / " }}";
+      }, 2000);
+  </script>
+{% endblock content %}

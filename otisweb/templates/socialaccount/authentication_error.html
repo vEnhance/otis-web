@@ -1,0 +1,43 @@
+{% extends "socialaccount/base.html" %}
+{% load i18n %}
+{% block head_title %}
+  {% trans "Authentication Error" %}
+{% endblock head_title %}
+{% block content %}
+  <div class="alert alert-danger" role="alert">
+    <h2 class="alert-heading">Authentication Error</h2>
+    <p>
+      Oops! Something went wrong while trying to authenticate you
+      with {{ provider.name|default:"the authentication provider" }}.
+    </p>
+  </div>
+  <h2>What happened?</h2>
+  <p>
+    There was an error during the authentication process.
+    This could happen for a few reasons:
+  </p>
+  <ul>
+    <li>The authentication provider may have rejected the request</li>
+    <li>There may have been a temporary network issue</li>
+    <li>The authentication token may have expired</li>
+    <li>Your account settings with the provider may need to be updated</li>
+  </ul>
+  <h2>What should I do?</h2>
+  <p>Try one of the following:</p>
+  <ul>
+    <li>
+      <a href="{% url 'account_login' %}">Try logging in again</a>
+      (sometimes it works the second time!)
+    </li>
+    <li>Try using a different authentication provider if you have one set up</li>
+    <li>
+      Check your
+      <a href="{% url 'socialaccount_connections' %}">🔐 account connections</a>
+      if you're already logged in
+    </li>
+    <li>If the problem persists, email Evan for help</li>
+  </ul>
+  <p class="text-center mt-4">
+    <a href="{% url 'account_login' %}" class="btn btn-primary">← Back to Login</a>
+  </p>
+{% endblock content %}

@@ -1,0 +1,38 @@
+{% extends "socialaccount/base.html" %}
+{% load i18n %}
+{% block head_title %}
+  {% trans "Login Cancelled" %}
+{% endblock head_title %}
+{% block content %}
+  <div class="alert alert-warning" role="alert">
+    <h2 class="alert-heading">Login Cancelled</h2>
+    <p>You cancelled the login process with {{ provider.name|default:"the authentication provider" }}.</p>
+  </div>
+  <p>
+    No worries! You can try again whenever you're ready,
+    or use a different login method.
+  </p>
+  <h2>What's next?</h2>
+  <ul>
+    <li>
+      <a href="{% url 'account_login' %}">Go back to the login page</a>
+      to try again
+    </li>
+    <li>Choose a different authentication provider</li>
+    <li>
+      If you already have an account, make sure you're using
+      an <em>existing</em> connection rather than creating a new one
+    </li>
+  </ul>
+  <div class="alert alert-info mt-3">
+    <p class="mb-0">
+      <strong>Reminder:</strong> If you already have an OTIS account,
+      don't create a new connection unless you've set it up in your
+      <a href="{% url 'socialaccount_connections' %}" class="alert-link">🔐 account settings</a> first.
+      Otherwise you might accidentally create a duplicate account!
+    </p>
+  </div>
+  <p class="text-center mt-4">
+    <a href="{% url 'account_login' %}" class="btn btn-primary">← Back to Login</a>
+  </p>
+{% endblock content %}
