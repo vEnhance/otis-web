@@ -20,6 +20,7 @@ class ArticleRevisionFactory(DjangoModelFactory):
 class ArticleFactory(DjangoModelFactory):
     class Meta:
         model = Article
+        skip_postgeneration_save = True
 
     @post_generation
     def set_current_revision(
@@ -27,6 +28,7 @@ class ArticleFactory(DjangoModelFactory):
     ):
         a: Article = self  # type: ignore
         a.current_revision = ArticleRevisionFactory(article=a)
+        a.save()
 
 
 class URLPathFactory(DjangoModelFactory):

@@ -47,6 +47,7 @@ else:
     ]
     SITE_URL = "http://127.0.0.1"
 SITE_ID = 1
+FORMS_URLFIELD_ASSUME_HTTPS = True
 TESTING = len(sys.argv) > 1 and sys.argv[1] == "test"
 if TESTING:
     assert DEBUG, "Don't run testing on production you big doofus"

@@ -18,6 +18,7 @@ from .models import Hint, Problem, Vote
 class ProblemFactory(DjangoModelFactory):
     class Meta:
         model = Problem
+        skip_postgeneration_save = True
 
     # TODO better way of all uppercase
     puid = Faker(

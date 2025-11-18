@@ -23,7 +23,7 @@ from dashboard.factories import (
 )
 from dashboard.models import PSet, UploadedFile
 from dashboard.utils import get_news, get_units_to_submit, get_units_to_unlock
-from exams.factories import QuizFactory, TestFactory
+from exams.factories import PracticeExamFactory, QuizFactory
 from hanabi.factories import HanabiContestFactory
 from markets.factories import MarketFactory
 from opal.factories import OpalHuntFactory
@@ -79,7 +79,7 @@ def test_portal(otis):
     prevSemester = SemesterFactory.create(end_year=2020)
     StudentFactory.create(user=alice.user, semester=prevSemester)
 
-    test = TestFactory.create(
+    test = PracticeExamFactory.create(
         start_date=datetime.datetime(2021, 6, 1, tzinfo=UTC),
         due_date=datetime.datetime(2021, 7, 31, tzinfo=UTC),
         family="Waltz",

@@ -27,6 +27,7 @@ class GroupFactory(DjangoModelFactory):
 class UserFactory(DjangoModelFactory):
     class Meta:
         model = User
+        skip_postgeneration_save = True
 
     first_name = Faker("first_name_female")
     last_name = Faker("last_name_female")
@@ -56,6 +57,7 @@ class UnitGroupFactory(DjangoModelFactory):
 class UnitFactory(DjangoModelFactory):
     class Meta:
         model = Unit
+        skip_postgeneration_save = True
 
     code = LazyAttribute(
         lambda o: random.choice("BDZ") + o.group.subject[0] + random.choice("WXY")
