@@ -77,7 +77,7 @@ repos:
             refactor,
             revert,
             style,
-            test,
+            tests,
           ]
 
   - repo: local
