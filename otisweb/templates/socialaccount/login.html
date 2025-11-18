@@ -1,81 +1,39 @@
 {% extends "socialaccount/base.html" %}
 {% load i18n %}
 {% block head_title %}
-  {% trans "Social Login" %}
+  {% trans "Sign In" %}
 {% endblock head_title %}
 {% block content %}
-  <p>
-    <em>Come meet me in the Ruby Palace~</em>
-  </p>
-  <h2>Log in with a social account</h2>
-  <p>
-    Use one of the providers below to log in to OTIS.
-    This is the recommended way to access your account.
-  </p>
-  <div class="alert alert-info">
-    <p class="mb-0">
-      <strong>First-time users:</strong> If you're a newly accepted OTIS student,
-      you can use any of the options below to create your account.
-      Just make sure to use an email you check regularly!
+  <div class="alert alert-info" role="alert">
+    <h2 class="alert-heading">Third-Party Authentication</h2>
+    <p>
+      You are about to sign in to OTIS using a third-party account from
+      <strong>{{ provider.name }}</strong>.
     </p>
   </div>
-  <div class="socialaccount_ballot">
-    <ul class="socialaccount_providers">
-      {% include "socialaccount/snippets/provider_list.html" with process="login" %}
-    </ul>
+  <p>
+    When you click the button below, you'll be redirected to {{ provider.name }}
+    to complete the authentication process.
+  </p>
+  <div class="alert alert-warning">
+    <p class="mb-0">
+      <strong>Important:</strong> If you already have an OTIS account,
+      make sure you're using an <em>existing</em> connection.
+      Creating a new connection with {{ provider.name }} might result in a duplicate account
+      if you haven't already linked it in your
+      <a href="{% url 'socialaccount_connections' %}" class="alert-link">🔐 account settings</a>.
+    </p>
   </div>
-  {% include "socialaccount/snippets/login_extra.html" %}
-  <hr />
-  <h2>Other options</h2>
-  <ul>
-    <li>
-      <a href="{% url 'account_login' %}">Use username and password instead</a>
-      (if you set one up)
-    </li>
-    <li>
-      <a href="{% url 'socialaccount_connections' %}">Manage your account connections</a>
-      (if you're already logged in)
-    </li>
-  </ul>
-  <div class="accordion mt-3">
-    <div class="accordion-item">
-      <h2 class="accordion-header" id="headingHelp">
-        <button class="accordion-button collapsed"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#collapseHelp"
-                aria-expanded="false"
-                aria-controls="collapseHelp">
-          <span class="text-muted">Help! I'm having trouble logging in...</span>
-        </button>
-      </h2>
-      <div id="collapseHelp"
-           class="accordion-collapse collapse"
-           aria-labelledby="headingHelp">
-        <div class="accordion-body">
-          <p>Common issues:</p>
-          <ul>
-            <li>
-              <strong>Multiple accounts:</strong>
-              If you accidentally created multiple accounts,
-              email Evan to merge them.
-            </li>
-            <li>
-              <strong>Wrong provider:</strong>
-              Make sure you're using the same provider you used to register.
-              Check your
-              <a href="{% url 'socialaccount_connections' %}">🔐 account connections</a>
-              to see which ones are linked.
-            </li>
-            <li>
-              <strong>Forgot everything:</strong>
-              Email Evan for help.
-              (And consider using a
-              <a href="https://github.com/Hanabi-Live/hanabi-live/blob/main/docs/passwords.md">password manager</a>!)
-            </li>
-          </ul>
-        </div>
-      </div>
+  <form method="post">
+    {% csrf_token %}
+    <div class="text-center">
+      <button class="btn btn-primary btn-lg" type="submit">
+        Continue with {{ provider.name }} →
+      </button>
     </div>
-  </div>
+  </form>
+  <hr />
+  <p class="text-center">
+    <a href="{% url 'account_login' %}">← Back to login page</a>
+  </p>
 {% endblock content %}
