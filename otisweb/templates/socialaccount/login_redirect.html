@@ -18,9 +18,9 @@
     </p>
   </div>
   <script>
-    // Auto-redirect after 2 seconds if not already redirected
-    setTimeout(function() {
-      window.location.href = "{{ redirect_to|default:"/" }}";
-    }, 2000);
+      // Auto-redirect after 2 seconds if not already redirected
+      setTimeout(function() {
+          window.location.href = "{{ redirect_to|default:" / " }}";
+      }, 2000);
   </script>
 {% endblock content %}
