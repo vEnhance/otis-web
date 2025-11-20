@@ -3,7 +3,15 @@ default_install_hook_types:
   - commit-msg
   - pre-push
 
+default_stages: [pre-commit]
+
 repos:
+  - repo: https://github.com/ecugol/pre-commit-hooks-django
+    rev: v0.4.0
+    hooks:
+      - id: check-absent-migrations
+        stages: [pre-push]
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
     hooks:
@@ -37,11 +45,6 @@ repos:
       - id: djlint-django
         name: djlint check
         types: [html]
-
-  - repo: https://github.com/ecugol/pre-commit-hooks-django
-    rev: v0.4.0
-    hooks:
-      - id: check-absent-migrations
 
   - repo: https://github.com/JoC0de/pre-commit-prettier
     rev: v3.6.2
