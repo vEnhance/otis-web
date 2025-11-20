@@ -15,15 +15,6 @@
     When you click the button below, you'll be redirected to {{ provider.name }}
     to complete the authentication process.
   </p>
-  <div class="alert alert-warning">
-    <p class="mb-0">
-      <strong>Important:</strong> If you already have an OTIS account,
-      make sure you're using an <em>existing</em> connection.
-      Creating a new connection with {{ provider.name }} might result in a duplicate account
-      if you haven't already linked it in your
-      <a href="{% url 'socialaccount_connections' %}" class="alert-link">🔐 account settings</a>.
-    </p>
-  </div>
   <form method="post">
     {% csrf_token %}
     <div class="text-center">
