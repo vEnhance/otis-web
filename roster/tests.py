@@ -439,7 +439,9 @@ def test_inquiry(otis) -> None:
     non_secret_subjects = ["A", "C", "G", "N", "F"]
     units: list[Unit] = [
         UnitFactory.create(
-            group=UnitGroupFactory.create(subject=non_secret_subjects[i % len(non_secret_subjects)])
+            group=UnitGroupFactory.create(
+                subject=non_secret_subjects[i % len(non_secret_subjects)]
+            )
         )
         for i in range(20)
     ]
