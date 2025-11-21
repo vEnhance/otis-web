@@ -9,7 +9,7 @@ Course management system for OTIS (Olympiad Training for Improving Scholars), a 
 - **Frontend:** Bootstrap 5, Django templates
 - **Package Management:** Poetry
 - **Code Quality:** prek (pre-commit hooks)
-- **Discord Logging:** `django-discordo` (Discord webhook handler for logging)
+- **Submodule:** `evans_django_tools` (shared utilities)
 
 ## Project Structure
 
@@ -42,6 +42,7 @@ make help                   # Show all available commands
 
 # Setup
 make install                # Install dependencies and prek hooks
+git submodule update --init # Initialize evans_django_tools
 
 # Database
 make migrate                # Apply migrations
@@ -72,6 +73,7 @@ make prek                   # Run all prek hooks on all files
 
 - Tests live in `*/tests.py` files in each app
 - Use `factory_boy` for test data (factories in `*/factories.py`)
+- Base class: `EvanTestCase` from `evans_django_tools.testsuite`
 - Common assertions: `assertGet20X()`, `assertGetDenied()`, `assertPost20X()`
 - All PRs must pass CI checks (GitHub Actions)
 - Pre-push hooks run `make check`, `make test`, and `make fmt`

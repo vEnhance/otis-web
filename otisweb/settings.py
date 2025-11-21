@@ -7,12 +7,15 @@ import os
 from pathlib import Path
 from typing import Any
 
-import django_discordo
 import django_stubs_ext
 import import_export.tmp_storages
 from dotenv import load_dotenv
 
+import evans_django_tools
+
 django_stubs_ext.monkeypatch()
+
+assert evans_django_tools is not None
 
 BASE_DIR = Path(__file__).parent.parent.absolute()
 ENV_PATH = BASE_DIR / ".env"
@@ -259,19 +262,6 @@ API_TARGET_HASH = os.getenv("API_TARGET_HASH")
 
 PATH_STATEMENT_ON_DISK = os.getenv("PATH_STATEMENT_ON_DISK")
 
-# Discord webhook configuration for logging
-# Can be configured as a simple string or a dict for level-specific webhooks
-DISCORD_WEBHOOK_URL = os.getenv("WEBHOOK_URL")
-# Alternatively, use level-specific webhooks:
-# DISCORD_WEBHOOK_URLS = {
-#     "CRITICAL": os.getenv("WEBHOOK_URL_CRITICAL"),
-#     "ERROR": os.getenv("WEBHOOK_URL_ERROR"),
-#     "WARNING": os.getenv("WEBHOOK_URL_WARNING"),
-#     "SUCCESS": os.getenv("WEBHOOK_URL_SUCCESS"),
-#     "ACTION": os.getenv("WEBHOOK_URL_ACTION"),
-#     "DEFAULT": os.getenv("WEBHOOK_URL"),
-# }
-
 STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY")
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
 STRIPE_ENDPOINT_SECRET = os.getenv("STRIPE_ENDPOINT_SECRET")
@@ -354,7 +344,7 @@ LOGGING = {
             "filters": ["filter_useless_404", "add_username"],
         },
         "discord": {
-            "class": "django_discordo.DiscordWebhookHandler",
+            "class": "evans_django_tools.DiscordWebhookHandler",
             "level": "VERBOSE",
             "filters": ["require_debug_false", "filter_useless_404", "add_username"],
         },
@@ -392,4 +382,4 @@ LOGGING = {
     },
 }
 if TESTING:
-    logging.disable(django_discordo.ACTION_LOG_LEVEL)
+    logging.disable(evans_django_tools.ACTION_LOG_LEVEL)

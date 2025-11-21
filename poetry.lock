@@ -668,22 +668,6 @@ django = ">=4.2.9"
 sqlparse = ">=0.2"
 
 [[package]]
-name = "django-discordo"
-version = "0.1.0"
-description = "Discord webhook handler for Django logging"
-optional = false
-python-versions = ">=3.8"
-groups = ["main"]
-files = [
-    {file = "django_discordo-0.1.0-py3-none-any.whl", hash = "sha256:2d003bc36c180528aca3ae48c6f2eca0b56fbf3698ef3015f2bfe57d61abba5b"},
-    {file = "django_discordo-0.1.0.tar.gz", hash = "sha256:d84546c6d76952ecb65e7f96b42fe87c7462be49961803171148305a6f7265e2"},
-]
-
-[package.dependencies]
-django = ">=3.2"
-requests = ">=2.25.0"
-
-[[package]]
 name = "django-extensions"
 version = "3.2.3"
 description = "Extensions for Django"
@@ -2966,4 +2950,4 @@ docs = ["sphinx (>=6,<8)", "sphinx-rtd-theme (==2.0.0)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13, <4.0"
-content-hash = "8755e2d82a968cd809d618077d8dcdc2c312460fcfe60853524f1f6ff437bf94"
+content-hash = "561038563ea2708054153dd3703540426536ab2c780476b944c1be0423f69bd4"
