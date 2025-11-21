@@ -35,7 +35,7 @@ check:
 	poetry run pyright .
 
 test:
-	poetry run coverage run -m pytest
+	poetry run coverage run -m pytest -n auto
 
 fmt:
 	poetry run prek run --all-files
