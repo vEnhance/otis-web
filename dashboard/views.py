@@ -31,7 +31,7 @@ from dashboard.forms import (
 )
 from dashboard.models import Announcement, PSet, SemesterDownloadFile, UploadedFile
 from dashboard.utils import get_news, get_units_to_submit, get_units_to_unlock
-from evans_django_tools import VERBOSE_LOG_LEVEL
+from django_discordo import VERBOSE_LOG_LEVEL
 from exams.models import PracticeExam
 from otisweb.decorators import staff_required
 from otisweb.mixins import VerifiedRequiredMixin

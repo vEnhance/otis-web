@@ -43,7 +43,7 @@ from prettytable import PrettyTable
 
 from core.models import EMAIL_PREFERENCE_FIELDS, Semester, Unit, UserProfile
 from dashboard.models import PSet
-from evans_django_tools import SUCCESS_LOG_LEVEL
+from django_discordo import SUCCESS_LOG_LEVEL
 from otisweb.decorators import admin_required, staff_required
 from otisweb.mixins import StaffRequiredMixin, VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest

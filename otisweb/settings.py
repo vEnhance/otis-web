@@ -11,11 +11,11 @@ import django_stubs_ext
 import import_export.tmp_storages
 from dotenv import load_dotenv
 
-import evans_django_tools
+import django_discordo
 
 django_stubs_ext.monkeypatch()
 
-assert evans_django_tools is not None
+assert django_discordo is not None
 
 BASE_DIR = Path(__file__).parent.parent.absolute()
 ENV_PATH = BASE_DIR / ".env"
@@ -344,7 +344,7 @@ LOGGING = {
             "filters": ["filter_useless_404", "add_username"],
         },
         "discord": {
-            "class": "evans_django_tools.DiscordWebhookHandler",
+            "class": "django_discordo.DiscordWebhookHandler",
             "level": "VERBOSE",
             "filters": ["require_debug_false", "filter_useless_404", "add_username"],
         },
@@ -382,4 +382,4 @@ LOGGING = {
     },
 }
 if TESTING:
-    logging.disable(evans_django_tools.ACTION_LOG_LEVEL)
+    logging.disable(django_discordo.ACTION_LOG_LEVEL)

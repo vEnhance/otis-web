@@ -18,7 +18,7 @@ from reversion.views import RevisionMixin
 from arch.forms import ProblemSelectForm
 from arch.models import get_disk_statement_from_puid
 from core.utils import get_from_google_storage
-from evans_django_tools import ACTION_LOG_LEVEL
+from django_discordo import ACTION_LOG_LEVEL
 from otisweb.decorators import verified_required
 from otisweb.mixins import VerifiedRequiredMixin
 

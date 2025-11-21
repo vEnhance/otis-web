@@ -18,7 +18,7 @@ from django.utils import timezone
 from django.views.generic.list import ListView
 from sql_util.utils import SubqueryCount
 
-from evans_django_tools import SUCCESS_LOG_LEVEL
+from django_discordo import SUCCESS_LOG_LEVEL
 from otisweb.decorators import admin_required, verified_required
 from otisweb.mixins import AdminRequiredMixin, VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest

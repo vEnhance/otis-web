@@ -20,7 +20,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView
 from sql_util.utils import Exists, SubqueryCount
 
-from evans_django_tools import SUCCESS_LOG_LEVEL
+from django_discordo import SUCCESS_LOG_LEVEL
 from otisweb.decorators import staff_required
 from otisweb.mixins import AdminRequiredMixin, StaffRequiredMixin, VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest, get_days_since

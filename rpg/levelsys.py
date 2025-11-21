@@ -13,7 +13,7 @@ from sql_util.utils import Exists
 
 from core.models import UserProfile
 from dashboard.models import PSet
-from evans_django_tools import VERBOSE_LOG_LEVEL
+from django_discordo import VERBOSE_LOG_LEVEL
 from exams.models import ExamAttempt, MockCompleted
 from hanabi.models import HanabiReplay
 from markets.models import Guess
