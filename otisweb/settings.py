@@ -14,8 +14,6 @@ from dotenv import load_dotenv
 
 django_stubs_ext.monkeypatch()
 
-assert django_discordo is not None
-
 BASE_DIR = Path(__file__).parent.parent.absolute()
 ENV_PATH = BASE_DIR / ".env"
 if ENV_PATH.exists():
