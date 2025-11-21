@@ -85,6 +85,13 @@ repos:
 
   - repo: local
     hooks:
+      - id: make-fmt
+        name: Check code formatting
+        entry: make fmt
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
+
       - id: make-check
         name: Run Django checks and type checking
         entry: make check
@@ -95,13 +102,6 @@ repos:
       - id: make-test
         name: Run tests
         entry: make test
-        language: system
-        pass_filenames: false
-        stages: [pre-push]
-
-      - id: make-fmt
-        name: Check code formatting
-        entry: make fmt
         language: system
         pass_filenames: false
         stages: [pre-push]
