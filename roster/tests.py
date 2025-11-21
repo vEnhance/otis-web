@@ -434,7 +434,15 @@ def test_master_schedule(otis) -> None:
 def test_inquiry(otis) -> None:
     firefly: Assistant = AssistantFactory.create()
     alice: Student = StudentFactory.create(assistant=firefly)
-    units: list[Unit] = UnitFactory.create_batch(20)
+    # Create non-secret unit groups to avoid random subject="K" causing flaky tests
+    non_secret_groups = [
+        UnitGroupFactory.create(subject=subject)
+        for subject in ["A", "C", "G", "N", "F"]
+    ]
+    units: list[Unit] = [
+        UnitFactory.create(group=non_secret_groups[i % len(non_secret_groups)])
+        for i in range(20)
+    ]
     otis.login(alice)
 
     # Check that an invalid unit is not processed
