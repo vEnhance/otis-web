@@ -74,17 +74,30 @@ Create a webhook in your Discord channel:
 2. Click "New Webhook"
 3. Copy the webhook URL
 
-### 2. Configure Environment Variables
+### 2. Configure Webhook URL
 
-Add your webhook URL to your `.env` file:
+Add your webhook URL to your Django `settings.py`:
+
+```python
+# Simple configuration - single webhook for all log levels
+DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/YOUR_WEBHOOK_URL"
+
+# OR: Advanced configuration - different webhooks per log level
+DISCORD_WEBHOOK_URLS = {
+    "CRITICAL": "https://discord.com/api/webhooks/CRITICAL_WEBHOOK",
+    "ERROR": "https://discord.com/api/webhooks/ERROR_WEBHOOK",
+    "WARNING": "https://discord.com/api/webhooks/WARNING_WEBHOOK",
+    "DEFAULT": "https://discord.com/api/webhooks/DEFAULT_WEBHOOK",  # Fallback for other levels
+}
+```
+
+**Alternative**: You can also use environment variables (the handler will check settings first, then fall back to environment variables):
 
 ```bash
-# General webhook for all log levels
+# In your .env file
 WEBHOOK_URL=https://discord.com/api/webhooks/YOUR_WEBHOOK_URL
-
-# Optional: Level-specific webhooks
+# Or level-specific
 WEBHOOK_URL_ERROR=https://discord.com/api/webhooks/YOUR_ERROR_WEBHOOK_URL
-WEBHOOK_URL_WARNING=https://discord.com/api/webhooks/YOUR_WARNING_WEBHOOK_URL
 ```
 
 ### 3. Update Django Settings
@@ -166,16 +179,25 @@ LOGGING = {
 
 ### Level-Specific Webhooks
 
-You can route different log levels to different Discord channels by setting level-specific webhook URLs:
+Route different log levels to different Discord channels using Django settings:
 
-```bash
-WEBHOOK_URL_CRITICAL=https://discord.com/api/webhooks/CRITICAL_CHANNEL
-WEBHOOK_URL_ERROR=https://discord.com/api/webhooks/ERROR_CHANNEL
-WEBHOOK_URL_WARNING=https://discord.com/api/webhooks/WARNING_CHANNEL
-WEBHOOK_URL=https://discord.com/api/webhooks/DEFAULT_CHANNEL
+```python
+# In settings.py
+DISCORD_WEBHOOK_URLS = {
+    "CRITICAL": "https://discord.com/api/webhooks/CRITICAL_CHANNEL",
+    "ERROR": "https://discord.com/api/webhooks/ERROR_CHANNEL",
+    "WARNING": "https://discord.com/api/webhooks/WARNING_CHANNEL",
+    "INFO": "https://discord.com/api/webhooks/INFO_CHANNEL",
+    "DEFAULT": "https://discord.com/api/webhooks/DEFAULT_CHANNEL",  # Fallback
+}
 ```
 
-The handler will check for `WEBHOOK_URL_{LEVELNAME}` first, then fall back to `WEBHOOK_URL`.
+The handler checks in this order:
+1. `settings.DISCORD_WEBHOOK_URLS[level.upper()]`
+2. `settings.DISCORD_WEBHOOK_URLS['DEFAULT']`
+3. `settings.DISCORD_WEBHOOK_URL` (if using simple config)
+4. `os.getenv(f"WEBHOOK_URL_{level.upper()}")` (environment variable fallback)
+5. `os.getenv("WEBHOOK_URL")` (final fallback)
 
 ## Testing Mode
 
@@ -213,7 +235,6 @@ Each log message appears as a Discord embed with:
 - Python 3.8+
 - Django 3.2+
 - requests
-- python-dotenv
 
 ## License
 
@@ -270,7 +291,6 @@ requires-python = ">=3.8"
 dependencies = [
     "django>=3.2",
     "requests>=2.25.0",
-    "python-dotenv>=0.19.0",
 ]
 
 [project.urls]
@@ -323,7 +343,6 @@ from collections import OrderedDict
 from typing import Any, Optional, TypedDict
 
 import requests
-from dotenv import load_dotenv
 
 VERBOSE_LOG_LEVEL = 15
 SUCCESS_LOG_LEVEL = 25
@@ -331,8 +350,6 @@ ACTION_LOG_LEVEL = 35
 logging.addLevelName(VERBOSE_LOG_LEVEL, "VERBOSE")
 logging.addLevelName(SUCCESS_LOG_LEVEL, "SUCCESS")
 logging.addLevelName(ACTION_LOG_LEVEL, "ACTION")
-
-load_dotenv()
 
 COLORS = {
     "default": 2040357,
@@ -486,8 +503,39 @@ class DiscordWebhookHandler(logging.Handler):
         return data
 
     def get_url(self, record: logging.LogRecord) -> Optional[str]:
+        """Get webhook URL from Django settings or environment variables.
+
+        Checks in this order:
+        1. settings.DISCORD_WEBHOOK_URLS[level]
+        2. settings.DISCORD_WEBHOOK_URLS['DEFAULT']
+        3. settings.DISCORD_WEBHOOK_URL
+        4. Environment variable WEBHOOK_URL_{LEVEL}
+        5. Environment variable WEBHOOK_URL
+        """
+        try:
+            from django.conf import settings
+
+            # Check for dictionary-style configuration
+            if hasattr(settings, 'DISCORD_WEBHOOK_URLS'):
+                urls = settings.DISCORD_WEBHOOK_URLS
+                if isinstance(urls, dict):
+                    # Try level-specific URL first, then DEFAULT
+                    url = urls.get(record.levelname.upper()) or urls.get('DEFAULT')
+                    if url:
+                        return url
+                elif isinstance(urls, str):
+                    return urls
+
+            # Check for simple string configuration
+            if hasattr(settings, 'DISCORD_WEBHOOK_URL'):
+                return settings.DISCORD_WEBHOOK_URL
+        except (ImportError, AttributeError):
+            pass
+
+        # Fall back to environment variables
         return os.getenv(
-            f"WEBHOOK_URL_{record.levelname.upper()}", os.getenv("WEBHOOK_URL")
+            f"WEBHOOK_URL_{record.levelname.upper()}",
+            os.getenv("WEBHOOK_URL")
         )
 
     def post_response(self, record: logging.LogRecord) -> Optional[requests.Response]:

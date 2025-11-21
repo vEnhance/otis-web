@@ -261,6 +261,19 @@ API_TARGET_HASH = os.getenv("API_TARGET_HASH")
 
 PATH_STATEMENT_ON_DISK = os.getenv("PATH_STATEMENT_ON_DISK")
 
+# Discord webhook configuration for logging
+# Can be configured as a simple string or a dict for level-specific webhooks
+DISCORD_WEBHOOK_URL = os.getenv("WEBHOOK_URL")
+# Alternatively, use level-specific webhooks:
+# DISCORD_WEBHOOK_URLS = {
+#     "CRITICAL": os.getenv("WEBHOOK_URL_CRITICAL"),
+#     "ERROR": os.getenv("WEBHOOK_URL_ERROR"),
+#     "WARNING": os.getenv("WEBHOOK_URL_WARNING"),
+#     "SUCCESS": os.getenv("WEBHOOK_URL_SUCCESS"),
+#     "ACTION": os.getenv("WEBHOOK_URL_ACTION"),
+#     "DEFAULT": os.getenv("WEBHOOK_URL"),
+# }
+
 STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY")
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
 STRIPE_ENDPOINT_SECRET = os.getenv("STRIPE_ENDPOINT_SECRET")
