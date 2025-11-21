@@ -21,6 +21,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import DeleteView, UpdateView
+from django_discordo import VERBOSE_LOG_LEVEL
 
 from core.models import Semester, Unit, UserProfile
 from dashboard.forms import (
@@ -31,7 +32,6 @@ from dashboard.forms import (
 )
 from dashboard.models import Announcement, PSet, SemesterDownloadFile, UploadedFile
 from dashboard.utils import get_news, get_units_to_submit, get_units_to_unlock
-from django_discordo import VERBOSE_LOG_LEVEL
 from exams.models import PracticeExam
 from otisweb.decorators import staff_required
 from otisweb.mixins import VerifiedRequiredMixin

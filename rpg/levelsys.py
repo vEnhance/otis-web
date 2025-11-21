@@ -8,12 +8,12 @@ from django.db.models.expressions import OuterRef, Subquery
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
 from django.utils import timezone
+from django_discordo import VERBOSE_LOG_LEVEL
 from sql_util.aggregates import SubqueryCount, SubquerySum
 from sql_util.utils import Exists
 
 from core.models import UserProfile
 from dashboard.models import PSet
-from django_discordo import VERBOSE_LOG_LEVEL
 from exams.models import ExamAttempt, MockCompleted
 from hanabi.models import HanabiReplay
 from markets.models import Guess

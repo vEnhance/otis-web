@@ -16,9 +16,9 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views.generic.list import ListView
+from django_discordo import SUCCESS_LOG_LEVEL
 from sql_util.utils import SubqueryCount
 
-from django_discordo import SUCCESS_LOG_LEVEL
 from otisweb.decorators import admin_required, verified_required
 from otisweb.mixins import AdminRequiredMixin, VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest

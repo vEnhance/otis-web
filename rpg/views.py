@@ -18,9 +18,9 @@ from django.urls import reverse
 from django.views.generic import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView
+from django_discordo import SUCCESS_LOG_LEVEL
 from sql_util.utils import Exists, SubqueryCount
 
-from django_discordo import SUCCESS_LOG_LEVEL
 from otisweb.decorators import staff_required
 from otisweb.mixins import AdminRequiredMixin, StaffRequiredMixin, VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest, get_days_since

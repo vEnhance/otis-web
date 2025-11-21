@@ -39,11 +39,11 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.generic.edit import UpdateView
 from django.views.generic.list import ListView
+from django_discordo import SUCCESS_LOG_LEVEL
 from prettytable import PrettyTable
 
 from core.models import EMAIL_PREFERENCE_FIELDS, Semester, Unit, UserProfile
 from dashboard.models import PSet
-from django_discordo import SUCCESS_LOG_LEVEL
 from otisweb.decorators import admin_required, staff_required
 from otisweb.mixins import StaffRequiredMixin, VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest

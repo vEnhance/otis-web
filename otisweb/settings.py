@@ -7,11 +7,10 @@ import os
 from pathlib import Path
 from typing import Any
 
+import django_discordo
 import django_stubs_ext
 import import_export.tmp_storages
 from dotenv import load_dotenv
-
-import django_discordo
 
 django_stubs_ext.monkeypatch()
 
