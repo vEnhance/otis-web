@@ -39,16 +39,14 @@ and replace `YOUR_USERNAME` in step 2 with `vEnhance`.
    (For each tool, search "[name of thing to install] [your OS]" on the web.)
 2. Clone this repository using the command
    `git clone https://github.com/YOUR_USERNAME/otis-web`.
-3. Run `git submodule update --init --recursive`
-   in order to pull the `evans_django_tools` submodule.
-4. Type `git checkout -b feature` to checkout a new branch named `feature`;
+3. Type `git checkout -b feature` to checkout a new branch named `feature`;
    this will make your life a bit easier than working on `main`.
    If you already know what feature you're trying to implement,
    you can use that, e.g. `git checkout -b add-bunny-pictures`.
-5. [Install Poetry](https://python-poetry.org/docs/).
+4. [Install Poetry](https://python-poetry.org/docs/).
    This enables you to use the `poetry` command;
    verify this by checking `poetry --help` produces a help message.
-6. Once you have `poetry`, hit `poetry install`.
+5. Once you have `poetry`, hit `poetry install`.
    This will automatically create a
    Python virtual environment and install stuff inside it.
    (If you are an expert familiar with Python virtual environments
@@ -60,7 +58,7 @@ and replace `YOUR_USERNAME` in step 2 with `vEnhance`.
    [mysql](https://github.com/PyMySQL/mysqlclient#install) in that case;
    see that link for instructions, under the "Install" section.
 
-7. If it isn't already activated,
+6. If it isn't already activated,
    [activate the Python virtual environment][activate]
    that was created in the previous step.
    The easiest way to do so is to run `poetry shell`.
@@ -69,15 +67,15 @@ and replace `YOUR_USERNAME` in step 2 with `vEnhance`.
    project. That is, always run `poetry shell` before doing any work, or
    for experts, activate the virtual environment using your preferred method.)
 
-8. If everything is working, `python manage.py check` should
+7. If everything is working, `python manage.py check` should
    run with no errors.
-9. Run `python manage.py migrate` to create the local database.
-10. Run `python manage.py createsuperuser` to create an admin user.
-11. Run `python manage.py runserver`.
+8. Run `python manage.py migrate` to create the local database.
+9. Run `python manage.py createsuperuser` to create an admin user.
+10. Run `python manage.py runserver`.
     The command will spin up a continuously running server.
-12. Point your browser to `http://127.0.0.1:8000`.
-    You should be able to log in with the user you defined in step 9.
-13. The website is functional now, but it is a bit bare-bones.
+11. Point your browser to `http://127.0.0.1:8000`.
+    You should be able to log in with the user you defined in step 8.
+12. The website is functional now, but it is a bit bare-bones.
     To populate it with some test data, use `http://127.0.0.1:8000/admin`
     or run `./fixtures/load-all.sh`.
     - To log in with the dummy accounts in the fixtures, it's easiest to log in
@@ -99,7 +97,7 @@ Optional steps:
 
 ### Using Docker
 
-0. Follow steps 0 - 3 from the above tutorial.
+0. Follow steps 0 - 2 from the above tutorial.
 1. Make sure to install [Docker](https://www.docker.com/) and make sure you
    download a version compatible with your computer.
 2. Set up the 3 environment variables at the bottom of `env` by copying them to
@@ -110,7 +108,7 @@ Optional steps:
 4. To start the server, run `docker compose up -d`. To execute a command inside
    the container, run `docker exec -it otis-web /bin/bash`. To stop the server,
    run `docker compose down`.
-5. Follow steps 11 - 12 from above.
+5. Follow steps 10 - 11 from above.
 
 Note: You may need to delete db.sqlite3 if you're not getting desired results,
 as it serves as a cache. At this point, spinning up 2 separate containers with
