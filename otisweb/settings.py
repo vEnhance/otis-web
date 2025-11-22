@@ -379,11 +379,6 @@ LOGGING = {
             "level": "DEBUG",
             "propagate": False,
         },
-        "mailchimp3.client": {
-            "handlers": ["console"],
-            "level": "WARNING",
-            "propagate": False,
-        },
         "stripe": {
             "handlers": ["console"],
             "level": "WARNING",
