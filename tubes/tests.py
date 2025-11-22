@@ -38,7 +38,9 @@ def test_tube_join_existing_record(otis):
     verified_group = GroupFactory(name="Verified")
     alice = UserFactory.create(username="alice", groups=(verified_group,))
     tube = TubeFactory.create(accepting_signups=True)
-    jr = JoinRecordFactory.create(tube=tube, user=alice, invite_url="https://example.com/invite")
+    jr = JoinRecordFactory.create(
+        tube=tube, user=alice, invite_url="https://example.com/invite"
+    )
 
     otis.login(alice)
     resp = otis.get("tube-join", tube.pk)
@@ -52,7 +54,9 @@ def test_tube_join_existing_record_no_invite_url(otis):
     """Test when user has JoinRecord but no invite_url, redirects to main_url."""
     verified_group = GroupFactory(name="Verified")
     alice = UserFactory.create(username="alice", groups=(verified_group,))
-    tube = TubeFactory.create(accepting_signups=True, main_url="https://example.com/main")
+    tube = TubeFactory.create(
+        accepting_signups=True, main_url="https://example.com/main"
+    )
     JoinRecordFactory.create(tube=tube, user=alice, invite_url="")
 
     otis.login(alice)
@@ -67,7 +71,9 @@ def test_tube_join_assigns_available_record(otis):
     verified_group = GroupFactory(name="Verified")
     alice = UserFactory.create(username="alice", groups=(verified_group,))
     tube = TubeFactory.create(accepting_signups=True)
-    jr = JoinRecordFactory.create(tube=tube, user=None, invite_url="https://example.com/join")
+    jr = JoinRecordFactory.create(
+        tube=tube, user=None, invite_url="https://example.com/join"
+    )
 
     otis.login(alice)
     resp = otis.get("tube-join", tube.pk)

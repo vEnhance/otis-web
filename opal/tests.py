@@ -400,7 +400,10 @@ def test_leaderboard(otis):
     """Test the leaderboard view (admin only)."""
     verified_group = GroupFactory(name="Verified")
     alice = UserFactory.create(
-        username="alice", first_name="Alice", last_name="Aardvark", groups=(verified_group,)
+        username="alice",
+        first_name="Alice",
+        last_name="Aardvark",
+        groups=(verified_group,),
     )
     bob = UserFactory.create(
         username="bob", first_name="Bob", last_name="Beta", groups=(verified_group,)
@@ -448,7 +451,10 @@ def test_leaderboard_early_access(otis):
     """Test the leaderboard with early access users (testsolvers)."""
     testsolver_group = GroupFactory(name="Testsolver")
     testsolver = UserFactory.create(
-        username="testsolver", first_name="Test", last_name="Solver", groups=(testsolver_group,)
+        username="testsolver",
+        first_name="Test",
+        last_name="Solver",
+        groups=(testsolver_group,),
     )
     admin = UserFactory.create(username="admin", is_staff=True, is_superuser=True)
 
@@ -546,13 +552,18 @@ def test_close_answer(otis):
     alice = UserFactory.create(username="alice", groups=(verified_group,))
 
     hunt = OpalHuntFactory.create(slug="hunt")
-    puzzle = OpalPuzzleFactory.create(
-        hunt=hunt, slug="puzzle", answer="CORRECT", partial_answers="CORRELATION\nALMOSTCORRECT"
+    OpalPuzzleFactory.create(
+        hunt=hunt,
+        slug="puzzle",
+        answer="CORRECT",
+        partial_answers="CORRELATION\nALMOSTCORRECT",
     )
 
     otis.login(alice)
     resp = otis.post_20x(
-        "opal-show-puzzle", "hunt", "puzzle",
+        "opal-show-puzzle",
+        "hunt",
+        "puzzle",
         data={"guess": "CORRELATION"},
         follow=True,
     )
