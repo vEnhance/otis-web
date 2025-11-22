@@ -35,7 +35,7 @@ check:
 	uv run pyright .
 
 test:
-	uv run coverage run -m pytest -n auto --cov --cov-report=term-missing
+	uv run pytest -n auto --cov --cov-report=term-missing --cov-report=lcov:coverage/lcov.info
 
 fmt:
 	uv run prek run --all-files

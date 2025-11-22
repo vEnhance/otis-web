@@ -39,9 +39,6 @@ jobs:
       - name: Run tests
         run: make test
 
-      - name: Write coverage report
-        run: uv run coverage lcov -o coverage/lcov.info
-
       - name: Upload coverage to Coveralls
         uses: coverallsapp/github-action@master
         with:
