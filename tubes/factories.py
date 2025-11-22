@@ -1,4 +1,4 @@
-import factory
+from factory.declarations import SubFactory
 from factory.django import DjangoModelFactory
 from factory.faker import Faker
 
@@ -19,7 +19,7 @@ class JoinRecordFactory(DjangoModelFactory):
     class Meta:
         model = JoinRecord
 
-    tube = factory.SubFactory(TubeFactory)
+    tube = SubFactory(TubeFactory)
     user = None
     activation_time = None
     invite_url = Faker("url")
