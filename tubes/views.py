@@ -40,7 +40,6 @@ def tube_join(request: HttpRequest, pk: int) -> HttpResponse:
                 request, "Ran out of one-time invite codes, please contact staff."
             )
             logging.critical(
-                request,
                 f"{tube} somehow ran out of one-time codes when {request.user} tried to join",
             )
 

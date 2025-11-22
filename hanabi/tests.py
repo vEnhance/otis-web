@@ -92,3 +92,94 @@ def test_register(otis):
         "hanabi-register", data={"hanab_username": "alice"}, follow=True
     )
     otis.assert_has(resp, "You already registered")
+
+
+@pytest.mark.django_db
+def test_replay_list(otis):
+    """Test viewing the replay list for a contest."""
+    contest = HanabiContestFactory.create(
+        pk=42,
+        variant_name="Rainbow (5 Suits)",
+        variant_id=15,
+        start_date=datetime.datetime(2024, 1, 1, tzinfo=UTC),
+        end_date=datetime.datetime(2024, 1, 14, tzinfo=UTC),
+        processed=True,  # Contest results are processed
+    )
+
+    # Create some replays
+    HanabiReplayFactory.create(contest=contest, game_score=25, turn_count=40)
+    HanabiReplayFactory.create(contest=contest, game_score=24, turn_count=42)
+    HanabiReplayFactory.create(contest=contest, game_score=20, turn_count=35)
+
+    # View the replays list
+    resp = otis.get_20x("hanabi-replays", contest.pk)
+    assert len(resp.context["replays"]) == 3
+    assert resp.context["contest"] == contest
+
+
+@pytest.mark.django_db
+def test_replay_list_unprocessed(otis):
+    """Test that unprocessed contest results are not visible to non-staff."""
+    verified_group = GroupFactory(name="Verified")
+    alice = UserFactory.create(username="alice", groups=(verified_group,))
+    admin = UserFactory.create(username="admin", is_staff=True, is_superuser=True)
+
+    contest = HanabiContestFactory.create(
+        pk=99,
+        start_date=datetime.datetime(2024, 1, 1, tzinfo=UTC),
+        end_date=datetime.datetime(2024, 1, 14, tzinfo=UTC),
+        processed=False,  # Contest not processed yet
+    )
+
+    # Non-staff user cannot view unprocessed results
+    otis.login(alice)
+    otis.get_40x("hanabi-replays", contest.pk)
+
+    # Staff can view unprocessed results
+    otis.login(admin)
+    resp = otis.get_20x("hanabi-replays", contest.pk)
+    assert resp.context["contest"] == contest
+
+
+@pytest.mark.django_db
+def test_replay_list_with_participation(otis):
+    """Test replay list shows own_replay when user participated."""
+    from hanabi.factories import HanabiParticipationFactory, HanabiPlayerFactory
+
+    verified_group = GroupFactory(name="Verified")
+    alice = UserFactory.create(username="alice", groups=(verified_group,))
+
+    contest = HanabiContestFactory.create(
+        pk=77,
+        start_date=datetime.datetime(2024, 1, 1, tzinfo=UTC),
+        end_date=datetime.datetime(2024, 1, 14, tzinfo=UTC),
+        processed=True,
+    )
+
+    # Create a replay with Alice's participation
+    player = HanabiPlayerFactory.create(user=alice)
+    replay = HanabiReplayFactory.create(contest=contest, game_score=22)
+    HanabiParticipationFactory.create(player=player, replay=replay)
+
+    otis.login(alice)
+    resp = otis.get_20x("hanabi-replays", contest.pk)
+    assert resp.context["own_replay"] == replay
+
+
+@pytest.mark.django_db
+def test_hanabi_upload(otis):
+    """Test the hanabi_upload admin view."""
+    verified_group = GroupFactory(name="Verified")
+    alice = UserFactory.create(username="alice", groups=(verified_group,))
+    admin = UserFactory.create(username="admin", is_staff=True, is_superuser=True)
+
+    contest = HanabiContestFactory.create(pk=55)
+
+    # Non-admin cannot access
+    otis.login(alice)
+    otis.get_40x("hanabi-upload", contest.pk)
+
+    # Admin can access (even though it's not implemented)
+    otis.login(admin)
+    resp = otis.get_20x("hanabi-upload", contest.pk)
+    otis.assert_has(resp, "Not implemented")

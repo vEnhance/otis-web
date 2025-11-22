@@ -393,3 +393,167 @@ def test_hint_visibility(otis):
         resp = otis.get_20x("opal-show-puzzle", puzzle.hunt.slug, puzzle.slug)
         assert "will release" not in resp.content.decode()
         assert "use your brain" in resp.content.decode()
+
+
+@pytest.mark.django_db
+def test_leaderboard(otis):
+    """Test the leaderboard view (admin only)."""
+    verified_group = GroupFactory(name="Verified")
+    alice = UserFactory.create(
+        username="alice", first_name="Alice", last_name="Aardvark", groups=(verified_group,)
+    )
+    bob = UserFactory.create(
+        username="bob", first_name="Bob", last_name="Beta", groups=(verified_group,)
+    )
+    admin = UserFactory.create(username="admin", is_staff=True, is_superuser=True)
+
+    hunt = OpalHuntFactory.create(
+        slug="hunt",
+        start_date=datetime.datetime(2024, 8, 1, tzinfo=UTC),
+    )
+    puzzle1 = OpalPuzzleFactory.create(
+        hunt=hunt, answer="one", order=1, is_metapuzzle=False
+    )
+    puzzle2 = OpalPuzzleFactory.create(
+        hunt=hunt, answer="two", order=2, is_metapuzzle=False
+    )
+    puzzle3 = OpalPuzzleFactory.create(
+        hunt=hunt, answer="three", order=3, is_metapuzzle=True
+    )
+
+    # Alice solves all puzzles (including meta) after hunt start
+    with freeze_time("2024-08-15"):
+        OpalAttemptFactory.create(user=alice, puzzle=puzzle1, guess="one")
+        OpalAttemptFactory.create(user=alice, puzzle=puzzle2, guess="two")
+        OpalAttemptFactory.create(user=alice, puzzle=puzzle3, guess="three")
+
+    # Bob solves first puzzle only
+    with freeze_time("2024-08-20"):
+        OpalAttemptFactory.create(user=bob, puzzle=puzzle1, guess="one")
+
+    # Test access control
+    otis.login(alice)
+    otis.get_40x("opal-leaderboard", "hunt")
+
+    otis.login(admin)
+    resp = otis.get_20x("opal-leaderboard", "hunt")
+    otis.assert_has(resp, "Alice Aardvark")
+    otis.assert_has(resp, "Bob Beta")
+    assert resp.context["hunt"] == hunt
+    assert len(resp.context["rows"]) == 2
+
+
+@pytest.mark.django_db
+def test_leaderboard_early_access(otis):
+    """Test the leaderboard with early access users (testsolvers)."""
+    testsolver_group = GroupFactory(name="Testsolver")
+    testsolver = UserFactory.create(
+        username="testsolver", first_name="Test", last_name="Solver", groups=(testsolver_group,)
+    )
+    admin = UserFactory.create(username="admin", is_staff=True, is_superuser=True)
+
+    hunt = OpalHuntFactory.create(
+        slug="hunt",
+        start_date=datetime.datetime(2024, 8, 10, tzinfo=UTC),
+    )
+    puzzle1 = OpalPuzzleFactory.create(hunt=hunt, answer="one", order=1)
+
+    # Testsolver solves before hunt starts (early access)
+    with freeze_time("2024-08-05"):
+        OpalAttemptFactory.create(user=testsolver, puzzle=puzzle1, guess="one")
+
+    otis.login(admin)
+    resp = otis.get_20x("opal-leaderboard", "hunt")
+    rows = resp.context["rows"]
+    assert len(rows) == 1
+    assert rows[0]["has_early_access"] is True
+
+
+@pytest.mark.django_db
+def test_person_log(otis):
+    """Test the person_log view (admin only)."""
+    verified_group = GroupFactory(name="Verified")
+    alice = UserFactory.create(username="alice", groups=(verified_group,))
+    admin = UserFactory.create(username="admin", is_staff=True, is_superuser=True)
+
+    hunt = OpalHuntFactory.create(slug="hunt")
+    puzzle = OpalPuzzleFactory.create(hunt=hunt, answer="answer")
+
+    # Alice makes some attempts
+    OpalAttemptFactory.create(user=alice, puzzle=puzzle, guess="wrong1")
+    OpalAttemptFactory.create(user=alice, puzzle=puzzle, guess="wrong2")
+    OpalAttemptFactory.create(user=alice, puzzle=puzzle, guess="answer")
+
+    # Test access control
+    otis.login(alice)
+    otis.get_40x("opal-person-log", "hunt", alice.pk)
+
+    otis.login(admin)
+    resp = otis.get_20x("opal-person-log", "hunt", alice.pk)
+    assert resp.context["hunt"] == hunt
+    assert resp.context["hunter"] == alice
+    assert len(resp.context["attempts"]) == 3
+
+
+@pytest.mark.django_db
+def test_finish_page(otis):
+    """Test the finish page (after solving a puzzle with achievement)."""
+    verified_group = GroupFactory(name="Verified")
+    alice = UserFactory.create(username="alice", groups=(verified_group,))
+
+    ach = AchievementFactory.create(diamonds=5)
+    hunt = OpalHuntFactory.create(slug="hunt")
+    puzzle = OpalPuzzleFactory.create(
+        hunt=hunt, slug="final", answer="answer", achievement=ach
+    )
+
+    otis.login(alice)
+
+    # Cannot access finish page without solving
+    otis.get_40x("opal-finish", "hunt", "final")
+
+    # Solve the puzzle
+    OpalAttemptFactory.create(user=alice, puzzle=puzzle, guess="answer")
+
+    # Now can access finish page
+    resp = otis.get_20x("opal-finish", "hunt", "final")
+    assert resp.context["puzzle"] == puzzle
+    assert resp.context["achievement"] == ach
+
+
+@pytest.mark.django_db
+def test_finish_page_no_achievement(otis):
+    """Test finish page for puzzle without achievement - should be forbidden."""
+    verified_group = GroupFactory(name="Verified")
+    alice = UserFactory.create(username="alice", groups=(verified_group,))
+
+    hunt = OpalHuntFactory.create(slug="hunt")
+    puzzle = OpalPuzzleFactory.create(
+        hunt=hunt, slug="noach", answer="answer", achievement=None
+    )
+
+    otis.login(alice)
+    OpalAttemptFactory.create(user=alice, puzzle=puzzle, guess="answer")
+
+    # Should be forbidden since puzzle has no achievement
+    otis.get_40x("opal-finish", "hunt", "noach")
+
+
+@pytest.mark.django_db
+def test_close_answer(otis):
+    """Test submitting a close answer."""
+    verified_group = GroupFactory(name="Verified")
+    alice = UserFactory.create(username="alice", groups=(verified_group,))
+
+    hunt = OpalHuntFactory.create(slug="hunt")
+    puzzle = OpalPuzzleFactory.create(
+        hunt=hunt, slug="puzzle", answer="CORRECT", partial_answers="CORRELATION\nALMOSTCORRECT"
+    )
+
+    otis.login(alice)
+    resp = otis.post_20x(
+        "opal-show-puzzle", "hunt", "puzzle",
+        data={"guess": "CORRELATION"},
+        follow=True,
+    )
+    otis.assert_has(resp, "Keep going")
