@@ -26,3 +26,8 @@ def test_social_page(otis):
     UserFactory.create(username="evan")
     otis.login("evan")
     otis.get_20x("socialaccount_connections")
+
+
+@pytest.mark.django_db
+def test_login_works(otis):
+    otis.get_20x("account_login")
