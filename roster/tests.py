@@ -422,7 +422,7 @@ def test_master_schedule(otis) -> None:
     )
     units: list[Unit] = UnitFactory.create_batch(10)
     alice.curriculum.set(units[:8])
-    otis.login(UserFactory.create(is_staff=True))
+    otis.login(UserFactory.create(is_staff=True, is_superuser=True))
     otis.assert_has(
         otis.get("master-schedule"),
         text=f'title="{alice.user.first_name} {alice.user.last_name}"',

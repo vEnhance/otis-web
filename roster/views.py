@@ -220,7 +220,7 @@ def invoice(request: HttpRequest, student_pk: Optional[int] = None) -> HttpRespo
     return render(request, "roster/invoice.html", context)
 
 
-@staff_required
+@admin_required
 def master_schedule(request: HttpRequest) -> HttpResponse:
     student_names_and_unit_pks = (
         get_current_students()

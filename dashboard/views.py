@@ -33,7 +33,7 @@ from dashboard.forms import (
 from dashboard.models import Announcement, PSet, SemesterDownloadFile, UploadedFile
 from dashboard.utils import get_news, get_units_to_submit, get_units_to_unlock
 from exams.models import PracticeExam
-from otisweb.decorators import staff_required
+from otisweb.decorators import admin_required
 from otisweb.mixins import VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest, get_days_since
 from roster.models import RegistrationContainer, Student, StudentRegistration
@@ -491,7 +491,7 @@ class DeleteFile(LoginRequiredMixin, DeleteView):
         return obj
 
 
-@staff_required
+@admin_required
 def idlewarn(request: AuthHttpRequest) -> HttpResponse:
     context: dict[str, Any] = {"title": "Idle-warn"}
     newest_qset = UploadedFile.objects.filter(

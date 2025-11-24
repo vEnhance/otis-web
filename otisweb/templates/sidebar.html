@@ -134,12 +134,6 @@
       <li>
         <a href="{% url "leaderboard" %}">Leaderboard</a>
       </li>
-      <li>
-        <a href="{% url "idlewarn" %}">Idle-warn</a>
-      </li>
-      <li>
-        <a href="{% url "master-schedule" %}">M Schedule</a>
-      </li>
     </ul>
     <h3>Instructor info</h3>
     <ul>
@@ -160,7 +154,7 @@
       <h3>Admin controls</h3>
       <ul>
         <li>
-          <a href="{% url "admin-unit-list" %}">Unit Grid</a>
+          <a href="{% url "admin-unit-list" %}">Unit grid</a>
         </li>
         <li>
           <a href="{% url "admin-palace-list" %}">Ruby Palace</a>
@@ -171,15 +165,21 @@
         <li>
           <a href="{% url "email-lookup" %}">By email</a>
         </li>
-        <li>Giga Chart</li>
-        <ul>
-          <li>
-            <a href="{% url "giga-chart" "csv" %}">CSV</a>
-          </li>
-          <li>
-            <a href="{% url "giga-chart" "html" %}">HTML</a>
-          </li>
-        </ul>
+      </ul>
+      <h3>Legacy views</h3>
+      <ul>
+        <li>
+          <a href="{% url "giga-chart" "csv" %}">Giga CSV</a>
+        </li>
+        <li>
+          <a href="{% url "giga-chart" "html" %}">Giga HTML</a>
+        </li>
+        <li>
+          <a href="{% url "idlewarn" %}">Idle warn</a>
+        </li>
+        <li>
+          <a href="{% url "master-schedule" %}">M sched</a>
+        </li>
       </ul>
     {% endif %}
   {% else %}

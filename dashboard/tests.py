@@ -765,9 +765,7 @@ def test_semester_list(otis):
 
 @pytest.mark.django_db
 def test_idle_warn(otis):
-    user = UserFactory.create()
-    user.is_staff = True
-    user.save()
+    user = UserFactory.create(is_staff=True, is_superuser=True)
     otis.login(user)
 
     unit = UnitFactory.create(code="BMX")
@@ -782,7 +780,7 @@ def test_idle_warn(otis):
 
     otis.assert_has(resp, "Idle-warn")
     otis.assert_has(resp, "Lv. 38")
-    otis.assert_has(resp, alice.user.email)
+    otis.assert_has(resp, alice.user.first_name)
     otis.assert_has(resp, "28.00d")
 
 

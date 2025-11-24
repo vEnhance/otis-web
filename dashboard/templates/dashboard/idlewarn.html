@@ -24,15 +24,7 @@
           <tr {% if student.newborn %}class="table-danger"{% endif %}>
             <td>Lv. {{ row.level }}</td>
             <td>
-              <a title="{{ student.name }}"
-                 href="{% url "portal" student.pk %}"
-                 class="tooltip-link">
-                {% if student.user.email|length > 24 %}
-                  <small>{{ student.user.email }}</small>
-                {% else %}
-                  {{ student.user.email }}
-                {% endif %}
-              </a>
+              <a href="{% url "portal" student.pk %}">{{ student.name|truncatechars:"28" }}</a>
             </td>
             {% if student.latest_pset %}
               <td class="text-end">{{ row.days_since_last_pset|floatformat:2 }}d</td>
