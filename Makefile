@@ -1,4 +1,4 @@
-.PHONY: help install runserver migrate migrations createsuperuser check test fmt prek
+.PHONY: help install runserver migrate migrations fmt check test ci copier
 
 help:
 	@echo "Available commands:"
@@ -6,11 +6,11 @@ help:
 	@echo "  make runserver        - Run Django development server"
 	@echo "  make migrate          - Apply database migrations"
 	@echo "  make migrations       - Create new migrations"
-	@echo "  make createsuperuser  - Create a Django superuser"
-	@echo "  make check            - Run Django checks and type checking"
-	@echo "  make test             - Run tests with coverage"
 	@echo "  make fmt              - Run code formatter"
-	@echo "  make prek             - Run prek on all files"
+	@echo "  make check            - Run Django checks and type checking"
+	@echo "  make test             - Run tests"
+	@echo "  make ci               - Short for fmt + check + test"
+	@echo "  make copier           - Run copier update with past answers"
 
 install:
 	uv sync
@@ -23,22 +23,27 @@ migrate:
 	uv run python manage.py migrate
 
 migrations:
-	@files=$$(uv run python manage.py makemigrations | grep -oP 'migrations/\S+\.py' | tr '\n' ' '); \
-	if [ -n "$$files" ]; then uv run prek run --files $$files; fi
+	files=$$(uv run python manage.py makemigrations --scriptable) && \
+	if [ -n "$$files" ]; then \
+		uv run prek run --files $$files; \
+	fi
 
-createsuperuser:
-	uv run python manage.py createsuperuser
+fmt:
+	uv run prek run --all-files
 
 check:
 	uv run python manage.py check
 	uv run python manage.py validate_templates
+	uv run python manage.py makemigrations --check --dry-run
 	uv run pyright .
 
 test:
 	uv run pytest -n auto --cov --cov-report=term-missing --cov-report=lcov:coverage/lcov.info
 
-fmt:
-	uv run prek run --all-files
+ci:
+	make fmt
+	make check
+	make test
 
-prek:
-	uv run prek run --all-files
+copier:
+	uv run copier update --skip-answered

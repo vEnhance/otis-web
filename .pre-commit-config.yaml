@@ -6,12 +6,6 @@ default_install_hook_types:
 default_stages: [pre-commit]
 
 repos:
-  - repo: https://github.com/ecugol/pre-commit-hooks-django
-    rev: v0.4.0
-    hooks:
-      - id: check-absent-migrations
-        stages: [pre-push]
-
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
     hooks:
@@ -50,7 +44,7 @@ repos:
     rev: v3.6.2
     hooks:
       - id: prettier
-        types_or: [css, javascript]
+        types_or: [css, javascript, markdown, json, toml, yaml]
 
   - repo: https://github.com/codespell-project/codespell
     rev: v2.4.1
@@ -80,6 +74,7 @@ repos:
             refactor,
             revert,
             style,
+            temp,
             tests,
           ]
 
@@ -91,6 +86,7 @@ repos:
         language: system
         pass_filenames: false
         stages: [pre-push]
+        fail_fast: true
 
       - id: make-check
         name: Run Django checks and type checking
@@ -98,6 +94,7 @@ repos:
         language: system
         pass_filenames: false
         stages: [pre-push]
+        fail_fast: true
 
       - id: make-test
         name: Run tests
@@ -105,3 +102,4 @@ repos:
         language: system
         pass_filenames: false
         stages: [pre-push]
+        fail_fast: true
