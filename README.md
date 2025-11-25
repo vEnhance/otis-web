@@ -29,39 +29,36 @@ Video tutorial: https://youtu.be/W27XcqeXp20
 ### Standard Linux environment
 
 If you're just trying to get a local copy of the OTIS-WEB code
-and don't plan to submit any code back, then skip steps 0 and 4,
+and don't plan to submit any code back, then skip steps 0 and 3,
 and replace `YOUR_USERNAME` in step 2 with `vEnhance`.
 
 0. Create an account on GitHub if you haven't already, and
    [fork the repository](https://docs.github.com/en/get-started/quickstart/fork-a-repo).
-1. Install the following standard tools: `python` (version 3.13+), `pip`, `git`.
-   (For each tool, search "[name of thing to install] [your OS]" on the web.)
+1. Install the following standard tools: `python` (version 3.13+), `git`,
+   and [uv](https://docs.astral.sh/uv/getting-started/installation/).
 2. Clone this repository using the command
    `git clone https://github.com/YOUR_USERNAME/otis-web`.
 3. Type `git checkout -b feature` to checkout a new branch named `feature`;
    this will make your life a bit easier than working on `main`.
    If you already know what feature you're trying to implement,
    you can use that, e.g. `git checkout -b add-bunny-pictures`.
-4. [Install uv](https://docs.astral.sh/uv/getting-started/installation/).
-   This enables you to use the `uv` command;
-   verify this by checking `uv --help` produces a help message.
-5. Once you have `uv`, run `make install` (or `uv sync`).
-   This will automatically create a Python virtual environment and install dependencies.
+4. Check that `uv` works.
+   Then run `make install`.
 
    On some systems, installation could fail when trying to install
    `mysqlclient`. You will have to separately install `pkg-config`
    [mysql](https://github.com/PyMySQL/mysqlclient#install) in that case;
    see that link for instructions, under the "Install" section.
 
-6. If everything is working, `uv run python manage.py check` should
+5. If everything is working, `uv run python manage.py check` should
    run with no errors.
-7. Run `make migrate` to create the local database.
-8. Run `make createsuperuser` to create an admin user.
-9. Run `make runserver`.
+6. Run `make migrate` to create the local database.
+7. Run `make createsuperuser` to create an admin user.
+8. Run `make runserver`.
    The command will spin up a continuously running server.
-10. Point your browser to `http://127.0.0.1:8000`.
-    You should be able to log in with the user you defined in step 8.
-11. The website is functional now, but it is a bit bare-bones.
+9. Point your browser to `http://127.0.0.1:8000`.
+   You should be able to log in with the user from before.
+10. The website is functional now, but it is a bit bare-bones.
     To populate it with some test data, use `http://127.0.0.1:8000/admin`
     or run `./fixtures/load-all.sh`.
     - To log in with the dummy accounts in the fixtures, it's easiest to log in
