@@ -31,6 +31,7 @@ make fmt              # Run code formatters (prek)
 ## Project Structure
 
 Key Django apps:
+
 - `core/` - Core models and utilities
 - `dashboard/` - Student dashboard
 - `roster/` - Student roster management
@@ -44,28 +45,33 @@ Key Django apps:
 ## Development Guidelines
 
 ### Code Style
+
 - Follow Google's Python style guide
 - Use type annotations for function parameters and return types
 - Run `make fmt` before committing to auto-format code
 - Run `make check` to verify type checking passes
 
 ### Testing
+
 - Write tests for any new functionality in `*/tests.py` files
 - Run `make test` to execute tests with coverage
 - Tests use pytest with the `--reuse-db` flag for speed
 
 ### Database
+
 - Use `make migrations` to create new migrations
 - Use `make migrate` to apply migrations
 - Fixtures are in `fixtures/` directory; load with `./fixtures/load-all.sh`
 
 ### Environment Variables
+
 - Copy `env` to `.env` and configure as needed
 - Required for Stripe integration and other optional features
 
 ## Type Checking Notes
 
 The codebase is heavily type-checked with pyright. Key settings:
+
 - `typeCheckingMode = "basic"`
 - Migrations and test files are excluded from type checking
 - Django stubs are installed for better type inference
