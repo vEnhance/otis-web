@@ -10,7 +10,7 @@ otisweb/static/answersheets/*.pdf
 .env
 .venv
 evanchen-cc-*.json
-htmlcov/*
+coverage/*
 .coverage
 .vscode/
 .ruff_cache/
