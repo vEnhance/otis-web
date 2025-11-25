@@ -1,15 +1,15 @@
 # This is a development dockerfile, that's made in 5 minutes by Amol Rama
 # If it seems bad, feel free to let him know :)
-FROM python:buster
-
-ENV CRYPTOGRAPHY_DONT_BUILD_RUST=1
-RUN pip install poetry black toml
+FROM python:3.13-bookworm
 
 WORKDIR /app
 
-COPY pyproject.toml .
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-RUN poetry install
+COPY pyproject.toml uv.lock ./
+
+RUN uv sync --frozen
 
 COPY . .
 

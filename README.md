@@ -7,9 +7,8 @@
 [<img src="https://github.com/vEnhance/otis-web/actions/workflows/codeql-analysis.yml/badge.svg" alt="OTIS-WEB status">](https://github.com/vEnhance/otis-web/actions)
 
 [<img src="https://img.shields.io/badge/html-djlint-blueviolet.svg" alt="djlint">](https://www.djlint.com)
-[<img src="https://img.shields.io/badge/python%20style-black-000000.svg" alt="style: black">](https://github.com/psf/black)
-[<img src="https://img.shields.io/badge/types-pyright-00cca7.svg" alt="types: pyright">](https://github.com/Microsoft/pyright)
 [<img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json" alt="lint: ruff">](https://github.com/astral-sh/ruff)
+[<img src="https://img.shields.io/badge/types-pyright-00cca7.svg" alt="types: pyright">](https://github.com/Microsoft/pyright)
 [<img src="https://coveralls.io/repos/github/vEnhance/otis-web/badge.svg?branch=main" alt="Coverage status">](https://coveralls.io/github/vEnhance/otis-web?branch=main)
 
 # OTIS-WEB
@@ -35,7 +34,7 @@ and replace `YOUR_USERNAME` in step 2 with `vEnhance`.
 
 0. Create an account on GitHub if you haven't already, and
    [fork the repository](https://docs.github.com/en/get-started/quickstart/fork-a-repo).
-1. Install the following standard tools: `python` (version 3.10), `pip`, `git`.
+1. Install the following standard tools: `python` (version 3.13+), `pip`, `git`.
    (For each tool, search "[name of thing to install] [your OS]" on the web.)
 2. Clone this repository using the command
    `git clone https://github.com/YOUR_USERNAME/otis-web`.
@@ -43,45 +42,30 @@ and replace `YOUR_USERNAME` in step 2 with `vEnhance`.
    this will make your life a bit easier than working on `main`.
    If you already know what feature you're trying to implement,
    you can use that, e.g. `git checkout -b add-bunny-pictures`.
-4. [Install Poetry](https://python-poetry.org/docs/).
-   This enables you to use the `poetry` command;
-   verify this by checking `poetry --help` produces a help message.
-5. Once you have `poetry`, hit `poetry install`.
-   This will automatically create a
-   Python virtual environment and install stuff inside it.
-   (If you are an expert familiar with Python virtual environments
-   and want to use your own rather than Poetry's auto-created one,
-   then activate said environment before running `poetry install`.)
+4. [Install uv](https://docs.astral.sh/uv/getting-started/installation/).
+   This enables you to use the `uv` command;
+   verify this by checking `uv --help` produces a help message.
+5. Once you have `uv`, run `make install` (or `uv sync`).
+   This will automatically create a Python virtual environment and install dependencies.
 
-   On some systems, `poetry install` could fail when trying to install
+   On some systems, installation could fail when trying to install
    `mysqlclient`. You will have to separately install `pkg-config`
    [mysql](https://github.com/PyMySQL/mysqlclient#install) in that case;
    see that link for instructions, under the "Install" section.
 
-6. If it isn't already activated,
-   [activate the Python virtual environment][activate]
-   that was created in the previous step.
-   The easiest way to do so is to run `poetry shell`.
-
-   (_Note_: you have to do this step every time you start working on the
-   project. That is, always run `poetry shell` before doing any work, or
-   for experts, activate the virtual environment using your preferred method.)
-
-7. If everything is working, `python manage.py check` should
+6. If everything is working, `uv run python manage.py check` should
    run with no errors.
-8. Run `python manage.py migrate` to create the local database.
-9. Run `python manage.py createsuperuser` to create an admin user.
-10. Run `python manage.py runserver`.
-    The command will spin up a continuously running server.
-11. Point your browser to `http://127.0.0.1:8000`.
+7. Run `make migrate` to create the local database.
+8. Run `make createsuperuser` to create an admin user.
+9. Run `make runserver`.
+   The command will spin up a continuously running server.
+10. Point your browser to `http://127.0.0.1:8000`.
     You should be able to log in with the user you defined in step 8.
-12. The website is functional now, but it is a bit bare-bones.
+11. The website is functional now, but it is a bit bare-bones.
     To populate it with some test data, use `http://127.0.0.1:8000/admin`
     or run `./fixtures/load-all.sh`.
     - To log in with the dummy accounts in the fixtures, it's easiest to log in
       with the superuser account and then use the hijack feature.
-
-[activate]: https://python-poetry.org/docs/basic-usage/#activating-the-virtual-environment
 
 Optional steps:
 
@@ -92,8 +76,6 @@ Optional steps:
   Create some API keys and `stripe login`.
   Add these API keys to `.env` (the three `STRIPE_*` variables).
   Then run `stripe listen --forward-to localhost:8000/payments/webhook/`.
-
-[venv]: https://djangocentral.com/how-to-a-create-virtual-environment-for-python/
 
 ### Using Docker
 

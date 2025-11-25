@@ -1,68 +1,70 @@
-[tool.poetry]
+[project]
 name = "otisweb"
 version = "1.9.0"
 description = "OTIS-WEB Course Management System"
-authors = ["Evan Chen <evan@evanchen.cc>"]
-license = "MIT"
+authors = [{ name = "Evan Chen", email = "evan@evanchen.cc" }]
+license = { text = "MIT" }
 readme = "README.md"
-repository = "https://github.com/vEnhance/otis-web"
+requires-python = ">=3.13, <4.0"
 
-[tool.poetry.dependencies]
-python = ">=3.13, <4.0"
-Django = "^5.2.8"
-PyMySQL = "^1.1.2"
-Unidecode = "^1.4.0"
-crispy-bootstrap5 = "^2024.2"
-django-allauth = {extras = ["socialaccount"], version = "^65.11.1"}
-django-bootstrap5 = "^24.2"
-django-braces = "^1.17.0"
-django-crispy-forms = "^2.4"
-django-debug-toolbar = "^4.4.6"
-django-discordo = "^0.1.0"
-django-extensions = "^3.2.1"
-django-hijack = "^3.7.4"
-django-import-export = "^4.3.9"
-django-markdownfield = "^0.11.0"
-django-markdownify = "^0.9.3"
-django-positions = "^0.6.0"
-django-qr-code = "^4.1.0"
-django-registration = "^3.4"
-django-reversion = "^5.0.10"
-django-sql-utils = "^0.7.0"
-django-storages = {extras = ["google"], version = "^1.14.5"}
-django-stubs = "^5.2.2"
-django-stubs-ext = "^5.2.2"
-mysqlclient = "^2.2.7"
-prettytable = "^3.15.1"
-pyparsing = "^3.2.1"
-python-dotenv = "^1.1.1"
-setuptools = "^78.1.1"
-stripe = "=5.5.0"
-wheel = "^0.45.1"
-wiki = "^0.12.0"
+dependencies = [
+  "Django>=5.2.8,<6.0.0",
+  "PyMySQL>=1.1.2,<2.0.0",
+  "Unidecode>=1.4.0,<2.0.0",
+  "crispy-bootstrap5>=2024.2",
+  "django-allauth[socialaccount]>=65.11.1,<66.0.0",
+  "django-bootstrap5>=24.2",
+  "django-braces>=1.17.0,<2.0.0",
+  "django-crispy-forms>=2.4,<3.0",
+  "django-debug-toolbar>=4.4.6,<5.0.0",
+  "django-discordo>=0.1.0,<0.2.0",
+  "django-extensions>=3.2.1,<4.0.0",
+  "django-hijack>=3.7.4,<4.0.0",
+  "django-import-export>=4.3.9,<5.0.0",
+  "django-markdownfield>=0.11.0,<0.12.0",
+  "django-markdownify>=0.9.3,<0.10.0",
+  "django-positions>=0.6.0,<0.7.0",
+  "django-qr-code>=4.1.0,<5.0.0",
+  "django-registration>=3.4,<4.0",
+  "django-reversion>=5.0.10,<6.0.0",
+  "django-sql-utils>=0.7.0,<0.8.0",
+  "django-storages[google]>=1.14.5,<2.0.0",
+  "django-stubs>=5.2.2,<6.0.0",
+  "django-stubs-ext>=5.2.2,<6.0.0",
+  "mysqlclient>=2.2.7,<3.0.0",
+  "prettytable>=3.15.1,<4.0.0",
+  "pyparsing>=3.2.1,<4.0.0",
+  "python-dotenv>=1.1.1,<2.0.0",
+  "setuptools>=78.1.1",
+  "stripe==5.5.0",
+  "wheel>=0.45.1",
+  "wiki>=0.12.0,<0.13.0",
+]
 
-[tool.poetry.group.dev.dependencies]
-Faker = "^33.3.1"
-codespell = "^2.4.1"
-coverage = {extras = ["toml"], version = "^7.10.6"}
-djlint = "^1.36.4"
-factory-boy = "^3.3.3"
-freezegun = "^1.5.5"
-ipython = "^9.5.0"
-jedi = "^0.19.2"
-pytest = "^9.0.1"
-pytest-cov = "^6.0.0"
-pytest-django = "^4.9.0"
-pytest-xdist = "^3.8.0"
-pyright = "^1.1.404"
-ruff = "^0.12.11"
-tblib = "^3.1.0"
-toml = "^0.10.2"
-types-Markdown = "^3.8.0.20250809"
-types-freezegun = "^1.1.2"
-types-requests = "^2.32.0.20250809"
-werkzeug = "^3.1.3"
-prek = "^0.2.14"
+[dependency-groups]
+dev = [
+  "Faker>=33.3.1,<34.0.0",
+  "codespell>=2.4.1,<3.0.0",
+  "coverage[toml]>=7.10.6,<8.0.0",
+  "djlint>=1.36.4,<2.0.0",
+  "factory-boy>=3.3.3,<4.0.0",
+  "freezegun>=1.5.5,<2.0.0",
+  "ipython>=9.5.0",
+  "jedi>=0.19.2,<0.20.0",
+  "pytest>=9.0.1",
+  "pytest-cov>=6.0.0,<7.0.0",
+  "pytest-django>=4.9.0,<5.0.0",
+  "pytest-xdist>=3.8.0,<4.0.0",
+  "pyright>=1.1.404",
+  "ruff>=0.12.11",
+  "tblib>=3.1.0,<4.0.0",
+  "toml>=0.10.2,<0.11.0",
+  "types-Markdown>=3.8.0.20250809",
+  "types-freezegun>=1.1.2,<2.0.0",
+  "types-requests>=2.32.0.20250809",
+  "werkzeug>=3.1.3,<4.0.0",
+  "prek>=0.2.14,<0.3.0",
+]
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "otisweb.settings"
@@ -151,14 +153,14 @@ strictParameterNoneValue = false
 strictSetInference = false
 
 [build-system]
-requires = ["poetry-core>=1.2.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.codereviewdoctor]
 disable = ["tall-model", "missing-related-name", "checking-settings-debug", "nullable-string-field"]
 
 [tool.codespell]
-skip = "roster/country_abbrevs.py,*/migrations/*.py,poetry.lock"
+skip = "roster/country_abbrevs.py,*/migrations/*.py,uv.lock"
 count = ""
 quiet-level = 3
 ignore-words-list = "assertIn"

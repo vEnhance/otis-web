@@ -81,8 +81,7 @@ It's not a bad idea to write the tests before the code.
 
 ## Checks
 
-There's a script `./lint.sh` at the top directory which will run several
-automated checks against the current commit.
+Run `make fmt` to auto-format code and `make check` to run checks.
 You need to make sure your code passes all these checks;
 GitHub will run the same tests on any submitted code.
 
@@ -93,26 +92,22 @@ Here are some details about what is checked:
 Your code should conform to the style of the rest of the OTIS,
 which follows Google's standards.
 
-- The codebase uses `isort` and `black`
-  for linting and formatting of Python files,
+- The codebase uses `ruff` for linting and formatting of Python files,
   to ensure the uniformity of style across the repository.
 - In addition, `djlint` is used to format the HTML templates.
 
 To preserve your sanity you may optionally configure
-your editor to automatically apply `black` and `djlint` after each save:
+your editor to automatically apply these formatters after each save:
 if you're using a sufficiently sophisticated editor,
 you can probably configure it to do so.
 
 ### Unit testing
 
-Running `python manage.py test` in the top directory will run Django's unit
-testing suite. This runs all the checks defined in `**/tests.py`.
+Running `make test` will run the test suite with coverage.
+This runs all the checks defined in `**/tests.py`.
 
-The `./lint.sh` will actually run `coverage run manage.py test` so it can then
-generate a [coverage report](https://coverage.readthedocs.io/en/6.4.4/) showing
-which lines of code were actually checked at some point by at least one unit
-test. The resulting percentage is a barometer on how far behind Evan is on
-writing tests for some of the older code.
+The coverage report shows which lines of code were actually
+checked at some point by at least one unit test.
 
 ### Type checking
 
@@ -120,17 +115,15 @@ If you're new to development, skip this section.
 I'll talk to you more about it later.
 
 The OTIS-WEB repository is heavily type-checked.
-We use `pyflakes` and `pyright` are to catch type errors and other
-issues. This means type annotations are usually required for function
+We use `pyright` to catch type errors and other issues.
+This means type annotations are usually required for function
 parameters or when initializing empty lists or dictionaries.
 
-You should be able to use `pyflakes` in pure Python.
-To use `pyright`, you'll need to do a separate installation process:
-follow [the README](https://github.com/Microsoft/pyright#installation).
+To use `pyright`, you can run `uv run pyright .` or just `make check`.
 
 If your editor supports language server protocols,
 you should be able to catch these errors inline.
-If your editor doesn't, consider switching 😉
+If your editor doesn't, consider switching.
 
 ## Submitting
 
@@ -150,9 +143,8 @@ Then:
 When you submit a pull request,
 GitHub will automatically run several checks on the code;
 they are roughly the same checks described above,
-and the exact specification can be read in `.github/workflows/main.yml`
+and the exact specification can be read in `.github/workflows/ci.yml`.
 If this is your first time doing this sort of thing
-(and you didn't run `./lint.sh` successfully)
 it's likely that at least one of these checks will fail.
 Don't freak out; I'll help you through getting the tests to pass.
 
@@ -160,16 +152,13 @@ Don't freak out; I'll help you through getting the tests to pass.
 
 ### Pre-commit hooks
 
-A mentioned above, the script `./lint.sh` will run all tests.
-So you might like to do something like
+You can use `prek` to run pre-commit hooks:
 
 ```bash
-echo "./lint.sh" > .git/hooks/pre-commit
-chmod +x .git/hooks/pre-commit
+uv run prek install
 ```
 
-which will prevent you from pushing a commit
-that isn't going to pass the tests on GitHub.
+This will install hooks that run the formatters and linters before each commit.
 
 ### Docker
 
@@ -187,8 +176,8 @@ docker run \
   otis-web sh
 ```
 
-Once in there, use `poetry run python ...` to run any python scripts. Also make sure
-that you start the runserver with `poetry run python manage.py runserver 0.0.0.0:8000`,
+Once in there, use `uv run python ...` to run any python scripts. Also make sure
+that you start the runserver with `uv run python manage.py runserver 0.0.0.0:8000`,
 as this will connect to the port you put in the `docker run` command. If you changed
 it from port 8000 in the `docker run` command, **DO NOT** change it here - instead, just
 go to `localhost:PORT`, where `PORT` is the specified port (not 8000 if you changed it).
