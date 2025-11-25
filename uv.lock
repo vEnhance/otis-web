@@ -1127,7 +1127,7 @@ wheels = [
 [[package]]
 name = "otisweb"
 version = "1.9.0"
-source = { editable = "." }
+source = { virtual = "." }
 dependencies = [
     { name = "crispy-bootstrap5" },
     { name = "django" },

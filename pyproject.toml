@@ -153,10 +153,6 @@ strictListInference = false
 strictParameterNoneValue = false
 strictSetInference = false
 
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
 [tool.codereviewdoctor]
 disable = ["tall-model", "missing-related-name", "checking-settings-debug", "nullable-string-field"]
 
