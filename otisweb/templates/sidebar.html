@@ -151,7 +151,7 @@
       </li>
     </ul>
     {% if request.user.is_superuser %}
-      <h3>Admin controls</h3>
+      <h3>Admin</h3>
       <ul>
         <li>
           <a href="{% url "admin-unit-list" %}">Unit grid</a>
@@ -164,21 +164,6 @@
         </li>
         <li>
           <a href="{% url "email-lookup" %}">By email</a>
-        </li>
-      </ul>
-      <h3>Legacy views</h3>
-      <ul>
-        <li>
-          <a href="{% url "giga-chart" "csv" %}">Giga CSV</a>
-        </li>
-        <li>
-          <a href="{% url "giga-chart" "html" %}">Giga HTML</a>
-        </li>
-        <li>
-          <a href="{% url "idlewarn" %}">Idle warn</a>
-        </li>
-        <li>
-          <a href="{% url "master-schedule" %}">M sched</a>
         </li>
       </ul>
     {% endif %}
@@ -200,9 +185,10 @@
       </li>
     </ul>
   {% endif %}
-  {% if student and request.user.is_staff %}
-    <ul>
-      {% if request.user.is_superuser %}
+  {% if student.user and request.user.is_staff %}
+    <h4>User</h4>
+    {% if request.user.is_superuser %}
+      <ul>
         <li>
           <a href="{% url "admin:auth_user_change" student.user.pk %}">Edit user</a>
         </li>
@@ -219,17 +205,20 @@
             <a href="{% url "admin:core_userprofile_change" student.user.profile.pk %}">Edit profile</a>
           </li>
         {% endif %}
-        {% if student.user %}
-          {# Hijack student account #}
-          <li>
-            <form action="{% url 'hijack:acquire' %}" method="post">
-              {% csrf_token %}
-              <input type="hidden" name="user_pk" value="{{ student.user.pk }}" />
-              <input type="hidden" name="next" value="{{ request.path }}" />
-              <button class="pseudo-button" type="submit">Hijack {{ student.user.first_name }}</button>
-            </form>
-          </li>
-        {% endif %}
+      </ul>
+      <ul>
+        <li>
+          <a href="{% url "user-info" student.user.pk %}">Show user info</a>
+        </li>
+        {# Hijack student account #}
+        <li>
+          <form action="{% url 'hijack:acquire' %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="user_pk" value="{{ student.user.pk }}" />
+            <input type="hidden" name="next" value="{{ request.path }}" />
+            <button class="pseudo-button" type="submit">Hijack {{ student.user.first_name }}</button>
+          </form>
+        </li>
         {% if student.assistant %}
           {# Hijack assistant account #}
           <li>
@@ -241,21 +230,39 @@
             </form>
           </li>
         {% endif %}
-      {% else %}
+      </ul>
+    {% else %}
+      <ul>
         <li>
           <a target="_blank"
              href="mailto:{{ student.user.email }}"
              rel="noreferrer">Email student</a>
-          <br />
         </li>
-      {% endif %}
-    </ul>
+      </ul>
+    {% endif %}
+    {% if request.user.is_superuser %}
+      <h4>Legacy views</h4>
+      <ul>
+        <li>
+          <a href="{% url "giga-chart" "csv" %}">Giga CSV</a>
+        </li>
+        <li>
+          <a href="{% url "giga-chart" "html" %}">Giga HTML</a>
+        </li>
+        <li>
+          <a href="{% url "idlewarn" %}">Idle warn</a>
+        </li>
+        <li>
+          <a href="{% url "master-schedule" %}">M sched</a>
+        </li>
+      </ul>
+    {% endif %}
+  {% else %}
+    <p>You are not logged in.</p>
+    <p>
+      <a href="{% url "account_login" %}">Log in now.</a>
+    </p>
   {% endif %}
-{% else %}
-  <p>You are not logged in.</p>
-  <p>
-    <a href="{% url "account_login" %}">Log in now.</a>
-  </p>
 {% endif %}
 <!--
   vim: ft=htmldjango
