@@ -236,6 +236,7 @@ REG_VENUEQ_INIT_KEYS = (
     "user__email",
     "created_at",
     "user__profile__email_on_registration_processed",
+    "applyuuid__uuid",
 )
 
 
