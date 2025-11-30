@@ -287,3 +287,71 @@ def test_bonus_student(otis):
     )  # Locked bonus level
     otis.login(student)
     assert_catalog_equal(otis, {}, ["BKV"])
+
+
+@pytest.mark.django_db
+def test_userinfo_access_control(otis):
+    target_user = UserFactory.create()
+
+    # Anonymous -> redirect to login
+    otis.get_30x("user-info", target_user.pk)
+
+    # Regular user -> denied
+    otis.login(UserFactory.create())
+    otis.get_40x("user-info", target_user.pk)
+
+    # Staff only (not superuser) -> denied
+    otis.login(UserFactory.create(is_staff=True))
+    otis.get_40x("user-info", target_user.pk)
+
+    # Superuser -> success
+    otis.login(UserFactory.create(is_superuser=True, is_staff=True))
+    otis.get_20x("user-info", target_user.pk)
+
+
+@pytest.mark.django_db
+def test_userinfo_displays_info(otis):
+    target_user = UserFactory.create(
+        username="testuser",
+        email="test@example.com",
+        first_name="Test",
+        last_name="User",
+    )
+    admin = UserFactory.create(is_superuser=True, is_staff=True)
+    otis.login(admin)
+    resp = otis.get_20x("user-info", target_user.pk)
+    otis.assert_has(resp, "testuser")
+    otis.assert_has(resp, "test@example.com")
+    otis.assert_has(resp, "Test User")
+
+
+@pytest.mark.django_db
+def test_generate_reset_link_access_control(otis):
+    target_user = UserFactory.create()
+
+    # Anonymous -> redirect
+    otis.post_login_redirect("generate-reset-link", target_user.pk)
+
+    # Regular user -> denied
+    otis.login(UserFactory.create())
+    otis.post_denied("generate-reset-link", target_user.pk)
+
+    # Staff only -> denied
+    otis.login(UserFactory.create(is_staff=True))
+    otis.post_denied("generate-reset-link", target_user.pk)
+
+
+@pytest.mark.django_db
+def test_generate_reset_link(otis):
+    target_user = UserFactory.create()
+    admin = UserFactory.create(is_superuser=True, is_staff=True)
+    otis.login(admin)
+
+    # POST to generate link
+    resp = otis.post("generate-reset-link", target_user.pk)
+    otis.assert_30x(resp)
+
+    # Follow redirect and check link is displayed
+    resp = otis.get_20x("user-info", target_user.pk)
+    otis.assert_has(resp, "Password reset link generated")
+    otis.assert_has(resp, "/core/reset/")

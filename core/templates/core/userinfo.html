@@ -1,0 +1,76 @@
+{% extends "layout.html" %}
+{% block title %}
+  User Info: {{ target_user.username }}
+{% endblock title %}
+{% block layout-content %}
+  <h2>Basic Information</h2>
+  <table class="table">
+    <tbody>
+      <tr>
+        <th>Username</th>
+        <td>
+          <code>{{ target_user.username }}</code>
+        </td>
+      </tr>
+      <tr>
+        <th>Email</th>
+        <td>{{ target_user.email|default:"(none)" }}</td>
+      </tr>
+      <tr>
+        <th>Full Name</th>
+        <td>{{ target_user.get_full_name|default:"(none)" }}</td>
+      </tr>
+      <tr>
+        <th>Has Password</th>
+        <td>
+          {% if has_password %}
+            Yes
+          {% else %}
+            No
+          {% endif %}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <h2>Connected Social Accounts</h2>
+  {% if social_accounts %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Provider</th>
+          <th>UID</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for account in social_accounts %}
+          <tr>
+            <td>{{ account.provider|title }}</td>
+            <td>
+              <code>{{ account.uid }}</code>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No connected social accounts.</p>
+  {% endif %}
+  <h2>Password Reset Link</h2>
+  {% if reset_link %}
+    <div class="alert alert-success">
+      <p>
+        <strong>Password reset link generated!</strong>
+      </p>
+      <p>Copy the link below and send it to the user:</p>
+      <input type="text"
+             class="form-control"
+             value="{{ reset_link }}"
+             readonly
+             onclick="this.select();" />
+    </div>
+  {% endif %}
+  <form method="post" action="{% url "generate-reset-link" target_user.pk %}">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-primary">Generate Password Reset Link</button>
+  </form>
+{% endblock layout-content %}

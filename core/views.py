@@ -3,6 +3,7 @@ from typing import Any, Optional
 from braces.views import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import AnonymousUser, User
+from django.contrib.auth.tokens import default_token_generator
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models.aggregates import Count, Max
@@ -14,8 +15,13 @@ from django.forms.models import BaseModelForm
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect
 from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
 from django.urls.base import reverse_lazy
 from django.utils import timezone
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
+from django.views.generic import View
+from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView
 from django.views.generic.list import ListView
 from sql_util.utils import Exists
@@ -351,3 +357,29 @@ def calendar(request: AuthHttpRequest) -> HttpResponse:
         return HttpResponseRedirect(semester.calendar_url)
     else:
         raise Http404("No calendar URL provided for this semester.")
+
+
+class UserInfoView(AdminRequiredMixin, DetailView[User]):
+    model = User
+    template_name = "core/userinfo.html"
+    context_object_name = "target_user"
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        user = self.object
+        context["social_accounts"] = user.socialaccount_set.all()  # type: ignore[attr-defined]
+        context["has_password"] = user.has_usable_password()
+        context["reset_link"] = self.request.session.pop("reset_link", None)
+        return context
+
+
+class GeneratePasswordResetLinkView(AdminRequiredMixin, View):
+    def post(self, request: HttpRequest, pk: int) -> HttpResponse:
+        user = get_object_or_404(User, pk=pk)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        token = default_token_generator.make_token(user)
+        reset_url = request.build_absolute_uri(
+            reverse("password-reset-confirm", kwargs={"uidb64": uid, "token": token})
+        )
+        request.session["reset_link"] = reset_url
+        return HttpResponseRedirect(reverse("user-info", kwargs={"pk": pk}))

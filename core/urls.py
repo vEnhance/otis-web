@@ -1,4 +1,6 @@
+from django.contrib.auth import views as auth_views
 from django.urls import path
+from django.urls.base import reverse_lazy
 from django.views.generic.base import RedirectView
 
 from . import views
@@ -21,4 +23,18 @@ urlpatterns = [
     path(r"unit/solutions/<int:pk>/", views.unit_solutions, name="view-solutions"),
     path(r"dismiss/news/", views.dismiss, name="dismiss-news"),
     path(r"calendar/", views.calendar, name="calendar"),
+    path(r"userinfo/<int:pk>/", views.UserInfoView.as_view(), name="user-info"),
+    path(
+        r"userinfo/<int:pk>/reset-link/",
+        views.GeneratePasswordResetLinkView.as_view(),
+        name="generate-reset-link",
+    ),
+    path(
+        r"reset/<uidb64>/<token>/",
+        auth_views.PasswordResetConfirmView.as_view(
+            template_name="core/password_reset_confirm.html",
+            success_url=reverse_lazy("account_login"),
+        ),
+        name="password-reset-confirm",
+    ),
 ]
