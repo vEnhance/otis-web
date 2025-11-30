@@ -257,12 +257,12 @@
         </li>
       </ul>
     {% endif %}
-  {% else %}
-    <p>You are not logged in.</p>
-    <p>
-      <a href="{% url "account_login" %}">Log in now.</a>
-    </p>
   {% endif %}
+{% else %}
+  <p>You are not logged in.</p>
+  <p>
+    <a href="{% url "account_login" %}">Log in now.</a>
+  </p>
 {% endif %}
 <!--
   vim: ft=htmldjango
