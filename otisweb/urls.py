@@ -54,6 +54,10 @@ urlpatterns = [
         r"wp-admin/",
         RedirectView.as_view(url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
     ),
+    path(
+        r"wp-admin/<path:path>",
+        RedirectView.as_view(url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
+    ),
     path(r"", RedirectView.as_view(pattern_name="index"), name="top"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)  # type: ignore
 
