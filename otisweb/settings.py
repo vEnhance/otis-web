@@ -296,6 +296,13 @@ MARKDOWNIFY = {
 }
 
 
+# Filters out the OSError: WriteError messages that keep popping up in WSGI
+def filter_oserror_write(record: logging.LogRecord) -> bool:
+    return not (
+        hasattr(record, "message") and record.message.startswith("OSError: write error")
+    )
+
+
 def add_username(record: logging.LogRecord):
     try:
         record.username = record.request.user.username  # type: ignore
@@ -314,6 +321,10 @@ LOGGING = {
         },
     },
     "filters": {
+        "filter_oserror_write": {
+            "()": "django.utils.log.CallbackFilter",
+            "callback": filter_oserror_write,
+        },
         "require_debug_false": {
             "()": "django.utils.log.RequireDebugFalse",
         },
@@ -330,12 +341,12 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "level": "VERBOSE",
             "formatter": "stream_format",
-            "filters": ["add_username"],
+            "filters": ["filter_oserror_write", "add_username"],
         },
         "discord": {
             "class": "django_discordo.DiscordWebhookHandler",
             "level": "VERBOSE",
-            "filters": ["require_debug_false", "add_username"],
+            "filters": ["require_debug_false", "filter_oserror_write", "add_username"],
         },
     },
     "root": {
