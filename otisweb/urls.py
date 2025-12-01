@@ -40,7 +40,19 @@ urlpatterns = [
     ),
     path(
         r"favicon.ico",
-        RedirectView.as_view(url="https://web.evanchen.cc/icons/favicon.ico"),
+        RedirectView.as_view(url="https://web.evanchen.cc/favicon.ico"),
+    ),
+    path(
+        r"apple-touch-icon.png",
+        RedirectView.as_view(url="https://web.evanchen.cc/icons/apple-touch-icon.png"),
+    ),
+    path(
+        r"apple-touch-icon-precomposed.png",
+        RedirectView.as_view(url="https://web.evanchen.cc/icons/apple-touch-icon.png"),
+    ),
+    path(
+        r"wp-admin/",
+        RedirectView.as_view(url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
     ),
     path(r"", RedirectView.as_view(pattern_name="index"), name="top"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)  # type: ignore
