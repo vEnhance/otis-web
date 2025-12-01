@@ -422,6 +422,18 @@ wheels = [
 ]
 
 [[package]]
+name = "django-bot-rickroll"
+version = "0.2.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a5/98/620c48ef6b4b740c1f9be0887743b5ffe1bb43e24a1e1144aaafde267e1c/django_bot_rickroll-0.2.0.tar.gz", hash = "sha256:32413b77a04fb1d7a9f74fcf05b200342d92e08eb947067f4ce81bf91275d138", size = 2752, upload-time = "2025-12-01T22:47:10.77Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/92/1d/3367477f06a2c2a227c45a6909cf8fcb4399d71ca037a16995deb182da61/django_bot_rickroll-0.2.0-py3-none-any.whl", hash = "sha256:50eedc610d2ddbd103783beea6626fa405c713b5bc2266a306eb1342d0b12cf6", size = 4097, upload-time = "2025-12-01T22:47:09.384Z" },
+]
+
+[[package]]
 name = "django-braces"
 version = "1.17.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1133,6 +1145,7 @@ dependencies = [
     { name = "django" },
     { name = "django-allauth", extra = ["socialaccount"] },
     { name = "django-bootstrap5" },
+    { name = "django-bot-rickroll" },
     { name = "django-braces" },
     { name = "django-crispy-forms" },
     { name = "django-debug-toolbar" },
@@ -1194,6 +1207,7 @@ requires-dist = [
     { name = "django", specifier = ">=5.2.8,<6.0.0" },
     { name = "django-allauth", extras = ["socialaccount"], specifier = ">=65.11.1,<66.0.0" },
     { name = "django-bootstrap5", specifier = ">=24.2" },
+    { name = "django-bot-rickroll", specifier = ">=0.2.0" },
     { name = "django-braces", specifier = ">=1.17.0,<2.0.0" },
     { name = "django-crispy-forms", specifier = ">=2.4,<3.0" },
     { name = "django-debug-toolbar", specifier = ">=4.4.6,<5.0.0" },
