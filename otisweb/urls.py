@@ -3,13 +3,17 @@
 import debug_toolbar
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, re_path
 from django.views.generic import RedirectView
 from django.views.generic.base import TemplateView
 
 from . import settings
 
 assert settings.MEDIA_URL is not None
+
+# bots/scrapers hoping my website is made in WordPress should become
+# more cultured by being redirected to the following music video
+COOL_MV = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 
 urlpatterns = [
     path(r"admin/", admin.site.urls),
@@ -50,14 +54,9 @@ urlpatterns = [
         r"apple-touch-icon-precomposed.png",
         RedirectView.as_view(url="https://web.evanchen.cc/icons/apple-touch-icon.png"),
     ),
-    path(
-        r"wp-admin/",
-        RedirectView.as_view(url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
-    ),
-    path(
-        r"wp-admin/<path:path>",
-        RedirectView.as_view(url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
-    ),
+    path(r"wp-admin/", RedirectView.as_view(url=COOL_MV)),
+    path(r"wp-admin/<path:path>", RedirectView.as_view(url=COOL_MV)),
+    re_path(r".*wlwmanifest\.xml$", RedirectView.as_view(url=COOL_MV)),
     path(r"", RedirectView.as_view(pattern_name="index"), name="top"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)  # type: ignore
 
