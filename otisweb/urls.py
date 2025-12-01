@@ -54,6 +54,18 @@ urlpatterns = [
         r"apple-touch-icon-precomposed.png",
         RedirectView.as_view(url="https://web.evanchen.cc/icons/apple-touch-icon.png"),
     ),
+    path(
+        r"apple-touch-icon-152x152.png",
+        RedirectView.as_view(
+            url="https://web.evanchen.cc/icons/apple-touch-icon-152x152.png"
+        ),
+    ),
+    path(
+        r"apple-touch-icon-152x152-precomposed.png",
+        RedirectView.as_view(
+            url="https://web.evanchen.cc/icons/apple-touch-icon-152x152.png"
+        ),
+    ),
     path(r"wp-admin/", RedirectView.as_view(url=COOL_MV)),
     path(r"wp-admin/<path:path>", RedirectView.as_view(url=COOL_MV)),
     path(r"wp-content/<path:path>", RedirectView.as_view(url=COOL_MV)),
