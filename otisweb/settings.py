@@ -296,20 +296,6 @@ MARKDOWNIFY = {
 }
 
 
-def filter_useless_404(record: logging.LogRecord) -> bool:
-    if hasattr(record, "message") and record.message.startswith("OSError: write error"):
-        return False
-    if record.args is None:
-        return True
-    a: list[str] = [str(s) for s in record.args]
-    if len(a) == 2:
-        return a[0] != "Not Found" or "wp-include" not in a[1] and ".php" not in a[1]
-    elif len(a) == 3:
-        return a[1] != "404" or "wp-include" not in a[0] and ".php" not in a[0]
-    else:
-        return True
-
-
 def add_username(record: logging.LogRecord):
     try:
         record.username = record.request.user.username  # type: ignore
@@ -328,10 +314,6 @@ LOGGING = {
         },
     },
     "filters": {
-        "filter_useless_404": {
-            "()": "django.utils.log.CallbackFilter",
-            "callback": filter_useless_404,
-        },
         "require_debug_false": {
             "()": "django.utils.log.RequireDebugFalse",
         },
@@ -348,12 +330,12 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "level": "VERBOSE",
             "formatter": "stream_format",
-            "filters": ["filter_useless_404", "add_username"],
+            "filters": ["add_username"],
         },
         "discord": {
             "class": "django_discordo.DiscordWebhookHandler",
             "level": "VERBOSE",
-            "filters": ["require_debug_false", "filter_useless_404", "add_username"],
+            "filters": ["require_debug_false", "add_username"],
         },
     },
     "root": {
