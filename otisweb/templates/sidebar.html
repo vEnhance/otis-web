@@ -240,23 +240,23 @@
         </li>
       </ul>
     {% endif %}
-    {% if request.user.is_superuser %}
-      <h4>Legacy views</h4>
-      <ul>
-        <li>
-          <a href="{% url "giga-chart" "csv" %}">Giga CSV</a>
-        </li>
-        <li>
-          <a href="{% url "giga-chart" "html" %}">Giga HTML</a>
-        </li>
-        <li>
-          <a href="{% url "idlewarn" %}">Idle warn</a>
-        </li>
-        <li>
-          <a href="{% url "master-schedule" %}">M sched</a>
-        </li>
-      </ul>
-    {% endif %}
+  {% endif %}
+  {% if request.user.is_superuser %}
+    <h4>Legacy views</h4>
+    <ul>
+      <li>
+        <a href="{% url "giga-chart" "csv" %}">Giga CSV</a>
+      </li>
+      <li>
+        <a href="{% url "giga-chart" "html" %}">Giga HTML</a>
+      </li>
+      <li>
+        <a href="{% url "idlewarn" %}">Idle warn</a>
+      </li>
+      <li>
+        <a href="{% url "master-schedule" %}">M sched</a>
+      </li>
+    </ul>
   {% endif %}
 {% else %}
   <p>You are not logged in.</p>
