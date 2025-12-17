@@ -1201,6 +1201,11 @@ def test_reg(otis) -> None:
     assert alice.last_name == "Aardvark"
     assert alice.email == "myemail@example.com"
 
+    # Passcode registration should NOT create a Student record (goes into queue)
+    assert not Student.objects.filter(user=alice).exists()
+    alice_reg = StudentRegistration.objects.get(user=alice, container=container)
+    assert alice_reg.processed is False
+
     profile = UserProfile.objects.get(user=alice)
     assert not profile.email_on_announcement
     assert profile.email_on_pset_complete
@@ -1336,7 +1341,7 @@ def test_reg_with_apply_uuid(otis) -> None:
     )
 
     messages = [m.message for m in resp.context["messages"]]
-    assert "Submitted! Sit tight." in messages
+    assert "Your registration was accepted! You can start working now." in messages
     alice_reg = StudentRegistration.objects.get(user=alice)
     alice.refresh_from_db()
     assert alice.first_name == "Alice"
@@ -1344,6 +1349,18 @@ def test_reg_with_apply_uuid(otis) -> None:
     assert alice.email == "myemail@example.com"
     au.refresh_from_db()
     assert au.reg == alice_reg
+
+    # ApplyUUID registration should instantly create a Student record
+    assert alice_reg.processed is True
+    alice_student = Student.objects.get(user=alice)
+    assert alice_student.semester == semester
+    assert alice_student.reg == alice_reg
+    # User should be added to Verified group
+    verified_group = Group.objects.get(name="Verified")
+    assert verified_group in alice.groups.all()
+    # Invoice should be created with financial aid applied
+    alice_invoice = Invoice.objects.get(student=alice_student)
+    assert alice_invoice.total_owed == 144  # 70% aid on 480 = 144
 
     # Bob shouldn't be able to steal Alice's passcode
     bob: User = UserFactory.create(first_name="Bob", last_name="Beta", email="b@b.net")
@@ -1378,7 +1395,7 @@ def test_reg_with_apply_uuid(otis) -> None:
     agreement4.name = "agreement.pdf"
     # Let's generate an ApplyUUID for Bob too
     au2 = ApplyUUIDFactory.create(percent_aid=0)
-    otis.post_20x(
+    resp = otis.post_20x(
         "register",
         data={
             "given_name": "Bob",
@@ -1401,6 +1418,14 @@ def test_reg_with_apply_uuid(otis) -> None:
         follow=True,
     )
 
+    # Bob should also be instantly accepted
+    messages = [m.message for m in resp.context["messages"]]
+    assert "Your registration was accepted! You can start working now." in messages
+    bob_reg = StudentRegistration.objects.get(user=bob)
+    assert bob_reg.processed is True
+    bob_student = Student.objects.get(user=bob)
+    assert Invoice.objects.get(student=bob_student).total_owed == 480  # 0% aid
+
     # Meanwhile, Carol just registers by passcode
     agreement5 = StringIO("i do five!")
     agreement5.name = "agreement.pdf"
@@ -1408,7 +1433,7 @@ def test_reg_with_apply_uuid(otis) -> None:
         first_name="Carol", last_name="Cutie", email="c@c.net"
     )
     otis.login(carol)
-    otis.post_20x(
+    resp = otis.post_20x(
         "register",
         data={
             "given_name": "Carol",
@@ -1431,9 +1456,18 @@ def test_reg_with_apply_uuid(otis) -> None:
         follow=True,
     )
 
-    build_students(StudentRegistration.objects.all())
+    # Carol used passcode, so she should be queued (not instantly accepted)
+    messages = [m.message for m in resp.context["messages"]]
+    assert "Submitted! Sit tight." in messages
+    carol_reg = StudentRegistration.objects.get(user=carol)
+    assert carol_reg.processed is False
+    assert not Student.objects.filter(user=carol).exists()
+
+    # build_students should only process Carol now (Alice and Bob already processed)
+    assert build_students(StudentRegistration.objects.all()) == 1
     assert Invoice.objects.get(student__user=alice).total_owed == 144
     assert Invoice.objects.get(student__user=bob).total_owed == 480
+    assert Invoice.objects.get(student__user=carol).total_owed == 480
 
 
 @pytest.mark.django_db

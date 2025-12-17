@@ -71,6 +71,7 @@ from .models import (
     Student,
     StudentRegistration,
     UnitInquiry,
+    build_students,
 )
 
 # Create your views here.
@@ -475,7 +476,19 @@ def register(request: AuthHttpRequest) -> HttpResponse:
                     user=request.user,
                     defaults={k: form.cleaned_data[k] for k in EMAIL_PREFERENCE_FIELDS},
                 )
-                messages.success(request, message="Submitted! Sit tight.")
+                if au is not None:
+                    # Instant acceptance for ApplyUUID registrations
+                    build_students(
+                        StudentRegistration.objects.filter(pk=registration.pk)
+                    )
+                    messages.success(
+                        request,
+                        message="Your registration was accepted! "
+                        "You can start working now.",
+                    )
+                else:
+                    # Queue for passcode registrations
+                    messages.success(request, message="Submitted! Sit tight.")
                 return HttpResponseRedirect(reverse("index"))
     else:
         initial_data_dict = {}
