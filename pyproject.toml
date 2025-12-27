@@ -95,6 +95,7 @@ omit = [
 [tool.ty.environment]
 python-version = "3.13"
 python-platform = "linux"
+python = ".venv/bin/python"  # Explicitly point to venv Python
 
 [tool.ty.src]
 exclude = ["**/node_modules", "**/typings", "**/__pycache__", ".git", "venv", ".venv", "**/migrations", "**/tests.py"]
