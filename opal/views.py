@@ -11,6 +11,7 @@ from django.db.models import Q
 from django.db.models.aggregates import Max
 from django.db.models.manager import Manager
 from django.db.models.query import QuerySet
+from django.http import HttpRequest
 from django.http.response import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -21,8 +22,6 @@ from sql_util.utils import SubqueryCount
 
 from otisweb.decorators import admin_required, verified_required
 from otisweb.mixins import AdminRequiredMixin, VerifiedRequiredMixin
-from django.http import HttpRequest
-
 from otisweb.utils import AuthHttpRequest
 from roster.models import Student
 from rpg.models import AchievementUnlock

@@ -171,7 +171,7 @@ class ProblemUpdate(
         return super().form_valid(form)
 
     def get_success_url(self) -> str:
-        return self.object.get_absolute_url()  # type: ignore
+        return self.object.get_absolute_url()
 
 
 class HintCreate(
@@ -272,7 +272,9 @@ class VoteCreate(
             user=request.user, problem=self.problem
         ).first()
 
-    def get_form(self, form_class: type[BaseModelForm[Vote]] | None = None) -> BaseModelForm[Vote]:
+    def get_form(
+        self, form_class: type[BaseModelForm[Vote]] | None = None
+    ) -> BaseModelForm[Vote]:
         form = super().get_form(form_class)
         if self.existing_vote is not None:
             form.fields["niceness"].widget.attrs["placeholder"] = (

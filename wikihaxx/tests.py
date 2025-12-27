@@ -1,6 +1,5 @@
 import pytest
 
-from arch.views import User
 from core.factories import UnitFactory, UserFactory
 from rpg.factories import AchievementFactory, AchievementUnlockFactory
 from wikihaxx.mdx.otis import OTISPreprocessor
@@ -91,7 +90,7 @@ def test_preprocessor():
         group__subject="M",
         code="DMW",
     )
-    alice: User = UserFactory.create()
+    alice = UserFactory.create()
     a1 = AchievementFactory.create(
         code="000000000000000000007E57",
         name="Test Diamond",

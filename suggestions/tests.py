@@ -1,6 +1,5 @@
 import pytest
 
-from arch.models import User
 from core.factories import GroupFactory, UnitFactory, UnitGroupFactory, UserFactory
 from core.models import Unit, UnitGroup
 from suggestions.models import ProblemSuggestion
@@ -9,8 +8,8 @@ from suggestions.models import ProblemSuggestion
 @pytest.mark.django_db
 def test_suggestions(otis):
     verified_group = GroupFactory(name="Verified")
-    alice: User = UserFactory(username="alice", groups=(verified_group,))
-    eve: User = UserFactory(username="eve", groups=(verified_group,))
+    alice = UserFactory(username="alice", groups=(verified_group,))
+    eve = UserFactory(username="eve", groups=(verified_group,))
 
     UnitGroupFactory()
     unitgroup: UnitGroup = UnitGroupFactory.create()
