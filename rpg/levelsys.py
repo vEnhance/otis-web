@@ -238,7 +238,7 @@ def get_level_info(student: Student) -> LevelInfoDict:
 
 
 def get_clubs_hearts_stats(
-    student: Student, leveldict: LevelInfoDict = None
+    student: Student, leveldict: LevelInfoDict | None = None
 ) -> Tuple[float, int]:
     psets = PSet.objects.filter(student__user=student.user, status="A", eligible=True)
     psets = psets.order_by("upload__created_at")
@@ -269,7 +269,7 @@ def get_diamond_stats(student: Student) -> int:
     return total_diamonds
 
 
-def get_spade_stats(student: Student, leveldict: LevelInfoDict = None) -> int:
+def get_spade_stats(student: Student, leveldict: LevelInfoDict | None = None) -> int:
     total_spades = 0
 
     # a billion unrelated spades items lol

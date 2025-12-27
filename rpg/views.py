@@ -112,7 +112,7 @@ def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
     except Achievement.DoesNotExist:
         pass
     level_info = get_level_info(student)
-    context |= level_info
+    context.update(level_info)  # type: ignore[no-matching-overload]
     level_number = level_info["level_number"]
     obtained_levels = Level.objects.filter(threshold__lte=level_number).order_by(
         "-threshold"

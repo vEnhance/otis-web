@@ -182,10 +182,10 @@ class OTISClient:
             assert response.status_code in (301, 302, 303, 307, 308), (
                 f"Expected redirect, got {response.status_code}\n{self.debug_short(response)}"
             )
-            redirect_url = (
-                response.url  # type: ignore
+            redirect_url: str = (
+                str(response.url)  # type: ignore[attr-defined]
                 if hasattr(response, "url")
-                else response.headers.get("Location", "")
+                else str(response.headers.get("Location", ""))
             )
             assert redirect_url == target or target in redirect_url, (
                 f"Expected redirect to {target}, got {redirect_url}\n{self.debug_short(response)}"

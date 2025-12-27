@@ -207,7 +207,7 @@ class UpdateGuess(VerifiedRequiredMixin, UpdateView[Guess, BaseModelForm[Guess]]
     request: AuthHttpRequest
     raise_exception = True
 
-    def get_object(self):
+    def get_object(self, queryset: QuerySet[Guess] | None = None) -> Guess:
         if not self.request.user.is_authenticated:
             raise PermissionDenied("Need log in to access this view")
         return get_object_or_404(
@@ -254,7 +254,7 @@ class GuessView(LoginRequiredMixin, DetailView[Guess]):
     model = Guess
     context_object_name = "guess"
 
-    def get_object(self):
+    def get_object(self, queryset: QuerySet[Guess] | None = None) -> Guess:
         if not self.request.user.is_authenticated:
             raise PermissionDenied("Need log in to access this view")
         return get_object_or_404(

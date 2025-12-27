@@ -96,7 +96,7 @@ def portal(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
     context["news"] = get_news(profile, student)
     context["num_news"] = sum(len(_) for _ in context["news"].values())  # type: ignore
 
-    context |= level_info
+    context.update(level_info)  # type: ignore[no-matching-overload]
     return render(request, "dashboard/portal.html", context)
 
 
@@ -552,7 +552,7 @@ class PSetDetail(LoginRequiredMixin, DetailView[PSet]):
         pset = self.get_object()
         if not can_view(request, pset.student):
             raise PermissionDenied("Can't view work by this student")
-        return super(DetailView, self).dispatch(request, *args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)

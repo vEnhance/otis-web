@@ -57,7 +57,7 @@ class CurriculumForm(forms.Form):
                 "disabled": not enabled,
                 "initial": [unit.pk for unit in chosen_units],
             }
-            self.fields[field_name] = UnitChoiceField(**form_kwargs)
+            self.fields[field_name] = UnitChoiceField(**form_kwargs)  # type: ignore[invalid-argument-type]
 
 
 class AdvanceUnitChoiceField(forms.ModelMultipleChoiceField):

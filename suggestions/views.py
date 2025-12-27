@@ -37,7 +37,7 @@ class ProblemSuggestionCreate(
     model = ProblemSuggestion
 
     def get_form(self, *args: Any, **kwargs: Any) -> BaseModelForm[ProblemSuggestion]:
-        form = super(CreateView, self).get_form(*args, **kwargs)
+        form = super().get_form(*args, **kwargs)
         form.fields["unit"].queryset = Unit.objects.filter(group__hidden=False)  # type: ignore
         return form
 

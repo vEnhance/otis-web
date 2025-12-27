@@ -153,7 +153,7 @@ class WorkerDetail(LoginRequiredMixin, DetailView[Worker]):
     context_object_name = "worker"
     template_name = "payments/worker_detail.html"
 
-    def get_object(self):
+    def get_object(self, queryset: QuerySet[Worker] | None = None) -> Worker:
         worker, _ = Worker.objects.get_or_create(user=self.request.user)
         return worker
 
@@ -171,7 +171,7 @@ class WorkerUpdate(VerifiedRequiredMixin, UpdateView[Worker, BaseModelForm[Worke
         "zelle_info",
     )
 
-    def get_object(self):
+    def get_object(self, queryset: QuerySet[Worker] | None = None) -> Worker:
         worker, _ = Worker.objects.get_or_create(user=self.request.user)
         return worker
 

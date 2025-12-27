@@ -272,8 +272,8 @@ class VoteCreate(
             user=request.user, problem=self.problem
         ).first()
 
-    def get_form(self) -> BaseModelForm[Vote]:
-        form = super().get_form()
+    def get_form(self, form_class: type[BaseModelForm[Vote]] | None = None) -> BaseModelForm[Vote]:
+        form = super().get_form(form_class)
         if self.existing_vote is not None:
             form.fields["niceness"].widget.attrs["placeholder"] = (
                 self.existing_vote.niceness

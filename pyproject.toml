@@ -56,7 +56,7 @@ dev = [
   "pytest-cov>=6.0.0,<7.0.0",
   "pytest-django>=4.9.0,<5.0.0",
   "pytest-xdist>=3.8.0,<4.0.0",
-  "pyright>=1.1.404",
+  "ty>=0.0.7",
   "ruff>=0.12.11",
   "tblib>=3.1.0,<4.0.0",
   "toml>=0.10.2,<0.11.0",
@@ -90,69 +90,32 @@ omit = [
   "fixtures/gen-dummy-data.sh",
 ]
 
-[tool.pyright]
-enableTypeIgnoreComments = true
-exclude = ["**/node_modules", "**/typings", "**/__pycache__", ".git", "venv", ".venv", "**/migrations", "**/tests.py"]
-pythonPlatform = "Linux"
-pythonVersion = "3.13"
-typeCheckingMode = "basic"
-useLibraryCodeForTypes = true
+[tool.ty]
 
-reportAssertAlwaysTrue = "error"
-reportCallInDefaultInitializer = "warning"
-reportConstantRedefinition = "none"
-reportDuplicateImport = "error"
-reportFunctionMemberAccess = "none"
-reportGeneralTypeIssues = "error"
-reportImplicitStringConcatenation = "none"
-reportImportCycles = "none"
-reportIncompatibleMethodOverride = "none"
-reportIncompatibleVariableOverride = "none"
-reportIncompleteStub = "none"
-reportInvalidStringEscapeSequence = "error"
-reportInvalidTypeVarUse = "warning"
-reportMissingImports = "error"
-reportMissingModuleSource = "warning"
-reportMissingTypeArgument = false
-reportMissingTypeStubs = false
-reportOptionalCall = "error"
-reportOptionalContextManager = "error"
-reportOptionalIterable = "error"
-reportOptionalMemberAccess = "error"
-reportOptionalOperand = "error"
-reportOptionalSubscript = "error"
-reportOverlappingOverload = "error"
-reportPrivateUsage = "error"
-reportPropertyTypeMismatch = "error"
-reportSelfClsParameterName = "warning"
-reportTypedDictNotRequiredAccess = "warning"
-reportUnboundVariable = "error"
-reportUndefinedVariable = "error"
-reportUnitializedInstanceVariable = "warning"
-reportUnknownArgumentType = "none"
-reportUnknownMemberType = "none"
-reportUnknownParameterType = "error"
-reportUnknownVariableType = "none"
-reportUnnecessaryCast = "error"
-reportUnnecessaryComparison = "error"
-reportUnnecessaryIsInstance = "error"
-reportUnsupportDunderAll = "warning"
-reportUntypedBaseClass = "none"
-reportUntypedClassDecorator = "none"
-reportUntypedFunctionDecorator = "none"
-reportUntypedNamedTuple = "error"
-reportUnusedCallResult = "none"
-reportUnusedClass = "error"
-reportUnusedCoroutine = "error"
-reportUnusedFunction = "error"
-reportUnusedImport = "warning"
-reportUnusedNamedTuple = "error"
-reportUnusedVariable = "error"
-reportWildcardImportFromLibrary = "warning"
-strictDictionaryInference = false
-strictListInference = false
-strictParameterNoneValue = false
-strictSetInference = false
+[tool.ty.environment]
+python-version = "3.13"
+python-platform = "linux"
+
+[tool.ty.src]
+exclude = ["**/node_modules", "**/typings", "**/__pycache__", ".git", "venv", ".venv", "**/migrations", "**/tests.py"]
+
+[tool.ty.analysis]
+respect-type-ignore-comments = true
+
+[tool.ty.rules]
+# Core type checking rules (error level)
+unresolved-reference = "error"
+invalid-assignment = "error"
+unresolved-attribute = "error"
+call-non-callable = "error"
+missing-argument = "error"
+redundant-cast = "error"
+
+# Warnings
+deprecated = "warn"
+
+[tool.uv]
+extra-build-dependencies = { django-positions = ["setuptools"], mysqlclient = ["setuptools"] }
 
 [tool.codereviewdoctor]
 disable = ["tall-model", "missing-related-name", "checking-settings-debug", "nullable-string-field"]

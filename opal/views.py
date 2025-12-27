@@ -21,6 +21,8 @@ from sql_util.utils import SubqueryCount
 
 from otisweb.decorators import admin_required, verified_required
 from otisweb.mixins import AdminRequiredMixin, VerifiedRequiredMixin
+from django.http import HttpRequest
+
 from otisweb.utils import AuthHttpRequest
 from roster.models import Student
 from rpg.models import AchievementUnlock
@@ -57,11 +59,11 @@ class PuzzleList(VerifiedRequiredMixin, ListView[OpalPuzzle]):
     model = OpalPuzzle
     context_object_name = "puzzles"
 
-    def setup(self, request: AuthHttpRequest, *args: Any, **kwargs: Any):
+    def setup(self, request: HttpRequest, *args: Any, **kwargs: Any) -> None:
         super().setup(request, *args, **kwargs)
         self.hunt = get_object_or_404(OpalHunt, slug=self.kwargs["hunt_slug"])
         if not self.hunt.has_started:
-            if has_early_access(request.user):
+            if isinstance(request.user, User) and has_early_access(request.user):
                 messages.warning(
                     request,
                     "This hunt hasn't started yet; this is an internal view for testsolvers and staff.",
@@ -85,7 +87,7 @@ class AttemptsList(AdminRequiredMixin, ListView[OpalAttempt]):
     model = OpalAttempt
     context_object_name = "attempts"
 
-    def setup(self, request: AuthHttpRequest, *args: Any, **kwargs: Any):
+    def setup(self, request: HttpRequest, *args: Any, **kwargs: Any) -> None:
         super().setup(request, *args, **kwargs)
         self.puzzle = get_object_or_404(
             OpalPuzzle,

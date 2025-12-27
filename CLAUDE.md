@@ -12,7 +12,7 @@ OTIS-WEB is a Django-based course management system for OTIS (Online Training fo
 - **Python**: 3.13+
 - **Package Manager**: uv
 - **Database**: SQLite (dev), MySQL (prod)
-- **Type Checking**: pyright
+- **Type Checking**: ty
 - **Linting/Formatting**: ruff, djlint
 - **Testing**: pytest with pytest-django, pytest-xdist, coverage
 
@@ -23,7 +23,7 @@ make install          # Install dependencies with uv
 make runserver        # Run Django development server
 make migrate          # Apply database migrations
 make migrations       # Create new migrations
-make check            # Run Django checks and pyright type checking
+make check            # Run Django checks and ty type checking
 make test             # Run tests with coverage
 make fmt              # Run code formatters (prek)
 ```
@@ -70,8 +70,8 @@ Key Django apps:
 
 ## Type Checking Notes
 
-The codebase is heavily type-checked with pyright. Key settings:
+The codebase is heavily type-checked with ty (Astral's type checker). Key settings:
 
-- `typeCheckingMode = "basic"`
 - Migrations and test files are excluded from type checking
 - Django stubs are installed for better type inference
+- Configuration is in `[tool.ty]` section of `pyproject.toml`
