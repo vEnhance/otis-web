@@ -4,12 +4,18 @@ from hashlib import sha256
 
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+from django.core.files.base import File
 from django.core.validators import RegexValidator
 from django.db import models
 
 from core.models import UnitGroup
-from dashboard.models import validate_at_most_1mb  # should be in core maybe?
 from roster.models import Student
+
+
+def validate_at_most_1mb(f: File):  # type: ignore
+    if f.size > 1024 * 1024:
+        raise ValidationError("At most 1MB allowed")
 
 
 def achievement_image_file_name(instance: "Achievement", filename: str) -> str:

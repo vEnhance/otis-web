@@ -7,8 +7,6 @@ import os
 from typing import Optional
 
 from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
-from django.core.files.base import File
 from django.core.validators import (
     FileExtensionValidator,
     MaxValueValidator,
@@ -21,11 +19,6 @@ from markdownfield.validators import VALIDATOR_STANDARD
 
 from core.models import Semester, Unit
 from roster.models import Student
-
-
-def validate_at_most_1mb(f: File):  # type: ignore
-    if f.size > 1024 * 1024:
-        raise ValidationError("At most 1MB allowed")
 
 
 def content_file_name(instance: "UploadedFile", filename: str) -> str:

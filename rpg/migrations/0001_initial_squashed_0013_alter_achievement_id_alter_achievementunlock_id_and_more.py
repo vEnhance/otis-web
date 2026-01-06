@@ -5,7 +5,6 @@ import django.db.models.deletion
 from django.conf import settings
 from django.db import migrations, models
 
-import dashboard.models
 import rpg.models
 
 
@@ -73,7 +72,7 @@ class Migration(migrations.Migration):
                         help_text="Image for the obtained achievement, at most 1MB.",
                         null=True,
                         upload_to=rpg.models.achievement_image_file_name,
-                        validators=[dashboard.models.validate_at_most_1mb],
+                        validators=[rpg.models.validate_at_most_1mb],
                     ),
                 ),
                 (
@@ -303,7 +302,7 @@ class Migration(migrations.Migration):
                         help_text="Optional small photo that will appear next to your carving, no more than 1 megabyte",
                         null=True,
                         upload_to=rpg.models.palace_image_file_name,
-                        validators=[dashboard.models.validate_at_most_1mb],
+                        validators=[rpg.models.validate_at_most_1mb],
                     ),
                 ),
                 (
