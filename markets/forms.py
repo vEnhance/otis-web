@@ -12,9 +12,11 @@ class MarketCreateForm(forms.ModelForm):
         fields = (
             "title",
             "slug",
-            "start_date",
-            "end_date",
+            "prompt_plain",
             "answer",
             "show_answer",
             "int_guesses_only",
+            "solution_plain",
+            "start_date",
+            "end_date",
         )
