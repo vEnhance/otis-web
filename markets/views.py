@@ -282,14 +282,10 @@ class MarketCreateView(AdminRequiredMixin, CreateView[Market, BaseModelForm[Mark
     form_class = MarketCreateForm
     object: Market
 
-    def form_valid(self, form: BaseModelForm[Market]):
-        messages.success(self.request, f"Created new market {form.instance.slug}.")
+    def get_initial(self) -> dict[str, Any]:
+        initial = super().get_initial()
 
-        semester = Semester.objects.get(active=True)
-        form.instance.semester = semester
-        form.instance.prompt = form.cleaned_data["prompt_plain"]
-        form.instance.solution = form.cleaned_data["solution_plain"]
-
+        # Calculate default dates based on existing markets
         markets = Market.objects.filter(semester__active=True)
         # fmt: off
         max_start_date: datetime.datetime | None = markets.aggregate(a=Max("start_date"))["a"]
@@ -303,7 +299,8 @@ class MarketCreateView(AdminRequiredMixin, CreateView[Market, BaseModelForm[Mark
                 timezone.now() + datetime.timedelta(hours=1),
                 max_start_date + datetime.timedelta(days=7),
             )
-        form.instance.start_date = start_date
+        initial["start_date"] = start_date
+
         if max_end_date is None:
             end_date = timezone.now() + datetime.timedelta(days=10)
         else:
@@ -311,7 +308,17 @@ class MarketCreateView(AdminRequiredMixin, CreateView[Market, BaseModelForm[Mark
                 timezone.now() + datetime.timedelta(days=3),
                 max_end_date + datetime.timedelta(days=7),
             )
-        form.instance.end_date = end_date
+        initial["end_date"] = end_date
+
+        return initial
+
+    def form_valid(self, form: BaseModelForm[Market]):
+        messages.success(self.request, f"Created new market {form.instance.slug}.")
+
+        semester = Semester.objects.get(active=True)
+        form.instance.semester = semester
+        form.instance.prompt = form.cleaned_data["prompt_plain"]
+        form.instance.solution = form.cleaned_data["solution_plain"]
 
         return super().form_valid(form)
 

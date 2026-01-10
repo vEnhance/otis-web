@@ -443,12 +443,15 @@ def test_create_market(otis, create_market_data):
     with freeze_time("2050-01-01", tz_offset=0):
         otis.login(admin)
 
+        # Test creating a market without specifying dates (uses defaults)
         otis.post_20x(
             "market-new",
             data={
                 "slug": "market1",
                 "title": "Market 1",
                 "prompt_plain": "Prompt for market 1",
+                "start_date": "2050-01-08 00:00:00",
+                "end_date": "2050-01-11 00:00:00",
             },
             follow=True,
         )
@@ -466,6 +469,8 @@ def test_create_market(otis, create_market_data):
                 "slug": "market2",
                 "title": "Market 2",
                 "prompt_plain": "Prompt for market 2",
+                "start_date": "2050-01-15 00:00:00",
+                "end_date": "2050-01-18 00:00:00",
             },
             follow=True,
         )
@@ -485,6 +490,8 @@ def test_create_market(otis, create_market_data):
                 "slug": "market3",
                 "title": "Market 3",
                 "prompt_plain": "Prompt for market 3",
+                "start_date": "2050-01-22 00:00:00",
+                "end_date": "2050-01-25 00:00:00",
             },
             follow=True,
         )
@@ -504,6 +511,8 @@ def test_create_market(otis, create_market_data):
                 "slug": "market4",
                 "title": "Market 4",
                 "prompt_plain": "Prompt for market 4",
+                "start_date": "2050-03-01 01:00:00",
+                "end_date": "2050-03-04 00:00:00",
             },
             follow=True,
         )
@@ -514,3 +523,36 @@ def test_create_market(otis, create_market_data):
         assert market4.end_date.year == 2050
         assert market4.end_date.month == 3
         assert market4.end_date.day == 4
+
+
+@pytest.mark.django_db
+def test_create_market_with_custom_dates(otis, create_market_data):
+    """Test that users can override the default start and end dates"""
+    admin = UserFactory.create(is_staff=True, is_superuser=True)
+
+    with freeze_time("2050-01-01", tz_offset=0):
+        otis.login(admin)
+
+        # Create a market with custom dates (different from defaults)
+        custom_start = datetime.datetime(2050, 2, 15, 12, 0, 0, tzinfo=UTC)
+        custom_end = datetime.datetime(2050, 2, 20, 18, 0, 0, tzinfo=UTC)
+
+        otis.post_20x(
+            "market-new",
+            data={
+                "slug": "custom-market",
+                "title": "Custom Market",
+                "prompt_plain": "Prompt for custom market",
+                "start_date": custom_start.strftime("%Y-%m-%d %H:%M:%S"),
+                "end_date": custom_end.strftime("%Y-%m-%d %H:%M:%S"),
+            },
+            follow=True,
+        )
+        market = Market.objects.get(slug="custom-market")
+        # Verify that the custom dates were used, not the defaults
+        assert market.start_date.year == 2050
+        assert market.start_date.month == 2
+        assert market.start_date.day == 15
+        assert market.end_date.year == 2050
+        assert market.end_date.month == 2
+        assert market.end_date.day == 20
