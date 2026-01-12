@@ -235,7 +235,8 @@
           }
 
           function checkQuadrupleBackslashes(s) {
-              return !s.includes("\\\\\\\\");
+              const pattern = /\\\\\s*\\\\/;
+              return !pattern.test(s);
           }
 
           function checkAdjacentDisplayMath(s) {
