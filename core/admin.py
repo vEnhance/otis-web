@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.db.models import QuerySet
+from django.http import HttpRequest
 from import_export import fields, resources, widgets
 from import_export.admin import ImportExportModelAdmin
 
@@ -122,6 +124,30 @@ class UnitGroupAdmin(ImportExportModelAdmin):
     list_per_page = 150
     list_max_show_all = 400
     inlines = (UnitInline,)
+    actions = ["set_default_artwork"]
+
+    @admin.action(description="Set default artwork paths based on slug")
+    def set_default_artwork(
+        self, request: HttpRequest, queryset: QuerySet[UnitGroup]
+    ) -> None:
+        """Set artwork fields to default values based on the unit group's slug."""
+        unit_groups_to_update = []
+        for unit_group in queryset:
+            unit_group.artwork = f"artwork/{unit_group.slug}.png"
+            unit_group.artwork_thumb_md = f"artwork-thumb-md/{unit_group.slug}.png"
+            unit_group.artwork_thumb_sm = f"artwork-thumb-sm/{unit_group.slug}.png"
+            unit_groups_to_update.append(unit_group)
+
+        updated_count = len(unit_groups_to_update)
+        UnitGroup.objects.bulk_update(
+            unit_groups_to_update,
+            ["artwork", "artwork_thumb_md", "artwork_thumb_sm"],
+        )
+
+        self.message_user(
+            request,
+            f"Successfully set default artwork paths for {updated_count} unit group(s).",
+        )
 
 
 @admin.register(UserProfile)
