@@ -310,9 +310,16 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
     )
 
     # auto reject criteria - the current petition counts toward the unlock count
-    auto_reject_criteria = (
+    auto_reject_too_many_unlocks = (
         inquiry.action_type == "INQ_ACT_UNLOCK" and unlocked_count > 9
     )
+    auto_reject_exists_pending = inquiry.action_type in (
+        "INQ_ACT_DROP",
+        "INQ_ACT_LOCK",
+    ) and PSet.objects.filter(
+        student=student, unit=inquiry.unit, status__in=("P", "PA", "PR")
+    )
+    auto_reject_criteria = auto_reject_too_many_unlocks or auto_reject_exists_pending
 
     if auto_reject_criteria:
         inquiry.status = "INQ_REJ"
@@ -320,7 +327,11 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
         inquiry.save()
         messages.error(
             request,
-            "You can't have more than 9 unfinished units unlocked at once.",
+            message=(
+                "You can't have more than 9 unfinished units unlocked at once."
+                if auto_reject_too_many_unlocks
+                else "You have a pending submission for this unit"
+            ),
         )
         return
 

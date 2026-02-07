@@ -848,6 +848,44 @@ def test_inquiry_cant_rapid_fire(otis) -> None:
 
 
 @pytest.mark.django_db
+def test_inquiry_rejects_drop_lock_if_pending_pset(otis) -> None:
+    """Drop/lock petition auto-rejected if there's a pending submission."""
+    alice: Student = StudentFactory.create()
+    unit: Unit = UnitFactory.create()
+    alice.curriculum.add(unit)
+    alice.unlocked_units.add(unit)
+    PSetFactory.create(student=alice, unit=unit, status="P")
+    otis.login(alice)
+
+    resp = otis.post(
+        "inquiry",
+        alice.pk,
+        data={
+            "unit": unit.pk,
+            "action_type": "INQ_ACT_DROP",
+            "explanation": "i'm a cool haxx0r who wants 10 units",
+        },
+        follow=True,
+    )
+    otis.assert_has(resp, "You have a pending submission for this unit")
+    inq = UnitInquiry.objects.get(student=alice, unit=unit, action_type="INQ_ACT_DROP")
+    assert inq.status == "INQ_REJ"
+    resp = otis.post(
+        "inquiry",
+        alice.pk,
+        data={
+            "unit": unit.pk,
+            "action_type": "INQ_ACT_LOCK",
+            "explanation": "o no evan is too smart for me 😂",
+        },
+        follow=True,
+    )
+    otis.assert_has(resp, "You have a pending submission for this unit")
+    inq = UnitInquiry.objects.get(student=alice, unit=unit, action_type="INQ_ACT_LOCK")
+    assert inq.status == "INQ_REJ"
+
+
+@pytest.mark.django_db
 def test_cancel_inquiry_sets_status_to_canceled(otis) -> None:
     alice = StudentFactory.create()
     unit = UnitFactory.create()
