@@ -161,8 +161,7 @@ def test_update_profile(otis) -> None:
 
 @pytest.mark.django_db
 def test_mystery(otis) -> None:
-    mysteryGroup: UnitGroup = UnitGroupFactory.create(name="Mystery")
-    mystery: Unit = UnitFactory(group=mysteryGroup)  # type: ignore
+    mystery: Unit = UnitFactory(group__name="Mystery")
     added_unit: Unit = UnitFactory.create_batch(2)[1]  # next two units
 
     alice: Student = StudentFactory.create()
@@ -186,6 +185,32 @@ def test_mystery(otis) -> None:
 
     messages = [m.message for m in resp.context["messages"]]
     assert f"Added the unit {added_unit}" in messages
+
+
+@pytest.mark.django_db
+def test_github_issue_447_fix(otis) -> None:
+    """If there's a pending Mystery submission with next_unit_to_unlock set,
+    unlocking via mystery-unlock should clear next_unit_to_unlock to prevent exploit."""
+    mystery: Unit = UnitFactory(group__name="Mystery")
+    exploit_unit: Unit = UnitFactory.create_batch(2)[1]
+
+    alice: Student = StudentFactory.create()
+    alice.curriculum.set([mystery])
+    alice.unlocked_units.set([mystery])
+
+    pset = PSetFactory.create(
+        student=alice,
+        unit=mystery,
+        status="P",  # Pending
+        next_unit_to_unlock=exploit_unit,
+    )
+
+    otis.login(alice)
+    resp = otis.client.get("/roster/mystery-unlock/harder/", follow=True)
+    otis.assert_response_20x(resp)
+
+    pset.refresh_from_db()
+    assert pset.next_unit_to_unlock is None
 
 
 @pytest.mark.django_db

@@ -563,7 +563,21 @@ def unlock_rest_of_mystery(request: HttpRequest, delta: int = 1) -> HttpResponse
         raise PermissionDenied(
             f"You don't have the Mystery unit unlocked!\nYou are currently {student}",
         )
+
+    # Patch the exploit in https://github.com/vEnhance/otis-web/issues/447
+    # If there is a pending Mystery submission, just accept it but don't process
+    try:
+        mystery_pset = PSet.objects.exclude(status="A").get(
+            unit=mystery, student=student
+        )
+    except PSet.DoesNotExist:
+        pass
+    else:
+        mystery_pset.next_unit_to_unlock = None
+        mystery_pset.save()
+
     added_unit = get_object_or_404(Unit, position=mystery.position + delta)
+
     student.unlocked_units.remove(mystery)
     student.curriculum.remove(mystery)
     student.unlocked_units.add(added_unit)
