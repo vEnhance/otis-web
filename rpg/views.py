@@ -190,6 +190,15 @@ class FoundList(LoginRequiredMixin, StaffRequiredMixin, ListView[AchievementUnlo
     template_name = "rpg/found_list.html"
     context_object_name = "unlocks_list"
 
+    def dispatch(self, *args: Any, **kwargs: Any) -> HttpResponseBase:
+        achievement = get_object_or_404(Achievement, pk=self.kwargs["pk"])
+        if (
+            isinstance(self.request.user, User)
+            and self.request.user == achievement.creator
+        ):
+            return super(StaffRequiredMixin, self).dispatch(*args, **kwargs)
+        return super().dispatch(*args, **kwargs)
+
     def get_queryset(self) -> QuerySet[AchievementUnlock]:
         self.achievement = get_object_or_404(Achievement, pk=self.kwargs["pk"])
         return (
