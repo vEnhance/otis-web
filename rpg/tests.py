@@ -496,3 +496,34 @@ def test_found_list_creator_access(otis):
     otis.login(charlie.user)
     otis.get_40x("found-listing", a1.pk)
     otis.get_40x("found-listing", a2.pk)
+
+
+@pytest.mark.django_db
+def test_found_list_edge_cases(otis):
+    """Test edge cases for diamond creator access."""
+    alice = StudentFactory.create()
+
+    # Diamond with no creator
+    a1 = AchievementFactory.create(creator=None)
+    AchievementUnlockFactory.create_batch(3, achievement=a1)
+
+    # Alice shouldn't see it (no creator = admin only)
+    otis.login(alice.user)
+    otis.get_40x("found-listing", a1.pk)
+
+    # Diamond with creator but no finders yet
+    a2 = AchievementFactory.create(creator=alice.user)
+    resp = otis.get_20x("found-listing", a2.pk)
+    assert resp.context["unlocks_list"].count() == 0
+
+    # Diamond where creator hasn't found it themselves
+    a3 = AchievementFactory.create(creator=alice.user)
+    AchievementUnlockFactory.create_batch(2, achievement=a3)
+    resp = otis.get_20x("found-listing", a3.pk)
+    assert resp.context["unlocks_list"].count() == 2
+
+    # Unauthenticated user redirects to login
+    otis.client.logout()
+    resp = otis.get("found-listing", a2.pk)
+    assert resp.status_code == 302  # Redirect to login
+    assert "/accounts/login/" in resp.url
