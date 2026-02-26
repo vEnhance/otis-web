@@ -3,6 +3,7 @@ import pytest
 from arch.models import User
 from core.factories import GroupFactory, UnitFactory, UnitGroupFactory, UserFactory
 from core.models import Unit, UnitGroup
+from suggestions.factories import ProblemSuggestionFactory
 from suggestions.models import ProblemSuggestion
 
 
@@ -88,3 +89,59 @@ def test_suggestions(otis):
     otis.post_20x("suggest-delete", sugg.pk, follow=True)
 
     assert not ProblemSuggestion.objects.filter(user=alice).exists()
+
+
+@pytest.mark.django_db
+def test_suggestion_update_ownership(otis):
+    """Non-owner cannot overwrite another user's suggestion via POST."""
+    alice: User = UserFactory(username="alice")
+    eve: User = UserFactory(username="eve")
+
+    UnitGroupFactory()
+    unitgroup: UnitGroup = UnitGroupFactory.create()
+    unit: Unit = UnitFactory.create(code=f"B{unitgroup.subject}W", group=unitgroup)
+
+    valid_data = {
+        "unit": unit.pk,
+        "weight": 2,
+        "source": "ISL 2020 C5",
+        "hyperlink": "",
+        "description": "Combinatorics problem",
+        "statement": "Find all functions",
+        "solution": "Alice original solution",
+        "comments": "",
+        "acknowledge": True,
+    }
+
+    sugg: ProblemSuggestion = ProblemSuggestionFactory(
+        user=alice, unit=unit, source="ISL 2020 C5", description="Combinatorics problem"
+    )
+
+    # Eve tries to GET Alice's suggestion — should be denied
+    otis.login(eve)
+    otis.get_denied("suggest-update", sugg.pk)
+
+    # Eve tries to POST to overwrite Alice's suggestion — should be denied
+    otis.post_denied(
+        "suggest-update",
+        sugg.pk,
+        data={**valid_data, "solution": "Overwritten by Eve"},
+    )
+
+    # Verify the suggestion was NOT modified in the database
+    sugg.refresh_from_db()
+    assert sugg.solution != "Overwritten by Eve"
+    assert sugg.user == alice
+
+    # Alice can still update her own suggestion
+    otis.login(alice)
+    resp = otis.post_20x(
+        "suggest-update",
+        sugg.pk,
+        data={**valid_data, "solution": "Updated by Alice"},
+        follow=True,
+    )
+    otis.assert_message(resp, "Edits saved.")
+
+    sugg.refresh_from_db()
+    assert sugg.solution == "Updated by Alice"
