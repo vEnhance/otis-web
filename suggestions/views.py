@@ -88,12 +88,15 @@ class ProblemSuggestionUpdate(
         messages.success(self.request, "Edits saved.")
         return super().form_valid(form)
 
+    def get_object(self, *args: Any, **kwargs: Any) -> ProblemSuggestion:
+        obj: ProblemSuggestion = super().get_object(*args, **kwargs)
+        assert isinstance(self.request.user, User)
+        if not (self.request.user.is_staff or self.request.user == obj.user):
+            raise PermissionDenied("Logged-in user cannot view this suggestion")
+        return obj
+
     def get_context_data(self, **kwargs: Any):
         context = super().get_context_data(**kwargs)
-        assert isinstance(self.request.user, User)
-        if not (self.request.user.is_staff or self.request.user == self.object.user):
-            raise PermissionDenied("Logged-in user cannot view this suggestion")
-
         context["pk"] = self.kwargs.get("pk", None)
         return context
 
