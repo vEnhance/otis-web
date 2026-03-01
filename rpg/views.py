@@ -8,8 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import PermissionDenied
-from django.db.models import CharField, F, OuterRef, Q, Subquery, Value
-from django.db.models.functions import Concat
+from django.db.models import F, IntegerField, OuterRef, Q, Subquery
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http import Http404, HttpResponse
@@ -41,17 +40,21 @@ RUBY_PALACE_DIAMOND_VALUE = 1
 @login_required
 def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
     student = get_student_by_pk(request, student_pk)
-    earlier_non_creator_unlock = AchievementUnlock.objects.filter(
-        achievement=OuterRef("achievement"),
-        timestamp__lt=OuterRef("timestamp"),
-    ).filter(
-        Q(achievement__creator__isnull=True) | ~Q(user=F("achievement__creator"))
+    first_non_creator_user_id = Subquery(
+        AchievementUnlock.objects.filter(achievement=OuterRef("achievement"))
+        .filter(
+            Q(achievement__creator__isnull=True)
+            | ~Q(user=F("achievement__creator"))
+        )
+        .order_by("timestamp")
+        .values("user_id")[:1],
+        output_field=IntegerField(),
     )
     unlocks = (
         AchievementUnlock.objects.filter(user=student.user)
         .order_by("achievement__name")
         .select_related("achievement")
-        .annotate(has_earlier_non_creator=Exists(earlier_non_creator_unlock))
+        .annotate(first_non_creator_user_id=first_non_creator_user_id)
     )
     context: dict[str, Any] = {
         "student": student,
@@ -152,22 +155,17 @@ class AchievementList(LoginRequiredMixin, ListView[Achievement]):
         )
 
         if self.request.user.is_staff:
-            first_finder_name = Subquery(
+            first_finder_id = Subquery(
                 AchievementUnlock.objects.filter(achievement=OuterRef("pk"))
                 .filter(
                     Q(achievement__creator__isnull=True)
                     | ~Q(user=F("achievement__creator"))
                 )
                 .order_by("timestamp")
-                .annotate(
-                    full_name=Concat(
-                        "user__first_name", Value(" "), "user__last_name"
-                    )
-                )
-                .values("full_name")[:1],
-                output_field=CharField(),
+                .values("user_id")[:1],
+                output_field=IntegerField(),
             )
-            achievements = achievements.annotate(first_finder_name=first_finder_name)
+            achievements = achievements.annotate(first_finder_id=first_finder_id)
 
         self.amount = len(achievements.filter(obtained=True))
 
@@ -181,6 +179,18 @@ class AchievementList(LoginRequiredMixin, ListView[Achievement]):
         except Http404:
             context["student_pk"] = None
         context["viewing"] = False
+        if self.request.user.is_staff:
+            achievement_list = context["object_list"]
+            finder_ids = {
+                a.first_finder_id  # type: ignore[attr-defined]
+                for a in achievement_list
+                if a.first_finder_id is not None  # type: ignore[attr-defined]
+            }
+            finders_by_id = {u.pk: u for u in User.objects.filter(pk__in=finder_ids)}
+            for a in achievement_list:
+                a.first_finder = finders_by_id.get(  # type: ignore[attr-defined]
+                    a.first_finder_id  # type: ignore[attr-defined]
+                )
         return context
 
 

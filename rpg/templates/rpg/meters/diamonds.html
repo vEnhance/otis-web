@@ -12,7 +12,7 @@
   {% if achievements|length > 0 %}
     <div class="list-group">
       {% for aunlock in achievements %}
-        <div class="list-group-item container"{% if not aunlock.has_earlier_non_creator and aunlock.achievement.creator_id != student.user_id %} style="background-color: #ccffcc;"{% endif %}>
+        <div class="list-group-item container{% if aunlock.first_non_creator_user_id == student.user_id %} list-group-item-success{% endif %}">
           <div class="d-flex justify-content-between">
             <strong>{{ aunlock.achievement.name }}</strong>
             <span style="color: {{ meters.diamonds.color }};">{{ aunlock.achievement.diamonds }}{{ meters.diamonds.unit }}</span>

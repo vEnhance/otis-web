@@ -445,6 +445,147 @@ def test_palace(otis):
 
 
 @pytest.mark.django_db
+def test_first_found_highlight(otis):
+    """Green highlight only for the first non-creator finder on the stats page."""
+    alice = StudentFactory.create(
+        user__first_name="Alice", user__last_name="Aardvark"
+    )
+    bob = StudentFactory.create(user__first_name="Bob", user__last_name="Beta")
+
+    # a1: Alice finds first, Bob finds second
+    a1 = AchievementFactory.create(diamonds=1, name="First Diamond")
+    au_alice = AchievementUnlockFactory.create(user=alice.user, achievement=a1)
+    au_bob = AchievementUnlockFactory.create(user=bob.user, achievement=a1)
+    AchievementUnlock.objects.filter(pk=au_alice.pk).update(
+        timestamp=datetime.datetime(2024, 1, 1, tzinfo=UTC)
+    )
+    AchievementUnlock.objects.filter(pk=au_bob.pk).update(
+        timestamp=datetime.datetime(2024, 1, 2, tzinfo=UTC)
+    )
+
+    # a2: Bob finds first, Alice finds second
+    a2 = AchievementFactory.create(diamonds=2, name="Second Diamond")
+    au_bob2 = AchievementUnlockFactory.create(user=bob.user, achievement=a2)
+    au_alice2 = AchievementUnlockFactory.create(user=alice.user, achievement=a2)
+    AchievementUnlock.objects.filter(pk=au_bob2.pk).update(
+        timestamp=datetime.datetime(2024, 1, 1, tzinfo=UTC)
+    )
+    AchievementUnlock.objects.filter(pk=au_alice2.pk).update(
+        timestamp=datetime.datetime(2024, 1, 2, tzinfo=UTC)
+    )
+
+    # Alice's stats: only a1 gets the green class (she was first)
+    otis.login(alice)
+    resp = otis.get_20x("stats", alice.pk)
+    otis.assert_has(resp, "list-group-item-success", count=1)
+    otis.assert_has(resp, "First Diamond")
+    otis.assert_has(resp, "Second Diamond")
+
+    # Bob's stats: only a2 gets the green class (he was first)
+    otis.login(bob)
+    resp = otis.get_20x("stats", bob.pk)
+    otis.assert_has(resp, "list-group-item-success", count=1)
+
+
+@pytest.mark.django_db
+def test_first_found_highlight_creator_excluded(otis):
+    """Creator's own unlock doesn't count; first non-creator still gets the green."""
+    creator = StudentFactory.create(
+        user__first_name="Creator", user__last_name="Cee"
+    )
+    alice = StudentFactory.create(
+        user__first_name="Alice", user__last_name="Aardvark"
+    )
+    a1 = AchievementFactory.create(diamonds=1, creator=creator.user)
+
+    # Creator unlocks their own achievement first
+    au_creator = AchievementUnlockFactory.create(
+        user=creator.user, achievement=a1
+    )
+    # Alice finds it second (but she is the first non-creator)
+    au_alice = AchievementUnlockFactory.create(user=alice.user, achievement=a1)
+    AchievementUnlock.objects.filter(pk=au_creator.pk).update(
+        timestamp=datetime.datetime(2024, 1, 1, tzinfo=UTC)
+    )
+    AchievementUnlock.objects.filter(pk=au_alice.pk).update(
+        timestamp=datetime.datetime(2024, 1, 2, tzinfo=UTC)
+    )
+
+    # Alice should see the green class (she's the first non-creator finder)
+    otis.login(alice)
+    resp = otis.get_20x("stats", alice.pk)
+    otis.assert_has(resp, "list-group-item-success")
+
+    # Creator should NOT see the green class for their own diamond
+    otis.login(creator)
+    resp = otis.get_20x("stats", creator.pk)
+    otis.assert_not_has(resp, "list-group-item-success")
+
+
+@pytest.mark.django_db
+def test_achievement_list_first_finder_staff(otis):
+    """Staff sees the first non-creator finder; non-staff does not."""
+    alice = StudentFactory.create(
+        user__first_name="Alice", user__last_name="Aardvark"
+    )
+    bob = StudentFactory.create(user__first_name="Bob", user__last_name="Beta")
+    a1 = AchievementFactory.create(diamonds=1)
+
+    # Alice finds a1 first, Bob finds it second
+    au_alice = AchievementUnlockFactory.create(user=alice.user, achievement=a1)
+    au_bob = AchievementUnlockFactory.create(user=bob.user, achievement=a1)
+    AchievementUnlock.objects.filter(pk=au_alice.pk).update(
+        timestamp=datetime.datetime(2024, 1, 1, tzinfo=UTC)
+    )
+    AchievementUnlock.objects.filter(pk=au_bob.pk).update(
+        timestamp=datetime.datetime(2024, 1, 2, tzinfo=UTC)
+    )
+
+    admin = UserFactory.create(is_staff=True, is_superuser=True)
+    otis.login(admin)
+    resp = otis.get_20x("achievements-listing")
+    otis.assert_has(resp, "First (non-creator)")
+    otis.assert_has(resp, "Alice Aardvark")
+
+    # Non-staff should not see first finder info
+    otis.login(bob)
+    resp = otis.get_20x("achievements-listing")
+    otis.assert_not_has(resp, "First (non-creator)")
+    otis.assert_not_has(resp, "Alice Aardvark")
+
+
+@pytest.mark.django_db
+def test_achievement_list_first_finder_creator_excluded(otis):
+    """The creator's own unlock is excluded when computing the first finder."""
+    creator = StudentFactory.create(
+        user__first_name="Creator", user__last_name="Cee"
+    )
+    alice = StudentFactory.create(
+        user__first_name="Alice", user__last_name="Aardvark"
+    )
+    a1 = AchievementFactory.create(diamonds=1, creator=creator.user)
+
+    # Creator finds it first (should be excluded), Alice finds it second
+    au_creator = AchievementUnlockFactory.create(
+        user=creator.user, achievement=a1
+    )
+    au_alice = AchievementUnlockFactory.create(user=alice.user, achievement=a1)
+    AchievementUnlock.objects.filter(pk=au_creator.pk).update(
+        timestamp=datetime.datetime(2024, 1, 1, tzinfo=UTC)
+    )
+    AchievementUnlock.objects.filter(pk=au_alice.pk).update(
+        timestamp=datetime.datetime(2024, 1, 2, tzinfo=UTC)
+    )
+
+    admin = UserFactory.create(is_staff=True, is_superuser=True)
+    otis.login(admin)
+    resp = otis.get_20x("achievements-listing")
+    # Alice (not the creator) is shown as first finder
+    otis.assert_has(resp, "Alice Aardvark")
+    otis.assert_not_has(resp, "Creator Cee")
+
+
+@pytest.mark.django_db
 def test_github_landing(otis):
     vuls = VulnerabilityRecordFactory.create_batch(5)
     resp = otis.get_20x("github-landing")
