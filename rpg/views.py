@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import PermissionDenied
-from django.db.models import F, IntegerField, OuterRef, Q, Subquery
+from django.db.models import F, IntegerField, OuterRef, Prefetch, Q, Subquery
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http import Http404, HttpResponse
@@ -154,20 +154,21 @@ class AchievementList(LoginRequiredMixin, ListView[Achievement]):
             .order_by("-obtained", "-num_found")
         )
 
-        if self.request.user.is_staff:
-            first_finder_id = Subquery(
-                AchievementUnlock.objects.filter(achievement=OuterRef("pk"))
-                .filter(
-                    Q(achievement__creator__isnull=True)
-                    | ~Q(user=F("achievement__creator"))
-                )
-                .order_by("timestamp")
-                .values("user_id")[:1],
-                output_field=IntegerField(),
-            )
-            achievements = achievements.annotate(first_finder_id=first_finder_id)
-
         self.amount = len(achievements.filter(obtained=True))
+
+        if self.request.user.is_staff:
+            achievements = achievements.prefetch_related(
+                Prefetch(
+                    "achievementunlock_set",
+                    queryset=AchievementUnlock.objects.filter(
+                        Q(achievement__creator__isnull=True)
+                        | ~Q(user=F("achievement__creator"))
+                    )
+                    .order_by("timestamp")
+                    .select_related("user"),
+                    to_attr="first_finder_unlocks",
+                )
+            )
 
         return achievements
 
@@ -179,18 +180,6 @@ class AchievementList(LoginRequiredMixin, ListView[Achievement]):
         except Http404:
             context["student_pk"] = None
         context["viewing"] = False
-        if self.request.user.is_staff:
-            achievement_list = context["object_list"]
-            finder_ids = {
-                a.first_finder_id  # type: ignore[attr-defined]
-                for a in achievement_list
-                if a.first_finder_id is not None  # type: ignore[attr-defined]
-            }
-            finders_by_id = {u.pk: u for u in User.objects.filter(pk__in=finder_ids)}
-            for a in achievement_list:
-                a.first_finder = finders_by_id.get(  # type: ignore[attr-defined]
-                    a.first_finder_id  # type: ignore[attr-defined]
-                )
         return context
 
 
