@@ -298,6 +298,13 @@ class UserProfile(models.Model):
         help_text="Hide all hints from the problem archive (ARCH).",
         default=False,
     )
+    timezone = models.CharField(
+        max_length=63,
+        blank=True,
+        default="",
+        verbose_name="Time zone",
+        help_text="Your local time zone for displaying timestamps. Leave blank to use server time (America/New_York).",
+    )
 
     email_on_announcement = models.BooleanField(
         verbose_name="Receive emails for announcements",

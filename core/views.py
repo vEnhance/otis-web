@@ -304,6 +304,7 @@ class UserProfileUpdateView(
         "show_portal_instructions",
         "show_unit_petitions",
         "disable_hints",
+        "timezone",
         "use_twemoji",
     )
     success_url = reverse_lazy("profile")
@@ -332,6 +333,7 @@ class UserProfileUpdateView(
             form["show_portal_instructions"],
             form["show_unit_petitions"],
             form["disable_hints"],
+            form["timezone"],
             form["use_twemoji"],
         )
 
