@@ -59,6 +59,9 @@
               <a href="{% url "found-listing" achievement.pk %}">
                 <b>{{ achievement.num_found }} user{{ achievement.num_found|pluralize }}</b>.
               </a>
+              {% if achievement.first_finder_name %}
+                First (non-creator): <b>{{ achievement.first_finder_name }}</b>.
+              {% endif %}
             {% else %}
               <b>{{ achievement.num_found }} user{{ achievement.num_found|pluralize }}</b>.
             {% endif %}

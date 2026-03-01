@@ -8,7 +8,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import PermissionDenied
-from django.db.models import F, OuterRef
+from django.db.models import CharField, F, OuterRef, Q, Subquery, Value
+from django.db.models.functions import Concat
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http import Http404, HttpResponse
@@ -40,10 +41,18 @@ RUBY_PALACE_DIAMOND_VALUE = 1
 @login_required
 def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
     student = get_student_by_pk(request, student_pk)
-    unlocks = AchievementUnlock.objects.filter(user=student.user).order_by(
-        "achievement__name"
+    earlier_non_creator_unlock = AchievementUnlock.objects.filter(
+        achievement=OuterRef("achievement"),
+        timestamp__lt=OuterRef("timestamp"),
+    ).filter(
+        Q(achievement__creator__isnull=True) | ~Q(user=F("achievement__creator"))
     )
-    unlocks = unlocks.select_related("achievement")
+    unlocks = (
+        AchievementUnlock.objects.filter(user=student.user)
+        .order_by("achievement__name")
+        .select_related("achievement")
+        .annotate(has_earlier_non_creator=Exists(earlier_non_creator_unlock))
+    )
     context: dict[str, Any] = {
         "student": student,
         "form": DiamondsForm(),
@@ -141,6 +150,24 @@ class AchievementList(LoginRequiredMixin, ListView[Achievement]):
             )
             .order_by("-obtained", "-num_found")
         )
+
+        if self.request.user.is_staff:
+            first_finder_name = Subquery(
+                AchievementUnlock.objects.filter(achievement=OuterRef("pk"))
+                .filter(
+                    Q(achievement__creator__isnull=True)
+                    | ~Q(user=F("achievement__creator"))
+                )
+                .order_by("timestamp")
+                .annotate(
+                    full_name=Concat(
+                        "user__first_name", Value(" "), "user__last_name"
+                    )
+                )
+                .values("full_name")[:1],
+                output_field=CharField(),
+            )
+            achievements = achievements.annotate(first_finder_name=first_finder_name)
 
         self.amount = len(achievements.filter(obtained=True))
 
