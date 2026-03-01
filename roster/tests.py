@@ -1677,3 +1677,257 @@ def test_ad_list_edit_link_visibility(otis) -> None:
     otis.login(other_user)
     resp = otis.get_20x("ad-list")
     otis.assert_not_has(resp, "(edit)")
+
+
+@pytest.mark.django_db
+def test_anonymous_feedback_submission(otis):
+    """Test that students can submit anonymous feedback and receive a token."""
+    import json
+
+    from roster.models import AnonymousFeedback
+
+    semester = SemesterFactory.create(active=True)
+    alice = StudentFactory.create(semester=semester)
+    otis.login(alice.user)
+
+    # Submit feedback
+    response = otis.post(
+        "feedback-submit",
+        data={"content": "This is my anonymous feedback"},
+    )
+
+    assert response.status_code == 200
+    data = json.loads(response.content)
+    assert data["success"] is True
+    assert "token" in data
+    assert "feedback_id" in data
+    assert len(data["token"]) > 0
+
+    # Verify feedback was created in database
+    feedback = AnonymousFeedback.objects.get(pk=data["feedback_id"])
+    assert feedback.content == "This is my anonymous feedback"
+    assert feedback.semester == semester
+    assert feedback.auth_hash is not None
+    assert len(feedback.auth_hash) == 64  # SHA-256 hex digest
+
+
+@pytest.mark.django_db
+def test_anonymous_feedback_view_with_valid_token(otis):
+    """Test viewing feedback with valid token."""
+    import hashlib
+    import json
+    import secrets
+
+    from roster.models import AnonymousFeedback
+
+    semester = SemesterFactory.create(active=True)
+    alice = StudentFactory.create(semester=semester)
+
+    # Create feedback manually
+    token = secrets.token_urlsafe(32)
+    auth_hash = hashlib.sha256(f"{alice.user.id}-{token}".encode()).hexdigest()
+    feedback = AnonymousFeedback.objects.create(
+        semester=semester,
+        content="Test feedback",
+        auth_hash=auth_hash,
+    )
+
+    otis.login(alice.user)
+
+    # View feedback with valid token
+    response = otis.client.get(
+        otis.url("feedback-view", feedback.pk), data={"token": token}
+    )
+
+    assert response.status_code == 200
+    data = json.loads(response.content)
+    assert data["id"] == feedback.pk
+    assert data["content"] == "Test feedback"
+    assert data["semester"] == str(semester)
+    assert "replies" in data
+    assert len(data["replies"]) == 0
+
+
+@pytest.mark.django_db
+def test_anonymous_feedback_view_with_invalid_token(otis):
+    """Test that invalid token is rejected."""
+    import hashlib
+    import secrets
+
+    from roster.models import AnonymousFeedback
+
+    semester = SemesterFactory.create(active=True)
+    alice = StudentFactory.create(semester=semester)
+
+    # Create feedback
+    token = secrets.token_urlsafe(32)
+    auth_hash = hashlib.sha256(f"{alice.user.id}-{token}".encode()).hexdigest()
+    feedback = AnonymousFeedback.objects.create(
+        semester=semester,
+        content="Test feedback",
+        auth_hash=auth_hash,
+    )
+
+    otis.login(alice.user)
+
+    # Try to view with wrong token
+    wrong_token = secrets.token_urlsafe(32)
+    response = otis.client.get(
+        otis.url("feedback-view", feedback.pk), data={"token": wrong_token}
+    )
+
+    assert response.status_code == 403  # Forbidden
+
+
+@pytest.mark.django_db
+def test_anonymous_feedback_view_different_user(otis):
+    """Test that a different user cannot view feedback even with token."""
+    import hashlib
+    import secrets
+
+    from roster.models import AnonymousFeedback
+
+    semester = SemesterFactory.create(active=True)
+    alice = StudentFactory.create(semester=semester)
+    bob = StudentFactory.create(semester=semester)
+
+    # Create feedback for Alice
+    token = secrets.token_urlsafe(32)
+    auth_hash = hashlib.sha256(f"{alice.user.id}-{token}".encode()).hexdigest()
+    feedback = AnonymousFeedback.objects.create(
+        semester=semester,
+        content="Alice's feedback",
+        auth_hash=auth_hash,
+    )
+
+    # Bob tries to view with Alice's token
+    otis.login(bob.user)
+    response = otis.client.get(
+        otis.url("feedback-view", feedback.pk), data={"token": token}
+    )
+
+    # Should be forbidden because hash includes user ID
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_staff_can_reply_to_feedback(otis):
+    """Test that staff can add replies to anonymous feedback."""
+    import hashlib
+    import json
+    import secrets
+
+    from roster.models import AnonymousFeedback, FeedbackReply
+
+    semester = SemesterFactory.create(active=True)
+    alice = StudentFactory.create(semester=semester)
+    staff_user = UserFactory.create(is_staff=True)
+
+    # Create feedback
+    token = secrets.token_urlsafe(32)
+    auth_hash = hashlib.sha256(f"{alice.user.id}-{token}".encode()).hexdigest()
+    feedback = AnonymousFeedback.objects.create(
+        semester=semester,
+        content="Student question",
+        auth_hash=auth_hash,
+    )
+
+    # Staff adds reply
+    otis.login(staff_user)
+    response = otis.post(
+        "feedback-reply",
+        feedback.pk,
+        data={"content": "Staff response here"},
+    )
+
+    assert response.status_code == 200
+    data = json.loads(response.content)
+    assert data["success"] is True
+
+    # Verify reply was created
+    assert FeedbackReply.objects.filter(feedback=feedback).count() == 1
+    reply = FeedbackReply.objects.get(feedback=feedback)
+    assert reply.author == staff_user
+    assert reply.content == "Staff response here"
+
+
+@pytest.mark.django_db
+def test_student_can_see_staff_replies(otis):
+    """Test that students can see staff replies when viewing their feedback."""
+    import hashlib
+    import json
+    import secrets
+
+    from roster.models import AnonymousFeedback, FeedbackReply
+
+    semester = SemesterFactory.create(active=True)
+    alice = StudentFactory.create(semester=semester)
+    staff_user = UserFactory.create(is_staff=True)
+
+    # Create feedback
+    token = secrets.token_urlsafe(32)
+    auth_hash = hashlib.sha256(f"{alice.user.id}-{token}".encode()).hexdigest()
+    feedback = AnonymousFeedback.objects.create(
+        semester=semester,
+        content="Student question",
+        auth_hash=auth_hash,
+    )
+
+    # Add staff reply
+    FeedbackReply.objects.create(
+        feedback=feedback,
+        author=staff_user,
+        content="Staff answer",
+    )
+
+    # Student views feedback
+    otis.login(alice.user)
+    response = otis.client.get(
+        otis.url("feedback-view", feedback.pk), data={"token": token}
+    )
+
+    assert response.status_code == 200
+    data = json.loads(response.content)
+    assert len(data["replies"]) == 1
+    assert data["replies"][0]["content"] == "Staff answer"
+    assert data["replies"][0]["author"] in [
+        staff_user.get_full_name(),
+        staff_user.username,
+    ]
+
+
+@pytest.mark.django_db
+def test_feedback_requires_content(otis):
+    """Test that empty feedback is rejected."""
+    import json
+
+    semester = SemesterFactory.create(active=True)
+    alice = StudentFactory.create(semester=semester)
+    otis.login(alice.user)
+
+    # Try to submit empty feedback
+    response = otis.post("feedback-submit", data={"content": ""})
+
+    assert response.status_code == 400
+    data = json.loads(response.content)
+    assert "error" in data
+
+
+@pytest.mark.django_db
+def test_feedback_requires_active_semester(otis):
+    """Test that students need an active semester to submit feedback."""
+    import json
+
+    # No active semester
+    semester = SemesterFactory.create(active=False)
+    alice = StudentFactory.create(semester=semester)
+    otis.login(alice.user)
+
+    response = otis.post(
+        "feedback-submit",
+        data={"content": "Some feedback"},
+    )
+
+    assert response.status_code == 400
+    data = json.loads(response.content)
+    assert "error" in data
