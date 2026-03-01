@@ -915,9 +915,7 @@ def submit_feedback(request: AuthHttpRequest) -> JsonResponse:
     try:
         student = request.user.student_set.filter(semester__active=True).first()  # type: ignore
         if not student:
-            return JsonResponse(
-                {"error": "No active semester found"}, status=400
-            )
+            return JsonResponse({"error": "No active semester found"}, status=400)
         semester = student.semester
     except ObjectDoesNotExist:
         return JsonResponse({"error": "Student not found"}, status=400)

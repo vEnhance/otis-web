@@ -4,7 +4,9 @@
 {% endblock title %}
 {% block layout-content %}
   <h1>Anonymous Feedback</h1>
-  <p>Submit anonymous feedback about your OTIS experience. You'll receive a token that lets you check for replies while keeping your identity private.</p>
+  <p>
+    Submit anonymous feedback about your OTIS experience. You'll receive a token that lets you check for replies while keeping your identity private.
+  </p>
   <div class="section">
     <h2>Submit New Feedback</h2>
     <form id="feedback-form">
@@ -52,11 +54,8 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">Save Your Feedback Token</h5>
-          <button type="button"
-                  class="close"
-                  data-dismiss="modal"
-                  aria-label="Close">
-            <span aria-hidden="true">&times;</span>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">×</span>
           </button>
         </div>
         <div class="modal-body">
@@ -72,9 +71,7 @@
           <button class="btn btn-sm btn-secondary" id="copy-token-btn">Copy to Clipboard</button>
         </div>
         <div class="modal-footer">
-          <button type="button"
-                  class="btn btn-primary"
-                  data-dismiss="modal">I've Saved It</button>
+          <button type="button" class="btn btn-primary" data-dismiss="modal">I've Saved It</button>
         </div>
       </div>
     </div>
@@ -104,8 +101,7 @@
           savedList.innerHTML = '<p>Feedback saved on this device:</p><div class="list-group">';
           for (const [feedbackId, token] of Object.entries(tokens)) {
               savedList.innerHTML += `
-                  <a href="#" class="list-group-item list-group-item-action"
-                     data-feedback-id="${feedbackId}" data-token="${token}">
+                  <a href="#" class="list-group-item list-group-item-action" data-feedback-id="${feedbackId}" data-token="${token}">
                       Feedback #${feedbackId}
                   </a>
               `;
@@ -135,7 +131,9 @@
                       'Content-Type': 'application/x-www-form-urlencoded',
                       'X-CSRFToken': csrfToken
                   },
-                  body: new URLSearchParams({content})
+                  body: new URLSearchParams({
+                      content
+                  })
               });
 
               if (!response.ok) {

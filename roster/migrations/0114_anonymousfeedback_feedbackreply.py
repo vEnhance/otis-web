@@ -6,43 +6,87 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0063_alter_userprofile_dynamic_progress_and_more'),
-        ('roster', '0113_applyuuid'),
+        ("core", "0063_alter_userprofile_dynamic_progress_and_more"),
+        ("roster", "0113_applyuuid"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='AnonymousFeedback',
+            name="AnonymousFeedback",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('content', models.TextField(help_text='The feedback content')),
-                ('auth_hash', models.CharField(db_index=True, help_text='Hash of H(user_id, token) for verifying authorship', max_length=64)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('semester', models.ForeignKey(help_text='The semester this feedback is for', on_delete=django.db.models.deletion.CASCADE, to='core.semester')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("content", models.TextField(help_text="The feedback content")),
+                (
+                    "auth_hash",
+                    models.CharField(
+                        db_index=True,
+                        help_text="Hash of H(user_id, token) for verifying authorship",
+                        max_length=64,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "semester",
+                    models.ForeignKey(
+                        help_text="The semester this feedback is for",
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="core.semester",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Anonymous Feedback',
-                'verbose_name_plural': 'Anonymous Feedback',
-                'ordering': ('-created_at',),
+                "verbose_name": "Anonymous Feedback",
+                "verbose_name_plural": "Anonymous Feedback",
+                "ordering": ("-created_at",),
             },
         ),
         migrations.CreateModel(
-            name='FeedbackReply',
+            name="FeedbackReply",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('content', models.TextField(help_text='The reply content')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('author', models.ForeignKey(help_text='Staff member who wrote this reply', on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-                ('feedback', models.ForeignKey(help_text='The feedback being replied to', on_delete=django.db.models.deletion.CASCADE, related_name='replies', to='roster.anonymousfeedback')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("content", models.TextField(help_text="The reply content")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "author",
+                    models.ForeignKey(
+                        help_text="Staff member who wrote this reply",
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "feedback",
+                    models.ForeignKey(
+                        help_text="The feedback being replied to",
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="replies",
+                        to="roster.anonymousfeedback",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Feedback Reply',
-                'verbose_name_plural': 'Feedback Replies',
-                'ordering': ('created_at',),
+                "verbose_name": "Feedback Reply",
+                "verbose_name_plural": "Feedback Replies",
+                "ordering": ("created_at",),
             },
         ),
     ]
