@@ -573,9 +573,12 @@ def test_is_first_obtain_no_bg_success_without_first_find(otis):
 @pytest.mark.django_db
 def test_is_first_obtain_retroactive_migration_logic():
     """
-    Simulate the retroactive migration: the earliest non-creator AchievementUnlock
-    for each Achievement should be identified as is_first_obtain=True.
+    Simulate the retroactive migration using the O(1) subquery approach:
+    exactly one AchievementUnlock per achievement should be marked is_first_obtain=True,
+    specifically the earliest non-creator unlock.
     """
+    from django.db.models import F, OuterRef, Subquery
+
     alice = StudentFactory.create()
     bob = StudentFactory.create()
     carol = StudentFactory.create()
@@ -595,17 +598,16 @@ def test_is_first_obtain_retroactive_migration_logic():
     a3 = AchievementFactory.create(creator=bob.user)
     u3_bob = AchievementUnlockFactory.create(user=bob.user, achievement=a3)
 
-    # Run the same logic as the retroactive migration
-    for achievement in Achievement.objects.all():
-        first_unlock = (
-            AchievementUnlock.objects.filter(achievement=achievement)
-            .exclude(user=achievement.creator)
-            .order_by("timestamp", "pk")
-            .first()
-        )
-        if first_unlock is not None:
-            first_unlock.is_first_obtain = True
-            first_unlock.save(update_fields=["is_first_obtain"])
+    # Run the same subquery-based logic as the migration (O(1) queries)
+    earliest_non_creator = (
+        AchievementUnlock.objects.filter(achievement_id=OuterRef("achievement_id"))
+        .exclude(achievement__creator=F("user"))
+        .order_by("timestamp", "pk")
+        .values("pk")[:1]
+    )
+    AchievementUnlock.objects.filter(pk=Subquery(earliest_non_creator)).update(
+        is_first_obtain=True
+    )
 
     # a1: alice (creator) skipped, bob should be first
     assert AchievementUnlock.objects.get(pk=u1_alice.pk).is_first_obtain is False
