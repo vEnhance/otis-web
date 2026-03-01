@@ -303,6 +303,7 @@ class UserProfileUpdateView(
         "dynamic_progress",
         "show_portal_instructions",
         "show_unit_petitions",
+        "disable_hints",
         "use_twemoji",
     )
     success_url = reverse_lazy("profile")
@@ -330,6 +331,7 @@ class UserProfileUpdateView(
         context["advanced_fields"] = (
             form["show_portal_instructions"],
             form["show_unit_petitions"],
+            form["disable_hints"],
             form["use_twemoji"],
         )
 
