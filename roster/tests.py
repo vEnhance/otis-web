@@ -2180,3 +2180,243 @@ def test_reply_ordering(otis):
     assert data["replies"][0]["content"] == "First reply"
     assert data["replies"][1]["content"] == "Second reply"
     assert data["replies"][2]["content"] == "Third reply"
+
+
+@pytest.mark.django_db
+def test_submit_feedback_requires_post(otis):
+    """Test that submit_feedback only accepts POST requests."""
+    import json
+
+    semester = SemesterFactory.create(active=True)
+    alice = StudentFactory.create(semester=semester)
+    otis.login(alice.user)
+
+    # Try GET request
+    response = otis.get("feedback-submit")
+
+    assert response.status_code == 405  # Method Not Allowed
+    data = json.loads(response.content)
+    assert "error" in data
+
+
+@pytest.mark.django_db
+def test_staff_cannot_submit_empty_reply(otis):
+    """Test that staff cannot submit empty replies."""
+    import hashlib
+    import json
+    import secrets
+
+    from roster.models import AnonymousFeedback, FeedbackReply
+
+    semester = SemesterFactory.create(active=True)
+    alice = StudentFactory.create(semester=semester)
+    staff = UserFactory.create(is_staff=True)
+
+    # Create feedback
+    token = secrets.token_urlsafe(32)
+    auth_hash = hashlib.sha256(f"{alice.user.id}-{token}".encode()).hexdigest()
+    feedback = AnonymousFeedback.objects.create(
+        semester=semester,
+        content="Question",
+        auth_hash=auth_hash,
+    )
+
+    # Staff tries to submit empty reply
+    otis.login(staff)
+    response = otis.post(
+        "feedback-reply",
+        feedback.pk,
+        data={"content": ""},
+    )
+
+    assert response.status_code == 400
+    data = json.loads(response.content)
+    assert "error" in data
+
+    # Verify no reply was created
+    assert FeedbackReply.objects.filter(feedback=feedback).count() == 0
+
+
+@pytest.mark.django_db
+def test_view_feedback_with_header_token(otis):
+    """Test that token can be provided via X-Feedback-Token header."""
+    import hashlib
+    import json
+    import secrets
+
+    from roster.models import AnonymousFeedback
+
+    semester = SemesterFactory.create(active=True)
+    alice = StudentFactory.create(semester=semester)
+
+    # Create feedback
+    token = secrets.token_urlsafe(32)
+    auth_hash = hashlib.sha256(f"{alice.user.id}-{token}".encode()).hexdigest()
+    feedback = AnonymousFeedback.objects.create(
+        semester=semester,
+        content="Test feedback",
+        auth_hash=auth_hash,
+    )
+
+    otis.login(alice.user)
+
+    # View feedback with token in header
+    response = otis.client.get(
+        otis.url("feedback-view", feedback.pk),
+        HTTP_X_FEEDBACK_TOKEN=token,
+    )
+
+    assert response.status_code == 200
+    data = json.loads(response.content)
+    assert data["content"] == "Test feedback"
+
+
+@pytest.mark.django_db
+def test_unauthenticated_cannot_access_feedback(otis):
+    """Test that unauthenticated users cannot access feedback endpoints."""
+    # Don't login - test as anonymous user
+
+    # Try to access feedback page
+    response = otis.get("feedback")
+    assert response.status_code in [302, 403]  # Redirect to login or forbidden
+
+    # Try to submit feedback
+    response = otis.post("feedback-submit", data={"content": "Test"})
+    assert response.status_code in [302, 403]
+
+    # Try to view feedback
+    response = otis.get("feedback-view", 1)
+    assert response.status_code in [302, 403]
+
+    # Try to add reply
+    response = otis.post("feedback-reply", 1, data={"content": "Test"})
+    assert response.status_code in [302, 403]
+
+
+@pytest.mark.django_db
+def test_deleting_feedback_cascades_to_replies():
+    """Test that deleting feedback also deletes associated replies."""
+    import hashlib
+    import secrets
+
+    from roster.models import AnonymousFeedback, FeedbackReply
+
+    semester = SemesterFactory.create(active=True)
+    alice = StudentFactory.create(semester=semester)
+    staff = UserFactory.create(is_staff=True)
+
+    # Create feedback with replies
+    token = secrets.token_urlsafe(32)
+    auth_hash = hashlib.sha256(f"{alice.user.id}-{token}".encode()).hexdigest()
+    feedback = AnonymousFeedback.objects.create(
+        semester=semester,
+        content="Question",
+        auth_hash=auth_hash,
+    )
+
+    FeedbackReply.objects.create(
+        feedback=feedback,
+        author=staff,
+        content="Reply 1",
+    )
+    FeedbackReply.objects.create(
+        feedback=feedback,
+        author=staff,
+        content="Reply 2",
+    )
+
+    # Verify replies exist
+    assert FeedbackReply.objects.filter(feedback=feedback).count() == 2
+
+    # Delete feedback
+    feedback_id = feedback.pk
+    feedback.delete()
+
+    # Verify feedback is gone
+    assert not AnonymousFeedback.objects.filter(pk=feedback_id).exists()
+
+    # Verify replies are also deleted (cascade)
+    assert FeedbackReply.objects.filter(feedback_id=feedback_id).count() == 0
+
+
+@pytest.mark.django_db
+def test_unicode_and_emoji_in_feedback(otis):
+    """Test that unicode characters and emoji work in feedback content."""
+    import json
+
+    from roster.models import AnonymousFeedback
+
+    semester = SemesterFactory.create(active=True)
+    alice = StudentFactory.create(semester=semester)
+    otis.login(alice.user)
+
+    # Submit feedback with unicode and emoji
+    unicode_content = "这是中文测试 🎉 Hello! Привет! مرحبا χίλιοι τετρακόσιοι τριάκοντα τέτταρες (1434)"
+    response = otis.post(
+        "feedback-submit",
+        data={"content": unicode_content},
+    )
+
+    assert response.status_code == 200
+    data = json.loads(response.content)
+    feedback_id = data["feedback_id"]
+
+    # Verify it was saved correctly
+    feedback = AnonymousFeedback.objects.get(pk=feedback_id)
+    assert feedback.content == unicode_content
+
+    # Verify it can be retrieved correctly
+    token = data["token"]
+    response = otis.client.get(
+        otis.url("feedback-view", feedback_id), data={"token": token}
+    )
+
+    data = json.loads(response.content)
+    assert data["content"] == unicode_content
+
+
+@pytest.mark.django_db
+def test_unicode_in_staff_replies(otis):
+    """Test that unicode characters work in staff replies."""
+    import hashlib
+    import json
+    import secrets
+
+    from roster.models import AnonymousFeedback, FeedbackReply
+
+    semester = SemesterFactory.create(active=True)
+    alice = StudentFactory.create(semester=semester)
+    staff = UserFactory.create(is_staff=True)
+
+    # Create feedback
+    token = secrets.token_urlsafe(32)
+    auth_hash = hashlib.sha256(f"{alice.user.id}-{token}".encode()).hexdigest()
+    feedback = AnonymousFeedback.objects.create(
+        semester=semester,
+        content="Question",
+        auth_hash=auth_hash,
+    )
+
+    # Staff replies with unicode
+    unicode_reply = "回答: This is the answer! 😊"
+    otis.login(staff)
+    response = otis.post(
+        "feedback-reply",
+        feedback.pk,
+        data={"content": unicode_reply},
+    )
+
+    assert response.status_code == 200
+
+    # Verify reply was saved correctly
+    reply = FeedbackReply.objects.get(feedback=feedback)
+    assert reply.content == unicode_reply
+
+    # Verify student can view it correctly
+    otis.login(alice.user)
+    response = otis.client.get(
+        otis.url("feedback-view", feedback.pk), data={"token": token}
+    )
+
+    data = json.loads(response.content)
+    assert data["replies"][0]["content"] == unicode_reply
