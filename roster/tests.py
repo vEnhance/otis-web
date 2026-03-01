@@ -2420,3 +2420,258 @@ def test_unicode_in_staff_replies(otis):
 
     data = json.loads(response.content)
     assert data["replies"][0]["content"] == unicode_reply
+
+
+@pytest.mark.django_db
+def test_user_can_submit_multiple_feedback(otis):
+    """Test that a user can submit multiple feedback items with unique tokens."""
+    import json
+
+    from roster.models import AnonymousFeedback
+
+    semester = SemesterFactory.create(active=True)
+    alice = StudentFactory.create(semester=semester)
+    otis.login(alice.user)
+
+    # Submit first feedback
+    response1 = otis.post(
+        "feedback-submit",
+        data={"content": "First feedback"},
+    )
+    assert response1.status_code == 200
+    data1 = json.loads(response1.content)
+    token1 = data1["token"]
+    feedback_id1 = data1["feedback_id"]
+
+    # Submit second feedback
+    response2 = otis.post(
+        "feedback-submit",
+        data={"content": "Second feedback"},
+    )
+    assert response2.status_code == 200
+    data2 = json.loads(response2.content)
+    token2 = data2["token"]
+    feedback_id2 = data2["feedback_id"]
+
+    # Tokens should be different
+    assert token1 != token2
+    assert feedback_id1 != feedback_id2
+
+    # Both feedback should exist
+    assert AnonymousFeedback.objects.filter(pk=feedback_id1).exists()
+    assert AnonymousFeedback.objects.filter(pk=feedback_id2).exists()
+
+    # Can view first feedback with first token
+    response = otis.client.get(
+        otis.url("feedback-view", feedback_id1), data={"token": token1}
+    )
+    assert response.status_code == 200
+    data = json.loads(response.content)
+    assert data["content"] == "First feedback"
+
+    # Can view second feedback with second token
+    response = otis.client.get(
+        otis.url("feedback-view", feedback_id2), data={"token": token2}
+    )
+    assert response.status_code == 200
+    data = json.loads(response.content)
+    assert data["content"] == "Second feedback"
+
+    # Cannot view first feedback with second token
+    response = otis.client.get(
+        otis.url("feedback-view", feedback_id1), data={"token": token2}
+    )
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_very_long_feedback_content(otis):
+    """Test that very long feedback content is handled correctly."""
+    import json
+
+    from roster.models import AnonymousFeedback
+
+    semester = SemesterFactory.create(active=True)
+    alice = StudentFactory.create(semester=semester)
+    otis.login(alice.user)
+
+    # Create very long content (10000 characters)
+    long_content = "x" * 10000
+
+    response = otis.post(
+        "feedback-submit",
+        data={"content": long_content},
+    )
+
+    assert response.status_code == 200
+    data = json.loads(response.content)
+
+    # Verify it was saved correctly
+    feedback = AnonymousFeedback.objects.get(pk=data["feedback_id"])
+    assert feedback.content == long_content
+    assert len(feedback.content) == 10000
+
+
+@pytest.mark.django_db
+def test_whitespace_only_feedback_rejected(otis):
+    """Test that whitespace-only feedback is rejected like empty content."""
+    import json
+
+    semester = SemesterFactory.create(active=True)
+    alice = StudentFactory.create(semester=semester)
+    otis.login(alice.user)
+
+    # Try various whitespace-only content
+    for whitespace_content in ["   ", "\t\t", "\n\n", "  \t\n  "]:
+        response = otis.post(
+            "feedback-submit",
+            data={"content": whitespace_content},
+        )
+
+        assert response.status_code == 400
+        data = json.loads(response.content)
+        assert "error" in data
+
+
+@pytest.mark.django_db
+def test_view_nonexistent_feedback_returns_404(otis):
+    """Test that viewing non-existent feedback returns 404."""
+    semester = SemesterFactory.create(active=True)
+    alice = StudentFactory.create(semester=semester)
+    otis.login(alice.user)
+
+    # Try to view feedback that doesn't exist
+    response = otis.client.get(
+        otis.url("feedback-view", 99999), data={"token": "fake-token"}
+    )
+
+    assert response.status_code == 404
+
+
+@pytest.mark.django_db
+def test_reply_to_nonexistent_feedback_returns_404(otis):
+    """Test that replying to non-existent feedback returns 404."""
+    staff = UserFactory.create(is_staff=True)
+    otis.login(staff)
+
+    # Try to reply to feedback that doesn't exist
+    response = otis.post(
+        "feedback-reply",
+        99999,
+        data={"content": "Reply to nothing"},
+    )
+
+    assert response.status_code == 404
+
+
+@pytest.mark.django_db
+def test_tokens_are_unique(otis):
+    """Test that generated tokens are unique across submissions."""
+    import json
+
+    semester = SemesterFactory.create(active=True)
+    alice = StudentFactory.create(semester=semester)
+    otis.login(alice.user)
+
+    tokens = set()
+
+    # Generate 50 tokens and verify they're all unique
+    for i in range(50):
+        response = otis.post(
+            "feedback-submit",
+            data={"content": f"Feedback {i}"},
+        )
+        assert response.status_code == 200
+        data = json.loads(response.content)
+        token = data["token"]
+
+        # Token should not have been seen before
+        assert token not in tokens
+        tokens.add(token)
+
+    # All 50 tokens should be unique
+    assert len(tokens) == 50
+
+
+@pytest.mark.django_db
+def test_feedback_from_different_semesters(otis):
+    """Test feedback from different semesters is properly isolated."""
+    import hashlib
+    import json
+    import secrets
+
+    from roster.models import AnonymousFeedback
+
+    semester1 = SemesterFactory.create(name="Fall 2025", active=False)
+    semester2 = SemesterFactory.create(name="Spring 2026", active=True)
+
+    alice_s1 = StudentFactory.create(semester=semester1)
+    alice_s2 = StudentFactory.create(user=alice_s1.user, semester=semester2)
+
+    # Create feedback for semester 1 manually
+    token1 = secrets.token_urlsafe(32)
+    auth_hash1 = hashlib.sha256(f"{alice_s1.user.id}-{token1}".encode()).hexdigest()
+    feedback1 = AnonymousFeedback.objects.create(
+        semester=semester1,
+        content="Semester 1 feedback",
+        auth_hash=auth_hash1,
+    )
+
+    # Submit feedback for semester 2 (active semester)
+    otis.login(alice_s2.user)
+    response = otis.post(
+        "feedback-submit",
+        data={"content": "Semester 2 feedback"},
+    )
+    assert response.status_code == 200
+    data = json.loads(response.content)
+    feedback2_id = data["feedback_id"]
+
+    # Both feedback should exist
+    assert AnonymousFeedback.objects.filter(semester=semester1).count() == 1
+    assert AnonymousFeedback.objects.filter(semester=semester2).count() == 1
+
+    # Feedback should be tied to correct semesters
+    feedback2 = AnonymousFeedback.objects.get(pk=feedback2_id)
+    assert feedback1.semester == semester1
+    assert feedback2.semester == semester2
+    assert feedback1.content == "Semester 1 feedback"
+    assert feedback2.content == "Semester 2 feedback"
+
+
+@pytest.mark.django_db
+def test_very_long_reply_content(otis):
+    """Test that very long reply content is handled correctly."""
+    import hashlib
+    import secrets
+
+    from roster.models import AnonymousFeedback, FeedbackReply
+
+    semester = SemesterFactory.create(active=True)
+    alice = StudentFactory.create(semester=semester)
+    staff = UserFactory.create(is_staff=True)
+
+    # Create feedback
+    token = secrets.token_urlsafe(32)
+    auth_hash = hashlib.sha256(f"{alice.user.id}-{token}".encode()).hexdigest()
+    feedback = AnonymousFeedback.objects.create(
+        semester=semester,
+        content="Question",
+        auth_hash=auth_hash,
+    )
+
+    # Staff replies with very long content
+    long_reply = "y" * 10000
+    otis.login(staff)
+    response = otis.post(
+        "feedback-reply",
+        feedback.pk,
+        data={"content": long_reply},
+    )
+
+    assert response.status_code == 200
+
+    # Verify reply was saved correctly
+    reply = FeedbackReply.objects.get(feedback=feedback)
+    assert reply.content == long_reply
+    assert len(reply.content) == 10000
