@@ -190,6 +190,21 @@ class FoundList(LoginRequiredMixin, StaffRequiredMixin, ListView[AchievementUnlo
     template_name = "rpg/found_list.html"
     context_object_name = "unlocks_list"
 
+    def dispatch(self, *args: Any, **kwargs: Any) -> HttpResponseBase:
+        # First check authentication (from LoginRequiredMixin)
+        if not self.request.user.is_authenticated:
+            return self.handle_no_permission(self.request)
+
+        # Check if user is the diamond creator (skip staff check if so)
+        achievement = get_object_or_404(Achievement, pk=self.kwargs["pk"])
+        if self.request.user == achievement.creator:
+            # Allow diamond creators to see who found their diamond
+            # Skip staff check, go straight to ListView
+            return ListView.dispatch(self, *args, **kwargs)
+
+        # Otherwise use normal behavior (includes staff check)
+        return super().dispatch(*args, **kwargs)
+
     def get_queryset(self) -> QuerySet[AchievementUnlock]:
         self.achievement = get_object_or_404(Achievement, pk=self.kwargs["pk"])
         return (

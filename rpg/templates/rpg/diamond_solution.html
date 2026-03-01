@@ -21,7 +21,7 @@
     </div>
   {% endif %}
   <div class="my-3 alert alert-success text-break">
-    {% if request.user.is_superuser %}
+    {% if request.user.is_superuser or request.user == achievement.creator %}
       <h4 class="alert-heading">
         Answer: <strong>{{ achievement.code }}</strong>
       </h4>
@@ -29,7 +29,7 @@
     {{ achievement.solution|linebreaks }}
   </div>
   <ul>
-    {% if request.user.is_superuser %}
+    {% if request.user.is_superuser or request.user == achievement.creator %}
       <li>
         <a href="{% url "found-listing" achievement.pk %}">Show found list for this diamond</a>
       </li>

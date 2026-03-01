@@ -454,3 +454,76 @@ def test_github_landing(otis):
         assert v.commit_hash in resp.content.decode()
         assert v.get_absolute_url() in resp.content.decode()
         assert v.get_absolute_url().endswith(v.commit_hash)
+
+
+@pytest.mark.django_db
+def test_found_list_creator_access(otis):
+    """Test that diamond creators can see who found their diamond."""
+    alice = StudentFactory.create()
+    bob = StudentFactory.create()
+
+    # Alice creates a diamond
+    a1 = AchievementFactory.create(creator=alice.user)
+    # Bob creates a different diamond
+    a2 = AchievementFactory.create(creator=bob.user)
+
+    # Some people find Alice's diamond
+    AchievementUnlockFactory.create(user=alice.user, achievement=a1)
+    AchievementUnlockFactory.create_batch(5, achievement=a1)
+
+    # Some people find Bob's diamond
+    AchievementUnlockFactory.create_batch(3, achievement=a2)
+
+    # Alice should be able to see the found list for her own diamond
+    otis.login(alice.user)
+    resp = otis.get_20x("found-listing", a1.pk)
+    assert resp.context["unlocks_list"].count() == 6
+
+    # But Alice shouldn't see Bob's diamond found list
+    otis.get_40x("found-listing", a2.pk)
+
+    # Bob should be able to see the found list for his own diamond
+    otis.login(bob.user)
+    resp = otis.get_20x("found-listing", a2.pk)
+    assert resp.context["unlocks_list"].count() == 3
+
+    # But Bob shouldn't see Alice's diamond found list
+    otis.get_40x("found-listing", a1.pk)
+
+    # Regular users still can't see found lists
+    charlie = StudentFactory.create()
+    AchievementUnlockFactory.create(user=charlie.user, achievement=a1)
+    otis.login(charlie.user)
+    otis.get_40x("found-listing", a1.pk)
+    otis.get_40x("found-listing", a2.pk)
+
+
+@pytest.mark.django_db
+def test_found_list_edge_cases(otis):
+    """Test edge cases for diamond creator access."""
+    alice = StudentFactory.create()
+
+    # Diamond with no creator
+    a1 = AchievementFactory.create(creator=None)
+    AchievementUnlockFactory.create_batch(3, achievement=a1)
+
+    # Alice shouldn't see it (no creator = admin only)
+    otis.login(alice.user)
+    otis.get_40x("found-listing", a1.pk)
+
+    # Diamond with creator but no finders yet
+    a2 = AchievementFactory.create(creator=alice.user)
+    resp = otis.get_20x("found-listing", a2.pk)
+    assert resp.context["unlocks_list"].count() == 0
+
+    # Diamond where creator hasn't found it themselves
+    a3 = AchievementFactory.create(creator=alice.user)
+    AchievementUnlockFactory.create_batch(2, achievement=a3)
+    resp = otis.get_20x("found-listing", a3.pk)
+    assert resp.context["unlocks_list"].count() == 2
+
+    # Unauthenticated user redirects to login
+    otis.client.logout()
+    resp = otis.get("found-listing", a2.pk)
+    assert resp.status_code == 302  # Redirect to login
+    assert "/accounts/login/" in resp.url
