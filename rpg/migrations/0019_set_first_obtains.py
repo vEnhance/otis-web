@@ -26,9 +26,9 @@ def set_first_obtains(apps: object, schema_editor: object) -> None:
     # cannot do the UPDATE and the correlated subquery in a single statement.
     # Fetching IDs first (SELECT) has no such restriction.
     pks = list(
-        AchievementUnlock.objects.filter(
-            pk=Subquery(earliest_non_creator)
-        ).values_list("pk", flat=True)
+        AchievementUnlock.objects.filter(pk=Subquery(earliest_non_creator)).values_list(
+            "pk", flat=True
+        )
     )
     AchievementUnlock.objects.filter(pk__in=pks).update(is_first_obtain=True)
 
