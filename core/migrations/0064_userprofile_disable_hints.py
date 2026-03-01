@@ -4,15 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0063_alter_userprofile_dynamic_progress_and_more'),
+        ("core", "0063_alter_userprofile_dynamic_progress_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='userprofile',
-            name='disable_hints',
-            field=models.BooleanField(default=False, help_text='Hide all hints from the problem archive (ARCH).', verbose_name='Disable hints'),
+            model_name="userprofile",
+            name="disable_hints",
+            field=models.BooleanField(
+                default=False,
+                help_text="Hide all hints from the problem archive (ARCH).",
+                verbose_name="Disable hints",
+            ),
         ),
     ]
