@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("rpg", "0016_alter_achievement_code"),
+        ("rpg", "0017_achievement_special_effect_id_and_more"),
     ]
 
     operations = [

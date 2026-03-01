@@ -34,7 +34,7 @@ def unset_first_obtains(apps: object, schema_editor: object) -> None:
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("rpg", "0017_achievementunlock_is_first_obtain"),
+        ("rpg", "0018_achievementunlock_is_first_obtain"),
     ]
 
     operations = [
