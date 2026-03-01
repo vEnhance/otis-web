@@ -37,11 +37,11 @@ class AchievementAdmin(ImportExportModelAdmin):
     list_display = (
         "code",
         "name",
+        "special_effect_id",
         "diamonds",
         "always_show_image",
         "show_solution",
         "description",
-        "solution",
         "creator",
     )
     list_display_links = (
@@ -59,6 +59,7 @@ class AchievementAdmin(ImportExportModelAdmin):
         "always_show_image",
         "show_solution",
         ("creator", admin.EmptyFieldListFilter),
+        ("special_effect_id", admin.EmptyFieldListFilter),
     )
     resource_class = AchievementIEResource
 
