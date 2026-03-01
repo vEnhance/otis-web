@@ -1,6 +1,7 @@
 import os
 import random
 from hashlib import sha256
+from typing import Any
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -89,9 +90,30 @@ class Achievement(models.Model):
         help_text="If enabled, the creator of a diamond is shown on the diamond page.",
         verbose_name="Show Creator",
     )
+    special_effect_id = models.SlugField(
+        unique=True,
+        blank=True,
+        null=True,
+        default=None,
+        help_text="A unique identifier for this particular achievement. "
+        "Useful if you want to have some special effects associated to it.",
+    )
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=~models.Q(special_effect_id=""),
+                name="%(app_label)s_%(class)s_special_effect_id_not_empty",
+            ),
+        ]
 
     def __str__(self) -> str:
         return str(self.name)
+
+    def save(self, *args: Any, **kwargs: Any):
+        if not self.special_effect_id:
+            self.special_effect_id = None
+        super().save(*args, **kwargs)
 
 
 class Level(models.Model):
