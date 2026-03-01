@@ -1,0 +1,249 @@
+{% extends "layout.html" %}
+{% block title %}
+  Anonymous Feedback
+{% endblock title %}
+{% block layout-content %}
+  <h1>Anonymous Feedback</h1>
+  <p>Submit anonymous feedback about your OTIS experience. You'll receive a token that lets you check for replies while keeping your identity private.</p>
+  <div class="section">
+    <h2>Submit New Feedback</h2>
+    <form id="feedback-form">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="feedback-content">Your Feedback</label>
+        <textarea class="form-control"
+                  id="feedback-content"
+                  rows="6"
+                  required
+                  placeholder="Share your thoughts about OTIS..."></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">Submit Feedback</button>
+    </form>
+  </div>
+  <hr />
+  <div class="section">
+    <h2>View Past Feedback</h2>
+    <p>
+      If you've submitted feedback before on this device, you can view it here.
+      Or enter your token manually if you saved it.
+    </p>
+    <div id="saved-feedback-list" class="my-3"></div>
+    <div class="form-group">
+      <label for="manual-token">Or enter token manually:</label>
+      <div class="input-group">
+        <input type="text"
+               class="form-control"
+               id="manual-token"
+               placeholder="Paste your feedback token here">
+        <div class="input-group-append">
+          <button class="btn btn-secondary" id="load-manual-btn">Load</button>
+        </div>
+      </div>
+    </div>
+    <div id="feedback-view" class="mt-4"></div>
+  </div>
+  <!-- Token Modal -->
+  <div class="modal fade"
+       id="tokenModal"
+       tabindex="-1"
+       role="dialog"
+       aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Save Your Feedback Token</h5>
+          <button type="button"
+                  class="close"
+                  data-dismiss="modal"
+                  aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>
+            <strong>Important:</strong> Save this token to check for replies later!
+          </p>
+          <div class="alert alert-info">
+            <code id="token-display" style="word-break: break-all;"></code>
+          </div>
+          <p>
+            <small>This token has been saved on this device, but save it elsewhere too in case you clear your browser data or use a different device.</small>
+          </p>
+          <button class="btn btn-sm btn-secondary" id="copy-token-btn">Copy to Clipboard</button>
+        </div>
+        <div class="modal-footer">
+          <button type="button"
+                  class="btn btn-primary"
+                  data-dismiss="modal">I've Saved It</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+      const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+      // Load saved feedback tokens from localStorage
+      function loadSavedFeedback() {
+          const savedList = document.getElementById('saved-feedback-list');
+          const tokens = {};
+
+          // Find all feedback tokens in localStorage
+          for (let i = 0; i < localStorage.length; i++) {
+              const key = localStorage.key(i);
+              if (key && key.startsWith('feedback-token-')) {
+                  const feedbackId = key.replace('feedback-token-', '');
+                  tokens[feedbackId] = localStorage.getItem(key);
+              }
+          }
+
+          if (Object.keys(tokens).length === 0) {
+              savedList.innerHTML = '<p class="text-muted">No saved feedback on this device.</p>';
+              return;
+          }
+
+          savedList.innerHTML = '<p>Feedback saved on this device:</p><div class="list-group">';
+          for (const [feedbackId, token] of Object.entries(tokens)) {
+              savedList.innerHTML += `
+                  <a href="#" class="list-group-item list-group-item-action"
+                     data-feedback-id="${feedbackId}" data-token="${token}">
+                      Feedback #${feedbackId}
+                  </a>
+              `;
+          }
+          savedList.innerHTML += '</div>';
+
+          // Add click handlers
+          document.querySelectorAll('.list-group-item[data-feedback-id]').forEach(item => {
+              item.addEventListener('click', function(e) {
+                  e.preventDefault();
+                  loadFeedback(this.dataset.feedbackId, this.dataset.token);
+              });
+          });
+      }
+
+      // Submit feedback
+      document.getElementById('feedback-form').addEventListener('submit', async function(e) {
+          e.preventDefault();
+
+          const content = document.getElementById('feedback-content').value.trim();
+          if (!content) return;
+
+          try {
+              const response = await fetch('/feedback/submit/', {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/x-www-form-urlencoded',
+                      'X-CSRFToken': csrfToken
+                  },
+                  body: new URLSearchParams({content})
+              });
+
+              if (!response.ok) {
+                  const data = await response.json();
+                  alert('Error: ' + (data.error || 'Failed to submit feedback'));
+                  return;
+              }
+
+              const data = await response.json();
+
+              // Save token to localStorage
+              localStorage.setItem(`feedback-token-${data.feedback_id}`, data.token);
+
+              // Show token modal
+              document.getElementById('token-display').textContent = data.token;
+              $('#tokenModal').modal('show');
+
+              // Clear form
+              document.getElementById('feedback-content').value = '';
+
+              // Reload saved feedback list
+              loadSavedFeedback();
+
+          } catch (error) {
+              alert('Error submitting feedback: ' + error.message);
+          }
+      });
+
+      // Copy token to clipboard
+      document.getElementById('copy-token-btn').addEventListener('click', function() {
+          const token = document.getElementById('token-display').textContent;
+          navigator.clipboard.writeText(token).then(() => {
+              this.textContent = 'Copied!';
+              setTimeout(() => this.textContent = 'Copy to Clipboard', 2000);
+          });
+      });
+
+      // Load feedback with token
+      async function loadFeedback(feedbackId, token) {
+          try {
+              const response = await fetch(`/feedback/${feedbackId}/`, {
+                  headers: {
+                      'X-Feedback-Token': token
+                  }
+              });
+
+              if (!response.ok) {
+                  alert('Error: Invalid token or feedback not found');
+                  return;
+              }
+
+              const data = await response.json();
+              displayFeedback(data);
+
+          } catch (error) {
+              alert('Error loading feedback: ' + error.message);
+          }
+      }
+
+      // Display feedback and replies
+      function displayFeedback(data) {
+          const view = document.getElementById('feedback-view');
+          view.innerHTML = `
+              <div class="card">
+                  <div class="card-header">
+                      <h5>Feedback #${data.id}</h5>
+                      <small class="text-muted">Submitted: ${new Date(data.created_at).toLocaleString()}</small>
+                  </div>
+                  <div class="card-body">
+                      <p>${escapeHtml(data.content)}</p>
+                  </div>
+              </div>
+          `;
+
+          if (data.replies && data.replies.length > 0) {
+              view.innerHTML += '<h4 class="mt-4">Replies</h4>';
+              data.replies.forEach(reply => {
+                  view.innerHTML += `
+                      <div class="card mt-2">
+                          <div class="card-body">
+                              <p>${escapeHtml(reply.content)}</p>
+                              <small class="text-muted">— ${escapeHtml(reply.author)}, ${new Date(reply.created_at).toLocaleString()}</small>
+                          </div>
+                      </div>
+                  `;
+              });
+          }
+      }
+
+      // Manual token load
+      document.getElementById('load-manual-btn').addEventListener('click', function() {
+          const token = document.getElementById('manual-token').value.trim();
+          if (!token) return;
+
+          const feedbackId = prompt('Enter feedback ID:');
+          if (!feedbackId) return;
+
+          loadFeedback(feedbackId, token);
+      });
+
+      // Helper function
+      function escapeHtml(text) {
+          const div = document.createElement('div');
+          div.textContent = text;
+          return div.innerHTML;
+      }
+
+      // Load saved feedback on page load
+      loadSavedFeedback();
+  </script>
+{% endblock layout-content %}

@@ -734,3 +734,55 @@ class ApplyUUID(models.Model):
 
     def __str__(self) -> str:
         return str(self.uuid)
+
+
+class AnonymousFeedback(models.Model):
+    """Anonymous feedback from students that can be replied to."""
+
+    semester = models.ForeignKey(
+        Semester,
+        on_delete=models.CASCADE,
+        help_text="The semester this feedback is for",
+    )
+    content = models.TextField(help_text="The feedback content")
+    auth_hash = models.CharField(
+        max_length=64,
+        db_index=True,
+        help_text="Hash of H(user_id, token) for verifying authorship",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("-created_at",)
+        verbose_name = "Anonymous Feedback"
+        verbose_name_plural = "Anonymous Feedback"
+
+    def __str__(self) -> str:
+        return f"Feedback #{self.pk} from {self.semester}"
+
+
+class FeedbackReply(models.Model):
+    """Replies to anonymous feedback (from staff)."""
+
+    feedback = models.ForeignKey(
+        AnonymousFeedback,
+        on_delete=models.CASCADE,
+        related_name="replies",
+        help_text="The feedback being replied to",
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        help_text="Staff member who wrote this reply",
+    )
+    content = models.TextField(help_text="The reply content")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("created_at",)
+        verbose_name = "Feedback Reply"
+        verbose_name_plural = "Feedback Replies"
+
+    def __str__(self) -> str:
+        return f"Reply by {self.author.username} to Feedback #{self.feedback.pk}"

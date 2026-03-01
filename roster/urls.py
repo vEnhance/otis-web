@@ -33,4 +33,12 @@ urlpatterns = [
     path(r"email-lookup/", views.email_lookup, name="email-lookup"),
     path(r"ais/", views.AdList.as_view(), name="ad-list"),
     path(r"advertise/", views.AdUpdate.as_view(), name="ad-update"),
+    path(r"feedback/", views.feedback_page, name="feedback"),
+    path(r"feedback/submit/", views.submit_feedback, name="feedback-submit"),
+    path(r"feedback/<int:feedback_id>/", views.view_feedback, name="feedback-view"),
+    path(
+        r"feedback/<int:feedback_id>/reply/",
+        views.add_feedback_reply,
+        name="feedback-reply",
+    ),
 ]

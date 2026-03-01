@@ -12,7 +12,9 @@ So e.g. "list students by most recent pset" goes under dashboard.
 
 import collections
 import datetime
+import hashlib
 import logging
+import secrets
 from typing import Any, Optional
 
 from allauth.socialaccount.models import SocialAccount
@@ -32,7 +34,13 @@ from django.db.models.manager import Manager
 from django.db.models.query import QuerySet
 from django.forms import ValidationError
 from django.forms.models import BaseModelForm
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.http import (
+    HttpRequest,
+    HttpResponse,
+    HttpResponseForbidden,
+    HttpResponseRedirect,
+    JsonResponse,
+)
 from django.http.response import Http404
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -48,7 +56,7 @@ from otisweb.decorators import admin_required, staff_required
 from otisweb.mixins import StaffRequiredMixin, VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest
 from roster.forms import LinkAssistantForm
-from roster.models import ApplyUUID, Assistant
+from roster.models import AnonymousFeedback, ApplyUUID, Assistant, FeedbackReply
 from roster.utils import (
     can_edit,
     get_current_students,
@@ -882,3 +890,127 @@ class AdUpdate(StaffRequiredMixin, UpdateView[Assistant, BaseModelForm[Assistant
 
     def get_success_url(self) -> str:
         return reverse("ad-list")
+
+
+# Anonymous Feedback Views
+
+
+@login_required
+def feedback_page(request: AuthHttpRequest) -> HttpResponse:
+    """Render the feedback submission and viewing page."""
+    return render(request, "roster/feedback.html")
+
+
+@login_required
+def submit_feedback(request: AuthHttpRequest) -> JsonResponse:
+    """Submit anonymous feedback and receive a token."""
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+
+    content = request.POST.get("content", "").strip()
+    if not content:
+        return JsonResponse({"error": "Content required"}, status=400)
+
+    # Get current student's semester
+    try:
+        student = request.user.student_set.filter(semester__active=True).first()  # type: ignore
+        if not student:
+            return JsonResponse(
+                {"error": "No active semester found"}, status=400
+            )
+        semester = student.semester
+    except ObjectDoesNotExist:
+        return JsonResponse({"error": "Student not found"}, status=400)
+
+    # Generate token and hash
+    token = secrets.token_urlsafe(32)
+    auth_hash = hashlib.sha256(
+        f"{request.user.id}-{token}".encode()  # type: ignore
+    ).hexdigest()
+
+    # Create feedback
+    feedback = AnonymousFeedback.objects.create(
+        semester=semester,
+        content=content,
+        auth_hash=auth_hash,
+    )
+
+    return JsonResponse(
+        {
+            "success": True,
+            "token": token,
+            "feedback_id": feedback.pk,
+        }
+    )
+
+
+@login_required
+def view_feedback(
+    request: AuthHttpRequest, feedback_id: int
+) -> JsonResponse | HttpResponseForbidden:
+    """View feedback and replies if token is valid."""
+    feedback = get_object_or_404(AnonymousFeedback, id=feedback_id)
+
+    # Get token from header or GET param
+    token = request.headers.get("X-Feedback-Token") or request.GET.get("token")
+    if not token:
+        return JsonResponse({"error": "Token required"}, status=400)
+
+    # Verify hash
+    expected_hash = hashlib.sha256(
+        f"{request.user.id}-{token}".encode()  # type: ignore
+    ).hexdigest()
+
+    if feedback.auth_hash != expected_hash:
+        return HttpResponseForbidden("Invalid token")
+
+    # Return feedback with replies
+    return JsonResponse(
+        {
+            "id": feedback.pk,
+            "content": feedback.content,
+            "created_at": feedback.created_at.isoformat(),
+            "updated_at": feedback.updated_at.isoformat(),
+            "semester": str(feedback.semester),
+            "replies": [
+                {
+                    "id": reply.pk,
+                    "author": reply.author.get_full_name() or reply.author.username,
+                    "content": reply.content,
+                    "created_at": reply.created_at.isoformat(),
+                }
+                for reply in feedback.replies.all()  # type: ignore
+            ],
+        }
+    )
+
+
+@staff_required
+def add_feedback_reply(request: AuthHttpRequest, feedback_id: int) -> JsonResponse:
+    """Add a reply to feedback (staff only)."""
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+
+    feedback = get_object_or_404(AnonymousFeedback, id=feedback_id)
+    content = request.POST.get("content", "").strip()
+
+    if not content:
+        return JsonResponse({"error": "Content required"}, status=400)
+
+    reply = FeedbackReply.objects.create(
+        feedback=feedback,
+        author=request.user,
+        content=content,
+    )
+
+    return JsonResponse(
+        {
+            "success": True,
+            "reply": {
+                "id": reply.pk,
+                "author": reply.author.get_full_name() or reply.author.username,
+                "content": reply.content,
+                "created_at": reply.created_at.isoformat(),
+            },
+        }
+    )

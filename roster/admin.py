@@ -14,8 +14,10 @@ from core.models import Semester
 from roster.models import build_students
 
 from .models import (
+    AnonymousFeedback,
     ApplyUUID,
     Assistant,
+    FeedbackReply,
     Invoice,
     RegistrationContainer,
     Student,
@@ -452,4 +454,67 @@ class RegistrationContainerAdmin(admin.ModelAdmin):
     list_display_links = (
         "pk",
         "semester",
+    )
+
+
+# ANONYMOUS FEEDBACK
+class FeedbackReplyInline(admin.StackedInline):
+    model = FeedbackReply
+    fields = (
+        "author",
+        "content",
+        "created_at",
+    )
+    readonly_fields = ("created_at",)
+    extra = 1
+
+
+@admin.register(AnonymousFeedback)
+class AnonymousFeedbackAdmin(admin.ModelAdmin):
+    readonly_fields = (
+        "created_at",
+        "updated_at",
+        "auth_hash",
+    )
+    list_display = (
+        "pk",
+        "semester",
+        "created_at",
+        "num_replies",
+    )
+    list_display_links = ("pk",)
+    list_filter = (
+        "semester",
+        "created_at",
+    )
+    search_fields = ("content",)
+    inlines = (FeedbackReplyInline,)
+
+    def num_replies(self, obj: AnonymousFeedback) -> int:
+        return obj.replies.count()  # type: ignore
+
+    num_replies.short_description = "# Replies"  # type: ignore
+
+
+@admin.register(FeedbackReply)
+class FeedbackReplyAdmin(admin.ModelAdmin):
+    readonly_fields = ("created_at",)
+    list_display = (
+        "pk",
+        "feedback",
+        "author",
+        "created_at",
+    )
+    list_display_links = ("pk",)
+    list_filter = (
+        "created_at",
+        "author",
+    )
+    search_fields = (
+        "content",
+        "author__username",
+    )
+    autocomplete_fields = (
+        "feedback",
+        "author",
     )
