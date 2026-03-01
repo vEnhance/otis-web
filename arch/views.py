@@ -59,7 +59,9 @@ class HintList(VerifiedRequiredMixin, ListView[Hint]):
     problem: Problem
 
     def get_queryset(self):
-        if self.request.user.profile.disable_hints:
+        if self.request.user.is_authenticated and getattr(
+            getattr(self.request.user, "profile", None), "disable_hints", False
+        ):
             return Hint.objects.none()
         return Hint.objects.filter(problem__puid=self.kwargs["puid"]).order_by("number")
 
