@@ -1931,3 +1931,252 @@ def test_feedback_requires_active_semester(otis):
     assert response.status_code == 400
     data = json.loads(response.content)
     assert "error" in data
+
+
+@pytest.mark.django_db
+def test_non_staff_cannot_reply_to_feedback(otis):
+    """Test that non-staff users cannot add replies to feedback."""
+    import hashlib
+    import secrets
+
+    from roster.models import AnonymousFeedback
+
+    semester = SemesterFactory.create(active=True)
+    alice = StudentFactory.create(semester=semester)
+    bob = StudentFactory.create(semester=semester)
+
+    # Create feedback
+    token = secrets.token_urlsafe(32)
+    auth_hash = hashlib.sha256(f"{alice.user.id}-{token}".encode()).hexdigest()
+    feedback = AnonymousFeedback.objects.create(
+        semester=semester,
+        content="Student question",
+        auth_hash=auth_hash,
+    )
+
+    # Non-staff user tries to reply
+    otis.login(bob.user)
+    response = otis.post(
+        "feedback-reply",
+        feedback.pk,
+        data={"content": "Bob trying to reply"},
+    )
+
+    # Should be denied (staff_member_required decorator)
+    assert response.status_code in [302, 403]  # Redirect to login or forbidden
+
+
+@pytest.mark.django_db
+def test_multiple_staff_replies(otis):
+    """Test that multiple staff members can reply to same feedback."""
+    import hashlib
+    import json
+    import secrets
+
+    from roster.models import AnonymousFeedback, FeedbackReply
+
+    semester = SemesterFactory.create(active=True)
+    alice = StudentFactory.create(semester=semester)
+    staff1 = UserFactory.create(is_staff=True)
+    staff2 = UserFactory.create(is_staff=True)
+
+    # Create feedback
+    token = secrets.token_urlsafe(32)
+    auth_hash = hashlib.sha256(f"{alice.user.id}-{token}".encode()).hexdigest()
+    feedback = AnonymousFeedback.objects.create(
+        semester=semester,
+        content="Student question",
+        auth_hash=auth_hash,
+    )
+
+    # First staff replies
+    otis.login(staff1)
+    response1 = otis.post(
+        "feedback-reply",
+        feedback.pk,
+        data={"content": "First staff response"},
+    )
+    assert response1.status_code == 200
+
+    # Second staff replies
+    otis.login(staff2)
+    response2 = otis.post(
+        "feedback-reply",
+        feedback.pk,
+        data={"content": "Second staff response"},
+    )
+    assert response2.status_code == 200
+
+    # Verify both replies exist
+    assert FeedbackReply.objects.filter(feedback=feedback).count() == 2
+    replies = FeedbackReply.objects.filter(feedback=feedback).order_by("created_at")
+    assert replies[0].author == staff1
+    assert replies[1].author == staff2
+
+    # Student can see both replies
+    otis.login(alice.user)
+    response = otis.client.get(
+        otis.url("feedback-view", feedback.pk), data={"token": token}
+    )
+    data = json.loads(response.content)
+    assert len(data["replies"]) == 2
+
+
+@pytest.mark.django_db
+def test_view_feedback_without_token(otis):
+    """Test that viewing feedback without token returns error."""
+    import hashlib
+    import json
+    import secrets
+
+    from roster.models import AnonymousFeedback
+
+    semester = SemesterFactory.create(active=True)
+    alice = StudentFactory.create(semester=semester)
+
+    # Create feedback
+    token = secrets.token_urlsafe(32)
+    auth_hash = hashlib.sha256(f"{alice.user.id}-{token}".encode()).hexdigest()
+    feedback = AnonymousFeedback.objects.create(
+        semester=semester,
+        content="Test feedback",
+        auth_hash=auth_hash,
+    )
+
+    otis.login(alice.user)
+
+    # Try to view without token
+    response = otis.get("feedback-view", feedback.pk)
+
+    assert response.status_code == 400
+    data = json.loads(response.content)
+    assert "error" in data
+    assert "token" in data["error"].lower()
+
+
+@pytest.mark.django_db
+def test_feedback_page_accessible(otis):
+    """Test that feedback page renders for logged-in users."""
+    semester = SemesterFactory.create(active=True)
+    alice = StudentFactory.create(semester=semester)
+    otis.login(alice.user)
+
+    response = otis.get_20x("feedback")
+
+    # Verify key elements are in the page
+    otis.assert_has(response, "Anonymous Feedback")
+
+
+@pytest.mark.django_db
+def test_feedback_model_str():
+    """Test AnonymousFeedback string representation."""
+    import hashlib
+    import secrets
+
+    from roster.models import AnonymousFeedback
+
+    semester = SemesterFactory.create(name="Fall 2025", active=True)
+    token = secrets.token_urlsafe(32)
+    auth_hash = hashlib.sha256(f"123-{token}".encode()).hexdigest()
+
+    feedback = AnonymousFeedback.objects.create(
+        semester=semester,
+        content="Test feedback content that is quite long",
+        auth_hash=auth_hash,
+    )
+
+    str_repr = str(feedback)
+    # Should include semester and truncated content
+    assert "Fall 2025" in str_repr or str(semester.pk) in str_repr
+
+
+@pytest.mark.django_db
+def test_reply_model_str():
+    """Test FeedbackReply string representation."""
+    import hashlib
+    import secrets
+
+    from roster.models import AnonymousFeedback, FeedbackReply
+
+    semester = SemesterFactory.create(active=True)
+    staff = UserFactory.create(is_staff=True, username="staffuser")
+    token = secrets.token_urlsafe(32)
+    auth_hash = hashlib.sha256(f"123-{token}".encode()).hexdigest()
+
+    feedback = AnonymousFeedback.objects.create(
+        semester=semester,
+        content="Original feedback",
+        auth_hash=auth_hash,
+    )
+
+    reply = FeedbackReply.objects.create(
+        feedback=feedback,
+        author=staff,
+        content="Staff reply content",
+    )
+
+    str_repr = str(reply)
+    # Should include author info
+    assert "staffuser" in str_repr or str(staff.pk) in str_repr
+
+
+@pytest.mark.django_db
+def test_reply_ordering(otis):
+    """Test that replies are ordered by creation time."""
+    import hashlib
+    import json
+    import secrets
+    from datetime import timedelta
+
+    from django.utils import timezone as django_timezone
+
+    from roster.models import AnonymousFeedback, FeedbackReply
+
+    semester = SemesterFactory.create(active=True)
+    alice = StudentFactory.create(semester=semester)
+    staff = UserFactory.create(is_staff=True)
+
+    # Create feedback
+    token = secrets.token_urlsafe(32)
+    auth_hash = hashlib.sha256(f"{alice.user.id}-{token}".encode()).hexdigest()
+    feedback = AnonymousFeedback.objects.create(
+        semester=semester,
+        content="Question",
+        auth_hash=auth_hash,
+    )
+
+    # Add multiple replies at different times
+    reply1 = FeedbackReply.objects.create(
+        feedback=feedback,
+        author=staff,
+        content="First reply",
+    )
+    reply1.created_at = django_timezone.now() - timedelta(hours=2)
+    reply1.save()
+
+    reply2 = FeedbackReply.objects.create(
+        feedback=feedback,
+        author=staff,
+        content="Second reply",
+    )
+    reply2.created_at = django_timezone.now() - timedelta(hours=1)
+    reply2.save()
+
+    FeedbackReply.objects.create(
+        feedback=feedback,
+        author=staff,
+        content="Third reply",
+    )
+
+    # View feedback and verify reply order
+    otis.login(alice.user)
+    response = otis.client.get(
+        otis.url("feedback-view", feedback.pk), data={"token": token}
+    )
+    data = json.loads(response.content)
+
+    assert len(data["replies"]) == 3
+    # Replies should be in chronological order
+    assert data["replies"][0]["content"] == "First reply"
+    assert data["replies"][1]["content"] == "Second reply"
+    assert data["replies"][2]["content"] == "Third reply"
