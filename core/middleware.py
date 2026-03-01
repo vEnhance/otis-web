@@ -1,6 +1,5 @@
-from typing import Callable
-
 import zoneinfo
+from typing import Callable
 
 from django.core.cache import cache
 from django.http.request import HttpRequest

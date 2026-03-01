@@ -36,19 +36,19 @@
     </div>
   </form>
   <script>
-    // Auto-detect and prefill timezone if field is empty
-    document.addEventListener('DOMContentLoaded', function() {
-      const timezoneField = document.getElementById('id_timezone');
-      if (timezoneField && !timezoneField.value) {
-        try {
-          const detectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-          if (detectedTimezone) {
-            timezoneField.value = detectedTimezone;
+      // Auto-detect and prefill timezone if field is empty
+      document.addEventListener('DOMContentLoaded', function() {
+          const timezoneField = document.getElementById('id_timezone');
+          if (timezoneField && !timezoneField.value) {
+              try {
+                  const detectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                  if (detectedTimezone) {
+                      timezoneField.value = detectedTimezone;
+                  }
+              } catch (error) {
+                  console.log('Could not auto-detect timezone:', error);
+              }
           }
-        } catch (error) {
-          console.log('Could not auto-detect timezone:', error);
-        }
-      }
-    });
+      });
   </script>
 {% endblock layout-content %}

@@ -4,15 +4,20 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0063_alter_userprofile_dynamic_progress_and_more'),
+        ("core", "0063_alter_userprofile_dynamic_progress_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='userprofile',
-            name='timezone',
-            field=models.CharField(blank=True, default='', help_text='Your local time zone for displaying timestamps. Leave blank to use server time (America/New_York).', max_length=63, verbose_name='Time zone'),
+            model_name="userprofile",
+            name="timezone",
+            field=models.CharField(
+                blank=True,
+                default="",
+                help_text="Your local time zone for displaying timestamps. Leave blank to use server time (America/New_York).",
+                max_length=63,
+                verbose_name="Time zone",
+            ),
         ),
     ]
