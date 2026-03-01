@@ -18,6 +18,7 @@ from reversion.views import RevisionMixin
 
 from arch.forms import ProblemSelectForm
 from arch.models import get_disk_statement_from_puid
+from core.models import UserProfile
 from core.utils import get_from_google_storage
 from otisweb.decorators import verified_required
 from otisweb.mixins import VerifiedRequiredMixin
@@ -59,9 +60,8 @@ class HintList(VerifiedRequiredMixin, ListView[Hint]):
     problem: Problem
 
     def get_queryset(self):
-        if self.request.user.is_authenticated and getattr(
-            getattr(self.request.user, "profile", None), "disable_hints", False
-        ):
+        profile = get_object_or_404(UserProfile, user=self.request.user)
+        if profile.disable_hints:
             return Hint.objects.none()
         return Hint.objects.filter(problem__puid=self.kwargs["puid"]).order_by("number")
 
