@@ -8,7 +8,7 @@ readme = "README.md"
 requires-python = ">=3.13, <4.0"
 
 dependencies = [
-  "Django>=5.2.8,<6.0.0",
+  "Django>=5.2.11,<6.0.0",
   "PyMySQL>=1.1.2,<2.0.0",
   "Unidecode>=1.4.0,<2.0.0",
   "crispy-bootstrap5>=2024.2",
@@ -63,7 +63,7 @@ dev = [
   "types-Markdown>=3.8.0.20250809",
   "types-freezegun>=1.1.2,<2.0.0",
   "types-requests>=2.32.0.20250809",
-  "werkzeug>=3.1.3,<4.0.0",
+  "werkzeug>=3.1.6,<4.0.0",
   "prek>=0.2.14,<0.3.0",
   "copier>=9.11.0",
 ]
