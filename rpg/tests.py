@@ -454,3 +454,167 @@ def test_github_landing(otis):
         assert v.commit_hash in resp.content.decode()
         assert v.get_absolute_url() in resp.content.decode()
         assert v.get_absolute_url().endswith(v.commit_hash)
+
+
+# --- is_first_obtain tests ---
+
+
+@pytest.mark.django_db
+def test_is_first_obtain_first_finder(otis):
+    """First non-creator to submit a code gets is_first_obtain=True; subsequent finders get False."""
+    alice = StudentFactory.create()
+    bob = StudentFactory.create()
+    achievement = AchievementFactory.create()
+
+    otis.login(alice)
+    otis.post_20x("stats", alice.pk, data={"code": achievement.code})
+    alice_unlock = AchievementUnlock.objects.get(
+        user=alice.user, achievement=achievement
+    )
+    assert alice_unlock.is_first_obtain is True
+
+    otis.login(bob)
+    otis.post_20x("stats", bob.pk, data={"code": achievement.code})
+    bob_unlock = AchievementUnlock.objects.get(user=bob.user, achievement=achievement)
+    assert bob_unlock.is_first_obtain is False
+
+
+@pytest.mark.django_db
+def test_is_first_obtain_creator_unlock_skipped(otis):
+    """Creator unlocking their own achievement is not counted as first find; the next non-creator is."""
+    alice = StudentFactory.create()
+    bob = StudentFactory.create()
+    achievement = AchievementFactory.create(creator=alice.user)
+
+    # Alice (the creator) submits first
+    otis.login(alice)
+    otis.post_20x("stats", alice.pk, data={"code": achievement.code})
+    alice_unlock = AchievementUnlock.objects.get(
+        user=alice.user, achievement=achievement
+    )
+    assert alice_unlock.is_first_obtain is False
+
+    # Bob is the first non-creator finder
+    otis.login(bob)
+    otis.post_20x("stats", bob.pk, data={"code": achievement.code})
+    bob_unlock = AchievementUnlock.objects.get(user=bob.user, achievement=achievement)
+    assert bob_unlock.is_first_obtain is True
+
+
+@pytest.mark.django_db
+def test_is_first_obtain_creator_only(otis):
+    """Creator unlocking their own achievement when no non-creator has found it yet: is_first_obtain=False."""
+    alice = StudentFactory.create()
+    achievement = AchievementFactory.create(creator=alice.user)
+
+    otis.login(alice)
+    otis.post_20x("stats", alice.pk, data={"code": achievement.code})
+    unlock = AchievementUnlock.objects.get(user=alice.user, achievement=achievement)
+    assert unlock.is_first_obtain is False
+
+
+@pytest.mark.django_db
+def test_is_first_obtain_resubmit_unchanged(otis):
+    """Re-submitting an already-obtained code does not change is_first_obtain."""
+    alice = StudentFactory.create()
+    achievement = AchievementFactory.create()
+
+    otis.login(alice)
+    otis.post_20x("stats", alice.pk, data={"code": achievement.code})
+    assert (
+        AchievementUnlock.objects.get(
+            user=alice.user, achievement=achievement
+        ).is_first_obtain
+        is True
+    )
+
+    # Submit again — should remain True
+    otis.post_20x("stats", alice.pk, data={"code": achievement.code})
+    assert (
+        AchievementUnlock.objects.get(
+            user=alice.user, achievement=achievement
+        ).is_first_obtain
+        is True
+    )
+
+
+@pytest.mark.django_db
+def test_is_first_obtain_bg_success_rendered(otis):
+    """Stats page renders bg-success for achievements where is_first_obtain=True."""
+    alice = StudentFactory.create()
+    LevelFactory.reset_sequence(0)
+    LevelFactory.create_batch(size=5)
+    achievement = AchievementFactory.create(diamonds=1)
+    AchievementUnlockFactory.create(
+        user=alice.user, achievement=achievement, is_first_obtain=True
+    )
+
+    otis.login(alice)
+    resp = otis.get_20x("stats", alice.pk)
+    otis.assert_has(resp, "bg-success")
+
+
+@pytest.mark.django_db
+def test_is_first_obtain_no_bg_success_without_first_find(otis):
+    """Stats page does not render bg-success when user has no first-obtain achievements."""
+    alice = StudentFactory.create()
+    LevelFactory.reset_sequence(0)
+    LevelFactory.create_batch(size=5)
+    achievement = AchievementFactory.create(diamonds=1)
+    AchievementUnlockFactory.create(
+        user=alice.user, achievement=achievement, is_first_obtain=False
+    )
+
+    otis.login(alice)
+    resp = otis.get_20x("stats", alice.pk)
+    otis.assert_not_has(resp, "bg-success")
+
+
+@pytest.mark.django_db
+def test_is_first_obtain_retroactive_migration_logic():
+    """
+    Simulate the retroactive migration: the earliest non-creator AchievementUnlock
+    for each Achievement should be identified as is_first_obtain=True.
+    """
+    alice = StudentFactory.create()
+    bob = StudentFactory.create()
+    carol = StudentFactory.create()
+
+    # Achievement created by alice: alice's unlock should be skipped, bob's should be first
+    a1 = AchievementFactory.create(creator=alice.user)
+    u1_alice = AchievementUnlockFactory.create(user=alice.user, achievement=a1)
+    u1_bob = AchievementUnlockFactory.create(user=bob.user, achievement=a1)
+    u1_carol = AchievementUnlockFactory.create(user=carol.user, achievement=a1)
+
+    # Achievement with no creator: alice should be first
+    a2 = AchievementFactory.create(creator=None)
+    u2_alice = AchievementUnlockFactory.create(user=alice.user, achievement=a2)
+    u2_bob = AchievementUnlockFactory.create(user=bob.user, achievement=a2)
+
+    # Achievement with no non-creator unlocks (only creator unlocked it)
+    a3 = AchievementFactory.create(creator=bob.user)
+    u3_bob = AchievementUnlockFactory.create(user=bob.user, achievement=a3)
+
+    # Run the same logic as the retroactive migration
+    for achievement in Achievement.objects.all():
+        first_unlock = (
+            AchievementUnlock.objects.filter(achievement=achievement)
+            .exclude(user=achievement.creator)
+            .order_by("timestamp", "pk")
+            .first()
+        )
+        if first_unlock is not None:
+            first_unlock.is_first_obtain = True
+            first_unlock.save(update_fields=["is_first_obtain"])
+
+    # a1: alice (creator) skipped, bob should be first
+    assert AchievementUnlock.objects.get(pk=u1_alice.pk).is_first_obtain is False
+    assert AchievementUnlock.objects.get(pk=u1_bob.pk).is_first_obtain is True
+    assert AchievementUnlock.objects.get(pk=u1_carol.pk).is_first_obtain is False
+
+    # a2: no creator, alice should be first
+    assert AchievementUnlock.objects.get(pk=u2_alice.pk).is_first_obtain is True
+    assert AchievementUnlock.objects.get(pk=u2_bob.pk).is_first_obtain is False
+
+    # a3: only creator unlocked it, nobody gets first obtain
+    assert AchievementUnlock.objects.get(pk=u3_bob.pk).is_first_obtain is False
