@@ -141,6 +141,10 @@ class AchievementUnlock(models.Model):
     timestamp = models.DateTimeField(
         auto_now_add=True, help_text="The time the achievement was granted"
     )
+    is_first_obtain = models.BooleanField(
+        default=False,
+        help_text="Whether this was the first time this achievement was obtained by a non-creator.",
+    )
 
     class Meta:
         unique_together = (

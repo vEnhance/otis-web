@@ -71,6 +71,7 @@ class AchievementUnlockAdmin(admin.ModelAdmin):
         "user",
         "achievement",
         "timestamp",
+        "is_first_obtain",
     )
     autocomplete_fields = (
         "user",
@@ -81,6 +82,7 @@ class AchievementUnlockAdmin(admin.ModelAdmin):
         "achievement__name",
         "achievement__code",
     )
+    list_filter = ("is_first_obtain",)
 
 
 @admin.register(QuestComplete)

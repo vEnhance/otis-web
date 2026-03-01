@@ -74,6 +74,7 @@ def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
                 _, is_new = AchievementUnlock.objects.get_or_create(
                     user=student.user,
                     achievement=achievement,
+                    defaults={"is_first_obtain": is_first_obtain},
                 )
                 if is_new is True:
                     msg = r"🎉 Achievement unlocked! "

@@ -12,7 +12,7 @@
   {% if achievements|length > 0 %}
     <div class="list-group">
       {% for aunlock in achievements %}
-        <div class="list-group-item container">
+        <div class="list-group-item container{% if aunlock.is_first_obtain %} bg-success{% endif %}">
           <div class="d-flex justify-content-between">
             <strong>{{ aunlock.achievement.name }}</strong>
             <span style="color: {{ meters.diamonds.color }};">{{ aunlock.achievement.diamonds }}{{ meters.diamonds.unit }}</span>
