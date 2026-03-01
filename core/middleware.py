@@ -34,7 +34,9 @@ class TimezoneMiddleware:
 
     def __call__(self, request: HttpRequest):
         if request.user.is_authenticated:
-            user_timezone = request.user.profile.timezone
+            user_timezone = getattr(
+                getattr(request.user, "profile", None), "timezone", ""
+            )
             if user_timezone:
                 try:
                     timezone.activate(zoneinfo.ZoneInfo(user_timezone))
