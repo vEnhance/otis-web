@@ -34,7 +34,7 @@ from .models import Achievement, AchievementUnlock, Level, PalaceCarving
 
 logger = logging.getLogger(__name__)
 
-RUBY_PALACE_DIAMOND_VALUE = 4
+RUBY_PALACE_DIAMOND_VALUE = 1
 
 
 @login_required
