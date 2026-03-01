@@ -2,9 +2,11 @@ from __future__ import unicode_literals
 
 import datetime
 import os
+import zoneinfo
 from typing import Callable
 
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.manager import BaseManager
 from django.urls import reverse
@@ -12,6 +14,14 @@ from positions import PositionField
 
 User = get_user_model()
 # Create your models here.
+
+
+def validate_timezone(value: str) -> None:
+    if value:  # blank is allowed
+        try:
+            zoneinfo.ZoneInfo(value)
+        except zoneinfo.ZoneInfoNotFoundError:
+            raise ValidationError(f"{value} is not a valid timezone")
 
 
 class Semester(models.Model):
@@ -304,6 +314,7 @@ class UserProfile(models.Model):
         default="",
         verbose_name="Time zone",
         help_text="Your local time zone for displaying timestamps. Leave blank to use server time (America/New_York).",
+        validators=[validate_timezone],
     )
 
     email_on_announcement = models.BooleanField(

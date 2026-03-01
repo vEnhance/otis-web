@@ -39,9 +39,7 @@ class TimezoneMiddleware:
                 try:
                     timezone.activate(zoneinfo.ZoneInfo(up.timezone))
                 except zoneinfo.ZoneInfoNotFoundError:
-                    timezone.deactivate()
-            else:
-                timezone.deactivate()
+                    pass  # Fall back to default timezone
         response = self.get_response(request)
         timezone.deactivate()
         return response
