@@ -341,12 +341,8 @@ class DiamondUpdate(
         return achievement
 
     def form_valid(self, form: BaseModelForm[Achievement]):
-        form.instance.diamonds = RUBY_PALACE_DIAMOND_VALUE
         form.instance.creator = self.student.user
-        messages.success(
-            self.request,
-            f"Successfully forged diamond worth {form.instance.diamonds}♦.",
-        )
+        messages.success(self.request, "Successfully forged diamond.")
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
