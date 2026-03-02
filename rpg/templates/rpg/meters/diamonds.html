@@ -14,7 +14,10 @@
       {% for aunlock in achievements %}
         <div class="list-group-item container{% if aunlock.is_first_obtain %} bg-success-subtle{% endif %}">
           <div class="d-flex justify-content-between">
-            <strong>{{ aunlock.achievement.name }}</strong>
+            <strong>
+              {% if aunlock.is_first_obtain %}✴️{% endif %}
+              {{ aunlock.achievement.name }}
+            </strong>
             <span style="color: {{ meters.diamonds.color }};">{{ aunlock.achievement.diamonds }}{{ meters.diamonds.unit }}</span>
           </div>
           <a href="{% url "diamond-solution" aunlock.achievement.pk %}">
@@ -27,6 +30,9 @@
             {% endif %}
           </a>
           <p>{{ aunlock.achievement.description }}</p>
+          {% if aunlock.is_first_obtain %}
+            <p class="fst-italic">You were the first person to find this diamond! Congratulations!</p>
+          {% endif %}
         </div>
       {% endfor %}
     </div>
