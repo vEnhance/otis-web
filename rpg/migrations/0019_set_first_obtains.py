@@ -21,10 +21,16 @@ def set_first_obtains(apps: object, schema_editor: object) -> None:
         .values("pk")[:1]
     )
 
-    # A single UPDATE: mark every row whose pk matches the subquery result.
-    AchievementUnlock.objects.filter(pk=Subquery(earliest_non_creator)).update(
-        is_first_obtain=True
+    # Materialise the PKs in a plain SELECT first.  MySQL forbids referencing
+    # the target table of an UPDATE inside a subquery (error 1093), so we
+    # cannot do the UPDATE and the correlated subquery in a single statement.
+    # Fetching IDs first (SELECT) has no such restriction.
+    pks = list(
+        AchievementUnlock.objects.filter(pk=Subquery(earliest_non_creator)).values_list(
+            "pk", flat=True
+        )
     )
+    AchievementUnlock.objects.filter(pk__in=pks).update(is_first_obtain=True)
 
 
 def unset_first_obtains(apps: object, schema_editor: object) -> None:
