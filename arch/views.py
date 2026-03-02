@@ -85,6 +85,9 @@ class HintList(VerifiedRequiredMixin, ListView[Hint]):
 
         context["problem"] = self.problem
         context["statement"] = self.problem.get_statement()
+        context["hints_disabled"] = UserProfile.objects.filter(
+            user=self.request.user, disable_hints=True
+        ).exists()
 
         return context
 
@@ -93,10 +96,24 @@ class HintDetail(HintObjectView, VerifiedRequiredMixin, DetailView[Hint]):
     context_object_name = "hint"
     model = Hint
 
+    def get_queryset(self):
+        if UserProfile.objects.filter(
+            user=self.request.user, disable_hints=True
+        ).exists():
+            return Hint.objects.none()
+        return Hint.objects.all()
+
 
 class HintDetailByPK(VerifiedRequiredMixin, DetailView[Hint]):
     context_object_name = "hint"
     model = Hint
+
+    def get_queryset(self):
+        if UserProfile.objects.filter(
+            user=self.request.user, disable_hints=True
+        ).exists():
+            return Hint.objects.none()
+        return Hint.objects.all()
 
 
 class HintUpdate(

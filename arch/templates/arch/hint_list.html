@@ -36,15 +36,23 @@
       for more personalized help!
     </p>
   {% else %}
-    <p>
-      There aren't any hints here yet.
-      You'd probably have better luck asking on Discord.
-      Or, you can also <a href="mailto:evan@evanchen.cc">email Evan</a>.
-    </p>
-    <p>
-      If you've solved this, please help future students by
-      <a href="{% url "hint-create" problem.puid %}">adding a hint</a>.
-    </p>
+    {% if hints_disabled %}
+      <p>
+        <strong>Hints are disabled in your settings.</strong>
+        To view hints, please enable them in your
+        <a href="{% url "profile" %}">user preferences</a>.
+      </p>
+    {% else %}
+      <p>
+        There aren't any hints here yet.
+        You'd probably have better luck asking on Discord.
+        Or, you can also <a href="mailto:evan@evanchen.cc">email Evan</a>.
+      </p>
+      <p>
+        If you've solved this, please help future students by
+        <a href="{% url "hint-create" problem.puid %}">adding a hint</a>.
+      </p>
+    {% endif %}
   {% endif %}
   <div class="text-center">
     <a href="https://discord.com/channels/740366393022742618/1019651152385679491"
