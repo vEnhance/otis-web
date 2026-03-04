@@ -18,6 +18,7 @@ from reversion.views import RevisionMixin
 
 from arch.forms import ProblemSelectForm
 from arch.models import get_disk_statement_from_puid
+from core.models import UserProfile
 from core.utils import get_from_google_storage
 from otisweb.decorators import verified_required
 from otisweb.mixins import VerifiedRequiredMixin
@@ -59,6 +60,10 @@ class HintList(VerifiedRequiredMixin, ListView[Hint]):
     problem: Problem
 
     def get_queryset(self):
+        if UserProfile.objects.filter(
+            user=self.request.user, disable_hints=True
+        ).exists():
+            return Hint.objects.none()
         return Hint.objects.filter(problem__puid=self.kwargs["puid"]).order_by("number")
 
     def get_context_data(self, **kwargs: Any):
@@ -80,6 +85,9 @@ class HintList(VerifiedRequiredMixin, ListView[Hint]):
 
         context["problem"] = self.problem
         context["statement"] = self.problem.get_statement()
+        context["hints_disabled"] = UserProfile.objects.filter(
+            user=self.request.user, disable_hints=True
+        ).exists()
 
         return context
 
@@ -88,10 +96,24 @@ class HintDetail(HintObjectView, VerifiedRequiredMixin, DetailView[Hint]):
     context_object_name = "hint"
     model = Hint
 
+    def get_queryset(self):
+        if UserProfile.objects.filter(
+            user=self.request.user, disable_hints=True
+        ).exists():
+            return Hint.objects.none()
+        return Hint.objects.all()
+
 
 class HintDetailByPK(VerifiedRequiredMixin, DetailView[Hint]):
     context_object_name = "hint"
     model = Hint
+
+    def get_queryset(self):
+        if UserProfile.objects.filter(
+            user=self.request.user, disable_hints=True
+        ).exists():
+            return Hint.objects.none()
+        return Hint.objects.all()
 
 
 class HintUpdate(

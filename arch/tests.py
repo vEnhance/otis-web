@@ -6,9 +6,10 @@ from django.http import Http404
 from django.test import override_settings
 from django.urls import reverse
 
-from arch.factories import ProblemFactory
+from arch.factories import HintFactory, ProblemFactory
 from arch.models import Hint, Problem, Vote, validate_puid
 from core.factories import GroupFactory, UserFactory
+from core.models import UserProfile
 
 
 @pytest.mark.django_db
@@ -204,3 +205,73 @@ def test_validate_puid():
         validate_puid("A" * 1000)
     validate_puid("15TWNQJ36")
     validate_puid("A" * 24)
+
+
+@pytest.mark.django_db
+def test_disable_hints(otis):
+    """Test that disable_hints setting properly hides hints and shows appropriate message."""
+    verified_group = GroupFactory(name="Verified")
+    alice = UserFactory.create(groups=(verified_group,))
+    otis.login(alice)
+
+    problem: Problem = ProblemFactory.create()
+    hint: Hint = HintFactory.create(problem=problem, number=10, keywords="test hint")
+
+    # Test with hints enabled (default) - should see the hint
+    resp = otis.get_20x("hint-list", problem.puid)
+    otis.assert_has(resp, hint.keywords)
+    otis.assert_has(resp, "Hint 10")
+
+    # Update user profile to disable hints
+    profile = UserProfile.objects.get(user=alice)
+    profile.disable_hints = True
+    profile.save()
+
+    # Test with hints disabled - should see disabled message
+    resp = otis.get_20x("hint-list", problem.puid)
+    otis.assert_has(resp, "Hints are disabled in your settings")
+    otis.assert_has(resp, "user preferences")
+    # Should NOT see the hint
+    assert hint.keywords not in resp.content.decode()
+    assert "Hint 10" not in resp.content.decode()
+
+
+@pytest.mark.django_db
+def test_no_hints_message(otis):
+    """Test that appropriate message is shown when there are genuinely no hints."""
+    verified_group = GroupFactory(name="Verified")
+    alice = UserFactory.create(groups=(verified_group,))
+    otis.login(alice)
+
+    problem: Problem = ProblemFactory.create()
+
+    # Test with no hints - should see the "no hints yet" message
+    resp = otis.get_20x("hint-list", problem.puid)
+    otis.assert_has(resp, "There aren't any hints here yet")
+    otis.assert_has(resp, "adding a hint")
+    # Should NOT see the disabled message
+    assert "Hints are disabled" not in resp.content.decode()
+
+
+@pytest.mark.django_db
+def test_disable_hints_blocks_detail_view(otis):
+    """Test that disable_hints blocks access to individual hint detail pages."""
+    verified_group = GroupFactory(name="Verified")
+    alice = UserFactory.create(groups=(verified_group,))
+    otis.login(alice)
+
+    problem: Problem = ProblemFactory.create()
+    hint: Hint = HintFactory.create(problem=problem, number=15, keywords="blocked hint")
+
+    # First verify the hint is accessible with hints enabled
+    otis.get_20x("hint-detail", problem.puid, hint.number)
+    otis.get_20x("hint-detail-pk", hint.pk)
+
+    # Disable hints
+    profile = UserProfile.objects.get(user=alice)
+    profile.disable_hints = True
+    profile.save()
+
+    # Now both detail views should return 404
+    otis.get_40x("hint-detail", problem.puid, hint.number)
+    otis.get_40x("hint-detail-pk", hint.pk)

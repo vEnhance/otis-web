@@ -35,6 +35,12 @@
       or <a href="mailto:evan@evanchen.cc">email Evan (evan@evanchen.cc)</a>
       for more personalized help!
     </p>
+  {% elif hints_disabled %}
+    <p>
+      <strong>Hints are disabled in your settings.</strong>
+      To view hints, please enable them in your
+      <a href="{% url "profile" %}">user preferences</a>.
+    </p>
   {% else %}
     <p>
       There aren't any hints here yet.

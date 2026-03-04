@@ -293,6 +293,11 @@ class UserProfile(models.Model):
         help_text="Show previous unit petitions that you have requested. Useful to disable if you have far too many.",
         default=True,
     )
+    disable_hints = models.BooleanField(
+        verbose_name="Disable hints",
+        help_text="Hide all hints from the problem archive (ARCH).",
+        default=False,
+    )
 
     email_on_announcement = models.BooleanField(
         verbose_name="Receive emails for announcements",
