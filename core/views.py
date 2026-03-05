@@ -41,13 +41,13 @@ from .utils import get_from_google_storage
 # Create your views here.
 
 PREFERRED_TIMEZONES = (
-    "America/New_York",
-    "America/Chicago",
-    "America/Denver",
+    "Pacific/Honolulu",
+    "America/Anchorage",
     "America/Los_Angeles",
     "America/Phoenix",
-    "America/Anchorage",
-    "Pacific/Honolulu",
+    "America/Denver",
+    "America/Chicago",
+    "America/New_York",
 )
 _all_timezones = set(zoneinfo.available_timezones())
 _preferred_timezones = [tz for tz in PREFERRED_TIMEZONES if tz in _all_timezones]
@@ -348,8 +348,8 @@ class UserProfileUpdateView(
             form["show_portal_instructions"],
             form["show_unit_petitions"],
             form["disable_hints"],
-            form["timezone"],
             form["use_twemoji"],
+            form["timezone"],
         )
         context["timezone_choices"] = TIMEZONE_CHOICES
 
