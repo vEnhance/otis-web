@@ -599,12 +599,12 @@ def test_profile_timezone_choices_order(otis):
     timezone_choices = response.context["timezone_choices"]
 
     assert timezone_choices[:7] == [
-        "America/New_York",
-        "America/Chicago",
-        "America/Denver",
+        "Pacific/Honolulu",
+        "America/Anchorage",
         "America/Los_Angeles",
         "America/Phoenix",
-        "America/Anchorage",
-        "Pacific/Honolulu",
+        "America/Denver",
+        "America/Chicago",
+        "America/New_York",
     ]
     assert "Europe/London" in timezone_choices
