@@ -4,11 +4,9 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0064_userprofile_disable_hints'),
-        ('core', '0065_alter_userprofile_timezone'),
+        ("core", "0064_userprofile_disable_hints"),
+        ("core", "0065_alter_userprofile_timezone"),
     ]
 
-    operations = [
-    ]
+    operations = []
