@@ -33,6 +33,9 @@
       <h1>Advanced settings</h1>
       {% for field in advanced_fields %}{{ field|as_crispy_field }}{% endfor %}
       <button type="submit" class="btn btn-success">Update settings</button>
+      <datalist id="timezone-list">
+        {% for tz in timezone_choices %}<option value="{{ tz }}"></option>{% endfor %}
+      </datalist>
       <div id="timezone-suggestion"
            class="alert alert-info mt-2"
            style="display: none">
@@ -53,10 +56,16 @@
       // Show timezone suggestion if field is empty
       document.addEventListener('DOMContentLoaded', function() {
           const timezoneField = document.getElementById('id_timezone');
+          const timezoneList = document.getElementById('timezone-list');
           const suggestionDiv = document.getElementById('timezone-suggestion');
           const detectedTzSpan = document.getElementById('detected-tz');
           const useButton = document.getElementById('use-detected-tz');
           const dismissButton = document.getElementById('dismiss-tz-suggestion');
+
+          if (timezoneField && timezoneList) {
+              timezoneField.setAttribute('list', 'timezone-list');
+              timezoneField.setAttribute('autocomplete', 'off');
+          }
 
           if (timezoneField && !timezoneField.value && suggestionDiv) {
               try {
@@ -75,7 +84,7 @@
                       });
                   }
               } catch (error) {
-                  console.log('Could not auto-detect timezone:', error);
+                  // Fail silently if auto-detection isn't available.
               }
           }
       });

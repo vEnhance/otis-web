@@ -34,8 +34,8 @@ class TimezoneMiddleware:
 
     def __call__(self, request: HttpRequest):
         if request.user.is_authenticated:
-            up, _ = UserProfile.objects.get_or_create(user=request.user)
-            if up.timezone:
+            up = UserProfile.objects.filter(user=request.user).only("timezone").first()
+            if up and up.timezone:
                 try:
                     timezone.activate(zoneinfo.ZoneInfo(up.timezone))
                 except zoneinfo.ZoneInfoNotFoundError:

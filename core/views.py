@@ -1,3 +1,4 @@
+import zoneinfo
 from typing import Any, Optional
 
 from braces.views import LoginRequiredMixin
@@ -38,6 +39,20 @@ from .models import Unit, UnitGroup
 from .utils import get_from_google_storage
 
 # Create your views here.
+
+PREFERRED_TIMEZONES = (
+    "America/New_York",
+    "America/Chicago",
+    "America/Denver",
+    "America/Los_Angeles",
+    "America/Phoenix",
+    "America/Anchorage",
+    "Pacific/Honolulu",
+)
+_all_timezones = set(zoneinfo.available_timezones())
+_preferred_timezones = [tz for tz in PREFERRED_TIMEZONES if tz in _all_timezones]
+_remaining_timezones = sorted(_all_timezones - set(_preferred_timezones))
+TIMEZONE_CHOICES = [*_preferred_timezones, *_remaining_timezones]
 
 
 class AdminUnitListView(AdminRequiredMixin, ListView[Unit]):
@@ -336,6 +351,7 @@ class UserProfileUpdateView(
             form["timezone"],
             form["use_twemoji"],
         )
+        context["timezone_choices"] = TIMEZONE_CHOICES
 
         return context
 
