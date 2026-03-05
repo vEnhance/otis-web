@@ -547,6 +547,26 @@ def test_timezone_middleware():
 
 
 @pytest.mark.django_db
+def test_timezone_middleware_does_not_create_profile():
+    from django.http import HttpResponse
+    from django.test import RequestFactory
+
+    from core.middleware import TimezoneMiddleware
+    from core.models import UserProfile
+
+    user = UserFactory.create()
+    assert not UserProfile.objects.filter(user=user).exists()
+
+    request = RequestFactory().get("/")
+    request.user = user
+
+    middleware = TimezoneMiddleware(lambda _: HttpResponse("ok"))
+    middleware(request)
+
+    assert not UserProfile.objects.filter(user=user).exists()
+
+
+@pytest.mark.django_db
 def test_timezone_in_profile_form(otis):
     from core.models import UserProfile
 
@@ -568,3 +588,23 @@ def test_timezone_in_profile_form(otis):
 
     profile.refresh_from_db()
     assert profile.timezone == "Europe/Paris"
+
+
+@pytest.mark.django_db
+def test_profile_timezone_choices_order(otis):
+    user = UserFactory.create()
+    otis.login(user)
+
+    response = otis.get_20x("profile")
+    timezone_choices = response.context["timezone_choices"]
+
+    assert timezone_choices[:7] == [
+        "America/New_York",
+        "America/Chicago",
+        "America/Denver",
+        "America/Los_Angeles",
+        "America/Phoenix",
+        "America/Anchorage",
+        "Pacific/Honolulu",
+    ]
+    assert "Europe/London" in timezone_choices
