@@ -32,10 +32,15 @@
     <div class="section">
       <h1>Advanced settings</h1>
       {% for field in advanced_fields %}{{ field|as_crispy_field }}{% endfor %}
+      <div class="mb-2">
+        <label for="timezone-search" class="form-label">Search time zone</label>
+        <input type="text"
+               class="form-control"
+               id="timezone-search"
+               placeholder="Type to filter, e.g. Seoul or Korea" />
+      </div>
+      {{ timezone_field|as_crispy_field }}
       <button type="submit" class="btn btn-success">Update settings</button>
-      <datalist id="timezone-list">
-        {% for tz in timezone_choices %}<option value="{{ tz }}"></option>{% endfor %}
-      </datalist>
       <div id="timezone-suggestion"
            class="alert alert-info mt-2"
            style="display: none">
@@ -49,6 +54,7 @@
                 id="dismiss-tz-suggestion"></button>
       </div>
     </div>
+    {{ timezone_extra_aliases|json_script:"timezone-extra-aliases" }}
   </form>
 {% endblock layout-content %}
 {% block scripts %}
@@ -56,15 +62,73 @@
       // Show timezone suggestion if field is empty
       document.addEventListener('DOMContentLoaded', function() {
           const timezoneField = document.getElementById('id_timezone');
-          const timezoneList = document.getElementById('timezone-list');
+          const timezoneSearch = document.getElementById('timezone-search');
           const suggestionDiv = document.getElementById('timezone-suggestion');
           const detectedTzSpan = document.getElementById('detected-tz');
           const useButton = document.getElementById('use-detected-tz');
           const dismissButton = document.getElementById('dismiss-tz-suggestion');
+          const aliasesScript = document.getElementById('timezone-extra-aliases');
+          let aliasesByTimezone = {};
+          if (aliasesScript) {
+              aliasesByTimezone = JSON.parse(aliasesScript.textContent);
+          }
 
-          if (timezoneField && timezoneList) {
-              timezoneField.setAttribute('list', 'timezone-list');
-              timezoneField.setAttribute('autocomplete', 'off');
+          function getTimezoneNameForSearch(timezoneName) {
+              if (!timezoneName) {
+                  return '';
+              }
+              try {
+                  const parts = new Intl.DateTimeFormat('en-US', {
+                      timeZone: timezoneName,
+                      timeZoneName: 'longGeneric',
+                  }).formatToParts(new Date());
+                  const zonePart = parts.find(function(part) {
+                      return part.type === 'timeZoneName';
+                  });
+                  return zonePart ? zonePart.value : '';
+              } catch (error) {
+                  return '';
+              }
+          }
+
+          let allOptions = [];
+          if (timezoneField) {
+              allOptions = Array.from(timezoneField.options).map(function(opt) {
+                  const aliasText = (aliasesByTimezone[opt.value] || []).join(' ');
+                  const zoneNameText = getTimezoneNameForSearch(opt.value);
+                  return {
+                      value: opt.value,
+                      label: opt.textContent,
+                      searchText: (opt.textContent + ' ' + zoneNameText + ' ' + aliasText).toLowerCase()
+                  };
+              });
+          }
+
+          if (timezoneSearch && timezoneField) {
+              timezoneSearch.addEventListener('input', function() {
+                  const query = timezoneSearch.value.toLowerCase().trim();
+                  const selectedValue = timezoneField.value;
+                  const filtered = allOptions.filter(function(opt) {
+                      if (!query) {
+                          return true;
+                      }
+                      return opt.searchText.includes(query);
+                  });
+                  timezoneField.innerHTML = '';
+                  filtered.forEach(function(opt) {
+                      const option = document.createElement('option');
+                      option.value = opt.value;
+                      option.textContent = opt.label;
+                      timezoneField.appendChild(option);
+                  });
+                  if (filtered.some(function(opt) {
+                          return opt.value === selectedValue;
+                      })) {
+                      timezoneField.value = selectedValue;
+                  } else if (filtered.length > 0) {
+                      timezoneField.selectedIndex = 0;
+                  }
+              });
           }
 
           if (timezoneField && !timezoneField.value && suggestionDiv) {

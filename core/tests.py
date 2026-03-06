@@ -580,6 +580,8 @@ def test_timezone_in_profile_form(otis):
     content = response.content.decode()
     assert "timezone" in content.lower() or "time zone" in content.lower()
     assert "id_timezone" in content
+    assert '<select name="timezone"' in content
+    assert "Asia/Seoul" in content
 
     # Verify we can set and save timezone directly on model
     profile, _ = UserProfile.objects.get_or_create(user=user)
@@ -608,3 +610,21 @@ def test_profile_timezone_choices_order(otis):
         "America/New_York",
     ]
     assert "Europe/London" in timezone_choices
+
+
+@pytest.mark.django_db
+def test_profile_timezone_search_aliases(otis):
+    user = UserFactory.create()
+    otis.login(user)
+
+    response = otis.get_20x("profile")
+    extra_aliases = response.context["timezone_extra_aliases"]
+    content = response.content.decode()
+
+    assert "timeZoneName: 'longGeneric'" in content
+    assert "Asia/Seoul" in content
+    assert "Europe/Vienna" in content
+    if "Asia/Kolkata" in response.context["timezone_choices"]:
+        assert "bombay" in extra_aliases["Asia/Kolkata"]
+    elif "Asia/Calcutta" in response.context["timezone_choices"]:
+        assert "bombay" in extra_aliases["Asia/Calcutta"]

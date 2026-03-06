@@ -12,6 +12,7 @@ from django.db.models.base import Model
 from django.db.models.expressions import Value
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
+from django.forms import Select
 from django.forms.models import BaseModelForm
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect
 from django.http.response import JsonResponse
@@ -53,6 +54,15 @@ _all_timezones = set(zoneinfo.available_timezones())
 _preferred_timezones = [tz for tz in PREFERRED_TIMEZONES if tz in _all_timezones]
 _remaining_timezones = sorted(_all_timezones - set(_preferred_timezones))
 TIMEZONE_CHOICES = [*_preferred_timezones, *_remaining_timezones]
+TIMEZONE_SELECT_CHOICES = [
+    ("", "Server default (America/New_York)"),
+    *((tz, tz) for tz in TIMEZONE_CHOICES),
+]
+TIMEZONE_EXTRA_ALIASES: dict[str, tuple[str, ...]] = {
+    # Common legacy city names users may still search for.
+    "Asia/Kolkata": ("bombay",),
+    "Asia/Calcutta": ("bombay",),
+}
 
 
 class AdminUnitListView(AdminRequiredMixin, ListView[Unit]):
@@ -349,11 +359,17 @@ class UserProfileUpdateView(
             form["show_unit_petitions"],
             form["disable_hints"],
             form["use_twemoji"],
-            form["timezone"],
         )
+        context["timezone_field"] = form["timezone"]
         context["timezone_choices"] = TIMEZONE_CHOICES
+        context["timezone_extra_aliases"] = TIMEZONE_EXTRA_ALIASES
 
         return context
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        form.fields["timezone"].widget = Select(choices=TIMEZONE_SELECT_CHOICES)
+        return form
 
 
 @login_required
