@@ -356,6 +356,7 @@ class UserProfileUpdateView(
             form["use_twemoji"],
             form["timezone"],
         )
+        context["timezone_choices"] = TIMEZONE_CHOICES
         return context
 
     def get_form(self, form_class=None):

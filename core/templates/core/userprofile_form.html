@@ -41,14 +41,9 @@
           <button type="button"
                   class="btn btn-sm btn-primary ms-2"
                   id="use-detected-tz">Use this timezone</button>
-          <button type="button"
-                  class="btn-close float-end"
-                  aria-label="Close"
-                  id="dismiss-tz-suggestion"></button>
         </p>
-        <p>If the detected time zone is not correct, you can filter for it using the widget below:</p>
+        <p>Or, you can use this widget to filter choices above:</p>
         <p>
-          <label for="timezone-search" class="form-label">Search time zone</label>
           <input type="text"
                  class="form-control"
                  id="timezone-search"
@@ -60,41 +55,56 @@
 {% endblock layout-content %}
 {% block scripts %}
   <script>
-      // Show timezone suggestion if field is empty
       document.addEventListener('DOMContentLoaded', function() {
           const timezoneField = document.getElementById('id_timezone');
           const timezoneSearch = document.getElementById('timezone-search');
           const suggestionDiv = document.getElementById('timezone-suggestion');
           const detectedTzSpan = document.getElementById('detected-tz');
           const useButton = document.getElementById('use-detected-tz');
-          const dismissButton = document.getElementById('dismiss-tz-suggestion');
 
-          function getTimezoneNameForSearch(timezoneName) {
-              if (!timezoneName) {
-                  return '';
-              }
+          function getTimezoneInfo(tzName) {
+              if (!tzName) return {
+                  offset: '',
+                  genericName: ''
+              };
               try {
-                  const parts = new Intl.DateTimeFormat('en-US', {
-                      timeZone: timezoneName,
+                  const now = new Date();
+                  const offsetPart = new Intl.DateTimeFormat('en-US', {
+                      timeZone: tzName,
+                      timeZoneName: 'shortOffset',
+                  }).formatToParts(now).find(p => p.type === 'timeZoneName');
+                  const genericPart = new Intl.DateTimeFormat('en-US', {
+                      timeZone: tzName,
                       timeZoneName: 'longGeneric',
-                  }).formatToParts(new Date());
-                  const zonePart = parts.find(function(part) {
-                      return part.type === 'timeZoneName';
-                  });
-                  return zonePart ? zonePart.value : '';
-              } catch (error) {
-                  return '';
+                  }).formatToParts(now).find(p => p.type === 'timeZoneName');
+                  return {
+                      offset: offsetPart ? offsetPart.value : '',
+                      genericName: genericPart ? genericPart.value : '',
+                  };
+              } catch (e) {
+                  return {
+                      offset: '',
+                      genericName: ''
+                  };
               }
           }
 
           let allOptions = [];
           if (timezoneField) {
               allOptions = Array.from(timezoneField.options).map(function(opt) {
-                  const zoneNameText = getTimezoneNameForSearch(opt.value);
+                  const {
+                      offset,
+                      genericName
+                  } = getTimezoneInfo(opt.value);
+                  // Show UTC offset in the displayed label
+                  const label = offset ? `${opt.textContent} (${offset})` : opt.textContent;
+                  if (offset) opt.textContent = label;
+                  // Normalize underscores to spaces so e.g. "los ang" matches "Los_Angeles"
+                  const searchText = (opt.textContent.replace(/_/g, ' ') + ' ' + genericName).toLowerCase();
                   return {
                       value: opt.value,
-                      label: opt.textContent,
-                      searchText: (opt.textContent + ' ' + zoneNameText).toLowerCase()
+                      label,
+                      searchText
                   };
               });
           }
@@ -103,12 +113,9 @@
               timezoneSearch.addEventListener('input', function() {
                   const query = timezoneSearch.value.toLowerCase().trim();
                   const selectedValue = timezoneField.value;
-                  const filtered = allOptions.filter(function(opt) {
-                      if (!query) {
-                          return true;
-                      }
-                      return opt.searchText.includes(query);
-                  });
+                  const filtered = query ?
+                      allOptions.filter(opt => opt.searchText.includes(query)) :
+                      allOptions;
                   timezoneField.innerHTML = '';
                   filtered.forEach(function(opt) {
                       const option = document.createElement('option');
@@ -116,9 +123,7 @@
                       option.textContent = opt.label;
                       timezoneField.appendChild(option);
                   });
-                  if (filtered.some(function(opt) {
-                          return opt.value === selectedValue;
-                      })) {
+                  if (filtered.some(opt => opt.value === selectedValue)) {
                       timezoneField.value = selectedValue;
                   } else if (filtered.length > 0) {
                       timezoneField.selectedIndex = 0;
@@ -128,21 +133,15 @@
 
           if (timezoneField && !timezoneField.value && suggestionDiv) {
               try {
-                  const detectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-                  if (detectedTimezone) {
-                      detectedTzSpan.textContent = detectedTimezone;
+                  const detectedTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                  if (detectedTz) {
+                      detectedTzSpan.textContent = detectedTz;
                       suggestionDiv.style.display = 'block';
-
                       useButton.addEventListener('click', function() {
-                          timezoneField.value = detectedTimezone;
-                          suggestionDiv.style.display = 'none';
-                      });
-
-                      dismissButton.addEventListener('click', function() {
-                          suggestionDiv.style.display = 'none';
+                          timezoneField.value = detectedTz;
                       });
                   }
-              } catch (error) {
+              } catch (e) {
                   // Fail silently if auto-detection isn't available.
               }
           }

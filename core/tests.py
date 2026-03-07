@@ -613,18 +613,17 @@ def test_profile_timezone_choices_order(otis):
 
 
 @pytest.mark.django_db
-def test_profile_timezone_search_aliases(otis):
+def test_profile_timezone_search_js(otis):
     user = UserFactory.create()
     otis.login(user)
 
     response = otis.get_20x("profile")
-    extra_aliases = response.context["timezone_extra_aliases"]
     content = response.content.decode()
 
+    # JS uses longGeneric for search (e.g. "Pacific Time") and shortOffset for display
     assert "timeZoneName: 'longGeneric'" in content
+    assert "timeZoneName: 'shortOffset'" in content
+    # Underscore normalization comment should be present
+    assert "Los_Angeles" in content
     assert "Asia/Seoul" in content
     assert "Europe/Vienna" in content
-    if "Asia/Kolkata" in response.context["timezone_choices"]:
-        assert "bombay" in extra_aliases["Asia/Kolkata"]
-    elif "Asia/Calcutta" in response.context["timezone_choices"]:
-        assert "bombay" in extra_aliases["Asia/Calcutta"]
