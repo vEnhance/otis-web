@@ -1,3 +1,4 @@
+import zoneinfo
 from typing import Callable
 
 from django.core.cache import cache
@@ -24,4 +25,21 @@ class LastSeenMiddleware:
             cache.set(key, 1, 60 * 15)  # we won't update last_seen for 15 minutes
             up.last_seen = timezone.now()
             up.save(update_fields=("last_seen",))
+        return response
+
+
+class TimezoneMiddleware:
+    def __init__(self, get_response: Callable[[HttpRequest], HttpResponse]):
+        self.get_response = get_response
+
+    def __call__(self, request: HttpRequest):
+        if request.user.is_authenticated:
+            up = UserProfile.objects.filter(user=request.user).only("timezone").first()
+            if up and up.timezone:
+                try:
+                    timezone.activate(zoneinfo.ZoneInfo(up.timezone))
+                except zoneinfo.ZoneInfoNotFoundError:
+                    pass  # Fall back to default timezone
+        response = self.get_response(request)
+        timezone.deactivate()
         return response
