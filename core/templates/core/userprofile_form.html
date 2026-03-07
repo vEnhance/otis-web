@@ -68,11 +68,6 @@
           const detectedTzSpan = document.getElementById('detected-tz');
           const useButton = document.getElementById('use-detected-tz');
           const dismissButton = document.getElementById('dismiss-tz-suggestion');
-          const aliasesScript = document.getElementById('timezone-extra-aliases');
-          let aliasesByTimezone = {};
-          if (aliasesScript) {
-              aliasesByTimezone = JSON.parse(aliasesScript.textContent);
-          }
 
           function getTimezoneNameForSearch(timezoneName) {
               if (!timezoneName) {
@@ -95,12 +90,11 @@
           let allOptions = [];
           if (timezoneField) {
               allOptions = Array.from(timezoneField.options).map(function(opt) {
-                  const aliasText = (aliasesByTimezone[opt.value] || []).join(' ');
                   const zoneNameText = getTimezoneNameForSearch(opt.value);
                   return {
                       value: opt.value,
                       label: opt.textContent,
-                      searchText: (opt.textContent + ' ' + zoneNameText + ' ' + aliasText).toLowerCase()
+                      searchText: (opt.textContent + ' ' + zoneNameText).toLowerCase()
                   };
               });
           }
