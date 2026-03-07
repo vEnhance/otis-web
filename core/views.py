@@ -166,6 +166,10 @@ class UnitGroupListView(LoginRequiredMixin, ListView[Unit]):
                         status_query |= Q(
                             user_taking=True, user_unlocked=False, has_pset=False
                         )
+                    if "none" in statuses:
+                        status_query |= Q(
+                            user_taking=False, user_unlocked=False, has_pset=False
+                        )
                     queryset = queryset.filter(status_query)
 
             sort_option = form.cleaned_data.get("sort")
