@@ -58,11 +58,6 @@ TIMEZONE_SELECT_CHOICES = [
     ("", "Server default (America/New_York)"),
     *((tz, tz) for tz in TIMEZONE_CHOICES),
 ]
-TIMEZONE_EXTRA_ALIASES: dict[str, tuple[str, ...]] = {
-    # Common legacy city names users may still search for.
-    "Asia/Kolkata": ("bombay",),
-    "Asia/Calcutta": ("bombay",),
-}
 
 
 class AdminUnitListView(AdminRequiredMixin, ListView[Unit]):
@@ -359,11 +354,8 @@ class UserProfileUpdateView(
             form["show_unit_petitions"],
             form["disable_hints"],
             form["use_twemoji"],
+            form["timezone"],
         )
-        context["timezone_field"] = form["timezone"]
-        context["timezone_choices"] = TIMEZONE_CHOICES
-        context["timezone_extra_aliases"] = TIMEZONE_EXTRA_ALIASES
-
         return context
 
     def get_form(self, form_class=None):

@@ -32,29 +32,30 @@
     <div class="section">
       <h1>Advanced settings</h1>
       {% for field in advanced_fields %}{{ field|as_crispy_field }}{% endfor %}
-      <div class="mb-2">
-        <label for="timezone-search" class="form-label">Search time zone</label>
-        <input type="text"
-               class="form-control"
-               id="timezone-search"
-               placeholder="Type to filter, e.g. Seoul or Korea" />
-      </div>
-      {{ timezone_field|as_crispy_field }}
       <button type="submit" class="btn btn-success">Update settings</button>
       <div id="timezone-suggestion"
            class="alert alert-info mt-2"
            style="display: none">
-        Detected timezone: <strong id="detected-tz"></strong>
-        <button type="button"
-                class="btn btn-sm btn-primary ms-2"
-                id="use-detected-tz">Use this timezone</button>
-        <button type="button"
-                class="btn-close float-end"
-                aria-label="Close"
-                id="dismiss-tz-suggestion"></button>
+        <p>
+          Detected timezone: <strong id="detected-tz"></strong>
+          <button type="button"
+                  class="btn btn-sm btn-primary ms-2"
+                  id="use-detected-tz">Use this timezone</button>
+          <button type="button"
+                  class="btn-close float-end"
+                  aria-label="Close"
+                  id="dismiss-tz-suggestion"></button>
+        </p>
+        <p>If the detected time zone is not correct, you can filter for it using the widget below:</p>
+        <p>
+          <label for="timezone-search" class="form-label">Search time zone</label>
+          <input type="text"
+                 class="form-control"
+                 id="timezone-search"
+                 placeholder="Type to filter, e.g. Seoul or Korea" />
+        </p>
       </div>
     </div>
-    {{ timezone_extra_aliases|json_script:"timezone-extra-aliases" }}
   </form>
 {% endblock layout-content %}
 {% block scripts %}
