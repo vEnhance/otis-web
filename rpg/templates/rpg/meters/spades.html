@@ -113,7 +113,7 @@
         <tr>
           <td style="color:{{ meters.spades.color }};">
             <b>
-              {% if guess.score >= 0 %}+{% endif %}{{ guess.score|floatformat:2 }}{{ meters.spades.unit }}
+              {% if guess.score|floatformat:2|slice:":1" != "-" %}+{% endif %}{{ guess.score|floatformat:2 }}{{ meters.spades.unit }}
             </b>
           </td>
           <td>
