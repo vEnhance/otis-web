@@ -128,6 +128,7 @@ MIDDLEWARE += [
     "allauth.account.middleware.AccountMiddleware",
     "hijack.middleware.HijackUserMiddleware",
     "core.middleware.LastSeenMiddleware",
+    "core.middleware.TimezoneMiddleware",
 ]
 
 ROOT_URLCONF = "otisweb.urls"

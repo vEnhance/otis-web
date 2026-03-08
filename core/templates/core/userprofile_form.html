@@ -33,6 +33,118 @@
       <h1>Advanced settings</h1>
       {% for field in advanced_fields %}{{ field|as_crispy_field }}{% endfor %}
       <button type="submit" class="btn btn-success">Update settings</button>
+      <div id="timezone-suggestion"
+           class="alert alert-info mt-2"
+           style="display: none">
+        <p>
+          Detected timezone: <strong id="detected-tz"></strong>
+          <button type="button"
+                  class="btn btn-sm btn-primary ms-2"
+                  id="use-detected-tz">Use this timezone</button>
+        </p>
+        <p>Or, you can use this widget to filter choices above:</p>
+        <p>
+          <input type="text"
+                 class="form-control"
+                 id="timezone-search"
+                 placeholder="Type to filter, e.g. Seoul or Korea" />
+        </p>
+      </div>
     </div>
   </form>
 {% endblock layout-content %}
+{% block scripts %}
+  <script>
+      document.addEventListener('DOMContentLoaded', function() {
+          const timezoneField = document.getElementById('id_timezone');
+          const timezoneSearch = document.getElementById('timezone-search');
+          const suggestionDiv = document.getElementById('timezone-suggestion');
+          const detectedTzSpan = document.getElementById('detected-tz');
+          const useButton = document.getElementById('use-detected-tz');
+
+          function getTimezoneInfo(tzName) {
+              if (!tzName) return {
+                  offset: '',
+                  genericName: ''
+              };
+              try {
+                  const now = new Date();
+                  const offsetPart = new Intl.DateTimeFormat('en-US', {
+                      timeZone: tzName,
+                      timeZoneName: 'shortOffset',
+                  }).formatToParts(now).find(p => p.type === 'timeZoneName');
+                  const genericPart = new Intl.DateTimeFormat('en-US', {
+                      timeZone: tzName,
+                      timeZoneName: 'longGeneric',
+                  }).formatToParts(now).find(p => p.type === 'timeZoneName');
+                  return {
+                      offset: offsetPart ? offsetPart.value : '',
+                      genericName: genericPart ? genericPart.value : '',
+                  };
+              } catch (e) {
+                  return {
+                      offset: '',
+                      genericName: ''
+                  };
+              }
+          }
+
+          let allOptions = [];
+          if (timezoneField) {
+              allOptions = Array.from(timezoneField.options).map(function(opt) {
+                  const {
+                      offset,
+                      genericName
+                  } = getTimezoneInfo(opt.value);
+                  // Show UTC offset in the displayed label
+                  const label = offset ? `${opt.textContent} (${offset})` : opt.textContent;
+                  if (offset) opt.textContent = label;
+                  // Normalize underscores to spaces so e.g. "los ang" matches "Los_Angeles"
+                  const searchText = (opt.textContent.replace(/_/g, ' ') + ' ' + genericName).toLowerCase();
+                  return {
+                      value: opt.value,
+                      label,
+                      searchText
+                  };
+              });
+          }
+
+          if (timezoneSearch && timezoneField) {
+              timezoneSearch.addEventListener('input', function() {
+                  const query = timezoneSearch.value.toLowerCase().trim();
+                  const selectedValue = timezoneField.value;
+                  const filtered = query ?
+                      allOptions.filter(opt => opt.searchText.includes(query)) :
+                      allOptions;
+                  timezoneField.innerHTML = '';
+                  filtered.forEach(function(opt) {
+                      const option = document.createElement('option');
+                      option.value = opt.value;
+                      option.textContent = opt.label;
+                      timezoneField.appendChild(option);
+                  });
+                  if (filtered.some(opt => opt.value === selectedValue)) {
+                      timezoneField.value = selectedValue;
+                  } else if (filtered.length > 0) {
+                      timezoneField.selectedIndex = 0;
+                  }
+              });
+          }
+
+          if (timezoneField && !timezoneField.value && suggestionDiv) {
+              try {
+                  const detectedTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                  if (detectedTz) {
+                      detectedTzSpan.textContent = detectedTz;
+                      suggestionDiv.style.display = 'block';
+                      useButton.addEventListener('click', function() {
+                          timezoneField.value = detectedTz;
+                      });
+                  }
+              } catch (e) {
+                  // Fail silently if auto-detection isn't available.
+              }
+          }
+      });
+  </script>
+{% endblock scripts %}
