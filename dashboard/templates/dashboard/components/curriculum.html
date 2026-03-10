@@ -14,9 +14,17 @@
     <button id="sort-by-subject"
             class="tooltip-button"
             title="Sort by subject"
-            style="margin-left: 4px">Sort by subject</button>
+            style="margin-left: 4px"
+            onclick="HiEvil()">Sort by subject</button>
     <span class="fs-6 fst-italic" style="margin-left: 4px">Mouse over icons for hints.</span>
   </p>
+  <script>
+      function HiEvil(){
+        const Chin=document.getElementById("sort-by-subject")
+        if(Chin.textcontent==="Sort by subject"){Chin.textcontent="Sort by OTIS logical order"}
+        else{Chin.textcontent="Sort by subject"}
+      }
+  </script>
   <script>
       $("#hide-completed-units").click(function() {
           $(".unit-completed").toggleClass("unit-completed-hidden");
