@@ -754,39 +754,6 @@ def test_inquiry(otis) -> None:
         assert inq.was_auto_processed
         assert inq.status == "INQ_ACC"
 
-        # check that autoprocessing old units works
-        inactive_semester = SemesterFactory.create(active=False)
-        inactive_alice = StudentFactory.create(
-            semester=inactive_semester, user=alice.user
-        )
-        old_group = UnitGroupFactory.create(name="Last Year Unit", subject="A")
-        old_unit = UnitFactory.create(code="BAW", group=old_group)
-        inactive_alice.curriculum.add(old_unit)
-        inactive_alice.unlocked_units.add(old_unit)
-        assert inactive_alice.curriculum.count() == 1
-        assert inactive_alice.unlocked_units.count() == 1
-        inactive_alice.save()
-        otis.assert_has(
-            otis.post(
-                "inquiry",
-                alice.pk,
-                data={
-                    "unit": old_unit.pk,
-                    "action_type": "INQ_ACT_UNLOCK",
-                    "explanation": "did last year.",
-                },
-                follow=True,
-            ),
-            "Petition automatically processed",
-        )
-        inq = UnitInquiry.objects.get(
-            student=alice, unit=old_unit.pk, action_type="INQ_ACT_UNLOCK"
-        )
-        assert inq.was_auto_processed
-        assert inq.status == "INQ_ACC"
-        assert alice.curriculum.count() == 9
-        assert alice.unlocked_units.count() == 6
-
     # test a bunch of fail conditions
     bob: Student = StudentFactory.create(semester=SemesterFactory.create(active=False))
     otis.login(bob)
