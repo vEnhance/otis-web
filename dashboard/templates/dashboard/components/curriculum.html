@@ -72,6 +72,7 @@
           }
 
           tbody.appendChild(frag);
+          $(this).text(sorted ? "Sort by OTIS logical order" : "Sort by subject");
       });
   </script>
   {% with profile=request.user|getprofile %}
