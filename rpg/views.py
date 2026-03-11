@@ -289,8 +289,7 @@ class PalaceUpdate(
         carving, is_created = PalaceCarving.objects.get_or_create(user=student.user)
         if is_created is True:
             carving.display_name = student.name
-        logging.log(
-            SUCCESS_LOG_LEVEL,
+        logger.info(
             f"{student} {'created' if is_created else 'updated'} their carving in the Ruby Palace.",
         )
         return carving
@@ -335,8 +334,7 @@ class DiamondUpdate(
             achievement.name = student.name
             achievement.save()
 
-        logging.log(
-            SUCCESS_LOG_LEVEL,
+        logger.info(
             f"{student} {'forged' if is_new else 'updated'} their diamond in the Ruby Palace.",
         )
         return achievement
