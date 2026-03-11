@@ -4,6 +4,7 @@ Django settings for otisweb project.
 
 import logging
 import os
+import warnings
 from pathlib import Path
 from typing import Any
 
@@ -44,6 +45,11 @@ else:
     SITE_URL = "http://127.0.0.1"
 SITE_ID = 1
 FORMS_URLFIELD_ASSUME_HTTPS = True
+warnings.filterwarnings(
+    "ignore",
+    message="The FORMS_URLFIELD_ASSUME_HTTPS transitional setting is deprecated.",
+    category=DeprecationWarning,
+)
 TESTING = False
 
 # Application definition

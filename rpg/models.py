@@ -102,7 +102,7 @@ class Achievement(models.Model):
     class Meta:
         constraints = [
             models.CheckConstraint(
-                check=~models.Q(special_effect_id=""),
+                condition=~models.Q(special_effect_id=""),
                 name="%(app_label)s_%(class)s_special_effect_id_not_empty",
             ),
         ]
