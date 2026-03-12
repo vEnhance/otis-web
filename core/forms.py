@@ -21,6 +21,7 @@ class CatalogFilterForm(forms.Form):
             ("completed", "Done (✓)"),
             ("unlocked", "Unlocked (⏲)"),
             ("locked", "Locked (⧖)"),
+            ("none", "None"),
         ],
         widget=forms.CheckboxSelectMultiple(attrs={"class": "filter-form"}),
         required=False,
