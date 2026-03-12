@@ -120,8 +120,8 @@ def test_preprocessor():
     assert r'Bob says, "no you".' in reply
     assert r'<tr class="danger"><th>Diamond</th><td>INVALID</td></tr>' in reply
     assert r'<tr class="danger"><th>Diamond</th><td>NOT ALLOWED</td></tr>' in reply
-    assert r"<tr><th>Name</th><td>Test Diamond</td></tr>" in reply
-    assert r"<tr><th>Description</th><td>Hi.</td></tr>" in reply
+    assert r"<tr><th>Name</th><td>Test Diamond</td></tr>" not in reply
+    assert r"<tr><th>Description</th><td>Hi.</td></tr>" not in reply
     assert r"<td>@evanchen.cc</td>" in reply
     assert r'<tr class="danger"><th>Name</th><td>nonexistent</td></tr>' in reply
     assert r"<tr><th>Name</th><td>Example Unit</td></tr>" in reply

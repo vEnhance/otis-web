@@ -65,10 +65,8 @@ class OTISPreprocessor(markdown.preprocessors.Preprocessor):
                                 )
                             table_output.extend(
                                 (
-                                    f"<tr><th>Name</th><td>{diamond.name}</td></tr>",
                                     f"<tr><th>Value</th><td>{diamond.diamonds}♦</td></tr>",
                                     f"<tr><th>Found by</th><td>{num_found}</td></tr>",
-                                    f"<tr><th>Description</th><td>{diamond.description}</td></tr>",
                                 )
                             )
                         else:
