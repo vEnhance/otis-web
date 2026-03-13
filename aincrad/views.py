@@ -545,7 +545,7 @@ def invoice_handler(action: str, data: JSONData) -> JsonResponse:
 def arch_url_handler(action: str, data: JSONData) -> JsonResponse:
     del action
     urls_map = data["urls"]
-    # update existing problem URL's
+    # update existing problem URLs
     problems_to_update: list[Problem] = []
     for problem in Problem.objects.all():
         puid = problem.puid
