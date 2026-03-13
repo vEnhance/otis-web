@@ -321,10 +321,13 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
     )
     auto_reject_lock_accepted = (
         inquiry.action_type == "INQ_ACT_LOCK"
-    ) and PSet.objects.filter(
-        student=student, unit=inquiry.unit, status__in=("A")
+        and PSet.objects.filter(student=student, unit=inquiry.unit, status="A")
     )
-    auto_reject_criteria = auto_reject_too_many_unlocks or auto_reject_exists_pending or auto_reject_lock_accepted
+    auto_reject_criteria = (
+        auto_reject_too_many_unlocks
+        or auto_reject_exists_pending
+        or auto_reject_lock_accepted
+    )
 
     if auto_reject_criteria:
         inquiry.status = "INQ_REJ"
