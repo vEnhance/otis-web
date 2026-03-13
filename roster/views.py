@@ -309,31 +309,32 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
         + student.unlocked_units.count()
     )
 
-    # auto reject criteria - the current petition counts toward the unlock count
-    auto_reject_too_many_unlocks = (
-        inquiry.action_type == "INQ_ACT_UNLOCK" and unlocked_count > 9
-    )
-    auto_reject_exists_pending = inquiry.action_type in (
-        "INQ_ACT_DROP",
-        "INQ_ACT_LOCK",
-    ) and PSet.objects.filter(
-        student=student, unit=inquiry.unit, status__in=("P", "PA", "PR")
-    )
-    auto_reject_criteria = auto_reject_too_many_unlocks or auto_reject_exists_pending
-
-    if auto_reject_criteria:
-        inquiry.status = "INQ_REJ"
-        inquiry.was_auto_processed = True
-        inquiry.save()
-        messages.error(
-            request,
-            message=(
-                "You can't have more than 9 unfinished units unlocked at once."
-                if auto_reject_too_many_unlocks
-                else "You have a pending submission for this unit"
+    auto_reject_checks = [
+        (
+            inquiry.action_type == "INQ_ACT_UNLOCK" and unlocked_count > 9,
+            "You can't have more than 9 unfinished units unlocked at once.",
+        ),
+        (
+            inquiry.action_type in ("INQ_ACT_DROP", "INQ_ACT_LOCK")
+            and PSet.objects.filter(
+                student=student, unit=inquiry.unit, status__in=("P", "PA", "PR")
             ),
-        )
-        return
+            "You have a pending submission for this unit.",
+        ),
+        (
+            inquiry.action_type == "INQ_ACT_LOCK"
+            and PSet.objects.filter(student=student, unit=inquiry.unit, status="A"),
+            "You can't lock units with accepted submissions.",
+        ),
+    ]
+
+    for condition, message in auto_reject_checks:
+        if condition:
+            inquiry.status = "INQ_REJ"
+            inquiry.was_auto_processed = True
+            inquiry.save()
+            messages.error(request, message=message)
+            return
 
     # auto hold criteria
     num_psets = PSet.objects.filter(student=student).count()
