@@ -317,9 +317,14 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
         "INQ_ACT_DROP",
         "INQ_ACT_LOCK",
     ) and PSet.objects.filter(
-        student=student, unit=inquiry.unit, status__in=("A", "P", "PA", "PR")
+        student=student, unit=inquiry.unit, status__in=("P", "PA", "PR")
     )
-    auto_reject_criteria = auto_reject_too_many_unlocks or auto_reject_exists_pending
+    auto_reject_lock_accepted = (
+        inquiry.action_type == "INQ_ACT_LOCK"
+    ) and PSet.objects.filter(
+        student=student, unit=inquiry.unit, status__in=("A")
+    )
+    auto_reject_criteria = auto_reject_too_many_unlocks or auto_reject_exists_pending or auto_reject_lock_accepted
 
     if auto_reject_criteria:
         inquiry.status = "INQ_REJ"
@@ -330,7 +335,9 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
             message=(
                 "You can't have more than 9 unfinished units unlocked at once."
                 if auto_reject_too_many_unlocks
-                else "You have a pending or successful submission for this unit."
+                else "You have a pending submission for this unit."
+                if auto_reject_exists_pending
+                else "You can't lock units with accepted submissions."
             ),
         )
         return
