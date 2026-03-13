@@ -18,7 +18,7 @@ https://youtu.be/W27XcqeXp20
 
 ### Pre-reading
 
-If you're totally new to development world,
+If you're totally new to the development world,
 it's probably a good idea to learn how a bunch of tools work.
 [There's a nice series by MIT](https://missing.csail.mit.edu/) to this end.
 You'll likely want to go through the first six of the 2020 lectures,
@@ -56,7 +56,7 @@ The list of things to-do is sorted with two different views:
 - The [issues page](https://github.com/vEnhance/otis-web/issues)
   lists all the issues, including those with no bounty set yet.
 
-To claim a task, you should go to the corresponding
+To claim a task, you should go to the corresponding issue
 and leave a comment that you'd like to work on it.
 A moderator (well, Evan) will then assign the task to you.
 
