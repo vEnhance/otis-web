@@ -554,7 +554,7 @@ def test_file_operations(otis):
     messages = [m.message for m in resp.context["messages"]]
     assert "New file has been uploaded." in messages
 
-    # invalid upload  ofa file
+    # invalid upload of a file
     resp = otis.post_20x(
         "uploads",
         alice.pk,

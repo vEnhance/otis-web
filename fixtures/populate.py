@@ -252,7 +252,7 @@ def create_sem_independent(users: list[User]):
     HanabiContestFactory.create()
 
 
-# Creates models dependent on a smester
+# Creates models dependent on a semester
 def create_sem_dependent(semester: Semester, users: list[User]):
     container: RegistrationContainer = RegistrationContainerFactory.create(
         semester=semester
