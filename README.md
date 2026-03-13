@@ -81,7 +81,7 @@ Optional steps:
    download a version compatible with your computer.
 2. Set up the 3 environment variables at the bottom of `env` by copying them to
    `.env` and uncommenting them. Note that you should not have any spaces (it is
-   fine to leave the values as it is, but if you want to change anything, just
+   fine to leave the values as they are, but if you want to change anything, just
    make sure there is no whitespace surrounding the `=`).
 3. Run `docker compose build`. Wait for it to finish.
 4. To start the server, run `docker compose up -d`. To execute a command inside
