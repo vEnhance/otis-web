@@ -44,22 +44,26 @@ urlpatterns = [
     ),
     path(
         r"apple-touch-icon.png",
-        RedirectView.as_view(url="https://web.evanchen.cc/icons/apple-touch-icon.png"),
+        RedirectView.as_view(
+            url="https://web.evanchen.cc/static/icons/apple-touch-icon.png"
+        ),
     ),
     path(
         r"apple-touch-icon-precomposed.png",
-        RedirectView.as_view(url="https://web.evanchen.cc/icons/apple-touch-icon.png"),
+        RedirectView.as_view(
+            url="https://web.evanchen.cc/static/icons/apple-touch-icon.png"
+        ),
     ),
     path(
         r"apple-touch-icon-152x152.png",
         RedirectView.as_view(
-            url="https://web.evanchen.cc/icons/apple-touch-icon-152x152.png"
+            url="https://web.evanchen.cc/static/icons/apple-touch-icon-152x152.png"
         ),
     ),
     path(
         r"apple-touch-icon-152x152-precomposed.png",
         RedirectView.as_view(
-            url="https://web.evanchen.cc/icons/apple-touch-icon-152x152.png"
+            url="https://web.evanchen.cc/static/icons/apple-touch-icon-152x152.png"
         ),
     ),
     path(r"", include("bot_rickroll.urls")),
