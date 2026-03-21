@@ -45,28 +45,28 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
   deploy:
-    name: Deploy to production
+    name: 🚢 Deploy to production
     runs-on: ubuntu-latest
     needs: ci
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
-      - name: Checkout code
+      - name: 🧾 Checkout code
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - name: Set up SSH
+      - name: 🔐 Set up SSH
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.PRODUCTION_SSH_KEY }}" > ~/.ssh/id_github_actions
           chmod 600 ~/.ssh/id_github_actions
           ssh-keyscan -H ${{ secrets.PRODUCTION_SSH_HOSTNAME }} >> ~/.ssh/known_hosts
 
-      - name: Configure production remote
+      - name: 🎯 Configure production remote
         run: |
           git config core.sshCommand "ssh -i ~/.ssh/id_github_actions"
           git remote add production "${{ secrets.PRODUCTION_SSH_TARGET }}"
 
-      - name: Push to production
+      - name: 🔥 Push to production
         run: git push production main
