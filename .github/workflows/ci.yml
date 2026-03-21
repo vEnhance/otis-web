@@ -61,7 +61,7 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.PRODUCTION_SSH_KEY }}" > ~/.ssh/id_github_actions
           chmod 600 ~/.ssh/id_github_actions
-          ssh-keyscan -H ${{ secrets.PRODUCTION_HOSTNAME }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H ${{ secrets.PRODUCTION_SSH_HOSTNAME }} >> ~/.ssh/known_hosts
 
       - name: Configure production remote
         run: |
