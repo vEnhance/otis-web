@@ -35,53 +35,32 @@ hooks = [
 ]
 
 [[repos]]
-repo = "local"
+repo = "https://github.com/djlint/djLint"
+rev = "v1.36.4"
 hooks = [
   {
-    id = "ruff-format",
-    name = "ruff format",
-    entry = "uv run ruff format",
-    language = "system",
-    types = ["python"]
-  },
-  {
-    id = "ruff-check",
-    name = "ruff check",
-    entry = "uv run ruff check",
-    language = "system",
-    args = ["--fix"],
-    types = ["python"]
+    id = "djlint",
+    files = "templates/",
   },
   {
     id = "djlint-reformat",
-    name = "djlint reformat",
-    entry = "uv run djlint --reformat",
-    language = "system",
     files = "templates/",
-    types = ["html"]
-  },
-  {
-    id = "djlint-check",
-    name = "djlint check",
-    entry = "uv run djlint",
-    language = "system",
-    files = "templates/",
-    types = ["html"]
-  },
-  {
-    id = "codespell",
-    name = "codespell",
-    entry = "uv run codespell",
-    language = "system",
-    types = ["text"]
-  },
-#  {
-#    id = "ty",
-#    name = "ty",
-#    entry = "uv run ty check .",
-#    language = "system",
-#    types = ["python"]
-#  }
+  }
+]
+
+[[repos]]
+repo = "https://github.com/codespell-project/codespell"
+rev = "v2.4.2"
+hooks = [
+  { id = "codespell" }
+]
+
+[[repos]]
+repo = "https://github.com/astral-sh/ruff-pre-commit"
+rev = "v0.15.7"
+hooks = [
+  { id = "ruff-check" },
+  { id = "ruff-format" }
 ]
 
 [[repos]]
@@ -96,7 +75,7 @@ hooks = [
 
 [[repos]]
 repo = "https://github.com/astral-sh/uv-pre-commit"
-rev = "0.10.10"
+rev = "0.10.12"
 hooks = [
   { id = "uv-lock" }
 ]
