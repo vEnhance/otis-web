@@ -12,7 +12,7 @@ and work with you as you pick things up.
 
 If you prefer videos to text, see:
 
-https://youtu.be/W27XcqeXp20
+<https://youtu.be/W27XcqeXp20>
 
 ## Getting started
 

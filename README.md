@@ -24,7 +24,7 @@ which is great.
 
 ## Installation instructions
 
-Video tutorial: https://youtu.be/W27XcqeXp20
+Video tutorial: <https://youtu.be/W27XcqeXp20>
 
 ### Standard Linux environment
 

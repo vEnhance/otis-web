@@ -4,7 +4,8 @@ This file provides guidance for Claude Code when working with this repository.
 
 ## Project Overview
 
-OTIS-WEB is a Django-based course management system for OTIS (Online Training for International Students), a math olympiad training program. The production server is hosted on PythonAnywhere.
+OTIS-WEB is a Django-based course management system for OTIS.
+The production server is hosted on PythonAnywhere.
 
 ## Tech Stack
 
