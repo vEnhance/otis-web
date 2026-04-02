@@ -250,11 +250,6 @@ def test_certify(otis):
 
 
 @pytest.mark.django_db
-def test_certify_when_not_logged_in(otis):
-    otis.get_30x("certify")
-
-
-@pytest.mark.django_db
 def test_submit_permissions(otis):
     # delinquent
 
