@@ -57,6 +57,16 @@ rev = "v3.8.1"
 hooks = [{ id = "prettier", types_or = ["css", "javascript", "json", "yaml"] }]
 
 [[repos]]
+repo = "https://github.com/shellcheck-py/shellcheck-py"
+rev = "v0.11.0.1"
+hooks = [{ id = "shellcheck", files = '\.sh$'}]
+
+[[repos]]
+repo = "https://github.com/scop/pre-commit-shfmt"
+rev = "v3.13.0-1"
+hooks = [{ id = "shfmt", args = ["-i", "2", "-ci"], files = '\.sh$' }]
+
+[[repos]]
 repo = "https://github.com/djlint/djLint"
 rev = "v1.36.4"
 hooks = [
