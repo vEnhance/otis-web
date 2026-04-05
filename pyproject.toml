@@ -3,7 +3,7 @@ name = "otisweb"
 version = "1.9.0"
 description = "OTIS-WEB Course Management System"
 authors = [{ name = "Evan Chen", email = "evan@evanchen.cc" }]
-license = { text = "MIT" }
+license = "MIT"
 readme = "README.md"
 requires-python = ">=3.13, <4.0"
 
