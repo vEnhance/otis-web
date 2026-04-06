@@ -18,7 +18,7 @@ def storage_hash(value: str) -> str:
     return f"TESTING_{h}" if settings.TESTING else h
 
 
-def get_from_google_storage(filename: str):
+def get_from_google_storage(filename: str, inline_pdf: bool = False, inline_tex: bool = True):
     ext = filename[-4:]
     if ext not in [".tex", ".pdf"]:
         return HttpResponseBadRequest("Bad filename extension")
@@ -34,9 +34,9 @@ def get_from_google_storage(filename: str):
     response = HttpResponse(content=file)
     if ext == ".pdf":
         response["Content-Type"] = "application/pdf"
-        response["Content-Disposition"] = f'inline; filename="{filename}"'
+        response["Content-Disposition"] = f'{'inline' if inline_pdf else 'attachment'}; filename="{filename}"'
     else:
         response["Content-Type"] = "text/plain"
-        response["Content-Disposition"] = "inline"
+        response["Content-Disposition"] = f'{'inline' if inline_tex else 'attachment'}; filename="{filename}"'
 
     return response
