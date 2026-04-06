@@ -308,6 +308,16 @@ class UserProfile(models.Model):
         help_text="Hide all hints from the problem archive (ARCH).",
         default=False,
     )
+    inline_pdf = models.BooleanField(
+        verbose_name="Display PDF inline",
+        help_text="Open PDF files without downloading them permanently.",
+        default=True,
+    )
+    inline_tex = models.BooleanField(
+        verbose_name="Display TeX inline",
+        help_text="Open TeX files without downloading them permanently.",
+        default=True,
+    )
     timezone = models.CharField(
         max_length=63,
         blank=True,
