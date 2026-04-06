@@ -285,7 +285,12 @@ def permitted(unit: Unit, request: HttpRequest, asking_solution: bool) -> bool:
 def unit_problems(request: HttpRequest, pk: int) -> HttpResponse:
     unit = get_object_or_404(Unit, pk=pk)
     if permitted(unit, request, asking_solution=False):
-        return get_from_google_storage(unit.problems_pdf_filename)
+        profile, _ = UserProfile.objects.get_or_create(user=request.user)
+        return get_from_google_storage(
+            unit.problems_pdf_filename,
+            inline_pdf=profile.inline_pdf,
+            inline_tex=profile.inline_tex,
+        )
     else:
         raise PermissionDenied(f"Can't view the problems pdf for {unit}")
 
@@ -294,7 +299,12 @@ def unit_problems(request: HttpRequest, pk: int) -> HttpResponse:
 def unit_tex(request: HttpRequest, pk: int) -> HttpResponse:
     unit = get_object_or_404(Unit, pk=pk)
     if permitted(unit, request, asking_solution=False):
-        return get_from_google_storage(unit.problems_tex_filename)
+        profile, _ = UserProfile.objects.get_or_create(user=request.user)
+        return get_from_google_storage(
+            unit.problems_tex_filename,
+            inline_pdf=profile.inline_pdf,
+            inline_tex=profile.inline_tex,
+        )
     else:
         raise PermissionDenied(f"Can't view the problems TeX for {unit}")
 
@@ -303,7 +313,12 @@ def unit_tex(request: HttpRequest, pk: int) -> HttpResponse:
 def unit_solutions(request: HttpRequest, pk: int) -> HttpResponse:
     unit = get_object_or_404(Unit, pk=pk)
     if permitted(unit, request, asking_solution=True):
-        return get_from_google_storage(unit.solutions_pdf_filename)
+        profile, _ = UserProfile.objects.get_or_create(user=request.user)
+        return get_from_google_storage(
+            unit.solutions_pdf_filename,
+            inline_pdf=profile.inline_pdf,
+            inline_tex=profile.inline_tex,
+        )
     else:
         raise PermissionDenied(f"Can't view the solutions for {unit}")
 
