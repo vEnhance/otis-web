@@ -330,6 +330,8 @@ class UserProfileUpdateView(
         "disable_hints",
         "timezone",
         "use_twemoji",
+        "inline_pdf",
+        "inline_tex",
     )
     success_url = reverse_lazy("profile")
     object: UserProfile
@@ -358,6 +360,8 @@ class UserProfileUpdateView(
             form["show_unit_petitions"],
             form["disable_hints"],
             form["use_twemoji"],
+            form["inline_pdf"],
+            form["inline_tex"],
             form["timezone"],
         )
         context["timezone_choices"] = TIMEZONE_CHOICES
