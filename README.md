@@ -32,31 +32,31 @@ If you're just trying to get a local copy of the OTIS-WEB code
 and don't plan to submit any code back, then skip steps 1 and 4,
 and replace `YOUR_USERNAME` in step 3 with `vEnhance`.
 
-1.  Create an account on GitHub if you haven't already, and
-    [fork the repository](https://docs.github.com/en/get-started/quickstart/fork-a-repo).
-1.  Install the following standard tools: `python` (version 3.13+), `git`,
-    and [uv](https://docs.astral.sh/uv/getting-started/installation/).
-1.  Clone this repository using the command
-    `git clone git@github.com:YOUR_USERNAME/otis-web`.
-1.  Type `git checkout -b feature` to checkout a new branch named `feature`;
-    this will make your life a bit easier than working on `main`.
-    If you already know what feature you're trying to implement,
-    you can use that, e.g. `git checkout -b add-bunny-pictures`.
-1.  Check that `uv` works.
-    Then run `make install`.
-    (On some systems, installation could fail when trying to install
-    `mysqlclient`. You will have to separately install `pkg-config`
-    [mysql](https://github.com/PyMySQL/mysqlclient#install) in that case;
-    see that link for instructions, under the "Install" section.)
-1.  If everything is working, `uv run python manage.py check` should
-    run with no errors.
-1.  Run `make migrate` to create the local database.
-1.  Run `make createsuperuser` to create an admin user.
-1.  Run `make runserver`.
-    The command will spin up a continuously running server.
-1.  Point your browser to `http://127.0.0.1:8000`.
+1. Create an account on GitHub if you haven't already, and
+   [fork the repository](https://docs.github.com/en/get-started/quickstart/fork-a-repo).
+2. Install the following standard tools: `python` (version 3.13+), `git`,
+   and [uv](https://docs.astral.sh/uv/getting-started/installation/).
+3. Clone this repository using the command
+   `git clone git@github.com:YOUR_USERNAME/otis-web`.
+4. Type `git checkout -b feature` to checkout a new branch named `feature`;
+   this will make your life a bit easier than working on `main`.
+   If you already know what feature you're trying to implement,
+   you can use that, e.g. `git checkout -b add-bunny-pictures`.
+5. Check that `uv` works.
+   Then run `make install`.
+   (On some systems, installation could fail when trying to install
+   `mysqlclient`. You will have to separately install `pkg-config`
+   [mysql](https://github.com/PyMySQL/mysqlclient#install) in that case;
+   see that link for instructions, under the "Install" section.)
+6. If everything is working, `uv run python manage.py check` should
+   run with no errors.
+7. Run `make migrate` to create the local database.
+8. Run `make createsuperuser` to create an admin user.
+9. Run `make runserver`.
+   The command will spin up a continuously running server.
+10. Point your browser to `http://127.0.0.1:8000`.
     You should be able to log in with the user from before.
-1.  The website is functional now, but it is a bit bare-bones.
+11. The website is functional now, but it is a bit bare-bones.
     To populate it with some test data, use `http://127.0.0.1:8000/admin`
     or run `./fixtures/load-all.sh`.
     - To log in with the dummy accounts in the fixtures, it's easiest to log in
@@ -74,17 +74,17 @@ Optional steps:
 
 ### Using Docker
 
-1.  Follow steps 1 - 3 from the above tutorial.
-1.  Make sure to install [Docker](https://www.docker.com/) and make sure you
-    download a version compatible with your computer.
-1.  Set up the 3 environment variables at the bottom of `env` by copying them to
-    `.env` and uncommenting them. Note that you should not have any spaces (it is
-    fine to leave the values as they are, but if you want to change anything, just
-    make sure there is no whitespace surrounding the `=`).
-1.  Run `docker compose build`. Wait for it to finish.
-1.  To start the server, run `docker compose up -d`. To execute a command inside
-    the container, run `docker exec -it otis-web /bin/bash`. To stop the server,
-    run `docker compose down`.
+1. Follow steps 1 - 3 from the above tutorial.
+2. Make sure to install [Docker](https://www.docker.com/) and make sure you
+   download a version compatible with your computer.
+3. Set up the 3 environment variables at the bottom of `env` by copying them to
+   `.env` and uncommenting them. Note that you should not have any spaces (it is
+   fine to leave the values as they are, but if you want to change anything, just
+   make sure there is no whitespace surrounding the `=`).
+4. Run `docker compose build`. Wait for it to finish.
+5. To start the server, run `docker compose up -d`. To execute a command inside
+   the container, run `docker exec -it otis-web /bin/bash`. To stop the server,
+   run `docker compose down`.
 
 Note: You may need to delete db.sqlite3 if you're not getting desired results,
 as it serves as a cache. At this point, spinning up 2 separate containers with
