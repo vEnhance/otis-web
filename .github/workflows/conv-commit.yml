@@ -13,4 +13,4 @@ permissions:
 
 jobs:
   main:
-    uses: vEnhance/dotfiles@6fe4f49fd29e1e09fab6bbc586044293694514b7 # main
+    uses: vEnhance/dotfiles/.github/workflows/conv-commit.yml@6fe4f49fd29e1e09fab6bbc586044293694514b7 # main
