@@ -7,8 +7,7 @@ on:
     branches: [main]
   workflow_dispatch:
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   ci:
@@ -58,6 +57,8 @@ jobs:
     needs: ci
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     environment: deployment
+    permissions:
+      contents: read
 
     steps:
       - name: 🧾 Checkout code
