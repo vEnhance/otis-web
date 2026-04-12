@@ -21,7 +21,7 @@ def storage_hash(value: str) -> str:
     return f"TESTING_{h}" if settings.TESTING else h
 
 
-def get_from_google_storage(filename: str, user):
+def get_from_google_storage(filename: str, user: User):
     profile, _ = UserProfile.objects.get_or_create(user=user)
     inline_pdf = profile.inline_pdf
     inline_tex = profile.inline_tex
