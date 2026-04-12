@@ -1,4 +1,3 @@
-from django.contrib.auth import get_user_model
 from factory.declarations import LazyAttribute, SubFactory
 from factory.django import DjangoModelFactory
 from factory.faker import Faker
@@ -14,8 +13,6 @@ from roster.models import (
     StudentRegistration,
     UnitInquiry,
 )
-
-User = get_user_model()
 
 
 class ApplyUUIDFactory(DjangoModelFactory):

@@ -46,7 +46,9 @@ class UploadedFile(models.Model):
         help_text="The student for which this file is meant",
     )
     owner = models.ForeignKey(
-        User, on_delete=models.CASCADE, help_text="The user who uploaded the file"
+        User,
+        on_delete=models.CASCADE,
+        help_text="The user who uploaded the file",
     )
     category = models.CharField(
         max_length=10, choices=CHOICES, help_text="What kind of file this is"

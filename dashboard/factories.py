@@ -1,4 +1,3 @@
-from django.contrib.auth import get_user_model
 from factory.declarations import LazyAttribute, SubFactory
 from factory.django import DjangoModelFactory, FileField
 from factory.faker import Faker
@@ -8,8 +7,6 @@ from otisweb_testsuite import UniqueFaker
 from roster.factories import StudentFactory
 
 from .models import Announcement, PSet, SemesterDownloadFile, UploadedFile
-
-User = get_user_model()
 
 
 class UploadedFileFactory(DjangoModelFactory):
