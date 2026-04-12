@@ -1,4 +1,4 @@
-from django.conf import settings
+from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
 from django.db import models
 from django.urls import reverse
@@ -34,7 +34,7 @@ class Worker(models.Model):
     RE_AT_USER = r"@[-a-zA-Z0-9_]+"
 
     user = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
+        User,
         related_name="workers",
         on_delete=models.CASCADE,
     )

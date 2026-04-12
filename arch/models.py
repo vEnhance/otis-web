@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Optional
 
 import reversion
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.core.exceptions import SuspiciousOperation
 from django.core.validators import MaxValueValidator, RegexValidator
 from django.db import models
@@ -77,7 +78,7 @@ class Problem(models.Model):
 
 class Vote(models.Model):
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+        User,
         help_text="User who voted for this problem.",
         on_delete=models.CASCADE,
     )

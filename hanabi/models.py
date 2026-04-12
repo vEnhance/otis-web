@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from django.conf import settings
+from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.query import QuerySet
 from django.urls.base import reverse
@@ -9,7 +9,7 @@ from django.utils.http import urlencode
 
 
 class HanabiPlayer(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     hanab_username = models.CharField(
         max_length=64,
         help_text="The username you use on hanab.live.",

@@ -1,7 +1,7 @@
 from datetime import timedelta
 from typing import Optional
 
-from django.conf import settings
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -134,7 +134,7 @@ class Market(models.Model):
 
 class Guess(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     market = models.ForeignKey(Market, on_delete=models.CASCADE)
     value = models.FloatField(
         help_text="User's guess",

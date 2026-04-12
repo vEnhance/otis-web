@@ -5,7 +5,7 @@ import os
 import zoneinfo
 from typing import Callable
 
-from django.conf import settings
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.manager import BaseManager
@@ -256,7 +256,7 @@ class Unit(models.Model):
 
 class UserProfile(models.Model):
     user = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
+        User,
         on_delete=models.CASCADE,
         help_text="The user these preferences belong to",
         related_name="profile",

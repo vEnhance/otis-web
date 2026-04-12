@@ -1,4 +1,4 @@
-from django.conf import settings
+from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
 
@@ -15,7 +15,7 @@ class ProblemSuggestion(models.Model):
     )
 
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+        User,
         on_delete=models.CASCADE,
         help_text="User who suggested the problem.",
     )

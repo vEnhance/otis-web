@@ -6,7 +6,7 @@ import datetime
 import os
 from typing import Optional
 
-from django.conf import settings
+from django.contrib.auth.models import User
 from django.core.validators import (
     FileExtensionValidator,
     MaxValueValidator,
@@ -46,7 +46,7 @@ class UploadedFile(models.Model):
         help_text="The student for which this file is meant",
     )
     owner = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+        User,
         on_delete=models.CASCADE,
         help_text="The user who uploaded the file",
     )
