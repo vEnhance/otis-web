@@ -309,13 +309,13 @@ class UserProfile(models.Model):
         default=False,
     )
     inline_pdf = models.BooleanField(
-        verbose_name="Display PDF inline",
-        help_text="Open PDF files without downloading them permanently.",
+        verbose_name="Open PDF files inline",
+        help_text="Uses inline content-disposition for PDF instead of attachment. May not be supported in all browsers.",
         default=True,
     )
     inline_tex = models.BooleanField(
-        verbose_name="Display TeX inline",
-        help_text="Open TeX files without downloading them permanently.",
+        verbose_name="Open TeX files inline",
+        help_text="Uses inline content-disposition for TeX instead of attachment. May not be supported in all browsers.",
         default=True,
     )
     timezone = models.CharField(
