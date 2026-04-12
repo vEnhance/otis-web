@@ -40,7 +40,7 @@ class LiveOpalHuntManager(models.Manager):
 
 class OpalAttempt(models.Model):
     user = models.ForeignKey(
-        User, on_delete=models.CASCADE, help_text="The user making the attempt"
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, help_text="The user making the attempt"
     )
     puzzle = models.ForeignKey(
         "OpalPuzzle",

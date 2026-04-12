@@ -2,8 +2,7 @@ import random
 from typing import Any, Iterable
 
 from django.conf import settings
-from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, User
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from factory.declarations import LazyAttribute, Sequence, SubFactory
@@ -16,7 +15,6 @@ from core.models import Semester, Unit, UnitGroup, UserProfile
 from core.utils import storage_hash
 from otisweb_testsuite import UniqueFaker
 
-User = get_user_model()
 
 
 class GroupFactory(DjangoModelFactory):

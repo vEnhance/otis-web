@@ -6,7 +6,8 @@ from datetime import timedelta
 from hashlib import pbkdf2_hmac
 from typing import TypedDict
 
-from django.contrib.auth.models import Group, User
+from django.conf import settings
+from django.contrib.auth.models import Group
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import FileExtensionValidator
 from django.db import models
@@ -40,7 +41,7 @@ class Assistant(models.Model):
     """This is a wrapper object for a single assistant."""
 
     user = models.OneToOneField(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         help_text="The Django Auth user attached to the Assistant.",
     )
@@ -103,7 +104,7 @@ class Student(models.Model):
     unlisted_assistants: QuerySet["Assistant"]
 
     user = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         help_text="The Django auth user attached to the student",
     )
@@ -545,7 +546,7 @@ class StudentRegistration(models.Model):
         ("U", "Prefer not to say"),
     )
     user = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         help_text="The user to attach",
         on_delete=models.CASCADE,
         related_name="regs",

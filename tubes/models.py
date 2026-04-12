@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.conf import settings
 from django.db import models
 
 
@@ -32,7 +32,7 @@ class Tube(models.Model):
 
 class JoinRecord(models.Model):
     user = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         help_text="The user who joined.",
         on_delete=models.CASCADE,
         null=True,

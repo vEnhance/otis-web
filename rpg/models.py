@@ -4,7 +4,6 @@ from hashlib import sha256
 from typing import Any
 
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.files.base import File
 from django.core.validators import RegexValidator
@@ -69,7 +68,7 @@ class Achievement(models.Model):
         help_text="Number of diamonds for this achievement",
     )
     creator = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         null=True,
         blank=True,
@@ -129,7 +128,7 @@ class Level(models.Model):
 
 class AchievementUnlock(models.Model):
     user = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         help_text="The user who unlocked the achievement",
     )
@@ -208,7 +207,7 @@ def palace_image_file_name(instance: "PalaceCarving", filename: str) -> str:
 
 
 class PalaceCarving(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
     display_name = models.CharField(
         max_length=128,
         help_text="How you would like your name to be displayed in the Ruby Palace.",
