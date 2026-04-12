@@ -21,8 +21,7 @@ from .models import ExamAttempt, PracticeExam
 def pdf(request: AuthHttpRequest, pk: int) -> HttpResponse:
     exam = get_object_or_404(PracticeExam, pk=pk)
     if request.user.is_staff:
-        profile, _ = UserProfile.objects.get_or_create(user=request.user)
-        return get_from_google_storage(exam.pdfname, profile)
+        return get_from_google_storage(exam.pdfname, request.user)
 
     student = infer_student(request)
     if not exam.started:
@@ -32,8 +31,7 @@ def pdf(request: AuthHttpRequest, pk: int) -> HttpResponse:
     elif not student.enabled:
         raise PermissionDenied("Your student account is disabled.")
 
-    profile, _ = UserProfile.objects.get_or_create(user=request.user)
-    return get_from_google_storage(exam.pdfname, profile)
+    return get_from_google_storage(exam.pdfname, request.user)
 
 
 @login_required
