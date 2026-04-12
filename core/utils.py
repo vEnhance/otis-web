@@ -37,9 +37,13 @@ def get_from_google_storage(filename: str, user):
     response = HttpResponse(content=file)
     if ext == ".pdf":
         response["Content-Type"] = "application/pdf"
-        response["Content-Disposition"] = f'{'inline' if inline_pdf else 'attachment'}; filename="{filename}"'
+        response["Content-Disposition"] = (
+            f'{"inline" if inline_pdf else "attachment"}; filename="{filename}"'
+        )
     else:
         response["Content-Type"] = "text/plain"
-        response["Content-Disposition"] = f'{'inline' if inline_tex else 'attachment'}; filename="{filename}"'
+        response["Content-Disposition"] = (
+            f'{"inline" if inline_tex else "attachment"}; filename="{filename}"'
+        )
 
     return response
