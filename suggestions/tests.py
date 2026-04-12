@@ -1,6 +1,6 @@
 import pytest
+from django.contrib.auth.models import User
 
-from arch.models import User
 from core.factories import GroupFactory, UnitFactory, UnitGroupFactory, UserFactory
 from core.models import Unit, UnitGroup
 from suggestions.factories import ProblemSuggestionFactory
