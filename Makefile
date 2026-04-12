@@ -1,4 +1,4 @@
-.PHONY: help install runserver migrate migrations fmt check test ci copier
+.PHONY: help install runserver migrate migrations fmt check test ci
 
 help:
 	@echo "Available commands:"
@@ -10,7 +10,6 @@ help:
 	@echo "  make check            - Run Django checks and type checking"
 	@echo "  make test             - Run tests"
 	@echo "  make ci               - Short for fmt + check + test"
-	@echo "  make copier           - Run copier update with past answers"
 
 install:
 	uv sync
@@ -39,11 +38,7 @@ check:
 
 test:
 	uv run pytest -n auto --cov --cov-report=term-missing --cov-report=lcov:coverage/lcov.info
-
 ci:
 	make fmt
 	make check
 	make test
-
-copier:
-	uv run copier update --skip-answered
