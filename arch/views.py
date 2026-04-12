@@ -3,8 +3,8 @@ from typing import Any, ClassVar, Optional
 
 import reversion
 from django.contrib import messages
-from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http import Http404, HttpRequest, HttpResponseRedirect
@@ -25,7 +25,6 @@ from otisweb.mixins import VerifiedRequiredMixin
 
 from .forms import HintUpdateFormWithReason
 from .models import Hint, Problem, Vote
-
 
 ContextType = dict[str, Any]
 
