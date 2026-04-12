@@ -2,12 +2,17 @@ import logging
 from hashlib import sha256
 
 from django.conf import settings
+from django.contrib.auth.models import User
+from django.core.exceptions import PermissionDenied
 from django.core.files.storage import default_storage
+from django.http import HttpRequest
 from django.http.response import (
     HttpResponse,
     HttpResponseBadRequest,
     HttpResponseServerError,
 )
+
+from core.models import UserProfile
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +23,12 @@ def storage_hash(value: str) -> str:
     return f"TESTING_{h}" if settings.TESTING else h
 
 
-def get_from_google_storage(filename: str):
+def get_from_google_storage(filename: str, request: HttpRequest):
+    if not isinstance(request.user, User):
+        raise PermissionDenied("Only logged in users may query core storage.")
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    inline_pdf = profile.inline_pdf
+    inline_tex = profile.inline_tex
     ext = filename[-4:]
     if ext not in [".tex", ".pdf"]:
         return HttpResponseBadRequest("Bad filename extension")
@@ -34,9 +44,13 @@ def get_from_google_storage(filename: str):
     response = HttpResponse(content=file)
     if ext == ".pdf":
         response["Content-Type"] = "application/pdf"
-        response["Content-Disposition"] = f'inline; filename="{filename}"'
+        response["Content-Disposition"] = (
+            f'{"inline" if inline_pdf else "attachment"}; filename="{filename}"'
+        )
     else:
         response["Content-Type"] = "text/plain"
-        response["Content-Disposition"] = "inline"
+        response["Content-Disposition"] = (
+            f'{"inline" if inline_tex else "attachment"}; filename="{filename}"'
+        )
 
     return response

@@ -285,7 +285,7 @@ def permitted(unit: Unit, request: HttpRequest, asking_solution: bool) -> bool:
 def unit_problems(request: HttpRequest, pk: int) -> HttpResponse:
     unit = get_object_or_404(Unit, pk=pk)
     if permitted(unit, request, asking_solution=False):
-        return get_from_google_storage(unit.problems_pdf_filename)
+        return get_from_google_storage(unit.problems_pdf_filename, request)
     else:
         raise PermissionDenied(f"Can't view the problems pdf for {unit}")
 
@@ -294,7 +294,7 @@ def unit_problems(request: HttpRequest, pk: int) -> HttpResponse:
 def unit_tex(request: HttpRequest, pk: int) -> HttpResponse:
     unit = get_object_or_404(Unit, pk=pk)
     if permitted(unit, request, asking_solution=False):
-        return get_from_google_storage(unit.problems_tex_filename)
+        return get_from_google_storage(unit.problems_tex_filename, request)
     else:
         raise PermissionDenied(f"Can't view the problems TeX for {unit}")
 
@@ -303,7 +303,7 @@ def unit_tex(request: HttpRequest, pk: int) -> HttpResponse:
 def unit_solutions(request: HttpRequest, pk: int) -> HttpResponse:
     unit = get_object_or_404(Unit, pk=pk)
     if permitted(unit, request, asking_solution=True):
-        return get_from_google_storage(unit.solutions_pdf_filename)
+        return get_from_google_storage(unit.solutions_pdf_filename, request)
     else:
         raise PermissionDenied(f"Can't view the solutions for {unit}")
 
@@ -328,8 +328,10 @@ class UserProfileUpdateView(
         "show_portal_instructions",
         "show_unit_petitions",
         "disable_hints",
-        "timezone",
         "use_twemoji",
+        "inline_pdf",
+        "inline_tex",
+        "timezone",
     )
     success_url = reverse_lazy("profile")
     object: UserProfile
@@ -358,6 +360,8 @@ class UserProfileUpdateView(
             form["show_unit_petitions"],
             form["disable_hints"],
             form["use_twemoji"],
+            form["inline_pdf"],
+            form["inline_tex"],
             form["timezone"],
         )
         context["timezone_choices"] = TIMEZONE_CHOICES

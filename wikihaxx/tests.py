@@ -1,6 +1,6 @@
 import pytest
+from django.contrib.auth.models import User
 
-from arch.views import User
 from core.factories import UnitFactory, UserFactory
 from rpg.factories import AchievementFactory, AchievementUnlockFactory
 from wikihaxx.mdx.otis import OTISPreprocessor

@@ -3,7 +3,6 @@ from typing import Any, ClassVar, Optional
 
 import reversion
 from django.contrib import messages
-from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
@@ -25,8 +24,6 @@ from otisweb.mixins import VerifiedRequiredMixin
 
 from .forms import HintUpdateFormWithReason
 from .models import Hint, Problem, Vote
-
-User = get_user_model()
 
 ContextType = dict[str, Any]
 
@@ -274,7 +271,7 @@ def view_solution(request: HttpRequest, puid: str) -> HttpResponse:
             f"The problem {puid} is not in the OTIS database, "
             "therefore no solution file could be retrieved."
         )
-    return get_from_google_storage(f"{puid}.tex")
+    return get_from_google_storage(f"{puid}.tex", request)
 
 
 class VoteCreate(
