@@ -286,7 +286,7 @@ def unit_problems(request: HttpRequest, pk: int) -> HttpResponse:
     unit = get_object_or_404(Unit, pk=pk)
     if permitted(unit, request, asking_solution=False):
         assert isinstance(request.user, User)
-        return get_from_google_storage(unit.problems_pdf_filename, request.user)
+        return get_from_google_storage(unit.problems_pdf_filename, request)
     else:
         raise PermissionDenied(f"Can't view the problems pdf for {unit}")
 
@@ -296,7 +296,7 @@ def unit_tex(request: HttpRequest, pk: int) -> HttpResponse:
     unit = get_object_or_404(Unit, pk=pk)
     if permitted(unit, request, asking_solution=False):
         assert isinstance(request.user, User)
-        return get_from_google_storage(unit.problems_tex_filename, request.user)
+        return get_from_google_storage(unit.problems_tex_filename, request)
     else:
         raise PermissionDenied(f"Can't view the problems TeX for {unit}")
 
@@ -306,7 +306,7 @@ def unit_solutions(request: HttpRequest, pk: int) -> HttpResponse:
     unit = get_object_or_404(Unit, pk=pk)
     if permitted(unit, request, asking_solution=True):
         assert isinstance(request.user, User)
-        return get_from_google_storage(unit.solutions_pdf_filename, request.user)
+        return get_from_google_storage(unit.solutions_pdf_filename, request)
     else:
         raise PermissionDenied(f"Can't view the solutions for {unit}")
 

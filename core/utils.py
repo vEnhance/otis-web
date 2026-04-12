@@ -3,7 +3,9 @@ from hashlib import sha256
 
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.exceptions import PermissionDenied
 from django.core.files.storage import default_storage
+from django.http import HttpRequest
 from django.http.response import (
     HttpResponse,
     HttpResponseBadRequest,
@@ -21,8 +23,10 @@ def storage_hash(value: str) -> str:
     return f"TESTING_{h}" if settings.TESTING else h
 
 
-def get_from_google_storage(filename: str, user: User):
-    profile, _ = UserProfile.objects.get_or_create(user=user)
+def get_from_google_storage(filename: str, request: HttpRequest):
+    if not isinstance(request.user, User):
+        raise PermissionDenied("Only logged in users may query core storage.")
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
     inline_pdf = profile.inline_pdf
     inline_tex = profile.inline_tex
     ext = filename[-4:]

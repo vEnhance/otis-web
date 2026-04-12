@@ -273,7 +273,7 @@ def view_solution(request: HttpRequest, puid: str) -> HttpResponse:
             "therefore no solution file could be retrieved."
         )
     assert isinstance(request.user, User)
-    return get_from_google_storage(f"{puid}.tex", request.user)
+    return get_from_google_storage(f"{puid}.tex", request)
 
 
 class VoteCreate(
