@@ -331,10 +331,10 @@ class UserProfileUpdateView(
         "show_portal_instructions",
         "show_unit_petitions",
         "disable_hints",
-        "timezone",
         "use_twemoji",
         "inline_pdf",
         "inline_tex",
+        "timezone",
     )
     success_url = reverse_lazy("profile")
     object: UserProfile
