@@ -4,7 +4,6 @@ from typing import Any, ClassVar, Optional
 import reversion
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http import Http404, HttpRequest, HttpResponseRedirect
@@ -272,7 +271,6 @@ def view_solution(request: HttpRequest, puid: str) -> HttpResponse:
             f"The problem {puid} is not in the OTIS database, "
             "therefore no solution file could be retrieved."
         )
-    assert isinstance(request.user, User)
     return get_from_google_storage(f"{puid}.tex", request)
 
 
