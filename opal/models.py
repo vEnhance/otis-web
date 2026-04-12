@@ -4,7 +4,7 @@ from hashlib import pbkdf2_hmac
 from typing import Any
 
 from django.conf import settings
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.core.exceptions import SuspiciousOperation
 from django.core.validators import FileExtensionValidator
 from django.db import models
@@ -17,6 +17,8 @@ from markdownfield.validators import VALIDATOR_STANDARD
 from sql_util.aggregates import Exists
 
 from rpg.models import Achievement
+
+User = get_user_model()
 
 ALLOWED_ANSWER_CHARACTERS = string.ascii_uppercase + string.digits
 
@@ -40,7 +42,9 @@ class LiveOpalHuntManager(models.Manager):
 
 class OpalAttempt(models.Model):
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, help_text="The user making the attempt"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        help_text="The user making the attempt",
     )
     puzzle = models.ForeignKey(
         "OpalPuzzle",

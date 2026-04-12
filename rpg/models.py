@@ -207,7 +207,9 @@ def palace_image_file_name(instance: "PalaceCarving", filename: str) -> str:
 
 
 class PalaceCarving(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True
+    )
     display_name = models.CharField(
         max_length=128,
         help_text="How you would like your name to be displayed in the Ruby Palace.",

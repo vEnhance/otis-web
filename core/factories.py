@@ -16,7 +16,6 @@ from core.utils import storage_hash
 from otisweb_testsuite import UniqueFaker
 
 
-
 class GroupFactory(DjangoModelFactory):
     class Meta:
         model = Group
