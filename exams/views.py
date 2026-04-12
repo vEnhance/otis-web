@@ -5,7 +5,6 @@ from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 
-from core.models import UserProfile
 from core.utils import get_from_google_storage
 from exams.calculator import expr_compute
 from otisweb.utils import AuthHttpRequest

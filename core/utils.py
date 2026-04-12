@@ -9,6 +9,8 @@ from django.http.response import (
     HttpResponseServerError,
 )
 
+from core.models import UserProfile
+
 logger = logging.getLogger(__name__)
 
 
@@ -19,7 +21,7 @@ def storage_hash(value: str) -> str:
 
 
 def get_from_google_storage(filename: str, user):
-    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    profile, _ = UserProfile.objects.get_or_create(user=user)
     inline_pdf = profile.inline_pdf
     inline_tex = profile.inline_tex
     ext = filename[-4:]
