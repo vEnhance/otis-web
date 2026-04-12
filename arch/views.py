@@ -274,8 +274,7 @@ def view_solution(request: HttpRequest, puid: str) -> HttpResponse:
             f"The problem {puid} is not in the OTIS database, "
             "therefore no solution file could be retrieved."
         )
-    profile, _ = UserProfile.objects.get_or_create(user=request.user)
-    return get_from_google_storage(f"{puid}.tex", profile)
+    return get_from_google_storage(f"{puid}.tex", request.user)
 
 
 class VoteCreate(
