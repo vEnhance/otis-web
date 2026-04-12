@@ -4,20 +4,27 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0065_userprofile_timezone'),
+        ("core", "0065_userprofile_timezone"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='userprofile',
-            name='inline_pdf',
-            field=models.BooleanField(default=True, help_text='Open PDF files without downloading them permanently.', verbose_name='Display PDF inline'),
+            model_name="userprofile",
+            name="inline_pdf",
+            field=models.BooleanField(
+                default=True,
+                help_text="Open PDF files without downloading them permanently.",
+                verbose_name="Display PDF inline",
+            ),
         ),
         migrations.AddField(
-            model_name='userprofile',
-            name='inline_tex',
-            field=models.BooleanField(default=True, help_text='Open TeX files without downloading them permanently.', verbose_name='Display TeX inline'),
+            model_name="userprofile",
+            name="inline_tex",
+            field=models.BooleanField(
+                default=True,
+                help_text="Open TeX files without downloading them permanently.",
+                verbose_name="Display TeX inline",
+            ),
         ),
     ]
