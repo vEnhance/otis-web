@@ -275,11 +275,7 @@ def view_solution(request: HttpRequest, puid: str) -> HttpResponse:
             "therefore no solution file could be retrieved."
         )
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
-    return get_from_google_storage(
-        f"{puid}.tex",
-        inline_pdf=profile.inline_pdf,
-        inline_tex=profile.inline_tex,
-    )
+    return get_from_google_storage(f"{puid}.tex", profile)
 
 
 class VoteCreate(
