@@ -22,11 +22,7 @@ def pdf(request: AuthHttpRequest, pk: int) -> HttpResponse:
     exam = get_object_or_404(PracticeExam, pk=pk)
     if request.user.is_staff:
         profile, _ = UserProfile.objects.get_or_create(user=request.user)
-        return get_from_google_storage(
-            exam.pdfname,
-            inline_pdf=profile.inline_pdf,
-            inline_tex=profile.inline_tex,
-        )
+        return get_from_google_storage(exam.pdfname, profile)
 
     student = infer_student(request)
     if not exam.started:
@@ -37,11 +33,7 @@ def pdf(request: AuthHttpRequest, pk: int) -> HttpResponse:
         raise PermissionDenied("Your student account is disabled.")
 
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
-    return get_from_google_storage(
-        exam.pdfname,
-        inline_pdf=profile.inline_pdf,
-        inline_tex=profile.inline_tex,
-    )
+    return get_from_google_storage(exam.pdfname, profile)
 
 
 @login_required
