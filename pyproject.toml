@@ -9,7 +9,6 @@ requires-python = ">=3.13, <4.0"
 
 dependencies = [
   "Django>=5.2.11,<6.0.0",
-  "PyMySQL>=1.1.2,<2.0.0",
   "Unidecode",
   "crispy-bootstrap5",
   "django-allauth[socialaccount]",
@@ -32,7 +31,6 @@ dependencies = [
   "django-storages[google]",
   "django-stubs>=5.2.2,<6.0.0",
   "django-stubs-ext>=5.2.2,<6.0.0",
-  "mysqlclient>=2.2.8,<3.0.0",
   "prettytable",
   "pyparsing",
   "python-dotenv",
@@ -40,6 +38,11 @@ dependencies = [
   "stripe==5.5.0",
   "wheel",
   "wiki",
+]
+
+[project.optional-dependencies]
+prod = [
+  "mysqlclient",
 ]
 
 [dependency-groups]
@@ -66,7 +69,6 @@ dev = [
   "werkzeug",
   "prek",
 ]
-
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "otisweb.settings"
 python_files = ["tests.py", "test_*.py", "*_tests.py"]

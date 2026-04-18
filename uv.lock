@@ -1189,9 +1189,7 @@ dependencies = [
     { name = "django-storages", extra = ["google"] },
     { name = "django-stubs" },
     { name = "django-stubs-ext" },
-    { name = "mysqlclient" },
     { name = "prettytable" },
-    { name = "pymysql" },
     { name = "pyparsing" },
     { name = "python-dotenv" },
     { name = "setuptools" },
@@ -1199,6 +1197,11 @@ dependencies = [
     { name = "unidecode" },
     { name = "wheel" },
     { name = "wiki" },
+]
+
+[package.optional-dependencies]
+prod = [
+    { name = "mysqlclient" },
 ]
 
 [package.dev-dependencies]
@@ -1250,9 +1253,8 @@ requires-dist = [
     { name = "django-storages", extras = ["google"] },
     { name = "django-stubs", specifier = ">=5.2.2,<6.0.0" },
     { name = "django-stubs-ext", specifier = ">=5.2.2,<6.0.0" },
-    { name = "mysqlclient", specifier = ">=2.2.8,<3.0.0" },
+    { name = "mysqlclient", marker = "extra == 'prod'" },
     { name = "prettytable" },
-    { name = "pymysql", specifier = ">=1.1.2,<2.0.0" },
     { name = "pyparsing" },
     { name = "python-dotenv" },
     { name = "setuptools" },
@@ -1261,6 +1263,7 @@ requires-dist = [
     { name = "wheel" },
     { name = "wiki" },
 ]
+provides-extras = ["prod"]
 
 [package.metadata.requires-dev]
 dev = [
@@ -1621,15 +1624,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/fd/fe/a3f51f84844e7a493884dbd5d70775fc83e26e414234c212fb342d65a079/pymdown_extensions-10.5.tar.gz", hash = "sha256:1b60f1e462adbec5a1ed79dac91f666c9c0d241fa294de1989f29d20096cfd0b", size = 788318, upload-time = "2023-11-25T16:51:54.234Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/4b/fb/7316b19d9a342b9b4bc953abd806dfc609d5d8e1b250b727e8f47551ecf7/pymdown_extensions-10.5-py3-none-any.whl", hash = "sha256:1f0ca8bb5beff091315f793ee17683bc1390731f6ac4c5eb01e27464b80fe879", size = 241130, upload-time = "2023-11-25T16:51:51.543Z" },
-]
-
-[[package]]
-name = "pymysql"
-version = "1.1.2"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/f5/ae/1fe3fcd9f959efa0ebe200b8de88b5a5ce3e767e38c7ac32fb179f16a388/pymysql-1.1.2.tar.gz", hash = "sha256:4961d3e165614ae65014e361811a724e2044ad3ea3739de9903ae7c21f539f03", size = 48258, upload-time = "2025-08-24T12:55:55.146Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/7c/4c/ad33b92b9864cbde84f259d5df035a6447f91891f5be77788e2a3892bce3/pymysql-1.1.2-py3-none-any.whl", hash = "sha256:e6b1d89711dd51f8f74b1631fe08f039e7d76cf67a42a323d3178f0f25762ed9", size = 45300, upload-time = "2025-08-24T12:55:53.394Z" },
 ]
 
 [[package]]
