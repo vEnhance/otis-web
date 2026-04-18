@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     "arch",
     "core",
     "dashboard",
+    "debug_toolbar",
     "exams",
     "hanabi",
     "markets",
@@ -83,8 +84,6 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
 ]
 
-if DEBUG is True and TESTING is False:
-    INSTALLED_APPS.append("debug_toolbar")
 
 INSTALLED_APPS += [
     "allauth",
@@ -118,12 +117,8 @@ INSTALLED_APPS += [
     "wikihaxx",
 ]
 
-if DEBUG is True and TESTING is False:
-    MIDDLEWARE = ["debug_toolbar.middleware.DebugToolbarMiddleware"]
-else:
-    MIDDLEWARE = []
-
-MIDDLEWARE += [
+MIDDLEWARE = [
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
