@@ -1231,7 +1231,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "crispy-bootstrap5" },
-    { name = "django", specifier = ">=5.2.11,<6.0.0" },
+    { name = "django", specifier = ">=5.2,<6.0.0" },
     { name = "django-allauth", extras = ["socialaccount"] },
     { name = "django-bootstrap5" },
     { name = "django-bot-rickroll" },
