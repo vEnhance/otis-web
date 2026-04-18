@@ -737,7 +737,7 @@ def test_announcement(otis):
     a = Announcement.objects.get(slug="testing")
     assert a.subject == "Testing 1"
     assert (
-        a.content_rendered == "<p>This is a sample <strong>announcement</strong>.</p>"
+        a.content_rendered == "<p>This is a sample <strong>announcement</strong>.</p>\n"
     )
 
     # Update it
@@ -755,7 +755,7 @@ def test_announcement(otis):
     assert Announcement.objects.all().count() == 1
     a = Announcement.objects.get(slug="testing")
     assert a.subject == "Testing 2"
-    assert a.content_rendered == "<p>Another update.</p>"
+    assert a.content_rendered == "<p>Another update.</p>\n"
 
     # Create a third announcement
     resp = otis.post_20x(
@@ -772,7 +772,7 @@ def test_announcement(otis):
     assert Announcement.objects.all().count() == 2
     a = Announcement.objects.get(slug="thinking")
     assert a.subject == "Deep in thought"
-    assert a.content_rendered == "<p>Couldn't be me!</p>"
+    assert a.content_rendered == "<p>Couldn't be me!</p>\n"
 
 
 @pytest.mark.django_db
