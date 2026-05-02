@@ -431,6 +431,33 @@ def test_finalize(otis) -> None:
 
 
 @pytest.mark.django_db
+def test_finalize_archived_semester(otis) -> None:
+    alice: Student = StudentFactory.create(newborn=True, semester__active=False)
+    units: list[Unit] = UnitFactory.create_batch(5)
+    alice.curriculum.set(units)
+    otis.login(alice)
+    otis.post_40x("finalize", alice.pk, data={})
+    alice.refresh_from_db()
+    assert alice.newborn is True  # unchanged
+
+
+@pytest.mark.django_db
+def test_curriculum_archived_semester(otis) -> None:
+    alice: Student = StudentFactory.create(newborn=True, semester__active=False)
+    unitgroups: list[UnitGroup] = UnitGroupFactory.create_batch(2)
+    for unitgroup in unitgroups:
+        for letter in "BDZ":
+            UnitFactory.create(
+                code=letter + unitgroup.subject[0] + "W", group=unitgroup
+            )
+    otis.login(alice)
+    # POST should be silently ignored (disabled form)
+    data = {"group-0": [1, 2], "group-1": [4, 5]}
+    otis.post("currshow", alice.pk, data=data)
+    assert alice.curriculum.count() == 0  # unchanged
+
+
+@pytest.mark.django_db
 def test_student_properties(otis) -> None:
     alice: Student = StudentFactory.create()
     units: list[Unit] = UnitFactory.create_batch(10)
