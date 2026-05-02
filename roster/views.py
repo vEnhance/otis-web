@@ -96,7 +96,9 @@ def curriculum(request: HttpRequest, student_pk: int) -> HttpResponse:
     units = Unit.objects.filter(group__hidden=False)
     original = student.curriculum.values_list("pk", flat=True)
 
-    enabled = can_edit(request, student) or student.newborn
+    enabled = student.semester.active and (
+        can_edit(request, student) or student.newborn
+    )
     if request.method == "POST" and enabled:
         form = CurriculumForm(request.POST, units=units, enabled=True)
         if form.is_valid():
@@ -136,6 +138,8 @@ def finalize(request: HttpRequest, student_pk: int) -> HttpResponse:
     student = get_student_by_pk(request, student_pk)
     if student.newborn is not True:
         raise PermissionDenied("Not allowed to call finalize more than once.")
+    elif student.semester.active is False:
+        raise PermissionDenied("Not allowed to call finalize on a completed semester.")
     elif student.curriculum.count() > 0:
         student.newborn = False
         first_units = student.curriculum.all()[:3]

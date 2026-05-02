@@ -91,7 +91,7 @@
       Markets and Hanabi contests are still active and you may still participate.
     </div>
   {% endif %}
-  {% if student.newborn %}
+  {% if student.newborn and student.semester.active %}
     <p>
       Hello, {{ student.name }}!
       Welcome to OTIS.
