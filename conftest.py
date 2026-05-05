@@ -1,7 +1,9 @@
 import os
 
 import django
+import pytest
 from django.conf import settings
+from pytest_django.fixtures import SettingsWrapper
 
 # Set Django settings module before any Django imports
 # This is needed because pytest_plugins is processed before pyproject.toml settings
@@ -14,3 +16,8 @@ pytest_plugins = ["otisweb_testsuite.fixtures"]
 
 def pytest_configure():
     settings.TESTING = True
+
+
+@pytest.fixture(autouse=True)
+def fast_password_hasher(settings: SettingsWrapper) -> None:
+    settings.PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
