@@ -380,3 +380,4 @@ LOGGING = {
 }
 if TESTING:
     logging.disable(django_discordo.ACTION_LOG_LEVEL)
+    PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
