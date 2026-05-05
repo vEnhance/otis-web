@@ -1,6 +1,7 @@
 import os
 
 import django
+import pytest
 from django.conf import settings
 
 # Set Django settings module before any Django imports
@@ -14,3 +15,8 @@ pytest_plugins = ["otisweb_testsuite.fixtures"]
 
 def pytest_configure():
     settings.TESTING = True
+
+
+@pytest.fixture(autouse=True)
+def fast_password_hasher(settings):
+    settings.PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
