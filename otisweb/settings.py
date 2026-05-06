@@ -42,6 +42,9 @@ else:
     INTERNAL_IPS = [
         "127.0.0.1",
     ]
+    DEBUG_TOOLBAR_CONFIG = {
+        "SHOW_COLLAPSED": False,
+    }
     SITE_URL = "http://127.0.0.1"
 SITE_ID = 1
 FORMS_URLFIELD_ASSUME_HTTPS = True
