@@ -1,6 +1,7 @@
+:root[data-theme="light"],
 :root {
   --primary: #0f851d;
-  --accent: #3cb99a;
+  --accent: #fff;
   --primary-fg: #fff;
   --header-bg: #0f851d;
   --header-link-color: #fff;
@@ -16,12 +17,20 @@
   --object-tools-hover-bg: #333;
 }
 
-#changelist-filter {
-  top: -250px;
-  right: 15px;
-}
-
-#changelist-filter h2 {
-  padding-top: 0px;
-  padding-bottom: 0px;
+:root[data-theme="dark"] {
+  --primary: #0f851d;
+  --accent: #3cb99a;
+  --primary-fg: #fff;
+  --header-bg: #0a6615;
+  --header-link-color: #d0ffd8;
+  --breadcrumbs-bg: #1a5c35;
+  --breadcrumbs-fg: #a0d4b8;
+  --breadcrumbs-link-fg: #d0ffd8;
+  --button-bg: #2a9a80;
+  --button-hover-bg: #1a7a60;
+  --default-button-bg: #0a6615;
+  --default-button-hover-bg: #074010;
+  --link-fg: #4cba5c;
+  --link-hover-color: #6dd87a;
+  --object-tools-hover-bg: #222;
 }

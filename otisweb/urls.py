@@ -72,4 +72,4 @@ urlpatterns = [
 
 admin.site.site_header = "OTIS Headquarters"
 admin.site.index_title = "GM Panel"
-admin.site.site_title = "OTIS HQ"
+admin.site.site_title = "OTIS Headquarters"
