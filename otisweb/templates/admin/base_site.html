@@ -1,13 +1,10 @@
 {% extends "admin/base_site.html" %}
 {% load static %}
 {% block extrastyle %}
-  {% if debug %}
-    <link rel="stylesheet"
-          type="text/css"
-          href="{% static 'css/admin-red.css' %}" />
-  {% else %}
-    <link rel="stylesheet"
-          type="text/css"
-          href="{% static 'css/admin-green.css' %}" />
-  {% endif %}
+  <link rel="stylesheet"
+        type="text/css"
+        href="{% static 'css/admin-green.css' %}" />
+  <script>
+      document.documentElement.dataset.theme = "{% if debug %}dark{% else %}light{% endif %}";
+  </script>
 {% endblock extrastyle %}
