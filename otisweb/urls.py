@@ -66,6 +66,18 @@ urlpatterns = [
             url="https://web.evanchen.cc/static/icons/apple-touch-icon-152x152.png"
         ),
     ),
+    path(
+        r"apple-touch-icon-120x120.png",
+        RedirectView.as_view(
+            url="https://web.evanchen.cc/static/icons/apple-touch-icon.png"
+        ),
+    ),
+    path(
+        r"apple-touch-icon-120x120-precomposed.png",
+        RedirectView.as_view(
+            url="https://web.evanchen.cc/static/icons/apple-touch-icon.png"
+        ),
+    ),
     path(r"", include("bot_rickroll.urls")),
     path(r"", RedirectView.as_view(pattern_name="index"), name="top"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)  # type: ignore
