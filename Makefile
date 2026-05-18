@@ -3,6 +3,7 @@
 help:
 	@echo "Available commands:"
 	@echo "  make install          - Install dependencies with uv"
+	@echo "  make createsuperuser  - Create a superuser"
 	@echo "  make runserver        - Run Django development server"
 	@echo "  make migrate          - Apply database migrations"
 	@echo "  make migrations       - Create new migrations"
@@ -14,6 +15,9 @@ help:
 install:
 	uv sync
 	uv run prek install
+
+createsuperuser:
+	uv run python manage.py createsuperuser
 
 runserver:
 	uv run python manage.py runserver_plus
