@@ -228,6 +228,7 @@ SHORT_DATE_FORMAT = "Y-m-d"  # ISO 8601
 
 STATIC_ROOT = BASE_DIR / "static/"
 MEDIA_ROOT = BASE_DIR / "media/"
+STATIC_URL = "/static/"
 
 if PRODUCTION:
     STORAGES = {
@@ -236,17 +237,14 @@ if PRODUCTION:
             "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
         },
     }
-    STATIC_URL = os.getenv("STATIC_URL")
     GS_BUCKET_NAME = os.getenv("GS_BUCKET_NAME")
     MEDIA_URL = os.getenv("MEDIA_URL")
-    assert STATIC_URL is not None
     assert GS_BUCKET_NAME is not None
     assert MEDIA_URL is not None
     IMPORT_EXPORT_TMP_STORAGE_CLASS = import_export.tmp_storages.CacheStorage
     SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
     assert SECRET_KEY is not None
 else:
-    STATIC_URL = "/static/"
     MEDIA_URL = "/media/"
     SECRET_KEY = "evan_chen_is_really_cool"
 
