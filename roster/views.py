@@ -471,11 +471,7 @@ def register(request: AuthHttpRequest) -> HttpResponse:
                         message="This application has expired. "
                         "Please contact Evan for more details.",
                     )
-                    return render(
-                        request,
-                        "decision.html",
-                        context,
-                    )
+                    return HttpResponseRedirect(reverse("index"))
             except (ApplyUUID.DoesNotExist, ValidationError):
                 au = None
 
