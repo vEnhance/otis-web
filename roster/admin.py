@@ -80,6 +80,10 @@ class ApplyUUIDAdmin(ImportExportModelAdmin):
     resource_class = ApplyUUIDIEResource
     actions = ["disable_uuids"]
 
+    @admin.action(description="Enable selected ApplyUUIDs")
+    def enable_uuids(self, request: HttpRequest, queryset: QuerySet[ApplyUUID]) -> None:
+        queryset.update(enabled=True)
+
     @admin.action(description="Disable selected ApplyUUIDs")
     def disable_uuids(
         self, request: HttpRequest, queryset: QuerySet[ApplyUUID]
