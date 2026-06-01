@@ -731,6 +731,10 @@ class ApplyUUID(models.Model):
     percent_aid = models.PositiveSmallIntegerField(
         default=0, help_text="Percentage financial aid requested."
     )
+    enabled = models.BooleanField(
+        default=True,
+        help_text="If disabled, this UUID cannot be used for registration.",
+    )
 
     def __str__(self) -> str:
         return str(self.uuid)

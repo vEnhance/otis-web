@@ -1528,6 +1528,47 @@ def test_reg_with_apply_uuid(otis) -> None:
 
 
 @pytest.mark.django_db
+def test_reg_with_disabled_apply_uuid(otis) -> None:
+    au = ApplyUUIDFactory.create(percent_aid=0, enabled=False)
+    semester: Semester = SemesterFactory.create()
+    alice: User = UserFactory.create(first_name="a", last_name="a", email="a@a.net")
+    otis.login(alice)
+    RegistrationContainerFactory.create(semester=semester, accepting_responses=True)
+
+    agreement = StringIO("i do!")
+    agreement.name = "agreement.pdf"
+
+    resp = otis.post_20x(
+        "register",
+        data={
+            "given_name": "Alice",
+            "surname": "Aardvark",
+            "email_address": "myemail@example.com",
+            "passcode": au.uuid,
+            "gender": "O",
+            "parent_email": "myemail@example.com",
+            "graduation_year": 0,
+            "school_name": "Generic School District",
+            "country": "USA",
+            "aops_username": "",
+            "agreement_form": agreement,
+            "email_on_announcement": False,
+            "email_on_pset_complete": True,
+            "email_on_suggestion_processed": False,
+            "email_on_inquiry_complete": False,
+            "email_on_registration_processed": False,
+        },
+        follow=True,
+    )
+    messages = [m.message for m in resp.context["messages"]]
+    assert any("expired" in m for m in messages)
+    # No registration should have been created
+    assert not StudentRegistration.objects.filter(user=alice).exists()
+    au.refresh_from_db()
+    assert au.reg is None
+
+
+@pytest.mark.django_db
 def test_ad_list_view_access(otis) -> None:
     user = UserFactory.create()
     otis.get_30x("ad-list")  # redirect anonymous
