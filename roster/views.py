@@ -465,6 +465,17 @@ def register(request: AuthHttpRequest) -> HttpResponse:
                 au = ApplyUUID.objects.get(uuid=passcode)
                 if au.reg is not None:
                     raise PermissionDenied("This UUID was already used.")
+                if not au.enabled:
+                    messages.error(
+                        request,
+                        message="This application has expired. "
+                        "Please contact Evan for more details.",
+                    )
+                    return render(
+                        request,
+                        "decision.html",
+                        context,
+                    )
             except (ApplyUUID.DoesNotExist, ValidationError):
                 au = None
 

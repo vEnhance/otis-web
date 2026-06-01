@@ -65,14 +65,26 @@ class ApplyUUIDAdmin(ImportExportModelAdmin):
         "pk",
         "uuid",
         "percent_aid",
+        "enabled",
         "reg",
     )
     list_display_links = (
         "pk",
         "uuid",
     )
-    list_filter = (("reg", admin.EmptyFieldListFilter), NeedsFinaidListFilter)
+    list_filter = (
+        ("reg", admin.EmptyFieldListFilter),
+        NeedsFinaidListFilter,
+        "enabled",
+    )
     resource_class = ApplyUUIDIEResource
+    actions = ["disable_uuids"]
+
+    @admin.action(description="Disable selected ApplyUUIDs")
+    def disable_uuids(
+        self, request: HttpRequest, queryset: QuerySet[ApplyUUID]
+    ) -> None:
+        queryset.update(enabled=False)
 
 
 # ASSISTANT
