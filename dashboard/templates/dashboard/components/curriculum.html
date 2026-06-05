@@ -72,7 +72,9 @@
           }
 
           tbody.appendChild(frag);
-          $(this).text(sorted ? "Sort by OTIS logical order" : "Sort by subject");
+          const button_text = sorted ? "Sort by OTIS logical order" : "Sort by subject";
+          $(this).text(button_text);
+          $(this).attr("title", button_text);
       });
   </script>
   {% with profile=request.user|getprofile %}
