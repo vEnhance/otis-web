@@ -9,7 +9,10 @@ class OIMESetupForm(forms.Form):
         help_text="The name you want credited on problems you author or help select.",
     )
     is_serious = forms.ChoiceField(
-        choices=[("serious", "Serious (timed sessions)"), ("casual", "Casual (browse freely)")],
+        choices=[
+            ("serious", "Serious (timed sessions)"),
+            ("casual", "Casual (browse freely)"),
+        ],
         widget=forms.RadioSelect,
         initial="serious",
         label="Testsolving mode",
@@ -38,7 +41,9 @@ class OIMEAnswerForm(forms.Form):
     answer = forms.IntegerField(
         min_value=0,
         max_value=999,
-        widget=forms.NumberInput(attrs={"class": "form-control", "placeholder": "0-999"}),
+        widget=forms.NumberInput(
+            attrs={"class": "form-control", "placeholder": "0-999"}
+        ),
     )
 
 

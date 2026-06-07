@@ -59,7 +59,14 @@ class OIMEParticipationAdmin(admin.ModelAdmin[OIMEParticipation]):
 
 @admin.register(OIMEProposal)
 class OIMEProposalAdmin(admin.ModelAdmin[OIMEProposal]):
-    list_display = ["__str__", "author", "subject", "difficulty", "archived", "created_at"]
+    list_display = [
+        "__str__",
+        "author",
+        "subject",
+        "difficulty",
+        "archived",
+        "created_at",
+    ]
     list_filter = ["subject", "difficulty", "archived"]
     search_fields = ["author__display_name", "statement"]
     readonly_fields = ["created_at", "updated_at"]
@@ -68,7 +75,15 @@ class OIMEProposalAdmin(admin.ModelAdmin[OIMEProposal]):
 
 @admin.register(OIMEAttempt)
 class OIMEAttemptAdmin(admin.ModelAdmin[OIMEAttempt]):
-    list_display = ["contributor", "proposal", "year", "status", "wrong_answers", "solve_time_seconds", "started_at"]
+    list_display = [
+        "contributor",
+        "proposal",
+        "year",
+        "status",
+        "wrong_answers",
+        "solve_time_seconds",
+        "started_at",
+    ]
     list_filter = ["status", "year"]
     search_fields = ["contributor__display_name"]
     readonly_fields = ["started_at"]
