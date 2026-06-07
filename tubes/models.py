@@ -168,10 +168,14 @@ class OIMEProposal(models.Model):
 
 
 class OIMEAttempt(models.Model):
+    ANSWER_LIMIT = 5
+
     STATUS_CHOICES = [
-        ("IN_PROGRESS", "In Progress"),
-        ("CORRECT", "Solved"),
-        ("GAVE_UP", "Gave Up"),
+        ("OIME_TBD", "In Progress"),
+        ("OIME_OK", "Solved"),
+        ("OIME_FAIL", "Gave Up"),
+        ("OIME_TLE", "Time Limit Exceeded"),
+        ("OIME_ALE", "Answer Limit Exceeded"),
     ]
 
     contributor = models.ForeignKey(
@@ -191,14 +195,12 @@ class OIMEAttempt(models.Model):
     )
     started_at = models.DateTimeField(auto_now_add=True)
     submitted_at = models.DateTimeField(null=True, blank=True)
-    status = models.CharField(
-        max_length=15, choices=STATUS_CHOICES, default="IN_PROGRESS"
-    )
+    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default="OIME_TBD")
     wrong_answers = models.IntegerField(default=0)
     solve_time_seconds = models.IntegerField(
         null=True,
         blank=True,
-        help_text="Only set when status is CORRECT.",
+        help_text="Only set when status is OIME_OK.",
     )
 
     class Meta:
@@ -209,7 +211,7 @@ class OIMEAttempt(models.Model):
 
     @property
     def is_complete(self) -> bool:
-        return self.status in ("CORRECT", "GAVE_UP")
+        return self.status != "OIME_TBD"
 
     @property
     def time_expired(self) -> bool:

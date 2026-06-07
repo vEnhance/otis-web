@@ -48,85 +48,45 @@
       </form>
     </div>
   {% endif %}
-  {# ---- Serious solver: in progress ---- #}
-  {% if is_serious and attempt and not attempt.is_complete %}
-    <div class="card mb-4 border-warning">
-      <div class="card-header bg-warning text-dark fw-bold d-flex justify-content-between">
-        <span>Time Remaining</span>
-        <span id="countdown">{{ remaining_seconds }}s</span>
-      </div>
-      <div class="card-body">
-        {% if attempt.wrong_answers > 0 %}
-          <p class="text-danger">Wrong answers so far: {{ attempt.wrong_answers }}</p>
-        {% endif %}
-        <form method="post"
-              action="{% url "oime-submit-answer" proposal.pk %}"
-              class="d-flex gap-2 align-items-end mb-3">
-          {% csrf_token %}
-          <div>
-            <label class="form-label fw-bold">Your Answer (0–999)</label>
-            {{ answer_form.answer }}
-          </div>
-          <button type="submit" class="btn btn-success">Submit Answer</button>
-        </form>
-        <form method="post" action="{% url "oime-give-up" proposal.pk %}">
-          {% csrf_token %}
-          <button type="submit"
-                  class="btn btn-outline-danger btn-sm"
-                  onclick="return confirm('Give up and reveal the solution?')">Give Up</button>
-        </form>
-      </div>
-    </div>
-    <script>
-        (function() {
-            let secs = {
-                {
-                    remaining_seconds
-                }
-            };
-            const el = document.getElementById("countdown");
-            const header = el.closest(".card-header");
-            const interval = setInterval(function() {
-                secs -= 1;
-                if (secs <= 0) {
-                    clearInterval(interval);
-                    el.textContent = "Time's up!";
-                    header.classList.replace("bg-warning", "bg-danger");
-                    header.classList.remove("text-dark");
-                    header.classList.add("text-white");
-                    setTimeout(function() {
-                        location.reload();
-                    }, 1000);
-                } else {
-                    const m = Math.floor(secs / 60);
-                    const s = secs % 60;
-                    el.textContent = m + ":" + String(s).padStart(2, "0");
-                }
-            }, 1000);
-        })();
-    </script>
-  {% endif %}
   {# ---- Casual solver: answer check + modal solution reveal ---- #}
   {% if not is_serious %}
     <div class="card mb-4">
       <div class="card-header fw-bold">Check Your Answer</div>
       <div class="card-body">
-        <form method="post"
-              action="{% url "oime-check-casual" proposal.pk %}"
-              class="d-flex gap-2 align-items-end mb-3">
-          {% csrf_token %}
+        <div class="d-flex gap-2 align-items-end mb-3">
           <div>
-            <label class="form-label fw-bold">Your Answer (0–999)</label>
-            {{ answer_form.answer }}
+            <label class="form-label fw-bold" for="casual-answer-input">Your Answer (0–999)</label>
+            <input type="number"
+                   id="casual-answer-input"
+                   class="form-control"
+                   min="0"
+                   max="999"
+                   style="width:100px">
           </div>
-          <button type="submit" class="btn btn-success">Check</button>
-        </form>
+          <button type="button"
+                  class="btn btn-success"
+                  onclick="checkCasualAnswer({{ proposal.answer }})">Check</button>
+        </div>
+        <div id="casual-answer-feedback" class="mb-2"></div>
         <button type="button"
                 class="btn btn-outline-secondary btn-sm"
                 data-bs-toggle="modal"
                 data-bs-target="#solution-modal">Reveal Solution</button>
       </div>
     </div>
+    <script>
+        function checkCasualAnswer(correct) {
+            const val = parseInt(document.getElementById("casual-answer-input").value, 10);
+            const fb = document.getElementById("casual-answer-feedback");
+            if (isNaN(val) || val < 0 || val > 999) {
+                fb.innerHTML = '<span class="text-danger">Please enter an integer from 0 to 999.</span>';
+            } else if (val === correct) {
+                fb.innerHTML = '<span class="text-success fw-bold">Correct!</span>';
+            } else {
+                fb.innerHTML = '<span class="text-danger">Incorrect, try again.</span>';
+            }
+        }
+    </script>
     <div class="modal fade"
          id="solution-modal"
          tabindex="-1"
@@ -175,12 +135,18 @@
   {% endif %}
   {# ---- Serious solver: completed — show solution directly ---- #}
   {% if is_serious and can_see_solution %}
-    {% if attempt.status == "CORRECT" %}
+    {% if attempt.status == "OIME_OK" %}
       <div class="alert alert-success">
         Solved in {{ attempt.solve_time_seconds }}s with {{ attempt.wrong_answers }} wrong answer{{ attempt.wrong_answers|pluralize }}.
       </div>
-    {% elif attempt.status == "GAVE_UP" %}
+    {% elif attempt.status == "OIME_FAIL" %}
       <div class="alert alert-secondary">You gave up on this problem.</div>
+    {% elif attempt.status == "OIME_TLE" %}
+      <div class="alert alert-danger">Time limit exceeded.</div>
+    {% elif attempt.status == "OIME_ALE" %}
+      <div class="alert alert-danger">
+        Answer limit exceeded ({{ attempt.wrong_answers }} wrong answer{{ attempt.wrong_answers|pluralize }}).
+      </div>
     {% endif %}
     <div class="card mb-4" id="oime-answer-section">
       <div class="card-header fw-bold d-flex justify-content-between align-items-center">

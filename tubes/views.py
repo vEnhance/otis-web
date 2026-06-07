@@ -109,8 +109,8 @@ def _get_solver_context(
             attempt = OIMEAttempt.objects.get(
                 contributor=contributor, proposal=proposal
             )
-            if attempt.status == "IN_PROGRESS" and attempt.time_expired:
-                attempt.status = "GAVE_UP"
+            if attempt.status == "OIME_TBD" and attempt.time_expired:
+                attempt.status = "OIME_TLE"
                 attempt.submitted_at = timezone.now()
                 attempt.save()
         except OIMEAttempt.DoesNotExist:
@@ -295,7 +295,7 @@ class ProposalUpdateView(
 
 
 # ---------------------------------------------------------------------------
-# OIME: Proposal detail (view / testsolver)
+# OIME: Proposal detail and solve views
 # ---------------------------------------------------------------------------
 
 
@@ -310,8 +310,11 @@ def proposal_detail(request: HttpRequest, pk: int) -> HttpResponse:
     ctx = _get_solver_context(contributor, proposal, year)
     attempt: OIMEAttempt | None = ctx["attempt"]
 
+    # Serious solver with an active attempt → go to the solve view
+    if ctx["is_serious"] and attempt is not None and not attempt.is_complete:
+        return redirect("oime-proposal-fight", pk=pk)
+
     comment_form = OIMECommentForm()
-    answer_form = OIMEAnswerForm()
 
     if request.method == "POST":
         if "submit_comment" in request.POST:
@@ -325,9 +328,6 @@ def proposal_detail(request: HttpRequest, pk: int) -> HttpResponse:
                 comment.save()
                 return redirect("oime-proposal-detail", pk=pk)
 
-    remaining_seconds = (
-        attempt.remaining_seconds if (attempt and not attempt.is_complete) else None
-    )
     comments = (
         OIMEComment.objects.filter(proposal=proposal).select_related("author")
         if ctx["can_see_solution"]
@@ -345,12 +345,40 @@ def proposal_detail(request: HttpRequest, pk: int) -> HttpResponse:
         {
             "proposal": proposal,
             "contributor": contributor,
-            "answer_form": answer_form,
+            "answer_form": OIMEAnswerForm(),
             "comment_form": comment_form,
             "comments": comments,
-            "remaining_seconds": remaining_seconds,
             "has_upvoted": has_upvoted,
             **ctx,
+        },
+    )
+
+
+@verified_required
+def proposal_fight(request: HttpRequest, pk: int) -> HttpResponse:
+    """Timed solving screen for serious testsolvers with an active attempt."""
+    proposal = get_object_or_404(OIMEProposal, pk=pk)
+    contributor = _get_contributor(request)
+    if contributor is None:
+        return redirect("oime-setup")
+
+    year = _get_active_year()
+    ctx = _get_solver_context(contributor, proposal, year)
+    attempt: OIMEAttempt | None = ctx["attempt"]
+
+    # Only valid when there's an active in-progress serious attempt
+    if not ctx["is_serious"] or attempt is None or attempt.is_complete:
+        return redirect("oime-proposal-detail", pk=pk)
+
+    return render(
+        request,
+        "tubes/proposal_fight.html",
+        {
+            "proposal": proposal,
+            "contributor": contributor,
+            "attempt": attempt,
+            "remaining_seconds": attempt.remaining_seconds,
+            "answer_form": OIMEAnswerForm(),
         },
     )
 
@@ -379,7 +407,7 @@ def start_attempt(request: HttpRequest, pk: int) -> HttpResponse:
         proposal=proposal,
         defaults={"year": year},
     )
-    return redirect("oime-proposal-detail", pk=pk)
+    return redirect("oime-proposal-fight", pk=pk)
 
 
 @verified_required
@@ -394,14 +422,14 @@ def submit_answer(request: HttpRequest, pk: int) -> HttpResponse:
 
     attempt = get_object_or_404(OIMEAttempt, contributor=contributor, proposal=proposal)
 
-    if attempt.status != "IN_PROGRESS":
+    if attempt.status != "OIME_TBD":
         return redirect("oime-proposal-detail", pk=pk)
 
     if attempt.time_expired:
-        attempt.status = "GAVE_UP"
+        attempt.status = "OIME_TLE"
         attempt.submitted_at = timezone.now()
         attempt.save()
-        messages.warning(request, "Time's up! The problem has been marked as gave up.")
+        messages.warning(request, "Time's up!")
         return redirect("oime-proposal-detail", pk=pk)
 
     form = OIMEAnswerForm(request.POST)
@@ -412,17 +440,28 @@ def submit_answer(request: HttpRequest, pk: int) -> HttpResponse:
     submitted = form.cleaned_data["answer"]
     if submitted == proposal.answer:
         elapsed = int((timezone.now() - attempt.started_at).total_seconds())
-        attempt.status = "CORRECT"
+        attempt.status = "OIME_OK"
         attempt.submitted_at = timezone.now()
         attempt.solve_time_seconds = elapsed
         attempt.save()
         messages.success(request, "Correct! Great job!")
     else:
         attempt.wrong_answers += 1
-        attempt.save()
-        messages.error(
-            request, f"Incorrect (wrong answer #{attempt.wrong_answers}). Try again!"
-        )
+        if attempt.wrong_answers >= OIMEAttempt.ANSWER_LIMIT:
+            attempt.status = "OIME_ALE"
+            attempt.submitted_at = timezone.now()
+            attempt.save()
+            messages.error(
+                request,
+                f"Incorrect. You have used all {OIMEAttempt.ANSWER_LIMIT} attempts.",
+            )
+        else:
+            attempt.save()
+            remaining = OIMEAttempt.ANSWER_LIMIT - attempt.wrong_answers
+            messages.error(
+                request,
+                f"Incorrect (wrong answer #{attempt.wrong_answers}). {remaining} attempt{'' if remaining == 1 else 's'} remaining.",
+            )
 
     return redirect("oime-proposal-detail", pk=pk)
 
@@ -439,34 +478,13 @@ def give_up(request: HttpRequest, pk: int) -> HttpResponse:
 
     attempt = get_object_or_404(OIMEAttempt, contributor=contributor, proposal=proposal)
 
-    if attempt.status == "IN_PROGRESS":
-        attempt.status = "GAVE_UP"
+    if attempt.status == "OIME_TBD":
+        attempt.status = "OIME_FAIL"
         attempt.submitted_at = timezone.now()
         attempt.save()
         messages.info(
             request, "You gave up on this problem. You can now view the solution."
         )
-
-    return redirect("oime-proposal-detail", pk=pk)
-
-
-@verified_required
-def check_casual_answer(request: HttpRequest, pk: int) -> HttpResponse:
-    if request.method != "POST":
-        return redirect("oime-proposal-detail", pk=pk)
-
-    proposal = get_object_or_404(OIMEProposal, pk=pk)
-    contributor = _get_contributor(request)
-    if contributor is None:
-        return redirect("oime-setup")
-
-    form = OIMEAnswerForm(request.POST)
-    if not form.is_valid():
-        messages.error(request, "Please enter a valid integer (0-999).")
-    elif form.cleaned_data["answer"] == proposal.answer:
-        messages.success(request, "Correct!")
-    else:
-        messages.error(request, "Incorrect, try again.")
 
     return redirect("oime-proposal-detail", pk=pk)
 

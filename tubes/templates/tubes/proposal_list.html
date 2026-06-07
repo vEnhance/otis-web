@@ -54,10 +54,14 @@
           {% if is_serious %}
             <td>
               {% if proposal.user_attempt %}
-                {% if proposal.user_attempt.status == "CORRECT" %}
+                {% if proposal.user_attempt.status == "OIME_OK" %}
                   <span class="badge bg-success">Solved ({{ proposal.user_attempt.solve_time_seconds }}s)</span>
-                {% elif proposal.user_attempt.status == "GAVE_UP" %}
+                {% elif proposal.user_attempt.status == "OIME_FAIL" %}
                   <span class="badge bg-secondary">Gave Up</span>
+                {% elif proposal.user_attempt.status == "OIME_TLE" %}
+                  <span class="badge bg-danger">TLE</span>
+                {% elif proposal.user_attempt.status == "OIME_ALE" %}
+                  <span class="badge bg-danger">ALE</span>
                 {% else %}
                   <span class="badge bg-warning text-dark">In Progress</span>
                 {% endif %}

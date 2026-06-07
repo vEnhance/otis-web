@@ -1,0 +1,73 @@
+{% extends "layout.html" %}
+{% block title %}
+  Fighting {{ proposal }} — OIME
+{% endblock title %}
+{% block layout-content %}
+  <div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+      <h2>{{ proposal.get_subject_display }} — Difficulty {{ proposal.difficulty }}/5</h2>
+      <p class="text-muted">Submitted by {{ proposal.author }}</p>
+    </div>
+    <a href="{% url "oime-proposal-list" %}" class="btn btn-outline-secondary btn-sm">← Back</a>
+  </div>
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags|default:"info" }}">{{ message }}</div>
+  {% endfor %}
+  <div class="card mb-4">
+    <div class="card-header fw-bold">Problem Statement</div>
+    <div class="card-body">
+      <div class="math-content">{{ proposal.statement }}</div>
+    </div>
+  </div>
+  <div class="card mb-4 border-warning">
+    <div class="card-header bg-warning text-dark fw-bold d-flex justify-content-between">
+      <span>Time Remaining</span>
+      <span id="countdown">{{ remaining_seconds }}s</span>
+    </div>
+    <div class="card-body">
+      <p class="text-muted mb-2">
+        Wrong answers: {{ attempt.wrong_answers }} / {{ attempt.ANSWER_LIMIT }}
+      </p>
+      <form method="post"
+            action="{% url "oime-submit-answer" proposal.pk %}"
+            class="d-flex gap-2 align-items-end mb-3">
+        {% csrf_token %}
+        <div>
+          <label class="form-label fw-bold" for="{{ answer_form.answer.id_for_label }}">Your Answer (0–999)</label>
+          {{ answer_form.answer }}
+        </div>
+        <button type="submit" class="btn btn-success">Submit Answer</button>
+      </form>
+      <form method="post" action="{% url "oime-give-up" proposal.pk %}">
+        {% csrf_token %}
+        <button type="submit"
+                class="btn btn-outline-danger btn-sm"
+                onclick="return confirm('Give up and reveal the solution?')">Give Up</button>
+      </form>
+    </div>
+  </div>
+  <script>
+      (function() {
+          let secs = {{ remaining_seconds }};
+          const el = document.getElementById("countdown");
+          const header = el.closest(".card-header");
+          const interval = setInterval(function() {
+              secs -= 1;
+              if (secs <= 0) {
+                  clearInterval(interval);
+                  el.textContent = "Time's up!";
+                  header.classList.replace("bg-warning", "bg-danger");
+                  header.classList.remove("text-dark");
+                  header.classList.add("text-white");
+                  setTimeout(function() {
+                      location.reload();
+                  }, 1000);
+              } else {
+                  const m = Math.floor(secs / 60);
+                  const s = secs % 60;
+                  el.textContent = m + ":" + String(s).padStart(2, "0");
+              }
+          }, 1000);
+      })();
+  </script>
+{% endblock layout-content %}

@@ -351,13 +351,13 @@ def test_serious_correct_answer(otis):
     OIMEParticipationFactory.create(contributor=contributor, year=year, is_serious=True)
     proposal = OIMEProposalFactory.create(answer=42)
     OIMEAttemptFactory.create(
-        contributor=contributor, year=year, proposal=proposal, status="IN_PROGRESS"
+        contributor=contributor, year=year, proposal=proposal, status="OIME_TBD"
     )
     otis.login(user)
     resp = otis.post("oime-submit-answer", proposal.pk, data={"answer": 42})
     otis.assert_30x(resp)
     attempt = OIMEAttempt.objects.get(contributor=contributor, proposal=proposal)
-    assert attempt.status == "CORRECT"
+    assert attempt.status == "OIME_OK"
     assert attempt.solve_time_seconds is not None
 
 
@@ -368,12 +368,12 @@ def test_serious_wrong_answer_increments_count(otis):
     OIMEParticipationFactory.create(contributor=contributor, year=year, is_serious=True)
     proposal = OIMEProposalFactory.create(answer=42)
     OIMEAttemptFactory.create(
-        contributor=contributor, year=year, proposal=proposal, status="IN_PROGRESS"
+        contributor=contributor, year=year, proposal=proposal, status="OIME_TBD"
     )
     otis.login(user)
     otis.post("oime-submit-answer", proposal.pk, data={"answer": 99})
     attempt = OIMEAttempt.objects.get(contributor=contributor, proposal=proposal)
-    assert attempt.status == "IN_PROGRESS"
+    assert attempt.status == "OIME_TBD"
     assert attempt.wrong_answers == 1
 
 
@@ -384,13 +384,13 @@ def test_serious_give_up(otis):
     OIMEParticipationFactory.create(contributor=contributor, year=year, is_serious=True)
     proposal = OIMEProposalFactory.create()
     OIMEAttemptFactory.create(
-        contributor=contributor, year=year, proposal=proposal, status="IN_PROGRESS"
+        contributor=contributor, year=year, proposal=proposal, status="OIME_TBD"
     )
     otis.login(user)
     resp = otis.post("oime-give-up", proposal.pk)
     otis.assert_30x(resp)
     attempt = OIMEAttempt.objects.get(contributor=contributor, proposal=proposal)
-    assert attempt.status == "GAVE_UP"
+    assert attempt.status == "OIME_FAIL"
     assert attempt.submitted_at is not None
 
 
@@ -401,7 +401,7 @@ def test_serious_gave_up_sees_solution(otis):
     OIMEParticipationFactory.create(contributor=contributor, year=year, is_serious=True)
     proposal = OIMEProposalFactory.create(answer=42)
     OIMEAttemptFactory.create(
-        contributor=contributor, year=year, proposal=proposal, status="GAVE_UP"
+        contributor=contributor, year=year, proposal=proposal, status="OIME_FAIL"
     )
     otis.login(user)
     resp = otis.get_20x("oime-proposal-detail", proposal.pk)
@@ -415,15 +415,17 @@ def test_serious_cannot_comment_before_solving(otis):
     OIMEParticipationFactory.create(contributor=contributor, year=year, is_serious=True)
     proposal = OIMEProposalFactory.create()
     OIMEAttemptFactory.create(
-        contributor=contributor, year=year, proposal=proposal, status="IN_PROGRESS"
+        contributor=contributor, year=year, proposal=proposal, status="OIME_TBD"
     )
     otis.login(user)
+    # In-progress serious solver is redirected to the fight view, never sees the form
     resp = otis.post(
         "oime-proposal-detail",
         proposal.pk,
         data={"submit_comment": "1", "content": "Spoiler!"},
     )
-    assert resp.status_code == 403
+    otis.assert_30x(resp)
+    assert resp.url.endswith(f"/tubes/proposal/{proposal.pk}/fight/")
     assert not OIMEComment.objects.exists()
 
 
@@ -439,7 +441,7 @@ def test_upvote_after_solving(otis):
     OIMEParticipationFactory.create(contributor=contributor, year=year, is_serious=True)
     proposal = OIMEProposalFactory.create()
     OIMEAttemptFactory.create(
-        contributor=contributor, year=year, proposal=proposal, status="CORRECT"
+        contributor=contributor, year=year, proposal=proposal, status="OIME_OK"
     )
     otis.login(user)
     resp = otis.post("oime-upvote", proposal.pk)
