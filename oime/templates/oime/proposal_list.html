@@ -1,0 +1,68 @@
+{% extends "layout.html" %}
+{% block title %}
+  OIME Problem Proposals
+{% endblock title %}
+{% block layout-content %}
+  <h2>OIME Problem Proposals</h2>
+
+  <div class="mb-3">
+    <a href="{% url "oime-proposal-create" %}" class="btn btn-primary">Submit a Problem</a>
+    <a href="{% url "oime-role-select" %}" class="btn btn-outline-secondary ms-2">
+      Role: {% if role_set %}{% if is_serious %}Serious{% else %}Casual{% endif %}{% else %}Not set{% endif %}
+    </a>
+  </div>
+
+  {% if not role_set %}
+    <div class="alert alert-info">
+      You haven't chosen a solving role yet.
+      <a href="{% url "oime-role-select" %}">Pick casual or serious</a> before solving problems.
+    </div>
+  {% endif %}
+
+  {% if proposals %}
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Subject</th>
+          <th>Difficulty</th>
+          <th>Author</th>
+          <th>Submitted</th>
+          {% if is_serious %}<th>Your Status</th>{% endif %}
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for proposal in proposals %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ proposal.get_subject_display }}</td>
+            <td>{{ proposal.difficulty }} / 5</td>
+            <td>{{ proposal.author.get_full_name|default:proposal.author.username }}</td>
+            <td>{{ proposal.created_at|date:"Y-m-d" }}</td>
+            {% if is_serious %}
+              <td>
+                {% if proposal.user_attempt %}
+                  {% if proposal.user_attempt.status == "CORRECT" %}
+                    <span class="badge bg-success">Solved ({{ proposal.user_attempt.solve_time_seconds }}s)</span>
+                  {% elif proposal.user_attempt.status == "GAVE_UP" %}
+                    <span class="badge bg-secondary">Gave Up</span>
+                  {% else %}
+                    <span class="badge bg-warning text-dark">In Progress</span>
+                  {% endif %}
+                {% else %}
+                  <span class="badge bg-light text-muted">Not started</span>
+                {% endif %}
+              </td>
+            {% endif %}
+            <td>
+              <a href="{{ proposal.get_absolute_url }}" class="btn btn-sm btn-outline-primary">View</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="alert alert-warning">No proposals yet. Be the first to submit!</div>
+  {% endif %}
+{% endblock layout-content %}

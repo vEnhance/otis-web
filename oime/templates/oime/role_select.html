@@ -1,0 +1,58 @@
+{% extends "layout.html" %}
+{% block title %}
+  Choose Solving Role — OIME
+{% endblock title %}
+{% block layout-content %}
+  <h2>Choose Your Solving Role</h2>
+  <p>
+    Select how you want to participate in OIME testsolving. You can change this at any time.
+    <strong>Note:</strong> changing from serious to casual does not erase your existing timed attempts.
+  </p>
+
+  <div class="row g-4 mb-4">
+    <div class="col-md-6">
+      <div class="card h-100 {% if role and not role.is_serious %}border-primary{% endif %}">
+        <div class="card-header fw-bold">Casual</div>
+        <div class="card-body">
+          <ul>
+            <li>Browse all problems and solutions freely</li>
+            <li>No timers or locks</li>
+            <li>Solve at your own pace</li>
+            <li>Solve times are unofficial</li>
+          </ul>
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="role" value="casual">
+            <button type="submit" class="btn btn-primary w-100">Choose Casual</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card h-100 {% if role and role.is_serious %}border-primary{% endif %}">
+        <div class="card-header fw-bold">Serious</div>
+        <div class="card-body">
+          <ul>
+            <li>Timed attempts: 5n + 5 minutes for difficulty n</li>
+            <li>Timer starts when you open a problem</li>
+            <li>Wrong answers are tracked</li>
+            <li>Solution visible only after solving or giving up</li>
+            <li>Solve times feed into official statistics</li>
+          </ul>
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="role" value="serious">
+            <button type="submit" class="btn btn-outline-primary w-100">Choose Serious</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if role %}
+    <p class="text-muted">Your current role: <strong>{% if role.is_serious %}Serious{% else %}Casual{% endif %}</strong>.</p>
+  {% endif %}
+
+  <a href="{% url "oime-proposal-list" %}" class="btn btn-outline-secondary">← Back to Problems</a>
+{% endblock layout-content %}
