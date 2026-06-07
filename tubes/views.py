@@ -451,6 +451,27 @@ def give_up(request: HttpRequest, pk: int) -> HttpResponse:
 
 
 @verified_required
+def check_casual_answer(request: HttpRequest, pk: int) -> HttpResponse:
+    if request.method != "POST":
+        return redirect("oime-proposal-detail", pk=pk)
+
+    proposal = get_object_or_404(OIMEProposal, pk=pk)
+    contributor = _get_contributor(request)
+    if contributor is None:
+        return redirect("oime-setup")
+
+    form = OIMEAnswerForm(request.POST)
+    if not form.is_valid():
+        messages.error(request, "Please enter a valid integer (0-999).")
+    elif form.cleaned_data["answer"] == proposal.answer:
+        messages.success(request, "Correct!")
+    else:
+        messages.error(request, "Incorrect, try again.")
+
+    return redirect("oime-proposal-detail", pk=pk)
+
+
+@verified_required
 def upvote_proposal(request: HttpRequest, pk: int) -> HttpResponse:
     if request.method != "POST":
         return redirect("oime-proposal-detail", pk=pk)

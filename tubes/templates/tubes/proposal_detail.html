@@ -27,7 +27,7 @@
       <div class="math-content">{{ proposal.statement }}</div>
     </div>
   </div>
-  {# ---- Serious solver: not yet enrolled in active year ---- #}
+  {# ---- Not yet enrolled in active year ---- #}
   {% if is_serious is False and not participation and year %}
     <div class="alert alert-warning">
       You haven't set a testsolving mode for {{ year }} yet.
@@ -106,16 +106,81 @@
         })();
     </script>
   {% endif %}
-  {# ---- Solution (visible to casual or completed serious) ---- #}
-  {% if can_see_solution %}
-    {% if attempt %}
-      {% if attempt.status == "CORRECT" %}
-        <div class="alert alert-success">
-          Solved in {{ attempt.solve_time_seconds }}s with {{ attempt.wrong_answers }} wrong answer{{ attempt.wrong_answers|pluralize }}.
+  {# ---- Casual solver: answer check + modal solution reveal ---- #}
+  {% if not is_serious %}
+    <div class="card mb-4">
+      <div class="card-header fw-bold">Check Your Answer</div>
+      <div class="card-body">
+        <form method="post"
+              action="{% url "oime-check-casual" proposal.pk %}"
+              class="d-flex gap-2 align-items-end mb-3">
+          {% csrf_token %}
+          <div>
+            <label class="form-label fw-bold">Your Answer (0–999)</label>
+            {{ answer_form.answer }}
+          </div>
+          <button type="submit" class="btn btn-success">Check</button>
+        </form>
+        <button type="button"
+                class="btn btn-outline-secondary btn-sm"
+                data-bs-toggle="modal"
+                data-bs-target="#solution-modal">Reveal Solution</button>
+      </div>
+    </div>
+    <div class="modal fade"
+         id="solution-modal"
+         tabindex="-1"
+         aria-labelledby="solution-modal-label">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="solution-modal-label">Solution</h5>
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p id="oime-answer-section">
+              <strong class="fs-5">Answer: {{ proposal.answer }}</strong>
+            </p>
+            <hr>
+            <div class="math-content">{{ proposal.solution }}</div>
+          </div>
+          <div class="modal-footer">
+            {% if can_upvote %}
+              <form method="post"
+                    action="{% url "oime-upvote" proposal.pk %}"
+                    class="me-auto">
+                {% csrf_token %}
+                <button type="submit"
+                        class="btn btn-sm {% if has_upvoted %}btn-warning{% else %}btn-outline-secondary{% endif %}">
+                  ♥
+                  {% if has_upvoted %}
+                    Upvoted
+                  {% else %}
+                    Upvote
+                  {% endif %}
+                  ({{ proposal.upvotes.count }})
+                </button>
+              </form>
+            {% else %}
+              <span class="text-muted small me-auto">{{ proposal.upvotes.count }} upvote{{ proposal.upvotes.count|pluralize }}</span>
+            {% endif %}
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
         </div>
-      {% elif attempt.status == "GAVE_UP" %}
-        <div class="alert alert-secondary">You gave up on this problem.</div>
-      {% endif %}
+      </div>
+    </div>
+  {% endif %}
+  {# ---- Serious solver: completed — show solution directly ---- #}
+  {% if is_serious and can_see_solution %}
+    {% if attempt.status == "CORRECT" %}
+      <div class="alert alert-success">
+        Solved in {{ attempt.solve_time_seconds }}s with {{ attempt.wrong_answers }} wrong answer{{ attempt.wrong_answers|pluralize }}.
+      </div>
+    {% elif attempt.status == "GAVE_UP" %}
+      <div class="alert alert-secondary">You gave up on this problem.</div>
     {% endif %}
     <div class="card mb-4" id="oime-answer-section">
       <div class="card-header fw-bold d-flex justify-content-between align-items-center">
@@ -150,7 +215,9 @@
         <div class="math-content">{{ proposal.solution }}</div>
       </div>
     </div>
-    {# ---- Comments ---- #}
+  {% endif %}
+  {# ---- Comments (casual always; serious after completion) ---- #}
+  {% if can_comment %}
     <h4>Discussion</h4>
     {% if comments %}
       {% for comment in comments %}
@@ -171,17 +238,15 @@
     {% else %}
       <p class="text-muted">No comments yet.</p>
     {% endif %}
-    {% if can_comment %}
-      <div class="card mt-3">
-        <div class="card-header">Add a comment</div>
-        <div class="card-body">
-          <form method="post">
-            {% csrf_token %}
-            {{ comment_form.content }}
-            <button type="submit" name="submit_comment" class="btn btn-primary mt-2">Post Comment</button>
-          </form>
-        </div>
+    <div class="card mt-3">
+      <div class="card-header">Add a comment</div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          {{ comment_form.content }}
+          <button type="submit" name="submit_comment" class="btn btn-primary mt-2">Post Comment</button>
+        </form>
       </div>
-    {% endif %}
+    </div>
   {% endif %}
 {% endblock layout-content %}

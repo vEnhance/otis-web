@@ -17,31 +17,10 @@
   {% if not is_edit %}
     <p>Before you can submit problems or participate in testsolving, please fill in your details below.</p>
   {% endif %}
-  <form method="post">
-    {% csrf_token %}
-    {% for field in form %}
-      <div class="mb-3">
-        <label class="form-label fw-bold" for="{{ field.id_for_label }}">{{ field.label }}</label>
-        {{ field }}
-        {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
-        {% for error in field.errors %}<div class="text-danger">{{ error }}</div>{% endfor %}
-      </div>
-    {% endfor %}
-    {% if not year %}
-      <div class="alert alert-info">
-        There is no active OIME year right now, so your testsolving mode will be set when one opens.
-      </div>
-    {% endif %}
-    <button type="submit" class="btn btn-primary">
-      {% if is_edit %}
-        Save Changes
-      {% else %}
-        Get Started
-      {% endif %}
-    </button>
-    {% if is_edit %}
-      <a href="{% url "oime-proposal-list" %}"
-         class="btn btn-outline-secondary ms-2">Cancel</a>
-    {% endif %}
-  </form>
+  {% include "otisweb/components/generic_form.html" with submit_name=is_edit|yesno:"Save Changes,Get Started" %}
+  {% if not year %}
+    <div class="alert alert-info mt-3">
+      There is no active OIME year right now, so your testsolving mode will be set when one opens.
+    </div>
+  {% endif %}
 {% endblock layout-content %}
