@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("tubes", "0009_oimeyear_oimecontributor_oimeproposal_oimecomment_and_more"),
     ]
