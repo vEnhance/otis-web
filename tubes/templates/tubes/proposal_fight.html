@@ -8,7 +8,8 @@
       <h2>{{ proposal.get_subject_display }} — Difficulty {{ proposal.difficulty }}/5</h2>
       <p class="text-muted">Submitted by {{ proposal.author }}</p>
     </div>
-    <a href="{% url "oime-proposal-list" %}" class="btn btn-outline-secondary btn-sm">← Back</a>
+    <a href="{% url "oime-proposal-list" %}"
+       class="btn btn-outline-secondary btn-sm">← Back</a>
   </div>
   {% for message in messages %}
     <div class="alert alert-{{ message.tags|default:"info" }}">{{ message }}</div>
@@ -25,15 +26,14 @@
       <span id="countdown">{{ remaining_seconds }}s</span>
     </div>
     <div class="card-body">
-      <p class="text-muted mb-2">
-        Wrong answers: {{ attempt.wrong_answers }} / {{ attempt.ANSWER_LIMIT }}
-      </p>
+      <p class="text-muted mb-2">Wrong answers: {{ attempt.wrong_answers }} / {{ attempt.ANSWER_LIMIT }}</p>
       <form method="post"
             action="{% url "oime-submit-answer" proposal.pk %}"
             class="d-flex gap-2 align-items-end mb-3">
         {% csrf_token %}
         <div>
-          <label class="form-label fw-bold" for="{{ answer_form.answer.id_for_label }}">Your Answer (0–999)</label>
+          <label class="form-label fw-bold"
+                 for="{{ answer_form.answer.id_for_label }}">Your Answer (0–999)</label>
           {{ answer_form.answer }}
         </div>
         <button type="submit" class="btn btn-success">Submit Answer</button>
@@ -48,7 +48,11 @@
   </div>
   <script>
       (function() {
-          let secs = {{ remaining_seconds }};
+          let secs = {
+              {
+                  remaining_seconds
+              }
+          };
           const el = document.getElementById("countdown");
           const header = el.closest(".card-header");
           const interval = setInterval(function() {
