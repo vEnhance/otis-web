@@ -31,7 +31,7 @@
   <table class="table table-hover">
     <thead>
       <tr>
-        <th>#</th>
+        <th>ID</th>
         <th>Subject</th>
         <th>Difficulty</th>
         <th>Author</th>
@@ -44,7 +44,7 @@
       {% for proposal in proposals %}
         <tr {% if proposal.archived %}class="text-muted"{% endif %}>
           <td>
-            {{ forloop.counter }}
+            {{ proposal.label }}
             {% if proposal.archived %}<span class="badge bg-secondary">archived</span>{% endif %}
           </td>
           <td>{{ proposal.get_subject_display }}</td>

@@ -1,11 +1,11 @@
 {% extends "layout.html" %}
 {% block title %}
-  {{ proposal }} — OIME Proposal
+  {{ proposal.label }} — OIME Proposal
 {% endblock title %}
 {% block layout-content %}
   <div class="d-flex justify-content-between align-items-start mb-3">
     <div>
-      <h2>{{ proposal.get_subject_display }} — Difficulty {{ proposal.difficulty }}/5</h2>
+      <h2>{{ proposal.label }}: {{ proposal.get_subject_display }} — Difficulty {{ proposal.difficulty }}/5</h2>
       <p class="text-muted">
         Submitted by {{ proposal.author }}
         on {{ proposal.created_at|date:"Y-m-d" }}

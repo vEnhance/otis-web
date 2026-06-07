@@ -163,6 +163,10 @@ class OIMEProposal(models.Model):
         return reverse("oime-proposal-detail", args=[self.pk])
 
     @property
+    def label(self) -> str:
+        return f"{self.subject}{self.pk}"
+
+    @property
     def time_limit_minutes(self) -> int:
         return 5 * self.difficulty + 5
 
