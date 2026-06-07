@@ -7,9 +7,12 @@
     <div>
       <h2>{{ proposal.get_subject_display }} — Difficulty {{ proposal.difficulty }}/5</h2>
       <p class="text-muted">
-        Submitted by {{ proposal.author.get_full_name|default:proposal.author.username }}
+        Submitted by {{ proposal.author }}
         on {{ proposal.created_at|date:"Y-m-d" }}
-        {% if proposal.author == request.user or request.user.is_staff %}
+        {% if proposal.archived %}
+          · <span class="badge bg-secondary">archived</span>
+        {% endif %}
+        {% if proposal.author == contributor or request.user.is_staff %}
           · <a href="{% url "oime-proposal-update" proposal.pk %}">Edit</a>
         {% endif %}
       </p>
@@ -28,13 +31,21 @@
     </div>
   </div>
 
+  {# ---- Serious solver: not yet enrolled in active year ---- #}
+  {% if is_serious is False and not participation and year %}
+    <div class="alert alert-warning">
+      You haven't set a testsolving mode for {{ year }} yet.
+      <a href="{% url "oime-setup" %}">Choose serious or casual</a> before you start.
+    </div>
+  {% endif %}
+
   {# ---- Serious solver: no attempt yet ---- #}
   {% if is_serious and not attempt %}
     <div class="alert alert-info">
       <p>
-        You are in <strong>serious mode</strong>.
-        Once you start, you will have <strong>{{ proposal.time_limit_minutes }} minutes</strong> to solve this problem.
-        The timer begins the moment you click Start.
+        You are testsolving in <strong>serious mode</strong>.
+        Once you start, you will have <strong>{{ proposal.time_limit_minutes }} minutes</strong>
+        and the timer begins immediately.
       </p>
       <form method="post" action="{% url "oime-start-attempt" proposal.pk %}">
         {% csrf_token %}
@@ -52,7 +63,7 @@
       </div>
       <div class="card-body">
         {% if attempt.wrong_answers > 0 %}
-          <p class="text-danger">Wrong answers: {{ attempt.wrong_answers }}</p>
+          <p class="text-danger">Wrong answers so far: {{ attempt.wrong_answers }}</p>
         {% endif %}
         <form method="post" action="{% url "oime-submit-answer" proposal.pk %}" class="d-flex gap-2 align-items-end mb-3">
           {% csrf_token %}
@@ -76,15 +87,15 @@
       (function () {
         let secs = {{ remaining_seconds }};
         const el = document.getElementById("countdown");
+        const header = el.closest(".card-header");
         const interval = setInterval(function () {
           secs -= 1;
           if (secs <= 0) {
             clearInterval(interval);
             el.textContent = "Time's up!";
-            el.closest(".card-header").classList.replace("bg-warning", "bg-danger");
-            el.closest(".card-header").classList.remove("text-dark");
-            el.closest(".card-header").classList.add("text-white");
-            // Reload so the server can mark attempt as gave_up
+            header.classList.replace("bg-warning", "bg-danger");
+            header.classList.remove("text-dark");
+            header.classList.add("text-white");
             setTimeout(function () { location.reload(); }, 1000);
           } else {
             const m = Math.floor(secs / 60);
@@ -98,7 +109,7 @@
 
   {# ---- Solution (visible to casual or completed serious) ---- #}
   {% if can_see_solution %}
-    {% if is_serious and attempt %}
+    {% if attempt %}
       {% if attempt.status == "CORRECT" %}
         <div class="alert alert-success">
           Solved in {{ attempt.solve_time_seconds }}s with {{ attempt.wrong_answers }} wrong answer{{ attempt.wrong_answers|pluralize }}.
@@ -109,7 +120,19 @@
     {% endif %}
 
     <div class="card mb-4" id="oime-answer-section">
-      <div class="card-header fw-bold">Answer</div>
+      <div class="card-header fw-bold d-flex justify-content-between align-items-center">
+        <span>Answer</span>
+        {% if can_upvote %}
+          <form method="post" action="{% url "oime-upvote" proposal.pk %}" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm {% if has_upvoted %}btn-warning{% else %}btn-outline-secondary{% endif %}">
+              ♥ {% if has_upvoted %}Upvoted{% else %}Upvote{% endif %} ({{ proposal.upvotes.count }})
+            </button>
+          </form>
+        {% else %}
+          <span class="text-muted small">{{ proposal.upvotes.count }} upvote{{ proposal.upvotes.count|pluralize }}</span>
+        {% endif %}
+      </div>
       <div class="card-body">
         <strong class="fs-5">{{ proposal.answer }}</strong>
       </div>
@@ -131,8 +154,14 @@
           <div class="card-body">
             <p class="card-text">{{ comment.content|linebreaks }}</p>
             <small class="text-muted">
-              {{ comment.author.get_full_name|default:comment.author.username }}
+              {{ comment.author }}
               · {{ comment.created_at|date:"Y-m-d H:i" }}
+              {% if comment.updated_at != comment.created_at %}
+                (edited {{ comment.updated_at|date:"Y-m-d H:i" }})
+              {% endif %}
+              {% if comment.author == contributor or request.user.is_staff %}
+                · <a href="{% url "oime-comment-edit" comment.pk %}">Edit</a>
+              {% endif %}
             </small>
           </div>
         </div>

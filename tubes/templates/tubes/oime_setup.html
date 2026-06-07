@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block title %}
+  {% if is_edit %}OIME Settings{% else %}OIME Setup{% endif %}
+{% endblock title %}
+{% block layout-content %}
+  <h2>{% if is_edit %}OIME Settings{% else %}Welcome to OIME{% endif %}</h2>
+
+  {% if not is_edit %}
+    <p>
+      Before you can submit problems or participate in testsolving, please fill in your details below.
+    </p>
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="mb-3">
+        <label class="form-label fw-bold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}
+          <div class="form-text">{{ field.help_text }}</div>
+        {% endif %}
+        {% for error in field.errors %}
+          <div class="text-danger">{{ error }}</div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+
+    {% if not year %}
+      <div class="alert alert-info">
+        There is no active OIME year right now, so your testsolving mode will be set when one opens.
+      </div>
+    {% endif %}
+
+    <button type="submit" class="btn btn-primary">
+      {% if is_edit %}Save Changes{% else %}Get Started{% endif %}
+    </button>
+    {% if is_edit %}
+      <a href="{% url "oime-proposal-list" %}" class="btn btn-outline-secondary ms-2">Cancel</a>
+    {% endif %}
+  </form>
+{% endblock layout-content %}

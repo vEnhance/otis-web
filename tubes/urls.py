@@ -12,5 +12,7 @@ urlpatterns = [
     path(r"proposal/<int:pk>/start/", views.start_attempt, name="oime-start-attempt"),
     path(r"proposal/<int:pk>/submit/", views.submit_answer, name="oime-submit-answer"),
     path(r"proposal/<int:pk>/giveup/", views.give_up, name="oime-give-up"),
-    path(r"role/", views.role_select, name="oime-role-select"),
+    path(r"proposal/<int:pk>/upvote/", views.upvote_proposal, name="oime-upvote"),
+    path(r"comment/<int:pk>/edit/", views.edit_comment, name="oime-comment-edit"),
+    path(r"setup/", views.oime_setup, name="oime-setup"),
 ]

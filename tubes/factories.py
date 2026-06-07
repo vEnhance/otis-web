@@ -5,7 +5,16 @@ from factory.fuzzy import FuzzyChoice, FuzzyInteger
 
 from core.factories import UserFactory
 
-from .models import JoinRecord, OIMEAttempt, OIMEComment, OIMEProposal, OIMESolverRole, Tube
+from .models import (
+    JoinRecord,
+    OIMEAttempt,
+    OIMEComment,
+    OIMEContributor,
+    OIMEParticipation,
+    OIMEProposal,
+    OIMEYear,
+    Tube,
+)
 
 
 class TubeFactory(DjangoModelFactory):
@@ -28,31 +37,50 @@ class JoinRecordFactory(DjangoModelFactory):
     invite_url = Faker("url")
 
 
+class OIMEYearFactory(DjangoModelFactory):
+    class Meta:
+        model = OIMEYear
+
+    name = Faker("year")
+    active = True
+
+
+class OIMEContributorFactory(DjangoModelFactory):
+    class Meta:
+        model = OIMEContributor
+
+    user = SubFactory(UserFactory)
+    display_name = Faker("name")
+
+
+class OIMEParticipationFactory(DjangoModelFactory):
+    class Meta:
+        model = OIMEParticipation
+
+    contributor = SubFactory(OIMEContributorFactory)
+    year = SubFactory(OIMEYearFactory)
+    is_serious = True
+
+
 class OIMEProposalFactory(DjangoModelFactory):
     class Meta:
         model = OIMEProposal
 
-    author = SubFactory(UserFactory)
+    author = SubFactory(OIMEContributorFactory)
     statement = Faker("paragraph")
     answer = FuzzyInteger(0, 999)
     solution = Faker("paragraph")
     subject = FuzzyChoice(["A", "C", "G", "N"])
     difficulty = FuzzyInteger(1, 5)
-
-
-class OIMESolverRoleFactory(DjangoModelFactory):
-    class Meta:
-        model = OIMESolverRole
-
-    user = SubFactory(UserFactory)
-    is_serious = False
+    archived = False
 
 
 class OIMEAttemptFactory(DjangoModelFactory):
     class Meta:
         model = OIMEAttempt
 
-    user = SubFactory(UserFactory)
+    contributor = SubFactory(OIMEContributorFactory)
+    year = SubFactory(OIMEYearFactory)
     proposal = SubFactory(OIMEProposalFactory)
     status = "IN_PROGRESS"
     wrong_answers = 0
@@ -62,6 +90,6 @@ class OIMECommentFactory(DjangoModelFactory):
     class Meta:
         model = OIMEComment
 
-    author = SubFactory(UserFactory)
+    author = SubFactory(OIMEContributorFactory)
     proposal = SubFactory(OIMEProposalFactory)
     content = Faker("paragraph")

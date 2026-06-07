@@ -93,7 +93,7 @@ omit = [
 
 [tool.pyright]
 enableTypeIgnoreComments = true
-exclude = ["**/node_modules", "**/typings", "**/__pycache__", ".git", "venv", ".venv", "**/migrations", "**/tests.py", "**/tests_*.py"]
+exclude = ["**/node_modules", "**/typings", "**/__pycache__", ".git", "venv", ".venv", "**/migrations", "**/tests.py", "**/tests_*.py", "**/test_*.py"]
 pythonPlatform = "Linux"
 pythonVersion = "3.13"
 typeCheckingMode = "basic"

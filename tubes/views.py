@@ -14,8 +14,22 @@ from django.views.generic import CreateView, ListView, UpdateView
 from otisweb.decorators import verified_required
 from otisweb.mixins import VerifiedRequiredMixin
 
-from .forms import OIMEAnswerForm, OIMECommentForm, OIMEProposalForm
-from .models import JoinRecord, OIMEAttempt, OIMEComment, OIMEProposal, OIMESolverRole, Tube
+from .forms import OIMEAnswerForm, OIMECommentForm, OIMEProposalForm, OIMESetupForm
+from .models import (
+    JoinRecord,
+    OIMEAttempt,
+    OIMEComment,
+    OIMEContributor,
+    OIMEParticipation,
+    OIMEProposal,
+    OIMEYear,
+    Tube,
+)
+
+
+# ---------------------------------------------------------------------------
+# Tube views (existing)
+# ---------------------------------------------------------------------------
 
 
 class TubeList(VerifiedRequiredMixin, ListView[Tube]):
@@ -37,14 +51,12 @@ def tube_join(request: HttpRequest, pk: int) -> HttpResponse:
     except JoinRecord.DoesNotExist:
         jr = JoinRecord.objects.filter(tube=tube, user__isnull=True).first()
         if jr is None:
-            # we ran out of valid codes to give fml
             messages.error(
                 request, "Ran out of one-time invite codes, please contact staff."
             )
             logging.critical(
                 f"{tube} somehow ran out of one-time codes when {request.user} tried to join",
             )
-
             return HttpResponseRedirect(reverse("tube-list"))
         else:
             jr.user = request.user
@@ -53,32 +65,180 @@ def tube_join(request: HttpRequest, pk: int) -> HttpResponse:
     return HttpResponseRedirect(jr.invite_url if jr.invite_url else jr.tube.main_url)
 
 
+# ---------------------------------------------------------------------------
+# OIME helpers
+# ---------------------------------------------------------------------------
+
+
+def _get_active_year() -> OIMEYear | None:
+    return OIMEYear.objects.filter(active=True).first()
+
+
+def _get_contributor(request: HttpRequest) -> OIMEContributor | None:
+    try:
+        return request.user.oime_contributor  # type: ignore[union-attr]
+    except OIMEContributor.DoesNotExist:
+        return None
+
+
+
+def _get_participation(contributor: OIMEContributor, year: OIMEYear) -> OIMEParticipation | None:
+    try:
+        return OIMEParticipation.objects.get(contributor=contributor, year=year)
+    except OIMEParticipation.DoesNotExist:
+        return None
+
+
+def _get_solver_context(
+    contributor: OIMEContributor,
+    proposal: OIMEProposal,
+    year: OIMEYear | None,
+) -> dict[str, Any]:
+    """Compute access flags for a contributor viewing a proposal."""
+    participation: OIMEParticipation | None = None
+    is_serious = False
+
+    if year is not None:
+        participation = _get_participation(contributor, year)
+        if participation is not None:
+            is_serious = participation.is_serious
+
+    attempt: OIMEAttempt | None = None
+    if is_serious:
+        try:
+            attempt = OIMEAttempt.objects.get(contributor=contributor, proposal=proposal)
+            if attempt.status == "IN_PROGRESS" and attempt.time_expired:
+                attempt.status = "GAVE_UP"
+                attempt.submitted_at = timezone.now()
+                attempt.save()
+        except OIMEAttempt.DoesNotExist:
+            pass
+
+    can_see_solution = not is_serious or (attempt is not None and attempt.is_complete)
+    can_comment = can_see_solution
+    can_upvote = can_see_solution and contributor != proposal.author
+
+    return {
+        "year": year,
+        "participation": participation,
+        "is_serious": is_serious,
+        "attempt": attempt,
+        "can_see_solution": can_see_solution,
+        "can_comment": can_comment,
+        "can_upvote": can_upvote,
+    }
+
+
+# ---------------------------------------------------------------------------
+# OIME: Setup / onboarding
+# ---------------------------------------------------------------------------
+
+
+@verified_required
+def oime_setup(request: HttpRequest) -> HttpResponse:
+    """First-time setup: create OIMEContributor and optionally enrol in active year."""
+    contributor = _get_contributor(request)
+    year = _get_active_year()
+
+    if request.method == "POST":
+        form = OIMESetupForm(request.POST)
+        if form.is_valid():
+            if contributor is None:
+                contributor = OIMEContributor.objects.create(
+                    user=request.user,  # type: ignore[union-attr]
+                    display_name=form.cleaned_data["display_name"],
+                )
+            else:
+                contributor.display_name = form.cleaned_data["display_name"]
+                contributor.save()
+
+            if year is not None:
+                is_serious = form.cleaned_data["is_serious"] == "serious"
+                participation, created = OIMEParticipation.objects.get_or_create(
+                    contributor=contributor,
+                    year=year,
+                    defaults={"is_serious": is_serious},
+                )
+                if not created and participation.is_serious and not is_serious:
+                    # Allow downgrade serious → casual only
+                    participation.is_serious = False
+                    participation.save()
+
+            return redirect("oime-proposal-list")
+    else:
+        initial: dict[str, Any] = {}
+        if contributor is not None:
+            initial["display_name"] = contributor.display_name
+            if year is not None:
+                p = _get_participation(contributor, year)
+                if p is not None:
+                    initial["is_serious"] = "serious" if p.is_serious else "casual"
+        form = OIMESetupForm(initial=initial)
+
+    return render(
+        request,
+        "tubes/oime_setup.html",
+        {
+            "form": form,
+            "contributor": contributor,
+            "year": year,
+            "is_edit": contributor is not None,
+        },
+    )
+
+
+# ---------------------------------------------------------------------------
+# OIME: Proposal list / create / update
+# ---------------------------------------------------------------------------
+
+
 class ProposalListView(VerifiedRequiredMixin, ListView[OIMEProposal]):
     model = OIMEProposal
     template_name = "tubes/proposal_list.html"
     context_object_name = "proposals"
 
+    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        if not request.user.is_authenticated:  # type: ignore[union-attr]
+            return redirect("account_login")
+        if _get_contributor(request) is None:
+            return redirect("oime-setup")
+        return super().dispatch(request, *args, **kwargs)  # type: ignore[return-value]
+
     def get_queryset(self) -> QuerySet[OIMEProposal]:
-        return OIMEProposal.objects.select_related("author").order_by("-created_at")
+        user = self.request.user
+        qs = OIMEProposal.objects.select_related("author").order_by("-created_at")
+        # Staff see all; others see non-archived plus their own archived
+        if not user.is_staff:  # type: ignore[union-attr]
+            contributor = _get_contributor(self.request)
+            if contributor is not None:
+                qs = qs.filter(archived=False) | qs.filter(author=contributor)
+            else:
+                qs = qs.filter(archived=False)
+        return qs.distinct()
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        user = self.request.user
-        try:
-            role = user.oime_role  # type: ignore[union-attr]
-            context["is_serious"] = role.is_serious
-            context["role_set"] = True
-        except OIMESolverRole.DoesNotExist:
-            context["is_serious"] = False
-            context["role_set"] = False
+        contributor = _get_contributor(self.request)
+        year = _get_active_year()
+        context["contributor"] = contributor
+        context["year"] = year
 
-        if context["is_serious"]:
+        if contributor is None:
+            return context
+
+        participation = _get_participation(contributor, year) if year else None
+        context["participation"] = participation
+        is_serious = participation is not None and participation.is_serious
+        context["is_serious"] = is_serious
+
+        if is_serious:
             user_attempts: dict[int, OIMEAttempt] = {
                 a.proposal_id: a  # type: ignore[attr-defined]
-                for a in OIMEAttempt.objects.filter(user=user)
+                for a in OIMEAttempt.objects.filter(contributor=contributor)
             }
             for proposal in context["proposals"]:
                 proposal.user_attempt = user_attempts.get(proposal.pk)  # type: ignore[attr-defined]
+
         return context
 
 
@@ -87,8 +247,18 @@ class ProposalCreateView(VerifiedRequiredMixin, CreateView[OIMEProposal, OIMEPro
     form_class = OIMEProposalForm
     template_name = "tubes/proposal_form.html"
 
+    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        if not request.user.is_authenticated:  # type: ignore[union-attr]
+            return redirect("account_login")
+        if _get_contributor(request) is None:
+            return redirect("oime-setup")
+        return super().dispatch(request, *args, **kwargs)  # type: ignore[return-value]
+
     def form_valid(self, form: OIMEProposalForm) -> HttpResponse:
-        form.instance.author = self.request.user  # type: ignore[union-attr]
+        contributor = _get_contributor(self.request)
+        if contributor is None:
+            return redirect("oime-setup")
+        form.instance.author = contributor
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
@@ -104,7 +274,9 @@ class ProposalUpdateView(VerifiedRequiredMixin, UpdateView[OIMEProposal, OIMEPro
 
     def get_object(self, queryset: QuerySet[OIMEProposal] | None = None) -> OIMEProposal:
         proposal = super().get_object(queryset)
-        if proposal.author != self.request.user and not self.request.user.is_staff:  # type: ignore[union-attr]
+        contributor = _get_contributor(self.request)
+        is_author = contributor is not None and proposal.author == contributor
+        if not is_author and not self.request.user.is_staff:  # type: ignore[union-attr]
             raise PermissionDenied("You can only edit your own proposals.")
         return proposal
 
@@ -114,64 +286,20 @@ class ProposalUpdateView(VerifiedRequiredMixin, UpdateView[OIMEProposal, OIMEPro
         return context
 
 
-@verified_required
-def role_select(request: HttpRequest) -> HttpResponse:
-    try:
-        role = request.user.oime_role  # type: ignore[union-attr]
-    except OIMESolverRole.DoesNotExist:
-        role = None
-
-    if request.method == "POST":
-        is_serious = request.POST.get("role") == "serious"
-        if role is None:
-            OIMESolverRole.objects.create(user=request.user, is_serious=is_serious)  # type: ignore[union-attr]
-        else:
-            role.is_serious = is_serious
-            role.save()
-        return redirect("oime-proposal-list")
-
-    return render(request, "tubes/role_select.html", {"role": role})
-
-
-def _get_solver_context(user: Any, proposal: OIMEProposal) -> dict[str, Any]:
-    try:
-        is_serious = user.oime_role.is_serious
-    except OIMESolverRole.DoesNotExist:
-        is_serious = False
-
-    attempt: OIMEAttempt | None = None
-    if is_serious:
-        try:
-            attempt = OIMEAttempt.objects.get(user=user, proposal=proposal)
-            if attempt.status == "IN_PROGRESS" and attempt.time_expired:
-                attempt.status = "GAVE_UP"
-                attempt.submitted_at = timezone.now()
-                attempt.save()
-        except OIMEAttempt.DoesNotExist:
-            pass
-
-    can_see_solution = not is_serious or (attempt is not None and attempt.is_complete)
-    can_comment = can_see_solution and (
-        user == proposal.author
-        or user.is_staff
-        or (attempt is not None and attempt.is_complete)
-        or not is_serious
-    )
-
-    return {
-        "is_serious": is_serious,
-        "attempt": attempt,
-        "can_see_solution": can_see_solution,
-        "can_comment": can_comment,
-    }
+# ---------------------------------------------------------------------------
+# OIME: Proposal detail (view / testsolver)
+# ---------------------------------------------------------------------------
 
 
 @verified_required
 def proposal_detail(request: HttpRequest, pk: int) -> HttpResponse:
     proposal = get_object_or_404(OIMEProposal, pk=pk)
-    user = request.user
+    contributor = _get_contributor(request)
+    if contributor is None:
+        return redirect("oime-setup")
 
-    ctx = _get_solver_context(user, proposal)
+    year = _get_active_year()
+    ctx = _get_solver_context(contributor, proposal, year)
     attempt: OIMEAttempt | None = ctx["attempt"]
 
     comment_form = OIMECommentForm()
@@ -184,7 +312,7 @@ def proposal_detail(request: HttpRequest, pk: int) -> HttpResponse:
             comment_form = OIMECommentForm(request.POST)
             if comment_form.is_valid():
                 comment = comment_form.save(commit=False)
-                comment.author = user  # type: ignore[union-attr]
+                comment.author = contributor
                 comment.proposal = proposal
                 comment.save()
                 return redirect("oime-proposal-detail", pk=pk)
@@ -195,16 +323,19 @@ def proposal_detail(request: HttpRequest, pk: int) -> HttpResponse:
         if ctx["can_see_solution"]
         else None
     )
+    has_upvoted = proposal.upvotes.filter(pk=contributor.pk).exists() if ctx["can_see_solution"] else False
 
     return render(
         request,
         "tubes/proposal_detail.html",
         {
             "proposal": proposal,
+            "contributor": contributor,
             "answer_form": answer_form,
             "comment_form": comment_form,
             "comments": comments,
             "remaining_seconds": remaining_seconds,
+            "has_upvoted": has_upvoted,
             **ctx,
         },
     )
@@ -214,8 +345,26 @@ def proposal_detail(request: HttpRequest, pk: int) -> HttpResponse:
 def start_attempt(request: HttpRequest, pk: int) -> HttpResponse:
     if request.method != "POST":
         return redirect("oime-proposal-detail", pk=pk)
+
     proposal = get_object_or_404(OIMEProposal, pk=pk)
-    OIMEAttempt.objects.get_or_create(user=request.user, proposal=proposal)  # type: ignore[union-attr]
+    contributor = _get_contributor(request)
+    if contributor is None:
+        return redirect("oime-setup")
+
+    year = _get_active_year()
+    if year is None:
+        messages.error(request, "No active year for testsolving.")
+        return redirect("oime-proposal-detail", pk=pk)
+
+    participation = _get_participation(contributor, year)
+    if participation is None or not participation.is_serious:
+        return redirect("oime-proposal-detail", pk=pk)
+
+    OIMEAttempt.objects.get_or_create(
+        contributor=contributor,
+        proposal=proposal,
+        defaults={"year": year},
+    )
     return redirect("oime-proposal-detail", pk=pk)
 
 
@@ -225,7 +374,11 @@ def submit_answer(request: HttpRequest, pk: int) -> HttpResponse:
         return redirect("oime-proposal-detail", pk=pk)
 
     proposal = get_object_or_404(OIMEProposal, pk=pk)
-    attempt = get_object_or_404(OIMEAttempt, user=request.user, proposal=proposal)
+    contributor = _get_contributor(request)
+    if contributor is None:
+        return redirect("oime-setup")
+
+    attempt = get_object_or_404(OIMEAttempt, contributor=contributor, proposal=proposal)
 
     if attempt.status != "IN_PROGRESS":
         return redirect("oime-proposal-detail", pk=pk)
@@ -264,7 +417,11 @@ def give_up(request: HttpRequest, pk: int) -> HttpResponse:
         return redirect("oime-proposal-detail", pk=pk)
 
     proposal = get_object_or_404(OIMEProposal, pk=pk)
-    attempt = get_object_or_404(OIMEAttempt, user=request.user, proposal=proposal)
+    contributor = _get_contributor(request)
+    if contributor is None:
+        return redirect("oime-setup")
+
+    attempt = get_object_or_404(OIMEAttempt, contributor=contributor, proposal=proposal)
 
     if attempt.status == "IN_PROGRESS":
         attempt.status = "GAVE_UP"
@@ -273,3 +430,46 @@ def give_up(request: HttpRequest, pk: int) -> HttpResponse:
         messages.info(request, "You gave up on this problem. You can now view the solution.")
 
     return redirect("oime-proposal-detail", pk=pk)
+
+
+@verified_required
+def upvote_proposal(request: HttpRequest, pk: int) -> HttpResponse:
+    if request.method != "POST":
+        return redirect("oime-proposal-detail", pk=pk)
+
+    proposal = get_object_or_404(OIMEProposal, pk=pk)
+    contributor = _get_contributor(request)
+    if contributor is None:
+        return redirect("oime-setup")
+
+    year = _get_active_year()
+    ctx = _get_solver_context(contributor, proposal, year)
+    if not ctx["can_upvote"]:
+        raise PermissionDenied
+
+    if proposal.upvotes.filter(pk=contributor.pk).exists():
+        proposal.upvotes.remove(contributor)
+    else:
+        proposal.upvotes.add(contributor)
+
+    return redirect("oime-proposal-detail", pk=pk)
+
+
+@verified_required
+def edit_comment(request: HttpRequest, pk: int) -> HttpResponse:
+    comment = get_object_or_404(OIMEComment, pk=pk)
+    contributor = _get_contributor(request)
+    if contributor is None:
+        return redirect("oime-setup")
+    if comment.author != contributor and not request.user.is_staff:  # type: ignore[union-attr]
+        raise PermissionDenied
+
+    if request.method == "POST":
+        form = OIMECommentForm(request.POST, instance=comment)
+        if form.is_valid():
+            form.save()
+            return redirect("oime-proposal-detail", pk=comment.proposal_id)  # type: ignore[attr-defined]
+    else:
+        form = OIMECommentForm(instance=comment)
+
+    return render(request, "tubes/comment_edit.html", {"form": form, "comment": comment})

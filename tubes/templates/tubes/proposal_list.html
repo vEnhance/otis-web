@@ -7,16 +7,21 @@
 
   <div class="mb-3">
     <a href="{% url "oime-proposal-create" %}" class="btn btn-primary">Submit a Problem</a>
-    <a href="{% url "oime-role-select" %}" class="btn btn-outline-secondary ms-2">
-      Role: {% if role_set %}{% if is_serious %}Serious{% else %}Casual{% endif %}{% else %}Not set{% endif %}
-    </a>
+    <a href="{% url "oime-setup" %}" class="btn btn-outline-secondary ms-2">Settings</a>
   </div>
 
-  {% if not role_set %}
-    <div class="alert alert-info">
-      You haven't chosen a solving role yet.
-      <a href="{% url "oime-role-select" %}">Pick casual or serious</a> before solving problems.
-    </div>
+  {% if year %}
+    <p class="text-muted">
+      Active year: <strong>{{ year }}</strong> ·
+      {% if participation %}
+        Testsolving as <strong>{% if participation.is_serious %}serious{% else %}casual{% endif %}</strong>
+        {% if participation.is_serious %}
+          (<a href="{% url "oime-setup" %}">downgrade to casual</a>)
+        {% endif %}
+      {% else %}
+        <a href="{% url "oime-setup" %}">Set your testsolving mode</a>
+      {% endif %}
+    </p>
   {% endif %}
 
   {% if proposals %}
@@ -34,11 +39,16 @@
       </thead>
       <tbody>
         {% for proposal in proposals %}
-          <tr>
-            <td>{{ forloop.counter }}</td>
+          <tr {% if proposal.archived %}class="text-muted"{% endif %}>
+            <td>
+              {{ forloop.counter }}
+              {% if proposal.archived %}
+                <span class="badge bg-secondary">archived</span>
+              {% endif %}
+            </td>
             <td>{{ proposal.get_subject_display }}</td>
             <td>{{ proposal.difficulty }} / 5</td>
-            <td>{{ proposal.author.get_full_name|default:proposal.author.username }}</td>
+            <td>{{ proposal.author }}</td>
             <td>{{ proposal.created_at|date:"Y-m-d" }}</td>
             {% if is_serious %}
               <td>
