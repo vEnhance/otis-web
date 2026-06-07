@@ -64,9 +64,6 @@ class ProposalUpdateView(VerifiedRequiredMixin, UpdateView[OIMEProposal, OIMEPro
     form_class = OIMEProposalForm
     template_name = "oime/proposal_form.html"
 
-    def check_membership(self, groups: Any) -> bool:
-        return self.request.user.is_staff or super().check_membership(groups)  # type: ignore[union-attr]
-
     def get_object(self, queryset: QuerySet[OIMEProposal] | None = None) -> OIMEProposal:
         proposal = super().get_object(queryset)
         if proposal.author != self.request.user and not self.request.user.is_staff:  # type: ignore[union-attr]
