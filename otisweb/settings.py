@@ -71,7 +71,6 @@ INSTALLED_APPS = [
     "roster",
     "rpg",
     "payments",
-    "oime",
     "suggestions",
     "tubes",
     # ------------
