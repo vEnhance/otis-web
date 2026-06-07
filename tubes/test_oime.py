@@ -1,5 +1,4 @@
 import pytest
-
 from django.contrib.auth.models import Group
 
 from core.factories import UserFactory
@@ -90,7 +89,9 @@ def test_setup_creates_contributor(otis):
     verified_group, _ = Group.objects.get_or_create(name="Verified")
     user = UserFactory.create(username="alice", groups=(verified_group,))
     otis.login("alice")
-    resp = otis.post("oime-setup", data={"display_name": "Alice A.", "is_serious": "serious"})
+    resp = otis.post(
+        "oime-setup", data={"display_name": "Alice A.", "is_serious": "serious"}
+    )
     otis.assert_30x(resp)
     assert OIMEContributor.objects.filter(user=user, display_name="Alice A.").exists()
 
@@ -103,7 +104,9 @@ def test_setup_creates_participation_for_active_year(otis):
     otis.login("alice")
     otis.post("oime-setup", data={"display_name": "Alice", "is_serious": "serious"})
     contributor = OIMEContributor.objects.get(user=user)
-    assert OIMEParticipation.objects.filter(contributor=contributor, year=year, is_serious=True).exists()
+    assert OIMEParticipation.objects.filter(
+        contributor=contributor, year=year, is_serious=True
+    ).exists()
 
 
 @pytest.mark.django_db
@@ -131,9 +134,14 @@ def test_setup_can_edit_display_name(otis):
 def test_setup_allows_downgrade_serious_to_casual(otis):
     user, contributor = _verified_contributor()
     year = OIMEYearFactory.create(active=True)
-    participation = OIMEParticipationFactory.create(contributor=contributor, year=year, is_serious=True)
+    participation = OIMEParticipationFactory.create(
+        contributor=contributor, year=year, is_serious=True
+    )
     otis.login(user)
-    otis.post("oime-setup", data={"display_name": contributor.display_name, "is_serious": "casual"})
+    otis.post(
+        "oime-setup",
+        data={"display_name": contributor.display_name, "is_serious": "casual"},
+    )
     participation.refresh_from_db()
     assert participation.is_serious is False
 
@@ -142,9 +150,14 @@ def test_setup_allows_downgrade_serious_to_casual(otis):
 def test_setup_does_not_upgrade_casual_to_serious(otis):
     user, contributor = _verified_contributor()
     year = OIMEYearFactory.create(active=True)
-    participation = OIMEParticipationFactory.create(contributor=contributor, year=year, is_serious=False)
+    participation = OIMEParticipationFactory.create(
+        contributor=contributor, year=year, is_serious=False
+    )
     otis.login(user)
-    otis.post("oime-setup", data={"display_name": contributor.display_name, "is_serious": "serious"})
+    otis.post(
+        "oime-setup",
+        data={"display_name": contributor.display_name, "is_serious": "serious"},
+    )
     participation.refresh_from_db()
     # still casual — upgrade is not allowed
     assert participation.is_serious is False
@@ -171,6 +184,7 @@ def test_create_proposal(otis):
     )
     otis.assert_30x(resp)
     from .models import OIMEProposal
+
     proposal = OIMEProposal.objects.get()
     assert proposal.author == contributor
     assert proposal.answer == 2
@@ -211,7 +225,7 @@ def test_cannot_update_others_proposal(otis):
 def test_staff_can_update_any_proposal(otis):
     _, contributor = _verified_contributor()
     proposal = OIMEProposalFactory.create(author=contributor, answer=3)
-    staff = UserFactory.create(username="staff", is_staff=True)
+    UserFactory.create(username="staff", is_staff=True)
     otis.login("staff")
     resp = otis.post(
         "oime-proposal-update",
@@ -246,7 +260,7 @@ def test_archived_hidden_from_regular_users(otis):
 @pytest.mark.django_db
 def test_archived_visible_to_own_author(otis):
     user, contributor = _verified_contributor()
-    proposal = OIMEProposalFactory.create(author=contributor, archived=True)
+    OIMEProposalFactory.create(author=contributor, archived=True)
     otis.login(user)
     resp = otis.get_20x("oime-proposal-list")
     otis.assert_has(resp, "archived")
@@ -261,7 +275,9 @@ def test_archived_visible_to_own_author(otis):
 def test_casual_sees_solution(otis):
     user, contributor = _verified_contributor()
     year = OIMEYearFactory.create(active=True)
-    OIMEParticipationFactory.create(contributor=contributor, year=year, is_serious=False)
+    OIMEParticipationFactory.create(
+        contributor=contributor, year=year, is_serious=False
+    )
     proposal = OIMEProposalFactory.create()
     otis.login(user)
     resp = otis.get_20x("oime-proposal-detail", proposal.pk)
@@ -281,7 +297,9 @@ def test_no_participation_still_sees_solution(otis):
 def test_casual_can_comment(otis):
     user, contributor = _verified_contributor()
     year = OIMEYearFactory.create(active=True)
-    OIMEParticipationFactory.create(contributor=contributor, year=year, is_serious=False)
+    OIMEParticipationFactory.create(
+        contributor=contributor, year=year, is_serious=False
+    )
     proposal = OIMEProposalFactory.create()
     otis.login(user)
     resp = otis.post(
@@ -290,7 +308,9 @@ def test_casual_can_comment(otis):
         data={"submit_comment": "1", "content": "Nice problem!"},
     )
     otis.assert_30x(resp)
-    assert OIMEComment.objects.filter(proposal=proposal, content="Nice problem!").exists()
+    assert OIMEComment.objects.filter(
+        proposal=proposal, content="Nice problem!"
+    ).exists()
 
 
 # ---------------------------------------------------------------------------
@@ -319,7 +339,9 @@ def test_serious_start_creates_attempt(otis):
     otis.login(user)
     resp = otis.post("oime-start-attempt", proposal.pk)
     otis.assert_30x(resp)
-    assert OIMEAttempt.objects.filter(contributor=contributor, proposal=proposal, year=year).exists()
+    assert OIMEAttempt.objects.filter(
+        contributor=contributor, proposal=proposal, year=year
+    ).exists()
 
 
 @pytest.mark.django_db
@@ -328,7 +350,9 @@ def test_serious_correct_answer(otis):
     year = OIMEYearFactory.create(active=True)
     OIMEParticipationFactory.create(contributor=contributor, year=year, is_serious=True)
     proposal = OIMEProposalFactory.create(answer=42)
-    OIMEAttemptFactory.create(contributor=contributor, year=year, proposal=proposal, status="IN_PROGRESS")
+    OIMEAttemptFactory.create(
+        contributor=contributor, year=year, proposal=proposal, status="IN_PROGRESS"
+    )
     otis.login(user)
     resp = otis.post("oime-submit-answer", proposal.pk, data={"answer": 42})
     otis.assert_30x(resp)
@@ -343,7 +367,9 @@ def test_serious_wrong_answer_increments_count(otis):
     year = OIMEYearFactory.create(active=True)
     OIMEParticipationFactory.create(contributor=contributor, year=year, is_serious=True)
     proposal = OIMEProposalFactory.create(answer=42)
-    OIMEAttemptFactory.create(contributor=contributor, year=year, proposal=proposal, status="IN_PROGRESS")
+    OIMEAttemptFactory.create(
+        contributor=contributor, year=year, proposal=proposal, status="IN_PROGRESS"
+    )
     otis.login(user)
     otis.post("oime-submit-answer", proposal.pk, data={"answer": 99})
     attempt = OIMEAttempt.objects.get(contributor=contributor, proposal=proposal)
@@ -357,7 +383,9 @@ def test_serious_give_up(otis):
     year = OIMEYearFactory.create(active=True)
     OIMEParticipationFactory.create(contributor=contributor, year=year, is_serious=True)
     proposal = OIMEProposalFactory.create()
-    OIMEAttemptFactory.create(contributor=contributor, year=year, proposal=proposal, status="IN_PROGRESS")
+    OIMEAttemptFactory.create(
+        contributor=contributor, year=year, proposal=proposal, status="IN_PROGRESS"
+    )
     otis.login(user)
     resp = otis.post("oime-give-up", proposal.pk)
     otis.assert_30x(resp)
@@ -372,7 +400,9 @@ def test_serious_gave_up_sees_solution(otis):
     year = OIMEYearFactory.create(active=True)
     OIMEParticipationFactory.create(contributor=contributor, year=year, is_serious=True)
     proposal = OIMEProposalFactory.create(answer=42)
-    OIMEAttemptFactory.create(contributor=contributor, year=year, proposal=proposal, status="GAVE_UP")
+    OIMEAttemptFactory.create(
+        contributor=contributor, year=year, proposal=proposal, status="GAVE_UP"
+    )
     otis.login(user)
     resp = otis.get_20x("oime-proposal-detail", proposal.pk)
     otis.assert_has(resp, "oime-answer-section")
@@ -384,7 +414,9 @@ def test_serious_cannot_comment_before_solving(otis):
     year = OIMEYearFactory.create(active=True)
     OIMEParticipationFactory.create(contributor=contributor, year=year, is_serious=True)
     proposal = OIMEProposalFactory.create()
-    OIMEAttemptFactory.create(contributor=contributor, year=year, proposal=proposal, status="IN_PROGRESS")
+    OIMEAttemptFactory.create(
+        contributor=contributor, year=year, proposal=proposal, status="IN_PROGRESS"
+    )
     otis.login(user)
     resp = otis.post(
         "oime-proposal-detail",
@@ -406,7 +438,9 @@ def test_upvote_after_solving(otis):
     year = OIMEYearFactory.create(active=True)
     OIMEParticipationFactory.create(contributor=contributor, year=year, is_serious=True)
     proposal = OIMEProposalFactory.create()
-    OIMEAttemptFactory.create(contributor=contributor, year=year, proposal=proposal, status="CORRECT")
+    OIMEAttemptFactory.create(
+        contributor=contributor, year=year, proposal=proposal, status="CORRECT"
+    )
     otis.login(user)
     resp = otis.post("oime-upvote", proposal.pk)
     otis.assert_30x(resp)
@@ -417,7 +451,9 @@ def test_upvote_after_solving(otis):
 def test_upvote_toggles_off(otis):
     user, contributor = _verified_contributor()
     year = OIMEYearFactory.create(active=True)
-    OIMEParticipationFactory.create(contributor=contributor, year=year, is_serious=False)
+    OIMEParticipationFactory.create(
+        contributor=contributor, year=year, is_serious=False
+    )
     proposal = OIMEProposalFactory.create()
     proposal.upvotes.add(contributor)
     otis.login(user)
@@ -429,7 +465,9 @@ def test_upvote_toggles_off(otis):
 def test_author_cannot_upvote_own_proposal(otis):
     user, contributor = _verified_contributor()
     year = OIMEYearFactory.create(active=True)
-    OIMEParticipationFactory.create(contributor=contributor, year=year, is_serious=False)
+    OIMEParticipationFactory.create(
+        contributor=contributor, year=year, is_serious=False
+    )
     proposal = OIMEProposalFactory.create(author=contributor)
     otis.login(user)
     resp = otis.post("oime-upvote", proposal.pk)
@@ -445,9 +483,13 @@ def test_author_cannot_upvote_own_proposal(otis):
 def test_author_can_edit_own_comment(otis):
     user, contributor = _verified_contributor()
     year = OIMEYearFactory.create(active=True)
-    OIMEParticipationFactory.create(contributor=contributor, year=year, is_serious=False)
+    OIMEParticipationFactory.create(
+        contributor=contributor, year=year, is_serious=False
+    )
     proposal = OIMEProposalFactory.create()
-    comment = OIMECommentFactory.create(author=contributor, proposal=proposal, content="Original")
+    comment = OIMECommentFactory.create(
+        author=contributor, proposal=proposal, content="Original"
+    )
     otis.login(user)
     resp = otis.post("oime-comment-edit", comment.pk, data={"content": "Edited"})
     otis.assert_30x(resp)

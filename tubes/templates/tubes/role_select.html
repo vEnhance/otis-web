@@ -8,7 +8,6 @@
     Select how you want to participate in OIME testsolving. You can change this at any time.
     <strong>Note:</strong> changing from serious to casual does not erase your existing timed attempts.
   </p>
-
   <div class="row g-4 mb-4">
     <div class="col-md-6">
       <div class="card h-100 {% if role and not role.is_serious %}border-primary{% endif %}">
@@ -28,7 +27,6 @@
         </div>
       </div>
     </div>
-
     <div class="col-md-6">
       <div class="card h-100 {% if role and role.is_serious %}border-primary{% endif %}">
         <div class="card-header fw-bold">Serious</div>
@@ -49,10 +47,17 @@
       </div>
     </div>
   </div>
-
   {% if role %}
-    <p class="text-muted">Your current role: <strong>{% if role.is_serious %}Serious{% else %}Casual{% endif %}</strong>.</p>
-  {% endif %}
-
-  <a href="{% url "oime-proposal-list" %}" class="btn btn-outline-secondary">← Back to Problems</a>
+    <p class="text-muted">
+      Your current role: <strong>
+      {% if role.is_serious %}
+        Serious
+      {% else %}
+        Casual
+      {% endif %}
+    </strong>.
+  </p>
+{% endif %}
+<a href="{% url "oime-proposal-list" %}"
+   class="btn btn-outline-secondary">← Back to Problems</a>
 {% endblock layout-content %}

@@ -26,7 +26,6 @@ from .models import (
     Tube,
 )
 
-
 # ---------------------------------------------------------------------------
 # Tube views (existing)
 # ---------------------------------------------------------------------------
@@ -81,8 +80,9 @@ def _get_contributor(request: HttpRequest) -> OIMEContributor | None:
         return None
 
 
-
-def _get_participation(contributor: OIMEContributor, year: OIMEYear) -> OIMEParticipation | None:
+def _get_participation(
+    contributor: OIMEContributor, year: OIMEYear
+) -> OIMEParticipation | None:
     try:
         return OIMEParticipation.objects.get(contributor=contributor, year=year)
     except OIMEParticipation.DoesNotExist:
@@ -106,7 +106,9 @@ def _get_solver_context(
     attempt: OIMEAttempt | None = None
     if is_serious:
         try:
-            attempt = OIMEAttempt.objects.get(contributor=contributor, proposal=proposal)
+            attempt = OIMEAttempt.objects.get(
+                contributor=contributor, proposal=proposal
+            )
             if attempt.status == "IN_PROGRESS" and attempt.time_expired:
                 attempt.status = "GAVE_UP"
                 attempt.submitted_at = timezone.now()
@@ -242,7 +244,9 @@ class ProposalListView(VerifiedRequiredMixin, ListView[OIMEProposal]):
         return context
 
 
-class ProposalCreateView(VerifiedRequiredMixin, CreateView[OIMEProposal, OIMEProposalForm]):
+class ProposalCreateView(
+    VerifiedRequiredMixin, CreateView[OIMEProposal, OIMEProposalForm]
+):
     model = OIMEProposal
     form_class = OIMEProposalForm
     template_name = "tubes/proposal_form.html"
@@ -267,12 +271,16 @@ class ProposalCreateView(VerifiedRequiredMixin, CreateView[OIMEProposal, OIMEPro
         return context
 
 
-class ProposalUpdateView(VerifiedRequiredMixin, UpdateView[OIMEProposal, OIMEProposalForm]):
+class ProposalUpdateView(
+    VerifiedRequiredMixin, UpdateView[OIMEProposal, OIMEProposalForm]
+):
     model = OIMEProposal
     form_class = OIMEProposalForm
     template_name = "tubes/proposal_form.html"
 
-    def get_object(self, queryset: QuerySet[OIMEProposal] | None = None) -> OIMEProposal:
+    def get_object(
+        self, queryset: QuerySet[OIMEProposal] | None = None
+    ) -> OIMEProposal:
         proposal = super().get_object(queryset)
         contributor = _get_contributor(self.request)
         is_author = contributor is not None and proposal.author == contributor
@@ -317,13 +325,19 @@ def proposal_detail(request: HttpRequest, pk: int) -> HttpResponse:
                 comment.save()
                 return redirect("oime-proposal-detail", pk=pk)
 
-    remaining_seconds = attempt.remaining_seconds if (attempt and not attempt.is_complete) else None
+    remaining_seconds = (
+        attempt.remaining_seconds if (attempt and not attempt.is_complete) else None
+    )
     comments = (
         OIMEComment.objects.filter(proposal=proposal).select_related("author")
         if ctx["can_see_solution"]
         else None
     )
-    has_upvoted = proposal.upvotes.filter(pk=contributor.pk).exists() if ctx["can_see_solution"] else False
+    has_upvoted = (
+        proposal.upvotes.filter(pk=contributor.pk).exists()
+        if ctx["can_see_solution"]
+        else False
+    )
 
     return render(
         request,
@@ -406,7 +420,9 @@ def submit_answer(request: HttpRequest, pk: int) -> HttpResponse:
     else:
         attempt.wrong_answers += 1
         attempt.save()
-        messages.error(request, f"Incorrect (wrong answer #{attempt.wrong_answers}). Try again!")
+        messages.error(
+            request, f"Incorrect (wrong answer #{attempt.wrong_answers}). Try again!"
+        )
 
     return redirect("oime-proposal-detail", pk=pk)
 
@@ -427,7 +443,9 @@ def give_up(request: HttpRequest, pk: int) -> HttpResponse:
         attempt.status = "GAVE_UP"
         attempt.submitted_at = timezone.now()
         attempt.save()
-        messages.info(request, "You gave up on this problem. You can now view the solution.")
+        messages.info(
+            request, "You gave up on this problem. You can now view the solution."
+        )
 
     return redirect("oime-proposal-detail", pk=pk)
 
@@ -472,4 +490,6 @@ def edit_comment(request: HttpRequest, pk: int) -> HttpResponse:
     else:
         form = OIMECommentForm(instance=comment)
 
-    return render(request, "tubes/comment_edit.html", {"form": form, "comment": comment})
+    return render(
+        request, "tubes/comment_edit.html", {"form": form, "comment": comment}
+    )

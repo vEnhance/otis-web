@@ -9,28 +9,24 @@
       <p class="text-muted">
         Submitted by {{ proposal.author }}
         on {{ proposal.created_at|date:"Y-m-d" }}
-        {% if proposal.archived %}
-          · <span class="badge bg-secondary">archived</span>
-        {% endif %}
+        {% if proposal.archived %}· <span class="badge bg-secondary">archived</span>{% endif %}
         {% if proposal.author == contributor or request.user.is_staff %}
           · <a href="{% url "oime-proposal-update" proposal.pk %}">Edit</a>
         {% endif %}
       </p>
     </div>
-    <a href="{% url "oime-proposal-list" %}" class="btn btn-outline-secondary btn-sm">← Back</a>
+    <a href="{% url "oime-proposal-list" %}"
+       class="btn btn-outline-secondary btn-sm">← Back</a>
   </div>
-
   {% for message in messages %}
     <div class="alert alert-{{ message.tags|default:"info" }}">{{ message }}</div>
   {% endfor %}
-
   <div class="card mb-4">
     <div class="card-header fw-bold">Problem Statement</div>
     <div class="card-body">
       <div class="math-content">{{ proposal.statement }}</div>
     </div>
   </div>
-
   {# ---- Serious solver: not yet enrolled in active year ---- #}
   {% if is_serious is False and not participation and year %}
     <div class="alert alert-warning">
@@ -38,7 +34,6 @@
       <a href="{% url "oime-setup" %}">Choose serious or casual</a> before you start.
     </div>
   {% endif %}
-
   {# ---- Serious solver: no attempt yet ---- #}
   {% if is_serious and not attempt %}
     <div class="alert alert-info">
@@ -53,7 +48,6 @@
       </form>
     </div>
   {% endif %}
-
   {# ---- Serious solver: in progress ---- #}
   {% if is_serious and attempt and not attempt.is_complete %}
     <div class="card mb-4 border-warning">
@@ -65,7 +59,9 @@
         {% if attempt.wrong_answers > 0 %}
           <p class="text-danger">Wrong answers so far: {{ attempt.wrong_answers }}</p>
         {% endif %}
-        <form method="post" action="{% url "oime-submit-answer" proposal.pk %}" class="d-flex gap-2 align-items-end mb-3">
+        <form method="post"
+              action="{% url "oime-submit-answer" proposal.pk %}"
+              class="d-flex gap-2 align-items-end mb-3">
           {% csrf_token %}
           <div>
             <label class="form-label fw-bold">Your Answer (0–999)</label>
@@ -75,38 +71,41 @@
         </form>
         <form method="post" action="{% url "oime-give-up" proposal.pk %}">
           {% csrf_token %}
-          <button type="submit" class="btn btn-outline-danger btn-sm"
-                  onclick="return confirm('Give up and reveal the solution?')">
-            Give Up
-          </button>
+          <button type="submit"
+                  class="btn btn-outline-danger btn-sm"
+                  onclick="return confirm('Give up and reveal the solution?')">Give Up</button>
         </form>
       </div>
     </div>
-
     <script>
-      (function () {
-        let secs = {{ remaining_seconds }};
-        const el = document.getElementById("countdown");
-        const header = el.closest(".card-header");
-        const interval = setInterval(function () {
-          secs -= 1;
-          if (secs <= 0) {
-            clearInterval(interval);
-            el.textContent = "Time's up!";
-            header.classList.replace("bg-warning", "bg-danger");
-            header.classList.remove("text-dark");
-            header.classList.add("text-white");
-            setTimeout(function () { location.reload(); }, 1000);
-          } else {
-            const m = Math.floor(secs / 60);
-            const s = secs % 60;
-            el.textContent = m + ":" + String(s).padStart(2, "0");
-          }
-        }, 1000);
-      })();
+        (function() {
+            let secs = {
+                {
+                    remaining_seconds
+                }
+            };
+            const el = document.getElementById("countdown");
+            const header = el.closest(".card-header");
+            const interval = setInterval(function() {
+                secs -= 1;
+                if (secs <= 0) {
+                    clearInterval(interval);
+                    el.textContent = "Time's up!";
+                    header.classList.replace("bg-warning", "bg-danger");
+                    header.classList.remove("text-dark");
+                    header.classList.add("text-white");
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1000);
+                } else {
+                    const m = Math.floor(secs / 60);
+                    const s = secs % 60;
+                    el.textContent = m + ":" + String(s).padStart(2, "0");
+                }
+            }, 1000);
+        })();
     </script>
   {% endif %}
-
   {# ---- Solution (visible to casual or completed serious) ---- #}
   {% if can_see_solution %}
     {% if attempt %}
@@ -118,15 +117,23 @@
         <div class="alert alert-secondary">You gave up on this problem.</div>
       {% endif %}
     {% endif %}
-
     <div class="card mb-4" id="oime-answer-section">
       <div class="card-header fw-bold d-flex justify-content-between align-items-center">
         <span>Answer</span>
         {% if can_upvote %}
-          <form method="post" action="{% url "oime-upvote" proposal.pk %}" class="d-inline">
+          <form method="post"
+                action="{% url "oime-upvote" proposal.pk %}"
+                class="d-inline">
             {% csrf_token %}
-            <button type="submit" class="btn btn-sm {% if has_upvoted %}btn-warning{% else %}btn-outline-secondary{% endif %}">
-              ♥ {% if has_upvoted %}Upvoted{% else %}Upvote{% endif %} ({{ proposal.upvotes.count }})
+            <button type="submit"
+                    class="btn btn-sm {% if has_upvoted %}btn-warning{% else %}btn-outline-secondary{% endif %}">
+              ♥
+              {% if has_upvoted %}
+                Upvoted
+              {% else %}
+                Upvote
+              {% endif %}
+              ({{ proposal.upvotes.count }})
             </button>
           </form>
         {% else %}
@@ -137,17 +144,14 @@
         <strong class="fs-5">{{ proposal.answer }}</strong>
       </div>
     </div>
-
     <div class="card mb-4">
       <div class="card-header fw-bold">Solution</div>
       <div class="card-body">
         <div class="math-content">{{ proposal.solution }}</div>
       </div>
     </div>
-
     {# ---- Comments ---- #}
     <h4>Discussion</h4>
-
     {% if comments %}
       {% for comment in comments %}
         <div class="card mb-2">
@@ -156,9 +160,7 @@
             <small class="text-muted">
               {{ comment.author }}
               · {{ comment.created_at|date:"Y-m-d H:i" }}
-              {% if comment.updated_at != comment.created_at %}
-                (edited {{ comment.updated_at|date:"Y-m-d H:i" }})
-              {% endif %}
+              {% if comment.updated_at != comment.created_at %}(edited {{ comment.updated_at|date:"Y-m-d H:i" }}){% endif %}
               {% if comment.author == contributor or request.user.is_staff %}
                 · <a href="{% url "oime-comment-edit" comment.pk %}">Edit</a>
               {% endif %}
@@ -169,7 +171,6 @@
     {% else %}
       <p class="text-muted">No comments yet.</p>
     {% endif %}
-
     {% if can_comment %}
       <div class="card mt-3">
         <div class="card-header">Add a comment</div>
@@ -183,5 +184,4 @@
       </div>
     {% endif %}
   {% endif %}
-
 {% endblock layout-content %}
