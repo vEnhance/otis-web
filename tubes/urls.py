@@ -3,8 +3,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path(r"list/", views.TubeList.as_view(), name="tube-list"),
-    path(r"invite/<int:pk>/", views.tube_join, name="tube-join"),
+    path(r"landing/", views.LandingView.as_view(), name="oime-landing"),
     path(r"proposals/", views.ProposalListView.as_view(), name="oime-proposal-list"),
     path(r"propose/", views.ProposalCreateView.as_view(), name="oime-proposal-create"),
     path(r"proposal/<int:pk>/", views.proposal_detail, name="oime-proposal-detail"),

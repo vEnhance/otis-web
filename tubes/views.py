@@ -1,72 +1,25 @@
-import logging
 from typing import Any
 
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.db.models.query import QuerySet
 from django.http import HttpRequest, HttpResponse
-from django.http.response import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
 from django.utils import timezone
-from django.views.generic import CreateView, ListView, UpdateView
+from django.views.generic import CreateView, ListView, TemplateView, UpdateView
 
 from otisweb.decorators import verified_required
 from otisweb.mixins import VerifiedRequiredMixin
 
 from .forms import OIMEAnswerForm, OIMECommentForm, OIMEProposalForm, OIMESetupForm
 from .models import (
-    JoinRecord,
     OIMEAttempt,
     OIMEComment,
     OIMEContributor,
     OIMEParticipation,
     OIMEProposal,
     OIMEYear,
-    Tube,
 )
-
-# ---------------------------------------------------------------------------
-# Tube views (existing)
-# ---------------------------------------------------------------------------
-
-
-class TubeList(VerifiedRequiredMixin, ListView[Tube]):
-    model = Tube
-    context_object_name = "tube_list"
-    template_name = "tubes/tube_list.html"
-
-    def get_queryset(self) -> QuerySet[Tube]:
-        return Tube.objects.filter(status="TB_ACTIVE")
-
-
-@verified_required
-def tube_join(request: HttpRequest, pk: int) -> HttpResponse:
-    tube = get_object_or_404(Tube, pk=pk)
-    if not tube.status == "TB_ACTIVE" or not tube.accepting_signups:
-        raise PermissionDenied("Cannot join right now")
-    try:
-        jr = JoinRecord.objects.get(tube=tube, user=request.user)
-    except JoinRecord.DoesNotExist:
-        jr = JoinRecord.objects.filter(tube=tube, user__isnull=True).first()
-        if jr is None:
-            messages.error(
-                request, "Ran out of one-time invite codes, please contact staff."
-            )
-            logging.critical(
-                f"{tube} somehow ran out of one-time codes when {request.user} tried to join",
-            )
-            return HttpResponseRedirect(reverse("tube-list"))
-        else:
-            jr.user = request.user
-            jr.activation_time = timezone.now()
-            jr.save()
-    return HttpResponseRedirect(jr.invite_url if jr.invite_url else jr.tube.main_url)
-
-
-# ---------------------------------------------------------------------------
-# OIME helpers
-# ---------------------------------------------------------------------------
 
 
 def _get_active_year() -> OIMEYear | None:
@@ -534,3 +487,7 @@ def edit_comment(request: HttpRequest, pk: int) -> HttpResponse:
     return render(
         request, "tubes/comment_edit.html", {"form": form, "comment": comment}
     )
+
+
+class LandingView(TemplateView):
+    template_name = "tubes/landing.html"
