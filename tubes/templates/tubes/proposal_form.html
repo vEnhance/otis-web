@@ -7,11 +7,10 @@
   {% endif %}
 {% endblock title %}
 {% block layout-content %}
-  <h2>{{ action }} Problem Proposal</h2>
-  <div class="alert alert-info">
-    <strong>LaTeX note:</strong> Use <code>\( ... \)</code> for inline math and
-    <code>\[ ... \]</code> for display math. Write the full problem statement and a
-    complete solution.
-  </div>
+  <p>
+    Use <code>$ ... $</code> for inline math and
+    <code>\[ ... \]</code> for display math.
+    Write the full problem statement and a complete solution.
+  </p>
   {% include "otisweb/components/generic_form.html" with submit_name=submit_name %}
 {% endblock layout-content %}
