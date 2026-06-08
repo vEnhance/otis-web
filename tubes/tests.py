@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 import pytest
 from django.contrib.auth.models import Group
 from django.utils import timezone
@@ -300,6 +302,22 @@ def test_unspoiled_start_creates_attempt(otis):
 
 
 @pytest.mark.django_db
+def test_cannot_start_second_concurrent_fight(otis):
+    user, contributor = _verified_contributor()
+    proposal1 = OIMEProposalFactory.create()
+    proposal2 = OIMEProposalFactory.create()
+    OIMEAttemptFactory.create(
+        contributor=contributor, proposal=proposal1, status="OIME_TBD"
+    )
+    otis.login(user)
+    resp = otis.post("oime-start-attempt", proposal2.pk)
+    otis.assert_30x(resp)
+    assert not OIMEAttempt.objects.filter(
+        contributor=contributor, proposal=proposal2
+    ).exists()
+
+
+@pytest.mark.django_db
 def test_correct_answer_solves(otis):
     user, contributor = _verified_contributor()
     proposal = OIMEProposalFactory.create(answer=42)
@@ -341,6 +359,28 @@ def test_give_up(otis):
     attempt = OIMEAttempt.objects.get(contributor=contributor, proposal=proposal)
     assert attempt.status == "OIME_FAIL"
     assert attempt.submitted_at is not None
+
+
+@pytest.mark.django_db
+def test_give_up_rate_limited(otis):
+    from .views import GIVE_UP_RATE_LIMIT, GIVE_UP_WINDOW_MINUTES
+
+    user, contributor = _verified_contributor()
+    proposals = [OIMEProposalFactory.create() for _ in range(GIVE_UP_RATE_LIMIT + 1)]
+    recent = timezone.now() - timedelta(minutes=GIVE_UP_WINDOW_MINUTES - 1)
+    for p in proposals[:GIVE_UP_RATE_LIMIT]:
+        OIMEAttemptFactory.create(
+            contributor=contributor, proposal=p, status="OIME_FAIL", submitted_at=recent
+        )
+    target = proposals[GIVE_UP_RATE_LIMIT]
+    OIMEAttemptFactory.create(
+        contributor=contributor, proposal=target, status="OIME_TBD"
+    )
+    otis.login(user)
+    resp = otis.post("oime-give-up", target.pk)
+    otis.assert_30x(resp)
+    target_attempt = OIMEAttempt.objects.get(contributor=contributor, proposal=target)
+    assert target_attempt.status == "OIME_TBD"
 
 
 @pytest.mark.django_db

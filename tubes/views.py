@@ -1,3 +1,4 @@
+from datetime import timedelta
 from typing import Any
 
 from django.contrib import messages
@@ -18,6 +19,9 @@ from .forms import (
     OIMEProposalForm,
 )
 from .models import OIMEAttempt, OIMEComment, OIMEContributor, OIMEProposal
+
+GIVE_UP_RATE_LIMIT = 2  # max give-ups allowed within the window
+GIVE_UP_WINDOW_MINUTES = 10
 
 
 def _get_contributor(request: HttpRequest) -> OIMEContributor | None:
@@ -354,6 +358,10 @@ def start_attempt(request: HttpRequest, pk: int) -> HttpResponse:
         messages.error(request, "You cannot start a new attempt on this problem.")
         return redirect("oime-proposal-detail", pk)
 
+    if OIMEAttempt.objects.filter(contributor=contributor, status="OIME_TBD").exists():
+        messages.error(request, "You already have an active fight in progress.")
+        return redirect("oime-proposal-detail", pk)
+
     OIMEAttempt.objects.create(contributor=contributor, proposal=proposal)
     return redirect("oime-proposal-fight", pk)
 
@@ -427,6 +435,19 @@ def give_up(request: HttpRequest, pk: int) -> HttpResponse:
     attempt = get_object_or_404(OIMEAttempt, contributor=contributor, proposal=proposal)
 
     if attempt.status == "OIME_TBD":
+        window_start = timezone.now() - timedelta(minutes=GIVE_UP_WINDOW_MINUTES)
+        recent_give_ups = OIMEAttempt.objects.filter(
+            contributor=contributor,
+            status="OIME_FAIL",
+            submitted_at__gte=window_start,
+        ).count()
+        if recent_give_ups >= GIVE_UP_RATE_LIMIT:
+            messages.error(
+                request,
+                f"You have given up {GIVE_UP_RATE_LIMIT} times in the last "
+                f"{GIVE_UP_WINDOW_MINUTES} minutes. Please wait before giving up again.",
+            )
+            return redirect("oime-proposal-fight", pk)
         attempt.status = "OIME_FAIL"
         attempt.submitted_at = timezone.now()
         attempt.save()
