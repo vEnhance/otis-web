@@ -140,6 +140,10 @@ class OIMEProposal(models.Model):
         return f"{self.subject}{self.pk}"
 
     @property
+    def difficulty_display(self) -> str:
+        return "💡" * self.difficulty
+
+    @property
     def time_limit_minutes(self) -> int:
         return 5 * self.difficulty + 5
 

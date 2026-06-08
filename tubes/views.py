@@ -190,17 +190,38 @@ class ProposalListView(VerifiedRequiredMixin, ListView[OIMEProposal]):
             f.proposal_id: f  # type: ignore[attr-defined]
             for f in OIMEFight.objects.filter(contributor=contributor)
         }
+
+        own: list[OIMEProposal] = []
+        unspoiled: list[OIMEProposal] = []
+        completed: list[OIMEProposal] = []
+        globally_spoiled: list[OIMEProposal] = []
+
         for proposal in context["proposals"]:
             fight = user_fights.get(proposal.pk)
             proposal.user_fight = fight  # type: ignore[attr-defined]
-            proposal.user_is_spoiled = (  # type: ignore[attr-defined]
-                contributor == proposal.author
-                or (
-                    contributor.spoil_before is not None
-                    and proposal.created_at <= contributor.spoil_before
-                )
-                or (fight is not None and fight.is_complete)
-            )
+            if contributor == proposal.author:
+                proposal.user_list_status = "author"  # type: ignore[attr-defined]
+                own.append(proposal)
+            elif fight is not None and fight.is_complete:
+                proposal.user_list_status = "completed"  # type: ignore[attr-defined]
+                completed.append(proposal)
+            elif (
+                contributor.spoil_before is not None
+                and proposal.created_at <= contributor.spoil_before
+            ):
+                proposal.user_list_status = "spoiled"  # type: ignore[attr-defined]
+                globally_spoiled.append(proposal)
+            elif fight is not None:
+                proposal.user_list_status = "in_progress"  # type: ignore[attr-defined]
+                unspoiled.append(proposal)
+            else:
+                proposal.user_list_status = "not_started"  # type: ignore[attr-defined]
+                unspoiled.append(proposal)
+
+        context["own_proposals"] = own
+        context["unspoiled_proposals"] = unspoiled
+        context["completed_proposals"] = completed
+        context["globally_spoiled_proposals"] = globally_spoiled
 
         return context
 
