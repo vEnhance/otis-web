@@ -120,7 +120,13 @@ class OIMEProposal(models.Model):
         ("G", "Geometry"),
         ("N", "Number Theory"),
     ]
-    DIFFICULTY_CHOICES = [(i, str(i)) for i in range(1, 6)]
+    DIFFICULTY_CHOICES = [
+        (1, "Tier I (AIME 1-3): 10 minutes"),
+        (2, "Tier II (AIME 4-6): 15 minutes"),
+        (3, "Tier III (AIME 7-9): 20 minutes"),
+        (4, "Tier IV (AIME 10-12): 25 minutes"),
+        (5, "Tier V (AIME 13-15): 30 minutes"),
+    ]
 
     author = models.ForeignKey(
         OIMEContributor,
