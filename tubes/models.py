@@ -186,6 +186,10 @@ class OIMEFight(models.Model):
         return f"{self.contributor} on {self.proposal}"
 
     @property
+    def answer_attempts_display(self) -> str:
+        return "✗" * self.wrong_answers + "·" * (self.ANSWER_LIMIT - self.wrong_answers)
+
+    @property
     def is_complete(self) -> bool:
         return self.status != "OIME_TBD"
 

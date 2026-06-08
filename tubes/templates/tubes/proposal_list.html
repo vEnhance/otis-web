@@ -24,10 +24,10 @@
       </div>
     {% endif %}
   {% endif %}
+  {% include "tubes/components/proposal_table.html" with title="Your proposals" proposals=own_proposals %}
   {% include "tubes/components/proposal_table.html" with title="New problems" proposals=unspoiled_proposals %}
   {% include "tubes/components/proposal_table.html" with title="Problems you've fought" proposals=completed_proposals %}
   {% include "tubes/components/proposal_table.html" with title="Spoiled problems" proposals=globally_spoiled_proposals %}
-  {% include "tubes/components/proposal_table.html" with title="Your proposals" proposals=own_proposals %}
   {% if not unspoiled_proposals and not completed_proposals and not globally_spoiled_proposals and not own_proposals %}
     <div class="alert alert-warning">No proposals yet. Be the first to submit!</div>
   {% endif %}
