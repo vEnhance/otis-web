@@ -7,12 +7,12 @@ from django.utils import timezone
 from core.factories import UserFactory
 
 from .factories import (
-    OIMEAttemptFactory,
     OIMECommentFactory,
     OIMEContributorFactory,
+    OIMEFightFactory,
     OIMEProposalFactory,
 )
-from .models import OIMEAttempt, OIMEComment, OIMEContributor
+from .models import OIMEComment, OIMEContributor, OIMEFight
 
 
 def _verified_contributor(username: str = "alice") -> tuple[object, object]:
@@ -296,9 +296,7 @@ def test_unspoiled_start_creates_attempt(otis):
     otis.login(user)
     resp = otis.post("oime-start-attempt", proposal.pk)
     otis.assert_30x(resp)
-    assert OIMEAttempt.objects.filter(
-        contributor=contributor, proposal=proposal
-    ).exists()
+    assert OIMEFight.objects.filter(contributor=contributor, proposal=proposal).exists()
 
 
 @pytest.mark.django_db
@@ -306,13 +304,13 @@ def test_cannot_start_second_concurrent_fight(otis):
     user, contributor = _verified_contributor()
     proposal1 = OIMEProposalFactory.create()
     proposal2 = OIMEProposalFactory.create()
-    OIMEAttemptFactory.create(
+    OIMEFightFactory.create(
         contributor=contributor, proposal=proposal1, status="OIME_TBD"
     )
     otis.login(user)
     resp = otis.post("oime-start-attempt", proposal2.pk)
     otis.assert_30x(resp)
-    assert not OIMEAttempt.objects.filter(
+    assert not OIMEFight.objects.filter(
         contributor=contributor, proposal=proposal2
     ).exists()
 
@@ -321,44 +319,44 @@ def test_cannot_start_second_concurrent_fight(otis):
 def test_correct_answer_solves(otis):
     user, contributor = _verified_contributor()
     proposal = OIMEProposalFactory.create(answer=42)
-    OIMEAttemptFactory.create(
+    OIMEFightFactory.create(
         contributor=contributor, proposal=proposal, status="OIME_TBD"
     )
     otis.login(user)
     resp = otis.post("oime-submit-answer", proposal.pk, data={"answer": 42})
     otis.assert_30x(resp)
-    attempt = OIMEAttempt.objects.get(contributor=contributor, proposal=proposal)
-    assert attempt.status == "OIME_OK"
-    assert attempt.solve_time_seconds is not None
+    fight = OIMEFight.objects.get(contributor=contributor, proposal=proposal)
+    assert fight.status == "OIME_OK"
+    assert fight.solve_time_seconds is not None
 
 
 @pytest.mark.django_db
 def test_wrong_answer_increments_count(otis):
     user, contributor = _verified_contributor()
     proposal = OIMEProposalFactory.create(answer=42)
-    OIMEAttemptFactory.create(
+    OIMEFightFactory.create(
         contributor=contributor, proposal=proposal, status="OIME_TBD"
     )
     otis.login(user)
     otis.post("oime-submit-answer", proposal.pk, data={"answer": 99})
-    attempt = OIMEAttempt.objects.get(contributor=contributor, proposal=proposal)
-    assert attempt.status == "OIME_TBD"
-    assert attempt.wrong_answers == 1
+    fight = OIMEFight.objects.get(contributor=contributor, proposal=proposal)
+    assert fight.status == "OIME_TBD"
+    assert fight.wrong_answers == 1
 
 
 @pytest.mark.django_db
 def test_give_up(otis):
     user, contributor = _verified_contributor()
     proposal = OIMEProposalFactory.create()
-    OIMEAttemptFactory.create(
+    OIMEFightFactory.create(
         contributor=contributor, proposal=proposal, status="OIME_TBD"
     )
     otis.login(user)
     resp = otis.post("oime-give-up", proposal.pk)
     otis.assert_30x(resp)
-    attempt = OIMEAttempt.objects.get(contributor=contributor, proposal=proposal)
-    assert attempt.status == "OIME_FAIL"
-    assert attempt.submitted_at is not None
+    fight = OIMEFight.objects.get(contributor=contributor, proposal=proposal)
+    assert fight.status == "OIME_FAIL"
+    assert fight.submitted_at is not None
 
 
 @pytest.mark.django_db
@@ -369,25 +367,23 @@ def test_give_up_rate_limited(otis):
     proposals = [OIMEProposalFactory.create() for _ in range(GIVE_UP_RATE_LIMIT + 1)]
     recent = timezone.now() - timedelta(minutes=GIVE_UP_WINDOW_MINUTES - 1)
     for p in proposals[:GIVE_UP_RATE_LIMIT]:
-        OIMEAttemptFactory.create(
+        OIMEFightFactory.create(
             contributor=contributor, proposal=p, status="OIME_FAIL", submitted_at=recent
         )
     target = proposals[GIVE_UP_RATE_LIMIT]
-    OIMEAttemptFactory.create(
-        contributor=contributor, proposal=target, status="OIME_TBD"
-    )
+    OIMEFightFactory.create(contributor=contributor, proposal=target, status="OIME_TBD")
     otis.login(user)
     resp = otis.post("oime-give-up", target.pk)
     otis.assert_30x(resp)
-    target_attempt = OIMEAttempt.objects.get(contributor=contributor, proposal=target)
-    assert target_attempt.status == "OIME_TBD"
+    target_fight = OIMEFight.objects.get(contributor=contributor, proposal=target)
+    assert target_fight.status == "OIME_TBD"
 
 
 @pytest.mark.django_db
 def test_gave_up_sees_solution(otis):
     user, contributor = _verified_contributor()
     proposal = OIMEProposalFactory.create(answer=42)
-    OIMEAttemptFactory.create(
+    OIMEFightFactory.create(
         contributor=contributor, proposal=proposal, status="OIME_FAIL"
     )
     otis.login(user)
@@ -399,7 +395,7 @@ def test_gave_up_sees_solution(otis):
 def test_cannot_comment_before_spoiled(otis):
     user, contributor = _verified_contributor()
     proposal = OIMEProposalFactory.create()
-    OIMEAttemptFactory.create(
+    OIMEFightFactory.create(
         contributor=contributor, proposal=proposal, status="OIME_TBD"
     )
     otis.login(user)
@@ -423,7 +419,7 @@ def test_spoiled_cannot_start_attempt(otis):
     otis.login(user)
     resp = otis.post("oime-start-attempt", proposal.pk)
     otis.assert_30x(resp)
-    assert not OIMEAttempt.objects.filter(
+    assert not OIMEFight.objects.filter(
         contributor=contributor, proposal=proposal
     ).exists()
 
@@ -435,7 +431,7 @@ def test_author_cannot_start_attempt(otis):
     otis.login(user)
     resp = otis.post("oime-start-attempt", proposal.pk)
     otis.assert_30x(resp)
-    assert not OIMEAttempt.objects.filter(
+    assert not OIMEFight.objects.filter(
         contributor=contributor, proposal=proposal
     ).exists()
 
@@ -449,7 +445,7 @@ def test_author_cannot_start_attempt(otis):
 def test_upvote_after_solving(otis):
     user, contributor = _verified_contributor()
     proposal = OIMEProposalFactory.create()
-    OIMEAttemptFactory.create(
+    OIMEFightFactory.create(
         contributor=contributor, proposal=proposal, status="OIME_OK"
     )
     otis.login(user)

@@ -7,9 +7,9 @@ from core.factories import UserFactory
 
 from .models import (
     JoinRecord,
-    OIMEAttempt,
     OIMEComment,
     OIMEContributor,
+    OIMEFight,
     OIMEProposal,
     Tube,
 )
@@ -57,9 +57,9 @@ class OIMEProposalFactory(DjangoModelFactory):
     archived = False
 
 
-class OIMEAttemptFactory(DjangoModelFactory):
+class OIMEFightFactory(DjangoModelFactory):
     class Meta:
-        model = OIMEAttempt
+        model = OIMEFight
 
     contributor = SubFactory(OIMEContributorFactory)
     proposal = SubFactory(OIMEProposalFactory)

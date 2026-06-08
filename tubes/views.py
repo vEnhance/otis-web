@@ -18,7 +18,7 @@ from .forms import (
     OIMEContributorForm,
     OIMEProposalForm,
 )
-from .models import OIMEAttempt, OIMEComment, OIMEContributor, OIMEProposal
+from .models import OIMEComment, OIMEContributor, OIMEFight, OIMEProposal
 
 GIVE_UP_RATE_LIMIT = 2  # max give-ups allowed within the window
 GIVE_UP_WINDOW_MINUTES = 10
@@ -51,8 +51,8 @@ def _get_solver_context(
         return {
             "is_spoiled": True,
             "is_author": True,
-            "attempt": None,
-            "can_start_attempt": False,
+            "fight": None,
+            "can_start_fight": False,
             "can_comment": True,
             "can_upvote": False,
         }
@@ -62,23 +62,23 @@ def _get_solver_context(
         and proposal.created_at <= contributor.spoil_before
     )
 
-    attempt: OIMEAttempt | None = None
+    fight: OIMEFight | None = None
     try:
-        attempt = OIMEAttempt.objects.get(contributor=contributor, proposal=proposal)
-        if attempt.status == "OIME_TBD" and attempt.time_expired:
-            attempt.status = "OIME_TLE"
-            attempt.submitted_at = timezone.now()
-            attempt.save()
-    except OIMEAttempt.DoesNotExist:
+        fight = OIMEFight.objects.get(contributor=contributor, proposal=proposal)
+        if fight.status == "OIME_TBD" and fight.time_expired:
+            fight.status = "OIME_TLE"
+            fight.submitted_at = timezone.now()
+            fight.save()
+    except OIMEFight.DoesNotExist:
         pass
 
-    is_spoiled = is_globally_spoiled or (attempt is not None and attempt.is_complete)
+    is_spoiled = is_globally_spoiled or (fight is not None and fight.is_complete)
 
     return {
         "is_spoiled": is_spoiled,
         "is_author": False,
-        "attempt": attempt,
-        "can_start_attempt": not is_spoiled and attempt is None,
+        "fight": fight,
+        "can_start_fight": not is_spoiled and fight is None,
         "can_comment": is_spoiled,
         "can_upvote": is_spoiled,
     }
@@ -122,7 +122,7 @@ def spoil_self(request: HttpRequest) -> HttpResponse:
         return redirect("oime-setup")
     if contributor.spoil_before is not None:
         return redirect("oime-proposal-list")
-    has_active_fight = OIMEAttempt.objects.filter(
+    has_active_fight = OIMEFight.objects.filter(
         contributor=contributor, status="OIME_TBD"
     ).exists()
     if request.method == "POST":
@@ -186,20 +186,20 @@ class ProposalListView(VerifiedRequiredMixin, ListView[OIMEProposal]):
 
         context["spoil_before"] = contributor.spoil_before
 
-        user_attempts: dict[int, OIMEAttempt] = {
-            a.proposal_id: a  # type: ignore[attr-defined]
-            for a in OIMEAttempt.objects.filter(contributor=contributor)
+        user_fights: dict[int, OIMEFight] = {
+            f.proposal_id: f  # type: ignore[attr-defined]
+            for f in OIMEFight.objects.filter(contributor=contributor)
         }
         for proposal in context["proposals"]:
-            attempt = user_attempts.get(proposal.pk)
-            proposal.user_attempt = attempt  # type: ignore[attr-defined]
+            fight = user_fights.get(proposal.pk)
+            proposal.user_fight = fight  # type: ignore[attr-defined]
             proposal.user_is_spoiled = (  # type: ignore[attr-defined]
                 contributor == proposal.author
                 or (
                     contributor.spoil_before is not None
                     and proposal.created_at <= contributor.spoil_before
                 )
-                or (attempt is not None and attempt.is_complete)
+                or (fight is not None and fight.is_complete)
             )
 
         return context
@@ -270,10 +270,10 @@ def proposal_detail(request: HttpRequest, pk: int) -> HttpResponse:
         return redirect("oime-setup")
 
     ctx = _get_solver_context(contributor, proposal)
-    attempt: OIMEAttempt | None = ctx["attempt"]
+    fight: OIMEFight | None = ctx["fight"]
 
-    # Unspoiled contributor with an active attempt → send to the fight view
-    if not ctx["is_spoiled"] and attempt is not None and not attempt.is_complete:
+    # Unspoiled contributor with an active fight → send to the fight view
+    if not ctx["is_spoiled"] and fight is not None and not fight.is_complete:
         return redirect("oime-proposal-fight", pk)
 
     comment_form = OIMECommentForm()
@@ -324,10 +324,10 @@ def proposal_fight(request: HttpRequest, pk: int) -> HttpResponse:
         return redirect("oime-setup")
 
     ctx = _get_solver_context(contributor, proposal)
-    attempt: OIMEAttempt | None = ctx["attempt"]
+    fight: OIMEFight | None = ctx["fight"]
 
-    # Only valid while there is an active, in-progress attempt and the user isn't spoiled
-    if ctx["is_spoiled"] or attempt is None or attempt.is_complete:
+    # Only valid while there is an active, in-progress fight and the user isn't spoiled
+    if ctx["is_spoiled"] or fight is None or fight.is_complete:
         return redirect("oime-proposal-detail", pk)
 
     return render(
@@ -336,8 +336,8 @@ def proposal_fight(request: HttpRequest, pk: int) -> HttpResponse:
         {
             "proposal": proposal,
             "contributor": contributor,
-            "attempt": attempt,
-            "remaining_seconds": attempt.remaining_seconds,
+            "fight": fight,
+            "remaining_seconds": fight.remaining_seconds,
             "answer_form": OIMEAnswerForm(),
         },
     )
@@ -354,15 +354,15 @@ def start_attempt(request: HttpRequest, pk: int) -> HttpResponse:
         return redirect("oime-setup")
 
     ctx = _get_solver_context(contributor, proposal)
-    if not ctx["can_start_attempt"]:
-        messages.error(request, "You cannot start a new attempt on this problem.")
+    if not ctx["can_start_fight"]:
+        messages.error(request, "You cannot start a new fight on this problem.")
         return redirect("oime-proposal-detail", pk)
 
-    if OIMEAttempt.objects.filter(contributor=contributor, status="OIME_TBD").exists():
+    if OIMEFight.objects.filter(contributor=contributor, status="OIME_TBD").exists():
         messages.error(request, "You already have an active fight in progress.")
         return redirect("oime-proposal-detail", pk)
 
-    OIMEAttempt.objects.create(contributor=contributor, proposal=proposal)
+    OIMEFight.objects.create(contributor=contributor, proposal=proposal)
     return redirect("oime-proposal-fight", pk)
 
 
@@ -376,7 +376,7 @@ def submit_answer(request: HttpRequest, pk: int) -> HttpResponse:
     if contributor is None:
         return redirect("oime-setup")
 
-    attempt = get_object_or_404(OIMEAttempt, contributor=contributor, proposal=proposal)
+    attempt = get_object_or_404(OIMEFight, contributor=contributor, proposal=proposal)
 
     if attempt.status != "OIME_TBD":
         return redirect("oime-proposal-detail", pk)
@@ -403,17 +403,17 @@ def submit_answer(request: HttpRequest, pk: int) -> HttpResponse:
         messages.success(request, "Correct! Great job!")
     else:
         attempt.wrong_answers += 1
-        if attempt.wrong_answers >= OIMEAttempt.ANSWER_LIMIT:
+        if attempt.wrong_answers >= OIMEFight.ANSWER_LIMIT:
             attempt.status = "OIME_ALE"
             attempt.submitted_at = timezone.now()
             attempt.save()
             messages.error(
                 request,
-                f"Incorrect. You have used all {OIMEAttempt.ANSWER_LIMIT} attempts.",
+                f"Incorrect. You have used all {OIMEFight.ANSWER_LIMIT} attempts.",
             )
         else:
             attempt.save()
-            remaining = OIMEAttempt.ANSWER_LIMIT - attempt.wrong_answers
+            remaining = OIMEFight.ANSWER_LIMIT - attempt.wrong_answers
             messages.error(
                 request,
                 f"Incorrect (wrong answer #{attempt.wrong_answers}). {remaining} attempt{'' if remaining == 1 else 's'} remaining.",
@@ -432,11 +432,11 @@ def give_up(request: HttpRequest, pk: int) -> HttpResponse:
     if contributor is None:
         return redirect("oime-setup")
 
-    attempt = get_object_or_404(OIMEAttempt, contributor=contributor, proposal=proposal)
+    attempt = get_object_or_404(OIMEFight, contributor=contributor, proposal=proposal)
 
     if attempt.status == "OIME_TBD":
         window_start = timezone.now() - timedelta(minutes=GIVE_UP_WINDOW_MINUTES)
-        recent_give_ups = OIMEAttempt.objects.filter(
+        recent_give_ups = OIMEFight.objects.filter(
             contributor=contributor,
             status="OIME_FAIL",
             submitted_at__gte=window_start,

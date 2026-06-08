@@ -27,7 +27,7 @@
       <span id="countdown">{{ remaining_seconds }}s</span>
     </div>
     <div class="card-body">
-      <p class="text-muted mb-2">Wrong answers: {{ attempt.wrong_answers }} / {{ attempt.ANSWER_LIMIT }}</p>
+      <p class="text-muted mb-2">Wrong answers: {{ fight.wrong_answers }} / {{ fight.ANSWER_LIMIT }}</p>
       <form method="post"
             action="{% url "oime-submit-answer" proposal.pk %}"
             class="d-flex gap-2 align-items-end mb-3">

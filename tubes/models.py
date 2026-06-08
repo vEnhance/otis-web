@@ -144,7 +144,7 @@ class OIMEProposal(models.Model):
         return 5 * self.difficulty + 5
 
 
-class OIMEAttempt(models.Model):
+class OIMEFight(models.Model):
     ANSWER_LIMIT = 5
 
     STATUS_CHOICES = [
@@ -158,12 +158,12 @@ class OIMEAttempt(models.Model):
     contributor = models.ForeignKey(
         OIMEContributor,
         on_delete=models.CASCADE,
-        related_name="attempts",
+        related_name="fights",
     )
     proposal = models.ForeignKey(
         OIMEProposal,
         on_delete=models.CASCADE,
-        related_name="attempts",
+        related_name="fights",
     )
     started_at = models.DateTimeField(auto_now_add=True)
     submitted_at = models.DateTimeField(null=True, blank=True)

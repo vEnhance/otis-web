@@ -32,7 +32,7 @@
     </div>
   {% endif %}
   {# ---- Can start a new timed attempt ---- #}
-  {% if can_start_attempt %}
+  {% if can_start_fight %}
     <div class="alert alert-info">
       <p>
         Starting a timed session will reveal the problem statement.
@@ -47,10 +47,10 @@
   {% endif %}
   {# ---- Spoiled: show attempt result + answer + solution ---- #}
   {% if is_spoiled %}
-    {% if attempt %}
+    {% if fight %}
       {% if attempt.status == "OIME_OK" %}
         <div class="alert alert-success">
-          Solved in {{ attempt.solve_time_seconds }}s with {{ attempt.wrong_answers }} wrong answer{{ attempt.wrong_answers|pluralize }}.
+          Solved in {{ fight.solve_time_seconds }}s with {{ fight.wrong_answers }} wrong answer{{ fight.wrong_answers|pluralize }}.
         </div>
       {% elif attempt.status == "OIME_FAIL" %}
         <div class="alert alert-secondary">You gave up on this problem.</div>
@@ -58,7 +58,7 @@
         <div class="alert alert-danger">Time limit exceeded.</div>
       {% elif attempt.status == "OIME_ALE" %}
         <div class="alert alert-danger">
-          Answer limit exceeded ({{ attempt.wrong_answers }} wrong answer{{ attempt.wrong_answers|pluralize }}).
+          Answer limit exceeded ({{ fight.wrong_answers }} wrong answer{{ fight.wrong_answers|pluralize }}).
         </div>
       {% endif %}
     {% endif %}

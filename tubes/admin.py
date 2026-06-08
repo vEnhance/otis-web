@@ -4,9 +4,9 @@ from import_export.admin import ImportExportModelAdmin
 
 from .models import (
     JoinRecord,
-    OIMEAttempt,
     OIMEComment,
     OIMEContributor,
+    OIMEFight,
     OIMEProposal,
     Tube,
 )
@@ -59,8 +59,8 @@ class OIMEProposalAdmin(admin.ModelAdmin[OIMEProposal]):
     filter_horizontal = ["upvotes"]
 
 
-@admin.register(OIMEAttempt)
-class OIMEAttemptAdmin(admin.ModelAdmin[OIMEAttempt]):
+@admin.register(OIMEFight)
+class OIMEFightAdmin(admin.ModelAdmin[OIMEFight]):
     list_display = [
         "contributor",
         "proposal",

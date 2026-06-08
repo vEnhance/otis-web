@@ -53,14 +53,14 @@
             <td>
               {% if proposal.author == contributor %}
                 <span class="badge bg-primary">Author</span>
-              {% elif proposal.user_attempt %}
-                {% if proposal.user_attempt.status == "OIME_OK" %}
-                  <span class="badge bg-success">Solved ({{ proposal.user_attempt.solve_time_seconds }}s)</span>
-                {% elif proposal.user_attempt.status == "OIME_FAIL" %}
+              {% elif proposal.user_fight %}
+                {% if proposal.user_fight.status == "OIME_OK" %}
+                  <span class="badge bg-success">Solved ({{ proposal.user_fight.solve_time_seconds }}s)</span>
+                {% elif proposal.user_fight.status == "OIME_FAIL" %}
                   <span class="badge bg-secondary">Gave Up</span>
-                {% elif proposal.user_attempt.status == "OIME_TLE" %}
+                {% elif proposal.user_fight.status == "OIME_TLE" %}
                   <span class="badge bg-danger">TLE</span>
-                {% elif proposal.user_attempt.status == "OIME_ALE" %}
+                {% elif proposal.user_fight.status == "OIME_ALE" %}
                   <span class="badge bg-danger">ALE</span>
                 {% else %}
                   <span class="badge bg-warning text-dark">In Progress</span>
