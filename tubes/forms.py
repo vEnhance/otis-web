@@ -28,6 +28,16 @@ class OIMEContributorForm(forms.ModelForm[OIMEContributor]):
 
 
 class OIMEProposalForm(forms.ModelForm[OIMEProposal]):
+    subject = forms.ChoiceField(
+        choices=OIMEProposal.SUBJECT_CHOICES,
+        widget=forms.RadioSelect,
+    )
+    difficulty = forms.TypedChoiceField(
+        choices=OIMEProposal.DIFFICULTY_CHOICES,
+        coerce=int,
+        widget=forms.RadioSelect,
+    )
+
     class Meta:
         model = OIMEProposal
         fields = ["statement", "answer", "solution", "subject", "difficulty"]

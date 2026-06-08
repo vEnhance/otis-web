@@ -268,6 +268,7 @@ class ProposalCreateView(
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["action"] = "Submit"
+        context["submit_name"] = "Submit Proposal"
         return context
 
 
@@ -291,6 +292,7 @@ class ProposalUpdateView(
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["action"] = "Update"
+        context["submit_name"] = "Update Proposal"
         return context
 
 

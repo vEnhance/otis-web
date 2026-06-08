@@ -13,18 +13,5 @@
     <code>\[ ... \]</code> for display math. Write the full problem statement and a
     complete solution.
   </div>
-  <form method="post">
-    {% csrf_token %}
-    {% for field in form %}
-      <div class="mb-3">
-        <label class="form-label fw-bold" for="{{ field.id_for_label }}">{{ field.label }}</label>
-        {{ field }}
-        {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
-        {% for error in field.errors %}<div class="text-danger">{{ error }}</div>{% endfor %}
-      </div>
-    {% endfor %}
-    <button type="submit" class="btn btn-primary">{{ action }} Proposal</button>
-    <a href="{% url "oime-proposal-list" %}"
-       class="btn btn-outline-secondary ms-2">Cancel</a>
-  </form>
+  {% include "otisweb/components/generic_form.html" with submit_name=submit_name %}
 {% endblock layout-content %}
