@@ -5,8 +5,7 @@
 {% block layout-content %}
   <h2>OIME Problem Proposals</h2>
   <div class="mb-3">
-    <a href="{% url "oime-proposal-create" %}" class="btn btn-primary">Submit a Problem</a>
-    <a href="{% url "oime-setup" %}" class="btn btn-outline-secondary ms-2">Settings</a>
+    <a href="{% url "oime-proposal-create" %}" class="btn btn-success">Submit a problem</a>
   </div>
   {% if contributor %}
     {% if spoil_before %}
