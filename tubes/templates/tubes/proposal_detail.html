@@ -19,9 +19,6 @@
     <a href="{% url "oime-proposal-list" %}"
        class="btn btn-outline-secondary btn-sm">← Back</a>
   </div>
-  {% for message in messages %}
-    <div class="alert alert-{{ message.tags|default:"info" }}">{{ message }}</div>
-  {% endfor %}
   {# ---- Problem statement (only visible when spoiled) ---- #}
   {% if is_spoiled %}
     <div class="card mb-4">

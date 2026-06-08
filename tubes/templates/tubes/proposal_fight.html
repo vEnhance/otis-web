@@ -12,9 +12,6 @@
     <a href="{% url "oime-proposal-list" %}"
        class="btn btn-outline-secondary btn-sm">← Back</a>
   </div>
-  {% for message in messages %}
-    <div class="alert alert-{{ message.tags|default:"info" }}">{{ message }}</div>
-  {% endfor %}
   <div class="card mb-4">
     <div class="card-header fw-bold">Problem Statement</div>
     <div class="card-body">
