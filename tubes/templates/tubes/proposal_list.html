@@ -8,52 +8,53 @@
     <a href="{% url "oime-proposal-create" %}" class="btn btn-primary">Submit a Problem</a>
     <a href="{% url "oime-setup" %}" class="btn btn-outline-secondary ms-2">Settings</a>
   </div>
-  {% if year %}
-    <p class="text-muted">
-      Active year: <strong>{{ year }}</strong> ·
-      {% if participation %}
-        Testsolving as <strong>
-        {% if participation.is_serious %}
-          serious
-        {% else %}
-          casual
-        {% endif %}
-      </strong>
-      {% if participation.is_serious %}
-        (<a href="{% url "oime-setup" %}">downgrade to casual</a>)
-      {% endif %}
+  {% if contributor %}
+    {% if spoil_before %}
+      <p class="text-muted">
+        You are spoiled on all problems created before
+        <strong>{{ spoil_before|date:"Y-m-d H:i" }}</strong>.
+      </p>
     {% else %}
-      <a href="{% url "oime-setup" %}">Set your testsolving mode</a>
+      <div class="alert alert-info d-flex justify-content-between align-items-center">
+        <span>
+          You are testsolving seriously.
+          You won't see problem statements or solutions until you start (and finish) a timed session.
+        </span>
+        <a href="{% url "oime-spoil" %}"
+           class="btn btn-outline-danger btn-sm ms-3 flex-shrink-0">Spoil me on everything</a>
+      </div>
     {% endif %}
-  </p>
-{% endif %}
-{% if proposals %}
-  <table class="table table-hover">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Subject</th>
-        <th>Difficulty</th>
-        <th>Author</th>
-        <th>Submitted</th>
-        {% if is_serious %}<th>Your Status</th>{% endif %}
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for proposal in proposals %}
-        <tr {% if proposal.archived %}class="text-muted"{% endif %}>
-          <td>
-            {{ proposal.label }}
-            {% if proposal.archived %}<span class="badge bg-secondary">archived</span>{% endif %}
-          </td>
-          <td>{{ proposal.get_subject_display }}</td>
-          <td>{{ proposal.difficulty }} / 5</td>
-          <td>{{ proposal.author }}</td>
-          <td>{{ proposal.created_at|date:"Y-m-d" }}</td>
-          {% if is_serious %}
+  {% endif %}
+  {% if proposals %}
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Title</th>
+          <th>Subject</th>
+          <th>Difficulty</th>
+          <th>Author</th>
+          <th>Submitted</th>
+          <th>Your Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for proposal in proposals %}
+          <tr {% if proposal.archived %}class="text-muted"{% endif %}>
             <td>
-              {% if proposal.user_attempt %}
+              {{ proposal.label }}
+              {% if proposal.archived %}<span class="badge bg-secondary">archived</span>{% endif %}
+            </td>
+            <td>{{ proposal.title }}</td>
+            <td>{{ proposal.get_subject_display }}</td>
+            <td>{{ proposal.difficulty }} / 5</td>
+            <td>{{ proposal.author }}</td>
+            <td>{{ proposal.created_at|date:"Y-m-d" }}</td>
+            <td>
+              {% if proposal.author == contributor %}
+                <span class="badge bg-primary">Author</span>
+              {% elif proposal.user_attempt %}
                 {% if proposal.user_attempt.status == "OIME_OK" %}
                   <span class="badge bg-success">Solved ({{ proposal.user_attempt.solve_time_seconds }}s)</span>
                 {% elif proposal.user_attempt.status == "OIME_FAIL" %}
@@ -65,20 +66,21 @@
                 {% else %}
                   <span class="badge bg-warning text-dark">In Progress</span>
                 {% endif %}
+              {% elif proposal.user_is_spoiled %}
+                <span class="badge bg-light text-muted border">Spoiled</span>
               {% else %}
                 <span class="badge bg-light text-muted">Not started</span>
               {% endif %}
             </td>
-          {% endif %}
-          <td>
-            <a href="{{ proposal.get_absolute_url }}"
-               class="btn btn-sm btn-outline-primary">View</a>
-          </td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-{% else %}
-  <div class="alert alert-warning">No proposals yet. Be the first to submit!</div>
-{% endif %}
+            <td>
+              <a href="{{ proposal.get_absolute_url }}"
+                 class="btn btn-sm btn-outline-primary">View</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="alert alert-warning">No proposals yet. Be the first to submit!</div>
+  {% endif %}
 {% endblock layout-content %}

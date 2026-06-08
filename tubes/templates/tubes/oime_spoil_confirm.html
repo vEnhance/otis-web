@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% block title %}
+  Spoil Yourself — OIME
+{% endblock title %}
+{% block layout-content %}
+  <h2>Spoil yourself on all current problems</h2>
+  <div class="alert alert-warning">
+    <strong>Warning: this action is permanent and cannot be undone.</strong>
+    <p class="mb-0 mt-2">
+      After confirming, you will be able to freely view the statements, answers, and solutions
+      of all problems that exist right now.
+      You will no longer be able to start a timed solving session on any of them.
+      Problems added in the future can still be testsolved seriously.
+    </p>
+  </div>
+  {% if has_active_fight %}
+    <div class="alert alert-danger">
+      You have a timed fight currently in progress.
+      Finish or give up on it before spoiling yourself.
+    </div>
+    <a href="{% url "oime-proposal-list" %}"
+       class="btn btn-outline-secondary">Back</a>
+  {% else %}
+    {% include "otisweb/components/generic_form.html" with submit_name="Yes, spoil me" btn_class="btn-danger" %}
+    <a href="{% url "oime-proposal-list" %}"
+       class="btn btn-outline-secondary ms-2">Cancel</a>
+  {% endif %}
+{% endblock layout-content %}

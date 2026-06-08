@@ -56,19 +56,6 @@ class JoinRecord(models.Model):
 # ---------------------------------------------------------------------------
 
 
-class OIMEYear(models.Model):
-    """One academic year / iteration of the OIME problem-selection process."""
-
-    name = models.CharField(max_length=50, help_text='E.g. "2025-2026".')
-    active = models.BooleanField(
-        default=False,
-        help_text="At most one year should be active at a time.",
-    )
-
-    def __str__(self) -> str:
-        return self.name
-
-
 class OIMEContributor(models.Model):
     """A student who participates in OIME (as proposer and/or testsolver)."""
 
@@ -81,36 +68,15 @@ class OIMEContributor(models.Model):
         max_length=200,
         help_text="Name used in credits when problems are attributed.",
     )
+    spoil_before = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="If set, this contributor is spoiled on all proposals created before this time "
+        "and cannot start new timed attempts on them.",
+    )
 
     def __str__(self) -> str:
         return self.display_name
-
-
-class OIMEParticipation(models.Model):
-    """Tracks a contributor's enrolment in a particular year, including their solve mode."""
-
-    contributor = models.ForeignKey(
-        OIMEContributor,
-        on_delete=models.CASCADE,
-        related_name="participations",
-    )
-    year = models.ForeignKey(
-        OIMEYear,
-        on_delete=models.CASCADE,
-        related_name="participations",
-    )
-    is_serious = models.BooleanField(
-        default=True,
-        help_text="Serious solvers get timed sessions; casual solvers browse freely. "
-        "Can only be downgraded from serious to casual, never upgraded.",
-    )
-
-    class Meta:
-        unique_together = [("contributor", "year")]
-
-    def __str__(self) -> str:
-        role = "serious" if self.is_serious else "casual"
-        return f"{self.contributor} in {self.year} ({role})"
 
 
 class OIMEProposal(models.Model):
@@ -134,6 +100,7 @@ class OIMEProposal(models.Model):
         related_name="proposals",
         help_text="The contributor who wrote this problem.",
     )
+    title = models.CharField(max_length=200, help_text="Short title for the proposal.")
     statement = models.TextField(help_text="The problem statement, in LaTeX.")
     answer = models.IntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(999)],
@@ -190,11 +157,6 @@ class OIMEAttempt(models.Model):
 
     contributor = models.ForeignKey(
         OIMEContributor,
-        on_delete=models.CASCADE,
-        related_name="attempts",
-    )
-    year = models.ForeignKey(
-        OIMEYear,
         on_delete=models.CASCADE,
         related_name="attempts",
     )

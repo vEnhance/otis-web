@@ -5,7 +5,8 @@
 {% block layout-content %}
   <div class="d-flex justify-content-between align-items-start mb-3">
     <div>
-      <h2>{{ proposal.label }}: {{ proposal.get_subject_display }} — Difficulty {{ proposal.difficulty }}/5</h2>
+      <h2>{{ proposal.label }}: {{ proposal.title }}</h2>
+      <p class="text-muted mb-0">{{ proposal.get_subject_display }} — Difficulty {{ proposal.difficulty }}/5</p>
       <p class="text-muted">
         Submitted by {{ proposal.author }}
         on {{ proposal.created_at|date:"Y-m-d" }}
@@ -21,25 +22,21 @@
   {% for message in messages %}
     <div class="alert alert-{{ message.tags|default:"info" }}">{{ message }}</div>
   {% endfor %}
-  <div class="card mb-4">
-    <div class="card-header fw-bold">Problem Statement</div>
-    <div class="card-body">
-      <div class="math-content">{{ proposal.statement }}</div>
-    </div>
-  </div>
-  {# ---- Not yet enrolled in active year ---- #}
-  {% if is_serious is False and not participation and year %}
-    <div class="alert alert-warning">
-      You haven't set a testsolving mode for {{ year }} yet.
-      <a href="{% url "oime-setup" %}">Choose serious or casual</a> before you start.
+  {# ---- Problem statement (only visible when spoiled) ---- #}
+  {% if is_spoiled %}
+    <div class="card mb-4">
+      <div class="card-header fw-bold">Problem Statement</div>
+      <div class="card-body">
+        <div class="math-content">{{ proposal.statement }}</div>
+      </div>
     </div>
   {% endif %}
-  {# ---- Serious solver: no attempt yet ---- #}
-  {% if is_serious and not attempt %}
+  {# ---- Can start a new timed attempt ---- #}
+  {% if can_start_attempt %}
     <div class="alert alert-info">
       <p>
-        You are testsolving in <strong>serious mode</strong>.
-        Once you start, you will have <strong>{{ proposal.time_limit_minutes }} minutes</strong>
+        Starting a timed session will reveal the problem statement.
+        You will have <strong>{{ proposal.time_limit_minutes }} minutes</strong>
         and the timer begins immediately.
       </p>
       <form method="post" action="{% url "oime-start-attempt" proposal.pk %}">
@@ -48,105 +45,22 @@
       </form>
     </div>
   {% endif %}
-  {# ---- Casual solver: answer check + modal solution reveal ---- #}
-  {% if not is_serious %}
-    <div class="card mb-4">
-      <div class="card-header fw-bold">Check Your Answer</div>
-      <div class="card-body">
-        <div class="d-flex gap-2 align-items-end mb-3">
-          <div>
-            <label class="form-label fw-bold" for="casual-answer-input">Your Answer (0–999)</label>
-            <input type="number"
-                   id="casual-answer-input"
-                   class="form-control"
-                   min="0"
-                   max="999"
-                   style="width:100px">
-          </div>
-          <button type="button"
-                  class="btn btn-success"
-                  onclick="checkCasualAnswer({{ proposal.answer }})">Check</button>
+  {# ---- Spoiled: show attempt result + answer + solution ---- #}
+  {% if is_spoiled %}
+    {% if attempt %}
+      {% if attempt.status == "OIME_OK" %}
+        <div class="alert alert-success">
+          Solved in {{ attempt.solve_time_seconds }}s with {{ attempt.wrong_answers }} wrong answer{{ attempt.wrong_answers|pluralize }}.
         </div>
-        <div id="casual-answer-feedback" class="mb-2"></div>
-        <button type="button"
-                class="btn btn-outline-secondary btn-sm"
-                data-bs-toggle="modal"
-                data-bs-target="#solution-modal">Reveal Solution</button>
-      </div>
-    </div>
-    <script>
-        function checkCasualAnswer(correct) {
-            const val = parseInt(document.getElementById("casual-answer-input").value, 10);
-            const fb = document.getElementById("casual-answer-feedback");
-            if (isNaN(val) || val < 0 || val > 999) {
-                fb.innerHTML = '<span class="text-danger">Please enter an integer from 0 to 999.</span>';
-            } else if (val === correct) {
-                fb.innerHTML = '<span class="text-success fw-bold">Correct!</span>';
-            } else {
-                fb.innerHTML = '<span class="text-danger">Incorrect, try again.</span>';
-            }
-        }
-    </script>
-    <div class="modal fade"
-         id="solution-modal"
-         tabindex="-1"
-         aria-labelledby="solution-modal-label">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="solution-modal-label">Solution</h5>
-            <button type="button"
-                    class="btn-close"
-                    data-bs-dismiss="modal"
-                    aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <p id="oime-answer-section">
-              <strong class="fs-5">Answer: {{ proposal.answer }}</strong>
-            </p>
-            <hr>
-            <div class="math-content">{{ proposal.solution }}</div>
-          </div>
-          <div class="modal-footer">
-            {% if can_upvote %}
-              <form method="post"
-                    action="{% url "oime-upvote" proposal.pk %}"
-                    class="me-auto">
-                {% csrf_token %}
-                <button type="submit"
-                        class="btn btn-sm {% if has_upvoted %}btn-warning{% else %}btn-outline-secondary{% endif %}">
-                  ♥
-                  {% if has_upvoted %}
-                    Upvoted
-                  {% else %}
-                    Upvote
-                  {% endif %}
-                  ({{ proposal.upvotes.count }})
-                </button>
-              </form>
-            {% else %}
-              <span class="text-muted small me-auto">{{ proposal.upvotes.count }} upvote{{ proposal.upvotes.count|pluralize }}</span>
-            {% endif %}
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          </div>
+      {% elif attempt.status == "OIME_FAIL" %}
+        <div class="alert alert-secondary">You gave up on this problem.</div>
+      {% elif attempt.status == "OIME_TLE" %}
+        <div class="alert alert-danger">Time limit exceeded.</div>
+      {% elif attempt.status == "OIME_ALE" %}
+        <div class="alert alert-danger">
+          Answer limit exceeded ({{ attempt.wrong_answers }} wrong answer{{ attempt.wrong_answers|pluralize }}).
         </div>
-      </div>
-    </div>
-  {% endif %}
-  {# ---- Serious solver: completed — show solution directly ---- #}
-  {% if is_serious and can_see_solution %}
-    {% if attempt.status == "OIME_OK" %}
-      <div class="alert alert-success">
-        Solved in {{ attempt.solve_time_seconds }}s with {{ attempt.wrong_answers }} wrong answer{{ attempt.wrong_answers|pluralize }}.
-      </div>
-    {% elif attempt.status == "OIME_FAIL" %}
-      <div class="alert alert-secondary">You gave up on this problem.</div>
-    {% elif attempt.status == "OIME_TLE" %}
-      <div class="alert alert-danger">Time limit exceeded.</div>
-    {% elif attempt.status == "OIME_ALE" %}
-      <div class="alert alert-danger">
-        Answer limit exceeded ({{ attempt.wrong_answers }} wrong answer{{ attempt.wrong_answers|pluralize }}).
-      </div>
+      {% endif %}
     {% endif %}
     <div class="card mb-4" id="oime-answer-section">
       <div class="card-header fw-bold d-flex justify-content-between align-items-center">
@@ -182,7 +96,7 @@
       </div>
     </div>
   {% endif %}
-  {# ---- Comments (casual always; serious after completion) ---- #}
+  {# ---- Discussion (only when spoiled) ---- #}
   {% if can_comment %}
     <h4>Discussion</h4>
     {% if comments %}

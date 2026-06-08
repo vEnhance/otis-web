@@ -18,9 +18,4 @@
     <p>Before you can submit problems or participate in testsolving, please fill in your details below.</p>
   {% endif %}
   {% include "otisweb/components/generic_form.html" with submit_name=is_edit|yesno:"Save Changes,Get Started" %}
-  {% if not year %}
-    <div class="alert alert-info mt-3">
-      There is no active OIME year right now, so your testsolving mode will be set when one opens.
-    </div>
-  {% endif %}
 {% endblock layout-content %}

@@ -19,4 +19,5 @@ urlpatterns = [
     path(r"proposal/<int:pk>/upvote/", views.upvote_proposal, name="oime-upvote"),
     path(r"comment/<int:pk>/edit/", views.edit_comment, name="oime-comment-edit"),
     path(r"setup/", views.oime_setup, name="oime-setup"),
+    path(r"spoil/", views.spoil_self, name="oime-spoil"),
 ]

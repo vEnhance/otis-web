@@ -7,9 +7,7 @@ from .models import (
     OIMEAttempt,
     OIMEComment,
     OIMEContributor,
-    OIMEParticipation,
     OIMEProposal,
-    OIMEYear,
     Tube,
 )
 
@@ -38,29 +36,17 @@ class JoinRecordAdmin(ImportExportModelAdmin):
     resource_class = JoinRecordResource
 
 
-@admin.register(OIMEYear)
-class OIMEYearAdmin(admin.ModelAdmin[OIMEYear]):
-    list_display = ["name", "active"]
-    list_filter = ["active"]
-
-
 @admin.register(OIMEContributor)
 class OIMEContributorAdmin(admin.ModelAdmin[OIMEContributor]):
-    list_display = ["display_name", "user"]
+    list_display = ["display_name", "user", "spoil_before"]
     search_fields = ["display_name", "user__username"]
-
-
-@admin.register(OIMEParticipation)
-class OIMEParticipationAdmin(admin.ModelAdmin[OIMEParticipation]):
-    list_display = ["contributor", "year", "is_serious"]
-    list_filter = ["year", "is_serious"]
-    search_fields = ["contributor__display_name"]
 
 
 @admin.register(OIMEProposal)
 class OIMEProposalAdmin(admin.ModelAdmin[OIMEProposal]):
     list_display = [
         "__str__",
+        "title",
         "author",
         "subject",
         "difficulty",
@@ -68,7 +54,7 @@ class OIMEProposalAdmin(admin.ModelAdmin[OIMEProposal]):
         "created_at",
     ]
     list_filter = ["subject", "difficulty", "archived"]
-    search_fields = ["author__display_name", "statement"]
+    search_fields = ["author__display_name", "title", "statement"]
     readonly_fields = ["created_at", "updated_at"]
     filter_horizontal = ["upvotes"]
 
@@ -78,13 +64,12 @@ class OIMEAttemptAdmin(admin.ModelAdmin[OIMEAttempt]):
     list_display = [
         "contributor",
         "proposal",
-        "year",
         "status",
         "wrong_answers",
         "solve_time_seconds",
         "started_at",
     ]
-    list_filter = ["status", "year"]
+    list_filter = ["status"]
     search_fields = ["contributor__display_name"]
     readonly_fields = ["started_at"]
 

@@ -10,9 +10,7 @@ from .models import (
     OIMEAttempt,
     OIMEComment,
     OIMEContributor,
-    OIMEParticipation,
     OIMEProposal,
-    OIMEYear,
     Tube,
 )
 
@@ -37,14 +35,6 @@ class JoinRecordFactory(DjangoModelFactory):
     invite_url = Faker("url")
 
 
-class OIMEYearFactory(DjangoModelFactory):
-    class Meta:
-        model = OIMEYear
-
-    name = Faker("year")
-    active = True
-
-
 class OIMEContributorFactory(DjangoModelFactory):
     class Meta:
         model = OIMEContributor
@@ -53,20 +43,12 @@ class OIMEContributorFactory(DjangoModelFactory):
     display_name = Faker("name")
 
 
-class OIMEParticipationFactory(DjangoModelFactory):
-    class Meta:
-        model = OIMEParticipation
-
-    contributor = SubFactory(OIMEContributorFactory)
-    year = SubFactory(OIMEYearFactory)
-    is_serious = True
-
-
 class OIMEProposalFactory(DjangoModelFactory):
     class Meta:
         model = OIMEProposal
 
     author = SubFactory(OIMEContributorFactory)
+    title = Faker("sentence", nb_words=4)
     statement = Faker("paragraph")
     answer = FuzzyInteger(0, 999)
     solution = Faker("paragraph")
@@ -80,9 +62,8 @@ class OIMEAttemptFactory(DjangoModelFactory):
         model = OIMEAttempt
 
     contributor = SubFactory(OIMEContributorFactory)
-    year = SubFactory(OIMEYearFactory)
     proposal = SubFactory(OIMEProposalFactory)
-    status = "IN_PROGRESS"
+    status = "OIME_TBD"
     wrong_answers = 0
 
 

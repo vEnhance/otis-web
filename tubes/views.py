@@ -11,19 +11,13 @@ from django.views.generic import CreateView, ListView, TemplateView, UpdateView
 from otisweb.decorators import verified_required
 from otisweb.mixins import VerifiedRequiredMixin
 
-from .forms import OIMEAnswerForm, OIMECommentForm, OIMEProposalForm, OIMESetupForm
-from .models import (
-    OIMEAttempt,
-    OIMEComment,
-    OIMEContributor,
-    OIMEParticipation,
-    OIMEProposal,
-    OIMEYear,
+from .forms import (
+    OIMEAnswerForm,
+    OIMECommentForm,
+    OIMEContributorForm,
+    OIMEProposalForm,
 )
-
-
-def _get_active_year() -> OIMEYear | None:
-    return OIMEYear.objects.filter(active=True).first()
+from .models import OIMEAttempt, OIMEComment, OIMEContributor, OIMEProposal
 
 
 def _get_contributor(request: HttpRequest) -> OIMEContributor | None:
@@ -33,54 +27,56 @@ def _get_contributor(request: HttpRequest) -> OIMEContributor | None:
         return None
 
 
-def _get_participation(
-    contributor: OIMEContributor, year: OIMEYear
-) -> OIMEParticipation | None:
-    try:
-        return OIMEParticipation.objects.get(contributor=contributor, year=year)
-    except OIMEParticipation.DoesNotExist:
-        return None
-
-
 def _get_solver_context(
     contributor: OIMEContributor,
     proposal: OIMEProposal,
-    year: OIMEYear | None,
 ) -> dict[str, Any]:
-    """Compute access flags for a contributor viewing a proposal."""
-    participation: OIMEParticipation | None = None
-    is_serious = False
+    """Compute spoil status and access flags for a contributor viewing a proposal.
 
-    if year is not None:
-        participation = _get_participation(contributor, year)
-        if participation is not None:
-            is_serious = participation.is_serious
+    A contributor is *spoiled* on a proposal if any of the following hold:
+    - They are the proposal's author.
+    - Their ``spoil_before`` timestamp is set and is >= the proposal's creation time.
+    - They have a completed attempt on the proposal.
+
+    Spoiled contributors can see the statement, answer, solution, and discussion.
+    Unspoiled contributors see the statement only while actively fighting (proposal_fight).
+    """
+    is_author = contributor == proposal.author
+
+    if is_author:
+        return {
+            "is_spoiled": True,
+            "is_author": True,
+            "attempt": None,
+            "can_start_attempt": False,
+            "can_comment": True,
+            "can_upvote": False,
+        }
+
+    is_globally_spoiled = (
+        contributor.spoil_before is not None
+        and proposal.created_at <= contributor.spoil_before
+    )
 
     attempt: OIMEAttempt | None = None
-    if is_serious:
-        try:
-            attempt = OIMEAttempt.objects.get(
-                contributor=contributor, proposal=proposal
-            )
-            if attempt.status == "OIME_TBD" and attempt.time_expired:
-                attempt.status = "OIME_TLE"
-                attempt.submitted_at = timezone.now()
-                attempt.save()
-        except OIMEAttempt.DoesNotExist:
-            pass
+    try:
+        attempt = OIMEAttempt.objects.get(contributor=contributor, proposal=proposal)
+        if attempt.status == "OIME_TBD" and attempt.time_expired:
+            attempt.status = "OIME_TLE"
+            attempt.submitted_at = timezone.now()
+            attempt.save()
+    except OIMEAttempt.DoesNotExist:
+        pass
 
-    can_see_solution = not is_serious or (attempt is not None and attempt.is_complete)
-    can_comment = can_see_solution
-    can_upvote = can_see_solution and contributor != proposal.author
+    is_spoiled = is_globally_spoiled or (attempt is not None and attempt.is_complete)
 
     return {
-        "year": year,
-        "participation": participation,
-        "is_serious": is_serious,
+        "is_spoiled": is_spoiled,
+        "is_author": False,
         "attempt": attempt,
-        "can_see_solution": can_see_solution,
-        "can_comment": can_comment,
-        "can_upvote": can_upvote,
+        "can_start_attempt": not is_spoiled and attempt is None,
+        "can_comment": is_spoiled,
+        "can_upvote": is_spoiled,
     }
 
 
@@ -91,54 +87,59 @@ def _get_solver_context(
 
 @verified_required
 def oime_setup(request: HttpRequest) -> HttpResponse:
-    """First-time setup: create OIMEContributor and optionally enroll in active year."""
+    """Create or update OIMEContributor profile."""
     contributor = _get_contributor(request)
-    year = _get_active_year()
-
     if request.method == "POST":
-        form = OIMESetupForm(request.POST)
+        form = OIMEContributorForm(request.POST, instance=contributor)
         if form.is_valid():
-            if contributor is None:
-                contributor = OIMEContributor.objects.create(
-                    user=request.user,  # type: ignore[union-attr]
-                    display_name=form.cleaned_data["display_name"],
-                )
-            else:
-                contributor.display_name = form.cleaned_data["display_name"]
-                contributor.save()
-
-            if year is not None:
-                is_serious = form.cleaned_data["is_serious"] == "serious"
-                participation, created = OIMEParticipation.objects.get_or_create(
-                    contributor=contributor,
-                    year=year,
-                    defaults={"is_serious": is_serious},
-                )
-                if not created and participation.is_serious and not is_serious:
-                    # Allow downgrade serious → casual only
-                    participation.is_serious = False
-                    participation.save()
-
+            obj = form.save(commit=False)
+            obj.user = request.user  # type: ignore[union-attr]
+            obj.save()
             return redirect("oime-proposal-list")
     else:
-        initial: dict[str, Any] = {}
-        if contributor is not None:
-            initial["display_name"] = contributor.display_name
-            if year is not None:
-                p = _get_participation(contributor, year)
-                if p is not None:
-                    initial["is_serious"] = "serious" if p.is_serious else "casual"
-        form = OIMESetupForm(initial=initial)
-
+        form = OIMEContributorForm(instance=contributor)
     return render(
         request,
         "tubes/oime_setup.html",
         {
             "form": form,
-            "contributor": contributor,
-            "year": year,
             "is_edit": contributor is not None,
         },
+    )
+
+
+@verified_required
+def spoil_self(request: HttpRequest) -> HttpResponse:
+    """Confirmation page and action for spoiling oneself on all current proposals."""
+    from django import forms as django_forms
+
+    contributor = _get_contributor(request)
+    if contributor is None:
+        return redirect("oime-setup")
+    if contributor.spoil_before is not None:
+        return redirect("oime-proposal-list")
+    has_active_fight = OIMEAttempt.objects.filter(
+        contributor=contributor, status="OIME_TBD"
+    ).exists()
+    if request.method == "POST":
+        if has_active_fight:
+            messages.error(
+                request,
+                "You have an active fight in progress. Finish or give up first.",
+            )
+            return redirect("oime-spoil")
+        contributor.spoil_before = timezone.now()
+        contributor.save()
+        messages.success(
+            request,
+            "You are now spoiled on all problems created up to this moment "
+            "and can browse their statements and solutions freely.",
+        )
+        return redirect("oime-proposal-list")
+    return render(
+        request,
+        "tubes/oime_spoil_confirm.html",
+        {"form": django_forms.Form(), "has_active_fight": has_active_fight},
     )
 
 
@@ -174,25 +175,28 @@ class ProposalListView(VerifiedRequiredMixin, ListView[OIMEProposal]):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         contributor = _get_contributor(self.request)
-        year = _get_active_year()
         context["contributor"] = contributor
-        context["year"] = year
 
         if contributor is None:
             return context
 
-        participation = _get_participation(contributor, year) if year else None
-        context["participation"] = participation
-        is_serious = participation is not None and participation.is_serious
-        context["is_serious"] = is_serious
+        context["spoil_before"] = contributor.spoil_before
 
-        if is_serious:
-            user_attempts: dict[int, OIMEAttempt] = {
-                a.proposal_id: a  # type: ignore[attr-defined]
-                for a in OIMEAttempt.objects.filter(contributor=contributor)
-            }
-            for proposal in context["proposals"]:
-                proposal.user_attempt = user_attempts.get(proposal.pk)  # type: ignore[attr-defined]
+        user_attempts: dict[int, OIMEAttempt] = {
+            a.proposal_id: a  # type: ignore[attr-defined]
+            for a in OIMEAttempt.objects.filter(contributor=contributor)
+        }
+        for proposal in context["proposals"]:
+            attempt = user_attempts.get(proposal.pk)
+            proposal.user_attempt = attempt  # type: ignore[attr-defined]
+            proposal.user_is_spoiled = (  # type: ignore[attr-defined]
+                contributor == proposal.author
+                or (
+                    contributor.spoil_before is not None
+                    and proposal.created_at <= contributor.spoil_before
+                )
+                or (attempt is not None and attempt.is_complete)
+            )
 
         return context
 
@@ -261,12 +265,11 @@ def proposal_detail(request: HttpRequest, pk: int) -> HttpResponse:
     if contributor is None:
         return redirect("oime-setup")
 
-    year = _get_active_year()
-    ctx = _get_solver_context(contributor, proposal, year)
+    ctx = _get_solver_context(contributor, proposal)
     attempt: OIMEAttempt | None = ctx["attempt"]
 
-    # Serious solver with an active attempt → go to the fight view
-    if ctx["is_serious"] and attempt is not None and not attempt.is_complete:
+    # Unspoiled contributor with an active attempt → send to the fight view
+    if not ctx["is_spoiled"] and attempt is not None and not attempt.is_complete:
         return redirect("oime-proposal-fight", pk)
 
     comment_form = OIMECommentForm()
@@ -285,12 +288,12 @@ def proposal_detail(request: HttpRequest, pk: int) -> HttpResponse:
 
     comments = (
         OIMEComment.objects.filter(proposal=proposal).select_related("author")
-        if ctx["can_see_solution"]
+        if ctx["is_spoiled"]
         else None
     )
     has_upvoted = (
         proposal.upvotes.filter(pk=contributor.pk).exists()
-        if ctx["can_see_solution"]
+        if ctx["is_spoiled"]
         else False
     )
 
@@ -300,7 +303,6 @@ def proposal_detail(request: HttpRequest, pk: int) -> HttpResponse:
         {
             "proposal": proposal,
             "contributor": contributor,
-            "answer_form": OIMEAnswerForm(),
             "comment_form": comment_form,
             "comments": comments,
             "has_upvoted": has_upvoted,
@@ -311,18 +313,17 @@ def proposal_detail(request: HttpRequest, pk: int) -> HttpResponse:
 
 @verified_required
 def proposal_fight(request: HttpRequest, pk: int) -> HttpResponse:
-    """Timed solving screen for serious testsolvers with an active attempt."""
+    """Timed solving screen for an unspoiled contributor with an active attempt."""
     proposal = get_object_or_404(OIMEProposal, pk=pk)
     contributor = _get_contributor(request)
     if contributor is None:
         return redirect("oime-setup")
 
-    year = _get_active_year()
-    ctx = _get_solver_context(contributor, proposal, year)
+    ctx = _get_solver_context(contributor, proposal)
     attempt: OIMEAttempt | None = ctx["attempt"]
 
-    # Only valid when there's an active in-progress serious attempt
-    if not ctx["is_serious"] or attempt is None or attempt.is_complete:
+    # Only valid while there is an active, in-progress attempt and the user isn't spoiled
+    if ctx["is_spoiled"] or attempt is None or attempt.is_complete:
         return redirect("oime-proposal-detail", pk)
 
     return render(
@@ -348,20 +349,12 @@ def start_attempt(request: HttpRequest, pk: int) -> HttpResponse:
     if contributor is None:
         return redirect("oime-setup")
 
-    year = _get_active_year()
-    if year is None:
-        messages.error(request, "No active year for testsolving.")
+    ctx = _get_solver_context(contributor, proposal)
+    if not ctx["can_start_attempt"]:
+        messages.error(request, "You cannot start a new attempt on this problem.")
         return redirect("oime-proposal-detail", pk)
 
-    participation = _get_participation(contributor, year)
-    if participation is None or not participation.is_serious:
-        return redirect("oime-proposal-detail", pk)
-
-    OIMEAttempt.objects.get_or_create(
-        contributor=contributor,
-        proposal=proposal,
-        defaults={"year": year},
-    )
+    OIMEAttempt.objects.create(contributor=contributor, proposal=proposal)
     return redirect("oime-proposal-fight", pk)
 
 
@@ -454,8 +447,7 @@ def upvote_proposal(request: HttpRequest, pk: int) -> HttpResponse:
     if contributor is None:
         return redirect("oime-setup")
 
-    year = _get_active_year()
-    ctx = _get_solver_context(contributor, proposal, year)
+    ctx = _get_solver_context(contributor, proposal)
     if not ctx["can_upvote"]:
         raise PermissionDenied
 
