@@ -352,19 +352,13 @@
         <h3>Academic</h3>
         <ul>
           <li>
-            <a href="{% url 'downloads' student.pk %}">Posted files ({{ num_sem_downloads }})</a>
-          </li>
-          <li>
             <a href="{% url 'currshow' student.pk %}">Class selection</a>
           </li>
           <li>
-            <a href="{% url 'catalog' %}">Unit catalog</a>
-          </li>
-          <li>
-            <a href="{% static 'info/unit-guide.pdf' %}">Unit selection guide</a>
-          </li>
-          <li>
             <a href="{% static 'info/mock-imo.pdf' %}">Extra mock IMO's (shortlist)</a>
+          </li>
+          <li>
+            <a href="{% static 'info/guest-unit-spec.pdf' %}">Guest unit proposals</a>
           </li>
           <li>
             <a href="{% static 'info/psychology.pdf' %}">Handout on olympiad strategy</a>
@@ -373,7 +367,13 @@
             <a href="https://web.evanchen.cc/handouts/LaTeXPetPeeve/LaTeXPetPeeve.pdf">LaTeX pet peeves</a>
           </li>
           <li>
-            <a href="{% static 'info/guest-unit-spec.pdf' %}">Guest unit proposals</a>
+            <a href="{% url 'downloads' student.pk %}">Posted files ({{ num_sem_downloads }})</a>
+          </li>
+          <li>
+            <a href="{% url 'catalog' %}">Unit catalog</a>
+          </li>
+          <li>
+            <a href="{% static 'info/unit-guide.pdf' %}">Unit selection guide</a>
           </li>
         </ul>
       </td>
@@ -396,13 +396,13 @@
             </li>
           {% endif %}
           <li>
-            <a href="https://web.evanchen.cc/upload/otis-syllabus.pdf">Syllabus</a>
-          </li>
-          <li>
             <a href="{% static 'info/parent-info.pdf' %}">Payment info</a>
           </li>
           <li>
             <a href="{% url 'student-ids' %}">Student ID numbers</a>
+          </li>
+          <li>
+            <a href="https://web.evanchen.cc/upload/otis-syllabus.pdf">Syllabus</a>
           </li>
         </ul>
       </td>
