@@ -853,6 +853,14 @@ def discord_lookup(request: HttpRequest) -> HttpResponse:
     return render(request, "roster/discord_lookup.html", context)
 
 
+@login_required
+def student_ids(request: HttpRequest) -> HttpResponse:
+    students = Student.objects.filter(user=request.user).order_by("-semester__end_year")
+    return render(
+        request, "roster/ids.html", {"title": "My Student IDs", "students": students}
+    )
+
+
 class AdList(VerifiedRequiredMixin, ListView[Assistant]):
     model = Assistant
     template_name = "roster/ad_list.html"

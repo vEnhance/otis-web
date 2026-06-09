@@ -1712,3 +1712,29 @@ def test_ad_list_edit_link_visibility(otis) -> None:
     otis.login(other_user)
     resp = otis.get_20x("ad-list")
     otis.assert_not_has(resp, "(edit)")
+
+
+@pytest.mark.django_db
+def test_student_ids(otis) -> None:
+    alice: User = UserFactory.create()
+    semester_old: Semester = SemesterFactory.create(end_year=2024)
+    semester_new: Semester = SemesterFactory.create(end_year=2025)
+    student_old: Student = StudentFactory.create(user=alice, semester=semester_old)
+    student_new: Student = StudentFactory.create(user=alice, semester=semester_new)
+
+    # anonymous user should be redirected
+    otis.get_30x("student-ids")
+
+    otis.login(alice)
+    resp = otis.get_20x("student-ids")
+    otis.assert_has(resp, f'class="student-id">{student_old.pk}<')
+    otis.assert_has(resp, f'class="student-id">{student_new.pk}<')
+
+    # other user only sees their own records
+    bob: User = UserFactory.create()
+    bob_student: Student = StudentFactory.create(user=bob, semester=semester_new)
+    otis.login(bob)
+    resp = otis.get_20x("student-ids")
+    otis.assert_has(resp, f'class="student-id">{bob_student.pk}<')
+    otis.assert_not_has(resp, f'class="student-id">{student_old.pk}<')
+    otis.assert_not_has(resp, f'class="student-id">{student_new.pk}<')

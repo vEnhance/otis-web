@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% block layout-content %}
+  <h1>My Student IDs</h1>
+  <table class="table table-striped">
+    <thead class="table-dark">
+      <tr>
+        <th>Semester</th>
+        <th>Student ID</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for student in students %}
+        <tr>
+          <td>
+            <a href="{{ student.semester.get_absolute_url }}">{{ student.semester }}</a>
+          </td>
+          <td>
+            <a href="{{ student.get_absolute_url }}"><span class="student-id">{{ student.pk }}</span></a>
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="2">No student records found.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock layout-content %}
