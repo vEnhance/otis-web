@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block layout-content %}
-  <h1>My Student IDs</h1>
+  <p>Below are the student ID numbers for all your participations in OTIS.</p>
   <table class="table table-striped">
     <thead class="table-dark">
       <tr>
@@ -12,7 +12,7 @@
       {% for student in students %}
         <tr>
           <td>
-            <a href="{{ student.semester.get_absolute_url }}">{{ student.semester }}</a>
+            <a href="{{ student.get_absolute_url }}">{{ student.semester }}</a>
           </td>
           <td>
             <a href="{{ student.get_absolute_url }}"><span class="student-id">{{ student.pk }}</span></a>

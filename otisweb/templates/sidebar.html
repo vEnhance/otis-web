@@ -170,16 +170,22 @@
   {% else %}
     {% if not student %}<hr />{% endif %}
     <ul>
-      {% if student.semester.social_url %}
-        <li>
-          <a href="{{ student.semester.social_url }}">Open Discord</a>
-        </li>
-      {% endif %}
       {% if not student.newborn and semester.active and student.enabled %}
         <li>
           <a href="{% url 'inquiry' student.pk %}">Manage units</a>
         </li>
       {% endif %}
+      {% if student.semester.social_url %}
+        <li>
+          <a href="{{ student.semester.social_url }}">Open Discord</a>
+        </li>
+      {% endif %}
+      <li>
+        <a href="{% url "student-ids" %}">Student ID's</a>
+      </li>
+      <li>
+        <a href="https://web.evanchen.cc/upload/otis-syllabus.pdf">Syllabus</a>
+      </li>
       <li>
         <a target="_blank" href="mailto:evan@evanchen.cc" rel="noreferrer">Email Evan</a>
       </li>
