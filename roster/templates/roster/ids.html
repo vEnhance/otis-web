@@ -11,8 +11,8 @@
   <tbody>
     {% for student in students %}
     <tr>
-      <td>{{ student.semester }}</td>
-      <td><span class="student-id">{{ student.pk }}</span></td>
+      <td><a href="{{ student.semester.get_absolute_url }}">{{ student.semester }}</a></td>
+      <td><a href="{{ student.get_absolute_url }}"><span class="student-id">{{ student.pk }}</span></a></td>
     </tr>
     {% empty %}
     <tr>
