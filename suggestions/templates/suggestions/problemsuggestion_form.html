@@ -95,7 +95,7 @@
             <h1 class="alert-heading">Line length exceeded in statement!</h1>
             As specified in
             <a href="https://web.evanchen.cc/latex-style-guide.html">LaTeX guidelines #1</a>,
-            lines MUST be wrapped to be at most 100 characters long,
+            lines MUST be wrapped to be at most 120 characters long,
             and SHOULD be wrapped to at most 80 characters long.
           </div>
           <div id="statement_double_dollar_warning"
@@ -132,7 +132,7 @@
             <h1 class="alert-heading">Line length exceeded in solution!</h1>
             As specified in
             <a href="https://web.evanchen.cc/latex-style-guide.html">LaTeX guidelines #1</a>,
-            lines MUST be wrapped to be at most 100 characters long,
+            lines MUST be wrapped to be at most 120 characters long,
             and SHOULD be wrapped to at most 80 characters long.
           </div>
           <div id="solution_double_dollar_warning"
@@ -232,7 +232,7 @@
           $("#id_unit").chosen();
 
           function checkLineLength(s) {
-              return !s.split("\n").some(e => e.length > 100); // amol stronk
+              return !s.split("\n").some(e => e.length > 120); // amol stronk
           }
 
           function checkDoubleDollars(s) {
