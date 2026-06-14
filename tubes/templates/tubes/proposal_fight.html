@@ -1,0 +1,71 @@
+{% extends "layout.html" %}
+{% block title %}
+  OIME {{ proposal.label }} Timed Session
+{% endblock title %}
+{% block layout-content %}
+  <div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+      <h2>{{ proposal.label }}: {{ proposal.title }}</h2>
+      <p class="text-muted mb-0">{{ proposal.get_subject_display }} — {{ proposal.difficulty_display }}</p>
+      <p class="text-muted">Written by {{ proposal.credit_display }}</p>
+    </div>
+    <a href="{% url "oime-proposal-list" %}"
+       class="btn btn-outline-secondary btn-sm">← Back</a>
+  </div>
+  <div class="card mb-4">
+    <div class="card-header fw-bold">Problem Statement</div>
+    <div class="card-body">
+      <div class="math-content">{{ proposal.statement }}</div>
+    </div>
+  </div>
+  <h2>Submit answer</h2>
+  <form method="post"
+        action="{% url "oime-submit-answer" proposal.pk %}"
+        class="d-inline">
+    {% csrf_token %}
+    <input type="number"
+           name="answer"
+           min="0"
+           max="999"
+           style="width: 8em"
+           class="form-control d-inline-block"
+           placeholder="..."
+           required>
+    <button type="submit" class="btn btn-success">Submit</button>
+  </form>
+  <form method="post"
+        action="{% url "oime-give-up" proposal.pk %}"
+        class="d-inline ms-2">
+    {% csrf_token %}
+    <button type="submit"
+            class="btn btn-outline-danger btn-sm"
+            onclick="return confirm('Give up and reveal the solution?')">Give Up</button>
+  </form>
+  <hr />
+  <p>
+    Time remaining: <strong id="countdown">{{ remaining_seconds }}s</strong>
+    &nbsp;·&nbsp;
+    <span style="font-family: monospace; letter-spacing: 0.1em">{{ fight.answer_attempts_display }}</span>
+  </p>
+  <script>
+      (function() {
+          const el = document.getElementById("countdown");
+          let secs = parseInt(el.textContent, 10);
+          const interval = setInterval(function() {
+              secs -= 1;
+              if (secs <= 0) {
+                  clearInterval(interval);
+                  el.textContent = "Time's up!";
+                  el.classList.add("text-danger");
+                  setTimeout(function() {
+                      location.reload();
+                  }, 1000);
+              } else {
+                  const m = Math.floor(secs / 60);
+                  const s = secs % 60;
+                  el.textContent = m + ":" + String(s).padStart(2, "0");
+              }
+          }, 1000);
+      })();
+  </script>
+{% endblock layout-content %}

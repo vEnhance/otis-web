@@ -319,3 +319,18 @@ img.emoji {
 #id_password_helptext {
   display: none !important;
 }
+
+/* OIME proposal upvote button */
+.oime-upvote-btn {
+  cursor: pointer;
+  transition:
+    transform 0.1s ease,
+    box-shadow 0.1s ease;
+}
+.oime-upvote-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 0 0.15rem rgba(220, 53, 69, 0.35);
+}
+.oime-upvote-btn:active {
+  transform: scale(0.95);
+}

@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block title %}
+  {% if action == "Update" %}
+    OIME Edit Proposal: {{ proposal.label }}
+  {% else %}
+    OIME: Write a Problem
+  {% endif %}
+{% endblock title %}
+{% block layout-content %}
+  <div class="alert alert-warning">
+    <h2 class="alert-heading">Please get your answers right!</h2>
+    Consider having a friend or an LLM verify you got the right answer.
+    If you save a wrong answer, testsolvers will be really upset at you.
+  </div>
+  {% include "otisweb/components/generic_form.html" with submit_name=submit_name %}
+{% endblock layout-content %}

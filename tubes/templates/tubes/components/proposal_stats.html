@@ -1,0 +1,34 @@
+{% comment %}
+Testsolve statistics summary table.
+Context var: stats (dict from views._proposal_stats).
+{% endcomment %}
+<table class="table table-sm w-auto mb-2">
+  <tbody>
+    <tr>
+      <th class="pe-4">Fastest clean solve</th>
+      <td>
+        {% if stats.fastest_clean %}
+          {{ stats.fastest_clean.solve_time_display }} ({{ stats.fastest_clean.contributor.leaderboard_name }})
+        {% else %}
+          —
+        {% endif %}
+      </td>
+    </tr>
+    <tr>
+      <th class="pe-4">Median clean solve</th>
+      <td>{{ stats.median_clean|default:"—" }}</td>
+    </tr>
+    <tr>
+      <th class="pe-4">Total testsolvers</th>
+      <td>{{ stats.total }}</td>
+    </tr>
+    <tr>
+      <th class="pe-4">Clean solves</th>
+      <td>{{ stats.first_correct }} ({{ stats.first_correct_pct }}%)</td>
+    </tr>
+    <tr>
+      <th class="pe-4">Eventual solves</th>
+      <td>{{ stats.correct }} ({{ stats.correct_pct }}%)</td>
+    </tr>
+  </tbody>
+</table>

@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+{% block title %}
+  OIME Proposals
+{% endblock title %}
+{% block layout-content %}
+  <div class="mb-3">
+    <a href="{% url "oime-landing" %}" class="btn btn-info">Instructions</a>
+    <a href="{% url "oime-proposal-create" %}" class="btn btn-success">Write a problem</a>
+    {% if contributor %}
+      {% if casual %}
+        <a href="{% url "oime-serious" %}" class="btn btn-outline-warning">Return to ranked mode</a>
+      {% else %}
+        <a href="{% url "oime-casual" %}" class="btn btn-outline-warning">Switch to casual mode</a>
+      {% endif %}
+    {% endif %}
+  </div>
+  {% if contributor %}
+    {% if casual %}
+      <p class="text-muted">
+        You're in <strong>casual mode</strong>.
+        Nothing you do is recorded or timed, so browse as you like.
+      </p>
+    {% else %}
+      <p class="text-muted">
+        You're testsolving in <strong>ranked mode</strong>.
+        Please try problems seriously!
+        We'll use your times and answers for statistics
+        when deciding how to choose the problems.
+      </p>
+    {% endif %}
+  {% endif %}
+  {% include "tubes/components/proposal_table.html" with title="Your proposals" proposals=own_proposals %}
+  {% include "tubes/components/proposal_table.html" with title="Problems you've attempted" proposals=completed_proposals %}
+  {% if casual %}
+    {% include "tubes/components/proposal_table.html" with title="Other problems" proposals=browse_proposals %}
+  {% else %}
+    {% include "tubes/components/proposal_table.html" with title="New problems" proposals=unsolved_proposals %}
+    {% include "tubes/components/proposal_table.html" with title="Browse-only problems" proposals=browse_proposals %}
+  {% endif %}
+  {% if not own_proposals and not browse_proposals and not unsolved_proposals and not completed_proposals %}
+    <div class="alert alert-warning">No proposals yet. Be the first to submit!</div>
+  {% endif %}
+{% endblock layout-content %}

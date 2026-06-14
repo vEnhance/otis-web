@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% block title %}
+  {% if is_edit %}
+    OIME Profile
+  {% else %}
+    Welcome to OIME
+  {% endif %}
+{% endblock title %}
+{% block layout-content %}
+  <h2>Hey there, otter chef!</h2>
+  <p>
+    For testsolving, how would you like to be called?
+    This is the name that appears on the internal leaderboards
+    as well as the acknowledgments in the published PDF packet.
+  </p>
+  <p>
+    (This is also the default name filled in when you submit new problems,
+    but for every submitted problem you can override the author name too.)
+  </p>
+  {% include "otisweb/components/generic_form.html" with submit_name=is_edit|yesno:"Save Changes,Get Started" %}
+{% endblock layout-content %}

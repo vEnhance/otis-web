@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block title %}
+  OIME {{ proposal.label }} Statistics
+{% endblock title %}
+{% block layout-content %}
+  <div class="d-flex justify-content-between align-items-start mb-3">
+    <h2>{{ proposal.label }}: results</h2>
+    <a href="{% url "oime-proposal-detail" proposal.pk %}"
+       class="btn btn-outline-secondary btn-sm">← Back to problem</a>
+  </div>
+  {% include "tubes/components/proposal_stats.html" %}
+  {% if fights %}
+    <table class="table table-striped">
+      <thead class="table-dark">
+        <tr>
+          <th>#</th>
+          <th>Solver</th>
+          <th>Solve time</th>
+          <th>Wrong answers</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for fight in fights %}
+          <tr>
+            <td>
+              {% if fight.is_success %}{{ forloop.counter }}{% endif %}
+            </td>
+            <td>{{ fight.contributor.leaderboard_name }}</td>
+            <td class="text-success">
+              {% if fight.is_success %}✔ {{ fight.solve_time_display }}{% endif %}
+            </td>
+            <td class="text-danger">
+              {% if fight.wrong_answers %}✖{{ fight.wrong_answers }}{% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="text-muted">No one has attempted this problem yet.</p>
+  {% endif %}
+{% endblock layout-content %}

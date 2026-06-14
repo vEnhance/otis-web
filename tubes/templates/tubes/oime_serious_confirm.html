@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+{% block title %}
+  OIME: Ranked mode
+{% endblock title %}
+{% block layout-content %}
+  <h2>Switch from casual mode to ranked mode?</h2>
+  <p class="mb-0">
+    In ranked mode, you're committing to trying the problems seriously.
+    When you try problems, we'll record the number of attempts and time taken.
+    Please try your best on every problem you open.
+  </p>
+  <p>
+    Note you are considered spoiled on any problems submitted before this
+    ({% now "DATETIME_FORMAT" %}).
+    Only problems after this date will be considered eligible for ranked solves.
+  </p>
+  <hr />
+  {% include "otisweb/components/generic_form.html" with submit_name="Return to ranked mode" btn_class="btn-primary" %}
+  <hr />
+  <p>
+    <a href="{% url "oime-proposal-list" %}">Cancel and go back</a>
+  </p>
+{% endblock layout-content %}

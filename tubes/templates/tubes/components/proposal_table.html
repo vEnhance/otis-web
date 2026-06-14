@@ -1,0 +1,63 @@
+{% comment %}
+Renders a proposal table section.
+Context vars: title (str), proposals (list of OIMEProposal annotated with user_fight, user_list_status, difficulty_display).
+{% endcomment %}
+{% if proposals %}
+  <h3 class="mt-4">{{ title }}</h3>
+  <table class="table table-striped" style="table-layout: fixed;">
+    <colgroup>
+      <col style="width: 3rem;">
+      <col>
+      <col style="width: 5rem;">
+      <col style="width: 5rem;">
+      <col style="width: 7rem;">
+    </colgroup>
+    <thead class="table-dark">
+      <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Diff.</th>
+        <th>Votes</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for proposal in proposals %}
+        <tr>
+          <td>
+            <a href="{{ proposal.get_absolute_url }}" class="fw-bold">{{ proposal.label }}</a>
+            {% if proposal.archived %}<span class="badge bg-secondary ms-1">archived</span>{% endif %}
+          </td>
+          <td>
+            <a href="{{ proposal.get_absolute_url }}">{{ proposal.title|truncatechars:"30" }}</a>
+          </td>
+          <td>{{ proposal.difficulty_display }}</td>
+          <td>🩷 × {{ proposal.upvote_count }}</td>
+          <td>
+            {% if proposal.user_list_status == "author" %}
+              <span>Author</span>
+            {% elif proposal.user_list_status == "in_progress" %}
+              <span>In Progress</span>
+            {% elif proposal.user_list_status == "not_started" %}
+              <a href="{% url "oime-start-fight" proposal.pk %}">New!</a>
+            {% elif proposal.user_list_status == "revealed" %}
+              <span class="text-muted">Spoiled</span>
+            {% elif proposal.user_list_status == "casual" %}
+              <a href="{{ proposal.get_absolute_url }}">Not spoiled</a>
+            {% elif proposal.user_fight.status == "OIME_OK" %}
+              <span class="text-success">✔{{ proposal.user_fight.solve_time_display }}
+                {% if proposal.user_fight.wrong_answers %}(✖{{ proposal.user_fight.wrong_answers }}){% endif %}
+              </span>
+            {% elif proposal.user_fight.status == "OIME_FAIL" %}
+              <span class="text-danger">Gave Up</span>
+            {% elif proposal.user_fight.status == "OIME_TLE" %}
+              <span class="text-danger">TLE</span>
+            {% elif proposal.user_fight.status == "OIME_ALE" %}
+              <span class="text-danger">Reached ✖5</span>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endif %}

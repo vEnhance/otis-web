@@ -1,23 +1,23 @@
 from django.contrib import admin
+from django.db.models import QuerySet
+from django.http import HttpRequest
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
-from .models import JoinRecord, Tube
+from .models import (
+    JoinRecord,
+    OIMEComment,
+    OIMEContributor,
+    OIMEFight,
+    OIMEProposal,
+    Tube,
+)
 
 
 @admin.register(Tube)
-class TubeAdmin(admin.ModelAdmin):
-    list_display = (
-        "pk",
-        "display_name",
-        "status",
-        "main_url",
-        "accepting_signups",
-    )
-    list_display_links = (
-        "pk",
-        "display_name",
-    )
+class TubeAdmin(admin.ModelAdmin[Tube]):
+    list_display = ("pk", "display_name", "status", "main_url", "accepting_signups")
+    list_display_links = ("pk", "display_name")
     list_filter = ("status", "accepting_signups")
 
 
@@ -25,12 +25,7 @@ class JoinRecordResource(resources.ModelResource):
     class Meta:
         skip_unchanged = True
         model = JoinRecord
-        fields = (
-            "id",
-            "tube",
-            "activation_time",
-            "invite_url",
-        )
+        fields = ("id", "tube", "activation_time", "invite_url")
         export_order = fields
 
 
@@ -41,3 +36,64 @@ class JoinRecordAdmin(ImportExportModelAdmin):
     list_filter = (("user", admin.EmptyFieldListFilter),)
     search_fields = ("user__username", "invite_url")
     resource_class = JoinRecordResource
+
+
+@admin.register(OIMEContributor)
+class OIMEContributorAdmin(admin.ModelAdmin[OIMEContributor]):
+    list_display = ["display_name", "user", "casual_mode"]
+    list_filter = ["casual_mode"]
+    search_fields = ["display_name", "user__username"]
+
+
+@admin.register(OIMEProposal)
+class OIMEProposalAdmin(admin.ModelAdmin[OIMEProposal]):
+    list_display = [
+        "pk",
+        "title",
+        "author",
+        "subject",
+        "difficulty",
+        "archived",
+        "created_at",
+    ]
+    list_filter = ["subject", "difficulty", "archived"]
+    search_fields = ["author__display_name", "title", "statement"]
+    readonly_fields = ["created_at", "updated_at"]
+    filter_horizontal = ["upvotes"]
+    actions = ["archive_problems", "unarchive_problems"]
+
+    @admin.action(description="Archive selected problems")
+    def archive_problems(
+        self, request: HttpRequest, queryset: QuerySet[OIMEProposal]
+    ) -> None:
+        count = queryset.update(archived=True)
+        self.message_user(request, f"Archived {count} problem(s).")
+
+    @admin.action(description="Unarchive selected problems")
+    def unarchive_problems(
+        self, request: HttpRequest, queryset: QuerySet[OIMEProposal]
+    ) -> None:
+        count = queryset.update(archived=False)
+        self.message_user(request, f"Unarchived {count} problem(s).")
+
+
+@admin.register(OIMEFight)
+class OIMEFightAdmin(admin.ModelAdmin[OIMEFight]):
+    list_display = [
+        "contributor",
+        "proposal",
+        "status",
+        "wrong_answers",
+        "solve_time_seconds",
+        "started_at",
+    ]
+    list_filter = ["status"]
+    search_fields = ["contributor__display_name"]
+    readonly_fields = ["started_at"]
+
+
+@admin.register(OIMEComment)
+class OIMECommentAdmin(admin.ModelAdmin[OIMEComment]):
+    list_display = ["author", "proposal", "created_at"]
+    search_fields = ["author__display_name", "content"]
+    readonly_fields = ["created_at"]

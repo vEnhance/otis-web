@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+{% block title %}
+  OIME {{ proposal.label }} Start Screen
+{% endblock title %}
+{% block layout-content %}
+  <h1>{{ proposal.label }}: {{ proposal.title }}</h1>
+  <p class="text-muted">
+    {{ proposal.difficulty_display }} · Written by {{ proposal.credit_display }}
+    on {{ proposal.created_at|date:"Y-m-d" }}
+  </p>
+  <hr />
+  <h2>Start timed session</h2>
+  <p>Starting a timed session will reveal the problem statement.</p>
+  <p>
+    You will have <strong>{{ proposal.time_limit_minutes }} minutes</strong>,
+    and the timer begins immediately.
+  </p>
+  <form method="post" action="{% url "oime-start-fight" proposal.pk %}">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-primary">Start solving</button>
+  </form>
+  <hr />
+  <h3>Bypass problem</h3>
+  <p>
+    If for some reason you want to spoil yourself immediately
+    (for example, if you were a coauthor and already know the answer),
+    you can bypass the problem below.
+    This option isn't available anymore once you start a timed session it.
+  </p>
+  <form method="post" action="{% url "oime-reveal" proposal.pk %}">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-outline-secondary">Bypass problem</button>
+  </form>
+  <hr />
+  <p>
+    <a href="{% url "oime-proposal-list" %}">Back to problem list</a>
+  </p>
+{% endblock layout-content %}
