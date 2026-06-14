@@ -94,9 +94,10 @@
     </p>
     <div class="mt-3 oime-self-check" data-answer="{{ proposal.answer }}">
       <div class="input-group input-group-sm" style="max-width: 18rem;">
-        <input type="number"
-               min="0"
-               max="999"
+        <input type="text"
+               inputmode="numeric"
+               pattern="[0-9]{1,3}"
+               maxlength="3"
                class="form-control oime-check-input"
                placeholder="Your answer (0–999)" />
         <button type="button" class="btn btn-outline-secondary oime-check-btn">Check</button>
