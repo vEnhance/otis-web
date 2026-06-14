@@ -48,14 +48,14 @@ class OIMEContributorAdmin(admin.ModelAdmin[OIMEContributor]):
 @admin.register(OIMEProposal)
 class OIMEProposalAdmin(admin.ModelAdmin[OIMEProposal]):
     list_display = [
-        "pk",
+        "label",
         "title",
-        "author",
-        "subject",
-        "difficulty",
-        "archived",
+        "credit_display",
+        "difficulty_display",
         "created_at",
+        "archived",
     ]
+    list_display_links = ("label", "title")
     list_filter = ["subject", "difficulty", "archived"]
     search_fields = ["author__display_name", "title", "statement"]
     readonly_fields = ["created_at", "updated_at"]
