@@ -620,22 +620,25 @@ def test_detail_explains_gave_up_status(otis):
 def test_detail_shows_stats_summary(otis):
     user, contributor = _verified_contributor()
     proposal = OIMEProposalFactory.create()
-    # Viewer has fought (so the summary shows), plus a clean solver for the numbers.
+    # Viewer has fought (so the summary shows), plus three clean solvers whose times
+    # {100, 185, 300} give a clear fastest and median.
     OIMEFightFactory.create(
         contributor=contributor, proposal=proposal, status="OIME_FAIL"
     )
-    clean = OIMEContributorFactory.create()
-    OIMEFightFactory.create(
-        contributor=clean,
-        proposal=proposal,
-        status="OIME_OK",
-        wrong_answers=0,
-        solve_time_seconds=185,
-    )
+    for seconds in (100, 185, 300):
+        OIMEFightFactory.create(
+            contributor=OIMEContributorFactory.create(),
+            proposal=proposal,
+            status="OIME_OK",
+            wrong_answers=0,
+            solve_time_seconds=seconds,
+        )
     otis.login(user)
     resp = otis.get_20x("oime-proposal-detail", proposal.pk)
     otis.assert_has(resp, "Total testsolvers")
-    otis.assert_has(resp, "03:05")  # 185s fastest clean solve
+    otis.assert_has(resp, "01:40")  # 100s fastest clean solve
+    otis.assert_has(resp, "Median clean solve")
+    otis.assert_has(resp, "03:05")  # median of 100/185/300 → 185s
 
 
 @pytest.mark.django_db

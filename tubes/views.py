@@ -1,3 +1,4 @@
+import statistics
 from datetime import timedelta
 from typing import Any
 
@@ -132,6 +133,11 @@ def _proposal_stats(proposal: OIMEProposal) -> dict[str, Any]:
     clean = [f for f in first_correct if f.solve_time_seconds is not None]
     fastest_clean = min(clean, key=lambda f: f.solve_time_seconds) if clean else None  # type: ignore[arg-type, return-value]
 
+    median_clean = None
+    if clean:
+        median_seconds = round(statistics.median(f.solve_time_seconds for f in clean))  # type: ignore[misc]
+        median_clean = f"{median_seconds // 60:02d}:{median_seconds % 60:02d}"
+
     def pct(n: int) -> int:
         return round(100 * n / total) if total else 0
 
@@ -142,6 +148,7 @@ def _proposal_stats(proposal: OIMEProposal) -> dict[str, Any]:
         "first_correct": len(first_correct),
         "first_correct_pct": pct(len(first_correct)),
         "fastest_clean": fastest_clean,
+        "median_clean": median_clean,
     }
 
 
