@@ -45,15 +45,15 @@ Context vars: title (str), proposals (list of OIMEProposal annotated with user_f
             {% elif proposal.user_list_status == "casual" %}
               <a href="{{ proposal.get_absolute_url }}">Not spoiled</a>
             {% elif proposal.user_fight.status == "OIME_OK" %}
-              <span class="text-success">{{ proposal.user_fight.solve_time_display }}
-                {% if proposal.user_fight.wrong_answers %}({{ proposal.user_fight.wrong_answers }}✖){% endif %}
+              <span class="text-success">✔{{ proposal.user_fight.solve_time_display }}
+                {% if proposal.user_fight.wrong_answers %}(✖{{ proposal.user_fight.wrong_answers }}){% endif %}
               </span>
             {% elif proposal.user_fight.status == "OIME_FAIL" %}
               <span class="text-danger">Gave Up</span>
             {% elif proposal.user_fight.status == "OIME_TLE" %}
               <span class="text-danger">TLE</span>
             {% elif proposal.user_fight.status == "OIME_ALE" %}
-              <span class="text-danger">Reached 5✖</span>
+              <span class="text-danger">Reached ✖5</span>
             {% endif %}
           </td>
         </tr>

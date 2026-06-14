@@ -9,41 +9,28 @@
        class="btn btn-outline-secondary btn-sm">← Back to problem</a>
   </div>
   {% include "tubes/components/proposal_stats.html" %}
-  <h4 class="mt-4">All attempts</h4>
   {% if fights %}
     <table class="table table-striped">
       <thead class="table-dark">
         <tr>
           <th>#</th>
           <th>Solver</th>
-          <th>Result</th>
-          <th>Wrong answers</th>
           <th>Solve time</th>
+          <th>Wrong answers</th>
         </tr>
       </thead>
       <tbody>
         {% for fight in fights %}
           <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>{{ fight.contributor.display_name }}</td>
             <td>
-              {% if fight.status == "OIME_OK" %}
-                <span class="text-success">Solved</span>
-              {% elif fight.status == "OIME_FAIL" %}
-                <span class="text-muted">Gave up</span>
-              {% elif fight.status == "OIME_TLE" %}
-                <span class="text-danger">Time limit exceeded</span>
-              {% elif fight.status == "OIME_ALE" %}
-                <span class="text-danger">Answer limit exceeded</span>
-              {% endif %}
+              {% if fight.is_success %}{{ forloop.counter }}{% endif %}
             </td>
-            <td>{{ fight.wrong_answers }}</td>
-            <td>
-              {% if fight.solve_time_seconds is not None %}
-                {{ fight.solve_time_display }}
-              {% else %}
-                —
-              {% endif %}
+            <td>{{ fight.contributor.display_name }}</td>
+            <td class="text-success">
+              {% if fight.is_success %}✔ {{ fight.solve_time_display }}{% endif %}
+            </td>
+            <td class="text-danger">
+              {% if fight.wrong_answers %}✖{{ fight.wrong_answers }}{% endif %}
             </td>
           </tr>
         {% endfor %}

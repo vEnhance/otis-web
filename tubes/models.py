@@ -218,6 +218,10 @@ class OIMEFight(models.Model):
         return self.status != "OIME_TBD"
 
     @property
+    def is_success(self) -> bool:
+        return self.status == "OIME_OK"
+
+    @property
     def time_expired(self) -> bool:
         if self.is_complete:
             return False

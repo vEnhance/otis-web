@@ -1,9 +1,9 @@
 {% extends "layout.html" %}
 {% block title %}
   {% if action == "Update" %}
-    Edit Proposal
+    OIME Edit Proposal: {{ proposal.label }}
   {% else %}
-    Write a Problem
+    OIME: Write a Problem
   {% endif %}
 {% endblock title %}
 {% block layout-content %}

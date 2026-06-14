@@ -345,7 +345,7 @@ def test_go_casual_sets_casual_mode(otis):
 @pytest.mark.django_db
 def test_casual_completed_fight_shows_as_solved(otis):
     # A casual solver who completed a fight earlier should see the recorded result
-    # ("MM:SS (N✖)"), not "Try it" (regression for a list/detail mismatch).
+    # ("MM:SS (✖N)"), not "Try it" (regression for a list/detail mismatch).
     user, contributor = _verified_contributor()
     proposal = OIMEProposalFactory.create()
     OIMEFightFactory.create(
@@ -360,7 +360,7 @@ def test_casual_completed_fight_shows_as_solved(otis):
     otis.login(user)
     resp = otis.get_20x("oime-proposal-list")
     otis.assert_has(resp, "02:00")
-    otis.assert_not_has(resp, "0✖")
+    otis.assert_not_has(resp, "✖0")
     otis.assert_not_has(resp, "Try it")
 
 
