@@ -100,7 +100,7 @@ class OIMEContributor(models.Model):
     )
     display_name = models.CharField(
         max_length=200,
-        help_text="Name used in credits when problems are attributed.",
+        help_text="Published name for all OIME testsolving interactions. Nicknames or usernames are fine if you prefer.",
     )
     casual_mode = models.BooleanField(
         default=False,
@@ -123,11 +123,11 @@ class OIMEContributor(models.Model):
     )
     hide_from_leaderboards = models.BooleanField(
         default=False,
-        help_text="If set, your name is shown as an anonymous alias on testsolving leaderboards.",
+        help_text="If checked, your name is shown as an anonymous alias on testsolving leaderboards.",
     )
     hide_from_acknowledgments = models.BooleanField(
         default=False,
-        help_text="If set, your name is left out of public testsolver acknowledgments.",
+        help_text="If checked, your name is omitted of published testsolver acknowledgments in the final packet.",
     )
 
     def __str__(self) -> str:
