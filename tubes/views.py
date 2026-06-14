@@ -661,6 +661,19 @@ def upvote_proposal(request: HttpRequest, pk: int) -> HttpResponse:
 
 
 @verified_required
+def toggle_archive(request: HttpRequest, pk: int) -> HttpResponse:
+    """Staff-only: flip a problem's archived state."""
+    if request.method != "POST":
+        return redirect("oime-proposal-detail", pk)
+    if not request.user.is_staff:  # type: ignore[union-attr]
+        raise PermissionDenied
+    proposal = get_object_or_404(OIMEProposal, pk=pk)
+    proposal.archived = not proposal.archived
+    proposal.save(update_fields=["archived"])
+    return redirect("oime-proposal-detail", pk)
+
+
+@verified_required
 def proposal_results(request: HttpRequest, pk: int) -> HttpResponse:
     """Leaderboard of every fight on a problem, for contributors who can no longer fight it."""
     proposal = get_object_or_404(OIMEProposal, pk=pk)

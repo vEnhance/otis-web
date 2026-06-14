@@ -20,6 +20,11 @@ urlpatterns = [
     path(r"proposal/<int:pk>/upvote/", views.upvote_proposal, name="oime-upvote"),
     path(r"proposal/<int:pk>/reveal/", views.reveal_solution, name="oime-reveal"),
     path(
+        r"proposal/<int:pk>/archive/",
+        views.toggle_archive,
+        name="oime-proposal-archive",
+    ),
+    path(
         r"proposal/<int:pk>/results/",
         views.proposal_results,
         name="oime-proposal-results",

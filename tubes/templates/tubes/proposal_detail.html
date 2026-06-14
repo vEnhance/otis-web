@@ -35,6 +35,18 @@
         <a href="{% url "oime-proposal-update" proposal.pk %}"
            class="btn btn-outline-secondary btn-sm">Edit</a>
       {% endif %}
+      {% if request.user.is_staff %}
+        <form method="post" action="{% url "oime-proposal-archive" proposal.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-outline-secondary btn-sm">
+            {% if proposal.archived %}
+              Unarchive
+            {% else %}
+              Archive
+            {% endif %}
+          </button>
+        </form>
+      {% endif %}
       <a href="{% url "oime-proposal-list" %}"
          class="btn btn-outline-secondary btn-sm">← Back</a>
     </div>

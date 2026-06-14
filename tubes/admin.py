@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.db.models import QuerySet
+from django.http import HttpRequest
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
@@ -58,6 +60,21 @@ class OIMEProposalAdmin(admin.ModelAdmin[OIMEProposal]):
     search_fields = ["author__display_name", "title", "statement"]
     readonly_fields = ["created_at", "updated_at"]
     filter_horizontal = ["upvotes"]
+    actions = ["archive_problems", "unarchive_problems"]
+
+    @admin.action(description="Archive selected problems")
+    def archive_problems(
+        self, request: HttpRequest, queryset: QuerySet[OIMEProposal]
+    ) -> None:
+        count = queryset.update(archived=True)
+        self.message_user(request, f"Archived {count} problem(s).")
+
+    @admin.action(description="Unarchive selected problems")
+    def unarchive_problems(
+        self, request: HttpRequest, queryset: QuerySet[OIMEProposal]
+    ) -> None:
+        count = queryset.update(archived=False)
+        self.message_user(request, f"Unarchived {count} problem(s).")
 
 
 @admin.register(OIMEFight)
