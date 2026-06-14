@@ -2,6 +2,7 @@ import statistics
 from datetime import timedelta
 from typing import Any
 
+from django import forms
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count
@@ -179,8 +180,6 @@ def oime_setup(request: HttpRequest) -> HttpResponse:
 @verified_required
 def go_casual(request: HttpRequest) -> HttpResponse:
     """Confirmation page and action for switching into casual mode."""
-    from django import forms as django_forms
-
     contributor = _get_contributor(request)
     if contributor is None:
         return redirect("oime-setup")
@@ -203,15 +202,13 @@ def go_casual(request: HttpRequest) -> HttpResponse:
     return render(
         request,
         "tubes/oime_casual_confirm.html",
-        {"form": django_forms.Form(), "has_active_fight": has_active_fight},
+        {"form": forms.Form(), "has_active_fight": has_active_fight},
     )
 
 
 @verified_required
 def go_serious(request: HttpRequest) -> HttpResponse:
     """Confirmation page and action for returning to ranked mode from casual mode."""
-    from django import forms as django_forms
-
     contributor = _get_contributor(request)
     if contributor is None:
         return redirect("oime-setup")
@@ -226,7 +223,7 @@ def go_serious(request: HttpRequest) -> HttpResponse:
     return render(
         request,
         "tubes/oime_serious_confirm.html",
-        {"form": django_forms.Form()},
+        {"form": forms.Form()},
     )
 
 
