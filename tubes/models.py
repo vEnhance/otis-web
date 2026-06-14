@@ -68,11 +68,24 @@ class OIMEContributor(models.Model):
         max_length=200,
         help_text="Name used in credits when problems are attributed.",
     )
-    spoil_before = models.DateTimeField(
+    casual_mode = models.BooleanField(
+        default=False,
+        help_text="If set, this contributor browses casually: they can view every problem "
+        "statement untimed and upvote, nothing is recorded, and they can no longer start "
+        "timed sessions. Solutions stay hidden until revealed per-problem.",
+    )
+    ranked_cutoff = models.DateTimeField(
         null=True,
         blank=True,
-        help_text="If set, this contributor is spoiled on all proposals created before this time "
-        "and cannot start new timed attempts on them.",
+        help_text="Set each time this contributor returns to ranked mode from casual mode. "
+        "Problems created at or before this time are no longer eligible for a timed solve by "
+        "them (they could have browsed them casually) and stay browsable casually instead.",
+    )
+    revealed_proposals = models.ManyToManyField(
+        "OIMEProposal",
+        related_name="revealed_by",
+        blank=True,
+        help_text="Proposals whose solution this contributor has chosen to reveal.",
     )
 
     def __str__(self) -> str:
@@ -87,11 +100,11 @@ class OIMEProposal(models.Model):
         ("N", "Number Theory"),
     ]
     DIFFICULTY_CHOICES = [
-        (1, "Tier I (AIME 1-3): 10 minutes"),
-        (2, "Tier II (AIME 4-6): 15 minutes"),
-        (3, "Tier III (AIME 7-9): 20 minutes"),
-        (4, "Tier IV (AIME 10-12): 25 minutes"),
-        (5, "Tier V (AIME 13-15): 30 minutes"),
+        (1, "🔥 × 1 (AIME 1-3): 10 minutes"),
+        (2, "🔥 × 2 (AIME 4-6): 15 minutes"),
+        (3, "🔥 × 3 (AIME 7-9): 20 minutes"),
+        (4, "🔥 × 4 (AIME 10-12): 25 minutes"),
+        (5, "🔥 × 5 (AIME 13-15): 30 minutes"),
     ]
 
     author = models.ForeignKey(
@@ -188,6 +201,14 @@ class OIMEFight(models.Model):
     @property
     def answer_attempts_display(self) -> str:
         return "✗" * self.wrong_answers + "·" * (self.ANSWER_LIMIT - self.wrong_answers)
+
+    @property
+    def solve_time_display(self) -> str:
+        """Solve time formatted as MM:SS, or empty if not solved."""
+        if self.solve_time_seconds is None:
+            return ""
+        minutes, seconds = divmod(self.solve_time_seconds, 60)
+        return f"{minutes:02d}:{seconds:02d}"
 
     @property
     def is_complete(self) -> bool:

@@ -17,7 +17,14 @@ urlpatterns = [
     path(r"proposal/<int:pk>/submit/", views.submit_answer, name="oime-submit-answer"),
     path(r"proposal/<int:pk>/giveup/", views.give_up, name="oime-give-up"),
     path(r"proposal/<int:pk>/upvote/", views.upvote_proposal, name="oime-upvote"),
+    path(r"proposal/<int:pk>/reveal/", views.reveal_solution, name="oime-reveal"),
+    path(
+        r"proposal/<int:pk>/results/",
+        views.proposal_results,
+        name="oime-proposal-results",
+    ),
     path(r"comment/<int:pk>/edit/", views.edit_comment, name="oime-comment-edit"),
     path(r"setup/", views.oime_setup, name="oime-setup"),
-    path(r"spoil/", views.spoil_self, name="oime-spoil"),
+    path(r"casual/", views.go_casual, name="oime-casual"),
+    path(r"serious/", views.go_serious, name="oime-serious"),
 ]

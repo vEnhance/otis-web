@@ -32,36 +32,50 @@ def _get_contributor(request: HttpRequest) -> OIMEContributor | None:
         return None
 
 
+def _is_casual_for(contributor: OIMEContributor, proposal: OIMEProposal) -> bool:
+    """Whether this contributor engages with this problem casually rather than ranked.
+
+    True when the contributor is currently in casual mode, or when the problem predates
+    their ``ranked_cutoff`` (set when they last returned to ranked mode) — such problems
+    could have been browsed casually, so they remain casual-only for that contributor.
+    """
+    return contributor.casual_mode or (
+        contributor.ranked_cutoff is not None
+        and proposal.created_at <= contributor.ranked_cutoff
+    )
+
+
 def _get_solver_context(
     contributor: OIMEContributor,
     proposal: OIMEProposal,
 ) -> dict[str, Any]:
-    """Compute spoil status and access flags for a contributor viewing a proposal.
+    """Compute visibility and access flags for a contributor viewing a proposal.
 
-    A contributor is *spoiled* on a proposal if any of the following hold:
-    - They are the proposal's author.
-    - Their ``spoil_before`` timestamp is set and is >= the proposal's creation time.
-    - They have a completed attempt on the proposal.
+    There are two ways to engage with a problem:
 
-    Spoiled contributors can see the statement, answer, solution, and discussion.
-    Unspoiled contributors see the statement only while actively fighting (proposal_fight).
+    - **Ranked** (default): the statement is hidden until a timed fight is started,
+      and the answer/solution are revealed only once that fight is complete. Solve
+      times are recorded.
+    - **Casual** (see :func:`_is_casual_for`): every statement is browsable untimed
+      and nothing is recorded, but the answer/solution stay hidden until the
+      contributor explicitly reveals them on this problem.
+
+    The proposal's author always sees everything.
     """
     is_author = contributor == proposal.author
+    casual = _is_casual_for(contributor, proposal)
 
     if is_author:
         return {
-            "is_spoiled": True,
             "is_author": True,
+            "casual": casual,
             "fight": None,
+            "can_see_statement": True,
+            "can_see_solution": True,
             "can_start_fight": False,
             "can_comment": True,
             "can_upvote": True,
         }
-
-    is_globally_spoiled = (
-        contributor.spoil_before is not None
-        and proposal.created_at <= contributor.spoil_before
-    )
 
     fight: OIMEFight | None = None
     try:
@@ -73,15 +87,61 @@ def _get_solver_context(
     except OIMEFight.DoesNotExist:
         pass
 
-    is_spoiled = is_globally_spoiled or (fight is not None and fight.is_complete)
+    fight_complete = fight is not None and fight.is_complete
+    revealed = contributor.revealed_proposals.filter(pk=proposal.pk).exists()
+
+    if casual:
+        can_see_solution = revealed or fight_complete
+        return {
+            "is_author": False,
+            "casual": True,
+            "fight": fight,
+            "can_see_statement": True,
+            "can_see_solution": can_see_solution,
+            "can_start_fight": False,
+            "can_comment": can_see_solution,
+            "can_upvote": True,
+        }
+
+    # Ranked. Revealing a problem (escape hatch for someone who already knows it,
+    # e.g. a co-author) forfeits the chance to fight it and spoils the solution.
+    fight_active = fight is not None and not fight.is_complete
+    can_see_solution = fight_complete or revealed
+    return {
+        "is_author": False,
+        "casual": False,
+        "fight": fight,
+        "can_see_statement": fight_active or can_see_solution,
+        "can_see_solution": can_see_solution,
+        "can_start_fight": fight is None and not revealed,
+        "can_comment": can_see_solution,
+        "can_upvote": can_see_solution,
+    }
+
+
+def _proposal_stats(proposal: OIMEProposal) -> dict[str, Any]:
+    """Aggregate testsolve statistics for a problem (completed fights only)."""
+    fights = list(
+        OIMEFight.objects.filter(proposal=proposal)
+        .exclude(status="OIME_TBD")
+        .select_related("contributor")
+    )
+    total = len(fights)
+    correct = [f for f in fights if f.status == "OIME_OK"]
+    first_correct = [f for f in correct if f.wrong_answers == 0]
+    clean = [f for f in first_correct if f.solve_time_seconds is not None]
+    fastest_clean = min(clean, key=lambda f: f.solve_time_seconds) if clean else None  # type: ignore[arg-type, return-value]
+
+    def pct(n: int) -> int:
+        return round(100 * n / total) if total else 0
 
     return {
-        "is_spoiled": is_spoiled,
-        "is_author": False,
-        "fight": fight,
-        "can_start_fight": not is_spoiled and fight is None,
-        "can_comment": is_spoiled,
-        "can_upvote": is_spoiled,
+        "total": total,
+        "correct": len(correct),
+        "correct_pct": pct(len(correct)),
+        "first_correct": len(first_correct),
+        "first_correct_pct": pct(len(first_correct)),
+        "fastest_clean": fastest_clean,
     }
 
 
@@ -117,14 +177,14 @@ def oime_setup(request: HttpRequest) -> HttpResponse:
 
 
 @verified_required
-def spoil_self(request: HttpRequest) -> HttpResponse:
-    """Confirmation page and action for spoiling oneself on all current proposals."""
+def go_casual(request: HttpRequest) -> HttpResponse:
+    """Confirmation page and action for switching into casual mode."""
     from django import forms as django_forms
 
     contributor = _get_contributor(request)
     if contributor is None:
         return redirect("oime-setup")
-    if contributor.spoil_before is not None:
+    if contributor.casual_mode:
         return redirect("oime-proposal-list")
     has_active_fight = OIMEFight.objects.filter(
         contributor=contributor, status="OIME_TBD"
@@ -135,19 +195,46 @@ def spoil_self(request: HttpRequest) -> HttpResponse:
                 request,
                 "You have an active fight in progress. Finish or give up first.",
             )
-            return redirect("oime-spoil")
-        contributor.spoil_before = timezone.now()
+            return redirect("oime-casual")
+        contributor.casual_mode = True
         contributor.save()
         messages.success(
             request,
-            "You are now spoiled on all problems created up to this moment "
-            "and can browse their statements and solutions freely.",
+            "You are now in casual mode. Browse and try any problem untimed and "
+            "upvote ones you like; solutions stay hidden until you reveal them.",
         )
         return redirect("oime-proposal-list")
     return render(
         request,
-        "tubes/oime_spoil_confirm.html",
+        "tubes/oime_casual_confirm.html",
         {"form": django_forms.Form(), "has_active_fight": has_active_fight},
+    )
+
+
+@verified_required
+def go_serious(request: HttpRequest) -> HttpResponse:
+    """Confirmation page and action for returning to ranked mode from casual mode."""
+    from django import forms as django_forms
+
+    contributor = _get_contributor(request)
+    if contributor is None:
+        return redirect("oime-setup")
+    if not contributor.casual_mode:
+        return redirect("oime-proposal-list")
+    if request.method == "POST":
+        contributor.casual_mode = False
+        contributor.ranked_cutoff = timezone.now()
+        contributor.save()
+        messages.success(
+            request,
+            "You are back in ranked mode. Problems added from now on are eligible for "
+            "timed solving; everything that already exists stays browsable casually.",
+        )
+        return redirect("oime-proposal-list")
+    return render(
+        request,
+        "tubes/oime_serious_confirm.html",
+        {"form": django_forms.Form()},
     )
 
 
@@ -192,17 +279,18 @@ class ProposalListView(VerifiedRequiredMixin, ListView[OIMEProposal]):
         if contributor is None:
             return context
 
-        context["spoil_before"] = contributor.spoil_before
+        context["casual"] = contributor.casual_mode
 
         user_fights: dict[int, OIMEFight] = {
             f.proposal_id: f  # type: ignore[attr-defined]
             for f in OIMEFight.objects.filter(contributor=contributor)
         }
+        revealed_ids = set(contributor.revealed_proposals.values_list("pk", flat=True))
 
         own: list[OIMEProposal] = []
-        unspoiled: list[OIMEProposal] = []
+        browse: list[OIMEProposal] = []
+        unsolved: list[OIMEProposal] = []
         completed: list[OIMEProposal] = []
-        globally_spoiled: list[OIMEProposal] = []
 
         for proposal in context["proposals"]:
             fight = user_fights.get(proposal.pk)
@@ -210,26 +298,29 @@ class ProposalListView(VerifiedRequiredMixin, ListView[OIMEProposal]):
             if contributor == proposal.author:
                 proposal.user_list_status = "author"  # type: ignore[attr-defined]
                 own.append(proposal)
+            elif _is_casual_for(contributor, proposal):
+                proposal.user_list_status = (  # type: ignore[attr-defined]
+                    "revealed" if proposal.pk in revealed_ids else "casual"
+                )
+                browse.append(proposal)
+            elif proposal.pk in revealed_ids:
+                # Ranked, but spoiled via the escape hatch → no longer fightable.
+                proposal.user_list_status = "revealed"  # type: ignore[attr-defined]
+                browse.append(proposal)
             elif fight is not None and fight.is_complete:
                 proposal.user_list_status = "completed"  # type: ignore[attr-defined]
                 completed.append(proposal)
-            elif (
-                contributor.spoil_before is not None
-                and proposal.created_at <= contributor.spoil_before
-            ):
-                proposal.user_list_status = "spoiled"  # type: ignore[attr-defined]
-                globally_spoiled.append(proposal)
             elif fight is not None:
                 proposal.user_list_status = "in_progress"  # type: ignore[attr-defined]
-                unspoiled.append(proposal)
+                unsolved.append(proposal)
             else:
                 proposal.user_list_status = "not_started"  # type: ignore[attr-defined]
-                unspoiled.append(proposal)
+                unsolved.append(proposal)
 
         context["own_proposals"] = own
-        context["unspoiled_proposals"] = unspoiled
+        context["browse_proposals"] = browse
+        context["unsolved_proposals"] = unsolved
         context["completed_proposals"] = completed
-        context["globally_spoiled_proposals"] = globally_spoiled
 
         return context
 
@@ -301,8 +392,8 @@ def proposal_detail(request: HttpRequest, pk: int) -> HttpResponse:
     ctx = _get_solver_context(contributor, proposal)
     fight: OIMEFight | None = ctx["fight"]
 
-    # Unspoiled contributor with an active fight → send to the fight view
-    if not ctx["is_spoiled"] and fight is not None and not fight.is_complete:
+    # Ranked contributor with an active fight → send to the timed fight view
+    if not ctx["casual"] and fight is not None and not fight.is_complete:
         return redirect("oime-proposal-fight", pk)
 
     comment_form = OIMECommentForm()
@@ -321,14 +412,16 @@ def proposal_detail(request: HttpRequest, pk: int) -> HttpResponse:
 
     comments = (
         OIMEComment.objects.filter(proposal=proposal).select_related("author")
-        if ctx["is_spoiled"]
+        if ctx["can_see_solution"]
         else None
     )
     has_upvoted = (
         proposal.upvotes.filter(pk=contributor.pk).exists()
-        if ctx["is_spoiled"]
+        if ctx["can_upvote"]
         else False
     )
+    # Show the testsolve stats summary to anyone who can no longer fight the problem.
+    stats = None if ctx["can_start_fight"] else _proposal_stats(proposal)
 
     return render(
         request,
@@ -339,6 +432,7 @@ def proposal_detail(request: HttpRequest, pk: int) -> HttpResponse:
             "comment_form": comment_form,
             "comments": comments,
             "has_upvoted": has_upvoted,
+            "stats": stats,
             **ctx,
         },
     )
@@ -346,7 +440,7 @@ def proposal_detail(request: HttpRequest, pk: int) -> HttpResponse:
 
 @verified_required
 def proposal_fight(request: HttpRequest, pk: int) -> HttpResponse:
-    """Timed solving screen for an unspoiled contributor with an active attempt."""
+    """Timed solving screen for a ranked contributor with an active attempt."""
     proposal = get_object_or_404(OIMEProposal, pk=pk)
     contributor = _get_contributor(request)
     if contributor is None:
@@ -355,8 +449,8 @@ def proposal_fight(request: HttpRequest, pk: int) -> HttpResponse:
     ctx = _get_solver_context(contributor, proposal)
     fight: OIMEFight | None = ctx["fight"]
 
-    # Only valid while there is an active, in-progress fight and the user isn't spoiled
-    if ctx["is_spoiled"] or fight is None or fight.is_complete:
+    # Only valid while there is an active, in-progress fight (ranked mode only)
+    if ctx["casual"] or fight is None or fight.is_complete:
         return redirect("oime-proposal-detail", pk)
 
     return render(
@@ -488,6 +582,32 @@ def give_up(request: HttpRequest, pk: int) -> HttpResponse:
 
 
 @verified_required
+def reveal_solution(request: HttpRequest, pk: int) -> HttpResponse:
+    """Reveal the answer and solution for a single problem.
+
+    Used both by casual browsing and as a ranked-mode escape hatch for someone who
+    already knows a problem (e.g. a co-author). Revealing forfeits the chance to fight
+    it, so it is refused while a timed fight is in progress.
+    """
+    if request.method != "POST":
+        return redirect("oime-proposal-detail", pk)
+
+    proposal = get_object_or_404(OIMEProposal, pk=pk)
+    contributor = _get_contributor(request)
+    if contributor is None:
+        return redirect("oime-setup")
+
+    active_fight = OIMEFight.objects.filter(
+        contributor=contributor, proposal=proposal, status="OIME_TBD"
+    ).exists()
+    if active_fight:
+        raise PermissionDenied
+
+    contributor.revealed_proposals.add(proposal)
+    return redirect("oime-proposal-detail", pk)
+
+
+@verified_required
 def upvote_proposal(request: HttpRequest, pk: int) -> HttpResponse:
     if request.method != "POST":
         return redirect("oime-proposal-detail", pk)
@@ -507,6 +627,45 @@ def upvote_proposal(request: HttpRequest, pk: int) -> HttpResponse:
         proposal.upvotes.add(contributor)
 
     return redirect("oime-proposal-detail", pk)
+
+
+@verified_required
+def proposal_results(request: HttpRequest, pk: int) -> HttpResponse:
+    """Leaderboard of every fight on a problem, for contributors who can no longer fight it."""
+    proposal = get_object_or_404(OIMEProposal, pk=pk)
+    contributor = _get_contributor(request)
+    if contributor is None:
+        return redirect("oime-setup")
+
+    # The leaderboard is for anyone who can no longer start a fight on the problem
+    # (casual browsers, those who have fought or revealed it, and the author).
+    ctx = _get_solver_context(contributor, proposal)
+    if ctx["can_start_fight"]:
+        return redirect("oime-proposal-detail", pk)
+
+    fights = list(
+        OIMEFight.objects.filter(proposal=proposal)
+        .exclude(status="OIME_TBD")
+        .select_related("contributor")
+    )
+    # Rank: solved first, then fewest wrong answers, then fastest solve time.
+    fights.sort(
+        key=lambda f: (
+            f.status != "OIME_OK",
+            f.wrong_answers,
+            f.solve_time_seconds if f.solve_time_seconds is not None else 1_000_000,
+        )
+    )
+
+    return render(
+        request,
+        "tubes/proposal_results.html",
+        {
+            "proposal": proposal,
+            "contributor": contributor,
+            "fights": fights,
+        },
+    )
 
 
 @verified_required

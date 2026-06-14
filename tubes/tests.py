@@ -211,12 +211,12 @@ def test_archived_visible_to_own_author(otis):
 
 
 # ---------------------------------------------------------------------------
-# Spoil / unspoiled logic
+# Casual mode / solution reveal logic
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.django_db
-def test_unspoiled_hides_solution(otis):
+def test_ranked_hides_solution(otis):
     user, _ = _verified_contributor()
     proposal = OIMEProposalFactory.create()
     otis.login(user)
@@ -225,53 +225,117 @@ def test_unspoiled_hides_solution(otis):
 
 
 @pytest.mark.django_db
-def test_spoiled_sees_solution(otis):
+def test_casual_hides_solution_until_revealed(otis):
     user, contributor = _verified_contributor()
     proposal = OIMEProposalFactory.create()
-    contributor.spoil_before = timezone.now()
+    contributor.casual_mode = True
     contributor.save()
     otis.login(user)
+    # Casual: statement visible, solution still hidden behind the reveal action
+    resp = otis.get_20x("oime-proposal-detail", proposal.pk)
+    otis.assert_not_has(resp, "oime-answer-section")
+    otis.assert_has(resp, "Reveal solution")
+
+
+@pytest.mark.django_db
+def test_casual_reveal_shows_solution(otis):
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create()
+    contributor.casual_mode = True
+    contributor.save()
+    otis.login(user)
+    resp = otis.post("oime-reveal", proposal.pk)
+    otis.assert_30x(resp)
+    assert contributor.revealed_proposals.filter(pk=proposal.pk).exists()
     resp = otis.get_20x("oime-proposal-detail", proposal.pk)
     otis.assert_has(resp, "oime-answer-section")
 
 
 @pytest.mark.django_db
-def test_spoil_only_applies_to_old_proposals(otis):
-    # proposals created AFTER spoil_before are still unspoiled
+def test_ranked_escape_hatch_reveal(otis):
+    # A ranked solver who already knows a problem can reveal it without a fight,
+    # which forfeits the chance to fight it for a recorded time.
     user, contributor = _verified_contributor()
-    contributor.spoil_before = timezone.now()
-    contributor.save()
-    # create proposal after spoil_before is set — it will have a newer created_at
     proposal = OIMEProposalFactory.create()
-    # Manually backdate proposal to before spoil_before to verify logic
-    from .models import OIMEProposal
+    otis.login(user)
+    resp = otis.post("oime-reveal", proposal.pk)
+    otis.assert_30x(resp)
+    assert contributor.revealed_proposals.filter(pk=proposal.pk).exists()
+    # The solution is now visible and the start-fight option is gone.
+    resp = otis.get_20x("oime-proposal-detail", proposal.pk)
+    otis.assert_has(resp, "oime-answer-section")
+    resp = otis.post("oime-start-attempt", proposal.pk)
+    otis.assert_30x(resp)
+    assert not OIMEFight.objects.filter(
+        contributor=contributor, proposal=proposal
+    ).exists()
 
-    OIMEProposal.objects.filter(pk=proposal.pk).update(
-        created_at=contributor.spoil_before  # type: ignore[arg-type]
+
+@pytest.mark.django_db
+def test_cannot_reveal_during_active_fight(otis):
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create()
+    OIMEFightFactory.create(
+        contributor=contributor, proposal=proposal, status="OIME_TBD"
     )
-    proposal.refresh_from_db()
-    # proposal.created_at == spoil_before → spoiled (<=)
     otis.login(user)
-    resp = otis.get_20x("oime-proposal-detail", proposal.pk)
-    otis.assert_has(resp, "oime-answer-section")
+    resp = otis.post("oime-reveal", proposal.pk)
+    assert resp.status_code == 403
+    assert not contributor.revealed_proposals.exists()
 
 
 @pytest.mark.django_db
-def test_spoil_self_sets_spoil_before(otis):
+def test_go_casual_sets_casual_mode(otis):
     user, contributor = _verified_contributor()
     otis.login(user)
-    resp = otis.post("oime-spoil")
+    resp = otis.post("oime-casual")
     otis.assert_30x(resp)
     contributor.refresh_from_db()
-    assert contributor.spoil_before is not None
+    assert contributor.casual_mode is True
 
 
 @pytest.mark.django_db
-def test_spoiled_can_comment(otis):
+def test_go_serious_sets_cutoff_and_locks_old_problems(otis):
+    user, contributor = _verified_contributor()
+    contributor.casual_mode = True
+    contributor.save()
+    old_proposal = OIMEProposalFactory.create()
+    otis.login(user)
+    resp = otis.post("oime-serious")
+    otis.assert_30x(resp)
+    contributor.refresh_from_db()
+    assert contributor.casual_mode is False
+    assert contributor.ranked_cutoff is not None
+    # The pre-existing problem is no longer fightable, but stays browsable casually.
+    resp = otis.post("oime-start-attempt", old_proposal.pk)
+    otis.assert_30x(resp)
+    assert not OIMEFight.objects.filter(
+        contributor=contributor, proposal=old_proposal
+    ).exists()
+    resp = otis.get_20x("oime-proposal-detail", old_proposal.pk)
+    otis.assert_has(resp, "Reveal solution")
+
+
+@pytest.mark.django_db
+def test_serious_can_fight_problem_after_cutoff(otis):
+    user, contributor = _verified_contributor()
+    contributor.ranked_cutoff = timezone.now()
+    contributor.save()
+    # Created after the cutoff → eligible for a timed fight.
+    proposal = OIMEProposalFactory.create()
+    otis.login(user)
+    resp = otis.post("oime-start-attempt", proposal.pk)
+    otis.assert_30x(resp)
+    assert OIMEFight.objects.filter(contributor=contributor, proposal=proposal).exists()
+
+
+@pytest.mark.django_db
+def test_casual_revealed_can_comment(otis):
     user, contributor = _verified_contributor()
     proposal = OIMEProposalFactory.create()
-    contributor.spoil_before = timezone.now()
+    contributor.casual_mode = True
     contributor.save()
+    contributor.revealed_proposals.add(proposal)
     otis.login(user)
     resp = otis.post(
         "oime-proposal-detail",
@@ -392,7 +456,7 @@ def test_gave_up_sees_solution(otis):
 
 
 @pytest.mark.django_db
-def test_cannot_comment_before_spoiled(otis):
+def test_cannot_comment_during_active_fight(otis):
     user, contributor = _verified_contributor()
     proposal = OIMEProposalFactory.create()
     OIMEFightFactory.create(
@@ -411,10 +475,10 @@ def test_cannot_comment_before_spoiled(otis):
 
 
 @pytest.mark.django_db
-def test_spoiled_cannot_start_attempt(otis):
+def test_casual_cannot_start_attempt(otis):
     user, contributor = _verified_contributor()
     proposal = OIMEProposalFactory.create()
-    contributor.spoil_before = timezone.now()
+    contributor.casual_mode = True
     contributor.save()
     otis.login(user)
     resp = otis.post("oime-start-attempt", proposal.pk)
@@ -458,7 +522,7 @@ def test_upvote_after_solving(otis):
 def test_upvote_toggles_off(otis):
     user, contributor = _verified_contributor()
     proposal = OIMEProposalFactory.create()
-    contributor.spoil_before = timezone.now()
+    contributor.casual_mode = True
     contributor.save()
     proposal.upvotes.add(contributor)
     otis.login(user)
@@ -467,12 +531,103 @@ def test_upvote_toggles_off(otis):
 
 
 @pytest.mark.django_db
-def test_author_cannot_upvote_own_proposal(otis):
+def test_author_can_upvote_own_proposal(otis):
     user, contributor = _verified_contributor()
     proposal = OIMEProposalFactory.create(author=contributor)
     otis.login(user)
     resp = otis.post("oime-upvote", proposal.pk)
-    assert resp.status_code == 403
+    otis.assert_30x(resp)
+    assert proposal.upvotes.filter(pk=contributor.pk).exists()
+
+
+# ---------------------------------------------------------------------------
+# Fight results leaderboard
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.django_db
+def test_results_hidden_while_still_fightable(otis):
+    user, _ = _verified_contributor()
+    proposal = OIMEProposalFactory.create()
+    otis.login(user)
+    # A ranked solver who can still fight may not peek at others' results.
+    resp = otis.get("oime-proposal-results", proposal.pk)
+    otis.assert_30x(resp)
+    assert resp.url.endswith(f"/tubes/proposal/{proposal.pk}/")
+
+
+@pytest.mark.django_db
+def test_results_visible_to_author(otis):
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create(author=contributor)
+    otis.login(user)
+    otis.get_20x("oime-proposal-results", proposal.pk)
+
+
+@pytest.mark.django_db
+def test_detail_shows_stats_summary(otis):
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create()
+    # Viewer has fought (so the summary shows), plus a clean solver for the numbers.
+    OIMEFightFactory.create(
+        contributor=contributor, proposal=proposal, status="OIME_FAIL"
+    )
+    clean = OIMEContributorFactory.create()
+    OIMEFightFactory.create(
+        contributor=clean,
+        proposal=proposal,
+        status="OIME_OK",
+        wrong_answers=0,
+        solve_time_seconds=185,
+    )
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-detail", proposal.pk)
+    otis.assert_has(resp, "Total testsolvers")
+    otis.assert_has(resp, "03:05")  # 185s fastest clean solve
+
+
+@pytest.mark.django_db
+def test_results_visible_to_casual_browser(otis):
+    # Casual browsers can no longer fight, so they may view the leaderboard.
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create()
+    contributor.casual_mode = True
+    contributor.save()
+    otis.login(user)
+    otis.get_20x("oime-proposal-results", proposal.pk)
+
+
+@pytest.mark.django_db
+def test_results_ranked_for_ineligible_solver(otis):
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create()
+    # Viewer has finished their own fight, so they are eligible to see results.
+    OIMEFightFactory.create(
+        contributor=contributor, proposal=proposal, status="OIME_FAIL"
+    )
+    fast = OIMEContributorFactory.create()
+    slow = OIMEContributorFactory.create()
+    OIMEFightFactory.create(
+        contributor=slow,
+        proposal=proposal,
+        status="OIME_OK",
+        wrong_answers=0,
+        solve_time_seconds=300,
+    )
+    OIMEFightFactory.create(
+        contributor=fast,
+        proposal=proposal,
+        status="OIME_OK",
+        wrong_answers=0,
+        solve_time_seconds=100,
+    )
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-results", proposal.pk)
+    fights = resp.context["fights"]
+    # Solved-and-fastest ranks first; the unsolved give-up ranks last.
+    assert fights[0].contributor == fast
+    assert fights[1].contributor == slow
+    assert fights[-1].contributor == contributor
 
 
 # ---------------------------------------------------------------------------
@@ -484,8 +639,9 @@ def test_author_cannot_upvote_own_proposal(otis):
 def test_author_can_edit_own_comment(otis):
     user, contributor = _verified_contributor()
     proposal = OIMEProposalFactory.create()
-    contributor.spoil_before = timezone.now()
+    contributor.casual_mode = True
     contributor.save()
+    contributor.revealed_proposals.add(proposal)
     comment = OIMECommentFactory.create(
         author=contributor, proposal=proposal, content="Original"
     )

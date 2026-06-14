@@ -8,27 +8,36 @@
     <a href="{% url "oime-proposal-create" %}" class="btn btn-success">Write a problem</a>
   </div>
   {% if contributor %}
-    {% if spoil_before %}
-      <p class="text-muted">
-        You are spoiled on all problems created before
-        <strong>{{ spoil_before|date:"Y-m-d H:i" }}</strong>.
-      </p>
+    {% if casual %}
+      <div class="alert alert-info d-flex justify-content-between align-items-center">
+        <span>
+          You're in <strong>casual mode</strong>: browse and try any problem untimed and
+          upvote ones you like. Nothing is recorded, and each solution stays hidden until
+          you choose to reveal it.
+        </span>
+        <a href="{% url "oime-serious" %}"
+           class="btn btn-outline-secondary btn-sm ms-3 flex-shrink-0">Return to ranked mode</a>
+      </div>
     {% else %}
       <div class="alert alert-info d-flex justify-content-between align-items-center">
         <span>
-          You are testsolving seriously.
-          You won't see problem statements or solutions until you start (and finish) a timed session.
+          You're testsolving in <strong>ranked mode</strong>.
+          You won't see a problem statement or solution until you start (and finish) a timed session.
         </span>
-        <a href="{% url "oime-spoil" %}"
-           class="btn btn-outline-danger btn-sm ms-3 flex-shrink-0">Spoil me on everything</a>
+        <a href="{% url "oime-casual" %}"
+           class="btn btn-outline-secondary btn-sm ms-3 flex-shrink-0">Switch to casual mode</a>
       </div>
     {% endif %}
   {% endif %}
   {% include "tubes/components/proposal_table.html" with title="Your proposals" proposals=own_proposals %}
-  {% include "tubes/components/proposal_table.html" with title="New problems" proposals=unspoiled_proposals %}
-  {% include "tubes/components/proposal_table.html" with title="Problems you've fought" proposals=completed_proposals %}
-  {% include "tubes/components/proposal_table.html" with title="Spoiled problems" proposals=globally_spoiled_proposals %}
-  {% if not unspoiled_proposals and not completed_proposals and not globally_spoiled_proposals and not own_proposals %}
+  {% if casual %}
+    {% include "tubes/components/proposal_table.html" with title="All problems" proposals=browse_proposals %}
+  {% else %}
+    {% include "tubes/components/proposal_table.html" with title="New problems" proposals=unsolved_proposals %}
+    {% include "tubes/components/proposal_table.html" with title="Problems you've fought" proposals=completed_proposals %}
+    {% include "tubes/components/proposal_table.html" with title="Browse-only problems" proposals=browse_proposals %}
+  {% endif %}
+  {% if not own_proposals and not browse_proposals and not unsolved_proposals and not completed_proposals %}
     <div class="alert alert-warning">No proposals yet. Be the first to submit!</div>
   {% endif %}
 {% endblock layout-content %}

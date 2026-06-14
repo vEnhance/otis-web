@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+{% block title %}
+  {{ proposal.label }} — Fight Results
+{% endblock title %}
+{% block layout-content %}
+  <div class="d-flex justify-content-between align-items-start mb-3">
+    <h2>{{ proposal.label }}: fight results</h2>
+    <a href="{% url "oime-proposal-detail" proposal.pk %}"
+       class="btn btn-outline-secondary btn-sm">← Back to problem</a>
+  </div>
+  {% if fights %}
+    <table class="table table-striped">
+      <thead class="table-dark">
+        <tr>
+          <th>#</th>
+          <th>Solver</th>
+          <th>Result</th>
+          <th>Wrong answers</th>
+          <th>Solve time</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for fight in fights %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ fight.contributor.display_name }}</td>
+            <td>
+              {% if fight.status == "OIME_OK" %}
+                <span class="text-success">Solved</span>
+              {% elif fight.status == "OIME_FAIL" %}
+                <span class="text-muted">Gave up</span>
+              {% elif fight.status == "OIME_TLE" %}
+                <span class="text-danger">Time limit exceeded</span>
+              {% elif fight.status == "OIME_ALE" %}
+                <span class="text-danger">Answer limit exceeded</span>
+              {% endif %}
+            </td>
+            <td>{{ fight.wrong_answers }}</td>
+            <td>
+              {% if fight.solve_time_seconds is not None %}
+                {{ fight.solve_time_display }}
+              {% else %}
+                —
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="text-muted">No one has fought this problem yet.</p>
+  {% endif %}
+{% endblock layout-content %}

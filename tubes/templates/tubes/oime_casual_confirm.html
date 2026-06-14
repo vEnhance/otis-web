@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+{% block title %}
+  Switch to Casual Mode — OIME
+{% endblock title %}
+{% block layout-content %}
+  <h2>Switch to casual mode</h2>
+  <div class="alert alert-warning">
+    <p class="mb-0">
+      In casual mode you can freely browse and try every problem at your own pace,
+      and upvote the ones you like. Nothing you do is recorded, and you won't be able
+      to start timed solving sessions. Solutions stay hidden until you choose to reveal
+      them, one problem at a time.
+    </p>
+    <p class="mb-0 mt-2">
+      You can switch back to ranked mode later, but any problem that exists while you're
+      in casual mode will no longer be eligible for a timed solve once you return.
+    </p>
+  </div>
+  {% if has_active_fight %}
+    <div class="alert alert-danger">
+      You have a timed fight currently in progress.
+      Finish or give up on it before switching to casual mode.
+    </div>
+    <a href="{% url "oime-proposal-list" %}"
+       class="btn btn-outline-secondary">Back</a>
+  {% else %}
+    {% include "otisweb/components/generic_form.html" with submit_name="Switch to casual mode" btn_class="btn-primary" %}
+    <a href="{% url "oime-proposal-list" %}"
+       class="btn btn-outline-secondary ms-2">Cancel</a>
+  {% endif %}
+{% endblock layout-content %}
