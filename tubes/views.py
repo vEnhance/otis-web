@@ -696,6 +696,7 @@ def proposal_results(request: HttpRequest, pk: int) -> HttpResponse:
             "proposal": proposal,
             "contributor": contributor,
             "fights": fights,
+            "stats": _proposal_stats(proposal),
         },
     )
 

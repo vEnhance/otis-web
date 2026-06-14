@@ -8,6 +8,8 @@
     <a href="{% url "oime-proposal-detail" proposal.pk %}"
        class="btn btn-outline-secondary btn-sm">← Back to problem</a>
   </div>
+  {% include "tubes/components/proposal_stats.html" %}
+  <h4 class="mt-4">All fights</h4>
   {% if fights %}
     <table class="table table-striped">
       <thead class="table-dark">
