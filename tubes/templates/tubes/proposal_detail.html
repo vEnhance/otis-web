@@ -6,9 +6,9 @@
   <div class="d-flex justify-content-between align-items-start mb-3">
     <div>
       <h2>{{ proposal.label }}: {{ proposal.title }}</h2>
-      <p class="text-muted mb-0">{{ proposal.difficulty_display }}</p>
       <p class="text-muted">
-        Written by {{ proposal.author }}
+        {{ proposal.difficulty_display }}
+        · Written by {{ proposal.author }}
         on {{ proposal.created_at|date:"Y-m-d" }}
         {% if proposal.archived %}· <span class="badge bg-secondary">archived</span>{% endif %}
         {% if proposal.author == contributor or request.user.is_staff %}
@@ -81,11 +81,8 @@
       {% endif %}
     {% endif %}
     <div class="card mb-4" id="oime-answer-section">
-      <div class="card-header fw-bold">Solution</div>
+      <div class="card-header fw-bold">Answer: {{ proposal.answer }}</div>
       <div class="card-body">
-        <p>
-          <strong>Answer:</strong> {{ proposal.answer }}
-        </p>
         <div class="math-content">{{ proposal.solution }}</div>
       </div>
     </div>
