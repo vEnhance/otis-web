@@ -251,7 +251,7 @@ class Migration(migrations.Migration):
                         max_length=15,
                     ),
                 ),
-                ("wrong_answers", models.IntegerField(default=0)),
+                ("wrong_answers", models.PositiveSmallIntegerField(default=0)),
                 (
                     "solve_time_seconds",
                     models.IntegerField(

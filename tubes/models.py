@@ -248,7 +248,7 @@ class OIMEFight(models.Model):
     started_at = models.DateTimeField(auto_now_add=True)
     submitted_at = models.DateTimeField(null=True, blank=True)
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default="OIME_TBD")
-    wrong_answers = models.IntegerField(default=0)
+    wrong_answers = models.PositiveSmallIntegerField(default=0)
     solve_time_seconds = models.IntegerField(
         null=True,
         blank=True,
