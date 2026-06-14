@@ -57,7 +57,7 @@ class ProblemSuggestionAdmin(admin.ModelAdmin):
     ):
         queryset.update(eligible=False)
 
-    actions = [
+    actions = (
         "mark_eligible",
         "mark_uneligible",
-    ]
+    )

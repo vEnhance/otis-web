@@ -156,9 +156,7 @@ class JobAdmin(ImportExportModelAdmin):
 
     resource_class = JobIEResource
 
-    actions = [
-        "unassign_job",
-    ]
+    actions = ("unassign_job",)
 
     def unassign_job(self, request: HttpRequest, queryset: QuerySet[Job]):
         del request

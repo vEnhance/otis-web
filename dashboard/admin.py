@@ -124,8 +124,8 @@ class PSetAdmin(admin.ModelAdmin):
         del request
         queryset.update(status="R")
 
-    actions = [
+    actions = (
         "accept_pset",
         "accept_pset_without_unlock",
         "reject_pset",
-    ]
+    )

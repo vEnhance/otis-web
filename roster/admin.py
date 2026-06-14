@@ -78,7 +78,7 @@ class ApplyUUIDAdmin(ImportExportModelAdmin):
         "enabled",
     )
     resource_class = ApplyUUIDIEResource
-    actions = ["disable_uuids"]
+    actions = ("disable_uuids",)
 
     @admin.action(description="Enable selected ApplyUUIDs")
     def enable_uuids(self, request: HttpRequest, queryset: QuerySet[ApplyUUID]) -> None:
@@ -390,11 +390,9 @@ class StudentRegistrationAdmin(ImportExportModelAdmin):
     )
     resource_class = StudentRegistrationIEResource
     search_fields = ("user__first_name", "user__last_name")
-    inlines = [StudentRegistrationStudentInline]
+    inlines = (StudentRegistrationStudentInline,)
 
-    actions = [
-        "create_student",
-    ]
+    actions = ("create_student",)
 
     def create_student(
         self, request: HttpRequest, queryset: QuerySet[StudentRegistration]
@@ -436,7 +434,7 @@ class UnitInquiryAdmin(admin.ModelAdmin):
         "student",
     )
 
-    actions = ["hold_petition", "reject_petition", "accept_petition", "reset_petition"]
+    actions = ("hold_petition", "reject_petition", "accept_petition", "reset_petition")
 
     def hold_petition(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
         del request

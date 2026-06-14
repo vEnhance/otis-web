@@ -35,10 +35,7 @@ class MarketAdmin(admin.ModelAdmin):
         text = obj.prompt
         return text[:NUM_CHAR] + ("..." if len(text) > NUM_CHAR else "")
 
-    actions = [
-        "postpone_market",
-        "hasten_market",
-    ]
+    actions = ("postpone_market", "hasten_market")
 
     def shift_market(self, queryset: QuerySet[Market], num_days: int):
         queryset.update(

@@ -40,27 +40,27 @@ class JoinRecordAdmin(ImportExportModelAdmin):
 
 @admin.register(OIMEContributor)
 class OIMEContributorAdmin(admin.ModelAdmin[OIMEContributor]):
-    list_display = ["display_name", "user", "casual_mode"]
-    list_filter = ["casual_mode"]
-    search_fields = ["display_name", "user__username"]
+    list_display = ("display_name", "user", "casual_mode")
+    list_filter = ("casual_mode",)
+    search_fields = ("display_name", "user__username")
 
 
 @admin.register(OIMEProposal)
 class OIMEProposalAdmin(admin.ModelAdmin[OIMEProposal]):
-    list_display = [
+    list_display = (
         "label",
         "title",
         "credit_display",
         "difficulty_display",
         "created_at",
         "archived",
-    ]
+    )
     list_display_links = ("label", "title")
-    list_filter = ["subject", "difficulty", "archived"]
-    search_fields = ["author__display_name", "title", "statement"]
-    readonly_fields = ["created_at", "updated_at"]
-    filter_horizontal = ["upvotes"]
-    actions = ["archive_problems", "unarchive_problems"]
+    list_filter = ("subject", "difficulty", "archived")
+    search_fields = ("author__display_name", "title", "statement")
+    readonly_fields = ("created_at", "updated_at")
+    filter_horizontal = ("upvotes",)
+    actions = ("archive_problems", "unarchive_problems")
 
     @admin.action(description="Archive selected problems")
     def archive_problems(
@@ -79,21 +79,21 @@ class OIMEProposalAdmin(admin.ModelAdmin[OIMEProposal]):
 
 @admin.register(OIMEFight)
 class OIMEFightAdmin(admin.ModelAdmin[OIMEFight]):
-    list_display = [
+    list_display = (
         "contributor",
         "proposal",
         "status",
         "wrong_answers",
         "solve_time_seconds",
         "started_at",
-    ]
-    list_filter = ["status"]
-    search_fields = ["contributor__display_name"]
-    readonly_fields = ["started_at"]
+    )
+    list_filter = ("status",)
+    search_fields = ("contributor__display_name",)
+    readonly_fields = ("started_at",)
 
 
 @admin.register(OIMEComment)
 class OIMECommentAdmin(admin.ModelAdmin[OIMEComment]):
-    list_display = ["author", "proposal", "created_at"]
-    search_fields = ["author__display_name", "content"]
-    readonly_fields = ["created_at"]
+    list_display = ("author", "proposal", "created_at")
+    search_fields = ("author__display_name", "content")
+    readonly_fields = ("created_at",)

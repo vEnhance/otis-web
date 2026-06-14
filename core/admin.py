@@ -124,7 +124,7 @@ class UnitGroupAdmin(ImportExportModelAdmin):
     list_per_page = 150
     list_max_show_all = 400
     inlines = (UnitInline,)
-    actions = ["set_default_artwork"]
+    actions = ("set_default_artwork",)
 
     @admin.action(description="Set default artwork paths based on slug")
     def set_default_artwork(
