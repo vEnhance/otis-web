@@ -101,7 +101,10 @@ def oime_setup(request: HttpRequest) -> HttpResponse:
             obj.save()
             return redirect("oime-proposal-list")
     else:
-        form = OIMEContributorForm(instance=contributor)
+        initial = {}
+        if contributor is None:
+            initial["display_name"] = request.user.get_full_name()  # type: ignore[union-attr]
+        form = OIMEContributorForm(instance=contributor, initial=initial)
     return render(
         request,
         "tubes/oime_setup.html",
@@ -250,7 +253,7 @@ class ProposalCreateView(
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["action"] = "Submit"
-        context["submit_name"] = "Submit Proposal"
+        context["submit_name"] = "Write Proposal"
         return context
 
 
