@@ -141,7 +141,7 @@ class OIMEProposal(models.Model):
 
     @property
     def difficulty_display(self) -> str:
-        return "💡" * self.difficulty
+        return f"🔥 × {self.difficulty}"
 
     @property
     def time_limit_minutes(self) -> int:

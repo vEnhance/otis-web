@@ -4,12 +4,20 @@ Context vars: title (str), proposals (list of OIMEProposal annotated with user_f
 {% endcomment %}
 {% if proposals %}
   <h3 class="mt-4">{{ title }}</h3>
-  <table class="table table-striped">
+  <table class="table table-striped" style="table-layout: fixed;">
+    <colgroup>
+      <col style="width: 3rem;">
+      <col>
+      <col style="width: 5rem;">
+      <col style="width: 5rem;">
+      <col style="width: 7rem;">
+    </colgroup>
     <thead class="table-dark">
       <tr>
         <th>ID</th>
         <th>Title</th>
-        <th>Difficulty</th>
+        <th>Diff.</th>
+        <th>Votes</th>
         <th>Status</th>
       </tr>
     </thead>
@@ -24,23 +32,24 @@ Context vars: title (str), proposals (list of OIMEProposal annotated with user_f
             <a href="{{ proposal.get_absolute_url }}">{{ proposal.title }}</a>
           </td>
           <td>{{ proposal.difficulty_display }}</td>
+          <td>🩷 × {{ proposal.upvote_count }}</td>
           <td>
             {% if proposal.user_list_status == "author" %}
-              <span class="badge bg-primary">Author</span>
+              <span>Author</span>
             {% elif proposal.user_list_status == "in_progress" %}
-              <span class="badge bg-warning text-dark">In Progress</span>
+              <span>In Progress</span>
             {% elif proposal.user_list_status == "not_started" %}
-              <span class="badge bg-light text-muted border">Not started</span>
+              <a href="{{ proposal.get_absolute_url }}">Not started</a>
             {% elif proposal.user_list_status == "spoiled" %}
-              <span class="badge bg-light text-muted border">Spoiled</span>
+              Spoiled
             {% elif proposal.user_fight.status == "OIME_OK" %}
-              <span class="badge bg-success">Solved ({{ proposal.user_fight.solve_time_seconds }}s)</span>
+              <span class="text-success">Solved ({{ proposal.user_fight.solve_time_seconds }}s)</span>
             {% elif proposal.user_fight.status == "OIME_FAIL" %}
-              <span class="badge bg-secondary">Gave Up</span>
+              <span class="text-danger">Gave Up</span>
             {% elif proposal.user_fight.status == "OIME_TLE" %}
-              <span class="badge bg-danger">TLE</span>
+              <span class="text-danger">TLE</span>
             {% elif proposal.user_fight.status == "OIME_ALE" %}
-              <span class="badge bg-danger">ALE</span>
+              <span class="text-danger">ALE</span>
             {% endif %}
           </td>
         </tr>

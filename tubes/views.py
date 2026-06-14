@@ -3,6 +3,7 @@ from typing import Any
 
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
+from django.db.models import Count
 from django.db.models.query import QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -54,7 +55,7 @@ def _get_solver_context(
             "fight": None,
             "can_start_fight": False,
             "can_comment": True,
-            "can_upvote": False,
+            "can_upvote": True,
         }
 
     is_globally_spoiled = (
@@ -169,7 +170,11 @@ class ProposalListView(VerifiedRequiredMixin, ListView[OIMEProposal]):
 
     def get_queryset(self) -> QuerySet[OIMEProposal]:
         user = self.request.user
-        qs = OIMEProposal.objects.select_related("author").order_by("-created_at")
+        qs = (
+            OIMEProposal.objects.select_related("author")
+            .annotate(upvote_count=Count("upvotes", distinct=True))
+            .order_by("-created_at")
+        )
         # Staff see all; others see non-archived plus their own archived
         if not user.is_staff:  # type: ignore[union-attr]
             contributor = _get_contributor(self.request)

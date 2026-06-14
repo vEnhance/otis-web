@@ -6,9 +6,26 @@
   <div class="d-flex justify-content-between align-items-start mb-3">
     <div>
       <h2>{{ proposal.label }}: {{ proposal.title }}</h2>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <span class="badge bg-light text-dark border px-2 py-2">{{ proposal.difficulty_display }}</span>
+        {% if can_upvote %}
+          <form method="post"
+                action="{% url "oime-upvote" proposal.pk %}"
+                class="d-inline">
+            {% csrf_token %}
+            <button type="submit"
+                    class="badge border px-2 py-2 oime-upvote-btn {% if has_upvoted %}bg-danger text-white{% else %}bg-light text-dark{% endif %}"
+                    title="{% if has_upvoted %}Click to remove your upvote{% else %}Click to upvote this problem{% endif %}">
+              🩷 × {{ proposal.upvotes.count }}
+              {% if not has_upvoted %}· vote{% endif %}
+            </button>
+          </form>
+        {% elif is_spoiled %}
+          <span class="badge bg-light text-dark border px-2 py-2">🩷 × {{ proposal.upvotes.count }}</span>
+        {% endif %}
+      </div>
       <p class="text-muted">
-        {{ proposal.difficulty_display }}
-        · Written by {{ proposal.author }}
+        Written by {{ proposal.author }}
         on {{ proposal.created_at|date:"Y-m-d" }}
         {% if proposal.archived %}· <span class="badge bg-secondary">archived</span>{% endif %}
         {% if proposal.author == contributor or request.user.is_staff %}
@@ -16,29 +33,8 @@
         {% endif %}
       </p>
     </div>
-    <div class="d-flex align-items-center gap-2">
-      {% if can_upvote %}
-        <form method="post"
-              action="{% url "oime-upvote" proposal.pk %}"
-              class="d-inline">
-          {% csrf_token %}
-          <button type="submit"
-                  class="btn btn-sm {% if has_upvoted %}btn-warning{% else %}btn-outline-secondary{% endif %}">
-            ♥
-            {% if has_upvoted %}
-              Upvoted
-            {% else %}
-              Upvote
-            {% endif %}
-            ({{ proposal.upvotes.count }})
-          </button>
-        </form>
-      {% elif is_spoiled %}
-        <span class="text-muted small">{{ proposal.upvotes.count }} upvote{{ proposal.upvotes.count|pluralize }}</span>
-      {% endif %}
-      <a href="{% url "oime-proposal-list" %}"
-         class="btn btn-outline-secondary btn-sm">← Back</a>
-    </div>
+    <a href="{% url "oime-proposal-list" %}"
+       class="btn btn-outline-secondary btn-sm">← Back</a>
   </div>
   {# ---- Problem statement (only visible when spoiled) ---- #}
   {% if is_spoiled %}
