@@ -142,8 +142,7 @@ class OIMEProposal(models.Model):
         ordering = ["-created_at"]
 
     def __str__(self) -> str:
-        subject = self.get_subject_display()  # type: ignore[attr-defined]
-        return f"{subject} D{self.difficulty} by {self.author}"
+        return self.label
 
     def get_absolute_url(self) -> str:
         return reverse("oime-proposal-detail", args=[self.pk])

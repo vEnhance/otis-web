@@ -46,7 +46,7 @@ class OIMEContributorAdmin(admin.ModelAdmin[OIMEContributor]):
 @admin.register(OIMEProposal)
 class OIMEProposalAdmin(admin.ModelAdmin[OIMEProposal]):
     list_display = [
-        "__str__",
+        "pk",
         "title",
         "author",
         "subject",
