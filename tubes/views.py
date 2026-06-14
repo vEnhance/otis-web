@@ -380,21 +380,36 @@ class ProposalUpdateView(
 
 
 @verified_required
-def proposal_start(request: HttpRequest, pk: int) -> HttpResponse:
-    """Pre-fight screen: start a timed session, or reveal if you already know it."""
+def start_fight(request: HttpRequest, pk: int) -> HttpResponse:
+    """Pre-fight screen (GET) and the action that begins a timed session (POST).
+
+    A POST creates the fight and redirects into the timed solving view; a GET shows
+    the intro screen with the "start" and "I already know it" options.
+    """
     proposal = get_object_or_404(OIMEProposal, pk=pk)
     contributor = _get_contributor(request)
     if contributor is None:
         return redirect("oime-setup")
 
     ctx = _get_solver_context(contributor, proposal)
-    # Only meaningful when the user can actually start a fight; otherwise show detail.
+    # Only reachable while the user can actually start a fight; otherwise show detail.
     if not ctx["can_start_fight"]:
         return redirect("oime-proposal-detail", pk)
 
+    if request.method == "POST":
+        if OIMEFight.objects.filter(
+            contributor=contributor, status="OIME_TBD"
+        ).exists():
+            messages.error(
+                request, "You already have an active timed session in progress."
+            )
+            return redirect("oime-proposal-detail", pk)
+        OIMEFight.objects.create(contributor=contributor, proposal=proposal)
+        return redirect("oime-proposal-fight", pk)
+
     return render(
         request,
-        "tubes/proposal_start.html",
+        "tubes/start_fight.html",
         {"proposal": proposal, "contributor": contributor, **ctx},
     )
 
@@ -414,7 +429,7 @@ def proposal_detail(request: HttpRequest, pk: int) -> HttpResponse:
         return redirect("oime-proposal-fight", pk)
     # Hasn't engaged yet → send to the pre-fight start screen
     if ctx["can_start_fight"]:
-        return redirect("oime-proposal-start", pk)
+        return redirect("oime-start-fight", pk)
 
     comment_form = OIMECommentForm()
 
@@ -485,29 +500,6 @@ def proposal_fight(request: HttpRequest, pk: int) -> HttpResponse:
             "answer_form": OIMEAnswerForm(),
         },
     )
-
-
-@verified_required
-def start_attempt(request: HttpRequest, pk: int) -> HttpResponse:
-    if request.method != "POST":
-        return redirect("oime-proposal-detail", pk)
-
-    proposal = get_object_or_404(OIMEProposal, pk=pk)
-    contributor = _get_contributor(request)
-    if contributor is None:
-        return redirect("oime-setup")
-
-    ctx = _get_solver_context(contributor, proposal)
-    if not ctx["can_start_fight"]:
-        messages.error(request, "You cannot start a new timed session on this problem.")
-        return redirect("oime-proposal-detail", pk)
-
-    if OIMEFight.objects.filter(contributor=contributor, status="OIME_TBD").exists():
-        messages.error(request, "You already have an active timed session in progress.")
-        return redirect("oime-proposal-detail", pk)
-
-    OIMEFight.objects.create(contributor=contributor, proposal=proposal)
-    return redirect("oime-proposal-fight", pk)
 
 
 @verified_required

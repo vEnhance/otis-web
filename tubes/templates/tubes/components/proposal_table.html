@@ -39,7 +39,7 @@ Context vars: title (str), proposals (list of OIMEProposal annotated with user_f
             {% elif proposal.user_list_status == "in_progress" %}
               <span>In Progress</span>
             {% elif proposal.user_list_status == "not_started" %}
-              <a href="{% url "oime-start-attempt" proposal.pk %}">New!</a>
+              <a href="{% url "oime-start-fight" proposal.pk %}">New!</a>
             {% elif proposal.user_list_status == "revealed" %}
               <span class="text-muted">Spoiled</span>
             {% elif proposal.user_list_status == "casual" %}

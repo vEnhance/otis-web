@@ -15,7 +15,7 @@
     You will have <strong>{{ proposal.time_limit_minutes }} minutes</strong>,
     and the timer begins immediately.
   </p>
-  <form method="post" action="{% url "oime-start-attempt" proposal.pk %}">
+  <form method="post" action="{% url "oime-start-fight" proposal.pk %}">
     {% csrf_token %}
     <button type="submit" class="btn btn-primary">Start solving</button>
   </form>

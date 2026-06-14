@@ -81,7 +81,7 @@ def test_verified_with_contributor_can_view_proposal(otis):
     resp = otis.get("oime-proposal-detail", proposal.pk)
     otis.assert_30x(resp)
     assert resp.url.endswith(f"/tubes/proposal/{proposal.pk}/begin/")
-    otis.get_20x("oime-proposal-start", proposal.pk)
+    otis.get_20x("oime-start-fight", proposal.pk)
 
 
 # ---------------------------------------------------------------------------
@@ -370,7 +370,7 @@ def test_ranked_hides_solution(otis):
     proposal = OIMEProposalFactory.create()
     otis.login(user)
     # Pre-fight, a ranked solver sees only the start screen, never the solution.
-    resp = otis.get_20x("oime-proposal-start", proposal.pk)
+    resp = otis.get_20x("oime-start-fight", proposal.pk)
     otis.assert_has(resp, "Start solving")
     otis.assert_not_has(resp, "oime-answer-section")
 
@@ -388,7 +388,7 @@ def test_start_screen_redirects_when_cannot_fight(otis):
         solve_time_seconds=60,
     )
     otis.login(user)
-    resp = otis.get("oime-proposal-start", proposal.pk)
+    resp = otis.get("oime-start-fight", proposal.pk)
     otis.assert_30x(resp)
     assert resp.url.endswith(f"/tubes/proposal/{proposal.pk}/")
 
@@ -435,7 +435,7 @@ def test_ranked_escape_hatch_reveal(otis):
     # The solution is now visible and the start-fight option is gone.
     resp = otis.get_20x("oime-proposal-detail", proposal.pk)
     otis.assert_has(resp, "oime-answer-section")
-    resp = otis.post("oime-start-attempt", proposal.pk)
+    resp = otis.post("oime-start-fight", proposal.pk)
     otis.assert_30x(resp)
     assert not OIMEFight.objects.filter(
         contributor=contributor, proposal=proposal
@@ -500,7 +500,7 @@ def test_go_serious_sets_cutoff_and_locks_old_problems(otis):
     assert contributor.casual_mode is False
     assert contributor.ranked_cutoff is not None
     # The pre-existing problem is no longer fightable, but stays browsable casually.
-    resp = otis.post("oime-start-attempt", old_proposal.pk)
+    resp = otis.post("oime-start-fight", old_proposal.pk)
     otis.assert_30x(resp)
     assert not OIMEFight.objects.filter(
         contributor=contributor, proposal=old_proposal
@@ -517,7 +517,7 @@ def test_serious_can_fight_problem_after_cutoff(otis):
     # Created after the cutoff → eligible for a timed fight.
     proposal = OIMEProposalFactory.create()
     otis.login(user)
-    resp = otis.post("oime-start-attempt", proposal.pk)
+    resp = otis.post("oime-start-fight", proposal.pk)
     otis.assert_30x(resp)
     assert OIMEFight.objects.filter(contributor=contributor, proposal=proposal).exists()
 
@@ -551,7 +551,7 @@ def test_unspoiled_start_creates_attempt(otis):
     user, contributor = _verified_contributor()
     proposal = OIMEProposalFactory.create()
     otis.login(user)
-    resp = otis.post("oime-start-attempt", proposal.pk)
+    resp = otis.post("oime-start-fight", proposal.pk)
     otis.assert_30x(resp)
     assert OIMEFight.objects.filter(contributor=contributor, proposal=proposal).exists()
 
@@ -565,7 +565,7 @@ def test_cannot_start_second_concurrent_fight(otis):
         contributor=contributor, proposal=proposal1, status="OIME_TBD"
     )
     otis.login(user)
-    resp = otis.post("oime-start-attempt", proposal2.pk)
+    resp = otis.post("oime-start-fight", proposal2.pk)
     otis.assert_30x(resp)
     assert not OIMEFight.objects.filter(
         contributor=contributor, proposal=proposal2
@@ -674,7 +674,7 @@ def test_casual_cannot_start_attempt(otis):
     contributor.casual_mode = True
     contributor.save()
     otis.login(user)
-    resp = otis.post("oime-start-attempt", proposal.pk)
+    resp = otis.post("oime-start-fight", proposal.pk)
     otis.assert_30x(resp)
     assert not OIMEFight.objects.filter(
         contributor=contributor, proposal=proposal
@@ -686,7 +686,7 @@ def test_author_cannot_start_attempt(otis):
     user, contributor = _verified_contributor()
     proposal = OIMEProposalFactory.create(author=contributor)
     otis.login(user)
-    resp = otis.post("oime-start-attempt", proposal.pk)
+    resp = otis.post("oime-start-fight", proposal.pk)
     otis.assert_30x(resp)
     assert not OIMEFight.objects.filter(
         contributor=contributor, proposal=proposal
