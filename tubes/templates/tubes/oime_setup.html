@@ -14,8 +14,14 @@
       Welcome to OIME
     {% endif %}
   </h2>
-  {% if not is_edit %}
-    <p>Before you can submit problems or participate in testsolving, please fill in your details below.</p>
-  {% endif %}
+  <p>
+    Please decide how you'd like to be called.
+    When we write acknowledgments for OIME, we'll use this name.
+  </p>
+  <p>
+    <strong>This name is public.</strong>
+    It's attached to all your testsolving sessions and submitted problems authors.
+  </p>
+  <hr />
   {% include "otisweb/components/generic_form.html" with submit_name=is_edit|yesno:"Save Changes,Get Started" %}
 {% endblock layout-content %}

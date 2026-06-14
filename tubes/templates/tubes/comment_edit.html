@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block title %}
-  Edit Comment
+  OIME: Edit Comment ({% comment.proposal %})
 {% endblock title %}
 {% block layout-content %}
   <h2>Edit Comment</h2>
@@ -11,6 +11,7 @@
     {% csrf_token %}
     <div class="mb-3">{{ form.content }}</div>
     <button type="submit" class="btn btn-primary">Save</button>
+    <hr />
     <a href="{{ comment.proposal.get_absolute_url }}"
        class="btn btn-outline-secondary ms-2">Cancel</a>
   </form>

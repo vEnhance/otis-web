@@ -160,6 +160,28 @@ def test_update_own_proposal(otis):
 
 
 @pytest.mark.django_db
+def test_cannot_change_difficulty_after_submission(otis):
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create(author=contributor, difficulty=2)
+    otis.login(user)
+    resp = otis.post(
+        "oime-proposal-update",
+        proposal.pk,
+        data={
+            "title": proposal.title,
+            "statement": proposal.statement,
+            "answer": proposal.answer,
+            "solution": proposal.solution,
+            "subject": proposal.subject,
+            "difficulty": 5,
+        },
+    )
+    otis.assert_30x(resp)
+    proposal.refresh_from_db()
+    assert proposal.difficulty == 2
+
+
+@pytest.mark.django_db
 def test_cannot_update_others_proposal(otis):
     user, _ = _verified_contributor()
     _, other_contributor = _verified_contributor("bob")
@@ -226,7 +248,7 @@ def test_ranked_hides_solution(otis):
     otis.login(user)
     # Pre-fight, a ranked solver sees only the start screen, never the solution.
     resp = otis.get_20x("oime-proposal-start", proposal.pk)
-    otis.assert_has(resp, "Start Solving")
+    otis.assert_has(resp, "Start solving")
     otis.assert_not_has(resp, "oime-answer-section")
 
 

@@ -205,11 +205,7 @@ def go_casual(request: HttpRequest) -> HttpResponse:
             return redirect("oime-casual")
         contributor.casual_mode = True
         contributor.save()
-        messages.success(
-            request,
-            "You are now in casual mode. Browse and try any problem untimed and "
-            "upvote ones you like; solutions stay hidden until you reveal them.",
-        )
+        messages.success(request, "You are now in casual mode.")
         return redirect("oime-proposal-list")
     return render(
         request,
@@ -232,11 +228,7 @@ def go_serious(request: HttpRequest) -> HttpResponse:
         contributor.casual_mode = False
         contributor.ranked_cutoff = timezone.now()
         contributor.save()
-        messages.success(
-            request,
-            "You are back in ranked mode. Problems added from now on are eligible for "
-            "timed solving; everything that already exists stays browsable casually.",
-        )
+        messages.success(request, "You are back in ranked mode.")
         return redirect("oime-proposal-list")
     return render(
         request,
@@ -540,7 +532,7 @@ def submit_answer(request: HttpRequest, pk: int) -> HttpResponse:
         attempt.status = "OIME_TLE"
         attempt.submitted_at = timezone.now()
         attempt.save()
-        messages.warning(request, "Time's up!")
+        messages.warning(request, "The time limit for your fight has expired.")
         return redirect("oime-proposal-detail", pk)
 
     form = OIMEAnswerForm(request.POST)
@@ -555,7 +547,7 @@ def submit_answer(request: HttpRequest, pk: int) -> HttpResponse:
         attempt.submitted_at = timezone.now()
         attempt.solve_time_seconds = elapsed
         attempt.save()
-        messages.success(request, "Correct! Great job!")
+        messages.success(request, f"Correct! You took {attempt.solve_time_display}.")
     else:
         attempt.wrong_answers += 1
         if attempt.wrong_answers >= OIMEFight.ANSWER_LIMIT:
@@ -571,7 +563,7 @@ def submit_answer(request: HttpRequest, pk: int) -> HttpResponse:
             remaining = OIMEFight.ANSWER_LIMIT - attempt.wrong_answers
             messages.error(
                 request,
-                f"Incorrect (wrong answer #{attempt.wrong_answers}). {remaining} attempt{'' if remaining == 1 else 's'} remaining.",
+                f"Incorrect. {remaining} attempt{'' if remaining == 1 else 's'} remaining.",
             )
 
     return redirect("oime-proposal-fight", pk)

@@ -1,31 +1,32 @@
 {% extends "layout.html" %}
 {% block title %}
-  OIME Problem Proposals
+  OIME Proposals
 {% endblock title %}
 {% block layout-content %}
   <h2>OIME Problem Proposals</h2>
   <div class="mb-3">
+    <a href="{% url "oime-landing" %}" class="btn btn-info">Instructions</a>
     <a href="{% url "oime-proposal-create" %}" class="btn btn-success">Write a problem</a>
     {% if contributor %}
       {% if casual %}
-        <a href="{% url "oime-serious" %}" class="btn btn-outline-secondary">Return to ranked mode</a>
+        <a href="{% url "oime-serious" %}" class="btn btn-outline-warning">Return to ranked mode</a>
       {% else %}
-        <a href="{% url "oime-casual" %}" class="btn btn-outline-secondary">Switch to casual mode</a>
+        <a href="{% url "oime-casual" %}" class="btn btn-outline-warning">Switch to casual mode</a>
       {% endif %}
     {% endif %}
-    <a href="{% url "oime-landing" %}" class="btn btn-outline-secondary">Instructions</a>
   </div>
   {% if contributor %}
     {% if casual %}
       <p class="text-muted">
-        You're in <strong>casual mode</strong>: browse and try any problem untimed and
-        upvote ones you like. Nothing is recorded, and each solution stays hidden until
-        you choose to reveal it.
+        You're in <strong>casual mode</strong>.
+        Nothing you do is recorded or timed, so browse as you like.
       </p>
     {% else %}
       <p class="text-muted">
         You're testsolving in <strong>ranked mode</strong>.
-        You won't see a problem statement or solution until you start (and finish) a timed session.
+        Please try problems seriously!
+        We'll use your times and answers for statistics
+        when deciding how to choose the problems.
       </p>
     {% endif %}
   {% endif %}

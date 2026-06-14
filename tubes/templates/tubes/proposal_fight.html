@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block title %}
-  Fighting {{ proposal.label }} — OIME
+  OIME {{ proposal.label }} Fight
 {% endblock title %}
 {% block layout-content %}
   <div class="d-flex justify-content-between align-items-start mb-3">
@@ -18,11 +18,7 @@
       <div class="math-content">{{ proposal.statement }}</div>
     </div>
   </div>
-  <p>
-    Time remaining: <strong id="countdown">{{ remaining_seconds }}s</strong>
-    &nbsp;·&nbsp;
-    <span style="font-family: monospace; letter-spacing: 0.1em">{{ fight.answer_attempts_display }}</span>
-  </p>
+  <h2>Submit answer</h2>
   <form method="post"
         action="{% url "oime-submit-answer" proposal.pk %}"
         class="d-inline">
@@ -31,8 +27,9 @@
            name="answer"
            min="0"
            max="999"
-           style="width: 5em"
+           style="width: 8em"
            class="form-control d-inline-block"
+           placeholder="..."
            required>
     <button type="submit" class="btn btn-success">Submit</button>
   </form>
@@ -44,6 +41,12 @@
             class="btn btn-outline-danger btn-sm"
             onclick="return confirm('Give up and reveal the solution?')">Give Up</button>
   </form>
+  <hr />
+  <p>
+    Time remaining: <strong id="countdown">{{ remaining_seconds }}s</strong>
+    &nbsp;·&nbsp;
+    <span style="font-family: monospace; letter-spacing: 0.1em">{{ fight.answer_attempts_display }}</span>
+  </p>
   <script>
       (function() {
           const el = document.getElementById("countdown");

@@ -10,70 +10,25 @@
   <h2>Actions</h2>
   <div class="mb-3">
     <a href="{% url "oime-proposal-list" %}" class="btn btn-primary">View problems</a>
-    <a href="{% url "oime-proposal-create" %}" class="btn btn-success">Write a new problem</a>
+    <a href="{% url "oime-proposal-create" %}" class="btn btn-success">Write a problem</a>
     <a href="{% url "oime-setup" %}" class="btn btn-outline-secondary ms-2">Change name</a>
   </div>
   <hr />
-  <h1>What to Expect</h1>
-  <h2>Writing new problems</h2>
-  <ul>
-    <li>Use "Write a new problem" once you're in the Probase collection.</li>
-    <li>
-      Please make sure to provide a full solution and triple-check your answer
-      for accuracy to avoid frustration for the testsolvers.
-    </li>
-    <li>
-      Please use a <strong>descriptive title</strong> that doesn't
-      spoil the problem but gives an idea for what the problem is about.
-    </li>
-    <li>
-      Note that the database rolls over from year to year.
-      If you ever want to withdraw a problem from the database,
-      you need to manually ask OTIS staff to have it withdrawn.
-      Otherwise you should assume by default it can be seen by future years
-      of OTIS as well and possibly appear in subsequent years' mock AIME's.
-      <ul>
-        <li>
-          In practice, we probably won't go out of our way to dig out
-          ancient problems for use, but the point is that
-          right now we don't systematically erase old problems.
-        </li>
-        <li>
-          Even then, because OTIS has such a large community of students,
-          problems submitted to OTIS should no longer be considered secure,
-          even if you ask for the problem to be withdrawn later.
-          If you think you might want to submit a problem to a different
-          competition later in life where problem security is at all relevant,
-          you should not submit it here.
-        </li>
-      </ul>
-    </li>
-  </ul>
-  <h2>Solving problems</h2>
+  <h1>What to Expect / Instructions</h1>
+  <h2>Writing problems</h2>
+  <p>Use "Write a problem" above!</p>
   <p>
-    By default you're in <b>ranked mode</b>. Problem statements stay hidden until you
-    choose to <b>fight</b> a proposal, where you enter a timed session and have five
-    chances to answer it correctly. The time limit is based on the difficulty tier,
-    see below. This data is used as legit testsolving data for statistics, etc.
+    <strong>Note that the database rolls over from year to year</strong>.
+    Because OTIS has such a large community of students,
+    problems submitted to OTIS should no longer be considered secure.
+    If you think you might want to submit a problem to a different
+    competition later in life where problem security is at all relevant,
+    you should not submit it here.
   </p>
   <p>
-    If you'd rather not race the clock, you can switch to <b>casual mode</b>.
-    There you can browse and try any problem at your own pace and upvote the ones
-    you like, with nothing recorded. Each solution stays hidden until you reveal it,
-    so you won't be spoiled before you're ready. You can switch back to ranked mode
-    later, but any problem that already exists by then is no longer eligible for a
-    timed solve (it stays browsable casually instead).
-  </p>
-  <p>
-    If you already know a particular problem — say you helped write it — you can
-    reveal its solution from the problem page without doing a timed session. That
-    forfeits your chance to fight that one problem for a recorded time, but lets you
-    read and discuss it.
-  </p>
-  <h2>Difficulty tiers</h2>
-  <p>
-    There are five tiers of difficulty, and testsolvers get an amount of
-    time per problem when testsolving it based on the tier:
+    You are asked to select a difficulty tier for your problems.
+    This tier the amount of time that testsolvers get to spend on it.
+    <strong>You can't change difficulty after submission!</strong>
   </p>
   <ul>
     <li>
@@ -92,12 +47,36 @@
       <strong>🔥 × 5:</strong> AIME 13-15, solvers get 30 minutes
     </li>
   </ul>
+  <h2>Solving problems</h2>
+  <p>
+    You can play in two modes, <b>ranked mode</b> and <b>casual mode</b>.
+  </p>
+  <ul>
+    <li>
+      In <b>ranked mode</b>, you're committing to trying the problems seriously,
+      meaning that we'll use the statistics from ranked mode to evaluate difficulty.
+      We use ranked data when writing acknowledgments for testsolvers in the published pacukeut.
+      When you try problems, we'll record the number of attempts and time taken.
+      Please try your best on every problem you open.
+    </li>
+    <li>
+      In <b>casual mode</b>, you can browse and try whatever problems you like.
+      There's an answer checker, but it doesn't store anything
+      and there's no timers or locks.
+    </li>
+  </ul>
+  <p>
+    You can switch from ranked to casual at any time.
+    If you try to switch from casual to ranked, we'll allow it too,
+    but any problems that were published before you switched
+    are no longer eligible for you to try in ranked mode.
+  </p>
   <p>
     After you solve or give up on a proposal, you can read spoilers and comment
     on the thread for the problem. You can also upvote the problem using the heart
     icon to indicate that you like it.
   </p>
-  <h2>Selection process for the 15 slots</h2>
+  <h2>How Evan picks the 15 problems</h2>
   <p>For now, final selection of problems and placements is done by Evan.</p>
   <p>The selection of problems are based on the following criteria.</p>
   <ul>

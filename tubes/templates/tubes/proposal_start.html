@@ -1,39 +1,38 @@
 {% extends "layout.html" %}
 {% block title %}
-  {{ proposal.label }} — Start
+  OIME {{ proposal.label }} Start Screen
 {% endblock title %}
 {% block layout-content %}
-  <div class="d-flex justify-content-between align-items-start mb-3">
-    <div>
-      <h2>{{ proposal.label }}: {{ proposal.title }}</h2>
-      <p class="text-muted">
-        <span class="badge bg-light text-dark border px-2 py-2">{{ proposal.difficulty_display }}</span>
-        Written by {{ proposal.author }}
-        on {{ proposal.created_at|date:"Y-m-d" }}
-      </p>
-    </div>
-    <a href="{% url "oime-proposal-list" %}"
-       class="btn btn-outline-secondary btn-sm">← Back</a>
-  </div>
-  <div class="alert alert-info">
-    <p>
-      Starting a timed session will reveal the problem statement.
-      You will have <strong>{{ proposal.time_limit_minutes }} minutes</strong>
-      and the timer begins immediately.
-    </p>
-    <form method="post" action="{% url "oime-start-attempt" proposal.pk %}">
-      {% csrf_token %}
-      <button type="submit" class="btn btn-primary">Start Solving</button>
-    </form>
-    <hr />
-    <p class="small text-muted mb-2">
-      Already know this problem — for instance, you helped write it?
-      You can reveal the solution without a timed session, but doing so means
-      you can no longer fight it for a recorded time.
-    </p>
-    <form method="post" action="{% url "oime-reveal" proposal.pk %}">
-      {% csrf_token %}
-      <button type="submit" class="btn btn-outline-secondary btn-sm">I already know it — reveal solution</button>
-    </form>
-  </div>
+  <h1>{{ proposal.label }}: {{ proposal.title }}</h1>
+  <p class="text-muted">
+    {{ proposal.difficulty_display }} · Written by {{ proposal.author }}
+    on {{ proposal.created_at|date:"Y-m-d" }}
+  </p>
+  <hr />
+  <h2>Start timed session</h2>
+  <p>Starting a timed session will reveal the problem statement.</p>
+  <p>
+    You will have <strong>{{ proposal.time_limit_minutes }} minutes</strong>,
+    and the timer begins immediately.
+  </p>
+  <form method="post" action="{% url "oime-start-attempt" proposal.pk %}">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-primary">Start solving</button>
+  </form>
+  <hr />
+  <h3>Bypass problem</h3>
+  <p>
+    If for some reason you want to spoil yourself immediately
+    (for example, if you were a coauthor and already know the answer),
+    you can bypass the problem below.
+    This option isn't available anymore once you start a timed session it.
+  </p>
+  <form method="post" action="{% url "oime-reveal" proposal.pk %}">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-outline-secondary">Bypass problem</button>
+  </form>
+  <hr />
+  <p>
+    <a href="{% url "oime-proposal-list" %}">Back to problem list</a>
+  </p>
 {% endblock layout-content %}

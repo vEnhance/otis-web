@@ -1,3 +1,5 @@
+from typing import Any
+
 from django import forms
 
 from .models import OIMEComment, OIMEContributor, OIMEProposal
@@ -27,6 +29,13 @@ class OIMEProposalForm(forms.ModelForm[OIMEProposal]):
             "statement": forms.Textarea(attrs={"rows": 6}),
             "solution": forms.Textarea(attrs={"rows": 10}),
         }
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        # Difficulty is fixed once the problem is submitted: its time limit and any
+        # recorded fights depend on it, so it can only be chosen at creation.
+        if self.instance.pk is not None:
+            self.fields.pop("difficulty", None)
 
 
 class OIMEAnswerForm(forms.Form):

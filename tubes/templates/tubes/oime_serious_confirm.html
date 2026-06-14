@@ -1,21 +1,23 @@
 {% extends "layout.html" %}
 {% block title %}
-  Return to Ranked Mode — OIME
+  OIME: Ranked mode
 {% endblock title %}
 {% block layout-content %}
-  <h2>Return to ranked mode</h2>
-  <div class="alert alert-warning">
-    <p class="mb-0">
-      Back in ranked mode, problems added from now on are hidden until you start a
-      timed session, and your solve times are recorded again.
-    </p>
-    <p class="mb-0 mt-2">
-      Every problem that exists right now will <strong>not</strong> be eligible for a
-      timed solve — you could already have browsed it casually — but it stays browsable
-      casually so you don't lose access. This cannot be undone.
-    </p>
-  </div>
+  <h2>Switch from casual mode to ranked mode?</h2>
+  <p class="mb-0">
+    In ranked mode, you're committing to trying the problems seriously.
+    When you try problems, we'll record the number of attempts and time taken.
+    Please try your best on every problem you open.
+  </p>
+  <p>
+    Note you are considered spoiled on any problems submitted before this
+    ({% now "DATETIME_FORMAT" %}).
+    Only problems after this date will be considered eligible for ranked solves.
+  </p>
+  <hr />
   {% include "otisweb/components/generic_form.html" with submit_name="Return to ranked mode" btn_class="btn-primary" %}
-  <a href="{% url "oime-proposal-list" %}"
-     class="btn btn-outline-secondary ms-2">Cancel</a>
+  <hr />
+  <p>
+    <a href="{% url "oime-proposal-list" %}">Cancel and go back</a>
+  </p>
 {% endblock layout-content %}

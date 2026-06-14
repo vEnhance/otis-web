@@ -113,7 +113,10 @@ class OIMEProposal(models.Model):
         related_name="proposals",
         help_text="The contributor who wrote this problem.",
     )
-    title = models.CharField(max_length=200, help_text="Short title for the proposal.")
+    title = models.CharField(
+        max_length=200,
+        help_text="Short title for the proposal. No spoilers!",
+    )
     statement = models.TextField(help_text="The problem statement, in LaTeX.")
     answer = models.IntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(999)],
@@ -122,6 +125,7 @@ class OIMEProposal(models.Model):
     solution = models.TextField(help_text="Full solution write-up, in LaTeX.")
     subject = models.CharField(max_length=1, choices=SUBJECT_CHOICES)
     difficulty = models.IntegerField(
+        help_text="Difficulty rating (affects testsolve time limits). CANNOT BE CHANGED AFTER SUBMISSION.",
         choices=DIFFICULTY_CHOICES,
         validators=[MinValueValidator(1), MaxValueValidator(5)],
     )
