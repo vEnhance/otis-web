@@ -25,7 +25,7 @@
             <td>
               {% if fight.is_success %}{{ forloop.counter }}{% endif %}
             </td>
-            <td>{{ fight.contributor.display_name }}</td>
+            <td>{{ fight.contributor.leaderboard_name }}</td>
             <td class="text-success">
               {% if fight.is_success %}✔ {{ fight.solve_time_display }}{% endif %}
             </td>

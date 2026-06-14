@@ -55,6 +55,40 @@ class JoinRecord(models.Model):
 # OIME models
 # ---------------------------------------------------------------------------
 
+_ANONYMOUS_ANIMALS = [
+    "Aardvark",
+    "Badger",
+    "Cat",
+    "Dinosaur",
+    "Echidna",
+    "Ferret",
+    "Gazelle",
+    "Hedgehog",
+    "Ibis",
+    "Jaguar",
+    "Koala",
+    "Lemur",
+    "Monkey",
+    "Narwhal",
+    "Otter",  # orangutan?
+    "Pangolin",
+    "Quokka",
+    "Raccoon",
+    "Salamander",
+    "Tapir",
+    "Urchin",
+    "Vole",
+    "Wombat",
+    "Xerus",
+    "Yak",
+    "Zebra",
+]
+
+
+def _anonymous_alias(seed: int) -> str:
+    """A stable ``Anonymous <Animal>`` alias derived from an integer seed."""
+    return f"Anonymous {_ANONYMOUS_ANIMALS[seed % len(_ANONYMOUS_ANIMALS)]}"
+
 
 class OIMEContributor(models.Model):
     """A student who participates in OIME (as proposer and/or testsolver)."""
@@ -87,8 +121,23 @@ class OIMEContributor(models.Model):
         blank=True,
         help_text="Proposals whose solution this contributor has chosen to reveal.",
     )
+    hide_from_leaderboards = models.BooleanField(
+        default=False,
+        help_text="If set, your name is shown as an anonymous alias on testsolving leaderboards.",
+    )
+    hide_from_acknowledgments = models.BooleanField(
+        default=False,
+        help_text="If set, your name is left out of public testsolver acknowledgments.",
+    )
 
     def __str__(self) -> str:
+        return self.display_name
+
+    @property
+    def leaderboard_name(self) -> str:
+        """Name to show on testsolving leaderboards, anonymized on request."""
+        if self.hide_from_leaderboards:
+            return _anonymous_alias(self.pk)
         return self.display_name
 
 
@@ -112,6 +161,12 @@ class OIMEProposal(models.Model):
         on_delete=models.CASCADE,
         related_name="proposals",
         help_text="The contributor who wrote this problem.",
+    )
+    credit = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="How you'd like this problem credited (for example, to include "
+        "coauthors). Defaults to your display name.",
     )
     title = models.CharField(
         max_length=200,
@@ -154,6 +209,11 @@ class OIMEProposal(models.Model):
     @property
     def label(self) -> str:
         return f"{self.subject}{self.pk}"
+
+    @property
+    def credit_display(self) -> str:
+        """How to attribute the problem: the credit string, or the author's name."""
+        return self.credit or self.author.display_name
 
     @property
     def difficulty_display(self) -> str:

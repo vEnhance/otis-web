@@ -25,7 +25,7 @@
         {% endif %}
       </div>
       <p class="text-muted">
-        Written by {{ proposal.author }}
+        Written by {{ proposal.credit_display }}
         on {{ proposal.created_at|date:"Y-m-d" }}
         {% if proposal.archived %}· <span class="badge bg-secondary">archived</span>{% endif %}
       </p>

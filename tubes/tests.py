@@ -138,6 +138,104 @@ def test_create_proposal(otis):
 
 
 @pytest.mark.django_db
+def test_credit_defaults_to_author_name(otis):
+    from .factories import OIMEContributorFactory
+
+    contributor = OIMEContributorFactory.create(display_name="Ada Lovelace")
+    proposal = OIMEProposalFactory.create(author=contributor, credit="")
+    # No explicit credit → falls back to the author's display name.
+    assert proposal.credit_display == "Ada Lovelace"
+    proposal.credit = "Ada Lovelace and a friend"
+    assert proposal.credit_display == "Ada Lovelace and a friend"
+
+
+@pytest.mark.django_db
+def test_create_proposal_prefills_credit(otis):
+    user, contributor = _verified_contributor()
+    contributor.display_name = "Grace H."
+    contributor.save()
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-create")
+    otis.assert_has(resp, "Grace H.")
+
+
+@pytest.mark.django_db
+def test_credit_saved_on_create(otis):
+    user, contributor = _verified_contributor()
+    otis.login(user)
+    otis.post(
+        "oime-proposal-create",
+        data={
+            "title": "Squares",
+            "credit": "Alice & Bob",
+            "statement": "Find $x$.",
+            "answer": 2,
+            "solution": "Two.",
+            "subject": "A",
+            "difficulty": 1,
+        },
+    )
+    from .models import OIMEProposal
+
+    proposal = OIMEProposal.objects.get()
+    assert proposal.credit == "Alice & Bob"
+    assert proposal.credit_display == "Alice & Bob"
+
+
+@pytest.mark.django_db
+def test_hidden_contributor_uses_anonymous_alias(otis):
+    from .factories import OIMEContributorFactory
+
+    contributor = OIMEContributorFactory.create(
+        display_name="Real Name", hide_from_leaderboards=True
+    )
+    assert contributor.leaderboard_name.startswith("Anonymous ")
+    assert "Real Name" not in contributor.leaderboard_name
+    contributor.hide_from_leaderboards = False
+    assert contributor.leaderboard_name == "Real Name"
+
+
+@pytest.mark.django_db
+def test_leaderboard_hides_name_when_requested(otis):
+    from .factories import OIMEContributorFactory
+
+    user, viewer = _verified_contributor()
+    proposal = OIMEProposalFactory.create()
+    OIMEFightFactory.create(contributor=viewer, proposal=proposal, status="OIME_FAIL")
+    hidden = OIMEContributorFactory.create(
+        display_name="Secret Solver", hide_from_leaderboards=True
+    )
+    OIMEFightFactory.create(
+        contributor=hidden,
+        proposal=proposal,
+        status="OIME_OK",
+        wrong_answers=0,
+        solve_time_seconds=90,
+    )
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-results", proposal.pk)
+    otis.assert_not_has(resp, "Secret Solver")
+    otis.assert_has(resp, "Anonymous ")
+
+
+@pytest.mark.django_db
+def test_setup_saves_name_visibility_preferences(otis):
+    user, contributor = _verified_contributor()
+    otis.login(user)
+    otis.post(
+        "oime-setup",
+        data={
+            "display_name": contributor.display_name,
+            "hide_from_leaderboards": "on",
+            "hide_from_acknowledgments": "on",
+        },
+    )
+    contributor.refresh_from_db()
+    assert contributor.hide_from_leaderboards is True
+    assert contributor.hide_from_acknowledgments is True
+
+
+@pytest.mark.django_db
 def test_update_own_proposal(otis):
     user, contributor = _verified_contributor()
     proposal = OIMEProposalFactory.create(author=contributor, answer=5)

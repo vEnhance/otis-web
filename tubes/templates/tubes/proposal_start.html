@@ -5,7 +5,7 @@
 {% block layout-content %}
   <h1>{{ proposal.label }}: {{ proposal.title }}</h1>
   <p class="text-muted">
-    {{ proposal.difficulty_display }} · Written by {{ proposal.author }}
+    {{ proposal.difficulty_display }} · Written by {{ proposal.credit_display }}
     on {{ proposal.created_at|date:"Y-m-d" }}
   </p>
   <hr />

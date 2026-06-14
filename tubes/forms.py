@@ -8,7 +8,11 @@ from .models import OIMEComment, OIMEContributor, OIMEProposal
 class OIMEContributorForm(forms.ModelForm[OIMEContributor]):
     class Meta:
         model = OIMEContributor
-        fields = ["display_name"]
+        fields = [
+            "display_name",
+            "hide_from_leaderboards",
+            "hide_from_acknowledgments",
+        ]
 
 
 class OIMEProposalForm(forms.ModelForm[OIMEProposal]):
@@ -24,7 +28,15 @@ class OIMEProposalForm(forms.ModelForm[OIMEProposal]):
 
     class Meta:
         model = OIMEProposal
-        fields = ["title", "statement", "answer", "solution", "subject", "difficulty"]
+        fields = [
+            "title",
+            "credit",
+            "statement",
+            "answer",
+            "solution",
+            "subject",
+            "difficulty",
+        ]
         widgets = {
             "statement": forms.Textarea(attrs={"rows": 6}),
             "solution": forms.Textarea(attrs={"rows": 10}),

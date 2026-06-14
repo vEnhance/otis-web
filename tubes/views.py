@@ -339,6 +339,13 @@ class ProposalCreateView(
             return redirect("oime-setup")
         return super().dispatch(request, *args, **kwargs)  # type: ignore[return-value]
 
+    def get_initial(self) -> dict[str, Any]:
+        initial = super().get_initial()
+        contributor = _get_contributor(self.request)
+        if contributor is not None:
+            initial["credit"] = contributor.display_name
+        return initial
+
     def form_valid(self, form: OIMEProposalForm) -> HttpResponse:
         contributor = _get_contributor(self.request)
         if contributor is None:
