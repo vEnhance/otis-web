@@ -73,8 +73,28 @@
         </tr>
       </tbody>
     </table>
-    <p class="mb-4">
+    <p class="mb-2">
       <a href="{% url "oime-proposal-results" proposal.pk %}">View full statistics →</a>
+    </p>
+    <hr />
+    <p class="small text-muted mb-4">
+      {% if is_author %}
+        You wrote this problem, so you can see the solution.
+      {% elif fight.status == "OIME_OK" %}
+        You solved this problem in {{ fight.solve_time_display }}
+        (with {{ fight.wrong_answers }} incorrect answer{{ fight.wrong_answers|pluralize }})
+        on {{ fight.submitted_at|date:"F j, Y" }}.
+      {% elif fight.status == "OIME_FAIL" %}
+        You gave up on this problem on {{ fight.submitted_at|date:"F j, Y" }}.
+      {% elif fight.status == "OIME_TLE" %}
+        You ran out of time on this problem on {{ fight.submitted_at|date:"F j, Y" }}.
+      {% elif fight.status == "OIME_ALE" %}
+        You used up all your answer attempts on this problem on {{ fight.submitted_at|date:"F j, Y" }}.
+      {% elif can_see_solution %}
+        You revealed the solution to this problem.
+      {% else %}
+        The solution stays hidden until you reveal it.
+      {% endif %}
     </p>
   {% endif %}
   {# ---- Casual mode: self-check or reveal the solution on demand ---- #}

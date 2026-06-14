@@ -588,6 +588,34 @@ def test_results_visible_to_author(otis):
 
 
 @pytest.mark.django_db
+def test_detail_explains_solved_status(otis):
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create()
+    OIMEFightFactory.create(
+        contributor=contributor,
+        proposal=proposal,
+        status="OIME_OK",
+        wrong_answers=1,
+        solve_time_seconds=125,
+    )
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-detail", proposal.pk)
+    otis.assert_has(resp, "You solved this problem in 02:05")
+
+
+@pytest.mark.django_db
+def test_detail_explains_gave_up_status(otis):
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create()
+    OIMEFightFactory.create(
+        contributor=contributor, proposal=proposal, status="OIME_FAIL"
+    )
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-detail", proposal.pk)
+    otis.assert_has(resp, "You gave up on this problem")
+
+
+@pytest.mark.django_db
 def test_detail_shows_stats_summary(otis):
     user, contributor = _verified_contributor()
     proposal = OIMEProposalFactory.create()
