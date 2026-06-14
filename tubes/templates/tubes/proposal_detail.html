@@ -20,8 +20,6 @@
               {% if not has_upvoted %}· vote{% endif %}
             </button>
           </form>
-        {% elif can_see_statement %}
-          <span class="badge bg-light text-dark border px-2 py-2">🩷 × {{ proposal.upvotes.count }}</span>
         {% endif %}
       </div>
       <p class="text-muted">
@@ -52,41 +50,37 @@
     </div>
   </div>
   {# ---- Problem statement ---- #}
-  {% if can_see_statement %}
-    <div class="card mb-4">
-      <div class="card-header fw-bold">Problem Statement</div>
-      <div class="card-body">
-        <div class="math-content">{{ proposal.statement }}</div>
-      </div>
+  <div class="card mb-4">
+    <div class="card-header fw-bold">Problem Statement</div>
+    <div class="card-body">
+      <div class="math-content">{{ proposal.statement }}</div>
     </div>
-  {% endif %}
-  {# ---- Testsolve stats summary (anyone no longer able to fight it) ---- #}
-  {% if stats %}
-    {% include "tubes/components/proposal_stats.html" %}
-    <p class="mb-2">
-      <a href="{% url "oime-proposal-results" proposal.pk %}">View full statistics →</a>
-    </p>
-    <hr />
-    <p class="small text-muted mb-4">
-      {% if is_author %}
-        You wrote this problem, so you can see the solution.
-      {% elif fight.status == "OIME_OK" %}
-        You solved this problem in {{ fight.solve_time_display }}
-        (with {{ fight.wrong_answers }} incorrect answer{{ fight.wrong_answers|pluralize }})
-        on {{ fight.submitted_at|date:"F j, Y" }}.
-      {% elif fight.status == "OIME_FAIL" %}
-        You gave up on this problem on {{ fight.submitted_at|date:"F j, Y" }}.
-      {% elif fight.status == "OIME_TLE" %}
-        You ran out of time on this problem on {{ fight.submitted_at|date:"F j, Y" }}.
-      {% elif fight.status == "OIME_ALE" %}
-        You used up all your answer attempts on this problem on {{ fight.submitted_at|date:"F j, Y" }}.
-      {% elif can_see_solution %}
-        You revealed the solution to this problem.
-      {% endif %}
-    </p>
-  {% endif %}
+  </div>
+  {# ---- Testsolve stats summary ---- #}
+  {% include "tubes/components/proposal_stats.html" %}
+  <p class="mb-2">
+    <a href="{% url "oime-proposal-results" proposal.pk %}">View full statistics →</a>
+  </p>
+  <hr />
+  <p class="small text-muted mb-4">
+    {% if is_author %}
+      You wrote this problem, so you can see the solution.
+    {% elif fight.status == "OIME_OK" %}
+      You solved this problem in {{ fight.solve_time_display }}
+      (with {{ fight.wrong_answers }} incorrect answer{{ fight.wrong_answers|pluralize }})
+      on {{ fight.submitted_at|date:"F j, Y" }}.
+    {% elif fight.status == "OIME_FAIL" %}
+      You gave up on this problem on {{ fight.submitted_at|date:"F j, Y" }}.
+    {% elif fight.status == "OIME_TLE" %}
+      You ran out of time on this problem on {{ fight.submitted_at|date:"F j, Y" }}.
+    {% elif fight.status == "OIME_ALE" %}
+      You used up all your answer attempts on this problem on {{ fight.submitted_at|date:"F j, Y" }}.
+    {% elif can_see_solution %}
+      You revealed the solution to this problem.
+    {% endif %}
+  </p>
   {# ---- Casual mode: self-check or reveal the solution on demand ---- #}
-  {% if casual and not can_see_solution %}
+  {% if not can_see_solution %}
     <h3>Solution</h3>
     <form method="post" action="{% url "oime-reveal" proposal.pk %}">
       {% csrf_token %}
@@ -135,7 +129,7 @@
     </div>
   {% endif %}
   {# ---- Discussion (only once the solution is visible) ---- #}
-  {% if can_comment %}
+  {% if can_see_solution %}
     <h3>Discussion</h3>
     {% if comments %}
       {% for comment in comments %}

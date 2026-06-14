@@ -71,10 +71,8 @@ def _get_solver_context(
             "is_author": True,
             "casual": casual,
             "fight": None,
-            "can_see_statement": True,
             "can_see_solution": True,
             "can_start_fight": False,
-            "can_comment": True,
             "can_upvote": True,
         }
 
@@ -97,25 +95,20 @@ def _get_solver_context(
             "is_author": False,
             "casual": True,
             "fight": fight,
-            "can_see_statement": True,
             "can_see_solution": can_see_solution,
             "can_start_fight": False,
-            "can_comment": can_see_solution,
             "can_upvote": True,
         }
 
     # Ranked. Revealing a problem (escape hatch for someone who already knows it,
     # e.g. a co-author) forfeits the chance to fight it and spoils the solution.
-    fight_active = fight is not None and not fight.is_complete
     can_see_solution = fight_complete or revealed
     return {
         "is_author": False,
         "casual": False,
         "fight": fight,
-        "can_see_statement": fight_active or can_see_solution,
         "can_see_solution": can_see_solution,
         "can_start_fight": fight is None and not revealed,
-        "can_comment": can_see_solution,
         "can_upvote": can_see_solution,
     }
 
@@ -430,7 +423,7 @@ def proposal_detail(request: HttpRequest, pk: int) -> HttpResponse:
 
     if request.method == "POST":
         if "submit_comment" in request.POST:
-            if not ctx["can_comment"]:
+            if not ctx["can_see_solution"]:
                 raise PermissionDenied
             comment_form = OIMECommentForm(request.POST)
             if comment_form.is_valid():
