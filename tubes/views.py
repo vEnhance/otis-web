@@ -298,6 +298,10 @@ class ProposalListView(VerifiedRequiredMixin, ListView[OIMEProposal]):
             if contributor == proposal.author:
                 proposal.user_list_status = "author"  # type: ignore[attr-defined]
                 own.append(proposal)
+            elif fight is not None and fight.is_complete:
+                # A finished fight is a real recorded result, in any mode.
+                proposal.user_list_status = "completed"  # type: ignore[attr-defined]
+                completed.append(proposal)
             elif _is_casual_for(contributor, proposal):
                 proposal.user_list_status = (  # type: ignore[attr-defined]
                     "revealed" if proposal.pk in revealed_ids else "casual"
@@ -307,9 +311,6 @@ class ProposalListView(VerifiedRequiredMixin, ListView[OIMEProposal]):
                 # Ranked, but spoiled via the escape hatch → no longer fightable.
                 proposal.user_list_status = "revealed"  # type: ignore[attr-defined]
                 browse.append(proposal)
-            elif fight is not None and fight.is_complete:
-                proposal.user_list_status = "completed"  # type: ignore[attr-defined]
-                completed.append(proposal)
             elif fight is not None:
                 proposal.user_list_status = "in_progress"  # type: ignore[attr-defined]
                 unsolved.append(proposal)

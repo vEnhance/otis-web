@@ -30,11 +30,11 @@
     {% endif %}
   {% endif %}
   {% include "tubes/components/proposal_table.html" with title="Your proposals" proposals=own_proposals %}
+  {% include "tubes/components/proposal_table.html" with title="Problems you've fought" proposals=completed_proposals %}
   {% if casual %}
-    {% include "tubes/components/proposal_table.html" with title="All problems" proposals=browse_proposals %}
+    {% include "tubes/components/proposal_table.html" with title="Other problems" proposals=browse_proposals %}
   {% else %}
     {% include "tubes/components/proposal_table.html" with title="New problems" proposals=unsolved_proposals %}
-    {% include "tubes/components/proposal_table.html" with title="Problems you've fought" proposals=completed_proposals %}
     {% include "tubes/components/proposal_table.html" with title="Browse-only problems" proposals=browse_proposals %}
   {% endif %}
   {% if not own_proposals and not browse_proposals and not unsolved_proposals and not completed_proposals %}

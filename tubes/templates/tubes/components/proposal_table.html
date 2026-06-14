@@ -41,11 +41,11 @@ Context vars: title (str), proposals (list of OIMEProposal annotated with user_f
             {% elif proposal.user_list_status == "not_started" %}
               <a href="{{ proposal.get_absolute_url }}">Not started</a>
             {% elif proposal.user_list_status == "revealed" %}
-              <span class="text-muted">Solution revealed</span>
+              <span class="text-muted">Spoiled</span>
             {% elif proposal.user_list_status == "casual" %}
               <a href="{{ proposal.get_absolute_url }}">Try it</a>
             {% elif proposal.user_fight.status == "OIME_OK" %}
-              <span class="text-success">Solved ({{ proposal.user_fight.solve_time_display }})</span>
+              <span class="text-success">{{ proposal.user_fight.solve_time_display }} ({{ proposal.user_fight.wrong_answers }}✖)</span>
             {% elif proposal.user_fight.status == "OIME_FAIL" %}
               <span class="text-danger">Gave Up</span>
             {% elif proposal.user_fight.status == "OIME_TLE" %}

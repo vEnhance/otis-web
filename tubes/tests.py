@@ -231,10 +231,12 @@ def test_casual_hides_solution_until_revealed(otis):
     contributor.casual_mode = True
     contributor.save()
     otis.login(user)
-    # Casual: statement visible, solution still hidden behind the reveal action
+    # Casual: statement visible, solution still hidden behind the reveal action,
+    # but a client-side self-checker is offered.
     resp = otis.get_20x("oime-proposal-detail", proposal.pk)
     otis.assert_not_has(resp, "oime-answer-section")
     otis.assert_has(resp, "Reveal solution")
+    otis.assert_has(resp, "oime-self-check")
 
 
 @pytest.mark.django_db
@@ -292,6 +294,27 @@ def test_go_casual_sets_casual_mode(otis):
     otis.assert_30x(resp)
     contributor.refresh_from_db()
     assert contributor.casual_mode is True
+
+
+@pytest.mark.django_db
+def test_casual_completed_fight_shows_as_solved(otis):
+    # A casual solver who completed a fight earlier should see the recorded result
+    # ("MM:SS (N✖)"), not "Try it" (regression for a list/detail mismatch).
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create()
+    OIMEFightFactory.create(
+        contributor=contributor,
+        proposal=proposal,
+        status="OIME_OK",
+        wrong_answers=0,
+        solve_time_seconds=120,
+    )
+    contributor.casual_mode = True
+    contributor.save()
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-list")
+    otis.assert_has(resp, "02:00 (0✖)")
+    otis.assert_not_has(resp, "Try it")
 
 
 @pytest.mark.django_db
