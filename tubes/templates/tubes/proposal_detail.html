@@ -124,30 +124,6 @@
       </div>
     </div>
   {% endif %}
-  {# ---- Can start a new timed attempt ---- #}
-  {% if can_start_fight %}
-    <div class="alert alert-info">
-      <p>
-        Starting a timed session will reveal the problem statement.
-        You will have <strong>{{ proposal.time_limit_minutes }} minutes</strong>
-        and the timer begins immediately.
-      </p>
-      <form method="post" action="{% url "oime-start-attempt" proposal.pk %}">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-primary">Start Solving</button>
-      </form>
-      <hr />
-      <p class="small text-muted mb-2">
-        Already know this problem — for instance, you helped write it?
-        You can reveal the solution without a timed session, but doing so means
-        you can no longer fight it for a recorded time.
-      </p>
-      <form method="post" action="{% url "oime-reveal" proposal.pk %}">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-outline-secondary btn-sm">I already know it — reveal solution</button>
-      </form>
-    </div>
-  {% endif %}
   {# ---- Show attempt result + answer + solution ---- #}
   {% if can_see_solution %}
     {% if fight %}

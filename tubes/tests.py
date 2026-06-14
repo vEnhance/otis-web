@@ -77,7 +77,11 @@ def test_verified_with_contributor_can_view_proposal(otis):
     user, _ = _verified_contributor()
     proposal = OIMEProposalFactory.create()
     otis.login(user)
-    otis.get_20x("oime-proposal-detail", proposal.pk)
+    # A fresh ranked solver is routed from detail to the pre-fight start screen.
+    resp = otis.get("oime-proposal-detail", proposal.pk)
+    otis.assert_30x(resp)
+    assert resp.url.endswith(f"/tubes/proposal/{proposal.pk}/begin/")
+    otis.get_20x("oime-proposal-start", proposal.pk)
 
 
 # ---------------------------------------------------------------------------
@@ -220,8 +224,28 @@ def test_ranked_hides_solution(otis):
     user, _ = _verified_contributor()
     proposal = OIMEProposalFactory.create()
     otis.login(user)
-    resp = otis.get_20x("oime-proposal-detail", proposal.pk)
+    # Pre-fight, a ranked solver sees only the start screen, never the solution.
+    resp = otis.get_20x("oime-proposal-start", proposal.pk)
+    otis.assert_has(resp, "Start Solving")
     otis.assert_not_has(resp, "oime-answer-section")
+
+
+@pytest.mark.django_db
+def test_start_screen_redirects_when_cannot_fight(otis):
+    # Someone who already finished a fight can't use the start screen → back to detail.
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create()
+    OIMEFightFactory.create(
+        contributor=contributor,
+        proposal=proposal,
+        status="OIME_OK",
+        wrong_answers=0,
+        solve_time_seconds=60,
+    )
+    otis.login(user)
+    resp = otis.get("oime-proposal-start", proposal.pk)
+    otis.assert_30x(resp)
+    assert resp.url.endswith(f"/tubes/proposal/{proposal.pk}/")
 
 
 @pytest.mark.django_db

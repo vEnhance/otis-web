@@ -391,6 +391,26 @@ class ProposalUpdateView(
 
 
 @verified_required
+def proposal_start(request: HttpRequest, pk: int) -> HttpResponse:
+    """Pre-fight screen: start a timed session, or reveal if you already know it."""
+    proposal = get_object_or_404(OIMEProposal, pk=pk)
+    contributor = _get_contributor(request)
+    if contributor is None:
+        return redirect("oime-setup")
+
+    ctx = _get_solver_context(contributor, proposal)
+    # Only meaningful when the user can actually start a fight; otherwise show detail.
+    if not ctx["can_start_fight"]:
+        return redirect("oime-proposal-detail", pk)
+
+    return render(
+        request,
+        "tubes/proposal_start.html",
+        {"proposal": proposal, "contributor": contributor, **ctx},
+    )
+
+
+@verified_required
 def proposal_detail(request: HttpRequest, pk: int) -> HttpResponse:
     proposal = get_object_or_404(OIMEProposal, pk=pk)
     contributor = _get_contributor(request)
@@ -403,6 +423,9 @@ def proposal_detail(request: HttpRequest, pk: int) -> HttpResponse:
     # Ranked contributor with an active fight → send to the timed fight view
     if not ctx["casual"] and fight is not None and not fight.is_complete:
         return redirect("oime-proposal-fight", pk)
+    # Hasn't engaged yet → send to the pre-fight start screen
+    if ctx["can_start_fight"]:
+        return redirect("oime-proposal-start", pk)
 
     comment_form = OIMECommentForm()
 
@@ -428,8 +451,9 @@ def proposal_detail(request: HttpRequest, pk: int) -> HttpResponse:
         if ctx["can_upvote"]
         else False
     )
-    # Show the testsolve stats summary to anyone who can no longer fight the problem.
-    stats = None if ctx["can_start_fight"] else _proposal_stats(proposal)
+    # Detail is only reached once the user can no longer start a fight, so always
+    # show the testsolve stats summary here.
+    stats = _proposal_stats(proposal)
 
     return render(
         request,
