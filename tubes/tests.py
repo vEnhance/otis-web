@@ -313,7 +313,8 @@ def test_casual_completed_fight_shows_as_solved(otis):
     contributor.save()
     otis.login(user)
     resp = otis.get_20x("oime-proposal-list")
-    otis.assert_has(resp, "02:00 (0✖)")
+    otis.assert_has(resp, "02:00")
+    otis.assert_not_has(resp, "0✖")
     otis.assert_not_has(resp, "Try it")
 
 
