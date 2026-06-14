@@ -200,7 +200,7 @@ def go_casual(request: HttpRequest) -> HttpResponse:
         if has_active_fight:
             messages.error(
                 request,
-                "You have an active fight in progress. Finish or give up first.",
+                "You have an active timed session in progress. Finish or give up first.",
             )
             return redirect("oime-casual")
         contributor.casual_mode = True
@@ -502,11 +502,11 @@ def start_attempt(request: HttpRequest, pk: int) -> HttpResponse:
 
     ctx = _get_solver_context(contributor, proposal)
     if not ctx["can_start_fight"]:
-        messages.error(request, "You cannot start a new fight on this problem.")
+        messages.error(request, "You cannot start a new timed session on this problem.")
         return redirect("oime-proposal-detail", pk)
 
     if OIMEFight.objects.filter(contributor=contributor, status="OIME_TBD").exists():
-        messages.error(request, "You already have an active fight in progress.")
+        messages.error(request, "You already have an active timed session in progress.")
         return redirect("oime-proposal-detail", pk)
 
     OIMEFight.objects.create(contributor=contributor, proposal=proposal)
@@ -532,7 +532,7 @@ def submit_answer(request: HttpRequest, pk: int) -> HttpResponse:
         attempt.status = "OIME_TLE"
         attempt.submitted_at = timezone.now()
         attempt.save()
-        messages.warning(request, "The time limit for your fight has expired.")
+        messages.warning(request, "The time limit for your timed session has expired.")
         return redirect("oime-proposal-detail", pk)
 
     form = OIMEAnswerForm(request.POST)

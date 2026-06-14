@@ -31,7 +31,7 @@
     {% endif %}
   {% endif %}
   {% include "tubes/components/proposal_table.html" with title="Your proposals" proposals=own_proposals %}
-  {% include "tubes/components/proposal_table.html" with title="Problems you've fought" proposals=completed_proposals %}
+  {% include "tubes/components/proposal_table.html" with title="Problems you've attempted" proposals=completed_proposals %}
   {% if casual %}
     {% include "tubes/components/proposal_table.html" with title="Other problems" proposals=browse_proposals %}
   {% else %}
