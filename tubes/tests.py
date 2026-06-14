@@ -707,6 +707,8 @@ def test_results_ranked_for_ineligible_solver(otis):
     assert fights[0].contributor == fast
     assert fights[1].contributor == slow
     assert fights[-1].contributor == contributor
+    # The shared stats summary is shown here too.
+    otis.assert_has(resp, "Total testsolvers")
 
 
 # ---------------------------------------------------------------------------

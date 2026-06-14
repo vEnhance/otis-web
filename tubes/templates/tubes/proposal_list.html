@@ -6,27 +6,27 @@
   <h2>OIME Problem Proposals</h2>
   <div class="mb-3">
     <a href="{% url "oime-proposal-create" %}" class="btn btn-success">Write a problem</a>
+    {% if contributor %}
+      {% if casual %}
+        <a href="{% url "oime-serious" %}" class="btn btn-outline-secondary">Return to ranked mode</a>
+      {% else %}
+        <a href="{% url "oime-casual" %}" class="btn btn-outline-secondary">Switch to casual mode</a>
+      {% endif %}
+    {% endif %}
+    <a href="{% url "oime-landing" %}" class="btn btn-outline-secondary">Instructions</a>
   </div>
   {% if contributor %}
     {% if casual %}
-      <div class="alert alert-info d-flex justify-content-between align-items-center">
-        <span>
-          You're in <strong>casual mode</strong>: browse and try any problem untimed and
-          upvote ones you like. Nothing is recorded, and each solution stays hidden until
-          you choose to reveal it.
-        </span>
-        <a href="{% url "oime-serious" %}"
-           class="btn btn-outline-secondary btn-sm ms-3 flex-shrink-0">Return to ranked mode</a>
-      </div>
+      <p class="text-muted">
+        You're in <strong>casual mode</strong>: browse and try any problem untimed and
+        upvote ones you like. Nothing is recorded, and each solution stays hidden until
+        you choose to reveal it.
+      </p>
     {% else %}
-      <div class="alert alert-info d-flex justify-content-between align-items-center">
-        <span>
-          You're testsolving in <strong>ranked mode</strong>.
-          You won't see a problem statement or solution until you start (and finish) a timed session.
-        </span>
-        <a href="{% url "oime-casual" %}"
-           class="btn btn-outline-secondary btn-sm ms-3 flex-shrink-0">Switch to casual mode</a>
-      </div>
+      <p class="text-muted">
+        You're testsolving in <strong>ranked mode</strong>.
+        You won't see a problem statement or solution until you start (and finish) a timed session.
+      </p>
     {% endif %}
   {% endif %}
   {% include "tubes/components/proposal_table.html" with title="Your proposals" proposals=own_proposals %}
