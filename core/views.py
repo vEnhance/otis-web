@@ -451,7 +451,10 @@ def unit_dump(request: HttpRequest) -> JsonResponse:
         )
 
     return JsonResponse(
-        {"unit_groups": data},
+        {
+            "timestamp": timezone.now().isoformat(),
+            "unit_groups": data,
+        },
         json_dumps_params={"indent": 2},
     )
 
