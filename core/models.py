@@ -109,6 +109,10 @@ class Semester(models.Model):
 # <ARTWORK_CDN_BASE>/thumb-sm/SLUG.webp (104x104).
 ARTWORK_CDN_BASE = "https://gallery.evanchen.cc"
 
+# Base URL for the unit fandom, which will eventually replace the wiki. A unit
+# group lives at <FANDOM_BASE>/<subject letter>/<slug>.
+FANDOM_BASE = "https://catalog.evanchen.cc"
+
 
 class UnitGroup(models.Model):
     """Represents an entire group of units with the same name,
@@ -171,6 +175,11 @@ class UnitGroup(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+    @property
+    def fandom_url(self) -> str:
+        """URL for this unit group on the fandom site."""
+        return f"{FANDOM_BASE}/{self.subject.lower()}/{self.slug}"
 
     @property
     def has_artwork(self) -> bool:

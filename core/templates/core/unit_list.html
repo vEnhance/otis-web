@@ -53,7 +53,7 @@
           <div class="row">
             <div class="col-3">
               {% if unitgroup.has_artwork %}
-                <a href="{% url "wiki-unitgroup" unitgroup.pk %}">
+                <a href="{{ unitgroup.fandom_url }}">
                   <img width="100%"
                        src="{{ unitgroup.artwork_thumb_sm_url }}"
                        alt="Artwork for {{ unitgroup.name }}" />
@@ -63,9 +63,9 @@
             <div class="col-9">
               <h4>
                 {% if units.0.has_pset_for_any_unit %}
-                  <a href="{% url "wiki-unitgroup" unitgroup.pk %}"><span class="text-success">{{ unitgroup.name }}</span></a>
+                  <a href="{{ unitgroup.fandom_url }}"><span class="text-success">{{ unitgroup.name }}</span></a>
                 {% else %}
-                  <a href="{% url "wiki-unitgroup" unitgroup.pk %}">{{ unitgroup.name }}</a>
+                  <a href="{{ unitgroup.fandom_url }}">{{ unitgroup.name }}</a>
                 {% endif %}
               </h4>
               <div>

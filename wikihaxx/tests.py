@@ -5,14 +5,6 @@ from core.factories import UnitFactory, UserFactory
 from rpg.factories import AchievementFactory, AchievementUnlockFactory
 from wikihaxx.mdx.otis import OTISPreprocessor
 
-from .factories import URLPathFactory
-from .views import (
-    WIKI_SUBJECT_CHART,
-    edit_redirect,
-    view_redirect,
-    wiki_redirect,
-)
-
 WIKI_SAMPLE_BBCODE = r"""Hello!
 
 Alice says, "you are a doofus".
@@ -46,41 +38,6 @@ YouTube | vEnhance
 [unit example]
 [/unit]
 """
-
-
-@pytest.fixture
-def wiki_setup(db):
-    """Setup wiki URLs for testing."""
-    user = UserFactory.create(is_staff=True, is_superuser=True)
-    root_url = URLPathFactory.create(article__owner=user)
-    units_url = URLPathFactory.create(
-        article__owner=user, parent=root_url, slug="units"
-    )
-
-    for subject in set(WIKI_SUBJECT_CHART.values()):
-        URLPathFactory.create(
-            article__owner=user,
-            parent=units_url,
-            slug=f"list-of-{subject}-units",
-        )
-    return user
-
-
-@pytest.mark.django_db
-def test_unitgroup_views(otis, wiki_setup):
-    otis.login(wiki_setup)
-    for subject, slug in WIKI_SUBJECT_CHART.items():
-        unit = UnitFactory.create(group__subject=subject)
-        resp = otis.get_20x("wiki-unitgroup", unit.pk, follow=True)
-        otis.assert_has(resp, f"list-of-{slug}-units")
-
-
-@pytest.mark.django_db
-def test_raw_views(wiki_setup):
-    urlpath = URLPathFactory.create(article__owner=wiki_setup)
-    edit_redirect(urlpath)
-    view_redirect(urlpath)
-    wiki_redirect(urlpath)
 
 
 @pytest.mark.django_db

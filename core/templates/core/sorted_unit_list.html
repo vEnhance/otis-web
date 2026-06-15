@@ -28,9 +28,7 @@
                style="text-shadow: 1px black"
                title="Add suggestion"
                href="{% url "suggest-new" unit.pk %}">💡</a>
-            <a class="emoji-link"
-               title="Wiki"
-               href="{% url "wiki-unitgroup" unit.group.pk %}">🎮</a>
+            <a class="emoji-link" title="Fandom" href="{{ unit.group.fandom_url }}">🎮</a>
           </td>
         </tr>
       {% endfor %}
