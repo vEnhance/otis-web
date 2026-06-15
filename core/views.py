@@ -412,7 +412,7 @@ class UserInfoView(AdminRequiredMixin, DetailView[User]):
 
 
 @staff_required
-def dump(request: HttpRequest) -> JsonResponse:
+def unit_dump(request: HttpRequest) -> JsonResponse:
     del request
 
     # Aggregate submission stats per group, keyed by group pk.

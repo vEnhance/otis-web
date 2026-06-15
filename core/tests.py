@@ -96,7 +96,7 @@ def test_admin_unit_list(otis):
 def test_dump(otis):
     # non-staff users are denied
     otis.login(UserFactory.create())
-    otis.get_denied("dump")
+    otis.get_denied("unit-dump")
 
     ug = UnitGroupFactory.create(name="Target", subject="A")
     u1 = UnitFactory.create(group=ug, code="BAW")
@@ -109,7 +109,7 @@ def test_dump(otis):
     PSetFactory.create(unit=u2, student=bob, clubs=5, hours=6.0)
 
     otis.login(UserFactory.create(is_staff=True))
-    resp = otis.get_20x("dump")
+    resp = otis.get_20x("unit-dump")
     groups = json.loads(resp.content)["unit_groups"]
     target = next(g for g in groups if g["name"] == "Target")
     assert target["subject"] == "Algebra (Hufflepuff)"
