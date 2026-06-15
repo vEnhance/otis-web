@@ -1,3 +1,4 @@
+import json
 import re
 from typing import Any
 
@@ -89,6 +90,35 @@ def test_admin_unit_list(otis):
     UnitFactory.create(group__name="Grinding", group__subject="M")
     resp = otis.get_20x("admin-unit-list")
     otis.assert_has(resp, "Grinding")
+
+
+@pytest.mark.django_db
+def test_dump(otis):
+    # non-staff users are denied
+    otis.login(UserFactory.create())
+    otis.get_denied("dump")
+
+    ug = UnitGroupFactory.create(name="Target", subject="A")
+    u1 = UnitFactory.create(group=ug, code="BAW")
+    u2 = UnitFactory.create(group=ug, code="DAX")
+    alice = StudentFactory.create()
+    bob = StudentFactory.create()
+    alice.curriculum.add(u1)
+    bob.curriculum.set((u1, u2))
+    PSetFactory.create(unit=u1, student=alice, clubs=3, hours=4.0)
+    PSetFactory.create(unit=u2, student=bob, clubs=5, hours=6.0)
+
+    otis.login(UserFactory.create(is_staff=True))
+    resp = otis.get_20x("dump")
+    groups = json.loads(resp.content)["unit_groups"]
+    target = next(g for g in groups if g["name"] == "Target")
+    assert target["subject"] == "Algebra (Hufflepuff)"
+    assert target["slug"] == ug.slug
+    assert target["num_submissions"] == 2
+    assert target["num_students"] == 2  # alice and bob, counted once
+    assert target["num_clubs"] == 8
+    assert target["num_hearts"] == 10.0
+    assert target["versions"] == ["BAW", "DAX"]
 
 
 @pytest.mark.django_db

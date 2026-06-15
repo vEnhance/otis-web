@@ -17,6 +17,7 @@ urlpatterns = [
     path(
         r"admin-unit-list/", views.AdminUnitListView.as_view(), name="admin-unit-list"
     ),
+    path(r"dump/", views.dump, name="dump"),
     path(r"prefs/", views.UserProfileUpdateView.as_view(), name="profile"),
     path(r"unit/problems/<int:pk>/", views.unit_problems, name="view-problems"),
     path(r"unit/tex/<int:pk>/", views.unit_tex, name="view-tex"),

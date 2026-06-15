@@ -7,9 +7,10 @@ from django.contrib.auth.models import AnonymousUser, User
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import PermissionDenied
-from django.db.models.aggregates import Count, Max
+from django.db.models.aggregates import Count, Max, Sum
 from django.db.models.base import Model
 from django.db.models.expressions import Value
+from django.db.models.functions import Coalesce
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
 from django.forms import Select
@@ -30,7 +31,7 @@ from sql_util.utils import Exists
 
 from core.models import EMAIL_PREFERENCE_FIELDS, Semester, UserProfile
 from dashboard.models import PSet, UploadedFile
-from otisweb.decorators import verified_required
+from otisweb.decorators import staff_required, verified_required
 from otisweb.mixins import AdminRequiredMixin
 from otisweb.utils import AuthHttpRequest
 from roster.models import Student
@@ -408,6 +409,64 @@ class UserInfoView(AdminRequiredMixin, DetailView[User]):
         context["has_password"] = user.has_usable_password()
         context["reset_link"] = self.request.session.pop("reset_link", None)
         return context
+
+
+@staff_required
+def dump(request: HttpRequest) -> JsonResponse:
+    del request
+
+    # Aggregate submission stats per group, keyed by group pk.
+    # These are computed in a single pass over PSet to avoid the join
+    # multiplication that would occur if Sum/Count were mixed with the
+    # students_taking join on the UnitGroup queryset itself.
+    pset_stats = {
+        row["unit__group"]: row
+        for row in PSet.objects.filter(unit__group__isnull=False)
+        .values("unit__group")
+        .annotate(
+            num_submissions=Count("pk"),
+            num_clubs=Coalesce(Sum("clubs"), 0),
+            num_hearts=Coalesce(Sum("hours"), 0.0),
+        )
+    }
+
+    # Distinct students with any unit of the group in their curriculum.
+    student_counts = {
+        row["group"]: row["num_students"]
+        for row in Unit.objects.values("group").annotate(
+            num_students=Count("students_taking", distinct=True)
+        )
+    }
+
+    # Version codes offered for each group.
+    versions: dict[int, list[str]] = {}
+    for group_pk, code in Unit.objects.order_by("position").values_list(
+        "group", "code"
+    ):
+        versions.setdefault(group_pk, []).append(code)
+
+    data = []
+    for ug in UnitGroup.objects.all():
+        stats = pset_stats.get(ug.pk, {})
+        data.append(
+            {
+                "name": ug.name,
+                "subject": ug.get_subject_display(),
+                "description": ug.description,
+                "slug": ug.slug,
+                "artist_name": ug.artist_name,
+                "num_submissions": stats.get("num_submissions", 0),
+                "num_students": student_counts.get(ug.pk, 0),
+                "num_clubs": stats.get("num_clubs", 0),
+                "num_hearts": stats.get("num_hearts", 0.0),
+                "versions": versions.get(ug.pk, []),
+            }
+        )
+
+    return JsonResponse(
+        {"unit_groups": data},
+        json_dumps_params={"indent": 2},
+    )
 
 
 class GeneratePasswordResetLinkView(AdminRequiredMixin, View):
