@@ -131,16 +131,6 @@ def test_mallory_core_views(otis):
 
 
 @pytest.mark.django_db
-def test_hidden_catalog_public(otis):
-    otis.login(UserFactory.create())
-    UnitFactory.create(group__name="VisibleUnit", group__hidden=False)
-    UnitFactory.create(group__name="HiddenUnit", group__hidden=True)
-    resp = otis.get_20x("catalog-public")
-    otis.assert_has(resp, "VisibleUnit")
-    otis.assert_not_has(resp, "HiddenUnit")
-
-
-@pytest.mark.django_db
 def test_storage_hash():
     # In test mode, storage_hash returns "TESTING_" prefix
     assert re.match(r"(TESTING_)?[0-9a-z]{64}", storage_hash("meow"))
@@ -388,100 +378,26 @@ def test_generate_reset_link(otis):
 
 
 @pytest.mark.django_db
-def test_set_default_artwork_action():
-    """Test the set_default_artwork admin action for UnitGroup."""
-    from unittest.mock import Mock, patch
-
-    from core.admin import UnitGroupAdmin
-    from core.models import UnitGroup
-
-    # Create test unit groups with different slugs
-    ug1 = UnitGroupFactory.create(
-        slug="g6summit",
-        artwork="old/path1.png",
-        artwork_thumb_md="old/path2.png",
-        artwork_thumb_sm="old/path3.png",
+def test_artwork_cdn_urls():
+    """Artwork URLs are derived from the slug, gated on artist_name."""
+    finished = UnitGroupFactory.create(slug="g6summit", artist_name="Bob Ross")
+    assert finished.has_artwork is True
+    assert finished.artwork_url == "https://gallery.evanchen.cc/webp/g6summit.webp"
+    assert (
+        finished.artwork_thumb_md_url
+        == "https://gallery.evanchen.cc/thumb-md/g6summit.webp"
     )
-    ug2 = UnitGroupFactory.create(
-        slug="n7summit",
-        artwork="custom/artwork.png",
-        artwork_thumb_md="custom/thumb-md.png",
-        artwork_thumb_sm="custom/thumb-sm.png",
-    )
-    ug3 = UnitGroupFactory.create(
-        slug="c8summit",
-        artwork="",
-        artwork_thumb_md="",
-        artwork_thumb_sm="",
+    assert (
+        finished.artwork_thumb_sm_url
+        == "https://gallery.evanchen.cc/thumb-sm/g6summit.webp"
     )
 
-    # Create admin instance and mock request
-    admin = UnitGroupAdmin(UnitGroup, None)
-    request = Mock()
-
-    # Create queryset with all unit groups
-    queryset = UnitGroup.objects.filter(pk__in=[ug1.pk, ug2.pk, ug3.pk])
-
-    # Mock the message_user method and call the admin action
-    with patch.object(admin, "message_user") as mock_message_user:
-        admin.set_default_artwork(request, queryset)
-        # Verify message_user was called
-        mock_message_user.assert_called_once()
-
-    # Refresh from database
-    ug1.refresh_from_db()
-    ug2.refresh_from_db()
-    ug3.refresh_from_db()
-
-    # Verify artwork fields are set correctly for ug1
-    assert ug1.artwork == "artwork/g6summit.png"
-    assert ug1.artwork_thumb_md == "artwork-thumb-md/g6summit.png"
-    assert ug1.artwork_thumb_sm == "artwork-thumb-sm/g6summit.png"
-
-    # Verify artwork fields are set correctly for ug2
-    assert ug2.artwork == "artwork/n7summit.png"
-    assert ug2.artwork_thumb_md == "artwork-thumb-md/n7summit.png"
-    assert ug2.artwork_thumb_sm == "artwork-thumb-sm/n7summit.png"
-
-    # Verify artwork fields are set correctly for ug3
-    assert ug3.artwork == "artwork/c8summit.png"
-    assert ug3.artwork_thumb_md == "artwork-thumb-md/c8summit.png"
-    assert ug3.artwork_thumb_sm == "artwork-thumb-sm/c8summit.png"
-
-
-@pytest.mark.django_db
-def test_set_default_artwork_action_single_unit_group():
-    """Test the set_default_artwork admin action with a single unit group."""
-    from unittest.mock import Mock
-
-    from core.admin import UnitGroupAdmin
-    from core.models import UnitGroup
-
-    # Create a single unit group
-    ug = UnitGroupFactory.create(
-        slug="test-unit",
-        artwork="initial/artwork.png",
-        artwork_thumb_md="initial/thumb-md.png",
-        artwork_thumb_sm="initial/thumb-sm.png",
-    )
-
-    # Create admin instance and mock request
-    admin = UnitGroupAdmin(UnitGroup, None)
-    request = Mock()
-
-    # Create queryset with single unit group
-    queryset = UnitGroup.objects.filter(pk=ug.pk)
-
-    # Call the admin action
-    admin.set_default_artwork(request, queryset)
-
-    # Refresh from database
-    ug.refresh_from_db()
-
-    # Verify artwork fields are set correctly
-    assert ug.artwork == "artwork/test-unit.png"
-    assert ug.artwork_thumb_md == "artwork-thumb-md/test-unit.png"
-    assert ug.artwork_thumb_sm == "artwork-thumb-sm/test-unit.png"
+    # A blank artist_name marks the artwork as unfinished.
+    unfinished = UnitGroupFactory.create(slug="n7summit", artist_name="")
+    assert unfinished.has_artwork is False
+    assert unfinished.artwork_url is None
+    assert unfinished.artwork_thumb_md_url is None
+    assert unfinished.artwork_thumb_sm_url is None
 
 
 @pytest.mark.django_db

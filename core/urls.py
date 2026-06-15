@@ -11,7 +11,6 @@ urlpatterns = [
         RedirectView.as_view(pattern_name="catalog", permanent=True),
     ),
     path(r"catalog/", views.UnitGroupListView.as_view(), name="catalog"),
-    path(r"catalog/public/", views.PublicCatalog.as_view(), name="catalog-public"),
     path(r"gallery/", views.UnitArtworkListView.as_view(), name="artwork-list"),
     path(r"unit-list/", views.SortedUnitListView.as_view(), name="sorted-unit-list"),
     path(

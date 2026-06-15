@@ -39,9 +39,6 @@
   </ul>
   <p>
     This page was printed on {% now "r" %}.
-    You can also see the
-    <a href="{% url "catalog-public" %}">public versions of the unit catalog</a>,
-    which is prettier but less informative.
     If you just want a list of all the units by number without descriptions,
     check the <a href="{% url "sorted-unit-list" %}">one-line list</a>.
   </p>
@@ -55,10 +52,10 @@
         <div class="list-group-item container">
           <div class="row">
             <div class="col-3">
-              {% if unitgroup.artwork_thumb_sm %}
+              {% if unitgroup.has_artwork %}
                 <a href="{% url "wiki-unitgroup" unitgroup.pk %}">
                   <img width="100%"
-                       src="{{ unitgroup.artwork_thumb_sm.url }}"
+                       src="{{ unitgroup.artwork_thumb_sm_url }}"
                        alt="Artwork for {{ unitgroup.name }}" />
                 </a>
               {% endif %}

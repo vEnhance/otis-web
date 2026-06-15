@@ -20,8 +20,8 @@
             <h4 class="card-title">
               <a href="{% url "wiki-unitgroup" unitgroup.pk %}">{{ unitgroup.name }}</a>
             </h4>
-            <a href="{{ unitgroup.artwork.url }}" target="_blank">
-              <img src="{{ unitgroup.artwork_thumb_md.url }}"
+            <a href="{{ unitgroup.artwork_url }}" target="_blank">
+              <img src="{{ unitgroup.artwork_thumb_md_url }}"
                    class="artwork"
                    alt="Artwork for {{ unitgroup.name }}" />
             </a>

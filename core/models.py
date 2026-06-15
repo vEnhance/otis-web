@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
 import datetime
-import os
 import zoneinfo
 from typing import Callable
 
@@ -104,19 +103,11 @@ class Semester(models.Model):
         return f"{self.start_year}-{self.end_year}"
 
 
-def artwork_image_file_name(instance: "UnitGroup", filename: str) -> str:
-    del instance
-    return os.path.join("artwork", filename)
-
-
-def artwork_thumb_md_file_name(instance: "UnitGroup", filename: str) -> str:
-    del instance
-    return os.path.join("artwork-thumb-md", filename)
-
-
-def artwork_thumb_sm_file_name(instance: "UnitGroup", filename: str) -> str:
-    del instance
-    return os.path.join("artwork-thumb-sm", filename)
+# Base URL for the artwork CDN. For a unit group with slug SLUG, the artwork
+# lives at <ARTWORK_CDN_BASE>/webp/SLUG.webp (full size), and the square
+# thumbnails at <ARTWORK_CDN_BASE>/thumb-md/SLUG.webp (226x226) and
+# <ARTWORK_CDN_BASE>/thumb-sm/SLUG.webp (104x104).
+ARTWORK_CDN_BASE = "https://gallery.evanchen.cc"
 
 
 class UnitGroup(models.Model):
@@ -136,27 +127,10 @@ class UnitGroup(models.Model):
         help_text="The slug for the filename for this unit group",
         unique=True,
     )
-    artwork = models.ImageField(
-        upload_to=artwork_image_file_name,
-        help_text="Artwork for this unit",
-        null=True,
-        blank=True,
-    )
-    artwork_thumb_md = models.ImageField(
-        upload_to=artwork_thumb_md_file_name,
-        help_text="Artwork for this unit",
-        null=True,
-        blank=True,
-    )
-    artwork_thumb_sm = models.ImageField(
-        upload_to=artwork_thumb_md_file_name,
-        help_text="Artwork for this unit",
-        null=True,
-        blank=True,
-    )
     artist_name = models.CharField(
         max_length=64,
-        help_text="Name of the artist for the unit artwork.",
+        help_text="Name of the artist for the unit artwork. "
+        "A nonempty value marks the artwork as finished and available on the CDN.",
         blank=True,
     )
 
@@ -199,14 +173,32 @@ class UnitGroup(models.Model):
         return self.name
 
     @property
-    def artwork_basename(self) -> str | None:
-        return None if not self.artwork else os.path.basename(self.artwork.name)
+    def has_artwork(self) -> bool:
+        """Whether finished artwork exists for this unit group.
+
+        Artwork is considered finished once an artist has been credited."""
+        return bool(self.artist_name)
 
     @property
-    def artwork_thumb_md_basename(self) -> str | None:
-        if not self.artwork_thumb_md:
+    def artwork_url(self) -> str | None:
+        """Full-size artwork URL on the CDN, or None if unfinished."""
+        if not self.has_artwork:
             return None
-        return os.path.basename(self.artwork_thumb_md.name)
+        return f"{ARTWORK_CDN_BASE}/webp/{self.slug}.webp"
+
+    @property
+    def artwork_thumb_md_url(self) -> str | None:
+        """226x226 thumbnail URL on the CDN, or None if unfinished."""
+        if not self.has_artwork:
+            return None
+        return f"{ARTWORK_CDN_BASE}/thumb-md/{self.slug}.webp"
+
+    @property
+    def artwork_thumb_sm_url(self) -> str | None:
+        """104x104 thumbnail URL on the CDN, or None if unfinished."""
+        if not self.has_artwork:
+            return None
+        return f"{ARTWORK_CDN_BASE}/thumb-sm/{self.slug}.webp"
 
 
 class Unit(models.Model):

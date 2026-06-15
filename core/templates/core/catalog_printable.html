@@ -44,11 +44,9 @@
           <div class="list-group-item container">
             <div class="row">
               <div class="col-4">
-                {% if unitgroup.artwork and unitgroup.artwork_thumb_md %}
-                  <a class="artwork"
-                     href="https://web.evanchen.cc/otis/artwork/{{ unitgroup.artwork_basename }}">
-                    <img width="226px"
-                         src="https://web.evanchen.cc/otis/thumb/{{ unitgroup.artwork_thumb_md_basename }}" />
+                {% if unitgroup.has_artwork %}
+                  <a class="artwork" href="{{ unitgroup.artwork_url }}">
+                    <img width="226px" src="{{ unitgroup.artwork_thumb_md_url }}" />
                   </a>
                 {% else %}
                   <p class="text-center text-muted">

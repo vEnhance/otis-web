@@ -7,7 +7,20 @@ import positions.fields
 from django.conf import settings
 from django.db import migrations, models
 
-import core.models
+
+# These upload_to callables used to live in core.models for the (now removed)
+# artwork ImageFields. They are kept here so this historical migration remains
+# importable; artwork is now served from an external CDN.
+def artwork_image_file_name(instance, filename):
+    import os
+
+    return os.path.join("artwork", filename)
+
+
+def artwork_thumb_md_file_name(instance, filename):
+    import os
+
+    return os.path.join("artwork-thumb-md", filename)
 
 
 class Migration(migrations.Migration):
@@ -81,7 +94,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         help_text="Artwork for this unit",
                         null=True,
-                        upload_to=core.models.artwork_image_file_name,
+                        upload_to=artwork_image_file_name,
                     ),
                 ),
                 (
@@ -90,7 +103,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         help_text="Artwork for this unit",
                         null=True,
-                        upload_to=core.models.artwork_thumb_md_file_name,
+                        upload_to=artwork_thumb_md_file_name,
                     ),
                 ),
                 (
@@ -99,7 +112,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         help_text="Artwork for this unit",
                         null=True,
-                        upload_to=core.models.artwork_thumb_md_file_name,
+                        upload_to=artwork_thumb_md_file_name,
                     ),
                 ),
                 (

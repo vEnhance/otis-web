@@ -219,19 +219,6 @@ class UnitGroupListView(LoginRequiredMixin, ListView[Unit]):
         return context
 
 
-class PublicCatalog(ListView[UnitGroup]):
-    model = UnitGroup
-    queryset = (
-        UnitGroup.objects.filter(
-            hidden=False,
-        )
-        .order_by("subject", "name")
-        .annotate(num_psets=Count("unit__pset"))
-    )
-
-    template_name = "core/catalog_printable.html"
-
-
 class UnitArtworkListView(ListView[UnitGroup]):
     model = UnitGroup
     queryset = (

@@ -107,15 +107,15 @@
           </td>
           {% if profile.show_artwork_on_curriculum %}
             <td class="thumbnail">
-              {% if row.unit.group.artwork_thumb_sm %}
+              {% if row.unit.group.has_artwork %}
                 {% if row.is_visible %}
                   <a title="Download PDF" href="{% view_problems row.unit %}">
                     <img class="artwork"
                          width="32"
-                         src="{{ row.unit.group.artwork_thumb_sm.url }}" />
+                         src="{{ row.unit.group.artwork_thumb_sm_url }}" />
                   </a>
                 {% else %}
-                  <img width="32" src="{{ row.unit.group.artwork_thumb_sm.url }}" />
+                  <img width="32" src="{{ row.unit.group.artwork_thumb_sm_url }}" />
                 {% endif %}
               {% endif %}
             </td>
