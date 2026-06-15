@@ -33,7 +33,7 @@
         <a href="{% url "oime-proposal-update" proposal.pk %}"
            class="btn btn-outline-secondary btn-sm">Edit</a>
       {% endif %}
-      {% if request.user.is_staff %}
+      {% if proposal.author == contributor or request.user.is_staff %}
         <form method="post" action="{% url "oime-proposal-archive" proposal.pk %}">
           {% csrf_token %}
           <button type="submit" class="btn btn-outline-secondary btn-sm">
@@ -140,7 +140,7 @@
             <small class="text-muted">
               {{ comment.author }}
               · {{ comment.created_at|date:"Y-m-d H:i" }}
-              {% if comment.updated_at != comment.created_at %}(edited {{ comment.updated_at|date:"Y-m-d H:i" }}){% endif %}
+              {% if comment.is_edited %}(edited {{ comment.updated_at|date:"Y-m-d H:i" }}){% endif %}
               {% if comment.author == contributor or request.user.is_staff %}
                 · <a href="{% url "oime-comment-edit" comment.pk %}">Edit</a>
               {% endif %}

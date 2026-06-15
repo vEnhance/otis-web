@@ -350,11 +350,25 @@ def test_staff_can_toggle_archive(otis):
 
 @pytest.mark.django_db
 def test_non_staff_cannot_toggle_archive(otis):
-    user, contributor = _verified_contributor()
-    proposal = OIMEProposalFactory.create(author=contributor, archived=False)
+    user, _ = _verified_contributor()
+    _, other = _verified_contributor("bob")
+    proposal = OIMEProposalFactory.create(author=other, archived=False)
     otis.login(user)
     resp = otis.post("oime-proposal-archive", proposal.pk)
     assert resp.status_code == 403
+    proposal.refresh_from_db()
+    assert proposal.archived is False
+
+
+@pytest.mark.django_db
+def test_author_can_toggle_own_proposal_archive(otis):
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create(author=contributor, archived=False)
+    otis.login(user)
+    otis.post("oime-proposal-archive", proposal.pk)
+    proposal.refresh_from_db()
+    assert proposal.archived is True
+    otis.post("oime-proposal-archive", proposal.pk)
     proposal.refresh_from_db()
     assert proposal.archived is False
 
@@ -889,3 +903,60 @@ def test_other_contributor_cannot_edit_comment(otis):
     assert resp.status_code == 403
     comment.refresh_from_db()
     assert comment.content != "Hacked"
+
+
+# ---------------------------------------------------------------------------
+# Comment is_edited property
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.django_db
+def test_comment_is_edited_false_when_fresh(otis):
+    comment = OIMECommentFactory.create()
+    assert comment.is_edited is False
+
+
+@pytest.mark.django_db
+def test_comment_is_edited_true_after_meaningful_edit(otis):
+    comment = OIMECommentFactory.create()
+    # Bypass auto_now to simulate an edit made well after creation.
+    OIMEComment.objects.filter(pk=comment.pk).update(
+        updated_at=comment.created_at + timedelta(minutes=5)
+    )
+    comment.refresh_from_db()
+    assert comment.is_edited is True
+
+
+@pytest.mark.django_db
+def test_comment_is_edited_false_within_threshold(otis):
+    comment = OIMECommentFactory.create()
+    OIMEComment.objects.filter(pk=comment.pk).update(
+        updated_at=comment.created_at + timedelta(seconds=30)
+    )
+    comment.refresh_from_db()
+    assert comment.is_edited is False
+
+
+@pytest.mark.django_db
+def test_edited_label_not_shown_for_fresh_comment(otis):
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create(author=contributor)
+    OIMECommentFactory.create(author=contributor, proposal=proposal, content="Hi")
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-detail", proposal.pk)
+    otis.assert_not_has(resp, "edited")
+
+
+@pytest.mark.django_db
+def test_edited_label_shown_after_meaningful_edit(otis):
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create(author=contributor)
+    comment = OIMECommentFactory.create(
+        author=contributor, proposal=proposal, content="Hi"
+    )
+    OIMEComment.objects.filter(pk=comment.pk).update(
+        updated_at=comment.created_at + timedelta(minutes=5)
+    )
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-detail", proposal.pk)
+    otis.assert_has(resp, "edited")

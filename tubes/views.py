@@ -644,12 +644,14 @@ def upvote_proposal(request: HttpRequest, pk: int) -> HttpResponse:
 
 @verified_required
 def toggle_archive(request: HttpRequest, pk: int) -> HttpResponse:
-    """Staff-only: flip a problem's archived state."""
+    """Flip a problem's archived state. Allowed for staff and the proposal's own author."""
     if request.method != "POST":
         return redirect("oime-proposal-detail", pk)
-    if not request.user.is_staff:  # type: ignore[union-attr]
-        raise PermissionDenied
     proposal = get_object_or_404(OIMEProposal, pk=pk)
+    contributor = _get_contributor(request)
+    is_author = contributor is not None and proposal.author == contributor
+    if not is_author and not request.user.is_staff:  # type: ignore[union-attr]
+        raise PermissionDenied
     proposal.archived = not proposal.archived
     proposal.save(update_fields=["archived"])
     return redirect("oime-proposal-detail", pk)

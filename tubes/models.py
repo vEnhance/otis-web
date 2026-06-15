@@ -314,3 +314,8 @@ class OIMEComment(models.Model):
 
     def __str__(self) -> str:
         return f"Comment by {self.author} on {self.proposal}"
+
+    @property
+    def is_edited(self) -> bool:
+        """True only if the comment was meaningfully edited after creation."""
+        return (self.updated_at - self.created_at).total_seconds() > 60
