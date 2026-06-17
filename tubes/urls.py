@@ -3,7 +3,6 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path(r"landing/", views.LandingView.as_view(), name="oime-landing"),
     path(r"proposals/", views.ProposalListView.as_view(), name="oime-proposal-list"),
     path(r"propose/", views.ProposalCreateView.as_view(), name="oime-proposal-create"),
     path(r"proposal/<int:pk>/", views.proposal_detail, name="oime-proposal-detail"),
@@ -32,4 +31,5 @@ urlpatterns = [
     path(r"setup/", views.oime_setup, name="oime-setup"),
     path(r"casual/", views.go_casual, name="oime-casual"),
     path(r"serious/", views.go_serious, name="oime-serious"),
+    path(r"", views.LandingView.as_view(), name="oime-landing"),
 ]
