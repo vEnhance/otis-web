@@ -45,7 +45,7 @@ Context vars: title (str), proposals (list of OIMEProposal annotated with user_f
             {% elif proposal.user_list_status == "casual" %}
               <a href="{{ proposal.get_absolute_url }}">Not spoiled</a>
             {% elif proposal.user_fight.status == "OIME_OK" %}
-              <span class="text-success">✔{{ proposal.user_fight.solve_time_display }}
+              <span class="text-success">✔{{ proposal.user_fight.time_display }}
                 {% if proposal.user_fight.wrong_answers %}(✖{{ proposal.user_fight.wrong_answers }}){% endif %}
               </span>
             {% elif proposal.user_fight.status == "OIME_FAIL" %}

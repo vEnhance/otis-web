@@ -536,7 +536,7 @@ def submit_answer(request: HttpRequest, pk: int) -> HttpResponse:
         attempt.submitted_at = timezone.now()
         attempt.solve_time_seconds = elapsed
         attempt.save()
-        messages.success(request, f"Correct! You took {attempt.solve_time_display}.")
+        messages.success(request, f"Correct! You took {attempt.time_display}.")
     else:
         attempt.wrong_answers += 1
         if attempt.wrong_answers >= OIMEFight.ANSWER_LIMIT:
@@ -674,7 +674,7 @@ def proposal_results(request: HttpRequest, pk: int) -> HttpResponse:
     fights = list(
         OIMEFight.objects.filter(proposal=proposal)
         .exclude(status="OIME_TBD")
-        .select_related("contributor")
+        .select_related("contributor", "proposal")
     )
     # Rank: solved first, then fewest wrong answers, then fastest solve time.
     fights.sort(

@@ -266,12 +266,18 @@ class OIMEFight(models.Model):
         return "✗" * self.wrong_answers + "·" * (self.ANSWER_LIMIT - self.wrong_answers)
 
     @property
-    def solve_time_display(self) -> str:
-        """Solve time formatted as MM:SS, or empty if not solved."""
-        if self.solve_time_seconds is None:
+    def time_display(self) -> str:
+        """Fight duration as MM:SS. Uses solve_time_seconds for solved fights, time limit for TLE, else submitted_at − started_at."""
+        if self.solve_time_seconds is not None:
+            seconds = self.solve_time_seconds
+        elif self.status == "OIME_TLE":
+            seconds = self.proposal.time_limit_minutes * 60
+        elif self.submitted_at is not None:
+            seconds = int((self.submitted_at - self.started_at).total_seconds())
+        else:
             return ""
-        minutes, seconds = divmod(self.solve_time_seconds, 60)
-        return f"{minutes:02d}:{seconds:02d}"
+        m, s = divmod(seconds, 60)
+        return f"{m:02d}:{s:02d}"
 
     @property
     def is_complete(self) -> bool:

@@ -8,7 +8,7 @@ Context var: stats (dict from views._proposal_stats).
       <th class="pe-4">Fastest clean solve</th>
       <td>
         {% if stats.fastest_clean %}
-          {{ stats.fastest_clean.solve_time_display }} ({{ stats.fastest_clean.contributor.leaderboard_name }})
+          {{ stats.fastest_clean.time_display }} ({{ stats.fastest_clean.contributor.leaderboard_name }})
         {% else %}
           —
         {% endif %}

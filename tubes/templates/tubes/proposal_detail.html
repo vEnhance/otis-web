@@ -66,7 +66,7 @@
     {% if is_author %}
       You wrote this problem, so you can see the solution.
     {% elif fight.status == "OIME_OK" %}
-      You solved this problem in {{ fight.solve_time_display }}
+      You solved this problem in {{ fight.time_display }}
       (with {{ fight.wrong_answers }} incorrect answer{{ fight.wrong_answers|pluralize }})
       on {{ fight.submitted_at|date:"F j, Y" }}.
     {% elif fight.status == "OIME_FAIL" %}
@@ -110,7 +110,7 @@
     {% if fight %}
       {% if attempt.status == "OIME_OK" %}
         <div class="alert alert-success">
-          Solved in {{ fight.solve_time_display }} with {{ fight.wrong_answers }} wrong answer{{ fight.wrong_answers|pluralize }}.
+          Solved in {{ fight.time_display }} with {{ fight.wrong_answers }} wrong answer{{ fight.wrong_answers|pluralize }}.
         </div>
       {% elif attempt.status == "OIME_FAIL" %}
         <div class="alert alert-secondary">You gave up on this problem.</div>

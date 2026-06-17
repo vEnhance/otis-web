@@ -8,6 +8,10 @@
     <a href="{% url "oime-proposal-detail" proposal.pk %}"
        class="btn btn-outline-secondary btn-sm">← Back to problem</a>
   </div>
+  <div class="d-flex gap-2 mb-2">
+    <span class="badge bg-light text-dark border px-2 py-2">{{ proposal.difficulty_display }}</span>
+    <span class="badge bg-light text-dark border px-2 py-2">🩷 × {{ proposal.upvotes.count }}</span>
+  </div>
   {% include "tubes/components/proposal_stats.html" %}
   {% if fights %}
     <table class="table table-striped">
@@ -16,21 +20,28 @@
           <th>#</th>
           <th>Solver</th>
           <th>Solve time</th>
-          <th>Wrong answers</th>
+          <th>Notes</th>
         </tr>
       </thead>
       <tbody>
         {% for fight in fights %}
-          <tr>
+          <tr {% if fight.contributor == contributor %}class="table-primary fw-bold"{% endif %}>
             <td>
               {% if fight.is_success %}{{ forloop.counter }}{% endif %}
             </td>
-            <td>{{ fight.contributor.leaderboard_name }}</td>
+            <td>
+              {% if not fight.is_success and fight.contributor != contributor and proposal.author != contributor and not request.user.is_staff %}
+                —
+              {% else %}
+                {{ fight.contributor.leaderboard_name }}
+              {% endif %}
+            </td>
             <td class="text-success">
-              {% if fight.is_success %}✔ {{ fight.solve_time_display }}{% endif %}
+              {% if fight.is_success %}✔ {{ fight.time_display }}{% endif %}
             </td>
             <td class="text-danger">
               {% if fight.wrong_answers %}✖{{ fight.wrong_answers }}{% endif %}
+              {% if not fight.is_success %}({{ fight.time_display }}){% endif %}
             </td>
           </tr>
         {% endfor %}
