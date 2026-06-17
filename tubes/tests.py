@@ -210,7 +210,6 @@ def test_leaderboard_hides_name_when_requested(otis):
         proposal=proposal,
         status="OIME_OK",
         wrong_answers=0,
-        solve_time_seconds=90,
     )
     otis.login(user)
     resp = otis.get_20x("oime-proposal-results", proposal.pk)
@@ -399,7 +398,6 @@ def test_start_screen_redirects_when_cannot_fight(otis):
         proposal=proposal,
         status="OIME_OK",
         wrong_answers=0,
-        solve_time_seconds=60,
     )
     otis.login(user)
     resp = otis.get("oime-start-fight", proposal.pk)
@@ -485,12 +483,16 @@ def test_casual_completed_fight_shows_as_solved(otis):
     # ("MM:SS (✖N)"), not "Try it" (regression for a list/detail mismatch).
     user, contributor = _verified_contributor()
     proposal = OIMEProposalFactory.create()
-    OIMEFightFactory.create(
+    fight = OIMEFightFactory.create(
         contributor=contributor,
         proposal=proposal,
         status="OIME_OK",
         wrong_answers=0,
-        solve_time_seconds=120,
+    )
+    now = timezone.now()
+    OIMEFight.objects.filter(pk=fight.pk).update(
+        started_at=now - timedelta(seconds=120),
+        submitted_at=now,
     )
     contributor.casual_mode = True
     contributor.save()
@@ -598,7 +600,7 @@ def test_correct_answer_solves(otis):
     otis.assert_30x(resp)
     fight = OIMEFight.objects.get(contributor=contributor, proposal=proposal)
     assert fight.status == "OIME_OK"
-    assert fight.solve_time_seconds is not None
+    assert fight.submitted_at is not None
 
 
 @pytest.mark.django_db
@@ -775,12 +777,16 @@ def test_results_visible_to_author(otis):
 def test_detail_explains_solved_status(otis):
     user, contributor = _verified_contributor()
     proposal = OIMEProposalFactory.create()
-    OIMEFightFactory.create(
+    fight = OIMEFightFactory.create(
         contributor=contributor,
         proposal=proposal,
         status="OIME_OK",
         wrong_answers=1,
-        solve_time_seconds=125,
+    )
+    now = timezone.now()
+    OIMEFight.objects.filter(pk=fight.pk).update(
+        started_at=now - timedelta(seconds=125),
+        submitted_at=now,
     )
     otis.login(user)
     resp = otis.get_20x("oime-proposal-detail", proposal.pk)
@@ -809,12 +815,16 @@ def test_detail_shows_stats_summary(otis):
         contributor=contributor, proposal=proposal, status="OIME_FAIL"
     )
     for seconds in (100, 185, 300):
-        OIMEFightFactory.create(
+        fight = OIMEFightFactory.create(
             contributor=OIMEContributorFactory.create(),
             proposal=proposal,
             status="OIME_OK",
             wrong_answers=0,
-            solve_time_seconds=seconds,
+        )
+        now = timezone.now()
+        OIMEFight.objects.filter(pk=fight.pk).update(
+            started_at=now - timedelta(seconds=seconds),
+            submitted_at=now,
         )
     otis.login(user)
     resp = otis.get_20x("oime-proposal-detail", proposal.pk)
@@ -845,19 +855,18 @@ def test_results_ranked_for_ineligible_solver(otis):
     )
     fast = OIMEContributorFactory.create()
     slow = OIMEContributorFactory.create()
-    OIMEFightFactory.create(
-        contributor=slow,
-        proposal=proposal,
-        status="OIME_OK",
-        wrong_answers=0,
-        solve_time_seconds=300,
+    now = timezone.now()
+    slow_fight = OIMEFightFactory.create(
+        contributor=slow, proposal=proposal, status="OIME_OK", wrong_answers=0
     )
-    OIMEFightFactory.create(
-        contributor=fast,
-        proposal=proposal,
-        status="OIME_OK",
-        wrong_answers=0,
-        solve_time_seconds=100,
+    OIMEFight.objects.filter(pk=slow_fight.pk).update(
+        started_at=now - timedelta(seconds=300), submitted_at=now
+    )
+    fast_fight = OIMEFightFactory.create(
+        contributor=fast, proposal=proposal, status="OIME_OK", wrong_answers=0
+    )
+    OIMEFight.objects.filter(pk=fast_fight.pk).update(
+        started_at=now - timedelta(seconds=100), submitted_at=now
     )
     otis.login(user)
     resp = otis.get_20x("oime-proposal-results", proposal.pk)

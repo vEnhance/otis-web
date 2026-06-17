@@ -84,7 +84,7 @@ class OIMEFightAdmin(admin.ModelAdmin[OIMEFight]):
         "proposal",
         "status",
         "wrong_answers",
-        "solve_time_seconds",
+        "time_display",
         "started_at",
     )
     list_filter = ("status",)

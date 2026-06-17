@@ -123,13 +123,18 @@ def _proposal_stats(proposal: OIMEProposal) -> dict[str, Any]:
     )
     total = len(fights)
     correct = [f for f in fights if f.status == "OIME_OK"]
-    first_correct = [f for f in correct if f.wrong_answers == 0]
-    clean = [f for f in first_correct if f.solve_time_seconds is not None]
-    fastest_clean = min(clean, key=lambda f: f.solve_time_seconds) if clean else None  # type: ignore[arg-type, return-value]
+    first_correct = [
+        f for f in correct if f.wrong_answers == 0 and f.submitted_at is not None
+    ]
+
+    def _elapsed(f: OIMEFight) -> int:
+        return int((f.submitted_at - f.started_at).total_seconds())  # type: ignore[operator]
+
+    fastest_clean = min(first_correct, key=_elapsed) if first_correct else None
 
     median_clean = None
-    if clean:
-        median_seconds = round(statistics.median(f.solve_time_seconds for f in clean))  # type: ignore[misc]
+    if first_correct:
+        median_seconds = round(statistics.median(_elapsed(f) for f in first_correct))
         median_clean = f"{median_seconds // 60:02d}:{median_seconds % 60:02d}"
 
     def pct(n: int) -> int:
@@ -531,10 +536,8 @@ def submit_answer(request: HttpRequest, pk: int) -> HttpResponse:
 
     submitted = form.cleaned_data["answer"]
     if submitted == proposal.answer:
-        elapsed = int((timezone.now() - attempt.started_at).total_seconds())
         attempt.status = "OIME_OK"
         attempt.submitted_at = timezone.now()
-        attempt.solve_time_seconds = elapsed
         attempt.save()
         messages.success(request, f"Correct! You took {attempt.time_display}.")
     else:
@@ -674,14 +677,16 @@ def proposal_results(request: HttpRequest, pk: int) -> HttpResponse:
     fights = list(
         OIMEFight.objects.filter(proposal=proposal)
         .exclude(status="OIME_TBD")
-        .select_related("contributor", "proposal")
+        .select_related("contributor")
     )
     # Rank: solved first, then fewest wrong answers, then fastest solve time.
     fights.sort(
         key=lambda f: (
             f.status != "OIME_OK",
             f.wrong_answers,
-            f.solve_time_seconds if f.solve_time_seconds is not None else 1_000_000,
+            int((f.submitted_at - f.started_at).total_seconds())
+            if f.status == "OIME_OK" and f.submitted_at is not None
+            else 1_000_000,
         )
     )
 

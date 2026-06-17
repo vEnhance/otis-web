@@ -41,7 +41,11 @@
             </td>
             <td class="text-danger">
               {% if fight.wrong_answers %}✖{{ fight.wrong_answers }}{% endif %}
-              {% if not fight.is_success %}({{ fight.time_display }}){% endif %}
+              {% if fight.status == "OIME_TLE" %}
+                TLE
+              {% elif not fight.is_success %}
+                ({{ fight.time_display }})
+              {% endif %}
             </td>
           </tr>
         {% endfor %}

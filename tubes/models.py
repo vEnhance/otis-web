@@ -249,11 +249,6 @@ class OIMEFight(models.Model):
     submitted_at = models.DateTimeField(null=True, blank=True)
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default="OIME_TBD")
     wrong_answers = models.PositiveSmallIntegerField(default=0)
-    solve_time_seconds = models.IntegerField(
-        null=True,
-        blank=True,
-        help_text="Only set when status is OIME_OK.",
-    )
 
     class Meta:
         unique_together = [("contributor", "proposal")]
@@ -267,17 +262,12 @@ class OIMEFight(models.Model):
 
     @property
     def time_display(self) -> str:
-        """Fight duration as MM:SS. Uses solve_time_seconds for solved fights, time limit for TLE, else submitted_at − started_at."""
-        if self.solve_time_seconds is not None:
-            seconds = self.solve_time_seconds
-        elif self.status == "OIME_TLE":
-            seconds = self.proposal.time_limit_minutes * 60
-        elif self.submitted_at is not None:
+        """Fight duration as MM:SS via submitted_at − started_at. Empty for TLE and in-progress."""
+        if self.submitted_at is not None and self.status != "OIME_TLE":
             seconds = int((self.submitted_at - self.started_at).total_seconds())
-        else:
-            return ""
-        m, s = divmod(seconds, 60)
-        return f"{m:02d}:{s:02d}"
+            m, s = divmod(seconds, 60)
+            return f"{m:02d}:{s:02d}"
+        return ""
 
     @property
     def is_complete(self) -> bool:
