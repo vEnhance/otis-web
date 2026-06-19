@@ -4,21 +4,14 @@ Context vars: title (str), proposals (list of OIMEProposal annotated with user_f
 {% endcomment %}
 {% if proposals %}
   <h3 class="mt-4">{{ title }}</h3>
-  <table class="table table-striped" style="table-layout: fixed;">
-    <colgroup>
-      <col style="width: 3rem;">
-      <col>
-      <col style="width: 5rem;">
-      <col style="width: 5rem;">
-      <col style="width: 7rem;">
-    </colgroup>
+  <table class="table table-striped">
     <thead class="table-dark">
       <tr>
-        <th>ID</th>
-        <th>Title</th>
-        <th>Diff.</th>
-        <th>Votes</th>
-        <th>Status</th>
+        <th style="width: 3rem;">ID</th>
+        <th class="d-none d-sm-table-cell">Title</th>
+        <th style="width: 5rem;">Diff.</th>
+        <th style="width: 5rem;">Votes</th>
+        <th style="width: 5rem;">Status</th>
       </tr>
     </thead>
     <tbody>
@@ -28,7 +21,7 @@ Context vars: title (str), proposals (list of OIMEProposal annotated with user_f
             <a href="{{ proposal.get_absolute_url }}" class="fw-bold">{{ proposal.label }}</a>
             {% if proposal.archived %}<span class="badge bg-secondary ms-1">archived</span>{% endif %}
           </td>
-          <td>
+          <td class="d-none d-sm-table-cell">
             <a href="{{ proposal.get_absolute_url }}">{{ proposal.title|truncatechars:"30" }}</a>
           </td>
           <td>{{ proposal.difficulty_display }}</td>
@@ -43,17 +36,17 @@ Context vars: title (str), proposals (list of OIMEProposal annotated with user_f
             {% elif proposal.user_list_status == "revealed" %}
               <span class="text-muted">Spoiled</span>
             {% elif proposal.user_list_status == "casual" %}
-              <a href="{{ proposal.get_absolute_url }}">Not spoiled</a>
+              <a href="{{ proposal.get_absolute_url }}">Open</a>
             {% elif proposal.user_fight.status == "OIME_OK" %}
               <span class="text-success">✔{{ proposal.user_fight.time_display }}
                 {% if proposal.user_fight.wrong_answers %}(✖{{ proposal.user_fight.wrong_answers }}){% endif %}
               </span>
             {% elif proposal.user_fight.status == "OIME_FAIL" %}
-              <span class="text-danger">Gave Up</span>
+              <span class="text-danger">Gave up</span>
             {% elif proposal.user_fight.status == "OIME_TLE" %}
               <span class="text-danger">TLE</span>
             {% elif proposal.user_fight.status == "OIME_ALE" %}
-              <span class="text-danger">Reached ✖5</span>
+              <span class="text-danger">✖{{ proposal.user_fight.wrong_answers }}</span>
             {% endif %}
           </td>
         </tr>
