@@ -179,7 +179,7 @@ class UnitGroup(models.Model):
     @property
     def fandom_url(self) -> str:
         """URL for this unit group on the fandom site."""
-        return f"{FANDOM_BASE}/{self.subject.lower()}/{self.slug}"
+        return f"{FANDOM_BASE}/{self.subject.upper()}/{self.slug}"
 
     @property
     def has_artwork(self) -> bool:
