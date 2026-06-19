@@ -429,7 +429,7 @@ def unit_dump(request: HttpRequest) -> JsonResponse:
                 "num_submissions": stats.get("num_submissions", 0),
                 "num_students": student_counts.get(ug.pk, 0),
                 "num_clubs": stats.get("num_clubs", 0),
-                "num_hearts": stats.get("num_hearts", 0.0),
+                "num_hearts": round(stats.get("num_hearts", 0.0), 2),
                 "versions": versions.get(ug.pk, []),
             }
         )
