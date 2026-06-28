@@ -11,7 +11,6 @@
   {% spaceless %}
     <h1>{{ problem }}</h1>
   {% endspaceless %}
-
   {% if statement %}
     <div class="alert-secondary alert">{{ statement|safe }}</div>
     <details class="mt-3 mb-4">
@@ -23,10 +22,9 @@
                   white-space: pre-wrap;
                   border: 1px solid #C4C8CB;
                   border-radius: 6px;
-                  background: #E2E3E5;">{{ statement|escape }}</pre>
+                  background: #E2E3E5">{{ statement|escape }}</pre>
     </details>
   {% endif %}
-  
   {% if problem.hyperlink %}
     <p class="text-center">
       <a class="btn btn-secondary" href="{{ problem.hyperlink }}">
