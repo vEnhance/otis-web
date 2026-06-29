@@ -7,12 +7,16 @@ from django.http import HttpRequest
 from django.http.response import (
     HttpResponse,
     HttpResponseBadRequest,
+    HttpResponseRedirect,
     HttpResponseServerError,
 )
+from storages.backends.s3 import S3Storage
 
 from core.models import UserProfile
 
 logger = logging.getLogger(__name__)
+
+PROTECTED_FILE_URL_EXPIRE_SECONDS = 30
 
 
 def get_protected_file(folder: str, filename: str, request: HttpRequest):
@@ -25,8 +29,35 @@ def get_protected_file(folder: str, filename: str, request: HttpRequest):
     if ext not in [".tex", ".pdf"]:
         return HttpResponseBadRequest("Bad filename extension")
 
+    if ext == ".pdf":
+        content_type = "application/pdf"
+        disposition = (
+            f'{"inline" if inline_pdf else "attachment"}; filename="{filename}"'
+        )
+    else:
+        content_type = "text/plain"
+        disposition = (
+            f'{"inline" if inline_tex else "attachment"}; filename="{filename}"'
+        )
+
     path = f"{folder}/{filename}"
     storage = storages["protected"]
+
+    # On production the protected storage is S3Storage (R2-backed), which can
+    # mint presigned URLs locally without touching the network. Redirect the
+    # client directly to R2 so file bytes never pass through our server.
+    if isinstance(storage, S3Storage):
+        url = storage.url(
+            path,
+            parameters={
+                "ResponseContentType": content_type,
+                "ResponseContentDisposition": disposition,
+            },
+            expire=PROTECTED_FILE_URL_EXPIRE_SECONDS,
+        )
+        return HttpResponseRedirect(url)
+
+    # Fallback: stream the file through Django (used in dev/test with InMemoryStorage).
     try:
         file = storage.open(path)
     except FileNotFoundError:
@@ -35,15 +66,6 @@ def get_protected_file(folder: str, filename: str, request: HttpRequest):
         return HttpResponseServerError("File not found")
 
     response = HttpResponse(content=file)
-    if ext == ".pdf":
-        response["Content-Type"] = "application/pdf"
-        response["Content-Disposition"] = (
-            f'{"inline" if inline_pdf else "attachment"}; filename="{filename}"'
-        )
-    else:
-        response["Content-Type"] = "text/plain"
-        response["Content-Disposition"] = (
-            f'{"inline" if inline_tex else "attachment"}; filename="{filename}"'
-        )
-
+    response["Content-Type"] = content_type
+    response["Content-Disposition"] = disposition
     return response
