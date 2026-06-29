@@ -70,7 +70,7 @@ class UnitFactory(DjangoModelFactory):
         protected = storages["protected"]
         stuff_to_write = [
             ("unit-pdf", u.problems_pdf_filename, b"Prob"),
-            ("sol-pdf", u.solutions_pdf_filename, b"Soln"),
+            ("unit-sol", u.solutions_pdf_filename, b"Soln"),
             ("unit-tex", u.problems_tex_filename, b"TeX"),
         ]
         for folder, fname, content in stuff_to_write:

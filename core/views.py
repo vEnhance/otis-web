@@ -275,7 +275,7 @@ def unit_tex(request: HttpRequest, pk: int) -> HttpResponse:
 def unit_solutions(request: HttpRequest, pk: int) -> HttpResponse:
     unit = get_object_or_404(Unit, pk=pk)
     if permitted(unit, request, asking_solution=True):
-        return get_protected_file("sol-pdf", unit.solutions_pdf_filename, request)
+        return get_protected_file("unit-sol", unit.solutions_pdf_filename, request)
     else:
         raise PermissionDenied(f"Can't view the solutions for {unit}")
 
