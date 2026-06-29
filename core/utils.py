@@ -1,10 +1,8 @@
 import logging
-from hashlib import sha256
 
-from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
-from django.core.files.storage import default_storage
+from django.core.files.storage import storages
 from django.http import HttpRequest
 from django.http.response import (
     HttpResponse,
@@ -17,13 +15,7 @@ from core.models import UserProfile
 logger = logging.getLogger(__name__)
 
 
-def storage_hash(value: str) -> str:
-    s = f"{settings.STORAGE_HASH_KEY}|{value}"
-    h = sha256(s.encode("ascii")).hexdigest()
-    return f"TESTING_{h}" if settings.TESTING else h
-
-
-def get_from_google_storage(filename: str, request: HttpRequest):
+def get_protected_file(folder: str, filename: str, request: HttpRequest):
     if not isinstance(request.user, User):
         raise PermissionDenied("Only logged in users may query core storage.")
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
@@ -33,9 +25,10 @@ def get_from_google_storage(filename: str, request: HttpRequest):
     if ext not in [".tex", ".pdf"]:
         return HttpResponseBadRequest("Bad filename extension")
 
-    path = f"protected/{storage_hash(filename)}{ext}"
+    path = f"{folder}/{filename}"
+    storage = storages["protected"]
     try:
-        file = default_storage.open(path)
+        file = storage.open(path)
     except FileNotFoundError:
         errmsg = f"Unable to find {filename} at {path}."
         logger.critical(errmsg)

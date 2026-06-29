@@ -15,7 +15,10 @@ IS_PRODUCTION=0
 # GOOGLE_APPLICATION_CREDENTIALS="creds"
 # DJANGO_SECRET_KEY="django secret key"
 # INVOICE_HASH_KEY="invoice hash key"
-# STORAGE_HASH_KEY='storage hash key'
+# R2_ACCOUNT_ID="cloudflare account id"
+# R2_ACCESS_KEY_ID="r2 access key id"
+# R2_SECRET_ACCESS_KEY="r2 secret access key"
+# R2_BUCKET_NAME="r2 bucket name"
 
 # WEBHOOK_URL="discord webhook URL"
 # WEBHOOK_URL_SUCCESS="discord webhook URL"

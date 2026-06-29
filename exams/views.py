@@ -5,7 +5,7 @@ from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 
-from core.utils import get_from_google_storage
+from core.utils import get_protected_file
 from exams.calculator import expr_compute
 from otisweb.utils import AuthHttpRequest
 from roster.utils import get_student_by_pk, infer_student
@@ -20,7 +20,7 @@ from .models import ExamAttempt, PracticeExam
 def pdf(request: AuthHttpRequest, pk: int) -> HttpResponse:
     exam = get_object_or_404(PracticeExam, pk=pk)
     if request.user.is_staff:
-        return get_from_google_storage(exam.pdfname, request)
+        return get_protected_file("exam-pdf", exam.pdfname, request)
 
     student = infer_student(request)
     if not exam.started:
@@ -30,7 +30,7 @@ def pdf(request: AuthHttpRequest, pk: int) -> HttpResponse:
     elif not student.enabled:
         raise PermissionDenied("Your student account is disabled.")
 
-    return get_from_google_storage(exam.pdfname, request)
+    return get_protected_file("exam-pdf", exam.pdfname, request)
 
 
 @login_required

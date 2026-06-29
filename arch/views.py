@@ -18,7 +18,7 @@ from reversion.views import RevisionMixin
 from arch.forms import ProblemSelectForm
 from arch.models import get_disk_statement_from_puid
 from core.models import UserProfile
-from core.utils import get_from_google_storage
+from core.utils import get_protected_file
 from otisweb.decorators import verified_required
 from otisweb.mixins import VerifiedRequiredMixin
 
@@ -271,7 +271,7 @@ def view_solution(request: HttpRequest, puid: str) -> HttpResponse:
             f"The problem {puid} is not in the OTIS database, "
             "therefore no solution file could be retrieved."
         )
-    return get_from_google_storage(f"{puid}.tex", request)
+    return get_protected_file("arch-sol", f"{puid}.tex", request)
 
 
 class VoteCreate(

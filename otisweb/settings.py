@@ -236,15 +236,36 @@ if PRODUCTION:
         "staticfiles": {
             "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
         },
+        "protected": {
+            "BACKEND": "storages.backends.s3.S3Storage",
+            "OPTIONS": {
+                "bucket_name": os.getenv("R2_BUCKET_NAME"),
+                "access_key": os.getenv("R2_ACCESS_KEY_ID"),
+                "secret_key": os.getenv("R2_SECRET_ACCESS_KEY"),
+                "endpoint_url": f"https://{os.getenv('R2_ACCOUNT_ID')}.r2.cloudflarestorage.com",
+                "region_name": "auto",
+                "signature_version": "s3v4",
+                "default_acl": None,  # R2 has no ACLs
+                "querystring_auth": True,
+            },
+        },
     }
     GS_BUCKET_NAME = os.getenv("GS_BUCKET_NAME")
     MEDIA_URL = os.getenv("MEDIA_URL")
     assert GS_BUCKET_NAME is not None
     assert MEDIA_URL is not None
+    assert os.getenv("R2_BUCKET_NAME") is not None
     IMPORT_EXPORT_TMP_STORAGE_CLASS = import_export.tmp_storages.CacheStorage
     SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
     assert SECRET_KEY is not None
 else:
+    STORAGES = {
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+        "protected": {"BACKEND": "django.core.files.storage.InMemoryStorage"},
+    }
     MEDIA_URL = "/media/"
     SECRET_KEY = "evan_chen_is_really_cool"
 
@@ -255,7 +276,6 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
 
 # Custom Evan keys
 INVOICE_HASH_KEY = os.getenv("INVOICE_HASH_KEY", "evan_chen_is_still_really_cool")
-STORAGE_HASH_KEY = os.getenv("STORAGE_HASH_KEY", "look_at_me_im_a_cute_kitten")
 CERT_HASH_KEY = os.getenv("CERT_HASH_KEY", "certified_by_god")
 OPAL_HASH_KEY = os.getenv("OPAL_HASH_KEY", "paradise_is_where_i_am")
 API_TARGET_HASH = os.getenv("API_TARGET_HASH")

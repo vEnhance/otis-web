@@ -4,7 +4,7 @@ from typing import Any, Iterable
 from django.conf import settings
 from django.contrib.auth.models import Group, User
 from django.core.files.base import ContentFile
-from django.core.files.storage import default_storage
+from django.core.files.storage import storages
 from factory.declarations import LazyAttribute, Sequence, SubFactory
 from factory.django import DjangoModelFactory
 from factory.faker import Faker
@@ -12,7 +12,6 @@ from factory.fuzzy import FuzzyChoice
 from factory.helpers import post_generation
 
 from core.models import Semester, Unit, UnitGroup, UserProfile
-from core.utils import storage_hash
 from otisweb_testsuite import UniqueFaker
 
 
@@ -68,15 +67,14 @@ class UnitFactory(DjangoModelFactory):
         if settings.TESTING_NEEDS_MOCK_MEDIA is False:
             return
         u: Unit = self  # type: ignore
+        protected = storages["protected"]
         stuff_to_write = [
-            (u.problems_pdf_filename, b"Prob", ".pdf"),
-            (u.solutions_pdf_filename, b"Soln", ".pdf"),
-            (u.problems_tex_filename, b"TeX", ".tex"),
+            ("unit-pdf", u.problems_pdf_filename, b"Prob"),
+            ("sol-pdf", u.solutions_pdf_filename, b"Soln"),
+            ("unit-tex", u.problems_tex_filename, b"TeX"),
         ]
-        for fname, content, ext in stuff_to_write:
-            default_storage.save(
-                f"protected/{storage_hash(fname)}{ext}", ContentFile(content)
-            )
+        for folder, fname, content in stuff_to_write:
+            protected.save(f"{folder}/{fname}", ContentFile(content))
 
 
 class SemesterFactory(DjangoModelFactory):

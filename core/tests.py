@@ -1,5 +1,4 @@
 import json
-import re
 from typing import Any
 
 import pytest
@@ -13,7 +12,6 @@ from core.factories import (
     UserFactory,
 )
 from core.models import Semester
-from core.utils import storage_hash
 from dashboard.factories import PSetFactory
 from roster.factories import StudentFactory
 from rpg.factories import BonusLevelFactory
@@ -128,13 +126,6 @@ def test_mallory_core_views(otis):
     for v in ("view-problems", "view-tex", "view-solutions"):
         otis.get_denied(v, u.pk)
     otis.get_40x("admin-unit-list")
-
-
-@pytest.mark.django_db
-def test_storage_hash():
-    # In test mode, storage_hash returns "TESTING_" prefix
-    assert re.match(r"(TESTING_)?[0-9a-z]{64}", storage_hash("meow"))
-    assert storage_hash("Serral") != storage_hash("Reynor")
 
 
 @pytest.mark.django_db

@@ -2,13 +2,12 @@ from typing import Any
 
 from django.conf import settings
 from django.core.files.base import ContentFile
-from django.core.files.storage import default_storage
+from django.core.files.storage import storages
 from factory.declarations import LazyAttribute, Sequence, SubFactory
 from factory.django import DjangoModelFactory
 from factory.faker import Faker
 from factory.helpers import post_generation
 
-from core.utils import storage_hash
 from exams.models import ExamAttempt, PracticeExam
 from roster.factories import StudentFactory
 
@@ -29,9 +28,7 @@ class PracticeExamFactory(DjangoModelFactory):
             return
 
         exam: PracticeExam = self  # type: ignore
-        default_storage.save(
-            f"protected/{storage_hash(exam.pdfname)}.pdf", ContentFile(b"exam")
-        )
+        storages["protected"].save(f"exam-pdf/{exam.pdfname}", ContentFile(b"exam"))
 
 
 class QuizFactory(PracticeExamFactory):
