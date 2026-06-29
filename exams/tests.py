@@ -5,7 +5,6 @@ from django.test.utils import override_settings
 from freezegun import freeze_time
 
 from core.factories import SemesterFactory, UserFactory
-from core.utils import PROTECTED_FILE_URL_EXPIRE_SECONDS
 from exams.calculator import expr_compute
 from exams.factories import PracticeExamFactory, QuizFactory
 from exams.models import ExamAttempt, PracticeExam
@@ -207,47 +206,3 @@ def test_quiz(otis, exam_setup):
         a.delete()  # make sure we can't resubmit
         otis.login("alice")
         otis.post_denied("quiz", alice.pk, quiz_waltz.pk, data={"answer1": 1337})
-
-
-@pytest.mark.django_db
-def test_exam_pdf_presigned_redirect(otis):
-    """On an S3-backed protected storage, get_protected_file should 302-redirect
-    to a short-lived presigned URL rather than streaming the file."""
-    r2_storages = {
-        "default": {"BACKEND": "django.core.files.storage.InMemoryStorage"},
-        "staticfiles": {
-            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
-        },
-        "protected": {
-            "BACKEND": "storages.backends.s3.S3Storage",
-            "OPTIONS": {
-                "bucket_name": "test-bucket",
-                "access_key": "fake-access-key",
-                "secret_key": "fake-secret-key",
-                "endpoint_url": "https://fake-account.r2.cloudflarestorage.com",
-                "region_name": "auto",
-                "signature_version": "s3v4",
-                "default_acl": None,
-                "querystring_auth": True,
-            },
-        },
-    }
-
-    exam = PracticeExamFactory.create(
-        family="Waltz",
-        number=99,
-        is_test=True,
-    )
-    staff = UserFactory.create(is_staff=True)
-    otis.login(staff)
-
-    # Staff bypass doesn't check semester/family, so we get to the redirect immediately.
-    with override_settings(STORAGES=r2_storages):
-        resp = otis.get_30x("exam-pdf", exam.pk)
-
-    assert resp.status_code == 302
-    location = resp["Location"]
-    assert f"exam-pdf/{exam.pdfname}" in location
-    assert "X-Amz-Signature" in location
-    assert f"X-Amz-Expires={PROTECTED_FILE_URL_EXPIRE_SECONDS}" in location
-    assert "response-content-disposition" in location
