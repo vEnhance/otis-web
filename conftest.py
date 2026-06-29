@@ -21,3 +21,11 @@ def pytest_configure():
 @pytest.fixture(autouse=True)
 def fast_password_hasher(settings: SettingsWrapper) -> None:
     settings.PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
+
+
+@pytest.fixture(autouse=True)
+def in_memory_default_storage(settings: SettingsWrapper) -> None:
+    settings.STORAGES = {
+        **settings.STORAGES,
+        "default": {"BACKEND": "django.core.files.storage.InMemoryStorage"},
+    }
