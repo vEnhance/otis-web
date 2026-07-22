@@ -34,7 +34,7 @@ dependencies = [
   "prettytable>=3.17.0",
   "pyparsing>=3.3.2",
   "python-dotenv>=1.2.2",
-  "setuptools>=82.0.1",
+  "setuptools>=83.0.0",
   "stripe==5.5.0",
   "wheel>=0.47.0",
   "wiki>=0.12.2",
