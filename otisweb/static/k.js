@@ -716,7 +716,7 @@ function runKatamari() {
         att,
         numAttachedVisible = 0;
       drawBall();
-      for (i = attached.length; --i >= 0; ) {
+      for (i = attached.length; --i >= 0;) {
         att = attached[i];
         if (att.removeR < radius) {
           attached.splice(i, 1).map(onAttachedRemoved);
