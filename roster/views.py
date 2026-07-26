@@ -797,7 +797,7 @@ def link_assistant(request: HttpRequest) -> HttpResponse:
     return render(request, "roster/link_assistant.html", context)
 
 
-USER_LOOKUP_LIMIT = 10
+USER_LOOKUP_LIMIT = 30
 
 # Where to find a human-readable handle within a SocialAccount's extra_data,
 # in order of preference: username (Discord/GitHub-ish), login (GitHub), email (Google).

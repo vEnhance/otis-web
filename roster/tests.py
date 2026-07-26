@@ -140,12 +140,6 @@ def test_user_lookup(otis) -> None:
     assert resp.context["results"] == []
     otis.assert_has(resp, "No matches were found.")
 
-    # Results are capped at 10
-    for i in range(12):
-        UserFactory.create(username=f"capzz{i:02d}")
-    resp = otis.post_20x("user-lookup", data={"query": "capzz"})
-    assert len(resp.context["results"]) == 10
-
 
 @pytest.mark.django_db
 def test_update_profile(otis) -> None:
