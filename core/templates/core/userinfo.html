@@ -30,6 +30,44 @@
           {% endif %}
         </td>
       </tr>
+      <tr>
+        <th>Groups</th>
+        <td>
+          {% for group in groups %}
+            {{ group.name }}{% if not forloop.last %}, {% endif %}
+          {% empty %}
+            (none)
+          {% endfor %}
+        </td>
+      </tr>
+      <tr>
+        <th>Staff</th>
+        <td>
+          {% if target_user.is_staff %}
+            Yes
+          {% else %}
+            No
+          {% endif %}
+        </td>
+      </tr>
+      <tr>
+        <th>Superuser</th>
+        <td>
+          {% if target_user.is_superuser %}
+            Yes
+          {% else %}
+            No
+          {% endif %}
+        </td>
+      </tr>
+      <tr>
+        <th>Last Login</th>
+        <td>{{ target_user.last_login|date:"Y-m-d H:i"|default:"(never)" }}</td>
+      </tr>
+      <tr>
+        <th>Date Joined</th>
+        <td>{{ target_user.date_joined|date:"Y-m-d H:i" }}</td>
+      </tr>
     </tbody>
   </table>
   <h2>Connected Social Accounts</h2>

@@ -2,10 +2,12 @@ import datetime
 from io import StringIO
 
 import pytest
+from allauth.socialaccount.models import SocialAccount
 from django.conf import settings
 from django.contrib.auth.models import Group, User
 from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
 from freezegun.api import freeze_time
 
 from core.factories import (
@@ -56,54 +58,93 @@ def test_username_lookup(otis) -> None:
 
 
 @pytest.mark.django_db
-def test_email_lookup(otis) -> None:
+def test_user_lookup(otis) -> None:
     admin: User = UserFactory.create(is_superuser=True, is_staff=True)
     regular_user: User = UserFactory.create()
+    staff_only: User = UserFactory.create(is_staff=True)
     semester_old: Semester = SemesterFactory.create(end_year=2025)
     semester_new: Semester = SemesterFactory.create(end_year=2026)
 
     # Create students with different emails and semesters
-    alice: User = UserFactory.create(email="alice@example.com")
+    alice: User = UserFactory.create(
+        username="alice", email="alice@example.com", first_name="Alice"
+    )
     StudentFactory.create(user=alice, semester=semester_old)
     alice_new: Student = StudentFactory.create(user=alice, semester=semester_new)
 
-    bob: User = UserFactory.create(email="bob@example.com")
+    bob: User = UserFactory.create(username="bob", email="bob@example.com")
     bob_student: Student = StudentFactory.create(user=bob, semester=semester_new)
 
+    # A user with no Student instance at all should still show up.
+    carl: User = UserFactory.create(username="carl", email="carl@example.com")
+
+    SocialAccount.objects.create(
+        user=bob,
+        provider="discord",
+        uid="12345",
+        extra_data={"username": "bobdiscord"},
+    )
+    SocialAccount.objects.create(
+        user=carl,
+        provider="github",
+        uid="67890",
+        extra_data={"login": "carlhub"},
+    )
+
     # Test access control - anonymous user should be redirected
-    otis.get_30x("email-lookup")
+    otis.get_30x("user-lookup")
 
     # Test access control - regular user should be denied
     otis.login(regular_user)
-    otis.get_40x("email-lookup")
+    otis.get_40x("user-lookup")
+
+    # Test access control - staff-but-not-superuser should also be denied
+    otis.login(staff_only)
+    otis.get_40x("user-lookup")
 
     # Test GET request with admin user - should show form
     otis.login(admin)
-    resp = otis.get_20x("email-lookup")
-    otis.assert_has(resp, "Email lookup")
+    resp = otis.get_20x("user-lookup")
+    otis.assert_has(resp, "User lookup")
 
-    # Test POST with valid email that matches a student (should redirect)
-    resp = otis.post("email-lookup", data={"email": "alice@example.com"})
-    assert resp.url == alice_new.get_absolute_url()
+    # Search by exact email
+    resp = otis.post_20x("user-lookup", data={"query": "alice@example.com"})
+    otis.assert_has(resp, "alice")
+    otis.assert_has(resp, reverse("user-info", args=(alice.pk,)))
+    otis.assert_has(resp, alice_new.get_absolute_url())
 
-    # Test POST with valid email but no matching student (should show warning)
-    resp = otis.post_20x(
-        "email-lookup", data={"email": "nonexistent@example.com"}, follow=True
-    )
-    messages = [m.message for m in resp.context["messages"]]
-    assert "No matches found" in messages
+    # Search by Django username, case-insensitive substring
+    resp = otis.post_20x("user-lookup", data={"query": "BO"})
+    otis.assert_has(resp, "bob")
+    otis.assert_has(resp, bob_student.get_absolute_url())
 
-    # Test POST with invalid email format (form validation should catch it)
-    resp = otis.post_20x(
-        "email-lookup",
-        data={"email": "invalid_email"},
-    )
-    # Form should be re-displayed with errors, no redirect should occur
-    otis.assert_has(resp, "Email lookup")
+    # Search by real name
+    resp = otis.post_20x("user-lookup", data={"query": "Alice"})
+    otis.assert_has(resp, "alice")
 
-    # Test case insensitive matching
-    resp = otis.post("email-lookup", data={"email": "BOB@EXAMPLE.COM"})
-    assert resp.url == bob_student.get_absolute_url()
+    # Search by a social account username (not restricted to Discord)
+    resp = otis.post_20x("user-lookup", data={"query": "bobdiscord"})
+    otis.assert_has(resp, "bob")
+    otis.assert_has(resp, "Discord (bobdiscord)")
+
+    resp = otis.post_20x("user-lookup", data={"query": "carlhub"})
+    otis.assert_has(resp, "carl")
+    otis.assert_has(resp, "GitHub (carlhub)")
+
+    # A user with no Student instance still shows up, with no students listed.
+    resp = otis.post_20x("user-lookup", data={"query": "carl@example.com"})
+    otis.assert_has(resp, "carl")
+
+    # No matches -> empty result list, rendered as an empty-state alert
+    resp = otis.post_20x("user-lookup", data={"query": "nonexistent-query-zzz"})
+    assert resp.context["results"] == []
+    otis.assert_has(resp, "No matches were found.")
+
+    # Results are capped at 10
+    for i in range(12):
+        UserFactory.create(username=f"capzz{i:02d}")
+    resp = otis.post_20x("user-lookup", data={"query": "capzz"})
+    assert len(resp.context["results"]) == 10
 
 
 @pytest.mark.django_db

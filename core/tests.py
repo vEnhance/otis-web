@@ -327,13 +327,19 @@ def test_userinfo_displays_info(otis):
         email="test@example.com",
         first_name="Test",
         last_name="User",
+        is_staff=True,
     )
+    target_user.groups.add(GroupFactory.create(name="Testers"))
     admin = UserFactory.create(is_superuser=True, is_staff=True)
     otis.login(admin)
     resp = otis.get_20x("user-info", target_user.pk)
     otis.assert_has(resp, "testuser")
     otis.assert_has(resp, "test@example.com")
     otis.assert_has(resp, "Test User")
+    otis.assert_has(resp, "Testers")
+    otis.assert_has(resp, target_user.date_joined.strftime("%Y-%m-%d"))
+    assert target_user.last_login is None
+    otis.assert_has(resp, "(never)")
 
 
 @pytest.mark.django_db

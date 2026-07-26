@@ -378,6 +378,7 @@ class UserInfoView(AdminRequiredMixin, DetailView[User]):
         user = self.object
         context["social_accounts"] = user.socialaccount_set.all()  # type: ignore[attr-defined]
         context["has_password"] = user.has_usable_password()
+        context["groups"] = user.groups.all()
         context["reset_link"] = self.request.session.pop("reset_link", None)
         return context
 

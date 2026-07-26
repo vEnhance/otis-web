@@ -30,6 +30,7 @@ from django.db.models.fields import FloatField
 from django.db.models.functions.comparison import Cast
 from django.db.models.manager import Manager
 from django.db.models.query import QuerySet
+from django.db.models.query_utils import Q
 from django.forms import ValidationError
 from django.forms.models import BaseModelForm
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
@@ -60,10 +61,9 @@ from .forms import (
     AdvanceForm,
     CurriculumForm,
     DecisionForm,
-    DiscordLookupForm,
-    EmailLookupForm,
     InquiryForm,
     UserForm,
+    UserLookupForm,
 )
 from .models import (
     Invoice,
@@ -797,60 +797,91 @@ def link_assistant(request: HttpRequest) -> HttpResponse:
     return render(request, "roster/link_assistant.html", context)
 
 
+USER_LOOKUP_LIMIT = 10
+
+# Where to find a human-readable handle within a SocialAccount's extra_data,
+# in order of preference: username (Discord/GitHub-ish), login (GitHub), email (Google).
+SOCIAL_HANDLE_KEYS = ("username", "login", "email")
+
+# django-allauth provider IDs are lowercase; .title() mangles "github" into "Github".
+SOCIAL_PROVIDER_LABELS: dict[str, str] = {
+    "discord": "Discord",
+    "github": "GitHub",
+    "google": "Google",
+}
+
+
+def _social_handle(account: SocialAccount) -> Optional[str]:
+    extra_data = account.extra_data
+    if isinstance(extra_data, dict):
+        for key in SOCIAL_HANDLE_KEYS:
+            if value := extra_data.get(key):
+                return str(value)
+    return account.uid or None
+
+
+def _social_label(account: SocialAccount) -> str:
+    if account.provider in SOCIAL_PROVIDER_LABELS:
+        return SOCIAL_PROVIDER_LABELS[account.provider]
+    return account.provider.title()
+
+
 @admin_required
-def email_lookup(request: HttpRequest) -> HttpResponse:
-    context = {}
+def user_lookup(request: HttpRequest) -> HttpResponse:
+    context: dict[str, Any] = {}
+    results = None
     if request.method == "POST":
-        form = EmailLookupForm(request.POST)
+        form = UserLookupForm(request.POST)
         if form.is_valid():
-            email = form.cleaned_data["email"]
-            student = (
-                Student.objects.filter(user__email__iexact=email)
-                .order_by("-semester__end_year")
-                .first()
-            )
-            if student is None:
-                messages.warning(request, "No matches found")
-            else:
-                return HttpResponseRedirect(student.get_absolute_url())
-
-    else:
-        form = EmailLookupForm()
-    context["form"] = form
-    return render(request, "roster/email_lookup.html", context)
-
-
-@admin_required
-def discord_lookup(request: HttpRequest) -> HttpResponse:
-    context = {}
-    if request.method == "POST":
-        form = DiscordLookupForm(request.POST)
-        if form.is_valid():
-            discord_handle = form.cleaned_data["discord_handle"]
-            lookup: dict[SocialAccount, str] = {}
-            for sa in SocialAccount.objects.filter(
-                provider="discord", extra_data__icontains=discord_handle
-            ).select_related("user")[:5]:
-                student = (
-                    Student.objects.filter(user=sa.user)
-                    .order_by("-semester__end_year")
-                    .first()
+            query = form.cleaned_data["query"]
+            users = list(
+                User.objects.filter(
+                    Q(username__icontains=query)
+                    | Q(email__icontains=query)
+                    | Q(first_name__icontains=query)
+                    | Q(last_name__icontains=query)
+                    | Q(socialaccount__extra_data__icontains=query)
                 )
-                if student is not None:
-                    lookup[sa] = student.get_absolute_url()
-                else:
-                    lookup[sa] = reverse("admin:auth_user_change", args=(sa.user.pk,))
-            if len(lookup) == 1:
-                _, url = list(lookup.items())[0]
-                return HttpResponseRedirect(url)
-            context["lookup"] = lookup
-        else:
-            context["lookup"] = None
+                .distinct()
+                .prefetch_related("socialaccount_set", "groups")
+                .order_by("username")[:USER_LOOKUP_LIMIT]
+            )
+
+            students_by_user_id: dict[int, list[Student]] = collections.defaultdict(
+                list
+            )
+            student_qs = (
+                Student.objects.filter(user__in=users)
+                .select_related("semester")
+                .order_by("-semester__end_year")
+            )
+            for student in student_qs:
+                students_by_user_id[student.user_id].append(student)  # type: ignore
+
+            results = []
+            for user in users:
+                auth_methods = [
+                    f"{_social_label(account)} ({handle})"
+                    if (handle := _social_handle(account)) is not None
+                    else _social_label(account)
+                    for account in user.socialaccount_set.all()  # type: ignore[attr-defined]
+                ]
+                if user.has_usable_password():
+                    auth_methods.append("Password")
+                results.append(
+                    {
+                        "user": user,
+                        "groups": list(user.groups.all()),
+                        "auth_methods": auth_methods,
+                        "userinfo_url": reverse("user-info", args=(user.pk,)),
+                        "students": students_by_user_id.get(user.pk, []),
+                    }
+                )
     else:
-        form = DiscordLookupForm()
-        context["lookup"] = None
+        form = UserLookupForm()
     context["form"] = form
-    return render(request, "roster/discord_lookup.html", context)
+    context["results"] = results
+    return render(request, "roster/user_lookup.html", context)
 
 
 @login_required

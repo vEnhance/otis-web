@@ -1,0 +1,72 @@
+{% extends "layout.html" %}
+{% block title %}
+  User lookup
+{% endblock title %}
+{% block layout-content %}
+  {% if results != None %}
+    <h2>Results</h2>
+    {% if results|length == 0 %}
+      <div class="alert alert-danger">No matches were found.</div>
+    {% else %}
+      {% for r in results %}
+        <div class="card mb-3">
+          <b class="card-header">
+            <a href="{{ r.userinfo_url }}" class="text-decoration-none">{{ r.user.get_full_name|default:r.user.username }}</a>
+            {% if r.user.is_superuser %}<span class="badge bg-danger">Superuser</span>{% endif %}
+            {% if r.user.is_staff %}<span class="badge bg-secondary">Staff</span>{% endif %}
+          </b>
+          <div class="card-body py-0">
+            <table class="table mb-0">
+              <tbody>
+                <tr>
+                  <th>Username</th>
+                  <td>
+                    <code>{{ r.user.username }}</code>
+                  </td>
+                </tr>
+                <tr>
+                  <th>Email</th>
+                  <td>{{ r.user.email|default:"(none)" }}</td>
+                </tr>
+                <tr>
+                  <th>Groups</th>
+                  <td>
+                    {% for group in r.groups %}
+                      {{ group.name }}{% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                      (none)
+                    {% endfor %}
+                  </td>
+                </tr>
+                <tr>
+                  <th>Auth</th>
+                  <td>
+                    {% for method in r.auth_methods %}
+                      {{ method }}{% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                      (none)
+                    {% endfor %}
+                  </td>
+                </tr>
+                <tr>
+                  <th>Students</th>
+                  <td>
+                    {% for student in r.students %}
+                      <a href="{{ student.get_absolute_url }}">{{ student.semester }}</a>{% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                      (none)
+                    {% endfor %}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      {% endfor %}
+    {% endif %}
+    <hr />
+  {% endif %}
+  <h2>User lookup</h2>
+  <p>Look up a user by email, Django username, social account username, or real name.</p>
+  {% include "otisweb/components/generic_form.html" with submit_name="Search" %}
+{% endblock layout-content %}

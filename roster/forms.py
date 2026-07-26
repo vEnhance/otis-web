@@ -221,9 +221,8 @@ class LinkAssistantForm(forms.Form):
     )
 
 
-class DiscordLookupForm(forms.Form):
-    discord_handle = forms.CharField()
-
-
-class EmailLookupForm(forms.Form):
-    email = forms.EmailField()
+class UserLookupForm(forms.Form):
+    query = forms.CharField(
+        label="Search query",
+        help_text="Email, Django username, social account username, or real name.",
+    )
