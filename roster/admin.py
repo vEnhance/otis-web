@@ -32,14 +32,17 @@ class RosterResource(resources.ModelResource):
     )
 
 
-class ApplyUUIDIEResource:
+class ApplyUUIDIEResource(resources.ModelResource):
     class Meta:
         skip_unchanged = True
         model = ApplyUUID
+        import_id_fields = ("uuid",)
         fields = (
             "uuid",
             "percent_aid",
+            "enabled",
         )
+        export_order = fields
 
 
 class NeedsFinaidListFilter(admin.SimpleListFilter):
@@ -78,7 +81,7 @@ class ApplyUUIDAdmin(ImportExportModelAdmin):
         "enabled",
     )
     resource_class = ApplyUUIDIEResource
-    actions = ("disable_uuids",)
+    actions = ("enable_uuids", "disable_uuids")
 
     @admin.action(description="Enable selected ApplyUUIDs")
     def enable_uuids(self, request: HttpRequest, queryset: QuerySet[ApplyUUID]) -> None:

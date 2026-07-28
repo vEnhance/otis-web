@@ -1,7 +1,9 @@
 import datetime
 from io import StringIO
+from uuid import uuid4
 
 import pytest
+import tablib
 from allauth.socialaccount.models import SocialAccount
 from django.conf import settings
 from django.contrib.auth.models import Group, User
@@ -28,6 +30,7 @@ from roster.factories import (
     StudentRegistrationFactory,
 )
 from roster.models import (
+    ApplyUUID,
     Assistant,
     Invoice,
     RegistrationContainer,
@@ -36,7 +39,7 @@ from roster.models import (
     UnitInquiry,
 )
 
-from .admin import build_students
+from .admin import ApplyUUIDIEResource, build_students
 
 UTC = datetime.timezone.utc
 
@@ -1601,6 +1604,39 @@ def test_reg_with_disabled_apply_uuid(otis) -> None:
     assert not StudentRegistration.objects.filter(user=alice).exists()
     au.refresh_from_db()
     assert au.reg is None
+
+
+@pytest.mark.django_db
+def test_applyuuid_admin_import_export(otis) -> None:
+    admin: User = UserFactory.create(is_superuser=True, is_staff=True)
+    au: ApplyUUID = ApplyUUIDFactory.create(percent_aid=40)
+    original_pk = au.pk
+    otis.login(admin)
+    otis.get_20x("admin:roster_applyuuid_export")
+    otis.get_20x("admin:roster_applyuuid_import")
+
+    resource = ApplyUUIDIEResource()
+    # `id` must never be exported/imported: rows are matched on the unique
+    # `uuid`, and an importable `id` column would let a CSV reassign an
+    # existing row's primary key.
+    assert resource.get_export_headers() == ["uuid", "percent_aid", "enabled"]
+
+    dataset = tablib.Dataset(headers=["uuid", "percent_aid"])
+    dataset.append([str(uuid4()), 30])
+    result = resource.import_data(dataset, raise_errors=True)
+    assert not result.has_errors()
+    assert result.totals["new"] == 1
+
+    # Re-importing an existing uuid should update that row in place, not
+    # create a duplicate or touch its primary key.
+    dataset = tablib.Dataset(headers=["uuid", "percent_aid"])
+    dataset.append([str(au.uuid), 55])
+    result = resource.import_data(dataset, raise_errors=True)
+    assert not result.has_errors()
+    assert result.totals["update"] == 1
+    au.refresh_from_db()
+    assert au.percent_aid == 55
+    assert au.pk == original_pk
 
 
 @pytest.mark.django_db
