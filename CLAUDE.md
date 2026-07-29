@@ -40,7 +40,6 @@ Key Django apps:
 - `arch/` - Problem archive
 - `payments/` - Stripe payment integration
 - `rpg/` - Achievement/gamification system
-- `wiki/` - Wiki integration
 - `otisweb/` - Main project settings
 
 ## Development Guidelines
