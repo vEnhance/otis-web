@@ -99,25 +99,12 @@ INSTALLED_APPS += [
     "crispy_forms",
     "django_bootstrap5",
     "django_extensions",
-    "django_nyt.apps.DjangoNytConfig",
     "hijack",
     "hijack.contrib.admin",
     "import_export",
     "markdownify.apps.MarkdownifyConfig",
-    "mptt",
     "qr_code",
     "reversion",
-    "sekizai",
-    "sorl.thumbnail",
-    "wiki.apps.WikiConfig",
-    "wiki.plugins.editsection.apps.EditSectionConfig",
-    "wiki.plugins.globalhistory.apps.GlobalHistoryConfig",
-    "wiki.plugins.help.apps.HelpConfig",
-    "wiki.plugins.images.apps.ImagesConfig",
-    "wiki.plugins.links.apps.LinksConfig",
-    "wiki.plugins.macros.apps.MacrosConfig",
-    "wiki.plugins.redlinks.apps.RedlinksConfig",
-    "wikihaxx",
 ]
 
 MIDDLEWARE = [
@@ -148,7 +135,6 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "sekizai.context_processors.sekizai",
             ],
             "debug": not PRODUCTION,
         },
@@ -295,10 +281,6 @@ DISCORD_WEBHOOK_URLS = {
 STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY")
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
 STRIPE_ENDPOINT_SECRET = os.getenv("STRIPE_ENDPOINT_SECRET")
-
-WIKI_ACCOUNT_HANDLING = False
-WIKI_ACCOUNT_SIGNUP_ALLOWED = False
-WIKI_PLUGINS_METHODS = ("article_list", "toc", "meow")
 
 MARKDOWNIFY = {
     "default": {
