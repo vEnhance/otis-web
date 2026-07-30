@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+{% load static %}
+{% block title %}
+  OTIS yearbook
+{% endblock title %}
+{% block css %}
+  <link href="{% static 'yearbook/yearbook.css' %}" rel="stylesheet" />
+{% endblock css %}
+{% block layout-content %}
+  <p>
+    The yearbook is an opt-in directory of OTIS folks, past and present.
+    Everyone here chose to be here, and wrote their own page.
+  </p>
+  {% if own_entry %}
+    <p class="text-center">
+      <a href="{{ own_entry.get_absolute_url }}" class="btn btn-primary">Your page</a>
+      &nbsp;
+      <a href="{% url "yearbook-update" %}" class="btn btn-outline-primary">Edit your entry</a>
+    </p>
+  {% else %}
+    {% include "yearbook/components/yearbook_policy.html" %}
+    <p class="text-center">
+      <a href="{% url "yearbook-create" %}" class="btn btn-success">Sign the yearbook</a>
+    </p>
+  {% endif %}
+  <hr />
+  {% if entries %}
+    <p>
+      <b>{{ entries|length }}</b> {{ entries|length|pluralize:"person,people" }} in the yearbook.
+    </p>
+    <div class="yearbook-grid">
+      {% for entry in entries %}
+        <a class="yearbook-card" href="{{ entry.get_absolute_url }}">
+          {% if entry.avatar %}
+            <img class="yearbook-avatar"
+                 src="{{ entry.avatar.url }}"
+                 width="56"
+                 height="56"
+                 alt="Avatar for {{ entry.name }}" />
+          {% else %}
+            <span class="yearbook-avatar yearbook-avatar-blank" aria-hidden="true">🙂</span>
+          {% endif %}
+          <span class="yearbook-card-body">
+            <span class="yearbook-card-name">
+              {% if entry.country %}
+                <span role="img"
+                      title="{{ entry.country_name }}"
+                      aria-label="{{ entry.country_name }}">{{ entry.country_flag }}</span>
+              {% endif %}
+              {{ entry.name }}
+            </span>
+            {% if entry.tagline %}<span class="yearbook-card-tagline">{{ entry.tagline }}</span>{% endif %}
+            {% if entry.graduation_year %}
+              <span class="yearbook-card-meta">Class of {{ entry.graduation_year }}</span>
+            {% endif %}
+          </span>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="fst-italic">Nobody has signed the yearbook yet. Be the first!</p>
+  {% endif %}
+{% endblock layout-content %}

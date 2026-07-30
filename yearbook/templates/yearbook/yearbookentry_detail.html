@@ -1,0 +1,143 @@
+{% extends "layout.html" %}
+{% load static %}
+{% block title %}
+  {{ entry.name }}
+{% endblock title %}
+{% block css %}
+  <link href="{% static 'yearbook/yearbook.css' %}" rel="stylesheet" />
+{% endblock css %}
+{% block layout-content %}
+  <table class="yearbook-infobox">
+    <tbody>
+      <tr>
+        <th colspan="2" class="yearbook-infobox-title" scope="colgroup">{{ entry.name }}</th>
+      </tr>
+      {% if entry.avatar %}
+        <tr>
+          <td colspan="2" class="yearbook-infobox-image">
+            <img src="{{ entry.avatar.url }}"
+                 width="180"
+                 alt="Avatar for {{ entry.name }}" />
+          </td>
+        </tr>
+      {% endif %}
+      {% if entry.tagline %}
+        <tr>
+          <td colspan="2" class="yearbook-infobox-tagline">{{ entry.tagline }}</td>
+        </tr>
+      {% endif %}
+      {% if entry.country %}
+        <tr>
+          <th scope="row">Country</th>
+          <td>
+            <span role="img"
+                  title="{{ entry.country_name }}"
+                  aria-label="{{ entry.country_name }}">{{ entry.country_flag }}</span>
+            {{ entry.country_name }}
+          </td>
+        </tr>
+      {% endif %}
+      {% if entry.graduation_year %}
+        <tr>
+          <th scope="row">High school</th>
+          <td>Class of {{ entry.graduation_year }}</td>
+        </tr>
+      {% endif %}
+      {% if entry.university %}
+        <tr>
+          <th scope="row">University</th>
+          <td>{{ entry.university }}</td>
+        </tr>
+      {% endif %}
+      {% if entry.imo_year_list %}
+        <tr>
+          <th scope="row">IMO</th>
+          <td>
+            {% for year in entry.imo_year_list %}
+              {{ year }}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+          </td>
+        </tr>
+      {% endif %}
+      <tr>
+        <th colspan="2" class="yearbook-infobox-header" scope="colgroup">OTIS</th>
+      </tr>
+      <tr>
+        <th scope="row">Years</th>
+        <td>
+          {% for semester in entry.otis_semesters %}
+            {{ semester.name }} ({{ semester.years }})
+            {% if not forloop.last %}<br />{% endif %}
+          {% empty %}
+            <span class="fst-italic">No student enrollments on record</span>
+          {% endfor %}
+        </td>
+      </tr>
+      {% if entry.email or entry.discord_username or entry.github_username or entry.aops_username or entry.instagram_username %}
+        <tr>
+          <th colspan="2" class="yearbook-infobox-header" scope="colgroup">Elsewhere</th>
+        </tr>
+        {% if entry.email %}
+          <tr>
+            <th scope="row">Email</th>
+            <td>
+              <a href="mailto:{{ entry.email }}">{{ entry.email }}</a>
+            </td>
+          </tr>
+        {% endif %}
+        {% if entry.discord_username %}
+          <tr>
+            <th scope="row">Discord</th>
+            <td>{{ entry.discord_username }}</td>
+          </tr>
+        {% endif %}
+        {% if entry.github_username %}
+          <tr>
+            <th scope="row">GitHub</th>
+            <td>
+              <a target="_blank"
+                 rel="noreferrer"
+                 href="https://github.com/{{ entry.github_username }}">{{ entry.github_username }}</a>
+            </td>
+          </tr>
+        {% endif %}
+        {% if entry.aops_username %}
+          <tr>
+            <th scope="row">AoPS</th>
+            <td>{{ entry.aops_username }}</td>
+          </tr>
+        {% endif %}
+        {% if entry.instagram_username %}
+          <tr>
+            <th scope="row">Instagram</th>
+            <td>
+              <a target="_blank"
+                 rel="noreferrer"
+                 href="https://www.instagram.com/{{ entry.instagram_username }}/">{{ entry.instagram_username }}</a>
+            </td>
+          </tr>
+        {% endif %}
+      {% endif %}
+    </tbody>
+  </table>
+  <div class="yearbook-bio">
+    {% if entry.bio_rendered %}
+      {{ entry.bio_rendered|safe }}
+    {% else %}
+      <p class="fst-italic">
+        {{ entry.name }} has not written anything here yet.
+      </p>
+    {% endif %}
+  </div>
+  <div style="clear: both;"></div>
+  <hr />
+  <p>
+    <a href="{% url "yearbook-list" %}">Back to the yearbook</a>
+    {% if is_own_entry %}
+      &nbsp;&middot;&nbsp;
+      <a href="{% url "yearbook-update" %}">Edit your entry</a>
+      &nbsp;&middot;&nbsp;
+      <a class="text-danger" href="{% url "yearbook-delete" %}">Delete your entry</a>
+    {% endif %}
+  </p>
+{% endblock layout-content %}

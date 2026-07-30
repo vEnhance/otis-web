@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% block title %}
+  {% if object %}
+    Edit your yearbook entry
+  {% else %}
+    Sign the yearbook
+  {% endif %}
+{% endblock title %}
+{% block layout-content %}
+  {% if not object %}{% include "yearbook/components/yearbook_policy.html" %}{% endif %}
+  <p>
+    Your page is titled <b>{{ request.user.get_full_name|default:request.user.username }}</b>
+    and lists the semesters you were an OTIS student.
+    Every field below is optional; leave blank anything you'd rather not share.
+  </p>
+  {% include "otisweb/components/generic_form.html" with submit_name="Save" %}
+  <hr />
+  <p>
+    <a href="{% url "yearbook-list" %}">Back to the yearbook</a>
+    {% if object %}
+      &nbsp;&middot;&nbsp;
+      <a href="{{ object.get_absolute_url }}">View your page</a>
+      &nbsp;&middot;&nbsp;
+      <a class="text-danger" href="{% url "yearbook-delete" %}">Delete your entry</a>
+    {% endif %}
+  </p>
+{% endblock layout-content %}
