@@ -12,9 +12,6 @@
   <link href="{% static 'yearbook/yearbook.css' %}" rel="stylesheet" />
 {% endblock css %}
 {% block layout-content %}
-  {% if not object %}
-    {% include "yearbook/components/yearbook_policy.html" %}
-  {% endif %}
   <p>
     Your page is titled <b>{{ request.user.get_full_name|default:request.user.username }}</b>
     and lists the semesters you were an OTIS student.
@@ -54,6 +51,24 @@
     </table>
     <button type="submit" class="btn btn-success">Save</button>
   </form>
+  {% if not object %}
+    <div class="alert alert-warning mt-2">
+      <h4 class="alert-heading">⚠️ The OTIS yearbook requires real names</h4>
+      <p>
+        Yearbook entries show your name as it is registered in OTIS
+        (which is {{ request.user.get_full_name }}).
+        They also show which semesters of OTIS you participated in.
+        If you don't want this information to be public,
+        <b>do not create an entry</b>.
+      </p>
+      <p>
+        (Your name on OTIS-WEB is also used by staff.
+        Please do not change it to circumvent this requirement;
+        it will cause confusion for Evan.
+        Yearbook entries with fake names may be deleted by staff.)
+      </p>
+    </div>
+  {% endif %}
   <hr />
   <p>
     <a href="{% url "yearbook-list" %}">Back to the yearbook</a>

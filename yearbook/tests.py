@@ -73,8 +73,8 @@ def test_yearbook_listing(otis):
     otis.assert_has(resp, "Class of 2026")
     otis.assert_has(resp, "🇦🇺")
     otis.assert_has(resp, 'aria-label="Australia"')
-    # already signed, so no policy warning and no invitation to sign
-    otis.assert_not_has(resp, "Before you sign the yearbook")
+    # the policy warning lives on the create form, not on the listing
+    otis.assert_not_has(resp, "requires real names")
 
 
 @pytest.mark.django_db
@@ -120,9 +120,11 @@ def test_yearbook_detail(otis):
     otis.assert_has(resp, "carol_aops")
     otis.assert_has(resp, "https://www.instagram.com/carolgram/")
     otis.assert_has(resp, "I like <strong>ducks</strong> a lot.")
-    # years in OTIS come off the roster, not from anything the student typed
-    otis.assert_has(resp, "Year I (2022-2023)")
-    otis.assert_has(resp, "Year II (2023-2024)")
+    # years in OTIS come off the roster, not from anything the student typed,
+    # and show as the end year of each semester
+    otis.assert_has(resp, "2023,")
+    otis.assert_has(resp, "2024")
+    otis.assert_not_has(resp, "Year I")
     # IMO years get sorted on the way in
     otis.assert_has(resp, "2022")
     assert YearbookEntry.objects.get(user=carol).imo_year_list == [2022, 2023]
@@ -159,7 +161,7 @@ def test_yearbook_create(otis):
     otis.login(erin)
 
     resp = otis.get_20x("yearbook-create")
-    otis.assert_has(resp, "Before you sign the yearbook")
+    otis.assert_has(resp, "requires real names")
     # the create form is prefilled with the account email
     otis.assert_has(resp, "erin@example.com")
     # the form is grouped into sections

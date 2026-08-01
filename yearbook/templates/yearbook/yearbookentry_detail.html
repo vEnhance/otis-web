@@ -89,18 +89,21 @@
         <th scope="row">Years</th>
         <td>
           {% for semester in entry.otis_semesters %}
-            {{ semester.name }} ({{ semester.years }})
-            {% if not forloop.last %}
-              <br />
-            {% endif %}
+            {{ semester.end_year }}{% if not forloop.last %},{% endif %}
           {% empty %}
-            <span class="fst-italic">No student enrollments on record</span>
+            <span class="fst-italic">None</span>
           {% endfor %}
         </td>
       </tr>
+      {% if entry.user.is_superuser %}
+        <tr>
+          <th scope="row">Role</th>
+          <td>Game Master</td>
+        </tr>
+      {% endif %}
       {% if entry.email or entry.discord_username or entry.github_username or entry.aops_username or entry.instagram_username %}
         <tr>
-          <th colspan="2" class="yearbook-infobox-header" scope="colgroup">Elsewhere</th>
+          <th colspan="2" class="yearbook-infobox-header" scope="colgroup">Socials</th>
         </tr>
         {% if entry.email %}
           <tr>
