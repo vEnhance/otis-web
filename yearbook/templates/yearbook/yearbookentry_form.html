@@ -7,7 +7,9 @@
   {% endif %}
 {% endblock title %}
 {% block layout-content %}
-  {% if not object %}{% include "yearbook/components/yearbook_policy.html" %}{% endif %}
+  {% if not object %}
+    {% include "yearbook/components/yearbook_policy.html" %}
+  {% endif %}
   <p>
     Your page is titled <b>{{ request.user.get_full_name|default:request.user.username }}</b>
     and lists the semesters you were an OTIS student.
@@ -18,9 +20,9 @@
   <p>
     <a href="{% url "yearbook-list" %}">Back to the yearbook</a>
     {% if object %}
-      &nbsp;&middot;&nbsp;
+      &nbsp;・&nbsp;
       <a href="{{ object.get_absolute_url }}">View your page</a>
-      &nbsp;&middot;&nbsp;
+      &nbsp;・&nbsp;
       <a class="text-danger" href="{% url "yearbook-delete" %}">Delete your entry</a>
     {% endif %}
   </p>

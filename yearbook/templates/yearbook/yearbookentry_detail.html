@@ -67,7 +67,9 @@
         <td>
           {% for semester in entry.otis_semesters %}
             {{ semester.name }} ({{ semester.years }})
-            {% if not forloop.last %}<br />{% endif %}
+            {% if not forloop.last %}
+              <br />
+            {% endif %}
           {% empty %}
             <span class="fst-italic">No student enrollments on record</span>
           {% endfor %}
@@ -124,9 +126,7 @@
     {% if entry.bio_rendered %}
       {{ entry.bio_rendered|safe }}
     {% else %}
-      <p class="fst-italic">
-        {{ entry.name }} has not written anything here yet.
-      </p>
+      <p class="fst-italic">{{ entry.name }} has not written anything here yet.</p>
     {% endif %}
   </div>
   <div style="clear: both;"></div>
@@ -134,9 +134,9 @@
   <p>
     <a href="{% url "yearbook-list" %}">Back to the yearbook</a>
     {% if is_own_entry %}
-      &nbsp;&middot;&nbsp;
+      &nbsp;・&nbsp;
       <a href="{% url "yearbook-update" %}">Edit your entry</a>
-      &nbsp;&middot;&nbsp;
+      &nbsp;・&nbsp;
       <a class="text-danger" href="{% url "yearbook-delete" %}">Delete your entry</a>
     {% endif %}
   </p>

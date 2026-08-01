@@ -50,9 +50,7 @@
               {{ entry.name }}
             </span>
             {% if entry.tagline %}<span class="yearbook-card-tagline">{{ entry.tagline }}</span>{% endif %}
-            {% if entry.graduation_year %}
-              <span class="yearbook-card-meta">Class of {{ entry.graduation_year }}</span>
-            {% endif %}
+            {% if entry.graduation_year %}<span class="yearbook-card-meta">Class of {{ entry.graduation_year }}</span>{% endif %}
           </span>
         </a>
       {% endfor %}

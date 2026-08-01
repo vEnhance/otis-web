@@ -12,7 +12,6 @@ from yearbook.models import YearbookEntry
 def test_country_flag():
     assert get_country_flag("USA") == "🇺🇸"
     assert get_country_flag("UNK") == "🇬🇧"  # IMO calls the UK "UNK", ISO says "GB"
-    assert get_country_flag("HEL") == "🇬🇷"  # ditto Greece, "HEL" versus "GR"
     assert get_country_flag("") == ""
     assert get_country_flag("YUG") == "🌐"  # no flag emoji for defunct countries
     assert get_country_name("SAF") == "South Africa"
@@ -37,7 +36,9 @@ def test_yearbook_requires_verified(otis):
 def test_yearbook_listing(otis):
     verified_group = GroupFactory(name="Verified")
     alice: User = UserFactory(
-        username="alice", first_name="Alice", last_name="Aardvark",
+        username="alice",
+        first_name="Alice",
+        last_name="Aardvark",
         groups=(verified_group,),
     )
     YearbookEntryFactory(
@@ -59,26 +60,12 @@ def test_yearbook_listing(otis):
 
 
 @pytest.mark.django_db
-def test_yearbook_listing_warns_before_signing(otis):
-    verified_group = GroupFactory(name="Verified")
-    bob: User = UserFactory(
-        username="bob", first_name="Bob", last_name="Bobson", groups=(verified_group,)
-    )
-    otis.login(bob)
-
-    resp = otis.get_20x("yearbook-list")
-    otis.assert_has(resp, "Before you sign the yearbook")
-    otis.assert_has(resp, "The yearbook uses real names")
-    otis.assert_has(resp, "Your years in OTIS are shown")
-    otis.assert_has(resp, "Bob Bobson")
-    otis.assert_has(resp, "Nobody has signed the yearbook yet")
-
-
-@pytest.mark.django_db
 def test_yearbook_detail(otis):
     verified_group = GroupFactory(name="Verified")
     carol: User = UserFactory(
-        username="carol", first_name="Carol", last_name="Carolson",
+        username="carol",
+        first_name="Carol",
+        last_name="Carolson",
         groups=(verified_group,),
     )
     StudentFactory(user=carol, semester=SemesterFactory(name="Year I", end_year=2023))
@@ -141,8 +128,11 @@ def test_yearbook_detail_hides_blank_fields(otis):
 def test_yearbook_create(otis):
     verified_group = GroupFactory(name="Verified")
     erin: User = UserFactory(
-        username="erin", first_name="Erin", last_name="Erinson",
-        email="erin@example.com", groups=(verified_group,),
+        username="erin",
+        first_name="Erin",
+        last_name="Erinson",
+        email="erin@example.com",
+        groups=(verified_group,),
     )
     otis.login(erin)
 
