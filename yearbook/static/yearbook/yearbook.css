@@ -147,6 +147,19 @@
   font-style: italic;
 }
 
+.yearbook-infobox .yearbook-social-icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 5px;
+  vertical-align: -3px;
+}
+
+/* The socials have no header row of their own, so the first one needs a
+   heavier rule to keep it from reading as part of the section above */
+.yearbook-infobox .yearbook-infobox-social-top {
+  border-top: 2px solid #c8ccd1;
+}
+
 .yearbook-infobox .yearbook-infobox-header {
   width: auto;
   background-color: #eaecf0;

@@ -102,59 +102,27 @@
           <td>Game Master</td>
         </tr>
       {% endif %}
-      {% if entry.email or entry.discord_username or entry.github_username or entry.aops_username or entry.instagram_username or entry.website %}
+      {% if entry.socials %}
         <tr>
           <th colspan="2" class="yearbook-infobox-header" scope="colgroup">Socials</th>
         </tr>
-        {% if entry.email %}
-          <tr>
-            <th scope="row">Email</th>
-            <td>
-              <a href="mailto:{{ entry.email }}">{{ entry.email }}</a>
-            </td>
-          </tr>
-        {% endif %}
-        {% if entry.discord_username %}
-          <tr>
-            <th scope="row">Discord</th>
-            <td>{{ entry.discord_username }}</td>
-          </tr>
-        {% endif %}
-        {% if entry.github_username %}
-          <tr>
-            <th scope="row">GitHub</th>
-            <td>
-              <a target="_blank"
-                 rel="noreferrer"
-                 href="https://github.com/{{ entry.github_username }}">{{ entry.github_username }}</a>
-            </td>
-          </tr>
-        {% endif %}
-        {% if entry.aops_username %}
-          <tr>
-            <th scope="row">AoPS</th>
-            <td>{{ entry.aops_username }}</td>
-          </tr>
-        {% endif %}
-        {% if entry.instagram_username %}
-          <tr>
-            <th scope="row">Instagram</th>
-            <td>
-              <a target="_blank"
-                 rel="noreferrer"
-                 href="https://www.instagram.com/{{ entry.instagram_username }}/">{{ entry.instagram_username }}</a>
-            </td>
-          </tr>
-        {% endif %}
-        {% if entry.website %}
-          <tr>
-            <th scope="row">Website</th>
-            <td>
-              <a target="_blank" rel="noreferrer" href="{{ entry.website }}">{{ entry.website_display }}</a>
-            </td>
-          </tr>
-        {% endif %}
       {% endif %}
+      {% for social in entry.socials %}
+        <tr>
+          <td colspan="2"
+              class="yearbook-infobox-social{% if forloop.first %} yearbook-infobox-social-top{% endif %}">
+            <img class="yearbook-social-icon"
+                 src="{% static social.icon %}"
+                 title="{{ social.label }}"
+                 alt="{{ social.label }}" />
+            {% if social.url %}
+              <a target="_blank" rel="noreferrer" href="{{ social.url }}">{{ social.text }}</a>
+            {% else %}
+              {{ social.text }}
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
     </tbody>
   </table>
   <div class="yearbook-bio">

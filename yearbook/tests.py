@@ -116,9 +116,13 @@ def test_yearbook_detail(otis):
     otis.assert_has(resp, "Class of")  # the infobox row label; 2024 is the value
     otis.assert_has(resp, "Duck University")
     otis.assert_has(resp, "carol@example.com")
+    # socials are icon rows, with the account type in the icon's alt text
     otis.assert_has(resp, "carolduck")
+    otis.assert_has(resp, 'alt="Discord"')
+    otis.assert_has(resp, "yearbook/icons/discord.svg")
+    otis.assert_has(resp, "yearbook/icons/aops.png")
     otis.assert_has(resp, "https://github.com/carol-hub")
-    otis.assert_has(resp, "carol_aops")
+    otis.assert_has(resp, "https://artofproblemsolving.com/community/user/carol_aops")
     otis.assert_has(resp, "https://www.instagram.com/carolgram/")
     otis.assert_has(resp, "I like <strong>ducks</strong> a lot.")
     # years in OTIS come off the roster, not from anything the student typed,
@@ -148,7 +152,7 @@ def test_yearbook_detail_hides_blank_fields(otis):
     resp = otis.get_20x("yearbook-detail", entry.pk)
     otis.assert_has(resp, "has not written anything here yet")
     otis.assert_has(resp, '<span class="fst-italic">None</span>')
-    otis.assert_not_has(resp, "Elsewhere")
+    otis.assert_not_has(resp, "yearbook-infobox-social")
     otis.assert_not_has(resp, "University")
 
 

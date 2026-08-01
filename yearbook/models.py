@@ -1,7 +1,7 @@
 import os
 import random
 import re
-from typing import Optional
+from typing import NamedTuple, Optional
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -46,6 +46,18 @@ def validate_username(value: str) -> None:
 def validate_at_most_1mb(f: File):  # type: ignore
     if f.size > 1024 * 1024:
         raise ValidationError("At most 1MB allowed")
+
+
+class SocialLink(NamedTuple):
+    """One row of the infobox's social accounts.
+
+    The icon stands in for a text label to buy back width in a narrow infobox,
+    so `label` has to carry the meaning for the alt text and tooltip."""
+
+    icon: str  # path under static/, passed to {% static %}
+    label: str
+    text: str
+    url: str  # blank for accounts with no linkable public profile
 
 
 def avatar_file_name(instance: "YearbookEntry", filename: str) -> str:
@@ -223,6 +235,63 @@ class YearbookEntry(models.Model):
         if self.imo_id is None:
             return ""
         return f"https://www.imo-official.org/results/contestant/{self.imo_id}/"
+
+    @property
+    def socials(self) -> list[SocialLink]:
+        links: list[SocialLink] = []
+        if self.email:
+            links.append(
+                SocialLink(
+                    "yearbook/icons/email.svg",
+                    "Email",
+                    self.email,
+                    f"mailto:{self.email}",
+                )
+            )
+        if self.discord_username:
+            # Discord has no public profile URL to link a handle to
+            links.append(
+                SocialLink(
+                    "yearbook/icons/discord.svg", "Discord", self.discord_username, ""
+                )
+            )
+        if self.github_username:
+            links.append(
+                SocialLink(
+                    "yearbook/icons/github.svg",
+                    "GitHub",
+                    self.github_username,
+                    f"https://github.com/{self.github_username}",
+                )
+            )
+        if self.aops_username:
+            links.append(
+                SocialLink(
+                    "yearbook/icons/aops.png",
+                    "AoPS",
+                    self.aops_username,
+                    f"https://artofproblemsolving.com/community/user/{self.aops_username}",
+                )
+            )
+        if self.instagram_username:
+            links.append(
+                SocialLink(
+                    "yearbook/icons/instagram.svg",
+                    "Instagram",
+                    self.instagram_username,
+                    f"https://www.instagram.com/{self.instagram_username}/",
+                )
+            )
+        if self.website:
+            links.append(
+                SocialLink(
+                    "yearbook/icons/website.svg",
+                    "Website",
+                    self.website_display,
+                    self.website,
+                )
+            )
+        return links
 
     @property
     def website_display(self) -> str:
