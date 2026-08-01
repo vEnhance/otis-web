@@ -7,10 +7,7 @@
   <link href="{% static 'yearbook/yearbook.css' %}" rel="stylesheet" />
 {% endblock css %}
 {% block layout-content %}
-  <p>
-    The yearbook is an opt-in directory of OTIS folks, past and present.
-    Everyone here chose to be here, and wrote their own page.
-  </p>
+  <p>A list of past and present otters.</p>
   {% if own_entry %}
     <p class="text-center">
       <a href="{{ own_entry.get_absolute_url }}" class="btn btn-primary">Your page</a>
