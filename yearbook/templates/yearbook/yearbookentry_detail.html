@@ -116,7 +116,7 @@
                  title="{{ social.label }}"
                  alt="{{ social.label }}" />
             {% if social.url %}
-              <a target="_blank" rel="noreferrer" href="{{ social.url }}">{{ social.text|truncatechars:"24" }}</a>
+              <a target="_blank" rel="noreferrer" href="{{ social.url }}">{{ social.text|truncatechars:"20" }}</a>
             {% else %}
               {{ social.text }}
             {% endif %}
