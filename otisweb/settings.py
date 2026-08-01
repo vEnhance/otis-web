@@ -73,6 +73,7 @@ INSTALLED_APPS = [
     "payments",
     "suggestions",
     "tubes",
+    "yearbook",
     # ------------
     "otisweb",
     # ------------

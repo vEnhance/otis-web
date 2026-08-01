@@ -1,0 +1,218 @@
+/* Listing: a grid of small cards, one per person */
+.yearbook-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  margin-bottom: 1em;
+}
+
+.yearbook-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border: 1px solid #b0b0b0;
+  border-radius: 6px;
+  background-color: #f8f9fa;
+  color: inherit;
+  text-decoration: none;
+}
+
+.yearbook-card:hover {
+  background-color: #eaf3ff;
+}
+
+.yearbook-avatar {
+  flex: 0 0 auto;
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border: 1px solid #b0b0b0;
+  border-radius: 4px;
+  background-color: #ffffff;
+}
+
+.yearbook-avatar-blank {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+}
+
+.yearbook-card-body {
+  min-width: 0;
+}
+
+.yearbook-card-name {
+  display: block;
+  font-weight: bold;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.yearbook-draft-badge {
+  display: inline-block;
+  padding: 0 5px;
+  border-radius: 3px;
+  background-color: #6c757d;
+  color: #ffffff;
+  font-size: 75%;
+  text-transform: uppercase;
+}
+
+.yearbook-card-tagline {
+  display: block;
+  font-style: italic;
+  font-size: 90%;
+}
+
+.yearbook-card-meta {
+  display: block;
+  font-size: 85%;
+  color: #555555;
+}
+
+/* Individual page: a Wikipedia-flavored biography with an infobox */
+.yearbook-infobox {
+  float: right;
+  clear: right;
+  /* table-layout: fixed keeps the box at this width instead of letting a long
+     email address or semester name stretch it across the (narrow) page */
+  table-layout: fixed;
+  width: 200px;
+  max-width: 40%;
+  margin: 0 0 1em 1em;
+  padding: 4px;
+  border: 1px solid #a2a9b1;
+  border-radius: 2px;
+  background-color: #f8f9fa;
+  font-size: 88%;
+  line-height: 1.4;
+}
+
+@media (max-width: 575px) {
+  .yearbook-infobox {
+    float: none;
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+  }
+}
+
+.yearbook-infobox .yearbook-infobox-title {
+  width: auto;
+  padding: 8px 4px;
+  border-top: none;
+  background-color: #eaecf0;
+  font-size: 115%;
+  font-weight: bold;
+  text-align: center;
+}
+
+.yearbook-infobox td,
+.yearbook-infobox th {
+  padding: 4px 6px;
+  border-top: 1px solid #eaecf0;
+  vertical-align: top;
+  text-align: left;
+}
+
+.yearbook-infobox td {
+  overflow-wrap: break-word;
+}
+
+.yearbook-infobox col.yearbook-infobox-labels {
+  width: 45%;
+}
+
+.yearbook-infobox th {
+  font-weight: bold;
+}
+
+.yearbook-infobox .yearbook-infobox-image {
+  padding: 6px 4px;
+  text-align: center;
+  border-top: none;
+}
+
+.yearbook-infobox .yearbook-infobox-image img {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #a2a9b1;
+}
+
+.yearbook-infobox .yearbook-infobox-tagline {
+  text-align: center;
+  font-style: italic;
+}
+
+.yearbook-infobox .yearbook-social-icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 5px;
+  vertical-align: -3px;
+}
+
+/* The socials have no header row of their own, so the first one needs a
+   heavier rule to keep it from reading as part of the section above */
+.yearbook-infobox .yearbook-infobox-social-top {
+  border-top: 2px solid #c8ccd1;
+}
+
+.yearbook-infobox .yearbook-infobox-header {
+  width: auto;
+  background-color: #eaecf0;
+  text-align: center;
+  font-weight: bold;
+}
+
+.yearbook-bio {
+  line-height: 1.6;
+}
+
+.yearbook-bio h1,
+.yearbook-bio h2,
+.yearbook-bio h3 {
+  border-bottom: 1px solid #a2a9b1;
+  font-family: "Linux Libertine", Georgia, Times, serif;
+}
+
+/* Label-on-the-left form rows on the entry form */
+.yearbook-form-table {
+  max-width: 34em;
+}
+
+.yearbook-form-table th {
+  font-weight: bold;
+}
+
+.yearbook-form-table label {
+  margin-bottom: 0;
+}
+
+.yearbook-form-table .form-text {
+  margin-top: 2px;
+}
+
+/* These rows carry help text under the input, so the label lines up with the
+   top of the cell rather than the middle of the whole block */
+.yearbook-bio-table th,
+.yearbook-bio-table td {
+  vertical-align: top;
+}
+
+.yearbook-bio-table th {
+  width: 11em;
+  padding-top: 0.5rem;
+}
+
+/* One line per account, so middle alignment is what lines up here */
+.yearbook-contact-table th,
+.yearbook-contact-table td {
+  vertical-align: middle;
+}
+
+.yearbook-contact-table th {
+  width: 7em;
+}
