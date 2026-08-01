@@ -1,0 +1,13 @@
+<tr>
+  <th scope="row">
+    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+  </th>
+  <td>
+    {{ field }}
+    {# the id is what the widget's own aria-describedby points at #}
+    {% if field.help_text %}
+      <div id="{{ field.auto_id }}_helptext" class="form-text">{{ field.help_text }}</div>
+    {% endif %}
+    {% for error in field.errors %}<div class="text-danger">{{ error }}</div>{% endfor %}
+  </td>
+</tr>

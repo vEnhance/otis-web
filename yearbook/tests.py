@@ -3,7 +3,11 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
 from core.factories import GroupFactory, SemesterFactory, UserFactory
-from roster.country_abbrevs import get_country_flag, get_country_name
+from roster.country_abbrevs import (
+    get_country_flag,
+    get_country_imo_url,
+    get_country_name,
+)
 from roster.factories import StudentFactory
 from yearbook.factories import YearbookEntryFactory
 from yearbook.models import YearbookEntry
@@ -18,6 +22,20 @@ def test_country_flag():
     assert get_country_name("bogus") == "bogus"
 
 
+def test_country_imo_url():
+    assert (
+        get_country_imo_url("CHN")
+        == "https://www.imo-official.org/results/team/country/CHN/"
+    )
+    # the IMO keeps results pages for countries that no longer exist
+    assert (
+        get_country_imo_url("USS")
+        == "https://www.imo-official.org/results/team/country/USS/"
+    )
+    assert get_country_imo_url("") == ""
+    assert get_country_imo_url("bogus") == ""
+
+
 @pytest.mark.django_db
 def test_yearbook_requires_verified(otis):
     otis.get_login_redirect("yearbook-list")
@@ -29,7 +47,7 @@ def test_yearbook_requires_verified(otis):
     otis.login(rando)
     otis.get_denied("yearbook-list")
     otis.get_denied("yearbook-create")
-    otis.get_denied("yearbook-detail", entry.user.username)
+    otis.get_denied("yearbook-detail", entry.pk)
 
 
 @pytest.mark.django_db
@@ -86,11 +104,15 @@ def test_yearbook_detail(otis):
     )
     otis.login(carol)
 
-    resp = otis.get_20x("yearbook-detail", "carol")
+    entry = YearbookEntry.objects.get(user=carol)
+    resp = otis.get_20x("yearbook-detail", entry.pk)
     otis.assert_has(resp, "Carol Carolson")
     otis.assert_has(resp, "fond of ducks")
     otis.assert_has(resp, "🇨🇦")
-    otis.assert_has(resp, "Class of 2024")
+    # the country shows as its IMO abbreviation, linked to the IMO results page
+    otis.assert_has(resp, "https://www.imo-official.org/results/team/country/CAN/")
+    otis.assert_has(resp, 'title="Canada at the IMO"')
+    otis.assert_has(resp, "Class of")  # the infobox row label; 2024 is the value
     otis.assert_has(resp, "Duck University")
     otis.assert_has(resp, "carol@example.com")
     otis.assert_has(resp, "carolduck")
@@ -105,19 +127,19 @@ def test_yearbook_detail(otis):
     otis.assert_has(resp, "2022")
     assert YearbookEntry.objects.get(user=carol).imo_year_list == [2022, 2023]
 
-    otis.get_not_found("yearbook-detail", "nonexistent")
+    otis.get_not_found("yearbook-detail", entry.pk + 1000)
 
 
 @pytest.mark.django_db
 def test_yearbook_detail_hides_blank_fields(otis):
     verified_group = GroupFactory(name="Verified")
     dave: User = UserFactory(username="dave", groups=(verified_group,))
-    YearbookEntryFactory(
+    entry = YearbookEntryFactory(
         user=dave, tagline="", country="", graduation_year=None, university="", bio=""
     )
     otis.login(dave)
 
-    resp = otis.get_20x("yearbook-detail", "dave")
+    resp = otis.get_20x("yearbook-detail", entry.pk)
     otis.assert_has(resp, "has not written anything here yet")
     otis.assert_has(resp, "No student enrollments on record")
     otis.assert_not_has(resp, "Elsewhere")
@@ -138,20 +160,25 @@ def test_yearbook_create(otis):
 
     resp = otis.get_20x("yearbook-create")
     otis.assert_has(resp, "Before you sign the yearbook")
-    otis.assert_has(resp, "I understand the yearbook policy")
     # the create form is prefilled with the account email
     otis.assert_has(resp, "erin@example.com")
-
-    # refusing to acknowledge the policy blocks the entry
-    otis.post_20x(
-        "yearbook-create", data={"tagline": "no thanks", "bio": "", "imo_years": ""}
-    )
-    assert not YearbookEntry.objects.filter(user=erin).exists()
+    # the form is grouped into sections
+    otis.assert_has(resp, "<h2>Biographical data</h2>")
+    otis.assert_has(resp, "<h2>Contact</h2>")
+    # contact accounts are a compact table of short labels, with no help text
+    otis.assert_has(resp, "yearbook-contact-table")
+    otis.assert_has(resp, '<label for="id_discord_username">Discord</label>')
+    # ...whereas the biographical table keeps its help text
+    otis.assert_has(resp, "yearbook-bio-table")
+    otis.assert_has(resp, "The university you attend or attended")
+    otis.assert_not_has(resp, "Your Discord handle")
+    # the country picker is a chosen-style autocomplete, as on the decision form
+    otis.assert_has(resp, 'id="id_country"')
+    otis.assert_has(resp, '$("#id_country").chosen(')
 
     resp = otis.post_30x(
         "yearbook-create",
         data={
-            "acknowledge": "on",
             "tagline": "just another otter",
             "country": "USA",
             "graduation_year": 2027,
@@ -181,21 +208,87 @@ def test_yearbook_create_rejects_bad_input(otis):
 
     otis.post_20x(
         "yearbook-create",
-        data={"acknowledge": "on", "imo_years": "twenty twenty three"},
+        data={"imo_years": "twenty twenty three"},
     )
     otis.post_20x(
         "yearbook-create",
-        data={"acknowledge": "on", "imo_years": "1066"},
+        data={"imo_years": "1066"},
     )
     otis.post_20x(
         "yearbook-create",
-        data={"acknowledge": "on", "github_username": "not a username"},
+        data={"github_username": "not a username"},
     )
+    # pasting a handle with its @ would silently break the profile links
+    resp = otis.post_20x(
+        "yearbook-create",
+        data={"instagram_username": "@evanchen.cc"},
+    )
+    otis.assert_has(resp, "without the leading @")
     assert not YearbookEntry.objects.filter(user=frank).exists()
 
 
 @pytest.mark.django_db
-def test_yearbook_update_and_delete(otis):
+def test_yearbook_drafts_are_hidden(otis):
+    verified_group = GroupFactory(name="Verified")
+    iris: User = UserFactory(
+        username="iris",
+        first_name="Iris",
+        last_name="Irisson",
+        groups=(verified_group,),
+    )
+    nosy: User = UserFactory(username="nosy", groups=(verified_group,))
+    staffer: User = UserFactory(username="staffer", is_staff=True)
+    draft = YearbookEntryFactory(user=iris, tagline="not ready yet", is_draft=True)
+
+    # a nosy classmate sees neither the card nor the page
+    otis.login(nosy)
+    otis.assert_not_has(otis.get_20x("yearbook-list"), "Iris Irisson")
+    otis.get_not_found("yearbook-detail", draft.pk)
+
+    # the author sees their own draft, flagged as such
+    otis.login(iris)
+    resp = otis.get_20x("yearbook-list")
+    otis.assert_has(resp, "Iris Irisson")
+    otis.assert_has(resp, "Draft")
+    resp = otis.get_20x("yearbook-detail", draft.pk)
+    otis.assert_has(resp, "This entry is a draft")
+    otis.assert_has(resp, "not ready yet")
+
+    # so does staff
+    otis.login(staffer)
+    otis.assert_has(otis.get_20x("yearbook-list"), "Iris Irisson")
+    otis.assert_has(otis.get_20x("yearbook-detail", draft.pk), "This entry is a draft")
+
+    # publishing makes it visible to everyone
+    otis.login(iris)
+    otis.post_30x("yearbook-update", data={"tagline": "ready now", "imo_years": ""})
+    assert YearbookEntry.objects.get(user=iris).is_draft is False
+    otis.login(nosy)
+    resp = otis.get_20x("yearbook-list")
+    otis.assert_has(resp, "Iris Irisson")
+    otis.assert_not_has(resp, "Draft")
+    otis.assert_has(otis.get_20x("yearbook-detail", draft.pk), "ready now")
+
+
+@pytest.mark.django_db
+def test_yearbook_create_as_draft(otis):
+    verified_group = GroupFactory(name="Verified")
+    jack: User = UserFactory(username="jack", groups=(verified_group,))
+    otis.login(jack)
+
+    # entries are published by default; draft mode is opt-in
+    otis.post_30x("yearbook-create", data={"tagline": "hello", "imo_years": ""})
+    assert YearbookEntry.objects.get(user=jack).is_draft is False
+
+    otis.post_30x(
+        "yearbook-update",
+        data={"tagline": "hello", "imo_years": "", "is_draft": "on"},
+    )
+    assert YearbookEntry.objects.get(user=jack).is_draft is True
+
+
+@pytest.mark.django_db
+def test_yearbook_update(otis):
     verified_group = GroupFactory(name="Verified")
     gina: User = UserFactory(username="gina", groups=(verified_group,))
     hank: User = UserFactory(username="hank", groups=(verified_group,))
@@ -209,15 +302,9 @@ def test_yearbook_update_and_delete(otis):
     )
     assert YearbookEntry.objects.get(user=gina).tagline == "after"
 
-    # somebody without an entry has nothing to edit or delete
+    # somebody without an entry has nothing to edit
     otis.login(hank)
     otis.get_not_found("yearbook-update")
-    otis.get_not_found("yearbook-delete")
-
-    otis.login(gina)
-    otis.assert_has(otis.get_20x("yearbook-delete"), "leave the yearbook")
-    otis.post_30x("yearbook-delete")
-    assert not YearbookEntry.objects.filter(user=gina).exists()
 
 
 @pytest.mark.django_db

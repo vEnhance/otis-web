@@ -12,10 +12,12 @@ class YearbookEntryAdmin(admin.ModelAdmin):
         "country",
         "graduation_year",
         "university",
+        "is_draft",
         "created_at",
     )
     list_display_links = ("pk", "user")
     list_filter = (
+        "is_draft",
         "country",
         ("avatar", admin.EmptyFieldListFilter),
     )

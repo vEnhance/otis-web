@@ -51,6 +51,16 @@
   white-space: nowrap;
 }
 
+.yearbook-draft-badge {
+  display: inline-block;
+  padding: 0 5px;
+  border-radius: 3px;
+  background-color: #6c757d;
+  color: #ffffff;
+  font-size: 75%;
+  text-transform: uppercase;
+}
+
 .yearbook-card-tagline {
   display: block;
   font-style: italic;
@@ -67,8 +77,11 @@
 .yearbook-infobox {
   float: right;
   clear: right;
-  width: 22em;
-  max-width: 100%;
+  /* table-layout: fixed keeps the box at this width instead of letting a long
+     email address or semester name stretch it across the (narrow) page */
+  table-layout: fixed;
+  width: 200px;
+  max-width: 40%;
   margin: 0 0 1em 1em;
   padding: 4px;
   border: 1px solid #a2a9b1;
@@ -82,6 +95,7 @@
   .yearbook-infobox {
     float: none;
     width: 100%;
+    max-width: 100%;
     margin-left: 0;
   }
 }
@@ -104,8 +118,15 @@
   text-align: left;
 }
 
+.yearbook-infobox td {
+  overflow-wrap: break-word;
+}
+
+.yearbook-infobox col.yearbook-infobox-labels {
+  width: 45%;
+}
+
 .yearbook-infobox th {
-  width: 40%;
   font-weight: bold;
 }
 
@@ -142,4 +163,43 @@
 .yearbook-bio h3 {
   border-bottom: 1px solid #a2a9b1;
   font-family: "Linux Libertine", Georgia, Times, serif;
+}
+
+/* Label-on-the-left form rows on the entry form */
+.yearbook-form-table {
+  max-width: 34em;
+}
+
+.yearbook-form-table th {
+  font-weight: bold;
+}
+
+.yearbook-form-table label {
+  margin-bottom: 0;
+}
+
+.yearbook-form-table .form-text {
+  margin-top: 2px;
+}
+
+/* These rows carry help text under the input, so the label lines up with the
+   top of the cell rather than the middle of the whole block */
+.yearbook-bio-table th,
+.yearbook-bio-table td {
+  vertical-align: top;
+}
+
+.yearbook-bio-table th {
+  width: 11em;
+  padding-top: 0.5rem;
+}
+
+/* One line per account, so middle alignment is what lines up here */
+.yearbook-contact-table th,
+.yearbook-contact-table td {
+  vertical-align: middle;
+}
+
+.yearbook-contact-table th {
+  width: 7em;
 }

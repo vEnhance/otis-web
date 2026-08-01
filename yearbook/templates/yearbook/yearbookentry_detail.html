@@ -7,7 +7,27 @@
   <link href="{% static 'yearbook/yearbook.css' %}" rel="stylesheet" />
 {% endblock css %}
 {% block layout-content %}
+  {% if entry.is_draft %}
+    <div class="alert alert-secondary">
+      <b>This entry is a draft.</b>
+      It is hidden from the yearbook listing, and only
+      {% if is_own_entry %}
+        you
+      {% else %}
+        {{ entry.name }}
+      {% endif %}
+      and OTIS staff can open this page.
+      {% if is_own_entry %}
+        Uncheck <i>draft mode</i> on the
+        <a href="{% url "yearbook-update" %}">edit form</a> to publish it.
+      {% endif %}
+    </div>
+  {% endif %}
   <table class="yearbook-infobox">
+    <colgroup>
+      <col class="yearbook-infobox-labels" />
+      <col />
+    </colgroup>
     <tbody>
       <tr>
         <th colspan="2" class="yearbook-infobox-title" scope="colgroup">{{ entry.name }}</th>
@@ -16,7 +36,7 @@
         <tr>
           <td colspan="2" class="yearbook-infobox-image">
             <img src="{{ entry.avatar.url }}"
-                 width="180"
+                 width="140"
                  alt="Avatar for {{ entry.name }}" />
           </td>
         </tr>
@@ -33,14 +53,17 @@
             <span role="img"
                   title="{{ entry.country_name }}"
                   aria-label="{{ entry.country_name }}">{{ entry.country_flag }}</span>
-            {{ entry.country_name }}
+            <a target="_blank"
+               rel="noreferrer"
+               title="{{ entry.country_name }} at the IMO"
+               href="{{ entry.country_imo_url }}">{{ entry.country }}</a>
           </td>
         </tr>
       {% endif %}
       {% if entry.graduation_year %}
         <tr>
-          <th scope="row">High school</th>
-          <td>Class of {{ entry.graduation_year }}</td>
+          <th scope="row">Class of</th>
+          <td>{{ entry.graduation_year }}</td>
         </tr>
       {% endif %}
       {% if entry.university %}
@@ -136,8 +159,6 @@
     {% if is_own_entry %}
       &nbsp;・&nbsp;
       <a href="{% url "yearbook-update" %}">Edit your entry</a>
-      &nbsp;・&nbsp;
-      <a class="text-danger" href="{% url "yearbook-delete" %}">Delete your entry</a>
     {% endif %}
   </p>
 {% endblock layout-content %}

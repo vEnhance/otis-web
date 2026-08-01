@@ -5,14 +5,14 @@ from django.contrib.auth.models import User
 from django.db.models.query import QuerySet
 from django.http.response import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import CreateView, DeleteView, UpdateView
+from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic.list import ListView
 
 from otisweb.mixins import VerifiedRequiredMixin
 
-from .forms import YearbookEntryCreateForm, YearbookEntryForm
+from .forms import YearbookEntryForm
 from .models import YearbookEntry
 
 
@@ -25,7 +25,8 @@ class YearbookList(VerifiedRequiredMixin, ListView[YearbookEntry]):
     context_object_name = "entries"
 
     def get_queryset(self) -> QuerySet[YearbookEntry]:
-        return YearbookEntry.objects.select_related("user")
+        assert isinstance(self.request.user, User)
+        return YearbookEntry.visible_to(self.request.user)
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
@@ -37,12 +38,12 @@ class YearbookList(VerifiedRequiredMixin, ListView[YearbookEntry]):
 class YearbookDetail(VerifiedRequiredMixin, DetailView[YearbookEntry]):
     model = YearbookEntry
     context_object_name = "entry"
-    slug_field = "user__username"
-    slug_url_kwarg = "username"
     object: YearbookEntry
 
     def get_queryset(self) -> QuerySet[YearbookEntry]:
-        return YearbookEntry.objects.select_related("user")
+        # Drafts 404 for everyone but their author and staff
+        assert isinstance(self.request.user, User)
+        return YearbookEntry.visible_to(self.request.user)
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
@@ -54,7 +55,7 @@ class YearbookCreate(
     VerifiedRequiredMixin, CreateView[YearbookEntry, YearbookEntryForm]
 ):
     model = YearbookEntry
-    form_class = YearbookEntryCreateForm
+    form_class = YearbookEntryForm
 
     def existing_entry_redirect(self) -> Optional[HttpResponseRedirect]:
         """Nobody gets two entries; send repeat visitors to the edit form."""
@@ -97,18 +98,4 @@ class YearbookUpdate(
 
     def form_valid(self, form: YearbookEntryForm) -> HttpResponse:
         messages.success(self.request, "Updated your yearbook entry.")
-        return super().form_valid(form)
-
-
-class YearbookDelete(VerifiedRequiredMixin, DeleteView):
-    model = YearbookEntry
-    context_object_name = "entry"
-    success_url = reverse_lazy("yearbook-list")
-
-    def get_object(self, queryset: Optional[QuerySet[Any]] = None) -> YearbookEntry:
-        del queryset
-        return get_object_or_404(YearbookEntry, user=self.request.user)
-
-    def form_valid(self, form: Any) -> HttpResponse:
-        messages.success(self.request, "Removed your yearbook entry.")
         return super().form_valid(form)

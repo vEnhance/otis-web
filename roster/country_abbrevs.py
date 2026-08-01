@@ -314,3 +314,14 @@ def get_country_flag(code: str) -> str:
     if alpha2 is None:
         return "\N{GLOBE WITH MERIDIANS}"
     return "".join(chr(ord(c) + _REGIONAL_INDICATOR_OFFSET) for c in alpha2)
+
+
+def get_country_imo_url(code: str) -> str:
+    """Link to a country's IMO results page.
+
+    The abbreviations above are the ones the IMO itself uses, so this works for
+    the defunct countries (Soviet Union, Yugoslavia, ...) too.
+    """
+    if code not in COUNTRY_NAMES:
+        return ""
+    return f"https://www.imo-official.org/results/team/country/{code}/"

@@ -1,4 +1,6 @@
 {% extends "layout.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
 {% block title %}
   {% if object %}
     Edit your yearbook entry
@@ -6,6 +8,9 @@
     Sign the yearbook
   {% endif %}
 {% endblock title %}
+{% block css %}
+  <link href="{% static 'yearbook/yearbook.css' %}" rel="stylesheet" />
+{% endblock css %}
 {% block layout-content %}
   {% if not object %}
     {% include "yearbook/components/yearbook_policy.html" %}
@@ -15,15 +20,58 @@
     and lists the semesters you were an OTIS student.
     Every field below is optional; leave blank anything you'd rather not share.
   </p>
-  {% include "otisweb/components/generic_form.html" with submit_name="Save" %}
+  <form action="{{ request.path }}"
+        method="post"
+        enctype="multipart/form-data"
+        class="form">
+    {% csrf_token %}
+    {% include "otisweb/components/generic_form_errors.html" %}
+    {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+    <h2>Your page</h2>
+    {{ form.avatar|as_crispy_field }}
+    {{ form.tagline|as_crispy_field }}
+    {{ form.bio|as_crispy_field }}
+    {{ form.is_draft|as_crispy_field }}
+    <h2>Biographical data</h2>
+    <table class="table table-sm yearbook-form-table yearbook-bio-table">
+      <tbody>
+        {% for field in form.biographical_fields %}
+          {% include "yearbook/components/form_row.html" %}
+        {% endfor %}
+      </tbody>
+    </table>
+    <h2>Contact</h2>
+    <p>
+      Usernames only, without a leading <code>@</code>.
+      Anything left blank is omitted from your page.
+    </p>
+    <table class="table table-sm yearbook-form-table yearbook-contact-table">
+      <tbody>
+        {% for field in form.contact_fields %}
+          {% include "yearbook/components/form_row.html" %}
+        {% endfor %}
+      </tbody>
+    </table>
+    <button type="submit" class="btn btn-success">Save</button>
+  </form>
   <hr />
   <p>
     <a href="{% url "yearbook-list" %}">Back to the yearbook</a>
     {% if object %}
       &nbsp;・&nbsp;
       <a href="{{ object.get_absolute_url }}">View your page</a>
-      &nbsp;・&nbsp;
-      <a class="text-danger" href="{% url "yearbook-delete" %}">Delete your entry</a>
     {% endif %}
   </p>
 {% endblock layout-content %}
+{% block scripts %}
+  <script type="text/javascript">
+      $(() => {
+          $("#id_country").chosen({
+              width: "100%",
+              // the IMO abbreviation is at the end of each label, so that
+              // typing "USA" should find "United States of America (USA)"
+              search_contains: true,
+          });
+      });
+  </script>
+{% endblock scripts %}

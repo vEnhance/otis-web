@@ -1,5 +1,6 @@
 import os
 import random
+import re
 from typing import Optional
 
 from django.contrib.auth.models import User
@@ -9,25 +10,41 @@ from django.core.validators import (
     FileExtensionValidator,
     MaxValueValidator,
     MinValueValidator,
-    RegexValidator,
 )
 from django.db import models
 from django.db.models.query import QuerySet
+from django.db.models.query_utils import Q
 from django.urls import reverse
 from django.utils import timezone
 from markdownfield.models import MarkdownField, RenderedMarkdownField
 from markdownfield.validators import VALIDATOR_STANDARD
 
 from core.models import Semester
-from roster.country_abbrevs import COUNTRY_CHOICES, get_country_flag, get_country_name
+from roster.country_abbrevs import (
+    COUNTRY_CHOICES,
+    get_country_flag,
+    get_country_imo_url,
+    get_country_name,
+)
 
 # The first IMO was held in 1959; nobody in OTIS predates that.
 FIRST_IMO_YEAR = 1959
 
-USERNAME_VALIDATOR = RegexValidator(
-    regex=r"^[A-Za-z0-9._-]+$",
-    message="Only letters, digits, and the characters . _ - are allowed.",
-)
+USERNAME_CHARACTERS = re.compile(r"[A-Za-z0-9._-]+")
+
+
+def validate_username(value: str) -> None:
+    """Checks a social media handle.
+
+    Pasting the handle with its @ is the easy mistake to make, and it would
+    silently break the profile links, so it gets its own message rather than
+    the generic one about which characters are allowed."""
+    if value.startswith("@"):
+        raise ValidationError("Enter just the username, without the leading @.")
+    if not USERNAME_CHARACTERS.fullmatch(value):
+        raise ValidationError(
+            "Only letters, digits, and the characters . _ - are allowed."
+        )
 
 
 def validate_at_most_1mb(f: File):  # type: ignore
@@ -60,10 +77,12 @@ def avatar_file_name(instance: "YearbookEntry", filename: str) -> str:
 class YearbookEntry(models.Model):
     """An opt-in yearbook page for a single OTIS participant.
 
-    The existence of a row is the opt-in: deleting it removes the person from
-    the yearbook entirely. Real names and years of OTIS participation are read
-    off the attached user rather than stored here, since the yearbook policy is
-    that both of those are shown."""
+    Creating a row is the opt-in, and `is_draft` is the way back out: rather
+    than offering a delete button, taking yourself out of the yearbook hides
+    the page but keeps what you wrote, so that changing your mind again
+    doesn't mean starting over. Real names and years of OTIS participation are
+    read off the attached user rather than stored here, since the yearbook
+    policy is that both of those are shown."""
 
     user = models.OneToOneField(
         User,
@@ -117,28 +136,28 @@ class YearbookEntry(models.Model):
         max_length=64,
         blank=True,
         verbose_name="Discord username",
-        validators=[USERNAME_VALIDATOR],
+        validators=[validate_username],
         help_text="Your Discord handle, without the leading @.",
     )
     github_username = models.CharField(
         max_length=64,
         blank=True,
         verbose_name="GitHub username",
-        validators=[USERNAME_VALIDATOR],
+        validators=[validate_username],
         help_text="Your GitHub username, without the leading @.",
     )
     aops_username = models.CharField(
         max_length=64,
         blank=True,
         verbose_name="AoPS username",
-        validators=[USERNAME_VALIDATOR],
+        validators=[validate_username],
         help_text="Your Art of Problem Solving username.",
     )
     instagram_username = models.CharField(
         max_length=64,
         blank=True,
         verbose_name="Instagram username",
-        validators=[USERNAME_VALIDATOR],
+        validators=[validate_username],
         help_text="Your Instagram handle, without the leading @.",
     )
     imo_years = models.CharField(
@@ -163,6 +182,15 @@ class YearbookEntry(models.Model):
     )
     bio_rendered = RenderedMarkdownField()
 
+    is_draft = models.BooleanField(
+        default=False,
+        verbose_name="Draft mode",
+        help_text="While this is checked, your page is hidden from the yearbook; "
+        "only you and OTIS staff can see it. Use this to draft your page before "
+        "publishing it, or to quietly take yourself out of the yearbook later "
+        "without losing anything you wrote.",
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -175,7 +203,7 @@ class YearbookEntry(models.Model):
         return f"Yearbook entry for {self.user.username}"
 
     def get_absolute_url(self) -> str:
-        return reverse("yearbook-detail", args=(self.user.username,))
+        return reverse("yearbook-detail", args=(self.pk,))
 
     def clean(self) -> None:
         super().clean()
@@ -184,6 +212,15 @@ class YearbookEntry(models.Model):
             validate_year_list(self.imo_years)
             years = {int(chunk.strip()) for chunk in self.imo_years.split(",")}
             self.imo_years = ", ".join(str(year) for year in sorted(years))
+
+    @classmethod
+    def visible_to(cls, user: User) -> QuerySet["YearbookEntry"]:
+        """Everything `user` is allowed to see: drafts are hidden from everyone
+        except their author and staff."""
+        queryset = cls.objects.select_related("user")
+        if user.is_staff:
+            return queryset
+        return queryset.filter(Q(is_draft=False) | Q(user=user))
 
     @property
     def name(self) -> str:
@@ -197,6 +234,10 @@ class YearbookEntry(models.Model):
     @property
     def country_flag(self) -> str:
         return get_country_flag(self.country) if self.country else ""
+
+    @property
+    def country_imo_url(self) -> str:
+        return get_country_imo_url(self.country) if self.country else ""
 
     @property
     def imo_year_list(self) -> list[int]:

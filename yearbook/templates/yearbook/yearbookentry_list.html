@@ -49,6 +49,7 @@
               {% endif %}
               {{ entry.name }}
             </span>
+            {% if entry.is_draft %}<span class="yearbook-draft-badge">Draft</span>{% endif %}
             {% if entry.tagline %}<span class="yearbook-card-tagline">{{ entry.tagline }}</span>{% endif %}
             {% if entry.graduation_year %}<span class="yearbook-card-meta">Class of {{ entry.graduation_year }}</span>{% endif %}
           </span>

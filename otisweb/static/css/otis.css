@@ -217,6 +217,23 @@ table.curriculum td.emojis {
   min-width: max-content;
 }
 
+/* Emoji navigation grid in the sidebar. The row height is set per row rather
+   than on the table as a whole, so that adding a row to the grid gives the
+   sidebar another row instead of squashing the existing ones. */
+#emoji_nav {
+  width: 100%;
+  font-size: 22px;
+  text-shadow:
+    1px 0 0 #000,
+    0 -1px 0 #000,
+    0 1px 0 #000,
+    -1px 0 0 #000;
+}
+
+#emoji_nav td {
+  height: 36px;
+}
+
 a.emoji-link {
   text-shadow:
     1px 0 0 black,

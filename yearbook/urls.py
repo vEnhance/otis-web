@@ -6,10 +6,5 @@ urlpatterns = [
     path(r"", views.YearbookList.as_view(), name="yearbook-list"),
     path(r"create/", views.YearbookCreate.as_view(), name="yearbook-create"),
     path(r"edit/", views.YearbookUpdate.as_view(), name="yearbook-update"),
-    path(r"delete/", views.YearbookDelete.as_view(), name="yearbook-delete"),
-    path(
-        r"page/<str:username>/",
-        views.YearbookDetail.as_view(),
-        name="yearbook-detail",
-    ),
+    path(r"page/<int:pk>/", views.YearbookDetail.as_view(), name="yearbook-detail"),
 ]
