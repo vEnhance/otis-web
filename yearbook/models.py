@@ -15,7 +15,6 @@ from django.db import models
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
 from django.urls import reverse
-from django.utils import timezone
 from markdownfield.models import MarkdownField, RenderedMarkdownField
 from markdownfield.validators import VALIDATOR_STANDARD
 
@@ -26,9 +25,6 @@ from roster.country_abbrevs import (
     get_country_imo_url,
     get_country_name,
 )
-
-# The first IMO was held in 1959; nobody in OTIS predates that.
-FIRST_IMO_YEAR = 1959
 
 USERNAME_CHARACTERS = re.compile(r"[A-Za-z0-9._-]+")
 
@@ -50,21 +46,6 @@ def validate_username(value: str) -> None:
 def validate_at_most_1mb(f: File):  # type: ignore
     if f.size > 1024 * 1024:
         raise ValidationError("At most 1MB allowed")
-
-
-def validate_year_list(value: str) -> None:
-    """Checks a comma-separated list of plausible four-digit years."""
-    if not value:
-        return
-    for chunk in value.split(","):
-        chunk = chunk.strip()
-        if not chunk.isdigit():
-            raise ValidationError(f"{chunk} is not a year; use e.g. 2023, 2024.")
-        year = int(chunk)
-        if not FIRST_IMO_YEAR <= year <= timezone.now().year + 1:
-            raise ValidationError(
-                f"{year} is not between {FIRST_IMO_YEAR} and {timezone.now().year + 1}."
-            )
 
 
 def avatar_file_name(instance: "YearbookEntry", filename: str) -> str:
@@ -160,12 +141,18 @@ class YearbookEntry(models.Model):
         validators=[validate_username],
         help_text="Your Instagram handle, without the leading @.",
     )
-    imo_years = models.CharField(
-        max_length=128,
+    website = models.URLField(
         blank=True,
-        verbose_name="IMO participations",
-        validators=[validate_year_list],
-        help_text="Comma-separated years you competed at the IMO, e.g. 2023, 2024.",
+        max_length=128,
+        help_text="A personal website or blog, if you have one.",
+    )
+    imo_id = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        verbose_name="IMO ID",
+        help_text="If you attended the IMO, you can list your contestant ID "
+        "number here. It is the number in the URL of your page on the IMO "
+        "website, e.g. 24870 for imo-official.org/results/contestant/24870/.",
     )
     university = models.CharField(
         max_length=128,
@@ -205,14 +192,6 @@ class YearbookEntry(models.Model):
     def get_absolute_url(self) -> str:
         return reverse("yearbook-detail", args=(self.pk,))
 
-    def clean(self) -> None:
-        super().clean()
-        # Normalize the IMO years to a sorted, deduplicated, tidy list
-        if self.imo_years:
-            validate_year_list(self.imo_years)
-            years = {int(chunk.strip()) for chunk in self.imo_years.split(",")}
-            self.imo_years = ", ".join(str(year) for year in sorted(years))
-
     @classmethod
     def visible_to(cls, user: User) -> QuerySet["YearbookEntry"]:
         """Everything `user` is allowed to see: drafts are hidden from everyone
@@ -240,12 +219,15 @@ class YearbookEntry(models.Model):
         return get_country_imo_url(self.country) if self.country else ""
 
     @property
-    def imo_year_list(self) -> list[int]:
-        if not self.imo_years:
-            return []
-        return sorted(
-            int(chunk.strip()) for chunk in self.imo_years.split(",") if chunk.strip()
-        )
+    def imo_url(self) -> str:
+        if self.imo_id is None:
+            return ""
+        return f"https://www.imo-official.org/results/contestant/{self.imo_id}/"
+
+    @property
+    def website_display(self) -> str:
+        """The website without its scheme, which is just noise in the infobox."""
+        return re.sub(r"^https?://", "", self.website).rstrip("/")
 
     @property
     def otis_semesters(self) -> QuerySet[Semester]:

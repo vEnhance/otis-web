@@ -98,7 +98,8 @@ def test_yearbook_detail(otis):
         github_username="carol-hub",
         aops_username="carol_aops",
         instagram_username="carolgram",
-        imo_years="2023, 2022",
+        imo_id=24870,
+        website="https://ducks.example.com/carol/",
         university="Duck University",
         bio="I like **ducks** a lot.",
     )
@@ -125,9 +126,12 @@ def test_yearbook_detail(otis):
     otis.assert_has(resp, "2023,")
     otis.assert_has(resp, "2024")
     otis.assert_not_has(resp, "Year I")
-    # IMO years get sorted on the way in
-    otis.assert_has(resp, "2022")
-    assert YearbookEntry.objects.get(user=carol).imo_year_list == [2022, 2023]
+    # the IMO ID links to that contestant's page on the IMO site
+    otis.assert_has(resp, "https://www.imo-official.org/results/contestant/24870/")
+    otis.assert_has(resp, "24870")
+    # the website is shown without its scheme, which is noise in the infobox
+    otis.assert_has(resp, 'href="https://ducks.example.com/carol/"')
+    otis.assert_has(resp, "ducks.example.com/carol")
 
     otis.get_not_found("yearbook-detail", entry.pk + 1000)
 
@@ -143,7 +147,7 @@ def test_yearbook_detail_hides_blank_fields(otis):
 
     resp = otis.get_20x("yearbook-detail", entry.pk)
     otis.assert_has(resp, "has not written anything here yet")
-    otis.assert_has(resp, "No student enrollments on record")
+    otis.assert_has(resp, '<span class="fst-italic">None</span>')
     otis.assert_not_has(resp, "Elsewhere")
     otis.assert_not_has(resp, "University")
 
@@ -185,7 +189,8 @@ def test_yearbook_create(otis):
             "country": "USA",
             "graduation_year": 2027,
             "email": "erin@example.com",
-            "imo_years": "2024, 2023, 2024",
+            "imo_id": 24870,
+            "website": "https://otters.example.com",
             "university": "Otter Tech",
             "bio": "Hello!",
         },
@@ -193,8 +198,9 @@ def test_yearbook_create(otis):
     entry = YearbookEntry.objects.get(user=erin)
     assert entry.tagline == "just another otter"
     assert entry.country_name == "United States of America"
-    # duplicate years are collapsed and the list is sorted
-    assert entry.imo_years == "2023, 2024"
+    assert entry.imo_id == 24870
+    assert entry.imo_url == "https://www.imo-official.org/results/contestant/24870/"
+    assert entry.website_display == "otters.example.com"
     otis.assert_redirects(resp, entry.get_absolute_url())
 
     # a second attempt to sign sends you to the edit form instead
@@ -210,11 +216,15 @@ def test_yearbook_create_rejects_bad_input(otis):
 
     otis.post_20x(
         "yearbook-create",
-        data={"imo_years": "twenty twenty three"},
+        data={"imo_id": "not a number"},
     )
     otis.post_20x(
         "yearbook-create",
-        data={"imo_years": "1066"},
+        data={"imo_id": -5},
+    )
+    otis.post_20x(
+        "yearbook-create",
+        data={"website": "not a url"},
     )
     otis.post_20x(
         "yearbook-create",
@@ -263,7 +273,7 @@ def test_yearbook_drafts_are_hidden(otis):
 
     # publishing makes it visible to everyone
     otis.login(iris)
-    otis.post_30x("yearbook-update", data={"tagline": "ready now", "imo_years": ""})
+    otis.post_30x("yearbook-update", data={"tagline": "ready now"})
     assert YearbookEntry.objects.get(user=iris).is_draft is False
     otis.login(nosy)
     resp = otis.get_20x("yearbook-list")
@@ -279,12 +289,12 @@ def test_yearbook_create_as_draft(otis):
     otis.login(jack)
 
     # entries are published by default; draft mode is opt-in
-    otis.post_30x("yearbook-create", data={"tagline": "hello", "imo_years": ""})
+    otis.post_30x("yearbook-create", data={"tagline": "hello"})
     assert YearbookEntry.objects.get(user=jack).is_draft is False
 
     otis.post_30x(
         "yearbook-update",
-        data={"tagline": "hello", "imo_years": "", "is_draft": "on"},
+        data={"tagline": "hello", "is_draft": "on"},
     )
     assert YearbookEntry.objects.get(user=jack).is_draft is True
 
@@ -300,7 +310,7 @@ def test_yearbook_update(otis):
     otis.assert_has(otis.get_20x("yearbook-update"), "before")
     otis.post_30x(
         "yearbook-update",
-        data={"tagline": "after", "imo_years": "", "bio": ""},
+        data={"tagline": "after", "bio": ""},
     )
     assert YearbookEntry.objects.get(user=gina).tagline == "after"
 
@@ -324,8 +334,10 @@ def test_yearbook_entry_model():
     StudentFactory(user=user, semester=SemesterFactory(name="Year III", end_year=2025))
     assert entry.otis_years == "2022-2025"
 
-    entry.imo_years = "2020"
-    entry.full_clean(exclude=("bio_rendered",))
-    entry.imo_years = "2020, notayear"
+    # no IMO ID and no website means nothing to link to
+    assert entry.imo_url == ""
+    assert entry.website_display == ""
+
+    entry.discord_username = "@ivy"
     with pytest.raises(ValidationError):
         entry.full_clean(exclude=("bio_rendered",))

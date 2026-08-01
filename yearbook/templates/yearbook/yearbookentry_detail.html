@@ -72,13 +72,14 @@
           <td>{{ entry.university }}</td>
         </tr>
       {% endif %}
-      {% if entry.imo_year_list %}
+      {% if entry.imo_id %}
         <tr>
           <th scope="row">IMO</th>
           <td>
-            {% for year in entry.imo_year_list %}
-              {{ year }}{% if not forloop.last %},{% endif %}
-            {% endfor %}
+            <a target="_blank"
+               rel="noreferrer"
+               title="{{ entry.name }} at the IMO"
+               href="{{ entry.imo_url }}">{{ entry.imo_id }}</a>
           </td>
         </tr>
       {% endif %}
@@ -101,7 +102,7 @@
           <td>Game Master</td>
         </tr>
       {% endif %}
-      {% if entry.email or entry.discord_username or entry.github_username or entry.aops_username or entry.instagram_username %}
+      {% if entry.email or entry.discord_username or entry.github_username or entry.aops_username or entry.instagram_username or entry.website %}
         <tr>
           <th colspan="2" class="yearbook-infobox-header" scope="colgroup">Socials</th>
         </tr>
@@ -142,6 +143,14 @@
               <a target="_blank"
                  rel="noreferrer"
                  href="https://www.instagram.com/{{ entry.instagram_username }}/">{{ entry.instagram_username }}</a>
+            </td>
+          </tr>
+        {% endif %}
+        {% if entry.website %}
+          <tr>
+            <th scope="row">Website</th>
+            <td>
+              <a target="_blank" rel="noreferrer" href="{{ entry.website }}">{{ entry.website_display }}</a>
             </td>
           </tr>
         {% endif %}

@@ -294,7 +294,6 @@ class Migration(migrations.Migration):
                         blank=True,
                         help_text="Comma-separated years you competed at the IMO, e.g. 2023, 2024.",
                         max_length=128,
-                        validators=[yearbook.models.validate_year_list],
                         verbose_name="IMO participations",
                     ),
                 ),

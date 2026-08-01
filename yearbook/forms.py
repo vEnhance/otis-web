@@ -9,7 +9,7 @@ from .models import YearbookEntry
 PAGE_FIELDS = ("avatar", "tagline", "bio", "is_draft")
 
 # Rendered as a label/input table, keeping their help text
-BIOGRAPHICAL_FIELDS = ("country", "graduation_year", "university", "imo_years")
+BIOGRAPHICAL_FIELDS = ("country", "graduation_year", "university", "imo_id")
 
 # Also a label/input table, but these labels say it all, so the help text is
 # dropped to keep each account on a single line
@@ -19,6 +19,7 @@ CONTACT_FIELDS = {
     "github_username": "GitHub",
     "aops_username": "AoPS",
     "instagram_username": "Instagram",
+    "website": "Website",
 }
 
 
