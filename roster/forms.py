@@ -155,7 +155,6 @@ class DecisionForm(forms.ModelForm):
         max_length=128,
         label="Invitation passcode",
         help_text="You should have gotten the passcode in your acceptance email.",
-        widget=forms.PasswordInput,
     )
     gender = forms.ChoiceField(
         choices=StudentRegistration.GENDER_CHOICES,
