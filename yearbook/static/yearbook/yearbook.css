@@ -1,8 +1,8 @@
 /* Listing: a grid of small cards, one per person */
 .yearbook-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   margin-bottom: 1em;
 }
 
@@ -20,6 +20,7 @@
 
 .yearbook-card:hover {
   background-color: #eaf3ff;
+  text-decoration: none;
 }
 
 .yearbook-avatar {
@@ -53,24 +54,30 @@
 
 .yearbook-draft-badge {
   display: inline-block;
+  max-width: 100%;
   padding: 0 5px;
+  overflow: hidden;
   border-radius: 3px;
   background-color: #6c757d;
   color: #ffffff;
   font-size: 75%;
+  text-overflow: ellipsis;
   text-transform: uppercase;
+  white-space: nowrap;
+  vertical-align: bottom;
+}
+
+.yearbook-card-classof {
+  font-weight: normal;
+  font-size: 85%;
+  color: #555555;
 }
 
 .yearbook-card-tagline {
   display: block;
+  color: #121212;
   font-style: italic;
   font-size: 90%;
-}
-
-.yearbook-card-meta {
-  display: block;
-  font-size: 85%;
-  color: #555555;
 }
 
 /* Individual page: a Wikipedia-flavored biography with an infobox */

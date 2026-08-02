@@ -44,10 +44,12 @@
                       aria-label="{{ entry.country_name }}">{{ entry.country_flag }}</span>
               {% endif %}
               {{ entry.name }}
+              {% if entry.graduation_year %}
+                <span class="yearbook-card-classof">’{{ entry.graduation_year_short }}</span>
+              {% endif %}
             </span>
             {% if entry.is_draft %}<span class="yearbook-draft-badge">Draft</span>{% endif %}
             {% if entry.tagline %}<span class="yearbook-card-tagline">{{ entry.tagline }}</span>{% endif %}
-            {% if entry.graduation_year %}<span class="yearbook-card-meta">Class of {{ entry.graduation_year }}</span>{% endif %}
           </span>
         </a>
       {% endfor %}

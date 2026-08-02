@@ -70,7 +70,7 @@ def test_yearbook_listing(otis):
     resp = otis.get_20x("yearbook-list")
     otis.assert_has(resp, "Alice Aardvark")
     otis.assert_has(resp, "just another otter")
-    otis.assert_has(resp, "Class of 2026")
+    otis.assert_has(resp, "’26")
     otis.assert_has(resp, "🇦🇺")
     otis.assert_has(resp, 'aria-label="Australia"')
     # the policy warning lives on the create form, not on the listing

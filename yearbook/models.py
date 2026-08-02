@@ -227,6 +227,11 @@ class YearbookEntry(models.Model):
         return get_country_flag(self.country) if self.country else ""
 
     @property
+    def graduation_year_short(self) -> str:
+        """The graduation year as a two-digit string, e.g. "14" for 2014."""
+        return f"{self.graduation_year % 100:02d}" if self.graduation_year else ""
+
+    @property
     def country_imo_url(self) -> str:
         return get_country_imo_url(self.country) if self.country else ""
 
