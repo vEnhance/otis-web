@@ -3,6 +3,13 @@ from django import forms
 from .models import UnitGroup
 
 
+class CheckStampForm(forms.Form):
+    text = forms.CharField(
+        label="Text to check",
+        widget=forms.Textarea,
+    )
+
+
 class CatalogFilterForm(forms.Form):
     difficulty = forms.MultipleChoiceField(
         choices=[("B", "B"), ("D", "D"), ("Z", "Z")],

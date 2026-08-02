@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+{% block title %}
+  Check stamp
+{% endblock title %}
+{% block layout-content %}
+  {% if form.is_bound %}
+    <h2>Result</h2>
+    {% if stamp %}
+      <div class="alert alert-success">
+        <p>Valid stamp.</p>
+      </div>
+      <table class="table">
+        <tbody>
+          <tr>
+            <th>User</th>
+            <td>
+              <a href="{% url "user-info" target_user.pk %}">{{ target_user.get_full_name|default:target_user.username }}</a>
+              (<code>{{ target_user.username }}</code>, pk {{ stamp.pk }})
+            </td>
+          </tr>
+          <tr>
+            <th>Email</th>
+            <td>{{ target_user.email|default:"(none)" }}</td>
+          </tr>
+          <tr>
+            <th>Timestamp</th>
+            <td>{{ stamp.when|date:"Y-m-d H:i T" }}</td>
+          </tr>
+        </tbody>
+      </table>
+      {% if not target_user %}
+        <div class="alert alert-warning">
+          Valid stamp, but no user with pk {{ stamp.pk }} exists anymore (deleted
+          account?).
+        </div>
+      {% endif %}
+    {% endif %}
+    <hr />
+  {% endif %}
+  <h2>Check stamp</h2>
+  <p>Paste in text below to check whether it contains a valid OTIS stamp.</p>
+  {% include "otisweb/components/generic_form.html" with submit_name="Check" %}
+{% endblock layout-content %}

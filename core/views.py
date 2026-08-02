@@ -2,6 +2,7 @@ import zoneinfo
 from typing import Any, Optional
 
 from braces.views import LoginRequiredMixin
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import AnonymousUser, User
 from django.contrib.auth.tokens import default_token_generator
@@ -17,7 +18,7 @@ from django.forms import Select
 from django.forms.models import BaseModelForm
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect
 from django.http.response import JsonResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.urls.base import reverse_lazy
 from django.utils import timezone
@@ -31,14 +32,15 @@ from sql_util.utils import Exists
 
 from core.models import EMAIL_PREFERENCE_FIELDS, Semester, UserProfile
 from dashboard.models import PSet, UploadedFile
-from otisweb.decorators import staff_required, verified_required
+from otisweb.decorators import admin_required, staff_required, verified_required
 from otisweb.mixins import AdminRequiredMixin
 from otisweb.utils import AuthHttpRequest
 from roster.models import Student
 
-from .forms import CatalogFilterForm
+from .forms import CatalogFilterForm, CheckStampForm
 from .models import Unit, UnitGroup
 from .utils import get_protected_file
+from .watermark import verify_corner_stamp
 
 # Create your views here.
 
@@ -380,6 +382,24 @@ class UserInfoView(AdminRequiredMixin, DetailView[User]):
         context["groups"] = user.groups.all()
         context["reset_link"] = self.request.session.pop("reset_link", None)
         return context
+
+
+@admin_required
+def check_stamp(request: HttpRequest) -> HttpResponse:
+    context: dict[str, Any] = {"stamp": None, "target_user": None}
+    if request.method == "POST":
+        form = CheckStampForm(request.POST)
+        if form.is_valid():
+            stamp = verify_corner_stamp(form.cleaned_data["text"])
+            if stamp is None:
+                messages.warning(request, "No valid stamp found in that text.")
+            else:
+                context["stamp"] = stamp
+                context["target_user"] = User.objects.filter(pk=stamp.pk).first()
+    else:
+        form = CheckStampForm()
+    context["form"] = form
+    return render(request, "core/check_stamp.html", context)
 
 
 @staff_required

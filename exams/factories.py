@@ -8,6 +8,7 @@ from factory.django import DjangoModelFactory
 from factory.faker import Faker
 from factory.helpers import post_generation
 
+from core.factories import mock_pdf
 from exams.models import ExamAttempt, PracticeExam
 from roster.factories import StudentFactory
 
@@ -28,7 +29,9 @@ class PracticeExamFactory(DjangoModelFactory):
             return
 
         exam: PracticeExam = self  # type: ignore
-        storages["protected"].save(f"exam-pdf/{exam.pdfname}", ContentFile(b"exam"))
+        storages["protected"].save(
+            f"exam-pdf/{exam.pdfname}", ContentFile(mock_pdf(b"exam"))
+        )
 
 
 class QuizFactory(PracticeExamFactory):

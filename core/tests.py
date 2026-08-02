@@ -1,9 +1,12 @@
+import io
 import json
 from typing import Any
 
 import pytest
 from django.test.utils import override_settings
 from django.utils.timezone import localtime
+from pypdf import PdfReader
+from reportlab.pdfgen.canvas import Canvas
 
 from core.factories import (
     GroupFactory,
@@ -13,6 +16,7 @@ from core.factories import (
     UserFactory,
 )
 from core.models import Semester
+from core.watermark import get_corner_text, verify_corner_stamp, watermark_pdf
 from dashboard.factories import PSetFactory
 from roster.factories import StudentFactory
 from rpg.factories import BonusLevelFactory
@@ -71,6 +75,110 @@ def test_staff_core_views(otis):
     otis.login(UserFactory.create(is_staff=True))
     for v in ("view-problems", "view-tex", "view-solutions"):
         otis.get_20x(v, u.pk)
+
+
+@pytest.mark.django_db
+@override_settings(TESTING_NEEDS_MOCK_MEDIA=True)
+def test_pdf_watermark(otis):
+    alice = StudentFactory.create(
+        user__first_name="Alice",
+        user__last_name="Aardvark",
+        user__email="alice@example.com",
+    )
+    unit = UnitFactory.create()
+    alice.unlocked_units.add(unit)
+    otis.login(alice)
+
+    resp = otis.get_20x("view-problems", unit.pk)
+    text = PdfReader(io.BytesIO(resp.content)).pages[0].extract_text()
+    assert "Prob" in text  # the original content is still there
+    assert "Alice Aardvark" in text
+    assert alice.user.username in text
+    assert "alice@example.com" in text
+    assert f"OTIS PK {alice.user.pk}" in text  # invisible corner stamp
+    stamp = verify_corner_stamp(text)
+    assert stamp is not None
+    assert stamp.pk == alice.user.pk
+
+    # TeX files are served as-is
+    assert otis.get_20x("view-tex", unit.pk).content == b"TeX"
+
+
+@pytest.mark.django_db
+def test_watermark_all_pages():
+    # A leaker sharing just one page (not necessarily the first) should still
+    # be traceable, so every page gets both stamps, not just the first.
+    alice = UserFactory.create()
+    buffer = io.BytesIO()
+    canvas = Canvas(buffer, pagesize=(612, 792))
+    for i in range(3):
+        canvas.drawString(72, 720, f"Page {i + 1}")
+        canvas.showPage()
+    canvas.save()
+
+    out = watermark_pdf(buffer.getvalue(), alice)
+    reader = PdfReader(io.BytesIO(out))
+    assert len(reader.pages) == 3
+    for i, page in enumerate(reader.pages):
+        text = page.extract_text()
+        assert f"Page {i + 1}" in text
+        assert alice.username in text
+        stamp = verify_corner_stamp(text)
+        assert stamp is not None
+        assert stamp.pk == alice.pk
+
+
+@pytest.mark.django_db
+def test_watermark_unparseable_pdf():
+    # Serving an unmarked file beats serving a broken one
+    alice = UserFactory.create()
+    assert watermark_pdf(b"certainly not a PDF", alice) == b"certainly not a PDF"
+
+
+@pytest.mark.django_db
+def test_corner_stamp_tamper_detection():
+    alice = UserFactory.create()
+    mallory = UserFactory.create()
+    text = get_corner_text(alice)
+    stamp = verify_corner_stamp(text)
+    assert stamp is not None
+    assert stamp.pk == alice.pk
+
+    # Mallory can't just edit the pk in a leaked copy to frame Alice, since she
+    # doesn't know SECRET_KEY and so can't produce a matching signature.
+    forged = text.replace(f"PK {alice.pk} ", f"PK {mallory.pk} ", 1)
+    assert verify_corner_stamp(forged) is None
+
+    # Garbage/missing stamps are handled the same way.
+    assert verify_corner_stamp("no stamp here") is None
+
+
+@pytest.mark.django_db
+def test_check_stamp(otis):
+    admin = UserFactory.create(is_staff=True, is_superuser=True)
+    staff_not_admin = UserFactory.create(is_staff=True)
+    alice = UserFactory.create(username="alice")
+    text = get_corner_text(alice)
+
+    # Access control: only staff+superuser (admin_required) may use this.
+    otis.get_30x("check-stamp")
+    otis.login(UserFactory.create())
+    otis.get_40x("check-stamp")
+    otis.login(staff_not_admin)
+    otis.get_40x("check-stamp")
+
+    otis.login(admin)
+    resp = otis.get_20x("check-stamp")
+    otis.assert_has(resp, "Check stamp")
+
+    # A genuine stamp resolves to the user and links their userinfo page.
+    resp = otis.post_ok("check-stamp", data={"text": f"blah blah {text} blah"})
+    otis.assert_has(resp, "alice")
+    otis.assert_has(resp, f"/core/userinfo/{alice.pk}/")
+
+    # A forged/garbled stamp resolves to nobody.
+    resp = otis.post_ok("check-stamp", data={"text": "not a real stamp"})
+    otis.assert_has(resp, "No valid stamp")
 
 
 @pytest.mark.django_db

@@ -24,6 +24,11 @@ urlpatterns = [
     path(r"calendar/", views.calendar, name="calendar"),
     path(r"userinfo/<int:pk>/", views.UserInfoView.as_view(), name="user-info"),
     path(
+        r"check-stamp/",
+        views.check_stamp,
+        name="check-stamp",
+    ),
+    path(
         r"userinfo/<int:pk>/reset-link/",
         views.GeneratePasswordResetLinkView.as_view(),
         name="generate-reset-link",
