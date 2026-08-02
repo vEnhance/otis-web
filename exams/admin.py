@@ -1,3 +1,5 @@
+import datetime
+
 from django.contrib import admin
 from django.db.models.query import QuerySet
 from django.http.request import HttpRequest
@@ -7,6 +9,17 @@ from import_export.admin import ImportExportModelAdmin
 from .models import ExamAttempt, MockCompleted, PracticeExam
 
 # Register your models here.
+
+
+def shift_years(date: datetime.date, num_years: int) -> datetime.date:
+    """Returns the same calendar day, num_years later.
+
+    A Feb 29 date lands on Feb 28 whenever the target year isn't a leap year.
+    """
+    try:
+        return date.replace(year=date.year + num_years)
+    except ValueError:
+        return date.replace(year=date.year + num_years, day=28)
 
 
 class PracticeExamIEResource(resources.ModelResource):
@@ -67,7 +80,7 @@ class PracticeExamAdmin(ImportExportModelAdmin):
         for exam in exams:
             for field in ("start_date", "due_date"):
                 if (d := getattr(exam, field)) is not None:
-                    setattr(exam, field, d.replace(year=d.year + 2))
+                    setattr(exam, field, shift_years(d, num_years=2))
         PracticeExam.objects.bulk_update(exams, ("start_date", "due_date"))
         self.message_user(request, f"Postponed {len(exams)} exam(s) by two years.")
 
