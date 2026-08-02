@@ -6,6 +6,7 @@ from braces.views import LoginRequiredMixin
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.contrib.humanize.templatetags.humanize import naturaltime
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models import F, OuterRef
@@ -30,11 +31,100 @@ from rpg.models import VulnerabilityRecord
 
 from .forms import DiamondsForm
 from .levelsys import LevelInfoDict, get_level_info, get_student_rows
-from .models import Achievement, AchievementUnlock, Level, PalaceCarving
+from .models import (
+    GUESS_CODE_MAX_LENGTH,
+    WRONG_GUESS_LIMIT,
+    Achievement,
+    AchievementCodeGuess,
+    AchievementUnlock,
+    Level,
+    PalaceCarving,
+    get_guess_rate_limit_release,
+)
 
 logger = logging.getLogger(__name__)
 
 RUBY_PALACE_DIAMOND_VALUE = 1
+
+
+def handle_diamond_guess(
+    request: AuthHttpRequest, student: Student, code: str, is_well_formed: bool
+) -> None:
+    """Records a guess at a diamond code and awards the diamond if it was right.
+
+    Guesses that aren't shaped like a code at all are recorded too, but are
+    never looked up; the form has already told the user those were rejected.
+
+    The rate limit is enforced against the user who submitted the guess, which
+    is not necessarily the user the diamond would be awarded to (staff members
+    can submit codes from a student's stats page).
+    """
+    assert student.user is not None
+    release = get_guess_rate_limit_release(request.user)
+    if release is not None:
+        messages.error(
+            request,
+            f"🛑 You've used up your {WRONG_GUESS_LIMIT} incorrect guesses. "
+            f"You can try again {naturaltime(release)}.",
+        )
+        return
+
+    achievement = (
+        Achievement.objects.exclude(code="").filter(code__iexact=code).first()
+        if is_well_formed
+        else None
+    )
+    AchievementCodeGuess.objects.create(
+        user=request.user,
+        code=code[:GUESS_CODE_MAX_LENGTH],
+        achievement=achievement,
+        is_correct=achievement is not None,
+        is_well_formed=is_well_formed,
+    )
+    if achievement is None:
+        if is_well_formed:
+            messages.error(request, "❌ You entered an invalid code.")
+        return
+
+    is_first_obtain = (
+        not AchievementUnlock.objects.filter(achievement=achievement)
+        .exclude(achievement__creator=F("user"))
+        .exists()
+    ) and not achievement.creator == student.user
+    _, is_new = AchievementUnlock.objects.get_or_create(
+        user=student.user,
+        achievement=achievement,
+        defaults={"is_first_obtain": is_first_obtain},
+    )
+    if is_new is True:
+        msg = r"🎉 Achievement unlocked! "
+        if is_first_obtain:
+            logger.log(
+                SUCCESS_LOG_LEVEL,
+                f"`{achievement}` newly found by {student.name}! Wow!",
+                extra={"request": request},
+            )
+            msg += f"You're the first to find {achievement.name}! Wowie!"
+        else:
+            logger.info(
+                f"{student.name} just obtained `{achievement}`!",
+                extra={"request": request},
+            )
+            msg += f"You earned the achievement {achievement.name}."
+        if achievement.creator is not None:
+            msg += " This was a user-created achievement code, "
+            msg += "so please avoid sharing it with others."
+        messages.success(request, msg)
+    else:
+        logger.info(
+            f"{student.name} has already obtained {achievement} before",
+            extra={"request": request},
+        )
+        messages.warning(
+            request,
+            r"Already unlocked! ❎ "
+            f"You already earned the achievement {achievement.name}.",
+        )
 
 
 @login_required
@@ -50,62 +140,14 @@ def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
         "achievements": unlocks,
     }
     if request.method == "POST":
-        assert student.user is not None
         form = DiamondsForm(request.POST)
-        if form.is_valid():
+        is_well_formed = form.is_valid()
+        if is_well_formed:
             code = form.cleaned_data["code"]
-
-            try:
-                achievement = Achievement.objects.exclude(code="").get(
-                    code__iexact=code
-                )
-            except Achievement.DoesNotExist:
-                messages.error(request, "❌ You entered an invalid code.")
-                logger.info(
-                    f"Invalid diamond code `{code}` from {student.name}",
-                    extra={"request": request},
-                )
-            else:
-                is_first_obtain = (
-                    not AchievementUnlock.objects.filter(achievement=achievement)
-                    .exclude(achievement__creator=F("user"))
-                    .exists()
-                ) and not achievement.creator == student.user
-                _, is_new = AchievementUnlock.objects.get_or_create(
-                    user=student.user,
-                    achievement=achievement,
-                    defaults={"is_first_obtain": is_first_obtain},
-                )
-                if is_new is True:
-                    msg = r"🎉 Achievement unlocked! "
-                    if is_first_obtain:
-                        logger.log(
-                            SUCCESS_LOG_LEVEL,
-                            f"`{achievement}` newly found by {student.name}! Wow!",
-                            extra={"request": request},
-                        )
-                        msg += f"You're the first to find {achievement.name}! Wowie!"
-                    else:
-                        logger.info(
-                            f"{student.name} just obtained `{achievement}`!",
-                            extra={"request": request},
-                        )
-                        msg += f"You earned the achievement {achievement.name}."
-                    if achievement.creator is not None:
-                        msg += " This was a user-created achievement code, "
-                        msg += "so please avoid sharing it with others."
-                    messages.success(request, msg)
-                else:
-                    logger.info(
-                        f"{student.name} has already obtained {achievement} before",
-                        extra={"request": request},
-                    )
-                    messages.warning(
-                        request,
-                        r"Already unlocked! ❎ "
-                        f"You already earned the achievement {achievement.name}.",
-                    )
-
+        else:
+            code = request.POST.get("code", "").strip()
+        if code:
+            handle_diamond_guess(request, student, code, is_well_formed)
     else:
         form = DiamondsForm()
     try:
