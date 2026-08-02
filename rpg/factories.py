@@ -10,6 +10,7 @@ from rpg.models import VulnerabilityRecord
 
 from .models import (
     Achievement,
+    AchievementCodeGuess,
     AchievementUnlock,
     BonusLevel,
     BonusLevelUnlock,
@@ -44,6 +45,16 @@ class AchievementUnlockFactory(DjangoModelFactory):
 
     user = SubFactory(UserFactory)
     achievement = SubFactory(AchievementFactory)
+
+
+class AchievementCodeGuessFactory(DjangoModelFactory):
+    class Meta:
+        model = AchievementCodeGuess
+
+    user = SubFactory(UserFactory)
+    code = UniqueFaker("hexify", text="^" * 24)
+    achievement = None
+    is_correct = False
 
 
 class QuestCompleteFactory(DjangoModelFactory):

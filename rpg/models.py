@@ -1,7 +1,8 @@
+import datetime
 import os
 import random
 from hashlib import sha256
-from typing import Any
+from typing import Any, Optional
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -9,9 +10,13 @@ from django.core.exceptions import ValidationError
 from django.core.files.base import File
 from django.core.validators import RegexValidator
 from django.db import models
+from django.utils import timezone
 
 from core.models import UnitGroup
 from roster.models import Student
+
+WRONG_GUESS_LIMIT = 20
+GUESS_WINDOW = datetime.timedelta(days=1)
 
 
 def validate_at_most_1mb(f: File):  # type: ignore
@@ -154,6 +159,70 @@ class AchievementUnlock(models.Model):
 
     def __str__(self) -> str:
         return self.timestamp.strftime("%c")
+
+
+class AchievementCodeGuess(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        help_text="The user who submitted the guess",
+    )
+    code = models.CharField(
+        max_length=96,
+        help_text="The code that was submitted",
+    )
+    achievement = models.ForeignKey(
+        Achievement,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text="The achievement the code matched, if any",
+    )
+    is_correct = models.BooleanField(
+        help_text="Whether the code matched an achievement when it was submitted",
+    )
+    timestamp = models.DateTimeField(
+        auto_now_add=True, help_text="The time the guess was submitted"
+    )
+
+    class Meta:
+        verbose_name_plural = "Achievement code guesses"
+        indexes = [
+            models.Index(fields=["user", "is_correct", "timestamp"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.code} " + self.timestamp.strftime("%c")
+
+
+def get_guess_rate_limit_release(user: User) -> Optional[datetime.datetime]:
+    """Checks whether a user has used up their wrong guesses on diamond codes.
+
+    Returns the time at which the user may guess again, or None if they are
+    under the limit. Only the wrong guesses made both within the last
+    GUESS_WINDOW and since the user's most recent correct guess are counted.
+    """
+    window_start = timezone.now() - GUESS_WINDOW
+    last_correct_at = (
+        AchievementCodeGuess.objects.filter(user=user, is_correct=True)
+        .order_by("-timestamp")
+        .values_list("timestamp", flat=True)
+        .first()
+    )
+    if last_correct_at is not None:
+        window_start = max(window_start, last_correct_at)
+    timestamps = list(
+        AchievementCodeGuess.objects.filter(
+            user=user, is_correct=False, timestamp__gt=window_start
+        )
+        .order_by("-timestamp")
+        .values_list("timestamp", flat=True)[:WRONG_GUESS_LIMIT]
+    )
+    if len(timestamps) < WRONG_GUESS_LIMIT:
+        return None
+    # once the oldest of these guesses ages out of the window,
+    # the user is one guess below the limit again
+    return timestamps[-1] + GUESS_WINDOW
 
 
 class QuestComplete(models.Model):

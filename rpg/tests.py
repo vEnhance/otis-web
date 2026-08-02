@@ -1,6 +1,8 @@
 import datetime
 
 import pytest
+from django.contrib.auth.models import User
+from django.utils import timezone
 
 from core.factories import GroupFactory, UnitFactory, UserFactory
 from dashboard.factories import PSetFactory
@@ -9,6 +11,7 @@ from payments.factories import JobFactory, WorkerFactory
 from roster.factories import StudentFactory
 from roster.models import Student
 from rpg.factories import (
+    AchievementCodeGuessFactory,
     AchievementFactory,
     AchievementUnlockFactory,
     BonusLevelFactory,
@@ -21,7 +24,12 @@ from rpg.levelsys import (
     get_level_info,
     get_student_rows,
 )
-from rpg.models import Achievement, AchievementUnlock
+from rpg.models import (
+    WRONG_GUESS_LIMIT,
+    Achievement,
+    AchievementCodeGuess,
+    AchievementUnlock,
+)
 
 UTC = datetime.timezone.utc
 
@@ -568,3 +576,109 @@ def test_is_first_obtain_no_bg_success_without_first_find(otis):
     otis.login(alice)
     resp = otis.get_20x("stats", alice.pk)
     otis.assert_not_has(resp, "bg-success")
+
+
+# --- diamond code guess tests ---
+
+WRONG_CODE = "123456123456123456123456"
+
+
+def make_wrong_guesses(user: User, count: int):
+    return AchievementCodeGuessFactory.create_batch(count, user=user)
+
+
+@pytest.mark.django_db
+def test_guesses_are_recorded(otis):
+    """Both wrong and right guesses at diamond codes are saved to the database."""
+    alice = StudentFactory.create()
+    achievement = AchievementFactory.create()
+
+    otis.login(alice)
+    otis.post_20x("stats", alice.pk, data={"code": WRONG_CODE})
+    otis.post_20x("stats", alice.pk, data={"code": achievement.code})
+
+    wrong_guess, right_guess = AchievementCodeGuess.objects.filter(
+        user=alice.user
+    ).order_by("pk")
+    assert wrong_guess.code == WRONG_CODE
+    assert wrong_guess.is_correct is False
+    assert wrong_guess.achievement is None
+    assert right_guess.code == achievement.code
+    assert right_guess.is_correct is True
+    assert right_guess.achievement == achievement
+
+
+@pytest.mark.django_db
+def test_wrong_guesses_are_rate_limited(otis):
+    """After WRONG_GUESS_LIMIT wrong guesses, further guesses are refused."""
+    alice = StudentFactory.create()
+    achievement = AchievementFactory.create()
+    make_wrong_guesses(alice.user, WRONG_GUESS_LIMIT - 1)
+
+    otis.login(alice)
+    resp = otis.post_20x("stats", alice.pk, data={"code": WRONG_CODE})
+    otis.assert_has(resp, "You entered an invalid code.")
+
+    # the limit is now used up, so even a correct code is turned away
+    resp = otis.post_20x("stats", alice.pk, data={"code": achievement.code})
+    otis.assert_has(
+        resp, f"You&#x27;ve used up your {WRONG_GUESS_LIMIT} incorrect guesses."
+    )
+    assert not AchievementUnlock.objects.filter(
+        user=alice.user, achievement=achievement
+    ).exists()
+    # ... and the refused guess isn't recorded either
+    assert AchievementCodeGuess.objects.filter(user=alice.user).count() == (
+        WRONG_GUESS_LIMIT
+    )
+
+
+@pytest.mark.django_db
+def test_rate_limit_is_per_user(otis):
+    """One user using up their guesses doesn't affect anyone else."""
+    alice = StudentFactory.create()
+    bob = StudentFactory.create()
+    make_wrong_guesses(alice.user, WRONG_GUESS_LIMIT)
+
+    otis.login(bob)
+    resp = otis.post_20x("stats", bob.pk, data={"code": WRONG_CODE})
+    otis.assert_has(resp, "You entered an invalid code.")
+
+
+@pytest.mark.django_db
+def test_rate_limit_forgets_old_guesses(otis):
+    """Wrong guesses older than a day don't count against the limit."""
+    alice = StudentFactory.create()
+    make_wrong_guesses(alice.user, WRONG_GUESS_LIMIT)
+    AchievementCodeGuess.objects.filter(user=alice.user).update(
+        timestamp=timezone.now() - datetime.timedelta(hours=25)
+    )
+
+    otis.login(alice)
+    resp = otis.post_20x("stats", alice.pk, data={"code": WRONG_CODE})
+    otis.assert_has(resp, "You entered an invalid code.")
+
+
+@pytest.mark.django_db
+def test_correct_guess_resets_rate_limit(otis):
+    """A correct guess wipes the slate of wrong guesses counted so far."""
+    alice = StudentFactory.create()
+    achievement = AchievementFactory.create()
+    make_wrong_guesses(alice.user, WRONG_GUESS_LIMIT - 1)
+
+    otis.login(alice)
+    otis.post_20x("stats", alice.pk, data={"code": achievement.code})
+    assert AchievementUnlock.objects.filter(
+        user=alice.user, achievement=achievement
+    ).exists()
+
+    # the wrong guesses before the unlock no longer count
+    make_wrong_guesses(alice.user, WRONG_GUESS_LIMIT - 1)
+    resp = otis.post_20x("stats", alice.pk, data={"code": WRONG_CODE})
+    otis.assert_has(resp, "You entered an invalid code.")
+
+    # but the ones after it do
+    resp = otis.post_20x("stats", alice.pk, data={"code": WRONG_CODE})
+    otis.assert_has(
+        resp, f"You&#x27;ve used up your {WRONG_GUESS_LIMIT} incorrect guesses."
+    )
