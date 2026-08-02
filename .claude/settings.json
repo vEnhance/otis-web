@@ -1,0 +1,19 @@
+{
+  "env": {
+    "ZIZMOR_OFFLINE": "true"
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "make -C \"$CLAUDE_PROJECT_DIR\" install",
+            "timeout": 300
+          }
+        ]
+      }
+    ]
+  }
+}
