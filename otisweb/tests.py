@@ -46,7 +46,7 @@ def test_login_works(otis):
 )
 def test_wiki_redirects_to_catalog(client: Client, path: str):
     response = client.get(path)
-    assert response.status_code == 302
+    assert response.status_code == 301
     assert response["Location"] == "https://catalog.evanchen.cc/"
 
 

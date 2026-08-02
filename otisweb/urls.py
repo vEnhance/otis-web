@@ -32,7 +32,7 @@ urlpatterns = [
     # The wiki moved to the catalog, so send legacy links there instead of 404
     re_path(
         r"^wiki(?:/|$)",
-        RedirectView.as_view(url="https://catalog.evanchen.cc/"),
+        RedirectView.as_view(url="https://catalog.evanchen.cc/", permanent=True),
         name="wiki",
     ),
     # ------
