@@ -60,12 +60,24 @@ def test_config(otis):
 @pytest.mark.django_db
 def test_checkout(otis, payment_test_data):
     invoice = payment_test_data["invoice"]
+    checksum = payment_test_data["checksum"]
     pk = invoice.pk
-    otis.post_40x("payments-checkout", pk, 240)
-    otis.get_40x("payments-checkout", pk, 0)  # amount >= 0
+    otis.post_40x("payments-checkout", pk, 240, checksum)
+    otis.get_40x("payments-checkout", pk, 0, checksum)  # amount >= 0
+    otis.get_denied("payments-checkout", pk, 240, "?")  # bad checksum
+    otis.get_not_found("payments-checkout", pk + 1, 240, checksum)  # no such invoice
+
+    # the checksum of some other student shouldn't work either
+    bob = StudentFactory.create(user__username="bob")
+    otis.get_denied(
+        "payments-checkout",
+        pk,
+        240,
+        bob.get_checksum(settings.INVOICE_HASH_KEY),
+    )
 
     if settings.STRIPE_PUBLISHABLE_KEY:
-        resp = otis.get_20x("payments-checkout", pk, 480)
+        resp = otis.get_20x("payments-checkout", pk, 480, checksum)
         assert "sessionId" in resp.json()
 
 

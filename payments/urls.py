@@ -10,7 +10,7 @@ urlpatterns = [
     ),
     path(r"config/", views.config, name="payments-config"),
     path(
-        r"checkout/<int:invoice_pk>/<int:amount>/",
+        r"checkout/<int:invoice_pk>/<int:amount>/<str:checksum>/",
         views.checkout,
         name="payments-checkout",
     ),

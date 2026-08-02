@@ -63,7 +63,12 @@ def config(request: HttpRequest) -> HttpResponse:
 
 
 @csrf_exempt
-def checkout(request: HttpRequest, invoice_pk: int, amount: int) -> HttpResponse:
+def checkout(
+    request: HttpRequest, invoice_pk: int, amount: int, checksum: str
+) -> HttpResponse:
+    invoice = get_object_or_404(Invoice, pk=invoice_pk)
+    if checksum != invoice.student.get_checksum(settings.INVOICE_HASH_KEY):
+        raise PermissionDenied("Bad hash provided")
     if amount <= 0:
         raise PermissionDenied("Need to enter a positive amount for payment...")
     stripe.api_key = settings.STRIPE_SECRET_KEY
