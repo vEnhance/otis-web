@@ -71,6 +71,7 @@ dev = [
   "werkzeug>=3.1.8",
   "prek>=0.4.5",
 ]
+
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "otisweb.settings"
 python_files = ["tests.py", "test_*.py", "*_tests.py"]
