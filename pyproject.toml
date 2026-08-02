@@ -8,7 +8,7 @@ readme = "README.md"
 requires-python = ">=3.13, <4.0"
 
 dependencies = [
-  "Django>=5.2.13,<6.0.0",
+  "Django>=6.0.7,<6.1.0",
   "Unidecode>=1.4.0",
   "crispy-bootstrap5>=2026.3",
   "django-allauth[socialaccount]>=65.18.0",
@@ -29,8 +29,8 @@ dependencies = [
   "django-reversion>=6.3.0",
   "django-sql-utils>=0.7.0",
   "django-storages[google,s3]>=1.14.6",
-  "django-stubs>=5.2.9,<6.0.0",
-  "django-stubs-ext>=5.2.9,<6.0.0",
+  "django-stubs>=6.0.7,<7.0.0",
+  "django-stubs-ext>=6.0.7,<7.0.0",
   "pillow>=12.3.0",
   "prettytable>=3.17.0",
   "pyparsing>=3.3.2",

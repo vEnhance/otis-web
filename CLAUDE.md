@@ -9,7 +9,7 @@ The production server is hosted on PythonAnywhere.
 
 ## Tech Stack
 
-- **Framework**: Django 5.2+
+- **Framework**: Django 6.0+
 - **Python**: 3.13+
 - **Package Manager**: uv
 - **Database**: SQLite (dev), MySQL (prod)
