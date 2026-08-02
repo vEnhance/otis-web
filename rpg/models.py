@@ -183,6 +183,11 @@ class AchievementCodeGuess(models.Model):
         help_text="Whether the code was a hex string of the right length; "
         "if not, it was never checked against any achievement",
     )
+    is_new_unlock = models.BooleanField(
+        default=False,
+        help_text="Whether this guess actually earned the achievement, as "
+        "opposed to re-entering a code the user had already redeemed",
+    )
     is_correct = models.BooleanField(
         help_text="Whether the code matched an achievement when it was submitted",
     )

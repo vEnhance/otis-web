@@ -604,9 +604,45 @@ def test_guesses_are_recorded(otis):
     assert wrong_guess.code == WRONG_CODE
     assert wrong_guess.is_correct is False
     assert wrong_guess.achievement is None
+    assert wrong_guess.is_new_unlock is False
     assert right_guess.code == achievement.code
     assert right_guess.is_correct is True
     assert right_guess.achievement == achievement
+    assert right_guess.is_new_unlock is True
+
+
+@pytest.mark.django_db
+def test_repeat_redeem_is_marked(otis):
+    """A code entered a second time is recorded, but not as earning anything."""
+    alice = StudentFactory.create()
+    achievement = AchievementFactory.create()
+
+    otis.login(alice)
+    otis.post_20x("stats", alice.pk, data={"code": achievement.code})
+    resp = otis.post_20x("stats", alice.pk, data={"code": achievement.code})
+    otis.assert_has(resp, "Already unlocked!")
+
+    earned, repeat = AchievementCodeGuess.objects.filter(user=alice.user).order_by("pk")
+    assert earned.is_new_unlock is True
+    assert repeat.is_new_unlock is False
+    # the repeat is still a correct guess; it just didn't earn the diamond
+    assert repeat.is_correct is True
+    assert repeat.achievement == achievement
+
+
+@pytest.mark.django_db
+def test_creator_redeeming_own_code_earns_it_once(otis):
+    """The first redeem is marked even when the guesser created the diamond."""
+    alice = StudentFactory.create()
+    achievement = AchievementFactory.create(creator=alice.user)
+
+    otis.login(alice)
+    otis.post_20x("stats", alice.pk, data={"code": achievement.code})
+    otis.post_20x("stats", alice.pk, data={"code": achievement.code})
+
+    earned, repeat = AchievementCodeGuess.objects.filter(user=alice.user).order_by("pk")
+    assert earned.is_new_unlock is True
+    assert repeat.is_new_unlock is False
 
 
 @pytest.mark.django_db
@@ -729,6 +765,7 @@ def test_malformed_guesses_are_recorded(otis):
     assert guess.code == "not a hex code"
     assert guess.is_well_formed is False
     assert guess.is_correct is False
+    assert guess.is_new_unlock is False
     assert guess.achievement is None
 
 

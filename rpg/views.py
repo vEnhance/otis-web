@@ -74,7 +74,7 @@ def handle_diamond_guess(
         if is_well_formed
         else None
     )
-    AchievementCodeGuess.objects.create(
+    guess = AchievementCodeGuess.objects.create(
         user=request.user,
         code=code[:GUESS_CODE_MAX_LENGTH],
         achievement=achievement,
@@ -97,6 +97,8 @@ def handle_diamond_guess(
         defaults={"is_first_obtain": is_first_obtain},
     )
     if is_new is True:
+        guess.is_new_unlock = True
+        guess.save(update_fields=["is_new_unlock"])
         msg = r"🎉 Achievement unlocked! "
         if is_first_obtain:
             logger.log(
