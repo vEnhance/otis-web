@@ -1,10 +1,15 @@
 import datetime
 
 import pytest
+from django.contrib.admin.sites import AdminSite
+from django.contrib.messages.storage.cookie import CookieStorage
+from django.http.request import HttpRequest
+from django.test.client import RequestFactory
 from django.test.utils import override_settings
 from freezegun import freeze_time
 
 from core.factories import SemesterFactory, UserFactory
+from exams.admin import PracticeExamAdmin
 from exams.calculator import expr_compute
 from exams.factories import PracticeExamFactory, QuizFactory
 from exams.models import ExamAttempt, PracticeExam
@@ -206,3 +211,34 @@ def test_quiz(otis, exam_setup):
         a.delete()  # make sure we can't resubmit
         otis.login("alice")
         otis.post_denied("quiz", alice.pk, quiz_waltz.pk, data={"answer1": 1337})
+
+
+@pytest.mark.django_db
+def test_admin_postpone_two_years():
+    with override_settings(TESTING_NEEDS_MOCK_MEDIA=False):
+        shifted = PracticeExamFactory.create(
+            start_date=datetime.date(2020, 2, 29),
+            due_date=datetime.date(2020, 12, 31),
+        )
+        no_dates = PracticeExamFactory.create(start_date=None, due_date=None)
+        untouched = PracticeExamFactory.create(
+            start_date=datetime.date(2020, 1, 1),
+            due_date=datetime.date(2020, 6, 1),
+        )
+
+    admin = PracticeExamAdmin(PracticeExam, AdminSite())
+    request: HttpRequest = RequestFactory().get("/")
+    setattr(request, "_messages", CookieStorage(request))
+    admin.postpone_two_years(request, PracticeExam.objects.exclude(pk=untouched.pk))
+
+    shifted.refresh_from_db()
+    assert shifted.start_date == datetime.date(2022, 2, 28)  # 2022 isn't a leap year
+    assert shifted.due_date == datetime.date(2022, 12, 31)
+
+    no_dates.refresh_from_db()
+    assert no_dates.start_date is None
+    assert no_dates.due_date is None
+
+    untouched.refresh_from_db()
+    assert untouched.start_date == datetime.date(2020, 1, 1)
+    assert untouched.due_date == datetime.date(2020, 6, 1)

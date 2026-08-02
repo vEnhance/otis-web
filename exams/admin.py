@@ -1,10 +1,25 @@
+import datetime
+
 from django.contrib import admin
+from django.db.models.query import QuerySet
+from django.http.request import HttpRequest
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
 from .models import ExamAttempt, MockCompleted, PracticeExam
 
 # Register your models here.
+
+
+def shift_years(date: datetime.date, num_years: int) -> datetime.date:
+    """Returns the same calendar day, num_years later.
+
+    A Feb 29 date lands on Feb 28 whenever the target year isn't a leap year.
+    """
+    try:
+        return date.replace(year=date.year + num_years)
+    except ValueError:
+        return date.replace(year=date.year + num_years, day=28)
 
 
 class PracticeExamIEResource(resources.ModelResource):
@@ -55,6 +70,20 @@ class PracticeExamAdmin(ImportExportModelAdmin):
         "number",
     )
     resource_class = PracticeExamIEResource
+    actions = ("postpone_two_years",)
+
+    @admin.action(description="Move start and due dates forward by two calendar years")
+    def postpone_two_years(
+        self, request: HttpRequest, queryset: QuerySet[PracticeExam]
+    ) -> None:
+        exams = list(queryset)
+        for exam in exams:
+            if exam.start_date is not None:
+                exam.start_date = shift_years(exam.start_date, num_years=2)
+            if exam.due_date is not None:
+                exam.due_date = shift_years(exam.due_date, num_years=2)
+        PracticeExam.objects.bulk_update(exams, ("start_date", "due_date"))
+        self.message_user(request, f"Postponed {len(exams)} exam(s) by two years.")
 
 
 @admin.register(ExamAttempt)
