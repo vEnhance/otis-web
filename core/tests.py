@@ -3,6 +3,7 @@ from typing import Any
 
 import pytest
 from django.test.utils import override_settings
+from django.utils.timezone import localtime
 
 from core.factories import (
     GroupFactory,
@@ -337,7 +338,7 @@ def test_userinfo_displays_info(otis):
     otis.assert_has(resp, "test@example.com")
     otis.assert_has(resp, "Test User")
     otis.assert_has(resp, "Testers")
-    otis.assert_has(resp, target_user.date_joined.strftime("%Y-%m-%d"))
+    otis.assert_has(resp, localtime(target_user.date_joined).strftime("%Y-%m-%d %H:%M"))
     assert target_user.last_login is None
     otis.assert_has(resp, "(never)")
 
