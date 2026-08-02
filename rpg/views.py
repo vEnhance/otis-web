@@ -32,6 +32,7 @@ from rpg.models import VulnerabilityRecord
 from .forms import DiamondsForm
 from .levelsys import LevelInfoDict, get_level_info, get_student_rows
 from .models import (
+    GUESS_CODE_MAX_LENGTH,
     WRONG_GUESS_LIMIT,
     Achievement,
     AchievementCodeGuess,
@@ -46,8 +47,13 @@ logger = logging.getLogger(__name__)
 RUBY_PALACE_DIAMOND_VALUE = 1
 
 
-def handle_diamond_guess(request: AuthHttpRequest, student: Student, code: str) -> None:
+def handle_diamond_guess(
+    request: AuthHttpRequest, student: Student, code: str, is_well_formed: bool
+) -> None:
     """Records a guess at a diamond code and awards the diamond if it was right.
+
+    Guesses that aren't shaped like a code at all are recorded too, but are
+    never looked up; the form has already told the user those were rejected.
 
     The rate limit is enforced against the user who submitted the guess, which
     is not necessarily the user the diamond would be awarded to (staff members
@@ -63,15 +69,21 @@ def handle_diamond_guess(request: AuthHttpRequest, student: Student, code: str) 
         )
         return
 
-    achievement = Achievement.objects.exclude(code="").filter(code__iexact=code).first()
+    achievement = (
+        Achievement.objects.exclude(code="").filter(code__iexact=code).first()
+        if is_well_formed
+        else None
+    )
     AchievementCodeGuess.objects.create(
         user=request.user,
-        code=code,
+        code=code[:GUESS_CODE_MAX_LENGTH],
         achievement=achievement,
         is_correct=achievement is not None,
+        is_well_formed=is_well_formed,
     )
     if achievement is None:
-        messages.error(request, "❌ You entered an invalid code.")
+        if is_well_formed:
+            messages.error(request, "❌ You entered an invalid code.")
         return
 
     is_first_obtain = (
@@ -129,8 +141,13 @@ def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
     }
     if request.method == "POST":
         form = DiamondsForm(request.POST)
-        if form.is_valid():
-            handle_diamond_guess(request, student, form.cleaned_data["code"])
+        is_well_formed = form.is_valid()
+        if is_well_formed:
+            code = form.cleaned_data["code"]
+        else:
+            code = request.POST.get("code", "").strip()
+        if code:
+            handle_diamond_guess(request, student, code, is_well_formed)
     else:
         form = DiamondsForm()
     try:

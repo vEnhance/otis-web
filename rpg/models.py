@@ -17,6 +17,7 @@ from roster.models import Student
 
 WRONG_GUESS_LIMIT = 20
 GUESS_WINDOW = datetime.timedelta(days=1)
+GUESS_CODE_MAX_LENGTH = 96
 
 
 def validate_at_most_1mb(f: File):  # type: ignore
@@ -168,8 +169,8 @@ class AchievementCodeGuess(models.Model):
         help_text="The user who submitted the guess",
     )
     code = models.CharField(
-        max_length=96,
-        help_text="The code that was submitted",
+        max_length=GUESS_CODE_MAX_LENGTH,
+        help_text="The code that was submitted, truncated if it was overlong",
     )
     achievement = models.ForeignKey(
         Achievement,
@@ -177,6 +178,10 @@ class AchievementCodeGuess(models.Model):
         null=True,
         blank=True,
         help_text="The achievement the code matched, if any",
+    )
+    is_well_formed = models.BooleanField(
+        help_text="Whether the code was a hex string of the right length; "
+        "if not, it was never checked against any achievement",
     )
     is_correct = models.BooleanField(
         help_text="Whether the code matched an achievement when it was submitted",

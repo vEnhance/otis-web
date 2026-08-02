@@ -25,6 +25,7 @@ from rpg.levelsys import (
     get_student_rows,
 )
 from rpg.models import (
+    GUESS_CODE_MAX_LENGTH,
     WRONG_GUESS_LIMIT,
     Achievement,
     AchievementCodeGuess,
@@ -678,6 +679,60 @@ def test_correct_guess_resets_rate_limit(otis):
     otis.assert_has(resp, "You entered an invalid code.")
 
     # but the ones after it do
+    resp = otis.post_20x("stats", alice.pk, data={"code": WRONG_CODE})
+    otis.assert_has(
+        resp, f"You&#x27;ve used up your {WRONG_GUESS_LIMIT} incorrect guesses."
+    )
+
+
+@pytest.mark.django_db
+def test_malformed_guesses_are_recorded(otis):
+    """Submissions that aren't shaped like a code are recorded but never looked up."""
+    alice = StudentFactory.create()
+
+    otis.login(alice)
+    resp = otis.post_20x("stats", alice.pk, data={"code": "not a hex code"})
+    otis.assert_has(resp, "This doesn&#x27;t appear to be a hex code.")
+
+    guess = AchievementCodeGuess.objects.get(user=alice.user)
+    assert guess.code == "not a hex code"
+    assert guess.is_well_formed is False
+    assert guess.is_correct is False
+    assert guess.achievement is None
+
+
+@pytest.mark.django_db
+def test_overlong_guess_is_truncated(otis):
+    """An absurdly long submission is stored, cut down to the column width."""
+    alice = StudentFactory.create()
+
+    otis.login(alice)
+    otis.post_20x("stats", alice.pk, data={"code": "f" * 500})
+
+    guess = AchievementCodeGuess.objects.get(user=alice.user)
+    assert guess.code == "f" * GUESS_CODE_MAX_LENGTH
+    assert guess.is_well_formed is False
+
+
+@pytest.mark.django_db
+def test_empty_guess_is_not_recorded(otis):
+    """Submitting the form with nothing in it isn't a guess at all."""
+    alice = StudentFactory.create()
+
+    otis.login(alice)
+    otis.post_20x("stats", alice.pk, data={"code": "   "})
+
+    assert not AchievementCodeGuess.objects.filter(user=alice.user).exists()
+
+
+@pytest.mark.django_db
+def test_malformed_guesses_count_against_rate_limit(otis):
+    """Garbage submissions burn guesses just like wrong codes do."""
+    alice = StudentFactory.create()
+    make_wrong_guesses(alice.user, WRONG_GUESS_LIMIT - 1)
+
+    otis.login(alice)
+    otis.post_20x("stats", alice.pk, data={"code": "not a hex code"})
     resp = otis.post_20x("stats", alice.pk, data={"code": WRONG_CODE})
     otis.assert_has(
         resp, f"You&#x27;ve used up your {WRONG_GUESS_LIMIT} incorrect guesses."

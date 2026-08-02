@@ -93,6 +93,7 @@ class AchievementCodeGuessAdmin(admin.ModelAdmin):
         "user",
         "code",
         "is_correct",
+        "is_well_formed",
         "achievement",
         "timestamp",
     )
@@ -104,7 +105,10 @@ class AchievementCodeGuessAdmin(admin.ModelAdmin):
         "user__username",
         "code",
     )
-    list_filter = ("is_correct",)
+    list_filter = (
+        "is_correct",
+        "is_well_formed",
+    )
 
 
 @admin.register(QuestComplete)

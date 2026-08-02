@@ -55,6 +55,7 @@ class AchievementCodeGuessFactory(DjangoModelFactory):
     code = UniqueFaker("hexify", text="^" * 24)
     achievement = None
     is_correct = False
+    is_well_formed = True
 
 
 class QuestCompleteFactory(DjangoModelFactory):
