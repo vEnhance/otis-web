@@ -32,7 +32,6 @@ from roster.factories import (
     InvoiceFactory,
     RegistrationContainerFactory,
     StudentFactory,
-    StudentRegistrationFactory,
 )
 from rpg.factories import BonusLevelFactory
 from rpg.models import Level
@@ -680,12 +679,6 @@ def test_index(otis):
     RegistrationContainerFactory.create(semester=semester)
     resp = otis.get_20x("index")
     otis.assert_has(resp, "If you've already gotten your acceptance letter")
-
-    StudentRegistrationFactory.create(user=user)
-    resp = otis.get_20x("index")
-    otis.assert_has(
-        resp, "so you'll need to wait for Evan to confirm your registration"
-    )
 
     alice = StudentFactory.create(user=user)
     otis.get_redirects(reverse("portal", args=(alice.pk,)), "index", follow=True)

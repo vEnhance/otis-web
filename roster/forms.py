@@ -182,11 +182,6 @@ class DecisionForm(forms.ModelForm):
         help_text="Receive an email when your problem suggestion status is updated.",
         required=False,
     )
-    email_on_registration_processed = forms.BooleanField(
-        label="Receive email on registration",
-        help_text="Receive an email when your registration for the year is approved.",
-        required=False,
-    )
 
     class Meta:
         model = StudentRegistration

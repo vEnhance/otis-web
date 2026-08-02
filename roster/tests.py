@@ -1253,7 +1253,6 @@ def test_reg(otis) -> None:
             "email_on_pset_complete": True,
             "email_on_suggestion_processed": False,
             "email_on_inquiry_complete": False,
-            "email_on_registration_processed": False,
         },
         follow=True,
     )
@@ -1285,7 +1284,6 @@ def test_reg(otis) -> None:
             "email_on_pset_complete": True,
             "email_on_suggestion_processed": False,
             "email_on_inquiry_complete": False,
-            "email_on_registration_processed": False,
         },
         follow=True,
     )
@@ -1306,7 +1304,6 @@ def test_reg(otis) -> None:
     assert profile.email_on_pset_complete
     assert not profile.email_on_suggestion_processed
     assert not profile.email_on_inquiry_complete
-    assert not profile.email_on_registration_processed
 
     resp = otis.post_20x(
         "register",
@@ -1326,7 +1323,6 @@ def test_reg(otis) -> None:
             "email_on_pset_complete": True,
             "email_on_suggestion_processed": False,
             "email_on_inquiry_complete": False,
-            "email_on_registration_processed": False,
         },
         follow=True,
     )
@@ -1401,7 +1397,6 @@ def test_reg_with_apply_uuid(otis) -> None:
             "email_on_pset_complete": True,
             "email_on_suggestion_processed": False,
             "email_on_inquiry_complete": False,
-            "email_on_registration_processed": False,
         },
         follow=True,
     )
@@ -1433,7 +1428,6 @@ def test_reg_with_apply_uuid(otis) -> None:
             "email_on_pset_complete": True,
             "email_on_suggestion_processed": False,
             "email_on_inquiry_complete": False,
-            "email_on_registration_processed": False,
         },
         follow=True,
     )
@@ -1483,7 +1477,6 @@ def test_reg_with_apply_uuid(otis) -> None:
             "email_on_pset_complete": True,
             "email_on_suggestion_processed": False,
             "email_on_inquiry_complete": False,
-            "email_on_registration_processed": False,
         },
         follow=True,
     )
@@ -1510,7 +1503,6 @@ def test_reg_with_apply_uuid(otis) -> None:
             "email_on_pset_complete": True,
             "email_on_suggestion_processed": False,
             "email_on_inquiry_complete": False,
-            "email_on_registration_processed": False,
         },
         follow=True,
     )
@@ -1552,7 +1544,6 @@ def test_reg_with_disabled_apply_uuid(otis) -> None:
             "email_on_pset_complete": True,
             "email_on_suggestion_processed": False,
             "email_on_inquiry_complete": False,
-            "email_on_registration_processed": False,
         },
         follow=True,
     )
