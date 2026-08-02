@@ -183,6 +183,11 @@ class AchievementCodeGuess(models.Model):
         help_text="Whether the code was a hex string of the right length; "
         "if not, it was never checked against any achievement",
     )
+    is_new_unlock = models.BooleanField(
+        default=False,
+        help_text="Whether this guess actually earned the achievement, as "
+        "opposed to re-entering a code the user had already redeemed",
+    )
     is_correct = models.BooleanField(
         help_text="Whether the code matched an achievement when it was submitted",
     )
@@ -205,17 +210,23 @@ def get_guess_rate_limit_release(user: User) -> Optional[datetime.datetime]:
 
     Returns the time at which the user may guess again, or None if they are
     under the limit. Only the wrong guesses made both within the last
-    GUESS_WINDOW and since the user's most recent correct guess are counted.
+    GUESS_WINDOW and since the user's most recent unlock are counted.
+
+    The slate is wiped by an unlock rather than by any correct guess, since
+    every student is shown one working code on their own stats page: keying
+    the reset on a correct submission would let anyone clear their record at
+    will by retyping a code they already own. Buying a reset with a diamond
+    that was actually new caps how often it can happen.
     """
     window_start = timezone.now() - GUESS_WINDOW
-    last_correct_at = (
-        AchievementCodeGuess.objects.filter(user=user, is_correct=True)
+    last_unlock_at = (
+        AchievementUnlock.objects.filter(user=user)
         .order_by("-timestamp")
         .values_list("timestamp", flat=True)
         .first()
     )
-    if last_correct_at is not None:
-        window_start = max(window_start, last_correct_at)
+    if last_unlock_at is not None:
+        window_start = max(window_start, last_unlock_at)
     timestamps = list(
         AchievementCodeGuess.objects.filter(
             user=user, is_correct=False, timestamp__gt=window_start

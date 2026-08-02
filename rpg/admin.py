@@ -93,6 +93,7 @@ class AchievementCodeGuessAdmin(admin.ModelAdmin):
         "user",
         "code",
         "is_correct",
+        "is_new_unlock",
         "is_well_formed",
         "achievement",
         "timestamp",
@@ -107,6 +108,7 @@ class AchievementCodeGuessAdmin(admin.ModelAdmin):
     )
     list_filter = (
         "is_correct",
+        "is_new_unlock",
         "is_well_formed",
     )
 
