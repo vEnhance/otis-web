@@ -11,6 +11,7 @@ from django.http.response import (
 )
 
 from core.models import UserProfile
+from core.watermark import watermark_pdf
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +35,13 @@ def get_protected_file(folder: str, filename: str, request: HttpRequest):
         logger.critical(errmsg)
         return HttpResponseServerError("File not found")
 
-    response = HttpResponse(content=file)
+    if ext == ".pdf":
+        with file:
+            content = watermark_pdf(file.read(), request.user)
+    else:
+        content = file
+
+    response = HttpResponse(content=content)
     if ext == ".pdf":
         response["Content-Type"] = "application/pdf"
         response["Content-Disposition"] = (

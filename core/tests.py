@@ -1,8 +1,10 @@
+import io
 import json
 from typing import Any
 
 import pytest
 from django.test.utils import override_settings
+from pypdf import PdfReader
 
 from core.factories import (
     GroupFactory,
@@ -12,6 +14,7 @@ from core.factories import (
     UserFactory,
 )
 from core.models import Semester
+from core.watermark import watermark_pdf
 from dashboard.factories import PSetFactory
 from roster.factories import StudentFactory
 from rpg.factories import BonusLevelFactory
@@ -70,6 +73,36 @@ def test_staff_core_views(otis):
     otis.login(UserFactory.create(is_staff=True))
     for v in ("view-problems", "view-tex", "view-solutions"):
         otis.get_20x(v, u.pk)
+
+
+@pytest.mark.django_db
+@override_settings(TESTING_NEEDS_MOCK_MEDIA=True)
+def test_pdf_watermark(otis):
+    alice = StudentFactory.create(
+        user__first_name="Alice",
+        user__last_name="Aardvark",
+        user__email="alice@example.com",
+    )
+    unit = UnitFactory.create()
+    alice.unlocked_units.add(unit)
+    otis.login(alice)
+
+    resp = otis.get_20x("view-problems", unit.pk)
+    text = PdfReader(io.BytesIO(resp.content)).pages[0].extract_text()
+    assert "Prob" in text  # the original content is still there
+    assert "Alice Aardvark" in text
+    assert alice.user.username in text
+    assert "alice@example.com" in text
+
+    # TeX files are served as-is
+    assert otis.get_20x("view-tex", unit.pk).content == b"TeX"
+
+
+@pytest.mark.django_db
+def test_watermark_unparseable_pdf():
+    # Serving an unmarked file beats serving a broken one
+    alice = UserFactory.create()
+    assert watermark_pdf(b"certainly not a PDF", alice) == b"certainly not a PDF"
 
 
 @pytest.mark.django_db

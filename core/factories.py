@@ -1,4 +1,6 @@
+import io
 import random
+from functools import cache
 from typing import Any, Iterable
 
 from django.conf import settings
@@ -10,6 +12,7 @@ from factory.django import DjangoModelFactory
 from factory.faker import Faker
 from factory.fuzzy import FuzzyChoice
 from factory.helpers import post_generation
+from reportlab.pdfgen.canvas import Canvas
 
 from core.models import Semester, Unit, UnitGroup, UserProfile
 from otisweb_testsuite import UniqueFaker
@@ -50,6 +53,20 @@ class UnitGroupFactory(DjangoModelFactory):
     subject = FuzzyChoice([subject[0] for subject in UnitGroup.SUBJECT_CHOICES])
 
 
+@cache
+def mock_pdf(label: bytes) -> bytes:
+    """Return the bytes of a one-page PDF saying `label`.
+
+    Mock PDFs need to actually parse as PDFs, since protected files are
+    watermarked on their way out of storage.
+    """
+    buffer = io.BytesIO()
+    canvas = Canvas(buffer, pagesize=(612, 792))
+    canvas.drawString(72, 720, label.decode())
+    canvas.save()
+    return buffer.getvalue()
+
+
 class UnitFactory(DjangoModelFactory):
     class Meta:
         model = Unit
@@ -69,8 +86,8 @@ class UnitFactory(DjangoModelFactory):
         u: Unit = self  # type: ignore
         protected = storages["protected"]
         stuff_to_write = [
-            ("unit-pdf", u.problems_pdf_filename, b"Prob"),
-            ("unit-sol", u.solutions_pdf_filename, b"Soln"),
+            ("unit-pdf", u.problems_pdf_filename, mock_pdf(b"Prob")),
+            ("unit-sol", u.solutions_pdf_filename, mock_pdf(b"Soln")),
             ("unit-tex", u.problems_tex_filename, b"TeX"),
         ]
         for folder, fname, content in stuff_to_write:
