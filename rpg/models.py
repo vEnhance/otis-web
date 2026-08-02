@@ -15,8 +15,8 @@ from django.utils import timezone
 from core.models import UnitGroup
 from roster.models import Student
 
-WRONG_GUESS_LIMIT = 20
-GUESS_WINDOW = datetime.timedelta(days=1)
+WRONG_GUESS_LIMIT = 15
+GUESS_WINDOW = datetime.timedelta(hours=6)
 GUESS_CODE_MAX_LENGTH = 96
 
 

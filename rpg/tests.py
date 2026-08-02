@@ -26,6 +26,7 @@ from rpg.levelsys import (
 )
 from rpg.models import (
     GUESS_CODE_MAX_LENGTH,
+    GUESS_WINDOW,
     WRONG_GUESS_LIMIT,
     Achievement,
     AchievementCodeGuess,
@@ -684,11 +685,11 @@ def test_rate_limit_is_per_user(otis):
 
 @pytest.mark.django_db
 def test_rate_limit_forgets_old_guesses(otis):
-    """Wrong guesses older than a day don't count against the limit."""
+    """Wrong guesses older than GUESS_WINDOW don't count against the limit."""
     alice = StudentFactory.create()
     make_wrong_guesses(alice.user, WRONG_GUESS_LIMIT)
     AchievementCodeGuess.objects.filter(user=alice.user).update(
-        timestamp=timezone.now() - datetime.timedelta(hours=25)
+        timestamp=timezone.now() - GUESS_WINDOW - datetime.timedelta(minutes=1)
     )
 
     otis.login(alice)
