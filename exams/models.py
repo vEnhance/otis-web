@@ -92,8 +92,10 @@ class PracticeExam(models.Model):
     def get_number_display(self) -> str:
         if self.is_test:
             return f"{self.number:02d}"
-        else:
+        elif self.number <= 26:
             return string.ascii_uppercase[self.number - 1]
+        else:
+            return str(self.number)
 
     @property
     def overdue(self) -> bool:
