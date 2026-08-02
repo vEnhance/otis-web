@@ -154,7 +154,7 @@ class DecisionForm(forms.ModelForm):
     passcode = forms.CharField(
         max_length=128,
         label="Invitation passcode",
-        help_text="You should have gotten the passcode in your acceptance email.",
+        help_text="This is provided in your acceptance letter and registration instructions on apply.evanchen.cc.",
     )
     gender = forms.ChoiceField(
         choices=StudentRegistration.GENDER_CHOICES,
