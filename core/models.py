@@ -71,11 +71,6 @@ class Semester(models.Model):
     )
     end_year = models.IntegerField(help_text="The year in which OTIS will end")
 
-    gradescope_key = models.CharField(
-        max_length=10,
-        blank=True,
-        help_text="NO LONGER USED. Previously, the entry code for GradeScope this semester.",
-    )
     social_url = models.URLField(
         max_length=128,
         blank=True,
