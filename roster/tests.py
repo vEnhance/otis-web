@@ -37,9 +37,10 @@ from roster.models import (
     Student,
     StudentRegistration,
     UnitInquiry,
+    build_student,
 )
 
-from .admin import ApplyUUIDIEResource, build_students
+from .admin import ApplyUUIDIEResource
 
 UTC = datetime.timezone.utc
 
@@ -1297,8 +1298,7 @@ def test_reg(otis) -> None:
     assert alice.last_name == "Aardvark"
     assert alice.email == "myemail@example.com"
 
-    alice_reg = StudentRegistration.objects.get(user=alice, container=container)
-    assert alice_reg.processed is True
+    assert StudentRegistration.objects.filter(user=alice, container=container).exists()
     assert Student.objects.filter(user=alice, semester=semester).exists()
 
     profile = UserProfile.objects.get(user=alice)
@@ -1347,19 +1347,24 @@ def test_semester_switch(otis) -> None:
     )
     # Suppose there are two semesters left
     with freeze_time("2023-08-01", tz_offset=0):
-        StudentRegistrationFactory.create(container=container, user__username="alice")
-        StudentRegistrationFactory.create(container=container, user__username="bob")
-        assert build_students(StudentRegistration.objects.all()) == 2
-        alice: Student = Student.objects.get(user__username="alice")
+        alice: Student = build_student(
+            StudentRegistrationFactory.create(
+                container=container, user__username="alice"
+            )
+        )
+        bob: Student = build_student(
+            StudentRegistrationFactory.create(container=container, user__username="bob")
+        )
         assert alice.invoice.total_owed == 480
-        bob: Student = Student.objects.get(user__username="bob")
         assert bob.invoice.total_owed == 480
 
     # Now suppose the first semester has finished
     with freeze_time("2024-01-01", tz_offset=0):
-        StudentRegistrationFactory.create(container=container, user__username="carol")
-        assert build_students(StudentRegistration.objects.all()) == 1
-        carol: Student = Student.objects.get(user__username="carol")
+        carol: Student = build_student(
+            StudentRegistrationFactory.create(
+                container=container, user__username="carol"
+            )
+        )
         assert carol.invoice.total_owed == 240
 
 
@@ -1372,9 +1377,7 @@ def test_reg_with_apply_uuid(otis) -> None:
     alice: User = UserFactory.create(first_name="a", last_name="a", email="a@a.net")
     otis.login(alice)
     # registration should redirect if there's no container yet
-    container: RegistrationContainer = RegistrationContainerFactory.create(
-        semester=semester, accepting_responses=True
-    )
+    RegistrationContainerFactory.create(semester=semester, accepting_responses=True)
     # make pdf
     agreement = StringIO("i do!")
     agreement.name = "agreement.pdf"
@@ -1446,7 +1449,6 @@ def test_reg_with_apply_uuid(otis) -> None:
     assert au.reg == alice_reg
 
     # ApplyUUID registration should instantly create a Student record
-    assert alice_reg.processed is True
     alice_student = Student.objects.get(user=alice)
     assert alice_student.semester == semester
     assert alice_student.reg == alice_reg
@@ -1516,24 +1518,9 @@ def test_reg_with_apply_uuid(otis) -> None:
     # Bob should also be instantly accepted
     messages = [m.message for m in resp.context["messages"]]
     assert "Your registration was accepted! You can start working now." in messages
-    bob_reg = StudentRegistration.objects.get(user=bob)
-    assert bob_reg.processed is True
     bob_student = Student.objects.get(user=bob)
     assert Invoice.objects.get(student=bob_student).total_owed == 480  # 0% aid
-
-    # Meanwhile, Carol is queued up by staff rather than registering herself
-    carol: User = UserFactory.create(
-        first_name="Carol", last_name="Cutie", email="c@c.net"
-    )
-    carol_reg = StudentRegistrationFactory.create(user=carol, container=container)
-    assert carol_reg.processed is False
-    assert not Student.objects.filter(user=carol).exists()
-
-    # build_students should only process Carol now (Alice and Bob already processed)
-    assert build_students(StudentRegistration.objects.all()) == 1
     assert Invoice.objects.get(student__user=alice).total_owed == 144
-    assert Invoice.objects.get(student__user=bob).total_owed == 480
-    assert Invoice.objects.get(student__user=carol).total_owed == 480
 
 
 @pytest.mark.django_db

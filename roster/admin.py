@@ -1,6 +1,6 @@
 from typing import Any, Optional, Tuple
 
-from django.contrib import admin, messages
+from django.contrib import admin
 from django.contrib.admin.options import ModelAdmin
 from django.contrib.auth.models import User
 from django.db.models import F, FloatField, QuerySet
@@ -11,7 +11,6 @@ from import_export import fields, resources, widgets
 from import_export.admin import ImportExportModelAdmin
 
 from core.models import Semester
-from roster.models import build_students
 
 from .models import (
     ApplyUUID,
@@ -347,7 +346,6 @@ class StudentRegistrationIEResource(RosterResource):
             "user__email",
             "user_name",
             "container__semester__name",
-            "processed",
             "parent_email",
             "country",
             "gender",
@@ -374,7 +372,6 @@ class StudentRegistrationAdmin(ImportExportModelAdmin):
     readonly_fields = ("created_at",)
     list_display = (
         "name",
-        "processed",
         "container",
         "about",
         "country",
@@ -382,7 +379,6 @@ class StudentRegistrationAdmin(ImportExportModelAdmin):
     )
     list_filter = (
         "container__semester",
-        "processed",
         "gender",
         "graduation_year",
         "country",
@@ -394,14 +390,6 @@ class StudentRegistrationAdmin(ImportExportModelAdmin):
     resource_class = StudentRegistrationIEResource
     search_fields = ("user__first_name", "user__last_name")
     inlines = (StudentRegistrationStudentInline,)
-
-    actions = ("create_student",)
-
-    def create_student(
-        self, request: HttpRequest, queryset: QuerySet[StudentRegistration]
-    ):
-        num_built = build_students(queryset)
-        messages.success(request, message=f"Built {num_built} students")
 
 
 # INQUIRY

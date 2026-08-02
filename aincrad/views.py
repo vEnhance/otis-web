@@ -32,7 +32,6 @@ from roster.models import (
     Student,
     StudentRegistration,
     UnitInquiry,
-    build_students,
 )
 from suggestions.models import ProblemSuggestion
 
@@ -226,19 +225,6 @@ JOB_VENUEQ_INIT_KEYS = (
     "updated_at",
 )
 
-REG_VENUEQ_INIT_QUERYSET = StudentRegistration.objects.filter(
-    processed=False,
-    container__semester__active=True,
-)
-REG_VENUEQ_INIT_KEYS = (
-    "user__first_name",
-    "user__last_name",
-    "user__email",
-    "created_at",
-    "user__profile__email_on_registration_processed",
-    "applyuuid__uuid",
-)
-
 
 def venueq_handler(action: str, data: JSONData) -> JsonResponse:
     if action == "init":
@@ -275,12 +261,6 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
                     JOB_VENUEQ_INIT_QUERYSET.values(*JOB_VENUEQ_INIT_KEYS)
                 ),
             },
-            {
-                "_name": "Regs",
-                "registrations": list(
-                    REG_VENUEQ_INIT_QUERYSET.values(*REG_VENUEQ_INIT_KEYS)
-                ),
-            },
         ]
         return JsonResponse(output_data, status=200)
     elif action == "accept_inquiries":
@@ -292,12 +272,6 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
         ):
             inquiry.run_accept()
             n += 1
-        if n > 0:
-            return JsonResponse({"result": "success", "count": n}, status=200)
-        else:
-            return JsonResponse({"result": "failed", "count": 0}, status=400)
-    elif action == "accept_registrations":
-        n = build_students(REG_VENUEQ_INIT_QUERYSET)
         if n > 0:
             return JsonResponse({"result": "success", "count": n}, status=200)
         else:
@@ -743,7 +717,6 @@ def api(request: HttpRequest) -> JsonResponse:
 
     if action in (
         "grade_problem_set",
-        "accept_registrations",
         "accept_inquiries",
         "mark_suggestion",
         "triage_job",

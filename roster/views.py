@@ -71,7 +71,7 @@ from .models import (
     Student,
     StudentRegistration,
     UnitInquiry,
-    build_students,
+    build_student,
 )
 
 # Create your views here.
@@ -489,7 +489,7 @@ def register(request: AuthHttpRequest) -> HttpResponse:
                     user=request.user,
                     defaults={k: form.cleaned_data[k] for k in EMAIL_PREFERENCE_FIELDS},
                 )
-                build_students(StudentRegistration.objects.filter(pk=registration.pk))
+                build_student(registration)
                 messages.success(
                     request,
                     message="Your registration was accepted! "
