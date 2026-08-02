@@ -463,7 +463,6 @@ class RegistrationContainerAdmin(admin.ModelAdmin):
     list_display = (
         "pk",
         "semester",
-        "passcode",
         "accepting_responses",
     )
     list_display_links = (

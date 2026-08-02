@@ -1196,6 +1196,7 @@ def test_update_invoice(otis) -> None:
 
 @pytest.mark.django_db
 def test_reg(otis) -> None:
+    au = ApplyUUIDFactory.create(percent_aid=0)
     semester: Semester = SemesterFactory.create()
 
     # registration should redirect if there's no container yet
@@ -1239,7 +1240,7 @@ def test_reg(otis) -> None:
             "given_name": "Alice",
             "surname": "Aardvark",
             "email_address": "myemail@example.com",
-            "passcode": f"{container.passcode}1",
+            "passcode": str(uuid4()),
             "gender": "O",
             "parent_email": "myemail@example.com",
             "graduation_year": 0,
@@ -1271,7 +1272,7 @@ def test_reg(otis) -> None:
             "given_name": "Alice",
             "surname": "Aardvark",
             "email_address": "myemail@example.com",
-            "passcode": container.passcode,
+            "passcode": au.uuid,
             "gender": "O",
             "parent_email": "myemail@example.com",
             "graduation_year": 0,
@@ -1289,17 +1290,16 @@ def test_reg(otis) -> None:
     )
 
     messages = [m.message for m in resp.context["messages"]]
-    assert "Submitted! Sit tight." in messages
+    assert "Your registration was accepted! You can start working now." in messages
     assert StudentRegistration.objects.filter(user=alice).exists()
     alice.refresh_from_db()
     assert alice.first_name == "Alice"
     assert alice.last_name == "Aardvark"
     assert alice.email == "myemail@example.com"
 
-    # Passcode registration should NOT create a Student record (goes into queue)
-    assert not Student.objects.filter(user=alice).exists()
     alice_reg = StudentRegistration.objects.get(user=alice, container=container)
-    assert alice_reg.processed is False
+    assert alice_reg.processed is True
+    assert Student.objects.filter(user=alice, semester=semester).exists()
 
     profile = UserProfile.objects.get(user=alice)
     assert not profile.email_on_announcement
@@ -1314,7 +1314,7 @@ def test_reg(otis) -> None:
             "given_name": "Alice",
             "surname": "Aardvark",
             "email_address": "myemail@example.com",
-            "passcode": container.passcode,
+            "passcode": au.uuid,
             "gender": "O",
             "parent_email": "myemail@example.com",
             "graduation_year": 0,
@@ -1521,40 +1521,11 @@ def test_reg_with_apply_uuid(otis) -> None:
     bob_student = Student.objects.get(user=bob)
     assert Invoice.objects.get(student=bob_student).total_owed == 480  # 0% aid
 
-    # Meanwhile, Carol just registers by passcode
-    agreement5 = StringIO("i do five!")
-    agreement5.name = "agreement.pdf"
+    # Meanwhile, Carol is queued up by staff rather than registering herself
     carol: User = UserFactory.create(
         first_name="Carol", last_name="Cutie", email="c@c.net"
     )
-    otis.login(carol)
-    resp = otis.post_20x(
-        "register",
-        data={
-            "given_name": "Carol",
-            "surname": "Cutie",
-            "email_address": "carol@example.com",
-            "passcode": container.passcode,
-            "gender": "O",
-            "parent_email": "carol@example.com",
-            "graduation_year": 0,
-            "school_name": "Generic School District",
-            "country": "USA",
-            "aops_username": "",
-            "agreement_form": agreement5,
-            "email_on_announcement": False,
-            "email_on_pset_complete": True,
-            "email_on_suggestion_processed": False,
-            "email_on_inquiry_complete": False,
-            "email_on_registration_processed": False,
-        },
-        follow=True,
-    )
-
-    # Carol used passcode, so she should be queued (not instantly accepted)
-    messages = [m.message for m in resp.context["messages"]]
-    assert "Submitted! Sit tight." in messages
-    carol_reg = StudentRegistration.objects.get(user=carol)
+    carol_reg = StudentRegistrationFactory.create(user=carol, container=container)
     assert carol_reg.processed is False
     assert not Student.objects.filter(user=carol).exists()
 

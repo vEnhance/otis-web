@@ -35,7 +35,6 @@ class RegistrationContainerFactory(DjangoModelFactory):
         model = RegistrationContainer
 
     semester = SubFactory(SemesterFactory)
-    passcode = Faker("color_name")
 
 
 class StudentRegistrationFactory(DjangoModelFactory):

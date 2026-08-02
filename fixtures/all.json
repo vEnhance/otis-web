@@ -7346,7 +7346,6 @@
     "pk": 1,
     "fields": {
       "semester": 1,
-      "passcode": "Salmon",
       "accepting_responses": false
     }
   },
@@ -7355,7 +7354,6 @@
     "pk": 2,
     "fields": {
       "semester": 2,
-      "passcode": "DeepSkyBlue",
       "accepting_responses": false
     }
   },

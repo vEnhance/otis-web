@@ -524,9 +524,6 @@ class RegistrationContainer(models.Model):
         help_text="Controls the settings for registering for a semester",
         on_delete=models.CASCADE,
     )
-    passcode = models.CharField(
-        max_length=128, help_text="The passcode for that year's registration"
-    )
     accepting_responses = models.BooleanField(
         default=False,
         help_text="Whether responses for this year are being accepted or not.",
