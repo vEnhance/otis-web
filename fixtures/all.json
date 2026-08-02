@@ -7346,7 +7346,6 @@
     "pk": 1,
     "fields": {
       "semester": 1,
-      "passcode": "Salmon",
       "accepting_responses": false
     }
   },
@@ -7355,7 +7354,6 @@
     "pk": 2,
     "fields": {
       "semester": 2,
-      "passcode": "DeepSkyBlue",
       "accepting_responses": false
     }
   },
@@ -7371,7 +7369,6 @@
       "school_name": "Charlesside",
       "aops_username": "",
       "agreement_form": "",
-      "processed": true,
       "created_at": "2023-08-26T06:41:09.437Z",
       "country": "USA"
     }
@@ -7388,7 +7385,6 @@
       "school_name": "West Brandyberg",
       "aops_username": "",
       "agreement_form": "",
-      "processed": true,
       "created_at": "2023-08-26T06:41:09.437Z",
       "country": "USA"
     }
@@ -7405,7 +7401,6 @@
       "school_name": "South Fred",
       "aops_username": "",
       "agreement_form": "",
-      "processed": true,
       "created_at": "2023-08-26T06:41:09.437Z",
       "country": "USA"
     }
@@ -7422,7 +7417,6 @@
       "school_name": "Suarezfort",
       "aops_username": "",
       "agreement_form": "",
-      "processed": true,
       "created_at": "2023-08-26T06:41:09.437Z",
       "country": "USA"
     }
@@ -7439,7 +7433,6 @@
       "school_name": "Lake Robert",
       "aops_username": "",
       "agreement_form": "",
-      "processed": true,
       "created_at": "2023-08-26T06:41:09.437Z",
       "country": "USA"
     }
@@ -7456,7 +7449,6 @@
       "school_name": "Brianberg",
       "aops_username": "",
       "agreement_form": "",
-      "processed": true,
       "created_at": "2023-08-26T06:41:09.437Z",
       "country": "USA"
     }
@@ -7473,7 +7465,6 @@
       "school_name": "Dianafurt",
       "aops_username": "",
       "agreement_form": "",
-      "processed": true,
       "created_at": "2023-08-26T06:41:09.437Z",
       "country": "USA"
     }
@@ -7490,7 +7481,6 @@
       "school_name": "West Joyce",
       "aops_username": "",
       "agreement_form": "",
-      "processed": true,
       "created_at": "2023-08-26T06:41:09.437Z",
       "country": "USA"
     }
@@ -7507,7 +7497,6 @@
       "school_name": "South Robert",
       "aops_username": "",
       "agreement_form": "",
-      "processed": true,
       "created_at": "2023-08-26T06:41:09.437Z",
       "country": "USA"
     }
@@ -7524,7 +7513,6 @@
       "school_name": "Jarvisfurt",
       "aops_username": "",
       "agreement_form": "",
-      "processed": true,
       "created_at": "2023-08-26T06:41:09.437Z",
       "country": "USA"
     }
@@ -7541,7 +7529,6 @@
       "school_name": "Martinezbury",
       "aops_username": "",
       "agreement_form": "",
-      "processed": true,
       "created_at": "2023-08-26T06:41:09.437Z",
       "country": "USA"
     }
@@ -7558,7 +7545,6 @@
       "school_name": "West Rachael",
       "aops_username": "",
       "agreement_form": "",
-      "processed": true,
       "created_at": "2023-08-26T06:41:09.437Z",
       "country": "USA"
     }
@@ -7575,7 +7561,6 @@
       "school_name": "Englishmouth",
       "aops_username": "",
       "agreement_form": "",
-      "processed": true,
       "created_at": "2023-08-26T06:41:09.437Z",
       "country": "USA"
     }
@@ -7592,7 +7577,6 @@
       "school_name": "Port Kyle",
       "aops_username": "",
       "agreement_form": "",
-      "processed": true,
       "created_at": "2023-08-26T06:41:09.437Z",
       "country": "USA"
     }
@@ -7609,7 +7593,6 @@
       "school_name": "South Marcus",
       "aops_username": "",
       "agreement_form": "",
-      "processed": true,
       "created_at": "2023-08-26T06:41:09.437Z",
       "country": "USA"
     }
@@ -7626,7 +7609,6 @@
       "school_name": "Lake Bradhaven",
       "aops_username": "",
       "agreement_form": "",
-      "processed": true,
       "created_at": "2023-08-26T06:41:12.257Z",
       "country": "USA"
     }
@@ -7643,7 +7625,6 @@
       "school_name": "South Kirstenborough",
       "aops_username": "",
       "agreement_form": "",
-      "processed": true,
       "created_at": "2023-08-26T06:41:12.257Z",
       "country": "USA"
     }
@@ -7660,7 +7641,6 @@
       "school_name": "New Ashleymouth",
       "aops_username": "",
       "agreement_form": "",
-      "processed": true,
       "created_at": "2023-08-26T06:41:12.257Z",
       "country": "USA"
     }
@@ -7677,7 +7657,6 @@
       "school_name": "South Luis",
       "aops_username": "",
       "agreement_form": "",
-      "processed": true,
       "created_at": "2023-08-26T06:41:12.257Z",
       "country": "USA"
     }
@@ -7694,7 +7673,6 @@
       "school_name": "West Sarahfurt",
       "aops_username": "",
       "agreement_form": "",
-      "processed": true,
       "created_at": "2023-08-26T06:41:12.257Z",
       "country": "USA"
     }
@@ -7711,7 +7689,6 @@
       "school_name": "South Angelamouth",
       "aops_username": "",
       "agreement_form": "",
-      "processed": true,
       "created_at": "2023-08-26T06:41:12.257Z",
       "country": "USA"
     }
@@ -7728,7 +7705,6 @@
       "school_name": "Edwardsport",
       "aops_username": "",
       "agreement_form": "",
-      "processed": true,
       "created_at": "2023-08-26T06:41:12.257Z",
       "country": "USA"
     }
@@ -7745,7 +7721,6 @@
       "school_name": "Jimenezville",
       "aops_username": "",
       "agreement_form": "",
-      "processed": true,
       "created_at": "2023-08-26T06:41:12.257Z",
       "country": "USA"
     }
@@ -7762,7 +7737,6 @@
       "school_name": "Lake Andrewton",
       "aops_username": "",
       "agreement_form": "",
-      "processed": true,
       "created_at": "2023-08-26T06:41:12.257Z",
       "country": "USA"
     }
@@ -7779,7 +7753,6 @@
       "school_name": "New Gabrielchester",
       "aops_username": "",
       "agreement_form": "",
-      "processed": true,
       "created_at": "2023-08-26T06:41:12.257Z",
       "country": "USA"
     }
@@ -7796,7 +7769,6 @@
       "school_name": "North Denisechester",
       "aops_username": "",
       "agreement_form": "",
-      "processed": true,
       "created_at": "2023-08-26T06:41:12.257Z",
       "country": "USA"
     }
@@ -7813,7 +7785,6 @@
       "school_name": "Dodsonside",
       "aops_username": "",
       "agreement_form": "",
-      "processed": true,
       "created_at": "2023-08-26T06:41:12.257Z",
       "country": "USA"
     }
@@ -7830,7 +7801,6 @@
       "school_name": "Davisfurt",
       "aops_username": "",
       "agreement_form": "",
-      "processed": true,
       "created_at": "2023-08-26T06:41:12.257Z",
       "country": "USA"
     }
@@ -7847,7 +7817,6 @@
       "school_name": "Avilachester",
       "aops_username": "",
       "agreement_form": "",
-      "processed": true,
       "created_at": "2023-08-26T06:41:12.257Z",
       "country": "USA"
     }
@@ -7864,7 +7833,6 @@
       "school_name": "East Williamstad",
       "aops_username": "",
       "agreement_form": "",
-      "processed": true,
       "created_at": "2023-08-26T06:41:12.257Z",
       "country": "USA"
     }
@@ -7881,7 +7849,6 @@
       "school_name": "New Frankmouth",
       "aops_username": "",
       "agreement_form": "",
-      "processed": true,
       "created_at": "2023-08-26T06:41:12.257Z",
       "country": "USA"
     }
@@ -7898,7 +7865,6 @@
       "school_name": "Dianebury",
       "aops_username": "",
       "agreement_form": "",
-      "processed": true,
       "created_at": "2023-08-26T06:41:12.257Z",
       "country": "USA"
     }

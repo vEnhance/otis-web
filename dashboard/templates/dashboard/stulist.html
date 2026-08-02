@@ -66,41 +66,6 @@
     <p>There isn't anything here yet.</p>
     {% if request.user.is_staff %}
       <p>You're a staff member, so if you're expecting to see something, contact Evan.</p>
-    {% elif submitted_registration %}
-      <p>
-        You just recently registered,
-        so you'll need to wait for Evan to confirm your registration.
-        Contact me if you think this is an error.
-      </p>
-      <p>
-        Also contact Evan if it has been more than 48 hours
-        and your registration hasn't been processed yet.
-      </p>
-      <div class="alert alert-info">
-        <h2>
-          {% if subscribed_to_reg_email %}
-            Registration email notification enabled
-          {% else %}
-            Registration email notification disabled
-          {% endif %}
-        </h2>
-        <p>
-          {% if subscribed_to_reg_email %}
-            You are subscribed to registration updates,
-            so you'll get an email once Evan processes your registration.
-            Please don't mark this email (or others) as spam;
-            if you do, all OTIS emails will be permanently disabled by Postmark.
-          {% else %}
-            Your current settings are such that you will not
-            be notified by email once your registration is processed.
-          {% endif %}
-        </p>
-        <p>
-          To change your email settings, go under
-          <a href="{% url "profile" %}">settings</a>
-          (or use the ⚙️ icon in the sidebar).
-        </p>
-      </div>
     {% elif exists_registration %}
       <p>
         If you've already gotten your acceptance letter, then you should

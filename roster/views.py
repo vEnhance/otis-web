@@ -71,7 +71,7 @@ from .models import (
     Student,
     StudentRegistration,
     UnitInquiry,
-    build_students,
+    build_student,
 )
 
 # Create your views here.
@@ -463,6 +463,9 @@ def register(request: AuthHttpRequest) -> HttpResponse:
             passcode = form.cleaned_data["passcode"]
             try:
                 au = ApplyUUID.objects.get(uuid=passcode)
+            except (ApplyUUID.DoesNotExist, ValidationError):
+                messages.error(request, message="Wrong passcode")
+            else:
                 if au.reg is not None:
                     raise PermissionDenied("This UUID was already used.")
                 if not au.enabled:
@@ -472,19 +475,12 @@ def register(request: AuthHttpRequest) -> HttpResponse:
                         "Please contact Evan for more details.",
                     )
                     return HttpResponseRedirect(reverse("index"))
-            except (ApplyUUID.DoesNotExist, ValidationError):
-                au = None
-
-            if au is None and passcode.lower() != container.passcode.lower():
-                messages.error(request, message="Wrong passcode")
-            else:
                 registration = form.save(commit=False)
                 registration.container = container
                 registration.user = request.user
                 registration.save()
-                if au is not None:
-                    au.reg = registration
-                    au.save()
+                au.reg = registration
+                au.save()
                 request.user.first_name = form.cleaned_data["given_name"].strip()
                 request.user.last_name = form.cleaned_data["surname"].strip()
                 request.user.email = form.cleaned_data["email_address"]
@@ -493,19 +489,12 @@ def register(request: AuthHttpRequest) -> HttpResponse:
                     user=request.user,
                     defaults={k: form.cleaned_data[k] for k in EMAIL_PREFERENCE_FIELDS},
                 )
-                if au is not None:
-                    # Instant acceptance for ApplyUUID registrations
-                    build_students(
-                        StudentRegistration.objects.filter(pk=registration.pk)
-                    )
-                    messages.success(
-                        request,
-                        message="Your registration was accepted! "
-                        "You can start working now.",
-                    )
-                else:
-                    # Queue for passcode registrations
-                    messages.success(request, message="Submitted! Sit tight.")
+                build_student(registration)
+                messages.success(
+                    request,
+                    message="Your registration was accepted! "
+                    "You can start working now.",
+                )
                 return HttpResponseRedirect(reverse("index"))
     else:
         initial_data_dict = {}

@@ -36,7 +36,7 @@ from exams.models import PracticeExam
 from otisweb.decorators import admin_required
 from otisweb.mixins import VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest, get_days_since
-from roster.models import RegistrationContainer, Student, StudentRegistration
+from roster.models import RegistrationContainer, Student
 from roster.utils import (
     can_view,
     get_student_by_pk,
@@ -402,12 +402,6 @@ def index(request: AuthHttpRequest) -> HttpResponse:
         "rows": get_student_rows(queryset),
         "stulist_show_semester": False,
     }
-    context["submitted_registration"] = StudentRegistration.objects.filter(
-        user=request.user, container__semester__active=True
-    ).exists()
-    if context["submitted_registration"] is True:
-        profile, _ = UserProfile.objects.get_or_create(user=request.user)
-        context["subscribed_to_reg_email"] = profile.email_on_registration_processed
     context["exists_registration"] = RegistrationContainer.objects.filter(
         semester__active=True,
     ).exists()

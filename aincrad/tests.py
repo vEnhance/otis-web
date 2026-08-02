@@ -1,7 +1,6 @@
 from hashlib import sha256
 
 import pytest
-from django.contrib.auth.models import User
 from django.test.utils import override_settings
 
 from arch.factories import HintFactory, ProblemFactory
@@ -132,14 +131,7 @@ def aincrad_setup(db):
                 if student.semester.active is True
                 else regcontainer_old
             ),
-            processed=True,
         )
-    new_user = UserFactory.create(
-        username="frisk", first_name="Frank", last_name="Frisk"
-    )
-    StudentRegistrationFactory.create(
-        user=new_user, container=regcontainer_active, processed=False
-    )
 
 
 @pytest.mark.django_db
@@ -186,11 +178,6 @@ def test_init(otis, aincrad_setup):
     inquiries = out["_children"][1]["inquiries"]
     assert len(inquiries) == 3
     assert inquiries[0]["unlock_inquiry_count"] == 8
-
-    regs = out["_children"][4]["registrations"]
-    assert len(regs) == 1
-    assert regs[0]["user__first_name"] == "Frank"
-    assert regs[0]["user__last_name"] == "Frisk"
 
 
 @pytest.mark.django_db
@@ -307,27 +294,6 @@ def test_accept_inquiries(otis, aincrad_setup):
     assert resp.json()["result"] == "success"
     assert resp.json()["count"] == 3
     assert not UnitInquiry.objects.filter(status="INQ_NEW").exists()
-
-
-@pytest.mark.django_db
-@override_settings(API_TARGET_HASH=TARGET_HASH)
-def test_accept_registrations(otis, aincrad_setup):
-    n = Student.objects.count()
-    frisk = User.objects.get(username="frisk")
-    assert not frisk.groups.filter(name="Verified").exists()
-    assert not Student.objects.filter(user__username="frisk").exists()
-    resp = otis.post_20x(
-        "api",
-        json={
-            "action": "accept_registrations",
-            "token": EXAMPLE_PASSWORD,
-        },
-    )
-    assert resp.json()["result"] == "success"
-    assert resp.json()["count"] == 1
-    assert Student.objects.count() == n + 1
-    assert Student.objects.filter(user__username="frisk").exists()
-    assert frisk.groups.filter(name="Verified").exists()
 
 
 @pytest.mark.django_db

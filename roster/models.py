@@ -524,9 +524,6 @@ class RegistrationContainer(models.Model):
         help_text="Controls the settings for registering for a semester",
         on_delete=models.CASCADE,
     )
-    passcode = models.CharField(
-        max_length=128, help_text="The passcode for that year's registration"
-    )
     accepting_responses = models.BooleanField(
         default=False,
         help_text="Whether responses for this year are being accepted or not.",
@@ -623,9 +620,6 @@ class StudentRegistration(models.Model):
             )
         ],
     )
-    processed = models.BooleanField(
-        help_text="Whether Evan has dealt with this kid yet", default=False
-    )
     created_at = models.DateTimeField(auto_now_add=True)
     country = models.CharField(max_length=6, choices=COUNTRY_CHOICES, default="USA")
 
@@ -664,55 +658,37 @@ class StudentRegistration(models.Model):
         return f"{self.grade}{self.gender or 'U'}"
 
 
-def build_students(queryset: QuerySet[StudentRegistration]) -> int:
-    students_to_create = []
-    semester = Semester.objects.get(active=True)
-    container = RegistrationContainer.objects.get(semester=semester)
-    queryset = queryset.filter(container=container)
-    queryset = queryset.exclude(processed=True)
-    queryset = queryset.select_related("user", "applyuuid")
-    finaid_awards: dict[int, int] = {}  # reg pk -> amount (>= 0)
+def build_student(registration: StudentRegistration) -> Student:
+    """Accepts a registration, creating the student and their invoice.
+
+    The financial aid recorded on the registration's ApplyUUID, if any,
+    is applied to the invoice as an adjustment.
+    """
+    semester = registration.container.semester
     semester_date = semester.one_semester_date
     num_preps = 1 if semester_date is not None and now() > semester_date else 2
 
-    count = 0
-    for registration in queryset:
-        students_to_create.append(
-            Student(
-                user=registration.user,
-                semester=semester,
-                reg=registration,
-            )
-        )
-        try:
-            au: ApplyUUID = registration.applyuuid  # type: ignore
-        except ApplyUUID.DoesNotExist:
-            pass
-        else:
-            finaid_awards[registration.pk] = (
-                num_preps * semester.prep_rate * au.percent_aid / 100
-            )
-        count += 1
-    Student.objects.bulk_create(students_to_create)
+    student = Student.objects.create(
+        user=registration.user,
+        semester=semester,
+        reg=registration,
+    )
 
     group, _ = Group.objects.get_or_create(name="Verified")
-    group.user_set.add(*queryset.values_list("user__pk", flat=True))  # type: ignore
+    group.user_set.add(registration.user)  # type: ignore
 
-    queryset.update(processed=True)
-
-    if count > 0:
-        invoices_to_create = []
-        for student in Student.objects.filter(
-            invoice__isnull=True, semester__active=True
-        ).select_related("reg"):
-            invoice = Invoice(
-                student=student,
-                preps_taught=num_preps,
-                adjustment=-finaid_awards.get(student.reg.pk, 0),
-            )
-            invoices_to_create.append(invoice)
-        Invoice.objects.bulk_create(invoices_to_create)
-    return count
+    try:
+        au: ApplyUUID = registration.applyuuid  # type: ignore
+    except ApplyUUID.DoesNotExist:
+        finaid_award = 0
+    else:
+        finaid_award = num_preps * semester.prep_rate * au.percent_aid / 100
+    Invoice.objects.create(
+        student=student,
+        preps_taught=num_preps,
+        adjustment=-finaid_award,
+    )
+    return student
 
 
 class ApplyUUID(models.Model):

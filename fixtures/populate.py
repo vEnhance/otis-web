@@ -297,7 +297,6 @@ def create_sem_dependent(semester: Semester, users: list[User]):
         StudentRegistrationFactory,
         len(users),
         container=container,
-        processed=True,
         user=Iterator(users),
     )
     for i, reg in enumerate(regs):

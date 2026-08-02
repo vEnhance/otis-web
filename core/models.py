@@ -347,12 +347,6 @@ class UserProfile(models.Model):
         help_text="Receive an email when your problem suggestion status is updated.",
         default=True,
     )
-    email_on_registration_processed = models.BooleanField(
-        verbose_name="Receive email on registration",
-        help_text="Receive an email when your registration for the year is approved.",
-        default=False,
-    )
-
     last_seen = models.DateTimeField(
         help_text="Last time user was seen at all",
         default=datetime.datetime.fromtimestamp(0, tz=datetime.timezone.utc),
@@ -371,5 +365,4 @@ EMAIL_PREFERENCE_FIELDS = (
     "email_on_pset_complete",
     "email_on_suggestion_processed",
     "email_on_inquiry_complete",
-    "email_on_registration_processed",
 )

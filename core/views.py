@@ -291,7 +291,6 @@ class UserProfileUpdateView(
         "email_on_inquiry_complete",
         "email_on_pset_complete",
         "email_on_suggestion_processed",
-        "email_on_registration_processed",
         "show_bars",
         "show_completed_by_default",
         "show_locked_by_default",
