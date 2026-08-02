@@ -64,7 +64,7 @@ hooks = [{ id = "rumdl" }, { id = "rumdl-fmt" }]
 [[repos]]
 repo = "https://github.com/zizmorcore/zizmor-pre-commit"
 rev = "v1.28.0"
-hooks = [{ id = "zizmor", args = ["--offline"] }]
+hooks = [{ id = "zizmor" }]
 
 [[repos]]
 repo = "https://github.com/shellcheck-py/shellcheck-py"
