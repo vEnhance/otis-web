@@ -1,4 +1,5 @@
 import pytest
+from django.test import Client
 
 from core.factories import UserFactory
 
@@ -31,3 +32,24 @@ def test_social_page(otis):
 @pytest.mark.django_db
 def test_login_works(otis):
     otis.get_20x("account_login")
+
+
+@pytest.mark.parametrize(
+    "path",
+    (
+        "/wiki",
+        "/wiki/",
+        "/wiki/Main_Page",
+        "/wiki/some/deeply/nested/page/",
+        "/wiki/page?query=1",
+    ),
+)
+def test_wiki_redirects_to_catalog(client: Client, path: str):
+    response = client.get(path)
+    assert response.status_code == 301
+    assert response["Location"] == "https://catalog.evanchen.cc/"
+
+
+@pytest.mark.parametrize("path", ("/wikipedia/", "/wikis/"))
+def test_wiki_redirect_does_not_overreach(client: Client, path: str):
+    assert client.get(path).status_code == 404
