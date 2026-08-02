@@ -150,6 +150,16 @@ def watermark_pdf(content: bytes, user: User) -> bytes:
             page.merge_page(margin_overlay)
             page.merge_page(corner_overlay)
 
+        # merge_page leaves page content streams uncompressed and the
+        # now-unreferenced original stream objects still in the file, which
+        # roughly quadruples output size on a content-heavy PDF. Recompress
+        # and prune before writing.
+        for page in writer.pages:
+            page.compress_content_streams()
+        writer.compress_identical_objects(
+            remove_duplicates=True, remove_unreferenced=True
+        )
+
         buffer = io.BytesIO()
         writer.write(buffer)
         return buffer.getvalue()
