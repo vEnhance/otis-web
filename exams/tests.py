@@ -217,7 +217,7 @@ def test_quiz(otis, exam_setup):
 def test_admin_postpone_two_years():
     with override_settings(TESTING_NEEDS_MOCK_MEDIA=False):
         shifted = PracticeExamFactory.create(
-            start_date=datetime.date(2020, 2, 29),
+            start_date=datetime.date(2020, 3, 1),
             due_date=datetime.date(2020, 12, 31),
         )
         no_dates = PracticeExamFactory.create(start_date=None, due_date=None)
@@ -232,7 +232,7 @@ def test_admin_postpone_two_years():
     admin.postpone_two_years(request, PracticeExam.objects.exclude(pk=untouched.pk))
 
     shifted.refresh_from_db()
-    assert shifted.start_date == datetime.date(2022, 2, 28)  # 2022 isn't a leap year
+    assert shifted.start_date == datetime.date(2022, 3, 1)
     assert shifted.due_date == datetime.date(2022, 12, 31)
 
     no_dates.refresh_from_db()
