@@ -79,7 +79,7 @@ class ApplyUUIDAdmin(ImportExportModelAdmin):
         NeedsFinaidListFilter,
         "enabled",
     )
-    resource_class = ApplyUUIDIEResource
+    resource_classes = [ApplyUUIDIEResource]
     actions = ("enable_uuids", "disable_uuids")
 
     @admin.action(description="Enable selected ApplyUUIDs")
@@ -146,7 +146,7 @@ class AssistantAdmin(ImportExportModelAdmin):
         "unlisted_students",
     )
     inlines = (StudentInline,)
-    resource_class = AssistantIEResource
+    resource_classes = [AssistantIEResource]
 
 
 # INVOICE
@@ -242,7 +242,7 @@ class InvoiceAdmin(ImportExportModelAdmin):
         ("memo", admin.EmptyFieldListFilter),
         "student__semester",
     )
-    resource_class = InvoiceIEResource
+    resource_classes = [InvoiceIEResource]
 
 
 # STUDENT
@@ -332,7 +332,7 @@ class StudentAdmin(ImportExportModelAdmin):
         InvoiceInline,
         UnlistedInline,
     )
-    resource_class = StudentIEResource
+    resource_classes = [StudentIEResource]
 
 
 # REG FORM
@@ -387,7 +387,7 @@ class StudentRegistrationAdmin(ImportExportModelAdmin):
         "name",
         "container",
     )
-    resource_class = StudentRegistrationIEResource
+    resource_classes = [StudentRegistrationIEResource]
     search_fields = ("user__first_name", "user__last_name")
     inlines = (StudentRegistrationStudentInline,)
 

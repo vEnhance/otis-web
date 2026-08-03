@@ -78,18 +78,18 @@ class UploadedFile(models.Model):
     class Meta:
         ordering = ("-created_at",)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.filename
 
-    def get_absolute_url(self):
+    def get_absolute_url(self) -> str:
         return self.url
 
     @property
-    def filename(self):
-        return os.path.basename(self.content.name)
+    def filename(self) -> str:
+        return os.path.basename(self.content.name or "")
 
     @property
-    def url(self):
+    def url(self) -> str:
         return self.content.url
 
 
@@ -115,10 +115,10 @@ class SemesterDownloadFile(models.Model):
     class Meta:
         ordering = ("-created_at",)
 
-    def __str__(self):
-        return os.path.basename(self.content.name)
+    def __str__(self) -> str:
+        return os.path.basename(self.content.name or "")
 
-    def get_absolute_url(self):
+    def get_absolute_url(self) -> str:
         return self.content.url
 
 

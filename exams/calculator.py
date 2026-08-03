@@ -36,6 +36,7 @@ from typing import Any, Optional, Union
 
 from pyparsing import (
     CaselessKeyword,
+    DelimitedList,
     Forward,
     Group,
     Literal,
@@ -45,7 +46,6 @@ from pyparsing import (
     Word,
     alphanums,
     alphas,
-    delimitedList,
 )
 
 exprStack: Any = []
@@ -94,7 +94,7 @@ def BNF() -> Any:
         expop = Literal("^")
 
         expr = Forward()
-        expr_list = delimitedList(Group(expr))
+        expr_list = DelimitedList(Group(expr))
 
         # add parse action that replaces the function identifier with a (name, number of args) tuple
         def insert_fn_argcount_tuple(t: list[Any]):
@@ -103,23 +103,23 @@ def BNF() -> Any:
             t.insert(0, (fn, num_args))
 
         f = ident + lpar - Group(expr_list) + rpar  # type: ignore
-        fn_call = f.setParseAction(insert_fn_argcount_tuple)  # type: ignore
+        fn_call = f.set_parse_action(insert_fn_argcount_tuple)  # type: ignore
         g = fn_call | pi | e | fnumber | ident  # type: ignore
         assert g is not None
         atom = addop[...] + (
-            g.setParseAction(push_first) | Group(lpar + expr + rpar)  # type: ignore
+            g.set_parse_action(push_first) | Group(lpar + expr + rpar)  # type: ignore
         )
-        atom = atom.setParseAction(push_unary_minus)  # type: ignore
+        atom = atom.set_parse_action(push_unary_minus)  # type: ignore
 
         # by defining exponentiation as "atom [ ^ factor ]..." instead of "atom [ ^ atom ]...", we get right-to-left
         # exponents, instead of left-to-right that is, 2^3^2 = 2^(3^2), not (2^3)^2.
         factor = Forward()
-        factor <<= atom + (expop + factor).setParseAction(push_first)[...]  # type: ignore
+        factor <<= atom + (expop + factor).set_parse_action(push_first)[...]  # type: ignore
         term = (
-            factor + (multop + factor).setParseAction(push_first)[...]  # type: ignore
+            factor + (multop + factor).set_parse_action(push_first)[...]  # type: ignore
         )  # type: ignore
         expr <<= (
-            term + (addop + term).setParseAction(push_first)[...]  # type: ignore
+            term + (addop + term).set_parse_action(push_first)[...]  # type: ignore
         )  # type: ignore
         bnf = expr
     return bnf
@@ -173,7 +173,7 @@ def expr_compute(s: str) -> Optional[float]:
     if not s:
         return None
     exprStack[:] = []
-    BNF().parseString(s, parseAll=True)
+    BNF().parse_string(s, parse_all=True)
     return evaluate_stack(exprStack[:])
 
 
