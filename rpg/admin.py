@@ -6,6 +6,7 @@ from rpg.models import VulnerabilityRecord
 
 from .models import (
     Achievement,
+    AchievementCodeGuess,
     AchievementUnlock,
     BonusLevel,
     BonusLevelUnlock,
@@ -83,6 +84,33 @@ class AchievementUnlockAdmin(admin.ModelAdmin):
         "achievement__code",
     )
     list_filter = ("is_first_obtain",)
+
+
+@admin.register(AchievementCodeGuess)
+class AchievementCodeGuessAdmin(admin.ModelAdmin):
+    readonly_fields = ("timestamp",)
+    list_display = (
+        "user",
+        "code",
+        "is_correct",
+        "is_new_unlock",
+        "is_well_formed",
+        "achievement",
+        "timestamp",
+    )
+    autocomplete_fields = (
+        "user",
+        "achievement",
+    )
+    search_fields = (
+        "user__username",
+        "code",
+    )
+    list_filter = (
+        "is_correct",
+        "is_new_unlock",
+        "is_well_formed",
+    )
 
 
 @admin.register(QuestComplete)

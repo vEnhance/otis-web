@@ -16,6 +16,7 @@ from django.utils.crypto import salted_hmac
 from pypdf import PageObject, PdfReader, PdfWriter
 from reportlab.lib.colors import Color
 from reportlab.pdfgen.canvas import Canvas
+from unidecode import unidecode
 
 logger = logging.getLogger(__name__)
 
@@ -36,8 +37,15 @@ CORNER_STAMP_RE = re.compile(rf"OTIS PK (\d+) TS (\d+) SIG ([0-9a-f]{{{SIG_LENGT
 
 
 def get_watermark_text(user: User) -> str:
-    """Return the line of text identifying `user` as the downloader."""
-    parts = [user.get_full_name(), user.username, user.email]
+    """Return the line of text identifying `user` as the downloader.
+
+    The stamp font only covers ASCII, so names are transliterated; a name
+    unidecode can't render as anything meaningful is dropped rather than
+    shown as boxes, falling back to username/email.
+    """
+    full_name = unidecode(user.get_full_name()).strip()
+    username = unidecode(user.username).strip()
+    parts = [full_name, username, user.email]
     who = " / ".join(part for part in parts if part)
     when = timezone.now().strftime("%Y-%m-%d %H:%M %Z")
     return f"Downloaded from OTIS by {who} on {when}. Not for redistribution."

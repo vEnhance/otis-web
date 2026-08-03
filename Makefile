@@ -42,6 +42,7 @@ check:
 
 test:
 	uv run pytest -n auto --cov --cov-report=term-missing --cov-report=lcov:coverage/lcov.info
+
 ci:
 	make fmt
 	make check

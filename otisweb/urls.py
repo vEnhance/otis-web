@@ -3,7 +3,7 @@
 import debug_toolbar
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, re_path
 from django.views.generic import RedirectView
 from django.views.generic.base import TemplateView
 
@@ -28,6 +28,13 @@ urlpatterns = [
     path(r"suggestions/", include("suggestions.urls")),
     path(r"tubes/", include("tubes.urls")),
     path(r"yearbook/", include("yearbook.urls")),
+    # ------
+    # The wiki moved to the catalog, so send legacy links there instead of 404
+    re_path(
+        r"^wiki(?:/|$)",
+        RedirectView.as_view(url="https://catalog.evanchen.cc/", permanent=True),
+        name="wiki",
+    ),
     # ------
     path(r"hijack/", include("hijack.urls")),
     path(r"accounts/", include("allauth.urls")),
