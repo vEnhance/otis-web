@@ -23,15 +23,11 @@
       {% endif %}
     </div>
   {% else %}
-    <div class="alert alert-danger">
-      <h3 class="alert-heading">PDF file for this puzzle not found</h3>
-      <p>If you think that's a mistake, contact Evan.</p>
-      <p>
-        Otherwise, go back to <a class="alert-link" href="{{ hunt.get_absolute_url }}">{{ hunt }}</a>.
-      </p>
+    <div class="fst-italic">
+      There was no PDF file to download.
       {% if request.user.is_superuser %}
         <p>
-          You can also
+          You can
           <a href="{% url "admin:opal_opalpuzzle_change" puzzle.pk %}"
              title="Edit in admin">edit in admin</a>
           or
