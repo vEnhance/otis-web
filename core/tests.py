@@ -16,7 +16,12 @@ from core.factories import (
     UserFactory,
 )
 from core.models import Semester
-from core.watermark import get_corner_text, verify_corner_stamp, watermark_pdf
+from core.watermark import (
+    get_corner_text,
+    get_watermark_text,
+    verify_corner_stamp,
+    watermark_pdf,
+)
 from dashboard.factories import PSetFactory
 from roster.factories import StudentFactory
 from rpg.factories import BonusLevelFactory
@@ -102,6 +107,28 @@ def test_pdf_watermark(otis):
 
     # TeX files are served as-is
     assert otis.get_20x("view-tex", unit.pk).content == b"TeX"
+
+
+@pytest.mark.django_db
+def test_watermark_text_transliteration():
+    # Names with diacritics are transliterated to ASCII, not dropped as boxes.
+    dorde = UserFactory.create(
+        first_name="Đorđe", last_name="Petrović", username="dpetrovic"
+    )
+    text = get_watermark_text(dorde)
+    assert "Dorde Petrovic" in text
+    assert "dpetrovic" in text
+    assert text.isascii()
+
+    # A name unidecode can't turn into anything meaningful is omitted rather
+    # than left to render as tofu boxes; username/email still identify them.
+    emoji = UserFactory.create(
+        first_name="\U0001f389\U0001f389\U0001f389", last_name="", username="emoji_user"
+    )
+    text = get_watermark_text(emoji)
+    assert "emoji_user" in text
+    assert emoji.email in text
+    assert text.isascii()
 
 
 @pytest.mark.django_db
