@@ -5,37 +5,24 @@
 {% endblock title %}
 {% block layout-content %}
   {% if puzzle.credits %}<p class="fst-italic">{{ puzzle.credits }}</p>{% endif %}
-  {% if puzzle.content %}
-    <div>
+  <div>
+    {% if puzzle.content %}
       <a href="{{ puzzle.content.url }}"
          title="Download as PDF"
          class="btn btn-primary">Download PDF</a>
-      <a href="{{ hunt.get_absolute_url }}"
-         title="Download as PDF"
-         class="btn btn-secondary">Back to hunt</a>
-      {% if request.user.is_superuser %}
-        <a href="{{ puzzle.get_attempt_log_url }}"
-           title="Guess log"
-           class="btn btn-success">Guess log</a>
-        <a href="{% url "admin:opal_opalpuzzle_change" puzzle.pk %}"
-           title="Edit in admin"
-           class="btn btn-outline-dark">Edit in admin</a>
-      {% endif %}
-    </div>
-  {% else %}
-    <div class="fst-italic">
-      There was no PDF file to download.
-      {% if request.user.is_superuser %}
-        <p>
-          You can
-          <a href="{% url "admin:opal_opalpuzzle_change" puzzle.pk %}"
-             title="Edit in admin">edit in admin</a>
-          or
-          <a href="{{ puzzle.get_attempt_log_url }}">view attempts</a>.
-        </p>
-      {% endif %}
-    </div>
-  {% endif %}
+    {% endif %}
+    <a href="{{ hunt.get_absolute_url }}"
+       title="Download as PDF"
+       class="btn btn-secondary">Back to hunt</a>
+    {% if request.user.is_superuser %}
+      <a href="{{ puzzle.get_attempt_log_url }}"
+         title="Guess log"
+         class="btn btn-success">Guess log</a>
+      <a href="{% url "admin:opal_opalpuzzle_change" puzzle.pk %}"
+         title="Edit in admin"
+         class="btn btn-outline-dark">Edit in admin</a>
+    {% endif %}
+  </div>
   {% if puzzle.errata %}
     <hr />
     <div class="alert alert-warning">
