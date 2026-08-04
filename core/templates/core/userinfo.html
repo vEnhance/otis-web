@@ -3,6 +3,11 @@
   User Info: {{ target_user.username }}
 {% endblock title %}
 {% block layout-content %}
+  {% if not target_user.is_active %}
+    <div class="alert alert-warning">
+      <strong>This account is inactive.</strong> The user cannot log in.
+    </div>
+  {% endif %}
   <h2>Basic Information</h2>
   <table class="table">
     <tbody>
@@ -41,6 +46,16 @@
         </td>
       </tr>
       <tr>
+        <th>Active</th>
+        <td>
+          {% if target_user.is_active %}
+            Yes
+          {% else %}
+            No
+          {% endif %}
+        </td>
+      </tr>
+      <tr>
         <th>Staff</th>
         <td>
           {% if target_user.is_staff %}
@@ -70,6 +85,8 @@
       </tr>
     </tbody>
   </table>
+  <a href="{% url "admin:auth_user_change" target_user.pk %}"
+     class="btn btn-secondary">Edit user in Django admin</a>
   <h2>Connected Social Accounts</h2>
   {% if social_accounts %}
     <table class="table">

@@ -4,6 +4,7 @@ from typing import Any
 
 import pytest
 from django.test.utils import override_settings
+from django.urls import reverse
 from django.utils.timezone import localtime
 from pypdf import PdfReader
 from reportlab.pdfgen.canvas import Canvas
@@ -476,6 +477,16 @@ def test_userinfo_displays_info(otis):
     otis.assert_has(resp, localtime(target_user.date_joined).strftime("%Y-%m-%d %H:%M"))
     assert target_user.last_login is None
     otis.assert_has(resp, "(never)")
+    otis.assert_has(resp, reverse("admin:auth_user_change", args=(target_user.pk,)))
+    otis.assert_not_has(resp, "This account is inactive.")
+
+
+@pytest.mark.django_db
+def test_userinfo_warns_on_inactive(otis):
+    target_user = UserFactory.create(is_active=False)
+    otis.login(UserFactory.create(is_superuser=True, is_staff=True))
+    resp = otis.get_20x("user-info", target_user.pk)
+    otis.assert_has(resp, "This account is inactive.")
 
 
 @pytest.mark.django_db

@@ -144,6 +144,14 @@ def test_user_lookup(otis) -> None:
     assert resp.context["results"] == []
     otis.assert_has(resp, "No matches were found.")
 
+    # Inactive accounts are flagged with a badge; active ones are not
+    resp = otis.post_20x("user-lookup", data={"query": "alice"})
+    otis.assert_not_has(resp, "Inactive")
+    alice.is_active = False
+    alice.save()
+    resp = otis.post_20x("user-lookup", data={"query": "alice"})
+    otis.assert_has(resp, "Inactive")
+
 
 @pytest.mark.django_db
 def test_update_profile(otis) -> None:
