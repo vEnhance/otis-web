@@ -1,4 +1,8 @@
-from django.contrib import admin
+import os
+
+from django.contrib import admin, messages
+from django.forms import ModelForm
+from django.http import HttpRequest
 
 from opal.models import OpalAttempt, OpalHunt, OpalPuzzle
 
@@ -42,6 +46,23 @@ class OpalPuzzleAdmin(admin.ModelAdmin):
         ("achievement", admin.EmptyFieldListFilter),
     )
     search_fields = ("hunt__name", "slug", "title")
+
+    def save_model(
+        self,
+        request: HttpRequest,
+        obj: OpalPuzzle,
+        form: ModelForm[OpalPuzzle],
+        change: bool,
+    ) -> None:
+        if "content" in form.changed_data and obj.content:
+            uploaded_name = os.path.basename(obj.content.name or "")
+            if uploaded_name != obj.slug + ".pdf":
+                messages.warning(
+                    request,
+                    f"The file {uploaded_name} does not match the slug {obj.slug}; "
+                    f"it was saved as {obj.slug}.pdf anyway.",
+                )
+        super().save_model(request, obj, form, change)
 
 
 @admin.register(OpalAttempt)

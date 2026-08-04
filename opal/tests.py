@@ -2,7 +2,7 @@ import datetime
 import re
 
 import pytest
-from django.core.exceptions import SuspiciousOperation
+from django.core.files.uploadedfile import SimpleUploadedFile
 from freezegun.api import freeze_time
 
 from core.factories import GroupFactory, UserFactory
@@ -152,10 +152,48 @@ def test_model_methods():
 def test_puzzle_upload():
     puzzle = OpalPuzzleFactory.create(hunt__slug="hunt", slug="sudoku")
     assert not puzzle.is_uploaded
-    with pytest.raises(SuspiciousOperation):
-        puzzle_file_name(puzzle, "wrong_file.pdf")
-    filename = puzzle_file_name(puzzle, "sudoku.pdf")
-    assert re.match(r"opals\/hunt\/[a-z0-9]+\/sudoku.pdf", filename), filename
+    for name in ("sudoku.pdf", "wrong_file.pdf"):
+        filename = puzzle_file_name(puzzle, name)
+        assert re.match(r"opals\/hunt\/[a-z0-9]+\/sudoku.pdf", filename), filename
+
+
+@pytest.mark.django_db
+def test_puzzle_admin_upload_slug_mismatch(otis, settings, tmp_path):
+    settings.MEDIA_ROOT = str(tmp_path)
+    puzzle = OpalPuzzleFactory.create(hunt__slug="hunt", slug="sudoku")
+    otis.login(UserFactory.create(is_staff=True, is_superuser=True))
+    form_data = {
+        "hunt": puzzle.hunt.pk,
+        "title": puzzle.title,
+        "slug": puzzle.slug,
+        "answer": puzzle.answer,
+        "partial_answers": "",
+        "order": puzzle.order,
+        "num_to_unlock": puzzle.num_to_unlock,
+        "credits": "",
+        "guess_limit": puzzle.guess_limit,
+        "errata": "",
+        "hint_text": "",
+    }
+    resp = otis.post(
+        "admin:opal_opalpuzzle_change",
+        puzzle.pk,
+        data=form_data
+        | {"content": SimpleUploadedFile("wrong_file.pdf", b"%PDF-1.4 sudoku")},
+        follow=True,
+    )
+    otis.assert_has(resp, "wrong_file.pdf does not match the slug sudoku")
+    puzzle.refresh_from_db()
+    assert puzzle.content.name.endswith("sudoku.pdf")
+
+    resp = otis.post(
+        "admin:opal_opalpuzzle_change",
+        puzzle.pk,
+        data=form_data
+        | {"content": SimpleUploadedFile("sudoku.pdf", b"%PDF-1.4 sudoku")},
+        follow=True,
+    )
+    otis.assert_not_has(resp, "does not match the slug")
 
 
 @pytest.mark.django_db
