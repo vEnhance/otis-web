@@ -217,10 +217,11 @@ table.curriculum td.emojis {
   min-width: max-content;
 }
 
-/* Emoji navigation grid in the sidebar. The row height is set per row rather
-   than on the table as a whole, so that adding a row to the grid gives the
-   sidebar another row instead of squashing the existing ones. */
-#emoji_nav {
+/* Emoji navigation grid in the sidebar, split into labelled sections. The row
+   height is set per row rather than on the table as a whole, so that adding a
+   row to a grid gives the sidebar another row instead of squashing the
+   existing ones. */
+#emoji_nav table {
   width: 100%;
   font-size: 22px;
   text-shadow:
@@ -232,6 +233,18 @@ table.curriculum td.emojis {
 
 #emoji_nav td {
   height: 36px;
+}
+
+#emoji_nav h4 {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0.6em 0 0.1em;
+}
+
+#emoji_nav h4:first-child {
+  margin-top: 0;
 }
 
 a.emoji-link {

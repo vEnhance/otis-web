@@ -1,122 +1,134 @@
 {% load static %}
 {% if request.user.is_authenticated %}
-  <table id="emoji_nav">
-    <tr>
-      <td>
-        <a title="Home" class="emoji-link" href="{% url "index" %}">🏠</a>
-      </td>
-      {% if request.user.is_superuser %}
+  <div id="emoji_nav">
+    <h4>Home</h4>
+    <table>
+      <tr>
         <td>
-          <a title="Past" class="emoji-link" href="{% url "semester-list" %}">⏳</a>
+          <a title="Home" class="emoji-link" href="{% url "index" %}">🏠</a>
         </td>
-      {% else %}
+        {% if request.user.is_superuser %}
+          <td>
+            <a title="Past" class="emoji-link" href="{% url "semester-list" %}">⏳</a>
+          </td>
+        {% else %}
+          <td>
+            <a title="Past" class="emoji-link" href="{% url "past" %}">🕗</a>
+          </td>
+        {% endif %}
         <td>
-          <a title="Past" class="emoji-link" href="{% url "past" %}">🕗</a>
-        </td>
-      {% endif %}
-      <td>
-        <a title="Linked accounts"
-           class="emoji-link"
-           href="{% url "socialaccount_connections" %}">🔐</a>
-      </td>
-      <td>
-        <a title="Display settings"
-           class="emoji-link"
-           href="{% url "profile" %}">⚙</a>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <a title="ARCH" class="emoji-link" href="{% url "arch-index" %}">🗼</a>
-      </td>
-      <td>
-        <a title="Suggest"
-           class="emoji-link"
-           href="{% url "suggest-queue-listing" %}">💡</a>
-      </td>
-      <td>
-        <a title="Fandom" class="emoji-link" href="https://catalog.evanchen.cc/">🎮</a>
-      </td>
-      <td>
-        <a title="GitHub" class="emoji-link" href="{% url "github-landing" %}">🖥️</a>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <a title="Announcements"
-           class="emoji-link"
-           href="{% url "announcement-list" %}">📢</a>
-      </td>
-      <td>
-        <a title="Catalog" class="emoji-link" href="{% url "catalog" %}">🗃️</a>
-      </td>
-      {% if student %}
-        <td>
-          <a title="Invoice"
+          <a title="Linked accounts"
              class="emoji-link"
-             href="{% url "invoice" student.pk %}">💵</a>
+             href="{% url "socialaccount_connections" %}">🔐</a>
         </td>
-      {% else %}
         <td>
-          <a title="Invoice" class="emoji-link" href="{% url "invoice" %}">💵</a>
-        </td>
-      {% endif %}
-      <td>
-        <a title="Markets" class="emoji-link" href="{% url "market-list" %}">📈</a>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <a title="Diamonds"
-           class="emoji-link"
-           href="{% url "achievements-listing" %}"
-           data-hex="496e737065637420456c6d21">💎</a>
-      </td>
-      {% if student %}
-        <td>
-          <a title="Certificate"
+          <a title="Display settings"
              class="emoji-link"
-             href="{% url "certify" student.pk %}">🎓</a>
+             href="{% url "profile" %}">⚙</a>
         </td>
-      {% else %}
+      </tr>
+      <tr>
         <td>
-          <a title="Certificate" class="emoji-link" href="{% url "certify" %}">🎓</a>
+          <a title="Announcements"
+             class="emoji-link"
+             href="{% url "announcement-list" %}">📢</a>
         </td>
-      {% endif %}
-      <td>
-        <a title="PSet Queue"
-           class="emoji-link"
-           href="{% url "pset-queue-listing" %}">🛂</a>
-      </td>
-      <td>
-        <a title="Calendar"
-           class="emoji-link"
-           href="{% url "calendar" %}"
-           target="_blank">📆</a>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <a title="Gallery"
-           class="emoji-link"
-           href="https://catalog.evanchen.cc/gallery/">🎨</a>
-      </td>
-      <td>
-        <a title="Hanabi" class="emoji-link" href="{% url "hanabi-contests" %}">🎇</a>
-      </td>
-      <td>
-        <a title="OIME" class="emoji-link" href="{% url "oime-landing" %}">🧪</a>
-      </td>
-      <td>
-        <a title="OPAL" class="emoji-link" href="{% url "opal-hunt-list" %}">🧩</a>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <a title="Yearbook" class="emoji-link" href="{% url "yearbook-list" %}">📖</a>
-      </td>
-    </tr>
-  </table>
+        {% if student %}
+          <td>
+            <a title="Invoice"
+               class="emoji-link"
+               href="{% url "invoice" student.pk %}">💵</a>
+          </td>
+        {% else %}
+          <td>
+            <a title="Invoice" class="emoji-link" href="{% url "invoice" %}">💵</a>
+          </td>
+        {% endif %}
+        <td>
+          <a title="Calendar"
+             class="emoji-link"
+             href="{% url "calendar" %}"
+             target="_blank">📆</a>
+        </td>
+        <td></td>
+      </tr>
+    </table>
+    <h4>Units</h4>
+    <table>
+      <tr>
+        <td>
+          <a title="ARCH" class="emoji-link" href="{% url "arch-index" %}">🗼</a>
+        </td>
+        <td>
+          <a title="Suggest"
+             class="emoji-link"
+             href="{% url "suggest-queue-listing" %}">💡</a>
+        </td>
+        <td>
+          <a title="Fandom" class="emoji-link" href="https://catalog.evanchen.cc/">🎮</a>
+        </td>
+        <td>
+          <a title="Catalog" class="emoji-link" href="{% url "catalog" %}">🗃️</a>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a title="Gallery"
+             class="emoji-link"
+             href="https://catalog.evanchen.cc/gallery/">🎨</a>
+        </td>
+        <td>
+          <a title="PSet Queue"
+             class="emoji-link"
+             href="{% url "pset-queue-listing" %}">🛂</a>
+        </td>
+        <td></td>
+        <td></td>
+      </tr>
+    </table>
+    <h4>Fun</h4>
+    <table>
+      <tr>
+        <td>
+          <a title="Markets" class="emoji-link" href="{% url "market-list" %}">📈</a>
+        </td>
+        <td>
+          <a title="Diamonds"
+             class="emoji-link"
+             href="{% url "achievements-listing" %}"
+             data-hex="496e737065637420456c6d21">💎</a>
+        </td>
+        <td>
+          <a title="Hanabi" class="emoji-link" href="{% url "hanabi-contests" %}">🎇</a>
+        </td>
+        <td>
+          <a title="OIME" class="emoji-link" href="{% url "oime-landing" %}">🧪</a>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a title="OPAL" class="emoji-link" href="{% url "opal-hunt-list" %}">🧩</a>
+        </td>
+        <td>
+          <a title="GitHub" class="emoji-link" href="{% url "github-landing" %}">🖥️</a>
+        </td>
+        <td>
+          <a title="Yearbook" class="emoji-link" href="{% url "yearbook-list" %}">📖</a>
+        </td>
+        {% if student %}
+          <td>
+            <a title="Certificate"
+               class="emoji-link"
+               href="{% url "certify" student.pk %}">🎓</a>
+          </td>
+        {% else %}
+          <td>
+            <a title="Certificate" class="emoji-link" href="{% url "certify" %}">🎓</a>
+          </td>
+        {% endif %}
+      </tr>
+    </table>
+  </div>
   {% if student %}
     <hr />
     <p>
