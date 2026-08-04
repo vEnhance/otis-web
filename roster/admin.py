@@ -1,4 +1,4 @@
-from typing import Any, Optional, Tuple
+from typing import Any
 
 from django.contrib import admin
 from django.contrib.admin.options import ModelAdmin
@@ -125,7 +125,7 @@ class StudentInline(admin.TabularInline):
     show_change_link = True
 
     def has_delete_permission(
-        self, request: HttpRequest, obj: Optional[Student] = None
+        self, request: HttpRequest, obj: Student | None = None
     ) -> bool:
         del request, obj
         return False
@@ -181,7 +181,7 @@ class OwedFilter(admin.SimpleListFilter):
         self,
         request: HttpRequest,
         model_admin: ModelAdmin[Any],
-    ) -> list[Tuple[str, str]]:
+    ) -> list[tuple[str, str]]:
         del request, model_admin
         return [
             ("incomplete", "Incomplete"),
