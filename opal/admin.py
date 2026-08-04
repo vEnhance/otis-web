@@ -60,7 +60,8 @@ class OpalPuzzleAdmin(admin.ModelAdmin):
                 messages.warning(
                     request,
                     f"The file {uploaded_name} does not match the slug {obj.slug}; "
-                    f"it was saved as {obj.slug}.pdf anyway.",
+                    "it was saved under that name anyway, but check you uploaded "
+                    "the right file.",
                 )
         super().save_model(request, obj, form, change)
 

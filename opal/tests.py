@@ -152,9 +152,9 @@ def test_model_methods():
 def test_puzzle_upload():
     puzzle = OpalPuzzleFactory.create(hunt__slug="hunt", slug="sudoku")
     assert not puzzle.is_uploaded
-    for name in ("sudoku.pdf", "wrong_file.pdf"):
+    for name in ("sudoku.pdf", "differently_named_file.pdf"):
         filename = puzzle_file_name(puzzle, name)
-        assert re.match(r"opals\/hunt\/[a-z0-9]+\/sudoku.pdf", filename), filename
+        assert re.match(rf"opals\/hunt\/[a-z0-9]+\/{name}", filename), filename
 
 
 @pytest.mark.django_db
@@ -179,12 +179,16 @@ def test_puzzle_admin_upload_slug_mismatch(otis, settings, tmp_path):
         "admin:opal_opalpuzzle_change",
         puzzle.pk,
         data=form_data
-        | {"content": SimpleUploadedFile("wrong_file.pdf", b"%PDF-1.4 sudoku")},
+        | {
+            "content": SimpleUploadedFile(
+                "differently_named_file.pdf", b"%PDF-1.4 sudoku"
+            )
+        },
         follow=True,
     )
-    otis.assert_has(resp, "wrong_file.pdf does not match the slug sudoku")
+    otis.assert_has(resp, "differently_named_file.pdf does not match the slug sudoku")
     puzzle.refresh_from_db()
-    assert puzzle.content.name.endswith("sudoku.pdf")
+    assert puzzle.content.name.endswith("differently_named_file.pdf")
 
     resp = otis.post(
         "admin:opal_opalpuzzle_change",
@@ -194,6 +198,8 @@ def test_puzzle_admin_upload_slug_mismatch(otis, settings, tmp_path):
         follow=True,
     )
     otis.assert_not_has(resp, "does not match the slug")
+    puzzle.refresh_from_db()
+    assert puzzle.content.name.endswith("sudoku.pdf")
 
 
 @pytest.mark.django_db

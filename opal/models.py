@@ -70,7 +70,6 @@ class OpalAttempt(models.Model):
 
 
 def puzzle_file_name(instance: "OpalPuzzle", filename: str) -> str:
-    del filename  # the uploaded file is always renamed after the puzzle's slug
     hexstring = pbkdf2_hmac(
         "sha256",
         (settings.OPAL_HASH_KEY + str(instance.pk)).encode("utf-8"),
@@ -78,7 +77,10 @@ def puzzle_file_name(instance: "OpalPuzzle", filename: str) -> str:
         100000,
         dklen=18,
     ).hex()
-    return os.path.join("opals", instance.hunt.slug, hexstring, instance.slug + ".pdf")
+    # the file keeps whatever name was uploaded; the admin warns on a slug mismatch
+    return os.path.join(
+        "opals", instance.hunt.slug, hexstring, os.path.basename(filename)
+    )
 
 
 class OpalPuzzle(models.Model):
