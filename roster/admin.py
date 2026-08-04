@@ -63,6 +63,7 @@ class NeedsFinaidListFilter(admin.SimpleListFilter):
 
 @admin.register(ApplyUUID)
 class ApplyUUIDAdmin(ImportExportModelAdmin):
+    search_fields = ("uuid",)
     list_display = (
         "pk",
         "uuid",
