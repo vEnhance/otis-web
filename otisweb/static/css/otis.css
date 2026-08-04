@@ -243,10 +243,6 @@ table.curriculum td.emojis {
   margin: 0.6em 0 0.1em;
 }
 
-#emoji_nav h4:first-child {
-  margin-top: 0;
-}
-
 a.emoji-link {
   text-shadow:
     1px 0 0 black,
