@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any
 
 from django.contrib import admin
@@ -32,6 +33,10 @@ class RosterResource(resources.ModelResource):
 
 
 class ApplyUUIDIEResource(resources.ModelResource):
+    # Exported for reference, but never written back on import.
+    created_at = fields.Field(attribute="created_at", readonly=True)
+    registered_at = fields.Field(attribute="registered_at", readonly=True)
+
     class Meta:
         skip_unchanged = True
         model = ApplyUUID
@@ -40,6 +45,8 @@ class ApplyUUIDIEResource(resources.ModelResource):
             "uuid",
             "percent_aid",
             "enabled",
+            "created_at",
+            "registered_at",
         )
         export_order = fields
 
@@ -71,6 +78,7 @@ class ApplyUUIDAdmin(ImportExportModelAdmin):
         "enabled",
         "reg",
         "created_at",
+        "registered_at",
     )
     list_display_links = (
         "pk",
@@ -81,8 +89,13 @@ class ApplyUUIDAdmin(ImportExportModelAdmin):
         NeedsFinaidListFilter,
         "enabled",
     )
+    list_select_related = ("reg",)
     resource_classes = [ApplyUUIDIEResource]
     actions = ("enable_uuids", "disable_uuids")
+
+    @admin.display(description="Registered at", ordering="reg__created_at")
+    def registered_at(self, obj: ApplyUUID) -> datetime | None:
+        return obj.registered_at
 
     @admin.action(description="Enable selected ApplyUUIDs")
     def enable_uuids(self, request: HttpRequest, queryset: QuerySet[ApplyUUID]) -> None:

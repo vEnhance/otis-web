@@ -1576,7 +1576,13 @@ def test_applyuuid_admin_import_export(otis) -> None:
     # `id` must never be exported/imported: rows are matched on the unique
     # `uuid`, and an importable `id` column would let a CSV reassign an
     # existing row's primary key.
-    assert resource.get_export_headers() == ["uuid", "percent_aid", "enabled"]
+    assert resource.get_export_headers() == [
+        "uuid",
+        "percent_aid",
+        "enabled",
+        "created_at",
+        "registered_at",
+    ]
 
     dataset = tablib.Dataset(headers=["uuid", "percent_aid"])
     dataset.append([str(uuid4()), 30])
@@ -1594,6 +1600,17 @@ def test_applyuuid_admin_import_export(otis) -> None:
     au.refresh_from_db()
     assert au.percent_aid == 55
     assert au.pk == original_pk
+
+    # `created_at` is export-only: a CSV carrying that column must not be
+    # able to rewrite when a UUID was issued.
+    original_created_at = au.created_at
+    dataset = tablib.Dataset(headers=["uuid", "percent_aid", "created_at"])
+    dataset.append([str(au.uuid), 60, "2000-01-01 00:00:00"])
+    result = resource.import_data(dataset, raise_errors=True)
+    assert not result.has_errors()
+    au.refresh_from_db()
+    assert au.percent_aid == 60
+    assert au.created_at == original_created_at
 
 
 @pytest.mark.django_db

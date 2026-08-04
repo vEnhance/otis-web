@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 import os
 from _pydecimal import Decimal
-from datetime import timedelta
+from datetime import datetime, timedelta
 from hashlib import pbkdf2_hmac
 from typing import TypedDict
 
@@ -715,3 +715,8 @@ class ApplyUUID(models.Model):
 
     def __str__(self) -> str:
         return str(self.uuid)
+
+    @property
+    def registered_at(self) -> datetime | None:
+        """When the student cashed in this UUID, or None if unused."""
+        return self.reg.created_at if self.reg is not None else None
