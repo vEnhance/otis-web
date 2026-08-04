@@ -223,7 +223,7 @@ class OpalHunt(models.Model):
 
     thanks = models.TextField(help_text="Thanks to people who helped.", blank=True)
     discord_webhook_url = models.URLField(
-        help_text="Webhook to post to congratulating people who finish the hunt.",
+        help_text="Webhook to post to congratulate people who finish the hunt.",
         blank=True,
     )
 
