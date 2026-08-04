@@ -711,6 +711,7 @@ class ApplyUUID(models.Model):
         default=True,
         help_text="If disabled, this UUID cannot be used for registration.",
     )
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
         return str(self.uuid)

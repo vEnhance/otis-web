@@ -70,6 +70,7 @@ class ApplyUUIDAdmin(ImportExportModelAdmin):
         "percent_aid",
         "enabled",
         "reg",
+        "created_at",
     )
     list_display_links = (
         "pk",
