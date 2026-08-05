@@ -92,6 +92,18 @@
     </div>
   {% endif %}
   {% if student.newborn and student.semester.active %}
+    <div class="alert alert-secondary">
+      <h3 class="alert-heading">Linked accounts</h3>
+      You may wish to
+      check your <b><a href="{% url "socialaccount_connections" %}">🔐 linked accounts</a></b>
+      if you haven't already.
+      If you want to link multiple login methods
+      (Google, Discord, GitHub), now's a good time to do that.
+      (Before you forget and accidentally spawn duplicate accounts.)
+      You can always access this page from
+      <a href="{% url "socialaccount_connections" %}">🔐</a>
+      in the sidebar.
+    </div>
     <p>
       Hello, {{ student.name }}!
       Welcome to OTIS.
@@ -99,8 +111,9 @@
     </p>
     <p>Let's get you set up by picking your units!</p>
     <h1>Getting Started — Setup Instructions</h1>
-    <p>Follow the three steps below to get everything working.</p>
+    <p>Follow the steps below to get everything working.</p>
     <ol>
+      <li></li>
       <li>
         Read the <a href="{% static 'info/unit-guide.pdf' %}">unit selection guide</a>
         to give yourself ideas on which units you want to work on.

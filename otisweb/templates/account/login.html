@@ -24,12 +24,19 @@
            class="accordion-collapse collapse show"
            aria-labelledby="headingSocialLogin">
         <div class="accordion-body">
-          <p>Use an already existing connection (not for new connections).</p>
+          <p>Use an already existing connection.</p>
           <div class="socialaccount_ballot">
             <ul class="socialaccount_providers">
               {% include "socialaccount/snippets/provider_list.html" with process="login" %}
             </ul>
           </div>
+          <p class="text-muted">
+            <b>NOT for creating new connections!</b>
+            <br />
+            (To add new connections to an existing account, use
+            <a href="{% url "socialaccount_connections" %}">🔐</a>
+            in the sidebar instead.)
+          </p>
         </div>
       </div>
     </div>
@@ -49,7 +56,7 @@
           <div class="alert alert-info">
             The form here will only work if you chose a traditional
             password after registering (which you can do by clicking the
-            <a href="https://otis.evanchen.cc/accounts/social/connections/">🔐</a>
+            <a href="{% url "socialaccount_connections" %}">🔐</a>
             icon in the sidebar when you are logged in).
             If you signed up with Google/GitHub/Discord,
             and didn't choose a password, you should use that to log in.
