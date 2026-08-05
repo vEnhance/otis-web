@@ -31,7 +31,7 @@
         srcelem.textContent = srcelem.textContent.replaceAll('<span class="math inline">', '').replaceAll('<span class="math display">', '').replaceAll('</span>', '');
         srcelem.textContent = srcelem.textContent.replaceAll('<p>', '').replaceAll('</p>', '');
         srcelem.textContent = srcelem.textContent.replaceAll('<ol>', '\\begin{enumerate}').replaceAll('</ol>', '\\end{enumerate}');
-        srcelem.textContent = srcelem.textContent.replaceAll('<ul>', '\\begin{itemize}').replaceAll('</ul>', '\\end{itemize}')
+        srcelem.textContent = srcelem.textContent.replaceAll('<ul>', '\\begin{itemize}').replaceAll('</ul>', '\\end{itemize}');
         srcelem.textContent = srcelem.textContent.replaceAll('<li>', '\\item').replaceAll('</li>', '');
       })();
     </script>
