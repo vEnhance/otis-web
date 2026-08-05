@@ -38,6 +38,13 @@
       But please avoid changing this to a username or other unrecognizable string,
       because it's confusing for Evan.
     </p>
+    <p>
+      This name will never be automatically revealed to other students.
+      (There are optional places you can choose to interact, e.g.,
+      creating a yearbook entry will show your name in the yearbook, duh.
+      These are all signposted clearly; if you are very paranoid, you can
+      <a href="{% url "github-landing" %}">read the website source code to verify</a>.)
+    </p>
     <h1>Please fill the following in...</h1>
     {% include "otisweb/components/generic_form.html" with submit_name="Register" %}
   {% else %}
