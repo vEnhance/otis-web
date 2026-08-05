@@ -17,13 +17,24 @@
       <summary>
         <b>Show problem source</b>
       </summary>
-      <pre style="margin-top: 12px;
+      <pre id="problem-src" style="margin-top: 12px;
                   padding: 12px;
                   white-space: pre-wrap;
                   border: 1px solid #C4C8CB;
                   border-radius: 6px;
                   background: #E2E3E5">{{ statement|escape }}</pre>
     </details>
+    <script>
+      (function () {
+        const srcelem = document.getElementById("problem-src");
+        if (!srcelem) return;
+        srcelem.textContent = srcelem.textContent.replaceAll('<span class="math inline">', '').replaceAll('<span class="math display">', '').replaceAll('</span>', '');
+        srcelem.textContent = srcelem.textContent.replaceAll('<p>', '').replaceAll('</p>', '');
+        srcelem.textContent = srcelem.textContent.replaceAll('<ol>', '\\begin{enumerate}').replaceAll('</ol>', '\\end{enumerate}');
+        srcelem.textContent = srcelem.textContent.replaceAll('<ul>', '\\begin{itemize}').replaceAll('</ul>', '\\end{itemize}')
+        srcelem.textContent = srcelem.textContent.replaceAll('<li>', '\\item').replaceAll('</li>', '');
+      })();
+    </script>
   {% endif %}
   {% if problem.hyperlink %}
     <p class="text-center">
