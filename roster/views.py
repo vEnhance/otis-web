@@ -34,7 +34,6 @@ from django.db.models.query_utils import Q
 from django.forms import ValidationError
 from django.forms.models import BaseModelForm
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
-from django.http.response import Http404
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
@@ -77,17 +76,6 @@ from .models import (
 # Create your views here.
 
 logger = logging.getLogger(__name__)
-
-
-@staff_required
-def username_lookup(request: HttpRequest, username: str) -> HttpResponse:
-    queryset = Student.objects.filter(user__username=username).order_by(
-        "-semester__end_year"
-    )
-    if (student := queryset.first()) is not None:
-        return HttpResponseRedirect(student.get_absolute_url())
-    else:
-        raise Http404(f"No student attached to the user {username}")
 
 
 @login_required

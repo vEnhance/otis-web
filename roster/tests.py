@@ -46,22 +46,6 @@ UTC = datetime.timezone.utc
 
 
 @pytest.mark.django_db
-def test_username_lookup(otis) -> None:
-    admin: User = UserFactory.create(is_superuser=True, is_staff=True)
-    semester_old: Semester = SemesterFactory.create(end_year=2025)
-    semester_new: Semester = SemesterFactory.create(end_year=2026)
-    bob: User = UserFactory.create(username="bob")
-    StudentFactory.create(user=bob, semester=semester_old)
-    bob_new: Student = StudentFactory.create(user=bob, semester=semester_new)
-
-    otis.login(admin)
-    otis.get_not_found("username-lookup", "carl")
-
-    resp = otis.get("username-lookup", "bob")
-    assert resp.url == bob_new.get_absolute_url()
-
-
-@pytest.mark.django_db
 def test_user_lookup(otis) -> None:
     admin: User = UserFactory.create(is_superuser=True, is_staff=True)
     regular_user: User = UserFactory.create()
