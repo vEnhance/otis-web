@@ -19,11 +19,5 @@ class HintUpdateFormWithReason(forms.ModelForm):
         )
 
 
-class ProblemUpdateForm(forms.ModelForm):
-    class Meta:
-        model = Problem
-        fields = ("puid",)
-
-
 class ProblemSelectForm(forms.Form):
     problem = forms.ModelChoiceField(queryset=Problem.objects.all())

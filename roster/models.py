@@ -89,9 +89,6 @@ class Assistant(models.Model):
     def name(self) -> str:
         return self.user.get_full_name()
 
-    def student_count(self) -> int:
-        return self.student_set.count()  # type: ignore
-
 
 class Student(models.Model):
     """This is really a pair of a user and a semester (with a display name),

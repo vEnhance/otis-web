@@ -20,7 +20,11 @@
       <tr>
         <td>{{ unlock.timestamp|date:"Y-m-d H:i" }}</td>
         <td>
-          <a href="{% url "username-lookup" unlock.user.username %}">{{ unlock.user.get_full_name|truncatechars:"40" }}</a>
+          {% if request.user.is_superuser %}
+            <a href="{% url "user-info" unlock.user.pk %}">{{ unlock.user.get_full_name|truncatechars:"40" }}</a>
+          {% else %}
+            {{ unlock.user.get_full_name|truncatechars:"40" }}
+          {% endif %}
         </td>
       </tr>
     {% endfor %}

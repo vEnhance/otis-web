@@ -176,16 +176,6 @@ class LevelInfoDict(TypedDict):
     hanabi_replays: QuerySet[HanabiReplay]
 
 
-def get_week_count(dates: list[datetime.datetime]) -> int:
-    seen: list[Tuple[int, int]] = []
-    for d in dates:
-        d = d.astimezone(tz=datetime.timezone.utc)
-        week_number = d.isocalendar()[1]
-        year = d.year
-        seen.append((year, week_number))
-    return len(set(seen))
-
-
 def get_level_info(student: Student) -> LevelInfoDict:
     """Uses a bunch of expensive database queries to compute a student's levels and data,
     returning the findings as a typed dictionary."""
