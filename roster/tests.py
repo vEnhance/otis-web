@@ -1,4 +1,5 @@
 import datetime
+import re
 from io import StringIO
 from uuid import uuid4
 
@@ -173,9 +174,9 @@ def test_user_merge(otis) -> None:
     group.user_set.add(dupe)  # type: ignore
 
     # Test access control
-    otis.post_30x("user-merge", data={"old_user": dupe.pk, "new_user": real.pk})
+    otis.post_30x("user-merge", data={"impostor": dupe.pk, "crewmate": real.pk})
     otis.login(UserFactory.create(is_staff=True))
-    otis.post_40x("user-merge", data={"old_user": dupe.pk, "new_user": real.pk})
+    otis.post_40x("user-merge", data={"impostor": dupe.pk, "crewmate": real.pk})
 
     otis.login(admin)
 
@@ -183,21 +184,45 @@ def test_user_merge(otis) -> None:
     otis.assert_redirects(otis.get("user-merge"), reverse("user-lookup"))
 
     # Can't merge an account into itself
-    resp = otis.post_20x("user-merge", data={"old_user": dupe.pk, "new_user": dupe.pk})
+    resp = otis.post_20x("user-merge", data={"impostor": dupe.pk, "crewmate": dupe.pk})
     otis.assert_has(resp, "distinct")
+    # ... and the accordion is expanded so the error is actually visible
+    otis.assert_has(resp, "accordion-collapse collapse show")
 
     # Can't clobber a staff account
-    resp = otis.post_20x("user-merge", data={"old_user": admin.pk, "new_user": real.pk})
+    resp = otis.post_20x("user-merge", data={"impostor": admin.pk, "crewmate": real.pk})
     otis.assert_has(resp, "Merge this one by hand")
 
     # Can't merge two students of the same semester together
     clash: Student = StudentFactory.create(user=dupe, semester=semester_new)
-    resp = otis.post_20x("user-merge", data={"old_user": dupe.pk, "new_user": real.pk})
+    resp = otis.post_20x("user-merge", data={"impostor": dupe.pk, "crewmate": real.pk})
     otis.assert_has(resp, "Delete the redundant student(s) first.")
     clash.delete()
 
-    # Now the real thing
-    resp = otis.post_30x("user-merge", data={"old_user": dupe.pk, "new_user": real.pk})
+    # An unconfirmed post only previews the merge, leaving the database alone
+    resp = otis.post_20x("user-merge", data={"impostor": dupe.pk, "crewmate": real.pk})
+    otis.assert_has(resp, "Nothing has happened yet.")
+    otis.assert_has(resp, "<h2>Impostor (to be ejected)</h2>")
+    otis.assert_has(resp, "<h2>Crewmate</h2>")
+    # ... and the two accounts are the right way around
+    otis.assert_has(resp, f"<code>alice2</code> ({dupe.pk}) will be marked inactive")
+    otis.assert_has(resp, "These students move to <code>alice</code>")
+    otis.assert_has(resp, "Discord (alicediscord)")
+    otis.assert_has(resp, str(semester_old))
+    otis.assert_has(resp, "Verified")
+    dupe.refresh_from_db()
+    assert dupe.is_active is True
+    assert dupe.groups.count() == 1
+    assert Student.objects.filter(user=dupe).count() == 1
+
+    # Now the real thing, by resubmitting the confirmation page's own form
+    hidden_inputs = {
+        name.decode(): value.decode()
+        for name, value in re.findall(rb'name="(\w+)" value="([^"]*)"', resp.content)
+    }
+    assert hidden_inputs["impostor"] == str(dupe.pk)
+    assert hidden_inputs["crewmate"] == str(real.pk)
+    resp = otis.post_30x("user-merge", data=hidden_inputs)
     otis.assert_redirects(resp, reverse("user-lookup"))
 
     dupe.refresh_from_db()
@@ -209,8 +234,12 @@ def test_user_merge(otis) -> None:
     assert social.user == real
     assert Student.objects.filter(user=real).count() == 2
 
-    # Merging into a nonexistent account does nothing
-    resp = otis.post_20x("user-merge", data={"old_user": real.pk, "new_user": 999999})
+    # Merging into a nonexistent account does nothing, even when confirmed
+    resp = otis.post_20x(
+        "user-merge",
+        data={"impostor": real.pk, "crewmate": 999999, "confirmed": True},
+    )
+    otis.assert_has(resp, "Merge duplicate accounts")
     real.refresh_from_db()
     assert real.is_active is True
 

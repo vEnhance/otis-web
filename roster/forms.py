@@ -223,38 +223,52 @@ class UserLookupForm(forms.Form):
 
 
 class UserMergeForm(forms.Form):
-    """Folds a duplicate account X into the account Y which is kept."""
+    """Folds a duplicate account (the impostor)
+    into the account which is kept (the crewmate)."""
 
-    old_user = forms.ModelChoiceField(
+    impostor = forms.ModelChoiceField(
         queryset=User.objects.all(),
         widget=forms.NumberInput,
-        label="Duplicate user PK (X)",
-        help_text="This account is deactivated and emptied out.",
+        label="Impostor's user PK",
+        help_text="Sus. This account is deactivated and emptied out.",
     )
-    new_user = forms.ModelChoiceField(
+    crewmate = forms.ModelChoiceField(
         queryset=User.objects.all(),
         widget=forms.NumberInput,
-        label="Surviving user PK (Y)",
-        help_text="Students and social accounts of X are moved here.",
+        label="Crewmate's user PK",
+        help_text="The genuine account, which inherits everything.",
     )
+    # Set only by the confirmation page; a bare submission is a dry run.
+    confirmed = forms.BooleanField(required=False, widget=forms.HiddenInput)
+
+    def __init__(self, *args: Any, **kwargs: Any):
+        # On the confirmation page the two PK's are settled already,
+        # so they ride along as hidden inputs instead of editable boxes.
+        hide_users = kwargs.pop("hide_users", False)
+        super().__init__(*args, **kwargs)
+        if hide_users:
+            self.fields["impostor"].widget = forms.HiddenInput()
+            self.fields["crewmate"].widget = forms.HiddenInput()
 
     def clean(self) -> dict[str, Any]:
         cleaned_data: dict[str, Any] = super().clean() or {}
-        old_user: Optional[User] = cleaned_data.get("old_user")
-        new_user: Optional[User] = cleaned_data.get("new_user")
-        if old_user is None or new_user is None:
+        impostor: Optional[User] = cleaned_data.get("impostor")
+        crewmate: Optional[User] = cleaned_data.get("crewmate")
+        if impostor is None or crewmate is None:
             return cleaned_data
-        if old_user == new_user:
-            raise forms.ValidationError("The two accounts need to be distinct.")
-        if old_user.is_superuser or old_user.is_staff:
+        if impostor == crewmate:
             raise forms.ValidationError(
-                f"Refusing to deactivate {old_user.username}, who is staff. "
+                "The impostor and the crewmate need to be distinct accounts."
+            )
+        if impostor.is_superuser or impostor.is_staff:
+            raise forms.ValidationError(
+                f"Refusing to deactivate {impostor.username}, who is staff. "
                 "Merge this one by hand."
             )
         # Student has unique_together (user, semester), so a shared semester
         # would make the move blow up; bail out rather than merge halfway.
-        clashes = Semester.objects.filter(student__user=old_user).filter(
-            student__user=new_user
+        clashes = Semester.objects.filter(student__user=impostor).filter(
+            student__user=crewmate
         )
         if clashes.exists():
             names = ", ".join(str(semester) for semester in clashes)

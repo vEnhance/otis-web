@@ -1,0 +1,61 @@
+{% extends "layout.html" %}
+{% block title %}
+  Confirm account merge
+{% endblock title %}
+{% block layout-content %}
+  <p>
+    Nothing has happened yet.
+    Check that the two accounts below are really the ones you meant,
+    then confirm at the bottom of the page.
+  </p>
+  <h2>Impostor (to be ejected)</h2>
+  {% include "roster/user_card.html" with r=impostor %}
+  <h2>Crewmate</h2>
+  {% include "roster/user_card.html" with r=crewmate %}
+  <hr />
+  <h2>What will happen</h2>
+  <ul>
+    <li>
+      <b><code>{{ impostor.user.username }}</code> ({{ impostor.user.pk }}) will be marked inactive</b>,
+      so nobody can sign in with it again.
+    </li>
+    <li>
+      {% if impostor.students %}
+        These students move to <code>{{ crewmate.user.username }}</code>:
+        {% for student in impostor.students %}
+          {{ student.semester }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+      {% else %}
+        No students to move.
+      {% endif %}
+    </li>
+    <li>
+      {% if impostor.socials %}
+        These social accounts move to <code>{{ crewmate.user.username }}</code>:
+        {% for social in impostor.socials %}
+          {{ social }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+      {% else %}
+        No social accounts to move.
+      {% endif %}
+    </li>
+    <li>
+      {% if impostor.groups %}
+        <code>{{ impostor.user.username }}</code> is ejected from these groups:
+        {% for group in impostor.groups %}
+          {{ group.name }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+      {% else %}
+        <code>{{ impostor.user.username }}</code> is not in any groups.
+      {% endif %}
+    </li>
+  </ul>
+  <p>
+    Everything else attached to <code>{{ impostor.user.username }}</code>
+    (its email address, registrations, uploads, and so on) is left alone.
+  </p>
+  {% include "otisweb/components/generic_form.html" with form=form target=merge_url submit_name="Merge" btn_class="btn-danger" %}
+  <p class="mt-3">
+    <a href="{% url "user-lookup" %}">Never mind, take me back</a>
+  </p>
+{% endblock layout-content %}

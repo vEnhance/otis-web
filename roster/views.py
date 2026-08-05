@@ -13,6 +13,7 @@ So e.g. "list students by most recent pset" goes under dashboard.
 import collections
 import datetime
 import logging
+from collections.abc import Sequence
 from typing import Any, Optional
 
 from allauth.socialaccount.models import SocialAccount
@@ -817,6 +818,39 @@ def _social_label(account: SocialAccount) -> str:
     return account.provider.title()
 
 
+def _user_summaries(users: Sequence[User]) -> list[dict[str, Any]]:
+    """Assembles the data behind roster/user_card.html, one dict per user."""
+    students_by_user_id: dict[int, list[Student]] = collections.defaultdict(list)
+    student_qs = (
+        Student.objects.filter(user__in=users)
+        .select_related("semester")
+        .order_by("-semester__end_year")
+    )
+    for student in student_qs:
+        students_by_user_id[student.user_id].append(student)  # type: ignore
+
+    summaries: list[dict[str, Any]] = []
+    for user in users:
+        socials = [
+            f"{_social_label(account)} ({handle})"
+            if (handle := _social_handle(account)) is not None
+            else _social_label(account)
+            for account in user.socialaccount_set.all()  # type: ignore[attr-defined]
+        ]
+        auth_methods = socials + (["Password"] if user.has_usable_password() else [])
+        summaries.append(
+            {
+                "user": user,
+                "groups": list(user.groups.all()),
+                "socials": socials,
+                "auth_methods": auth_methods,
+                "userinfo_url": reverse("user-info", args=(user.pk,)),
+                "students": students_by_user_id.get(user.pk, []),
+            }
+        )
+    return summaries
+
+
 @admin_required
 def user_lookup(request: HttpRequest) -> HttpResponse:
     context: dict[str, Any] = {}
@@ -837,37 +871,7 @@ def user_lookup(request: HttpRequest) -> HttpResponse:
                 .prefetch_related("socialaccount_set", "groups")
                 .order_by("username")[:USER_LOOKUP_LIMIT]
             )
-
-            students_by_user_id: dict[int, list[Student]] = collections.defaultdict(
-                list
-            )
-            student_qs = (
-                Student.objects.filter(user__in=users)
-                .select_related("semester")
-                .order_by("-semester__end_year")
-            )
-            for student in student_qs:
-                students_by_user_id[student.user_id].append(student)  # type: ignore
-
-            results = []
-            for user in users:
-                auth_methods = [
-                    f"{_social_label(account)} ({handle})"
-                    if (handle := _social_handle(account)) is not None
-                    else _social_label(account)
-                    for account in user.socialaccount_set.all()  # type: ignore[attr-defined]
-                ]
-                if user.has_usable_password():
-                    auth_methods.append("Password")
-                results.append(
-                    {
-                        "user": user,
-                        "groups": list(user.groups.all()),
-                        "auth_methods": auth_methods,
-                        "userinfo_url": reverse("user-info", args=(user.pk,)),
-                        "students": students_by_user_id.get(user.pk, []),
-                    }
-                )
+            results = _user_summaries(users)
     else:
         form = UserLookupForm()
     context["form"] = form
@@ -890,27 +894,50 @@ def user_merge(request: HttpRequest) -> HttpResponse:
                 "form": UserLookupForm(),
                 "results": None,
                 "merge_form": merge_form,
+                "merge_open": True,
                 "merge_url": reverse("user-merge"),
             },
         )
 
-    old_user: User = merge_form.cleaned_data["old_user"]
-    new_user: User = merge_form.cleaned_data["new_user"]
+    impostor: User = merge_form.cleaned_data["impostor"]
+    crewmate: User = merge_form.cleaned_data["crewmate"]
+
+    if not merge_form.cleaned_data["confirmed"]:
+        # First pass: show what the merge would do and make them click again.
+        impostor_summary, crewmate_summary = _user_summaries([impostor, crewmate])
+        return render(
+            request,
+            "roster/user_merge_confirm.html",
+            {
+                "impostor": impostor_summary,
+                "crewmate": crewmate_summary,
+                "form": UserMergeForm(
+                    hide_users=True,
+                    initial={
+                        "impostor": impostor.pk,
+                        "crewmate": crewmate.pk,
+                        "confirmed": True,
+                    },
+                ),
+                "merge_url": reverse("user-merge"),
+            },
+        )
+
     with atomic():
-        num_students = Student.objects.filter(user=old_user).update(user=new_user)
-        num_socials = SocialAccount.objects.filter(user=old_user).update(user=new_user)
-        old_user.groups.clear()
-        old_user.is_active = False
-        old_user.save()
+        num_students = Student.objects.filter(user=impostor).update(user=crewmate)
+        num_socials = SocialAccount.objects.filter(user=impostor).update(user=crewmate)
+        impostor.groups.clear()
+        impostor.is_active = False
+        impostor.save()
     messages.success(
         request,
-        f"Merged {old_user.username} ({old_user.pk}) into "
-        f"{new_user.username} ({new_user.pk}): moved {num_students} student(s) "
+        f"Merged {impostor.username} ({impostor.pk}) into "
+        f"{crewmate.username} ({crewmate.pk}): moved {num_students} student(s) "
         f"and {num_socials} social account(s).",
     )
     logger.log(
         SUCCESS_LOG_LEVEL,
-        f"Merged user {old_user.username} into {new_user.username}",
+        f"Merged user {impostor.username} into {crewmate.username}",
         extra={"request": request},
     )
     return HttpResponseRedirect(reverse("user-lookup"))

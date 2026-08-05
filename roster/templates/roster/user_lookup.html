@@ -9,61 +9,7 @@
       <div class="alert alert-danger">No matches were found.</div>
     {% else %}
       {% for r in results %}
-        <div class="card mb-3">
-          <b class="card-header">
-            <a href="{{ r.userinfo_url }}" class="text-decoration-none">{{ r.user.get_full_name|default:r.user.username }}</a>
-            {% if not r.user.is_active %}<span class="badge bg-warning text-dark">Inactive</span>{% endif %}
-            {% if r.user.is_superuser %}<span class="badge bg-danger">Superuser</span>{% endif %}
-            {% if r.user.is_staff %}<span class="badge bg-secondary">Staff</span>{% endif %}
-          </b>
-          <div class="card-body py-0">
-            <table class="table mb-0">
-              <tbody>
-                <tr>
-                  <th>User</th>
-                  <td>
-                    <code>{{ r.user.username }}</code>
-                    ({{ r.user.pk }})
-                  </td>
-                </tr>
-                <tr>
-                  <th>Email</th>
-                  <td>{{ r.user.email|default:"(none)" }}</td>
-                </tr>
-                <tr>
-                  <th>Groups</th>
-                  <td>
-                    {% for group in r.groups %}
-                      {{ group.name }}{% if not forloop.last %}, {% endif %}
-                    {% empty %}
-                      (none)
-                    {% endfor %}
-                  </td>
-                </tr>
-                <tr>
-                  <th>Auth</th>
-                  <td>
-                    {% for method in r.auth_methods %}
-                      {{ method }}{% if not forloop.last %}, {% endif %}
-                    {% empty %}
-                      (none)
-                    {% endfor %}
-                  </td>
-                </tr>
-                <tr>
-                  <th>Students</th>
-                  <td>
-                    {% for student in r.students %}
-                      <a href="{{ student.get_absolute_url }}">{{ student.semester }}</a>{% if not forloop.last %}, {% endif %}
-                    {% empty %}
-                      (none)
-                    {% endfor %}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+        {% include "roster/user_card.html" with r=r %}
       {% endfor %}
     {% endif %}
     <hr />
@@ -72,11 +18,31 @@
   <p>Look up a user by email, Django username, social account username, or real name.</p>
   {% include "otisweb/components/generic_form.html" with submit_name="Search" %}
   <hr />
-  <h2>Merge duplicate accounts</h2>
-  <p>
-    For the clueless kids who signed up twice.
-    Account X is deactivated and dropped from all its groups,
-    and its students and social accounts are handed over to account Y.
-  </p>
-  {% include "otisweb/components/generic_form.html" with form=merge_form target=merge_url submit_name="Merge" btn_class="btn-danger" %}
+  <div class="accordion">
+    <div class="accordion-item">
+      <div class="accordion-header" id="headingMerge">
+        <button class="accordion-button {% if not merge_open %}collapsed{% endif %}"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapseMerge"
+                aria-expanded="{{ merge_open|yesno:"true,false" }}"
+                aria-controls="collapseMerge">
+          <span class="text-muted">Merge duplicate accounts…</span>
+        </button>
+      </div>
+      <div id="collapseMerge"
+           class="accordion-collapse collapse {% if merge_open %}show{% endif %}"
+           aria-labelledby="headingMerge">
+        <div class="accordion-body">
+          <p>
+            For the clueless kids who signed up twice.
+            The impostor account is deactivated and ejected from all its groups,
+            and its students and social accounts are handed over to the crewmate.
+            You get a confirmation page before anything happens.
+          </p>
+          {% include "otisweb/components/generic_form.html" with form=merge_form target=merge_url submit_name="Preview merge" btn_class="btn-danger" %}
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock layout-content %}
