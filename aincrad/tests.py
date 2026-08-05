@@ -146,12 +146,16 @@ def test_init(otis, aincrad_setup):
     )
     out = resp.json()
     assert out["_name"] == "Root"
-    assert len(out["_children"][0]["_children"]) == 12
+    assert len(out["_children"][0]["_children"]) == 10
     assert "timestamp" in out
     assert len(out.keys()) == 4
 
     pset_data = out["_children"][0]
     assert pset_data["_name"] == "Problem sets"
+
+    # psets from past semesters should not show up at all
+    old_alice_pk = Student.objects.get(semester__active=False).pk
+    assert all(pset["student__pk"] != old_alice_pk for pset in pset_data["_children"])
 
     for pset in pset_data["_children"]:
         if pset["feedback"] == "Meow":
