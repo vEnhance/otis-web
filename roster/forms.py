@@ -1,12 +1,12 @@
 import itertools
-from typing import Any
+from typing import Any, Optional
 
 from django import forms
 from django.contrib.auth.models import User
 from django.db.models.query_utils import Q
 from django.forms.forms import BaseForm
 
-from core.models import EMAIL_PREFERENCE_FIELDS, Unit
+from core.models import EMAIL_PREFERENCE_FIELDS, Semester, Unit
 from dashboard.models import PSet
 from roster.models import Student, StudentRegistration, UnitInquiry
 
@@ -220,3 +220,46 @@ class UserLookupForm(forms.Form):
         label="Search query",
         help_text="Email, Django username, social account username, or real name.",
     )
+
+
+class UserMergeForm(forms.Form):
+    """Folds a duplicate account X into the account Y which is kept."""
+
+    old_user = forms.ModelChoiceField(
+        queryset=User.objects.all(),
+        widget=forms.NumberInput,
+        label="Duplicate user PK (X)",
+        help_text="This account is deactivated and emptied out.",
+    )
+    new_user = forms.ModelChoiceField(
+        queryset=User.objects.all(),
+        widget=forms.NumberInput,
+        label="Surviving user PK (Y)",
+        help_text="Students and social accounts of X are moved here.",
+    )
+
+    def clean(self) -> dict[str, Any]:
+        cleaned_data: dict[str, Any] = super().clean() or {}
+        old_user: Optional[User] = cleaned_data.get("old_user")
+        new_user: Optional[User] = cleaned_data.get("new_user")
+        if old_user is None or new_user is None:
+            return cleaned_data
+        if old_user == new_user:
+            raise forms.ValidationError("The two accounts need to be distinct.")
+        if old_user.is_superuser or old_user.is_staff:
+            raise forms.ValidationError(
+                f"Refusing to deactivate {old_user.username}, who is staff. "
+                "Merge this one by hand."
+            )
+        # Student has unique_together (user, semester), so a shared semester
+        # would make the move blow up; bail out rather than merge halfway.
+        clashes = Semester.objects.filter(student__user=old_user).filter(
+            student__user=new_user
+        )
+        if clashes.exists():
+            names = ", ".join(str(semester) for semester in clashes)
+            raise forms.ValidationError(
+                f"Both accounts have a student for {names}. "
+                "Delete the redundant student(s) first."
+            )
+        return cleaned_data

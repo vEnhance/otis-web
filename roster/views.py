@@ -31,6 +31,7 @@ from django.db.models.functions.comparison import Cast
 from django.db.models.manager import Manager
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
+from django.db.transaction import atomic
 from django.forms import ValidationError
 from django.forms.models import BaseModelForm
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
@@ -64,6 +65,7 @@ from .forms import (
     InquiryForm,
     UserForm,
     UserLookupForm,
+    UserMergeForm,
 )
 from .models import (
     Invoice,
@@ -870,7 +872,48 @@ def user_lookup(request: HttpRequest) -> HttpResponse:
         form = UserLookupForm()
     context["form"] = form
     context["results"] = results
+    context.setdefault("merge_form", UserMergeForm())
+    context["merge_url"] = reverse("user-merge")
     return render(request, "roster/user_lookup.html", context)
+
+
+@admin_required
+def user_merge(request: HttpRequest) -> HttpResponse:
+    if request.method != "POST":
+        return HttpResponseRedirect(reverse("user-lookup"))
+    merge_form = UserMergeForm(request.POST)
+    if not merge_form.is_valid():
+        return render(
+            request,
+            "roster/user_lookup.html",
+            {
+                "form": UserLookupForm(),
+                "results": None,
+                "merge_form": merge_form,
+                "merge_url": reverse("user-merge"),
+            },
+        )
+
+    old_user: User = merge_form.cleaned_data["old_user"]
+    new_user: User = merge_form.cleaned_data["new_user"]
+    with atomic():
+        num_students = Student.objects.filter(user=old_user).update(user=new_user)
+        num_socials = SocialAccount.objects.filter(user=old_user).update(user=new_user)
+        old_user.groups.clear()
+        old_user.is_active = False
+        old_user.save()
+    messages.success(
+        request,
+        f"Merged {old_user.username} ({old_user.pk}) into "
+        f"{new_user.username} ({new_user.pk}): moved {num_students} student(s) "
+        f"and {num_socials} social account(s).",
+    )
+    logger.log(
+        SUCCESS_LOG_LEVEL,
+        f"Merged user {old_user.username} into {new_user.username}",
+        extra={"request": request},
+    )
+    return HttpResponseRedirect(reverse("user-lookup"))
 
 
 @login_required

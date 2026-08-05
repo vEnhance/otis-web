@@ -71,4 +71,12 @@
   <h2>User lookup</h2>
   <p>Look up a user by email, Django username, social account username, or real name.</p>
   {% include "otisweb/components/generic_form.html" with submit_name="Search" %}
+  <hr />
+  <h2>Merge duplicate accounts</h2>
+  <p>
+    For the clueless kids who signed up twice.
+    Account X is deactivated and dropped from all its groups,
+    and its students and social accounts are handed over to account Y.
+  </p>
+  {% include "otisweb/components/generic_form.html" with form=merge_form target=merge_url submit_name="Merge" btn_class="btn-danger" %}
 {% endblock layout-content %}

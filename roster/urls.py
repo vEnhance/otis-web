@@ -30,6 +30,7 @@ urlpatterns = [
     path(r"instructors/", views.StudentAssistantList.as_view(), name="instructors"),
     path(r"link-assistant/", views.link_assistant, name="link-assistant"),
     path(r"lookup/", views.user_lookup, name="user-lookup"),
+    path(r"merge/", views.user_merge, name="user-merge"),
     path(r"ids/", views.student_ids, name="student-ids"),
     path(r"ais/", views.AdList.as_view(), name="ad-list"),
     path(r"advertise/", views.AdUpdate.as_view(), name="ad-update"),

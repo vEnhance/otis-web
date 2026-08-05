@@ -154,6 +154,68 @@ def test_user_lookup(otis) -> None:
 
 
 @pytest.mark.django_db
+def test_user_merge(otis) -> None:
+    admin: User = UserFactory.create(is_superuser=True, is_staff=True)
+    semester_old: Semester = SemesterFactory.create(end_year=2025)
+    semester_new: Semester = SemesterFactory.create(end_year=2026)
+
+    dupe: User = UserFactory.create(username="alice2")
+    real: User = UserFactory.create(username="alice")
+    dupe_student: Student = StudentFactory.create(user=dupe, semester=semester_old)
+    StudentFactory.create(user=real, semester=semester_new)
+    social = SocialAccount.objects.create(
+        user=dupe,
+        provider="discord",
+        uid="12345",
+        extra_data={"username": "alicediscord"},
+    )
+    group: Group = Group.objects.create(name="Verified")
+    group.user_set.add(dupe)  # type: ignore
+
+    # Test access control
+    otis.post_30x("user-merge", data={"old_user": dupe.pk, "new_user": real.pk})
+    otis.login(UserFactory.create(is_staff=True))
+    otis.post_40x("user-merge", data={"old_user": dupe.pk, "new_user": real.pk})
+
+    otis.login(admin)
+
+    # GET just bounces back to the lookup page
+    otis.assert_redirects(otis.get("user-merge"), reverse("user-lookup"))
+
+    # Can't merge an account into itself
+    resp = otis.post_20x("user-merge", data={"old_user": dupe.pk, "new_user": dupe.pk})
+    otis.assert_has(resp, "distinct")
+
+    # Can't clobber a staff account
+    resp = otis.post_20x("user-merge", data={"old_user": admin.pk, "new_user": real.pk})
+    otis.assert_has(resp, "Merge this one by hand")
+
+    # Can't merge two students of the same semester together
+    clash: Student = StudentFactory.create(user=dupe, semester=semester_new)
+    resp = otis.post_20x("user-merge", data={"old_user": dupe.pk, "new_user": real.pk})
+    otis.assert_has(resp, "Delete the redundant student(s) first.")
+    clash.delete()
+
+    # Now the real thing
+    resp = otis.post_30x("user-merge", data={"old_user": dupe.pk, "new_user": real.pk})
+    otis.assert_redirects(resp, reverse("user-lookup"))
+
+    dupe.refresh_from_db()
+    dupe_student.refresh_from_db()
+    social.refresh_from_db()
+    assert dupe.is_active is False
+    assert dupe.groups.count() == 0
+    assert dupe_student.user == real
+    assert social.user == real
+    assert Student.objects.filter(user=real).count() == 2
+
+    # Merging into a nonexistent account does nothing
+    resp = otis.post_20x("user-merge", data={"old_user": real.pk, "new_user": 999999})
+    real.refresh_from_db()
+    assert real.is_active is True
+
+
+@pytest.mark.django_db
 def test_update_profile(otis) -> None:
     alice: User = UserFactory.create()
     otis.login(alice)
