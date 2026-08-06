@@ -1,106 +1,106 @@
 {% extends "layout.html" %}
 {% load static %}
 {% block title %}
-    ARCH hints for {{ problem }}
+  ARCH hints for {{ problem }}
 {% endblock title %}
 {% block layout-content %}
-    <p>
-        <a href="{% url "arch-index" %}"><span class="emoji-text">⬅️</span> Back to ARCH index</a>
+  <p>
+    <a href="{% url "arch-index" %}"><span class="emoji-text">⬅️</span> Back to ARCH index</a>
+  </p>
+  <hr />
+  {% spaceless %}
+    <h1>{{ problem }}</h1>
+  {% endspaceless %}
+  {% if statement %}
+    <div class="alert-secondary alert">{{ statement|safe }}</div>
+    <details class="mt-3 mb-4">
+      <summary>
+        <b>Show problem source</b>
+      </summary>
+      <pre id="problem-src"
+           style="margin-top: 12px;
+                  padding: 12px;
+                  white-space: pre-wrap;
+                  border: 1px solid #C4C8CB;
+                  border-radius: 6px;
+                  background: #E2E3E5">{{ statement|escape }}</pre>
+    </details>
+    <script>
+        (function() {
+            const srcelem = document.getElementById("problem-src");
+            if (!srcelem) return;
+            srcelem.textContent = srcelem.textContent.replaceAll('<span class="math inline">', '').replaceAll('<span class="math display">', '').replaceAll('</span>', '');
+            srcelem.textContent = srcelem.textContent.replaceAll('<p>', '').replaceAll('</p>', '');
+            srcelem.textContent = srcelem.textContent.replaceAll('<ol>', '\\begin{enumerate}').replaceAll('</ol>', '\\end{enumerate}');
+            srcelem.textContent = srcelem.textContent.replaceAll('<ul>', '\\begin{itemize}').replaceAll('</ul>', '\\end{itemize}');
+            srcelem.textContent = srcelem.textContent.replaceAll('<li>', '\\item').replaceAll('</li>', '');
+        })();
+    </script>
+  {% endif %}
+  {% if problem.hyperlink %}
+    <p class="text-center">
+      <a class="btn btn-secondary" href="{{ problem.hyperlink }}">
+        <tt><span class="emoji-text">🌏</span> {{ problem.hyperlink|truncatechars:"40" }}</tt>
+      </a>
     </p>
-    <hr />
-    {% spaceless %}
-        <h1>{{ problem }}</h1>
-    {% endspaceless %}
-    {% if statement %}
-        <div class="alert-secondary alert">{{ statement|safe }}</div>
-        <details class="mt-3 mb-4">
-            <summary>
-                <b>Show problem source</b>
-            </summary>
-            <pre id="problem-src"
-                 style="margin-top: 12px;
-                        padding: 12px;
-                        white-space: pre-wrap;
-                        border: 1px solid #C4C8CB;
-                        border-radius: 6px;
-                        background: #E2E3E5">{{ statement|escape }}</pre>
-        </details>
-        <script>
-      (function () {
-        const srcelem = document.getElementById("problem-src");
-        if (!srcelem) return;
-        srcelem.textContent = srcelem.textContent.replaceAll('<span class="math inline">', '').replaceAll('<span class="math display">', '').replaceAll('</span>', '');
-        srcelem.textContent = srcelem.textContent.replaceAll('<p>', '').replaceAll('</p>', '');
-        srcelem.textContent = srcelem.textContent.replaceAll('<ol>', '\\begin{enumerate}').replaceAll('</ol>', '\\end{enumerate}');
-        srcelem.textContent = srcelem.textContent.replaceAll('<ul>', '\\begin{itemize}').replaceAll('</ul>', '\\end{itemize}');
-        srcelem.textContent = srcelem.textContent.replaceAll('<li>', '\\item').replaceAll('</li>', '');
-      })();
-        </script>
-    {% endif %}
-    {% if problem.hyperlink %}
-        <p class="text-center">
-            <a class="btn btn-secondary" href="{{ problem.hyperlink }}">
-                <tt><span class="emoji-text">🌏</span> {{ problem.hyperlink|truncatechars:"40" }}</tt>
-            </a>
-        </p>
-    {% endif %}
-    {% if hint_list %}
-        {% for hint in hint_list %}
-            <a href="{% url "hint-detail" hint.puid hint.number %}">
-                <div class="alert alert-primary">
-                    <h2>Hint {{ hint.number }}%</h2>
-                    {% if hint.keywords %}<i>Keywords</i>: {{ hint.keywords }}{% endif %}
-                </div>
-            </a>
-        {% endfor %}
-        <p>
-            Some of the hints may be pretty oblique
-            or not apply to you.
-            Remember, you can always ask the OTIS Discord
-            or <a href="mailto:evan@evanchen.cc">email Evan (evan@evanchen.cc)</a>
-            for more personalized help!
-        </p>
-    {% elif hints_disabled %}
-        <p>
-            <strong>Hints are disabled in your settings.</strong>
-            To view hints, please enable them in your
-            <a href="{% url "profile" %}">user preferences</a>.
-        </p>
+  {% endif %}
+  {% if hint_list %}
+    {% for hint in hint_list %}
+      <a href="{% url "hint-detail" hint.puid hint.number %}">
+        <div class="alert alert-primary">
+          <h2>Hint {{ hint.number }}%</h2>
+          {% if hint.keywords %}<i>Keywords</i>: {{ hint.keywords }}{% endif %}
+        </div>
+      </a>
+    {% endfor %}
+    <p>
+      Some of the hints may be pretty oblique
+      or not apply to you.
+      Remember, you can always ask the OTIS Discord
+      or <a href="mailto:evan@evanchen.cc">email Evan (evan@evanchen.cc)</a>
+      for more personalized help!
+    </p>
+  {% elif hints_disabled %}
+    <p>
+      <strong>Hints are disabled in your settings.</strong>
+      To view hints, please enable them in your
+      <a href="{% url "profile" %}">user preferences</a>.
+    </p>
+  {% else %}
+    <p>
+      There aren't any hints here yet.
+      You'd probably have better luck asking on Discord.
+      Or, you can also <a href="mailto:evan@evanchen.cc">email Evan</a>.
+    </p>
+    <p>
+      If you've solved this, please help future students by
+      <a href="{% url "hint-create" problem.puid %}">adding a hint</a>.
+    </p>
+  {% endif %}
+  <div class="text-center">
+    <a href="https://discord.com/channels/740366393022742618/1019651152385679491"
+       class="btn btn-primary"><span class="emoji-text">💬</span> #math-discuss</a>
+    <a href="{% url "hint-create" problem.puid %}" class="btn btn-success">
+      <span class="emoji-text">🆕</span> Add hint
+    </a>
+    {% if request.user.is_staff %}
+      <a href="{% url "admin:arch_problem_change" problem.pk %}"
+         class="btn btn-dark"><span class="emoji-text">✏️</span> Edit</a>
     {% else %}
-        <p>
-            There aren't any hints here yet.
-            You'd probably have better luck asking on Discord.
-            Or, you can also <a href="mailto:evan@evanchen.cc">email Evan</a>.
-        </p>
-        <p>
-            If you've solved this, please help future students by
-            <a href="{% url "hint-create" problem.puid %}">adding a hint</a>.
-        </p>
+      <a href="{% url "problem-update" problem.puid %}" class="btn btn-dark">
+        <span class="emoji-text">✏️</span> Edit
+      </a>
     {% endif %}
-    <div class="text-center">
-        <a href="https://discord.com/channels/740366393022742618/1019651152385679491"
-           class="btn btn-primary"><span class="emoji-text">💬</span> #math-discuss</a>
-        <a href="{% url "hint-create" problem.puid %}" class="btn btn-success">
-            <span class="emoji-text">🆕</span> Add hint
-        </a>
-        {% if request.user.is_staff %}
-            <a href="{% url "admin:arch_problem_change" problem.pk %}"
-               class="btn btn-dark"><span class="emoji-text">✏️</span> Edit</a>
-        {% else %}
-            <a href="{% url "problem-update" problem.puid %}" class="btn btn-dark">
-                <span class="emoji-text">✏️</span> Edit
-            </a>
-        {% endif %}
-    </div>
-    <hr />
-    <div class="text-center">
-        {% if statement %}
-            <a href="{% url "view-solution" problem.puid %}" class="btn btn-info">
-                <span class="emoji-text">📜</span> Solution (TeX)
-            </a>
-        {% endif %}
-        <a href="{% url "vote-create" problem.puid %}" class="btn btn-secondary">
-            <span class="emoji-text">🗳</span> Rate
-        </a>
-    </div>
+  </div>
+  <hr />
+  <div class="text-center">
+    {% if statement %}
+      <a href="{% url "view-solution" problem.puid %}" class="btn btn-info">
+        <span class="emoji-text">📜</span> Solution (TeX)
+      </a>
+    {% endif %}
+    <a href="{% url "vote-create" problem.puid %}" class="btn btn-secondary">
+      <span class="emoji-text">🗳</span> Rate
+    </a>
+  </div>
 {% endblock layout-content %}
