@@ -121,8 +121,64 @@ table.table tr.subjectH:nth-child(even) td {
   background-color: #ecb3ef;
 }
 
-table.table tr.unit-locked {
-  filter: brightness(60%) saturate(60%);
+/* Locked units are dimmed.  The colors below are the subject colors above run
+   through `brightness(60%) saturate(60%)`, precomputed rather than applied as a
+   `filter:` on the row.  Firefox draws a filtered element through an
+   intermediate surface, and color emoji inside one render far too small once
+   the page is zoomed in, so locked rows ended up with shrunken icons while
+   unlocked rows were fine. */
+table.table tr.subjectG.unit-locked:nth-child(odd),
+table.table tr.subjectG.unit-locked:nth-child(odd) td {
+  background-color: #759375;
+}
+table.table tr.subjectC.unit-locked:nth-child(odd),
+table.table tr.subjectC.unit-locked:nth-child(odd) td {
+  background-color: #70838f;
+}
+table.table tr.subjectA.unit-locked:nth-child(odd),
+table.table tr.subjectA.unit-locked:nth-child(odd) td,
+table.table tr.subjectF.unit-locked:nth-child(odd),
+table.table tr.subjectF.unit-locked:nth-child(odd) td {
+  background-color: #896a6a;
+}
+table.table tr.subjectN.unit-locked:nth-child(odd),
+table.table tr.subjectN.unit-locked:nth-child(odd) td {
+  background-color: #8f8f8f;
+}
+table.table tr.subjectM.unit-locked:nth-child(odd),
+table.table tr.subjectM.unit-locked:nth-child(odd) td {
+  background-color: #948e63;
+}
+table.table tr.subjectH.unit-locked:nth-child(odd),
+table.table tr.subjectH.unit-locked:nth-child(odd) td {
+  background-color: #8d778d;
+}
+
+table.table tr.subjectG.unit-locked:nth-child(even),
+table.table tr.subjectG.unit-locked:nth-child(even) td {
+  background-color: #718e71;
+}
+table.table tr.subjectC.unit-locked:nth-child(even),
+table.table tr.subjectC.unit-locked:nth-child(even) td {
+  background-color: #6d7e89;
+}
+table.table tr.subjectA.unit-locked:nth-child(even),
+table.table tr.subjectA.unit-locked:nth-child(even) td,
+table.table tr.subjectF.unit-locked:nth-child(even),
+table.table tr.subjectF.unit-locked:nth-child(even) td {
+  background-color: #846767;
+}
+table.table tr.subjectN.unit-locked:nth-child(even),
+table.table tr.subjectN.unit-locked:nth-child(even) td {
+  background-color: #858585;
+}
+table.table tr.subjectM.unit-locked:nth-child(even),
+table.table tr.subjectM.unit-locked:nth-child(even) td {
+  background-color: #8e8860;
+}
+table.table tr.subjectH.unit-locked:nth-child(even),
+table.table tr.subjectH.unit-locked:nth-child(even) td {
+  background-color: #846f85;
 }
 
 /* Unit selection */
@@ -161,16 +217,16 @@ table.curriculum td.thumbnail {
 }
 
 table.curriculum tr.unit-locked td.thumbnail img {
-  filter: grayscale(100%);
+  filter: grayscale(100%) brightness(60%);
 }
 table.curriculum tr.unit-locked,
 table.curriculum tr.unit-locked td {
-  color: #444444;
+  color: #292929;
 }
 table.table tr.subjectK.unit-locked,
 table.table tr.subjectK.unit-locked td {
-  background-color: #125252;
-  color: #efefef;
+  background-color: #172e2e;
+  color: #8f8f8f;
 }
 table.table tr.subjectK,
 table.table tr.subjectK td {
