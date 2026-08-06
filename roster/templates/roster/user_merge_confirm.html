@@ -8,10 +8,10 @@
     Check that the two accounts below are really the ones you meant,
     then confirm at the bottom of the page.
   </p>
-  <h2>Impostor (to be ejected)</h2>
-  {% include "roster/user_card.html" with r=impostor %}
-  <h2>Crewmate</h2>
-  {% include "roster/user_card.html" with r=crewmate %}
+  <h2 class="text-danger">Impostor (to be ejected)</h2>
+  {% include "roster/user_card.html" with r=impostor tint="danger" %}
+  <h2 class="text-success">Crewmate (to be kept)</h2>
+  {% include "roster/user_card.html" with r=crewmate tint="success" %}
   <hr />
   <h2>What will happen</h2>
   <ul>

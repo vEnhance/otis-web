@@ -186,8 +186,8 @@ def test_user_merge(otis) -> None:
     # An unconfirmed post only previews the merge, leaving the database alone
     resp = otis.post_20x("user-merge", data={"impostor": dupe.pk, "crewmate": real.pk})
     otis.assert_has(resp, "Nothing has happened yet.")
-    otis.assert_has(resp, "<h2>Impostor (to be ejected)</h2>")
-    otis.assert_has(resp, "<h2>Crewmate</h2>")
+    otis.assert_has(resp, '<h2 class="text-danger">Impostor (to be ejected)</h2>')
+    otis.assert_has(resp, '<h2 class="text-success">Crewmate (to be kept)</h2>')
     # ... and the two accounts are the right way around
     otis.assert_has(resp, f"<code>alice2</code> ({dupe.pk}) will be marked inactive")
     otis.assert_has(resp, "These students move to <code>alice</code>")

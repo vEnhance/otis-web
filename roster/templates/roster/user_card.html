@@ -1,9 +1,10 @@
 {% comment %}
 Summary card for one user, built by _user_summaries() in roster/views.py.
 Include with `r` set to one such summary dict.
+Optionally set `tint` to a Bootstrap color name (e.g. danger, success) to color the card.
 {% endcomment %}
-<div class="card mb-3">
-  <b class="card-header">
+<div class="card mb-3 {% if tint %}border-{{ tint }}{% endif %}">
+  <b class="card-header {% if tint %}bg-{{ tint }}-subtle{% endif %}">
     <a href="{{ r.userinfo_url }}" class="text-decoration-none">{{ r.user.get_full_name|default:r.user.username }}</a>
     {% if not r.user.is_active %}<span class="badge bg-warning text-dark">Inactive</span>{% endif %}
     {% if r.user.is_superuser %}<span class="badge bg-danger">Superuser</span>{% endif %}
