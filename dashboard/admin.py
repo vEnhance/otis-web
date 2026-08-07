@@ -17,6 +17,7 @@ class AnnouncementAdmin(admin.ModelAdmin):
         "slug",
         "subject",
         "created_at",
+        "archived",
     )
     list_display_links = (
         "pk",
@@ -28,6 +29,22 @@ class AnnouncementAdmin(admin.ModelAdmin):
         "subject",
         "content",
     )
+    list_filter = ("archived",)
+    actions = ("archive_announcements", "unarchive_announcements")
+
+    @admin.action(description="Archive selected announcements")
+    def archive_announcements(
+        self, request: HttpRequest, queryset: QuerySet[Announcement]
+    ) -> None:
+        count = queryset.update(archived=True)
+        self.message_user(request, f"Archived {count} announcement(s).")
+
+    @admin.action(description="Unarchive selected announcements")
+    def unarchive_announcements(
+        self, request: HttpRequest, queryset: QuerySet[Announcement]
+    ) -> None:
+        count = queryset.update(archived=False)
+        self.message_user(request, f"Unarchived {count} announcement(s).")
 
 
 @admin.register(UploadedFile)

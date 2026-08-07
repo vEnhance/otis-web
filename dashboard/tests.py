@@ -4,6 +4,10 @@ from io import StringIO
 
 import pytest
 from django.conf import settings
+from django.contrib.admin.sites import AdminSite
+from django.contrib.messages.storage.cookie import CookieStorage
+from django.http import HttpRequest
+from django.test import RequestFactory
 from django.urls import reverse
 from freezegun import freeze_time
 
@@ -16,12 +20,13 @@ from core.factories import (
     UserProfileFactory,
 )
 from core.models import Unit
+from dashboard.admin import AnnouncementAdmin
 from dashboard.factories import (
     AnnouncementFactory,
     PSetFactory,
     SemesterDownloadFileFactory,
 )
-from dashboard.models import PSet, UploadedFile
+from dashboard.models import Announcement, PSet, UploadedFile
 from dashboard.utils import get_news, get_units_to_submit, get_units_to_unlock
 from exams.factories import PracticeExamFactory, QuizFactory
 from hanabi.factories import HanabiContestFactory
@@ -212,6 +217,43 @@ def test_announcements(otis):
     otis.assert_has(otis.get_20x("announcement-detail", "one"), "하나")
     otis.assert_has(otis.get_20x("announcement-detail", "two"), "둘")
     otis.assert_has(otis.get_20x("announcement-detail", "three"), "셋")
+
+
+@pytest.mark.django_db
+def test_announcement_archive(otis):
+    current = AnnouncementFactory.create(slug="current", subject="Fresh news")
+    stale = AnnouncementFactory.create(slug="stale", subject="Ancient news")
+
+    verified_group = GroupFactory(name="Verified")
+    otis.login(UserFactory.create(username="alice", groups=(verified_group,)))
+
+    # by default nothing is archived, so the past years section is hidden
+    response = otis.get_20x("announcement-list")
+    otis.assert_has(response, "Current year")
+    otis.assert_not_has(response, "Past years")
+    assert set(response.context["current_announcements"]) == {stale, current}
+    assert list(response.context["archived_announcements"]) == []
+
+    # the admin action archives in bulk
+    admin = AnnouncementAdmin(Announcement, AdminSite())
+    request: HttpRequest = RequestFactory().get("/")
+    request._messages = CookieStorage(request)
+    admin.archive_announcements(request, Announcement.objects.filter(slug="stale"))
+
+    stale.refresh_from_db()
+    current.refresh_from_db()
+    assert stale.archived is True
+    assert current.archived is False
+
+    response = otis.get_20x("announcement-list")
+    otis.assert_has(response, "Past years")
+    assert list(response.context["current_announcements"]) == [current]
+    assert list(response.context["archived_announcements"]) == [stale]
+
+    # ... and unarchives them again
+    admin.unarchive_announcements(request, Announcement.objects.filter(slug="stale"))
+    stale.refresh_from_db()
+    assert stale.archived is False
 
 
 @pytest.mark.django_db

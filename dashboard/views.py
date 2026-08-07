@@ -526,6 +526,13 @@ class AnnouncementList(VerifiedRequiredMixin, ListView[Announcement]):
     model = Announcement
     context_object_name = "announcements"
 
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        announcements = context["announcements"]
+        context["current_announcements"] = [a for a in announcements if not a.archived]
+        context["archived_announcements"] = [a for a in announcements if a.archived]
+        return context
+
 
 class AnnouncementDetail(VerifiedRequiredMixin, DetailView[Announcement]):
     slug_url_kwarg = "announcement_slug"
