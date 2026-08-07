@@ -7,7 +7,8 @@ from django.test import override_settings
 from django.urls import reverse
 
 from arch.factories import HintFactory, ProblemFactory
-from arch.models import Hint, Problem, Vote, validate_puid
+from arch.models import Hint, Problem, Vote
+from arch.utils import get_disk_statement_from_puid, validate_puid
 from core.factories import GroupFactory, UserFactory
 from core.models import UserProfile
 
@@ -26,10 +27,13 @@ def test_disk_problem(otis):
     if not os.path.exists(settings.PATH_STATEMENT_ON_DISK):
         os.makedirs(settings.PATH_STATEMENT_ON_DISK)
 
-    problem_path = os.path.join(settings.PATH_STATEMENT_ON_DISK, f"{disk_puid}.html")
+    html_path = os.path.join(settings.PATH_STATEMENT_ON_DISK, f"{disk_puid}.html")
+    tex_path = os.path.join(settings.PATH_STATEMENT_ON_DISK, f"{disk_puid}.tex")
 
-    with open(problem_path, "w", encoding="utf_8") as f:
-        f.write("rock and roll")
+    with open(html_path, "w", encoding="utf_8") as f:
+        f.write("<p>rock and roll</p>")
+    with open(tex_path, "w", encoding="utf_8") as f:
+        f.write(r"Show that $x < y$ \emph{rocks and rolls}.")
 
     otis.get_40x("hint-list", "NONEXISTENT")
     resp = otis.get_20x("hint-list", disk_puid)
@@ -37,9 +41,52 @@ def test_disk_problem(otis):
     messages = [m.message for m in resp.context["messages"]]
     assert f"Created previously nonexistent problem {disk_puid}" in messages
 
-    otis.assert_has(resp, "rock and roll")
+    # the HTML statement is rendered as-is, the TeX source is shown escaped
+    otis.assert_has(resp, "<p>rock and roll</p>")
+    otis.assert_has(resp, r"Show that $x &lt; y$ \emph{rocks and rolls}.")
 
-    os.remove(problem_path)
+    # the PUID is used verbatim: uppercasing inside the lookup would let
+    # view_solution pass this check and then 500 on the lowercase solution.
+    # (skipped when the filesystem itself is case-insensitive)
+    lower_path = os.path.join(
+        settings.PATH_STATEMENT_ON_DISK, f"{disk_puid.lower()}.html"
+    )
+    if not os.path.exists(lower_path):
+        assert get_disk_statement_from_puid(disk_puid.lower()) is None
+        otis.get_40x("view-solution", disk_puid.lower())
+
+    os.remove(html_path)
+    os.remove(tex_path)
+    if not os.listdir(settings.PATH_STATEMENT_ON_DISK):
+        os.rmdir(settings.PATH_STATEMENT_ON_DISK)
+
+
+@pytest.mark.django_db
+@override_settings(
+    PATH_STATEMENT_ON_DISK=os.path.join(settings.BASE_DIR, "test_static/")
+)
+def test_disk_statement_missing_tex(otis):
+    """An HTML statement with no TeX source next to it should still render."""
+    verified_group = GroupFactory(name="Verified")
+    alice = UserFactory.create(groups=(verified_group,))
+    otis.login(alice)
+
+    disk_puid = "LONELY"
+
+    if not os.path.exists(settings.PATH_STATEMENT_ON_DISK):
+        os.makedirs(settings.PATH_STATEMENT_ON_DISK)
+
+    html_path = os.path.join(settings.PATH_STATEMENT_ON_DISK, f"{disk_puid}.html")
+    with open(html_path, "w", encoding="utf_8") as f:
+        f.write("<p>no source here</p>")
+
+    assert get_disk_statement_from_puid(disk_puid, "tex") is None
+
+    resp = otis.get_20x("hint-list", disk_puid)
+    otis.assert_has(resp, "<p>no source here</p>")
+    assert "Show problem source" not in resp.content.decode()
+
+    os.remove(html_path)
     if not os.listdir(settings.PATH_STATEMENT_ON_DISK):
         os.rmdir(settings.PATH_STATEMENT_ON_DISK)
 
