@@ -45,6 +45,16 @@ def test_disk_problem(otis):
     otis.assert_has(resp, "<p>rock and roll</p>")
     otis.assert_has(resp, r"Show that $x &lt; y$ \emph{rocks and rolls}.")
 
+    # the PUID is used verbatim: uppercasing inside the lookup would let
+    # view_solution pass this check and then 500 on the lowercase solution.
+    # (skipped when the filesystem itself is case-insensitive)
+    lower_path = os.path.join(
+        settings.PATH_STATEMENT_ON_DISK, f"{disk_puid.lower()}.html"
+    )
+    if not os.path.exists(lower_path):
+        assert get_disk_statement_from_puid(disk_puid.lower()) is None
+        otis.get_40x("view-solution", disk_puid.lower())
+
     os.remove(html_path)
     os.remove(tex_path)
     if not os.listdir(settings.PATH_STATEMENT_ON_DISK):

@@ -27,24 +27,20 @@ def get_disk_statement_from_puid(
     ``{puid}.html`` (the rendered statement, meant to be displayed as HTML)
     and ``{puid}.tex`` (the raw TeX source of the same statement).
     Returns ``None`` if no such file is available.
+
+    The PUID is used verbatim, so callers are responsible for normalizing
+    its case; the files on disk are named after uppercase PUIDs.
     """
-    puid = puid.upper()
     validate_puid(puid)
-    if fmt not in ("html", "tex"):
-        raise SuspiciousOperation(f"Illegal statement format requested: {fmt}")
     if settings.PATH_STATEMENT_ON_DISK is None:
         return None
     base_path = Path(settings.PATH_STATEMENT_ON_DISK).resolve()
-    if not base_path.exists() or not base_path.is_dir():
-        return None
-
-    statement_name = f"{puid}.{fmt}"
-    statement_path = base_path.joinpath(statement_name).resolve()
-    try:
-        statement_path.relative_to(base_path)
-    except ValueError:
+    statement_path = (base_path / f"{puid}.{fmt}").resolve()
+    # validate_puid already rules out separators and dots, but insist that
+    # the statement be a direct child of the statement directory anyway
+    if statement_path.parent != base_path:
         raise SuspiciousOperation(f"oh this is really bad ur so screwed ({puid})")
-    if statement_path.exists() and statement_path.is_file():
+    elif statement_path.exists() and statement_path.is_file():
         return statement_path.read_text()
     else:
         return None
