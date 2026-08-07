@@ -1,7 +1,14 @@
+import logging
+import os
+
 import pytest
-from django.test import Client
+from django.http import HttpResponse
+from django.test import Client, RequestFactory
+from django.urls import Resolver404, resolve
+from django.utils.log import log_response
 
 from core.factories import UserFactory
+from otisweb.settings import fix_response_location
 
 
 @pytest.mark.django_db
@@ -53,3 +60,60 @@ def test_wiki_redirects_to_catalog(client: Client, path: str):
 @pytest.mark.parametrize("path", ("/wikipedia/", "/wikis/"))
 def test_wiki_redirect_does_not_overreach(client: Client, path: str):
     assert client.get(path).status_code == 404
+
+
+class _Capture(logging.Handler):
+    def __init__(self):
+        super().__init__()
+        self.records: list[logging.LogRecord] = []
+        self.addFilter(fix_response_location)
+
+    def emit(self, record: logging.LogRecord) -> None:
+        self.records.append(record)
+
+
+def _log_server_error(rf: RequestFactory, path: str) -> logging.LogRecord:
+    request = rf.get(path)
+    try:
+        request.resolver_match = resolve(path)
+    except Resolver404:
+        pass
+    logger = logging.getLogger("otisweb.tests.response_location")
+    logger.propagate = False
+    handler = _Capture()
+    logger.addHandler(handler)
+    try:
+        log_response(
+            "Internal Server Error: %s",
+            path,
+            response=HttpResponse(status=500),
+            request=request,
+            logger=logger,
+        )
+    finally:
+        logger.removeHandler(handler)
+    (record,) = handler.records
+    return record
+
+
+def test_response_location_unfiltered(rf: RequestFactory):
+    record = _log_server_error(rf, "/nonexistent/")
+    assert record.module == "log"
+    assert record.pathname.endswith(os.path.join("django", "utils", "log.py"))
+
+
+@pytest.mark.parametrize(
+    "path,expected_module",
+    (
+        ("/arch/", "arch.views.ProblemCreate"),
+        ("/dash/portal/1/", "dashboard.views.portal"),
+    ),
+)
+def test_response_location_view(rf: RequestFactory, path: str, expected_module: str):
+    record = _log_server_error(rf, path)
+    assert record.module == expected_module
+    assert record.filename == "views.py"
+    assert record.pathname.endswith(
+        os.path.join(expected_module.split(".")[0], "views.py")
+    )
+    assert record.lineno > 0
