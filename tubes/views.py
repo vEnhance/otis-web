@@ -250,20 +250,14 @@ class ProposalListView(VerifiedRequiredMixin, ListView[OIMEProposal]):
         return super().dispatch(request, *args, **kwargs)  # type: ignore[return-value]
 
     def get_queryset(self) -> QuerySet[OIMEProposal]:
-        user = self.request.user
-        qs = (
-            OIMEProposal.objects.select_related("author")
+        # Archived proposals are hidden from everyone, authors and staff
+        # included; use the Django admin to browse them.
+        return (
+            OIMEProposal.objects.filter(archived=False)
+            .select_related("author")
             .annotate(upvote_count=Count("upvotes", distinct=True))
             .order_by("-created_at")
         )
-        # Staff see all; others see non-archived plus their own archived
-        if not user.is_staff:  # type: ignore[union-attr]
-            contributor = _get_contributor(self.request)
-            if contributor is not None:
-                qs = qs.filter(archived=False) | qs.filter(author=contributor)
-            else:
-                qs = qs.filter(archived=False)
-        return qs.distinct()
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)

@@ -19,7 +19,6 @@ Context vars: title (str), proposals (list of OIMEProposal annotated with user_f
         <tr>
           <td>
             <a href="{{ proposal.get_absolute_url }}" class="fw-bold">{{ proposal.label }}</a>
-            {% if proposal.archived %}<span class="badge bg-secondary ms-1">archived</span>{% endif %}
           </td>
           <td class="d-none d-sm-table-cell">
             <a href="{{ proposal.get_absolute_url }}">{{ proposal.title|truncatechars:"30" }}</a>

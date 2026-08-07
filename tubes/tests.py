@@ -325,12 +325,25 @@ def test_archived_hidden_from_regular_users(otis):
 
 
 @pytest.mark.django_db
-def test_archived_visible_to_own_author(otis):
+def test_archived_hidden_from_own_author(otis):
     user, contributor = _verified_contributor()
-    OIMEProposalFactory.create(author=contributor, archived=True)
+    own_proposal = OIMEProposalFactory.create(author=contributor, archived=True)
     otis.login(user)
     resp = otis.get_20x("oime-proposal-list")
-    otis.assert_has(resp, "archived")
+    otis.assert_not_has(resp, own_proposal.statement[:20])
+
+
+@pytest.mark.django_db
+def test_archived_hidden_from_staff(otis):
+    verified_group, _ = Group.objects.get_or_create(name="Verified")
+    staff = UserFactory.create(
+        username="staff", is_staff=True, groups=(verified_group,)
+    )
+    OIMEContributorFactory.create(user=staff)
+    other_proposal = OIMEProposalFactory.create(archived=True)
+    otis.login(staff)
+    resp = otis.get_20x("oime-proposal-list")
+    otis.assert_not_has(resp, other_proposal.statement[:20])
 
 
 @pytest.mark.django_db
