@@ -121,64 +121,81 @@ table.table tr.subjectH:nth-child(even) td {
   background-color: #ecb3ef;
 }
 
-/* Locked units are dimmed.  The colors below are the subject colors above run
-   through `brightness(60%) saturate(60%)`, precomputed rather than applied as a
-   `filter:` on the row.  Firefox draws a filtered element through an
-   intermediate surface, and color emoji inside one render far too small once
-   the page is zoomed in, so locked rows ended up with shrunken icons while
-   unlocked rows were fine. */
+/* Locked units are dimmed.  This used to be a `filter: brightness(60%)
+   saturate(60%)` on the whole row, but Firefox draws a filtered element through
+   an intermediate surface and color emoji inside one render far too small once
+   the page is zoomed in -- locked rows got shrunken icons while unlocked rows
+   were fine.
+
+   Brightness is scalar multiplication and saturation is a linear map, so the
+   two commute and the filter can be split in half.  The saturate(60%) half is
+   precomputed into the colors below.  The brightness(60%) half is the scrim on
+   `td::after`: painting rgba(0, 0, 0, 0.4) over a color leaves exactly 0.6 of
+   it, and the scrim covers the cell uniformly, so background, text and color
+   emoji are all dimmed together without any text being filtered. */
+table.table tr.unit-locked td {
+  position: relative;
+}
+table.table tr.unit-locked td::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+}
+
 table.table tr.subjectG.unit-locked:nth-child(odd),
 table.table tr.subjectG.unit-locked:nth-child(odd) td {
-  background-color: #759375;
+  background-color: #c2f5c2;
 }
 table.table tr.subjectC.unit-locked:nth-child(odd),
 table.table tr.subjectC.unit-locked:nth-child(odd) td {
-  background-color: #70838f;
+  background-color: #bbdaee;
 }
 table.table tr.subjectA.unit-locked:nth-child(odd),
 table.table tr.subjectA.unit-locked:nth-child(odd) td,
 table.table tr.subjectF.unit-locked:nth-child(odd),
 table.table tr.subjectF.unit-locked:nth-child(odd) td {
-  background-color: #896a6a;
+  background-color: #e4b1b1;
 }
 table.table tr.subjectN.unit-locked:nth-child(odd),
 table.table tr.subjectN.unit-locked:nth-child(odd) td {
-  background-color: #8f8f8f;
+  background-color: #eeeeee;
 }
 table.table tr.subjectM.unit-locked:nth-child(odd),
 table.table tr.subjectM.unit-locked:nth-child(odd) td {
-  background-color: #948e63;
+  background-color: #f6eca5;
 }
 table.table tr.subjectH.unit-locked:nth-child(odd),
 table.table tr.subjectH.unit-locked:nth-child(odd) td {
-  background-color: #8d778d;
+  background-color: #ebc6ec;
 }
 
 table.table tr.subjectG.unit-locked:nth-child(even),
 table.table tr.subjectG.unit-locked:nth-child(even) td {
-  background-color: #718e71;
+  background-color: #bcecbc;
 }
 table.table tr.subjectC.unit-locked:nth-child(even),
 table.table tr.subjectC.unit-locked:nth-child(even) td {
-  background-color: #6d7e89;
+  background-color: #b5d2e5;
 }
 table.table tr.subjectA.unit-locked:nth-child(even),
 table.table tr.subjectA.unit-locked:nth-child(even) td,
 table.table tr.subjectF.unit-locked:nth-child(even),
 table.table tr.subjectF.unit-locked:nth-child(even) td {
-  background-color: #846767;
+  background-color: #dcacac;
 }
 table.table tr.subjectN.unit-locked:nth-child(even),
 table.table tr.subjectN.unit-locked:nth-child(even) td {
-  background-color: #858585;
+  background-color: #dddddd;
 }
 table.table tr.subjectM.unit-locked:nth-child(even),
 table.table tr.subjectM.unit-locked:nth-child(even) td {
-  background-color: #8e8860;
+  background-color: #ede3a0;
 }
 table.table tr.subjectH.unit-locked:nth-child(even),
 table.table tr.subjectH.unit-locked:nth-child(even) td {
-  background-color: #846f85;
+  background-color: #dcbade;
 }
 
 /* Unit selection */
@@ -217,16 +234,16 @@ table.curriculum td.thumbnail {
 }
 
 table.curriculum tr.unit-locked td.thumbnail img {
-  filter: grayscale(100%) brightness(60%);
+  filter: grayscale(100%);
 }
 table.curriculum tr.unit-locked,
 table.curriculum tr.unit-locked td {
-  color: #292929;
+  color: #444444;
 }
 table.table tr.subjectK.unit-locked,
 table.table tr.subjectK.unit-locked td {
-  background-color: #172e2e;
-  color: #8f8f8f;
+  background-color: #264d4d;
+  color: #efefef;
 }
 table.table tr.subjectK,
 table.table tr.subjectK td {
