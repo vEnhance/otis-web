@@ -396,6 +396,9 @@
             <a href="{% url "announcement-list" %}">Announcement emails</a>
           </li>
           <li>
+            <a href="{% url "ad-list" %}">Available instructors</a>
+          </li>
+          <li>
             {% if semester.show_invoices %}
               <a href="{% url 'invoice' student.pk %}">Invoice</a>
             {% else %}
