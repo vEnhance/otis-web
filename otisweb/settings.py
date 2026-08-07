@@ -2,10 +2,12 @@
 Django settings for otisweb project.
 """
 
+import inspect
 import logging
 import os
+import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 import django_discordo
 import django_stubs_ext
@@ -310,6 +312,33 @@ def add_username(record: logging.LogRecord):
     return True
 
 
+# Return location of the view that handled a request.
+def _view_location(request: Any) -> Optional[tuple[str, str, int]]:
+    match = getattr(request, "resolver_match", None)
+    if match is None:
+        return None
+    # for a class-based view, func is the closure that as_view() returned
+    target = getattr(match.func, "view_class", None) or inspect.unwrap(match.func)
+    code = getattr(target, "__code__", None)
+    if code is not None:
+        return match._func_path, code.co_filename, code.co_firstlineno
+    module = sys.modules.get(getattr(target, "__module__", ""))
+    path = getattr(module, "__file__", None)
+    if path is None:
+        return None
+    return match._func_path, path, getattr(target, "__firstlineno__", 0)
+
+
+def fix_response_location(record: logging.LogRecord) -> bool:
+    if not record.pathname.endswith(os.path.join("django", "utils", "log.py")):
+        return True
+    location = _view_location(getattr(record, "request", None))
+    if location is not None:
+        record.module, record.pathname, record.lineno = location
+        record.filename = os.path.basename(record.pathname)
+    return True
+
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -334,18 +363,31 @@ LOGGING = {
             "()": "django.utils.log.CallbackFilter",
             "callback": add_username,
         },
+        "fix_response_location": {
+            "()": "django.utils.log.CallbackFilter",
+            "callback": fix_response_location,
+        },
     },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
             "level": "VERBOSE",
             "formatter": "stream_format",
-            "filters": ["filter_oserror_write", "add_username"],
+            "filters": [
+                "filter_oserror_write",
+                "add_username",
+                "fix_response_location",
+            ],
         },
         "discord": {
             "class": "django_discordo.DiscordWebhookHandler",
             "level": "VERBOSE",
-            "filters": ["require_debug_false", "filter_oserror_write", "add_username"],
+            "filters": [
+                "require_debug_false",
+                "filter_oserror_write",
+                "add_username",
+                "fix_response_location",
+            ],
         },
     },
     "root": {
