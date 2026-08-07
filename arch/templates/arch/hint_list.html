@@ -11,8 +11,10 @@
   {% spaceless %}
     <h1>{{ problem }}</h1>
   {% endspaceless %}
-  {% if statement %}
-    <div class="alert-secondary alert">{{ statement|safe }}</div>
+  {% if html_statement %}
+    <div class="alert-secondary alert">{{ html_statement|safe }}</div>
+  {% endif %}
+  {% if tex_statement %}
     <details class="mt-3 mb-4">
       <summary>
         <b>Show problem source</b>
@@ -22,7 +24,7 @@
                   white-space: pre-wrap;
                   border: 1px solid #C4C8CB;
                   border-radius: 6px;
-                  background: #E2E3E5">{{ statement|escape }}</pre>
+                  background: #E2E3E5">{{ tex_statement|escape }}</pre>
     </details>
   {% endif %}
   {% if problem.hyperlink %}
@@ -82,7 +84,7 @@
   </div>
   <hr />
   <div class="text-center">
-    {% if statement %}
+    {% if html_statement %}
       <a href="{% url "view-solution" problem.puid %}" class="btn btn-info">
         <span class="emoji-text">📜</span> Solution (TeX)
       </a>

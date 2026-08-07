@@ -16,7 +16,7 @@ from django_discordo import ACTION_LOG_LEVEL
 from reversion.views import RevisionMixin
 
 from arch.forms import ProblemSelectForm
-from arch.models import get_disk_statement_from_puid
+from arch.utils import get_disk_statement_from_puid
 from core.models import UserProfile
 from core.utils import get_protected_file
 from otisweb.decorators import verified_required
@@ -81,7 +81,8 @@ class HintList(VerifiedRequiredMixin, ListView[Hint]):
                 raise Http404(f"Couldn't find {puid} in database or disk")
 
         context["problem"] = self.problem
-        context["statement"] = self.problem.get_statement()
+        context["html_statement"] = self.problem.get_html_statement()
+        context["tex_statement"] = self.problem.get_tex_statement()
         context["hints_disabled"] = UserProfile.objects.filter(
             user=self.request.user, disable_hints=True
         ).exists()

@@ -1,40 +1,16 @@
-import string
-from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
 import reversion
-from django.conf import settings
 from django.contrib.auth.models import User
-from django.core.exceptions import SuspiciousOperation
 from django.core.validators import MaxValueValidator, RegexValidator
 from django.db import models
 from django.db.models.manager import Manager
-from django.http import Http404
 from django.urls import reverse
+
+from arch.utils import get_disk_statement_from_puid
 
 if TYPE_CHECKING:
     assert hasattr(reversion, "register")
-
-
-def validate_puid(puid: str) -> None:
-    if not all(_ in string.ascii_letters + string.digits for _ in puid):
-        raise Http404(f"The PUID {puid} contains illegal characters.")
-    elif len(puid) > 32:
-        raise Http404(f"The PUID {puid} is too long to be possible.")
-
-
-def get_disk_statement_from_puid(puid: str) -> Optional[str]:
-    validate_puid(puid)
-    if settings.PATH_STATEMENT_ON_DISK is None:
-        return None
-    base_path = Path(settings.PATH_STATEMENT_ON_DISK).resolve()
-    statement_path = (base_path / f"{puid}.html").resolve()
-    if statement_path.parent != base_path:
-        raise SuspiciousOperation(f"oh this is really bad ur so screwed ({puid})")
-    elif statement_path.exists() and statement_path.is_file():
-        return statement_path.read_text()
-    else:
-        return None
 
 
 # Create your models here.
@@ -64,8 +40,11 @@ class Problem(models.Model):
     def get_absolute_url(self):
         return reverse("hint-list", args=(self.puid,))
 
-    def get_statement(self) -> Optional[str]:
-        return get_disk_statement_from_puid(self.puid)
+    def get_html_statement(self) -> Optional[str]:
+        return get_disk_statement_from_puid(self.puid, "html")
+
+    def get_tex_statement(self) -> Optional[str]:
+        return get_disk_statement_from_puid(self.puid, "tex")
 
     @property
     def niceness(self) -> Optional[float]:
