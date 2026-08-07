@@ -134,6 +134,10 @@ class Announcement(models.Model):
         validator=VALIDATOR_STANDARD,
     )
     content_rendered = RenderedMarkdownField()
+    archived = models.BooleanField(
+        default=False,
+        help_text="Announcements from past years, de-emphasized in the listing",
+    )
 
     class Meta:
         ordering = ("-created_at",)
