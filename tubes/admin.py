@@ -54,9 +54,10 @@ class OIMEProposalAdmin(admin.ModelAdmin[OIMEProposal]):
         "difficulty_display",
         "created_at",
         "archived",
+        "is_draft",
     )
     list_display_links = ("label", "title")
-    list_filter = ("subject", "difficulty", "archived")
+    list_filter = ("subject", "difficulty", "archived", "is_draft")
     search_fields = ("author__display_name", "title", "statement")
     readonly_fields = ("created_at", "updated_at")
     filter_horizontal = ("upvotes",)

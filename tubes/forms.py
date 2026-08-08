@@ -36,6 +36,7 @@ class OIMEProposalForm(forms.ModelForm[OIMEProposal]):
             "solution",
             "subject",
             "difficulty",
+            "is_draft",
         ]
         widgets = {
             "statement": forms.Textarea(attrs={"rows": 6}),

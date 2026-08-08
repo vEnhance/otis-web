@@ -188,6 +188,13 @@ class OIMEProposal(models.Model):
         default=False,
         help_text="Hide this problem from the active list (staff-visible only).",
     )
+    is_draft = models.BooleanField(
+        default=False,
+        verbose_name="Draft",
+        help_text="Keep this problem as a private draft while you are still working "
+        "on it. Drafts are hidden from everyone else and are only listed on your own "
+        "drafts page; uncheck this box when it is ready for testsolving.",
+    )
     upvotes = models.ManyToManyField(
         OIMEContributor,
         related_name="upvoted_proposals",
