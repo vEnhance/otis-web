@@ -386,6 +386,146 @@ def test_author_can_toggle_own_proposal_archive(otis):
 
 
 # ---------------------------------------------------------------------------
+# Drafts
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.django_db
+def test_draft_hidden_from_regular_users(otis):
+    user, _ = _verified_contributor()
+    other_proposal = OIMEProposalFactory.create(is_draft=True)
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-list")
+    otis.assert_not_has(resp, other_proposal.statement[:20])
+
+
+@pytest.mark.django_db
+def test_draft_hidden_from_own_author_on_main_list(otis):
+    user, contributor = _verified_contributor()
+    own_proposal = OIMEProposalFactory.create(author=contributor, is_draft=True)
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-list")
+    otis.assert_not_has(resp, own_proposal.statement[:20])
+
+
+@pytest.mark.django_db
+def test_draft_list_shows_own_drafts_only(otis):
+    user, contributor = _verified_contributor()
+    _, other = _verified_contributor("bob")
+    OIMEProposalFactory.create(author=contributor, is_draft=True, title="My draft")
+    OIMEProposalFactory.create(author=contributor, is_draft=False, title="My problem")
+    OIMEProposalFactory.create(author=other, is_draft=True, title="Bob's draft")
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-drafts")
+    otis.assert_has(resp, "My draft")
+    otis.assert_not_has(resp, "My problem")
+    otis.assert_not_has(resp, "Bob&#x27;s draft")
+
+
+@pytest.mark.django_db
+def test_draft_list_hides_archived_drafts(otis):
+    user, contributor = _verified_contributor()
+    OIMEProposalFactory.create(
+        author=contributor, is_draft=True, archived=True, title="Archived draft"
+    )
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-drafts")
+    otis.assert_not_has(resp, "Archived draft")
+
+
+@pytest.mark.django_db
+def test_main_list_links_to_drafts(otis):
+    user, _ = _verified_contributor()
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-list")
+    otis.assert_has(resp, "/tubes/drafts/")
+
+
+@pytest.mark.django_db
+def test_draft_not_viewable_by_others(otis):
+    user, _ = _verified_contributor()
+    _, other = _verified_contributor("bob")
+    proposal = OIMEProposalFactory.create(author=other, is_draft=True)
+    otis.login(user)
+    otis.get_40x("oime-proposal-detail", proposal.pk)
+    otis.get_40x("oime-start-fight", proposal.pk)
+    otis.get_40x("oime-proposal-results", proposal.pk)
+
+
+@pytest.mark.django_db
+def test_draft_viewable_by_its_author(otis):
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create(author=contributor, is_draft=True)
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-detail", proposal.pk)
+    otis.assert_has(resp, "oime-answer-section")
+
+
+@pytest.mark.django_db
+def test_create_proposal_as_draft(otis):
+    user, contributor = _verified_contributor()
+    otis.login(user)
+    otis.post(
+        "oime-proposal-create",
+        data={
+            "title": "Draft Squares",
+            "statement": "Find all $x$ such that $x^2 = 4$.",
+            "answer": 2,
+            "solution": "Clearly $x = \\pm 2$.",
+            "subject": "A",
+            "difficulty": 1,
+            "is_draft": "on",
+        },
+    )
+    from .models import OIMEProposal
+
+    proposal = OIMEProposal.objects.get()
+    assert proposal.is_draft is True
+
+
+@pytest.mark.django_db
+def test_update_can_publish_a_draft(otis):
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create(author=contributor, is_draft=True)
+    otis.login(user)
+    # Omitting the checkbox unchecks it, publishing the problem.
+    otis.post(
+        "oime-proposal-update",
+        proposal.pk,
+        data={
+            "title": proposal.title,
+            "statement": proposal.statement,
+            "answer": proposal.answer,
+            "solution": proposal.solution,
+            "subject": proposal.subject,
+        },
+    )
+    proposal.refresh_from_db()
+    assert proposal.is_draft is False
+
+
+@pytest.mark.django_db
+def test_update_can_return_a_proposal_to_draft(otis):
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create(author=contributor, is_draft=False)
+    otis.login(user)
+    otis.post(
+        "oime-proposal-update",
+        proposal.pk,
+        data={
+            "title": proposal.title,
+            "statement": proposal.statement,
+            "answer": proposal.answer,
+            "solution": proposal.solution,
+            "subject": proposal.subject,
+            "is_draft": "on",
+        },
+    )
+    proposal.refresh_from_db()
+    assert proposal.is_draft is True
+
+
+# ---------------------------------------------------------------------------
 # Casual mode / solution reveal logic
 # ---------------------------------------------------------------------------
 

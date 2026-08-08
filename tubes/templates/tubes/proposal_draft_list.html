@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% block title %}
+  OIME Drafts
+{% endblock title %}
+{% block layout-content %}
+  <div class="mb-3">
+    <a href="{% url "oime-proposal-list" %}"
+       class="btn btn-outline-secondary">← Back to proposals</a>
+    <a href="{% url "oime-proposal-create" %}" class="btn btn-success">Write a problem</a>
+  </div>
+  <p class="text-muted">
+    These are your own unfinished problems.
+    Nobody else can see a draft, and it cannot be testsolved.
+    Edit one and uncheck <strong>Draft</strong> to publish it to the proposal list.
+  </p>
+  {% include "tubes/components/proposal_table.html" with title="Your drafts" proposals=proposals %}
+  {% if not proposals %}
+    <div class="alert alert-info">You have no drafts.</div>
+  {% endif %}
+{% endblock layout-content %}

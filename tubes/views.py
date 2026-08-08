@@ -34,6 +34,25 @@ def _get_contributor(request: HttpRequest) -> OIMEContributor | None:
         return None
 
 
+def _deny_if_draft(
+    request: HttpRequest,
+    proposal: OIMEProposal,
+    contributor: OIMEContributor | None,
+) -> None:
+    """Raise unless the viewer may see ``proposal``, which may still be a draft.
+
+    A draft is private work in progress: only its author (and staff) may reach it,
+    so that it cannot be testsolved before the author marks it ready.
+    """
+    if not proposal.is_draft:
+        return
+    if contributor is not None and proposal.author == contributor:
+        return
+    if request.user.is_staff:  # type: ignore[union-attr]
+        return
+    raise PermissionDenied("This proposal is still a draft.")
+
+
 def _is_casual_for(contributor: OIMEContributor, proposal: OIMEProposal) -> bool:
     """Whether this contributor engages with this problem casually rather than ranked.
 
@@ -237,10 +256,8 @@ def go_serious(request: HttpRequest) -> HttpResponse:
 # ---------------------------------------------------------------------------
 
 
-class ProposalListView(VerifiedRequiredMixin, ListView[OIMEProposal]):
-    model = OIMEProposal
-    template_name = "tubes/proposal_list.html"
-    context_object_name = "proposals"
+class ContributorRequiredMixin(VerifiedRequiredMixin):
+    """Send anonymous users to login and contributor-less users through onboarding."""
 
     def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         if not request.user.is_authenticated:  # type: ignore[union-attr]
@@ -249,11 +266,18 @@ class ProposalListView(VerifiedRequiredMixin, ListView[OIMEProposal]):
             return redirect("oime-setup")
         return super().dispatch(request, *args, **kwargs)  # type: ignore[return-value]
 
+
+class ProposalListView(ContributorRequiredMixin, ListView[OIMEProposal]):
+    model = OIMEProposal
+    template_name = "tubes/proposal_list.html"
+    context_object_name = "proposals"
+
     def get_queryset(self) -> QuerySet[OIMEProposal]:
         # Archived proposals are hidden from everyone, authors and staff
-        # included; use the Django admin to browse them.
+        # included; use the Django admin to browse them. Drafts are hidden the
+        # same way here, but their authors can find them on the drafts page.
         return (
-            OIMEProposal.objects.filter(archived=False)
+            OIMEProposal.objects.filter(archived=False, is_draft=False)
             .select_related("author")
             .annotate(upvote_count=Count("upvotes", distinct=True))
             .order_by("-created_at")
@@ -314,19 +338,39 @@ class ProposalListView(VerifiedRequiredMixin, ListView[OIMEProposal]):
         return context
 
 
+class ProposalDraftListView(ContributorRequiredMixin, ListView[OIMEProposal]):
+    """The current user's own unpublished drafts, which the main list omits."""
+
+    model = OIMEProposal
+    template_name = "tubes/proposal_draft_list.html"
+    context_object_name = "proposals"
+
+    def get_queryset(self) -> QuerySet[OIMEProposal]:
+        return (
+            OIMEProposal.objects.filter(
+                author=_get_contributor(self.request),
+                archived=False,
+                is_draft=True,
+            )
+            .select_related("author")
+            .annotate(upvote_count=Count("upvotes", distinct=True))
+            .order_by("-created_at")
+        )
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["contributor"] = _get_contributor(self.request)
+        for proposal in context["proposals"]:
+            proposal.user_list_status = "author"  # type: ignore[attr-defined]
+        return context
+
+
 class ProposalCreateView(
-    VerifiedRequiredMixin, CreateView[OIMEProposal, OIMEProposalForm]
+    ContributorRequiredMixin, CreateView[OIMEProposal, OIMEProposalForm]
 ):
     model = OIMEProposal
     form_class = OIMEProposalForm
     template_name = "tubes/proposal_form.html"
-
-    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-        if not request.user.is_authenticated:  # type: ignore[union-attr]
-            return redirect("account_login")
-        if _get_contributor(request) is None:
-            return redirect("oime-setup")
-        return super().dispatch(request, *args, **kwargs)  # type: ignore[return-value]
 
     def get_initial(self) -> dict[str, Any]:
         initial = super().get_initial()
@@ -390,6 +434,8 @@ def start_fight(request: HttpRequest, pk: int) -> HttpResponse:
     if contributor is None:
         return redirect("oime-setup")
 
+    _deny_if_draft(request, proposal, contributor)
+
     ctx = _get_solver_context(contributor, proposal)
     # Only reachable while the user can actually start a fight; otherwise show detail.
     if not ctx["can_start_fight"]:
@@ -419,6 +465,8 @@ def proposal_detail(request: HttpRequest, pk: int) -> HttpResponse:
     contributor = _get_contributor(request)
     if contributor is None:
         return redirect("oime-setup")
+
+    _deny_if_draft(request, proposal, contributor)
 
     ctx = _get_solver_context(contributor, proposal)
     fight: OIMEFight | None = ctx["fight"]
@@ -480,6 +528,8 @@ def proposal_fight(request: HttpRequest, pk: int) -> HttpResponse:
     contributor = _get_contributor(request)
     if contributor is None:
         return redirect("oime-setup")
+
+    _deny_if_draft(request, proposal, contributor)
 
     ctx = _get_solver_context(contributor, proposal)
     fight: OIMEFight | None = ctx["fight"]
@@ -607,6 +657,8 @@ def reveal_solution(request: HttpRequest, pk: int) -> HttpResponse:
     if contributor is None:
         return redirect("oime-setup")
 
+    _deny_if_draft(request, proposal, contributor)
+
     active_fight = OIMEFight.objects.filter(
         contributor=contributor, proposal=proposal, status="OIME_TBD"
     ).exists()
@@ -626,6 +678,8 @@ def upvote_proposal(request: HttpRequest, pk: int) -> HttpResponse:
     contributor = _get_contributor(request)
     if contributor is None:
         return redirect("oime-setup")
+
+    _deny_if_draft(request, proposal, contributor)
 
     ctx = _get_solver_context(contributor, proposal)
     if not ctx["can_upvote"]:
@@ -661,6 +715,8 @@ def proposal_results(request: HttpRequest, pk: int) -> HttpResponse:
     contributor = _get_contributor(request)
     if contributor is None:
         return redirect("oime-setup")
+
+    _deny_if_draft(request, proposal, contributor)
 
     # The leaderboard is for anyone who can no longer start a fight on the problem
     # (casual browsers, those who have fought or revealed it, and the author).

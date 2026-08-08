@@ -55,6 +55,7 @@ class OIMEProposalFactory(DjangoModelFactory):
     subject = FuzzyChoice(["A", "C", "G", "N"])
     difficulty = FuzzyInteger(1, 5)
     archived = False
+    is_draft = False
 
 
 class OIMEFightFactory(DjangoModelFactory):
