@@ -3,7 +3,7 @@ import logging
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.core.files.storage import storages
-from django.http import HttpRequest
+from django.http import Http404, HttpRequest
 from django.http.response import (
     HttpResponse,
     HttpResponseBadRequest,
@@ -16,7 +16,9 @@ from core.watermark import watermark_pdf
 logger = logging.getLogger(__name__)
 
 
-def get_protected_file(folder: str, filename: str, request: HttpRequest):
+def get_protected_file(
+    folder: str, filename: str, request: HttpRequest, missing_is_404: bool = False
+):
     if not isinstance(request.user, User):
         raise PermissionDenied("Only logged in users may query core storage.")
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
@@ -31,6 +33,8 @@ def get_protected_file(folder: str, filename: str, request: HttpRequest):
     try:
         file = storage.open(path)
     except FileNotFoundError:
+        if missing_is_404:
+            raise Http404(f"No file named {filename} is available.")
         errmsg = f"Unable to find {filename} at {path}."
         logger.critical(errmsg)
         return HttpResponseServerError("File not found")
