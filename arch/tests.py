@@ -241,6 +241,31 @@ def test_view_solution(otis):
     assert resp.status_code == 404
 
 
+@pytest.mark.django_db
+@override_settings(
+    PATH_STATEMENT_ON_DISK=os.path.join(settings.BASE_DIR, "test_static/")
+)
+def test_view_solution_without_solution_on_bucket(otis):
+    verified_group = GroupFactory(name="Verified")
+    alice = UserFactory.create(groups=(verified_group,))
+    otis.login(alice)
+
+    disk_puid = "SOLLESS"
+
+    if not os.path.exists(settings.PATH_STATEMENT_ON_DISK):
+        os.makedirs(settings.PATH_STATEMENT_ON_DISK)
+    html_path = os.path.join(settings.PATH_STATEMENT_ON_DISK, f"{disk_puid}.html")
+    with open(html_path, "w", encoding="utf_8") as f:
+        f.write("<p>statement without solution</p>")
+
+    assert get_disk_statement_from_puid(disk_puid) is not None
+    otis.get_not_found("view-solution", disk_puid)
+
+    os.remove(html_path)
+    if not os.listdir(settings.PATH_STATEMENT_ON_DISK):
+        os.rmdir(settings.PATH_STATEMENT_ON_DISK)
+
+
 def test_validate_puid():
     with pytest.raises(Http404):
         validate_puid("✈✈✈")

@@ -275,7 +275,8 @@ def view_solution(request: HttpRequest, puid: str) -> HttpResponse:
             f"The problem {puid} is not in the OTIS database, "
             "therefore no solution file could be retrieved."
         )
-    return get_protected_file("arch-sol", f"{puid}.tex", request)
+    # statement is on disk and solution is in bucket, which can drift...
+    return get_protected_file("arch-sol", f"{puid}.tex", request, missing_is_404=True)
 
 
 class VoteCreate(
