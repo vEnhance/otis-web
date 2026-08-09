@@ -67,23 +67,8 @@ def _is_casual_for(contributor: OIMEContributor, proposal: OIMEProposal) -> bool
 
 
 def _active_fight(contributor: OIMEContributor) -> OIMEFight | None:
-    """This contributor's live timed session, if any.
-
-    A session is only "live" while its clock is still running. Time-outs are recorded
-    lazily (nothing runs when the clock hits zero), so a session that expired while the
-    contributor was away is still ``OIME_TBD`` in the database until someone looks at
-    it. Settle those here, so an abandoned session cannot block the contributor forever.
-    """
-    for fight in OIMEFight.objects.filter(
-        contributor=contributor, status="OIME_TBD"
-    ).select_related("proposal"):
-        if fight.time_expired:
-            fight.status = "OIME_TLE"
-            fight.submitted_at = timezone.now()
-            fight.save()
-        else:
-            return fight
-    return None
+    """This contributor's in-progress timed session, if any."""
+    return OIMEFight.objects.filter(contributor=contributor, status="OIME_TBD").first()
 
 
 def _get_solver_context(

@@ -1145,46 +1145,6 @@ def test_cannot_reveal_other_problem_during_active_fight(otis):
 
 
 @pytest.mark.django_db
-def test_expired_fight_does_not_block_reveal(otis):
-    # An abandoned session is only OIME_TBD because time-outs are recorded lazily; it
-    # must not lock the contributor out of the rest of OIME forever.
-    user, contributor = _verified_contributor()
-    stale = OIMEProposalFactory.create(difficulty=1)
-    other = OIMEProposalFactory.create()
-    fight = OIMEFightFactory.create(
-        contributor=contributor, proposal=stale, status="OIME_TBD"
-    )
-    OIMEFight.objects.filter(pk=fight.pk).update(
-        started_at=timezone.now() - timedelta(days=3)
-    )
-    otis.login(user)
-    resp = otis.post("oime-reveal", other.pk)
-    otis.assert_30x(resp)
-    assert contributor.revealed_proposals.filter(pk=other.pk).exists()
-    fight.refresh_from_db()
-    assert fight.status == "OIME_TLE"
-
-
-@pytest.mark.django_db
-def test_expired_fight_does_not_block_new_fight(otis):
-    user, contributor = _verified_contributor()
-    stale = OIMEProposalFactory.create(difficulty=1)
-    fresh = OIMEProposalFactory.create()
-    fight = OIMEFightFactory.create(
-        contributor=contributor, proposal=stale, status="OIME_TBD"
-    )
-    OIMEFight.objects.filter(pk=fight.pk).update(
-        started_at=timezone.now() - timedelta(days=3)
-    )
-    otis.login(user)
-    resp = otis.post("oime-start-fight", fresh.pk)
-    otis.assert_30x(resp)
-    assert OIMEFight.objects.filter(contributor=contributor, proposal=fresh).exists()
-    fight.refresh_from_db()
-    assert fight.status == "OIME_TLE"
-
-
-@pytest.mark.django_db
 def test_start_fight_redirects_to_the_session_already_running(otis):
     user, contributor = _verified_contributor()
     running = OIMEProposalFactory.create()
