@@ -43,17 +43,11 @@ button.pseudo-button {
   cursor: pointer;
 }
 
-div.form-group > label {
-  display: block;
-  font-weight: bold;
-  font-family: Verdana, Geneva, sans-serif;
-  padding-right: 5px;
-  min-width: 6rem;
-  color: #331199;
+label.form-label,
+legend.form-label {
+  font-weight: 700;
 }
-div.form-group > label.requiredField {
-  color: #991111;
-}
+
 table.table.form-table td {
   padding-left: 12px;
   padding-right: 12px;
@@ -62,11 +56,4 @@ table.table.form-table td {
 
 textarea {
   font-family: "Dejavu Sans Mono", monospace;
-}
-
-label {
-  font-weight: 700;
-}
-label.requiredField {
-  color: #770000;
 }
