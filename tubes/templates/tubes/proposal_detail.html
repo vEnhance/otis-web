@@ -108,15 +108,15 @@
   {# ---- Show attempt result + answer + solution ---- #}
   {% if can_see_solution %}
     {% if fight %}
-      {% if attempt.status == "OIME_OK" %}
+      {% if fight.status == "OIME_OK" %}
         <div class="alert alert-success">
           Solved in {{ fight.time_display }} with {{ fight.wrong_answers }} wrong answer{{ fight.wrong_answers|pluralize }}.
         </div>
-      {% elif attempt.status == "OIME_FAIL" %}
+      {% elif fight.status == "OIME_FAIL" %}
         <div class="alert alert-secondary">You gave up on this problem.</div>
-      {% elif attempt.status == "OIME_TLE" %}
+      {% elif fight.status == "OIME_TLE" %}
         <div class="alert alert-danger">Time limit exceeded.</div>
-      {% elif attempt.status == "OIME_ALE" %}
+      {% elif fight.status == "OIME_ALE" %}
         <div class="alert alert-danger">
           Answer limit exceeded ({{ fight.wrong_answers }} wrong answer{{ fight.wrong_answers|pluralize }}).
         </div>

@@ -1122,3 +1122,159 @@ def test_edited_label_shown_after_meaningful_edit(otis):
     otis.login(user)
     resp = otis.get_20x("oime-proposal-detail", proposal.pk)
     otis.assert_has(resp, "edited")
+
+
+# ---------------------------------------------------------------------------
+# Active timed sessions are exclusive and can't be sidestepped
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.django_db
+def test_cannot_reveal_other_problem_during_active_fight(otis):
+    # A timed session is meant to be an undistracted attempt at one problem. Bypassing
+    # some *other* problem mid-session hands over its solution and discussion thread
+    # while the clock on the original attempt keeps running.
+    user, contributor = _verified_contributor()
+    mine = OIMEProposalFactory.create()
+    other = OIMEProposalFactory.create()
+    OIMEFightFactory.create(contributor=contributor, proposal=mine, status="OIME_TBD")
+    otis.login(user)
+    resp = otis.post("oime-reveal", other.pk)
+    assert resp.status_code == 403
+    assert not contributor.revealed_proposals.exists()
+
+
+@pytest.mark.django_db
+def test_expired_fight_does_not_block_reveal(otis):
+    # An abandoned session is only OIME_TBD because time-outs are recorded lazily; it
+    # must not lock the contributor out of the rest of OIME forever.
+    user, contributor = _verified_contributor()
+    stale = OIMEProposalFactory.create(difficulty=1)
+    other = OIMEProposalFactory.create()
+    fight = OIMEFightFactory.create(
+        contributor=contributor, proposal=stale, status="OIME_TBD"
+    )
+    OIMEFight.objects.filter(pk=fight.pk).update(
+        started_at=timezone.now() - timedelta(days=3)
+    )
+    otis.login(user)
+    resp = otis.post("oime-reveal", other.pk)
+    otis.assert_30x(resp)
+    assert contributor.revealed_proposals.filter(pk=other.pk).exists()
+    fight.refresh_from_db()
+    assert fight.status == "OIME_TLE"
+
+
+@pytest.mark.django_db
+def test_expired_fight_does_not_block_new_fight(otis):
+    user, contributor = _verified_contributor()
+    stale = OIMEProposalFactory.create(difficulty=1)
+    fresh = OIMEProposalFactory.create()
+    fight = OIMEFightFactory.create(
+        contributor=contributor, proposal=stale, status="OIME_TBD"
+    )
+    OIMEFight.objects.filter(pk=fight.pk).update(
+        started_at=timezone.now() - timedelta(days=3)
+    )
+    otis.login(user)
+    resp = otis.post("oime-start-fight", fresh.pk)
+    otis.assert_30x(resp)
+    assert OIMEFight.objects.filter(contributor=contributor, proposal=fresh).exists()
+    fight.refresh_from_db()
+    assert fight.status == "OIME_TLE"
+
+
+@pytest.mark.django_db
+def test_start_fight_redirects_to_the_session_already_running(otis):
+    user, contributor = _verified_contributor()
+    running = OIMEProposalFactory.create()
+    other = OIMEProposalFactory.create()
+    OIMEFightFactory.create(
+        contributor=contributor, proposal=running, status="OIME_TBD"
+    )
+    otis.login(user)
+    resp = otis.post("oime-start-fight", other.pk)
+    otis.assert_30x(resp)
+    assert resp.url.endswith(f"/tubes/proposal/{running.pk}/fight/")
+    assert not OIMEFight.objects.filter(
+        contributor=contributor, proposal=other
+    ).exists()
+
+
+@pytest.mark.django_db
+def test_fight_page_is_not_cacheable(otis):
+    # Otherwise "back" after giving up restores the page with a live countdown,
+    # which reads as though the attempt were still open.
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create()
+    OIMEFightFactory.create(
+        contributor=contributor, proposal=proposal, status="OIME_TBD"
+    )
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-fight", proposal.pk)
+    assert "no-store" in resp.headers["Cache-Control"]
+
+
+@pytest.mark.django_db
+def test_give_up_after_time_expired_records_tle(otis):
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create(difficulty=1)
+    fight = OIMEFightFactory.create(
+        contributor=contributor, proposal=proposal, status="OIME_TBD"
+    )
+    OIMEFight.objects.filter(pk=fight.pk).update(
+        started_at=timezone.now() - timedelta(hours=5)
+    )
+    otis.login(user)
+    resp = otis.post("oime-give-up", proposal.pk)
+    otis.assert_30x(resp)
+    fight.refresh_from_db()
+    assert fight.status == "OIME_TLE"
+    # TLE fights report no solve time, rather than a bogus multi-hour one.
+    assert fight.time_display == ""
+
+
+@pytest.mark.django_db
+def test_expired_give_up_does_not_count_against_rate_limit(otis):
+    from .views import GIVE_UP_RATE_LIMIT
+
+    user, contributor = _verified_contributor()
+    expired = OIMEProposalFactory.create(difficulty=1)
+    fight = OIMEFightFactory.create(
+        contributor=contributor, proposal=expired, status="OIME_TBD"
+    )
+    OIMEFight.objects.filter(pk=fight.pk).update(
+        started_at=timezone.now() - timedelta(hours=5)
+    )
+    otis.login(user)
+    otis.post("oime-give-up", expired.pk)
+    assert (
+        OIMEFight.objects.filter(contributor=contributor, status="OIME_FAIL").count()
+        < GIVE_UP_RATE_LIMIT
+    )
+
+
+@pytest.mark.django_db
+def test_detail_shows_gave_up_alert_box(otis):
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create()
+    OIMEFightFactory.create(
+        contributor=contributor, proposal=proposal, status="OIME_FAIL"
+    )
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-detail", proposal.pk)
+    otis.assert_has(resp, "alert alert-secondary")
+
+
+@pytest.mark.django_db
+def test_start_screen_unavailable_during_active_fight(otis):
+    user, contributor = _verified_contributor()
+    running = OIMEProposalFactory.create()
+    other = OIMEProposalFactory.create()
+    OIMEFightFactory.create(
+        contributor=contributor, proposal=running, status="OIME_TBD"
+    )
+    otis.login(user)
+    resp = otis.get("oime-start-fight", other.pk)
+    otis.assert_30x(resp)
+    assert resp.url.endswith(f"/tubes/proposal/{running.pk}/fight/")

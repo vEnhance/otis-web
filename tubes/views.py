@@ -66,6 +66,26 @@ def _is_casual_for(contributor: OIMEContributor, proposal: OIMEProposal) -> bool
     )
 
 
+def _active_fight(contributor: OIMEContributor) -> OIMEFight | None:
+    """This contributor's live timed session, if any.
+
+    A session is only "live" while its clock is still running. Time-outs are recorded
+    lazily (nothing runs when the clock hits zero), so a session that expired while the
+    contributor was away is still ``OIME_TBD`` in the database until someone looks at
+    it. Settle those here, so an abandoned session cannot block the contributor forever.
+    """
+    for fight in OIMEFight.objects.filter(
+        contributor=contributor, status="OIME_TBD"
+    ).select_related("proposal"):
+        if fight.time_expired:
+            fight.status = "OIME_TLE"
+            fight.submitted_at = timezone.now()
+            fight.save()
+        else:
+            return fight
+    return None
+
+
 def _get_solver_context(
     contributor: OIMEContributor,
     proposal: OIMEProposal,
@@ -209,9 +229,7 @@ def go_casual(request: HttpRequest) -> HttpResponse:
         return redirect("oime-setup")
     if contributor.casual_mode:
         return redirect("oime-proposal-list")
-    has_active_fight = OIMEFight.objects.filter(
-        contributor=contributor, status="OIME_TBD"
-    ).exists()
+    has_active_fight = _active_fight(contributor) is not None
     if request.method == "POST":
         if has_active_fight:
             messages.error(
@@ -441,14 +459,15 @@ def start_fight(request: HttpRequest, pk: int) -> HttpResponse:
     if not ctx["can_start_fight"]:
         return redirect("oime-proposal-detail", pk)
 
+    # One timed session at a time. Neither option on this screen is available while
+    # another clock is running, so send them back to it rather than showing a screen
+    # whose buttons both fail.
+    other = _active_fight(contributor)
+    if other is not None:
+        messages.error(request, "You already have an active timed session in progress.")
+        return redirect("oime-proposal-fight", other.proposal_id)  # type: ignore[attr-defined]
+
     if request.method == "POST":
-        if OIMEFight.objects.filter(
-            contributor=contributor, status="OIME_TBD"
-        ).exists():
-            messages.error(
-                request, "You already have an active timed session in progress."
-            )
-            return redirect("oime-proposal-detail", pk)
         OIMEFight.objects.create(contributor=contributor, proposal=proposal)
         return redirect("oime-proposal-fight", pk)
 
@@ -538,7 +557,7 @@ def proposal_fight(request: HttpRequest, pk: int) -> HttpResponse:
     if ctx["casual"] or fight is None or fight.is_complete:
         return redirect("oime-proposal-detail", pk)
 
-    return render(
+    response = render(
         request,
         "tubes/proposal_fight.html",
         {
@@ -549,6 +568,11 @@ def proposal_fight(request: HttpRequest, pk: int) -> HttpResponse:
             "answer_form": OIMEAnswerForm(),
         },
     )
+    # Never let this page come back from the browser cache. Otherwise, after giving
+    # up and reading the solution, hitting "back" restores this page with a live
+    # countdown, which looks like the attempt is still open when it is long over.
+    response["Cache-Control"] = "no-store, max-age=0"
+    return response
 
 
 @verified_required
@@ -617,6 +641,15 @@ def give_up(request: HttpRequest, pk: int) -> HttpResponse:
 
     attempt = get_object_or_404(OIMEFight, contributor=contributor, proposal=proposal)
 
+    # A session whose clock already ran out is a time-out, not a give-up: record it
+    # as such so it neither burns a give-up nor logs a bogus multi-hour solve time.
+    if attempt.status == "OIME_TBD" and attempt.time_expired:
+        attempt.status = "OIME_TLE"
+        attempt.submitted_at = timezone.now()
+        attempt.save()
+        messages.warning(request, "The time limit for your timed session has expired.")
+        return redirect("oime-proposal-detail", pk)
+
     if attempt.status == "OIME_TBD":
         window_start = timezone.now() - timedelta(minutes=GIVE_UP_WINDOW_MINUTES)
         recent_give_ups = OIMEFight.objects.filter(
@@ -647,7 +680,9 @@ def reveal_solution(request: HttpRequest, pk: int) -> HttpResponse:
 
     Used both by casual browsing and as a ranked-mode escape hatch for someone who
     already knows a problem (e.g. a co-author). Revealing forfeits the chance to fight
-    it, so it is refused while a timed fight is in progress.
+    it, so it is refused while any timed fight is in progress: a timed session is meant
+    to be an undistracted attempt at one problem, and the clock keeps running while you
+    read someone else's solution and discussion thread.
     """
     if request.method != "POST":
         return redirect("oime-proposal-detail", pk)
@@ -659,10 +694,7 @@ def reveal_solution(request: HttpRequest, pk: int) -> HttpResponse:
 
     _deny_if_draft(request, proposal, contributor)
 
-    active_fight = OIMEFight.objects.filter(
-        contributor=contributor, proposal=proposal, status="OIME_TBD"
-    ).exists()
-    if active_fight:
+    if _active_fight(contributor) is not None:
         raise PermissionDenied
 
     contributor.revealed_proposals.add(proposal)
