@@ -347,10 +347,10 @@ def test_archived_hidden_from_staff(otis):
 
 
 @pytest.mark.django_db
-def test_staff_can_toggle_archive(otis):
+def test_superuser_can_toggle_archive(otis):
     _, contributor = _verified_contributor()
     proposal = OIMEProposalFactory.create(author=contributor, archived=False)
-    UserFactory.create(username="staff", is_staff=True)
+    UserFactory.create(username="staff", is_staff=True, is_superuser=True)
     otis.login("staff")
     otis.post("oime-proposal-archive", proposal.pk)
     proposal.refresh_from_db()
@@ -361,7 +361,7 @@ def test_staff_can_toggle_archive(otis):
 
 
 @pytest.mark.django_db
-def test_non_staff_cannot_toggle_archive(otis):
+def test_non_superuser_cannot_toggle_archive(otis):
     user, _ = _verified_contributor()
     _, other = _verified_contributor("bob")
     proposal = OIMEProposalFactory.create(author=other, archived=False)
@@ -373,16 +373,24 @@ def test_non_staff_cannot_toggle_archive(otis):
 
 
 @pytest.mark.django_db
-def test_author_can_toggle_own_proposal_archive(otis):
+def test_author_cannot_toggle_own_proposal_archive(otis):
     user, contributor = _verified_contributor()
     proposal = OIMEProposalFactory.create(author=contributor, archived=False)
     otis.login(user)
-    otis.post("oime-proposal-archive", proposal.pk)
-    proposal.refresh_from_db()
-    assert proposal.archived is True
-    otis.post("oime-proposal-archive", proposal.pk)
+    resp = otis.post("oime-proposal-archive", proposal.pk)
+    assert resp.status_code == 403
     proposal.refresh_from_db()
     assert proposal.archived is False
+
+
+@pytest.mark.django_db
+def test_archived_author_sees_note_but_no_archive_button(otis):
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create(author=contributor, archived=True)
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-detail", proposal.pk)
+    otis.assert_has(resp, "archived by staff")
+    otis.assert_not_has(resp, "Unarchive")
 
 
 # ---------------------------------------------------------------------------

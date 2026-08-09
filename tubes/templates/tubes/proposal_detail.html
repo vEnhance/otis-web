@@ -3,6 +3,12 @@
   OIME {{ proposal.label }} Solution
 {% endblock title %}
 {% block layout-content %}
+  {% if proposal.archived %}
+    <div class="alert alert-warning">
+      This problem has been archived by staff, so it is not viewable to other
+      users anymore. If you think this is an error, please contact Evan.
+    </div>
+  {% endif %}
   <div class="d-flex justify-content-between align-items-start mb-3">
     <div>
       <h2>{{ proposal.label }}: {{ proposal.title }}</h2>
@@ -25,25 +31,12 @@
       <p class="text-muted">
         Written by {{ proposal.credit_display }}
         on {{ proposal.created_at|date:"Y-m-d" }}
-        {% if proposal.archived %}· <span class="badge bg-secondary">archived</span>{% endif %}
       </p>
     </div>
     <div class="d-flex gap-2">
       {% if proposal.author == contributor or request.user.is_staff %}
         <a href="{% url "oime-proposal-update" proposal.pk %}"
            class="btn btn-outline-secondary btn-sm">Edit</a>
-      {% endif %}
-      {% if proposal.author == contributor or request.user.is_staff %}
-        <form method="post" action="{% url "oime-proposal-archive" proposal.pk %}">
-          {% csrf_token %}
-          <button type="submit" class="btn btn-outline-secondary btn-sm">
-            {% if proposal.archived %}
-              Unarchive
-            {% else %}
-              Archive
-            {% endif %}
-          </button>
-        </form>
       {% endif %}
       <a href="{% url "oime-proposal-list" %}"
          class="btn btn-outline-secondary btn-sm">← Back</a>
@@ -56,6 +49,21 @@
       <div class="math-content">{{ proposal.statement }}</div>
     </div>
   </div>
+  {# ---- Staff-only archive toggle ---- #}
+  {% if request.user.is_superuser %}
+    <form method="post"
+          action="{% url "oime-proposal-archive" proposal.pk %}"
+          class="mb-4">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-outline-secondary btn-sm">
+        {% if proposal.archived %}
+          Unarchive
+        {% else %}
+          Archive
+        {% endif %}
+      </button>
+    </form>
+  {% endif %}
   {# ---- Testsolve stats summary ---- #}
   {% include "tubes/components/proposal_stats.html" %}
   <p class="mb-2">
