@@ -538,7 +538,7 @@ def proposal_fight(request: HttpRequest, pk: int) -> HttpResponse:
     if ctx["casual"] or fight is None or fight.is_complete:
         return redirect("oime-proposal-detail", pk)
 
-    return render(
+    response = render(
         request,
         "tubes/proposal_fight.html",
         {
@@ -549,6 +549,11 @@ def proposal_fight(request: HttpRequest, pk: int) -> HttpResponse:
             "answer_form": OIMEAnswerForm(),
         },
     )
+    # Never let this page come back from the browser cache. Otherwise, after giving
+    # up and reading the solution, hitting "back" restores this page with a live
+    # countdown, which looks like the attempt is still open when it is long over.
+    response["Cache-Control"] = "no-store, max-age=0"
+    return response
 
 
 @verified_required
@@ -616,6 +621,15 @@ def give_up(request: HttpRequest, pk: int) -> HttpResponse:
         return redirect("oime-setup")
 
     attempt = get_object_or_404(OIMEFight, contributor=contributor, proposal=proposal)
+
+    # A session whose clock already ran out is a time-out, not a give-up: record it
+    # as such so it neither burns a give-up nor logs a bogus multi-hour solve time.
+    if attempt.status == "OIME_TBD" and attempt.time_expired:
+        attempt.status = "OIME_TLE"
+        attempt.submitted_at = timezone.now()
+        attempt.save()
+        messages.warning(request, "The time limit for your timed session has expired.")
+        return redirect("oime-proposal-detail", pk)
 
     if attempt.status == "OIME_TBD":
         window_start = timezone.now() - timedelta(minutes=GIVE_UP_WINDOW_MINUTES)

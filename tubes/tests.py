@@ -1130,3 +1130,73 @@ def test_edited_label_shown_after_meaningful_edit(otis):
     otis.login(user)
     resp = otis.get_20x("oime-proposal-detail", proposal.pk)
     otis.assert_has(resp, "edited")
+
+
+# ---------------------------------------------------------------------------
+# Ending a timed session: caching, and the give-up/time-out boundary
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.django_db
+def test_fight_page_is_not_cacheable(otis):
+    # Otherwise "back" after giving up restores the page with a live countdown,
+    # which reads as though the attempt were still open.
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create()
+    OIMEFightFactory.create(
+        contributor=contributor, proposal=proposal, status="OIME_TBD"
+    )
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-fight", proposal.pk)
+    assert "no-store" in resp.headers["Cache-Control"]
+
+
+@pytest.mark.django_db
+def test_give_up_after_time_expired_records_tle(otis):
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create(difficulty=1)
+    fight = OIMEFightFactory.create(
+        contributor=contributor, proposal=proposal, status="OIME_TBD"
+    )
+    OIMEFight.objects.filter(pk=fight.pk).update(
+        started_at=timezone.now() - timedelta(hours=5)
+    )
+    otis.login(user)
+    resp = otis.post("oime-give-up", proposal.pk)
+    otis.assert_30x(resp)
+    fight.refresh_from_db()
+    assert fight.status == "OIME_TLE"
+    # TLE fights report no solve time, rather than a bogus multi-hour one.
+    assert fight.time_display == ""
+
+
+@pytest.mark.django_db
+def test_expired_give_up_does_not_count_against_rate_limit(otis):
+    from .views import GIVE_UP_RATE_LIMIT
+
+    user, contributor = _verified_contributor()
+    expired = OIMEProposalFactory.create(difficulty=1)
+    fight = OIMEFightFactory.create(
+        contributor=contributor, proposal=expired, status="OIME_TBD"
+    )
+    OIMEFight.objects.filter(pk=fight.pk).update(
+        started_at=timezone.now() - timedelta(hours=5)
+    )
+    otis.login(user)
+    otis.post("oime-give-up", expired.pk)
+    assert (
+        OIMEFight.objects.filter(contributor=contributor, status="OIME_FAIL").count()
+        < GIVE_UP_RATE_LIMIT
+    )
+
+
+@pytest.mark.django_db
+def test_detail_shows_gave_up_alert_box(otis):
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create()
+    OIMEFightFactory.create(
+        contributor=contributor, proposal=proposal, status="OIME_FAIL"
+    )
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-detail", proposal.pk)
+    otis.assert_has(resp, "alert alert-secondary")
