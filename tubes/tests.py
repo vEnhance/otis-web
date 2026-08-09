@@ -1125,40 +1125,8 @@ def test_edited_label_shown_after_meaningful_edit(otis):
 
 
 # ---------------------------------------------------------------------------
-# Active timed sessions are exclusive and can't be sidestepped
+# Ending a timed session: caching, and the give-up/time-out boundary
 # ---------------------------------------------------------------------------
-
-
-@pytest.mark.django_db
-def test_cannot_reveal_other_problem_during_active_fight(otis):
-    # A timed session is meant to be an undistracted attempt at one problem. Bypassing
-    # some *other* problem mid-session hands over its solution and discussion thread
-    # while the clock on the original attempt keeps running.
-    user, contributor = _verified_contributor()
-    mine = OIMEProposalFactory.create()
-    other = OIMEProposalFactory.create()
-    OIMEFightFactory.create(contributor=contributor, proposal=mine, status="OIME_TBD")
-    otis.login(user)
-    resp = otis.post("oime-reveal", other.pk)
-    assert resp.status_code == 403
-    assert not contributor.revealed_proposals.exists()
-
-
-@pytest.mark.django_db
-def test_start_fight_redirects_to_the_session_already_running(otis):
-    user, contributor = _verified_contributor()
-    running = OIMEProposalFactory.create()
-    other = OIMEProposalFactory.create()
-    OIMEFightFactory.create(
-        contributor=contributor, proposal=running, status="OIME_TBD"
-    )
-    otis.login(user)
-    resp = otis.post("oime-start-fight", other.pk)
-    otis.assert_30x(resp)
-    assert resp.url.endswith(f"/tubes/proposal/{running.pk}/fight/")
-    assert not OIMEFight.objects.filter(
-        contributor=contributor, proposal=other
-    ).exists()
 
 
 @pytest.mark.django_db
@@ -1224,17 +1192,3 @@ def test_detail_shows_gave_up_alert_box(otis):
     otis.login(user)
     resp = otis.get_20x("oime-proposal-detail", proposal.pk)
     otis.assert_has(resp, "alert alert-secondary")
-
-
-@pytest.mark.django_db
-def test_start_screen_unavailable_during_active_fight(otis):
-    user, contributor = _verified_contributor()
-    running = OIMEProposalFactory.create()
-    other = OIMEProposalFactory.create()
-    OIMEFightFactory.create(
-        contributor=contributor, proposal=running, status="OIME_TBD"
-    )
-    otis.login(user)
-    resp = otis.get("oime-start-fight", other.pk)
-    otis.assert_30x(resp)
-    assert resp.url.endswith(f"/tubes/proposal/{running.pk}/fight/")

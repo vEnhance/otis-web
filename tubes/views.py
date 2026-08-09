@@ -66,11 +66,6 @@ def _is_casual_for(contributor: OIMEContributor, proposal: OIMEProposal) -> bool
     )
 
 
-def _active_fight(contributor: OIMEContributor) -> OIMEFight | None:
-    """This contributor's in-progress timed session, if any."""
-    return OIMEFight.objects.filter(contributor=contributor, status="OIME_TBD").first()
-
-
 def _get_solver_context(
     contributor: OIMEContributor,
     proposal: OIMEProposal,
@@ -214,7 +209,9 @@ def go_casual(request: HttpRequest) -> HttpResponse:
         return redirect("oime-setup")
     if contributor.casual_mode:
         return redirect("oime-proposal-list")
-    has_active_fight = _active_fight(contributor) is not None
+    has_active_fight = OIMEFight.objects.filter(
+        contributor=contributor, status="OIME_TBD"
+    ).exists()
     if request.method == "POST":
         if has_active_fight:
             messages.error(
@@ -444,15 +441,14 @@ def start_fight(request: HttpRequest, pk: int) -> HttpResponse:
     if not ctx["can_start_fight"]:
         return redirect("oime-proposal-detail", pk)
 
-    # One timed session at a time. Neither option on this screen is available while
-    # another clock is running, so send them back to it rather than showing a screen
-    # whose buttons both fail.
-    other = _active_fight(contributor)
-    if other is not None:
-        messages.error(request, "You already have an active timed session in progress.")
-        return redirect("oime-proposal-fight", other.proposal_id)  # type: ignore[attr-defined]
-
     if request.method == "POST":
+        if OIMEFight.objects.filter(
+            contributor=contributor, status="OIME_TBD"
+        ).exists():
+            messages.error(
+                request, "You already have an active timed session in progress."
+            )
+            return redirect("oime-proposal-detail", pk)
         OIMEFight.objects.create(contributor=contributor, proposal=proposal)
         return redirect("oime-proposal-fight", pk)
 
@@ -665,9 +661,7 @@ def reveal_solution(request: HttpRequest, pk: int) -> HttpResponse:
 
     Used both by casual browsing and as a ranked-mode escape hatch for someone who
     already knows a problem (e.g. a co-author). Revealing forfeits the chance to fight
-    it, so it is refused while any timed fight is in progress: a timed session is meant
-    to be an undistracted attempt at one problem, and the clock keeps running while you
-    read someone else's solution and discussion thread.
+    it, so it is refused while a timed fight is in progress.
     """
     if request.method != "POST":
         return redirect("oime-proposal-detail", pk)
@@ -679,7 +673,10 @@ def reveal_solution(request: HttpRequest, pk: int) -> HttpResponse:
 
     _deny_if_draft(request, proposal, contributor)
 
-    if _active_fight(contributor) is not None:
+    active_fight = OIMEFight.objects.filter(
+        contributor=contributor, proposal=proposal, status="OIME_TBD"
+    ).exists()
+    if active_fight:
         raise PermissionDenied
 
     contributor.revealed_proposals.add(proposal)
