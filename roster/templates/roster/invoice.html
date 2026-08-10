@@ -83,10 +83,6 @@
         {% if student.semester.most_payment_deadline %}<li>{{ student.semester.most_payment_deadline|date }}</li>{% endif %}
       </ul>
     {% endif %}
-    <p>
-      If you have an assistant instructor,
-      that payment should be done separately.
-    </p>
     {% if request.user.is_staff %}
       <ul>
         <li>
