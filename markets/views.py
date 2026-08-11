@@ -1,5 +1,5 @@
 import datetime
-from typing import Any
+from typing import Any, ClassVar
 
 from braces.views import LoginRequiredMixin
 from django.contrib import messages
@@ -152,7 +152,7 @@ def recompute(request: AuthHttpRequest, market_slug: str):
 class MarketList(LoginRequiredMixin, ListView[Market]):
     model = Market
     context_object_name = "markets"
-    extra_context = {"past": False}
+    extra_context: ClassVar[dict[str, Any]] = {"past": False}
 
     def get_queryset(self) -> QuerySet[Market]:
         if getattr(self.request.user, "is_staff", False) is True:
@@ -163,7 +163,7 @@ class MarketList(LoginRequiredMixin, ListView[Market]):
 
 
 class MarketListPast(MarketList):
-    extra_context = {"past": True}
+    extra_context: ClassVar[dict[str, Any]] = {"past": True}
 
     def get_queryset(self) -> QuerySet[Market]:
         if getattr(self.request.user, "is_staff", False) is True:

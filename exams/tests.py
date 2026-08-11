@@ -16,7 +16,7 @@ from exams.models import ExamAttempt, PracticeExam
 from roster.factories import StudentFactory
 from roster.models import Student
 
-UTC = datetime.timezone.utc
+UTC = datetime.UTC
 
 
 def check_calculator(expr: str, out: float):
@@ -228,7 +228,7 @@ def test_admin_postpone_two_years():
 
     admin = PracticeExamAdmin(PracticeExam, AdminSite())
     request: HttpRequest = RequestFactory().get("/")
-    setattr(request, "_messages", CookieStorage(request))
+    request._messages = CookieStorage(request)
     admin.postpone_two_years(request, PracticeExam.objects.exclude(pk=untouched.pk))
 
     shifted.refresh_from_db()

@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, ClassVar
 
 from django import forms
 from django.core.validators import FileExtensionValidator
@@ -12,10 +12,10 @@ class NewUploadForm(forms.ModelForm):
     class Meta:
         model = UploadedFile
         fields = ("category", "content", "description")
-        widgets = {
+        widgets: ClassVar[dict[str, forms.Widget]] = {
             "description": forms.Textarea(attrs={"cols": 40, "rows": 2}),
         }
-        help_texts = {
+        help_texts: ClassVar[dict[str, str]] = {
             "content": "",
         }
 

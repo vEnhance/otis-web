@@ -480,17 +480,16 @@ def proposal_detail(request: HttpRequest, pk: int) -> HttpResponse:
 
     comment_form = OIMECommentForm()
 
-    if request.method == "POST":
-        if "submit_comment" in request.POST:
-            if not ctx["can_see_solution"]:
-                raise PermissionDenied
-            comment_form = OIMECommentForm(request.POST)
-            if comment_form.is_valid():
-                comment = comment_form.save(commit=False)
-                comment.author = contributor
-                comment.proposal = proposal
-                comment.save()
-                return redirect("oime-proposal-detail", pk)
+    if request.method == "POST" and "submit_comment" in request.POST:
+        if not ctx["can_see_solution"]:
+            raise PermissionDenied
+        comment_form = OIMECommentForm(request.POST)
+        if comment_form.is_valid():
+            comment = comment_form.save(commit=False)
+            comment.author = contributor
+            comment.proposal = proposal
+            comment.save()
+            return redirect("oime-proposal-detail", pk)
 
     comments = (
         OIMEComment.objects.filter(proposal=proposal).select_related("author")

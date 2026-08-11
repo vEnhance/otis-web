@@ -3,6 +3,8 @@ from typing import Any
 
 from django.core.management.base import BaseCommand
 
+logger = logging.getLogger(__name__)
+
 
 class Command(BaseCommand):
     help = "Try logging"
@@ -12,4 +14,4 @@ class Command(BaseCommand):
         try:
             raise ValueError("AHHHH THE WORLD IS ON FIRE")
         except ValueError as e:
-            logging.error(str(e))
+            logger.error(str(e))

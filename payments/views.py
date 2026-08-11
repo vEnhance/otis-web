@@ -35,6 +35,8 @@ from roster.models import Invoice, Student
 
 from .models import PaymentLog, Worker
 
+logger = logging.getLogger(__name__)
+
 
 def invoice(request: HttpRequest, student_pk: int, checksum: str) -> HttpResponse:
     student = get_object_or_404(Student, pk=student_pk)
@@ -114,26 +116,26 @@ def webhook(request: HttpRequest) -> HttpResponse:
     payload = request.body
     if "HTTP_STRIPE_SIGNATURE" not in request.META:
         if settings.PRODUCTION:
-            logging.error(f"No HTTP_STRIPE_SIGNATURE in request.META = {request.META}")
+            logger.error(f"No HTTP_STRIPE_SIGNATURE in request.META = {request.META}")
         return HttpResponse(status=400)
     sig_header: str = request.META["HTTP_STRIPE_SIGNATURE"]
-    # logging.debug(payload)
+    # logger.debug(payload)
 
     try:
         event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
     except ValueError as e:
         # Invalid payload
         if settings.PRODUCTION:
-            logging.error(f"Invalid payload for {str(e)}")
+            logger.error(f"Invalid payload for {e!s}")
         return HttpResponse(status=400)
     except stripe.error.SignatureVerificationError as e:  # type: ignore
         # Invalid signature
         if settings.PRODUCTION:
-            logging.error(f"Invalid signature for {str(e)}")
+            logger.error(f"Invalid signature for {e!s}")
         return HttpResponse(status=400)
 
     # Handle the checkout.session.completed event
-    logging.debug(event)
+    logger.debug(event)
     if event["type"] == "checkout.session.completed":
         process_payment(
             amount=int(event["data"]["object"]["amount_total"] / 100),

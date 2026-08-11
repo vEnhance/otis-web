@@ -182,7 +182,7 @@ def leaderboard(request: AuthHttpRequest, hunt_slug: str) -> HttpResponse:
             "has_early_access": user_early_record[user_pk],
         }
 
-    MAX_DATETIME = datetime.datetime.max.replace(tzinfo=datetime.timezone.utc)
+    MAX_DATETIME = datetime.datetime.max.replace(tzinfo=datetime.UTC)
     sorted_user_pks = sorted(
         user_solve_record.keys(),
         key=lambda user_pk: (

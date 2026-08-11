@@ -1,6 +1,6 @@
 import string
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Literal
 
 from django.conf import settings
 from django.core.exceptions import SuspiciousOperation
@@ -20,7 +20,7 @@ def validate_puid(puid: str) -> None:
 
 def get_disk_statement_from_puid(
     puid: str, fmt: StatementFormat = "html"
-) -> Optional[str]:
+) -> str | None:
     """Reads a problem statement for the given PUID off disk.
 
     The statements live in ``settings.PATH_STATEMENT_ON_DISK`` as

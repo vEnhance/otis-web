@@ -1,8 +1,6 @@
-from __future__ import unicode_literals
-
 import datetime
 import zoneinfo
-from typing import Callable
+from collections.abc import Callable
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -344,11 +342,11 @@ class UserProfile(models.Model):
     )
     last_seen = models.DateTimeField(
         help_text="Last time user was seen at all",
-        default=datetime.datetime.fromtimestamp(0, tz=datetime.timezone.utc),
+        default=datetime.datetime.fromtimestamp(0, tz=datetime.UTC),
     )
     last_notif_dismiss = models.DateTimeField(
         help_text="Last time user dismissed the notifications modal.",
-        default=datetime.datetime.fromtimestamp(0, tz=datetime.timezone.utc),
+        default=datetime.datetime.fromtimestamp(0, tz=datetime.UTC),
     )
 
     def __str__(self) -> str:

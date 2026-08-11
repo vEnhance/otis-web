@@ -11,7 +11,7 @@ from markets.admin import MarketAdmin
 from markets.factories import GuessFactory, MarketFactory
 from markets.models import Guess, Market
 
-UTC = datetime.timezone.utc
+UTC = datetime.UTC
 
 
 @pytest.fixture

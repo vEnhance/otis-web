@@ -16,8 +16,8 @@ class HanabiContestFactory(DjangoModelFactory):
 
     variant_id = 0
     variant_name = "No Variant (5 Suits)"
-    start_date = Faker("past_datetime", tzinfo=datetime.timezone.utc)
-    end_date = Faker("future_datetime", tzinfo=datetime.timezone.utc)
+    start_date = Faker("past_datetime", tzinfo=datetime.UTC)
+    end_date = Faker("future_datetime", tzinfo=datetime.UTC)
 
 
 class HanabiPlayerFactory(DjangoModelFactory):

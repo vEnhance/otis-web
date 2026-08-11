@@ -2,7 +2,7 @@ import datetime
 import os
 import random
 from hashlib import sha256
-from typing import Any, Optional
+from typing import Any
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -106,12 +106,12 @@ class Achievement(models.Model):
     )
 
     class Meta:
-        constraints = [
+        constraints = (
             models.CheckConstraint(
                 condition=~models.Q(special_effect_id=""),
                 name="%(app_label)s_%(class)s_special_effect_id_not_empty",
             ),
-        ]
+        )
 
     def __str__(self) -> str:
         return str(self.name)
@@ -197,15 +197,13 @@ class AchievementCodeGuess(models.Model):
 
     class Meta:
         verbose_name_plural = "Achievement code guesses"
-        indexes = [
-            models.Index(fields=["user", "is_correct", "timestamp"]),
-        ]
+        indexes = (models.Index(fields=["user", "is_correct", "timestamp"]),)
 
     def __str__(self) -> str:
         return f"{self.code} " + self.timestamp.strftime("%c")
 
 
-def get_guess_rate_limit_release(user: User) -> Optional[datetime.datetime]:
+def get_guess_rate_limit_release(user: User) -> datetime.datetime | None:
     """Checks whether a user has used up their wrong guesses on diamond codes.
 
     Returns the time at which the user may guess again, or None if they are

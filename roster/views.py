@@ -14,7 +14,7 @@ import collections
 import datetime
 import logging
 from collections.abc import Sequence
-from typing import Any, Optional
+from typing import Any
 
 from allauth.socialaccount.models import SocialAccount
 from braces.views import LoginRequiredMixin
@@ -190,7 +190,7 @@ def advance(request: HttpRequest, student_pk: int) -> Any:
 
 
 @login_required
-def invoice(request: HttpRequest, student_pk: Optional[int] = None) -> HttpResponse:
+def invoice(request: HttpRequest, student_pk: int | None = None) -> HttpResponse:
     if student_pk is None:
         student = infer_student(request)
         return HttpResponseRedirect(reverse("invoice", args=(student.pk,)))
@@ -199,7 +199,7 @@ def invoice(request: HttpRequest, student_pk: Optional[int] = None) -> HttpRespo
     student = get_student_by_pk(request, student_pk, payment_exempt=True)
 
     try:
-        invoice: Optional[Invoice] = student.invoice
+        invoice: Invoice | None = student.invoice
     except ObjectDoesNotExist:
         invoice = None
 
@@ -791,7 +791,7 @@ SOCIAL_PROVIDER_LABELS: dict[str, str] = {
 }
 
 
-def _social_handle(account: SocialAccount) -> Optional[str]:
+def _social_handle(account: SocialAccount) -> str | None:
     extra_data = account.extra_data
     if isinstance(extra_data, dict):
         for key in SOCIAL_HANDLE_KEYS:

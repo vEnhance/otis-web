@@ -7,7 +7,7 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import django_discordo
 import django_stubs_ext
@@ -313,7 +313,7 @@ def add_username(record: logging.LogRecord):
 
 
 # Return location of the view that handled a request.
-def _view_location(request: Any) -> Optional[tuple[str, str, int]]:
+def _view_location(request: Any) -> tuple[str, str, int] | None:
     match = getattr(request, "resolver_match", None)
     if match is None:
         return None

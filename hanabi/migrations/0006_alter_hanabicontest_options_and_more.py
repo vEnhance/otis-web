@@ -23,9 +23,7 @@ class Migration(migrations.Migration):
             model_name="hanabicontest",
             name="end_date",
             field=models.DateTimeField(
-                default=datetime.datetime(
-                    2099, 1, 1, 0, 0, tzinfo=datetime.timezone.utc
-                ),
+                default=datetime.datetime(2099, 1, 1, 0, 0, tzinfo=datetime.UTC),
                 help_text="The end_date to play this seed.",
             ),
             preserve_default=False,

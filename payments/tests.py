@@ -13,7 +13,7 @@ from roster.factories import InvoiceFactory, StudentFactory
 
 from .views import process_payment
 
-UTC = datetime.timezone.utc
+UTC = datetime.UTC
 
 
 @pytest.fixture
@@ -181,12 +181,12 @@ def test_claim_limits(otis) -> None:
     folder = JobFolderFactory.create(max_pending=3, max_total=5)
     jobs = JobFactory.create_batch(10, folder=folder)
 
-    for i in range(0, 3):
+    for i in range(3):
         otis.assert_has(
             otis.post_ok("job-claim", jobs[i].pk, follow=True),
             "You have successfully claimed",
         )
-    for i in range(0, 3):
+    for i in range(3):
         otis.assert_has(
             otis.post_ok("job-claim", jobs[i].pk, follow=True),
             "This task is already claimed",
@@ -197,7 +197,7 @@ def test_claim_limits(otis) -> None:
         "maximum number of pending tasks",
     )
 
-    for i in range(0, 3):
+    for i in range(3):
         Job.objects.filter(pk__in=[jobs[i].pk for i in range(3)]).update(
             progress="JOB_VFD"
         )

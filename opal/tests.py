@@ -12,7 +12,7 @@ from rpg.models import AchievementUnlock
 
 from .models import answerize, puzzle_file_name
 
-UTC = datetime.timezone.utc
+UTC = datetime.UTC
 
 
 @pytest.mark.django_db

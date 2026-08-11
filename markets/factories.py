@@ -16,8 +16,8 @@ class MarketFactory(DjangoModelFactory):
         model = Market
 
     semester = SubFactory(SemesterFactory)
-    start_date = Faker("past_datetime", tzinfo=datetime.timezone.utc)
-    end_date = Faker("future_datetime", tzinfo=datetime.timezone.utc)
+    start_date = Faker("past_datetime", tzinfo=datetime.UTC)
+    end_date = Faker("future_datetime", tzinfo=datetime.UTC)
 
     slug = UniqueFaker("slug")
     title = Faker("bs")

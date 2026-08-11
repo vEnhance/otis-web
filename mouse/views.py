@@ -1,9 +1,8 @@
-from datetime import datetime
-
 from django.contrib import messages
 from django.http.request import HttpRequest
 from django.http.response import HttpResponse
 from django.shortcuts import render
+from django.utils import timezone
 
 from otisweb.decorators import admin_required
 from roster.models import Student
@@ -13,7 +12,7 @@ from .forms import GraderForm, ScoreForm
 
 # Create your views here.
 
-YEAR = datetime.now().year
+YEAR = timezone.localdate().year
 
 
 @admin_required

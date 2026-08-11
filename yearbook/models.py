@@ -1,7 +1,7 @@
 import os
 import random
 import re
-from typing import NamedTuple, Optional
+from typing import NamedTuple
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -313,7 +313,7 @@ class YearbookEntry(models.Model):
         )
 
     @property
-    def otis_years(self) -> Optional[str]:
+    def otis_years(self) -> str | None:
         """A compact range like "2021-2024", for use on the listing."""
         semesters = list(self.otis_semesters)
         if not semesters:

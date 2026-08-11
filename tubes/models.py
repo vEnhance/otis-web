@@ -142,19 +142,19 @@ class OIMEContributor(models.Model):
 
 
 class OIMEProposal(models.Model):
-    SUBJECT_CHOICES = [
+    SUBJECT_CHOICES = (
         ("A", "Algebra"),
         ("C", "Combinatorics"),
         ("G", "Geometry"),
         ("N", "Number Theory"),
-    ]
-    DIFFICULTY_CHOICES = [
+    )
+    DIFFICULTY_CHOICES = (
         (1, "🔥 × 1 (AIME 1-3): 10 minutes"),
         (2, "🔥 × 2 (AIME 4-6): 15 minutes"),
         (3, "🔥 × 3 (AIME 7-9): 20 minutes"),
         (4, "🔥 × 4 (AIME 10-12): 25 minutes"),
         (5, "🔥 × 5 (AIME 13-15): 30 minutes"),
-    ]
+    )
 
     author = models.ForeignKey(
         OIMEContributor,
@@ -205,7 +205,7 @@ class OIMEProposal(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ["-created_at"]
+        ordering = ("-created_at",)
 
     def __str__(self) -> str:
         return self.label
@@ -234,13 +234,13 @@ class OIMEProposal(models.Model):
 class OIMEFight(models.Model):
     ANSWER_LIMIT = 5
 
-    STATUS_CHOICES = [
+    STATUS_CHOICES = (
         ("OIME_TBD", "In Progress"),
         ("OIME_OK", "Solved"),
         ("OIME_FAIL", "Gave Up"),
         ("OIME_TLE", "Time Limit Exceeded"),
         ("OIME_ALE", "Answer Limit Exceeded"),
-    ]
+    )
 
     contributor = models.ForeignKey(
         OIMEContributor,
@@ -258,7 +258,7 @@ class OIMEFight(models.Model):
     wrong_answers = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
-        unique_together = [("contributor", "proposal")]
+        unique_together = (("contributor", "proposal"),)
 
     def __str__(self) -> str:
         return f"{self.contributor} on {self.proposal}"
@@ -313,7 +313,7 @@ class OIMEComment(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ["created_at"]
+        ordering = ("created_at",)
 
     def __str__(self) -> str:
         return f"Comment by {self.author} on {self.proposal}"

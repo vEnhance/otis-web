@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import reversion
 from django.contrib.auth.models import User
@@ -40,14 +40,14 @@ class Problem(models.Model):
     def get_absolute_url(self):
         return reverse("hint-list", args=(self.puid,))
 
-    def get_html_statement(self) -> Optional[str]:
+    def get_html_statement(self) -> str | None:
         return get_disk_statement_from_puid(self.puid, "html")
 
-    def get_tex_statement(self) -> Optional[str]:
+    def get_tex_statement(self) -> str | None:
         return get_disk_statement_from_puid(self.puid, "tex")
 
     @property
-    def niceness(self) -> Optional[float]:
+    def niceness(self) -> float | None:
         votes: models.QuerySet[Vote] = self.vote_set.all()
         if len(votes) > 0:
             return round(sum(vote.niceness for vote in votes) / len(votes), 2)

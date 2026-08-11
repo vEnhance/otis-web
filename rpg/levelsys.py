@@ -1,7 +1,7 @@
 # Functions to compute student levels and whatnot
 import datetime
 import logging
-from typing import Any, Set, Tuple, TypedDict, Union
+from typing import Any, TypedDict
 
 from django.db.models.aggregates import Count, Max, Sum
 from django.db.models.expressions import OuterRef, Subquery
@@ -32,7 +32,7 @@ from .models import (
 BONUS_D_UNIT = 0.3
 BONUS_Z_UNIT = 0.5
 
-SuggestUnitSet = Set[Tuple[int, str, str]]
+SuggestUnitSet = set[tuple[int, str, str]]
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +42,7 @@ class Meter:
         self,
         name: str,
         emoji: str,
-        value: Union[float, int],
+        value: float,
         unit: str,
         color: str,
         max_value: int,
@@ -148,7 +148,7 @@ class Meter:
         )
 
 
-AggregateDict = dict[str, Union[int, float]]
+AggregateDict = dict[str, int | float]
 
 
 class FourMetersDict(TypedDict):
@@ -229,7 +229,7 @@ def get_level_info(student: Student) -> LevelInfoDict:
 
 def get_clubs_hearts_stats(
     student: Student, leveldict: LevelInfoDict = None
-) -> Tuple[float, int]:
+) -> tuple[float, int]:
     psets = PSet.objects.filter(student__user=student.user, status="A", eligible=True)
     psets = psets.order_by("upload__created_at")
     pset_data = psets.aggregate(
@@ -426,13 +426,11 @@ def get_student_rows(queryset: QuerySet[Student]) -> list[dict[str, Any]]:
         try:
             row["last_seen"] = student.user.profile.last_seen
         except UserProfile.DoesNotExist:
-            row["last_seen"] = datetime.datetime.fromtimestamp(
-                0, tz=datetime.timezone.utc
-            )
+            row["last_seen"] = datetime.datetime.fromtimestamp(0, tz=datetime.UTC)
         row["insanity"] = compute_insanity_rating(
-            getattr(student, "pset_B_count"),
-            getattr(student, "pset_D_count"),
-            getattr(student, "pset_Z_count"),
+            student.pset_B_count,  # type: ignore
+            student.pset_D_count,  # type: ignore
+            student.pset_Z_count,  # type: ignore
         )
         if row["level"] > max_level:
             row["level_name"] = levels[max_level]
