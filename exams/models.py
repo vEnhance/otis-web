@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import datetime
 import string
 
@@ -7,6 +5,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 from django.db import models
 from django.urls.base import reverse
+from django.utils import timezone
 
 from exams.calculator import expr_compute
 from roster.models import Student
@@ -16,10 +15,14 @@ def expr_validator(value: str):
     try:
         x = float(expr_compute(value) or 0)
         assert abs(x) < 1e10000
-    except OverflowError:
-        raise ValidationError(r"This result has absolute value too large to parse.")
-    except Exception:
-        raise ValidationError("Could not evaluate this expression, please fix it")
+    except OverflowError as e:
+        raise ValidationError(
+            r"This result has absolute value too large to parse."
+        ) from e
+    except Exception as e:
+        raise ValidationError(
+            "Could not evaluate this expression, please fix it"
+        ) from e
 
 
 def expr_validator_multiple(value: str):
@@ -99,7 +102,7 @@ class PracticeExam(models.Model):
 
     @property
     def overdue(self) -> bool:
-        return (self.due_date is not None) and (self.due_date < datetime.date.today())
+        return (self.due_date is not None) and (self.due_date < timezone.localdate())
 
     @property
     def deadline(self) -> datetime.datetime | None:
@@ -113,14 +116,14 @@ class PracticeExam(models.Model):
         return (
             self.due_date is not None
             and self.is_test is False
-            and datetime.date.today() >= self.due_date + datetime.timedelta(days=-9)
+            and timezone.localdate() >= self.due_date + datetime.timedelta(days=-9)
         )
 
     @property
     def started(self) -> bool:
         if self.start_date is None:
             return True
-        return self.start_date <= datetime.date.today()
+        return self.start_date <= timezone.localdate()
 
     @property
     def current(self) -> bool:

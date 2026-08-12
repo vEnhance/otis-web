@@ -645,7 +645,7 @@ class Migration(migrations.Migration):
                     models.DateTimeField(
                         auto_now_add=True,
                         default=datetime.datetime(
-                            1970, 1, 1, 0, 0, tzinfo=datetime.timezone.utc
+                            1970, 1, 1, 0, 0, tzinfo=datetime.UTC
                         ),
                     ),
                 ),

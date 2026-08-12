@@ -78,7 +78,7 @@ def verify_corner_stamp(text: str) -> CornerStamp | None:
     pk, epoch, sig = match.groups()
     if not hmac.compare_digest(_sign(f"{pk}:{epoch}"), sig):
         return None
-    when = datetime.datetime.fromtimestamp(int(epoch), tz=datetime.timezone.utc)
+    when = datetime.datetime.fromtimestamp(int(epoch), tz=datetime.UTC)
     return CornerStamp(pk=int(pk), when=when)
 
 

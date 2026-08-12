@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -50,7 +50,7 @@ def quiz(request: AuthHttpRequest, student_pk: int, pk: int) -> HttpResponse:
     if student.semester.exam_family != quiz.family:
         raise PermissionDenied("You can't access this quiz.")
 
-    attempt: Optional[ExamAttempt] = None
+    attempt: ExamAttempt | None = None
     try:
         attempt = ExamAttempt.objects.get(student=student, quiz=pk)
     except ExamAttempt.DoesNotExist:
@@ -90,9 +90,10 @@ def quiz(request: AuthHttpRequest, student_pk: int, pk: int) -> HttpResponse:
             guess_val = expr_compute(guess_str)
             accepted_str = getattr(quiz, f"answer{i}")
             accepted_vals = [expr_compute(_) for _ in accepted_str.split(",") if _]
-            if len(guess_str.replace(" ", "")) > 24:
-                correct = False
-            elif len([_ for _ in guess_str if _ in "+-*/^"]) > 4:
+            if (
+                len(guess_str.replace(" ", "")) > 24
+                or len([_ for _ in guess_str if _ in "+-*/^"]) > 4
+            ):
                 correct = False
             elif guess_val is not None:
                 correct = any(

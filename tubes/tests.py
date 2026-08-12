@@ -161,7 +161,7 @@ def test_create_proposal_prefills_credit(otis):
 
 @pytest.mark.django_db
 def test_credit_saved_on_create(otis):
-    user, contributor = _verified_contributor()
+    user, _ = _verified_contributor()
     otis.login(user)
     otis.post(
         "oime-proposal-create",
@@ -317,7 +317,7 @@ def test_staff_can_update_any_proposal(otis):
 
 @pytest.mark.django_db
 def test_archived_hidden_from_regular_users(otis):
-    user, contributor = _verified_contributor()
+    user, _ = _verified_contributor()
     other_proposal = OIMEProposalFactory.create(archived=True)
     otis.login(user)
     resp = otis.get_20x("oime-proposal-list")
@@ -471,7 +471,7 @@ def test_draft_viewable_by_its_author(otis):
 
 @pytest.mark.django_db
 def test_create_proposal_as_draft(otis):
-    user, contributor = _verified_contributor()
+    user, _ = _verified_contributor()
     otis.login(user)
     otis.post(
         "oime-proposal-create",

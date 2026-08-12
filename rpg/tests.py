@@ -33,7 +33,7 @@ from rpg.models import (
     AchievementUnlock,
 )
 
-UTC = datetime.timezone.utc
+UTC = datetime.UTC
 
 
 @pytest.fixture
@@ -202,49 +202,49 @@ def test_multi_student_annotate(otis, alice_with_data):
     carol = queryset.get(pk=carol.pk)
     donald = queryset.get(pk=donald.pk)
 
-    assert getattr(alice, "num_psets") == 3
-    assert getattr(alice, "clubs_any") == 400
-    assert getattr(alice, "clubs_D") == 100
-    assert getattr(alice, "clubs_Z") == 180
-    assert getattr(alice, "hearts") == 84
-    assert getattr(alice, "num_semesters") == 1
-    assert getattr(alice, "spades_quizzes") == 7
-    assert getattr(alice, "spades_quests") == 5
-    assert getattr(alice, "spades_jobs") == 7
-    assert getattr(alice, "diamonds") == 11
+    assert alice.num_psets == 3
+    assert alice.clubs_any == 400
+    assert alice.clubs_D == 100
+    assert alice.clubs_Z == 180
+    assert alice.hearts == 84
+    assert alice.num_semesters == 1
+    assert alice.spades_quizzes == 7
+    assert alice.spades_quests == 5
+    assert alice.spades_jobs == 7
+    assert alice.diamonds == 11
 
-    assert getattr(bob, "num_psets") == 2
-    assert getattr(bob, "clubs_any") == 196
-    assert getattr(bob, "clubs_D") == 196
-    assert getattr(bob, "clubs_Z") is None
-    assert getattr(bob, "hearts") == 64
-    assert getattr(bob, "num_semesters") == 1
-    assert getattr(bob, "spades_quizzes") == 3
-    assert getattr(bob, "spades_quests") is None
-    assert getattr(bob, "spades_jobs") == 4
-    assert getattr(bob, "diamonds") == 6
+    assert bob.num_psets == 2
+    assert bob.clubs_any == 196
+    assert bob.clubs_D == 196
+    assert bob.clubs_Z is None
+    assert bob.hearts == 64
+    assert bob.num_semesters == 1
+    assert bob.spades_quizzes == 3
+    assert bob.spades_quests is None
+    assert bob.spades_jobs == 4
+    assert bob.diamonds == 6
 
-    assert getattr(carol, "num_psets") == 0
-    assert getattr(carol, "clubs_any") is None
-    assert getattr(carol, "clubs_D") is None
-    assert getattr(carol, "clubs_Z") is None
-    assert getattr(carol, "hearts") is None
-    assert getattr(carol, "num_semesters") == 1
-    assert getattr(carol, "spades_quizzes") == 6
-    assert getattr(carol, "spades_quests") == 5
-    assert getattr(carol, "spades_jobs") is None
-    assert getattr(carol, "diamonds") == 9
+    assert carol.num_psets == 0
+    assert carol.clubs_any is None
+    assert carol.clubs_D is None
+    assert carol.clubs_Z is None
+    assert carol.hearts is None
+    assert carol.num_semesters == 1
+    assert carol.spades_quizzes == 6
+    assert carol.spades_quests == 5
+    assert carol.spades_jobs is None
+    assert carol.diamonds == 9
 
-    assert getattr(donald, "num_psets") == 0
-    assert getattr(donald, "clubs_any") is None
-    assert getattr(donald, "clubs_D") is None
-    assert getattr(donald, "clubs_Z") is None
-    assert getattr(donald, "hearts") is None
-    assert getattr(donald, "num_semesters") == 1
-    assert getattr(donald, "spades_quizzes") is None
-    assert getattr(donald, "spades_quests") is None
-    assert getattr(donald, "spades_jobs") is None
-    assert getattr(donald, "diamonds") is None
+    assert donald.num_psets == 0
+    assert donald.clubs_any is None
+    assert donald.clubs_D is None
+    assert donald.clubs_Z is None
+    assert donald.hearts is None
+    assert donald.num_semesters == 1
+    assert donald.spades_quizzes is None
+    assert donald.spades_quests is None
+    assert donald.spades_jobs is None
+    assert donald.diamonds is None
 
     rows = get_student_rows(queryset)
     rows.sort(key=lambda row: row["student"].pk)
@@ -439,7 +439,7 @@ def test_palace(otis):
     LevelFactory.reset_sequence()
     LevelFactory.create_batch(size=5)
 
-    for i in range(0, 4):
+    for i in range(4):
         AchievementUnlockFactory.create(
             user=alice.user, achievement__diamonds=2 * i + 1
         )

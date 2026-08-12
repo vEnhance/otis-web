@@ -1,5 +1,5 @@
 import zoneinfo
-from typing import Any, Optional
+from typing import Any
 
 from braces.views import LoginRequiredMixin
 from django.contrib import messages
@@ -83,7 +83,8 @@ class UnitGroupListView(LoginRequiredMixin, ListView[Unit]):
     template_name = "core/unit_list.html"
 
     def get_queryset(self):
-        assert isinstance(user := self.request.user, User)
+        user = self.request.user
+        assert isinstance(user, User)
         students = Student.objects.filter(user=user)
         active_student = students.filter(semester__active=True).first()
         level = students.aggregate(level=Max("last_level_seen"))["level"] or 0
@@ -150,7 +151,7 @@ class UnitGroupListView(LoginRequiredMixin, ListView[Unit]):
 
     def get_form(self) -> CatalogFilterForm:
         if self.request.GET and any(
-            field in self.request.GET for field in CatalogFilterForm.base_fields.keys()
+            field in self.request.GET for field in CatalogFilterForm.base_fields
         ):
             form = CatalogFilterForm(self.request.GET)
         else:
@@ -226,31 +227,29 @@ def permitted(unit: Unit, request: HttpRequest, asking_solution: bool) -> bool:
         return True
     elif isinstance(request.user, AnonymousUser):
         return False
-    elif PSet.objects.filter(student__user=request.user, unit=unit).exists():
-        return True
-    elif UploadedFile.objects.filter(
-        benefactor__semester__uses_legacy_pset_system=True,
-        benefactor__user=request.user,
-        category="psets",
-        unit=unit,
-    ).exists():
-        return True
     elif (
-        not asking_solution
-        and Student.objects.filter(user=request.user, unlocked_units=unit).exists()
+        PSet.objects.filter(student__user=request.user, unit=unit).exists()
+        or UploadedFile.objects.filter(
+            benefactor__semester__uses_legacy_pset_system=True,
+            benefactor__user=request.user,
+            category="psets",
+            unit=unit,
+        ).exists()
+        or (
+            not asking_solution
+            and Student.objects.filter(user=request.user, unlocked_units=unit).exists()
+        )
+        or Student.objects.filter(
+            user=request.user,
+            unlocked_units=unit,
+            semester__active=False,
+        ).exists()
+        or Student.objects.filter(
+            user=request.user,
+            unlocked_units=unit,
+            enabled=False,
+        ).exists()
     ):
-        return True
-    elif Student.objects.filter(
-        user=request.user,
-        unlocked_units=unit,
-        semester__active=False,
-    ).exists():
-        return True
-    elif Student.objects.filter(
-        user=request.user,
-        unlocked_units=unit,
-        enabled=False,
-    ).exists():
         return True
     return False
 
@@ -312,7 +311,7 @@ class UserProfileUpdateView(
     def get_success_message(self, cleaned_data: dict[str, Any]) -> str:
         return f"Updated settings for {self.object.user.username}!"
 
-    def get_object(self, queryset: Optional[QuerySet[Model]] = None) -> UserProfile:
+    def get_object(self, queryset: QuerySet[Model] | None = None) -> UserProfile:
         userprofile, _ = UserProfile.objects.get_or_create(user=self.request.user)
         return userprofile
 

@@ -90,7 +90,7 @@ def handle_diamond_guess(
         not AchievementUnlock.objects.filter(achievement=achievement)
         .exclude(achievement__creator=F("user"))
         .exists()
-    ) and not achievement.creator == student.user
+    ) and achievement.creator != student.user
     _, is_new = AchievementUnlock.objects.get_or_create(
         user=student.user,
         achievement=achievement,

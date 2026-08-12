@@ -1,6 +1,5 @@
 import os
 import re
-from typing import Optional
 
 from django import template
 from django.contrib.auth.models import AnonymousUser, User
@@ -45,7 +44,7 @@ def getenv(s: str) -> str:
 
 
 @register.filter(name="getprofile")
-def getprofile(user: User) -> Optional[UserProfile]:
+def getprofile(user: User) -> UserProfile | None:
     try:
         return UserProfile.objects.get(user=user)
     except UserProfile.DoesNotExist:

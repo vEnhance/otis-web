@@ -1,5 +1,4 @@
 from datetime import timedelta
-from typing import Optional
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -173,7 +172,7 @@ class Guess(models.Model):
         if self.market.int_guesses_only is True and not self.value.is_integer():
             raise ValidationError({"value": "This market only allows integer guesses."})
 
-    def get_score(self) -> Optional[float]:
+    def get_score(self) -> float | None:
         if self.market.answer is None or self.market.alpha is None:
             return None
         a = round(self.market.answer, ndigits=6)

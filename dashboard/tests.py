@@ -41,7 +41,7 @@ from roster.factories import (
 from rpg.factories import BonusLevelFactory
 from rpg.models import Level
 
-UTC = datetime.timezone.utc
+UTC = datetime.UTC
 
 
 @pytest.mark.django_db

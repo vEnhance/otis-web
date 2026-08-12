@@ -1,5 +1,5 @@
 import itertools
-from typing import Any, Optional
+from typing import Any, ClassVar
 
 from django import forms
 from django.contrib.auth.models import User
@@ -43,12 +43,12 @@ class CurriculumForm(forms.Form):
             itertools.groupby(units, lambda u: u.group.name)
         ):
             group = list(group_iter)
-            field_name = f"group-{str(n)}"
+            field_name = f"group-{n!s}"
             chosen_units = [unit for unit in group if unit.pk in original]
 
             form_kwargs = {
                 "label": name,
-                "choices": tuple(((unit.pk, unit.code) for unit in group)),
+                "choices": tuple((unit.pk, unit.code) for unit in group),
                 "help_text": " ".join([unit.code for unit in group]),
                 "required": False,
                 "label_suffix": "aoeu",
@@ -131,7 +131,7 @@ class InquiryForm(forms.ModelForm):
     class Meta:
         model = UnitInquiry
         fields = ("unit", "action_type", "explanation")
-        widgets = {
+        widgets: ClassVar[dict[str, forms.Widget]] = {
             "explanation": forms.Textarea(attrs={"cols": 40, "rows": 3}),
         }
 
@@ -252,8 +252,8 @@ class UserMergeForm(forms.Form):
 
     def clean(self) -> dict[str, Any]:
         cleaned_data: dict[str, Any] = super().clean() or {}
-        impostor: Optional[User] = cleaned_data.get("impostor")
-        crewmate: Optional[User] = cleaned_data.get("crewmate")
+        impostor: User | None = cleaned_data.get("impostor")
+        crewmate: User | None = cleaned_data.get("crewmate")
         if impostor is None or crewmate is None:
             return cleaned_data
         if impostor == crewmate:

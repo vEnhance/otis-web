@@ -7,9 +7,8 @@ Provides the same conveniences as EvanTestCase but in pytest-style fixtures.
 import json
 import logging
 import pprint
-from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Union
+from typing import TYPE_CHECKING, Any
 
 import pytest
 from django.conf import settings
@@ -18,13 +17,16 @@ from django.db import models
 from django.test import RequestFactory
 from django.test.client import Client
 from django.urls.base import resolve, reverse
+from django.utils import timezone
 
 if TYPE_CHECKING:  # pragma: no cover
-    from django.test.client import _MonkeyPatchedWSGIResponse  # type: ignore  # NOQA
+    from django.test.client import _MonkeyPatchedWSGIResponse  # type: ignore
 
     MonkeyResponseType = _MonkeyPatchedWSGIResponse  # type: ignore
 else:
     MonkeyResponseType = Any
+
+logger = logging.getLogger(__name__)
 
 
 class OTISClient:
@@ -44,7 +46,7 @@ class OTISClient:
         return "\n" + pprint.pformat(d, compact=False, depth=3) + "\n"
 
     def debug_dump(self, response: MonkeyResponseType) -> None:
-        timestamp = datetime.now().strftime("%d_%b_%Y_%H%M%S")
+        timestamp = timezone.localtime().strftime("%d_%b_%Y_%H%M%S")
         html_path = Path(f"/tmp/{settings.WSGI_APPLICATION}.tests/{timestamp}.html")
         txt_path = Path(f"/tmp/{settings.WSGI_APPLICATION}.tests/{timestamp}.txt")
 
@@ -54,7 +56,7 @@ class OTISClient:
             pass
         else:
             if len(response.content) > 0:
-                logging.info(f"Wrote to {html_path}")
+                logger.info(f"Wrote to {html_path}")
                 html_path.write_bytes(response.content)
                 txt_path.write_text(pprint.pformat(response.__dict__, depth=3))
 
@@ -118,7 +120,7 @@ class OTISClient:
     def assert_has(
         self,
         response: MonkeyResponseType,
-        text: Union[bytes, int, str, Any],
+        text: bytes | int | str | Any,
         count: int = 0,
     ) -> MonkeyResponseType:
         if isinstance(text, int):
@@ -143,7 +145,7 @@ class OTISClient:
         return response
 
     def assert_not_has(
-        self, response: MonkeyResponseType, text: Union[bytes, str]
+        self, response: MonkeyResponseType, text: bytes | str
     ) -> MonkeyResponseType:
         if isinstance(text, str):
             text = text.encode()
@@ -157,7 +159,7 @@ class OTISClient:
         return response
 
     def assert_message(
-        self, response: MonkeyResponseType, text: Union[bytes, int, str]
+        self, response: MonkeyResponseType, text: bytes | int | str
     ) -> MonkeyResponseType:
         messages = [m.message for m in response.context["messages"] or []]
         assert text in messages, f"Message {text!r} not found in {messages}"
@@ -258,7 +260,7 @@ class OTISClient:
         return self.assert_redirects(self.post(name, *args, **kwargs), target)
 
     # Login helpers
-    def login(self, obj: Union[str, models.Model]) -> User:
+    def login(self, obj: str | models.Model) -> User:
         if isinstance(obj, str):
             user = User.objects.get(username=obj)
             self.client.force_login(user)
@@ -267,7 +269,7 @@ class OTISClient:
             self.client.force_login(obj)
             return obj
         elif hasattr(obj, "user"):
-            user = getattr(obj, "user")
+            user = obj.user  # type: ignore
             self.client.force_login(user)
             return user
         else:

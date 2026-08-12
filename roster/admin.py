@@ -90,7 +90,7 @@ class ApplyUUIDAdmin(ImportExportModelAdmin):
         "enabled",
     )
     list_select_related = ("reg",)
-    resource_classes = [ApplyUUIDIEResource]
+    resource_classes = (ApplyUUIDIEResource,)
     actions = ("enable_uuids", "disable_uuids")
 
     @admin.display(description="Registered at", ordering="reg__created_at")
@@ -161,7 +161,7 @@ class AssistantAdmin(ImportExportModelAdmin):
         "unlisted_students",
     )
     inlines = (StudentInline,)
-    resource_classes = [AssistantIEResource]
+    resource_classes = (AssistantIEResource,)
 
 
 # INVOICE
@@ -257,7 +257,7 @@ class InvoiceAdmin(ImportExportModelAdmin):
         ("memo", admin.EmptyFieldListFilter),
         "student__semester",
     )
-    resource_classes = [InvoiceIEResource]
+    resource_classes = (InvoiceIEResource,)
 
 
 # STUDENT
@@ -347,7 +347,7 @@ class StudentAdmin(ImportExportModelAdmin):
         InvoiceInline,
         UnlistedInline,
     )
-    resource_classes = [StudentIEResource]
+    resource_classes = (StudentIEResource,)
 
 
 # REG FORM
@@ -402,7 +402,7 @@ class StudentRegistrationAdmin(ImportExportModelAdmin):
         "name",
         "container",
     )
-    resource_classes = [StudentRegistrationIEResource]
+    resource_classes = (StudentRegistrationIEResource,)
     search_fields = ("user__first_name", "user__last_name")
     inlines = (StudentRegistrationStudentInline,)
 

@@ -5,7 +5,7 @@ from datetime import timedelta
 from decimal import Decimal
 from hashlib import sha256
 from json.decoder import JSONDecodeError
-from typing import Any, Literal, TypedDict, Union
+from typing import Any, Literal, TypedDict
 
 from allauth.socialaccount.models import SocialAccount
 from django.conf import settings
@@ -34,6 +34,8 @@ from roster.models import (
     UnitInquiry,
 )
 from suggestions.models import ProblemSuggestion
+
+logger = logging.getLogger(__name__)
 
 
 class HintData(TypedDict):
@@ -76,7 +78,7 @@ class JSONData(TypedDict):
 
     # invoice
     entries: dict[str, float]
-    field: Union[Literal["adjustment"], Literal["extras"], Literal["total_paid"]]
+    field: Literal["adjustment", "extras", "total_paid"]
 
     # jobs
     progress: str
@@ -88,10 +90,9 @@ class JSONData(TypedDict):
     num_suits: int
     replays: list[ReplayData]
 
-    # announcement
+    # announcement (also reuses `content` above)
     slug: str
     subject: str
-    content: str
 
     # ApplyUUID
     uuid: str
@@ -307,7 +308,7 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
                 if pset.student.unlocked_units.count() < 9:
                     pset.student.unlocked_units.add(pset.next_unit_to_unlock)
                 else:
-                    logging.error(
+                    logger.error(
                         f"{pset.student} somehow already has 9 units "
                         f"after submitting {pset.unit} "
                         f"and trying to unlock {pset.next_unit_to_unlock}."
@@ -342,14 +343,14 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
                     student__semester__active=True, student__user=job.assignee.user
                 )
             except Invoice.DoesNotExist:
-                logging.warning(f"Could not get invoice for {job.assignee.user}")
+                logger.warning(f"Could not get invoice for {job.assignee.user}")
                 return JsonResponse({"result": "failed", "changed": False}, status=400)
             else:
                 invoice.credits += job.usd_bounty
                 invoice.save()
         return JsonResponse({"result": "success", "changed": True}, status=200)
     else:
-        raise Exception("No such command")
+        raise SuspiciousOperation("No such command")
 
 
 def discord_handler(action: str, data: JSONData) -> JsonResponse:
@@ -371,7 +372,7 @@ def discord_handler(action: str, data: JSONData) -> JsonResponse:
     regform = StudentRegistration.objects.filter(user=user).order_by("-pk").first()
 
     if student is not None:
-        logging.info(
+        logger.info(
             f"Student {student} /register'd with Discord ID {uid}, aka {social.user.username}",
         )
         return JsonResponse(
@@ -502,7 +503,7 @@ def invoice_handler(action: str, data: JSONData) -> JsonResponse:
         prefetch_related_objects(invoices_to_update, "paymentlog_set")
         for inv in invoices_to_update:
             logs: QuerySet[Invoice] = inv.paymentlog_set.filter(refunded=False)  # type: ignore
-            stripe_paid: Union[Decimal, int] = logs.aggregate(s=Sum("amount"))["s"] or 0
+            stripe_paid: Decimal | int = logs.aggregate(s=Sum("amount"))["s"] or 0
             inv.total_paid += stripe_paid
 
     Invoice.objects.bulk_update(

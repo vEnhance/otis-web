@@ -1,5 +1,4 @@
-from collections.abc import Awaitable
-from typing import Callable, TypeVar
+from collections.abc import Awaitable, Callable
 
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import AbstractBaseUser, AnonymousUser, User
@@ -7,10 +6,7 @@ from django.core.exceptions import PermissionDenied
 from django.http.response import HttpResponseBase
 
 AnyUser = AbstractBaseUser | AnonymousUser
-
-_VIEW = TypeVar(
-    "_VIEW", bound=Callable[..., HttpResponseBase | Awaitable[HttpResponseBase]]
-)
+ViewFunc = Callable[..., HttpResponseBase | Awaitable[HttpResponseBase]]
 
 
 def auth_test(
@@ -28,7 +24,7 @@ def auth_test(
     return ret
 
 
-def verified_required(view_func: _VIEW) -> _VIEW:
+def verified_required[V: ViewFunc](view_func: V) -> V:
     """
     Decorator for views that checks that the user is logged in and is in Verified group.
     Redirects anonymous users; 403 error otherwise.
@@ -42,7 +38,7 @@ def verified_required(view_func: _VIEW) -> _VIEW:
     return actual_decorator(view_func)
 
 
-def staff_required(view_func: _VIEW) -> _VIEW:
+def staff_required[V: ViewFunc](view_func: V) -> V:
     """
     Decorator for views that checks that the user is logged in and is staff.
     Redirects anonymous users; 403 error otherwise.
@@ -56,7 +52,7 @@ def staff_required(view_func: _VIEW) -> _VIEW:
     return actual_decorator(view_func)
 
 
-def admin_required(view_func: _VIEW) -> _VIEW:
+def admin_required[V: ViewFunc](view_func: V) -> V:
     """
     Decorator for views that checks that the user is logged in and is an admin.
     Redirects anonymous users; 403 error otherwise.

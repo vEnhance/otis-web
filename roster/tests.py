@@ -43,7 +43,7 @@ from roster.models import (
 
 from .admin import ApplyUUIDIEResource
 
-UTC = datetime.timezone.utc
+UTC = datetime.UTC
 
 
 @pytest.mark.django_db
@@ -342,7 +342,7 @@ def test_giga_chart(otis) -> None:
         StudentFactory.create(
             reg=StudentRegistrationFactory.create(), semester=semester
         )
-        for _ in range(0, 30)
+        for _ in range(30)
     ]
 
     for student in students:

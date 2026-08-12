@@ -1,6 +1,5 @@
 import datetime
 import logging
-from typing import Optional
 
 from django.contrib.auth.models import User
 from django.http import HttpRequest
@@ -13,7 +12,7 @@ class AuthHttpRequest(HttpRequest):
     user: User
 
 
-def get_days_since(t: Optional[datetime.datetime]) -> Optional[float]:
+def get_days_since(t: datetime.datetime | None) -> float | None:
     if t is None:
         return None
     return (timezone.now() - t).total_seconds() / (3600 * 24)

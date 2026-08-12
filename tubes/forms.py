@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, ClassVar
 
 from django import forms
 
@@ -8,11 +8,11 @@ from .models import OIMEComment, OIMEContributor, OIMEProposal
 class OIMEContributorForm(forms.ModelForm[OIMEContributor]):
     class Meta:
         model = OIMEContributor
-        fields = [
+        fields = (
             "display_name",
             "hide_from_leaderboards",
             "hide_from_acknowledgments",
-        ]
+        )
 
 
 class OIMEProposalForm(forms.ModelForm[OIMEProposal]):
@@ -28,7 +28,7 @@ class OIMEProposalForm(forms.ModelForm[OIMEProposal]):
 
     class Meta:
         model = OIMEProposal
-        fields = [
+        fields = (
             "title",
             "credit",
             "statement",
@@ -37,8 +37,8 @@ class OIMEProposalForm(forms.ModelForm[OIMEProposal]):
             "subject",
             "difficulty",
             "is_draft",
-        ]
-        widgets = {
+        )
+        widgets: ClassVar[dict[str, forms.Widget]] = {
             "statement": forms.Textarea(attrs={"rows": 6}),
             "solution": forms.Textarea(attrs={"rows": 10}),
         }
@@ -64,7 +64,7 @@ class OIMEAnswerForm(forms.Form):
 class OIMECommentForm(forms.ModelForm[OIMEComment]):
     class Meta:
         model = OIMEComment
-        fields = ["content"]
-        widgets = {
+        fields = ("content",)
+        widgets: ClassVar[dict[str, forms.Widget]] = {
             "content": forms.Textarea(attrs={"rows": 4, "class": "form-control"}),
         }

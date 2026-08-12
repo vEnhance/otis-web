@@ -1,5 +1,3 @@
-from typing import Optional
-
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
@@ -14,7 +12,7 @@ from . import models
 
 
 def get_current_students(
-    queryset: Optional[QuerySet[Student]] = None,
+    queryset: QuerySet[Student] | None = None,
 ) -> QuerySet[Student]:
     if queryset is None:
         queryset = models.Student.objects.all()

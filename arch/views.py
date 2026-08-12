@@ -1,5 +1,5 @@
 import logging
-from typing import Any, ClassVar, Optional
+from typing import Any, ClassVar
 
 import reversion
 from django.contrib import messages
@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 class HintObjectView:
     kwargs: ClassVar[dict[str, Any]] = {}
 
-    def get_object(self, queryset: Optional[QuerySet[Hint]] = None) -> Hint:
+    def get_object(self, queryset: QuerySet[Hint] | None = None) -> Hint:
         if queryset is None:
             queryset = self.get_queryset()  # type: ignore
         assert queryset is not None
@@ -45,7 +45,7 @@ class HintObjectView:
 class ProblemObjectView:
     kwargs: ClassVar[dict[str, Any]] = {}
 
-    def get_object(self, queryset: Optional[QuerySet[Problem]] = None) -> Problem:
+    def get_object(self, queryset: QuerySet[Problem] | None = None) -> Problem:
         if queryset is None:
             queryset = self.get_queryset()  # type: ignore
         assert queryset is not None

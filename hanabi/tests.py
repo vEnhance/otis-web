@@ -7,7 +7,7 @@ from core.factories import GroupFactory, UserFactory
 from hanabi.factories import HanabiContestFactory, HanabiReplayFactory
 from hanabi.models import HanabiContest, HanabiPlayer
 
-UTC = datetime.timezone.utc
+UTC = datetime.UTC
 
 
 @pytest.mark.django_db

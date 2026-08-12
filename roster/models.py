@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import os
 from _pydecimal import Decimal
 from datetime import datetime, timedelta
@@ -255,12 +253,9 @@ class Student(models.Model):
     def check_unit_unlocked(self, unit: Unit) -> bool:
         if self.newborn:
             return False
-        elif self.unlocked_units.filter(pk=unit.pk).exists():
+        if self.unlocked_units.filter(pk=unit.pk).exists():
             return True
-        elif self.has_submitted_pset(unit):
-            return True
-        else:
-            return False
+        return self.has_submitted_pset(unit)
 
     def generate_curriculum_rows(self) -> list[CurriculumRowTypeDict]:
         curriculum = self.generate_curriculum_queryset().order_by("position")
@@ -282,8 +277,8 @@ class Student(models.Model):
                 row["is_accepted"] = row["is_submitted"] and not row["is_current"]
                 row["is_rejected"] = False
             else:
-                row["is_accepted"] = getattr(unit, "accepted")
-                row["is_rejected"] = getattr(unit, "rejected")
+                row["is_accepted"] = unit.accepted  # type: ignore
+                row["is_rejected"] = unit.rejected  # type: ignore
             rows.append(row)
         return rows
 
@@ -487,7 +482,7 @@ class UnitInquiry(models.Model):
         verbose_name_plural = "Unit petitions"
 
     def __str__(self) -> str:
-        return f"{self.action_type} {str(self.unit)}"
+        return f"{self.action_type} {self.unit!s}"
 
     def run_accept(self):
         unit = self.unit

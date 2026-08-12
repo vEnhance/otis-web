@@ -336,7 +336,7 @@ class Migration(migrations.Migration):
                     "last_notif_dismiss",
                     models.DateTimeField(
                         default=datetime.datetime(
-                            1970, 1, 1, 0, 0, tzinfo=datetime.timezone.utc
+                            1970, 1, 1, 0, 0, tzinfo=datetime.UTC
                         ),
                         help_text="Last time user dismissed the notifications modal.",
                     ),
@@ -345,7 +345,7 @@ class Migration(migrations.Migration):
                     "last_seen",
                     models.DateTimeField(
                         default=datetime.datetime(
-                            1970, 1, 1, 0, 0, tzinfo=datetime.timezone.utc
+                            1970, 1, 1, 0, 0, tzinfo=datetime.UTC
                         ),
                         help_text="Last time user was seen at all",
                     ),

@@ -1,10 +1,5 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-
 import datetime
 import os
-from typing import Optional
 
 from django.contrib.auth.models import User
 from django.core.validators import (
@@ -22,7 +17,7 @@ from roster.models import Student
 
 
 def content_file_name(instance: "UploadedFile", filename: str) -> str:
-    now = datetime.datetime.now(datetime.timezone.utc)
+    now = datetime.datetime.now(datetime.UTC)
     return os.path.join(
         instance.category,
         instance.owner.username,
@@ -227,7 +222,7 @@ class PSet(models.Model):
         return reverse("pset", args=(self.pk,))
 
     @property
-    def filename(self) -> Optional[str]:
+    def filename(self) -> str | None:
         return self.upload.filename if self.upload is not None else None
 
     @property

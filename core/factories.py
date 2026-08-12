@@ -1,7 +1,8 @@
 import io
 import random
+from collections.abc import Iterable
 from functools import cache
-from typing import Any, Iterable
+from typing import Any
 
 from django.conf import settings
 from django.contrib.auth.models import Group, User

@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -16,7 +16,7 @@ from .forms import YearbookEntryForm
 from .models import YearbookEntry
 
 
-def get_own_entry(user: User) -> Optional[YearbookEntry]:
+def get_own_entry(user: User) -> YearbookEntry | None:
     return YearbookEntry.objects.filter(user=user).first()
 
 
@@ -57,7 +57,7 @@ class YearbookCreate(
     model = YearbookEntry
     form_class = YearbookEntryForm
 
-    def existing_entry_redirect(self) -> Optional[HttpResponseRedirect]:
+    def existing_entry_redirect(self) -> HttpResponseRedirect | None:
         """Nobody gets two entries; send repeat visitors to the edit form."""
         assert isinstance(self.request.user, User)
         if get_own_entry(self.request.user) is None:
@@ -92,7 +92,7 @@ class YearbookUpdate(
     model = YearbookEntry
     form_class = YearbookEntryForm
 
-    def get_object(self, queryset: Optional[QuerySet[Any]] = None) -> YearbookEntry:
+    def get_object(self, queryset: QuerySet[Any] | None = None) -> YearbookEntry:
         del queryset
         return get_object_or_404(YearbookEntry, user=self.request.user)
 

@@ -8,7 +8,6 @@ student has, who submitted which quiz, ...) is the same on every run.
 
 # Django models can't be imported before the app registry is ready,
 # hence the imports sitting below the django.setup() call.
-# ruff: noqa: E402
 
 import argparse
 import math

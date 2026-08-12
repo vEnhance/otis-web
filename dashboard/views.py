@@ -1,9 +1,5 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from braces.views import LoginRequiredMixin
 from django.conf import settings
@@ -102,8 +98,8 @@ def portal(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
 
 def certify(
     request: HttpRequest,
-    student_pk: Optional[int] = None,
-    checksum: Optional[str] = None,
+    student_pk: int | None = None,
+    checksum: str | None = None,
 ):
     if student_pk is None:
         student = infer_student(request)
@@ -409,7 +405,7 @@ def index(request: AuthHttpRequest) -> HttpResponse:
 
 
 @login_required
-def past(request: AuthHttpRequest, semester_pk: Optional[int] = None):
+def past(request: AuthHttpRequest, semester_pk: int | None = None):
     students = get_visible_students(request.user, current=False)
     if semester_pk is not None:
         semester = get_object_or_404(Semester, pk=semester_pk)
