@@ -35,6 +35,11 @@ urlpatterns = [
     path(r"comment/<int:pk>/edit/", views.edit_comment, name="oime-comment-edit"),
     path(r"setup/", views.oime_setup, name="oime-setup"),
     path(r"casual/", views.go_casual, name="oime-casual"),
+    path(
+        r"casual/<str:subject>/",
+        views.casual_browse,
+        name="oime-casual-browse",
+    ),
     path(r"serious/", views.go_serious, name="oime-serious"),
     path(r"", views.LandingView.as_view(), name="oime-landing"),
 ]

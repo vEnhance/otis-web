@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count
 from django.db.models.query import QuerySet
-from django.http import HttpRequest, HttpResponse
+from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.generic import CreateView, ListView, TemplateView, UpdateView
@@ -22,6 +22,8 @@ from .forms import (
     OIMEProposalForm,
 )
 from .models import OIMEComment, OIMEContributor, OIMEFight, OIMEProposal
+
+SUBJECT_NAMES = dict(OIMEProposal.SUBJECT_CHOICES)
 
 GIVE_UP_RATE_LIMIT = 2  # max give-ups allowed within the window
 GIVE_UP_WINDOW_MINUTES = 10
@@ -251,6 +253,51 @@ def go_serious(request: HttpRequest) -> HttpResponse:
     )
 
 
+@verified_required
+def casual_browse(request: HttpRequest, subject: str) -> HttpResponse:
+    """Every unspoiled statement in one subject, on a single scrollable page.
+
+    Casual mode only. The point of ranked mode is that a statement is seen for the
+    first time under the clock, so bulk-reading statements would defeat it; in casual
+    mode nothing is timed or recorded, so browsing for a problem to try is the whole
+    idea. "Unspoiled" here means the contributor has not engaged with the problem at
+    all: not their own, not revealed, and never fought.
+    """
+    if subject not in SUBJECT_NAMES:
+        raise Http404("Not an OIME subject.")
+    contributor = _get_contributor(request)
+    if contributor is None:
+        return redirect("oime-setup")
+    if not contributor.casual_mode:
+        messages.error(
+            request,
+            "Browsing problem statements in bulk is only available in casual mode.",
+        )
+        return redirect("oime-proposal-list")
+
+    proposals = (
+        OIMEProposal.objects.filter(archived=False, is_draft=False, subject=subject)
+        .exclude(author=contributor)
+        .exclude(pk__in=contributor.revealed_proposals.values("pk"))
+        .exclude(fights__contributor=contributor)
+        .select_related("author")
+        .annotate(upvote_count=Count("upvotes", distinct=True))
+        .order_by("difficulty", "-created_at")
+    )
+
+    return render(
+        request,
+        "tubes/casual_browse.html",
+        {
+            "proposals": proposals,
+            "contributor": contributor,
+            "subject": subject,
+            "subject_name": SUBJECT_NAMES[subject],
+            "subject_choices": OIMEProposal.SUBJECT_CHOICES,
+        },
+    )
+
+
 # ---------------------------------------------------------------------------
 # OIME: Proposal list / create / update
 # ---------------------------------------------------------------------------
@@ -292,6 +339,7 @@ class ProposalListView(ContributorRequiredMixin, ListView[OIMEProposal]):
             return context
 
         context["casual"] = contributor.casual_mode
+        context["subject_choices"] = OIMEProposal.SUBJECT_CHOICES
 
         user_fights: dict[int, OIMEFight] = {
             f.proposal_id: f  # type: ignore[attr-defined]

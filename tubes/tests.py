@@ -719,6 +719,132 @@ def test_casual_revealed_can_comment(otis):
 
 
 # ---------------------------------------------------------------------------
+# Casual full-statement browser
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.django_db
+def test_casual_browse_shows_unspoiled_statements_of_one_subject(otis):
+    user, contributor = _verified_contributor()
+    contributor.casual_mode = True
+    contributor.save()
+    wanted = OIMEProposalFactory.create(subject="G", statement="Geometry statement.")
+    other_subject = OIMEProposalFactory.create(subject="N", statement="Number theory.")
+    otis.login(user)
+    resp = otis.get_20x("oime-casual-browse", "G")
+    otis.assert_has(resp, "Geometry statement.")
+    otis.assert_not_has(resp, "Number theory.")
+    otis.assert_has(resp, wanted.label)
+    otis.assert_not_has(resp, other_subject.label)
+
+
+@pytest.mark.django_db
+def test_casual_browse_never_shows_answers_or_solutions(otis):
+    user, contributor = _verified_contributor()
+    contributor.casual_mode = True
+    contributor.save()
+    OIMEProposalFactory.create(subject="A", answer=123, solution="Secret solution.")
+    otis.login(user)
+    resp = otis.get_20x("oime-casual-browse", "A")
+    otis.assert_not_has(resp, "Secret solution.")
+    otis.assert_not_has(resp, "oime-answer-section")
+
+
+@pytest.mark.django_db
+def test_casual_browse_omits_spoiled_problems(otis):
+    user, contributor = _verified_contributor()
+    contributor.casual_mode = True
+    contributor.save()
+    own = OIMEProposalFactory.create(
+        author=contributor, subject="C", statement="I wrote this."
+    )
+    revealed = OIMEProposalFactory.create(subject="C", statement="Already revealed.")
+    contributor.revealed_proposals.add(revealed)
+    fought = OIMEProposalFactory.create(subject="C", statement="Already fought.")
+    OIMEFightFactory.create(
+        contributor=contributor, proposal=fought, status="OIME_FAIL"
+    )
+    fresh = OIMEProposalFactory.create(subject="C", statement="Brand new one.")
+    otis.login(user)
+    resp = otis.get_20x("oime-casual-browse", "C")
+    otis.assert_has(resp, "Brand new one.")
+    for proposal in (own, revealed, fought):
+        otis.assert_not_has(resp, proposal.statement)
+    assert list(resp.context["proposals"]) == [fresh]
+
+
+@pytest.mark.django_db
+def test_casual_browse_hides_archived_and_drafts(otis):
+    user, contributor = _verified_contributor()
+    contributor.casual_mode = True
+    contributor.save()
+    OIMEProposalFactory.create(subject="N", archived=True, statement="Archived one.")
+    OIMEProposalFactory.create(subject="N", is_draft=True, statement="Draft one.")
+    otis.login(user)
+    resp = otis.get_20x("oime-casual-browse", "N")
+    otis.assert_not_has(resp, "Archived one.")
+    otis.assert_not_has(resp, "Draft one.")
+
+
+@pytest.mark.django_db
+def test_casual_browse_orders_by_difficulty(otis):
+    user, contributor = _verified_contributor()
+    contributor.casual_mode = True
+    contributor.save()
+    hard = OIMEProposalFactory.create(subject="A", difficulty=5)
+    easy = OIMEProposalFactory.create(subject="A", difficulty=1)
+    medium = OIMEProposalFactory.create(subject="A", difficulty=3)
+    otis.login(user)
+    resp = otis.get_20x("oime-casual-browse", "A")
+    assert list(resp.context["proposals"]) == [easy, medium, hard]
+
+
+@pytest.mark.django_db
+def test_casual_browse_refused_in_ranked_mode(otis):
+    # Ranked statements are meant to be read for the first time under the clock.
+    user, _ = _verified_contributor()
+    OIMEProposalFactory.create(subject="G", statement="Geometry statement.")
+    otis.login(user)
+    resp = otis.get("oime-casual-browse", "G")
+    otis.assert_30x(resp)
+    assert resp.url.endswith("/tubes/proposals/")
+
+
+@pytest.mark.django_db
+def test_casual_browse_rejects_unknown_subject(otis):
+    user, contributor = _verified_contributor()
+    contributor.casual_mode = True
+    contributor.save()
+    otis.login(user)
+    otis.get_not_found("oime-casual-browse", "Z")
+
+
+@pytest.mark.django_db
+def test_casual_browse_requires_verification(otis):
+    UserFactory.create(username="mallory")
+    otis.login("mallory")
+    otis.get_40x("oime-casual-browse", "G")
+
+
+@pytest.mark.django_db
+def test_casual_list_links_to_browser(otis):
+    user, contributor = _verified_contributor()
+    contributor.casual_mode = True
+    contributor.save()
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-list")
+    otis.assert_has(resp, "/tubes/casual/G/")
+
+
+@pytest.mark.django_db
+def test_ranked_list_does_not_link_to_browser(otis):
+    user, _ = _verified_contributor()
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-list")
+    otis.assert_not_has(resp, "/tubes/casual/G/")
+
+
+# ---------------------------------------------------------------------------
 # Timed solve flow
 # ---------------------------------------------------------------------------
 
