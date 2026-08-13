@@ -45,7 +45,7 @@
     </div>
   {% endif %}
   {% if student.enabled and not student.payment_status|divisibleby:"4" %}
-    <div class="alert {% if student.payment_status == 1 or student.payment_status == 5 %} alert-info {% elif student.payment_status == 2 or student.payment_status == 6 %} alert-warning {% elif student.payment_status == 3 or student.payment_status == 7 %} alert-danger {% endif %} ">
+    <div class="alert {% if student.payment_status == 1 or student.payment_status == 5 %} alert-info {% elif student.payment_status == 2 or student.payment_status == 6 %} alert-warning {% elif student.payment_status == 3 or student.payment_status == 7 %} alert-danger {% endif %}">
       <h1 class="alert-heading">
         {% if student.payment_status == 1 or student.payment_status == 5 %}
           Payment reminder
