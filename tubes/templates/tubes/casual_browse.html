@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% load django_bootstrap5 %}
 {% block title %}
   Casual {{ subject_name }} Problems
 {% endblock title %}
@@ -9,27 +10,47 @@
     {% include "tubes/components/casual_subject_nav.html" %}
   </div>
   <p class="text-muted">
-    Every {{ subject_name }} problem you haven't opened yet, statement and all.
+    Every {{ subject_name }} problem, statement and all, newest first.
     Scroll until you find one you'd like to try;
     nothing here is timed or recorded.
-    Answers and solutions stay hidden until you open a problem and reveal them.
+    Problems you've already seen are greyed out,
+    and answers and solutions stay hidden
+    until you open a problem and reveal them.
   </p>
-  {% for proposal in proposals %}
-    <div class="card mb-4">
+  {% for proposal in page_obj %}
+    <div class="card mb-4 {% if proposal.spoiled %}border-secondary{% else %}border-primary{% endif %}">
       <div class="card-header d-flex justify-content-between align-items-start gap-2">
         <span class="fw-bold">
           <a href="{{ proposal.get_absolute_url }}">{{ proposal.label }}</a>: {{ proposal.title }}
+          {% if proposal.browse_status == "author" %}
+            <span class="badge bg-secondary">Yours</span>
+          {% elif proposal.browse_status == "solved" %}
+            <span class="badge bg-secondary">Solved</span>
+          {% elif proposal.browse_status == "attempted" %}
+            <span class="badge bg-secondary">Attempted</span>
+          {% elif proposal.browse_status == "revealed" %}
+            <span class="badge bg-secondary">Spoiled</span>
+          {% else %}
+            <span class="badge bg-primary">New</span>
+          {% endif %}
         </span>
         <span class="text-nowrap">🩷 × {{ proposal.upvote_count }} · {{ proposal.difficulty_display }}</span>
       </div>
       <div class="card-body">
-        <div class="math-content">{{ proposal.statement }}</div>
+        <div class="math-content {% if proposal.spoiled %}text-muted{% endif %}">{{ proposal.statement }}</div>
       </div>
       <div class="card-footer">
-        <a href="{{ proposal.get_absolute_url }}">Open {{ proposal.label }} to check your answer →</a>
+        {% if proposal.spoiled %}
+          <a href="{{ proposal.get_absolute_url }}">Open {{ proposal.label }} →</a>
+        {% else %}
+          <a href="{{ proposal.get_absolute_url }}">Open {{ proposal.label }} to check your answer →</a>
+        {% endif %}
       </div>
     </div>
   {% empty %}
-    <div class="alert alert-warning">There are no {{ subject_name }} problems left that you haven't already seen.</div>
+    <div class="alert alert-warning">There are no {{ subject_name }} problems yet.</div>
   {% endfor %}
+  {% if page_obj.has_other_pages %}
+    {% bootstrap_pagination page_obj justify_content="center" %}
+  {% endif %}
 {% endblock layout-content %}
