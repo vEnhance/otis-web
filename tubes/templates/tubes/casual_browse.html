@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% load django_bootstrap5 %}
 {% block title %}
-  Casual {{ subject_name }} Problems
+  {{ subject_name }} Problems (Casual)
 {% endblock title %}
 {% block layout-content %}
   <div class="mb-3">
@@ -9,46 +9,34 @@
        class="btn btn-outline-secondary btn-sm">← All problems</a>
     {% include "tubes/components/casual_subject_nav.html" %}
   </div>
-  <p class="text-muted">
-    Every {{ subject_name }} problem, statement and all, newest first.
-    Scroll until you find one you'd like to try;
-    nothing here is timed or recorded.
-    Problems you've already seen are greyed out,
-    and answers and solutions stay hidden
-    until you open a problem and reveal them.
-  </p>
+  <p>Showing all {{ subject_name }} problems in casual mode.</p>
   {% for proposal in page_obj %}
     <div class="card mb-4 {% if proposal.spoiled %}border-secondary{% else %}border-primary{% endif %}">
       <div class="card-header d-flex justify-content-between align-items-start gap-2">
         <span class="fw-bold">
-          <a href="{{ proposal.get_absolute_url }}">{{ proposal.label }}</a>: {{ proposal.title }}
-          {% if proposal.browse_status == "author" %}
-            <span class="badge bg-secondary">Yours</span>
-          {% elif proposal.browse_status == "solved" %}
-            <span class="badge bg-secondary">Solved</span>
-          {% elif proposal.browse_status == "attempted" %}
-            <span class="badge bg-secondary">Attempted</span>
-          {% elif proposal.browse_status == "revealed" %}
-            <span class="badge bg-secondary">Spoiled</span>
-          {% else %}
-            <span class="badge bg-primary">New</span>
-          {% endif %}
+          <a href="{{ proposal.get_absolute_url }}">{{ proposal.label }}: {{ proposal.title }}</a>
         </span>
         <span class="text-nowrap">🩷 × {{ proposal.upvote_count }} · {{ proposal.difficulty_display }}</span>
       </div>
       <div class="card-body">
         <div class="math-content {% if proposal.spoiled %}text-muted{% endif %}">{{ proposal.statement }}</div>
       </div>
-      <div class="card-footer">
-        {% if proposal.spoiled %}
-          <a href="{{ proposal.get_absolute_url }}">Open {{ proposal.label }} →</a>
+      <div class="card-footer text-muted fst-italic">
+        {% if proposal.browse_status == "author" %}
+          You are the author of this problem!
+        {% elif proposal.browse_status == "solved" %}
+          You solved this problem under ranked mode. Nice!
+        {% elif proposal.browse_status == "attempted" %}
+          You previously attempted this problem under ranked mode.
+        {% elif proposal.browse_status == "revealed" %}
+          You are spoiled on this problem.
         {% else %}
-          <a href="{{ proposal.get_absolute_url }}">Open {{ proposal.label }} to check your answer →</a>
+          You haven't read the solution to this problem yet.
         {% endif %}
       </div>
     </div>
   {% empty %}
-    <div class="alert alert-warning">There are no {{ subject_name }} problems yet.</div>
+    <p class="fw-bold">There are no {{ subject_name }} problems yet.</p>
   {% endfor %}
   {% if page_obj.has_other_pages %}
     {% bootstrap_pagination page_obj justify_content="center" %}

@@ -5,5 +5,5 @@ page currently being viewed, if any).
 {% endcomment %}
 {% for code, name in subject_choices %}
   <a href="{% url "oime-casual-browse" code %}"
-     class="btn btn-sm {% if code == subject %}btn-primary{% else %}btn-outline-primary{% endif %}">{{ name }}</a>
+     class="btn btn-sm {% if code == subject %}btn-primary{% else %}btn-outline-primary{% endif %}">{{ code }}</a>
 {% endfor %}
