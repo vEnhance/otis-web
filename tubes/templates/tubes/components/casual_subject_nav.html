@@ -1,0 +1,9 @@
+{% comment %}
+Links into the casual full-statement browser, one per subject.
+Context vars: subject_choices (the SUBJECT_CHOICES pairs), subject (the code of the
+page currently being viewed, if any).
+{% endcomment %}
+{% for code, name in subject_choices %}
+  <a href="{% url "oime-casual-browse" code %}"
+     class="btn btn-sm {% if code == subject %}btn-primary{% else %}btn-outline-primary{% endif %}">{{ code }}</a>
+{% endfor %}

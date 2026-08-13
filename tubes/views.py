@@ -5,9 +5,10 @@ from typing import Any
 from django import forms
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
+from django.core.paginator import Paginator
 from django.db.models import Count
 from django.db.models.query import QuerySet
-from django.http import HttpRequest, HttpResponse
+from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.generic import CreateView, ListView, TemplateView, UpdateView
@@ -23,8 +24,11 @@ from .forms import (
 )
 from .models import OIMEComment, OIMEContributor, OIMEFight, OIMEProposal
 
+SUBJECT_NAMES = dict(OIMEProposal.SUBJECT_CHOICES)
+
 GIVE_UP_RATE_LIMIT = 2  # max give-ups allowed within the window
 GIVE_UP_WINDOW_MINUTES = 10
+CASUAL_BROWSE_PAGE_SIZE = 20
 
 
 def _get_contributor(request: HttpRequest) -> OIMEContributor | None:
@@ -251,6 +255,80 @@ def go_serious(request: HttpRequest) -> HttpResponse:
     )
 
 
+@verified_required
+def casual_browse(request: HttpRequest, subject: str) -> HttpResponse:
+    """Every visible statement in one subject, newest first, in pages of 20.
+
+    Casual mode only. The point of ranked mode is that a statement is seen for the
+    first time under the clock, so bulk-reading statements would defeat it; in casual
+    mode nothing is timed or recorded, so browsing for a problem to try is the whole
+    idea. Every problem the contributor may see is listed, their own included; the
+    ones already spoiled for them are just marked as such.
+    """
+    if subject not in SUBJECT_NAMES:
+        raise Http404("Not an OIME subject.")
+    contributor = _get_contributor(request)
+    if contributor is None:
+        return redirect("oime-setup")
+    if not contributor.casual_mode:
+        messages.error(
+            request,
+            "Browsing problem statements in bulk is only available in casual mode.",
+        )
+        return redirect("oime-proposal-list")
+
+    proposals = (
+        OIMEProposal.objects.filter(archived=False, is_draft=False, subject=subject)
+        .select_related("author")
+        .annotate(upvote_count=Count("upvotes", distinct=True))
+        .order_by("-pk")
+    )
+    paginator = Paginator(proposals, CASUAL_BROWSE_PAGE_SIZE)
+    page_obj = paginator.get_page(request.GET.get("page"))
+
+    # Flag the problems this contributor has already engaged with, so a page of
+    # statements shows at a glance which ones are still fresh. Only the current
+    # page is inspected, so this stays cheap however long the subject list grows.
+    page_proposals = list(page_obj.object_list)
+    fights: dict[int, OIMEFight] = {
+        f.proposal_id: f  # type: ignore[attr-defined]
+        for f in OIMEFight.objects.filter(
+            contributor=contributor, proposal__in=page_proposals
+        )
+    }
+    revealed_ids = set(
+        contributor.revealed_proposals.filter(
+            pk__in=[p.pk for p in page_proposals]
+        ).values_list("pk", flat=True)
+    )
+    for proposal in page_proposals:
+        fight = fights.get(proposal.pk)
+        if proposal.author == contributor:
+            proposal.browse_status = "author"  # type: ignore[attr-defined]
+        elif fight is not None:
+            proposal.browse_status = (  # type: ignore[attr-defined]
+                "solved" if fight.is_success else "attempted"
+            )
+        elif proposal.pk in revealed_ids:
+            proposal.browse_status = "revealed"  # type: ignore[attr-defined]
+        else:
+            proposal.browse_status = "new"  # type: ignore[attr-defined]
+        proposal.spoiled = proposal.browse_status != "new"  # type: ignore[attr-defined]
+    page_obj.object_list = page_proposals
+
+    return render(
+        request,
+        "tubes/casual_browse.html",
+        {
+            "page_obj": page_obj,
+            "contributor": contributor,
+            "subject": subject,
+            "subject_name": SUBJECT_NAMES[subject],
+            "subject_choices": OIMEProposal.SUBJECT_CHOICES,
+        },
+    )
+
+
 # ---------------------------------------------------------------------------
 # OIME: Proposal list / create / update
 # ---------------------------------------------------------------------------
@@ -292,6 +370,7 @@ class ProposalListView(ContributorRequiredMixin, ListView[OIMEProposal]):
             return context
 
         context["casual"] = contributor.casual_mode
+        context["subject_choices"] = OIMEProposal.SUBJECT_CHOICES
 
         user_fights: dict[int, OIMEFight] = {
             f.proposal_id: f  # type: ignore[attr-defined]
