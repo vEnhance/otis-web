@@ -5,3 +5,7 @@
         type="text/css"
         href="{% static 'css/admin-green.css' %}" />
 {% endblock extrastyle %}
+{% block extrahead %}
+  {{ block.super }}
+  <script src="{% static 'number-wheel.js' %}"></script>
+{% endblock extrahead %}
