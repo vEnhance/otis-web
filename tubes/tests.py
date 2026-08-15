@@ -1389,14 +1389,14 @@ def test_detail_shows_gave_up_alert_box(otis):
 @pytest.mark.django_db
 def test_landing_links_to_active_fight(otis):
     user, contributor = _verified_contributor()
-    proposal = OIMEProposalFactory.create(title="Sneaky Sum", difficulty=5)
+    proposal = OIMEProposalFactory.create(difficulty=5)
     OIMEFightFactory.create(
         contributor=contributor, proposal=proposal, status="OIME_TBD"
     )
     otis.login(user)
     resp = otis.get_20x("oime-landing")
     otis.assert_has(resp, otis.url("oime-proposal-fight", proposal.pk))
-    otis.assert_has(resp, "Sneaky Sum")
+    otis.assert_has(resp, proposal.label)
 
 
 @pytest.mark.django_db
@@ -1428,7 +1428,8 @@ def test_landing_quiet_without_active_fight(otis):
     )
     otis.login(user)
     resp = otis.get_20x("oime-landing")
-    otis.assert_not_has(resp, "timed session in progress")
+    otis.assert_not_has(resp, "Your timer is still running")
+    otis.assert_not_has(resp, otis.url("oime-proposal-fight", proposal.pk))
 
 
 @pytest.mark.django_db

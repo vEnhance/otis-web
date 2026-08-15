@@ -4,16 +4,10 @@
 {% endblock title %}
 {% block layout-content %}
   {% if active_fight %}
-    <div class="alert alert-danger">
-      <h4 class="alert-heading">⏳ You have a timed session in progress!</h4>
-      <p>
-        Your clock is running on
-        <strong>{{ active_fight.proposal.label }}: {{ active_fight.proposal.title }}</strong>,
-        with about {{ active_fight.remaining_display }} left.
-        If you don't finish, it gets recorded as a time limit exceeded.
-      </p>
+    <div class="alert alert-warning">
+      Your timer is still running on
       <a href="{% url "oime-proposal-fight" active_fight.proposal.pk %}"
-         class="btn btn-danger">Return to your session →</a>
+         class="btn btn-danger">{{ active_fight.proposal.label }}</a>.
     </div>
   {% endif %}
   <p class="fst-italic">Satisfactory. Keep cooking.</p>

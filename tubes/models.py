@@ -296,12 +296,6 @@ class OIMEFight(models.Model):
         elapsed = (timezone.now() - self.started_at).total_seconds()
         return max(0, int(self.proposal.time_limit_minutes * 60 - elapsed))
 
-    @property
-    def remaining_display(self) -> str:
-        """Time left on the clock as M:SS, for showing a fight that is still open."""
-        m, s = divmod(self.remaining_seconds, 60)
-        return f"{m}:{s:02d}"
-
 
 class OIMEComment(models.Model):
     author = models.ForeignKey(
