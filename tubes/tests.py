@@ -1379,3 +1379,128 @@ def test_detail_shows_gave_up_alert_box(otis):
     otis.login(user)
     resp = otis.get_20x("oime-proposal-detail", proposal.pk)
     otis.assert_has(resp, "alert alert-secondary")
+
+
+# ---------------------------------------------------------------------------
+# Landing page: recovering an abandoned timed session
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.django_db
+def test_landing_links_to_active_fight(otis):
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create(title="Sneaky Sum", difficulty=5)
+    OIMEFightFactory.create(
+        contributor=contributor, proposal=proposal, status="OIME_TBD"
+    )
+    otis.login(user)
+    resp = otis.get_20x("oime-landing")
+    otis.assert_has(resp, otis.url("oime-proposal-fight", proposal.pk))
+    otis.assert_has(resp, "Sneaky Sum")
+
+
+@pytest.mark.django_db
+def test_landing_marks_abandoned_fight_as_tle(otis):
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create(difficulty=1)
+    fight = OIMEFightFactory.create(
+        contributor=contributor, proposal=proposal, status="OIME_TBD"
+    )
+    OIMEFight.objects.filter(pk=fight.pk).update(
+        started_at=timezone.now() - timedelta(hours=5)
+    )
+    otis.login(user)
+    resp = otis.get_20x("oime-landing")
+    fight.refresh_from_db()
+    assert fight.status == "OIME_TLE"
+    assert fight.submitted_at is not None
+    otis.assert_has(resp, "ran out of time")
+    # No point offering to resume a session that has just been closed out.
+    otis.assert_not_has(resp, otis.url("oime-proposal-fight", proposal.pk))
+
+
+@pytest.mark.django_db
+def test_landing_quiet_without_active_fight(otis):
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create()
+    OIMEFightFactory.create(
+        contributor=contributor, proposal=proposal, status="OIME_OK"
+    )
+    otis.login(user)
+    resp = otis.get_20x("oime-landing")
+    otis.assert_not_has(resp, "timed session in progress")
+
+
+@pytest.mark.django_db
+def test_landing_works_for_anonymous_and_contributorless_users(otis):
+    otis.get_20x("oime-landing")
+    verified_group, _ = Group.objects.get_or_create(name="Verified")
+    UserFactory.create(username="alice", groups=(verified_group,))
+    otis.login("alice")
+    otis.get_20x("oime-landing")
+
+
+# ---------------------------------------------------------------------------
+# A started session survives the problem or the mode changing underneath it
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.django_db
+def test_active_fight_survives_proposal_going_to_draft(otis):
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create(answer=42)
+    OIMEFightFactory.create(
+        contributor=contributor, proposal=proposal, status="OIME_TBD"
+    )
+    proposal.is_draft = True
+    proposal.save()
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-fight", proposal.pk)
+    otis.assert_has(resp, "back to draft")
+    # ...and the session can still be closed out normally.
+    otis.assert_30x(otis.post("oime-submit-answer", proposal.pk, data={"answer": 42}))
+    assert (
+        OIMEFight.objects.get(contributor=contributor, proposal=proposal).status
+        == "OIME_OK"
+    )
+
+
+@pytest.mark.django_db
+def test_finished_fight_survives_proposal_going_to_draft(otis):
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create(is_draft=True)
+    OIMEFightFactory.create(
+        contributor=contributor, proposal=proposal, status="OIME_FAIL"
+    )
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-detail", proposal.pk)
+    otis.assert_has(resp, "back to draft")
+    otis.assert_has(resp, proposal.solution)
+
+
+@pytest.mark.django_db
+def test_draft_still_denied_to_someone_who_never_started(otis):
+    user, _ = _verified_contributor()
+    proposal = OIMEProposalFactory.create(is_draft=True)
+    otis.login(user)
+    otis.get_denied("oime-proposal-detail", proposal.pk)
+
+
+@pytest.mark.django_db
+def test_active_fight_survives_switch_to_casual_mode(otis):
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create(answer=42)
+    OIMEFightFactory.create(
+        contributor=contributor, proposal=proposal, status="OIME_TBD"
+    )
+    # Going casual is normally blocked mid-fight; force it to model any way it slips
+    # through (a stale tab, an admin edit) and check the session is still usable.
+    contributor.casual_mode = True
+    contributor.save()
+    otis.login(user)
+    otis.get_20x("oime-proposal-fight", proposal.pk)
+    otis.assert_30x(otis.post("oime-submit-answer", proposal.pk, data={"answer": 42}))
+    assert (
+        OIMEFight.objects.get(contributor=contributor, proposal=proposal).status
+        == "OIME_OK"
+    )
