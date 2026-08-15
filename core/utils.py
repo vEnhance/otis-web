@@ -52,7 +52,7 @@ def get_protected_file(
             f'{"inline" if inline_pdf else "attachment"}; filename="{filename}"'
         )
     else:
-        response["Content-Type"] = "text/plain"
+        response["Content-Type"] = "text/plain; charset=utf-8"
         response["Content-Disposition"] = (
             f'{"inline" if inline_tex else "attachment"}; filename="{filename}"'
         )
