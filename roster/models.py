@@ -705,6 +705,13 @@ class ApplyUUID(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
+    memo = models.TextField(blank=True, help_text="Any notes about this ApplyUUID.")
+    applicant_name = models.CharField(
+        max_length=80,
+        blank=True,
+        help_text="The copied application name from apply.evanchen.cc",
+    )
+
     def __str__(self) -> str:
         return str(self.uuid)
 
