@@ -3,6 +3,13 @@
   OTIS Mock AIME
 {% endblock title %}
 {% block layout-content %}
+  {% if active_fight %}
+    <div class="alert alert-warning">
+      Your timer is still running on
+      <a href="{% url "oime-proposal-fight" active_fight.proposal.pk %}"
+         class="btn btn-danger">{{ active_fight.proposal.label }}</a>.
+    </div>
+  {% endif %}
   <p class="fst-italic">Satisfactory. Keep cooking.</p>
   <p>
     Welcome to the <strong>OTIS Mock AIME <s>Kitchen</s> Lab</strong>!

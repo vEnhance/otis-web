@@ -47,6 +47,11 @@ def _deny_if_draft(
 
     A draft is private work in progress: only its author (and staff) may reach it,
     so that it cannot be testsolved before the author marks it ready.
+
+    The exception is a contributor who already started a fight on the problem before
+    the author flipped it back to draft. Locking them out would strand a session with
+    the clock still running and no way to submit or give up, so they keep access —
+    with a warning, since the problem they are looking at may now be in flux.
     """
     if not proposal.is_draft:
         return
@@ -54,7 +59,54 @@ def _deny_if_draft(
         return
     if request.user.is_staff:  # type: ignore[union-attr]
         return
+    if (
+        contributor is not None
+        and OIMEFight.objects.filter(
+            contributor=contributor, proposal=proposal
+        ).exists()
+    ):
+        messages.warning(
+            request,
+            f"The author has taken {proposal.label} back to draft, so it may still "
+            "change. You keep access because you already started a session on it.",
+        )
+        return
     raise PermissionDenied("This proposal is still a draft.")
+
+
+def _resolve_active_fight(request: HttpRequest) -> OIMEFight | None:
+    """The caller's fight that is still running, if there is one.
+
+    People close the fight page and forget about it, leaving an attempt open while its
+    clock keeps ticking. So an attempt found past its time limit is closed out here as
+    a time-out and reported via a message, rather than left dangling forever; a fight
+    still within its limit is handed back so the caller can be offered a way to resume.
+
+    Only ranked mode creates fights, so there is nothing to find for a casual browser.
+    """
+    if not request.user.is_authenticated:  # type: ignore[union-attr]
+        return None
+    contributor = _get_contributor(request)
+    if contributor is None:
+        return None
+    fight = (
+        OIMEFight.objects.filter(contributor=contributor, status="OIME_TBD")
+        .select_related("proposal")
+        .first()
+    )
+    if fight is None:
+        return None
+    if fight.time_expired:
+        fight.status = "OIME_TLE"
+        fight.submitted_at = timezone.now()
+        fight.save()
+        messages.warning(
+            request,
+            f"Your timed session on {fight.proposal.label} ran out of time and has "
+            "been recorded as a time limit exceeded.",
+        )
+        return None
+    return fight
 
 
 def _is_casual_for(contributor: OIMEContributor, proposal: OIMEProposal) -> bool:
@@ -112,6 +164,13 @@ def _get_solver_context(
 
     fight_complete = fight is not None and fight.is_complete
     revealed = contributor.revealed_proposals.filter(pk=proposal.pk).exists()
+
+    # A session that has started is never taken away. Whatever has changed since the
+    # clock began — the contributor moving to casual mode, the problem going back to
+    # draft — they stay on the ranked path for this problem so they can finish it or
+    # give up, instead of being stranded with an attempt they cannot close.
+    if fight is not None and not fight_complete:
+        casual = False
 
     if casual:
         can_see_solution = revealed or fight_complete
@@ -866,3 +925,10 @@ def edit_comment(request: HttpRequest, pk: int) -> HttpResponse:
 
 class LandingView(TemplateView):
     template_name = "tubes/landing.html"
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        # The sidebar sends people here, so this is where someone who abandoned a
+        # fight page most likely turns up: surface the open session (or retire it).
+        context["active_fight"] = _resolve_active_fight(self.request)
+        return context
