@@ -25,13 +25,17 @@
            aria-labelledby="headingSocialLogin">
         <div class="accordion-body">
           <p>Use an already existing connection.</p>
+          {# "login_existing" is otisweb.adapters.AUTH_PROCESS_LOGIN_EXISTING, #}
+          {# which refuses to create an account if none is connected yet. #}
           <div class="socialaccount_ballot">
             <ul class="socialaccount_providers">
-              {% include "socialaccount/snippets/provider_list.html" with process="login" %}
+              {% include "socialaccount/snippets/provider_list.html" with process="login_existing" %}
             </ul>
           </div>
           <p class="text-muted">
             <b>NOT for creating new connections!</b>
+            If no OTIS account is attached to the account you pick,
+            you will get an error instead of a new account.
             <br />
             (To add new connections to an existing account, use
             <a href="{% url "socialaccount_connections" %}">🔐</a>

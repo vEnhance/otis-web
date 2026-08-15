@@ -191,6 +191,7 @@ ACCOUNT_EMAIL_VERIFICATION = "none"
 ACCOUNT_PRESERVE_USERNAME_CASING = False
 ACCOUNT_SIGNUP_FORM_CLASS = "otisweb.forms.OTISUserRegistrationForm"
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+SOCIALACCOUNT_ADAPTER = "otisweb.adapters.OTISSocialAccountAdapter"
 SOCIALACCOUNT_EMAIL_REQUIRED = True
 
 # Internationalization

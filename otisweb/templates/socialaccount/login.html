@@ -15,6 +15,16 @@
     When you click the button below, you'll be redirected to {{ provider.name }}
     to complete the authentication process.
   </p>
+  {% comment %}
+    "login_existing" is otisweb.adapters.AUTH_PROCESS_LOGIN_EXISTING.
+  {% endcomment %}
+  {% if process == "login_existing" %}
+    <p class="text-muted">
+      This will only log you in to an OTIS account that is already
+      attached to your {{ provider.name }} account.
+      If there isn't one, you'll get an error rather than a new account.
+    </p>
+  {% endif %}
   <form method="post">
     {% csrf_token %}
     <div class="text-center">
