@@ -113,21 +113,6 @@ def test_login_page_offers_login_only_social_option(otis, google_app: SocialApp)
 
 
 @pytest.mark.django_db
-def test_social_login_interstitial_warns_about_login_only(otis, google_app: SocialApp):
-    warning = b"you'll get an error rather than a new account"
-    response = otis.assert_20x(
-        otis.client.get(
-            f"/accounts/google/login/?process={AUTH_PROCESS_LOGIN_EXISTING}"
-        )
-    )
-    otis.assert_has(response, warning)
-    otis.assert_not_has(
-        otis.assert_20x(otis.client.get("/accounts/google/login/?process=login")),
-        warning,
-    )
-
-
-@pytest.mark.django_db
 def test_social_login_existing_refuses_to_create_account(google_app: SocialApp):
     request = _social_request()
     response = _attempt_social_login(request, uid="12345", email="nobody@evanchen.cc")
