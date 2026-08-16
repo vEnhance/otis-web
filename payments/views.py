@@ -308,16 +308,18 @@ class JobUpdate(VerifiedRequiredMixin, UpdateView[Job, BaseModelForm[Job]]):
         "worker_notes",
     )
 
-    def post(self, *args: Any, **kwargs: Any):
-        response = super().post(*args, **kwargs)
-        job = self.object
+    def get_object(self, queryset: QuerySet[Job] | None = None) -> Job:
+        # This check needs to happen in get_object() rather than post() so that it
+        # guards GET requests too (the form leaks the assignee's submission) and so
+        # that it runs *before* any changes are written to the database.
+        job = super().get_object(queryset)
         if job.assignee is None:
             raise PermissionDenied("Someone needs to claim this job first.")
         elif self.request.user != job.assignee.user:
             raise PermissionDenied("Can't submit for someone else's claim.")
-        elif job.status == "JOB_VFD":
+        elif job.progress == "JOB_VFD":
             raise PermissionDenied("This job is already completed.")
-        return response
+        return job
 
     def form_valid(self, form: BaseModelForm[Job]):
         self.object.progress = "JOB_SUB"

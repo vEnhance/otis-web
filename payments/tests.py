@@ -214,6 +214,92 @@ def test_claim_limits(otis) -> None:
 
 
 @pytest.mark.django_db
+def test_job_update_permissions(otis) -> None:
+    verified_group = GroupFactory(name="Verified")
+    alice = WorkerFactory.create(user__username="alice", user__groups=(verified_group,))
+    bob = WorkerFactory.create(user__username="bob", user__groups=(verified_group,))
+    admin: User = UserFactory.create(username="admin", is_staff=True, is_superuser=True)
+
+    folder = JobFolderFactory.create()
+    unclaimed = JobFactory.create(folder=folder)
+    alices_job = JobFactory.create(
+        folder=folder,
+        assignee=alice,
+        worker_deliverable="alice-secret-deliverable",
+        worker_notes="alice-secret-notes",
+    )
+    done_job = JobFactory.create(folder=folder, assignee=alice, progress="JOB_VFD")
+
+    payload = {"payment_preference": "PREF_PROBONO", "worker_deliverable": "stolen"}
+
+    def assert_unchanged(job: Job) -> None:
+        job.refresh_from_db()
+        assert job.worker_deliverable == "alice-secret-deliverable"
+        assert job.worker_notes == "alice-secret-notes"
+        assert job.progress == "JOB_NEW"
+
+    # anonymous users get bounced to the login page
+    otis.get_30x("job-update", alices_job.pk)
+    otis.post_30x("job-update", alices_job.pk, data=payload)
+    assert_unchanged(alices_job)
+
+    # a verified user who isn't the assignee must not see or touch the submission
+    otis.login(bob.user)
+    otis.assert_not_has(
+        otis.get_denied("job-update", alices_job.pk), "alice-secret-deliverable"
+    )
+    otis.post_denied("job-update", alices_job.pk, data=payload)
+    assert_unchanged(alices_job)
+
+    # ...and neither may staff, who go through the admin instead
+    otis.login(admin)
+    otis.assert_not_has(
+        otis.get_denied("job-update", alices_job.pk), "alice-secret-deliverable"
+    )
+    otis.post_denied("job-update", alices_job.pk, data=payload)
+    assert_unchanged(alices_job)
+
+    otis.login(alice.user)
+    # an unclaimed job can't be submitted, even by a worker in good standing
+    otis.get_denied("job-update", unclaimed.pk)
+    otis.post_denied("job-update", unclaimed.pk, data=payload)
+    unclaimed.refresh_from_db()
+    assert unclaimed.worker_deliverable == ""
+
+    # nor can a job that's already been signed off on
+    otis.get_denied("job-update", done_job.pk)
+    otis.post_denied("job-update", done_job.pk, data=payload)
+    done_job.refresh_from_db()
+    assert done_job.worker_deliverable == ""
+
+    # but the assignee can see her own form and submit it
+    otis.assert_has(
+        otis.get_20x("job-update", alices_job.pk), "alice-secret-deliverable"
+    )
+    otis.post_30x(
+        "job-update",
+        alices_job.pk,
+        data={
+            "payment_preference": "PREF_VENMO",
+            "worker_deliverable": "here is my work",
+            "worker_notes": "took a while",
+        },
+    )
+    alices_job.refresh_from_db()
+    assert alices_job.worker_deliverable == "here is my work"
+    assert alices_job.worker_notes == "took a while"
+    assert alices_job.payment_preference == "PREF_VENMO"
+    assert alices_job.progress == "JOB_SUB"
+
+    # having submitted, she still can't reach someone else's job
+    bobs_job = JobFactory.create(folder=folder, assignee=bob)
+    otis.get_denied("job-update", bobs_job.pk)
+    otis.post_denied("job-update", bobs_job.pk, data=payload)
+    bobs_job.refresh_from_db()
+    assert bobs_job.worker_deliverable == ""
+
+
+@pytest.mark.django_db
 def test_inactive_worker_list(otis) -> None:
     folder = JobFolderFactory.create(slug="art")
 
