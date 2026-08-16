@@ -13,7 +13,6 @@ from django.db.models import F, OuterRef
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http import Http404, HttpResponse
-from django.http.response import HttpResponseBase
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views.generic import ListView
@@ -207,27 +206,27 @@ class AchievementDetail(VerifiedRequiredMixin, DetailView[Achievement]):
     model = Achievement
     context_object_name = "achievement"
 
-    def dispatch(self, *args: Any, **kwargs: Any) -> HttpResponseBase:
-        achievement = self.get_object()
-        ret = super().dispatch(*args, **kwargs)  # trigger verified required
-        if not isinstance(self.request.user, User):
+    # Checking in get_object() means VerifiedRequiredMixin has already run, and the
+    # decision is made *before* the response is built. The old version called
+    # super().dispatch() first and only then decided whether to raise, which happened
+    # to be safe for a read-only DetailView but breaks the moment the view can write.
+    def get_object(self, queryset: QuerySet[Achievement] | None = None) -> Achievement:
+        achievement = super().get_object(queryset)
+        user = self.request.user
+        if not isinstance(user, User):
             raise PermissionDenied("Log in first")
-        elif self.request.user == achievement.creator:
-            return ret
-        elif self.request.user.is_superuser:
+        elif user == achievement.creator:
+            return achievement
+        elif user.is_superuser:
             messages.warning(self.request, "Viewing as admin…")
-            return ret
-        else:
-            if not AchievementUnlock.objects.filter(
-                user=self.request.user, achievement=achievement
-            ).exists():
-                raise PermissionDenied("You haven't found this one yet.")
-            elif not achievement.show_solution:
-                raise PermissionDenied(
-                    "The solution page to this diamond is not public."
-                )
-            else:
-                return ret
+            return achievement
+        elif not AchievementUnlock.objects.filter(
+            user=user, achievement=achievement
+        ).exists():
+            raise PermissionDenied("You haven't found this one yet.")
+        elif not achievement.show_solution:
+            raise PermissionDenied("The solution page to this diamond is not public.")
+        return achievement
 
 
 class FoundList(LoginRequiredMixin, StaffRequiredMixin, ListView[AchievementUnlock]):

@@ -541,16 +541,18 @@ class PSetDetail(LoginRequiredMixin, DetailView[PSet]):
     template_name = "dashboard/pset_detail.html"
     model = PSet
     object_name = "pset"
+    object: PSet
 
-    def dispatch(
-        self, request: HttpRequest, *args: Any, **kwargs: Any
-    ) -> HttpResponseBase:
-        pset = self.get_object()
-        if not can_view(request, pset.student):
+    # The check belongs in get_object() rather than dispatch(): the old dispatch
+    # called super(DetailView, self).dispatch(), which skipped past
+    # LoginRequiredMixin in the MRO and so never ran the login check at all.
+    def get_object(self, queryset: QuerySet[PSet] | None = None) -> PSet:
+        pset = super().get_object(queryset)
+        if not can_view(self.request, pset.student):
             raise PermissionDenied("Can't view work by this student")
-        return super(DetailView, self).dispatch(request, *args, **kwargs)
+        return pset
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        context["student"] = self.get_object().student
+        context["student"] = self.object.student
         return context
