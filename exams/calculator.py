@@ -62,11 +62,14 @@ def push_first(toks: list[Token]):
 
 
 def push_unary_minus(toks: list[Token]):
+    # the leading tokens are the signs; the rest of the factor follows, and a
+    # factor can never itself start with a sign, so the first one that is
+    # neither '+' nor '-' ends the run
     stack = _expr_stack.get()
     for t in toks:
         if t == "-":
             stack.append("unary -")
-        else:
+        elif t != "+":
             break
 
 
@@ -75,10 +78,11 @@ def make_bnf() -> Any:
     expop   :: '^'
     multop  :: '*' | '/'
     addop   :: '+' | '-'
-    integer :: ['+' | '-'] '0'..'9'+
+    integer :: '0'..'9'+
     atom    :: PI | E | real | fn '(' expr ')' | '(' expr ')'
-    factor  :: atom [ expop factor ]*
-    term    :: factor [ multop factor ]*
+    factor  :: atom [ expop signed ]*
+    signed  :: [ addop ]* factor
+    term    :: signed [ multop signed ]*
     expr    :: term [ addop term ]*
     """
     # use CaselessKeyword for e and pi, to avoid accidentally matching
@@ -86,7 +90,9 @@ def make_bnf() -> Any:
     # and CaselessKeyword only match whole words
     e = CaselessKeyword("E")
     pi = CaselessKeyword("PI")
-    fnumber = Regex(r"[+-]?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?")
+    # a leading sign is deliberately not part of a number: it is handled by
+    # `signed` below, so that there is only one way to parse "-2^2"
+    fnumber = Regex(r"\d+(?:\.\d*)?(?:[eE][+-]?\d+)?")
     ident = Word(alphas, f"{alphanums}_$")
 
     plus, minus, mult, div = map(Literal, "+-*/")
@@ -108,16 +114,19 @@ def make_bnf() -> Any:
     fn_call = f.set_parse_action(insert_fn_argcount_tuple)  # type: ignore
     g = fn_call | pi | e | fnumber | ident  # type: ignore
     assert g is not None
-    atom = addop[...] + (
-        g.set_parse_action(push_first) | Group(lpar + expr + rpar)  # type: ignore
-    )
-    atom = atom.set_parse_action(push_unary_minus)  # type: ignore
+    atom = g.set_parse_action(push_first) | Group(lpar + expr + rpar)  # type: ignore
 
     # by defining exponentiation as "atom [ ^ factor ]..." instead of "atom [ ^ atom ]...", we get right-to-left
     # exponents, instead of left-to-right that is, 2^3^2 = 2^(3^2), not (2^3)^2.
+    #
+    # a unary minus sits *outside* the exponentiation, so that -2^2 is -(2^2) =
+    # -4 rather than (-2)^2 = 4, the way it would be read on paper.  the base of
+    # a power is therefore an unsigned atom, while its exponent is signed, which
+    # keeps 2^-2 working.
     factor = Forward()
-    factor <<= atom + (expop + factor).set_parse_action(push_first)[...]  # type: ignore
-    term = factor + (multop + factor).set_parse_action(push_first)[...]  # type: ignore
+    signed = (addop[...] + factor).set_parse_action(push_unary_minus)  # type: ignore
+    factor <<= atom + (expop + signed).set_parse_action(push_first)[...]  # type: ignore
+    term = signed + (multop + signed).set_parse_action(push_first)[...]  # type: ignore
     expr <<= term + (addop + term).set_parse_action(push_first)[...]  # type: ignore
     return expr
 
@@ -214,6 +223,6 @@ def expr_compute(s: str) -> Optional[float]:
 # writes to state shared by every later call, so two threads reaching an
 # un-probed action at once can trim the wrong number of arguments.  This
 # expression exercises all six of the parse actions attached in make_bnf().
-assert expr_compute("-sqrt(4)^2*3-1/2") == 11.5
+assert expr_compute("-sqrt(4)^2*3-1/2") == -12.5
 
 # flake8: noqa

@@ -36,6 +36,27 @@ def test_arithmetic():
 
 
 @pytest.mark.django_db
+def test_unary_minus_precedence():
+    # a minus sign binds looser than the exponent above it, as it would on paper
+    check_calculator("-2^2", -4)
+    check_calculator("-2^3^2", -512)
+    check_calculator("-(2+3)^2", -25)
+    check_calculator("3-2^2", -1)
+    check_calculator("(-2)^2", 4)
+
+    # ... but the exponent itself may still be signed
+    check_calculator("2^-2", 0.25)
+    check_calculator("-2^-2", -0.25)
+    check_calculator("4^-1^2", 0.25)
+
+    # signs otherwise stack the way you would expect
+    check_calculator("--2", 2)
+    check_calculator("-+-2", 2)
+    check_calculator("3*-2", -6)
+    check_calculator("2--3", 5)
+
+
+@pytest.mark.django_db
 def test_huge_exponents():
     # answers that are merely large should still evaluate exactly
     check_calculator("2^1000", 4**500)
