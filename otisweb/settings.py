@@ -37,13 +37,8 @@ DEBUG = not PRODUCTION
 
 
 def require_env(name: str) -> str:
-    """Read an environment variable that the server cannot run without.
-
-    Raises ImproperlyConfigured (rather than booting with a bogus value) if the
-    variable is unset or empty.
-    """
-    value = os.environ.get(name, "")
-    if not value:
+    """Read an environment variable that the server cannot run without."""
+    if not (value := os.environ.get(name, "")):
         raise ImproperlyConfigured(
             f"The environment variable {name} must be set and nonempty "
             "when IS_PRODUCTION is turned on."
@@ -52,11 +47,7 @@ def require_env(name: str) -> str:
 
 
 def env_secret(name: str, dev_fallback: str) -> str:
-    """Read a secret, falling back to a dummy value outside of production.
-
-    The fallbacks are hard-coded in this open-source repository, so they are
-    public knowledge; production refuses to start rather than use one.
-    """
+    """Read a secret, falling back to a public dummy outside of production."""
     if PRODUCTION:
         return require_env(name)
     return os.getenv(name) or dev_fallback
