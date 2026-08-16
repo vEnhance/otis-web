@@ -125,6 +125,29 @@ def BNF() -> Any:
     return bnf
 
 
+# Largest magnitude, as a power of ten, that exponentiation is allowed to
+# produce.  Results are ultimately consumed as floats (whose range stops around
+# 1e308), so this is generous; the point is only to keep an input like 9^9^9
+# from asking Python for a 370-million-digit integer, which takes hours and
+# gigabytes of memory.  Anything under the cap is computed instantly.
+MAX_RESULT_LOG10 = 1000
+
+
+def safe_pow(op1: Union[int, float], op2: Union[int, float]) -> Union[int, float]:
+    """Exponentiation that refuses to evaluate absurdly large results.
+
+    Only int ** nonnegative int can run away: every other combination of
+    operands either returns immediately or raises OverflowError, because
+    Python falls back to floating point.
+    """
+    if isinstance(op1, int) and isinstance(op2, int) and abs(op1) > 1 and op2 > 0:
+        # equivalent to op2 * log10(|op1|) > MAX_RESULT_LOG10, but written so
+        # that an enormous op2 doesn't have to be converted to a float
+        if op2 > MAX_RESULT_LOG10 / math.log10(abs(op1)):
+            raise OverflowError("exponentiation result is too large to evaluate")
+    return operator.pow(op1, op2)
+
+
 # map operator symbols to corresponding arithmetic operations
 epsilon = 1e-12
 opn = {
@@ -132,7 +155,7 @@ opn = {
     "-": operator.sub,
     "*": operator.mul,
     "/": operator.truediv,
-    "^": operator.pow,
+    "^": safe_pow,
 }
 
 fn = {

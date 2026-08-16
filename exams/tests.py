@@ -3,6 +3,7 @@ import datetime
 import pytest
 from django.contrib.admin.sites import AdminSite
 from django.contrib.messages.storage.cookie import CookieStorage
+from django.core.exceptions import ValidationError
 from django.http.request import HttpRequest
 from django.test.client import RequestFactory
 from django.test.utils import override_settings
@@ -12,7 +13,7 @@ from core.factories import SemesterFactory, UserFactory
 from exams.admin import PracticeExamAdmin
 from exams.calculator import expr_compute
 from exams.factories import PracticeExamFactory, QuizFactory
-from exams.models import ExamAttempt, PracticeExam
+from exams.models import ExamAttempt, PracticeExam, expr_validator
 from roster.factories import StudentFactory
 from roster.models import Student
 
@@ -30,6 +31,28 @@ def test_arithmetic():
     check_calculator("1/3^4", 1 / 81)
     check_calculator("(2*sqrt(2))^2 - 4^(3/2)", 0)
     check_calculator("16900/4*pi", 13273.2289614)
+
+
+@pytest.mark.django_db
+def test_huge_exponents():
+    # answers that are merely large should still evaluate exactly
+    check_calculator("2^1000", 4**500)
+    check_calculator("2^1000 - 4^500", 0)
+    check_calculator("10^999", 10**999)
+
+    # ... but anything past the cap must bail out rather than hang the server
+    for expr in ("9^9^9", "10^1001", "(-3)^10^500", "(10^600)^10", "2^(10^100)"):
+        with pytest.raises(OverflowError):
+            expr_compute(expr)
+
+    # these are harmless: Python falls back to floats and answers immediately
+    check_calculator("9^(-9^9)", 0)
+    check_calculator("0.5^(9^9)", 0)
+    check_calculator("1^(9^9)", 1)
+
+    # and the model validator should turn all of it into a friendly complaint
+    with pytest.raises(ValidationError):
+        expr_validator("9^9^9")
 
 
 @pytest.mark.django_db

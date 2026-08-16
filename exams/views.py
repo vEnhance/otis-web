@@ -87,20 +87,19 @@ def quiz(request: AuthHttpRequest, student_pk: int, pk: int) -> HttpResponse:
         for i in range(1, 6):
             field = dummy_form.visible_fields()[i - 1]
             guess_str = getattr(attempt, f"guess{i}")
-            guess_val = expr_compute(guess_str)
             accepted_str = getattr(quiz, f"answer{i}")
-            accepted_vals = [expr_compute(_) for _ in accepted_str.split(",") if _]
             if (
                 len(guess_str.replace(" ", "")) > 24
                 or len([_ for _ in guess_str if _ in "+-*/^"]) > 4
             ):
+                # too convoluted to bother evaluating
                 correct = False
-            elif guess_val is not None:
-                correct = any(
+            else:
+                guess_val = expr_compute(guess_str)
+                accepted_vals = [expr_compute(_) for _ in accepted_str.split(",") if _]
+                correct = guess_val is not None and any(
                     v is not None and abs(guess_val - v) < 1e-12 for v in accepted_vals
                 )
-            else:
-                correct = False
 
             context["rows"].append(
                 {
