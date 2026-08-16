@@ -1,6 +1,4 @@
 import datetime
-import sys
-from concurrent.futures import ThreadPoolExecutor
 
 import pytest
 from django.contrib.admin.sites import AdminSite
@@ -37,7 +35,7 @@ def test_arithmetic():
 
 @pytest.mark.django_db
 def test_unary_minus_precedence():
-    # a minus sign binds looser than the exponent above it, as it would on paper
+    # a minus binds looser than the exponent above it
     check_calculator("-2^2", -4)
     check_calculator("-2^3^2", -512)
     check_calculator("-(2+3)^2", -25)
@@ -49,7 +47,6 @@ def test_unary_minus_precedence():
     check_calculator("-2^-2", -0.25)
     check_calculator("4^-1^2", 0.25)
 
-    # signs otherwise stack the way you would expect
     check_calculator("--2", 2)
     check_calculator("-+-2", 2)
     check_calculator("3*-2", -6)
@@ -73,28 +70,8 @@ def test_huge_exponents():
     check_calculator("0.5^(9^9)", 0)
     check_calculator("1^(9^9)", 1)
 
-    # and the model validator should turn all of it into a friendly complaint
     with pytest.raises(ValidationError):
         expr_validator("9^9^9")
-
-
-def test_concurrent_evaluation():
-    # two submissions scored at the same time must not share a parse stack
-    def compute(i: int) -> tuple[int, float | None]:
-        return i, expr_compute(f"({i}+1)*sqrt({i}^2)-{i}")
-
-    # a shared stack only interleaves if the interpreter switches threads
-    # mid-parse, which at the default interval happens often enough to corrupt
-    # answers but not often enough for a test to rely on
-    old_interval = sys.getswitchinterval()
-    sys.setswitchinterval(1e-6)
-    try:
-        with ThreadPoolExecutor(max_workers=8) as pool:
-            results = list(pool.map(compute, range(200)))
-    finally:
-        sys.setswitchinterval(old_interval)
-
-    assert results == [(i, (i + 1) * i - i) for i in range(200)]
 
 
 @pytest.mark.django_db

@@ -33,7 +33,6 @@ dependencies = [
   "django-stubs-ext>=6.0.9,<7.0.0",
   "pillow>=12.3.0",
   "prettytable>=3.18.0",
-  "pyparsing>=3.3.2",
   "pypdf>=6.15.0",
   "python-dotenv>=1.2.2",
   "reportlab>=5.0.0",

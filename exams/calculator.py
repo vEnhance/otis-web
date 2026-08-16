@@ -1,228 +1,192 @@
-# fourFn.py
-#
-# Demonstration of the pyparsing module, implementing a simple 4-function expression parser,
-# with support for scientific notation, and symbols for e and pi.
-# Extended to add exponentiation and simple built-in functions.
-# Extended test cases, simplified pushFirst method.
-# Removed unnecessary expr.suppress() call (thanks Nathaniel Peterson!), and added Group
-# Changed fnumber to use a Regex, which is now the preferred method
-# Reformatted to latest pypyparsing features, support multiple and variable args to functions
-#
-# Copyright 2003-2019 by Paul McGuire
-#
+"""Evaluates the arithmetic expressions students submit as quiz answers.
 
-# Permission is hereby granted, free of charge, to any person obtaining
-# a copy of this software and associated documentation files (the
-# "Software"), to deal in the Software without restriction, including
-# without limitation the rights to use, copy, modify, merge, publish,
-# distribute, sublicense, and/or sell copies of the Software, and to
-# permit persons to whom the Software is furnished to do so, subject to
-# the following conditions:
-#
-# The above copyright notice and this permission notice shall be
-# included in all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-# IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-# CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-# TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+A student whose answer is 4^500 may prefer to write 2^1000, so guesses are
+scored by evaluating both sides.  The input is untrusted, hence a parser rather
+than eval().  Precedence is the usual mathematical one, which is also Python's:
+'^' binds tightest and groups to the right, with a leading minus outside it, so
+-2^2 is -4 and 2^-2 is 0.25.
+
+The accepted language is inherited from pyparsing's fourFn.py example, which
+this module used to be built on.
+"""
 
 import math
 import operator
-from contextvars import ContextVar
-from typing import Any, Optional, Union
+import re
+from collections.abc import Callable
 
-from pyparsing import (
-    CaselessKeyword,
-    DelimitedList,
-    Forward,
-    Group,
-    Literal,
-    Regex,
-    Suppress,
-    Token,
-    Word,
-    alphanums,
-    alphas,
-)
-
-# The parse actions below push tokens onto a stack as the grammar matches them,
-# which evaluate_stack then consumes.  That stack belongs to a single call to
-# expr_compute: were it shared, two quiz submissions being scored at the same
-# time would interleave their tokens and silently mis-score each other.  A
-# ContextVar hands every thread (and every async task) its own.
-_expr_stack: ContextVar[list[Any]] = ContextVar("_expr_stack")
+Number = int | float
 
 
-def push_first(toks: list[Token]):
-    _expr_stack.get().append(toks[0])
+class CalculatorError(ValueError):
+    """Raised when an expression is malformed and cannot be evaluated."""
 
 
-def push_unary_minus(toks: list[Token]):
-    # the leading tokens are the signs; the rest of the factor follows, and a
-    # factor can never itself start with a sign, so the first one that is
-    # neither '+' nor '-' ends the run
-    stack = _expr_stack.get()
-    for t in toks:
-        if t == "-":
-            stack.append("unary -")
-        elif t != "+":
-            break
-
-
-def make_bnf() -> Any:
-    """
-    expop   :: '^'
-    multop  :: '*' | '/'
-    addop   :: '+' | '-'
-    integer :: '0'..'9'+
-    atom    :: PI | E | real | fn '(' expr ')' | '(' expr ')'
-    factor  :: atom [ expop signed ]*
-    signed  :: [ addop ]* factor
-    term    :: signed [ multop signed ]*
-    expr    :: term [ addop term ]*
-    """
-    # use CaselessKeyword for e and pi, to avoid accidentally matching
-    # functions that start with 'e' or 'pi' (such as 'exp'); Keyword
-    # and CaselessKeyword only match whole words
-    e = CaselessKeyword("E")
-    pi = CaselessKeyword("PI")
-    # a leading sign is deliberately not part of a number: it is handled by
-    # `signed` below, so that there is only one way to parse "-2^2"
-    fnumber = Regex(r"\d+(?:\.\d*)?(?:[eE][+-]?\d+)?")
-    ident = Word(alphas, f"{alphanums}_$")
-
-    plus, minus, mult, div = map(Literal, "+-*/")
-    lpar, rpar = map(Suppress, "()")
-    addop = plus | minus
-    multop = mult | div
-    expop = Literal("^")
-
-    expr = Forward()
-    expr_list = DelimitedList(Group(expr))
-
-    # add parse action that replaces the function identifier with a (name, number of args) tuple
-    def insert_fn_argcount_tuple(t: list[Any]):
-        fn = t.pop(0)
-        num_args = len(t[0])
-        t.insert(0, (fn, num_args))
-
-    f = ident + lpar - Group(expr_list) + rpar  # type: ignore
-    fn_call = f.set_parse_action(insert_fn_argcount_tuple)  # type: ignore
-    g = fn_call | pi | e | fnumber | ident  # type: ignore
-    assert g is not None
-    atom = g.set_parse_action(push_first) | Group(lpar + expr + rpar)  # type: ignore
-
-    # by defining exponentiation as "atom [ ^ factor ]..." instead of "atom [ ^ atom ]...", we get right-to-left
-    # exponents, instead of left-to-right that is, 2^3^2 = 2^(3^2), not (2^3)^2.
-    #
-    # a unary minus sits *outside* the exponentiation, so that -2^2 is -(2^2) =
-    # -4 rather than (-2)^2 = 4, the way it would be read on paper.  the base of
-    # a power is therefore an unsigned atom, while its exponent is signed, which
-    # keeps 2^-2 working.
-    factor = Forward()
-    signed = (addop[...] + factor).set_parse_action(push_unary_minus)  # type: ignore
-    factor <<= atom + (expop + signed).set_parse_action(push_first)[...]  # type: ignore
-    term = signed + (multop + signed).set_parse_action(push_first)[...]  # type: ignore
-    expr <<= term + (addop + term).set_parse_action(push_first)[...]  # type: ignore
-    return expr
-
-
-# Built (and streamlined) once, at import: the grammar is only read from during
-# a parse, so one instance is safe to share, but building it lazily on first use
-# would race -- and so would leaving parse_string to streamline it, since that
-# rewrites the grammar in place the first time it runs.
-BNF = make_bnf()
-BNF.streamline()
-
-
-# Largest magnitude, as a power of ten, that exponentiation is allowed to
-# produce.  Results are ultimately consumed as floats (whose range stops around
-# 1e308), so this is generous; the point is only to keep an input like 9^9^9
-# from asking Python for a 370-million-digit integer, which takes hours and
-# gigabytes of memory.  Anything under the cap is computed instantly.
+# Results are consumed as floats, so a cap well past the float range costs
+# nothing and stops 9^9^9 from asking for a 370-million-digit integer.
 MAX_RESULT_LOG10 = 1000
 
+# Parentheses and signs recurse, so stay well short of Python's recursion limit.
+MAX_DEPTH = 100
 
-def safe_pow(op1: Union[int, float], op2: Union[int, float]) -> Union[int, float]:
-    """Exponentiation that refuses to evaluate absurdly large results.
 
-    Only int ** nonnegative int can run away: every other combination of
-    operands either returns immediately or raises OverflowError, because
-    Python falls back to floating point.
-    """
-    if isinstance(op1, int) and isinstance(op2, int) and abs(op1) > 1 and op2 > 0:
-        # equivalent to op2 * log10(|op1|) > MAX_RESULT_LOG10, but written so
-        # that an enormous op2 doesn't have to be converted to a float
-        if op2 > MAX_RESULT_LOG10 / math.log10(abs(op1)):
-            raise OverflowError("exponentiation result is too large to evaluate")
+def safe_pow(op1: Number, op2: Number) -> Number:
+    """Exponentiation that refuses to evaluate absurdly large results."""
+    # only int ** positive int can run away; anything involving a float either
+    # returns at once or raises OverflowError
+    grows_exactly = (
+        isinstance(op1, int) and isinstance(op2, int) and abs(op1) > 1 and op2 > 0
+    )
+    # op2 * log10(|op1|) > MAX_RESULT_LOG10, rearranged so that an enormous op2
+    # never has to become a float
+    if grows_exactly and op2 > MAX_RESULT_LOG10 / math.log10(abs(op1)):
+        raise OverflowError("exponentiation result is too large to evaluate")
     return operator.pow(op1, op2)
 
 
-# map operator symbols to corresponding arithmetic operations
-epsilon = 1e-12
-opn = {
-    "+": operator.add,
-    "-": operator.sub,
-    "*": operator.mul,
-    "/": operator.truediv,
-    "^": safe_pow,
+LEFT = "left"
+RIGHT = "right"
+
+BINARY_OPS: dict[str, tuple[int, str, Callable[[Number, Number], Number]]] = {
+    "+": (1, LEFT, operator.add),
+    "-": (1, LEFT, operator.sub),
+    "*": (2, LEFT, operator.mul),
+    "/": (2, LEFT, operator.truediv),
+    "^": (4, RIGHT, safe_pow),
 }
 
-fn = {
-    "sqrt": math.sqrt,
-}
+# looser than '^' so that -2^2 is -(2^2), tighter than '*' so that 3*-2 works
+UNARY_PRECEDENCE = 3
+
+CONSTANTS: dict[str, Number] = {"pi": math.pi, "e": math.e}
+FUNCTIONS: dict[str, Callable[[Number], Number]] = {"sqrt": math.sqrt}
+
+_TOKEN_RE = re.compile(
+    r"""
+      (?P<number> \d+ (?:\.\d*)? (?:[eE][+-]?\d+)? )
+    | (?P<name>   [A-Za-z][A-Za-z0-9_]* )
+    | (?P<op>     [-+*/^()] )
+    | (?P<space>  \s+ )
+    | (?P<bad>    . )
+    """,
+    re.VERBOSE | re.DOTALL,
+)
 
 
-def evaluate_stack(s: list[Any]) -> Union[int, float]:
-    op, num_args = s.pop(), 0
-    if isinstance(op, tuple):
-        op, num_args = op
-    if op == "unary -":
-        return -evaluate_stack(s)
-    if op in "+-*/^":
-        # note: operands are pushed onto the stack in reverse order
-        op2 = evaluate_stack(s)
-        op1 = evaluate_stack(s)
-        return opn[op](op1, op2)
-    elif op == "PI":
-        return math.pi  # 3.1415926535
-    elif op == "E":
-        return math.e  # 2.718281828
-    elif op in fn:
-        # note: args are pushed onto the stack in reverse order
-        args = reversed([evaluate_stack(s) for _ in range(num_args)])
-        return fn[op](*args)
-    elif op[0].isalpha():
-        raise Exception(f"invalid identifier {op}")
-    else:
-        # try to evaluate as int first, then as float if int fails
+def tokenize(s: str) -> list[tuple[str, str]]:
+    tokens: list[tuple[str, str]] = []
+    for match in _TOKEN_RE.finditer(s):
+        kind = match.lastgroup
+        if kind == "bad":
+            raise CalculatorError(f"unexpected character {match.group()!r}")
+        if kind != "space":
+            assert kind is not None
+            tokens.append((kind, match.group()))
+    return tokens
+
+
+def to_number(text: str) -> Number:
+    """Read a numeric literal, keeping whole numbers exact."""
+    try:
+        return int(text)
+    except ValueError:
+        return float(text)
+
+
+class Parser:
+    """A precedence-climbing parser that evaluates as it goes."""
+
+    def __init__(self, tokens: list[tuple[str, str]]):
+        self.tokens = tokens
+        self.pos = 0
+        self.depth = 0
+
+    def parse(self) -> Number:
+        value = self.parse_expr(0)
+        if self.pos < len(self.tokens):
+            raise CalculatorError(f"unexpected {self.tokens[self.pos][1]!r}")
+        return value
+
+    def peek(self) -> tuple[str, str] | None:
+        return self.tokens[self.pos] if self.pos < len(self.tokens) else None
+
+    def accept(self, text: str) -> bool:
+        token = self.peek()
+        if token is not None and token[1] == text:
+            self.pos += 1
+            return True
+        return False
+
+    def expect(self, text: str):
+        if not self.accept(text):
+            found = self.peek()
+            raise CalculatorError(
+                f"expected {text!r} but found "
+                + (repr(found[1]) if found is not None else "end of expression")
+            )
+
+    def parse_expr(self, min_precedence: int) -> Number:
+        """Evaluate operators binding at least as tightly as min_precedence."""
+        self.depth += 1
+        if self.depth > MAX_DEPTH:
+            raise CalculatorError("expression is nested too deeply")
         try:
-            return int(op)
-        except ValueError:
-            return float(op)
+            lhs = self.parse_unary()
+            while (token := self.peek()) is not None:
+                op = token[1]
+                if token[0] != "op" or op not in BINARY_OPS:
+                    break
+                precedence, associativity, apply = BINARY_OPS[op]
+                if precedence < min_precedence:
+                    break
+                self.pos += 1
+                # recurring at its own precedence is what makes '^' right
+                # associative, so that 2^3^2 is 2^(3^2)
+                rhs = self.parse_expr(
+                    precedence if associativity == RIGHT else precedence + 1
+                )
+                lhs = apply(lhs, rhs)
+            return lhs
+        finally:
+            self.depth -= 1
+
+    def parse_unary(self) -> Number:
+        if self.accept("-"):
+            return -self.parse_expr(UNARY_PRECEDENCE)
+        if self.accept("+"):
+            return self.parse_expr(UNARY_PRECEDENCE)
+        return self.parse_atom()
+
+    def parse_atom(self) -> Number:
+        token = self.peek()
+        if token is None:
+            raise CalculatorError("expression ended unexpectedly")
+        self.pos += 1
+        kind, text = token
+
+        if kind == "number":
+            return to_number(text)
+        if kind == "name":
+            if text.lower() in CONSTANTS:
+                return CONSTANTS[text.lower()]
+            if text in FUNCTIONS:
+                self.expect("(")
+                argument = self.parse_expr(0)
+                self.expect(")")
+                return FUNCTIONS[text](argument)
+            raise CalculatorError(f"invalid identifier {text}")
+        if text == "(":
+            value = self.parse_expr(0)
+            self.expect(")")
+            return value
+        raise CalculatorError(f"unexpected {text!r}")
 
 
-def expr_compute(s: str) -> Optional[float]:
+def expr_compute(s: str) -> float | None:
+    """Evaluate an expression, or return None if there isn't one.
+
+    Raises CalculatorError if malformed, OverflowError if impractically large.
+    """
     if not s:
         return None
-    stack: list[Any] = []
-    reset_token = _expr_stack.set(stack)
-    try:
-        BNF.parse_string(s, parse_all=True)
-        return evaluate_stack(stack)
-    finally:
-        _expr_stack.reset(reset_token)
-
-
-# Warm the grammar up while we are still single-threaded.  pyparsing works out
-# each parse action's arity by calling it and catching TypeError, and that probe
-# writes to state shared by every later call, so two threads reaching an
-# un-probed action at once can trim the wrong number of arguments.  This
-# expression exercises all six of the parse actions attached in make_bnf().
-assert expr_compute("-sqrt(4)^2*3-1/2") == -12.5
-
-# flake8: noqa
+    return Parser(tokenize(s)).parse()
