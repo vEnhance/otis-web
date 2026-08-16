@@ -32,6 +32,7 @@
 
 import math
 import operator
+from contextvars import ContextVar
 from typing import Any, Optional, Union
 
 from pyparsing import (
@@ -48,25 +49,28 @@ from pyparsing import (
     alphas,
 )
 
-exprStack: Any = []
+# The parse actions below push tokens onto a stack as the grammar matches them,
+# which evaluate_stack then consumes.  That stack belongs to a single call to
+# expr_compute: were it shared, two quiz submissions being scored at the same
+# time would interleave their tokens and silently mis-score each other.  A
+# ContextVar hands every thread (and every async task) its own.
+_expr_stack: ContextVar[list[Any]] = ContextVar("_expr_stack")
 
 
 def push_first(toks: list[Token]):
-    exprStack.append(toks[0])
+    _expr_stack.get().append(toks[0])
 
 
 def push_unary_minus(toks: list[Token]):
+    stack = _expr_stack.get()
     for t in toks:
         if t == "-":
-            exprStack.append("unary -")
+            stack.append("unary -")
         else:
             break
 
 
-bnf = None
-
-
-def BNF() -> Any:
+def make_bnf() -> Any:
     """
     expop   :: '^'
     multop  :: '*' | '/'
@@ -77,52 +81,53 @@ def BNF() -> Any:
     term    :: factor [ multop factor ]*
     expr    :: term [ addop term ]*
     """
-    global bnf
-    if not bnf:
-        # use CaselessKeyword for e and pi, to avoid accidentally matching
-        # functions that start with 'e' or 'pi' (such as 'exp'); Keyword
-        # and CaselessKeyword only match whole words
-        e = CaselessKeyword("E")
-        pi = CaselessKeyword("PI")
-        fnumber = Regex(r"[+-]?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?")
-        ident = Word(alphas, f"{alphanums}_$")
+    # use CaselessKeyword for e and pi, to avoid accidentally matching
+    # functions that start with 'e' or 'pi' (such as 'exp'); Keyword
+    # and CaselessKeyword only match whole words
+    e = CaselessKeyword("E")
+    pi = CaselessKeyword("PI")
+    fnumber = Regex(r"[+-]?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?")
+    ident = Word(alphas, f"{alphanums}_$")
 
-        plus, minus, mult, div = map(Literal, "+-*/")
-        lpar, rpar = map(Suppress, "()")
-        addop = plus | minus
-        multop = mult | div
-        expop = Literal("^")
+    plus, minus, mult, div = map(Literal, "+-*/")
+    lpar, rpar = map(Suppress, "()")
+    addop = plus | minus
+    multop = mult | div
+    expop = Literal("^")
 
-        expr = Forward()
-        expr_list = DelimitedList(Group(expr))
+    expr = Forward()
+    expr_list = DelimitedList(Group(expr))
 
-        # add parse action that replaces the function identifier with a (name, number of args) tuple
-        def insert_fn_argcount_tuple(t: list[Any]):
-            fn = t.pop(0)
-            num_args = len(t[0])
-            t.insert(0, (fn, num_args))
+    # add parse action that replaces the function identifier with a (name, number of args) tuple
+    def insert_fn_argcount_tuple(t: list[Any]):
+        fn = t.pop(0)
+        num_args = len(t[0])
+        t.insert(0, (fn, num_args))
 
-        f = ident + lpar - Group(expr_list) + rpar  # type: ignore
-        fn_call = f.set_parse_action(insert_fn_argcount_tuple)  # type: ignore
-        g = fn_call | pi | e | fnumber | ident  # type: ignore
-        assert g is not None
-        atom = addop[...] + (
-            g.set_parse_action(push_first) | Group(lpar + expr + rpar)  # type: ignore
-        )
-        atom = atom.set_parse_action(push_unary_minus)  # type: ignore
+    f = ident + lpar - Group(expr_list) + rpar  # type: ignore
+    fn_call = f.set_parse_action(insert_fn_argcount_tuple)  # type: ignore
+    g = fn_call | pi | e | fnumber | ident  # type: ignore
+    assert g is not None
+    atom = addop[...] + (
+        g.set_parse_action(push_first) | Group(lpar + expr + rpar)  # type: ignore
+    )
+    atom = atom.set_parse_action(push_unary_minus)  # type: ignore
 
-        # by defining exponentiation as "atom [ ^ factor ]..." instead of "atom [ ^ atom ]...", we get right-to-left
-        # exponents, instead of left-to-right that is, 2^3^2 = 2^(3^2), not (2^3)^2.
-        factor = Forward()
-        factor <<= atom + (expop + factor).set_parse_action(push_first)[...]  # type: ignore
-        term = (
-            factor + (multop + factor).set_parse_action(push_first)[...]  # type: ignore
-        )  # type: ignore
-        expr <<= (
-            term + (addop + term).set_parse_action(push_first)[...]  # type: ignore
-        )  # type: ignore
-        bnf = expr
-    return bnf
+    # by defining exponentiation as "atom [ ^ factor ]..." instead of "atom [ ^ atom ]...", we get right-to-left
+    # exponents, instead of left-to-right that is, 2^3^2 = 2^(3^2), not (2^3)^2.
+    factor = Forward()
+    factor <<= atom + (expop + factor).set_parse_action(push_first)[...]  # type: ignore
+    term = factor + (multop + factor).set_parse_action(push_first)[...]  # type: ignore
+    expr <<= term + (addop + term).set_parse_action(push_first)[...]  # type: ignore
+    return expr
+
+
+# Built (and streamlined) once, at import: the grammar is only read from during
+# a parse, so one instance is safe to share, but building it lazily on first use
+# would race -- and so would leaving parse_string to streamline it, since that
+# rewrites the grammar in place the first time it runs.
+BNF = make_bnf()
+BNF.streamline()
 
 
 # Largest magnitude, as a power of ten, that exponentiation is allowed to
@@ -195,9 +200,20 @@ def evaluate_stack(s: list[Any]) -> Union[int, float]:
 def expr_compute(s: str) -> Optional[float]:
     if not s:
         return None
-    exprStack[:] = []
-    BNF().parse_string(s, parse_all=True)
-    return evaluate_stack(exprStack[:])
+    stack: list[Any] = []
+    reset_token = _expr_stack.set(stack)
+    try:
+        BNF.parse_string(s, parse_all=True)
+        return evaluate_stack(stack)
+    finally:
+        _expr_stack.reset(reset_token)
 
+
+# Warm the grammar up while we are still single-threaded.  pyparsing works out
+# each parse action's arity by calling it and catching TypeError, and that probe
+# writes to state shared by every later call, so two threads reaching an
+# un-probed action at once can trim the wrong number of arguments.  This
+# expression exercises all six of the parse actions attached in make_bnf().
+assert expr_compute("-sqrt(4)^2*3-1/2") == 11.5
 
 # flake8: noqa
