@@ -12,6 +12,7 @@ from typing import Any
 import django_discordo
 import django_stubs_ext
 import import_export.tmp_storages
+from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
 django_stubs_ext.monkeypatch()
@@ -33,6 +34,34 @@ LOGIN_REDIRECT_URL = "/"
 
 PRODUCTION = bool(int(os.getenv("IS_PRODUCTION") or 0))
 DEBUG = not PRODUCTION
+
+
+def require_env(name: str) -> str:
+    """Read an environment variable that the server cannot run without.
+
+    Raises ImproperlyConfigured (rather than booting with a bogus value) if the
+    variable is unset or empty.
+    """
+    value = os.environ.get(name, "")
+    if not value:
+        raise ImproperlyConfigured(
+            f"The environment variable {name} must be set and nonempty "
+            "when IS_PRODUCTION is turned on."
+        )
+    return value
+
+
+def env_secret(name: str, dev_fallback: str) -> str:
+    """Read a secret, falling back to a dummy value outside of production.
+
+    The fallbacks are hard-coded in this open-source repository, so they are
+    public knowledge; production refuses to start rather than use one.
+    """
+    if PRODUCTION:
+        return require_env(name)
+    return os.getenv(name) or dev_fallback
+
+
 if PRODUCTION:
     ALLOWED_HOSTS = ["otis.evanchen.cc", ".localhost", "127.0.0.1"]
     CSRF_TRUSTED_ORIGINS = [
@@ -222,10 +251,10 @@ if PRODUCTION:
         "protected": {
             "BACKEND": "storages.backends.s3.S3Storage",
             "OPTIONS": {
-                "bucket_name": os.getenv("R2_BUCKET_NAME"),
-                "access_key": os.getenv("R2_ACCESS_KEY_ID"),
-                "secret_key": os.getenv("R2_SECRET_ACCESS_KEY"),
-                "endpoint_url": f"https://{os.getenv('R2_ACCOUNT_ID')}.r2.cloudflarestorage.com",
+                "bucket_name": require_env("R2_BUCKET_NAME"),
+                "access_key": require_env("R2_ACCESS_KEY_ID"),
+                "secret_key": require_env("R2_SECRET_ACCESS_KEY"),
+                "endpoint_url": f"https://{require_env('R2_ACCOUNT_ID')}.r2.cloudflarestorage.com",
                 "region_name": "auto",
                 "signature_version": "s3v4",
                 "default_acl": None,  # R2 has no ACLs
@@ -233,14 +262,9 @@ if PRODUCTION:
             },
         },
     }
-    GS_BUCKET_NAME = os.getenv("GS_BUCKET_NAME")
-    MEDIA_URL = os.getenv("MEDIA_URL")
-    assert GS_BUCKET_NAME is not None
-    assert MEDIA_URL is not None
-    assert os.getenv("R2_BUCKET_NAME") is not None
+    GS_BUCKET_NAME = require_env("GS_BUCKET_NAME")
+    MEDIA_URL = require_env("MEDIA_URL")
     IMPORT_EXPORT_TMP_STORAGE_CLASS = import_export.tmp_storages.CacheStorage
-    SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
-    assert SECRET_KEY is not None
 else:
     STORAGES = {
         "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
@@ -250,7 +274,8 @@ else:
         "protected": {"BACKEND": "django.core.files.storage.InMemoryStorage"},
     }
     MEDIA_URL = "/media/"
-    SECRET_KEY = "evan_chen_is_really_cool"
+
+SECRET_KEY = env_secret("DJANGO_SECRET_KEY", "evan_chen_is_really_cool")
 
 TESTING_NEEDS_MOCK_MEDIA = False  # true only for a few tests
 
@@ -258,9 +283,10 @@ FILE_UPLOAD_HANDLERS = ("django.core.files.uploadhandler.MemoryFileUploadHandler
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
 
 # Custom Evan keys
-INVOICE_HASH_KEY = os.getenv("INVOICE_HASH_KEY", "evan_chen_is_still_really_cool")
-CERT_HASH_KEY = os.getenv("CERT_HASH_KEY", "certified_by_god")
-OPAL_HASH_KEY = os.getenv("OPAL_HASH_KEY", "paradise_is_where_i_am")
+INVOICE_HASH_KEY = env_secret("INVOICE_HASH_KEY", "evan_chen_is_still_really_cool")
+CERT_HASH_KEY = env_secret("CERT_HASH_KEY", "certified_by_god")
+OPAL_HASH_KEY = env_secret("OPAL_HASH_KEY", "paradise_is_where_i_am")
+# Unset means "the aincrad API is disabled", which is a legitimate state
 API_TARGET_HASH = os.getenv("API_TARGET_HASH")
 
 PATH_STATEMENT_ON_DISK = os.getenv("PATH_STATEMENT_ON_DISK")

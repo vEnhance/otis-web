@@ -12,14 +12,16 @@ from django.contrib.messages.middleware import MessageMiddleware
 from django.contrib.messages.storage.base import Message
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.contrib.sites.models import Site
+from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpRequest, HttpResponse
 from django.test import Client, RequestFactory
 from django.urls import Resolver404, resolve, reverse
 from django.utils.log import log_response
 
+import otisweb.settings
 from core.factories import UserFactory
 from otisweb.adapters import AUTH_PROCESS_LOGIN_EXISTING
-from otisweb.settings import fix_response_location
+from otisweb.settings import env_secret, fix_response_location, require_env
 
 
 @pytest.mark.django_db
@@ -260,3 +262,31 @@ def test_response_location_view(rf: RequestFactory, path: str, expected_module: 
         os.path.join(expected_module.split(".")[0], "views.py")
     )
     assert record.lineno > 0
+
+
+def test_require_env(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setenv("OTIS_MADE_UP_VARIABLE", "hunter2")
+    assert require_env("OTIS_MADE_UP_VARIABLE") == "hunter2"
+    monkeypatch.setenv("OTIS_MADE_UP_VARIABLE", "")
+    with pytest.raises(ImproperlyConfigured):
+        require_env("OTIS_MADE_UP_VARIABLE")
+    monkeypatch.delenv("OTIS_MADE_UP_VARIABLE")
+    with pytest.raises(ImproperlyConfigured):
+        require_env("OTIS_MADE_UP_VARIABLE")
+
+
+@pytest.mark.parametrize("production", (True, False))
+def test_env_secret(monkeypatch: pytest.MonkeyPatch, production: bool):
+    # env_secret reads PRODUCTION out of the settings module at call time
+    monkeypatch.setattr(otisweb.settings, "PRODUCTION", production)
+    monkeypatch.setenv("OTIS_MADE_UP_SECRET", "correct_horse_battery_staple")
+    assert env_secret("OTIS_MADE_UP_SECRET", "insecure") == (
+        "correct_horse_battery_staple"
+    )
+    # the public fallback is fine locally, but must never reach production
+    monkeypatch.delenv("OTIS_MADE_UP_SECRET")
+    if production:
+        with pytest.raises(ImproperlyConfigured):
+            env_secret("OTIS_MADE_UP_SECRET", "insecure")
+    else:
+        assert env_secret("OTIS_MADE_UP_SECRET", "insecure") == "insecure"
