@@ -119,8 +119,6 @@ def test_worker(otis) -> None:
         data={"gmail_address": "alice.aardvark@gmail.com", "notes": "hi there"},
         follow=True,
     )
-    otis.assert_has(resp, "alice.aardvark@gmail.com")
-    otis.assert_has(resp, "hi there")
     worker = Worker.objects.get(user__username="alice")
     assert worker.gmail_address == "alice.aardvark@gmail.com"
     assert worker.notes == "hi there"
@@ -134,9 +132,6 @@ def test_worker(otis) -> None:
         },
         follow=True,
     )
-    otis.assert_has(resp, "alice.aardvark")
-    otis.assert_has(resp, "hello again")
-
     worker = Worker.objects.get(user__username="alice")
     assert worker.gmail_address == "alice.aardvark@gmail.com"
     assert worker.venmo_handle == "@Alice-Aardvark-42"
@@ -150,7 +145,7 @@ def test_worker(otis) -> None:
         },
         follow=True,
     )
-    otis.assert_has(resp, "Enter a valid value.")
+    assert resp.context["form"].errors
     worker = Worker.objects.get(user__username="alice")
     assert worker.gmail_address == "alice.aardvark@gmail.com"
     assert worker.venmo_handle == "@Alice-Aardvark-42"
@@ -164,7 +159,7 @@ def test_worker(otis) -> None:
         },
         follow=True,
     )
-    otis.assert_has(resp, "Enter a valid value.")
+    assert resp.context["form"].errors
     worker = Worker.objects.get(user__username="alice")
     assert worker.gmail_address == "alice.aardvark@gmail.com"
     assert worker.venmo_handle == "@Alice-Aardvark-42"
@@ -177,24 +172,24 @@ def test_claim_limits(otis) -> None:
     alice: User = UserFactory.create(username="alice", groups=(verified_group,))
     otis.login(alice)
     otis.post_ok("worker-update", data={"notes": "hi"}, follow=True)
+    worker = Worker.objects.get(user=alice)
 
     folder = JobFolderFactory.create(max_pending=3, max_total=5)
     jobs = JobFactory.create_batch(10, folder=folder)
 
     for i in range(3):
-        otis.assert_has(
-            otis.post_ok("job-claim", jobs[i].pk, follow=True),
-            "You have successfully claimed",
-        )
+        otis.post_ok("job-claim", jobs[i].pk, follow=True)
+        jobs[i].refresh_from_db()
+        assert jobs[i].assignee == worker
     for i in range(3):
-        otis.assert_has(
+        otis.assert_message(
             otis.post_ok("job-claim", jobs[i].pk, follow=True),
-            "This task is already claimed",
+            "This task is already claimed.",
         )
 
-    otis.assert_has(
+    otis.assert_message(
         otis.post_ok("job-claim", jobs[3].pk, follow=True),
-        "maximum number of pending tasks",
+        "You already reached the maximum number of pending tasks for this category.",
     )
 
     for i in range(3):
@@ -203,13 +198,12 @@ def test_claim_limits(otis) -> None:
         )
 
     for i in range(3, 5):
-        otis.assert_has(
-            otis.post_ok("job-claim", jobs[i].pk, follow=True),
-            "You have successfully claimed",
-        )
-    otis.assert_has(
+        otis.post_ok("job-claim", jobs[i].pk, follow=True)
+        jobs[i].refresh_from_db()
+        assert jobs[i].assignee == worker
+    otis.assert_message(
         otis.post_ok("job-claim", jobs[5].pk, follow=True),
-        "maximum number of total tasks",
+        "You already reached the maximum number of total tasks for this category.",
     )
 
 
@@ -342,9 +336,10 @@ def test_inactive_worker_list(otis) -> None:
     admin = UserFactory.create(is_staff=True, is_superuser=True)
     otis.login(admin)
     resp = otis.get_20x("job-inactive", "art")
-    otis.assert_has(resp, "Alice Aardvark")
-    otis.assert_has(resp, "Bob Beta")
-    otis.assert_not_has(resp, "Carol Cutie")
+    assert {w.user.get_full_name() for w in resp.context["workers"]} == {
+        "Alice Aardvark",
+        "Bob Beta",
+    }
 
     view = otis.setup_view_get(InactiveWorkerList, "job-inactive", "art")
     assert isinstance(view, InactiveWorkerList)
