@@ -4,7 +4,7 @@
 {% endblock title %}
 {% block layout-content %}
   {% if not target_user.is_active %}
-    <div class="alert alert-warning">
+    <div class="alert alert-warning" data-testid="user-inactive-warning">
       <strong>This account is inactive.</strong> The user cannot log in.
     </div>
   {% endif %}
