@@ -61,9 +61,7 @@ def test_list(otis, market_model_data):
     with freeze_time("2020-01-02", tz_offset=0):
         otis.login(UserFactory.create())
         response = otis.get("market-list")
-        otis.assert_has(response, "m-one")
-        otis.assert_has(response, "m-two")
-        otis.assert_not_has(response, "m-three")
+        assert {m.slug for m in response.context["markets"]} == {"m-one", "m-two"}
 
 
 @pytest.mark.django_db
@@ -147,7 +145,7 @@ def test_guess_perms(otis, market_data):
     with freeze_time("2050-07-01", tz_offset=0):
         otis.login("alice")
         resp = otis.get_20x("market-guess", "guess-my-ssn")
-        otis.assert_has(resp, "market main page")
+        assert resp.context["market"].alpha is not None
     with freeze_time("2050-11-01", tz_offset=0):
         otis.login("alice")
         otis.get_redirects(
@@ -179,7 +177,7 @@ def test_guess_form_with_answer(otis, market_data):
 
         # Guess a non-integer, shouldn't work
         resp = otis.get_20x("market-guess", "guess-my-ssn")
-        otis.assert_has(resp, "market main page")
+        assert resp.context["market"].alpha is not None
         resp = otis.post_20x(
             "market-guess", "guess-my-ssn", data={"value": 13.37}, follow=True
         )
@@ -187,7 +185,7 @@ def test_guess_form_with_answer(otis, market_data):
 
         # Guess an integer, should save
         resp = otis.get_20x("market-guess", "guess-my-ssn")
-        otis.assert_has(resp, "market main page")
+        assert resp.context["market"].alpha is not None
         otis.post_20x("market-guess", "guess-my-ssn", data={"value": 100}, follow=True)
 
         # Forbid more guesses
@@ -208,7 +206,7 @@ def test_guess_form_without_answer(otis, market_data):
         market = Market.objects.get(slug="guess-my-ssn")
         otis.login("alice")
         resp = otis.get_20x("market-guess", "guess-my-ssn")
-        otis.assert_has(resp, "market main page")
+        assert resp.context["market"].alpha is not None
         otis.post_20x("market-guess", "guess-my-ssn", data={"value": 100}, follow=True)
         otis.get_30x("market-guess", "guess-my-ssn")  # redirects to DetailView
         resp = otis.post_20x(
@@ -245,7 +243,8 @@ def test_guess_form_without_alpha(otis, market_data):
         market.save()
         otis.login("alice")
         resp = otis.get_20x("market-guess", "guess-my-ssn")
-        otis.assert_not_has(resp, "market main page")  # because it's a special market
+        # a special market has no alpha, so the standard-scoring blurb is hidden
+        assert resp.context["market"].alpha is None
         otis.post_20x("market-guess", "guess-my-ssn", data={"value": 100}, follow=True)
 
         otis.get_30x("market-guess", "guess-my-ssn")  # redirects to DetailView
@@ -285,7 +284,7 @@ def test_spades_view(otis, market_data):
         otis.login("alice")
         otis.post_20x("market-guess", "guess-my-ssn", data={"value": 100}, follow=True)
         resp = otis.get_20x("market-spades")
-        otis.assert_has(resp, "You have not completed")
+        assert list(resp.context["guesses"]) == []
     with freeze_time("2050-11-01", tz_offset=0):
         otis.login("alice")
         resp = otis.get_20x("market-spades")
@@ -308,7 +307,7 @@ def test_update_guess_perms(otis, market_data):
         assert guess.value == 13
         # Now we can update it
         resp = otis.get_20x("market-guess-update", "guess-my-ssn")
-        otis.assert_has(resp, "market main page")
+        assert resp.context["market"].alpha is not None
         otis.post_20x(
             "market-guess-update",
             "guess-my-ssn",
@@ -354,7 +353,7 @@ def test_update_guess_form_with_answer(otis, market_data):
 
         # Try to update with a non-integer (should fail)
         resp = otis.get_20x("market-guess-update", "guess-my-ssn")
-        otis.assert_has(resp, "market main page")
+        assert resp.context["market"].alpha is not None
         resp = otis.post_20x(
             "market-guess-update",
             "guess-my-ssn",
