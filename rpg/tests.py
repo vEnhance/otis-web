@@ -1,7 +1,7 @@
 import datetime
 
 import pytest
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Group, User
 from django.utils import timezone
 
 from core.factories import GroupFactory, UnitFactory, UserFactory
@@ -806,3 +806,41 @@ def test_malformed_guesses_count_against_rate_limit(otis):
     otis.assert_has(
         resp, f"You&#x27;ve used up your {WRONG_GUESS_LIMIT} incorrect guesses."
     )
+
+
+@pytest.mark.django_db
+def test_diamond_solution_permissions(otis, alice_with_data) -> None:
+    alice = get_alice()
+    # Eve must be Verified, or every denial below would pass for the wrong reason
+    # (the mixin bouncing her) instead of exercising the per-object check.
+    eve = StudentFactory.create(
+        user__first_name="Eve",
+        user__last_name="Epsilon",
+        user__groups=(Group.objects.get(name="Verified"),),
+        semester=alice.semester,
+    )
+    secret = "the-diamond-solution-text"
+    public = AchievementFactory.create(solution=secret, show_solution=True)
+    private = AchievementFactory.create(solution=secret, show_solution=False)
+
+    # nobody sees a solution they haven't unlocked
+    otis.login(eve.user)
+    otis.assert_not_has(otis.get_denied("diamond-solution", public.pk), secret)
+    otis.assert_not_has(otis.get_denied("diamond-solution", private.pk), secret)
+
+    # unlocking is enough for a diamond whose solution is public...
+    AchievementUnlockFactory.create(user=eve.user, achievement=public)
+    AchievementUnlockFactory.create(user=eve.user, achievement=private)
+    otis.assert_has(otis.get_20x("diamond-solution", public.pk), secret)
+    # ...but show_solution=False keeps it hidden even from a finder
+    otis.assert_not_has(otis.get_denied("diamond-solution", private.pk), secret)
+
+    # the creator always gets through, show_solution or not
+    mine = AchievementFactory.create(
+        solution=secret, show_solution=False, creator=eve.user
+    )
+    otis.assert_has(otis.get_20x("diamond-solution", mine.pk), secret)
+
+    # and so does an admin
+    otis.login(UserFactory.create(is_staff=True, is_superuser=True))
+    otis.assert_has(otis.get_20x("diamond-solution", private.pk), secret)

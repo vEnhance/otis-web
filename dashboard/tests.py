@@ -898,3 +898,33 @@ def test_level_up_and_bonus(otis) -> None:
     assert "There are no secret units you can request yet." not in messages
     alice.refresh_from_db()
     assert alice.curriculum.filter(pk=desired_unit.pk).exists()
+
+
+@pytest.mark.django_db
+def test_pset_detail_permissions(otis) -> None:
+    alice = StudentFactory.create()
+    pset = PSetFactory.create(student=alice, feedback="alice-secret-feedback")
+
+    # anonymous users belong at the login page, not at a 403
+    otis.assert_not_has(
+        otis.get_login_redirect("pset", pset.pk), "alice-secret-feedback"
+    )
+
+    # an unrelated student can't read someone else's submission
+    eve = StudentFactory.create()
+    otis.login(eve)
+    otis.assert_not_has(otis.get_denied("pset", pset.pk), "alice-secret-feedback")
+
+    # a staff member who doesn't teach Alice is no better off
+    unrelated_assistant = AssistantFactory.create()
+    otis.login(unrelated_assistant.user)
+    otis.assert_not_has(otis.get_denied("pset", pset.pk), "alice-secret-feedback")
+
+    # but Alice, and the instructor who actually teaches her, can
+    otis.login(alice)
+    otis.get_20x("pset", pset.pk)
+
+    alice.assistant = AssistantFactory.create()
+    alice.save()
+    otis.login(alice.assistant.user)
+    otis.get_20x("pset", pset.pk)
