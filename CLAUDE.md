@@ -83,6 +83,19 @@ the contract:
 
 `dashboard/tests.py` is the worked example of this style.
 
+Asserting on `messages` text is fine when the string is a fixed literal — it
+lives in `views.py` next to the code you're editing, so a reword breaks one
+obvious test. But do **not** assert on a message that interpolates a value; that
+couples the test to a model's `__str__` or to float formatting. Assert the state
+change instead, plus the level if it matters that the user was notified:
+
+```python
+assert any(m.level == message_levels.SUCCESS for m in resp.context["messages"])
+```
+
+Import it as `from django.contrib.messages import constants as message_levels` —
+`messages` is already a common local variable name in these test files.
+
 ### Database
 
 - Use `make migrations` to create new migrations

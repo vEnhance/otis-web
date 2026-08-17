@@ -5,6 +5,7 @@ from io import StringIO
 import pytest
 from django.conf import settings
 from django.contrib.admin.sites import AdminSite
+from django.contrib.messages import constants as message_levels
 from django.contrib.messages.storage.cookie import CookieStorage
 from django.http import HttpRequest
 from django.test import RequestFactory
@@ -97,22 +98,27 @@ def test_portal(otis):
         number=1,
     )
 
-    # assistant does not cause level up message
+    # an assistant viewing the portal must not consume the student's level-up
     assistant = AssistantFactory.create()
     alice.assistant = assistant
     alice.save()
     otis.login(assistant)
     with freeze_time("2021-07-01", tz_offset=0):
         resp = otis.get_20x("portal", alice.pk, follow=True)
-    messages = [m.message for m in resp.context["messages"]]
-    assert "You leveled up! You're now level 22." not in messages
+    assert resp.context["level_number"] == 22
+    alice.refresh_from_db()
+    assert alice.last_level_seen != 22
+    assert not resp.context["messages"]
 
+    # but the student seeing it themselves does level up, and is told
     otis.login(alice)
     with freeze_time("2021-07-01", tz_offset=0):
         resp = otis.get_20x("portal", alice.pk, follow=True)
 
-    messages = [m.message for m in resp.context["messages"]]
-    assert "You leveled up! You're now level 22." in messages
+    assert resp.context["level_number"] == 22
+    alice.refresh_from_db()
+    assert alice.last_level_seen == 22
+    assert any(m.level == message_levels.SUCCESS for m in resp.context["messages"])
 
     # static stuff
     assert resp.context["title"] == f"{alice.name} ({alice.semester.name})"
@@ -867,8 +873,7 @@ def test_level_up_and_bonus(otis) -> None:
     otis.assert_testid(resp, "bonus-level-request")
 
     # make sure the level up does its job
-    messages = [m.message for m in resp.context["messages"]]
-    assert "You leveled up! You're now level 9." in messages
+    assert any(m.level == message_levels.SUCCESS for m in resp.context["messages"])
     alice.refresh_from_db()
     assert alice.last_level_seen == 9
     assert alice.curriculum.all().count() == 2
@@ -896,7 +901,6 @@ def test_level_up_and_bonus(otis) -> None:
         follow=True,
     )
     messages = [m.message for m in resp.context["messages"]]
-    assert f"Added bonus unit {desired_unit} for you." in messages
     assert "There are no secret units you can request yet." not in messages
     alice.refresh_from_db()
     assert alice.curriculum.filter(pk=desired_unit.pk).exists()

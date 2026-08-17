@@ -2,6 +2,7 @@ import os
 
 import pytest
 from django.conf import settings
+from django.contrib.messages import constants as message_levels
 from django.http import Http404
 from django.test import override_settings
 from django.urls import reverse
@@ -38,8 +39,9 @@ def test_disk_problem(otis):
     otis.get_40x("hint-list", "NONEXISTENT")
     resp = otis.get_20x("hint-list", disk_puid)
 
-    messages = [m.message for m in resp.context["messages"]]
-    assert f"Created previously nonexistent problem {disk_puid}" in messages
+    # the problem row is created on demand, and the student is told so
+    assert Problem.objects.filter(puid=disk_puid).exists()
+    assert any(m.level == message_levels.INFO for m in resp.context["messages"])
 
     # the HTML statement is rendered as-is, the TeX source is shown escaped
     otis.assert_has(resp, "<p>rock and roll</p>")
@@ -202,10 +204,9 @@ def test_vote(otis):
     otis.get_20x("vote-create", problem.puid)
 
     resp = otis.post_20x("vote-create", problem.puid, data={"niceness": 4}, follow=True)
-    messages = [m.message for m in resp.context["messages"]]
-    assert f"You rated {problem.puid} as 4." in messages
+    assert any(m.level == message_levels.SUCCESS for m in resp.context["messages"])
 
-    assert Vote.objects.filter(problem__puid=problem.puid).exists()
+    assert Vote.objects.get(problem__puid=problem.puid).niceness == 4
 
 
 @pytest.mark.django_db
