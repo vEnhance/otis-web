@@ -44,9 +44,8 @@ def test_suggestions(otis):
         in messages
     )
 
-    otis.assert_has(otis.get_20x("suggest-queue-listing"), "Ring around the Rosie")
-
     sugg: ProblemSuggestion = ProblemSuggestion.objects.get(user=alice)
+    assert list(otis.get_20x("suggest-queue-listing").context["suggestions"]) == [sugg]
 
     # Update solution
     resp = otis.post_20x(
@@ -75,13 +74,15 @@ def test_suggestions(otis):
     sugg.refresh_from_db()
     assert not sugg.acknowledge
 
-    otis.assert_has(otis.get_20x("suggest-queue-listing"), "Ring around the Rosie")
-    otis.assert_has(otis.get_20x("suggest-list"), "Shortlist 1955")
+    queue = otis.get_20x("suggest-queue-listing").context["suggestions"]
+    assert list(queue) == [sugg]
+    assert list(otis.get_20x("suggest-list").context["problem_suggestions"]) == [sugg]
 
     otis.login(eve)
 
-    otis.assert_has(otis.get_20x("suggest-queue-listing"), "Ring around the Rosie")
-    otis.assert_not_has(otis.get_20x("suggest-list"), "Shortlist 1955")
+    # the review queue is shared, but "my suggestions" is per-user
+    assert list(otis.get_20x("suggest-queue-listing").context["suggestions"]) == [sugg]
+    assert list(otis.get_20x("suggest-list").context["problem_suggestions"]) == []
     otis.post_denied("suggest-delete", sugg.pk, follow=True)
 
     otis.login(alice)
