@@ -9,7 +9,9 @@
     <thead class="table-dark">
       <tr>
         <th>Year</th>
-        {% if request.user.is_superuser %}<th>Students</th>{% endif %}
+        {% if request.user.is_superuser %}
+          <th data-testid="semester-student-count">Students</th>
+        {% endif %}
         <th>Active</th>
       </tr>
     </thead>

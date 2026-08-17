@@ -8,19 +8,19 @@
     Back to <a href="{% url "submit-pset" student.pk %}">submission page</a>.
   </p>
   {% if pset.rejected %}
-    <div class="alert alert-warning">
+    <div class="alert alert-warning" data-testid="pset-status-rejected">
       This unit submission was rejected.
       You should <a href="{% url "resubmit-pset" pset.pk %}">replace it</a>.
     </div>
   {% elif pset.accepted %}
-    <div class="alert alert-success">
+    <div class="alert alert-success" data-testid="pset-status-accepted">
       This unit submission was accepted.
       If you haven't read the solutions yet,
       you can <a href="{% url "resubmit-pset" pset.pk %}">submit additional problems</a>
       if you find time.
     </div>
   {% else %}
-    <div class="alert alert-primary">
+    <div class="alert alert-primary" data-testid="pset-status-pending">
       This unit submission is pending review from Evan.
       <a href="{% url "resubmit-pset" pset.pk %}">Update it</a>
       if you wish to make changes.
