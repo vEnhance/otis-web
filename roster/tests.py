@@ -1,5 +1,6 @@
 import datetime
 import re
+from decimal import Decimal
 from io import StringIO
 from uuid import uuid4
 
@@ -95,48 +96,54 @@ def test_user_lookup(otis) -> None:
     # Test GET request with admin user - should show form
     otis.login(admin)
     resp = otis.get_20x("user-lookup")
-    otis.assert_has(resp, "User lookup")
+    assert resp.context["results"] is None
 
     # Search by exact email
     resp = otis.post_20x("user-lookup", data={"query": "alice@example.com"})
-    otis.assert_has(resp, "alice")
+    (result,) = resp.context["results"]
+    assert result["user"] == alice
+    assert alice_new in result["students"]
     otis.assert_has(resp, reverse("user-info", args=(alice.pk,)))
-    otis.assert_has(resp, alice_new.get_absolute_url())
 
     # Search by Django username, case-insensitive substring
     resp = otis.post_20x("user-lookup", data={"query": "BO"})
-    otis.assert_has(resp, "bob")
-    otis.assert_has(resp, bob_student.get_absolute_url())
+    (result,) = resp.context["results"]
+    assert result["user"] == bob
+    assert bob_student in result["students"]
 
     # Search by real name
     resp = otis.post_20x("user-lookup", data={"query": "Alice"})
-    otis.assert_has(resp, "alice")
+    assert [r["user"] for r in resp.context["results"]] == [alice]
 
     # Search by a social account username (not restricted to Discord)
     resp = otis.post_20x("user-lookup", data={"query": "bobdiscord"})
-    otis.assert_has(resp, "bob")
-    otis.assert_has(resp, "Discord (bobdiscord)")
+    (result,) = resp.context["results"]
+    assert result["user"] == bob
+    assert "Discord (bobdiscord)" in result["socials"]
 
     resp = otis.post_20x("user-lookup", data={"query": "carlhub"})
-    otis.assert_has(resp, "carl")
-    otis.assert_has(resp, "GitHub (carlhub)")
+    (result,) = resp.context["results"]
+    assert result["user"] == carl
+    assert "GitHub (carlhub)" in result["socials"]
 
     # A user with no Student instance still shows up, with no students listed.
     resp = otis.post_20x("user-lookup", data={"query": "carl@example.com"})
-    otis.assert_has(resp, "carl")
+    (result,) = resp.context["results"]
+    assert result["user"] == carl
+    assert result["students"] == []
 
     # No matches -> empty result list, rendered as an empty-state alert
     resp = otis.post_20x("user-lookup", data={"query": "nonexistent-query-zzz"})
     assert resp.context["results"] == []
-    otis.assert_has(resp, "No matches were found.")
+    otis.assert_testid(resp, "user-lookup-no-matches")
 
     # Inactive accounts are flagged with a badge; active ones are not
     resp = otis.post_20x("user-lookup", data={"query": "alice"})
-    otis.assert_not_has(resp, "Inactive")
+    otis.assert_no_testid(resp, "user-inactive-badge")
     alice.is_active = False
     alice.save()
     resp = otis.post_20x("user-lookup", data={"query": "alice"})
-    otis.assert_has(resp, "Inactive")
+    otis.assert_testid(resp, "user-inactive-badge")
 
 
 @pytest.mark.django_db
@@ -170,31 +177,34 @@ def test_user_merge(otis) -> None:
 
     # Can't merge an account into itself
     resp = otis.post_20x("user-merge", data={"impostor": dupe.pk, "crewmate": dupe.pk})
-    otis.assert_has(resp, "distinct")
+    assert not resp.context["merge_form"].is_valid()
+    assert "distinct" in str(resp.context["merge_form"].errors)
     # ... and the accordion is expanded so the error is actually visible
-    otis.assert_has(resp, "accordion-collapse collapse show")
+    assert resp.context["merge_open"]
 
     # Can't clobber a staff account
     resp = otis.post_20x("user-merge", data={"impostor": admin.pk, "crewmate": real.pk})
-    otis.assert_has(resp, "Merge this one by hand")
+    assert "Merge this one by hand." in str(resp.context["merge_form"].errors)
 
     # Can't merge two students of the same semester together
     clash: Student = StudentFactory.create(user=dupe, semester=semester_new)
     resp = otis.post_20x("user-merge", data={"impostor": dupe.pk, "crewmate": real.pk})
-    otis.assert_has(resp, "Delete the redundant student(s) first.")
+    assert "Delete the redundant student(s) first." in str(
+        resp.context["merge_form"].errors
+    )
     clash.delete()
 
     # An unconfirmed post only previews the merge, leaving the database alone
     resp = otis.post_20x("user-merge", data={"impostor": dupe.pk, "crewmate": real.pk})
-    otis.assert_has(resp, "Nothing has happened yet.")
-    otis.assert_has(resp, '<h2 class="text-danger">Impostor (to be ejected)</h2>')
-    otis.assert_has(resp, '<h2 class="text-success">Crewmate (to be kept)</h2>')
-    # ... and the two accounts are the right way around
-    otis.assert_has(resp, f"<code>alice2</code> ({dupe.pk}) will be marked inactive")
-    otis.assert_has(resp, "These students move to <code>alice</code>")
-    otis.assert_has(resp, "Discord (alicediscord)")
-    otis.assert_has(resp, str(semester_old))
-    otis.assert_has(resp, "Verified")
+    otis.assert_testid(resp, "merge-preview-note")
+    # the two accounts are the right way around, and the impostor's summary
+    # carries everything that would be handed over
+    assert resp.context["impostor"]["user"] == dupe
+    assert resp.context["crewmate"]["user"] == real
+    assert resp.context["impostor"]["students"] == [dupe_student]
+    assert dupe_student.semester == semester_old
+    assert "Discord (alicediscord)" in resp.context["impostor"]["socials"]
+    assert [g.name for g in resp.context["impostor"]["groups"]] == ["Verified"]
     dupe.refresh_from_db()
     assert dupe.is_active is True
     assert dupe.groups.count() == 1
@@ -224,7 +234,8 @@ def test_user_merge(otis) -> None:
         "user-merge",
         data={"impostor": real.pk, "crewmate": 999999, "confirmed": True},
     )
-    otis.assert_has(resp, "Merge duplicate accounts")
+    assert not resp.context["merge_form"].is_valid()
+    assert resp.context["merge_open"]
     real.refresh_from_db()
     assert real.is_active is True
 
@@ -355,6 +366,8 @@ def test_giga_chart(otis) -> None:
     otis.login(admin)
     otis.get_20x("giga-chart", "csv", follow=True)
 
+    # the giga-chart is an export: its rendered text is the product, so these
+    # stay as content assertions
     resp = otis.get_20x("giga-chart", "html", follow=True)
     for student in students:
         for prop in [
@@ -379,18 +392,22 @@ def test_student_assistant_list(otis) -> None:
     staff: User = UserFactory.create(is_staff=True)
     otis.login(staff)
     resp = otis.get_20x("instructors")
+    # a student with no assistant is not on this page at all
+    assert len(resp.context["students"]) == 1 + 4 + 9 + 16 + 25
+    assert all(s.user.first_name == "GoodKid" for s in resp.context["students"])
+    # this page is a mailing list, so the rendered address text is the product
     for i in range(1, 6):
         otis.assert_has(resp, f'"F{i} L{i}"')
         otis.assert_has(resp, f"user{i}@evanchen.cc")
-    otis.assert_has(resp, "GoodKid", count=2 * (1 + 4 + 9 + 16 + 25))
     otis.assert_has(resp, r"&lt;user5@evanchen.cc&gt;")
     otis.assert_not_has(resp, "BadKid")
-    otis.assert_not_has(resp, "out of sync")  # only admins can see the sync button
+    assert resp.context["needs_sync"]
+    otis.assert_no_testid(resp, "staff-group-out-of-sync")  # admins only
 
     admin: User = UserFactory.create(is_staff=True, is_superuser=True)
     otis.login(admin)
     resp = otis.get_20x("instructors")
-    otis.assert_has(resp, "out of sync")
+    otis.assert_testid(resp, "staff-group-out-of-sync")
 
     group = Group.objects.get(name="Active Staff")
     qs: QuerySet[User] = group.user_set.all()  # type: ignore
@@ -398,9 +415,9 @@ def test_student_assistant_list(otis) -> None:
 
     resp = otis.post_ok("instructors")
     assert qs.count() == 5
-    otis.assert_not_has(resp, "out of sync")
+    assert not resp.context["needs_sync"]
     resp = otis.get_ok("instructors")
-    otis.assert_not_has(resp, "out of sync")
+    assert not resp.context["needs_sync"]
 
     otis.login(staff)
     otis.post_40x("instructors")  # staff can't post
@@ -502,12 +519,13 @@ def test_curriculum(otis) -> None:
             )
 
     otis.login(alice)
-    otis.assert_has(otis.get("currshow", alice.pk), text="you are not an instructor")
+    not_instructor = "You can't edit this curriculum since you are not an instructor."
+    otis.assert_message(otis.get("currshow", alice.pk), text=not_instructor)
 
     otis.login(staff)
-    otis.assert_not_has(
-        otis.get("currshow", alice.pk), text="you are not an instructor"
-    )
+    assert not_instructor not in [
+        m.message for m in otis.get("currshow", alice.pk).context["messages"]
+    ]
 
     invalid_data = {
         "group-0": [
@@ -540,15 +558,18 @@ def test_curriculum(otis) -> None:
 def test_finalize(otis) -> None:
     alice: Student = StudentFactory.create(newborn=True)
     otis.login(alice)
-    otis.assert_has(
+    otis.assert_message(
         otis.post("finalize", alice.pk, data={"submit": True}, follow=True),
-        "You should select some units",
+        "You didn't select any units. "
+        "You should select some units before using this link.",
     )
     units: list[Unit] = UnitFactory.create_batch(20)
     alice.curriculum.set(units)
-    otis.assert_has(
+    otis.assert_message(
         otis.post("finalize", alice.pk, data={}, follow=True),
-        "Your curriculum has been finalized!",
+        "Your curriculum has been finalized! "
+        "You can start working now; "
+        "the first three units have been unlocked.",
     )
     assert alice.unlocked_units.count() == 3
     otis.post_40x("finalize", alice.pk, data={"submit": True})
@@ -599,8 +620,9 @@ def test_master_schedule(otis) -> None:
     units: list[Unit] = UnitFactory.create_batch(10)
     alice.curriculum.set(units[:8])
     otis.login(UserFactory.create(is_staff=True, is_superuser=True))
+    resp = otis.get("master-schedule")
     otis.assert_has(
-        otis.get("master-schedule"),
+        resp,
         text=f'title="{alice.user.first_name} {alice.user.last_name}"',
         count=8,
     )
@@ -633,7 +655,9 @@ def test_inquiry(otis) -> None:
             "explanation": "hi",
         },
     )
-    otis.assert_not_has(invalid_resp, "Petition automatically processed")
+    assert "Petition automatically processed." not in [
+        m.message for m in invalid_resp.context["messages"]
+    ]
 
     with freeze_time("2025-10-29", tz_offset=0):
         # Alice unlocks 6 units, should be autoprocessed.
@@ -648,7 +672,7 @@ def test_inquiry(otis) -> None:
                 },
                 follow=True,
             )
-            otis.assert_has(resp, "Petition automatically processed")
+            otis.assert_message(resp, "Petition automatically processed.")
             inq = UnitInquiry.objects.get(
                 student=alice, unit=units[i].pk, action_type="INQ_ACT_UNLOCK"
             )
@@ -661,7 +685,7 @@ def test_inquiry(otis) -> None:
         # (This differs from production behavior because production also gives you a default three units)
         assert alice.curriculum.count() == 6
         assert alice.unlocked_units.count() == 6
-        otis.assert_has(
+        otis.assert_message(
             otis.post(
                 "inquiry",
                 alice.pk,
@@ -685,7 +709,7 @@ def test_inquiry(otis) -> None:
 
         # We have our assistant lock a unit
         otis.login(firefly)
-        otis.assert_has(
+        otis.assert_message(
             otis.post(
                 "inquiry",
                 alice.pk,
@@ -696,7 +720,7 @@ def test_inquiry(otis) -> None:
                 },
                 follow=True,
             ),
-            "Petition automatically processed",
+            "Petition automatically processed.",
         )
         assert alice.curriculum.count() == 6
         assert alice.unlocked_units.count() == 5
@@ -709,7 +733,7 @@ def test_inquiry(otis) -> None:
 
         # Now dropping should be autoprocessed by Alice
         otis.login(alice)
-        otis.assert_has(
+        otis.assert_message(
             otis.post(
                 "inquiry",
                 alice.pk,
@@ -720,7 +744,7 @@ def test_inquiry(otis) -> None:
                 },
                 follow=True,
             ),
-            "Petition automatically processed",
+            "Petition automatically processed.",
         )
         inq = UnitInquiry.objects.get(
             student=alice, unit=units[3].pk, action_type="INQ_ACT_DROP"
@@ -735,7 +759,7 @@ def test_inquiry(otis) -> None:
         # We now give Alice some more units :o
         otis.login(firefly)
         for i in range(6, 10):
-            otis.assert_has(
+            otis.assert_message(
                 otis.post(
                     "inquiry",
                     alice.pk,
@@ -746,7 +770,7 @@ def test_inquiry(otis) -> None:
                     },
                     follow=True,
                 ),
-                "Petition automatically processed",
+                "Petition automatically processed.",
             )
             inq = UnitInquiry.objects.get(
                 student=alice, unit=units[i].pk, action_type="INQ_ACT_UNLOCK"
@@ -759,7 +783,7 @@ def test_inquiry(otis) -> None:
         # Check that you can't unlock more units when you are already at nine
         otis.login(alice)
         for i in range(11, 14):
-            otis.assert_has(
+            otis.assert_message(
                 otis.post(
                     "inquiry",
                     alice.pk,
@@ -770,7 +794,7 @@ def test_inquiry(otis) -> None:
                     },
                     follow=True,
                 ),
-                "more than 9 unfinished",
+                "You can't have more than 9 unfinished units unlocked at once.",
             )
             inq = UnitInquiry.objects.get(
                 student=alice, unit=units[i].pk, action_type="INQ_ACT_UNLOCK"
@@ -782,7 +806,7 @@ def test_inquiry(otis) -> None:
 
         # appending should be autoprocessed
         for i in range(15, 18):
-            otis.assert_has(
+            otis.assert_message(
                 otis.post(
                     "inquiry",
                     alice.pk,
@@ -793,7 +817,7 @@ def test_inquiry(otis) -> None:
                     },
                     follow=True,
                 ),
-                "Petition automatically processed",
+                "Petition automatically processed.",
             )
             inq = UnitInquiry.objects.get(
                 student=alice, unit=units[i].pk, action_type="INQ_ACT_APPEND"
@@ -804,7 +828,7 @@ def test_inquiry(otis) -> None:
         assert alice.unlocked_units.count() == 9
 
         # check that petitions are now locked because of abnormally large count
-        otis.assert_has(
+        otis.assert_message(
             otis.post(
                 "inquiry",
                 alice.pk,
@@ -815,7 +839,8 @@ def test_inquiry(otis) -> None:
                 },
                 follow=True,
             ),
-            "abnormally large",
+            "You have submitted an abnormally large number of petitions "
+            "so you should contact Evan specially to explain why.",
         )
         inq = UnitInquiry.objects.get(
             student=alice, unit=units[19].pk, action_type="INQ_ACT_DROP"
@@ -826,7 +851,7 @@ def test_inquiry(otis) -> None:
         # drop a bunch of units for alice
         otis.login(firefly)
         for i in range(4, 14):
-            otis.assert_has(
+            otis.assert_message(
                 otis.post(
                     "inquiry",
                     alice.pk,
@@ -837,7 +862,7 @@ def test_inquiry(otis) -> None:
                     },
                     follow=True,
                 ),
-                "Petition automatically processed",
+                "Petition automatically processed.",
             )
             inq = UnitInquiry.objects.get(
                 student=alice, unit=units[i].pk, action_type="INQ_ACT_DROP"
@@ -848,7 +873,7 @@ def test_inquiry(otis) -> None:
         assert alice.unlocked_units.count() == 3
 
     with freeze_time("2025-10-31", tz_offset=0):
-        otis.assert_has(
+        otis.assert_message(
             otis.post(
                 "inquiry",
                 alice.pk,
@@ -859,7 +884,7 @@ def test_inquiry(otis) -> None:
                 },
                 follow=True,
             ),
-            "Petition automatically processed",
+            "Petition automatically processed.",
         )
         assert alice.curriculum.count() == 7
         assert alice.unlocked_units.count() == 4
@@ -884,7 +909,7 @@ def test_inquiry(otis) -> None:
         secret_unit = UnitFactory.create(code="BKV", group=secret_group)
         alice.curriculum.add(secret_unit)
 
-        otis.assert_has(
+        otis.assert_message(
             otis.post(
                 "inquiry",
                 alice.pk,
@@ -895,7 +920,7 @@ def test_inquiry(otis) -> None:
                 },
                 follow=True,
             ),
-            "Petition automatically processed",
+            "Petition automatically processed.",
         )
         assert alice.curriculum.count() == 8
         assert alice.unlocked_units.count() == 5
@@ -937,7 +962,7 @@ def test_inquiry_cant_rapid_fire(otis) -> None:
         alice = StudentFactory.create()
         unit = UnitFactory.create()
         otis.login(alice)
-        otis.assert_has(
+        otis.assert_message(
             otis.post(
                 "inquiry",
                 alice.pk,
@@ -948,9 +973,9 @@ def test_inquiry_cant_rapid_fire(otis) -> None:
                 },
                 follow=True,
             ),
-            "Petition automatically processed",
+            "Petition automatically processed.",
         )
-        otis.assert_has(
+        otis.assert_message(
             otis.post(
                 "inquiry",
                 alice.pk,
@@ -985,7 +1010,7 @@ def test_inquiry_rejects_drop_lock_if_pending_pset(otis) -> None:
         },
         follow=True,
     )
-    otis.assert_has(resp, "You have a pending submission for this unit")
+    otis.assert_message(resp, "You have a pending submission for this unit.")
     inq = UnitInquiry.objects.get(student=alice, unit=unit, action_type="INQ_ACT_DROP")
     assert inq.status == "INQ_REJ"
     resp = otis.post(
@@ -998,7 +1023,7 @@ def test_inquiry_rejects_drop_lock_if_pending_pset(otis) -> None:
         },
         follow=True,
     )
-    otis.assert_has(resp, "You have a pending submission for this unit")
+    otis.assert_message(resp, "You have a pending submission for this unit.")
     inq = UnitInquiry.objects.get(student=alice, unit=unit, action_type="INQ_ACT_LOCK")
     assert inq.status == "INQ_REJ"
 
@@ -1022,7 +1047,7 @@ def test_cancel_inquiry_sets_status_to_canceled(otis) -> None:
     )
     inquiry.refresh_from_db()
     assert inquiry.status == "INQ_CANC"
-    otis.assert_has(resp, "Inquiry successfully canceled.")
+    otis.assert_message(resp, "Inquiry successfully canceled.")
 
 
 @pytest.mark.django_db
@@ -1099,10 +1124,10 @@ def test_invoice(otis) -> None:
         total_paid=400,
     )
     response = otis.get("invoice", follow=True)
-    otis.assert_has(response, "752.00")
+    assert response.context["invoice"].total_owed == Decimal("752.00")
     checksum = alice.get_checksum(settings.INVOICE_HASH_KEY)
     assert len(checksum) == 36
-    otis.assert_has(response, checksum)
+    assert response.context["checksum"] == checksum
 
 
 @pytest.mark.django_db
@@ -1723,25 +1748,24 @@ def test_ad_list_only_shows_enabled(otis) -> None:
     otis.login(user)
     resp = otis.get_20x("ad-list")
 
-    otis.assert_has(resp, enabled_assistant.name)
-    otis.assert_has(resp, "enabled@example.com")
-    otis.assert_has(resp, "I am alive.")
-
+    # only opted-in instructors are listed; the rest must not leak
+    assert list(resp.context["assistants"]) == [enabled_assistant]
     otis.assert_not_has(resp, disabled_assistant.name)
     otis.assert_not_has(resp, "disabled@example.com")
     otis.assert_not_has(resp, "I am not alive.")
 
-    otis.assert_not_has(resp, "update your listing")
-    otis.assert_not_has(resp, "enable your entry")
-    otis.assert_not_has(resp, "you are not registered as an authorized instructor")
+    assert resp.context["current_assistant"] is None
+    otis.assert_no_testid(resp, "ad-update-prompt")
+    otis.assert_no_testid(resp, "ad-enable-prompt")
+    otis.assert_no_testid(resp, "ad-not-instructor")
 
     random_staff = UserFactory.create(is_staff=True)
     random_staff.groups.add(verified_group)
     otis.login(random_staff)
     resp = otis.get_20x("ad-list")
-    otis.assert_not_has(resp, "update your listing")
-    otis.assert_not_has(resp, "enable your entry")
-    otis.assert_has(resp, "you are not registered as an authorized instructor")
+    otis.assert_no_testid(resp, "ad-update-prompt")
+    otis.assert_no_testid(resp, "ad-enable-prompt")
+    otis.assert_testid(resp, "ad-not-instructor")
 
 
 @pytest.mark.django_db
@@ -1774,7 +1798,7 @@ def test_ad_update(otis) -> None:
     verified_group, _ = Group.objects.get_or_create(name="Verified")
     assistant_user.groups.add(verified_group)
     resp = otis.get_20x("ad-list")
-    otis.assert_has(resp, "enable your entry")
+    otis.assert_testid(resp, "ad-enable-prompt")
 
     otis.get_20x("ad-update")
     resp = otis.post_20x(
@@ -1797,7 +1821,7 @@ def test_ad_update(otis) -> None:
     assert assistant.ad_blurb == "I'm an ovie!"
 
     resp = otis.get_20x("ad-list")
-    otis.assert_has(resp, "update your listing below")
+    otis.assert_testid(resp, "ad-update-prompt")
 
 
 @pytest.mark.django_db
@@ -1829,11 +1853,11 @@ def test_ad_list_edit_link_visibility(otis) -> None:
 
     otis.login(assistant_user)
     resp = otis.get_20x("ad-list")
-    otis.assert_has(resp, "(edit)")
+    otis.assert_testid(resp, "ad-edit-link")
 
     otis.login(other_user)
     resp = otis.get_20x("ad-list")
-    otis.assert_not_has(resp, "(edit)")
+    otis.assert_no_testid(resp, "ad-edit-link")
 
 
 @pytest.mark.django_db
@@ -1849,14 +1873,11 @@ def test_student_ids(otis) -> None:
 
     otis.login(alice)
     resp = otis.get_20x("student-ids")
-    otis.assert_has(resp, f'class="student-id">{student_old.pk}<')
-    otis.assert_has(resp, f'class="student-id">{student_new.pk}<')
+    assert set(resp.context["students"]) == {student_old, student_new}
 
     # other user only sees their own records
     bob: User = UserFactory.create()
     bob_student: Student = StudentFactory.create(user=bob, semester=semester_new)
     otis.login(bob)
     resp = otis.get_20x("student-ids")
-    otis.assert_has(resp, f'class="student-id">{bob_student.pk}<')
-    otis.assert_not_has(resp, f'class="student-id">{student_old.pk}<')
-    otis.assert_not_has(resp, f'class="student-id">{student_new.pk}<')
+    assert list(resp.context["students"]) == [bob_student]

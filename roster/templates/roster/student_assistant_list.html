@@ -6,7 +6,7 @@
 {% block layout-content %}
   {% regroup students by assistant as instructor_list %}
   {% if needs_sync and request.user.is_superuser %}
-    <div class="alert alert-warning">
+    <div class="alert alert-warning" data-testid="staff-group-out-of-sync">
       The "Active Staff" group is out of sync
       with the list of actual instructors.
       Click below to fix this.

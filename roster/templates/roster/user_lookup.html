@@ -6,7 +6,7 @@
   {% if results != None %}
     <h2>Results</h2>
     {% if results|length == 0 %}
-      <div class="alert alert-danger">No matches were found.</div>
+      <div class="alert alert-danger" data-testid="user-lookup-no-matches">No matches were found.</div>
     {% else %}
       {% for r in results %}
         {% include "roster/user_card.html" with r=r %}

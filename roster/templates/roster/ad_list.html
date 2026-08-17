@@ -10,17 +10,17 @@
   </p>
   {% if current_assistant %}
     {% if current_assistant.ad_enabled %}
-      <p>
+      <p data-testid="ad-update-prompt">
         You can <a href="{% url "ad-update" %}">update your listing below</a> if you want.
       </p>
     {% else %}
-      <div class="alert alert-primary">
+      <div class="alert alert-primary" data-testid="ad-enable-prompt">
         You are currently <strong>not</strong> on the listing below.
         To add yourself, <a href="{% url "ad-update" %}">enable your entry</a>.
       </div>
     {% endif %}
   {% elif request.user.is_staff %}
-    <p>
+    <p data-testid="ad-not-instructor">
       Although you are a staff member, you are not registered as an authorized instructor.
       Contact Evan if you think that's a mistake.
     </p>
@@ -30,7 +30,7 @@
     <h2>
       {{ assistant.name }}
       {% if assistant.user == request.user %}
-        <a href="{% url "ad-update" %}">(edit)</a>
+        <a href="{% url "ad-update" %}" data-testid="ad-edit-link">(edit)</a>
       {% elif request.user.is_superuser %}
         <a href="{% url "admin:roster_assistant_change" assistant.pk %}">(admin edit)</a>
       {% endif %}
