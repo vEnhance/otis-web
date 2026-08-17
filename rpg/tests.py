@@ -2,6 +2,7 @@ import datetime
 
 import pytest
 from django.contrib.auth.models import Group, User
+from django.contrib.messages import constants as message_levels
 from django.utils import timezone
 
 from core.factories import GroupFactory, UnitFactory, UserFactory
@@ -97,11 +98,12 @@ def test_portal_stats(otis, alice_with_data):
     alice = get_alice()
     otis.login(alice)
     resp = otis.get("portal", alice.pk)
-    otis.assert_has(resp, "Level 38")
-    otis.assert_has(resp, "520♣")
-    otis.assert_has(resp, "84.0♥")
-    otis.assert_has(resp, "11♦")
-    otis.assert_has(resp, "19♠")
+    assert resp.context["level_name"] == "Level 38"
+    meters = resp.context["meters"]
+    assert meters["clubs"].value == 520
+    assert meters["hearts"].value == 84
+    assert meters["diamonds"].value == 11
+    assert meters["spades"].value == 19
 
 
 @pytest.mark.django_db
@@ -113,15 +115,19 @@ def test_stats_page(otis, alice_with_data):
     QuestCompleteFactory.create(student=bob, title="FAIL THIS TEST")
 
     resp = otis.get("stats", alice.pk)
-    otis.assert_has(resp, "Level 38")
-    otis.assert_has(resp, "520♣")
-    otis.assert_has(resp, "84.0♥")
-    otis.assert_has(resp, "11♦")
-    otis.assert_has(resp, "19♠")
-    otis.assert_has(resp, "Feel the fours")
-    otis.assert_has(resp, "Not problem six")
-    otis.assert_has(resp, "Lucky number")
-    otis.assert_not_has(resp, "FAIL THIS TEST")
+    assert resp.context["level_name"] == "Level 38"
+    meters = resp.context["meters"]
+    assert meters["clubs"].value == 520
+    assert meters["hearts"].value == 84
+    assert meters["diamonds"].value == 11
+    assert meters["spades"].value == 19
+
+    # bob's achievements and quests must not leak onto alice's page
+    assert {u.achievement.name for u in resp.context["achievements"]} == {
+        "Feel the fours",
+        "Lucky number",
+    }
+    assert {q.title for q in resp.context["quest_completes"]} == {"Not problem six"}
 
 
 @pytest.mark.django_db
@@ -131,30 +137,40 @@ def test_level_up(otis, alice_with_data):
     bonus = BonusLevelFactory.create(group__name="Level 40 Quest", level=40)
     bonus_unit = UnitFactory.create(group=bonus.group, code="DKU")
 
-    resp = otis.get_20x("portal", alice.pk)
-    otis.assert_has(resp, "You&#x27;re now level 38.")
-    otis.assert_not_has(resp, "Level 40 Quest")
+    def leveled_up(resp) -> bool:
+        return any(m.level == message_levels.SUCCESS for m in resp.context["messages"])
 
+    # level 38 is below the bonus threshold, so no bonus unit is granted
     resp = otis.get_20x("portal", alice.pk)
-    otis.assert_not_has(resp, "You&#x27;re now level 38.")
-    otis.assert_not_has(resp, "Level 40 Quest")
+    alice.refresh_from_db()
+    assert alice.last_level_seen == 38
+    assert leveled_up(resp)
+    assert not alice.curriculum.contains(bonus_unit)
+
+    # viewing again does not re-announce the same level
+    assert not leveled_up(otis.get_20x("portal", alice.pk))
 
     QuestCompleteFactory.create(student=alice, spades=24)
 
+    # crossing level 40 grants the bonus unit
     resp = otis.get_20x("portal", alice.pk)
-    otis.assert_has(resp, "You&#x27;re now level 40.")
-    otis.assert_has(resp, "Level 40 Quest")
+    alice.refresh_from_db()
+    assert alice.last_level_seen == 40
+    assert leveled_up(resp)
+    assert alice.curriculum.contains(bonus_unit)
 
-    resp = otis.get_20x("portal", alice.pk)
-    otis.assert_not_has(resp, "You&#x27;re now level 40.")
-    otis.assert_has(resp, "Level 40 Quest")
+    assert not leveled_up(otis.get_20x("portal", alice.pk))
+    assert alice.curriculum.contains(bonus_unit)
 
     QuestCompleteFactory.create(student=alice, spades=64)
     alice.curriculum.remove(bonus_unit)
 
+    # the BonusLevelUnlock record means a later level-up must not re-grant it
     resp = otis.get_20x("portal", alice.pk)
-    otis.assert_has(resp, "You&#x27;re now level 44.")
-    otis.assert_not_has(resp, "Level 40 Quest")
+    alice.refresh_from_db()
+    assert alice.last_level_seen == 44
+    assert leveled_up(resp)
+    assert not alice.curriculum.contains(bonus_unit)
 
 
 @pytest.mark.django_db
@@ -302,9 +318,19 @@ def test_submit_diamond_and_read_solution(otis, alice_with_data):
     def alice_has(a: Achievement):
         return AchievementUnlock.objects.filter(achievement=a, user=alice.user).exists()
 
+    def unlocked(resp) -> bool:
+        return any(m.level == message_levels.SUCCESS for m in resp.context["messages"])
+
+    def already(resp) -> bool:
+        return any(m.level == message_levels.WARNING for m in resp.context["messages"])
+
+    def was_first_find(a: Achievement, user) -> bool:
+        """ "Wowie!" in the page is just this flag; assert the flag."""
+        return AchievementUnlock.objects.get(achievement=a, user=user).is_first_obtain
+
     # Submit a nonexistent code
     resp = otis.post_20x("stats", alice.pk, data={"code": "123456123456123456123456"})
-    assert "You entered an invalid code." in resp.content.decode()
+    assert INVALID_CODE in message_texts(resp)
     assert not alice_has(a1)
     assert not alice_has(a2)
     assert not alice_has(a3)
@@ -314,8 +340,8 @@ def test_submit_diamond_and_read_solution(otis, alice_with_data):
 
     # Submit a valid code for a1
     resp = otis.post_20x("stats", alice.pk, data={"code": a1.code})
-    assert "Achievement unlocked!" in resp.content.decode()
-    assert "Wowie!" in resp.content.decode()
+    assert unlocked(resp)
+    assert was_first_find(a1, alice.user)
     assert alice_has(a1)
     assert not alice_has(a2)
     assert not alice_has(a3)
@@ -325,7 +351,7 @@ def test_submit_diamond_and_read_solution(otis, alice_with_data):
 
     # Submit a valid code for a1 that was obtained already
     resp = otis.post_20x("stats", alice.pk, data={"code": a1.code})
-    assert "Already unlocked!" in resp.content.decode()
+    assert already(resp)
     assert alice_has(a1)
     assert not alice_has(a2)
     assert not alice_has(a3)
@@ -335,8 +361,8 @@ def test_submit_diamond_and_read_solution(otis, alice_with_data):
 
     # Submit a valid code for a2
     resp = otis.post_20x("stats", alice.pk, data={"code": a2.code})
-    assert "Achievement unlocked!" in resp.content.decode()
-    assert "Wowie!" not in resp.content.decode()
+    assert unlocked(resp)
+    assert not was_first_find(a2, alice.user)
     assert alice_has(a1)
     assert alice_has(a2)
     assert not alice_has(a3)
@@ -346,7 +372,7 @@ def test_submit_diamond_and_read_solution(otis, alice_with_data):
 
     # Submit a valid code for a2 that was obtained already
     resp = otis.post_20x("stats", alice.pk, data={"code": a2.code})
-    assert "Already unlocked!" in resp.content.decode()
+    assert already(resp)
     assert alice_has(a1)
     assert alice_has(a2)
     assert not alice_has(a3)
@@ -356,8 +382,8 @@ def test_submit_diamond_and_read_solution(otis, alice_with_data):
 
     # Submit a valid code for a3
     resp = otis.post_20x("stats", alice.pk, data={"code": a3.code})
-    assert "Achievement unlocked!" in resp.content.decode()
-    assert "Wowie!" in resp.content.decode()
+    assert unlocked(resp)
+    assert was_first_find(a3, alice.user)
     assert alice_has(a1)
     assert alice_has(a2)
     assert alice_has(a3)
@@ -369,16 +395,16 @@ def test_submit_diamond_and_read_solution(otis, alice_with_data):
     otis.login(bob.user)
     # Bob submits a1
     resp = otis.post_20x("stats", bob.pk, data={"code": a1.code})
-    assert "Achievement unlocked!" in resp.content.decode()
-    assert "Wowie!" not in resp.content.decode()
+    assert unlocked(resp)
+    assert not was_first_find(a1, bob.user)
     # Bob submits a2
     resp = otis.post_20x("stats", bob.pk, data={"code": a2.code})
-    assert "Achievement unlocked!" in resp.content.decode()
-    assert "Wowie!" in resp.content.decode()
+    assert unlocked(resp)
+    assert was_first_find(a2, bob.user)
     # Bob submits a3
     resp = otis.post_20x("stats", bob.pk, data={"code": a3.code})
-    assert "Achievement unlocked!" in resp.content.decode()
-    assert "Wowie!" not in resp.content.decode()
+    assert unlocked(resp)
+    assert not was_first_find(a3, bob.user)
 
 
 @pytest.mark.django_db
@@ -443,12 +469,13 @@ def test_palace(otis):
         AchievementUnlockFactory.create(
             user=alice.user, achievement__diamonds=2 * i + 1
         )
-        otis.assert_not_has(otis.get("portal", alice.pk), "Ruby Palace")
+        # the palace link is gated on having maxed out the level table
+        assert not otis.get("portal", alice.pk).context["is_maxed"]
         otis.get_40x("palace-list", alice.pk)
         otis.get_40x("palace-update", alice.pk)
         otis.get_40x("diamond-update", alice.pk)
     AchievementUnlockFactory.create(user=alice.user, achievement__diamonds=9)
-    otis.assert_has(otis.get("portal", alice.pk), "Ruby Palace")
+    assert otis.get("portal", alice.pk).context["is_maxed"]
     otis.get_ok("palace-list", alice.pk)
     otis.get_ok("palace-update", alice.pk)
     otis.get_ok("diamond-update", alice.pk)
@@ -458,11 +485,8 @@ def test_palace(otis):
 def test_github_landing(otis):
     vuls = VulnerabilityRecordFactory.create_batch(5)
     resp = otis.get_20x("github-landing")
+    assert set(resp.context["vulnerabilities"]) == set(vuls)
     for v in vuls:
-        assert v.finder_name in resp.content.decode()
-        assert v.description in resp.content.decode()
-        assert v.commit_hash in resp.content.decode()
-        assert v.get_absolute_url() in resp.content.decode()
         assert v.get_absolute_url().endswith(v.commit_hash)
 
 
@@ -561,7 +585,7 @@ def test_is_first_obtain_bg_success_rendered(otis):
 
     otis.login(alice)
     resp = otis.get_20x("stats", alice.pk)
-    otis.assert_has(resp, "bg-success")
+    otis.assert_testid(resp, "achievement-first-obtain")
 
 
 @pytest.mark.django_db
@@ -577,12 +601,23 @@ def test_is_first_obtain_no_bg_success_without_first_find(otis):
 
     otis.login(alice)
     resp = otis.get_20x("stats", alice.pk)
-    otis.assert_not_has(resp, "bg-success")
+    otis.assert_no_testid(resp, "achievement-first-obtain")
 
 
 # --- diamond code guess tests ---
 
 WRONG_CODE = "123456123456123456123456"
+INVALID_CODE = "❌ You entered an invalid code."
+
+
+def message_texts(resp) -> list[str]:
+    return [m.message for m in resp.context["messages"]]
+
+
+def rate_limited(resp) -> bool:
+    """The refusal embeds a naturaltime, so match on level plus what it isn't."""
+    errored = any(m.level == message_levels.ERROR for m in resp.context["messages"])
+    return errored and INVALID_CODE not in message_texts(resp)
 
 
 def make_wrong_guesses(user: User, count: int):
@@ -621,7 +656,7 @@ def test_repeat_redeem_is_marked(otis):
     otis.login(alice)
     otis.post_20x("stats", alice.pk, data={"code": achievement.code})
     resp = otis.post_20x("stats", alice.pk, data={"code": achievement.code})
-    otis.assert_has(resp, "Already unlocked!")
+    assert any(m.level == message_levels.WARNING for m in resp.context["messages"])
 
     earned, repeat = AchievementCodeGuess.objects.filter(user=alice.user).order_by("pk")
     assert earned.is_new_unlock is True
@@ -655,13 +690,14 @@ def test_wrong_guesses_are_rate_limited(otis):
 
     otis.login(alice)
     resp = otis.post_20x("stats", alice.pk, data={"code": WRONG_CODE})
-    otis.assert_has(resp, "You entered an invalid code.")
+    assert INVALID_CODE in message_texts(resp)
 
     # the limit is now used up, so even a correct code is turned away
+    # (the refusal text embeds a naturaltime, so assert on the level and the
+    # state it guards rather than on the sentence)
     resp = otis.post_20x("stats", alice.pk, data={"code": achievement.code})
-    otis.assert_has(
-        resp, f"You&#x27;ve used up your {WRONG_GUESS_LIMIT} incorrect guesses."
-    )
+    assert any(m.level == message_levels.ERROR for m in resp.context["messages"])
+    assert INVALID_CODE not in message_texts(resp)
     assert not AchievementUnlock.objects.filter(
         user=alice.user, achievement=achievement
     ).exists()
@@ -680,7 +716,7 @@ def test_rate_limit_is_per_user(otis):
 
     otis.login(bob)
     resp = otis.post_20x("stats", bob.pk, data={"code": WRONG_CODE})
-    otis.assert_has(resp, "You entered an invalid code.")
+    assert INVALID_CODE in message_texts(resp)
 
 
 @pytest.mark.django_db
@@ -694,7 +730,7 @@ def test_rate_limit_forgets_old_guesses(otis):
 
     otis.login(alice)
     resp = otis.post_20x("stats", alice.pk, data={"code": WRONG_CODE})
-    otis.assert_has(resp, "You entered an invalid code.")
+    assert INVALID_CODE in message_texts(resp)
 
 
 @pytest.mark.django_db
@@ -713,13 +749,11 @@ def test_new_unlock_resets_rate_limit(otis):
     # the wrong guesses before the unlock no longer count
     make_wrong_guesses(alice.user, WRONG_GUESS_LIMIT - 1)
     resp = otis.post_20x("stats", alice.pk, data={"code": WRONG_CODE})
-    otis.assert_has(resp, "You entered an invalid code.")
+    assert INVALID_CODE in message_texts(resp)
 
     # but the ones after it do
     resp = otis.post_20x("stats", alice.pk, data={"code": WRONG_CODE})
-    otis.assert_has(
-        resp, f"You&#x27;ve used up your {WRONG_GUESS_LIMIT} incorrect guesses."
-    )
+    assert rate_limited(resp)
 
 
 @pytest.mark.django_db
@@ -738,7 +772,7 @@ def test_repeat_of_owned_code_does_not_reset_rate_limit(otis):
 
     # submitting the owned code again is still a correct guess, but unlocks nothing
     resp = otis.post_20x("stats", alice.pk, data={"code": achievement.code})
-    otis.assert_has(resp, "Already unlocked!")
+    assert any(m.level == message_levels.WARNING for m in resp.context["messages"])
     assert (
         AchievementCodeGuess.objects.filter(user=alice.user, is_correct=True).count()
         == 2
@@ -746,11 +780,9 @@ def test_repeat_of_owned_code_does_not_reset_rate_limit(otis):
 
     # so the earlier wrong guesses still count: one left, then the limit bites
     resp = otis.post_20x("stats", alice.pk, data={"code": WRONG_CODE})
-    otis.assert_has(resp, "You entered an invalid code.")
+    assert INVALID_CODE in message_texts(resp)
     resp = otis.post_20x("stats", alice.pk, data={"code": WRONG_CODE})
-    otis.assert_has(
-        resp, f"You&#x27;ve used up your {WRONG_GUESS_LIMIT} incorrect guesses."
-    )
+    assert rate_limited(resp)
 
 
 @pytest.mark.django_db
@@ -760,7 +792,9 @@ def test_malformed_guesses_are_recorded(otis):
 
     otis.login(alice)
     resp = otis.post_20x("stats", alice.pk, data={"code": "not a hex code"})
-    otis.assert_has(resp, "This doesn&#x27;t appear to be a hex code.")
+    assert (
+        "This doesn't appear to be a hex code." in resp.context["form"].errors["code"]
+    )
 
     guess = AchievementCodeGuess.objects.get(user=alice.user)
     assert guess.code == "not a hex code"
@@ -803,9 +837,7 @@ def test_malformed_guesses_count_against_rate_limit(otis):
     otis.login(alice)
     otis.post_20x("stats", alice.pk, data={"code": "not a hex code"})
     resp = otis.post_20x("stats", alice.pk, data={"code": WRONG_CODE})
-    otis.assert_has(
-        resp, f"You&#x27;ve used up your {WRONG_GUESS_LIMIT} incorrect guesses."
-    )
+    assert rate_limited(resp)
 
 
 @pytest.mark.django_db

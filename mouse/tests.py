@@ -1,4 +1,5 @@
 import pytest
+from django.contrib.messages import constants as message_levels
 
 from core.factories import UserFactory
 from roster.factories import StudentFactory
@@ -53,7 +54,7 @@ def test_usemo_score(otis, mouse_setup):
     )
     assert len(spades_list) == 3
     assert set(spades_list) == {14, 37, 42}
-    otis.assert_has(resp, "Built 3 records")
+    assert any(m.level == message_levels.SUCCESS for m in resp.context["messages"])
 
 
 @pytest.mark.django_db
@@ -72,6 +73,6 @@ def test_usemo_grading(otis, mouse_setup):
     spades_list = QuestComplete.objects.filter(category="UG").values_list(
         "spades", flat=True
     )
-    otis.assert_has(resp, "Built 3 records")
+    assert any(m.level == message_levels.SUCCESS for m in resp.context["messages"])
     assert len(spades_list) == 3
     assert set(spades_list) == {15}

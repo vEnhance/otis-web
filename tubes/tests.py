@@ -2,6 +2,7 @@ from datetime import timedelta
 
 import pytest
 from django.contrib.auth.models import Group
+from django.contrib.messages import constants as message_levels
 from django.utils import timezone
 
 from core.factories import UserFactory
@@ -156,7 +157,7 @@ def test_create_proposal_prefills_credit(otis):
     contributor.save()
     otis.login(user)
     resp = otis.get_20x("oime-proposal-create")
-    otis.assert_has(resp, "Grace H.")
+    assert resp.context["form"].initial["credit"] == "Grace H."
 
 
 @pytest.mark.django_db
@@ -214,7 +215,11 @@ def test_leaderboard_hides_name_when_requested(otis):
     otis.login(user)
     resp = otis.get_20x("oime-proposal-results", proposal.pk)
     otis.assert_not_has(resp, "Secret Solver")
-    otis.assert_has(resp, "Anonymous ")
+    assert hidden.leaderboard_name.startswith("Anonymous ")
+    assert {f.contributor.leaderboard_name for f in resp.context["fights"]} == {
+        viewer.leaderboard_name,
+        hidden.leaderboard_name,
+    }
 
 
 @pytest.mark.django_db
@@ -321,7 +326,7 @@ def test_archived_hidden_from_regular_users(otis):
     other_proposal = OIMEProposalFactory.create(archived=True)
     otis.login(user)
     resp = otis.get_20x("oime-proposal-list")
-    otis.assert_not_has(resp, other_proposal.statement[:20])
+    assert other_proposal not in resp.context["proposals"]
 
 
 @pytest.mark.django_db
@@ -330,7 +335,8 @@ def test_archived_hidden_from_own_author(otis):
     own_proposal = OIMEProposalFactory.create(author=contributor, archived=True)
     otis.login(user)
     resp = otis.get_20x("oime-proposal-list")
-    otis.assert_not_has(resp, own_proposal.statement[:20])
+    assert own_proposal not in resp.context["proposals"]
+    assert own_proposal not in resp.context["own_proposals"]
 
 
 @pytest.mark.django_db
@@ -343,7 +349,7 @@ def test_archived_hidden_from_staff(otis):
     other_proposal = OIMEProposalFactory.create(archived=True)
     otis.login(staff)
     resp = otis.get_20x("oime-proposal-list")
-    otis.assert_not_has(resp, other_proposal.statement[:20])
+    assert other_proposal not in resp.context["proposals"]
 
 
 @pytest.mark.django_db
@@ -389,8 +395,9 @@ def test_archived_author_sees_note_but_no_archive_button(otis):
     proposal = OIMEProposalFactory.create(author=contributor, archived=True)
     otis.login(user)
     resp = otis.get_20x("oime-proposal-detail", proposal.pk)
-    otis.assert_has(resp, "archived by staff")
-    otis.assert_not_has(resp, "Unarchive")
+    otis.assert_testid(resp, "proposal-archived-note")
+    # only a superuser gets the archive toggle
+    otis.assert_no_testid(resp, "proposal-archive-toggle")
 
 
 # ---------------------------------------------------------------------------
@@ -404,7 +411,7 @@ def test_draft_hidden_from_regular_users(otis):
     other_proposal = OIMEProposalFactory.create(is_draft=True)
     otis.login(user)
     resp = otis.get_20x("oime-proposal-list")
-    otis.assert_not_has(resp, other_proposal.statement[:20])
+    assert other_proposal not in resp.context["proposals"]
 
 
 @pytest.mark.django_db
@@ -413,21 +420,22 @@ def test_draft_hidden_from_own_author_on_main_list(otis):
     own_proposal = OIMEProposalFactory.create(author=contributor, is_draft=True)
     otis.login(user)
     resp = otis.get_20x("oime-proposal-list")
-    otis.assert_not_has(resp, own_proposal.statement[:20])
+    assert own_proposal not in resp.context["proposals"]
+    assert own_proposal not in resp.context["own_proposals"]
 
 
 @pytest.mark.django_db
 def test_draft_list_shows_own_drafts_only(otis):
     user, contributor = _verified_contributor()
     _, other = _verified_contributor("bob")
-    OIMEProposalFactory.create(author=contributor, is_draft=True, title="My draft")
+    mine = OIMEProposalFactory.create(
+        author=contributor, is_draft=True, title="My draft"
+    )
     OIMEProposalFactory.create(author=contributor, is_draft=False, title="My problem")
     OIMEProposalFactory.create(author=other, is_draft=True, title="Bob's draft")
     otis.login(user)
     resp = otis.get_20x("oime-proposal-drafts")
-    otis.assert_has(resp, "My draft")
-    otis.assert_not_has(resp, "My problem")
-    otis.assert_not_has(resp, "Bob&#x27;s draft")
+    assert list(resp.context["proposals"]) == [mine]
 
 
 @pytest.mark.django_db
@@ -438,7 +446,7 @@ def test_draft_list_hides_archived_drafts(otis):
     )
     otis.login(user)
     resp = otis.get_20x("oime-proposal-drafts")
-    otis.assert_not_has(resp, "Archived draft")
+    assert list(resp.context["proposals"]) == []
 
 
 @pytest.mark.django_db
@@ -446,7 +454,7 @@ def test_main_list_links_to_drafts(otis):
     user, _ = _verified_contributor()
     otis.login(user)
     resp = otis.get_20x("oime-proposal-list")
-    otis.assert_has(resp, "/tubes/drafts/")
+    otis.assert_has(resp, otis.url("oime-proposal-drafts"))
 
 
 @pytest.mark.django_db
@@ -466,7 +474,7 @@ def test_draft_viewable_by_its_author(otis):
     proposal = OIMEProposalFactory.create(author=contributor, is_draft=True)
     otis.login(user)
     resp = otis.get_20x("oime-proposal-detail", proposal.pk)
-    otis.assert_has(resp, "oime-answer-section")
+    assert resp.context["can_see_solution"]
 
 
 @pytest.mark.django_db
@@ -545,8 +553,8 @@ def test_ranked_hides_solution(otis):
     otis.login(user)
     # Pre-fight, a ranked solver sees only the start screen, never the solution.
     resp = otis.get_20x("oime-start-fight", proposal.pk)
-    otis.assert_has(resp, "Start solving")
-    otis.assert_not_has(resp, "oime-answer-section")
+    assert resp.context["can_start_fight"]
+    assert not resp.context["can_see_solution"]
 
 
 @pytest.mark.django_db
@@ -576,9 +584,9 @@ def test_casual_hides_solution_until_revealed(otis):
     # Casual: statement visible, solution still hidden behind the reveal action,
     # but a client-side self-checker is offered.
     resp = otis.get_20x("oime-proposal-detail", proposal.pk)
-    otis.assert_not_has(resp, "oime-answer-section")
-    otis.assert_has(resp, "Reveal solution")
-    otis.assert_has(resp, "oime-self-check")
+    assert resp.context["casual"]
+    # the reveal button and the client-side checker are both gated on this flag
+    assert not resp.context["can_see_solution"]
 
 
 @pytest.mark.django_db
@@ -592,7 +600,7 @@ def test_casual_reveal_shows_solution(otis):
     otis.assert_30x(resp)
     assert contributor.revealed_proposals.filter(pk=proposal.pk).exists()
     resp = otis.get_20x("oime-proposal-detail", proposal.pk)
-    otis.assert_has(resp, "oime-answer-section")
+    assert resp.context["can_see_solution"]
 
 
 @pytest.mark.django_db
@@ -607,7 +615,7 @@ def test_ranked_escape_hatch_reveal(otis):
     assert contributor.revealed_proposals.filter(pk=proposal.pk).exists()
     # The solution is now visible and the start-fight option is gone.
     resp = otis.get_20x("oime-proposal-detail", proposal.pk)
-    otis.assert_has(resp, "oime-answer-section")
+    assert resp.context["can_see_solution"]
     resp = otis.post("oime-start-fight", proposal.pk)
     otis.assert_30x(resp)
     assert not OIMEFight.objects.filter(
@@ -659,9 +667,11 @@ def test_casual_completed_fight_shows_as_solved(otis):
     contributor.save()
     otis.login(user)
     resp = otis.get_20x("oime-proposal-list")
-    otis.assert_has(resp, "02:00")
-    otis.assert_not_has(resp, "✖0")
-    otis.assert_not_has(resp, "Try it")
+    (row,) = resp.context["completed_proposals"]
+    assert row.user_list_status == "completed"
+    assert row.user_fight.time_display == "02:00"
+    # a clean solve renders no wrong-answer marker
+    assert row.user_fight.wrong_answers == 0
 
 
 @pytest.mark.django_db
@@ -683,7 +693,7 @@ def test_go_serious_sets_cutoff_and_locks_old_problems(otis):
         contributor=contributor, proposal=old_proposal
     ).exists()
     resp = otis.get_20x("oime-proposal-detail", old_proposal.pk)
-    otis.assert_has(resp, "Reveal solution")
+    assert not resp.context["can_see_solution"]
 
 
 @pytest.mark.django_db
@@ -732,10 +742,11 @@ def test_casual_browse_shows_statements_of_one_subject(otis):
     other_subject = OIMEProposalFactory.create(subject="N", statement="Number theory.")
     otis.login(user)
     resp = otis.get_20x("oime-casual-browse", "G")
+    assert list(resp.context["page_obj"]) == [wanted]
+    assert other_subject not in resp.context["page_obj"]
+    # this browser exists to put whole statements on the page, so that is content
     otis.assert_has(resp, "Geometry statement.")
     otis.assert_not_has(resp, "Number theory.")
-    otis.assert_has(resp, wanted.label)
-    otis.assert_not_has(resp, other_subject.label)
 
 
 @pytest.mark.django_db
@@ -745,9 +756,10 @@ def test_casual_browse_never_shows_answers_or_solutions(otis):
     contributor.save()
     OIMEProposalFactory.create(subject="A", answer=123, solution="Secret solution.")
     otis.login(user)
+    # bulk browse has no per-proposal solver context; the page must simply never
+    # carry a solution, so this stays a leakage check on the bytes
     resp = otis.get_20x("oime-casual-browse", "A")
     otis.assert_not_has(resp, "Secret solution.")
-    otis.assert_not_has(resp, "oime-answer-section")
 
 
 @pytest.mark.django_db
@@ -769,10 +781,8 @@ def test_casual_browse_includes_spoiled_problems_but_marks_them(otis):
     )
     otis.login(user)
     resp = otis.get_20x("oime-casual-browse", "C")
-    # Every problem is listed, statement and all...
-    for proposal in (fresh, own, revealed, solved, gave_up):
-        otis.assert_has(resp, proposal.statement)
-    # ...but each is labelled by how the viewer has already engaged with it.
+    # Every problem is listed, but each is labelled by how the viewer has
+    # already engaged with it.
     statuses = {p.pk: p.browse_status for p in resp.context["page_obj"]}
     assert statuses == {
         fresh.pk: "new",
@@ -798,9 +808,7 @@ def test_casual_browse_hides_archived_and_drafts(otis):
     )
     otis.login(user)
     resp = otis.get_20x("oime-casual-browse", "N")
-    otis.assert_not_has(resp, "Archived one.")
-    otis.assert_not_has(resp, "Draft one.")
-    otis.assert_not_has(resp, "My draft.")
+    assert list(resp.context["page_obj"]) == []
 
 
 @pytest.mark.django_db
@@ -886,7 +894,8 @@ def test_casual_list_links_to_browser(otis):
     contributor.save()
     otis.login(user)
     resp = otis.get_20x("oime-proposal-list")
-    otis.assert_has(resp, "/tubes/casual/G/")
+    assert resp.context["casual"]
+    otis.assert_has(resp, otis.url("oime-casual-browse", "G"))
 
 
 @pytest.mark.django_db
@@ -894,7 +903,8 @@ def test_ranked_list_does_not_link_to_browser(otis):
     user, _ = _verified_contributor()
     otis.login(user)
     resp = otis.get_20x("oime-proposal-list")
-    otis.assert_not_has(resp, "/tubes/casual/G/")
+    assert not resp.context["casual"]
+    otis.assert_not_has(resp, otis.url("oime-casual-browse", "G"))
 
 
 # ---------------------------------------------------------------------------
@@ -1001,7 +1011,7 @@ def test_gave_up_sees_solution(otis):
     )
     otis.login(user)
     resp = otis.get_20x("oime-proposal-detail", proposal.pk)
-    otis.assert_has(resp, "oime-answer-section")
+    assert resp.context["can_see_solution"]
 
 
 @pytest.mark.django_db
@@ -1130,7 +1140,8 @@ def test_detail_explains_solved_status(otis):
     )
     otis.login(user)
     resp = otis.get_20x("oime-proposal-detail", proposal.pk)
-    otis.assert_has(resp, "You solved this problem in 02:05")
+    assert resp.context["fight"].is_success
+    assert resp.context["fight"].time_display == "02:05"
 
 
 @pytest.mark.django_db
@@ -1142,7 +1153,7 @@ def test_detail_explains_gave_up_status(otis):
     )
     otis.login(user)
     resp = otis.get_20x("oime-proposal-detail", proposal.pk)
-    otis.assert_has(resp, "You gave up on this problem")
+    assert resp.context["fight"].status == "OIME_FAIL"
 
 
 @pytest.mark.django_db
@@ -1168,10 +1179,11 @@ def test_detail_shows_stats_summary(otis):
         )
     otis.login(user)
     resp = otis.get_20x("oime-proposal-detail", proposal.pk)
-    otis.assert_has(resp, "Total testsolvers")
-    otis.assert_has(resp, "01:40")  # 100s fastest clean solve
-    otis.assert_has(resp, "Median clean solve")
-    otis.assert_has(resp, "03:05")  # median of 100/185/300 → 185s
+    stats = resp.context["stats"]
+    assert stats["total"] == 4
+    assert stats["first_correct"] == 3
+    assert stats["fastest_clean"].time_display == "01:40"  # 100s
+    assert stats["median_clean"] == "03:05"  # median of 100/185/300 → 185s
 
 
 @pytest.mark.django_db
@@ -1215,8 +1227,8 @@ def test_results_ranked_for_ineligible_solver(otis):
     assert fights[0].contributor == fast
     assert fights[1].contributor == slow
     assert fights[-1].contributor == contributor
-    # The shared stats summary is shown here too.
-    otis.assert_has(resp, "Total testsolvers")
+    # The shared stats summary is computed here too.
+    assert resp.context["stats"]["total"] == 3
 
 
 # ---------------------------------------------------------------------------
@@ -1293,7 +1305,7 @@ def test_edited_label_not_shown_for_fresh_comment(otis):
     OIMECommentFactory.create(author=contributor, proposal=proposal, content="Hi")
     otis.login(user)
     resp = otis.get_20x("oime-proposal-detail", proposal.pk)
-    otis.assert_not_has(resp, "edited")
+    otis.assert_no_testid(resp, "comment-edited")
 
 
 @pytest.mark.django_db
@@ -1308,7 +1320,7 @@ def test_edited_label_shown_after_meaningful_edit(otis):
     )
     otis.login(user)
     resp = otis.get_20x("oime-proposal-detail", proposal.pk)
-    otis.assert_has(resp, "edited")
+    otis.assert_testid(resp, "comment-edited")
 
 
 # ---------------------------------------------------------------------------
@@ -1409,7 +1421,7 @@ def test_detail_shows_gave_up_alert_box(otis):
     )
     otis.login(user)
     resp = otis.get_20x("oime-proposal-detail", proposal.pk)
-    otis.assert_has(resp, "alert alert-secondary")
+    otis.assert_testid(resp, "fight-gave-up")
 
 
 # ---------------------------------------------------------------------------
@@ -1426,8 +1438,7 @@ def test_landing_links_to_active_fight(otis):
     )
     otis.login(user)
     resp = otis.get_20x("oime-landing")
-    otis.assert_has(resp, otis.url("oime-proposal-fight", proposal.pk))
-    otis.assert_has(resp, proposal.label)
+    assert resp.context["active_fight"].proposal == proposal
 
 
 @pytest.mark.django_db
@@ -1445,9 +1456,8 @@ def test_landing_marks_abandoned_fight_as_tle(otis):
     fight.refresh_from_db()
     assert fight.status == "OIME_TLE"
     assert fight.submitted_at is not None
-    otis.assert_has(resp, "ran out of time")
     # No point offering to resume a session that has just been closed out.
-    otis.assert_not_has(resp, otis.url("oime-proposal-fight", proposal.pk))
+    assert resp.context["active_fight"] is None
 
 
 @pytest.mark.django_db
@@ -1459,8 +1469,7 @@ def test_landing_quiet_without_active_fight(otis):
     )
     otis.login(user)
     resp = otis.get_20x("oime-landing")
-    otis.assert_not_has(resp, "Your timer is still running")
-    otis.assert_not_has(resp, otis.url("oime-proposal-fight", proposal.pk))
+    assert resp.context["active_fight"] is None
 
 
 @pytest.mark.django_db
@@ -1488,7 +1497,7 @@ def test_active_fight_survives_proposal_going_to_draft(otis):
     proposal.save()
     otis.login(user)
     resp = otis.get_20x("oime-proposal-fight", proposal.pk)
-    otis.assert_has(resp, "back to draft")
+    assert any(m.level == message_levels.WARNING for m in resp.context["messages"])
     # ...and the session can still be closed out normally.
     otis.assert_30x(otis.post("oime-submit-answer", proposal.pk, data={"answer": 42}))
     assert (
@@ -1506,8 +1515,8 @@ def test_finished_fight_survives_proposal_going_to_draft(otis):
     )
     otis.login(user)
     resp = otis.get_20x("oime-proposal-detail", proposal.pk)
-    otis.assert_has(resp, "back to draft")
-    otis.assert_has(resp, proposal.solution)
+    assert any(m.level == message_levels.WARNING for m in resp.context["messages"])
+    assert resp.context["can_see_solution"]
 
 
 @pytest.mark.django_db

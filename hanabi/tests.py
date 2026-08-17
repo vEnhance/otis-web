@@ -60,9 +60,11 @@ def test_contest_list(otis):
 
     with freeze_time("2050-10-31", tz_offset=0):
         resp = otis.get_20x("hanabi-contests")
-        assert resp.content.count(b"Candy Corn Mix") == 2
-        otis.assert_has(resp, "Valentine Mix")
-        otis.assert_not_has(resp, "Holiday Mix")
+        # the December contest has not opened yet, so it stays off the list
+        assert {c.variant_name for c in resp.context["contests"]} == {
+            "Candy Corn Mix (5 Suits)",
+            "Valentine Mix (5 Suits)",
+        }
 
 
 @pytest.mark.django_db
@@ -77,21 +79,21 @@ def test_register(otis):
 
     otis.login("alice")
     resp = otis.get_20x("hanabi-register")
-    otis.assert_not_has(resp, "You already registered")
+    otis.assert_no_messages(resp)
     resp = otis.post_20x(
         "hanabi-register", data={"hanab_username": "alice"}, follow=True
     )
-    otis.assert_has(resp, "You set your username to alice.")
+    otis.assert_message(resp, "You set your username to alice.")
     assert HanabiPlayer.objects.filter(
         user__username="alice", hanab_username="alice"
     ).exists()
 
-    resp = otis.get_20x("hanabi-register", follow=True)
-    otis.assert_has(resp, "You already registered")
+    already = "You already registered a hanab.live username."
+    otis.assert_message(otis.get_20x("hanabi-register", follow=True), already)
     resp = otis.post_20x(
         "hanabi-register", data={"hanab_username": "alice"}, follow=True
     )
-    otis.assert_has(resp, "You already registered")
+    otis.assert_message(resp, already)
 
 
 @pytest.mark.django_db

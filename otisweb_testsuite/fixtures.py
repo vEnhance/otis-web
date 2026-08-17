@@ -123,6 +123,21 @@ class OTISClient:
         text: bytes | int | str | Any,
         count: int = 0,
     ) -> MonkeyResponseType:
+        """Assert `text` appears somewhere in the raw response bytes.
+
+        This is a substring search over the whole page, so it is both brittle
+        (any reword of a template breaks it) and often weak (`assert_has(resp,
+        38)` matches any pk, date, or CSS value containing those digits).
+        Prefer, in order:
+
+        1. `assert resp.context[...]` -- for what the view computed.
+        2. A direct database read -- for what a POST actually wrote.
+        3. `assert_testid` -- for whether an element is visible to this user.
+
+        Reach for `assert_has` when the bytes really are the contract: leakage
+        checks (`assert_not_has` on secret content) and views whose output is
+        text, such as the mailing-list and export pages.
+        """
         if isinstance(text, int):
             text = str(text)
         if not isinstance(text, (bytes, str)):
@@ -152,6 +167,52 @@ class OTISClient:
         try:
             assert text not in response.content, (
                 f"Found {text!r} in response\n{self.debug_short(response)}"
+            )
+        except AssertionError:
+            self.debug_dump(response)
+            raise
+        return response
+
+    def assert_testid(
+        self,
+        response: MonkeyResponseType,
+        testid: str,
+        count: int | None = None,
+    ) -> MonkeyResponseType:
+        """Assert a `data-testid="..."` hook is present in the response.
+
+        Matches the full attribute rather than a bare substring, so it cannot
+        collide with unrelated page text. Use this for "is this element visible
+        to this user", which is the one question that genuinely needs to look at
+        rendered HTML. Pass `count` to pin down how many times it appears.
+        """
+        marker = f'data-testid="{testid}"'.encode()
+        actual = response.content.count(marker)
+        try:
+            if count is None:
+                assert actual > 0, (
+                    f"Could not find data-testid={testid!r} in response"
+                    f"\n{self.debug_short(response)}"
+                )
+            else:
+                assert actual == count, (
+                    f"Found {actual} elements with data-testid={testid!r}, "
+                    f"expected {count}\n{self.debug_short(response)}"
+                )
+        except AssertionError:
+            self.debug_dump(response)
+            raise
+        return response
+
+    def assert_no_testid(
+        self, response: MonkeyResponseType, testid: str
+    ) -> MonkeyResponseType:
+        """Assert a `data-testid="..."` hook is absent from the response."""
+        marker = f'data-testid="{testid}"'.encode()
+        try:
+            assert marker not in response.content, (
+                f"Found data-testid={testid!r} in response"
+                f"\n{self.debug_short(response)}"
             )
         except AssertionError:
             self.debug_dump(response)

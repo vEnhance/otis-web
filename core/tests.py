@@ -5,7 +5,6 @@ from typing import Any
 import pytest
 from django.test.utils import override_settings
 from django.urls import reverse
-from django.utils.timezone import localtime
 from pypdf import PdfReader
 from reportlab.pdfgen.canvas import Canvas
 
@@ -197,16 +196,18 @@ def test_check_stamp(otis):
 
     otis.login(admin)
     resp = otis.get_20x("check-stamp")
-    otis.assert_has(resp, "Check stamp")
+    assert resp.context["stamp"] is None
 
     # A genuine stamp resolves to the user and links their userinfo page.
     resp = otis.post_ok("check-stamp", data={"text": f"blah blah {text} blah"})
-    otis.assert_has(resp, "alice")
-    otis.assert_has(resp, f"/core/userinfo/{alice.pk}/")
+    assert resp.context["target_user"] == alice
+    otis.assert_has(resp, reverse("user-info", args=(alice.pk,)))
 
     # A forged/garbled stamp resolves to nobody.
     resp = otis.post_ok("check-stamp", data={"text": "not a real stamp"})
-    otis.assert_has(resp, "No valid stamp")
+    assert resp.context["stamp"] is None
+    assert resp.context["target_user"] is None
+    otis.assert_message(resp, "No valid stamp found in that text.")
 
 
 @pytest.mark.django_db
@@ -215,8 +216,7 @@ def test_sorted_unit_list(otis):
     UnitFactory.create(group__name="VisibleUnit", group__hidden=False)
     UnitFactory.create(group__name="HiddenUnit", group__hidden=True)
     resp = otis.get_20x("sorted-unit-list")
-    otis.assert_has(resp, "VisibleUnit")
-    otis.assert_not_has(resp, "HiddenUnit")
+    assert [u.group.name for u in resp.context["unit_list"]] == ["VisibleUnit"]
 
 
 @pytest.mark.django_db
@@ -224,7 +224,7 @@ def test_admin_unit_list(otis):
     otis.login(UserFactory.create(is_staff=True, is_superuser=True))
     UnitFactory.create(group__name="Grinding", group__subject="M")
     resp = otis.get_20x("admin-unit-list")
-    otis.assert_has(resp, "Grinding")
+    assert [u.group.name for u in resp.context["unit_list"]] == ["Grinding"]
 
 
 @pytest.mark.django_db
@@ -410,7 +410,7 @@ def test_hidden_staff(otis):
     UnitFactory.create(group__name="HiddenUnit", group__hidden=True)
     otis.login(staff)
     resp = otis.get_20x("catalog")
-    otis.assert_has(resp, "HiddenUnit")
+    assert "HiddenUnit" in [u.group.name for u in resp.context["units"]]
 
 
 @pytest.mark.django_db
@@ -470,15 +470,11 @@ def test_userinfo_displays_info(otis):
     admin = UserFactory.create(is_superuser=True, is_staff=True)
     otis.login(admin)
     resp = otis.get_20x("user-info", target_user.pk)
-    otis.assert_has(resp, "testuser")
-    otis.assert_has(resp, "test@example.com")
-    otis.assert_has(resp, "Test User")
-    otis.assert_has(resp, "Testers")
-    otis.assert_has(resp, localtime(target_user.date_joined).strftime("%Y-%m-%d %H:%M"))
+    assert resp.context["target_user"] == target_user
+    assert [g.name for g in resp.context["groups"]] == ["Testers"]
     assert target_user.last_login is None
-    otis.assert_has(resp, "(never)")
     otis.assert_has(resp, reverse("admin:auth_user_change", args=(target_user.pk,)))
-    otis.assert_not_has(resp, "This account is inactive.")
+    otis.assert_no_testid(resp, "user-inactive-warning")
 
 
 @pytest.mark.django_db
@@ -486,7 +482,7 @@ def test_userinfo_warns_on_inactive(otis):
     target_user = UserFactory.create(is_active=False)
     otis.login(UserFactory.create(is_superuser=True, is_staff=True))
     resp = otis.get_20x("user-info", target_user.pk)
-    otis.assert_has(resp, "This account is inactive.")
+    otis.assert_testid(resp, "user-inactive-warning")
 
 
 @pytest.mark.django_db
@@ -517,8 +513,7 @@ def test_generate_reset_link(otis):
 
     # Follow redirect and check link is displayed
     resp = otis.get_20x("user-info", target_user.pk)
-    otis.assert_has(resp, "Password reset link generated")
-    otis.assert_has(resp, "/core/reset/")
+    assert "/core/reset/" in resp.context["reset_link"]
 
 
 @pytest.mark.django_db

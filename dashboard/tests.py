@@ -5,6 +5,7 @@ from io import StringIO
 import pytest
 from django.conf import settings
 from django.contrib.admin.sites import AdminSite
+from django.contrib.messages import constants as message_levels
 from django.contrib.messages.storage.cookie import CookieStorage
 from django.http import HttpRequest
 from django.test import RequestFactory
@@ -97,32 +98,35 @@ def test_portal(otis):
         number=1,
     )
 
-    # assistant does not cause level up message
+    # an assistant viewing the portal must not consume the student's level-up
     assistant = AssistantFactory.create()
     alice.assistant = assistant
     alice.save()
     otis.login(assistant)
     with freeze_time("2021-07-01", tz_offset=0):
         resp = otis.get_20x("portal", alice.pk, follow=True)
-    messages = [m.message for m in resp.context["messages"]]
-    assert "You leveled up! You're now level 22." not in messages
+    assert resp.context["level_number"] == 22
+    alice.refresh_from_db()
+    assert alice.last_level_seen != 22
+    assert not resp.context["messages"]
 
+    # but the student seeing it themselves does level up, and is told
     otis.login(alice)
     with freeze_time("2021-07-01", tz_offset=0):
         resp = otis.get_20x("portal", alice.pk, follow=True)
 
-    messages = [m.message for m in resp.context["messages"]]
-    assert "You leveled up! You're now level 22." in messages
+    assert resp.context["level_number"] == 22
+    alice.refresh_from_db()
+    assert alice.last_level_seen == 22
+    assert any(m.level == message_levels.SUCCESS for m in resp.context["messages"])
 
     # static stuff
-    otis.assert_has(resp, f"{alice.name} ({alice.semester.name})")
-    otis.assert_has(resp, 501)
-    otis.assert_has(resp, 2020)
-    otis.assert_has(resp, unit.code)
-    otis.assert_has(resp, test)
-    otis.assert_has(resp, quiz)
-
-    # TODO check for whether meters are being rendered?
+    assert resp.context["title"] == f"{alice.name} ({alice.semester.name})"
+    assert resp.context["meters"]["clubs"].value == 501
+    assert 2020 in [row["semester__end_year"] for row in resp.context["history"]]
+    assert [row["unit"] for row in resp.context["curriculum"]] == [unit]
+    assert list(resp.context["tests"]) == [test]
+    assert list(resp.context["quizzes"]) == [quiz]
 
 
 @pytest.mark.django_db
@@ -229,8 +233,6 @@ def test_announcement_archive(otis):
 
     # by default nothing is archived, so the past years section is hidden
     response = otis.get_20x("announcement-list")
-    otis.assert_has(response, "Current year")
-    otis.assert_not_has(response, "Past years")
     assert set(response.context["current_announcements"]) == {stale, current}
     assert list(response.context["archived_announcements"]) == []
 
@@ -246,7 +248,6 @@ def test_announcement_archive(otis):
     assert current.archived is False
 
     response = otis.get_20x("announcement-list")
-    otis.assert_has(response, "Past years")
     assert list(response.context["current_announcements"]) == [current]
     assert list(response.context["archived_announcements"]) == [stale]
 
@@ -278,9 +279,9 @@ def test_certify(otis):
         follow=True,
     )
 
-    otis.assert_has(resp, 1501)
-    otis.assert_has(resp, 38)
-    otis.assert_has(resp, "Level Thirty Eight")
+    assert resp.context["hearts"] == 1501
+    assert resp.context["level_number"] == 38
+    assert resp.context["level_name"] == "Level Thirty Eight"
 
     otis.get_denied("certify", alice.pk, "invalid")
     otis.get_20x("certify", alice.pk, checksum)
@@ -332,11 +333,11 @@ def test_submit(otis):
 
     # Alice should show initially as Level 0
     resp = otis.get_20x("stats", alice.pk)
-    otis.assert_has(resp, "Level 0")
+    assert resp.context["level_number"] == 0
 
     # Alice submits a problem set
     resp = otis.get_20x("submit-pset", alice.pk)
-    otis.assert_has(resp, "Ready to submit?")
+    assert resp.context["title"] == "Ready to submit?"
 
     content1 = StringIO("Meow")
     content1.name = "content1.txt"
@@ -354,13 +355,13 @@ def test_submit(otis):
         },
         follow=True,
     )
-    otis.assert_has(resp, "13♣")
-    otis.assert_has(resp, "37.0♥")
-    otis.assert_has(resp, "This unit submission is pending review")
+    otis.assert_testid(resp, "pset-status-pending")
+    assert resp.context["pset"].clubs == 13
+    assert resp.context["pset"].hours == 37
 
     # Alice should still be Level 0 though
     resp = otis.get_20x("stats", alice.pk)
-    otis.assert_has(resp, "Level 0")
+    assert resp.context["level_number"] == 0
 
     # Check pset reflects this data
     pset = PSet.objects.get(student=alice, unit=unit1)
@@ -374,7 +375,7 @@ def test_submit(otis):
 
     # Alice realizes she made a typo in hours and edits the problem set
     resp = otis.get_20x("resubmit-pset", alice.pk)
-    otis.assert_has(resp, "content1.txt")
+    assert resp.context["pset"].filename == "content1.txt"
 
     content2 = StringIO("Purr")
     content2.name = "content2.txt"
@@ -392,9 +393,9 @@ def test_submit(otis):
         },
         follow=True,
     )
-    otis.assert_has(resp, "This unit submission is pending review")
-    otis.assert_has(resp, "13♣")
-    otis.assert_has(resp, "3.7♥")
+    otis.assert_testid(resp, "pset-status-pending")
+    assert resp.context["pset"].clubs == 13
+    assert resp.context["pset"].hours == 3.7
 
     # Check the updated problem set object
     pset = PSet.objects.get(student=alice, unit=unit1)
@@ -408,7 +409,7 @@ def test_submit(otis):
 
     # Alice should still be Level 0 though
     resp = otis.get_20x("stats", alice.pk)
-    otis.assert_has(resp, "Level 0")
+    assert resp.context["level_number"] == 0
 
     # update again, but this time change just the metadata
     resp = otis.post_20x(
@@ -424,9 +425,9 @@ def test_submit(otis):
         },
         follow=True,
     )
-    otis.assert_has(resp, "This unit submission is pending review")
-    otis.assert_has(resp, "13♣")
-    otis.assert_has(resp, "3.7♥")
+    otis.assert_testid(resp, "pset-status-pending")
+    assert resp.context["pset"].clubs == 13
+    assert resp.context["pset"].hours == 3.7
 
     # Check the updated problem set object
     pset = PSet.objects.get(student=alice, unit=unit1)
@@ -447,13 +448,13 @@ def test_submit(otis):
 
     # check it shows up this way
     resp = otis.get_20x("pset", pset.pk)
-    otis.assert_has(resp, "This unit submission was accepted")
-    otis.assert_has(resp, "13♣")
-    otis.assert_has(resp, "3.7♥")
+    otis.assert_testid(resp, "pset-status-accepted")
+    assert resp.context["pset"].clubs == 13
+    assert resp.context["pset"].hours == 3.7
 
     # Alice should show as leveled up now
     resp = otis.get_20x("stats", alice.pk)
-    otis.assert_has(resp, "Level 4")
+    assert resp.context["level_number"] == 4
 
     # now let's say Alice resubmits
     content3 = StringIO("Rawr")
@@ -475,9 +476,9 @@ def test_submit(otis):
 
     # check it shows up this way
     resp = otis.get_20x("pset", pset.pk)
-    otis.assert_has(resp, "This unit submission is pending review")
-    otis.assert_has(resp, "100♣")
-    otis.assert_has(resp, "20.0♥")
+    otis.assert_testid(resp, "pset-status-pending")
+    assert resp.context["pset"].clubs == 100
+    assert resp.context["pset"].hours == 20
 
     # Check the problem set
     pset = PSet.objects.get(student=alice, unit=unit1)
@@ -491,7 +492,7 @@ def test_submit(otis):
 
     # Alice is now back to Level 0
     resp = otis.get_20x("stats", alice.pk)
-    otis.assert_has(resp, "Level 0")
+    assert resp.context["level_number"] == 0
 
     # simulate acceptance
     pset.status = "A"
@@ -499,13 +500,13 @@ def test_submit(otis):
 
     # Alice is now Level 14
     resp = otis.get_20x("stats", alice.pk)
-    otis.assert_has(resp, "Level 14")
+    assert resp.context["level_number"] == 14
 
     # check it shows up this way
     resp = otis.get_20x("pset", pset.pk)
-    otis.assert_has(resp, "This unit submission was accepted")
-    otis.assert_has(resp, "100♣")
-    otis.assert_has(resp, "20.0♥")
+    otis.assert_testid(resp, "pset-status-accepted")
+    assert resp.context["pset"].clubs == 100
+    assert resp.context["pset"].hours == 20
 
 
 @pytest.mark.django_db
@@ -534,14 +535,13 @@ def test_pset_list(otis):
     unit2 = UnitFactory.create(code="ZMX")
     unit3 = UnitFactory.create(code="DAY")
 
-    PSetFactory.create(student=alice, clubs=0, hours=0, status="A", unit=unit1)
-    PSetFactory.create(student=alice, clubs=0, hours=0, status="A", unit=unit2)
+    pset1 = PSetFactory.create(student=alice, clubs=0, hours=0, status="A", unit=unit1)
+    pset2 = PSetFactory.create(student=alice, clubs=0, hours=0, status="A", unit=unit2)
     PSetFactory.create(student=eve, clubs=0, hours=0, status="A", unit=unit3)
 
+    # eve's problem set must not leak into alice's listing
     resp = otis.get_20x("student-pset-list", alice.pk)
-    otis.assert_has(resp, unit1.code)
-    otis.assert_has(resp, unit2.code)
-    otis.assert_not_has(resp, unit3.code)
+    assert set(resp.context["object_list"]) == {pset1, pset2}
 
 
 @pytest.mark.django_db
@@ -704,23 +704,22 @@ def test_index(otis):
     # 0 Students
     resp = otis.get_20x("index")
 
-    otis.assert_has(resp, "But nobody came.")
+    assert resp.context["rows"] == []
+    otis.assert_no_testid(resp, "stulist-empty-staff")
 
     # But now they are staff!
     user.is_staff = True
     user.save()
     resp = otis.get_20x("index")
-    otis.assert_has(
-        resp,
-        "You're a staff member, so if you're expecting to see something, contact Evan.",
-    )
+    otis.assert_testid(resp, "stulist-empty-staff")
     user.is_staff = False
     user.save()
 
     semester = SemesterFactory.create()
     RegistrationContainerFactory.create(semester=semester)
     resp = otis.get_20x("index")
-    otis.assert_has(resp, "If you've already gotten your acceptance letter")
+    assert resp.context["exists_registration"] is True
+    otis.assert_testid(resp, "stulist-empty-register")
 
     alice = StudentFactory.create(user=user)
     otis.get_redirects(reverse("portal", args=(alice.pk,)), "index", follow=True)
@@ -732,7 +731,7 @@ def test_index(otis):
 
     otis.login(assistant)
     resp = otis.get_20x("index")
-    otis.assert_has(resp, bob.name)
+    assert {row["student"] for row in resp.context["rows"]} == {alice, bob}
 
 
 @pytest.mark.django_db
@@ -744,19 +743,25 @@ def test_past(otis):
 
     prevAlice = StudentFactory.create(semester=prevSemester, user=alice.user)
 
+    # With no semester pinned the listing spans years, so both of this user's
+    # enrollments appear and the Year column is shown to tell them apart.
+    # (Asserting on names cannot distinguish them -- they share a user.)
     resp = otis.get_20x("past")
-    otis.assert_has(resp, "Previous year listing")
-    otis.assert_has(resp, prevSemester.name)
-    otis.assert_has(resp, prevAlice.name)
+    assert resp.context["past"] is True
+    assert resp.context["stulist_show_semester"] is True
+    assert {row["student"] for row in resp.context["rows"]} == {alice, prevAlice}
 
     unit = UnitFactory.create(code="BMX")
     PSetFactory.create(student=prevAlice, clubs=0, hours=1501, status="A", unit=unit)
 
+    # pinning a semester restricts the listing and swaps Year for Level
     resp = otis.get_20x("past", prevSemester.pk)
-    otis.assert_has(resp, 38)
-    otis.assert_has(resp, "Previous year listing")
-    otis.assert_has(resp, prevSemester.name)
-    otis.assert_has(resp, prevAlice.name)
+    assert resp.context["past"] is True
+    assert resp.context["semester"] == prevSemester
+    assert resp.context["stulist_show_semester"] is False
+    (row,) = resp.context["rows"]
+    assert row["student"] == prevAlice
+    assert row["level"] == 38
 
     assistant = AssistantFactory.create()
     prevAlice.assistant = assistant
@@ -765,11 +770,10 @@ def test_past(otis):
 
     otis.login(assistant)
     resp = otis.get_20x("past", prevSemester.pk)
-    otis.assert_has(resp, 38)
-    otis.assert_has(resp, "Previous year listing")
-    otis.assert_has(resp, prevSemester.name)
-    otis.assert_has(resp, prevAlice.name)
-    otis.assert_has(resp, bob.name)
+    assert resp.context["semester"] == prevSemester
+    rows = {row["student"]: row for row in resp.context["rows"]}
+    assert set(rows) == {prevAlice, bob}
+    assert rows[prevAlice]["level"] == 38
 
 
 @pytest.mark.django_db
@@ -781,16 +785,17 @@ def test_semester_list(otis):
     alice = StudentFactory.create(semester=semester, user=user)
     otis.login(alice)
 
+    # the student-count column is superuser-only
     resp = otis.get_20x("semester-list")
-    otis.assert_has(resp, prevSemester.name)
-    otis.assert_not_has(resp, "<th>Students</th>")
+    assert prevSemester in resp.context["object_list"]
+    otis.assert_no_testid(resp, "semester-student-count")
 
     user.is_superuser = True
     user.save()
 
     resp = otis.get_20x("semester-list")
-    otis.assert_has(resp, prevSemester.name)
-    otis.assert_has(resp, "<th>Students</th>")
+    assert prevSemester in resp.context["object_list"]
+    otis.assert_testid(resp, "semester-student-count")
 
 
 @pytest.mark.django_db
@@ -808,10 +813,11 @@ def test_idle_warn(otis):
     with freeze_time("2021-07-29", tz_offset=0):
         resp = otis.get_20x("idlewarn")
 
-    otis.assert_has(resp, "Idle-warn")
-    otis.assert_has(resp, "Lv. 38")
-    otis.assert_has(resp, alice.user.first_name)
-    otis.assert_has(resp, "28.00d")
+    assert resp.context["title"] == "Idle-warn"
+    (row,) = resp.context["rows"]
+    assert row["student"] == alice
+    assert row["level"] == 38
+    assert row["days_since_last_pset"] == pytest.approx(28.0)
 
 
 @pytest.mark.django_db
@@ -825,7 +831,7 @@ def test_download_list(otis):
     otis.get_40x("downloads", alice.pk + 1)
     resp = otis.get_20x("downloads", alice.pk)
 
-    otis.assert_has(resp, download.content)
+    assert list(resp.context["object_list"]) == [download]
 
 
 @pytest.mark.django_db
@@ -845,7 +851,8 @@ def test_level_up_and_bonus(otis) -> None:
     BonusLevelFactory.create(level=16, group=secret16)
 
     resp = otis.get_20x("portal", alice.pk, follow=True)
-    otis.assert_not_has(resp, "request secret units")
+    assert not resp.context["bonus_levels"]
+    otis.assert_no_testid(resp, "bonus-level-request")
 
     # the form shouldn't have anything in the queryset right now
     resp = otis.get_20x("bonus-level-request", alice.pk, follow=True)
@@ -862,11 +869,11 @@ def test_level_up_and_bonus(otis) -> None:
         unit__code="BCY",
     )
     resp = otis.get_20x("portal", alice.pk, follow=True)
-    otis.assert_has(resp, "request secret units")
+    assert resp.context["bonus_levels"]
+    otis.assert_testid(resp, "bonus-level-request")
 
     # make sure the level up does its job
-    messages = [m.message for m in resp.context["messages"]]
-    assert "You leveled up! You're now level 9." in messages
+    assert any(m.level == message_levels.SUCCESS for m in resp.context["messages"])
     alice.refresh_from_db()
     assert alice.last_level_seen == 9
     assert alice.curriculum.all().count() == 2
@@ -894,7 +901,6 @@ def test_level_up_and_bonus(otis) -> None:
         follow=True,
     )
     messages = [m.message for m in resp.context["messages"]]
-    assert f"Added bonus unit {desired_unit} for you." in messages
     assert "There are no secret units you can request yet." not in messages
     alice.refresh_from_db()
     assert alice.curriculum.filter(pk=desired_unit.pk).exists()

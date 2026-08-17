@@ -74,7 +74,7 @@ def test_yearbook_listing(otis):
     otis.assert_has(resp, "🇦🇺")
     otis.assert_has(resp, 'aria-label="Australia"')
     # the policy warning lives on the create form, not on the listing
-    otis.assert_not_has(resp, "requires real names")
+    otis.assert_no_testid(resp, "yearbook-real-names-warning")
 
 
 @pytest.mark.django_db
@@ -107,13 +107,17 @@ def test_yearbook_detail(otis):
 
     entry = YearbookEntry.objects.get(user=carol)
     resp = otis.get_20x("yearbook-detail", entry.pk)
+    # A profile page exists to put this person's own data on the screen, so the
+    # rendered values are the contract here. These assertions are on model data
+    # and links, never on the page's own wording.
     otis.assert_has(resp, "Carol Carolson")
     otis.assert_has(resp, "fond of ducks")
     otis.assert_has(resp, "🇨🇦")
     # the country shows as its IMO abbreviation, linked to the IMO results page
     otis.assert_has(resp, "https://www.imo-official.org/results/team/country/CAN/")
     otis.assert_has(resp, 'title="Canada at the IMO"')
-    otis.assert_has(resp, "Class of")  # the infobox row label; 2024 is the value
+    otis.assert_testid(resp, "yearbook-class-of-row")
+    assert resp.context["entry"].graduation_year == 2024
     otis.assert_has(resp, "Duck University")
     otis.assert_has(resp, "carol@example.com")
     # socials are icon rows, with the account type in the icon's alt text
@@ -126,10 +130,8 @@ def test_yearbook_detail(otis):
     otis.assert_has(resp, "https://www.instagram.com/carolgram/")
     otis.assert_has(resp, "I like <strong>ducks</strong> a lot.")
     # years in OTIS come off the roster, not from anything the student typed,
-    # and show as the end year of each semester
-    otis.assert_has(resp, "2023,")
-    otis.assert_has(resp, "2024")
-    otis.assert_not_has(resp, "Year I")
+    # and collapse to a range rather than showing the semester names
+    assert resp.context["entry"].otis_years == "2022-2024"
     # the IMO ID links to that contestant's page on the IMO site
     otis.assert_has(resp, "https://www.imo-official.org/results/contestant/24870/")
     otis.assert_has(resp, "24870")
@@ -150,10 +152,11 @@ def test_yearbook_detail_hides_blank_fields(otis):
     otis.login(dave)
 
     resp = otis.get_20x("yearbook-detail", entry.pk)
-    otis.assert_has(resp, "has not written anything here yet")
-    otis.assert_has(resp, '<span class="fst-italic">None</span>')
-    otis.assert_not_has(resp, "yearbook-infobox-social")
-    otis.assert_not_has(resp, "University")
+    otis.assert_testid(resp, "yearbook-empty-bio")
+    otis.assert_testid(resp, "yearbook-no-contact")
+    otis.assert_no_testid(resp, "yearbook-infobox-social")
+    otis.assert_no_testid(resp, "yearbook-university-row")
+    otis.assert_no_testid(resp, "yearbook-class-of-row")
 
 
 @pytest.mark.django_db
@@ -169,21 +172,22 @@ def test_yearbook_create(otis):
     otis.login(erin)
 
     resp = otis.get_20x("yearbook-create")
-    otis.assert_has(resp, "requires real names")
+    otis.assert_testid(resp, "yearbook-real-names-warning")
+    form = resp.context["form"]
     # the create form is prefilled with the account email
-    otis.assert_has(resp, "erin@example.com")
+    assert form.initial["email"] == "erin@example.com"
     # the form is grouped into sections
-    otis.assert_has(resp, "<h2>Biographical data</h2>")
-    otis.assert_has(resp, "<h2>Contact</h2>")
-    # contact accounts are a compact table of short labels, with no help text
-    otis.assert_has(resp, "yearbook-contact-table")
-    otis.assert_has(resp, '<label for="id_discord_username">Discord</label>')
-    # ...whereas the biographical table keeps its help text
-    otis.assert_has(resp, "yearbook-bio-table")
-    otis.assert_has(resp, "The university you attend or attended")
-    otis.assert_not_has(resp, "Your Discord handle")
+    otis.assert_testid(resp, "yearbook-bio-table")
+    otis.assert_testid(resp, "yearbook-contact-heading")
+    otis.assert_testid(resp, "yearbook-contact-table")
+    # contact accounts get short labels and no help text...
+    assert form.fields["discord_username"].label == "Discord"
+    assert not form.fields["discord_username"].help_text
+    # ...whereas the biographical fields keep theirs (the wording is Evan's to
+    # change; what matters is that one table has help text and the other doesn't)
+    assert form.fields["university"].help_text
     # the country picker is a chosen-style autocomplete, as on the decision form
-    otis.assert_has(resp, 'id="id_country"')
+    assert "country" in form.fields
     otis.assert_has(resp, '$("#id_country").chosen(')
 
     resp = otis.post_30x(
@@ -239,7 +243,7 @@ def test_yearbook_create_rejects_bad_input(otis):
         "yearbook-create",
         data={"instagram_username": "@evanchen.cc"},
     )
-    otis.assert_has(resp, "without the leading @")
+    assert "instagram_username" in resp.context["form"].errors
     assert not YearbookEntry.objects.filter(user=frank).exists()
 
 
@@ -258,22 +262,22 @@ def test_yearbook_drafts_are_hidden(otis):
 
     # a nosy classmate sees neither the card nor the page
     otis.login(nosy)
-    otis.assert_not_has(otis.get_20x("yearbook-list"), "Iris Irisson")
+    assert draft not in otis.get_20x("yearbook-list").context["entries"]
     otis.get_not_found("yearbook-detail", draft.pk)
 
     # the author sees their own draft, flagged as such
     otis.login(iris)
     resp = otis.get_20x("yearbook-list")
-    otis.assert_has(resp, "Iris Irisson")
-    otis.assert_has(resp, "Draft")
+    assert draft in resp.context["entries"]
+    otis.assert_testid(resp, "yearbook-draft-badge")
     resp = otis.get_20x("yearbook-detail", draft.pk)
-    otis.assert_has(resp, "This entry is a draft")
-    otis.assert_has(resp, "not ready yet")
+    otis.assert_testid(resp, "yearbook-draft-note")
+    assert resp.context["entry"].tagline == "not ready yet"
 
     # so does staff
     otis.login(staffer)
-    otis.assert_has(otis.get_20x("yearbook-list"), "Iris Irisson")
-    otis.assert_has(otis.get_20x("yearbook-detail", draft.pk), "This entry is a draft")
+    assert draft in otis.get_20x("yearbook-list").context["entries"]
+    otis.assert_testid(otis.get_20x("yearbook-detail", draft.pk), "yearbook-draft-note")
 
     # publishing makes it visible to everyone
     otis.login(iris)
@@ -281,9 +285,11 @@ def test_yearbook_drafts_are_hidden(otis):
     assert YearbookEntry.objects.get(user=iris).is_draft is False
     otis.login(nosy)
     resp = otis.get_20x("yearbook-list")
-    otis.assert_has(resp, "Iris Irisson")
-    otis.assert_not_has(resp, "Draft")
-    otis.assert_has(otis.get_20x("yearbook-detail", draft.pk), "ready now")
+    assert draft in resp.context["entries"]
+    otis.assert_no_testid(resp, "yearbook-draft-badge")
+    assert otis.get_20x("yearbook-detail", draft.pk).context["entry"].tagline == (
+        "ready now"
+    )
 
 
 @pytest.mark.django_db
@@ -311,7 +317,9 @@ def test_yearbook_update(otis):
     YearbookEntryFactory(user=gina, tagline="before")
     otis.login(gina)
 
-    otis.assert_has(otis.get_20x("yearbook-update"), "before")
+    assert otis.get_20x("yearbook-update").context["form"].initial["tagline"] == (
+        "before"
+    )
     otis.post_30x(
         "yearbook-update",
         data={"tagline": "after", "bio": ""},

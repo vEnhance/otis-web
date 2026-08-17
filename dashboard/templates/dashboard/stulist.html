@@ -65,9 +65,9 @@
     <hr />
     <p>There isn't anything here yet.</p>
     {% if request.user.is_staff %}
-      <p>You're a staff member, so if you're expecting to see something, contact Evan.</p>
+      <p data-testid="stulist-empty-staff">You're a staff member, so if you're expecting to see something, contact Evan.</p>
     {% elif exists_registration %}
-      <p>
+      <p data-testid="stulist-empty-register">
         If you've already gotten your acceptance letter, then you should
         <a href="{% url "register" %}">submit the decision form</a>.
       </p>

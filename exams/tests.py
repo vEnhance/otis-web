@@ -193,7 +193,8 @@ def test_quiz(otis, exam_setup):
 
         # OK, now actually take a quiz, lol
         resp_before_submit = otis.get_20x("quiz", alice.pk, quiz_waltz.pk)
-        otis.assert_has(resp_before_submit, "Submit answers")
+        # the submit form is offered only while there is no attempt yet
+        assert resp_before_submit.context.get("attempt") is None
 
         # submit quiz improperly
         resp_after_improper = otis.post_20x(
@@ -205,7 +206,8 @@ def test_quiz(otis, exam_setup):
                 "guess2": "2000",
             },
         )
-        otis.assert_has(resp_after_improper, "Submit answers")
+        # the malformed guess fails validation, so nothing was recorded
+        assert resp_after_improper.context.get("attempt") is None
 
         # submit quiz properly
         resp_after_submit = otis.post_20x(
@@ -219,15 +221,12 @@ def test_quiz(otis, exam_setup):
                 "guess4": "2^5*5^3",
             },
         )
-        otis.assert_has(resp_after_submit, "1337", count=1)
-        otis.assert_has(resp_after_submit, "1000", count=1)
-        otis.assert_has(resp_after_submit, "2000", count=2)
-        otis.assert_has(resp_after_submit, "30+100", count=1)
-        otis.assert_has(resp_after_submit, "3000", count=1)
-        otis.assert_has(resp_after_submit, "2^5*5^3", count=1)
-        otis.assert_has(resp_after_submit, "4000", count=1)
-        otis.assert_has(resp_after_submit, "5000", count=1)
-        otis.assert_not_has(resp_after_submit, "Submit answers")
+        # 2000 matches outright; 2^5*5^3 evaluates to 4000; 30+100 does not
+        # reach 3000, and an empty guess never scores
+        rows = resp_after_submit.context["rows"]
+        assert [r["correct"] for r in rows] == [False, True, False, True, False]
+        assert [r["accepted"] for r in rows] == ["1000", "2000", "3000", "4000", "5000"]
+        assert resp_after_submit.context["attempt"].score == 2
 
         # verify that the attempt is saved properly
         a = ExamAttempt.objects.get(student__user__username="alice")

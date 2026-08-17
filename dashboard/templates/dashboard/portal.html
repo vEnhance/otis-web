@@ -350,7 +350,7 @@
           {% else %}
             <a href="{% url 'inquiry' student.pk %}" class="btn btn-warning">Manage units</a>
             {% if bonus_levels %}
-              <p>
+              <p data-testid="bonus-level-request">
                 You are also sufficiently high level to
                 <a href="{% url "bonus-level-request" student.pk %}">request secret units</a>.
               </p>
