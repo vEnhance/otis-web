@@ -147,6 +147,9 @@
             <p class="card-text">{{ comment.content|linebreaks }}</p>
             <small class="text-muted">
               {{ comment.author }}
+              {% if comment.author_id == proposal.author_id %}
+                <span class="badge bg-secondary" title="This commenter wrote the problem">Author</span>
+              {% endif %}
               · {{ comment.created_at|date:"Y-m-d H:i" }}
               {% if comment.is_edited %}(edited {{ comment.updated_at|date:"Y-m-d H:i" }}){% endif %}
               {% if comment.author == contributor or request.user.is_staff %}

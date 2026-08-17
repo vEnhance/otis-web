@@ -1312,6 +1312,37 @@ def test_edited_label_shown_after_meaningful_edit(otis):
 
 
 # ---------------------------------------------------------------------------
+# "Author" badge on comments written by the problem's author
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.django_db
+def test_author_badge_shown_only_for_problem_author_comments(otis):
+    user, contributor = _verified_contributor()
+    other = OIMEContributorFactory.create(user=UserFactory.create(username="bob"))
+    proposal = OIMEProposalFactory.create(author=contributor)
+    OIMECommentFactory.create(author=contributor, proposal=proposal, content="Mine")
+    OIMECommentFactory.create(author=other, proposal=proposal, content="Theirs")
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-detail", proposal.pk)
+    otis.assert_has(resp, ">Author</span>", count=1)
+
+
+@pytest.mark.django_db
+def test_author_badge_absent_when_author_has_not_commented(otis):
+    user, contributor = _verified_contributor()
+    author = OIMEContributorFactory.create(user=UserFactory.create(username="bob"))
+    proposal = OIMEProposalFactory.create(author=author)
+    contributor.casual_mode = True
+    contributor.save()
+    contributor.revealed_proposals.add(proposal)
+    OIMECommentFactory.create(author=contributor, proposal=proposal, content="Nice")
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-detail", proposal.pk)
+    otis.assert_not_has(resp, ">Author</span>")
+
+
+# ---------------------------------------------------------------------------
 # Ending a timed session: caching, and the give-up/time-out boundary
 # ---------------------------------------------------------------------------
 
