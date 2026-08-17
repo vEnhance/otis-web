@@ -670,6 +670,7 @@ def opal_handler(action: str, data: JSONData) -> JsonResponse:
                     "answer",
                     "partial_answers",
                     "credits",
+                    "hint_text",
                 )
             )
         }
