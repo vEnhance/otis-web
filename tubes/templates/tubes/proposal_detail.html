@@ -4,7 +4,7 @@
 {% endblock title %}
 {% block layout-content %}
   {% if proposal.archived %}
-    <div class="alert alert-warning">
+    <div class="alert alert-warning" data-testid="proposal-archived-note">
       This problem has been archived by staff, so it is not viewable to other
       users anymore. If you think this is an error, please contact Evan.
     </div>
@@ -55,7 +55,9 @@
           action="{% url "oime-proposal-archive" proposal.pk %}"
           class="mb-4">
       {% csrf_token %}
-      <button type="submit" class="btn btn-outline-secondary btn-sm">
+      <button type="submit"
+              class="btn btn-outline-secondary btn-sm"
+              data-testid="proposal-archive-toggle">
         {% if proposal.archived %}
           Unarchive
         {% else %}
@@ -121,7 +123,7 @@
           Solved in {{ fight.time_display }} with {{ fight.wrong_answers }} wrong answer{{ fight.wrong_answers|pluralize }}.
         </div>
       {% elif fight.status == "OIME_FAIL" %}
-        <div class="alert alert-secondary">You gave up on this problem.</div>
+        <div class="alert alert-secondary" data-testid="fight-gave-up">You gave up on this problem.</div>
       {% elif fight.status == "OIME_TLE" %}
         <div class="alert alert-danger">Time limit exceeded.</div>
       {% elif fight.status == "OIME_ALE" %}
@@ -148,7 +150,9 @@
             <small class="text-muted">
               {{ comment.author }}
               · {{ comment.created_at|date:"Y-m-d H:i" }}
-              {% if comment.is_edited %}(edited {{ comment.updated_at|date:"Y-m-d H:i" }}){% endif %}
+              {% if comment.is_edited %}
+                <span data-testid="comment-edited">(edited {{ comment.updated_at|date:"Y-m-d H:i" }})</span>
+              {% endif %}
               {% if comment.author == contributor or request.user.is_staff %}
                 · <a href="{% url "oime-comment-edit" comment.pk %}">Edit</a>
               {% endif %}
