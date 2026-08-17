@@ -47,7 +47,7 @@
               {% if entry.graduation_year %}
                 <span class="yearbook-card-classof">’{{ entry.graduation_year_short }}</span>
               {% endif %}
-              {% if entry.is_draft %}<span class="yearbook-draft-badge">Draft</span>{% endif %}
+              {% if entry.is_draft %}<span class="yearbook-draft-badge" data-testid="yearbook-draft-badge">Draft</span>{% endif %}
             </span>
             {% if entry.tagline %}<span class="yearbook-card-tagline">{{ entry.tagline }}</span>{% endif %}
           </span>

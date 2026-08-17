@@ -9,7 +9,7 @@
 {% block layout-content %}
   {% if entry.is_draft %}
     <div class="alert alert-secondary">
-      <b>This entry is a draft.</b>
+      <b data-testid="yearbook-draft-note">This entry is a draft.</b>
       It is hidden from the yearbook listing, and only
       {% if is_own_entry %}
         you
@@ -62,13 +62,13 @@
       {% endif %}
       {% if entry.graduation_year %}
         <tr>
-          <th scope="row">Class of</th>
+          <th scope="row" data-testid="yearbook-class-of-row">Class of</th>
           <td>{{ entry.graduation_year }}</td>
         </tr>
       {% endif %}
       {% if entry.university %}
         <tr>
-          <th scope="row">University</th>
+          <th scope="row" data-testid="yearbook-university-row">University</th>
           <td>{{ entry.university }}</td>
         </tr>
       {% endif %}
@@ -92,7 +92,7 @@
           {% for semester in entry.otis_semesters %}
             {{ semester.end_year }}{% if not forloop.last %},{% endif %}
           {% empty %}
-            <span class="fst-italic">None</span>
+            <span class="fst-italic" data-testid="yearbook-no-contact">None</span>
           {% endfor %}
         </td>
       </tr>
@@ -110,6 +110,7 @@
       {% for social in entry.socials %}
         <tr>
           <td colspan="2"
+              data-testid="yearbook-infobox-social"
               class="yearbook-infobox-social{% if forloop.first %} yearbook-infobox-social-top{% endif %}">
             <img class="yearbook-social-icon"
                  src="{% static social.icon %}"
@@ -129,7 +130,7 @@
     {% if entry.bio_rendered %}
       {{ entry.bio_rendered|safe }}
     {% else %}
-      <p class="fst-italic">{{ entry.name }} has not written anything here yet.</p>
+      <p class="fst-italic" data-testid="yearbook-empty-bio">{{ entry.name }} has not written anything here yet.</p>
     {% endif %}
   </div>
   <div style="clear: both;"></div>

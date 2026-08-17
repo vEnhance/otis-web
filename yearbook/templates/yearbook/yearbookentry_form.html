@@ -30,19 +30,21 @@
     {{ form.bio|as_crispy_field }}
     {{ form.is_draft|as_crispy_field }}
     <h2>Biographical data</h2>
-    <table class="table table-sm yearbook-form-table yearbook-bio-table">
+    <table class="table table-sm yearbook-form-table yearbook-bio-table"
+           data-testid="yearbook-bio-table">
       <tbody>
         {% for field in form.biographical_fields %}
           {% include "yearbook/components/form_row.html" %}
         {% endfor %}
       </tbody>
     </table>
-    <h2>Contact</h2>
+    <h2 data-testid="yearbook-contact-heading">Contact</h2>
     <p>
       Anything left blank is omitted from your page.
       Enter usernames on their own, without a leading <code>@</code>.
     </p>
-    <table class="table table-sm yearbook-form-table yearbook-contact-table">
+    <table class="table table-sm yearbook-form-table yearbook-contact-table"
+           data-testid="yearbook-contact-table">
       <tbody>
         {% for field in form.contact_fields %}
           {% include "yearbook/components/form_row.html" %}
@@ -53,7 +55,7 @@
   </form>
   {% if not object %}
     <div class="alert alert-warning mt-2">
-      <h4 class="alert-heading">⚠️ The OTIS yearbook requires real names</h4>
+      <h4 class="alert-heading" data-testid="yearbook-real-names-warning">⚠️ The OTIS yearbook requires real names</h4>
       <p>
         Yearbook entries show your name as it is registered in OTIS
         (which is {{ request.user.get_full_name }}).
