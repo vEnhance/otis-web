@@ -49,7 +49,6 @@ prod = [
 [dependency-groups]
 dev = [
   "Faker>=40.15.0",
-  "codespell>=2.4.3",
   "coverage[toml]>=7.15.4",
   "factory-boy>=3.3.3",
   "freezegun>=1.5.5",
