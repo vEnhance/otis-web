@@ -43,7 +43,11 @@
           {% if request.user.is_superuser %}
             <a class="btn btn-info" href="{% url "opal-leaderboard" hunt.slug %}">Leaderboard</a>
           {% endif %}
-          <p class="mb-0 mt-2">Started {{ hunt.start_date }} ({{ hunt.start_date|timesince }} ago).</p>
+          <p class="mb-0 mt-2">
+            Started {{ hunt.start_date }}
+            <br />
+            ({{ hunt.start_date|timesince }} ago).
+          </p>
         </div>
       </div>
     {% else %}
@@ -54,10 +58,19 @@
           <ul class="mb-0">
             <li>
               Starts <strong>{{ hunt.start_date }}</strong>
+              <br />
               (in {{ hunt.start_date|timeuntil }})
             </li>
-            <li>Author signup deadline: {{ hunt.author_signup_deadline }}</li>
-            <li>Author draft deadline: {{ hunt.author_draft_deadline }}</li>
+            <li>
+              Author signup deadline:
+              <br />
+              {{ hunt.author_signup_deadline }}
+            </li>
+            <li>
+              Author draft deadline:
+              <br />
+              {{ hunt.author_draft_deadline }}
+            </li>
             {% if hunt.author_signups_are_open and hunt.author_signup_url %}
               <li>
                 <a href="{{ hunt.author_signup_url }}">Sign up to contribute a puzzle</a>
