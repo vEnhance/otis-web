@@ -14,6 +14,7 @@ class OpalHuntAdmin(admin.ModelAdmin):
         "slug",
         "active",
         "start_date",
+        "artwork_slug",
     )
     list_filter = ("active",)
     search_fields = (

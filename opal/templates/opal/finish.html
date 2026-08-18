@@ -10,13 +10,9 @@
   </p>
   <p>As a prize, you obtained the following achievement:</p>
   <h2>{{ achievement.name }} ({{ achievement.diamonds }}♦️)</h2>
-  {% if achievement.image %}
-    <div class="text-center">
-      <a href="{{ achievement.image.url }}">
-        <img width="256px" src="{{ achievement.image.url }}" />
-      </a>
-    </div>
-  {% endif %}
+  <div class="d-flex justify-content-center my-4">
+    {% include "opal/components/artwork.html" with hunt=hunt size="lg" %}
+  </div>
   <p class="fst-italic">{{ achievement.description }}</p>
   <hr />
   <p>We hope you enjoyed playing. See you next time!</p>

@@ -15,6 +15,7 @@ from markdownfield.models import MarkdownField, RenderedMarkdownField
 from markdownfield.validators import VALIDATOR_STANDARD
 from sql_util.aggregates import Exists
 
+from core.models import ARTWORK_CDN_BASE
 from rpg.models import Achievement
 
 ALLOWED_ANSWER_CHARACTERS = string.ascii_uppercase + string.digits
@@ -221,6 +222,13 @@ class OpalHunt(models.Model):
     )
     story_text_rendered = RenderedMarkdownField()
 
+    artwork_slug = models.CharField(
+        max_length=64,
+        blank=True,
+        help_text="Filename (without extension) of the artwork for this hunt "
+        "on the gallery CDN, like 'opal3'. Leave blank to show a placeholder.",
+    )
+
     thanks = models.TextField(help_text="Thanks to people who helped.", blank=True)
     discord_webhook_url = models.URLField(
         help_text="Webhook to post to congratulate people who finish the hunt.",
@@ -242,6 +250,32 @@ class OpalHunt(models.Model):
     @property
     def has_started(self) -> bool:
         return timezone.now() >= self.start_date
+
+    @property
+    def has_artwork(self) -> bool:
+        """Whether artwork exists for this hunt on the CDN."""
+        return bool(self.artwork_slug)
+
+    @property
+    def artwork_url(self) -> str | None:
+        """Full-size artwork URL on the CDN, or None if there is no artwork."""
+        if not self.has_artwork:
+            return None
+        return f"{ARTWORK_CDN_BASE}/webp/{self.artwork_slug}.webp"
+
+    @property
+    def artwork_thumb_md_url(self) -> str | None:
+        """384x384 thumbnail URL on the CDN, or None if there is no artwork."""
+        if not self.has_artwork:
+            return None
+        return f"{ARTWORK_CDN_BASE}/thumb-md/{self.artwork_slug}.webp"
+
+    @property
+    def artwork_thumb_sm_url(self) -> str | None:
+        """104x104 thumbnail URL on the CDN, or None if there is no artwork."""
+        if not self.has_artwork:
+            return None
+        return f"{ARTWORK_CDN_BASE}/thumb-sm/{self.artwork_slug}.webp"
 
     @property
     def author_signups_are_open(self) -> bool:

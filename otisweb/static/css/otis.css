@@ -329,6 +329,32 @@ img.emoji {
   vertical-align: -0.1em;
 }
 
+/* OPAL hunt artwork; the blank variant keeps the same footprint as an image */
+.opal-artwork {
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 0.375rem;
+  flex-shrink: 0;
+}
+.opal-artwork-sm {
+  width: min(104px, 30vw);
+}
+.opal-artwork-md {
+  width: min(256px, 40vw);
+}
+.opal-artwork-lg {
+  width: min(384px, 60vw);
+}
+.opal-artwork-blank {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #d3d3d3;
+  color: #808080;
+  font-size: 3rem;
+  font-weight: bold;
+}
+
 #opal_hints li {
   background-color: grey;
   color: grey;

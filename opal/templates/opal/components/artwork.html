@@ -1,0 +1,21 @@
+{% comment %}
+  Square artwork for a hunt, linking to the full-resolution image.
+  Callers pass `hunt` plus `size`: "sm" (104px, for the hunt list and the answer
+  checker), "md" (256px, for the round page) or "lg" (the full 384px, for the
+  leaderboard). Anything but "sm" draws on the 384px thumbnail. A hunt with no
+  artwork gets a placeholder of the same size, so the surrounding layout doesn't
+  depend on the artwork existing yet.
+{% endcomment %}
+{% if hunt.has_artwork %}
+  <a href="{{ hunt.artwork_url }}"
+     title="Full-resolution artwork for {{ hunt }}">
+    <img class="opal-artwork opal-artwork-{{ size }}"
+         src="{% if size == "sm" %}{{ hunt.artwork_thumb_sm_url }}{% else %}{{ hunt.artwork_thumb_md_url }}{% endif %}"
+         alt="Artwork for {{ hunt }}"
+         data-testid="opal-artwork" />
+  </a>
+{% else %}
+  <div class="opal-artwork opal-artwork-{{ size }} opal-artwork-blank"
+       title="No artwork for {{ hunt }} yet"
+       data-testid="opal-artwork-blank">?</div>
+{% endif %}

@@ -14,10 +14,13 @@
          class="btn btn-outline-dark">Edit in admin</a>
     </p>
   {% endif %}
+  <div class="float-end ms-3 mb-3">{% include "opal/components/artwork.html" with hunt=hunt size="md" %}</div>
   {% if hunt.story_text %}
     <h2>Introduction</h2>
     {{ hunt.story_text_rendered|safe }}
   {% endif %}
+  {# the puzzle table is full width, so start it below the artwork #}
+  <div class="clearfix"></div>
   <h2>List of puzzles</h2>
   <table class="table table-striped">
     <tr class="table-dark">

@@ -31,21 +31,27 @@
     </div>
   {% endif %}
   <hr />
-  {% if can_attempt %}
-    {% include "otisweb/components/generic_form.html" %}
-  {% elif solved %}
-    <div class="alert alert-success">
-      <h2 class="alert-heading">
-        Answer: <tt>{{ puzzle.answer }}</tt>
-      </h2>
-      Congrats, you solved this puzzle!
-      {% if puzzle.achievement %}
-        <a href="{% url "opal-finish" hunt.slug puzzle.slug %}">It was worth {{ puzzle.achievement.diamonds }}♦️</a>.
+  {# the answer checker is short, so the artwork sits alongside it #}
+  <div class="d-flex flex-column flex-md-row-reverse align-items-md-start gap-3">
+    {% include "opal/components/artwork.html" with hunt=hunt size="sm" %}
+    <div class="flex-grow-1">
+      {% if can_attempt %}
+        {% include "otisweb/components/generic_form.html" %}
+      {% elif solved %}
+        <div class="alert alert-success">
+          <h2 class="alert-heading">
+            Answer: <tt>{{ puzzle.answer }}</tt>
+          </h2>
+          Congrats, you solved this puzzle!
+          {% if puzzle.achievement %}
+            <a href="{% url "opal-finish" hunt.slug puzzle.slug %}">It was worth {{ puzzle.achievement.diamonds }}♦️</a>.
+          {% endif %}
+        </div>
+      {% elif not solved %}
+        <div class="alert alert-danger">You have run out of guesses for this puzzle.</div>
       {% endif %}
     </div>
-  {% elif not solved %}
-    <div class="alert alert-danger">You have run out of guesses for this puzzle.</div>
-  {% endif %}
+  </div>
   <hr />
   {% if show_hints and puzzle.hint_text_rendered %}
     <h3>Hints</h3>

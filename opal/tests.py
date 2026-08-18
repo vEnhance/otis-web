@@ -245,6 +245,71 @@ def test_hunt_list(otis):
 
 
 @pytest.mark.django_db
+def test_artwork_urls():
+    hunt = OpalHuntFactory.create(artwork_slug="opal3")
+    assert hunt.has_artwork
+    assert hunt.artwork_url == "https://gallery.evanchen.cc/webp/opal3.webp"
+    assert (
+        hunt.artwork_thumb_md_url == "https://gallery.evanchen.cc/thumb-md/opal3.webp"
+    )
+    assert (
+        hunt.artwork_thumb_sm_url == "https://gallery.evanchen.cc/thumb-sm/opal3.webp"
+    )
+
+    blank = OpalHuntFactory.create(artwork_slug="")
+    assert not blank.has_artwork
+    assert blank.artwork_url is None
+    assert blank.artwork_thumb_md_url is None
+    assert blank.artwork_thumb_sm_url is None
+
+
+@pytest.mark.django_db
+def test_artwork_display(otis):
+    verified_group = GroupFactory(name="Verified")
+    alice = UserFactory.create(username="alice", groups=(verified_group,))
+    otis.login(alice)
+
+    hunt = OpalHuntFactory.create(slug="withart", artwork_slug="opal3")
+    OpalPuzzleFactory.create(hunt=hunt, slug="puzzle", num_to_unlock=0)
+    blank_hunt = OpalHuntFactory.create(slug="noart", artwork_slug="")
+    OpalPuzzleFactory.create(hunt=blank_hunt, slug="other", num_to_unlock=0)
+
+    # one hunt has artwork and the other gets a placeholder of the same size
+    resp = otis.get_20x("opal-hunt-list")
+    otis.assert_testid(resp, "opal-artwork", count=1)
+    otis.assert_testid(resp, "opal-artwork-blank", count=1)
+    # the thumbnail links to the full-resolution image on the CDN
+    otis.assert_has(resp, "https://gallery.evanchen.cc/webp/opal3.webp")
+
+    resp = otis.get_20x("opal-puzzle-list", "withart")
+    otis.assert_testid(resp, "opal-artwork", count=1)
+    otis.assert_no_testid(resp, "opal-artwork-blank")
+    resp = otis.get_20x("opal-puzzle-list", "noart")
+    otis.assert_testid(resp, "opal-artwork-blank", count=1)
+    otis.assert_no_testid(resp, "opal-artwork")
+
+    resp = otis.get_20x("opal-show-puzzle", "withart", "puzzle")
+    otis.assert_testid(resp, "opal-artwork", count=1)
+    resp = otis.get_20x("opal-show-puzzle", "noart", "other")
+    otis.assert_testid(resp, "opal-artwork-blank", count=1)
+
+    otis.login(UserFactory.create(username="root", is_staff=True, is_superuser=True))
+    resp = otis.get_20x("opal-leaderboard", "withart")
+    otis.assert_testid(resp, "opal-artwork", count=1)
+    resp = otis.get_20x("opal-leaderboard", "noart")
+    otis.assert_testid(resp, "opal-artwork-blank", count=1)
+
+    # the finish page shows the hunt artwork in place of the achievement image
+    otis.login(alice)
+    solved = OpalPuzzleFactory.create(
+        hunt=hunt, slug="solved", achievement=AchievementFactory.create()
+    )
+    OpalAttemptFactory.create(user=alice, puzzle=solved, guess=solved.answer)
+    resp = otis.get_20x("opal-finish", "withart", "solved")
+    otis.assert_testid(resp, "opal-artwork", count=1)
+
+
+@pytest.mark.django_db
 def test_puzzle_list(otis):
     verified_group = GroupFactory(name="Verified")
     alice = UserFactory.create(username="alice", groups=(verified_group,))

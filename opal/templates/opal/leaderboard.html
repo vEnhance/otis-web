@@ -68,6 +68,9 @@
       </tr>
     {% endfor %}
   </table>
+  <div class="d-flex justify-content-center my-4">
+    {% include "opal/components/artwork.html" with hunt=hunt size="lg" %}
+  </div>
 {% endblock layout-content %}
 {% comment %}
 vim: ft=htmldjango

@@ -30,48 +30,54 @@
         {% endif %}
       </p>
     {% elif hunt.has_started %}
-      <div class="alert alert-success">
-        <h2 class="alert-heading">
-          {{ hunt }}
+      <div class="alert alert-success d-flex align-items-start gap-3">
+        {% include "opal/components/artwork.html" with hunt=hunt size="sm" %}
+        <div>
+          <h2 class="alert-heading">
+            {{ hunt }}
+            {% if request.user.is_superuser %}
+              <a href="{% url "admin:opal_opalhunt_change" hunt.pk %}">(edit)</a>
+            {% endif %}
+          </h2>
+          <a class="btn btn-primary" href="{{ hunt.get_absolute_url }}">Show puzzles</a>
           {% if request.user.is_superuser %}
-            <a href="{% url "admin:opal_opalhunt_change" hunt.pk %}">(edit)</a>
+            <a class="btn btn-info" href="{% url "opal-leaderboard" hunt.slug %}">Leaderboard</a>
           {% endif %}
-        </h2>
-        <a class="btn btn-primary" href="{{ hunt.get_absolute_url }}">Show puzzles</a>
-        {% if request.user.is_superuser %}
-          <a class="btn btn-info" href="{% url "opal-leaderboard" hunt.slug %}">Leaderboard</a>
-        {% endif %}
-        <p>Started {{ hunt.start_date }} ({{ hunt.start_date|timesince }} ago).</p>
+          <p class="mb-0 mt-2">Started {{ hunt.start_date }} ({{ hunt.start_date|timesince }} ago).</p>
+        </div>
       </div>
     {% else %}
-      <div class="alert alert-info">
-        <h2 class="alert-heading">{{ hunt }}</h2>
-        <ul>
-          <li>
-            Starts <strong>{{ hunt.start_date }}</strong>
-            (in {{ hunt.start_date|timeuntil }})
-          </li>
-          <li>Author signup deadline: {{ hunt.author_signup_deadline }}</li>
-          <li>Author draft deadline: {{ hunt.author_draft_deadline }}</li>
-          {% if hunt.author_signups_are_open and hunt.author_signup_url %}
+      <div class="alert alert-info d-flex align-items-start gap-3">
+        {% include "opal/components/artwork.html" with hunt=hunt size="sm" %}
+        <div>
+          <h2 class="alert-heading">{{ hunt }}</h2>
+          <ul class="mb-0">
             <li>
-              <a href="{{ hunt.author_signup_url }}">Sign up to contribute a puzzle</a>
+              Starts <strong>{{ hunt.start_date }}</strong>
+              (in {{ hunt.start_date|timeuntil }})
             </li>
-          {% endif %}
-          {% if has_early_access %}
-            <li>
-              <a href="{{ hunt.get_absolute_url }}">(open as testsolver/staff)</a>
-            </li>
-          {% endif %}
-          {% if request.user.is_superuser %}
-            <li>
-              <a href="{% url "opal-leaderboard" hunt.slug %}">(leaderboard)</a>
-            </li>
-            <li>
-              <a href="{% url "admin:opal_opalhunt_change" hunt.pk %}">(edit)</a>
-            </li>
-          {% endif %}
-        </ul>
+            <li>Author signup deadline: {{ hunt.author_signup_deadline }}</li>
+            <li>Author draft deadline: {{ hunt.author_draft_deadline }}</li>
+            {% if hunt.author_signups_are_open and hunt.author_signup_url %}
+              <li>
+                <a href="{{ hunt.author_signup_url }}">Sign up to contribute a puzzle</a>
+              </li>
+            {% endif %}
+            {% if has_early_access %}
+              <li>
+                <a href="{{ hunt.get_absolute_url }}">(open as testsolver/staff)</a>
+              </li>
+            {% endif %}
+            {% if request.user.is_superuser %}
+              <li>
+                <a href="{% url "opal-leaderboard" hunt.slug %}">(leaderboard)</a>
+              </li>
+              <li>
+                <a href="{% url "admin:opal_opalhunt_change" hunt.pk %}">(edit)</a>
+              </li>
+            {% endif %}
+          </ul>
+        </div>
       </div>
     {% endif %}
   {% endfor %}
