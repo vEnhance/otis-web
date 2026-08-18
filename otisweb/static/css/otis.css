@@ -360,3 +360,13 @@ img.emoji {
 .oime-upvote-btn:active {
   transform: scale(0.95);
 }
+
+/* OIME proposal table collapse toggle */
+.oime-table-toggle::before {
+  content: "▾ ";
+  display: inline-block;
+  width: 1.2rem;
+}
+.oime-table-toggle.collapsed::before {
+  content: "▸ ";
+}
