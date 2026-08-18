@@ -48,26 +48,40 @@ from .admin import ApplyUUIDIEResource
 UTC = datetime.UTC
 
 
+def lookup_user(username: str, first: str, last: str, **kwargs: bool) -> User:
+    """UserFactory with every field the lookup view searches pinned.
+
+    The view matches username, email, first name and last name, so faker's
+    random names would otherwise collide with a short query like "BO" and
+    make the result counts in test_user_lookup flaky.
+    """
+    return UserFactory.create(
+        username=username,
+        email=f"{username}@example.com",
+        first_name=first,
+        last_name=last,
+        **kwargs,
+    )
+
+
 @pytest.mark.django_db
 def test_user_lookup(otis) -> None:
-    admin: User = UserFactory.create(is_superuser=True, is_staff=True)
-    regular_user: User = UserFactory.create()
-    staff_only: User = UserFactory.create(is_staff=True)
+    admin: User = lookup_user("admin", "Ada", "Min", is_superuser=True, is_staff=True)
+    regular_user: User = lookup_user("regular", "Reg", "Ular")
+    staff_only: User = lookup_user("staffer", "Stef", "Ann", is_staff=True)
     semester_old: Semester = SemesterFactory.create(end_year=2025)
     semester_new: Semester = SemesterFactory.create(end_year=2026)
 
     # Create students with different emails and semesters
-    alice: User = UserFactory.create(
-        username="alice", email="alice@example.com", first_name="Alice"
-    )
+    alice: User = lookup_user("alice", "Alice", "Adams")
     StudentFactory.create(user=alice, semester=semester_old)
     alice_new: Student = StudentFactory.create(user=alice, semester=semester_new)
 
-    bob: User = UserFactory.create(username="bob", email="bob@example.com")
+    bob: User = lookup_user("bob", "Bob", "Byrne")
     bob_student: Student = StudentFactory.create(user=bob, semester=semester_new)
 
     # A user with no Student instance at all should still show up.
-    carl: User = UserFactory.create(username="carl", email="carl@example.com")
+    carl: User = lookup_user("carl", "Carl", "Chen")
 
     SocialAccount.objects.create(
         user=bob,
