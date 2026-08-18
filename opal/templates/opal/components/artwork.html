@@ -7,10 +7,11 @@
   depend on the artwork existing yet.
 {% endcomment %}
 {% if hunt.has_artwork %}
-  <a href="{{ hunt.artwork_url }}"
+  {# the link carries the size, since it and not the image is the flex item #}
+  <a class="opal-artwork opal-artwork-{{ size }}"
+     href="{{ hunt.artwork_url }}"
      title="Full-resolution artwork for {{ hunt }}">
-    <img class="opal-artwork opal-artwork-{{ size }}"
-         src="{% if size == "sm" %}{{ hunt.artwork_thumb_sm_url }}{% else %}{{ hunt.artwork_thumb_md_url }}{% endif %}"
+    <img src="{% if size == "sm" %}{{ hunt.artwork_thumb_sm_url }}{% else %}{{ hunt.artwork_thumb_md_url }}{% endif %}"
          alt="Artwork for {{ hunt }}"
          data-testid="opal-artwork" />
   </a>
