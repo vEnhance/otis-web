@@ -98,7 +98,7 @@ class Semester(models.Model):
 
 # Base URL for the artwork CDN. For a unit group with slug SLUG, the artwork
 # lives at <ARTWORK_CDN_BASE>/webp/SLUG.webp (full size), and the square
-# thumbnails at <ARTWORK_CDN_BASE>/thumb-md/SLUG.webp (226x226) and
+# thumbnails at <ARTWORK_CDN_BASE>/thumb-md/SLUG.webp (384x384) and
 # <ARTWORK_CDN_BASE>/thumb-sm/SLUG.webp (104x104).
 ARTWORK_CDN_BASE = "https://gallery.evanchen.cc"
 
@@ -190,7 +190,7 @@ class UnitGroup(models.Model):
 
     @property
     def artwork_thumb_md_url(self) -> str | None:
-        """226x226 thumbnail URL on the CDN, or None if unfinished."""
+        """384x384 thumbnail URL on the CDN, or None if unfinished."""
         if not self.has_artwork:
             return None
         return f"{ARTWORK_CDN_BASE}/thumb-md/{self.slug}.webp"
