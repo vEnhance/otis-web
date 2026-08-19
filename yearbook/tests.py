@@ -1,6 +1,7 @@
 import pytest
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from freezegun.api import freeze_time
 
 from core.factories import GroupFactory, SemesterFactory, UserFactory
 from roster.country_abbrevs import (
@@ -11,6 +12,7 @@ from roster.country_abbrevs import (
 from roster.factories import StudentFactory
 from yearbook.factories import YearbookEntryFactory
 from yearbook.models import YearbookEntry
+from yearbook.views import ENTRIES_PER_PAGE, NUM_RANDOM_ENTRIES
 
 
 def test_country_flag():
@@ -38,6 +40,7 @@ def test_country_imo_url():
 
 @pytest.mark.django_db
 def test_yearbook_requires_verified(otis):
+    otis.get_login_redirect("yearbook-index")
     otis.get_login_redirect("yearbook-list")
     otis.get_login_redirect("yearbook-create")
 
@@ -45,13 +48,14 @@ def test_yearbook_requires_verified(otis):
     entry = YearbookEntryFactory(tagline="just another otter")
 
     otis.login(rando)
+    otis.get_denied("yearbook-index")
     otis.get_denied("yearbook-list")
     otis.get_denied("yearbook-create")
     otis.get_denied("yearbook-detail", entry.pk)
 
 
 @pytest.mark.django_db
-def test_yearbook_listing(otis):
+def test_yearbook_list_shows_cards(otis):
     verified_group = GroupFactory(name="Verified")
     alice: User = UserFactory(
         username="alice",
@@ -75,6 +79,134 @@ def test_yearbook_listing(otis):
     otis.assert_has(resp, 'aria-label="Australia"')
     # the policy warning lives on the create form, not on the listing
     otis.assert_no_testid(resp, "yearbook-real-names-warning")
+
+
+@pytest.mark.django_db
+def test_yearbook_list_paginates(otis):
+    verified_group = GroupFactory(name="Verified")
+    zoe: User = UserFactory(
+        username="zoe", first_name="Zoe", last_name="Zebra", groups=(verified_group,)
+    )
+    zoe_entry = YearbookEntryFactory(user=zoe)
+    for i in range(24):
+        YearbookEntryFactory(
+            user=UserFactory(
+                username=f"otter{i:02d}",
+                first_name=f"Otter{i:02d}",
+                last_name="Otterson",
+            )
+        )
+    otis.login(zoe)
+
+    resp = otis.get_20x("yearbook-list")
+    assert resp.context["paginator"].count == 25
+    assert len(resp.context["entries"]) == ENTRIES_PER_PAGE
+    assert resp.context["page_obj"].number == 1
+
+    resp = otis.get_20x("yearbook-list", data={"page": 2})
+    assert len(resp.context["entries"]) == 25 - ENTRIES_PER_PAGE
+    # the list is alphabetical, so Zoe Zebra is on the last page
+    assert zoe_entry in resp.context["entries"]
+
+
+@pytest.mark.django_db
+def test_yearbook_index(otis):
+    verified_group = GroupFactory(name="Verified")
+    alice: User = UserFactory(
+        username="alice",
+        first_name="Alice",
+        last_name="Aardvark",
+        groups=(verified_group,),
+    )
+    bob: User = UserFactory(
+        username="bob", first_name="Bob", last_name="Bobson", groups=(verified_group,)
+    )
+    gm: User = UserFactory(
+        username="gm", first_name="Game", last_name="Master", is_superuser=True
+    )
+    alice_entry = YearbookEntryFactory(user=alice, tagline="just another otter")
+    bob_entry = YearbookEntryFactory(user=bob)
+    gm_entry = YearbookEntryFactory(user=gm)
+    otis.login(alice)
+
+    resp = otis.get_20x("yearbook-index")
+    assert resp.context["num_entries"] == 3
+    # the picker offers every entry this person may open
+    assert set(resp.context["all_entries"]) == {alice_entry, bob_entry, gm_entry}
+    otis.assert_testid(resp, "yearbook-jump")
+    # the viewer's own entry gets a section of its own, as a single card
+    assert resp.context["own_entry"] == alice_entry
+    assert resp.context["own_entries"] == [alice_entry]
+    otis.assert_no_testid(resp, "yearbook-no-own-entry")
+    # so do the game masters
+    assert resp.context["gm_entries"] == [gm_entry]
+    # the index is a way in, not the whole yearbook: the full list lives
+    # behind its own paginated page
+    otis.assert_has(resp, otis.url("yearbook-list"))
+
+
+@pytest.mark.django_db
+def test_yearbook_index_without_own_entry(otis):
+    verified_group = GroupFactory(name="Verified")
+    nemo: User = UserFactory(username="nemo", groups=(verified_group,))
+    YearbookEntryFactory()
+    otis.login(nemo)
+
+    resp = otis.get_20x("yearbook-index")
+    assert resp.context["own_entry"] is None
+    assert resp.context["own_entries"] == []
+    otis.assert_testid(resp, "yearbook-no-own-entry")
+
+
+@pytest.mark.django_db
+def test_yearbook_index_random_entries_of_the_day(otis):
+    verified_group = GroupFactory(name="Verified")
+    olive: User = UserFactory(username="olive", groups=(verified_group,))
+    for i in range(20):
+        YearbookEntryFactory(
+            user=UserFactory(
+                username=f"otter{i:02d}",
+                first_name=f"Otter{i:02d}",
+                last_name="Otterson",
+            )
+        )
+    otis.login(olive)
+
+    with freeze_time("2026-08-19 23:30:00"):
+        sample = otis.get_20x("yearbook-index").context["random_entries"]
+        assert len(sample) == NUM_RANDOM_ENTRIES
+        # the sample holds still rather than reshuffling on every page load
+        assert otis.get_20x("yearbook-index").context["random_entries"] == sample
+
+    # ...and rolls over at 0:00 UTC, not at local midnight
+    with freeze_time("2026-08-20 00:30:00"):
+        assert otis.get_20x("yearbook-index").context["random_entries"] != sample
+
+
+@pytest.mark.django_db
+def test_yearbook_index_never_features_drafts(otis):
+    verified_group = GroupFactory(name="Verified")
+    quinn: User = UserFactory(username="quinn", groups=(verified_group,))
+    staffer: User = UserFactory(username="staffer", is_staff=True)
+    shy_gm: User = UserFactory(username="shygm", is_superuser=True)
+    published = YearbookEntryFactory()
+    own_draft = YearbookEntryFactory(user=quinn, is_draft=True)
+    gm_draft = YearbookEntryFactory(user=shy_gm, is_draft=True)
+
+    # your own draft is yours to see, but it is not shown off to anybody
+    otis.login(quinn)
+    resp = otis.get_20x("yearbook-index")
+    assert resp.context["own_entry"] == own_draft
+    assert resp.context["random_entries"] == [published]
+    assert resp.context["gm_entries"] == []
+
+    # not even staff, who can see the drafts everywhere else
+    otis.login(staffer)
+    resp = otis.get_20x("yearbook-index")
+    assert own_draft in resp.context["all_entries"]
+    assert gm_draft in resp.context["all_entries"]
+    assert resp.context["random_entries"] == [published]
+    assert resp.context["gm_entries"] == []
 
 
 @pytest.mark.django_db

@@ -1,60 +1,23 @@
 {% extends "layout.html" %}
 {% load static %}
+{% load django_bootstrap5 %}
 {% block title %}
-  OTIS yearbook
+  All yearbook entries
 {% endblock title %}
 {% block css %}
   <link href="{% static 'yearbook/yearbook.css' %}" rel="stylesheet" />
 {% endblock css %}
 {% block layout-content %}
-  <p>A list of past and present otters.</p>
-  {% if own_entry %}
-    <p class="text-center">
-      <a href="{{ own_entry.get_absolute_url }}" class="btn btn-primary">Your page</a>
-      &nbsp;
-      <a href="{% url "yearbook-update" %}" class="btn btn-outline-primary">Edit your entry</a>
-    </p>
-  {% else %}
-    <p class="text-center">
-      <a href="{% url "yearbook-create" %}" class="btn btn-success">Sign the yearbook</a>
-    </p>
+  <p>
+    All <b>{{ paginator.count }}</b> {{ paginator.count|pluralize:"entry,entries" }} in the yearbook,
+    in alphabetical order.
+  </p>
+  {% include "yearbook/components/entry_list.html" with empty_message="Nobody has signed the yearbook yet. Be the first!" %}
+  {% if page_obj.has_other_pages %}
+    {% bootstrap_pagination page_obj justify_content="center" %}
   {% endif %}
   <hr />
-  {% if entries %}
-    <p>
-      <b>{{ entries|length }}</b> {{ entries|length|pluralize:"person,people" }} in the yearbook.
-    </p>
-    <div class="yearbook-grid">
-      {% for entry in entries %}
-        <a class="yearbook-card" href="{{ entry.get_absolute_url }}">
-          {% if entry.avatar %}
-            <img class="yearbook-avatar"
-                 src="{{ entry.avatar.url }}"
-                 width="56"
-                 height="56"
-                 alt="Avatar for {{ entry.name }}" />
-          {% else %}
-            <span class="yearbook-avatar yearbook-avatar-blank" aria-hidden="true">🦦</span>
-          {% endif %}
-          <span class="yearbook-card-body">
-            <span class="yearbook-card-name">
-              {% if entry.country %}
-                <span role="img"
-                      title="{{ entry.country_name }}"
-                      aria-label="{{ entry.country_name }}">{{ entry.country_flag }}</span>
-              {% endif %}
-              {{ entry.name }}
-              {% if entry.graduation_year %}
-                <span class="yearbook-card-classof">’{{ entry.graduation_year_short }}</span>
-              {% endif %}
-              {% if entry.is_draft %}<span class="yearbook-draft-badge" data-testid="yearbook-draft-badge">Draft</span>{% endif %}
-            </span>
-            {% if entry.tagline %}<span class="yearbook-card-tagline">{{ entry.tagline }}</span>{% endif %}
-          </span>
-        </a>
-      {% endfor %}
-    </div>
-  {% else %}
-    <p class="fst-italic">Nobody has signed the yearbook yet. Be the first!</p>
-  {% endif %}
+  <p>
+    <a href="{% url "yearbook-index" %}">Back to the yearbook</a>
+  </p>
 {% endblock layout-content %}
