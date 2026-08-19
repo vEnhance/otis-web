@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+{% load static %}
+{% block title %}
+  OTIS yearbook
+{% endblock title %}
+{% block css %}
+  <link href="{% static 'yearbook/yearbook.css' %}" rel="stylesheet" />
+{% endblock css %}
+{% block layout-content %}
+  <p>
+    A list of past and present otters.
+    Currently <b data-testid="yearbook-count">{{ num_entries }}</b> {{ num_entries|pluralize:"entry,entries" }}.
+  </p>
+  <h2>Lookup</h2>
+  <p>
+    You can <a href="{% url "yearbook-list" %}">browse all entries in alphabetical order</a>,
+    or look for a specific entry below:
+  </p>
+  {% include "otisweb/components/generic_form.html" with form=lookup_form target=lookup_url submit_name="Look up" btn_class="btn-primary" %}
+  <h2>
+    Your entry
+    {% if own_entry %}
+      <a class="fs-6" href="{% url "yearbook-update" %}">(edit)</a>
+    {% else %}
+      <a class="fs-6" href="{% url "yearbook-create" %}">(create)</a>
+    {% endif %}
+  </h2>
+  {% if own_entry %}
+    {% include "yearbook/components/entry_list.html" with entries=own_entries %}
+  {% else %}
+    <p class="fst-italic" data-testid="yearbook-no-own-entry">
+      You have not created an entry yet.
+      <a href="{% url "yearbook-create" %}">Add one now.</a>
+    </p>
+  {% endif %}
+  <h2>Random entries of the day</h2>
+  <p>Resets daily at 0:00 UTC.</p>
+  {% include "yearbook/components/entry_list.html" with entries=random_entries empty_message="Nothing to show here today; check back tomorrow." %}
+  <h2>GM entries</h2>
+  <p>Here are entries from game masters.</p>
+  {% include "yearbook/components/entry_list.html" with entries=gm_entries empty_message="No game master has signed the yearbook yet." %}
+{% endblock layout-content %}
+{% block scripts %}
+  <script type="text/javascript">
+      $(() => {
+          $("#id_entry").chosen({
+              width: "100%",
+              // search_contains so that typing a last name finds the entry too
+              search_contains: true,
+          });
+      });
+  </script>
+{% endblock scripts %}

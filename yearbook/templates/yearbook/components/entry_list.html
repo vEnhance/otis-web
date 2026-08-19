@@ -1,0 +1,39 @@
+{% comment %}
+  A grid of yearbook cards, used everywhere entries are listed.
+  Takes `entries` (any iterable of YearbookEntry), and optionally an
+  `empty_message` to show in its place when there are none.
+{% endcomment %}
+{% if entries %}
+  <div class="yearbook-grid">
+    {% for entry in entries %}
+      <a class="yearbook-card" href="{{ entry.get_absolute_url }}">
+        {% if entry.avatar %}
+          <img class="yearbook-avatar"
+               src="{{ entry.avatar.url }}"
+               width="56"
+               height="56"
+               alt="Avatar for {{ entry.name }}" />
+        {% else %}
+          <span class="yearbook-avatar yearbook-avatar-blank" aria-hidden="true">🦦</span>
+        {% endif %}
+        <span class="yearbook-card-body">
+          <span class="yearbook-card-name">
+            {% if entry.country %}
+              <span role="img"
+                    title="{{ entry.country_name }}"
+                    aria-label="{{ entry.country_name }}">{{ entry.country_flag }}</span>
+            {% endif %}
+            {{ entry.name }}
+            {% if entry.graduation_year %}
+              <span class="yearbook-card-classof">’{{ entry.graduation_year_short }}</span>
+            {% endif %}
+            {% if entry.is_draft %}<span class="yearbook-draft-badge" data-testid="yearbook-draft-badge">Draft</span>{% endif %}
+          </span>
+          {% if entry.tagline %}<span class="yearbook-card-tagline">{{ entry.tagline }}</span>{% endif %}
+        </span>
+      </a>
+    {% endfor %}
+  </div>
+{% else %}
+  <p class="fst-italic" data-testid="yearbook-empty-list">{{ empty_message|default:"No entries here yet." }}</p>
+{% endif %}
