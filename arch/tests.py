@@ -213,6 +213,12 @@ def test_vote(otis):
 
 
 @pytest.mark.django_db
+def test_vote_anonymous(otis):
+    problem: Problem = ProblemFactory.create()
+    otis.get_login_redirect("vote-create", problem.puid)
+
+
+@pytest.mark.django_db
 def test_lookup(otis):
     verified_group = GroupFactory(name="Verified")
     alice = UserFactory.create(groups=(verified_group,))
