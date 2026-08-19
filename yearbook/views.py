@@ -4,11 +4,12 @@ from typing import Any
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.db.models.query import QuerySet
+from django.http.request import HttpRequest
 from django.http.response import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
-from django.views.generic.base import TemplateView
+from django.views.generic.base import TemplateView, View
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic.list import ListView
@@ -89,6 +90,25 @@ class YearbookIndex(VerifiedRequiredMixin, TemplateView):
             entries.filter(is_draft=False, user__is_superuser=True)
         )
         return context
+
+
+class YearbookJump(VerifiedRequiredMixin, View):
+    """Sends the index's entry picker to the entry that was picked.
+
+    A GET form can only put the choice in the query string, so something has to
+    turn it into that entry's own URL. Doing that in JavaScript instead would
+    mean navigating to a URL read back out of the page, which reads as an open
+    redirect (and trips CodeQL) even when every option on the page is ours."""
+
+    def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        del args, kwargs
+        assert isinstance(request.user, User)
+        pk = request.GET.get("pk", "")
+        if not pk.isdigit():
+            # Submitting the picker without choosing anybody means "stay here"
+            return HttpResponseRedirect(reverse("yearbook-index"))
+        entry = get_object_or_404(YearbookEntry.visible_to(request.user), pk=pk)
+        return HttpResponseRedirect(entry.get_absolute_url())
 
 
 class YearbookList(VerifiedRequiredMixin, ListView[YearbookEntry]):

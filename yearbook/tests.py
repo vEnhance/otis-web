@@ -42,6 +42,7 @@ def test_country_imo_url():
 def test_yearbook_requires_verified(otis):
     otis.get_login_redirect("yearbook-index")
     otis.get_login_redirect("yearbook-list")
+    otis.get_login_redirect("yearbook-jump")
     otis.get_login_redirect("yearbook-create")
 
     rando: User = UserFactory(username="rando")
@@ -50,6 +51,7 @@ def test_yearbook_requires_verified(otis):
     otis.login(rando)
     otis.get_denied("yearbook-index")
     otis.get_denied("yearbook-list")
+    otis.get_denied("yearbook-jump")
     otis.get_denied("yearbook-create")
     otis.get_denied("yearbook-detail", entry.pk)
 
@@ -107,6 +109,31 @@ def test_yearbook_list_paginates(otis):
     assert len(resp.context["entries"]) == 25 - ENTRIES_PER_PAGE
     # the list is alphabetical, so Zoe Zebra is on the last page
     assert zoe_entry in resp.context["entries"]
+
+
+@pytest.mark.django_db
+def test_yearbook_jump(otis):
+    verified_group = GroupFactory(name="Verified")
+    reader: User = UserFactory(username="reader", groups=(verified_group,))
+    shy: User = UserFactory(username="shy", groups=(verified_group,))
+    entry = YearbookEntryFactory()
+    draft = YearbookEntryFactory(user=shy, is_draft=True)
+    otis.login(reader)
+
+    resp = otis.get_30x("yearbook-jump", data={"pk": entry.pk})
+    otis.assert_redirects(resp, entry.get_absolute_url())
+
+    # submitting the picker without picking anybody stays on the index
+    index_url = otis.url("yearbook-index")
+    otis.assert_redirects(otis.get_30x("yearbook-jump"), index_url)
+    otis.assert_redirects(otis.get_30x("yearbook-jump", data={"pk": ""}), index_url)
+    otis.assert_redirects(
+        otis.get_30x("yearbook-jump", data={"pk": "otter"}), index_url
+    )
+
+    # the picker is no way around the draft rules
+    otis.get_not_found("yearbook-jump", data={"pk": draft.pk})
+    otis.get_not_found("yearbook-jump", data={"pk": draft.pk + 1000})
 
 
 @pytest.mark.django_db

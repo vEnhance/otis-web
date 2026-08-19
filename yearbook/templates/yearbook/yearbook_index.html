@@ -16,20 +16,28 @@
     You can <a href="{% url "yearbook-list" %}">browse all entries in alphabetical order</a>,
     or look for a specific entry below:
   </p>
-  <p>
-    <select id="yearbook-jump"
-            data-testid="yearbook-jump"
-            class="form-select"
-            aria-label="Jump to a yearbook entry">
-      <option value="">Search for a name...</option>
-      {% for entry in all_entries %}
-        <option value="{{ entry.get_absolute_url }}">
-          {{ entry.name }}
-          {% if entry.tagline %}({{ entry.tagline }}){% endif %}
-        </option>
-      {% endfor %}
-    </select>
-  </p>
+  <form method="get" action="{% url "yearbook-jump" %}">
+    <p>
+      <select id="yearbook-jump"
+              name="pk"
+              data-testid="yearbook-jump"
+              class="form-select"
+              aria-label="Jump to a yearbook entry">
+        <option value="">Search for a name...</option>
+        {% for entry in all_entries %}
+          <option value="{{ entry.pk }}">
+            {{ entry.name }}
+            {% if entry.tagline %}({{ entry.tagline }}){% endif %}
+          </option>
+        {% endfor %}
+      </select>
+    </p>
+    <noscript>
+      <p>
+        <button type="submit" class="btn btn-primary">Go</button>
+      </p>
+    </noscript>
+  </form>
   <h2>
     Your entry
     {% if own_entry %}
@@ -62,12 +70,10 @@
               width: "100%",
               search_contains: true
           });
+          // The form is what navigates: the page never reads a URL back out
+          // of itself, it just submits the pk to the yearbook-jump view
           $jump.on("change", () => {
-              const url = $jump.val();
-              // Only allow same-site relative paths from the select options.
-              if (typeof url === "string" && /^\/(?!\/)/.test(url)) {
-                  window.location.href = url;
-              }
+              $jump.closest("form").submit();
           });
       });
   </script>
