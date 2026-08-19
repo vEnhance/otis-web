@@ -11,6 +11,7 @@
     A list of past and present otters.
     Currently <b data-testid="yearbook-count">{{ num_entries }}</b> {{ num_entries|pluralize:"entry,entries" }}.
   </p>
+  <h2>Lookup</h2>
   <p>
     You can <a href="{% url "yearbook-list" %}">browse all entries in alphabetical order</a>,
     or look for a specific entry below:
@@ -22,7 +23,10 @@
             aria-label="Jump to a yearbook entry">
       <option value="">Search for a name...</option>
       {% for entry in all_entries %}
-        <option value="{{ entry.get_absolute_url }}">{{ entry.name }}{% if entry.tagline %} ({{ entry.tagline }}){% endif %}</option>
+        <option value="{{ entry.get_absolute_url }}">
+          {{ entry.name }}
+          {% if entry.tagline %}({{ entry.tagline }}){% endif %}
+        </option>
       {% endfor %}
     </select>
   </p>
@@ -43,10 +47,7 @@
     </p>
   {% endif %}
   <h2>Random entries of the day</h2>
-  <p>
-    Here {{ random_entries|length|pluralize:"is,are" }} {{ random_entries|length }} randomly selected
-    {{ random_entries|length|pluralize:"entry,entries" }} from the yearbook. Resets daily at 0:00 UTC.
-  </p>
+  <p>Resets daily at 0:00 UTC.</p>
   {% include "yearbook/components/entry_list.html" with entries=random_entries empty_message="Nobody has signed the yearbook yet. Be the first!" %}
   <h2>GM entries</h2>
   <p>Here are entries from game masters.</p>
