@@ -31,15 +31,28 @@ def get_own_entry(user: User) -> YearbookEntry | None:
 def entries_of_the_day(
     queryset: QuerySet[YearbookEntry], count: int = NUM_RANDOM_ENTRIES
 ) -> list[YearbookEntry]:
-    """A sample of at most `count` entries drawn from `queryset`.
+    """The first `count` published entries of a shuffle of `queryset`.
 
-    Seeded on the current UTC date, so that the sample holds still for the day
-    instead of reshuffling on every page load, and so that everyone browsing on
-    the same day is looking at the same entries."""
-    pks = sorted(queryset.values_list("pk", flat=True))
-    rng = random.Random(timezone.now().date().toordinal())
-    sampled = rng.sample(pks, min(count, len(pks)))
-    return list(queryset.filter(pk__in=sampled))
+    Everything about the draw is pinned to the current UTC day, so that the
+    entries somebody sees this morning are still there this evening: the seed
+    is today's date, and the entries taking part are the ones that already
+    existed when the day started.
+
+    That way, what other people do today cannot reshuffle today's draw.
+    Somebody signing the yearbook this afternoon would otherwise change
+    everyone else's five; instead their entry joins the shuffle tomorrow.
+    Drafts take part in the shuffle too, and are skipped when reading the five
+    off the front of it, so that taking your own entry out of the yearbook
+    leaves everyone else's where they were rather than dealing a new hand."""
+    day_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    # The pk list has to be read out anyway to shuffle it, so `is_draft` comes
+    # along for the ride rather than costing a query of its own.
+    rows = sorted(
+        queryset.filter(created_at__lt=day_start).values_list("pk", "is_draft")
+    )
+    random.Random(day_start.date().toordinal()).shuffle(rows)
+    pks = [pk for pk, is_draft in rows if not is_draft][:count]
+    return list(queryset.filter(pk__in=pks))
 
 
 class YearbookIndex(VerifiedRequiredMixin, TemplateView):
@@ -70,9 +83,11 @@ class YearbookIndex(VerifiedRequiredMixin, TemplateView):
 
         # The featured sections are the same for everybody, so drafts stay out
         # of them: nobody's unfinished page gets shown off, not even to staff.
-        published = YearbookEntry.objects.filter(is_draft=False).select_related("user")
-        context["random_entries"] = entries_of_the_day(published)
-        context["gm_entries"] = list(published.filter(user__is_superuser=True))
+        entries = YearbookEntry.objects.select_related("user")
+        context["random_entries"] = entries_of_the_day(entries)
+        context["gm_entries"] = list(
+            entries.filter(is_draft=False, user__is_superuser=True)
+        )
         return context
 
 

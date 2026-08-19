@@ -48,7 +48,7 @@
   {% endif %}
   <h2>Random entries of the day</h2>
   <p>Resets daily at 0:00 UTC.</p>
-  {% include "yearbook/components/entry_list.html" with entries=random_entries empty_message="Nobody has signed the yearbook yet. Be the first!" %}
+  {% include "yearbook/components/entry_list.html" with entries=random_entries empty_message="Nothing to show here today; check back tomorrow." %}
   <h2>GM entries</h2>
   <p>Here are entries from game masters.</p>
   {% include "yearbook/components/entry_list.html" with entries=gm_entries empty_message="No game master has signed the yearbook yet." %}

@@ -162,24 +162,45 @@ def test_yearbook_index_without_own_entry(otis):
 def test_yearbook_index_random_entries_of_the_day(otis):
     verified_group = GroupFactory(name="Verified")
     olive: User = UserFactory(username="olive", groups=(verified_group,))
-    for i in range(20):
-        YearbookEntryFactory(
-            user=UserFactory(
-                username=f"otter{i:02d}",
-                first_name=f"Otter{i:02d}",
-                last_name="Otterson",
+    with freeze_time("2026-08-18 12:00:00"):
+        for i in range(20):
+            YearbookEntryFactory(
+                user=UserFactory(
+                    username=f"otter{i:02d}",
+                    first_name=f"Otter{i:02d}",
+                    last_name="Otterson",
+                )
             )
-        )
-    otis.login(olive)
 
     with freeze_time("2026-08-19 23:30:00"):
+        otis.login(olive)
         sample = otis.get_20x("yearbook-index").context["random_entries"]
         assert len(sample) == NUM_RANDOM_ENTRIES
         # the sample holds still rather than reshuffling on every page load
         assert otis.get_20x("yearbook-index").context["random_entries"] == sample
 
-    # ...and rolls over at 0:00 UTC, not at local midnight
+        # signing the yearbook today doesn't reshuffle today's five; the new
+        # entry becomes eligible tomorrow
+        newcomer = YearbookEntryFactory(
+            user=UserFactory(username="newbie", first_name="New", last_name="Comer")
+        )
+        resp = otis.get_20x("yearbook-index")
+        assert newcomer not in resp.context["random_entries"]
+        assert resp.context["random_entries"] == sample
+
+        # taking your entry out of the yearbook doesn't reshuffle it either:
+        # it is skipped over, and the other four stay where they are
+        dropped = sample[0]
+        dropped.is_draft = True
+        dropped.save()
+        new_sample = otis.get_20x("yearbook-index").context["random_entries"]
+        assert dropped not in new_sample
+        assert len(new_sample) == NUM_RANDOM_ENTRIES
+        assert set(sample[1:]) < set(new_sample)
+
+    # ...and it rolls over at 0:00 UTC, not at local midnight
     with freeze_time("2026-08-20 00:30:00"):
+        otis.login(olive)
         assert otis.get_20x("yearbook-index").context["random_entries"] != sample
 
 
@@ -189,24 +210,26 @@ def test_yearbook_index_never_features_drafts(otis):
     quinn: User = UserFactory(username="quinn", groups=(verified_group,))
     staffer: User = UserFactory(username="staffer", is_staff=True)
     shy_gm: User = UserFactory(username="shygm", is_superuser=True)
-    published = YearbookEntryFactory()
-    own_draft = YearbookEntryFactory(user=quinn, is_draft=True)
-    gm_draft = YearbookEntryFactory(user=shy_gm, is_draft=True)
+    with freeze_time("2026-08-18 12:00:00"):
+        published = YearbookEntryFactory()
+        own_draft = YearbookEntryFactory(user=quinn, is_draft=True)
+        gm_draft = YearbookEntryFactory(user=shy_gm, is_draft=True)
 
-    # your own draft is yours to see, but it is not shown off to anybody
-    otis.login(quinn)
-    resp = otis.get_20x("yearbook-index")
-    assert resp.context["own_entry"] == own_draft
-    assert resp.context["random_entries"] == [published]
-    assert resp.context["gm_entries"] == []
+    with freeze_time("2026-08-19 12:00:00"):
+        # your own draft is yours to see, but it is not shown off to anybody
+        otis.login(quinn)
+        resp = otis.get_20x("yearbook-index")
+        assert resp.context["own_entry"] == own_draft
+        assert resp.context["random_entries"] == [published]
+        assert resp.context["gm_entries"] == []
 
-    # not even staff, who can see the drafts everywhere else
-    otis.login(staffer)
-    resp = otis.get_20x("yearbook-index")
-    assert own_draft in resp.context["all_entries"]
-    assert gm_draft in resp.context["all_entries"]
-    assert resp.context["random_entries"] == [published]
-    assert resp.context["gm_entries"] == []
+        # not even staff, who can see the drafts everywhere else
+        otis.login(staffer)
+        resp = otis.get_20x("yearbook-index")
+        assert own_draft in resp.context["all_entries"]
+        assert gm_draft in resp.context["all_entries"]
+        assert resp.context["random_entries"] == [published]
+        assert resp.context["gm_entries"] == []
 
 
 @pytest.mark.django_db
