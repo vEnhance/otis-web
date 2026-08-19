@@ -16,28 +16,7 @@
     You can <a href="{% url "yearbook-list" %}">browse all entries in alphabetical order</a>,
     or look for a specific entry below:
   </p>
-  <form method="get" action="{% url "yearbook-jump" %}">
-    <p>
-      <select id="yearbook-jump"
-              name="pk"
-              data-testid="yearbook-jump"
-              class="form-select"
-              aria-label="Jump to a yearbook entry">
-        <option value="">Search for a name...</option>
-        {% for entry in all_entries %}
-          <option value="{{ entry.pk }}">
-            {{ entry.name }}
-            {% if entry.tagline %}({{ entry.tagline }}){% endif %}
-          </option>
-        {% endfor %}
-      </select>
-    </p>
-    <noscript>
-      <p>
-        <button type="submit" class="btn btn-primary">Go</button>
-      </p>
-    </noscript>
-  </form>
+  {% include "otisweb/components/generic_form.html" with form=lookup_form target=lookup_url submit_name="Look up" btn_class="btn-primary" %}
   <h2>
     Your entry
     {% if own_entry %}
@@ -64,16 +43,10 @@
 {% block scripts %}
   <script type="text/javascript">
       $(() => {
-          const $jump = $("#yearbook-jump");
-          // search_contains so that typing a last name finds the entry too
-          $jump.chosen({
+          $("#id_entry").chosen({
               width: "100%",
-              search_contains: true
-          });
-          // The form is what navigates: the page never reads a URL back out
-          // of itself, it just submits the pk to the yearbook-jump view
-          $jump.on("change", () => {
-              $jump.closest("form").submit();
+              // search_contains so that typing a last name finds the entry too
+              search_contains: true,
           });
       });
   </script>

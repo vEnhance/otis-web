@@ -1,6 +1,7 @@
 from typing import Any
 
 from django import forms
+from django.db.models.query import QuerySet
 from django.forms.boundfield import BoundField
 
 from .models import YearbookEntry
@@ -54,3 +55,34 @@ class YearbookEntryForm(forms.ModelForm):
     @property
     def contact_fields(self) -> list[BoundField]:
         return [self[name] for name in CONTACT_FIELDS]
+
+
+class YearbookEntryChoiceField(forms.ModelChoiceField):
+    """Labels the picker's options the way the cards read.
+
+    The label is also what the search box matches against, so it has to be the
+    person's name rather than `str(entry)`."""
+
+    def label_from_instance(self, obj: Any) -> str:
+        assert isinstance(obj, YearbookEntry)
+        return f"{obj.name} ({obj.tagline})" if obj.tagline else obj.name
+
+
+class YearbookEntrySelectForm(forms.Form):
+    """The index's jump-to-an-entry picker.
+
+    The choices are per-viewer, since a draft is only in the yearbook for its
+    author and for staff; picking one that isn't yours to see is the same
+    non-answer as picking nobody."""
+
+    entry = YearbookEntryChoiceField(
+        queryset=YearbookEntry.objects.none(),
+        label="Entry",
+        empty_label="Search for a name...",
+    )
+
+    def __init__(self, queryset: QuerySet[YearbookEntry], *args: Any, **kwargs: Any):
+        super().__init__(*args, **kwargs)
+        field = self.fields["entry"]
+        assert isinstance(field, YearbookEntryChoiceField)
+        field.queryset = queryset

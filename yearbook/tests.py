@@ -116,24 +116,32 @@ def test_yearbook_jump(otis):
     verified_group = GroupFactory(name="Verified")
     reader: User = UserFactory(username="reader", groups=(verified_group,))
     shy: User = UserFactory(username="shy", groups=(verified_group,))
-    entry = YearbookEntryFactory()
+    entry = YearbookEntryFactory(tagline="fond of ducks")
     draft = YearbookEntryFactory(user=shy, is_draft=True)
     otis.login(reader)
 
-    resp = otis.get_30x("yearbook-jump", data={"pk": entry.pk})
-    otis.assert_redirects(resp, entry.get_absolute_url())
-
-    # submitting the picker without picking anybody stays on the index
     index_url = otis.url("yearbook-index")
-    otis.assert_redirects(otis.get_30x("yearbook-jump"), index_url)
-    otis.assert_redirects(otis.get_30x("yearbook-jump", data={"pk": ""}), index_url)
-    otis.assert_redirects(
-        otis.get_30x("yearbook-jump", data={"pk": "otter"}), index_url
+    otis.post_redirects(
+        entry.get_absolute_url(), "yearbook-jump", data={"entry": entry.pk}
     )
 
-    # the picker is no way around the draft rules
-    otis.get_not_found("yearbook-jump", data={"pk": draft.pk})
-    otis.get_not_found("yearbook-jump", data={"pk": draft.pk + 1000})
+    # anything the form won't take leaves you on the index rather than erroring
+    otis.get_redirects(index_url, "yearbook-jump")
+    otis.post_redirects(index_url, "yearbook-jump", data={})
+    otis.post_redirects(index_url, "yearbook-jump", data={"entry": ""})
+    otis.post_redirects(index_url, "yearbook-jump", data={"entry": "otter"})
+    # including a draft that isn't yours, which is not among the choices
+    otis.post_redirects(index_url, "yearbook-jump", data={"entry": draft.pk})
+
+    # the options read the way the cards do, not the way str(entry) does
+    picker = otis.get_20x("yearbook-index").context["lookup_form"].fields["entry"]
+    assert picker.label_from_instance(entry) == f"{entry.name} (fond of ducks)"
+
+    # the author of a draft can still pick their own
+    otis.login(shy)
+    otis.post_redirects(
+        draft.get_absolute_url(), "yearbook-jump", data={"entry": draft.pk}
+    )
 
 
 @pytest.mark.django_db
@@ -159,8 +167,8 @@ def test_yearbook_index(otis):
     resp = otis.get_20x("yearbook-index")
     assert resp.context["num_entries"] == 3
     # the picker offers every entry this person may open
-    assert set(resp.context["all_entries"]) == {alice_entry, bob_entry, gm_entry}
-    otis.assert_testid(resp, "yearbook-jump")
+    picker = resp.context["lookup_form"].fields["entry"]
+    assert set(picker.queryset) == {alice_entry, bob_entry, gm_entry}
     # the viewer's own entry gets a section of its own, as a single card
     assert resp.context["own_entry"] == alice_entry
     assert resp.context["own_entries"] == [alice_entry]
@@ -253,8 +261,9 @@ def test_yearbook_index_never_features_drafts(otis):
         # not even staff, who can see the drafts everywhere else
         otis.login(staffer)
         resp = otis.get_20x("yearbook-index")
-        assert own_draft in resp.context["all_entries"]
-        assert gm_draft in resp.context["all_entries"]
+        picker = resp.context["lookup_form"].fields["entry"]
+        assert own_draft in picker.queryset
+        assert gm_draft in picker.queryset
         assert resp.context["random_entries"] == [published]
         assert resp.context["gm_entries"] == []
 

@@ -9,14 +9,15 @@ from django.http.response import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
-from django.views.generic.base import TemplateView, View
+from django.views.generic.base import TemplateView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic.list import ListView
 
+from otisweb.decorators import verified_required
 from otisweb.mixins import VerifiedRequiredMixin
 
-from .forms import YearbookEntryForm
+from .forms import YearbookEntryForm, YearbookEntrySelectForm
 from .models import YearbookEntry
 
 # The yearbook has outgrown a single page, so the full list is paginated and
@@ -70,11 +71,12 @@ class YearbookIndex(VerifiedRequiredMixin, TemplateView):
         user = self.request.user
         assert isinstance(user, User)
 
-        # The picker lists everything this person is allowed to open, so the
+        # The picker offers everything this person is allowed to open, so the
         # count shown next to it counts the same set.
-        visible = list(YearbookEntry.visible_to(user))
-        context["all_entries"] = visible
-        context["num_entries"] = len(visible)
+        visible = YearbookEntry.visible_to(user)
+        context["lookup_form"] = YearbookEntrySelectForm(visible)
+        context["lookup_url"] = reverse("yearbook-jump")
+        context["num_entries"] = visible.count()
 
         own_entry = get_own_entry(user)
         context["own_entry"] = own_entry
@@ -92,25 +94,6 @@ class YearbookIndex(VerifiedRequiredMixin, TemplateView):
         return context
 
 
-class YearbookJump(VerifiedRequiredMixin, View):
-    """Sends the index's entry picker to the entry that was picked.
-
-    A GET form can only put the choice in the query string, so something has to
-    turn it into that entry's own URL. Doing that in JavaScript instead would
-    mean navigating to a URL read back out of the page, which reads as an open
-    redirect (and trips CodeQL) even when every option on the page is ours."""
-
-    def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-        del args, kwargs
-        assert isinstance(request.user, User)
-        pk = request.GET.get("pk", "")
-        if not pk.isdigit():
-            # Submitting the picker without choosing anybody means "stay here"
-            return HttpResponseRedirect(reverse("yearbook-index"))
-        entry = get_object_or_404(YearbookEntry.visible_to(request.user), pk=pk)
-        return HttpResponseRedirect(entry.get_absolute_url())
-
-
 class YearbookList(VerifiedRequiredMixin, ListView[YearbookEntry]):
     model = YearbookEntry
     context_object_name = "entries"
@@ -119,6 +102,22 @@ class YearbookList(VerifiedRequiredMixin, ListView[YearbookEntry]):
     def get_queryset(self) -> QuerySet[YearbookEntry]:
         assert isinstance(self.request.user, User)
         return YearbookEntry.visible_to(self.request.user)
+
+
+@verified_required
+def jump(request: HttpRequest) -> HttpResponse:
+    """Sends the index's picker to the entry it selected.
+
+    The form is what navigates, rather than JavaScript following a URL read
+    back out of the page. Anything the form won't validate -- nobody picked,
+    or somebody else's draft -- is a non-answer, and leaves you on the index."""
+    if request.method != "POST":
+        return HttpResponseRedirect(reverse("yearbook-index"))
+    assert isinstance(request.user, User)
+    form = YearbookEntrySelectForm(YearbookEntry.visible_to(request.user), request.POST)
+    if not form.is_valid():
+        return HttpResponseRedirect(reverse("yearbook-index"))
+    return HttpResponseRedirect(form.cleaned_data["entry"].get_absolute_url())
 
 
 class YearbookDetail(VerifiedRequiredMixin, DetailView[YearbookEntry]):
