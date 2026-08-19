@@ -292,9 +292,11 @@ class VoteCreate(
         puid = kwargs.pop("puid")
         super().setup(request, *args, **kwargs)
         self.problem = get_object_or_404(Problem, puid=puid)
-        self.existing_vote = Vote.objects.filter(
-            user=request.user, problem=self.problem
-        ).first()
+        self.existing_vote = (
+            Vote.objects.filter(user=request.user, problem=self.problem).first()
+            if request.user.is_authenticated
+            else None
+        )
 
     def get_form(self) -> BaseModelForm[Vote]:
         form = super().get_form()
