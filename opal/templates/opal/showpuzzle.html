@@ -44,6 +44,7 @@
           </h2>
           Congrats, you solved this puzzle!
           {% if puzzle.achievement %}
+            <br />
             <a href="{% url "opal-finish" hunt.slug puzzle.slug %}">It was worth {{ puzzle.achievement.diamonds }}♦️</a>.
           {% endif %}
         </div>
