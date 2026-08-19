@@ -64,7 +64,8 @@
           });
           $jump.on("change", () => {
               const url = $jump.val();
-              if (url) {
+              // Only allow same-site relative paths from the select options.
+              if (typeof url === "string" && /^\/(?!\/)/.test(url)) {
                   window.location.href = url;
               }
           });
