@@ -1,5 +1,6 @@
 import datetime
 import re
+from unittest import mock
 
 import pytest
 from django.contrib.messages import constants as message_levels
@@ -11,7 +12,7 @@ from opal.factories import OpalAttemptFactory, OpalHuntFactory, OpalPuzzleFactor
 from rpg.factories import AchievementFactory
 from rpg.models import AchievementUnlock
 
-from .models import answerize, puzzle_file_name
+from .models import OpalAttempt, answerize, puzzle_file_name
 
 UTC = datetime.UTC
 
@@ -682,3 +683,29 @@ def test_close_answer(otis):
     )
     # a correct-but-not-final guess is acknowledged without solving the puzzle
     assert any(m.level == message_levels.WARNING for m in resp.context["messages"])
+
+
+@pytest.mark.django_db
+def test_guess_budget_is_rechecked_under_the_lock(otis):
+    """A guess that stops being eligible while it waits for the lock is refused.
+
+    The first `_can_attempt` is the optimistic check that decides whether to show
+    the form; the second runs holding the puzzle row. A guess submitted in
+    parallel that used up the last of the budget in between shows up here as the
+    two disagreeing, and the later guess must not be evaluated.
+    """
+    verified_group = GroupFactory(name="Verified")
+    alice = UserFactory.create(username="alice", groups=(verified_group,))
+    otis.login(alice)
+
+    hunt = OpalHuntFactory.create(slug="hunt")
+    puzzle = OpalPuzzleFactory.create(
+        slug="one", answer="1", hunt=hunt, num_to_unlock=0, guess_limit=3
+    )
+
+    with mock.patch("opal.views._can_attempt", side_effect=[True, False]):
+        otis.post_40x(
+            "opal-show-puzzle", "hunt", "one", data={"guess": "1"}, follow=True
+        )
+
+    assert not OpalAttempt.objects.filter(puzzle=puzzle, user=alice).exists()

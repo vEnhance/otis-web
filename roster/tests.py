@@ -2,6 +2,7 @@ import datetime
 import re
 from decimal import Decimal
 from io import StringIO
+from unittest import mock
 from uuid import uuid4
 
 import pytest
@@ -1923,3 +1924,58 @@ def test_student_ids(otis) -> None:
     otis.login(bob)
     resp = otis.get_20x("student-ids")
     assert list(resp.context["students"]) == [bob_student]
+
+
+@pytest.mark.django_db
+def test_registration_is_all_or_nothing(otis) -> None:
+    """A failure partway through redemption leaves the passcode unspent.
+
+    Redemption saves the registration, claims the ApplyUUID, rewrites the user's
+    name and email, and builds the student and invoice. Those now happen in one
+    transaction, so a failure in the middle can't burn a passcode without
+    producing the student it was supposed to pay for.
+    """
+    au = ApplyUUIDFactory.create(percent_aid=0)
+    semester: Semester = SemesterFactory.create()
+    container: RegistrationContainer = RegistrationContainerFactory.create(
+        semester=semester, accepting_responses=True
+    )
+    alice: User = UserFactory.create(first_name="a", last_name="a", email="a@a.net")
+    otis.login(alice)
+
+    agreement = StringIO("agree!")
+    agreement.name = "agreement.pdf"
+
+    with (
+        mock.patch("roster.views.build_student", side_effect=RuntimeError("boom")),
+        pytest.raises(RuntimeError),
+    ):
+        otis.post(
+            "register",
+            data={
+                "given_name": "Alice",
+                "surname": "Aardvark",
+                "email_address": "myemail@example.com",
+                "passcode": au.uuid,
+                "gender": "O",
+                "parent_email": "myemail@example.com",
+                "graduation_year": 0,
+                "school_name": "Generic School District",
+                "country": "USA",
+                "aops_username": "",
+                "agreement_form": agreement,
+                "email_on_announcement": False,
+                "email_on_pset_complete": True,
+                "email_on_suggestion_processed": False,
+                "email_on_inquiry_complete": False,
+            },
+        )
+
+    au.refresh_from_db()
+    assert au.reg is None
+    assert not StudentRegistration.objects.filter(
+        user=alice, container=container
+    ).exists()
+    assert not Student.objects.filter(user=alice).exists()
+    alice.refresh_from_db()
+    assert alice.first_name == "a"

@@ -6,6 +6,7 @@ from django import forms
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.db.models import Count
 from django.db.models.query import QuerySet
 from django.http import Http404, HttpRequest, HttpResponse
@@ -637,14 +638,20 @@ def start_fight(request: HttpRequest, pk: int) -> HttpResponse:
         return redirect("oime-proposal-detail", pk)
 
     if request.method == "POST":
-        if OIMEFight.objects.filter(
-            contributor=contributor, status="OIME_TBD"
-        ).exists():
-            messages.error(
-                request, "You already have an active timed session in progress."
-            )
-            return redirect("oime-proposal-detail", pk)
-        OIMEFight.objects.create(contributor=contributor, proposal=proposal)
+        # Hold the contributor row across the check and the create. The unique
+        # constraint on the fight is (contributor, proposal), so it does nothing
+        # to stop starts on two *different* proposals from both finding no active
+        # session and each opening one.
+        with transaction.atomic():
+            OIMEContributor.objects.select_for_update().get(pk=contributor.pk)
+            if OIMEFight.objects.filter(
+                contributor=contributor, status="OIME_TBD"
+            ).exists():
+                messages.error(
+                    request, "You already have an active timed session in progress."
+                )
+                return redirect("oime-proposal-detail", pk)
+            OIMEFight.objects.create(contributor=contributor, proposal=proposal)
         return redirect("oime-proposal-fight", pk)
 
     return render(
@@ -763,46 +770,57 @@ def submit_answer(request: HttpRequest, pk: int) -> HttpResponse:
     if contributor is None:
         return redirect("oime-setup")
 
-    attempt = get_object_or_404(OIMEFight, contributor=contributor, proposal=proposal)
+    # Hold the fight row for the whole adjudication. Answers submitted in
+    # parallel would otherwise all read the same wrong_answers and all judge
+    # against the same not-yet-terminal status, so the increments clobber each
+    # other and more than ANSWER_LIMIT answers get graded.
+    with transaction.atomic():
+        attempt = get_object_or_404(
+            OIMEFight.objects.select_for_update(),
+            contributor=contributor,
+            proposal=proposal,
+        )
 
-    if attempt.status != "OIME_TBD":
-        return redirect("oime-proposal-detail", pk)
+        if attempt.status != "OIME_TBD":
+            return redirect("oime-proposal-detail", pk)
 
-    if attempt.time_expired:
-        attempt.status = "OIME_TLE"
-        attempt.submitted_at = timezone.now()
-        attempt.save()
-        messages.warning(request, "The time limit for your timed session has expired.")
-        return redirect("oime-proposal-detail", pk)
-
-    form = OIMEAnswerForm(request.POST)
-    if not form.is_valid():
-        messages.error(request, "Please enter a valid integer (0-999).")
-        return redirect("oime-proposal-fight", pk)
-
-    submitted = form.cleaned_data["answer"]
-    if submitted == proposal.answer:
-        attempt.status = "OIME_OK"
-        attempt.submitted_at = timezone.now()
-        attempt.save()
-        messages.success(request, f"Correct! You took {attempt.time_display}.")
-    else:
-        attempt.wrong_answers += 1
-        if attempt.wrong_answers >= OIMEFight.ANSWER_LIMIT:
-            attempt.status = "OIME_ALE"
+        if attempt.time_expired:
+            attempt.status = "OIME_TLE"
             attempt.submitted_at = timezone.now()
             attempt.save()
-            messages.error(
-                request,
-                f"Incorrect. You have used all {OIMEFight.ANSWER_LIMIT} attempts.",
+            messages.warning(
+                request, "The time limit for your timed session has expired."
             )
-        else:
+            return redirect("oime-proposal-detail", pk)
+
+        form = OIMEAnswerForm(request.POST)
+        if not form.is_valid():
+            messages.error(request, "Please enter a valid integer (0-999).")
+            return redirect("oime-proposal-fight", pk)
+
+        submitted = form.cleaned_data["answer"]
+        if submitted == proposal.answer:
+            attempt.status = "OIME_OK"
+            attempt.submitted_at = timezone.now()
             attempt.save()
-            remaining = OIMEFight.ANSWER_LIMIT - attempt.wrong_answers
-            messages.error(
-                request,
-                f"Incorrect. {remaining} attempt{'' if remaining == 1 else 's'} remaining.",
-            )
+            messages.success(request, f"Correct! You took {attempt.time_display}.")
+        else:
+            attempt.wrong_answers += 1
+            if attempt.wrong_answers >= OIMEFight.ANSWER_LIMIT:
+                attempt.status = "OIME_ALE"
+                attempt.submitted_at = timezone.now()
+                attempt.save()
+                messages.error(
+                    request,
+                    f"Incorrect. You have used all {OIMEFight.ANSWER_LIMIT} attempts.",
+                )
+            else:
+                attempt.save()
+                remaining = OIMEFight.ANSWER_LIMIT - attempt.wrong_answers
+                messages.error(
+                    request,
+                    f"Incorrect. {remaining} attempt{'' if remaining == 1 else 's'} remaining.",
+                )
 
     return redirect("oime-proposal-fight", pk)
 
@@ -817,37 +835,50 @@ def give_up(request: HttpRequest, pk: int) -> HttpResponse:
     if contributor is None:
         return redirect("oime-setup")
 
-    attempt = get_object_or_404(OIMEFight, contributor=contributor, proposal=proposal)
-
-    # A session whose clock already ran out is a time-out, not a give-up: record it
-    # as such so it neither burns a give-up nor logs a bogus multi-hour solve time.
-    if attempt.status == "OIME_TBD" and attempt.time_expired:
-        attempt.status = "OIME_TLE"
-        attempt.submitted_at = timezone.now()
-        attempt.save()
-        messages.warning(request, "The time limit for your timed session has expired.")
-        return redirect("oime-proposal-detail", pk)
-
-    if attempt.status == "OIME_TBD":
-        window_start = timezone.now() - timedelta(minutes=GIVE_UP_WINDOW_MINUTES)
-        recent_give_ups = OIMEFight.objects.filter(
+    # The contributor lock is what makes the give-up rate limit hold: it counts
+    # rows across proposals, so give-ups on two problems at once would otherwise
+    # both read the same count. This is the only view here that takes both locks,
+    # and no other takes the fight before the contributor, so the order can't
+    # cycle.
+    with transaction.atomic():
+        OIMEContributor.objects.select_for_update().get(pk=contributor.pk)
+        attempt = get_object_or_404(
+            OIMEFight.objects.select_for_update(),
             contributor=contributor,
-            status="OIME_FAIL",
-            submitted_at__gte=window_start,
-        ).count()
-        if recent_give_ups >= GIVE_UP_RATE_LIMIT:
-            messages.error(
-                request,
-                f"You have given up {GIVE_UP_RATE_LIMIT} times in the last "
-                f"{GIVE_UP_WINDOW_MINUTES} minutes. Please wait before giving up again.",
-            )
-            return redirect("oime-proposal-fight", pk)
-        attempt.status = "OIME_FAIL"
-        attempt.submitted_at = timezone.now()
-        attempt.save()
-        messages.info(
-            request, "You gave up on this problem. You can now view the solution."
+            proposal=proposal,
         )
+
+        # A session whose clock already ran out is a time-out, not a give-up: record
+        # it as such so it neither burns a give-up nor logs a bogus multi-hour time.
+        if attempt.status == "OIME_TBD" and attempt.time_expired:
+            attempt.status = "OIME_TLE"
+            attempt.submitted_at = timezone.now()
+            attempt.save()
+            messages.warning(
+                request, "The time limit for your timed session has expired."
+            )
+            return redirect("oime-proposal-detail", pk)
+
+        if attempt.status == "OIME_TBD":
+            window_start = timezone.now() - timedelta(minutes=GIVE_UP_WINDOW_MINUTES)
+            recent_give_ups = OIMEFight.objects.filter(
+                contributor=contributor,
+                status="OIME_FAIL",
+                submitted_at__gte=window_start,
+            ).count()
+            if recent_give_ups >= GIVE_UP_RATE_LIMIT:
+                messages.error(
+                    request,
+                    f"You have given up {GIVE_UP_RATE_LIMIT} times in the last "
+                    f"{GIVE_UP_WINDOW_MINUTES} minutes. Please wait before giving up again.",
+                )
+                return redirect("oime-proposal-fight", pk)
+            attempt.status = "OIME_FAIL"
+            attempt.submitted_at = timezone.now()
+            attempt.save()
+            messages.info(
+                request, "You gave up on this problem. You can now view the solution."
+            )
 
     return redirect("oime-proposal-detail", pk)
 
@@ -870,13 +901,17 @@ def reveal_solution(request: HttpRequest, pk: int) -> HttpResponse:
 
     _deny_if_hidden(request, proposal, contributor)
 
-    active_fight = OIMEFight.objects.filter(
-        contributor=contributor, proposal=proposal, status="OIME_TBD"
-    ).exists()
-    if active_fight:
-        raise PermissionDenied
+    # Same contributor lock as start_fight, so that revealing and starting a
+    # fight can't interleave and leave the problem both revealed and being fought.
+    with transaction.atomic():
+        OIMEContributor.objects.select_for_update().get(pk=contributor.pk)
+        active_fight = OIMEFight.objects.filter(
+            contributor=contributor, proposal=proposal, status="OIME_TBD"
+        ).exists()
+        if active_fight:
+            raise PermissionDenied
 
-    contributor.revealed_proposals.add(proposal)
+        contributor.revealed_proposals.add(proposal)
     return redirect("oime-proposal-detail", pk)
 
 

@@ -457,34 +457,40 @@ def register(request: AuthHttpRequest) -> HttpResponse:
         if form.is_valid():
             passcode = form.cleaned_data["passcode"]
             try:
-                au = ApplyUUID.objects.get(uuid=passcode)
+                # Redemption runs in one transaction holding the UUID row, so that
+                # two people sent the same passcode can't both find it unused and
+                # each walk away an enrolled student.
+                with atomic():
+                    au = ApplyUUID.objects.select_for_update().get(uuid=passcode)
+                    if au.reg is not None:
+                        raise PermissionDenied("This UUID was already used.")
+                    if not au.enabled:
+                        messages.error(
+                            request,
+                            message="This application has expired. "
+                            "Please contact Evan for more details.",
+                        )
+                        return HttpResponseRedirect(reverse("index"))
+                    registration = form.save(commit=False)
+                    registration.container = container
+                    registration.user = request.user
+                    registration.save()
+                    au.reg = registration
+                    au.save()
+                    request.user.first_name = form.cleaned_data["given_name"].strip()
+                    request.user.last_name = form.cleaned_data["surname"].strip()
+                    request.user.email = form.cleaned_data["email_address"]
+                    request.user.save()
+                    UserProfile.objects.update_or_create(
+                        user=request.user,
+                        defaults={
+                            k: form.cleaned_data[k] for k in EMAIL_PREFERENCE_FIELDS
+                        },
+                    )
+                    build_student(registration)
             except (ApplyUUID.DoesNotExist, ValidationError):
                 messages.error(request, message="Wrong passcode")
             else:
-                if au.reg is not None:
-                    raise PermissionDenied("This UUID was already used.")
-                if not au.enabled:
-                    messages.error(
-                        request,
-                        message="This application has expired. "
-                        "Please contact Evan for more details.",
-                    )
-                    return HttpResponseRedirect(reverse("index"))
-                registration = form.save(commit=False)
-                registration.container = container
-                registration.user = request.user
-                registration.save()
-                au.reg = registration
-                au.save()
-                request.user.first_name = form.cleaned_data["given_name"].strip()
-                request.user.last_name = form.cleaned_data["surname"].strip()
-                request.user.email = form.cleaned_data["email_address"]
-                request.user.save()
-                UserProfile.objects.update_or_create(
-                    user=request.user,
-                    defaults={k: form.cleaned_data[k] for k in EMAIL_PREFERENCE_FIELDS},
-                )
-                build_student(registration)
                 messages.success(
                     request,
                     message="Your registration was accepted! "

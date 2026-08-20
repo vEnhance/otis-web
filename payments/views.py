@@ -372,33 +372,43 @@ def job_claim(request: HttpRequest, pk: int) -> HttpResponse:
         messages.error(request, "You need to set up a work profile first")
         return HttpResponseRedirect(reverse("worker-update"))
     else:
-        job: Job = Job.objects.get(pk=pk)
-        jobfolder: JobFolder = job.folder
-        jobs_already_claimed = Job.objects.filter(folder=jobfolder, assignee=worker)
+        # Both the quotas and "is this job still free" are check-then-act, so the
+        # whole claim runs in one transaction. Locking the worker serializes that
+        # worker's own claims against each other, which is what the per-folder
+        # quotas are counting; locking the job settles two workers racing for the
+        # same one. This is the only place that takes both, so the order of the
+        # two can't cycle with anything.
+        with transaction.atomic():
+            Worker.objects.select_for_update().get(pk=worker.pk)
+            job: Job = Job.objects.select_for_update().get(pk=pk)
+            jobfolder: JobFolder = job.folder
+            jobs_already_claimed = Job.objects.filter(folder=jobfolder, assignee=worker)
 
-        if job.assignee is not None:
-            messages.error(request, "This task is already claimed.")
-        elif (
-            jobfolder.max_pending is not None
-            and jobs_already_claimed.exclude(progress="JOB_VFD").count()
-            >= jobfolder.max_pending
-        ):
-            messages.error(
-                request,
-                "You already reached the maximum number of pending tasks for this category.",
-            )
-        elif (
-            jobfolder.max_total is not None
-            and jobs_already_claimed.count() >= jobfolder.max_total
-        ):
-            messages.error(
-                request,
-                "You already reached the maximum number of total tasks for this category.",
-            )
-        else:
-            job.assignee = worker
-            job.save()
-            messages.success(request, f"You have successfully claimed task #{job.pk}.")
+            if job.assignee is not None:
+                messages.error(request, "This task is already claimed.")
+            elif (
+                jobfolder.max_pending is not None
+                and jobs_already_claimed.exclude(progress="JOB_VFD").count()
+                >= jobfolder.max_pending
+            ):
+                messages.error(
+                    request,
+                    "You already reached the maximum number of pending tasks for this category.",
+                )
+            elif (
+                jobfolder.max_total is not None
+                and jobs_already_claimed.count() >= jobfolder.max_total
+            ):
+                messages.error(
+                    request,
+                    "You already reached the maximum number of total tasks for this category.",
+                )
+            else:
+                job.assignee = worker
+                job.save()
+                messages.success(
+                    request, f"You have successfully claimed task #{job.pk}."
+                )
         return HttpResponseRedirect(job.get_absolute_url())
 
 
