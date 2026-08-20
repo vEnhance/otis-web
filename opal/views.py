@@ -7,6 +7,7 @@ from allauth.socialaccount.models import SocialAccount
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
 from django.db.models import Q
 from django.db.models.aggregates import Max
 from django.db.models.manager import Manager
@@ -226,6 +227,27 @@ def _discord_send_congratulations(request: AuthHttpRequest, hunt: OpalHunt):
     requests.post(url=hunt.discord_webhook_url, json={"content": message})
 
 
+def _incorrect_attempts(puzzle: OpalPuzzle, user: User) -> QuerySet[OpalAttempt]:
+    """The attempts by `user` that count against the guess limit on `puzzle`."""
+    return OpalAttempt.objects.filter(
+        puzzle=puzzle,
+        user=user,
+        excused=False,
+        is_close=False,
+        is_correct=False,
+    ).order_by("-created_at")
+
+
+def _can_attempt(puzzle: OpalPuzzle, user: User) -> bool:
+    """Whether `user` has a guess left on `puzzle` and hasn't already solved it."""
+    is_solved = OpalAttempt.objects.filter(
+        puzzle=puzzle, user=user, is_correct=True
+    ).exists()
+    return (
+        not is_solved and _incorrect_attempts(puzzle, user).count() < puzzle.guess_limit
+    )
+
+
 @verified_required
 def show_puzzle(
     request: AuthHttpRequest, hunt_slug: str, puzzle_slug: str
@@ -240,28 +262,33 @@ def show_puzzle(
                 "Warning: this puzzle isn't unlocked yet. Showing for testsolvers and admins only.",
             )
 
-    past_attempts = OpalAttempt.objects.filter(puzzle=puzzle, user=request.user)
-    is_solved = past_attempts.filter(is_correct=True).exists()
-    incorrect_attempts = OpalAttempt.objects.filter(
-        puzzle=puzzle,
-        user=request.user,
-        excused=False,
-        is_close=False,
-        is_correct=False,
-    ).order_by("-created_at")
-    can_attempt = not is_solved and incorrect_attempts.count() < puzzle.guess_limit
+    is_solved = OpalAttempt.objects.filter(
+        puzzle=puzzle, user=request.user, is_correct=True
+    ).exists()
+    incorrect_attempts = _incorrect_attempts(puzzle, request.user)
+    can_attempt = _can_attempt(puzzle, request.user)
 
     if request.method == "POST":
         if not can_attempt:
             raise PermissionDenied("You cannot attempt this puzzle anymore.")
         form = AttemptForm(request.POST)
         if form.is_valid():
-            attempt = OpalAttempt(
-                guess=form.cleaned_data["guess"],
-                user=request.user,
-                puzzle=puzzle,
-            )
-            attempt.save()
+            # Hold the puzzle row while the guess budget is rechecked and the
+            # attempt is written. Without it, guesses submitted in parallel all
+            # read the same remaining count and all get evaluated, so the limit
+            # can be overrun. Keep this block short and free of network calls:
+            # everything else on this puzzle waits behind the lock until it
+            # commits, so the Discord ping below stays outside it.
+            with transaction.atomic():
+                puzzle = OpalPuzzle.objects.select_for_update().get(pk=puzzle.pk)
+                if not _can_attempt(puzzle, request.user):
+                    raise PermissionDenied("You cannot attempt this puzzle anymore.")
+                attempt = OpalAttempt(
+                    guess=form.cleaned_data["guess"],
+                    user=request.user,
+                    puzzle=puzzle,
+                )
+                attempt.save()
             if attempt.is_correct:
                 solve_message = f"Correct answer to {puzzle.title}!"
                 messages.success(request, solve_message)
