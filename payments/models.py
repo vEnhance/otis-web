@@ -22,7 +22,25 @@ class PaymentLog(models.Model):
         help_text="Stripe payment intent identifier",
         verbose_name="Stripe payment intent ID",
     )
-    refunded = models.BooleanField(default=False)
+    refunded = models.BooleanField(
+        default=False,
+        help_text="Set when the payment has been fully refunded or charged back. "
+        "Such rows are ignored when totaling up what a student has paid.",
+    )
+
+    class Meta:
+        constraints = (
+            # Stripe can deliver the same webhook event more than once, so a
+            # payment intent may only be credited to an invoice once. Refunds are
+            # recorded as extra rows with a negative amount sharing the payment
+            # intent of the payment they reverse, hence the amount condition;
+            # manually entered payments have no payment intent at all.
+            models.UniqueConstraint(
+                fields=("stripe_id",),
+                condition=models.Q(amount__gt=0) & ~models.Q(stripe_id=""),
+                name="unique_stripe_id_per_payment",
+            ),
+        )
 
     def __str__(self) -> str:
         return f"{self.created_at.strftime('%c')} {self.stripe_id or '?'}"
