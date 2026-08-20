@@ -83,10 +83,10 @@
         {% if student.semester.most_payment_deadline %}<li>{{ student.semester.most_payment_deadline|date }}</li>{% endif %}
       </ul>
     {% endif %}
-    {% if request.user.is_staff %}
+    {% if request.user.is_superuser %}
       <ul>
-        <li>
-          (Staff) <a href="{% url "edit-invoice" invoice.pk %}">Edit invoice</a>
+        <li data-testid="edit-invoice-link">
+          (Admin) <a href="{% url "edit-invoice" invoice.pk %}">Edit invoice</a>
         </li>
       </ul>
     {% endif %}

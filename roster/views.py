@@ -47,7 +47,11 @@ from prettytable import PrettyTable
 from core.models import EMAIL_PREFERENCE_FIELDS, Semester, Unit, UserProfile
 from dashboard.models import PSet
 from otisweb.decorators import admin_required, staff_required
-from otisweb.mixins import StaffRequiredMixin, VerifiedRequiredMixin
+from otisweb.mixins import (
+    AdminRequiredMixin,
+    StaffRequiredMixin,
+    VerifiedRequiredMixin,
+)
 from otisweb.utils import AuthHttpRequest
 from roster.forms import LinkAssistantForm
 from roster.models import ApplyUUID, Assistant
@@ -249,7 +253,7 @@ def master_schedule(request: HttpRequest) -> HttpResponse:
 
 class UpdateInvoice(
     LoginRequiredMixin,
-    StaffRequiredMixin,
+    AdminRequiredMixin,
     UpdateView[Invoice, BaseModelForm[Invoice]],
 ):
     model = Invoice

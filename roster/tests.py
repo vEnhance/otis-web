@@ -1300,12 +1300,37 @@ def test_delinquency_for_joining_second_semester(otis) -> None:
 @pytest.mark.django_db
 def test_update_invoice(otis) -> None:
     firefly: Assistant = AssistantFactory.create()
-    alice: Student = StudentFactory.create(assistant=firefly)
-    invoice: Invoice = InvoiceFactory.create(student=alice)
+    alice: Student = StudentFactory.create(
+        assistant=firefly, semester__show_invoices=True
+    )
+    invoice: Invoice = InvoiceFactory.create(student=alice, total_paid=0)
+
+    # staff who aren't superusers can see the invoice, but can't edit it
     otis.login(firefly)
-    otis.get_20x("edit-invoice", alice.pk)
+    otis.assert_no_testid(otis.get_20x("invoice", alice.pk), "edit-invoice-link")
+    otis.get_denied("edit-invoice", invoice.pk)
+    otis.post_denied(
+        "edit-invoice",
+        invoice.pk,
+        data={
+            "preps_taught": 2,
+            "hours_taught": 8.4,
+            "adjustment": 0,
+            "extras": 0,
+            "total_paid": 1337,
+            "credits": 0,
+        },
+    )
+    invoice.refresh_from_db()
+    assert invoice.total_paid == 0
+
+    # superusers get the edit link and can actually edit
+    admin: User = UserFactory.create(is_staff=True, is_superuser=True)
+    otis.login(admin)
+    otis.assert_testid(otis.get_20x("invoice", alice.pk), "edit-invoice-link")
+    otis.get_20x("edit-invoice", invoice.pk)
     otis.post_redirects(
-        otis.url("invoice", invoice.pk),
+        otis.url("invoice", alice.pk),
         "edit-invoice",
         invoice.pk,
         data={
@@ -1317,6 +1342,9 @@ def test_update_invoice(otis) -> None:
             "credits": 0,
         },
     )
+    invoice.refresh_from_db()
+    assert invoice.preps_taught == 2
+    assert invoice.total_paid == 1152
 
 
 @pytest.mark.django_db
