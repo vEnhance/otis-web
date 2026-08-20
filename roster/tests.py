@@ -317,13 +317,13 @@ def test_mystery(otis) -> None:
     otis.login(alice)
 
     otis.assert_response_denied(
-        otis.client.get("/roster/mystery-unlock/easier/", follow=True)
+        otis.client.post("/roster/mystery-unlock/easier/", follow=True)
     )
 
     alice.curriculum.set([mystery])
     alice.unlocked_units.set([mystery])
 
-    resp = otis.client.get("/roster/mystery-unlock/harder/", follow=True)
+    resp = otis.client.post("/roster/mystery-unlock/harder/", follow=True)
     otis.assert_response_20x(resp)
 
     assert not alice.curriculum.contains(mystery)
@@ -356,11 +356,29 @@ def test_github_issue_447_fix(otis) -> None:
     )
 
     otis.login(alice)
-    resp = otis.client.get("/roster/mystery-unlock/harder/", follow=True)
+    resp = otis.client.post("/roster/mystery-unlock/harder/", follow=True)
     otis.assert_response_20x(resp)
 
     pset.refresh_from_db()
     assert pset.next_unit_to_unlock is None
+
+
+@pytest.mark.django_db
+def test_mystery_unlock_get_only_confirms(otis) -> None:
+    mystery: Unit = UnitFactory(group__name="Mystery")
+    UnitFactory.create_batch(2)  # next two units
+
+    alice: Student = StudentFactory.create()
+    alice.curriculum.set([mystery])
+    alice.unlocked_units.set([mystery])
+    otis.login(alice)
+
+    # a GET is only the confirmation page; nothing about the curriculum moves
+    resp = otis.client.get("/roster/mystery-unlock/harder/")
+    otis.assert_response_20x(resp)
+    assert resp.context["delta"] == 2
+    assert alice.curriculum.contains(mystery)
+    assert alice.unlocked_units.contains(mystery)
 
 
 @pytest.mark.django_db
@@ -1063,6 +1081,24 @@ def test_cancel_inquiry_sets_status_to_canceled(otis) -> None:
     inquiry.refresh_from_db()
     assert inquiry.status == "INQ_CANC"
     otis.assert_message(resp, "Inquiry successfully canceled.")
+
+
+@pytest.mark.django_db
+def test_cancel_inquiry_rejects_get(otis) -> None:
+    alice = StudentFactory.create()
+    unit = UnitFactory.create()
+    inquiry = UnitInquiry.objects.create(
+        student=alice,
+        unit=unit,
+        action_type="INQ_ACT_UNLOCK",
+        status="INQ_NEW",
+        explanation="Please unlock",
+    )
+    otis.login(alice)
+    # a cross-site navigation is a GET, so canceling can't be reachable that way
+    assert otis.get("inquiry-cancel", inquiry.pk).status_code == 405
+    inquiry.refresh_from_db()
+    assert inquiry.status == "INQ_NEW"
 
 
 @pytest.mark.django_db

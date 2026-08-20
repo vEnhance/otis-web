@@ -408,6 +408,20 @@ def test_claim_limits(otis) -> None:
 
 
 @pytest.mark.django_db
+def test_claim_rejects_get(otis) -> None:
+    verified_group = GroupFactory(name="Verified")
+    alice: User = UserFactory.create(username="alice", groups=(verified_group,))
+    otis.login(alice)
+    otis.post_ok("worker-update", data={"notes": "hi"}, follow=True)
+    job = JobFactory.create()
+
+    # a cross-site navigation is a GET, so claiming can't be reachable that way
+    assert otis.get("job-claim", job.pk).status_code == 405
+    job.refresh_from_db()
+    assert job.assignee is None
+
+
+@pytest.mark.django_db
 def test_job_update_permissions(otis) -> None:
     verified_group = GroupFactory(name="Verified")
     alice = WorkerFactory.create(user__username="alice", user__groups=(verified_group,))
