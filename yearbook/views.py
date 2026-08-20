@@ -23,7 +23,7 @@ from .models import YearbookEntry
 # The yearbook has outgrown a single page, so the full list is paginated and
 # the index instead features a few entries at a time.
 ENTRIES_PER_PAGE = 20
-NUM_RANDOM_ENTRIES = 5
+NUM_RANDOM_ENTRIES = 15
 
 
 def get_own_entry(user: User) -> YearbookEntry | None:
