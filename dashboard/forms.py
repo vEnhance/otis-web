@@ -1,24 +1,11 @@
-from typing import Any, ClassVar
+from typing import Any
 
 from django import forms
 from django.core.validators import FileExtensionValidator
 from django.forms.models import ModelChoiceField
 
 from core.models import Unit
-from dashboard.models import PSet, UploadedFile
-
-
-class NewUploadForm(forms.ModelForm):
-    class Meta:
-        model = UploadedFile
-        fields = ("category", "content", "description")
-        widgets: ClassVar[dict[str, forms.Widget]] = {
-            "description": forms.Textarea(attrs={"cols": 40, "rows": 2}),
-        }
-        help_texts: ClassVar[dict[str, str]] = {
-            "content": "",
-        }
-
+from dashboard.models import PSet
 
 pset_file_validator = FileExtensionValidator(
     allowed_extensions=["pdf", "txt", "tex", "png", "jpg"]

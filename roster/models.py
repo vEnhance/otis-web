@@ -8,11 +8,11 @@ from django.contrib.auth.models import Group, User
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import FileExtensionValidator
 from django.db import models
-from django.db.models import Count, Q
+from django.db.models import Q
 from django.db.models.query import QuerySet
 from django.urls import reverse
 from django.utils.timezone import localtime, now
-from sql_util.aggregates import Exists, SubqueryAggregate
+from sql_util.aggregates import Exists
 
 from core.models import Semester, Unit
 
@@ -22,7 +22,6 @@ from .country_abbrevs import COUNTRY_CHOICES
 class CurriculumRowTypeDict(TypedDict, total=False):
     unit: Unit
     number: int
-    num_uploads: int
     student_still_active: bool
 
     is_submitted: bool
@@ -217,15 +216,7 @@ class Student(models.Model):
         return self.unlocked_units.count()
 
     def generate_curriculum_queryset(self) -> QuerySet[Unit]:
-        queryset = (
-            self.curriculum.all()
-            .select_related("group")
-            .annotate(
-                num_uploads=SubqueryAggregate(
-                    "uploadedfile", filter=Q(benefactor__pk=self.pk), aggregate=Count
-                )
-            )
-        )
+        queryset = self.curriculum.all().select_related("group")
         if self.semester.uses_legacy_pset_system is True:
             return queryset.annotate(
                 has_pset=Exists(
@@ -267,7 +258,6 @@ class Student(models.Model):
             row: CurriculumRowTypeDict = {
                 "unit": unit,
                 "number": n,
-                "num_uploads": getattr(unit, "num_uploads", 0),
                 "student_still_active": self.semester.active and self.enabled,
                 "is_submitted": getattr(unit, "has_pset", False),
                 "is_current": unit.pk in unlocked_units_pks,
