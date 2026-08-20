@@ -24,6 +24,16 @@ def _verified_contributor(username: str = "alice") -> tuple[object, object]:
     return user, contributor
 
 
+def _verified_staff(username: str = "staff") -> tuple[object, object]:
+    """Helper: verified-group staff user + OIMEContributor."""
+    verified_group, _ = Group.objects.get_or_create(name="Verified")
+    user = UserFactory.create(
+        username=username, is_staff=True, groups=(verified_group,)
+    )
+    contributor = OIMEContributorFactory.create(user=user)
+    return user, contributor
+
+
 # ---------------------------------------------------------------------------
 # Verified-gating: no contributor → redirect to setup
 # ---------------------------------------------------------------------------
@@ -398,6 +408,140 @@ def test_archived_author_sees_note_but_no_archive_button(otis):
     otis.assert_testid(resp, "proposal-archived-note")
     # only a superuser gets the archive toggle
     otis.assert_no_testid(resp, "proposal-archive-toggle")
+
+
+@pytest.mark.django_db
+def test_archived_not_readable_by_other_users(otis):
+    user, _ = _verified_contributor()
+    _, other = _verified_contributor("bob")
+    proposal = OIMEProposalFactory.create(author=other, archived=True)
+    otis.login(user)
+    otis.get_40x("oime-proposal-detail", proposal.pk)
+    otis.get_40x("oime-start-fight", proposal.pk)
+    otis.get_40x("oime-proposal-fight", proposal.pk)
+    otis.get_40x("oime-proposal-results", proposal.pk)
+    otis.post_40x("oime-reveal", proposal.pk)
+
+
+@pytest.mark.django_db
+def test_archived_readable_by_its_author(otis):
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create(author=contributor, archived=True)
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-detail", proposal.pk)
+    assert resp.context["can_see_solution"]
+
+
+@pytest.mark.django_db
+def test_archived_readable_by_staff(otis):
+    staff, _ = _verified_staff()
+    proposal = OIMEProposalFactory.create(archived=True)
+    otis.login(staff)
+    otis.get_20x("oime-proposal-detail", proposal.pk)
+
+
+@pytest.mark.django_db
+def test_archived_cannot_start_timed_session(otis):
+    user, _ = _verified_contributor()
+    _, other = _verified_contributor("bob")
+    proposal = OIMEProposalFactory.create(author=other, archived=True)
+    otis.login(user)
+    resp = otis.post("oime-start-fight", proposal.pk)
+    assert resp.status_code == 403
+    assert not OIMEFight.objects.exists()
+
+
+@pytest.mark.django_db
+def test_archived_cannot_start_timed_session_even_as_staff(otis):
+    # Staff keep read access, but the problem is out of circulation for them too.
+    staff, _ = _verified_staff()
+    proposal = OIMEProposalFactory.create(archived=True)
+    otis.login(staff)
+    resp = otis.get_20x("oime-proposal-detail", proposal.pk)
+    assert not resp.context["can_start_fight"]
+    resp = otis.post("oime-start-fight", proposal.pk)
+    otis.assert_30x(resp)
+    assert not OIMEFight.objects.exists()
+
+
+@pytest.mark.django_db
+def test_archived_cannot_be_upvoted(otis):
+    user, contributor = _verified_contributor()
+    _, other = _verified_contributor("bob")
+    proposal = OIMEProposalFactory.create(author=other, archived=True)
+    # A finished session keeps this contributor's read access to the problem.
+    OIMEFightFactory.create(
+        contributor=contributor, proposal=proposal, status="OIME_OK"
+    )
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-detail", proposal.pk)
+    assert not resp.context["can_upvote"]
+    resp = otis.post("oime-upvote", proposal.pk)
+    assert resp.status_code == 403
+    assert proposal.upvotes.count() == 0
+
+
+@pytest.mark.django_db
+def test_archived_cannot_be_upvoted_by_its_author(otis):
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create(author=contributor, archived=True)
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-detail", proposal.pk)
+    assert not resp.context["can_upvote"]
+    resp = otis.post("oime-upvote", proposal.pk)
+    assert resp.status_code == 403
+    assert proposal.upvotes.count() == 0
+
+
+@pytest.mark.django_db
+def test_archived_cannot_be_commented_on(otis):
+    user, contributor = _verified_contributor()
+    _, other = _verified_contributor("bob")
+    proposal = OIMEProposalFactory.create(author=other, archived=True)
+    OIMEFightFactory.create(
+        contributor=contributor, proposal=proposal, status="OIME_FAIL"
+    )
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-detail", proposal.pk)
+    otis.assert_no_testid(resp, "comment-form")
+    resp = otis.post(
+        "oime-proposal-detail",
+        proposal.pk,
+        data={"submit_comment": "1", "content": "Nice problem!"},
+    )
+    assert resp.status_code == 403
+    assert not OIMEComment.objects.exists()
+
+
+@pytest.mark.django_db
+def test_archived_comment_cannot_be_edited(otis):
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create(author=contributor, archived=True)
+    comment = OIMECommentFactory.create(
+        author=contributor, proposal=proposal, content="Original"
+    )
+    otis.login(user)
+    resp = otis.post("oime-comment-edit", comment.pk, data={"content": "Edited"})
+    assert resp.status_code == 403
+    comment.refresh_from_db()
+    assert comment.content == "Original"
+
+
+@pytest.mark.django_db
+def test_archived_keeps_access_for_unfinished_session(otis):
+    # Archiving mid-session must not strand an attempt with its clock still running.
+    user, contributor = _verified_contributor()
+    _, other = _verified_contributor("bob")
+    proposal = OIMEProposalFactory.create(author=other, archived=True)
+    OIMEFightFactory.create(
+        contributor=contributor, proposal=proposal, status="OIME_TBD"
+    )
+    otis.login(user)
+    otis.get_20x("oime-proposal-fight", proposal.pk)
+    resp = otis.post("oime-give-up", proposal.pk)
+    otis.assert_30x(resp)
+    fight = OIMEFight.objects.get(contributor=contributor, proposal=proposal)
+    assert fight.status == "OIME_FAIL"
 
 
 # ---------------------------------------------------------------------------

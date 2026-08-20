@@ -74,6 +74,58 @@ def _deny_if_draft(
     raise PermissionDenied("This proposal is still a draft.")
 
 
+def _deny_if_archived(
+    request: HttpRequest,
+    proposal: OIMEProposal,
+    contributor: OIMEContributor | None,
+) -> None:
+    """Raise unless the viewer may see ``proposal``, which may be archived.
+
+    Archiving is staff pulling a problem out of circulation, so an archived problem
+    is readable only by staff and by its author; it is also frozen, in that nobody
+    starts a session on it, upvotes it or comments on it any more (see
+    :func:`_get_solver_context`).
+
+    As with drafts, a contributor who already started a session keeps read access.
+    Nothing is hidden from them that they have not already seen, and locking them
+    out would strand an attempt with the clock still running and no way to submit
+    or give up.
+    """
+    if not proposal.archived:
+        return
+    if contributor is not None and proposal.author == contributor:
+        return
+    if request.user.is_staff:  # type: ignore[union-attr]
+        return
+    if (
+        contributor is not None
+        and OIMEFight.objects.filter(
+            contributor=contributor, proposal=proposal
+        ).exists()
+    ):
+        messages.warning(
+            request,
+            f"{proposal.label} has been archived by staff. You keep access because "
+            "you already started a session on it.",
+        )
+        return
+    raise PermissionDenied("This proposal has been archived.")
+
+
+def _deny_if_hidden(
+    request: HttpRequest,
+    proposal: OIMEProposal,
+    contributor: OIMEContributor | None,
+) -> None:
+    """Raise unless the viewer may see ``proposal`` at all.
+
+    Every per-proposal view starts here, so that a problem withdrawn from the
+    listings — as a draft or as archived — cannot be reached by URL either.
+    """
+    _deny_if_draft(request, proposal, contributor)
+    _deny_if_archived(request, proposal, contributor)
+
+
 def _resolve_active_fight(request: HttpRequest) -> OIMEFight | None:
     """The caller's fight that is still running, if there is one.
 
@@ -138,9 +190,14 @@ def _get_solver_context(
       contributor explicitly reveals them on this problem.
 
     The proposal's author always sees everything.
+
+    An archived problem is frozen on top of all that: staff pulled it out of
+    circulation, so no one starts a session on it or upvotes it any more, however
+    they came to still have read access to it.
     """
     is_author = contributor == proposal.author
     casual = _is_casual_for(contributor, proposal)
+    frozen = proposal.archived
 
     if is_author:
         return {
@@ -149,7 +206,7 @@ def _get_solver_context(
             "fight": None,
             "can_see_solution": True,
             "can_start_fight": False,
-            "can_upvote": True,
+            "can_upvote": not frozen,
         }
 
     fight: OIMEFight | None = None
@@ -180,7 +237,7 @@ def _get_solver_context(
             "fight": fight,
             "can_see_solution": can_see_solution,
             "can_start_fight": False,
-            "can_upvote": True,
+            "can_upvote": not frozen,
         }
 
     # Ranked. Revealing a problem (escape hatch for someone who already knows it,
@@ -191,8 +248,8 @@ def _get_solver_context(
         "casual": False,
         "fight": fight,
         "can_see_solution": can_see_solution,
-        "can_start_fight": fight is None and not revealed,
-        "can_upvote": can_see_solution,
+        "can_start_fight": fight is None and not revealed and not frozen,
+        "can_upvote": can_see_solution and not frozen,
     }
 
 
@@ -572,7 +629,7 @@ def start_fight(request: HttpRequest, pk: int) -> HttpResponse:
     if contributor is None:
         return redirect("oime-setup")
 
-    _deny_if_draft(request, proposal, contributor)
+    _deny_if_hidden(request, proposal, contributor)
 
     ctx = _get_solver_context(contributor, proposal)
     # Only reachable while the user can actually start a fight; otherwise show detail.
@@ -604,7 +661,7 @@ def proposal_detail(request: HttpRequest, pk: int) -> HttpResponse:
     if contributor is None:
         return redirect("oime-setup")
 
-    _deny_if_draft(request, proposal, contributor)
+    _deny_if_hidden(request, proposal, contributor)
 
     ctx = _get_solver_context(contributor, proposal)
     fight: OIMEFight | None = ctx["fight"]
@@ -617,9 +674,11 @@ def proposal_detail(request: HttpRequest, pk: int) -> HttpResponse:
         return redirect("oime-start-fight", pk)
 
     comment_form = OIMECommentForm()
+    # The discussion on an archived problem is frozen along with the rest of it.
+    can_comment = ctx["can_see_solution"] and not proposal.archived
 
     if request.method == "POST" and "submit_comment" in request.POST:
-        if not ctx["can_see_solution"]:
+        if not can_comment:
             raise PermissionDenied
         comment_form = OIMECommentForm(request.POST)
         if comment_form.is_valid():
@@ -651,6 +710,7 @@ def proposal_detail(request: HttpRequest, pk: int) -> HttpResponse:
             "contributor": contributor,
             "comment_form": comment_form,
             "comments": comments,
+            "can_comment": can_comment,
             "has_upvoted": has_upvoted,
             "stats": stats,
             **ctx,
@@ -666,7 +726,7 @@ def proposal_fight(request: HttpRequest, pk: int) -> HttpResponse:
     if contributor is None:
         return redirect("oime-setup")
 
-    _deny_if_draft(request, proposal, contributor)
+    _deny_if_hidden(request, proposal, contributor)
 
     ctx = _get_solver_context(contributor, proposal)
     fight: OIMEFight | None = ctx["fight"]
@@ -808,7 +868,7 @@ def reveal_solution(request: HttpRequest, pk: int) -> HttpResponse:
     if contributor is None:
         return redirect("oime-setup")
 
-    _deny_if_draft(request, proposal, contributor)
+    _deny_if_hidden(request, proposal, contributor)
 
     active_fight = OIMEFight.objects.filter(
         contributor=contributor, proposal=proposal, status="OIME_TBD"
@@ -830,7 +890,7 @@ def upvote_proposal(request: HttpRequest, pk: int) -> HttpResponse:
     if contributor is None:
         return redirect("oime-setup")
 
-    _deny_if_draft(request, proposal, contributor)
+    _deny_if_hidden(request, proposal, contributor)
 
     ctx = _get_solver_context(contributor, proposal)
     if not ctx["can_upvote"]:
@@ -865,7 +925,7 @@ def proposal_results(request: HttpRequest, pk: int) -> HttpResponse:
     if contributor is None:
         return redirect("oime-setup")
 
-    _deny_if_draft(request, proposal, contributor)
+    _deny_if_hidden(request, proposal, contributor)
 
     # The leaderboard is for anyone who can no longer start a fight on the problem
     # (casual browsers, those who have fought or revealed it, and the author).
@@ -909,6 +969,9 @@ def edit_comment(request: HttpRequest, pk: int) -> HttpResponse:
         return redirect("oime-setup")
     if comment.author != contributor and not request.user.is_staff:  # type: ignore[union-attr]
         raise PermissionDenied
+    # An archived problem's discussion is frozen, so its comments are read-only too.
+    if comment.proposal.archived:
+        raise PermissionDenied("This proposal has been archived.")
 
     if request.method == "POST":
         form = OIMECommentForm(request.POST, instance=comment)
