@@ -1,17 +1,27 @@
 import datetime
+from typing import Any
 
 import pytest
+import stripe
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.db import transaction
+from django.db.models.aggregates import Sum
+from django.db.utils import IntegrityError
 from freezegun.api import freeze_time
 
 from core.factories import GroupFactory, UserFactory
-from payments.factories import JobFactory, JobFolderFactory, WorkerFactory
+from payments.factories import (
+    JobFactory,
+    JobFolderFactory,
+    PaymentLogFactory,
+    WorkerFactory,
+)
 from payments.models import Job, PaymentLog, Worker
 from payments.views import InactiveWorkerList
 from roster.factories import InvoiceFactory, StudentFactory
 
-from .views import process_payment
+from .views import process_payment, process_reversal
 
 UTC = datetime.UTC
 
@@ -92,10 +102,200 @@ def test_process_payment(payment_test_data):
 
 
 @pytest.mark.django_db
+def test_process_payment_is_idempotent(payment_test_data):
+    invoice = payment_test_data["invoice"]
+
+    # Stripe retries a delivery it didn't get an answer to; the second one
+    # must not credit the invoice again
+    first = process_payment(300, invoice, "pm_XXXXXXXX")
+    again = process_payment(300, invoice, "pm_XXXXXXXX")
+
+    assert again.pk == first.pk
+    assert PaymentLog.objects.count() == 1
+    invoice.refresh_from_db()
+    assert invoice.total_paid == 300
+
+    # a genuinely different payment still goes through
+    process_payment(120, invoice, "pm_YYYYYYYY")
+    invoice.refresh_from_db()
+    assert invoice.total_paid == 420
+
+    # ...as do payments recorded by hand, which carry no payment intent
+    process_payment(50, invoice)
+    process_payment(50, invoice)
+    invoice.refresh_from_db()
+    assert invoice.total_paid == 520
+
+
+@pytest.mark.django_db
+def test_payment_intent_is_unique_in_database(payment_test_data):
+    """The database is the backstop if two duplicate deliveries race each other."""
+    invoice = payment_test_data["invoice"]
+    PaymentLogFactory.create(invoice=invoice, amount=300, stripe_id="pm_XXXXXXXX")
+
+    with pytest.raises(IntegrityError), transaction.atomic():
+        PaymentLogFactory.create(invoice=invoice, amount=300, stripe_id="pm_XXXXXXXX")
+
+    # a refund shares the payment intent of the payment it reverses, though
+    PaymentLogFactory.create(invoice=invoice, amount=-300, stripe_id="pm_XXXXXXXX")
+    # and payments entered by hand have no payment intent to collide over
+    PaymentLogFactory.create_batch(2, invoice=invoice, amount=300)
+
+
+@pytest.mark.django_db
+def test_process_reversal(payment_test_data):
+    invoice = payment_test_data["invoice"]
+    process_payment(300, invoice, "pm_XXXXXXXX")
+
+    # a refund of half the payment takes back half the credit
+    process_reversal("pm_XXXXXXXX", 15000)
+    invoice.refresh_from_db()
+    assert invoice.total_paid == 150
+    assert PaymentLog.objects.get(amount=-150).invoice_id == invoice.pk
+    assert not PaymentLog.objects.filter(refunded=True).exists()
+
+    # Stripe reports the running total refunded, so redelivering that event
+    # (or the matching dispute event) changes nothing
+    assert process_reversal("pm_XXXXXXXX", 15000) is None
+    invoice.refresh_from_db()
+    assert invoice.total_paid == 150
+
+    # refunding the rest takes back the rest, and only the rest
+    process_reversal("pm_XXXXXXXX", 30000)
+    invoice.refresh_from_db()
+    assert invoice.total_paid == 0
+    assert PaymentLog.objects.filter(refunded=False).count() == 0
+
+    # a reversal larger than the payment can't drive the invoice negative
+    assert process_reversal("pm_XXXXXXXX", 99999) is None
+    invoice.refresh_from_db()
+    assert invoice.total_paid == 0
+
+    # and re-delivering the original payment event doesn't restore the credit
+    process_payment(300, invoice, "pm_XXXXXXXX")
+    invoice.refresh_from_db()
+    assert invoice.total_paid == 0
+
+
+@pytest.mark.django_db
+def test_process_reversal_of_unknown_payment(payment_test_data):
+    invoice = payment_test_data["invoice"]
+    assert process_reversal("pm_NOSUCHPAYMENT", 30000) is None
+    invoice.refresh_from_db()
+    assert invoice.total_paid == 0
+    assert not PaymentLog.objects.exists()
+
+
+@pytest.mark.django_db
+def test_payment_log_total_matches_invoice(payment_test_data):
+    """The aincrad sync recomputes total_paid by summing the un-refunded logs.
+
+    That sum has to agree with what the webhook credited, both after a partial
+    refund (where the negative log cancels part of the payment) and after a full
+    one (where every row involved is skipped instead).
+    """
+    invoice = payment_test_data["invoice"]
+
+    def logged_total() -> int:
+        logs = PaymentLog.objects.filter(invoice=invoice, refunded=False)
+        return logs.aggregate(s=Sum("amount"))["s"] or 0
+
+    process_payment(300, invoice, "pm_XXXXXXXX")
+    process_payment(120, invoice, "pm_YYYYYYYY")
+    invoice.refresh_from_db()
+    assert logged_total() == invoice.total_paid == 420
+
+    process_reversal("pm_XXXXXXXX", 10000)
+    invoice.refresh_from_db()
+    assert logged_total() == invoice.total_paid == 320
+
+    process_reversal("pm_XXXXXXXX", 30000)
+    invoice.refresh_from_db()
+    assert logged_total() == invoice.total_paid == 120
+
+
+@pytest.mark.django_db
 def test_webhook(otis):
     otis.get_40x("payments-webhook")
     otis.post_40x("payments-webhook")
     otis.post_40x("payments-webhook", HTTP_STRIPE_SIGNATURE="meow")
+
+
+@pytest.mark.django_db
+def test_webhook_events(otis, monkeypatch, payment_test_data):
+    invoice = payment_test_data["invoice"]
+    event: dict[str, Any] = {}
+
+    def fake_construct_event(payload: bytes, sig_header: str, secret: str):
+        del payload, sig_header, secret
+        return event
+
+    monkeypatch.setattr(stripe.Webhook, "construct_event", fake_construct_event)
+
+    def deliver(event_type: str, **obj: Any) -> None:
+        nonlocal event
+        event = {"type": event_type, "data": {"object": obj}}
+        otis.post_20x("payments-webhook", HTTP_STRIPE_SIGNATURE="meow")
+
+    deliver(
+        "checkout.session.completed",
+        amount_total=30000,
+        client_reference_id=str(invoice.pk),
+        payment_intent="pm_XXXXXXXX",
+    )
+    invoice.refresh_from_db()
+    assert invoice.total_paid == 300
+
+    # a duplicate delivery of the same event is acknowledged but not credited
+    deliver(
+        "checkout.session.completed",
+        amount_total=30000,
+        client_reference_id=str(invoice.pk),
+        payment_intent="pm_XXXXXXXX",
+    )
+    invoice.refresh_from_db()
+    assert invoice.total_paid == 300
+    assert PaymentLog.objects.count() == 1
+
+    # a chargeback pulls the money back out...
+    deliver("charge.dispute.created", amount=30000, payment_intent="pm_XXXXXXXX")
+    invoice.refresh_from_db()
+    assert invoice.total_paid == 0
+    assert PaymentLog.objects.filter(refunded=False).count() == 0
+
+    # ...and the follow-up event for the same dispute doesn't double count
+    deliver(
+        "charge.dispute.funds_withdrawn", amount=30000, payment_intent="pm_XXXXXXXX"
+    )
+    invoice.refresh_from_db()
+    assert invoice.total_paid == 0
+    assert PaymentLog.objects.count() == 2
+
+    # events we don't act on are still acknowledged
+    deliver("payment_intent.created", amount=30000, payment_intent="pm_XXXXXXXX")
+    invoice.refresh_from_db()
+    assert invoice.total_paid == 0
+    assert PaymentLog.objects.count() == 2
+
+
+@pytest.mark.django_db
+def test_webhook_refund_without_payment_intent(otis, monkeypatch, payment_test_data):
+    """Stripe should always name the payment intent, but a refund that somehow
+    arrives without one must not blow up the endpoint."""
+    invoice = payment_test_data["invoice"]
+    process_payment(300, invoice, "pm_XXXXXXXX")
+
+    monkeypatch.setattr(
+        stripe.Webhook,
+        "construct_event",
+        lambda payload, sig_header, secret: {
+            "type": "charge.refunded",
+            "data": {"object": {"amount_refunded": 30000}},
+        },
+    )
+    otis.post_20x("payments-webhook", HTTP_STRIPE_SIGNATURE="meow")
+    invoice.refresh_from_db()
+    assert invoice.total_paid == 300
 
 
 @pytest.mark.django_db

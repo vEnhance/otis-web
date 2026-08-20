@@ -8,7 +8,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
-from django.db.models.aggregates import Count
+from django.db import transaction
+from django.db.models.aggregates import Count, Sum
+from django.db.models.expressions import F
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
 from django.forms.models import BaseModelForm
@@ -100,11 +102,103 @@ def checkout(
         return HttpResponseForbidden("Need to use request method GET")
 
 
-def process_payment(amount: int, invoice: Invoice, stripe_id: str):
-    invoice.total_paid += amount
-    invoice.save()
-    payment_log = PaymentLog(amount=amount, invoice=invoice, stripe_id=stripe_id)
-    payment_log.save()
+# Stripe events that mean money went back to the payer. A dispute is reported
+# both when it is opened and when the funds actually leave the account; both are
+# listened for, and process_reversal() makes sure the second one is a no-op.
+REVERSAL_EVENT_TYPES = (
+    "charge.refunded",
+    "charge.dispute.created",
+    "charge.dispute.funds_withdrawn",
+)
+
+
+def cents_to_usd(cents: int) -> int:
+    """Stripe reports amounts in cents, but invoices are tracked in whole dollars."""
+    return int(cents) // 100
+
+
+def process_payment(amount: int, invoice: Invoice, stripe_id: str = "") -> PaymentLog:
+    """Credit `amount` dollars to `invoice` and log it.
+
+    A `stripe_id` (the payment intent) is credited at most once, no matter how
+    many times Stripe delivers the event for it; the existing log is returned
+    unchanged in that case. Payments entered by hand carry no payment intent and
+    are always credited.
+    """
+    with transaction.atomic():
+        if stripe_id:
+            # Hold the invoice for the rest of the transaction, so that two
+            # deliveries of one event arriving together can't both find nothing
+            # and credit it twice. MySQL has no partial unique indexes, so the
+            # constraint on PaymentLog doesn't catch that race in production.
+            Invoice.objects.select_for_update().get(pk=invoice.pk)
+            credited = PaymentLog.objects.filter(
+                stripe_id=stripe_id, amount__gt=0
+            ).first()
+            if credited is not None:
+                logger.warning(f"Payment intent {stripe_id} was already credited")
+                return credited
+        payment_log = PaymentLog.objects.create(
+            amount=amount, invoice=invoice, stripe_id=stripe_id
+        )
+        # F() rather than a read-modify-write, so that two payments landing at
+        # the same time can't clobber each other's credit
+        Invoice.objects.filter(pk=invoice.pk).update(
+            total_paid=F("total_paid") + amount
+        )
+        invoice.refresh_from_db(fields=("total_paid",))
+    return payment_log
+
+
+def process_reversal(stripe_id: str, cents_reversed: int) -> PaymentLog | None:
+    """Take back credit for the payment intent `stripe_id`.
+
+    `cents_reversed` is the total Stripe has taken back for that payment so far,
+    which is how Stripe reports both refunds and disputes. Only the part that
+    hasn't been taken back yet is reversed, so redelivered events and a dispute
+    that arrives twice change nothing, and a series of partial refunds never
+    reverses more than was paid.
+
+    The reversal is recorded as its own log with a negative amount rather than by
+    editing the original, so the payment history stays auditable. Returns that
+    log, or None if there was nothing left to reverse.
+    """
+    with transaction.atomic():
+        try:
+            payment_log = PaymentLog.objects.select_for_update().get(
+                stripe_id=stripe_id, amount__gt=0
+            )
+        except PaymentLog.DoesNotExist:
+            logger.warning(f"Stripe reversed unknown payment intent {stripe_id}")
+            return None
+
+        reversed_so_far = -(
+            PaymentLog.objects.filter(stripe_id=stripe_id, amount__lt=0).aggregate(
+                total=Sum("amount")
+            )["total"]
+            or 0
+        )
+        amount = min(cents_to_usd(cents_reversed), payment_log.amount) - reversed_so_far
+        if amount <= 0:
+            return None
+
+        invoice = payment_log.invoice
+        reversal = PaymentLog.objects.create(
+            amount=-amount,
+            invoice=invoice,
+            stripe_id=stripe_id,
+        )
+        Invoice.objects.filter(pk=invoice.pk).update(
+            total_paid=F("total_paid") - amount
+        )
+        if reversed_so_far + amount >= payment_log.amount:
+            # Nothing of this payment is left. Flag the payment and its reversals
+            # alike, since totals over PaymentLog skip refunded rows and would
+            # otherwise subtract the reversals a second time.
+            PaymentLog.objects.filter(stripe_id=stripe_id).update(refunded=True)
+            reversal.refunded = True
+        logger.warning(f"Reversed ${amount} of payment intent {stripe_id}")
+    return reversal
 
 
 @csrf_exempt
@@ -134,16 +228,27 @@ def webhook(request: HttpRequest) -> HttpResponse:
             logger.error(f"Invalid signature for {e!s}")
         return HttpResponse(status=400)
 
-    # Handle the checkout.session.completed event
     logger.debug(event)
+    obj = event["data"]["object"]
     if event["type"] == "checkout.session.completed":
         process_payment(
-            amount=int(event["data"]["object"]["amount_total"] / 100),
-            invoice=get_object_or_404(
-                Invoice, pk=int(event["data"]["object"]["client_reference_id"])
-            ),
-            stripe_id=event["data"]["object"]["payment_intent"],
+            amount=cents_to_usd(obj["amount_total"]),
+            invoice=get_object_or_404(Invoice, pk=int(obj["client_reference_id"])),
+            stripe_id=obj["payment_intent"],
         )
+    elif event["type"] in REVERSAL_EVENT_TYPES:
+        # A refund reports the running total refunded on the charge, while a
+        # dispute reports the amount being taken away.
+        cents_reversed = (
+            obj["amount_refunded"]
+            if event["type"] == "charge.refunded"
+            else obj["amount"]
+        )
+        stripe_id = obj.get("payment_intent")
+        if stripe_id:
+            process_reversal(stripe_id=stripe_id, cents_reversed=cents_reversed)
+        else:
+            logger.error(f"{event['type']} without a payment intent: {obj}")
     return HttpResponse(status=200)
 
 
