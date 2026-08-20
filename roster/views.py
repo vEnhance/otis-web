@@ -39,6 +39,7 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
+from django.views.decorators.http import require_POST
 from django.views.generic.edit import UpdateView
 from django.views.generic.list import ListView
 from django_discordo import SUCCESS_LOG_LEVEL
@@ -418,6 +419,7 @@ def inquiry(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
 
 
 @login_required
+@require_POST
 def cancel_inquiry(request: AuthHttpRequest, pk: int) -> HttpResponse:
     inquiry = get_object_or_404(UnitInquiry, pk=pk)
     if inquiry.student.user != request.user and not request.user.is_staff:
@@ -570,6 +572,13 @@ def unlock_rest_of_mystery(request: HttpRequest, delta: int = 1) -> HttpResponse
         raise PermissionDenied(
             f"You don't have the Mystery unit unlocked!\nYou are currently {student}",
         )
+
+    # Students reach this by typing the URL rather than from a link, so a GET
+    # asks for confirmation instead of acting: Django exempts safe methods from
+    # CSRF checks, and swapping someone's units shouldn't be something another
+    # site can trigger by navigating them here.
+    if request.method != "POST":
+        return render(request, "roster/mystery_unlock.html", {"delta": delta})
 
     # Patch the exploit in https://github.com/vEnhance/otis-web/issues/447
     # If there is a pending Mystery submission, just accept it but don't process

@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% block title %}
+  Unlock the rest of Mystery
+{% endblock title %}
+{% block layout-content %}
+  <div class="alert alert-warning">
+    This will remove the Mystery unit from your curriculum and replace it with
+    the {% if delta == 1 %}easier{% else %}harder{% endif %} of the units behind
+    it. You can't undo this yourself.
+  </div>
+  <form method="post">
+    {% csrf_token %}
+    <p class="text-center">
+      <input type="submit"
+             class="btn btn-primary"
+             value="Unlock the {% if delta == 1 %}easier{% else %}harder{% endif %} unit" />
+    </p>
+  </form>
+{% endblock layout-content %}

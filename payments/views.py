@@ -24,6 +24,7 @@ from django.http.response import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView
 from django.views.generic.list import ListView
@@ -364,6 +365,7 @@ class JobDetail(VerifiedRequiredMixin, DetailView[Job]):
 
 @login_required
 @verified_required
+@require_POST
 def job_claim(request: HttpRequest, pk: int) -> HttpResponse:
     assert isinstance(request.user, User)
     try:
