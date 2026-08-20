@@ -6,7 +6,8 @@
   {% if proposal.archived %}
     <div class="alert alert-warning" data-testid="proposal-archived-note">
       This problem has been archived by staff, so it is not viewable to other
-      users anymore. If you think this is an error, please contact Evan.
+      users anymore, and it can no longer be testsolved, upvoted or commented
+      on. If you think this is an error, please contact Evan.
     </div>
   {% endif %}
   <div class="d-flex justify-content-between align-items-start mb-3">
@@ -156,8 +157,10 @@
               {% if comment.is_edited %}
                 <span data-testid="comment-edited">(edited {{ comment.updated_at|date:"Y-m-d H:i" }})</span>
               {% endif %}
-              {% if comment.author == contributor or request.user.is_staff %}
-                · <a href="{% url "oime-comment-edit" comment.pk %}">Edit</a>
+              {% if not proposal.archived %}
+                {% if comment.author == contributor or request.user.is_staff %}
+                  · <a href="{% url "oime-comment-edit" comment.pk %}">Edit</a>
+                {% endif %}
               {% endif %}
             </small>
           </div>
@@ -166,16 +169,18 @@
     {% else %}
       <p class="text-muted">No comments yet.</p>
     {% endif %}
-    <div class="card mt-3">
-      <div class="card-header">Add a comment</div>
-      <div class="card-body">
-        <form method="post">
-          {% csrf_token %}
-          {{ comment_form.content }}
-          <button type="submit" name="submit_comment" class="btn btn-primary mt-2">Post Comment</button>
-        </form>
+    {% if can_comment %}
+      <div class="card mt-3" data-testid="comment-form">
+        <div class="card-header">Add a comment</div>
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+            {{ comment_form.content }}
+            <button type="submit" name="submit_comment" class="btn btn-primary mt-2">Post Comment</button>
+          </form>
+        </div>
       </div>
-    </div>
+    {% endif %}
   {% endif %}
 {% endblock layout-content %}
 {% block scripts %}
