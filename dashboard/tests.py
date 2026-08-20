@@ -27,7 +27,7 @@ from dashboard.factories import (
     PSetFactory,
     SemesterDownloadFileFactory,
 )
-from dashboard.models import Announcement, PSet, UploadedFile
+from dashboard.models import Announcement, PSet
 from dashboard.utils import get_news, get_units_to_submit, get_units_to_unlock
 from exams.factories import PracticeExamFactory, QuizFactory
 from hanabi.factories import HanabiContestFactory
@@ -565,135 +565,6 @@ def test_pset_list_permission(otis):
 
     otis.get_20x("student-pset-list", eve.pk)
     otis.get_denied("student-pset-list", alice.pk)
-
-
-@pytest.mark.django_db
-def test_file_operations(otis):
-    semester = SemesterFactory.create()
-    alice = StudentFactory.create(semester=semester)
-    otis.login(alice)
-    unit = UnitFactory.create(code="BMW")
-    alice.curriculum.set([unit])
-    alice.unlocked_units.add(unit)
-
-    content = StringIO("Something")
-    content.name = "content.txt"
-
-    # upload a file
-    resp = otis.post_20x(
-        "uploads",
-        alice.pk,
-        unit.pk,
-        data={"category": "scripts", "content": content, "description": "woof"},
-    )
-
-    messages = [m.message for m in resp.context["messages"]]
-    assert "New file has been uploaded." in messages
-
-    # invalid upload of a file
-    resp = otis.post_20x(
-        "uploads",
-        alice.pk,
-        unit.pk,
-        data={"category": "invalid", "content": content, "description": "woof"},
-    )
-
-    messages = [m.message for m in resp.context["messages"]]
-    assert "New file has been uploaded." not in messages
-
-    upload = UploadedFile.objects.filter(benefactor=alice, unit=unit).first()
-
-    assert upload is not None
-
-    assert upload.unit == unit
-    assert upload.owner == alice.user
-
-    pk = upload.pk
-
-    content1 = StringIO("Now with double the something!")
-    content1.name = "content1.txt"
-    # modify the file
-    resp = otis.post_20x(
-        "edit-file",
-        upload.pk,
-        data={"category": "scripts", "content": content1, "description": "bark"},
-        follow=True,
-    )
-
-    upload = UploadedFile.objects.filter(pk=pk).first()
-    assert upload is not None
-    assert upload.description == "bark"
-
-    otis.post_40x("delete-file", upload.pk)
-    assert UploadedFile.objects.filter(pk=pk).exists()
-    otis.login(UserFactory.create(is_staff=True))
-    otis.post_20x("delete-file", upload.pk, follow=True)
-    assert not UploadedFile.objects.filter(pk=pk).exists()
-
-
-@pytest.mark.django_db
-def test_update_and_delete(otis) -> None:
-    semester = SemesterFactory.create(active=True)
-    alice = StudentFactory.create(semester=semester)
-    otis.login(alice)
-    unit = UnitFactory.create(code="BMW")
-    otis.post_denied("uploads", alice.pk, unit.pk, follow=True)
-    alice.curriculum.set([unit])
-    alice.unlocked_units.add(unit)
-
-    # upload a file
-    content = StringIO("Something")
-    content.name = "content.txt"
-    otis.post_20x(
-        "uploads",
-        alice.pk,
-        unit.pk,
-        data={"category": "scripts", "content": content, "description": "woof"},
-        follow=True,
-    )
-    upload = UploadedFile.objects.get(benefactor=alice, unit=unit)
-
-    # make sure Eve can't do anything
-    eve = StudentFactory.create(semester=semester)
-    otis.login(eve)
-    malicious_content = StringIO("Now with double the something!")
-    malicious_content.name = "malicous_content.txt"
-    otis.post_denied(
-        "edit-file",
-        upload.pk,
-        data={
-            "category": "scripts",
-            "content": malicious_content,
-            "description": "bark",
-        },
-        follow=True,
-    )
-    otis.post_denied(
-        "delete-file",
-        upload.pk,
-        data={
-            "category": "scripts",
-            "content": malicious_content,
-            "description": "bark",
-        },
-        follow=True,
-    )
-
-    otis.login(alice)
-    new_content = StringIO("Look I solved another problem")
-    new_content.name = "new_content.txt"
-    otis.post_20x(
-        "edit-file",
-        upload.pk,
-        data={
-            "category": "scripts",
-            "content": new_content,
-            "description": "meow",
-        },
-        follow=True,
-    )
-    upload.refresh_from_db()
-    assert upload.description == "meow"
 
 
 @pytest.mark.django_db

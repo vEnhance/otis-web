@@ -9,23 +9,16 @@ from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count, OuterRef, Subquery
 from django.db.models.query import QuerySet
-from django.forms.models import BaseModelForm
 from django.http import HttpResponse, HttpResponseRedirect
 from django.http.request import HttpRequest
 from django.http.response import HttpResponseBase
 from django.shortcuts import get_object_or_404, render
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 from django.views.generic import DetailView, ListView
-from django.views.generic.edit import DeleteView, UpdateView
 from django_discordo import VERBOSE_LOG_LEVEL
 
 from core.models import Semester, Unit, UserProfile
-from dashboard.forms import (
-    BonusRequestForm,
-    NewUploadForm,
-    PSetResubmitForm,
-    PSetSubmitForm,
-)
+from dashboard.forms import BonusRequestForm, PSetResubmitForm, PSetSubmitForm
 from dashboard.models import Announcement, PSet, SemesterDownloadFile, UploadedFile
 from dashboard.utils import get_news, get_units_to_submit, get_units_to_unlock
 from exams.models import PracticeExam
@@ -329,39 +322,6 @@ def resubmit_pset(request: HttpRequest, pk: int) -> HttpResponse:
 
 
 @login_required
-def uploads(request: HttpRequest, student_pk: int, unit_pk: int) -> HttpResponse:
-    student = get_student_by_pk(request, student_pk)
-    unit = get_object_or_404(Unit, pk=unit_pk)
-    uploads = UploadedFile.objects.filter(benefactor=student, unit=unit)
-    if not student.check_unit_unlocked(unit) and not uploads.exists():
-        raise PermissionDenied("This unit is not unlocked yet")
-
-    form = None
-    if request.method == "POST":
-        form = NewUploadForm(request.POST, request.FILES)
-        if form.is_valid():
-            new_upload = form.save(commit=False)
-            new_upload.unit = unit
-            new_upload.benefactor = student
-            new_upload.owner = request.user
-            new_upload.save()
-            messages.success(request, "New file has been uploaded.")
-            form = None  # clear form on successful upload, prevent duplicates
-    if form is None:
-        form = NewUploadForm(initial={"unit": unit})
-
-    context: dict[str, Any] = {
-        "title": "File Uploads",
-        "student": student,
-        "unit": unit,
-        "form": form,
-        "files": uploads,
-    }
-    # TODO form for adding new files
-    return render(request, "dashboard/uploads.html", context)
-
-
-@login_required
 def bonus_level_request(request: HttpRequest, student_pk: int) -> HttpResponse:
     student = get_student_by_pk(request, student_pk)
     if student.semester.active is False:
@@ -436,48 +396,6 @@ class SemesterList(LoginRequiredMixin, ListView[Semester]):
         queryset = super().get_queryset()
         queryset = queryset.annotate(count=Count("student"))  # type: ignore
         return queryset  # type: ignore
-
-
-class UpdateFile(
-    LoginRequiredMixin, UpdateView[UploadedFile, BaseModelForm[UploadedFile]]
-):
-    model = UploadedFile
-    fields = (
-        "category",
-        "content",
-        "description",
-    )
-    object: UploadedFile
-
-    def get_success_url(self) -> str:
-        stu_pk: int = self.object.benefactor.pk
-        unit_pk: int = self.object.unit.pk if self.object.unit is not None else 0
-        return reverse(
-            "uploads",
-            args=(
-                stu_pk,
-                unit_pk,
-            ),
-        )
-
-    def get_object(self, *args: Any, **kwargs: Any) -> UploadedFile:
-        obj = super().get_object(*args, **kwargs)
-        assert isinstance(self.request.user, User)
-        if obj.owner != self.request.user and not self.request.user.is_staff:
-            raise PermissionDenied("Not authorized to update this file")
-        return obj
-
-
-class DeleteFile(LoginRequiredMixin, DeleteView):
-    model = UploadedFile
-    success_url = reverse_lazy("index")
-
-    def get_object(self, *args: Any, **kwargs: Any) -> UploadedFile:
-        obj = super().get_object(*args, **kwargs)
-        assert isinstance(self.request.user, User)
-        if not self.request.user.is_staff:
-            raise PermissionDenied("Not authorized to delete this file")
-        return obj
 
 
 @admin_required

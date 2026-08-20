@@ -140,14 +140,6 @@
             {% elif request.user.is_staff %}
               <a href="{% view_problems row.unit %}">(PDF)</a>
             {% endif %}
-            {% spaceless %}
-              {% if row.is_visible %}
-                <a class="emoji-link"
-                   title="File uploads"
-                   href="{% url "uploads" student.pk row.unit.pk %}">📂</a>
-                <sup style="text-shadow: none;">{{ row.num_uploads|default:"0" }}</sup>
-              {% endif %}
-            {% endspaceless %}
             <a class="emoji-link"
                title="Fandom"
                href="{{ row.unit.group.fandom_url }}">🎮</a>
