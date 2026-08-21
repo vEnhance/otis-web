@@ -498,14 +498,37 @@ def test_hint_visibility(otis):
     )
     with freeze_time("2025-09-04"):
         otis.get_40x("opal-show-puzzle", puzzle.hunt.slug, puzzle.slug)
+    # before the release date the hint text must not leak into the page
     with freeze_time("2025-09-06"):
         resp = otis.get_20x("opal-show-puzzle", puzzle.hunt.slug, puzzle.slug)
-        assert "will release" in resp.content.decode()
-        assert "use your brain" not in resp.content.decode()
+        assert resp.context["show_hints"] is False
+        otis.assert_not_has(resp, "use your brain")
     with freeze_time("2025-09-08"):
         resp = otis.get_20x("opal-show-puzzle", puzzle.hunt.slug, puzzle.slug)
-        assert "will release" not in resp.content.decode()
-        assert "use your brain" in resp.content.decode()
+        assert resp.context["show_hints"] is True
+        otis.assert_has(resp, "use your brain")
+
+
+@pytest.mark.django_db
+def test_hint_visibility_without_hint_text(otis):
+    """A puzzle with no pre-written hints says so once hints are released."""
+    verified_group = GroupFactory(name="Verified")
+    alice = UserFactory.create(username="alice", groups=(verified_group,))
+    otis.login(alice)
+    puzzle = OpalPuzzleFactory.create(
+        slug="puzzle",
+        hunt__start_date=datetime.datetime(2025, 9, 5, tzinfo=UTC),
+        hunt__hints_released_date=datetime.datetime(2025, 9, 7, tzinfo=UTC),
+    )
+    assert not puzzle.hint_text_rendered
+    with freeze_time("2025-09-06"):
+        resp = otis.get_20x("opal-show-puzzle", puzzle.hunt.slug, puzzle.slug)
+        otis.assert_testid(resp, "opal-hints-pending")
+    with freeze_time("2025-09-08"):
+        resp = otis.get_20x("opal-show-puzzle", puzzle.hunt.slug, puzzle.slug)
+        assert resp.context["show_hints"] is True
+        otis.assert_testid(resp, "opal-hints-none")
+        otis.assert_no_testid(resp, "opal-hints-available")
 
 
 @pytest.mark.django_db

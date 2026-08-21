@@ -54,9 +54,9 @@
     </div>
   </div>
   <hr />
+  <h3>Hints</h3>
   {% if show_hints and puzzle.hint_text_rendered %}
-    <h3>Hints</h3>
-    <p>
+    <p data-testid="opal-hints-available">
       <a id="open_opal_hints" href="#">Click to reveal pre-written hints.</a>
       Email Evan for more detailed hint requests.
       If so, include a viewable link to your spreadsheet.
@@ -66,9 +66,14 @@
       {{ puzzle.hint_text_rendered|safe }}
     </div>
     <hr />
+  {% elif show_hints %}
+    <p data-testid="opal-hints-none">There aren't any pre-written hints for this puzzle.</p>
+    <p>
+      You can email Evan for more detailed hint requests.
+      If so, include a viewable link to your spreadsheet.
+    </p>
   {% else %}
-    <h3>Hints</h3>
-    <p>Pre-written hints for this puzzle will release on {{ puzzle.hunt.hints_released_date }}.</p>
+    <p data-testid="opal-hints-pending">Pre-written hints will appear on {{ puzzle.hunt.hints_released_date }}</p>
     <p>
       Even before then, you can email Evan for more detailed hint requests.
       If so, include a viewable link to your spreadsheet.
