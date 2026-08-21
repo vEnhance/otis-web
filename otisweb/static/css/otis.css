@@ -217,22 +217,28 @@ table.curriculum td.emojis {
   min-width: max-content;
 }
 
-/* Emoji navigation grid in the sidebar, split into labelled sections. The row
-   height is set per row rather than on the table as a whole, so that adding a
-   row to a grid gives the sidebar another row instead of squashing the
+/* Emoji navigation grid in the sidebar, split into labelled sections. The four
+   columns are a fixed width rather than sized from content or from the space
+   available, so a section holding fewer than four icons still lines its icons
+   up with the sections above it, and the spacing stays put when the sidebar
+   wraps below the main column and gets wider on a narrow screen. Any leftover
+   width collects at the right edge instead of being dealt out between the
+   columns. The row height is set per row rather than on the grid as a whole, so
+   that adding a row gives the sidebar another row instead of squashing the
    existing ones. */
-#emoji_nav table {
-  width: 100%;
+#emoji_nav .emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 36px);
+  grid-auto-rows: 36px;
+  justify-content: start;
+  align-items: center;
+  justify-items: start;
   font-size: 22px;
   text-shadow:
     1px 0 0 #000,
     0 -1px 0 #000,
     0 1px 0 #000,
     -1px 0 0 #000;
-}
-
-#emoji_nav td {
-  height: 36px;
 }
 
 #emoji_nav h4 {

@@ -2,132 +2,72 @@
 {% if request.user.is_authenticated %}
   <div id="emoji_nav">
     <h4>Home</h4>
-    <table>
-      <tr>
-        <td>
-          <a title="Home" class="emoji-link" href="{% url "index" %}">🏠</a>
-        </td>
-        {% if request.user.is_superuser %}
-          <td>
-            <a title="Past" class="emoji-link" href="{% url "semester-list" %}">⏳</a>
-          </td>
-        {% else %}
-          <td>
-            <a title="Past" class="emoji-link" href="{% url "past" %}">🕗</a>
-          </td>
-        {% endif %}
-        <td>
-          <a title="Linked accounts"
-             class="emoji-link"
-             href="{% url "socialaccount_connections" %}">🔐</a>
-        </td>
-        <td>
-          <a title="Display settings"
-             class="emoji-link"
-             href="{% url "profile" %}">⚙</a>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <a title="Announcements"
-             class="emoji-link"
-             href="{% url "announcement-list" %}">📢</a>
-        </td>
-        {% if student %}
-          <td>
-            <a title="Invoice"
-               class="emoji-link"
-               href="{% url "invoice" student.pk %}">💵</a>
-          </td>
-        {% else %}
-          <td>
-            <a title="Invoice" class="emoji-link" href="{% url "invoice" %}">💵</a>
-          </td>
-        {% endif %}
-        <td>
-          <a title="Calendar"
-             class="emoji-link"
-             href="{% url "calendar" %}"
-             target="_blank">📆</a>
-        </td>
-        <td></td>
-      </tr>
-    </table>
+    <div class="emoji-grid">
+      <a title="Home" class="emoji-link" href="{% url "index" %}">🏠</a>
+      {% if request.user.is_superuser %}
+        <a title="Past" class="emoji-link" href="{% url "semester-list" %}">⏳</a>
+      {% else %}
+        <a title="Past" class="emoji-link" href="{% url "past" %}">🕗</a>
+      {% endif %}
+      <a title="Linked accounts"
+         class="emoji-link"
+         href="{% url "socialaccount_connections" %}">🔐</a>
+      <a title="Display settings"
+         class="emoji-link"
+         href="{% url "profile" %}">⚙</a>
+      <a title="Announcements"
+         class="emoji-link"
+         href="{% url "announcement-list" %}">📢</a>
+      {% if student %}
+        <a title="Invoice"
+           class="emoji-link"
+           href="{% url "invoice" student.pk %}">💵</a>
+      {% else %}
+        <a title="Invoice" class="emoji-link" href="{% url "invoice" %}">💵</a>
+      {% endif %}
+      <a title="Calendar"
+         class="emoji-link"
+         href="{% url "calendar" %}"
+         target="_blank">📆</a>
+    </div>
     <h4>Units</h4>
-    <table>
-      <tr>
-        <td>
-          <a title="ARCH" class="emoji-link" href="{% url "arch-index" %}">🗼</a>
-        </td>
-        <td>
-          <a title="Suggest"
-             class="emoji-link"
-             href="{% url "suggest-queue-listing" %}">💡</a>
-        </td>
-        <td>
-          <a title="Fandom" class="emoji-link" href="https://catalog.evanchen.cc/">🎮</a>
-        </td>
-        <td>
-          <a title="Catalog" class="emoji-link" href="{% url "catalog" %}">🗃️</a>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <a title="Gallery"
-             class="emoji-link"
-             href="https://catalog.evanchen.cc/gallery/">🎨</a>
-        </td>
-        <td>
-          <a title="PSet Queue"
-             class="emoji-link"
-             href="{% url "pset-queue-listing" %}">🛂</a>
-        </td>
-        <td></td>
-        <td></td>
-      </tr>
-    </table>
+    <div class="emoji-grid">
+      <a title="ARCH" class="emoji-link" href="{% url "arch-index" %}">🗼</a>
+      <a title="Suggest"
+         class="emoji-link"
+         href="{% url "suggest-queue-listing" %}">💡</a>
+      <a title="Fandom" class="emoji-link" href="https://catalog.evanchen.cc/">🎮</a>
+      <a title="Catalog" class="emoji-link" href="{% url "catalog" %}">🗃️</a>
+      <a title="Gallery"
+         class="emoji-link"
+         href="https://catalog.evanchen.cc/gallery/">🎨</a>
+      <a title="PSet Queue"
+         class="emoji-link"
+         href="{% url "pset-queue-listing" %}">🛂</a>
+    </div>
     <h4>Fun</h4>
-    <table>
-      <tr>
-        <td>
-          <a title="Markets" class="emoji-link" href="{% url "market-list" %}">📈</a>
-        </td>
-        <td>
-          <a title="Diamonds"
-             class="emoji-link"
-             href="{% url "achievements-listing" %}"
-             data-hex="496e737065637420456c6d21">💎</a>
-        </td>
-        <td>
-          <a title="Hanabi" class="emoji-link" href="{% url "hanabi-contests" %}">🎇</a>
-        </td>
-        <td>
-          <a title="OIME" class="emoji-link" href="{% url "oime-landing" %}">🧪</a>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <a title="OPAL" class="emoji-link" href="{% url "opal-hunt-list" %}">🧩</a>
-        </td>
-        <td>
-          <a title="GitHub" class="emoji-link" href="{% url "github-landing" %}">🖥️</a>
-        </td>
-        <td>
-          <a title="Yearbook" class="emoji-link" href="{% url "yearbook-index" %}">📖</a>
-        </td>
-        {% if student %}
-          <td>
-            <a title="Certificate"
-               class="emoji-link"
-               href="{% url "certify" student.pk %}">🎓</a>
-          </td>
-        {% else %}
-          <td>
-            <a title="Certificate" class="emoji-link" href="{% url "certify" %}">🎓</a>
-          </td>
-        {% endif %}
-      </tr>
-    </table>
+    <div class="emoji-grid">
+      <a title="Markets" class="emoji-link" href="{% url "market-list" %}">📈</a>
+      <a title="Diamonds"
+         class="emoji-link"
+         href="{% url "achievements-listing" %}"
+         data-hex="496e737065637420456c6d21">💎</a>
+      <a title="Hanabi" class="emoji-link" href="{% url "hanabi-contests" %}">🎇</a>
+      <a title="OIME" class="emoji-link" href="{% url "oime-landing" %}">🧪</a>
+      <a title="OPAL" class="emoji-link" href="{% url "opal-hunt-list" %}">🧩</a>
+      <a title="Yearbook" class="emoji-link" href="{% url "yearbook-index" %}">📖</a>
+    </div>
+    <h4>Misc</h4>
+    <div class="emoji-grid">
+      <a title="GitHub" class="emoji-link" href="{% url "github-landing" %}">🖥️</a>
+      {% if student %}
+        <a title="Certificate"
+           class="emoji-link"
+           href="{% url "certify" student.pk %}">🎓</a>
+      {% else %}
+        <a title="Certificate" class="emoji-link" href="{% url "certify" %}">🎓</a>
+      {% endif %}
+    </div>
   </div>
   {% if student %}
     <hr />
