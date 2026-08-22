@@ -960,7 +960,7 @@ def user_merge(request: HttpRequest) -> HttpResponse:
 
 
 @admin_required
-def apply_lookup(request: HttpRequest, student_pk: int) -> HttpResponse:
+def apply_uuid_lookup(request: HttpRequest, student_pk: int) -> HttpResponse:
     """Redirect to the apply.evanchen.cc application behind a student's registration."""
     del request
     uuid = (
