@@ -277,13 +277,20 @@ class UpdateInvoice(
 def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Student):
     current_inquiries = UnitInquiry.objects.filter(student=student)
     inquiry.student = student
-    # check if exists already and created recently
-    if current_inquiries.filter(
-        unit=inquiry.unit,
-        action_type=inquiry.action_type,
-        created_at__gte=timezone.now() - datetime.timedelta(seconds=90),
-        status__in=("INQ_NEW", "INQ_ACC"),
-    ).exists():
+    # check if exists already and created recently.
+    # every status counts here except INQ_CANC: canceling a petition is the one
+    # action that should let a student immediately submit the same one again.
+    # in particular a double submit whose first copy was auto-rejected or put
+    # on hold still needs to be caught.
+    if (
+        current_inquiries.filter(
+            unit=inquiry.unit,
+            action_type=inquiry.action_type,
+            created_at__gte=timezone.now() - datetime.timedelta(seconds=90),
+        )
+        .exclude(status="INQ_CANC")
+        .exists()
+    ):
         messages.warning(
             request,
             "The same petition already was submitted within the last 90 seconds.",
