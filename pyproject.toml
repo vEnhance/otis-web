@@ -17,11 +17,11 @@ dependencies = [
   "django-braces>=1.17.0",
   "django-crispy-forms>=2.7",
   "django-debug-toolbar>=7.1.1",
-  "django-discordo>=1.1.0",
+  "django-discordo>=1.2.0",
   "django-extensions>=4.1",
   "django-hijack>=3.7.8",
   "django-import-export>=4.4.1",
-  "django-markdownfield>=0.20.2",
+  "django-markdownfield>=0.21.1",
   "django-markdownify>=0.9.7",
   "django-positions>=0.6.0",
   "django-qr-code>=4.2.0",
@@ -35,7 +35,7 @@ dependencies = [
   "prettytable>=3.18.0",
   "pypdf>=6.16.1",
   "python-dotenv>=1.2.3",
-  "reportlab>=5.0.0",
+  "reportlab>=5.0.1",
   "setuptools>=84.0.0",
   "stripe==5.5.0",
   "wheel>=0.48.0",
@@ -48,7 +48,7 @@ prod = [
 
 [dependency-groups]
 dev = [
-  "Faker>=40.15.0",
+  "Faker>=40.37.0",
   "coverage[toml]>=7.15.4",
   "factory-boy>=3.3.3",
   "freezegun>=1.5.5",
