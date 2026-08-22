@@ -19,6 +19,9 @@
     {% bootstrap_javascript %}
     <link rel="stylesheet"
           href="{% static "tom-select/tom-select.bootstrap5.min.css" %}" />
+    {# single-submit.js stays undeferred on purpose: it arms the guard before #}
+    {# the first form is parsed. See the comment at the top of that file. #}
+    <script src="{% static "single-submit.js" %}"></script>
     <script defer src="{% static "tom-select/tom-select.complete.min.js" %}"></script>
     <script defer src="{% static "otis-select.js" %}"></script>
     <script defer src="{% static "table-sort.js" %}"></script>
