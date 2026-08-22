@@ -164,6 +164,9 @@
           <li>
             <a href="{% url "admin:roster_studentregistration_change" student.reg.pk %}">Edit reg</a>
           </li>
+          <li>
+            <a href="{% url "apply-lookup" student.pk %}">Show application</a>
+          </li>
         {% endif %}
         {% if student.user.profile %}
           <li>
