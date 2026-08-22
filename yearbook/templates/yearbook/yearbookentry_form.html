@@ -82,12 +82,12 @@
 {% endblock layout-content %}
 {% block scripts %}
   <script type="text/javascript">
-      $(() => {
-          $("#id_country").chosen({
+      document.addEventListener("DOMContentLoaded", () => {
+          // Tom Select matches anywhere in a label, and the IMO abbreviation
+          // sits at the end of each one, so typing "USA" finds
+          // "United States of America (USA)".
+          otisSelect("#id_country", {
               width: "100%",
-              // the IMO abbreviation is at the end of each label, so that
-              // typing "USA" should find "United States of America (USA)"
-              search_contains: true,
           });
       });
   </script>

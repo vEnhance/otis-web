@@ -3,7 +3,7 @@
  * value, silently rewriting an answer that was just typed. Firefox did this
  * unconditionally until it was removed in Firefox 130; Chrome and Safari do it
  * only when a non-passive "wheel" listener is registered on the input or on
- * one of its ancestors, which any jQuery plugin can do by accident.
+ * one of its ancestors, which a dropdown or table script can do by accident.
  *
  * Dropping focus when the wheel turns cancels the step, since the value only
  * moves while the input is focused. The wheel listener lives on the input and

@@ -17,17 +17,13 @@
     {% load django_bootstrap5 %}
     {% bootstrap_css %}
     {% bootstrap_javascript %}
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.min.js"
-            integrity="sha384-f7i3wx95GUaq/1ED3jYQs30oXd4a1nL5q5TIA77QbZdDimOMAqtQte21IkV6Nt6k"
-            crossorigin="anonymous"></script>
     <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.css"
-          integrity="sha384-onzP0A1hYntgRfEeA/TnoI5RyILXmbm/LIj9rhayHajboFyIatoRQ2ppsA0tqRec"
-          crossorigin="anonymous">
-    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-    <script src="{% static "k.js" %}"></script>
-    <script src="{% static "number-wheel.js" %}"></script>
+          href="{% static "tom-select/tom-select.bootstrap5.min.css" %}" />
+    <script defer src="{% static "tom-select/tom-select.complete.min.js" %}"></script>
+    <script defer src="{% static "otis-select.js" %}"></script>
+    <script defer src="{% static "table-sort.js" %}"></script>
+    <script defer src="{% static "k.js" %}"></script>
+    <script defer src="{% static "number-wheel.js" %}"></script>
     {% if request.user|getconfig:"use_twemoji" %}
       <script src="https://unpkg.com/twemoji@latest/dist/twemoji.min.js"
               crossorigin="anonymous"></script>

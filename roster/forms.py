@@ -63,7 +63,7 @@ class CurriculumForm(forms.Form):
 class AdvanceUnitChoiceField(forms.ModelMultipleChoiceField):
     def __init__(self, *args: Any, **kwargs: Any):
         widget = kwargs.pop(
-            "widget", forms.SelectMultiple(attrs={"class": "chosen-select"})
+            "widget", forms.SelectMultiple(attrs={"class": "otis-select"})
         )
         required = kwargs.pop("required", False)
         super().__init__(*args, widget=widget, required=required, **kwargs)

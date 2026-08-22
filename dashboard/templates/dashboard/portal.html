@@ -459,7 +459,7 @@
 {% endblock layout-content %}
 {% block scripts %}
   <script type="text/javascript">
-      $(() => {
+      document.addEventListener("DOMContentLoaded", () => {
           // https://docs.djangoproject.com/en/3.2/ref/csrf/
           function getCookie(name) {
               let cookieValue = null;
@@ -492,9 +492,12 @@
               });;
           }
 
-          $('#dismiss_news').on('click', () => {
-              ajaxCall("{% url 'dismiss-news' %}");
-          });
+          const dismiss = document.getElementById("dismiss_news");
+          if (dismiss !== null) {
+              dismiss.addEventListener("click", () => {
+                  ajaxCall("{% url 'dismiss-news' %}");
+              });
+          }
       });
   </script>
 {% endblock scripts %}

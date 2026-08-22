@@ -70,32 +70,24 @@
 {% endblock css %}
 {% block scripts %}
   <script type="text/javascript">
-      $(document).ready(function() {
-          $("#id_problem").chosen({
-              placeholder_text: "...",
+      document.addEventListener("DOMContentLoaded", function() {
+          otisSelect("#id_problem", {
+              placeholder: "...",
               width: "90%",
-              search_contains: true,
           });
 
-          parent = $("#id_content").parent().get(0)
-          d = document.createElement('div');
-          $(d).attr('id', 'content_render')
-              .html('')
-              .appendTo(parent);
+          const content = document.getElementById("id_content");
+          const render = document.createElement("div");
+          render.id = "content_render";
+          content.parentNode.appendChild(render);
 
-          $("#id_content").on("input", (e) => {
-              render_content(true);
-          });
-
-          function render_content(enabled) {
-              const s = $("#id_content").val();
-              if (!enabled) return;
-              $("#content_render").text(s);
-              console.log(s);
-              MathJax.typeset([document.querySelector("#content_render")]);
+          function render_content() {
+              render.textContent = content.value;
+              MathJax.typeset([render]);
           }
 
-          $("#id_content").blur(render_content(true));
+          content.addEventListener("input", render_content);
+          content.addEventListener("blur", render_content);
       });
   </script>
 {% endblock scripts %}

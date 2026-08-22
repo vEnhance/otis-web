@@ -414,3 +414,25 @@ img.emoji {
 .oime-table-toggle.collapsed::before {
   content: "▸ ";
 }
+
+/* Sort indicators for <table class="otis-sortable"> (see table-sort.js).
+   The old tablesorter plugin shipped arrows in a stylesheet this site never
+   loaded, so until now a sortable header looked exactly like a fixed one. */
+table.otis-sortable th[aria-sort] {
+  cursor: pointer;
+  user-select: none;
+}
+table.otis-sortable th[aria-sort]::after {
+  content: "↕";
+  margin-left: 0.35em;
+  font-size: 0.85em;
+  opacity: 0.4;
+}
+table.otis-sortable th[aria-sort="ascending"]::after {
+  content: "↑";
+  opacity: 1;
+}
+table.otis-sortable th[aria-sort="descending"]::after {
+  content: "↓";
+  opacity: 1;
+}

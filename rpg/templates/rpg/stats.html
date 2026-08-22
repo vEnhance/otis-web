@@ -31,14 +31,14 @@
     {% endfor %}
   </ul>
   <script>
-      $(function() {
-          var hash = location.hash;
+      document.addEventListener("DOMContentLoaded", function() {
+          const hash = location.hash;
           if (hash == "#headingDexterity" ||
               hash == "#headingWisdom" ||
               hash == "#headingStrength" ||
               hash == "#headingCharisma") {
-              var stat = hash.slice(8);
-              $("#collapse" + stat).addClass("show");
+              const stat = hash.slice(8);
+              document.getElementById("collapse" + stat).classList.add("show");
           }
       });
   </script>

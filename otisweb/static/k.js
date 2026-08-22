@@ -277,6 +277,7 @@ function runKatamari() {
         el,
         go,
         off,
+        rect,
         w,
         h,
         endXI = Math.floor(docW / GRIDX) + 1,
@@ -292,9 +293,13 @@ function runKatamari() {
         if (el.khPicked) {
           continue;
         }
-        off = $(el).offset();
-        w = $(el).width();
-        h = $(el).height();
+        rect = el.getBoundingClientRect();
+        off = {
+          left: rect.left + window.scrollX,
+          top: rect.top + window.scrollY,
+        };
+        w = rect.width;
+        h = rect.height;
         go = {
           el: domNodes[i] /* dom element. */,
           left: off.left,
@@ -507,7 +512,7 @@ function runKatamari() {
         attX = r * Math.cos(offTh),
         attY = r * Math.sin(offTh),
         el = go.el.cloneNode(true),
-        go_jel = $(go.el),
+        go_style = window.getComputedStyle(go.el),
         newAtt = {
           el: el,
           attX: attX,
@@ -527,7 +532,7 @@ function runKatamari() {
           diag: go.diag,
           removeR: r + go.diag,
           visible: false,
-          display: go_jel.css("display"),
+          display: go_style.display,
         };
       attached.push(newAtt);
       grow(go);
@@ -541,10 +546,10 @@ function runKatamari() {
       );
       el.style.display = "none";
       /* copy computed styles from old object. */
-      el.style.color = go_jel.css("color");
-      el.style.textDecoration = go_jel.css("text-decoration");
-      el.style.fontSize = go_jel.css("font-size");
-      el.style.fontWeight = go_jel.css("font-weight");
+      el.style.color = go_style.color;
+      el.style.textDecoration = go_style.textDecoration;
+      el.style.fontSize = go_style.fontSize;
+      el.style.fontWeight = go_style.fontWeight;
       el.khIgnore = true;
       attachedDiv.appendChild(el);
       if (sounds) {
@@ -745,7 +750,10 @@ function runKatamari() {
     window.scrollTo(0, 200);
 
     function on_resize() {
-      player1.setDocSize($(document).width() - 5, $(document).height() - 5);
+      player1.setDocSize(
+        document.documentElement.scrollWidth - 5,
+        document.documentElement.scrollHeight - 5,
+      );
     }
     on_resize();
 
@@ -832,8 +840,14 @@ function runKatamari() {
   }
 
   function whenAllLoaded(gameDiv, stickyNodes) {
-    stickyNodes.finalize($(document).width(), $(document).height());
-    $("#loadingp").empty();
+    stickyNodes.finalize(
+      document.documentElement.scrollWidth,
+      document.documentElement.scrollHeight,
+    );
+    var loadingp = document.getElementById("loadingp");
+    if (loadingp) {
+      loadingp.replaceChildren();
+    }
     var bgmusic, ballOpts;
     if (!(bgmusic = document.getElementById("khbgmusic"))) {
       bgmusic = document.createElement("audio");
@@ -853,7 +867,7 @@ function runKatamari() {
     new Game(gameDiv, stickyNodes, ballOpts);
   }
   function main() {
-    var gameDiv, checkInterval;
+    var gameDiv;
 
     gameDiv = document.createElement("div");
     gameDiv.khIgnore = true;
@@ -876,12 +890,7 @@ function runKatamari() {
         ]);
       }
 
-      checkInterval = setInterval(function () {
-        if (window.$) {
-          clearInterval(checkInterval);
-          whenAllLoaded(gameDiv, window.khNodes);
-        }
-      }, 100);
+      whenAllLoaded(gameDiv, window.khNodes);
     }, 0);
   }
 
@@ -889,7 +898,7 @@ function runKatamari() {
     main();
   }
 }
-$(document).ready(function () {
+document.addEventListener("DOMContentLoaded", function () {
   const ks = [];
   document.addEventListener("keydown", function (e) {
     ks.push(e.keyCode);
@@ -910,14 +919,16 @@ $(document).ready(function () {
     if (a * a + b * b * b + d * d * d * d != 2851721) return;
     if (l * l + r * r * r + u * u * u * u != 2145824) return;
     console.log(ks);
-    $("#sitetitle").html(
-      (5 * a * a - 1814).toString(16) +
+    const sitetitle = document.getElementById("sitetitle");
+    if (sitetitle) {
+      sitetitle.textContent =
+        (5 * a * a - 1814).toString(16) +
         (6 * b * b + 2121).toString(16) +
         ((35 * d * d) / 2 + 9).toString(16) +
         (14 * l * l + 131).toString(16) +
         (20 * r * r - 627).toString(16) +
-        (6 * u * u - 183).toString(16),
-    );
+        (6 * u * u - 183).toString(16);
+    }
     runKatamari();
   });
 });

@@ -2,12 +2,13 @@
 {% load static %}
 {% block css %}
   <style type="text/css">
-      ul.chosen-choices {
+      .ts-control {
           border: 2px solid #aaa;
       }
 
-      .chosen-container-multi .chosen-choices li {
-          float: none;
+      /* One selected unit per row, so a long list stays readable. */
+      .ts-wrapper.multi .ts-control>.item {
+          flex-basis: 100%;
       }
 
       label.form-label {
@@ -18,10 +19,9 @@
 {% endblock css %}
 {% block scripts %}
   <script type="text/javascript">
-      $(document).ready(function() {
-          $("select.chosen-select").chosen({
-              placeholder_text: "...",
-              width: "300",
+      document.addEventListener("DOMContentLoaded", function() {
+          otisSelect("select.otis-select", {
+              placeholder: "...",
           });
       });
   </script>

@@ -108,10 +108,14 @@
 {% endblock layout-content %}
 {% block scripts %}
   <script type="text/javascript">
-      $(() => {
-          $("#open_opal_hints").click(function() {
-              $("#opal_hints").toggleClass("d-none");
-          });
+      document.addEventListener("DOMContentLoaded", () => {
+          // The link only renders when this puzzle has hints to reveal.
+          const opener = document.getElementById("open_opal_hints");
+          if (opener !== null) {
+              opener.addEventListener("click", () => {
+                  document.getElementById("opal_hints").classList.toggle("d-none");
+              });
+          }
       });
   </script>
 {% endblock scripts %}
