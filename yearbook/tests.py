@@ -133,9 +133,8 @@ def test_yearbook_jump(otis):
     # including a draft that isn't yours, which is not among the choices
     otis.post_redirects(index_url, "yearbook-jump", data={"entry": draft.pk})
 
-    # the options read the way the cards do, not the way str(entry) does
     picker = otis.get_20x("yearbook-index").context["lookup_form"].fields["entry"]
-    assert picker.label_from_instance(entry) == f"{entry.name} (fond of ducks)"
+    assert picker.label_from_instance(entry) == entry.name
 
     # the author of a draft can still pick their own
     otis.login(shy)

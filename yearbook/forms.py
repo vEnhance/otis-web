@@ -65,7 +65,7 @@ class YearbookEntryChoiceField(forms.ModelChoiceField):
 
     def label_from_instance(self, obj: Any) -> str:
         assert isinstance(obj, YearbookEntry)
-        return f"{obj.name} ({obj.tagline})" if obj.tagline else obj.name
+        return obj.name
 
 
 class YearbookEntrySelectForm(forms.Form):

@@ -11,6 +11,7 @@
   <p>
     All <b>{{ paginator.count }}</b> {{ paginator.count|pluralize:"entry,entries" }} in the yearbook,
     in alphabetical order.
+    <a href="{% url "yearbook-index" %}">Back to index</a>
   </p>
   {% include "yearbook/components/entry_list.html" with empty_message="Nobody has signed the yearbook yet. Be the first!" %}
   {% if page_obj.has_other_pages %}
