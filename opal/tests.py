@@ -9,6 +9,7 @@ from freezegun.api import freeze_time
 
 from core.factories import GroupFactory, UserFactory
 from opal.factories import OpalAttemptFactory, OpalHuntFactory, OpalPuzzleFactory
+from opal.views import _Eligibility
 from rpg.factories import AchievementFactory
 from rpg.models import AchievementUnlock
 
@@ -712,7 +713,7 @@ def test_close_answer(otis):
 def test_guess_budget_is_rechecked_under_the_lock(otis):
     """A guess that stops being eligible while it waits for the lock is refused.
 
-    The first `_can_attempt` is the optimistic check that decides whether to show
+    The first `_eligibility` is the optimistic check that decides whether to show
     the form; the second runs holding the puzzle row. A guess submitted in
     parallel that used up the last of the budget in between shows up here as the
     two disagreeing, and the later guess must not be evaluated.
@@ -726,7 +727,13 @@ def test_guess_budget_is_rechecked_under_the_lock(otis):
         slug="one", answer="1", hunt=hunt, num_to_unlock=0, guess_limit=3
     )
 
-    with mock.patch("opal.views._can_attempt", side_effect=[True, False]):
+    with mock.patch(
+        "opal.views._eligibility",
+        side_effect=[
+            _Eligibility(False, OpalAttempt.objects.none(), True),
+            _Eligibility(False, OpalAttempt.objects.none(), False),
+        ],
+    ):
         otis.post_40x(
             "opal-show-puzzle", "hunt", "one", data={"guess": "1"}, follow=True
         )

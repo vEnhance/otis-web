@@ -1,6 +1,6 @@
 import datetime
 import logging
-from typing import Any
+from typing import Any, NamedTuple
 
 import requests
 from allauth.socialaccount.models import SocialAccount
@@ -227,24 +227,29 @@ def _discord_send_congratulations(request: AuthHttpRequest, hunt: OpalHunt):
     requests.post(url=hunt.discord_webhook_url, json={"content": message})
 
 
-def _incorrect_attempts(puzzle: OpalPuzzle, user: User) -> QuerySet[OpalAttempt]:
-    """The attempts by `user` that count against the guess limit on `puzzle`."""
-    return OpalAttempt.objects.filter(
+class _Eligibility(NamedTuple):
+    """Where `user` stands on `puzzle`: solved it, guesses spent, guess left?"""
+
+    is_solved: bool
+    incorrect_attempts: QuerySet[OpalAttempt]
+    can_attempt: bool
+
+
+def _eligibility(puzzle: OpalPuzzle, user: User) -> _Eligibility:
+    is_solved = OpalAttempt.objects.filter(
+        puzzle=puzzle, user=user, is_correct=True
+    ).exists()
+    incorrect_attempts = OpalAttempt.objects.filter(
         puzzle=puzzle,
         user=user,
         excused=False,
         is_close=False,
         is_correct=False,
     ).order_by("-created_at")
-
-
-def _can_attempt(puzzle: OpalPuzzle, user: User) -> bool:
-    """Whether `user` has a guess left on `puzzle` and hasn't already solved it."""
-    is_solved = OpalAttempt.objects.filter(
-        puzzle=puzzle, user=user, is_correct=True
-    ).exists()
-    return (
-        not is_solved and _incorrect_attempts(puzzle, user).count() < puzzle.guess_limit
+    return _Eligibility(
+        is_solved=is_solved,
+        incorrect_attempts=incorrect_attempts,
+        can_attempt=(not is_solved and incorrect_attempts.count() < puzzle.guess_limit),
     )
 
 
@@ -262,26 +267,29 @@ def show_puzzle(
                 "Warning: this puzzle isn't unlocked yet. Showing for testsolvers and admins only.",
             )
 
-    is_solved = OpalAttempt.objects.filter(
-        puzzle=puzzle, user=request.user, is_correct=True
-    ).exists()
-    incorrect_attempts = _incorrect_attempts(puzzle, request.user)
-    can_attempt = _can_attempt(puzzle, request.user)
+    eligibility = _eligibility(puzzle, request.user)
 
     if request.method == "POST":
-        if not can_attempt:
+        if not eligibility.can_attempt:
             raise PermissionDenied("You cannot attempt this puzzle anymore.")
         form = AttemptForm(request.POST)
         if form.is_valid():
             # Hold the puzzle row while the guess budget is rechecked and the
             # attempt is written. Without it, guesses submitted in parallel all
             # read the same remaining count and all get evaluated, so the limit
-            # can be overrun. Keep this block short and free of network calls:
-            # everything else on this puzzle waits behind the lock until it
-            # commits, so the Discord ping below stays outside it.
+            # can be overrun.
+            #
+            # The lock has to be on the puzzle and not on the attempts: the race
+            # is over a row that doesn't exist yet, and Django talks to MySQL at
+            # READ COMMITTED, where InnoDB takes no gap locks. Locking the
+            # existing attempts would not stop the new INSERT.
+            #
+            # Keep this block short and free of network calls: every other guess
+            # on this puzzle waits behind the lock until it commits, which is why
+            # the Discord ping below stays outside it.
             with transaction.atomic():
                 puzzle = OpalPuzzle.objects.select_for_update().get(pk=puzzle.pk)
-                if not _can_attempt(puzzle, request.user):
+                if not _eligibility(puzzle, request.user).can_attempt:
                     raise PermissionDenied("You cannot attempt this puzzle anymore.")
                 attempt = OpalAttempt(
                     guess=form.cleaned_data["guess"],
@@ -312,7 +320,7 @@ def show_puzzle(
                 messages.warning(request, f"Sorry, wrong answer to {puzzle.title}.")
             return HttpResponseRedirect(puzzle.get_absolute_url())
 
-    elif can_attempt is True:
+    elif eligibility.can_attempt is True:
         form = AttemptForm()
     else:
         form = None
@@ -324,15 +332,15 @@ def show_puzzle(
     context: dict[str, Any] = {}
     context["puzzle"] = puzzle
     context["hunt"] = puzzle.hunt
-    context["solved"] = is_solved
+    context["solved"] = eligibility.is_solved
     context["attempts"] = attempts
     context["form"] = form
-    context["can_attempt"] = can_attempt
+    context["can_attempt"] = eligibility.can_attempt
     context["show_hints"] = (
         timezone.now() >= puzzle.hunt.hints_released_date
         or has_early_access(request.user)
     )
-    context["incorrect_attempts"] = incorrect_attempts
+    context["incorrect_attempts"] = eligibility.incorrect_attempts
     return render(request, "opal/showpuzzle.html", context)
 
 
