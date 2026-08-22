@@ -18,19 +18,24 @@
         <th>Suggestion</th>
         <th>Weight</th>
         <th>Unit</th>
-        <th>Timestamp</th>
-        <th class="text-end">PK</th>
+        <th>Date</th>
       </tr>
     </thead>
     <tbody>
       {% for suggestion in suggestions %}
         <tr {% if suggestion.user == request.user %}class="table-warning fw-bold"{% endif %}>
-          <th class="text-end">{{ forloop.counter }}.</th>
+          <th class="text-end">
+            {% if request.user.is_staff %}
+              <a href="{% url "admin:suggestions_problemsuggestion_change" suggestion.pk %}">{{ suggestion.pk }}</a>
+            {% else %}
+              {{ suggestion.pk }}
+            {% endif %}
+          </th>
           <td>
             {% if suggestion.user == request.user or request.user.is_staff %}
-              <a href="{{ suggestion.get_absolute_url }}">{{ suggestion.description }}</a>
+              <a href="{{ suggestion.get_absolute_url }}">{{ suggestion.description|truncatechars:24 }}</a>
             {% else %}
-              {{ suggestion.description }}
+              {{ suggestion.description|truncatechars:24 }}
             {% endif %}
           </td>
           <td>{{ suggestion.weight }}♣</td>
@@ -45,14 +50,7 @@
               {% endif %}
             {% endif %}
           </td>
-          <td>{{ suggestion.updated_at }}</td>
-          <td class="text-end">
-            {% if request.user.is_staff %}
-              <a href="{% url "admin:suggestions_problemsuggestion_change" suggestion.pk %}">{{ suggestion.pk }}</a>
-            {% else %}
-              {{ suggestion.pk }}
-            {% endif %}
-          </td>
+          <td>{{ suggestion.updated_at|date:"Y-m-d" }}</td>
         </tr>
       {% endfor %}
     </tbody>
