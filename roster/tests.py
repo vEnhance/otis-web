@@ -1033,6 +1033,73 @@ def test_inquiry_cant_rapid_fire(otis) -> None:
 
 
 @pytest.mark.django_db
+def test_inquiry_cant_rapid_fire_after_auto_reject(otis) -> None:
+    """A double submit is caught even when the first copy was auto-rejected."""
+    with freeze_time("2025-10-31", tz_offset=0):
+        alice: Student = StudentFactory.create()
+        unit: Unit = UnitFactory.create()
+        alice.curriculum.add(unit)
+        alice.unlocked_units.add(unit)
+        PSetFactory.create(student=alice, unit=unit, status="P")
+        otis.login(alice)
+
+        data = {
+            "unit": unit.pk,
+            "action_type": "INQ_ACT_DROP",
+            "explanation": "drop this unit please",
+        }
+        otis.assert_message(
+            otis.post("inquiry", alice.pk, data=data, follow=True),
+            "You have a pending submission for this unit.",
+        )
+        otis.assert_message(
+            otis.post("inquiry", alice.pk, data=data, follow=True),
+            "The same petition already was submitted within the last 90 seconds.",
+        )
+        assert (
+            UnitInquiry.objects.filter(
+                student=alice, unit=unit, action_type="INQ_ACT_DROP"
+            ).count()
+            == 1
+        )
+
+
+@pytest.mark.django_db
+def test_inquiry_can_resubmit_after_cancel(otis) -> None:
+    """Canceling a petition lets the student submit the same one right away."""
+    with freeze_time("2025-10-31", tz_offset=0):
+        alice: Student = StudentFactory.create()
+        unit: Unit = UnitFactory.create()
+        inquiry = UnitInquiry.objects.create(
+            student=alice,
+            unit=unit,
+            action_type="INQ_ACT_UNLOCK",
+            explanation="changed my mind",
+            status="INQ_CANC",
+        )
+        otis.login(alice)
+        otis.assert_message(
+            otis.post(
+                "inquiry",
+                alice.pk,
+                data={
+                    "unit": unit.pk,
+                    "action_type": "INQ_ACT_UNLOCK",
+                    "explanation": "actually i do want this one",
+                },
+                follow=True,
+            ),
+            "Petition automatically processed.",
+        )
+        assert (
+            UnitInquiry.objects.filter(student=alice, unit=unit)
+            .exclude(pk=inquiry.pk)
+            .count()
+            == 1
+        )
+
+
+@pytest.mark.django_db
 def test_inquiry_rejects_drop_lock_if_pending_pset(otis) -> None:
     """Drop/lock petition auto-rejected if there's a pending submission."""
     alice: Student = StudentFactory.create()
