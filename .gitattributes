@@ -17,6 +17,3 @@
 *.png binary
 *.jpg binary
 *.pdf binary
-
-# Vendored third-party assets: exclude from GitHub's language statistics.
-otisweb/static/tom-select/** linguist-vendored

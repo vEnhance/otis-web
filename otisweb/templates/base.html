@@ -18,11 +18,16 @@
     {% bootstrap_css %}
     {% bootstrap_javascript %}
     <link rel="stylesheet"
-          href="{% static "tom-select/tom-select.bootstrap5.min.css" %}" />
+          href="https://cdn.jsdelivr.net/npm/tom-select@2.6.2/dist/css/tom-select.bootstrap5.min.css"
+          integrity="sha384-qNqaCnsmyTrYVwmqv4/4PcwMK8ZFAQnYPpVjWor+6cX6rKsPhebzu8vO2J3s+VZg"
+          crossorigin="anonymous" />
     {# single-submit.js stays undeferred on purpose: it arms the guard before #}
     {# the first form is parsed. See the comment at the top of that file. #}
     <script src="{% static "single-submit.js" %}"></script>
-    <script defer src="{% static "tom-select/tom-select.complete.min.js" %}"></script>
+    <script defer
+            src="https://cdn.jsdelivr.net/npm/tom-select@2.6.2/dist/js/tom-select.complete.min.js"
+            integrity="sha384-1mYKSrq1Nu5YJmWrIU9cvwWQlUyyukJJM9XMkAxY03nb/T69CK+Sn7rjFxVU3SSM"
+            crossorigin="anonymous"></script>
     <script defer src="{% static "otis-select.js" %}"></script>
     <script defer src="{% static "table-sort.js" %}"></script>
     <script defer src="{% static "k.js" %}"></script>

@@ -9,10 +9,6 @@ default_install_hook_types = [
 ]
 default_stages = ["pre-commit"]
 
-# Vendored third-party assets. These are kept as published upstream (minus the
-# source-map reference, since we don't ship the .map files), so no hook should
-# reformat, spell-check or otherwise touch them.
-exclude = '^otisweb/static/tom-select/'
 
 [[repos]]
 repo = "https://github.com/compilerla/conventional-pre-commit"
