@@ -2091,3 +2091,28 @@ def test_registration_is_all_or_nothing(otis) -> None:
     assert not Student.objects.filter(user=alice).exists()
     alice.refresh_from_db()
     assert alice.first_name == "a"
+
+
+@pytest.mark.django_db
+def test_apply_uuid_lookup(otis) -> None:
+    au: ApplyUUID = ApplyUUIDFactory.create()
+    reg: StudentRegistration = StudentRegistrationFactory.create()
+    student: Student = StudentFactory.create(reg=reg)
+    unregistered: Student = StudentFactory.create()
+
+    otis.login(UserFactory.create(is_staff=True, is_superuser=True))
+    # the registration hasn't cashed in an ApplyUUID yet
+    otis.get_not_found("apply-uuid-lookup", student.pk)
+
+    au.reg = reg
+    au.save()
+    otis.get_redirects(
+        f"https://apply.evanchen.cc/{au.uuid}", "apply-uuid-lookup", student.pk
+    )
+
+    # a student with no registration at all has nothing to show
+    otis.get_not_found("apply-uuid-lookup", unregistered.pk)
+
+    # staff who aren't admins can't peek at applications
+    otis.login(UserFactory.create(is_staff=True))
+    otis.get_denied("apply-uuid-lookup", student.pk)

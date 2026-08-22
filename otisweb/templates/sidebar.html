@@ -160,9 +160,12 @@
         <li>
           <a href="{% url "admin:roster_student_change" student.pk %}">Edit student</a>
         </li>
-        {% if student.reg %}
+        {% if student.reg_id %}
           <li>
-            <a href="{% url "admin:roster_studentregistration_change" student.reg.pk %}">Edit reg</a>
+            <a href="{% url "admin:roster_studentregistration_change" student.reg_id %}">Edit reg</a>
+          </li>
+          <li>
+            <a href="{% url "apply-uuid-lookup" student.pk %}">Show application</a>
           </li>
         {% endif %}
         {% if student.user.profile %}
@@ -189,7 +192,7 @@
           <li>
             <form action="{% url 'hijack:acquire' %}" method="post">
               {% csrf_token %}
-              <input type="hidden" name="user_pk" value="{{ student.assistant.user.pk }}" />
+              <input type="hidden" name="user_pk" value="{{ student.assistant.user_id }}" />
               <input type="hidden" name="next" value="{{ request.path }}" />
               <button class="pseudo-button" type="submit">Hijack {{ student.assistant.shortname }}</button>
             </form>

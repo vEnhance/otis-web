@@ -35,7 +35,7 @@ from django.db.models.query_utils import Q
 from django.db.transaction import atomic
 from django.forms import ValidationError
 from django.forms.models import BaseModelForm
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
@@ -957,6 +957,20 @@ def user_merge(request: HttpRequest) -> HttpResponse:
         extra={"request": request},
     )
     return HttpResponseRedirect(reverse("user-lookup"))
+
+
+@admin_required
+def apply_uuid_lookup(request: HttpRequest, student_pk: int) -> HttpResponse:
+    """Redirect to the apply.evanchen.cc application behind a student's registration."""
+    del request
+    uuid = (
+        ApplyUUID.objects.filter(reg__student=student_pk)
+        .values_list("uuid", flat=True)
+        .first()
+    )
+    if uuid is None:
+        raise Http404("No application UUID is attached to this student")
+    return HttpResponseRedirect(f"https://apply.evanchen.cc/{uuid}")
 
 
 @login_required
