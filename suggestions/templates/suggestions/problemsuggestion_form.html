@@ -228,8 +228,12 @@
 {% endblock css %}
 {% block scripts %}
   <script type="text/javascript">
-      $(document).ready(function() {
-          $("#id_unit").chosen();
+      document.addEventListener("DOMContentLoaded", function() {
+          otisSelect("#id_unit");
+
+          function setWarning(id, visible) {
+              document.getElementById(id).style.display = visible ? "" : "none";
+          }
 
           function checkLineLength(s) {
               return !s.split("\n").some(e => e.length > 120); // amol stronk
@@ -249,26 +253,28 @@
               return !pattern.test(s);
           }
 
+          const statement = document.getElementById("id_statement");
+          const solution = document.getElementById("id_solution");
+
           function latexcheck_statement() {
-              const s = $("#id_statement").val();
-              $("#statement_line_length_warning").toggle(!checkLineLength(s));
-              $("#statement_double_dollar_warning").toggle(!checkDoubleDollars(s));
-              $("#statement_quadruple_backslash_warning").toggle(!checkQuadrupleBackslashes(s));
-              $("#statement_adjacent_display_warning").toggle(!checkAdjacentDisplayMath(s));
+              const s = statement.value;
+              setWarning("statement_line_length_warning", !checkLineLength(s));
+              setWarning("statement_double_dollar_warning", !checkDoubleDollars(s));
+              setWarning("statement_quadruple_backslash_warning", !checkQuadrupleBackslashes(s));
+              setWarning("statement_adjacent_display_warning", !checkAdjacentDisplayMath(s));
           }
 
           function latexcheck_solution() {
-              const s = $("#id_solution").val();
-              $("#solution_line_length_warning").toggle(!checkLineLength(s));
-              $("#solution_double_dollar_warning").toggle(!checkDoubleDollars(s));
-              $("#solution_quadruple_backslash_warning").toggle(!checkQuadrupleBackslashes(s));
-              $("#solution_adjacent_display_warning").toggle(!checkAdjacentDisplayMath(s));
+              const s = solution.value;
+              setWarning("solution_line_length_warning", !checkLineLength(s));
+              setWarning("solution_double_dollar_warning", !checkDoubleDollars(s));
+              setWarning("solution_quadruple_backslash_warning", !checkQuadrupleBackslashes(s));
+              setWarning("solution_adjacent_display_warning", !checkAdjacentDisplayMath(s));
           }
           latexcheck_statement();
           latexcheck_solution();
-          $("#id_statement").blur(latexcheck_statement);
-          $("#id_solution").blur(latexcheck_solution);
-
+          statement.addEventListener("blur", latexcheck_statement);
+          solution.addEventListener("blur", latexcheck_solution);
       });
   </script>
 {% endblock scripts %}

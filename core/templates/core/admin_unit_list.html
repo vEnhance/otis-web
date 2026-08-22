@@ -6,14 +6,14 @@
 {% load humanize %}
 {% block layout-content %}
   <p>For your downloading pleasure.</p>
-  <table id="units" class="table table-striped tablesorter">
+  <table id="units" class="table table-striped otis-sortable">
     <thead>
       <tr class="table-info">
         <th>#</th>
         <th>Code</th>
         <th>Unit name</th>
         <th>Slug</th>
-        <th>Actions</th>
+        <th data-sort="none">Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -45,13 +45,3 @@
     </tbody>
   </table>
 {% endblock layout-content %}
-{% block scripts %}
-  <script src="https://cdn.jsdelivr.net/npm/tablesorter@2.31.3/dist/js/jquery.tablesorter.combined.min.js"
-          integrity="sha256-ounC3wWwZ9iBUyF8x1+X+REppGjK+p6/+w+ky1MGoMM="
-          crossorigin="anonymous"></script>
-  <script type="text/javascript">
-      $(() => {
-          $("#units").tablesorter();
-      });
-  </script>
-{% endblock scripts %}

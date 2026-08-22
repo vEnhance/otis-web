@@ -414,3 +414,24 @@ img.emoji {
 .oime-table-toggle.collapsed::before {
   content: "▸ ";
 }
+
+/* Sort indicators for <table class="otis-sortable">; the state itself lives in
+   aria-sort, which table-sort.js maintains. */
+table.otis-sortable th[aria-sort] {
+  cursor: pointer;
+  user-select: none;
+}
+table.otis-sortable th[aria-sort]::after {
+  content: "↕";
+  margin-left: 0.35em;
+  font-size: 0.85em;
+  opacity: 0.4;
+}
+table.otis-sortable th[aria-sort="ascending"]::after {
+  content: "↑";
+  opacity: 1;
+}
+table.otis-sortable th[aria-sort="descending"]::after {
+  content: "↓";
+  opacity: 1;
+}

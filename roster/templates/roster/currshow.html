@@ -4,9 +4,9 @@
 {% block scripts %}
   {% if enabled %}
     <script type="text/javascript">
-        $(document).ready(function() {
-            $("td.unit-select > select").chosen({
-                placeholder_text: "...",
+        document.addEventListener("DOMContentLoaded", function() {
+            otisSelect("td.unit-select > select", {
+                placeholder: "...",
             });
         });
     </script>

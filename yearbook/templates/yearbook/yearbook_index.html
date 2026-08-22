@@ -42,11 +42,9 @@
 {% endblock layout-content %}
 {% block scripts %}
   <script type="text/javascript">
-      $(() => {
-          $("#id_entry").chosen({
+      document.addEventListener("DOMContentLoaded", () => {
+          otisSelect("#id_entry", {
               width: "100%",
-              // search_contains so that typing a last name finds the entry too
-              search_contains: true,
           });
       });
   </script>

@@ -10,16 +10,8 @@
   <div class="container row">
     <div class="col-6">
       <h2>Find problem</h2>
-      <div id="arch_puid_chosen_form" class="mathjax_ignore">
+      <div class="mathjax_ignore">
         {% include "otisweb/components/generic_form.html" with form=lookup_form target=lookup_url submit_name="Lookup" btn_class="btn-primary" %}
-      </div>
-      <div id="arch_puid_mobile_form" class="invisible">
-        <p>
-          <input id="arch_puid_mobile_input" />
-        </p>
-        <p>
-          <button id="arch_puid_mobile_submit" class="btn btn-primary">Go</button>
-        </p>
       </div>
     </div>
     <div class="col-6">
@@ -61,42 +53,18 @@
 {% endblock layout-content %}
 {% block scripts %}
   <script type="text/javascript">
-      $(document).ready(function() {
-          // https://github.com/harvesthq/chosen/pull/1388
-          const is_supported_browser = (function() {
-              if (/iP(od|hone)/i.test(window.navigator.userAgent)) {
-                  return false;
-              }
-              if (/\ Android\ /i.test(window.navigator.userAgent)) {
-                  return /Mobile/i.test(window.navigator.userAgent);
-              }
-              return true;
-          })();
-          const jumpToARCHPage = function(e) {
-              const s = $("#arch_puid_mobile_input").val().toUpperCase().replace(/[^0-9A-Z]/gi, '');
-              console.log(s);
-              if (s !== "") {
-                  window.location.assign("/arch/" + s);
-              }
-          }
-
-          if (is_supported_browser) {
-              $("#id_problem").chosen({
-                  placeholder_text: "...",
-                  width: "90%",
-                  search_contains: true,
-              });
-              $("#arch_puid_mobile_form").remove();
-          } else {
-              $("#arch_puid_chosen_form").remove();
-              $("#arch_puid_mobile_form").removeClass("invisible");
-              $("#arch_puid_mobile_input").bind('blur', jumpToARCHPage);
-              $("#arch_puid_mobile_submit").bind('click', jumpToARCHPage);
-          }
-          $("#id_puid").bind('keyup', function(e) {
-              const s = $("#id_puid").val().toUpperCase().replace(/[^0-9A-Z]/gi, '');
-              $("#id_puid").val(s);
+      document.addEventListener("DOMContentLoaded", function() {
+          otisSelect("#id_problem", {
+              placeholder: "...",
+              width: "90%",
           });
+
+          const puid = document.getElementById("id_puid");
+          if (puid !== null) {
+              puid.addEventListener("keyup", function() {
+                  puid.value = puid.value.toUpperCase().replace(/[^0-9A-Z]/gi, '');
+              });
+          }
       });
   </script>
 {% endblock scripts %}

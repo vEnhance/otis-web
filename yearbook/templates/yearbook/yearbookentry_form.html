@@ -82,12 +82,9 @@
 {% endblock layout-content %}
 {% block scripts %}
   <script type="text/javascript">
-      $(() => {
-          $("#id_country").chosen({
+      document.addEventListener("DOMContentLoaded", () => {
+          otisSelect("#id_country", {
               width: "100%",
-              // the IMO abbreviation is at the end of each label, so that
-              // typing "USA" should find "United States of America (USA)"
-              search_contains: true,
           });
       });
   </script>

@@ -3,7 +3,7 @@
 {% load otis_extras %}
 {% block css %}
   <style type="text/css">
-      a.chosen-single {
+      .ts-control {
           border: 2px solid #aaa;
           background-color: #fff;
           border-radius: 5px;
@@ -17,9 +17,9 @@
 {% endblock css %}
 {% block scripts %}
   <script type="text/javascript">
-      $(document).ready(function() {
-          $("#id_unit").chosen({
-              placeholder_text: "...",
+      document.addEventListener("DOMContentLoaded", function() {
+          otisSelect("#id_unit", {
+              placeholder: "...",
           });
       });
   </script>

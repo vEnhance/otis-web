@@ -84,7 +84,7 @@
       };
 
       // https://stackoverflow.com/a/26608674/4826845
-      $(document).ready(async function() {
+      document.addEventListener("DOMContentLoaded", async function() {
           let result = await fetch(
               "https://api.github.com/repos/vEnhance/otis-web/issues?state=open");
           let allIssues = await result.json();

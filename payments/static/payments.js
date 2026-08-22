@@ -10,11 +10,11 @@ fetch("/payments/config/")
       // Get Checkout Session ID
       fetch(
         "/payments/checkout/" +
-          $("#invoice_id").val() +
+          document.querySelector("#invoice_id").value +
           "/" +
-          Math.round($("#amount").val()) +
+          Math.round(document.querySelector("#amount").value) +
           "/" +
-          $("#checksum").val() +
+          document.querySelector("#checksum").value +
           "/",
       )
         .then((result) => {

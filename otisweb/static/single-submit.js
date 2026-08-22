@@ -13,10 +13,10 @@
 // left alone.
 //
 // This is progressive enhancement: with JavaScript off, nothing here runs and
-// every form posts exactly as it did before. Deliberately no jQuery and no
-// DOMContentLoaded wrapper, since both listeners attach to objects that
-// already exist -- the guard is armed before the first form is parsed, and it
-// survives the jQuery CDN being blocked.
+// every form posts exactly as it did before. Deliberately no DOMContentLoaded
+// wrapper, and this is the one script base.html loads without defer: both
+// listeners attach to objects that already exist, so the guard is armed before
+// the first form is parsed rather than after the document finishes parsing.
 
 (function () {
   function submitButtons(form) {

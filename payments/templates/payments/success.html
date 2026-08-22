@@ -24,14 +24,14 @@
 {% endblock base-content %}
 {% block scripts %}
   <script type="text/javascript">
-      $(document).ready(function() {
+      document.addEventListener("DOMContentLoaded", function() {
           setTimeout(function() {
               window.location = "{% url 'invoice' %}";
           }, 10000);
           let t = 10;
           setInterval(function() {
               t--;
-              $("#num_seconds").html(t);
+              document.getElementById("num_seconds").textContent = t;
           }, 1000);
       });
   </script>

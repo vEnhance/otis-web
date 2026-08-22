@@ -18,16 +18,20 @@
     <span class="fs-6 fst-italic" style="margin-left: 4px">Mouse over icons for hints.</span>
   </p>
   <script>
-      $("#hide-completed-units").click(function() {
-          $(".unit-completed").toggleClass("unit-completed-hidden");
-      });
-      $("#hide-locked-units").click(function() {
-          $(".unit-locked").toggleClass("unit-locked-hidden");
-      });
+      function toggleUnits(buttonId, unitClass, hiddenClass) {
+          document.getElementById(buttonId).addEventListener("click", function() {
+              document.querySelectorAll("." + unitClass).forEach(function(unit) {
+                  unit.classList.toggle(hiddenClass);
+              });
+          });
+      }
+      toggleUnits("hide-completed-units", "unit-completed", "unit-completed-hidden");
+      toggleUnits("hide-locked-units", "unit-locked", "unit-locked-hidden");
 
       let sorted = false;
       let originalOrder = [];
-      $("#sort-by-subject").click(function() {
+      const sortButton = document.getElementById("sort-by-subject");
+      sortButton.addEventListener("click", function() {
           const list = document.getElementsByClassName("curriculum")[0];
           const tbody = list.querySelector("tbody");
           const frag = document.createDocumentFragment();
@@ -73,8 +77,8 @@
 
           tbody.appendChild(frag);
           const button_text = sorted ? "Sort by OTIS logical order" : "Sort by subject";
-          $(this).text(button_text);
-          $(this).attr("title", button_text);
+          sortButton.textContent = button_text;
+          sortButton.title = button_text;
       });
   </script>
   {% with profile=request.user|getprofile %}

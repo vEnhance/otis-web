@@ -72,8 +72,8 @@
 {% endblock layout-content %}
 {% block scripts %}
   <script type="text/javascript">
-      $(() => {
-          $("select").chosen();
+      document.addEventListener("DOMContentLoaded", () => {
+          otisSelect("select");
       });
   </script>
 {% endblock scripts %}

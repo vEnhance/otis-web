@@ -88,7 +88,11 @@
 </style>
 <script>
     document.addEventListener("DOMContentLoaded", function(event) {
-        document.querySelector("#notfound").innerHTML = "NoUnitsFound".split("").map(c => c.charCodeAt(0).toString(16).padStart(2, "0")).join("");
+        // Only rendered when the search came up empty, which is the whole point.
+        const notfound = document.querySelector("#notfound");
+        if (notfound !== null) {
+            notfound.innerHTML = "NoUnitsFound".split("").map(c => c.charCodeAt(0).toString(16).padStart(2, "0")).join("");
+        }
     });
 </script>
 {# vim: ft=htmldjango #}

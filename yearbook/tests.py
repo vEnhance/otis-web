@@ -377,9 +377,9 @@ def test_yearbook_create(otis):
     # ...whereas the biographical fields keep theirs (the wording is Evan's to
     # change; what matters is that one table has help text and the other doesn't)
     assert form.fields["university"].help_text
-    # the country picker is a chosen-style autocomplete, as on the decision form
+    # the country picker is a searchable autocomplete, as on the decision form
     assert "country" in form.fields
-    otis.assert_has(resp, '$("#id_country").chosen(')
+    otis.assert_has(resp, 'otisSelect("#id_country"')
 
     resp = otis.post_30x(
         "yearbook-create",
