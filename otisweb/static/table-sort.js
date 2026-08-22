@@ -1,13 +1,12 @@
 /*
- * Click-to-sort table columns, replacing the jQuery tablesorter plugin.
+ * Click-to-sort table columns.
  *
  * Any <table class="otis-sortable"> with a <thead> and a <tbody> is picked up
  * automatically; no per-page setup is needed. A header opts out of sorting
  * with data-sort="none", which is what the emoji "Actions" columns use.
  *
- * The old plugin's stylesheet was never actually loaded here, so its sort
- * arrows never rendered. The arrows now come from aria-sort in otis.css, which
- * means screen readers announce the sort state as well.
+ * Sort state lives in aria-sort: otis.css draws the arrow from it, and screen
+ * readers announce it.
  */
 
 /* Leading number in a cell, so that "1st" sorts as 1 and "+1.23" as 1.23. */

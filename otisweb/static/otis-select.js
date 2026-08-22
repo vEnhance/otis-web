@@ -1,15 +1,8 @@
 /*
  * Searchable <select> dropdowns, backed by Tom Select.
  *
- * This replaces the Chosen plugin, which was the last thing on the site that
- * needed jQuery. Two behavior notes carried over from that migration:
- *
- * Chosen refused to run on phones (harvesthq/chosen#1388), so any page that
- * needed a picker on mobile had to ship a separate plain-text fallback. Tom
- * Select works on touch devices, so those fallbacks are gone.
- *
- * Chosen's "search_contains" has no equivalent here because it is the default:
- * Tom Select matches anywhere in an option's label, not just at the start.
+ * Matching is substring-based and needs no opting in: a query hits anywhere in
+ * an option's label, not just at the start.
  */
 
 /**
@@ -40,7 +33,7 @@ function otisSelect(selector, options = {}) {
       settings.placeholder = options.placeholder;
     }
     if (select.multiple) {
-      /* Chosen put an X on each chip; remove_button is the equivalent. */
+      /* remove_button puts an X on each selected chip. */
       settings.plugins = ["remove_button"];
     }
     const instance = new TomSelect(select, settings);

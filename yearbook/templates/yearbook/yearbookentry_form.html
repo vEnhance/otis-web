@@ -83,9 +83,6 @@
 {% block scripts %}
   <script type="text/javascript">
       document.addEventListener("DOMContentLoaded", () => {
-          // Tom Select matches anywhere in a label, and the IMO abbreviation
-          // sits at the end of each one, so typing "USA" finds
-          // "United States of America (USA)".
           otisSelect("#id_country", {
               width: "100%",
           });

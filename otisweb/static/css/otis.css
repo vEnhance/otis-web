@@ -415,9 +415,8 @@ img.emoji {
   content: "▸ ";
 }
 
-/* Sort indicators for <table class="otis-sortable"> (see table-sort.js).
-   The old tablesorter plugin shipped arrows in a stylesheet this site never
-   loaded, so until now a sortable header looked exactly like a fixed one. */
+/* Sort indicators for <table class="otis-sortable">; the state itself lives in
+   aria-sort, which table-sort.js maintains. */
 table.otis-sortable th[aria-sort] {
   cursor: pointer;
   user-select: none;
