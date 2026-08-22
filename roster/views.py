@@ -933,14 +933,16 @@ def user_merge(request: HttpRequest) -> HttpResponse:
     with atomic():
         num_students = Student.objects.filter(user=impostor).update(user=crewmate)
         num_socials = SocialAccount.objects.filter(user=impostor).update(user=crewmate)
+        groups = list(impostor.groups.all())
+        crewmate.groups.add(*groups)
         impostor.groups.clear()
         impostor.is_active = False
         impostor.save()
     messages.success(
         request,
         f"Merged {impostor.username} ({impostor.pk}) into "
-        f"{crewmate.username} ({crewmate.pk}): moved {num_students} student(s) "
-        f"and {num_socials} social account(s).",
+        f"{crewmate.username} ({crewmate.pk}): moved {num_students} student(s), "
+        f"{num_socials} social account(s), and {len(groups)} group(s).",
     )
     logger.log(
         SUCCESS_LOG_LEVEL,

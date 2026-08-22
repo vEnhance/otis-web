@@ -179,6 +179,9 @@ def test_user_merge(otis) -> None:
     )
     group: Group = Group.objects.create(name="Verified")
     group.user_set.add(dupe)  # type: ignore
+    # a group both accounts are already in, to check the merge doesn't choke on it
+    shared_group: Group = Group.objects.create(name="Active")
+    shared_group.user_set.add(dupe, real)  # type: ignore
 
     # Test access control
     otis.post_30x("user-merge", data={"impostor": dupe.pk, "crewmate": real.pk})
@@ -219,10 +222,14 @@ def test_user_merge(otis) -> None:
     assert resp.context["impostor"]["students"] == [dupe_student]
     assert dupe_student.semester == semester_old
     assert "Discord (alicediscord)" in resp.context["impostor"]["socials"]
-    assert [g.name for g in resp.context["impostor"]["groups"]] == ["Verified"]
+    assert sorted(g.name for g in resp.context["impostor"]["groups"]) == [
+        "Active",
+        "Verified",
+    ]
     dupe.refresh_from_db()
     assert dupe.is_active is True
-    assert dupe.groups.count() == 1
+    assert dupe.groups.count() == 2
+    assert real.groups.count() == 1
     assert Student.objects.filter(user=dupe).count() == 1
 
     # Now the real thing, by resubmitting the confirmation page's own form
@@ -240,6 +247,8 @@ def test_user_merge(otis) -> None:
     social.refresh_from_db()
     assert dupe.is_active is False
     assert dupe.groups.count() == 0
+    # the impostor's groups were handed over, with no duplicate for the shared one
+    assert sorted(g.name for g in real.groups.all()) == ["Active", "Verified"]
     assert dupe_student.user == real
     assert social.user == real
     assert Student.objects.filter(user=real).count() == 2

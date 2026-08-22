@@ -41,7 +41,8 @@
     </li>
     <li>
       {% if impostor.groups %}
-        <code>{{ impostor.user.username }}</code> is ejected from these groups:
+        <code>{{ impostor.user.username }}</code> is ejected from these groups,
+        and <code>{{ crewmate.user.username }}</code> is added to them:
         {% for group in impostor.groups %}
           {{ group.name }}{% if not forloop.last %}, {% endif %}
         {% endfor %}
