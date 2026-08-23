@@ -39,6 +39,7 @@ class ProblemSuggestionCreate(
     def get_form(self, *args: Any, **kwargs: Any) -> BaseModelForm[ProblemSuggestion]:
         form = super(CreateView, self).get_form(*args, **kwargs)
         form.fields["unit"].queryset = Unit.objects.filter(group__hidden=False)  # type: ignore
+        form.fields["unit"].empty_label = "Search for a unit..."  # type: ignore
         return form
 
     def get_initial(self):
@@ -79,6 +80,11 @@ class ProblemSuggestionUpdate(
     )
     model = ProblemSuggestion
     object: ProblemSuggestion
+
+    def get_form(self, *args: Any, **kwargs: Any) -> BaseModelForm[ProblemSuggestion]:
+        form = super().get_form(*args, **kwargs)
+        form.fields["unit"].empty_label = "Search for a unit..."  # type: ignore
+        return form
 
     def get_success_url(self):
         return reverse("suggest-update", kwargs=self.kwargs)

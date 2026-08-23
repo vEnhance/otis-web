@@ -14,7 +14,8 @@
  * Upgrade every <select> matching `selector` into a searchable dropdown.
  *
  * Options:
- *   placeholder - text shown while nothing is selected.
+ *   placeholder - text shown while nothing is selected. Defaults to the label
+ *                 Django gave its empty choice, e.g. "---------".
  *   width       - CSS width for the widget, e.g. "90%". Defaults to whatever
  *                 the surrounding stylesheet gives the original <select>.
  *   maxOptions  - how many rows the dropdown renders at once (default 500).
@@ -32,18 +33,21 @@ function otisSelect(selector, options = {}) {
       return;
     }
     const settings = {
-      /* Django renders an empty choice for optional fields; without this it is
-       * hidden, and a value once picked could never be cleared again. */
-      allowEmptyOption: true,
+      /* Keep Django's empty choice ("---------") out of the option list, as
+       * Tom Select reads its label as a real option otherwise. */
+      allowEmptyOption: false,
       maxOptions: options.maxOptions ?? 500,
+      ...(options.placeholder !== undefined
+        ? { placeholder: options.placeholder }
+        : {}),
+      plugins: [
+        /* remove_button puts an X on each selected chip;
+         * dropdown_input moves the query into the dropdown */
+        ...(select.multiple ? ["remove_button"] : ["dropdown_input"]),
+        /* clear_button puts an X on the control */
+        ...(select.required ? [] : ["clear_button"]),
+      ],
     };
-    if (options.placeholder !== undefined) {
-      settings.placeholder = options.placeholder;
-    }
-    if (select.multiple) {
-      /* remove_button puts an X on each selected chip. */
-      settings.plugins = ["remove_button"];
-    }
     const instance = new TomSelect(select, settings);
     if (options.width !== undefined) {
       instance.wrapper.style.width = options.width;

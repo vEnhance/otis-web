@@ -435,3 +435,8 @@ table.otis-sortable th[aria-sort="descending"]::after {
   content: "↓";
   opacity: 1;
 }
+
+/* upstream tom select layout shift bug */
+.ts-wrapper.plugin-dropdown_input .ts-control {
+  min-height: calc(1.5em + 0.75rem);
+}
