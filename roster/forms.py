@@ -52,6 +52,9 @@ class CurriculumForm(forms.Form):
                 "help_text": " ".join([unit.code for unit in group]),
                 "required": False,
                 "label_suffix": "aoeu",
+                "widget": forms.SelectMultiple(
+                    attrs={"data-placeholder": "Search for a unit..."}
+                ),
                 "coerce": int,
                 "empty_value": None,
                 "disabled": not enabled,
@@ -63,7 +66,13 @@ class CurriculumForm(forms.Form):
 class AdvanceUnitChoiceField(forms.ModelMultipleChoiceField):
     def __init__(self, *args: Any, **kwargs: Any):
         widget = kwargs.pop(
-            "widget", forms.SelectMultiple(attrs={"class": "otis-select"})
+            "widget",
+            forms.SelectMultiple(
+                attrs={
+                    "class": "otis-select",
+                    "data-placeholder": "Search for a unit...",
+                }
+            ),
         )
         required = kwargs.pop("required", False)
         super().__init__(*args, widget=widget, required=required, **kwargs)
@@ -127,6 +136,7 @@ class InquiryForm(forms.ModelForm):
             Q(group__hidden=False) | Q(pk__in=curriculum_pks)
         )
         self.fields["unit"].queryset = queryset  # type: ignore
+        self.fields["unit"].empty_label = "Search for a unit..."  # type: ignore
 
     class Meta:
         model = UnitInquiry
@@ -211,6 +221,7 @@ class LinkAssistantForm(forms.Form):
             semester__active=True,
             assistant__isnull=True,
         ),
+        empty_label="Search for a student...",
         label="Student to claim",
     )
 

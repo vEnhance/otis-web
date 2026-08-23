@@ -20,6 +20,11 @@ class PSetSubmitForm(forms.ModelForm):
         ],
     )
 
+    def __init__(self, *args: Any, **kwargs: Any):
+        super().__init__(*args, **kwargs)
+        self.fields["unit"].empty_label = "Search for a unit..."  # type: ignore
+        self.fields["next_unit_to_unlock"].empty_label = "Search for a unit..."  # type: ignore
+
     class Meta:
         model = PSet
         fields = (
@@ -40,6 +45,10 @@ class PSetResubmitForm(forms.ModelForm):
         ],
         required=False,
     )
+
+    def __init__(self, *args: Any, **kwargs: Any):
+        super().__init__(*args, **kwargs)
+        self.fields["next_unit_to_unlock"].empty_label = "Search for a unit..."  # type: ignore
 
     class Meta:
         model = PSet
