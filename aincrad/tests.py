@@ -1,6 +1,7 @@
 from hashlib import sha256
 
 import pytest
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test.utils import override_settings
 
 from arch.factories import HintFactory, ProblemFactory
@@ -10,7 +11,8 @@ from dashboard.factories import PSetFactory
 from dashboard.models import Announcement
 from hanabi.factories import HanabiContestFactory, HanabiPlayerFactory
 from hanabi.models import HanabiParticipation, HanabiReplay
-from opal.factories import OpalPuzzleFactory
+from opal.factories import OpalHuntFactory, OpalPuzzleFactory
+from opal.models import OpalPuzzle
 from payments.factories import PaymentLogFactory
 from roster.factories import (
     InvoiceFactory,
@@ -23,6 +25,10 @@ from roster.models import ApplyUUID, Invoice, Student, UnitInquiry
 
 EXAMPLE_PASSWORD = "take just the first 24"
 TARGET_HASH = sha256(EXAMPLE_PASSWORD.encode("ascii")).hexdigest()
+
+
+def opal_pdf(body: bytes) -> SimpleUploadedFile:
+    return SimpleUploadedFile("tetrogram.pdf", b"%PDF-1.4 " + body)
 
 
 @pytest.fixture
@@ -748,9 +754,8 @@ def test_announcement(otis):
 @pytest.mark.django_db
 @override_settings(API_TARGET_HASH=TARGET_HASH)
 def test_opal_handler(otis):
-    OpalPuzzleFactory.create(
-        hunt__slug="teammate", slug="tetrogram", is_metapuzzle=True
-    )
+    hunt = OpalHuntFactory.create(slug="teammate")
+    OpalPuzzleFactory.create(hunt=hunt, slug="tetrogram", is_metapuzzle=True)
     resp = otis.post_20x(
         "api",
         json={
@@ -763,6 +768,27 @@ def test_opal_handler(otis):
     assert puzzle_json["hunt__slug"] == "teammate"
     assert puzzle_json["slug"] == "tetrogram"
     assert puzzle_json["is_metapuzzle"] is True
+    # A puzzle with no PDF yet reports no fingerprint, which is what tells a sync
+    # to upload rather than skip.
+    assert puzzle_json["content"] == ""
+    assert puzzle_json["content_hash"] == ""
+
+
+@pytest.mark.django_db
+@override_settings(API_TARGET_HASH=TARGET_HASH)
+def test_opal_handler_reports_content_hash(otis):
+    puzzle = OpalPuzzleFactory.create(hunt__slug="teammate", slug="tetrogram")
+    puzzle.content.save("tetrogram.pdf", opal_pdf(b"first"), save=False)
+    puzzle.content_hash = "a" * 64
+    puzzle.save()
+
+    resp = otis.post_20x(
+        "api",
+        json={"action": "opal_list", "token": EXAMPLE_PASSWORD},
+    )
+    puzzle_json = resp.json()["puzzles"][0]
+    assert puzzle_json["content_hash"] == "a" * 64
+    assert puzzle_json["content"].endswith("tetrogram.pdf")
 
 
 @pytest.mark.django_db
@@ -782,4 +808,152 @@ def test_apply_uuid_handler(otis):
             uuid="f81d4fae-7dec-11d0-a765-00a0c91e6bf6", percent_aid=50
         ).count()
         == 1
+    )
+
+
+@pytest.mark.django_db
+@override_settings(API_TARGET_HASH=TARGET_HASH)
+def test_opal_pdf_upload(otis):
+    puzzle = OpalPuzzleFactory.create(hunt__slug="teammate", slug="tetrogram")
+    assert puzzle.content_hash == ""
+
+    resp = otis.post_20x(
+        "opal-pdf-upload",
+        data={
+            "token": EXAMPLE_PASSWORD,
+            "pk": puzzle.pk,
+            "content": opal_pdf(b"first draft"),
+        },
+    )
+    assert resp.json()["status"] == "created"
+    puzzle.refresh_from_db()
+    assert puzzle.content.read() == b"%PDF-1.4 first draft"
+    assert puzzle.content.name.startswith("opals/teammate/")
+    assert puzzle.content.name.endswith("/tetrogram.pdf")
+    assert puzzle.content_hash == sha256(b"%PDF-1.4 first draft").hexdigest()
+    assert resp.json()["content_hash"] == puzzle.content_hash
+
+    first_name = puzzle.content.name
+
+    # Same bytes again: the server should recognize them and leave storage alone.
+    resp = otis.post_20x(
+        "opal-pdf-upload",
+        data={
+            "token": EXAMPLE_PASSWORD,
+            "pk": puzzle.pk,
+            "content": opal_pdf(b"first draft"),
+        },
+    )
+    assert resp.json()["status"] == "unchanged"
+    puzzle.refresh_from_db()
+    assert puzzle.content.name == first_name
+
+    # Different bytes: rewritten in place, with no suffixed duplicate left behind.
+    resp = otis.post_20x(
+        "opal-pdf-upload",
+        data={
+            "token": EXAMPLE_PASSWORD,
+            "pk": puzzle.pk,
+            "content": opal_pdf(b"second draft"),
+        },
+    )
+    assert resp.json()["status"] == "updated"
+    puzzle.refresh_from_db()
+    assert puzzle.content.name == first_name
+    assert puzzle.content.read() == b"%PDF-1.4 second draft"
+    assert puzzle.content_hash == sha256(b"%PDF-1.4 second draft").hexdigest()
+
+
+@pytest.mark.django_db
+@override_settings(API_TARGET_HASH=TARGET_HASH)
+def test_opal_pdf_upload_renamed_file_leaves_no_orphan(otis):
+    puzzle = OpalPuzzleFactory.create(hunt__slug="teammate", slug="tetrogram")
+    otis.post_20x(
+        "opal-pdf-upload",
+        data={
+            "token": EXAMPLE_PASSWORD,
+            "pk": puzzle.pk,
+            "content": SimpleUploadedFile("old_name.pdf", b"%PDF-1.4 draft"),
+        },
+    )
+    puzzle.refresh_from_db()
+    old_name = puzzle.content.name
+    assert puzzle.content.storage.exists(old_name)
+
+    otis.post_20x(
+        "opal-pdf-upload",
+        data={
+            "token": EXAMPLE_PASSWORD,
+            "pk": puzzle.pk,
+            "content": SimpleUploadedFile("tetrogram.pdf", b"%PDF-1.4 draft"),
+        },
+    )
+    puzzle.refresh_from_db()
+    assert puzzle.content.name.endswith("tetrogram.pdf")
+    assert not puzzle.content.storage.exists(old_name)
+
+
+@pytest.mark.django_db
+@override_settings(API_TARGET_HASH=TARGET_HASH)
+@pytest.mark.parametrize(
+    "upload",
+    (
+        SimpleUploadedFile("tetrogram.tex", b"%PDF-1.4 not really"),
+        SimpleUploadedFile("tetrogram.pdf", b"\\documentclass{article}"),
+    ),
+    ids=("wrong extension", "wrong bytes"),
+)
+def test_opal_pdf_upload_rejects_non_pdf(otis, upload: SimpleUploadedFile):
+    puzzle = OpalPuzzleFactory.create(hunt__slug="teammate", slug="tetrogram")
+    otis.post_40x(
+        "opal-pdf-upload",
+        data={"token": EXAMPLE_PASSWORD, "pk": puzzle.pk, "content": upload},
+    )
+    puzzle.refresh_from_db()
+    assert not puzzle.content
+    assert puzzle.content_hash == ""
+
+
+@pytest.mark.django_db
+@override_settings(API_TARGET_HASH=TARGET_HASH)
+def test_opal_pdf_upload_failed_auth(otis):
+    puzzle = OpalPuzzleFactory.create(hunt__slug="teammate", slug="tetrogram")
+    resp = otis.post_40x(
+        "opal-pdf-upload",
+        data={
+            "token": "this wrong password is not a puzzle",
+            "pk": puzzle.pk,
+            "content": opal_pdf(b"first draft"),
+        },
+    )
+    assert resp.status_code == 418
+    puzzle.refresh_from_db()
+    assert not puzzle.content
+
+
+@pytest.mark.django_db
+@override_settings(API_TARGET_HASH=TARGET_HASH)
+def test_opal_pdf_upload_unknown_puzzle(otis):
+    otis.post_not_found(
+        "opal-pdf-upload",
+        data={
+            "token": EXAMPLE_PASSWORD,
+            "pk": 1729,
+            "content": opal_pdf(b"first draft"),
+        },
+    )
+    assert not OpalPuzzle.objects.exists()
+
+
+@pytest.mark.django_db
+@override_settings(API_TARGET_HASH=TARGET_HASH)
+@pytest.mark.parametrize("pk", ("", "tetrogram"), ids=("empty", "not a number"))
+def test_opal_pdf_upload_malformed_pk(otis, pk: str):
+    otis.post_40x(
+        "opal-pdf-upload",
+        data={
+            "token": EXAMPLE_PASSWORD,
+            "pk": pk,
+            "content": opal_pdf(b"first draft"),
+        },
     )

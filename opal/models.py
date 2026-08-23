@@ -1,10 +1,11 @@
 import os
 import string
-from hashlib import pbkdf2_hmac
+from hashlib import pbkdf2_hmac, sha256
 from typing import Any
 
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.files.base import File
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.db.models.query import QuerySet
@@ -23,6 +24,20 @@ ALLOWED_ANSWER_CHARACTERS = string.ascii_uppercase + string.digits
 
 def answerize(s: str) -> str:
     return "".join(c for c in s.upper() if c in ALLOWED_ANSWER_CHARACTERS)
+
+
+def sha256_of(f: File[Any]) -> str:
+    """Fingerprint a file's bytes, so a sync can tell which PDFs actually changed.
+
+    Reads in chunks rather than all at once, since these are PDFs and the caller
+    may be holding a handle to remote storage. ``File.chunks()`` rewinds first and
+    Django rewinds again before writing, so this is safe to call on a file that is
+    about to be saved.
+    """
+    digest = sha256()
+    for chunk in f.chunks():
+        digest.update(chunk)
+    return digest.hexdigest()
 
 
 class LiveOpalHuntManager(models.Manager):
@@ -119,6 +134,13 @@ class OpalPuzzle(models.Model):
         validators=[FileExtensionValidator(allowed_extensions=["pdf"])],
         null=True,
         blank=True,
+    )
+    content_hash = models.CharField(
+        max_length=64,
+        blank=True,
+        default="",
+        help_text="SHA-256 of the puzzle file, so a bulk sync can skip PDFs whose "
+        "bytes did not change. Blank means unknown, which makes the sync re-upload.",
     )
 
     guess_limit = models.PositiveSmallIntegerField(

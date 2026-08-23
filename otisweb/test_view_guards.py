@@ -72,6 +72,7 @@ WRITE_METHODS = frozenset({"post", "put", "patch", "delete", "form_valid"})
 # (url name, why) pair; adding to this list should be a conscious decision.
 PUBLIC_VIEWS: dict[str | None, str] = {
     "api": "aincrad API; authenticated by a hashed token in the POST body",
+    "opal-pdf-upload": "aincrad API; authenticated by a hashed token in the POST body",
     "certify": "capability URL; the checksum is verified before anything renders",
     "hanabi-contests": "public list of Hanabi contests",
     "hanabi-replays": "public results, gated on the contest being over",
