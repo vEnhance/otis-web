@@ -59,6 +59,15 @@ from rpg.factories import (
 )
 from rpg.models import Achievement
 from suggestions.factories import ProblemSuggestionFactory
+from tubes.factories import (
+    JoinRecordFactory,
+    OIMECommentFactory,
+    OIMEContributorFactory,
+    OIMEFightFactory,
+    OIMEProposalFactory,
+    TubeFactory,
+)
+from tubes.models import OIMEContributor, OIMEFight, OIMEProposal
 
 # How many objects to create; each one is also a command-line flag.
 # (flag, name, default, help text)
@@ -69,6 +78,7 @@ ARGUMENTS: tuple[tuple[str, str, int, str], ...] = (
     ("-e", "exam_num", 5, "number of tests and quizzes, respectively"),
     ("-a", "assistant_num", 2, "number of assistants"),
     ("-m", "market_num", 3, "number of markets"),
+    ("-o", "oime_num", 20, "number of OIME proposals"),
 )
 
 # Dice rolls deciding who gets what; tweak to taste.
@@ -83,6 +93,27 @@ P_MARKET_GUESS = 0.8  # chance a guessing student guesses on a given market
 P_ASSISTANT = 0.1  # chance a student is assigned an instructor
 MAX_STU_UNITS = 27  # largest curriculum a student can be given
 MIN_PSET_UNITS = 3  # units at the start of a curriculum that are never pset
+
+# Dice rolls for the OIME testsolving tube.
+P_OIME = 0.5  # chance a user signs up for OIME as a contributor
+P_OIME_CASUAL = 0.15  # chance a contributor is currently in casual mode
+P_OIME_RETURNED = 0.2  # chance a ranked contributor once dipped into casual mode
+P_OIME_ANON = 0.1  # chance a contributor hides their name on leaderboards
+P_OIME_DRAFT = 0.15  # chance a proposal is still its author's private draft
+P_OIME_ARCHIVED = 0.05  # chance a proposal has been archived by staff
+P_OIME_FIGHT = 0.25  # chance a contributor testsolves a given proposal
+P_OIME_ACTIVE = 0.05  # chance a testsolve is still in progress right now
+P_OIME_UPVOTE = 0.5  # chance a solved proposal gets an upvote from its solver
+P_OIME_COMMENT = 0.25  # chance a finished testsolve leaves a comment
+P_OIME_REVEAL = 0.1  # chance a contributor spoils a proposal they never fought
+OIME_DAYS = 90  # how far back OIME proposals and testsolves are spread
+# Weights for how a finished testsolve turned out.
+OIME_OUTCOMES = (
+    ("OIME_OK", 55),  # solved
+    ("OIME_ALE", 15),  # ran out of answer attempts
+    ("OIME_TLE", 15),  # ran out of time
+    ("OIME_FAIL", 15),  # gave up
+)
 
 ## Utils
 
@@ -213,6 +244,233 @@ def create_sem_independent(args: argparse.Namespace, users: list[User]):
 
     print("Creating a Hanabi contest")
     HanabiContestFactory.create()
+
+
+def create_oime_contributors(users: list[User]) -> list[OIMEContributor]:
+    """Signs a subset of users up for OIME, and records them joining the tube."""
+    print("Creating the OIME tube")
+    tube = TubeFactory.create(
+        display_name="OIME testsolving",
+        description="Testsolving for the OTIS Invitational Mathematics Examination.",
+        main_url="https://otis.evanchen.cc/tubes/proposals/",
+    )
+
+    joiners = [user for user in users if random.random() < P_OIME]
+    now = timezone.now()
+    contributor_rows: list[Any] = []
+    for user in joiners:
+        casual = random.random() < P_OIME_CASUAL
+        # A ranked contributor who once browsed casually keeps a cutoff, which
+        # leaves every older problem browse-only for them.
+        returned = not casual and random.random() < P_OIME_RETURNED
+        contributor_rows.append(
+            (
+                user,
+                user.get_full_name() or user.username,
+                casual,
+                random.random() < P_OIME_ANON,
+                now - timedelta(days=random.randint(1, OIME_DAYS))
+                if returned
+                else None,
+            )
+        )
+
+    print(f"Creating {len(joiners)} OIME contributors")
+    contributors: list[OIMEContributor] = bulk_create_rows(
+        OIMEContributorFactory,
+        contributor_rows,
+        "user",
+        "display_name",
+        "casual_mode",
+        "hide_from_leaderboards",
+        "ranked_cutoff",
+    )
+    print(f"Creating {len(joiners)} join records")
+    bulk_create_rows(
+        JoinRecordFactory,
+        [
+            (user, now - timedelta(days=random.randint(1, OIME_DAYS)))
+            for user in joiners
+        ],
+        "user",
+        "activation_time",
+        tube=tube,
+    )
+    return contributors
+
+
+def create_oime_proposals(
+    oime_num: int, contributors: list[OIMEContributor]
+) -> list[OIMEProposal]:
+    """Writes proposals, spread over the last few months, some drafted or archived."""
+    subjects = [subject for subject, _ in OIMEProposal.SUBJECT_CHOICES]
+    print(f"Creating {oime_num} OIME proposals")
+    proposals: list[OIMEProposal] = bulk_create_rows(
+        OIMEProposalFactory,
+        [
+            (
+                random.choice(contributors),
+                random.choice(subjects),
+                randint_low(1, 5),
+                random.random() < P_OIME_DRAFT,
+                random.random() < P_OIME_ARCHIVED,
+            )
+            for _ in range(oime_num)
+        ],
+        "author",
+        "subject",
+        "difficulty",
+        "is_draft",
+        "archived",
+    )
+
+    # created_at is auto_now_add, so spreading the proposals out over the term
+    # has to happen after the insert. Doing it matters: a contributor's
+    # ranked_cutoff is compared against it to decide what they may still fight.
+    # The stamps are sorted so that creation order matches pk order, the way it
+    # does in real life; otherwise the default newest-first list looks shuffled.
+    now = timezone.now()
+    stamps = sorted(
+        now - timedelta(minutes=random.randint(60, OIME_DAYS * 24 * 60))
+        for _ in proposals
+    )
+    for proposal, created_at in zip(proposals, stamps):
+        proposal.created_at = created_at
+    OIMEProposal.objects.bulk_update(proposals, fields=("created_at",), batch_size=50)
+    return proposals
+
+
+def create_oime_fights(
+    contributors: list[OIMEContributor], proposals: list[OIMEProposal]
+) -> list[OIMEFight]:
+    """Testsolves the published proposals, with a mix of outcomes."""
+    now = timezone.now()
+    statuses = [status for status, _ in OIME_OUTCOMES]
+    weights = [weight for _, weight in OIME_OUTCOMES]
+
+    rows: list[Any] = []
+    started: list[datetime] = []
+    # At most one active session per contributor, the invariant start_fight enforces.
+    busy: set[int] = set()
+
+    for proposal in proposals:
+        if proposal.is_draft or proposal.archived:
+            continue
+        limit = proposal.time_limit_minutes * 60
+        for contributor in contributors:
+            if contributor.pk == proposal.author_id:  # type: ignore[attr-defined]
+                continue
+            if random.random() > P_OIME_FIGHT:
+                continue
+
+            active = (
+                not contributor.casual_mode
+                and contributor.pk not in busy
+                and random.random() < P_OIME_ACTIVE
+            )
+            if active:
+                busy.add(contributor.pk)
+                # Still inside the clock, so the fight page shows a live timer.
+                started.append(now - timedelta(seconds=random.randint(0, limit // 2)))
+                rows.append((contributor, proposal, "OIME_TBD", 0, None))
+                continue
+
+            status = random.choices(statuses, weights)[0]
+            start = proposal.created_at + timedelta(
+                seconds=random.randint(
+                    0, int((now - proposal.created_at).total_seconds())
+                )
+            )
+            started.append(start)
+            if status == "OIME_ALE":
+                wrong_answers = OIMEFight.ANSWER_LIMIT
+            elif status == "OIME_OK":
+                wrong_answers = randint_low(0, OIMEFight.ANSWER_LIMIT - 1)
+            else:
+                wrong_answers = randint_low(0, OIMEFight.ANSWER_LIMIT)
+            # A timed-out fight is closed at the buzzer; the rest end whenever.
+            spent = limit if status == "OIME_TLE" else random.randint(30, limit)
+            rows.append(
+                (
+                    contributor,
+                    proposal,
+                    status,
+                    wrong_answers,
+                    start + timedelta(seconds=spent),
+                )
+            )
+
+    print(f"Creating {len(rows)} OIME testsolve attempts")
+    fights: list[OIMEFight] = bulk_create_rows(
+        OIMEFightFactory,
+        rows,
+        "contributor",
+        "proposal",
+        "status",
+        "wrong_answers",
+        "submitted_at",
+    )
+    # started_at is auto_now_add, so it too can only be backdated after the insert.
+    for fight, start in zip(fights, started):
+        fight.started_at = start
+    OIMEFight.objects.bulk_update(fights, fields=("started_at",), batch_size=50)
+    return fights
+
+
+def create_oime_reactions(
+    contributors: list[OIMEContributor],
+    proposals: list[OIMEProposal],
+    fights: list[OIMEFight],
+):
+    """Upvotes, revealed solutions and comments left in the wake of the testsolves."""
+    UpvoteThroughModel = OIMEProposal.upvotes.through
+    RevealedThroughModel = OIMEContributor.revealed_proposals.through
+
+    fought = {(f.contributor_id, f.proposal_id) for f in fights}  # type: ignore[attr-defined]
+    upvotes = [
+        UpvoteThroughModel(
+            oimeproposal_id=fight.proposal_id,  # type: ignore[attr-defined]
+            oimecontributor_id=fight.contributor_id,  # type: ignore[attr-defined]
+        )
+        for fight in fights
+        if fight.is_success and random.random() < P_OIME_UPVOTE
+    ]
+    print(f"Creating {len(upvotes)} OIME upvotes")
+    UpvoteThroughModel.objects.bulk_create(upvotes)
+
+    # Reading a solution without solving is the escape hatch out of a problem;
+    # it only happens to problems the contributor never fought.
+    reveals = [
+        RevealedThroughModel(
+            oimecontributor_id=contributor.pk, oimeproposal_id=proposal.pk
+        )
+        for contributor in contributors
+        for proposal in proposals
+        if not proposal.is_draft
+        and contributor.pk != proposal.author_id  # type: ignore[attr-defined]
+        and (contributor.pk, proposal.pk) not in fought
+        and random.random() < P_OIME_REVEAL
+    ]
+    print(f"Creating {len(reveals)} revealed OIME solutions")
+    RevealedThroughModel.objects.bulk_create(reveals)
+
+    comments = [
+        (fight.contributor, fight.proposal)
+        for fight in fights
+        if fight.is_complete and random.random() < P_OIME_COMMENT
+    ]
+    print(f"Creating {len(comments)} OIME comments")
+    bulk_create_rows(OIMECommentFactory, comments, "author", "proposal")
+
+
+def create_oime(args: argparse.Namespace, users: list[User]):
+    """Creates the OIME tube: contributors, proposals, testsolves and discussion."""
+    contributors = create_oime_contributors(users)
+    if not contributors:
+        return
+    proposals = create_oime_proposals(args.oime_num, contributors)
+    fights = create_oime_fights(contributors, proposals)
+    create_oime_reactions(contributors, proposals, fights)
 
 
 def assign_curriculums(students: list[Student]):
@@ -376,6 +634,7 @@ def main():
     )
 
     create_sem_independent(args, users)
+    create_oime(args, users + assistant_users)
 
     current_year = timezone.now().year
     old_semester: Semester = SemesterFactory.create(
