@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import string
 from datetime import timedelta
 from decimal import Decimal
@@ -10,6 +11,7 @@ from typing import Any, Literal, TypedDict
 from allauth.socialaccount.models import SocialAccount
 from django.conf import settings
 from django.core.exceptions import PermissionDenied, SuspiciousOperation
+from django.core.files.uploadhandler import TemporaryFileUploadHandler
 from django.db.models.aggregates import Sum
 from django.db.models.query import QuerySet, prefetch_related_objects
 from django.db.models.query_utils import Q
@@ -24,7 +26,7 @@ from unidecode import unidecode
 from arch.models import Hint, Problem
 from dashboard.models import Announcement, PSet
 from hanabi.models import HanabiContest, HanabiParticipation, HanabiPlayer, HanabiReplay
-from opal.models import OpalPuzzle
+from opal.models import OpalPuzzle, sha256_of
 from payments.models import Job
 from roster.models import (
     ApplyUUID,
@@ -666,6 +668,7 @@ def opal_handler(action: str, data: JSONData) -> JsonResponse:
                     "order",
                     "num_to_unlock",
                     "content",
+                    "content_hash",
                     "is_metapuzzle",
                     "answer",
                     "partial_answers",
@@ -673,6 +676,90 @@ def opal_handler(action: str, data: JSONData) -> JsonResponse:
                     "hint_text",
                 )
             )
+        }
+    )
+
+
+@csrf_exempt
+def opal_pdf_upload(request: HttpRequest) -> JsonResponse:
+    """Replace one OPAL puzzle's PDF, skipping the write if the bytes are unchanged.
+
+    Separate from `api` because that view is JSON-only (`json.loads(request.body)`),
+    and one puzzle per request because that keeps a partial sync legible: the client
+    gets a per-file verdict instead of one opaque result for the whole batch.
+    """
+    if request.method != "POST":
+        raise PermissionDenied("Must use POST")
+
+    # Swap the upload handler before anything reads request.POST, which is what
+    # populates request.FILES. The project configures memory-only uploads capped at
+    # FILE_UPLOAD_MAX_MEMORY_SIZE, and that handler measures the whole request body:
+    # a PDF over the cap would be discarded with no error at all, leaving
+    # request.FILES empty while the sync script saw a 200. Streaming to disk instead
+    # takes the size limit out of the picture. Safe under @csrf_exempt, which stops
+    # CsrfViewMiddleware from touching request.POST first.
+    request.upload_handlers = [TemporaryFileUploadHandler(request)]
+
+    if (bad_token := reject_bad_token(request.POST.get("token"))) is not None:
+        return bad_token
+
+    # isdigit() rather than leaving it to the ORM, which raises ValueError (a 500)
+    # on a pk that is not a number at all.
+    pk = request.POST.get("pk", "")
+    if not pk.isdigit():
+        raise SuspiciousOperation("No valid puzzle pk provided")
+    puzzle = get_object_or_404(OpalPuzzle, pk=int(pk))
+
+    upload = request.FILES.get("content")
+    if upload is None:
+        raise SuspiciousOperation("No file provided")
+
+    filename = os.path.basename(upload.name or "")
+    if not filename.lower().endswith(".pdf"):
+        return JsonResponse(
+            {"error": f"{filename} is not named like a PDF"}, status=400
+        )
+    # Cheap guard against a sync pointed at the wrong directory, or at a PDF that
+    # never finished being written. The model only validates the extension.
+    header = upload.read(5)
+    upload.seek(0)
+    if header != b"%PDF-":
+        return JsonResponse({"error": f"{filename} is not a PDF"}, status=400)
+
+    digest = sha256_of(upload)
+    # Same bytes under a new name still has to be written, since the storage key
+    # ends in the basename and the old one would otherwise stay the live file.
+    stored_name = os.path.basename(puzzle.content.name or "") if puzzle.content else ""
+    if digest == puzzle.content_hash and stored_name == filename:
+        return JsonResponse(
+            {
+                "status": "unchanged",
+                "pk": puzzle.pk,
+                "hunt": puzzle.hunt.slug,
+                "slug": puzzle.slug,
+                "content": puzzle.content.name,
+                "content_hash": digest,
+            }
+        )
+
+    status = "updated" if puzzle.content else "created"
+    if puzzle.content:
+        # Delete the old blob before writing. The storage key ends in the file's
+        # basename, so a renamed PDF would strand the old one; and locally
+        # FileSystemStorage would suffix the new name rather than overwrite it.
+        puzzle.content.delete(save=False)
+    puzzle.content.save(filename, upload, save=False)
+    puzzle.content_hash = digest
+    puzzle.save()
+
+    return JsonResponse(
+        {
+            "status": status,
+            "pk": puzzle.pk,
+            "hunt": puzzle.hunt.slug,
+            "slug": puzzle.slug,
+            "content": puzzle.content.name,
+            "content_hash": digest,
         }
     )
 
@@ -698,6 +785,17 @@ def apply_handler(action: str, data: JSONData) -> JsonResponse:
     return JsonResponse({"pk": au.pk})
 
 
+def reject_bad_token(token: str | None) -> JsonResponse | None:
+    """Return the response to send if `token` is no good, or None if it checks out."""
+    if token is None:
+        raise SuspiciousOperation("No token provided")
+    elif settings.API_TARGET_HASH is None:
+        return JsonResponse({"error": "Not accepting tokens right now"}, status=503)
+    elif sha256(token.encode("ascii")).hexdigest() != settings.API_TARGET_HASH:
+        return JsonResponse({"error": "🧋"}, status=418)
+    return None
+
+
 @csrf_exempt
 def api(request: HttpRequest) -> JsonResponse:
     if not request.method == "POST":
@@ -711,12 +809,8 @@ def api(request: HttpRequest) -> JsonResponse:
         raise SuspiciousOperation("You need to provide an action, silly")
     action = data["action"]
 
-    if "token" not in data:
-        raise SuspiciousOperation("No token provided")
-    elif settings.API_TARGET_HASH is None:
-        return JsonResponse({"error": "Not accepting tokens right now"}, status=503)
-    elif sha256(data["token"].encode("ascii")).hexdigest() != settings.API_TARGET_HASH:
-        return JsonResponse({"error": "🧋"}, status=418)
+    if (bad_token := reject_bad_token(data.get("token"))) is not None:
+        return bad_token
 
     if action in (
         "grade_problem_set",

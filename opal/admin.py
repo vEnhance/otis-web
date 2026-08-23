@@ -4,7 +4,7 @@ from django.contrib import admin, messages
 from django.forms import ModelForm
 from django.http import HttpRequest
 
-from opal.models import OpalAttempt, OpalHunt, OpalPuzzle
+from opal.models import OpalAttempt, OpalHunt, OpalPuzzle, sha256_of
 
 
 @admin.register(OpalHunt)
@@ -47,6 +47,7 @@ class OpalPuzzleAdmin(admin.ModelAdmin):
         ("achievement", admin.EmptyFieldListFilter),
     )
     search_fields = ("hunt__name", "slug", "title")
+    readonly_fields = ("content_hash",)
 
     def save_model(
         self,
@@ -55,15 +56,19 @@ class OpalPuzzleAdmin(admin.ModelAdmin):
         form: ModelForm[OpalPuzzle],
         change: bool,
     ) -> None:
-        if "content" in form.changed_data and obj.content:
-            uploaded_name = os.path.basename(obj.content.name or "")
-            if uploaded_name != obj.slug + ".pdf":
-                messages.warning(
-                    request,
-                    f"The file {uploaded_name} does not match the slug {obj.slug}; "
-                    "it was saved under that name anyway, but check you uploaded "
-                    "the right file.",
-                )
+        if "content" in form.changed_data:
+            # Keep the fingerprint in step with the bytes, or the bulk-sync API would
+            # compare a new PDF against a stale hash and decide nothing had changed.
+            obj.content_hash = sha256_of(obj.content) if obj.content else ""
+            if obj.content:
+                uploaded_name = os.path.basename(obj.content.name or "")
+                if uploaded_name != obj.slug + ".pdf":
+                    messages.warning(
+                        request,
+                        f"The file {uploaded_name} does not match the slug {obj.slug}; "
+                        "it was saved under that name anyway, but check you uploaded "
+                        "the right file.",
+                    )
         super().save_model(request, obj, form, change)
 
 
