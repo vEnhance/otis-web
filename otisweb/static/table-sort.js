@@ -5,6 +5,10 @@
  * automatically; no per-page setup is needed. A header opts out of sorting
  * with data-sort="none", which is what the emoji "Actions" columns use.
  *
+ * Clicking a header cycles it ascending -> descending -> back to the order the
+ * server rendered, which is usually meaningful (newest first, OTIS unit order,
+ * leaderboard rank) and is otherwise unreachable without a reload.
+ *
  * Sort state lives in aria-sort: otis.css draws the arrow from it, and screen
  * readers announce it.
  */
@@ -20,9 +24,24 @@ function otisSortValue(text) {
   return Number.parseFloat(match[0].replace(/,/g, ""));
 }
 
-function otisSortTable(table, headers, th, index) {
+function otisSortTable(table, headers, th, index, original) {
   const body = table.tBodies[0];
   const textOf = (row) => (row.cells[index]?.textContent ?? "").trim();
+
+  /* none -> ascending -> descending -> none. */
+  const previous = th.getAttribute("aria-sort");
+  const next =
+    previous === "none"
+      ? "ascending"
+      : previous === "ascending"
+        ? "descending"
+        : "none";
+  headers.forEach((other) => other.setAttribute("aria-sort", "none"));
+  th.setAttribute("aria-sort", next);
+  if (next === "none") {
+    body.append(...original);
+    return;
+  }
 
   const rows = Array.from(body.rows);
   const filled = rows.filter((row) => textOf(row) !== "");
@@ -42,10 +61,7 @@ function otisSortTable(table, headers, th, index) {
           sensitivity: "base",
         });
 
-  const descending = th.getAttribute("aria-sort") === "ascending";
-  headers.forEach((other) => other.setAttribute("aria-sort", "none"));
-  th.setAttribute("aria-sort", descending ? "descending" : "ascending");
-
+  const descending = next === "descending";
   filled.sort((a, b) => (descending ? -compare(a, b) : compare(a, b)));
   /* Rows with nothing in the sorted column stay at the bottom either way. */
   body.append(...filled, ...blank);
@@ -59,18 +75,20 @@ function otisMakeSortable(table) {
   const headers = Array.from(head.rows[head.rows.length - 1].cells).filter(
     (th) => th.dataset.sort !== "none",
   );
+  /* Snapshot before any sorting, so the third click can put it all back. */
+  const original = Array.from(table.tBodies[0].rows);
   headers.forEach((th) => {
     const index = th.cellIndex;
     th.tabIndex = 0;
     th.setAttribute("role", "button");
     th.setAttribute("aria-sort", "none");
     th.addEventListener("click", () =>
-      otisSortTable(table, headers, th, index),
+      otisSortTable(table, headers, th, index, original),
     );
     th.addEventListener("keydown", (event) => {
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
-        otisSortTable(table, headers, th, index);
+        otisSortTable(table, headers, th, index, original);
       }
     });
   });
