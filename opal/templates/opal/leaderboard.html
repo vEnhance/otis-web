@@ -11,6 +11,7 @@
 {% block layout-content %}
   <p>
     <a class="btn btn-dark" href="{% url "opal-hunt-list" %}">Back to list of hunts</a>
+    <a class="btn btn-secondary" href="{% url "opal-hunt-log" hunt.slug %}">Log</a>
   </p>
   <h2>Puzzle statistics</h2>
   <table class="table table-striped">
