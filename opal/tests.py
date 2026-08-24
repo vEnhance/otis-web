@@ -9,7 +9,7 @@ from freezegun.api import freeze_time
 
 from core.factories import GroupFactory, UserFactory
 from opal.factories import OpalAttemptFactory, OpalHuntFactory, OpalPuzzleFactory
-from opal.views import _Eligibility
+from opal.views import HUNT_LOG_PAGE_SIZE, RECENT_ATTEMPTS_PER_HUNT, _Eligibility
 from rpg.factories import AchievementFactory
 from rpg.models import AchievementUnlock
 
@@ -739,3 +739,142 @@ def test_guess_budget_is_rechecked_under_the_lock(otis):
         )
 
     assert not OpalAttempt.objects.filter(puzzle=puzzle, user=alice).exists()
+
+
+@pytest.mark.django_db
+def test_recent_activity(otis):
+    """The all-hunts activity page shows the newest guesses of every hunt."""
+    verified_group = GroupFactory(name="Verified")
+    alice = UserFactory.create(username="alice", groups=(verified_group,))
+    admin = UserFactory.create(username="admin", is_staff=True, is_superuser=True)
+
+    old_hunt = OpalHuntFactory.create(
+        slug="old", start_date=datetime.datetime(2024, 1, 1, tzinfo=UTC)
+    )
+    new_hunt = OpalHuntFactory.create(
+        slug="new", start_date=datetime.datetime(2025, 1, 1, tzinfo=UTC)
+    )
+    OpalHuntFactory.create(
+        slug="quiet", start_date=datetime.datetime(2023, 1, 1, tzinfo=UTC)
+    )
+    old_puzzle = OpalPuzzleFactory.create(hunt=old_hunt, answer="old")
+    new_puzzle = OpalPuzzleFactory.create(hunt=new_hunt, answer="new")
+
+    OpalAttemptFactory.create(user=alice, puzzle=old_puzzle, guess="nope")
+    fresh = [
+        OpalAttemptFactory.create(user=alice, puzzle=new_puzzle, guess=f"guess{i}")
+        for i in range(RECENT_ATTEMPTS_PER_HUNT + 5)
+    ]
+
+    otis.login(alice)
+    otis.get_40x("opal-recent-activity")
+
+    otis.login(admin)
+    resp = otis.get_20x("opal-recent-activity")
+    sections = resp.context["sections"]
+    # a section for every hunt, newest hunt first, even the one nobody guessed on
+    assert [section["hunt"].slug for section in sections] == ["new", "old", "quiet"]
+    # each hunt is capped at its most recent guesses, newest first
+    assert [attempt.pk for attempt in sections[0]["attempts"]] == [
+        attempt.pk for attempt in reversed(fresh[-RECENT_ATTEMPTS_PER_HUNT:])
+    ]
+    assert len(sections[1]["attempts"]) == 1
+    assert sections[2]["attempts"] == []
+
+
+@pytest.mark.django_db
+def test_recent_activity_solve_counts(otis):
+    """The solve count on a row counts only that hunt, and only correct guesses."""
+    alice = UserFactory.create(username="alice")
+    bob = UserFactory.create(username="bob")
+    admin = UserFactory.create(username="admin", is_staff=True, is_superuser=True)
+
+    hunt = OpalHuntFactory.create(slug="hunt")
+    puzzle1 = OpalPuzzleFactory.create(hunt=hunt, answer="one")
+    puzzle2 = OpalPuzzleFactory.create(hunt=hunt, answer="two")
+    other_puzzle = OpalPuzzleFactory.create(answer="elsewhere")
+
+    OpalAttemptFactory.create(user=alice, puzzle=puzzle1, guess="one")
+    OpalAttemptFactory.create(user=alice, puzzle=puzzle2, guess="two")
+    OpalAttemptFactory.create(user=alice, puzzle=other_puzzle, guess="elsewhere")
+    bobs_guess = OpalAttemptFactory.create(user=bob, puzzle=puzzle1, guess="wrong")
+
+    otis.login(admin)
+    for resp in (
+        otis.get_20x("opal-recent-activity"),
+        otis.get_20x("opal-hunt-log", "hunt"),
+    ):
+        if "sections" in resp.context:
+            rows = next(
+                s["attempts"] for s in resp.context["sections"] if s["hunt"] == hunt
+            )
+        else:
+            rows = resp.context["attempts"]
+        solve_counts = {attempt.pk: attempt.solve_count for attempt in rows}
+        # Alice's solve elsewhere doesn't count, and Bob has solved nothing here
+        assert solve_counts.pop(bobs_guess.pk) == 0
+        assert set(solve_counts.values()) == {2}
+
+
+@pytest.mark.django_db
+def test_hunt_log(otis):
+    """The per-hunt guess log paginates every guess, newest first."""
+    verified_group = GroupFactory(name="Verified")
+    alice = UserFactory.create(username="alice", groups=(verified_group,))
+    admin = UserFactory.create(username="admin", is_staff=True, is_superuser=True)
+
+    hunt = OpalHuntFactory.create(slug="hunt")
+    puzzle = OpalPuzzleFactory.create(hunt=hunt, answer="answer")
+    other_puzzle = OpalPuzzleFactory.create(answer="answer")
+
+    # Frozen time makes every guess share a timestamp, which is exactly the case
+    # the pk tiebreaker in the ordering exists for.
+    with freeze_time("2025-03-04"):
+        attempts = OpalAttemptFactory.create_batch(
+            HUNT_LOG_PAGE_SIZE + 3, user=alice, puzzle=puzzle, guess="wrong"
+        )
+    OpalAttemptFactory.create(user=alice, puzzle=other_puzzle, guess="wrong")
+
+    otis.login(alice)
+    otis.get_40x("opal-hunt-log", "hunt")
+
+    otis.login(admin)
+    resp = otis.get_20x("opal-hunt-log", "hunt")
+    assert resp.context["hunt"] == hunt
+    # guesses on other hunts stay out of this log
+    assert resp.context["paginator"].count == len(attempts)
+    assert resp.context["page_obj"].paginator.num_pages == 2
+    newest_first = [attempt.pk for attempt in reversed(attempts)]
+    assert [a.pk for a in resp.context["attempts"]] == newest_first[:HUNT_LOG_PAGE_SIZE]
+    otis.assert_testid(resp, "opal-attempt-row", count=HUNT_LOG_PAGE_SIZE)
+
+    resp = otis.get_20x("opal-hunt-log", "hunt", data={"page": 2})
+    assert [a.pk for a in resp.context["attempts"]] == newest_first[HUNT_LOG_PAGE_SIZE:]
+
+    otis.get_not_found("opal-hunt-log", "nonexistent")
+
+
+@pytest.mark.django_db
+def test_staff_log_links_on_hunt_list(otis):
+    """Only admins see the links to the guess logs from the hunt list."""
+    verified_group = GroupFactory(name="Verified")
+    alice = UserFactory.create(username="alice", groups=(verified_group,))
+    admin = UserFactory.create(username="admin", is_staff=True, is_superuser=True)
+
+    OpalHuntFactory.create(
+        slug="started", start_date=datetime.datetime(2024, 1, 1, tzinfo=UTC)
+    )
+    OpalHuntFactory.create(
+        slug="upcoming", start_date=datetime.datetime(2099, 1, 1, tzinfo=UTC)
+    )
+    OpalHuntFactory.create(slug="archived", active=False)
+
+    otis.login(alice)
+    resp = otis.get_20x("opal-hunt-list")
+    otis.assert_no_testid(resp, "opal-recent-activity-link")
+    otis.assert_no_testid(resp, "opal-hunt-log-link")
+
+    otis.login(admin)
+    resp = otis.get_20x("opal-hunt-list")
+    otis.assert_testid(resp, "opal-recent-activity-link", count=1)
+    otis.assert_testid(resp, "opal-hunt-log-link", count=3)

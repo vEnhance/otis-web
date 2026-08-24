@@ -1,0 +1,41 @@
+{% comment %}
+  The guess-log table shared by the recent-activity and hunt-log views.
+  Expects `hunt`, plus `attempts` whose rows each carry a `solve_count`.
+{% endcomment %}
+<table class="table table-striped">
+  <tr class="table-dark">
+    <th>Timestamp</th>
+    <th>User</th>
+    <th>Solves</th>
+    <th>Puzzle</th>
+    <th>Guess</th>
+  </tr>
+  {% for attempt in attempts %}
+    <tr data-testid="opal-attempt-row">
+      <td>
+        {% if attempt.is_correct %}
+          ✅
+        {% elif attempt.is_close %}
+          ▶️
+        {% else %}
+          ✖️
+        {% endif %}
+        {{ attempt.created_at|date:"Y-m-d H:i" }}
+      </td>
+      <td>
+        <a href="{% url "opal-person-log" hunt.slug attempt.user.pk %}">{{ attempt.user.get_full_name|truncatechars:"24" }}</a>
+      </td>
+      <td class="text-end">{{ attempt.solve_count }}</td>
+      <td>
+        <a href="{% url "opal-attempts-list" hunt.slug attempt.puzzle.slug %}">{{ attempt.puzzle.title|truncatechars:"32" }}</a>
+      </td>
+      <td class="{% if attempt.is_correct %}text-success{% elif attempt.is_close %}text-dark{% else %}text-danger{% endif %}">
+        <tt>{{ attempt.guess|truncatechars:24 }}</tt>
+      </td>
+    </tr>
+  {% empty %}
+    <tr>
+      <td colspan="5" class="fst-italic">No guesses yet.</td>
+    </tr>
+  {% endfor %}
+</table>

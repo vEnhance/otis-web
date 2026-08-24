@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% block title %}
+  Recent OPAL activity
+{% endblock title %}
+{% block main-class %}
+  col-12
+{% endblock main-class %}
+{% block side-class %}
+  col-6 col-md-4
+{% endblock side-class %}
+{% block layout-content %}
+  <p>
+    <a class="btn btn-dark" href="{% url "opal-hunt-list" %}">Back to list of hunts</a>
+  </p>
+  {% for section in sections %}
+    <h2>{{ section.hunt }}</h2>
+    <p>
+      <a class="btn btn-info btn-sm"
+         href="{% url "opal-leaderboard" section.hunt.slug %}">Leaderboard</a>
+      <a class="btn btn-secondary btn-sm"
+         href="{% url "opal-hunt-log" section.hunt.slug %}">Log</a>
+    </p>
+    {% include "opal/components/attempt_table.html" with hunt=section.hunt attempts=section.attempts %}
+  {% empty %}
+    <p>There are no hunts yet.</p>
+  {% endfor %}
+{% endblock layout-content %}
+{% comment %}
+vim: ft=htmldjango
+{% endcomment %}
