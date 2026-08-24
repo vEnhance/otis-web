@@ -15,16 +15,13 @@
   {% for section in sections %}
     <h2>{{ section.hunt }}</h2>
     <p>
+      <a class="btn btn-primary btn-sm" href="{{ hunt.get_absolute_url }}">Show puzzles</a>
       <a class="btn btn-info btn-sm"
          href="{% url "opal-leaderboard" section.hunt.slug %}">Leaderboard</a>
       <a class="btn btn-secondary btn-sm"
          href="{% url "opal-hunt-log" section.hunt.slug %}">Log</a>
     </p>
     {% include "opal/components/attempt_table.html" with hunt=section.hunt attempts=section.attempts %}
-    <p>
-      <a href="{% url "opal-hunt-log" section.hunt.slug %}"
-         data-testid="opal-full-log-link">Full guess log for {{ section.hunt }} →</a>
-    </p>
   {% empty %}
     <p>There are no hunts yet.</p>
   {% endfor %}
