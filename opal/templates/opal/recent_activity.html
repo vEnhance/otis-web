@@ -21,6 +21,10 @@
          href="{% url "opal-hunt-log" section.hunt.slug %}">Log</a>
     </p>
     {% include "opal/components/attempt_table.html" with hunt=section.hunt attempts=section.attempts %}
+    <p>
+      <a href="{% url "opal-hunt-log" section.hunt.slug %}"
+         data-testid="opal-full-log-link">See the full guess log for {{ section.hunt }} →</a>
+    </p>
   {% empty %}
     <p>There are no hunts yet.</p>
   {% endfor %}

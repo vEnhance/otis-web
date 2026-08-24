@@ -780,6 +780,8 @@ def test_recent_activity(otis):
     ]
     assert len(sections[1]["attempts"]) == 1
     assert sections[2]["attempts"] == []
+    # every section, even the empty one, offers the full log for its hunt
+    otis.assert_testid(resp, "opal-full-log-link", count=len(sections))
 
 
 @pytest.mark.django_db
