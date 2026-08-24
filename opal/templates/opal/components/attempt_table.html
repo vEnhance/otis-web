@@ -4,16 +4,26 @@
 {% endcomment %}
 <table class="table table-striped">
   <tr class="table-dark">
-    <th>Timestamp</th>
+    <th>Puzzle</th>
     <th>User</th>
     {# width:1% collapses the column onto the header word, which is already wider
        than any count it will hold; centering keeps the digits under it #}
     <th class="text-center text-nowrap" style="width:1%;">Solves</th>
-    <th>Puzzle</th>
     <th>Guess</th>
+    <th>Timestamp</th>
   </tr>
   {% for attempt in attempts %}
     <tr data-testid="opal-attempt-row">
+      <td>
+        <a href="{% url "opal-attempts-list" hunt.slug attempt.puzzle.slug %}">{{ attempt.puzzle.title|truncatechars:"12" }}</a>
+      </td>
+      <td>
+        <a href="{% url "opal-person-log" hunt.slug attempt.user.pk %}">{{ attempt.user.get_full_name|truncatechars:"24" }}</a>
+      </td>
+      <td class="text-center fw-bold">{{ attempt.solve_count }}</td>
+      <td class="{% if attempt.is_correct %}text-success{% elif attempt.is_close %}text-dark{% else %}text-danger{% endif %}">
+        <tt>{{ attempt.guess|truncatechars:24 }}</tt>
+      </td>
       <td>
         {% if attempt.is_correct %}
           ✅
@@ -23,16 +33,6 @@
           ✖️
         {% endif %}
         {{ attempt.created_at|date:"Y-m-d H:i" }}
-      </td>
-      <td>
-        <a href="{% url "opal-person-log" hunt.slug attempt.user.pk %}">{{ attempt.user.get_full_name|truncatechars:"24" }}</a>
-      </td>
-      <td class="text-center fw-bold">{{ attempt.solve_count }}</td>
-      <td>
-        <a href="{% url "opal-attempts-list" hunt.slug attempt.puzzle.slug %}">{{ attempt.puzzle.title|truncatechars:"12" }}</a>
-      </td>
-      <td class="{% if attempt.is_correct %}text-success{% elif attempt.is_close %}text-dark{% else %}text-danger{% endif %}">
-        <tt>{{ attempt.guess|truncatechars:24 }}</tt>
       </td>
     </tr>
   {% empty %}
