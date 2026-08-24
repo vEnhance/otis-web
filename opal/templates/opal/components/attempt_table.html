@@ -6,7 +6,9 @@
   <tr class="table-dark">
     <th>Timestamp</th>
     <th>User</th>
-    <th>Solves</th>
+    {# width:1% collapses the column onto the header word, which is already wider
+       than any count it will hold; centering keeps the digits under it #}
+    <th class="text-center text-nowrap" style="width:1%;">Solves</th>
     <th>Puzzle</th>
     <th>Guess</th>
   </tr>
@@ -25,7 +27,7 @@
       <td>
         <a href="{% url "opal-person-log" hunt.slug attempt.user.pk %}">{{ attempt.user.get_full_name|truncatechars:"24" }}</a>
       </td>
-      <td class="text-end fw-bold">{{ attempt.solve_count }}</td>
+      <td class="text-center fw-bold">{{ attempt.solve_count }}</td>
       <td>
         <a href="{% url "opal-attempts-list" hunt.slug attempt.puzzle.slug %}">{{ attempt.puzzle.title|truncatechars:"12" }}</a>
       </td>
