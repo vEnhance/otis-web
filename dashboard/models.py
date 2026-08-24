@@ -180,7 +180,8 @@ class PSet(models.Model):
         validators=[MinValueValidator(0), MaxValueValidator(200)],
     )
     clubs = models.IntegerField(
-        help_text="Total number of clubs (♣) that you solved, including 1♣ for feedback",
+        help_text="Total number of clubs (♣) that you solved, including 1♣ for feedback. "
+        "Do not apply the ×1.3 or ×1.5 bonus for D and Z units.",
         verbose_name="♣ Clubs earned",
         null=True,
         blank=True,
