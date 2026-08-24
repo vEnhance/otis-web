@@ -37,7 +37,7 @@
         <td class="{% if attempt.is_correct %}text-success{% elif attempt.is_close %}text-dark{% else %}text-danger{% endif %}">
           <tt>{{ attempt.guess|truncatechars:24 }}</tt>
         </td>
-        <td>
+        <td class="text-nowrap">
           {% if attempt.is_correct %}
             ✅
           {% elif attempt.is_close %}

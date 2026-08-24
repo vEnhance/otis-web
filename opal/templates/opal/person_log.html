@@ -41,7 +41,7 @@
         <td>
           <a href="{% url "opal-attempts-list" hunt.slug attempt.puzzle.slug %}">{{ attempt.puzzle.title }}</a>
         </td>
-        <td>
+        <td class="text-nowrap">
           {% if attempt.is_correct %}
             ✅
           {% elif attempt.is_close %}
