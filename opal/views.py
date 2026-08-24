@@ -1,5 +1,6 @@
 import datetime
 import logging
+from collections.abc import Iterable
 from typing import Any, NamedTuple
 
 import requests
@@ -9,7 +10,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models import Q
-from django.db.models.aggregates import Max
+from django.db.models.aggregates import Count, Max
 from django.db.models.manager import Manager
 from django.db.models.query import QuerySet
 from django.http.response import HttpResponse, HttpResponseRedirect
@@ -34,6 +35,42 @@ logger = logging.getLogger(__name__)
 
 def has_early_access(u: User) -> bool:
     return u.is_staff or u.is_superuser or u.groups.filter(name="Testsolver").exists()
+
+
+# How many guesses each hunt contributes to the all-hunts activity page.
+RECENT_ATTEMPTS_PER_HUNT = 20
+# How many guesses one page of a single hunt's guess log holds.
+HUNT_LOG_PAGE_SIZE = 100
+# Newest first, with the pk breaking ties. Guesses landing in the same instant
+# would otherwise be ordered arbitrarily, which a page boundary turns into a
+# guess repeated on one page and missing from the next.
+ATTEMPT_LOG_ORDERING = ("-created_at", "-pk")
+
+
+def _with_solve_counts(
+    attempts: Iterable[OpalAttempt], hunt: OpalHunt
+) -> list[OpalAttempt]:
+    """The attempts as a list, each carrying `solve_count` for its guesser.
+
+    That is the number of puzzles of `hunt` the guesser has solved by now, which
+    is what makes a row of the log readable: it says how far along the person
+    making the guess is. Counted in a single query for the whole page, since
+    `OpalHunt.num_solves` would be one query per row.
+    """
+    rows = list(attempts)
+    solve_counts: dict[int, int] = {
+        d["user"]: d["num_solves"]
+        for d in OpalAttempt.objects.filter(
+            puzzle__hunt=hunt,
+            user__in=[attempt.user for attempt in rows],
+            is_correct=True,
+        )
+        .values("user")
+        .annotate(num_solves=Count("puzzle", distinct=True))
+    }
+    for attempt in rows:
+        attempt.solve_count = solve_counts.get(attempt.user.pk, 0)  # type: ignore[attr-defined]
+    return rows
 
 
 class HuntList(ListView[OpalHunt]):
@@ -103,6 +140,53 @@ class AttemptsList(AdminRequiredMixin, ListView[OpalAttempt]):
 
     def get_queryset(self) -> QuerySet[OpalAttempt]:
         return OpalAttempt.objects.filter(puzzle=self.puzzle).order_by("-created_at")
+
+
+class HuntAttemptsList(AdminRequiredMixin, ListView[OpalAttempt]):
+    """Every guess on one hunt, newest first, a page at a time."""
+
+    hunt: OpalHunt
+    model = OpalAttempt
+    context_object_name = "attempts"
+    template_name = "opal/hunt_log.html"
+    paginate_by = HUNT_LOG_PAGE_SIZE
+
+    def setup(self, request: AuthHttpRequest, *args: Any, **kwargs: Any):
+        super().setup(request, *args, **kwargs)
+        self.hunt = get_object_or_404(OpalHunt, slug=self.kwargs["hunt_slug"])
+
+    def get_queryset(self) -> QuerySet[OpalAttempt]:
+        return (
+            OpalAttempt.objects.filter(puzzle__hunt=self.hunt)
+            .select_related("user", "puzzle")
+            .order_by(*ATTEMPT_LOG_ORDERING)
+        )
+
+    def get_context_data(self, **kwargs: Any):
+        context = super().get_context_data(**kwargs)
+        context["hunt"] = self.hunt
+        # Only the current page gets solve counts; the queryset itself is every
+        # guess ever made on the hunt.
+        context["attempts"] = _with_solve_counts(context["object_list"], self.hunt)
+        return context
+
+
+@admin_required
+def recent_activity(request: AuthHttpRequest) -> HttpResponse:
+    """The last few guesses on every hunt at once, newest hunt first."""
+    sections = [
+        {
+            "hunt": hunt,
+            "attempts": _with_solve_counts(
+                OpalAttempt.objects.filter(puzzle__hunt=hunt)
+                .select_related("user", "puzzle")
+                .order_by(*ATTEMPT_LOG_ORDERING)[:RECENT_ATTEMPTS_PER_HUNT],
+                hunt,
+            ),
+        }
+        for hunt in OpalHunt.objects.order_by("-start_date")
+    ]
+    return render(request, "opal/recent_activity.html", {"sections": sections})
 
 
 # this is ugly af and untested but i'm getting dinner with my senpai in an hour

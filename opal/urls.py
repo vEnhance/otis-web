@@ -21,6 +21,12 @@ urlpatterns = [
         name="opal-puzzle-list",
     ),
     path(r"leaderboard/<slug:hunt_slug>/", views.leaderboard, name="opal-leaderboard"),
+    path(r"activity/", views.recent_activity, name="opal-recent-activity"),
+    path(
+        r"log/<slug:hunt_slug>/",
+        views.HuntAttemptsList.as_view(),
+        name="opal-hunt-log",
+    ),
     path(
         r"puzzle/<slug:hunt_slug>/<slug:puzzle_slug>/",
         views.show_puzzle,

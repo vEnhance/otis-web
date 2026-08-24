@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% load django_bootstrap5 %}
+{% block title %}
+  Guess log for {{ hunt.name }}
+{% endblock title %}
+{% block main-class %}
+  col-12
+{% endblock main-class %}
+{% block side-class %}
+  col-6 col-md-4
+{% endblock side-class %}
+{% block layout-content %}
+  <p>
+    <a class="btn btn-dark" href="{% url "opal-recent-activity" %}">All recent activity</a>
+    <a class="btn btn-info" href="{% url "opal-leaderboard" hunt.slug %}">Leaderboard</a>
+    <a class="btn btn-primary" href="{{ hunt.get_absolute_url }}">Show puzzles</a>
+  </p>
+  <p>
+    There have been <b>{{ paginator.count }} guesses</b> on this hunt.
+  </p>
+  {% include "opal/components/attempt_table.html" %}
+  {% if page_obj.has_other_pages %}
+    {% bootstrap_pagination page_obj justify_content="center" %}
+  {% endif %}
+{% endblock layout-content %}
+{% comment %}
+vim: ft=htmldjango
+{% endcomment %}

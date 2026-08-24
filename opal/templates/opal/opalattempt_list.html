@@ -22,14 +22,20 @@
   <table class="table table-striped">
     <tr class="table-dark">
       <th>#</th>
-      <th>Timestamp</th>
       <th>User</th>
       <th>Guess</th>
+      <th>Timestamp</th>
     </tr>
     {% for attempt in attempts %}
       <tr>
         <td>
           <a href="{% url "admin:opal_opalattempt_change" attempt.pk %}">{{ forloop.counter }}</a>
+        </td>
+        <td>
+          <a href="{% url "opal-person-log" puzzle.hunt.slug attempt.user.pk %}">{{ attempt.user.get_full_name|truncatechars:"24" }}</a>
+        </td>
+        <td class="{% if attempt.is_correct %}text-success{% elif attempt.is_close %}text-dark{% else %}text-danger{% endif %}">
+          <tt>{{ attempt.guess|truncatechars:24 }}</tt>
         </td>
         <td>
           {% if attempt.is_correct %}
@@ -40,12 +46,6 @@
             ✖️
           {% endif %}
           {{ attempt.created_at|date:"Y-m-d H:i" }}
-        </td>
-        <td>
-          <a href="{% url "opal-person-log" puzzle.hunt.slug attempt.user.pk %}">{{ attempt.user.get_full_name|truncatechars:"24" }}</a>
-        </td>
-        <td class="{% if attempt.is_correct %}text-success{% elif attempt.is_close %}text-dark{% else %}text-danger{% endif %}">
-          <tt>{{ attempt.guess|truncatechars:24 }}</tt>
         </td>
       </tr>
     {% endfor %}
