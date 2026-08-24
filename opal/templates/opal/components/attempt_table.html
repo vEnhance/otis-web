@@ -25,9 +25,9 @@
       <td>
         <a href="{% url "opal-person-log" hunt.slug attempt.user.pk %}">{{ attempt.user.get_full_name|truncatechars:"24" }}</a>
       </td>
-      <td class="text-end">{{ attempt.solve_count }}</td>
+      <td class="text-end fw-bold">{{ attempt.solve_count }}</td>
       <td>
-        <a href="{% url "opal-attempts-list" hunt.slug attempt.puzzle.slug %}">{{ attempt.puzzle.title|truncatechars:"32" }}</a>
+        <a href="{% url "opal-attempts-list" hunt.slug attempt.puzzle.slug %}">{{ attempt.puzzle.title|truncatechars:"12" }}</a>
       </td>
       <td class="{% if attempt.is_correct %}text-success{% elif attempt.is_close %}text-dark{% else %}text-danger{% endif %}">
         <tt>{{ attempt.guess|truncatechars:24 }}</tt>
