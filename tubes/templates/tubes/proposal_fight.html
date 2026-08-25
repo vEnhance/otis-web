@@ -51,16 +51,24 @@
   <script>
       (function() {
           const el = document.getElementById("countdown");
-          let secs = parseInt(el.dataset.seconds, 10);
+          const deadline = Date.now() + parseInt(el.dataset.seconds, 10) * 1000;
+          let interval = null;
+          let finished = false;
 
           function fmt(s) {
               return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
           }
-          el.textContent = fmt(secs);
-          const interval = setInterval(function() {
-              secs -= 1;
+
+          function tick() {
+              if (finished) {
+                  return;
+              }
+              const secs = Math.max(0, Math.round((deadline - Date.now()) / 1000));
               if (secs <= 0) {
-                  clearInterval(interval);
+                  finished = true;
+                  if (interval !== null) {
+                      clearInterval(interval);
+                  }
                   el.textContent = "Time's up!";
                   el.classList.add("text-danger");
                   setTimeout(function() {
@@ -69,7 +77,17 @@
               } else {
                   el.textContent = fmt(secs);
               }
-          }, 1000);
+          }
+
+          tick();
+          if (!finished) {
+              interval = setInterval(tick, 1000);
+              document.addEventListener("visibilitychange", function() {
+                  if (!document.hidden) {
+                      tick();
+                  }
+              });
+          }
       })();
   </script>
 {% endblock layout-content %}
