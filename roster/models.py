@@ -276,9 +276,9 @@ class Student(models.Model):
     def payment_status(self):
         """Returns one of several codes:
         0: student is clear (no invoice exists or total owed is nonpositive)
-        1: remind of upcoming payment for first deadline
-        2: warn of late payment for first deadline
-        3: lock late payment for first deadline (more than 2 days past)
+        1: remind of upcoming payment for half deadline
+        2: warn of late payment for half deadline
+        3: lock late payment for half deadline (more than 2 days past)
         4: student has something owed for full deadline, but no warning yet
         5: remind of upcoming payment for full deadline (up to 28d in advance)
         6: warn of late payment for full deadline
@@ -302,12 +302,12 @@ class Student(models.Model):
 
         if (
             self.semester.one_semester_date is not None
-            and self.semester.most_payment_deadline
+            and self.semester.full_payment_deadline
             and invoice.created_at > self.semester.one_semester_date
         ):
-            initial_payment_deadline = self.semester.most_payment_deadline
+            initial_payment_deadline = self.semester.full_payment_deadline
         else:
-            initial_payment_deadline = self.semester.first_payment_deadline
+            initial_payment_deadline = self.semester.half_payment_deadline
 
         if (
             initial_payment_deadline is not None
@@ -320,10 +320,10 @@ class Student(models.Model):
                 return 2
             return 1
 
-        most_payment_deadline = self.semester.most_payment_deadline
-        if most_payment_deadline is not None:
+        full_payment_deadline = self.semester.full_payment_deadline
+        if full_payment_deadline is not None:
             # anything reaching here has total_owed > 0, i.e. is not paid in full
-            d = max(invoice.created_at, most_payment_deadline) - now
+            d = max(invoice.created_at, full_payment_deadline) - now
             if d < timedelta(days=-2):
                 return 7
             elif d < timedelta(days=0):

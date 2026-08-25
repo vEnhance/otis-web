@@ -987,7 +987,7 @@ def test_inquiry(otis) -> None:
 
     invoice_semester = SemesterFactory.create(
         show_invoices=True,
-        first_payment_deadline=datetime.datetime(2021, 7, 1, tzinfo=UTC),
+        half_payment_deadline=datetime.datetime(2021, 7, 1, tzinfo=UTC),
     )
     eve = StudentFactory.create(semester=invoice_semester)
     otis.login(eve)
@@ -1261,8 +1261,8 @@ def test_invoice(otis) -> None:
 def test_delinquency(otis) -> None:
     semester: Semester = SemesterFactory.create(
         show_invoices=True,
-        first_payment_deadline=datetime.datetime(2022, 9, 21, tzinfo=UTC),
-        most_payment_deadline=datetime.datetime(2023, 1, 21, tzinfo=UTC),
+        half_payment_deadline=datetime.datetime(2022, 9, 21, tzinfo=UTC),
+        full_payment_deadline=datetime.datetime(2023, 1, 21, tzinfo=UTC),
     )
 
     alice: Student = StudentFactory.create(semester=semester)
@@ -1348,7 +1348,7 @@ def test_delinquency(otis) -> None:
         assert not bob.is_delinquent
 
     # Now he is affected
-    semester.first_payment_deadline = datetime.datetime(2023, 1, 28, tzinfo=UTC)
+    semester.half_payment_deadline = datetime.datetime(2023, 1, 28, tzinfo=UTC)
     semester.save()
 
     with freeze_time("2023-2-08", tz_offset=0):
@@ -1362,7 +1362,7 @@ def test_delinquency(otis) -> None:
         assert bob.payment_status == 7
         assert bob.is_delinquent
 
-    semester.most_payment_deadline = datetime.datetime(2023, 2, 21, tzinfo=UTC)
+    semester.full_payment_deadline = datetime.datetime(2023, 2, 21, tzinfo=UTC)
     semester.save()
 
     with freeze_time("2023-3-01", tz_offset=0):
@@ -1374,8 +1374,8 @@ def test_delinquency(otis) -> None:
 def test_delinquency_payment_fractions(otis) -> None:
     semester: Semester = SemesterFactory.create(
         show_invoices=True,
-        first_payment_deadline=datetime.datetime(2022, 9, 21, tzinfo=UTC),
-        most_payment_deadline=datetime.datetime(2023, 1, 21, tzinfo=UTC),
+        half_payment_deadline=datetime.datetime(2022, 9, 21, tzinfo=UTC),
+        full_payment_deadline=datetime.datetime(2023, 1, 21, tzinfo=UTC),
     )
     alice: Student = StudentFactory.create(semester=semester)
     with freeze_time("2022-08-05", tz_offset=0):
@@ -1426,8 +1426,8 @@ def test_delinquency_payment_fractions(otis) -> None:
 def test_delinquency_counts_credits(otis) -> None:
     semester: Semester = SemesterFactory.create(
         show_invoices=True,
-        first_payment_deadline=datetime.datetime(2022, 9, 21, tzinfo=UTC),
-        most_payment_deadline=datetime.datetime(2023, 1, 21, tzinfo=UTC),
+        half_payment_deadline=datetime.datetime(2022, 9, 21, tzinfo=UTC),
+        full_payment_deadline=datetime.datetime(2023, 1, 21, tzinfo=UTC),
     )
     alice: Student = StudentFactory.create(semester=semester)
     with freeze_time("2022-08-05", tz_offset=0):
@@ -1465,8 +1465,8 @@ def test_delinquency_counts_credits(otis) -> None:
 def test_delinquency_for_joining_second_semester(otis) -> None:
     semester: Semester = SemesterFactory.create(
         show_invoices=True,
-        first_payment_deadline=datetime.datetime(2022, 9, 21, tzinfo=UTC),
-        most_payment_deadline=datetime.datetime(2023, 1, 21, tzinfo=UTC),
+        half_payment_deadline=datetime.datetime(2022, 9, 21, tzinfo=UTC),
+        full_payment_deadline=datetime.datetime(2023, 1, 21, tzinfo=UTC),
         one_semester_date=datetime.datetime(2022, 12, 30, tzinfo=UTC),
     )
 

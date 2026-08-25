@@ -49,7 +49,7 @@ UTC = datetime.UTC
 def test_portal_invoice_redirect(otis):
     semester = SemesterFactory.create(
         show_invoices=True,
-        first_payment_deadline=datetime.datetime(2021, 7, 1, tzinfo=UTC),
+        half_payment_deadline=datetime.datetime(2021, 7, 1, tzinfo=UTC),
     )
     alice = StudentFactory.create(semester=semester)
     otis.login(alice)
@@ -297,7 +297,7 @@ def test_submit_permissions(otis):
 
     semester = SemesterFactory.create(
         show_invoices=True,
-        first_payment_deadline=datetime.datetime(2021, 7, 1, tzinfo=UTC),
+        half_payment_deadline=datetime.datetime(2021, 7, 1, tzinfo=UTC),
     )
     alice = StudentFactory.create(semester=semester)
     otis.login(alice)
@@ -548,7 +548,7 @@ def test_pset_list(otis):
 def test_pset_list_permission(otis):
     semester = SemesterFactory.create(
         show_invoices=True,
-        first_payment_deadline=datetime.datetime(2021, 7, 1, tzinfo=UTC),
+        half_payment_deadline=datetime.datetime(2021, 7, 1, tzinfo=UTC),
     )
     alice = StudentFactory.create(semester=semester)
     otis.login(alice)
