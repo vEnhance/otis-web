@@ -345,7 +345,7 @@ def handle_petition(request: AuthHttpRequest, petition: UnitPetition, student: S
 
     # auto hold criteria
     num_psets = PSet.objects.filter(student=student).count()
-    auto_hold_criteria = num_past_unlock_petitions > (10 + 2.5 * num_psets**1.2)
+    auto_hold_criteria = num_past_unlock_petitions > 10 + 1.5 * num_psets**1.1
 
     if auto_hold_criteria:
         petition.status = "PET_HOLD"
