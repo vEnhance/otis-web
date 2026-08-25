@@ -283,6 +283,9 @@ class Student(models.Model):
         5: remind of upcoming payment for full deadline (up to 28d in advance)
         6: warn of late payment for full deadline
         7: lock late payment for full deadline (more than 2 days past)
+
+        Codes 1-3 apply while more than half the cost is still owed;
+        codes 4-7 apply until the invoice is paid off entirely.
         """
         if self.semester.show_invoices is False:
             return 0
@@ -308,7 +311,7 @@ class Student(models.Model):
 
         if (
             initial_payment_deadline is not None
-            and invoice.total_paid < invoice.total_cost / 2
+            and invoice.total_owed > invoice.total_cost / 2
         ):
             d = max(invoice.created_at, initial_payment_deadline) - now
             if d < timedelta(days=-2):
@@ -318,10 +321,8 @@ class Student(models.Model):
             return 1
 
         most_payment_deadline = self.semester.most_payment_deadline
-        if (
-            most_payment_deadline is not None
-            and invoice.total_paid < invoice.total_cost
-        ):
+        if most_payment_deadline is not None:
+            # anything reaching here has total_owed > 0, i.e. is not paid in full
             d = max(invoice.created_at, most_payment_deadline) - now
             if d < timedelta(days=-2):
                 return 7

@@ -1371,6 +1371,97 @@ def test_delinquency(otis) -> None:
 
 
 @pytest.mark.django_db
+def test_delinquency_payment_fractions(otis) -> None:
+    semester: Semester = SemesterFactory.create(
+        show_invoices=True,
+        first_payment_deadline=datetime.datetime(2022, 9, 21, tzinfo=UTC),
+        most_payment_deadline=datetime.datetime(2023, 1, 21, tzinfo=UTC),
+    )
+    alice: Student = StudentFactory.create(semester=semester)
+    with freeze_time("2022-08-05", tz_offset=0):
+        invoice: Invoice = InvoiceFactory.create(student=alice, preps_taught=2)
+    assert invoice.total_cost == 480
+
+    # Paying less than half still counts against the initial deadline
+    invoice.total_paid = 239
+    invoice.save()
+    with freeze_time("2022-09-17", tz_offset=0):
+        assert alice.payment_status == 1
+        assert not alice.is_delinquent
+    with freeze_time("2022-09-22", tz_offset=0):
+        assert alice.payment_status == 2
+        assert not alice.is_delinquent
+    with freeze_time("2022-10-15", tz_offset=0):
+        assert alice.payment_status == 3
+        assert alice.is_delinquent
+
+    # Paying half satisfies the initial deadline, but not the primary one
+    invoice.total_paid = 240
+    invoice.save()
+    with freeze_time("2022-10-15", tz_offset=0):
+        assert alice.payment_status == 4
+        assert not alice.is_delinquent
+    with freeze_time("2023-01-22", tz_offset=0):
+        assert alice.payment_status == 6
+        assert not alice.is_delinquent
+    with freeze_time("2023-02-15", tz_offset=0):
+        assert alice.payment_status == 7
+        assert alice.is_delinquent
+
+    # Anything short of payment in full is late at the primary deadline
+    invoice.total_paid = 400
+    invoice.save()
+    with freeze_time("2023-02-15", tz_offset=0):
+        assert alice.payment_status == 7
+        assert alice.is_delinquent
+
+    invoice.total_paid = 480
+    invoice.save()
+    with freeze_time("2023-02-15", tz_offset=0):
+        assert alice.payment_status == 0
+        assert not alice.is_delinquent
+
+
+@pytest.mark.django_db
+def test_delinquency_counts_credits(otis) -> None:
+    semester: Semester = SemesterFactory.create(
+        show_invoices=True,
+        first_payment_deadline=datetime.datetime(2022, 9, 21, tzinfo=UTC),
+        most_payment_deadline=datetime.datetime(2023, 1, 21, tzinfo=UTC),
+    )
+    alice: Student = StudentFactory.create(semester=semester)
+    with freeze_time("2022-08-05", tz_offset=0):
+        invoice: Invoice = InvoiceFactory.create(student=alice, preps_taught=2)
+    assert invoice.total_cost == 480
+
+    # Credits count toward the half needed by the first deadline
+    invoice.credits = 200
+    invoice.total_paid = 39
+    invoice.save()
+    with freeze_time("2022-10-15", tz_offset=0):
+        assert alice.payment_status == 3
+        assert alice.is_delinquent
+
+    invoice.total_paid = 40
+    invoice.save()
+    assert invoice.total_owed == 240
+    with freeze_time("2022-10-15", tz_offset=0):
+        assert alice.payment_status == 4
+        assert not alice.is_delinquent
+    with freeze_time("2023-02-15", tz_offset=0):
+        assert alice.payment_status == 7
+        assert alice.is_delinquent
+
+    # Credits alone can settle the invoice outright
+    invoice.credits = 480
+    invoice.total_paid = 0
+    invoice.save()
+    with freeze_time("2023-02-15", tz_offset=0):
+        assert alice.payment_status == 0
+        assert not alice.is_delinquent
+
+
+@pytest.mark.django_db
 def test_delinquency_for_joining_second_semester(otis) -> None:
     semester: Semester = SemesterFactory.create(
         show_invoices=True,
