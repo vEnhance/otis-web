@@ -1277,12 +1277,12 @@ def test_delinquency(otis) -> None:
     # Alice has paid $0 so far
     assert invoice.total_owed == 480
     with freeze_time("2022-09-05", tz_offset=0):
-        assert alice.payment_status == 4
+        assert alice.payment_status == 1
         assert not alice.is_delinquent
     with freeze_time("2022-09-17", tz_offset=0):
         assert alice.payment_status == 1
         assert not alice.is_delinquent
-    with freeze_time("2022-09-25", tz_offset=0):
+    with freeze_time("2022-09-22", tz_offset=0):
         assert alice.payment_status == 2
         assert not alice.is_delinquent
     with freeze_time("2022-10-15", tz_offset=0):
@@ -1310,10 +1310,13 @@ def test_delinquency(otis) -> None:
     with freeze_time("2022-10-15", tz_offset=0):
         assert alice.payment_status == 4
         assert not alice.is_delinquent
+    with freeze_time("2022-12-30", tz_offset=0):
+        assert alice.payment_status == 5
+        assert not alice.is_delinquent
     with freeze_time("2023-01-17", tz_offset=0):
         assert alice.payment_status == 5
         assert not alice.is_delinquent
-    with freeze_time("2023-01-25", tz_offset=0):
+    with freeze_time("2023-01-22", tz_offset=0):
         assert alice.payment_status == 6
         assert not alice.is_delinquent
     with freeze_time("2023-02-15", tz_offset=0):
@@ -1388,7 +1391,7 @@ def test_delinquency_for_joining_second_semester(otis) -> None:
     with freeze_time("2023-01-02", tz_offset=0):
         assert alice.payment_status == 3
         assert alice.is_delinquent
-        assert bob.payment_status == 4
+        assert bob.payment_status == 1
         assert not bob.is_delinquent
 
     with freeze_time("2023-01-20", tz_offset=0):
@@ -1397,7 +1400,7 @@ def test_delinquency_for_joining_second_semester(otis) -> None:
         assert bob.payment_status == 1
         assert not bob.is_delinquent
 
-    with freeze_time("2023-01-25", tz_offset=0):
+    with freeze_time("2023-01-22", tz_offset=0):
         assert alice.payment_status == 3
         assert alice.is_delinquent
         assert bob.payment_status == 2

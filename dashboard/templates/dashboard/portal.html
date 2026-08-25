@@ -56,21 +56,20 @@
         {% endif %}
       </h1>
       {% if student.payment_status == 1 %}
-        As a quick reminder, the payment deadline
-        {{ semester.first_payment_deadline|date }}
-        is coming soon.
+        As a quick reminder, the deadline for initial payment is
+        {{ semester.first_payment_deadline|date }}.
+        You have not sent any payment at all yet.
       {% elif student.payment_status == 2 %}
-        The payment deadline
-        {{ semester.first_payment_deadline|date }}
+        The payment deadline {{ semester.first_payment_deadline|date }}
         has passed, but no payment was received.
       {% elif student.payment_status == 3 %}
         More than a week since the deadline
         {{ semester.first_payment_deadline|date }}
         has passed, but no payment is recorded.
       {% elif student.payment_status == 5 %}
-        As a quick reminder, the deadline
-        {{ semester.most_payment_deadline|date }}
-        for full payment is coming soon.
+        As a quick reminder, the deadline for full payment for all semesters is
+        {{ semester.most_payment_deadline|date }}.
+        Your payment is still incomplete.
       {% elif student.payment_status == 6 %}
         The payment deadline
         {{ semester.most_payment_deadline|date }}

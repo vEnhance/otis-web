@@ -57,10 +57,10 @@ class Semester(models.Model):
         default=80, help_text="The hourly rate for the semester."
     )
     first_payment_deadline = models.DateTimeField(
-        null=True, blank=True, help_text="Deadline for nonzero payment."
+        null=True, blank=True, help_text="Deadline for half payment."
     )
     most_payment_deadline = models.DateTimeField(
-        null=True, blank=True, help_text="Deadline for two-thirds of the payment."
+        null=True, blank=True, help_text="Deadline for full payment."
     )
     one_semester_date = models.DateTimeField(
         null=True,
