@@ -59,29 +59,29 @@
         </tr>
       </thead>
       <tbody>
-        {% for inquiry in inquiries %}
+        {% for petition in petitions %}
           <tr>
-            <td title="{{ inquiry.created_at|date:"r" }}">{{ inquiry.created_at|date:"M d" }}</td>
+            <td title="{{ petition.created_at|date:"r" }}">{{ petition.created_at|date:"M d" }}</td>
             <td>
-              <strong>{{ inquiry.unit }}</strong>
+              <strong>{{ petition.unit }}</strong>
             </td>
-            <td>{{ inquiry.get_action_type_display }}</td>
+            <td>{{ petition.get_action_type_display }}</td>
             <td>
-              {% if inquiry.status == "INQ_NEW" %}
+              {% if petition.status == "PET_NEW" %}
                 Pending
-              {% elif inquiry.status == "INQ_ACC" %}
+              {% elif petition.status == "PET_ACC" %}
                 <strong class="text-success">Accepted</strong>
-              {% elif inquiry.status == "INQ_REJ" %}
+              {% elif petition.status == "PET_REJ" %}
                 <strong class="text-danger">Rejected</strong>
-              {% elif inquiry.status == "INQ_CANC" %}
+              {% elif petition.status == "PET_CANC" %}
                 <strong class="text-danger">Canceled</strong>
-              {% elif inquiry.status == "INQ_HOLD" %}
+              {% elif petition.status == "PET_HOLD" %}
                 <strong class="text-warning">On hold</strong>
               {% endif %}
             </td>
             <td>
-              {% if inquiry.status == "INQ_NEW" %}
-                <form action="{% url 'inquiry-cancel' inquiry.pk %}" method="post">
+              {% if petition.status == "PET_NEW" %}
+                <form action="{% url 'petition-cancel' petition.pk %}" method="post">
                   {% csrf_token %}
                   <button class="btn btn-sm btn-danger btn-xs"
                           type="submit"
@@ -92,7 +92,7 @@
           </tr>
           <tr>
             <td></td>
-            <td colspan="4" class="fst-italic">{{ inquiry.explanation }}</td>
+            <td colspan="4" class="fst-italic">{{ petition.explanation }}</td>
           </tr>
         {% endfor %}
       </tbody>

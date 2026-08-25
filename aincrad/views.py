@@ -33,7 +33,7 @@ from roster.models import (
     Invoice,
     Student,
     StudentRegistration,
-    UnitInquiry,
+    UnitPetition,
 )
 from suggestions.models import ProblemSuggestion
 
@@ -145,17 +145,17 @@ PSET_VENUEQ_INIT_KEYS = (
     "student__user__profile__email_on_pset_complete",
 )
 
-INQUIRY_VENUEQ_INIT_QUERYSET = UnitInquiry.objects.filter(
-    status="INQ_NEW",
+PETITION_VENUEQ_INIT_QUERYSET = UnitPetition.objects.filter(
+    status="PET_NEW",
     student__semester__active=True,
     student__legit=True,
 ).annotate(
-    unlock_inquiry_count=SubqueryCount(
-        "student__unitinquiry",
-        filter=Q(action_type="INQ_ACT_UNLOCK"),
+    unlock_petition_count=SubqueryCount(
+        "student__unitpetition",
+        filter=Q(action_type="PET_ACT_UNLOCK"),
     ),
 )
-INQUIRY_VENUEQ_INIT_KEYS = (
+PETITION_VENUEQ_INIT_KEYS = (
     "action_type",
     "unit__group__name",
     "unit__code",
@@ -164,14 +164,14 @@ INQUIRY_VENUEQ_INIT_KEYS = (
     "student__user__email",
     "explanation",
     "created_at",
-    "unlock_inquiry_count",
-    "student__user__profile__email_on_inquiry_complete",
+    "unlock_petition_count",
+    "student__user__profile__email_on_petition_complete",
 )
-INQUIRY_VENUEQ_AUTO_QUERYSET = UnitInquiry.objects.filter(
+PETITION_VENUEQ_AUTO_QUERYSET = UnitPetition.objects.filter(
     was_auto_processed=True,
     created_at__gte=timezone.now() + timedelta(days=-2),
 )
-INQUIRY_VENUEQ_AUTO_KEYS = (
+PETITION_VENUEQ_AUTO_KEYS = (
     "action_type",
     "unit__group__name",
     "unit__code",
@@ -245,12 +245,12 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
                 ),
             },
             {
-                "_name": "Inquiries",
-                "inquiries": list(
-                    INQUIRY_VENUEQ_INIT_QUERYSET.values(*INQUIRY_VENUEQ_INIT_KEYS)
+                "_name": "Petitions",
+                "petitions": list(
+                    PETITION_VENUEQ_INIT_QUERYSET.values(*PETITION_VENUEQ_INIT_KEYS)
                 ),
                 "reading": list(
-                    INQUIRY_VENUEQ_AUTO_QUERYSET.values(*INQUIRY_VENUEQ_AUTO_KEYS)
+                    PETITION_VENUEQ_AUTO_QUERYSET.values(*PETITION_VENUEQ_AUTO_KEYS)
                 ),
             },
             {
@@ -267,14 +267,14 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
             },
         ]
         return JsonResponse(output_data, status=200)
-    elif action == "accept_inquiries":
+    elif action == "accept_petitions":
         n = 0
-        for inquiry in UnitInquiry.objects.filter(
-            status="INQ_NEW",
+        for petition in UnitPetition.objects.filter(
+            status="PET_NEW",
             student__semester__active=True,
             student__legit=True,
         ):
-            inquiry.run_accept()
+            petition.run_accept()
             n += 1
         if n > 0:
             return JsonResponse({"result": "success", "count": n}, status=200)
@@ -814,7 +814,7 @@ def api(request: HttpRequest) -> JsonResponse:
 
     if action in (
         "grade_problem_set",
-        "accept_inquiries",
+        "accept_petitions",
         "mark_suggestion",
         "triage_job",
         "init",

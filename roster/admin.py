@@ -20,7 +20,7 @@ from .models import (
     RegistrationContainer,
     Student,
     StudentRegistration,
-    UnitInquiry,
+    UnitPetition,
 )
 
 
@@ -407,9 +407,9 @@ class StudentRegistrationAdmin(ImportExportModelAdmin):
     inlines = (StudentRegistrationStudentInline,)
 
 
-# INQUIRY
-@admin.register(UnitInquiry)
-class UnitInquiryAdmin(admin.ModelAdmin):
+# PETITION
+@admin.register(UnitPetition)
+class UnitPetitionAdmin(admin.ModelAdmin):
     readonly_fields = (
         "created_at",
         "updated_at",
@@ -442,22 +442,22 @@ class UnitInquiryAdmin(admin.ModelAdmin):
 
     actions = ("hold_petition", "reject_petition", "accept_petition", "reset_petition")
 
-    def hold_petition(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
+    def hold_petition(self, request: HttpRequest, queryset: QuerySet[UnitPetition]):
         del request
-        queryset.update(status="INQ_HOLD")
+        queryset.update(status="PET_HOLD")
 
-    def reject_petition(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
+    def reject_petition(self, request: HttpRequest, queryset: QuerySet[UnitPetition]):
         del request
-        queryset.update(status="INQ_REJ")
+        queryset.update(status="PET_REJ")
 
-    def accept_petition(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
+    def accept_petition(self, request: HttpRequest, queryset: QuerySet[UnitPetition]):
         del request
-        for inquiry in queryset:
-            inquiry.run_accept()
+        for petition in queryset:
+            petition.run_accept()
 
-    def reset_petition(self, request: HttpRequest, queryset: QuerySet[UnitInquiry]):
+    def reset_petition(self, request: HttpRequest, queryset: QuerySet[UnitPetition]):
         del request
-        queryset.update(status="INQ_NEW")
+        queryset.update(status="PET_NEW")
 
 
 # REGISTRATION

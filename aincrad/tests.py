@@ -19,9 +19,9 @@ from roster.factories import (
     RegistrationContainerFactory,
     StudentFactory,
     StudentRegistrationFactory,
-    UnitInquiryFactory,
+    UnitPetitionFactory,
 )
-from roster.models import ApplyUUID, Invoice, Student, UnitInquiry
+from roster.models import ApplyUUID, Invoice, Student, UnitPetition
 
 EXAMPLE_PASSWORD = "take just the first 24"
 TARGET_HASH = sha256(EXAMPLE_PASSWORD.encode("ascii")).hexdigest()
@@ -98,14 +98,14 @@ def aincrad_setup(db):
     PSetFactory.create_batch(4, student=old_alice, status="A")
     PSetFactory.create_batch(2, student=old_alice, status="P")
 
-    UnitInquiryFactory.create_batch(
-        5, student=alice, action_type="INQ_ACT_UNLOCK", status="INQ_ACC"
+    UnitPetitionFactory.create_batch(
+        5, student=alice, action_type="PET_ACT_UNLOCK", status="PET_ACC"
     )
-    UnitInquiryFactory.create_batch(
-        2, student=alice, action_type="INQ_ACT_DROP", status="INQ_ACC"
+    UnitPetitionFactory.create_batch(
+        2, student=alice, action_type="PET_ACT_DROP", status="PET_ACC"
     )
-    UnitInquiryFactory.create_batch(
-        3, student=alice, action_type="INQ_ACT_UNLOCK", status="INQ_NEW"
+    UnitPetitionFactory.create_batch(
+        3, student=alice, action_type="PET_ACT_UNLOCK", status="PET_NEW"
     )
 
     alice.curriculum.add(submitted_unit)
@@ -185,9 +185,9 @@ def test_init(otis, aincrad_setup):
     else:
         pytest.fail("Could not find a pset from Bôb B. in aincrad test")
 
-    inquiries = out["_children"][1]["inquiries"]
-    assert len(inquiries) == 3
-    assert inquiries[0]["unlock_inquiry_count"] == 8
+    petitions = out["_children"][1]["petitions"]
+    assert len(petitions) == 3
+    assert petitions[0]["unlock_petition_count"] == 8
 
 
 @pytest.mark.django_db
@@ -293,17 +293,17 @@ def test_invoice(otis, aincrad_setup):
 
 @pytest.mark.django_db
 @override_settings(API_TARGET_HASH=TARGET_HASH)
-def test_accept_inquiries(otis, aincrad_setup):
+def test_accept_petitions(otis, aincrad_setup):
     resp = otis.post_20x(
         "api",
         json={
-            "action": "accept_inquiries",
+            "action": "accept_petitions",
             "token": EXAMPLE_PASSWORD,
         },
     )
     assert resp.json()["result"] == "success"
     assert resp.json()["count"] == 3
-    assert not UnitInquiry.objects.filter(status="INQ_NEW").exists()
+    assert not UnitPetition.objects.filter(status="PET_NEW").exists()
 
 
 @pytest.mark.django_db

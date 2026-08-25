@@ -131,7 +131,7 @@
     <ul>
       {% if not student.newborn and semester.active and student.enabled %}
         <li>
-          <a href="{% url 'inquiry' student.pk %}">Manage units</a>
+          <a href="{% url 'petition' student.pk %}">Manage units</a>
         </li>
       {% endif %}
       {% if student.semester.social_url %}

@@ -40,7 +40,7 @@ from roster.models import (
     RegistrationContainer,
     Student,
     StudentRegistration,
-    UnitInquiry,
+    UnitPetition,
     build_student,
 )
 
@@ -671,7 +671,16 @@ def test_master_schedule(otis) -> None:
 
 
 @pytest.mark.django_db
-def test_inquiry(otis) -> None:
+def test_legacy_inquiry_url_redirects_to_petition(otis) -> None:
+    alice: Student = StudentFactory.create()
+    otis.login(alice)
+    resp = otis.client.get(f"/roster/inquiry/{alice.pk}/")
+    assert resp.status_code == 302
+    assert resp["Location"] == reverse("petition", args=(alice.pk,))
+
+
+@pytest.mark.django_db
+def test_petition(otis) -> None:
     firefly: Assistant = AssistantFactory.create()
     alice: Student = StudentFactory.create(assistant=firefly)
     # Create units with non-secret subjects to avoid random subject="K" causing flaky tests
@@ -689,11 +698,11 @@ def test_inquiry(otis) -> None:
 
     # Check that an invalid unit is not processed
     invalid_resp = otis.post(
-        "inquiry",
+        "petition",
         alice.pk,
         data={
             "unit": "invalid",
-            "action_type": "INQ_ACT_UNLOCK",
+            "action_type": "PET_ACT_UNLOCK",
             "explanation": "hi",
         },
     )
@@ -705,23 +714,23 @@ def test_inquiry(otis) -> None:
         # Alice unlocks 6 units, should be autoprocessed.
         for i in range(6):
             resp = otis.post(
-                "inquiry",
+                "petition",
                 alice.pk,
                 data={
                     "unit": units[i].pk,
-                    "action_type": "INQ_ACT_UNLOCK",
+                    "action_type": "PET_ACT_UNLOCK",
                     "explanation": "hi",
                 },
                 follow=True,
             )
             otis.assert_message(resp, "Petition automatically processed.")
-            inq = UnitInquiry.objects.get(
-                student=alice, unit=units[i].pk, action_type="INQ_ACT_UNLOCK"
+            pet = UnitPetition.objects.get(
+                student=alice, unit=units[i].pk, action_type="PET_ACT_UNLOCK"
             )
-            assert inq.was_auto_processed
-            assert inq.status == "INQ_ACC"
+            assert pet.was_auto_processed
+            assert pet.status == "PET_ACC"
 
-        otis.get_20x("inquiry", alice.pk, follow=True)
+        otis.get_20x("petition", alice.pk, follow=True)
 
         # Now Alice has done 6 units, they shouldn't be able to get more
         # (This differs from production behavior because production also gives you a default three units)
@@ -729,22 +738,22 @@ def test_inquiry(otis) -> None:
         assert alice.unlocked_units.count() == 6
         otis.assert_message(
             otis.post(
-                "inquiry",
+                "petition",
                 alice.pk,
                 data={
                     "unit": units[19].pk,
-                    "action_type": "INQ_ACT_UNLOCK",
+                    "action_type": "PET_ACT_UNLOCK",
                     "explanation": "hi",
                 },
                 follow=True,
             ),
             "Petition submitted, wait for it!",
         )
-        inq = UnitInquiry.objects.get(
-            student=alice, unit=units[19].pk, action_type="INQ_ACT_UNLOCK"
+        pet = UnitPetition.objects.get(
+            student=alice, unit=units[19].pk, action_type="PET_ACT_UNLOCK"
         )
-        assert not inq.was_auto_processed
-        assert inq.status == "INQ_NEW"
+        assert not pet.was_auto_processed
+        assert pet.status == "PET_NEW"
 
         assert alice.curriculum.count() == 6
         assert alice.unlocked_units.count() == 6
@@ -753,11 +762,11 @@ def test_inquiry(otis) -> None:
         otis.login(firefly)
         otis.assert_message(
             otis.post(
-                "inquiry",
+                "petition",
                 alice.pk,
                 data={
                     "unit": units[3].pk,
-                    "action_type": "INQ_ACT_LOCK",
+                    "action_type": "PET_ACT_LOCK",
                     "explanation": "hi",
                 },
                 follow=True,
@@ -766,33 +775,33 @@ def test_inquiry(otis) -> None:
         )
         assert alice.curriculum.count() == 6
         assert alice.unlocked_units.count() == 5
-        inq = UnitInquiry.objects.get(
-            student=alice, unit=units[3].pk, action_type="INQ_ACT_LOCK"
+        pet = UnitPetition.objects.get(
+            student=alice, unit=units[3].pk, action_type="PET_ACT_LOCK"
         )
-        assert inq.was_auto_processed
-        assert inq.status == "INQ_ACC"
+        assert pet.was_auto_processed
+        assert pet.status == "PET_ACC"
         assert not alice.unlocked_units.contains(units[3])
 
         # Now dropping should be autoprocessed by Alice
         otis.login(alice)
         otis.assert_message(
             otis.post(
-                "inquiry",
+                "petition",
                 alice.pk,
                 data={
                     "unit": units[3].pk,
-                    "action_type": "INQ_ACT_DROP",
+                    "action_type": "PET_ACT_DROP",
                     "explanation": "hi",
                 },
                 follow=True,
             ),
             "Petition automatically processed.",
         )
-        inq = UnitInquiry.objects.get(
-            student=alice, unit=units[3].pk, action_type="INQ_ACT_DROP"
+        pet = UnitPetition.objects.get(
+            student=alice, unit=units[3].pk, action_type="PET_ACT_DROP"
         )
-        assert inq.was_auto_processed
-        assert inq.status == "INQ_ACC"
+        assert pet.was_auto_processed
+        assert pet.status == "PET_ACC"
 
         assert alice.curriculum.count() == 5
         assert alice.unlocked_units.count() == 5
@@ -803,22 +812,22 @@ def test_inquiry(otis) -> None:
         for i in range(6, 10):
             otis.assert_message(
                 otis.post(
-                    "inquiry",
+                    "petition",
                     alice.pk,
                     data={
                         "unit": units[i].pk,
-                        "action_type": "INQ_ACT_UNLOCK",
+                        "action_type": "PET_ACT_UNLOCK",
                         "explanation": "hi",
                     },
                     follow=True,
                 ),
                 "Petition automatically processed.",
             )
-            inq = UnitInquiry.objects.get(
-                student=alice, unit=units[i].pk, action_type="INQ_ACT_UNLOCK"
+            pet = UnitPetition.objects.get(
+                student=alice, unit=units[i].pk, action_type="PET_ACT_UNLOCK"
             )
-            assert inq.was_auto_processed
-            assert inq.status == "INQ_ACC"
+            assert pet.was_auto_processed
+            assert pet.status == "PET_ACC"
         assert alice.curriculum.count() == 9
         assert alice.unlocked_units.count() == 9
 
@@ -827,22 +836,22 @@ def test_inquiry(otis) -> None:
         for i in range(11, 14):
             otis.assert_message(
                 otis.post(
-                    "inquiry",
+                    "petition",
                     alice.pk,
                     data={
                         "unit": units[i].pk,
-                        "action_type": "INQ_ACT_UNLOCK",
+                        "action_type": "PET_ACT_UNLOCK",
                         "explanation": "hi",
                     },
                     follow=True,
                 ),
                 "You can't have more than 9 unfinished units unlocked at once.",
             )
-            inq = UnitInquiry.objects.get(
-                student=alice, unit=units[i].pk, action_type="INQ_ACT_UNLOCK"
+            pet = UnitPetition.objects.get(
+                student=alice, unit=units[i].pk, action_type="PET_ACT_UNLOCK"
             )
-            assert inq.was_auto_processed
-            assert inq.status == "INQ_REJ"
+            assert pet.was_auto_processed
+            assert pet.status == "PET_REJ"
         assert alice.curriculum.count() == 9
         assert alice.unlocked_units.count() == 9
 
@@ -850,33 +859,33 @@ def test_inquiry(otis) -> None:
         for i in range(15, 18):
             otis.assert_message(
                 otis.post(
-                    "inquiry",
+                    "petition",
                     alice.pk,
                     data={
                         "unit": units[i].pk,
-                        "action_type": "INQ_ACT_APPEND",
+                        "action_type": "PET_ACT_APPEND",
                         "explanation": "hi",
                     },
                     follow=True,
                 ),
                 "Petition automatically processed.",
             )
-            inq = UnitInquiry.objects.get(
-                student=alice, unit=units[i].pk, action_type="INQ_ACT_APPEND"
+            pet = UnitPetition.objects.get(
+                student=alice, unit=units[i].pk, action_type="PET_ACT_APPEND"
             )
-            assert inq.was_auto_processed
-            assert inq.status == "INQ_ACC"
+            assert pet.was_auto_processed
+            assert pet.status == "PET_ACC"
         assert alice.curriculum.count() == 12
         assert alice.unlocked_units.count() == 9
 
         # check that petitions are now locked because of abnormally large count
         otis.assert_message(
             otis.post(
-                "inquiry",
+                "petition",
                 alice.pk,
                 data={
                     "unit": units[19].pk,
-                    "action_type": "INQ_ACT_DROP",
+                    "action_type": "PET_ACT_DROP",
                     "explanation": "hi",
                 },
                 follow=True,
@@ -884,44 +893,44 @@ def test_inquiry(otis) -> None:
             "You have submitted an abnormally large number of petitions "
             "so you should contact Evan specially to explain why.",
         )
-        inq = UnitInquiry.objects.get(
-            student=alice, unit=units[19].pk, action_type="INQ_ACT_DROP"
+        pet = UnitPetition.objects.get(
+            student=alice, unit=units[19].pk, action_type="PET_ACT_DROP"
         )
-        assert not inq.was_auto_processed
-        assert inq.status == "INQ_HOLD"
+        assert not pet.was_auto_processed
+        assert pet.status == "PET_HOLD"
 
         # drop a bunch of units for alice
         otis.login(firefly)
         for i in range(4, 14):
             otis.assert_message(
                 otis.post(
-                    "inquiry",
+                    "petition",
                     alice.pk,
                     data={
                         "unit": units[i].pk,
-                        "action_type": "INQ_ACT_DROP",
+                        "action_type": "PET_ACT_DROP",
                         "explanation": "hi",
                     },
                     follow=True,
                 ),
                 "Petition automatically processed.",
             )
-            inq = UnitInquiry.objects.get(
-                student=alice, unit=units[i].pk, action_type="INQ_ACT_DROP"
+            pet = UnitPetition.objects.get(
+                student=alice, unit=units[i].pk, action_type="PET_ACT_DROP"
             )
-            assert inq.was_auto_processed
-            assert inq.status == "INQ_ACC"
+            assert pet.was_auto_processed
+            assert pet.status == "PET_ACC"
         assert alice.curriculum.count() == 6
         assert alice.unlocked_units.count() == 3
 
     with freeze_time("2025-10-31", tz_offset=0):
         otis.assert_message(
             otis.post(
-                "inquiry",
+                "petition",
                 alice.pk,
                 data={
                     "unit": units[5].pk,
-                    "action_type": "INQ_ACT_UNLOCK",
+                    "action_type": "PET_ACT_UNLOCK",
                     "explanation": "add back in",
                 },
                 follow=True,
@@ -930,14 +939,14 @@ def test_inquiry(otis) -> None:
         )
         assert alice.curriculum.count() == 7
         assert alice.unlocked_units.count() == 4
-        inq = UnitInquiry.objects.get(
+        pet = UnitPetition.objects.get(
             student=alice,
             unit=units[5].pk,
-            action_type="INQ_ACT_UNLOCK",
+            action_type="PET_ACT_UNLOCK",
             explanation="add back in",
         )
-        assert inq.was_auto_processed
-        assert inq.status == "INQ_ACC"
+        assert pet.was_auto_processed
+        assert pet.status == "PET_ACC"
 
         # Alice hit the hold limit earlier, this just circumvents it.
         otis.login(alice)
@@ -953,11 +962,11 @@ def test_inquiry(otis) -> None:
 
         otis.assert_message(
             otis.post(
-                "inquiry",
+                "petition",
                 alice.pk,
                 data={
                     "unit": secret_unit.pk,
-                    "action_type": "INQ_ACT_UNLOCK",
+                    "action_type": "PET_ACT_UNLOCK",
                     "explanation": "its almost halloween and my family wants to host it at our house.",
                 },
                 follow=True,
@@ -966,24 +975,24 @@ def test_inquiry(otis) -> None:
         )
         assert alice.curriculum.count() == 8
         assert alice.unlocked_units.count() == 5
-        inq = UnitInquiry.objects.get(
-            student=alice, unit=secret_unit.pk, action_type="INQ_ACT_UNLOCK"
+        pet = UnitPetition.objects.get(
+            student=alice, unit=secret_unit.pk, action_type="PET_ACT_UNLOCK"
         )
-        assert inq.was_auto_processed
-        assert inq.status == "INQ_ACC"
+        assert pet.was_auto_processed
+        assert pet.status == "PET_ACC"
 
     # test a bunch of fail conditions
     bob: Student = StudentFactory.create(semester=SemesterFactory.create(active=False))
     otis.login(bob)
-    otis.get_denied("inquiry", bob.pk)
+    otis.get_denied("petition", bob.pk)
 
     carl: Student = StudentFactory.create(enabled=False)
     otis.login(carl)
-    otis.get_denied("inquiry", carl.pk)
+    otis.get_denied("petition", carl.pk)
 
     dave: Student = StudentFactory.create(newborn=True)
     otis.login(dave)
-    otis.get_denied("inquiry", dave.pk)
+    otis.get_denied("petition", dave.pk)
 
     invoice_semester = SemesterFactory.create(
         show_invoices=True,
@@ -995,22 +1004,22 @@ def test_inquiry(otis) -> None:
         InvoiceFactory.create(student=eve)
 
     with freeze_time("2021-07-30", tz_offset=0):
-        otis.get_denied("inquiry", eve.pk)
+        otis.get_denied("petition", eve.pk)
 
 
 @pytest.mark.django_db
-def test_inquiry_cant_rapid_fire(otis) -> None:
+def test_petition_cant_rapid_fire(otis) -> None:
     with freeze_time("2025-10-31", tz_offset=0):
         alice = StudentFactory.create()
         unit = UnitFactory.create()
         otis.login(alice)
         otis.assert_message(
             otis.post(
-                "inquiry",
+                "petition",
                 alice.pk,
                 data={
                     "unit": unit.pk,
-                    "action_type": "INQ_ACT_UNLOCK",
+                    "action_type": "PET_ACT_UNLOCK",
                     "explanation": "unlock a unit",
                 },
                 follow=True,
@@ -1019,11 +1028,11 @@ def test_inquiry_cant_rapid_fire(otis) -> None:
         )
         otis.assert_message(
             otis.post(
-                "inquiry",
+                "petition",
                 alice.pk,
                 data={
                     "unit": unit.pk,
-                    "action_type": "INQ_ACT_UNLOCK",
+                    "action_type": "PET_ACT_UNLOCK",
                     "explanation": "accidentally pressed again because trigger happy",
                 },
                 follow=True,
@@ -1033,7 +1042,7 @@ def test_inquiry_cant_rapid_fire(otis) -> None:
 
 
 @pytest.mark.django_db
-def test_inquiry_cant_rapid_fire_after_auto_reject(otis) -> None:
+def test_petition_cant_rapid_fire_after_auto_reject(otis) -> None:
     """A double submit is caught even when the first copy was auto-rejected."""
     with freeze_time("2025-10-31", tz_offset=0):
         alice: Student = StudentFactory.create()
@@ -1045,46 +1054,46 @@ def test_inquiry_cant_rapid_fire_after_auto_reject(otis) -> None:
 
         data = {
             "unit": unit.pk,
-            "action_type": "INQ_ACT_DROP",
+            "action_type": "PET_ACT_DROP",
             "explanation": "drop this unit please",
         }
         otis.assert_message(
-            otis.post("inquiry", alice.pk, data=data, follow=True),
+            otis.post("petition", alice.pk, data=data, follow=True),
             "You have a pending submission for this unit.",
         )
         otis.assert_message(
-            otis.post("inquiry", alice.pk, data=data, follow=True),
+            otis.post("petition", alice.pk, data=data, follow=True),
             "The same petition already was submitted within the last 90 seconds.",
         )
         assert (
-            UnitInquiry.objects.filter(
-                student=alice, unit=unit, action_type="INQ_ACT_DROP"
+            UnitPetition.objects.filter(
+                student=alice, unit=unit, action_type="PET_ACT_DROP"
             ).count()
             == 1
         )
 
 
 @pytest.mark.django_db
-def test_inquiry_can_resubmit_after_cancel(otis) -> None:
+def test_petition_can_resubmit_after_cancel(otis) -> None:
     """Canceling a petition lets the student submit the same one right away."""
     with freeze_time("2025-10-31", tz_offset=0):
         alice: Student = StudentFactory.create()
         unit: Unit = UnitFactory.create()
-        inquiry = UnitInquiry.objects.create(
+        petition = UnitPetition.objects.create(
             student=alice,
             unit=unit,
-            action_type="INQ_ACT_UNLOCK",
+            action_type="PET_ACT_UNLOCK",
             explanation="changed my mind",
-            status="INQ_CANC",
+            status="PET_CANC",
         )
         otis.login(alice)
         otis.assert_message(
             otis.post(
-                "inquiry",
+                "petition",
                 alice.pk,
                 data={
                     "unit": unit.pk,
-                    "action_type": "INQ_ACT_UNLOCK",
+                    "action_type": "PET_ACT_UNLOCK",
                     "explanation": "actually i do want this one",
                 },
                 follow=True,
@@ -1092,15 +1101,15 @@ def test_inquiry_can_resubmit_after_cancel(otis) -> None:
             "Petition automatically processed.",
         )
         assert (
-            UnitInquiry.objects.filter(student=alice, unit=unit)
-            .exclude(pk=inquiry.pk)
+            UnitPetition.objects.filter(student=alice, unit=unit)
+            .exclude(pk=petition.pk)
             .count()
             == 1
         )
 
 
 @pytest.mark.django_db
-def test_inquiry_rejects_drop_lock_if_pending_pset(otis) -> None:
+def test_petition_rejects_drop_lock_if_pending_pset(otis) -> None:
     """Drop/lock petition auto-rejected if there's a pending submission."""
     alice: Student = StudentFactory.create()
     unit: Unit = UnitFactory.create()
@@ -1110,71 +1119,71 @@ def test_inquiry_rejects_drop_lock_if_pending_pset(otis) -> None:
     otis.login(alice)
 
     resp = otis.post(
-        "inquiry",
+        "petition",
         alice.pk,
         data={
             "unit": unit.pk,
-            "action_type": "INQ_ACT_DROP",
+            "action_type": "PET_ACT_DROP",
             "explanation": "i'm a cool haxx0r who wants 10 units",
         },
         follow=True,
     )
     otis.assert_message(resp, "You have a pending submission for this unit.")
-    inq = UnitInquiry.objects.get(student=alice, unit=unit, action_type="INQ_ACT_DROP")
-    assert inq.status == "INQ_REJ"
+    pet = UnitPetition.objects.get(student=alice, unit=unit, action_type="PET_ACT_DROP")
+    assert pet.status == "PET_REJ"
     resp = otis.post(
-        "inquiry",
+        "petition",
         alice.pk,
         data={
             "unit": unit.pk,
-            "action_type": "INQ_ACT_LOCK",
+            "action_type": "PET_ACT_LOCK",
             "explanation": "o no evan is too smart for me 😂",
         },
         follow=True,
     )
     otis.assert_message(resp, "You have a pending submission for this unit.")
-    inq = UnitInquiry.objects.get(student=alice, unit=unit, action_type="INQ_ACT_LOCK")
-    assert inq.status == "INQ_REJ"
+    pet = UnitPetition.objects.get(student=alice, unit=unit, action_type="PET_ACT_LOCK")
+    assert pet.status == "PET_REJ"
 
 
 @pytest.mark.django_db
-def test_cancel_inquiry_sets_status_to_canceled(otis) -> None:
+def test_cancel_petition_sets_status_to_canceled(otis) -> None:
     alice = StudentFactory.create()
     unit = UnitFactory.create()
-    inquiry = UnitInquiry.objects.create(
+    petition = UnitPetition.objects.create(
         student=alice,
         unit=unit,
-        action_type="INQ_ACT_UNLOCK",
-        status="INQ_NEW",
+        action_type="PET_ACT_UNLOCK",
+        status="PET_NEW",
         explanation="Please unlock",
     )
     otis.login(alice)
     resp = otis.post_20x(
-        "inquiry-cancel",
-        inquiry.pk,
+        "petition-cancel",
+        petition.pk,
         follow=True,
     )
-    inquiry.refresh_from_db()
-    assert inquiry.status == "INQ_CANC"
-    otis.assert_message(resp, "Inquiry successfully canceled.")
+    petition.refresh_from_db()
+    assert petition.status == "PET_CANC"
+    otis.assert_message(resp, "Petition successfully canceled.")
 
 
 @pytest.mark.django_db
-def test_cancel_inquiry_rejects_get(otis) -> None:
+def test_cancel_petition_rejects_get(otis) -> None:
     alice = StudentFactory.create()
     unit = UnitFactory.create()
-    inquiry = UnitInquiry.objects.create(
+    petition = UnitPetition.objects.create(
         student=alice,
         unit=unit,
-        action_type="INQ_ACT_UNLOCK",
-        status="INQ_NEW",
+        action_type="PET_ACT_UNLOCK",
+        status="PET_NEW",
         explanation="Please unlock",
     )
     otis.login(alice)
     # a cross-site navigation is a GET, so canceling can't be reachable that way
-    assert otis.get("inquiry-cancel", inquiry.pk).status_code == 405
-    inquiry.refresh_from_db()
-    assert inquiry.status == "INQ_NEW"
+    assert otis.get("petition-cancel", petition.pk).status_code == 405
+    petition.refresh_from_db()
+    assert petition.status == "PET_NEW"
 
 
 @pytest.mark.django_db
@@ -1183,58 +1192,58 @@ def test_only_owner_or_staff_can_cancel(otis):
     bob = StudentFactory.create()
     staff = UserFactory.create(is_staff=True, is_superuser=True)
     unit = UnitFactory.create()
-    inquiry = UnitInquiry.objects.create(
+    petition = UnitPetition.objects.create(
         student=alice,
         unit=unit,
-        action_type="INQ_ACT_UNLOCK",
-        status="INQ_NEW",
+        action_type="PET_ACT_UNLOCK",
+        status="PET_NEW",
         explanation="Please unlock",
     )
-    # Bob cannot cancel Alice's inquiry
+    # Bob cannot cancel Alice's petition
     otis.login(bob)
-    otis.post_40x("inquiry-cancel", inquiry.pk)
-    inquiry.refresh_from_db()
-    assert inquiry.status == "INQ_NEW"  # Ensure status is still "INQ_NEW"
+    otis.post_40x("petition-cancel", petition.pk)
+    petition.refresh_from_db()
+    assert petition.status == "PET_NEW"  # Ensure status is still "PET_NEW"
 
     # Staff can cancel
     otis.login(staff)
-    otis.post_20x("inquiry-cancel", inquiry.pk, follow=True)
-    inquiry.refresh_from_db()
-    assert inquiry.status == "INQ_CANC"
+    otis.post_20x("petition-cancel", petition.pk, follow=True)
+    petition.refresh_from_db()
+    assert petition.status == "PET_CANC"
 
 
 @pytest.mark.django_db
 def test_cancel_button_only_for_pending(otis):
-    for status in ["INQ_ACC", "INQ_REJ", "INQ_HOLD", "INQ_CANC"]:
+    for status in ["PET_ACC", "PET_REJ", "PET_HOLD", "PET_CANC"]:
         alice = StudentFactory.create()
         unit = UnitFactory.create()
-        UnitInquiry.objects.create(
+        UnitPetition.objects.create(
             student=alice,
             unit=unit,
-            action_type="INQ_ACT_UNLOCK",
+            action_type="PET_ACT_UNLOCK",
             status=status,
             explanation="Test",
         )
         otis.login(alice)
-        otis.get_20x("inquiry", alice.pk)
+        otis.get_20x("petition", alice.pk)
 
 
 @pytest.mark.django_db
 def test_cannot_cancel_non_pending(otis):
     alice = StudentFactory.create()
     unit = UnitFactory.create()
-    for status in ["INQ_ACC", "INQ_REJ", "INQ_HOLD", "INQ_CANC"]:
-        inquiry = UnitInquiry.objects.create(
+    for status in ["PET_ACC", "PET_REJ", "PET_HOLD", "PET_CANC"]:
+        petition = UnitPetition.objects.create(
             student=alice,
             unit=unit,
-            action_type="INQ_ACT_UNLOCK",
+            action_type="PET_ACT_UNLOCK",
             status=status,
             explanation="Test",
         )
         otis.login(alice)
-        otis.post_40x("inquiry-cancel", inquiry.pk)
-        inquiry.refresh_from_db()
-        assert inquiry.status == status
+        otis.post_40x("petition-cancel", petition.pk)
+        petition.refresh_from_db()
+        assert petition.status == status
 
 
 @pytest.mark.django_db
@@ -1611,7 +1620,7 @@ def test_reg(otis) -> None:
             "email_on_announcement": False,
             "email_on_pset_complete": True,
             "email_on_suggestion_processed": False,
-            "email_on_inquiry_complete": False,
+            "email_on_petition_complete": False,
         },
         follow=True,
     )
@@ -1642,7 +1651,7 @@ def test_reg(otis) -> None:
             "email_on_announcement": False,
             "email_on_pset_complete": True,
             "email_on_suggestion_processed": False,
-            "email_on_inquiry_complete": False,
+            "email_on_petition_complete": False,
         },
         follow=True,
     )
@@ -1662,7 +1671,7 @@ def test_reg(otis) -> None:
     assert not profile.email_on_announcement
     assert profile.email_on_pset_complete
     assert not profile.email_on_suggestion_processed
-    assert not profile.email_on_inquiry_complete
+    assert not profile.email_on_petition_complete
 
     resp = otis.post_20x(
         "register",
@@ -1681,7 +1690,7 @@ def test_reg(otis) -> None:
             "email_on_announcement": False,
             "email_on_pset_complete": True,
             "email_on_suggestion_processed": False,
-            "email_on_inquiry_complete": False,
+            "email_on_petition_complete": False,
         },
         follow=True,
     )
@@ -1755,7 +1764,7 @@ def test_reg_with_apply_uuid(otis) -> None:
             "email_on_announcement": False,
             "email_on_pset_complete": True,
             "email_on_suggestion_processed": False,
-            "email_on_inquiry_complete": False,
+            "email_on_petition_complete": False,
         },
         follow=True,
     )
@@ -1786,7 +1795,7 @@ def test_reg_with_apply_uuid(otis) -> None:
             "email_on_announcement": False,
             "email_on_pset_complete": True,
             "email_on_suggestion_processed": False,
-            "email_on_inquiry_complete": False,
+            "email_on_petition_complete": False,
         },
         follow=True,
     )
@@ -1835,7 +1844,7 @@ def test_reg_with_apply_uuid(otis) -> None:
             "email_on_announcement": False,
             "email_on_pset_complete": True,
             "email_on_suggestion_processed": False,
-            "email_on_inquiry_complete": False,
+            "email_on_petition_complete": False,
         },
         follow=True,
     )
@@ -1861,7 +1870,7 @@ def test_reg_with_apply_uuid(otis) -> None:
             "email_on_announcement": False,
             "email_on_pset_complete": True,
             "email_on_suggestion_processed": False,
-            "email_on_inquiry_complete": False,
+            "email_on_petition_complete": False,
         },
         follow=True,
     )
@@ -1902,7 +1911,7 @@ def test_reg_with_disabled_apply_uuid(otis) -> None:
             "email_on_announcement": False,
             "email_on_pset_complete": True,
             "email_on_suggestion_processed": False,
-            "email_on_inquiry_complete": False,
+            "email_on_petition_complete": False,
         },
         follow=True,
     )
@@ -2173,7 +2182,7 @@ def test_registration_is_all_or_nothing(otis) -> None:
                 "email_on_announcement": False,
                 "email_on_pset_complete": True,
                 "email_on_suggestion_processed": False,
-                "email_on_inquiry_complete": False,
+                "email_on_petition_complete": False,
             },
         )
 

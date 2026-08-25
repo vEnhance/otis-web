@@ -8,7 +8,7 @@ from django.forms.forms import BaseForm
 
 from core.models import EMAIL_PREFERENCE_FIELDS, Semester, Unit
 from dashboard.models import PSet
-from roster.models import Student, StudentRegistration, UnitInquiry
+from roster.models import Student, StudentRegistration, UnitPetition
 
 
 class UnitChoiceBoundField(forms.BoundField):
@@ -126,7 +126,7 @@ class AdvanceForm(forms.Form):
         )
 
 
-class InquiryForm(forms.ModelForm):
+class PetitionForm(forms.ModelForm):
     def __init__(self, *args: Any, **kwargs: Any):
         student: Student = kwargs.pop("student")
         super().__init__(*args, **kwargs)
@@ -139,7 +139,7 @@ class InquiryForm(forms.ModelForm):
         self.fields["unit"].empty_label = "Search for a unit..."  # type: ignore
 
     class Meta:
-        model = UnitInquiry
+        model = UnitPetition
         fields = ("unit", "action_type", "explanation")
         widgets: ClassVar[dict[str, forms.Widget]] = {
             "explanation": forms.Textarea(attrs={"cols": 40, "rows": 3}),
@@ -176,7 +176,7 @@ class DecisionForm(forms.ModelForm):
         help_text="Receive all-student announcements. If this is set to False, announcements will only appear on OTIS-WEB.",
         required=False,
     )
-    email_on_inquiry_complete = forms.BooleanField(
+    email_on_petition_complete = forms.BooleanField(
         label="Receive email on petition processed",
         help_text="Receive an email when your petition has been processed.",
         required=False,

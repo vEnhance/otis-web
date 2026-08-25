@@ -1,5 +1,6 @@
 from django.shortcuts import redirect
 from django.urls import path
+from django.views.generic.base import RedirectView
 
 from . import views
 
@@ -11,8 +12,14 @@ urlpatterns = [
     path(r"invoice/<int:student_pk>/", views.invoice, name="invoice"),
     path(r"master-schedule/", views.master_schedule, name="master-schedule"),
     path(r"edit-invoice/<int:pk>/", views.UpdateInvoice.as_view(), name="edit-invoice"),
-    path(r"inquiry/<int:student_pk>/", views.inquiry, name="inquiry"),
-    path(r"inquiry/cancel/<int:pk>/", views.cancel_inquiry, name="inquiry-cancel"),
+    path(r"petition/<int:student_pk>/", views.petition, name="petition"),
+    path(r"petition/cancel/<int:pk>/", views.cancel_petition, name="petition-cancel"),
+    # "inquiry" was the old internal name for a unit petition; keep the URL
+    # students may have bookmarked pointing at the renamed view.
+    path(
+        r"inquiry/<int:student_pk>/",
+        RedirectView.as_view(pattern_name="petition"),
+    ),
     path(r"register/", views.register, name="register"),
     path(r"profile/", views.update_profile, name="update-profile"),
     path(r"giga-chart/<str:format_as>/", views.giga_chart, name="giga-chart"),
