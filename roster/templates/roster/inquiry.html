@@ -30,10 +30,20 @@
     A <b>unit petition</b> lets you make requests for changes to your set of units.
     Here you can open new petitions and see the status of previous ones.
   </p>
-  <p>
-    I try to respond to petitions somewhat regularly,
-    but if I don't get to yours for a few days, please send me a reminder.
-  </p>
+  <ul>
+    <li>Your first few petitions will be automatically approved by OTIS-WEB.</li>
+    <li>
+      After that, petitions will be manually reviewed by Evan.
+      This may take 1-2 days, but usually not longer than that.
+    </li>
+    <li>
+      If you submit an egregious amount of petitions
+      relative to the number of completed units
+      (i.e., you are requesting units with no intention of actually working on them),
+      then OTIS-WEB may rate-limit you and prevent further petition usage.
+      In that case, you'll need to contact Evan manually and beg for forgiveness.
+    </li>
+  </ul>
   <h2>New petition</h2>
   {% include "otisweb/components/generic_form.html" with submit_name="Send" %}
   {% if request.user|getconfig:"show_unit_petitions" %}
