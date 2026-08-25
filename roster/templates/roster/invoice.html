@@ -76,11 +76,11 @@
       Please contact me if you think there are any errors
       (I make mistakes every year!).
     </p>
-    {% if student.semester.first_payment_deadline or student.semester.most_payment_deadline %}
+    {% if student.semester.half_payment_deadline or student.semester.full_payment_deadline %}
       <p>As a reminder, the payment deadlines are:</p>
       <ul>
-        {% if student.semester.first_payment_deadline %}<li>{{ student.semester.first_payment_deadline|date }}</li>{% endif %}
-        {% if student.semester.most_payment_deadline %}<li>{{ student.semester.most_payment_deadline|date }}</li>{% endif %}
+        {% if student.semester.half_payment_deadline %}<li>{{ student.semester.half_payment_deadline|date }}</li>{% endif %}
+        {% if student.semester.full_payment_deadline %}<li>{{ student.semester.full_payment_deadline|date }}</li>{% endif %}
       </ul>
     {% endif %}
     {% if request.user.is_superuser %}
