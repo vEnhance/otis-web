@@ -289,7 +289,7 @@ class UserProfileUpdateView(
     model = UserProfile
     fields = (
         "email_on_announcement",
-        "email_on_inquiry_complete",
+        "email_on_petition_complete",
         "email_on_pset_complete",
         "email_on_suggestion_processed",
         "show_bars",

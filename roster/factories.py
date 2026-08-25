@@ -11,7 +11,7 @@ from roster.models import (
     RegistrationContainer,
     Student,
     StudentRegistration,
-    UnitInquiry,
+    UnitPetition,
 )
 
 
@@ -67,11 +67,11 @@ class InvoiceFactory(DjangoModelFactory):
     preps_taught = 2
 
 
-class UnitInquiryFactory(DjangoModelFactory):
+class UnitPetitionFactory(DjangoModelFactory):
     class Meta:
-        model = UnitInquiry
+        model = UnitPetition
 
     student = SubFactory(StudentFactory)
     unit = SubFactory(UnitFactory)
-    action_type = "INQ_ACT_UNLOCK"
+    action_type = "PET_ACT_UNLOCK"
     explanation = Faker("sentence")

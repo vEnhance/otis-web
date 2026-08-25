@@ -337,7 +337,7 @@
       <td valign="top" width="50%">
         <h3 id="petitions">Petitions</h3>
         {% if request.user.is_staff %}
-          <a href="{% url 'inquiry' student.pk %}" class="btn btn-warning">Manage units</a>
+          <a href="{% url 'petition' student.pk %}" class="btn btn-warning">Manage units</a>
           <a href="{% url 'advance' student.pk %}" class="btn btn-dark">Edit units</a>
         {% else %}
           {% if not student.enabled %}
@@ -347,7 +347,7 @@
           {% elif student.newborn %}
             <p class="text-muted fst-italic">Pick units first!</p>
           {% else %}
-            <a href="{% url 'inquiry' student.pk %}" class="btn btn-warning">Manage units</a>
+            <a href="{% url 'petition' student.pk %}" class="btn btn-warning">Manage units</a>
             {% if bonus_levels %}
               <p data-testid="bonus-level-request">
                 You are also sufficiently high level to

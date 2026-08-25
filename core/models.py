@@ -325,7 +325,7 @@ class UserProfile(models.Model):
         help_text="Receive all-student announcements. If this is set to False, announcements will only appear on OTIS-WEB.",
         default=True,
     )
-    email_on_inquiry_complete = models.BooleanField(
+    email_on_petition_complete = models.BooleanField(
         verbose_name="Receive email on petition processed",
         help_text="Receive an email when your petition has been processed.",
         default=False,
@@ -357,5 +357,5 @@ EMAIL_PREFERENCE_FIELDS = (
     "email_on_announcement",
     "email_on_pset_complete",
     "email_on_suggestion_processed",
-    "email_on_inquiry_complete",
+    "email_on_petition_complete",
 )

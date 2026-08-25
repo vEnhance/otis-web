@@ -67,7 +67,7 @@ from .forms import (
     AdvanceForm,
     CurriculumForm,
     DecisionForm,
-    InquiryForm,
+    PetitionForm,
     UserForm,
     UserLookupForm,
     UserMergeForm,
@@ -77,7 +77,7 @@ from .models import (
     RegistrationContainer,
     Student,
     StudentRegistration,
-    UnitInquiry,
+    UnitPetition,
     build_student,
 )
 
@@ -274,21 +274,21 @@ class UpdateInvoice(
         return reverse("invoice", args=(self.object.student.pk,))
 
 
-def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Student):
-    current_inquiries = UnitInquiry.objects.filter(student=student)
-    inquiry.student = student
+def handle_petition(request: AuthHttpRequest, petition: UnitPetition, student: Student):
+    current_petitions = UnitPetition.objects.filter(student=student)
+    petition.student = student
     # check if exists already and created recently.
-    # every status counts here except INQ_CANC: canceling a petition is the one
+    # every status counts here except PET_CANC: canceling a petition is the one
     # action that should let a student immediately submit the same one again.
     # in particular a double submit whose first copy was auto-rejected or put
     # on hold still needs to be caught.
     if (
-        current_inquiries.filter(
-            unit=inquiry.unit,
-            action_type=inquiry.action_type,
+        current_petitions.filter(
+            unit=petition.unit,
+            action_type=petition.action_type,
             created_at__gte=timezone.now() - datetime.timedelta(seconds=90),
         )
-        .exclude(status="INQ_CANC")
+        .exclude(status="PET_CANC")
         .exists()
     ):
         messages.warning(
@@ -297,63 +297,63 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
         )
         return
 
-    inquiry.save()
+    petition.save()
 
     # early auto accept criteria
-    if inquiry.action_type == "INQ_ACT_APPEND" or request.user.is_staff:
-        inquiry.run_accept()
-        inquiry.was_auto_processed = True
-        inquiry.save()
+    if petition.action_type == "PET_ACT_APPEND" or request.user.is_staff:
+        petition.run_accept()
+        petition.was_auto_processed = True
+        petition.save()
         messages.success(request, "Petition automatically processed.")
         return
 
-    past_unlock_inquiries = current_inquiries.filter(action_type="INQ_ACT_UNLOCK")
+    past_unlock_petitions = current_petitions.filter(action_type="PET_ACT_UNLOCK")
 
-    num_past_unlock_inquiries = past_unlock_inquiries.count()
+    num_past_unlock_petitions = past_unlock_petitions.count()
 
     unlocked_count = (
-        past_unlock_inquiries.filter(status="INQ_NEW").count()
+        past_unlock_petitions.filter(status="PET_NEW").count()
         + student.unlocked_units.count()
     )
 
     auto_reject_checks = [
         (
-            inquiry.action_type == "INQ_ACT_UNLOCK" and unlocked_count > 9,
+            petition.action_type == "PET_ACT_UNLOCK" and unlocked_count > 9,
             "You can't have more than 9 unfinished units unlocked at once.",
         ),
         (
-            inquiry.action_type in ("INQ_ACT_DROP", "INQ_ACT_LOCK")
+            petition.action_type in ("PET_ACT_DROP", "PET_ACT_LOCK")
             and PSet.objects.filter(
-                student=student, unit=inquiry.unit, status__in=("P", "PA", "PR")
+                student=student, unit=petition.unit, status__in=("P", "PA", "PR")
             ),
             "You have a pending submission for this unit.",
         ),
         (
-            inquiry.action_type == "INQ_ACT_LOCK"
-            and PSet.objects.filter(student=student, unit=inquiry.unit, status="A"),
+            petition.action_type == "PET_ACT_LOCK"
+            and PSet.objects.filter(student=student, unit=petition.unit, status="A"),
             "You can't lock units with accepted submissions.",
         ),
     ]
 
     for condition, message in auto_reject_checks:
         if condition:
-            inquiry.status = "INQ_REJ"
-            inquiry.was_auto_processed = True
-            inquiry.save()
+            petition.status = "PET_REJ"
+            petition.was_auto_processed = True
+            petition.save()
             messages.error(request, message=message)
             return
 
     # auto hold criteria
     num_psets = PSet.objects.filter(student=student).count()
-    auto_hold_criteria = num_past_unlock_inquiries > (10 + 2.5 * num_psets**1.2)
+    auto_hold_criteria = num_past_unlock_petitions > (10 + 2.5 * num_psets**1.2)
 
     if auto_hold_criteria:
-        inquiry.status = "INQ_HOLD"
-        inquiry.save()
+        petition.status = "PET_HOLD"
+        petition.save()
         logger.log(
             SUCCESS_LOG_LEVEL,
-            f"Held {student}'s petition to {inquiry.action_type} {inquiry.unit} "
-            f"({num_psets} psets and {num_past_unlock_inquiries} unlock petitions).",
+            f"Held {student}'s petition to {petition.action_type} {petition.unit} "
+            f"({num_psets} psets and {num_past_unlock_petitions} unlock petitions).",
             extra={"request": request},
         )
         messages.warning(
@@ -363,33 +363,33 @@ def handle_inquiry(request: AuthHttpRequest, inquiry: UnitInquiry, student: Stud
         )
         return
 
-    unit = inquiry.unit
+    unit = petition.unit
 
     # auto accepting criteria for unlocking
-    if inquiry.action_type == "INQ_ACT_UNLOCK" and unlocked_count <= 9:
+    if petition.action_type == "PET_ACT_UNLOCK" and unlocked_count <= 9:
         # when less than 6 past unlock (newbie) or a secret unit (currently uses subject to determine this)
         auto_accept_criteria = (
-            num_past_unlock_inquiries <= 6 or unit.group.subject == "K"
+            num_past_unlock_petitions <= 6 or unit.group.subject == "K"
         )
-    elif inquiry.action_type == "INQ_ACT_DROP":
+    elif petition.action_type == "PET_ACT_DROP":
         # auto dropping locked units
         auto_accept_criteria = not student.unlocked_units.contains(unit)
     else:
         auto_accept_criteria = False
 
     if auto_accept_criteria:
-        inquiry.run_accept()
-        inquiry.was_auto_processed = True
-        inquiry.save()
+        petition.run_accept()
+        petition.was_auto_processed = True
+        petition.save()
         messages.success(request, "Petition automatically processed.")
         return
 
     messages.success(request, "Petition submitted, wait for it!")
 
 
-# Inquiry views
+# Petition views
 @login_required
-def inquiry(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
+def petition(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
     student = get_student_by_pk(request, student_pk)
     if not request.user.is_staff:
         if not student.semester.active:
@@ -406,37 +406,37 @@ def inquiry(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
             )
     context: dict[str, Any] = {}
 
-    # Create form for submitting new inquiries
+    # Create form for submitting new petitions
     if request.method == "POST":
-        form = InquiryForm(request.POST, student=student)
+        form = PetitionForm(request.POST, student=student)
         if form.is_valid():
-            inquiry: UnitInquiry = form.save(commit=False)
-            handle_inquiry(request, inquiry, student)
-            return HttpResponseRedirect(reverse("inquiry", args=(student.pk,)))
+            petition: UnitPetition = form.save(commit=False)
+            handle_petition(request, petition, student)
+            return HttpResponseRedirect(reverse("petition", args=(student.pk,)))
 
     else:
-        form = InquiryForm(student=student)
+        form = PetitionForm(student=student)
     context["form"] = form
 
-    context["inquiries"] = UnitInquiry.objects.filter(student=student)
+    context["petitions"] = UnitPetition.objects.filter(student=student)
     context["student"] = student
     context["curriculum"] = student.generate_curriculum_rows()
 
-    return render(request, "roster/inquiry.html", context)
+    return render(request, "roster/petition.html", context)
 
 
 @login_required
 @require_POST
-def cancel_inquiry(request: AuthHttpRequest, pk: int) -> HttpResponse:
-    inquiry = get_object_or_404(UnitInquiry, pk=pk)
-    if inquiry.student.user != request.user and not request.user.is_staff:
-        raise PermissionDenied("You are not authorized to cancel this inquiry.")
-    if inquiry.status != "INQ_NEW":
+def cancel_petition(request: AuthHttpRequest, pk: int) -> HttpResponse:
+    petition = get_object_or_404(UnitPetition, pk=pk)
+    if petition.student.user != request.user and not request.user.is_staff:
+        raise PermissionDenied("You are not authorized to cancel this petition.")
+    if petition.status != "PET_NEW":
         raise PermissionDenied
-    inquiry.status = "INQ_CANC"
-    inquiry.save()
-    messages.success(request, "Inquiry successfully canceled.")
-    return HttpResponseRedirect(reverse("inquiry", args=(inquiry.student.pk,)))
+    petition.status = "PET_CANC"
+    petition.save()
+    messages.success(request, "Petition successfully canceled.")
+    return HttpResponseRedirect(reverse("petition", args=(petition.student.pk,)))
 
 
 @login_required
@@ -775,7 +775,7 @@ class StudentAssistantList(StaffRequiredMixin, ListView[Student]):
 @staff_required
 def link_assistant(request: HttpRequest) -> HttpResponse:
     assistant = get_object_or_404(Assistant, user=request.user)
-    # Create form for submitting new inquiries
+    # Create form for submitting new petitions
     if request.method == "POST":
         form = LinkAssistantForm(request.POST)
         if form.is_valid():

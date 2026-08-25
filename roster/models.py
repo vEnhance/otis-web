@@ -428,7 +428,7 @@ class Invoice(models.Model):
         return self.total_owed <= 0
 
 
-class UnitInquiry(models.Model):
+class UnitPetition(models.Model):
     unit = models.ForeignKey(
         Unit, on_delete=models.CASCADE, help_text="The unit being requested."
     )
@@ -441,23 +441,23 @@ class UnitInquiry(models.Model):
     action_type = models.CharField(
         max_length=15,
         choices=(
-            ("INQ_ACT_UNLOCK", "Unlock now"),
-            ("INQ_ACT_APPEND", "Add for later"),
-            ("INQ_ACT_DROP", "Drop"),
-            ("INQ_ACT_LOCK", "Lock (Drop + Add for later)"),
+            ("PET_ACT_UNLOCK", "Unlock now"),
+            ("PET_ACT_APPEND", "Add for later"),
+            ("PET_ACT_DROP", "Drop"),
+            ("PET_ACT_LOCK", "Lock (Drop + Add for later)"),
         ),
         help_text="Describe the action you want to make.",
     )
     status = models.CharField(
         max_length=10,
         choices=(
-            ("INQ_ACC", "Accepted"),
-            ("INQ_REJ", "Rejected"),
-            ("INQ_NEW", "Pending"),
-            ("INQ_HOLD", "On hold"),
-            ("INQ_CANC", "Canceled"),
+            ("PET_ACC", "Accepted"),
+            ("PET_REJ", "Rejected"),
+            ("PET_NEW", "Pending"),
+            ("PET_HOLD", "On hold"),
+            ("PET_CANC", "Canceled"),
         ),
-        default="INQ_NEW",
+        default="PET_NEW",
         help_text="The current status of the petition.",
     )
     explanation = models.TextField(
@@ -465,7 +465,7 @@ class UnitInquiry(models.Model):
     )
     was_auto_processed = models.BooleanField(
         default=False,
-        help_text="Whether the inquiry was automatically accepted or rejected by auto-criteria.",
+        help_text="Whether the petition was automatically accepted or rejected by auto-criteria.",
         verbose_name="Auto",
     )
 
@@ -479,19 +479,19 @@ class UnitInquiry(models.Model):
 
     def run_accept(self):
         unit = self.unit
-        if self.action_type == "INQ_ACT_UNLOCK":
+        if self.action_type == "PET_ACT_UNLOCK":
             self.student.curriculum.add(unit)
             self.student.unlocked_units.add(unit)
-        elif self.action_type == "INQ_ACT_APPEND":
+        elif self.action_type == "PET_ACT_APPEND":
             self.student.curriculum.add(unit)
-        elif self.action_type == "INQ_ACT_DROP":
+        elif self.action_type == "PET_ACT_DROP":
             self.student.curriculum.remove(unit)
             self.student.unlocked_units.remove(unit)
-        elif self.action_type == "INQ_ACT_LOCK":
+        elif self.action_type == "PET_ACT_LOCK":
             self.student.unlocked_units.remove(unit)
         else:
             raise ValueError(f"No action {self.action_type}")
-        self.status = "INQ_ACC"
+        self.status = "PET_ACC"
         self.save()
 
 
