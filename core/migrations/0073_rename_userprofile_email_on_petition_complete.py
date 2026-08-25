@@ -5,7 +5,10 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0071_alter_semester_first_payment_deadline_and_more"),
+        (
+            "core",
+            "0072_rename_first_payment_deadline_semester_half_payment_deadline_and_more",
+        ),
     ]
 
     operations = [
