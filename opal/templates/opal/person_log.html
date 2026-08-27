@@ -30,8 +30,8 @@
     <tr class="table-dark">
       <th>#</th>
       <th>Puzzle</th>
-      <th>Timestamp</th>
       <th>Guess</th>
+      <th>Timestamp</th>
     </tr>
     {% for attempt in attempts %}
       <tr class="{{ attempt.row_class }}" data-testid="opal-attempt-row">
@@ -41,8 +41,8 @@
         <td>
           <a href="{% url "opal-attempts-list" hunt.slug attempt.puzzle.slug %}">{{ attempt.puzzle.title }}</a>
         </td>
-        {% include "opal/components/verdict_cell.html" %}
         {% include "opal/components/guess_cell.html" %}
+        {% include "opal/components/verdict_cell.html" %}
       </tr>
     {% endfor %}
   </table>
