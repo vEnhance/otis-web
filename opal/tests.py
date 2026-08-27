@@ -891,20 +891,76 @@ def test_guess_log_row_styling(otis):
         pk: expected[pk] for pk in (bob_miss.pk, bob_feeder.pk, bob_stuck.pk)
     }
 
-    # once Bob finishes, the hunt-wide green wins over the per-puzzle yellow
+    # and the leaderboard the logs are mirroring agrees on both counts
+    resp = otis.get_20x("opal-leaderboard", "hunt")
+    leaders = {row["name"]: row for row in resp.context["rows"]}
+    assert leaders["Tess Solver"]["emoji_string"] == "☑️🆗"
+    assert leaders["Tess Solver"]["row_class"] == "table-primary"
+    assert leaders["Alice A"]["emoji_string"] == "✅🈴"
+    assert leaders["Alice A"]["row_class"] == "table-success"
+
+    # spending the last guess on the meta turns Bob's rows on it red, and
+    # leaves his rows on the puzzle he did get alone
+    with freeze_time("2024-08-16"):
+        OpalAttemptFactory.create_batch(
+            meta.guess_limit - 1, user=bob, puzzle=meta, guess="nope"
+        )
+    resp = otis.get_20x("opal-person-log", "hunt", bob.pk)
+    rows = {a.pk: a.row_class for a in resp.context["attempts"]}
+    assert rows.pop(bob_miss.pk) == ""
+    assert rows.pop(bob_feeder.pk) == ""
+    assert set(rows.values()) == {"table-danger"}
+
+    # once Bob finishes, the hunt-wide green wins over both per-puzzle tints
     OpalAttemptFactory.create(user=bob, puzzle=meta, guess="two")
     resp = otis.get_20x("opal-person-log", "hunt", bob.pk)
     assert {a.pk: a.row_class for a in resp.context["attempts"]} == {
         a.pk: "table-success" for a in resp.context["attempts"]
     }
 
-    # and the leaderboard the logs are mirroring agrees on both counts
-    resp = otis.get_20x("opal-leaderboard", "hunt")
-    rows = {row["name"]: row for row in resp.context["rows"]}
-    assert rows["Tess Solver"]["emoji_string"] == "☑️🆗"
-    assert rows["Tess Solver"]["row_class"] == "table-primary"
-    assert rows["Alice A"]["emoji_string"] == "✅🈴"
-    assert rows["Alice A"]["row_class"] == "table-success"
+
+@pytest.mark.django_db
+def test_guess_log_out_of_guesses_matches_puzzle_page(otis):
+    """A row goes red exactly when the puzzle page stops taking guesses."""
+    verified_group = GroupFactory(name="Verified")
+    alice = UserFactory.create(username="alice", groups=(verified_group,))
+    admin = UserFactory.create(username="admin", is_staff=True, is_superuser=True)
+
+    hunt = OpalHuntFactory.create(
+        slug="hunt", start_date=datetime.datetime(2024, 8, 1, tzinfo=UTC)
+    )
+    puzzle = OpalPuzzleFactory.create(
+        hunt=hunt, slug="puzzle", answer="right", partial_answers="warm", guess_limit=3
+    )
+
+    def row_classes() -> set[str]:
+        otis.login(admin)
+        resp = otis.get_20x("opal-person-log", "hunt", alice.pk)
+        classes = {a.row_class for a in resp.context["attempts"]}
+        otis.login(alice)
+        return classes
+
+    with freeze_time("2024-08-15"):
+        # guesses that do not eat the limit: a close one, and an excused one
+        OpalAttemptFactory.create(user=alice, puzzle=puzzle, guess="warm")
+        excused = OpalAttemptFactory.create(user=alice, puzzle=puzzle, guess="nope")
+        excused.excused = True
+        excused.save()
+        OpalAttemptFactory.create_batch(2, user=alice, puzzle=puzzle, guess="nope")
+
+    # two of three spent, so the form is still up and nothing is red yet
+    otis.login(alice)
+    resp = otis.get_20x("opal-show-puzzle", "hunt", "puzzle")
+    assert resp.context["can_attempt"] is True
+    assert row_classes() == {"table-warning"}
+
+    with freeze_time("2024-08-16"):
+        OpalAttemptFactory.create(user=alice, puzzle=puzzle, guess="nope")
+
+    # the third spends the limit: the page shuts the form and the rows go red
+    resp = otis.get_20x("opal-show-puzzle", "hunt", "puzzle")
+    assert resp.context["can_attempt"] is False
+    assert row_classes() == {"table-danger"}
 
 
 @pytest.mark.django_db

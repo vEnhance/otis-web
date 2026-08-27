@@ -11,7 +11,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models import Q
-from django.db.models.aggregates import Max
+from django.db.models.aggregates import Count, Max, Min
 from django.db.models.manager import Manager
 from django.db.models.query import QuerySet
 from django.http.response import HttpResponse, HttpResponseRedirect
@@ -47,13 +47,20 @@ HUNT_LOG_PAGE_SIZE = 100
 # guess repeated on one page and missing from the next.
 ATTEMPT_LOG_ORDERING = ("-created_at", "-pk")
 
+# A guess eats one of the puzzle's guess limit unless it was right, close, or
+# excused by an admin. `_eligibility` enforces this and the logs read it back,
+# so what a row calls "out of guesses" is what the puzzle page acted on.
+COUNTS_AGAINST_GUESS_LIMIT = Q(excused=False, is_close=False, is_correct=False)
+
 
 # How a guesser's standing in a hunt tints their row, on the leaderboard and in
 # every guess log: blue for a testsolver, green for someone who has finished,
-# yellow for a guess on a puzzle its guesser never did get.
+# yellow for a guess on a puzzle its guesser never did get, and red once they
+# also ran out of guesses on it.
 TESTSOLVER_ROW_CLASS = "table-primary"
 FINISHER_ROW_CLASS = "table-success"
 UNSOLVED_ROW_CLASS = "table-warning"
+EXHAUSTED_ROW_CLASS = "table-danger"
 
 
 def correct_emoji(is_testsolver: bool, is_metapuzzle: bool) -> str:
@@ -70,19 +77,26 @@ def correct_emoji(is_testsolver: bool, is_metapuzzle: bool) -> str:
 
 
 def standing_row_class(
-    is_testsolver: bool, has_finished: bool, puzzle_unsolved: bool = False
+    is_testsolver: bool,
+    has_finished: bool,
+    puzzle_unsolved: bool = False,
+    out_of_guesses: bool = False,
 ) -> str:
     """The Bootstrap tint for a row belonging to a guesser with this standing.
 
     `puzzle_unsolved` says this row is a guess on a puzzle its guesser has no
-    correct answer for anywhere in the hunt, so the guess led nowhere. It only
-    means something for a row about one puzzle: the leaderboard's rows span the
-    whole hunt, so it leaves the argument alone.
+    correct answer for anywhere in the hunt, so the guess led nowhere;
+    `out_of_guesses` says they also spent that puzzle's whole guess limit, so
+    it led nowhere and there is no way back. Both only mean something for a row
+    about one puzzle: the leaderboard's rows span the whole hunt, so it leaves
+    the two arguments alone.
     """
     if is_testsolver:
         return TESTSOLVER_ROW_CLASS
     elif has_finished:
         return FINISHER_ROW_CLASS
+    elif puzzle_unsolved and out_of_guesses:
+        return EXHAUSTED_ROW_CLASS
     elif puzzle_unsolved:
         return UNSOLVED_ROW_CLASS
     else:
@@ -95,11 +109,12 @@ class _Standing(NamedTuple):
     A testsolver is someone who solved something before the hunt opened, the
     same test the leaderboard uses, so the two pages agree on who is who.
 
-    `solved_puzzles` is kept whole rather than counted, since a row also wants
-    to know whether its own puzzle is in there.
+    The two puzzle sets are kept whole rather than counted, since a row also
+    wants to know whether its own puzzle is in either of them.
     """
 
     solved_puzzles: frozenset[int]
+    exhausted_puzzles: frozenset[int]
     is_testsolver: bool
     has_finished: bool
 
@@ -109,34 +124,53 @@ class _Standing(NamedTuple):
 
 
 NO_SOLVES = _Standing(
-    solved_puzzles=frozenset(), is_testsolver=False, has_finished=False
+    solved_puzzles=frozenset(),
+    exhausted_puzzles=frozenset(),
+    is_testsolver=False,
+    has_finished=False,
 )
 
 
 def _standings(hunt: OpalHunt, user_pks: Collection[int]) -> dict[int, _Standing]:
     """Each of those users' standing in `hunt`, in one query for the whole page.
 
-    Users with no correct guess on the hunt are absent; `NO_SOLVES` covers them.
+    The query groups every guess on the hunt by guesser and puzzle, so a row
+    comes back per puzzle a guesser has touched, saying when they first got it
+    right (never, if they did not) and how many of their guesses on it ate the
+    guess limit. That is enough for all four facts a standing carries, and it
+    stays one round trip however long the page is.
+
+    Users who have not guessed on the hunt are absent; `NO_SOLVES` covers them.
     """
-    solved_puzzles: defaultdict[int, set[int]] = defaultdict(set)
+    solved: defaultdict[int, set[int]] = defaultdict(set)
+    exhausted: defaultdict[int, set[int]] = defaultdict(set)
     testsolvers: set[int] = set()
     finishers: set[int] = set()
-    for d in OpalAttempt.objects.filter(
-        puzzle__hunt=hunt, user__in=user_pks, is_correct=True
-    ).values("user", "puzzle", "created_at", "puzzle__is_metapuzzle"):
-        user_pk = d["user"]
-        solved_puzzles[user_pk].add(d["puzzle"])
-        if d["created_at"] < hunt.start_date:
-            testsolvers.add(user_pk)
-        if d["puzzle__is_metapuzzle"]:
-            finishers.add(user_pk)
+    for d in (
+        OpalAttempt.objects.filter(puzzle__hunt=hunt, user__in=user_pks)
+        .values("user", "puzzle", "puzzle__is_metapuzzle", "puzzle__guess_limit")
+        .annotate(
+            first_correct=Min("created_at", filter=Q(is_correct=True)),
+            num_counted=Count("pk", filter=COUNTS_AGAINST_GUESS_LIMIT),
+        )
+    ):
+        user_pk, puzzle_pk = d["user"], d["puzzle"]
+        if (first_correct := d["first_correct"]) is not None:
+            solved[user_pk].add(puzzle_pk)
+            if first_correct < hunt.start_date:
+                testsolvers.add(user_pk)
+            if d["puzzle__is_metapuzzle"]:
+                finishers.add(user_pk)
+        if d["num_counted"] >= d["puzzle__guess_limit"]:
+            exhausted[user_pk].add(puzzle_pk)
     return {
         user_pk: _Standing(
-            solved_puzzles=frozenset(puzzle_pks),
+            solved_puzzles=frozenset(solved.get(user_pk, ())),
+            exhausted_puzzles=frozenset(exhausted.get(user_pk, ())),
             is_testsolver=user_pk in testsolvers,
             has_finished=user_pk in finishers,
         )
-        for user_pk, puzzle_pks in solved_puzzles.items()
+        for user_pk in solved.keys() | exhausted.keys()
     }
 
 
@@ -154,7 +188,8 @@ def decorate_attempts(
       making the guess is.
     * `emoji` and `text_class`, how the guess itself was judged.
     * `row_class`, the tint for where the guesser stands in the hunt, and for
-      whether they ever solved the puzzle this row is a guess on.
+      whether they ever solved the puzzle this row is a guess on and whether
+      they still had guesses left on it.
 
     The standings take a single query for the whole page, since
     `OpalHunt.num_solves` would be one query per row. Pass a queryset that has
@@ -170,6 +205,7 @@ def decorate_attempts(
             is_testsolver=standing.is_testsolver,
             has_finished=standing.has_finished,
             puzzle_unsolved=attempt.puzzle.pk not in standing.solved_puzzles,
+            out_of_guesses=attempt.puzzle.pk in standing.exhausted_puzzles,
         )
         if attempt.is_correct:
             attempt.emoji = correct_emoji(  # type: ignore[attr-defined]
@@ -456,11 +492,7 @@ def _eligibility(puzzle: OpalPuzzle, user: User) -> _Eligibility:
         puzzle=puzzle, user=user, is_correct=True
     ).exists()
     incorrect_attempts = OpalAttempt.objects.filter(
-        puzzle=puzzle,
-        user=user,
-        excused=False,
-        is_close=False,
-        is_correct=False,
+        COUNTS_AGAINST_GUESS_LIMIT, puzzle=puzzle, user=user
     ).order_by("-created_at")
     return _Eligibility(
         is_solved=is_solved,
