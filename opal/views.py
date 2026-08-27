@@ -54,7 +54,7 @@ TESTSOLVER_ROW_CLASS = "table-primary"
 FINISHER_ROW_CLASS = "table-success"
 
 
-def correct_emoji(*, is_testsolver: bool, is_metapuzzle: bool) -> str:
+def correct_emoji(is_testsolver: bool, is_metapuzzle: bool) -> str:
     """The check mark for a correct guess.
 
     A testsolver's solve is grayed out, since it happened before the hunt was
@@ -67,7 +67,7 @@ def correct_emoji(*, is_testsolver: bool, is_metapuzzle: bool) -> str:
         return "☑️" if is_testsolver else "✅"
 
 
-def standing_row_class(*, is_testsolver: bool, has_finished: bool) -> str:
+def standing_row_class(is_testsolver: bool, has_finished: bool) -> str:
     """The Bootstrap tint for a row belonging to a guesser with this standing."""
     if is_testsolver:
         return TESTSOLVER_ROW_CLASS
