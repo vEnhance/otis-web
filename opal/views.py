@@ -1,6 +1,7 @@
 import datetime
 import logging
-from collections.abc import Iterable
+from collections import defaultdict
+from collections.abc import Collection, Iterable
 from typing import Any, NamedTuple
 
 import requests
@@ -10,7 +11,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models import Q
-from django.db.models.aggregates import Count, Max
+from django.db.models.aggregates import Max
 from django.db.models.manager import Manager
 from django.db.models.query import QuerySet
 from django.http.response import HttpResponse, HttpResponseRedirect
@@ -47,29 +48,118 @@ HUNT_LOG_PAGE_SIZE = 100
 ATTEMPT_LOG_ORDERING = ("-created_at", "-pk")
 
 
-def _with_solve_counts(
+# How a guesser's standing in a hunt tints their row, on the leaderboard and in
+# every guess log: blue for a testsolver, green for someone who has finished.
+TESTSOLVER_ROW_CLASS = "table-primary"
+FINISHER_ROW_CLASS = "table-success"
+
+
+def correct_emoji(*, is_testsolver: bool, is_metapuzzle: bool) -> str:
+    """The check mark for a correct guess.
+
+    A testsolver's solve is grayed out, since it happened before the hunt was
+    open to everyone, and the metapuzzle that ends the hunt gets a glyph of its
+    own so a finish is visible at a glance.
+    """
+    if is_metapuzzle:
+        return "🆗" if is_testsolver else "🈴"
+    else:
+        return "☑️" if is_testsolver else "✅"
+
+
+def standing_row_class(*, is_testsolver: bool, has_finished: bool) -> str:
+    """The Bootstrap tint for a row belonging to a guesser with this standing."""
+    if is_testsolver:
+        return TESTSOLVER_ROW_CLASS
+    elif has_finished:
+        return FINISHER_ROW_CLASS
+    else:
+        return ""
+
+
+class _Standing(NamedTuple):
+    """Where one guesser stands in a hunt, as far as a log row cares.
+
+    A testsolver is someone who solved something before the hunt opened, the
+    same test the leaderboard uses, so the two pages agree on who is who.
+    """
+
+    solve_count: int
+    is_testsolver: bool
+    has_finished: bool
+
+
+NO_SOLVES = _Standing(solve_count=0, is_testsolver=False, has_finished=False)
+
+
+def _standings(hunt: OpalHunt, user_pks: Collection[int]) -> dict[int, _Standing]:
+    """Each of those users' standing in `hunt`, in one query for the whole page.
+
+    Users with no correct guess on the hunt are absent; `NO_SOLVES` covers them.
+    """
+    solved_puzzles: defaultdict[int, set[int]] = defaultdict(set)
+    testsolvers: set[int] = set()
+    finishers: set[int] = set()
+    for d in OpalAttempt.objects.filter(
+        puzzle__hunt=hunt, user__in=user_pks, is_correct=True
+    ).values("user", "puzzle", "created_at", "puzzle__is_metapuzzle"):
+        user_pk = d["user"]
+        solved_puzzles[user_pk].add(d["puzzle"])
+        if d["created_at"] < hunt.start_date:
+            testsolvers.add(user_pk)
+        if d["puzzle__is_metapuzzle"]:
+            finishers.add(user_pk)
+    return {
+        user_pk: _Standing(
+            solve_count=len(puzzle_pks),
+            is_testsolver=user_pk in testsolvers,
+            has_finished=user_pk in finishers,
+        )
+        for user_pk, puzzle_pks in solved_puzzles.items()
+    }
+
+
+def decorate_attempts(
     attempts: Iterable[OpalAttempt], hunt: OpalHunt
 ) -> list[OpalAttempt]:
-    """The attempts as a list, each carrying `solve_count` for its guesser.
+    """The attempts as a list, each carrying what the guess-log templates show.
 
-    That is the number of puzzles of `hunt` the guesser has solved by now, which
-    is what makes a row of the log readable: it says how far along the person
-    making the guess is. Counted in a single query for the whole page, since
-    `OpalHunt.num_solves` would be one query per row.
+    Every log of guesses on `hunt` -- per puzzle, per user, per hunt, and the
+    all-hunt activity page -- renders its rows the same way, out of four
+    attributes stapled on here:
+
+    * `solve_count`, the number of puzzles of `hunt` the guesser has solved by
+      now, which is what makes a row readable: it says how far along the person
+      making the guess is.
+    * `emoji` and `text_class`, how the guess itself was judged.
+    * `row_class`, the tint for the guesser's standing in the hunt.
+
+    The standings take a single query for the whole page, since
+    `OpalHunt.num_solves` would be one query per row. Pass a queryset that has
+    `select_related("user", "puzzle")` on it, or the rows go back to a query
+    apiece; `test_guess_log_query_count` is what notices if one stops.
     """
     rows = list(attempts)
-    solve_counts: dict[int, int] = {
-        d["user"]: d["num_solves"]
-        for d in OpalAttempt.objects.filter(
-            puzzle__hunt=hunt,
-            user__in=[attempt.user for attempt in rows],
-            is_correct=True,
-        )
-        .values("user")
-        .annotate(num_solves=Count("puzzle", distinct=True))
-    }
+    standings = _standings(hunt, {attempt.user.pk for attempt in rows})
     for attempt in rows:
-        attempt.solve_count = solve_counts.get(attempt.user.pk, 0)  # type: ignore[attr-defined]
+        standing = standings.get(attempt.user.pk, NO_SOLVES)
+        attempt.solve_count = standing.solve_count  # type: ignore[attr-defined]
+        attempt.row_class = standing_row_class(  # type: ignore[attr-defined]
+            is_testsolver=standing.is_testsolver,
+            has_finished=standing.has_finished,
+        )
+        if attempt.is_correct:
+            attempt.emoji = correct_emoji(  # type: ignore[attr-defined]
+                is_testsolver=standing.is_testsolver,
+                is_metapuzzle=attempt.puzzle.is_metapuzzle,
+            )
+            attempt.text_class = "text-success"  # type: ignore[attr-defined]
+        elif attempt.is_close:
+            attempt.emoji = "▶️"  # type: ignore[attr-defined]
+            attempt.text_class = "text-dark"  # type: ignore[attr-defined]
+        else:
+            attempt.emoji = "✖️"  # type: ignore[attr-defined]
+            attempt.text_class = "text-danger"  # type: ignore[attr-defined]
     return rows
 
 
@@ -136,10 +226,17 @@ class AttemptsList(AdminRequiredMixin, ListView[OpalAttempt]):
         context["puzzle"] = self.puzzle
         context["num_total"] = self.get_queryset().count()
         context["num_correct"] = self.get_queryset().filter(is_correct=True).count()
+        context["attempts"] = decorate_attempts(
+            context["object_list"], self.puzzle.hunt
+        )
         return context
 
     def get_queryset(self) -> QuerySet[OpalAttempt]:
-        return OpalAttempt.objects.filter(puzzle=self.puzzle).order_by("-created_at")
+        return (
+            OpalAttempt.objects.filter(puzzle=self.puzzle)
+            .select_related("user", "puzzle")
+            .order_by(*ATTEMPT_LOG_ORDERING)
+        )
 
 
 class HuntAttemptsList(AdminRequiredMixin, ListView[OpalAttempt]):
@@ -165,9 +262,9 @@ class HuntAttemptsList(AdminRequiredMixin, ListView[OpalAttempt]):
     def get_context_data(self, **kwargs: Any):
         context = super().get_context_data(**kwargs)
         context["hunt"] = self.hunt
-        # Only the current page gets solve counts; the queryset itself is every
+        # Only the current page gets decorated; the queryset itself is every
         # guess ever made on the hunt.
-        context["attempts"] = _with_solve_counts(context["object_list"], self.hunt)
+        context["attempts"] = decorate_attempts(context["object_list"], self.hunt)
         return context
 
 
@@ -177,7 +274,7 @@ def recent_activity(request: AuthHttpRequest) -> HttpResponse:
     sections = [
         {
             "hunt": hunt,
-            "attempts": _with_solve_counts(
+            "attempts": decorate_attempts(
                 OpalAttempt.objects.filter(puzzle__hunt=hunt)
                 .select_related("user", "puzzle")
                 .order_by(*ATTEMPT_LOG_ORDERING)[:RECENT_ATTEMPTS_PER_HUNT],
@@ -246,17 +343,22 @@ def leaderboard(request: AuthHttpRequest, hunt_slug: str) -> HttpResponse:
         num_total_attempts=SubqueryCount("opalattempt"),
     )
 
-    def get_row(user_pk: int) -> dict[str, Any]:
-        correct_emoji = "☑️" if user_early_record[user_pk] else "✅"
-        emoji_string = "".join(
-            correct_emoji if r else "✖️" for r in user_solve_record[user_pk]
+    meta_orders = set(
+        OpalPuzzle.objects.filter(hunt=hunt, is_metapuzzle=True).values_list(
+            "order", flat=True
         )
-        if user_pk in meta_solved_time:
-            if user_early_record[user_pk]:
-                emoji_string = emoji_string[:-2] + "🆗"
-            else:
-                emoji_string = emoji_string[:-1] + "🈴"
+    )
 
+    def get_row(user_pk: int) -> dict[str, Any]:
+        is_testsolver = user_early_record[user_pk]
+        emoji_string = "".join(
+            correct_emoji(
+                is_testsolver=is_testsolver, is_metapuzzle=order in meta_orders
+            )
+            if solved
+            else "✖️"
+            for order, solved in enumerate(user_solve_record[user_pk], start=1)
+        )
         return {
             "name": realname_dict[user_pk],
             "user_pk": user_pk,
@@ -264,7 +366,11 @@ def leaderboard(request: AuthHttpRequest, hunt_slug: str) -> HttpResponse:
             "most_recent_solve": most_recent_solve_dict[user_pk],
             "meta_solved_time": meta_solved_time.get(user_pk, None),
             "emoji_string": emoji_string,
-            "has_early_access": user_early_record[user_pk],
+            "has_early_access": is_testsolver,
+            "row_class": standing_row_class(
+                is_testsolver=is_testsolver,
+                has_finished=user_pk in meta_solved_time,
+            ),
         }
 
     MAX_DATETIME = datetime.datetime.max.replace(tzinfo=datetime.UTC)
@@ -286,9 +392,12 @@ def person_log(request: AuthHttpRequest, hunt_slug: str, user_pk: int) -> HttpRe
     hunt = get_object_or_404(OpalHunt, slug=hunt_slug)
     user = get_object_or_404(User, pk=user_pk)
     context["hunt"] = hunt
-    context["attempts"] = OpalAttempt.objects.filter(
-        puzzle__hunt=hunt, user=user
-    ).order_by("-created_at")
+    context["attempts"] = decorate_attempts(
+        OpalAttempt.objects.filter(puzzle__hunt=hunt, user=user)
+        .select_related("user", "puzzle")
+        .order_by(*ATTEMPT_LOG_ORDERING),
+        hunt,
+    )
     context["hunter"] = user
     context["student"] = (
         Student.objects.filter(user=user).order_by("-semester__end_year").first()

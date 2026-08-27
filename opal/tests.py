@@ -5,6 +5,8 @@ from unittest import mock
 import pytest
 from django.contrib.messages import constants as message_levels
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from freezegun.api import freeze_time
 
 from core.factories import GroupFactory, UserFactory
@@ -814,6 +816,116 @@ def test_recent_activity_solve_counts(otis):
         # Alice's solve elsewhere doesn't count, and Bob has solved nothing here
         assert solve_counts.pop(bobs_guess.pk) == 0
         assert set(solve_counts.values()) == {2}
+
+
+@pytest.mark.django_db
+def test_guess_log_row_styling(otis):
+    """Every guess log marks testsolvers and finishers the way the leaderboard does."""
+    admin = UserFactory.create(username="admin", is_staff=True, is_superuser=True)
+    tess = UserFactory.create(username="tess", first_name="Tess", last_name="Solver")
+    alice = UserFactory.create(username="alice", first_name="Alice", last_name="A")
+    bob = UserFactory.create(username="bob", first_name="Bob", last_name="B")
+
+    hunt = OpalHuntFactory.create(
+        slug="hunt", start_date=datetime.datetime(2024, 8, 10, tzinfo=UTC)
+    )
+    feeder = OpalPuzzleFactory.create(
+        hunt=hunt, slug="feeder", answer="one", order=1, is_metapuzzle=False
+    )
+    meta = OpalPuzzleFactory.create(
+        hunt=hunt, slug="meta", answer="two", order=2, is_metapuzzle=True
+    )
+
+    # Tess testsolves the whole hunt before it opens; Alice finishes it after.
+    with freeze_time("2024-08-05"):
+        tess_feeder = OpalAttemptFactory.create(user=tess, puzzle=feeder, guess="one")
+        tess_meta = OpalAttemptFactory.create(user=tess, puzzle=meta, guess="two")
+    with freeze_time("2024-08-15"):
+        alice_feeder = OpalAttemptFactory.create(user=alice, puzzle=feeder, guess="one")
+        alice_meta = OpalAttemptFactory.create(user=alice, puzzle=meta, guess="two")
+        bob_wrong = OpalAttemptFactory.create(user=bob, puzzle=feeder, guess="nope")
+
+    expected = {
+        # a testsolver's check is grayed out, and their meta is 🆗
+        tess_feeder.pk: ("☑️", "table-primary"),
+        tess_meta.pk: ("🆗", "table-primary"),
+        # someone who finished the hunt for real gets ✅, 🈴, and a green row
+        alice_feeder.pk: ("✅", "table-success"),
+        alice_meta.pk: ("🈴", "table-success"),
+        # a wrong guess from someone still hunting is untinted
+        bob_wrong.pk: ("✖️", ""),
+    }
+
+    def styling(attempts) -> dict[int, tuple[str, str]]:
+        return {a.pk: (a.emoji, a.row_class) for a in attempts}
+
+    otis.login(admin)
+
+    # the per-hunt log and the all-hunt activity page see every guess
+    resp = otis.get_20x("opal-hunt-log", "hunt")
+    assert styling(resp.context["attempts"]) == expected
+
+    resp = otis.get_20x("opal-recent-activity")
+    section = next(s for s in resp.context["sections"] if s["hunt"] == hunt)
+    assert styling(section["attempts"]) == expected
+
+    # the per-puzzle log sees one puzzle's guesses
+    resp = otis.get_20x("opal-attempts-list", "hunt", "meta")
+    assert styling(resp.context["attempts"]) == {
+        pk: expected[pk] for pk in (tess_meta.pk, alice_meta.pk)
+    }
+
+    # the per-user log sees one person's guesses, and a testsolver's stay blue
+    resp = otis.get_20x("opal-person-log", "hunt", tess.pk)
+    assert styling(resp.context["attempts"]) == {
+        pk: expected[pk] for pk in (tess_feeder.pk, tess_meta.pk)
+    }
+    resp = otis.get_20x("opal-person-log", "hunt", bob.pk)
+    assert styling(resp.context["attempts"]) == {bob_wrong.pk: expected[bob_wrong.pk]}
+
+    # and the leaderboard the logs are mirroring agrees on both counts
+    resp = otis.get_20x("opal-leaderboard", "hunt")
+    rows = {row["name"]: row for row in resp.context["rows"]}
+    assert rows["Tess Solver"]["emoji_string"] == "☑️🆗"
+    assert rows["Tess Solver"]["row_class"] == "table-primary"
+    assert rows["Alice A"]["emoji_string"] == "✅🈴"
+    assert rows["Alice A"]["row_class"] == "table-success"
+
+
+@pytest.mark.django_db
+def test_guess_log_query_count(otis):
+    """A guess log costs the same number of queries however many rows it has."""
+    admin = UserFactory.create(username="admin", is_staff=True, is_superuser=True)
+    hunt = OpalHuntFactory.create(slug="hunt")
+    puzzle = OpalPuzzleFactory.create(hunt=hunt, slug="puzzle", answer="answer")
+    alice = UserFactory.create(username="alice")
+    OpalAttemptFactory.create(user=alice, puzzle=puzzle, guess="answer")
+
+    otis.login(admin)
+    views = (
+        ("opal-hunt-log", ("hunt",)),
+        ("opal-recent-activity", ()),
+        ("opal-attempts-list", ("hunt", "puzzle")),
+        ("opal-person-log", ("hunt", alice.pk)),
+    )
+
+    def query_count(name: str, args: tuple) -> int:
+        # The first hit of a view in a test process pays one-off costs (the
+        # session row, the template loader), so warm it up before counting.
+        otis.get_20x(name, *args)
+        with CaptureQueriesContext(connection) as captured:
+            otis.get_20x(name, *args)
+        return len(captured)
+
+    baseline = {name: query_count(name, args) for name, args in views}
+
+    # a page an order of magnitude longer, with more guessers on it
+    for i in range(20):
+        user = UserFactory.create(username=f"guesser{i}")
+        OpalAttemptFactory.create_batch(2, user=user, puzzle=puzzle, guess="nope")
+    OpalAttemptFactory.create_batch(20, user=alice, puzzle=puzzle, guess="nope")
+
+    assert {name: query_count(name, args) for name, args in views} == baseline
 
 
 @pytest.mark.django_db
