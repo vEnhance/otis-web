@@ -30,30 +30,19 @@
     <tr class="table-dark">
       <th>#</th>
       <th>Puzzle</th>
-      <th>Timestamp</th>
       <th>Guess</th>
+      <th>Timestamp</th>
     </tr>
     {% for attempt in attempts %}
-      <tr>
+      <tr class="{{ attempt.row_class }}" data-testid="opal-attempt-row">
         <td>
           <a href="{% url "admin:opal_opalattempt_change" attempt.pk %}">{{ forloop.counter }}</a>
         </td>
         <td>
           <a href="{% url "opal-attempts-list" hunt.slug attempt.puzzle.slug %}">{{ attempt.puzzle.title }}</a>
         </td>
-        <td class="text-nowrap">
-          {% if attempt.is_correct %}
-            ✅
-          {% elif attempt.is_close %}
-            ▶️
-          {% else %}
-            ✖️
-          {% endif %}
-          {{ attempt.created_at|date:"Y-m-d H:i" }}
-        </td>
-        <td class="{% if attempt.is_correct %}text-success{% elif attempt.is_close %}text-dark{% else %}text-danger{% endif %}">
-          <tt>{{ attempt.guess|truncatechars:24 }}</tt>
-        </td>
+        {% include "opal/components/guess_cell.html" %}
+        {% include "opal/components/verdict_cell.html" %}
       </tr>
     {% endfor %}
   </table>

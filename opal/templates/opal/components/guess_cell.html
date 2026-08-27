@@ -1,0 +1,7 @@
+{% comment %}
+  The guess itself in a row of a guess log, colored by how it was judged.
+  Expects `attempt` decorated by `opal.views.decorate_attempts`.
+{% endcomment %}
+<td class="{{ attempt.text_class }}">
+  <tt>{{ attempt.guess|truncatechars:24 }}</tt>
+</td>
