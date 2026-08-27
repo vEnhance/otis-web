@@ -843,7 +843,10 @@ def test_guess_log_row_styling(otis):
     with freeze_time("2024-08-15"):
         alice_feeder = OpalAttemptFactory.create(user=alice, puzzle=feeder, guess="one")
         alice_meta = OpalAttemptFactory.create(user=alice, puzzle=meta, guess="two")
-        bob_wrong = OpalAttemptFactory.create(user=bob, puzzle=feeder, guess="nope")
+        # Bob misses the feeder, then gets it, then never does get the meta
+        bob_miss = OpalAttemptFactory.create(user=bob, puzzle=feeder, guess="nope")
+        bob_feeder = OpalAttemptFactory.create(user=bob, puzzle=feeder, guess="one")
+        bob_stuck = OpalAttemptFactory.create(user=bob, puzzle=meta, guess="nope")
 
     expected = {
         # a testsolver's check is grayed out, and their meta is 🆗
@@ -852,8 +855,11 @@ def test_guess_log_row_styling(otis):
         # someone who finished the hunt for real gets ✅, 🈴, and a green row
         alice_feeder.pk: ("✅", "table-success"),
         alice_meta.pk: ("🈴", "table-success"),
-        # a wrong guess from someone still hunting is untinted
-        bob_wrong.pk: ("✖️", ""),
+        # Bob is still hunting: the puzzle he did eventually get is untinted,
+        # a miss on it included, but the one he never got goes yellow
+        bob_miss.pk: ("✖️", ""),
+        bob_feeder.pk: ("✅", ""),
+        bob_stuck.pk: ("✖️", "table-warning"),
     }
 
     def styling(attempts) -> dict[int, tuple[str, str]]:
@@ -872,7 +878,7 @@ def test_guess_log_row_styling(otis):
     # the per-puzzle log sees one puzzle's guesses
     resp = otis.get_20x("opal-attempts-list", "hunt", "meta")
     assert styling(resp.context["attempts"]) == {
-        pk: expected[pk] for pk in (tess_meta.pk, alice_meta.pk)
+        pk: expected[pk] for pk in (tess_meta.pk, alice_meta.pk, bob_stuck.pk)
     }
 
     # the per-user log sees one person's guesses, and a testsolver's stay blue
@@ -881,7 +887,16 @@ def test_guess_log_row_styling(otis):
         pk: expected[pk] for pk in (tess_feeder.pk, tess_meta.pk)
     }
     resp = otis.get_20x("opal-person-log", "hunt", bob.pk)
-    assert styling(resp.context["attempts"]) == {bob_wrong.pk: expected[bob_wrong.pk]}
+    assert styling(resp.context["attempts"]) == {
+        pk: expected[pk] for pk in (bob_miss.pk, bob_feeder.pk, bob_stuck.pk)
+    }
+
+    # once Bob finishes, the hunt-wide green wins over the per-puzzle yellow
+    OpalAttemptFactory.create(user=bob, puzzle=meta, guess="two")
+    resp = otis.get_20x("opal-person-log", "hunt", bob.pk)
+    assert {a.pk: a.row_class for a in resp.context["attempts"]} == {
+        a.pk: "table-success" for a in resp.context["attempts"]
+    }
 
     # and the leaderboard the logs are mirroring agrees on both counts
     resp = otis.get_20x("opal-leaderboard", "hunt")
