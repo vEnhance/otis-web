@@ -123,7 +123,7 @@ def test_social_login_existing_refuses_to_create_account(google_app: SocialApp):
     assert not User.objects.exists()
     assert not SocialAccount.objects.exists()
     (message,) = _get_messages(request)
-    assert "no new account was created" in message.message
+    assert "no such Google registered" in message.message
 
 
 @pytest.mark.django_db

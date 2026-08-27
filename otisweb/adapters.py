@@ -66,19 +66,12 @@ def _get_login_hint(request: HttpRequest, sociallogin: SocialLogin) -> str:
     if provider_ids:
         names = _provider_names(request)
         listed = ", ".join(sorted(names.get(pk, pk) for pk in provider_ids))
-        return (
-            "By the way, there is already an OTIS account with that email address "
-            f"which signs in with: {listed}."
-        )
+        return f"However, that email address probably signs in with: {listed}."
     if (
         User.objects.filter(email__in=emails).exists()
         or EmailAddress.objects.filter(email__in=emails).exists()
     ):
-        return (
-            "By the way, there is already an OTIS account with that email address, "
-            "but it has no social connections attached, "
-            "so you probably signed up with a username and password."
-        )
+        return "You need to sign with username and password."
     return ""
 
 
@@ -90,16 +83,7 @@ class OTISSocialAccountAdapter(DefaultSocialAccountAdapter):
     ) -> str:
         provider = getattr(sociallogin, "provider", None)
         provider_name = provider.name if provider is not None else "that provider"
-        message = (
-            f"You asked to log in with an existing {provider_name} connection, "
-            f"but no OTIS account is linked to that {provider_name} account, "
-            "so no new account was created. "
-            "If you already have an OTIS account, log in the way you did before "
-            "and then use the 🔐 icon in the sidebar to attach "
-            f"{provider_name} to it. "
-            "If you are a newly accepted student who needs a brand new account, "
-            "use the section about being accepted to OTIS for the first time."
-        )
+        message = f"There is no such {provider_name} registered on OTIS-WEB."
         hint = _get_login_hint(request, sociallogin)
         return f"{message} {hint}".strip()
 
