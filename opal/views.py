@@ -49,9 +49,11 @@ ATTEMPT_LOG_ORDERING = ("-created_at", "-pk")
 
 
 # How a guesser's standing in a hunt tints their row, on the leaderboard and in
-# every guess log: blue for a testsolver, green for someone who has finished.
+# every guess log: blue for a testsolver, green for someone who has finished,
+# yellow for a guess on a puzzle its guesser never did get.
 TESTSOLVER_ROW_CLASS = "table-primary"
 FINISHER_ROW_CLASS = "table-success"
+UNSOLVED_ROW_CLASS = "table-warning"
 
 
 def correct_emoji(is_testsolver: bool, is_metapuzzle: bool) -> str:
@@ -67,12 +69,22 @@ def correct_emoji(is_testsolver: bool, is_metapuzzle: bool) -> str:
         return "☑️" if is_testsolver else "✅"
 
 
-def standing_row_class(is_testsolver: bool, has_finished: bool) -> str:
-    """The Bootstrap tint for a row belonging to a guesser with this standing."""
+def standing_row_class(
+    is_testsolver: bool, has_finished: bool, puzzle_unsolved: bool = False
+) -> str:
+    """The Bootstrap tint for a row belonging to a guesser with this standing.
+
+    `puzzle_unsolved` says this row is a guess on a puzzle its guesser has no
+    correct answer for anywhere in the hunt, so the guess led nowhere. It only
+    means something for a row about one puzzle: the leaderboard's rows span the
+    whole hunt, so it leaves the argument alone.
+    """
     if is_testsolver:
         return TESTSOLVER_ROW_CLASS
     elif has_finished:
         return FINISHER_ROW_CLASS
+    elif puzzle_unsolved:
+        return UNSOLVED_ROW_CLASS
     else:
         return ""
 
@@ -82,14 +94,23 @@ class _Standing(NamedTuple):
 
     A testsolver is someone who solved something before the hunt opened, the
     same test the leaderboard uses, so the two pages agree on who is who.
+
+    `solved_puzzles` is kept whole rather than counted, since a row also wants
+    to know whether its own puzzle is in there.
     """
 
-    solve_count: int
+    solved_puzzles: frozenset[int]
     is_testsolver: bool
     has_finished: bool
 
+    @property
+    def solve_count(self) -> int:
+        return len(self.solved_puzzles)
 
-NO_SOLVES = _Standing(solve_count=0, is_testsolver=False, has_finished=False)
+
+NO_SOLVES = _Standing(
+    solved_puzzles=frozenset(), is_testsolver=False, has_finished=False
+)
 
 
 def _standings(hunt: OpalHunt, user_pks: Collection[int]) -> dict[int, _Standing]:
@@ -111,7 +132,7 @@ def _standings(hunt: OpalHunt, user_pks: Collection[int]) -> dict[int, _Standing
             finishers.add(user_pk)
     return {
         user_pk: _Standing(
-            solve_count=len(puzzle_pks),
+            solved_puzzles=frozenset(puzzle_pks),
             is_testsolver=user_pk in testsolvers,
             has_finished=user_pk in finishers,
         )
@@ -132,7 +153,8 @@ def decorate_attempts(
       now, which is what makes a row readable: it says how far along the person
       making the guess is.
     * `emoji` and `text_class`, how the guess itself was judged.
-    * `row_class`, the tint for the guesser's standing in the hunt.
+    * `row_class`, the tint for where the guesser stands in the hunt, and for
+      whether they ever solved the puzzle this row is a guess on.
 
     The standings take a single query for the whole page, since
     `OpalHunt.num_solves` would be one query per row. Pass a queryset that has
@@ -147,6 +169,7 @@ def decorate_attempts(
         attempt.row_class = standing_row_class(  # type: ignore[attr-defined]
             is_testsolver=standing.is_testsolver,
             has_finished=standing.has_finished,
+            puzzle_unsolved=attempt.puzzle.pk not in standing.solved_puzzles,
         )
         if attempt.is_correct:
             attempt.emoji = correct_emoji(  # type: ignore[attr-defined]
