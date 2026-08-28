@@ -576,6 +576,15 @@ def test_userinfo_displays_info(otis):
 
 
 @pytest.mark.django_db
+def test_userinfo_shows_hijack_button(otis):
+    target_user = UserFactory.create()
+    otis.login(UserFactory.create(is_superuser=True, is_staff=True))
+    resp = otis.get_20x("user-info", target_user.pk)
+    otis.assert_testid(resp, "hijack-button")
+    otis.assert_has(resp, reverse("hijack:acquire"))
+
+
+@pytest.mark.django_db
 def test_userinfo_warns_on_inactive(otis):
     target_user = UserFactory.create(is_active=False)
     otis.login(UserFactory.create(is_superuser=True, is_staff=True))

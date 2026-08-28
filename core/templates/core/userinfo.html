@@ -134,4 +134,10 @@
     {% csrf_token %}
     <button type="submit" class="btn btn-primary">Generate Password Reset Link</button>
   </form>
+  <h2>Hijack User</h2>
+  <form method="post" action="{% url "hijack:acquire" %}">
+    {% csrf_token %}
+    <input type="hidden" name="user_pk" value="{{ target_user.pk }}" />
+    <button type="submit" class="btn btn-danger" data-testid="hijack-button">Hijack</button>
+  </form>
 {% endblock layout-content %}
