@@ -19,7 +19,12 @@
         <span class="fw-bold">
           <a href="{{ proposal.get_absolute_url }}">{{ proposal.label }}: {{ proposal.title }}</a>
         </span>
-        <span class="text-nowrap">🩷 × {{ proposal.upvote_count }} · {{ proposal.difficulty_display }}</span>
+        <span class="d-flex gap-2 text-nowrap">
+          <span class="badge border px-2 py-2 {% if proposal.has_upvoted %}bg-danger text-white{% else %}bg-light text-dark{% endif %}"
+                {% if proposal.has_upvoted %}data-testid="browse-upvoted"{% endif %}
+                title="{% if proposal.has_upvoted %}You upvoted this problem{% else %}You have not upvoted this problem{% endif %}">🩷 × {{ proposal.upvote_count }}</span>
+          <span class="badge bg-light text-dark border px-2 py-2">{{ proposal.difficulty_display }}</span>
+        </span>
       </div>
       <div class="card-body">
         <div class="math-content">{{ proposal.statement }}</div>

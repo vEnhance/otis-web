@@ -473,6 +473,13 @@ def casual_browse(request: HttpRequest, subject: str) -> HttpResponse:
             pk__in=[p.pk for p in page_proposals]
         ).values_list("pk", flat=True)
     )
+    # Which of these the contributor has already hearted, so the upvote badge can
+    # look the same here as it does on the problem's own page.
+    upvoted_ids = set(
+        OIMEProposal.objects.filter(
+            pk__in=[p.pk for p in page_proposals], upvotes=contributor
+        ).values_list("pk", flat=True)
+    )
     for proposal in page_proposals:
         fight = fights.get(proposal.pk)
         if proposal.author == contributor:
@@ -486,6 +493,7 @@ def casual_browse(request: HttpRequest, subject: str) -> HttpResponse:
         else:
             proposal.browse_status = "new"  # type: ignore[attr-defined]
         proposal.spoiled = proposal.browse_status != "new"  # type: ignore[attr-defined]
+        proposal.has_upvoted = proposal.pk in upvoted_ids  # type: ignore[attr-defined]
     page_obj.object_list = page_proposals
 
     return render(

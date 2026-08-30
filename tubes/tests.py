@@ -1045,6 +1045,22 @@ def test_casual_browse_buttons_carry_settings(otis):
 
 
 @pytest.mark.django_db
+def test_casual_browse_marks_upvoted_problems(otis):
+    user, contributor = _verified_contributor()
+    contributor.casual_mode = True
+    contributor.save()
+    hearted = OIMEProposalFactory.create(subject="A")
+    OIMEProposalFactory.create(subject="A")
+    # Someone else's upvote must not light up the badge for this contributor.
+    OIMEProposalFactory.create(subject="A").upvotes.add(OIMEContributorFactory.create())
+    hearted.upvotes.add(contributor)
+    otis.login(user)
+    resp = otis.get_20x("oime-casual-browse", "A")
+    assert [p.has_upvoted for p in resp.context["page_obj"]] == [False, False, True]
+    otis.assert_testid(resp, "browse-upvoted", count=1)
+
+
+@pytest.mark.django_db
 def test_casual_browse_paginates(otis):
     from .views import CASUAL_BROWSE_PAGE_SIZE
 
