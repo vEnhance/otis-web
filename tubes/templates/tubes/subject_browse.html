@@ -6,8 +6,60 @@
 {% block layout-content %}
   <div class="mb-3 d-flex flex-wrap align-items-center gap-2">
     {% include "tubes/components/subject_nav.html" %}
-    {% include "tubes/components/browse_controls.html" %}
+    {# Filters and sorts #}
+    <span class="dropdown d-inline-block">
+      <button type="button"
+              data-testid="browse-difficulty-filter"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+              title="Filter by difficulty"
+              class="btn btn-sm dropdown-toggle {% if difficulty %}btn-primary{% else %}btn-outline-primary{% endif %}">
+        🔥{{ difficulty|default_if_none:"" }}
+      </button>
+      <ul class="dropdown-menu">
+        {% for option in difficulty_options %}
+          <li>
+            <a class="dropdown-item{% if option.selected %} active{% endif %}"
+               href="{% url "oime-subject-browse" subject %}{% if option.params %}?{{ option.params }}{% endif %}">{{ option.label }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    </span>
+    {% if lock_options %}
+      <span class="dropdown d-inline-block">
+        <button type="button"
+                data-testid="browse-lock-filter"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+                title="Filter by whether you have opened the problem"
+                class="btn btn-sm dropdown-toggle {% if lock %}btn-primary{% else %}btn-outline-primary{% endif %}">
+          {% if lock == "unlocked" %}
+            🔓
+          {% else %}
+            🔒
+          {% endif %}
+        </button>
+        <ul class="dropdown-menu">
+          {% for option in lock_options %}
+            <li>
+              <a class="dropdown-item{% if option.selected %} active{% endif %}"
+                 href="{% url "oime-subject-browse" subject %}{% if option.params %}?{{ option.params }}{% endif %}">{{ option.label }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      </span>
+    {% endif %}
     <span class="ms-auto d-flex flex-wrap gap-2">
+      <a href="{% url "oime-subject-browse" subject %}{% if sort_toggle_params %}?{{ sort_toggle_params }}{% endif %}"
+         data-testid="browse-sort-toggle"
+         title="{% if sort_by_votes %}Sort by newest{% else %}Sort by most upvoted{% endif %}"
+         class="btn btn-sm btn-primary">
+        {% if sort_by_votes %}
+          🩷↓
+        {% else %}
+          🕑↓
+        {% endif %}
+      </a>
       <a href="{% url "oime-landing" %}" class="btn btn-sm btn-outline-info">Home</a>
     </span>
   </div>
