@@ -13,7 +13,7 @@ from .factories import (
     OIMEFightFactory,
     OIMEProposalFactory,
 )
-from .models import OIMEComment, OIMEContributor, OIMEFight
+from .models import OIMEComment, OIMEContributor, OIMEFight, OIMEProposal
 
 
 def _verified_contributor(username: str = "alice") -> tuple[object, object]:
@@ -583,39 +583,6 @@ def test_draft_hidden_from_own_author_on_main_list(otis):
 
 
 @pytest.mark.django_db
-def test_draft_list_shows_own_drafts_only(otis):
-    user, contributor = _verified_contributor()
-    _, other = _verified_contributor("bob")
-    mine = OIMEProposalFactory.create(
-        author=contributor, is_draft=True, title="My draft"
-    )
-    OIMEProposalFactory.create(author=contributor, is_draft=False, title="My problem")
-    OIMEProposalFactory.create(author=other, is_draft=True, title="Bob's draft")
-    otis.login(user)
-    resp = otis.get_20x("oime-proposal-drafts")
-    assert list(resp.context["proposals"]) == [mine]
-
-
-@pytest.mark.django_db
-def test_draft_list_hides_archived_drafts(otis):
-    user, contributor = _verified_contributor()
-    OIMEProposalFactory.create(
-        author=contributor, is_draft=True, archived=True, title="Archived draft"
-    )
-    otis.login(user)
-    resp = otis.get_20x("oime-proposal-drafts")
-    assert list(resp.context["proposals"]) == []
-
-
-@pytest.mark.django_db
-def test_main_list_links_to_drafts(otis):
-    user, _ = _verified_contributor()
-    otis.login(user)
-    resp = otis.get_20x("oime-proposal-list")
-    otis.assert_has(resp, otis.url("oime-proposal-drafts"))
-
-
-@pytest.mark.django_db
 def test_draft_not_viewable_by_others(otis):
     user, _ = _verified_contributor()
     _, other = _verified_contributor("bob")
@@ -887,19 +854,19 @@ def test_casual_revealed_can_comment(otis):
 
 
 # ---------------------------------------------------------------------------
-# Casual full-statement browser
+# Per-subject full-statement browser
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.django_db
-def test_casual_browse_shows_statements_of_one_subject(otis):
+def test_subject_browse_shows_statements_of_one_subject(otis):
     user, contributor = _verified_contributor()
     contributor.casual_mode = True
     contributor.save()
     wanted = OIMEProposalFactory.create(subject="G", statement="Geometry statement.")
     other_subject = OIMEProposalFactory.create(subject="N", statement="Number theory.")
     otis.login(user)
-    resp = otis.get_20x("oime-casual-browse", "G")
+    resp = otis.get_20x("oime-subject-browse", "G")
     assert list(resp.context["page_obj"]) == [wanted]
     assert other_subject not in resp.context["page_obj"]
     # this browser exists to put whole statements on the page, so that is content
@@ -908,7 +875,7 @@ def test_casual_browse_shows_statements_of_one_subject(otis):
 
 
 @pytest.mark.django_db
-def test_casual_browse_never_shows_answers_or_solutions(otis):
+def test_subject_browse_never_shows_answers_or_solutions(otis):
     user, contributor = _verified_contributor()
     contributor.casual_mode = True
     contributor.save()
@@ -916,12 +883,12 @@ def test_casual_browse_never_shows_answers_or_solutions(otis):
     otis.login(user)
     # bulk browse has no per-proposal solver context; the page must simply never
     # carry a solution, so this stays a leakage check on the bytes
-    resp = otis.get_20x("oime-casual-browse", "A")
+    resp = otis.get_20x("oime-subject-browse", "A")
     otis.assert_not_has(resp, "Secret solution.")
 
 
 @pytest.mark.django_db
-def test_casual_browse_includes_spoiled_problems_but_marks_them(otis):
+def test_subject_browse_includes_spoiled_problems_but_marks_them(otis):
     user, contributor = _verified_contributor()
     contributor.casual_mode = True
     contributor.save()
@@ -938,23 +905,23 @@ def test_casual_browse_includes_spoiled_problems_but_marks_them(otis):
         contributor=contributor, proposal=gave_up, status="OIME_FAIL"
     )
     otis.login(user)
-    resp = otis.get_20x("oime-casual-browse", "C")
+    resp = otis.get_20x("oime-subject-browse", "C")
     # Every problem is listed, but each is labelled by how the viewer has
     # already engaged with it.
-    statuses = {p.pk: p.browse_status for p in resp.context["page_obj"]}
+    statuses = {p.pk: p.user_list_status for p in resp.context["page_obj"]}
     assert statuses == {
-        fresh.pk: "new",
+        fresh.pk: "casual",
         own.pk: "author",
         revealed.pk: "revealed",
-        solved.pk: "solved",
-        gave_up.pk: "attempted",
+        solved.pk: "completed",
+        gave_up.pk: "completed",
     }
     spoiled = {p.pk for p in resp.context["page_obj"] if p.spoiled}
     assert spoiled == {own.pk, revealed.pk, solved.pk, gave_up.pk}
 
 
 @pytest.mark.django_db
-def test_casual_browse_hides_archived_and_drafts(otis):
+def test_subject_browse_hides_archived_and_drafts(otis):
     user, contributor = _verified_contributor()
     contributor.casual_mode = True
     contributor.save()
@@ -965,12 +932,12 @@ def test_casual_browse_hides_archived_and_drafts(otis):
         author=contributor, subject="N", is_draft=True, statement="My draft."
     )
     otis.login(user)
-    resp = otis.get_20x("oime-casual-browse", "N")
+    resp = otis.get_20x("oime-subject-browse", "N")
     assert list(resp.context["page_obj"]) == []
 
 
 @pytest.mark.django_db
-def test_casual_browse_orders_newest_first(otis):
+def test_subject_browse_orders_newest_first(otis):
     user, contributor = _verified_contributor()
     contributor.casual_mode = True
     contributor.save()
@@ -978,12 +945,12 @@ def test_casual_browse_orders_newest_first(otis):
     middle = OIMEProposalFactory.create(subject="A")
     newest = OIMEProposalFactory.create(subject="A")
     otis.login(user)
-    resp = otis.get_20x("oime-casual-browse", "A")
+    resp = otis.get_20x("oime-subject-browse", "A")
     assert list(resp.context["page_obj"]) == [newest, middle, oldest]
 
 
 @pytest.mark.django_db
-def test_casual_browse_sorts_by_votes_on_request(otis):
+def test_subject_browse_sorts_by_votes_on_request(otis):
     user, contributor = _verified_contributor()
     contributor.casual_mode = True
     contributor.save()
@@ -994,51 +961,51 @@ def test_casual_browse_sorts_by_votes_on_request(otis):
         beloved.upvotes.add(OIMEContributorFactory.create())
     liked.upvotes.add(OIMEContributorFactory.create())
     otis.login(user)
-    resp = otis.get_20x("oime-casual-browse", "A", data={"sort": "votes"})
+    resp = otis.get_20x("oime-subject-browse", "A", data={"sort": "votes"})
     assert list(resp.context["page_obj"]) == [beloved, liked, unloved]
     # Without the parameter the browser is still newest-first.
-    resp = otis.get_20x("oime-casual-browse", "A")
+    resp = otis.get_20x("oime-subject-browse", "A")
     assert list(resp.context["page_obj"]) == [liked, beloved, unloved]
 
 
 @pytest.mark.django_db
-def test_casual_browse_filters_by_difficulty(otis):
+def test_subject_browse_filters_by_difficulty(otis):
     user, contributor = _verified_contributor()
     contributor.casual_mode = True
     contributor.save()
     easy = OIMEProposalFactory.create(subject="C", difficulty=1)
     hard = OIMEProposalFactory.create(subject="C", difficulty=5)
     otis.login(user)
-    resp = otis.get_20x("oime-casual-browse", "C", data={"difficulty": 5})
+    resp = otis.get_20x("oime-subject-browse", "C", data={"difficulty": 5})
     assert list(resp.context["page_obj"]) == [hard]
     assert resp.context["difficulty"] == 5
-    resp = otis.get_20x("oime-casual-browse", "C", data={"difficulty": 1})
+    resp = otis.get_20x("oime-subject-browse", "C", data={"difficulty": 1})
     assert list(resp.context["page_obj"]) == [easy]
-    resp = otis.get_20x("oime-casual-browse", "C")
+    resp = otis.get_20x("oime-subject-browse", "C")
     assert list(resp.context["page_obj"]) == [hard, easy]
     assert resp.context["difficulty"] is None
 
 
 @pytest.mark.django_db
 @pytest.mark.parametrize("raw", ["0", "6", "banana", ""])
-def test_casual_browse_ignores_bogus_difficulty(otis, raw: str):
+def test_subject_browse_ignores_bogus_difficulty(otis, raw: str):
     user, contributor = _verified_contributor()
     contributor.casual_mode = True
     contributor.save()
     proposal = OIMEProposalFactory.create(subject="G", difficulty=2)
     otis.login(user)
-    resp = otis.get_20x("oime-casual-browse", "G", data={"difficulty": raw})
+    resp = otis.get_20x("oime-subject-browse", "G", data={"difficulty": raw})
     assert list(resp.context["page_obj"]) == [proposal]
     assert resp.context["difficulty"] is None
 
 
 @pytest.mark.django_db
-def test_casual_browse_controls_carry_settings(otis):
+def test_subject_browse_controls_carry_settings(otis):
     user, contributor = _verified_contributor()
     contributor.casual_mode = True
     contributor.save()
     otis.login(user)
-    resp = otis.get_20x("oime-casual-browse", "N")
+    resp = otis.get_20x("oime-subject-browse", "N")
     otis.assert_testid(resp, "browse-sort-toggle")
     otis.assert_testid(resp, "browse-difficulty-filter")
     assert resp.context["browse_params"] == ""
@@ -1046,7 +1013,7 @@ def test_casual_browse_controls_carry_settings(otis):
 
     # Each control keeps whatever the other one is set to.
     resp = otis.get_20x(
-        "oime-casual-browse", "N", data={"sort": "votes", "difficulty": 4}
+        "oime-subject-browse", "N", data={"sort": "votes", "difficulty": 4}
     )
     assert resp.context["browse_params"] == "sort=votes&difficulty=4"
     assert resp.context["sort_toggle_params"] == "difficulty=4"
@@ -1063,14 +1030,14 @@ def test_casual_browse_controls_carry_settings(otis):
     assert [o["selected"] for o in options] == [False] * 4 + [True, False]
 
     # With no filter on, the dropdown marks "All" as the selected entry.
-    resp = otis.get_20x("oime-casual-browse", "N")
+    resp = otis.get_20x("oime-subject-browse", "N")
     assert [o["selected"] for o in resp.context["difficulty_options"]] == [True] + [
         False
     ] * 5
 
 
 @pytest.mark.django_db
-def test_casual_browse_difficulty_badges_toggle_the_filter(otis):
+def test_subject_browse_difficulty_badges_toggle_the_filter(otis):
     user, contributor = _verified_contributor()
     contributor.casual_mode = True
     contributor.save()
@@ -1079,20 +1046,20 @@ def test_casual_browse_difficulty_badges_toggle_the_filter(otis):
     otis.login(user)
 
     # Unfiltered, each badge links to its own difficulty, keeping the sort.
-    resp = otis.get_20x("oime-casual-browse", "A", data={"sort": "votes"})
+    resp = otis.get_20x("oime-subject-browse", "A", data={"sort": "votes"})
     assert [p.difficulty_params for p in resp.context["page_obj"]] == [
         "sort=votes&difficulty=4",
         "sort=votes&difficulty=2",
     ]
 
     # The badge of the difficulty already filtered on clears the filter instead.
-    resp = otis.get_20x("oime-casual-browse", "A", data={"difficulty": 4})
+    resp = otis.get_20x("oime-subject-browse", "A", data={"difficulty": 4})
     assert [p.difficulty_params for p in resp.context["page_obj"]] == [""]
     otis.assert_testid(resp, "browse-difficulty-badge", count=1)
 
 
 @pytest.mark.django_db
-def test_casual_browse_marks_upvoted_problems(otis):
+def test_subject_browse_marks_upvoted_problems(otis):
     user, contributor = _verified_contributor()
     contributor.casual_mode = True
     contributor.save()
@@ -1102,92 +1069,255 @@ def test_casual_browse_marks_upvoted_problems(otis):
     OIMEProposalFactory.create(subject="A").upvotes.add(OIMEContributorFactory.create())
     hearted.upvotes.add(contributor)
     otis.login(user)
-    resp = otis.get_20x("oime-casual-browse", "A")
+    resp = otis.get_20x("oime-subject-browse", "A")
     assert [p.has_upvoted for p in resp.context["page_obj"]] == [False, False, True]
     otis.assert_testid(resp, "browse-upvoted", count=1)
 
 
 @pytest.mark.django_db
-def test_casual_browse_paginates(otis):
-    from .views import CASUAL_BROWSE_PAGE_SIZE
+def test_subject_browse_paginates(otis):
+    from .views import BROWSE_PAGE_SIZE
 
     user, contributor = _verified_contributor()
     contributor.casual_mode = True
     contributor.save()
     proposals = [
-        OIMEProposalFactory.create(subject="G")
-        for _ in range(CASUAL_BROWSE_PAGE_SIZE + 3)
+        OIMEProposalFactory.create(subject="G") for _ in range(BROWSE_PAGE_SIZE + 3)
     ]
     otis.login(user)
-    resp = otis.get_20x("oime-casual-browse", "G")
+    resp = otis.get_20x("oime-subject-browse", "G")
     page_obj = resp.context["page_obj"]
     assert page_obj.paginator.num_pages == 2
-    assert len(page_obj.object_list) == CASUAL_BROWSE_PAGE_SIZE
-    assert list(page_obj) == list(reversed(proposals))[:CASUAL_BROWSE_PAGE_SIZE]
-    resp = otis.get_20x("oime-casual-browse", "G", data={"page": 2})
+    assert len(page_obj.object_list) == BROWSE_PAGE_SIZE
+    assert list(page_obj) == list(reversed(proposals))[:BROWSE_PAGE_SIZE]
+    resp = otis.get_20x("oime-subject-browse", "G", data={"page": 2})
     page_obj = resp.context["page_obj"]
-    assert list(page_obj) == list(reversed(proposals))[CASUAL_BROWSE_PAGE_SIZE:]
+    assert list(page_obj) == list(reversed(proposals))[BROWSE_PAGE_SIZE:]
     # Statuses are still computed on later pages.
-    assert all(p.browse_status == "new" for p in page_obj)
+    assert all(p.user_list_status == "casual" for p in page_obj)
 
 
 @pytest.mark.django_db
-def test_casual_browse_bad_page_falls_back_to_first(otis):
+def test_subject_browse_bad_page_falls_back_to_first(otis):
     user, contributor = _verified_contributor()
     contributor.casual_mode = True
     contributor.save()
     OIMEProposalFactory.create(subject="G")
     otis.login(user)
     for bad_page in ("0", "99", "banana"):
-        resp = otis.get_20x("oime-casual-browse", "G", data={"page": bad_page})
+        resp = otis.get_20x("oime-subject-browse", "G", data={"page": bad_page})
         assert resp.context["page_obj"].number == 1
 
 
 @pytest.mark.django_db
-def test_casual_browse_refused_in_ranked_mode(otis):
-    # Ranked statements are meant to be read for the first time under the clock.
-    user, _ = _verified_contributor()
-    OIMEProposalFactory.create(subject="G", statement="Geometry statement.")
+def test_subject_browse_locks_unopened_problems_in_ranked_mode(otis):
+    # Ranked statements are meant to be read for the first time under the clock, so
+    # the browser is open to ranked contributors but holds back what they have not
+    # started yet.
+    user, contributor = _verified_contributor()
+    unopened = OIMEProposalFactory.create(subject="G", statement="Still secret.")
+    opened = OIMEProposalFactory.create(subject="G", statement="Already fought this.")
+    OIMEFightFactory.create(contributor=contributor, proposal=opened, status="OIME_OK")
     otis.login(user)
-    resp = otis.get("oime-casual-browse", "G")
-    otis.assert_30x(resp)
-    assert resp.url.endswith("/tubes/proposals/")
+    resp = otis.get_20x("oime-subject-browse", "G")
+    assert {p.pk: p.locked for p in resp.context["page_obj"]} == {
+        unopened.pk: True,
+        opened.pk: False,
+    }
+    # A locked statement must not reach the page at all, so this is a leakage check.
+    otis.assert_not_has(resp, "Still secret.")
+    otis.assert_has(resp, "Already fought this.")
+    otis.assert_testid(resp, "browse-locked", count=1)
 
 
 @pytest.mark.django_db
-def test_casual_browse_rejects_unknown_subject(otis):
+def test_subject_browse_unlocks_what_ranked_mode_no_longer_covers(otis):
+    # Everything a ranked contributor can no longer fight is readable: their own
+    # problems, ones they revealed, ones they have an open session on, and ones that
+    # went casual for them when they last came back to ranked mode.
+    user, contributor = _verified_contributor()
+    own = OIMEProposalFactory.create(author=contributor, subject="A")
+    revealed = OIMEProposalFactory.create(subject="A")
+    contributor.revealed_proposals.add(revealed)
+    in_progress = OIMEProposalFactory.create(subject="A")
+    OIMEFightFactory.create(
+        contributor=contributor, proposal=in_progress, status="OIME_TBD"
+    )
+    before_cutoff = OIMEProposalFactory.create(subject="A")
+    contributor.ranked_cutoff = timezone.now()
+    contributor.save()
+    after_cutoff = OIMEProposalFactory.create(subject="A")
+    otis.login(user)
+    resp = otis.get_20x("oime-subject-browse", "A")
+    assert {p.pk: p.locked for p in resp.context["page_obj"]} == {
+        own.pk: False,
+        revealed.pk: False,
+        in_progress.pk: False,
+        before_cutoff.pk: False,
+        after_cutoff.pk: True,
+    }
+
+
+@pytest.mark.django_db
+def test_subject_browse_locked_problems_cannot_be_voted_on(otis):
+    # The heart is the one control on a locked card that would do something, and a
+    # misclick there would be easy; the view refuses the vote either way.
+    user, _ = _verified_contributor()
+    locked = OIMEProposalFactory.create(subject="N")
+    otis.login(user)
+    resp = otis.get_20x("oime-subject-browse", "N")
+    assert [p.locked for p in resp.context["page_obj"]] == [True]
+    otis.assert_not_has(resp, otis.url("oime-upvote", locked.pk))
+    resp = otis.post("oime-upvote", locked.pk, data={"back_subject": "N"})
+    assert resp.status_code == 403
+    assert locked.upvotes.count() == 0
+
+
+@pytest.mark.django_db
+def test_subject_browse_shows_the_verdict_of_a_finished_fight(otis):
+    # The card footer says what happened, the same way the listing tables do,
+    # instead of the generic "you are spoiled on this" line.
+    user, contributor = _verified_contributor()
+    solved = OIMEProposalFactory.create(subject="C")
+    OIMEFightFactory.create(contributor=contributor, proposal=solved, status="OIME_OK")
+    gave_up = OIMEProposalFactory.create(subject="C")
+    OIMEFightFactory.create(
+        contributor=contributor, proposal=gave_up, status="OIME_FAIL"
+    )
+    otis.login(user)
+    resp = otis.get_20x("oime-subject-browse", "C")
+    otis.assert_testid(resp, "verdict-solved", count=1)
+    otis.assert_testid(resp, "verdict-gave-up", count=1)
+
+
+@pytest.mark.django_db
+def test_subject_browse_keeps_casual_footer_messages(otis):
+    # A casual browser who never fought the problem still gets the old wording.
+    user, contributor = _verified_contributor()
+    contributor.casual_mode = True
+    contributor.save()
+    fresh = OIMEProposalFactory.create(subject="G")
+    revealed = OIMEProposalFactory.create(subject="G")
+    contributor.revealed_proposals.add(revealed)
+    otis.login(user)
+    resp = otis.get_20x("oime-subject-browse", "G")
+    assert {p.pk: p.user_list_status for p in resp.context["page_obj"]} == {
+        fresh.pk: "casual",
+        revealed.pk: "revealed",
+    }
+    # Nothing is locked in casual mode, so every statement is on the page.
+    otis.assert_no_testid(resp, "browse-locked")
+
+
+@pytest.mark.django_db
+def test_subject_browse_filters_by_lock_state(otis):
+    user, contributor = _verified_contributor()
+    # A problem that predates their return to ranked mode is browse-only for them,
+    # so it counts as unlocked however untouched it is.
+    before_cutoff = OIMEProposalFactory.create(subject="N")
+    contributor.ranked_cutoff = timezone.now()
+    contributor.save()
+    locked = OIMEProposalFactory.create(subject="N")
+    unlocked = OIMEProposalFactory.create(subject="N")
+    OIMEFightFactory.create(
+        contributor=contributor, proposal=unlocked, status="OIME_OK"
+    )
+    mine = OIMEProposalFactory.create(author=contributor, subject="N")
+    otis.login(user)
+    resp = otis.get_20x("oime-subject-browse", "N", data={"lock": "locked"})
+    assert set(resp.context["page_obj"]) == {locked}
+    assert resp.context["lock"] == "locked"
+    resp = otis.get_20x("oime-subject-browse", "N", data={"lock": "unlocked"})
+    assert set(resp.context["page_obj"]) == {unlocked, mine, before_cutoff}
+    resp = otis.get_20x("oime-subject-browse", "N")
+    assert set(resp.context["page_obj"]) == {locked, unlocked, mine, before_cutoff}
+    assert resp.context["lock"] is None
+    # The filter and the per-card lock flag are two readings of the same rule.
+    assert {p.pk for p in resp.context["page_obj"] if p.locked} == {locked.pk}
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("raw", ["", "open", "1"])
+def test_subject_browse_ignores_bogus_lock(otis, raw: str):
+    user, _ = _verified_contributor()
+    proposal = OIMEProposalFactory.create(subject="G")
+    otis.login(user)
+    resp = otis.get_20x("oime-subject-browse", "G", data={"lock": raw})
+    assert list(resp.context["page_obj"]) == [proposal]
+    assert resp.context["lock"] is None
+
+
+@pytest.mark.django_db
+def test_subject_browse_hides_the_lock_filter_in_casual_mode(otis):
+    # Nothing is ever locked in casual mode, so the filter would only be a way to
+    # ask for an empty page.
+    user, contributor = _verified_contributor()
+    contributor.casual_mode = True
+    contributor.save()
+    proposal = OIMEProposalFactory.create(subject="A")
+    otis.login(user)
+    resp = otis.get_20x("oime-subject-browse", "A", data={"lock": "locked"})
+    assert resp.context["lock_options"] is None
+    assert resp.context["lock"] is None
+    assert list(resp.context["page_obj"]) == [proposal]
+    otis.assert_no_testid(resp, "browse-lock-filter")
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("casual_mode", [True, False])
+def test_subject_browse_offers_the_mode_switch(otis, casual_mode: bool):
+    # The mode is what decides whether anything on this page is locked, so the way
+    # to change it belongs here too.
+    user, contributor = _verified_contributor()
+    contributor.casual_mode = casual_mode
+    contributor.save()
+    otis.login(user)
+    resp = otis.get_20x("oime-subject-browse", "A")
+    wanted = "oime-serious" if casual_mode else "oime-casual"
+    otis.assert_has(resp, otis.url(wanted))
+
+
+@pytest.mark.django_db
+def test_subject_browse_lock_filter_offered_in_ranked_mode(otis):
+    user, _ = _verified_contributor()
+    otis.login(user)
+    resp = otis.get_20x("oime-subject-browse", "A")
+    otis.assert_testid(resp, "browse-lock-filter")
+    options = resp.context["lock_options"]
+    assert [o["value"] for o in options] == [None, "locked", "unlocked"]
+    assert [o["params"] for o in options] == ["", "lock=locked", "lock=unlocked"]
+
+
+@pytest.mark.django_db
+def test_subject_browse_rejects_unknown_subject(otis):
     user, contributor = _verified_contributor()
     contributor.casual_mode = True
     contributor.save()
     otis.login(user)
-    otis.get_not_found("oime-casual-browse", "Z")
+    otis.get_not_found("oime-subject-browse", "Z")
 
 
 @pytest.mark.django_db
-def test_casual_browse_requires_verification(otis):
+def test_subject_browse_requires_verification(otis):
     UserFactory.create(username="mallory")
     otis.login("mallory")
-    otis.get_40x("oime-casual-browse", "G")
+    otis.get_40x("oime-subject-browse", "G")
 
 
 @pytest.mark.django_db
-def test_casual_list_links_to_browser(otis):
+@pytest.mark.parametrize("casual_mode", [True, False])
+def test_all_problems_always_links_to_every_subject(otis, casual_mode: bool):
+    # The subject browser is useful in both modes now, so its four buttons are part
+    # of the navigation rather than a casual-only extra.
     user, contributor = _verified_contributor()
-    contributor.casual_mode = True
+    contributor.casual_mode = casual_mode
     contributor.save()
     otis.login(user)
     resp = otis.get_20x("oime-proposal-list")
-    assert resp.context["casual"]
-    otis.assert_has(resp, otis.url("oime-casual-browse", "G"))
-
-
-@pytest.mark.django_db
-def test_ranked_list_does_not_link_to_browser(otis):
-    user, _ = _verified_contributor()
-    otis.login(user)
-    resp = otis.get_20x("oime-proposal-list")
-    assert not resp.context["casual"]
-    otis.assert_not_has(resp, otis.url("oime-casual-browse", "G"))
+    assert resp.context["casual"] is casual_mode
+    for code in ("A", "C", "G", "N"):
+        otis.assert_has(resp, otis.url("oime-subject-browse", code))
+    otis.assert_has(resp, otis.url("oime-landing"))
 
 
 # ---------------------------------------------------------------------------
@@ -1373,7 +1503,7 @@ def test_upvote_toggles_off(otis):
 
 
 @pytest.mark.django_db
-def test_upvote_from_casual_browse_returns_to_the_same_page(otis):
+def test_upvote_from_subject_browse_returns_to_the_same_page(otis):
     user, contributor = _verified_contributor()
     contributor.casual_mode = True
     contributor.save()
@@ -1388,7 +1518,7 @@ def test_upvote_from_casual_browse_returns_to_the_same_page(otis):
         },
     )
     otis.assert_30x(resp)
-    assert resp.url == "/tubes/casual/A/?sort=votes&difficulty=3&page=2"
+    assert resp.url == "/tubes/browse/A/?sort=votes&difficulty=3&page=2"
     assert proposal.upvotes.filter(pk=contributor.pk).exists()
 
 
@@ -1428,7 +1558,7 @@ def test_upvote_return_ignores_bogus_browse_params(otis):
         data={"back_subject": "G", "back_params": "difficulty=9&page=banana&sort=x"},
     )
     otis.assert_30x(resp)
-    assert resp.url == "/tubes/casual/G/"
+    assert resp.url == "/tubes/browse/G/"
 
 
 @pytest.mark.django_db
@@ -1447,7 +1577,7 @@ def test_upvote_allowed_during_a_running_fight(otis):
     otis.login(user)
     resp = otis.post("oime-upvote", proposal.pk, data={"back_subject": "C"})
     otis.assert_30x(resp)
-    assert resp.url == "/tubes/casual/C/"
+    assert resp.url == "/tubes/browse/C/"
     assert proposal.upvotes.filter(pk=contributor.pk).exists()
 
 
@@ -1849,12 +1979,108 @@ def test_landing_quiet_without_active_fight(otis):
 
 
 @pytest.mark.django_db
-def test_landing_works_for_anonymous_and_contributorless_users(otis):
-    otis.get_20x("oime-landing")
+def test_landing_requires_login(otis):
+    otis.assert_30x(otis.get("oime-landing"))
+    UserFactory.create(username="mallory")
+    otis.login("mallory")
+    otis.get_40x("oime-landing")
+
+
+# ---------------------------------------------------------------------------
+# Landing page: the newest problems and your own
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.django_db
+def test_landing_shows_the_five_newest_problems(otis):
+    from .views import LANDING_RECENT_COUNT
+
+    user, _ = _verified_contributor()
+    proposals = [OIMEProposalFactory.create() for _ in range(LANDING_RECENT_COUNT + 2)]
+    otis.login(user)
+    resp = otis.get_20x("oime-landing")
+    assert (
+        resp.context["recent_proposals"]
+        == list(reversed(proposals))[:LANDING_RECENT_COUNT]
+    )
+
+
+@pytest.mark.django_db
+def test_landing_newest_omits_drafts_and_archived(otis):
+    user, contributor = _verified_contributor()
+    published = OIMEProposalFactory.create()
+    OIMEProposalFactory.create(is_draft=True)
+    OIMEProposalFactory.create(archived=True)
+    # Even the viewer's own draft stays out of the public list; it belongs under
+    # "Your problems" instead.
+    OIMEProposalFactory.create(author=contributor, is_draft=True)
+    otis.login(user)
+    resp = otis.get_20x("oime-landing")
+    assert resp.context["recent_proposals"] == [published]
+
+
+@pytest.mark.django_db
+def test_landing_shows_own_proposals_and_drafts(otis):
+    user, contributor = _verified_contributor()
+    _, other = _verified_contributor("bob")
+    published = OIMEProposalFactory.create(author=contributor)
+    draft = OIMEProposalFactory.create(author=contributor, is_draft=True)
+    OIMEProposalFactory.create(author=contributor, archived=True)
+    OIMEProposalFactory.create()  # somebody else's
+    OIMEProposalFactory.create(author=other, is_draft=True, title="Bob's draft")
+    otis.login(user)
+    resp = otis.get_20x("oime-landing")
+    assert set(resp.context["own_proposals"]) == {published, draft}
+    otis.assert_not_has(resp, "Bob's draft")
+    assert all(p.user_list_status == "author" for p in resp.context["own_proposals"])
+    # The status column names which is which. The published one is also in the
+    # "newest problems" table above, so it is rendered twice; the draft is not,
+    # since drafts are nobody else's business.
+    otis.assert_testid(resp, "table-published", count=2)
+    otis.assert_testid(resp, "table-draft", count=1)
+
+
+@pytest.mark.django_db
+def test_landing_links_to_every_subject_and_all_problems(otis):
+    user, _ = _verified_contributor()
+    otis.login(user)
+    resp = otis.get_20x("oime-landing")
+    for code in ("A", "C", "G", "N"):
+        otis.assert_has(resp, otis.url("oime-subject-browse", code))
+    otis.assert_has(resp, otis.url("oime-proposal-list"))
+    otis.assert_has(resp, otis.url("oime-proposal-create"))
+    otis.assert_has(resp, otis.url("oime-setup"))
+
+
+@pytest.mark.django_db
+def test_landing_offers_onboarding_without_a_contributor(otis):
+    # None of the tables mean anything without a profile, so the one thing on offer
+    # is making one.
+    OIMEProposalFactory.create(title="Somebody's problem")
     verified_group, _ = Group.objects.get_or_create(name="Verified")
-    UserFactory.create(username="alice", groups=(verified_group,))
-    otis.login("alice")
-    otis.get_20x("oime-landing")
+    UserFactory.create(username="bob", groups=(verified_group,))
+    otis.login("bob")
+    resp = otis.get_20x("oime-landing")
+    assert resp.context["contributor"] is None
+    assert "recent_proposals" not in resp.context
+    otis.assert_not_has(resp, "Somebody's problem")
+    otis.assert_has(resp, otis.url("oime-setup"))
+    otis.assert_not_has(resp, otis.url("oime-proposal-create"))
+
+
+@pytest.mark.django_db
+def test_landing_newest_table_carries_the_viewers_own_status(otis):
+    user, contributor = _verified_contributor()
+    solved = OIMEProposalFactory.create()
+    OIMEFightFactory.create(contributor=contributor, proposal=solved, status="OIME_OK")
+    OIMEProposalFactory.create()
+    otis.login(user)
+    resp = otis.get_20x("oime-landing")
+    assert {p.pk: p.user_list_status for p in resp.context["recent_proposals"]} == {
+        solved.pk: "completed",
+        OIMEProposal.objects.exclude(pk=solved.pk).get().pk: "not_started",
+    }
+    otis.assert_testid(resp, "verdict-solved", count=1)
 
 
 # ---------------------------------------------------------------------------

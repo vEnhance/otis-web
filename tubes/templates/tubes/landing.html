@@ -14,15 +14,34 @@
   <p>
     Welcome to the <strong>OTIS Mock AIME <s>Kitchen</s> Lab</strong>!
   </p>
-  <div class="mb-3">
-    <a href="{% url "oime-proposal-list" %}" class="btn btn-primary">View problems</a>
-    <a href="{% url "oime-proposal-create" %}" class="btn btn-success">Write a problem</a>
-    <a href="{% url "oime-setup" %}" class="btn btn-outline-secondary ms-2">Change name</a>
-  </div>
+  {% if contributor %}
+    <hr />
+    <h1>Problems</h1>
+    <p>
+      <a href="{% url "oime-proposal-list" %}"
+         class="btn btn-outline-secondary">All problems</a>
+      {% for code, name in subject_choices %}
+        <a href="{% url "oime-subject-browse" code %}"
+           title="{{ name }}"
+           class="btn btn-outline-primary">{{ name }}</a>
+      {% endfor %}
+    </p>
+    {% include "tubes/components/proposal_table.html" with title="Recent problems" proposals=recent_proposals %}
+    {% include "tubes/components/proposal_table.html" with title="Your proposals" proposals=own_proposals %}
+    <div class="mb-4">
+      <a href="{% url "oime-proposal-create" %}" class="btn btn-success">Write a problem</a>
+      <a href="{% url "oime-setup" %}" class="btn btn-outline-secondary">Change name</a>
+    </div>
+    <hr />
+    {% include "tubes/components/mode_toggle.html" %}
+  {% else %}
+    <div class="mb-4">
+      <a href="{% url "oime-setup" %}" class="btn btn-primary">Get Started</a>
+    </div>
+  {% endif %}
   <hr />
   <h1>What to Expect / Instructions</h1>
-  <h2>Writing problems</h2>
-  <p>Use "Write a problem" above!</p>
+  <h2 class="accordion-header">Writing problems</h2>
   <p>
     <strong>Note that the database rolls over from year to year</strong>.
     Because OTIS has such a large community of students,
@@ -34,7 +53,6 @@
   <p>
     You are asked to select a difficulty tier for your problems.
     This tier the amount of time that testsolvers get to spend on it.
-    <strong>You can't change difficulty after submission!</strong>
   </p>
   <ul>
     <li>
@@ -53,7 +71,11 @@
       <strong>🔥 × 5:</strong> AIME 13-15, solvers get 30 minutes
     </li>
   </ul>
-  <h2>Solving problems</h2>
+  <p>
+    <strong>You can't change difficulty after submission!</strong>
+    Think hard about which one you pick.
+  </p>
+  <h2 class="accordion-header">Solving problems</h2>
   <p>
     You can play in two modes, <b>ranked mode</b> and <b>casual mode</b>.
   </p>
@@ -68,12 +90,8 @@
     </li>
     <li>
       In <b>casual mode</b>, you can browse and try whatever problems you like.
-      There's an answer checker, but it doesn't store anything
+      There's a client-side answer checker, but it doesn't store anything
       and there's no timers or locks.
-      You also get a per-subject page listing the full statement of every
-      problem, so you can scroll through (say) all the geometry problems and
-      pick one you feel like doing.
-      Problems you've already seen are greyed out there.
     </li>
   </ul>
   <p>
@@ -84,9 +102,7 @@
   </p>
   <p>
     After you solve or give up on a proposal, you can read spoilers and comment
-    on the thread for the problem. Once you have seen a problem's statement, you
-    can upvote it using the heart icon to indicate that you like it; you do not
-    have to wait until you have finished with it.
+    on the thread for the problem.
   </p>
   <h2>How Evan picks the 15 problems</h2>
   <p>For now, final selection of problems and placements is done by Evan.</p>

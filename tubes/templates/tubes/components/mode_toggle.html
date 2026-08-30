@@ -1,0 +1,27 @@
+{% comment %}
+  The switch between ranked and casual mode. It belongs on any page whose contents
+  depend on which one you are in, which is the all-problems list and the per-subject
+  browser, where the mode decides what stays locked.
+{% endcomment %}
+{% if contributor %}
+  {% if contributor.casual_mode %}
+    <p>
+      You're currently in <b>casual mode</b>.
+      Nothing you do is recorded or timed.
+    </p>
+    <p>
+      <a href="{% url "oime-serious" %}"
+         class="btn btn-sm btn-outline-warning">Return to ranked mode</a>
+    </p>
+  {% else %}
+    <p>
+      You're testsolving in <b>ranked mode</b>.
+      Please try problems seriously!
+      We'll use your times and answers for statistics
+      when deciding how to choose the problems.
+    </p>
+    <p>
+      <a href="{% url "oime-casual" %}" class="btn btn-sm btn-outline-warning">Switch to casual mode</a>
+    </p>
+  {% endif %}
+{% endif %}

@@ -31,7 +31,15 @@
             <td {% if proposal.has_upvoted %}class="fw-bold" data-testid="table-upvoted" title="You upvoted this problem"{% endif %}>🩷 × {{ proposal.upvote_count }}</td>
             <td>
               {% if proposal.user_list_status == "author" %}
-                <span>Author</span>
+                {% if proposal.is_draft %}
+                  <a href="{{ proposal.get_absolute_url }}"
+                     class="text-danger"
+                     data-testid="table-draft">Draft</a>
+                {% else %}
+                  <a href="{{ proposal.get_absolute_url }}"
+                     class="text-success"
+                     data-testid="table-published">Published</a>
+                {% endif %}
               {% elif proposal.user_list_status == "in_progress" %}
                 <span>In Progress</span>
               {% elif proposal.user_list_status == "not_started" %}
@@ -40,16 +48,8 @@
                 <span class="text-muted">Spoiled</span>
               {% elif proposal.user_list_status == "casual" %}
                 <a href="{{ proposal.get_absolute_url }}">Open</a>
-              {% elif proposal.user_fight.status == "OIME_OK" %}
-                <span class="text-success">✔{{ proposal.user_fight.time_display }}
-                  {% if proposal.user_fight.wrong_answers %}(✖{{ proposal.user_fight.wrong_answers }}){% endif %}
-                </span>
-              {% elif proposal.user_fight.status == "OIME_FAIL" %}
-                <span class="text-danger">Gave up</span>
-              {% elif proposal.user_fight.status == "OIME_TLE" %}
-                <span class="text-danger">TLE</span>
-              {% elif proposal.user_fight.status == "OIME_ALE" %}
-                <span class="text-danger">✖{{ proposal.user_fight.wrong_answers }}</span>
+              {% else %}
+                {% include "tubes/components/fight_verdict.html" with fight=proposal.user_fight %}
               {% endif %}
             </td>
           </tr>

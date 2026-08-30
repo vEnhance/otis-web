@@ -404,6 +404,22 @@ img.emoji {
 .oime-upvote-btn:active {
   transform: scale(0.95);
 }
+/* Its counterpart on a locked card, where there is no vote to cast yet. */
+.oime-upvote-locked {
+  cursor: not-allowed;
+}
+
+/* OIME per-subject browser: the panel standing in for a statement that this
+   contributor has not unlocked yet. Hazard stripes, because that is what it is. */
+.oime-locked {
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(0, 0, 0, 0.04),
+    rgba(0, 0, 0, 0.04) 0.6rem,
+    rgba(0, 0, 0, 0.09) 0.6rem,
+    rgba(0, 0, 0, 0.09) 1.2rem
+  );
+}
 
 /* OIME proposal table collapse toggle */
 .oime-table-toggle::before {

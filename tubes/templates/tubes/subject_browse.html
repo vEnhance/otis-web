@@ -1,0 +1,127 @@
+{% extends "layout.html" %}
+{% load django_bootstrap5 %}
+{% block title %}
+  {{ subject_name }} Problems
+{% endblock title %}
+{% block layout-content %}
+  <div class="mb-3 d-flex flex-wrap align-items-center gap-2">
+    {% include "tubes/components/subject_nav.html" %}
+    {# Filters and sorts #}
+    <span class="dropdown d-inline-block">
+      <button type="button"
+              data-testid="browse-difficulty-filter"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+              title="Filter by difficulty"
+              class="btn btn-sm dropdown-toggle {% if difficulty %}btn-primary{% else %}btn-outline-primary{% endif %}">
+        🔥{{ difficulty|default_if_none:"" }}
+      </button>
+      <ul class="dropdown-menu">
+        {% for option in difficulty_options %}
+          <li>
+            <a class="dropdown-item{% if option.selected %} active{% endif %}"
+               href="{% url "oime-subject-browse" subject %}{% if option.params %}?{{ option.params }}{% endif %}">{{ option.label }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    </span>
+    {% if lock_options %}
+      <span class="dropdown d-inline-block">
+        <button type="button"
+                data-testid="browse-lock-filter"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+                title="Filter by whether you have opened the problem"
+                class="btn btn-sm dropdown-toggle {% if lock %}btn-primary{% else %}btn-outline-primary{% endif %}">
+          {% if lock == "unlocked" %}
+            👀
+          {% else %}
+            🔒
+          {% endif %}
+        </button>
+        <ul class="dropdown-menu">
+          {% for option in lock_options %}
+            <li>
+              <a class="dropdown-item{% if option.selected %} active{% endif %}"
+                 href="{% url "oime-subject-browse" subject %}{% if option.params %}?{{ option.params }}{% endif %}">{{ option.label }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      </span>
+    {% endif %}
+    <span class="ms-auto d-flex flex-wrap gap-2">
+      <a href="{% url "oime-subject-browse" subject %}{% if sort_toggle_params %}?{{ sort_toggle_params }}{% endif %}"
+         data-testid="browse-sort-toggle"
+         title="{% if sort_by_votes %}Sort by newest{% else %}Sort by most upvoted{% endif %}"
+         class="btn btn-sm btn-primary">
+        {% if sort_by_votes %}
+          🩷↓
+        {% else %}
+          🕑↓
+        {% endif %}
+      </a>
+      <a href="{% url "oime-landing" %}" class="btn btn-sm btn-outline-info">Home</a>
+    </span>
+  </div>
+  {% include "tubes/components/mode_toggle.html" %}
+  <br />
+  {% for proposal in page_obj %}
+    <div class="card mb-4 {% if proposal.spoiled %}border-secondary{% else %}border-primary{% endif %}">
+      <div class="card-header d-flex justify-content-between align-items-center gap-2">
+        <span class="fw-bold">
+          <a href="{{ proposal.get_absolute_url }}">{{ proposal.label }}: {{ proposal.title|truncatechars:"32" }}</a>
+        </span>
+        <span class="d-flex align-items-center gap-1 text-nowrap">
+          <a class="badge border text-decoration-none {% if difficulty %}bg-primary text-white{% else %}bg-light text-dark{% endif %}"
+             data-testid="browse-difficulty-badge"
+             title="{% if difficulty %}Clear the difficulty filter{% else %}Show only 🔥 × {{ proposal.difficulty }} problems{% endif %}"
+             href="{% url "oime-subject-browse" subject %}{% if proposal.difficulty_params %}?{{ proposal.difficulty_params }}{% endif %}">{{ proposal.difficulty_display }}</a>
+          {% if proposal.locked %}
+            {# Nothing to have an opinion about yet, and this is where a misclick would be easy. #}
+            <span class="badge border bg-light text-muted oime-upvote-locked">🩷 × {{ proposal.upvote_count }}</span>
+          {% else %}
+            <form method="post"
+                  action="{% url "oime-upvote" proposal.pk %}"
+                  class="d-inline">
+              {% csrf_token %}
+              <input type="hidden" name="back_subject" value="{{ subject }}" />
+              <input type="hidden" name="back_params" value="{{ back_params }}" />
+              <button type="submit"
+                      class="badge border oime-upvote-btn {% if proposal.has_upvoted %}bg-danger text-white{% else %}bg-light text-dark{% endif %}"
+                      {% if proposal.has_upvoted %}data-testid="browse-upvoted"{% endif %}
+                      title="{% if proposal.has_upvoted %}Click to remove your upvote{% else %}Click to upvote this problem{% endif %}">
+                🩷 × {{ proposal.upvote_count }}
+              </button>
+            </form>
+          {% endif %}
+        </span>
+      </div>
+      {% if proposal.locked %}
+        <div class="card-body oime-locked text-center" data-testid="browse-locked">
+          <a href="{% url "oime-start-fight" proposal.pk %}"
+             class="btn btn-outline-primary btn-sm">🔒 Start problem</a>
+        </div>
+      {% else %}
+        <div class="card-body">
+          <div class="math-content">{{ proposal.statement }}</div>
+        </div>
+        <div class="card-footer text-muted fst-italic">
+          {% if proposal.user_fight.is_complete %}
+            {% include "tubes/components/fight_verdict.html" with fight=proposal.user_fight %}
+          {% elif proposal.user_list_status == "author" %}
+            You are the author of this problem!
+          {% elif proposal.user_list_status == "revealed" %}
+            You are spoiled on this problem.
+          {% else %}
+            You haven't read the solution to this problem yet.
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  {% empty %}
+    <p class="fw-bold">No results found.</p>
+  {% endfor %}
+  {% if page_obj.has_other_pages %}
+    {% bootstrap_pagination page_obj justify_content="center" extra=browse_params %}
+  {% endif %}
+{% endblock layout-content %}

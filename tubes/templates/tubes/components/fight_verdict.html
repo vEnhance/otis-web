@@ -1,0 +1,17 @@
+{% comment %}
+  How a finished fight ended, in the few characters a status column has room for.
+  Shared by the listing tables and the per-subject browser so a problem reads the
+  same way wherever the contributor meets it again. Renders nothing if `fight` is
+  unset or still in progress.
+{% endcomment %}
+{% if fight.status == "OIME_OK" %}
+  <span class="text-success" data-testid="verdict-solved">✔{{ fight.time_display }}
+    {% if fight.wrong_answers %}(✖{{ fight.wrong_answers }}){% endif %}
+  </span>
+{% elif fight.status == "OIME_FAIL" %}
+  <span class="text-danger" data-testid="verdict-gave-up">Gave up</span>
+{% elif fight.status == "OIME_TLE" %}
+  <span class="text-danger" data-testid="verdict-tle">TLE</span>
+{% elif fight.status == "OIME_ALE" %}
+  <span class="text-danger" data-testid="verdict-ale">✖{{ fight.wrong_answers }}</span>
+{% endif %}

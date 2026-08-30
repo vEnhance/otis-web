@@ -143,10 +143,10 @@ class OIMEContributor(models.Model):
 
 class OIMEProposal(models.Model):
     SUBJECT_CHOICES = (
-        ("A", "Algebra"),
-        ("C", "Combinatorics"),
-        ("G", "Geometry"),
-        ("N", "Number Theory"),
+        ("A", "Alg"),
+        ("C", "Combo"),
+        ("G", "Geo"),
+        ("N", "NT"),
     )
     DIFFICULTY_CHOICES = (
         (1, "🔥 × 1 (AIME 1-3): 10 minutes"),
