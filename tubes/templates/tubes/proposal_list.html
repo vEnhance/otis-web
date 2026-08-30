@@ -6,26 +6,11 @@
   <div class="mb-3 d-flex flex-wrap align-items-center gap-2">
     <a href="{% url "oime-landing" %}" class="btn btn-sm btn-info">Home</a>
     {% include "tubes/components/subject_nav.html" %}
-    <a href="{% url "oime-proposal-create" %}"
-       class="btn btn-sm btn-success">Write a problem</a>
-    {% include "tubes/components/mode_toggle.html" %}
   </div>
-  {% if contributor %}
-    {% if casual %}
-      <p class="text-muted">
-        You're in <strong>casual mode</strong>.
-        Nothing you do is recorded or timed, so browse as you like.
-      </p>
-    {% else %}
-      <p class="text-muted">
-        You're testsolving in <strong>ranked mode</strong>.
-        Please try problems seriously!
-        We'll use your times and answers for statistics
-        when deciding how to choose the problems.
-      </p>
-    {% endif %}
-  {% endif %}
+  {% include "tubes/components/mode_toggle.html" %}
   {% include "tubes/components/proposal_table.html" with title="Your proposals" proposals=own_proposals %}
+  <a href="{% url "oime-proposal-create" %}"
+     class="btn btn-sm btn-success">Write a problem</a>
   {% if casual %}
     {% include "tubes/components/proposal_table.html" with title="Other problems" proposals=browse_proposals %}
   {% else %}

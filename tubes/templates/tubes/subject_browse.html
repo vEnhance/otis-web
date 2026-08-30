@@ -5,18 +5,15 @@
 {% endblock title %}
 {% block layout-content %}
   <div class="mb-3 d-flex flex-wrap align-items-center gap-2">
+    <a href="{% url "oime-landing" %}" class="btn btn-sm btn-info">Home</a>
     {% include "tubes/components/subject_nav.html" %}
     {% include "tubes/components/browse_controls.html" %}
     <span class="ms-auto d-flex flex-wrap gap-2">
-      {% include "tubes/components/mode_toggle.html" %}
-      <a href="{% url "oime-landing" %}" class="btn btn-sm btn-info">Home</a>
-      <a href="{% url "oime-proposal-list" %}"
-         class="btn btn-sm btn-outline-secondary">All problems</a>
+      <a href="{% url "oime-proposal-list" %}" class="btn btn-sm btn-dark">All problems</a>
     </span>
   </div>
-  <p>
-    Showing {% if lock == "locked" %}locked{% elif lock == "unlocked" %}unlocked{% endif %} {% if difficulty %}🔥 × {{ difficulty }}{% elif not lock %}all{% endif %} {{ subject_name }} problems{% if sort_by_votes %}, most upvoted first{% endif %}.
-  </p>
+  {% include "tubes/components/mode_toggle.html" %}
+  <br />
   {% for proposal in page_obj %}
     <div class="card mb-4 {% if proposal.spoiled %}border-secondary{% else %}border-primary{% endif %}">
       <div class="card-header d-flex justify-content-between align-items-center gap-2">
@@ -72,7 +69,7 @@
       {% endif %}
     </div>
   {% empty %}
-    <p class="fw-bold">There are no {{ subject_name }} problems yet.</p>
+    <p class="fw-bold">No results found.</p>
   {% endfor %}
   {% if page_obj.has_other_pages %}
     {% bootstrap_pagination page_obj justify_content="center" extra=browse_params %}

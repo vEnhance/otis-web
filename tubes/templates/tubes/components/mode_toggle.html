@@ -5,9 +5,23 @@
 {% endcomment %}
 {% if contributor %}
   {% if contributor.casual_mode %}
-    <a href="{% url "oime-serious" %}"
-       class="btn btn-sm btn-outline-warning">Return to ranked mode</a>
+    <p>
+      You're currently in <b>casual mode</b>.
+      Nothing you do is recorded or timed.
+    </p>
+    <p>
+      <a href="{% url "oime-serious" %}"
+         class="btn btn-sm btn-outline-warning">Return to ranked mode</a>
+    </p>
   {% else %}
-    <a href="{% url "oime-casual" %}" class="btn btn-sm btn-outline-warning">Switch to casual mode</a>
+    <p>
+      You're testsolving in <b>ranked mode</b>.
+      Please try problems seriously!
+      We'll use your times and answers for statistics
+      when deciding how to choose the problems.
+    </p>
+    <p>
+      <a href="{% url "oime-casual" %}" class="btn btn-sm btn-outline-warning">Switch to casual mode</a>
+    </p>
   {% endif %}
 {% endif %}

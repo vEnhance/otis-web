@@ -15,17 +15,22 @@
     Welcome to the <strong>OTIS Mock AIME <s>Kitchen</s> Lab</strong>!
   </p>
   {% if contributor %}
-    {% include "tubes/components/proposal_table.html" with title="Newest problems" proposals=recent_proposals %}
+    {% include "tubes/components/mode_toggle.html" %}
+    <hr />
+    <h1>Problems</h1>
+    <p>
+      {% for code, name in subject_choices %}
+        <a href="{% url "oime-subject-browse" code %}"
+           title="{{ name }}"
+           class="btn btn-outline-primary">{{ name }}</a>
+      {% endfor %}
+      <a href="{% url "oime-proposal-list" %}" class="btn btn-dark">All problems</a>
+    </p>
+    {% include "tubes/components/proposal_table.html" with title="Recent problems" proposals=recent_proposals %}
+    {% include "tubes/components/proposal_table.html" with title="Your proposals" proposals=own_proposals %}
     <div class="mb-4">
-      {% include "tubes/components/subject_nav.html" %}
-      <a href="{% url "oime-proposal-list" %}" class="btn btn-sm btn-primary">All problems</a>
-    </div>
-    {% include "tubes/components/proposal_table.html" with title="Your problems" proposals=own_proposals %}
-    <div class="mb-4">
-      <a href="{% url "oime-proposal-create" %}"
-         class="btn btn-sm btn-success">Write a problem</a>
-      <a href="{% url "oime-setup" %}"
-         class="btn btn-sm btn-outline-secondary">Change name</a>
+      <a href="{% url "oime-proposal-create" %}" class="btn btn-success">Write a problem</a>
+      <a href="{% url "oime-setup" %}" class="btn btn-outline-secondary">Change name</a>
     </div>
   {% else %}
     <div class="mb-4">
