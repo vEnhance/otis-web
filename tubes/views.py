@@ -9,8 +9,9 @@ from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Count
 from django.db.models.query import QuerySet
-from django.http import Http404, HttpRequest, HttpResponse
+from django.http import Http404, HttpRequest, HttpResponse, QueryDict
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import urlencode
 from django.views.generic import CreateView, ListView, TemplateView, UpdateView
@@ -389,18 +390,44 @@ def _parse_difficulty(raw: str | None) -> int | None:
     return difficulty if difficulty in CASUAL_BROWSE_DIFFICULTIES else None
 
 
-def _browse_params(sort_by_votes: bool, difficulty: int | None) -> str:
+def _browse_params(sort_by_votes: bool, difficulty: int | None, page: int = 1) -> str:
     """The query string (no leading "?") holding the casual browser's settings.
 
-    The page number is deliberately left out: any change of sort or filter reshuffles
-    the list, so whatever page the contributor was on no longer means anything.
+    The page is left out by default: any change of sort or filter reshuffles the list,
+    so whatever page the contributor was on no longer means anything. It is only
+    passed when returning someone to the exact page they voted from.
     """
     params: dict[str, str] = {}
     if sort_by_votes:
         params["sort"] = "votes"
     if difficulty is not None:
         params["difficulty"] = str(difficulty)
+    if page > 1:
+        params["page"] = str(page)
     return urlencode(params)
+
+
+def _upvote_return_url(request: HttpRequest) -> str | None:
+    """Where a vote cast from the casual browser should land, or None if not from it.
+
+    Voting from the browser should leave the reader where they were rather than
+    bouncing them to the problem page. The target is rebuilt from the posted values
+    instead of being echoed back, so a forged form can only ever point at a subject
+    page of this browser.
+    """
+    subject = request.POST.get("back_subject", "")
+    if subject not in SUBJECT_NAMES:
+        return None
+    query = QueryDict(request.POST.get("back_params", ""))
+    try:
+        page = int(query.get("page", ""))
+    except ValueError:
+        page = 1
+    params = _browse_params(
+        query.get("sort") == "votes", _parse_difficulty(query.get("difficulty")), page
+    )
+    url = reverse("oime-casual-browse", args=[subject])
+    return f"{url}?{params}" if params else url
 
 
 def _difficulty_options(
@@ -503,6 +530,15 @@ def casual_browse(request: HttpRequest, subject: str) -> HttpResponse:
             proposal.browse_status = "new"  # type: ignore[attr-defined]
         proposal.spoiled = proposal.browse_status != "new"  # type: ignore[attr-defined]
         proposal.has_upvoted = proposal.pk in upvoted_ids  # type: ignore[attr-defined]
+        # Everything listed here is unarchived and browsed casually, so voting is
+        # open except on a problem whose ranked fight is still running: that path
+        # withholds the solution, and the vote with it, until the fight is closed.
+        proposal.can_upvote = (  # type: ignore[attr-defined]
+            proposal.author == contributor
+            or fight is None
+            or fight.is_complete
+            or proposal.pk in revealed_ids
+        )
         # Clicking a card's difficulty badge filters down to that difficulty, or
         # clears the filter when it is the one already being applied.
         proposal.difficulty_params = _browse_params(  # type: ignore[attr-defined]
@@ -525,6 +561,7 @@ def casual_browse(request: HttpRequest, subject: str) -> HttpResponse:
             "browse_params": _browse_params(sort_by_votes, difficulty),
             "sort_toggle_params": _browse_params(not sort_by_votes, difficulty),
             "difficulty_options": _difficulty_options(sort_by_votes, difficulty),
+            "back_params": _browse_params(sort_by_votes, difficulty, page_obj.number),
         },
     )
 
@@ -1025,7 +1062,9 @@ def upvote_proposal(request: HttpRequest, pk: int) -> HttpResponse:
     else:
         proposal.upvotes.add(contributor)
 
-    return redirect("oime-proposal-detail", pk)
+    return redirect(
+        _upvote_return_url(request) or reverse("oime-proposal-detail", args=[pk])
+    )
 
 
 @verified_required

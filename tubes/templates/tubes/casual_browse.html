@@ -24,9 +24,20 @@
              data-testid="browse-difficulty-badge"
              title="{% if difficulty %}Clear the difficulty filter{% else %}Show only 🔥 × {{ proposal.difficulty }} problems{% endif %}"
              href="{% url "oime-casual-browse" subject %}{% if proposal.difficulty_params %}?{{ proposal.difficulty_params }}{% endif %}">{{ proposal.difficulty_display }}</a>
-          <span class="badge border {% if proposal.has_upvoted %}bg-danger text-white{% else %}bg-light text-dark{% endif %}"
-                {% if proposal.has_upvoted %}data-testid="browse-upvoted"{% endif %}
-                title="{% if proposal.has_upvoted %}You upvoted this problem{% else %}You have not upvoted this problem{% endif %}">🩷 × {{ proposal.upvote_count }}</span>
+          <form method="post"
+                action="{% url "oime-upvote" proposal.pk %}"
+                class="d-inline">
+            {% csrf_token %}
+            <input type="hidden" name="back_subject" value="{{ subject }}" />
+            <input type="hidden" name="back_params" value="{{ back_params }}" />
+            <button type="submit"
+                    class="badge border oime-upvote-btn {% if proposal.has_upvoted %}bg-danger text-white{% else %}bg-light text-dark{% endif %}"
+                    {% if proposal.has_upvoted %}data-testid="browse-upvoted"{% endif %}
+                    {% if not proposal.can_upvote %}disabled{% endif %}
+                    title="{% if not proposal.can_upvote %}Finish your attempt before voting on this problem{% elif proposal.has_upvoted %}Click to remove your upvote{% else %}Click to upvote this problem{% endif %}">
+              🩷 × {{ proposal.upvote_count }}
+            </button>
+          </form>
         </span>
       </div>
       <div class="card-body">

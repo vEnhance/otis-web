@@ -1092,6 +1092,30 @@ def test_casual_browse_difficulty_badges_toggle_the_filter(otis):
 
 
 @pytest.mark.django_db
+def test_casual_browse_blocks_voting_during_a_ranked_fight(otis):
+    user, contributor = _verified_contributor()
+    contributor.casual_mode = True
+    contributor.save()
+    # A fight still running keeps the solution hidden, and the vote with it.
+    running = OIMEProposalFactory.create(subject="C")
+    OIMEFightFactory.create(
+        contributor=contributor, proposal=running, status="OIME_TBD"
+    )
+    finished = OIMEProposalFactory.create(subject="C")
+    OIMEFightFactory.create(
+        contributor=contributor, proposal=finished, status="OIME_OK"
+    )
+    untouched = OIMEProposalFactory.create(subject="C")
+    otis.login(user)
+    resp = otis.get_20x("oime-casual-browse", "C")
+    assert {p.pk: p.can_upvote for p in resp.context["page_obj"]} == {
+        running.pk: False,
+        finished.pk: True,
+        untouched.pk: True,
+    }
+
+
+@pytest.mark.django_db
 def test_casual_browse_marks_upvoted_problems(otis):
     user, contributor = _verified_contributor()
     contributor.casual_mode = True
@@ -1370,6 +1394,65 @@ def test_upvote_toggles_off(otis):
     otis.login(user)
     otis.post("oime-upvote", proposal.pk)
     assert not proposal.upvotes.filter(pk=contributor.pk).exists()
+
+
+@pytest.mark.django_db
+def test_upvote_from_casual_browse_returns_to_the_same_page(otis):
+    user, contributor = _verified_contributor()
+    contributor.casual_mode = True
+    contributor.save()
+    proposal = OIMEProposalFactory.create(subject="A", difficulty=3)
+    otis.login(user)
+    resp = otis.post(
+        "oime-upvote",
+        proposal.pk,
+        data={
+            "back_subject": "A",
+            "back_params": "sort=votes&difficulty=3&page=2",
+        },
+    )
+    otis.assert_30x(resp)
+    assert resp.url == "/tubes/casual/A/?sort=votes&difficulty=3&page=2"
+    assert proposal.upvotes.filter(pk=contributor.pk).exists()
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "data",
+    [
+        # No return target at all: an ordinary vote from the problem's own page.
+        {},
+        # A forged target cannot send the voter anywhere but this browser.
+        {"back_subject": "https://evil.example.com"},
+        {"back_subject": "Z"},
+    ],
+)
+def test_upvote_falls_back_to_the_detail_page(otis, data: dict[str, str]):
+    user, contributor = _verified_contributor()
+    contributor.casual_mode = True
+    contributor.save()
+    proposal = OIMEProposalFactory.create()
+    otis.login(user)
+    resp = otis.post("oime-upvote", proposal.pk, data=data)
+    otis.assert_30x(resp)
+    assert resp.url == f"/tubes/proposal/{proposal.pk}/"
+    assert proposal.upvotes.filter(pk=contributor.pk).exists()
+
+
+@pytest.mark.django_db
+def test_upvote_return_ignores_bogus_browse_params(otis):
+    user, contributor = _verified_contributor()
+    contributor.casual_mode = True
+    contributor.save()
+    proposal = OIMEProposalFactory.create(subject="G")
+    otis.login(user)
+    resp = otis.post(
+        "oime-upvote",
+        proposal.pk,
+        data={"back_subject": "G", "back_params": "difficulty=9&page=banana&sort=x"},
+    )
+    otis.assert_30x(resp)
+    assert resp.url == "/tubes/casual/G/"
 
 
 @pytest.mark.django_db
