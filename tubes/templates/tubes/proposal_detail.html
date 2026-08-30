@@ -75,7 +75,7 @@
   <hr />
   {# ---- Casual mode: self-check or reveal the solution on demand ---- #}
   {% if not can_see_solution %}
-    <h3>Solution</h3>
+    <h2>Solution</h2>
     <form method="post" action="{% url "oime-reveal" proposal.pk %}">
       {% csrf_token %}
       <button type="submit" class="btn btn-primary btn-sm">Reveal solution</button>
@@ -102,66 +102,64 @@
   {# ---- Answer + solution ---- #}
   {% if can_see_solution %}
     <h2 id="oime-answer-section">Answer: {{ proposal.answer }}</h2>
-    {% comment %}
-      The disclosure element is a flex item, so it sits beside the download button
-      while closed and takes a line of its own once the solution unfolds. Using it
-      keeps the preview a toggle without any JavaScript.
-    {% endcomment %}
-    <div class="d-flex flex-wrap align-items-start gap-2 mb-4">
+    <p class="mb-2">
       <a href="{% url "oime-proposal-solution-tex" proposal.pk %}"
          class="btn btn-primary"
          target="_blank"
          rel="noopener"
          data-testid="solution-tex-link">Download solution (TeX)</a>
-      <details data-testid="solution-preview">
-        <summary class="btn btn-secondary">Preview with MathJax</summary>
-        <p class="small text-muted mt-3 mb-2">
-          MathJax ≠ LaTeX, so this convenience preview only supports some basic features.
-        </p>
-        <div class="math-content">{{ proposal.solution }}</div>
-      </details>
-    </div>
+    </p>
+    {% comment %}
+      A plain disclosure element, so the toggle needs no JavaScript. It sits on a
+      line of its own rather than beside the download button, so that unfolding
+      the preview never moves the button that unfolds it.
+    {% endcomment %}
+    <details class="oime-solution-preview mb-4" data-testid="solution-preview">
+      <summary class="btn btn-secondary">Preview with MathJax</summary>
+      <p class="small text-muted mt-3 mb-2">
+        MathJax ≠ LaTeX, so this convenience preview only supports some basic features.
+      </p>
+      <div class="math-content">{{ proposal.solution }}</div>
+    </details>
   {% endif %}
   {# ---- Discussion (only once the solution is visible) ---- #}
   {% if can_see_solution %}
     <h2>Discussion</h2>
     {% if comments %}
       {% for comment in comments %}
-        <div class="card mb-2">
-          <div class="card-body">
-            <p class="card-text">{{ comment.content|linebreaks }}</p>
-            <small class="text-muted">
-              {{ comment.author }}
-              {% if comment.author_id == proposal.author_id %}
-                <span class="badge bg-secondary" title="This commenter wrote the problem">Author</span>
+        {% comment %}
+          Plain prose, not a card: the byline hangs off the bottom of the comment
+          it belongs to, and the gap to the next comment is the wider one.
+        {% endcomment %}
+        <div class="mb-4">
+          {{ comment.content|linebreaks }}
+          <p class="small text-muted mb-0">
+            {{ comment.author }}
+            {% if comment.author_id == proposal.author_id %}
+              <span class="badge bg-secondary" title="This commenter wrote the problem">Author</span>
+            {% endif %}
+            · {{ comment.created_at|date:"Y-m-d H:i" }}
+            {% if comment.is_edited %}
+              <span data-testid="comment-edited">(edited {{ comment.updated_at|date:"Y-m-d H:i" }})</span>
+            {% endif %}
+            {% if not proposal.archived %}
+              {% if comment.author == contributor or request.user.is_staff %}
+                · <a href="{% url "oime-comment-edit" comment.pk %}">Edit</a>
               {% endif %}
-              · {{ comment.created_at|date:"Y-m-d H:i" }}
-              {% if comment.is_edited %}
-                <span data-testid="comment-edited">(edited {{ comment.updated_at|date:"Y-m-d H:i" }})</span>
-              {% endif %}
-              {% if not proposal.archived %}
-                {% if comment.author == contributor or request.user.is_staff %}
-                  · <a href="{% url "oime-comment-edit" comment.pk %}">Edit</a>
-                {% endif %}
-              {% endif %}
-            </small>
-          </div>
+            {% endif %}
+          </p>
         </div>
       {% endfor %}
     {% else %}
       <p class="text-muted">No comments yet.</p>
     {% endif %}
     {% if can_comment %}
-      <div class="card mt-3" data-testid="comment-form">
-        <div class="card-header">Add a comment</div>
-        <div class="card-body">
-          <form method="post">
-            {% csrf_token %}
-            {{ comment_form.content }}
-            <button type="submit" name="submit_comment" class="btn btn-primary mt-2">Post Comment</button>
-          </form>
-        </div>
-      </div>
+      <h3>Add a comment</h3>
+      <form method="post" data-testid="comment-form">
+        {% csrf_token %}
+        {{ comment_form.content }}
+        <button type="submit" name="submit_comment" class="btn btn-primary mt-2">Post Comment</button>
+      </form>
     {% endif %}
   {% endif %}
 {% endblock layout-content %}

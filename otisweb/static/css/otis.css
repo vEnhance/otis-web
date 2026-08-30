@@ -421,6 +421,15 @@ img.emoji {
   );
 }
 
+/* OIME solution preview. Its summary is styled as a button, so drop the
+   disclosure triangle a browser would otherwise draw beside the label. */
+.oime-solution-preview > summary {
+  list-style: none;
+}
+.oime-solution-preview > summary::-webkit-details-marker {
+  display: none;
+}
+
 /* OIME proposal table collapse toggle */
 .oime-table-toggle::before {
   content: "▾ ";
