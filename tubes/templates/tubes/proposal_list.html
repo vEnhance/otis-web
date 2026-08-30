@@ -1,16 +1,19 @@
 {% extends "layout.html" %}
 {% block title %}
-  OIME Proposals
+  All Problems
 {% endblock title %}
 {% block layout-content %}
-  <div class="mb-3">
-    <a href="{% url "oime-landing" %}" class="btn btn-info">Instructions</a>
-    <a href="{% url "oime-proposal-create" %}" class="btn btn-success">Write a problem</a>
+  <div class="mb-3 d-flex flex-wrap align-items-center gap-2">
+    <a href="{% url "oime-landing" %}" class="btn btn-sm btn-info">Home</a>
+    {% include "tubes/components/subject_nav.html" %}
+    <a href="{% url "oime-proposal-create" %}"
+       class="btn btn-sm btn-success">Write a problem</a>
     {% if contributor %}
       {% if casual %}
-        <a href="{% url "oime-serious" %}" class="btn btn-outline-warning">Return to ranked mode</a>
+        <a href="{% url "oime-serious" %}"
+           class="btn btn-sm btn-outline-warning">Return to ranked mode</a>
       {% else %}
-        <a href="{% url "oime-casual" %}" class="btn btn-outline-warning">Switch to casual mode</a>
+        <a href="{% url "oime-casual" %}" class="btn btn-sm btn-outline-warning">Switch to casual mode</a>
       {% endif %}
     {% endif %}
   </div>
@@ -19,10 +22,6 @@
       <p class="text-muted">
         You're in <strong>casual mode</strong>.
         Nothing you do is recorded or timed, so browse as you like.
-      </p>
-      <p class="text-muted">
-        Subject view:
-        {% include "tubes/components/casual_subject_nav.html" %}
       </p>
     {% else %}
       <p class="text-muted">

@@ -1,4 +1,0 @@
-{% for code, name in subject_choices %}
-  <a href="{% url "oime-casual-browse" code %}{% if browse_params %}?{{ browse_params }}{% endif %}"
-     class="btn btn-sm {% if code == subject %}btn-primary{% else %}btn-outline-primary{% endif %}">{{ code }}</a>
-{% endfor %}

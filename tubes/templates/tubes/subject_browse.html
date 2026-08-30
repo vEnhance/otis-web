@@ -1,0 +1,85 @@
+{% extends "layout.html" %}
+{% load django_bootstrap5 %}
+{% block title %}
+  {{ subject_name }} Problems
+{% endblock title %}
+{% block layout-content %}
+  <div class="mb-3 d-flex flex-wrap align-items-center gap-2">
+    {% include "tubes/components/subject_nav.html" %}
+    {% include "tubes/components/browse_controls.html" %}
+    <span class="ms-auto d-flex flex-wrap gap-2">
+      <a href="{% url "oime-landing" %}" class="btn btn-sm btn-info">Home</a>
+      <a href="{% url "oime-proposal-list" %}"
+         class="btn btn-sm btn-outline-secondary">All problems</a>
+    </span>
+  </div>
+  <p>
+    Showing {% if lock == "locked" %}locked{% elif lock == "unlocked" %}unlocked{% endif %} {% if difficulty %}🔥 × {{ difficulty }}{% elif not lock %}all{% endif %} {{ subject_name }} problems{% if sort_by_votes %}, most upvoted first{% endif %}.
+    {% if lock_options %}
+      Problems you haven't opened yet stay locked; start one to read it.
+    {% endif %}
+  </p>
+  {% for proposal in page_obj %}
+    <div class="card mb-4 {% if proposal.spoiled %}border-secondary{% else %}border-primary{% endif %}">
+      <div class="card-header d-flex justify-content-between align-items-center gap-2">
+        <span class="fw-bold">
+          <a href="{{ proposal.get_absolute_url }}">{{ proposal.label }}: {{ proposal.title|truncatechars:"32" }}</a>
+        </span>
+        <span class="d-flex align-items-center gap-1 text-nowrap">
+          <a class="badge border text-decoration-none {% if difficulty %}bg-primary text-white{% else %}bg-light text-dark{% endif %}"
+             data-testid="browse-difficulty-badge"
+             title="{% if difficulty %}Clear the difficulty filter{% else %}Show only 🔥 × {{ proposal.difficulty }} problems{% endif %}"
+             href="{% url "oime-subject-browse" subject %}{% if proposal.difficulty_params %}?{{ proposal.difficulty_params }}{% endif %}">{{ proposal.difficulty_display }}</a>
+          {% if proposal.locked %}
+            {# Nothing to have an opinion about yet, and this is where a misclick would be easy. #}
+            <span class="badge border bg-light text-muted"
+                  title="Start this problem before voting on it">🩷 × {{ proposal.upvote_count }}</span>
+          {% else %}
+            <form method="post"
+                  action="{% url "oime-upvote" proposal.pk %}"
+                  class="d-inline">
+              {% csrf_token %}
+              <input type="hidden" name="back_subject" value="{{ subject }}" />
+              <input type="hidden" name="back_params" value="{{ back_params }}" />
+              <button type="submit"
+                      class="badge border oime-upvote-btn {% if proposal.has_upvoted %}bg-danger text-white{% else %}bg-light text-dark{% endif %}"
+                      {% if proposal.has_upvoted %}data-testid="browse-upvoted"{% endif %}
+                      title="{% if proposal.has_upvoted %}Click to remove your upvote{% else %}Click to upvote this problem{% endif %}">
+                🩷 × {{ proposal.upvote_count }}
+              </button>
+            </form>
+          {% endif %}
+        </span>
+      </div>
+      {% if proposal.locked %}
+        <div class="card-body oime-locked text-center" data-testid="browse-locked">
+          <p class="fst-italic text-muted mb-2">🔒 Locked — you haven't opened this problem yet.</p>
+          <a href="{% url "oime-start-fight" proposal.pk %}"
+             class="btn btn-primary btn-sm">Start problem</a>
+        </div>
+      {% else %}
+        <div class="card-body">
+          <div class="math-content">{{ proposal.statement }}</div>
+        </div>
+        <div class="card-footer text-muted fst-italic">
+          {% if proposal.user_fight.is_complete %}
+            {% include "tubes/components/fight_verdict.html" with fight=proposal.user_fight %}
+          {% elif proposal.user_list_status == "author" %}
+            You are the author of this problem!
+          {% elif proposal.user_list_status == "in_progress" %}
+            Your timed session on this problem is still open.
+          {% elif proposal.user_list_status == "revealed" %}
+            You are spoiled on this problem.
+          {% else %}
+            You haven't read the solution to this problem yet.
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  {% empty %}
+    <p class="fw-bold">There are no {{ subject_name }} problems to show here.</p>
+  {% endfor %}
+  {% if page_obj.has_other_pages %}
+    {% bootstrap_pagination page_obj justify_content="center" extra=browse_params %}
+  {% endif %}
+{% endblock layout-content %}

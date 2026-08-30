@@ -36,9 +36,9 @@ urlpatterns = [
     path(r"setup/", views.oime_setup, name="oime-setup"),
     path(r"casual/", views.go_casual, name="oime-casual"),
     path(
-        r"casual/<str:subject>/",
-        views.casual_browse,
-        name="oime-casual-browse",
+        r"browse/<str:subject>/",
+        views.subject_browse,
+        name="oime-subject-browse",
     ),
     path(r"serious/", views.go_serious, name="oime-serious"),
     path(r"", views.LandingView.as_view(), name="oime-landing"),

@@ -1,4 +1,5 @@
 import statistics
+from collections.abc import Sequence
 from datetime import timedelta
 from typing import Any
 
@@ -7,7 +8,7 @@ from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.db.models.query import QuerySet
 from django.http import Http404, HttpRequest, HttpResponse, QueryDict
 from django.shortcuts import get_object_or_404, redirect, render
@@ -31,11 +32,15 @@ SUBJECT_NAMES = dict(OIMEProposal.SUBJECT_CHOICES)
 
 GIVE_UP_RATE_LIMIT = 2  # max give-ups allowed within the window
 GIVE_UP_WINDOW_MINUTES = 10
-CASUAL_BROWSE_PAGE_SIZE = 20
-CASUAL_BROWSE_DIFFICULTIES = [d for d, _ in OIMEProposal.DIFFICULTY_CHOICES]
+BROWSE_PAGE_SIZE = 20
+BROWSE_DIFFICULTIES = [d for d, _ in OIMEProposal.DIFFICULTY_CHOICES]
+BROWSE_LOCK_CHOICES = ("locked", "unlocked")
+LANDING_RECENT_COUNT = 5
 
 
 def _get_contributor(request: HttpRequest) -> OIMEContributor | None:
+    if not request.user.is_authenticated:  # type: ignore[union-attr]
+        return None
     try:
         return request.user.oime_contributor  # type: ignore[union-attr]
     except OIMEContributor.DoesNotExist:
@@ -176,6 +181,94 @@ def _is_casual_for(contributor: OIMEContributor, proposal: OIMEProposal) -> bool
         contributor.ranked_cutoff is not None
         and proposal.created_at <= contributor.ranked_cutoff
     )
+
+
+def _annotate_user_status(
+    proposals: Sequence[OIMEProposal], contributor: OIMEContributor
+) -> None:
+    """Tag each proposal with where ``contributor`` stands on it.
+
+    Every listing — the landing tables, the all-problems tables and the per-subject
+    browser — answers the same question in its status column, so they all come
+    through here. Each proposal gains ``user_fight`` (their fight on it, if any),
+    ``has_upvoted``, and ``user_list_status``, one of:
+
+    ``author``
+        They wrote it, so it is theirs to publish or keep as a draft.
+    ``completed``
+        They have a finished fight on it, in either mode: the verdict is the status.
+    ``in_progress``
+        Their timed session on it is still running.
+    ``revealed``
+        They took the escape hatch and read the solution without fighting it.
+    ``casual``
+        Casual for them (see :func:`_is_casual_for`) and not yet opened, so the
+        statement is theirs to read whenever they like.
+    ``not_started``
+        Ranked and never opened. This is the locked state: the statement has to
+        stay hidden, because the point of ranked mode is meeting it under the clock.
+
+    Only the proposals handed in are queried, so a page of twenty costs the same
+    three queries however long the full list grows.
+    """
+    pks = [p.pk for p in proposals]
+    fights: dict[int, OIMEFight] = {
+        f.proposal_id: f  # type: ignore[attr-defined]
+        for f in OIMEFight.objects.filter(contributor=contributor, proposal__in=pks)
+    }
+    revealed_ids = set(
+        contributor.revealed_proposals.filter(pk__in=pks).values_list("pk", flat=True)
+    )
+    upvoted_ids = set(
+        OIMEProposal.objects.filter(pk__in=pks, upvotes=contributor).values_list(
+            "pk", flat=True
+        )
+    )
+    for proposal in proposals:
+        fight = fights.get(proposal.pk)
+        proposal.user_fight = fight  # type: ignore[attr-defined]
+        proposal.has_upvoted = proposal.pk in upvoted_ids  # type: ignore[attr-defined]
+        if proposal.author_id == contributor.pk:  # type: ignore[attr-defined]
+            status = "author"
+        elif fight is not None and fight.is_complete:
+            status = "completed"
+        elif proposal.pk in revealed_ids:
+            status = "revealed"
+        elif fight is not None:
+            # A session that has started keeps them on the ranked path for this
+            # problem however the mode has changed underneath it, so this beats
+            # the casual check below.
+            status = "in_progress"
+        elif _is_casual_for(contributor, proposal):
+            status = "casual"
+        else:
+            status = "not_started"
+        proposal.user_list_status = status  # type: ignore[attr-defined]
+        proposal.locked = status == "not_started"  # type: ignore[attr-defined]
+        proposal.spoiled = status not in ("not_started", "casual")  # type: ignore[attr-defined]
+
+
+def _locked_q(contributor: OIMEContributor) -> Q:
+    """Match the problems ``contributor`` has never opened, so still under lock.
+
+    The database twin of the ``not_started`` status from
+    :func:`_annotate_user_status`, needed because the per-subject browser filters on
+    lockedness before paginating. A locked problem is one they could still start a
+    timed session on: not theirs, never fought, never revealed, and not already put
+    out of ranked reach by a spell in casual mode. Nothing is locked for a
+    contributor who is in casual mode right now.
+    """
+    if contributor.casual_mode:
+        return Q(pk__in=[])
+    opened = set(
+        OIMEFight.objects.filter(contributor=contributor).values_list(
+            "proposal_id", flat=True
+        )
+    ) | set(contributor.revealed_proposals.values_list("pk", flat=True))
+    q = ~Q(author=contributor) & ~Q(pk__in=opened)
+    if contributor.ranked_cutoff is not None:
+        q &= Q(created_at__gt=contributor.ranked_cutoff)
+    return q
 
 
 def _get_solver_context(
@@ -386,17 +479,31 @@ def _parse_difficulty(raw: str | None) -> int | None:
     Anything unrecognized is treated as no filter rather than an error: these
     parameters are set by clicking the browser's own buttons, so a bad value only
     ever comes from a hand-edited URL, and dropping it quietly is friendlier than a
-    404 on a page whose whole purpose is casual browsing.
+    404 on a page whose whole purpose is browsing.
     """
     try:
         difficulty = int(raw or "")
     except ValueError:
         return None
-    return difficulty if difficulty in CASUAL_BROWSE_DIFFICULTIES else None
+    return difficulty if difficulty in BROWSE_DIFFICULTIES else None
 
 
-def _browse_params(sort_by_votes: bool, difficulty: int | None, page: int = 1) -> str:
-    """The query string (no leading "?") holding the casual browser's settings.
+def _parse_lock(raw: str | None) -> str | None:
+    """The lock filter named by a query parameter, or None for "no filter".
+
+    Unrecognized values are dropped quietly, for the same reason as in
+    :func:`_parse_difficulty`.
+    """
+    return raw if raw in BROWSE_LOCK_CHOICES else None
+
+
+def _browse_params(
+    sort_by_votes: bool,
+    difficulty: int | None,
+    lock: str | None = None,
+    page: int = 1,
+) -> str:
+    """The query string (no leading "?") holding the subject browser's settings.
 
     The page is left out by default: any change of sort or filter reshuffles the list,
     so whatever page the contributor was on no longer means anything. It is only
@@ -407,13 +514,15 @@ def _browse_params(sort_by_votes: bool, difficulty: int | None, page: int = 1) -
         params["sort"] = "votes"
     if difficulty is not None:
         params["difficulty"] = str(difficulty)
+    if lock is not None:
+        params["lock"] = lock
     if page > 1:
         params["page"] = str(page)
     return urlencode(params)
 
 
 def _upvote_return_url(request: HttpRequest) -> str | None:
-    """Where a vote cast from the casual browser should land, or None if not from it.
+    """Where a vote cast from the subject browser should land, or None if not from it.
 
     Voting from the browser should leave the reader where they were rather than
     bouncing them to the problem page. The target is rebuilt from the posted values
@@ -429,59 +538,87 @@ def _upvote_return_url(request: HttpRequest) -> str | None:
     except ValueError:
         page = 1
     params = _browse_params(
-        query.get("sort") == "votes", _parse_difficulty(query.get("difficulty")), page
+        query.get("sort") == "votes",
+        _parse_difficulty(query.get("difficulty")),
+        _parse_lock(query.get("lock")),
+        page,
     )
-    url = reverse("oime-casual-browse", args=[subject])
+    url = reverse("oime-subject-browse", args=[subject])
     return f"{url}?{params}" if params else url
 
 
 def _difficulty_options(
-    sort_by_votes: bool, difficulty: int | None
+    sort_by_votes: bool, difficulty: int | None, lock: str | None
 ) -> list[dict[str, Any]]:
     """The entries of the difficulty dropdown, "All" first and then 1 through 5.
 
     Each carries the query string that selects it, so the template only has to render
-    links; the current sort is preserved by every one of them.
+    links; the other controls' settings are preserved by every one of them.
     """
     return [
         {
             "value": value,
             "label": "All" if value is None else f"🔥 × {value}",
-            "params": _browse_params(sort_by_votes, value),
+            "params": _browse_params(sort_by_votes, value, lock),
             "selected": value == difficulty,
         }
-        for value in [None, *CASUAL_BROWSE_DIFFICULTIES]
+        for value in [None, *BROWSE_DIFFICULTIES]
+    ]
+
+
+def _lock_options(
+    sort_by_votes: bool, difficulty: int | None, lock: str | None
+) -> list[dict[str, Any]]:
+    """The entries of the padlock dropdown: everything, locked only, unlocked only.
+
+    Only ranked contributors are offered this, since nothing is ever locked in casual
+    mode; :func:`subject_browse` leaves it out of the context entirely for them.
+    """
+    labels = {
+        None: "All",
+        "locked": "🔒 Locked",
+        "unlocked": "🔓 Unlocked",
+    }
+    return [
+        {
+            "value": value,
+            "label": labels[value],
+            "params": _browse_params(sort_by_votes, difficulty, value),
+            "selected": value == lock,
+        }
+        for value in [None, *BROWSE_LOCK_CHOICES]
     ]
 
 
 @verified_required
-def casual_browse(request: HttpRequest, subject: str) -> HttpResponse:
-    """Every visible statement in one subject, newest first, in pages of 20.
+def subject_browse(request: HttpRequest, subject: str) -> HttpResponse:
+    """Every problem in one subject, newest first, in pages of 20.
 
-    Casual mode only. The point of ranked mode is that a statement is seen for the
-    first time under the clock, so bulk-reading statements would defeat it; in casual
-    mode nothing is timed or recorded, so browsing for a problem to try is the whole
-    idea. Every problem the contributor may see is listed, their own included; the
-    ones already spoiled for them are just marked as such.
+    Casual browsers get what they always got: the full statement of everything, since
+    nothing is timed or recorded for them and picking a problem to try is the whole
+    idea. Ranked contributors get the same page with the statements they have not
+    opened yet held back behind a lock, so the list is useful for scrolling back
+    through what they have already fought without ever spoiling what they have not.
+    A locked problem cannot be upvoted either; there is nothing to have an opinion
+    about yet, and the button sits where a misclick would be easy.
 
-    Two optional query parameters, both driven by controls on the page itself so that
+    Three optional query parameters, all driven by controls on the page itself so that
     they survive pagination: ``sort=votes`` orders by upvote count instead of by
-    recency, and ``difficulty=N`` keeps only problems of that difficulty.
+    recency, ``difficulty=N`` keeps only problems of that difficulty, and
+    ``lock=locked``/``lock=unlocked`` keeps only the problems on one side of the lock
+    (offered to ranked contributors only, since nothing is locked in casual mode).
     """
     if subject not in SUBJECT_NAMES:
         raise Http404("Not an OIME subject.")
     contributor = _get_contributor(request)
     if contributor is None:
         return redirect("oime-setup")
-    if not contributor.casual_mode:
-        messages.error(
-            request,
-            "Browsing problem statements in bulk is only available in casual mode.",
-        )
-        return redirect("oime-proposal-list")
 
     sort_by_votes = request.GET.get("sort") == "votes"
     difficulty = _parse_difficulty(request.GET.get("difficulty"))
+    # Nothing is locked in casual mode, so the filter would only ever be a way to ask
+    # for an empty page: drop it rather than offer it.
+    lock = None if contributor.casual_mode else _parse_lock(request.GET.get("lock"))
 
     proposals = (
         OIMEProposal.objects.filter(archived=False, is_draft=False, subject=subject)
@@ -490,62 +627,37 @@ def casual_browse(request: HttpRequest, subject: str) -> HttpResponse:
     )
     if difficulty is not None:
         proposals = proposals.filter(difficulty=difficulty)
+    if lock == "locked":
+        proposals = proposals.filter(_locked_q(contributor))
+    elif lock == "unlocked":
+        proposals = proposals.exclude(_locked_q(contributor))
     # Ties on upvote count fall back to recency, so the order is always total and
     # pagination cannot show the same problem twice.
     if sort_by_votes:
         proposals = proposals.order_by("-upvote_count", "-pk")
     else:
         proposals = proposals.order_by("-pk")
-    paginator = Paginator(proposals, CASUAL_BROWSE_PAGE_SIZE)
+    paginator = Paginator(proposals, BROWSE_PAGE_SIZE)
     page_obj = paginator.get_page(request.GET.get("page"))
 
-    # Flag the problems this contributor has already engaged with, so a page of
-    # statements shows at a glance which ones are still fresh. Only the current
-    # page is inspected, so this stays cheap however long the subject list grows.
+    # Work out where the reader stands on each problem on this page, which is what
+    # decides whether its statement is shown at all. Only the current page is
+    # inspected, so this stays cheap however long the subject list grows.
     page_proposals = list(page_obj.object_list)
-    fights: dict[int, OIMEFight] = {
-        f.proposal_id: f  # type: ignore[attr-defined]
-        for f in OIMEFight.objects.filter(
-            contributor=contributor, proposal__in=page_proposals
-        )
-    }
-    revealed_ids = set(
-        contributor.revealed_proposals.filter(
-            pk__in=[p.pk for p in page_proposals]
-        ).values_list("pk", flat=True)
-    )
-    # Which of these the contributor has already hearted, so the upvote badge can
-    # look the same here as it does on the problem's own page.
-    upvoted_ids = set(
-        OIMEProposal.objects.filter(
-            pk__in=[p.pk for p in page_proposals], upvotes=contributor
-        ).values_list("pk", flat=True)
-    )
+    _annotate_user_status(page_proposals, contributor)
     for proposal in page_proposals:
-        fight = fights.get(proposal.pk)
-        if proposal.author == contributor:
-            proposal.browse_status = "author"  # type: ignore[attr-defined]
-        elif fight is not None:
-            proposal.browse_status = (  # type: ignore[attr-defined]
-                "solved" if fight.is_success else "attempted"
-            )
-        elif proposal.pk in revealed_ids:
-            proposal.browse_status = "revealed"  # type: ignore[attr-defined]
-        else:
-            proposal.browse_status = "new"  # type: ignore[attr-defined]
-        proposal.spoiled = proposal.browse_status != "new"  # type: ignore[attr-defined]
-        proposal.has_upvoted = proposal.pk in upvoted_ids  # type: ignore[attr-defined]
         # Clicking a card's difficulty badge filters down to that difficulty, or
         # clears the filter when it is the one already being applied.
         proposal.difficulty_params = _browse_params(  # type: ignore[attr-defined]
             sort_by_votes,
             None if proposal.difficulty == difficulty else proposal.difficulty,
+            lock,
         )
     page_obj.object_list = page_proposals
 
     return render(
         request,
-        "tubes/casual_browse.html",
+        "tubes/subject_browse.html",
         {
             "page_obj": page_obj,
             "contributor": contributor,
@@ -554,10 +666,18 @@ def casual_browse(request: HttpRequest, subject: str) -> HttpResponse:
             "subject_choices": OIMEProposal.SUBJECT_CHOICES,
             "sort_by_votes": sort_by_votes,
             "difficulty": difficulty,
-            "browse_params": _browse_params(sort_by_votes, difficulty),
-            "sort_toggle_params": _browse_params(not sort_by_votes, difficulty),
-            "difficulty_options": _difficulty_options(sort_by_votes, difficulty),
-            "back_params": _browse_params(sort_by_votes, difficulty, page_obj.number),
+            "lock": lock,
+            "browse_params": _browse_params(sort_by_votes, difficulty, lock),
+            "sort_toggle_params": _browse_params(not sort_by_votes, difficulty, lock),
+            "difficulty_options": _difficulty_options(sort_by_votes, difficulty, lock),
+            "lock_options": (
+                None
+                if contributor.casual_mode
+                else _lock_options(sort_by_votes, difficulty, lock)
+            ),
+            "back_params": _browse_params(
+                sort_by_votes, difficulty, lock, page_obj.number
+            ),
         },
     )
 
@@ -605,48 +725,25 @@ class ProposalListView(ContributorRequiredMixin, ListView[OIMEProposal]):
         context["casual"] = contributor.casual_mode
         context["subject_choices"] = OIMEProposal.SUBJECT_CHOICES
 
-        user_fights: dict[int, OIMEFight] = {
-            f.proposal_id: f  # type: ignore[attr-defined]
-            for f in OIMEFight.objects.filter(contributor=contributor)
-        }
-        revealed_ids = set(contributor.revealed_proposals.values_list("pk", flat=True))
-        upvoted_ids = set(
-            OIMEProposal.objects.filter(upvotes=contributor).values_list(
-                "pk", flat=True
-            )
-        )
+        proposals = list(context["proposals"])
+        _annotate_user_status(proposals, contributor)
 
         own: list[OIMEProposal] = []
         browse: list[OIMEProposal] = []
         unsolved: list[OIMEProposal] = []
         completed: list[OIMEProposal] = []
-
-        for proposal in context["proposals"]:
-            fight = user_fights.get(proposal.pk)
-            proposal.user_fight = fight  # type: ignore[attr-defined]
-            proposal.has_upvoted = proposal.pk in upvoted_ids  # type: ignore[attr-defined]
-            if contributor == proposal.author:
-                proposal.user_list_status = "author"  # type: ignore[attr-defined]
-                own.append(proposal)
-            elif fight is not None and fight.is_complete:
-                # A finished fight is a real recorded result, in any mode.
-                proposal.user_list_status = "completed"  # type: ignore[attr-defined]
-                completed.append(proposal)
-            elif _is_casual_for(contributor, proposal):
-                proposal.user_list_status = (  # type: ignore[attr-defined]
-                    "revealed" if proposal.pk in revealed_ids else "casual"
-                )
-                browse.append(proposal)
-            elif proposal.pk in revealed_ids:
-                # Ranked, but spoiled via the escape hatch → no longer fightable.
-                proposal.user_list_status = "revealed"  # type: ignore[attr-defined]
-                browse.append(proposal)
-            elif fight is not None:
-                proposal.user_list_status = "in_progress"  # type: ignore[attr-defined]
-                unsolved.append(proposal)
-            else:
-                proposal.user_list_status = "not_started"  # type: ignore[attr-defined]
-                unsolved.append(proposal)
+        # One bucket per table on the page. "revealed" and "casual" both mean the
+        # problem is readable but no longer fightable, so they share a table.
+        buckets = {
+            "author": own,
+            "completed": completed,
+            "revealed": browse,
+            "casual": browse,
+            "in_progress": unsolved,
+            "not_started": unsolved,
+        }
+        for proposal in proposals:
+            buckets[proposal.user_list_status].append(proposal)  # type: ignore[attr-defined]
 
         context["own_proposals"] = own
         context["browse_proposals"] = browse
@@ -677,9 +774,10 @@ class ProposalDraftListView(ContributorRequiredMixin, ListView[OIMEProposal]):
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        context["contributor"] = _get_contributor(self.request)
-        for proposal in context["proposals"]:
-            proposal.user_list_status = "author"  # type: ignore[attr-defined]
+        contributor = _get_contributor(self.request)
+        context["contributor"] = contributor
+        if contributor is not None:
+            _annotate_user_status(list(context["proposals"]), contributor)
         return context
 
 
@@ -1146,6 +1244,16 @@ def edit_comment(request: HttpRequest, pk: int) -> HttpResponse:
 
 
 class LandingView(TemplateView):
+    """The front door: what is new, what you have written, and then the instructions.
+
+    The instructions stop being worth reading after the first visit, so the useful
+    things go above them: the newest handful of problems, a way into each subject,
+    and the state of your own proposals and drafts.
+
+    This page is public, and none of that means anything without a contributor
+    profile, so an anonymous or not-yet-onboarded visitor gets the instructions alone.
+    """
+
     template_name = "tubes/landing.html"
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
@@ -1153,4 +1261,29 @@ class LandingView(TemplateView):
         # The sidebar sends people here, so this is where someone who abandoned a
         # fight page most likely turns up: surface the open session (or retire it).
         context["active_fight"] = _resolve_active_fight(self.request)
+        context["subject_choices"] = OIMEProposal.SUBJECT_CHOICES
+
+        contributor = _get_contributor(self.request)
+        context["contributor"] = contributor
+        if contributor is None:
+            return context
+
+        recent = list(
+            OIMEProposal.objects.filter(archived=False, is_draft=False)
+            .select_related("author")
+            .annotate(upvote_count=Count("upvotes", distinct=True))
+            .order_by("-created_at")[:LANDING_RECENT_COUNT]
+        )
+        # Drafts belong here alongside the published ones: this is the one page that
+        # shows an author everything they have written, whatever state it is in.
+        own = list(
+            OIMEProposal.objects.filter(author=contributor, archived=False)
+            .select_related("author")
+            .annotate(upvote_count=Count("upvotes", distinct=True))
+            .order_by("-created_at")
+        )
+        _annotate_user_status(recent, contributor)
+        _annotate_user_status(own, contributor)
+        context["recent_proposals"] = recent
+        context["own_proposals"] = own
         return context
