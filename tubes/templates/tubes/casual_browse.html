@@ -33,8 +33,7 @@
             <button type="submit"
                     class="badge border oime-upvote-btn {% if proposal.has_upvoted %}bg-danger text-white{% else %}bg-light text-dark{% endif %}"
                     {% if proposal.has_upvoted %}data-testid="browse-upvoted"{% endif %}
-                    {% if not proposal.can_upvote %}disabled{% endif %}
-                    title="{% if not proposal.can_upvote %}Finish your attempt before voting on this problem{% elif proposal.has_upvoted %}Click to remove your upvote{% else %}Click to upvote this problem{% endif %}">
+                    title="{% if proposal.has_upvoted %}Click to remove your upvote{% else %}Click to upvote this problem{% endif %}">
               🩷 × {{ proposal.upvote_count }}
             </button>
           </form>

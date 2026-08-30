@@ -195,6 +195,11 @@ def _get_solver_context(
 
     The proposal's author always sees everything.
 
+    Upvoting is gated on having seen the *statement*, not the solution: a casual
+    browser may vote on anything they can read, and a ranked contributor from the
+    moment they start a fight rather than only once it is finished. Voting on a
+    problem you have never opened is the only thing being prevented.
+
     An archived problem is frozen on top of all that: staff pulled it out of
     circulation, so no one starts a session on it or upvotes it any more, however
     they came to still have read access to it.
@@ -253,7 +258,7 @@ def _get_solver_context(
         "fight": fight,
         "can_see_solution": can_see_solution,
         "can_start_fight": fight is None and not revealed and not frozen,
-        "can_upvote": can_see_solution and not frozen,
+        "can_upvote": (fight is not None or revealed) and not frozen,
     }
 
 
@@ -530,15 +535,6 @@ def casual_browse(request: HttpRequest, subject: str) -> HttpResponse:
             proposal.browse_status = "new"  # type: ignore[attr-defined]
         proposal.spoiled = proposal.browse_status != "new"  # type: ignore[attr-defined]
         proposal.has_upvoted = proposal.pk in upvoted_ids  # type: ignore[attr-defined]
-        # Everything listed here is unarchived and browsed casually, so voting is
-        # open except on a problem whose ranked fight is still running: that path
-        # withholds the solution, and the vote with it, until the fight is closed.
-        proposal.can_upvote = (  # type: ignore[attr-defined]
-            proposal.author == contributor
-            or fight is None
-            or fight.is_complete
-            or proposal.pk in revealed_ids
-        )
         # Clicking a card's difficulty badge filters down to that difficulty, or
         # clears the filter when it is the one already being applied.
         proposal.difficulty_params = _browse_params(  # type: ignore[attr-defined]
