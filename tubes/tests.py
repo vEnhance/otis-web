@@ -749,6 +749,67 @@ def test_ranked_escape_hatch_reveal(otis):
 
 
 @pytest.mark.django_db
+def test_solution_offered_as_tex_download_and_mathjax_preview(otis):
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create()
+    OIMEFightFactory.create(
+        contributor=contributor, proposal=proposal, status="OIME_OK"
+    )
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-detail", proposal.pk)
+    otis.assert_testid(resp, "solution-tex-link")
+    otis.assert_testid(resp, "solution-preview")
+    otis.assert_has(resp, otis.url("oime-proposal-solution-tex", proposal.pk))
+
+
+@pytest.mark.django_db
+def test_solution_tex_download(otis):
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create(
+        answer=42,
+        statement="Compute $1+1$.",
+        solution="Clearly $1+1=2$.",
+    )
+    OIMEFightFactory.create(
+        contributor=contributor, proposal=proposal, status="OIME_OK"
+    )
+    otis.login(user)
+    # The response body is the product here, so the bytes really are the contract.
+    resp = otis.get_20x("oime-proposal-solution-tex", proposal.pk)
+    assert resp.headers["Content-Disposition"] == (
+        f'attachment; filename="oime-{proposal.label}.tex"'
+    )
+    otis.assert_has(resp, "Compute $1+1$.")
+    otis.assert_has(resp, "\\textbf{Answer.} 42")
+    otis.assert_has(resp, "Clearly $1+1=2$.")
+
+
+@pytest.mark.django_db
+def test_solution_tex_denied_before_solution_is_visible(otis):
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create(solution="Secret solution.")
+    otis.login(user)
+    # Ranked, never fought: the answer and solution are still under lock.
+    resp = otis.get_40x("oime-proposal-solution-tex", proposal.pk)
+    otis.assert_not_has(resp, "Secret solution.")
+    # An active fight is no better; the file carries the answer.
+    OIMEFightFactory.create(
+        contributor=contributor, proposal=proposal, status="OIME_TBD"
+    )
+    resp = otis.get_40x("oime-proposal-solution-tex", proposal.pk)
+    otis.assert_not_has(resp, "Secret solution.")
+
+
+@pytest.mark.django_db
+def test_solution_tex_denied_on_archived_problem(otis):
+    user, _ = _verified_contributor()
+    _, other = _verified_contributor("bob")
+    proposal = OIMEProposalFactory.create(author=other, archived=True)
+    otis.login(user)
+    otis.get_40x("oime-proposal-solution-tex", proposal.pk)
+
+
+@pytest.mark.django_db
 def test_cannot_reveal_during_active_fight(otis):
     user, contributor = _verified_contributor()
     proposal = OIMEProposalFactory.create()
@@ -1919,7 +1980,7 @@ def test_expired_give_up_does_not_count_against_rate_limit(otis):
 
 
 @pytest.mark.django_db
-def test_detail_shows_gave_up_alert_box(otis):
+def test_detail_stats_show_own_verdict(otis):
     user, contributor = _verified_contributor()
     proposal = OIMEProposalFactory.create()
     OIMEFightFactory.create(
@@ -1927,7 +1988,33 @@ def test_detail_shows_gave_up_alert_box(otis):
     )
     otis.login(user)
     resp = otis.get_20x("oime-proposal-detail", proposal.pk)
-    otis.assert_testid(resp, "fight-gave-up")
+    otis.assert_testid(resp, "stats-your-result")
+    otis.assert_testid(resp, "verdict-gave-up")
+
+
+@pytest.mark.django_db
+def test_detail_stats_show_dash_when_never_fought(otis):
+    """An author never fights their own problem, so their verdict row stays empty."""
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create(author=contributor)
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-detail", proposal.pk)
+    otis.assert_testid(resp, "stats-your-result")
+    otis.assert_no_testid(resp, "verdict-gave-up")
+    otis.assert_no_testid(resp, "verdict-solved")
+
+
+@pytest.mark.django_db
+def test_results_stats_show_own_verdict(otis):
+    user, contributor = _verified_contributor()
+    proposal = OIMEProposalFactory.create()
+    OIMEFightFactory.create(
+        contributor=contributor, proposal=proposal, status="OIME_OK"
+    )
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-results", proposal.pk)
+    assert resp.context["fight"].status == "OIME_OK"
+    otis.assert_testid(resp, "stats-your-result")
 
 
 # ---------------------------------------------------------------------------
