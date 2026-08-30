@@ -577,7 +577,7 @@ def _lock_options(
     labels = {
         None: "All",
         "locked": "🔒 Locked",
-        "unlocked": "🔓 Unlocked",
+        "unlocked": "👀 Unlocked",
     }
     return [
         {
