@@ -503,6 +503,12 @@ def casual_browse(request: HttpRequest, subject: str) -> HttpResponse:
             proposal.browse_status = "new"  # type: ignore[attr-defined]
         proposal.spoiled = proposal.browse_status != "new"  # type: ignore[attr-defined]
         proposal.has_upvoted = proposal.pk in upvoted_ids  # type: ignore[attr-defined]
+        # Clicking a card's difficulty badge filters down to that difficulty, or
+        # clears the filter when it is the one already being applied.
+        proposal.difficulty_params = _browse_params(  # type: ignore[attr-defined]
+            sort_by_votes,
+            None if proposal.difficulty == difficulty else proposal.difficulty,
+        )
     page_obj.object_list = page_proposals
 
     return render(

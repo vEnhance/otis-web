@@ -1070,6 +1070,28 @@ def test_casual_browse_controls_carry_settings(otis):
 
 
 @pytest.mark.django_db
+def test_casual_browse_difficulty_badges_toggle_the_filter(otis):
+    user, contributor = _verified_contributor()
+    contributor.casual_mode = True
+    contributor.save()
+    OIMEProposalFactory.create(subject="A", difficulty=2)
+    OIMEProposalFactory.create(subject="A", difficulty=4)
+    otis.login(user)
+
+    # Unfiltered, each badge links to its own difficulty, keeping the sort.
+    resp = otis.get_20x("oime-casual-browse", "A", data={"sort": "votes"})
+    assert [p.difficulty_params for p in resp.context["page_obj"]] == [
+        "sort=votes&difficulty=4",
+        "sort=votes&difficulty=2",
+    ]
+
+    # The badge of the difficulty already filtered on clears the filter instead.
+    resp = otis.get_20x("oime-casual-browse", "A", data={"difficulty": 4})
+    assert [p.difficulty_params for p in resp.context["page_obj"]] == [""]
+    otis.assert_testid(resp, "browse-difficulty-badge", count=1)
+
+
+@pytest.mark.django_db
 def test_casual_browse_marks_upvoted_problems(otis):
     user, contributor = _verified_contributor()
     contributor.casual_mode = True

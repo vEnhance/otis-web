@@ -15,15 +15,18 @@
   </p>
   {% for proposal in page_obj %}
     <div class="card mb-4 {% if proposal.spoiled %}border-secondary{% else %}border-primary{% endif %}">
-      <div class="card-header d-flex justify-content-between align-items-start gap-2">
+      <div class="card-header d-flex justify-content-between align-items-center gap-2">
         <span class="fw-bold">
           <a href="{{ proposal.get_absolute_url }}">{{ proposal.label }}: {{ proposal.title|truncatechars:"32" }}</a>
         </span>
-        <span class="d-flex gap-2 text-nowrap">
-          <span class="badge border px-2 py-2 {% if proposal.has_upvoted %}bg-danger text-white{% else %}bg-light text-dark{% endif %}"
+        <span class="d-flex align-items-center gap-1 text-nowrap">
+          <a class="badge border text-decoration-none {% if difficulty %}bg-primary text-white{% else %}bg-light text-dark{% endif %}"
+             data-testid="browse-difficulty-badge"
+             title="{% if difficulty %}Clear the difficulty filter{% else %}Show only 🔥 × {{ proposal.difficulty }} problems{% endif %}"
+             href="{% url "oime-casual-browse" subject %}{% if proposal.difficulty_params %}?{{ proposal.difficulty_params }}{% endif %}">{{ proposal.difficulty_display }}</a>
+          <span class="badge border {% if proposal.has_upvoted %}bg-danger text-white{% else %}bg-light text-dark{% endif %}"
                 {% if proposal.has_upvoted %}data-testid="browse-upvoted"{% endif %}
                 title="{% if proposal.has_upvoted %}You upvoted this problem{% else %}You have not upvoted this problem{% endif %}">🩷 × {{ proposal.upvote_count }}</span>
-          <span class="badge bg-light text-dark border px-2 py-2">{{ proposal.difficulty_display }}</span>
         </span>
       </div>
       <div class="card-body">
