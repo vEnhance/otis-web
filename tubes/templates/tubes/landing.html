@@ -16,19 +16,11 @@
   </p>
   {% if contributor %}
     {% include "tubes/components/proposal_table.html" with title="Newest problems" proposals=recent_proposals %}
-    {% if not recent_proposals %}
-      <h3 class="mt-4">Newest problems</h3>
-      <div class="alert alert-warning">No problems yet. Be the first to submit!</div>
-    {% endif %}
     <div class="mb-4">
       {% include "tubes/components/subject_nav.html" %}
       <a href="{% url "oime-proposal-list" %}" class="btn btn-sm btn-primary">All problems</a>
     </div>
     {% include "tubes/components/proposal_table.html" with title="Your problems" proposals=own_proposals %}
-    {% if not own_proposals %}
-      <h3 class="mt-4">Your problems</h3>
-      <div class="alert alert-info">You haven't written any problems yet.</div>
-    {% endif %}
     <div class="mb-4">
       <a href="{% url "oime-proposal-create" %}"
          class="btn btn-sm btn-success">Write a problem</a>
@@ -37,8 +29,7 @@
     </div>
   {% else %}
     <div class="mb-4">
-      <a href="{% url "oime-proposal-list" %}" class="btn btn-primary">View problems</a>
-      <a href="{% url "oime-proposal-create" %}" class="btn btn-success">Write a problem</a>
+      <a href="{% url "oime-setup" %}" class="btn btn-primary">Get Started</a>
     </div>
   {% endif %}
   <hr />
@@ -67,7 +58,7 @@
           </p>
           <p>
             You are asked to select a difficulty tier for your problems.
-            This tier is the amount of time that testsolvers get to spend on it.
+            This tier the amount of time that testsolvers get to spend on it.
             <strong>You can't change difficulty after submission!</strong>
           </p>
           <ul>
@@ -87,12 +78,6 @@
               <strong>🔥 × 5:</strong> AIME 13-15, solvers get 30 minutes
             </li>
           </ul>
-          <p>
-            A problem you are still working on can be kept as a <strong>draft</strong>,
-            which nobody else can see and which cannot be testsolved.
-            Your drafts are listed under "Your problems" above; edit one and uncheck
-            <strong>Draft</strong> when it is ready.
-          </p>
         </div>
       </div>
     </div>
@@ -125,17 +110,12 @@
               In <b>casual mode</b>, you can browse and try whatever problems you like.
               There's an answer checker, but it doesn't store anything
               and there's no timers or locks.
+              You also get a per-subject page listing the full statement of every
+              problem, so you can scroll through (say) all the geometry problems and
+              pick one you feel like doing.
+              Problems you've already seen are greyed out there.
             </li>
           </ul>
-          <p>
-            The A / C / G / N buttons above open a per-subject page listing every
-            problem in that subject, so you can scroll through (say) all the geometry
-            problems at once. In casual mode you see every statement there.
-            In ranked mode, a problem you haven't opened yet stays 🔒 locked and shows
-            a <strong>Start problem</strong> button instead of its statement, so the
-            page is safe to scroll; the padlock filter narrows the list to one side or
-            the other.
-          </p>
           <p>
             You can switch from ranked to casual at any time.
             If you try to switch from casual to ranked, we'll allow it too,

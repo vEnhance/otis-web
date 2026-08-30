@@ -79,7 +79,6 @@ PUBLIC_VIEWS: dict[str | None, str] = {
     "hint-list-deprecated": "pure redirect to the guarded hint list",
     "opal-hunt-list": "public list of OPAL hunts",
     "github-landing": "public landing page",
-    "oime-landing": "public landing page",
     "payments-cancelled": "static 'payment cancelled' page",
     "payments-checkout": "capability URL; checksum verified before Stripe is touched",
     "payments-config": "returns only the Stripe publishable key",

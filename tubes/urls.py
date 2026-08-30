@@ -4,11 +4,6 @@ from . import views
 
 urlpatterns = [
     path(r"proposals/", views.ProposalListView.as_view(), name="oime-proposal-list"),
-    path(
-        r"drafts/",
-        views.ProposalDraftListView.as_view(),
-        name="oime-proposal-drafts",
-    ),
     path(r"propose/", views.ProposalCreateView.as_view(), name="oime-proposal-create"),
     path(r"proposal/<int:pk>/", views.proposal_detail, name="oime-proposal-detail"),
     path(r"proposal/<int:pk>/begin/", views.start_fight, name="oime-start-fight"),

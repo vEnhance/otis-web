@@ -8,6 +8,7 @@
     {% include "tubes/components/subject_nav.html" %}
     {% include "tubes/components/browse_controls.html" %}
     <span class="ms-auto d-flex flex-wrap gap-2">
+      {% include "tubes/components/mode_toggle.html" %}
       <a href="{% url "oime-landing" %}" class="btn btn-sm btn-info">Home</a>
       <a href="{% url "oime-proposal-list" %}"
          class="btn btn-sm btn-outline-secondary">All problems</a>
@@ -15,9 +16,6 @@
   </div>
   <p>
     Showing {% if lock == "locked" %}locked{% elif lock == "unlocked" %}unlocked{% endif %} {% if difficulty %}🔥 × {{ difficulty }}{% elif not lock %}all{% endif %} {{ subject_name }} problems{% if sort_by_votes %}, most upvoted first{% endif %}.
-    {% if lock_options %}
-      Problems you haven't opened yet stay locked; start one to read it.
-    {% endif %}
   </p>
   {% for proposal in page_obj %}
     <div class="card mb-4 {% if proposal.spoiled %}border-secondary{% else %}border-primary{% endif %}">
@@ -32,8 +30,7 @@
              href="{% url "oime-subject-browse" subject %}{% if proposal.difficulty_params %}?{{ proposal.difficulty_params }}{% endif %}">{{ proposal.difficulty_display }}</a>
           {% if proposal.locked %}
             {# Nothing to have an opinion about yet, and this is where a misclick would be easy. #}
-            <span class="badge border bg-light text-muted"
-                  title="Start this problem before voting on it">🩷 × {{ proposal.upvote_count }}</span>
+            <span class="badge border bg-light text-muted">🩷 × {{ proposal.upvote_count }}</span>
           {% else %}
             <form method="post"
                   action="{% url "oime-upvote" proposal.pk %}"
@@ -53,7 +50,7 @@
       </div>
       {% if proposal.locked %}
         <div class="card-body oime-locked text-center" data-testid="browse-locked">
-          <p class="fst-italic text-muted mb-2">🔒 Locked — you haven't opened this problem yet.</p>
+          <p class="fst-italic text-muted mb-2">🔒</p>
           <a href="{% url "oime-start-fight" proposal.pk %}"
              class="btn btn-primary btn-sm">Start problem</a>
         </div>
@@ -66,8 +63,6 @@
             {% include "tubes/components/fight_verdict.html" with fight=proposal.user_fight %}
           {% elif proposal.user_list_status == "author" %}
             You are the author of this problem!
-          {% elif proposal.user_list_status == "in_progress" %}
-            Your timed session on this problem is still open.
           {% elif proposal.user_list_status == "revealed" %}
             You are spoiled on this problem.
           {% else %}
@@ -77,7 +72,7 @@
       {% endif %}
     </div>
   {% empty %}
-    <p class="fw-bold">There are no {{ subject_name }} problems to show here.</p>
+    <p class="fw-bold">There are no {{ subject_name }} problems yet.</p>
   {% endfor %}
   {% if page_obj.has_other_pages %}
     {% bootstrap_pagination page_obj justify_content="center" extra=browse_params %}

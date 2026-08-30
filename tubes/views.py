@@ -753,34 +753,6 @@ class ProposalListView(ContributorRequiredMixin, ListView[OIMEProposal]):
         return context
 
 
-class ProposalDraftListView(ContributorRequiredMixin, ListView[OIMEProposal]):
-    """The current user's own unpublished drafts, which the main list omits."""
-
-    model = OIMEProposal
-    template_name = "tubes/proposal_draft_list.html"
-    context_object_name = "proposals"
-
-    def get_queryset(self) -> QuerySet[OIMEProposal]:
-        return (
-            OIMEProposal.objects.filter(
-                author=_get_contributor(self.request),
-                archived=False,
-                is_draft=True,
-            )
-            .select_related("author")
-            .annotate(upvote_count=Count("upvotes", distinct=True))
-            .order_by("-created_at")
-        )
-
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-        contributor = _get_contributor(self.request)
-        context["contributor"] = contributor
-        if contributor is not None:
-            _annotate_user_status(list(context["proposals"]), contributor)
-        return context
-
-
 class ProposalCreateView(
     ContributorRequiredMixin, CreateView[OIMEProposal, OIMEProposalForm]
 ):
@@ -1243,15 +1215,15 @@ def edit_comment(request: HttpRequest, pk: int) -> HttpResponse:
     )
 
 
-class LandingView(TemplateView):
+class LandingView(VerifiedRequiredMixin, TemplateView):
     """The front door: what is new, what you have written, and then the instructions.
 
     The instructions stop being worth reading after the first visit, so the useful
     things go above them: the newest handful of problems, a way into each subject,
     and the state of your own proposals and drafts.
 
-    This page is public, and none of that means anything without a contributor
-    profile, so an anonymous or not-yet-onboarded visitor gets the instructions alone.
+    None of it means anything without a contributor profile, so someone who has not
+    onboarded yet gets the instructions and a way to make one.
     """
 
     template_name = "tubes/landing.html"

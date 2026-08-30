@@ -583,39 +583,6 @@ def test_draft_hidden_from_own_author_on_main_list(otis):
 
 
 @pytest.mark.django_db
-def test_draft_list_shows_own_drafts_only(otis):
-    user, contributor = _verified_contributor()
-    _, other = _verified_contributor("bob")
-    mine = OIMEProposalFactory.create(
-        author=contributor, is_draft=True, title="My draft"
-    )
-    OIMEProposalFactory.create(author=contributor, is_draft=False, title="My problem")
-    OIMEProposalFactory.create(author=other, is_draft=True, title="Bob's draft")
-    otis.login(user)
-    resp = otis.get_20x("oime-proposal-drafts")
-    assert list(resp.context["proposals"]) == [mine]
-
-
-@pytest.mark.django_db
-def test_draft_list_hides_archived_drafts(otis):
-    user, contributor = _verified_contributor()
-    OIMEProposalFactory.create(
-        author=contributor, is_draft=True, archived=True, title="Archived draft"
-    )
-    otis.login(user)
-    resp = otis.get_20x("oime-proposal-drafts")
-    assert list(resp.context["proposals"]) == []
-
-
-@pytest.mark.django_db
-def test_main_list_links_to_drafts(otis):
-    user, _ = _verified_contributor()
-    otis.login(user)
-    resp = otis.get_20x("oime-proposal-list")
-    otis.assert_has(resp, otis.url("oime-proposal-drafts"))
-
-
-@pytest.mark.django_db
 def test_draft_not_viewable_by_others(otis):
     user, _ = _verified_contributor()
     _, other = _verified_contributor("bob")
@@ -1294,6 +1261,20 @@ def test_subject_browse_hides_the_lock_filter_in_casual_mode(otis):
     assert resp.context["lock"] is None
     assert list(resp.context["page_obj"]) == [proposal]
     otis.assert_no_testid(resp, "browse-lock-filter")
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("casual_mode", [True, False])
+def test_subject_browse_offers_the_mode_switch(otis, casual_mode: bool):
+    # The mode is what decides whether anything on this page is locked, so the way
+    # to change it belongs here too.
+    user, contributor = _verified_contributor()
+    contributor.casual_mode = casual_mode
+    contributor.save()
+    otis.login(user)
+    resp = otis.get_20x("oime-subject-browse", "A")
+    wanted = "oime-serious" if casual_mode else "oime-casual"
+    otis.assert_has(resp, otis.url(wanted))
 
 
 @pytest.mark.django_db
@@ -1998,12 +1979,11 @@ def test_landing_quiet_without_active_fight(otis):
 
 
 @pytest.mark.django_db
-def test_landing_works_for_anonymous_and_contributorless_users(otis):
-    otis.get_20x("oime-landing")
-    verified_group, _ = Group.objects.get_or_create(name="Verified")
-    UserFactory.create(username="alice", groups=(verified_group,))
-    otis.login("alice")
-    otis.get_20x("oime-landing")
+def test_landing_requires_login(otis):
+    otis.assert_30x(otis.get("oime-landing"))
+    UserFactory.create(username="mallory")
+    otis.login("mallory")
+    otis.get_40x("oime-landing")
 
 
 # ---------------------------------------------------------------------------
@@ -2042,13 +2022,16 @@ def test_landing_newest_omits_drafts_and_archived(otis):
 @pytest.mark.django_db
 def test_landing_shows_own_proposals_and_drafts(otis):
     user, contributor = _verified_contributor()
+    _, other = _verified_contributor("bob")
     published = OIMEProposalFactory.create(author=contributor)
     draft = OIMEProposalFactory.create(author=contributor, is_draft=True)
     OIMEProposalFactory.create(author=contributor, archived=True)
     OIMEProposalFactory.create()  # somebody else's
+    OIMEProposalFactory.create(author=other, is_draft=True, title="Bob's draft")
     otis.login(user)
     resp = otis.get_20x("oime-landing")
     assert set(resp.context["own_proposals"]) == {published, draft}
+    otis.assert_not_has(resp, "Bob's draft")
     assert all(p.user_list_status == "author" for p in resp.context["own_proposals"])
     # The status column names which is which. The published one is also in the
     # "newest problems" table above, so it is rendered twice; the draft is not,
@@ -2070,20 +2053,19 @@ def test_landing_links_to_every_subject_and_all_problems(otis):
 
 
 @pytest.mark.django_db
-def test_landing_shows_no_problems_without_a_contributor(otis):
-    # The page is public, and none of the tables mean anything without a profile.
+def test_landing_offers_onboarding_without_a_contributor(otis):
+    # None of the tables mean anything without a profile, so the one thing on offer
+    # is making one.
     OIMEProposalFactory.create(title="Somebody's problem")
-    resp = otis.get_20x("oime-landing")
-    assert resp.context["contributor"] is None
-    assert "recent_proposals" not in resp.context
-    otis.assert_not_has(resp, "Somebody's problem")
-
     verified_group, _ = Group.objects.get_or_create(name="Verified")
     UserFactory.create(username="bob", groups=(verified_group,))
     otis.login("bob")
     resp = otis.get_20x("oime-landing")
     assert resp.context["contributor"] is None
+    assert "recent_proposals" not in resp.context
     otis.assert_not_has(resp, "Somebody's problem")
+    otis.assert_has(resp, otis.url("oime-setup"))
+    otis.assert_not_has(resp, otis.url("oime-proposal-create"))
 
 
 @pytest.mark.django_db

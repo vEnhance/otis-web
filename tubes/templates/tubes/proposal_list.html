@@ -8,14 +8,7 @@
     {% include "tubes/components/subject_nav.html" %}
     <a href="{% url "oime-proposal-create" %}"
        class="btn btn-sm btn-success">Write a problem</a>
-    {% if contributor %}
-      {% if casual %}
-        <a href="{% url "oime-serious" %}"
-           class="btn btn-sm btn-outline-warning">Return to ranked mode</a>
-      {% else %}
-        <a href="{% url "oime-casual" %}" class="btn btn-sm btn-outline-warning">Switch to casual mode</a>
-      {% endif %}
-    {% endif %}
+    {% include "tubes/components/mode_toggle.html" %}
   </div>
   {% if contributor %}
     {% if casual %}
@@ -43,9 +36,4 @@
   {% if not own_proposals and not browse_proposals and not unsolved_proposals and not completed_proposals %}
     <div class="alert alert-warning">No proposals yet. Be the first to submit!</div>
   {% endif %}
-  <hr />
-  <p class="text-muted">
-    <a href="{% url "oime-proposal-drafts" %}">View your drafts →</a>
-    Drafts are problems you are still working on; they are hidden from everyone else.
-  </p>
 {% endblock layout-content %}
