@@ -46,9 +46,8 @@
       </div>
       {% if proposal.locked %}
         <div class="card-body oime-locked text-center" data-testid="browse-locked">
-          <p class="fst-italic text-muted mb-2">🔒</p>
           <a href="{% url "oime-start-fight" proposal.pk %}"
-             class="btn btn-primary btn-sm">Start problem</a>
+             class="btn btn-outline-primary btn-sm">🔏 Start problem</a>
         </div>
       {% else %}
         <div class="card-body">
