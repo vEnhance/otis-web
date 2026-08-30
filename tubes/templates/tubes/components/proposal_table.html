@@ -28,29 +28,29 @@
               <a href="{{ proposal.get_absolute_url }}">{{ proposal.title|truncatechars:"30" }}</a>
             </td>
             <td>{{ proposal.difficulty_display }}</td>
-            <td {% if proposal.has_upvoted %}class="fw-bold" data-testid="table-upvoted" title="You upvoted this problem"{% endif %}>🩷 × {{ proposal.upvote_count }}</td>
+            <td {% if proposal.has_upvoted %}class="fw-bold" data-testid="table-upvoted" title="You upvoted this problem"{% endif %}>
+              🩷 × {{ proposal.upvote_count }}
+            </td>
             <td>
-              {% if proposal.user_list_status == "author" %}
-                {% if proposal.is_draft %}
-                  <a href="{{ proposal.get_absolute_url }}"
-                     class="text-danger"
-                     data-testid="table-draft">Draft</a>
+              <a href="{{ proposal.get_absolute_url }}">
+                {% if proposal.user_list_status == "author" %}
+                  {% if proposal.is_draft %}
+                    <span class="text-danger" data-testid="table-draft">Draft</span>
+                  {% else %}
+                    <span class="text-success" data-testid="table-published">Published</span>
+                  {% endif %}
+                {% elif proposal.user_list_status == "in_progress" %}
+                  <span>In Progress</span>
+                {% elif proposal.user_list_status == "not_started" %}
+                  New!
+                {% elif proposal.user_list_status == "revealed" %}
+                  <span class="text-muted">Spoiled</span>
+                {% elif proposal.user_list_status == "casual" %}
+                  Open
                 {% else %}
-                  <a href="{{ proposal.get_absolute_url }}"
-                     class="text-success"
-                     data-testid="table-published">Published</a>
+                  {% include "tubes/components/fight_verdict.html" with fight=proposal.user_fight %}
                 {% endif %}
-              {% elif proposal.user_list_status == "in_progress" %}
-                <span>In Progress</span>
-              {% elif proposal.user_list_status == "not_started" %}
-                <a href="{% url "oime-start-fight" proposal.pk %}">New!</a>
-              {% elif proposal.user_list_status == "revealed" %}
-                <span class="text-muted">Spoiled</span>
-              {% elif proposal.user_list_status == "casual" %}
-                <a href="{{ proposal.get_absolute_url }}">Open</a>
-              {% else %}
-                {% include "tubes/components/fight_verdict.html" with fight=proposal.user_fight %}
-              {% endif %}
+              </a>
             </td>
           </tr>
         {% endfor %}
