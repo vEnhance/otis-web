@@ -109,16 +109,9 @@
          rel="noopener"
          data-testid="solution-tex-link">Download solution (TeX)</a>
     </p>
-    {% comment %}
-      A plain disclosure element, so the toggle needs no JavaScript. It sits on a
-      line of its own rather than beside the download button, so that unfolding
-      the preview never moves the button that unfolds it.
-    {% endcomment %}
     <details class="oime-solution-preview mb-4" data-testid="solution-preview">
       <summary class="btn btn-secondary">Preview solution with MathJax</summary>
-      <p class="small text-muted mt-3 mb-2">
-        MathJax ≠ LaTeX, so this convenience preview only supports some basic features.
-      </p>
+      <p class="small text-danger mt-3 mb-2">MathJax ≠ LaTeX. This convenience preview only supports basic math.</p>
       <div class="math-content">{{ proposal.solution }}</div>
     </details>
   {% endif %}
