@@ -105,7 +105,7 @@
         <div class="card-body">
           <div class="math-content">{{ proposal.statement }}</div>
         </div>
-        <div class="card-footer text-muted fst-italic">
+        <div class="card-footer text-muted{% if not proposal.user_fight.is_complete %} fst-italic{% endif %}">
           {% if proposal.user_fight.is_complete %}
             {% include "tubes/components/fight_verdict.html" with fight=proposal.user_fight %}
           {% elif proposal.user_list_status == "author" %}
