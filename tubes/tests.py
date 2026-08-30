@@ -331,6 +331,20 @@ def test_staff_can_update_any_proposal(otis):
 
 
 @pytest.mark.django_db
+def test_proposal_list_marks_upvoted_rows(otis):
+    user, contributor = _verified_contributor()
+    hearted = OIMEProposalFactory.create()
+    OIMEProposalFactory.create()
+    # Another contributor's upvote must not bold the row for this user.
+    OIMEProposalFactory.create().upvotes.add(OIMEContributorFactory.create())
+    hearted.upvotes.add(contributor)
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-list")
+    assert {p.pk for p in resp.context["proposals"] if p.has_upvoted} == {hearted.pk}
+    otis.assert_testid(resp, "table-upvoted", count=1)
+
+
+@pytest.mark.django_db
 def test_archived_hidden_from_regular_users(otis):
     user, _ = _verified_contributor()
     other_proposal = OIMEProposalFactory.create(archived=True)
@@ -966,6 +980,109 @@ def test_casual_browse_orders_newest_first(otis):
     otis.login(user)
     resp = otis.get_20x("oime-casual-browse", "A")
     assert list(resp.context["page_obj"]) == [newest, middle, oldest]
+
+
+@pytest.mark.django_db
+def test_casual_browse_sorts_by_votes_on_request(otis):
+    user, contributor = _verified_contributor()
+    contributor.casual_mode = True
+    contributor.save()
+    unloved = OIMEProposalFactory.create(subject="A")
+    beloved = OIMEProposalFactory.create(subject="A")
+    liked = OIMEProposalFactory.create(subject="A")
+    for _ in range(3):
+        beloved.upvotes.add(OIMEContributorFactory.create())
+    liked.upvotes.add(OIMEContributorFactory.create())
+    otis.login(user)
+    resp = otis.get_20x("oime-casual-browse", "A", data={"sort": "votes"})
+    assert list(resp.context["page_obj"]) == [beloved, liked, unloved]
+    # Without the parameter the browser is still newest-first.
+    resp = otis.get_20x("oime-casual-browse", "A")
+    assert list(resp.context["page_obj"]) == [liked, beloved, unloved]
+
+
+@pytest.mark.django_db
+def test_casual_browse_filters_by_difficulty(otis):
+    user, contributor = _verified_contributor()
+    contributor.casual_mode = True
+    contributor.save()
+    easy = OIMEProposalFactory.create(subject="C", difficulty=1)
+    hard = OIMEProposalFactory.create(subject="C", difficulty=5)
+    otis.login(user)
+    resp = otis.get_20x("oime-casual-browse", "C", data={"difficulty": 5})
+    assert list(resp.context["page_obj"]) == [hard]
+    assert resp.context["difficulty"] == 5
+    resp = otis.get_20x("oime-casual-browse", "C", data={"difficulty": 1})
+    assert list(resp.context["page_obj"]) == [easy]
+    resp = otis.get_20x("oime-casual-browse", "C")
+    assert list(resp.context["page_obj"]) == [hard, easy]
+    assert resp.context["difficulty"] is None
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("raw", ["0", "6", "banana", ""])
+def test_casual_browse_ignores_bogus_difficulty(otis, raw: str):
+    user, contributor = _verified_contributor()
+    contributor.casual_mode = True
+    contributor.save()
+    proposal = OIMEProposalFactory.create(subject="G", difficulty=2)
+    otis.login(user)
+    resp = otis.get_20x("oime-casual-browse", "G", data={"difficulty": raw})
+    assert list(resp.context["page_obj"]) == [proposal]
+    assert resp.context["difficulty"] is None
+
+
+@pytest.mark.django_db
+def test_casual_browse_controls_carry_settings(otis):
+    user, contributor = _verified_contributor()
+    contributor.casual_mode = True
+    contributor.save()
+    otis.login(user)
+    resp = otis.get_20x("oime-casual-browse", "N")
+    otis.assert_testid(resp, "browse-sort-toggle")
+    otis.assert_testid(resp, "browse-difficulty-filter")
+    assert resp.context["browse_params"] == ""
+    assert resp.context["sort_toggle_params"] == "sort=votes"
+
+    # Each control keeps whatever the other one is set to.
+    resp = otis.get_20x(
+        "oime-casual-browse", "N", data={"sort": "votes", "difficulty": 4}
+    )
+    assert resp.context["browse_params"] == "sort=votes&difficulty=4"
+    assert resp.context["sort_toggle_params"] == "difficulty=4"
+    options = resp.context["difficulty_options"]
+    assert [o["value"] for o in options] == [None, 1, 2, 3, 4, 5]
+    assert [o["params"] for o in options] == [
+        "sort=votes",
+        "sort=votes&difficulty=1",
+        "sort=votes&difficulty=2",
+        "sort=votes&difficulty=3",
+        "sort=votes&difficulty=4",
+        "sort=votes&difficulty=5",
+    ]
+    assert [o["selected"] for o in options] == [False] * 4 + [True, False]
+
+    # With no filter on, the dropdown marks "All" as the selected entry.
+    resp = otis.get_20x("oime-casual-browse", "N")
+    assert [o["selected"] for o in resp.context["difficulty_options"]] == [True] + [
+        False
+    ] * 5
+
+
+@pytest.mark.django_db
+def test_casual_browse_marks_upvoted_problems(otis):
+    user, contributor = _verified_contributor()
+    contributor.casual_mode = True
+    contributor.save()
+    hearted = OIMEProposalFactory.create(subject="A")
+    OIMEProposalFactory.create(subject="A")
+    # Someone else's upvote must not light up the badge for this contributor.
+    OIMEProposalFactory.create(subject="A").upvotes.add(OIMEContributorFactory.create())
+    hearted.upvotes.add(contributor)
+    otis.login(user)
+    resp = otis.get_20x("oime-casual-browse", "A")
+    assert [p.has_upvoted for p in resp.context["page_obj"]] == [False, False, True]
+    otis.assert_testid(resp, "browse-upvoted", count=1)
 
 
 @pytest.mark.django_db

@@ -1,0 +1,22 @@
+<a href="{% url "oime-casual-browse" subject %}{% if sort_toggle_params %}?{{ sort_toggle_params }}{% endif %}"
+   data-testid="browse-sort-toggle"
+   title="{% if sort_by_votes %}Sort by newest{% else %}Sort by most upvoted{% endif %}"
+   class="btn btn-sm {% if sort_by_votes %}btn-primary{% else %}btn-outline-primary{% endif %}">🩷</a>
+<span class="dropdown d-inline-block">
+  <button type="button"
+          data-testid="browse-difficulty-filter"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+          title="Filter by difficulty"
+          class="btn btn-sm dropdown-toggle {% if difficulty %}btn-primary{% else %}btn-outline-primary{% endif %}">
+    🔥{{ difficulty|default_if_none:"" }}
+  </button>
+  <ul class="dropdown-menu">
+    {% for option in difficulty_options %}
+      <li>
+        <a class="dropdown-item{% if option.selected %} active{% endif %}"
+           href="{% url "oime-casual-browse" subject %}{% if option.params %}?{{ option.params }}{% endif %}">{{ option.label }}</a>
+      </li>
+    {% endfor %}
+  </ul>
+</span>

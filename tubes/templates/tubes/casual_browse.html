@@ -8,18 +8,26 @@
     <a href="{% url "oime-proposal-list" %}"
        class="btn btn-outline-secondary btn-sm">← All problems</a>
     {% include "tubes/components/casual_subject_nav.html" %}
+    {% include "tubes/components/casual_browse_controls.html" %}
   </div>
-  <p>Showing all {{ subject_name }} problems in casual mode.</p>
+  <p>
+    Showing {% if difficulty %}🔥 × {{ difficulty }}{% else %}all{% endif %} {{ subject_name }} problems in casual mode{% if sort_by_votes %}, most upvoted first{% endif %}.
+  </p>
   {% for proposal in page_obj %}
     <div class="card mb-4 {% if proposal.spoiled %}border-secondary{% else %}border-primary{% endif %}">
       <div class="card-header d-flex justify-content-between align-items-start gap-2">
         <span class="fw-bold">
-          <a href="{{ proposal.get_absolute_url }}">{{ proposal.label }}: {{ proposal.title }}</a>
+          <a href="{{ proposal.get_absolute_url }}">{{ proposal.label }}: {{ proposal.title|truncatechars:"32" }}</a>
         </span>
-        <span class="text-nowrap">🩷 × {{ proposal.upvote_count }} · {{ proposal.difficulty_display }}</span>
+        <span class="d-flex gap-2 text-nowrap">
+          <span class="badge border px-2 py-2 {% if proposal.has_upvoted %}bg-danger text-white{% else %}bg-light text-dark{% endif %}"
+                {% if proposal.has_upvoted %}data-testid="browse-upvoted"{% endif %}
+                title="{% if proposal.has_upvoted %}You upvoted this problem{% else %}You have not upvoted this problem{% endif %}">🩷 × {{ proposal.upvote_count }}</span>
+          <span class="badge bg-light text-dark border px-2 py-2">{{ proposal.difficulty_display }}</span>
+        </span>
       </div>
       <div class="card-body">
-        <div class="math-content {% if proposal.spoiled %}text-muted{% endif %}">{{ proposal.statement }}</div>
+        <div class="math-content">{{ proposal.statement }}</div>
       </div>
       <div class="card-footer text-muted fst-italic">
         {% if proposal.browse_status == "author" %}
@@ -39,6 +47,6 @@
     <p class="fw-bold">There are no {{ subject_name }} problems yet.</p>
   {% endfor %}
   {% if page_obj.has_other_pages %}
-    {% bootstrap_pagination page_obj justify_content="center" %}
+    {% bootstrap_pagination page_obj justify_content="center" extra=browse_params %}
   {% endif %}
 {% endblock layout-content %}

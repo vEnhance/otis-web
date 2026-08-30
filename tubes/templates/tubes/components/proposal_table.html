@@ -1,7 +1,3 @@
-{% comment %}
-Renders a proposal table section.
-Context vars: title (str), proposals (list of OIMEProposal annotated with user_fight, user_list_status, difficulty_display).
-{% endcomment %}
 {% if proposals %}
   <h3 class="mt-4">
     <a class="oime-table-toggle link-dark text-decoration-none"
@@ -32,7 +28,7 @@ Context vars: title (str), proposals (list of OIMEProposal annotated with user_f
               <a href="{{ proposal.get_absolute_url }}">{{ proposal.title|truncatechars:"30" }}</a>
             </td>
             <td>{{ proposal.difficulty_display }}</td>
-            <td>🩷 × {{ proposal.upvote_count }}</td>
+            <td {% if proposal.has_upvoted %}class="fw-bold" data-testid="table-upvoted" title="You upvoted this problem"{% endif %}>🩷 × {{ proposal.upvote_count }}</td>
             <td>
               {% if proposal.user_list_status == "author" %}
                 <span>Author</span>
