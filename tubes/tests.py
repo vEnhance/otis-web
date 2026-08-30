@@ -331,6 +331,20 @@ def test_staff_can_update_any_proposal(otis):
 
 
 @pytest.mark.django_db
+def test_proposal_list_marks_upvoted_rows(otis):
+    user, contributor = _verified_contributor()
+    hearted = OIMEProposalFactory.create()
+    OIMEProposalFactory.create()
+    # Another contributor's upvote must not bold the row for this user.
+    OIMEProposalFactory.create().upvotes.add(OIMEContributorFactory.create())
+    hearted.upvotes.add(contributor)
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-list")
+    assert {p.pk for p in resp.context["proposals"] if p.has_upvoted} == {hearted.pk}
+    otis.assert_testid(resp, "table-upvoted", count=1)
+
+
+@pytest.mark.django_db
 def test_archived_hidden_from_regular_users(otis):
     user, _ = _verified_contributor()
     other_proposal = OIMEProposalFactory.create(archived=True)

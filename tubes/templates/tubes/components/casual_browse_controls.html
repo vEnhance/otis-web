@@ -1,11 +1,3 @@
-{% comment %}
-The sort and difficulty controls for the casual full-statement browser. Every entry is
-a plain link carrying query parameters read by the view, so the filtering itself needs
-no JavaScript and survives pagination. The heart sorts by upvotes instead of recency;
-the flame opens a dropdown to pick one difficulty, or All.
-Context vars: sort_by_votes, difficulty, sort_toggle_params, difficulty_options,
-subject.
-{% endcomment %}
 <a href="{% url "oime-casual-browse" subject %}{% if sort_toggle_params %}?{{ sort_toggle_params }}{% endif %}"
    data-testid="browse-sort-toggle"
    title="{% if sort_by_votes %}Sort by newest{% else %}Sort by most upvoted{% endif %}"

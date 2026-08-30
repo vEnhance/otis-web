@@ -571,6 +571,11 @@ class ProposalListView(ContributorRequiredMixin, ListView[OIMEProposal]):
             for f in OIMEFight.objects.filter(contributor=contributor)
         }
         revealed_ids = set(contributor.revealed_proposals.values_list("pk", flat=True))
+        upvoted_ids = set(
+            OIMEProposal.objects.filter(upvotes=contributor).values_list(
+                "pk", flat=True
+            )
+        )
 
         own: list[OIMEProposal] = []
         browse: list[OIMEProposal] = []
@@ -580,6 +585,7 @@ class ProposalListView(ContributorRequiredMixin, ListView[OIMEProposal]):
         for proposal in context["proposals"]:
             fight = user_fights.get(proposal.pk)
             proposal.user_fight = fight  # type: ignore[attr-defined]
+            proposal.has_upvoted = proposal.pk in upvoted_ids  # type: ignore[attr-defined]
             if contributor == proposal.author:
                 proposal.user_list_status = "author"  # type: ignore[attr-defined]
                 own.append(proposal)
