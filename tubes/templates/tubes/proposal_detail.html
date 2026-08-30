@@ -101,7 +101,7 @@
   {% endif %}
   {# ---- Answer + solution ---- #}
   {% if can_see_solution %}
-    <h3 id="oime-answer-section">Answer: {{ proposal.answer }}</h3>
+    <h2 id="oime-answer-section">Answer: {{ proposal.answer }}</h2>
     {% comment %}
       The disclosure element is a flex item, so it sits beside the download button
       while closed and takes a line of its own once the solution unfolds. Using it
@@ -124,7 +124,7 @@
   {% endif %}
   {# ---- Discussion (only once the solution is visible) ---- #}
   {% if can_see_solution %}
-    <h3>Discussion</h3>
+    <h2>Discussion</h2>
     {% if comments %}
       {% for comment in comments %}
         <div class="card mb-2">
