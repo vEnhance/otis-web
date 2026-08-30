@@ -4,8 +4,10 @@
 {% endblock title %}
 {% block layout-content %}
   <div class="mb-3 d-flex flex-wrap align-items-center gap-2">
-    <a href="{% url "oime-landing" %}" class="btn btn-sm btn-info">Home</a>
     {% include "tubes/components/subject_nav.html" %}
+    <span class="ms-auto d-flex flex-wrap gap-2">
+      <a href="{% url "oime-landing" %}" class="btn btn-sm btn-outline-info">Home</a>
+    </span>
   </div>
   {% include "tubes/components/mode_toggle.html" %}
   {% include "tubes/components/proposal_table.html" with title="Your proposals" proposals=own_proposals %}

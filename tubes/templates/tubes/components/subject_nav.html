@@ -1,8 +1,5 @@
-{% comment %}
-  The A / C / G / N buttons into the per-subject browser. `subject` highlights the
-  one being viewed (unset elsewhere, so none is), and `browse_params` carries the
-  current sort and filters across, so switching subject keeps your settings.
-{% endcomment %}
+<a href="{% url "oime-proposal-list" %}"
+   class="btn btn-sm {% if subject %}btn-outline-dark{% else %}btn-dark{% endif %}">All</a>
 {% for code, name in subject_choices %}
   <a href="{% url "oime-subject-browse" code %}{% if browse_params %}?{{ browse_params }}{% endif %}"
      title="{{ name }}"

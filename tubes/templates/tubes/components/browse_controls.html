@@ -1,12 +1,10 @@
 {% comment %}
-  The per-subject browser's own controls: sort by votes, filter by difficulty, and
-  — for ranked contributors, who are the only ones anything is locked for — filter
-  by whether the problem has been opened yet.
+  Filters and sorts
 {% endcomment %}
 <a href="{% url "oime-subject-browse" subject %}{% if sort_toggle_params %}?{{ sort_toggle_params }}{% endif %}"
    data-testid="browse-sort-toggle"
    title="{% if sort_by_votes %}Sort by newest{% else %}Sort by most upvoted{% endif %}"
-   class="btn btn-sm {% if sort_by_votes %}btn-primary{% else %}btn-outline-primary{% endif %}">🩷</a>
+   class="btn btn-sm {% if sort_by_votes %}btn-primary{% else %}btn-outline-primary{% endif %}">🩷↓</a>
 <span class="dropdown d-inline-block">
   <button type="button"
           data-testid="browse-difficulty-filter"

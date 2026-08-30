@@ -5,11 +5,10 @@
 {% endblock title %}
 {% block layout-content %}
   <div class="mb-3 d-flex flex-wrap align-items-center gap-2">
-    <a href="{% url "oime-landing" %}" class="btn btn-sm btn-info">Home</a>
     {% include "tubes/components/subject_nav.html" %}
     {% include "tubes/components/browse_controls.html" %}
     <span class="ms-auto d-flex flex-wrap gap-2">
-      <a href="{% url "oime-proposal-list" %}" class="btn btn-sm btn-dark">All problems</a>
+      <a href="{% url "oime-landing" %}" class="btn btn-sm btn-outline-info">Home</a>
     </span>
   </div>
   {% include "tubes/components/mode_toggle.html" %}

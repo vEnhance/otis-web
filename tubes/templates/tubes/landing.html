@@ -18,12 +18,13 @@
     <hr />
     <h1>Problems</h1>
     <p>
+      <a href="{% url "oime-proposal-list" %}"
+         class="btn btn-outline-secondary">All problems</a>
       {% for code, name in subject_choices %}
         <a href="{% url "oime-subject-browse" code %}"
            title="{{ name }}"
            class="btn btn-outline-primary">{{ name }}</a>
       {% endfor %}
-      <a href="{% url "oime-proposal-list" %}" class="btn btn-dark">All problems</a>
     </p>
     {% include "tubes/components/proposal_table.html" with title="Recent problems" proposals=recent_proposals %}
     {% include "tubes/components/proposal_table.html" with title="Your proposals" proposals=own_proposals %}
