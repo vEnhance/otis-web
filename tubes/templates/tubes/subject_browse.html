@@ -78,7 +78,7 @@
              href="{% url "oime-subject-browse" subject %}{% if proposal.difficulty_params %}?{{ proposal.difficulty_params }}{% endif %}">{{ proposal.difficulty_display }}</a>
           {% if proposal.locked %}
             {# Nothing to have an opinion about yet, and this is where a misclick would be easy. #}
-            <span class="badge border bg-light text-muted">🩷 × {{ proposal.upvote_count }}</span>
+            <span class="badge border bg-light text-muted oime-upvote-locked">🩷 × {{ proposal.upvote_count }}</span>
           {% else %}
             <form method="post"
                   action="{% url "oime-upvote" proposal.pk %}"

@@ -404,6 +404,10 @@ img.emoji {
 .oime-upvote-btn:active {
   transform: scale(0.95);
 }
+/* Its counterpart on a locked card, where there is no vote to cast yet. */
+.oime-upvote-locked {
+  cursor: not-allowed;
+}
 
 /* OIME per-subject browser: the panel standing in for a statement that this
    contributor has not unlocked yet. Hazard stripes, because that is what it is. */
