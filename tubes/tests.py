@@ -1019,29 +1019,40 @@ def test_casual_browse_ignores_bogus_difficulty(otis, raw: str):
 
 
 @pytest.mark.django_db
-def test_casual_browse_buttons_carry_settings(otis):
+def test_casual_browse_controls_carry_settings(otis):
     user, contributor = _verified_contributor()
     contributor.casual_mode = True
     contributor.save()
     otis.login(user)
     resp = otis.get_20x("oime-casual-browse", "N")
     otis.assert_testid(resp, "browse-sort-toggle")
-    otis.assert_testid(resp, "browse-difficulty-cycle")
+    otis.assert_testid(resp, "browse-difficulty-filter")
     assert resp.context["browse_params"] == ""
     assert resp.context["sort_toggle_params"] == "sort=votes"
-    assert resp.context["difficulty_cycle_params"] == "difficulty=1"
 
-    # Each button keeps whatever the other one is set to.
+    # Each control keeps whatever the other one is set to.
     resp = otis.get_20x(
         "oime-casual-browse", "N", data={"sort": "votes", "difficulty": 4}
     )
     assert resp.context["browse_params"] == "sort=votes&difficulty=4"
     assert resp.context["sort_toggle_params"] == "difficulty=4"
-    assert resp.context["difficulty_cycle_params"] == "sort=votes&difficulty=5"
+    options = resp.context["difficulty_options"]
+    assert [o["value"] for o in options] == [None, 1, 2, 3, 4, 5]
+    assert [o["params"] for o in options] == [
+        "sort=votes",
+        "sort=votes&difficulty=1",
+        "sort=votes&difficulty=2",
+        "sort=votes&difficulty=3",
+        "sort=votes&difficulty=4",
+        "sort=votes&difficulty=5",
+    ]
+    assert [o["selected"] for o in options] == [False] * 4 + [True, False]
 
-    # The difficulty button cycles off again after the last difficulty.
-    resp = otis.get_20x("oime-casual-browse", "N", data={"difficulty": 5})
-    assert resp.context["difficulty_cycle_params"] == ""
+    # With no filter on, the dropdown marks "All" as the selected entry.
+    resp = otis.get_20x("oime-casual-browse", "N")
+    assert [o["selected"] for o in resp.context["difficulty_options"]] == [True] + [
+        False
+    ] * 5
 
 
 @pytest.mark.django_db

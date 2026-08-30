@@ -389,16 +389,6 @@ def _parse_difficulty(raw: str | None) -> int | None:
     return difficulty if difficulty in CASUAL_BROWSE_DIFFICULTIES else None
 
 
-def _next_difficulty(difficulty: int | None) -> int | None:
-    """The difficulty the filter button moves to: 1, 2, ..., 5, then off again."""
-    if difficulty is None:
-        return CASUAL_BROWSE_DIFFICULTIES[0]
-    index = CASUAL_BROWSE_DIFFICULTIES.index(difficulty) + 1
-    if index == len(CASUAL_BROWSE_DIFFICULTIES):
-        return None
-    return CASUAL_BROWSE_DIFFICULTIES[index]
-
-
 def _browse_params(sort_by_votes: bool, difficulty: int | None) -> str:
     """The query string (no leading "?") holding the casual browser's settings.
 
@@ -413,6 +403,25 @@ def _browse_params(sort_by_votes: bool, difficulty: int | None) -> str:
     return urlencode(params)
 
 
+def _difficulty_options(
+    sort_by_votes: bool, difficulty: int | None
+) -> list[dict[str, Any]]:
+    """The entries of the difficulty dropdown, "All" first and then 1 through 5.
+
+    Each carries the query string that selects it, so the template only has to render
+    links; the current sort is preserved by every one of them.
+    """
+    return [
+        {
+            "value": value,
+            "label": "All" if value is None else f"🔥 × {value}",
+            "params": _browse_params(sort_by_votes, value),
+            "selected": value == difficulty,
+        }
+        for value in [None, *CASUAL_BROWSE_DIFFICULTIES]
+    ]
+
+
 @verified_required
 def casual_browse(request: HttpRequest, subject: str) -> HttpResponse:
     """Every visible statement in one subject, newest first, in pages of 20.
@@ -423,7 +432,7 @@ def casual_browse(request: HttpRequest, subject: str) -> HttpResponse:
     idea. Every problem the contributor may see is listed, their own included; the
     ones already spoiled for them are just marked as such.
 
-    Two optional query parameters, both driven by buttons on the page itself so that
+    Two optional query parameters, both driven by controls on the page itself so that
     they survive pagination: ``sort=votes`` orders by upvote count instead of by
     recency, and ``difficulty=N`` keeps only problems of that difficulty.
     """
@@ -509,9 +518,7 @@ def casual_browse(request: HttpRequest, subject: str) -> HttpResponse:
             "difficulty": difficulty,
             "browse_params": _browse_params(sort_by_votes, difficulty),
             "sort_toggle_params": _browse_params(not sort_by_votes, difficulty),
-            "difficulty_cycle_params": _browse_params(
-                sort_by_votes, _next_difficulty(difficulty)
-            ),
+            "difficulty_options": _difficulty_options(sort_by_votes, difficulty),
         },
     )
 

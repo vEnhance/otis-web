@@ -1,16 +1,30 @@
 {% comment %}
-The sort and difficulty buttons for the casual full-statement browser. Both are plain
-links carrying query parameters, so they work without JavaScript and survive
-pagination. The heart sorts by upvotes instead of recency; the flame cycles the
-difficulty filter through 1-5 and then off again.
-Context vars: sort_by_votes, difficulty, sort_toggle_params, difficulty_cycle_params,
+The sort and difficulty controls for the casual full-statement browser. Every entry is
+a plain link carrying query parameters read by the view, so the filtering itself needs
+no JavaScript and survives pagination. The heart sorts by upvotes instead of recency;
+the flame opens a dropdown to pick one difficulty, or All.
+Context vars: sort_by_votes, difficulty, sort_toggle_params, difficulty_options,
 subject.
 {% endcomment %}
-<a href="{% url "oime-casual-browse" subject %}?{{ sort_toggle_params }}"
+<a href="{% url "oime-casual-browse" subject %}{% if sort_toggle_params %}?{{ sort_toggle_params }}{% endif %}"
    data-testid="browse-sort-toggle"
    title="{% if sort_by_votes %}Sort by newest{% else %}Sort by most upvoted{% endif %}"
    class="btn btn-sm {% if sort_by_votes %}btn-primary{% else %}btn-outline-primary{% endif %}">🩷</a>
-<a href="{% url "oime-casual-browse" subject %}?{{ difficulty_cycle_params }}"
-   data-testid="browse-difficulty-cycle"
-   title="{% if difficulty %}Showing 🔥 × {{ difficulty }} only; click to change{% else %}Filter by difficulty{% endif %}"
-   class="btn btn-sm {% if difficulty %}btn-primary{% else %}btn-outline-primary{% endif %}">🔥{{ difficulty|default_if_none:"" }}</a>
+<span class="dropdown d-inline-block">
+  <button type="button"
+          data-testid="browse-difficulty-filter"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+          title="Filter by difficulty"
+          class="btn btn-sm dropdown-toggle {% if difficulty %}btn-primary{% else %}btn-outline-primary{% endif %}">
+    🔥{{ difficulty|default_if_none:"" }}
+  </button>
+  <ul class="dropdown-menu">
+    {% for option in difficulty_options %}
+      <li>
+        <a class="dropdown-item{% if option.selected %} active{% endif %}"
+           href="{% url "oime-casual-browse" subject %}{% if option.params %}?{{ option.params }}{% endif %}">{{ option.label }}</a>
+      </li>
+    {% endfor %}
+  </ul>
+</span>
