@@ -15,7 +15,6 @@
     Welcome to the <strong>OTIS Mock AIME <s>Kitchen</s> Lab</strong>!
   </p>
   {% if contributor %}
-    {% include "tubes/components/mode_toggle.html" %}
     <hr />
     <h1>Problems</h1>
     <p>
@@ -32,6 +31,8 @@
       <a href="{% url "oime-proposal-create" %}" class="btn btn-success">Write a problem</a>
       <a href="{% url "oime-setup" %}" class="btn btn-outline-secondary">Change name</a>
     </div>
+    <hr />
+    {% include "tubes/components/mode_toggle.html" %}
   {% else %}
     <div class="mb-4">
       <a href="{% url "oime-setup" %}" class="btn btn-primary">Get Started</a>
@@ -39,136 +40,92 @@
   {% endif %}
   <hr />
   <h1>What to Expect / Instructions</h1>
-  <div class="accordion mb-3" id="oime-instructions">
-    <div class="accordion-item">
-      <h2 class="accordion-header">
-        <button class="accordion-button collapsed"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#oime-instructions-writing"
-                aria-expanded="false"
-                aria-controls="oime-instructions-writing">Writing problems</button>
-      </h2>
-      <div id="oime-instructions-writing"
-           class="accordion-collapse collapse"
-           data-bs-parent="#oime-instructions">
-        <div class="accordion-body">
-          <p>
-            <strong>Note that the database rolls over from year to year</strong>.
-            Because OTIS has such a large community of students,
-            problems submitted to OTIS should no longer be considered secure.
-            If you think you might want to submit a problem to a different
-            competition later in life where problem security is at all relevant,
-            you should not submit it here.
-          </p>
-          <p>
-            You are asked to select a difficulty tier for your problems.
-            This tier the amount of time that testsolvers get to spend on it.
-            <strong>You can't change difficulty after submission!</strong>
-          </p>
-          <ul>
-            <li>
-              <strong>🔥 × 1:</strong> AIME 1-3, solvers get 10 minutes
-            </li>
-            <li>
-              <strong>🔥 × 2:</strong> AIME 4-6, solvers get 15 minutes
-            </li>
-            <li>
-              <strong>🔥 × 3:</strong> AIME 7-9, solvers get 20 minutes
-            </li>
-            <li>
-              <strong>🔥 × 4:</strong> AIME 10-12, solvers get 25 minutes
-            </li>
-            <li>
-              <strong>🔥 × 5:</strong> AIME 13-15, solvers get 30 minutes
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-    <div class="accordion-item">
-      <h2 class="accordion-header">
-        <button class="accordion-button collapsed"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#oime-instructions-solving"
-                aria-expanded="false"
-                aria-controls="oime-instructions-solving">Solving problems</button>
-      </h2>
-      <div id="oime-instructions-solving"
-           class="accordion-collapse collapse"
-           data-bs-parent="#oime-instructions">
-        <div class="accordion-body">
-          <p>
-            You can play in two modes, <b>ranked mode</b> and <b>casual mode</b>.
-          </p>
-          <ul>
-            <li>
-              In <b>ranked mode</b>, you're committing to trying the problems seriously,
-              meaning that we'll use the statistics from ranked mode to evaluate difficulty.
-              We use ranked data when writing acknowledgments for testsolvers in the published packet.
-              When you try problems, we'll record the number of attempts and time taken.
-              <strong>Please try your best on every problem you open;</strong>
-              otherwise, you screw up the statistics we're collecting.
-            </li>
-            <li>
-              In <b>casual mode</b>, you can browse and try whatever problems you like.
-              There's a client-side answer checker, but it doesn't store anything
-              and there's no timers or locks.
-            </li>
-          </ul>
-          <p>
-            You can switch from ranked to casual at any time.
-            If you try to switch from casual to ranked, we'll allow it too,
-            but any problems that were published before you switched
-            are no longer eligible for you to try in ranked mode.
-          </p>
-          <p>
-            After you solve or give up on a proposal, you can read spoilers and comment
-            on the thread for the problem.
-          </p>
-        </div>
-      </div>
-    </div>
-    <div class="accordion-item">
-      <h2 class="accordion-header">
-        <button class="accordion-button collapsed"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#oime-instructions-picking"
-                aria-expanded="false"
-                aria-controls="oime-instructions-picking">How Evan picks the 15 problems</button>
-      </h2>
-      <div id="oime-instructions-picking"
-           class="accordion-collapse collapse"
-           data-bs-parent="#oime-instructions">
-        <div class="accordion-body">
-          <p>For now, final selection of problems and placements is done by Evan.</p>
-          <p>The selection of problems are based on the following criteria.</p>
-          <ul>
-            <li>
-              <strong>Popularity</strong>: as evidenced by comments, upvotes,
-              and Evan's own personal taste.
-            </li>
-            <li>
-              <strong>Solution write-up</strong>: if the solution needs a lot of
-              editing to be presentable (or worse, is just a sketch with no details),
-              then the problem is less likely to be chosen.
-            </li>
-            <li>
-              <strong>Solve rate</strong>: problems with too few correct testsolves
-              are less likely to be chosen.
-              We want problems that OTIS students can actually get right.
-            </li>
-          </ul>
-          <p>
-            Note that problem proposals submitted earlier gain an advantage
-            because there is more time for people to upvote it
-            and more opportunities for it to be testsolved.
-            Thus, submitting problems well before the deadline is advised.
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
+  <h2 class="accordion-header">Writing problems</h2>
+  <p>
+    <strong>Note that the database rolls over from year to year</strong>.
+    Because OTIS has such a large community of students,
+    problems submitted to OTIS should no longer be considered secure.
+    If you think you might want to submit a problem to a different
+    competition later in life where problem security is at all relevant,
+    you should not submit it here.
+  </p>
+  <p>
+    You are asked to select a difficulty tier for your problems.
+    This tier the amount of time that testsolvers get to spend on it.
+  </p>
+  <ul>
+    <li>
+      <strong>🔥 × 1:</strong> AIME 1-3, solvers get 10 minutes
+    </li>
+    <li>
+      <strong>🔥 × 2:</strong> AIME 4-6, solvers get 15 minutes
+    </li>
+    <li>
+      <strong>🔥 × 3:</strong> AIME 7-9, solvers get 20 minutes
+    </li>
+    <li>
+      <strong>🔥 × 4:</strong> AIME 10-12, solvers get 25 minutes
+    </li>
+    <li>
+      <strong>🔥 × 5:</strong> AIME 13-15, solvers get 30 minutes
+    </li>
+  </ul>
+  <p>
+    <strong>You can't change difficulty after submission!</strong>
+    Think hard about which one you pick.
+  </p>
+  <h2 class="accordion-header">Solving problems</h2>
+  <p>
+    You can play in two modes, <b>ranked mode</b> and <b>casual mode</b>.
+  </p>
+  <ul>
+    <li>
+      In <b>ranked mode</b>, you're committing to trying the problems seriously,
+      meaning that we'll use the statistics from ranked mode to evaluate difficulty.
+      We use ranked data when writing acknowledgments for testsolvers in the published packet.
+      When you try problems, we'll record the number of attempts and time taken.
+      <strong>Please try your best on every problem you open;</strong>
+      otherwise, you screw up the statistics we're collecting.
+    </li>
+    <li>
+      In <b>casual mode</b>, you can browse and try whatever problems you like.
+      There's a client-side answer checker, but it doesn't store anything
+      and there's no timers or locks.
+    </li>
+  </ul>
+  <p>
+    You can switch from ranked to casual at any time.
+    If you try to switch from casual to ranked, we'll allow it too,
+    but any problems that were published before you switched
+    are no longer eligible for you to try in ranked mode.
+  </p>
+  <p>
+    After you solve or give up on a proposal, you can read spoilers and comment
+    on the thread for the problem.
+  </p>
+  <h2>How Evan picks the 15 problems</h2>
+  <p>For now, final selection of problems and placements is done by Evan.</p>
+  <p>The selection of problems are based on the following criteria.</p>
+  <ul>
+    <li>
+      <strong>Popularity</strong>: as evidenced by comments, upvotes,
+      and Evan's own personal taste.
+    </li>
+    <li>
+      <strong>Solution write-up</strong>: if the solution needs a lot of
+      editing to be presentable (or worse, is just a sketch with no details),
+      then the problem is less likely to be chosen.
+    </li>
+    <li>
+      <strong>Solve rate</strong>: problems with too few correct testsolves
+      are less likely to be chosen.
+      We want problems that OTIS students can actually get right.
+    </li>
+  </ul>
+  <p>
+    Note that problem proposals submitted earlier gain an advantage
+    because there is more time for people to upvote it
+    and more opportunities for it to be testsolved.
+    Thus, submitting problems well before the deadline is advised.
+  </p>
 {% endblock layout-content %}
