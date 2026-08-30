@@ -941,17 +941,23 @@ def proposal_solution_tex(request: HttpRequest, pk: int) -> HttpResponse:
     written_on = f"{timezone.localtime(proposal.created_at):%Y-%m-%d}"
     content = "\n".join(
         (
-            f"% OIME {proposal.label}: {proposal.title}",
-            f"% Written by {proposal.credit_display} on {written_on}",
+            r"\documentclass[11pt]{article}",
+            r"\usepackage{amsmath,amsthm,amssymb}",
+            r"\begin{document}",
+            f"\\title{{{proposal.label}: {proposal.title}}}",
+            f"\\author{{{proposal.credit_display}}}",
+            f"\\date{{{written_on}}}",
+            r"\maketitle",
             "",
-            "\\textbf{Problem.}",
+            r"\section*{Problem}",
             proposal.statement,
             "",
-            f"\\textbf{{Answer.}} {proposal.answer}",
+            f"\\section*{{Answer}}\n{proposal.answer}",
             "",
-            "\\textbf{Solution.}",
+            r"\section*{Solution}",
             proposal.solution,
             "",
+            r"\end{document}",
         )
     )
     filename = f"oime-{proposal.label}.tex"

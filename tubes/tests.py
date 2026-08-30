@@ -780,7 +780,7 @@ def test_solution_tex_download(otis):
         f'attachment; filename="oime-{proposal.label}.tex"'
     )
     otis.assert_has(resp, "Compute $1+1$.")
-    otis.assert_has(resp, "\\textbf{Answer.} 42")
+    otis.assert_has(resp, "42")
     otis.assert_has(resp, "Clearly $1+1=2$.")
 
 
