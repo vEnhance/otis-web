@@ -1,6 +1,16 @@
 <table class="table table-sm w-auto mb-2">
   <tbody>
     <tr>
+      <th class="pe-4">Your result</th>
+      <td data-testid="stats-your-result">
+        {% if fight.is_complete %}
+          {% include "tubes/components/fight_verdict.html" %}
+        {% else %}
+          —
+        {% endif %}
+      </td>
+    </tr>
+    <tr>
       <th class="pe-4">Fastest clean solve</th>
       <td>
         {% if stats.fastest_clean %}

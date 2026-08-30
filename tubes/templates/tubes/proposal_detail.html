@@ -28,6 +28,23 @@
             </button>
           </form>
         {% endif %}
+        {# Staff archive toggle rides along with the badges to save vertical space. #}
+        {% if request.user.is_superuser %}
+          <form method="post"
+                action="{% url "oime-proposal-archive" proposal.pk %}"
+                class="d-inline">
+            {% csrf_token %}
+            <button type="submit"
+                    class="btn btn-outline-secondary btn-sm"
+                    data-testid="proposal-archive-toggle">
+              {% if proposal.archived %}
+                Unarchive
+              {% else %}
+                Archive
+              {% endif %}
+            </button>
+          </form>
+        {% endif %}
       </div>
       <p class="text-muted">
         Written by {{ proposal.credit_display }}
@@ -50,49 +67,15 @@
       <div class="math-content">{{ proposal.statement }}</div>
     </div>
   </div>
-  {# ---- Staff-only archive toggle ---- #}
-  {% if request.user.is_superuser %}
-    <form method="post"
-          action="{% url "oime-proposal-archive" proposal.pk %}"
-          class="mb-4">
-      {% csrf_token %}
-      <button type="submit"
-              class="btn btn-outline-secondary btn-sm"
-              data-testid="proposal-archive-toggle">
-        {% if proposal.archived %}
-          Unarchive
-        {% else %}
-          Archive
-        {% endif %}
-      </button>
-    </form>
-  {% endif %}
   {# ---- Testsolve stats summary ---- #}
   {% include "tubes/components/proposal_stats.html" %}
   <p class="mb-2">
     <a href="{% url "oime-proposal-results" proposal.pk %}">View full statistics →</a>
   </p>
   <hr />
-  <p class="small text-muted mb-4">
-    {% if is_author %}
-      You wrote this problem, so you can see the solution.
-    {% elif fight.status == "OIME_OK" %}
-      You solved this problem in {{ fight.time_display }}
-      (with {{ fight.wrong_answers }} incorrect answer{{ fight.wrong_answers|pluralize }})
-      on {{ fight.submitted_at|date:"F j, Y" }}.
-    {% elif fight.status == "OIME_FAIL" %}
-      You gave up on this problem on {{ fight.submitted_at|date:"F j, Y" }}.
-    {% elif fight.status == "OIME_TLE" %}
-      You ran out of time on this problem on {{ fight.submitted_at|date:"F j, Y" }}.
-    {% elif fight.status == "OIME_ALE" %}
-      You used up all your answer attempts on this problem on {{ fight.submitted_at|date:"F j, Y" }}.
-    {% elif can_see_solution %}
-      You revealed the solution to this problem.
-    {% endif %}
-  </p>
   {# ---- Casual mode: self-check or reveal the solution on demand ---- #}
   {% if not can_see_solution %}
-    <h3>Solution</h3>
+    <h2>Solution</h2>
     <form method="post" action="{% url "oime-reveal" proposal.pk %}">
       {% csrf_token %}
       <button type="submit" class="btn btn-primary btn-sm">Reveal solution</button>
@@ -116,70 +99,60 @@
       <small class="oime-check-result ms-1"></small>
     </div>
   {% endif %}
-  {# ---- Show attempt result + answer + solution ---- #}
+  {# ---- Answer + solution ---- #}
   {% if can_see_solution %}
-    {% if fight %}
-      {% if fight.status == "OIME_OK" %}
-        <div class="alert alert-success">
-          Solved in {{ fight.time_display }} with {{ fight.wrong_answers }} wrong answer{{ fight.wrong_answers|pluralize }}.
-        </div>
-      {% elif fight.status == "OIME_FAIL" %}
-        <div class="alert alert-secondary" data-testid="fight-gave-up">You gave up on this problem.</div>
-      {% elif fight.status == "OIME_TLE" %}
-        <div class="alert alert-danger">Time limit exceeded.</div>
-      {% elif fight.status == "OIME_ALE" %}
-        <div class="alert alert-danger">
-          Answer limit exceeded ({{ fight.wrong_answers }} wrong answer{{ fight.wrong_answers|pluralize }}).
-        </div>
-      {% endif %}
-    {% endif %}
-    <div class="card mb-4" id="oime-answer-section">
-      <div class="card-header fw-bold">Answer: {{ proposal.answer }}</div>
-      <div class="card-body">
-        <div class="math-content">{{ proposal.solution }}</div>
-      </div>
-    </div>
+    <h2 id="oime-answer-section">Answer: {{ proposal.answer }}</h2>
+    <p class="mb-2">
+      <a href="{% url "oime-proposal-solution-tex" proposal.pk %}"
+         class="btn btn-primary"
+         target="_blank"
+         rel="noopener"
+         data-testid="solution-tex-link">Download solution (TeX)</a>
+    </p>
+    <details class="oime-solution-preview mb-4" data-testid="solution-preview">
+      <summary class="btn btn-secondary">Preview solution with MathJax</summary>
+      <p class="small text-danger mt-3 mb-2">MathJax ≠ LaTeX. This convenience preview only supports basic math.</p>
+      <div class="math-content">{{ proposal.solution }}</div>
+    </details>
   {% endif %}
   {# ---- Discussion (only once the solution is visible) ---- #}
   {% if can_see_solution %}
-    <h3>Discussion</h3>
+    <h2>Discussion</h2>
     {% if comments %}
       {% for comment in comments %}
-        <div class="card mb-2">
-          <div class="card-body">
-            <p class="card-text">{{ comment.content|linebreaks }}</p>
-            <small class="text-muted">
-              {{ comment.author }}
-              {% if comment.author_id == proposal.author_id %}
-                <span class="badge bg-secondary" title="This commenter wrote the problem">Author</span>
+        {% comment %}
+          Plain prose, not a card: the byline hangs off the bottom of the comment
+          it belongs to, and the gap to the next comment is the wider one.
+        {% endcomment %}
+        <div class="mb-4">
+          {{ comment.content|linebreaks }}
+          <p class="small text-muted mb-0">
+            {{ comment.author }}
+            {% if comment.author_id == proposal.author_id %}
+              <span class="badge bg-secondary" title="This commenter wrote the problem">Author</span>
+            {% endif %}
+            · {{ comment.created_at|date:"Y-m-d H:i" }}
+            {% if comment.is_edited %}
+              <span data-testid="comment-edited">(edited {{ comment.updated_at|date:"Y-m-d H:i" }})</span>
+            {% endif %}
+            {% if not proposal.archived %}
+              {% if comment.author == contributor or request.user.is_staff %}
+                · <a href="{% url "oime-comment-edit" comment.pk %}">Edit</a>
               {% endif %}
-              · {{ comment.created_at|date:"Y-m-d H:i" }}
-              {% if comment.is_edited %}
-                <span data-testid="comment-edited">(edited {{ comment.updated_at|date:"Y-m-d H:i" }})</span>
-              {% endif %}
-              {% if not proposal.archived %}
-                {% if comment.author == contributor or request.user.is_staff %}
-                  · <a href="{% url "oime-comment-edit" comment.pk %}">Edit</a>
-                {% endif %}
-              {% endif %}
-            </small>
-          </div>
+            {% endif %}
+          </p>
         </div>
       {% endfor %}
     {% else %}
       <p class="text-muted">No comments yet.</p>
     {% endif %}
     {% if can_comment %}
-      <div class="card mt-3" data-testid="comment-form">
-        <div class="card-header">Add a comment</div>
-        <div class="card-body">
-          <form method="post">
-            {% csrf_token %}
-            {{ comment_form.content }}
-            <button type="submit" name="submit_comment" class="btn btn-primary mt-2">Post Comment</button>
-          </form>
-        </div>
-      </div>
+      <h3>Add a comment</h3>
+      <form method="post" data-testid="comment-form">
+        {% csrf_token %}
+        {{ comment_form.content }}
+        <button type="submit" name="submit_comment" class="btn btn-primary mt-2">Post Comment</button>
+      </form>
     {% endif %}
   {% endif %}
 {% endblock layout-content %}

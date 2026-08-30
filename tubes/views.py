@@ -918,6 +918,57 @@ def proposal_detail(request: HttpRequest, pk: int) -> HttpResponse:
 
 
 @verified_required
+def proposal_solution_tex(request: HttpRequest, pk: int) -> HttpResponse:
+    """Download a problem's answer and solution as a LaTeX file.
+
+    The on-page preview is typeset by MathJax, which understands only a fraction of
+    LaTeX, so the source is what a contributor actually wants once a solution uses
+    anything beyond basic math mode. Gated exactly like the solution itself: the
+    answer is in the file, so anyone who cannot see the solution on the detail page
+    must not be able to fetch it here either.
+    """
+    proposal = get_object_or_404(OIMEProposal, pk=pk)
+    contributor = _get_contributor(request)
+    if contributor is None:
+        return redirect("oime-setup")
+
+    _deny_if_hidden(request, proposal, contributor)
+
+    ctx = _get_solver_context(contributor, proposal)
+    if not ctx["can_see_solution"]:
+        raise PermissionDenied("You cannot see the solution to this problem yet.")
+
+    written_on = f"{timezone.localtime(proposal.created_at):%Y-%m-%d}"
+    content = "\n".join(
+        (
+            r"\documentclass[11pt]{article}",
+            r"\usepackage{amsmath,amsthm,amssymb}",
+            r"\begin{document}",
+            f"\\title{{{proposal.label}: {proposal.title}}}",
+            f"\\author{{{proposal.credit_display}}}",
+            f"\\date{{{written_on}}}",
+            r"\maketitle",
+            "",
+            r"\section*{Problem}",
+            proposal.statement,
+            "",
+            f"\\section*{{Answer}}\n{proposal.answer}",
+            "",
+            r"\section*{Solution}",
+            proposal.solution,
+            "",
+            r"\end{document}",
+        )
+    )
+    filename = f"oime-{proposal.label}.tex"
+    return HttpResponse(
+        content=content,
+        content_type="application/x-tex; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@verified_required
 def proposal_fight(request: HttpRequest, pk: int) -> HttpResponse:
     """Timed solving screen for a ranked contributor with an active attempt."""
     proposal = get_object_or_404(OIMEProposal, pk=pk)
@@ -1185,6 +1236,8 @@ def proposal_results(request: HttpRequest, pk: int) -> HttpResponse:
             "proposal": proposal,
             "contributor": contributor,
             "fights": fights,
+            # The stats table leads with this viewer's own verdict on the problem.
+            "fight": ctx["fight"],
             "stats": _proposal_stats(proposal),
         },
     )
