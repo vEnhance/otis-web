@@ -969,6 +969,82 @@ def test_casual_browse_orders_newest_first(otis):
 
 
 @pytest.mark.django_db
+def test_casual_browse_sorts_by_votes_on_request(otis):
+    user, contributor = _verified_contributor()
+    contributor.casual_mode = True
+    contributor.save()
+    unloved = OIMEProposalFactory.create(subject="A")
+    beloved = OIMEProposalFactory.create(subject="A")
+    liked = OIMEProposalFactory.create(subject="A")
+    for _ in range(3):
+        beloved.upvotes.add(OIMEContributorFactory.create())
+    liked.upvotes.add(OIMEContributorFactory.create())
+    otis.login(user)
+    resp = otis.get_20x("oime-casual-browse", "A", data={"sort": "votes"})
+    assert list(resp.context["page_obj"]) == [beloved, liked, unloved]
+    # Without the parameter the browser is still newest-first.
+    resp = otis.get_20x("oime-casual-browse", "A")
+    assert list(resp.context["page_obj"]) == [liked, beloved, unloved]
+
+
+@pytest.mark.django_db
+def test_casual_browse_filters_by_difficulty(otis):
+    user, contributor = _verified_contributor()
+    contributor.casual_mode = True
+    contributor.save()
+    easy = OIMEProposalFactory.create(subject="C", difficulty=1)
+    hard = OIMEProposalFactory.create(subject="C", difficulty=5)
+    otis.login(user)
+    resp = otis.get_20x("oime-casual-browse", "C", data={"difficulty": 5})
+    assert list(resp.context["page_obj"]) == [hard]
+    assert resp.context["difficulty"] == 5
+    resp = otis.get_20x("oime-casual-browse", "C", data={"difficulty": 1})
+    assert list(resp.context["page_obj"]) == [easy]
+    resp = otis.get_20x("oime-casual-browse", "C")
+    assert list(resp.context["page_obj"]) == [hard, easy]
+    assert resp.context["difficulty"] is None
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("raw", ["0", "6", "banana", ""])
+def test_casual_browse_ignores_bogus_difficulty(otis, raw: str):
+    user, contributor = _verified_contributor()
+    contributor.casual_mode = True
+    contributor.save()
+    proposal = OIMEProposalFactory.create(subject="G", difficulty=2)
+    otis.login(user)
+    resp = otis.get_20x("oime-casual-browse", "G", data={"difficulty": raw})
+    assert list(resp.context["page_obj"]) == [proposal]
+    assert resp.context["difficulty"] is None
+
+
+@pytest.mark.django_db
+def test_casual_browse_buttons_carry_settings(otis):
+    user, contributor = _verified_contributor()
+    contributor.casual_mode = True
+    contributor.save()
+    otis.login(user)
+    resp = otis.get_20x("oime-casual-browse", "N")
+    otis.assert_testid(resp, "browse-sort-toggle")
+    otis.assert_testid(resp, "browse-difficulty-cycle")
+    assert resp.context["browse_params"] == ""
+    assert resp.context["sort_toggle_params"] == "sort=votes"
+    assert resp.context["difficulty_cycle_params"] == "difficulty=1"
+
+    # Each button keeps whatever the other one is set to.
+    resp = otis.get_20x(
+        "oime-casual-browse", "N", data={"sort": "votes", "difficulty": 4}
+    )
+    assert resp.context["browse_params"] == "sort=votes&difficulty=4"
+    assert resp.context["sort_toggle_params"] == "difficulty=4"
+    assert resp.context["difficulty_cycle_params"] == "sort=votes&difficulty=5"
+
+    # The difficulty button cycles off again after the last difficulty.
+    resp = otis.get_20x("oime-casual-browse", "N", data={"difficulty": 5})
+    assert resp.context["difficulty_cycle_params"] == ""
+
+
+@pytest.mark.django_db
 def test_casual_browse_paginates(otis):
     from .views import CASUAL_BROWSE_PAGE_SIZE
 

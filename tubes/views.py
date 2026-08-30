@@ -12,6 +12,7 @@ from django.db.models.query import QuerySet
 from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.http import urlencode
 from django.views.generic import CreateView, ListView, TemplateView, UpdateView
 
 from otisweb.decorators import verified_required
@@ -30,6 +31,7 @@ SUBJECT_NAMES = dict(OIMEProposal.SUBJECT_CHOICES)
 GIVE_UP_RATE_LIMIT = 2  # max give-ups allowed within the window
 GIVE_UP_WINDOW_MINUTES = 10
 CASUAL_BROWSE_PAGE_SIZE = 20
+CASUAL_BROWSE_DIFFICULTIES = [d for d, _ in OIMEProposal.DIFFICULTY_CHOICES]
 
 
 def _get_contributor(request: HttpRequest) -> OIMEContributor | None:
@@ -372,6 +374,45 @@ def go_serious(request: HttpRequest) -> HttpResponse:
     )
 
 
+def _parse_difficulty(raw: str | None) -> int | None:
+    """The difficulty named by a query parameter, or None for "no filter".
+
+    Anything unrecognized is treated as no filter rather than an error: these
+    parameters are set by clicking the browser's own buttons, so a bad value only
+    ever comes from a hand-edited URL, and dropping it quietly is friendlier than a
+    404 on a page whose whole purpose is casual browsing.
+    """
+    try:
+        difficulty = int(raw or "")
+    except ValueError:
+        return None
+    return difficulty if difficulty in CASUAL_BROWSE_DIFFICULTIES else None
+
+
+def _next_difficulty(difficulty: int | None) -> int | None:
+    """The difficulty the filter button moves to: 1, 2, ..., 5, then off again."""
+    if difficulty is None:
+        return CASUAL_BROWSE_DIFFICULTIES[0]
+    index = CASUAL_BROWSE_DIFFICULTIES.index(difficulty) + 1
+    if index == len(CASUAL_BROWSE_DIFFICULTIES):
+        return None
+    return CASUAL_BROWSE_DIFFICULTIES[index]
+
+
+def _browse_params(sort_by_votes: bool, difficulty: int | None) -> str:
+    """The query string (no leading "?") holding the casual browser's settings.
+
+    The page number is deliberately left out: any change of sort or filter reshuffles
+    the list, so whatever page the contributor was on no longer means anything.
+    """
+    params: dict[str, str] = {}
+    if sort_by_votes:
+        params["sort"] = "votes"
+    if difficulty is not None:
+        params["difficulty"] = str(difficulty)
+    return urlencode(params)
+
+
 @verified_required
 def casual_browse(request: HttpRequest, subject: str) -> HttpResponse:
     """Every visible statement in one subject, newest first, in pages of 20.
@@ -381,6 +422,10 @@ def casual_browse(request: HttpRequest, subject: str) -> HttpResponse:
     mode nothing is timed or recorded, so browsing for a problem to try is the whole
     idea. Every problem the contributor may see is listed, their own included; the
     ones already spoiled for them are just marked as such.
+
+    Two optional query parameters, both driven by buttons on the page itself so that
+    they survive pagination: ``sort=votes`` orders by upvote count instead of by
+    recency, and ``difficulty=N`` keeps only problems of that difficulty.
     """
     if subject not in SUBJECT_NAMES:
         raise Http404("Not an OIME subject.")
@@ -394,12 +439,22 @@ def casual_browse(request: HttpRequest, subject: str) -> HttpResponse:
         )
         return redirect("oime-proposal-list")
 
+    sort_by_votes = request.GET.get("sort") == "votes"
+    difficulty = _parse_difficulty(request.GET.get("difficulty"))
+
     proposals = (
         OIMEProposal.objects.filter(archived=False, is_draft=False, subject=subject)
         .select_related("author")
         .annotate(upvote_count=Count("upvotes", distinct=True))
-        .order_by("-pk")
     )
+    if difficulty is not None:
+        proposals = proposals.filter(difficulty=difficulty)
+    # Ties on upvote count fall back to recency, so the order is always total and
+    # pagination cannot show the same problem twice.
+    if sort_by_votes:
+        proposals = proposals.order_by("-upvote_count", "-pk")
+    else:
+        proposals = proposals.order_by("-pk")
     paginator = Paginator(proposals, CASUAL_BROWSE_PAGE_SIZE)
     page_obj = paginator.get_page(request.GET.get("page"))
 
@@ -442,6 +497,13 @@ def casual_browse(request: HttpRequest, subject: str) -> HttpResponse:
             "subject": subject,
             "subject_name": SUBJECT_NAMES[subject],
             "subject_choices": OIMEProposal.SUBJECT_CHOICES,
+            "sort_by_votes": sort_by_votes,
+            "difficulty": difficulty,
+            "browse_params": _browse_params(sort_by_votes, difficulty),
+            "sort_toggle_params": _browse_params(not sort_by_votes, difficulty),
+            "difficulty_cycle_params": _browse_params(
+                sort_by_votes, _next_difficulty(difficulty)
+            ),
         },
     )
 

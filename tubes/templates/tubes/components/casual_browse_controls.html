@@ -1,0 +1,16 @@
+{% comment %}
+The sort and difficulty buttons for the casual full-statement browser. Both are plain
+links carrying query parameters, so they work without JavaScript and survive
+pagination. The heart sorts by upvotes instead of recency; the flame cycles the
+difficulty filter through 1-5 and then off again.
+Context vars: sort_by_votes, difficulty, sort_toggle_params, difficulty_cycle_params,
+subject.
+{% endcomment %}
+<a href="{% url "oime-casual-browse" subject %}?{{ sort_toggle_params }}"
+   data-testid="browse-sort-toggle"
+   title="{% if sort_by_votes %}Sort by newest{% else %}Sort by most upvoted{% endif %}"
+   class="btn btn-sm {% if sort_by_votes %}btn-primary{% else %}btn-outline-primary{% endif %}">🩷</a>
+<a href="{% url "oime-casual-browse" subject %}?{{ difficulty_cycle_params }}"
+   data-testid="browse-difficulty-cycle"
+   title="{% if difficulty %}Showing 🔥 × {{ difficulty }} only; click to change{% else %}Filter by difficulty{% endif %}"
+   class="btn btn-sm {% if difficulty %}btn-primary{% else %}btn-outline-primary{% endif %}">🔥{{ difficulty|default_if_none:"" }}</a>
