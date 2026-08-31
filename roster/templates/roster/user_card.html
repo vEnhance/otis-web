@@ -42,12 +42,13 @@ Optionally set `tint` to a Bootstrap color name (e.g. danger, success) to color 
         <tr>
           <th>Auth</th>
           <td>
-            {% for method in r.auth_methods %}
-              {{ method }}
-              {% if not forloop.last %},{% endif %}
-            {% empty %}
+            {% if r.auth_methods %}
+              <ul>
+                {% for method in r.auth_methods %}<li>{{ method }}</li>{% endfor %}
+              </ul>
+            {% else %}
               (none)
-            {% endfor %}
+            {% endif %}
           </td>
         </tr>
         <tr>
