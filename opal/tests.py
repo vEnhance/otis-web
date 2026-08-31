@@ -616,6 +616,35 @@ def test_leaderboard_early_access(otis):
 
 
 @pytest.mark.django_db
+def test_early_access_excludes_plain_staff(otis):
+    """Only superusers and the Testsolver group can open a hunt before it starts."""
+    testsolver_group = GroupFactory(name="Testsolver")
+    verified_group = GroupFactory(name="Verified")
+    hunt = OpalHuntFactory.create(
+        slug="hunt", start_date=datetime.datetime(2024, 8, 10, tzinfo=UTC)
+    )
+    OpalPuzzleFactory.create(hunt=hunt, answer="one", order=1)
+
+    with freeze_time("2024-08-05"):
+        otis.login(UserFactory.create(username="staffer", is_staff=True))
+        otis.assert_40x(otis.get("opal-puzzle-list", "hunt"))
+
+        otis.login(
+            UserFactory.create(
+                username="testsolver", groups=(testsolver_group, verified_group)
+            )
+        )
+        resp = otis.get_20x("opal-puzzle-list", "hunt")
+        assert resp.context["has_early_access"] is True
+
+        otis.login(
+            UserFactory.create(username="root", is_staff=True, is_superuser=True)
+        )
+        resp = otis.get_20x("opal-puzzle-list", "hunt")
+        assert resp.context["has_early_access"] is True
+
+
+@pytest.mark.django_db
 def test_person_log(otis):
     """Test the person_log view (admin only)."""
     verified_group = GroupFactory(name="Verified")
