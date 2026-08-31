@@ -5,7 +5,7 @@
 {% endblock title %}
 {% block layout-content %}
   <p>
-    <a href="{% url "market-list" %}">Back to market list.</a>
+    <a href="{{ market_list_url }}">Back to market list.</a>
   </p>
   {% if request.user.is_superuser %}
     {% if not market.has_ended or not market.answer %}
