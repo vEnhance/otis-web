@@ -142,13 +142,13 @@ def test_results_back_link(otis, market_data):
     with freeze_time("2050-11-01", tz_offset=0):
         otis.login("alice")
         resp = otis.get_20x("market-results", "guess-my-ssn")
-        assert resp.context["market_list_url"] == otis.url("market-list")
+        otis.assert_not_has(resp, otis.url("market-list-past"))
 
         market = Market.objects.get(slug="guess-my-ssn")
         market.semester = SemesterFactory.create(active=False)
         market.save()
         resp = otis.get_20x("market-results", "guess-my-ssn")
-        assert resp.context["market_list_url"] == otis.url("market-list-past")
+        otis.assert_has(resp, otis.url("market-list-past"))
 
 
 @pytest.mark.django_db

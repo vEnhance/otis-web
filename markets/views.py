@@ -112,9 +112,6 @@ class MarketResults(LoginRequiredMixin, ListView[Guess]):
             context["best_guess"] = (
                 Guess.objects.filter(market=self.market).order_by("-score").first()
             )
-        context["market_list_url"] = reverse(
-            "market-list" if self.market.semester.active else "market-list-past"
-        )
         return context
 
     def get_queryset(self) -> QuerySet[Guess]:
