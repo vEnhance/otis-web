@@ -20,6 +20,7 @@ from rpg.factories import (
     QuestCompleteFactory,
     VulnerabilityRecordFactory,
 )
+from rpg.forms import DiamondsForm
 from rpg.levelsys import (
     annotate_student_queryset_with_scores,
     get_level_info,
@@ -783,6 +784,14 @@ def test_repeat_of_owned_code_does_not_reset_rate_limit(otis):
     assert INVALID_CODE in message_texts(resp)
     resp = otis.post_20x("stats", alice.pk, data={"code": WRONG_CODE})
     assert rate_limited(resp)
+
+
+def test_diamond_form_has_no_client_side_validation():
+    """The browser must submit any nonempty guess, so the server can record it."""
+    attrs = DiamondsForm().fields["code"].widget.attrs
+    assert "pattern" not in attrs
+    assert "minlength" not in attrs
+    assert "maxlength" not in attrs
 
 
 @pytest.mark.django_db
