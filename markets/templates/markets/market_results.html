@@ -5,7 +5,12 @@
 {% endblock title %}
 {% block layout-content %}
   <p>
-    <a href="{% url "market-list" %}">Back to market list.</a>
+    {% if market.semester.active %}
+      <a href="{% url "market-list" %}" data-testid="market-back-link">Back to market list.</a>
+    {% else %}
+      <a href="{% url "market-list-past" %}"
+         data-testid="market-back-link-past">Back to market list.</a>
+    {% endif %}
   </p>
   {% if request.user.is_superuser %}
     {% if not market.has_ended or not market.answer %}

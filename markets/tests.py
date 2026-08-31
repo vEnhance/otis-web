@@ -138,6 +138,22 @@ def test_results_perms(otis, market_data):
 
 
 @pytest.mark.django_db
+def test_results_back_link(otis, market_data):
+    with freeze_time("2050-11-01", tz_offset=0):
+        otis.login("alice")
+        resp = otis.get_20x("market-results", "guess-my-ssn")
+        otis.assert_testid(resp, "market-back-link", count=1)
+        otis.assert_testid(resp, "market-back-link-past", count=0)
+
+        market = Market.objects.get(slug="guess-my-ssn")
+        market.semester = SemesterFactory.create(active=False)
+        market.save()
+        resp = otis.get_20x("market-results", "guess-my-ssn")
+        otis.assert_testid(resp, "market-back-link", count=0)
+        otis.assert_testid(resp, "market-back-link-past", count=1)
+
+
+@pytest.mark.django_db
 def test_guess_perms(otis, market_data):
     with freeze_time("2050-01-01", tz_offset=0):
         otis.login("alice")
