@@ -99,6 +99,7 @@ class JSONData(TypedDict):
     # ApplyUUID
     uuid: str
     percent_aid: int
+    applicant_name: str
 
 
 PSET_VENUEQ_INIT_QUERYSET = PSet.objects.filter(
@@ -781,7 +782,11 @@ def announcement_handler(action: str, data: JSONData) -> JsonResponse:
 
 def apply_handler(action: str, data: JSONData) -> JsonResponse:
     del action
-    au = ApplyUUID.objects.create(uuid=data["uuid"], percent_aid=data["percent_aid"])
+    au = ApplyUUID.objects.create(
+        uuid=data["uuid"],
+        percent_aid=data["percent_aid"],
+        applicant_name=data["applicant_name"],
+    )
     return JsonResponse({"pk": au.pk})
 
 

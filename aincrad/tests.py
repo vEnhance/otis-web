@@ -801,11 +801,14 @@ def test_apply_uuid_handler(otis):
             "token": EXAMPLE_PASSWORD,
             "uuid": "f81d4fae-7dec-11d0-a765-00a0c91e6bf6",  # no that's not a diamond
             "percent_aid": 50,
+            "applicant_name": "Alice Applicant",
         },
     )
     assert (
         ApplyUUID.objects.filter(
-            uuid="f81d4fae-7dec-11d0-a765-00a0c91e6bf6", percent_aid=50
+            uuid="f81d4fae-7dec-11d0-a765-00a0c91e6bf6",
+            percent_aid=50,
+            applicant_name="Alice Applicant",
         ).count()
         == 1
     )

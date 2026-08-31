@@ -47,6 +47,7 @@ class ApplyUUIDIEResource(resources.ModelResource):
             "enabled",
             "created_at",
             "registered_at",
+            "applicant_name",
         )
         export_order = fields
 
@@ -79,6 +80,7 @@ class ApplyUUIDAdmin(ImportExportModelAdmin):
         "reg",
         "created_at",
         "registered_at",
+        "applicant_name",
     )
     list_display_links = (
         "pk",

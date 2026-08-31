@@ -1942,6 +1942,7 @@ def test_applyuuid_admin_import_export(otis) -> None:
         "enabled",
         "created_at",
         "registered_at",
+        "applicant_name",
     ]
 
     dataset = tablib.Dataset(headers=["uuid", "percent_aid"])
