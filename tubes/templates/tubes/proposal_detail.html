@@ -119,30 +119,28 @@
   {% if can_see_solution %}
     <h2>Discussion</h2>
     {% if comments %}
-      {% for comment in comments %}
-        {% comment %}
-          Plain prose, not a card: the byline hangs off the bottom of the comment
-          it belongs to, and the gap to the next comment is the wider one.
-        {% endcomment %}
-        <div class="mb-4">
-          {{ comment.content|linebreaks }}
-          <p class="small text-muted mb-0">
-            {{ comment.author }}
-            {% if comment.author_id == proposal.author_id %}
-              <span class="badge bg-secondary" title="This commenter wrote the problem">Author</span>
-            {% endif %}
-            · {{ comment.created_at|date:"Y-m-d H:i" }}
-            {% if comment.is_edited %}
-              <span data-testid="comment-edited">(edited {{ comment.updated_at|date:"Y-m-d H:i" }})</span>
-            {% endif %}
-            {% if not proposal.archived %}
-              {% if comment.author == contributor or request.user.is_staff %}
-                · <a href="{% url "oime-comment-edit" comment.pk %}">Edit</a>
+      <ul>
+        {% for comment in comments %}
+          <li class="mb-4">
+            {{ comment.content|linebreaks }}
+            <p class="small text-muted mb-0">
+              {{ comment.author }}
+              {% if comment.author_id == proposal.author_id %}
+                <span class="badge bg-secondary" title="This commenter wrote the problem">Author</span>
               {% endif %}
-            {% endif %}
-          </p>
-        </div>
-      {% endfor %}
+              · {{ comment.created_at|date:"Y-m-d H:i" }}
+              {% if comment.is_edited %}
+                <span data-testid="comment-edited">(edited {{ comment.updated_at|date:"Y-m-d H:i" }})</span>
+              {% endif %}
+              {% if not proposal.archived %}
+                {% if comment.author == contributor or request.user.is_staff %}
+                  · <a href="{% url "oime-comment-edit" comment.pk %}">Edit</a>
+                {% endif %}
+              {% endif %}
+            </p>
+          </li>
+        {% endfor %}
+      </ul>
     {% else %}
       <p class="text-muted">No comments yet.</p>
     {% endif %}
