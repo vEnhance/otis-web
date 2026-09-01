@@ -9,22 +9,21 @@
 \usepackage{booktabs}
 \usepackage{lastpage}
 \usepackage[usenames,svgnames,dvipsnames]{xcolor}
-\usepackage[framemethod=TikZ]{mdframed}
-\usepackage[colorlinks]{hyperref}
-\usetikzlibrary{shadows}
-\mdfdefinestyle{mdpurplebox}{roundcorner=10pt,linewidth=1pt,
-  skipabove=12pt,skipbelow=12pt,innertopmargin=9pt,innerbottommargin=9pt,
-  linecolor=black,backgroundcolor=red!60!black,
-  shadow=true,shadowsize=12pt,shadowcolor=black!30,
-  frametitleaboveskip=4pt,frametitlebelowskip=4pt,frametitlebackgroundcolor=black,
-  frametitlefont=\bfseries\sffamily\color{white},frametitlerule=true}
-\newcommand{\makeheader}{\begin{mdframed}[style=mdpurplebox,
-  frametitle={$\diamondsuit$ OPAL Hunt \thehuntnumber}]
+\usepackage[skins]{tcolorbox}
+\usepackage[colorlinks,pdfusetitle]{hyperref}
+\tcbset{opalbox/.style={enhanced,arc=10pt,boxrule=1pt,
+  before skip=2pt,after skip=12pt,top=6pt,bottom=6pt,
+  colframe=black,colback=red!60!black,
+  toptitle=2pt,bottomtitle=2pt,colbacktitle=black,coltitle=white,
+  fonttitle=\bfseries\sffamily,
+  shadow={8pt}{-8pt}{0pt}{black!30}}}
+\newcommand{\makeheader}{\begin{tcolorbox}[opalbox,
+  title={$\diamondsuit$ OPAL Hunt \thehuntnumber}]
   \centering\huge\sffamily\bfseries\color{white} \thepuzzletitle
-\end{mdframed}}
+\end{tcolorbox}}
 \newenvironment{flavortext}%
-{\trivlist\nopagebreak\parindent0pt\item\relax\obeylines\color{red!50!black}\sffamily\itshape}%
-  {\par \nopagebreak\endtrivlist}
+  {\trivlist\nopagebreak\parindent0pt\item\relax\obeylines\color{red!50!black}\sffamily\itshape}%
+  {\par\nopagebreak\endtrivlist}
 \newcommand{\hrulebar}{\bgroup\color{red!30!black}
 \par\hspace{\fill}\rule{0.95\linewidth}{.7pt}\hspace{\fill}
 \par\nointerlineskip \vspace{\baselineskip}\egroup}
