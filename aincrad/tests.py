@@ -1,7 +1,6 @@
 from hashlib import sha256
 
 import pytest
-from django.contrib.auth.hashers import make_password
 from django.core.files.uploadedfile import SimpleUploadedFile
 from pytest_django import Settings
 
@@ -30,8 +29,10 @@ READONLY_TOKEN = "look but do not touch"
 
 @pytest.fixture(autouse=True)
 def api_tokens(settings: Settings) -> None:
-    settings.API_TOKEN_HASH_FULL = make_password(FULL_TOKEN)
-    settings.API_TOKEN_HASH_READONLY = make_password(READONLY_TOKEN)
+    settings.API_TOKEN_HASH_FULL = sha256(FULL_TOKEN.encode("utf-8")).hexdigest()
+    settings.API_TOKEN_HASH_READONLY = sha256(
+        READONLY_TOKEN.encode("utf-8")
+    ).hexdigest()
 
 
 def opal_pdf(body: bytes) -> SimpleUploadedFile:
@@ -342,14 +343,6 @@ def test_failed_auth(otis):
             "token": "this wrong password is not a puzzle",
         },
     )
-    assert resp.status_code == 418
-
-
-@pytest.mark.django_db
-def test_sha256_hash_still_accepted(otis, aincrad_setup, settings: Settings):
-    settings.API_TOKEN_HASH_FULL = sha256(FULL_TOKEN.encode("utf-8")).hexdigest()
-    otis.post_20x("api", json={"action": "init", "token": FULL_TOKEN})
-    resp = otis.post_40x("api", json={"action": "init", "token": "wrong"})
     assert resp.status_code == 418
 
 
