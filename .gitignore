@@ -9,7 +9,6 @@ otisweb/static/answersheets/*.log
 otisweb/static/answersheets/*.pdf
 .env
 .venv
-evanchen-cc-*.json
 coverage/*
 .coverage
 .vscode/
