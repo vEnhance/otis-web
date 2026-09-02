@@ -33,7 +33,7 @@ IS_PRODUCTION=0
 
 # CERT_HASH_KEY="cert hash key"
 
-# Hashes of the aincrad API tokens; see ./manage.py mkapitoken
+# SHA-256 hexdigests of the aincrad API tokens
 # API_TOKEN_HASH_FULL="hash of the token allowed to do anything"
 # API_TOKEN_HASH_READONLY="hash of the token allowed only to run init"
 

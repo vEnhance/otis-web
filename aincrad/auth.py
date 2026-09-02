@@ -1,16 +1,15 @@
 """Token authentication for the aincrad API.
 
 Two tokens are recognized: a full-access one, and a read-only one which may
-only run the actions in `READONLY_ACTIONS`. Each is configured as the hash of
-the token, in either of the two formats `token_matches` accepts;
-`./manage.py mkapitoken` generates a token and prints its hash.
+only run the actions in `READONLY_ACTIONS`. Each is configured as the SHA-256
+hexdigest of the token, which is safe as long as the tokens are long random
+strings rather than anything memorable.
 """
 
 import logging
 from hashlib import sha256
 
 from django.conf import settings
-from django.contrib.auth.hashers import check_password
 from django.core.exceptions import SuspiciousOperation
 from django.http.request import HttpRequest
 from django.http.response import JsonResponse
@@ -34,17 +33,6 @@ def get_token(request: HttpRequest, fallback: str | None = None) -> str | None:
 
 
 def token_matches(token: str, target_hash: str) -> bool:
-    """Check `token` against either a Django password hash or a SHA-256 digest.
-
-    A "$" is what Django's hashers put between the algorithm name and the salt,
-    so its presence is what tells the two formats apart.
-    """
-    if "$" in target_hash:
-        try:
-            return check_password(token, target_hash)
-        except ValueError:
-            logger.error("An aincrad token hash names an unknown algorithm")
-            return False
     return constant_time_compare(sha256(token.encode("utf-8")).hexdigest(), target_hash)
 
 
