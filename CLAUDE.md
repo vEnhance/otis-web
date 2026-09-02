@@ -7,40 +7,61 @@ This file provides guidance for Claude Code when working with this repository.
 OTIS-WEB is a Django-based course management system for OTIS.
 The production server is hosted on PythonAnywhere.
 
+`README.md` covers installation and `CONTRIBUTING.md` covers the human-facing
+workflow; this file only adds what is specific to working here as an agent.
+
 ## Tech Stack
 
-- **Framework**: Django 6.0+
+- **Framework**: Django 6.0 (pinned `>=6.0.7,<6.1.0`)
 - **Python**: 3.13+
-- **Package Manager**: uv
+- **Package manager**: uv
 - **Database**: SQLite (dev), MySQL (prod)
-- **Type Checking**: pyright
-- **Linting/Formatting**: ruff, djlint
-- **Testing**: pytest with pytest-django, pytest-xdist, coverage
+- **Type checking**: pyright
+- **Testing**: pytest with pytest-django, pytest-xdist, factory-boy, freezegun, coverage
+- **Hooks**: prek (a pre-commit reimplementation), configured in `prek.toml`
+- **Formatters/linters**: ruff (Python), djlint (templates), prettier (CSS/JS/JSON/YAML),
+  rumdl (Markdown), codespell, shellcheck and shfmt (shell), zizmor (workflows)
 
 ## Common Commands
 
 ```bash
-make install          # Install dependencies with uv
-make runserver        # Run Django development server
+make install          # Install dependencies and git hooks
+make runserver        # Run Django development server (runserver_plus)
+make createsuperuser  # Create an admin user
 make migrate          # Apply database migrations
-make migrations       # Create new migrations
-make check            # Run Django checks and pyright type checking
+make migrations       # Create new migrations, then format them
+make check            # Django checks, template validation, missing-migration check, pyright
 make test             # Run tests with coverage
-make fmt              # Run code formatters (prek)
+make fmt              # Run all formatters and linters via prek
+make ci               # fmt + check + test, i.e. everything GitHub Actions runs
 ```
+
+`make fmt` rewrites files in place, so re-read anything you had open afterwards.
+
+The pre-push hook runs `make fmt`, `make check`, and `make test`, so a push
+takes a few minutes and fails loudly rather than pushing broken code.
 
 ## Project Structure
 
-Key Django apps:
-
-- `core/` - Core models and utilities
-- `dashboard/` - Student dashboard
-- `roster/` - Student roster management
-- `exams/` - Exam management
-- `arch/` - Problem archive
-- `payments/` - Stripe payment integration
-- `rpg/` - Achievement/gamification system
-- `otisweb/` - Main project settings
+```text
+otisweb/            Project settings, URLs, shared mixins and decorators
+otisweb_testsuite/  The `otis` test fixture and faker helpers
+core/               Semesters, units, unit groups, user profiles
+roster/             Students, assistants, invoices, unit petitions, registration
+dashboard/          Student portal: problem set uploads, announcements, downloads
+arch/               Problem archive: statements, hints, votes
+exams/              Practice exams, quizzes, mock attempts
+rpg/                Achievements, levels, quests, palace carvings
+payments/           Stripe integration and worker job board
+suggestions/        Student-submitted problem suggestions
+tubes/              Testsolving containers, plus OIME proposals and voting
+opal/               OPAL puzzle hunts
+hanabi/             hanab.live contests and replays
+markets/            Estimation markets and guesses
+yearbook/           Student yearbook entries
+mouse/              USEMO scoring and grader pages
+aincrad/            JSON API endpoints for external scripts (token-authenticated)
+```
 
 ## Development Guidelines
 
@@ -48,14 +69,35 @@ Key Django apps:
 
 - Follow Google's Python style guide
 - Use type annotations for function parameters and return types
-- Run `make fmt` before committing to auto-format code
-- Run `make check` to verify type checking passes
+- Run `make fmt` before committing and `make check` to verify types
+
+### Commits
+
+The `commit-msg` hook enforces Conventional Commits. The type must be one of:
+
+```text
+feat fix build ci chore docs drop edit perf polish
+root refactor revert style temp tests
+```
+
+A scope is usually the app name, e.g. `feat(roster): add applicant_name field`.
+Append `!` for a breaking change: `refactor(roster)!: rename UnitInquiry`.
+
+### Pull Requests
+
+**Leave the PR body empty.** Evan rewrites it anyway, so generating one is
+wasted effort. The title still matters — it becomes the squashed commit message,
+so it must follow the commit conventions above.
 
 ### Testing
 
-- Write tests for any new functionality in `*/tests.py` files
-- Run `make test` to execute tests with coverage
-- Tests use pytest with the `--reuse-db` flag for speed
+Tests are plain pytest functions in `*/tests.py`, marked `@pytest.mark.django_db`
+and built from the per-app `factories.py`. The `otis` fixture
+(`otisweb_testsuite/fixtures.py`) wraps the Django test client with `login`,
+`get_ok`/`post_redirects`-style helpers, and the assertions below.
+`dashboard/tests.py` is the worked example. `make test` runs them in parallel with
+`--reuse-db`, so after adding a migration run `uv run pytest --create-db` once to
+rebuild the cached test database.
 
 #### What to assert on
 
@@ -81,8 +123,6 @@ the contract:
 - **Views whose output is text** — the mailing-list and export views, where the
   rendered text is the product.
 
-`dashboard/tests.py` is the worked example of this style.
-
 Asserting on `messages` text is fine when the string is a fixed literal — it
 lives in `views.py` next to the code you're editing, so a reword breaks one
 obvious test. But do **not** assert on a message that interpolates a value; that
@@ -98,19 +138,19 @@ Import it as `from django.contrib.messages import constants as message_levels` �
 
 ### Database
 
-- Use `make migrations` to create new migrations
-- Use `make migrate` to apply migrations
-- Fixtures are in `fixtures/` directory; load with `./fixtures/load-all.sh`
+- Use `make migrations` to create new migrations and `make migrate` to apply them
+- `make check` fails if a model change has no migration
+- Fixtures are in `fixtures/`; load them with `./fixtures/load-all.sh`
 
 ### Environment Variables
 
-- Copy `env` to `.env` and configure as needed
-- Required for Stripe integration and other optional features
+- Copy `env` to `.env` and uncomment what you need
+- Only required for optional integrations (Stripe, Discord webhooks, cloud storage)
 
 ## Type Checking Notes
 
-The codebase is heavily type-checked with pyright. Key settings:
+The codebase is heavily type-checked with pyright. Key settings in `pyproject.toml`:
 
-- `typeCheckingMode = "basic"`
+- `typeCheckingMode = "basic"`, with many individual rules raised to `"error"`
 - Migrations and test files are excluded from type checking
 - Django stubs are installed for better type inference
