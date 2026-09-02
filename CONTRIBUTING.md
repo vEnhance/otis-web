@@ -160,28 +160,6 @@ uv run prek install
 
 This will install hooks that run the formatters and linters before each commit.
 
-### Docker
-
-If you're using Docker, @AmoleR has created Dockerfile.dev that works well enough.
-Something to note is that the last line (creation of `superuser`) doesn't actually
-work right now due to the interactive nature of django's default, so you have to
-manually run it. To spin up the image, run
-
-```sh
-docker build -f Dockerfile.dev -t otis-web .
-docker run \
-  -v $(pwd):/app \ # This links your current edits into the docker
-  -p 8000:8000   \ # This maps ports. Change the first number if you wish.
-  -it            \ # Connect terminal stdin/stdout with docker
-  otis-web sh
-```
-
-Once in there, use `uv run python ...` to run any python scripts. Also make sure
-that you start the runserver with `uv run python manage.py runserver 0.0.0.0:8000`,
-as this will connect to the port you put in the `docker run` command. If you changed
-it from port 8000 in the `docker run` command, **DO NOT** change it here - instead, just
-go to `localhost:PORT`, where `PORT` is the specified port (not 8000 if you changed it).
-
 ## LLM usage for pull requests
 
 Nothing surprising here:

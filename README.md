@@ -72,24 +72,6 @@ Optional steps:
   Add these API keys to `.env` (the three `STRIPE_*` variables).
   Then run `stripe listen --forward-to localhost:8000/payments/webhook/`.
 
-### Using Docker
-
-1. Follow steps 1 - 3 from the above tutorial.
-2. Make sure to install [Docker](https://www.docker.com/) and make sure you
-   download a version compatible with your computer.
-3. Set up the 3 environment variables at the bottom of `env` by copying them to
-   `.env` and uncommenting them. Note that you should not have any spaces (it is
-   fine to leave the values as they are, but if you want to change anything, just
-   make sure there is no whitespace surrounding the `=`).
-4. Run `docker compose build`. Wait for it to finish.
-5. To start the server, run `docker compose up -d`. To execute a command inside
-   the container, run `docker exec -it otis-web /bin/bash`. To stop the server,
-   run `docker compose down`.
-
-Note: You may need to delete db.sqlite3 if you're not getting desired results,
-as it serves as a cache. At this point, spinning up 2 separate containers with
-separate data stores is not supported.
-
 ## Feature requests or bug reports
 
 Submit an [issue on GitHub](https://github.com/vEnhance/otis-web/issues).
