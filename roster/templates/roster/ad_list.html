@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% load static %}
 {% block title %}
-  Authorized instructor listing
+  Available instructors
 {% endblock title %}
 {% block layout-content %}
   <p>
@@ -35,6 +35,9 @@
         <a href="{% url "admin:roster_assistant_change" assistant.pk %}">(admin edit)</a>
       {% endif %}
     </h2>
+    <p class="fst-italic text-muted" data-testid="ad-updated-at">
+      Last updated at {{ assistant.updated_at|date:"Y-m-d H:i T" }}
+    </p>
     {% if assistant.ad_blurb %}
       <div>{{ assistant.ad_blurb|linebreaks }}</div>
     {% else %}

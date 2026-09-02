@@ -2059,6 +2059,8 @@ def test_ad_update(otis) -> None:
     resp = otis.get_20x("ad-list")
     otis.assert_testid(resp, "ad-enable-prompt")
 
+    original_updated_at = assistant.updated_at
+
     otis.get_20x("ad-update")
     resp = otis.post_20x(
         "ad-update",
@@ -2078,9 +2080,12 @@ def test_ad_update(otis) -> None:
     assert assistant.ad_url == "https://evanchen.cc/"
     assert assistant.ad_email == "overlord@evanchen.cc"
     assert assistant.ad_blurb == "I'm an ovie!"
+    assert assistant.updated_at > original_updated_at
+    assert assistant.created_at < assistant.updated_at
 
     resp = otis.get_20x("ad-list")
     otis.assert_testid(resp, "ad-update-prompt")
+    otis.assert_testid(resp, "ad-updated-at")
 
 
 @pytest.mark.django_db
