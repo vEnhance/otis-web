@@ -158,7 +158,7 @@ disable = ["tall-model", "missing-related-name", "checking-settings-debug", "nul
 skip = "roster/country_abbrevs.py,*/migrations/*.py,uv.lock"
 count = ""
 quiet-level = 3
-ignore-words-list = "assertIn,callin"
+ignore-words-list = "assertIn"
 
 [tool.djlint]
 profile = "django"

@@ -563,12 +563,14 @@ def show_puzzle(
                         reverse("opal-finish", args=(puzzle.hunt.slug, puzzle.slug))
                     )
             elif attempt.is_close:
-                messages.warning(request, f"Keep going for {puzzle.title}...")
+                # codespell:ignore-next-line callin
                 if answerize(attempt.guess).startswith("CALLIN"):
                     messages.info(
                         request,
                         'In puzzle hunts, "call in X" is an instruction to submit the answer X',
                     )
+                else:
+                    messages.info(request, f"Keep going for {puzzle.title}...")
             else:
                 messages.warning(request, f"Sorry, wrong answer to {puzzle.title}.")
             return HttpResponseRedirect(puzzle.get_absolute_url())
