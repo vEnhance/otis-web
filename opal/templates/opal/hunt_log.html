@@ -16,7 +16,10 @@
     <a class="btn btn-primary" href="{{ hunt.get_absolute_url }}">Show puzzles</a>
   </p>
   <p>
-    There have been <b>{{ paginator.count }} guesses</b> on this hunt.
+    There have been <b>{{ num_total }} guesses</b> on this hunt.
+    {% if hunt.has_started %}
+      <span class="fst-italic" data-testid="opal-stats-hunt-only">Guesses made before the hunt started are not counted.</span>
+    {% endif %}
   </p>
   {% include "opal/components/attempt_table.html" %}
   {% if page_obj.has_other_pages %}

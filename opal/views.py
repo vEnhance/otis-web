@@ -331,6 +331,11 @@ class HuntAttemptsList(AdminRequiredMixin, ListView[OpalAttempt]):
     def get_context_data(self, **kwargs: Any):
         context = super().get_context_data(**kwargs)
         context["hunt"] = self.hunt
+        # The log itself lists every guess ever made on the hunt, so the count
+        # up top is its own query rather than `paginator.count`.
+        context["num_total"] = (
+            self.get_queryset().filter(stats_window(self.hunt)).count()
+        )
         # Only the current page gets decorated; the queryset itself is every
         # guess ever made on the hunt.
         context["attempts"] = decorate_attempts(context["object_list"], self.hunt)
