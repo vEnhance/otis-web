@@ -741,6 +741,36 @@ def test_close_answer(otis):
 
 
 @pytest.mark.django_db
+def test_call_in_close_answer(otis):
+    """A close guess reading "call in X" gets told what that phrase means."""
+    verified_group = GroupFactory(name="Verified")
+    alice = UserFactory.create(username="alice", groups=(verified_group,))
+
+    hunt = OpalHuntFactory.create(slug="hunt")
+    OpalPuzzleFactory.create(
+        hunt=hunt,
+        slug="puzzle",
+        answer="CORRECT",
+        partial_answers="CALL IN CORRECT\nCORRELATION",
+    )
+
+    otis.login(alice)
+
+    def info_messages(guess: str) -> list[str]:
+        resp = otis.post_20x(
+            "opal-show-puzzle", "hunt", "puzzle", data={"guess": guess}, follow=True
+        )
+        return [
+            str(m) for m in resp.context["messages"] if m.level == message_levels.INFO
+        ]
+
+    assert info_messages("call in correct") == [
+        'In puzzle hunts, "call in X" is an instruction to submit the answer X'
+    ]
+    assert info_messages("CORRELATION") == []
+
+
+@pytest.mark.django_db
 def test_guess_budget_is_rechecked_under_the_lock(otis):
     """A guess that stops being eligible while it waits for the lock is refused.
 

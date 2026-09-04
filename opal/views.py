@@ -29,7 +29,7 @@ from roster.models import Student
 from rpg.models import AchievementUnlock
 
 from .forms import AttemptForm
-from .models import OpalAttempt, OpalHunt, OpalPuzzle
+from .models import OpalAttempt, OpalHunt, OpalPuzzle, answerize
 
 logger = logging.getLogger(__name__)
 
@@ -564,6 +564,11 @@ def show_puzzle(
                     )
             elif attempt.is_close:
                 messages.warning(request, f"Keep going for {puzzle.title}...")
+                if answerize(attempt.guess).startswith("CALLIN"):
+                    messages.info(
+                        request,
+                        'In puzzle hunts, "call in X" is an instruction to submit the answer X',
+                    )
             else:
                 messages.warning(request, f"Sorry, wrong answer to {puzzle.title}.")
             return HttpResponseRedirect(puzzle.get_absolute_url())
