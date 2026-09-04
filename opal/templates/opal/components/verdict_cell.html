@@ -1,6 +1,2 @@
-{% comment %}
-  When a guess was made, and how it was judged: a check mark whose flavor says
-  whether the guesser was a testsolver and whether this was the metapuzzle.
-  Expects `attempt` decorated by `opal.views.decorate_attempts`.
-{% endcomment %}
-<td class="text-nowrap">{{ attempt.emoji }} {{ attempt.created_at|date:"Y-m-d H:i" }}</td>
+{# Expects `attempt` decorated by `opal.views.decorate_attempts`. #}
+<td class="text-nowrap">{{ attempt.emoji }} {{ attempt.created_at|date:"Y-m-d H:i:s" }}</td>
