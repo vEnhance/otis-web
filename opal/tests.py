@@ -646,6 +646,9 @@ def test_stats_drop_testsolve_once_hunt_starts(otis):
         resp = otis.get_20x("opal-attempts-list", "hunt", "puzzle")
         assert (resp.context["num_correct"], resp.context["num_total"]) == (1, 2)
 
+        resp = otis.get_20x("opal-hunt-log", "hunt")
+        assert resp.context["num_total"] == 2
+
     with freeze_time("2024-08-15"):
         OpalAttemptFactory.create(user=alice, puzzle=puzzle, guess="one")
 
@@ -658,6 +661,11 @@ def test_stats_drop_testsolve_once_hunt_starts(otis):
         resp = otis.get_20x("opal-attempts-list", "hunt", "puzzle")
         assert (resp.context["num_correct"], resp.context["num_total"]) == (1, 1)
         assert len(resp.context["attempts"]) == 3
+
+        resp = otis.get_20x("opal-hunt-log", "hunt")
+        assert resp.context["num_total"] == 1
+        otis.assert_testid(resp, "opal-stats-hunt-only")
+        assert resp.context["paginator"].count == 3
 
 
 @pytest.mark.django_db
