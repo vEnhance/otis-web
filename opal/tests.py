@@ -737,7 +737,40 @@ def test_close_answer(otis):
         follow=True,
     )
     # a correct-but-not-final guess is acknowledged without solving the puzzle
-    assert any(m.level == message_levels.WARNING for m in resp.context["messages"])
+    assert any(m.level == message_levels.INFO for m in resp.context["messages"])
+
+
+@pytest.mark.django_db
+def test_call_in_close_answer(otis):
+    """A close guess reading "call in X" gets told what that phrase means."""
+    verified_group = GroupFactory(name="Verified")
+    alice = UserFactory.create(username="alice", groups=(verified_group,))
+
+    hunt = OpalHuntFactory.create(slug="hunt")
+    OpalPuzzleFactory.create(
+        hunt=hunt,
+        slug="puzzle",
+        answer="CORRECT",
+        partial_answers="CALL IN CORRECT\nCORRELATION",
+    )
+
+    otis.login(alice)
+
+    def info_messages(guess: str) -> list[str]:
+        resp = otis.post_20x(
+            "opal-show-puzzle", "hunt", "puzzle", data={"guess": guess}, follow=True
+        )
+        return [
+            str(m) for m in resp.context["messages"] if m.level == message_levels.INFO
+        ]
+
+    call_in_message = (
+        'In puzzle hunts, "call in X" is an instruction to submit the answer X'
+    )
+    assert info_messages("call in correct") == [call_in_message]
+    ordinary_close_messages = info_messages("CORRELATION")
+    assert len(ordinary_close_messages) == 1
+    assert call_in_message not in ordinary_close_messages
 
 
 @pytest.mark.django_db
