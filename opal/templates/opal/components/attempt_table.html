@@ -5,8 +5,8 @@
 <table class="table table-striped">
   <tr class="table-dark">
     <th>Puzzle</th>
-    <th>User</th>
     <th class="text-center text-nowrap" style="width:1%;">S</th>
+    <th>User</th>
     <th>Guess</th>
     <th>Timestamp</th>
   </tr>
@@ -15,10 +15,10 @@
       <td>
         <a href="{% url "opal-attempts-list" hunt.slug attempt.puzzle.slug %}">{{ attempt.puzzle.title|truncatechars:"12" }}</a>
       </td>
+      <td class="text-center fw-bold">{{ attempt.solve_count }}</td>
       <td>
         <a href="{% url "opal-person-log" hunt.slug attempt.user.pk %}">{{ attempt.user.get_full_name|truncatechars:"24" }}</a>
       </td>
-      <td class="text-center fw-bold">{{ attempt.solve_count }}</td>
       {% include "opal/components/guess_cell.html" %}
       {% include "opal/components/verdict_cell.html" %}
     </tr>
