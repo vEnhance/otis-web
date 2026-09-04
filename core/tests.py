@@ -8,6 +8,7 @@ from django.core.files.base import ContentFile
 from django.core.files.storage import storages
 from django.test.utils import override_settings
 from django.urls import reverse
+from factory.base import DictFactory
 from pypdf import PdfReader
 from reportlab.pdfgen.canvas import Canvas
 
@@ -28,6 +29,7 @@ from core.watermark import (
     watermark_pdf,
 )
 from dashboard.factories import PSetFactory
+from otisweb_testsuite import UniqueFaker
 from roster.factories import StudentFactory
 from rpg.factories import BonusLevelFactory
 
@@ -819,3 +821,18 @@ def test_profile_timezone_search_js(otis):
     assert "Los_Angeles" in content
     assert "Asia/Seoul" in content
     assert "Europe/Vienna" in content
+
+
+def test_unique_faker_actually_dedupes():
+    """Guard against `UniqueFaker` silently degrading to a plain `Faker`.
+
+    Its override has to match whatever hook factory_boy currently calls; when
+    it stops matching, nothing errors, the factories just start handing out
+    duplicates and unique columns blow up at random.
+    """
+
+    class TinyFactory(DictFactory):
+        value = UniqueFaker("random_int", min=1000, max=1099)
+
+    values = [TinyFactory.build()["value"] for _ in range(100)]
+    assert len(set(values)) == 100
