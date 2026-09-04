@@ -4,12 +4,10 @@ import os
 import string
 from datetime import timedelta
 from decimal import Decimal
-from hashlib import sha256
 from json.decoder import JSONDecodeError
 from typing import Any, Literal, TypedDict
 
 from allauth.socialaccount.models import SocialAccount
-from django.conf import settings
 from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from django.core.files.uploadhandler import TemporaryFileUploadHandler
 from django.db.models.aggregates import Sum
@@ -23,6 +21,7 @@ from django.views.decorators.csrf import csrf_exempt
 from sql_util.aggregates import SubqueryCount
 from unidecode import unidecode
 
+from aincrad.auth import get_token, reject_bad_token
 from arch.models import Hint, Problem
 from dashboard.models import Announcement, PSet
 from hanabi.models import HanabiContest, HanabiParticipation, HanabiPlayer, HanabiReplay
@@ -701,7 +700,8 @@ def opal_pdf_upload(request: HttpRequest) -> JsonResponse:
     # CsrfViewMiddleware from touching request.POST first.
     request.upload_handlers = [TemporaryFileUploadHandler(request)]
 
-    if (bad_token := reject_bad_token(request.POST.get("token"))) is not None:
+    token = get_token(request, request.POST.get("token"))
+    if (bad_token := reject_bad_token(token, "opal_pdf_upload")) is not None:
         return bad_token
 
     # isdigit() rather than leaving it to the ORM, which raises ValueError (a 500)
@@ -790,17 +790,6 @@ def apply_handler(action: str, data: JSONData) -> JsonResponse:
     return JsonResponse({"pk": au.pk})
 
 
-def reject_bad_token(token: str | None) -> JsonResponse | None:
-    """Return the response to send if `token` is no good, or None if it checks out."""
-    if token is None:
-        raise SuspiciousOperation("No token provided")
-    elif settings.API_TARGET_HASH is None:
-        return JsonResponse({"error": "Not accepting tokens right now"}, status=503)
-    elif sha256(token.encode("ascii")).hexdigest() != settings.API_TARGET_HASH:
-        return JsonResponse({"error": "🧋"}, status=418)
-    return None
-
-
 @csrf_exempt
 def api(request: HttpRequest) -> JsonResponse:
     if not request.method == "POST":
@@ -814,7 +803,8 @@ def api(request: HttpRequest) -> JsonResponse:
         raise SuspiciousOperation("You need to provide an action, silly")
     action = data["action"]
 
-    if (bad_token := reject_bad_token(data.get("token"))) is not None:
+    token = get_token(request, data.get("token"))
+    if (bad_token := reject_bad_token(token, action)) is not None:
         return bad_token
 
     if action in (
