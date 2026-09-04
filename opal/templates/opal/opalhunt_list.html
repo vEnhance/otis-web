@@ -20,7 +20,7 @@
   <h1>List of hunts</h1>
   {% if request.user.is_superuser %}
     <p>
-      <a class="btn btn-secondary"
+      <a class="btn btn-dark"
          href="{% url "opal-recent-activity" %}"
          data-testid="opal-recent-activity-link">Recent activity on all hunts</a>
     </p>
