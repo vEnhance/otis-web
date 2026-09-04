@@ -1,5 +1,4 @@
 import io
-import random
 from collections.abc import Iterable
 from functools import cache
 from typing import Any
@@ -13,6 +12,7 @@ from factory.django import DjangoModelFactory
 from factory.faker import Faker
 from factory.fuzzy import FuzzyChoice
 from factory.helpers import post_generation
+from factory.random import randgen
 from reportlab.pdfgen.canvas import Canvas
 
 from core.models import Semester, Unit, UnitGroup, UserProfile
@@ -74,7 +74,7 @@ class UnitFactory(DjangoModelFactory):
         skip_postgeneration_save = True
 
     code = LazyAttribute(
-        lambda o: random.choice("BDZ") + o.group.subject[0] + random.choice("WXY")
+        lambda o: randgen.choice("BDZ") + o.group.subject[0] + randgen.choice("WXY")
     )
     group = SubFactory(UnitGroupFactory)
     position = Sequence(lambda n: n + 1)
