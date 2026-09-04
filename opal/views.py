@@ -63,6 +63,16 @@ UNSOLVED_ROW_CLASS = "table-warning"
 EXHAUSTED_ROW_CLASS = "table-danger"
 
 
+def stats_window(hunt: OpalHunt) -> Q:
+    """Which of a hunt's guesses the statistics counts describe.
+
+    Once the hunt opens the counts are about the live hunt, so the testsolve
+    guesses from before it drop out. Until then the testsolve is all there is
+    to report on, so everything counts.
+    """
+    return Q(created_at__gte=hunt.start_date) if hunt.has_started else Q()
+
+
 def correct_emoji(is_testsolver: bool, is_metapuzzle: bool) -> str:
     """The check mark for a correct guess.
 
@@ -282,12 +292,12 @@ class AttemptsList(AdminRequiredMixin, ListView[OpalAttempt]):
 
     def get_context_data(self, **kwargs: Any):
         context = super().get_context_data(**kwargs)
+        hunt = self.puzzle.hunt
+        counted = self.get_queryset().filter(stats_window(hunt))
         context["puzzle"] = self.puzzle
-        context["num_total"] = self.get_queryset().count()
-        context["num_correct"] = self.get_queryset().filter(is_correct=True).count()
-        context["attempts"] = decorate_attempts(
-            context["object_list"], self.puzzle.hunt
-        )
+        context["num_total"] = counted.count()
+        context["num_correct"] = counted.filter(is_correct=True).count()
+        context["attempts"] = decorate_attempts(context["object_list"], hunt)
         return context
 
     def get_queryset(self) -> QuerySet[OpalAttempt]:
@@ -397,9 +407,10 @@ def leaderboard(request: AuthHttpRequest, hunt_slug: str) -> HttpResponse:
             meta_solved_time[user_pk] = attempt_dict["created_at"]
 
     context["hunt"] = hunt
+    counted = stats_window(hunt)
     context["puzzles"] = OpalPuzzle.objects.filter(hunt=hunt).annotate(
-        num_solves=SubqueryCount("opalattempt", filter=Q(is_correct=True)),
-        num_total_attempts=SubqueryCount("opalattempt"),
+        num_solves=SubqueryCount("opalattempt", filter=counted & Q(is_correct=True)),
+        num_total_attempts=SubqueryCount("opalattempt", filter=counted),
     )
 
     meta_orders = set(

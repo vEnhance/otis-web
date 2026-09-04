@@ -14,6 +14,11 @@
     <a class="btn btn-secondary" href="{% url "opal-hunt-log" hunt.slug %}">Log</a>
   </p>
   <h2>Puzzle statistics</h2>
+  {% if hunt.has_started %}
+    <p class="fst-italic" data-testid="opal-stats-hunt-only">
+      Guesses made before the hunt started are not counted below.
+    </p>
+  {% endif %}
   <table class="table table-striped">
     <tr class="table-dark">
       <th>Order</th>

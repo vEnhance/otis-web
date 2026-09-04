@@ -616,6 +616,51 @@ def test_leaderboard_early_access(otis):
 
 
 @pytest.mark.django_db
+def test_stats_drop_testsolve_once_hunt_starts(otis):
+    """Statistics count the testsolve until the hunt opens, then only the hunt."""
+    testsolver_group = GroupFactory(name="Testsolver")
+    testsolver = UserFactory.create(
+        username="testsolver", groups=(testsolver_group,), first_name="Test"
+    )
+    alice = UserFactory.create(username="alice", first_name="Alice")
+    admin = UserFactory.create(username="admin", is_staff=True, is_superuser=True)
+
+    hunt = OpalHuntFactory.create(
+        slug="hunt", start_date=datetime.datetime(2024, 8, 10, tzinfo=UTC)
+    )
+    puzzle = OpalPuzzleFactory.create(
+        hunt=hunt, slug="puzzle", answer="one", order=1, is_metapuzzle=True
+    )
+
+    with freeze_time("2024-08-05"):
+        OpalAttemptFactory.create(user=testsolver, puzzle=puzzle, guess="one")
+        OpalAttemptFactory.create(user=testsolver, puzzle=puzzle, guess="nope")
+
+    otis.login(admin)
+    with freeze_time("2024-08-05"):
+        resp = otis.get_20x("opal-leaderboard", "hunt")
+        (stats,) = resp.context["puzzles"]
+        assert (stats.num_solves, stats.num_total_attempts) == (1, 2)
+        otis.assert_no_testid(resp, "opal-stats-hunt-only")
+
+        resp = otis.get_20x("opal-attempts-list", "hunt", "puzzle")
+        assert (resp.context["num_correct"], resp.context["num_total"]) == (1, 2)
+
+    with freeze_time("2024-08-15"):
+        OpalAttemptFactory.create(user=alice, puzzle=puzzle, guess="one")
+
+        resp = otis.get_20x("opal-leaderboard", "hunt")
+        (stats,) = resp.context["puzzles"]
+        assert (stats.num_solves, stats.num_total_attempts) == (1, 1)
+        otis.assert_testid(resp, "opal-stats-hunt-only")
+        assert len(resp.context["rows"]) == 2
+
+        resp = otis.get_20x("opal-attempts-list", "hunt", "puzzle")
+        assert (resp.context["num_correct"], resp.context["num_total"]) == (1, 1)
+        assert len(resp.context["attempts"]) == 3
+
+
+@pytest.mark.django_db
 def test_early_access_excludes_plain_staff(otis):
     """Only superusers and the Testsolver group can open a hunt before it starts."""
     testsolver_group = GroupFactory(name="Testsolver")
