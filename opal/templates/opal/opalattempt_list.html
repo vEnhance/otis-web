@@ -18,6 +18,9 @@
   </p>
   <p>
     There were <b>{{ num_correct }} solves</b> and <b>{{ num_total }} guesses</b>.
+    {% if puzzle.hunt.has_started %}
+      <span class="fst-italic" data-testid="opal-stats-hunt-only">Guesses made before the hunt started are not counted.</span>
+    {% endif %}
   </p>
   <table class="table table-striped">
     <tr class="table-dark">
