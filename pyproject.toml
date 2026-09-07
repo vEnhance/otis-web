@@ -10,14 +10,14 @@ requires-python = ">=3.13, <4.0"
 dependencies = [
   "Django>=6.0.7,<6.1.0",
   "Unidecode>=1.4.0",
-  "crispy-bootstrap5>=2026.3",
-  "django-allauth[socialaccount]>=65.19.1",
-  "django-bootstrap5>=26.2",
+  "crispy-bootstrap5>=2026.9",
+  "django-allauth[socialaccount]>=65.19.2",
+  "django-bootstrap5>=26.3",
   "django-bot-rickroll>=0.3.1",
   "django-braces>=1.17.0",
   "django-crispy-forms>=2.7",
-  "django-debug-toolbar>=7.1.1",
-  "django-discordo>=1.2.0",
+  "django-debug-toolbar>=8.0.0",
+  "django-discordo>=1.2.1",
   "django-extensions>=4.1",
   "django-hijack>=3.7.8",
   "django-import-export>=4.4.1",
@@ -33,7 +33,7 @@ dependencies = [
   "django-stubs-ext>=6.1.0,<7.0.0",
   "pillow>=12.3.0",
   "prettytable>=3.18.0",
-  "pypdf>=6.16.1",
+  "pypdf>=6.17.0",
   "python-dotenv>=1.2.3",
   "reportlab>=5.0.1",
   "setuptools>=84.0.0",
@@ -49,10 +49,10 @@ prod = [
 [dependency-groups]
 dev = [
   "Faker>=40.37.0",
-  "coverage[toml]>=7.15.4",
+  "coverage[toml]>=7.16.0",
   "factory-boy>=3.3.3",
   "freezegun>=1.5.5",
-  "ipython>=9.16.1",
+  "ipython>=9.17.1",
   "jedi>=0.20.0",
   "pytest>=9.1.1",
   "pytest-cov>=7.1.0",
@@ -63,9 +63,9 @@ dev = [
   "toml>=0.10.2",
   "types-Markdown>=3.10.2.20260408",
   "types-freezegun>=1.1.10",
-  "types-requests>=2.33.0.20260712",
+  "types-requests>=2.33.0.20260906",
   "werkzeug>=3.1.8",
-  "prek>=0.4.14",
+  "prek>=0.5.2",
 ]
 
 [tool.pytest.ini_options]
