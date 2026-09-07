@@ -3,5 +3,5 @@
   Expects `attempt` decorated by `opal.views.decorate_attempts`.
 {% endcomment %}
 <td class="{{ attempt.text_class }}">
-  <code>{{ attempt.guess|truncatechars:24 }}</code>
+  <span class="font-monospace">{{ attempt.guess|truncatechars:24 }}</span>
 </td>

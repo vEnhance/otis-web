@@ -40,7 +40,7 @@
       {% elif solved %}
         <div class="alert alert-success">
           <h2 class="alert-heading">
-            Answer: <code>{{ puzzle.answer }}</code>
+            Answer: <span class="font-monospace">{{ puzzle.answer }}</span>
           </h2>
           Congrats, you solved this puzzle!
           {% if puzzle.achievement %}
@@ -90,7 +90,7 @@
     {% for attempt in attempts %}
       <tr>
         <td>
-          <code>{{ attempt.guess }}</code>
+          <span class="font-monospace">{{ attempt.guess }}</span>
         </td>
         {% if attempt.is_correct %}
           <td class="text-success">Solved!</td>

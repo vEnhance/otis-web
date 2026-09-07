@@ -8,7 +8,7 @@
   <p>
     Previous submission:
     {% if pset.filename %}
-      <code><a href="{{ pset.get_absolute_url }}">{{ pset.filename }}</a></code>.
+      <span class="font-monospace"><a href="{{ pset.get_absolute_url }}">{{ pset.filename }}</a></span>.
     {% else %}
       <a href="{{ pset.get_absolute_url }}">Submission #{{ pset.pk }}</a>.
     {% endif %}
