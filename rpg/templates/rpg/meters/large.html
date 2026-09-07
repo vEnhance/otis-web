@@ -10,7 +10,9 @@
         <span style="font-size: 150%;">{{ meter.str_level }}</span>
         {{ meter.name }}
       </span>
-      <span class="badge bg-secondary" style="position:absolute; right:60px;">Total {{ meter.value }}{{ meter.unit }}</span>
+      <span class="badge bg-secondary"
+            style="position:absolute;
+                   right:60px">Total {{ meter.value }}{{ meter.unit }}</span>
     </button>
   </h2>
   <div id="collapse{{ meter.name }}"

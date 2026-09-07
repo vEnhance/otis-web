@@ -123,7 +123,7 @@
       {% endfor %}
       {% for replay in hanabi_replays %}
         <tr>
-          <td style="color:{{ meters.spades.color }};">+{{ replay.spades_score|floatformat:2 }}{{ meters.spades.unit }}</td>
+          <td style="color:{{ meters.spades.color }}">+{{ replay.spades_score|floatformat:2 }}{{ meters.spades.unit }}</td>
           <td>
             <a href="{{ replay.contest.get_absolute_url }}">{{ replay.contest }}</a>
           </td>

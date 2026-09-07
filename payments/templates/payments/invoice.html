@@ -23,7 +23,9 @@
              value="{{ invoice.total_owed|floatformat:0 }}" />
       <input id="invoice_id" type="hidden" value="{{ invoice.pk }}" />
       <input id="checksum" type="hidden" value="{{ checksum }}" />
-      <button class="button is-primary btn btn-success" id="payButton">Pay</button>
+      <button type="button"
+              class="button is-primary btn btn-success"
+              id="payButton">Pay</button>
     </p>
     <p>
       If you don't want to pay by credit/debit card, see

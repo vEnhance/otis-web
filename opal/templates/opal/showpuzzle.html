@@ -40,7 +40,7 @@
       {% elif solved %}
         <div class="alert alert-success">
           <h2 class="alert-heading">
-            Answer: <tt>{{ puzzle.answer }}</tt>
+            Answer: <code>{{ puzzle.answer }}</code>
           </h2>
           Congrats, you solved this puzzle!
           {% if puzzle.achievement %}
@@ -90,7 +90,7 @@
     {% for attempt in attempts %}
       <tr>
         <td>
-          <tt>{{ attempt.guess }}</tt>
+          <code>{{ attempt.guess }}</code>
         </td>
         {% if attempt.is_correct %}
           <td class="text-success">Solved!</td>
@@ -107,7 +107,7 @@
   </table>
 {% endblock layout-content %}
 {% block scripts %}
-  <script type="text/javascript">
+  <script>
       document.addEventListener("DOMContentLoaded", () => {
           // The link only renders when this puzzle has hints to reveal.
           const opener = document.getElementById("open_opal_hints");

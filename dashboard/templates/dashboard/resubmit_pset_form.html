@@ -8,7 +8,7 @@
   <p>
     Previous submission:
     {% if pset.filename %}
-      <tt><a href="{{ pset.get_absolute_url }}">{{ pset.filename }}</a></tt>.
+      <code><a href="{{ pset.get_absolute_url }}">{{ pset.filename }}</a></code>.
     {% else %}
       <a href="{{ pset.get_absolute_url }}">Submission #{{ pset.pk }}</a>.
     {% endif %}
@@ -34,7 +34,7 @@
   </div>
 {% endblock layout-content %}
 {% block scripts %}
-  <script type="text/javascript">
+  <script>
       document.addEventListener("DOMContentLoaded", () => {
           otisSelect("select");
       });

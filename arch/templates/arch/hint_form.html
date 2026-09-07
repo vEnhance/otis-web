@@ -57,7 +57,7 @@
   </p>
 {% endblock layout-content %}
 {% block css %}
-  <style type="text/css">
+  <style>
       #content_render {
           color: blue;
           font-family: sans-serif;
@@ -69,7 +69,7 @@
   </style>
 {% endblock css %}
 {% block scripts %}
-  <script type="text/javascript">
+  <script>
       document.addEventListener("DOMContentLoaded", function() {
           otisSelect("#id_problem", {
               width: "90%",

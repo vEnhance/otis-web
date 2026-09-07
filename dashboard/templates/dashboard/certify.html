@@ -36,9 +36,9 @@
           To verify this certificate digitally,
           scan the QR code above or use the URL below:
         </p>
-        <tt>
+        <code>
           <a href="{% url "certify" student.pk checksum %}">{{ request.get_host }}{{ request.path }}</a>
-        </tt>
+        </code>
         <p>
           This certificate (ID {{ student.pk|stringformat:"07d" }})
           was produced on {% now "r" %}.

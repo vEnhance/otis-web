@@ -59,29 +59,29 @@
       </li>
       <li>
         The answers should all be simple mathematical expressions.
-        You can use the functions <tt>+-*/^</tt> and <tt>sqrt()</tt>.
-        The constants <tt>pi</tt> and <tt>e</tt> are also built in.
-        Multiplication <tt>*</tt> should be written out;
-        write <tt>3*sqrt(2)</tt> not <tt>3sqrt(2)</tt>.
+        You can use the functions <code>+-*/^</code> and <code>sqrt()</code>.
+        The constants <code>pi</code> and <code>e</code> are also built in.
+        Multiplication <code>*</code> should be written out;
+        write <code>3*sqrt(2)</code> not <code>3sqrt(2)</code>.
         Examples:
         <ul>
           <li>
-            <tt>1 - 1/10^6</tt>, <tt>0.999999</tt>,
-            and <tt>999999/1000000</tt> are all equivalent and accepted.
+            <code>1 - 1/10^6</code>, <code>0.999999</code>,
+            and <code>999999/1000000</code> are all equivalent and accepted.
           </li>
           <li>
-            <tt>5/sqrt(2)</tt>, <tt>sqrt(25/2)</tt>,
-            and <tt>5*sqrt(2)/2</tt> are all equivalent and accepted.
+            <code>5/sqrt(2)</code>, <code>sqrt(25/2)</code>,
+            and <code>5*sqrt(2)/2</code> are all equivalent and accepted.
           </li>
           <li>
-            <tt>sqrt(27/20)</tt>, <tt>3/2*sqrt(3/5)</tt>,
-            and <tt>3*sqrt(15)/10</tt> are all equivalent and accepted.
+            <code>sqrt(27/20)</code>, <code>3/2*sqrt(3/5)</code>,
+            and <code>3*sqrt(15)/10</code> are all equivalent and accepted.
           </li>
         </ul>
       </li>
       <li>
         You are limited to
-        <strong>at most four uses of the operands <tt>+-*/^</tt></strong>
+        <strong>at most four uses of the operands <code>+-*/^</code></strong>
         and
         <strong>at most 24 non-whitespace characters total</strong>.
         Thus, you should try to simplify your answer as much as possible.
@@ -101,7 +101,7 @@
     <h1>Submit answers</h1>
     <p>Enter your responses below as expressions.</p>
     {% include "otisweb/components/generic_form.html" %}
-    <script type="text/javascript">
+    <script>
         document.querySelector("form.form").onsubmit = function() {
             return confirm('Are you ready to submit? This cannot be reversed.');
         }
@@ -123,7 +123,7 @@
   {% endif %}
 {% endblock layout-content %}
 {% block scripts %}
-  <script type="text/javascript">
+  <script>
       document.addEventListener('DOMContentLoaded', function() {
           for (let i = 1; i <= 5; ++i) {
               const input = document.getElementById('id_guess' + i);
@@ -135,7 +135,7 @@
           }
       });
   </script>
-  <script type="text/javascript">
+  <script>
       document.addEventListener('DOMContentLoaded', function() {
           for (let i = 1; i <= 5; ++i) {
               const input = document.getElementById('id_guess' + i);

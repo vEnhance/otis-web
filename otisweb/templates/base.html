@@ -53,7 +53,7 @@
     {% block scripts %}
     {% endblock scripts %}
     {% if request.user|getconfig:"use_twemoji" %}
-      <script type="text/javascript">
+      <script>
           twemoji.parse(document.body, {
               base: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/',
               callback: function(icon, options, variant) {
