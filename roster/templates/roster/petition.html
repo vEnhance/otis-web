@@ -2,7 +2,7 @@
 {% load static %}
 {% load otis_extras %}
 {% block css %}
-  <style type="text/css">
+  <style>
       .ts-control {
           border: 2px solid #aaa;
           background-color: #fff;
@@ -16,7 +16,7 @@
   </style>
 {% endblock css %}
 {% block scripts %}
-  <script type="text/javascript">
+  <script>
       document.addEventListener("DOMContentLoaded", function() {
           otisSelect("#id_unit");
       });

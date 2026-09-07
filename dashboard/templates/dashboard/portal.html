@@ -14,7 +14,7 @@
       <table class="table table-striped">
         <tr>
           <td>
-            <tt>{{ student.user.username }}</tt>
+            <span class="font-monospace">{{ student.user.username }}</span>
           </td>
           <td>
             <code>{{ student.user.email }}</code>
@@ -216,7 +216,6 @@
           <span class="emoji-text">📢</span>
           <b><a class="alert-link" href="{{ announcement.get_absolute_url }}">{{ announcement.subject }}</a></b>
           | {{ announcement.created_at|naturaltime }}
-          <br />
         </p>
       {% endfor %}
       {% for dl in news.downloads %}
@@ -448,7 +447,8 @@
         <a href="{{ semester.calendar_url }}" target="_blank" rel="noreferrer">OTIS calendar</a>
       </li>
     </ul>
-    <iframe src="{{ student.calendar_url }}"
+    <iframe title="OTIS calendar"
+            src="{{ student.calendar_url }}"
             style="border-width:0"
             width="520"
             height="600"
@@ -457,7 +457,7 @@
   {% endif %}
 {% endblock layout-content %}
 {% block scripts %}
-  <script type="text/javascript">
+  <script>
       document.addEventListener("DOMContentLoaded", () => {
           // https://docs.djangoproject.com/en/3.2/ref/csrf/
           function getCookie(name) {

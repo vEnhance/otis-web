@@ -19,7 +19,7 @@
               {% if aunlock.is_first_obtain %}✴️{% endif %}
               {{ aunlock.achievement.name }}
             </strong>
-            <span style="color: {{ meters.diamonds.color }};">{{ aunlock.achievement.diamonds }}{{ meters.diamonds.unit }}</span>
+            <span style="color: {{ meters.diamonds.color }}">{{ aunlock.achievement.diamonds }}{{ meters.diamonds.unit }}</span>
           </div>
           <a href="{% url "diamond-solution" aunlock.achievement.pk %}">
             {% if aunlock.achievement.image %}

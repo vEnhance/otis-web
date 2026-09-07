@@ -2,16 +2,19 @@
 {% if curriculum %}
   <p>
     <button id="hide-completed-units"
+            type="button"
             class="tooltip-button"
             title="Show/hide completed units">
       Toggle <span class="emoji-text">✅</span>
     </button>
     <button id="hide-locked-units"
+            type="button"
             class="tooltip-button"
             title="Show/hide locked units">
       Toggle <span class="emoji-text">❓</span>
     </button>
     <button id="sort-by-subject"
+            type="button"
             class="tooltip-button"
             title="Sort by subject"
             style="margin-left: 4px">Sort by subject</button>
@@ -127,7 +130,8 @@
           <td class="unit-name {% if row.is_current %}active{% endif %}"
               {% if request.user.is_superuser %}title="{{ row.unit.group.name }} pk={{ row.unit.pk }} group={{ row.unit.group.pk }}" {% endif %}>
             {% if row.is_visible %}
-              <a title="Download PDF" href="{% view_problems row.unit %}">{{ row.number }}. {{ row.unit.group.name }}</a>
+              <a title="Download PDF"
+                 href="{% view_problems row.unit %}">{{ row.number }}. {{ row.unit.group.name }}</a>
             {% else %}
               {{ row.number }}. {{ row.unit.group.name }} (locked)
             {% endif %}

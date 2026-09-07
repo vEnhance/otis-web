@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% load static %}
 {% block css %}
-  <style type="text/css">
+  <style>
       .ts-control {
           border: 2px solid #aaa;
       }
@@ -18,7 +18,7 @@
   </style>
 {% endblock css %}
 {% block scripts %}
-  <script type="text/javascript">
+  <script>
       document.addEventListener("DOMContentLoaded", function() {
           otisSelect("select.otis-select");
       });

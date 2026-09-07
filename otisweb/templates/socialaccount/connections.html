@@ -7,7 +7,7 @@
   <h2>Name and email</h2>
   <ul>
     <li>
-      Your username is <strong><tt>{{ user.username }}</tt></strong>.
+      Your username is <strong><span class="font-monospace">{{ user.username }}</span></strong>.
       {% if form.accounts %}
         But you don't need this username to sign in because
         you have {{ form.accounts|length }} connections set up.
@@ -17,7 +17,7 @@
       Your name is <strong>{{ user.first_name }} {{ user.last_name }}</strong>.
     </li>
     <li>
-      You registered with the email <strong><tt>{{ user.email }}</tt></strong>.
+      You registered with the email <strong><span class="font-monospace">{{ user.email }}</span></strong>.
     </li>
     <li>
       You can <a href="{% url "update-profile" %}">change your name or email</a>.

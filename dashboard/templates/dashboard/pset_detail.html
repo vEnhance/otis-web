@@ -101,7 +101,10 @@
     </p>
     <div>
       {% if ".pdf" in pset.upload.url or ".jpg" in pset.upload.url or ".png" in pset.upload.url %}
-        <iframe width="100%" height="200px" src="{{ pset.upload.url }}"></iframe>
+        <iframe title="Submission preview"
+                width="100%"
+                height="200px"
+                src="{{ pset.upload.url }}"></iframe>
       {% else %}
         <p class="fst-italic">
           No preview available for <code>{{ pset.filename }}</code>.

@@ -30,7 +30,7 @@
   {% if problem.hyperlink %}
     <p class="text-center">
       <a class="btn btn-secondary" href="{{ problem.hyperlink }}">
-        <tt><span class="emoji-text">🌏</span> {{ problem.hyperlink|truncatechars:"40" }}</tt>
+        <span class="font-monospace"><span class="emoji-text">🌏</span> {{ problem.hyperlink|truncatechars:"40" }}</span>
       </a>
     </p>
   {% endif %}
