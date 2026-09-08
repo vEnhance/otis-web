@@ -43,7 +43,7 @@ urlpatterns = [
         name="opal-attempts-list",
     ),
     path(
-        r"person/<slug:hunt_slug>/<int:user_pk>/",
+        r"person/<int:user_pk>/",
         views.person_log,
         name="opal-person-log",
     ),

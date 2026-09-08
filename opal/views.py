@@ -462,17 +462,23 @@ def leaderboard(request: AuthHttpRequest, hunt_slug: str) -> HttpResponse:
 
 
 @admin_required
-def person_log(request: AuthHttpRequest, hunt_slug: str, user_pk: int) -> HttpResponse:
-    context: dict[str, Any] = {}
-    hunt = get_object_or_404(OpalHunt, slug=hunt_slug)
+def person_log(request: AuthHttpRequest, user_pk: int) -> HttpResponse:
+    """Every guess one person has made, hunt by hunt, newest hunt first."""
     user = get_object_or_404(User, pk=user_pk)
-    context["hunt"] = hunt
-    context["attempts"] = decorate_attempts(
-        OpalAttempt.objects.filter(puzzle__hunt=hunt, user=user)
-        .select_related("user", "puzzle")
-        .order_by(*ATTEMPT_LOG_ORDERING),
-        hunt,
-    )
+    by_hunt: defaultdict[OpalHunt, list[OpalAttempt]] = defaultdict(list)
+    for attempt in (
+        OpalAttempt.objects.filter(user=user)
+        .select_related("user", "puzzle", "puzzle__hunt")
+        .order_by(*ATTEMPT_LOG_ORDERING)
+    ):
+        by_hunt[attempt.puzzle.hunt].append(attempt)
+    context: dict[str, Any] = {}
+    context["sections"] = [
+        {"hunt": hunt, "attempts": decorate_attempts(attempts, hunt)}
+        for hunt, attempts in sorted(
+            by_hunt.items(), key=lambda item: item[0].start_date, reverse=True
+        )
+    ]
     context["hunter"] = user
     context["student"] = (
         Student.objects.filter(user=user).order_by("-semester__end_year").first()
