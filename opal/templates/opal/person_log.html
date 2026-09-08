@@ -15,11 +15,11 @@
   <p>
     This is the activity log for
     {% if student %}
-      <a href="{{ student.get_absolute_url }}"><b>{{ student }}</b></a>
+      <a href="{{ student.get_absolute_url }}"><b>{{ student }}</b></a>,
     {% else %}
-      <b>{{ hunter.get_full_name }}</b>
+      <b>{{ hunter.get_full_name }}</b>,
     {% endif %}
-    ({{ hunter.pk }}), aka <code>{{ hunter.username }}</code>.
+    aka <code>{{ hunter.username }}</code>.
   </p>
   <p>
     {% load account socialaccount %}
