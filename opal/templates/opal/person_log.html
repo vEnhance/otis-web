@@ -36,7 +36,7 @@
       <a class="btn btn-secondary btn-sm"
          href="{% url "opal-hunt-log" section.hunt.slug %}">Log</a>
     </p>
-    {% include "opal/components/attempt_table.html" with hunt=section.hunt attempts=section.attempts show_pk=True %}
+    {% include "opal/components/attempt_table.html" with hunt=section.hunt attempts=section.attempts for_one_person=True %}
   {% empty %}
     <p data-testid="opal-person-no-guesses">This person has not guessed on any hunt.</p>
   {% endfor %}
