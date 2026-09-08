@@ -36,7 +36,7 @@
           <a href="{% url "admin:opal_opalattempt_change" attempt.pk %}">{{ forloop.counter }}</a>
         </td>
         <td>
-          <a href="{% url "opal-person-log" puzzle.hunt.slug attempt.user.pk %}">{{ attempt.user.get_full_name|truncatechars:"24" }}</a>
+          <a href="{% url "opal-person-log" attempt.user.pk %}">{{ attempt.user.get_full_name|truncatechars:"24" }}</a>
         </td>
         {% include "opal/components/guess_cell.html" %}
         {% include "opal/components/verdict_cell.html" %}

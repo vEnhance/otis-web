@@ -20,6 +20,11 @@ from .models import OpalAttempt, answerize, puzzle_file_name
 UTC = datetime.UTC
 
 
+def section_attempts(resp, hunt) -> list:
+    """The rows for one hunt on a page that groups its guesses by hunt."""
+    return next(s["attempts"] for s in resp.context["sections"] if s["hunt"] == hunt)
+
+
 @pytest.mark.django_db
 def test_answerize():
     assert answerize("Third time's the charm") == "THIRDTIMESTHECHARM"
@@ -699,28 +704,45 @@ def test_early_access_excludes_plain_staff(otis):
 
 @pytest.mark.django_db
 def test_person_log(otis):
-    """Test the person_log view (admin only)."""
+    """The person log shows every hunt someone guessed on, newest hunt first."""
     verified_group = GroupFactory(name="Verified")
     alice = UserFactory.create(username="alice", groups=(verified_group,))
+    bob = UserFactory.create(username="bob")
     admin = UserFactory.create(username="admin", is_staff=True, is_superuser=True)
 
-    hunt = OpalHuntFactory.create(slug="hunt")
-    puzzle = OpalPuzzleFactory.create(hunt=hunt, answer="answer")
+    old_hunt = OpalHuntFactory.create(
+        slug="old", start_date=datetime.datetime(2023, 8, 1, tzinfo=UTC)
+    )
+    new_hunt = OpalHuntFactory.create(
+        slug="new", start_date=datetime.datetime(2024, 8, 1, tzinfo=UTC)
+    )
+    OpalHuntFactory.create(slug="unplayed")
+    old_puzzle = OpalPuzzleFactory.create(hunt=old_hunt, answer="answer")
+    new_puzzle = OpalPuzzleFactory.create(hunt=new_hunt, answer="answer")
 
-    # Alice makes some attempts
-    OpalAttemptFactory.create(user=alice, puzzle=puzzle, guess="wrong1")
-    OpalAttemptFactory.create(user=alice, puzzle=puzzle, guess="wrong2")
-    OpalAttemptFactory.create(user=alice, puzzle=puzzle, guess="answer")
+    OpalAttemptFactory.create(user=alice, puzzle=old_puzzle, guess="wrong1")
+    OpalAttemptFactory.create(user=alice, puzzle=new_puzzle, guess="wrong2")
+    OpalAttemptFactory.create(user=alice, puzzle=new_puzzle, guess="answer")
+    OpalAttemptFactory.create(user=bob, puzzle=new_puzzle, guess="not alice")
 
-    # Test access control
     otis.login(alice)
-    otis.get_40x("opal-person-log", "hunt", alice.pk)
+    otis.get_40x("opal-person-log", alice.pk)
 
     otis.login(admin)
-    resp = otis.get_20x("opal-person-log", "hunt", alice.pk)
-    assert resp.context["hunt"] == hunt
+    resp = otis.get_20x("opal-person-log", alice.pk)
     assert resp.context["hunter"] == alice
-    assert len(resp.context["attempts"]) == 3
+    # hunts with no guesses from Alice are left out, and the rest run newest first
+    assert [s["hunt"] for s in resp.context["sections"]] == [new_hunt, old_hunt]
+    assert len(section_attempts(resp, new_hunt)) == 2
+    assert len(section_attempts(resp, old_hunt)) == 1
+
+    resp = otis.get_20x("opal-person-log", bob.pk)
+    assert [s["hunt"] for s in resp.context["sections"]] == [new_hunt]
+
+    stranger = UserFactory.create(username="stranger")
+    resp = otis.get_20x("opal-person-log", stranger.pk)
+    assert resp.context["sections"] == []
+    otis.assert_testid(resp, "opal-person-no-guesses")
 
 
 @pytest.mark.django_db
@@ -996,13 +1018,16 @@ def test_guess_log_row_styling(otis):
         pk: expected[pk] for pk in (tess_meta.pk, alice_meta.pk, bob_stuck.pk)
     }
 
-    # the per-user log sees one person's guesses, and a testsolver's stay blue
-    resp = otis.get_20x("opal-person-log", "hunt", tess.pk)
-    assert styling(resp.context["attempts"]) == {
-        pk: expected[pk] for pk in (tess_feeder.pk, tess_meta.pk)
+    # the per-user log sees one person's guesses, and leaves out the tints
+    # that would apply to every row of it: Tess's whole testsolve is untinted
+    resp = otis.get_20x("opal-person-log", tess.pk)
+    assert styling(section_attempts(resp, hunt)) == {
+        tess_feeder.pk: ("☑️", ""),
+        tess_meta.pk: ("🆗", ""),
     }
-    resp = otis.get_20x("opal-person-log", "hunt", bob.pk)
-    assert styling(resp.context["attempts"]) == {
+    # while Bob, who stands nowhere in particular, gets the same rows as anywhere
+    resp = otis.get_20x("opal-person-log", bob.pk)
+    assert styling(section_attempts(resp, hunt)) == {
         pk: expected[pk] for pk in (bob_miss.pk, bob_feeder.pk, bob_stuck.pk)
     }
 
@@ -1020,18 +1045,21 @@ def test_guess_log_row_styling(otis):
         OpalAttemptFactory.create_batch(
             meta.guess_limit - 1, user=bob, puzzle=meta, guess="nope"
         )
-    resp = otis.get_20x("opal-person-log", "hunt", bob.pk)
-    rows = {a.pk: a.row_class for a in resp.context["attempts"]}
+    resp = otis.get_20x("opal-person-log", bob.pk)
+    rows = {a.pk: a.row_class for a in section_attempts(resp, hunt)}
     assert rows.pop(bob_miss.pk) == ""
     assert rows.pop(bob_feeder.pk) == ""
     assert set(rows.values()) == {"table-danger"}
 
     # once Bob finishes, the hunt-wide green wins over both per-puzzle tints
     OpalAttemptFactory.create(user=bob, puzzle=meta, guess="two")
-    resp = otis.get_20x("opal-person-log", "hunt", bob.pk)
-    assert {a.pk: a.row_class for a in resp.context["attempts"]} == {
-        a.pk: "table-success" for a in resp.context["attempts"]
-    }
+    resp = otis.get_20x("opal-hunt-log", "hunt")
+    bobs_rows = [a for a in resp.context["attempts"] if a.user == bob]
+    assert {a.row_class for a in bobs_rows} == {"table-success"}
+
+    # but his own page, where that green would be every row, stays uncolored
+    resp = otis.get_20x("opal-person-log", bob.pk)
+    assert {a.row_class for a in section_attempts(resp, hunt)} == {""}
 
 
 @pytest.mark.django_db
@@ -1050,8 +1078,8 @@ def test_guess_log_out_of_guesses_matches_puzzle_page(otis):
 
     def row_classes() -> set[str]:
         otis.login(admin)
-        resp = otis.get_20x("opal-person-log", "hunt", alice.pk)
-        classes = {a.row_class for a in resp.context["attempts"]}
+        resp = otis.get_20x("opal-person-log", alice.pk)
+        classes = {a.row_class for a in section_attempts(resp, hunt)}
         otis.login(alice)
         return classes
 
@@ -1092,7 +1120,7 @@ def test_guess_log_query_count(otis):
         ("opal-hunt-log", ("hunt",)),
         ("opal-recent-activity", ()),
         ("opal-attempts-list", ("hunt", "puzzle")),
-        ("opal-person-log", ("hunt", alice.pk)),
+        ("opal-person-log", (alice.pk,)),
     )
 
     def query_count(name: str, args: tuple) -> int:

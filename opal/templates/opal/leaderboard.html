@@ -61,7 +61,7 @@
           {% endif %}
         </td>
         <td>
-          <a href="{% url "opal-person-log" hunt.slug row.user_pk %}">{{ row.name|truncatechars:"28" }}</a>
+          <a href="{% url "opal-person-log" row.user_pk %}">{{ row.name|truncatechars:"28" }}</a>
         </td>
         <td>{{ row.emoji_string }}</td>
         <td>

@@ -10,7 +10,7 @@
 {% endblock side-class %}
 {% block layout-content %}
   <p>
-    <a class="btn btn-info" href="{% url "opal-leaderboard" hunt.slug %}">Leaderboard</a>
+    <a class="btn btn-dark" href="{% url "opal-recent-activity" %}">All recent activity</a>
   </p>
   <p>
     This is the activity log for
@@ -26,24 +26,21 @@
     {% get_social_accounts hunter as linked %}
     (Discord: <code>{{ linked.discord.0.get_provider_account|default:"None" }}</code>.)
   </p>
-  <table class="table table-striped">
-    <tr class="table-dark">
-      <th>#</th>
-      <th>Puzzle</th>
-      <th>Guess</th>
-      <th>Timestamp</th>
-    </tr>
-    {% for attempt in attempts %}
-      <tr class="{{ attempt.row_class }}" data-testid="opal-attempt-row">
-        <td>
-          <a href="{% url "admin:opal_opalattempt_change" attempt.pk %}">{{ forloop.counter }}</a>
-        </td>
-        <td>
-          <a href="{% url "opal-attempts-list" hunt.slug attempt.puzzle.slug %}">{{ attempt.puzzle.title }}</a>
-        </td>
-        {% include "opal/components/guess_cell.html" %}
-        {% include "opal/components/verdict_cell.html" %}
-      </tr>
-    {% endfor %}
-  </table>
+  {% for section in sections %}
+    <h2>{{ section.hunt }}</h2>
+    <p>
+      <a class="btn btn-primary btn-sm"
+         href="{{ section.hunt.get_absolute_url }}">Show puzzles</a>
+      <a class="btn btn-info btn-sm"
+         href="{% url "opal-leaderboard" section.hunt.slug %}">Leaderboard</a>
+      <a class="btn btn-secondary btn-sm"
+         href="{% url "opal-hunt-log" section.hunt.slug %}">Log</a>
+    </p>
+    {% include "opal/components/attempt_table.html" with hunt=section.hunt attempts=section.attempts for_one_person=True %}
+  {% empty %}
+    <p data-testid="opal-person-no-guesses">This person has not guessed on any hunt.</p>
+  {% endfor %}
 {% endblock layout-content %}
+{% comment %}
+vim: ft=htmldjango
+{% endcomment %}

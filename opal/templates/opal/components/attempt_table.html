@@ -1,24 +1,37 @@
 {% comment %}
-  The guess-log table shared by the recent-activity and hunt-log views.
-  Expects `hunt`, plus `attempts` decorated by `opal.views.decorate_attempts`.
+  The guess-log table shared by the recent-activity, hunt-log and person-log
+  views. Expects `hunt`, plus `attempts` decorated by
+  `opal.views.decorate_attempts`. A log that is already about one person passes
+  `for_one_person`: it leads with the guess pk, linking into the admin, and
+  drops the two columns that would say the same thing on every row.
 {% endcomment %}
 <table class="table table-striped">
   <tr class="table-dark">
+    {% if for_one_person %}<th>PK</th>{% endif %}
     <th>Puzzle</th>
-    <th class="text-center text-nowrap" style="width:1%;">S</th>
-    <th>User</th>
+    {% if not for_one_person %}
+      <th class="text-center text-nowrap" style="width:1%;">S</th>
+      <th>User</th>
+    {% endif %}
     <th>Guess</th>
     <th>Timestamp</th>
   </tr>
   {% for attempt in attempts %}
     <tr class="{{ attempt.row_class }}" data-testid="opal-attempt-row">
+      {% if for_one_person %}
+        <td>
+          <a href="{% url "admin:opal_opalattempt_change" attempt.pk %}">{{ attempt.pk }}</a>
+        </td>
+      {% endif %}
       <td>
         <a href="{% url "opal-attempts-list" hunt.slug attempt.puzzle.slug %}">{{ attempt.puzzle.title|truncatechars:"12" }}</a>
       </td>
-      <td class="text-center fw-bold">{{ attempt.solve_count }}</td>
-      <td>
-        <a href="{% url "opal-person-log" hunt.slug attempt.user.pk %}">{{ attempt.user.get_full_name|truncatechars:"24" }}</a>
-      </td>
+      {% if not for_one_person %}
+        <td class="text-center fw-bold">{{ attempt.solve_count }}</td>
+        <td>
+          <a href="{% url "opal-person-log" attempt.user.pk %}">{{ attempt.user.get_full_name|truncatechars:"24" }}</a>
+        </td>
+      {% endif %}
       {% include "opal/components/guess_cell.html" %}
       {% include "opal/components/verdict_cell.html" %}
     </tr>
