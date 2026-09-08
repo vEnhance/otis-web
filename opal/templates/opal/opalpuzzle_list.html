@@ -9,6 +9,9 @@
       <a href="{% url "opal-leaderboard" hunt.slug %}"
          title="Leaderboard"
          class="btn btn-info">Leaderboard</a>
+      <a href="{% url "opal-hunt-log" hunt.slug %}"
+         title="Log"
+         class="btn btn-secondary">Log</a>
       <a href="{% url "admin:opal_opalhunt_change" hunt.pk %}"
          title="Edit in admin"
          class="btn btn-outline-dark">Edit in admin</a>
