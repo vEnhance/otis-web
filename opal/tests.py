@@ -1018,11 +1018,14 @@ def test_guess_log_row_styling(otis):
         pk: expected[pk] for pk in (tess_meta.pk, alice_meta.pk, bob_stuck.pk)
     }
 
-    # the per-user log sees one person's guesses, and a testsolver's stay blue
+    # the per-user log sees one person's guesses, and leaves out the tints
+    # that would apply to every row of it: Tess's whole testsolve is untinted
     resp = otis.get_20x("opal-person-log", tess.pk)
     assert styling(section_attempts(resp, hunt)) == {
-        pk: expected[pk] for pk in (tess_feeder.pk, tess_meta.pk)
+        tess_feeder.pk: ("☑️", ""),
+        tess_meta.pk: ("🆗", ""),
     }
+    # while Bob, who stands nowhere in particular, gets the same rows as anywhere
     resp = otis.get_20x("opal-person-log", bob.pk)
     assert styling(section_attempts(resp, hunt)) == {
         pk: expected[pk] for pk in (bob_miss.pk, bob_feeder.pk, bob_stuck.pk)
@@ -1050,9 +1053,13 @@ def test_guess_log_row_styling(otis):
 
     # once Bob finishes, the hunt-wide green wins over both per-puzzle tints
     OpalAttemptFactory.create(user=bob, puzzle=meta, guess="two")
-    resp = otis.get_20x("opal-person-log", bob.pk)
-    bobs_rows = section_attempts(resp, hunt)
+    resp = otis.get_20x("opal-hunt-log", "hunt")
+    bobs_rows = [a for a in resp.context["attempts"] if a.user == bob]
     assert {a.row_class for a in bobs_rows} == {"table-success"}
+
+    # but his own page, where that green would be every row, stays uncolored
+    resp = otis.get_20x("opal-person-log", bob.pk)
+    assert {a.row_class for a in section_attempts(resp, hunt)} == {""}
 
 
 @pytest.mark.django_db
