@@ -510,6 +510,32 @@ def test_submit(otis):
 
 
 @pytest.mark.django_db
+def test_resubmit_requires_active_semester(otis):
+    unit = UnitFactory.create(code="BMW")
+    alice_past = StudentFactory.create(semester=SemesterFactory.create(active=False))
+    old_pset = PSetFactory.create(student=alice_past, unit=unit, status="A")
+    otis.login(alice_past)
+
+    resp = otis.get_20x("pset", old_pset.pk)
+    assert resp.context["can_resubmit"] is False
+    otis.assert_testid(resp, "pset-semester-inactive")
+    otis.get_denied("resubmit-pset", old_pset.pk)
+
+    # enrolling for the current year doesn't reopen the old submission
+    alice_now = StudentFactory.create(user=alice_past.user)
+    resp = otis.get_20x("pset", old_pset.pk)
+    assert resp.context["current_student"] == alice_now
+    otis.get_denied("resubmit-pset", old_pset.pk)
+
+    # but the same unit submitted this year is still editable
+    new_pset = PSetFactory.create(student=alice_now, unit=unit, status="A")
+    resp = otis.get_20x("pset", new_pset.pk)
+    assert resp.context["can_resubmit"] is True
+    otis.assert_no_testid(resp, "pset-semester-inactive")
+    otis.get_20x("resubmit-pset", new_pset.pk)
+
+
+@pytest.mark.django_db
 def test_unit_query(otis):
     units = UnitFactory.create_batch(size=20)
     alice = StudentFactory.create()

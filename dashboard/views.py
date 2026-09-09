@@ -250,16 +250,13 @@ class StudentPSetList(LoginRequiredMixin, ListView[PSet]):
 def resubmit_pset(request: HttpRequest, pk: int) -> HttpResponse:
     pset = get_object_or_404(PSet, pk=pk)
     student = pset.student
-    current_semester = Semester.objects.filter(active=True).first()
-    if (
-        not current_semester
-        or not Student.objects.filter(
-            user=student.user, semester=current_semester
-        ).exists()
-    ):
-        raise PermissionDenied("Not enrolled in an active semester")
     if not can_view(request, student):
         raise PermissionDenied("You are missing privileges for this problem set")
+    if not student.semester.active:
+        raise PermissionDenied(
+            f"{student.semester} is no longer active, so this problem set "
+            "can no longer be edited; submit the unit in the current year instead."
+        )
 
     if pset.status == "R":
         verb = "Replace"
@@ -472,5 +469,11 @@ class PSetDetail(LoginRequiredMixin, DetailView[PSet]):
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        context["student"] = self.object.student
+        student = self.object.student
+        context["student"] = student
+        context["can_resubmit"] = student.semester.active
+        if not student.semester.active:
+            context["current_student"] = Student.objects.filter(
+                user=student.user, semester__active=True
+            ).first()
         return context
