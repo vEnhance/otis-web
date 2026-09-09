@@ -4,26 +4,50 @@
   Submission for {{ pset.unit }}
 {% endblock title %}
 {% block layout-content %}
-  <p>
-    Back to <a href="{% url "submit-pset" student.pk %}">submission page</a>.
-  </p>
+  {% if can_resubmit %}
+    <p>
+      Back to <a href="{% url "submit-pset" student.pk %}">submission page</a>.
+    </p>
+  {% elif current_student %}
+    <p>
+      Back to <a href="{% url "submit-pset" current_student.pk %}">this year's submission page</a>.
+    </p>
+  {% endif %}
   {% if pset.rejected %}
     <div class="alert alert-warning" data-testid="pset-status-rejected">
       This unit submission was rejected.
-      You should <a href="{% url "resubmit-pset" pset.pk %}">replace it</a>.
+      {% if can_resubmit %}
+        You should <a href="{% url "resubmit-pset" pset.pk %}">replace it</a>.
+      {% endif %}
     </div>
   {% elif pset.accepted %}
     <div class="alert alert-success" data-testid="pset-status-accepted">
       This unit submission was accepted.
-      If you haven't read the solutions yet,
-      you can <a href="{% url "resubmit-pset" pset.pk %}">submit additional problems</a>
-      if you find time.
+      {% if can_resubmit %}
+        If you haven't read the solutions yet,
+        you can <a href="{% url "resubmit-pset" pset.pk %}">submit additional problems</a>
+        if you find time.
+      {% endif %}
     </div>
   {% else %}
     <div class="alert alert-primary" data-testid="pset-status-pending">
       This unit submission is pending review from Evan.
-      <a href="{% url "resubmit-pset" pset.pk %}">Update it</a>
-      if you wish to make changes.
+      {% if can_resubmit %}
+        <a href="{% url "resubmit-pset" pset.pk %}">Update it</a>
+        if you wish to make changes.
+      {% endif %}
+    </div>
+  {% endif %}
+  {% if not can_resubmit %}
+    <div class="alert alert-secondary" data-testid="pset-semester-inactive">
+      {{ student.semester }} is over, so this submission can no longer be edited.
+      {% if current_student %}
+        Submit the unit again from
+        <a href="{% url "submit-pset" current_student.pk %}">this year's submission page</a>
+        instead.
+      {% else %}
+        Submissions are only accepted for the current year.
+      {% endif %}
     </div>
   {% endif %}
   {% if pset.staff_comments %}
@@ -31,16 +55,18 @@
     {{ pset.staff_comments|markdownify }}
   {% endif %}
   <p class="text-center">
-    <a href="{% url "resubmit-pset" pset.pk %}"
-       class="btn {% if pset.rejected %}btn-success{% elif pset.accepted %}btn-warning{% else %}btn-primary{% endif %}">
-      {% if pset.rejected %}
-        Replace problem set
-      {% elif pset.accepted %}
-        Submit additional problems
-      {% else %}
-        Update submission
-      {% endif %}
-    </a>
+    {% if can_resubmit %}
+      <a href="{% url "resubmit-pset" pset.pk %}"
+         class="btn {% if pset.rejected %}btn-success{% elif pset.accepted %}btn-warning{% else %}btn-primary{% endif %}">
+        {% if pset.rejected %}
+          Replace problem set
+        {% elif pset.accepted %}
+          Submit additional problems
+        {% else %}
+          Update submission
+        {% endif %}
+      </a>
+    {% endif %}
     {% if request.user.is_staff %}
       <a href="{% url "admin:dashboard_pset_change" pset.pk %}"
          class="btn btn-dark">Staff edit</a>
