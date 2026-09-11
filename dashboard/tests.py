@@ -7,8 +7,10 @@ from django.conf import settings
 from django.contrib.admin.sites import AdminSite
 from django.contrib.messages import constants as message_levels
 from django.contrib.messages.storage.cookie import CookieStorage
+from django.db import connection
 from django.http import HttpRequest
 from django.test import RequestFactory
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from freezegun import freeze_time
 
@@ -128,6 +130,20 @@ def test_portal(otis):
     assert [row["unit"] for row in resp.context["curriculum"]] == [unit]
     assert list(resp.context["tests"]) == [test]
     assert list(resp.context["quizzes"]) == [quiz]
+
+
+@pytest.mark.django_db
+def test_portal_fetches_profile_once(otis):
+    alice = StudentFactory.create()
+    otis.login(alice)
+    otis.get_20x("portal", alice.pk, follow=True)
+
+    with CaptureQueriesContext(connection) as ctx:
+        otis.get_20x("portal", alice.pk, follow=True)
+    profile_queries = [
+        q for q in ctx.captured_queries if "core_userprofile" in q["sql"]
+    ]
+    assert len(profile_queries) == 1, profile_queries
 
 
 @pytest.mark.django_db

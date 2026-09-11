@@ -46,6 +46,7 @@ from django_discordo import SUCCESS_LOG_LEVEL
 from prettytable import PrettyTable
 
 from core.models import EMAIL_PREFERENCE_FIELDS, Semester, Unit, UserProfile
+from core.utils import get_profile
 from dashboard.models import PSet
 from otisweb.decorators import admin_required, staff_required
 from otisweb.mixins import (
@@ -528,7 +529,7 @@ def register(request: AuthHttpRequest) -> HttpResponse:
                 "us_state",
             ):
                 initial_data_dict[k] = getattr(most_recent_reg, k)
-        profile, _ = UserProfile.objects.get_or_create(user=request.user)
+        profile = get_profile(request.user)
         for k in EMAIL_PREFERENCE_FIELDS:
             initial_data_dict[k] = getattr(profile, k)
         form = DecisionForm(initial=initial_data_dict)
@@ -868,7 +869,7 @@ def _user_summaries(users: Sequence[User]) -> list[dict[str, Any]]:
         .order_by("-semester__end_year")
     )
     for student in student_qs:
-        students_by_user_id[student.user_id].append(student)  # type: ignore
+        students_by_user_id[student.user_id].append(student)
 
     summaries: list[dict[str, Any]] = []
     for user in users:

@@ -13,6 +13,7 @@ from sql_util.aggregates import SubqueryCount, SubquerySum
 from sql_util.utils import Exists
 
 from core.models import UserProfile
+from core.utils import find_profile
 from dashboard.models import PSet
 from exams.models import ExamAttempt, MockCompleted
 from hanabi.models import HanabiReplay
@@ -188,10 +189,8 @@ def get_level_info(student: Student) -> LevelInfoDict:
 
     total_spades = get_spade_stats(student, level_data)
 
-    try:
-        dynamic_progress = (UserProfile.objects.get(user=student.user)).dynamic_progress
-    except UserProfile.DoesNotExist:
-        dynamic_progress = False
+    profile = find_profile(student.user)
+    dynamic_progress = profile is not None and profile.dynamic_progress
 
     meters: FourMetersDict = {
         "clubs": Meter.ClubMeter(int(total_clubs), dynamic_progress),

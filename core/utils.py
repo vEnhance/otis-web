@@ -23,6 +23,27 @@ ETAG_LENGTH = 32
 CACHE_MAX_AGE_SECONDS = 15 * 60
 
 
+def find_profile(user: User) -> UserProfile | None:
+    """Get the user's profile, or None if they don't have one.
+
+    The result is cached on the user instance by Django's one-to-one
+    descriptor, so repeated calls within a request cost only one query.
+    """
+    try:
+        return user.profile  # type: ignore
+    except UserProfile.DoesNotExist:
+        return None
+
+
+def get_profile(user: User) -> UserProfile:
+    """Like find_profile, but creates the profile if it doesn't exist yet."""
+    profile = find_profile(user)
+    if profile is None:
+        profile, _ = UserProfile.objects.get_or_create(user=user)
+        user.profile = profile  # type: ignore
+    return profile
+
+
 def get_protected_etag(storage: Storage, path: str, user: User) -> str | None:
     try:
         mtime = storage.get_modified_time(path)
@@ -46,7 +67,7 @@ def get_protected_file(
 ):
     if not isinstance(request.user, User):
         raise PermissionDenied("Only logged in users may query core storage.")
-    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    profile = get_profile(request.user)
     inline_pdf = profile.inline_pdf
     inline_tex = profile.inline_tex
     ext = filename[-4:]

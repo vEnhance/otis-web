@@ -12,6 +12,7 @@ from django.utils.safestring import SafeData, mark_safe
 from django.utils.text import normalize_newlines
 
 from core.models import Unit, UserProfile
+from core.utils import find_profile
 from rpg.levelsys import BONUS_D_UNIT, BONUS_Z_UNIT
 
 register = template.Library()
@@ -44,23 +45,16 @@ def getenv(s: str) -> str:
 
 
 @register.filter(name="getprofile")
-def getprofile(user: User) -> UserProfile | None:
-    try:
-        return UserProfile.objects.get(user=user)
-    except UserProfile.DoesNotExist:
+def getprofile(user: User | AnonymousUser) -> UserProfile | None:
+    if isinstance(user, AnonymousUser):
         return None
+    return find_profile(user)
 
 
 @register.filter(name="getconfig")
-def getconfig(user: User, config: str) -> bool:
-    if isinstance(user, AnonymousUser):
-        return False
-    try:
-        profile: UserProfile = UserProfile.objects.get(user=user)
-    except UserProfile.DoesNotExist:
-        return False
-    else:
-        return getattr(profile, config)
+def getconfig(user: User | AnonymousUser, config: str) -> bool:
+    profile = getprofile(user)
+    return getattr(profile, config) if profile is not None else False
 
 
 @register.filter(name="clubs_multiplier")
