@@ -1,0 +1,25 @@
+<div class="text-center">
+  <a href="{% url 'stats' student.pk %}"
+     style="margin: 0 auto;
+            width: 120px"
+     class="btn btn-primary text-white"
+     role="button">View stats</a>
+  {% if student.enabled and semester.active %}
+    <a href="{% url 'submit-pset' student.pk %}"
+       style="margin: 0 auto;
+              width: 120px"
+       class="btn btn-success text-white"
+       role="button">Submit unit</a>
+  {% endif %}
+  <a href="{% url 'student-pset-list' student.pk %}"
+     style="margin: 0 auto;
+            width: 120px"
+     class="btn btn-secondary text-white"
+     role="button">Past work</a>
+  {% if is_maxed %}
+    <br />
+    <a href="{% url 'palace-list' student.pk %}"
+       class="btn btn-danger text-white mx-auto my-2"
+       role="button">Ruby Palace</a>
+  {% endif %}
+</div>

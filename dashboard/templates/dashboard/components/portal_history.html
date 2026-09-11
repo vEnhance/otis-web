@@ -1,0 +1,17 @@
+<div class="float-end btn-group" role="group">
+  &nbsp;
+  <a class="fs-5 emoji-link"
+     title="Settings"
+     href="{% url "profile" %}"
+     style="display: flex;
+            align-items: center">⚙️</a>
+  &nbsp;
+  {% for x in history %}
+    {% if x.pk == student.pk %}
+      <span class="btn btn-sm btn-primary active">{{ x.semester__end_year }}</span>
+    {% else %}
+      <a href="{% url "portal" x.pk %}"
+         class="btn btn-sm btn-outline-secondary">{{ x.semester__end_year }}</a>
+    {% endif %}
+  {% endfor %}
+</div>

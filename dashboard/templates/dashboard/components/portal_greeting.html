@@ -1,0 +1,24 @@
+{% load otis_extras %}
+<div class="greeting">
+  {% if request.user|getconfig:"show_bars" %}
+    <h1>
+      Level {{ level_number }} {{ str_im_level }}
+      —
+      <a href="{% url 'stats' student.pk %}">
+        <span class="emoji-text">🏅</span>{{ level_name }}</a>
+    </h1>
+    <div class="container">
+      <div class="row">
+        {% include "rpg/meters/small.html" with meter=meters.clubs %}
+        {% include "rpg/meters/small.html" with meter=meters.hearts %}
+        {% include "rpg/meters/small.html" with meter=meters.spades %}
+        {% include "rpg/meters/small.html" with meter=meters.diamonds %}
+      </div>
+    </div>
+  {% else %}
+    <h1>Welcome back</h1>
+    <p>
+      You are logged in as <code>{{ request.user.username }}</code>.
+    </p>
+  {% endif %}
+</div>

@@ -1,0 +1,99 @@
+{% load static %}
+<table width="100%">
+  <tr>
+    <td valign="top" width="50%">
+      <h3>Discord</h3>
+      {% if semester.social_url %}
+        <a href="{{ semester.social_url }}" class="btn btn-info" role="button">Open Discord</a>
+      {% else %}
+        Nothing here yet!
+      {% endif %}
+    </td>
+    <td valign="top" width="50%">
+      <h3 id="petitions">Petitions</h3>
+      {% if request.user.is_staff %}
+        <a href="{% url 'petition' student.pk %}" class="btn btn-warning">Manage units</a>
+        <a href="{% url 'advance' student.pk %}" class="btn btn-dark">Edit units</a>
+      {% else %}
+        {% if not student.enabled %}
+          <p class="text-muted fst-italic">Disabled.</p>
+        {% elif not semester.active %}
+          <p class="text-muted fst-italic">Course is archived.</p>
+        {% elif student.newborn %}
+          <p class="text-muted fst-italic">Pick units first!</p>
+        {% else %}
+          <a href="{% url 'petition' student.pk %}" class="btn btn-warning">Manage units</a>
+          {% if bonus_levels %}
+            <p data-testid="bonus-level-request">
+              You are also sufficiently high level to
+              <a href="{% url "bonus-level-request" student.pk %}">request secret units</a>.
+            </p>
+          {% endif %}
+        {% endif %}
+      {% endif %}
+    </td>
+  </tr>
+  <tr>
+    <td valign="top" width="50%">
+      <h3>Academic</h3>
+      <ul>
+        <li>
+          <a href="{% url 'currshow' student.pk %}">Class selection</a>
+        </li>
+        <li>
+          <a href="{% static 'info/mock-imo.pdf' %}">Extra mock IMO's (shortlist)</a>
+        </li>
+        <li>
+          <a href="{% static 'info/guest-unit-spec.pdf' %}">Guest unit proposals</a>
+        </li>
+        <li>
+          <a href="{% static 'info/psychology.pdf' %}">Handout on olympiad strategy</a>
+        </li>
+        <li>
+          <a href="https://web.evanchen.cc/handouts/LaTeXPetPeeve/LaTeXPetPeeve.pdf">LaTeX pet peeves</a>
+        </li>
+        <li>
+          <a href="{% url 'downloads' student.pk %}">Posted files ({{ num_sem_downloads }})</a>
+        </li>
+        <li>
+          <a href="{% url 'catalog' %}">Unit catalog</a>
+        </li>
+        <li>
+          <a href="{% static 'info/unit-guide.pdf' %}">Unit selection guide</a>
+        </li>
+      </ul>
+    </td>
+    <td valign="top" width="50%">
+      <h3>Logistics</h3>
+      <ul>
+        <li>
+          <a href="{% url "announcement-list" %}">Announcement emails</a>
+        </li>
+        <li>
+          <a href="{% url "ad-list" %}">Available instructors</a>
+        </li>
+        <li>
+          {% if semester.show_invoices %}
+            <a href="{% url 'invoice' student.pk %}">Invoice</a>
+          {% else %}
+            Invoice not ready yet; check back later.
+          {% endif %}
+        </li>
+        {% if semester.active %}
+          <li>
+            <a href="{{ semester.calendar_url }}" target="_blank" rel="noreferrer">OTIS calendar</a>
+          </li>
+        {% endif %}
+        <li>
+          <a href="{% static 'info/parent-info.pdf' %}">Payment info</a>
+        </li>
+        <li>
+          <a href="{% url 'student-ids' %}">Student ID numbers</a>
+        </li>
+        <li>
+          <a href="https://web.evanchen.cc/upload/otis-syllabus.pdf">Syllabus</a>
+        </li>
+      </ul>
+    </td>
+  </tr>
+</table>
