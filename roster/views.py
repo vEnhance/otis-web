@@ -541,34 +541,27 @@ def register(request: AuthHttpRequest) -> HttpResponse:
 
 
 @login_required
+@require_POST
 def backfill_us_state(request: AuthHttpRequest) -> HttpResponse:
-    """One-shot form for students who registered before the state field existed.
+    """Handles the state dropdown on the portal alert.
 
-    Once the state is filled in, the user no longer qualifies for this page,
-    so it retires itself as the backfill completes.
+    Every USA registration of the user is filled in at once, past years
+    included, so the alert never comes back after one submission.
     """
-    regs = get_regs_missing_us_state(request.user)
-    if not regs.exists():
-        messages.info(request, "Your state is already on file, nothing to do here.")
-        return HttpResponseRedirect(reverse("index"))
-    if request.method == "POST":
-        form = BackfillUSStateForm(request.POST)
-        if form.is_valid():
-            us_state = form.cleaned_data["us_state"]
-            regs.update(us_state=us_state)
+    form = BackfillUSStateForm(request.POST)
+    if not form.is_valid():
+        messages.error(request, "Please choose a state from the dropdown.")
+    else:
+        us_state = form.cleaned_data["us_state"]
+        if get_regs_missing_us_state(request.user).update(us_state=us_state):
             messages.success(
                 request,
                 message=f"Thanks! Evan's accountant now knows you are "
                 f"in {get_us_state_name(us_state)}.",
             )
-            return HttpResponseRedirect(reverse("index"))
-    else:
-        form = BackfillUSStateForm()
-    return render(
-        request,
-        "roster/backfill_us_state.html",
-        {"title": "Which state are you from?", "form": form},
-    )
+        else:
+            messages.info(request, "Your state is already on file, nothing to do here.")
+    return HttpResponseRedirect(reverse("index"))
 
 
 @login_required

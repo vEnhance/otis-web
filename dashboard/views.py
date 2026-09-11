@@ -25,6 +25,7 @@ from exams.models import PracticeExam
 from otisweb.decorators import admin_required
 from otisweb.mixins import VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest, get_days_since
+from roster.forms import BackfillUSStateForm
 from roster.models import RegistrationContainer, Student
 from roster.utils import (
     can_view,
@@ -71,9 +72,10 @@ def portal(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
     }
     context["profile"] = profile
 
-    context["needs_us_state"] = (
-        request.user == student.user
-        and get_regs_missing_us_state(student.user).exists()
+    context["us_state_form"] = (
+        BackfillUSStateForm()
+        if get_regs_missing_us_state(student.user).exists()
+        else None
     )
 
     context["curriculum"] = student.generate_curriculum_rows()

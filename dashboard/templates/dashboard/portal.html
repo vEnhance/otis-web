@@ -82,19 +82,8 @@
       <a href="{% url 'invoice' student.pk %}" class="alert-link">Link to invoice.</a>
     </div>
   {% endif %}
-  {% if needs_us_state %}
-    <div class="alert alert-warning" data-testid="us-state-alert">
-      <h1 class="alert-heading">US state needed</h1>
-      hi so apparently for tax reasons i'm supposed to report
-      what income is coming from what US state.
-      if you could take a moment to
-      <a href="{% url "backfill-us-state" %}" class="alert-link">tell me what state you're from</a>
-      my <a href="https://w.wiki/URan" class="alert-link">CPA</a> will be real happy.
-      ty for the assist.
-      <p class="text-center">
-        <a href="{% url "backfill-us-state" %}" class="btn btn-primary">Record US state</a>
-      </p>
-    </div>
+  {% if us_state_form %}
+    {% include "dashboard/components/us_state_alert.html" %}
   {% endif %}
   {% if not student.enabled %}
     <div class="alert alert-secondary">

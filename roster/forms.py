@@ -212,10 +212,12 @@ class DecisionForm(forms.ModelForm):
 
 
 class BackfillUSStateForm(forms.Form):
+    """Just the state dropdown, rendered inline in the portal alert."""
+
     us_state = forms.ChoiceField(
-        choices=US_STATE_CHOICES,
+        choices=(("", "Choose your state..."),) + US_STATE_CHOICES,
         label="Your state",
-        help_text="The US state you live in.",
+        widget=forms.Select(attrs={"class": "form-select", "aria-label": "Your state"}),
     )
 
 

@@ -1761,7 +1761,10 @@ def test_backfill_us_state(otis) -> None:
     bob_reg: StudentRegistration = StudentRegistrationFactory.create()
 
     otis.login(alice)
-    otis.get_20x("backfill-us-state")
+    otis.assert_message(
+        otis.post_20x("backfill-us-state", data={"us_state": ""}, follow=True),
+        "Please choose a state from the dropdown.",
+    )
     otis.assert_message(
         otis.post_20x("backfill-us-state", data={"us_state": "NY"}, follow=True),
         "Thanks! Evan's accountant now knows you are in New York.",
@@ -1776,11 +1779,13 @@ def test_backfill_us_state(otis) -> None:
     assert abroad_reg.us_state == ""
     assert bob_reg.us_state == ""
 
-    # nothing left to backfill, so the form retires itself
+    # nothing left to backfill, so a stray resubmission changes nothing
     otis.assert_message(
-        otis.get_20x("backfill-us-state", follow=True),
+        otis.post_20x("backfill-us-state", data={"us_state": "TX"}, follow=True),
         "Your state is already on file, nothing to do here.",
     )
+    new_reg.refresh_from_db()
+    assert new_reg.us_state == "NY"
 
 
 @pytest.mark.django_db
