@@ -155,12 +155,8 @@ def test_portal_dismiss_news(otis):
     portal_url = otis.url("portal", alice.pk)
     assert otis.get_20x("portal", alice.pk, follow=True).context["num_news"] == 1
 
-    otis.post_redirects(portal_url, "dismiss-news", data={"next": portal_url})
+    otis.post_redirects(portal_url, "dismiss-news", alice.pk)
     assert otis.get_20x("portal", alice.pk, follow=True).context["num_news"] == 0
-
-    otis.post_redirects(
-        otis.url("index"), "dismiss-news", data={"next": "https://evil.example.com"}
-    )
 
 
 @pytest.mark.django_db

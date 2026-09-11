@@ -23,7 +23,7 @@ from django.urls import reverse
 from django.urls.base import reverse_lazy
 from django.utils import timezone
 from django.utils.encoding import force_bytes
-from django.utils.http import url_has_allowed_host_and_scheme, urlsafe_base64_encode
+from django.utils.http import urlsafe_base64_encode
 from django.views.generic import View
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView
@@ -346,16 +346,13 @@ class UserProfileUpdateView(
 
 
 @login_required
-def dismiss(request: AuthHttpRequest) -> HttpResponse:
+def dismiss(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
     if not request.method == "POST":
         raise PermissionDenied("Must use POST")
     profile = get_object_or_404(UserProfile, user=request.user)
     profile.last_notif_dismiss = timezone.now()
     profile.save()
-    next_url = request.POST.get("next", "")
-    if not url_has_allowed_host_and_scheme(next_url, allowed_hosts=None):
-        next_url = reverse("index")
-    return HttpResponseRedirect(next_url)
+    return HttpResponseRedirect(reverse("portal", args=(student_pk,)))
 
 
 @verified_required

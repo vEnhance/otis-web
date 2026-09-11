@@ -49,9 +49,8 @@
       <em class="text-muted">OPAL hunt active!</em>
     </p>
   {% endfor %}
-  <form action="{% url "dismiss-news" %}" method="post">
+  <form action="{% url "dismiss-news" student.pk %}" method="post">
     {% csrf_token %}
-    <input type="hidden" name="next" value="{{ request.path }}" />
     <button type="submit" class="btn-close" aria-label="Dismiss news"></button>
   </form>
 </div>
