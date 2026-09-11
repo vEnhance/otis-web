@@ -330,9 +330,7 @@ def test_submit_diamond_and_read_solution(otis, alice_with_data):
         return AchievementUnlock.objects.get(achievement=a, user=user).is_first_obtain
 
     # Submit a nonexistent code
-    resp = otis.post_20x(
-        "achievements-listing", data={"code": "123456123456123456123456"}
-    )
+    resp = submit_code(otis, WRONG_CODE)
     assert INVALID_CODE in message_texts(resp)
     assert not alice_has(a1)
     assert not alice_has(a2)
@@ -342,7 +340,7 @@ def test_submit_diamond_and_read_solution(otis, alice_with_data):
     otis.get_40x("diamond-solution", a3.pk)
 
     # Submit a valid code for a1
-    resp = otis.post_20x("achievements-listing", data={"code": a1.code})
+    resp = submit_code(otis, a1.code)
     assert unlocked(resp)
     assert was_first_find(a1, alice.user)
     assert alice_has(a1)
@@ -353,7 +351,7 @@ def test_submit_diamond_and_read_solution(otis, alice_with_data):
     otis.get_40x("diamond-solution", a3.pk)
 
     # Submit a valid code for a1 that was obtained already
-    resp = otis.post_20x("achievements-listing", data={"code": a1.code})
+    resp = submit_code(otis, a1.code)
     assert already(resp)
     assert alice_has(a1)
     assert not alice_has(a2)
@@ -363,7 +361,7 @@ def test_submit_diamond_and_read_solution(otis, alice_with_data):
     otis.get_40x("diamond-solution", a3.pk)
 
     # Submit a valid code for a2
-    resp = otis.post_20x("achievements-listing", data={"code": a2.code})
+    resp = submit_code(otis, a2.code)
     assert unlocked(resp)
     assert not was_first_find(a2, alice.user)
     assert alice_has(a1)
@@ -374,7 +372,7 @@ def test_submit_diamond_and_read_solution(otis, alice_with_data):
     otis.get_40x("diamond-solution", a3.pk)
 
     # Submit a valid code for a2 that was obtained already
-    resp = otis.post_20x("achievements-listing", data={"code": a2.code})
+    resp = submit_code(otis, a2.code)
     assert already(resp)
     assert alice_has(a1)
     assert alice_has(a2)
@@ -384,7 +382,7 @@ def test_submit_diamond_and_read_solution(otis, alice_with_data):
     otis.get_40x("diamond-solution", a3.pk)
 
     # Submit a valid code for a3
-    resp = otis.post_20x("achievements-listing", data={"code": a3.code})
+    resp = submit_code(otis, a3.code)
     assert unlocked(resp)
     assert was_first_find(a3, alice.user)
     assert alice_has(a1)
@@ -397,15 +395,15 @@ def test_submit_diamond_and_read_solution(otis, alice_with_data):
     # Test Bob, the owner of a3
     otis.login(bob.user)
     # Bob submits a1
-    resp = otis.post_20x("achievements-listing", data={"code": a1.code})
+    resp = submit_code(otis, a1.code)
     assert unlocked(resp)
     assert not was_first_find(a1, bob.user)
     # Bob submits a2
-    resp = otis.post_20x("achievements-listing", data={"code": a2.code})
+    resp = submit_code(otis, a2.code)
     assert unlocked(resp)
     assert was_first_find(a2, bob.user)
     # Bob submits a3
-    resp = otis.post_20x("achievements-listing", data={"code": a3.code})
+    resp = submit_code(otis, a3.code)
     assert unlocked(resp)
     assert not was_first_find(a3, bob.user)
 
@@ -504,14 +502,14 @@ def test_is_first_obtain_first_finder(otis):
     achievement = AchievementFactory.create()
 
     otis.login(alice)
-    otis.post_20x("achievements-listing", data={"code": achievement.code})
+    submit_code(otis, achievement.code)
     alice_unlock = AchievementUnlock.objects.get(
         user=alice.user, achievement=achievement
     )
     assert alice_unlock.is_first_obtain is True
 
     otis.login(bob)
-    otis.post_20x("achievements-listing", data={"code": achievement.code})
+    submit_code(otis, achievement.code)
     bob_unlock = AchievementUnlock.objects.get(user=bob.user, achievement=achievement)
     assert bob_unlock.is_first_obtain is False
 
@@ -525,7 +523,7 @@ def test_is_first_obtain_creator_unlock_skipped(otis):
 
     # Alice (the creator) submits first
     otis.login(alice)
-    otis.post_20x("achievements-listing", data={"code": achievement.code})
+    submit_code(otis, achievement.code)
     alice_unlock = AchievementUnlock.objects.get(
         user=alice.user, achievement=achievement
     )
@@ -533,7 +531,7 @@ def test_is_first_obtain_creator_unlock_skipped(otis):
 
     # Bob is the first non-creator finder
     otis.login(bob)
-    otis.post_20x("achievements-listing", data={"code": achievement.code})
+    submit_code(otis, achievement.code)
     bob_unlock = AchievementUnlock.objects.get(user=bob.user, achievement=achievement)
     assert bob_unlock.is_first_obtain is True
 
@@ -545,7 +543,7 @@ def test_is_first_obtain_creator_only(otis):
     achievement = AchievementFactory.create(creator=alice.user)
 
     otis.login(alice)
-    otis.post_20x("achievements-listing", data={"code": achievement.code})
+    submit_code(otis, achievement.code)
     unlock = AchievementUnlock.objects.get(user=alice.user, achievement=achievement)
     assert unlock.is_first_obtain is False
 
@@ -557,7 +555,7 @@ def test_is_first_obtain_resubmit_unchanged(otis):
     achievement = AchievementFactory.create()
 
     otis.login(alice)
-    otis.post_20x("achievements-listing", data={"code": achievement.code})
+    submit_code(otis, achievement.code)
     assert (
         AchievementUnlock.objects.get(
             user=alice.user, achievement=achievement
@@ -566,7 +564,7 @@ def test_is_first_obtain_resubmit_unchanged(otis):
     )
 
     # Submit again — should remain True
-    otis.post_20x("achievements-listing", data={"code": achievement.code})
+    submit_code(otis, achievement.code)
     assert (
         AchievementUnlock.objects.get(
             user=alice.user, achievement=achievement
@@ -623,6 +621,12 @@ def rate_limited(resp) -> bool:
     return errored and INVALID_CODE not in message_texts(resp)
 
 
+def submit_code(otis, code: str):
+    """Submitting a code redirects back to the listing; follow it for the messages."""
+    resp = otis.post_20x("diamond-submit", data={"code": code}, follow=True)
+    return otis.assert_redirects(resp, otis.url("achievements-listing"))
+
+
 def make_wrong_guesses(user: User, count: int):
     return AchievementCodeGuessFactory.create_batch(count, user=user)
 
@@ -634,8 +638,8 @@ def test_guesses_are_recorded(otis):
     achievement = AchievementFactory.create()
 
     otis.login(alice)
-    otis.post_20x("achievements-listing", data={"code": WRONG_CODE})
-    otis.post_20x("achievements-listing", data={"code": achievement.code})
+    submit_code(otis, WRONG_CODE)
+    submit_code(otis, achievement.code)
 
     wrong_guess, right_guess = AchievementCodeGuess.objects.filter(
         user=alice.user
@@ -657,8 +661,8 @@ def test_repeat_redeem_is_marked(otis):
     achievement = AchievementFactory.create()
 
     otis.login(alice)
-    otis.post_20x("achievements-listing", data={"code": achievement.code})
-    resp = otis.post_20x("achievements-listing", data={"code": achievement.code})
+    submit_code(otis, achievement.code)
+    resp = submit_code(otis, achievement.code)
     assert any(m.level == message_levels.WARNING for m in resp.context["messages"])
 
     earned, repeat = AchievementCodeGuess.objects.filter(user=alice.user).order_by("pk")
@@ -676,8 +680,8 @@ def test_creator_redeeming_own_code_earns_it_once(otis):
     achievement = AchievementFactory.create(creator=alice.user)
 
     otis.login(alice)
-    otis.post_20x("achievements-listing", data={"code": achievement.code})
-    otis.post_20x("achievements-listing", data={"code": achievement.code})
+    submit_code(otis, achievement.code)
+    submit_code(otis, achievement.code)
 
     earned, repeat = AchievementCodeGuess.objects.filter(user=alice.user).order_by("pk")
     assert earned.is_new_unlock is True
@@ -692,13 +696,13 @@ def test_wrong_guesses_are_rate_limited(otis):
     make_wrong_guesses(alice.user, WRONG_GUESS_LIMIT - 1)
 
     otis.login(alice)
-    resp = otis.post_20x("achievements-listing", data={"code": WRONG_CODE})
+    resp = submit_code(otis, WRONG_CODE)
     assert INVALID_CODE in message_texts(resp)
 
     # the limit is now used up, so even a correct code is turned away
     # (the refusal text embeds a naturaltime, so assert on the level and the
     # state it guards rather than on the sentence)
-    resp = otis.post_20x("achievements-listing", data={"code": achievement.code})
+    resp = submit_code(otis, achievement.code)
     assert any(m.level == message_levels.ERROR for m in resp.context["messages"])
     assert INVALID_CODE not in message_texts(resp)
     assert not AchievementUnlock.objects.filter(
@@ -718,7 +722,7 @@ def test_rate_limit_is_per_user(otis):
     make_wrong_guesses(alice.user, WRONG_GUESS_LIMIT)
 
     otis.login(bob)
-    resp = otis.post_20x("achievements-listing", data={"code": WRONG_CODE})
+    resp = submit_code(otis, WRONG_CODE)
     assert INVALID_CODE in message_texts(resp)
 
 
@@ -732,7 +736,7 @@ def test_rate_limit_forgets_old_guesses(otis):
     )
 
     otis.login(alice)
-    resp = otis.post_20x("achievements-listing", data={"code": WRONG_CODE})
+    resp = submit_code(otis, WRONG_CODE)
     assert INVALID_CODE in message_texts(resp)
 
 
@@ -744,18 +748,18 @@ def test_new_unlock_resets_rate_limit(otis):
     make_wrong_guesses(alice.user, WRONG_GUESS_LIMIT - 1)
 
     otis.login(alice)
-    otis.post_20x("achievements-listing", data={"code": achievement.code})
+    submit_code(otis, achievement.code)
     assert AchievementUnlock.objects.filter(
         user=alice.user, achievement=achievement
     ).exists()
 
     # the wrong guesses before the unlock no longer count
     make_wrong_guesses(alice.user, WRONG_GUESS_LIMIT - 1)
-    resp = otis.post_20x("achievements-listing", data={"code": WRONG_CODE})
+    resp = submit_code(otis, WRONG_CODE)
     assert INVALID_CODE in message_texts(resp)
 
     # but the ones after it do
-    resp = otis.post_20x("achievements-listing", data={"code": WRONG_CODE})
+    resp = submit_code(otis, WRONG_CODE)
     assert rate_limited(resp)
 
 
@@ -763,18 +767,19 @@ def test_new_unlock_resets_rate_limit(otis):
 def test_repeat_of_owned_code_does_not_reset_rate_limit(otis):
     """Retyping a code you already own doesn't buy you a fresh set of guesses.
 
-    Every student is shown a working code on this very page, so a reset that
-    any correct submission could trigger would be no rate limit at all.
+    Every student is shown a working code on the achievements listing, so a
+    reset that any correct submission could trigger would be no rate limit at
+    all.
     """
     alice = StudentFactory.create()
     achievement = AchievementFactory.create()
 
     otis.login(alice)
-    otis.post_20x("achievements-listing", data={"code": achievement.code})
+    submit_code(otis, achievement.code)
     make_wrong_guesses(alice.user, WRONG_GUESS_LIMIT - 1)
 
     # submitting the owned code again is still a correct guess, but unlocks nothing
-    resp = otis.post_20x("achievements-listing", data={"code": achievement.code})
+    resp = submit_code(otis, achievement.code)
     assert any(m.level == message_levels.WARNING for m in resp.context["messages"])
     assert (
         AchievementCodeGuess.objects.filter(user=alice.user, is_correct=True).count()
@@ -782,9 +787,9 @@ def test_repeat_of_owned_code_does_not_reset_rate_limit(otis):
     )
 
     # so the earlier wrong guesses still count: one left, then the limit bites
-    resp = otis.post_20x("achievements-listing", data={"code": WRONG_CODE})
+    resp = submit_code(otis, WRONG_CODE)
     assert INVALID_CODE in message_texts(resp)
-    resp = otis.post_20x("achievements-listing", data={"code": WRONG_CODE})
+    resp = submit_code(otis, WRONG_CODE)
     assert rate_limited(resp)
 
 
@@ -812,7 +817,7 @@ def test_diamond_form_needs_a_student(otis):
     """A user with no Student record gets no form, and can't submit one either."""
     otis.login(UserFactory.create(is_staff=True, is_superuser=True))
     otis.assert_testid(otis.get_20x("achievements-listing"), "diamond-form", count=0)
-    otis.post_not_found("achievements-listing", data={"code": WRONG_CODE})
+    otis.post_not_found("diamond-submit", data={"code": WRONG_CODE})
     assert not AchievementCodeGuess.objects.exists()
 
 
@@ -822,10 +827,8 @@ def test_malformed_guesses_are_recorded(otis):
     alice = StudentFactory.create()
 
     otis.login(alice)
-    resp = otis.post_20x("achievements-listing", data={"code": "not a hex code"})
-    assert (
-        "This doesn't appear to be a hex code." in resp.context["form"].errors["code"]
-    )
+    resp = submit_code(otis, "not a hex code")
+    assert any(m.level == message_levels.ERROR for m in resp.context["messages"])
 
     guess = AchievementCodeGuess.objects.get(user=alice.user)
     assert guess.code == "not a hex code"
@@ -841,7 +844,7 @@ def test_overlong_guess_is_truncated(otis):
     alice = StudentFactory.create()
 
     otis.login(alice)
-    otis.post_20x("achievements-listing", data={"code": "f" * 500})
+    submit_code(otis, "f" * 500)
 
     guess = AchievementCodeGuess.objects.get(user=alice.user)
     assert guess.code == "f" * GUESS_CODE_MAX_LENGTH
@@ -854,7 +857,7 @@ def test_empty_guess_is_not_recorded(otis):
     alice = StudentFactory.create()
 
     otis.login(alice)
-    otis.post_20x("achievements-listing", data={"code": "   "})
+    submit_code(otis, "   ")
 
     assert not AchievementCodeGuess.objects.filter(user=alice.user).exists()
 
@@ -866,8 +869,8 @@ def test_malformed_guesses_count_against_rate_limit(otis):
     make_wrong_guesses(alice.user, WRONG_GUESS_LIMIT - 1)
 
     otis.login(alice)
-    otis.post_20x("achievements-listing", data={"code": "not a hex code"})
-    resp = otis.post_20x("achievements-listing", data={"code": WRONG_CODE})
+    submit_code(otis, "not a hex code")
+    resp = submit_code(otis, WRONG_CODE)
     assert rate_limited(resp)
 
 
