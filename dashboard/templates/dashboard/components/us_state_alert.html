@@ -5,13 +5,18 @@
   if you could take a moment to tell me what state you're from below,
   my <a href="https://w.wiki/URan" class="alert-link">CPA</a> will be real happy.
   ty for the assist.
-  <form class="row row-cols-lg-auto g-2 justify-content-center mt-2"
+  <form class="row justify-content-center g-2 mt-1"
         method="post"
         action="{% url "backfill-us-state" %}">
     {% csrf_token %}
-    <div class="col-12">{{ us_state_form.us_state }}</div>
-    <div class="col-12">
-      <button type="submit" class="btn btn-primary">Record US state</button>
+    <div class="col-12 col-sm-6">{{ us_state_form.us_state }}</div>
+    <div class="col-12 col-sm-auto">
+      <button type="submit" class="btn btn-primary w-100">Record US state</button>
     </div>
   </form>
 </div>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        otisSelect("#id_us_state");
+    });
+</script>
