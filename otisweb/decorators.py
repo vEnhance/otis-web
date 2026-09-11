@@ -24,16 +24,19 @@ def auth_test(
     return ret
 
 
+def is_verified(user: AnyUser) -> bool:
+    return isinstance(user, User) and (
+        user.is_staff or user.groups.filter(name="Verified").exists()
+    )
+
+
 def verified_required[V: ViewFunc](view_func: V) -> V:
     """
     Decorator for views that checks that the user is logged in and is in Verified group.
     Redirects anonymous users; 403 error otherwise.
     """
     actual_decorator = user_passes_test(
-        auth_test(
-            lambda u: u.groups.filter(name="Verified").exists() or u.is_staff,
-            error_msg="Not in Verified group",
-        ),
+        auth_test(is_verified, error_msg="Not in Verified group"),
     )
     return actual_decorator(view_func)
 

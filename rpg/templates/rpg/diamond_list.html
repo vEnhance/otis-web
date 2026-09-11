@@ -3,15 +3,22 @@
   Achievements listing
 {% endblock title %}
 {% block layout-content %}
-  <p class="fst-italic">
-    To cash in an achievement, go to your
-    {% if student_pk != None %}
-      <a href="{% url "stats" student_pk=student_pk %}#headingCharisma">dashboard</a>
-    {% else %}
-      dashboard
+  {% if can_submit %}
+    <h2>Found a diamond?</h2>
+    {% url "diamond-submit" as submit_url %}
+    <div class="position-relative" data-testid="diamond-form">
+      {% include "otisweb/components/generic_form.html" with submit_name="♦️" target=submit_url %}
+    </div>
+    {% if first_achievement %}
+      <p>
+        Don't know where to look?
+        <br />
+        Here's one to start: <code>{{ first_achievement.code }}</code>.
+      </p>
     {% endif %}
-    and open the Charisma meter.
-  </p>
+    <hr />
+  {% endif %}
+  <h2>Diamond listing</h2>
   <ul>
     <li>
       <span style="background-color: #cceecc;"><b>GREEN</b></span> diamonds
@@ -27,6 +34,7 @@
       students and can involve unorthodox steps.
     </li>
   </ul>
+  <p>If you find a diamond, please don't spoil it for others!</p>
   <div class="list-group">
     {% for achievement in achievement_list %}
       <div class="list-group-item container"
@@ -80,4 +88,33 @@
       </div>
     {% endfor %}
   </div>
+  <script>
+      document.addEventListener('DOMContentLoaded', function() {
+          const input = document.querySelector('input[type="text"]');
+          if (input) {
+              const wrapper = document.createElement('div');
+              wrapper.style.position = 'relative';
+              wrapper.style.display = 'inline-block';
+              wrapper.style.width = '100%';
+
+              input.parentNode.insertBefore(wrapper, input);
+              wrapper.appendChild(input);
+
+              const counter = document.createElement('div');
+              counter.id = 'char-counter';
+              counter.style.position = 'absolute';
+              counter.style.right = '10px';
+              counter.style.top = '50%';
+              counter.style.transform = 'translateY(-50%)';
+              counter.style.color = '#666';
+              counter.textContent = input.value.length;
+
+              wrapper.appendChild(counter);
+
+              input.addEventListener('input', function() {
+                  counter.textContent = this.value.length;
+              });
+          }
+      });
+  </script>
 {% endblock layout-content %}

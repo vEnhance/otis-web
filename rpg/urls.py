@@ -7,6 +7,7 @@ urlpatterns = [
     path(
         r"achievements/", views.AchievementList.as_view(), name="achievements-listing"
     ),
+    path(r"achievements/submit/", views.submit_diamond, name="diamond-submit"),
     path(r"foundlist/<int:pk>/", views.FoundList.as_view(), name="found-listing"),
     path(
         r"solution/<int:pk>/",
