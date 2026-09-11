@@ -56,15 +56,18 @@ from otisweb.mixins import (
 from otisweb.utils import AuthHttpRequest
 from roster.forms import LinkAssistantForm
 from roster.models import ApplyUUID, Assistant
+from roster.us_states import get_us_state_name
 from roster.utils import (
     can_edit,
     get_current_students,
+    get_regs_missing_us_state,
     get_student_by_pk,
     infer_student,
 )
 
 from .forms import (
     AdvanceForm,
+    BackfillUSStateForm,
     CurriculumForm,
     DecisionForm,
     PetitionForm,
@@ -522,6 +525,7 @@ def register(request: AuthHttpRequest) -> HttpResponse:
                 "school_name",
                 "aops_username",
                 "gender",
+                "us_state",
             ):
                 initial_data_dict[k] = getattr(most_recent_reg, k)
         profile, _ = UserProfile.objects.get_or_create(user=request.user)
@@ -534,6 +538,37 @@ def register(request: AuthHttpRequest) -> HttpResponse:
         "container": container,
     }
     return render(request, "roster/decision_form.html", context)
+
+
+@login_required
+def backfill_us_state(request: AuthHttpRequest) -> HttpResponse:
+    """One-shot form for students who registered before the state field existed.
+
+    Once the state is filled in, the user no longer qualifies for this page,
+    so it retires itself as the backfill completes.
+    """
+    regs = get_regs_missing_us_state(request.user)
+    if not regs.exists():
+        messages.info(request, "Your state is already on file, nothing to do here.")
+        return HttpResponseRedirect(reverse("index"))
+    if request.method == "POST":
+        form = BackfillUSStateForm(request.POST)
+        if form.is_valid():
+            us_state = form.cleaned_data["us_state"]
+            regs.update(us_state=us_state)
+            messages.success(
+                request,
+                message=f"Thanks! Evan's accountant now knows you are "
+                f"in {get_us_state_name(us_state)}.",
+            )
+            return HttpResponseRedirect(reverse("index"))
+    else:
+        form = BackfillUSStateForm()
+    return render(
+        request,
+        "roster/backfill_us_state.html",
+        {"title": "Which state are you from?", "form": form},
+    )
 
 
 @login_required

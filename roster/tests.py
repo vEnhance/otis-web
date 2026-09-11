@@ -1615,6 +1615,7 @@ def test_reg(otis) -> None:
             "graduation_year": 0,
             "school_name": "Generic School District",
             "country": "USA",
+            "us_state": "MA",
             "aops_username": "",
             "agreement_form": agreement,
             "email_on_announcement": False,
@@ -1646,6 +1647,7 @@ def test_reg(otis) -> None:
             "graduation_year": 0,
             "school_name": "Generic School District",
             "country": "USA",
+            "us_state": "MA",
             "aops_username": "",
             "agreement_form": agreement2,
             "email_on_announcement": False,
@@ -1685,6 +1687,7 @@ def test_reg(otis) -> None:
             "graduation_year": 0,
             "school_name": "Generic School District",
             "country": "USA",
+            "us_state": "MA",
             "aops_username": "",
             "agreement_form": agreement,
             "email_on_announcement": False,
@@ -1697,6 +1700,87 @@ def test_reg(otis) -> None:
 
     messages = [m.message for m in resp.context["messages"]]
     assert "You have already submitted a decision form for this year!" in messages
+
+
+@pytest.mark.django_db
+def test_registration_us_state(otis) -> None:
+    semester: Semester = SemesterFactory.create()
+    container: RegistrationContainer = RegistrationContainerFactory.create(
+        semester=semester, accepting_responses=True
+    )
+    au: ApplyUUID = ApplyUUIDFactory.create()
+    alice: User = UserFactory.create()
+    otis.login(alice)
+
+    def register(**kwargs: str):
+        agreement = StringIO("agree!")
+        agreement.name = "agreement.pdf"
+        return otis.post_20x(
+            "register",
+            data={
+                "given_name": "Alice",
+                "surname": "Aardvark",
+                "email_address": "myemail@example.com",
+                "passcode": au.uuid,
+                "gender": "O",
+                "parent_email": "myemail@example.com",
+                "graduation_year": 0,
+                "school_name": "Generic School District",
+                "aops_username": "",
+                "agreement_form": agreement,
+                "email_on_announcement": False,
+                "email_on_pset_complete": True,
+                "email_on_suggestion_processed": False,
+                "email_on_petition_complete": False,
+                **kwargs,
+            },
+            follow=True,
+        )
+
+    resp = register(country="USA", us_state="")
+    assert "us_state" in resp.context["form"].errors
+    assert not StudentRegistration.objects.filter(user=alice).exists()
+
+    resp = register(country="CAN", us_state="MA")
+    assert "us_state" in resp.context["form"].errors
+    assert not StudentRegistration.objects.filter(user=alice).exists()
+
+    register(country="CAN", us_state="")
+    reg = StudentRegistration.objects.get(user=alice, container=container)
+    assert reg.us_state == ""
+
+
+@pytest.mark.django_db
+def test_backfill_us_state(otis) -> None:
+    alice: User = UserFactory.create()
+    old_reg: StudentRegistration = StudentRegistrationFactory.create(user=alice)
+    new_reg: StudentRegistration = StudentRegistrationFactory.create(user=alice)
+    abroad_reg: StudentRegistration = StudentRegistrationFactory.create(
+        user=alice, country="FRA"
+    )
+    bob_reg: StudentRegistration = StudentRegistrationFactory.create()
+
+    otis.login(alice)
+    otis.get_20x("backfill-us-state")
+    otis.assert_message(
+        otis.post_20x("backfill-us-state", data={"us_state": "NY"}, follow=True),
+        "Thanks! Evan's accountant now knows you are in New York.",
+    )
+
+    old_reg.refresh_from_db()
+    new_reg.refresh_from_db()
+    abroad_reg.refresh_from_db()
+    bob_reg.refresh_from_db()
+    assert old_reg.us_state == "NY"
+    assert new_reg.us_state == "NY"
+    assert abroad_reg.us_state == ""
+    assert bob_reg.us_state == ""
+
+    # nothing left to backfill, so the form retires itself
+    otis.assert_message(
+        otis.get_20x("backfill-us-state", follow=True),
+        "Your state is already on file, nothing to do here.",
+    )
 
 
 @pytest.mark.django_db
@@ -1759,6 +1843,7 @@ def test_reg_with_apply_uuid(otis) -> None:
             "graduation_year": 0,
             "school_name": "Generic School District",
             "country": "USA",
+            "us_state": "MA",
             "aops_username": "",
             "agreement_form": agreement,
             "email_on_announcement": False,
@@ -1790,6 +1875,7 @@ def test_reg_with_apply_uuid(otis) -> None:
             "graduation_year": 0,
             "school_name": "Generic School District",
             "country": "USA",
+            "us_state": "MA",
             "aops_username": "",
             "agreement_form": agreement2,
             "email_on_announcement": False,
@@ -1839,6 +1925,7 @@ def test_reg_with_apply_uuid(otis) -> None:
             "graduation_year": 0,
             "school_name": "Generic School District",
             "country": "USA",
+            "us_state": "MA",
             "aops_username": "",
             "agreement_form": agreement3,
             "email_on_announcement": False,
@@ -1865,6 +1952,7 @@ def test_reg_with_apply_uuid(otis) -> None:
             "graduation_year": 0,
             "school_name": "Generic School District",
             "country": "USA",
+            "us_state": "MA",
             "aops_username": "",
             "agreement_form": agreement4,
             "email_on_announcement": False,
@@ -1906,6 +1994,7 @@ def test_reg_with_disabled_apply_uuid(otis) -> None:
             "graduation_year": 0,
             "school_name": "Generic School District",
             "country": "USA",
+            "us_state": "MA",
             "aops_username": "",
             "agreement_form": agreement,
             "email_on_announcement": False,
@@ -2183,6 +2272,7 @@ def test_registration_is_all_or_nothing(otis) -> None:
                 "graduation_year": 0,
                 "school_name": "Generic School District",
                 "country": "USA",
+                "us_state": "MA",
                 "aops_username": "",
                 "agreement_form": agreement,
                 "email_on_announcement": False,

@@ -9,6 +9,7 @@ from django.forms.forms import BaseForm
 from core.models import EMAIL_PREFERENCE_FIELDS, Semester, Unit
 from dashboard.models import PSet
 from roster.models import Student, StudentRegistration, UnitPetition
+from roster.us_states import US_STATE_CHOICES
 
 
 class UnitChoiceBoundField(forms.BoundField):
@@ -202,11 +203,20 @@ class DecisionForm(forms.ModelForm):
             "graduation_year",
             "school_name",
             "country",
+            "us_state",
             "aops_username",
             "agreement_form",
             "passcode",
             "parent_email",
         ) + EMAIL_PREFERENCE_FIELDS
+
+
+class BackfillUSStateForm(forms.Form):
+    us_state = forms.ChoiceField(
+        choices=US_STATE_CHOICES,
+        label="Your state",
+        help_text="The US state you live in.",
+    )
 
 
 class UserForm(forms.ModelForm):

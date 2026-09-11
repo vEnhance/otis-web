@@ -28,6 +28,7 @@ from otisweb.utils import AuthHttpRequest, get_days_since
 from roster.models import RegistrationContainer, Student
 from roster.utils import (
     can_view,
+    get_regs_missing_us_state,
     get_student_by_pk,
     get_visible_students,
     infer_student,
@@ -69,6 +70,11 @@ def portal(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
         .values("pk", "semester__end_year"),
     }
     context["profile"] = profile
+
+    context["needs_us_state"] = (
+        request.user == student.user
+        and get_regs_missing_us_state(student.user).exists()
+    )
 
     context["curriculum"] = student.generate_curriculum_rows()
     context["tests"] = PracticeExam.objects.filter(

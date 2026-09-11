@@ -64,6 +64,20 @@
   <script>
       document.addEventListener("DOMContentLoaded", () => {
           otisSelect("select");
+          const country = document.querySelector("#id_country");
+          const usState = document.querySelector("#id_us_state");
+          const usStateRow = document.querySelector("#div_id_us_state");
+          if (country === null || usState === null || usStateRow === null) {
+              return;
+          }
+          country.addEventListener("change", () => {
+              usStateRow.hidden = country.value !== "USA";
+              if (usStateRow.hidden && usState.value !== "") {
+                  usState.value = "";
+                  usState.dispatchEvent(new Event("change"));
+              }
+          });
+          usStateRow.hidden = country.value !== "USA";
       });
   </script>
 {% endblock scripts %}

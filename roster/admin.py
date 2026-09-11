@@ -365,6 +365,7 @@ class StudentRegistrationIEResource(RosterResource):
             "container__semester__name",
             "parent_email",
             "country",
+            "us_state",
             "gender",
             "graduation_year",
             "school_name",
@@ -399,6 +400,7 @@ class StudentRegistrationAdmin(ImportExportModelAdmin):
         "gender",
         "graduation_year",
         "country",
+        "us_state",
     )
     list_display_links = (
         "name",

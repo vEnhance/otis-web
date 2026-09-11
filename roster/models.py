@@ -5,7 +5,7 @@ from hashlib import pbkdf2_hmac
 from typing import TypedDict
 
 from django.contrib.auth.models import Group, User
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.db.models import Q
@@ -17,6 +17,7 @@ from sql_util.aggregates import Exists
 from core.models import Semester, Unit
 
 from .country_abbrevs import COUNTRY_CHOICES
+from .us_states import US_STATE_CHOICES
 
 
 class CurriculumRowTypeDict(TypedDict, total=False):
@@ -610,6 +611,15 @@ class StudentRegistration(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     country = models.CharField(max_length=6, choices=COUNTRY_CHOICES, default="USA")
+    us_state = models.CharField(
+        max_length=2,
+        choices=US_STATE_CHOICES,
+        blank=True,
+        verbose_name="State",
+        help_text="If your country is the USA, the state you live in. "
+        "Evan needs this to report which state his income comes from. "
+        "Leave blank if you are outside the USA.",
+    )
 
     class Meta:
         unique_together = (
@@ -629,6 +639,17 @@ class StudentRegistration(models.Model):
             return self.container.semester.get_absolute_url()
         else:
             return student.get_absolute_url()
+
+    def clean(self) -> None:
+        super().clean()
+        if self.country == "USA" and not self.us_state:
+            raise ValidationError(
+                {"us_state": "Students in the USA need to specify a state."}
+            )
+        elif self.country != "USA" and self.us_state:
+            raise ValidationError(
+                {"us_state": "Only students in the USA should specify a state."}
+            )
 
     @property
     def name(self) -> str:

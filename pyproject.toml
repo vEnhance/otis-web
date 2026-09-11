@@ -155,7 +155,7 @@ strictSetInference = false
 disable = ["tall-model", "missing-related-name", "checking-settings-debug", "nullable-string-field"]
 
 [tool.codespell]
-skip = "roster/country_abbrevs.py,*/migrations/*.py,uv.lock"
+skip = "roster/country_abbrevs.py,roster/us_states.py,*/migrations/*.py,uv.lock"
 count = ""
 quiet-level = 3
 ignore-words-list = "assertIn"
