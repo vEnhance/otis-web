@@ -38,6 +38,12 @@ from rpg.models import (
 UTC = datetime.UTC
 
 
+def verified_user(**kwargs) -> User:
+    """Diamonds are keyed to users, so redeeming a code needs no Student."""
+    group, _ = Group.objects.get_or_create(name="Verified")
+    return UserFactory.create(groups=(group,), **kwargs)
+
+
 @pytest.fixture
 def alice_with_data(db):
     # Reset level factory sequence to ensure consistent threshold numbering
@@ -306,14 +312,10 @@ def test_multi_student_annotate(otis, alice_with_data):
 @pytest.mark.django_db
 def test_submit_diamond_and_read_solution(otis, alice_with_data):
     alice = get_alice()
-    bob = StudentFactory.create(
-        user__first_name="Bob",
-        user__last_name="Beta",
-        semester=alice.semester,
-    )
+    bob = verified_user(first_name="Bob", last_name="Beta")
     a1 = AchievementFactory.create(diamonds=1)
     a2 = AchievementFactory.create(diamonds=2, creator=alice.user)
-    a3 = AchievementFactory.create(diamonds=3, creator=bob.user)
+    a3 = AchievementFactory.create(diamonds=3, creator=bob)
     otis.login(alice.user)
 
     def alice_has(a: Achievement):
@@ -393,19 +395,19 @@ def test_submit_diamond_and_read_solution(otis, alice_with_data):
     otis.get_20x("diamond-solution", a3.pk)
 
     # Test Bob, the owner of a3
-    otis.login(bob.user)
+    otis.login(bob)
     # Bob submits a1
     resp = submit_code(otis, a1.code)
     assert unlocked(resp)
-    assert not was_first_find(a1, bob.user)
+    assert not was_first_find(a1, bob)
     # Bob submits a2
     resp = submit_code(otis, a2.code)
     assert unlocked(resp)
-    assert was_first_find(a2, bob.user)
+    assert was_first_find(a2, bob)
     # Bob submits a3
     resp = submit_code(otis, a3.code)
     assert unlocked(resp)
-    assert not was_first_find(a3, bob.user)
+    assert not was_first_find(a3, bob)
 
 
 @pytest.mark.django_db
@@ -497,68 +499,64 @@ def test_github_landing(otis):
 @pytest.mark.django_db
 def test_is_first_obtain_first_finder(otis):
     """First non-creator to submit a code gets is_first_obtain=True; subsequent finders get False."""
-    alice = StudentFactory.create()
-    bob = StudentFactory.create()
+    alice = verified_user()
+    bob = verified_user()
     achievement = AchievementFactory.create()
 
     otis.login(alice)
     submit_code(otis, achievement.code)
-    alice_unlock = AchievementUnlock.objects.get(
-        user=alice.user, achievement=achievement
-    )
+    alice_unlock = AchievementUnlock.objects.get(user=alice, achievement=achievement)
     assert alice_unlock.is_first_obtain is True
 
     otis.login(bob)
     submit_code(otis, achievement.code)
-    bob_unlock = AchievementUnlock.objects.get(user=bob.user, achievement=achievement)
+    bob_unlock = AchievementUnlock.objects.get(user=bob, achievement=achievement)
     assert bob_unlock.is_first_obtain is False
 
 
 @pytest.mark.django_db
 def test_is_first_obtain_creator_unlock_skipped(otis):
     """Creator unlocking their own achievement is not counted as first find; the next non-creator is."""
-    alice = StudentFactory.create()
-    bob = StudentFactory.create()
-    achievement = AchievementFactory.create(creator=alice.user)
+    alice = verified_user()
+    bob = verified_user()
+    achievement = AchievementFactory.create(creator=alice)
 
     # Alice (the creator) submits first
     otis.login(alice)
     submit_code(otis, achievement.code)
-    alice_unlock = AchievementUnlock.objects.get(
-        user=alice.user, achievement=achievement
-    )
+    alice_unlock = AchievementUnlock.objects.get(user=alice, achievement=achievement)
     assert alice_unlock.is_first_obtain is False
 
     # Bob is the first non-creator finder
     otis.login(bob)
     submit_code(otis, achievement.code)
-    bob_unlock = AchievementUnlock.objects.get(user=bob.user, achievement=achievement)
+    bob_unlock = AchievementUnlock.objects.get(user=bob, achievement=achievement)
     assert bob_unlock.is_first_obtain is True
 
 
 @pytest.mark.django_db
 def test_is_first_obtain_creator_only(otis):
     """Creator unlocking their own achievement when no non-creator has found it yet: is_first_obtain=False."""
-    alice = StudentFactory.create()
-    achievement = AchievementFactory.create(creator=alice.user)
+    alice = verified_user()
+    achievement = AchievementFactory.create(creator=alice)
 
     otis.login(alice)
     submit_code(otis, achievement.code)
-    unlock = AchievementUnlock.objects.get(user=alice.user, achievement=achievement)
+    unlock = AchievementUnlock.objects.get(user=alice, achievement=achievement)
     assert unlock.is_first_obtain is False
 
 
 @pytest.mark.django_db
 def test_is_first_obtain_resubmit_unchanged(otis):
     """Re-submitting an already-obtained code does not change is_first_obtain."""
-    alice = StudentFactory.create()
+    alice = verified_user()
     achievement = AchievementFactory.create()
 
     otis.login(alice)
     submit_code(otis, achievement.code)
     assert (
         AchievementUnlock.objects.get(
-            user=alice.user, achievement=achievement
+            user=alice, achievement=achievement
         ).is_first_obtain
         is True
     )
@@ -567,7 +565,7 @@ def test_is_first_obtain_resubmit_unchanged(otis):
     submit_code(otis, achievement.code)
     assert (
         AchievementUnlock.objects.get(
-            user=alice.user, achievement=achievement
+            user=alice, achievement=achievement
         ).is_first_obtain
         is True
     )
@@ -634,16 +632,16 @@ def make_wrong_guesses(user: User, count: int):
 @pytest.mark.django_db
 def test_guesses_are_recorded(otis):
     """Both wrong and right guesses at diamond codes are saved to the database."""
-    alice = StudentFactory.create()
+    alice = verified_user()
     achievement = AchievementFactory.create()
 
     otis.login(alice)
     submit_code(otis, WRONG_CODE)
     submit_code(otis, achievement.code)
 
-    wrong_guess, right_guess = AchievementCodeGuess.objects.filter(
-        user=alice.user
-    ).order_by("pk")
+    wrong_guess, right_guess = AchievementCodeGuess.objects.filter(user=alice).order_by(
+        "pk"
+    )
     assert wrong_guess.code == WRONG_CODE
     assert wrong_guess.is_correct is False
     assert wrong_guess.achievement is None
@@ -657,7 +655,7 @@ def test_guesses_are_recorded(otis):
 @pytest.mark.django_db
 def test_repeat_redeem_is_marked(otis):
     """A code entered a second time is recorded, but not as earning anything."""
-    alice = StudentFactory.create()
+    alice = verified_user()
     achievement = AchievementFactory.create()
 
     otis.login(alice)
@@ -665,7 +663,7 @@ def test_repeat_redeem_is_marked(otis):
     resp = submit_code(otis, achievement.code)
     assert any(m.level == message_levels.WARNING for m in resp.context["messages"])
 
-    earned, repeat = AchievementCodeGuess.objects.filter(user=alice.user).order_by("pk")
+    earned, repeat = AchievementCodeGuess.objects.filter(user=alice).order_by("pk")
     assert earned.is_new_unlock is True
     assert repeat.is_new_unlock is False
     # the repeat is still a correct guess; it just didn't earn the diamond
@@ -676,14 +674,14 @@ def test_repeat_redeem_is_marked(otis):
 @pytest.mark.django_db
 def test_creator_redeeming_own_code_earns_it_once(otis):
     """The first redeem is marked even when the guesser created the diamond."""
-    alice = StudentFactory.create()
-    achievement = AchievementFactory.create(creator=alice.user)
+    alice = verified_user()
+    achievement = AchievementFactory.create(creator=alice)
 
     otis.login(alice)
     submit_code(otis, achievement.code)
     submit_code(otis, achievement.code)
 
-    earned, repeat = AchievementCodeGuess.objects.filter(user=alice.user).order_by("pk")
+    earned, repeat = AchievementCodeGuess.objects.filter(user=alice).order_by("pk")
     assert earned.is_new_unlock is True
     assert repeat.is_new_unlock is False
 
@@ -691,9 +689,9 @@ def test_creator_redeeming_own_code_earns_it_once(otis):
 @pytest.mark.django_db
 def test_wrong_guesses_are_rate_limited(otis):
     """After WRONG_GUESS_LIMIT wrong guesses, further guesses are refused."""
-    alice = StudentFactory.create()
+    alice = verified_user()
     achievement = AchievementFactory.create()
-    make_wrong_guesses(alice.user, WRONG_GUESS_LIMIT - 1)
+    make_wrong_guesses(alice, WRONG_GUESS_LIMIT - 1)
 
     otis.login(alice)
     resp = submit_code(otis, WRONG_CODE)
@@ -706,10 +704,10 @@ def test_wrong_guesses_are_rate_limited(otis):
     assert any(m.level == message_levels.ERROR for m in resp.context["messages"])
     assert INVALID_CODE not in message_texts(resp)
     assert not AchievementUnlock.objects.filter(
-        user=alice.user, achievement=achievement
+        user=alice, achievement=achievement
     ).exists()
     # ... and the refused guess isn't recorded either
-    assert AchievementCodeGuess.objects.filter(user=alice.user).count() == (
+    assert AchievementCodeGuess.objects.filter(user=alice).count() == (
         WRONG_GUESS_LIMIT
     )
 
@@ -717,9 +715,9 @@ def test_wrong_guesses_are_rate_limited(otis):
 @pytest.mark.django_db
 def test_rate_limit_is_per_user(otis):
     """One user using up their guesses doesn't affect anyone else."""
-    alice = StudentFactory.create()
-    bob = StudentFactory.create()
-    make_wrong_guesses(alice.user, WRONG_GUESS_LIMIT)
+    alice = verified_user()
+    bob = verified_user()
+    make_wrong_guesses(alice, WRONG_GUESS_LIMIT)
 
     otis.login(bob)
     resp = submit_code(otis, WRONG_CODE)
@@ -729,9 +727,9 @@ def test_rate_limit_is_per_user(otis):
 @pytest.mark.django_db
 def test_rate_limit_forgets_old_guesses(otis):
     """Wrong guesses older than GUESS_WINDOW don't count against the limit."""
-    alice = StudentFactory.create()
-    make_wrong_guesses(alice.user, WRONG_GUESS_LIMIT)
-    AchievementCodeGuess.objects.filter(user=alice.user).update(
+    alice = verified_user()
+    make_wrong_guesses(alice, WRONG_GUESS_LIMIT)
+    AchievementCodeGuess.objects.filter(user=alice).update(
         timestamp=timezone.now() - GUESS_WINDOW - datetime.timedelta(minutes=1)
     )
 
@@ -743,18 +741,18 @@ def test_rate_limit_forgets_old_guesses(otis):
 @pytest.mark.django_db
 def test_new_unlock_resets_rate_limit(otis):
     """Earning a diamond wipes the slate of wrong guesses counted so far."""
-    alice = StudentFactory.create()
+    alice = verified_user()
     achievement = AchievementFactory.create()
-    make_wrong_guesses(alice.user, WRONG_GUESS_LIMIT - 1)
+    make_wrong_guesses(alice, WRONG_GUESS_LIMIT - 1)
 
     otis.login(alice)
     submit_code(otis, achievement.code)
     assert AchievementUnlock.objects.filter(
-        user=alice.user, achievement=achievement
+        user=alice, achievement=achievement
     ).exists()
 
     # the wrong guesses before the unlock no longer count
-    make_wrong_guesses(alice.user, WRONG_GUESS_LIMIT - 1)
+    make_wrong_guesses(alice, WRONG_GUESS_LIMIT - 1)
     resp = submit_code(otis, WRONG_CODE)
     assert INVALID_CODE in message_texts(resp)
 
@@ -771,20 +769,17 @@ def test_repeat_of_owned_code_does_not_reset_rate_limit(otis):
     reset that any correct submission could trigger would be no rate limit at
     all.
     """
-    alice = StudentFactory.create()
+    alice = verified_user()
     achievement = AchievementFactory.create()
 
     otis.login(alice)
     submit_code(otis, achievement.code)
-    make_wrong_guesses(alice.user, WRONG_GUESS_LIMIT - 1)
+    make_wrong_guesses(alice, WRONG_GUESS_LIMIT - 1)
 
     # submitting the owned code again is still a correct guess, but unlocks nothing
     resp = submit_code(otis, achievement.code)
     assert any(m.level == message_levels.WARNING for m in resp.context["messages"])
-    assert (
-        AchievementCodeGuess.objects.filter(user=alice.user, is_correct=True).count()
-        == 2
-    )
+    assert AchievementCodeGuess.objects.filter(user=alice, is_correct=True).count() == 2
 
     # so the earlier wrong guesses still count: one left, then the limit bites
     resp = submit_code(otis, WRONG_CODE)
@@ -803,7 +798,7 @@ def test_diamond_form_has_no_client_side_validation():
 
 @pytest.mark.django_db
 def test_diamond_form_is_on_the_listing_not_the_stats_page(otis):
-    alice = StudentFactory.create()
+    alice = StudentFactory.create(user=verified_user())
     LevelFactory.reset_sequence(0)
     LevelFactory.create_batch(size=5)
 
@@ -813,24 +808,36 @@ def test_diamond_form_is_on_the_listing_not_the_stats_page(otis):
 
 
 @pytest.mark.django_db
-def test_diamond_form_needs_a_student(otis):
-    """A user with no Student record gets no form, and can't submit one either."""
-    otis.login(UserFactory.create(is_staff=True, is_superuser=True))
+def test_diamond_submission_needs_only_verification(otis):
+    """A Verified user can redeem a code without having any Student record."""
+    user = verified_user()
+    achievement = AchievementFactory.create()
+
+    otis.login(user)
+    otis.assert_testid(otis.get_20x("achievements-listing"), "diamond-form")
+    submit_code(otis, achievement.code)
+    assert AchievementUnlock.objects.filter(user=user, achievement=achievement).exists()
+
+
+@pytest.mark.django_db
+def test_diamond_submission_is_refused_to_the_unverified(otis):
+    """An unverified student gets no form, and is turned away from the endpoint."""
+    otis.login(StudentFactory.create())
     otis.assert_testid(otis.get_20x("achievements-listing"), "diamond-form", count=0)
-    otis.post_not_found("diamond-submit", data={"code": WRONG_CODE})
+    otis.post_denied("diamond-submit", data={"code": WRONG_CODE})
     assert not AchievementCodeGuess.objects.exists()
 
 
 @pytest.mark.django_db
 def test_malformed_guesses_are_recorded(otis):
     """Submissions that aren't shaped like a code are recorded but never looked up."""
-    alice = StudentFactory.create()
+    alice = verified_user()
 
     otis.login(alice)
     resp = submit_code(otis, "not a hex code")
     assert any(m.level == message_levels.ERROR for m in resp.context["messages"])
 
-    guess = AchievementCodeGuess.objects.get(user=alice.user)
+    guess = AchievementCodeGuess.objects.get(user=alice)
     assert guess.code == "not a hex code"
     assert guess.is_well_formed is False
     assert guess.is_correct is False
@@ -841,12 +848,12 @@ def test_malformed_guesses_are_recorded(otis):
 @pytest.mark.django_db
 def test_overlong_guess_is_truncated(otis):
     """An absurdly long submission is stored, cut down to the column width."""
-    alice = StudentFactory.create()
+    alice = verified_user()
 
     otis.login(alice)
     submit_code(otis, "f" * 500)
 
-    guess = AchievementCodeGuess.objects.get(user=alice.user)
+    guess = AchievementCodeGuess.objects.get(user=alice)
     assert guess.code == "f" * GUESS_CODE_MAX_LENGTH
     assert guess.is_well_formed is False
 
@@ -854,19 +861,19 @@ def test_overlong_guess_is_truncated(otis):
 @pytest.mark.django_db
 def test_empty_guess_is_not_recorded(otis):
     """Submitting the form with nothing in it isn't a guess at all."""
-    alice = StudentFactory.create()
+    alice = verified_user()
 
     otis.login(alice)
     submit_code(otis, "   ")
 
-    assert not AchievementCodeGuess.objects.filter(user=alice.user).exists()
+    assert not AchievementCodeGuess.objects.filter(user=alice).exists()
 
 
 @pytest.mark.django_db
 def test_malformed_guesses_count_against_rate_limit(otis):
     """Garbage submissions burn guesses just like wrong codes do."""
-    alice = StudentFactory.create()
-    make_wrong_guesses(alice.user, WRONG_GUESS_LIMIT - 1)
+    alice = verified_user()
+    make_wrong_guesses(alice, WRONG_GUESS_LIMIT - 1)
 
     otis.login(alice)
     submit_code(otis, "not a hex code")

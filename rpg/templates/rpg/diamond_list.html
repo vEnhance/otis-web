@@ -3,7 +3,7 @@
   Achievements listing
 {% endblock title %}
 {% block layout-content %}
-  {% if student_pk != None %}
+  {% if can_submit %}
     <h2>Found a diamond?</h2>
     {% url "diamond-submit" as submit_url %}
     <div class="position-relative" data-testid="diamond-form">

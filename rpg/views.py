@@ -12,7 +12,7 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import F, OuterRef
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
-from django.http import Http404, HttpResponse
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
@@ -22,11 +22,11 @@ from django.views.generic.edit import UpdateView
 from django_discordo import SUCCESS_LOG_LEVEL
 from sql_util.utils import Exists, SubqueryCount
 
-from otisweb.decorators import staff_required
+from otisweb.decorators import is_verified, staff_required, verified_required
 from otisweb.mixins import AdminRequiredMixin, StaffRequiredMixin, VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest, get_days_since
 from roster.models import Student
-from roster.utils import get_student_by_pk, infer_student
+from roster.utils import get_student_by_pk
 from rpg.models import VulnerabilityRecord
 
 from .forms import DiamondsForm
@@ -48,15 +48,16 @@ RUBY_PALACE_DIAMOND_VALUE = 1
 
 
 def handle_diamond_guess(
-    request: AuthHttpRequest, student: Student, code: str, is_well_formed: bool
+    request: AuthHttpRequest, code: str, is_well_formed: bool
 ) -> None:
     """Records a guess at a diamond code and awards the diamond if it was right.
 
     Guesses that aren't shaped like a code at all are recorded too, but are
     never looked up; the form has already told the user those were rejected.
     """
-    assert student.user is not None
-    release = get_guess_rate_limit_release(request.user)
+    user = request.user
+    name = user.get_full_name() or user.username
+    release = get_guess_rate_limit_release(user)
     if release is not None:
         messages.error(
             request,
@@ -71,7 +72,7 @@ def handle_diamond_guess(
         else None
     )
     guess = AchievementCodeGuess.objects.create(
-        user=request.user,
+        user=user,
         code=code[:GUESS_CODE_MAX_LENGTH],
         achievement=achievement,
         is_correct=achievement is not None,
@@ -86,9 +87,9 @@ def handle_diamond_guess(
         not AchievementUnlock.objects.filter(achievement=achievement)
         .exclude(achievement__creator=F("user"))
         .exists()
-    ) and achievement.creator != student.user
+    ) and achievement.creator != user
     _, is_new = AchievementUnlock.objects.get_or_create(
-        user=student.user,
+        user=user,
         achievement=achievement,
         defaults={"is_first_obtain": is_first_obtain},
     )
@@ -99,13 +100,13 @@ def handle_diamond_guess(
         if is_first_obtain:
             logger.log(
                 SUCCESS_LOG_LEVEL,
-                f"`{achievement}` newly found by {student.name}! Wow!",
+                f"`{achievement}` newly found by {name}! Wow!",
                 extra={"request": request},
             )
             msg += f"You're the first to find {achievement.name}! Wowie!"
         else:
             logger.info(
-                f"{student.name} just obtained `{achievement}`!",
+                f"{name} just obtained `{achievement}`!",
                 extra={"request": request},
             )
             msg += f"You earned the achievement {achievement.name}."
@@ -115,7 +116,7 @@ def handle_diamond_guess(
         messages.success(request, msg)
     else:
         logger.info(
-            f"{student.name} has already obtained {achievement} before",
+            f"{name} has already obtained {achievement} before",
             extra={"request": request},
         )
         messages.warning(
@@ -146,10 +147,9 @@ def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
     return render(request, "rpg/stats.html", context)
 
 
-@login_required
+@verified_required
 @require_POST
 def submit_diamond(request: AuthHttpRequest) -> HttpResponse:
-    student = infer_student(request)
     form = DiamondsForm(request.POST)
     is_well_formed = form.is_valid()
     if is_well_formed:
@@ -159,7 +159,7 @@ def submit_diamond(request: AuthHttpRequest) -> HttpResponse:
         for error in form.errors.get("code", ()):
             messages.error(request, str(error))
     if code:
-        handle_diamond_guess(request, student, code, is_well_formed)
+        handle_diamond_guess(request, code, is_well_formed)
     return redirect("achievements-listing")
 
 
@@ -190,11 +190,8 @@ class AchievementList(LoginRequiredMixin, ListView[Achievement]):
     def get_context_data(self, **kwargs: Any):
         context = super().get_context_data(**kwargs)
         context["pk"] = self.request.user.pk
-        try:
-            context["student_pk"] = infer_student(self.request).pk
-        except Http404:
-            context["student_pk"] = None
         context["viewing"] = False
+        context["can_submit"] = is_verified(self.request.user)
         context["form"] = DiamondsForm()
         context["first_achievement"] = Achievement.objects.filter(pk=1).first()
         return context
