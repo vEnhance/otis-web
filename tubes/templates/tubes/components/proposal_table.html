@@ -1,12 +1,12 @@
+<h3 class="mt-4">
+  <a class="oime-table-toggle link-dark text-decoration-none"
+     data-bs-toggle="collapse"
+     href="#oime-table-{{ title|slugify }}"
+     role="button"
+     aria-expanded="true"
+     aria-controls="oime-table-{{ title|slugify }}">{{ title }}</a>
+</h3>
 {% if proposals %}
-  <h3 class="mt-4">
-    <a class="oime-table-toggle link-dark text-decoration-none"
-       data-bs-toggle="collapse"
-       href="#oime-table-{{ title|slugify }}"
-       role="button"
-       aria-expanded="true"
-       aria-controls="oime-table-{{ title|slugify }}">{{ title }}</a>
-  </h3>
   <div class="collapse show" id="oime-table-{{ title|slugify }}">
     <table class="table table-striped otis-sortable">
       <thead class="table-dark">
@@ -56,5 +56,9 @@
         {% endfor %}
       </tbody>
     </table>
+  </div>
+{% else %}
+  <div class="collapse show" id="oime-table-{{ title|slugify }}">
+    <p class="fst-italic text-muted">No such problems.</p>
   </div>
 {% endif %}
