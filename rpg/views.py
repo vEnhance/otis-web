@@ -53,10 +53,6 @@ def handle_diamond_guess(
 
     Guesses that aren't shaped like a code at all are recorded too, but are
     never looked up; the form has already told the user those were rejected.
-
-    The rate limit is enforced against the user who submitted the guess, which
-    is not necessarily the user the diamond would be awarded to (staff members
-    can submit codes from a student's stats page).
     """
     assert student.user is not None
     release = get_guess_rate_limit_release(request.user)
@@ -137,24 +133,8 @@ def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
     unlocks = unlocks.select_related("achievement")
     context: dict[str, Any] = {
         "student": student,
-        "form": DiamondsForm(),
         "achievements": unlocks,
     }
-    if request.method == "POST":
-        form = DiamondsForm(request.POST)
-        is_well_formed = form.is_valid()
-        if is_well_formed:
-            code = form.cleaned_data["code"]
-        else:
-            code = request.POST.get("code", "").strip()
-        if code:
-            handle_diamond_guess(request, student, code, is_well_formed)
-    else:
-        form = DiamondsForm()
-    try:
-        context["first_achievement"] = Achievement.objects.get(pk=1)
-    except Achievement.DoesNotExist:
-        pass
     level_info = get_level_info(student)
     context |= level_info
     level_number = level_info["level_number"]
@@ -162,12 +142,12 @@ def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
         "-threshold"
     )
     context["obtained_levels"] = obtained_levels
-    context["form"] = form
     return render(request, "rpg/stats.html", context)
 
 
 class AchievementList(LoginRequiredMixin, ListView[Achievement]):
     template_name = "rpg/diamond_list.html"
+    form: DiamondsForm | None = None
 
     def get_queryset(self) -> QuerySet[Achievement]:
         if not isinstance(self.request.user, User):
@@ -190,6 +170,19 @@ class AchievementList(LoginRequiredMixin, ListView[Achievement]):
 
         return achievements
 
+    def post(self, request: AuthHttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        student = infer_student(request)
+        form = DiamondsForm(request.POST)
+        is_well_formed = form.is_valid()
+        if is_well_formed:
+            code = form.cleaned_data["code"]
+        else:
+            code = request.POST.get("code", "").strip()
+        if code:
+            handle_diamond_guess(request, student, code, is_well_formed)
+        self.form = form
+        return self.get(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs: Any):
         context = super().get_context_data(**kwargs)
         context["pk"] = self.request.user.pk
@@ -198,6 +191,8 @@ class AchievementList(LoginRequiredMixin, ListView[Achievement]):
         except Http404:
             context["student_pk"] = None
         context["viewing"] = False
+        context["form"] = self.form if self.form is not None else DiamondsForm()
+        context["first_achievement"] = Achievement.objects.filter(pk=1).first()
         return context
 
 

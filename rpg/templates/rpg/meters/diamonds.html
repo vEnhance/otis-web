@@ -6,9 +6,10 @@
     <span style="color: {{ meters.diamonds.color }};">{{ meters.diamonds.unit }}</span>
     by finding metaphorical diamonds.
   </p>
-  <h3>Found a diamond?</h3>
-  <div class="position-relative">{% include "otisweb/components/generic_form.html" with submit_name="♦️" %}</div>
-  <br />
+  <p>
+    To cash in an achievement, submit it at the
+    <a href="{% url "achievements-listing" %}">achievements listing</a>.
+  </p>
   {% if achievements|length > 0 %}
     <div class="list-group">
       {% for aunlock in achievements %}
@@ -40,45 +41,4 @@
   {% else %}
     <p>You have no achievements yet.</p>
   {% endif %}
-  <p>If you find a diamond, please don't spoil it for others!</p>
-  {% if first_achievement %}
-    <p>
-      Don't know where to look?
-      <br />
-      Here's one to start: <code>{{ first_achievement.code }}</code>.
-      <br />
-      See also <a href="{% url "achievements-listing" %}">diamonds leaderboard</a>.
-    </p>
-  {% endif %}
-  {% block scripts %}
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const input = document.querySelector('input[type="text"]');
-            if (input) {
-                const wrapper = document.createElement('div');
-                wrapper.style.position = 'relative';
-                wrapper.style.display = 'inline-block';
-                wrapper.style.width = '100%';
-
-                input.parentNode.insertBefore(wrapper, input);
-                wrapper.appendChild(input);
-
-                const counter = document.createElement('div');
-                counter.id = 'char-counter';
-                counter.style.position = 'absolute';
-                counter.style.right = '10px';
-                counter.style.top = '50%';
-                counter.style.transform = 'translateY(-50%)';
-                counter.style.color = '#666';
-                counter.textContent = input.value.length;
-
-                wrapper.appendChild(counter);
-
-                input.addEventListener('input', function() {
-                    counter.textContent = this.value.length;
-                });
-            }
-        });
-    </script>
-  {% endblock scripts %}
 {% endblock meter-content %}
