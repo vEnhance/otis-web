@@ -1767,7 +1767,7 @@ def test_backfill_us_state(otis) -> None:
     )
     otis.assert_message(
         otis.post_20x("backfill-us-state", data={"us_state": "NY"}, follow=True),
-        "Thanks! Evan's accountant now knows you are in New York.",
+        "ty, recorded as New York.",
     )
 
     old_reg.refresh_from_db()
