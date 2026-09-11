@@ -9,7 +9,6 @@
     <div class="position-relative" data-testid="diamond-form">
       {% include "otisweb/components/generic_form.html" with submit_name="♦️" target=submit_url %}
     </div>
-    <p>If you find a diamond, please don't spoil it for others!</p>
     {% if first_achievement %}
       <p>
         Don't know where to look?
@@ -17,7 +16,9 @@
         Here's one to start: <code>{{ first_achievement.code }}</code>.
       </p>
     {% endif %}
+    <hr />
   {% endif %}
+  <h2>Diamond listing</h2>
   <ul>
     <li>
       <span style="background-color: #cceecc;"><b>GREEN</b></span> diamonds
@@ -33,6 +34,7 @@
       students and can involve unorthodox steps.
     </li>
   </ul>
+  <p>If you find a diamond, please don't spoil it for others!</p>
   <div class="list-group">
     {% for achievement in achievement_list %}
       <div class="list-group-item container"
