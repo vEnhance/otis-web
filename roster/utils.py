@@ -43,10 +43,16 @@ def get_student_by_pk(
     """Returns an ordered pair containing a Student object and
     a boolean indicating whether editing is allowed (is instructor)."""
 
-    student = get_object_or_404(models.Student, pk=student_pk)
+    student = get_object_or_404(
+        models.Student.objects.select_related("user", "semester"), pk=student_pk
+    )
 
     if not isinstance(request.user, User):
         raise PermissionDenied("Authentication is needed, how did you even get here?")
+
+    # sharing the instance lets student.user reuse the request user's cached profile
+    if student.user_id == request.user.pk:
+        student.user = request.user
 
     if not payment_exempt and student.is_delinquent and not request.user.is_staff:
         raise PermissionDenied(

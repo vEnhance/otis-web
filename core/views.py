@@ -39,7 +39,7 @@ from roster.models import Student
 
 from .forms import CatalogFilterForm, CheckStampForm
 from .models import Unit, UnitGroup
-from .utils import get_protected_file
+from .utils import get_profile, get_protected_file
 from .watermark import verify_corner_stamp
 
 # Create your views here.
@@ -312,8 +312,8 @@ class UserProfileUpdateView(
         return f"Updated settings for {self.object.user.username}!"
 
     def get_object(self, queryset: QuerySet[Model] | None = None) -> UserProfile:
-        userprofile, _ = UserProfile.objects.get_or_create(user=self.request.user)
-        return userprofile
+        assert isinstance(self.request.user, User)
+        return get_profile(self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

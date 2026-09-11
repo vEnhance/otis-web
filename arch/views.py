@@ -4,6 +4,7 @@ from typing import Any, ClassVar
 import reversion
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.http import Http404, HttpRequest, HttpResponseRedirect
@@ -17,8 +18,7 @@ from reversion.views import RevisionMixin
 
 from arch.forms import ProblemSelectForm
 from arch.utils import get_disk_statement_from_puid, validate_puid
-from core.models import UserProfile
-from core.utils import get_protected_file
+from core.utils import find_profile, get_protected_file
 from otisweb.decorators import verified_required
 from otisweb.mixins import VerifiedRequiredMixin
 
@@ -28,6 +28,12 @@ from .models import Hint, Problem, Vote
 ContextType = dict[str, Any]
 
 logger = logging.getLogger(__name__)
+
+
+def hints_disabled(request: HttpRequest) -> bool:
+    assert isinstance(request.user, User)
+    profile = find_profile(request.user)
+    return profile is not None and profile.disable_hints
 
 
 class HintObjectView:
@@ -57,9 +63,7 @@ class HintList(VerifiedRequiredMixin, ListView[Hint]):
     problem: Problem
 
     def get_queryset(self):
-        if UserProfile.objects.filter(
-            user=self.request.user, disable_hints=True
-        ).exists():
+        if hints_disabled(self.request):
             return Hint.objects.none()
         return Hint.objects.filter(problem__puid=self.kwargs["puid"]).order_by("number")
 
@@ -85,9 +89,7 @@ class HintList(VerifiedRequiredMixin, ListView[Hint]):
         context["problem"] = self.problem
         context["html_statement"] = self.problem.get_html_statement()
         context["tex_statement"] = self.problem.get_tex_statement()
-        context["hints_disabled"] = UserProfile.objects.filter(
-            user=self.request.user, disable_hints=True
-        ).exists()
+        context["hints_disabled"] = hints_disabled(self.request)
 
         return context
 
@@ -97,9 +99,7 @@ class HintDetail(HintObjectView, VerifiedRequiredMixin, DetailView[Hint]):
     model = Hint
 
     def get_queryset(self):
-        if UserProfile.objects.filter(
-            user=self.request.user, disable_hints=True
-        ).exists():
+        if hints_disabled(self.request):
             return Hint.objects.none()
         return Hint.objects.all()
 
@@ -109,9 +109,7 @@ class HintDetailByPK(VerifiedRequiredMixin, DetailView[Hint]):
     model = Hint
 
     def get_queryset(self):
-        if UserProfile.objects.filter(
-            user=self.request.user, disable_hints=True
-        ).exists():
+        if hints_disabled(self.request):
             return Hint.objects.none()
         return Hint.objects.all()
 

@@ -17,7 +17,8 @@ from django.urls import reverse
 from django.views.generic import DetailView, ListView
 from django_discordo import VERBOSE_LOG_LEVEL
 
-from core.models import Semester, Unit, UserProfile
+from core.models import Semester, Unit
+from core.utils import get_profile
 from dashboard.forms import BonusRequestForm, PSetResubmitForm, PSetSubmitForm
 from dashboard.models import Announcement, PSet, SemesterDownloadFile, UploadedFile
 from dashboard.utils import get_news, get_units_to_submit, get_units_to_unlock
@@ -50,8 +51,8 @@ def portal(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
     if not request.user.is_staff and student.is_delinquent:
         return HttpResponseRedirect(reverse("invoice", args=(student_pk,)))
     semester = student.semester
-    profile, _ = UserProfile.objects.get_or_create(user=request.user)
-    student_profile, _ = UserProfile.objects.get_or_create(user=student.user)
+    profile = get_profile(request.user)
+    student_profile = get_profile(student.user)
 
     level_info = get_level_info(student)
     if request.user == student.user:

@@ -97,6 +97,7 @@ class Student(models.Model):
     It also names the assistant of the student, if any."""
 
     pk: int
+    user_id: int
     invoice: "Invoice"
     unlisted_assistants: QuerySet["Assistant"]
 
