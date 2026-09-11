@@ -1,0 +1,64 @@
+{% load static %}
+<div class="alert alert-secondary">
+  <h3 class="alert-heading">Linked accounts</h3>
+  You may wish to
+  check your <b><a href="{% url "socialaccount_connections" %}">🔐 linked accounts</a></b>
+  if you haven't already.
+  If you want to link multiple login methods
+  (Google, Discord, GitHub), now's a good time to do that.
+  (Before you forget and accidentally spawn duplicate accounts.)
+  You can always access this page from
+  <a href="{% url "socialaccount_connections" %}">🔐</a>
+  in the sidebar.
+</div>
+<p>
+  Hello, {{ student.name }}!
+  Welcome to OTIS.
+  You are participating in {{ semester.name }}.
+</p>
+<p>Let's get you set up by picking your units!</p>
+<h1>Getting Started — Setup Instructions</h1>
+<p>Follow the steps below to get everything working.</p>
+<ol>
+  <li>
+    Read the <a href="{% static 'info/unit-guide.pdf' %}">unit selection guide</a>
+    to give yourself ideas on which units you want to work on.
+  </li>
+  <li>
+    Read the <a href="{% url 'catalog' %}">catalog</a>
+    for the list of all possible units.
+  </li>
+  <li>
+    Use the
+    <a href="{% url 'currshow' student.pk %}">selection form</a>
+    to input your initial choices for which units you want to do.
+    For full-year students,
+    I suggest to pick 15-20 units you are most interested in.
+    (If you're joining halfway through, start with 7-10 units.)
+    You can save this form multiple times;
+    the intermediate results will be shown below.
+    <br />
+    <a href="{% url 'currshow' student.pk %}"
+       class="text-white btn btn-success">Open selection form</a>
+    <br />
+    Note that these initial 15-20 units are <b>just a plan</b>.
+    They can be easily edited later, and isn't a commitment.
+  </li>
+  <li>
+    Once you are happy with your selection, you may
+    finalize your choices.
+    <br />
+    <form action="{% url 'finalize' student.pk %}" method="post">
+      {% csrf_token %}
+      <input type="submit" class="btn btn-warning" value="Finalize" />
+    </form>
+    <br />
+    <i>Warning:</i> once you click this link,
+    your decision is complete and you cannot directly make further changes.
+    However, the <b>unit petition</b> system (linked below) becomes enabled,
+    and you can request changes there.
+    Moreover, the <b>first three</b> of the units above will be unlocked to start.
+    Use the "Manage Units" button to request more (up to 9 unlocked at once).
+  </li>
+</ol>
+<hr />

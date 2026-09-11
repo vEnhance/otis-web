@@ -1,0 +1,11 @@
+<h2 id="quizzes">Quizzes</h2>
+{% include "dashboard/components/exam_table.html" with exams=quizzes %}
+<p>Click on a quiz above to open it. Quiz submissions are done directly on OTIS-WEB.</p>
+<h2>Mock olympiads</h2>
+{% include "dashboard/components/exam_table.html" with exams=tests %}
+<p>
+  Mock olympiads are no longer graded
+  (so the deadlines for mock olympiads are just suggestions).
+</p>
+<h2>Discussion</h2>
+{% include "exams/components/gateway.html" %}

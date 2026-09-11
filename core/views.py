@@ -346,13 +346,13 @@ class UserProfileUpdateView(
 
 
 @login_required
-def dismiss(request: AuthHttpRequest) -> JsonResponse:
+def dismiss(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
     if not request.method == "POST":
         raise PermissionDenied("Must use POST")
     profile = get_object_or_404(UserProfile, user=request.user)
     profile.last_notif_dismiss = timezone.now()
     profile.save()
-    return JsonResponse({"result": "success"})
+    return HttpResponseRedirect(reverse("portal", args=(student_pk,)))
 
 
 @verified_required

@@ -1,0 +1,40 @@
+<p>
+  After submitting a unit, it's marked <span class="emoji-text">⏳</span>
+  and <a href="{% url "pset-queue-listing" %}">queued</a>;
+  once approved, it becomes <span class="emoji-text">✅</span>
+  (you can access solutions in the meantime).
+  Units to work on are marked <span class="emoji-text">🌠.</span>
+</p>
+{% if not student.newborn and semester.active and student.enabled %}
+  {% with num_unlocked=student.num_unlocked %}
+    <p>
+      Currently, you have
+      <strong>{{ num_unlocked }} active units</strong>,
+      {% if num_unlocked < 9 %}
+        out of a maximum possible of 9.
+        You can request more units via the
+        <a href="#petitions">"Manage Units" button below</a>,
+        which lets you submit requests to unlock additional units
+        or drop existing ones.
+      {% elif num_unlocked == 9 %}
+        which is the maximum possible.
+        You can use the <a href="#petitions">"Manage Units" button below</a>
+        to request further changes.
+      {% else %}
+        which is actually... not supposed to happen (the maximum is 9).
+        <span class="emoji-text">🤔</span>
+        <br />
+        This could occur if a staff member manually edits your unlocked units
+        and doesn't respect the maximum of 9.
+        Alternatively, if you think you've found a bug on the website, please
+        <a href="https://github.com/vEnhance/otis-web/issues">open a GitHub issue</a>.
+      {% endif %}
+    </p>
+  {% endwith %}
+{% endif %}
+{% if not student.newborn %}
+  <p>
+    You can hide these instructions in
+    <a href="{% url "profile" %}">user settings</a>.
+  </p>
+{% endif %}

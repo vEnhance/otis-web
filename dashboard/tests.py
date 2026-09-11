@@ -147,6 +147,19 @@ def test_portal_fetches_profile_once(otis):
 
 
 @pytest.mark.django_db
+def test_portal_dismiss_news(otis):
+    alice = StudentFactory.create()
+    otis.login(alice)
+    AnnouncementFactory.create()
+
+    portal_url = otis.url("portal", alice.pk)
+    assert otis.get_20x("portal", alice.pk, follow=True).context["num_news"] == 1
+
+    otis.post_redirects(portal_url, "dismiss-news", alice.pk)
+    assert otis.get_20x("portal", alice.pk, follow=True).context["num_news"] == 0
+
+
+@pytest.mark.django_db
 def test_portal_us_state_alert(otis):
     alice = StudentFactory.create()
     reg = StudentRegistrationFactory.create(user=alice.user, country="USA")

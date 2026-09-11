@@ -1,0 +1,33 @@
+{% load humanize %}
+{% load account socialaccount %}
+<div class="alert alert-secondary pb-0 alert-dismissible fade show">
+  {% get_social_accounts student.user as linked %}
+  <button type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"></button>
+  <table class="table table-striped">
+    <tr>
+      <td>
+        <span class="font-monospace">{{ student.user.username }}</span>
+      </td>
+      <td>
+        <code>{{ student.user.email }}</code>
+      </td>
+    </tr>
+    <tr>
+      <td>{{ last_seen|naturaltime }}</td>
+      <td>
+        <code>{{ linked.discord.0.get_provider_account|default:"No Discord" }}</code>
+        on Discord
+      </td>
+    </tr>
+    <tr>
+      <td>{{ reg.country }} ({{ reg.grade }}{{ reg.gender }})</td>
+      <td>
+        <code>{{ reg.aops_username|default:"No AoPS" }}</code>
+        on AoPS
+      </td>
+    </tr>
+  </table>
+</div>
