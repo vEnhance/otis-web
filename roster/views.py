@@ -556,8 +556,7 @@ def backfill_us_state(request: AuthHttpRequest) -> HttpResponse:
         if get_regs_missing_us_state(request.user).update(us_state=us_state):
             messages.success(
                 request,
-                message=f"Thanks! Evan's accountant now knows you are "
-                f"in {get_us_state_name(us_state)}.",
+                message=f"ty, recorded as {get_us_state_name(us_state)}.",
             )
         else:
             messages.info(request, "Your state is already on file, nothing to do here.")
