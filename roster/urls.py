@@ -22,6 +22,7 @@ urlpatterns = [
     ),
     path(r"register/", views.register, name="register"),
     path(r"profile/", views.update_profile, name="update-profile"),
+    path(r"us-state/", views.backfill_us_state, name="backfill-us-state"),
     path(r"giga-chart/<str:format_as>/", views.giga_chart, name="giga-chart"),
     path(
         r"mystery_unlock/easier/",

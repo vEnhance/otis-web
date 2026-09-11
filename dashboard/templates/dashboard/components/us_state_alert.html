@@ -1,0 +1,22 @@
+<div class="alert alert-warning" data-testid="us-state-alert">
+  <h1 class="alert-heading">US state needed</h1>
+  hi so apparently for tax reasons i'm supposed to report
+  what income is coming from what US state.
+  if you could take a moment to tell me what state you're from below,
+  my <a href="https://w.wiki/URan" class="alert-link">CPA</a> will be real happy.
+  ty for the assist.
+  <form class="row justify-content-center g-2 mt-1"
+        method="post"
+        action="{% url "backfill-us-state" %}">
+    {% csrf_token %}
+    <div class="col-12 col-sm-6">{{ us_state_form.us_state }}</div>
+    <div class="col-12 col-sm-auto">
+      <button type="submit" class="btn btn-primary w-100">Record US state</button>
+    </div>
+  </form>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        otisSelect("#id_us_state");
+    });
+</script>

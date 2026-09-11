@@ -38,6 +38,7 @@ from roster.factories import (
     InvoiceFactory,
     RegistrationContainerFactory,
     StudentFactory,
+    StudentRegistrationFactory,
 )
 from rpg.factories import BonusLevelFactory
 from rpg.models import Level
@@ -127,6 +128,31 @@ def test_portal(otis):
     assert [row["unit"] for row in resp.context["curriculum"]] == [unit]
     assert list(resp.context["tests"]) == [test]
     assert list(resp.context["quizzes"]) == [quiz]
+
+
+@pytest.mark.django_db
+def test_portal_us_state_alert(otis):
+    alice = StudentFactory.create()
+    reg = StudentRegistrationFactory.create(user=alice.user, country="USA")
+    otis.login(alice)
+
+    resp = otis.get_20x("portal", alice.pk, follow=True)
+    assert resp.context["us_state_form"] is not None
+    otis.assert_testid(resp, "us-state-alert")
+
+    # staff see the same alert the student does
+    assistant = AssistantFactory.create()
+    alice.assistant = assistant
+    alice.save()
+    otis.login(assistant)
+    otis.assert_testid(otis.get_20x("portal", alice.pk, follow=True), "us-state-alert")
+
+    reg.us_state = "NY"
+    reg.save()
+    otis.login(alice)
+    resp = otis.get_20x("portal", alice.pk, follow=True)
+    assert resp.context["us_state_form"] is None
+    otis.assert_no_testid(resp, "us-state-alert")
 
 
 @pytest.mark.django_db

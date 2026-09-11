@@ -79,6 +79,13 @@ def can_edit(request: HttpRequest, student: models.Student) -> bool:
     )
 
 
+def get_regs_missing_us_state(user: User) -> QuerySet[models.StudentRegistration]:
+    """The user's USA registrations which don't have a state recorded yet."""
+    return models.StudentRegistration.objects.filter(
+        user=user, country="USA", us_state=""
+    )
+
+
 def infer_student(request: HttpRequest) -> models.Student:
     if not isinstance(request.user, User):
         raise Http404("Not logged in, so cannot infer a student.")

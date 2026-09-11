@@ -82,6 +82,9 @@
       <a href="{% url 'invoice' student.pk %}" class="alert-link">Link to invoice.</a>
     </div>
   {% endif %}
+  {% if us_state_form %}
+    {% include "dashboard/components/us_state_alert.html" %}
+  {% endif %}
   {% if not student.enabled %}
     <div class="alert alert-secondary">
       <h1 class="alert-heading">Inactive</h1>

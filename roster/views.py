@@ -56,15 +56,18 @@ from otisweb.mixins import (
 from otisweb.utils import AuthHttpRequest
 from roster.forms import LinkAssistantForm
 from roster.models import ApplyUUID, Assistant
+from roster.us_states import get_us_state_name
 from roster.utils import (
     can_edit,
     get_current_students,
+    get_regs_missing_us_state,
     get_student_by_pk,
     infer_student,
 )
 
 from .forms import (
     AdvanceForm,
+    BackfillUSStateForm,
     CurriculumForm,
     DecisionForm,
     PetitionForm,
@@ -522,6 +525,7 @@ def register(request: AuthHttpRequest) -> HttpResponse:
                 "school_name",
                 "aops_username",
                 "gender",
+                "us_state",
             ):
                 initial_data_dict[k] = getattr(most_recent_reg, k)
         profile, _ = UserProfile.objects.get_or_create(user=request.user)
@@ -534,6 +538,29 @@ def register(request: AuthHttpRequest) -> HttpResponse:
         "container": container,
     }
     return render(request, "roster/decision_form.html", context)
+
+
+@login_required
+@require_POST
+def backfill_us_state(request: AuthHttpRequest) -> HttpResponse:
+    """Handles the state dropdown on the portal alert.
+
+    Every USA registration of the user is filled in at once, past years
+    included, so the alert never comes back after one submission.
+    """
+    form = BackfillUSStateForm(request.POST)
+    if not form.is_valid():
+        messages.error(request, "Please choose a state from the dropdown.")
+    else:
+        us_state = form.cleaned_data["us_state"]
+        if get_regs_missing_us_state(request.user).update(us_state=us_state):
+            messages.success(
+                request,
+                message=f"ty, recorded as {get_us_state_name(us_state)}.",
+            )
+        else:
+            messages.info(request, "Your state is already on file, nothing to do here.")
+    return HttpResponseRedirect(reverse("index"))
 
 
 @login_required
