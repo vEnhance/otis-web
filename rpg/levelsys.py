@@ -196,7 +196,7 @@ def get_level_info(student: Student) -> LevelInfoDict:
         "clubs": Meter.ClubMeter(int(total_clubs), dynamic_progress),
         "hearts": Meter.HeartMeter(round(total_hearts, 2), dynamic_progress),
         "diamonds": Meter.DiamondMeter(int(total_diamonds), dynamic_progress),
-        "spades": Meter.SpadeMeter(round(total_spades, 1), dynamic_progress),
+        "spades": Meter.SpadeMeter(round(total_spades, 2), dynamic_progress),
     }
 
     # Real component of level
