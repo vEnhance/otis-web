@@ -335,6 +335,17 @@ img.emoji {
   vertical-align: -0.1em;
 }
 
+/* Only datetimes carry a title, so the hover hint is scoped to that. */
+time[title] {
+  cursor: help;
+  text-decoration: underline dotted;
+  text-underline-offset: 0.2em;
+}
+a time[title] {
+  cursor: inherit;
+  text-decoration: none;
+}
+
 /* OPAL hunt artwork; the blank variant keeps the same footprint as an image */
 .opal-artwork {
   display: block;
