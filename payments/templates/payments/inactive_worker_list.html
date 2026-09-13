@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% load otis_extras %}
 {% block title %}
   Stale tasks in {{ jobfolder }}
 {% endblock title %}
@@ -22,8 +23,8 @@
           <td>
             <a href="mailto:{{ worker.user.email }}">{{ worker.user.get_full_name }}</a>
           </td>
-          <td>{{ worker.latest_update|date }}</td>
-          <td>{{ worker.oldest_undone|date }}</td>
+          <td>{% timestamp worker.latest_update "isodate" %}</td>
+          <td>{% timestamp worker.oldest_undone "isodate" %}</td>
           <td class="text-end">{{ worker.num_completed }}</td>
           <td class="text-end">{{ worker.num_total }}</td>
         </tr>

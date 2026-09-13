@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% load otis_extras %}
 {% block title %}
   {{ job.folder.name }}: {{ job.name }}
 {% endblock title %}
@@ -43,8 +44,8 @@
         <strong>Currently unclaimed</strong>
       </li>
     {% endif %}
-    <li>Created at: {{ job.created_at }}</li>
-    <li>Last updated: {{ job.updated_at }}</li>
+    <li>Created at: {% timestamp job.created_at "time" %}</li>
+    <li>Last updated: {% timestamp job.updated_at "time" %}</li>
   </ul>
   {% if job.assignee and request.user.is_staff %}
     <h2>Assignee info</h2>

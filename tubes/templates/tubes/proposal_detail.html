@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% load otis_extras %}
 {% block title %}
   OIME {{ proposal.label }} Solution
 {% endblock title %}
@@ -48,7 +49,7 @@
       </div>
       <p class="text-muted">
         Written by {{ proposal.credit_display }}
-        on {{ proposal.created_at|date:"Y-m-d" }}
+        on {% timestamp proposal.created_at "date" %}
       </p>
     </div>
     <div class="d-flex gap-2">
@@ -128,9 +129,9 @@
               {% if comment.author_id == proposal.author_id %}
                 <span class="badge bg-secondary" title="This commenter wrote the problem">Author</span>
               {% endif %}
-              · {{ comment.created_at|date:"Y-m-d H:i" }}
+              · {% timestamp comment.created_at "time" %}
               {% if comment.is_edited %}
-                <span data-testid="comment-edited">(edited {{ comment.updated_at|date:"Y-m-d H:i" }})</span>
+                <span data-testid="comment-edited">(edited {% timestamp comment.updated_at "time" %})</span>
               {% endif %}
               {% if not proposal.archived %}
                 {% if comment.author == contributor or request.user.is_staff %}

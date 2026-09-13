@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% load otis_extras %}
 {% block title %}
   Problem suggestions by {{ request.user }}
 {% endblock title %}
@@ -24,7 +25,7 @@
       </h3>
       <p>{{ suggestion.statement }}</p>
       <p>
-        <b>Date</b>: {{ suggestion.created_at }}
+        <b>Date</b>: {% timestamp suggestion.created_at "time" %}
       </p>
       <p>
         <b>Unit</b>: {{ suggestion.unit }}, {{ suggestion.weight }}♣

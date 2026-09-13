@@ -1,8 +1,8 @@
-{% load humanize %}
+{% load otis_extras %}
 <div class="card">
   <b class="card-header">{{ market.title }}</b>
   <div class="card-body">{{ market.prompt_rendered|safe }}</div>
   <div class="card-footer text-muted">
-    <p>{{ market.start_date }} – {{ market.end_date }}</p>
+    <p>{% timestamp market.start_date "time" %} – {% timestamp market.end_date "time" %}</p>
   </div>
 </div>

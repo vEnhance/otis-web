@@ -1,13 +1,17 @@
+import datetime
 import io
 import json
+import zoneinfo
 from typing import Any
 from unittest import mock
 
 import pytest
 from django.core.files.base import ContentFile
 from django.core.files.storage import storages
+from django.template import Context, Template
 from django.test.utils import override_settings
 from django.urls import reverse
+from django.utils import timezone
 from factory.base import DictFactory
 from pypdf import PdfReader
 from reportlab.pdfgen.canvas import Canvas
@@ -18,6 +22,7 @@ from core.factories import (
     UnitFactory,
     UnitGroupFactory,
     UserFactory,
+    UserProfileFactory,
     mock_pdf,
 )
 from core.models import Semester
@@ -836,3 +841,73 @@ def test_unique_faker_actually_dedupes():
 
     values = [TinyFactory.build()["value"] for _ in range(100)]
     assert len(set(values)) == 100
+
+
+def render_timestamp(value: Any, args: str) -> str:
+    template = Template("{% load otis_extras %}{% timestamp value " + args + " %}")
+    return template.render(Context({"value": value})).strip()
+
+
+def test_timestamp_tag_follows_active_timezone():
+    value = datetime.datetime(2026, 9, 12, 23, 30, tzinfo=datetime.UTC)
+    with timezone.override(zoneinfo.ZoneInfo("America/New_York")):
+        eastern = render_timestamp(value, '"time"')
+    with timezone.override(zoneinfo.ZoneInfo("Asia/Manila")):
+        manila = render_timestamp(value, '"time"')
+
+    assert ">12 Sep 2026 19:30:00 EDT</time>" in eastern
+    assert ">13 Sep 2026 07:30:00 PST</time>" in manila
+    assert 'datetime="2026-09-12T19:30:00-04:00"' in eastern
+    assert 'datetime="2026-09-13T07:30:00+08:00"' in manila
+
+
+@pytest.mark.parametrize(
+    ("style", "text"),
+    [
+        ("date", "12 Sep 2026"),
+        ("isodate", "2026-09-12"),
+        ("time", "12 Sep 2026 19:30:00 EDT"),
+        ("isotime", "2026-09-12 19:30 EDT"),
+    ],
+)
+def test_timestamp_tag_styles(style: str, text: str):
+    value = datetime.datetime(2026, 9, 12, 23, 30, tzinfo=datetime.UTC)
+    with timezone.override(zoneinfo.ZoneInfo("America/New_York")):
+        rendered = render_timestamp(value, f'"{style}"')
+    assert f">{text}</time>" in rendered
+    assert 'title="Sat, 12 Sep 2026 19:30:00 -0400"' in rendered
+
+
+def test_timestamp_tag_on_plain_dates_and_none():
+    rendered = render_timestamp(datetime.date(2026, 9, 12), '"time"')
+    assert rendered == '<time datetime="2026-09-12">12 Sep 2026</time>'
+    assert render_timestamp(datetime.date(2026, 9, 12), '"isotime"') == (
+        '<time datetime="2026-09-12">2026-09-12</time>'
+    )
+    assert render_timestamp(None, '"date" default="(never)"') == "(never)"
+    assert render_timestamp(None, '"date"') == ""
+
+
+def test_timestamp_tag_relative():
+    value = timezone.now() - datetime.timedelta(hours=3)
+    rendered = render_timestamp(value, '"relative"')
+    assert ">3\xa0hours ago</time>" in rendered
+    assert "title=" in rendered
+
+
+def test_timestamp_tag_rejects_unknown_style():
+    with pytest.raises(ValueError):
+        render_timestamp(timezone.now(), '"DATE_FORMAT"')
+
+
+@pytest.mark.django_db
+def test_timestamps_use_the_viewers_timezone(otis):
+    target = UserFactory.create(
+        date_joined=datetime.datetime(2026, 9, 12, 23, 30, tzinfo=datetime.UTC)
+    )
+    admin = UserFactory.create(is_superuser=True, is_staff=True)
+    UserProfileFactory.create(user=admin, timezone="Asia/Manila")
+    otis.login(admin)
+
+    resp = otis.get_ok("user-info", target.pk)
+    otis.assert_has(resp, "2026-09-13 07:30 PST")

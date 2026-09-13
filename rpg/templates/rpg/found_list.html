@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% load otis_extras %}
 {% block title %}
   {{ achievement.name }} found by...
 {% endblock title %}
@@ -18,7 +19,7 @@
     </tr>
     {% for unlock in unlocks_list %}
       <tr>
-        <td>{{ unlock.timestamp|date:"Y-m-d H:i" }}</td>
+        <td>{% timestamp unlock.timestamp "isotime" %}</td>
         <td>
           {% if request.user.is_superuser %}
             <a href="{% url "user-info" unlock.user.pk %}">{{ unlock.user.get_full_name|truncatechars:"40" }}</a>

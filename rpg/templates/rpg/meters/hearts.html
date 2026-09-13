@@ -1,5 +1,5 @@
 {% extends "rpg/meters/large.html" %}
-{% load humanize %}
+{% load otis_extras %}
 {% block meter-content %}
   <p>You gain {{ meters.hearts.unit }} by spending hours on units.</p>
   {% if psets %}
@@ -18,7 +18,7 @@
             <td>
               <a href="{{ pset.get_absolute_url }}">{{ pset.unit }}</a>
             </td>
-            <td>{{ pset.upload.created_at|date }}</td>
+            <td>{% timestamp pset.upload.created_at "isodate" %}</td>
           </tr>
         {% endfor %}
       </tbody>

@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% load humanize %}
+{% load otis_extras %}
 {% block layout-content %}
   <p>
     <a href="{% url "portal" student.pk %}">⬅️ Back to portal</a>
@@ -21,7 +21,7 @@
               {{ pset.unit.group.name }}<sup>{{ pset.unit.code }}</sup>
             </a>
           </td>
-          <td>{{ pset.upload.created_at|naturaltime }}</td>
+          <td>{% timestamp pset.upload.created_at "relative" %}</td>
           <td>
             <a href="{% url "resubmit-pset" pset.pk %}">
               {% if pset.status == "R" %}

@@ -1,3 +1,4 @@
+{% load otis_extras %}
 <table class="table table-striped">
   {% for exam in exams %}
     <tr>
@@ -27,14 +28,14 @@
         {% endif %}
       </td>
       {% if exam.overdue %}
-        <td>Ended {{ exam.deadline|date }}</td>
+        <td>Ended {% timestamp exam.deadline "isodate" %}</td>
       {% elif exam.started %}
         <td>
-          Due {{ exam.deadline|date }}
+          Due {% timestamp exam.deadline "isodate" %}
           {% if exam.was_extended %}(extended){% endif %}
         </td>
       {% else %}
-        <td>Open {{ exam.start_date|date }} – {{ exam.deadline|date }}</td>
+        <td>Open {% timestamp exam.start_date "isodate" %} – {% timestamp exam.deadline "isodate" %}</td>
       {% endif %}
     </tr>
   {% endfor %}

@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% load humanize %}
+{% load otis_extras %}
 {% block title %}
   OTIS Puzzle Assembly Line
 {% endblock title %}
@@ -30,7 +30,7 @@
       <p>
         ‣
         <b><a href="{{ hunt.get_absolute_url }}">{{ hunt }}</a></b>
-        (started {{ hunt.start_date }})
+        (started {% timestamp hunt.start_date "time" %})
         {% if request.user.is_superuser %}
           <a href="{% url "admin:opal_opalhunt_change" hunt.pk %}">(edit)</a>
           <a href="{% url "opal-leaderboard" hunt.slug %}">(scoreboard)</a>
@@ -56,9 +56,9 @@
                data-testid="opal-hunt-log-link">Log</a>
           {% endif %}
           <p class="mb-0 mt-2">
-            Started {{ hunt.start_date }}
+            Started {% timestamp hunt.start_date "time" %}
             <br />
-            ({{ hunt.start_date|timesince }} ago)
+            ({% timestamp hunt.start_date "relative" %})
           </p>
         </div>
       </div>
@@ -69,19 +69,19 @@
           <h2 class="alert-heading">{{ hunt }}</h2>
           <ul class="mb-0">
             <li>
-              Starts <strong>{{ hunt.start_date }}</strong>
+              Starts <strong>{% timestamp hunt.start_date "time" %}</strong>
               <br />
-              (in {{ hunt.start_date|timeuntil }})
+              ({% timestamp hunt.start_date "relative" %})
             </li>
             <li>
               Author signup deadline:
               <br />
-              {{ hunt.author_signup_deadline }}
+              {% timestamp hunt.author_signup_deadline "time" %}
             </li>
             <li>
               Author draft deadline:
               <br />
-              {{ hunt.author_draft_deadline }}
+              {% timestamp hunt.author_draft_deadline "time" %}
             </li>
             {% if hunt.author_signups_are_open and hunt.author_signup_url %}
               <li>

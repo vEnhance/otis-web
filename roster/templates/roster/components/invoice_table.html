@@ -22,11 +22,11 @@
         </tr>
         <tr>
           <th>Created</th>
-          <td>{{ invoice.created_at|date }}</td>
+          <td>{% timestamp invoice.created_at "isodate" %}</td>
         </tr>
         <tr>
           <th>Updated</th>
-          <td>{{ invoice.updated_at|date }}</td>
+          <td>{% timestamp invoice.updated_at "isodate" %}</td>
         </tr>
         <tr>
           <th>Invoice #</th>

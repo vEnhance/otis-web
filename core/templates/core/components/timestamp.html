@@ -1,0 +1,8 @@
+{% comment %}
+Don't include this directly; use `{% timestamp %}`.
+{% endcomment %}
+{% if iso %}
+  <time datetime="{{ iso }}"{% if full %} title="{{ full }}"{% endif %}>{{ text }}</time>
+{% else %}
+  {{ default }}
+{% endif %}

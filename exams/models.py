@@ -105,7 +105,7 @@ class PracticeExam(models.Model):
         return (self.due_date is not None) and (self.due_date < timezone.localdate())
 
     @property
-    def deadline(self) -> datetime.datetime | None:
+    def deadline(self) -> datetime.date | None:
         if self.is_test is True or self.was_extended:
             return self.due_date
         else:

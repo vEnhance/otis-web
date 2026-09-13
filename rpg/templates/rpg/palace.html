@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% load otis_extras %}
 {% block title %}
   The Ruby Palace
 {% endblock title %}
@@ -19,7 +20,7 @@
           </small>
         </p>
       {% endif %}
-      <p class="fst-italic">{{ carving.created_at }}</p>
+      <p class="fst-italic">{% timestamp carving.created_at "time" %}</p>
       {{ carving.message|linebreaks }}
     </div>
     <hr />

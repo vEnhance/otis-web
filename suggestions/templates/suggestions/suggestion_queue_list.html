@@ -50,7 +50,7 @@
               {% endif %}
             {% endif %}
           </td>
-          <td>{{ suggestion.updated_at|date:"Y-m-d" }}</td>
+          <td>{% timestamp suggestion.updated_at "isodate" %}</td>
         </tr>
       {% endfor %}
     </tbody>

@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% load otis_extras %}
 {% block title %}
   Your historical market results
 {% endblock title %}
@@ -24,7 +25,7 @@
             {% if g.score >= 0.01 %}+{{ g.score|floatformat:2 }}♠{% endif %}
             {% if g.score <= -0.01 %}{{ g.score|floatformat:2 }}♠{% endif %}
           </td>
-          <td>{{ g.market.end_date }}</td>
+          <td>{% timestamp g.market.end_date "isotime" %}</td>
         </tr>
       {% endfor %}
     </table>
