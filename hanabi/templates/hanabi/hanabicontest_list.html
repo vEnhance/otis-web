@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% load otis_extras %}
 {% block title %}
   Hanabi contests
 {% endblock title %}
@@ -25,7 +26,7 @@
     <h2>{{ contest.variant_name }}</h2>
     <ul>
       <li>Players: {{ contest.num_players }}</li>
-      <li>Deadline: {{ contest.end_date }} ({{ contest.end_date|timeuntil }})</li>
+      <li>Deadline: {% timestamp contest.end_date "time" %} ({% timestamp contest.end_date "relative" %})</li>
       {% if request.user.is_superuser %}
         <li>
           <a href="{{ contest.hanab_stats_page_url }}">Seed statistics on hanab.live</a>
@@ -65,7 +66,7 @@
             </td>
             <td>Completed</td>
           {% elif contest.is_upcoming %}
-            <td class="table-warning">Starts in {{ contest.start_date }}</td>
+            <td class="table-warning">Starts {% timestamp contest.start_date "relative" %}</td>
             <td class="table-warning">Upcoming</td>
           {% elif not contest.has_ended %}
             <td class="table-primary">{{ contest.variant_name }}</td>
@@ -84,9 +85,9 @@
           <td>{{ contest.num_players }}p</td>
           <td>
             {% if contest.processed or request.user.is_superuser %}
-              <a href="{{ contest.hanab_stats_page_url }}">{{ contest.end_date }}</a>
+              <a href="{{ contest.hanab_stats_page_url }}">{% timestamp contest.end_date "isotime" %}</a>
             {% else %}
-              {{ contest.end_date }}
+              {% timestamp contest.end_date "isotime" %}
             {% endif %}
           </td>
         </tr>

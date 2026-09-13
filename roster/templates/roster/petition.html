@@ -61,7 +61,7 @@
       <tbody>
         {% for petition in petitions %}
           <tr>
-            <td title="{{ petition.created_at|date:"r" }}">{{ petition.created_at|date:"M d" }}</td>
+            <td>{% timestamp petition.created_at "isodate" %}</td>
             <td>
               <strong>{{ petition.unit }}</strong>
             </td>

@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% load humanize %}
+{% load otis_extras %}
 {% block title %}
   {{ puzzle.title }}
 {% endblock title %}
@@ -73,7 +73,7 @@
       If so, include a viewable link to your spreadsheet.
     </p>
   {% else %}
-    <p data-testid="opal-hints-pending">Pre-written hints will appear on {{ puzzle.hunt.hints_released_date }}</p>
+    <p data-testid="opal-hints-pending">Pre-written hints will appear on {% timestamp puzzle.hunt.hints_released_date "time" %}</p>
     <p>
       Even before then, you can email Evan for more detailed hint requests.
       If so, include a viewable link to your spreadsheet.
@@ -101,7 +101,7 @@
         {% else %}
           <td class="text-danger">Incorrect</td>
         {% endif %}
-        <td>{{ attempt.created_at }}</td>
+        <td>{% timestamp attempt.created_at "isotime" %}</td>
       </tr>
     {% endfor %}
   </table>

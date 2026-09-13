@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% load humanize %}
+{% load otis_extras %}
 {% block title %}
   Estimation markets
 {% endblock title %}
@@ -30,13 +30,13 @@
     {% for market in markets %}
       <tr class="{% if market.is_upcoming %}table-primary{% elif not market.has_started %}table-warning{% elif not market.has_ended %}table-success{% endif %}">
         {% if market.is_upcoming and not request.user.is_staff %}
-          <td>Starts {{ market.start_date }}</td>
+          <td>Starts {% timestamp market.start_date "isotime" %}</td>
         {% else %}
           <td>
             <a href="{{ market.get_absolute_url }}">{{ market.title }}</a>
           </td>
         {% endif %}
-        <td>{{ market.end_date }}</td>
+        <td>{% timestamp market.end_date "isotime" %}</td>
       </tr>
     {% endfor %}
   </table>

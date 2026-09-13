@@ -1,2 +1,3 @@
+{% load otis_extras %}
 {# Expects `attempt` decorated by `opal.views.decorate_attempts`. #}
-<td class="text-nowrap">{{ attempt.emoji }} {{ attempt.created_at|date:"Y-m-d H:i:s" }}</td>
+<td class="text-nowrap">{{ attempt.emoji }} {% timestamp attempt.created_at "isotime" %}</td>

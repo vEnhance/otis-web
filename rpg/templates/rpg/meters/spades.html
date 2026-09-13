@@ -1,5 +1,5 @@
 {% extends "rpg/meters/large.html" %}
-{% load humanize %}
+{% load otis_extras %}
 {% block meter-content %}
   <p>
     You gain
@@ -71,7 +71,7 @@
         <tr>
           <td style="color:{{ meters.spades.color }};">+{{ quest.spades }}{{ meters.spades.unit }}</td>
           <td>{{ quest.title }}</td>
-          <td>{{ quest.timestamp|date }}</td>
+          <td>{% timestamp quest.timestamp "isodate" %}</td>
         </tr>
       {% endfor %}
       {% for attempt in quiz_attempts %}
@@ -80,14 +80,14 @@
           <td>
             <a href="{% url "quiz" student.pk attempt.quiz.pk %}">{{ attempt.quiz }}</a>
           </td>
-          <td>{{ attempt.submit_time|date }}</td>
+          <td>{% timestamp attempt.submit_time "isodate" %}</td>
         </tr>
       {% endfor %}
       {% for mc in mock_completes %}
         <tr>
           <td style="color:{{ meters.spades.color }};">+3{{ meters.spades.unit }}</td>
           <td>{{ mc.exam.family }} {{ mc.exam.number }}</td>
-          <td>{{ mc.exam.due_date|date|default_if_none:"—" }}</td>
+          <td>{% timestamp mc.exam.due_date "isodate" default="—" %}</td>
         </tr>
       {% endfor %}
       {% for u in suggest_unit_set %}
@@ -109,7 +109,7 @@
           <td>
             <a href="{{ guess.market.get_absolute_url }}">{{ guess.market.slug }}</a>
           </td>
-          <td>{{ guess.market.end_date|date }}</td>
+          <td>{% timestamp guess.market.end_date "isodate" %}</td>
         </tr>
       {% endfor %}
       {% for job in completed_jobs %}
@@ -118,7 +118,7 @@
           <td>
             <a href="{{ job.get_absolute_url }}">{{ job.name }} ({{ job.folder.name }})</a>
           </td>
-          <td>{{ job.updated_at|date }}</td>
+          <td>{% timestamp job.updated_at "isodate" %}</td>
         </tr>
       {% endfor %}
       {% for replay in hanabi_replays %}
@@ -127,7 +127,7 @@
           <td>
             <a href="{{ replay.contest.get_absolute_url }}">{{ replay.contest }}</a>
           </td>
-          <td>{{ replay.contest.end_date }}</td>
+          <td>{% timestamp replay.contest.end_date "isotime" %}</td>
         </tr>
       {% endfor %}
     </tbody>

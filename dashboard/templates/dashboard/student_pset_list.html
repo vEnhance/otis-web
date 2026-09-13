@@ -46,7 +46,7 @@
           </td>
           <td class="text-end">{{ pset.clubs|default_if_none:"" }}</td>
           <td class="text-end">{{ pset.hours|default_if_none:"" }}</td>
-          <td>{{ pset.upload.created_at }}</td>
+          <td>{% timestamp pset.upload.created_at "isotime" %}</td>
         </tr>
       {% endfor %}
     </tbody>

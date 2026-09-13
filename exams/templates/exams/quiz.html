@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
 {% load crispy_forms_tags %}
+{% load otis_extras %}
 {% block title %}
   {{ quiz }}
 {% endblock title %}
@@ -9,11 +10,11 @@
     {% if not finished and not quiz.overdue %}
       {% if quiz.was_extended %}
         <p>
-          Submit on or before end-of-day {{ quiz.deadline }}
+          Submit on or before end-of-day {% timestamp quiz.deadline "date" %}
           (deadline was extended) server time.
         </p>
       {% else %}
-        <p>Submit on or before end-of-day {{ quiz.deadline }} server time.</p>
+        <p>Submit on or before end-of-day {% timestamp quiz.deadline "date" %} server time.</p>
       {% endif %}
     {% endif %}
   </p>

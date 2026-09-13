@@ -219,13 +219,13 @@ SOCIALACCOUNT_EMAIL_REQUIRED = True
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "America/New_York"
 USE_I18N = True
-USE_L10N = False
 USE_TZ = True
 
-DATETIME_FORMAT = "d M Y H:i:s"
+DATETIME_FORMAT = "d M Y H:i:s T"
 DATE_FORMAT = "d M Y"
 TIME_FORMAT = "H:i:s"
 SHORT_DATE_FORMAT = "Y-m-d"  # ISO 8601
+SHORT_DATETIME_FORMAT = "Y-m-d H:i T"
 
 # Static files (CSS, JavaScript, Images)
 

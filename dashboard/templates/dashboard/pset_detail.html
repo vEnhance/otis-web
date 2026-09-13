@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
 {% load markdownify %}
+{% load otis_extras %}
 {% block title %}
   Submission for {{ pset.unit }}
 {% endblock title %}
@@ -86,7 +87,7 @@
     <tr>
       <td>#{{ pset.pk }}</td>
       {% if pset.upload %}
-        <td>{{ pset.upload.created_at }}</td>
+        <td>{% timestamp pset.upload.created_at "time" %}</td>
       {% else %}
         <td class="fst-italic">No uploaded file.</td>
       {% endif %}

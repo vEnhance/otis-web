@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% load otis_extras %}
 {% block title %}
   Downloads
 {% endblock title %}
@@ -11,7 +12,7 @@
           <b><a href="{{ file.content.url }}">{{ file }}</a></b>
           {% if file.description %}— {{ file.description }}{% endif %}
           <br />
-          <small>Uploaded at {{ file.created_at|date:"r" }}.
+          <small>Uploaded at {% timestamp file.created_at "time" %}.
             {% if request.user.is_superuser %}
               <a href="{% url "admin:dashboard_semesterdownloadfile_change" file.pk %}">(edit)</a>
             {% endif %}

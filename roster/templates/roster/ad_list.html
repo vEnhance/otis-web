@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
 {% load static %}
+{% load otis_extras %}
 {% block title %}
   Available instructors
 {% endblock title %}
@@ -36,7 +37,7 @@
       {% endif %}
     </h2>
     <p class="fst-italic text-muted" data-testid="ad-updated-at">
-      Last updated at {{ assistant.updated_at|date:"Y-m-d H:i T" }}
+      Last updated at {% timestamp assistant.updated_at "time" %}
     </p>
     {% if assistant.ad_blurb %}
       <div>{{ assistant.ad_blurb|linebreaks }}</div>

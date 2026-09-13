@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% load otis_extras %}
 {% block title %}
   Hacking OTIS-WEB
 {% endblock title %}
@@ -119,14 +120,12 @@
           <a href="{{ v.get_absolute_url }}">{{ v.commit_hash|slice:":7" }}</a>
           —
           {{ v.description }}
-          <br />
-          {{ timestamp }}
         </p>
         <p class="text-muted">
           {% if v.finder_name %}
-            Found by {{ v.finder_name }}. {{ v.timestamp }}.
+            Found by {{ v.finder_name }}. {% timestamp v.timestamp "date" %}.
           {% else %}
-            {{ v.timestamp }}.
+            {% timestamp v.timestamp "date" %}.
           {% endif %}
         </p>
       </li>

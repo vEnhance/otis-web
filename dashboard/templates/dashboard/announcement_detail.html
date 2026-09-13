@@ -1,12 +1,12 @@
 {% extends "layout.html" %}
-{% load humanize %}
+{% load otis_extras %}
 {% block title %}
   {{ announcement.subject }}
 {% endblock title %}
 {% block layout-content %}
   <p class="text-muted">
     📢
-    {{ announcement.created_at }}
+    {% timestamp announcement.created_at "time" %}
     <a href="{% url "announcement-list" %}">Back to all announcements</a>.
   </p>
   <hr />

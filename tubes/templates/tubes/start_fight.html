@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% load otis_extras %}
 {% block title %}
   OIME {{ proposal.label }} Start Screen
 {% endblock title %}
@@ -6,7 +7,7 @@
   <h1>{{ proposal.label }}: {{ proposal.title }}</h1>
   <p class="text-muted">
     {{ proposal.difficulty_display }} · Written by {{ proposal.credit_display }}
-    on {{ proposal.created_at|date:"Y-m-d" }}
+    on {% timestamp proposal.created_at "date" %}
   </p>
   <hr />
   <h2>Start timed session</h2>

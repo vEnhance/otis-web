@@ -1,4 +1,4 @@
-{% load humanize %}
+{% load otis_extras %}
 <div class="alert alert-primary alert-dismissible mt-3">
   <h2 class="alert-heading">
     News!
@@ -8,14 +8,14 @@
     <p class="mt-3">
       <span class="emoji-text">📢</span>
       <b><a class="alert-link" href="{{ announcement.get_absolute_url }}">{{ announcement.subject }}</a></b>
-      | {{ announcement.created_at|naturaltime }}
+      | {% timestamp announcement.created_at "relative" %}
     </p>
   {% endfor %}
   {% for dl in news.downloads %}
     <p class="mt-3">
       <span class="emoji-text">💾</span>
       <b><a class="alert-link" href="{{ dl.content.url }}">{{ dl }}</a></b>
-      | {{ dl.created_at|naturaltime }}
+      | {% timestamp dl.created_at "relative" %}
       <br />
       <em class="text-muted">New file: {{ dl.description }}</em>
     </p>
@@ -24,27 +24,27 @@
     <p class="mt-3">
       <span class="emoji-text">📈</span>
       <b><a class="alert-link" href="{{ market.get_absolute_url }}">{{ market.title }}</a></b>
-      | {{ market.start_date|naturaltime }}
+      | {% timestamp market.start_date "relative" %}
       <br />
       <em class="text-muted">New market opened:
-      ends {{ market.end_date|naturaltime }}</em>
+      ends {% timestamp market.end_date "relative" %}</em>
     </p>
   {% endfor %}
   {% for hc in news.hanabis %}
     <p class="mt-3">
       <span class="emoji-text">🎇</span>
       <b><a class="alert-link" href="{% url "hanabi-contests" %}">{{ hc }}</a></b>
-      | {{ hc.start_date|naturaltime }}
+      | {% timestamp hc.start_date "relative" %}
       <br />
       <em class="text-muted">New Hanabi seed active:
-      ends {{ hc.end_date|naturaltime }}</em>
+      ends {% timestamp hc.end_date "relative" %}</em>
     </p>
   {% endfor %}
   {% for hunt in news.opals %}
     <p class="mt-3">
       <span class="emoji-text">🧩</span>
       <b><a class="alert-link" href="{% url "opal-hunt-list" %}">{{ hunt.name }}</a></b>
-      | {{ hunt.start_date|naturaltime }}
+      | {% timestamp hunt.start_date "relative" %}
       <br />
       <em class="text-muted">OPAL hunt active!</em>
     </p>

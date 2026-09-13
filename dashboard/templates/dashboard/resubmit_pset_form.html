@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% load humanize %}
+{% load otis_extras %}
 {% block layout-content %}
   <p>
     <a href="{{ pset.get_absolute_url }}">Return to problem set view</a>
@@ -13,7 +13,7 @@
       <a href="{{ pset.get_absolute_url }}">Submission #{{ pset.pk }}</a>.
     {% endif %}
   </p>
-  <p>{% if pset.upload %}Submitted {{ pset.upload.created_at }}.{% endif %}</p>
+  <p>{% if pset.upload %}Submitted {% timestamp pset.upload.created_at "time" %}.{% endif %}</p>
   <p>
     {% if not pset.resubmitted %}
       You are about to <strong>resubmit</strong> {{ pset.unit.group }}.
