@@ -105,6 +105,7 @@ TIMESTAMP_FORMATS: dict[TimestampStyle, str] = {
     "isotime": "SHORT_DATETIME_FORMAT",
 }
 
+# when only a date is given, convert literal to a suitable type
 DATE_ONLY_STYLES: dict[TimestampStyle, TimestampStyle] = {
     "relative": "date",
     "time": "date",
