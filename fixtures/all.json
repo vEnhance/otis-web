@@ -6224,6 +6224,8 @@
     "fields": {
       "user": 26,
       "shortname": "Lydia",
+      "created_at": "2023-08-26T06:41:07.119Z",
+      "updated_at": "2023-08-26T06:41:07.119Z",
       "unlisted_students": []
     }
   },
@@ -6233,6 +6235,8 @@
     "fields": {
       "user": 27,
       "shortname": "Bianca",
+      "created_at": "2023-08-26T06:41:07.352Z",
+      "updated_at": "2023-08-26T06:41:07.352Z",
       "unlisted_students": []
     }
   },
