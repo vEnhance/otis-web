@@ -338,14 +338,9 @@ img.emoji {
 /* Only datetimes carry a title, so the hover hint is scoped to that. */
 time[title] {
   cursor: help;
-  text-decoration: underline dotted;
-  text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.2em;
 }
 a time[title] {
   cursor: inherit;
-  text-decoration: none;
 }
 
 /* OPAL hunt artwork; the blank variant keeps the same footprint as an image */
