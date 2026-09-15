@@ -54,6 +54,7 @@ exams/              Practice exams, quizzes, mock attempts
 rpg/                Achievements, levels, quests, palace carvings
 payments/           Stripe integration and worker job board
 suggestions/        Student-submitted problem suggestions
+surveys/            Student surveys with anonymous GM and instructor feedback
 tubes/              Testsolving containers, plus OIME proposals and voting
 opal/               OPAL puzzle hunts
 hanabi/             hanab.live contests and replays
