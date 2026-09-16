@@ -185,6 +185,12 @@
   font-family: "Linux Libertine", Georgia, Times, serif;
 }
 
+.yearbook-bio blockquote {
+  margin: 0.5em 0 0.5em 1em;
+  border-left: 1px solid #a2a9b1;
+  padding-left: 1em;
+}
+
 /* Label-on-the-left form rows on the entry form */
 .yearbook-form-table {
   max-width: 34em;
