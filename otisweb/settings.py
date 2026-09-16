@@ -87,6 +87,7 @@ INSTALLED_APPS = [
     "rpg",
     "payments",
     "suggestions",
+    "surveys",
     "tubes",
     "yearbook",
     # ------------
