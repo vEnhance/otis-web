@@ -31,6 +31,7 @@ from django.utils import timezone
 from factory.base import Factory
 from factory.declarations import Iterator
 from factory.fuzzy import FuzzyInteger
+from factory.random import reseed_random
 
 from arch.factories import HintFactory, ProblemFactory
 from arch.models import Problem
@@ -613,6 +614,7 @@ def main():
     args = parse_args()
     settings.TESTING = True
     random.seed("OTIS-WEB")
+    reseed_random("OTIS-WEB")
 
     verified_group, _ = Group.objects.get_or_create(name="Verified")
     staff_group, _ = Group.objects.get_or_create(name="Active Staff")

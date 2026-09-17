@@ -17,3 +17,6 @@
 *.png binary
 *.jpg binary
 *.pdf binary
+
+# Generated files, collapsed in GitHub diffs.
+fixtures/all.json linguist-generated=true
