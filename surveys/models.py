@@ -1,17 +1,21 @@
-"""Student surveys, split so that anonymous feedback can't be traced back.
+"""Student surveys, split so that anonymous feedback isn't directly linked.
 
 A submission writes a SurveyCompletion, which records *that* a student responded,
 and separately a GMFeedback and possibly an InstructorComment, which record *what*
-they said. Nothing links the completion to the feedback: completions have random
-primary keys and no timestamps, so neither insertion order nor the time of the
-diamond unlock can match an anonymous row to its author. The feedback rows keep
-ordinary ascending primary keys, since submission order helps when reading them.
+they said.
+
+(In theory, there's a data-ordering attack: feedback rows have ascending PKs,
+and submission unlocks are timestamped, so they can be matched. However, some
+who fill out the survey have already unlocked the achievement, and there's
+enough of these responses that there's no meaningful matching. If this becomes
+a problem in practice, we could award all achievements at end-of-survey?)
 """
 
 import uuid
 
 from django.core.validators import MaxValueValidator
 from django.db import models
+from django.utils import timezone
 
 from core.models import Semester
 from roster.models import Assistant, Student
@@ -58,6 +62,10 @@ class Survey(models.Model):
 
     def __str__(self) -> str:
         return f"{self.semester}: {self.name}"
+
+    @property
+    def is_open(self) -> bool:
+        return self.opens_at <= timezone.now() < self.closes_at
 
 
 class SurveyCompletion(models.Model):

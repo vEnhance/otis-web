@@ -473,3 +473,59 @@ table.otis-sortable th[aria-sort="descending"]::after {
 .ts-wrapper.plugin-dropdown_input .ts-control {
   min-height: calc(1.5em + 0.75rem);
 }
+
+/* survey styling */
+.survey-form {
+  margin-top: 1rem;
+}
+.survey-form [id^="div_id_"],
+.survey-form fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.survey-form [id^="div_id_"] {
+  margin-bottom: 2rem !important;
+}
+.survey-form .form-label,
+.survey-form legend {
+  order: -2;
+  margin: 0;
+  font-size: inherit !important;
+}
+.survey-form .asteriskField {
+  color: #db372d;
+  padding-left: 0.25em;
+}
+.survey-form .form-text {
+  order: -1;
+  margin: 0;
+  font-size: inherit;
+}
+.survey-form #id_essay_helptext {
+  margin: -0.5em 0;
+}
+.survey-form textarea {
+  font-family: inherit;
+}
+.survey-scale {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 1rem;
+}
+@media (max-width: 576px) {
+  .survey-scale {
+    gap: 0.25rem;
+  }
+}
+.survey-scale-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+.survey-scale-option .form-check-input {
+  margin: 0;
+}

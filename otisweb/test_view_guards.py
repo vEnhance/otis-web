@@ -40,6 +40,7 @@ PROJECT_APPS = (
     "roster",
     "rpg",
     "suggestions",
+    "surveys",
     "tubes",
     "yearbook",
 )

@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% load otis_extras %}
+{% block title %}
+  Surveys
+{% endblock title %}
+{% block layout-content %}
+  {% for row in rows %}
+    <p data-testid="survey-row-{{ row.survey.pk }}">
+      ‣
+      <b><a href="{% url "survey-detail" row.survey.pk %}">{{ row.survey }}</a></b>
+      {% if row.completed %}
+        <span class="badge bg-success">Submitted</span>
+      {% elif row.survey.is_open %}
+        <span class="badge bg-primary">Open</span>
+      {% endif %}
+      <br />
+      <small class="text-muted">
+        Open from {% timestamp row.survey.opens_at "time" %}
+        to {% timestamp row.survey.closes_at "time" %}
+      </small>
+      {% if request.user.is_superuser %}
+        <a href="{% url "admin:surveys_survey_change" row.survey.pk %}">(edit)</a>
+      {% endif %}
+    </p>
+  {% empty %}
+    <p>There are no surveys for you yet.</p>
+  {% endfor %}
+{% endblock layout-content %}
