@@ -1,0 +1,73 @@
+{% extends "layout.html" %}
+{% load otis_extras crispy_forms_tags %}
+{% block title %}
+  {{ survey }}
+{% endblock title %}
+{% block layout-content %}
+  <p>
+    <a href="{% url "survey-list" %}">← Back to surveys</a>
+  </p>
+  <p class="text-muted">
+    Open from {% timestamp survey.opens_at "time" %}
+    to {% timestamp survey.closes_at "time" %}
+  </p>
+  {% if preview %}
+    <div class="alert alert-warning" data-testid="survey-preview">
+      This is a preview of the form. You aren't a student in {{ survey.semester }},
+      so you can't submit it.
+    </div>
+    <div class="survey-form">{% for field in form.visible_fields %}{{ field|as_crispy_field }}{% endfor %}</div>
+  {% elif completed %}
+    {% if gm_feedback %}
+      <div class="alert alert-success" data-testid="survey-signed-response">
+        You submitted this survey and signed your name. Your response is shown below.
+      </div>
+      <h2>Your feedback</h2>
+      <div class="card mb-3">
+        <div class="card-header">Free comments</div>
+        <div class="card-body">{{ gm_feedback.essay|linebreaks }}</div>
+      </div>
+      {% if gm_feedback.satisfaction is not None %}
+        <div class="card mb-3">
+          <div class="card-header">{{ survey.satisfaction_prompt }}</div>
+          <div class="card-body">{{ gm_feedback.satisfaction }} / 7</div>
+        </div>
+      {% endif %}
+      {% if gm_feedback.anything_else %}
+        <div class="card mb-3">
+          <div class="card-header">{{ survey.anything_else_prompt }}</div>
+          <div class="card-body">{{ gm_feedback.anything_else|linebreaks }}</div>
+        </div>
+      {% endif %}
+      {% if gm_feedback.reply %}
+        <div class="card mb-3 border-primary" data-testid="survey-reply">
+          <div class="card-header">
+            Reply from Evan
+            {% if gm_feedback.replied_at %}({% timestamp gm_feedback.replied_at "time" %}){% endif %}
+          </div>
+          <div class="card-body">{{ gm_feedback.reply|linebreaks }}</div>
+        </div>
+      {% endif %}
+    {% else %}
+      <div class="alert alert-success" data-testid="survey-anonymous-response">
+        You submitted this survey. Your comments to Evan were anonymous, so they
+        can't be shown here.
+      </div>
+    {% endif %}
+    {% if instructor_comment %}
+      <h2>Your comments to {{ instructor_comment.assistant }}</h2>
+      <div class="card mb-3">
+        <div class="card-body">{{ instructor_comment.comments|linebreaks }}</div>
+      </div>
+    {% endif %}
+  {% elif form %}
+    <div class="survey-form">
+      {% url "survey-submit" survey.pk as submit_url %}
+      {% include "otisweb/components/generic_form.html" with target=submit_url submit_name="Submit survey" %}
+    </div>
+  {% else %}
+    <div class="alert alert-secondary" data-testid="survey-not-open">
+      <p class="mb-0">This survey isn't accepting responses right now.</p>
+    </div>
+  {% endif %}
+{% endblock layout-content %}

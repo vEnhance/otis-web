@@ -1,21 +1,24 @@
-"""Student surveys, split so that anonymous feedback can't be traced back.
+"""Student surveys, split so that anonymous feedback isn't directly linked.
 
 A submission writes a SurveyCompletion, which records *that* a student responded,
 and separately a GMFeedback and possibly an InstructorComment, which record *what*
-they said. Nothing links the completion to the feedback: completions have random
-primary keys and no timestamps, so neither insertion order nor the time of the
-diamond unlock can match an anonymous row to its author. The feedback rows keep
-ordinary ascending primary keys, since submission order helps when reading them.
+they said.
+
+Feedback rows keep ascending primary keys, since submission order helps when
+reading them, so a submission must not write anything timestamped that would line
+up with that order. In particular, the survey's achievement isn't granted on
+submission but in bulk once the survey closes, via Survey.grant_achievements.
 """
 
 import uuid
 
 from django.core.validators import MaxValueValidator
 from django.db import models
+from django.utils import timezone
 
 from core.models import Semester
 from roster.models import Assistant, Student
-from rpg.models import Achievement
+from rpg.models import Achievement, AchievementUnlock
 
 
 class Survey(models.Model):
@@ -58,6 +61,34 @@ class Survey(models.Model):
 
     def __str__(self) -> str:
         return f"{self.semester}: {self.name}"
+
+    @property
+    def is_open(self) -> bool:
+        return self.opens_at <= timezone.now() < self.closes_at
+
+    def grant_achievements(self) -> int:
+        """Unlocks the achievement for everyone who completed this survey.
+
+        Only call this once the survey has closed: unlocks are timestamped in
+        the order created, so granting while submissions trickle in would
+        reveal submission order. Returns the number of new unlocks.
+        """
+        if self.achievement is None:
+            return 0
+        already = AchievementUnlock.objects.filter(achievement=self.achievement)
+        # Completion pks are random, so this order says nothing about submissions.
+        user_ids = (
+            SurveyCompletion.objects.filter(survey=self)
+            .exclude(student__user__in=already.values("user"))
+            .order_by("pk")
+            .values_list("student__user", flat=True)
+        )
+        unlocks = [
+            AchievementUnlock(user_id=user_id, achievement=self.achievement)
+            for user_id in user_ids
+        ]
+        AchievementUnlock.objects.bulk_create(unlocks, ignore_conflicts=True)
+        return len(unlocks)
 
 
 class SurveyCompletion(models.Model):

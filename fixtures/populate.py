@@ -60,6 +60,12 @@ from rpg.factories import (
 )
 from rpg.models import Achievement
 from suggestions.factories import ProblemSuggestionFactory
+from surveys.factories import (
+    GMFeedbackFactory,
+    InstructorCommentFactory,
+    SurveyCompletionFactory,
+    SurveyFactory,
+)
 from tubes.factories import (
     JoinRecordFactory,
     OIMECommentFactory,
@@ -92,6 +98,11 @@ P_QUEST_SKIP = 0.65  # chance a student completes no quests
 P_MARKET_SKIP = 0.2  # chance a student guesses on no markets
 P_MARKET_GUESS = 0.8  # chance a guessing student guesses on a given market
 P_ASSISTANT = 0.1  # chance a student is assigned an instructor
+P_SURVEY = 0.7  # chance a student submits a survey
+P_SURVEY_SIGNED = 0.5  # chance a submission is signed rather than anonymous
+P_SURVEY_INSTRUCTOR = 0.6  # chance a student with an instructor comments on them
+P_SURVEY_READ = 0.5  # chance Evan has read a given piece of feedback
+P_SURVEY_REPLY = 0.5  # chance Evan replied to signed feedback he read
 MAX_STU_UNITS = 27  # largest curriculum a student can be given
 MIN_PSET_UNITS = 3  # units at the start of a curriculum that are never pset
 
@@ -608,6 +619,71 @@ def create_sem_dependent(
     create_quest_completes(students)
     create_market_guesses(students, markets)
     assign_assistants(students)
+    create_survey(semester, students)
+
+
+def create_survey(semester: Semester, students: list[Student]):
+    """Creates Survey 1 for the semester, open now if the semester is active.
+
+    Every year's Survey 1 shares an achievement, so returning students who
+    submitted last year don't get a second unlock.
+    """
+    achievement, _ = Achievement.objects.get_or_create(
+        code="537572766579203100000000",  # "Survey 1" in hex
+        defaults={"name": "Survey 1", "diamonds": 3},
+    )
+    now = timezone.now()
+    opens_at = now - timedelta(days=7) if semester.active else now - timedelta(days=365)
+    survey = SurveyFactory.create(
+        semester=semester,
+        name="Survey 1",
+        opens_at=opens_at,
+        closes_at=opens_at + timedelta(days=21),
+        achievement=achievement,
+        essay_prompt=(
+            "Here are some possible prompts that might help get you started, "
+            "but again feel free to say anything on your mind.\n\n"
+            "* Of the units that you've done so far, "
+            "are there any that stand out in particular?\n"
+            "* Is there anything I should tell new students "
+            "at the start of next year?\n"
+            "* Anything else on your mind (general or specific), "
+            "or suggestions for improvements once we start back up.\n\n"
+            "You can write as much as you want here "
+            "(in the past it's not uncommon for me to get full essays)."
+        ),
+        instructor_comments_prompt="Comments to pass onto instructor",
+        satisfaction_prompt="Overall, how satisfied are you with OTIS?",
+        anything_else_prompt="Anything else?",
+    )
+
+    respondents = [s for s in students if random.random() < P_SURVEY]
+    print(f"Creating {len(respondents)} responses to {survey}")
+    for student in respondents:
+        SurveyCompletionFactory.create(survey=survey, student=student)
+        signed = random.random() < P_SURVEY_SIGNED
+        is_read = random.random() < P_SURVEY_READ
+        replied = signed and is_read and random.random() < P_SURVEY_REPLY
+        GMFeedbackFactory.create(
+            survey=survey,
+            student=student if signed else None,
+            satisfaction=random.choice((None, *range(3, 8))),
+            anything_else=random.choice(("", "Thanks for running OTIS!")),
+            is_read=is_read,
+            reply="Thanks for the feedback!" if replied else "",
+            replied_at=opens_at + timedelta(days=random.randint(1, 7))
+            if replied
+            else None,
+        )
+        if student.assistant is not None and random.random() < P_SURVEY_INSTRUCTOR:
+            InstructorCommentFactory.create(
+                survey=survey,
+                student=student if random.random() < P_SURVEY_SIGNED else None,
+                assistant=student.assistant,
+                is_read=random.random() < P_SURVEY_READ,
+            )
+    if not survey.is_open:
+        survey.grant_achievements()
 
 
 def main():

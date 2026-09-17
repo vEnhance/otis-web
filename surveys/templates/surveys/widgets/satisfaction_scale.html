@@ -1,0 +1,18 @@
+{# crispy marks errors via attrs.class, whose other classes are for text inputs #}
+<div class="survey-scale{% if "is-invalid" in widget.attrs.class %} is-invalid{% endif %}">
+  <span class="emoji-text" aria-hidden="true">😒😓😩</span>
+  {% for group, options, index in widget.optgroups %}
+    {% for option in options %}
+      <label class="survey-scale-option">
+        {{ option.label }}
+        <input type="radio"
+               class="form-check-input{% if "is-invalid" in widget.attrs.class %} is-invalid{% endif %}"
+               name="{{ option.name }}"
+               value="{{ option.value }}"
+               id="{{ option.attrs.id }}"
+               {% if option.selected %}checked{% endif %} />
+      </label>
+    {% endfor %}
+  {% endfor %}
+  <span class="emoji-text" aria-hidden="true">😎🤩😃</span>
+</div>
