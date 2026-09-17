@@ -10,7 +10,6 @@ from django.utils import timezone
 
 from otisweb.utils import AuthHttpRequest
 from roster.models import Student
-from rpg.models import AchievementUnlock
 
 from .forms import SIGNED, SurveyForm
 from .models import GMFeedback, InstructorComment, Survey, SurveyCompletion
@@ -115,10 +114,6 @@ def survey_submit(request: AuthHttpRequest, survey_pk: int) -> HttpResponse:
                 student=student if data["instructor_signed"] == SIGNED else None,
                 assistant=student.assistant,
                 comments=data["instructor_comments"],
-            )
-        if survey.achievement is not None:
-            AchievementUnlock.objects.get_or_create(
-                achievement=survey.achievement, user=request.user
             )
 
     messages.success(

@@ -58,7 +58,7 @@ from rpg.factories import (
     AchievementUnlockFactory,
     QuestCompleteFactory,
 )
-from rpg.models import Achievement, AchievementUnlock
+from rpg.models import Achievement
 from suggestions.factories import ProblemSuggestionFactory
 from surveys.factories import (
     GMFeedbackFactory,
@@ -682,9 +682,8 @@ def create_survey(semester: Semester, students: list[Student]):
                 assistant=student.assistant,
                 is_read=random.random() < P_SURVEY_READ,
             )
-        AchievementUnlock.objects.get_or_create(
-            user=student.user, achievement=achievement
-        )
+    if not survey.is_open:
+        survey.grant_achievements()
 
 
 def main():

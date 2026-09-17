@@ -1,6 +1,7 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.db.models import Count, QuerySet
 from django.http import HttpRequest
+from django.utils import timezone
 from django.utils.text import Truncator
 
 from surveys.models import GMFeedback, InstructorComment, Survey, SurveyCompletion
@@ -35,6 +36,7 @@ class SurveyAdmin(admin.ModelAdmin):
     search_fields = ("name",)
     autocomplete_fields = ("achievement",)
     inlines = (SurveyCompletionInline,)
+    actions = ("grant_achievements",)
 
     def get_queryset(self, request: HttpRequest) -> QuerySet[Survey]:
         return (
@@ -47,6 +49,21 @@ class SurveyAdmin(admin.ModelAdmin):
     @admin.display(description="Completions", ordering="completion_count")
     def num_completions(self, obj: Survey) -> int:
         return obj.completion_count  # type: ignore[attr-defined]
+
+    @admin.action(description="Grant achievements for selected closed surveys")
+    def grant_achievements(
+        self, request: HttpRequest, queryset: QuerySet[Survey]
+    ) -> None:
+        for survey in queryset.select_related("semester", "achievement"):
+            if survey.closes_at > timezone.now():
+                self.message_user(
+                    request,
+                    f"Skipped {survey}, which hasn't closed yet.",
+                    messages.WARNING,
+                )
+                continue
+            count = survey.grant_achievements()
+            self.message_user(request, f"Granted {count} achievement(s) for {survey}.")
 
 
 @admin.register(SurveyCompletion)

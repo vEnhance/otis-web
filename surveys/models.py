@@ -4,11 +4,10 @@ A submission writes a SurveyCompletion, which records *that* a student responded
 and separately a GMFeedback and possibly an InstructorComment, which record *what*
 they said.
 
-(In theory, there's a data-ordering attack: feedback rows have ascending PKs,
-and submission unlocks are timestamped, so they can be matched. However, some
-who fill out the survey have already unlocked the achievement, and there's
-enough of these responses that there's no meaningful matching. If this becomes
-a problem in practice, we could award all achievements at end-of-survey?)
+Feedback rows keep ascending primary keys, since submission order helps when
+reading them, so a submission must not write anything timestamped that would line
+up with that order. In particular, the survey's achievement isn't granted on
+submission but in bulk once the survey closes, via Survey.grant_achievements.
 """
 
 import uuid
@@ -19,7 +18,7 @@ from django.utils import timezone
 
 from core.models import Semester
 from roster.models import Assistant, Student
-from rpg.models import Achievement
+from rpg.models import Achievement, AchievementUnlock
 
 
 class Survey(models.Model):
@@ -66,6 +65,30 @@ class Survey(models.Model):
     @property
     def is_open(self) -> bool:
         return self.opens_at <= timezone.now() < self.closes_at
+
+    def grant_achievements(self) -> int:
+        """Unlocks the achievement for everyone who completed this survey.
+
+        Only call this once the survey has closed: unlocks are timestamped in
+        the order created, so granting while submissions trickle in would
+        reveal submission order. Returns the number of new unlocks.
+        """
+        if self.achievement is None:
+            return 0
+        already = AchievementUnlock.objects.filter(achievement=self.achievement)
+        # Completion pks are random, so this order says nothing about submissions.
+        user_ids = (
+            SurveyCompletion.objects.filter(survey=self)
+            .exclude(student__user__in=already.values("user"))
+            .order_by("pk")
+            .values_list("student__user", flat=True)
+        )
+        unlocks = [
+            AchievementUnlock(user_id=user_id, achievement=self.achievement)
+            for user_id in user_ids
+        ]
+        AchievementUnlock.objects.bulk_create(unlocks, ignore_conflicts=True)
+        return len(unlocks)
 
 
 class SurveyCompletion(models.Model):

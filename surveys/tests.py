@@ -64,9 +64,8 @@ def test_submit_signed(otis):
     assert comment.student == alice
     assert comment.assistant == assistant
     assert comment.comments == "Thanks!"
-    assert AchievementUnlock.objects.filter(
-        user=alice.user, achievement=achievement
-    ).exists()
+    # The achievement waits for the survey to close; see Survey.grant_achievements.
+    assert not AchievementUnlock.objects.filter(achievement=achievement).exists()
 
     resp = otis.get_ok("survey-detail", survey.pk)
     assert resp.context["gm_feedback"] == feedback
@@ -279,15 +278,36 @@ def test_superuser_preview(otis):
 
 
 @pytest.mark.django_db
-def test_existing_achievement_is_kept(otis):
-    alice = StudentFactory.create()
+def test_grant_achievements_action(otis):
     achievement = AchievementFactory.create()
+    closed = SurveyFactory.create(
+        achievement=achievement,
+        opens_at=datetime.datetime(2021, 9, 1, tzinfo=UTC),
+        closes_at=datetime.datetime(2021, 10, 1, tzinfo=UTC),
+    )
+    still_open = SurveyFactory.create(achievement=AchievementFactory.create())
+    alice, bob, carol = (
+        SurveyCompletionFactory.create(survey=closed).student for _ in range(3)
+    )
     unlock = AchievementUnlockFactory.create(user=alice.user, achievement=achievement)
-    survey = SurveyFactory.create(semester=alice.semester, achievement=achievement)
-    otis.login(alice)
+    SurveyCompletionFactory.create(survey=still_open)
+    otis.login(UserFactory.create(is_staff=True, is_superuser=True))
 
-    otis.post_30x("survey-submit", survey.pk, data=_response())
-    assert list(AchievementUnlock.objects.filter(user=alice.user)) == [unlock]
+    for _ in range(2):  # granting again changes nothing
+        otis.post_ok(
+            "admin:surveys_survey_changelist",
+            data={
+                "action": "grant_achievements",
+                "_selected_action": [closed.pk, still_open.pk],
+            },
+            follow=True,
+        )
+        assert set(AchievementUnlock.objects.values_list("user", "achievement")) == {
+            (alice.user.pk, achievement.pk),
+            (bob.user.pk, achievement.pk),
+            (carol.user.pk, achievement.pk),
+        }
+    assert AchievementUnlock.objects.get(user=alice.user) == unlock
 
 
 @pytest.mark.django_db
