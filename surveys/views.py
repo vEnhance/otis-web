@@ -29,10 +29,11 @@ RESPONSES_PER_PAGE = 20
 # The inbox status dropdown: query value -> (label, filter).
 type StatusFilters = dict[str, tuple[str, Q]]
 
-DEFAULT_STATUS = "all"
+# Unread by default: an inbox is opened to work through what's new in it.
+DEFAULT_STATUS = "unread"
 READ_FILTERS: StatusFilters = {
-    DEFAULT_STATUS: ("All", Q()),
-    "unread": ("📬 Unread", Q(is_read=False)),
+    "all": ("All", Q()),
+    DEFAULT_STATUS: ("📬 Unread", Q(is_read=False)),
     "read": ("📭 Read", Q(is_read=True)),
 }
 # These overlap, since replying marks feedback read, but one dropdown is simpler
@@ -261,8 +262,9 @@ class _Inbox[M: models.Model](ListView[M]):
     """Responses to one survey, oldest first, filtered on whether they're read.
 
     Oldest first so they're read in the order they came in, which helps when
-    responding to them. Opening the inbox never marks anything read: that only
-    happens by pressing a button.
+    responding to them. Unread is the default filter, since that's what there is
+    to do; the dropdown switches to everything. Opening the inbox never marks
+    anything read: that only happens by pressing a button.
     """
 
     survey: Survey

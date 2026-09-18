@@ -524,13 +524,15 @@ def test_gm_feedback_inbox(otis):
         resp = otis.get_ok("survey-gm-feedback-inbox", survey.pk, data=data)
         return list(resp.context["page_obj"])
 
-    assert shown() == [unread, read, later, replied]
+    # Unread by default, which is what there is to do something about.
+    assert shown() == [unread, later]
     assert shown(status="unread") == [unread, later]
+    assert shown(status="all") == [unread, read, later, replied]
     assert shown(status="read") == [read, replied]
     assert shown(status="replied") == [replied]
     assert shown(status="unreplied") == [unread, read, later]
-    # A bad filter falls back to all, and a page past the end to the last one.
-    assert shown(status="x", page="9") == [unread, read, later, replied]
+    # A bad filter falls back to unread, and a page past the end to the last one.
+    assert shown(status="x", page="9") == [unread, later]
 
 
 @pytest.mark.django_db
@@ -576,9 +578,9 @@ def test_gm_feedback_respond(otis):
     assert not feedback.is_read
 
     with freeze_time("2021-09-15", tz_offset=0):
-        resp = respond(action="reply", reply="  Thanks!  ", back_status="unread")
+        resp = respond(action="reply", reply="  Thanks!  ", back_status="all")
     assert resp["Location"] == otis.url("survey-gm-feedback-inbox", survey.pk) + (
-        "?status=unread"
+        "?status=all"
     )
     feedback.refresh_from_db()
     assert feedback.is_read
@@ -619,7 +621,7 @@ def test_gm_feedback_respond_returns_to_page(otis):
     inbox = otis.url("survey-gm-feedback-inbox", survey.pk)
 
     otis.post_redirects(
-        f"{inbox}?status=unread&page=2",
+        f"{inbox}?page=2",
         "survey-gm-feedback-respond",
         survey.pk,
         feedbacks[-1].pk,
