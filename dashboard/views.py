@@ -27,7 +27,7 @@ from otisweb.decorators import admin_required
 from otisweb.mixins import VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest, get_days_since
 from roster.forms import BackfillUSStateForm
-from roster.models import RegistrationContainer, Student
+from roster.models import LEGIT_STANDINGS, RegistrationContainer, Student
 from roster.utils import (
     can_view,
     get_regs_missing_us_state,
@@ -413,7 +413,7 @@ def idlewarn(request: AuthHttpRequest) -> HttpResponse:
     newest = newest_qset.order_by("-created_at").values("created_at")[:1]
 
     queryset = annotate_student_queryset_with_scores(
-        get_visible_students(request.user).filter(legit=True)
+        get_visible_students(request.user).filter(standing__in=LEGIT_STANDINGS)
     )
     queryset = queryset.annotate(latest_pset=Subquery(newest))  # type: ignore
     rows = get_student_rows(queryset)

@@ -11,6 +11,7 @@ from roster.models import (
     RegistrationContainer,
     Student,
     StudentRegistration,
+    StudentStanding,
     UnitPetition,
 )
 
@@ -55,7 +56,7 @@ class StudentFactory(DjangoModelFactory):
 
     user = SubFactory(UserFactory)
     semester = SubFactory(SemesterFactory)
-    newborn = False
+    standing = StudentStanding.GOOD
     last_level_seen = 0
 
 

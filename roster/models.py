@@ -20,6 +20,26 @@ from .country_abbrevs import COUNTRY_CHOICES
 from .us_states import US_STATE_CHOICES
 
 
+class StudentStanding(models.TextChoices):
+    GOOD = "STND_GOOD", "Good standing"
+    NEWBORN = "STND_NEWB", "Newborn"
+    PROBATION = "STND_PROB", "Probation"
+    SUSPENDED = "STND_SUSP", "Suspended"
+    FAKE = "STND_FAKE", "Fake account"
+    DROPPED = "STND_DROP", "Dropped"
+
+
+LEGIT_STANDINGS = frozenset(StudentStanding) - {StudentStanding.FAKE}
+ENABLED_STANDINGS = frozenset(
+    {
+        StudentStanding.GOOD,
+        StudentStanding.NEWBORN,
+        StudentStanding.PROBATION,
+        StudentStanding.FAKE,
+    }
+)
+
+
 class CurriculumRowTypeDict(TypedDict, total=False):
     unit: Unit
     number: int
@@ -139,17 +159,11 @@ class Student(models.Model):
         "delete it from this list to mark them as complete.",
     )
 
-    legit = models.BooleanField(
-        default=True,
-        help_text="Whether this student is still active. "
-        "Set to false for dummy accounts and the like. "
-        "This will hide them from the master schedule, for example.",
-    )
-    newborn = models.BooleanField(
-        default=True, help_text="Whether the student is newly created."
-    )
-    enabled = models.BooleanField(
-        default=True, help_text="Allow student to submit/request units."
+    standing = models.CharField(
+        max_length=9,
+        choices=StudentStanding,
+        default=StudentStanding.NEWBORN,
+        help_text="The academic standing of this student.",
     )
 
     last_level_seen = models.PositiveSmallIntegerField(
@@ -163,7 +177,6 @@ class Student(models.Model):
         )
         ordering = (
             "semester",
-            "-legit",
             "user__first_name",
             "user__last_name",
         )
@@ -182,6 +195,29 @@ class Student(models.Model):
             100000,
             dklen=18,
         ).hex()
+
+    @property
+    def legit(self) -> bool:
+        """Whether this is a real student, rather than a testing account."""
+        return self.standing != StudentStanding.FAKE
+
+    @property
+    def newborn(self) -> bool:
+        """Whether the student still needs to choose their initial units."""
+        return self.standing == StudentStanding.NEWBORN
+
+    @property
+    def enabled(self) -> bool:
+        """Whether the student may submit or request units."""
+        return self.standing in ENABLED_STANDINGS
+
+    @property
+    def is_suspended(self) -> bool:
+        return self.standing == StudentStanding.SUSPENDED
+
+    @property
+    def is_on_probation(self) -> bool:
+        return self.standing == StudentStanding.PROBATION
 
     @property
     def first_name(self) -> str:

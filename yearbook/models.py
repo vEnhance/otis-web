@@ -25,6 +25,7 @@ from roster.country_abbrevs import (
     get_country_imo_url,
     get_country_name,
 )
+from roster.models import LEGIT_STANDINGS
 
 USERNAME_CHARACTERS = re.compile(r"[A-Za-z0-9._-]+")
 
@@ -307,7 +308,9 @@ class YearbookEntry(models.Model):
     def otis_semesters(self) -> QuerySet[Semester]:
         """The semesters during which this person was an OTIS student."""
         return (
-            Semester.objects.filter(student__user=self.user, student__legit=True)
+            Semester.objects.filter(
+                student__user=self.user, student__standing__in=LEGIT_STANDINGS
+            )
             .order_by("end_year")
             .distinct()
         )

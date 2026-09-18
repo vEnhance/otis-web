@@ -18,6 +18,7 @@ from django.utils.timezone import template_localtime  # type: ignore
 
 from core.models import Unit, UserProfile
 from core.utils import find_profile
+from roster.models import Student, StudentStanding
 from rpg.levelsys import BONUS_D_UNIT, BONUS_Z_UNIT
 
 register = template.Library()
@@ -60,6 +61,27 @@ def getprofile(user: User | AnonymousUser) -> UserProfile | None:
 def getconfig(user: User | AnonymousUser, config: str) -> bool:
     profile = getprofile(user)
     return getattr(profile, config) if profile is not None else False
+
+
+STANDING_ROW_CLASSES = {
+    StudentStanding.NEWBORN: "table-success",
+    StudentStanding.PROBATION: "table-warning",
+    StudentStanding.SUSPENDED: "table-danger",
+    StudentStanding.FAKE: "table-info",
+    StudentStanding.DROPPED: "table-dark",
+}
+
+
+@register.filter(name="standing_row_class")
+def standing_row_class(student: Student, user: User | AnonymousUser) -> str:
+    """The Bootstrap tint for a student's row in a listing.
+
+    Probation is only tinted for staff, since a student shouldn't be able to
+    tell their probation apart from good standing.
+    """
+    if student.is_on_probation and not user.is_staff:
+        return ""
+    return STANDING_ROW_CLASSES.get(StudentStanding(student.standing), "")
 
 
 @register.filter(name="clubs_multiplier")

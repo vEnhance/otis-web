@@ -131,7 +131,7 @@ class StudentInline(admin.TabularInline):
     fields = (
         "name",
         "semester",
-        "legit",
+        "standing",
     )
     readonly_fields = (
         "user",
@@ -253,7 +253,7 @@ class InvoiceAdmin(ImportExportModelAdmin):
     ordering = ("student",)
     list_filter = (
         OwedFilter,
-        "student__legit",
+        "student__standing",
         "student__semester__active",
         ("forgive_date", admin.EmptyFieldListFilter),
         ("memo", admin.EmptyFieldListFilter),
@@ -280,7 +280,7 @@ class StudentIEResource(RosterResource):
             "user__email",
             "semester_name",
             "user_name",
-            "legit",
+            "standing",
         )
         export_order = fields
 
@@ -317,8 +317,7 @@ class StudentAdmin(ImportExportModelAdmin):
         "name",
         "email",
         "semester",
-        "enabled",
-        "legit",
+        "standing",
         "last_level_seen",
     )
     list_display_links = (
@@ -328,9 +327,7 @@ class StudentAdmin(ImportExportModelAdmin):
     )
     list_filter = (
         "semester__active",
-        "legit",
-        "enabled",
-        "newborn",
+        "standing",
         "semester",
     )
     search_fields = (
@@ -378,9 +375,7 @@ class StudentRegistrationStudentInline(admin.StackedInline):
     model = Student
     fields = (
         "semester",
-        "legit",
-        "newborn",
-        "enabled",
+        "standing",
         "last_level_seen",
     )
 

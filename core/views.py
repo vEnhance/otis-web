@@ -35,7 +35,7 @@ from dashboard.models import PSet, UploadedFile
 from otisweb.decorators import admin_required, staff_required, verified_required
 from otisweb.mixins import AdminRequiredMixin
 from otisweb.utils import AuthHttpRequest
-from roster.models import Student
+from roster.models import ENABLED_STANDINGS, Student
 
 from .forms import CatalogFilterForm, CheckStampForm
 from .models import Unit, UnitGroup
@@ -244,11 +244,9 @@ def permitted(unit: Unit, request: HttpRequest, asking_solution: bool) -> bool:
             unlocked_units=unit,
             semester__active=False,
         ).exists()
-        or Student.objects.filter(
-            user=request.user,
-            unlocked_units=unit,
-            enabled=False,
-        ).exists()
+        or Student.objects.filter(user=request.user, unlocked_units=unit)
+        .exclude(standing__in=ENABLED_STANDINGS)
+        .exists()
     ):
         return True
     return False

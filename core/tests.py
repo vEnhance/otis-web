@@ -26,6 +26,7 @@ from core.factories import (
     mock_pdf,
 )
 from core.models import Semester
+from core.templatetags.otis_extras import standing_row_class
 from core.utils import CACHE_MAX_AGE_SECONDS
 from core.watermark import (
     get_corner_text,
@@ -36,6 +37,7 @@ from core.watermark import (
 from dashboard.factories import PSetFactory
 from otisweb_testsuite import UniqueFaker
 from roster.factories import StudentFactory
+from roster.models import StudentStanding
 from rpg.factories import BonusLevelFactory
 
 
@@ -911,3 +913,23 @@ def test_timestamps_use_the_viewers_timezone(otis):
 
     resp = otis.get_ok("user-info", target.pk)
     otis.assert_has(resp, "2026-09-13 07:30 PST")
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    ("standing", "staff_class", "student_class"),
+    [
+        (StudentStanding.GOOD, "", ""),
+        (StudentStanding.NEWBORN, "table-success", "table-success"),
+        (StudentStanding.PROBATION, "table-warning", ""),
+        (StudentStanding.SUSPENDED, "table-danger", "table-danger"),
+        (StudentStanding.FAKE, "table-info", "table-info"),
+        (StudentStanding.DROPPED, "table-dark", "table-dark"),
+    ],
+)
+def test_standing_row_class(
+    standing: StudentStanding, staff_class: str, student_class: str
+) -> None:
+    student = StudentFactory.create(standing=standing)
+    assert standing_row_class(student, UserFactory.create(is_staff=True)) == staff_class
+    assert standing_row_class(student, UserFactory.create()) == student_class

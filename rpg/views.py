@@ -25,7 +25,7 @@ from sql_util.utils import Exists, SubqueryCount
 from otisweb.decorators import is_verified, staff_required, verified_required
 from otisweb.mixins import AdminRequiredMixin, StaffRequiredMixin, VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest, get_days_since
-from roster.models import Student
+from roster.models import ENABLED_STANDINGS, LEGIT_STANDINGS, Student
 from roster.utils import get_student_by_pk
 from rpg.models import VulnerabilityRecord
 
@@ -248,7 +248,9 @@ class FoundList(LoginRequiredMixin, StaffRequiredMixin, ListView[AchievementUnlo
 
 @staff_required
 def leaderboard(request: AuthHttpRequest) -> HttpResponse:
-    students = Student.objects.filter(semester__active=True, enabled=True, legit=True)
+    students = Student.objects.filter(
+        semester__active=True, standing__in=ENABLED_STANDINGS & LEGIT_STANDINGS
+    )
     rows = get_student_rows(students)
     rows.sort(
         key=lambda row: (
