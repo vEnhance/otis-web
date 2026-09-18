@@ -4,13 +4,6 @@
   Announcements
 {% endblock title %}
 {% block layout-content %}
-  {% if request.user.is_superuser %}
-    <p>
-      <a class="btn btn-primary"
-         href="{% url "admin:dashboard_announcement_add" %}">Add announcement</a>
-    </p>
-    <hr />
-  {% endif %}
   <h2>Current year</h2>
   {% if current_announcements %}
     <ul>
