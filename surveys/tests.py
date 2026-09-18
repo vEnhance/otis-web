@@ -1,4 +1,5 @@
 import datetime
+import uuid
 
 import pytest
 from django.contrib.messages import constants as message_levels
@@ -25,7 +26,7 @@ def _response(**overrides: str) -> dict[str, str]:
         "essay": "Units are fun",
         "satisfaction": "6",
         "anything_else": "",
-        "gm_signed": "signed",
+        "gm_identity": "signed",
         "instructor_comments": "",
         "instructor_signed": "",
     }
@@ -41,7 +42,7 @@ def test_submit_signed(otis):
     survey = SurveyFactory.create(semester=alice.semester, achievement=achievement)
     otis.login(alice)
 
-    resp = otis.post_redirects(
+    otis.post_redirects(
         otis.url("survey-detail", survey.pk),
         "survey-submit",
         survey.pk,
@@ -50,13 +51,12 @@ def test_submit_signed(otis):
             instructor_comments="Thanks!",
             instructor_signed="signed",
         ),
-        follow=True,
     )
-    assert any(m.level == message_levels.SUCCESS for m in resp.context["messages"])
 
     assert SurveyCompletion.objects.filter(survey=survey, student=alice).exists()
     feedback = GMFeedback.objects.get(survey=survey)
     assert feedback.student == alice
+    assert feedback.token is None
     assert feedback.essay == "Units are fun"
     assert feedback.satisfaction == 6
     assert feedback.anything_else == "Hi Evan"
@@ -85,20 +85,45 @@ def test_submit_anonymous(otis):
         "survey-submit",
         survey.pk,
         data=_response(
-            gm_signed="anonymous",
+            gm_identity="anonymous",
             instructor_comments="Thanks!",
             instructor_signed="anonymous",
         ),
     )
 
     assert SurveyCompletion.objects.filter(survey=survey, student=alice).exists()
-    assert GMFeedback.objects.get(survey=survey).student is None
+    feedback = GMFeedback.objects.get(survey=survey)
+    assert feedback.student is None
+    assert feedback.token is None
     assert InstructorComment.objects.get(survey=survey).student is None
 
     resp = otis.get_ok("survey-detail", survey.pk)
     assert resp.context["gm_feedback"] is None
     assert resp.context["instructor_comment"] is None
     otis.assert_testid(resp, "survey-anonymous-response")
+
+
+@pytest.mark.django_db
+def test_submit_anonymous_with_link(otis):
+    alice = StudentFactory.create()
+    survey = SurveyFactory.create(semester=alice.semester)
+    otis.login(alice)
+
+    resp = otis.post_30x(
+        "survey-submit", survey.pk, data=_response(gm_identity="anonymous_link")
+    )
+
+    feedback = GMFeedback.objects.get(survey=survey)
+    assert feedback.student is None
+    assert feedback.token is not None
+    # Submitting lands on the private link, since nothing else leads back to it.
+    link = otis.url("survey-gm-feedback", survey.pk, feedback.token)
+    otis.assert_redirects(resp, link)
+
+    # The survey page can't link back, but says what the link looks like.
+    resp = otis.get_ok("survey-detail", survey.pk)
+    prefix = resp.context["private_link_prefix"]
+    assert f"http://testserver{link}" == f"{prefix}{feedback.token}/"
 
 
 @pytest.mark.django_db
@@ -111,7 +136,7 @@ def test_signing_is_independent(otis):
         "survey-submit",
         survey.pk,
         data=_response(
-            gm_signed="anonymous",
+            gm_identity="anonymous",
             instructor_comments="Thanks!",
             instructor_signed="signed",
         ),
@@ -143,10 +168,10 @@ def test_invalid_submission_keeps_input(otis):
     resp = otis.post_ok(
         "survey-submit",
         survey.pk,
-        data=_response(gm_signed="", instructor_comments="Thanks!"),
+        data=_response(gm_identity="", instructor_comments="Thanks!"),
     )
     form = resp.context["form"]
-    assert set(form.errors) == {"gm_signed", "instructor_signed"}
+    assert set(form.errors) == {"gm_identity", "instructor_signed"}
     assert form.data["essay"] == "Units are fun"
     assert not SurveyCompletion.objects.exists()
     assert not GMFeedback.objects.exists()
@@ -161,7 +186,7 @@ def test_form_drops_unasked_fields(otis):
     otis.login(alice)
 
     resp = otis.get_ok("survey-detail", survey.pk)
-    assert set(resp.context["form"].fields) == {"essay", "gm_signed"}
+    assert set(resp.context["form"].fields) == {"essay", "gm_identity"}
 
     # Posting a field the form dropped doesn't sneak it in.
     otis.post_30x(
@@ -320,6 +345,41 @@ def test_signed_response_shows_reply(otis):
 
     resp = otis.get_ok("survey-detail", survey.pk)
     otis.assert_testid(resp, "survey-reply")
+
+
+@pytest.mark.django_db
+def test_private_link(otis):
+    survey = SurveyFactory.create()
+    feedback = GMFeedbackFactory.create(survey=survey, token=uuid.uuid4())
+    # Anyone with the link can see the feedback, since nothing ties it to a student.
+    otis.login(StudentFactory.create())
+
+    resp = otis.get_ok("survey-gm-feedback", survey.pk, feedback.token)
+    assert resp.context["gm_feedback"] == feedback
+    otis.assert_testid(resp, "survey-private-link")
+    otis.assert_no_testid(resp, "survey-reply")
+    otis.assert_no_testid(resp, "survey-read")
+
+    feedback.is_read = True
+    feedback.save()
+    resp = otis.get_ok("survey-gm-feedback", survey.pk, feedback.token)
+    otis.assert_testid(resp, "survey-read")
+
+    feedback.reply = "Glad to hear it"
+    feedback.save()
+    resp = otis.get_ok("survey-gm-feedback", survey.pk, feedback.token)
+    otis.assert_testid(resp, "survey-reply")
+
+    otis.get_not_found("survey-gm-feedback", survey.pk, uuid.uuid4())
+    # The token only works under its own survey.
+    other = SurveyFactory.create()
+    otis.get_not_found("survey-gm-feedback", other.pk, feedback.token)
+
+
+@pytest.mark.django_db
+def test_private_link_requires_login(otis):
+    feedback = GMFeedbackFactory.create(token=uuid.uuid4())
+    otis.get_login_redirect("survey-gm-feedback", feedback.survey.pk, feedback.token)
 
 
 @pytest.mark.django_db

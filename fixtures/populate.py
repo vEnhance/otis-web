@@ -14,6 +14,7 @@ import math
 import os
 import random
 import sys
+import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -100,6 +101,7 @@ P_MARKET_GUESS = 0.8  # chance a guessing student guesses on a given market
 P_ASSISTANT = 0.1  # chance a student is assigned an instructor
 P_SURVEY = 0.7  # chance a student submits a survey
 P_SURVEY_SIGNED = 0.5  # chance a submission is signed rather than anonymous
+P_SURVEY_LINK = 0.5  # chance an anonymous submission asks for a private link
 P_SURVEY_INSTRUCTOR = 0.6  # chance a student with an instructor comments on them
 P_SURVEY_READ = 0.5  # chance Evan has read a given piece of feedback
 P_SURVEY_REPLY = 0.5  # chance Evan replied to signed feedback he read
@@ -663,10 +665,12 @@ def create_survey(semester: Semester, students: list[Student]):
         SurveyCompletionFactory.create(survey=survey, student=student)
         signed = random.random() < P_SURVEY_SIGNED
         is_read = random.random() < P_SURVEY_READ
-        replied = signed and is_read and random.random() < P_SURVEY_REPLY
+        linked = not signed and random.random() < P_SURVEY_LINK
+        replied = (signed or linked) and is_read and random.random() < P_SURVEY_REPLY
         GMFeedbackFactory.create(
             survey=survey,
             student=student if signed else None,
+            token=uuid.uuid4() if linked else None,
             satisfaction=random.choice((None, *range(3, 8))),
             anything_else=random.choice(("", "Thanks for running OTIS!")),
             is_read=is_read,

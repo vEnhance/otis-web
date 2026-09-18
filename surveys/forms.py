@@ -9,6 +9,7 @@ from surveys.models import Survey
 
 SIGNED = "signed"
 ANONYMOUS = "anonymous"
+ANONYMOUS_LINK = "anonymous_link"
 
 
 class SatisfactionScale(ChoiceWidget):
@@ -39,12 +40,18 @@ class SurveyForm(forms.Form):
         required=False,
         widget=forms.Textarea(attrs={"rows": 4}),
     )
-    gm_signed = forms.ChoiceField(
+    gm_identity = forms.ChoiceField(
         label="Sign your comments to Evan?",
-        help_text="If you sign your comments, Evan will see your name and be able to reply.",
         choices=(
-            (SIGNED, "Sign with my name"),
-            (ANONYMOUS, "Submit anonymously"),
+            (
+                SIGNED,
+                "Sign with my name. Any reply from Evan will show up on this page.",
+            ),
+            (
+                ANONYMOUS_LINK,
+                "Submit anonymously, but get a private link to see any replies. I'll need to save this link myself.",
+            ),
+            (ANONYMOUS, "Submit anonymously, with no way to see any replies."),
         ),
         widget=forms.RadioSelect,
     )
@@ -54,10 +61,9 @@ class SurveyForm(forms.Form):
     )
     instructor_signed = forms.ChoiceField(
         label="Sign your comments to your instructor?",
-        help_text="If you sign your comments, your instructor will see your name.",
         choices=(
-            (SIGNED, "Sign with my name"),
-            (ANONYMOUS, "Submit anonymously"),
+            (SIGNED, "Sign with my name."),
+            (ANONYMOUS, "Submit anonymously."),
         ),
         required=False,
         widget=forms.RadioSelect,

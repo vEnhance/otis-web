@@ -1,0 +1,36 @@
+{% load otis_extras %}
+<h2>Your feedback</h2>
+<div class="card mb-3">
+  <div class="card-header">Free comments</div>
+  <div class="card-body">
+    {{ gm_feedback.essay|linebreaks }}
+    {% if gm_feedback.is_read %}
+      <div class="text-end">
+        <span class="badge rounded-pill text-bg-light border"
+              title="Evan has read your feedback"
+              data-testid="survey-read"><span class="emoji-text">👍</span> Evan</span>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% if gm_feedback.satisfaction is not None %}
+  <div class="card mb-3">
+    <div class="card-header">{{ survey.satisfaction_prompt }}</div>
+    <div class="card-body">{{ gm_feedback.satisfaction }} / 7</div>
+  </div>
+{% endif %}
+{% if gm_feedback.anything_else %}
+  <div class="card mb-3">
+    <div class="card-header">{{ survey.anything_else_prompt }}</div>
+    <div class="card-body">{{ gm_feedback.anything_else|linebreaks }}</div>
+  </div>
+{% endif %}
+{% if gm_feedback.reply %}
+  <div class="card mb-3 border-primary" data-testid="survey-reply">
+    <div class="card-header">
+      Reply from Evan
+      {% if gm_feedback.replied_at %}({% timestamp gm_feedback.replied_at "time" %}){% endif %}
+    </div>
+    <div class="card-body">{{ gm_feedback.reply|linebreaks }}</div>
+  </div>
+{% endif %}

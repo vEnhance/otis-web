@@ -124,10 +124,16 @@ class GMFeedback(models.Model):
         help_text="Satisfaction from 0 to 7, if the survey asked",
     )
     anything_else = models.TextField(blank=True)
-    is_read = models.BooleanField(default=False)
-    reply = models.TextField(
-        blank=True, help_text="Reply shown to the student, if signed"
+    token = models.UUIDField(
+        null=True,
+        blank=True,
+        unique=True,
+        editable=False,
+        help_text="Secret in the private link to anonymous feedback and its reply, "
+        "if the student asked for one",
     )
+    is_read = models.BooleanField(default=False)
+    reply = models.TextField(blank=True, help_text="Reply shown to the student")
     replied_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:

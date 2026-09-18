@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+{% block title %}
+  {{ survey }}
+{% endblock title %}
+{% block layout-content %}
+  <p>
+    <a href="{% url "survey-list" %}">← Back to surveys</a>
+  </p>
+  <div class="alert alert-success">
+    If you don't have the diamond for this survey,
+    it'll be awarded automatically when the survey closes.
+  </div>
+  <div class="alert alert-warning" data-testid="survey-private-link">
+    <p>
+      You submitted your comments to Evan anonymously.
+      <strong>Save this link</strong>
+      if you want to see them again, or read any reply.
+    </p>
+    <p class="text-center mt-3 mb-0">
+      <a class="btn btn-secondary" href="{{ request.build_absolute_uri }}">
+        <span class="font-monospace text-break"><span class="emoji-text">🔗</span> {{ request.build_absolute_uri }}</span>
+      </a>
+    </p>
+  </div>
+  {% include "surveys/components/gm_feedback.html" %}
+{% endblock layout-content %}
