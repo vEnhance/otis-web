@@ -923,8 +923,8 @@ def test_timestamps_use_the_viewers_timezone(otis):
         (StudentStanding.NEWBORN, "table-success", "table-success"),
         (StudentStanding.PROBATION, "table-warning", ""),
         (StudentStanding.SUSPENDED, "table-danger", "table-danger"),
-        (StudentStanding.FAKE, "table-info", "table-info"),
-        (StudentStanding.DROPPED, "table-dark", "table-dark"),
+        (StudentStanding.FAKE, "table-primary", "table-primary"),
+        (StudentStanding.DROPPED, "table-info", "table-info"),
     ],
 )
 def test_standing_row_class(

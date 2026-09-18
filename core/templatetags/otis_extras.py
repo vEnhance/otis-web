@@ -67,8 +67,8 @@ STANDING_ROW_CLASSES = {
     StudentStanding.NEWBORN: "table-success",
     StudentStanding.PROBATION: "table-warning",
     StudentStanding.SUSPENDED: "table-danger",
-    StudentStanding.FAKE: "table-info",
-    StudentStanding.DROPPED: "table-dark",
+    StudentStanding.FAKE: "table-primary",
+    StudentStanding.DROPPED: "table-info",
 }
 
 
