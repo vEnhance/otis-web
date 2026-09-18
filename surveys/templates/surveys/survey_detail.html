@@ -19,32 +19,31 @@
     <div class="survey-form">{% for field in form.visible_fields %}{{ field|as_crispy_field }}{% endfor %}</div>
   {% elif completed %}
     {% if gm_feedback %}
-      <div class="alert alert-success" data-testid="survey-signed-response">
-        <p>
-          You submitted this survey and signed your name.
-          Your response is shown below.
-        </p>
-        <p>
-          If you don't have the diamond for this survey,
-          it'll be awarded automatically when the survey closes.
-        </p>
-      </div>
+      <p data-testid="survey-signed-response">
+        You submitted this survey!
+        If you don't have the diamond for this survey,
+        it'll be awarded automatically when the survey closes.
+      </p>
       {% include "surveys/components/gm_feedback.html" %}
     {% else %}
-      <div class="alert alert-success" data-testid="survey-anonymous-response">
+      <div data-testid="survey-anonymous-response">
+        <h2>Survey submitted!</h2>
         <p>
-          You submitted this survey.
-          Your comments to Evan were anonymous, so they can't be shown here.
-        </p>
-        <p>
-          If you have a private link,
-          use it to see your responses, and any reply.
-          It starts with <code>{{ private_link_prefix }}</code>,
-          so you may be able to find it in your browser history.
-        </p>
-        <p>
+          You submitted this survey already.
           If you don't have the diamond for this survey,
           it'll be awarded automatically when the survey closes.
+        </p>
+        <h3>Retrieving your response</h3>
+        <p>
+          Your comments to Evan were anonymous,
+          so there is nothing to tie them to your OTIS-WEB account.
+          OTIS-WEB server only remembers that you submitted the survey,
+          and can't identify which response came from you.
+        </p>
+        <p>
+          If you requested a link, you can use that to fetch your response.
+          It starts with <code>{{ private_link_prefix }}</code>,
+          so you may be able to find it in your browser history.
         </p>
       </div>
     {% endif %}
@@ -69,8 +68,6 @@
       {% include "otisweb/components/generic_form.html" with target=submit_url submit_name="Submit survey" %}
     </div>
   {% else %}
-    <div class="alert alert-secondary" data-testid="survey-not-open">
-      <p class="mb-0">This survey isn't accepting responses right now.</p>
-    </div>
+    <p data-testid="survey-not-open">This survey isn't accepting responses right now.</p>
   {% endif %}
 {% endblock layout-content %}
