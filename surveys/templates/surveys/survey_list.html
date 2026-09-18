@@ -37,7 +37,7 @@
       </ul>
       <div class="d-flex flex-wrap gap-2">
         {% if row.is_student %}
-          <a class="btn btn-primary"
+          <a class="btn {% if row.completed or row.status == "open" %}btn-primary{% else %}btn-outline-primary{% endif %}"
              href="{% url "survey-detail" row.survey.pk %}"
              data-testid="survey-open-{{ row.survey.pk }}">
             {% if row.completed %}
