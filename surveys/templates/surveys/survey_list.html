@@ -21,8 +21,18 @@
       <ul>
         <li>Opens: {% timestamp row.survey.opens_at "time" %}</li>
         <li>Deadline: {% timestamp row.survey.closes_at "time" %}</li>
+        {% if request.user.is_superuser or row.is_instructor %}
+          <li>
+            <a href="{% url "survey-detail" row.survey.pk %}"
+               data-testid="survey-preview-{{ row.survey.pk }}">Preview survey (as staff)</a>
+          </li>
+        {% endif %}
         {% if request.user.is_superuser %}
-          <li>{{ row.survey.num_completions }} submitted</li>
+          <li>
+            <a href="{% url "admin:surveys_survey_change" row.survey.pk %}"
+               data-testid="survey-edit-{{ row.survey.pk }}">Edit survey in Django admin</a>
+          </li>
+          <li>{{ row.survey.num_completions }} responses submitted</li>
         {% endif %}
       </ul>
       <div class="d-flex flex-wrap gap-2">
@@ -38,15 +48,8 @@
               View survey
             {% endif %}
           </a>
-        {% elif request.user.is_superuser or row.is_instructor %}
-          <a class="btn btn-primary"
-             href="{% url "survey-detail" row.survey.pk %}"
-             data-testid="survey-preview-{{ row.survey.pk }}">Preview</a>
         {% endif %}
         {% if request.user.is_superuser %}
-          <a class="btn btn-secondary"
-             href="{% url "admin:surveys_survey_change" row.survey.pk %}"
-             data-testid="survey-edit-{{ row.survey.pk }}">Edit</a>
           <a class="btn btn-info"
              href="{% url "survey-gm-feedback-inbox" row.survey.pk %}"
              data-testid="survey-inbox-{{ row.survey.pk }}">
@@ -70,6 +73,9 @@
         {% endif %}
       </div>
     </div>
+    {% if not forloop.last %}
+      <hr />
+    {% endif %}
   {% empty %}
     <p>There are no surveys for you yet.</p>
   {% endfor %}
