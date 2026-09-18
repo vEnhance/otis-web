@@ -64,13 +64,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterModelOptions(
             name="student",
-            options={
-                "ordering": (
-                    "semester",
-                    models.Case(models.When(standing="STND_FAKE", then=1), default=0),
-                    "user__first_name",
-                    "user__last_name",
-                )
-            },
+            options={"ordering": ("semester", "user__first_name", "user__last_name")},
         ),
     ]

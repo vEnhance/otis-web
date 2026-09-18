@@ -177,8 +177,6 @@ class Student(models.Model):
         )
         ordering = (
             "semester",
-            # testing accounts sort after the real students
-            models.Case(models.When(standing=StudentStanding.FAKE, then=1), default=0),
             "user__first_name",
             "user__last_name",
         )
