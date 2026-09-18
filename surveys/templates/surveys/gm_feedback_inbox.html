@@ -1,0 +1,95 @@
+{% extends "layout.html" %}
+{% load otis_extras django_bootstrap5 %}
+{% block title %}
+  {{ survey }}: feedback
+{% endblock title %}
+{% block layout-content %}
+  <div class="survey-inbox">
+    {% include "surveys/components/inbox_nav.html" %}
+    {% for feedback in page_obj %}
+      <div class="survey-card card mb-4 {% if feedback.is_read %}border-secondary{% else %}border-primary{% endif %}"
+           data-testid="feedback-{{ feedback.pk }}">
+        <div class="card-header d-flex justify-content-between align-items-center gap-2">
+          <span class="fw-bold">
+            #{{ feedback.pk }}:
+            {% if feedback.student %}
+              <a href="{% url "portal" feedback.student.pk %}">{{ feedback.student.name }}</a>
+            {% elif feedback.token %}
+              Anonymous, with private link
+            {% else %}
+              Anonymous, can't see replies
+            {% endif %}
+          </span>
+          <span class="d-flex align-items-center gap-1 text-nowrap">
+            {% if feedback.satisfaction is not None %}
+              <span class="badge border bg-light text-dark"
+                    title="Satisfaction"
+                    data-testid="feedback-satisfaction">{{ feedback.satisfaction_emoji }} {{ feedback.satisfaction }} / 7</span>
+            {% endif %}
+            {% if feedback.reply %}
+              <span class="badge bg-success">Replied</span>
+            {% elif feedback.is_read %}
+              <span class="badge bg-secondary">Read</span>
+            {% else %}
+              <span class="badge bg-primary">Unread</span>
+            {% endif %}
+          </span>
+        </div>
+        <div class="card-body">
+          {{ feedback.essay|linebreaks }}
+          {% if feedback.anything_else %}
+            <hr />
+            <p class="fw-bold">{{ survey.anything_else_prompt }}</p>
+            {{ feedback.anything_else|linebreaks }}
+          {% endif %}
+        </div>
+        <div class="card-footer">
+          <form method="post"
+                action="{% url "survey-gm-feedback-respond" survey.pk feedback.pk %}">
+            {% include "surveys/components/inbox_back.html" %}
+            {% if feedback.student or feedback.token %}
+              <textarea class="form-control mb-2"
+                        name="reply"
+                        rows="3"
+                        placeholder="Reply shown to the student"
+                        aria-label="Reply">{{ feedback.reply }}</textarea>
+            {% endif %}
+            <div class="d-flex gap-2">
+              {% if feedback.student or feedback.token %}
+                <button type="submit"
+                        name="action"
+                        value="reply"
+                        class="btn btn-sm btn-primary">
+                  {% if feedback.reply %}
+                    Edit reply
+                  {% else %}
+                    Reply
+                  {% endif %}
+                </button>
+              {% endif %}
+              {% if feedback.is_read %}
+                <button type="submit"
+                        name="action"
+                        value="unread"
+                        class="btn btn-sm btn-outline-secondary">Mark unread</button>
+              {% else %}
+                <button type="submit"
+                        name="action"
+                        value="read"
+                        class="btn btn-sm btn-outline-secondary">Mark read</button>
+              {% endif %}
+              {% if feedback.replied_at %}
+                <p class="small text-muted my-0">Replied {% timestamp feedback.replied_at "time" %}</p>
+              {% endif %}
+            </div>
+          </form>
+        </div>
+      </div>
+    {% empty %}
+      <p class="fw-bold">No feedback here.</p>
+    {% endfor %}
+    {% if page_obj.has_other_pages %}
+      {% bootstrap_pagination page_obj justify_content="center" extra=inbox_params %}
+    {% endif %}
+  </div>
+{% endblock layout-content %}

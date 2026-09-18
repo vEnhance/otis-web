@@ -17,6 +17,7 @@ from .factories import (
     SurveyFactory,
 )
 from .models import GMFeedback, InstructorComment, SurveyCompletion
+from .views import RESPONSES_PER_PAGE
 
 UTC = datetime.UTC
 
@@ -278,15 +279,20 @@ def test_other_semester_cannot_submit(otis):
 
 
 @pytest.mark.django_db
-def test_staff_cannot_submit_for_student(otis):
+def test_instructor_preview(otis):
     assistant = AssistantFactory.create()
     alice = StudentFactory.create(assistant=assistant)
     survey = SurveyFactory.create(semester=alice.semester)
     otis.login(assistant)
 
-    otis.get_denied("survey-detail", survey.pk)
+    resp = otis.get_ok("survey-detail", survey.pk)
+    assert resp.context["preview"]
     otis.post_denied("survey-submit", survey.pk, data=_response())
     assert not GMFeedback.objects.exists()
+
+    # Instructing in another semester doesn't count.
+    otis.login(AssistantFactory.create())
+    otis.get_denied("survey-detail", survey.pk)
 
 
 @pytest.mark.django_db
@@ -454,3 +460,250 @@ def test_admin_pages(otis):
     )
     assert resp.context["cl"].result_count == 1
     otis.get_ok("admin:surveys_instructorcomment_changelist")
+
+
+@pytest.mark.django_db
+def test_survey_list_instructor(otis):
+    assistant = AssistantFactory.create()
+    alice = StudentFactory.create(assistant=assistant)
+    at = datetime.datetime
+    upcoming = SurveyFactory.create(
+        semester=alice.semester,
+        opens_at=at(2021, 1, 1, tzinfo=UTC),
+        closes_at=at(2021, 2, 1, tzinfo=UTC),
+    )
+    SurveyFactory.create()  # another semester
+    InstructorCommentFactory.create(survey=upcoming, assistant=assistant)
+    InstructorCommentFactory.create(survey=upcoming, assistant=assistant, is_read=True)
+    InstructorCommentFactory.create(survey=upcoming)  # someone else's
+    otis.login(assistant)
+
+    with freeze_time("2020-09-15", tz_offset=0):
+        resp = otis.get_ok("survey-list")
+    (row,) = resp.context["rows"]
+    assert row["survey"] == upcoming
+    assert row["status"] == "upcoming"
+    assert row["is_instructor"]
+    assert not row["is_student"]
+    assert row["survey"].num_unread_comments == 1
+    otis.assert_testid(resp, f"survey-preview-{upcoming.pk}")
+    otis.assert_testid(resp, f"survey-comments-{upcoming.pk}")
+    otis.assert_no_testid(resp, f"survey-inbox-{upcoming.pk}")
+    otis.assert_no_testid(resp, f"survey-edit-{upcoming.pk}")
+
+
+@pytest.mark.django_db
+def test_survey_list_superuser_buttons(otis):
+    survey = SurveyFactory.create()
+    SurveyCompletionFactory.create(survey=survey)
+    GMFeedbackFactory.create(survey=survey)
+    GMFeedbackFactory.create(survey=survey, is_read=True)
+    otis.login(UserFactory.create(is_staff=True, is_superuser=True))
+
+    resp = otis.get_ok("survey-list")
+    (row,) = resp.context["rows"]
+    assert row["survey"].num_completions == 1
+    assert row["survey"].num_unread_feedback == 1
+    for button in ("preview", "edit", "inbox"):
+        otis.assert_testid(resp, f"survey-{button}-{survey.pk}")
+    otis.assert_no_testid(resp, f"survey-comments-{survey.pk}")
+
+
+@pytest.mark.django_db
+def test_gm_feedback_inbox(otis):
+    survey = SurveyFactory.create()
+    unread = GMFeedbackFactory.create(survey=survey)
+    read = GMFeedbackFactory.create(survey=survey, is_read=True)
+    later = GMFeedbackFactory.create(survey=survey)
+    GMFeedbackFactory.create()  # another survey
+    otis.login(UserFactory.create(is_staff=True, is_superuser=True))
+
+    replied = GMFeedbackFactory.create(survey=survey, is_read=True, reply="Hi")
+
+    def shown(**data: str) -> list[GMFeedback]:
+        resp = otis.get_ok("survey-gm-feedback-inbox", survey.pk, data=data)
+        return list(resp.context["page_obj"])
+
+    assert shown() == [unread, read, later, replied]
+    assert shown(status="unread") == [unread, later]
+    assert shown(status="read") == [read, replied]
+    assert shown(status="replied") == [replied]
+    assert shown(status="unreplied") == [unread, read, later]
+    # A bad filter falls back to all, and a page past the end to the last one.
+    assert shown(status="x", page="9") == [unread, read, later, replied]
+
+
+@pytest.mark.django_db
+def test_gm_feedback_inbox_is_superuser_only(otis):
+    alice = StudentFactory.create(assistant=AssistantFactory.create())
+    survey = SurveyFactory.create(semester=alice.semester)
+    feedback = GMFeedbackFactory.create(survey=survey, student=alice)
+    for user in (alice.user, alice.assistant.user):
+        otis.login(user)
+        otis.get_denied("survey-gm-feedback-inbox", survey.pk)
+        otis.post_denied(
+            "survey-gm-feedback-respond",
+            survey.pk,
+            feedback.pk,
+            data={"action": "reply", "reply": "Hi"},
+        )
+    feedback.refresh_from_db()
+    assert not feedback.is_read
+    assert feedback.reply == ""
+
+
+@pytest.mark.django_db
+def test_gm_feedback_respond(otis):
+    survey = SurveyFactory.create()
+    feedback = GMFeedbackFactory.create(survey=survey, student=StudentFactory.create())
+    otis.login(UserFactory.create(is_staff=True, is_superuser=True))
+
+    def respond(**data: str):
+        return otis.post_30x(
+            "survey-gm-feedback-respond", survey.pk, feedback.pk, data=data
+        )
+
+    # Viewing the inbox doesn't mark anything read.
+    otis.get_ok("survey-gm-feedback-inbox", survey.pk)
+    feedback.refresh_from_db()
+    assert not feedback.is_read
+
+    respond(action="read")
+    feedback.refresh_from_db()
+    assert feedback.is_read
+    respond(action="unread")
+    feedback.refresh_from_db()
+    assert not feedback.is_read
+
+    with freeze_time("2021-09-15", tz_offset=0):
+        resp = respond(action="reply", reply="  Thanks!  ", back_status="unread")
+    assert resp["Location"] == otis.url("survey-gm-feedback-inbox", survey.pk) + (
+        "?status=unread"
+    )
+    feedback.refresh_from_db()
+    assert feedback.is_read
+    assert feedback.reply == "Thanks!"
+    assert feedback.replied_at == datetime.datetime(2021, 9, 15, tzinfo=UTC)
+
+    # Resubmitting the same reply, as after marking unread, keeps its time.
+    respond(action="unread")
+    with freeze_time("2021-09-20", tz_offset=0):
+        respond(action="reply", reply="Thanks!")
+    feedback.refresh_from_db()
+    assert feedback.is_read
+    assert feedback.replied_at == datetime.datetime(2021, 9, 15, tzinfo=UTC)
+
+    respond(action="reply", reply="")
+    feedback.refresh_from_db()
+    assert feedback.reply == ""
+    assert feedback.replied_at is None
+
+    # The feedback only answers to its own survey.
+    otis.post_not_found(
+        "survey-gm-feedback-respond",
+        SurveyFactory.create().pk,
+        feedback.pk,
+        data={"action": "read"},
+    )
+    assert (
+        otis.get("survey-gm-feedback-respond", survey.pk, feedback.pk).status_code
+        == 405
+    )
+
+
+@pytest.mark.django_db
+def test_gm_feedback_respond_returns_to_page(otis):
+    survey = SurveyFactory.create()
+    feedbacks = GMFeedbackFactory.create_batch(RESPONSES_PER_PAGE + 1, survey=survey)
+    otis.login(UserFactory.create(is_staff=True, is_superuser=True))
+    inbox = otis.url("survey-gm-feedback-inbox", survey.pk)
+
+    otis.post_redirects(
+        f"{inbox}?status=unread&page=2",
+        "survey-gm-feedback-respond",
+        survey.pk,
+        feedbacks[-1].pk,
+        data={"action": "read", "back_status": "unread", "back_page": "2"},
+    )
+    # Page 2 is now empty under the unread filter, so it shows page 1.
+    resp = otis.get_ok(
+        "survey-gm-feedback-inbox", survey.pk, data={"status": "unread", "page": "2"}
+    )
+    assert resp.context["page_obj"].number == 1
+    # A forged return page can't point anywhere but the inbox.
+    otis.post_redirects(
+        inbox,
+        "survey-gm-feedback-respond",
+        survey.pk,
+        feedbacks[0].pk,
+        data={"action": "read", "back_status": "evil", "back_page": "x"},
+    )
+
+
+@pytest.mark.django_db
+def test_cannot_reply_to_unreachable_feedback(otis):
+    survey = SurveyFactory.create()
+    feedback = GMFeedbackFactory.create(survey=survey)  # anonymous, no link
+    otis.login(UserFactory.create(is_staff=True, is_superuser=True))
+
+    resp = otis.post_ok(
+        "survey-gm-feedback-respond",
+        survey.pk,
+        feedback.pk,
+        data={"action": "reply", "reply": "Hello?"},
+        follow=True,
+    )
+    assert any(m.level == message_levels.ERROR for m in resp.context["messages"])
+    feedback.refresh_from_db()
+    assert feedback.reply == ""
+    assert not feedback.is_read
+
+
+@pytest.mark.django_db
+def test_instructor_comment_inbox(otis):
+    assistant = AssistantFactory.create()
+    survey = SurveyFactory.create()
+    alice = StudentFactory.create(semester=survey.semester, assistant=assistant)
+    mine = InstructorCommentFactory.create(
+        survey=survey, assistant=assistant, student=alice
+    )
+    theirs = InstructorCommentFactory.create(survey=survey)
+    otis.login(assistant)
+
+    resp = otis.get_ok("survey-instructor-comment-inbox", survey.pk)
+    assert list(resp.context["page_obj"]) == [mine]
+
+    otis.post_redirects(
+        otis.url("survey-instructor-comment-inbox", survey.pk),
+        "survey-instructor-comment-mark",
+        survey.pk,
+        mine.pk,
+        data={"action": "read"},
+    )
+    mine.refresh_from_db()
+    assert mine.is_read
+
+    # Someone else's comments can't be touched.
+    otis.post_not_found(
+        "survey-instructor-comment-mark",
+        survey.pk,
+        theirs.pk,
+        data={"action": "read"},
+    )
+    theirs.refresh_from_db()
+    assert not theirs.is_read
+
+    # The student sees it was read.
+    SurveyCompletionFactory.create(survey=survey, student=alice)
+    otis.login(alice)
+    resp = otis.get_ok("survey-detail", survey.pk)
+    otis.assert_testid(resp, "survey-instructor-read")
+
+    # Students can't see the inbox at all.
+    otis.get_denied("survey-instructor-comment-inbox", survey.pk)
+
+
+def test_satisfaction_emoji():
+    emoji = [GMFeedback(satisfaction=n).satisfaction_emoji for n in range(8)]
+    assert emoji == ["😢"] * 3 + ["😐"] * 3 + ["🤩"] * 2
+    assert GMFeedback(satisfaction=None).satisfaction_emoji == ""

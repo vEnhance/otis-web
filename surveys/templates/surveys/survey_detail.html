@@ -51,7 +51,16 @@
     {% if instructor_comment %}
       <h2>Your comments to {{ instructor_comment.assistant }}</h2>
       <div class="card mb-3">
-        <div class="card-body">{{ instructor_comment.comments|linebreaks }}</div>
+        <div class="card-body">
+          {{ instructor_comment.comments|linebreaks }}
+          {% if instructor_comment.is_read %}
+            <div class="mt-3">
+              <span class="badge rounded-pill text-bg-light border"
+                    title="{{ instructor_comment.assistant }} has read your feedback"
+                    data-testid="survey-instructor-read"><span class="emoji-text">👍</span> {{ instructor_comment.assistant }}</span>
+            </div>
+          {% endif %}
+        </div>
       </div>
     {% endif %}
   {% elif form %}

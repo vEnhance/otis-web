@@ -49,6 +49,16 @@
       <em class="text-muted">OPAL hunt active!</em>
     </p>
   {% endfor %}
+  {% for survey in news.surveys %}
+    <p class="mt-3">
+      <span class="emoji-text">📝</span>
+      <b><a class="alert-link" href="{% url "survey-detail" survey.pk %}">{{ survey.name }}</a></b>
+      | {% timestamp survey.opens_at "relative" %}
+      <br />
+      <em class="text-muted">Survey open:
+      closes {% timestamp survey.closes_at "relative" %}</em>
+    </p>
+  {% endfor %}
   <form action="{% url "dismiss-news" student.pk %}" method="post">
     {% csrf_token %}
     <button type="submit" class="btn-close" aria-label="Dismiss news"></button>

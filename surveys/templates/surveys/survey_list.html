@@ -5,23 +5,73 @@
 {% endblock title %}
 {% block layout-content %}
   {% for row in rows %}
-    <p data-testid="survey-row-{{ row.survey.pk }}">
-      ‣
-      <b><a href="{% url "survey-detail" row.survey.pk %}">{{ row.survey }}</a></b>
-      {% if row.completed %}
-        <span class="badge bg-success">Submitted</span>
-      {% elif row.survey.is_open %}
-        <span class="badge bg-primary">Open</span>
-      {% endif %}
-      <br />
-      <small class="text-muted">
+    <div class="alert {% if row.status == "open" %}alert-success{% elif row.status == "upcoming" %}alert-info{% else %}alert-secondary{% endif %}"
+         data-testid="survey-row-{{ row.survey.pk }}">
+      <h2 class="alert-heading">
+        {{ row.survey }}
+        {% if row.completed %}
+          <span class="badge bg-success">Submitted</span>
+        {% elif row.status == "open" %}
+          <span class="badge bg-primary">Open</span>
+        {% elif row.status == "upcoming" %}
+          <span class="badge bg-info">Upcoming</span>
+        {% else %}
+          <span class="badge bg-secondary">Closed</span>
+        {% endif %}
+      </h2>
+      <p>
         Open from {% timestamp row.survey.opens_at "time" %}
         to {% timestamp row.survey.closes_at "time" %}
-      </small>
-      {% if request.user.is_superuser %}
-        <a href="{% url "admin:surveys_survey_change" row.survey.pk %}">(edit)</a>
-      {% endif %}
-    </p>
+        {% if request.user.is_superuser %}
+          <br />
+          {{ row.survey.num_completions }} submitted
+        {% endif %}
+      </p>
+      <div class="d-flex flex-wrap gap-2">
+        {% if row.is_student %}
+          <a class="btn btn-primary"
+             href="{% url "survey-detail" row.survey.pk %}"
+             data-testid="survey-open-{{ row.survey.pk }}">
+            {% if row.completed %}
+              View response
+            {% elif row.status == "open" %}
+              Take survey
+            {% else %}
+              View survey
+            {% endif %}
+          </a>
+        {% elif request.user.is_superuser or row.is_instructor %}
+          <a class="btn btn-primary"
+             href="{% url "survey-detail" row.survey.pk %}"
+             data-testid="survey-preview-{{ row.survey.pk }}">Preview</a>
+        {% endif %}
+        {% if request.user.is_superuser %}
+          <a class="btn btn-secondary"
+             href="{% url "admin:surveys_survey_change" row.survey.pk %}"
+             data-testid="survey-edit-{{ row.survey.pk }}">Edit</a>
+          <a class="btn btn-info"
+             href="{% url "survey-gm-feedback-inbox" row.survey.pk %}"
+             data-testid="survey-inbox-{{ row.survey.pk }}">
+            Responses
+            {% if row.survey.num_unread_feedback %}<span class="badge bg-danger">{{ row.survey.num_unread_feedback }}</span>{% endif %}
+          </a>
+        {% endif %}
+        {% if row.is_instructor and not row.is_student %}
+          {% if not request.user.is_superuser or row.survey.num_comments %}
+            <a class="btn btn-info"
+               href="{% url "survey-instructor-comment-inbox" row.survey.pk %}"
+               data-testid="survey-comments-{{ row.survey.pk }}">
+              {% if request.user.is_superuser %}
+                Comments to you
+              {% else %}
+                Responses
+              {% endif %}
+              {% if row.survey.num_unread_comments %}<span class="badge bg-danger">{{ row.survey.num_unread_comments }}</span>{% endif %}
+            </a>
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
   {% empty %}
     <p>There are no surveys for you yet.</p>
   {% endfor %}

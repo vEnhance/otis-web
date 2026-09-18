@@ -11,6 +11,7 @@ from hanabi.models import HanabiContest
 from markets.models import Market
 from opal.models import OpalHunt
 from roster.models import Student
+from surveys.models import Survey
 
 
 def pset_subquery(student: Student) -> Exists:
@@ -42,6 +43,7 @@ class NewsDict(TypedDict):
     markets: QuerySet[Market]
     hanabis: QuerySet[HanabiContest]
     opals: QuerySet[OpalHunt]
+    surveys: QuerySet[Survey]
 
 
 def get_news(profile: UserProfile, student: Student) -> NewsDict:
@@ -69,4 +71,10 @@ def get_news(profile: UserProfile, student: Student) -> NewsDict:
         ).filter(
             start_date__gte=timezone.now() - timedelta(days=270),
         ),
+        "surveys": Survey.objects.filter(
+            semester=student.semester,
+            opens_at__gte=profile.last_notif_dismiss,
+            opens_at__lte=timezone.now(),
+            closes_at__gt=timezone.now(),
+        ).exclude(surveycompletion__student=student),
     }

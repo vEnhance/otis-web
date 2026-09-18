@@ -505,8 +505,13 @@ table.otis-sortable th[aria-sort="descending"]::after {
 .survey-form #id_essay_helptext {
   margin: -0.5em 0;
 }
-.survey-form textarea {
+.survey-form textarea,
+.survey-card textarea {
   font-family: inherit;
+}
+/* room for the status dropdown to open when there's nothing listed */
+.survey-inbox {
+  min-height: 16rem;
 }
 .survey-scale {
   display: flex;
