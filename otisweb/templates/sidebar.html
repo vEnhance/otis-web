@@ -187,6 +187,18 @@
             <button class="pseudo-button" type="submit">Hijack {{ student.user.first_name }}</button>
           </form>
         </li>
+        {# Suspend or unsuspend student #}
+        <li>
+          <form action="{% url 'toggle-suspension' student.pk %}" method="post">
+            {% csrf_token %}
+            <button class="pseudo-button"
+                    type="submit"
+                    data-testid="toggle-suspension"
+                    onclick="return confirm('This will also {% if student.is_suspended %}reactivate{% else %}deactivate{% endif %} the Django account. Continue?')">
+              {% if student.is_suspended %}Unsuspend{% else %}Suspend{% endif %} {{ student.user.first_name }}
+            </button>
+          </form>
+        </li>
         {% if student.assistant %}
           {# Hijack assistant account #}
           <li>

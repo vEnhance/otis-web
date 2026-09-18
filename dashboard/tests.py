@@ -42,6 +42,7 @@ from roster.factories import (
     StudentFactory,
     StudentRegistrationFactory,
 )
+from roster.models import StudentStanding
 from rpg.factories import BonusLevelFactory
 from rpg.models import Level
 
@@ -130,6 +131,26 @@ def test_portal(otis):
     assert [row["unit"] for row in resp.context["curriculum"]] == [unit]
     assert list(resp.context["tests"]) == [test]
     assert list(resp.context["quizzes"]) == [quiz]
+
+
+@pytest.mark.django_db
+def test_portal_standing_alerts(otis):
+    alice = StudentFactory.create(standing=StudentStanding.SUSPENDED)
+    admin = UserFactory.create(is_staff=True, is_superuser=True)
+    otis.login(admin)
+    resp = otis.get_ok("portal", alice.pk)
+    otis.assert_testid(resp, "portal-suspended-alert")
+    otis.assert_no_testid(resp, "portal-probation-alert")
+
+    alice.standing = StudentStanding.PROBATION
+    alice.save()
+    otis.assert_testid(otis.get_ok("portal", alice.pk), "portal-probation-alert")
+
+    # a student on probation gets no hint of it
+    otis.login(alice)
+    resp = otis.get_ok("portal", alice.pk)
+    otis.assert_no_testid(resp, "portal-probation-alert")
+    otis.assert_no_testid(resp, "portal-suspended-alert")
 
 
 @pytest.mark.django_db
@@ -363,8 +384,7 @@ def test_submit_permissions(otis):
     with freeze_time("2021-07-30", tz_offset=0):
         otis.get_denied("submit-pset", alice.pk)
 
-    # unenabled
-    bob = StudentFactory.create(enabled=False)
+    bob = StudentFactory.create(standing=StudentStanding.DROPPED)
     otis.login(bob)
 
     otis.get_denied("submit-pset", bob.pk)

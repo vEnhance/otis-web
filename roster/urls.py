@@ -40,6 +40,11 @@ urlpatterns = [
     path(r"merge/", views.user_merge, name="user-merge"),
     path(r"ids/", views.student_ids, name="student-ids"),
     path(r"apply/<int:student_pk>/", views.apply_uuid_lookup, name="apply-uuid-lookup"),
+    path(
+        r"suspend/<int:student_pk>/",
+        views.toggle_suspension,
+        name="toggle-suspension",
+    ),
     path(r"ais/", views.AdList.as_view(), name="ad-list"),
     path(r"advertise/", views.AdUpdate.as_view(), name="ad-update"),
 ]

@@ -34,12 +34,15 @@ from roster.factories import (
     StudentRegistrationFactory,
 )
 from roster.models import (
+    ENABLED_STANDINGS,
+    LEGIT_STANDINGS,
     ApplyUUID,
     Assistant,
     Invoice,
     RegistrationContainer,
     Student,
     StudentRegistration,
+    StudentStanding,
     UnitPetition,
     build_student,
 )
@@ -598,7 +601,7 @@ def test_curriculum(otis) -> None:
 
 @pytest.mark.django_db
 def test_finalize(otis) -> None:
-    alice: Student = StudentFactory.create(newborn=True)
+    alice: Student = StudentFactory.create(standing=StudentStanding.NEWBORN)
     otis.login(alice)
     otis.assert_message(
         otis.post("finalize", alice.pk, data={"submit": True}, follow=True),
@@ -619,18 +622,22 @@ def test_finalize(otis) -> None:
 
 @pytest.mark.django_db
 def test_finalize_archived_semester(otis) -> None:
-    alice: Student = StudentFactory.create(newborn=True, semester__active=False)
+    alice: Student = StudentFactory.create(
+        standing=StudentStanding.NEWBORN, semester__active=False
+    )
     units: list[Unit] = UnitFactory.create_batch(5)
     alice.curriculum.set(units)
     otis.login(alice)
     otis.post_40x("finalize", alice.pk, data={})
     alice.refresh_from_db()
-    assert alice.newborn is True  # unchanged
+    assert alice.standing == StudentStanding.NEWBORN  # unchanged
 
 
 @pytest.mark.django_db
 def test_curriculum_archived_semester(otis) -> None:
-    alice: Student = StudentFactory.create(newborn=True, semester__active=False)
+    alice: Student = StudentFactory.create(
+        standing=StudentStanding.NEWBORN, semester__active=False
+    )
     unitgroups: list[UnitGroup] = UnitGroupFactory.create_batch(2)
     for unitgroup in unitgroups:
         for letter in "BDZ":
@@ -986,11 +993,11 @@ def test_petition(otis) -> None:
     otis.login(bob)
     otis.get_denied("petition", bob.pk)
 
-    carl: Student = StudentFactory.create(enabled=False)
+    carl: Student = StudentFactory.create(standing=StudentStanding.DROPPED)
     otis.login(carl)
     otis.get_denied("petition", carl.pk)
 
-    dave: Student = StudentFactory.create(newborn=True)
+    dave: Student = StudentFactory.create(standing=StudentStanding.NEWBORN)
     otis.login(dave)
     otis.get_denied("petition", dave.pk)
 
@@ -2320,3 +2327,74 @@ def test_apply_uuid_lookup(otis) -> None:
     # staff who aren't admins can't peek at applications
     otis.login(UserFactory.create(is_staff=True))
     otis.get_denied("apply-uuid-lookup", student.pk)
+
+
+@pytest.mark.django_db
+def test_toggle_suspension(otis) -> None:
+    alice: Student = StudentFactory.create()
+    otis.login(UserFactory.create(is_staff=True, is_superuser=True))
+
+    resp = otis.post("toggle-suspension", alice.pk, follow=True)
+    alice.refresh_from_db()
+    alice.user.refresh_from_db()
+    assert alice.standing == StudentStanding.SUSPENDED
+    assert alice.user.is_active is False
+    assert any(m.level == message_levels.SUCCESS for m in resp.context["messages"])
+
+    # unsuspending puts the student on probation and lets them log in again
+    otis.post("toggle-suspension", alice.pk)
+    alice.refresh_from_db()
+    alice.user.refresh_from_db()
+    assert alice.standing == StudentStanding.PROBATION
+    assert alice.user.is_active is True
+
+    otis.get_40x("toggle-suspension", alice.pk)
+
+    otis.login(UserFactory.create(is_staff=True))
+    otis.post_denied("toggle-suspension", alice.pk)
+    otis.login(alice)
+    otis.post_denied("toggle-suspension", alice.pk)
+    alice.refresh_from_db()
+    assert alice.standing == StudentStanding.PROBATION
+
+
+@pytest.mark.django_db
+def test_suspension_link_is_admin_only(otis) -> None:
+    alice: Student = StudentFactory.create()
+    otis.login(UserFactory.create(is_staff=True, is_superuser=True))
+    otis.assert_testid(otis.get_ok("portal", alice.pk), "toggle-suspension")
+    otis.login(alice)
+    otis.assert_no_testid(otis.get_ok("portal", alice.pk), "toggle-suspension")
+
+
+@pytest.mark.parametrize(
+    ("standing", "legit", "newborn", "enabled"),
+    [
+        (StudentStanding.GOOD, True, False, True),
+        (StudentStanding.NEWBORN, True, True, True),
+        (StudentStanding.PROBATION, True, False, True),
+        (StudentStanding.SUSPENDED, True, False, False),
+        (StudentStanding.FAKE, False, False, True),
+        (StudentStanding.DROPPED, True, False, False),
+    ],
+)
+def test_standing_booleans(
+    standing: StudentStanding, legit: bool, newborn: bool, enabled: bool
+) -> None:
+    student = Student(standing=standing)
+    assert student.legit is legit
+    assert student.newborn is newborn
+    assert student.enabled is enabled
+
+
+@pytest.mark.django_db
+def test_standing_filters_agree_with_booleans() -> None:
+    for standing in StudentStanding:
+        StudentFactory.create(standing=standing)
+    students = list(Student.objects.all())
+    assert set(Student.objects.filter(standing__in=LEGIT_STANDINGS)) == {
+        student for student in students if student.legit
+    }
+    assert set(Student.objects.filter(standing__in=ENABLED_STANDINGS)) == {
+        student for student in students if student.enabled
+    }

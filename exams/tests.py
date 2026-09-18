@@ -15,7 +15,7 @@ from exams.calculator import expr_compute
 from exams.factories import PracticeExamFactory, QuizFactory
 from exams.models import ExamAttempt, PracticeExam, expr_validator
 from roster.factories import StudentFactory
-from roster.models import Student
+from roster.models import Student, StudentStanding
 
 UTC = datetime.UTC
 
@@ -97,7 +97,7 @@ def exam_setup():
     )
     dead = StudentFactory.create(
         user__username="dead",
-        enabled=False,
+        standing=StudentStanding.DROPPED,
         semester=semester,
         user__first_name="Dead",
         user__last_name="Derp",

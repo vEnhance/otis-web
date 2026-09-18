@@ -29,6 +29,8 @@ from hanabi.models import HanabiContest, HanabiParticipation, HanabiPlayer, Hana
 from opal.models import OpalPuzzle, sha256_of
 from payments.models import Job
 from roster.models import (
+    ENABLED_STANDINGS,
+    LEGIT_STANDINGS,
     ApplyUUID,
     Invoice,
     Student,
@@ -105,8 +107,7 @@ class JSONData(TypedDict):
 PSET_VENUEQ_INIT_QUERYSET = PSet.objects.filter(
     status__in=("PA", "PR", "P"),
     student__semester__active=True,
-    student__legit=True,
-    student__enabled=True,
+    student__standing__in=ENABLED_STANDINGS & LEGIT_STANDINGS,
 ).annotate(
     num_accepted_all=SubqueryCount(
         "student__user__student__pset",
@@ -149,7 +150,7 @@ PSET_VENUEQ_INIT_KEYS = (
 PETITION_VENUEQ_INIT_QUERYSET = UnitPetition.objects.filter(
     status="PET_NEW",
     student__semester__active=True,
-    student__legit=True,
+    student__standing__in=LEGIT_STANDINGS,
 ).annotate(
     unlock_petition_count=SubqueryCount(
         "student__unitpetition",
@@ -273,7 +274,7 @@ def venueq_handler(action: str, data: JSONData) -> JsonResponse:
         for petition in UnitPetition.objects.filter(
             status="PET_NEW",
             student__semester__active=True,
-            student__legit=True,
+            student__standing__in=LEGIT_STANDINGS,
         ):
             petition.run_accept()
             n += 1
@@ -643,7 +644,7 @@ def email_handler(action: str, data: JSONData) -> JsonResponse:
                 Student.objects.filter(
                     semester__active=True,
                     user__profile__email_on_announcement=True,
-                    enabled=True,
+                    standing__in=ENABLED_STANDINGS,
                 ).values(
                     "user__first_name",
                     "user__last_name",

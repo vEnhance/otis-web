@@ -77,10 +77,13 @@ from .forms import (
     UserMergeForm,
 )
 from .models import (
+    ENABLED_STANDINGS,
+    LEGIT_STANDINGS,
     Invoice,
     RegistrationContainer,
     Student,
     StudentRegistration,
+    StudentStanding,
     UnitPetition,
     build_student,
 )
@@ -134,14 +137,13 @@ def curriculum(request: HttpRequest, student_pk: int) -> HttpResponse:
 def finalize(request: HttpRequest, student_pk: int) -> HttpResponse:
     if not request.method == "POST":
         raise PermissionDenied("Must use POST")
-    # Removes a newborn status, thus activating everything
     student = get_student_by_pk(request, student_pk)
     if student.newborn is not True:
         raise PermissionDenied("Not allowed to call finalize more than once.")
     elif student.semester.active is False:
         raise PermissionDenied("Not allowed to call finalize on a completed semester.")
     elif student.curriculum.count() > 0:
-        student.newborn = False
+        student.standing = StudentStanding.GOOD
         first_units = student.curriculum.all()[:3]
         student.unlocked_units.set(first_units)
         student.save()
@@ -229,7 +231,7 @@ def invoice(request: HttpRequest, student_pk: int | None = None) -> HttpResponse
 def master_schedule(request: HttpRequest) -> HttpResponse:
     student_names_and_unit_pks = (
         get_current_students()
-        .filter(legit=True)
+        .filter(standing__in=LEGIT_STANDINGS)
         .values("pk", "user__first_name", "user__last_name", "curriculum")
     )
     unit_to_student_dicts = collections.defaultdict(list)
@@ -639,7 +641,7 @@ def unlock_rest_of_mystery(request: HttpRequest, delta: int = 1) -> HttpResponse
 
 @admin_required
 def giga_chart(request: HttpRequest, format_as: str) -> HttpResponse:
-    queryset = Invoice.objects.filter(student__legit=True)
+    queryset = Invoice.objects.filter(student__standing__in=LEGIT_STANDINGS)
     queryset = queryset.filter(student__semester__active=True)
     queryset = queryset.select_related(
         "student__user",
@@ -663,8 +665,11 @@ def giga_chart(request: HttpRequest, format_as: str) -> HttpResponse:
         debt=Cast(F("owed") / (F("owed") + F("total_paid") + 1e-8), FloatField())
     )
 
+    queryset = queryset.annotate(
+        student_enabled=Q(student__standing__in=ENABLED_STANDINGS)
+    )
     queryset = queryset.order_by(
-        "student__enabled",
+        "student_enabled",
         "-forgive_date",
         "debt",
         "student__user__first_name",
@@ -771,7 +776,7 @@ class StudentAssistantList(StaffRequiredMixin, ListView[Student]):
         qs = Student.objects.filter(
             semester__active=True,
             assistant__isnull=False,
-            enabled=True,
+            standing__in=ENABLED_STANDINGS,
         )
         qs = qs.select_related("user", "assistant", "assistant__user")
         qs = qs.order_by("assistant__shortname", "user__first_name", "user__last_name")
@@ -999,6 +1004,35 @@ def apply_uuid_lookup(request: HttpRequest, student_pk: int) -> HttpResponse:
     if uuid is None:
         raise Http404("No application UUID is attached to this student")
     return HttpResponseRedirect(f"https://apply.evanchen.cc/{uuid}")
+
+
+@admin_required
+@require_POST
+def toggle_suspension(request: HttpRequest, student_pk: int) -> HttpResponse:
+    """Suspend a student, or lift the suspension of an already suspended one.
+
+    A suspension also deactivates the Django user, locking the account out of
+    the website entirely; lifting it puts the student back on probation.
+    """
+    student = get_object_or_404(Student.objects.select_related("user"), pk=student_pk)
+    if student.is_suspended:
+        student.standing = StudentStanding.PROBATION
+        student.user.is_active = True
+        summary = f"Unsuspended {student.name}, who is now on probation"
+    else:
+        student.standing = StudentStanding.SUSPENDED
+        student.user.is_active = False
+        summary = f"Suspended {student.name} and deactivated their account"
+    with atomic():
+        student.save()
+        student.user.save()
+    messages.success(request, f"{summary}.")
+    logger.log(
+        SUCCESS_LOG_LEVEL,
+        f"{summary} ({student.pk}).",
+        extra={"request": request},
+    )
+    return HttpResponseRedirect(reverse("portal", args=(student_pk,)))
 
 
 @login_required
