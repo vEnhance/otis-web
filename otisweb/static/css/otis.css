@@ -505,8 +505,45 @@ table.otis-sortable th[aria-sort="descending"]::after {
 .survey-form #id_essay_helptext {
   margin: -0.5em 0;
 }
-.survey-form textarea {
+.survey-form textarea,
+.survey-entry textarea {
   font-family: inherit;
+}
+/* room for the status dropdown to open when there's nothing listed */
+.survey-inbox {
+  min-height: 16rem;
+}
+/* An inbox entry is a heading and a blob of text, not a card: a rule between
+   entries is enough to separate them, and costs no vertical space. */
+.survey-entry + .survey-entry {
+  border-top: 1px solid #00005533;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+}
+.survey-entry h2 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.4rem;
+  margin-bottom: 0.5rem;
+}
+.survey-entry-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+/* The reply summary sits beside the read button until it's opened, at which
+   point the whole disclosure wraps onto its own full-width line. */
+.survey-entry-reply[open] {
+  flex-basis: 100%;
+}
+.survey-entry-reply > summary {
+  list-style: none;
+}
+.survey-entry-reply > summary::-webkit-details-marker {
+  display: none;
 }
 .survey-scale {
   display: flex;

@@ -142,6 +142,16 @@ class GMFeedback(models.Model):
     def __str__(self) -> str:
         return f"GM feedback for {self.survey}"
 
+    @property
+    def satisfaction_emoji(self) -> str:
+        if self.satisfaction is None:
+            return ""
+        if self.satisfaction <= 2:
+            return "😢"
+        if self.satisfaction <= 5:
+            return "😐"
+        return "🤩"
+
 
 class InstructorComment(models.Model):
     """Comments for the student's instructor."""

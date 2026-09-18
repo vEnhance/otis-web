@@ -1,0 +1,83 @@
+{% extends "layout.html" %}
+{% load otis_extras django_bootstrap5 %}
+{% block title %}
+  {{ survey }}: feedback
+{% endblock title %}
+{% block layout-content %}
+  <div class="survey-inbox">
+    {% include "surveys/components/inbox_nav.html" %}
+    {% for feedback in page_obj %}
+      <article class="survey-entry" data-testid="feedback-{{ feedback.pk }}">
+        <h1>
+          #{{ feedback.pk }}
+          {% if feedback.student %}
+            <a href="{% url "portal" feedback.student.pk %}">{{ feedback.student.name }}</a>
+          {% endif %}
+          {% if feedback.satisfaction is not None %}
+            <span class="badge border bg-light text-dark"
+                  title="Satisfaction"
+                  data-testid="feedback-satisfaction">{{ feedback.satisfaction_emoji }} {{ feedback.satisfaction }} / 7</span>
+          {% endif %}
+          {% if feedback.reply %}<span class="badge bg-success">Replied</span>{% endif %}
+        </h1>
+        {{ feedback.essay|linebreaks }}
+        {% if feedback.anything_else %}
+          <p class="fw-bold mb-0">{{ survey.anything_else_prompt }}</p>
+          {{ feedback.anything_else|linebreaks }}
+        {% endif %}
+        <form method="post"
+              class="survey-entry-actions"
+              action="{% url "survey-gm-feedback-respond" survey.pk feedback.pk %}">
+          {% include "surveys/components/inbox_back.html" %}
+          {% if feedback.is_read %}
+            <button type="submit"
+                    name="action"
+                    value="unread"
+                    title="Mark unread"
+                    class="btn btn-sm btn-secondary">
+              <span class="emoji-text">👍</span> Thanked!
+            </button>
+          {% else %}
+            <button type="submit"
+                    name="action"
+                    value="read"
+                    title="Mark read"
+                    class="btn btn-sm btn-outline-secondary">
+              <span class="emoji-text">👍</span> Mark read
+            </button>
+          {% endif %}
+          {% if feedback.student or feedback.token %}
+            <details class="survey-entry-reply">
+              <summary class="btn btn-sm btn-outline-primary">
+                {% if feedback.reply %}
+                  Edit reply
+                {% else %}
+                  Reply
+                {% endif %}
+              </summary>
+              <textarea class="form-control my-2"
+                        name="reply"
+                        rows="3"
+                        placeholder="Reply shown to the student"
+                        aria-label="Reply">{{ feedback.reply }}</textarea>
+              <button type="submit"
+                      name="action"
+                      value="reply"
+                      class="btn btn-sm btn-primary">Save reply</button>
+              {% if feedback.replied_at %}
+                <span class="small text-muted">Replied {% timestamp feedback.replied_at "time" %}</span>
+              {% endif %}
+            </details>
+          {% else %}
+            <button type="button" class="btn btn-sm btn-danger" disabled>Can't reply</button>
+          {% endif %}
+        </form>
+      </article>
+    {% empty %}
+      <p class="fw-bold">No feedback here.</p>
+    {% endfor %}
+    {% if page_obj.has_other_pages %}
+      {% bootstrap_pagination page_obj justify_content="center" extra=inbox_params %}
+    {% endif %}
+  </div>
+{% endblock layout-content %}

@@ -1,0 +1,22 @@
+<div class="mb-3 d-flex flex-wrap align-items-center gap-2">
+  <span class="dropdown d-inline-block">
+    <button type="button"
+            data-testid="inbox-status-filter"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+            title="Filter by whether it's been read"
+            class="btn btn-sm dropdown-toggle {% if status == "all" %}btn-outline-primary{% else %}btn-primary{% endif %}">{{ status_label }}</button>
+    <ul class="dropdown-menu">
+      {% for option in status_options %}
+        <li>
+          <a class="dropdown-item{% if option.selected %} active{% endif %}"
+             href="{{ inbox_url }}{% if option.params %}?{{ option.params }}{% endif %}">{{ option.label }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+  </span>
+  <span class="text-muted">{{ paginator.count }} shown</span>
+  <span class="ms-auto">
+    <a href="{% url "survey-list" %}" class="btn btn-sm btn-outline-info">All surveys</a>
+  </span>
+</div>

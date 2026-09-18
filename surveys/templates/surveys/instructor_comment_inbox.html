@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+{% load django_bootstrap5 %}
+{% block title %}
+  {{ survey }}: comments to you
+{% endblock title %}
+{% block layout-content %}
+  <div class="survey-inbox">
+    {% include "surveys/components/inbox_nav.html" %}
+    {% for comment in page_obj %}
+      <div class="card mb-4 {% if comment.is_read %}border-secondary{% else %}border-primary{% endif %}"
+           data-testid="comment-{{ comment.pk }}">
+        <div class="card-header d-flex justify-content-between align-items-center gap-2">
+          <span class="fw-bold">
+            {% if comment.student %}
+              {{ comment.student.name }}
+            {% else %}
+              Anonymous
+            {% endif %}
+          </span>
+          {% if comment.is_read %}
+            <span class="badge bg-secondary">Read</span>
+          {% else %}
+            <span class="badge bg-primary">Unread</span>
+          {% endif %}
+        </div>
+        <div class="card-body">{{ comment.comments|linebreaks }}</div>
+        <div class="card-footer">
+          <form method="post"
+                action="{% url "survey-instructor-comment-mark" survey.pk comment.pk %}">
+            {% include "surveys/components/inbox_back.html" %}
+            {% if comment.is_read %}
+              <button type="submit"
+                      name="action"
+                      value="unread"
+                      class="btn btn-sm btn-outline-secondary">Mark unread</button>
+            {% else %}
+              <button type="submit"
+                      name="action"
+                      value="read"
+                      class="btn btn-sm btn-outline-secondary">Mark read</button>
+            {% endif %}
+          </form>
+        </div>
+      </div>
+    {% empty %}
+      <p class="fw-bold">No comments here.</p>
+    {% endfor %}
+    {% if page_obj.has_other_pages %}
+      {% bootstrap_pagination page_obj justify_content="center" extra=inbox_params %}
+    {% endif %}
+  </div>
+{% endblock layout-content %}

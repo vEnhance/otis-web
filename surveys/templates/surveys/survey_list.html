@@ -5,23 +5,77 @@
 {% endblock title %}
 {% block layout-content %}
   {% for row in rows %}
-    <p data-testid="survey-row-{{ row.survey.pk }}">
-      ‣
-      <b><a href="{% url "survey-detail" row.survey.pk %}">{{ row.survey }}</a></b>
-      {% if row.completed %}
-        <span class="badge bg-success">Submitted</span>
-      {% elif row.survey.is_open %}
-        <span class="badge bg-primary">Open</span>
-      {% endif %}
-      <br />
-      <small class="text-muted">
-        Open from {% timestamp row.survey.opens_at "time" %}
-        to {% timestamp row.survey.closes_at "time" %}
-      </small>
-      {% if request.user.is_superuser %}
-        <a href="{% url "admin:surveys_survey_change" row.survey.pk %}">(edit)</a>
-      {% endif %}
-    </p>
+    <div data-testid="survey-row-{{ row.survey.pk }}">
+      <h2 class="alert-heading">
+        {{ row.survey }}
+        {% if row.completed %}
+          <span class="badge bg-success">Submitted</span>
+        {% elif row.status == "open" %}
+          <span class="badge bg-primary">Open</span>
+        {% elif row.status == "upcoming" %}
+          <span class="badge bg-info">Upcoming</span>
+        {% else %}
+          <span class="badge bg-secondary">Closed</span>
+        {% endif %}
+      </h2>
+      <ul>
+        <li>Opens: {% timestamp row.survey.opens_at "time" %}</li>
+        <li>Deadline: {% timestamp row.survey.closes_at "time" %}</li>
+        {% if request.user.is_superuser or row.is_instructor %}
+          <li>
+            <a href="{% url "survey-detail" row.survey.pk %}"
+               data-testid="survey-preview-{{ row.survey.pk }}">Preview survey (as staff)</a>
+          </li>
+        {% endif %}
+        {% if request.user.is_superuser %}
+          <li>
+            <a href="{% url "admin:surveys_survey_change" row.survey.pk %}"
+               data-testid="survey-edit-{{ row.survey.pk }}">Edit survey in Django admin</a>
+          </li>
+          <li>{{ row.survey.num_completions }} responses submitted</li>
+        {% endif %}
+      </ul>
+      <div class="d-flex flex-wrap gap-2">
+        {% if row.is_student %}
+          <a class="btn {% if row.completed or row.status == "open" %}btn-primary{% else %}btn-outline-primary{% endif %}"
+             href="{% url "survey-detail" row.survey.pk %}"
+             data-testid="survey-open-{{ row.survey.pk }}">
+            {% if row.completed %}
+              View response
+            {% elif row.status == "open" %}
+              Take survey
+            {% else %}
+              View survey
+            {% endif %}
+          </a>
+        {% endif %}
+        {% if request.user.is_superuser %}
+          <a class="btn btn-info"
+             href="{% url "survey-gm-feedback-inbox" row.survey.pk %}"
+             data-testid="survey-inbox-{{ row.survey.pk }}">
+            Responses
+            {% if row.survey.num_unread_feedback %}<span class="badge bg-danger">{{ row.survey.num_unread_feedback }}</span>{% endif %}
+          </a>
+        {% endif %}
+        {% if row.is_instructor and not row.is_student %}
+          {% if not request.user.is_superuser or row.survey.num_comments %}
+            <a class="btn btn-info"
+               href="{% url "survey-instructor-comment-inbox" row.survey.pk %}"
+               data-testid="survey-comments-{{ row.survey.pk }}">
+              {% if request.user.is_superuser %}
+                Comments to you
+              {% else %}
+                Responses
+              {% endif %}
+              {% if row.survey.num_unread_comments %}<span class="badge bg-danger">{{ row.survey.num_unread_comments }}</span>{% endif %}
+            </a>
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+    {% if not forloop.last %}
+      <hr />
+    {% endif %}
   {% empty %}
     <p>There are no surveys for you yet.</p>
   {% endfor %}

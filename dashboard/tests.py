@@ -45,6 +45,7 @@ from roster.factories import (
 from roster.models import StudentStanding
 from rpg.factories import BonusLevelFactory
 from rpg.models import Level
+from surveys.factories import SurveyCompletionFactory, SurveyFactory
 
 UTC = datetime.UTC
 
@@ -232,6 +233,26 @@ def test_get_news(otis):
             active=(y == 2021),
         )
 
+    at = datetime.datetime
+    SurveyFactory.create(
+        semester=semester,
+        opens_at=at(2021, 6, 30, tzinfo=UTC),
+        closes_at=at(2021, 7, 20, tzinfo=UTC),
+    )
+    # Neither a survey already submitted nor one for another semester is news.
+    SurveyCompletionFactory.create(
+        student=alice,
+        survey=SurveyFactory.create(
+            semester=semester,
+            opens_at=at(2021, 6, 30, tzinfo=UTC),
+            closes_at=at(2021, 7, 20, tzinfo=UTC),
+        ),
+    )
+    SurveyFactory.create(
+        opens_at=at(2021, 6, 30, tzinfo=UTC),
+        closes_at=at(2021, 7, 20, tzinfo=UTC),
+    )
+
     with freeze_time("2021-06-30", tz_offset=0):
         AnnouncementFactory.create()
 
@@ -245,6 +266,7 @@ def test_get_news(otis):
         assert news["markets"].count() == 1
         assert news["hanabis"].count() == 1
         assert news["opals"].count() == 1
+        assert news["surveys"].count() == 1
 
     with freeze_time("2021-07-30", tz_offset=0):
         news = get_news(alice_profile, alice)
@@ -253,6 +275,7 @@ def test_get_news(otis):
         assert not news["markets"].exists()
         assert not news["hanabis"].exists()
         assert news["opals"].count() == 1
+        assert not news["surveys"].exists()
 
     # alice dismisses stuff
     alice_profile.last_notif_dismiss = datetime.datetime(2021, 7, 2, tzinfo=UTC)
@@ -265,6 +288,7 @@ def test_get_news(otis):
         assert not news["markets"].exists()
         assert not news["hanabis"].exists()
         assert not news["opals"].exists()
+        assert not news["surveys"].exists()
 
     with freeze_time("2022-07-02", tz_offset=0):
         SemesterDownloadFileFactory.create(semester=semester)
