@@ -7,84 +7,72 @@
   <div class="survey-inbox">
     {% include "surveys/components/inbox_nav.html" %}
     {% for feedback in page_obj %}
-      <div class="survey-card card mb-4 {% if feedback.is_read %}border-secondary{% else %}border-primary{% endif %}"
-           data-testid="feedback-{{ feedback.pk }}">
-        <div class="card-header d-flex justify-content-between align-items-center gap-2">
-          <span class="fw-bold">
-            #{{ feedback.pk }}:
-            {% if feedback.student %}
-              <a href="{% url "portal" feedback.student.pk %}">{{ feedback.student.name }}</a>
-            {% elif feedback.token %}
-              Anonymous, with private link
-            {% else %}
-              Anonymous, can't see replies
-            {% endif %}
-          </span>
-          <span class="d-flex align-items-center gap-1 text-nowrap">
-            {% if feedback.satisfaction is not None %}
-              <span class="badge border bg-light text-dark"
-                    title="Satisfaction"
-                    data-testid="feedback-satisfaction">{{ feedback.satisfaction_emoji }} {{ feedback.satisfaction }} / 7</span>
-            {% endif %}
-            {% if feedback.reply %}
-              <span class="badge bg-success">Replied</span>
-            {% elif feedback.is_read %}
-              <span class="badge bg-secondary">Read</span>
-            {% else %}
-              <span class="badge bg-primary">Unread</span>
-            {% endif %}
-          </span>
-        </div>
-        <div class="card-body">
-          {{ feedback.essay|linebreaks }}
-          {% if feedback.anything_else %}
-            <hr />
-            <p class="fw-bold">{{ survey.anything_else_prompt }}</p>
-            {{ feedback.anything_else|linebreaks }}
+      <article class="survey-entry" data-testid="feedback-{{ feedback.pk }}">
+        <h1>
+          #{{ feedback.pk }}
+          {% if feedback.student %}
+            <a href="{% url "portal" feedback.student.pk %}">{{ feedback.student.name }}</a>
           {% endif %}
-        </div>
-        <div class="card-footer">
-          <form method="post"
-                action="{% url "survey-gm-feedback-respond" survey.pk feedback.pk %}">
-            {% include "surveys/components/inbox_back.html" %}
-            {% if feedback.student or feedback.token %}
-              <textarea class="form-control mb-2"
+          {% if feedback.satisfaction is not None %}
+            <span class="badge border bg-light text-dark"
+                  title="Satisfaction"
+                  data-testid="feedback-satisfaction">{{ feedback.satisfaction_emoji }} {{ feedback.satisfaction }} / 7</span>
+          {% endif %}
+          {% if feedback.reply %}<span class="badge bg-success">Replied</span>{% endif %}
+        </h1>
+        {{ feedback.essay|linebreaks }}
+        {% if feedback.anything_else %}
+          <p class="fw-bold mb-0">{{ survey.anything_else_prompt }}</p>
+          {{ feedback.anything_else|linebreaks }}
+        {% endif %}
+        <form method="post"
+              class="survey-entry-actions"
+              action="{% url "survey-gm-feedback-respond" survey.pk feedback.pk %}">
+          {% include "surveys/components/inbox_back.html" %}
+          {% if feedback.is_read %}
+            <button type="submit"
+                    name="action"
+                    value="unread"
+                    title="Mark unread"
+                    class="btn btn-sm btn-secondary">
+              <span class="emoji-text">👍</span> Thanked!
+            </button>
+          {% else %}
+            <button type="submit"
+                    name="action"
+                    value="read"
+                    title="Mark read"
+                    class="btn btn-sm btn-outline-secondary">
+              <span class="emoji-text">👍</span> Mark read
+            </button>
+          {% endif %}
+          {% if feedback.student or feedback.token %}
+            <details class="survey-entry-reply">
+              <summary class="btn btn-sm btn-outline-primary">
+                {% if feedback.reply %}
+                  Edit reply
+                {% else %}
+                  Reply
+                {% endif %}
+              </summary>
+              <textarea class="form-control my-2"
                         name="reply"
                         rows="3"
                         placeholder="Reply shown to the student"
                         aria-label="Reply">{{ feedback.reply }}</textarea>
-            {% endif %}
-            <div class="d-flex gap-2">
-              {% if feedback.student or feedback.token %}
-                <button type="submit"
-                        name="action"
-                        value="reply"
-                        class="btn btn-sm btn-primary">
-                  {% if feedback.reply %}
-                    Edit reply
-                  {% else %}
-                    Reply
-                  {% endif %}
-                </button>
-              {% endif %}
-              {% if feedback.is_read %}
-                <button type="submit"
-                        name="action"
-                        value="unread"
-                        class="btn btn-sm btn-outline-secondary">Mark unread</button>
-              {% else %}
-                <button type="submit"
-                        name="action"
-                        value="read"
-                        class="btn btn-sm btn-outline-secondary">Mark read</button>
-              {% endif %}
+              <button type="submit"
+                      name="action"
+                      value="reply"
+                      class="btn btn-sm btn-primary">Save reply</button>
               {% if feedback.replied_at %}
-                <p class="small text-muted my-0">Replied {% timestamp feedback.replied_at "time" %}</p>
+                <span class="small text-muted">Replied {% timestamp feedback.replied_at "time" %}</span>
               {% endif %}
-            </div>
-          </form>
-        </div>
-      </div>
+            </details>
+          {% else %}
+            <button type="button" class="btn btn-sm btn-danger" disabled>Can't reply</button>
+          {% endif %}
+        </form>
+      </article>
     {% empty %}
       <p class="fw-bold">No feedback here.</p>
     {% endfor %}
