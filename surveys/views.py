@@ -2,7 +2,6 @@ import uuid
 from typing import Any
 
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Page, Paginator
@@ -16,7 +15,7 @@ from django.utils.http import urlencode
 from django.views.decorators.http import require_POST
 from django.views.generic import ListView
 
-from otisweb.decorators import admin_required, staff_required
+from otisweb.decorators import admin_required, staff_required, verified_required
 from otisweb.mixins import AdminRequiredMixin, StaffRequiredMixin
 from otisweb.utils import AuthHttpRequest
 from roster.models import Student
@@ -45,7 +44,7 @@ REPLY_FILTERS: StatusFilters = {
 }
 
 
-@login_required
+@verified_required
 def survey_list(request: AuthHttpRequest) -> HttpResponse:
     user = request.user
     now = timezone.now()
@@ -152,7 +151,7 @@ def _render_detail(
     return render(request, "surveys/survey_detail.html", context)
 
 
-@login_required
+@verified_required
 def survey_detail(request: AuthHttpRequest, survey_pk: int) -> HttpResponse:
     survey = get_object_or_404(Survey.objects.select_related("semester"), pk=survey_pk)
     student = _get_student(request, survey)
@@ -161,7 +160,7 @@ def survey_detail(request: AuthHttpRequest, survey_pk: int) -> HttpResponse:
     return _render_detail(request, survey, student)
 
 
-@login_required
+@verified_required
 def survey_submit(request: AuthHttpRequest, survey_pk: int) -> HttpResponse:
     survey = get_object_or_404(Survey.objects.select_related("semester"), pk=survey_pk)
     if request.method != "POST":
@@ -210,7 +209,7 @@ def survey_submit(request: AuthHttpRequest, survey_pk: int) -> HttpResponse:
     return redirect("survey-detail", survey.pk)
 
 
-@login_required
+@verified_required
 def gm_feedback_detail(
     request: AuthHttpRequest, survey_pk: int, token: uuid.UUID
 ) -> HttpResponse:

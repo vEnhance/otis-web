@@ -2,11 +2,13 @@ import datetime
 import uuid
 
 import pytest
+from django.contrib.auth.models import Group
 from django.contrib.messages import constants as message_levels
 from freezegun.api import freeze_time
 
 from core.factories import SemesterFactory, UserFactory
 from roster.factories import AssistantFactory, StudentFactory
+from roster.models import Student
 from rpg.factories import AchievementFactory, AchievementUnlockFactory
 from rpg.models import AchievementUnlock
 
@@ -20,6 +22,11 @@ from .models import GMFeedback, InstructorComment, SurveyCompletion
 from .views import RESPONSES_PER_PAGE
 
 UTC = datetime.UTC
+
+
+def verified_student(**kwargs) -> Student:
+    group, _ = Group.objects.get_or_create(name="Verified")
+    return StudentFactory.create(user__groups=(group,), **kwargs)
 
 
 def _response(**overrides: str) -> dict[str, str]:
@@ -38,7 +45,7 @@ def _response(**overrides: str) -> dict[str, str]:
 @pytest.mark.django_db
 def test_submit_signed(otis):
     assistant = AssistantFactory.create()
-    alice = StudentFactory.create(assistant=assistant)
+    alice = verified_student(assistant=assistant)
     achievement = AchievementFactory.create()
     survey = SurveyFactory.create(semester=alice.semester, achievement=achievement)
     otis.login(alice)
@@ -77,7 +84,7 @@ def test_submit_signed(otis):
 
 @pytest.mark.django_db
 def test_submit_anonymous(otis):
-    alice = StudentFactory.create(assistant=AssistantFactory.create())
+    alice = verified_student(assistant=AssistantFactory.create())
     survey = SurveyFactory.create(semester=alice.semester)
     otis.login(alice)
 
@@ -106,7 +113,7 @@ def test_submit_anonymous(otis):
 
 @pytest.mark.django_db
 def test_submit_anonymous_with_link(otis):
-    alice = StudentFactory.create()
+    alice = verified_student()
     survey = SurveyFactory.create(semester=alice.semester)
     otis.login(alice)
 
@@ -129,7 +136,7 @@ def test_submit_anonymous_with_link(otis):
 
 @pytest.mark.django_db
 def test_signing_is_independent(otis):
-    alice = StudentFactory.create(assistant=AssistantFactory.create())
+    alice = verified_student(assistant=AssistantFactory.create())
     survey = SurveyFactory.create(semester=alice.semester)
     otis.login(alice)
 
@@ -148,7 +155,7 @@ def test_signing_is_independent(otis):
 
 @pytest.mark.django_db
 def test_optional_fields_can_be_skipped(otis):
-    alice = StudentFactory.create(assistant=AssistantFactory.create())
+    alice = verified_student(assistant=AssistantFactory.create())
     survey = SurveyFactory.create(semester=alice.semester)
     otis.login(alice)
 
@@ -161,7 +168,7 @@ def test_optional_fields_can_be_skipped(otis):
 
 @pytest.mark.django_db
 def test_invalid_submission_keeps_input(otis):
-    alice = StudentFactory.create(assistant=AssistantFactory.create())
+    alice = verified_student(assistant=AssistantFactory.create())
     survey = SurveyFactory.create(semester=alice.semester)
     otis.login(alice)
 
@@ -180,7 +187,7 @@ def test_invalid_submission_keeps_input(otis):
 
 @pytest.mark.django_db
 def test_form_drops_unasked_fields(otis):
-    alice = StudentFactory.create()  # no assistant
+    alice = verified_student()  # no assistant
     survey = SurveyFactory.create(
         semester=alice.semester, satisfaction_prompt="", anything_else_prompt=""
     )
@@ -208,7 +215,7 @@ def test_form_drops_unasked_fields(otis):
 
 @pytest.mark.django_db
 def test_blank_instructor_prompt_drops_field(otis):
-    bob = StudentFactory.create(assistant=AssistantFactory.create())
+    bob = verified_student(assistant=AssistantFactory.create())
     survey = SurveyFactory.create(semester=bob.semester)
     otis.login(bob)
     resp = otis.get_ok("survey-detail", survey.pk)
@@ -222,7 +229,7 @@ def test_blank_instructor_prompt_drops_field(otis):
 
 @pytest.mark.django_db
 def test_cannot_submit_twice(otis):
-    alice = StudentFactory.create()
+    alice = verified_student()
     survey = SurveyFactory.create(semester=alice.semester)
     otis.login(alice)
 
@@ -240,7 +247,7 @@ def test_cannot_submit_twice(otis):
 
 @pytest.mark.django_db
 def test_cannot_submit_when_closed(otis):
-    alice = StudentFactory.create()
+    alice = verified_student()
     survey = SurveyFactory.create(
         semester=alice.semester,
         opens_at=datetime.datetime(2021, 9, 1, tzinfo=UTC),
@@ -270,12 +277,24 @@ def test_cannot_submit_when_closed(otis):
 @pytest.mark.django_db
 def test_other_semester_cannot_submit(otis):
     survey = SurveyFactory.create()
-    old = StudentFactory.create(semester=SemesterFactory.create(end_year=2020))
+    old = verified_student(semester=SemesterFactory.create(end_year=2020))
     otis.login(old)
 
     otis.get_denied("survey-detail", survey.pk)
     otis.post_denied("survey-submit", survey.pk, data=_response())
     assert not GMFeedback.objects.exists()
+
+
+@pytest.mark.django_db
+def test_unverified_student_denied(otis):
+    alice = StudentFactory.create()
+    survey = SurveyFactory.create(semester=alice.semester)
+    otis.login(alice)
+
+    otis.get_denied("survey-list")
+    otis.get_denied("survey-detail", survey.pk)
+    otis.post_denied("survey-submit", survey.pk, data=_response())
+    assert not SurveyCompletion.objects.exists()
 
 
 @pytest.mark.django_db
@@ -343,7 +362,7 @@ def test_grant_achievements_action(otis):
 
 @pytest.mark.django_db
 def test_signed_response_shows_reply(otis):
-    alice = StudentFactory.create()
+    alice = verified_student()
     survey = SurveyFactory.create(semester=alice.semester)
     SurveyCompletionFactory.create(survey=survey, student=alice)
     GMFeedbackFactory.create(survey=survey, student=alice, reply="Glad to hear it")
@@ -358,7 +377,7 @@ def test_private_link(otis):
     survey = SurveyFactory.create()
     feedback = GMFeedbackFactory.create(survey=survey, token=uuid.uuid4())
     # Anyone with the link can see the feedback, since nothing ties it to a student.
-    otis.login(StudentFactory.create())
+    otis.login(verified_student())
 
     resp = otis.get_ok("survey-gm-feedback", survey.pk, feedback.token)
     assert resp.context["gm_feedback"] == feedback
@@ -390,7 +409,7 @@ def test_private_link_requires_login(otis):
 
 @pytest.mark.django_db
 def test_survey_list(otis):
-    alice = StudentFactory.create(semester=SemesterFactory.create(end_year=2021))
+    alice = verified_student(semester=SemesterFactory.create(end_year=2021))
     StudentFactory.create(
         user=alice.user, semester=SemesterFactory.create(end_year=2020)
     )
@@ -665,7 +684,7 @@ def test_cannot_reply_to_unreachable_feedback(otis):
 def test_instructor_comment_inbox(otis):
     assistant = AssistantFactory.create()
     survey = SurveyFactory.create()
-    alice = StudentFactory.create(semester=survey.semester, assistant=assistant)
+    alice = verified_student(semester=survey.semester, assistant=assistant)
     mine = InstructorCommentFactory.create(
         survey=survey, assistant=assistant, student=alice
     )
