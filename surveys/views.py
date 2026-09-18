@@ -1,3 +1,4 @@
+import uuid
 from typing import Any
 
 from django.contrib import messages
@@ -6,12 +7,13 @@ from django.core.exceptions import PermissionDenied
 from django.db import IntegrityError, transaction
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 
 from otisweb.utils import AuthHttpRequest
 from roster.models import Student
 
-from .forms import SIGNED, SurveyForm
+from .forms import ANONYMOUS_LINK, SIGNED, SurveyForm
 from .models import GMFeedback, InstructorComment, Survey, SurveyCompletion
 
 
@@ -55,6 +57,12 @@ def _render_detail(
         context["gm_feedback"] = GMFeedback.objects.filter(
             survey=survey, student=student
         ).first()
+        if context["gm_feedback"] is None:
+            # Anonymous, so we can't link it, but can say what to search history for.
+            placeholder = uuid.UUID(int=0)
+            context["private_link_prefix"] = request.build_absolute_uri(
+                reverse("survey-gm-feedback", args=[survey.pk, placeholder])
+            ).removesuffix(f"{placeholder}/")
         context["instructor_comment"] = (
             InstructorComment.objects.filter(survey=survey, student=student)
             .select_related("assistant")
@@ -100,9 +108,10 @@ def survey_submit(request: AuthHttpRequest, survey_pk: int) -> HttpResponse:
         except IntegrityError:
             messages.error(request, "You already submitted this survey.")
             return redirect("survey-detail", survey.pk)
-        GMFeedback.objects.create(
+        gm_feedback = GMFeedback.objects.create(
             survey=survey,
-            student=student if data["gm_signed"] == SIGNED else None,
+            student=student if data["gm_identity"] == SIGNED else None,
+            token=uuid.uuid4() if data["gm_identity"] == ANONYMOUS_LINK else None,
             essay=data["essay"],
             satisfaction=data.get("satisfaction"),
             anything_else=data.get("anything_else", ""),
@@ -116,10 +125,25 @@ def survey_submit(request: AuthHttpRequest, survey_pk: int) -> HttpResponse:
                 comments=data["instructor_comments"],
             )
 
-    messages.success(
-        request,
-        "Thanks for submitting. "
-        "If you don't have the diamond for this survey, "
-        "it'll be awarded when the survey closes.",
-    )
+    if gm_feedback.token is not None:
+        # The only way back to anonymous feedback is its private link.
+        return redirect("survey-gm-feedback", survey.pk, gm_feedback.token)
     return redirect("survey-detail", survey.pk)
+
+
+@login_required
+def gm_feedback_detail(
+    request: AuthHttpRequest, survey_pk: int, token: uuid.UUID
+) -> HttpResponse:
+    # The token is the credential: there's no ownership check, since anonymous
+    # feedback has no owner to check against.
+    gm_feedback = get_object_or_404(
+        GMFeedback.objects.select_related("survey__semester"),
+        survey=survey_pk,
+        token=token,
+    )
+    return render(
+        request,
+        "surveys/gm_feedback_detail.html",
+        {"survey": gm_feedback.survey, "gm_feedback": gm_feedback},
+    )
