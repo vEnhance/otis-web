@@ -5,8 +5,7 @@
 {% endblock title %}
 {% block layout-content %}
   {% for row in rows %}
-    <div class="alert {% if row.status == "open" %}alert-success{% elif row.status == "upcoming" %}alert-info{% else %}alert-secondary{% endif %}"
-         data-testid="survey-row-{{ row.survey.pk }}">
+    <div data-testid="survey-row-{{ row.survey.pk }}">
       <h2 class="alert-heading">
         {{ row.survey }}
         {% if row.completed %}
@@ -19,14 +18,13 @@
           <span class="badge bg-secondary">Closed</span>
         {% endif %}
       </h2>
-      <p>
-        Open from {% timestamp row.survey.opens_at "time" %}
-        to {% timestamp row.survey.closes_at "time" %}
+      <ul>
+        <li>Opens: {% timestamp row.survey.opens_at "time" %}</li>
+        <li>Deadline: {% timestamp row.survey.closes_at "time" %}</li>
         {% if request.user.is_superuser %}
-          <br />
-          {{ row.survey.num_completions }} submitted
+          <li>{{ row.survey.num_completions }} submitted</li>
         {% endif %}
-      </p>
+      </ul>
       <div class="d-flex flex-wrap gap-2">
         {% if row.is_student %}
           <a class="btn btn-primary"
