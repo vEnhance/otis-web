@@ -9,17 +9,6 @@ from surveys.models import GMFeedback, InstructorComment, Survey, SurveyCompleti
 EXCERPT_LENGTH = 80
 
 
-class SurveyCompletionInline(admin.TabularInline):
-    model = SurveyCompletion
-    fields = ("student",)
-    readonly_fields = ("student",)
-    extra = 0
-    can_delete = False
-
-    def has_add_permission(self, request: HttpRequest, obj: object = None) -> bool:
-        return False
-
-
 @admin.register(Survey)
 class SurveyAdmin(admin.ModelAdmin):
     list_display = (
@@ -35,7 +24,6 @@ class SurveyAdmin(admin.ModelAdmin):
     list_filter = ("semester",)
     search_fields = ("name",)
     autocomplete_fields = ("achievement",)
-    inlines = (SurveyCompletionInline,)
     actions = ("grant_achievements",)
 
     def get_queryset(self, request: HttpRequest) -> QuerySet[Survey]:
