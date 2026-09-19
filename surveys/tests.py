@@ -460,6 +460,50 @@ def test_survey_list(otis):
 
 
 @pytest.mark.django_db
+def test_survey_list_student_states(otis):
+    alice = verified_student()
+    at = datetime.datetime
+    kwargs = {
+        "semester": alice.semester,
+        "opens_at": at(2020, 9, 1, tzinfo=UTC),
+        "closes_at": at(2020, 10, 1, tzinfo=UTC),
+    }
+    untaken = SurveyFactory.create(**kwargs)
+    unread = SurveyFactory.create(**kwargs)
+    replied = SurveyFactory.create(**kwargs)
+    anonymous = SurveyFactory.create(**kwargs)
+    for survey in (unread, replied, anonymous):
+        SurveyCompletionFactory.create(survey=survey, student=alice)
+    GMFeedbackFactory.create(survey=unread, student=alice)
+    GMFeedbackFactory.create(
+        survey=replied, student=alice, is_read=True, reply="Thanks!"
+    )
+    GMFeedbackFactory.create(survey=anonymous, token=uuid.uuid4())
+
+    otis.login(alice)
+    with freeze_time("2020-09-15", tz_offset=0):
+        resp = otis.get_ok("survey-list")
+    assert {r["survey"]: r["gm_feedback"] for r in resp.context["rows"]}[
+        anonymous
+    ] is None
+
+    otis.assert_testid(resp, f"survey-open-{untaken.pk}")
+    otis.assert_no_testid(resp, f"survey-response-{untaken.pk}")
+
+    otis.assert_testid(resp, f"survey-response-{unread.pk}")
+    otis.assert_no_testid(resp, f"survey-open-{unread.pk}")
+    otis.assert_no_testid(resp, f"survey-read-{unread.pk}")
+    otis.assert_no_testid(resp, f"survey-reply-{unread.pk}")
+
+    otis.assert_testid(resp, f"survey-read-{replied.pk}")
+    otis.assert_testid(resp, f"survey-reply-{replied.pk}")
+
+    otis.assert_testid(resp, f"survey-anonymous-{anonymous.pk}")
+    otis.assert_no_testid(resp, f"survey-response-{anonymous.pk}")
+    otis.assert_no_testid(resp, f"survey-reply-{anonymous.pk}")
+
+
+@pytest.mark.django_db
 def test_admin_pages(otis):
     alice = StudentFactory.create(assistant=AssistantFactory.create())
     survey = SurveyFactory.create(semester=alice.semester)

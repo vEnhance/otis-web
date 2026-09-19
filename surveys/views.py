@@ -86,6 +86,12 @@ def survey_list(request: AuthHttpRequest) -> HttpResponse:
             "survey_id", flat=True
         )
     )
+    signed_feedback = {
+        feedback.survey.pk: feedback
+        for feedback in GMFeedback.objects.filter(student__user=user).select_related(
+            "survey"
+        )
+    }
     student_semester_ids = set(student_semesters.values_list("semester", flat=True))
     taught_semester_ids = set(taught_semesters.values_list("semester", flat=True))
     rows = [
@@ -99,6 +105,7 @@ def survey_list(request: AuthHttpRequest) -> HttpResponse:
             "is_student": s.semester.pk in student_semester_ids,
             "is_instructor": s.semester.pk in taught_semester_ids,
             "completed": s.pk in completed,
+            "gm_feedback": signed_feedback.get(s.pk),
         }
         for s in surveys
     ]

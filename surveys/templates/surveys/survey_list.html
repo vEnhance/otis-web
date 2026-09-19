@@ -35,18 +35,37 @@
           <li>{{ row.survey.num_completions }} responses submitted</li>
         {% endif %}
       </ul>
-      <div class="d-flex flex-wrap gap-2">
-        {% if row.is_student %}
-          <a class="btn {% if row.completed or row.status == "open" %}btn-primary{% else %}btn-outline-primary{% endif %}"
-             href="{% url "survey-detail" row.survey.pk %}"
-             data-testid="survey-open-{{ row.survey.pk }}">
-            {% if row.completed %}
-              View response
-            {% elif row.status == "open" %}
-              Take survey
+      {% if row.is_student and row.completed %}
+        {% if row.gm_feedback %}
+          <p data-testid="survey-response-{{ row.survey.pk }}">
+            <a href="{% url "survey-detail" row.survey.pk %}">View your response</a>
+            {% if row.gm_feedback.is_read %}
+              <span class="badge rounded-pill text-bg-light border"
+                    title="Evan has read your feedback"
+                    data-testid="survey-read-{{ row.survey.pk }}"><span class="emoji-text">👍</span> Evan</span>
             {% else %}
-              View survey
+              <span class="badge rounded-pill text-bg-light border text-muted">Not read by Evan yet</span>
             {% endif %}
+          </p>
+        {% else %}
+          <p data-testid="survey-anonymous-{{ row.survey.pk }}">
+            You have already
+            <a href="{% url "survey-detail" row.survey.pk %}">completed the survey</a>,
+            anonymously.
+          </p>
+        {% endif %}
+      {% endif %}
+      <div class="d-flex flex-wrap gap-2">
+        {% if row.is_student and not row.completed and row.status == "open" %}
+          <a class="btn btn-primary"
+             href="{% url "survey-detail" row.survey.pk %}"
+             data-testid="survey-open-{{ row.survey.pk }}">Take survey</a>
+        {% endif %}
+        {% if row.gm_feedback.reply %}
+          <a class="btn btn-success"
+             href="{% url "survey-detail" row.survey.pk %}"
+             data-testid="survey-reply-{{ row.survey.pk }}">
+            <span class="emoji-text">💬</span> Read Evan's reply
           </a>
         {% endif %}
         {% if request.user.is_superuser %}
