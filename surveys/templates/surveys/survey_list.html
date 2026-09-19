@@ -62,7 +62,7 @@
              data-testid="survey-open-{{ row.survey.pk }}">Take survey</a>
         {% endif %}
         {% if row.gm_feedback.reply %}
-          <a class="btn btn-success"
+          <a class="btn btn-primary"
              href="{% url "survey-detail" row.survey.pk %}"
              data-testid="survey-reply-{{ row.survey.pk }}">
             <span class="emoji-text">💬</span> Read Evan's reply

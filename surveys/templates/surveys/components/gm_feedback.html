@@ -2,16 +2,7 @@
 <h2>Your feedback</h2>
 <div class="card mb-3">
   <div class="card-header">Free comments</div>
-  <div class="card-body">
-    {{ gm_feedback.essay|linebreaks }}
-    {% if gm_feedback.is_read %}
-      <div class="mt-3">
-        <span class="badge rounded-pill text-bg-light border"
-              title="Evan has read your feedback"
-              data-testid="survey-read"><span class="emoji-text">👍</span> Evan</span>
-      </div>
-    {% endif %}
-  </div>
+  <div class="card-body">{{ gm_feedback.essay|linebreaks }}</div>
 </div>
 {% if gm_feedback.satisfaction is not None %}
   <div class="card mb-3">
@@ -25,12 +16,18 @@
     <div class="card-body">{{ gm_feedback.anything_else|linebreaks }}</div>
   </div>
 {% endif %}
+{% if gm_feedback.is_read %}
+  <div class="mt-3">
+    <span class="badge rounded-pill text-bg-light border"
+          title="Evan has read your feedback"
+          data-testid="survey-read"><span class="emoji-text">👍</span> Evan</span>
+  </div>
+{% endif %}
 {% if gm_feedback.reply %}
-  <div class="card mb-3 border-primary" data-testid="survey-reply">
-    <div class="card-header">
-      Reply from Evan
-      {% if gm_feedback.replied_at %}({% timestamp gm_feedback.replied_at "time" %}){% endif %}
-    </div>
-    <div class="card-body">{{ gm_feedback.reply|linebreaks }}</div>
+  <hr />
+  <div data-testid="survey-reply">
+    <h2>Reply from Evan</h2>
+    {{ gm_feedback.reply|linebreaks }}
+    <p class="text-muted">{% timestamp gm_feedback.replied_at "time" %}</p>
   </div>
 {% endif %}

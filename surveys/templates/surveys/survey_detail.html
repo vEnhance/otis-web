@@ -7,10 +7,6 @@
   <p>
     <a href="{% url "survey-list" %}">← Back to surveys</a>
   </p>
-  <p class="text-muted">
-    Open from {% timestamp survey.opens_at "time" %}
-    to {% timestamp survey.closes_at "time" %}
-  </p>
   {% if preview %}
     <div class="alert alert-warning" data-testid="survey-preview">
       This is a preview of the form.
@@ -19,21 +15,19 @@
     <div class="survey-form">{% for field in form.visible_fields %}{{ field|as_crispy_field }}{% endfor %}</div>
   {% elif completed %}
     {% if gm_feedback %}
-      <p data-testid="survey-signed-response">
+      <div class="alert alert-success" data-testid="survey-signed-response">
         You submitted this survey!
         If you don't have the diamond for this survey,
         it'll be awarded automatically when the survey closes.
-      </p>
+      </div>
       {% include "surveys/components/gm_feedback.html" %}
     {% else %}
       <div data-testid="survey-anonymous-response">
-        <h2>Survey submitted!</h2>
-        <p>
-          You submitted this survey already.
+        <div class="alert alert-success" data-testid="survey-signed-response">
+          You submitted this survey!
           If you don't have the diamond for this survey,
           it'll be awarded automatically when the survey closes.
-        </p>
-        <h3>Retrieving your response</h3>
+        </div>
         <p>
           Your comments to Evan were anonymous,
           so there is nothing to tie them to your OTIS-WEB account.
