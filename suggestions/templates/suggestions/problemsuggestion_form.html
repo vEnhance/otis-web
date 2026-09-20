@@ -9,11 +9,8 @@
 {% endblock main-class %}
 {% block layout-content %}
   <p>
-    <a href="{% url "suggest-list" %}">⬅️ List all suggestions by you.</a> Also check out the <a href="{% url "suggest-queue-listing" %}">suggestion queue</a>.
-  </p>
-  <p>
-    Thank you for suggesting problems for OTIS!
-    Your contributions are appreciated.
+    <a href="{% url "suggest-list" %}">⬅️ List all suggestions by you.</a>
+    Also check out the <a href="{% url "suggest-queue-listing" %}">suggestion queue</a>.
   </p>
   {% if suggestion %}
     <div class="alert {% if suggestion.status == "SUGG_EDIT" %} alert-warning {% elif suggestion.status == "SUGG_NEW" %} alert-primary {% elif suggestion.status == "SUGG_NOK" or suggestion.status == "SUGG_OK" %} alert-success {% elif suggestion.status == "SUGG_REJ" %} alert-secondary {% endif %}">
