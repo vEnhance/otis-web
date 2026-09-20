@@ -1,0 +1,100 @@
+<h3>Admin</h3>
+<ul>
+  <li>
+    <a href="{% url "admin:index" %}">GM Panel</a>
+  </li>
+  <li>
+    <a href="{% url "leaderboard" %}">Leaderboard</a>
+  </li>
+  <li>
+    <a href="{% url "user-lookup" %}">Lookup kid</a>
+  </li>
+  <li>
+    <a href="{% url "unit-dump" %}">Unit dump</a>
+  </li>
+  <li>
+    <a href="{% url "check-stamp" %}">Check stamp</a>
+  </li>
+  <li>
+    <a href="{% url "admin-palace-list" %}">Ruby Palace</a>
+  </li>
+</ul>
+{% if student.user %}
+  <h4>User</h4>
+  <ul>
+    <li>
+      <a href="{% url "user-info" student.user.pk %}">Show user info</a>
+    </li>
+    <li>
+      <a href="{% url "apply-uuid-lookup" student.pk %}">Show app</a>
+    </li>
+    <li>
+      <a href="{% url "admin:auth_user_change" student.user.pk %}">Edit DJ user</a>
+    </li>
+    <li>
+      <a href="{% url "admin:roster_student_change" student.pk %}">Edit student</a>
+    </li>
+    {% if student.reg_id %}
+      <li>
+        <a href="{% url "admin:roster_studentregistration_change" student.reg_id %}">Edit reg</a>
+      </li>
+    {% endif %}
+    {% if student.user.profile %}
+      <li>
+        <a href="{% url "admin:core_userprofile_change" student.user.profile.pk %}">Edit profile</a>
+      </li>
+    {% endif %}
+  </ul>
+  <ul>
+    {# Hijack student account #}
+    <li>
+      <form action="{% url 'hijack:acquire' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="user_pk" value="{{ student.user.pk }}" />
+        <input type="hidden" name="next" value="{{ request.path }}" />
+        <button class="pseudo-button" type="submit">Hijack {{ student.user.first_name|truncatechars:"8" }}</button>
+      </form>
+    </li>
+    {% if student.assistant %}
+      {# Hijack assistant account #}
+      <li>
+        <form action="{% url 'hijack:acquire' %}" method="post">
+          {% csrf_token %}
+          <input type="hidden" name="user_pk" value="{{ student.assistant.user_id }}" />
+          <input type="hidden" name="next" value="{{ request.path }}" />
+          <button class="pseudo-button" type="submit">Hijack {{ student.assistant.shortname }}</button>
+        </form>
+      </li>
+    {% endif %}
+    {# Suspend or unsuspend student #}
+    <li>
+      <form action="{% url 'toggle-suspension' student.pk %}" method="post">
+        {% csrf_token %}
+        <button class="pseudo-button"
+                type="submit"
+                data-testid="toggle-suspension"
+                onclick="return confirm('This will also {% if student.is_suspended %}reactivate{% else %}deactivate{% endif %} the Django account. Continue?')">
+          {% if student.is_suspended %}Unban{% else %}Ban{% endif %} {{ student.user.first_name|truncatechars:"8" }}
+        </button>
+      </form>
+    </li>
+  </ul>
+{% endif %}
+<h4>Legacy views</h4>
+<ul>
+  <li>
+    <a href="{% url "admin-unit-list" %}">Unit grid</a>
+  </li>
+  <li>
+    <a href="{% url "giga-chart" "csv" %}">Giga CSV</a>
+  </li>
+  <li>
+    <a href="{% url "giga-chart" "html" %}">Giga HTML</a>
+  </li>
+  <li>
+    <a href="{% url "idlewarn" %}">Idle warn</a>
+  </li>
+  <li>
+    <a href="{% url "master-schedule" %}">M sched</a>
+  </li>
+</ul>

@@ -70,6 +70,7 @@
       {% endif %}
     </div>
   </div>
+  {# Show the student name, year, ID, instructor #}
   {% if student %}
     <hr />
     <p>
@@ -81,17 +82,9 @@
       {% if student.assistant %}<p class="fst-italic">Instr: {{ student.assistant }}</p>{% endif %}
     </small>
   {% endif %}
+  {# Bulleted list for staff vs students #}
   {% if request.user.is_staff %}
     <hr />
-    <h3>Staff panel</h3>
-    <ul>
-      <li>
-        <a href="{% url "admin:index" %}">GM Panel</a>
-      </li>
-      <li>
-        <a href="{% url "leaderboard" %}">Leaderboard</a>
-      </li>
-    </ul>
     <h3>Instructor info</h3>
     <ul>
       <li>
@@ -107,26 +100,6 @@
         <a href="{% static 'info/instructor-expectations.pdf' %}">Expectations</a>
       </li>
     </ul>
-    {% if request.user.is_superuser %}
-      <h3>Admin</h3>
-      <ul>
-        <li>
-          <a href="{% url "admin-unit-list" %}">Unit grid</a>
-        </li>
-        <li>
-          <a href="{% url "unit-dump" %}">Unit dump</a>
-        </li>
-        <li>
-          <a href="{% url "admin-palace-list" %}">Ruby Palace</a>
-        </li>
-        <li>
-          <a href="{% url "user-lookup" %}">Lookup kid</a>
-        </li>
-        <li>
-          <a href="{% url "check-stamp" %}">Check stamp</a>
-        </li>
-      </ul>
-    {% endif %}
   {% else %}
     {% if not student %}<hr />{% endif %}
     <ul>
@@ -151,93 +124,9 @@
       </li>
     </ul>
   {% endif %}
-  {% if student.user and request.user.is_staff %}
-    <h4>User</h4>
-    {% if request.user.is_superuser %}
-      <ul>
-        <li>
-          <a href="{% url "admin:auth_user_change" student.user.pk %}">Edit user</a>
-        </li>
-        <li>
-          <a href="{% url "admin:roster_student_change" student.pk %}">Edit student</a>
-        </li>
-        {% if student.reg_id %}
-          <li>
-            <a href="{% url "admin:roster_studentregistration_change" student.reg_id %}">Edit reg</a>
-          </li>
-          <li>
-            <a href="{% url "apply-uuid-lookup" student.pk %}">Show app</a>
-          </li>
-        {% endif %}
-        {% if student.user.profile %}
-          <li>
-            <a href="{% url "admin:core_userprofile_change" student.user.profile.pk %}">Edit profile</a>
-          </li>
-        {% endif %}
-      </ul>
-      <ul>
-        <li>
-          <a href="{% url "user-info" student.user.pk %}">Show user info</a>
-        </li>
-        {# Hijack student account #}
-        <li>
-          <form action="{% url 'hijack:acquire' %}" method="post">
-            {% csrf_token %}
-            <input type="hidden" name="user_pk" value="{{ student.user.pk }}" />
-            <input type="hidden" name="next" value="{{ request.path }}" />
-            <button class="pseudo-button" type="submit">Hijack {{ student.user.first_name }}</button>
-          </form>
-        </li>
-        {# Suspend or unsuspend student #}
-        <li>
-          <form action="{% url 'toggle-suspension' student.pk %}" method="post">
-            {% csrf_token %}
-            <button class="pseudo-button"
-                    type="submit"
-                    data-testid="toggle-suspension"
-                    onclick="return confirm('This will also {% if student.is_suspended %}reactivate{% else %}deactivate{% endif %} the Django account. Continue?')">
-              {% if student.is_suspended %}Unsuspend{% else %}Suspend{% endif %} {{ student.user.first_name }}
-            </button>
-          </form>
-        </li>
-        {% if student.assistant %}
-          {# Hijack assistant account #}
-          <li>
-            <form action="{% url 'hijack:acquire' %}" method="post">
-              {% csrf_token %}
-              <input type="hidden" name="user_pk" value="{{ student.assistant.user_id }}" />
-              <input type="hidden" name="next" value="{{ request.path }}" />
-              <button class="pseudo-button" type="submit">Hijack {{ student.assistant.shortname }}</button>
-            </form>
-          </li>
-        {% endif %}
-      </ul>
-    {% else %}
-      <ul>
-        <li>
-          <a target="_blank"
-             href="mailto:{{ student.user.email }}"
-             rel="noreferrer">Email student</a>
-        </li>
-      </ul>
-    {% endif %}
-  {% endif %}
+  {# Admin panel #}
   {% if request.user.is_superuser %}
-    <h4>Legacy views</h4>
-    <ul>
-      <li>
-        <a href="{% url "giga-chart" "csv" %}">Giga CSV</a>
-      </li>
-      <li>
-        <a href="{% url "giga-chart" "html" %}">Giga HTML</a>
-      </li>
-      <li>
-        <a href="{% url "idlewarn" %}">Idle warn</a>
-      </li>
-      <li>
-        <a href="{% url "master-schedule" %}">M sched</a>
-      </li>
-    </ul>
+    {% include "components/admin_sidebar_list.html" %}
   {% endif %}
 {% else %}
   <p>You are not logged in.</p>
