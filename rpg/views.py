@@ -22,7 +22,11 @@ from django.views.generic.edit import UpdateView
 from django_discordo import SUCCESS_LOG_LEVEL
 from sql_util.utils import Exists, SubqueryCount
 
-from otisweb.decorators import is_verified, staff_required, verified_required
+from otisweb.decorators import (
+    admin_required,
+    is_verified,
+    verified_required,
+)
 from otisweb.mixins import AdminRequiredMixin, StaffRequiredMixin, VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest, get_days_since
 from roster.models import ENABLED_STANDINGS, LEGIT_STANDINGS, Student
@@ -246,7 +250,7 @@ class FoundList(LoginRequiredMixin, StaffRequiredMixin, ListView[AchievementUnlo
         return context
 
 
-@staff_required
+@admin_required
 def leaderboard(request: AuthHttpRequest) -> HttpResponse:
     students = Student.objects.filter(
         semester__active=True, standing__in=ENABLED_STANDINGS & LEGIT_STANDINGS
