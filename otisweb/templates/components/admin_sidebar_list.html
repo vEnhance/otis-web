@@ -52,7 +52,7 @@
         {% csrf_token %}
         <input type="hidden" name="user_pk" value="{{ student.user.pk }}" />
         <input type="hidden" name="next" value="{{ request.path }}" />
-        <button class="pseudo-button" type="submit">Hijack {{ student.user.first_name|truncatechars:"8" }}</button>
+        <button class="pseudo-button" type="submit">Hijack {{ student.user.first_name|truncatechars:"6" }}</button>
       </form>
     </li>
     {% if student.assistant %}
@@ -74,7 +74,7 @@
                 type="submit"
                 data-testid="toggle-suspension"
                 onclick="return confirm('This will also {% if student.is_suspended %}reactivate{% else %}deactivate{% endif %} the Django account. Continue?')">
-          {% if student.is_suspended %}Unban{% else %}Ban{% endif %} {{ student.user.first_name|truncatechars:"8" }}
+          {% if student.is_suspended %}Unban{% else %}Ban{% endif %} {{ student.user.first_name|truncatechars:"6" }}
         </button>
       </form>
     </li>
