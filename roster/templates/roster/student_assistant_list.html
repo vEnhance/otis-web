@@ -30,7 +30,6 @@
   <table class="table table-striped">
     <tr>
       <th>Name</th>
-      <th>Email</th>
       <th>Students</th>
     </tr>
     {% for igroup in instructor_list %}
@@ -39,21 +38,18 @@
           <td>
             <a href="{% url "admin:roster_assistant_change" instructor.pk %}">{{ instructor.name }}</a>
             <br />
-            {{ instructor.shortname }}
-          </td>
-          <td>
-            <small><code>{{ instructor.user.email|urlize }}</code>
-              {% if request.user.is_superuser %}
-                <br />
-                {# Hijack assistant account #}
-                <form action="{% url 'hijack:acquire' %}" method="post">
-                  {% csrf_token %}
-                  <input type="hidden" name="user_pk" value="{{ instructor.user.pk }}" />
-                  <input type="hidden" name="next" value="{{ request.path }}" />
-                  <button class="pseudo-button" type="submit">(Hijack)</button>
-                </form>
-              {% endif %}
-            </small>
+            {% if request.user.is_superuser %}
+              {# Hijack assistant account #}
+              <form action="{% url 'hijack:acquire' %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="user_pk" value="{{ instructor.user.pk }}" />
+                <input type="hidden" name="next" value="{{ request.path }}" />
+                <button class="pseudo-button" type="submit">
+                  Hijack
+                  {{ instructor.shortname }}
+                </button>
+              </form>
+            {% endif %}
           </td>
           <td>
             <ul>
