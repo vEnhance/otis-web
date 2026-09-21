@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+{% block title %}
+  Mass late fees
+{% endblock title %}
+{% block layout-content %}
+  {% if students %}
+    {% include "otisweb/components/generic_form.html" with submit_name="Charge late fee" btn_class="btn-danger" %}
+    <p>
+      <a class="btn btn-primary" href="?format=csv" data-testid="late-fee-csv">Download CSV</a>
+    </p>
+    <table class="table table-striped" data-testid="late-fee-table">
+      <thead class="table-dark">
+        <tr>
+          <th>Student</th>
+          <th>ID</th>
+          <th>Code</th>
+          <th>Paid</th>
+          <th>Owed</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for student in students %}
+          <tr>
+            <td>
+              <a href="{{ student.get_absolute_url }}">{{ student.name }}</a>
+            </td>
+            <td>
+              <a href="{% url "edit-invoice" student.invoice.pk %}"><span class="student-id">{{ student.pk }}</span></a>
+            </td>
+            <td>{{ student.payment_status_code }}</td>
+            <td>${{ student.invoice.total_paid }}</td>
+            <td>${{ student.invoice.total_owed }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p data-testid="late-fee-nobody">Nobody in the active semester has an overdue payment right now.</p>
+  {% endif %}
+{% endblock layout-content %}

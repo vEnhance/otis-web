@@ -1,4 +1,5 @@
 import itertools
+from decimal import Decimal
 from typing import Any, ClassVar
 
 from django import forms
@@ -300,3 +301,20 @@ class UserMergeForm(forms.Form):
                 "Delete the redundant student(s) first."
             )
         return cleaned_data
+
+
+class MassLateFeeForm(forms.Form):
+    """Charges a late fee to every invoice with an overdue payment."""
+
+    amount = forms.DecimalField(
+        initial=60,
+        max_digits=8,
+        decimal_places=2,
+        min_value=Decimal("0.01"),
+        label="Late fee",
+        help_text="Added to the extras field of each invoice listed below.",
+    )
+    confirmed = forms.BooleanField(
+        label="I have looked over the preview",
+        help_text="Nothing is charged until this box is checked.",
+    )

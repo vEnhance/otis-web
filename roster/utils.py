@@ -1,12 +1,16 @@
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
-from django.db.models import Q
+from django.db.models import Case, Q, Value, When
+from django.db.models.expressions import ExpressionWrapper, F
+from django.db.models.fields import DecimalField, IntegerField
+from django.db.models.functions import Coalesce, Greatest
 from django.db.models.query import QuerySet
 from django.http import Http404
 from django.http.request import HttpRequest
 from django.shortcuts import get_object_or_404
+from django.utils.timezone import localtime
 
-from roster.models import Student
+from roster.models import LATE_PAYMENT_GRACE, UPCOMING_PAYMENT_WINDOW, Student
 
 from . import models
 
@@ -105,3 +109,79 @@ def infer_student(request: HttpRequest) -> models.Student:
         raise Http404("No Student matches the given query.")
     else:
         return student
+
+
+OVERDUE_PAYMENT_STATUSES = frozenset({2, 3, 6, 7})
+
+
+def annotate_payment_status(queryset: QuerySet[Student]) -> QuerySet[Student]:
+    """Evaluate Student.payment_status in SQL, as `payment_status_code`.
+
+    This duplicates the property of the same name, so that a whole roster can
+    be classified in a single query; the two must be edited together.
+
+    Also annotates `invoice_total_cost` and `invoice_total_owed`, the SQL
+    counterparts of the Invoice properties.
+    """
+    now = localtime()
+    money = DecimalField(max_digits=8, decimal_places=2)
+    total_cost = ExpressionWrapper(
+        F("semester__prep_rate") * F("invoice__preps_taught")
+        + F("semester__hour_rate") * F("invoice__hours_taught")
+        + F("invoice__extras")
+        + F("invoice__adjustment"),
+        output_field=money,
+    )
+    queryset = queryset.annotate(
+        invoice_total_cost=total_cost,
+        invoice_total_owed=ExpressionWrapper(
+            total_cost - F("invoice__total_paid") - F("invoice__credits"),
+            output_field=money,
+        ),
+        initial_deadline=Case(
+            When(
+                semester__one_semester_date__isnull=False,
+                semester__full_payment_deadline__isnull=False,
+                invoice__created_at__gt=F("semester__one_semester_date"),
+                then=F("semester__full_payment_deadline"),
+            ),
+            default=F("semester__half_payment_deadline"),
+        ),
+    )
+    # Coalesce keeps a missing forgive date from swallowing the whole Greatest()
+    forgive_date = Coalesce("invoice__forgive_date", "invoice__created_at")
+    queryset = queryset.annotate(
+        initial_due=Greatest("invoice__created_at", "initial_deadline", forgive_date),
+        full_due=Greatest(
+            "invoice__created_at", "semester__full_payment_deadline", forgive_date
+        ),
+    )
+    behind_on_initial = Q(initial_deadline__isnull=False) & Q(
+        invoice_total_cost__lt=F("invoice_total_owed") * Value(2, output_field=money)
+    )
+    # Greatest() is null-propagating on MySQL and SQLite but not on Postgres,
+    # so the deadlines are checked for null explicitly rather than via *_due.
+    has_full_deadline = Q(semester__full_payment_deadline__isnull=False)
+    return queryset.annotate(
+        payment_status_code=Case(
+            When(
+                Q(semester__show_invoices=False)
+                | Q(invoice__isnull=True)
+                | Q(invoice_total_owed__lte=0),
+                then=0,
+            ),
+            When(
+                behind_on_initial & Q(initial_due__lt=now - LATE_PAYMENT_GRACE), then=3
+            ),
+            When(behind_on_initial & Q(initial_due__lt=now), then=2),
+            When(behind_on_initial, then=1),
+            When(has_full_deadline & Q(full_due__lt=now - LATE_PAYMENT_GRACE), then=7),
+            When(has_full_deadline & Q(full_due__lt=now), then=6),
+            When(
+                has_full_deadline & Q(full_due__lt=now + UPCOMING_PAYMENT_WINDOW),
+                then=5,
+            ),
+            default=4,
+            output_field=IntegerField(),
+        )
+    )
