@@ -1,3 +1,4 @@
+import csv
 import datetime
 import re
 from decimal import Decimal
@@ -46,6 +47,8 @@ from roster.models import (
     UnitPetition,
     build_student,
 )
+from roster.utils import annotate_payment_status
+from roster.views import get_late_fee_targets
 
 from .admin import ApplyUUIDIEResource
 
@@ -1518,6 +1521,185 @@ def test_delinquency_for_joining_second_semester(otis) -> None:
         assert alice.is_delinquent
         assert bob.payment_status == 3
         assert bob.is_delinquent
+
+
+def annotated_payment_status(student: Student) -> int:
+    queryset = annotate_payment_status(Student.objects.filter(pk=student.pk))
+    return queryset.get().payment_status_code  # type: ignore
+
+
+@pytest.mark.django_db
+def test_payment_status_annotation(otis) -> None:
+    """The SQL mirror in annotate_payment_status must agree with the property."""
+    semester: Semester = SemesterFactory.create(
+        show_invoices=True,
+        half_payment_deadline=datetime.datetime(2022, 9, 21, tzinfo=UTC),
+        full_payment_deadline=datetime.datetime(2023, 1, 21, tzinfo=UTC),
+        one_semester_date=datetime.datetime(2022, 12, 30, tzinfo=UTC),
+    )
+    alice: Student = StudentFactory.create(semester=semester)
+    assert annotated_payment_status(alice) == alice.payment_status == 0
+
+    with freeze_time("2022-08-05", tz_offset=0):
+        invoice: Invoice = InvoiceFactory.create(student=alice, preps_taught=2)
+    bob: Student = StudentFactory.create(semester=semester)
+    with freeze_time("2023-01-01", tz_offset=0):
+        InvoiceFactory.create(student=bob, preps_taught=1)
+
+    stamps = (
+        "2022-09-17",
+        "2022-09-22",
+        "2022-10-15",
+        "2022-12-30",
+        "2023-01-17",
+        "2023-01-22",
+        "2023-02-15",
+    )
+    for paid, credits, extras in (
+        (0, 0, 0),
+        (239, 0, 0),
+        (240, 0, 0),
+        (40, 200, 0),
+        (240, 0, 60),
+        (480, 0, 0),
+    ):
+        invoice.total_paid = paid
+        invoice.credits = credits
+        invoice.extras = extras
+        invoice.save()
+        for stamp in stamps:
+            with freeze_time(stamp, tz_offset=0):
+                for student in (alice, bob):
+                    assert (
+                        annotated_payment_status(student) == student.payment_status
+                    ), (
+                        student.pk,
+                        stamp,
+                        paid,
+                    )
+
+
+@pytest.mark.django_db
+def test_payment_status_annotation_without_deadlines(otis) -> None:
+    for kwargs in (
+        {"show_invoices": False},
+        {"show_invoices": True},
+        {"half_payment_deadline": datetime.datetime(2022, 9, 21, tzinfo=UTC)},
+        {"full_payment_deadline": datetime.datetime(2023, 1, 21, tzinfo=UTC)},
+    ):
+        semester: Semester = SemesterFactory.create(
+            show_invoices=kwargs.pop("show_invoices", True), **kwargs
+        )
+        student: Student = StudentFactory.create(semester=semester)
+        with freeze_time("2022-08-05", tz_offset=0):
+            InvoiceFactory.create(student=student, preps_taught=2)
+        with freeze_time("2023-02-15", tz_offset=0):
+            assert annotated_payment_status(student) == student.payment_status, kwargs
+
+
+@pytest.mark.django_db
+def test_mass_late_fee(otis) -> None:
+    deadlines = {
+        "half_payment_deadline": datetime.datetime(2020, 9, 21, tzinfo=UTC),
+        "full_payment_deadline": datetime.datetime(2021, 1, 21, tzinfo=UTC),
+    }
+    semester: Semester = SemesterFactory.create(show_invoices=True, **deadlines)
+    past: Semester = SemesterFactory.create(
+        show_invoices=True, active=False, **deadlines
+    )
+    with freeze_time("2020-08-05", tz_offset=0):
+        deadbeat: Student = StudentFactory.create(semester=semester)
+        InvoiceFactory.create(student=deadbeat, preps_taught=2)
+        halfway: Student = StudentFactory.create(semester=semester)
+        InvoiceFactory.create(student=halfway, preps_taught=2, total_paid=240)
+        cleared: Student = StudentFactory.create(semester=semester)
+        InvoiceFactory.create(student=cleared, preps_taught=2, total_paid=480)
+        impostor: Student = StudentFactory.create(
+            semester=semester, standing=StudentStanding.FAKE
+        )
+        InvoiceFactory.create(student=impostor, preps_taught=2)
+        alumnus: Student = StudentFactory.create(semester=past)
+        InvoiceFactory.create(student=alumnus, preps_taught=2)
+
+    assert deadbeat.payment_status == 3
+    assert halfway.payment_status == 7
+
+    otis.login(StudentFactory.create())
+    otis.get_denied("mass-late-fee")
+    otis.login(UserFactory.create(is_staff=True))
+    otis.get_denied("mass-late-fee")
+    otis.post_denied("mass-late-fee", data={"amount": 60, "confirmed": "on"})
+
+    otis.login(UserFactory.create(is_staff=True, is_superuser=True))
+    resp = otis.get_ok("mass-late-fee")
+    assert {s.pk: s.payment_status_code for s in resp.context["students"]} == {
+        deadbeat.pk: 3,
+        halfway.pk: 7,
+    }
+
+    # the preview is an export: its rendered text is the product
+    resp = otis.get_ok("mass-late-fee", data={"format": "csv"})
+    assert resp.headers["Content-Type"] == "text/csv"
+    rows = {
+        int(row["Student pk"]): row
+        for row in csv.DictReader(StringIO(resp.content.decode()))
+    }
+    assert set(rows) == {deadbeat.pk, halfway.pk}
+    assert rows[halfway.pk]["Payment status"] == "7"
+    assert rows[halfway.pk]["Total cost"] == "480.00"
+    assert rows[halfway.pk]["Total paid"] == "240.00"
+    assert rows[halfway.pk]["Total owed"] == "240.00"
+    assert rows[halfway.pk]["Prep total"] == "480"
+
+    # an unchecked confirmation box is a dry run
+    otis.post_ok("mass-late-fee", data={"amount": 60})
+    for student in (deadbeat, halfway):
+        student.invoice.refresh_from_db()
+        assert student.invoice.extras == 0
+
+    resp = otis.post(
+        "mass-late-fee", data={"amount": 60, "confirmed": "on"}, follow=True
+    )
+    otis.assert_redirects(resp, otis.url("mass-late-fee"))
+    assert any(m.level == message_levels.SUCCESS for m in resp.context["messages"])
+    for student in (deadbeat, halfway):
+        student.invoice.refresh_from_db()
+        assert student.invoice.extras == 60
+        assert student.invoice.memo.endswith("late fee of $60")
+    for student in (cleared, impostor, alumnus):
+        student.invoice.refresh_from_db()
+        assert student.invoice.extras == 0
+        assert student.invoice.memo == ""
+
+
+@pytest.mark.django_db
+def test_mass_late_fee_with_nobody_overdue(otis) -> None:
+    SemesterFactory.create(show_invoices=True)
+    otis.login(UserFactory.create(is_staff=True, is_superuser=True))
+    resp = otis.get_ok("mass-late-fee")
+    assert not resp.context["students"]
+    otis.assert_testid(resp, "late-fee-nobody")
+
+
+@pytest.mark.django_db
+def test_late_fee_targets_in_one_query(otis, django_assert_num_queries) -> None:
+    semester: Semester = SemesterFactory.create(
+        show_invoices=True,
+        half_payment_deadline=datetime.datetime(2020, 9, 21, tzinfo=UTC),
+        full_payment_deadline=datetime.datetime(2021, 1, 21, tzinfo=UTC),
+    )
+    with freeze_time("2020-08-05", tz_offset=0):
+        for _ in range(10):
+            InvoiceFactory.create(
+                student=StudentFactory.create(semester=semester), preps_taught=2
+            )
+
+    with django_assert_num_queries(1):
+        students = list(get_late_fee_targets())
+        for student in students:
+            assert student.invoice.prep_total > 0
+            assert student.name
+    assert len(students) == 10
 
 
 @pytest.mark.django_db

@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+{% block title %}
+  Mass late fees
+{% endblock title %}
+{% block layout-content %}
+  <p>
+    The students below are the ones in
+    <b>{{ semester }}</b>
+    whose payment is overdue, i.e. whose payment status is 2, 3, 6 or 7.
+    Download the
+    <a href="?format=csv" data-testid="late-fee-csv">preview CSV</a>
+    to inspect the invoices in a spreadsheet before charging anything.
+  </p>
+  {% if students %}
+    <div class="alert alert-warning">
+      Submitting the form adds the late fee to the <code>extras</code> field of
+      <b>{{ students|length }} invoice(s)</b>, and appends a note to each memo.
+      The list is recomputed when you submit, so a student who pays in the
+      meantime is spared.
+    </div>
+    {% include "otisweb/components/generic_form.html" with submit_name="Charge late fee" btn_class="btn-danger" %}
+    <hr />
+    <table class="table table-striped" data-testid="late-fee-table">
+      <thead class="table-dark">
+        <tr>
+          <th>Student</th>
+          <th>ID</th>
+          <th>Status</th>
+          <th>Cost</th>
+          <th>Paid</th>
+          <th>Owed</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for student in students %}
+          <tr>
+            <td>
+              <a href="{{ student.get_absolute_url }}">{{ student.name }}</a>
+            </td>
+            <td>
+              <a href="{% url "edit-invoice" student.invoice.pk %}"><span class="student-id">{{ student.pk }}</span></a>
+            </td>
+            <td>{{ student.payment_status_code }}</td>
+            <td>${{ student.invoice.total_cost }}</td>
+            <td>${{ student.invoice.total_paid }}</td>
+            <td>${{ student.invoice.total_owed }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="alert alert-success" data-testid="late-fee-nobody">
+      Nobody in the active semester has an overdue payment right now.
+    </div>
+  {% endif %}
+{% endblock layout-content %}

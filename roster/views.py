@@ -11,9 +11,11 @@ So e.g. "list students by most recent pset" goes under dashboard.
 """
 
 import collections
+import csv
 import datetime
 import logging
 from collections.abc import Sequence
+from decimal import Decimal
 from typing import Any
 
 from allauth.socialaccount.models import SocialAccount
@@ -26,9 +28,10 @@ from django.core.exceptions import (
     ObjectDoesNotExist,
     PermissionDenied,
 )
-from django.db.models.expressions import F
+from django.db.models.expressions import F, Value
 from django.db.models.fields import FloatField
 from django.db.models.functions.comparison import Cast
+from django.db.models.functions.text import Concat, Trim
 from django.db.models.manager import Manager
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
@@ -59,6 +62,8 @@ from roster.forms import LinkAssistantForm
 from roster.models import ApplyUUID, Assistant
 from roster.us_states import get_us_state_name
 from roster.utils import (
+    OVERDUE_PAYMENT_STATUSES,
+    annotate_payment_status,
     can_edit,
     get_current_students,
     get_regs_missing_us_state,
@@ -71,6 +76,7 @@ from .forms import (
     BackfillUSStateForm,
     CurriculumForm,
     DecisionForm,
+    MassLateFeeForm,
     PetitionForm,
     UserForm,
     UserLookupForm,
@@ -765,6 +771,115 @@ def giga_chart(request: HttpRequest, format_as: str) -> HttpResponse:
         return render(request, "roster/gigachart.html", context)
     else:
         raise NotImplementedError(f"Format {format_as} not implemented yet")
+
+
+def get_late_fee_targets() -> QuerySet[Student]:
+    """Students of the active semester with a payment that is genuinely overdue."""
+    queryset = get_current_students().filter(standing__in=LEGIT_STANDINGS)
+    queryset = annotate_payment_status(queryset)
+    queryset = queryset.filter(payment_status_code__in=OVERDUE_PAYMENT_STATUSES)
+    queryset = queryset.select_related("user", "semester", "invoice")
+    return queryset.order_by("-payment_status_code", "user__first_name")
+
+
+LATE_FEE_CSV_COLUMNS = (
+    "Student pk",
+    "Name",
+    "Username",
+    "Standing",
+    "Payment status",
+    "Invoice created",
+    "Preps taught",
+    "Prep rate",
+    "Prep total",
+    "Hours taught",
+    "Hour rate",
+    "Hours total",
+    "Adjustment",
+    "Extras",
+    "Total cost",
+    "Credits",
+    "Total paid",
+    "Total owed",
+    "Forgive date",
+)
+
+
+def late_fee_preview_csv(students: QuerySet[Student]) -> HttpResponse:
+    timestamp = timezone.localtime().strftime("%Y-%m-%d-%H%M%S")
+    filename = f"otis-late-fees-{timestamp}.csv"
+    response = HttpResponse(
+        content_type="text/csv",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+    writer = csv.writer(response)
+    writer.writerow(LATE_FEE_CSV_COLUMNS)
+    for student in students:
+        invoice = student.invoice
+        semester = student.semester
+        writer.writerow(
+            (
+                student.pk,
+                student.name,
+                student.user.username,
+                StudentStanding(student.standing).label,
+                student.payment_status_code,  # type: ignore
+                timezone.localtime(invoice.created_at).strftime("%Y-%m-%d"),
+                invoice.preps_taught,
+                semester.prep_rate,
+                invoice.prep_total,
+                invoice.hours_taught,
+                semester.hour_rate,
+                invoice.hours_total,
+                invoice.adjustment,
+                invoice.extras,
+                invoice.total_cost,
+                invoice.credits,
+                invoice.total_paid,
+                invoice.total_owed,
+                invoice.forgive_date or "",
+            )
+        )
+    return response
+
+
+@admin_required
+def mass_late_fee(request: HttpRequest) -> HttpResponse:
+    """Charge a late fee to everyone in the active semester who is overdue."""
+    students = get_late_fee_targets()
+
+    if request.method == "POST":
+        form = MassLateFeeForm(request.POST)
+        if form.is_valid():
+            amount: Decimal = form.cleaned_data["amount"]
+            note = f"{timezone.localdate()}: late fee of ${amount}"
+            count = Invoice.objects.filter(student__in=students).update(
+                extras=F("extras") + amount,
+                memo=Trim(Concat("memo", Value(f"\n{note}"))),
+            )
+            messages.success(
+                request, f"Charged a ${amount} late fee to {count} student(s)."
+            )
+            logger.log(
+                SUCCESS_LOG_LEVEL,
+                f"Charged a ${amount} late fee to {count} student(s)",
+                extra={"request": request},
+            )
+            return HttpResponseRedirect(reverse("mass-late-fee"))
+    elif request.GET.get("format") == "csv":
+        return late_fee_preview_csv(students)
+    else:
+        form = MassLateFeeForm()
+
+    return render(
+        request,
+        "roster/mass_late_fee.html",
+        {
+            "form": form,
+            "students": students,
+            "semester": Semester.objects.filter(active=True).first(),
+        },
+    )
 
 
 class StudentAssistantList(StaffRequiredMixin, ListView[Student]):
