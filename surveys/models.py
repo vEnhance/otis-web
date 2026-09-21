@@ -37,6 +37,11 @@ class Survey(models.Model):
         blank=True,
         help_text="Achievement granted for submitting, if the student lacks it",
     )
+    achievement_awarded_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="When the achievement was granted in bulk, if it has been",
+    )
     essay_prompt = models.TextField(help_text="Prompt for the required GM essay")
     instructor_comments_prompt = models.TextField(
         blank=True,
@@ -88,6 +93,9 @@ class Survey(models.Model):
             for user_id in user_ids
         ]
         AchievementUnlock.objects.bulk_create(unlocks, ignore_conflicts=True)
+        if self.achievement_awarded_at is None:
+            self.achievement_awarded_at = timezone.now()
+            self.save(update_fields=("achievement_awarded_at",))
         return len(unlocks)
 
 
