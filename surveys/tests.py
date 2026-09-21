@@ -328,7 +328,7 @@ def test_superuser_preview(otis):
 
 
 @pytest.mark.django_db
-def test_grant_achievements_action(otis):
+def test_grant_achievements_button(otis):
     achievement = AchievementFactory.create()
     closed = SurveyFactory.create(
         achievement=achievement,
@@ -343,21 +343,79 @@ def test_grant_achievements_action(otis):
     SurveyCompletionFactory.create(survey=still_open)
     otis.login(UserFactory.create(is_staff=True, is_superuser=True))
 
-    for _ in range(2):  # granting again changes nothing
-        otis.post_ok(
-            "admin:surveys_survey_changelist",
-            data={
-                "action": "grant_achievements",
-                "_selected_action": [closed.pk, still_open.pk],
-            },
+    resp = otis.get_ok("survey-list")
+    otis.assert_testid(resp, f"survey-award-{closed.pk}")
+    otis.assert_no_testid(resp, f"survey-award-{still_open.pk}")
+    otis.assert_no_testid(resp, f"survey-awarded-{closed.pk}")
+
+    with freeze_time("2021-10-02", tz_offset=0):
+        otis.post_redirects(
+            otis.url("survey-list"), "survey-grant-achievements", closed.pk
+        )
+    closed.refresh_from_db()
+    assert closed.achievement_awarded_at == datetime.datetime(2021, 10, 2, tzinfo=UTC)
+    assert set(AchievementUnlock.objects.values_list("user", "achievement")) == {
+        (alice.user.pk, achievement.pk),
+        (bob.user.pk, achievement.pk),
+        (carol.user.pk, achievement.pk),
+    }
+    assert AchievementUnlock.objects.get(user=alice.user) == unlock
+
+    resp = otis.get_ok("survey-list")
+    otis.assert_no_testid(resp, f"survey-award-{closed.pk}")
+    otis.assert_testid(resp, f"survey-awarded-{closed.pk}")
+
+
+@pytest.mark.django_db
+def test_grant_achievements_refused(otis):
+    closed = {
+        "opens_at": datetime.datetime(2021, 9, 1, tzinfo=UTC),
+        "closes_at": datetime.datetime(2021, 10, 1, tzinfo=UTC),
+    }
+    still_open = SurveyFactory.create(achievement=AchievementFactory.create())
+    no_achievement = SurveyFactory.create(**closed)
+    already_granted = SurveyFactory.create(
+        achievement=AchievementFactory.create(),
+        achievement_awarded_at=datetime.datetime(2021, 10, 2, tzinfo=UTC),
+        **closed,
+    )
+    for survey in (still_open, no_achievement, already_granted):
+        SurveyCompletionFactory.create(survey=survey)
+    otis.login(UserFactory.create(is_staff=True, is_superuser=True))
+
+    for survey in (still_open, no_achievement, already_granted):
+        resp = otis.post_redirects(
+            otis.url("survey-list"),
+            "survey-grant-achievements",
+            survey.pk,
             follow=True,
         )
-        assert set(AchievementUnlock.objects.values_list("user", "achievement")) == {
-            (alice.user.pk, achievement.pk),
-            (bob.user.pk, achievement.pk),
-            (carol.user.pk, achievement.pk),
-        }
-    assert AchievementUnlock.objects.get(user=alice.user) == unlock
+        assert any(m.level == message_levels.ERROR for m in resp.context["messages"])
+        otis.assert_no_testid(resp, f"survey-award-{survey.pk}")
+    assert not AchievementUnlock.objects.exists()
+    still_open.refresh_from_db()
+    assert still_open.achievement_awarded_at is None
+
+
+@pytest.mark.django_db
+def test_grant_achievements_needs_superuser(otis):
+    closed = SurveyFactory.create(
+        achievement=AchievementFactory.create(),
+        opens_at=datetime.datetime(2021, 9, 1, tzinfo=UTC),
+        closes_at=datetime.datetime(2021, 10, 1, tzinfo=UTC),
+    )
+    assistant = AssistantFactory.create()
+    student = SurveyCompletionFactory.create(
+        survey=closed, student__assistant=assistant
+    ).student
+    otis.login(assistant)
+    resp = otis.get_ok("survey-list")
+    otis.assert_no_testid(resp, f"survey-award-{closed.pk}")
+    otis.post_denied("survey-grant-achievements", closed.pk)
+
+    otis.login(student)
+    otis.post_denied("survey-grant-achievements", closed.pk)
+    assert not AchievementUnlock.objects.exists()
 
 
 @pytest.mark.django_db

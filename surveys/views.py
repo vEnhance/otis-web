@@ -59,7 +59,7 @@ def survey_list(request: AuthHttpRequest) -> HttpResponse:
             | Q(semester__in=taught_semesters)
         )
     surveys = (
-        surveys.select_related("semester")
+        surveys.select_related("semester", "achievement")
         .annotate(
             num_completions=Count("surveycompletion", distinct=True),
             num_unread_feedback=Count(
@@ -106,10 +106,32 @@ def survey_list(request: AuthHttpRequest) -> HttpResponse:
             "is_instructor": s.semester.pk in taught_semester_ids,
             "completed": s.pk in completed,
             "gm_feedback": signed_feedback.get(s.pk),
+            "can_award": s.achievement is not None
+            and s.achievement_awarded_at is None
+            and s.closes_at <= now,
         }
         for s in surveys
     ]
     return render(request, "surveys/survey_list.html", {"rows": rows})
+
+
+@admin_required
+@require_POST
+def survey_grant_achievements(request: AuthHttpRequest, survey_pk: int) -> HttpResponse:
+    """Unlocks a closed survey's achievement for everyone who completed it."""
+    survey = get_object_or_404(
+        Survey.objects.select_related("achievement"), pk=survey_pk
+    )
+    if survey.achievement is None:
+        messages.error(request, "This survey has no achievement to grant.")
+    elif timezone.now() < survey.closes_at:
+        messages.error(request, "This survey hasn't closed yet.")
+    elif survey.achievement_awarded_at is not None:
+        messages.error(request, "This survey's achievement was already granted.")
+    else:
+        count = survey.grant_achievements()
+        messages.success(request, f"Granted the achievement to {count} student(s).")
+    return redirect("survey-list")
 
 
 def _get_student(request: AuthHttpRequest, survey: Survey) -> Student | None:

@@ -33,6 +33,11 @@
                data-testid="survey-edit-{{ row.survey.pk }}">Edit survey in Django admin</a>
           </li>
           <li>{{ row.survey.num_completions }} responses submitted</li>
+          {% if row.survey.achievement_awarded_at %}
+            <li data-testid="survey-awarded-{{ row.survey.pk }}">
+              Diamonds awarded: {% timestamp row.survey.achievement_awarded_at "time" %}
+            </li>
+          {% endif %}
         {% endif %}
       </ul>
       {% if row.is_student and row.completed %}
@@ -75,6 +80,17 @@
             Responses
             {% if row.survey.num_unread_feedback %}<span class="badge bg-danger">{{ row.survey.num_unread_feedback }}</span>{% endif %}
           </a>
+        {% endif %}
+        {% if request.user.is_superuser and row.can_award %}
+          <form method="post"
+                action="{% url "survey-grant-achievements" row.survey.pk %}">
+            {% csrf_token %}
+            <button type="submit"
+                    class="btn btn-warning"
+                    data-testid="survey-award-{{ row.survey.pk }}">
+              <span class="emoji-text">💎</span> Award diamonds
+            </button>
+          </form>
         {% endif %}
         {% if row.is_instructor and not row.is_student %}
           {% if not request.user.is_superuser or row.survey.num_comments %}
