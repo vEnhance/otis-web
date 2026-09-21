@@ -39,6 +39,11 @@ ENABLED_STANDINGS = frozenset(
     }
 )
 
+# How long after a payment deadline before a delinquent student is locked out,
+# and how far ahead of one the upcoming payment is advertised.
+LATE_PAYMENT_GRACE = timedelta(days=2)
+UPCOMING_PAYMENT_WINDOW = timedelta(days=28)
+
 
 class CurriculumRowTypeDict(TypedDict, total=False):
     unit: Unit
@@ -319,14 +324,16 @@ class Student(models.Model):
         0: student is clear (no invoice exists or total owed is nonpositive)
         1: remind of upcoming payment for half deadline
         2: warn of late payment for half deadline
-        3: lock late payment for half deadline (more than 2 days past)
+        3: lock late payment for half deadline (LATE_PAYMENT_GRACE past)
         4: student has something owed for full deadline, but no warning yet
-        5: remind of upcoming payment for full deadline (up to 28d in advance)
+        5: remind of upcoming payment for full deadline (UPCOMING_PAYMENT_WINDOW ahead)
         6: warn of late payment for full deadline
-        7: lock late payment for full deadline (more than 2 days past)
+        7: lock late payment for full deadline (LATE_PAYMENT_GRACE past)
 
         Codes 1-3 apply while more than half the cost is still owed;
         codes 4-7 apply until the invoice is paid off entirely.
+
+        Mirrored in SQL by roster.utils.annotate_payment_status.
         """
         if self.semester.show_invoices is False:
             return 0
@@ -355,9 +362,9 @@ class Student(models.Model):
             and invoice.total_owed > invoice.total_cost / 2
         ):
             d = max(invoice.created_at, initial_payment_deadline) - now
-            if d < timedelta(days=-2):
+            if d < -LATE_PAYMENT_GRACE:
                 return 3
-            elif d < timedelta(days=0):
+            elif d < timedelta(0):
                 return 2
             return 1
 
@@ -365,11 +372,11 @@ class Student(models.Model):
         if full_payment_deadline is not None:
             # anything reaching here has total_owed > 0, i.e. is not paid in full
             d = max(invoice.created_at, full_payment_deadline) - now
-            if d < timedelta(days=-2):
+            if d < -LATE_PAYMENT_GRACE:
                 return 7
-            elif d < timedelta(days=0):
+            elif d < timedelta(0):
                 return 6
-            elif d < timedelta(days=28):
+            elif d < UPCOMING_PAYMENT_WINDOW:
                 return 5
         return 4
 

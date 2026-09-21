@@ -1,5 +1,3 @@
-from datetime import timedelta
-
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db.models import Case, Q, Value, When
@@ -12,7 +10,7 @@ from django.http.request import HttpRequest
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import localtime
 
-from roster.models import Student
+from roster.models import LATE_PAYMENT_GRACE, UPCOMING_PAYMENT_WINDOW, Student
 
 from . import models
 
@@ -115,9 +113,6 @@ def infer_student(request: HttpRequest) -> models.Student:
 
 OVERDUE_PAYMENT_STATUSES = frozenset({2, 3, 6, 7})
 
-HARD_LOCK_GRACE = timedelta(days=2)
-UPCOMING_WINDOW = timedelta(days=28)
-
 
 def annotate_payment_status(queryset: QuerySet[Student]) -> QuerySet[Student]:
     """Evaluate Student.payment_status in SQL, as `payment_status_code`.
@@ -171,12 +166,17 @@ def annotate_payment_status(queryset: QuerySet[Student]) -> QuerySet[Student]:
                 | Q(invoice_total_owed__lte=0),
                 then=0,
             ),
-            When(behind_on_initial & Q(initial_due__lt=now - HARD_LOCK_GRACE), then=3),
+            When(
+                behind_on_initial & Q(initial_due__lt=now - LATE_PAYMENT_GRACE), then=3
+            ),
             When(behind_on_initial & Q(initial_due__lt=now), then=2),
             When(behind_on_initial, then=1),
-            When(has_full_deadline & Q(full_due__lt=now - HARD_LOCK_GRACE), then=7),
+            When(has_full_deadline & Q(full_due__lt=now - LATE_PAYMENT_GRACE), then=7),
             When(has_full_deadline & Q(full_due__lt=now), then=6),
-            When(has_full_deadline & Q(full_due__lt=now + UPCOMING_WINDOW), then=5),
+            When(
+                has_full_deadline & Q(full_due__lt=now + UPCOMING_PAYMENT_WINDOW),
+                then=5,
+            ),
             default=4,
             output_field=IntegerField(),
         )
