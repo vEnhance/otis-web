@@ -335,12 +335,16 @@ img.emoji {
   vertical-align: -0.1em;
 }
 
-/* Only datetimes carry a title, so the hover hint is scoped to that. */
+/* Only a native title needs the hover hint; the Bootstrap tooltip that
+   local-time.js puts in its place is instant enough to advertise itself. */
 time[title] {
   cursor: help;
 }
 a time[title] {
   cursor: inherit;
+}
+.local-time-tooltip {
+  --bs-tooltip-max-width: min(92vw, 26rem);
 }
 
 /* OPAL hunt artwork; the blank variant keeps the same footprint as an image */
