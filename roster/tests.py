@@ -1578,6 +1578,19 @@ def test_payment_status_annotation(otis) -> None:
                         paid,
                     )
 
+    invoice.total_paid = 0
+    invoice.credits = 0
+    invoice.extras = 0
+    invoice.forgive_date = datetime.datetime(2023, 1, 30, tzinfo=UTC)
+    invoice.save()
+    for stamp in stamps:
+        with freeze_time(stamp, tz_offset=0):
+            for student in (alice, bob):
+                assert annotated_payment_status(student) == student.payment_status, (
+                    student.pk,
+                    stamp,
+                )
+
 
 @pytest.mark.django_db
 def test_payment_status_annotation_without_deadlines(otis) -> None:
@@ -1595,6 +1608,45 @@ def test_payment_status_annotation_without_deadlines(otis) -> None:
             InvoiceFactory.create(student=student, preps_taught=2)
         with freeze_time("2023-02-15", tz_offset=0):
             assert annotated_payment_status(student) == student.payment_status, kwargs
+
+
+@pytest.mark.django_db
+def test_forgive_date_extends_deadline(otis) -> None:
+    semester: Semester = SemesterFactory.create(
+        show_invoices=True,
+        half_payment_deadline=datetime.datetime(2022, 9, 21, tzinfo=UTC),
+        full_payment_deadline=datetime.datetime(2023, 1, 21, tzinfo=UTC),
+    )
+    alice: Student = StudentFactory.create(semester=semester)
+    with freeze_time("2022-08-05", tz_offset=0):
+        invoice: Invoice = InvoiceFactory.create(student=alice, preps_taught=2)
+
+    with freeze_time("2022-10-15", tz_offset=0):
+        assert alice.payment_status == 3
+        assert alice.is_delinquent
+
+    invoice.forgive_date = datetime.datetime(2022, 11, 1, tzinfo=UTC)
+    invoice.save()
+    for stamp, expected in (("2022-10-15", 1), ("2022-11-02", 2), ("2022-11-05", 3)):
+        with freeze_time(stamp, tz_offset=0):
+            assert alice.payment_status == expected, stamp
+            assert annotated_payment_status(alice) == expected, stamp
+            assert alice.is_delinquent is (expected == 3)
+
+    # the extension applies to the full payment deadline just the same
+    invoice.total_paid = 240
+    invoice.forgive_date = datetime.datetime(2023, 3, 1, tzinfo=UTC)
+    invoice.save()
+    for stamp, expected in (
+        ("2023-01-01", 4),
+        ("2023-02-15", 5),
+        ("2023-03-02", 6),
+        ("2023-03-04", 7),
+    ):
+        with freeze_time(stamp, tz_offset=0):
+            assert alice.payment_status == expected, stamp
+            assert annotated_payment_status(alice) == expected, stamp
+            assert alice.is_delinquent is (expected == 7)
 
 
 @pytest.mark.django_db
@@ -1620,9 +1672,16 @@ def test_mass_late_fee(otis) -> None:
         InvoiceFactory.create(student=impostor, preps_taught=2)
         alumnus: Student = StudentFactory.create(semester=past)
         InvoiceFactory.create(student=alumnus, preps_taught=2)
+        forgiven: Student = StudentFactory.create(semester=semester)
+        InvoiceFactory.create(
+            student=forgiven,
+            preps_taught=2,
+            forgive_date=datetime.datetime(2099, 1, 1, tzinfo=UTC),
+        )
 
     assert deadbeat.payment_status == 3
     assert halfway.payment_status == 7
+    assert forgiven.payment_status == 1
 
     otis.login(StudentFactory.create())
     otis.get_denied("mass-late-fee")
@@ -1666,7 +1725,7 @@ def test_mass_late_fee(otis) -> None:
         student.invoice.refresh_from_db()
         assert student.invoice.extras == 60
         assert student.invoice.memo.endswith("late fee of $60")
-    for student in (cleared, impostor, alumnus):
+    for student in (cleared, impostor, alumnus, forgiven):
         student.invoice.refresh_from_db()
         assert student.invoice.extras == 0
         assert student.invoice.memo == ""

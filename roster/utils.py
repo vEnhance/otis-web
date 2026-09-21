@@ -3,7 +3,7 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Case, Q, Value, When
 from django.db.models.expressions import ExpressionWrapper, F
 from django.db.models.fields import DecimalField, IntegerField
-from django.db.models.functions import Greatest
+from django.db.models.functions import Coalesce, Greatest
 from django.db.models.query import QuerySet
 from django.http import Http404
 from django.http.request import HttpRequest
@@ -148,9 +148,13 @@ def annotate_payment_status(queryset: QuerySet[Student]) -> QuerySet[Student]:
             default=F("semester__half_payment_deadline"),
         ),
     )
+    # Coalesce keeps a missing forgive date from swallowing the whole Greatest()
+    forgive_date = Coalesce("invoice__forgive_date", "invoice__created_at")
     queryset = queryset.annotate(
-        initial_due=Greatest("invoice__created_at", "initial_deadline"),
-        full_due=Greatest("invoice__created_at", "semester__full_payment_deadline"),
+        initial_due=Greatest("invoice__created_at", "initial_deadline", forgive_date),
+        full_due=Greatest(
+            "invoice__created_at", "semester__full_payment_deadline", forgive_date
+        ),
     )
     behind_on_initial = Q(initial_deadline__isnull=False) & Q(
         invoice_total_cost__lt=F("invoice_total_owed") * Value(2, output_field=money)

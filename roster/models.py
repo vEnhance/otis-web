@@ -45,6 +45,17 @@ LATE_PAYMENT_GRACE = timedelta(days=2)
 UPCOMING_PAYMENT_WINDOW = timedelta(days=28)
 
 
+def effective_payment_deadline(invoice: "Invoice", deadline: datetime) -> datetime:
+    """When a payment is really due, for a semester deadline of `deadline`.
+
+    A student who joined after the deadline, or who was granted a forgive
+    date, gets until then instead.
+    """
+    if invoice.forgive_date is not None:
+        deadline = max(deadline, invoice.forgive_date)
+    return max(invoice.created_at, deadline)
+
+
 class CurriculumRowTypeDict(TypedDict, total=False):
     unit: Unit
     number: int
@@ -332,6 +343,8 @@ class Student(models.Model):
 
         Codes 1-3 apply while more than half the cost is still owed;
         codes 4-7 apply until the invoice is paid off entirely.
+        Deadlines are the effective ones, so a forgive date postpones
+        every code, not just the lock.
 
         Mirrored in SQL by roster.utils.annotate_payment_status.
         """
@@ -361,7 +374,7 @@ class Student(models.Model):
             initial_payment_deadline is not None
             and invoice.total_owed > invoice.total_cost / 2
         ):
-            d = max(invoice.created_at, initial_payment_deadline) - now
+            d = effective_payment_deadline(invoice, initial_payment_deadline) - now
             if d < -LATE_PAYMENT_GRACE:
                 return 3
             elif d < timedelta(0):
@@ -371,7 +384,7 @@ class Student(models.Model):
         full_payment_deadline = self.semester.full_payment_deadline
         if full_payment_deadline is not None:
             # anything reaching here has total_owed > 0, i.e. is not paid in full
-            d = max(invoice.created_at, full_payment_deadline) - now
+            d = effective_payment_deadline(invoice, full_payment_deadline) - now
             if d < -LATE_PAYMENT_GRACE:
                 return 7
             elif d < timedelta(0):
@@ -382,9 +395,7 @@ class Student(models.Model):
 
     @property
     def is_delinquent(self) -> bool:
-        return self.payment_status % 4 == 3 and (
-            self.invoice.forgive_date is None or now() > self.invoice.forgive_date
-        )
+        return self.payment_status % 4 == 3
 
 
 class Invoice(models.Model):
@@ -431,7 +442,7 @@ class Invoice(models.Model):
     forgive_date = models.DateTimeField(
         null=True,
         blank=True,
-        help_text="When switched on, won't hard lock delinquents before this date.",
+        help_text="An extension: the payment is not treated as late until this date.",
     )
     memo = models.TextField(blank=True, help_text="Any notes about this invoice.")
 
