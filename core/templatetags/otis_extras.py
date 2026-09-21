@@ -7,11 +7,12 @@ from django import template
 from django.contrib.auth.models import AnonymousUser, User
 from django.contrib.humanize.templatetags.humanize import naturaltime
 from django.forms.boundfield import BoundField
+from django.forms.utils import flatatt
 from django.template.defaultfilters import stringfilter
 from django.urls import reverse
 from django.utils.formats import date_format
 from django.utils.functional import keep_lazy_text
-from django.utils.html import escape
+from django.utils.html import escape, format_html
 from django.utils.safestring import SafeData, mark_safe
 from django.utils.text import normalize_newlines
 from django.utils.timezone import template_localtime  # type: ignore
@@ -135,12 +136,12 @@ DATE_ONLY_STYLES: dict[TimestampStyle, TimestampStyle] = {
 }
 
 
-@register.inclusion_tag("core/components/timestamp.html")
+@register.simple_tag
 def timestamp(
     value: datetime.date | None,
     style: TimestampStyle,
     default: str = "",
-) -> dict[str, str]:
+) -> str:
     """
     Render a ``<time>`` element for a date or datetime.
 
@@ -148,7 +149,7 @@ def timestamp(
     spelled-out styles everywhere else.
     """
     if value is None:
-        return {"default": default}
+        return default
     local: datetime.date = template_localtime(value)
     is_datetime = isinstance(local, datetime.datetime)
     if not is_datetime:
@@ -159,8 +160,7 @@ def timestamp(
         text = date_format(local, TIMESTAMP_FORMATS[style], use_l10n=False)
     else:
         raise ValueError(f"Unknown timestamp style {style!r}")
-    return {
-        "iso": date_format(local, "c", use_l10n=False),
-        "full": date_format(local, "r", use_l10n=False) if is_datetime else "",
-        "text": text,
-    }
+    attrs = {"datetime": date_format(local, "c", use_l10n=False)}
+    if is_datetime:
+        attrs["title"] = date_format(local, "r", use_l10n=False)
+    return format_html("<time{}>{}</time>", flatatt(attrs), text)
