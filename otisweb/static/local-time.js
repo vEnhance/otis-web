@@ -30,9 +30,6 @@ function otisLocalizeTimestamp(element) {
   if (window.bootstrap === undefined) {
     return;
   }
-  /* Bootstrap moves the title out of the attribute, so otis.css keys the
-     hover cursor off this class once that has happened. */
-  element.classList.add("local-time");
   window.bootstrap.Tooltip.getOrCreateInstance(element, {
     container: "body",
     customClass: "local-time-tooltip",

@@ -335,14 +335,12 @@ img.emoji {
   vertical-align: -0.1em;
 }
 
-/* Only datetimes carry a hover hint; .local-time marks the ones whose title
-   local-time.js has handed to a Bootstrap tooltip. */
-time[title],
-time.local-time {
+/* Only a native title needs the hover hint; the Bootstrap tooltip that
+   local-time.js puts in its place is instant enough to advertise itself. */
+time[title] {
   cursor: help;
 }
-a time[title],
-a time.local-time {
+a time[title] {
   cursor: inherit;
 }
 .local-time-tooltip {
