@@ -13,6 +13,7 @@
         <tr>
           <th>Student</th>
           <th>ID</th>
+          <th>Standing</th>
           <th>Code</th>
           <th>Paid</th>
           <th>Owed</th>
@@ -27,6 +28,7 @@
             <td>
               <a href="{% url "edit-invoice" student.invoice.pk %}"><span class="student-id">{{ student.pk }}</span></a>
             </td>
+            <td>{{ student.standing }}</td>
             <td>{{ student.payment_status_code }}</td>
             <td>${{ student.invoice.total_paid }}</td>
             <td>${{ student.invoice.total_owed }}</td>
