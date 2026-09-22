@@ -1678,10 +1678,20 @@ def test_delinquents(otis) -> None:
             preps_taught=2,
             forgive_date=datetime.datetime(2099, 1, 1, tzinfo=UTC),
         )
+        springling: Student = StudentFactory.create(
+            semester=semester, standing=StudentStanding.DROPPED
+        )
+        InvoiceFactory.create(student=springling, preps_taught=1)
+        quitter: Student = StudentFactory.create(
+            semester=semester, standing=StudentStanding.DROPPED
+        )
+        InvoiceFactory.create(student=quitter, preps_taught=2)
 
     assert deadbeat.payment_status == 3
     assert halfway.payment_status == 7
     assert forgiven.payment_status == 1
+    assert springling.payment_status == 3
+    assert quitter.payment_status == 3
 
     otis.login(StudentFactory.create())
     otis.get_denied("delinquents")
@@ -1694,6 +1704,7 @@ def test_delinquents(otis) -> None:
     assert {s.pk: s.payment_status_code for s in resp.context["students"]} == {
         deadbeat.pk: 3,
         halfway.pk: 7,
+        quitter.pk: 3,
     }
 
     # the preview is an export: its rendered text is the product
@@ -1703,7 +1714,7 @@ def test_delinquents(otis) -> None:
         int(row["Student pk"]): row
         for row in csv.DictReader(StringIO(resp.content.decode()))
     }
-    assert set(rows) == {deadbeat.pk, halfway.pk}
+    assert set(rows) == {deadbeat.pk, halfway.pk, quitter.pk}
     assert rows[halfway.pk]["Payment status"] == "7"
     assert rows[halfway.pk]["Total cost"] == "480.00"
     assert rows[halfway.pk]["Total paid"] == "240.00"
@@ -1712,18 +1723,18 @@ def test_delinquents(otis) -> None:
 
     # an unchecked confirmation box is a dry run
     otis.post_ok("delinquents", data={"amount": 60})
-    for student in (deadbeat, halfway):
+    for student in (deadbeat, halfway, quitter):
         student.invoice.refresh_from_db()
         assert student.invoice.extras == 0
 
     resp = otis.post("delinquents", data={"amount": 60, "confirmed": "on"}, follow=True)
     otis.assert_redirects(resp, otis.url("delinquents"))
     assert any(m.level == message_levels.SUCCESS for m in resp.context["messages"])
-    for student in (deadbeat, halfway):
+    for student in (deadbeat, halfway, quitter):
         student.invoice.refresh_from_db()
         assert student.invoice.extras == 60
         assert student.invoice.memo.endswith("late fee of $60")
-    for student in (cleared, impostor, alumnus, forgiven):
+    for student in (cleared, impostor, alumnus, forgiven, springling):
         student.invoice.refresh_from_db()
         assert student.invoice.extras == 0
         assert student.invoice.memo == ""

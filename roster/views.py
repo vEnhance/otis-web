@@ -778,6 +778,13 @@ def get_late_fee_targets() -> QuerySet[Student]:
     queryset = get_current_students().filter(standing__in=LEGIT_STANDINGS)
     queryset = annotate_payment_status(queryset)
     queryset = queryset.filter(payment_status_code__in=OVERDUE_PAYMENT_STATUSES)
+    # a dropped student billed for a single semester joined in the spring only,
+    # so the fall half of the payment they never owed isn't actually overdue
+    queryset = queryset.exclude(
+        standing=StudentStanding.DROPPED,
+        invoice__preps_taught__lt=2,
+        payment_status_code__in=(2, 3),
+    )
     queryset = queryset.select_related("user", "semester", "invoice")
     return queryset.order_by("-payment_status_code", "user__first_name")
 
