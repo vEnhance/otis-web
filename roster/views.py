@@ -860,7 +860,10 @@ def delinquents(request: HttpRequest) -> HttpResponse:
         if form.is_valid():
             amount: Decimal = form.cleaned_data["amount"]
             note = f"{timezone.localdate()}: late fee of ${amount}"
-            count = Invoice.objects.filter(student__in=students).update(
+            # MySQL can't UPDATE a table that the subquery selecting the targets
+            # also reads, and the target queryset joins roster_invoice
+            target_pks = list(students.values_list("pk", flat=True))
+            count = Invoice.objects.filter(student__pk__in=target_pks).update(
                 extras=F("extras") + amount,
                 memo=Trim(Concat("memo", Value(f"\n{note}"))),
             )

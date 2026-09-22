@@ -12,8 +12,10 @@ from allauth.socialaccount.models import SocialAccount
 from django.conf import settings
 from django.contrib.auth.models import Group, User
 from django.contrib.messages import constants as message_levels
+from django.db import connection
 from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from freezegun.api import freeze_time
 
@@ -1727,7 +1729,21 @@ def test_delinquents(otis) -> None:
         student.invoice.refresh_from_db()
         assert student.invoice.extras == 0
 
-    resp = otis.post("delinquents", data={"amount": 60, "confirmed": "on"}, follow=True)
+    with CaptureQueriesContext(connection) as captured:
+        resp = otis.post(
+            "delinquents", data={"amount": 60, "confirmed": "on"}, follow=True
+        )
+    # MySQL rejects an UPDATE whose WHERE clause reads the table being updated,
+    # so the charge must name roster_invoice only as the target
+    updates = [
+        q["sql"]
+        for q in captured
+        if q["sql"].lstrip().upper().startswith("UPDATE")
+        and "roster_invoice" in q["sql"]
+    ]
+    assert len(updates) == 1
+    assert "SELECT" not in updates[0].upper()
+
     otis.assert_redirects(resp, otis.url("delinquents"))
     assert any(m.level == message_levels.SUCCESS for m in resp.context["messages"])
     for student in (deadbeat, halfway, quitter):
