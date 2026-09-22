@@ -1650,7 +1650,7 @@ def test_forgive_date_extends_deadline(otis) -> None:
 
 
 @pytest.mark.django_db
-def test_mass_late_fee(otis) -> None:
+def test_delinquents(otis) -> None:
     deadlines = {
         "half_payment_deadline": datetime.datetime(2020, 9, 21, tzinfo=UTC),
         "full_payment_deadline": datetime.datetime(2021, 1, 21, tzinfo=UTC),
@@ -1684,20 +1684,20 @@ def test_mass_late_fee(otis) -> None:
     assert forgiven.payment_status == 1
 
     otis.login(StudentFactory.create())
-    otis.get_denied("mass-late-fee")
+    otis.get_denied("delinquents")
     otis.login(UserFactory.create(is_staff=True))
-    otis.get_denied("mass-late-fee")
-    otis.post_denied("mass-late-fee", data={"amount": 60, "confirmed": "on"})
+    otis.get_denied("delinquents")
+    otis.post_denied("delinquents", data={"amount": 60, "confirmed": "on"})
 
     otis.login(UserFactory.create(is_staff=True, is_superuser=True))
-    resp = otis.get_ok("mass-late-fee")
+    resp = otis.get_ok("delinquents")
     assert {s.pk: s.payment_status_code for s in resp.context["students"]} == {
         deadbeat.pk: 3,
         halfway.pk: 7,
     }
 
     # the preview is an export: its rendered text is the product
-    resp = otis.get_ok("mass-late-fee", data={"format": "csv"})
+    resp = otis.get_ok("delinquents", data={"format": "csv"})
     assert resp.headers["Content-Type"] == "text/csv"
     rows = {
         int(row["Student pk"]): row
@@ -1711,15 +1711,13 @@ def test_mass_late_fee(otis) -> None:
     assert rows[halfway.pk]["Prep total"] == "480"
 
     # an unchecked confirmation box is a dry run
-    otis.post_ok("mass-late-fee", data={"amount": 60})
+    otis.post_ok("delinquents", data={"amount": 60})
     for student in (deadbeat, halfway):
         student.invoice.refresh_from_db()
         assert student.invoice.extras == 0
 
-    resp = otis.post(
-        "mass-late-fee", data={"amount": 60, "confirmed": "on"}, follow=True
-    )
-    otis.assert_redirects(resp, otis.url("mass-late-fee"))
+    resp = otis.post("delinquents", data={"amount": 60, "confirmed": "on"}, follow=True)
+    otis.assert_redirects(resp, otis.url("delinquents"))
     assert any(m.level == message_levels.SUCCESS for m in resp.context["messages"])
     for student in (deadbeat, halfway):
         student.invoice.refresh_from_db()
@@ -1732,10 +1730,10 @@ def test_mass_late_fee(otis) -> None:
 
 
 @pytest.mark.django_db
-def test_mass_late_fee_with_nobody_overdue(otis) -> None:
+def test_delinquents_with_nobody_overdue(otis) -> None:
     SemesterFactory.create(show_invoices=True)
     otis.login(UserFactory.create(is_staff=True, is_superuser=True))
-    resp = otis.get_ok("mass-late-fee")
+    resp = otis.get_ok("delinquents")
     assert not resp.context["students"]
     otis.assert_testid(resp, "late-fee-nobody")
 

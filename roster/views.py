@@ -844,7 +844,7 @@ def late_fee_preview_csv(students: QuerySet[Student]) -> HttpResponse:
 
 
 @admin_required
-def mass_late_fee(request: HttpRequest) -> HttpResponse:
+def delinquents(request: HttpRequest) -> HttpResponse:
     """Charge a late fee to everyone in the active semester who is overdue."""
     students = get_late_fee_targets()
 
@@ -865,7 +865,7 @@ def mass_late_fee(request: HttpRequest) -> HttpResponse:
                 f"Charged a ${amount} late fee to {count} student(s)",
                 extra={"request": request},
             )
-            return HttpResponseRedirect(reverse("mass-late-fee"))
+            return HttpResponseRedirect(reverse("delinquents"))
     elif request.GET.get("format") == "csv":
         return late_fee_preview_csv(students)
     else:
@@ -873,7 +873,7 @@ def mass_late_fee(request: HttpRequest) -> HttpResponse:
 
     return render(
         request,
-        "roster/mass_late_fee.html",
+        "roster/delinquents.html",
         {
             "form": form,
             "students": students,
