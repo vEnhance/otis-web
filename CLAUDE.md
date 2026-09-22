@@ -143,6 +143,29 @@ Import it as `from django.contrib.messages import constants as message_levels` â
 - `make check` fails if a model change has no migration
 - Fixtures are in `fixtures/`; load them with `./fixtures/load-all.sh`
 
+#### SQLite is not MySQL
+
+Dev and the test suite run on SQLite, production runs on MySQL, and the tests
+cannot catch a query that only MySQL rejects. When writing anything beyond a
+plain filter, check it against these:
+
+- **`.update()` or `.delete()` on a queryset filtered by another queryset.**
+  MySQL refuses an UPDATE whose WHERE clause selects from the table being
+  updated (error 1093). Evaluate the inner queryset into a list of pks first,
+  as `roster.views.delinquents` does.
+- **No partial unique indexes.** A `UniqueConstraint(condition=...)` is not
+  enforced in production, so a race it was meant to prevent needs
+  `select_for_update()` as well; see `payments.views.process_payment`.
+- **`Greatest` and `Least` propagate nulls** on MySQL and SQLite but not on
+  Postgres; check nullable operands explicitly, as
+  `roster.utils.annotate_payment_status` does.
+- **InnoDB runs at READ COMMITTED and takes no gap locks**, so a
+  `select_for_update()` guarding an INSERT has to lock an existing parent row;
+  see `opal.views.show_puzzle`.
+- **String comparison follows the column collation**, which on MySQL is
+  usually case- and accent-insensitive while SQLite is neither. Don't rely on
+  an exact-match lookup to be either.
+
 ### Environment Variables
 
 - Copy `env` to `.env` and uncomment what you need
