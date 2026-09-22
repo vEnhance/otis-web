@@ -15,6 +15,7 @@
           <th>ID</th>
           <th>Standing</th>
           <th>Code</th>
+          <th>#Sem</th>
           <th>Paid</th>
           <th>Owed</th>
         </tr>
@@ -30,6 +31,7 @@
             </td>
             <td>{{ student.standing }}</td>
             <td>{{ student.payment_status_code }}</td>
+            <td>{{ student.invoice.preps_taught }}</td>
             <td>${{ student.invoice.total_paid }}</td>
             <td>${{ student.invoice.total_owed }}</td>
           </tr>
