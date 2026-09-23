@@ -17,7 +17,6 @@ from core.utils import find_profile
 from otisweb.decorators import verified_required
 from otisweb.mixins import VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest
-from roster.models import Student
 from rpg.levelsys import Meter, get_spade_stats
 
 from .forms import InvestmentForm
@@ -42,31 +41,14 @@ class PonziSchemeList(VerifiedRequiredMixin, ListView[PonziScheme]):
     }
 
     def get_queryset(self) -> QuerySet[PonziScheme]:
-        schemes = PonziScheme.objects.select_related("semester")
         if getattr(self.request.user, "is_staff", False):
-            return schemes
-        return schemes.filter(start_date__lte=timezone.now())
+            return PonziScheme.objects.all()
+        return PonziScheme.objects.filter(start_date__lte=timezone.now())
 
 
-def find_player(user: User, scheme: PonziScheme) -> Student | None:
-    student = Student.objects.filter(user=user, semester=scheme.semester).first()
-    if student is None or not student.enabled or student.is_delinquent:
-        return None
-    return student
-
-
-def get_player(user: User, scheme: PonziScheme) -> Student:
-    student = find_player(user, scheme)
-    if student is None:
-        raise PermissionDenied("Only active students of this semester can play.")
-    return student
-
-
-def last_investment_date(
-    student: Student, scheme: PonziScheme
-) -> datetime.datetime | None:
+def last_investment_date(user: User, scheme: PonziScheme) -> datetime.datetime | None:
     latest = (
-        PonziInvestment.objects.filter(student=student, scheme=scheme)
+        PonziInvestment.objects.filter(user=user, scheme=scheme)
         .order_by("-created_at")
         .first()
     )
@@ -78,36 +60,28 @@ def scheme_detail(request: AuthHttpRequest, pk: int) -> HttpResponse:
     scheme = get_object_or_404(PonziScheme, pk=pk)
     if not scheme.has_started and not request.user.is_staff:
         raise PermissionDenied("This scheme hasn't started yet.")
-    student = find_player(request.user, scheme)
+    profile = find_profile(request.user)
+    last = last_investment_date(request.user, scheme)
 
     context: dict[str, Any] = {
         "scheme": scheme,
-        "student": student,
         "max_bid": MAX_INVESTMENT,
-        "num_investors": scheme.investments.values("student").distinct().count(),
+        "num_investors": scheme.investments.values("user").distinct().count(),
+        "investments": PonziInvestment.objects.filter(user=request.user, scheme=scheme),
+        "spades_meter": Meter.SpadeMeter(
+            round(get_spade_stats(request.user), 2),
+            dynamic_progress=profile is not None and profile.dynamic_progress,
+        ),
+        "next_investment_at": None if last is None else last + INVESTMENT_COOLDOWN,
+        "can_invest": scheme.is_running
+        and (last is None or timezone.now() >= last + INVESTMENT_COOLDOWN),
+        "form": InvestmentForm(),
     }
     if request.user.is_superuser or scheme.has_collapsed:
         context["summary"] = scheme.summary()
-        context["all_investments"] = scheme.investments.select_related(
-            "student__user"
-        ).order_by("created_at")
-    if student is not None:
-        context["investments"] = PonziInvestment.objects.filter(
-            student=student, scheme=scheme
+        context["all_investments"] = scheme.investments.select_related("user").order_by(
+            "created_at"
         )
-        profile = find_profile(request.user)
-        context["spades_meter"] = Meter.SpadeMeter(
-            round(get_spade_stats(student), 2),
-            dynamic_progress=profile is not None and profile.dynamic_progress,
-        )
-        last = last_investment_date(student, scheme)
-        context["next_investment_at"] = (
-            None if last is None else last + INVESTMENT_COOLDOWN
-        )
-        context["can_invest"] = scheme.is_running and (
-            last is None or timezone.now() >= last + INVESTMENT_COOLDOWN
-        )
-        context["form"] = InvestmentForm()
     return TemplateResponse(request, "ponzi/scheme_detail.html", context)
 
 
@@ -115,7 +89,6 @@ def scheme_detail(request: AuthHttpRequest, pk: int) -> HttpResponse:
 @require_POST
 def invest(request: AuthHttpRequest, pk: int) -> HttpResponse:
     scheme = get_object_or_404(PonziScheme, pk=pk)
-    student = get_player(request.user, scheme)
     form = InvestmentForm(request.POST)
     if not form.is_valid():
         messages.error(
@@ -126,16 +99,16 @@ def invest(request: AuthHttpRequest, pk: int) -> HttpResponse:
 
     with transaction.atomic():
         scheme = PonziScheme.objects.select_for_update().get(pk=scheme.pk)
-        last = last_investment_date(student, scheme)
+        last = last_investment_date(request.user, scheme)
         if not scheme.is_running:
             messages.error(request, "This scheme is not accepting bids.")
         elif last is not None and timezone.now() < last + INVESTMENT_COOLDOWN:
             messages.error(request, "You can only bid once per day.")
-        elif amount > get_spade_stats(student):
+        elif amount > get_spade_stats(request.user):
             messages.error(request, "You don't have enough spades for that.")
         else:
             PonziInvestment.objects.create(
-                scheme=scheme, student=student, amount=amount
+                scheme=scheme, user=request.user, amount=amount
             )
             messages.success(request, "Action recorded. Thanks for playing!")
     return HttpResponseRedirect(scheme.get_absolute_url())
@@ -146,10 +119,9 @@ def lock_own_investment(
 ) -> tuple[PonziScheme, PonziInvestment]:
     """Must be called inside a transaction; locks the scheme row, which
     serializes every change to that scheme's pool."""
-    investment = get_object_or_404(PonziInvestment, pk=pk, student__user=request.user)
+    investment = get_object_or_404(PonziInvestment, pk=pk, user=request.user)
     scheme = PonziScheme.objects.select_for_update().get(pk=investment.scheme_id)
     investment.refresh_from_db()
-    get_player(request.user, scheme)
     return scheme, investment
 
 
@@ -181,7 +153,7 @@ def withdraw(request: AuthHttpRequest, pk: int) -> HttpResponse:
             messages.error(request, "This bid can't be withdrawn right now.")
         elif (payout := investment.current_value) > scheme.pool():
             scheme.collapsed_at = timezone.now()
-            scheme.collapsed_by = investment.student
+            scheme.collapsed_by = request.user
             scheme.save()
             messages.error(request, "The scheme has collapsed!")
         else:

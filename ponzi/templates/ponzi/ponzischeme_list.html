@@ -11,7 +11,6 @@
     <table class="table table-striped">
       <tr class="table-dark">
         <th>Scheme</th>
-        <th>Semester</th>
         <th>Opened</th>
         <th>Status</th>
       </tr>
@@ -20,7 +19,6 @@
           <td>
             <a href="{{ scheme.get_absolute_url }}">{{ scheme.title }}</a>
           </td>
-          <td>{{ scheme.semester }}</td>
           <td>{% timestamp scheme.start_date "isodate" %}</td>
           <td>
             {% if scheme.has_collapsed %}
