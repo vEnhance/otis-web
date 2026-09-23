@@ -74,10 +74,10 @@ class Migration(migrations.Migration):
                 (
                     "amount",
                     models.PositiveSmallIntegerField(
-                        help_text="Number of spades invested, at most 20",
+                        help_text="Number of spades invested, at most 10",
                         validators=[
                             django.core.validators.MinValueValidator(1),
-                            django.core.validators.MaxValueValidator(20),
+                            django.core.validators.MaxValueValidator(10),
                         ],
                     ),
                 ),

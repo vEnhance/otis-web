@@ -1,5 +1,5 @@
 import datetime
-from typing import Any
+from typing import Any, ClassVar
 
 from braces.views import LoginRequiredMixin
 from django.contrib import messages
@@ -24,6 +24,9 @@ from rpg.levelsys import Meter, get_spade_stats
 from .forms import InvestmentForm
 from .models import (
     INVESTMENT_COOLDOWN,
+    MAX_INVESTMENT,
+    TIER_NAMES,
+    TIER_RETURNS,
     PonziInvestment,
     PonziScheme,
 )
@@ -32,6 +35,12 @@ from .models import (
 class PonziSchemeList(LoginRequiredMixin, ListView[PonziScheme]):
     model = PonziScheme
     context_object_name = "schemes"
+    extra_context: ClassVar[dict[str, Any]] = {
+        "max_bid": MAX_INVESTMENT,
+        "tier_returns": [
+            (TIER_NAMES[tier], rate * 100) for tier, rate in TIER_RETURNS.items()
+        ],
+    }
 
     def get_queryset(self) -> QuerySet[PonziScheme]:
         schemes = PonziScheme.objects.select_related("semester")
@@ -75,6 +84,7 @@ def scheme_detail(request: AuthHttpRequest, pk: int) -> HttpResponse:
     context: dict[str, Any] = {
         "scheme": scheme,
         "student": student,
+        "max_bid": MAX_INVESTMENT,
         "num_investors": scheme.investments.values("student").distinct().count(),
     }
     if request.user.is_superuser or scheme.has_collapsed:
@@ -109,7 +119,9 @@ def invest(request: AuthHttpRequest, pk: int) -> HttpResponse:
     student = get_player(request.user, scheme)
     form = InvestmentForm(request.POST)
     if not form.is_valid():
-        messages.error(request, "Bids must be a whole number from 1 to 20.")
+        messages.error(
+            request, f"Bids must be a whole number from 1 to {MAX_INVESTMENT}."
+        )
         return HttpResponseRedirect(scheme.get_absolute_url())
     amount: int = form.cleaned_data["amount"]
 

@@ -42,7 +42,7 @@
   </p>
   <ol>
     <li>
-      Up to once per day, you may bid anywhere from 1 to 20 spades,
+      Up to once per day, you may bid anywhere from 1 to {{ max_bid }} spades,
       inclusive (integers only).
       This is added to the global pool for that scheme.
     </li>
@@ -57,9 +57,9 @@
     <li>
       The return rate for each tier is:
       <ul>
-        <li>Tier I: <strong>6.7% return rate</strong></li>
-        <li>Tier II: <strong>14% return rate</strong></li>
-        <li>Tier III: <strong>34% return rate</strong></li>
+        {% for name, rate in tier_returns %}
+          <li>Tier {{ name }}: <strong>{{ rate|floatformat:"-1" }}% return rate</strong></li>
+        {% endfor %}
       </ul>
     </li>
     <li>All withdrawals are paid out of the global pool.</li>

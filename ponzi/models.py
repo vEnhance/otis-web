@@ -11,7 +11,7 @@ from django.utils import timezone
 from core.models import Semester
 from roster.models import Student
 
-MAX_INVESTMENT = 20
+MAX_INVESTMENT = 10
 GESTATION_PERIOD = timedelta(weeks=2)
 INVESTMENT_COOLDOWN = timedelta(days=1)
 TIER_RETURNS = {

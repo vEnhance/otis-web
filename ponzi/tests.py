@@ -42,15 +42,15 @@ def test_invest(otis, scheme: PonziScheme):
     alice = verified_student(scheme)
     otis.login(alice)
     with freeze_time(at(1)):
-        otis.post_30x("ponzi-invest", scheme.pk, data={"amount": 15})
+        otis.post_30x("ponzi-invest", scheme.pk, data={"amount": 10})
         investment = PonziInvestment.objects.get(student=alice)
-        assert investment.amount == 15
+        assert investment.amount == 10
         assert investment.created_at == at(1)
         assert investment.tier == 0
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("amount", [0, 21, 2.5, "lots"])
+@pytest.mark.parametrize("amount", [0, 11, 2.5, "lots"])
 def test_invest_bad_amount(otis, scheme: PonziScheme, amount):
     otis.login(verified_student(scheme))
     with freeze_time(at(1)):
@@ -117,7 +117,7 @@ def test_cannot_touch_other_investments(otis, scheme: PonziScheme):
 def test_withdraw_tier_one(otis, scheme: PonziScheme):
     alice = verified_student(scheme)
     with freeze_time(at(0)):
-        PonziInvestmentFactory.create(scheme=scheme, amount=20)
+        PonziInvestmentFactory.create(scheme=scheme, amount=10)
         investment = PonziInvestmentFactory.create(
             scheme=scheme, student=alice, amount=10
         )
@@ -133,7 +133,7 @@ def test_withdraw_tier_one(otis, scheme: PonziScheme):
     investment.refresh_from_db()
     assert investment.payout == Decimal("10.67")
     assert investment.withdrawn_at == at(15)
-    assert scheme.pool() == Decimal("19.33")
+    assert scheme.pool() == Decimal("9.33")
 
     with freeze_time(at(16)):
         otis.post_30x("ponzi-withdraw", investment.pk)
@@ -146,9 +146,9 @@ def test_withdraw_tier_one(otis, scheme: PonziScheme):
 def test_upgrade_to_tier_three(otis, scheme: PonziScheme):
     alice = verified_student(scheme)
     with freeze_time(at(0)):
-        PonziInvestmentFactory.create(scheme=scheme, amount=20)
+        PonziInvestmentFactory.create(scheme=scheme, amount=10)
         investment = PonziInvestmentFactory.create(
-            scheme=scheme, student=alice, amount=20
+            scheme=scheme, student=alice, amount=10
         )
     otis.login(alice)
 
@@ -180,7 +180,7 @@ def test_upgrade_to_tier_three(otis, scheme: PonziScheme):
         otis.assert_no_testid(resp, "ponzi-upgrade")
         otis.post_30x("ponzi-withdraw", investment.pk)
     investment.refresh_from_db()
-    assert investment.payout == Decimal("26.80")
+    assert investment.payout == Decimal("13.40")
 
 
 @pytest.mark.django_db
@@ -234,7 +234,7 @@ def test_collapse(otis, scheme: PonziScheme):
 @pytest.mark.django_db
 def test_spades_accounting(scheme: PonziScheme):
     alice = verified_student(scheme, spades=30)
-    PonziInvestmentFactory.create(scheme=scheme, student=alice, amount=20)
+    PonziInvestmentFactory.create(scheme=scheme, student=alice, amount=10)
     PonziInvestmentFactory.create(
         scheme=scheme,
         student=alice,
@@ -242,7 +242,7 @@ def test_spades_accounting(scheme: PonziScheme):
         payout=Decimal("11.40"),
         withdrawn_at=at(20),
     )
-    expected = 30 - 20 - 10 + 11.4
+    expected = 30 - 10 - 10 + 11.4
     assert get_level_info(alice)["meters"]["spades"].value == expected
     rows = get_student_rows(Student.objects.filter(pk=alice.pk))
     assert rows[0]["spades"] == pytest.approx(expected)
@@ -257,6 +257,7 @@ def test_views_render(otis, scheme: PonziScheme):
     with freeze_time(at(0.5)):
         resp = otis.get_ok("ponzi-list")
         assert list(resp.context["schemes"]) == [scheme]
+        assert resp.context["tier_returns"][2] == ("III", 34)
         resp = otis.get_ok("ponzi-scheme", scheme.pk)
         assert resp.context["num_investors"] == 1
         assert resp.context["spades_meter"].value == 95
