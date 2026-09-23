@@ -153,12 +153,15 @@ def recompute(request: AuthHttpRequest, market_slug: str):
 class MarketList(LoginRequiredMixin, ListView[Market]):
     model = Market
     context_object_name = "markets"
-    extra_context: ClassVar[dict[str, Any]] = {
-        "past": False,
-        "ponzi_active": PonziScheme.objects.filter(
+    extra_context: ClassVar[dict[str, Any]] = {"past": False}
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        # Must be computed per request, not in extra_context (evaluated at import)
+        context["ponzi_active"] = PonziScheme.objects.filter(
             start_date__lte=timezone.now(), collapsed_at__isnull=True
-        ).exists(),
-    }
+        ).exists()
+        return context
 
     def get_queryset(self) -> QuerySet[Market]:
         if getattr(self.request.user, "is_staff", False) is True:

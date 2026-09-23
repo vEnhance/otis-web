@@ -10,6 +10,7 @@ from core.factories import GroupFactory, SemesterFactory, UserFactory
 from markets.admin import MarketAdmin
 from markets.factories import GuessFactory, MarketFactory
 from markets.models import Guess, Market
+from ponzi.factories import PonziSchemeFactory
 
 UTC = datetime.UTC
 
@@ -62,6 +63,22 @@ def test_list(otis, market_model_data):
         otis.login(UserFactory.create())
         response = otis.get("market-list")
         assert {m.slug for m in response.context["markets"]} == {"m-one", "m-two"}
+
+
+@pytest.mark.django_db
+def test_list_ponzi_active(otis):
+    otis.login(UserFactory.create())
+    with freeze_time("2020-01-01", tz_offset=0):
+        assert otis.get("market-list").context["ponzi_active"] is False
+        scheme = PonziSchemeFactory.create(
+            start_date=datetime.datetime(2020, 1, 5, tzinfo=datetime.UTC)
+        )
+        assert otis.get("market-list").context["ponzi_active"] is False
+    with freeze_time("2020-01-06", tz_offset=0):
+        assert otis.get("market-list").context["ponzi_active"] is True
+        scheme.collapsed_at = datetime.datetime(2020, 1, 6, tzinfo=datetime.UTC)
+        scheme.save()
+        assert otis.get("market-list").context["ponzi_active"] is False
 
 
 @pytest.mark.django_db
