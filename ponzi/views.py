@@ -7,7 +7,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
-from django.db.models import Count, Max, Q, Sum
 from django.db.models.query import QuerySet
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
@@ -66,20 +65,6 @@ def last_investment_date(
     return None if latest is None else latest.created_at
 
 
-def scheme_summary(scheme: PonziScheme) -> dict[str, Any]:
-    withdrawn = Q(withdrawn_at__isnull=False)
-    return scheme.investments.aggregate(
-        num_bids=Count("pk"),
-        num_players=Count("student", distinct=True),
-        total_bid=Sum("amount"),
-        num_withdrawn=Count("pk", filter=withdrawn),
-        total_paid=Sum("payout"),
-        biggest_payout=Max("payout"),
-        num_lost=Count("pk", filter=~withdrawn),
-        total_lost=Sum("amount", filter=~withdrawn),
-    )
-
-
 @login_required
 def scheme_detail(request: AuthHttpRequest, pk: int) -> HttpResponse:
     scheme = get_object_or_404(PonziScheme, pk=pk)
@@ -92,14 +77,11 @@ def scheme_detail(request: AuthHttpRequest, pk: int) -> HttpResponse:
         "student": student,
         "num_investors": scheme.investments.values("student").distinct().count(),
     }
-    if request.user.is_staff:
-        context["pool"] = scheme.pool()
     if request.user.is_superuser or scheme.has_collapsed:
+        context["summary"] = scheme.summary()
         context["all_investments"] = scheme.investments.select_related(
             "student__user"
         ).order_by("created_at")
-    if scheme.has_collapsed:
-        context["summary"] = scheme_summary(scheme)
     if student is not None:
         context["investments"] = PonziInvestment.objects.filter(
             student=student, scheme=scheme

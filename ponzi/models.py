@@ -1,9 +1,10 @@
 from datetime import datetime, timedelta
 from decimal import Decimal
+from typing import Any
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.db.models import Sum
+from django.db.models import Count, Max, Q, Sum
 from django.urls import reverse
 from django.utils import timezone
 
@@ -63,9 +64,25 @@ class PonziScheme(models.Model):
     def is_running(self) -> bool:
         return self.has_started and not self.has_collapsed
 
+    def summary(self) -> dict[str, Any]:
+        withdrawn = Q(withdrawn_at__isnull=False)
+        stats = self.investments.aggregate(
+            num_bids=Count("pk"),
+            num_players=Count("student", distinct=True),
+            total_bid=Sum("amount"),
+            num_withdrawn=Count("pk", filter=withdrawn),
+            total_paid=Sum("payout"),
+            biggest_payout=Max("payout"),
+            num_outstanding=Count("pk", filter=~withdrawn),
+            total_outstanding=Sum("amount", filter=~withdrawn),
+        )
+        stats["pool"] = Decimal(stats["total_bid"] or 0) - (
+            stats["total_paid"] or Decimal(0)
+        )
+        return stats
+
     def pool(self) -> Decimal:
-        totals = self.investments.aggregate(invested=Sum("amount"), paid=Sum("payout"))
-        return Decimal(totals["invested"] or 0) - (totals["paid"] or Decimal(0))
+        return self.summary()["pool"]
 
 
 class PonziInvestment(models.Model):

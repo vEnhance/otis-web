@@ -103,15 +103,13 @@
         </tr>
       {% endfor %}
     </table>
-  {% elif pool is not None %}
-    <div class="alert alert-secondary">
-      <h2 class="alert-heading">Admin notes</h2>
-      The pool currently holds <b data-testid="ponzi-pool">{{ pool|floatformat:2 }}♠</b>
-      from {{ num_investors }} player{{ num_investors|pluralize }}.
-    </div>
   {% endif %}
   {% if summary %}
-    <h2>Final statistics</h2>
+    {% if scheme.has_collapsed %}
+      <h2>Final statistics</h2>
+    {% else %}
+      <h2>Statistics so far (admin only)</h2>
+    {% endif %}
     <ul data-testid="ponzi-summary">
       <li>
         {{ summary.num_players }} player{{ summary.num_players|pluralize }}
@@ -125,9 +123,17 @@
         {% if summary.biggest_payout %}(largest payout {{ summary.biggest_payout|floatformat:2 }}♠){% endif %}.
       </li>
       <li>
-        {{ summary.num_lost }} bid{{ summary.num_lost|pluralize }}
-        worth {{ summary.total_lost|default:0 }}♠
-        {{ summary.num_lost|pluralize:"was,were" }} lost in the collapse.
+        {{ summary.num_outstanding }} bid{{ summary.num_outstanding|pluralize }}
+        worth {{ summary.total_outstanding|default:0 }}♠
+        {% if scheme.has_collapsed %}
+          {{ summary.num_outstanding|pluralize:"was,were" }} lost in the collapse.
+        {% else %}
+          {{ summary.num_outstanding|pluralize:"is,are" }} still in play.
+        {% endif %}
+      </li>
+      <li>
+        The pool {% if scheme.has_collapsed %}was left with{% else %}holds{% endif %}
+        <b>{{ summary.pool|floatformat:2 }}♠</b>.
       </li>
       {% if scheme.collapsed_by %}<li>The scheme was brought down by {{ scheme.collapsed_by.name }}.</li>{% endif %}
     </ul>

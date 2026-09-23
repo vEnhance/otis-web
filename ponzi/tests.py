@@ -225,8 +225,9 @@ def test_collapse(otis, scheme: PonziScheme):
         "num_withdrawn": 1,
         "total_paid": Decimal("10.67"),
         "biggest_payout": Decimal("10.67"),
-        "num_lost": 1,
-        "total_lost": 10,
+        "num_outstanding": 1,
+        "total_outstanding": 10,
+        "pool": Decimal("9.33"),
     }
 
 
@@ -257,10 +258,9 @@ def test_views_render(otis, scheme: PonziScheme):
         resp = otis.get_ok("ponzi-list")
         assert list(resp.context["schemes"]) == [scheme]
         resp = otis.get_ok("ponzi-scheme", scheme.pk)
-        assert "pool" not in resp.context
         assert resp.context["num_investors"] == 1
         assert resp.context["spades_meter"].value == 95
-        otis.assert_no_testid(resp, "ponzi-pool")
+        otis.assert_no_testid(resp, "ponzi-summary")
         assert "all_investments" not in resp.context
         assert "summary" not in resp.context
         otis.assert_no_testid(resp, "ponzi-all-bids")
@@ -274,9 +274,7 @@ def test_views_render(otis, scheme: PonziScheme):
     otis.login(UserFactory.create(is_staff=True))
     with freeze_time(at(8)):
         resp = otis.get_ok("ponzi-scheme", scheme.pk)
-    assert resp.context["pool"] == 5
-    assert resp.context["num_investors"] == 1
-    otis.assert_testid(resp, "ponzi-pool")
+    assert "summary" not in resp.context
 
 
 @pytest.mark.django_db
@@ -289,5 +287,6 @@ def test_admin_sees_all_bids_before_collapse(otis, scheme: PonziScheme):
     with freeze_time(at(2)):
         resp = otis.get_ok("ponzi-scheme", scheme.pk)
     assert list(resp.context["all_investments"]) == [first, second]
-    assert "summary" not in resp.context
+    assert resp.context["summary"]["pool"] == 20
+    otis.assert_testid(resp, "ponzi-summary")
     otis.assert_testid(resp, "ponzi-all-bids")
