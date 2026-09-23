@@ -69,14 +69,14 @@ def test_invest_cannot_go_into_debt(otis, scheme: PonziScheme):
 
 
 @pytest.mark.django_db
-def test_invest_once_per_week(otis, scheme: PonziScheme):
+def test_invest_once_per_day(otis, scheme: PonziScheme):
     otis.login(verified_student(scheme))
     with freeze_time(at(1)):
         otis.post_30x("ponzi-invest", scheme.pk, data={"amount": 5})
-    with freeze_time(at(7.5)):
+    with freeze_time(at(1.5)):
         otis.post_30x("ponzi-invest", scheme.pk, data={"amount": 5})
         assert PonziInvestment.objects.count() == 1
-    with freeze_time(at(8.5)):
+    with freeze_time(at(2.5)):
         otis.post_30x("ponzi-invest", scheme.pk, data={"amount": 5})
         assert PonziInvestment.objects.count() == 2
 
@@ -241,7 +241,7 @@ def test_views_render(otis, scheme: PonziScheme):
     with freeze_time(at(0)):
         PonziInvestmentFactory.create(scheme=scheme, student=alice, amount=5)
     otis.login(alice)
-    with freeze_time(at(3)):
+    with freeze_time(at(0.5)):
         resp = otis.get_ok("ponzi-list")
         assert list(resp.context["schemes"]) == [scheme]
         resp = otis.get_ok("ponzi-scheme", scheme.pk)
@@ -250,7 +250,7 @@ def test_views_render(otis, scheme: PonziScheme):
         otis.assert_no_testid(resp, "ponzi-pool")
         assert resp.context["can_invest"] is False
         otis.assert_no_testid(resp, "ponzi-invest-form")
-    with freeze_time(at(8)):
+    with freeze_time(at(1.5)):
         resp = otis.get_ok("ponzi-scheme", scheme.pk)
         assert resp.context["can_invest"] is True
         otis.assert_testid(resp, "ponzi-invest-form")

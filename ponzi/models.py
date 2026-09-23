@@ -12,7 +12,7 @@ from roster.models import Student
 
 MAX_INVESTMENT = 20
 GESTATION_PERIOD = timedelta(weeks=2)
-INVESTMENT_COOLDOWN = timedelta(weeks=1)
+INVESTMENT_COOLDOWN = timedelta(days=1)
 TIER_RETURNS = {
     1: Decimal("0.067"),
     2: Decimal("0.14"),

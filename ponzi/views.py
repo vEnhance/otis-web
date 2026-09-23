@@ -118,7 +118,7 @@ def invest(request: AuthHttpRequest, pk: int) -> HttpResponse:
         if not scheme.is_running:
             messages.error(request, "This scheme is not accepting investments.")
         elif last is not None and timezone.now() < last + INVESTMENT_COOLDOWN:
-            messages.error(request, "You can only invest once per week.")
+            messages.error(request, "You can only invest once per day.")
         elif amount > get_spade_stats(student):
             messages.error(request, "You don't have enough spades for that.")
         else:
