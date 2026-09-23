@@ -4,7 +4,7 @@
   Ponzi schemes
 {% endblock title %}
 {% block layout-content %}
-  <p class="fst-italic">Invest spades. Maybe get returns.</p>
+  <p class="fst-italic">Bid spades. Maybe get returns.</p>
   {% if schemes %}
     <table class="table table-striped">
       <tr class="table-dark">
@@ -42,13 +42,13 @@
   </p>
   <ol>
     <li>
-      Up to once per day, you may invest anywhere from 1 to 20 spades,
+      Up to once per day, you may bid anywhere from 1 to 20 spades,
       inclusive (integers only).
       This is added to the global pool for that scheme.
     </li>
     <li>
-      An investment reaches the next tier two weeks after being paid.
-      While growing, an investment can't be withdrawn.
+      A bid reaches the next tier two weeks after being placed.
+      While growing, a bid can't be withdrawn.
     </li>
     <li>
       Once it reaches a tier, you may withdraw it with interest,
@@ -68,7 +68,7 @@
       which would make the global pool negative.
       In that case, the final transaction is cancelled
       and the scheme collapses.
-      Any invested spades are lost after the scheme collapses.
+      Any spades still bid are lost after the scheme collapses.
     </li>
     <li>The amount in the global pool is hidden from players.</li>
   </ol>

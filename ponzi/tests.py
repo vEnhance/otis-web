@@ -216,6 +216,18 @@ def test_collapse(otis, scheme: PonziScheme):
     assert PonziInvestment.objects.count() == 2
     otis.assert_testid(resp, "ponzi-collapsed")
     otis.assert_no_testid(resp, "ponzi-invest-form")
+    otis.assert_testid(resp, "ponzi-all-bids")
+    assert list(resp.context["all_investments"]) == [alice_inv, bob_inv]
+    assert resp.context["summary"] == {
+        "num_bids": 2,
+        "num_players": 2,
+        "total_bid": 20,
+        "num_withdrawn": 1,
+        "total_paid": Decimal("10.67"),
+        "biggest_payout": Decimal("10.67"),
+        "num_lost": 1,
+        "total_lost": 10,
+    }
 
 
 @pytest.mark.django_db
@@ -249,6 +261,9 @@ def test_views_render(otis, scheme: PonziScheme):
         assert resp.context["num_investors"] == 1
         assert resp.context["spades_meter"].value == 95
         otis.assert_no_testid(resp, "ponzi-pool")
+        assert "all_investments" not in resp.context
+        assert "summary" not in resp.context
+        otis.assert_no_testid(resp, "ponzi-all-bids")
         assert resp.context["can_invest"] is False
         otis.assert_no_testid(resp, "ponzi-invest-form")
     with freeze_time(at(1.5)):
@@ -262,3 +277,17 @@ def test_views_render(otis, scheme: PonziScheme):
     assert resp.context["pool"] == 5
     assert resp.context["num_investors"] == 1
     otis.assert_testid(resp, "ponzi-pool")
+
+
+@pytest.mark.django_db
+def test_admin_sees_all_bids_before_collapse(otis, scheme: PonziScheme):
+    with freeze_time(at(0)):
+        first = PonziInvestmentFactory.create(scheme=scheme)
+    with freeze_time(at(1)):
+        second = PonziInvestmentFactory.create(scheme=scheme)
+    otis.login(UserFactory.create(is_staff=True, is_superuser=True))
+    with freeze_time(at(2)):
+        resp = otis.get_ok("ponzi-scheme", scheme.pk)
+    assert list(resp.context["all_investments"]) == [first, second]
+    assert "summary" not in resp.context
+    otis.assert_testid(resp, "ponzi-all-bids")

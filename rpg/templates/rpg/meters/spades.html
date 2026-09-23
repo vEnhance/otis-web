@@ -140,7 +140,7 @@
         <tr>
           <td style="color:{{ meters.spades.color }}">-{{ investment.amount }}{{ meters.spades.unit }}</td>
           <td>
-            <a href="{{ investment.scheme.get_absolute_url }}">Invested in {{ investment.scheme }}</a>
+            <a href="{{ investment.scheme.get_absolute_url }}">Bid in {{ investment.scheme }}</a>
           </td>
           <td>{% timestamp investment.created_at "isodate" %}</td>
         </tr>

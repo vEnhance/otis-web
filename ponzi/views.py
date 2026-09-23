@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
+from django.db.models import Count, Max, Q, Sum
 from django.db.models.query import QuerySet
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
@@ -65,6 +66,20 @@ def last_investment_date(
     return None if latest is None else latest.created_at
 
 
+def scheme_summary(scheme: PonziScheme) -> dict[str, Any]:
+    withdrawn = Q(withdrawn_at__isnull=False)
+    return scheme.investments.aggregate(
+        num_bids=Count("pk"),
+        num_players=Count("student", distinct=True),
+        total_bid=Sum("amount"),
+        num_withdrawn=Count("pk", filter=withdrawn),
+        total_paid=Sum("payout"),
+        biggest_payout=Max("payout"),
+        num_lost=Count("pk", filter=~withdrawn),
+        total_lost=Sum("amount", filter=~withdrawn),
+    )
+
+
 @login_required
 def scheme_detail(request: AuthHttpRequest, pk: int) -> HttpResponse:
     scheme = get_object_or_404(PonziScheme, pk=pk)
@@ -79,6 +94,12 @@ def scheme_detail(request: AuthHttpRequest, pk: int) -> HttpResponse:
     }
     if request.user.is_staff:
         context["pool"] = scheme.pool()
+    if request.user.is_superuser or scheme.has_collapsed:
+        context["all_investments"] = scheme.investments.select_related(
+            "student__user"
+        ).order_by("created_at")
+    if scheme.has_collapsed:
+        context["summary"] = scheme_summary(scheme)
     if student is not None:
         context["investments"] = PonziInvestment.objects.filter(
             student=student, scheme=scheme
@@ -106,7 +127,7 @@ def invest(request: AuthHttpRequest, pk: int) -> HttpResponse:
     student = get_player(request.user, scheme)
     form = InvestmentForm(request.POST)
     if not form.is_valid():
-        messages.error(request, "Investments must be a whole number from 1 to 20.")
+        messages.error(request, "Bids must be a whole number from 1 to 20.")
         return HttpResponseRedirect(scheme.get_absolute_url())
     amount: int = form.cleaned_data["amount"]
 
@@ -114,9 +135,9 @@ def invest(request: AuthHttpRequest, pk: int) -> HttpResponse:
         scheme = PonziScheme.objects.select_for_update().get(pk=scheme.pk)
         last = last_investment_date(student, scheme)
         if not scheme.is_running:
-            messages.error(request, "This scheme is not accepting investments.")
+            messages.error(request, "This scheme is not accepting bids.")
         elif last is not None and timezone.now() < last + INVESTMENT_COOLDOWN:
-            messages.error(request, "You can only invest once per day.")
+            messages.error(request, "You can only bid once per day.")
         elif amount > get_spade_stats(student):
             messages.error(request, "You don't have enough spades for that.")
         else:
@@ -147,7 +168,7 @@ def upgrade(request: AuthHttpRequest, pk: int) -> HttpResponse:
         if not scheme.is_running:
             messages.error(request, "This scheme is no longer running.")
         elif not investment.can_upgrade:
-            messages.error(request, "This investment can't be upgraded right now.")
+            messages.error(request, "This bid can't be upgraded right now.")
         else:
             investment.target_tier += 1
             investment.upgraded_at = timezone.now()
@@ -164,7 +185,7 @@ def withdraw(request: AuthHttpRequest, pk: int) -> HttpResponse:
         if not scheme.is_running:
             messages.error(request, "This scheme is no longer running.")
         elif not investment.can_withdraw:
-            messages.error(request, "This investment can't be withdrawn right now.")
+            messages.error(request, "This bid can't be withdrawn right now.")
         elif (payout := investment.current_value) > scheme.pool():
             scheme.collapsed_at = timezone.now()
             scheme.collapsed_by = investment.student

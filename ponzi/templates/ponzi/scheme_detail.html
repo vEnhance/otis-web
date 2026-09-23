@@ -9,12 +9,12 @@
       This scheme collapsed on {% timestamp scheme.collapsed_at "isotime" %}.
     </div>
   {% elif not scheme.has_started %}
-    <div class="alert alert-info">Investments open at {% timestamp scheme.start_date "isotime" %}.</div>
+    <div class="alert alert-info">Bidding opens at {% timestamp scheme.start_date "isotime" %}.</div>
   {% else %}
     <p>{{ scheme }} is open for business!</p>
     <p data-testid="ponzi-num-investors">
       So far, there have been {{ num_investors }} distinct player{{ num_investors|pluralize }}.
-      (Players cannot see the total number of distinct investments
+      (Players cannot see the total number of bids
       or the total size of the pool.)
     </p>
     <hr />
@@ -26,7 +26,7 @@
     </div>
   {% endif %}
   {% if student %}
-    <h2>Make an investment</h2>
+    <h2>Place a bid</h2>
     {% if can_invest %}
       <form method="post"
             action="{% url 'ponzi-invest' scheme.pk %}"
@@ -45,11 +45,11 @@
                  placeholder="" />
         </div>
         <div class="col-auto">
-          <button type="submit" class="btn btn-success">Invest</button>
+          <button type="submit" class="btn btn-success">Bid</button>
         </div>
       </form>
     {% elif scheme.is_running and next_investment_at %}
-      <p>You can invest again {% timestamp next_investment_at "relative" %}.</p>
+      <p>You can bid again {% timestamp next_investment_at "relative" %}.</p>
     {% elif scheme.has_collapsed %}
       <p class="text-muted">This Ponzi scheme has collapsed.</p>
     {% else %}
@@ -58,7 +58,7 @@
     <h2>Your bids</h2>
     <table class="table table-striped">
       <tr class="table-dark">
-        <th>Invested</th>
+        <th>Placed</th>
         <th>♠</th>
         <th>Tier</th>
         <th>Status</th>
@@ -99,7 +99,7 @@
         </tr>
       {% empty %}
         <tr>
-          <td colspan="5">You haven't invested yet. What are you waiting for?</td>
+          <td colspan="5">You haven't bid yet. What are you waiting for?</td>
         </tr>
       {% endfor %}
     </table>
@@ -107,7 +107,60 @@
     <div class="alert alert-secondary">
       <h2 class="alert-heading">Admin notes</h2>
       The pool currently holds <b data-testid="ponzi-pool">{{ pool|floatformat:2 }}♠</b>
-      from {{ num_investors }} investor{{ num_investors|pluralize }}.
+      from {{ num_investors }} player{{ num_investors|pluralize }}.
     </div>
+  {% endif %}
+  {% if summary %}
+    <h2>Final statistics</h2>
+    <ul data-testid="ponzi-summary">
+      <li>
+        {{ summary.num_players }} player{{ summary.num_players|pluralize }}
+        placed {{ summary.num_bids }} bid{{ summary.num_bids|pluralize }}
+        totalling {{ summary.total_bid|default:0 }}♠.
+      </li>
+      <li>
+        {{ summary.num_withdrawn }} bid{{ summary.num_withdrawn|pluralize }}
+        {{ summary.num_withdrawn|pluralize:"was,were" }} withdrawn
+        for {{ summary.total_paid|default:0|floatformat:2 }}♠
+        {% if summary.biggest_payout %}(largest payout {{ summary.biggest_payout|floatformat:2 }}♠){% endif %}.
+      </li>
+      <li>
+        {{ summary.num_lost }} bid{{ summary.num_lost|pluralize }}
+        worth {{ summary.total_lost|default:0 }}♠
+        {{ summary.num_lost|pluralize:"was,were" }} lost in the collapse.
+      </li>
+      {% if scheme.collapsed_by %}<li>The scheme was brought down by {{ scheme.collapsed_by.name }}.</li>{% endif %}
+    </ul>
+  {% endif %}
+  {% if all_investments is not None %}
+    <h2>All bids</h2>
+    <table class="table table-striped table-sm" data-testid="ponzi-all-bids">
+      <tr class="table-dark">
+        <th>Placed</th>
+        <th>Player</th>
+        <th>♠</th>
+        <th>Tier</th>
+        <th>Withdrawn</th>
+        <th>Payout</th>
+      </tr>
+      {% for investment in all_investments %}
+        <tr>
+          <td>{% timestamp investment.created_at "isotime" %}</td>
+          <td>{{ investment.student.name }}</td>
+          <td>{{ investment.amount }}♠</td>
+          <td>{{ investment.tier_name }}</td>
+          <td>
+            {% if investment.withdrawn_at %}
+              {% timestamp investment.withdrawn_at "isotime" %}
+            {% endif %}
+          </td>
+          <td>{% if investment.payout is not None %}{{ investment.payout|floatformat:2 }}♠{% endif %}</td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="6">No bids.</td>
+        </tr>
+      {% endfor %}
+    </table>
   {% endif %}
 {% endblock layout-content %}
