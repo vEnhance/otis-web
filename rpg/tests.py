@@ -3,6 +3,7 @@ import datetime
 import pytest
 from django.contrib.auth.models import Group, User
 from django.contrib.messages import constants as message_levels
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 
 from core.factories import GroupFactory, UnitFactory, UserFactory
@@ -917,3 +918,51 @@ def test_diamond_solution_permissions(otis, alice_with_data) -> None:
     # and so does an admin
     otis.login(UserFactory.create(is_staff=True, is_superuser=True))
     otis.assert_has(otis.get_20x("diamond-solution", private.pk), secret)
+
+
+@pytest.mark.django_db
+def test_achievement_code_is_optional():
+    a = AchievementFactory.create(code="")
+    b = AchievementFactory.create(code=None)
+    a.refresh_from_db()
+    assert a.code is None and b.code is None
+    AchievementFactory.create(code="ab" * 12).full_clean()
+
+    with pytest.raises(ValidationError):
+        AchievementFactory.build(code="not hex").full_clean()
+    with pytest.raises(ValidationError):
+        AchievementFactory.build(code="ab" * 12).full_clean()
+
+
+@pytest.mark.django_db
+def test_first_achievement_found_by_special_effect_id(otis):
+    alice = StudentFactory.create()
+    otis.login(alice)
+    AchievementFactory.create()
+    first = AchievementFactory.create(special_effect_id="first")
+    resp = otis.get_ok("achievements-listing")
+    assert resp.context["first_achievement"] == first
+
+
+@pytest.mark.django_db
+def test_forged_diamond_requires_code(otis):
+    alice = StudentFactory.create()
+    otis.login(alice)
+    LevelFactory.reset_sequence()
+    LevelFactory.create_batch(size=1)
+    AchievementUnlockFactory.create(user=alice.user, achievement__diamonds=9)
+    otis.get_ok("diamond-update", alice.pk)
+    achievement = Achievement.objects.get(creator=alice.user)
+    old_code = achievement.code
+
+    resp = otis.post_ok("diamond-update", alice.pk, data={"code": "", "name": "x"})
+    assert "code" in resp.context["form"].errors
+    achievement.refresh_from_db()
+    assert achievement.code == old_code
+
+
+@pytest.mark.django_db
+def test_http_404_page_shows_diamond_code(otis):
+    AchievementFactory.create(code="c0de" * 6, special_effect_id="http-404")
+    resp = otis.assert_not_found(otis.client.get("/no-such-page/"))
+    otis.assert_has(resp, "c0de" * 6)

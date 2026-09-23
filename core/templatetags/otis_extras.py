@@ -1,11 +1,11 @@
 import datetime
-import os
 import re
 from typing import Literal
 
 from django import template
 from django.contrib.auth.models import AnonymousUser, User
 from django.contrib.humanize.templatetags.humanize import naturaltime
+from django.db import DatabaseError
 from django.forms.boundfield import BoundField
 from django.forms.utils import flatatt
 from django.template.defaultfilters import stringfilter
@@ -21,6 +21,7 @@ from core.models import Unit, UserProfile
 from core.utils import find_profile
 from roster.models import Student, StudentStanding
 from rpg.levelsys import BONUS_D_UNIT, BONUS_Z_UNIT
+from rpg.models import Achievement
 
 register = template.Library()
 
@@ -46,9 +47,18 @@ def display_initial_choice(field: BoundField) -> str:
     return " ".join([ucode for (uid, ucode) in choices if uid in field.initial])
 
 
-@register.filter(name="getenv")
-def getenv(s: str) -> str:
-    return os.getenv(s) or ""
+@register.simple_tag
+def http_error_diamond_code(status: int) -> str:
+    # Error pages can be rendered because the database is down.
+    try:
+        code = (
+            Achievement.objects.filter(special_effect_id=f"http-{status}")
+            .values_list("code", flat=True)
+            .first()
+        )
+    except DatabaseError:
+        return ""
+    return code or ""
 
 
 @register.filter(name="getprofile")

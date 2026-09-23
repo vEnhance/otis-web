@@ -9,7 +9,7 @@
     <div class="position-relative" data-testid="diamond-form">
       {% include "otisweb/components/generic_form.html" with submit_name="♦️" target=submit_url %}
     </div>
-    {% if first_achievement %}
+    {% if first_achievement.code %}
       <p>
         Don't know where to look?
         <br />
