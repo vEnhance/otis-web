@@ -5,6 +5,7 @@ import pytest
 from django.contrib.auth.models import Group
 from freezegun import freeze_time
 
+from core.factories import UserFactory
 from roster.factories import StudentFactory
 from roster.models import Student, StudentStanding
 from rpg.factories import QuestCompleteFactory
@@ -244,10 +245,17 @@ def test_views_render(otis, scheme: PonziScheme):
         resp = otis.get_ok("ponzi-list")
         assert list(resp.context["schemes"]) == [scheme]
         resp = otis.get_ok("ponzi-scheme", scheme.pk)
-        assert resp.context["pool"] == 5
+        assert "pool" not in resp.context
+        otis.assert_no_testid(resp, "ponzi-pool")
         assert resp.context["can_invest"] is False
         otis.assert_no_testid(resp, "ponzi-invest-form")
     with freeze_time(at(8)):
         resp = otis.get_ok("ponzi-scheme", scheme.pk)
         assert resp.context["can_invest"] is True
         otis.assert_testid(resp, "ponzi-invest-form")
+
+    otis.login(UserFactory.create(is_staff=True))
+    with freeze_time(at(8)):
+        resp = otis.get_ok("ponzi-scheme", scheme.pk)
+    assert resp.context["pool"] == 5
+    otis.assert_testid(resp, "ponzi-pool")

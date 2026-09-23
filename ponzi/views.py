@@ -76,12 +76,13 @@ def scheme_detail(request: AuthHttpRequest, pk: int) -> HttpResponse:
     context: dict[str, Any] = {
         "scheme": scheme,
         "student": student,
-        "pool": scheme.pool(),
         "num_investors": scheme.investments.values("student").distinct().count(),
         "tier_returns": [
             (TIER_NAMES[tier], rate * 100) for tier, rate in TIER_RETURNS.items()
         ],
     }
+    if request.user.is_staff:
+        context["pool"] = scheme.pool()
     if student is not None:
         context["investments"] = PonziInvestment.objects.filter(
             student=student, scheme=scheme
