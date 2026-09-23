@@ -14,13 +14,15 @@
       <a href="https://duckduckgo.com/?q=fermi+estimation">Fermi estimation</a>.
     </p>
     {% if ponzi_active %}
-      <div class="alert alert-secondary">
-        <h2 class="alert-heading">Ponzi scheme active</h2>
-        There is also a <a href="{% url "ponzi-list" %}">Ponzi scheme minigame running now</a>.
+      <p>
+        There is also an <a href="{% url "ponzi-list" %}">active Ponzi minigame running now</a>.
         If you're feeling lucky, you can try to bid your spades there.
-      </div>
+      </p>
     {% else %}
-      <p>There is also a separate <a href="{% url "ponzi-list" %}">Ponzi minigame</a>.</p>
+      <p>
+        There is also a separate <a href="{% url "ponzi-list" %}">Ponzi minigame</a>,
+        although no Ponzi scheme is currently active.
+      </p>
     {% endif %}
   {% endif %}
   {% if request.user.is_superuser %}
