@@ -246,7 +246,8 @@ def test_views_render(otis, scheme: PonziScheme):
         assert list(resp.context["schemes"]) == [scheme]
         resp = otis.get_ok("ponzi-scheme", scheme.pk)
         assert "pool" not in resp.context
-        assert "num_investors" not in resp.context
+        assert resp.context["num_investors"] == 1
+        assert resp.context["spades_meter"].value == 95
         otis.assert_no_testid(resp, "ponzi-pool")
         assert resp.context["can_invest"] is False
         otis.assert_no_testid(resp, "ponzi-invest-form")

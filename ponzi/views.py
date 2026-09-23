@@ -15,10 +15,11 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 from django.views.generic.list import ListView
 
+from core.utils import find_profile
 from otisweb.decorators import verified_required
 from otisweb.utils import AuthHttpRequest
 from roster.models import Student
-from rpg.levelsys import get_spade_stats
+from rpg.levelsys import Meter, get_spade_stats
 
 from .forms import InvestmentForm
 from .models import (
@@ -74,17 +75,19 @@ def scheme_detail(request: AuthHttpRequest, pk: int) -> HttpResponse:
     context: dict[str, Any] = {
         "scheme": scheme,
         "student": student,
+        "num_investors": scheme.investments.values("student").distinct().count(),
     }
     if request.user.is_staff:
         context["pool"] = scheme.pool()
-        context["num_investors"] = (
-            scheme.investments.values("student").distinct().count()
-        )
     if student is not None:
         context["investments"] = PonziInvestment.objects.filter(
             student=student, scheme=scheme
         )
-        context["balance"] = get_spade_stats(student)
+        profile = find_profile(request.user)
+        context["spades_meter"] = Meter.SpadeMeter(
+            round(get_spade_stats(student), 2),
+            dynamic_progress=profile is not None and profile.dynamic_progress,
+        )
         last = last_investment_date(student, scheme)
         context["next_investment_at"] = (
             None if last is None else last + INVESTMENT_COOLDOWN

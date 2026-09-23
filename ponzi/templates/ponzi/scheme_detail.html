@@ -6,18 +6,27 @@
 {% block layout-content %}
   {% if scheme.has_collapsed %}
     <div class="alert alert-danger" data-testid="ponzi-collapsed">
-      This scheme collapsed {% timestamp scheme.collapsed_at "relative" %},
-      when somebody tried to withdraw more than was left in the pool.
-      Any spades still invested are gone.
+      This scheme collapsed on {% timestamp scheme.collapsed_at "isotime" %}.
     </div>
   {% elif not scheme.has_started %}
-    <div class="alert alert-info">Investments open {% timestamp scheme.start_date "relative" %}.</div>
+    <div class="alert alert-info">Investments open at {% timestamp scheme.start_date "isotime" %}.</div>
   {% else %}
     <p>{{ scheme }} is open for business!</p>
+    <p data-testid="ponzi-num-investors">
+      So far, there have been {{ num_investors }} distinct player{{ num_investors|pluralize }}.
+      (Players cannot see the total number of distinct investments
+      or the total size of the pool.)
+    </p>
     <hr />
   {% endif %}
-  <h2>Make an investment</h2>
   {% if student %}
+    <h2>Your current spade count</h2>
+    <div class="container mb-3">
+      <div class="row">{% include "rpg/meters/small.html" with meter=spades_meter %}</div>
+    </div>
+  {% endif %}
+  {% if student %}
+    <h2>Make an investment</h2>
     {% if can_invest %}
       <form method="post"
             action="{% url 'ponzi-invest' scheme.pk %}"
@@ -43,7 +52,10 @@
       <p>You can invest again {% timestamp next_investment_at "relative" %}.</p>
     {% elif scheme.has_collapsed %}
       <p class="text-muted">This Ponzi scheme has collapsed.</p>
+    {% else %}
+      <p class="text-muted">You are not eligible to play.</p>
     {% endif %}
+    <h2>Your bids</h2>
     <table class="table table-striped">
       <tr class="table-dark">
         <th>Invested</th>
