@@ -1,9 +1,7 @@
 import datetime
 from typing import Any, ClassVar
 
-from braces.views import LoginRequiredMixin
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
@@ -17,6 +15,7 @@ from django.views.generic.list import ListView
 
 from core.utils import find_profile
 from otisweb.decorators import verified_required
+from otisweb.mixins import VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest
 from roster.models import Student
 from rpg.levelsys import Meter, get_spade_stats
@@ -32,7 +31,7 @@ from .models import (
 )
 
 
-class PonziSchemeList(LoginRequiredMixin, ListView[PonziScheme]):
+class PonziSchemeList(VerifiedRequiredMixin, ListView[PonziScheme]):
     model = PonziScheme
     context_object_name = "schemes"
     extra_context: ClassVar[dict[str, Any]] = {
@@ -74,7 +73,7 @@ def last_investment_date(
     return None if latest is None else latest.created_at
 
 
-@login_required
+@verified_required
 def scheme_detail(request: AuthHttpRequest, pk: int) -> HttpResponse:
     scheme = get_object_or_404(PonziScheme, pk=pk)
     if not scheme.has_started and not request.user.is_staff:

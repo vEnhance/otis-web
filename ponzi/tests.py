@@ -290,3 +290,13 @@ def test_admin_sees_all_bids_before_collapse(otis, scheme: PonziScheme):
     assert resp.context["summary"]["pool"] == 20
     otis.assert_testid(resp, "ponzi-summary")
     otis.assert_testid(resp, "ponzi-all-bids")
+
+
+@pytest.mark.django_db
+def test_unverified_users_are_denied(otis, scheme: PonziScheme):
+    student = StudentFactory.create(semester=scheme.semester)
+    otis.login(student)
+    otis.get_denied("ponzi-list")
+    otis.get_denied("ponzi-scheme", scheme.pk)
+    otis.post_denied("ponzi-invest", scheme.pk, data={"amount": 1})
+    assert not PonziInvestment.objects.exists()
