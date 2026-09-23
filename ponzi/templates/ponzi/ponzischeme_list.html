@@ -4,7 +4,7 @@
   Ponzi schemes
 {% endblock title %}
 {% block layout-content %}
-  <p>Invest spades. Maybe get returns.</p>
+  <p class="fst-italic">Invest spades. Maybe get returns.</p>
   {% if schemes %}
     <table class="table table-striped">
       <tr class="table-dark">
@@ -35,4 +35,41 @@
   {% else %}
     <p class="text-muted">Nothing here yet.</p>
   {% endif %}
+  <h2>Rules</h2>
+  <p>
+    Each Ponzi scheme minigame opens on a specified date
+    and runs until its global pool of spades is exhausted.
+  </p>
+  <ol>
+    <li>
+      Up to once per day, you may invest anywhere from 1 to 20 spades,
+      inclusive (integers only).
+      This is added to the global pool for that scheme.
+    </li>
+    <li>
+      An investment reaches the next tier two weeks after being paid.
+      While growing, an investment can't be withdrawn.
+    </li>
+    <li>
+      Once it reaches a tier, you may withdraw it with interest,
+      or lock it up for two more weeks to reach the next tier.
+    </li>
+    <li>
+      The return rate for each tier is:
+      <ul>
+        <li>Tier I: <strong>6.7% return rate</strong></li>
+        <li>Tier II: <strong>14% return rate</strong></li>
+        <li>Tier III: <strong>34% return rate</strong></li>
+      </ul>
+    </li>
+    <li>All withdrawals are paid out of the global pool.</li>
+    <li>
+      The scheme ends immediately once someone attempts to make a transaction
+      which would make the global pool negative.
+      In that case, the final transaction is cancelled
+      and the scheme collapses.
+      Any invested spades are lost after the scheme collapses.
+    </li>
+    <li>The amount in the global pool is hidden from players.</li>
+  </ol>
 {% endblock layout-content %}

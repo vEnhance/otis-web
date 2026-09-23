@@ -12,39 +12,19 @@
     </div>
   {% elif not scheme.has_started %}
     <div class="alert alert-info">Investments open {% timestamp scheme.start_date "relative" %}.</div>
+  {% else %}
+    <p>{{ scheme }} is open for business!</p>
+    <hr />
   {% endif %}
-  <h2>Rules</h2>
-  <ul>
-    <li>Invest a whole number of spades, up to 20, at most once per day.</li>
-    <li>After two weeks, your investment reaches the next tier.</li>
-    <li>
-      Once it reaches a tier, you may withdraw it with interest,
-      or lock it up for two more weeks to reach the next tier.
-    </li>
-    <li>
-      Returns:
-      {% for name, rate in tier_returns %}
-        Tier {{ name }} pays {{ rate|floatformat:"-1" }}%{% if forloop.last %}.{% else %},{% endif %}
-      {% endfor %}
-    </li>
-    <li>All withdrawals are paid out of the shared pool of investments.</li>
-  </ul>
-  {% if pool is not None %}
-    <div class="alert alert-secondary">
-      <h2 class="alert-heading">Admin notes</h2>
-      The pool currently holds <b data-testid="ponzi-pool">{{ pool|floatformat:2 }}♠</b>
-      from {{ num_investors }} investor{{ num_investors|pluralize }}.
-    </div>
-  {% endif %}
+  <h2>Make an investment</h2>
   {% if student %}
-    <h2>Your portfolio</h2>
-    <p>You currently have {{ balance|floatformat:2 }}♠.</p>
     {% if can_invest %}
       <form method="post"
             action="{% url 'ponzi-invest' scheme.pk %}"
             class="row g-2 align-items-center mb-3"
             data-testid="ponzi-invest-form">
         {% csrf_token %}
+        <p>Enter a number of spades from 1 to 20.</p>
         <div class="col-auto">
           <input type="number"
                  name="amount"
@@ -53,7 +33,7 @@
                  step="1"
                  required
                  class="form-control"
-                 placeholder="Spades" />
+                 placeholder="" />
         </div>
         <div class="col-auto">
           <button type="submit" class="btn btn-success">Invest</button>
@@ -61,13 +41,14 @@
       </form>
     {% elif scheme.is_running and next_investment_at %}
       <p>You can invest again {% timestamp next_investment_at "relative" %}.</p>
+    {% elif scheme.has_collapsed %}
+      <p class="text-muted">This Ponzi scheme has collapsed.</p>
     {% endif %}
     <table class="table table-striped">
       <tr class="table-dark">
         <th>Invested</th>
-        <th>Amount</th>
+        <th>♠</th>
         <th>Tier</th>
-        <th>Value</th>
         <th>Status</th>
       </tr>
       {% for investment in investments %}
@@ -75,14 +56,13 @@
           <td>{% timestamp investment.created_at "isodate" %}</td>
           <td>{{ investment.amount }}♠</td>
           <td>{{ investment.tier_name }}</td>
-          <td>{{ investment.current_value|floatformat:2 }}♠</td>
           <td>
             {% if investment.withdrawn_at %}
               Withdrew {{ investment.payout|floatformat:2 }}♠
             {% elif scheme.has_collapsed %}
               Lost
             {% elif investment.is_growing %}
-              Reaches next tier {% timestamp investment.matures_at "relative" %}
+              Matures {% timestamp investment.matures_at "isotime" %}
             {% else %}
               <form method="post"
                     action="{% url 'ponzi-withdraw' investment.pk %}"
@@ -90,7 +70,7 @@
                 {% csrf_token %}
                 <button type="submit"
                         class="btn btn-sm btn-primary"
-                        data-testid="ponzi-withdraw">Withdraw</button>
+                        data-testid="ponzi-withdraw">Withdraw {{ investment.current_value|floatformat:2 }}♠</button>
               </form>
               {% if investment.can_upgrade %}
                 <form method="post"
@@ -111,5 +91,11 @@
         </tr>
       {% endfor %}
     </table>
+  {% elif pool is not None %}
+    <div class="alert alert-secondary">
+      <h2 class="alert-heading">Admin notes</h2>
+      The pool currently holds <b data-testid="ponzi-pool">{{ pool|floatformat:2 }}♠</b>
+      from {{ num_investors }} investor{{ num_investors|pluralize }}.
+    </div>
   {% endif %}
 {% endblock layout-content %}

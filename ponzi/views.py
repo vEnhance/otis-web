@@ -23,8 +23,6 @@ from rpg.levelsys import get_spade_stats
 from .forms import InvestmentForm
 from .models import (
     INVESTMENT_COOLDOWN,
-    TIER_NAMES,
-    TIER_RETURNS,
     PonziInvestment,
     PonziScheme,
 )
@@ -76,9 +74,6 @@ def scheme_detail(request: AuthHttpRequest, pk: int) -> HttpResponse:
     context: dict[str, Any] = {
         "scheme": scheme,
         "student": student,
-        "tier_returns": [
-            (TIER_NAMES[tier], rate * 100) for tier, rate in TIER_RETURNS.items()
-        ],
     }
     if request.user.is_staff:
         context["pool"] = scheme.pool()
@@ -125,7 +120,7 @@ def invest(request: AuthHttpRequest, pk: int) -> HttpResponse:
             PonziInvestment.objects.create(
                 scheme=scheme, student=student, amount=amount
             )
-            messages.success(request, "Your investment is growing. Trust the process.")
+            messages.success(request, "Action recorded. Thanks for playing!")
     return HttpResponseRedirect(scheme.get_absolute_url())
 
 
@@ -154,7 +149,7 @@ def upgrade(request: AuthHttpRequest, pk: int) -> HttpResponse:
             investment.target_tier += 1
             investment.upgraded_at = timezone.now()
             investment.save()
-            messages.success(request, "Your investment is growing to the next tier.")
+            messages.success(request, "Upgrade has started!")
     return HttpResponseRedirect(scheme.get_absolute_url())
 
 
@@ -171,7 +166,7 @@ def withdraw(request: AuthHttpRequest, pk: int) -> HttpResponse:
             scheme.collapsed_at = timezone.now()
             scheme.collapsed_by = investment.student
             scheme.save()
-            messages.error(request, "The pool ran dry. The scheme has collapsed!")
+            messages.error(request, "The scheme has collapsed!")
         else:
             investment.payout = payout
             investment.withdrawn_at = timezone.now()
