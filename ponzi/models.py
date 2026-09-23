@@ -4,7 +4,7 @@ from typing import Any
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.db.models import Count, Max, Q, Sum
+from django.db.models import Count, Q, Sum
 from django.urls import reverse
 from django.utils import timezone
 
@@ -72,7 +72,6 @@ class PonziScheme(models.Model):
             total_bid=Sum("amount"),
             num_withdrawn=Count("pk", filter=withdrawn),
             total_paid=Sum("payout"),
-            biggest_payout=Max("payout"),
             num_outstanding=Count("pk", filter=~withdrawn),
             total_outstanding=Sum("amount", filter=~withdrawn),
         )

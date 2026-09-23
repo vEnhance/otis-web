@@ -111,32 +111,38 @@
     {% else %}
       <h1>Statistics so far (admin only)</h1>
     {% endif %}
-    <ul data-testid="ponzi-summary">
-      <li>
-        {{ summary.num_players }} player{{ summary.num_players|pluralize }}
-        placed {{ summary.num_bids }} bid{{ summary.num_bids|pluralize }}
-        totalling {{ summary.total_bid|default:0 }}♠.
-      </li>
-      <li>
-        {{ summary.num_withdrawn }} bid{{ summary.num_withdrawn|pluralize }}
-        {{ summary.num_withdrawn|pluralize:"was,were" }} withdrawn
-        for {{ summary.total_paid|default:0|floatformat:2 }}♠
-        {% if summary.biggest_payout %}(largest payout {{ summary.biggest_payout|floatformat:2 }}♠){% endif %}.
-      </li>
-      <li>
-        {{ summary.num_outstanding }} bid{{ summary.num_outstanding|pluralize }}
-        worth {{ summary.total_outstanding|default:0 }}♠
-        {% if scheme.has_collapsed %}
-          {{ summary.num_outstanding|pluralize:"was,were" }} lost in the collapse.
-        {% else %}
-          {{ summary.num_outstanding|pluralize:"is,are" }} still in play.
-        {% endif %}
-      </li>
-      <li>
-        The pool {% if scheme.has_collapsed %}was left with{% else %}holds{% endif %}
-        <b>{{ summary.pool|floatformat:2 }}♠</b>.
-      </li>
-    </ul>
+    <table class="table table-striped table-sm" data-testid="ponzi-summary">
+      <tr class="table-dark">
+        <th>Item</th>
+        <th>Number</th>
+        <th>Total value</th>
+      </tr>
+      <tr>
+        <th>Players</th>
+        <td>{{ summary.num_players }}</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <th>Bids placed</th>
+        <td>{{ summary.num_bids }}</td>
+        <td>{{ summary.total_bid|default:0 }}♠</td>
+      </tr>
+      <tr>
+        <th>Bids paid out</th>
+        <td>{{ summary.num_withdrawn }}</td>
+        <td>{{ summary.total_paid|default:0|floatformat:2 }}♠</td>
+      </tr>
+      <tr>
+        <th>Bids not paid out</th>
+        <td>{{ summary.num_outstanding }}</td>
+        <td>{{ summary.total_outstanding|default:0 }}♠</td>
+      </tr>
+      <tr>
+        <th>Global pool</th>
+        <td>—</td>
+        <td>{{ summary.pool|floatformat:2 }}♠</td>
+      </tr>
+    </table>
   {% endif %}
   {% if all_investments is not None %}
     <h2>All bids</h2>

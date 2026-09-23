@@ -224,7 +224,6 @@ def test_collapse(otis, scheme: PonziScheme):
         "total_bid": 20,
         "num_withdrawn": 1,
         "total_paid": Decimal("10.67"),
-        "biggest_payout": Decimal("10.67"),
         "num_outstanding": 1,
         "total_outstanding": 10,
         "pool": Decimal("9.33"),
