@@ -2,12 +2,12 @@ import datetime
 from decimal import Decimal
 
 import pytest
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, User
 from freezegun import freeze_time
 
-from core.factories import SemesterFactory, UserFactory
-from roster.factories import InvoiceFactory, StudentFactory
-from roster.models import Student, StudentStanding
+from core.factories import UserFactory
+from roster.factories import StudentFactory
+from roster.models import Student
 from rpg.factories import QuestCompleteFactory
 from rpg.levelsys import get_level_info, get_student_rows
 
@@ -22,14 +22,12 @@ def at(days: float) -> datetime.datetime:
     return START + datetime.timedelta(days=days)
 
 
-def verified_student(scheme: PonziScheme, spades: int = 100, **kwargs) -> Student:
+def verified_user(spades: int = 100) -> User:
     group, _ = Group.objects.get_or_create(name="Verified")
-    student = StudentFactory.create(
-        semester=scheme.semester, user__groups=(group,), **kwargs
-    )
+    user = UserFactory.create(groups=(group,))
     if spades:
-        QuestCompleteFactory.create(student=student, spades=spades)
-    return student
+        QuestCompleteFactory.create(student__user=user, spades=spades)
+    return user
 
 
 @pytest.fixture
@@ -39,11 +37,11 @@ def scheme(db) -> PonziScheme:
 
 @pytest.mark.django_db
 def test_invest(otis, scheme: PonziScheme):
-    alice = verified_student(scheme)
+    alice = verified_user()
     otis.login(alice)
     with freeze_time(at(1)):
         otis.post_30x("ponzi-invest", scheme.pk, data={"amount": 10})
-        investment = PonziInvestment.objects.get(student=alice)
+        investment = PonziInvestment.objects.get(user=alice)
         assert investment.amount == 10
         assert investment.created_at == at(1)
         assert investment.tier == 0
@@ -52,7 +50,7 @@ def test_invest(otis, scheme: PonziScheme):
 @pytest.mark.django_db
 @pytest.mark.parametrize("amount", [0, 11, 2.5, "lots"])
 def test_invest_bad_amount(otis, scheme: PonziScheme, amount):
-    otis.login(verified_student(scheme))
+    otis.login(verified_user())
     with freeze_time(at(1)):
         otis.post_30x("ponzi-invest", scheme.pk, data={"amount": amount})
     assert not PonziInvestment.objects.exists()
@@ -60,7 +58,7 @@ def test_invest_bad_amount(otis, scheme: PonziScheme, amount):
 
 @pytest.mark.django_db
 def test_invest_cannot_go_into_debt(otis, scheme: PonziScheme):
-    otis.login(verified_student(scheme, spades=7))
+    otis.login(verified_user(spades=7))
     with freeze_time(at(1)):
         otis.post_30x("ponzi-invest", scheme.pk, data={"amount": 8})
         assert not PonziInvestment.objects.exists()
@@ -70,7 +68,7 @@ def test_invest_cannot_go_into_debt(otis, scheme: PonziScheme):
 
 @pytest.mark.django_db
 def test_invest_once_per_day(otis, scheme: PonziScheme):
-    otis.login(verified_student(scheme))
+    otis.login(verified_user())
     with freeze_time(at(1)):
         otis.post_30x("ponzi-invest", scheme.pk, data={"amount": 5})
     with freeze_time(at(1.5)):
@@ -83,7 +81,7 @@ def test_invest_once_per_day(otis, scheme: PonziScheme):
 
 @pytest.mark.django_db
 def test_invest_before_start(otis, scheme: PonziScheme):
-    otis.login(verified_student(scheme))
+    otis.login(verified_user())
     with freeze_time(at(-1)):
         otis.get_denied("ponzi-scheme", scheme.pk)
         otis.post_30x("ponzi-invest", scheme.pk, data={"amount": 5})
@@ -91,23 +89,26 @@ def test_invest_before_start(otis, scheme: PonziScheme):
 
 
 @pytest.mark.django_db
-def test_only_active_students_play(otis, scheme: PonziScheme):
-    other_semester = PonziSchemeFactory.create(start_date=START)
-    otis.login(verified_student(other_semester))
+def test_any_verified_user_can_play(otis, scheme: PonziScheme):
+    alice = verified_user(spades=0)
+    otis.login(alice)
     with freeze_time(at(1)):
-        otis.post_denied("ponzi-invest", scheme.pk, data={"amount": 5})
+        resp = otis.get_ok("ponzi-scheme", scheme.pk)
+    assert resp.context["can_invest"] is True
 
-    otis.login(verified_student(scheme, standing=StudentStanding.DROPPED))
+    QuestCompleteFactory.create(
+        student__user=alice, student__semester__active=False, spades=5
+    )
     with freeze_time(at(1)):
-        otis.post_denied("ponzi-invest", scheme.pk, data={"amount": 5})
-    assert not PonziInvestment.objects.exists()
+        otis.post_30x("ponzi-invest", scheme.pk, data={"amount": 5})
+    assert PonziInvestment.objects.get().user == alice
 
 
 @pytest.mark.django_db
 def test_cannot_touch_other_investments(otis, scheme: PonziScheme):
     with freeze_time(at(1)):
         investment = PonziInvestmentFactory.create(scheme=scheme)
-    otis.login(verified_student(scheme))
+    otis.login(verified_user())
     with freeze_time(at(20)):
         otis.post_not_found("ponzi-withdraw", investment.pk)
         otis.post_not_found("ponzi-upgrade", investment.pk)
@@ -115,12 +116,10 @@ def test_cannot_touch_other_investments(otis, scheme: PonziScheme):
 
 @pytest.mark.django_db
 def test_withdraw_tier_one(otis, scheme: PonziScheme):
-    alice = verified_student(scheme)
+    alice = verified_user()
     with freeze_time(at(0)):
         PonziInvestmentFactory.create(scheme=scheme, amount=10)
-        investment = PonziInvestmentFactory.create(
-            scheme=scheme, student=alice, amount=10
-        )
+        investment = PonziInvestmentFactory.create(scheme=scheme, user=alice, amount=10)
     otis.login(alice)
 
     with freeze_time(at(13)):
@@ -144,12 +143,10 @@ def test_withdraw_tier_one(otis, scheme: PonziScheme):
 
 @pytest.mark.django_db
 def test_upgrade_to_tier_three(otis, scheme: PonziScheme):
-    alice = verified_student(scheme)
+    alice = verified_user()
     with freeze_time(at(0)):
         PonziInvestmentFactory.create(scheme=scheme, amount=10)
-        investment = PonziInvestmentFactory.create(
-            scheme=scheme, student=alice, amount=10
-        )
+        investment = PonziInvestmentFactory.create(scheme=scheme, user=alice, amount=10)
     otis.login(alice)
 
     with freeze_time(at(10)):
@@ -185,13 +182,11 @@ def test_upgrade_to_tier_three(otis, scheme: PonziScheme):
 
 @pytest.mark.django_db
 def test_collapse(otis, scheme: PonziScheme):
-    alice = verified_student(scheme)
-    bob = verified_student(scheme)
+    alice = verified_user()
+    bob = verified_user()
     with freeze_time(at(0)):
-        alice_inv = PonziInvestmentFactory.create(
-            scheme=scheme, student=alice, amount=10
-        )
-        bob_inv = PonziInvestmentFactory.create(scheme=scheme, student=bob, amount=10)
+        alice_inv = PonziInvestmentFactory.create(scheme=scheme, user=alice, amount=10)
+        bob_inv = PonziInvestmentFactory.create(scheme=scheme, user=bob, amount=10)
 
     with freeze_time(at(15)):
         otis.login(alice)
@@ -232,26 +227,27 @@ def test_collapse(otis, scheme: PonziScheme):
 
 @pytest.mark.django_db
 def test_spades_accounting(scheme: PonziScheme):
-    alice = verified_student(scheme, spades=30)
-    PonziInvestmentFactory.create(scheme=scheme, student=alice, amount=10)
+    alice = verified_user(spades=30)
+    student = Student.objects.get(user=alice)
+    PonziInvestmentFactory.create(scheme=scheme, user=alice, amount=10)
     PonziInvestmentFactory.create(
         scheme=scheme,
-        student=alice,
+        user=alice,
         amount=10,
         payout=Decimal("11.40"),
         withdrawn_at=at(20),
     )
     expected = 30 - 10 - 10 + 11.4
-    assert get_level_info(alice)["meters"]["spades"].value == expected
-    rows = get_student_rows(Student.objects.filter(pk=alice.pk))
+    assert get_level_info(student)["meters"]["spades"].value == expected
+    rows = get_student_rows(Student.objects.filter(pk=student.pk))
     assert rows[0]["spades"] == pytest.approx(expected)
 
 
 @pytest.mark.django_db
 def test_views_render(otis, scheme: PonziScheme):
-    alice = verified_student(scheme)
+    alice = verified_user()
     with freeze_time(at(0)):
-        PonziInvestmentFactory.create(scheme=scheme, student=alice, amount=5)
+        PonziInvestmentFactory.create(scheme=scheme, user=alice, amount=5)
     otis.login(alice)
     with freeze_time(at(0.5)):
         resp = otis.get_ok("ponzi-list")
@@ -294,30 +290,8 @@ def test_admin_sees_all_bids_before_collapse(otis, scheme: PonziScheme):
 
 @pytest.mark.django_db
 def test_unverified_users_are_denied(otis, scheme: PonziScheme):
-    student = StudentFactory.create(semester=scheme.semester)
-    otis.login(student)
+    otis.login(StudentFactory.create(semester__active=True))
     otis.get_denied("ponzi-list")
     otis.get_denied("ponzi-scheme", scheme.pk)
     otis.post_denied("ponzi-invest", scheme.pk, data={"amount": 1})
-    assert not PonziInvestment.objects.exists()
-
-
-@pytest.mark.django_db
-def test_delinquent_students_cannot_play(otis):
-    semester = SemesterFactory.create(
-        show_invoices=True,
-        one_semester_date=None,
-        half_payment_deadline=datetime.datetime(2025, 10, 1, tzinfo=UTC),
-        full_payment_deadline=datetime.datetime(2026, 6, 1, tzinfo=UTC),
-    )
-    scheme = PonziSchemeFactory.create(semester=semester, start_date=START)
-    alice = verified_student(scheme)
-    with freeze_time(at(-30)):
-        InvoiceFactory.create(student=alice)
-    otis.login(alice)
-    with freeze_time(at(1)):
-        assert alice.is_delinquent
-        resp = otis.get_ok("ponzi-scheme", scheme.pk)
-        assert resp.context["student"] is None
-        otis.post_denied("ponzi-invest", scheme.pk, data={"amount": 1})
     assert not PonziInvestment.objects.exists()

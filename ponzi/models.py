@@ -2,14 +2,12 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import Any
 
+from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import Count, Q, Sum
 from django.urls import reverse
 from django.utils import timezone
-
-from core.models import Semester
-from roster.models import Student
 
 MAX_INVESTMENT = 10
 GESTATION_PERIOD = timedelta(weeks=2)
@@ -24,7 +22,6 @@ TIER_NAMES = {0: "—", 1: "I", 2: "II", 3: "III"}
 
 
 class PonziScheme(models.Model):
-    semester = models.ForeignKey(Semester, on_delete=models.CASCADE)
     title = models.CharField(max_length=80)
     start_date = models.DateTimeField(help_text="When investments open")
     collapsed_at = models.DateTimeField(
@@ -33,12 +30,12 @@ class PonziScheme(models.Model):
         help_text="When somebody tried to withdraw more than the pool held",
     )
     collapsed_by = models.ForeignKey(
-        Student,
+        User,
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
         related_name="+",
-        help_text="The student whose withdrawal broke the bank",
+        help_text="The user whose withdrawal broke the bank",
     )
 
     investments: "models.Manager[PonziInvestment]"
@@ -68,7 +65,7 @@ class PonziScheme(models.Model):
         withdrawn = Q(withdrawn_at__isnull=False)
         stats = self.investments.aggregate(
             num_bids=Count("pk"),
-            num_players=Count("student", distinct=True),
+            num_players=Count("user", distinct=True),
             total_bid=Sum("amount"),
             num_withdrawn=Count("pk", filter=withdrawn),
             total_paid=Sum("payout"),
@@ -90,7 +87,7 @@ class PonziInvestment(models.Model):
     scheme = models.ForeignKey(
         PonziScheme, on_delete=models.CASCADE, related_name="investments"
     )
-    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     amount = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(MAX_INVESTMENT)],
         help_text=f"Number of spades invested, at most {MAX_INVESTMENT}",
@@ -111,7 +108,7 @@ class PonziInvestment(models.Model):
         ordering = ("-created_at",)
 
     def __str__(self) -> str:
-        return f"{self.amount}♠ by {self.student} in {self.scheme}"
+        return f"{self.amount}♠ by {self.user} in {self.scheme}"
 
     @property
     def matures_at(self) -> datetime:

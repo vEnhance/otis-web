@@ -18,92 +18,86 @@
       or the total size of the pool.)
     </p>
   {% endif %}
-  {% if student %}
-    <h2>Your current spade count</h2>
-    <div class="container mb-3">
-      <div class="row">{% include "rpg/meters/small.html" with meter=spades_meter %}</div>
-    </div>
+  <h2>Your current spade count</h2>
+  <div class="container mb-3">
+    <div class="row">{% include "rpg/meters/small.html" with meter=spades_meter %}</div>
+  </div>
+  <h2>Place a bid</h2>
+  {% if can_invest %}
+    <form method="post"
+          action="{% url 'ponzi-invest' scheme.pk %}"
+          class="row g-2 align-items-center mb-3"
+          data-testid="ponzi-invest-form">
+      {% csrf_token %}
+      <p>Enter a number of spades from 1 to {{ max_bid }}.</p>
+      <div class="col-auto">
+        <input type="number"
+               name="amount"
+               min="1"
+               max="{{ max_bid }}"
+               step="1"
+               required
+               class="form-control"
+               placeholder="" />
+      </div>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-success">Bid</button>
+      </div>
+    </form>
+    <hr />
+  {% elif scheme.is_running and next_investment_at %}
+    <p>You can bid again {% timestamp next_investment_at "relative" %}.</p>
+  {% elif scheme.has_collapsed %}
+    <p class="text-muted">This Ponzi scheme has collapsed.</p>
   {% endif %}
-  {% if student %}
-    <h2>Place a bid</h2>
-    {% if can_invest %}
-      <form method="post"
-            action="{% url 'ponzi-invest' scheme.pk %}"
-            class="row g-2 align-items-center mb-3"
-            data-testid="ponzi-invest-form">
-        {% csrf_token %}
-        <p>Enter a number of spades from 1 to {{ max_bid }}.</p>
-        <div class="col-auto">
-          <input type="number"
-                 name="amount"
-                 min="1"
-                 max="{{ max_bid }}"
-                 step="1"
-                 required
-                 class="form-control"
-                 placeholder="" />
-        </div>
-        <div class="col-auto">
-          <button type="submit" class="btn btn-success">Bid</button>
-        </div>
-      </form>
-      <hr />
-    {% elif scheme.is_running and next_investment_at %}
-      <p>You can bid again {% timestamp next_investment_at "relative" %}.</p>
-    {% elif scheme.has_collapsed %}
-      <p class="text-muted">This Ponzi scheme has collapsed.</p>
-    {% else %}
-      <p class="text-muted">You are not eligible to play.</p>
-    {% endif %}
-    <h2>Your bids</h2>
-    <table class="table table-striped">
-      <tr class="table-dark">
-        <th>Placed</th>
-        <th>♠</th>
-        <th>Tier</th>
-        <th>Status</th>
-      </tr>
-      {% for investment in investments %}
-        <tr>
-          <td>{% timestamp investment.created_at "isodate" %}</td>
-          <td>{{ investment.amount }}♠</td>
-          <td>{{ investment.tier_name }}</td>
-          <td>
-            {% if investment.withdrawn_at %}
-              Withdrew {{ investment.payout|floatformat:2 }}♠
-            {% elif scheme.has_collapsed %}
-              Lost
-            {% elif investment.is_growing %}
-              Wait {% timestamp investment.matures_at "relative" %}
-            {% else %}
+  <h2>Your bids</h2>
+  <table class="table table-striped">
+    <tr class="table-dark">
+      <th>Placed</th>
+      <th>♠</th>
+      <th>Tier</th>
+      <th>Status</th>
+    </tr>
+    {% for investment in investments %}
+      <tr>
+        <td>{% timestamp investment.created_at "isodate" %}</td>
+        <td>{{ investment.amount }}♠</td>
+        <td>{{ investment.tier_name }}</td>
+        <td>
+          {% if investment.withdrawn_at %}
+            Withdrew {{ investment.payout|floatformat:2 }}♠
+          {% elif scheme.has_collapsed %}
+            Lost
+          {% elif investment.is_growing %}
+            Wait {% timestamp investment.matures_at "relative" %}
+          {% else %}
+            <form method="post"
+                  action="{% url 'ponzi-withdraw' investment.pk %}"
+                  class="d-inline">
+              {% csrf_token %}
+              <button type="submit"
+                      class="btn btn-sm btn-primary"
+                      data-testid="ponzi-withdraw">Withdraw {{ investment.current_value|floatformat:2 }}♠</button>
+            </form>
+            {% if investment.can_upgrade %}
               <form method="post"
-                    action="{% url 'ponzi-withdraw' investment.pk %}"
+                    action="{% url 'ponzi-upgrade' investment.pk %}"
                     class="d-inline">
                 {% csrf_token %}
                 <button type="submit"
-                        class="btn btn-sm btn-primary"
-                        data-testid="ponzi-withdraw">Withdraw {{ investment.current_value|floatformat:2 }}♠</button>
+                        class="btn btn-sm btn-warning"
+                        data-testid="ponzi-upgrade">Keep growing</button>
               </form>
-              {% if investment.can_upgrade %}
-                <form method="post"
-                      action="{% url 'ponzi-upgrade' investment.pk %}"
-                      class="d-inline">
-                  {% csrf_token %}
-                  <button type="submit"
-                          class="btn btn-sm btn-warning"
-                          data-testid="ponzi-upgrade">Keep growing</button>
-                </form>
-              {% endif %}
             {% endif %}
-          </td>
-        </tr>
-      {% empty %}
-        <tr>
-          <td colspan="4">You haven't bid yet. What are you waiting for?</td>
-        </tr>
-      {% endfor %}
-    </table>
-  {% endif %}
+          {% endif %}
+        </td>
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="4">You haven't bid yet. What are you waiting for?</td>
+      </tr>
+    {% endfor %}
+  </table>
   {% if summary %}
     <hr />
     {% if scheme.has_collapsed %}

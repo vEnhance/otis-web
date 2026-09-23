@@ -3,6 +3,7 @@ import datetime
 import logging
 from typing import Any, TypedDict
 
+from django.contrib.auth.models import User
 from django.db.models.aggregates import Count, Max, Sum
 from django.db.models.expressions import OuterRef, Subquery
 from django.db.models.query import QuerySet
@@ -189,7 +190,7 @@ def get_level_info(student: Student) -> LevelInfoDict:
 
     total_diamonds = get_diamond_stats(student)
 
-    total_spades = get_spade_stats(student, level_data)
+    total_spades = get_spade_stats(student.user, level_data)
 
     profile = find_profile(student.user)
     dynamic_progress = profile is not None and profile.dynamic_progress
@@ -260,26 +261,26 @@ def get_diamond_stats(student: Student) -> int:
     return total_diamonds
 
 
-def get_spade_stats(student: Student, leveldict: LevelInfoDict = None) -> float:
+def get_spade_stats(user: User, leveldict: LevelInfoDict = None) -> float:
     total_spades = 0
 
     # a billion unrelated spades items lol
-    quiz_attempts = ExamAttempt.objects.filter(student__user=student.user)
+    quiz_attempts = ExamAttempt.objects.filter(student__user=user)
     quiz_attempts = quiz_attempts.order_by("quiz__family", "quiz__number")
     total_spades = (quiz_attempts.aggregate(total=Sum("score"))["total"] or 0) * 2
 
-    quest_completes = QuestComplete.objects.filter(student__user=student.user)
+    quest_completes = QuestComplete.objects.filter(student__user=user)
     quest_completes = quest_completes.order_by("-timestamp")
     total_spades += quest_completes.aggregate(total=Sum("spades"))["total"] or 0
 
-    mock_completes = MockCompleted.objects.filter(student__user=student.user)
+    mock_completes = MockCompleted.objects.filter(student__user=user)
     mock_completes = mock_completes.select_related("exam")
     mock_completes = mock_completes.order_by("exam__family", "exam__number")
     total_spades += mock_completes.count() * 3
 
     market_guesses = (
         Guess.objects.filter(
-            user=student.user,
+            user=user,
             market__end_date__lt=timezone.now(),
         )
         .order_by("-market__end_date")
@@ -288,7 +289,7 @@ def get_spade_stats(student: Student, leveldict: LevelInfoDict = None) -> float:
     total_spades += market_guesses.aggregate(total=Sum("score"))["total"] or 0
 
     suggested_units_queryset = ProblemSuggestion.objects.filter(
-        user=student.user,
+        user=user,
         status__in=("SUGG_NOK", "SUGG_OK"),
         eligible=True,
     ).values_list(
@@ -300,19 +301,19 @@ def get_spade_stats(student: Student, leveldict: LevelInfoDict = None) -> float:
     total_spades += len(suggest_units_set)
 
     completed_jobs = Job.objects.filter(
-        assignee__user=student.user, progress="JOB_VFD"
+        assignee__user=user, progress="JOB_VFD"
     ).select_related("folder")
     total_spades += completed_jobs.aggregate(total=Sum("spades_bounty"))["total"] or 0
 
     hanabi_replays = HanabiReplay.objects.filter(
         contest__processed=True,
-        hanabiparticipation__player__user=student.user,
+        hanabiparticipation__player__user=user,
     )
     total_spades += hanabi_replays.aggregate(total=Sum("spades_score"))["total"] or 0
 
-    ponzi_investments = PonziInvestment.objects.filter(
-        student__user=student.user
-    ).select_related("scheme")
+    ponzi_investments = PonziInvestment.objects.filter(user=user).select_related(
+        "scheme"
+    )
     ponzi_totals = ponzi_investments.aggregate(
         invested=Sum("amount"), paid=Sum("payout")
     )
@@ -396,8 +397,8 @@ def annotate_student_queryset_with_scores(
             "user__hanabiplayer__hanabiparticipation__replay__spades_score",
             filter=Q(contest__processed=True),
         ),
-        spades_ponzi_invested=SubquerySum("user__student__ponziinvestment__amount"),
-        spades_ponzi_paid=SubquerySum("user__student__ponziinvestment__payout"),
+        spades_ponzi_invested=SubquerySum("user__ponziinvestment__amount"),
+        spades_ponzi_paid=SubquerySum("user__ponziinvestment__payout"),
     )
 
 

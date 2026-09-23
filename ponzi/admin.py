@@ -5,8 +5,7 @@ from .models import PonziInvestment, PonziScheme
 
 @admin.register(PonziScheme)
 class PonziSchemeAdmin(admin.ModelAdmin):
-    list_display = ("title", "semester", "start_date", "collapsed_at", "collapsed_by")
-    list_filter = ("semester__active", "semester")
+    list_display = ("title", "start_date", "collapsed_at", "collapsed_by")
     search_fields = ("title",)
     autocomplete_fields = ("collapsed_by",)
 
@@ -14,7 +13,7 @@ class PonziSchemeAdmin(admin.ModelAdmin):
 @admin.register(PonziInvestment)
 class PonziInvestmentAdmin(admin.ModelAdmin):
     list_display = (
-        "student",
+        "user",
         "scheme",
         "amount",
         "target_tier",
@@ -23,10 +22,10 @@ class PonziInvestmentAdmin(admin.ModelAdmin):
         "withdrawn_at",
         "payout",
     )
-    list_filter = ("scheme__semester__active", "scheme", "target_tier")
+    list_filter = ("scheme", "target_tier")
     search_fields = (
-        "student__user__first_name",
-        "student__user__last_name",
-        "student__user__username",
+        "user__first_name",
+        "user__last_name",
+        "user__username",
     )
-    autocomplete_fields = ("student",)
+    autocomplete_fields = ("user",)
