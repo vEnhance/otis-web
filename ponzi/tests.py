@@ -5,8 +5,8 @@ import pytest
 from django.contrib.auth.models import Group
 from freezegun import freeze_time
 
-from core.factories import UserFactory
-from roster.factories import StudentFactory
+from core.factories import SemesterFactory, UserFactory
+from roster.factories import InvoiceFactory, StudentFactory
 from roster.models import Student, StudentStanding
 from rpg.factories import QuestCompleteFactory
 from rpg.levelsys import get_level_info, get_student_rows
@@ -299,4 +299,25 @@ def test_unverified_users_are_denied(otis, scheme: PonziScheme):
     otis.get_denied("ponzi-list")
     otis.get_denied("ponzi-scheme", scheme.pk)
     otis.post_denied("ponzi-invest", scheme.pk, data={"amount": 1})
+    assert not PonziInvestment.objects.exists()
+
+
+@pytest.mark.django_db
+def test_delinquent_students_cannot_play(otis):
+    semester = SemesterFactory.create(
+        show_invoices=True,
+        one_semester_date=None,
+        half_payment_deadline=datetime.datetime(2025, 10, 1, tzinfo=UTC),
+        full_payment_deadline=datetime.datetime(2026, 6, 1, tzinfo=UTC),
+    )
+    scheme = PonziSchemeFactory.create(semester=semester, start_date=START)
+    alice = verified_student(scheme)
+    with freeze_time(at(-30)):
+        InvoiceFactory.create(student=alice)
+    otis.login(alice)
+    with freeze_time(at(1)):
+        assert alice.is_delinquent
+        resp = otis.get_ok("ponzi-scheme", scheme.pk)
+        assert resp.context["student"] is None
+        otis.post_denied("ponzi-invest", scheme.pk, data={"amount": 1})
     assert not PonziInvestment.objects.exists()

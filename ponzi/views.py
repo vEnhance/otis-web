@@ -50,7 +50,7 @@ class PonziSchemeList(VerifiedRequiredMixin, ListView[PonziScheme]):
 
 def find_player(user: User, scheme: PonziScheme) -> Student | None:
     student = Student.objects.filter(user=user, semester=scheme.semester).first()
-    if student is None or not student.enabled:
+    if student is None or not student.enabled or student.is_delinquent:
         return None
     return student
 

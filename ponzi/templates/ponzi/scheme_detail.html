@@ -13,7 +13,7 @@
   {% else %}
     <p>{{ scheme }} is open for business!</p>
     <p data-testid="ponzi-num-investors">
-      So far, {{ num_investors }} distinct player{{ num_investors|pluralize }} have made at least one bid.
+      So far, {{ num_investors }} distinct player{{ num_investors|pluralize }} {{ num_investors|pluralize:"has,have" }} made at least one bid.
       (Players cannot see the total number of bids
       or the total size of the pool.)
     </p>
@@ -99,7 +99,7 @@
         </tr>
       {% empty %}
         <tr>
-          <td colspan="5">You haven't bid yet. What are you waiting for?</td>
+          <td colspan="4">You haven't bid yet. What are you waiting for?</td>
         </tr>
       {% endfor %}
     </table>
@@ -170,7 +170,7 @@
         </tr>
       {% empty %}
         <tr>
-          <td class="fst-italic" colspan="6">No bids placed in this Ponzi scheme.</td>
+          <td class="fst-italic" colspan="5">No bids placed in this Ponzi scheme.</td>
         </tr>
       {% endfor %}
     </table>
