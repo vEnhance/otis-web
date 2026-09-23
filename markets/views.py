@@ -25,6 +25,7 @@ from markets.forms import MarketCreateForm
 from otisweb.decorators import admin_required
 from otisweb.mixins import AdminRequiredMixin, VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest
+from ponzi.models import PonziScheme
 
 from .models import Guess, Market
 
@@ -152,7 +153,12 @@ def recompute(request: AuthHttpRequest, market_slug: str):
 class MarketList(LoginRequiredMixin, ListView[Market]):
     model = Market
     context_object_name = "markets"
-    extra_context: ClassVar[dict[str, Any]] = {"past": False}
+    extra_context: ClassVar[dict[str, Any]] = {
+        "past": False,
+        "ponzi_active": PonziScheme.objects.filter(
+            start_date__lte=timezone.now(), collapsed_at__isnull=True
+        ).exists(),
+    }
 
     def get_queryset(self) -> QuerySet[Market]:
         if getattr(self.request.user, "is_staff", False) is True:
