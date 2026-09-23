@@ -37,6 +37,7 @@ PROJECT_APPS = (
     "opal",
     "otisweb",
     "payments",
+    "ponzi",
     "roster",
     "rpg",
     "suggestions",

@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+{% load otis_extras %}
+{% block title %}
+  Ponzi schemes
+{% endblock title %}
+{% block layout-content %}
+  <p>
+    Invest your hard-earned spades in a completely legitimate financial instrument.
+    Returns are guaranteed, right up until they aren't.
+  </p>
+  <table class="table table-striped">
+    <tr class="table-dark">
+      <th>Scheme</th>
+      <th>Semester</th>
+      <th>Opened</th>
+      <th>Status</th>
+    </tr>
+    {% for scheme in schemes %}
+      <tr>
+        <td>
+          <a href="{{ scheme.get_absolute_url }}">{{ scheme.title }}</a>
+        </td>
+        <td>{{ scheme.semester }}</td>
+        <td>{% timestamp scheme.start_date "isodate" %}</td>
+        <td>
+          {% if scheme.has_collapsed %}
+            Collapsed {% timestamp scheme.collapsed_at "isodate" %}
+          {% elif scheme.has_started %}
+            Thriving
+          {% else %}
+            Not open yet
+          {% endif %}
+        </td>
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="4">No schemes yet.</td>
+      </tr>
+    {% endfor %}
+  </table>
+{% endblock layout-content %}

@@ -1,0 +1,112 @@
+{% extends "layout.html" %}
+{% load otis_extras %}
+{% block title %}
+  {{ scheme.title }}
+{% endblock title %}
+{% block layout-content %}
+  {% if scheme.has_collapsed %}
+    <div class="alert alert-danger" data-testid="ponzi-collapsed">
+      This scheme collapsed {% timestamp scheme.collapsed_at "relative" %},
+      when somebody tried to withdraw more than was left in the pool.
+      Any spades still invested are gone.
+    </div>
+  {% elif not scheme.has_started %}
+    <div class="alert alert-info">Investments open {% timestamp scheme.start_date "relative" %}.</div>
+  {% endif %}
+  <h2>How it works</h2>
+  <ul>
+    <li>Invest a whole number of spades, up to 20, at most once per week.</li>
+    <li>After two weeks, your investment reaches the next tier.</li>
+    <li>
+      Once it reaches a tier, you may withdraw it with interest,
+      or lock it up for two more weeks to reach the next tier.
+    </li>
+    <li>
+      Returns:
+      {% for name, rate in tier_returns %}
+        Tier {{ name }} pays {{ rate|floatformat:"-1" }}%{% if forloop.last %}.{% else %},{% endif %}
+      {% endfor %}
+    </li>
+    <li>All withdrawals are paid out of the shared pool of investments.</li>
+  </ul>
+  <p>
+    The pool currently holds <b data-testid="ponzi-pool">{{ pool|floatformat:2 }}♠</b>
+    from {{ num_investors }} investor{{ num_investors|pluralize }}.
+  </p>
+  {% if student %}
+    <h2>Your portfolio</h2>
+    <p>You currently have {{ balance|floatformat:2 }}♠.</p>
+    {% if can_invest %}
+      <form method="post"
+            action="{% url 'ponzi-invest' scheme.pk %}"
+            class="row g-2 align-items-center mb-3"
+            data-testid="ponzi-invest-form">
+        {% csrf_token %}
+        <div class="col-auto">
+          <input type="number"
+                 name="amount"
+                 min="1"
+                 max="20"
+                 step="1"
+                 required
+                 class="form-control"
+                 placeholder="Spades" />
+        </div>
+        <div class="col-auto">
+          <button type="submit" class="btn btn-success">Invest</button>
+        </div>
+      </form>
+    {% elif scheme.is_running and next_investment_at %}
+      <p>You can invest again {% timestamp next_investment_at "relative" %}.</p>
+    {% endif %}
+    <table class="table table-striped">
+      <tr class="table-dark">
+        <th>Invested</th>
+        <th>Amount</th>
+        <th>Tier</th>
+        <th>Value</th>
+        <th>Status</th>
+      </tr>
+      {% for investment in investments %}
+        <tr>
+          <td>{% timestamp investment.created_at "isodate" %}</td>
+          <td>{{ investment.amount }}♠</td>
+          <td>{{ investment.tier_name }}</td>
+          <td>{{ investment.current_value|floatformat:2 }}♠</td>
+          <td>
+            {% if investment.withdrawn_at %}
+              Withdrew {{ investment.payout|floatformat:2 }}♠
+            {% elif scheme.has_collapsed %}
+              Lost
+            {% elif investment.is_growing %}
+              Reaches next tier {% timestamp investment.matures_at "relative" %}
+            {% else %}
+              <form method="post"
+                    action="{% url 'ponzi-withdraw' investment.pk %}"
+                    class="d-inline">
+                {% csrf_token %}
+                <button type="submit"
+                        class="btn btn-sm btn-primary"
+                        data-testid="ponzi-withdraw">Withdraw</button>
+              </form>
+              {% if investment.can_upgrade %}
+                <form method="post"
+                      action="{% url 'ponzi-upgrade' investment.pk %}"
+                      class="d-inline">
+                  {% csrf_token %}
+                  <button type="submit"
+                          class="btn btn-sm btn-warning"
+                          data-testid="ponzi-upgrade">Keep growing</button>
+                </form>
+              {% endif %}
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="5">You haven't invested yet. What are you waiting for?</td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% endif %}
+{% endblock layout-content %}

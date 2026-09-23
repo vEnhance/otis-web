@@ -83,6 +83,7 @@ INSTALLED_APPS = [
     "markets",
     "mouse",
     "opal",
+    "ponzi",
     "roster",
     "rpg",
     "payments",
