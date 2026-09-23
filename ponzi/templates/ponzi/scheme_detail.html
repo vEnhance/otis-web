@@ -1,0 +1,178 @@
+{% extends "layout.html" %}
+{% load otis_extras %}
+{% block title %}
+  {{ scheme.title }}
+{% endblock title %}
+{% block layout-content %}
+  {% if scheme.has_collapsed %}
+    <div class="alert alert-danger" data-testid="ponzi-collapsed">
+      This scheme collapsed on {% timestamp scheme.collapsed_at "isotime" %}.
+    </div>
+  {% elif not scheme.has_started %}
+    <div class="alert alert-info">Bidding opens at {% timestamp scheme.start_date "isotime" %}.</div>
+  {% else %}
+    <p>{{ scheme }} is open for business!</p>
+    <p data-testid="ponzi-num-investors">
+      So far, {{ num_investors }} distinct player{{ num_investors|pluralize }} {{ num_investors|pluralize:"has,have" }} made at least one bid.
+      (Players cannot see the total number of bids
+      or the total size of the pool.)
+    </p>
+  {% endif %}
+  {% if student %}
+    <h2>Your current spade count</h2>
+    <div class="container mb-3">
+      <div class="row">{% include "rpg/meters/small.html" with meter=spades_meter %}</div>
+    </div>
+  {% endif %}
+  {% if student %}
+    <h2>Place a bid</h2>
+    {% if can_invest %}
+      <form method="post"
+            action="{% url 'ponzi-invest' scheme.pk %}"
+            class="row g-2 align-items-center mb-3"
+            data-testid="ponzi-invest-form">
+        {% csrf_token %}
+        <p>Enter a number of spades from 1 to {{ max_bid }}.</p>
+        <div class="col-auto">
+          <input type="number"
+                 name="amount"
+                 min="1"
+                 max="{{ max_bid }}"
+                 step="1"
+                 required
+                 class="form-control"
+                 placeholder="" />
+        </div>
+        <div class="col-auto">
+          <button type="submit" class="btn btn-success">Bid</button>
+        </div>
+      </form>
+      <hr />
+    {% elif scheme.is_running and next_investment_at %}
+      <p>You can bid again {% timestamp next_investment_at "relative" %}.</p>
+    {% elif scheme.has_collapsed %}
+      <p class="text-muted">This Ponzi scheme has collapsed.</p>
+    {% else %}
+      <p class="text-muted">You are not eligible to play.</p>
+    {% endif %}
+    <h2>Your bids</h2>
+    <table class="table table-striped">
+      <tr class="table-dark">
+        <th>Placed</th>
+        <th>♠</th>
+        <th>Tier</th>
+        <th>Status</th>
+      </tr>
+      {% for investment in investments %}
+        <tr>
+          <td>{% timestamp investment.created_at "isodate" %}</td>
+          <td>{{ investment.amount }}♠</td>
+          <td>{{ investment.tier_name }}</td>
+          <td>
+            {% if investment.withdrawn_at %}
+              Withdrew {{ investment.payout|floatformat:2 }}♠
+            {% elif scheme.has_collapsed %}
+              Lost
+            {% elif investment.is_growing %}
+              Wait {% timestamp investment.matures_at "relative" %}
+            {% else %}
+              <form method="post"
+                    action="{% url 'ponzi-withdraw' investment.pk %}"
+                    class="d-inline">
+                {% csrf_token %}
+                <button type="submit"
+                        class="btn btn-sm btn-primary"
+                        data-testid="ponzi-withdraw">Withdraw {{ investment.current_value|floatformat:2 }}♠</button>
+              </form>
+              {% if investment.can_upgrade %}
+                <form method="post"
+                      action="{% url 'ponzi-upgrade' investment.pk %}"
+                      class="d-inline">
+                  {% csrf_token %}
+                  <button type="submit"
+                          class="btn btn-sm btn-warning"
+                          data-testid="ponzi-upgrade">Keep growing</button>
+                </form>
+              {% endif %}
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="4">You haven't bid yet. What are you waiting for?</td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% endif %}
+  {% if summary %}
+    <hr />
+    {% if scheme.has_collapsed %}
+      <h1>Final statistics</h1>
+    {% else %}
+      <h1>Statistics so far (admin only)</h1>
+    {% endif %}
+    <table class="table table-striped table-sm" data-testid="ponzi-summary">
+      <tr class="table-dark">
+        <th>Item</th>
+        <th>Number</th>
+        <th>Total value</th>
+      </tr>
+      <tr>
+        <th>Players</th>
+        <td>{{ summary.num_players }}</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <th>Bids placed</th>
+        <td>{{ summary.num_bids }}</td>
+        <td>{{ summary.total_bid|default:0 }}♠</td>
+      </tr>
+      <tr>
+        <th>Bids paid out</th>
+        <td>{{ summary.num_withdrawn }}</td>
+        <td>{{ summary.total_paid|default:0|floatformat:2 }}♠</td>
+      </tr>
+      <tr>
+        <th>Bids not paid out</th>
+        <td>{{ summary.num_outstanding }}</td>
+        <td>{{ summary.total_outstanding|default:0 }}♠</td>
+      </tr>
+      <tr>
+        <th>Global pool</th>
+        <td>—</td>
+        <td>{{ summary.pool|floatformat:2 }}♠</td>
+      </tr>
+    </table>
+  {% endif %}
+  {% if all_investments is not None %}
+    <h2>All bids</h2>
+    <table class="table table-striped table-sm" data-testid="ponzi-all-bids">
+      <tr class="table-dark">
+        <th>Placed</th>
+        <th>Withdrawn</th>
+        <th>Tier</th>
+        <th>Paid in</th>
+        <th>Paid out</th>
+      </tr>
+      {% for investment in all_investments %}
+        <tr>
+          <td>{% timestamp investment.created_at "isotime" %}</td>
+          <td>
+            {% if investment.withdrawn_at %}
+              {% timestamp investment.withdrawn_at "isotime" %}
+            {% else %}
+              Never
+            {% endif %}
+          </td>
+          <td>{{ investment.tier_name }}</td>
+          <td>{{ investment.amount }}♠</td>
+          <td>{% if investment.payout is not None %}{{ investment.payout|floatformat:2 }}♠{% endif %}</td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td class="fst-italic" colspan="5">No bids placed in this Ponzi scheme.</td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% endif %}
+{% endblock layout-content %}

@@ -19,6 +19,7 @@ from exams.models import ExamAttempt, MockCompleted
 from hanabi.models import HanabiReplay
 from markets.models import Guess
 from payments.models import Job
+from ponzi.models import PonziInvestment
 from roster.models import Student
 from suggestions.models import ProblemSuggestion
 
@@ -175,6 +176,7 @@ class LevelInfoDict(TypedDict):
     completed_jobs: QuerySet[Job]
     bonus_levels: QuerySet[BonusLevel]
     hanabi_replays: QuerySet[HanabiReplay]
+    ponzi_investments: QuerySet[PonziInvestment]
 
 
 def get_level_info(student: Student) -> LevelInfoDict:
@@ -258,7 +260,7 @@ def get_diamond_stats(student: Student) -> int:
     return total_diamonds
 
 
-def get_spade_stats(student: Student, leveldict: LevelInfoDict = None) -> int:
+def get_spade_stats(student: Student, leveldict: LevelInfoDict = None) -> float:
     total_spades = 0
 
     # a billion unrelated spades items lol
@@ -308,6 +310,14 @@ def get_spade_stats(student: Student, leveldict: LevelInfoDict = None) -> int:
     )
     total_spades += hanabi_replays.aggregate(total=Sum("spades_score"))["total"] or 0
 
+    ponzi_investments = PonziInvestment.objects.filter(
+        student__user=student.user
+    ).select_related("scheme")
+    ponzi_totals = ponzi_investments.aggregate(
+        invested=Sum("amount"), paid=Sum("payout")
+    )
+    total_spades += float(ponzi_totals["paid"] or 0) - (ponzi_totals["invested"] or 0)
+
     if leveldict is not None:
         leveldict["quiz_attempts"] = quiz_attempts
         leveldict["quest_completes"] = quest_completes
@@ -316,6 +326,7 @@ def get_spade_stats(student: Student, leveldict: LevelInfoDict = None) -> int:
         leveldict["suggest_unit_set"] = suggest_units_set
         leveldict["completed_jobs"] = completed_jobs
         leveldict["hanabi_replays"] = hanabi_replays
+        leveldict["ponzi_investments"] = ponzi_investments
 
     return total_spades
 
@@ -385,6 +396,8 @@ def annotate_student_queryset_with_scores(
             "user__hanabiplayer__hanabiparticipation__replay__spades_score",
             filter=Q(contest__processed=True),
         ),
+        spades_ponzi_invested=SubquerySum("user__student__ponziinvestment__amount"),
+        spades_ponzi_paid=SubquerySum("user__student__ponziinvestment__payout"),
     )
 
 
@@ -413,6 +426,8 @@ def get_student_rows(queryset: QuerySet[Student]) -> list[dict[str, Any]]:
         row["spades"] += getattr(student, "spades_markets", 0) or 0
         row["spades"] += getattr(student, "spades_jobs", 0) or 0
         row["spades"] += getattr(student, "spades_hanabi", 0) or 0
+        row["spades"] += float(getattr(student, "spades_ponzi_paid", 0) or 0)
+        row["spades"] -= getattr(student, "spades_ponzi_invested", 0) or 0
         row["hearts"] = getattr(student, "hearts", 0) or 0
         row["clubs"] = getattr(student, "clubs_any", 0) or 0
         row["clubs"] += BONUS_D_UNIT * (getattr(student, "clubs_D", 0) or 0)

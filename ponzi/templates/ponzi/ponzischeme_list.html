@@ -1,0 +1,75 @@
+{% extends "layout.html" %}
+{% load otis_extras %}
+{% block title %}
+  Ponzi schemes
+{% endblock title %}
+{% block layout-content %}
+  <p class="fst-italic">Bid spades. Maybe get returns.</p>
+  {% if schemes %}
+    <table class="table table-striped">
+      <tr class="table-dark">
+        <th>Scheme</th>
+        <th>Semester</th>
+        <th>Opened</th>
+        <th>Status</th>
+      </tr>
+      {% for scheme in schemes %}
+        <tr>
+          <td>
+            <a href="{{ scheme.get_absolute_url }}">{{ scheme.title }}</a>
+          </td>
+          <td>{{ scheme.semester }}</td>
+          <td>{% timestamp scheme.start_date "isodate" %}</td>
+          <td>
+            {% if scheme.has_collapsed %}
+              Collapsed {% timestamp scheme.collapsed_at "isodate" %}
+            {% elif scheme.has_started %}
+              Thriving
+            {% else %}
+              Not open yet
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <p class="text-muted">Nothing here yet.</p>
+  {% endif %}
+  <h2>Rules</h2>
+  <p>
+    Each Ponzi scheme minigame opens on a specified date
+    and runs until its global pool of spades is exhausted.
+  </p>
+  <ol>
+    <li>
+      Up to once per day, you may bid anywhere from 1 to {{ max_bid }} spades,
+      inclusive (integers only).
+      This is added to the global pool for that scheme.
+    </li>
+    <li>
+      A bid reaches the next tier two weeks after being placed.
+      While growing, a bid can't be withdrawn.
+    </li>
+    <li>
+      Once it reaches a tier, you may withdraw it with interest,
+      or lock it up for two more weeks to reach the next tier.
+    </li>
+    <li>
+      The return rate for each tier is:
+      <ul>
+        {% for name, rate in tier_returns %}
+          <li>Tier {{ name }}: <strong>{{ rate|floatformat:"-1" }}% return rate</strong></li>
+        {% endfor %}
+      </ul>
+    </li>
+    <li>All withdrawals are paid out of the global pool.</li>
+    <li>
+      The scheme ends immediately once someone attempts to make a transaction
+      which would make the global pool negative.
+      In that case, the final transaction is cancelled
+      and the scheme collapses.
+      Any spades still bid are lost after the scheme collapses.
+    </li>
+    <li>The amount in the global pool is hidden from players.</li>
+  </ol>
+{% endblock layout-content %}
