@@ -29,10 +29,10 @@
     </li>
     <li>All withdrawals are paid out of the shared pool of investments.</li>
   </ul>
-  <p>{{ num_investors }} investor{{ num_investors|pluralize }} so far.</p>
   {% if pool is not None %}
     <p>
-      The pool currently holds <b data-testid="ponzi-pool">{{ pool|floatformat:2 }}♠</b>.
+      The pool currently holds <b data-testid="ponzi-pool">{{ pool|floatformat:2 }}♠</b>
+      from {{ num_investors }} investor{{ num_investors|pluralize }}.
       Only staff can see this.
     </p>
   {% endif %}
