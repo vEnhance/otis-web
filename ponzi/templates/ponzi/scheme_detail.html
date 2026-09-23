@@ -13,7 +13,7 @@
   {% elif not scheme.has_started %}
     <div class="alert alert-info">Investments open {% timestamp scheme.start_date "relative" %}.</div>
   {% endif %}
-  <h2>How it works</h2>
+  <h2>Rules</h2>
   <ul>
     <li>Invest a whole number of spades, up to 20, at most once per day.</li>
     <li>After two weeks, your investment reaches the next tier.</li>
@@ -30,11 +30,11 @@
     <li>All withdrawals are paid out of the shared pool of investments.</li>
   </ul>
   {% if pool is not None %}
-    <p>
+    <div class="alert alert-secondary">
+      <h2 class="alert-heading">Admin notes</h2>
       The pool currently holds <b data-testid="ponzi-pool">{{ pool|floatformat:2 }}♠</b>
       from {{ num_investors }} investor{{ num_investors|pluralize }}.
-      Only staff can see this.
-    </p>
+    </div>
   {% endif %}
   {% if student %}
     <h2>Your portfolio</h2>
