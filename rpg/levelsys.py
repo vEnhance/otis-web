@@ -4,7 +4,7 @@ import logging
 from typing import Any, TypedDict
 
 from django.contrib.auth.models import User
-from django.db.models.aggregates import Count, Max, Sum
+from django.db.models.aggregates import Count, Max
 from django.db.models.expressions import Combinable, Value
 from django.db.models.fields import FloatField
 from django.db.models.functions import Coalesce
@@ -27,7 +27,6 @@ from roster.models import Student
 from suggestions.models import ProblemSuggestion
 
 from .models import (
-    AchievementUnlock,
     BonusLevel,
     BonusLevelUnlock,
     Level,
@@ -153,9 +152,6 @@ class Meter:
         )
 
 
-AggregateDict = dict[str, int | float]
-
-
 class FourMetersDict(TypedDict):
     spades: Meter
     clubs: Meter
@@ -176,7 +172,6 @@ class SpadeItemsDict(TypedDict):
 
 class LevelInfoDict(SpadeItemsDict):
     psets: QuerySet[PSet]
-    pset_data: AggregateDict
     meters: FourMetersDict
     level_number: int
     str_im_level: str
@@ -190,21 +185,21 @@ def get_level_info(student: Student) -> LevelInfoDict:
     returning the findings as a typed dictionary."""
 
     level_data = LevelInfoDict(**get_spade_items(student.user))  # type: ignore
+    level_data["psets"] = PSet.objects.filter(
+        ACCEPTED_PSETS, student__user=student.user
+    ).order_by("upload__created_at")
 
-    total_clubs, total_hearts = get_clubs_hearts_stats(student, level_data)
-
-    total_diamonds = get_diamond_stats(student)
-
-    total_spades = get_total_spades(student.user)
+    totals = User.objects.filter(pk=student.user.pk).values(**suit_totals()).get()
+    totals = {suit: float(total) for suit, total in totals.items()}
 
     profile = find_profile(student.user)
     dynamic_progress = profile is not None and profile.dynamic_progress
 
     meters: FourMetersDict = {
-        "clubs": Meter.ClubMeter(int(total_clubs), dynamic_progress),
-        "hearts": Meter.HeartMeter(round(total_hearts, 2), dynamic_progress),
-        "diamonds": Meter.DiamondMeter(int(total_diamonds), dynamic_progress),
-        "spades": Meter.SpadeMeter(round(total_spades, 2), dynamic_progress),
+        "clubs": Meter.ClubMeter(int(totals["clubs"]), dynamic_progress),
+        "hearts": Meter.HeartMeter(round(totals["hearts"], 2), dynamic_progress),
+        "diamonds": Meter.DiamondMeter(int(totals["diamonds"]), dynamic_progress),
+        "spades": Meter.SpadeMeter(round(totals["spades"], 2), dynamic_progress),
     }
 
     # Real component of level
@@ -234,36 +229,34 @@ def get_level_info(student: Student) -> LevelInfoDict:
     return level_data
 
 
-def get_clubs_hearts_stats(
-    student: Student, leveldict: LevelInfoDict = None
-) -> tuple[float, int]:
-    psets = PSet.objects.filter(student__user=student.user, status="A", eligible=True)
-    psets = psets.order_by("upload__created_at")
-    pset_data = psets.aggregate(
-        clubs_any=Sum("clubs"),
-        clubs_D=Sum("clubs", filter=Q(unit__code__startswith="D")),
-        clubs_Z=Sum("clubs", filter=Q(unit__code__startswith="Z")),
-        hearts=Sum("hours"),
+ACCEPTED_PSETS = Q(status="A", eligible=True)
+
+
+def or_zero(subquery: Combinable) -> Coalesce:
+    return Coalesce(subquery, 0.0, output_field=FloatField())
+
+
+def clubs_expression(to_user: str = "") -> Combinable:
+    path = f"{to_user}student__pset__clubs"
+    return (
+        or_zero(SubquerySum(path, filter=ACCEPTED_PSETS))
+        + BONUS_D_UNIT
+        * or_zero(
+            SubquerySum(path, filter=ACCEPTED_PSETS & Q(unit__code__startswith="D"))
+        )
+        + BONUS_Z_UNIT
+        * or_zero(
+            SubquerySum(path, filter=ACCEPTED_PSETS & Q(unit__code__startswith="Z"))
+        )
     )
-    total_clubs: float = (
-        (pset_data["clubs_any"] or 0)
-        + (pset_data["clubs_D"] or 0) * BONUS_D_UNIT
-        + (pset_data["clubs_Z"] or 0) * BONUS_Z_UNIT
-    )
-    total_hearts: int = pset_data["hearts"] or 0
-
-    if leveldict is not None:
-        leveldict["psets"] = psets
-        leveldict["pset_data"] = pset_data
-
-    return total_clubs, total_hearts
 
 
-def get_diamond_stats(student: Student) -> int:
-    diamond_qset = AchievementUnlock.objects.filter(user=student.user)
-    total_diamonds = diamond_qset.aggregate(s=Sum("achievement__diamonds"))["s"] or 0
+def hearts_expression(to_user: str = "") -> Combinable:
+    return or_zero(SubquerySum(f"{to_user}student__pset__hours", filter=ACCEPTED_PSETS))
 
-    return total_diamonds
+
+def diamonds_expression(to_user: str = "") -> Combinable:
+    return or_zero(SubquerySum(f"{to_user}achievementunlock__achievement__diamonds"))
 
 
 SPADE_SUGGESTIONS = Q(status__in=("SUGG_NOK", "SUGG_OK"), eligible=True)
@@ -296,8 +289,20 @@ def spades_expression(to_user: str = "") -> Combinable:
     ]
     total: Combinable = Value(0.0)
     for subquery in subqueries:
-        total += Coalesce(subquery, 0.0, output_field=FloatField())
+        total += or_zero(subquery)
     return total
+
+
+SUITS = ("clubs", "hearts", "diamonds", "spades")
+
+
+def suit_totals(to_user: str = "") -> dict[str, Combinable]:
+    return {
+        "clubs": clubs_expression(to_user),
+        "hearts": hearts_expression(to_user),
+        "diamonds": diamonds_expression(to_user),
+        "spades": spades_expression(to_user),
+    }
 
 
 def get_spade_items(user: User) -> SpadeItemsDict:
@@ -352,23 +357,7 @@ def annotate_student_queryset_with_scores(
     return queryset.select_related(
         "user", "user__profile", "assistant", "semester"
     ).annotate(
-        num_psets=SubqueryCount("pset", filter=Q(status="A", eligible=True)),
-        clubs_any=SubquerySum(
-            "user__student__pset__clubs", filter=Q(status="A", eligible=True)
-        ),
-        clubs_D=SubquerySum(
-            "user__student__pset__clubs",
-            filter=Q(status="A", eligible=True, unit__code__startswith="D"),
-        ),
-        clubs_Z=SubquerySum(
-            "user__student__pset__clubs",
-            filter=Q(status="A", eligible=True, unit__code__startswith="Z"),
-        ),
-        hearts=SubquerySum(
-            "user__student__pset__hours",
-            filter=Q(status="A", eligible=True),
-        ),
-        diamonds=SubquerySum("user__achievementunlock__achievement__diamonds"),
+        num_psets=SubqueryCount("pset", filter=ACCEPTED_PSETS),
         pset_B_count=SubqueryCount(
             "pset__pk",
             filter=Q(eligible=True, unit__code__startswith="B"),
@@ -382,7 +371,7 @@ def annotate_student_queryset_with_scores(
             filter=Q(eligible=True, unit__code__startswith="Z"),
         ),
         num_semesters=SubqueryCount("user__student"),
-        spades=spades_expression(to_user="user__"),
+        **suit_totals(to_user="user__"),
     )
 
 
@@ -401,19 +390,10 @@ def get_student_rows(queryset: QuerySet[Student]) -> list[dict[str, Any]]:
     max_level = max(levels.keys())
 
     for student in annotate_student_queryset_with_scores(queryset):
-        row: dict[str, Any] = {
-            "student": student,
-            "spades": float(getattr(student, "spades", 0) or 0),
-        }
-        row["hearts"] = getattr(student, "hearts", 0) or 0
-        row["clubs"] = getattr(student, "clubs_any", 0) or 0
-        row["clubs"] += BONUS_D_UNIT * (getattr(student, "clubs_D", 0) or 0)
-        row["clubs"] += BONUS_Z_UNIT * (getattr(student, "clubs_Z", 0) or 0)
-        row["diamonds"] = getattr(student, "diamonds", 0) or 0
-        row["level"] = sum(
-            int(max(row[k], 0) ** 0.5)
-            for k in ("spades", "hearts", "clubs", "diamonds")
-        )
+        row: dict[str, Any] = {"student": student}
+        for suit in SUITS:
+            row[suit] = float(getattr(student, suit))
+        row["level"] = sum(int(max(row[k], 0) ** 0.5) for k in SUITS)
         try:
             row["last_seen"] = student.user.profile.last_seen
         except UserProfile.DoesNotExist:

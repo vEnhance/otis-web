@@ -232,40 +232,32 @@ def test_multi_student_annotate(otis, alice_with_data):
     donald = queryset.get(pk=donald.pk)
 
     assert alice.num_psets == 3
-    assert alice.clubs_any == 400
-    assert alice.clubs_D == 100
-    assert alice.clubs_Z == 180
+    assert alice.clubs == 520
     assert alice.hearts == 84
     assert alice.num_semesters == 1
     assert alice.spades == 26
     assert alice.diamonds == 11
 
     assert bob.num_psets == 2
-    assert bob.clubs_any == 196
-    assert bob.clubs_D == 196
-    assert bob.clubs_Z is None
+    assert bob.clubs == pytest.approx(254.8)
     assert bob.hearts == 64
     assert bob.num_semesters == 1
     assert bob.spades == 10
     assert bob.diamonds == 6
 
     assert carol.num_psets == 0
-    assert carol.clubs_any is None
-    assert carol.clubs_D is None
-    assert carol.clubs_Z is None
-    assert carol.hearts is None
+    assert carol.clubs == 0
+    assert carol.hearts == 0
     assert carol.num_semesters == 1
     assert carol.spades == 17
     assert carol.diamonds == 9
 
     assert donald.num_psets == 0
-    assert donald.clubs_any is None
-    assert donald.clubs_D is None
-    assert donald.clubs_Z is None
-    assert donald.hearts is None
+    assert donald.clubs == 0
+    assert donald.hearts == 0
     assert donald.num_semesters == 1
     assert donald.spades == 0
-    assert donald.diamonds is None
+    assert donald.diamonds == 0
 
     rows = get_student_rows(queryset)
     rows.sort(key=lambda row: row["student"].pk)
@@ -308,10 +300,15 @@ def test_multi_student_annotate(otis, alice_with_data):
 
 
 @pytest.mark.django_db
-def test_spades_single_and_bulk_agree():
+def test_suits_single_and_bulk_agree():
     student = StudentFactory.create()
     user = student.user
     earlier_student = StudentFactory.create(user=user)
+
+    PSetFactory.create(
+        student=earlier_student, clubs=10, hours=3.5, status="A", unit__code="DXX"
+    )
+    AchievementUnlockFactory.create(user=user, achievement__diamonds=4)
 
     ExamAttemptFactory.create(student=earlier_student, score=4)
     QuestCompleteFactory.create(student=student, spades=5)
@@ -334,10 +331,18 @@ def test_spades_single_and_bulk_agree():
         replay__contest__processed=True,
     )
 
-    expected = 4 * 2 + 5 + 3 + 6 + 1 + 7 + 2.5
-    assert get_total_spades(user) == pytest.approx(expected)
-    rows = get_student_rows(Student.objects.filter(pk=student.pk))
-    assert rows[0]["spades"] == pytest.approx(expected)
+    expected = {
+        "clubs": 13,
+        "hearts": 3.5,
+        "diamonds": 4,
+        "spades": 4 * 2 + 5 + 3 + 6 + 1 + 7 + 2.5,
+    }
+    meters = get_level_info(student)["meters"]
+    row = get_student_rows(Student.objects.filter(pk=student.pk))[0]
+    for suit, total in expected.items():
+        assert meters[suit].value == pytest.approx(total)
+        assert row[suit] == pytest.approx(total)
+    assert get_total_spades(user) == pytest.approx(expected["spades"])
 
 
 @pytest.mark.django_db
