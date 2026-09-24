@@ -4,8 +4,10 @@ import logging
 from typing import Any, TypedDict
 
 from django.contrib.auth.models import User
-from django.db.models.aggregates import Count, Max, Sum
-from django.db.models.expressions import OuterRef, Subquery
+from django.db.models.aggregates import Count, Max
+from django.db.models.expressions import Combinable, Value
+from django.db.models.fields import FloatField
+from django.db.models.functions import Coalesce
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
 from django.utils import timezone
@@ -25,7 +27,6 @@ from roster.models import Student
 from suggestions.models import ProblemSuggestion
 
 from .models import (
-    AchievementUnlock,
     BonusLevel,
     BonusLevelUnlock,
     Level,
@@ -151,9 +152,6 @@ class Meter:
         )
 
 
-AggregateDict = dict[str, int | float]
-
-
 class FourMetersDict(TypedDict):
     spades: Meter
     clubs: Meter
@@ -161,45 +159,47 @@ class FourMetersDict(TypedDict):
     hearts: Meter
 
 
-class LevelInfoDict(TypedDict):
-    psets: QuerySet[PSet]
-    pset_data: AggregateDict
+class SpadeItemsDict(TypedDict):
     quiz_attempts: QuerySet[ExamAttempt]
     quest_completes: QuerySet[QuestComplete]
+    mock_completes: QuerySet[MockCompleted]
+    market_guesses: QuerySet[Guess]
+    suggest_unit_set: SuggestUnitSet
+    completed_jobs: QuerySet[Job]
+    hanabi_replays: QuerySet[HanabiReplay]
+    ponzi_investments: QuerySet[PonziInvestment]
+
+
+class LevelInfoDict(SpadeItemsDict):
+    psets: QuerySet[PSet]
     meters: FourMetersDict
     level_number: int
     str_im_level: str
     level_name: str
     is_maxed: bool
-    market_guesses: QuerySet[Guess]
-    suggest_unit_set: SuggestUnitSet
-    mock_completes: QuerySet[MockCompleted]
-    completed_jobs: QuerySet[Job]
     bonus_levels: QuerySet[BonusLevel]
-    hanabi_replays: QuerySet[HanabiReplay]
-    ponzi_investments: QuerySet[PonziInvestment]
 
 
 def get_level_info(student: Student) -> LevelInfoDict:
     """Uses a bunch of expensive database queries to compute a student's levels and data,
     returning the findings as a typed dictionary."""
 
-    level_data = LevelInfoDict()  # type: ignore
+    level_data = LevelInfoDict(**get_spade_items(student.user))  # type: ignore
+    level_data["psets"] = PSet.objects.filter(
+        ACCEPTED_PSETS, student__user=student.user
+    ).order_by("upload__created_at")
 
-    total_clubs, total_hearts = get_clubs_hearts_stats(student, level_data)
-
-    total_diamonds = get_diamond_stats(student)
-
-    total_spades = get_spade_stats(student.user, level_data)
+    totals = User.objects.filter(pk=student.user.pk).values(**suit_totals()).get()
+    totals = {suit: float(total) for suit, total in totals.items()}
 
     profile = find_profile(student.user)
     dynamic_progress = profile is not None and profile.dynamic_progress
 
     meters: FourMetersDict = {
-        "clubs": Meter.ClubMeter(int(total_clubs), dynamic_progress),
-        "hearts": Meter.HeartMeter(round(total_hearts, 2), dynamic_progress),
-        "diamonds": Meter.DiamondMeter(int(total_diamonds), dynamic_progress),
-        "spades": Meter.SpadeMeter(round(total_spades, 2), dynamic_progress),
+        "clubs": Meter.ClubMeter(int(totals["clubs"]), dynamic_progress),
+        "hearts": Meter.HeartMeter(round(totals["hearts"], 2), dynamic_progress),
+        "diamonds": Meter.DiamondMeter(int(totals["diamonds"]), dynamic_progress),
+        "spades": Meter.SpadeMeter(round(totals["spades"], 2), dynamic_progress),
     }
 
     # Real component of level
@@ -229,107 +229,124 @@ def get_level_info(student: Student) -> LevelInfoDict:
     return level_data
 
 
-def get_clubs_hearts_stats(
-    student: Student, leveldict: LevelInfoDict = None
-) -> tuple[float, int]:
-    psets = PSet.objects.filter(student__user=student.user, status="A", eligible=True)
-    psets = psets.order_by("upload__created_at")
-    pset_data = psets.aggregate(
-        clubs_any=Sum("clubs"),
-        clubs_D=Sum("clubs", filter=Q(unit__code__startswith="D")),
-        clubs_Z=Sum("clubs", filter=Q(unit__code__startswith="Z")),
-        hearts=Sum("hours"),
-    )
-    total_clubs: float = (
-        (pset_data["clubs_any"] or 0)
-        + (pset_data["clubs_D"] or 0) * BONUS_D_UNIT
-        + (pset_data["clubs_Z"] or 0) * BONUS_Z_UNIT
-    )
-    total_hearts: int = pset_data["hearts"] or 0
-
-    if leveldict is not None:
-        leveldict["psets"] = psets
-        leveldict["pset_data"] = pset_data
-
-    return total_clubs, total_hearts
+ACCEPTED_PSETS = Q(status="A", eligible=True)
 
 
-def get_diamond_stats(student: Student) -> int:
-    diamond_qset = AchievementUnlock.objects.filter(user=student.user)
-    total_diamonds = diamond_qset.aggregate(s=Sum("achievement__diamonds"))["s"] or 0
-
-    return total_diamonds
+def or_zero(subquery: Combinable) -> Coalesce:
+    return Coalesce(subquery, 0.0, output_field=FloatField())
 
 
-def get_spade_stats(user: User, leveldict: LevelInfoDict = None) -> float:
-    total_spades = 0
-
-    # a billion unrelated spades items lol
-    quiz_attempts = ExamAttempt.objects.filter(student__user=user)
-    quiz_attempts = quiz_attempts.order_by("quiz__family", "quiz__number")
-    total_spades = (quiz_attempts.aggregate(total=Sum("score"))["total"] or 0) * 2
-
-    quest_completes = QuestComplete.objects.filter(student__user=user)
-    quest_completes = quest_completes.order_by("-timestamp")
-    total_spades += quest_completes.aggregate(total=Sum("spades"))["total"] or 0
-
-    mock_completes = MockCompleted.objects.filter(student__user=user)
-    mock_completes = mock_completes.select_related("exam")
-    mock_completes = mock_completes.order_by("exam__family", "exam__number")
-    total_spades += mock_completes.count() * 3
-
-    market_guesses = (
-        Guess.objects.filter(
-            user=user,
-            market__end_date__lt=timezone.now(),
+def clubs_expression(to_user: str = "") -> Combinable:
+    path = f"{to_user}student__pset__clubs"
+    return (
+        or_zero(SubquerySum(path, filter=ACCEPTED_PSETS))
+        + BONUS_D_UNIT
+        * or_zero(
+            SubquerySum(path, filter=ACCEPTED_PSETS & Q(unit__code__startswith="D"))
         )
-        .order_by("-market__end_date")
-        .select_related("market")
+        + BONUS_Z_UNIT
+        * or_zero(
+            SubquerySum(path, filter=ACCEPTED_PSETS & Q(unit__code__startswith="Z"))
+        )
     )
-    total_spades += market_guesses.aggregate(total=Sum("score"))["total"] or 0
 
-    suggested_units_queryset = ProblemSuggestion.objects.filter(
-        user=user,
-        status__in=("SUGG_NOK", "SUGG_OK"),
-        eligible=True,
-    ).values_list(
-        "unit__pk",
-        "unit__group__name",
-        "unit__code",
+
+def hearts_expression(to_user: str = "") -> Combinable:
+    return or_zero(SubquerySum(f"{to_user}student__pset__hours", filter=ACCEPTED_PSETS))
+
+
+def diamonds_expression(to_user: str = "") -> Combinable:
+    return or_zero(SubquerySum(f"{to_user}achievementunlock__achievement__diamonds"))
+
+
+SPADE_SUGGESTIONS = Q(status__in=("SUGG_NOK", "SUGG_OK"), eligible=True)
+VERIFIED_JOBS = Q(progress="JOB_VFD")
+PROCESSED_REPLAYS = Q(contest__processed=True)
+
+
+def closed_market_guesses() -> Q:
+    return Q(market__end_date__lt=timezone.now())
+
+
+def spades_expression(to_user: str = "") -> Combinable:
+    subqueries: list[Combinable] = [
+        SubquerySum(f"{to_user}student__examattempt__score") * 2,
+        SubquerySum(f"{to_user}student__questcomplete__spades"),
+        SubqueryCount(f"{to_user}student__mockcompleted") * 3,
+        SubquerySum(f"{to_user}guess__score", filter=closed_market_guesses()),
+        SubqueryCount(
+            f"{to_user}problemsuggestion__unit",
+            distinct=True,
+            filter=SPADE_SUGGESTIONS,
+        ),
+        SubquerySum(f"{to_user}workers__job__spades_bounty", filter=VERIFIED_JOBS),
+        SubquerySum(
+            f"{to_user}hanabiplayer__hanabiparticipation__replay__spades_score",
+            filter=PROCESSED_REPLAYS,
+        ),
+        SubquerySum(f"{to_user}ponziinvestment__payout"),
+        -SubquerySum(f"{to_user}ponziinvestment__amount"),
+    ]
+    total: Combinable = Value(0.0)
+    for subquery in subqueries:
+        total += or_zero(subquery)
+    return total
+
+
+SUITS = ("clubs", "hearts", "diamonds", "spades")
+
+
+def suit_totals(to_user: str = "") -> dict[str, Combinable]:
+    return {
+        "clubs": clubs_expression(to_user),
+        "hearts": hearts_expression(to_user),
+        "diamonds": diamonds_expression(to_user),
+        "spades": spades_expression(to_user),
+    }
+
+
+def get_spade_items(user: User) -> SpadeItemsDict:
+    return {
+        "quiz_attempts": ExamAttempt.objects.filter(student__user=user).order_by(
+            "quiz__family", "quiz__number"
+        ),
+        "quest_completes": QuestComplete.objects.filter(student__user=user).order_by(
+            "-timestamp"
+        ),
+        "mock_completes": (
+            MockCompleted.objects.filter(student__user=user)
+            .select_related("exam")
+            .order_by("exam__family", "exam__number")
+        ),
+        "market_guesses": (
+            Guess.objects.filter(closed_market_guesses(), user=user)
+            .order_by("-market__end_date")
+            .select_related("market")
+        ),
+        "suggest_unit_set": set(
+            ProblemSuggestion.objects.filter(SPADE_SUGGESTIONS, user=user).values_list(
+                "unit__pk", "unit__group__name", "unit__code"
+            )
+        ),
+        "completed_jobs": Job.objects.filter(
+            VERIFIED_JOBS, assignee__user=user
+        ).select_related("folder"),
+        "hanabi_replays": HanabiReplay.objects.filter(
+            PROCESSED_REPLAYS, hanabiparticipation__player__user=user
+        ),
+        "ponzi_investments": PonziInvestment.objects.filter(user=user).select_related(
+            "scheme"
+        ),
+    }
+
+
+def get_total_spades(user: User) -> float:
+    spades = (
+        User.objects.annotate(spades=spades_expression())
+        .values_list("spades", flat=True)
+        .get(pk=user.pk)
     )
-    suggest_units_set: SuggestUnitSet = set(suggested_units_queryset)
-    total_spades += len(suggest_units_set)
-
-    completed_jobs = Job.objects.filter(
-        assignee__user=user, progress="JOB_VFD"
-    ).select_related("folder")
-    total_spades += completed_jobs.aggregate(total=Sum("spades_bounty"))["total"] or 0
-
-    hanabi_replays = HanabiReplay.objects.filter(
-        contest__processed=True,
-        hanabiparticipation__player__user=user,
-    )
-    total_spades += hanabi_replays.aggregate(total=Sum("spades_score"))["total"] or 0
-
-    ponzi_investments = PonziInvestment.objects.filter(user=user).select_related(
-        "scheme"
-    )
-    ponzi_totals = ponzi_investments.aggregate(
-        invested=Sum("amount"), paid=Sum("payout")
-    )
-    total_spades += float(ponzi_totals["paid"] or 0) - (ponzi_totals["invested"] or 0)
-
-    if leveldict is not None:
-        leveldict["quiz_attempts"] = quiz_attempts
-        leveldict["quest_completes"] = quest_completes
-        leveldict["market_guesses"] = market_guesses
-        leveldict["mock_completes"] = mock_completes
-        leveldict["suggest_unit_set"] = suggest_units_set
-        leveldict["completed_jobs"] = completed_jobs
-        leveldict["hanabi_replays"] = hanabi_replays
-        leveldict["ponzi_investments"] = ponzi_investments
-
-    return total_spades
+    return float(spades)
 
 
 def annotate_student_queryset_with_scores(
@@ -337,37 +354,10 @@ def annotate_student_queryset_with_scores(
 ) -> QuerySet[Student]:
     """Helper function for constructing large lists of students
     Selects all important information to prevent a bunch of SQL queries"""
-    guess_subquery = (
-        Guess.objects.filter(
-            user=OuterRef("user"),
-            market__end_date__lt=timezone.now(),
-        )
-        .order_by()
-        .values("user")
-        .annotate(total=Sum("score"))
-        .values("total")
-    )
-
     return queryset.select_related(
         "user", "user__profile", "assistant", "semester"
     ).annotate(
-        num_psets=SubqueryCount("pset", filter=Q(status="A", eligible=True)),
-        clubs_any=SubquerySum(
-            "user__student__pset__clubs", filter=Q(status="A", eligible=True)
-        ),
-        clubs_D=SubquerySum(
-            "user__student__pset__clubs",
-            filter=Q(status="A", eligible=True, unit__code__startswith="D"),
-        ),
-        clubs_Z=SubquerySum(
-            "user__student__pset__clubs",
-            filter=Q(status="A", eligible=True, unit__code__startswith="Z"),
-        ),
-        hearts=SubquerySum(
-            "user__student__pset__hours",
-            filter=Q(status="A", eligible=True),
-        ),
-        diamonds=SubquerySum("user__achievementunlock__achievement__diamonds"),
+        num_psets=SubqueryCount("pset", filter=ACCEPTED_PSETS),
         pset_B_count=SubqueryCount(
             "pset__pk",
             filter=Q(eligible=True, unit__code__startswith="B"),
@@ -381,24 +371,7 @@ def annotate_student_queryset_with_scores(
             filter=Q(eligible=True, unit__code__startswith="Z"),
         ),
         num_semesters=SubqueryCount("user__student"),
-        spades_quizzes=SubquerySum("user__student__examattempt__score"),
-        spades_quests=SubquerySum("user__student__questcomplete__spades"),
-        spades_markets=Subquery(guess_subquery),  # type: ignore
-        spades_count_mocks=SubqueryCount("user__student__mockcompleted"),
-        spades_suggestions=SubqueryCount(
-            "user__problemsuggestion__unit__pk",
-            filter=Q(status__in=("SUGG_NOK", "SUGG_OK"), eligible=True),
-        ),
-        spades_jobs=SubquerySum(
-            "user__workers__job__spades_bounty",
-            filter=Q(progress="JOB_VFD"),
-        ),
-        spades_hanabi=SubquerySum(
-            "user__hanabiplayer__hanabiparticipation__replay__spades_score",
-            filter=Q(contest__processed=True),
-        ),
-        spades_ponzi_invested=SubquerySum("user__ponziinvestment__amount"),
-        spades_ponzi_paid=SubquerySum("user__ponziinvestment__payout"),
+        **suit_totals(to_user="user__"),
     )
 
 
@@ -417,27 +390,10 @@ def get_student_rows(queryset: QuerySet[Student]) -> list[dict[str, Any]]:
     max_level = max(levels.keys())
 
     for student in annotate_student_queryset_with_scores(queryset):
-        row: dict[str, Any] = {
-            "student": student,
-            "spades": (getattr(student, "spades_quizzes", 0) or 0) * 2,
-        }
-        row["spades"] += getattr(student, "spades_quests", 0) or 0
-        row["spades"] += (getattr(student, "spades_count_mocks", 0) or 0) * 3
-        row["spades"] += getattr(student, "spades_suggestions", 0) or 0
-        row["spades"] += getattr(student, "spades_markets", 0) or 0
-        row["spades"] += getattr(student, "spades_jobs", 0) or 0
-        row["spades"] += getattr(student, "spades_hanabi", 0) or 0
-        row["spades"] += float(getattr(student, "spades_ponzi_paid", 0) or 0)
-        row["spades"] -= getattr(student, "spades_ponzi_invested", 0) or 0
-        row["hearts"] = getattr(student, "hearts", 0) or 0
-        row["clubs"] = getattr(student, "clubs_any", 0) or 0
-        row["clubs"] += BONUS_D_UNIT * (getattr(student, "clubs_D", 0) or 0)
-        row["clubs"] += BONUS_Z_UNIT * (getattr(student, "clubs_Z", 0) or 0)
-        row["diamonds"] = getattr(student, "diamonds", 0) or 0
-        row["level"] = sum(
-            int(max(row[k], 0) ** 0.5)
-            for k in ("spades", "hearts", "clubs", "diamonds")
-        )
+        row: dict[str, Any] = {"student": student}
+        for suit in SUITS:
+            row[suit] = float(getattr(student, suit))
+        row["level"] = sum(int(max(row[k], 0) ** 0.5) for k in SUITS)
         try:
             row["last_seen"] = student.user.profile.last_seen
         except UserProfile.DoesNotExist:

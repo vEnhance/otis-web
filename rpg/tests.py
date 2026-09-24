@@ -9,6 +9,9 @@ from django.utils import timezone
 from core.factories import GroupFactory, UnitFactory, UserFactory
 from dashboard.factories import PSetFactory
 from exams.factories import ExamAttemptFactory, PracticeExamFactory
+from exams.models import MockCompleted
+from hanabi.factories import HanabiParticipationFactory
+from markets.factories import GuessFactory
 from payments.factories import JobFactory, WorkerFactory
 from roster.factories import StudentFactory
 from roster.models import Student
@@ -26,6 +29,7 @@ from rpg.levelsys import (
     annotate_student_queryset_with_scores,
     get_level_info,
     get_student_rows,
+    get_total_spades,
 )
 from rpg.models import (
     GUESS_CODE_MAX_LENGTH,
@@ -35,6 +39,7 @@ from rpg.models import (
     AchievementCodeGuess,
     AchievementUnlock,
 )
+from suggestions.factories import ProblemSuggestionFactory
 
 UTC = datetime.UTC
 
@@ -227,48 +232,32 @@ def test_multi_student_annotate(otis, alice_with_data):
     donald = queryset.get(pk=donald.pk)
 
     assert alice.num_psets == 3
-    assert alice.clubs_any == 400
-    assert alice.clubs_D == 100
-    assert alice.clubs_Z == 180
+    assert alice.clubs == 520
     assert alice.hearts == 84
     assert alice.num_semesters == 1
-    assert alice.spades_quizzes == 7
-    assert alice.spades_quests == 5
-    assert alice.spades_jobs == 7
+    assert alice.spades == 26
     assert alice.diamonds == 11
 
     assert bob.num_psets == 2
-    assert bob.clubs_any == 196
-    assert bob.clubs_D == 196
-    assert bob.clubs_Z is None
+    assert bob.clubs == pytest.approx(254.8)
     assert bob.hearts == 64
     assert bob.num_semesters == 1
-    assert bob.spades_quizzes == 3
-    assert bob.spades_quests is None
-    assert bob.spades_jobs == 4
+    assert bob.spades == 10
     assert bob.diamonds == 6
 
     assert carol.num_psets == 0
-    assert carol.clubs_any is None
-    assert carol.clubs_D is None
-    assert carol.clubs_Z is None
-    assert carol.hearts is None
+    assert carol.clubs == 0
+    assert carol.hearts == 0
     assert carol.num_semesters == 1
-    assert carol.spades_quizzes == 6
-    assert carol.spades_quests == 5
-    assert carol.spades_jobs is None
+    assert carol.spades == 17
     assert carol.diamonds == 9
 
     assert donald.num_psets == 0
-    assert donald.clubs_any is None
-    assert donald.clubs_D is None
-    assert donald.clubs_Z is None
-    assert donald.hearts is None
+    assert donald.clubs == 0
+    assert donald.hearts == 0
     assert donald.num_semesters == 1
-    assert donald.spades_quizzes is None
-    assert donald.spades_quests is None
-    assert donald.spades_jobs is None
-    assert donald.diamonds is None
+    assert donald.spades == 0
+    assert donald.diamonds == 0
 
     rows = get_student_rows(queryset)
     rows.sort(key=lambda row: row["student"].pk)
@@ -308,6 +297,52 @@ def test_multi_student_annotate(otis, alice_with_data):
     admin = UserFactory.create(is_staff=True, is_superuser=True)
     otis.login(admin)
     otis.get_20x("leaderboard")
+
+
+@pytest.mark.django_db
+def test_suits_single_and_bulk_agree():
+    student = StudentFactory.create()
+    user = student.user
+    earlier_student = StudentFactory.create(user=user)
+
+    PSetFactory.create(
+        student=earlier_student, clubs=10, hours=3.5, status="A", unit__code="DXX"
+    )
+    AchievementUnlockFactory.create(user=user, achievement__diamonds=4)
+
+    ExamAttemptFactory.create(student=earlier_student, score=4)
+    QuestCompleteFactory.create(student=student, spades=5)
+    MockCompleted.objects.create(student=student, exam=PracticeExamFactory.create())
+    GuessFactory.create(
+        user=user,
+        score=6,
+        market__end_date=timezone.now() - datetime.timedelta(days=1),
+    )
+    unit = UnitFactory.create()
+    ProblemSuggestionFactory.create_batch(
+        3, user=user, unit=unit, status="SUGG_OK", eligible=True
+    )
+    JobFactory.create(
+        assignee=WorkerFactory.create(user=user), spades_bounty=7, progress="JOB_VFD"
+    )
+    HanabiParticipationFactory.create(
+        player__user=user,
+        replay__spades_score=2.5,
+        replay__contest__processed=True,
+    )
+
+    expected = {
+        "clubs": 13,
+        "hearts": 3.5,
+        "diamonds": 4,
+        "spades": 4 * 2 + 5 + 3 + 6 + 1 + 7 + 2.5,
+    }
+    meters = get_level_info(student)["meters"]
+    row = get_student_rows(Student.objects.filter(pk=student.pk))[0]
+    for suit, total in expected.items():
+        assert meters[suit].value == pytest.approx(total)
+        assert row[suit] == pytest.approx(total)
+    assert get_total_spades(user) == pytest.approx(expected["spades"])
 
 
 @pytest.mark.django_db
