@@ -1,11 +1,22 @@
 # Functions to compute student levels and whatnot
 import datetime
 import logging
+from collections.abc import Callable
+from decimal import Decimal
 from typing import Any, TypedDict
 
 from django.contrib.auth.models import User
 from django.db.models.aggregates import Count, Max, Sum
-from django.db.models.expressions import OuterRef, Subquery
+from django.db.models.expressions import (
+    Combinable,
+    F,
+    Func,
+    OuterRef,
+    Subquery,
+    Value,
+)
+from django.db.models.fields import FloatField
+from django.db.models.functions import Coalesce
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
 from django.utils import timezone
@@ -261,75 +272,115 @@ def get_diamond_stats(student: Student) -> int:
     return total_diamonds
 
 
-def get_spade_stats(user: User, leveldict: LevelInfoDict = None) -> float:
-    total_spades = 0
+UserRef = User | OuterRef
 
-    # a billion unrelated spades items lol
-    quiz_attempts = ExamAttempt.objects.filter(student__user=user)
-    quiz_attempts = quiz_attempts.order_by("quiz__family", "quiz__number")
-    total_spades = (quiz_attempts.aggregate(total=Sum("score"))["total"] or 0) * 2
 
-    quest_completes = QuestComplete.objects.filter(student__user=user)
-    quest_completes = quest_completes.order_by("-timestamp")
-    total_spades += quest_completes.aggregate(total=Sum("spades"))["total"] or 0
+def quiz_attempts(user: UserRef) -> QuerySet[ExamAttempt]:
+    return ExamAttempt.objects.filter(student__user=user)
 
-    mock_completes = MockCompleted.objects.filter(student__user=user)
-    mock_completes = mock_completes.select_related("exam")
-    mock_completes = mock_completes.order_by("exam__family", "exam__number")
-    total_spades += mock_completes.count() * 3
 
-    market_guesses = (
-        Guess.objects.filter(
-            user=user,
-            market__end_date__lt=timezone.now(),
-        )
-        .order_by("-market__end_date")
-        .select_related("market")
-    )
-    total_spades += market_guesses.aggregate(total=Sum("score"))["total"] or 0
+def quest_completes(user: UserRef) -> QuerySet[QuestComplete]:
+    return QuestComplete.objects.filter(student__user=user)
 
-    suggested_units_queryset = ProblemSuggestion.objects.filter(
+
+def mock_completes(user: UserRef) -> QuerySet[MockCompleted]:
+    return MockCompleted.objects.filter(student__user=user)
+
+
+def market_guesses(user: UserRef) -> QuerySet[Guess]:
+    return Guess.objects.filter(user=user, market__end_date__lt=timezone.now())
+
+
+def spade_suggestions(user: UserRef) -> QuerySet[ProblemSuggestion]:
+    return ProblemSuggestion.objects.filter(
         user=user,
         status__in=("SUGG_NOK", "SUGG_OK"),
         eligible=True,
-    ).values_list(
-        "unit__pk",
-        "unit__group__name",
-        "unit__code",
     )
-    suggest_units_set: SuggestUnitSet = set(suggested_units_queryset)
-    total_spades += len(suggest_units_set)
 
-    completed_jobs = Job.objects.filter(
-        assignee__user=user, progress="JOB_VFD"
-    ).select_related("folder")
-    total_spades += completed_jobs.aggregate(total=Sum("spades_bounty"))["total"] or 0
 
-    hanabi_replays = HanabiReplay.objects.filter(
+def completed_jobs(user: UserRef) -> QuerySet[Job]:
+    return Job.objects.filter(assignee__user=user, progress="JOB_VFD")
+
+
+def hanabi_replays(user: UserRef) -> QuerySet[HanabiReplay]:
+    return HanabiReplay.objects.filter(
         contest__processed=True,
         hanabiparticipation__player__user=user,
     )
-    total_spades += hanabi_replays.aggregate(total=Sum("spades_score"))["total"] or 0
 
-    ponzi_investments = PonziInvestment.objects.filter(user=user).select_related(
-        "scheme"
-    )
-    ponzi_totals = ponzi_investments.aggregate(
-        invested=Sum("amount"), paid=Sum("payout")
-    )
-    total_spades += float(ponzi_totals["paid"] or 0) - (ponzi_totals["invested"] or 0)
 
+def ponzi_investments(user: UserRef) -> QuerySet[PonziInvestment]:
+    return PonziInvestment.objects.filter(user=user)
+
+
+# Plain SQL functions rather than Sum/Count: Django adds a GROUP BY for real
+# aggregates, and we want one row per subquery with no grouping at all.
+class SQLAggregate(Func):
+    def __init__(self, expression: Any):
+        super().__init__(expression, output_field=FloatField())
+
+
+class SQLSum(SQLAggregate):
+    function = "SUM"
+
+
+class SQLCountDistinct(SQLAggregate):
+    function = "COUNT"
+    template = "%(function)s(DISTINCT %(expressions)s)"
+
+
+SPADE_SOURCES: tuple[tuple[Callable[[UserRef], QuerySet[Any]], Func], ...] = (
+    (quiz_attempts, SQLSum(F("score") * 2)),
+    (quest_completes, SQLSum("spades")),
+    (mock_completes, SQLSum(Value(3))),
+    (market_guesses, SQLSum("score")),
+    (spade_suggestions, SQLCountDistinct("unit")),
+    (completed_jobs, SQLSum("spades_bounty")),
+    (hanabi_replays, SQLSum("spades_score")),
+    (ponzi_investments, SQLSum(Coalesce("payout", Value(Decimal(0))) - F("amount"))),
+)
+
+
+def spades_expression(user: OuterRef) -> Combinable:
+    total: Combinable = Value(0.0)
+    for queryset, value in SPADE_SOURCES:
+        subquery = Subquery(queryset(user).order_by().values(total=value))
+        total += Coalesce(subquery, Value(0.0))
+    return total
+
+
+def get_spade_stats(user: User, leveldict: LevelInfoDict = None) -> float:
     if leveldict is not None:
-        leveldict["quiz_attempts"] = quiz_attempts
-        leveldict["quest_completes"] = quest_completes
-        leveldict["market_guesses"] = market_guesses
-        leveldict["mock_completes"] = mock_completes
-        leveldict["suggest_unit_set"] = suggest_units_set
-        leveldict["completed_jobs"] = completed_jobs
-        leveldict["hanabi_replays"] = hanabi_replays
-        leveldict["ponzi_investments"] = ponzi_investments
+        leveldict["quiz_attempts"] = quiz_attempts(user).order_by(
+            "quiz__family", "quiz__number"
+        )
+        leveldict["quest_completes"] = quest_completes(user).order_by("-timestamp")
+        leveldict["mock_completes"] = (
+            mock_completes(user)
+            .select_related("exam")
+            .order_by("exam__family", "exam__number")
+        )
+        leveldict["market_guesses"] = (
+            market_guesses(user).order_by("-market__end_date").select_related("market")
+        )
+        leveldict["suggest_unit_set"] = set(
+            spade_suggestions(user).values_list(
+                "unit__pk", "unit__group__name", "unit__code"
+            )
+        )
+        leveldict["completed_jobs"] = completed_jobs(user).select_related("folder")
+        leveldict["hanabi_replays"] = hanabi_replays(user)
+        leveldict["ponzi_investments"] = ponzi_investments(user).select_related(
+            "scheme"
+        )
 
-    return total_spades
+    spades = (
+        User.objects.annotate(spades=spades_expression(OuterRef("pk")))
+        .values_list("spades", flat=True)
+        .get(pk=user.pk)
+    )
+    return float(spades)
 
 
 def annotate_student_queryset_with_scores(
@@ -337,17 +388,6 @@ def annotate_student_queryset_with_scores(
 ) -> QuerySet[Student]:
     """Helper function for constructing large lists of students
     Selects all important information to prevent a bunch of SQL queries"""
-    guess_subquery = (
-        Guess.objects.filter(
-            user=OuterRef("user"),
-            market__end_date__lt=timezone.now(),
-        )
-        .order_by()
-        .values("user")
-        .annotate(total=Sum("score"))
-        .values("total")
-    )
-
     return queryset.select_related(
         "user", "user__profile", "assistant", "semester"
     ).annotate(
@@ -381,24 +421,7 @@ def annotate_student_queryset_with_scores(
             filter=Q(eligible=True, unit__code__startswith="Z"),
         ),
         num_semesters=SubqueryCount("user__student"),
-        spades_quizzes=SubquerySum("user__student__examattempt__score"),
-        spades_quests=SubquerySum("user__student__questcomplete__spades"),
-        spades_markets=Subquery(guess_subquery),  # type: ignore
-        spades_count_mocks=SubqueryCount("user__student__mockcompleted"),
-        spades_suggestions=SubqueryCount(
-            "user__problemsuggestion__unit__pk",
-            filter=Q(status__in=("SUGG_NOK", "SUGG_OK"), eligible=True),
-        ),
-        spades_jobs=SubquerySum(
-            "user__workers__job__spades_bounty",
-            filter=Q(progress="JOB_VFD"),
-        ),
-        spades_hanabi=SubquerySum(
-            "user__hanabiplayer__hanabiparticipation__replay__spades_score",
-            filter=Q(contest__processed=True),
-        ),
-        spades_ponzi_invested=SubquerySum("user__ponziinvestment__amount"),
-        spades_ponzi_paid=SubquerySum("user__ponziinvestment__payout"),
+        spades=spades_expression(OuterRef("user")),
     )
 
 
@@ -419,16 +442,8 @@ def get_student_rows(queryset: QuerySet[Student]) -> list[dict[str, Any]]:
     for student in annotate_student_queryset_with_scores(queryset):
         row: dict[str, Any] = {
             "student": student,
-            "spades": (getattr(student, "spades_quizzes", 0) or 0) * 2,
+            "spades": float(getattr(student, "spades", 0) or 0),
         }
-        row["spades"] += getattr(student, "spades_quests", 0) or 0
-        row["spades"] += (getattr(student, "spades_count_mocks", 0) or 0) * 3
-        row["spades"] += getattr(student, "spades_suggestions", 0) or 0
-        row["spades"] += getattr(student, "spades_markets", 0) or 0
-        row["spades"] += getattr(student, "spades_jobs", 0) or 0
-        row["spades"] += getattr(student, "spades_hanabi", 0) or 0
-        row["spades"] += float(getattr(student, "spades_ponzi_paid", 0) or 0)
-        row["spades"] -= getattr(student, "spades_ponzi_invested", 0) or 0
         row["hearts"] = getattr(student, "hearts", 0) or 0
         row["clubs"] = getattr(student, "clubs_any", 0) or 0
         row["clubs"] += BONUS_D_UNIT * (getattr(student, "clubs_D", 0) or 0)
