@@ -44,6 +44,11 @@ class Achievement(models.Model):
     code = models.CharField(
         max_length=96,
         unique=True,
+        blank=True,
+        null=True,
+        default=None,
+        help_text="Code students enter to unlock this achievement. "
+        "Leave blank for achievements that are only granted directly.",
         validators=[
             RegexValidator(
                 regex=r"^[a-f0-9]{24,26}$",
@@ -108,6 +113,10 @@ class Achievement(models.Model):
     class Meta:
         constraints = (
             models.CheckConstraint(
+                condition=~models.Q(code=""),
+                name="%(app_label)s_%(class)s_code_not_empty",
+            ),
+            models.CheckConstraint(
                 condition=~models.Q(special_effect_id=""),
                 name="%(app_label)s_%(class)s_special_effect_id_not_empty",
             ),
@@ -117,6 +126,8 @@ class Achievement(models.Model):
         return str(self.name)
 
     def save(self, *args: Any, **kwargs: Any):
+        if not self.code:
+            self.code = None
         if not self.special_effect_id:
             self.special_effect_id = None
         super().save(*args, **kwargs)

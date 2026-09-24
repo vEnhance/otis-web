@@ -21,7 +21,7 @@
     </div>
   {% endif %}
   <div class="my-3 alert alert-success text-break">
-    {% if request.user.is_superuser %}
+    {% if request.user.is_superuser and achievement.code %}
       <h4 class="alert-heading">
         Answer: <strong>{{ achievement.code }}</strong>
       </h4>

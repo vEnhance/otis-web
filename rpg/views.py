@@ -71,7 +71,7 @@ def handle_diamond_guess(
         return
 
     achievement = (
-        Achievement.objects.exclude(code="").filter(code__iexact=code).first()
+        Achievement.objects.filter(code__iexact=code).first()
         if is_well_formed
         else None
     )
@@ -197,7 +197,9 @@ class AchievementList(LoginRequiredMixin, ListView[Achievement]):
         context["viewing"] = False
         context["can_submit"] = is_verified(self.request.user)
         context["form"] = DiamondsForm()
-        context["first_achievement"] = Achievement.objects.filter(pk=1).first()
+        context["first_achievement"] = Achievement.objects.filter(
+            special_effect_id="first"
+        ).first()
         return context
 
 
@@ -364,6 +366,11 @@ class DiamondUpdate(
         "always_show_image",
     )
     success_message = "Updated diamond successfully."
+
+    def get_form(self, form_class: Any = None) -> BaseModelForm[Achievement]:
+        form = super().get_form(form_class)
+        form.fields["code"].required = True
+        return form
 
     def get_object(self, *args: Any, **kwargs: Any) -> Achievement:
         student = get_student_by_pk(self.request, self.kwargs["student_pk"])

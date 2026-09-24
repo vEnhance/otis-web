@@ -6,7 +6,7 @@
 {% block layout-content %}
   {% if achievement.image %}<img width="96px" class="float-end" src="{{ achievement.image.url }}" />{% endif %}
   <h2>{{ achievement.name }} ({{ achievement.diamonds }}♦️)</h2>
-  {% if request.user.is_superuser %}
+  {% if request.user.is_superuser and achievement.code %}
     <p>
       <code>{{ achievement.code }}</code>
     </p>

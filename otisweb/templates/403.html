@@ -13,5 +13,5 @@
   <h2>{{ exception }}</h2>
 {% endblock message %}
 {% block extra %}
-  <span class="font-monospace">{{ "HTTP_403_NOTES"|getenv }}</span>
+  <span class="font-monospace">{% http_error_diamond_code 403 %}</span>
 {% endblock extra %}
