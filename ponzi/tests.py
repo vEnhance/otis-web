@@ -83,7 +83,10 @@ def test_invest_once_per_day(otis, scheme: PonziScheme):
 def test_invest_before_start(otis, scheme: PonziScheme):
     otis.login(verified_user())
     with freeze_time(at(-1)):
-        otis.get_denied("ponzi-scheme", scheme.pk)
+        resp = otis.get_ok("ponzi-list")
+        assert list(resp.context["schemes"]) == [scheme]
+        resp = otis.get_ok("ponzi-scheme", scheme.pk)
+        assert resp.context["can_invest"] is False
         otis.post_30x("ponzi-invest", scheme.pk, data={"amount": 5})
     assert not PonziInvestment.objects.exists()
 

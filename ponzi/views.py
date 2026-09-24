@@ -3,9 +3,7 @@ from typing import Any, ClassVar
 
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.core.exceptions import PermissionDenied
 from django.db import transaction
-from django.db.models.query import QuerySet
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
@@ -40,11 +38,6 @@ class PonziSchemeList(VerifiedRequiredMixin, ListView[PonziScheme]):
         ],
     }
 
-    def get_queryset(self) -> QuerySet[PonziScheme]:
-        if getattr(self.request.user, "is_staff", False):
-            return PonziScheme.objects.all()
-        return PonziScheme.objects.filter(start_date__lte=timezone.now())
-
 
 def last_investment_date(user: User, scheme: PonziScheme) -> datetime.datetime | None:
     latest = (
@@ -58,8 +51,6 @@ def last_investment_date(user: User, scheme: PonziScheme) -> datetime.datetime |
 @verified_required
 def scheme_detail(request: AuthHttpRequest, pk: int) -> HttpResponse:
     scheme = get_object_or_404(PonziScheme, pk=pk)
-    if not scheme.has_started and not request.user.is_staff:
-        raise PermissionDenied("This scheme hasn't started yet.")
     profile = find_profile(request.user)
     last = last_investment_date(request.user, scheme)
 
