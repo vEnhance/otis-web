@@ -3,9 +3,7 @@ from typing import Any, ClassVar
 
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.core.exceptions import PermissionDenied
 from django.db import transaction
-from django.db.models.query import QuerySet
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
@@ -40,11 +38,6 @@ class PonziSchemeList(VerifiedRequiredMixin, ListView[PonziScheme]):
         ],
     }
 
-    def get_queryset(self) -> QuerySet[PonziScheme]:
-        if getattr(self.request.user, "is_staff", False):
-            return PonziScheme.objects.all()
-        return PonziScheme.objects.filter(start_date__lte=timezone.now())
-
 
 def last_investment_date(user: User, scheme: PonziScheme) -> datetime.datetime | None:
     latest = (
@@ -58,8 +51,6 @@ def last_investment_date(user: User, scheme: PonziScheme) -> datetime.datetime |
 @verified_required
 def scheme_detail(request: AuthHttpRequest, pk: int) -> HttpResponse:
     scheme = get_object_or_404(PonziScheme, pk=pk)
-    if not scheme.has_started and not request.user.is_staff:
-        raise PermissionDenied("This scheme hasn't started yet.")
     profile = find_profile(request.user)
     last = last_investment_date(request.user, scheme)
 
@@ -67,7 +58,7 @@ def scheme_detail(request: AuthHttpRequest, pk: int) -> HttpResponse:
         "scheme": scheme,
         "max_bid": MAX_INVESTMENT,
         "num_investors": scheme.investments.values("user").distinct().count(),
-        "investments": PonziInvestment.objects.filter(user=request.user, scheme=scheme),
+        "investments": scheme.investments.filter(user=request.user),
         "spades_meter": Meter.SpadeMeter(
             round(get_spade_stats(request.user), 2),
             dynamic_progress=profile is not None and profile.dynamic_progress,

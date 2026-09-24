@@ -15,6 +15,7 @@ class PonziSchemeFactory(DjangoModelFactory):
 
     title = Faker("bs")
     start_date = Faker("past_datetime", tzinfo=datetime.UTC)
+    gestation_period = datetime.timedelta(weeks=2)
 
 
 class PonziInvestmentFactory(DjangoModelFactory):

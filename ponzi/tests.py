@@ -83,7 +83,10 @@ def test_invest_once_per_day(otis, scheme: PonziScheme):
 def test_invest_before_start(otis, scheme: PonziScheme):
     otis.login(verified_user())
     with freeze_time(at(-1)):
-        otis.get_denied("ponzi-scheme", scheme.pk)
+        resp = otis.get_ok("ponzi-list")
+        assert list(resp.context["schemes"]) == [scheme]
+        resp = otis.get_ok("ponzi-scheme", scheme.pk)
+        assert resp.context["can_invest"] is False
         otis.post_30x("ponzi-invest", scheme.pk, data={"amount": 5})
     assert not PonziInvestment.objects.exists()
 
@@ -139,6 +142,28 @@ def test_withdraw_tier_one(otis, scheme: PonziScheme):
     investment.refresh_from_db()
     assert investment.payout == Decimal("10.67")
     assert investment.withdrawn_at == at(15)
+
+
+@pytest.mark.django_db
+def test_gestation_period_is_per_scheme(otis):
+    scheme = PonziSchemeFactory.create(
+        start_date=START, gestation_period=datetime.timedelta(days=3)
+    )
+    alice = verified_user()
+    with freeze_time(at(0)):
+        PonziInvestmentFactory.create(scheme=scheme, amount=10)
+        investment = PonziInvestmentFactory.create(scheme=scheme, user=alice, amount=10)
+    otis.login(alice)
+
+    with freeze_time(at(2)):
+        otis.post_30x("ponzi-withdraw", investment.pk)
+        investment.refresh_from_db()
+        assert investment.withdrawn_at is None
+
+    with freeze_time(at(4)):
+        otis.post_30x("ponzi-withdraw", investment.pk)
+    investment.refresh_from_db()
+    assert investment.withdrawn_at == at(4)
 
 
 @pytest.mark.django_db

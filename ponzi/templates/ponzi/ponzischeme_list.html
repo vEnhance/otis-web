@@ -12,6 +12,7 @@
       <tr class="table-dark">
         <th>Scheme</th>
         <th>Opened</th>
+        <th>Time delay</th>
         <th>Status</th>
       </tr>
       {% for scheme in schemes %}
@@ -20,6 +21,7 @@
             <a href="{{ scheme.get_absolute_url }}">{{ scheme.title }}</a>
           </td>
           <td>{% timestamp scheme.start_date "isodate" %}</td>
+          <td>{{ scheme.gestation_period }}</td>
           <td>
             {% if scheme.has_collapsed %}
               Collapsed {% timestamp scheme.collapsed_at "isodate" %}
@@ -46,17 +48,19 @@
       However, the current amount in the global pool is not shown throughout the game.
     </li>
     <li>
-      Up to once per day, you may bid anywhere from 1 to {{ max_bid }} spades,
+      In the game, you may bid anywhere from 1 to {{ max_bid }} spades,
       inclusive (integers only).
-      This is added to the global pool for that scheme.
+      You must wait 24 hours between bids and you cannot bid more spades than you have.
+      Bids are added to the global pool for that scheme.
     </li>
     <li>
-      A bid reaches the next tier two weeks after being placed.
-      While growing, a bid can't be withdrawn.
+      Each game specifies a length of time $T$ one must wait
+      before a bid reaches the next tier.
+      During this time period, a bid cannot be withdrawn.
     </li>
     <li>
-      Once it reaches a tier, you may withdraw it with interest,
-      or lock it up for two more weeks to reach the next tier.
+      Once it reaches a tier, you may withdraw it for that tier's interest rate,
+      or re-invest it again to reach the next tier (after another $T$ time).
     </li>
     <li>
       The interest return rate for each tier is:

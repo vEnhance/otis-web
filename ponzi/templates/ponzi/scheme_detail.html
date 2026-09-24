@@ -9,9 +9,16 @@
       This scheme collapsed on {% timestamp scheme.collapsed_at "isotime" %}.
     </div>
   {% elif not scheme.has_started %}
-    <div class="alert alert-info">Bidding opens at {% timestamp scheme.start_date "isotime" %}.</div>
+    <div class="alert alert-info">
+      Bidding opens at {% timestamp scheme.start_date "isotime" %}.
+      The delay parameter for this game is {{ scheme.gestation_period }}.
+    </div>
   {% else %}
-    <p>{{ scheme }} is open for business!</p>
+    <p>
+      {{ scheme }} is open for business!
+      A bid requires <strong>{{ scheme.gestation_period }}</strong> to reach the next tier,
+      and can't be withdrawn during that time.
+    </p>
     <p data-testid="ponzi-num-investors">
       So far, {{ num_investors }} distinct player{{ num_investors|pluralize }} {{ num_investors|pluralize:"has,have" }} joined.
       (Players cannot see the total number of bids
@@ -29,7 +36,7 @@
           class="row g-2 align-items-center mb-3"
           data-testid="ponzi-invest-form">
       {% csrf_token %}
-      <p>Enter a number of spades from 1 to {{ max_bid }}.</p>
+      <p>Enter a number of spades from 1 to {{ max_bid }}. Wait one day between bids.</p>
       <div class="col-auto">
         <input type="number"
                name="amount"
@@ -49,6 +56,8 @@
     <p>You can bid again {% timestamp next_investment_at "relative" %}.</p>
   {% elif scheme.has_collapsed %}
     <p class="text-muted">This Ponzi scheme has collapsed.</p>
+  {% else %}
+    <p class="text-muted">Not available.</p>
   {% endif %}
   <h2>Your bids</h2>
   <table class="table table-striped">
@@ -105,6 +114,11 @@
     {% else %}
       <h1>Statistics so far (admin only)</h1>
     {% endif %}
+    <p>
+      The delay parameter $T$ for this Ponzi scheme
+      {% if scheme.has_collapsed %}was{% else %}is{% endif %}
+      <strong>{{ scheme.gestation_period }}</strong>.
+    </p>
     <table class="table table-striped table-sm" data-testid="ponzi-summary">
       <tr class="table-dark">
         <th>Item</th>

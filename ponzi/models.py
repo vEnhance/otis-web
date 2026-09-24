@@ -10,7 +10,6 @@ from django.urls import reverse
 from django.utils import timezone
 
 MAX_INVESTMENT = 10
-GESTATION_PERIOD = timedelta(weeks=2)
 INVESTMENT_COOLDOWN = timedelta(days=1)
 TIER_RETURNS = {
     1: Decimal("0.067"),
@@ -24,6 +23,9 @@ TIER_NAMES = {0: "—", 1: "I", 2: "II", 3: "III"}
 class PonziScheme(models.Model):
     title = models.CharField(max_length=80)
     start_date = models.DateTimeField(help_text="When investments open")
+    gestation_period = models.DurationField(
+        help_text="How long a bid takes to reach its next tier"
+    )
     collapsed_at = models.DateTimeField(
         null=True,
         blank=True,
@@ -112,7 +114,7 @@ class PonziInvestment(models.Model):
 
     @property
     def matures_at(self) -> datetime:
-        return (self.upgraded_at or self.created_at) + GESTATION_PERIOD
+        return (self.upgraded_at or self.created_at) + self.scheme.gestation_period
 
     @property
     def is_growing(self) -> bool:
