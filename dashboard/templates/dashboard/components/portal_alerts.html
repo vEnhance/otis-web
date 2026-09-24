@@ -25,9 +25,9 @@
       The payment deadline {% timestamp semester.half_payment_deadline "date" %}
       has passed, but no payment was received.
     {% elif student.payment_status == 3 %}
-      More than a week since the deadline
+      Several days have passed since the payment deadline of
       {% timestamp semester.half_payment_deadline "date" %}
-      has passed, but no payment is recorded.
+      but no payment is recorded.
     {% elif student.payment_status == 5 %}
       As a quick reminder, the deadline for full payment for all semesters is
       {% timestamp semester.full_payment_deadline "date" %}.
@@ -37,9 +37,9 @@
       {% timestamp semester.full_payment_deadline "date" %}
       has passed, but your payment is incomplete!
     {% elif student.payment_status == 7 %}
-      More than a week since the deadline
+      Several days have passed since the payment deadline of
       {% timestamp semester.full_payment_deadline "date" %}
-      has passed, but your payment is incomplete.
+      but your payment is incomplete.
     {% endif %}
     <a href="{% url 'invoice' student.pk %}" class="alert-link">Link to invoice.</a>
   </div>
