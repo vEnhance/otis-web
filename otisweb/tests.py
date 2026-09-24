@@ -202,7 +202,6 @@ def test_wiki_redirects_to_catalog(client: Client, path: str):
     assert response["Location"] == "https://catalog.evanchen.cc/"
 
 
-@pytest.mark.django_db
 @pytest.mark.parametrize("path", ("/wikipedia/", "/wikis/"))
 def test_wiki_redirect_does_not_overreach(client: Client, path: str):
     assert client.get(path).status_code == 404

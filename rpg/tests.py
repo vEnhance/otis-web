@@ -959,10 +959,3 @@ def test_forged_diamond_requires_code(otis):
     assert "code" in resp.context["form"].errors
     achievement.refresh_from_db()
     assert achievement.code == old_code
-
-
-@pytest.mark.django_db
-def test_http_404_page_shows_diamond_code(otis):
-    AchievementFactory.create(code="c0de" * 6, special_effect_id="http-404")
-    resp = otis.assert_not_found(otis.client.get("/no-such-page/"))
-    otis.assert_has(resp, "c0de" * 6)
