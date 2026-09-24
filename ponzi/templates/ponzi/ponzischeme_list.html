@@ -42,6 +42,10 @@
   </p>
   <ol>
     <li>
+      The global pool is initially empty.
+      However, the current amount in the global pool is not shown throughout the game.
+    </li>
+    <li>
       Up to once per day, you may bid anywhere from 1 to {{ max_bid }} spades,
       inclusive (integers only).
       This is added to the global pool for that scheme.
@@ -55,7 +59,7 @@
       or lock it up for two more weeks to reach the next tier.
     </li>
     <li>
-      The return rate for each tier is:
+      The interest return rate for each tier is:
       <ul>
         {% for name, rate in tier_returns %}
           <li>Tier {{ name }}: <strong>{{ rate|floatformat:"-1" }}% return rate</strong></li>
@@ -66,10 +70,8 @@
     <li>
       The scheme ends immediately once someone attempts to make a transaction
       which would make the global pool negative.
-      In that case, the final transaction is cancelled
-      and the scheme collapses.
+      In that case, the final transaction is cancelled and the scheme collapses.
       Any spades still bid are lost after the scheme collapses.
     </li>
-    <li>The amount in the global pool is hidden from players.</li>
   </ol>
 {% endblock layout-content %}
