@@ -59,6 +59,7 @@ class AchievementAdmin(ImportExportModelAdmin):
     list_filter = (
         "always_show_image",
         "show_solution",
+        ("code", admin.EmptyFieldListFilter),
         ("creator", admin.EmptyFieldListFilter),
         ("special_effect_id", admin.EmptyFieldListFilter),
     )
