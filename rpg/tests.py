@@ -311,8 +311,9 @@ def test_multi_student_annotate(otis, alice_with_data):
 def test_spades_single_and_bulk_agree():
     student = StudentFactory.create()
     user = student.user
+    earlier_student = StudentFactory.create(user=user)
 
-    ExamAttemptFactory.create(student=student, score=4)
+    ExamAttemptFactory.create(student=earlier_student, score=4)
     QuestCompleteFactory.create(student=student, spades=5)
     MockCompleted.objects.create(student=student, exam=PracticeExamFactory.create())
     GuessFactory.create(

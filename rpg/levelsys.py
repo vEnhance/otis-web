@@ -1,15 +1,11 @@
 # Functions to compute student levels and whatnot
 import datetime
 import logging
-from collections.abc import Callable
-from dataclasses import dataclass
-from decimal import Decimal
 from typing import Any, TypedDict
 
 from django.contrib.auth.models import User
 from django.db.models.aggregates import Count, Max, Sum
-from django.db.models.base import Model
-from django.db.models.expressions import Combinable, F, OuterRef, Subquery, Value
+from django.db.models.expressions import Combinable, Value
 from django.db.models.fields import FloatField
 from django.db.models.functions import Coalesce
 from django.db.models.query import QuerySet
@@ -267,97 +263,75 @@ def get_diamond_stats(student: Student) -> int:
     return total_diamonds
 
 
-UserRef = User | OuterRef
+SPADE_SUGGESTIONS = Q(status__in=("SUGG_NOK", "SUGG_OK"), eligible=True)
+VERIFIED_JOBS = Q(progress="JOB_VFD")
+PROCESSED_REPLAYS = Q(contest__processed=True)
 
 
-@dataclass(frozen=True)
-class SpadeSource[M: Model]:
-    queryset: Callable[[], QuerySet[M]]
-    user_path: str
-    value: Combinable
-
-    def rows(self, user: UserRef) -> QuerySet[M]:
-        return self.queryset().filter(**{self.user_path: user})
-
-    def total(self, user: OuterRef) -> Subquery:
-        grouped = self.rows(user).order_by().values(self.user_path)
-        return Subquery(grouped.annotate(total=self.value).values("total"))
+def closed_market_guesses() -> Q:
+    return Q(market__end_date__lt=timezone.now())
 
 
-QUIZZES = SpadeSource(ExamAttempt.objects.all, "student__user", Sum("score") * 2)
-QUESTS = SpadeSource(QuestComplete.objects.all, "student__user", Sum("spades"))
-MOCKS = SpadeSource(MockCompleted.objects.all, "student__user", Count("pk") * 3)
-MARKETS = SpadeSource(
-    lambda: Guess.objects.filter(market__end_date__lt=timezone.now()),
-    "user",
-    Sum("score"),
-)
-SUGGESTIONS = SpadeSource(
-    lambda: ProblemSuggestion.objects.filter(
-        status__in=("SUGG_NOK", "SUGG_OK"), eligible=True
-    ),
-    "user",
-    Count("unit", distinct=True),
-)
-JOBS = SpadeSource(
-    lambda: Job.objects.filter(progress="JOB_VFD"),
-    "assignee__user",
-    Sum("spades_bounty"),
-)
-HANABI = SpadeSource(
-    lambda: HanabiReplay.objects.filter(contest__processed=True),
-    "hanabiparticipation__player__user",
-    Sum("spades_score"),
-)
-PONZI = SpadeSource(
-    PonziInvestment.objects.all,
-    "user",
-    Sum(Coalesce("payout", Value(Decimal(0))) - F("amount")),
-)
-SPADE_SOURCES: tuple[SpadeSource[Any], ...] = (
-    QUIZZES,
-    QUESTS,
-    MOCKS,
-    MARKETS,
-    SUGGESTIONS,
-    JOBS,
-    HANABI,
-    PONZI,
-)
-
-
-def spades_expression(user: OuterRef) -> Combinable:
+def spades_expression(to_user: str = "") -> Combinable:
+    subqueries: list[Combinable] = [
+        SubquerySum(f"{to_user}student__examattempt__score") * 2,
+        SubquerySum(f"{to_user}student__questcomplete__spades"),
+        SubqueryCount(f"{to_user}student__mockcompleted") * 3,
+        SubquerySum(f"{to_user}guess__score", filter=closed_market_guesses()),
+        SubqueryCount(
+            f"{to_user}problemsuggestion__unit",
+            distinct=True,
+            filter=SPADE_SUGGESTIONS,
+        ),
+        SubquerySum(f"{to_user}workers__job__spades_bounty", filter=VERIFIED_JOBS),
+        SubquerySum(
+            f"{to_user}hanabiplayer__hanabiparticipation__replay__spades_score",
+            filter=PROCESSED_REPLAYS,
+        ),
+        SubquerySum(f"{to_user}ponziinvestment__payout"),
+        -SubquerySum(f"{to_user}ponziinvestment__amount"),
+    ]
     total: Combinable = Value(0.0)
-    for source in SPADE_SOURCES:
-        total += Coalesce(source.total(user), 0.0, output_field=FloatField())
+    for subquery in subqueries:
+        total += Coalesce(subquery, 0.0, output_field=FloatField())
     return total
 
 
 def get_spade_stats(user: User, leveldict: LevelInfoDict = None) -> float:
     if leveldict is not None:
-        leveldict["quiz_attempts"] = QUIZZES.rows(user).order_by(
-            "quiz__family", "quiz__number"
-        )
-        leveldict["quest_completes"] = QUESTS.rows(user).order_by("-timestamp")
+        leveldict["quiz_attempts"] = ExamAttempt.objects.filter(
+            student__user=user
+        ).order_by("quiz__family", "quiz__number")
+        leveldict["quest_completes"] = QuestComplete.objects.filter(
+            student__user=user
+        ).order_by("-timestamp")
         leveldict["mock_completes"] = (
-            MOCKS.rows(user)
+            MockCompleted.objects.filter(student__user=user)
             .select_related("exam")
             .order_by("exam__family", "exam__number")
         )
         leveldict["market_guesses"] = (
-            MARKETS.rows(user).order_by("-market__end_date").select_related("market")
+            Guess.objects.filter(closed_market_guesses(), user=user)
+            .order_by("-market__end_date")
+            .select_related("market")
         )
         leveldict["suggest_unit_set"] = set(
-            SUGGESTIONS.rows(user).values_list(
+            ProblemSuggestion.objects.filter(SPADE_SUGGESTIONS, user=user).values_list(
                 "unit__pk", "unit__group__name", "unit__code"
             )
         )
-        leveldict["completed_jobs"] = JOBS.rows(user).select_related("folder")
-        leveldict["hanabi_replays"] = HANABI.rows(user)
-        leveldict["ponzi_investments"] = PONZI.rows(user).select_related("scheme")
+        leveldict["completed_jobs"] = Job.objects.filter(
+            VERIFIED_JOBS, assignee__user=user
+        ).select_related("folder")
+        leveldict["hanabi_replays"] = HanabiReplay.objects.filter(
+            PROCESSED_REPLAYS, hanabiparticipation__player__user=user
+        )
+        leveldict["ponzi_investments"] = PonziInvestment.objects.filter(
+            user=user
+        ).select_related("scheme")
 
     spades = (
-        User.objects.annotate(spades=spades_expression(OuterRef("pk")))
+        User.objects.annotate(spades=spades_expression())
         .values_list("spades", flat=True)
         .get(pk=user.pk)
     )
@@ -402,7 +376,7 @@ def annotate_student_queryset_with_scores(
             filter=Q(eligible=True, unit__code__startswith="Z"),
         ),
         num_semesters=SubqueryCount("user__student"),
-        spades=spades_expression(OuterRef("user")),
+        spades=spades_expression(to_user="user__"),
     )
 
 
