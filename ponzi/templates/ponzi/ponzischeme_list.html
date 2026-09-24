@@ -12,6 +12,7 @@
       <tr class="table-dark">
         <th>Scheme</th>
         <th>Opened</th>
+        <th>Gestation</th>
         <th>Status</th>
       </tr>
       {% for scheme in schemes %}
@@ -20,6 +21,7 @@
             <a href="{{ scheme.get_absolute_url }}">{{ scheme.title }}</a>
           </td>
           <td>{% timestamp scheme.start_date "isodate" %}</td>
+          <td>{{ scheme.gestation_period.days }} day{{ scheme.gestation_period.days|pluralize }}</td>
           <td>
             {% if scheme.has_collapsed %}
               Collapsed {% timestamp scheme.collapsed_at "isodate" %}
@@ -51,12 +53,12 @@
       This is added to the global pool for that scheme.
     </li>
     <li>
-      A bid reaches the next tier two weeks after being placed.
+      A bid reaches the next tier once the scheme's gestation period has passed since it was placed.
       While growing, a bid can't be withdrawn.
     </li>
     <li>
       Once it reaches a tier, you may withdraw it with interest,
-      or lock it up for two more weeks to reach the next tier.
+      or lock it up for another gestation period to reach the next tier.
     </li>
     <li>
       The interest return rate for each tier is:

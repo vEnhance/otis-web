@@ -67,7 +67,7 @@ def scheme_detail(request: AuthHttpRequest, pk: int) -> HttpResponse:
         "scheme": scheme,
         "max_bid": MAX_INVESTMENT,
         "num_investors": scheme.investments.values("user").distinct().count(),
-        "investments": PonziInvestment.objects.filter(user=request.user, scheme=scheme),
+        "investments": scheme.investments.filter(user=request.user),
         "spades_meter": Meter.SpadeMeter(
             round(get_spade_stats(request.user), 2),
             dynamic_progress=profile is not None and profile.dynamic_progress,

@@ -5,7 +5,13 @@ from .models import PonziInvestment, PonziScheme
 
 @admin.register(PonziScheme)
 class PonziSchemeAdmin(admin.ModelAdmin):
-    list_display = ("title", "start_date", "collapsed_at", "collapsed_by")
+    list_display = (
+        "title",
+        "start_date",
+        "gestation_period",
+        "collapsed_at",
+        "collapsed_by",
+    )
     search_fields = ("title",)
     autocomplete_fields = ("collapsed_by",)
 
