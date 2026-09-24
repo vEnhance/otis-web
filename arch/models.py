@@ -4,12 +4,13 @@ import reversion
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, RegexValidator
 from django.db import models
-from django.db.models.manager import Manager
 from django.urls import reverse
 
 from arch.utils import get_disk_statement_from_puid
 
 if TYPE_CHECKING:
+    from django.db.models.fields.related_descriptors import RelatedManager
+
     assert hasattr(reversion, "register")
 
 
@@ -29,7 +30,7 @@ class Problem(models.Model):
         ],
     )
     hyperlink = models.URLField(help_text="An AoPS URL or similar", blank=True)
-    vote_set: Manager["Vote"]
+    vote_set: "RelatedManager[Vote]"
 
     class Meta:
         ordering = ("puid",)

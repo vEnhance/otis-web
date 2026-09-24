@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from decimal import Decimal
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -8,6 +8,9 @@ from django.db import models
 from django.db.models import Count, Q, Sum
 from django.urls import reverse
 from django.utils import timezone
+
+if TYPE_CHECKING:
+    from django.db.models.fields.related_descriptors import RelatedManager
 
 MAX_INVESTMENT = 10
 INVESTMENT_COOLDOWN = timedelta(days=1)
@@ -40,7 +43,7 @@ class PonziScheme(models.Model):
         help_text="The user whose withdrawal broke the bank",
     )
 
-    investments: "models.Manager[PonziInvestment]"
+    investments: "RelatedManager[PonziInvestment]"
 
     class Meta:
         ordering = ("-start_date",)
