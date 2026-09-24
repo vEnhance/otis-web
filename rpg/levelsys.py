@@ -163,36 +163,39 @@ class FourMetersDict(TypedDict):
     hearts: Meter
 
 
-class LevelInfoDict(TypedDict):
-    psets: QuerySet[PSet]
-    pset_data: AggregateDict
+class SpadeItemsDict(TypedDict):
     quiz_attempts: QuerySet[ExamAttempt]
     quest_completes: QuerySet[QuestComplete]
+    mock_completes: QuerySet[MockCompleted]
+    market_guesses: QuerySet[Guess]
+    suggest_unit_set: SuggestUnitSet
+    completed_jobs: QuerySet[Job]
+    hanabi_replays: QuerySet[HanabiReplay]
+    ponzi_investments: QuerySet[PonziInvestment]
+
+
+class LevelInfoDict(SpadeItemsDict):
+    psets: QuerySet[PSet]
+    pset_data: AggregateDict
     meters: FourMetersDict
     level_number: int
     str_im_level: str
     level_name: str
     is_maxed: bool
-    market_guesses: QuerySet[Guess]
-    suggest_unit_set: SuggestUnitSet
-    mock_completes: QuerySet[MockCompleted]
-    completed_jobs: QuerySet[Job]
     bonus_levels: QuerySet[BonusLevel]
-    hanabi_replays: QuerySet[HanabiReplay]
-    ponzi_investments: QuerySet[PonziInvestment]
 
 
 def get_level_info(student: Student) -> LevelInfoDict:
     """Uses a bunch of expensive database queries to compute a student's levels and data,
     returning the findings as a typed dictionary."""
 
-    level_data = LevelInfoDict()  # type: ignore
+    level_data = LevelInfoDict(**get_spade_items(student.user))  # type: ignore
 
     total_clubs, total_hearts = get_clubs_hearts_stats(student, level_data)
 
     total_diamonds = get_diamond_stats(student)
 
-    total_spades = get_spade_stats(student.user, level_data)
+    total_spades = get_spade_stats(student.user)
 
     profile = find_profile(student.user)
     dynamic_progress = profile is not None and profile.dynamic_progress
@@ -297,39 +300,42 @@ def spades_expression(to_user: str = "") -> Combinable:
     return total
 
 
-def get_spade_stats(user: User, leveldict: LevelInfoDict = None) -> float:
-    if leveldict is not None:
-        leveldict["quiz_attempts"] = ExamAttempt.objects.filter(
-            student__user=user
-        ).order_by("quiz__family", "quiz__number")
-        leveldict["quest_completes"] = QuestComplete.objects.filter(
-            student__user=user
-        ).order_by("-timestamp")
-        leveldict["mock_completes"] = (
+def get_spade_items(user: User) -> SpadeItemsDict:
+    return {
+        "quiz_attempts": ExamAttempt.objects.filter(student__user=user).order_by(
+            "quiz__family", "quiz__number"
+        ),
+        "quest_completes": QuestComplete.objects.filter(student__user=user).order_by(
+            "-timestamp"
+        ),
+        "mock_completes": (
             MockCompleted.objects.filter(student__user=user)
             .select_related("exam")
             .order_by("exam__family", "exam__number")
-        )
-        leveldict["market_guesses"] = (
+        ),
+        "market_guesses": (
             Guess.objects.filter(closed_market_guesses(), user=user)
             .order_by("-market__end_date")
             .select_related("market")
-        )
-        leveldict["suggest_unit_set"] = set(
+        ),
+        "suggest_unit_set": set(
             ProblemSuggestion.objects.filter(SPADE_SUGGESTIONS, user=user).values_list(
                 "unit__pk", "unit__group__name", "unit__code"
             )
-        )
-        leveldict["completed_jobs"] = Job.objects.filter(
+        ),
+        "completed_jobs": Job.objects.filter(
             VERIFIED_JOBS, assignee__user=user
-        ).select_related("folder")
-        leveldict["hanabi_replays"] = HanabiReplay.objects.filter(
+        ).select_related("folder"),
+        "hanabi_replays": HanabiReplay.objects.filter(
             PROCESSED_REPLAYS, hanabiparticipation__player__user=user
-        )
-        leveldict["ponzi_investments"] = PonziInvestment.objects.filter(
-            user=user
-        ).select_related("scheme")
+        ),
+        "ponzi_investments": PonziInvestment.objects.filter(user=user).select_related(
+            "scheme"
+        ),
+    }
 
+
+def get_spade_stats(user: User) -> float:
     spades = (
         User.objects.annotate(spades=spades_expression())
         .values_list("spades", flat=True)
