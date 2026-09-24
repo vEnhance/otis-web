@@ -15,7 +15,7 @@ from core.utils import find_profile
 from otisweb.decorators import verified_required
 from otisweb.mixins import VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest
-from rpg.levelsys import Meter, get_spade_stats
+from rpg.levelsys import Meter, get_total_spades
 
 from .forms import InvestmentForm
 from .models import (
@@ -60,7 +60,7 @@ def scheme_detail(request: AuthHttpRequest, pk: int) -> HttpResponse:
         "num_investors": scheme.investments.values("user").distinct().count(),
         "investments": scheme.investments.filter(user=request.user),
         "spades_meter": Meter.SpadeMeter(
-            round(get_spade_stats(request.user), 2),
+            round(get_total_spades(request.user), 2),
             dynamic_progress=profile is not None and profile.dynamic_progress,
         ),
         "next_investment_at": None if last is None else last + INVESTMENT_COOLDOWN,
@@ -95,7 +95,7 @@ def invest(request: AuthHttpRequest, pk: int) -> HttpResponse:
             messages.error(request, "This scheme is not accepting bids.")
         elif last is not None and timezone.now() < last + INVESTMENT_COOLDOWN:
             messages.error(request, "You can only bid once per day.")
-        elif amount > get_spade_stats(request.user):
+        elif amount > get_total_spades(request.user):
             messages.error(request, "You don't have enough spades for that.")
         else:
             PonziInvestment.objects.create(

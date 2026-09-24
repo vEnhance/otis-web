@@ -195,7 +195,7 @@ def get_level_info(student: Student) -> LevelInfoDict:
 
     total_diamonds = get_diamond_stats(student)
 
-    total_spades = get_spade_stats(student.user)
+    total_spades = get_total_spades(student.user)
 
     profile = find_profile(student.user)
     dynamic_progress = profile is not None and profile.dynamic_progress
@@ -335,7 +335,7 @@ def get_spade_items(user: User) -> SpadeItemsDict:
     }
 
 
-def get_spade_stats(user: User) -> float:
+def get_total_spades(user: User) -> float:
     spades = (
         User.objects.annotate(spades=spades_expression())
         .values_list("spades", flat=True)

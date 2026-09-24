@@ -28,8 +28,8 @@ from rpg.forms import DiamondsForm
 from rpg.levelsys import (
     annotate_student_queryset_with_scores,
     get_level_info,
-    get_spade_stats,
     get_student_rows,
+    get_total_spades,
 )
 from rpg.models import (
     GUESS_CODE_MAX_LENGTH,
@@ -335,7 +335,7 @@ def test_spades_single_and_bulk_agree():
     )
 
     expected = 4 * 2 + 5 + 3 + 6 + 1 + 7 + 2.5
-    assert get_spade_stats(user) == pytest.approx(expected)
+    assert get_total_spades(user) == pytest.approx(expected)
     rows = get_student_rows(Student.objects.filter(pk=student.pk))
     assert rows[0]["spades"] == pytest.approx(expected)
 
