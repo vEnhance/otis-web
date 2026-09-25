@@ -17,6 +17,7 @@ from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
+from django.utils import timezone
 from freezegun.api import freeze_time
 
 from core.factories import (
@@ -1665,7 +1666,9 @@ def test_delinquents(otis) -> None:
         deadbeat: Student = StudentFactory.create(semester=semester)
         InvoiceFactory.create(student=deadbeat, preps_taught=2)
         halfway: Student = StudentFactory.create(semester=semester)
-        InvoiceFactory.create(student=halfway, preps_taught=2, total_paid=240)
+        InvoiceFactory.create(
+            student=halfway, preps_taught=2, total_paid=240, memo="paid by check"
+        )
         cleared: Student = StudentFactory.create(semester=semester)
         InvoiceFactory.create(student=cleared, preps_taught=2, total_paid=480)
         impostor: Student = StudentFactory.create(
@@ -1749,7 +1752,10 @@ def test_delinquents(otis) -> None:
     for student in (deadbeat, halfway, quitter):
         student.invoice.refresh_from_db()
         assert student.invoice.extras == 60
-        assert student.invoice.memo.endswith("late fee of $60")
+    assert deadbeat.invoice.memo == f"{timezone.localdate()}: late fee of $60"
+    assert halfway.invoice.memo == (
+        f"paid by check\n{timezone.localdate()}: late fee of $60"
+    )
     for student in (cleared, impostor, alumnus, forgiven, springling):
         student.invoice.refresh_from_db()
         assert student.invoice.extras == 0
