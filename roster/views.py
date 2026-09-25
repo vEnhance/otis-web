@@ -28,10 +28,10 @@ from django.core.exceptions import (
     ObjectDoesNotExist,
     PermissionDenied,
 )
-from django.db.models.expressions import F, Value
-from django.db.models.fields import FloatField
+from django.db.models.expressions import Case, F, Value, When
+from django.db.models.fields import FloatField, TextField
 from django.db.models.functions.comparison import Cast
-from django.db.models.functions.text import Concat, Trim
+from django.db.models.functions.text import Concat
 from django.db.models.manager import Manager
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
@@ -865,7 +865,11 @@ def delinquents(request: HttpRequest) -> HttpResponse:
             target_pks = list(students.values_list("pk", flat=True))
             count = Invoice.objects.filter(student__pk__in=target_pks).update(
                 extras=F("extras") + amount,
-                memo=Trim(Concat("memo", Value(f"\n{note}"))),
+                memo=Case(
+                    When(memo="", then=Value(note)),
+                    default=Concat("memo", Value(f"\n{note}")),
+                    output_field=TextField(),
+                ),
             )
             messages.success(
                 request, f"Charged a ${amount} late fee to {count} student(s)."

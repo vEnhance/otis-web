@@ -92,9 +92,9 @@
     </div>
   </div>
   {% if invoice.memo %}
-    <div class="alert alert-info" role="alert">
+    <div class="alert alert-info mathjax_ignore" role="alert">
       <h3 class="alert-heading">Memo</h3>
-      {{ invoice.memo }}
+      {{ invoice.memo|linebreaksbr }}
     </div>
   {% endif %}
 </div>
