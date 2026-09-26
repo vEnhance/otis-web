@@ -14,6 +14,71 @@ body {
   background-color: #b2fee1;
 }
 
+/* Display color schemes (teal is the default above) */
+body[data-display-color="pink"] {
+  background-color: #eedde6;
+}
+body[data-display-color="pink"] #main {
+  background-color: #fe72b8;
+}
+body[data-display-color="pink"] #side {
+  background-color: #feb4d9;
+}
+body[data-display-color="green"] {
+  background-color: #ddeede;
+}
+body[data-display-color="green"] #main {
+  background-color: #72fe7d;
+}
+body[data-display-color="green"] #side {
+  background-color: #b4feba;
+}
+body[data-display-color="red"] {
+  background-color: #eedddd;
+}
+body[data-display-color="red"] #main {
+  background-color: #fe7272;
+}
+body[data-display-color="red"] #side {
+  background-color: #feb4b4;
+}
+body[data-display-color="orange"] {
+  background-color: #eee5dd;
+}
+body[data-display-color="orange"] #main {
+  background-color: #feb372;
+}
+body[data-display-color="orange"] #side {
+  background-color: #fed6b4;
+}
+body[data-display-color="blue"] {
+  background-color: #dde8ee;
+}
+body[data-display-color="blue"] #main {
+  background-color: #72cffe;
+}
+body[data-display-color="blue"] #side {
+  background-color: #b4e5fe;
+}
+body[data-display-color="indigo"] {
+  background-color: #dddeee;
+}
+body[data-display-color="indigo"] #main {
+  background-color: #727dfe;
+}
+body[data-display-color="indigo"] #side {
+  background-color: #b4bafe;
+}
+body[data-display-color="purple"] {
+  background-color: #e8ddee;
+}
+body[data-display-color="purple"] #main {
+  background-color: #cf72fe;
+}
+body[data-display-color="purple"] #side {
+  background-color: #e5b4fe;
+}
+
 div.entrywrap {
   background-color: #ffffff;
 }

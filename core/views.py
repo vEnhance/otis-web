@@ -295,6 +295,7 @@ class UserProfileUpdateView(
         "show_locked_by_default",
         "show_artwork_on_curriculum",
         "dynamic_progress",
+        "display_color",
         "show_portal_instructions",
         "show_unit_petitions",
         "disable_hints",
@@ -324,6 +325,7 @@ class UserProfileUpdateView(
             form["show_locked_by_default"],
             form["show_artwork_on_curriculum"],
             form["dynamic_progress"],
+            form["display_color"],
         )
         context["advanced_fields"] = (
             form["show_portal_instructions"],
@@ -340,6 +342,7 @@ class UserProfileUpdateView(
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
         form.fields["timezone"].widget = Select(choices=TIMEZONE_SELECT_CHOICES)
+        form.fields["display_color"].required = False
         return form
 
 

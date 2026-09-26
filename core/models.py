@@ -311,6 +311,22 @@ class UserProfile(models.Model):
         help_text="Uses inline content-disposition for TeX instead of attachment. May not be supported in all browsers.",
         default=True,
     )
+    display_color = models.CharField(
+        max_length=15,
+        choices=(
+            ("teal", "Teal (default)"),
+            ("pink", "Pink"),
+            ("green", "Green"),
+            ("red", "Red"),
+            ("orange", "Orange"),
+            ("blue", "Blue"),
+            ("indigo", "Indigo"),
+            ("purple", "Purple"),
+        ),
+        default="teal",
+        verbose_name="Display color",
+        help_text="Color scheme for the site background.",
+    )
     timezone = models.CharField(
         max_length=63,
         blank=True,

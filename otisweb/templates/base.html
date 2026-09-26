@@ -45,7 +45,7 @@
     {% block css %}
     {% endblock css %}
   </head>
-  <body>
+  <body data-display-color="{{ request.user.profile.display_color|default:'teal' }}">
     {% if request.user.is_hijacked %}
       {% include "hijack/notification.html" %}
     {% endif %}
