@@ -14,7 +14,7 @@ help:
 
 install:
 	uv sync
-	uv run prek install
+	grep -qs prek $$(git rev-parse --git-path hooks/pre-commit) || uv run prek install
 
 createsuperuser:
 	uv run python manage.py createsuperuser
