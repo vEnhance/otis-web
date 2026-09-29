@@ -4,7 +4,6 @@
   Instructor list
 {% endblock title %}
 {% block layout-content %}
-  {% regroup students by assistant as instructor_list %}
   {% if needs_sync and request.user.is_superuser %}
     <div class="alert alert-warning" data-testid="staff-group-out-of-sync">
       The "Active Staff" group is out of sync
@@ -32,58 +31,52 @@
       <th>Name</th>
       <th>Students</th>
     </tr>
-    {% for igroup in instructor_list %}
-      {% with instructor=igroup.grouper %}
-        <tr>
-          <td>
-            <a href="{% url "admin:roster_assistant_change" instructor.pk %}">{{ instructor.name }}</a>
-            <br />
-            {% if request.user.is_superuser %}
-              {# Hijack assistant account #}
-              <form action="{% url 'hijack:acquire' %}" method="post">
-                {% csrf_token %}
-                <input type="hidden" name="user_pk" value="{{ instructor.user.pk }}" />
-                <input type="hidden" name="next" value="{{ request.path }}" />
-                <button class="pseudo-button" type="submit">
-                  Hijack
-                  {{ instructor.shortname }}
-                </button>
-              </form>
-            {% endif %}
-          </td>
-          <td>
-            <ul>
-              {% for student in igroup.list %}
-                <li>
-                  <a href="{{ student.get_absolute_url }}">{{ student.name }}</a>
-                </li>
-              {% endfor %}
-            </ul>
-          </td>
-        </tr>
-      {% endwith %}
+    {% for instructor in instructors %}
+      <tr>
+        <td>
+          <a href="{% url "admin:roster_assistant_change" instructor.pk %}">{{ instructor.name }}</a>
+          <br />
+          {% if request.user.is_superuser %}
+            {# Hijack assistant account #}
+            <form action="{% url 'hijack:acquire' %}" method="post">
+              {% csrf_token %}
+              <input type="hidden" name="user_pk" value="{{ instructor.user.pk }}" />
+              <input type="hidden" name="next" value="{{ request.path }}" />
+              <button class="pseudo-button" type="submit">
+                Hijack
+                {{ instructor.shortname }}
+              </button>
+            </form>
+          {% endif %}
+        </td>
+        <td>
+          <ul>
+            {% for student in instructor.active_students %}
+              <li>
+                <a href="{{ student.get_absolute_url }}">{{ student.name }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        </td>
+      </tr>
     {% endfor %}
   </table>
   <hr />
   <h1>Instructor emails (for copy-pasting)</h1>
   <code>
-    {% for igroup in instructor_list %}
-      {% with instructor=igroup.grouper %}
-        "{{ instructor.name }}"
-        &lt;{{ instructor.user.email }}&gt;,
-        <br />
-      {% endwith %}
+    {% for instructor in instructors %}
+      "{{ instructor.name }}"
+      &lt;{{ instructor.user.email }}&gt;,
+      <br />
     {% endfor %}
   </code>
   <hr />
   <h1>Student emails (for copy-pasting)</h1>
   <code>
-    {% for igroup in instructor_list %}
-      {% for student in igroup.list %}
-        "{{ student.name }}"
-        &lt;{{ student.user.email }}&gt;,
-        <br />
-      {% endfor %}
+    {% for student in students %}
+      "{{ student.name }}"
+      &lt;{{ student.user.email }}&gt;,
+      <br />
     {% endfor %}
   </code>
 {% endblock layout-content %}

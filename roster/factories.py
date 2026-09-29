@@ -1,12 +1,17 @@
+from collections.abc import Sequence
+from typing import Any
+
 from factory.declarations import LazyAttribute, SubFactory
 from factory.django import DjangoModelFactory
 from factory.faker import Faker
 from factory.fuzzy import FuzzyChoice, FuzzyInteger
+from factory.helpers import post_generation
 
 from core.factories import SemesterFactory, UnitFactory, UserFactory
 from roster.models import (
     ApplyUUID,
     Assistant,
+    AssistantListing,
     Invoice,
     RegistrationContainer,
     Student,
@@ -31,6 +36,19 @@ class AssistantFactory(DjangoModelFactory):
     shortname = LazyAttribute(lambda o: o.user.first_name)
 
 
+class AssistantListingFactory(DjangoModelFactory):
+    class Meta:
+        model = AssistantListing
+
+    assistant = SubFactory(AssistantFactory)
+    enabled = True
+    offers_one_on_one = True
+    time_zone = Faker("timezone")
+    availability = "weekend evenings"
+    next_steps = "Email me at so-and-so@example.com."
+    blurb = Faker("paragraph")
+
+
 class RegistrationContainerFactory(DjangoModelFactory):
     class Meta:
         model = RegistrationContainer
@@ -53,11 +71,20 @@ class StudentRegistrationFactory(DjangoModelFactory):
 class StudentFactory(DjangoModelFactory):
     class Meta:
         model = Student
+        skip_postgeneration_save = True
 
     user = SubFactory(UserFactory)
     semester = SubFactory(SemesterFactory)
     standing = StudentStanding.GOOD
     last_level_seen = 0
+
+    @post_generation
+    def assistants(
+        self, create: bool, extracted: Sequence[Assistant] | None, **kwargs: Any
+    ):
+        if create and extracted:
+            student: Student = self  # type: ignore
+            student.assistants.set(extracted)
 
 
 class InvoiceFactory(DjangoModelFactory):

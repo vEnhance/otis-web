@@ -41,7 +41,7 @@
         </p>
       </div>
     {% endif %}
-    {% if instructor_comment %}
+    {% for instructor_comment in instructor_comments %}
       <h2>Your comments to {{ instructor_comment.assistant }}</h2>
       <div class="card mb-3">
         <div class="card-body">
@@ -55,7 +55,7 @@
           {% endif %}
         </div>
       </div>
-    {% endif %}
+    {% endfor %}
   {% elif form %}
     <div class="survey-form">
       {% url "survey-submit" survey.pk as submit_url %}

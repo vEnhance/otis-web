@@ -10,7 +10,7 @@
     who have additionally agreed to be contacted with additional requests.
   </p>
   {% if current_assistant %}
-    {% if current_assistant.ad_enabled %}
+    {% if current_listing.enabled %}
       <p data-testid="ad-update-prompt">
         You can <a href="{% url "ad-update" %}">update your listing below</a> if you want.
       </p>
@@ -26,37 +26,73 @@
       Contact Evan if you think that's a mistake.
     </p>
   {% endif %}
-  {% for assistant in assistants %}
-    <hr />
-    <h2>
-      {{ assistant.name }}
+  {% for listing in listings %}
+    {% with assistant=listing.assistant %}
+      <hr />
+      <h2>
+        {{ assistant.name }}
+        {% if listing.email %}
+          — <code><a href="mailto:{{ listing.email }}">{{ listing.email }}</a></code>
+        {% endif %}
+      </h2>
+      <ul>
+        <li>
+          <span class="fw-bold">Available for:</span>
+          {% if listing.offers_one_on_one and listing.offers_group %}
+            Both 1:1 and group meetings
+          {% elif listing.offers_one_on_one %}
+            1:1 meetings only
+          {% elif listing.offers_group %}
+            Group meetings only
+          {% else %}
+            <span class="text-muted">Not specified</span>
+          {% endif %}
+        </li>
+        <li>
+          <span class="fw-bold">Timing:</span>
+          {% if listing.availability and listing.time_zone %}
+            {{ listing.availability }} ({{ listing.time_zone }})
+          {% elif listing.availability or listing.time_zone %}
+            {{ listing.availability }}{{ listing.time_zone }}
+          {% else %}
+            <span class="text-muted">Not specified</span>
+          {% endif %}
+        </li>
+        <li>
+          <span class="fw-bold">To connect:</span>
+          {% if listing.next_steps %}
+            {{ listing.next_steps }}
+          {% else %}
+            <span class="text-muted">No instructions given</span>
+          {% endif %}
+        </li>
+        <li>
+          <span class="fw-bold">Links:</span>
+          {% for emoji, label, url in listing.links %}
+            {{ emoji }} <a href="{{ url }}">{{ label }}</a>{% if not forloop.last %},{% endif %}
+          {% empty %}
+            <span class="text-muted">No links provided.</span>
+          {% endfor %}
+        </li>
+      </ul>
+      {% if listing.blurb %}
+        <div>{{ listing.blurb|linebreaks }}</div>
+      {% else %}
+        <div class="text-muted">
+          <p>No description provided.</p>
+        </div>
+      {% endif %}
+      <p class="fst-italic text-muted" data-testid="ad-updated-at">
+        Last updated at {% timestamp listing.updated_at "time" %}
+      </p>
       {% if assistant.user == request.user %}
-        <a href="{% url "ad-update" %}" data-testid="ad-edit-link">(edit)</a>
+        <a href="{% url "ad-update" %}"
+           class="btn btn-primary"
+           data-testid="ad-edit-link">Edit your listing</a>
       {% elif request.user.is_superuser %}
-        <a href="{% url "admin:roster_assistant_change" assistant.pk %}">(admin edit)</a>
+        <a href="{% url "admin:roster_assistant_change" assistant.pk %}"
+           class="btn btn-secondary">DJ Admin</a>
       {% endif %}
-    </h2>
-    <p class="fst-italic text-muted" data-testid="ad-updated-at">
-      Last updated at {% timestamp assistant.updated_at "time" %}
-    </p>
-    {% if assistant.ad_blurb %}
-      <div>{{ assistant.ad_blurb|linebreaks }}</div>
-    {% else %}
-      <div class="text-muted">
-        <p>No description provided.</p>
-      </div>
-    {% endif %}
-    <div class="font-monospace">
-      {% if assistant.ad_url %}
-        <p>
-          ⛺ <a href="{{ assistant.ad_url }}">{{ assistant.ad_url }}</a>
-        </p>
-      {% endif %}
-      {% if assistant.ad_email %}
-        <p>
-          📧 <a class="font-mono" href="mailto:{{ assistant.ad_email }}">{{ assistant.ad_email }}</a>
-        </p>
-      {% endif %}
-    </div>
+    {% endwith %}
   {% endfor %}
 {% endblock layout-content %}

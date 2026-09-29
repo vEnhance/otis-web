@@ -58,17 +58,17 @@
         <button class="pseudo-button" type="submit">Hijack {{ student.user.first_name|truncatechars:"6" }}</button>
       </form>
     </li>
-    {% if student.assistant %}
+    {% for assistant in student.assistants.all %}
       {# Hijack assistant account #}
       <li>
         <form action="{% url 'hijack:acquire' %}" method="post">
           {% csrf_token %}
-          <input type="hidden" name="user_pk" value="{{ student.assistant.user_id }}" />
+          <input type="hidden" name="user_pk" value="{{ assistant.user_id }}" />
           <input type="hidden" name="next" value="{{ request.path }}" />
-          <button class="pseudo-button" type="submit">Hijack {{ student.assistant.shortname }}</button>
+          <button class="pseudo-button" type="submit">Hijack {{ assistant.shortname }}</button>
         </form>
       </li>
-    {% endif %}
+    {% endfor %}
     {# Suspend or unsuspend student #}
     <li>
       <form action="{% url 'toggle-suspension' student.pk %}" method="post">

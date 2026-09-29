@@ -7,7 +7,7 @@
   <div class="alert alert-info">
     You can use this form to update (or hide) the
     <a href="{% url "ad-list" %}">public listing</a>
-    for {{ assistant.name }}.
+    for {{ listing.assistant.name }}.
   </div>
   {% include "otisweb/components/generic_form.html" with submit_name="Update" %}
 {% endblock layout-content %}

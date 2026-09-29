@@ -105,8 +105,7 @@ def test_portal(otis):
 
     # an assistant viewing the portal must not consume the student's level-up
     assistant = AssistantFactory.create()
-    alice.assistant = assistant
-    alice.save()
+    alice.assistants.add(assistant)
     otis.login(assistant)
     with freeze_time("2021-07-01", tz_offset=0):
         resp = otis.get_20x("portal", alice.pk, follow=True)
@@ -193,8 +192,7 @@ def test_portal_us_state_alert(otis):
 
     # staff see the same alert the student does
     assistant = AssistantFactory.create()
-    alice.assistant = assistant
-    alice.save()
+    alice.assistants.add(assistant)
     otis.login(assistant)
     otis.assert_testid(otis.get_20x("portal", alice.pk, follow=True), "us-state-alert")
 
@@ -721,9 +719,8 @@ def test_index(otis):
     otis.get_redirects(reverse("portal", args=(alice.pk,)), "index", follow=True)
 
     assistant = AssistantFactory.create()
-    alice.assistant = assistant
-    alice.save()
-    bob = StudentFactory.create(assistant=assistant)
+    alice.assistants.add(assistant)
+    bob = StudentFactory.create(assistants=[assistant])
 
     otis.login(assistant)
     resp = otis.get_20x("index")
@@ -760,9 +757,8 @@ def test_past(otis):
     assert row["level"] == 38
 
     assistant = AssistantFactory.create()
-    prevAlice.assistant = assistant
-    prevAlice.save()
-    bob = StudentFactory.create(assistant=assistant, semester=prevSemester)
+    prevAlice.assistants.add(assistant)
+    bob = StudentFactory.create(assistants=[assistant], semester=prevSemester)
 
     otis.login(assistant)
     resp = otis.get_20x("past", prevSemester.pk)
@@ -801,7 +797,7 @@ def test_idle_warn(otis):
 
     unit = UnitFactory.create(code="BMX")
 
-    alice = StudentFactory.create(assistant=AssistantFactory.create(user=user))
+    alice = StudentFactory.create(assistants=[AssistantFactory.create(user=user)])
 
     with freeze_time("2021-07-01", tz_offset=0):
         PSetFactory.create(student=alice, clubs=0, hours=1501, status="A", unit=unit)
@@ -926,7 +922,7 @@ def test_pset_detail_permissions(otis) -> None:
     otis.login(alice)
     otis.get_20x("pset", pset.pk)
 
-    alice.assistant = AssistantFactory.create()
-    alice.save()
-    otis.login(alice.assistant.user)
+    instructor = AssistantFactory.create()
+    alice.assistants.add(instructor)
+    otis.login(instructor.user)
     otis.get_20x("pset", pset.pk)

@@ -247,7 +247,7 @@ class LinkAssistantForm(forms.Form):
     student = forms.ModelChoiceField(
         queryset=Student.objects.filter(
             semester__active=True,
-            assistant__isnull=True,
+            assistants__isnull=True,
         ),
         empty_label="Search for a student...",
         label="Student to claim",

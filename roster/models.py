@@ -2,7 +2,7 @@ import os
 from _pydecimal import Decimal
 from datetime import datetime, timedelta
 from hashlib import pbkdf2_hmac
-from typing import TypedDict
+from typing import TYPE_CHECKING, Any, TypedDict
 
 from django.contrib.auth.models import Group, User
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
@@ -18,6 +18,9 @@ from core.models import Semester, Unit
 
 from .country_abbrevs import COUNTRY_CHOICES
 from .us_states import US_STATE_CHOICES
+
+if TYPE_CHECKING:
+    from django.db.models.fields.related_descriptors import ManyRelatedManager
 
 
 class StudentStanding(models.TextChoices):
@@ -81,32 +84,12 @@ class Assistant(models.Model):
     shortname = models.CharField(
         max_length=18, help_text="Initials or short name for this Assistant"
     )
-    unlisted_students = models.ManyToManyField(
+    students = models.ManyToManyField(
         "Student",
         blank=True,
-        related_name="unlisted_assistants",
-        help_text="A list of students this assistant can see but which is not listed visibly.",
+        related_name="assistants",
+        help_text="The students this assistant teaches.",
     )
-
-    ad_enabled = models.BooleanField(
-        default=False,
-        help_text="Whether the assistant is advertising current availability.",
-    )
-    ad_url = models.URLField(
-        help_text="A URL the assistant can provide if desired.",
-        blank=True,
-    )
-    ad_email = models.EmailField(
-        help_text="An email the assistant can provide for contact.",
-        blank=True,
-    )
-    ad_blurb = models.TextField(
-        help_text="A text field the instructor can provide if desired.",
-        blank=True,
-    )
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ("shortname",)
@@ -127,15 +110,93 @@ class Assistant(models.Model):
         return self.user.get_full_name()
 
 
+class AssistantListing(models.Model):
+    """The public ad an assistant can post to advertise their availability."""
+
+    assistant = models.OneToOneField(
+        Assistant,
+        on_delete=models.CASCADE,
+        related_name="listing",
+    )
+    enabled = models.BooleanField(
+        default=False,
+        help_text="Whether the listing is shown publicly.",
+    )
+    website = models.URLField(
+        blank=True,
+        help_text="A URL the instructor can provide if desired.",
+    )
+    email = models.EmailField(
+        blank=True,
+        help_text="An email the instructor can provide for contact.",
+    )
+    syllabus_url = models.URLField(
+        blank=True,
+        verbose_name="syllabus URL",
+        help_text="A link to an external syllabus, if any.",
+    )
+    example_url = models.URLField(
+        blank=True,
+        verbose_name="example material URL",
+        help_text="A link to example material, if any.",
+    )
+    offers_one_on_one = models.BooleanField(
+        default=False,
+        verbose_name="1:1 meetings available",
+        help_text="Whether the instructor is taking students for 1:1 meetings.",
+    )
+    offers_group = models.BooleanField(
+        default=False,
+        verbose_name="group meetings available",
+        help_text="Whether the instructor is taking students for group meetings.",
+    )
+    time_zone = models.CharField(
+        max_length=64,
+        blank=True,
+        help_text="The instructor's time zone.",
+    )
+    availability = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text='When the instructor is available, e.g. "weekend evenings".',
+    )
+    next_steps = models.CharField(
+        max_length=500,
+        blank=True,
+        verbose_name="to connect further",
+        help_text='What a student should do to get started, e.g. "Email me at so-and-so@example.com."',
+    )
+    blurb = models.TextField(
+        blank=True,
+        help_text="Any other description the instructor wants to provide.",
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return f"Listing for {self.assistant}"
+
+    @property
+    def links(self) -> list[tuple[str, str, str]]:
+        """(emoji, label, url) for each link the instructor filled in."""
+        links = [
+            ("⛺", "website", self.website),
+            ("📚", "syllabus", self.syllabus_url),
+            ("📝", "example material", self.example_url),
+        ]
+        return [link for link in links if link[2]]
+
+
 class Student(models.Model):
     """This is really a pair of a user and a semester (with a display name),
     endowed with the data of the curriculum of that student.
-    It also names the assistant of the student, if any."""
+    The student's assistants are in the `assistants` relation."""
 
     pk: int
     user_id: int
     invoice: "Invoice"
-    unlisted_assistants: QuerySet["Assistant"]
+    assistants: "ManyRelatedManager[Assistant, Any]"
 
     user = models.ForeignKey(
         User,
@@ -144,13 +205,6 @@ class Student(models.Model):
     )
     semester = models.ForeignKey(
         Semester, on_delete=models.CASCADE, help_text="The semester for this student"
-    )
-    assistant = models.ForeignKey(
-        Assistant,
-        blank=True,
-        null=True,
-        on_delete=models.SET_NULL,
-        help_text="The assistant for this student, if any",
     )
     reg = models.OneToOneField(
         "StudentRegistration",

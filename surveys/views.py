@@ -49,7 +49,7 @@ def survey_list(request: AuthHttpRequest) -> HttpResponse:
     user = request.user
     now = timezone.now()
     student_semesters = Student.objects.filter(user=user).values("semester")
-    taught_semesters = Student.objects.filter(assistant__user=user).values("semester")
+    taught_semesters = Student.objects.filter(assistants__user=user).values("semester")
     if user.is_superuser:
         surveys = Survey.objects.all()
     else:
@@ -143,7 +143,7 @@ def _can_preview(user: User, survey: Survey) -> bool:
     return (
         user.is_superuser
         or Student.objects.filter(
-            semester=survey.semester, assistant__user=user
+            semester=survey.semester, assistants__user=user
         ).exists()
     )
 
@@ -170,10 +170,10 @@ def _render_detail(
             context["private_link_prefix"] = request.build_absolute_uri(
                 reverse("survey-gm-feedback", args=[survey.pk, placeholder])
             ).removesuffix(f"{placeholder}/")
-        context["instructor_comment"] = (
+        context["instructor_comments"] = (
             InstructorComment.objects.filter(survey=survey, student=student)
             .select_related("assistant")
-            .first()
+            .order_by("assistant__shortname")
         )
     elif survey.is_open:
         context["form"] = form or SurveyForm(survey=survey, student=student)
@@ -223,14 +223,16 @@ def survey_submit(request: AuthHttpRequest, survey_pk: int) -> HttpResponse:
             satisfaction=data.get("satisfaction"),
             anything_else=data.get("anything_else", ""),
         )
-        if data.get("instructor_comments"):
-            assert student.assistant is not None  # the form drops the field otherwise
-            InstructorComment.objects.create(
+        InstructorComment.objects.bulk_create(
+            InstructorComment(
                 survey=survey,
                 student=student if data["instructor_signed"] == SIGNED else None,
-                assistant=student.assistant,
-                comments=data["instructor_comments"],
+                assistant=assistant,
+                comments=data[name],
             )
+            for name, assistant in form.instructor_fields.items()
+            if data.get(name)
+        )
 
     if gm_feedback.token is not None:
         # The only way back to anonymous feedback is its private link.
