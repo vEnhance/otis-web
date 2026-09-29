@@ -37,27 +37,17 @@
           <a href="{% url "admin:roster_assistant_change" assistant.pk %}">(admin edit)</a>
         {% endif %}
       </h2>
-      <p class="fst-italic text-muted" data-testid="ad-updated-at">
-        Last updated at {% timestamp listing.updated_at "time" %}
-      </p>
-      {% if listing.blurb %}
-        <div>{{ listing.blurb|linebreaks }}</div>
-      {% else %}
-        <div class="text-muted">
-          <p>No description provided.</p>
-        </div>
-      {% endif %}
       <ul>
         {% if listing.offers_one_on_one or listing.offers_group %}
           <li>
-            <strong>Available for:</strong>
+            <span class="fw-bold">Available for:</span>
             {% if listing.offers_one_on_one %}1:1 meetings{% if listing.offers_group %},{% endif %}{% endif %}
             {% if listing.offers_group %}group meetings{% endif %}
           </li>
         {% endif %}
         {% if listing.availability or listing.time_zone %}
           <li>
-            <strong>Timing:</strong>
+            <span class="fw-bold">Timing:</span>
             {% if listing.availability and listing.time_zone %}
               {{ listing.availability }} ({{ listing.time_zone }})
             {% else %}
@@ -67,18 +57,28 @@
         {% endif %}
         {% if listing.next_steps %}
           <li>
-            <strong>To connect further:</strong> {{ listing.next_steps }}
+            <span class="fw-bold">To connect:</span> {{ listing.next_steps }}
           </li>
         {% endif %}
         {% if listing.links %}
           <li>
-            <strong>Links:</strong>
+            <span class="fw-bold">Links:</span>
             {% for emoji, label, url in listing.links %}
               {{ emoji }} <a href="{{ url }}">{{ label }}</a>{% if not forloop.last %},{% endif %}
             {% endfor %}
           </li>
         {% endif %}
       </ul>
+      {% if listing.blurb %}
+        <div>{{ listing.blurb|linebreaks }}</div>
+      {% else %}
+        <div class="text-muted">
+          <p>No description provided.</p>
+        </div>
+      {% endif %}
+      <p class="fst-italic text-muted" data-testid="ad-updated-at">
+        Last updated at {% timestamp listing.updated_at "time" %}
+      </p>
     {% endwith %}
   {% endfor %}
 {% endblock layout-content %}
