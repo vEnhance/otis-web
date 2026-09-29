@@ -16,16 +16,11 @@ from django.utils.crypto import constant_time_compare
 logger = logging.getLogger(__name__)
 
 
-def get_token(request: HttpRequest, fallback: str | None = None) -> str | None:
-    """Read the bearer token out of the request, falling back to `fallback`.
-
-    The fallback is the token in the request body, which is how the client
-    scripts used to send it and still may.
-    """
+def get_token(request: HttpRequest) -> str | None:
     scheme, _, token = request.headers.get("Authorization", "").partition(" ")
     if scheme.lower() == "bearer" and token:
         return token
-    return fallback
+    return None
 
 
 def token_matches(token: str, target_hash: str) -> bool:
