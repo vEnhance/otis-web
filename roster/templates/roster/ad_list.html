@@ -40,12 +40,6 @@
       <p class="fst-italic text-muted" data-testid="ad-updated-at">
         Last updated at {% timestamp listing.updated_at "time" %}
       </p>
-      <ul>
-        {% if listing.offers_one_on_one %}<li>Available for 1:1 meetings</li>{% endif %}
-        {% if listing.offers_group %}<li>Available for group meetings</li>{% endif %}
-        {% if listing.availability %}<li>Availability: {{ listing.availability }}</li>{% endif %}
-        {% if listing.time_zone %}<li>Time zone: {{ listing.time_zone }}</li>{% endif %}
-      </ul>
       {% if listing.blurb %}
         <div>{{ listing.blurb|linebreaks }}</div>
       {% else %}
@@ -53,33 +47,50 @@
           <p>No description provided.</p>
         </div>
       {% endif %}
-      {% if listing.next_steps %}
-        <p>
-          <strong>To connect further:</strong> {{ listing.next_steps }}
-        </p>
-      {% endif %}
-      <div class="font-monospace">
-        {% if listing.website %}
-          <p>
-            ⛺ <a href="{{ listing.website }}">{{ listing.website }}</a>
-          </p>
+      <ul>
+        {% if listing.offers_one_on_one or listing.offers_group %}
+          <li>
+            <strong>Available for:</strong>
+            {% if listing.offers_one_on_one %}1:1 meetings{% if listing.offers_group %},{% endif %}{% endif %}
+            {% if listing.offers_group %}group meetings{% endif %}
+          </li>
         {% endif %}
-        {% if listing.syllabus_url %}
-          <p>
-            📚 <a href="{{ listing.syllabus_url }}">Link to syllabus</a>
-          </p>
+        {% if listing.availability %}
+          <li>
+            <strong>Availability:</strong> {{ listing.availability }}
+          </li>
         {% endif %}
-        {% if listing.example_url %}
-          <p>
-            📝 <a href="{{ listing.example_url }}">Link to example material</a>
-          </p>
+        {% if listing.time_zone %}
+          <li>
+            <strong>Time zone:</strong> {{ listing.time_zone }}
+          </li>
+        {% endif %}
+        {% if listing.next_steps %}
+          <li>
+            <strong>To connect further:</strong> {{ listing.next_steps }}
+          </li>
         {% endif %}
         {% if listing.email %}
-          <p>
-            📧 <a class="font-mono" href="mailto:{{ listing.email }}">{{ listing.email }}</a>
-          </p>
+          <li>
+            <strong>Email:</strong> <a class="font-monospace" href="mailto:{{ listing.email }}">{{ listing.email }}</a>
+          </li>
         {% endif %}
-      </div>
+        {% if listing.website %}
+          <li>
+            <strong>Website:</strong> <a href="{{ listing.website }}">{{ listing.website }}</a>
+          </li>
+        {% endif %}
+        {% if listing.syllabus_url %}
+          <li>
+            <a href="{{ listing.syllabus_url }}">Link to syllabus</a>
+          </li>
+        {% endif %}
+        {% if listing.example_url %}
+          <li>
+            <a href="{{ listing.example_url }}">Link to example material</a>
+          </li>
+        {% endif %}
+      </ul>
     {% endwith %}
   {% endfor %}
 {% endblock layout-content %}
