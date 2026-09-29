@@ -708,7 +708,7 @@ def test_petition_form_marks_completed_units(otis) -> None:
     field = resp.context["form"].fields["unit"]
     assert field.completed_pks == {done_now.pk, done_past.pk}
     marked = {
-        unit.pk: field.label_from_instance(unit).startswith("\u2713")
+        unit.pk: field.label_from_instance(unit).startswith("\u2714")
         for unit in (done_now, done_past, pending, untouched)
     }
     assert marked == {

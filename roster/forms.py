@@ -133,7 +133,7 @@ class CompletedUnitChoiceField(forms.ModelChoiceField):
 
     def label_from_instance(self, obj: Unit) -> str:
         label = super().label_from_instance(obj)
-        return f"\N{CHECK MARK} {label}" if obj.pk in self.completed_pks else label
+        return f"✔ {label}" if obj.pk in self.completed_pks else label
 
 
 class PetitionForm(forms.ModelForm):
