@@ -177,6 +177,17 @@ class AssistantListing(models.Model):
     def __str__(self) -> str:
         return f"Listing for {self.assistant}"
 
+    @property
+    def links(self) -> list[tuple[str, str, str]]:
+        """(emoji, label, url) for each link the instructor filled in."""
+        links = [
+            ("⛺", "website", self.website),
+            ("📚", "syllabus", self.syllabus_url),
+            ("📝", "example material", self.example_url),
+            ("📧", "email", f"mailto:{self.email}" if self.email else ""),
+        ]
+        return [link for link in links if link[2]]
+
 
 class Student(models.Model):
     """This is really a pair of a user and a semester (with a display name),

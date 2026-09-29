@@ -55,14 +55,14 @@
             {% if listing.offers_group %}group meetings{% endif %}
           </li>
         {% endif %}
-        {% if listing.availability %}
+        {% if listing.availability or listing.time_zone %}
           <li>
-            <strong>Availability:</strong> {{ listing.availability }}
-          </li>
-        {% endif %}
-        {% if listing.time_zone %}
-          <li>
-            <strong>Time zone:</strong> {{ listing.time_zone }}
+            <strong>Availability:</strong>
+            {% if listing.availability and listing.time_zone %}
+              {{ listing.availability }} ({{ listing.time_zone }})
+            {% else %}
+              {{ listing.availability }}{{ listing.time_zone }}
+            {% endif %}
           </li>
         {% endif %}
         {% if listing.next_steps %}
@@ -70,24 +70,12 @@
             <strong>To connect further:</strong> {{ listing.next_steps }}
           </li>
         {% endif %}
-        {% if listing.email %}
+        {% if listing.links %}
           <li>
-            <strong>Email:</strong> <a class="font-monospace" href="mailto:{{ listing.email }}">{{ listing.email }}</a>
-          </li>
-        {% endif %}
-        {% if listing.website %}
-          <li>
-            <strong>Website:</strong> <a href="{{ listing.website }}">{{ listing.website }}</a>
-          </li>
-        {% endif %}
-        {% if listing.syllabus_url %}
-          <li>
-            <a href="{{ listing.syllabus_url }}">Link to syllabus</a>
-          </li>
-        {% endif %}
-        {% if listing.example_url %}
-          <li>
-            <a href="{{ listing.example_url }}">Link to example material</a>
+            <strong>Links:</strong>
+            {% for emoji, label, url in listing.links %}
+              {{ emoji }} <a href="{{ url }}">{{ label }}</a>{% if not forloop.last %},{% endif %}
+            {% endfor %}
           </li>
         {% endif %}
       </ul>
