@@ -6622,13 +6622,7 @@
     "fields": {
       "user": 26,
       "shortname": "Leslie",
-      "ad_enabled": false,
-      "ad_url": "",
-      "ad_email": "",
-      "ad_blurb": "",
-      "created_at": "2026-09-17T15:15:18.955Z",
-      "updated_at": "2026-09-17T15:15:18.955Z",
-      "unlisted_students": []
+      "students": [31]
     }
   },
   {
@@ -6637,13 +6631,43 @@
     "fields": {
       "user": 27,
       "shortname": "Monica",
-      "ad_enabled": false,
-      "ad_url": "",
-      "ad_email": "",
-      "ad_blurb": "",
+      "students": [4, 32]
+    }
+  },
+  {
+    "model": "roster.assistantlisting",
+    "pk": 1,
+    "fields": {
+      "assistant": 1,
+      "website": "https://example.com/leslie",
+      "email": "",
+      "syllabus_url": "",
+      "offers_one_on_one": true,
+      "offers_group": false,
+      "time_zone": "America/New_York",
+      "availability": "weekday evenings",
+      "next_steps": "Email me your AoPS username and which units you want to cover.",
+      "blurb": "Happy to take on students for weekly 1:1 meetings.",
       "created_at": "2026-09-17T15:15:18.955Z",
-      "updated_at": "2026-09-17T15:15:18.955Z",
-      "unlisted_students": []
+      "updated_at": "2026-09-17T15:15:18.955Z"
+    }
+  },
+  {
+    "model": "roster.assistantlisting",
+    "pk": 2,
+    "fields": {
+      "assistant": 2,
+      "website": "",
+      "email": "monica@example.com",
+      "syllabus_url": "https://example.com/monica/syllabus.pdf",
+      "offers_one_on_one": false,
+      "offers_group": true,
+      "time_zone": "Asia/Kolkata",
+      "availability": "weekend evenings",
+      "next_steps": "Message me on Discord to join the next group.",
+      "blurb": "I run small group sessions on geometry.",
+      "created_at": "2026-09-17T15:15:18.955Z",
+      "updated_at": "2026-09-17T15:15:18.955Z"
     }
   },
   {
@@ -6652,7 +6676,6 @@
     "fields": {
       "user": 2,
       "semester": 1,
-      "assistant": null,
       "reg": 1,
       "standing": "STND_GOOD",
       "last_level_seen": 0,
@@ -6666,7 +6689,6 @@
     "fields": {
       "user": 8,
       "semester": 1,
-      "assistant": null,
       "reg": 2,
       "standing": "STND_GOOD",
       "last_level_seen": 0,
@@ -6680,7 +6702,6 @@
     "fields": {
       "user": 17,
       "semester": 1,
-      "assistant": null,
       "reg": 3,
       "standing": "STND_GOOD",
       "last_level_seen": 0,
@@ -6694,7 +6715,6 @@
     "fields": {
       "user": 5,
       "semester": 1,
-      "assistant": 2,
       "reg": 4,
       "standing": "STND_GOOD",
       "last_level_seen": 0,
@@ -6708,7 +6728,6 @@
     "fields": {
       "user": 12,
       "semester": 1,
-      "assistant": null,
       "reg": 5,
       "standing": "STND_GOOD",
       "last_level_seen": 0,
@@ -6722,7 +6741,6 @@
     "fields": {
       "user": 10,
       "semester": 1,
-      "assistant": null,
       "reg": 6,
       "standing": "STND_GOOD",
       "last_level_seen": 0,
@@ -6738,7 +6756,6 @@
     "fields": {
       "user": 14,
       "semester": 1,
-      "assistant": null,
       "reg": 7,
       "standing": "STND_GOOD",
       "last_level_seen": 0,
@@ -6752,7 +6769,6 @@
     "fields": {
       "user": 13,
       "semester": 1,
-      "assistant": null,
       "reg": 8,
       "standing": "STND_GOOD",
       "last_level_seen": 0,
@@ -6768,7 +6784,6 @@
     "fields": {
       "user": 7,
       "semester": 1,
-      "assistant": null,
       "reg": 9,
       "standing": "STND_GOOD",
       "last_level_seen": 0,
@@ -6782,7 +6797,6 @@
     "fields": {
       "user": 3,
       "semester": 1,
-      "assistant": null,
       "reg": 10,
       "standing": "STND_GOOD",
       "last_level_seen": 0,
@@ -6796,7 +6810,6 @@
     "fields": {
       "user": 18,
       "semester": 1,
-      "assistant": null,
       "reg": 11,
       "standing": "STND_GOOD",
       "last_level_seen": 0,
@@ -6810,7 +6823,6 @@
     "fields": {
       "user": 9,
       "semester": 1,
-      "assistant": null,
       "reg": 12,
       "standing": "STND_GOOD",
       "last_level_seen": 0,
@@ -6826,7 +6838,6 @@
     "fields": {
       "user": 4,
       "semester": 1,
-      "assistant": null,
       "reg": 13,
       "standing": "STND_GOOD",
       "last_level_seen": 0,
@@ -6840,7 +6851,6 @@
     "fields": {
       "user": 1,
       "semester": 1,
-      "assistant": null,
       "reg": 14,
       "standing": "STND_GOOD",
       "last_level_seen": 0,
@@ -6854,7 +6864,6 @@
     "fields": {
       "user": 23,
       "semester": 1,
-      "assistant": null,
       "reg": 15,
       "standing": "STND_GOOD",
       "last_level_seen": 0,
@@ -6870,7 +6879,6 @@
     "fields": {
       "user": 11,
       "semester": 2,
-      "assistant": null,
       "reg": 16,
       "standing": "STND_GOOD",
       "last_level_seen": 0,
@@ -6884,7 +6892,6 @@
     "fields": {
       "user": 10,
       "semester": 2,
-      "assistant": null,
       "reg": 17,
       "standing": "STND_GOOD",
       "last_level_seen": 0,
@@ -6898,7 +6905,6 @@
     "fields": {
       "user": 18,
       "semester": 2,
-      "assistant": null,
       "reg": 18,
       "standing": "STND_GOOD",
       "last_level_seen": 0,
@@ -6915,7 +6921,6 @@
     "fields": {
       "user": 15,
       "semester": 2,
-      "assistant": null,
       "reg": 19,
       "standing": "STND_GOOD",
       "last_level_seen": 0,
@@ -6929,7 +6934,6 @@
     "fields": {
       "user": 23,
       "semester": 2,
-      "assistant": null,
       "reg": 20,
       "standing": "STND_GOOD",
       "last_level_seen": 0,
@@ -6946,7 +6950,6 @@
     "fields": {
       "user": 25,
       "semester": 2,
-      "assistant": null,
       "reg": 21,
       "standing": "STND_GOOD",
       "last_level_seen": 0,
@@ -6960,7 +6963,6 @@
     "fields": {
       "user": 8,
       "semester": 2,
-      "assistant": null,
       "reg": 22,
       "standing": "STND_GOOD",
       "last_level_seen": 0,
@@ -6977,7 +6979,6 @@
     "fields": {
       "user": 20,
       "semester": 2,
-      "assistant": null,
       "reg": 23,
       "standing": "STND_GOOD",
       "last_level_seen": 0,
@@ -6991,7 +6992,6 @@
     "fields": {
       "user": 1,
       "semester": 2,
-      "assistant": null,
       "reg": 24,
       "standing": "STND_GOOD",
       "last_level_seen": 0,
@@ -7005,7 +7005,6 @@
     "fields": {
       "user": 5,
       "semester": 2,
-      "assistant": null,
       "reg": 25,
       "standing": "STND_GOOD",
       "last_level_seen": 0,
@@ -7021,7 +7020,6 @@
     "fields": {
       "user": 14,
       "semester": 2,
-      "assistant": null,
       "reg": 26,
       "standing": "STND_GOOD",
       "last_level_seen": 0,
@@ -7035,7 +7033,6 @@
     "fields": {
       "user": 19,
       "semester": 2,
-      "assistant": null,
       "reg": 27,
       "standing": "STND_GOOD",
       "last_level_seen": 0,
@@ -7049,7 +7046,6 @@
     "fields": {
       "user": 6,
       "semester": 2,
-      "assistant": null,
       "reg": 28,
       "standing": "STND_GOOD",
       "last_level_seen": 0,
@@ -7068,7 +7064,6 @@
     "fields": {
       "user": 3,
       "semester": 2,
-      "assistant": null,
       "reg": 29,
       "standing": "STND_GOOD",
       "last_level_seen": 0,
@@ -7082,7 +7077,6 @@
     "fields": {
       "user": 7,
       "semester": 2,
-      "assistant": null,
       "reg": 30,
       "standing": "STND_GOOD",
       "last_level_seen": 0,
@@ -7096,7 +7090,6 @@
     "fields": {
       "user": 2,
       "semester": 2,
-      "assistant": 1,
       "reg": 31,
       "standing": "STND_GOOD",
       "last_level_seen": 0,
@@ -7110,7 +7103,6 @@
     "fields": {
       "user": 21,
       "semester": 2,
-      "assistant": 2,
       "reg": 32,
       "standing": "STND_GOOD",
       "last_level_seen": 0,
@@ -10026,6 +10018,7 @@
       "opens_at": "2025-09-17T15:15:19.445Z",
       "closes_at": "2025-10-08T15:15:19.445Z",
       "achievement": 6,
+      "achievement_awarded_at": null,
       "essay_prompt": "Here are some possible prompts that might help get you started, but again feel free to say anything on your mind.\n\n* Of the units that you've done so far, are there any that stand out in particular?\n* Is there anything I should tell new students at the start of next year?\n* Anything else on your mind (general or specific), or suggestions for improvements once we start back up.\n\nYou can write as much as you want here (in the past it's not uncommon for me to get full essays).",
       "instructor_comments_prompt": "Comments to pass onto instructor",
       "satisfaction_prompt": "Overall, how satisfied are you with OTIS?",
@@ -10041,6 +10034,7 @@
       "opens_at": "2026-09-10T15:15:19.738Z",
       "closes_at": "2026-10-01T15:15:19.738Z",
       "achievement": 6,
+      "achievement_awarded_at": null,
       "essay_prompt": "Here are some possible prompts that might help get you started, but again feel free to say anything on your mind.\n\n* Of the units that you've done so far, are there any that stand out in particular?\n* Is there anything I should tell new students at the start of next year?\n* Anything else on your mind (general or specific), or suggestions for improvements once we start back up.\n\nYou can write as much as you want here (in the past it's not uncommon for me to get full essays).",
       "instructor_comments_prompt": "Comments to pass onto instructor",
       "satisfaction_prompt": "Overall, how satisfied are you with OTIS?",
@@ -10208,6 +10202,7 @@
       "essay": "Huge national create for middle. Analysis trip sense according here out statement outside. Try difference leader traditional together.",
       "satisfaction": 4,
       "anything_else": "",
+      "token": null,
       "is_read": false,
       "reply": "",
       "replied_at": null
@@ -10222,6 +10217,7 @@
       "essay": "Agree it return brother for. Effort computer energy if recognize sing.",
       "satisfaction": 5,
       "anything_else": "",
+      "token": null,
       "is_read": false,
       "reply": "",
       "replied_at": null
@@ -10236,6 +10232,7 @@
       "essay": "Onto interest human positive thus campaign fact somebody. Between ever win cover government page tend.",
       "satisfaction": 6,
       "anything_else": "",
+      "token": null,
       "is_read": false,
       "reply": "",
       "replied_at": null
@@ -10250,6 +10247,7 @@
       "essay": "What law seven knowledge recognize seven.",
       "satisfaction": 5,
       "anything_else": "Thanks for running OTIS!",
+      "token": null,
       "is_read": true,
       "reply": "",
       "replied_at": null
@@ -10264,6 +10262,7 @@
       "essay": "But dream truth.",
       "satisfaction": 4,
       "anything_else": "",
+      "token": null,
       "is_read": true,
       "reply": "",
       "replied_at": null
@@ -10278,6 +10277,7 @@
       "essay": "Smile because indicate card article unit become. Accept follow size use. Group test money respond example.",
       "satisfaction": 5,
       "anything_else": "Thanks for running OTIS!",
+      "token": null,
       "is_read": true,
       "reply": "",
       "replied_at": null
@@ -10292,6 +10292,7 @@
       "essay": "Understand me determine vote mind boy certain. Throughout perform level science for. Market consumer again final.",
       "satisfaction": 3,
       "anything_else": "Thanks for running OTIS!",
+      "token": null,
       "is_read": false,
       "reply": "",
       "replied_at": null
@@ -10306,6 +10307,7 @@
       "essay": "Mind Mr people style industry box join. Light letter tax event deep hour out.",
       "satisfaction": 7,
       "anything_else": "Thanks for running OTIS!",
+      "token": null,
       "is_read": false,
       "reply": "",
       "replied_at": null
@@ -10320,6 +10322,7 @@
       "essay": "Suggest coach example record also class a grow. Teach show population what concern again Republican.",
       "satisfaction": 3,
       "anything_else": "",
+      "token": null,
       "is_read": true,
       "reply": "",
       "replied_at": null
@@ -10334,6 +10337,7 @@
       "essay": "Outside program page form. Way leave quite wonder.",
       "satisfaction": 6,
       "anything_else": "Thanks for running OTIS!",
+      "token": null,
       "is_read": true,
       "reply": "",
       "replied_at": null
@@ -10348,6 +10352,7 @@
       "essay": "Option radio but. Difficult nice pressure effect too establish.",
       "satisfaction": 6,
       "anything_else": "",
+      "token": null,
       "is_read": false,
       "reply": "",
       "replied_at": null
@@ -10362,6 +10367,7 @@
       "essay": "Land when his situation view meeting nice participant. Whatever fire north great century and drug.",
       "satisfaction": 3,
       "anything_else": "",
+      "token": null,
       "is_read": true,
       "reply": "",
       "replied_at": null
@@ -10376,6 +10382,7 @@
       "essay": "Finally station buy deal. Yes democratic identify yet.",
       "satisfaction": 5,
       "anything_else": "Thanks for running OTIS!",
+      "token": null,
       "is_read": false,
       "reply": "",
       "replied_at": null
@@ -10390,6 +10397,7 @@
       "essay": "Firm middle try strong you. Analysis seven after consumer source young treat.",
       "satisfaction": null,
       "anything_else": "Thanks for running OTIS!",
+      "token": null,
       "is_read": true,
       "reply": "Thanks for the feedback!",
       "replied_at": "2026-09-13T15:15:19.738Z"
@@ -10404,6 +10412,7 @@
       "essay": "Fast despite yet mind treatment if continue. Central learn home understand avoid dinner.",
       "satisfaction": 5,
       "anything_else": "",
+      "token": null,
       "is_read": false,
       "reply": "",
       "replied_at": null
@@ -10418,6 +10427,7 @@
       "essay": "Me hotel support assume ask beat. Interview film camera tell teacher.",
       "satisfaction": 6,
       "anything_else": "",
+      "token": null,
       "is_read": false,
       "reply": "",
       "replied_at": null
@@ -10432,6 +10442,7 @@
       "essay": "Glass military different kind ask class.",
       "satisfaction": 5,
       "anything_else": "Thanks for running OTIS!",
+      "token": null,
       "is_read": true,
       "reply": "",
       "replied_at": null
@@ -10446,6 +10457,7 @@
       "essay": "Light ten put. If keep night build success off.",
       "satisfaction": 3,
       "anything_else": "",
+      "token": null,
       "is_read": false,
       "reply": "",
       "replied_at": null
@@ -10460,6 +10472,7 @@
       "essay": "Agency short school fear. Myself stay their likely.",
       "satisfaction": 7,
       "anything_else": "",
+      "token": null,
       "is_read": false,
       "reply": "",
       "replied_at": null

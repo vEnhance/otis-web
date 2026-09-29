@@ -49,7 +49,7 @@ def survey_list(request: AuthHttpRequest) -> HttpResponse:
     user = request.user
     now = timezone.now()
     student_semesters = Student.objects.filter(user=user).values("semester")
-    taught_semesters = Student.objects.filter(assistant__user=user).values("semester")
+    taught_semesters = Student.objects.filter(assistants__user=user).values("semester")
     if user.is_superuser:
         surveys = Survey.objects.all()
     else:
@@ -143,7 +143,7 @@ def _can_preview(user: User, survey: Survey) -> bool:
     return (
         user.is_superuser
         or Student.objects.filter(
-            semester=survey.semester, assistant__user=user
+            semester=survey.semester, assistants__user=user
         ).exists()
     )
 
@@ -224,11 +224,10 @@ def survey_submit(request: AuthHttpRequest, survey_pk: int) -> HttpResponse:
             anything_else=data.get("anything_else", ""),
         )
         if data.get("instructor_comments"):
-            assert student.assistant is not None  # the form drops the field otherwise
             InstructorComment.objects.create(
                 survey=survey,
                 student=student if data["instructor_signed"] == SIGNED else None,
-                assistant=student.assistant,
+                assistant=data["instructor"],
                 comments=data["instructor_comments"],
             )
 

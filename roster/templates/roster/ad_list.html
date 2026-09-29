@@ -10,14 +10,15 @@
     who have additionally agreed to be contacted with additional requests.
   </p>
   {% if current_assistant %}
-    {% if current_assistant.ad_enabled %}
+    {% if current_listing.enabled %}
       <p data-testid="ad-update-prompt">
         You can <a href="{% url "ad-update" %}">update your listing below</a> if you want.
       </p>
     {% else %}
       <div class="alert alert-primary" data-testid="ad-enable-prompt">
         You are currently <strong>not</strong> on the listing below.
-        To add yourself, <a href="{% url "ad-update" %}">enable your entry</a>.
+        To add yourself, <a href="{% url "ad-update" %}">mark yourself available</a>
+        for 1:1 or group meetings.
       </div>
     {% endif %}
   {% elif request.user.is_staff %}
@@ -26,37 +27,55 @@
       Contact Evan if you think that's a mistake.
     </p>
   {% endif %}
-  {% for assistant in assistants %}
-    <hr />
-    <h2>
-      {{ assistant.name }}
-      {% if assistant.user == request.user %}
-        <a href="{% url "ad-update" %}" data-testid="ad-edit-link">(edit)</a>
-      {% elif request.user.is_superuser %}
-        <a href="{% url "admin:roster_assistant_change" assistant.pk %}">(admin edit)</a>
+  {% for listing in listings %}
+    {% with assistant=listing.assistant %}
+      <hr />
+      <h2>
+        {{ assistant.name }}
+        {% if assistant.user == request.user %}
+          <a href="{% url "ad-update" %}" data-testid="ad-edit-link">(edit)</a>
+        {% elif request.user.is_superuser %}
+          <a href="{% url "admin:roster_assistant_change" assistant.pk %}">(admin edit)</a>
+        {% endif %}
+      </h2>
+      <p class="fst-italic text-muted" data-testid="ad-updated-at">
+        Last updated at {% timestamp listing.updated_at "time" %}
+      </p>
+      <ul>
+        {% if listing.offers_one_on_one %}<li>Available for 1:1 meetings</li>{% endif %}
+        {% if listing.offers_group %}<li>Available for group meetings</li>{% endif %}
+        {% if listing.availability %}<li>Availability: {{ listing.availability }}</li>{% endif %}
+        {% if listing.time_zone %}<li>Time zone: {{ listing.time_zone }}</li>{% endif %}
+      </ul>
+      {% if listing.blurb %}
+        <div>{{ listing.blurb|linebreaks }}</div>
+      {% else %}
+        <div class="text-muted">
+          <p>No description provided.</p>
+        </div>
       {% endif %}
-    </h2>
-    <p class="fst-italic text-muted" data-testid="ad-updated-at">
-      Last updated at {% timestamp assistant.updated_at "time" %}
-    </p>
-    {% if assistant.ad_blurb %}
-      <div>{{ assistant.ad_blurb|linebreaks }}</div>
-    {% else %}
-      <div class="text-muted">
-        <p>No description provided.</p>
+      {% if listing.next_steps %}
+        <p>
+          <strong>To connect further:</strong> {{ listing.next_steps }}
+        </p>
+      {% endif %}
+      <div class="font-monospace">
+        {% if listing.website %}
+          <p>
+            ⛺ <a href="{{ listing.website }}">{{ listing.website }}</a>
+          </p>
+        {% endif %}
+        {% if listing.syllabus_url %}
+          <p>
+            📚 <a href="{{ listing.syllabus_url }}">{{ listing.syllabus_url }}</a>
+          </p>
+        {% endif %}
+        {% if listing.email %}
+          <p>
+            📧 <a class="font-mono" href="mailto:{{ listing.email }}">{{ listing.email }}</a>
+          </p>
+        {% endif %}
       </div>
-    {% endif %}
-    <div class="font-monospace">
-      {% if assistant.ad_url %}
-        <p>
-          ⛺ <a href="{{ assistant.ad_url }}">{{ assistant.ad_url }}</a>
-        </p>
-      {% endif %}
-      {% if assistant.ad_email %}
-        <p>
-          📧 <a class="font-mono" href="mailto:{{ assistant.ad_email }}">{{ assistant.ad_email }}</a>
-        </p>
-      {% endif %}
-    </div>
+    {% endwith %}
   {% endfor %}
 {% endblock layout-content %}

@@ -28,9 +28,8 @@ def get_visible_from_queryset(user: User, queryset: QuerySet[models.Student]):
     if user.is_superuser:
         return queryset
     else:
-        return queryset.filter(
-            Q(user=user) | Q(assistant__user=user) | Q(unlisted_assistants__user=user)
-        )
+        taught = models.Student.objects.filter(assistants__user=user).values("pk")
+        return queryset.filter(Q(user=user) | Q(pk__in=taught))
 
 
 def get_visible_students(user: User, current: bool = True):
@@ -83,9 +82,8 @@ def can_edit(request: HttpRequest, student: models.Student) -> bool:
     assert isinstance(request.user, User)
     if request.user.is_superuser:
         return True
-    return request.user.is_staff and (
-        (student.assistant is not None and student.assistant.user == request.user)
-        or (student.unlisted_assistants.filter(user=request.user).exists())
+    return (
+        request.user.is_staff and student.assistants.filter(user=request.user).exists()
     )
 
 

@@ -28,6 +28,7 @@ from django.core.exceptions import (
     ObjectDoesNotExist,
     PermissionDenied,
 )
+from django.db.models import Prefetch
 from django.db.models.expressions import Case, F, Value, When
 from django.db.models.fields import FloatField, TextField
 from django.db.models.functions.comparison import Cast
@@ -59,7 +60,7 @@ from otisweb.mixins import (
 )
 from otisweb.utils import AuthHttpRequest
 from roster.forms import LinkAssistantForm
-from roster.models import ApplyUUID, Assistant
+from roster.models import ApplyUUID, Assistant, AssistantListing
 from roster.us_states import get_us_state_name
 from roster.utils import (
     OVERDUE_PAYMENT_STATUSES,
@@ -896,40 +897,56 @@ def delinquents(request: HttpRequest) -> HttpResponse:
     )
 
 
-class StudentAssistantList(StaffRequiredMixin, ListView[Student]):
-    model = Student
-    template_name = "roster/student_assistant_list.html"
-    context_object_name = "students"
-
-    def get_queryset(self) -> QuerySet[Student]:
-        qs = Student.objects.filter(
-            semester__active=True,
-            assistant__isnull=False,
-            standing__in=ENABLED_STANDINGS,
+def _active_staff_pks() -> set[int]:
+    return set(
+        Assistant.objects.filter(students__semester__active=True).values_list(
+            "user__pk", flat=True
         )
-        qs = qs.select_related("user", "assistant", "assistant__user")
-        qs = qs.order_by("assistant__shortname", "user__first_name", "user__last_name")
-        return qs
+    )
+
+
+class StudentAssistantList(StaffRequiredMixin, ListView[Assistant]):
+    model = Assistant
+    template_name = "roster/student_assistant_list.html"
+    context_object_name = "instructors"
+
+    def get_active_students(self) -> QuerySet[Student]:
+        return (
+            Student.objects.filter(
+                semester__active=True, standing__in=ENABLED_STANDINGS
+            )
+            .select_related("user")
+            .order_by("user__first_name", "user__last_name")
+        )
+
+    def get_queryset(self) -> QuerySet[Assistant]:
+        active_students = self.get_active_students()
+        return (
+            Assistant.objects.filter(students__in=active_students)
+            .distinct()
+            .select_related("user")
+            .prefetch_related(
+                Prefetch("students", active_students, to_attr="active_students")
+            )
+        )
 
     def get_context_data(self, **kwargs: Any):
         context = super().get_context_data(**kwargs)
-        qs1 = Student.objects.filter(semester__active=True, assistant__isnull=False)
-        qs1 = qs1.select_related("assistant__user")
-        pks1 = qs1.values_list("assistant__user__pk", flat=True)
+        context["students"] = self.get_active_students().filter(
+            pk__in=Assistant.students.through.objects.values("student_id")
+        )
         group, _ = Group.objects.get_or_create(name="Active Staff")
-        qs2: QuerySet[User] = group.user_set.all()  # type: ignore
-        pks2 = qs2.values_list("pk", flat=True)
-        context["needs_sync"] = set(pks1) != set(pks2)
+        qs: QuerySet[User] = group.user_set.all()  # type: ignore
+        context["needs_sync"] = _active_staff_pks() != set(
+            qs.values_list("pk", flat=True)
+        )
         return context
 
     def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         if not isinstance(request.user, User) or not request.user.is_superuser:
             raise PermissionDenied("Need admin rights to run this POST request.")
         group, _ = Group.objects.get_or_create(name="Active Staff")
-        qs = Student.objects.filter(semester__active=True, assistant__isnull=False)
-        qs = qs.select_related("assistant__user")
-        pks = qs.values_list("assistant__user__pk", flat=True)
-        group.user_set.set(pks)  # type: ignore
+        group.user_set.set(_active_staff_pks())  # type: ignore
         messages.success(request, "Synced active staff group!")
         return super().get(request, *args, **kwargs)
 
@@ -937,14 +954,11 @@ class StudentAssistantList(StaffRequiredMixin, ListView[Student]):
 @staff_required
 def link_assistant(request: HttpRequest) -> HttpResponse:
     assistant = get_object_or_404(Assistant, user=request.user)
-    # Create form for submitting new petitions
     if request.method == "POST":
         form = LinkAssistantForm(request.POST)
         if form.is_valid():
             student: Student = form.cleaned_data["student"]
-            assert student.assistant is None
-            student.assistant = assistant
-            student.save()
+            student.assistants.add(assistant)
             messages.success(request, f"You were paired with student {student}.")
             logger.log(
                 SUCCESS_LOG_LEVEL,
@@ -957,9 +971,7 @@ def link_assistant(request: HttpRequest) -> HttpResponse:
     context = {
         "form": form,
         "assistant": assistant,
-        "current_students": Student.objects.filter(
-            assistant=assistant, semester__active=True
-        ),
+        "current_students": assistant.students.filter(semester__active=True),
     }
 
     return render(request, "roster/link_assistant.html", context)
@@ -1172,36 +1184,59 @@ def student_ids(request: HttpRequest) -> HttpResponse:
     )
 
 
-class AdList(VerifiedRequiredMixin, ListView[Assistant]):
-    model = Assistant
+class AdList(VerifiedRequiredMixin, ListView[AssistantListing]):
+    model = AssistantListing
     template_name = "roster/ad_list.html"
+    context_object_name = "listings"
 
-    context_object_name = "assistants"
-
-    def get_queryset(self) -> QuerySet[Assistant]:
-        return Assistant.objects.filter(ad_enabled=True)
+    def get_queryset(self) -> QuerySet[AssistantListing]:
+        return (
+            AssistantListing.objects.filter(
+                Q(offers_one_on_one=True) | Q(offers_group=True)
+            )
+            .select_related("assistant__user")
+            .order_by("assistant__shortname")
+        )
 
     def get_context_data(self, **kwargs: Any):
         context = super().get_context_data(**kwargs)
-        try:
-            context["current_assistant"] = Assistant.objects.get(user=self.request.user)
-        except Assistant.DoesNotExist:
-            context["current_assistant"] = None
+        assistant = Assistant.objects.filter(user=self.request.user).first()
+        context["current_assistant"] = assistant
+        context["current_listing"] = (
+            AssistantListing.objects.filter(assistant=assistant).first()
+            if assistant is not None
+            else None
+        )
         return context
 
 
-class AdUpdate(StaffRequiredMixin, UpdateView[Assistant, BaseModelForm[Assistant]]):
-    model = Assistant
+class AdUpdate(
+    StaffRequiredMixin, UpdateView[AssistantListing, BaseModelForm[AssistantListing]]
+):
+    model = AssistantListing
     template_name = "roster/ad_form.html"
-    context_object_name = "assistant"
-    fields = ("ad_enabled", "ad_url", "ad_email", "ad_blurb")
+    context_object_name = "listing"
+    fields = (
+        "offers_one_on_one",
+        "offers_group",
+        "time_zone",
+        "availability",
+        "website",
+        "email",
+        "syllabus_url",
+        "next_steps",
+        "blurb",
+    )
 
-    def get_object(self, *args: Any, **kwargs: Any) -> Assistant:
+    def get_object(self, *args: Any, **kwargs: Any) -> AssistantListing:
         del args
         del kwargs
-        return get_object_or_404(Assistant, user=self.request.user)
+        assistant = get_object_or_404(Assistant, user=self.request.user)
+        return AssistantListing.objects.filter(
+            assistant=assistant
+        ).first() or AssistantListing(assistant=assistant)
 
-    def form_valid(self, form: BaseModelForm[Assistant]):
+    def form_valid(self, form: BaseModelForm[AssistantListing]):
         messages.success(self.request, "Updated successfully.")
         return super().form_valid(form)
 

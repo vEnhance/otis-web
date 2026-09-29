@@ -4,7 +4,7 @@ from django import forms
 from django.forms.widgets import ChoiceWidget
 from markdownify.templatetags.markdownify import markdownify
 
-from roster.models import Student
+from roster.models import Assistant, Student
 from surveys.models import Survey
 
 SIGNED = "signed"
@@ -55,6 +55,11 @@ class SurveyForm(forms.Form):
         ),
         widget=forms.RadioSelect,
     )
+    instructor = forms.ModelChoiceField(
+        queryset=Assistant.objects.none(),
+        label="Which instructor are these comments for?",
+        required=False,
+    )
     instructor_comments = forms.CharField(
         required=False,
         widget=forms.Textarea(attrs={"rows": 6}),
@@ -82,13 +87,21 @@ class SurveyForm(forms.Form):
             self.fields["anything_else"].label = survey.anything_else_prompt
         else:
             del self.fields["anything_else"]
-        if survey.instructor_comments_prompt and (
-            student is None or student.assistant is not None
-        ):
+        instructors = [] if student is None else list(student.assistants.all())
+        self.sole_instructor = instructors[0] if len(instructors) == 1 else None
+        if survey.instructor_comments_prompt and (student is None or instructors):
             self.fields["instructor_comments"].label = survey.instructor_comments_prompt
         else:
             del self.fields["instructor_comments"]
             del self.fields["instructor_signed"]
+        if len(instructors) > 1 and "instructor_comments" in self.fields:
+            instructor_field = self.fields["instructor"]
+            assert isinstance(instructor_field, forms.ModelChoiceField)
+            instructor_field.queryset = Assistant.objects.filter(
+                pk__in=[a.pk for a in instructors]
+            )
+        else:
+            del self.fields["instructor"]
 
     def clean(self) -> dict[str, Any]:
         cleaned_data = super().clean() or {}
@@ -99,4 +112,11 @@ class SurveyForm(forms.Form):
                 "instructor_signed",
                 "Choose whether to sign your comments to your instructor.",
             )
+        if cleaned_data.get("instructor_comments"):
+            if self.sole_instructor is not None:
+                cleaned_data["instructor"] = self.sole_instructor
+            elif not cleaned_data.get("instructor"):
+                self.add_error(
+                    "instructor", "Choose which instructor to send your comments to."
+                )
         return cleaned_data

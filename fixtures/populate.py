@@ -48,6 +48,7 @@ from markets.models import Market
 from opal.factories import OpalHuntFactory
 from roster.factories import (
     AssistantFactory,
+    AssistantListingFactory,
     InvoiceFactory,
     RegistrationContainerFactory,
     StudentFactory,
@@ -571,13 +572,14 @@ def assign_assistants(students: list[Student]):
     assistants = list(Assistant.objects.all())
     if not assistants:
         return
-    lucky_students: list[Student] = []
-    for student in students:
-        if random.random() < P_ASSISTANT:
-            student.assistant = random.choice(assistants)
-            lucky_students.append(student)
-    print(f"Assigning instructors to {len(lucky_students)} students")
-    Student.objects.bulk_update(lucky_students, fields=("assistant",), batch_size=50)
+    Pairing = Assistant.students.through
+    pairings = [
+        Pairing(assistant=random.choice(assistants), student=student)
+        for student in students
+        if random.random() < P_ASSISTANT
+    ]
+    print(f"Assigning instructors to {len(pairings)} students")
+    Pairing.objects.bulk_create(pairings, batch_size=50)
 
 
 # Creates models dependent on a semester
@@ -679,11 +681,12 @@ def create_survey(semester: Semester, students: list[Student]):
             if replied
             else None,
         )
-        if student.assistant is not None and random.random() < P_SURVEY_INSTRUCTOR:
+        instructor = student.assistants.first()
+        if instructor is not None and random.random() < P_SURVEY_INSTRUCTOR:
             InstructorCommentFactory.create(
                 survey=survey,
                 student=student if random.random() < P_SURVEY_SIGNED else None,
-                assistant=student.assistant,
+                assistant=instructor,
                 is_read=random.random() < P_SURVEY_READ,
             )
     if not survey.is_open:
@@ -711,8 +714,11 @@ def main():
         groups=(verified_group, staff_group),
         is_staff=True,
     )
-    fast_bulk_create(
+    assistants = fast_bulk_create(
         AssistantFactory, args.assistant_num, user=Iterator(assistant_users)
+    )
+    fast_bulk_create(
+        AssistantListingFactory, args.assistant_num, assistant=Iterator(assistants)
     )
 
     create_sem_independent(args, users)

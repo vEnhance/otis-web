@@ -354,9 +354,7 @@ def annotate_student_queryset_with_scores(
 ) -> QuerySet[Student]:
     """Helper function for constructing large lists of students
     Selects all important information to prevent a bunch of SQL queries"""
-    return queryset.select_related(
-        "user", "user__profile", "assistant", "semester"
-    ).annotate(
+    return queryset.select_related("user", "user__profile", "semester").annotate(
         num_psets=SubqueryCount("pset", filter=ACCEPTED_PSETS),
         pset_B_count=SubqueryCount(
             "pset__pk",

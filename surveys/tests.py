@@ -45,7 +45,7 @@ def _response(**overrides: str) -> dict[str, str]:
 @pytest.mark.django_db
 def test_submit_signed(otis):
     assistant = AssistantFactory.create()
-    alice = verified_student(assistant=assistant)
+    alice = verified_student(assistants=[assistant])
     achievement = AchievementFactory.create()
     survey = SurveyFactory.create(semester=alice.semester, achievement=achievement)
     otis.login(alice)
@@ -84,7 +84,7 @@ def test_submit_signed(otis):
 
 @pytest.mark.django_db
 def test_submit_anonymous(otis):
-    alice = verified_student(assistant=AssistantFactory.create())
+    alice = verified_student(assistants=[AssistantFactory.create()])
     survey = SurveyFactory.create(semester=alice.semester)
     otis.login(alice)
 
@@ -112,6 +112,25 @@ def test_submit_anonymous(otis):
 
 
 @pytest.mark.django_db
+def test_submit_to_one_of_several_instructors(otis):
+    first, second = AssistantFactory.create_batch(2)
+    alice = verified_student(assistants=[first, second])
+    survey = SurveyFactory.create(semester=alice.semester)
+    otis.login(alice)
+
+    resp = otis.get_ok("survey-detail", survey.pk)
+    assert set(resp.context["form"].fields["instructor"].queryset) == {first, second}
+
+    data = _response(instructor_comments="Thanks!", instructor_signed="signed")
+    resp = otis.post_ok("survey-submit", survey.pk, data=data)
+    assert "instructor" in resp.context["form"].errors
+    assert not InstructorComment.objects.exists()
+
+    otis.post_30x("survey-submit", survey.pk, data={**data, "instructor": second.pk})
+    assert InstructorComment.objects.get(survey=survey).assistant == second
+
+
+@pytest.mark.django_db
 def test_submit_anonymous_with_link(otis):
     alice = verified_student()
     survey = SurveyFactory.create(semester=alice.semester)
@@ -136,7 +155,7 @@ def test_submit_anonymous_with_link(otis):
 
 @pytest.mark.django_db
 def test_signing_is_independent(otis):
-    alice = verified_student(assistant=AssistantFactory.create())
+    alice = verified_student(assistants=[AssistantFactory.create()])
     survey = SurveyFactory.create(semester=alice.semester)
     otis.login(alice)
 
@@ -155,7 +174,7 @@ def test_signing_is_independent(otis):
 
 @pytest.mark.django_db
 def test_optional_fields_can_be_skipped(otis):
-    alice = verified_student(assistant=AssistantFactory.create())
+    alice = verified_student(assistants=[AssistantFactory.create()])
     survey = SurveyFactory.create(semester=alice.semester)
     otis.login(alice)
 
@@ -168,7 +187,7 @@ def test_optional_fields_can_be_skipped(otis):
 
 @pytest.mark.django_db
 def test_invalid_submission_keeps_input(otis):
-    alice = verified_student(assistant=AssistantFactory.create())
+    alice = verified_student(assistants=[AssistantFactory.create()])
     survey = SurveyFactory.create(semester=alice.semester)
     otis.login(alice)
 
@@ -215,7 +234,7 @@ def test_form_drops_unasked_fields(otis):
 
 @pytest.mark.django_db
 def test_blank_instructor_prompt_drops_field(otis):
-    bob = verified_student(assistant=AssistantFactory.create())
+    bob = verified_student(assistants=[AssistantFactory.create()])
     survey = SurveyFactory.create(semester=bob.semester)
     otis.login(bob)
     resp = otis.get_ok("survey-detail", survey.pk)
@@ -300,7 +319,7 @@ def test_unverified_student_denied(otis):
 @pytest.mark.django_db
 def test_instructor_preview(otis):
     assistant = AssistantFactory.create()
-    alice = StudentFactory.create(assistant=assistant)
+    alice = StudentFactory.create(assistants=[assistant])
     survey = SurveyFactory.create(semester=alice.semester)
     otis.login(assistant)
 
@@ -406,7 +425,7 @@ def test_grant_achievements_needs_superuser(otis):
     )
     assistant = AssistantFactory.create()
     student = SurveyCompletionFactory.create(
-        survey=closed, student__assistant=assistant
+        survey=closed, student__assistants=[assistant]
     ).student
     otis.login(assistant)
     resp = otis.get_ok("survey-list")
@@ -563,12 +582,13 @@ def test_survey_list_student_states(otis):
 
 @pytest.mark.django_db
 def test_admin_pages(otis):
-    alice = StudentFactory.create(assistant=AssistantFactory.create())
+    assistant = AssistantFactory.create()
+    alice = StudentFactory.create(assistants=[assistant])
     survey = SurveyFactory.create(semester=alice.semester)
     SurveyCompletionFactory.create(survey=survey, student=alice)
     GMFeedbackFactory.create(survey=survey, student=alice)
     GMFeedbackFactory.create(survey=survey)
-    InstructorCommentFactory.create(survey=survey, assistant=alice.assistant)
+    InstructorCommentFactory.create(survey=survey, assistant=assistant)
     admin = UserFactory.create(is_staff=True, is_superuser=True)
     otis.login(admin)
 
@@ -586,7 +606,7 @@ def test_admin_pages(otis):
 @pytest.mark.django_db
 def test_survey_list_instructor(otis):
     assistant = AssistantFactory.create()
-    alice = StudentFactory.create(assistant=assistant)
+    alice = StudentFactory.create(assistants=[assistant])
     at = datetime.datetime
     upcoming = SurveyFactory.create(
         semester=alice.semester,
@@ -658,10 +678,11 @@ def test_gm_feedback_inbox(otis):
 
 @pytest.mark.django_db
 def test_gm_feedback_inbox_is_superuser_only(otis):
-    alice = StudentFactory.create(assistant=AssistantFactory.create())
+    assistant = AssistantFactory.create()
+    alice = StudentFactory.create(assistants=[assistant])
     survey = SurveyFactory.create(semester=alice.semester)
     feedback = GMFeedbackFactory.create(survey=survey, student=alice)
-    for user in (alice.user, alice.assistant.user):
+    for user in (alice.user, assistant.user):
         otis.login(user)
         otis.get_denied("survey-gm-feedback-inbox", survey.pk)
         otis.post_denied(
@@ -786,7 +807,7 @@ def test_cannot_reply_to_unreachable_feedback(otis):
 def test_instructor_comment_inbox(otis):
     assistant = AssistantFactory.create()
     survey = SurveyFactory.create()
-    alice = verified_student(semester=survey.semester, assistant=assistant)
+    alice = verified_student(semester=survey.semester, assistants=[assistant])
     mine = InstructorCommentFactory.create(
         survey=survey, assistant=assistant, student=alice
     )

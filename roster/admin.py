@@ -16,6 +16,7 @@ from core.models import Semester
 from .models import (
     ApplyUUID,
     Assistant,
+    AssistantListing,
     Invoice,
     RegistrationContainer,
     Student,
@@ -125,27 +126,9 @@ class AssistantIEResource(RosterResource):
         export_order = fields
 
 
-class StudentInline(admin.TabularInline):
-    model = Student
-    fk_name = "assistant"
-    fields = (
-        "name",
-        "semester",
-        "standing",
-    )
-    readonly_fields = (
-        "user",
-        "name",
-        "semester",
-    )
+class AssistantListingInline(admin.StackedInline):
+    model = AssistantListing
     extra = 0
-    show_change_link = True
-
-    def has_delete_permission(
-        self, request: HttpRequest, obj: Student | None = None
-    ) -> bool:
-        del request, obj
-        return False
 
 
 @admin.register(Assistant)
@@ -160,9 +143,9 @@ class AssistantAdmin(ImportExportModelAdmin):
     search_fields = ("user__first_name", "user__last_name", "user__username")
     autocomplete_fields = (
         "user",
-        "unlisted_students",
+        "students",
     )
-    inlines = (StudentInline,)
+    inlines = (AssistantListingInline,)
     resource_classes = (AssistantIEResource,)
 
 
@@ -285,10 +268,10 @@ class StudentIEResource(RosterResource):
         export_order = fields
 
 
-class UnlistedInline(admin.TabularInline):
-    model = Student.unlisted_assistants.through  # type: ignore
-    verbose_name = "Unlisted Assistant"
-    verbose_name_plural = "Unlisted Assistants"
+class AssistantInline(admin.TabularInline):
+    model = Student.assistants.through  # type: ignore
+    verbose_name = "Assistant"
+    verbose_name_plural = "Assistants"
     extra = 0
 
 
@@ -338,13 +321,12 @@ class StudentAdmin(ImportExportModelAdmin):
     )
     autocomplete_fields = (
         "user",
-        "assistant",
         "curriculum",
         "unlocked_units",
     )
     inlines = (
         InvoiceInline,
-        UnlistedInline,
+        AssistantInline,
     )
     resource_classes = (StudentIEResource,)
 
@@ -426,7 +408,7 @@ class UnitPetitionAdmin(admin.ModelAdmin):
         "status",
         "was_auto_processed",
         "action_type",
-        "student__assistant",
+        "student__assistants",
     )
     search_fields = (
         "student__user__first_name",

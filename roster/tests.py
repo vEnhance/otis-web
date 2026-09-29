@@ -32,6 +32,7 @@ from dashboard.factories import PSetFactory
 from roster.factories import (
     ApplyUUIDFactory,
     AssistantFactory,
+    AssistantListingFactory,
     InvoiceFactory,
     RegistrationContainerFactory,
     StudentFactory,
@@ -42,6 +43,7 @@ from roster.models import (
     LEGIT_STANDINGS,
     ApplyUUID,
     Assistant,
+    AssistantListing,
     Invoice,
     RegistrationContainer,
     Student,
@@ -50,7 +52,7 @@ from roster.models import (
     UnitPetition,
     build_student,
 )
-from roster.utils import annotate_payment_status
+from roster.utils import annotate_payment_status, get_visible_students
 from roster.views import get_late_fee_targets
 
 from .admin import ApplyUUIDIEResource
@@ -431,6 +433,7 @@ def test_giga_chart(otis) -> None:
 
 @pytest.mark.django_db
 def test_student_assistant_list(otis) -> None:
+    assistants: list[Assistant] = []
     for i in range(1, 6):
         asst: Assistant = AssistantFactory.create(
             user__first_name=f"F{i}",
@@ -438,13 +441,24 @@ def test_student_assistant_list(otis) -> None:
             user__email=f"user{i}@evanchen.cc",
             shortname=f"Short{i}",
         )
-        StudentFactory.create_batch(i * i, user__first_name="GoodKid", assistant=asst)
+        assistants.append(asst)
+        StudentFactory.create_batch(
+            i * i, user__first_name="GoodKid", assistants=[asst]
+        )
+    StudentFactory.create(user__first_name="GoodKid", assistants=assistants[:2])
     StudentFactory.create(user__first_name="BadKid")
     staff: User = UserFactory.create(is_staff=True)
     otis.login(staff)
     resp = otis.get_20x("instructors")
     # a student with no assistant is not on this page at all
-    assert len(resp.context["students"]) == 1 + 4 + 9 + 16 + 25
+    assert len(resp.context["students"]) == 1 + 4 + 9 + 16 + 25 + 1
+    assert [len(a.active_students) for a in resp.context["instructors"]] == [
+        2,
+        5,
+        9,
+        16,
+        25,
+    ]
     assert all(s.user.first_name == "GoodKid" for s in resp.context["students"])
     # this page is a mailing list, so the rendered address text is the product
     for i in range(1, 6):
@@ -475,9 +489,25 @@ def test_student_assistant_list(otis) -> None:
 
 
 @pytest.mark.django_db
+def test_co_instructors(otis) -> None:
+    first, second, stranger = AssistantFactory.create_batch(3)
+    alice: Student = StudentFactory.create(assistants=[first, second])
+
+    for assistant in (first, second):
+        assert list(get_visible_students(assistant.user)) == [alice]
+        otis.login(assistant.user)
+        otis.get_20x("portal", alice.pk, follow=True)
+    assert list(get_visible_students(alice.user)) == [alice]
+
+    assert not get_visible_students(stranger.user).exists()
+    otis.login(stranger.user)
+    otis.get_denied("portal", alice.pk)
+
+
+@pytest.mark.django_db
 def test_advance(otis) -> None:
     assist: Assistant = AssistantFactory.create()
-    alice: Student = StudentFactory.create(assistant=assist)
+    alice: Student = StudentFactory.create(assistants=[assist])
 
     otis.login(alice)
 
@@ -540,8 +570,8 @@ def test_link_assistant(otis) -> None:
     assistant2 = AssistantFactory.create()
     alice = StudentFactory.create()
     StudentFactory.create()
-    StudentFactory.create(assistant=assistant)
-    StudentFactory.create(assistant=assistant2)
+    StudentFactory.create(assistants=[assistant])
+    StudentFactory.create(assistants=[assistant2])
 
     otis.get_30x("link-assistant")  # anonymous redirects to login
     otis.login(UserFactory.create(is_staff=False))
@@ -552,7 +582,7 @@ def test_link_assistant(otis) -> None:
     assert len(resp.context["form"].fields["student"].queryset) == 2
     otis.post_ok("link-assistant", data={"student": alice.pk})
     alice.refresh_from_db()
-    assert alice.assistant.pk == assistant.pk
+    assert list(alice.assistants.all()) == [assistant]
     resp = otis.get_ok("link-assistant")
     assert len(resp.context["form"].fields["student"].queryset) == 1
 
@@ -560,7 +590,7 @@ def test_link_assistant(otis) -> None:
 @pytest.mark.django_db
 def test_curriculum(otis) -> None:
     staff: Assistant = AssistantFactory.create()
-    alice: Student = StudentFactory.create(assistant=staff)
+    alice: Student = StudentFactory.create(assistants=[staff])
 
     unitgroups: list[UnitGroup] = UnitGroupFactory.create_batch(4)
     for unitgroup in unitgroups:
@@ -722,7 +752,7 @@ def test_petition_form_marks_completed_units(otis) -> None:
 @pytest.mark.django_db
 def test_petition(otis) -> None:
     firefly: Assistant = AssistantFactory.create()
-    alice: Student = StudentFactory.create(assistant=firefly)
+    alice: Student = StudentFactory.create(assistants=[firefly])
     # Create units with non-secret subjects to avoid random subject="K" causing flaky tests
     # Each unit gets its own group to avoid unique_together constraint violations on (group, code)
     non_secret_subjects = ["A", "C", "G", "N", "F"]
@@ -1823,7 +1853,7 @@ def test_late_fee_targets_in_one_query(otis, django_assert_num_queries) -> None:
 def test_update_invoice(otis) -> None:
     firefly: Assistant = AssistantFactory.create()
     alice: Student = StudentFactory.create(
-        assistant=firefly, semester__show_invoices=True
+        assistants=[firefly], semester__show_invoices=True
     )
     invoice: Invoice = InvoiceFactory.create(student=alice, total_paid=0)
 
@@ -2391,25 +2421,26 @@ def test_ad_list_only_shows_enabled(otis) -> None:
     verified_group, _ = Group.objects.get_or_create(name="Verified")
     user.groups.add(verified_group)
 
-    enabled_assistant: Assistant = AssistantFactory.create(
-        ad_enabled=True,
-        ad_url="https://example.com/enabled",
-        ad_email="enabled@example.com",
-        ad_blurb="I am alive.",
+    one_on_one: AssistantListing = AssistantListingFactory.create(
+        offers_one_on_one=True, offers_group=False
     )
-    disabled_assistant: Assistant = AssistantFactory.create(
-        ad_enabled=False,
-        ad_url="https://example.com/disabled",
-        ad_email="disabled@example.com",
-        ad_blurb="I am not alive.",
+    group: AssistantListing = AssistantListingFactory.create(
+        offers_one_on_one=False, offers_group=True
     )
+    disabled: AssistantListing = AssistantListingFactory.create(
+        offers_one_on_one=False,
+        offers_group=False,
+        email="disabled@example.com",
+        blurb="I am not alive.",
+    )
+    AssistantFactory.create()  # no listing at all
 
     otis.login(user)
     resp = otis.get_20x("ad-list")
 
     # only opted-in instructors are listed; the rest must not leak
-    assert list(resp.context["assistants"]) == [enabled_assistant]
-    otis.assert_not_has(resp, disabled_assistant.name)
+    assert set(resp.context["listings"]) == {one_on_one, group}
+    otis.assert_not_has(resp, disabled.assistant.name)
     otis.assert_not_has(resp, "disabled@example.com")
     otis.assert_not_has(resp, "I am not alive.")
 
@@ -2445,13 +2476,7 @@ def test_ad_update_view_access_control(otis) -> None:
 @pytest.mark.django_db
 def test_ad_update(otis) -> None:
     assistant_user = UserFactory.create(is_staff=True)
-    assistant: Assistant = AssistantFactory.create(
-        user=assistant_user,
-        ad_enabled=False,
-        ad_url="",
-        ad_email="",
-        ad_blurb="",
-    )
+    assistant: Assistant = AssistantFactory.create(user=assistant_user)
 
     otis.login(assistant_user)
     verified_group, _ = Group.objects.get_or_create(name="Verified")
@@ -2459,49 +2484,64 @@ def test_ad_update(otis) -> None:
     resp = otis.get_20x("ad-list")
     otis.assert_testid(resp, "ad-enable-prompt")
 
-    original_updated_at = assistant.updated_at
-
     otis.get_20x("ad-update")
-    resp = otis.post_20x(
-        "ad-update",
-        data={
-            "ad_enabled": True,
-            "ad_url": "https://evanchen.cc/",
-            "ad_email": "overlord@evanchen.cc",
-            "ad_blurb": "I'm an ovie!",
-        },
-        follow=True,
-    )
+    assert not AssistantListing.objects.exists()
+    data = {
+        "offers_one_on_one": True,
+        "offers_group": False,
+        "time_zone": "Asia/Kolkata",
+        "availability": "weekend evenings",
+        "website": "https://evanchen.cc/",
+        "email": "overlord@evanchen.cc",
+        "syllabus_url": "https://evanchen.cc/syllabus.pdf",
+        "next_steps": "Fill out the form on my website.",
+        "blurb": "I'm an ovie!",
+    }
+    resp = otis.post_20x("ad-update", data=data, follow=True)
     messages = [m.message for m in resp.context["messages"]]
     assert "Updated successfully." in messages
 
-    assistant.refresh_from_db()
-    assert assistant.ad_enabled
-    assert assistant.ad_url == "https://evanchen.cc/"
-    assert assistant.ad_email == "overlord@evanchen.cc"
-    assert assistant.ad_blurb == "I'm an ovie!"
-    assert assistant.updated_at > original_updated_at
-    assert assistant.created_at < assistant.updated_at
+    listing = AssistantListing.objects.get(assistant=assistant)
+    assert listing.enabled
+    assert listing.time_zone == "Asia/Kolkata"
+    assert listing.availability == "weekend evenings"
+    assert listing.website == "https://evanchen.cc/"
+    assert listing.email == "overlord@evanchen.cc"
+    assert listing.syllabus_url == "https://evanchen.cc/syllabus.pdf"
+    assert listing.next_steps == "Fill out the form on my website."
+    assert listing.blurb == "I'm an ovie!"
+    original_updated_at = listing.updated_at
 
     resp = otis.get_20x("ad-list")
+    assert list(resp.context["listings"]) == [listing]
     otis.assert_testid(resp, "ad-update-prompt")
     otis.assert_testid(resp, "ad-updated-at")
+
+    otis.post_20x("ad-update", data={**data, "offers_one_on_one": False}, follow=True)
+    listing.refresh_from_db()
+    assert not listing.enabled
+    assert listing.updated_at > original_updated_at
+    assert listing.created_at < listing.updated_at
+    assert AssistantListing.objects.count() == 1
+
+    resp = otis.get_20x("ad-list")
+    assert list(resp.context["listings"]) == []
+    otis.assert_testid(resp, "ad-enable-prompt")
 
 
 @pytest.mark.django_db
 def test_ad_update_unauthorized_assistant(otis) -> None:
-    assistant1_user = UserFactory.create(is_staff=True)
-    assistant2_user = UserFactory.create(is_staff=True)
-    assistant1: Assistant = AssistantFactory.create(user=assistant1_user)
-    assistant2: Assistant = AssistantFactory.create(user=assistant2_user)
+    assistant1: Assistant = AssistantListingFactory.create().assistant
+    assistant2: Assistant = AssistantFactory.create()
 
-    otis.login(assistant1_user)
+    otis.login(assistant1.user)
     resp = otis.get("ad-update")
-    assert resp.context["assistant"] == assistant1
+    assert resp.context["listing"].assistant == assistant1
 
-    otis.login(assistant2_user)
+    otis.login(assistant2.user)
     resp = otis.get("ad-update")
-    assert resp.context["assistant"] == assistant2
+    assert resp.context["listing"].assistant == assistant2
+    assert resp.context["listing"].pk is None
 
 
 @pytest.mark.django_db
@@ -2513,7 +2553,7 @@ def test_ad_list_edit_link_visibility(otis) -> None:
     assistant_user.groups.add(verified_group)
     other_user.groups.add(verified_group)
 
-    AssistantFactory.create(user=assistant_user, ad_enabled=True)
+    AssistantListingFactory.create(assistant__user=assistant_user)
 
     otis.login(assistant_user)
     resp = otis.get_20x("ad-list")

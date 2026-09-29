@@ -69,6 +69,7 @@
       {% else %}
         <a title="Certificate" class="emoji-link" href="{% url "certify" %}">🎓</a>
       {% endif %}
+      <a title="Instructors" class="emoji-link" href="{% url "ad-list" %}">🧑‍🏫</a>
     </div>
   </div>
   {# Show the student name, year, ID, instructor #}
@@ -80,7 +81,9 @@
     <small>
       <p class="fst-italic">{{ student.semester }} ({{ student.semester.years }})</p>
       <p class="fst-italic">Student ID: {{ student.pk }}</p>
-      {% if student.assistant %}<p class="fst-italic">Instr: {{ student.assistant }}</p>{% endif %}
+      {% with instructors=student.assistants.all %}
+        {% if instructors %}<p class="fst-italic">Instr: {{ instructors|join:", " }}</p>{% endif %}
+      {% endwith %}
     </small>
   {% endif %}
   {# Bulleted list for staff vs students #}
