@@ -23,14 +23,13 @@ from roster.factories import (
 )
 from roster.models import ApplyUUID, Invoice, Student, UnitPetition
 
-FULL_TOKEN = "take just the first 24"
-RO_TOKEN = "token only for init"
+TOKEN = "take just the first 24"
 
 
 @pytest.fixture(autouse=True)
-def api_tokens(settings: Settings) -> None:
-    settings.API_TARGET_HASH_FULL = sha256(FULL_TOKEN.encode("utf-8")).hexdigest()
-    settings.API_TARGET_HASH_READONLY = sha256(RO_TOKEN.encode("utf-8")).hexdigest()
+def api_tokens(settings: Settings, otis) -> None:
+    settings.API_TARGET_HASH = sha256(TOKEN.encode("utf-8")).hexdigest()
+    otis.client.defaults["HTTP_AUTHORIZATION"] = f"Bearer {TOKEN}"
 
 
 def opal_pdf(body: bytes) -> SimpleUploadedFile:
@@ -152,7 +151,6 @@ def test_init(otis, aincrad_setup):
         "api",
         json={
             "action": "init",
-            "token": FULL_TOKEN,
         },
     )
     out = resp.json()
@@ -201,7 +199,6 @@ def test_invoice(otis, aincrad_setup):
         "api",
         json={
             "action": "invoice",
-            "token": FULL_TOKEN,
             "field": "adjustment",
             "entries": {
                 "alice.aardvark": -240,
@@ -222,7 +219,6 @@ def test_invoice(otis, aincrad_setup):
         "api",
         json={
             "action": "invoice",
-            "token": FULL_TOKEN,
             "field": "extras",
             "entries": {
                 Student.objects.get(
@@ -245,7 +241,6 @@ def test_invoice(otis, aincrad_setup):
         "api",
         json={
             "action": "invoice",
-            "token": FULL_TOKEN,
             "field": "total_paid",
             "entries": {
                 "alice.aardvark": 250,
@@ -301,7 +296,6 @@ def test_accept_petitions(otis, aincrad_setup):
         "api",
         json={
             "action": "accept_petitions",
-            "token": FULL_TOKEN,
         },
     )
     assert resp.json()["result"] == "success"
@@ -315,7 +309,6 @@ def test_email(otis, aincrad_setup):
         "api",
         json={
             "action": "email_list",
-            "token": FULL_TOKEN,
         },
     )
     students = resp.json()["students"]
@@ -336,65 +329,23 @@ def test_email(otis, aincrad_setup):
 def test_failed_auth(otis):
     resp = otis.post_40x(
         "api",
-        json={
-            "action": "init",
-            "token": "this wrong password is not a puzzle",
-        },
+        json={"action": "init"},
+        headers={"Authorization": "Bearer this wrong password is not a puzzle"},
     )
     assert resp.status_code == 418
 
 
 @pytest.mark.django_db
-def test_token_in_authorization_header(otis, aincrad_setup):
-    resp = otis.post_20x(
-        "api",
-        json={"action": "init"},
-        headers={"Authorization": f"Bearer {FULL_TOKEN}"},
-    )
-    assert resp.json()["_name"] == "Root"
-
-    resp = otis.post_40x(
-        "api",
-        json={"action": "init"},
-        headers={"Authorization": "Bearer nope"},
-    )
-    assert resp.status_code == 418
-
-
-@pytest.mark.django_db
-def test_readonly_token_can_init(otis, aincrad_setup):
-    resp = otis.post_20x("api", json={"action": "init", "token": RO_TOKEN})
-    assert resp.json()["_name"] == "Root"
-
-
-@pytest.mark.django_db
-def test_readonly_token_cannot_write(otis, aincrad_setup):
-    resp = otis.post_40x(
-        "api",
-        json={"action": "accept_petitions", "token": RO_TOKEN},
-    )
-    assert resp.status_code == 403
-    assert UnitPetition.objects.filter(status="PET_NEW").count() == 3
-
-    puzzle = OpalPuzzleFactory.create(hunt__slug="teammate", slug="tetrogram")
-    resp = otis.post_40x(
-        "opal-pdf-upload",
-        data={
-            "token": RO_TOKEN,
-            "pk": puzzle.pk,
-            "content": opal_pdf(b"first draft"),
-        },
-    )
-    assert resp.status_code == 403
-    puzzle.refresh_from_db()
-    assert not puzzle.content
+def test_token_in_body_is_ignored(otis, aincrad_setup):
+    del otis.client.defaults["HTTP_AUTHORIZATION"]
+    resp = otis.post_40x("api", json={"action": "init", "token": TOKEN})
+    assert resp.status_code == 400
 
 
 @pytest.mark.django_db
 def test_no_tokens_configured(otis, settings: Settings):
-    settings.API_TARGET_HASH_FULL = None
-    settings.API_TARGET_HASH_READONLY = None
-    resp = otis.post("api", json={"action": "init", "token": FULL_TOKEN})
+    settings.API_TARGET_HASH = None
+    resp = otis.post("api", json={"action": "init"})
     assert resp.status_code == 503
 
 
@@ -407,7 +358,6 @@ def test_get_add_hints(otis):
         json={
             "action": "get_hints",
             "puid": "18SLA7",
-            "token": FULL_TOKEN,
         },
     )
     out = resp.json()
@@ -421,7 +371,6 @@ def test_get_add_hints(otis):
             "action": "add_hints",
             "puid": "18SLA7",
             "content": "get",
-            "token": FULL_TOKEN,
         },
     )
     assert "pk" in resp.json()
@@ -432,7 +381,6 @@ def test_get_add_hints(otis):
             "action": "add_hints",
             "puid": "18SLA7",
             "content": "good",
-            "token": FULL_TOKEN,
         },
     )
     assert "pk" in resp.json()
@@ -443,7 +391,6 @@ def test_get_add_hints(otis):
         json={
             "action": "get_hints",
             "puid": "18SLA7",
-            "token": FULL_TOKEN,
         },
     )
     out = resp.json()
@@ -470,7 +417,6 @@ def test_get_add_hints(otis):
                     "content",
                 )
             ),
-            "token": FULL_TOKEN,
         },
     )
     out = resp.json()
@@ -489,7 +435,6 @@ def test_get_add_hints(otis):
             "puid": "18SLA7",
             "new_hints": [],
             "old_hints": [],
-            "token": FULL_TOKEN,
         },
     )
 
@@ -516,7 +461,6 @@ def test_get_add_hints(otis):
                     "keywords": "updated",
                 },
             ],
-            "token": FULL_TOKEN,
         },
     )
     out = resp.json()
@@ -563,7 +507,6 @@ def test_arch_url_update(otis):
                 "19USEMO6": "https://aops.com/community/p15425714",
                 "18SLA7": "https://aops.com/community/p12752777",
             },
-            "token": FULL_TOKEN,
         },
     )
     assert resp.json()["updated_count"] == 2
@@ -663,7 +606,6 @@ def test_hanabi_contest(otis):
                     "replay_id": 921020,
                 },
             ],
-            "token": FULL_TOKEN,
         },
     )
     assert {r["replay_id"] for r in resp.json()["replays"]} == {798, 811, 812, 271}
@@ -724,7 +666,6 @@ def test_grade_problem_set(otis):
         json={
             "pk": pset3.pk,
             "action": "grade_problem_set",
-            "token": FULL_TOKEN,
             "status": "A",
             "staff_comments": "Good job",
         },
@@ -755,7 +696,6 @@ def test_announcement(otis):
             "slug": "testing",
             "subject": "Testing 1",
             "content": "This is a sample **announcement**.",
-            "token": FULL_TOKEN,
         },
     )
     assert resp.json()["is_new"] is True
@@ -774,7 +714,6 @@ def test_announcement(otis):
             "slug": "testing",
             "subject": "Testing 2",
             "content": "Another update.",
-            "token": FULL_TOKEN,
         },
     )
     assert resp.json()["is_new"] is False
@@ -791,7 +730,6 @@ def test_announcement(otis):
             "slug": "thinking",
             "subject": "Deep in thought",
             "content": "Couldn't be me!",
-            "token": FULL_TOKEN,
         },
     )
     assert resp.json()["is_new"] is True
@@ -809,7 +747,6 @@ def test_opal_handler(otis):
         "api",
         json={
             "action": "opal_list",
-            "token": FULL_TOKEN,
         },
     )
     assert len(resp.json()["puzzles"]) == 1
@@ -832,7 +769,7 @@ def test_opal_handler_reports_content_hash(otis):
 
     resp = otis.post_20x(
         "api",
-        json={"action": "opal_list", "token": FULL_TOKEN},
+        json={"action": "opal_list"},
     )
     puzzle_json = resp.json()["puzzles"][0]
     assert puzzle_json["content_hash"] == "a" * 64
@@ -845,7 +782,6 @@ def test_apply_uuid_handler(otis):
         "api",
         json={
             "action": "apply_uuid",
-            "token": FULL_TOKEN,
             "uuid": "f81d4fae-7dec-11d0-a765-00a0c91e6bf6",  # no that's not a diamond
             "percent_aid": 50,
             "applicant_name": "Alice Applicant",
@@ -869,7 +805,6 @@ def test_opal_pdf_upload(otis):
     resp = otis.post_20x(
         "opal-pdf-upload",
         data={
-            "token": FULL_TOKEN,
             "pk": puzzle.pk,
             "content": opal_pdf(b"first draft"),
         },
@@ -888,7 +823,6 @@ def test_opal_pdf_upload(otis):
     resp = otis.post_20x(
         "opal-pdf-upload",
         data={
-            "token": FULL_TOKEN,
             "pk": puzzle.pk,
             "content": opal_pdf(b"first draft"),
         },
@@ -901,7 +835,6 @@ def test_opal_pdf_upload(otis):
     resp = otis.post_20x(
         "opal-pdf-upload",
         data={
-            "token": FULL_TOKEN,
             "pk": puzzle.pk,
             "content": opal_pdf(b"second draft"),
         },
@@ -919,7 +852,6 @@ def test_opal_pdf_upload_renamed_file_leaves_no_orphan(otis):
     otis.post_20x(
         "opal-pdf-upload",
         data={
-            "token": FULL_TOKEN,
             "pk": puzzle.pk,
             "content": SimpleUploadedFile("old_name.pdf", b"%PDF-1.4 draft"),
         },
@@ -931,7 +863,6 @@ def test_opal_pdf_upload_renamed_file_leaves_no_orphan(otis):
     otis.post_20x(
         "opal-pdf-upload",
         data={
-            "token": FULL_TOKEN,
             "pk": puzzle.pk,
             "content": SimpleUploadedFile("tetrogram.pdf", b"%PDF-1.4 draft"),
         },
@@ -954,7 +885,7 @@ def test_opal_pdf_upload_rejects_non_pdf(otis, upload: SimpleUploadedFile):
     puzzle = OpalPuzzleFactory.create(hunt__slug="teammate", slug="tetrogram")
     otis.post_40x(
         "opal-pdf-upload",
-        data={"token": FULL_TOKEN, "pk": puzzle.pk, "content": upload},
+        data={"pk": puzzle.pk, "content": upload},
     )
     puzzle.refresh_from_db()
     assert not puzzle.content
@@ -967,10 +898,10 @@ def test_opal_pdf_upload_failed_auth(otis):
     resp = otis.post_40x(
         "opal-pdf-upload",
         data={
-            "token": "this wrong password is not a puzzle",
             "pk": puzzle.pk,
             "content": opal_pdf(b"first draft"),
         },
+        headers={"Authorization": "Bearer this wrong password is not a puzzle"},
     )
     assert resp.status_code == 418
     puzzle.refresh_from_db()
@@ -982,7 +913,6 @@ def test_opal_pdf_upload_unknown_puzzle(otis):
     otis.post_not_found(
         "opal-pdf-upload",
         data={
-            "token": FULL_TOKEN,
             "pk": 1729,
             "content": opal_pdf(b"first draft"),
         },
@@ -996,7 +926,6 @@ def test_opal_pdf_upload_malformed_pk(otis, pk: str):
     otis.post_40x(
         "opal-pdf-upload",
         data={
-            "token": FULL_TOKEN,
             "pk": pk,
             "content": opal_pdf(b"first draft"),
         },

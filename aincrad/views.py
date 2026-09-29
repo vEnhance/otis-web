@@ -57,7 +57,6 @@ class ReplayData(TypedDict):
 
 class JSONData(TypedDict):
     action: str
-    token: str
 
     arch_puid: str | None
     puid: str
@@ -701,7 +700,7 @@ def opal_pdf_upload(request: HttpRequest) -> JsonResponse:
     # CsrfViewMiddleware from touching request.POST first.
     request.upload_handlers = [TemporaryFileUploadHandler(request)]
 
-    token = get_token(request, request.POST.get("token"))
+    token = get_token(request)
     if (bad_token := reject_bad_token(token, "opal_pdf_upload")) is not None:
         return bad_token
 
@@ -804,7 +803,7 @@ def api(request: HttpRequest) -> JsonResponse:
         raise SuspiciousOperation("You need to provide an action, silly")
     action = data["action"]
 
-    token = get_token(request, data.get("token"))
+    token = get_token(request)
     if (bad_token := reject_bad_token(token, action)) is not None:
         return bad_token
 
