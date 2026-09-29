@@ -41,8 +41,8 @@ def reject_bad_token(token: str | None, action: str) -> JsonResponse | None:
     if token is None:
         raise SuspiciousOperation("No token provided")
 
-    full_hash: str | None = settings.API_TOKEN_HASH_FULL
-    readonly_hash: str | None = settings.API_TOKEN_HASH_READONLY
+    full_hash: str | None = settings.API_TARGET_HASH_FULL
+    readonly_hash: str | None = settings.API_TARGET_HASH_READONLY
     if full_hash is None and readonly_hash is None:
         return JsonResponse({"error": "Not accepting tokens right now"}, status=503)
     if full_hash is not None and token_matches(token, full_hash):

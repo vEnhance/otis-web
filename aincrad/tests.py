@@ -29,8 +29,8 @@ RO_TOKEN = "token only for init"
 
 @pytest.fixture(autouse=True)
 def api_tokens(settings: Settings) -> None:
-    settings.API_TOKEN_HASH_FULL = sha256(FULL_TOKEN.encode("utf-8")).hexdigest()
-    settings.API_TOKEN_HASH_READONLY = sha256(RO_TOKEN.encode("utf-8")).hexdigest()
+    settings.API_TARGET_HASH_FULL = sha256(FULL_TOKEN.encode("utf-8")).hexdigest()
+    settings.API_TARGET_HASH_READONLY = sha256(RO_TOKEN.encode("utf-8")).hexdigest()
 
 
 def opal_pdf(body: bytes) -> SimpleUploadedFile:
@@ -392,8 +392,8 @@ def test_readonly_token_cannot_write(otis, aincrad_setup):
 
 @pytest.mark.django_db
 def test_no_tokens_configured(otis, settings: Settings):
-    settings.API_TOKEN_HASH_FULL = None
-    settings.API_TOKEN_HASH_READONLY = None
+    settings.API_TARGET_HASH_FULL = None
+    settings.API_TARGET_HASH_READONLY = None
     resp = otis.post("api", json={"action": "init", "token": FULL_TOKEN})
     assert resp.status_code == 503
 
