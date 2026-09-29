@@ -132,7 +132,7 @@ class Migration(migrations.Migration):
                     "next_steps",
                     models.CharField(
                         blank=True,
-                        help_text='What a student should do to get started, e.g. "Email me with your AoPS username and what you want to work on."',
+                        help_text='What a student should do to get started, e.g. "Email me at so-and-so@example.com."',
                         max_length=500,
                         verbose_name="to connect further",
                     ),

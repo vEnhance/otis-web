@@ -164,8 +164,7 @@ class AssistantListing(models.Model):
         max_length=500,
         blank=True,
         verbose_name="to connect further",
-        help_text="What a student should do to get started, "
-        'e.g. "Email me with your AoPS username and what you want to work on."',
+        help_text='What a student should do to get started, e.g. "Email me at so-and-so@example.com."',
     )
     blurb = models.TextField(
         blank=True,

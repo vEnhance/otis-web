@@ -45,7 +45,7 @@ class AssistantListingFactory(DjangoModelFactory):
     offers_one_on_one = True
     time_zone = Faker("timezone")
     availability = "weekend evenings"
-    next_steps = "Email me with your AoPS username."
+    next_steps = "Email me at so-and-so@example.com."
     blurb = Faker("paragraph")
 
 
