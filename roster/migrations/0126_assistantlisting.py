@@ -18,7 +18,7 @@ def move_ads(apps, schema_editor):
             website=assistant.ad_url,
             email=assistant.ad_email,
             blurb=assistant.ad_blurb,
-            offers_one_on_one=assistant.ad_enabled,
+            enabled=assistant.ad_enabled,
         )
         # auto_now_add and auto_now clobber these on create, but not on update()
         AssistantListing.objects.filter(pk=listing.pk).update(
@@ -31,7 +31,7 @@ def restore_ads(apps, schema_editor):
     AssistantListing = apps.get_model("roster", "AssistantListing")
     for listing in AssistantListing.objects.all():
         Assistant.objects.filter(pk=listing.assistant_id).update(
-            ad_enabled=listing.offers_one_on_one or listing.offers_group,
+            ad_enabled=listing.enabled,
             ad_url=listing.website,
             ad_email=listing.email,
             ad_blurb=listing.blurb,
@@ -59,6 +59,13 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
+                    "enabled",
+                    models.BooleanField(
+                        default=False,
+                        help_text="Whether the listing is shown publicly.",
+                    ),
+                ),
+                (
                     "website",
                     models.URLField(
                         blank=True,
@@ -79,6 +86,14 @@ class Migration(migrations.Migration):
                         blank=True,
                         help_text="A link to an external syllabus, if any.",
                         verbose_name="syllabus URL",
+                    ),
+                ),
+                (
+                    "example_url",
+                    models.URLField(
+                        blank=True,
+                        help_text="A link to example material, if any.",
+                        verbose_name="example material URL",
                     ),
                 ),
                 (

@@ -2424,12 +2424,11 @@ def test_ad_list_only_shows_enabled(otis) -> None:
     one_on_one: AssistantListing = AssistantListingFactory.create(
         offers_one_on_one=True, offers_group=False
     )
-    group: AssistantListing = AssistantListingFactory.create(
-        offers_one_on_one=False, offers_group=True
+    unavailable: AssistantListing = AssistantListingFactory.create(
+        offers_one_on_one=False, offers_group=False
     )
     disabled: AssistantListing = AssistantListingFactory.create(
-        offers_one_on_one=False,
-        offers_group=False,
+        enabled=False,
         email="disabled@example.com",
         blurb="I am not alive.",
     )
@@ -2439,7 +2438,7 @@ def test_ad_list_only_shows_enabled(otis) -> None:
     resp = otis.get_20x("ad-list")
 
     # only opted-in instructors are listed; the rest must not leak
-    assert set(resp.context["listings"]) == {one_on_one, group}
+    assert set(resp.context["listings"]) == {one_on_one, unavailable}
     otis.assert_not_has(resp, disabled.assistant.name)
     otis.assert_not_has(resp, "disabled@example.com")
     otis.assert_not_has(resp, "I am not alive.")
@@ -2487,6 +2486,7 @@ def test_ad_update(otis) -> None:
     otis.get_20x("ad-update")
     assert not AssistantListing.objects.exists()
     data = {
+        "enabled": True,
         "offers_one_on_one": True,
         "offers_group": False,
         "time_zone": "Asia/Kolkata",
@@ -2494,6 +2494,7 @@ def test_ad_update(otis) -> None:
         "website": "https://evanchen.cc/",
         "email": "overlord@evanchen.cc",
         "syllabus_url": "https://evanchen.cc/syllabus.pdf",
+        "example_url": "https://evanchen.cc/example.pdf",
         "next_steps": "Fill out the form on my website.",
         "blurb": "I'm an ovie!",
     }
@@ -2508,6 +2509,7 @@ def test_ad_update(otis) -> None:
     assert listing.website == "https://evanchen.cc/"
     assert listing.email == "overlord@evanchen.cc"
     assert listing.syllabus_url == "https://evanchen.cc/syllabus.pdf"
+    assert listing.example_url == "https://evanchen.cc/example.pdf"
     assert listing.next_steps == "Fill out the form on my website."
     assert listing.blurb == "I'm an ovie!"
     original_updated_at = listing.updated_at
@@ -2517,7 +2519,7 @@ def test_ad_update(otis) -> None:
     otis.assert_testid(resp, "ad-update-prompt")
     otis.assert_testid(resp, "ad-updated-at")
 
-    otis.post_20x("ad-update", data={**data, "offers_one_on_one": False}, follow=True)
+    otis.post_20x("ad-update", data={**data, "enabled": False}, follow=True)
     listing.refresh_from_db()
     assert not listing.enabled
     assert listing.updated_at > original_updated_at

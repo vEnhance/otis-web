@@ -41,6 +41,7 @@ class AssistantListingFactory(DjangoModelFactory):
         model = AssistantListing
 
     assistant = SubFactory(AssistantFactory)
+    enabled = True
     offers_one_on_one = True
     time_zone = Faker("timezone")
     availability = "weekend evenings"

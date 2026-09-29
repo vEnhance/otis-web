@@ -5,10 +5,9 @@
 {% endblock title %}
 {% block layout-content %}
   <div class="alert alert-info">
-    You can use this form to update the
+    You can use this form to update (or hide) the
     <a href="{% url "ad-list" %}">public listing</a>
     for {{ listing.assistant.name }}.
-    You are listed as long as you are available for 1:1 or group meetings.
   </div>
   {% include "otisweb/components/generic_form.html" with submit_name="Update" %}
 {% endblock layout-content %}

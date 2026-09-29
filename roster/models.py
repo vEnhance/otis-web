@@ -118,6 +118,10 @@ class AssistantListing(models.Model):
         on_delete=models.CASCADE,
         related_name="listing",
     )
+    enabled = models.BooleanField(
+        default=False,
+        help_text="Whether the listing is shown publicly.",
+    )
     website = models.URLField(
         blank=True,
         help_text="A URL the instructor can provide if desired.",
@@ -130,6 +134,11 @@ class AssistantListing(models.Model):
         blank=True,
         verbose_name="syllabus URL",
         help_text="A link to an external syllabus, if any.",
+    )
+    example_url = models.URLField(
+        blank=True,
+        verbose_name="example material URL",
+        help_text="A link to example material, if any.",
     )
     offers_one_on_one = models.BooleanField(
         default=False,
@@ -168,10 +177,6 @@ class AssistantListing(models.Model):
 
     def __str__(self) -> str:
         return f"Listing for {self.assistant}"
-
-    @property
-    def enabled(self) -> bool:
-        return self.offers_one_on_one or self.offers_group
 
 
 class Student(models.Model):

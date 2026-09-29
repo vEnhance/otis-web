@@ -6639,9 +6639,11 @@
     "pk": 1,
     "fields": {
       "assistant": 1,
+      "enabled": true,
       "website": "https://example.com/leslie",
       "email": "",
       "syllabus_url": "",
+      "example_url": "https://example.com/leslie/sample-handout.pdf",
       "offers_one_on_one": true,
       "offers_group": false,
       "time_zone": "America/New_York",
@@ -6657,9 +6659,11 @@
     "pk": 2,
     "fields": {
       "assistant": 2,
+      "enabled": true,
       "website": "",
       "email": "monica@example.com",
       "syllabus_url": "https://example.com/monica/syllabus.pdf",
+      "example_url": "",
       "offers_one_on_one": false,
       "offers_group": true,
       "time_zone": "Asia/Kolkata",

@@ -17,8 +17,7 @@
     {% else %}
       <div class="alert alert-primary" data-testid="ad-enable-prompt">
         You are currently <strong>not</strong> on the listing below.
-        To add yourself, <a href="{% url "ad-update" %}">mark yourself available</a>
-        for 1:1 or group meetings.
+        To add yourself, <a href="{% url "ad-update" %}">enable your entry</a>.
       </div>
     {% endif %}
   {% elif request.user.is_staff %}
@@ -67,7 +66,12 @@
         {% endif %}
         {% if listing.syllabus_url %}
           <p>
-            📚 <a href="{{ listing.syllabus_url }}">{{ listing.syllabus_url }}</a>
+            📚 <a href="{{ listing.syllabus_url }}">Link to syllabus</a>
+          </p>
+        {% endif %}
+        {% if listing.example_url %}
+          <p>
+            📝 <a href="{{ listing.example_url }}">Link to example material</a>
           </p>
         {% endif %}
         {% if listing.email %}

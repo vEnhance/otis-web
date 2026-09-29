@@ -1191,9 +1191,7 @@ class AdList(VerifiedRequiredMixin, ListView[AssistantListing]):
 
     def get_queryset(self) -> QuerySet[AssistantListing]:
         return (
-            AssistantListing.objects.filter(
-                Q(offers_one_on_one=True) | Q(offers_group=True)
-            )
+            AssistantListing.objects.filter(enabled=True)
             .select_related("assistant__user")
             .order_by("assistant__shortname")
         )
@@ -1217,6 +1215,7 @@ class AdUpdate(
     template_name = "roster/ad_form.html"
     context_object_name = "listing"
     fields = (
+        "enabled",
         "offers_one_on_one",
         "offers_group",
         "time_zone",
@@ -1224,6 +1223,7 @@ class AdUpdate(
         "website",
         "email",
         "syllabus_url",
+        "example_url",
         "next_steps",
         "blurb",
     )
