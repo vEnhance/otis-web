@@ -24,15 +24,13 @@ from roster.factories import (
 from roster.models import ApplyUUID, Invoice, Student, UnitPetition
 
 FULL_TOKEN = "take just the first 24"
-READONLY_TOKEN = "look but do not touch"
+RO_TOKEN = "token only for init"
 
 
 @pytest.fixture(autouse=True)
 def api_tokens(settings: Settings) -> None:
     settings.API_TOKEN_HASH_FULL = sha256(FULL_TOKEN.encode("utf-8")).hexdigest()
-    settings.API_TOKEN_HASH_READONLY = sha256(
-        READONLY_TOKEN.encode("utf-8")
-    ).hexdigest()
+    settings.API_TOKEN_HASH_READONLY = sha256(RO_TOKEN.encode("utf-8")).hexdigest()
 
 
 def opal_pdf(body: bytes) -> SimpleUploadedFile:
@@ -365,7 +363,7 @@ def test_token_in_authorization_header(otis, aincrad_setup):
 
 @pytest.mark.django_db
 def test_readonly_token_can_init(otis, aincrad_setup):
-    resp = otis.post_20x("api", json={"action": "init", "token": READONLY_TOKEN})
+    resp = otis.post_20x("api", json={"action": "init", "token": RO_TOKEN})
     assert resp.json()["_name"] == "Root"
 
 
@@ -373,7 +371,7 @@ def test_readonly_token_can_init(otis, aincrad_setup):
 def test_readonly_token_cannot_write(otis, aincrad_setup):
     resp = otis.post_40x(
         "api",
-        json={"action": "accept_petitions", "token": READONLY_TOKEN},
+        json={"action": "accept_petitions", "token": RO_TOKEN},
     )
     assert resp.status_code == 403
     assert UnitPetition.objects.filter(status="PET_NEW").count() == 3
@@ -382,7 +380,7 @@ def test_readonly_token_cannot_write(otis, aincrad_setup):
     resp = otis.post_40x(
         "opal-pdf-upload",
         data={
-            "token": READONLY_TOKEN,
+            "token": RO_TOKEN,
             "pk": puzzle.pk,
             "content": opal_pdf(b"first draft"),
         },
