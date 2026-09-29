@@ -149,6 +149,12 @@ class AssistantAdmin(ImportExportModelAdmin):
     resource_classes = (AssistantIEResource,)
 
 
+@admin.register(AssistantListing)
+class AssistantListingAdmin(admin.ModelAdmin):
+    list_display = ("pk", "assistant__shortname", "enabled", "created_at", "updated_at")
+    list_display_links = ("pk", "assistant__shortname")
+
+
 # INVOICE
 class InvoiceIEResource(resources.ModelResource):
     class Meta:
