@@ -2537,7 +2537,7 @@ def test_listing_links() -> None:
         website="https://example.com/"
     )
     assert [label for _, label, _ in listing.links] == ["website"]
-    assert listing.links[0][2] == "https://example.com"
+    assert listing.links[0][2] == "https://example.com/"
 
 
 @pytest.mark.django_db
