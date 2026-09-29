@@ -279,9 +279,8 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
 INVOICE_HASH_KEY = env_secret("INVOICE_HASH_KEY", "evan_chen_is_still_really_cool")
 CERT_HASH_KEY = env_secret("CERT_HASH_KEY", "certified_by_god")
 OPAL_HASH_KEY = env_secret("OPAL_HASH_KEY", "paradise_is_where_i_am")
-# Both unset means "the aincrad API is disabled", which is a legitimate state
-API_TARGET_HASH_FULL = os.getenv("API_TARGET_HASH_FULL")
-API_TARGET_HASH_READONLY = os.getenv("API_TARGET_HASH_READONLY")
+# Unset means "the aincrad API is disabled", which is a legitimate state
+API_TARGET_HASH = os.getenv("API_TARGET_HASH")
 
 PATH_STATEMENT_ON_DISK = os.getenv("PATH_STATEMENT_ON_DISK")
 
