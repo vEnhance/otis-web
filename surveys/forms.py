@@ -1,6 +1,7 @@
 from typing import Any
 
 from django import forms
+from django.forms import BoundField
 from django.forms.widgets import ChoiceWidget
 from markdownify.templatetags.markdownify import markdownify
 
@@ -44,8 +45,8 @@ class SurveyForm(forms.Form):
         required=False,
         widget=forms.Textarea(attrs={"rows": 4}),
     )
-    gm_identity = forms.ChoiceField(
-        label="Sign your comments to Evan?",
+    identity = forms.ChoiceField(
+        label="Sign your comments?",
         choices=(
             (
                 SIGNED,
@@ -57,15 +58,6 @@ class SurveyForm(forms.Form):
             ),
             (ANONYMOUS, "Submit anonymously, with no way to see any replies."),
         ),
-        widget=forms.RadioSelect,
-    )
-    instructor_signed = forms.ChoiceField(
-        label="Sign your comments to your instructor?",
-        choices=(
-            (SIGNED, "Sign with my name."),
-            (ANONYMOUS, "Submit anonymously."),
-        ),
-        required=False,
         widget=forms.RadioSelect,
     )
 
@@ -82,44 +74,38 @@ class SurveyForm(forms.Form):
             self.fields["anything_else"].label = survey.anything_else_prompt
         else:
             del self.fields["anything_else"]
+        # Field names of the instructor section, which the template renders
+        # under its own heading, and which assistant each one goes to.
+        self.instructor_field_names: list[str] = []
         self.instructor_fields: dict[str, Assistant] = {}
-        if not survey.instructor_comments_prompt:
-            del self.fields["instructor_signed"]
-        elif student is None:
-            self._add_instructor_field(
-                "instructor_comments", survey.instructor_comments_prompt
-            )
-        else:
-            instructors = list(student.assistants.select_related("user"))
-            for assistant in instructors:
+        if survey.instructor_comments_prompt and student is None:
+            self._add_instructor_field("instructor_comments", "Your instructor")
+        elif survey.instructor_comments_prompt and student is not None:
+            for assistant in student.assistants.select_related("user"):
                 name = instructor_field_name(assistant)
                 self.instructor_fields[name] = assistant
-                label = survey.instructor_comments_prompt
-                if len(instructors) > 1:
-                    label = f"{label} ({assistant.name})"
-                self._add_instructor_field(name, label)
-            if not instructors:
-                del self.fields["instructor_signed"]
-            elif len(instructors) > 1:
-                self.fields[
-                    "instructor_signed"
-                ].label = "Sign your comments to your instructors?"
+                self._add_instructor_field(name, assistant.name)
+        if self.instructor_field_names:
+            self.fields[
+                "identity"
+            ].help_text = "This also applies to your comments to your instructors."
+        # The signing choice comes last, after the instructor section.
+        self.fields["identity"] = self.fields.pop("identity")
 
     def _add_instructor_field(self, name: str, label: str) -> None:
+        self.instructor_field_names.append(name)
         self.fields[name] = forms.CharField(
             label=label,
             required=False,
-            widget=forms.Textarea(attrs={"rows": 6}),
+            widget=forms.Textarea(attrs={"rows": 6, "class": "form-control mb-3"}),
         )
-        self.fields["instructor_signed"] = self.fields.pop("instructor_signed")
 
-    def clean(self) -> dict[str, Any]:
-        cleaned_data = super().clean() or {}
-        if any(cleaned_data.get(name) for name in self.instructor_fields) and not (
-            cleaned_data.get("instructor_signed")
-        ):
-            self.add_error(
-                "instructor_signed",
-                "Choose whether to sign your comments.",
-            )
-        return cleaned_data
+    def main_fields(self) -> list[BoundField]:
+        return [
+            self[name]
+            for name in self.fields
+            if name != "identity" and name not in self.instructor_field_names
+        ]
+
+    def instructor_section(self) -> list[BoundField]:
+        return [self[name] for name in self.instructor_field_names]

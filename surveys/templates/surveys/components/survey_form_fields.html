@@ -1,0 +1,14 @@
+{% load crispy_forms_tags %}
+{% for field in form.main_fields %}{{ field|as_crispy_field }}{% endfor %}
+{% with instructor_fields=form.instructor_section %}
+  {% if instructor_fields %}
+    <h2>Comments to your instructors</h2>
+    <p>{{ survey.instructor_comments_prompt }}</p>
+    {% for field in instructor_fields %}
+      <h3>{{ field.label_tag }}</h3>
+      {{ field }}
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+<h2>Signoff</h2>
+{{ form.identity|as_crispy_field }}

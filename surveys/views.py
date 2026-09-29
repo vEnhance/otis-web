@@ -217,8 +217,8 @@ def survey_submit(request: AuthHttpRequest, survey_pk: int) -> HttpResponse:
             return redirect("survey-detail", survey.pk)
         gm_feedback = GMFeedback.objects.create(
             survey=survey,
-            student=student if data["gm_identity"] == SIGNED else None,
-            token=uuid.uuid4() if data["gm_identity"] == ANONYMOUS_LINK else None,
+            student=student if data["identity"] == SIGNED else None,
+            token=uuid.uuid4() if data["identity"] == ANONYMOUS_LINK else None,
             essay=data["essay"],
             satisfaction=data.get("satisfaction"),
             anything_else=data.get("anything_else", ""),
@@ -226,7 +226,7 @@ def survey_submit(request: AuthHttpRequest, survey_pk: int) -> HttpResponse:
         InstructorComment.objects.bulk_create(
             InstructorComment(
                 survey=survey,
-                student=student if data["instructor_signed"] == SIGNED else None,
+                student=student if data["identity"] == SIGNED else None,
                 assistant=assistant,
                 comments=data[name],
             )

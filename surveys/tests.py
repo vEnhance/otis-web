@@ -35,9 +35,8 @@ def _response(**overrides: str) -> dict[str, str]:
         "essay": "Units are fun",
         "satisfaction": "6",
         "anything_else": "",
-        "gm_identity": "signed",
+        "identity": "signed",
         "instructor_comments": "",
-        "instructor_signed": "",
     }
     data.update(overrides)
     return data
@@ -57,7 +56,6 @@ def test_submit_signed(otis):
         survey.pk,
         data=_response(
             anything_else="Hi Evan",
-            instructor_signed="signed",
             **{instructor_field_name(assistant): "Thanks!"},
         ),
     )
@@ -95,8 +93,7 @@ def test_submit_anonymous(otis):
         "survey-submit",
         survey.pk,
         data=_response(
-            gm_identity="anonymous",
-            instructor_signed="anonymous",
+            identity="anonymous",
             **{instructor_field_name(assistant): "Thanks!"},
         ),
     )
@@ -129,7 +126,7 @@ def test_submit_to_several_instructors(otis):
         "survey-submit",
         survey.pk,
         data=_response(
-            instructor_signed="anonymous",
+            identity="anonymous",
             **{
                 instructor_field_name(first): "Thanks, first!",
                 instructor_field_name(third): "Thanks, third!",
@@ -154,9 +151,7 @@ def test_comments_to_a_former_instructor_are_dropped(otis):
     otis.post_30x(
         "survey-submit",
         survey.pk,
-        data=_response(
-            instructor_signed="signed", **{instructor_field_name(removed): "Hi"}
-        ),
+        data=_response(**{instructor_field_name(removed): "Hi"}),
     )
     assert not InstructorComment.objects.exists()
 
@@ -168,7 +163,7 @@ def test_submit_anonymous_with_link(otis):
     otis.login(alice)
 
     resp = otis.post_30x(
-        "survey-submit", survey.pk, data=_response(gm_identity="anonymous_link")
+        "survey-submit", survey.pk, data=_response(identity="anonymous_link")
     )
 
     feedback = GMFeedback.objects.get(survey=survey)
@@ -185,7 +180,7 @@ def test_submit_anonymous_with_link(otis):
 
 
 @pytest.mark.django_db
-def test_signing_is_independent(otis):
+def test_anonymous_link_leaves_instructor_comments_anonymous(otis):
     assistant = AssistantFactory.create()
     alice = verified_student(assistants=[assistant])
     survey = SurveyFactory.create(semester=alice.semester)
@@ -195,13 +190,12 @@ def test_signing_is_independent(otis):
         "survey-submit",
         survey.pk,
         data=_response(
-            gm_identity="anonymous",
-            instructor_signed="signed",
+            identity="anonymous_link",
             **{instructor_field_name(assistant): "Thanks!"},
         ),
     )
     assert GMFeedback.objects.get(survey=survey).student is None
-    assert InstructorComment.objects.get(survey=survey).student == alice
+    assert InstructorComment.objects.get(survey=survey).student is None
 
 
 @pytest.mark.django_db
@@ -224,14 +218,14 @@ def test_invalid_submission_keeps_input(otis):
     survey = SurveyFactory.create(semester=alice.semester)
     otis.login(alice)
 
-    # Missing signing choices: nothing is saved and the form comes back filled in.
+    # Missing signing choice: nothing is saved and the form comes back filled in.
     resp = otis.post_ok(
         "survey-submit",
         survey.pk,
-        data=_response(gm_identity="", **{instructor_field_name(assistant): "Thanks!"}),
+        data=_response(identity="", **{instructor_field_name(assistant): "Thanks!"}),
     )
     form = resp.context["form"]
-    assert set(form.errors) == {"gm_identity", "instructor_signed"}
+    assert set(form.errors) == {"identity"}
     assert form.data["essay"] == "Units are fun"
     assert not SurveyCompletion.objects.exists()
     assert not GMFeedback.objects.exists()
@@ -246,7 +240,7 @@ def test_form_drops_unasked_fields(otis):
     otis.login(alice)
 
     resp = otis.get_ok("survey-detail", survey.pk)
-    assert set(resp.context["form"].fields) == {"essay", "gm_identity"}
+    assert set(resp.context["form"].fields) == {"essay", "identity"}
 
     # Posting a field the form dropped doesn't sneak it in.
     otis.post_30x(
@@ -256,7 +250,6 @@ def test_form_drops_unasked_fields(otis):
             satisfaction="3",
             anything_else="Sneaky",
             instructor_comments="Sneaky",
-            instructor_signed="signed",
         ),
     )
     feedback = GMFeedback.objects.get(survey=survey)
@@ -281,7 +274,7 @@ def test_blank_instructor_prompt_drops_field(otis):
         "essay",
         "satisfaction",
         "anything_else",
-        "gm_identity",
+        "identity",
     }
 
 
@@ -364,6 +357,7 @@ def test_instructor_preview(otis):
 
     resp = otis.get_ok("survey-detail", survey.pk)
     assert resp.context["preview"]
+    assert resp.context["form"].instructor_field_names == ["instructor_comments"]
     otis.post_denied("survey-submit", survey.pk, data=_response())
     assert not GMFeedback.objects.exists()
 
@@ -380,6 +374,7 @@ def test_superuser_preview(otis):
 
     resp = otis.get_ok("survey-detail", survey.pk)
     assert resp.context["preview"]
+    assert resp.context["form"].instructor_field_names == ["instructor_comments"]
     assert "instructor_comments" in resp.context["form"].fields
     otis.assert_testid(resp, "survey-preview")
     otis.post_denied("survey-submit", survey.pk, data=_response())
