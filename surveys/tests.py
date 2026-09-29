@@ -18,6 +18,7 @@ from .factories import (
     SurveyCompletionFactory,
     SurveyFactory,
 )
+from .forms import instructor_field_name
 from .models import GMFeedback, InstructorComment, SurveyCompletion
 from .views import RESPONSES_PER_PAGE
 
@@ -56,8 +57,8 @@ def test_submit_signed(otis):
         survey.pk,
         data=_response(
             anything_else="Hi Evan",
-            instructor_comments="Thanks!",
             instructor_signed="signed",
+            **{instructor_field_name(assistant): "Thanks!"},
         ),
     )
 
@@ -77,14 +78,15 @@ def test_submit_signed(otis):
 
     resp = otis.get_ok("survey-detail", survey.pk)
     assert resp.context["gm_feedback"] == feedback
-    assert resp.context["instructor_comment"] == comment
+    assert list(resp.context["instructor_comments"]) == [comment]
     assert "form" not in resp.context
     otis.assert_testid(resp, "survey-signed-response")
 
 
 @pytest.mark.django_db
 def test_submit_anonymous(otis):
-    alice = verified_student(assistants=[AssistantFactory.create()])
+    assistant = AssistantFactory.create()
+    alice = verified_student(assistants=[assistant])
     survey = SurveyFactory.create(semester=alice.semester)
     otis.login(alice)
 
@@ -94,8 +96,8 @@ def test_submit_anonymous(otis):
         survey.pk,
         data=_response(
             gm_identity="anonymous",
-            instructor_comments="Thanks!",
             instructor_signed="anonymous",
+            **{instructor_field_name(assistant): "Thanks!"},
         ),
     )
 
@@ -107,27 +109,56 @@ def test_submit_anonymous(otis):
 
     resp = otis.get_ok("survey-detail", survey.pk)
     assert resp.context["gm_feedback"] is None
-    assert resp.context["instructor_comment"] is None
+    assert not resp.context["instructor_comments"]
     otis.assert_testid(resp, "survey-anonymous-response")
 
 
 @pytest.mark.django_db
-def test_submit_to_one_of_several_instructors(otis):
-    first, second = AssistantFactory.create_batch(2)
-    alice = verified_student(assistants=[first, second])
+def test_submit_to_several_instructors(otis):
+    first, second, third = AssistantFactory.create_batch(3)
+    alice = verified_student(assistants=[first, second, third])
     survey = SurveyFactory.create(semester=alice.semester)
     otis.login(alice)
 
     resp = otis.get_ok("survey-detail", survey.pk)
-    assert set(resp.context["form"].fields["instructor"].queryset) == {first, second}
+    fields = resp.context["form"].fields
+    for assistant in (first, second, third):
+        assert instructor_field_name(assistant) in fields
 
-    data = _response(instructor_comments="Thanks!", instructor_signed="signed")
-    resp = otis.post_ok("survey-submit", survey.pk, data=data)
-    assert "instructor" in resp.context["form"].errors
+    otis.post_30x(
+        "survey-submit",
+        survey.pk,
+        data=_response(
+            instructor_signed="anonymous",
+            **{
+                instructor_field_name(first): "Thanks, first!",
+                instructor_field_name(third): "Thanks, third!",
+            },
+        ),
+    )
+    comments = InstructorComment.objects.filter(survey=survey)
+    assert {(c.assistant, c.comments) for c in comments} == {
+        (first, "Thanks, first!"),
+        (third, "Thanks, third!"),
+    }
+    assert all(c.student is None for c in comments)
+
+
+@pytest.mark.django_db
+def test_comments_to_a_former_instructor_are_dropped(otis):
+    kept, removed = AssistantFactory.create_batch(2)
+    alice = verified_student(assistants=[kept])
+    survey = SurveyFactory.create(semester=alice.semester)
+    otis.login(alice)
+
+    otis.post_30x(
+        "survey-submit",
+        survey.pk,
+        data=_response(
+            instructor_signed="signed", **{instructor_field_name(removed): "Hi"}
+        ),
+    )
     assert not InstructorComment.objects.exists()
-
-    otis.post_30x("survey-submit", survey.pk, data={**data, "instructor": second.pk})
-    assert InstructorComment.objects.get(survey=survey).assistant == second
 
 
 @pytest.mark.django_db
@@ -155,7 +186,8 @@ def test_submit_anonymous_with_link(otis):
 
 @pytest.mark.django_db
 def test_signing_is_independent(otis):
-    alice = verified_student(assistants=[AssistantFactory.create()])
+    assistant = AssistantFactory.create()
+    alice = verified_student(assistants=[assistant])
     survey = SurveyFactory.create(semester=alice.semester)
     otis.login(alice)
 
@@ -164,8 +196,8 @@ def test_signing_is_independent(otis):
         survey.pk,
         data=_response(
             gm_identity="anonymous",
-            instructor_comments="Thanks!",
             instructor_signed="signed",
+            **{instructor_field_name(assistant): "Thanks!"},
         ),
     )
     assert GMFeedback.objects.get(survey=survey).student is None
@@ -187,7 +219,8 @@ def test_optional_fields_can_be_skipped(otis):
 
 @pytest.mark.django_db
 def test_invalid_submission_keeps_input(otis):
-    alice = verified_student(assistants=[AssistantFactory.create()])
+    assistant = AssistantFactory.create()
+    alice = verified_student(assistants=[assistant])
     survey = SurveyFactory.create(semester=alice.semester)
     otis.login(alice)
 
@@ -195,7 +228,7 @@ def test_invalid_submission_keeps_input(otis):
     resp = otis.post_ok(
         "survey-submit",
         survey.pk,
-        data=_response(gm_identity="", instructor_comments="Thanks!"),
+        data=_response(gm_identity="", **{instructor_field_name(assistant): "Thanks!"}),
     )
     form = resp.context["form"]
     assert set(form.errors) == {"gm_identity", "instructor_signed"}
@@ -234,16 +267,22 @@ def test_form_drops_unasked_fields(otis):
 
 @pytest.mark.django_db
 def test_blank_instructor_prompt_drops_field(otis):
-    bob = verified_student(assistants=[AssistantFactory.create()])
+    assistant = AssistantFactory.create()
+    bob = verified_student(assistants=[assistant])
     survey = SurveyFactory.create(semester=bob.semester)
     otis.login(bob)
     resp = otis.get_ok("survey-detail", survey.pk)
-    assert "instructor_comments" in resp.context["form"].fields
+    assert instructor_field_name(assistant) in resp.context["form"].fields
 
     survey.instructor_comments_prompt = ""
     survey.save()
     resp = otis.get_ok("survey-detail", survey.pk)
-    assert "instructor_comments" not in resp.context["form"].fields
+    assert set(resp.context["form"].fields) == {
+        "essay",
+        "satisfaction",
+        "anything_else",
+        "gm_identity",
+    }
 
 
 @pytest.mark.django_db

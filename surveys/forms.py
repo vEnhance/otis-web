@@ -24,6 +24,10 @@ class SatisfactionScale(ChoiceWidget):
     use_fieldset = True
 
 
+def instructor_field_name(assistant: Assistant) -> str:
+    return f"instructor_comments_{assistant.pk}"
+
+
 class SurveyForm(forms.Form):
     essay = forms.CharField(
         label="Free comments (read only by Evan)",
@@ -55,15 +59,6 @@ class SurveyForm(forms.Form):
         ),
         widget=forms.RadioSelect,
     )
-    instructor = forms.ModelChoiceField(
-        queryset=Assistant.objects.none(),
-        label="Which instructor are these comments for?",
-        required=False,
-    )
-    instructor_comments = forms.CharField(
-        required=False,
-        widget=forms.Textarea(attrs={"rows": 6}),
-    )
     instructor_signed = forms.ChoiceField(
         label="Sign your comments to your instructor?",
         choices=(
@@ -87,36 +82,44 @@ class SurveyForm(forms.Form):
             self.fields["anything_else"].label = survey.anything_else_prompt
         else:
             del self.fields["anything_else"]
-        instructors = [] if student is None else list(student.assistants.all())
-        self.sole_instructor = instructors[0] if len(instructors) == 1 else None
-        if survey.instructor_comments_prompt and (student is None or instructors):
-            self.fields["instructor_comments"].label = survey.instructor_comments_prompt
-        else:
-            del self.fields["instructor_comments"]
+        self.instructor_fields: dict[str, Assistant] = {}
+        if not survey.instructor_comments_prompt:
             del self.fields["instructor_signed"]
-        if len(instructors) > 1 and "instructor_comments" in self.fields:
-            instructor_field = self.fields["instructor"]
-            assert isinstance(instructor_field, forms.ModelChoiceField)
-            instructor_field.queryset = Assistant.objects.filter(
-                pk__in=[a.pk for a in instructors]
+        elif student is None:
+            self._add_instructor_field(
+                "instructor_comments", survey.instructor_comments_prompt
             )
         else:
-            del self.fields["instructor"]
+            instructors = list(student.assistants.select_related("user"))
+            for assistant in instructors:
+                name = instructor_field_name(assistant)
+                self.instructor_fields[name] = assistant
+                label = survey.instructor_comments_prompt
+                if len(instructors) > 1:
+                    label = f"{label} ({assistant.name})"
+                self._add_instructor_field(name, label)
+            if not instructors:
+                del self.fields["instructor_signed"]
+            elif len(instructors) > 1:
+                self.fields[
+                    "instructor_signed"
+                ].label = "Sign your comments to your instructors?"
+
+    def _add_instructor_field(self, name: str, label: str) -> None:
+        self.fields[name] = forms.CharField(
+            label=label,
+            required=False,
+            widget=forms.Textarea(attrs={"rows": 6}),
+        )
+        self.fields["instructor_signed"] = self.fields.pop("instructor_signed")
 
     def clean(self) -> dict[str, Any]:
         cleaned_data = super().clean() or {}
-        if cleaned_data.get("instructor_comments") and not cleaned_data.get(
-            "instructor_signed"
+        if any(cleaned_data.get(name) for name in self.instructor_fields) and not (
+            cleaned_data.get("instructor_signed")
         ):
             self.add_error(
                 "instructor_signed",
-                "Choose whether to sign your comments to your instructor.",
+                "Choose whether to sign your comments.",
             )
-        if cleaned_data.get("instructor_comments"):
-            if self.sole_instructor is not None:
-                cleaned_data["instructor"] = self.sole_instructor
-            elif not cleaned_data.get("instructor"):
-                self.add_error(
-                    "instructor", "Choose which instructor to send your comments to."
-                )
         return cleaned_data
