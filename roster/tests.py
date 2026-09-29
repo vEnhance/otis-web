@@ -693,6 +693,33 @@ def test_legacy_inquiry_url_redirects_to_petition(otis) -> None:
 
 
 @pytest.mark.django_db
+def test_petition_form_marks_completed_units(otis) -> None:
+    alice: Student = StudentFactory.create()
+    past: Student = StudentFactory.create(
+        user=alice.user, semester=SemesterFactory.create(active=False)
+    )
+    done_now, done_past, pending, untouched = UnitFactory.create_batch(4)
+    PSetFactory.create(student=alice, unit=done_now, status="A")
+    PSetFactory.create(student=past, unit=done_past, status="A")
+    PSetFactory.create(student=alice, unit=pending, status="P")
+    otis.login(alice)
+
+    resp = otis.get_20x("petition", alice.pk)
+    field = resp.context["form"].fields["unit"]
+    assert field.completed_pks == {done_now.pk, done_past.pk}
+    marked = {
+        unit.pk: field.label_from_instance(unit).startswith("\u2714")
+        for unit in (done_now, done_past, pending, untouched)
+    }
+    assert marked == {
+        done_now.pk: True,
+        done_past.pk: True,
+        pending.pk: False,
+        untouched.pk: False,
+    }
+
+
+@pytest.mark.django_db
 def test_petition(otis) -> None:
     firefly: Assistant = AssistantFactory.create()
     alice: Student = StudentFactory.create(assistant=firefly)
