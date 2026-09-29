@@ -36,36 +36,44 @@
         {% endif %}
       </h2>
       <ul>
-        {% if listing.offers_one_on_one or listing.offers_group %}
-          <li>
-            <span class="fw-bold">Available for:</span>
-            {% if listing.offers_one_on_one %}1:1 meetings{% if listing.offers_group %},{% endif %}{% endif %}
-            {% if listing.offers_group %}group meetings{% endif %}
-          </li>
-        {% endif %}
-        {% if listing.availability or listing.time_zone %}
-          <li>
-            <span class="fw-bold">Timing:</span>
-            {% if listing.availability and listing.time_zone %}
-              {{ listing.availability }} ({{ listing.time_zone }})
-            {% else %}
-              {{ listing.availability }}{{ listing.time_zone }}
-            {% endif %}
-          </li>
-        {% endif %}
-        {% if listing.next_steps %}
-          <li>
-            <span class="fw-bold">To connect:</span> {{ listing.next_steps }}
-          </li>
-        {% endif %}
-        {% if listing.links %}
-          <li>
-            <span class="fw-bold">Links:</span>
-            {% for emoji, label, url in listing.links %}
-              {{ emoji }} <a href="{{ url }}">{{ label }}</a>{% if not forloop.last %},{% endif %}
-            {% endfor %}
-          </li>
-        {% endif %}
+        <li>
+          <span class="fw-bold">Available for:</span>
+          {% if listing.offers_one_on_one and listing.offers_group %}
+            Both 1:1 and group meetings
+          {% elif listing.offers_one_on_one %}
+            1:1 meetings only
+          {% elif listing.offers_group %}
+            Group meetings only
+          {% else %}
+            <span class="text-muted">Not specified</span>
+          {% endif %}
+        </li>
+        <li>
+          <span class="fw-bold">Timing:</span>
+          {% if listing.availability and listing.time_zone %}
+            {{ listing.availability }} ({{ listing.time_zone }})
+          {% elif listing.availability or listing.time_zone %}
+            {{ listing.availability }}{{ listing.time_zone }}
+          {% else %}
+            <span class="text-muted">Not specified</span>
+          {% endif %}
+        </li>
+        <li>
+          <span class="fw-bold">To connect:</span>
+          {% if listing.next_steps %}
+            {{ listing.next_steps }}
+          {% else %}
+            <span class="text-muted">No instructions given</span>
+          {% endif %}
+        </li>
+        <li>
+          <span class="fw-bold">Links:</span>
+          {% for emoji, label, url in listing.links %}
+            {{ emoji }} <a href="{{ url }}">{{ label }}</a>{% if not forloop.last %},{% endif %}
+          {% empty %}
+            <span class="text-muted">No links provided.</span>
+          {% endfor %}
+        </li>
       </ul>
       {% if listing.blurb %}
         <div>{{ listing.blurb|linebreaks }}</div>
