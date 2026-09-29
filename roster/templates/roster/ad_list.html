@@ -31,10 +31,8 @@
       <hr />
       <h2>
         {{ assistant.name }}
-        {% if assistant.user == request.user %}
-          <a href="{% url "ad-update" %}" data-testid="ad-edit-link">(edit)</a>
-        {% elif request.user.is_superuser %}
-          <a href="{% url "admin:roster_assistant_change" assistant.pk %}">(admin edit)</a>
+        {% if listing.email %}
+          — <code><a href="mailto:{{ listing.email }}">{{ listing.email }}</a></code>
         {% endif %}
       </h2>
       <ul>
@@ -79,6 +77,14 @@
       <p class="fst-italic text-muted" data-testid="ad-updated-at">
         Last updated at {% timestamp listing.updated_at "time" %}
       </p>
+      {% if assistant.user == request.user %}
+        <a href="{% url "ad-update" %}"
+           class="btn btn-primary"
+           data-testid="ad-edit-link">Edit your listing</a>
+      {% elif request.user.is_superuser %}
+        <a href="{% url "admin:roster_assistant_change" assistant.pk %}"
+           class="btn btn-secondary">DJ Admin</a>
+      {% endif %}
     {% endwith %}
   {% endfor %}
 {% endblock layout-content %}

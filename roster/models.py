@@ -184,7 +184,6 @@ class AssistantListing(models.Model):
             ("⛺", "website", self.website),
             ("📚", "syllabus", self.syllabus_url),
             ("📝", "example material", self.example_url),
-            ("📧", "email", f"mailto:{self.email}" if self.email else ""),
         ]
         return [link for link in links if link[2]]
 

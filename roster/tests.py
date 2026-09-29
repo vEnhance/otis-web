@@ -2534,10 +2534,10 @@ def test_ad_update(otis) -> None:
 @pytest.mark.django_db
 def test_listing_links() -> None:
     listing: AssistantListing = AssistantListingFactory.create(
-        website="https://example.com/", email="me@example.com"
+        website="https://example.com/"
     )
-    assert [label for _, label, _ in listing.links] == ["website", "email"]
-    assert listing.links[1][2] == "mailto:me@example.com"
+    assert [label for _, label, _ in listing.links] == ["website"]
+    assert listing.links[0][2] == "https://example.com"
 
 
 @pytest.mark.django_db
