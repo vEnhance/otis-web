@@ -128,10 +128,25 @@ class AdvanceForm(forms.Form):
         )
 
 
+class CompletedUnitChoiceField(forms.ModelChoiceField):
+    completed_pks: frozenset[int] = frozenset()
+
+    def label_from_instance(self, obj: Unit) -> str:
+        label = super().label_from_instance(obj)
+        return f"\N{CHECK MARK} {label}" if obj.pk in self.completed_pks else label
+
+
 class PetitionForm(forms.ModelForm):
+    unit = CompletedUnitChoiceField(queryset=Unit.objects.all())
+
     def __init__(self, *args: Any, **kwargs: Any):
         student: Student = kwargs.pop("student")
         super().__init__(*args, **kwargs)
+        self.fields["unit"].completed_pks = frozenset(  # type: ignore
+            PSet.objects.filter(student__user=student.user, status="A").values_list(
+                "unit_id", flat=True
+            )
+        )
         # TODO this breaks ordering, might want to fix
         curriculum_pks = student.curriculum.all().values_list("pk", flat=True)
         queryset = Unit.objects.filter(
