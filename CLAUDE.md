@@ -93,7 +93,10 @@ so it must follow the commit conventions above.
 ### Testing
 
 Tests are plain pytest functions in `*/tests.py`, marked `@pytest.mark.django_db`
-and built from the per-app `factories.py`. The `otis` fixture
+and built from the per-app `factories.py`. Once an app's tests outgrow one file
+they move to a `tests/` package with one `test_<area>.py` per feature, as in
+`roster/tests/` and `tubes/tests/`; prefer one behavior per test over long
+scenario tests. The `otis` fixture
 (`otisweb_testsuite/fixtures.py`) wraps the Django test client with `login`,
 `get_ok`/`post_redirects`-style helpers, and the assertions below.
 `dashboard/tests.py` is the worked example. `make test` runs them in parallel with
