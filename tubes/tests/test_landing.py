@@ -5,10 +5,7 @@ from django.contrib.auth.models import Group
 from django.utils import timezone
 
 from core.factories import UserFactory
-from tubes.factories import (
-    OIMEFightFactory,
-    OIMEProposalFactory,
-)
+from tubes.factories import OIMEFightFactory, OIMEProposalFactory
 from tubes.models import OIMEFight, OIMEProposal
 from tubes.views import LANDING_RECENT_COUNT
 

@@ -2,9 +2,7 @@ import pytest
 from django.contrib.auth.models import Group
 
 from core.factories import UserFactory
-from tubes.factories import (
-    OIMEProposalFactory,
-)
+from tubes.factories import OIMEProposalFactory
 from tubes.models import OIMEContributor
 
 from .helpers import verified_contributor

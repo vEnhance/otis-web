@@ -4,10 +4,7 @@ import pytest
 from django.contrib.messages import constants as message_levels
 from django.utils import timezone
 
-from tubes.factories import (
-    OIMEFightFactory,
-    OIMEProposalFactory,
-)
+from tubes.factories import OIMEFightFactory, OIMEProposalFactory
 from tubes.models import OIMEComment, OIMEFight
 from tubes.views import GIVE_UP_RATE_LIMIT, GIVE_UP_WINDOW_MINUTES
 
