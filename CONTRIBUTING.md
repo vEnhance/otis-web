@@ -75,7 +75,7 @@ which you can do in isolation while ignoring the other parts for now.
 ## Writing tests
 
 You should write tests for any new functionality you add.
-Read the files called `*/tests.py` and do as the Romans do.
+Read the files called `*/tests.py` (or `*/tests/test_*.py`) and do as the Romans do.
 
 It's not a bad idea to write the tests before the code.
 
@@ -104,7 +104,7 @@ you can probably configure it to do so.
 ### Unit testing
 
 Running `make test` will run the test suite with coverage.
-This runs all the checks defined in `**/tests.py`.
+This runs all the checks defined in `**/tests.py` and `**/tests/test_*.py`.
 
 The coverage report shows which lines of code were actually
 checked at some point by at least one unit test.
