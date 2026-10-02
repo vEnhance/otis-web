@@ -4,11 +4,6 @@
   Reorder upcoming markets
 {% endblock title %}
 {% block layout-content %}
-  <p>
-    Drag the markets into the order you want them to run.
-    The date slots stay where they are; each market takes over the
-    start and end dates of the row it lands in.
-  </p>
   {% if markets %}
     <form method="post" action="{% url "market-reorder" %}">
       {% csrf_token %}
@@ -27,7 +22,7 @@
               <td class="text-muted" style="cursor: grab">☰</td>
               <td>
                 <input type="hidden" name="order" value="{{ market.pk }}" />
-                {{ market.title }} <span class="text-muted">({{ market.slug }})</span>
+                {{ market.title }}
               </td>
               <td data-slot>{% timestamp market.start_date "isotime" %}</td>
               <td data-slot>{% timestamp market.end_date "isotime" %}</td>
