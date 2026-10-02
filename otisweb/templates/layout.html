@@ -13,8 +13,9 @@
       </div>
     </div>
     <div class="row">
-      <div class="col-7 offset-5 col-md-5 offset-md-7 text-sm-end">
-        <div id="email_box">
+      <div class="col-12 d-flex justify-content-end align-items-center gap-2">
+        <a class="btn btn-sm btn-outline-primary d-md-none" href="#side">☰ Menu</a>
+        <div id="email_box" class="text-end">
           {% if request.user.is_authenticated %}
             👋, <b>{{ request.user }}</b>.
             <a class="text-danger" title="Logout" href="{% url "account_logout" %}">(logout)</a>
