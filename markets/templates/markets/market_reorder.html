@@ -22,7 +22,7 @@
               <td class="text-muted" style="cursor: grab">☰</td>
               <td>
                 <input type="hidden" name="order" value="{{ market.pk }}" />
-                {{ market.title }}
+                <a href="{{ market.get_absolute_url }}">{{ market.title }}</a>
               </td>
               <td data-slot>{% timestamp market.start_date "isotime" %}</td>
               <td data-slot>{% timestamp market.end_date "isotime" %}</td>
