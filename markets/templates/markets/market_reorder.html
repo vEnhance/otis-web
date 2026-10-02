@@ -1,0 +1,93 @@
+{% extends "layout.html" %}
+{% load otis_extras %}
+{% block title %}
+  Reorder upcoming markets
+{% endblock title %}
+{% block layout-content %}
+  <p>
+    Drag the markets into the order you want them to run.
+    The date slots stay where they are; each market takes over the
+    start and end dates of the row it lands in.
+  </p>
+  {% if markets %}
+    <form method="post" action="{% url "market-reorder" %}">
+      {% csrf_token %}
+      <table class="table" id="market-reorder">
+        <thead>
+          <tr class="table-dark">
+            <th></th>
+            <th>Market</th>
+            <th>Start date</th>
+            <th>End date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for market in markets %}
+            <tr draggable="true" data-testid="reorder-row">
+              <td class="text-muted" style="cursor: grab">☰</td>
+              <td>
+                <input type="hidden" name="order" value="{{ market.pk }}" />
+                {{ market.title }} <span class="text-muted">({{ market.slug }})</span>
+              </td>
+              <td data-slot>{% timestamp market.start_date "isotime" %}</td>
+              <td data-slot>{% timestamp market.end_date "isotime" %}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <p class="text-center">
+        <button type="submit" class="btn btn-primary">Save order</button>
+        <a href="{% url "market-reorder" %}" class="btn btn-outline-secondary">Reset</a>
+      </p>
+    </form>
+  {% else %}
+    <p>There are no upcoming markets this semester.</p>
+  {% endif %}
+  <p>
+    <a href="{% url "market-list" %}">Back to market list</a>
+  </p>
+{% endblock layout-content %}
+{% block scripts %}
+  <script>
+      document.addEventListener("DOMContentLoaded", () => {
+          const body = document.querySelector("#market-reorder tbody");
+          if (body === null) {
+              return;
+          }
+          const slotCells = (row) => row.querySelectorAll("[data-slot]");
+          const pkOf = (row) => row.querySelector("input[name=order]").value;
+          const slots = Array.from(body.rows, (row) =>
+              Array.from(slotCells(row), (cell) => cell.innerHTML),
+          );
+          const originalOrder = Array.from(body.rows, pkOf);
+          let dragged = null;
+
+          body.addEventListener("dragstart", (event) => {
+              dragged = event.target.closest("tr");
+              dragged.classList.add("table-active");
+              event.dataTransfer.effectAllowed = "move";
+          });
+          body.addEventListener("dragover", (event) => {
+              const target = event.target.closest("tr");
+              if (dragged === null || target === null || target === dragged) {
+                  return;
+              }
+              event.preventDefault();
+              const rect = target.getBoundingClientRect();
+              const after = event.clientY > rect.top + rect.height / 2;
+              body.insertBefore(dragged, after ? target.nextSibling : target);
+          });
+          body.addEventListener("drop", (event) => event.preventDefault());
+          body.addEventListener("dragend", () => {
+              dragged.classList.remove("table-active");
+              dragged = null;
+              Array.from(body.rows).forEach((row, i) => {
+                  slotCells(row).forEach((cell, j) => {
+                      cell.innerHTML = slots[i][j];
+                  });
+                  row.classList.toggle("table-warning", pkOf(row) !== originalOrder[i]);
+              });
+          });
+      });
+  </script>
+{% endblock scripts %}

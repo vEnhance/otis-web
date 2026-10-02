@@ -1,13 +1,10 @@
 import datetime
 
 import pytest
-from django.contrib.admin.sites import AdminSite
-from django.http.request import HttpRequest
-from django.test.client import RequestFactory
+from django.contrib.messages import constants as message_levels
 from freezegun import freeze_time
 
 from core.factories import GroupFactory, SemesterFactory, UserFactory
-from markets.admin import MarketAdmin
 from markets.factories import GuessFactory, MarketFactory
 from markets.models import Guess, Market
 from ponzi.factories import PonziSchemeFactory
@@ -85,20 +82,6 @@ def test_list_ponzi_active(otis):
 def test_model_str(market_model_data):
     str(MarketFactory.create())
     str(GuessFactory.create())
-
-
-@pytest.mark.django_db
-def test_admin_action(market_model_data):
-    site = AdminSite()
-    admin = MarketAdmin(Market, site)
-    request: HttpRequest = RequestFactory().get("/")
-    qs = Market.objects.filter(slug="m-three")
-    admin.postpone_market(request, qs)
-    assert qs.get().start_date == datetime.datetime(2050, 1, 8, tzinfo=UTC)
-    assert qs.get().end_date == datetime.datetime(2050, 1, 10, tzinfo=UTC)
-    admin.hasten_market(request, qs)
-    assert qs.get().start_date == datetime.datetime(2050, 1, 1, tzinfo=UTC)
-    assert qs.get().end_date == datetime.datetime(2050, 1, 3, tzinfo=UTC)
 
 
 @pytest.fixture
@@ -588,3 +571,82 @@ def test_create_market_with_custom_dates(otis, create_market_data):
         assert market.end_date.year == 2050
         assert market.end_date.month == 2
         assert market.end_date.day == 20
+
+
+@pytest.fixture
+def reorder_data(db):
+    semester = SemesterFactory.create(active=True)
+
+    def make(slug: str, day: int) -> Market:
+        return MarketFactory.create(
+            semester=semester,
+            slug=slug,
+            start_date=datetime.datetime(2050, 1, day, tzinfo=UTC),
+            end_date=datetime.datetime(2050, 1, day + 3, tzinfo=UTC),
+        )
+
+    make("running", 1)
+    make("first", 8)
+    make("second", 15)
+    make("third", 22)
+    MarketFactory.create(
+        semester=SemesterFactory.create(active=False),
+        slug="other-semester",
+        start_date=datetime.datetime(2050, 1, 29, tzinfo=UTC),
+        end_date=datetime.datetime(2050, 2, 1, tzinfo=UTC),
+    )
+
+
+def reorder_dates() -> dict[str, tuple[int, int]]:
+    return {
+        m.slug: (m.start_date.day, m.end_date.day)
+        for m in Market.objects.filter(semester__active=True)
+    }
+
+
+@pytest.mark.django_db
+def test_reorder_requires_admin(otis, reorder_data):
+    otis.login(UserFactory.create(is_staff=True))
+    otis.get_denied("market-reorder")
+    otis.post_denied("market-reorder", data={"order": []})
+
+
+@pytest.mark.django_db
+def test_reorder_lists_only_upcoming(otis, reorder_data):
+    with freeze_time("2050-01-02", tz_offset=0):
+        otis.login(UserFactory.create(is_staff=True, is_superuser=True))
+        resp = otis.get_ok("market-reorder")
+    assert [m.slug for m in resp.context["markets"]] == ["first", "second", "third"]
+
+
+@pytest.mark.django_db
+def test_reorder_swaps_dates(otis, reorder_data):
+    pk = {m.slug: m.pk for m in Market.objects.all()}
+    with freeze_time("2050-01-02", tz_offset=0):
+        otis.login(UserFactory.create(is_staff=True, is_superuser=True))
+        otis.post_redirects(
+            otis.url("market-reorder"),
+            "market-reorder",
+            data={"order": [pk["third"], pk["first"], pk["second"]]},
+        )
+    assert reorder_dates() == {
+        "running": (1, 4),
+        "third": (8, 11),
+        "first": (15, 18),
+        "second": (22, 25),
+    }
+
+
+@pytest.mark.django_db
+def test_reorder_rejects_stale_list(otis, reorder_data):
+    pk = {m.slug: m.pk for m in Market.objects.all()}
+    before = reorder_dates()
+    with freeze_time("2050-01-02", tz_offset=0):
+        otis.login(UserFactory.create(is_staff=True, is_superuser=True))
+        resp = otis.post_ok(
+            "market-reorder",
+            data={"order": [pk["second"], pk["first"], pk["running"]]},
+            follow=True,
+        )
+    assert reorder_dates() == before
+    assert any(m.level == message_levels.ERROR for m in resp.context["messages"])
