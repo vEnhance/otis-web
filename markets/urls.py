@@ -28,4 +28,5 @@ urlpatterns = [
         r"", RedirectView.as_view(pattern_name="market-list"), name="market-recompute"
     ),
     path(r"new-market/", views.MarketCreateView.as_view(), name="market-new"),
+    path(r"reorder/", views.reorder_markets, name="market-reorder"),
 ]

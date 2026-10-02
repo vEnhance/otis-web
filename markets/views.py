@@ -5,6 +5,7 @@ from braces.views import LoginRequiredMixin
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
 from django.db.models import Avg, Max, Sum
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
@@ -13,7 +14,7 @@ from django.http.response import (
     HttpResponseBase,
     HttpResponseRedirect,
 )
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.urls.base import reverse
 from django.utils import timezone
 from django.views.generic.detail import DetailView
@@ -333,3 +334,37 @@ class MarketCreateView(AdminRequiredMixin, CreateView[Market, BaseModelForm[Mark
 
     def get_success_url(self) -> str:
         return reverse("market-list")
+
+
+def get_reorderable_markets() -> QuerySet[Market]:
+    return Market.objects.filter(
+        semester__active=True, start_date__gt=timezone.now()
+    ).order_by("start_date", "pk")
+
+
+@admin_required
+def reorder_markets(request: AuthHttpRequest):
+    if request.method == "POST":
+        with transaction.atomic():
+            markets = list(get_reorderable_markets().select_for_update())
+            by_pk = {str(m.pk): m for m in markets}
+            order = request.POST.getlist("order")
+            if sorted(order) != sorted(by_pk):
+                messages.error(
+                    request,
+                    "The list of upcoming markets changed since the page loaded; "
+                    "please try again.",
+                )
+                return HttpResponseRedirect(reverse("market-reorder"))
+            slots = [(m.start_date, m.end_date) for m in markets]
+            for pk, (start_date, end_date) in zip(order, slots, strict=True):
+                by_pk[pk].start_date = start_date
+                by_pk[pk].end_date = end_date
+            Market.objects.bulk_update(markets, fields=("start_date", "end_date"))
+        messages.success(request, "Updated the order of upcoming markets.")
+        return HttpResponseRedirect(reverse("market-reorder"))
+    return render(
+        request,
+        "markets/market_reorder.html",
+        {"markets": get_reorderable_markets()},
+    )
