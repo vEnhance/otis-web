@@ -168,6 +168,8 @@
           <td>
             {% if investment.withdrawn_at %}
               {% timestamp investment.withdrawn_at "isotime" %}
+            {% elif investment.is_growing %}
+              Growing
             {% else %}
               Never
             {% endif %}

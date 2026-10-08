@@ -251,6 +251,21 @@ def test_collapse(otis, scheme: PonziScheme):
 
 
 @pytest.mark.django_db
+def test_growth_freezes_at_collapse(scheme: PonziScheme):
+    with freeze_time(at(0)):
+        matured = PonziInvestmentFactory.create(scheme=scheme)
+    with freeze_time(at(10)):
+        growing = PonziInvestmentFactory.create(scheme=scheme)
+    scheme.collapsed_at = at(15)
+    scheme.save()
+    with freeze_time(at(40)):
+        matured.refresh_from_db()
+        growing.refresh_from_db()
+        assert not matured.is_growing
+        assert growing.is_growing
+
+
+@pytest.mark.django_db
 def test_spades_accounting(scheme: PonziScheme):
     alice = verified_user(spades=30)
     student = Student.objects.get(user=alice)

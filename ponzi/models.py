@@ -121,7 +121,8 @@ class PonziInvestment(models.Model):
 
     @property
     def is_growing(self) -> bool:
-        return self.withdrawn_at is None and timezone.now() < self.matures_at
+        as_of = self.scheme.collapsed_at or timezone.now()
+        return self.withdrawn_at is None and as_of < self.matures_at
 
     @property
     def tier(self) -> int:
