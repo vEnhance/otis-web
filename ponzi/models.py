@@ -20,7 +20,7 @@ TIER_RETURNS = {
     3: Decimal("0.34"),
 }
 MAX_TIER = max(TIER_RETURNS)
-TIER_NAMES = {0: "—", 1: "I", 2: "II", 3: "III"}
+TIER_NAMES = {1: "I", 2: "II", 3: "III"}
 
 
 class PonziScheme(models.Model):
@@ -121,15 +121,12 @@ class PonziInvestment(models.Model):
 
     @property
     def is_growing(self) -> bool:
-        return self.withdrawn_at is None and timezone.now() < self.matures_at
-
-    @property
-    def tier(self) -> int:
-        return self.target_tier - 1 if self.is_growing else self.target_tier
+        as_of = self.scheme.collapsed_at or timezone.now()
+        return self.withdrawn_at is None and as_of < self.matures_at
 
     @property
     def tier_name(self) -> str:
-        return TIER_NAMES[self.tier]
+        return TIER_NAMES[self.target_tier]
 
     @property
     def can_withdraw(self) -> bool:
@@ -144,7 +141,7 @@ class PonziInvestment(models.Model):
 
     @property
     def current_value(self) -> Decimal:
-        return self.value_at_tier(self.tier) if self.tier else Decimal(self.amount)
+        return self.value_at_tier(self.target_tier)
 
     @property
     def spades_delta(self) -> Decimal:

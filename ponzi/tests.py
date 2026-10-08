@@ -44,7 +44,8 @@ def test_invest(otis, scheme: PonziScheme):
         investment = PonziInvestment.objects.get(user=alice)
         assert investment.amount == 10
         assert investment.created_at == at(1)
-        assert investment.tier == 0
+        assert investment.target_tier == 1
+        assert investment.is_growing
 
 
 @pytest.mark.django_db
@@ -184,19 +185,18 @@ def test_upgrade_to_tier_three(otis, scheme: PonziScheme):
         investment.refresh_from_db()
         assert investment.target_tier == 2
         assert investment.upgraded_at == at(15)
-        assert investment.tier == 1
+        assert investment.is_growing
         otis.post_30x("ponzi-withdraw", investment.pk)
         investment.refresh_from_db()
         assert investment.withdrawn_at is None
 
     with freeze_time(at(30)):
-        assert investment.tier == 2
+        assert not investment.is_growing
         otis.post_30x("ponzi-upgrade", investment.pk)
     with freeze_time(at(45)):
         otis.post_30x("ponzi-upgrade", investment.pk)
         investment.refresh_from_db()
         assert investment.target_tier == 3
-        assert investment.tier == 3
         resp = otis.get_ok("ponzi-scheme", scheme.pk)
         otis.assert_testid(resp, "ponzi-withdraw")
         otis.assert_no_testid(resp, "ponzi-upgrade")
@@ -248,6 +248,21 @@ def test_collapse(otis, scheme: PonziScheme):
         "total_outstanding": 10,
         "pool": Decimal("9.33"),
     }
+
+
+@pytest.mark.django_db
+def test_growth_freezes_at_collapse(scheme: PonziScheme):
+    with freeze_time(at(0)):
+        matured = PonziInvestmentFactory.create(scheme=scheme)
+    with freeze_time(at(10)):
+        growing = PonziInvestmentFactory.create(scheme=scheme)
+    scheme.collapsed_at = at(15)
+    scheme.save()
+    with freeze_time(at(40)):
+        matured.refresh_from_db()
+        growing.refresh_from_db()
+        assert not matured.is_growing
+        assert growing.is_growing
 
 
 @pytest.mark.django_db
