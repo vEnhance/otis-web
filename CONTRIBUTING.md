@@ -143,7 +143,7 @@ Then:
 When you submit a pull request,
 GitHub will automatically run several checks on the code;
 they are roughly the same checks described above,
-and the exact specification can be read in `.github/workflows/ci.yml`.
+and the exact specification can be read in `.github/workflows/django.yml`.
 If this is your first time doing this sort of thing
 it's likely that at least one of these checks will fail.
 Don't freak out; I'll help you through getting the tests to pass.
