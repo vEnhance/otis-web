@@ -3,7 +3,7 @@
 [<img src="https://img.shields.io/github/last-commit/vEnhance/otis-web" alt="Last update">](https://img.shields.io/github/last-commit/vEnhance/otis-web)
 <img src="https://img.shields.io/github/forks/vEnhance/otis-web" alt="Forks">
 <img src="https://img.shields.io/github/stars/vEnhance/otis-web" alt="Stars">
-[<img src="https://github.com/vEnhance/otis-web/actions/workflows/ci.yml/badge.svg" alt="OTIS-WEB status">](https://github.com/vEnhance/otis-web/actions)
+[<img src="https://github.com/vEnhance/otis-web/actions/workflows/django.yml/badge.svg" alt="OTIS-WEB status">](https://github.com/vEnhance/otis-web/actions)
 [<img src="https://github.com/vEnhance/otis-web/actions/workflows/codeql-analysis.yml/badge.svg" alt="OTIS-WEB status">](https://github.com/vEnhance/otis-web/actions)
 
 [<img src="https://img.shields.io/badge/html-djlint-blueviolet.svg" alt="djlint">](https://www.djlint.com)
