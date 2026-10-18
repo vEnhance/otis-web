@@ -89,6 +89,17 @@ def test_user_lookup_by_real_name(otis) -> None:
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize("query", ["Alice Adams", "adams alice", "alice@example Adams"])
+def test_user_lookup_matches_every_word_in_any_field(otis, query: str) -> None:
+    alice = lookup_user("alice", "Alice", "Adams")
+    lookup_user("alicia", "Alice", "Byrne")
+    login_lookup_admin(otis)
+
+    resp = otis.post_20x("user-lookup", data={"query": query})
+    assert [r["user"] for r in resp.context["results"]] == [alice]
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize(
     ("provider", "extra_data", "query", "label"),
     [
