@@ -109,6 +109,7 @@ class ExamAttemptAdmin(admin.ModelAdmin):
         "quiz",
         "student",
     )
+    autocomplete_fields = ("student",)
 
 
 @admin.register(MockCompleted)
@@ -123,3 +124,4 @@ class MockCompletedAdmin(admin.ModelAdmin):
         "exam",
         "student__semester",
     )
+    autocomplete_fields = ("student",)

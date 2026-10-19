@@ -140,6 +140,7 @@ class UserProfileAdmin(admin.ModelAdmin):
         "user__last_name",
         "user__username",
     )
+    autocomplete_fields = ("user",)
 
 
 admin.site.unregister(User)

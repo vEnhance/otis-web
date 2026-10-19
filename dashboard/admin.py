@@ -64,6 +64,7 @@ class UploadedFileAdmin(admin.ModelAdmin):
         "unit",
         "owner",
     )
+    list_select_related = ("benefactor__user", "owner", "unit__group")
 
 
 @admin.register(SemesterDownloadFile)
@@ -117,6 +118,8 @@ class PSetAdmin(admin.ModelAdmin):
         "student",
         "unit",
     )
+    raw_id_fields = ("upload",)
+    list_select_related = ("student__user", "unit__group")
 
     def accept_pset(self, request: HttpRequest, queryset: QuerySet[PSet]):
         del request

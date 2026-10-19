@@ -154,6 +154,7 @@ class AssistantAdmin(ImportExportModelAdmin):
 class AssistantListingAdmin(admin.ModelAdmin):
     list_display = ("pk", "assistant__shortname", "enabled", "created_at", "updated_at")
     list_display_links = ("pk", "assistant__shortname")
+    autocomplete_fields = ("assistant",)
 
 
 # INVOICE
@@ -393,6 +394,7 @@ class StudentRegistrationAdmin(ImportExportModelAdmin):
     resource_classes = (StudentRegistrationIEResource,)
     search_fields = ("user__first_name", "user__last_name")
     inlines = (StudentRegistrationStudentInline,)
+    autocomplete_fields = ("user",)
 
 
 # PETITION

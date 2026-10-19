@@ -65,6 +65,7 @@ class AchievementAdmin(ImportExportModelAdmin):
         ("special_effect_id", admin.EmptyFieldListFilter),
     )
     resource_class = AchievementIEResource
+    autocomplete_fields = ("creator",)
 
     def view_on_site(self, obj: Achievement) -> str:
         return reverse("found-listing", args=(obj.pk,))
@@ -192,6 +193,7 @@ class PalaceCarvingAdmin(admin.ModelAdmin):
         "display_name",
         "created_at",
     )
+    autocomplete_fields = ("user",)
 
 
 class LevelIEResource(resources.ModelResource):
