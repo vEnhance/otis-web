@@ -92,6 +92,44 @@
   </table>
   <a href="{% url "admin:auth_user_change" target_user.pk %}"
      class="btn btn-secondary">Edit user in Django admin</a>
+  <h2>Students</h2>
+  {% if students %}
+    <ul>
+      {% for student in students %}
+        <li data-testid="userinfo-student">
+          <a href="{{ student.get_absolute_url }}">{{ student.semester }}</a>
+          (<a href="{% url "admin:roster_student_change" student.pk %}">admin</a>)
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>Not a student in any semester.</p>
+  {% endif %}
+  <h2>Activity</h2>
+  {% if activity %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>App</th>
+          <th>Model</th>
+          <th>Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in activity %}
+          <tr>
+            <td>{{ row.app }}</td>
+            <td>
+              <a href="{{ row.url }}">{{ row.label|capfirst }}</a>
+            </td>
+            <td>{{ row.count }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No activity recorded.</p>
+  {% endif %}
   <h2>Connected Social Accounts</h2>
   {% if social_accounts %}
     <table class="table">
@@ -99,7 +137,6 @@
         <tr>
           <th>Provider</th>
           <th>UID</th>
-          <th>Name</th>
         </tr>
       </thead>
       <tbody>
@@ -109,7 +146,6 @@
             <td>
               <code>{{ account.uid }}</code>
             </td>
-            <td>{{ account }}</td>
           </tr>
         {% endfor %}
       </tbody>

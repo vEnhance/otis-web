@@ -4,7 +4,9 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from hijack.contrib.admin import HijackUserAdminMixin
 
-from core.factories import GroupFactory, UserFactory
+from core.factories import GroupFactory, UserFactory, UserProfileFactory
+from roster.factories import StudentFactory
+from rpg.factories import AchievementUnlockFactory
 
 
 @pytest.mark.django_db
@@ -103,4 +105,36 @@ def test_user_admin_views_on_site(otis):
     assert isinstance(model_admin, HijackUserAdminMixin)
     assert model_admin.get_view_on_site_url(target_user) == reverse(
         "user-info", args=(target_user.pk,)
+    )
+
+
+@pytest.mark.django_db
+def test_userinfo_lists_students(otis):
+    target_user = UserFactory.create()
+    old = StudentFactory.create(user=target_user, semester__end_year=2023)
+    new = StudentFactory.create(user=target_user, semester__end_year=2025)
+    otis.login(UserFactory.create(is_superuser=True, is_staff=True))
+    resp = otis.get_20x("user-info", target_user.pk)
+    assert list(resp.context["students"]) == [new, old]
+    otis.assert_testid(resp, "userinfo-student", count=2)
+
+
+@pytest.mark.django_db
+def test_userinfo_activity_links_admin(otis):
+    target_user = UserFactory.create()
+    AchievementUnlockFactory.create_batch(3, user=target_user)
+    AchievementUnlockFactory.create()  # someone else's
+    profile = UserProfileFactory.create(user=target_user)
+    otis.login(UserFactory.create(is_superuser=True, is_staff=True))
+    resp = otis.get_20x("user-info", target_user.pk)
+    rows = {row["label"]: row for row in resp.context["activity"]}
+    unlocks = rows["achievement unlocks"]
+    assert unlocks["count"] == 3
+    changelist = otis.assert_20x(otis.client.get(unlocks["url"]))
+    assert changelist.context["cl"].result_count == 3
+    assert "students" not in rows
+    assert "social accounts" not in rows
+    # One-to-one relations link straight to the object.
+    assert rows["user profile"]["url"] == reverse(
+        "admin:core_userprofile_change", args=(profile.pk,)
     )
