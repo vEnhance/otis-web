@@ -98,3 +98,7 @@ class OpalAttemptAdmin(admin.ModelAdmin):
     )
     search_fields = ("pk",)
     readonly_fields = ("created_at",)
+    autocomplete_fields = ("user",)
+
+    def view_on_site(self, obj: OpalAttempt) -> str:
+        return obj.puzzle.get_absolute_url()

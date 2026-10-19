@@ -2,7 +2,7 @@ import zoneinfo
 from typing import Any
 
 from braces.views import LoginRequiredMixin
-from django.contrib import messages
+from django.contrib import admin, messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import AnonymousUser, User
 from django.contrib.auth.tokens import default_token_generator
@@ -366,6 +366,47 @@ def calendar(request: AuthHttpRequest) -> HttpResponse:
         raise Http404("No calendar URL provided for this semester.")
 
 
+# Reverse relations of User that the userinfo page already shows in full.
+USERINFO_SHOWN_RELATIONS = ("socialaccount_set", "student_set")
+
+
+def _user_activity(user: User) -> list[dict[str, Any]]:
+    """Counts the user's rows in every admin-registered model that points at User,
+    each linked to the matching admin page. Relations with no rows are omitted."""
+    activity: list[dict[str, Any]] = []
+    for rel in User._meta.related_objects:
+        model = rel.related_model
+        if rel.get_accessor_name() in USERINFO_SHOWN_RELATIONS:
+            continue
+        if not admin.site.is_registered(model):
+            continue
+        opts = model._meta
+        qs = model._default_manager.filter(**{rel.field.name: user})
+        if rel.one_to_one:
+            obj = qs.first()
+            if obj is None:
+                continue
+            count = 1
+            url = reverse(
+                f"admin:{opts.app_label}_{opts.model_name}_change", args=(obj.pk,)
+            )
+            label = str(opts.verbose_name)
+        else:
+            count = qs.count()
+            if count == 0:
+                continue
+            url = (
+                reverse(f"admin:{opts.app_label}_{opts.model_name}_changelist")
+                + f"?{rel.field.name}__id__exact={user.pk}"
+            )
+            label = str(opts.verbose_name_plural)
+        activity.append(
+            {"app": opts.app_label, "label": label, "count": count, "url": url}
+        )
+    activity.sort(key=lambda row: (row["app"], row["label"]))
+    return activity
+
+
 class UserInfoView(AdminRequiredMixin, DetailView[User]):
     model = User
     template_name = "core/userinfo.html"
@@ -377,6 +418,12 @@ class UserInfoView(AdminRequiredMixin, DetailView[User]):
         context["social_accounts"] = user.socialaccount_set.all()  # type: ignore[attr-defined]
         context["has_password"] = user.has_usable_password()
         context["groups"] = user.groups.all()
+        context["students"] = (
+            Student.objects.filter(user=user)
+            .select_related("semester")
+            .order_by("-semester__end_year")
+        )
+        context["activity"] = _user_activity(user)
         context["reset_link"] = self.request.session.pop("reset_link", None)
         return context
 

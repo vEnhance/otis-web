@@ -1,4 +1,7 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.models import User
+from django.urls import reverse
 from import_export import fields, resources, widgets
 from import_export.admin import ImportExportModelAdmin
 
@@ -137,3 +140,13 @@ class UserProfileAdmin(admin.ModelAdmin):
         "user__last_name",
         "user__username",
     )
+    autocomplete_fields = ("user",)
+
+
+admin.site.unregister(User)
+
+
+@admin.register(User)
+class OTISUserAdmin(UserAdmin):
+    def view_on_site(self, obj: User) -> str:
+        return reverse("user-info", args=(obj.pk,))

@@ -1046,15 +1046,17 @@ def user_lookup(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
         form = UserLookupForm(request.POST)
         if form.is_valid():
-            query = form.cleaned_data["query"]
-            users = list(
-                User.objects.filter(
-                    Q(username__icontains=query)
-                    | Q(email__icontains=query)
-                    | Q(first_name__icontains=query)
-                    | Q(last_name__icontains=query)
-                    | Q(socialaccount__extra_data__icontains=query)
+            condition = Q()
+            for word in form.cleaned_data["query"].split():
+                condition &= (
+                    Q(username__icontains=word)
+                    | Q(email__icontains=word)
+                    | Q(first_name__icontains=word)
+                    | Q(last_name__icontains=word)
+                    | Q(socialaccount__extra_data__icontains=word)
                 )
+            users = list(
+                User.objects.filter(condition)
                 .distinct()
                 .prefetch_related("socialaccount_set", "groups")
                 .order_by("username")[:USER_LOOKUP_LIMIT]

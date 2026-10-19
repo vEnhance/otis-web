@@ -8,6 +8,7 @@ from django.db.models import F, FloatField, QuerySet
 from django.db.models.base import Model
 from django.db.models.functions import Cast
 from django.http import HttpRequest
+from django.urls import reverse
 from import_export import fields, resources, widgets
 from import_export.admin import ImportExportModelAdmin
 
@@ -153,6 +154,7 @@ class AssistantAdmin(ImportExportModelAdmin):
 class AssistantListingAdmin(admin.ModelAdmin):
     list_display = ("pk", "assistant__shortname", "enabled", "created_at", "updated_at")
     list_display_links = ("pk", "assistant__shortname")
+    autocomplete_fields = ("assistant",)
 
 
 # INVOICE
@@ -392,6 +394,7 @@ class StudentRegistrationAdmin(ImportExportModelAdmin):
     resource_classes = (StudentRegistrationIEResource,)
     search_fields = ("user__first_name", "user__last_name")
     inlines = (StudentRegistrationStudentInline,)
+    autocomplete_fields = ("user",)
 
 
 # PETITION
@@ -445,6 +448,9 @@ class UnitPetitionAdmin(admin.ModelAdmin):
     def reset_petition(self, request: HttpRequest, queryset: QuerySet[UnitPetition]):
         del request
         queryset.update(status="PET_NEW")
+
+    def view_on_site(self, obj: UnitPetition) -> str:
+        return reverse("petition", args=(obj.student.pk,))
 
 
 # REGISTRATION

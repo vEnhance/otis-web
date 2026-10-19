@@ -14,6 +14,7 @@ import uuid
 
 from django.core.validators import MaxValueValidator
 from django.db import models
+from django.urls import reverse
 from django.utils import timezone
 
 from core.models import Semester
@@ -66,6 +67,9 @@ class Survey(models.Model):
 
     def __str__(self) -> str:
         return f"{self.semester}: {self.name}"
+
+    def get_absolute_url(self) -> str:
+        return reverse("survey-detail", args=(self.pk,))
 
     @property
     def is_open(self) -> bool:

@@ -36,6 +36,8 @@ class JoinRecordAdmin(ImportExportModelAdmin):
     list_filter = (("user", admin.EmptyFieldListFilter),)
     search_fields = ("user__username", "invite_url")
     resource_class = JoinRecordResource
+    autocomplete_fields = ("user",)
+    list_select_related = ("tube", "user")
 
 
 @admin.register(OIMEContributor)
@@ -43,6 +45,7 @@ class OIMEContributorAdmin(admin.ModelAdmin[OIMEContributor]):
     list_display = ("display_name", "user", "casual_mode")
     list_filter = ("casual_mode",)
     search_fields = ("display_name", "user__username")
+    autocomplete_fields = ("user",)
 
 
 @admin.register(OIMEProposal)
@@ -61,7 +64,9 @@ class OIMEProposalAdmin(admin.ModelAdmin[OIMEProposal]):
     search_fields = ("author__display_name", "title", "statement")
     readonly_fields = ("created_at", "updated_at")
     filter_horizontal = ("upvotes",)
+    list_select_related = ("author",)
     actions = ("archive_problems", "unarchive_problems")
+    autocomplete_fields = ("author",)
 
     @admin.action(description="Archive selected problems")
     def archive_problems(
@@ -91,6 +96,10 @@ class OIMEFightAdmin(admin.ModelAdmin[OIMEFight]):
     list_filter = ("status",)
     search_fields = ("contributor__display_name",)
     readonly_fields = ("started_at",)
+    autocomplete_fields = ("contributor",)
+
+    def view_on_site(self, obj: OIMEFight) -> str:
+        return obj.proposal.get_absolute_url()
 
 
 @admin.register(OIMEComment)
@@ -98,3 +107,7 @@ class OIMECommentAdmin(admin.ModelAdmin[OIMEComment]):
     list_display = ("author", "proposal", "created_at")
     search_fields = ("author__display_name", "content")
     readonly_fields = ("created_at",)
+    autocomplete_fields = ("author",)
+
+    def view_on_site(self, obj: OIMEComment) -> str:
+        return obj.proposal.get_absolute_url()

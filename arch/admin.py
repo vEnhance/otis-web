@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.db.models import QuerySet
+from django.http import HttpRequest
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 from reversion.admin import VersionAdmin
@@ -37,6 +39,10 @@ class ProblemAdmin(ImportExportModelAdmin):
     inlines = (HintInline,)
     resource_class = ProblemIEResource
 
+    def get_queryset(self, request: HttpRequest) -> QuerySet[Problem]:
+        # Problem.niceness reads vote_set for each row.
+        return super().get_queryset(request).prefetch_related("vote_set")
+
 
 @admin.register(Hint)
 class HintAdmin(VersionAdmin):
@@ -66,5 +72,5 @@ class VoteAdmin(VersionAdmin):
         "niceness",
     )
     search_fields = ("problem__puid", "user__username")
-    autocomplete_fields = ("problem",)
+    autocomplete_fields = ("problem", "user")
     list_per_page = 30
