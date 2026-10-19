@@ -8,6 +8,7 @@ from django.db.models import F, FloatField, QuerySet
 from django.db.models.base import Model
 from django.db.models.functions import Cast
 from django.http import HttpRequest
+from django.urls import reverse
 from import_export import fields, resources, widgets
 from import_export.admin import ImportExportModelAdmin
 
@@ -445,6 +446,9 @@ class UnitPetitionAdmin(admin.ModelAdmin):
     def reset_petition(self, request: HttpRequest, queryset: QuerySet[UnitPetition]):
         del request
         queryset.update(status="PET_NEW")
+
+    def view_on_site(self, obj: UnitPetition) -> str:
+        return reverse("petition", args=(obj.student.pk,))
 
 
 # REGISTRATION

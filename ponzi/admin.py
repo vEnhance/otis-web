@@ -35,3 +35,6 @@ class PonziInvestmentAdmin(admin.ModelAdmin):
         "user__username",
     )
     autocomplete_fields = ("user",)
+
+    def view_on_site(self, obj: PonziInvestment) -> str:
+        return obj.scheme.get_absolute_url()

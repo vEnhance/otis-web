@@ -1,5 +1,8 @@
 import pytest
+from django.contrib import admin
+from django.contrib.auth.models import User
 from django.urls import reverse
+from hijack.contrib.admin import HijackUserAdminMixin
 
 from core.factories import GroupFactory, UserFactory
 
@@ -90,3 +93,14 @@ def test_generate_reset_link(otis):
     # Follow redirect and check link is displayed
     resp = otis.get_20x("user-info", target_user.pk)
     assert "/core/reset/" in resp.context["reset_link"]
+
+
+@pytest.mark.django_db
+def test_user_admin_views_on_site(otis):
+    target_user = UserFactory.create()
+    model_admin = admin.site._registry[User]
+    # Re-registering User must not drop the mixin django-hijack adds.
+    assert isinstance(model_admin, HijackUserAdminMixin)
+    assert model_admin.get_view_on_site_url(target_user) == reverse(
+        "user-info", args=(target_user.pk,)
+    )

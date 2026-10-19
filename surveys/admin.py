@@ -50,6 +50,9 @@ class SurveyCompletionAdmin(admin.ModelAdmin):
     list_select_related = ("student__user", "student__semester", "survey__semester")
     autocomplete_fields = ("student",)
 
+    def view_on_site(self, obj: SurveyCompletion) -> str:
+        return obj.survey.get_absolute_url()
+
 
 @admin.register(GMFeedback)
 class GMFeedbackAdmin(admin.ModelAdmin):

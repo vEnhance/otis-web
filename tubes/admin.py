@@ -92,9 +92,15 @@ class OIMEFightAdmin(admin.ModelAdmin[OIMEFight]):
     search_fields = ("contributor__display_name",)
     readonly_fields = ("started_at",)
 
+    def view_on_site(self, obj: OIMEFight) -> str:
+        return obj.proposal.get_absolute_url()
+
 
 @admin.register(OIMEComment)
 class OIMECommentAdmin(admin.ModelAdmin[OIMEComment]):
     list_display = ("author", "proposal", "created_at")
     search_fields = ("author__display_name", "content")
     readonly_fields = ("created_at",)
+
+    def view_on_site(self, obj: OIMEComment) -> str:
+        return obj.proposal.get_absolute_url()

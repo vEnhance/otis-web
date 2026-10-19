@@ -96,3 +96,6 @@ class HanabiParticipationAdmin(admin.ModelAdmin):
         "player",
         "replay",
     )
+
+    def view_on_site(self, obj: HanabiParticipation) -> str:
+        return obj.replay.get_absolute_url()

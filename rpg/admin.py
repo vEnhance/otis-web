@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.urls import reverse
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
@@ -65,6 +66,9 @@ class AchievementAdmin(ImportExportModelAdmin):
     )
     resource_class = AchievementIEResource
 
+    def view_on_site(self, obj: Achievement) -> str:
+        return reverse("found-listing", args=(obj.pk,))
+
 
 @admin.register(AchievementUnlock)
 class AchievementUnlockAdmin(admin.ModelAdmin):
@@ -85,6 +89,9 @@ class AchievementUnlockAdmin(admin.ModelAdmin):
         "achievement__code",
     )
     list_filter = ("is_first_obtain",)
+
+    def view_on_site(self, obj: AchievementUnlock) -> str:
+        return reverse("found-listing", args=(obj.achievement.pk,))
 
 
 @admin.register(AchievementCodeGuess)
@@ -136,6 +143,9 @@ class QuestCompleteAdmin(admin.ModelAdmin):
         "student",
     )
 
+    def view_on_site(self, obj: QuestComplete) -> str:
+        return reverse("stats", args=(obj.student.pk,))
+
 
 @admin.register(BonusLevel)
 class BonusLevelAdmin(admin.ModelAdmin):
@@ -162,6 +172,9 @@ class BonusLevelUnlockAdmin(admin.ModelAdmin):
         "bonus",
     )
     list_filter = ("student__semester__active",)
+
+    def view_on_site(self, obj: BonusLevelUnlock) -> str:
+        return reverse("stats", args=(obj.student.pk,))
 
 
 @admin.register(PalaceCarving)
