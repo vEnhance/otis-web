@@ -36,6 +36,7 @@ class PaymentLogAdmin(admin.ModelAdmin):
 
 @admin.register(Worker)
 class WorkerAdmin(admin.ModelAdmin):
+    ordering = ("user__first_name", "user__last_name")
     readonly_fields = ("updated_at",)
     list_display = (
         "pk",

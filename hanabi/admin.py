@@ -29,6 +29,7 @@ class HanabiContestAdmin(admin.ModelAdmin):
 
 @admin.register(HanabiPlayer)
 class HanabiPlayerAdmin(admin.ModelAdmin):
+    ordering = ("hanab_username",)
     readonly_fields = ("created_at",)
     list_display = (
         "pk",
@@ -50,6 +51,7 @@ class HanabiPlayerAdmin(admin.ModelAdmin):
 
 @admin.register(HanabiReplay)
 class HanabiReplayAdmin(admin.ModelAdmin):
+    ordering = ("-pk",)
     list_display = (
         "pk",
         "contest",
