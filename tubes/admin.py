@@ -42,6 +42,7 @@ class JoinRecordAdmin(ImportExportModelAdmin):
 
 @admin.register(OIMEContributor)
 class OIMEContributorAdmin(admin.ModelAdmin[OIMEContributor]):
+    ordering = ("display_name",)
     list_display = ("display_name", "user", "casual_mode")
     list_filter = ("casual_mode",)
     search_fields = ("display_name", "user__username")

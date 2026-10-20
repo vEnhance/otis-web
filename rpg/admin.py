@@ -36,6 +36,7 @@ class AchievementIEResource(resources.ModelResource):
 
 @admin.register(Achievement)
 class AchievementAdmin(ImportExportModelAdmin):
+    ordering = ("name",)
     list_display = (
         "code",
         "name",
@@ -150,6 +151,7 @@ class QuestCompleteAdmin(admin.ModelAdmin):
 
 @admin.register(BonusLevel)
 class BonusLevelAdmin(admin.ModelAdmin):
+    ordering = ("level", "group__name")
     list_display = (
         "pk",
         "group",
