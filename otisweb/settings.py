@@ -437,5 +437,8 @@ LOGGING = {
         },
     },
 }
+
+logging.captureWarnings(True)  # otherwise they go to stderr
+
 if TESTING:
     logging.disable(django_discordo.ACTION_LOG_LEVEL)
