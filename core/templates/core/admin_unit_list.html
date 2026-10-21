@@ -21,7 +21,7 @@
         <tr class="subject{{ unit.group.subject }}">
           <td class="number">{{ unit.position }}</td>
           <td class="font-monospace">{{ unit.code }}</td>
-          <td>{{ unit.group.name }}</td>
+          <td>{{ unit.group.name|truncatechars:"18" }}</td>
           <td class="font-monospace">{{ unit.group.slug }}</td>
           <td class="emojis">
             <a class="emoji-link"
