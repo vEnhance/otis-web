@@ -9,7 +9,7 @@
     {% for file in object_list %}
       <li>
         <p>
-          <b><a href="{{ file.content.url }}">{{ file }}</a></b>
+          <b><a href="{% url "download-file" file.pk %}">{{ file }}</a></b>
           {% if file.description %}— {{ file.description }}{% endif %}
           <br />
           <small>Uploaded at {% timestamp file.created_at "time" %}.
