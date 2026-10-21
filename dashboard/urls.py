@@ -10,6 +10,7 @@ urlpatterns = [
     path(r"queue/", views.PSetQueueList.as_view(), name="pset-queue-listing"),
     path(r"idlewarn/", views.idlewarn, name="idlewarn"),
     path(r"downloads/<int:pk>/", views.DownloadList.as_view(), name="downloads"),
+    path(r"download/<int:pk>/", views.download_file, name="download-file"),
     path(r"pset/<int:pk>/", views.PSetDetail.as_view(), name="pset"),
     path(
         r"sent/<int:student_pk>/",

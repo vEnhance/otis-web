@@ -1,3 +1,5 @@
+import datetime
+
 import pytest
 from django.urls import reverse
 from freezegun import freeze_time
@@ -6,6 +8,7 @@ from core.factories import SemesterFactory, UserFactory
 from dashboard.factories import PSetFactory, SemesterDownloadFileFactory
 from roster.factories import (
     AssistantFactory,
+    InvoiceFactory,
     RegistrationContainerFactory,
     StudentFactory,
 )
@@ -137,3 +140,50 @@ def test_download_list_of_other_student_denied(otis) -> None:
     alice = StudentFactory.create()
     otis.login(alice)
     otis.get_40x("downloads", StudentFactory.create().pk)
+
+
+@pytest.mark.django_db
+def test_download_file_redirects_to_bucket(otis) -> None:
+    alice = StudentFactory.create()
+    download = SemesterDownloadFileFactory.create(semester=alice.semester)
+    otis.login(alice)
+    otis.get_redirects(download.content.url, "download-file", download.pk)
+
+
+@pytest.mark.django_db
+def test_download_file_other_semester_denied(otis) -> None:
+    alice = StudentFactory.create()
+    download = SemesterDownloadFileFactory.create()
+    otis.login(alice)
+    otis.get_denied("download-file", download.pk)
+
+
+@pytest.mark.django_db
+def test_download_file_delinquent_denied(otis) -> None:
+    alice = StudentFactory.create(
+        semester__show_invoices=True,
+        semester__half_payment_deadline=datetime.datetime(
+            2021, 7, 1, tzinfo=datetime.UTC
+        ),
+    )
+    with freeze_time("2021-06-20", tz_offset=0):
+        InvoiceFactory.create(student=alice)
+    download = SemesterDownloadFileFactory.create(semester=alice.semester)
+    otis.login(alice)
+    otis.get_denied("download-file", download.pk)
+
+
+@pytest.mark.django_db
+def test_download_file_assistant_of_semester_student(otis) -> None:
+    alice = StudentFactory.create()
+    assistant = AssistantFactory.create()
+    alice.assistants.add(assistant)
+    download = SemesterDownloadFileFactory.create(semester=alice.semester)
+    otis.login(assistant)
+    otis.get_redirects(download.content.url, "download-file", download.pk)
+
+
+@pytest.mark.django_db
+def test_download_file_requires_login(otis) -> None:
+    download = SemesterDownloadFileFactory.create()
+    otis.get_login_redirect("download-file", download.pk)

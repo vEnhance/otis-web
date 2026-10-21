@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
-from django.db.models import Count, OuterRef, Subquery
+from django.db.models import Count, OuterRef, Q, Subquery
 from django.db.models.query import QuerySet
 from django.http import HttpResponse, HttpResponseRedirect
 from django.http.request import HttpRequest
@@ -439,6 +439,22 @@ class DownloadList(LoginRequiredMixin, ListView[SemesterDownloadFile]):
     def get_queryset(self) -> QuerySet[SemesterDownloadFile]:
         student = get_student_by_pk(self.request, self.kwargs["pk"])
         return SemesterDownloadFile.objects.filter(semester=student.semester)
+
+
+@login_required
+def download_file(request: AuthHttpRequest, pk: int) -> HttpResponse:
+    download = get_object_or_404(SemesterDownloadFile, pk=pk)
+    if not request.user.is_superuser:
+        students = Student.objects.filter(semester=download.semester).filter(
+            Q(user=request.user) | Q(assistants__user=request.user)
+        )
+        if not any(
+            can_view(request, student)
+            and (request.user.is_staff or not student.is_delinquent)
+            for student in students
+        ):
+            raise PermissionDenied("You can't access this file.")
+    return HttpResponseRedirect(download.content.url)
 
 
 class AnnouncementList(VerifiedRequiredMixin, ListView[Announcement]):
