@@ -34,7 +34,7 @@
       {% for announcement in archived_announcements %}
         <li>
           <a class="link-secondary" href="{{ announcement.get_absolute_url }}">{{ announcement.subject }}</a>
-          ({% timestamp announcement.created_at "relative" %}) —
+          ({% timestamp announcement.created_at "relative" %})
         </li>
       {% endfor %}
     </ul>
