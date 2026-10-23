@@ -3,58 +3,57 @@
 <h2>News ({{ num_news }})</h2>
 <ul>
   {% for announcement in news.announcements %}
-    <li>
+    <li class="mb-3">
       <span class="emoji-text">📢</span>
       <b><a class="alert-link" href="{{ announcement.get_absolute_url }}">{{ announcement.subject }}</a></b>
-      | {% timestamp announcement.created_at "relative" %}
+      <br>
+      <em class="text-muted">Posted {% timestamp announcement.created_at "relative" %}</em>
     </li>
   {% endfor %}
   {% for dl in news.downloads %}
-    <li>
+    <li class="mb-3">
       <span class="emoji-text">💾</span>
       <b><a class="alert-link" href="{{ dl.content.url }}">{{ dl }}</a></b>
-      | {% timestamp dl.created_at "relative" %}
       <br />
-      <em class="text-muted">New file: {{ dl.description }}</em>
+      <em class="text-muted">{{ dl.description }}.
+        Created {% timestamp dl.created_at "relative" %}.
+      </em>
     </li>
   {% endfor %}
   {% for market in news.markets %}
-    <li>
+    <li class="mb-3">
       <span class="emoji-text">📈</span>
       <b><a class="alert-link" href="{{ market.get_absolute_url }}">{{ market.title }}</a></b>
-      | {% timestamp market.start_date "relative" %}
       <br />
-      <em class="text-muted">New market opened:
-      ends {% timestamp market.end_date "relative" %}</em>
+      <em class="text-muted">New market opened.
+      Ends {% timestamp market.end_date "relative" %}.</em>
     </li>
   {% endfor %}
   {% for hc in news.hanabis %}
-    <li>
+    <li class="mb-3">
       <span class="emoji-text">🎇</span>
       <b><a class="alert-link" href="{% url "hanabi-contests" %}">{{ hc }}</a></b>
-      | {% timestamp hc.start_date "relative" %}
       <br />
-      <em class="text-muted">New Hanabi seed active:
-      ends {% timestamp hc.end_date "relative" %}</em>
+      <em class="text-muted">New Hanabi seed active.
+      Ends {% timestamp hc.end_date "relative" %}.</em>
     </li>
   {% endfor %}
   {% for hunt in news.opals %}
-    <li>
+    <li class="mb-3">
       <span class="emoji-text">🧩</span>
       <b><a class="alert-link" href="{% url "opal-hunt-list" %}">{{ hunt.name }}</a></b>
-      | {% timestamp hunt.start_date "relative" %}
       <br />
-      <em class="text-muted">OPAL hunt active!</em>
+      <em class="text-muted">Started {% timestamp hunt.start_date "relative" %}.</em>
     </li>
   {% endfor %}
   {% for survey in news.surveys %}
-    <li>
+    <li class="mb-3">
       <span class="emoji-text">📝</span>
       <b><a class="alert-link" href="{% url "survey-detail" survey.pk %}">{{ survey.name }}</a></b>
       | {% timestamp survey.opens_at "relative" %}
       <br />
-      <em class="text-muted">Survey open:
-      ends {% timestamp survey.closes_at "relative" %}</em>
+      <em class="text-muted">Survey open.
+      Ends {% timestamp survey.closes_at "relative" %}.</em>
     </li>
   {% endfor %}
 </ul>
