@@ -6,14 +6,24 @@
 {% block layout-content %}
   <h2>Current year</h2>
   {% if current_announcements %}
-    <ul>
-      {% for announcement in current_announcements %}
-        <li>
-          <span class="fst-italic">{% timestamp announcement.created_at "relative" %}</span> —
-          <a href="{{ announcement.get_absolute_url }}">{{ announcement.subject }}</a>
-        </li>
-      {% endfor %}
-    </ul>
+    <table class="table table-striped">
+      <thead class="table-dark">
+        <tr>
+          <th>Announcement</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for announcement in current_announcements %}
+          <tr>
+            <td>
+              <a href="{{ announcement.get_absolute_url }}">{{ announcement.subject }}</a>
+            </td>
+            <td>{% timestamp announcement.created_at "relative" %}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   {% else %}
     <p class="fst-italic">No announcements yet this year.</p>
   {% endif %}
@@ -23,8 +33,8 @@
     <ul class="text-muted small">
       {% for announcement in archived_announcements %}
         <li>
-          <span class="fst-italic">{% timestamp announcement.created_at "relative" %}</span> —
           <a class="link-secondary" href="{{ announcement.get_absolute_url }}">{{ announcement.subject }}</a>
+          ({% timestamp announcement.created_at "relative" %}) —
         </li>
       {% endfor %}
     </ul>
