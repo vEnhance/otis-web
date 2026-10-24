@@ -26,14 +26,28 @@
   Unit petition
 {% endblock title %}
 {% block layout-content %}
-  <p>
-    A <b>unit petition</b> lets you request changes to your units.
-    Here you can open new petitions and see the status of previous ones.
-  </p>
-  <ul>
-    <li>Your first few petitions are auto-approved by OTIS-WEB.</li>
+  <h2>How petitions work</h2>
+  <ol>
     <li>
-      After that, petitions will be manually reviewed by Evan.
+      A <b>unit petition</b> lets you request changes to your units.
+      Here you can open new petitions and see the status of previous ones.
+    </li>
+    <li>
+      Some petitions are automatically accepted by OTIS-WEB:
+      <ul>
+        <li>
+          An "add for later" petition is automatically accepted
+          (but does not unlock the unit for you).
+        </li>
+        <li>
+          An drop petition for a unit which is locked is automatically accepted
+          (this removes the locked unit from the curriculum).
+        </li>
+        <li>The first few petitions you submit are granted automatically.</li>
+      </ul>
+    </li>
+    <li>
+      Besides that, petitions will be manually reviewed by Evan.
       This may take 1-2 days, but usually not longer than that.
     </li>
     <li>
@@ -43,7 +57,7 @@
       then OTIS-WEB may rate-limit you.
       In that case, you'll need to contact Evan manually and beg for forgiveness.
     </li>
-  </ul>
+  </ol>
   <h2>New petition</h2>
   {% include "otisweb/components/generic_form.html" with submit_name="Send" %}
   {% if request.user|getconfig:"show_unit_petitions" %}
