@@ -163,7 +163,7 @@
         <th>Paid out</th>
       </tr>
       {% for investment in all_investments %}
-        <tr>
+        <tr {% if investment.withdrawn_at %}class="table-success"{% elif not investment.is_growing %}class="table-warning"{% endif %}>
           <td>{% timestamp investment.created_at "isotime" %}</td>
           <td>
             {% if investment.withdrawn_at %}
