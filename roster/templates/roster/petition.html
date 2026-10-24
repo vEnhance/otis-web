@@ -66,7 +66,6 @@
       <thead class="table-dark">
         <tr>
           <th>Created</th>
-          <th>Unit</th>
           <th>Action</th>
           <th>Status</th>
           <th></th>
@@ -77,9 +76,9 @@
           <tr>
             <td>{% timestamp petition.created_at "isodate" %}</td>
             <td>
-              <strong>{{ petition.unit }}</strong>
+              {{ petition.get_action_short_verb }}
+              {{ petition.unit }}
             </td>
-            <td>{{ petition.get_action_type_display }}</td>
             <td>
               {% if petition.status == "PET_NEW" %}
                 Pending

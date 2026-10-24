@@ -607,6 +607,19 @@ class UnitPetition(models.Model):
         self.status = "PET_ACC"
         self.save()
 
+    def get_action_short_verb(self):
+        if self.action_type == "PET_ACT_UNLOCK":
+            return "Unlock"
+        elif self.action_type == "PET_ACT_APPEND":
+            return "Append"
+        elif self.action_type == "PET_ACT_DROP":
+            return "Drop"
+        elif self.action_type == "PET_ACT_LOCK":
+            return "Lock"
+        else:
+            raise ValueError(f"No action {self.action_type}")
+        self.save()
+
 
 def content_file_name(instance: "StudentRegistration", filename: str) -> str:
     return os.path.join(
