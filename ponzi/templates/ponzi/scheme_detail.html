@@ -163,15 +163,15 @@
         <th>Paid out</th>
       </tr>
       {% for investment in all_investments %}
-        <tr>
+        <tr {% if investment.withdrawn_at %}class="table-success"{% elif not investment.is_growing %}class="table-warning"{% endif %}>
           <td>{% timestamp investment.created_at "isotime" %}</td>
           <td>
             {% if investment.withdrawn_at %}
               {% timestamp investment.withdrawn_at "isotime" %}
             {% elif investment.is_growing %}
-              Growing
+              Growing ({{ investment.hours_until_maturity|floatformat:1 }}h left)
             {% else %}
-              Never
+              Never ({{ investment.hours_past_maturity|floatformat:1 }}h idle)
             {% endif %}
           </td>
           <td>{{ investment.tier_name }}</td>

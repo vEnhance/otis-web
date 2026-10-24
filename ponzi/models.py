@@ -120,9 +120,17 @@ class PonziInvestment(models.Model):
         return (self.upgraded_at or self.created_at) + self.scheme.gestation_period
 
     @property
-    def is_growing(self) -> bool:
+    def hours_past_maturity(self) -> float:
         as_of = self.scheme.collapsed_at or timezone.now()
-        return self.withdrawn_at is None and as_of < self.matures_at
+        return (as_of - self.matures_at).total_seconds() / 3600
+
+    @property
+    def hours_until_maturity(self) -> float:
+        return -self.hours_past_maturity
+
+    @property
+    def is_growing(self) -> bool:
+        return self.withdrawn_at is None and self.hours_past_maturity < 0
 
     @property
     def tier(self) -> int:
