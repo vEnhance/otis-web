@@ -169,9 +169,9 @@
             {% if investment.withdrawn_at %}
               {% timestamp investment.withdrawn_at "isotime" %}
             {% elif investment.is_growing %}
-              Growing
+              Growing ({{ investment.hours_until_maturity|floatformat:1 }}h left)
             {% else %}
-              Never
+              Never ({{ investment.hours_past_maturity|floatformat:1 }}h since withdrawable)
             {% endif %}
           </td>
           <td>{{ investment.tier_name }}</td>

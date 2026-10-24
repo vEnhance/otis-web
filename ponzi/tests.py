@@ -263,6 +263,8 @@ def test_growth_freezes_at_collapse(scheme: PonziScheme):
         growing.refresh_from_db()
         assert not matured.is_growing
         assert growing.is_growing
+        assert matured.hours_past_maturity == 24
+        assert growing.hours_until_maturity == 9 * 24
 
 
 @pytest.mark.django_db
