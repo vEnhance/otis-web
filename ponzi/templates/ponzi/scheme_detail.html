@@ -171,7 +171,7 @@
             {% elif investment.is_growing %}
               Growing ({{ investment.hours_until_maturity|floatformat:1 }}h left)
             {% else %}
-              Never ({{ investment.hours_past_maturity|floatformat:1 }}h since withdrawable)
+              Never ({{ investment.hours_past_maturity|floatformat:1 }}h idle)
             {% endif %}
           </td>
           <td>{{ investment.tier_name }}</td>
