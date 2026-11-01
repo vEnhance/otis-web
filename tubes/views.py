@@ -26,7 +26,13 @@ from .forms import (
     OIMEContributorForm,
     OIMEProposalForm,
 )
-from .models import OIMEComment, OIMEContributor, OIMEFight, OIMEProposal
+from .models import (
+    OIMEComment,
+    OIMEContributor,
+    OIMEFight,
+    OIMEProposal,
+    OIMEYear,
+)
 
 SUBJECT_NAMES = dict(OIMEProposal.SUBJECT_CHOICES)
 
@@ -83,24 +89,25 @@ def _deny_if_draft(
     raise PermissionDenied("This proposal is still a draft.")
 
 
-def _deny_if_archived(
+def _deny_if_frozen(
     request: HttpRequest,
     proposal: OIMEProposal,
     contributor: OIMEContributor | None,
 ) -> None:
-    """Raise unless the viewer may see ``proposal``, which may be archived.
+    """Raise unless the viewer may see ``proposal``, which may be archived or retired.
 
     Archiving is staff pulling a problem out of circulation, so an archived problem
     is readable only by staff and by its author; it is also frozen, in that nobody
     starts a session on it, upvotes it or comments on it any more (see
-    :func:`_get_solver_context`).
+    :func:`_get_solver_context`). A retired problem, one that appeared in a Mock
+    AIME that has since been released, is treated the same way.
 
     As with drafts, a contributor who already started a session keeps read access.
     Nothing is hidden from them that they have not already seen, and locking them
     out would strand an attempt with the clock still running and no way to submit
     or give up.
     """
-    if not proposal.archived:
+    if not proposal.is_frozen:
         return
     if contributor is not None and proposal.author == contributor:
         return
@@ -112,13 +119,20 @@ def _deny_if_archived(
             contributor=contributor, proposal=proposal
         ).exists()
     ):
+        reason = (
+            "has been archived by staff"
+            if proposal.archived
+            else "was released in a mock AIME"
+        )
         messages.warning(
             request,
-            f"{proposal.label} has been archived by staff. You keep access because "
+            f"{proposal.label} {reason}. You keep access because "
             "you already started a session on it.",
         )
         return
-    raise PermissionDenied("This proposal has been archived.")
+    if proposal.archived:
+        raise PermissionDenied("This proposal has been archived.")
+    raise PermissionDenied("This proposal was released in a mock AIME.")
 
 
 def _deny_if_hidden(
@@ -129,10 +143,11 @@ def _deny_if_hidden(
     """Raise unless the viewer may see ``proposal`` at all.
 
     Every per-proposal view starts here, so that a problem withdrawn from the
-    listings — as a draft or as archived — cannot be reached by URL either.
+    listings — as a draft, or frozen by archiving or retirement — cannot be
+    reached by URL either.
     """
     _deny_if_draft(request, proposal, contributor)
-    _deny_if_archived(request, proposal, contributor)
+    _deny_if_frozen(request, proposal, contributor)
 
 
 def _resolve_active_fight(request: HttpRequest) -> OIMEFight | None:
@@ -293,13 +308,14 @@ def _get_solver_context(
     moment they start a fight rather than only once it is finished. Voting on a
     problem you have never opened is the only thing being prevented.
 
-    An archived problem is frozen on top of all that: staff pulled it out of
-    circulation, so no one starts a session on it or upvotes it any more, however
-    they came to still have read access to it.
+    An archived or retired problem is frozen on top of all that: staff pulled it
+    out of circulation, or it appeared in a released contest, so no one starts a
+    session on it or upvotes it any more, however they came to still have read
+    access to it.
     """
     is_author = contributor == proposal.author
     casual = _is_casual_for(contributor, proposal)
-    frozen = proposal.archived
+    frozen = proposal.is_frozen
 
     if is_author:
         return {
@@ -362,6 +378,10 @@ def _proposal_stats(proposal: OIMEProposal) -> dict[str, Any]:
         .exclude(status="OIME_TBD")
         .select_related("contributor")
     )
+    return _stats_from_fights(fights)
+
+
+def _stats_from_fights(fights: Sequence[OIMEFight]) -> dict[str, Any]:
     total = len(fights)
     correct = [f for f in fights if f.status == "OIME_OK"]
     first_correct = [
@@ -621,7 +641,8 @@ def subject_browse(request: HttpRequest, subject: str) -> HttpResponse:
     lock = None if contributor.casual_mode else _parse_lock(request.GET.get("lock"))
 
     proposals = (
-        OIMEProposal.objects.filter(archived=False, is_draft=False, subject=subject)
+        OIMEProposal.in_pool()
+        .filter(subject=subject)
         .select_related("author")
         .annotate(upvote_count=Count("upvotes", distinct=True))
     )
@@ -704,11 +725,11 @@ class ProposalListView(ContributorRequiredMixin, ListView[OIMEProposal]):
     context_object_name = "proposals"
 
     def get_queryset(self) -> QuerySet[OIMEProposal]:
-        # Archived proposals are hidden from everyone, authors and staff
-        # included; use the Django admin to browse them. Drafts are hidden the
-        # same way here, but their authors can find them on the drafts page.
+        # Archived and retired proposals are hidden from everyone, authors and
+        # staff included; use the Django admin to browse them. Drafts are hidden
+        # the same way here, but their authors can find them on the drafts page.
         return (
-            OIMEProposal.objects.filter(archived=False, is_draft=False)
+            OIMEProposal.in_pool()
             .select_related("author")
             .annotate(upvote_count=Count("upvotes", distinct=True))
             .order_by("-created_at")
@@ -753,6 +774,36 @@ class ProposalListView(ContributorRequiredMixin, ListView[OIMEProposal]):
         return context
 
 
+def _proposals_open(request: HttpRequest) -> bool:
+    """Whether this user may publish a problem right now.
+
+    Publishing is accepted only while some year's proposal window is open; drafts
+    can be written and edited at any time.
+    """
+    if request.user.is_staff:  # type: ignore[union-attr]
+        return True
+    return OIMEYear.accepting().exists()
+
+
+def _can_edit(
+    request: HttpRequest,
+    proposal: OIMEProposal,
+    contributor: OIMEContributor | None,
+) -> bool:
+    """Whether this user may edit ``proposal`` through the proposal form.
+
+    Staff always may. Authors may until the problem is selected for a contest,
+    after which it is edited in the Overleaf instead.
+    """
+    if request.user.is_staff:  # type: ignore[union-attr]
+        return True
+    return (
+        contributor is not None
+        and proposal.author == contributor
+        and not proposal.is_selected
+    )
+
+
 class ProposalCreateView(
     ContributorRequiredMixin, CreateView[OIMEProposal, OIMEProposalForm]
 ):
@@ -765,12 +816,20 @@ class ProposalCreateView(
         contributor = _get_contributor(self.request)
         if contributor is not None:
             initial["credit"] = contributor.display_name
+        if not _proposals_open(self.request):
+            initial["is_draft"] = True
         return initial
 
     def form_valid(self, form: OIMEProposalForm) -> HttpResponse:
         contributor = _get_contributor(self.request)
         if contributor is None:
             return redirect("oime-setup")
+        if not form.cleaned_data["is_draft"] and not _proposals_open(self.request):
+            form.add_error(
+                "is_draft",
+                "Proposals are closed right now, so this can only be saved as a draft.",
+            )
+            return self.form_invalid(form)
         form.instance.author = contributor
         return super().form_valid(form)
 
@@ -793,10 +852,30 @@ class ProposalUpdateView(
     ) -> OIMEProposal:
         proposal = super().get_object(queryset)
         contributor = _get_contributor(self.request)
-        is_author = contributor is not None and proposal.author == contributor
-        if not is_author and not self.request.user.is_staff:  # type: ignore[union-attr]
+        if not _can_edit(self.request, proposal, contributor):
+            if contributor is not None and proposal.author == contributor:
+                raise PermissionDenied(
+                    "This problem should be edited in the Overleaf, not here."
+                )
             raise PermissionDenied("You can only edit your own proposals.")
+        self.was_draft = proposal.is_draft
         return proposal
+
+    def form_valid(self, form: OIMEProposalForm) -> HttpResponse:
+        # Taking a draft public is the real act of submission, so it is held to the
+        # proposal window. Going back to draft is held to it too: otherwise an author
+        # could pull a published problem out of the pool and be unable to return it.
+        is_draft = form.cleaned_data["is_draft"]
+        if is_draft != self.was_draft and not _proposals_open(self.request):
+            form.add_error(
+                "is_draft",
+                "Proposals are closed right now, so a published problem must stay "
+                "published."
+                if is_draft
+                else "Proposals are closed right now, so this must stay a draft.",
+            )
+            return self.form_invalid(form)
+        return super().form_valid(form)
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
@@ -873,8 +952,8 @@ def proposal_detail(request: HttpRequest, pk: int) -> HttpResponse:
         return redirect("oime-start-fight", pk)
 
     comment_form = OIMECommentForm()
-    # The discussion on an archived problem is frozen along with the rest of it.
-    can_comment = ctx["can_see_solution"] and not proposal.archived
+    # The discussion on a frozen problem is frozen along with the rest of it.
+    can_comment = ctx["can_see_solution"] and not proposal.is_frozen
 
     if request.method == "POST" and "submit_comment" in request.POST:
         if not can_comment:
@@ -912,6 +991,8 @@ def proposal_detail(request: HttpRequest, pk: int) -> HttpResponse:
             "can_comment": can_comment,
             "has_upvoted": has_upvoted,
             "stats": stats,
+            "frozen": proposal.is_frozen,
+            "can_edit": _can_edit(request, proposal, contributor),
             **ctx,
         },
     )
@@ -1223,9 +1304,11 @@ def proposal_results(request: HttpRequest, pk: int) -> HttpResponse:
         key=lambda f: (
             f.status != "OIME_OK",
             f.wrong_answers,
-            int((f.submitted_at - f.started_at).total_seconds())
-            if f.status == "OIME_OK" and f.submitted_at is not None
-            else 1_000_000,
+            (
+                int((f.submitted_at - f.started_at).total_seconds())
+                if f.status == "OIME_OK" and f.submitted_at is not None
+                else 1_000_000
+            ),
         )
     )
 
@@ -1251,9 +1334,9 @@ def edit_comment(request: HttpRequest, pk: int) -> HttpResponse:
         return redirect("oime-setup")
     if comment.author != contributor and not request.user.is_staff:  # type: ignore[union-attr]
         raise PermissionDenied
-    # An archived problem's discussion is frozen, so its comments are read-only too.
-    if comment.proposal.archived:
-        raise PermissionDenied("This proposal has been archived.")
+    # A frozen problem's discussion is frozen, so its comments are read-only too.
+    if comment.proposal.is_frozen:
+        raise PermissionDenied("This proposal has been closed.")
 
     if request.method == "POST":
         form = OIMECommentForm(request.POST, instance=comment)
@@ -1290,11 +1373,14 @@ class LandingView(VerifiedRequiredMixin, TemplateView):
 
         contributor = _get_contributor(self.request)
         context["contributor"] = contributor
+        context["accepting_year"] = (
+            OIMEYear.accepting().order_by("proposals_close_at").first()
+        )
         if contributor is None:
             return context
 
         recent = list(
-            OIMEProposal.objects.filter(archived=False, is_draft=False)
+            OIMEProposal.in_pool()
             .select_related("author")
             .annotate(upvote_count=Count("upvotes", distinct=True))
             .order_by("-created_at")[:LANDING_RECENT_COUNT]

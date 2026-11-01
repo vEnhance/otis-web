@@ -7,6 +7,7 @@ from tubes.factories import (
     OIMEContributorFactory,
     OIMEFightFactory,
     OIMEProposalFactory,
+    OIMEYearFactory,
 )
 from tubes.models import OIMEComment, OIMEFight, OIMEProposal
 
@@ -19,6 +20,7 @@ from .helpers import verified_contributor, verified_staff
 
 @pytest.mark.django_db
 def test_create_proposal(otis):
+    OIMEYearFactory.create()
     user, contributor = verified_contributor()
     otis.login(user)
     resp = otis.post(
@@ -53,6 +55,7 @@ def test_credit_defaults_to_author_name(otis):
 
 @pytest.mark.django_db
 def test_create_proposal_prefills_credit(otis):
+    OIMEYearFactory.create()
     user, contributor = verified_contributor()
     contributor.display_name = "Grace H."
     contributor.save()
@@ -63,6 +66,7 @@ def test_create_proposal_prefills_credit(otis):
 
 @pytest.mark.django_db
 def test_credit_saved_on_create(otis):
+    OIMEYearFactory.create()
     user, _ = verified_contributor()
     otis.login(user)
     otis.post(
@@ -492,6 +496,7 @@ def test_draft_viewable_by_its_author(otis):
 
 @pytest.mark.django_db
 def test_create_proposal_as_draft(otis):
+    OIMEYearFactory.create()
     user, _ = verified_contributor()
     otis.login(user)
     otis.post(
@@ -513,6 +518,7 @@ def test_create_proposal_as_draft(otis):
 
 @pytest.mark.django_db
 def test_update_can_publish_a_draft(otis):
+    OIMEYearFactory.create()
     user, contributor = verified_contributor()
     proposal = OIMEProposalFactory.create(author=contributor, is_draft=True)
     otis.login(user)
@@ -535,6 +541,7 @@ def test_update_can_publish_a_draft(otis):
 @pytest.mark.django_db
 def test_update_can_return_a_proposal_to_draft(otis):
     user, contributor = verified_contributor()
+    OIMEYearFactory.create()
     proposal = OIMEProposalFactory.create(author=contributor, is_draft=False)
     otis.login(user)
     otis.post(

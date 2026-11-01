@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% load otis_extras %}
 {% block title %}
   OTIS Mock AIME
 {% endblock title %}
@@ -14,6 +15,14 @@
   <p>
     Welcome to the <strong>OTIS Mock AIME <s>Kitchen</s> Lab</strong>!
   </p>
+  {% if accepting_year %}
+    <p data-testid="proposals-open-note">
+      Proposals for <strong>{{ accepting_year }}</strong> are open until
+      <strong>{% timestamp accepting_year.proposals_close_at "time" %}</strong>.
+    </p>
+  {% else %}
+    <p data-testid="proposals-closed-note">Proposals are closed right now.</p>
+  {% endif %}
   {% if contributor %}
     <hr />
     <h1>Problems</h1>

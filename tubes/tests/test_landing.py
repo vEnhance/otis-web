@@ -5,7 +5,7 @@ from django.contrib.auth.models import Group
 from django.utils import timezone
 
 from core.factories import UserFactory
-from tubes.factories import OIMEFightFactory, OIMEProposalFactory
+from tubes.factories import OIMEFightFactory, OIMEProposalFactory, OIMEYearFactory
 from tubes.models import OIMEFight, OIMEProposal
 from tubes.views import LANDING_RECENT_COUNT
 
@@ -122,6 +122,7 @@ def test_landing_shows_own_proposals_and_drafts(otis):
 
 @pytest.mark.django_db
 def test_landing_links_to_every_subject_and_all_problems(otis):
+    OIMEYearFactory.create()
     user, _ = verified_contributor()
     otis.login(user)
     resp = otis.get_20x("oime-landing")

@@ -10,6 +10,11 @@
       users anymore, and it can no longer be testsolved, upvoted or commented
       on. If you think this is an error, please contact Evan.
     </div>
+  {% elif proposal.is_retired %}
+    <div class="alert alert-info" data-testid="proposal-retired-note">
+      This problem has been released in a mock AIME, so it can no longer be
+      testsolved, upvoted or commented on.
+    </div>
   {% endif %}
   <div class="d-flex justify-content-between align-items-start mb-3">
     <div>
@@ -53,9 +58,10 @@
       </p>
     </div>
     <div class="d-flex gap-2">
-      {% if proposal.author == contributor or request.user.is_staff %}
+      {% if can_edit %}
         <a href="{% url "oime-proposal-update" proposal.pk %}"
-           class="btn btn-outline-secondary btn-sm">Edit</a>
+           class="btn btn-outline-secondary btn-sm"
+           data-testid="proposal-edit-link">Edit</a>
       {% endif %}
       <a href="{% url "oime-proposal-list" %}"
          class="btn btn-outline-secondary btn-sm">← Back</a>
@@ -133,7 +139,7 @@
               {% if comment.is_edited %}
                 <span data-testid="comment-edited">(edited {% timestamp comment.updated_at "time" %})</span>
               {% endif %}
-              {% if not proposal.archived %}
+              {% if not frozen %}
                 {% if comment.author == contributor or request.user.is_staff %}
                   · <a href="{% url "oime-comment-edit" comment.pk %}">Edit</a>
                 {% endif %}
