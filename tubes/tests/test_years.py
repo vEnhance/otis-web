@@ -1,16 +1,20 @@
+import io
+import zipfile
 from datetime import timedelta
 
 import pytest
 from django.utils import timezone
 
 from tubes.factories import (
+    OIMEContributorFactory,
+    OIMEFightFactory,
     OIMEProposalFactory,
     OIMESelectionFactory,
     OIMEYearFactory,
 )
 from tubes.models import OIMEProposal
 
-from .helpers import verified_contributor, verified_staff
+from .helpers import verified_admin, verified_contributor, verified_staff
 
 PROPOSAL_DATA = {
     "title": "Squares",
@@ -256,3 +260,167 @@ def test_staff_may_edit_selected_problem(otis):
     proposal = OIMESelectionFactory.create().proposal
     otis.login(staff)
     otis.get_20x("oime-proposal-update", proposal.pk)
+
+
+# ---------------------------------------------------------------------------
+# Exports: the bytes are the product here
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.django_db
+def test_exports_are_admin_only(otis):
+    staff, _ = verified_staff()
+    year = OIMEYearFactory.create()
+    otis.login(staff)
+    otis.get_40x("oime-year-export", year.pk)
+    otis.get_40x("oime-year-descriptions", year.pk)
+
+
+@pytest.mark.django_db
+def test_export_zip_has_house_format(otis):
+    admin, _ = verified_admin()
+    year = OIMEYearFactory.create()
+    author = OIMEContributorFactory.create(display_name="Jiahe Liu")
+    proposal = OIMEProposalFactory.create(
+        author=author,
+        subject="C",
+        title="i <3 u",
+        statement="Count pairs.",
+        answer=41,
+        solution="Use Pick's theorem.",
+    )
+    OIMESelectionFactory.create(
+        year=year, proposal=proposal, status="SEL_DONE", description="$i <3 u$"
+    )
+    OIMESelectionFactory.create(year=year, status="SEL_DEFERRED")
+    solver = OIMEContributorFactory.create(display_name="Tester Ann")
+    OIMEFightFactory.create(contributor=solver, proposal=proposal, status="OIME_OK")
+    # An unfinished fight on some other problem must not drop a testsolver.
+    OIMEFightFactory.create(contributor=solver, status="OIME_TBD")
+    bystander = OIMEContributorFactory.create(display_name="Only Started")
+    OIMEFightFactory.create(contributor=bystander, proposal=proposal, status="OIME_TBD")
+    shy = OIMEContributorFactory.create(
+        display_name="Shy Solver", hide_from_acknowledgments=True
+    )
+    OIMEFightFactory.create(contributor=shy, proposal=proposal, status="OIME_OK")
+
+    otis.login(admin)
+    resp = otis.get_20x("oime-year-export", year.pk)
+    archive = zipfile.ZipFile(io.BytesIO(resp.content))
+    assert sorted(archive.namelist()) == [
+        "data/solves.tex",
+        "data/testsolving.tex",
+        f"originals/{proposal.label}.tex",
+        f"problems/{proposal.label}.tex",
+        "problems/acknow.tex",
+        "problems/order1.tex",
+    ]
+    tex = archive.read(f"problems/{proposal.label}.tex").decode()
+    assert (
+        "\\shortdesc{$i <3 u$}\n\\begin{problem}\n  Count pairs.\n\\end{problem}" in tex
+    )
+    assert "\\answer{041}" in tex
+    assert "\\credits{Jiahe Liu}" in tex
+    assert "\\begin{soln}\n  Use Pick's theorem.\n\\end{soln}" in tex
+    assert otis.url("oime-proposal-detail", proposal.pk) in tex
+
+    order = archive.read("problems/order1.tex").decode()
+    assert f"\\input{{problems/{proposal.label}}}  % [C] $i <3 u$" in order
+    assert archive.read(f"originals/{proposal.label}.tex") == b"Count pairs.\n"
+
+    acknow = archive.read("problems/acknow.tex").decode()
+    assert "Jiahe Liu," in acknow
+    assert "Tester Ann,  % 1 problems" in acknow
+    assert "Shy Solver" not in acknow
+    assert "Only Started" not in acknow
+
+
+@pytest.mark.django_db
+def test_export_description_defaults_to_escaped_title(otis):
+    admin, _ = verified_admin()
+    year = OIMEYearFactory.create()
+    proposal = OIMEProposalFactory.create(title="50% off")
+    OIMESelectionFactory.create(year=year, proposal=proposal)
+    otis.login(admin)
+    archive = zipfile.ZipFile(
+        io.BytesIO(otis.get_20x("oime-year-export", year.pk).content)
+    )
+    tex = archive.read(f"problems/{proposal.label}.tex").decode()
+    assert "\\shortdesc{50\\% off}" in tex
+
+
+@pytest.mark.django_db
+def test_export_stats(otis):
+    admin, _ = verified_admin()
+    year = OIMEYearFactory.create()
+    solved = OIMEProposalFactory.create()
+    unsolved = OIMEProposalFactory.create()
+    OIMESelectionFactory.create(year=year, proposal=solved)
+    OIMESelectionFactory.create(year=year, proposal=unsolved)
+    fast = OIMEFightFactory.create(proposal=solved, status="OIME_OK")
+    fast.submitted_at = fast.started_at + timedelta(seconds=75)
+    fast.save()
+    slow = OIMEFightFactory.create(proposal=solved, status="OIME_OK")
+    solved.upvotes.add(slow.contributor)
+    slow.submitted_at = slow.started_at + timedelta(seconds=125)
+    slow.save()
+    OIMEFightFactory.create(
+        proposal=solved, status="OIME_OK", wrong_answers=1, submitted_at=timezone.now()
+    )
+    OIMEFightFactory.create(proposal=solved, status="OIME_FAIL")
+    OIMEFightFactory.create(proposal=unsolved, status="OIME_FAIL")
+
+    otis.login(admin)
+    archive = zipfile.ZipFile(
+        io.BytesIO(otis.get_20x("oime-year-export", year.pk).content)
+    )
+    stats = archive.read("data/testsolving.tex").decode()
+    assert (
+        f"\\oimetestsolving{{{solved.label}}}{{1:15}}{{1:40}}{{2}}{{3}}{{4}}{{1}}"
+        in stats
+    )
+    assert (
+        f"\\oimetestsolving{{{unsolved.label}}}{{---}}{{---}}{{0}}{{0}}{{1}}{{0}}"
+        in stats
+    )
+    solves = archive.read("data/solves.tex").decode()
+    assert f"%\\oimesolves{{{solved.label}}}{{}}" in solves
+    assert "%\\oimescore{2}{}" in solves
+
+
+@pytest.mark.django_db
+def test_descriptions_lists_only_chosen(otis):
+    admin, _ = verified_admin()
+    year = OIMEYearFactory.create()
+    chosen = OIMESelectionFactory.create(year=year)
+    OIMESelectionFactory.create(year=year, status="SEL_DEFERRED")
+    OIMESelectionFactory.create()
+    otis.login(admin)
+    resp = otis.get_20x("oime-year-descriptions", year.pk)
+    assert [f.instance for f in resp.context["formset"]] == [chosen]
+
+
+@pytest.mark.django_db
+def test_descriptions_bulk_save(otis):
+    admin, _ = verified_admin()
+    year = OIMEYearFactory.create()
+    first = OIMESelectionFactory.create(year=year)
+    second = OIMESelectionFactory.create(year=year, description="old")
+    otis.login(admin)
+    otis.post_redirects(
+        otis.url("oime-year-descriptions", year.pk),
+        "oime-year-descriptions",
+        year.pk,
+        data={
+            "form-TOTAL_FORMS": "2",
+            "form-INITIAL_FORMS": "2",
+            "form-0-id": str(first.pk),
+            "form-0-description": "$3n$ and $4n$",
+            "form-1-id": str(second.pk),
+            "form-1-description": "",
+        },
+    )
+    first.refresh_from_db()
+    second.refresh_from_db()
+    assert first.description == "$3n$ and $4n$"
+    assert second.description == ""

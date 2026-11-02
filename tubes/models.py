@@ -360,6 +360,12 @@ class OIMESelection(models.Model):
         help_text="The contributor writing up the solution in the TeX repository.",
     )
     notes = models.TextField(blank=True, help_text="Staff-only problem notes.")
+    description = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="Short LaTeX description for the answer key and statistics "
+        "tables, e.g. $3n$ and $4n$. Defaults to the title.",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

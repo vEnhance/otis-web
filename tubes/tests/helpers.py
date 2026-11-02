@@ -17,3 +17,14 @@ def verified_staff(username: str = "staff") -> tuple[User, OIMEContributor]:
         username=username, is_staff=True, groups=(verified_group,)
     )
     return user, OIMEContributorFactory.create(user=user)
+
+
+def verified_admin(username: str = "admin") -> tuple[User, OIMEContributor]:
+    verified_group, _ = Group.objects.get_or_create(name="Verified")
+    user = UserFactory.create(
+        username=username,
+        is_staff=True,
+        is_superuser=True,
+        groups=(verified_group,),
+    )
+    return user, OIMEContributorFactory.create(user=user)

@@ -41,5 +41,11 @@ urlpatterns = [
         name="oime-subject-browse",
     ),
     path(r"serious/", views.go_serious, name="oime-serious"),
+    path(r"years/<int:pk>/export.zip", views.year_export, name="oime-year-export"),
+    path(
+        r"years/<int:pk>/descriptions/",
+        views.year_descriptions,
+        name="oime-year-descriptions",
+    ),
     path(r"", views.LandingView.as_view(), name="oime-landing"),
 ]

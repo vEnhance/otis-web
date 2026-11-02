@@ -2,7 +2,7 @@ from typing import Any, ClassVar
 
 from django import forms
 
-from .models import OIMEComment, OIMEContributor, OIMEProposal
+from .models import OIMEComment, OIMEContributor, OIMEProposal, OIMESelection
 
 
 class OIMEContributorForm(forms.ModelForm[OIMEContributor]):
@@ -68,3 +68,19 @@ class OIMECommentForm(forms.ModelForm[OIMEComment]):
         widgets: ClassVar[dict[str, forms.Widget]] = {
             "content": forms.Textarea(attrs={"rows": 4, "class": "form-control"}),
         }
+
+
+class OIMEDescriptionForm(forms.ModelForm[OIMESelection]):
+    class Meta:
+        model = OIMESelection
+        fields = ("description",)
+        widgets: ClassVar[dict[str, forms.Widget]] = {
+            "description": forms.TextInput(
+                attrs={"class": "form-control font-monospace"}
+            ),
+        }
+
+
+OIMEDescriptionFormSet = forms.modelformset_factory(
+    OIMESelection, form=OIMEDescriptionForm, extra=0
+)

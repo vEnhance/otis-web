@@ -1,5 +1,8 @@
+import io
 import statistics
-from collections.abc import Sequence
+import zipfile
+from collections import defaultdict
+from collections.abc import Iterable, Sequence
 from datetime import timedelta
 from typing import Any
 
@@ -17,13 +20,14 @@ from django.utils import timezone
 from django.utils.http import urlencode
 from django.views.generic import CreateView, ListView, TemplateView, UpdateView
 
-from otisweb.decorators import verified_required
+from otisweb.decorators import admin_required, verified_required
 from otisweb.mixins import VerifiedRequiredMixin
 
 from .forms import (
     OIMEAnswerForm,
     OIMECommentForm,
     OIMEContributorForm,
+    OIMEDescriptionFormSet,
     OIMEProposalForm,
 )
 from .models import (
@@ -31,6 +35,7 @@ from .models import (
     OIMEContributor,
     OIMEFight,
     OIMEProposal,
+    OIMESelection,
     OIMEYear,
 )
 
@@ -381,6 +386,21 @@ def _proposal_stats(proposal: OIMEProposal) -> dict[str, Any]:
     return _stats_from_fights(fights)
 
 
+def _bulk_proposal_stats(
+    proposals: Iterable[OIMEProposal],
+) -> dict[int, dict[str, Any]]:
+    """:func:`_proposal_stats` for many problems in one query, keyed by pk."""
+    by_proposal: dict[int, list[OIMEFight]] = defaultdict(list)
+    fights = (
+        OIMEFight.objects.filter(proposal__in=proposals)
+        .exclude(status="OIME_TBD")
+        .select_related("contributor")
+    )
+    for fight in fights:
+        by_proposal[fight.proposal_id].append(fight)  # type: ignore[attr-defined]
+    return {p.pk: _stats_from_fights(by_proposal[p.pk]) for p in proposals}
+
+
 def _stats_from_fights(fights: Sequence[OIMEFight]) -> dict[str, Any]:
     total = len(fights)
     correct = [f for f in fights if f.status == "OIME_OK"]
@@ -393,6 +413,7 @@ def _stats_from_fights(fights: Sequence[OIMEFight]) -> dict[str, Any]:
 
     fastest_clean = min(first_correct, key=_elapsed) if first_correct else None
 
+    median_seconds = None
     median_clean = None
     if first_correct:
         median_seconds = round(statistics.median(_elapsed(f) for f in first_correct))
@@ -408,7 +429,9 @@ def _stats_from_fights(fights: Sequence[OIMEFight]) -> dict[str, Any]:
         "first_correct": len(first_correct),
         "first_correct_pct": pct(len(first_correct)),
         "fastest_clean": fastest_clean,
+        "fastest_seconds": _elapsed(fastest_clean) if fastest_clean else None,
         "median_clean": median_clean,
+        "median_seconds": median_seconds,
     }
 
 
@@ -1398,3 +1421,230 @@ class LandingView(VerifiedRequiredMixin, TemplateView):
         context["recent_proposals"] = recent
         context["own_proposals"] = own
         return context
+
+
+# ---------------------------------------------------------------------------
+# OIME: Years (editor-in-chief pages)
+# ---------------------------------------------------------------------------
+
+
+# The export below writes calls to macros defined in oime-tables.tex in the Mock
+# AIME repository (\shortdesc, \oimetestsolving, \oimesolves, \oimescore) and
+# lays files out where that file reads them (problems/, originals/, data/).
+# Renaming a macro or changing its arguments there needs the matching change
+# here, and the other way round.
+_LATEX_SPECIALS = {
+    "\\": r"\textbackslash{}",
+    "&": r"\&",
+    "%": r"\%",
+    "$": r"\$",
+    "#": r"\#",
+    "_": r"\_",
+    "{": r"\{",
+    "}": r"\}",
+    "~": r"\textasciitilde{}",
+    "^": r"\textasciicircum{}",
+}
+
+
+def _latex_text(s: str) -> str:
+    """Escape a plain-text field (title, name) for use in LaTeX text mode."""
+    return "".join(_LATEX_SPECIALS.get(c, c) for c in s)
+
+
+def _indent(text: str) -> str:
+    return "\n".join(
+        ("  " + line) if line.strip() else "" for line in text.strip().splitlines()
+    )
+
+
+def _chosen(year: OIMEYear) -> list[OIMESelection]:
+    return list(
+        year.selections.exclude(status="SEL_DEFERRED").select_related(
+            "proposal", "proposal__author"
+        )
+    )
+
+
+def _description(sel: OIMESelection) -> str:
+    """The EIC's LaTeX description, or else the escaped title."""
+    return sel.description or _latex_text(sel.proposal.title)
+
+
+def _problem_tex(request: HttpRequest, sel: OIMESelection) -> str:
+    r"""One ``problems/<label>.tex`` in the house format of the Mock AIME repository.
+
+    ``\shortdesc`` comes before the statement because ``\answer`` and
+    ``\credits`` end the file early on some passes.
+    """
+    proposal = sel.proposal
+    url = request.build_absolute_uri(proposal.get_absolute_url())
+    return "\n".join(
+        (
+            f"% {proposal.label}: {proposal.title}",
+            f"% {url}",
+            f"\\shortdesc{{{_description(sel)}}}",
+            r"\begin{problem}",
+            _indent(proposal.statement),
+            r"\end{problem}",
+            "",
+            f"\\answer{{{proposal.answer:03d}}}",
+            f"\\credits{{{_latex_text(proposal.credit_display)}}}",
+            "",
+            r"\begin{soln}",
+            _indent(proposal.solution),
+            r"\end{soln}",
+            "",
+        )
+    )
+
+
+def _order_tex(selections: Sequence[OIMESelection]) -> str:
+    """A stub order file: every chosen problem, easiest first, for the EIC to shuffle."""
+    ordered = sorted(
+        selections, key=lambda sel: (sel.proposal.difficulty, sel.proposal.pk)
+    )
+    lines = [
+        f"\\input{{problems/{sel.proposal.label}}}  % [{sel.proposal.subject}] {_description(sel)}"
+        for sel in ordered
+    ]
+    return "\n".join(lines) + "\n"
+
+
+def _mss(seconds: int | None) -> str:
+    return "---" if seconds is None else f"{seconds // 60}:{seconds % 60:02d}"
+
+
+def _testsolving_tex(selections: Sequence[OIMESelection]) -> str:
+    r"""One ``\oimetestsolving`` line per chosen problem, read by ``oime-tables.tex``.
+
+    The argument order must match the definition of ``\oimetestsolving`` there.
+
+    Attempts and upvotes are recorded for the EIC but not shown in the table.
+    """
+    proposals = [sel.proposal for sel in selections]
+    stats = _bulk_proposal_stats(proposals)
+    upvotes = dict(
+        OIMEProposal.objects.filter(pk__in=[p.pk for p in proposals])
+        .annotate(n=Count("upvotes", distinct=True))
+        .values_list("pk", "n")
+    )
+    lines = [
+        r"% \oimetestsolving{label}{fastest}{median}{correct first try}"
+        + r"{eventually correct}{attempts}{upvotes}"
+    ]
+    for p in proposals:
+        st = stats[p.pk]
+        fields = (
+            p.label,
+            _mss(st["fastest_seconds"]),
+            _mss(st["median_seconds"]),
+            str(st["first_correct"]),
+            str(st["correct"]),
+            str(st["total"]),
+            str(upvotes.get(p.pk, 0)),
+        )
+        lines.append(
+            "\\oimetestsolving" + "".join(f"{{{f}}}" for f in fields) + f"  % {p.title}"
+        )
+    return "\n".join(lines) + "\n"
+
+
+def _solves_tex(selections: Sequence[OIMESelection]) -> str:
+    r"""A stub for the contest results, which OTIS-WEB never sees.
+
+    Its ``\oimesolves`` and ``\oimescore`` lines must match their definitions in
+    ``oime-tables.tex``.
+    """
+    lines = [
+        "% Fill these in from the contest results and uncomment them.",
+        r"% \oimesolves{label}{number correct}",
+    ]
+    lines += [f"%\\oimesolves{{{sel.proposal.label}}}{{}}" for sel in selections]
+    lines += ["", r"% \oimescore{total score}{frequency}"]
+    lines += [f"%\\oimescore{{{k}}}{{}}" for k in range(len(selections) + 1)]
+    return "\n".join(lines) + "\n"
+
+
+def _acknow_tex(year: OIMEYear, selections: Sequence[OIMESelection]) -> str:
+    """Proposers for the window and ranked testsolvers of the chosen problems.
+
+    Testsolvers are listed most prolific first with their counts in comments, so
+    the EIC can draw the tiers wherever they like. Contributors who asked to be
+    left out of acknowledgments are left out.
+    """
+    proposals = [sel.proposal for sel in selections]
+    proposers = set(
+        OIMEProposal.objects.filter(
+            is_draft=False,
+            created_at__gte=year.proposals_open_at,
+            created_at__lt=year.proposals_close_at,
+        ).values_list("author__display_name", flat=True)
+    )
+    proposers.update(p.author.display_name for p in proposals)
+    completed = Q(fights__proposal__in=proposals) & ~Q(fights__status="OIME_TBD")
+    testsolvers = (
+        OIMEContributor.objects.filter(hide_from_acknowledgments=False)
+        .annotate(n=Count("fights", filter=completed, distinct=True))
+        .filter(n__gt=0)
+        .order_by("-n", "display_name")
+    )
+    lines = [r"\subsection*{Problem proposers}"]
+    lines += [f"{_latex_text(name)}," for name in sorted(proposers, key=str.casefold)]
+    lines += ["", r"\subsection*{Testsolvers}"]
+    lines += [
+        f"{_latex_text(c.display_name)},  % {c.n} problems"  # type: ignore[attr-defined]
+        for c in testsolvers
+    ]
+    return "\n".join(lines) + "\n"
+
+
+@admin_required
+def year_export(request: HttpRequest, pk: int) -> HttpResponse:
+    """Everything the TeX repository needs from here, as one zip.
+
+    It holds ``problems/``, ``originals/`` and ``data/``, to be pasted over a copy
+    of last year's repository; the macros that read them live in that
+    repository's ``oime-tables.tex``.
+
+    This is the one-way handoff: after it, the repository owns the text and
+    OTIS-WEB keeps the authors' originals.
+    """
+    year = get_object_or_404(OIMEYear, pk=pk)
+    selections = _chosen(year)
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as archive:
+        for sel in selections:
+            label = sel.proposal.label
+            archive.writestr(f"problems/{label}.tex", _problem_tex(request, sel))
+            archive.writestr(
+                f"originals/{label}.tex", sel.proposal.statement.strip() + "\n"
+            )
+        archive.writestr("problems/order1.tex", _order_tex(selections))
+        archive.writestr("problems/acknow.tex", _acknow_tex(year, selections))
+        archive.writestr("data/testsolving.tex", _testsolving_tex(selections))
+        archive.writestr("data/solves.tex", _solves_tex(selections))
+    return HttpResponse(
+        buffer.getvalue(),
+        content_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="oime-{year.pk}.zip"'},
+    )
+
+
+@admin_required
+def year_descriptions(request: HttpRequest, pk: int) -> HttpResponse:
+    """Set the short descriptions of every chosen problem at once, before export."""
+    year = get_object_or_404(OIMEYear, pk=pk)
+    queryset = year.selections.exclude(status="SEL_DEFERRED").select_related(
+        "proposal", "proposal__author"
+    )
+    formset = OIMEDescriptionFormSet(request.POST or None, queryset=queryset)
+    if request.method == "POST" and formset.is_valid():
+        formset.save()
+        messages.success(request, "Descriptions saved.")
+        return redirect("oime-year-descriptions", year.pk)
+    return render(
+        request,
+        "tubes/year_descriptions.html",
+        {"year": year, "formset": formset},
+    )
