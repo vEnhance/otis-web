@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 from django.contrib.humanize.templatetags.humanize import naturaltime
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
 from django.db.models import F, OuterRef
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
@@ -33,7 +34,7 @@ from roster.models import ENABLED_STANDINGS, LEGIT_STANDINGS, Student
 from roster.utils import get_student_by_pk
 from rpg.models import VulnerabilityRecord
 
-from .forms import DiamondsForm
+from .forms import DiamondsForm, PrestigeContractForm
 from .levelsys import LevelInfoDict, get_level_info, get_student_rows
 from .models import (
     GUESS_CODE_MAX_LENGTH,
@@ -43,6 +44,7 @@ from .models import (
     AchievementUnlock,
     Level,
     PalaceCarving,
+    PrestigeContract,
     get_guess_rate_limit_release,
 )
 
@@ -260,6 +262,7 @@ def leaderboard(request: AuthHttpRequest) -> HttpResponse:
     rows = get_student_rows(students)
     rows.sort(
         key=lambda row: (
+            -row["prestige"],
             -row["level"],
             -row["clubs"],
             -row["hearts"],
@@ -274,11 +277,41 @@ def leaderboard(request: AuthHttpRequest) -> HttpResponse:
     return render(request, "rpg/leaderboard.html", context)
 
 
-def assert_maxed_out_level_info(student: Student) -> LevelInfoDict:
+def assert_palace_access(student: Student) -> LevelInfoDict:
     level_info = get_level_info(student)
-    if not level_info["is_maxed"]:
+    if not level_info["has_palace_access"]:
         raise PermissionDenied("Insufficient level")
     return level_info
+
+
+@login_required
+def prestige(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
+    student = get_student_by_pk(request, student_pk)
+    if request.user != student.user:
+        raise PermissionDenied("Only the student can sign their own contract")
+
+    with transaction.atomic():
+        if request.method == "POST":
+            User.objects.select_for_update().get(pk=student.user.pk)
+        level_info = get_level_info(student)
+        if not level_info["is_maxed"]:
+            raise PermissionDenied("Insufficient level")
+        form = PrestigeContractForm(
+            request.POST or None,
+            meters=level_info["meters"],
+            max_level=level_info["max_level"],
+        )
+        if request.method == "POST" and form.is_valid():
+            PrestigeContract.objects.create(
+                user=student.user,
+                **{suit: form.cleaned_data[suit] ** 2 for suit in form.fields},
+            )
+            logger.log(SUCCESS_LOG_LEVEL, f"{student} signed a prestige contract!")
+            messages.success(request, "You signed a prestige contract. Ascend again!")
+            return redirect("stats", student.pk)
+
+    context: dict[str, Any] = {"student": student, "form": form} | level_info
+    return render(request, "rpg/prestige_form.html", context)
 
 
 class PalaceList(LoginRequiredMixin, ListView[PalaceCarving]):
@@ -288,7 +321,7 @@ class PalaceList(LoginRequiredMixin, ListView[PalaceCarving]):
 
     def get_queryset(self):
         student = get_student_by_pk(self.request, self.kwargs["student_pk"])
-        assert_maxed_out_level_info(student)
+        assert_palace_access(student)
         self.student = student
         queryset = PalaceCarving.objects.filter(visible=True)
         queryset = queryset.exclude(display_name="")
@@ -331,7 +364,7 @@ class PalaceUpdate(
 
     def get_object(self, *args: Any, **kwargs: Any) -> PalaceCarving:
         student = get_student_by_pk(self.request, self.kwargs["student_pk"])
-        assert_maxed_out_level_info(student)
+        assert_palace_access(student)
         self.student = student
         carving, is_created = PalaceCarving.objects.get_or_create(user=student.user)
         if is_created is True:
@@ -374,7 +407,7 @@ class DiamondUpdate(
 
     def get_object(self, *args: Any, **kwargs: Any) -> Achievement:
         student = get_student_by_pk(self.request, self.kwargs["student_pk"])
-        assert_maxed_out_level_info(student)
+        assert_palace_access(student)
         self.student = student
 
         achievement, is_new = Achievement.objects.get_or_create(creator=student.user)

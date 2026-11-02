@@ -13,6 +13,7 @@ from .models import (
     BonusLevelUnlock,
     Level,
     PalaceCarving,
+    PrestigeContract,
     QuestComplete,
 )
 
@@ -238,3 +239,10 @@ class VulnerabilityRecordAdmin(admin.ModelAdmin):
         "commit_hash",
         "finder_name",
     )
+
+
+@admin.register(PrestigeContract)
+class PrestigeContractAdmin(admin.ModelAdmin):
+    list_display = ("id", "user", "created_at", "clubs", "hearts", "spades", "diamonds")
+    search_fields = ("user__first_name", "user__last_name", "user__username")
+    autocomplete_fields = ("user",)

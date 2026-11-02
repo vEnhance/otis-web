@@ -145,6 +145,7 @@ def certify(
             "hearts": hearts,
             "letter_grade": letter_grade,
             "level_number": level_info["level_number"],
+            "stars": level_info["stars"],
             "level_name": level_info["level_name"],
             "checksum": student.get_checksum(settings.CERT_HASH_KEY),
             "target_url": f"{request.scheme}://{request.get_host()}"

@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+{% block title %}
+  Prestige contract
+{% endblock title %}
+{% block layout-content %}
+  <p>
+    <a href="{% url 'stats' student.pk %}">Back to stats</a>
+  </p>
+  <p>
+    You have reached <b>Level {{ level_number }}{{ stars }}</b>.
+    By signing a prestige contract, you choose nonnegative integers
+    $a$, $b$, $c$, $d$ with $a+b+c+d = {{ max_level }}$,
+    and give up $a^2$, $b^2$, $c^2$, $d^2$ points
+    of your four statistics, respectively.
+    Your level will drop, and you will earn a ★ next to it.
+  </p>
+  <p>
+    No statistic may become negative.
+    If a statistic is already negative, its number must be zero.
+    You keep your access to the Ruby Palace and to secret units.
+  </p>
+  <div class="alert alert-danger">This cannot be undone.</div>
+  {% include "otisweb/components/generic_form.html" with submit_name="Sign contract" btn_class="btn-danger" %}
+{% endblock layout-content %}

@@ -7,7 +7,7 @@
 {% block layout-content %}
   <h1>{{ student.name }} — {{ level_name }}</h1>
   <p>
-    You have reached <b>Level {{ level_number }}</b>,
+    You have reached <b>Level {{ level_number }}{{ stars }}</b>,
     granting you the title of <b>{{ level_name }}</b>.
   </p>
   <p>
@@ -21,6 +21,25 @@
     {% include "rpg/meters/spades.html" with meter=meters.spades %}
     {% include "rpg/meters/diamonds.html" with meter=meters.diamonds %}
   </div>
+  {% if is_maxed and request.user == student.user %}
+    <p class="text-center my-3">
+      <a href="{% url 'prestige' student.pk %}"
+         class="btn btn-danger text-white"
+         data-testid="prestige-button"
+         role="button">Sign a prestige contract</a>
+    </p>
+  {% endif %}
+  {% if prestige_contracts %}
+    <h3>Prestige contracts</h3>
+    <ul class="list-group mb-3">
+      {% for contract in prestige_contracts %}
+        <li class="list-group-item">
+          <strong>★{{ forloop.counter }}</strong> {{ contract.created_at|date }}:
+          −{{ contract.clubs }}♣, −{{ contract.hearts }}♥, −{{ contract.spades }}♠, −{{ contract.diamonds }}♦
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
   <h3>Previous levels</h3>
   <ul class="list-group">
     {% for level in obtained_levels %}

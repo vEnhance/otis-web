@@ -332,6 +332,20 @@ class PalaceCarving(models.Model):
         return self.user.get_full_name() if self.user is not None else ""
 
 
+class PrestigeContract(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    clubs = models.PositiveIntegerField(help_text="Clubs deducted (a perfect square)")
+    hearts = models.PositiveIntegerField(help_text="Hearts deducted (a perfect square)")
+    spades = models.PositiveIntegerField(help_text="Spades deducted (a perfect square)")
+    diamonds = models.PositiveIntegerField(
+        help_text="Diamonds deducted (a perfect square)"
+    )
+
+    def __str__(self) -> str:
+        return f"Prestige contract by {self.user} at {self.created_at}"
+
+
 class VulnerabilityRecord(models.Model):
     commit_hash = models.CharField(
         max_length=64,

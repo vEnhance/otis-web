@@ -1,5 +1,9 @@
+from typing import Any
+
 from django import forms
 from django.core.validators import RegexValidator
+
+from .levelsys import SUITS, FourMetersDict
 
 CODE_REGEX = r"\A[a-fA-F0-9]{24,26}\Z"
 
@@ -23,3 +27,40 @@ class DiamondsForm(forms.Form):
             )
         ],
     )
+
+
+class PrestigeContractForm(forms.Form):
+    """Takes the square roots of the four deductions."""
+
+    clubs = forms.IntegerField(min_value=0, label="♣ Dexterity")
+    hearts = forms.IntegerField(min_value=0, label="♥ Wisdom")
+    spades = forms.IntegerField(min_value=0, label="♠ Strength")
+    diamonds = forms.IntegerField(min_value=0, label="♦ Charisma")
+
+    def __init__(
+        self, *args: Any, meters: FourMetersDict, max_level: int, **kwargs: Any
+    ):
+        super().__init__(*args, **kwargs)
+        self.meters = meters
+        self.max_level = max_level
+        for suit, field in self.fields.items():
+            field.help_text = f"Current total: {meters[suit].value}"
+
+    def clean(self) -> dict[str, Any]:
+        cleaned_data = super().clean() or {}
+        roots = {suit: cleaned_data.get(suit) for suit in SUITS}
+        if any(root is None for root in roots.values()):
+            return cleaned_data
+        if sum(roots.values()) != self.max_level:  # type: ignore
+            raise forms.ValidationError(
+                f"The four numbers must add up to exactly {self.max_level}."
+            )
+        for suit, root in roots.items():
+            assert root is not None
+            value = self.meters[suit].value
+            if value < 0:
+                if root != 0:
+                    self.add_error(suit, "This statistic is negative, so pick 0.")
+            elif root * root > value:
+                self.add_error(suit, f"You only have {value} to give up.")
+        return cleaned_data

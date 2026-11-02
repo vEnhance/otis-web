@@ -30,6 +30,7 @@ from .models import (
     BonusLevel,
     BonusLevelUnlock,
     Level,
+    PrestigeContract,
     QuestComplete,
 )
 
@@ -177,6 +178,11 @@ class LevelInfoDict(SpadeItemsDict):
     str_im_level: str
     level_name: str
     is_maxed: bool
+    max_level: int
+    prestige_contracts: QuerySet[PrestigeContract]
+    prestige: int
+    stars: str
+    has_palace_access: bool
     bonus_levels: QuerySet[BonusLevel]
 
 
@@ -223,6 +229,14 @@ def get_level_info(student: Student) -> LevelInfoDict:
     level_data["level_number"] = level_number
     level_data["level_name"] = level_name
     level_data["is_maxed"] = level_number >= max_level
+    level_data["max_level"] = max_level
+    level_data["prestige_contracts"] = PrestigeContract.objects.filter(
+        user=student.user
+    ).order_by("created_at")
+    prestige = level_data["prestige_contracts"].count()
+    level_data["prestige"] = prestige
+    level_data["stars"] = "★" * prestige
+    level_data["has_palace_access"] = level_number >= max_level or prestige > 0
     level_data["bonus_levels"] = BonusLevel.objects.filter(level__lte=level_number)
     level_data["str_im_level"] = str_im_level
 
@@ -234,6 +248,10 @@ ACCEPTED_PSETS = Q(status="A", eligible=True)
 
 def or_zero(subquery: Combinable) -> Coalesce:
     return Coalesce(subquery, 0.0, output_field=FloatField())
+
+
+def prestige_deduction(suit: str, to_user: str) -> Combinable:
+    return or_zero(SubquerySum(f"{to_user}prestigecontract__{suit}"))
 
 
 def clubs_expression(to_user: str = "") -> Combinable:
@@ -248,15 +266,20 @@ def clubs_expression(to_user: str = "") -> Combinable:
         * or_zero(
             SubquerySum(path, filter=ACCEPTED_PSETS & Q(unit__code__startswith="Z"))
         )
+        - prestige_deduction("clubs", to_user)
     )
 
 
 def hearts_expression(to_user: str = "") -> Combinable:
-    return or_zero(SubquerySum(f"{to_user}student__pset__hours", filter=ACCEPTED_PSETS))
+    return or_zero(
+        SubquerySum(f"{to_user}student__pset__hours", filter=ACCEPTED_PSETS)
+    ) - prestige_deduction("hearts", to_user)
 
 
 def diamonds_expression(to_user: str = "") -> Combinable:
-    return or_zero(SubquerySum(f"{to_user}achievementunlock__achievement__diamonds"))
+    return or_zero(
+        SubquerySum(f"{to_user}achievementunlock__achievement__diamonds")
+    ) - prestige_deduction("diamonds", to_user)
 
 
 SPADE_SUGGESTIONS = Q(status__in=("SUGG_NOK", "SUGG_OK"), eligible=True)
@@ -290,7 +313,7 @@ def spades_expression(to_user: str = "") -> Combinable:
     total: Combinable = Value(0.0)
     for subquery in subqueries:
         total += or_zero(subquery)
-    return total
+    return total - prestige_deduction("spades", to_user)
 
 
 SUITS = ("clubs", "hearts", "diamonds", "spades")
@@ -369,6 +392,7 @@ def annotate_student_queryset_with_scores(
             filter=Q(eligible=True, unit__code__startswith="Z"),
         ),
         num_semesters=SubqueryCount("user__student"),
+        num_prestiges=SubqueryCount("user__prestigecontract"),
         **suit_totals(to_user="user__"),
     )
 
@@ -392,6 +416,9 @@ def get_student_rows(queryset: QuerySet[Student]) -> list[dict[str, Any]]:
         for suit in SUITS:
             row[suit] = float(getattr(student, suit))
         row["level"] = sum(int(max(row[k], 0) ** 0.5) for k in SUITS)
+        row["prestige"] = student.num_prestiges  # type: ignore
+        row["stars"] = "★" * row["prestige"]
+        row["sort_level"] = 1000 * row["prestige"] + row["level"]
         try:
             row["last_seen"] = student.user.profile.last_seen
         except UserProfile.DoesNotExist:
@@ -421,6 +448,8 @@ def check_level_up(student: Student, level_info: LevelInfoDict) -> bool:
     if not student.semester.active:
         return False
     level_number = level_info["level_number"]
+    if level_info["prestige"] > 0:
+        level_number = max(level_number, level_info["max_level"])
     if level_number <= student.last_level_seen:
         return False
 
