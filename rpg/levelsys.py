@@ -240,9 +240,11 @@ def get_level_info(student: Student) -> LevelInfoDict:
     ).order_by("created_at")
     prestige = level_data["prestige_contracts"].count()
     level_data["prestige"] = prestige
-    floored_level = max(level_number, max_level) if prestige > 0 else level_number
-    level_data["has_palace_access"] = floored_level >= max_level
-    level_data["bonus_levels"] = BonusLevel.objects.filter(level__lte=floored_level)
+    perk_level_number = (
+        max(level_number, prestige_perk_floor(max_level)) if prestige else level_number
+    )
+    level_data["has_palace_access"] = perk_level_number >= max_level
+    level_data["bonus_levels"] = BonusLevel.objects.filter(level__lte=perk_level_number)
     level_data["str_im_level"] = str_im_level
 
     return level_data
@@ -277,14 +279,21 @@ def get_max_level() -> int:
     return Level.objects.all().aggregate(max=Max("threshold"))["max"] or 0
 
 
+def prestige_perk_floor(max_level: int) -> int:
+    """Lowest perk level of anyone who has prestiged: enough for the Ruby Palace
+    and for every bonus level, even ones set above the max level."""
+    max_bonus = BonusLevel.objects.aggregate(max=Max("level"))["max"] or 0
+    return max(max_level, max_bonus)
+
+
 def perk_level(user: User, level: int) -> int:
     """The level used for Ruby Palace access and secret units.
 
-    Prestiging resets a student's real level, but they keep max-level perks.
+    Prestiging resets a student's real level, but they keep all the perks.
     Everything else (UI, level-up toasts) uses the real level."""
     if not PrestigeContract.objects.filter(user=user).exists():
         return level
-    return max(level, get_max_level())
+    return max(level, prestige_perk_floor(get_max_level()))
 
 
 ACCEPTED_PSETS = Q(status="A", eligible=True)

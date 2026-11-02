@@ -5,7 +5,7 @@
       Level {% level level_number prestige %} {{ str_im_level }}
       —
       <a href="{% url 'stats' student.pk %}">
-        <span class="emoji-text">🏅</span>{{ level_name }}</a>
+        <span class="emoji-text">🏅</span>{% level_name level_name prestige %}</a>
     </h1>
     <div class="container">
       <div class="row">

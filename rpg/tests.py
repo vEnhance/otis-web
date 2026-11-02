@@ -1149,12 +1149,16 @@ def test_prestige_keeps_secret_units(otis):
     PrestigeContract.objects.create(user=alice.user, **contract(4, 0, 0, 9))
     bonus = BonusLevelFactory.create(level=5)
     bonus_unit = UnitFactory.create(group=bonus.group, code="BKU")
+    beyond_max = BonusLevelFactory.create(level=50)
+    beyond_max_unit = UnitFactory.create(group=beyond_max.group, code="BKV")
     otis.login(alice)
 
     resp = otis.get_ok("portal", alice.pk)
     otis.assert_testid(resp, "bonus-level-request")
     resp = otis.get_ok("bonus-level-request", alice.pk)
-    assert bonus_unit in resp.context["form"].fields["unit"].queryset
+    units = resp.context["form"].fields["unit"].queryset
+    assert bonus_unit in units
+    assert beyond_max_unit in units
 
 
 @pytest.mark.django_db
@@ -1209,6 +1213,12 @@ def test_no_prestige_stars_without_contract(otis):
     alice = maxed_student()
     otis.login(alice)
     otis.assert_testid(otis.get_ok("stats", alice.pk), "prestige-stars", count=0)
+
+
+def test_level_name_tag_has_stars():
+    html = Template("{% load otis_extras %}{% level_name 'Ruby' 2 %}").render(Context())
+    assert "Ruby<span" in html
+    assert html.count("✷") == 2
 
 
 def test_level_tag_has_no_trailing_space():
