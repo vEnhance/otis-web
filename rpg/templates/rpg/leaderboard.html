@@ -36,7 +36,7 @@
           </td>
           <td data-sort-value="{{ row.sort_level }}">
             <strong>Lv {% level row.level row.prestige %}</strong>
-            <sup class="fst-italic">{% level_name row.level_name row.prestige %}</sup>
+            <sup class="fst-italic">{{ row.level_name }}</sup>
           </td>
           <td>{{ row.student.num_semesters }}</td>
           <td>
