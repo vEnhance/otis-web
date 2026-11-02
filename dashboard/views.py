@@ -27,7 +27,12 @@ from otisweb.decorators import admin_required
 from otisweb.mixins import VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest, get_days_since
 from roster.forms import BackfillUSStateForm
-from roster.models import LEGIT_STANDINGS, RegistrationContainer, Student
+from roster.models import (
+    LEGIT_STANDINGS,
+    RegistrationContainer,
+    Student,
+    StudentStanding,
+)
 from roster.utils import (
     can_view,
     get_regs_missing_us_state,
@@ -352,6 +357,40 @@ def bonus_level_request(request: HttpRequest, student_pk: int) -> HttpResponse:
     return render(request, "dashboard/bonus_level_request.html", context)
 
 
+STANDING_ROW_CLASSES = {
+    StudentStanding.NEWBORN: "table-success",
+    StudentStanding.PROBATION: "table-warning",
+    StudentStanding.SUSPENDED: "table-danger",
+    StudentStanding.FAKE: "table-primary",
+    StudentStanding.DROPPED: "table-info",
+}
+STAFF_ONLY_STANDINGS = {StudentStanding.PROBATION, StudentStanding.SUSPENDED}
+
+
+def get_stulist_rows(
+    request: AuthHttpRequest, queryset: QuerySet[Student]
+) -> list[dict[str, Any]]:
+    """Student rows for the listing, with each student's standing marked.
+
+    Each row gets a `row_class` tint and a `standing_note` to print beside the
+    name. Both stay empty for good standing, and for the standings in
+    `STAFF_ONLY_STANDINGS` unless the viewer is staff, so a student can't tell
+    probation or suspension apart from good standing.
+    """
+    rows = get_student_rows(queryset)
+    for row in rows:
+        student: Student = row["student"]
+        standing = StudentStanding(student.standing)
+        visible = request.user.is_staff or standing not in STAFF_ONLY_STANDINGS
+        if visible and standing != StudentStanding.GOOD:
+            row["row_class"] = STANDING_ROW_CLASSES.get(standing, "")
+            row["standing_note"] = standing.label.lower()
+        else:
+            row["row_class"] = ""
+            row["standing_note"] = ""
+    return rows
+
+
 @login_required
 def index(request: AuthHttpRequest) -> HttpResponse:
     students = get_visible_students(request.user, current=True)
@@ -364,7 +403,7 @@ def index(request: AuthHttpRequest) -> HttpResponse:
     )
     context: dict[str, Any] = {
         "title": "Current year listing",
-        "rows": get_student_rows(queryset),
+        "rows": get_stulist_rows(request, queryset),
         "stulist_show_semester": False,
     }
     context["exists_registration"] = RegistrationContainer.objects.filter(
@@ -386,7 +425,7 @@ def past(request: AuthHttpRequest, semester_pk: int | None = None):
     )
     context: dict[str, Any] = {
         "title": "Previous year listing",
-        "rows": get_student_rows(queryset),
+        "rows": get_stulist_rows(request, queryset),
         "past": True,
     }
     if semester is not None:

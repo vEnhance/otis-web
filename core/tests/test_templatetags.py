@@ -6,11 +6,6 @@ import pytest
 from django.template import Context, Template
 from django.utils import timezone
 
-from core.factories import UserFactory
-from core.templatetags.otis_extras import standing_row_class
-from roster.factories import StudentFactory
-from roster.models import StudentStanding
-
 
 def render_timestamp(value: Any, args: str) -> str:
     template = Template("{% load otis_extras %}{% timestamp value " + args + " %}")
@@ -67,23 +62,3 @@ def test_timestamp_tag_relative():
 def test_timestamp_tag_rejects_unknown_style():
     with pytest.raises(ValueError):
         render_timestamp(timezone.now(), '"DATE_FORMAT"')
-
-
-@pytest.mark.django_db
-@pytest.mark.parametrize(
-    ("standing", "staff_class", "student_class"),
-    [
-        (StudentStanding.GOOD, "", ""),
-        (StudentStanding.NEWBORN, "table-success", "table-success"),
-        (StudentStanding.PROBATION, "table-warning", ""),
-        (StudentStanding.SUSPENDED, "table-danger", "table-danger"),
-        (StudentStanding.FAKE, "table-primary", "table-primary"),
-        (StudentStanding.DROPPED, "table-info", "table-info"),
-    ],
-)
-def test_standing_row_class(
-    standing: StudentStanding, staff_class: str, student_class: str
-) -> None:
-    student = StudentFactory.create(standing=standing)
-    assert standing_row_class(student, UserFactory.create(is_staff=True)) == staff_class
-    assert standing_row_class(student, UserFactory.create()) == student_class

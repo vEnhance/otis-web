@@ -25,14 +25,12 @@
       <tbody>
         {% for row in rows %}
           {% with student=row.student %}
-            <tr class="{{ student|standing_row_class:request.user }}">
+            <tr class="{{ row.row_class }}">
               {# begin table row for this student #}
               <td>{{ student.pk }}</td>
               <td>
                 <a href="{% url "portal" student.pk %}">{{ student.name }}</a>
-                {% if student.newborn or not student.enabled %}
-                  ({{ student.get_standing_display|lower }})
-                {% endif %}
+                {% if row.standing_note %}({{ row.standing_note }}){% endif %}
               </td>
               {% if stulist_show_semester %}
                 <td>{{ student.semester }}</td>

@@ -12,7 +12,7 @@ from roster.factories import (
     RegistrationContainerFactory,
     StudentFactory,
 )
-from roster.models import Student
+from roster.models import Student, StudentStanding
 
 
 @pytest.mark.django_db
@@ -94,6 +94,55 @@ def test_past_for_one_semester_as_instructor(otis, past_alice) -> None:
     rows = {row["student"]: row for row in resp.context["rows"]}
     assert set(rows) == {past_alice, bob}
     assert rows[past_alice]["level"] == 38
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    ("standing", "row_class"),
+    [
+        (StudentStanding.GOOD, ""),
+        (StudentStanding.NEWBORN, "table-success"),
+        (StudentStanding.PROBATION, "table-warning"),
+        (StudentStanding.SUSPENDED, "table-danger"),
+        (StudentStanding.FAKE, "table-primary"),
+        (StudentStanding.DROPPED, "table-info"),
+    ],
+)
+def test_stulist_marks_standing_for_staff(
+    otis, standing: StudentStanding, row_class: str
+) -> None:
+    assistant = AssistantFactory.create()
+    StudentFactory.create_batch(2, assistants=[assistant], standing=standing)
+    otis.login(assistant)
+    for row in otis.get_20x("index").context["rows"]:
+        assert row["row_class"] == row_class
+        assert bool(row["standing_note"]) == (standing != StudentStanding.GOOD)
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    ("standing", "row_class"),
+    [
+        (StudentStanding.GOOD, ""),
+        (StudentStanding.NEWBORN, "table-success"),
+        (StudentStanding.PROBATION, ""),
+        (StudentStanding.SUSPENDED, ""),
+        (StudentStanding.FAKE, "table-primary"),
+        (StudentStanding.DROPPED, "table-info"),
+    ],
+)
+def test_stulist_marks_standing_for_non_staff(
+    otis, past_alice, standing: StudentStanding, row_class: str
+) -> None:
+    past_alice.standing = standing
+    past_alice.save()
+    StudentFactory.create(user=past_alice.user, standing=standing)
+    otis.login(past_alice)
+    rows = otis.get_20x("past").context["rows"]
+    assert len(rows) == 2
+    for row in rows:
+        assert row["row_class"] == row_class
+        assert bool(row["standing_note"]) == bool(row_class)
 
 
 @pytest.mark.django_db
