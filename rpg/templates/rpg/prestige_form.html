@@ -8,16 +8,23 @@
     <a href="{% url 'stats' student.pk %}">Back to stats</a>
   </p>
   <p>
-    The <strong>Prestige</strong> function lets you exchange
-    {{ max_level }} levels to obtain a special Prestige star indicator next to your level
-    (for example, "Level {% level "N" 1 %}").
+    Do you miss the beginning of OTIS when you could go up ten levels
+    from submitting just one unit?
+    Do you wish $\sqrt x$ was a little less convex?
   </p>
   <p>
-    After activating Prestige, you can continue to level up
-    (which will become easier again with the lowered statistics).
+    The <strong>Prestige</strong> function lets you exchange
+    {{ max_level }} levels to obtain a
+    special Prestige star indicator next to your level in its place.
+    Activating Prestige in this way does <b>not</b>
+    revoke access to the <a href="{% url "palace" student.pk %}">Ruby Palace</a>
+    or previously obtained secret units.
+  </p>
+  <p>
+    After activating Prestige, you can continue to level up.
     There is no limit to the number of Prestige stars you can obtain.
   </p>
-  <p>This action is irreversible!</p>
+  <p>Note this action is irreversible!</p>
   <hr />
   <h2>Your current statistics</h2>
   <div class="container">
