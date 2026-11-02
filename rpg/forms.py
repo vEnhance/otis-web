@@ -3,7 +3,7 @@ from typing import Any
 from django import forms
 from django.core.validators import RegexValidator
 
-from .levelsys import SUITS, FourMetersDict
+from .levelsys import SUITS
 
 CODE_REGEX = r"\A[a-fA-F0-9]{24,26}\Z"
 
@@ -38,13 +38,14 @@ class PrestigeContractForm(forms.Form):
     diamonds = forms.IntegerField(min_value=0, label="♦ Charisma")
 
     def __init__(
-        self, *args: Any, meters: FourMetersDict, max_level: int, **kwargs: Any
+        self, *args: Any, totals: dict[str, float], max_level: int, **kwargs: Any
     ):
+        """`totals` must be unrounded, so a deduction can't leave a stat negative."""
         super().__init__(*args, **kwargs)
-        self.meters = meters
+        self.totals = totals
         self.max_level = max_level
         for suit, field in self.fields.items():
-            field.help_text = f"Current total: {meters[suit].value}"
+            field.help_text = f"Current total: {round(totals[suit], 2)}"
 
     def clean(self) -> dict[str, Any]:
         cleaned_data = super().clean() or {}
@@ -57,10 +58,10 @@ class PrestigeContractForm(forms.Form):
             )
         for suit, root in roots.items():
             assert root is not None
-            value = self.meters[suit].value
+            value = self.totals[suit]
             if value < 0:
                 if root != 0:
                     self.add_error(suit, "This statistic is negative, so pick 0.")
             elif root * root > value:
-                self.add_error(suit, f"You only have {value} to give up.")
+                self.add_error(suit, f"You only have {round(value, 2)} to give up.")
         return cleaned_data

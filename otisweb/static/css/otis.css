@@ -570,3 +570,34 @@ table.otis-sortable th[aria-sort="descending"]::after {
 .survey-scale-option .form-check-input {
   margin: 0;
 }
+
+/* Prestige stars from rpg/components/level.html: gold, with a glint on hover */
+.otis-prestige {
+  cursor: help;
+  background: linear-gradient(
+    110deg,
+    #b8860b 0%,
+    #ffd700 40%,
+    #fff8dc 50%,
+    #ffd700 60%,
+    #b8860b 100%
+  );
+  background-size: 250% 100%;
+  background-position: 100% 0;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  transition: background-position 0.8s ease;
+}
+.otis-prestige:hover,
+.otis-prestige:focus-visible {
+  background-position: 0 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .otis-prestige {
+    transition: none;
+  }
+}
+.otis-prestige-tooltip {
+  --bs-tooltip-bg: #7a5c00;
+}

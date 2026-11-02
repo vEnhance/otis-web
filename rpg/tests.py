@@ -4,6 +4,7 @@ import pytest
 from django.contrib.auth.models import Group, User
 from django.contrib.messages import constants as message_levels
 from django.core.exceptions import ValidationError
+from django.template import Context, Template
 from django.utils import timezone
 
 from core.factories import GroupFactory, UnitFactory, UserFactory
@@ -28,6 +29,7 @@ from rpg.forms import DiamondsForm
 from rpg.levelsys import (
     annotate_student_queryset_with_scores,
     check_level_up,
+    format_level,
     get_level_info,
     get_student_rows,
     get_total_spades,
@@ -1028,7 +1030,7 @@ def test_prestige_resets_level(otis):
     assert info["meters"]["diamonds"].value == 7
     assert info["level_number"] == 4
     assert info["prestige"] == 1
-    assert info["stars"] == "★"
+    otis.assert_testid(otis.get_ok("stats", alice.pk), "prestige-stars")
     assert not info["is_maxed"]
     assert info["has_palace_access"]
 
@@ -1085,6 +1087,18 @@ def test_prestige_negative_stat(otis):
 
 
 @pytest.mark.django_db
+def test_prestige_uses_unrounded_totals(otis):
+    alice = maxed_student()
+    PSetFactory.create(student=alice, clubs=0, hours=15.996, unit__code="DGW")
+    otis.login(alice)
+    assert get_level_info(alice)["meters"]["hearts"].value == 16
+
+    resp = otis.post_ok("prestige", alice.pk, data=contract(0, 4, 0, 1))
+    assert "hearts" in resp.context["form"].errors
+    assert not PrestigeContract.objects.exists()
+
+
+@pytest.mark.django_db
 def test_prestige_keeps_palace(otis):
     alice = maxed_student()
     PrestigeContract.objects.create(user=alice.user, **contract(4, 0, 0, 9))
@@ -1101,11 +1115,37 @@ def test_prestige_keeps_secret_units(otis):
     PrestigeContract.objects.create(user=alice.user, **contract(4, 0, 0, 9))
     bonus = BonusLevelFactory.create(level=5)
     bonus_unit = UnitFactory.create(group=bonus.group, code="BKU")
+    otis.login(alice)
 
+    resp = otis.get_ok("portal", alice.pk)
+    otis.assert_testid(resp, "bonus-level-request")
+    resp = otis.get_ok("bonus-level-request", alice.pk)
+    assert bonus_unit in resp.context["form"].fields["unit"].queryset
+
+
+@pytest.mark.django_db
+def test_prestige_level_up_uses_real_level():
+    alice = maxed_student()
+    PrestigeContract.objects.create(user=alice.user, **contract(4, 0, 0, 9))
     assert check_level_up(alice, get_level_info(alice))
     alice.refresh_from_db()
-    assert alice.last_level_seen == 5
-    assert alice.curriculum.contains(bonus_unit)
+    assert alice.last_level_seen == 4
+
+
+@pytest.mark.django_db
+def test_prestige_resets_last_level_seen(otis):
+    alice = maxed_student(last_level_seen=7)
+    otis.login(alice)
+    otis.post_redirects(
+        otis.url("stats", alice.pk), "prestige", alice.pk, data=contract(2, 0, 0, 3)
+    )
+    alice.refresh_from_db()
+    assert alice.last_level_seen == 4
+
+    PSetFactory.create(student=alice, clubs=11, hours=0, unit__code="BGV")
+    assert check_level_up(alice, get_level_info(alice))
+    alice.refresh_from_db()
+    assert alice.last_level_seen == 6
 
 
 @pytest.mark.django_db
@@ -1119,4 +1159,41 @@ def test_prestige_leaderboard_order(otis):
     rows = otis.get_ok("leaderboard").context["rows"]
     assert [row["student"] for row in rows] == [alice, bob]
     assert rows[0]["level"] < rows[1]["level"]
-    assert rows[0]["stars"] == "★"
+    assert rows[0]["prestige"] == 1
+
+
+def test_format_level():
+    assert format_level(18, 0) == "18"
+    assert format_level(18, 2) == "18★★"
+
+
+@pytest.mark.django_db
+def test_no_prestige_stars_without_contract(otis):
+    alice = maxed_student()
+    otis.login(alice)
+    otis.assert_testid(otis.get_ok("stats", alice.pk), "prestige-stars", count=0)
+
+
+def test_level_tag_has_no_trailing_space():
+    html = Template("{% load otis_extras %}({% level 18 1 %})").render(Context())
+    assert html.endswith("★</span></span>)")
+
+
+@pytest.mark.django_db
+def test_stats_keeps_levels_reached_before_prestige(otis):
+    alice = maxed_student()
+    PrestigeContract.objects.create(user=alice.user, **contract(4, 0, 0, 9))
+    otis.login(alice)
+    resp = otis.get_ok("stats", alice.pk)
+    assert [lvl.threshold for lvl in resp.context["levels"]] == [5, 4, 3, 2, 1]
+    otis.assert_testid(resp, "level-to-reach-again", count=1)
+
+
+@pytest.mark.django_db
+def test_stats_levels_without_prestige(otis):
+    alice = maxed_student()
+    PSetFactory.create(student=alice, clubs=-9, hours=0, unit__code="BGV")
+    otis.login(alice)
+    resp = otis.get_ok("stats", alice.pk)
+    assert [lvl.threshold for lvl in resp.context["levels"]] == [4, 3, 2, 1]
+    otis.assert_testid(resp, "level-to-reach-again", count=0)

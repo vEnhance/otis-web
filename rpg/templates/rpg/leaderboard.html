@@ -35,7 +35,7 @@
             <sup>{{ forloop.counter|ordinal }}</sup>
           </td>
           <td data-sort-value="{{ row.sort_level }}">
-            <strong>Lv {{ row.level }}{{ row.stars }}</strong>
+            <strong>Lv {% level row.level row.prestige %}</strong>
             <sup class="fst-italic">{{ row.level_name }}</sup>
           </td>
           <td>{{ row.student.num_semesters }}</td>

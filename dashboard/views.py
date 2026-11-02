@@ -38,8 +38,10 @@ from roster.utils import (
 from rpg.levelsys import (
     annotate_student_queryset_with_scores,
     check_level_up,
+    format_level,
     get_level_info,
     get_student_rows,
+    perk_level,
 )
 
 logger = logging.getLogger(__name__)
@@ -58,7 +60,7 @@ def portal(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
     if request.user == student.user:
         result = check_level_up(student, level_info)
         if result is True and profile.show_bars is True:
-            lvl = level_info["level_number"]
+            lvl = format_level(level_info["level_number"], level_info["prestige"])
             messages.success(request, f"You leveled up! You're now level {lvl}.")
 
     context: dict[str, Any] = {
@@ -145,7 +147,7 @@ def certify(
             "hearts": hearts,
             "letter_grade": letter_grade,
             "level_number": level_info["level_number"],
-            "stars": level_info["stars"],
+            "prestige": level_info["prestige"],
             "level_name": level_info["level_name"],
             "checksum": student.get_checksum(settings.CERT_HASH_KEY),
             "target_url": f"{request.scheme}://{request.get_host()}"
@@ -334,18 +336,18 @@ def bonus_level_request(request: HttpRequest, student_pk: int) -> HttpResponse:
     if student.semester.active is False:
         raise PermissionDenied("Not an active semester")
 
-    level = student.last_level_seen
+    level = perk_level(student.user, student.last_level_seen)
     if not Unit.objects.filter(group__bonuslevel__level__lte=level).exists():
         messages.error(request, "There are no secret units you can request yet.")
 
     if request.method == "POST":
-        form = BonusRequestForm(request.POST, level=student.last_level_seen)
+        form = BonusRequestForm(request.POST, level=level)
         if form.is_valid():
             new_unit = form.cleaned_data["unit"]
             student.curriculum.add(new_unit)
             messages.success(request, f"Added bonus unit {new_unit} for you.")
     else:
-        form = BonusRequestForm(level=student.last_level_seen)
+        form = BonusRequestForm(level=level)
     context: dict[str, Any] = {"student": student, "form": form}
     return render(request, "dashboard/bonus_level_request.html", context)
 
