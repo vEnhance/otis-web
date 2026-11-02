@@ -1,6 +1,7 @@
 # Functions to compute student levels and whatnot
 import datetime
 import logging
+import math
 from typing import Any, TypedDict
 
 from django.contrib.auth.models import User
@@ -30,6 +31,7 @@ from .models import (
     BonusLevel,
     BonusLevelUnlock,
     Level,
+    PrestigeContract,
     QuestComplete,
 )
 
@@ -98,6 +100,17 @@ class Meter:
     @property
     def thresh(self) -> int:
         return (self.level + 1) ** 2
+
+    def prestige_deduction(self, offered_levels: int) -> int:
+        """Points to remove so this stat drops by exactly `offered_levels` levels.
+
+        Computed from the displayed (rounded) value, which is what the level is
+        read from; an integer deduction then leaves the display at exactly the
+        new threshold. The unrounded total can end up a hair below zero
+        (e.g. 15.996 - 16), which still displays and levels as 0."""
+        if offered_levels == 0:
+            return 0
+        return math.floor(self.value - (self.level - offered_levels) ** 2)
 
     @property
     def total(self):
@@ -173,10 +186,15 @@ class SpadeItemsDict(TypedDict):
 class LevelInfoDict(SpadeItemsDict):
     psets: QuerySet[PSet]
     meters: FourMetersDict
+    totals: dict[str, float]
     level_number: int
     str_im_level: str
     level_name: str
     is_maxed: bool
+    max_level: int
+    prestige_contracts: QuerySet[PrestigeContract]
+    prestige: int
+    has_palace_access: bool
     bonus_levels: QuerySet[BonusLevel]
 
 
@@ -195,20 +213,12 @@ def get_level_info(student: Student) -> LevelInfoDict:
     profile = find_profile(student.user)
     dynamic_progress = profile is not None and profile.dynamic_progress
 
-    meters: FourMetersDict = {
-        "clubs": Meter.ClubMeter(int(totals["clubs"]), dynamic_progress),
-        "hearts": Meter.HeartMeter(round(totals["hearts"], 2), dynamic_progress),
-        "diamonds": Meter.DiamondMeter(int(totals["diamonds"]), dynamic_progress),
-        "spades": Meter.SpadeMeter(round(totals["spades"], 2), dynamic_progress),
-    }
+    meters = build_meters(totals, dynamic_progress)
 
     # Real component of level
-    level_number = sum(meter.level for meter in meters.values())  # type: ignore
-    level = (
-        Level.objects.filter(threshold__lte=level_number).order_by("-threshold").first()
-    )
-    level_name = level.name if level is not None else "No Level"
-    max_level = Level.objects.all().aggregate(max=Max("threshold"))["max"] or 0
+    level_number = sum_levels(meters)
+    level_name = get_level_name(level_number)
+    max_level = get_max_level()
 
     # Imaginary component of level
     im_level_number = sum(meter.im_level for meter in meters.values())  # type: ignore
@@ -220,13 +230,61 @@ def get_level_info(student: Student) -> LevelInfoDict:
         str_im_level = f"+ {im_level_number}i"
 
     level_data["meters"] = meters
+    level_data["totals"] = totals
     level_data["level_number"] = level_number
     level_data["level_name"] = level_name
     level_data["is_maxed"] = level_number >= max_level
-    level_data["bonus_levels"] = BonusLevel.objects.filter(level__lte=level_number)
+    level_data["max_level"] = max_level
+    level_data["prestige_contracts"] = PrestigeContract.objects.filter(
+        user=student.user
+    ).order_by("created_at")
+    prestige = level_data["prestige_contracts"].count()
+    level_data["prestige"] = prestige
+    floored_level = max(level_number, max_level) if prestige > 0 else level_number
+    level_data["has_palace_access"] = floored_level >= max_level
+    level_data["bonus_levels"] = BonusLevel.objects.filter(level__lte=floored_level)
     level_data["str_im_level"] = str_im_level
 
     return level_data
+
+
+def build_meters(totals: dict[str, float], dynamic_progress: bool) -> FourMetersDict:
+    return {
+        "clubs": Meter.ClubMeter(int(totals["clubs"]), dynamic_progress),
+        "hearts": Meter.HeartMeter(round(totals["hearts"], 2), dynamic_progress),
+        "diamonds": Meter.DiamondMeter(int(totals["diamonds"]), dynamic_progress),
+        "spades": Meter.SpadeMeter(round(totals["spades"], 2), dynamic_progress),
+    }
+
+
+def sum_levels(meters: FourMetersDict) -> int:
+    return sum(meter.level for meter in meters.values())  # type: ignore
+
+
+def get_level_name(level_number: int) -> str:
+    level = (
+        Level.objects.filter(threshold__lte=level_number).order_by("-threshold").first()
+    )
+    return level.name if level is not None else "No Level"
+
+
+def format_level(level: int, prestige: int) -> str:
+    """Plain-text level, e.g. "18✷". Templates use the {% level %} tag instead."""
+    return f"{level}{'✷' * prestige}"
+
+
+def get_max_level() -> int:
+    return Level.objects.all().aggregate(max=Max("threshold"))["max"] or 0
+
+
+def perk_level(user: User, level: int) -> int:
+    """The level used for Ruby Palace access and secret units.
+
+    Prestiging resets a student's real level, but they keep max-level perks.
+    Everything else (UI, level-up toasts) uses the real level."""
+    if not PrestigeContract.objects.filter(user=user).exists():
+        return level
+    return max(level, get_max_level())
 
 
 ACCEPTED_PSETS = Q(status="A", eligible=True)
@@ -234,6 +292,10 @@ ACCEPTED_PSETS = Q(status="A", eligible=True)
 
 def or_zero(subquery: Combinable) -> Coalesce:
     return Coalesce(subquery, 0.0, output_field=FloatField())
+
+
+def prestige_deduction(suit: str, to_user: str) -> Combinable:
+    return or_zero(SubquerySum(f"{to_user}prestigecontract__{suit}"))
 
 
 def clubs_expression(to_user: str = "") -> Combinable:
@@ -248,15 +310,20 @@ def clubs_expression(to_user: str = "") -> Combinable:
         * or_zero(
             SubquerySum(path, filter=ACCEPTED_PSETS & Q(unit__code__startswith="Z"))
         )
+        - prestige_deduction("clubs", to_user)
     )
 
 
 def hearts_expression(to_user: str = "") -> Combinable:
-    return or_zero(SubquerySum(f"{to_user}student__pset__hours", filter=ACCEPTED_PSETS))
+    return or_zero(
+        SubquerySum(f"{to_user}student__pset__hours", filter=ACCEPTED_PSETS)
+    ) - prestige_deduction("hearts", to_user)
 
 
 def diamonds_expression(to_user: str = "") -> Combinable:
-    return or_zero(SubquerySum(f"{to_user}achievementunlock__achievement__diamonds"))
+    return or_zero(
+        SubquerySum(f"{to_user}achievementunlock__achievement__diamonds")
+    ) - prestige_deduction("diamonds", to_user)
 
 
 SPADE_SUGGESTIONS = Q(status__in=("SUGG_NOK", "SUGG_OK"), eligible=True)
@@ -290,7 +357,7 @@ def spades_expression(to_user: str = "") -> Combinable:
     total: Combinable = Value(0.0)
     for subquery in subqueries:
         total += or_zero(subquery)
-    return total
+    return total - prestige_deduction("spades", to_user)
 
 
 SUITS = ("clubs", "hearts", "diamonds", "spades")
@@ -369,6 +436,7 @@ def annotate_student_queryset_with_scores(
             filter=Q(eligible=True, unit__code__startswith="Z"),
         ),
         num_semesters=SubqueryCount("user__student"),
+        num_prestiges=SubqueryCount("user__prestigecontract"),
         **suit_totals(to_user="user__"),
     )
 
@@ -392,6 +460,8 @@ def get_student_rows(queryset: QuerySet[Student]) -> list[dict[str, Any]]:
         for suit in SUITS:
             row[suit] = float(getattr(student, suit))
         row["level"] = sum(int(max(row[k], 0) ** 0.5) for k in SUITS)
+        row["prestige"] = student.num_prestiges  # type: ignore
+        row["sort_level"] = 1000 * row["prestige"] + row["level"]
         try:
             row["last_seen"] = student.user.profile.last_seen
         except UserProfile.DoesNotExist:

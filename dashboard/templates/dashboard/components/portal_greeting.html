@@ -2,10 +2,10 @@
 <div class="greeting">
   {% if request.user|getconfig:"show_bars" %}
     <h1>
-      Level {{ level_number }} {{ str_im_level }}
+      Level {% level level_number prestige %} {{ str_im_level }}
       —
       <a href="{% url 'stats' student.pk %}">
-        <span class="emoji-text">🏅</span>{{ level_name }}</a>
+        <span class="emoji-text">🏅</span>{% level_name level_name prestige %}</a>
     </h1>
     <div class="container">
       <div class="row">

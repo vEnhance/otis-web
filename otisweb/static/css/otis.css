@@ -326,6 +326,9 @@ span.meter-header,
 strong.meter-def {
   font-family: Acme, sans-serif;
 }
+.acme {
+  font-family: Acme, sans-serif;
+}
 
 /* Twemoji - https://github.com/twitter/twemoji/ */
 img.emoji {
@@ -569,4 +572,35 @@ table.otis-sortable th[aria-sort="descending"]::after {
 }
 .survey-scale-option .form-check-input {
   margin: 0;
+}
+
+/* Prestige stars from the {% level %} tag: gold, with a glint on hover */
+.otis-prestige {
+  background: linear-gradient(
+    110deg,
+    #b8860b 0%,
+    #ffd700 40%,
+    #fff8dc 50%,
+    #ffd700 60%,
+    #b8860b 100%
+  );
+  background-size: 250% 100%;
+  background-position: 100% 0;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  transition: background-position 0.8s ease;
+  font-size: 110%;
+}
+.otis-prestige:hover,
+.otis-prestige:focus-visible {
+  background-position: 0 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .otis-prestige {
+    transition: none;
+  }
+}
+.otis-prestige-tooltip {
+  --bs-tooltip-bg: #7a5c00;
 }

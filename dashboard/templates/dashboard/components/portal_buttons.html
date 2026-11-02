@@ -16,7 +16,7 @@
             width: 120px"
      class="btn btn-secondary text-white"
      role="button">Past work</a>
-  {% if is_maxed %}
+  {% if has_palace_access %}
     <br />
     <a href="{% url 'palace-list' student.pk %}"
        class="btn btn-danger text-white mx-auto my-2"

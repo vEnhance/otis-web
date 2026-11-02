@@ -1,0 +1,110 @@
+{% extends "layout.html" %}
+{% load otis_extras %}
+{% block title %}
+  Prestige ritual
+{% endblock title %}
+{% block layout-content %}
+  <p>
+    <a href="{% url 'stats' student.pk %}">Back to stats</a>
+  </p>
+  {% if preview %}
+    <p>
+      This is a final confirmation before completing the Prestige offering.
+      Please check that this does what you want it to.
+    </p>
+    <hr />
+    <h1>Before</h1>
+    <p>
+      Currently, you are <b>Level {% level level_number prestige %}</b>
+      with the title <b>{% level_name level_name prestige %}</b>.
+    </p>
+    <div class="container">
+      <div class="row">
+        {% include "rpg/meters/small.html" with meter=meters.clubs %}
+        {% include "rpg/meters/small.html" with meter=meters.hearts %}
+        {% include "rpg/meters/small.html" with meter=meters.spades %}
+        {% include "rpg/meters/small.html" with meter=meters.diamonds %}
+      </div>
+    </div>
+    <hr />
+    <div data-testid="prestige-preview">
+      <h1>After (+1<span class="otis-prestige">✷</span>)</h1>
+      <p>
+        After Prestige, you would be
+        <b>Level {% level preview.level_number preview.prestige %}</b>,
+        with the title <b>{% level_name preview.level_name preview.prestige %}</b>.
+      </p>
+      <div class="container">
+        <div class="row">
+          {% include "rpg/meters/small.html" with meter=preview.meters.clubs %}
+          {% include "rpg/meters/small.html" with meter=preview.meters.hearts %}
+          {% include "rpg/meters/small.html" with meter=preview.meters.spades %}
+          {% include "rpg/meters/small.html" with meter=preview.meters.diamonds %}
+        </div>
+      </div>
+    </div>
+    <hr />
+    <h1>Confirm Prestige</h1>
+    <p>This action is irreversible!</p>
+    <form action="{{ request.path }}" method="post" class="form mt-3">
+      {% csrf_token %}
+      {% for field in form %}<input type="hidden" name="{{ field.html_name }}" value="{{ field.value }}" />{% endfor %}
+      <button type="submit"
+              name="confirm"
+              class="btn btn-danger"
+              onclick="return confirm('Are you sure you want to complete the ritual?');">Activate Prestige</button>
+      <button type="submit" name="edit" class="btn btn-secondary">No, take me back</button>
+    </form>
+  {% else %}
+    <h2>
+      About Prestige
+      <span class="otis-prestige">✷</span>
+    </h2>
+    <p>
+      Do you miss the beginning of OTIS when you could go up ten levels
+      from submitting just one unit?
+      Do you wish $\sqrt x$ was a little less convex?
+    </p>
+    <p>
+      The <strong>Prestige ritual</strong> lets you sacrifice
+      {{ max_level }} levels to obtain a
+      special Prestige star indicator next to your level in its place.
+      (This terminology is adapted from video games.)
+      After activating Prestige, you can then continue to level up again.
+      There is no limit to the number of Prestige stars you can obtain.
+    </p>
+    <p>
+      Activating Prestige in this way does <b>not</b>
+      revoke access to the <a href="{% url "palace-list" student.pk %}">Ruby Palace</a>
+      or previously obtained secret units.
+    </p>
+    <h2>Your current statistics</h2>
+    <div class="container">
+      <div class="row">
+        {% include "rpg/meters/small.html" with meter=meters.clubs %}
+        {% include "rpg/meters/small.html" with meter=meters.hearts %}
+        {% include "rpg/meters/small.html" with meter=meters.spades %}
+        {% include "rpg/meters/small.html" with meter=meters.diamonds %}
+      </div>
+    </div>
+    <hr />
+    <div data-testid="prestige-form">
+      <h2>Prestige parameters</h2>
+      <p>The sum of the offerings below must be exactly <strong>{{ max_level }}</strong>.</p>
+      {% include "otisweb/components/generic_form.html" with submit_name="Preview changes" btn_class="btn-primary" %}
+    </div>
+    <div class="alert alert-secondary mt-2">
+      <h3 class="alert-heading">How Prestige is calculated</h3>
+      <p>
+        You get to choose how to allocate the 100 levels offered.
+        For each level, a permanent deduction is applied to
+        reduce the total to the targeted perfect square.
+      </p>
+      <p>
+        For example, if you have 1000♣ (which is 31 Dexterity)
+        and you choose to offer 15 Dexterity (for 16 Dexterity remaining).
+        Then afterwards you will have 256♣.
+      </p>
+    </div>
+  {% endif %}
+{% endblock layout-content %}

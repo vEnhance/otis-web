@@ -22,7 +22,7 @@
       {% for row in rows %}
         {% with student=row.student %}
           <tr {% if student.newborn %}class="table-danger"{% endif %}>
-            <td>Lv. {{ row.level }}</td>
+            <td>Lv. {% level row.level row.prestige %}</td>
             <td>
               <a href="{% url "portal" student.pk %}">{{ student.name|truncatechars:"28" }}</a>
             </td>

@@ -13,7 +13,7 @@ from django.urls import reverse
 from django.utils.formats import date_format
 from django.utils.functional import keep_lazy_text
 from django.utils.html import escape, format_html
-from django.utils.safestring import SafeData, mark_safe
+from django.utils.safestring import SafeData, SafeString, mark_safe
 from django.utils.text import normalize_newlines
 from django.utils.timezone import template_localtime  # type: ignore
 
@@ -24,6 +24,32 @@ from rpg.levelsys import BONUS_D_UNIT, BONUS_Z_UNIT
 from rpg.models import Achievement
 
 register = template.Library()
+
+
+def with_prestige_stars(text: str | int, prestige: int) -> SafeString:
+    """Built in Python rather than a template because any whitespace a formatter
+    adds between the text and the stars would show up on the page."""
+    if not prestige:
+        return format_html('<span class="otis-level">{}</span>', text)
+    return format_html(
+        '<span class="otis-level">{}<span class="otis-prestige" tabindex="0" '
+        'data-testid="prestige-stars" title="Prestige {}">{}</span></span>',
+        text,
+        prestige,
+        "✷" * prestige,
+    )
+
+
+@register.simple_tag
+def level(level: int, prestige: int) -> SafeString:
+    """Render a level number with one star per prestige contract."""
+    return with_prestige_stars(level, prestige)
+
+
+@register.simple_tag
+def level_name(name: str, prestige: int) -> SafeString:
+    """Render a level name with one star per prestige contract."""
+    return with_prestige_stars(name, prestige)
 
 
 @register.simple_tag

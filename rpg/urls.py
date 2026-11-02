@@ -14,6 +14,7 @@ urlpatterns = [
         views.AchievementDetail.as_view(),
         name="diamond-solution",
     ),
+    path(r"prestige/<int:student_pk>/", views.prestige, name="prestige"),
     path(r"leaderboard/", views.leaderboard, name="leaderboard"),
     path(r"github/", views.GithubLandingView.as_view(), name="github-landing"),
     path(r"palace/<int:student_pk>/", views.PalaceList.as_view(), name="palace-list"),

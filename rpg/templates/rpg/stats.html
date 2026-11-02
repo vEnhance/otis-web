@@ -1,33 +1,64 @@
 {% extends "layout.html" %}
 {% load humanize %}
 {% load static %}
+{% load otis_extras %}
 {% block title %}
   Your Stats
 {% endblock title %}
 {% block layout-content %}
-  <h1>{{ student.name }} — {{ level_name }}</h1>
+  <h1>{{ student.name }} — {% level_name level_name prestige %}</h1>
   <p>
-    You have reached <b>Level {{ level_number }}</b>,
-    granting you the title of <b>{{ level_name }}</b>.
+    You have reached <b>Level {% level level_number prestige %}</b>,
+    granting you the title of <b>{% level_name level_name prestige %}</b>.
   </p>
   <p>
     Your level is defined as the sum of the four statistics below.
     Each statistic has value $\left\lfloor \sqrt{\max\left(n,0\right)} \right\rfloor$
     where $n$ is the number of points amassed towards that statistic.
   </p>
+  {% if has_palace_access and request.user == student.user %}
+    <p>
+      You can now access the
+      <a href="{% url "palace-list" student.pk %}">Ruby Palace</a>.
+    </p>
+  {% endif %}
+  {% if is_maxed and request.user == student.user %}
+    <p data-testid="prestige-paragraph">
+      You can use Prestige to <a href="{% url "prestige" student.pk %}">reset your level</a>.
+    </p>
+  {% endif %}
   <div class="accordion" id="accordion">
     {% include "rpg/meters/clubs.html" with meter=meters.clubs %}
     {% include "rpg/meters/hearts.html" with meter=meters.hearts %}
     {% include "rpg/meters/spades.html" with meter=meters.spades %}
     {% include "rpg/meters/diamonds.html" with meter=meters.diamonds %}
   </div>
+  {% if prestige_contracts %}
+    <h3>Prestige</h3>
+    <ul class="list-group mb-3">
+      {% for contract in prestige_contracts %}
+        <li class="list-group-item">
+          <strong>✷{{ forloop.counter }}</strong> {{ contract.created_at|date }}:
+          offered {{ contract.clubs }}♣, {{ contract.hearts }}♥, {{ contract.spades }}♠, {{ contract.diamonds }}♦
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
   <h3>Previous levels</h3>
   <ul class="list-group">
-    {% for level in obtained_levels %}
-      <li class="list-group-item">
-        <strong>Level {{ level.threshold }}</strong> {{ level.name }}
-        {% if level.alttext %}<p class="fst-italic">{{ level.alttext|linebreaksbr }}</p>{% endif %}
-      </li>
+    {% for level in levels %}
+      {% if level.threshold > level_number %}
+        <li class="list-group-item bg-body-secondary text-body-secondary"
+            data-testid="level-to-reach-again">
+          <strong class="text-body-secondary">Level {{ level.threshold }}</strong> {{ level.name }}
+          {% if level.alttext %}<p class="fst-italic">{{ level.alttext|linebreaksbr }}</p>{% endif %}
+        </li>
+      {% else %}
+        <li class="list-group-item">
+          <strong>Level {{ level.threshold }}</strong> {{ level.name }}
+          {% if level.alttext %}<p class="fst-italic">{{ level.alttext|linebreaksbr }}</p>{% endif %}
+        </li>
+      {% endif %}
     {% endfor %}
   </ul>
   <script>

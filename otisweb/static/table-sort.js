@@ -4,6 +4,7 @@
  * Any <table class="otis-sortable"> with a <thead> and a <tbody> is picked up
  * automatically; no per-page setup is needed. A header opts out of sorting
  * with data-sort="none", which is what the emoji "Actions" columns use.
+ * A cell's data-sort-value, if present, is sorted on instead of its text.
  *
  * Clicking a header cycles it ascending -> descending -> back to the order the
  * server rendered, which is usually meaningful (newest first, OTIS unit order,
@@ -26,7 +27,10 @@ function otisSortValue(text) {
 
 function otisSortTable(table, headers, th, index, original) {
   const body = table.tBodies[0];
-  const textOf = (row) => (row.cells[index]?.textContent ?? "").trim();
+  const textOf = (row) => {
+    const cell = row.cells[index];
+    return (cell?.dataset.sortValue ?? cell?.textContent ?? "").trim();
+  };
 
   /* none -> ascending -> descending -> none. */
   const previous = th.getAttribute("aria-sort");

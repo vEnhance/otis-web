@@ -4,6 +4,26 @@
   The Ruby Palace
 {% endblock title %}
 {% block layout-content %}
+  {% if student %}
+    <div class="text-center acme">
+      <a href="{% url "palace-update" student.pk %}"
+         class="btn btn-primary text-white w-25 mx-2"
+         role="button">Carve</a>
+      <a href="{% url "diamond-update" student.pk %}"
+         class="btn btn-danger text-white w-25 mx-2"
+         role="button">Forge</a>
+      {% if is_maxed %}
+        <a href="{% url "prestige" student.pk %}"
+           class="btn btn-secondary text-white w-25 mx-2"
+           data-testid="palace-prestige-button"
+           role="button">Prestige</a>
+      {% else %}
+        <a class="btn btn-secondary text-white w-25 mx-2 disabled"
+           aria-disabled="true"
+           role="button">Prestige</a>
+      {% endif %}
+    </div>
+  {% endif %}
   {% for carving in palace_carvings %}
     <div style="min-height:96px;">
       {% if carving.image %}
@@ -25,19 +45,4 @@
     </div>
     <hr />
   {% endfor %}
-  {% if student %}
-    <div class="text-center">
-      <a href="{% url "palace-update" student.pk %}"
-         style="margin: 0 auto;
-                width: 120px"
-         class="btn btn-primary text-white"
-         role="button">Carve</a>
-      &nbsp;
-      <a href="{% url "diamond-update" student.pk %}"
-         style="margin: 0 auto;
-                width: 120px"
-         class="btn btn-danger text-white"
-         role="button">Forge</a>
-    </div>
-  {% endif %}
 {% endblock layout-content %}

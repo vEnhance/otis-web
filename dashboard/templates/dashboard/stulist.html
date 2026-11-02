@@ -37,7 +37,7 @@
               {% if stulist_show_semester %}
                 <td>{{ student.semester }}</td>
               {% else %}
-                <td class="text-end">Lv{{ row.level }}</td>
+                <td class="text-end" data-sort-value="{{ row.sort_level }}">Lv{% level row.level row.prestige %}</td>
               {% endif %}
               <td class="text-end">
                 {% if student.legit %}
