@@ -27,27 +27,19 @@ class Migration(migrations.Migration):
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 (
                     "clubs",
-                    models.PositiveIntegerField(
-                        help_text="Clubs deducted (a perfect square)"
-                    ),
+                    models.PositiveIntegerField(help_text="Clubs deducted"),
                 ),
                 (
                     "hearts",
-                    models.PositiveIntegerField(
-                        help_text="Hearts deducted (a perfect square)"
-                    ),
+                    models.PositiveIntegerField(help_text="Hearts deducted"),
                 ),
                 (
                     "spades",
-                    models.PositiveIntegerField(
-                        help_text="Spades deducted (a perfect square)"
-                    ),
+                    models.PositiveIntegerField(help_text="Spades deducted"),
                 ),
                 (
                     "diamonds",
-                    models.PositiveIntegerField(
-                        help_text="Diamonds deducted (a perfect square)"
-                    ),
+                    models.PositiveIntegerField(help_text="Diamonds deducted"),
                 ),
                 (
                     "user",

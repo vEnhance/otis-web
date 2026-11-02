@@ -307,13 +307,13 @@ def prestige(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
             raise PermissionDenied("Prestige not allowed unless max level is reached.")
         form = PrestigeContractForm(
             request.POST or None,
-            totals=level_info["totals"],
+            meters=level_info["meters"],
             max_level=level_info["max_level"],
         )
         if request.method == "POST" and form.is_valid() and "confirm" in request.POST:
             PrestigeContract.objects.create(
                 user=student.user,
-                **{suit: form.cleaned_data[suit] ** 2 for suit in form.fields},
+                **form.deductions(),
             )
             # Reset so the climb back up gets level-up toasts again
             new_level = get_level_info(student)["level_number"]
@@ -326,8 +326,9 @@ def prestige(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
 
     context: dict[str, Any] = {"student": student, "form": form} | level_info
     if form.is_bound and form.is_valid() and "edit" not in request.POST:
+        deductions = form.deductions()
         new_totals = {
-            suit: total - form.cleaned_data[suit] ** 2
+            suit: total - deductions[suit]
             for suit, total in level_info["totals"].items()
         }
         new_meters = build_meters(

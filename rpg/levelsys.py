@@ -1,6 +1,7 @@
 # Functions to compute student levels and whatnot
 import datetime
 import logging
+import math
 from typing import Any, TypedDict
 
 from django.contrib.auth.models import User
@@ -99,6 +100,17 @@ class Meter:
     @property
     def thresh(self) -> int:
         return (self.level + 1) ** 2
+
+    def prestige_deduction(self, offered_levels: int) -> int:
+        """Points to remove so this stat drops by exactly `offered_levels` levels.
+
+        Computed from the displayed (rounded) value, which is what the level is
+        read from; an integer deduction then leaves the display at exactly the
+        new threshold. The unrounded total can end up a hair below zero
+        (e.g. 15.996 - 16), which still displays and levels as 0."""
+        if offered_levels == 0:
+            return 0
+        return math.floor(self.value - (self.level - offered_levels) ** 2)
 
     @property
     def total(self):

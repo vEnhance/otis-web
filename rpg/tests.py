@@ -27,6 +27,7 @@ from rpg.factories import (
 )
 from rpg.forms import DiamondsForm
 from rpg.levelsys import (
+    Meter,
     annotate_student_queryset_with_scores,
     check_level_up,
     format_level,
@@ -1030,11 +1031,11 @@ def test_prestige_resets_level(otis):
     )
 
     c = PrestigeContract.objects.get(user=alice.user)
-    assert (c.clubs, c.hearts, c.spades, c.diamonds) == (4, 0, 0, 9)
+    assert (c.clubs, c.hearts, c.spades, c.diamonds) == (8, 0, 0, 15)
     info = get_level_info(alice)
-    assert info["meters"]["clubs"].value == 5
-    assert info["meters"]["diamonds"].value == 7
-    assert info["level_number"] == 4
+    assert info["meters"]["clubs"].value == 1
+    assert info["meters"]["diamonds"].value == 1
+    assert info["level_number"] == 2
     assert info["prestige"] == 1
     otis.assert_testid(otis.get_ok("stats", alice.pk), "prestige-stars")
     assert not info["is_maxed"]
@@ -1097,15 +1098,38 @@ def test_prestige_negative_stat(otis):
 
 
 @pytest.mark.django_db
-def test_prestige_uses_unrounded_totals(otis):
+def test_prestige_uses_displayed_level(otis):
     alice = maxed_student()
     PSetFactory.create(student=alice, clubs=0, hours=15.996, unit__code="DGW")
     otis.login(alice)
-    assert get_level_info(alice)["meters"]["hearts"].value == 16
+    assert get_level_info(alice)["meters"]["hearts"].level == 4
 
-    resp = otis.post_ok("prestige", alice.pk, data=contract(0, 4, 0, 1))
-    assert "hearts" in resp.context["form"].errors
-    assert not PrestigeContract.objects.exists()
+    otis.post_redirects(
+        otis.url("stats", alice.pk),
+        "prestige",
+        alice.pk,
+        data=contract(0, 4, 0, 1) | CONFIRM,
+    )
+    hearts = get_level_info(alice)["meters"]["hearts"]
+    assert hearts.level == 0
+    assert hearts.str_level == "0"
+
+
+@pytest.mark.parametrize(
+    "meter, offered, remaining",
+    [
+        (Meter.ClubMeter(1225, False), 13, 484),
+        (Meter.ClubMeter(1290, False), 13, 484),
+        (Meter.HeartMeter(37.37, False), 2, 16.37),
+        (Meter.HeartMeter(16.0, False), 4, 0),
+    ],
+)
+def test_prestige_deduction_drops_exact_levels(meter, offered, remaining):
+    assert meter.value - meter.prestige_deduction(offered) == pytest.approx(remaining)
+
+
+def test_prestige_deduction_of_zero_levels():
+    assert Meter.HeartMeter(15.5, False).prestige_deduction(0) == 0
 
 
 @pytest.mark.django_db
@@ -1153,12 +1177,12 @@ def test_prestige_resets_last_level_seen(otis):
         data=contract(2, 0, 0, 3) | CONFIRM,
     )
     alice.refresh_from_db()
-    assert alice.last_level_seen == 4
+    assert alice.last_level_seen == 2
 
     PSetFactory.create(student=alice, clubs=11, hours=0, unit__code="BGV")
     assert check_level_up(alice, get_level_info(alice))
     alice.refresh_from_db()
-    assert alice.last_level_seen == 6
+    assert alice.last_level_seen == 4
 
 
 @pytest.mark.django_db
@@ -1222,10 +1246,10 @@ def test_prestige_preview_does_not_commit(otis):
     otis.assert_testid(resp, "prestige-preview")
     otis.assert_testid(resp, "prestige-form", count=0)
     preview = resp.context["preview"]
-    assert preview["level_number"] == 4
+    assert preview["level_number"] == 2
     assert preview["prestige"] == 1
-    assert preview["meters"]["clubs"].value == 5
-    assert preview["meters"]["diamonds"].value == 7
+    assert preview["meters"]["clubs"].value == 1
+    assert preview["meters"]["diamonds"].value == 1
     assert resp.context["level_number"] == 7
     assert not PrestigeContract.objects.exists()
 
