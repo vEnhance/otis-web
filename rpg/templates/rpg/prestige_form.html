@@ -46,5 +46,29 @@
   <hr />
   <h2>Prestige parameters</h2>
   <p>The sum of the values below must be exactly <strong>{{ max_level }}</strong>.</p>
-  {% include "otisweb/components/generic_form.html" with submit_name="Activate Prestige" btn_class="btn-danger" %}
+  {% include "otisweb/components/generic_form.html" with submit_name="Preview changes" btn_class="btn-primary" %}
+  {% if preview %}
+    <hr />
+    <div data-testid="prestige-preview">
+      <h2>Preview</h2>
+      <p>
+        After Prestige, you would be
+        <b>Level {% level preview.level_number preview.prestige %}</b>,
+        with the title <b>{{ preview.level_name }}</b>.
+      </p>
+      <div class="container">
+        <div class="row">
+          {% include "rpg/meters/small.html" with meter=preview.meters.clubs %}
+          {% include "rpg/meters/small.html" with meter=preview.meters.hearts %}
+          {% include "rpg/meters/small.html" with meter=preview.meters.spades %}
+          {% include "rpg/meters/small.html" with meter=preview.meters.diamonds %}
+        </div>
+      </div>
+      <form action="{{ request.path }}" method="post" class="form mt-3">
+        {% csrf_token %}
+        {% for field in form %}<input type="hidden" name="{{ field.html_name }}" value="{{ field.value }}" />{% endfor %}
+        <button type="submit" name="confirm" class="btn btn-danger">Activate Prestige</button>
+      </form>
+    </div>
+  {% endif %}
 {% endblock layout-content %}

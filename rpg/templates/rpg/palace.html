@@ -12,10 +12,16 @@
       <a href="{% url "diamond-update" student.pk %}"
          class="btn btn-danger text-white w-25 mx-2"
          role="button">Forge</a>
-      <a href="{% url "prestige" student.pk %}"
-         class="btn btn-secondary text-white w-25 mx-2"
-         {% if not is_maxed %}disabled{% endif %}
-         role="button">Prestige</a>
+      {% if is_maxed %}
+        <a href="{% url "prestige" student.pk %}"
+           class="btn btn-secondary text-white w-25 mx-2"
+           data-testid="palace-prestige-button"
+           role="button">Prestige</a>
+      {% else %}
+        <a class="btn btn-secondary text-white w-25 mx-2 disabled"
+           aria-disabled="true"
+           role="button">Prestige</a>
+      {% endif %}
     </div>
   {% endif %}
   {% for carving in palace_carvings %}

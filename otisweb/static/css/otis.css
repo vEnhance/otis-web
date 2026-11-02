@@ -574,7 +574,7 @@ table.otis-sortable th[aria-sort="descending"]::after {
   margin: 0;
 }
 
-/* Prestige stars from rpg/components/level.html: gold, with a glint on hover */
+/* Prestige stars from the {% level %} tag: gold, with a glint on hover */
 .otis-prestige {
   background: linear-gradient(
     110deg,

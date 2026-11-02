@@ -35,7 +35,14 @@ from roster.utils import get_student_by_pk
 from rpg.models import VulnerabilityRecord
 
 from .forms import DiamondsForm, PrestigeContractForm
-from .levelsys import LevelInfoDict, get_level_info, get_student_rows
+from .levelsys import (
+    LevelInfoDict,
+    build_meters,
+    get_level_info,
+    get_level_name,
+    get_student_rows,
+    sum_levels,
+)
 from .models import (
     GUESS_CODE_MAX_LENGTH,
     WRONG_GUESS_LIMIT,
@@ -303,7 +310,7 @@ def prestige(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
             totals=level_info["totals"],
             max_level=level_info["max_level"],
         )
-        if request.method == "POST" and form.is_valid():
+        if request.method == "POST" and form.is_valid() and "confirm" in request.POST:
             PrestigeContract.objects.create(
                 user=student.user,
                 **{suit: form.cleaned_data[suit] ** 2 for suit in form.fields},
@@ -318,6 +325,21 @@ def prestige(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
             return redirect("stats", student.pk)
 
     context: dict[str, Any] = {"student": student, "form": form} | level_info
+    if form.is_bound and form.is_valid():
+        new_totals = {
+            suit: total - form.cleaned_data[suit] ** 2
+            for suit, total in level_info["totals"].items()
+        }
+        new_meters = build_meters(
+            new_totals, level_info["meters"]["clubs"].dynamic_progress
+        )
+        new_level_number = sum_levels(new_meters)
+        context["preview"] = {
+            "meters": new_meters,
+            "level_number": new_level_number,
+            "level_name": get_level_name(new_level_number),
+            "prestige": level_info["prestige"] + 1,
+        }
     return render(request, "rpg/prestige_form.html", context)
 
 
@@ -328,7 +350,7 @@ class PalaceList(LoginRequiredMixin, ListView[PalaceCarving]):
 
     def get_queryset(self):
         student = get_student_by_pk(self.request, self.kwargs["student_pk"])
-        assert_palace_access(student)
+        self.is_maxed = assert_palace_access(student)["is_maxed"]
         self.student = student
         queryset = PalaceCarving.objects.filter(visible=True)
         queryset = queryset.exclude(display_name="")
@@ -338,6 +360,7 @@ class PalaceList(LoginRequiredMixin, ListView[PalaceCarving]):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["student"] = self.student
+        context["is_maxed"] = self.is_maxed
         return context
 
 

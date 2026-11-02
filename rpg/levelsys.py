@@ -201,19 +201,11 @@ def get_level_info(student: Student) -> LevelInfoDict:
     profile = find_profile(student.user)
     dynamic_progress = profile is not None and profile.dynamic_progress
 
-    meters: FourMetersDict = {
-        "clubs": Meter.ClubMeter(int(totals["clubs"]), dynamic_progress),
-        "hearts": Meter.HeartMeter(round(totals["hearts"], 2), dynamic_progress),
-        "diamonds": Meter.DiamondMeter(int(totals["diamonds"]), dynamic_progress),
-        "spades": Meter.SpadeMeter(round(totals["spades"], 2), dynamic_progress),
-    }
+    meters = build_meters(totals, dynamic_progress)
 
     # Real component of level
-    level_number = sum(meter.level for meter in meters.values())  # type: ignore
-    level = (
-        Level.objects.filter(threshold__lte=level_number).order_by("-threshold").first()
-    )
-    level_name = level.name if level is not None else "No Level"
+    level_number = sum_levels(meters)
+    level_name = get_level_name(level_number)
     max_level = get_max_level()
 
     # Imaginary component of level
@@ -242,6 +234,26 @@ def get_level_info(student: Student) -> LevelInfoDict:
     level_data["str_im_level"] = str_im_level
 
     return level_data
+
+
+def build_meters(totals: dict[str, float], dynamic_progress: bool) -> FourMetersDict:
+    return {
+        "clubs": Meter.ClubMeter(int(totals["clubs"]), dynamic_progress),
+        "hearts": Meter.HeartMeter(round(totals["hearts"], 2), dynamic_progress),
+        "diamonds": Meter.DiamondMeter(int(totals["diamonds"]), dynamic_progress),
+        "spades": Meter.SpadeMeter(round(totals["spades"], 2), dynamic_progress),
+    }
+
+
+def sum_levels(meters: FourMetersDict) -> int:
+    return sum(meter.level for meter in meters.values())  # type: ignore
+
+
+def get_level_name(level_number: int) -> str:
+    level = (
+        Level.objects.filter(threshold__lte=level_number).order_by("-threshold").first()
+    )
+    return level.name if level is not None else "No Level"
 
 
 def format_level(level: int, prestige: int) -> str:
