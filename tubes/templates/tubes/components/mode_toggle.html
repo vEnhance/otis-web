@@ -8,18 +8,13 @@
     <p>
       You're currently in <b>casual mode</b>.
       Nothing you do is recorded or timed.
-    </p>
-    <p>
-      <a href="{% url "oime-serious" %}"
-         class="btn btn-sm btn-outline-warning">Return to ranked mode</a>
+      <a href="{% url "oime-serious" %}">Return to ranked mode</a>.
     </p>
   {% else %}
     <p>
       You're testsolving in <b>ranked mode</b>.
       We use your times for statistics when deciding which problems to choose.
-    </p>
-    <p>
-      <a href="{% url "oime-casual" %}" class="btn btn-sm btn-outline-warning">Switch to casual mode</a>
+      <a href="{% url "oime-casual" %}">Switch to casual mode</a>.
     </p>
   {% endif %}
 {% endif %}

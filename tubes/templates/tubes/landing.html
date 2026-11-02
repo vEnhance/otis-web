@@ -68,6 +68,7 @@
   {% if contributor %}
     <hr />
     <h1>Problems</h1>
+    {% include "tubes/components/mode_toggle.html" %}
     <p>
       <a href="{% url "oime-proposal-list" %}"
          class="btn btn-outline-secondary">All problems</a>
@@ -84,7 +85,6 @@
       <a href="{% url "oime-setup" %}" class="btn btn-outline-secondary">Change name</a>
     </div>
     <hr />
-    {% include "tubes/components/mode_toggle.html" %}
   {% else %}
     <div class="mb-4">
       <a href="{% url "oime-setup" %}" class="btn btn-primary">Get Started</a>
