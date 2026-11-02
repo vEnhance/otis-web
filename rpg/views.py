@@ -325,7 +325,7 @@ def prestige(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
             return redirect("stats", student.pk)
 
     context: dict[str, Any] = {"student": student, "form": form} | level_info
-    if form.is_bound and form.is_valid():
+    if form.is_bound and form.is_valid() and "edit" not in request.POST:
         new_totals = {
             suit: total - form.cleaned_data[suit] ** 2
             for suit, total in level_info["totals"].items()

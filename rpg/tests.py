@@ -1220,6 +1220,7 @@ def test_prestige_preview_does_not_commit(otis):
 
     resp = otis.post_ok("prestige", alice.pk, data=contract(2, 0, 0, 3))
     otis.assert_testid(resp, "prestige-preview")
+    otis.assert_testid(resp, "prestige-form", count=0)
     preview = resp.context["preview"]
     assert preview["level_number"] == 4
     assert preview["prestige"] == 1
@@ -1248,3 +1249,15 @@ def test_palace_prestige_button_needs_max_level(otis):
     PrestigeContract.objects.create(user=alice.user, **contract(4, 0, 0, 9))
     resp = otis.get_ok("palace-list", alice.pk)
     otis.assert_testid(resp, "palace-prestige-button", count=0)
+
+
+@pytest.mark.django_db
+def test_prestige_back_from_preview_keeps_values(otis):
+    alice = maxed_student()
+    otis.login(alice)
+    data = contract(2, 0, 0, 3) | {"edit": ""}
+    resp = otis.post_ok("prestige", alice.pk, data=data)
+    assert "preview" not in resp.context
+    otis.assert_testid(resp, "prestige-form")
+    assert resp.context["form"]["clubs"].value() == "2"
+    assert not PrestigeContract.objects.exists()
