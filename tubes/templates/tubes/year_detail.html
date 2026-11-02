@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% block title %}
+  {{ desk.year }}
+{% endblock title %}
+{% block layout-content %}
+  <div class="d-flex flex-wrap gap-2 mb-3">
+    {% if desk.year.overleaf_url %}
+      <a href="{{ desk.year.overleaf_url }}"
+         class="btn btn-success"
+         target="_blank"
+         rel="noopener"
+         data-testid="year-overleaf-link">Overleaf</a>
+    {% endif %}
+    <a href="{% url "oime-year-bulk-edit" desk.year.pk %}"
+       class="btn btn-primary"
+       data-testid="year-bulk-edit-link">Bulk edit</a>
+    <a href="{% url "oime-year-export" desk.year.pk %}"
+       class="btn btn-outline-primary">ZIP</a>
+    <a href="{% url "oime-year-release" desk.year.pk %}"
+       class="btn btn-outline-danger"
+       data-testid="year-release-link">Release</a>
+    <a href="{% url "admin:tubes_oimeyear_change" desk.year.pk %}"
+       class="btn btn-outline-secondary">Admin</a>
+  </div>
+  {% include "tubes/components/chosen_table.html" with title="Waiting on you" selections=desk.chosen_eic empty="Nothing needs your attention." %}
+  {% include "tubes/components/chosen_table.html" with title="Waiting on others" selections=desk.chosen_others empty="Nothing here." %}
+  {% include "tubes/components/desk_table.html" with title="Pool" proposals=desk.pool testid="pool-row" show=True %}
+  {% include "tubes/components/desk_table.html" with title="Deferred" proposals=desk.deferred_proposals testid="deferred-row" show=False %}
+{% endblock layout-content %}

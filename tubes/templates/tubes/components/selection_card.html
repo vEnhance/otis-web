@@ -1,0 +1,129 @@
+{% comment %}
+  Where this problem stands for one year. Takes `card` = {year, selection,
+  transitions, form}. A chosen problem gets a heading with its description, a
+  status table, a row with the suggested next steps, then the Overleaf and edit
+  buttons (for other staff and the editor, Overleaf sits in the next-steps row
+  instead; authors don't get it). A
+  deferred problem gets the table and its buttons only. The current year's
+  unreviewed problem (no selection) gets just the triage buttons, which post
+  the first verdict to the triage view, or archive the problem outright.
+{% endcomment %}
+{% load crispy_forms_tags %}
+{% with sel=card.selection year=card.year %}
+  <div class="mb-2"
+       data-testid="{% if sel %}selection-card{% else %}triage-form{% endif %}">
+    {% if sel and not sel.is_deferred %}
+      <div class="d-flex justify-content-between align-items-start gap-2">
+        <h2>
+          {% if sel.description %}
+            <span data-testid="selection-description">{{ sel.description }}</span>
+          {% else %}
+            {{ proposal.title }}
+          {% endif %}
+        </h2>
+        <a href="{% if request.user.is_superuser %}{{ year.get_absolute_url }}{% else %}{% url "oime-landing" %}{% endif %}"
+           class="btn btn-outline-secondary btn-sm">← Back</a>
+      </div>
+    {% endif %}
+    {% if sel %}
+      <table class="table w-auto mb-2">
+        <tbody>
+          <tr>
+            <th class="pe-4">Editor</th>
+            <td>{{ sel.editor|default:"—" }}</td>
+          </tr>
+          <tr>
+            <th class="pe-4">Status</th>
+            <td>
+              {{ sel.get_status_display }}
+              {% if sel.blocked_on %}
+                <span data-testid="selection-blocked-on">(blocked on {{ sel.blocked_on }})</span>
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <th class="pe-4">Notes</th>
+            <td>
+              {% if sel.notes %}
+                <span data-testid="selection-notes">{{ sel.notes|linebreaksbr }}</span>
+              {% else %}
+                —
+              {% endif %}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    {% endif %}
+    {% if card.transitions or card.overleaf_inline or sel and request.user.is_superuser %}
+      <form method="post"
+            action="{% if sel %}{% url "oime-selection-action" sel.pk %}{% else %}{% url "oime-year-triage" year.pk %}{% endif %}"
+            class="mb-2">
+        {% csrf_token %}
+        {% if not sel %}<input type="hidden" name="proposal" value="{{ proposal.pk }}" />{% endif %}
+        {# Non-superusers have at most one button here, so Overleaf joins the row. #}
+        {% if card.overleaf_inline %}
+          <a href="{{ year.overleaf_url }}"
+             class="btn btn-success btn-sm"
+             target="_blank"
+             rel="noopener"
+             data-testid="selection-overleaf">Overleaf</a>
+        {% endif %}
+        {% for target, label in card.transitions %}
+          <button type="submit"
+                  name="change_status"
+                  value="{{ target }}"
+                  class="btn btn-outline-primary btn-sm"
+                  data-testid="selection-transition">{{ label }}</button>
+        {% endfor %}
+        {% if not sel %}
+          <button type="submit"
+                  name="archive"
+                  class="btn btn-outline-danger btn-sm"
+                  data-testid="triage-archive">🗄️ Archive</button>
+        {% endif %}
+        {% if sel and request.user.is_superuser %}
+          <details class="d-inline-block ms-1 my-1">
+            <summary class="btn btn-link btn-sm text-muted p-0">All statuses</summary>
+            <div class="mt-1">
+              {% for value, name in status_choices %}
+                {% if value != sel.status %}
+                  <button type="submit"
+                          name="change_status"
+                          value="{{ value }}"
+                          class="btn btn-outline-secondary btn-sm">{{ name }}</button>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </details>
+        {% endif %}
+      </form>
+    {% endif %}
+    {% if card.form %}
+      <div class="d-flex gap-2 mb-2">
+        {% if year.overleaf_url %}
+          <a href="{{ year.overleaf_url }}"
+             class="btn btn-outline-success btn-sm"
+             target="_blank"
+             rel="noopener">Overleaf</a>
+        {% endif %}
+        <button type="button"
+                class="btn btn-outline-secondary btn-sm"
+                data-bs-toggle="collapse"
+                data-bs-target="#selection-form-{{ sel.pk }}"
+                aria-expanded="false"
+                aria-controls="selection-form-{{ sel.pk }}">Edit metadata</button>
+      </div>
+      <div class="collapse" id="selection-form-{{ sel.pk }}">
+        <form method="post"
+              action="{% url "oime-selection-action" sel.pk %}"
+              data-testid="selection-form">
+          {% csrf_token %}
+          {{ card.form.editor|as_crispy_field }}
+          {{ card.form.description|as_crispy_field }}
+          {{ card.form.notes|as_crispy_field }}
+          <button type="submit" name="save" class="btn btn-secondary btn-sm">Save</button>
+        </form>
+      </div>
+    {% endif %}
+  </div>
+{% endwith %}

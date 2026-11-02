@@ -41,11 +41,19 @@ urlpatterns = [
         name="oime-subject-browse",
     ),
     path(r"serious/", views.go_serious, name="oime-serious"),
+    path(r"years/<int:pk>/", views.year_detail, name="oime-year-detail"),
+    path(r"years/<int:pk>/triage/", views.year_triage, name="oime-year-triage"),
+    path(r"years/<int:pk>/release/", views.year_release, name="oime-year-release"),
     path(r"years/<int:pk>/export.zip", views.year_export, name="oime-year-export"),
     path(
-        r"years/<int:pk>/descriptions/",
-        views.year_descriptions,
-        name="oime-year-descriptions",
+        r"years/<int:pk>/bulk-edit/",
+        views.year_bulk_edit,
+        name="oime-year-bulk-edit",
+    ),
+    path(
+        r"selection/<int:pk>/",
+        views.selection_action,
+        name="oime-selection-action",
     ),
     path(r"", views.LandingView.as_view(), name="oime-landing"),
 ]

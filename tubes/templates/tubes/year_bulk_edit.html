@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block title %}
+  Bulk edit {{ year }}
+{% endblock title %}
+{% block layout-content %}
+  <form method="post">
+    {% csrf_token %}
+    {{ formset.management_form }}
+    {% for form in formset %}
+      {% with proposal=form.instance.proposal %}
+        <div class="py-2 mb-2" data-testid="description-row">
+          <div class="mb-1">
+            <a href="{{ proposal.get_absolute_url }}" class="fw-bold">{{ proposal.label }}</a>
+            {{ proposal.title }}
+            <small class="text-muted">by {{ proposal.credit_display }}</small>
+          </div>
+          {{ form.id }}
+          <div class="row g-2">
+            <div class="col-md-6">
+              {{ form.description }}
+              {{ form.description.errors }}
+            </div>
+            <div class="col-md-6">
+              {{ form.editor }}
+              {{ form.editor.errors }}
+            </div>
+          </div>
+        </div>
+      {% endwith %}
+    {% endfor %}
+    <button type="submit" class="btn btn-primary">Save</button>
+  </form>
+{% endblock layout-content %}
+{% block scripts %}
+  <script>
+      document.addEventListener("DOMContentLoaded", function() {
+          otisSelect("select.otis-select", {
+              placeholder: "Editor"
+          });
+      });
+  </script>
+{% endblock scripts %}

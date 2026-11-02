@@ -25,10 +25,12 @@ from otisweb.mixins import VerifiedRequiredMixin
 
 from .forms import (
     OIMEAnswerForm,
+    OIMEBulkEditFormSet,
     OIMECommentForm,
     OIMEContributorForm,
-    OIMEDescriptionFormSet,
     OIMEProposalForm,
+    OIMEReleaseForm,
+    OIMESelectionForm,
 )
 from .models import (
     OIMEComment,
@@ -1003,6 +1005,58 @@ def proposal_detail(request: HttpRequest, pk: int) -> HttpResponse:
     # show the testsolve stats summary here.
     stats = _proposal_stats(proposal)
 
+    is_eic: bool = request.user.is_superuser  # type: ignore[union-attr]
+    is_staff: bool = request.user.is_staff  # type: ignore[union-attr]
+    all_selections = list(proposal.selections.select_related("year", "editor"))
+    selections = [
+        sel
+        for sel in all_selections
+        if is_staff
+        or sel.editor == contributor
+        or (ctx["is_author"] and not sel.is_deferred)
+    ]
+    cards: list[dict[str, Any]] = [
+        {
+            "year": sel.year,
+            "selection": sel,
+            "transitions": sel.transitions(is_eic=is_eic)
+            if is_eic or sel.editor == contributor
+            else [],
+            "form": OIMESelectionForm(instance=sel)
+            if is_eic and not sel.is_deferred
+            else None,
+            # Overleaf is shared with editors, not authors. The editor-in-chief
+            # gets it in the row below instead, next to the metadata button.
+            "overleaf_inline": not is_eic
+            and not sel.is_deferred
+            and bool(sel.year.overleaf_url)
+            and (is_staff or sel.editor == contributor),
+        }
+        for sel in selections
+    ]
+    # An unreviewed problem gets the same card for the current year, with no
+    # selection behind it; its buttons write the first verdict.
+    current_year = OIMEYear.current() if is_eic else None
+    can_triage = (
+        current_year is not None
+        and not proposal.is_draft
+        and not proposal.is_frozen
+        and not any(sel.year == current_year for sel in all_selections)
+    )
+    if can_triage:
+        cards.insert(
+            0,
+            {
+                "year": current_year,
+                "selection": None,
+                "transitions": [
+                    ("SEL_SHORTLISTED", "✅ Shortlist"),
+                    ("SEL_DEFERRED", "⏸️ Defer"),
+                ],
+                "form": None,
+            },
+        )
+
     return render(
         request,
         "tubes/proposal_detail.html",
@@ -1016,6 +1070,9 @@ def proposal_detail(request: HttpRequest, pk: int) -> HttpResponse:
             "stats": stats,
             "frozen": proposal.is_frozen,
             "can_edit": _can_edit(request, proposal, contributor),
+            "selection_cards": cards,
+            "can_triage": can_triage,
+            "status_choices": OIMESelection.STATUS_CHOICES,
             **ctx,
         },
     )
@@ -1402,6 +1459,32 @@ class LandingView(VerifiedRequiredMixin, TemplateView):
         if contributor is None:
             return context
 
+        # The contest section: the editor-in-chief gets every year, each linking
+        # to its desk; everyone else gets problems they are editing or wrote.
+        if self.request.user.is_superuser:  # type: ignore[union-attr]
+            # Meta.ordering is dropped on aggregate queries, so order explicitly.
+            context["years"] = list(
+                OIMEYear.objects.annotate(
+                    chosen_count=Count(
+                        "selections", filter=~Q(selections__status="SEL_DEFERRED")
+                    )
+                ).order_by("-proposals_open_at")
+            )
+        elif (year := OIMEYear.current()) is not None:
+            mine = list(
+                _chosen(year)
+                .filter(Q(editor=contributor) | Q(proposal__author=contributor))
+                .select_related("editor")
+            )
+            if mine:
+                context["current_year"] = year
+                context["my_selections"] = mine
+                # Overleaf is shared with editors, not authors.
+                context["show_overleaf"] = bool(year.overleaf_url) and (
+                    self.request.user.is_staff  # type: ignore[union-attr]
+                    or any(sel.editor == contributor for sel in mine)
+                )
+
         recent = list(
             OIMEProposal.in_pool()
             .select_related("author")
@@ -1426,6 +1509,166 @@ class LandingView(VerifiedRequiredMixin, TemplateView):
 # ---------------------------------------------------------------------------
 # OIME: Years (editor-in-chief pages)
 # ---------------------------------------------------------------------------
+
+
+def _attach_stats(proposals: Sequence[OIMEProposal]) -> None:
+    """Hang testsolve stats and the upvote count on each proposal, in two queries."""
+    stats = _bulk_proposal_stats(proposals)
+    upvotes = dict(
+        OIMEProposal.objects.filter(pk__in=[p.pk for p in proposals])
+        .annotate(n=Count("upvotes", distinct=True))
+        .values_list("pk", "n")
+    )
+    for proposal in proposals:
+        proposal.stats = stats[proposal.pk]  # type: ignore[attr-defined]
+        proposal.upvote_count = upvotes.get(proposal.pk, 0)  # type: ignore[attr-defined]
+
+
+def _unreviewed(year: OIMEYear) -> QuerySet[OIMEProposal]:
+    """Problems in the pool with no verdict for this year, most upvoted first."""
+    return (
+        OIMEProposal.in_pool()
+        .exclude(selections__year=year)
+        .annotate(n_upvotes=Count("upvotes", distinct=True))
+        .order_by("-n_upvotes", "-pk")
+    )
+
+
+def _year_desk(year: OIMEYear) -> dict[str, Any]:
+    """The editor-in-chief's view of one year."""
+    selections = list(
+        year.selections.select_related("proposal", "proposal__author", "editor")
+    )
+    chosen = [sel for sel in selections if not sel.is_deferred]
+    deferred = [sel for sel in selections if sel.is_deferred]
+    pool = list(_unreviewed(year).select_related("author"))
+    # Only the pool and deferred tables show stats; the chosen tables do not.
+    _attach_stats([sel.proposal for sel in deferred] + pool)
+    return {
+        "year": year,
+        "chosen_eic": [sel for sel in chosen if sel.blocked_on == "EIC"],
+        "chosen_others": [sel for sel in chosen if sel.blocked_on != "EIC"],
+        "deferred_proposals": [sel.proposal for sel in deferred],
+        "pool": pool,
+    }
+
+
+@admin_required
+def year_detail(request: HttpRequest, pk: int) -> HttpResponse:
+    year = get_object_or_404(OIMEYear, pk=pk)
+    return render(request, "tubes/year_detail.html", {"desk": _year_desk(year)})
+
+
+@admin_required
+def year_triage(request: HttpRequest, pk: int) -> HttpResponse:
+    """One verdict on one problem for one year, from the buttons on its page.
+
+    ``change_status`` (shortlisted or deferred) writes the selection row (creating it if this is
+    the first verdict on the problem this year). ``archive`` sets the global flag
+    on the proposal instead, since an archived problem is out for every year.
+    Either way the editor-in-chief moves on to the next unreviewed problem, or
+    back to the year once there are none left.
+    """
+    year = get_object_or_404(OIMEYear, pk=pk)
+    if request.method != "POST":
+        return redirect(year)
+    proposal = get_object_or_404(OIMEProposal, pk=request.POST.get("proposal"))
+    status = request.POST.get("change_status")
+    if status in ("SEL_SHORTLISTED", "SEL_DEFERRED"):
+        OIMESelection.objects.update_or_create(
+            year=year, proposal=proposal, defaults={"status": status}
+        )
+    elif "archive" in request.POST:
+        proposal.archived = True
+        proposal.save(update_fields=["archived"])
+    else:
+        raise Http404("Unknown triage action.")
+    next_proposal = _unreviewed(year).first()
+    if next_proposal is None:
+        messages.success(request, "Every problem has been reviewed.")
+        return redirect(year)
+    return redirect(next_proposal)
+
+
+@verified_required
+def selection_action(request: HttpRequest, pk: int) -> HttpResponse:
+    """The controls on a selection card, all POSTed from the problem's page.
+
+    ``change_status`` moves the problem along the pipeline. The editor-in-chief
+    may move it anywhere; the assigned editor only along the transitions marked
+    as theirs, which in practice means handing a finished solution back for
+    review. ``save`` writes the editor, notes and description, editor-in-chief
+    only.
+    """
+    selection = get_object_or_404(
+        OIMESelection.objects.select_related("proposal", "editor"), pk=pk
+    )
+    contributor = _get_contributor(request)
+    is_eic: bool = request.user.is_superuser  # type: ignore[union-attr]
+    is_editor = contributor is not None and selection.editor == contributor
+    if not (is_eic or is_editor):
+        raise PermissionDenied("You are not the editor of this problem.")
+    if request.method != "POST":
+        return redirect(selection.proposal)
+
+    if "change_status" in request.POST:
+        target = request.POST["change_status"]
+        if is_eic:
+            allowed = {value for value, _ in OIMESelection.STATUS_CHOICES}
+        else:
+            allowed = {t for t, _ in selection.transitions(is_eic=False)}
+        if target not in allowed:
+            raise PermissionDenied("That status change is not available to you.")
+        selection.status = target
+        selection.save(update_fields=["status", "updated_at"])
+        label = selection.get_status_display()  # type: ignore[attr-defined]
+        messages.success(request, f"{selection.proposal.label} is now {label}.")
+    elif "save" in request.POST:
+        if not is_eic:
+            raise PermissionDenied("Only the editor-in-chief can assign editors.")
+        form = OIMESelectionForm(request.POST, instance=selection)
+        if form.is_valid():
+            form.save()
+        else:
+            messages.error(request, "Could not save the selection.")
+    return redirect(selection.proposal)
+
+
+@admin_required
+def year_release(request: HttpRequest, pk: int) -> HttpResponse:
+    """Interstitial for setting (or clearing) the moment the contest goes public.
+
+    Lists exactly the problems that will be retired, so a problem that was cut but
+    never marked deferred is caught here rather than discovered when a testsolver
+    complains, and warns about anything not yet Done.
+    """
+    year = get_object_or_404(OIMEYear, pk=pk)
+    chosen = list(_chosen(year))
+    if request.method == "POST":
+        if "clear" in request.POST:
+            year.release_at = None
+            year.save(update_fields=["release_at"])
+            messages.success(request, "Release cleared.")
+            return redirect(year)
+        form = OIMEReleaseForm(request.POST)
+        if form.is_valid():
+            year.release_at = form.cleaned_data["release_at"]
+            year.save(update_fields=["release_at"])
+            messages.success(request, f"Release set for {year}.")
+            return redirect(year)
+    else:
+        initial = timezone.localtime(year.release_at or timezone.now())
+        form = OIMEReleaseForm(initial={"release_at": initial})
+    return render(
+        request,
+        "tubes/year_release.html",
+        {
+            "year": year,
+            "form": form,
+            "chosen": chosen,
+            "not_done": [sel for sel in chosen if sel.status != "SEL_DONE"],
+        },
+    )
 
 
 # The export below writes calls to macros defined in oime-tables.tex in the Mock
@@ -1458,11 +1701,9 @@ def _indent(text: str) -> str:
     )
 
 
-def _chosen(year: OIMEYear) -> list[OIMESelection]:
-    return list(
-        year.selections.exclude(status="SEL_DEFERRED").select_related(
-            "proposal", "proposal__author"
-        )
+def _chosen(year: OIMEYear) -> QuerySet[OIMESelection]:
+    return year.selections.filter(OIMESelection.CHOSEN).select_related(
+        "proposal", "proposal__author"
     )
 
 
@@ -1523,18 +1764,13 @@ def _testsolving_tex(selections: Sequence[OIMESelection]) -> str:
     Attempts and upvotes are recorded for the EIC but not shown in the table.
     """
     proposals = [sel.proposal for sel in selections]
-    stats = _bulk_proposal_stats(proposals)
-    upvotes = dict(
-        OIMEProposal.objects.filter(pk__in=[p.pk for p in proposals])
-        .annotate(n=Count("upvotes", distinct=True))
-        .values_list("pk", "n")
-    )
+    _attach_stats(proposals)
     lines = [
         r"% \oimetestsolving{label}{fastest}{median}{correct first try}"
         + r"{eventually correct}{attempts}{upvotes}"
     ]
     for p in proposals:
-        st = stats[p.pk]
+        st = p.stats  # type: ignore[attr-defined]
         fields = (
             p.label,
             _mss(st["fastest_seconds"]),
@@ -1542,7 +1778,7 @@ def _testsolving_tex(selections: Sequence[OIMESelection]) -> str:
             str(st["first_correct"]),
             str(st["correct"]),
             str(st["total"]),
-            str(upvotes.get(p.pk, 0)),
+            str(p.upvote_count),  # type: ignore[attr-defined]
         )
         lines.append(
             "\\oimetestsolving" + "".join(f"{{{f}}}" for f in fields) + f"  % {p.title}"
@@ -1579,9 +1815,14 @@ def _acknow_tex(year: OIMEYear, selections: Sequence[OIMESelection]) -> str:
             is_draft=False,
             created_at__gte=year.proposals_open_at,
             created_at__lt=year.proposals_close_at,
+            author__hide_from_acknowledgments=False,
         ).values_list("author__display_name", flat=True)
     )
-    proposers.update(p.author.display_name for p in proposals)
+    proposers.update(
+        p.author.display_name
+        for p in proposals
+        if not p.author.hide_from_acknowledgments
+    )
     completed = Q(fights__proposal__in=proposals) & ~Q(fights__status="OIME_TBD")
     testsolvers = (
         OIMEContributor.objects.filter(hide_from_acknowledgments=False)
@@ -1611,7 +1852,7 @@ def year_export(request: HttpRequest, pk: int) -> HttpResponse:
     OTIS-WEB keeps the authors' originals.
     """
     year = get_object_or_404(OIMEYear, pk=pk)
-    selections = _chosen(year)
+    selections = list(_chosen(year))
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as archive:
         for sel in selections:
@@ -1632,19 +1873,21 @@ def year_export(request: HttpRequest, pk: int) -> HttpResponse:
 
 
 @admin_required
-def year_descriptions(request: HttpRequest, pk: int) -> HttpResponse:
-    """Set the short descriptions of every chosen problem at once, before export."""
+def year_bulk_edit(request: HttpRequest, pk: int) -> HttpResponse:
+    """Set the editor and description of every chosen problem on one page."""
     year = get_object_or_404(OIMEYear, pk=pk)
-    queryset = year.selections.exclude(status="SEL_DEFERRED").select_related(
-        "proposal", "proposal__author"
-    )
-    formset = OIMEDescriptionFormSet(request.POST or None, queryset=queryset)
+    formset = OIMEBulkEditFormSet(request.POST or None, queryset=_chosen(year))
+    # Each row's editor dropdown would otherwise query every contributor again.
+    if formset.forms:
+        choices = list(formset.forms[0].fields["editor"].choices)  # type: ignore[attr-defined]
+        for form in formset.forms:
+            form.fields["editor"].choices = choices  # type: ignore[attr-defined]
     if request.method == "POST" and formset.is_valid():
         formset.save()
-        messages.success(request, "Descriptions saved.")
-        return redirect("oime-year-descriptions", year.pk)
+        messages.success(request, "Changes saved.")
+        return redirect("oime-year-bulk-edit", year.pk)
     return render(
         request,
-        "tubes/year_descriptions.html",
+        "tubes/year_bulk_edit.html",
         {"year": year, "formset": formset},
     )

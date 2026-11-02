@@ -70,17 +70,47 @@ class OIMECommentForm(forms.ModelForm[OIMEComment]):
         }
 
 
-class OIMEDescriptionForm(forms.ModelForm[OIMESelection]):
+class OIMESelectionForm(forms.ModelForm[OIMESelection]):
+    """The editor-in-chief's controls on one selected problem, other than status."""
+
     class Meta:
         model = OIMESelection
-        fields = ("description",)
+        fields = ("editor", "description", "notes")
         widgets: ClassVar[dict[str, forms.Widget]] = {
-            "description": forms.TextInput(
-                attrs={"class": "form-control font-monospace"}
-            ),
+            "editor": forms.Select(attrs={"class": "otis-select"}),
+            "description": forms.TextInput(attrs={"class": "form-control"}),
+            "notes": forms.Textarea(attrs={"class": "form-control", "rows": 2}),
         }
 
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self.fields["editor"].queryset = OIMEContributor.objects.order_by(  # type: ignore[attr-defined]
+            "display_name"
+        )
 
-OIMEDescriptionFormSet = forms.modelformset_factory(
-    OIMESelection, form=OIMEDescriptionForm, extra=0
+
+class OIMEBulkEditForm(OIMESelectionForm):
+    """One row of the bulk page: who edits a chosen problem and its description."""
+
+    class Meta(OIMESelectionForm.Meta):
+        fields = ("editor", "description")
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self.fields["description"].widget.attrs["placeholder"] = "Description"
+
+
+OIMEBulkEditFormSet = forms.modelformset_factory(
+    OIMESelection, form=OIMEBulkEditForm, extra=0
 )
+
+
+class OIMEReleaseForm(forms.Form):
+    """The one input on the release interstitial: when the contest goes public."""
+
+    release_at = forms.DateTimeField(
+        widget=forms.DateTimeInput(
+            attrs={"type": "datetime-local"}, format="%Y-%m-%dT%H:%M"
+        ),
+        help_text="Selected problems are retired from testsolving at this moment.",
+    )

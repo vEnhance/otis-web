@@ -117,10 +117,16 @@ class OIMECommentAdmin(admin.ModelAdmin[OIMEComment]):
 
 
 class OIMESelectionInline(admin.TabularInline[OIMESelection, OIMEYear]):
+    """Only the chosen problems: every deferred problem has a row too, and a year
+    defers far more than it chooses. Deferred rows live in the selection admin."""
+
     model = OIMESelection
     extra = 0
     fields = ("proposal", "status", "editor", "notes")
     autocomplete_fields = ("proposal", "editor")
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet[OIMESelection]:
+        return super().get_queryset(request).filter(OIMESelection.CHOSEN)
 
 
 @admin.register(OIMEYear)

@@ -1,0 +1,49 @@
+{% comment %}
+  A slim, collapsible list of proposals for the editor-in-chief's desk. Each
+  proposal carries `upvote_count` and `stats` from `_attach_stats`.
+{% endcomment %}
+<h3 class="mt-4">
+  <a class="oime-table-toggle link-dark text-decoration-none {% if not show %}collapsed{% endif %}"
+     data-bs-toggle="collapse"
+     href="#oime-desk-{{ title|slugify }}"
+     role="button"
+     aria-expanded="{{ show|yesno:'true,false' }}"
+     aria-controls="oime-desk-{{ title|slugify }}">{{ title }} ({{ proposals|length }})</a>
+</h3>
+<div class="collapse {% if show %}show{% endif %}"
+     id="oime-desk-{{ title|slugify }}">
+  {% if proposals %}
+    <table class="table table-striped otis-sortable">
+      <thead class="table-dark">
+        <tr>
+          <th class="text-nowrap">ID</th>
+          <th class="d-none d-sm-table-cell">Title</th>
+          <th class="text-nowrap">Diff.</th>
+          <th class="text-nowrap">Votes</th>
+          <th class="text-nowrap">
+            <abbr title="Clean / Eventual / Total">Solvers</abbr>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for proposal in proposals %}
+          <tr data-testid="{{ testid }}">
+            <td>
+              <a href="{{ proposal.get_absolute_url }}" class="fw-bold">{{ proposal.label }}</a>
+            </td>
+            <td class="d-none d-sm-table-cell">
+              <a href="{{ proposal.get_absolute_url }}">{{ proposal.title }}</a>
+            </td>
+            <td class="text-nowrap">{{ proposal.difficulty_display }}</td>
+            <td class="text-nowrap">🩷 × {{ proposal.upvote_count }}</td>
+            <td class="text-nowrap">
+              {{ proposal.stats.first_correct }} / {{ proposal.stats.correct }} / {{ proposal.stats.total }}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="fst-italic text-muted">No such problems.</p>
+  {% endif %}
+</div>

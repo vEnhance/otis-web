@@ -1,0 +1,55 @@
+{% comment %}
+  A collapsible table of chosen problems with where each stands in the editing
+  pipeline. Takes `title`, `selections` and `empty`, plus `first` to
+  drop the top margin when the table opens a section.
+{% endcomment %}
+<h3 class="{% if not first %}mt-4{% endif %}">
+  <a class="oime-table-toggle link-dark text-decoration-none"
+     data-bs-toggle="collapse"
+     href="#oime-desk-{{ title|slugify }}"
+     role="button"
+     aria-expanded="true"
+     aria-controls="oime-desk-{{ title|slugify }}">{{ title }} ({{ selections|length }})</a>
+</h3>
+<div class="collapse show" id="oime-desk-{{ title|slugify }}">
+  {% if selections %}
+    <table class="table table-striped otis-sortable">
+      <thead class="table-dark">
+        <tr>
+          <th class="text-nowrap">ID</th>
+          <th>Description</th>
+          <th class="text-nowrap">Status</th>
+          <th class="text-nowrap">Editor</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sel in selections %}
+          <tr data-testid="chosen-row">
+            <td>
+              <a href="{{ sel.proposal.get_absolute_url }}" class="fw-bold">{{ sel.proposal.label }}</a>
+            </td>
+            <td>
+              {% if sel.description %}
+                <span data-testid="chosen-description">{{ sel.description }}</span>
+              {% else %}
+                <span class="fst-italic">{{ sel.proposal.title }}</span>
+              {% endif %}
+              <br />
+              <small class="text-muted">{{ sel.proposal.credit_display }}</small>
+            </td>
+            <td class="text-nowrap">
+              {{ sel.get_status_display }}
+              {% if sel.blocked_on %}
+                <br />
+                <small class="text-muted">blocked on {{ sel.blocked_on }}</small>
+              {% endif %}
+            </td>
+            <td class="text-nowrap">{{ sel.editor|default:"—" }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="fst-italic text-muted">{{ empty }}</p>
+  {% endif %}
+</div>

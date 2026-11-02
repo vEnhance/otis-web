@@ -20,8 +20,50 @@
       Proposals for <strong>{{ accepting_year }}</strong> are open until
       <strong>{% timestamp accepting_year.proposals_close_at "time" %}</strong>.
     </p>
-  {% else %}
-    <p data-testid="proposals-closed-note">Proposals are closed right now.</p>
+  {% endif %}
+  {% if years %}
+    <hr />
+    <h1>Years</h1>
+    <table class="table table-striped">
+      <thead class="table-dark">
+        <tr>
+          <th>Year</th>
+          <th class="d-none d-md-table-cell">Proposals</th>
+          <th>Release</th>
+          <th>Chosen</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for year in years %}
+          <tr data-testid="year-row">
+            <td>
+              <a href="{{ year.get_absolute_url }}" class="fw-bold">{{ year }}</a>
+            </td>
+            <td class="d-none d-md-table-cell">
+              {% timestamp year.proposals_open_at "isodate" %} to {% timestamp year.proposals_close_at "isodate" %}
+            </td>
+            <td>{% timestamp year.release_at "isodate" "—" %}</td>
+            <td>{{ year.chosen_count }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <p>
+      <a href="{% url "admin:tubes_oimeyear_add" %}"
+         class="btn btn-outline-secondary btn-sm">New year</a>
+    </p>
+  {% elif my_selections %}
+    <hr />
+    <div data-testid="current-year">
+      {% include "tubes/components/chosen_table.html" with title="Chosen problems" selections=my_selections first=True empty="Nothing chosen yet." %}
+      {% if show_overleaf %}
+        <a href="{{ current_year.overleaf_url }}"
+           class="btn btn-success mb-2"
+           target="_blank"
+           rel="noopener"
+           data-testid="year-overleaf-link">Overleaf</a>
+      {% endif %}
+    </div>
   {% endif %}
   {% if contributor %}
     <hr />

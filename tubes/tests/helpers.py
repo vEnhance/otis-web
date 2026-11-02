@@ -19,7 +19,9 @@ def verified_staff(username: str = "staff") -> tuple[User, OIMEContributor]:
     return user, OIMEContributorFactory.create(user=user)
 
 
-def verified_admin(username: str = "admin") -> tuple[User, OIMEContributor]:
+def verified_admin(
+    username: str = "admin", *, casual_mode: bool = False
+) -> tuple[User, OIMEContributor]:
     verified_group, _ = Group.objects.get_or_create(name="Verified")
     user = UserFactory.create(
         username=username,
@@ -27,4 +29,4 @@ def verified_admin(username: str = "admin") -> tuple[User, OIMEContributor]:
         is_superuser=True,
         groups=(verified_group,),
     )
-    return user, OIMEContributorFactory.create(user=user)
+    return user, OIMEContributorFactory.create(user=user, casual_mode=casual_mode)

@@ -195,6 +195,19 @@ class OIMEYear(models.Model):
             proposals_open_at__lte=now, proposals_close_at__gt=now
         )
 
+    @classmethod
+    def current(cls) -> "OIMEYear | None":
+        """The latest year whose proposal window has opened.
+
+        A year created ahead of time doesn't take over until its window opens,
+        unless no year has opened yet.
+        """
+        opened = cls.objects.filter(proposals_open_at__lte=timezone.now())
+        return (
+            opened.order_by("-proposals_open_at").first()
+            or cls.objects.order_by("proposals_open_at").first()
+        )
+
 
 class OIMEProposal(models.Model):
     SUBJECT_CHOICES = (
@@ -306,7 +319,7 @@ class OIMEProposal(models.Model):
         From that point the TeX repository owns the text, so the author can no
         longer edit it here. Deferred selections do not count.
         """
-        return self.selections.exclude(status="SEL_DEFERRED").exists()
+        return self.selections.filter(OIMESelection.CHOSEN).exists()
 
     @cached_property
     def is_retired(self) -> bool:
@@ -342,6 +355,29 @@ class OIMESelection(models.Model):
         "SEL_REVIEW": "EIC",
         "SEL_DONE": "",
     }
+    # Chosen for the contest: shortlisted or further along, i.e. not deferred.
+    CHOSEN = ~models.Q(status="SEL_DEFERRED")
+
+    # The suggested next steps from each status, as (target, button label,
+    # whether the assigned editor may take it).
+    TRANSITIONS: ClassVar[dict[str, list[tuple[str, str, bool]]]] = {
+        "SEL_DEFERRED": [
+            ("SEL_SHORTLISTED", "✅ Shortlist", False),
+        ],
+        "SEL_SHORTLISTED": [
+            ("SEL_EDITING", "📝 Send to editor", False),
+            ("SEL_DEFERRED", "⏸️ Defer", False),
+        ],
+        "SEL_EDITING": [
+            ("SEL_REVIEW", "✅ Request review", True),
+        ],
+        "SEL_REVIEW": [
+            ("SEL_EDITING", "📝 Request revisions", True),
+            ("SEL_DONE", "🎉 Mark done", False),
+        ],
+        "SEL_DONE": [],
+    }
+
     year = models.ForeignKey(
         OIMEYear, on_delete=models.CASCADE, related_name="selections"
     )
@@ -359,7 +395,9 @@ class OIMESelection(models.Model):
         related_name="editing",
         help_text="The contributor writing up the solution in the TeX repository.",
     )
-    notes = models.TextField(blank=True, help_text="Staff-only problem notes.")
+    notes = models.TextField(
+        blank=True, help_text="Notes for the editor and author, e.g. edits needed."
+    )
     description = models.CharField(
         max_length=200,
         blank=True,
@@ -379,9 +417,7 @@ class OIMESelection(models.Model):
     @classmethod
     def retiring(cls) -> "models.QuerySet[OIMESelection]":
         """All selections that should retire their problem."""
-        return cls.objects.filter(year__release_at__lte=timezone.now()).exclude(
-            status="SEL_DEFERRED"
-        )
+        return cls.objects.filter(cls.CHOSEN, year__release_at__lte=timezone.now())
 
     @property
     def is_deferred(self) -> bool:
@@ -390,6 +426,14 @@ class OIMESelection(models.Model):
     @property
     def blocked_on(self) -> str:
         return self.BLOCKED_ON[self.status]
+
+    def transitions(self, *, is_eic: bool) -> list[tuple[str, str]]:
+        """The ``(target status, label)`` buttons to offer this viewer."""
+        return [
+            (target, label)
+            for target, label, editor_may in self.TRANSITIONS[self.status]
+            if is_eic or editor_may
+        ]
 
 
 class OIMEFight(models.Model):

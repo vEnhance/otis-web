@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+{% load otis_extras %}
+{% block title %}
+  Release {{ year }}
+{% endblock title %}
+{% block layout-content %}
+  <h1>Release {{ year }}</h1>
+  <p>
+    Problems below will be <strong>retired</strong>. Anything cut should be
+    deferred first.
+  </p>
+  {% if not_done %}
+    <div class="alert alert-warning" data-testid="release-not-done">
+      {{ not_done|length }} of these problems are not done yet.
+    </div>
+  {% endif %}
+  <h2>Retiring ({{ chosen|length }})</h2>
+  {% if chosen %}
+    <ul>
+      {% for sel in chosen %}
+        <li data-testid="release-row">
+          <a href="{{ sel.proposal.get_absolute_url }}" class="fw-bold">{{ sel.proposal.label }}</a>:
+          {{ sel.proposal.title }}
+          <small class="text-muted">({{ sel.get_status_display }})</small>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="fst-italic text-muted">Nothing is chosen for this year.</p>
+  {% endif %}
+  {% include "otisweb/components/generic_form.html" with submit_name="Set release" btn_class="btn-danger" %}
+  {% if year.release_at %}
+    <form method="post" class="mt-3">
+      {% csrf_token %}
+      <button type="submit"
+              name="clear"
+              class="btn btn-outline-secondary"
+              data-testid="release-clear">Clear release ({% timestamp year.release_at "time" %})</button>
+    </form>
+  {% endif %}
+{% endblock layout-content %}
