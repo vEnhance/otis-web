@@ -39,7 +39,7 @@
       {% for contract in prestige_contracts %}
         <li class="list-group-item">
           <strong>✷{{ forloop.counter }}</strong> {{ contract.created_at|date }}:
-          −{{ contract.clubs }}♣, −{{ contract.hearts }}♥, −{{ contract.spades }}♠, −{{ contract.diamonds }}♦
+          offered {{ contract.clubs }}♣, {{ contract.hearts }}♥, {{ contract.spades }}♠, {{ contract.diamonds }}♦
         </li>
       {% endfor %}
     </ul>
