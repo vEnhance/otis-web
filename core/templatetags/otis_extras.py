@@ -27,7 +27,7 @@ register = template.Library()
 
 
 @register.simple_tag
-def level(level: int | str, prestige: int) -> SafeString:
+def level(level: int, prestige: int) -> SafeString:
     """Render a level number with one star per prestige contract.
 
     Built in Python rather than a template because any whitespace a formatter
