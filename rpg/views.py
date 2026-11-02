@@ -290,14 +290,14 @@ def assert_palace_access(student: Student) -> LevelInfoDict:
 def prestige(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
     student = get_student_by_pk(request, student_pk)
     if request.user != student.user:
-        raise PermissionDenied("TODO(prestige) not your student")
+        raise PermissionDenied("Prestige on a different user not allowed.")
 
     with transaction.atomic():
         if request.method == "POST":
             User.objects.select_for_update().get(pk=student.user.pk)
         level_info = get_level_info(student)
         if not level_info["is_maxed"]:
-            raise PermissionDenied("TODO(prestige) not max level")
+            raise PermissionDenied("Prestige not allowed unless")
         form = PrestigeContractForm(
             request.POST or None,
             totals=level_info["totals"],
@@ -313,8 +313,8 @@ def prestige(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
             Student.objects.filter(user=student.user, semester__active=True).update(
                 last_level_seen=new_level
             )
-            logger.log(SUCCESS_LOG_LEVEL, f"TODO(prestige) Discord log {student}")
-            messages.success(request, "TODO(prestige) success")
+            logger.log(SUCCESS_LOG_LEVEL, f"{student} activated prestige")
+            messages.success(request, "Prestige activated successfully.")
             return redirect("stats", student.pk)
 
     context: dict[str, Any] = {"student": student, "form": form} | level_info

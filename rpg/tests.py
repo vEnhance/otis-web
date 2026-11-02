@@ -1018,7 +1018,7 @@ def contract(clubs: int = 0, hearts: int = 0, spades: int = 0, diamonds: int = 0
 def test_prestige_resets_level(otis):
     alice = maxed_student()
     otis.login(alice)
-    otis.assert_testid(otis.get_ok("stats", alice.pk), "prestige-button")
+    otis.assert_testid(otis.get_ok("stats", alice.pk), "prestige-paragraph")
     otis.post_redirects(
         otis.url("stats", alice.pk), "prestige", alice.pk, data=contract(2, 0, 0, 3)
     )

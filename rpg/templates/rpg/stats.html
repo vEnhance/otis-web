@@ -16,22 +16,25 @@
     Each statistic has value $\left\lfloor \sqrt{\max\left(n,0\right)} \right\rfloor$
     where $n$ is the number of points amassed towards that statistic.
   </p>
+  {% if has_palace_access and request.user == student.user %}
+    <p>
+      You can now access the
+      <a href="{% url "palace-list" student.pk %}">Ruby Palace</a>.
+    </p>
+  {% endif %}
+  {% if is_maxed and request.user == student.user %}
+    <p data-testid="prestige-paragraph">
+      You can use Prestige to <a href="{% url "prestige" student.pk %}">reset your level</a>.
+    </p>
+  {% endif %}
   <div class="accordion" id="accordion">
     {% include "rpg/meters/clubs.html" with meter=meters.clubs %}
     {% include "rpg/meters/hearts.html" with meter=meters.hearts %}
     {% include "rpg/meters/spades.html" with meter=meters.spades %}
     {% include "rpg/meters/diamonds.html" with meter=meters.diamonds %}
   </div>
-  {% if is_maxed and request.user == student.user %}
-    <p class="text-center my-3">
-      <a href="{% url 'prestige' student.pk %}"
-         class="btn btn-danger text-white"
-         data-testid="prestige-button"
-         role="button">TODO(prestige) button</a>
-    </p>
-  {% endif %}
   {% if prestige_contracts %}
-    <h3>TODO(prestige) heading</h3>
+    <h3>Prestige</h3>
     <ul class="list-group mb-3">
       {% for contract in prestige_contracts %}
         <li class="list-group-item">

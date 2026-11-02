@@ -1,12 +1,37 @@
 {% extends "layout.html" %}
 {% load otis_extras %}
 {% block title %}
-  TODO(prestige) title
+  Prestige
 {% endblock title %}
 {% block layout-content %}
   <p>
     <a href="{% url 'stats' student.pk %}">Back to stats</a>
   </p>
-  <p>TODO(prestige) explanation. Level {% level level_number prestige %}, a+b+c+d = {{ max_level }}.</p>
-  {% include "otisweb/components/generic_form.html" with submit_name="TODO(prestige) submit" btn_class="btn-danger" %}
+  <p>
+    The <strong>Prestige</strong> function lets you exchange
+    {{ max_level }} levels to obtain a special Prestige star indicator next to your level
+    (for example, "Level {% level "N" 1 %}").
+  </p>
+  <p>
+    After activating Prestige, you can continue to level up
+    (which will become easier again with the lowered statistics).
+    There is no limit to the number of Prestige stars you can obtain.
+  </p>
+  <p>This action is irreversible!</p>
+  <hr />
+  <h2>Your current statistics</h2>
+  <div class="container">
+    <div class="row">
+      {% include "rpg/meters/small.html" with meter=meters.clubs %}
+      {% include "rpg/meters/small.html" with meter=meters.hearts %}
+      {% include "rpg/meters/small.html" with meter=meters.spades %}
+      {% include "rpg/meters/small.html" with meter=meters.diamonds %}
+    </div>
+  </div>
+  <hr />
+  <h2>Prestige parameters</h2>
+  <p>The sum of the values below must be exactly <strong>{{ max_level }}</strong>.</p>
+  {% include "otisweb/components/generic_form.html" with submit_name="Activate Prestige" btn_class="btn-danger" %}
+  <hr />
+  <h2>Preview</h2>
 {% endblock layout-content %}

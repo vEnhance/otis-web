@@ -326,6 +326,9 @@ span.meter-header,
 strong.meter-def {
   font-family: Acme, sans-serif;
 }
+.acme {
+  font-family: Acme, sans-serif;
+}
 
 /* Twemoji - https://github.com/twitter/twemoji/ */
 img.emoji {

@@ -1,4 +1,8 @@
-<span class="otis-level">{{ level }}{% if prestige %}<span class="otis-prestige"
-      tabindex="0"
-      data-testid="prestige-stars"
-      title="TODO(prestige) tooltip {{ prestige }}">{{ stars }}</span>{% endif %}</span>
+<span class="otis-level">{{ level }}
+  {% if prestige %}
+    <span class="otis-prestige"
+          tabindex="0"
+          data-testid="prestige-stars"
+          title="Prestige {{ prestige }}">{{ stars }}</span>
+  {% endif %}
+</span>
