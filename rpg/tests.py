@@ -1158,7 +1158,7 @@ def test_prestige_keeps_secret_units(otis):
     resp = otis.get_ok("bonus-level-request", alice.pk)
     units = resp.context["form"].fields["unit"].queryset
     assert bonus_unit in units
-    assert beyond_max_unit in units
+    assert beyond_max_unit not in units
 
 
 @pytest.mark.django_db
