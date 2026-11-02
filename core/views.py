@@ -36,6 +36,7 @@ from otisweb.decorators import admin_required, staff_required, verified_required
 from otisweb.mixins import AdminRequiredMixin
 from otisweb.utils import AuthHttpRequest
 from roster.models import ENABLED_STANDINGS, Student
+from rpg.levelsys import perk_level
 
 from .forms import CatalogFilterForm, CheckStampForm
 from .models import Unit, UnitGroup
@@ -88,6 +89,7 @@ class UnitGroupListView(LoginRequiredMixin, ListView[Unit]):
         students = Student.objects.filter(user=user)
         active_student = students.filter(semester__active=True).first()
         level = students.aggregate(level=Max("last_level_seen"))["level"] or 0
+        level = perk_level(user, level)
 
         queryset = Unit.objects.all()
         queryset = queryset.annotate(

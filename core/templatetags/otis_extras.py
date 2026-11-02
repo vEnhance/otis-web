@@ -9,11 +9,12 @@ from django.db import DatabaseError
 from django.forms.boundfield import BoundField
 from django.forms.utils import flatatt
 from django.template.defaultfilters import stringfilter
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.formats import date_format
 from django.utils.functional import keep_lazy_text
 from django.utils.html import escape, format_html
-from django.utils.safestring import SafeData, mark_safe
+from django.utils.safestring import SafeData, SafeString, mark_safe
 from django.utils.text import normalize_newlines
 from django.utils.timezone import template_localtime  # type: ignore
 
@@ -24,6 +25,16 @@ from rpg.levelsys import BONUS_D_UNIT, BONUS_Z_UNIT
 from rpg.models import Achievement
 
 register = template.Library()
+
+
+@register.simple_tag
+def level(level: int, prestige: int) -> SafeString:
+    """Render a level number with one star per prestige contract.
+
+    Stripped so the template's trailing newline can't put a space before
+    whatever follows, e.g. the ")" in "(Level 18★)"."""
+    context = {"level": level, "prestige": prestige, "stars": "★" * prestige}
+    return mark_safe(render_to_string("rpg/components/level.html", context).strip())
 
 
 @register.simple_tag

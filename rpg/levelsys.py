@@ -174,6 +174,7 @@ class SpadeItemsDict(TypedDict):
 class LevelInfoDict(SpadeItemsDict):
     psets: QuerySet[PSet]
     meters: FourMetersDict
+    totals: dict[str, float]
     level_number: int
     str_im_level: str
     level_name: str
@@ -181,7 +182,6 @@ class LevelInfoDict(SpadeItemsDict):
     max_level: int
     prestige_contracts: QuerySet[PrestigeContract]
     prestige: int
-    stars: str
     has_palace_access: bool
     bonus_levels: QuerySet[BonusLevel]
 
@@ -214,7 +214,7 @@ def get_level_info(student: Student) -> LevelInfoDict:
         Level.objects.filter(threshold__lte=level_number).order_by("-threshold").first()
     )
     level_name = level.name if level is not None else "No Level"
-    max_level = Level.objects.all().aggregate(max=Max("threshold"))["max"] or 0
+    max_level = get_max_level()
 
     # Imaginary component of level
     im_level_number = sum(meter.im_level for meter in meters.values())  # type: ignore
@@ -226,6 +226,7 @@ def get_level_info(student: Student) -> LevelInfoDict:
         str_im_level = f"+ {im_level_number}i"
 
     level_data["meters"] = meters
+    level_data["totals"] = totals
     level_data["level_number"] = level_number
     level_data["level_name"] = level_name
     level_data["is_maxed"] = level_number >= max_level
@@ -235,12 +236,31 @@ def get_level_info(student: Student) -> LevelInfoDict:
     ).order_by("created_at")
     prestige = level_data["prestige_contracts"].count()
     level_data["prestige"] = prestige
-    level_data["stars"] = "★" * prestige
-    level_data["has_palace_access"] = level_number >= max_level or prestige > 0
-    level_data["bonus_levels"] = BonusLevel.objects.filter(level__lte=level_number)
+    floored_level = max(level_number, max_level) if prestige > 0 else level_number
+    level_data["has_palace_access"] = floored_level >= max_level
+    level_data["bonus_levels"] = BonusLevel.objects.filter(level__lte=floored_level)
     level_data["str_im_level"] = str_im_level
 
     return level_data
+
+
+def format_level(level: int, prestige: int) -> str:
+    """Plain-text level, e.g. "18★". Templates use the {% level %} tag instead."""
+    return f"{level}{'★' * prestige}"
+
+
+def get_max_level() -> int:
+    return Level.objects.all().aggregate(max=Max("threshold"))["max"] or 0
+
+
+def perk_level(user: User, level: int) -> int:
+    """The level used for Ruby Palace access and secret units.
+
+    Prestiging resets a student's real level, but they keep max-level perks.
+    Everything else (UI, level-up toasts) uses the real level."""
+    if not PrestigeContract.objects.filter(user=user).exists():
+        return level
+    return max(level, get_max_level())
 
 
 ACCEPTED_PSETS = Q(status="A", eligible=True)
@@ -417,7 +437,6 @@ def get_student_rows(queryset: QuerySet[Student]) -> list[dict[str, Any]]:
             row[suit] = float(getattr(student, suit))
         row["level"] = sum(int(max(row[k], 0) ** 0.5) for k in SUITS)
         row["prestige"] = student.num_prestiges  # type: ignore
-        row["stars"] = "★" * row["prestige"]
         row["sort_level"] = 1000 * row["prestige"] + row["level"]
         try:
             row["last_seen"] = student.user.profile.last_seen
@@ -448,8 +467,6 @@ def check_level_up(student: Student, level_info: LevelInfoDict) -> bool:
     if not student.semester.active:
         return False
     level_number = level_info["level_number"]
-    if level_info["prestige"] > 0:
-        level_number = max(level_number, level_info["max_level"])
     if level_number <= student.last_level_seen:
         return False
 

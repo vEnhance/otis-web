@@ -145,11 +145,13 @@ def stats(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
     }
     level_info = get_level_info(student)
     context |= level_info
-    level_number = level_info["level_number"]
-    obtained_levels = Level.objects.filter(threshold__lte=level_number).order_by(
+    # After a prestige, keep showing the levels reached before it, up to max
+    shown_up_to = level_info["level_number"]
+    if level_info["prestige"] > 0:
+        shown_up_to = max(shown_up_to, level_info["max_level"])
+    context["levels"] = Level.objects.filter(threshold__lte=shown_up_to).order_by(
         "-threshold"
     )
-    context["obtained_levels"] = obtained_levels
     return render(request, "rpg/stats.html", context)
 
 
@@ -298,13 +300,18 @@ def prestige(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
             raise PermissionDenied("Insufficient level")
         form = PrestigeContractForm(
             request.POST or None,
-            meters=level_info["meters"],
+            totals=level_info["totals"],
             max_level=level_info["max_level"],
         )
         if request.method == "POST" and form.is_valid():
             PrestigeContract.objects.create(
                 user=student.user,
                 **{suit: form.cleaned_data[suit] ** 2 for suit in form.fields},
+            )
+            # Reset so the climb back up gets level-up toasts again
+            new_level = get_level_info(student)["level_number"]
+            Student.objects.filter(user=student.user, semester__active=True).update(
+                last_level_seen=new_level
             )
             logger.log(SUCCESS_LOG_LEVEL, f"{student} signed a prestige contract!")
             messages.success(request, "You signed a prestige contract. Ascend again!")
