@@ -297,7 +297,7 @@ def prestige(request: AuthHttpRequest, student_pk: int) -> HttpResponse:
             User.objects.select_for_update().get(pk=student.user.pk)
         level_info = get_level_info(student)
         if not level_info["is_maxed"]:
-            raise PermissionDenied("Prestige not allowed unless")
+            raise PermissionDenied("Prestige not allowed unless max level is reached.")
         form = PrestigeContractForm(
             request.POST or None,
             totals=level_info["totals"],
