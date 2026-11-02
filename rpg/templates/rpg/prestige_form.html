@@ -1,14 +1,23 @@
 {% extends "layout.html" %}
 {% load otis_extras %}
 {% block title %}
-  Prestige
+  Prestige ritual
 {% endblock title %}
 {% block layout-content %}
   <p>
     <a href="{% url 'stats' student.pk %}">Back to stats</a>
   </p>
   {% if preview %}
-    <h2>Your current statistics</h2>
+    <p>
+      You are about to activate a Prestige.
+      Please check that this does what you want it to.
+    </p>
+    <hr />
+    <h1>Before</h1>
+    <p>
+      Currently, you are <b>Level {% level level_number prestige %}</b>
+      with the title <b>{{ level_name }}</b>.
+    </p>
     <div class="container">
       <div class="row">
         {% include "rpg/meters/small.html" with meter=meters.clubs %}
@@ -19,7 +28,7 @@
     </div>
     <hr />
     <div data-testid="prestige-preview">
-      <h2>Preview</h2>
+      <h1>After</h1>
       <p>
         After Prestige, you would be
         <b>Level {% level preview.level_number preview.prestige %}</b>,
@@ -33,13 +42,16 @@
           {% include "rpg/meters/small.html" with meter=preview.meters.diamonds %}
         </div>
       </div>
-      <form action="{{ request.path }}" method="post" class="form mt-3">
-        {% csrf_token %}
-        {% for field in form %}<input type="hidden" name="{{ field.html_name }}" value="{{ field.value }}" />{% endfor %}
-        <button type="submit" name="confirm" class="btn btn-danger">Activate Prestige</button>
-        <button type="submit" name="edit" class="btn btn-secondary">No, take me back</button>
-      </form>
     </div>
+    <hr />
+    <h1>Confirm Prestige</h1>
+    <p>This action is irreversible!</p>
+    <form action="{{ request.path }}" method="post" class="form mt-3">
+      {% csrf_token %}
+      {% for field in form %}<input type="hidden" name="{{ field.html_name }}" value="{{ field.value }}" />{% endfor %}
+      <button type="submit" name="confirm" class="btn btn-danger">Activate Prestige</button>
+      <button type="submit" name="edit" class="btn btn-secondary">No, take me back</button>
+    </form>
   {% else %}
     <h2>
       About Prestige
@@ -51,10 +63,9 @@
       Do you wish $\sqrt x$ was a little less convex?
     </p>
     <p>
-      The <strong>Prestige</strong> function lets you exchange
+      The <strong>Prestige ritual</strong> lets you sacrifice
       {{ max_level }} levels to obtain a
-      special Prestige star indicator
-      next to your level in its place.
+      special Prestige star indicator next to your level in its place.
       (This terminology is adapted from video games.)
     </p>
     <p>
@@ -63,7 +74,7 @@
       or previously obtained secret units.
     </p>
     <p>
-      After activating Prestige, you can continue to level up.
+      After activating Prestige, you can then continue to level up again.
       There is no limit to the number of Prestige stars you can obtain.
     </p>
     <p>Note this action is irreversible!</p>
@@ -80,7 +91,7 @@
     <hr />
     <div data-testid="prestige-form">
       <h2>Prestige parameters</h2>
-      <p>The sum of the values below must be exactly <strong>{{ max_level }}</strong>.</p>
+      <p>The sum of the offerings below must be exactly <strong>{{ max_level }}</strong>.</p>
       {% include "otisweb/components/generic_form.html" with submit_name="Preview changes" btn_class="btn-primary" %}
     </div>
   {% endif %}
