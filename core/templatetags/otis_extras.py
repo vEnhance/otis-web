@@ -9,7 +9,6 @@ from django.db import DatabaseError
 from django.forms.boundfield import BoundField
 from django.forms.utils import flatatt
 from django.template.defaultfilters import stringfilter
-from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.formats import date_format
 from django.utils.functional import keep_lazy_text
@@ -28,13 +27,20 @@ register = template.Library()
 
 
 @register.simple_tag
-def level(level: int, prestige: int) -> SafeString:
+def level(level: int | str, prestige: int) -> SafeString:
     """Render a level number with one star per prestige contract.
 
-    Stripped so the template's trailing newline can't put a space before
-    whatever follows, e.g. the ")" in "(Level 18★)"."""
-    context = {"level": level, "prestige": prestige, "stars": "★" * prestige}
-    return mark_safe(render_to_string("rpg/components/level.html", context).strip())
+    Built in Python rather than a template because any whitespace a formatter
+    adds between the number and the stars would show up on the page."""
+    if not prestige:
+        return format_html('<span class="otis-level">{}</span>', level)
+    return format_html(
+        '<span class="otis-level">{}<span class="otis-prestige" tabindex="0" '
+        'data-testid="prestige-stars" title="Prestige {}">{}</span></span>',
+        level,
+        prestige,
+        "★" * prestige,
+    )
 
 
 @register.simple_tag

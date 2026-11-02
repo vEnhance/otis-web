@@ -1077,13 +1077,14 @@ def test_prestige_negative_stat(otis):
     otis.login(alice)
     assert get_level_info(alice)["meters"]["spades"].value == -4
 
-    otis.post_ok("prestige", alice.pk, data=contract(1, 0, 1, 3))
-    assert PrestigeContract.objects.count() == 1
+    form = otis.get_ok("prestige", alice.pk).context["form"]
+    assert form.fields["spades"].disabled
 
+    # the disabled field ignores the submitted 1 and uses 0
     otis.post_redirects(
-        otis.url("stats", alice.pk), "prestige", alice.pk, data=contract(2, 0, 0, 3)
+        otis.url("stats", alice.pk), "prestige", alice.pk, data=contract(2, 0, 1, 3)
     )
-    assert PrestigeContract.objects.count() == 2
+    assert PrestigeContract.objects.latest("pk").spades == 0
 
 
 @pytest.mark.django_db

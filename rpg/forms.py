@@ -68,9 +68,9 @@ class PrestigeContractForm(forms.Form):
             )
         for suit, root in roots.items():
             assert root is not None
-            if (value := self.totals[suit]) < root**2 and value > 0:
+            if root > 0 and (value := self.totals[suit]) < root**2:
                 self.add_error(
                     suit,
-                    f"Insufficient value. {root} is less than sqrt({round(value, 2)}) ≈ {int(value**0.5)}.",
+                    f"Insufficient value. {root} is more than sqrt({round(value, 2)}) ≈ {int(value**0.5)}.",
                 )
         return cleaned_data

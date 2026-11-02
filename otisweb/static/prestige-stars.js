@@ -1,5 +1,5 @@
 /*
- * Upgrade the native title tooltip on prestige stars (see rpg/components/level.html) to a
+ * Upgrade the native title tooltip on prestige stars (see the level tag in otis_extras.py) to a
  * Bootstrap tooltip, which appears at once and matches the rest of the page.
  * Without Bootstrap the title attribute still works on its own.
  */
