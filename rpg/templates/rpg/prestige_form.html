@@ -7,6 +7,10 @@
   <p>
     <a href="{% url 'stats' student.pk %}">Back to stats</a>
   </p>
+  <h2>
+    About Prestige
+    <span class="otis-prestige" title="Example of a prestige star">✷</span>
+  </h2>
   <p>
     Do you miss the beginning of OTIS when you could go up ten levels
     from submitting just one unit?
@@ -16,8 +20,8 @@
     The <strong>Prestige</strong> function lets you exchange
     {{ max_level }} levels to obtain a
     special Prestige star indicator
-    <span class="otis-prestige" title="Example of a prestige star">★</span>
     next to your level in its place.
+    (This terminology is adapted from video games.)
     Activating Prestige in this way does <b>not</b>
     revoke access to the <a href="{% url "palace-list" student.pk %}">Ruby Palace</a>
     or previously obtained secret units.

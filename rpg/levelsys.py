@@ -245,8 +245,8 @@ def get_level_info(student: Student) -> LevelInfoDict:
 
 
 def format_level(level: int, prestige: int) -> str:
-    """Plain-text level, e.g. "18★". Templates use the {% level %} tag instead."""
-    return f"{level}{'★' * prestige}"
+    """Plain-text level, e.g. "18✷". Templates use the {% level %} tag instead."""
+    return f"{level}{'✷' * prestige}"
 
 
 def get_max_level() -> int:

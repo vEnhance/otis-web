@@ -1165,7 +1165,7 @@ def test_prestige_leaderboard_order(otis):
 
 def test_format_level():
     assert format_level(18, 0) == "18"
-    assert format_level(18, 2) == "18★★"
+    assert format_level(18, 2) == "18✷✷"
 
 
 @pytest.mark.django_db
@@ -1177,7 +1177,7 @@ def test_no_prestige_stars_without_contract(otis):
 
 def test_level_tag_has_no_trailing_space():
     html = Template("{% load otis_extras %}({% level 18 1 %})").render(Context())
-    assert html.endswith("★</span></span>)")
+    assert html.endswith("✷</span></span>)")
 
 
 @pytest.mark.django_db

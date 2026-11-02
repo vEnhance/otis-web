@@ -39,7 +39,7 @@ def level(level: int, prestige: int) -> SafeString:
         'data-testid="prestige-stars" title="Prestige {}">{}</span></span>',
         level,
         prestige,
-        "★" * prestige,
+        "✷" * prestige,
     )
 
 
