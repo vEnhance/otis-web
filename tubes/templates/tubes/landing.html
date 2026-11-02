@@ -17,8 +17,9 @@
   </p>
   {% if accepting_year %}
     <p data-testid="proposals-open-note">
-      Proposals for <strong>{{ accepting_year }}</strong> are open until
-      <strong>{% timestamp accepting_year.proposals_close_at "time" %}</strong>.
+      Proposals for {{ accepting_year }} are currently open!
+      <br />
+      Deadline: {% timestamp accepting_year.proposals_close_at "time" %}.
     </p>
   {% endif %}
   {% if years %}
@@ -49,8 +50,7 @@
       </tbody>
     </table>
     <p>
-      <a href="{% url "admin:tubes_oimeyear_add" %}"
-         class="btn btn-outline-secondary btn-sm">New year</a>
+      <a href="{% url "admin:tubes_oimeyear_add" %}">Add new year in Django admin</a>
     </p>
   {% elif my_selections %}
     <hr />
