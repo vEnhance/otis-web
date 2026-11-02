@@ -32,10 +32,10 @@ class DiamondsForm(forms.Form):
 class PrestigeContractForm(forms.Form):
     """Takes the square roots of the four deductions."""
 
-    clubs = forms.IntegerField(min_value=0, label="♣ Dexterity")
-    hearts = forms.IntegerField(min_value=0, label="♥ Wisdom")
-    spades = forms.IntegerField(min_value=0, label="♠ Strength")
-    diamonds = forms.IntegerField(min_value=0, label="♦ Charisma")
+    clubs = forms.IntegerField(min_value=0, label="TODO(prestige) clubs")
+    hearts = forms.IntegerField(min_value=0, label="TODO(prestige) hearts")
+    spades = forms.IntegerField(min_value=0, label="TODO(prestige) spades")
+    diamonds = forms.IntegerField(min_value=0, label="TODO(prestige) diamonds")
 
     def __init__(
         self, *args: Any, totals: dict[str, float], max_level: int, **kwargs: Any
@@ -45,7 +45,7 @@ class PrestigeContractForm(forms.Form):
         self.totals = totals
         self.max_level = max_level
         for suit, field in self.fields.items():
-            field.help_text = f"Current total: {round(totals[suit], 2)}"
+            field.help_text = f"TODO(prestige) help {round(totals[suit], 2)}"
 
     def clean(self) -> dict[str, Any]:
         cleaned_data = super().clean() or {}
@@ -53,15 +53,13 @@ class PrestigeContractForm(forms.Form):
         if any(root is None for root in roots.values()):
             return cleaned_data
         if sum(roots.values()) != self.max_level:  # type: ignore
-            raise forms.ValidationError(
-                f"The four numbers must add up to exactly {self.max_level}."
-            )
+            raise forms.ValidationError(f"TODO(prestige) wrong sum {self.max_level}")
         for suit, root in roots.items():
             assert root is not None
             value = self.totals[suit]
             if value < 0:
                 if root != 0:
-                    self.add_error(suit, "This statistic is negative, so pick 0.")
+                    self.add_error(suit, "TODO(prestige) negative stat")
             elif root * root > value:
-                self.add_error(suit, f"You only have {round(value, 2)} to give up.")
+                self.add_error(suit, f"TODO(prestige) too much {round(value, 2)}")
         return cleaned_data
