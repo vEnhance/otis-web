@@ -11,25 +11,25 @@
     </td>
     <td valign="top" width="50%">
       <h3 id="petitions">Petitions</h3>
-      {% if request.user.is_staff %}
-        <a href="{% url 'petition' student.pk %}" class="btn btn-warning">Manage units</a>
-        <a href="{% url 'advance' student.pk %}" class="btn btn-dark">Edit units</a>
+      {% if not student.enabled %}
+        <p class="text-muted fst-italic">Disabled.</p>
+      {% elif not semester.active %}
+        <p class="text-muted fst-italic">Course is archived.</p>
+      {% elif student.newborn %}
+        <p class="text-muted fst-italic">Pick units first!</p>
       {% else %}
-        {% if not student.enabled %}
-          <p class="text-muted fst-italic">Disabled.</p>
-        {% elif not semester.active %}
-          <p class="text-muted fst-italic">Course is archived.</p>
-        {% elif student.newborn %}
-          <p class="text-muted fst-italic">Pick units first!</p>
-        {% else %}
-          <a href="{% url 'petition' student.pk %}" class="btn btn-warning">Manage units</a>
-          {% if bonus_levels %}
-            <p data-testid="bonus-level-request">
-              You are also sufficiently high level to
-              <a href="{% url "bonus-level-request" student.pk %}">request secret units</a>.
-            </p>
-          {% endif %}
+        <a href="{% url 'petition' student.pk %}" class="btn btn-warning">Manage units</a>
+        {% if bonus_levels %}
+          <p data-testid="bonus-level-request">
+            You are also sufficiently high level to
+            <a href="{% url "bonus-level-request" student.pk %}">request secret units</a>.
+          </p>
         {% endif %}
+      {% endif %}
+      {% if request.user.is_staff %}
+        <p>
+          <a href="{% url 'advance' student.pk %}" class="btn btn-dark">Edit units as staff</a>
+        </p>
       {% endif %}
     </td>
   </tr>
