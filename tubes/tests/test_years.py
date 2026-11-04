@@ -63,14 +63,62 @@ def test_create_form_defaults_to_draft_without_open_window(otis):
 
 
 @pytest.mark.django_db
-def test_create_published_blocked_without_open_window(otis):
+def test_create_form_warns_without_open_window(otis):
     user, _ = verified_contributor()
     closed_year()
     otis.login(user)
-    resp = otis.post("oime-proposal-create", data=PROPOSAL_DATA)
-    assert resp.status_code == 200
-    assert "is_draft" in resp.context["form"].errors
-    assert OIMEProposal.objects.count() == 0
+    resp = otis.get_20x("oime-proposal-create")
+    otis.assert_testid(resp, "proposals-closed")
+
+
+@pytest.mark.django_db
+def test_create_form_no_warning_during_window(otis):
+    user, _ = verified_contributor()
+    OIMEYearFactory.create()
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-create")
+    otis.assert_no_testid(resp, "proposals-closed")
+
+
+@pytest.mark.django_db
+def test_update_form_warns_without_open_window(otis):
+    user, contributor = verified_contributor()
+    closed_year()
+    proposal = OIMEProposalFactory.create(author=contributor, is_draft=True)
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-update", proposal.pk)
+    otis.assert_testid(resp, "proposals-closed")
+
+
+@pytest.mark.django_db
+def test_update_published_form_has_no_warning_without_open_window(otis):
+    user, contributor = verified_contributor()
+    closed_year()
+    proposal = OIMEProposalFactory.create(author=contributor, is_draft=False)
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-update", proposal.pk)
+    otis.assert_no_testid(resp, "proposals-closed")
+    assert resp.context["form"].fields["is_draft"].disabled
+
+
+@pytest.mark.django_db
+def test_staff_draft_field_enabled_outside_window(otis):
+    staff, _ = verified_staff()
+    closed_year()
+    otis.login(staff)
+    resp = otis.get_20x("oime-proposal-create")
+    assert not resp.context["form"].fields["is_draft"].disabled
+
+
+@pytest.mark.django_db
+def test_create_published_saves_draft_without_open_window(otis):
+    user, _ = verified_contributor()
+    closed_year()
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-create")
+    assert resp.context["form"].fields["is_draft"].disabled
+    otis.post_30x("oime-proposal-create", data=PROPOSAL_DATA)
+    assert OIMEProposal.objects.get().is_draft is True
 
 
 @pytest.mark.django_db
@@ -106,11 +154,7 @@ def test_publishing_a_draft_blocked_without_open_window(otis):
     closed_year()
     proposal = OIMEProposalFactory.create(author=contributor, is_draft=True)
     otis.login(user)
-    resp = otis.post(
-        "oime-proposal-update", proposal.pk, data=update_data(is_draft=False)
-    )
-    assert resp.status_code == 200
-    assert "is_draft" in resp.context["form"].errors
+    otis.post_30x("oime-proposal-update", proposal.pk, data=update_data(is_draft=False))
     proposal.refresh_from_db()
     assert proposal.is_draft is True
 
@@ -133,11 +177,7 @@ def test_unpublishing_blocked_without_open_window(otis):
     closed_year()
     proposal = OIMEProposalFactory.create(author=contributor, is_draft=False)
     otis.login(user)
-    resp = otis.post(
-        "oime-proposal-update", proposal.pk, data=update_data(is_draft=True)
-    )
-    assert resp.status_code == 200
-    assert "is_draft" in resp.context["form"].errors
+    otis.post_30x("oime-proposal-update", proposal.pk, data=update_data(is_draft=True))
     proposal.refresh_from_db()
     assert proposal.is_draft is False
 
