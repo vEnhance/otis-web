@@ -810,6 +810,16 @@ def _proposals_open(request: HttpRequest) -> bool:
     return OIMEYear.accepting().exists()
 
 
+def _lock_draft_field(request: HttpRequest, form: OIMEProposalForm) -> None:
+    """Outside the proposal window, a problem stays a draft or stays published."""
+    if not _proposals_open(request):
+        field = form.fields["is_draft"]
+        field.disabled = True
+        field.help_text = (
+            "Proposals are closed, so this can't change until the next cycle."
+        )
+
+
 def _can_edit(
     request: HttpRequest,
     proposal: OIMEProposal,
@@ -845,16 +855,15 @@ class ProposalCreateView(
             initial["is_draft"] = True
         return initial
 
+    def get_form(self, form_class: Any = None) -> OIMEProposalForm:
+        form = super().get_form(form_class)
+        _lock_draft_field(self.request, form)
+        return form
+
     def form_valid(self, form: OIMEProposalForm) -> HttpResponse:
         contributor = _get_contributor(self.request)
         if contributor is None:
             return redirect("oime-setup")
-        if not form.cleaned_data["is_draft"] and not _proposals_open(self.request):
-            form.add_error(
-                "is_draft",
-                "Proposals are closed right now, so this can only be saved as a draft.",
-            )
-            return self.form_invalid(form)
         form.instance.author = contributor
         return super().form_valid(form)
 
@@ -862,7 +871,7 @@ class ProposalCreateView(
         context = super().get_context_data(**kwargs)
         context["action"] = "Submit"
         context["submit_name"] = "Write Proposal"
-        context["proposals_open"] = _proposals_open(self.request)
+        context["show_closed_alert"] = not _proposals_open(self.request)
         return context
 
 
@@ -884,30 +893,20 @@ class ProposalUpdateView(
                     "This problem should be edited in the Overleaf, not here."
                 )
             raise PermissionDenied("You can only edit your own proposals.")
-        self.was_draft = proposal.is_draft
         return proposal
 
-    def form_valid(self, form: OIMEProposalForm) -> HttpResponse:
-        # Taking a draft public is the real act of submission, so it is held to the
-        # proposal window. Going back to draft is held to it too: otherwise an author
-        # could pull a published problem out of the pool and be unable to return it.
-        is_draft = form.cleaned_data["is_draft"]
-        if is_draft != self.was_draft and not _proposals_open(self.request):
-            form.add_error(
-                "is_draft",
-                "Proposals are closed right now, so a published problem must stay "
-                "published."
-                if is_draft
-                else "Proposals are closed right now, so this must stay a draft.",
-            )
-            return self.form_invalid(form)
-        return super().form_valid(form)
+    def get_form(self, form_class: Any = None) -> OIMEProposalForm:
+        form = super().get_form(form_class)
+        _lock_draft_field(self.request, form)
+        return form
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["action"] = "Update"
         context["submit_name"] = "Update Proposal"
-        context["proposals_open"] = _proposals_open(self.request)
+        context["show_closed_alert"] = self.object.is_draft and not _proposals_open(
+            self.request
+        )
         return context
 
 

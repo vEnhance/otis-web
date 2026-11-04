@@ -7,7 +7,7 @@
   {% endif %}
 {% endblock title %}
 {% block layout-content %}
-  {% if not proposals_open %}
+  {% if show_closed_alert %}
     <div class="alert alert-warning" data-testid="proposals-closed">
       <h2 class="alert-heading">No active OIME year</h2>
       The deadline for new proposals has passed.
