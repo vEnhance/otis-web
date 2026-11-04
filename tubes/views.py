@@ -862,6 +862,7 @@ class ProposalCreateView(
         context = super().get_context_data(**kwargs)
         context["action"] = "Submit"
         context["submit_name"] = "Write Proposal"
+        context["proposals_open"] = _proposals_open(self.request)
         return context
 
 
@@ -906,6 +907,7 @@ class ProposalUpdateView(
         context = super().get_context_data(**kwargs)
         context["action"] = "Update"
         context["submit_name"] = "Update Proposal"
+        context["proposals_open"] = _proposals_open(self.request)
         return context
 
 

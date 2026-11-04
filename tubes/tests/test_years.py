@@ -63,6 +63,34 @@ def test_create_form_defaults_to_draft_without_open_window(otis):
 
 
 @pytest.mark.django_db
+def test_create_form_warns_without_open_window(otis):
+    user, _ = verified_contributor()
+    closed_year()
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-create")
+    otis.assert_testid(resp, "proposals-closed")
+
+
+@pytest.mark.django_db
+def test_create_form_no_warning_during_window(otis):
+    user, _ = verified_contributor()
+    OIMEYearFactory.create()
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-create")
+    otis.assert_no_testid(resp, "proposals-closed")
+
+
+@pytest.mark.django_db
+def test_update_form_warns_without_open_window(otis):
+    user, contributor = verified_contributor()
+    closed_year()
+    proposal = OIMEProposalFactory.create(author=contributor, is_draft=True)
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-update", proposal.pk)
+    otis.assert_testid(resp, "proposals-closed")
+
+
+@pytest.mark.django_db
 def test_create_published_blocked_without_open_window(otis):
     user, _ = verified_contributor()
     closed_year()
