@@ -580,12 +580,13 @@ table.otis-sortable th[aria-sort="descending"]::after {
     #b8860b 0%,
     #ffd700 40%,
     #fff8dc 50%,
-    #ffd700 60%,
-    #b8860b 100%
+    #ffeb70 60%,
+    #a07408 100%
   );
   background-size: 250% 100%;
   background-position: 100% 0;
-  transition: background-position 0.8s ease;
+  transition: background-position 1.5s ease;
+
   --otis-star-height: 1.6cap; /* a bit taller than a capital letter */
   --otis-star-width: calc(1.14 * var(--otis-star-height)); /* plus a gap */
   /* Lower the star so its center lines up with the center of a capital letter. */
