@@ -25,24 +25,19 @@ from rpg.models import Achievement, PrestigeContract
 register = template.Library()
 
 
-def with_prestige_stars(text: str | int, prestige: int) -> SafeString:
+@register.simple_tag
+def level(level: int, prestige: int) -> SafeString:
     """Built in Python rather than a template because any whitespace a formatter
-    adds between the text and the stars would show up on the page."""
+    adds between the level and the stars would show up on the page."""
     if not prestige:
-        return format_html('<span class="otis-level">{}</span>', text)
+        return format_html('<span class="otis-level">{}</span>', level)
     return format_html(
         '<span class="otis-level">{}<span class="otis-prestige" tabindex="0" '
         'data-testid="prestige-stars" title="Prestige {}">{}</span></span>',
-        text,
+        level,
         prestige,
         "✷" * prestige,
     )
-
-
-@register.simple_tag
-def level(level: int, prestige: int) -> SafeString:
-    """Render a level number with one star per prestige contract."""
-    return with_prestige_stars(level, prestige)
 
 
 @register.simple_tag
