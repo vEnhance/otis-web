@@ -574,7 +574,6 @@ table.otis-sortable th[aria-sort="descending"]::after {
   margin: 0;
 }
 
-/* Prestige stars from the {% level %} tag: gold, with a glint on hover */
 .otis-prestige {
   background: linear-gradient(
     110deg,
@@ -586,11 +585,17 @@ table.otis-sortable th[aria-sort="descending"]::after {
   );
   background-size: 250% 100%;
   background-position: 100% 0;
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
   transition: background-position 0.8s ease;
-  font-size: 110%;
+  --otis-star-height: 1.6cap; /* a bit taller than a capital letter */
+  --otis-star-width: calc(1.14 * var(--otis-star-height)); /* plus a gap */
+  /* Lower the star so its center lines up with the center of a capital letter. */
+  vertical-align: calc((1cap - var(--otis-star-height)) / 2);
+  display: inline-block;
+
+  width: calc(var(--stars, 1) * var(--otis-star-width));
+  height: var(--otis-star-height);
+  mask: url("../img/prestige-star.svg") repeat-x left bottom /
+    var(--otis-star-width) var(--otis-star-height);
 }
 .otis-prestige:hover,
 .otis-prestige:focus-visible {
@@ -603,4 +608,10 @@ table.otis-sortable th[aria-sort="descending"]::after {
 }
 .otis-prestige-tooltip {
   --bs-tooltip-bg: #7a5c00;
+}
+#header-prestige {
+  position: relative;
+  top: 10px; /* simple-53544.css on web.evanchen.cc nudges #sitetitle down by 10px */
+  font-size: 40px; /* match #sitetitle in simple-53544.css */
+  margin-right: 10px;
 }

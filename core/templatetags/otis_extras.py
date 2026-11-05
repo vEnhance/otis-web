@@ -33,10 +33,12 @@ def level(level: int, prestige: int) -> SafeString:
         return format_html('<span class="otis-level">{}</span>', level)
     return format_html(
         '<span class="otis-level">{}<span class="otis-prestige" tabindex="0" '
-        'data-testid="prestige-stars" title="Prestige {}">{}</span></span>',
+        'role="img" aria-label="Prestige {}" style="--stars: {}" '
+        'data-testid="prestige-stars" title="Prestige {}"></span></span>',
         level,
         prestige,
-        "✷" * prestige,
+        prestige,
+        prestige,
     )
 
 
@@ -52,9 +54,11 @@ def header_prestige_stars(user: User | AnonymousUser) -> str:
         return ""
     return format_html(
         '<h1 id="header-prestige"><span class="otis-prestige" tabindex="0" '
-        'data-testid="header-prestige-stars" title="Prestige {}">{}</span></h1>',
+        'role="img" aria-label="Prestige {}" style="--stars: {}" '
+        'data-testid="header-prestige-stars" title="Prestige {}"></span></h1>',
         prestige,
-        "✷" * prestige,
+        prestige,
+        prestige,
     )
 
 

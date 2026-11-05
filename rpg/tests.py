@@ -1223,7 +1223,7 @@ def test_header_shows_one_star_per_prestige(otis):
     otis.login(alice)
     resp = otis.get_ok("stats", alice.pk)
     otis.assert_testid(resp, "header-prestige-stars")
-    assert "✷✷</span></h1>" in resp.content.decode()
+    assert 'style="--stars: 2"' in resp.content.decode()
 
 
 @pytest.mark.django_db
@@ -1235,7 +1235,7 @@ def test_header_has_no_stars_without_prestige(otis):
 
 def test_level_tag_has_no_trailing_space():
     html = Template("{% load otis_extras %}({% level 18 1 %})").render(Context())
-    assert html.endswith("✷</span></span>)")
+    assert html.endswith("></span></span>)")
 
 
 @pytest.mark.django_db
