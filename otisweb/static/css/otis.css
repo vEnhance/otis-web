@@ -612,7 +612,8 @@ table.otis-sortable th[aria-sort="descending"]::after {
 }
 #header-prestige {
   position: relative;
-  top: 10px; /* simple-53544.css on web.evanchen.cc nudges #sitetitle down by 10px */
-  font-size: 40px; /* match #sitetitle in simple-53544.css */
   margin-right: 10px;
+  /* match simple-53544.css #sitetitle effects */
+  top: 10px;
+  font-size: 40px;
 }
