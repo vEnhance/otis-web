@@ -20,7 +20,7 @@ from django.utils.timezone import template_localtime  # type: ignore
 from core.models import Unit, UserProfile
 from core.utils import find_profile
 from rpg.levelsys import BONUS_D_UNIT, BONUS_Z_UNIT
-from rpg.models import Achievement
+from rpg.models import Achievement, PrestigeContract
 
 register = template.Library()
 
@@ -46,9 +46,21 @@ def level(level: int, prestige: int) -> SafeString:
 
 
 @register.simple_tag
-def level_name(name: str, prestige: int) -> SafeString:
-    """Render a level name with one star per prestige contract."""
-    return with_prestige_stars(name, prestige)
+def header_prestige_stars(user: User | AnonymousUser) -> str:
+    if not user.is_authenticated:
+        return ""
+    try:
+        prestige = PrestigeContract.objects.filter(user=user).count()
+    except DatabaseError:
+        return ""
+    if not prestige:
+        return ""
+    return format_html(
+        '<h1 id="header-prestige"><span class="otis-prestige" tabindex="0" '
+        'data-testid="header-prestige-stars" title="Prestige {}">{}</span></h1>',
+        prestige,
+        "✷" * prestige,
+    )
 
 
 @register.simple_tag

@@ -1215,10 +1215,22 @@ def test_no_prestige_stars_without_contract(otis):
     otis.assert_testid(otis.get_ok("stats", alice.pk), "prestige-stars", count=0)
 
 
-def test_level_name_tag_has_stars():
-    html = Template("{% load otis_extras %}{% level_name 'Ruby' 2 %}").render(Context())
-    assert "Ruby<span" in html
-    assert html.count("✷") == 2
+@pytest.mark.django_db
+def test_header_shows_one_star_per_prestige(otis):
+    alice = maxed_student()
+    PrestigeContract.objects.create(user=alice.user, **contract(4, 0, 0, 9))
+    PrestigeContract.objects.create(user=alice.user, **contract(4, 0, 0, 9))
+    otis.login(alice)
+    resp = otis.get_ok("stats", alice.pk)
+    otis.assert_testid(resp, "header-prestige-stars")
+    assert "✷✷</span></h1>" in resp.content.decode()
+
+
+@pytest.mark.django_db
+def test_header_has_no_stars_without_prestige(otis):
+    alice = maxed_student()
+    otis.login(alice)
+    otis.assert_testid(otis.get_ok("stats", alice.pk), "header-prestige-stars", count=0)
 
 
 def test_level_tag_has_no_trailing_space():

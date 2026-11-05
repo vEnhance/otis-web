@@ -16,7 +16,7 @@
     <h1>Before</h1>
     <p>
       Currently, you are <b>Level {% level level_number prestige %}</b>
-      with the title <b>{% level_name level_name prestige %}</b>.
+      with the title <b>{{ level_name }}</b>.
     </p>
     <div class="container">
       <div class="row">
@@ -32,7 +32,7 @@
       <p>
         After Prestige, you would be
         <b>Level {% level preview.level_number preview.prestige %}</b>,
-        with the title <b>{% level_name preview.level_name preview.prestige %}</b>.
+        with the title <b>{{ preview.level_name }}</b>.
       </p>
       <div class="container">
         <div class="row">
