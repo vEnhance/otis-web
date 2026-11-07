@@ -11,6 +11,7 @@ from roster.models import Student
 from rpg.factories import QuestCompleteFactory
 from rpg.levelsys import get_level_info, get_student_rows
 
+from .chart import locked_chart, nice_step
 from .factories import PonziInvestmentFactory, PonziSchemeFactory
 from .models import PonziInvestment, PonziScheme
 
@@ -246,6 +247,10 @@ def test_collapse(otis, scheme: PonziScheme):
         "total_paid": Decimal("10.67"),
         "num_outstanding": 1,
         "total_outstanding": 10,
+        "num_idle": 1,
+        "total_idle": 10,
+        "num_locked": 0,
+        "total_locked": None,
         "pool": Decimal("9.33"),
     }
 
@@ -326,7 +331,9 @@ def test_admin_sees_all_bids_before_collapse(otis, scheme: PonziScheme):
         resp = otis.get_ok("ponzi-scheme", scheme.pk)
     assert list(resp.context["all_investments"]) == [first, second]
     assert resp.context["summary"]["pool"] == 20
+    assert resp.context["locked_chart"].total == 20
     otis.assert_testid(resp, "ponzi-summary")
+    otis.assert_testid(resp, "ponzi-locked-chart")
     otis.assert_testid(resp, "ponzi-all-bids")
 
 
@@ -337,3 +344,61 @@ def test_unverified_users_are_denied(otis, scheme: PonziScheme):
     otis.get_denied("ponzi-scheme", scheme.pk)
     otis.post_denied("ponzi-invest", scheme.pk, data={"amount": 1})
     assert not PonziInvestment.objects.exists()
+
+
+@pytest.mark.django_db
+def test_summary_splits_idle_and_locked(scheme: PonziScheme):
+    with freeze_time(at(0)):
+        PonziInvestmentFactory.create(scheme=scheme, amount=3)  # idle by day 20
+        PonziInvestmentFactory.create(
+            scheme=scheme, amount=4, upgraded_at=at(10)
+        )  # upgrade restarts the timer, so locked
+        PonziInvestmentFactory.create(
+            scheme=scheme, amount=5, payout=Decimal(5), withdrawn_at=at(15)
+        )  # paid out, so neither
+    with freeze_time(at(12)):
+        PonziInvestmentFactory.create(scheme=scheme, amount=6)  # locked
+    with freeze_time(at(20)):
+        summary = scheme.summary()
+        locked = set(scheme.locked_investments())
+        assert all(
+            inv.is_growing == (inv in locked) for inv in scheme.investments.all()
+        )
+    assert (summary["num_outstanding"], summary["total_outstanding"]) == (3, 13)
+    assert (summary["num_idle"], summary["total_idle"]) == (1, 3)
+    assert (summary["num_locked"], summary["total_locked"]) == (2, 10)
+
+
+@pytest.mark.django_db
+def test_locked_chart_steps(scheme: PonziScheme):
+    with freeze_time(at(0)):
+        PonziInvestmentFactory.create(scheme=scheme, amount=1)  # idle at day 20
+    with freeze_time(at(8)):
+        PonziInvestmentFactory.create(scheme=scheme, amount=2)
+        PonziInvestmentFactory.create(scheme=scheme, amount=3)
+    with freeze_time(at(18)):
+        PonziInvestmentFactory.create(scheme=scheme, amount=4)
+    with freeze_time(at(20)):
+        chart = locked_chart(scheme)
+    assert [(s.growth, s.amount, s.cumulative, s.num_bids) for s in chart.steps] == [
+        (datetime.timedelta(days=2), 4, 4, 1),
+        (datetime.timedelta(days=12), 5, 9, 2),
+    ]
+    assert chart.total == 9
+    assert chart.y_max >= 9
+    assert chart.x_ticks[-1].label == "14d"
+
+
+@pytest.mark.django_db
+def test_locked_chart_empty(scheme: PonziScheme):
+    chart = locked_chart(scheme)
+    assert chart.steps == []
+    assert chart.total == 0
+    assert chart.y_max == 1
+
+
+@pytest.mark.parametrize(
+    ("total", "step"), [(0, 1), (3, 1), (9, 5), (40, 10), (75, 20), (1000, 500)]
+)
+def test_nice_step(total: int, step: int):
+    assert nice_step(total) == step

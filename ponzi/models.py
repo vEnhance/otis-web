@@ -66,8 +66,34 @@ class PonziScheme(models.Model):
     def is_running(self) -> bool:
         return self.has_started and not self.has_collapsed
 
+    @property
+    def as_of(self) -> datetime:
+        """The moment bid timers are measured against; growth freezes at collapse."""
+        return self.collapsed_at or timezone.now()
+
+    def _growing_q(self) -> Q:
+        """Matches the bids for which PonziInvestment.is_growing holds."""
+        cutoff = self.as_of - self.gestation_period
+        return Q(withdrawn_at__isnull=True) & (
+            Q(upgraded_at__gt=cutoff)
+            | Q(upgraded_at__isnull=True, created_at__gt=cutoff)
+        )
+
+    def _idle_q(self) -> Q:
+        """Matches unpaid bids whose timer has run out."""
+        cutoff = self.as_of - self.gestation_period
+        return Q(withdrawn_at__isnull=True) & (
+            Q(upgraded_at__lte=cutoff)
+            | Q(upgraded_at__isnull=True, created_at__lte=cutoff)
+        )
+
+    def locked_investments(self) -> "models.QuerySet[PonziInvestment]":
+        return self.investments.filter(self._growing_q())
+
     def summary(self) -> dict[str, Any]:
         withdrawn = Q(withdrawn_at__isnull=False)
+        locked = self._growing_q()
+        idle = self._idle_q()
         stats = self.investments.aggregate(
             num_bids=Count("pk"),
             num_players=Count("user", distinct=True),
@@ -76,6 +102,10 @@ class PonziScheme(models.Model):
             total_paid=Sum("payout"),
             num_outstanding=Count("pk", filter=~withdrawn),
             total_outstanding=Sum("amount", filter=~withdrawn),
+            num_idle=Count("pk", filter=idle),
+            total_idle=Sum("amount", filter=idle),
+            num_locked=Count("pk", filter=locked),
+            total_locked=Sum("amount", filter=locked),
         )
         stats["pool"] = Decimal(stats["total_bid"] or 0) - (
             stats["total_paid"] or Decimal(0)
@@ -121,8 +151,7 @@ class PonziInvestment(models.Model):
 
     @property
     def hours_past_maturity(self) -> float:
-        as_of = self.scheme.collapsed_at or timezone.now()
-        return (as_of - self.matures_at).total_seconds() / 3600
+        return (self.scheme.as_of - self.matures_at).total_seconds() / 3600
 
     @property
     def hours_until_maturity(self) -> float:
