@@ -57,7 +57,6 @@ class LockedChart:
     points: list[Point]
     now: Point
     collapse_in: timedelta | None
-    has_inferred: bool
     y_max: int
     width: int = WIDTH
     height: int = HEIGHT
@@ -163,35 +162,14 @@ def add_bid_changes(inv: PonziInvestment, T: timedelta, changes: Changes) -> Non
         add(inv.withdrawn_at, 0, (inv.payout or Decimal(0)) - inv.amount)
 
 
-def has_inferred_overlap(
-    inv: PonziInvestment, start: datetime, end: datetime, T: timedelta
-) -> bool:
-    """Whether a guessed timer start could move the curves inside the window.
-
-    A guessed start can only lie between the previous timer's maturity and the
-    next timer's start, so check whether that stretch overlaps the window.
-    """
-    timers = list(inv.timers.all())
-    for i, timer in enumerate(timers):
-        if not timer.inferred:
-            continue
-        earliest = (timers[i - 1].started_at if i else inv.created_at) + T
-        latest = timers[i + 1].started_at if i + 1 < len(timers) else end
-        if earliest < end and latest > start:
-            return True
-    return False
-
-
 def locked_chart(scheme: PonziScheme) -> LockedChart:
     as_of = scheme.as_of
     T = scheme.gestation_period
     start, end = as_of - T, as_of + T
 
     changes: Changes = {}
-    has_inferred = False
     for inv in scheme.investments.prefetch_related("timers"):
         add_bid_changes(inv, T, changes)
-        has_inferred = has_inferred or has_inferred_overlap(inv, start, end, T)
 
     locked, shortfall = 0, Decimal(0)
     points: list[Point] = []
@@ -228,7 +206,6 @@ def locked_chart(scheme: PonziScheme) -> LockedChart:
         points=points,
         now=now,
         collapse_in=collapse_in,
-        has_inferred=has_inferred,
         y_max=y_max,
     )
 

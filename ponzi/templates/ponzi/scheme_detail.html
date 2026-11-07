@@ -195,12 +195,6 @@
           Shortfall: profit paid or owed on unlocked bids
         </li>
       </ul>
-      {% if locked_chart.has_inferred %}
-        <p class="text-muted small" data-testid="ponzi-chart-inferred">
-          Some upgrades in this window predate upgrade logging,
-          so their tier II start times are estimated.
-        </p>
-      {% endif %}
       <svg viewBox="0 0 {{ locked_chart.width }} {{ locked_chart.height }}"
            class="w-100 mb-3"
            style="max-width: 720px"

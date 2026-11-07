@@ -401,7 +401,6 @@ def test_locked_chart_points(scheme: PonziScheme):
     assert (chart.now.locked, chart.now.shortfall) == (9, Decimal("0.07"))
     assert chart.collapse_in == datetime.timedelta(days=12)
     assert [t.label for t in chart.x_ticks] == ["−14d", "−7d", "now", "+7d", "+14d"]
-    assert not chart.has_inferred
 
 
 @pytest.mark.django_db
@@ -420,7 +419,6 @@ def test_locked_chart_reconstructs_upgrades(scheme: PonziScheme):
         (4, 0, Decimal("3.40")),  # day 44: matures at tier III
     ]
     assert chart.collapse_in == datetime.timedelta(days=4)
-    assert chart.has_inferred
 
 
 @pytest.mark.django_db
