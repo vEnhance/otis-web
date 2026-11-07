@@ -118,6 +118,7 @@ class PonziScheme(models.Model):
 
 class PonziInvestment(models.Model):
     scheme_id: int
+    timers: "RelatedManager[PonziTimer]"
 
     scheme = models.ForeignKey(
         PonziScheme, on_delete=models.CASCADE, related_name="investments"
@@ -187,3 +188,32 @@ class PonziInvestment(models.Model):
     @property
     def spades_delta(self) -> Decimal:
         return (self.payout or Decimal(0)) - self.amount
+
+
+class PonziTimer(models.Model):
+    """One growth timer on a bid: the bid is locked from `started_at` until a
+    gestation period later, after which it is worth `tier`."""
+
+    investment = models.ForeignKey(
+        PonziInvestment, on_delete=models.CASCADE, related_name="timers"
+    )
+    tier = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(MAX_TIER)],
+        help_text="The tier the bid reaches when this timer runs out",
+    )
+    started_at = models.DateTimeField()
+    inferred = models.BooleanField(
+        default=False,
+        help_text="Backfilled guess for an upgrade made before timers were logged",
+    )
+
+    class Meta:
+        ordering = ("investment", "tier")
+        constraints = (
+            models.UniqueConstraint(
+                fields=("investment", "tier"), name="unique_timer_per_tier"
+            ),
+        )
+
+    def __str__(self) -> str:
+        return f"Tier {TIER_NAMES[self.tier]} timer for {self.investment}"

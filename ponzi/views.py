@@ -100,9 +100,10 @@ def invest(request: AuthHttpRequest, pk: int) -> HttpResponse:
         elif amount > get_total_spades(request.user):
             messages.error(request, "You don't have enough spades for that.")
         else:
-            PonziInvestment.objects.create(
+            investment = PonziInvestment.objects.create(
                 scheme=scheme, user=request.user, amount=amount
             )
+            investment.timers.create(tier=1, started_at=investment.created_at)
             messages.success(request, "Action recorded. Thanks for playing!")
     return HttpResponseRedirect(scheme.get_absolute_url())
 
@@ -131,6 +132,9 @@ def upgrade(request: AuthHttpRequest, pk: int) -> HttpResponse:
             investment.target_tier += 1
             investment.upgraded_at = timezone.now()
             investment.save()
+            investment.timers.create(
+                tier=investment.target_tier, started_at=investment.upgraded_at
+            )
             messages.success(request, "Upgrade has started!")
     return HttpResponseRedirect(scheme.get_absolute_url())
 

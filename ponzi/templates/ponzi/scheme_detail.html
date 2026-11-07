@@ -166,9 +166,8 @@
       {% if scheme.has_collapsed %}
         <p data-testid="ponzi-collapse-snapshot">
           When the scheme collapsed,
-          {{ locked_chart.total }}♠ was still locked
-          against a {{ locked_chart.initial_shortfall|floatformat:2 }}♠ shortfall.
-          The chart shows how that would have unwound afterwards.
+          {{ locked_chart.now.locked }}♠ was still locked
+          against a {{ locked_chart.now.shortfall|floatformat:2 }}♠ shortfall.
         </p>
       {% else %}
         <p data-testid="ponzi-collapse-eta">
@@ -196,6 +195,12 @@
           Shortfall: profit paid or owed on unlocked bids
         </li>
       </ul>
+      {% if locked_chart.has_inferred %}
+        <p class="text-muted small" data-testid="ponzi-chart-inferred">
+          Some upgrades in this window predate upgrade logging,
+          so their tier II start times are estimated.
+        </p>
+      {% endif %}
       <svg viewBox="0 0 {{ locked_chart.width }} {{ locked_chart.height }}"
            class="w-100 mb-3"
            style="max-width: 720px"
@@ -212,19 +217,23 @@
         {% endfor %}
         <text x="{{ locked_chart.center_x }}" y="{{ locked_chart.height|add:-4 }}" text-anchor="middle">{{ locked_chart.axis_label }}</text>
         </g>
+        <line x1="{{ locked_chart.now_x }}" x2="{{ locked_chart.now_x }}" y1="{{ locked_chart.top }}" y2="{{ locked_chart.bottom }}" stroke="var(--bs-secondary-color)" stroke-width="1" />
         <path d="{{ locked_chart.shortfall_path }}" fill="none" stroke="var(--bs-danger)" stroke-width="2" stroke-linejoin="round" />
         <path d="{{ locked_chart.path }}" fill="none" stroke="var(--bs-primary)" stroke-width="2" stroke-linejoin="round" />
-        {% for step in locked_chart.steps %}
-          <circle cx="{{ step.x }}" cy="{{ step.y_shortfall }}" r="4" fill="var(--bs-danger)" stroke="var(--bs-body-bg)" stroke-width="2" />
-          <circle cx="{{ step.x }}" cy="{{ step.y }}" r="4" fill="var(--bs-primary)" stroke="var(--bs-body-bg)" stroke-width="2" />
+        {% for point in locked_chart.changes %}
+          <circle cx="{{ point.x }}" cy="{{ point.y_shortfall }}" r="3" fill="var(--bs-danger)" stroke="var(--bs-body-bg)" stroke-width="1.5" />
+          <circle cx="{{ point.x }}" cy="{{ point.y }}" r="3" fill="var(--bs-primary)" stroke="var(--bs-body-bg)" stroke-width="1.5" />
         {% endfor %}
         <g id="ponzi-crosshair" visibility="hidden" pointer-events="none" font-size="16">
         <line y1="{{ locked_chart.top }}" y2="{{ locked_chart.bottom }}" stroke="var(--bs-secondary-color)" stroke-dasharray="3 3" />
         <circle r="5" fill="var(--bs-primary)" stroke="var(--bs-body-bg)" stroke-width="2" />
         <circle r="5" fill="var(--bs-danger)" stroke="var(--bs-body-bg)" stroke-width="2" />
-        <text y="{{ locked_chart.top|add:14 }}" fill="var(--bs-body-color)" font-weight="bold"></text>
-        <text y="{{ locked_chart.top|add:34 }}" fill="var(--bs-body-color)"></text>
-        <text y="{{ locked_chart.top|add:54 }}" fill="var(--bs-body-color)"></text>
+        <g>
+        <rect rx="4" fill="var(--bs-body-bg)" fill-opacity="0.85" />
+        <text y="14" fill="var(--bs-body-color)" font-weight="bold"></text>
+        <text y="34" fill="var(--bs-body-color)"></text>
+        <text y="54" fill="var(--bs-body-color)"></text>
+        </g>
         </g>
         <rect x="{{ locked_chart.left }}" y="{{ locked_chart.top }}" width="{{ locked_chart.plot_width }}" height="{{ locked_chart.plot_height }}" fill="transparent" id="ponzi-hover-area" />
       </svg>
@@ -273,17 +282,55 @@
             const area = document.getElementById("ponzi-hover-area");
             const svg = area.ownerSVGElement;
             const cross = document.getElementById("ponzi-crosshair");
-            const [line, dot, redDot, ...labels] = cross.children;
+            const [line, dot, redDot, labelBox] = cross.children;
+            const [backdrop, ...labels] = labelBox.children;
+            const PAD = 4;
+            // pixel-y ranges [min, max] that each curve covers for x in [a, b]
+            const curveRanges = (a, b) => {
+                let [, y, , yShort] = data.points[0];
+                const blue = [y, y],
+                    red = [yShort, yShort];
+                const take = (range, v) => ((range[0] = Math.min(range[0], v)), (range[1] = Math.max(range[1], v)));
+                for (const [sx, sy, , ssy] of data.points.slice(1)) {
+                    if (sx > b) break;
+                    [y, yShort] = [sy, ssy];
+                    if (sx > a) {
+                        take(blue, y);
+                        take(red, yShort);
+                    } else {
+                        blue[0] = blue[1] = y;
+                        red[0] = red[1] = yShort;
+                    }
+                }
+                return [blue, red];
+            };
+            // the tallest stretch of [top, bottom] that neither curve passes through
+            const roomiestGap = (ranges) => {
+                ranges.sort((p, q) => p[0] - q[0]);
+                let best = [data.top, data.top],
+                    cursor = data.top;
+                for (const [lo, hi] of [...ranges, [data.bottom, data.bottom]]) {
+                    if (lo - cursor > best[1] - best[0]) best = [cursor, lo];
+                    cursor = Math.max(cursor, hi);
+                }
+                return best;
+            };
             area.addEventListener("pointermove", (e) => {
                 const pt = new DOMPoint(e.clientX, e.clientY).matrixTransform(svg.getScreenCTM().inverse());
                 const x = Math.min(Math.max(pt.x, data.left), data.right);
-                // a bid with exactly x left has unlocked by x, so apply every drop at or before the cursor
-                let [y, locked, yShort, shortfall] = data.start;
-                for (const step of data.steps) {
-                    if (step[0] > x) break;
-                    [, y, locked, yShort, shortfall] = step;
+                // each point holds until the next, so take the last one at or before the cursor
+                let [, y, locked, yShort, shortfall] = data.points[0];
+                for (const point of data.points) {
+                    if (point[0] > x) break;
+                    [, y, locked, yShort, shortfall] = point;
                 }
-                const t = ((x - data.left) / (data.right - data.left)) * data.span;
+                const t = ((2 * (x - data.left)) / (data.right - data.left) - 1) * data.span;
+                const when = `${Math.abs(t).toFixed(1)}${data.unit}`;
+                const heading = data.collapsed ?
+                    `${when} ${t < 0 ? "before" : "after"} collapse` :
+                    t < 0 ?
+                    `${when} ago` :
+                    `in ${when}`;
                 line.setAttribute("x1", x);
                 line.setAttribute("x2", x);
                 dot.setAttribute("cx", x);
@@ -291,13 +338,33 @@
                 redDot.setAttribute("cx", x);
                 redDot.setAttribute("cy", yShort);
                 const flip = x > (data.left + data.right) / 2;
-                const texts = [`${data.prefix}${t.toFixed(1)}${data.unit}`, `locked ${locked}♠`, `shortfall ${shortfall.toFixed(2)}♠`];
+                const texts = [heading, `locked ${locked}♠`, `shortfall ${shortfall.toFixed(2)}♠`];
                 labels.forEach((label, i) => {
-                    label.setAttribute("x", flip ? x - 8 : x + 8);
+                    label.setAttribute("x", 0);
                     label.setAttribute("text-anchor", flip ? "end" : "start");
                     label.textContent = texts[i];
                 });
                 cross.setAttribute("visibility", "visible");
+                // put the label in whichever empty band, above or below both curves, is roomier
+                const boxes = labels.map((l) => l.getBBox());
+                const minX = Math.min(...boxes.map((b) => b.x));
+                const box = {
+                    x: minX,
+                    w: Math.max(...boxes.map((b) => b.x + b.width)) - minX,
+                    h: Math.max(...boxes.map((b) => b.y + b.height)),
+                };
+                const height = box.h + 2 * PAD;
+                const [x0, x1] = flip ? [x - 8 - box.w - PAD, x] : [x, x + 8 + box.w + PAD];
+                const [gapTop, gapBottom] = roomiestGap(curveRanges(x0, x1).map(([lo, hi]) => [lo - 6, hi + 6]));
+                const ly = Math.min(
+                    Math.max((gapTop + gapBottom - height) / 2, data.top),
+                    data.bottom - height,
+                );
+                labelBox.setAttribute("transform", `translate(${flip ? x - 8 : x + 8}, ${ly + PAD})`);
+                backdrop.setAttribute("x", box.x - PAD);
+                backdrop.setAttribute("y", -PAD);
+                backdrop.setAttribute("width", box.w + 2 * PAD);
+                backdrop.setAttribute("height", height);
             });
             area.addEventListener("pointerleave", () => cross.setAttribute("visibility", "hidden"));
         })();

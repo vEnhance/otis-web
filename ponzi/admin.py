@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import PonziInvestment, PonziScheme
+from .models import PonziInvestment, PonziScheme, PonziTimer
 
 
 @admin.register(PonziScheme)
@@ -16,8 +16,15 @@ class PonziSchemeAdmin(admin.ModelAdmin):
     autocomplete_fields = ("collapsed_by",)
 
 
+class PonziTimerInline(admin.TabularInline):
+    model = PonziTimer
+    fields = ("tier", "started_at", "inferred")
+    extra = 0
+
+
 @admin.register(PonziInvestment)
 class PonziInvestmentAdmin(admin.ModelAdmin):
+    inlines = (PonziTimerInline,)
     list_display = (
         "user",
         "scheme",
@@ -38,3 +45,19 @@ class PonziInvestmentAdmin(admin.ModelAdmin):
 
     def view_on_site(self, obj: PonziInvestment) -> str:
         return obj.scheme.get_absolute_url()
+
+
+@admin.register(PonziTimer)
+class PonziTimerAdmin(admin.ModelAdmin):
+    list_display = ("investment", "tier", "started_at", "inferred")
+    list_filter = ("investment__scheme", "tier", "inferred")
+    list_select_related = ("investment__user", "investment__scheme")
+    search_fields = (
+        "investment__user__first_name",
+        "investment__user__last_name",
+        "investment__user__username",
+    )
+    autocomplete_fields = ("investment",)
+
+    def view_on_site(self, obj: PonziTimer) -> str:
+        return obj.investment.scheme.get_absolute_url()
