@@ -1,7 +1,6 @@
-"""Server-side geometry for the locked-vs-shortfall chart on the scheme stats page.
+"""Server-side geometry for the locked-vs-shortfall charts on the scheme stats page.
 
-The chart spans T either side of "now" (or of the collapse, for a collapsed
-scheme). At each moment it shows two totals:
+Each chart plots two totals over time:
 
 - Locked (blue): principal in bids whose growth timer is running.
 - Shortfall (red): payouts promised beyond the principal paid in, i.e. profit
@@ -9,8 +8,10 @@ scheme). At each moment it shows two totals:
 
 The pool equals all unpaid principal minus profit already withdrawn, so paying
 out every unlocked bid would overdraw it exactly when shortfall > locked.
-The past half is reconstructed from the timer log; the future half assumes no
-new bids, withdrawals, or upgrades.
+
+The history chart runs from the first bid to now (or the collapse) and is
+rebuilt from the timer log. The forecast chart runs from now to T later and
+assumes no new bids, withdrawals, or upgrades; collapsed schemes don't get one.
 """
 
 import math
@@ -18,6 +19,9 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import Any
+
+from django.utils import timezone
+from django.utils.dateformat import format as format_date
 
 from .models import PonziInvestment, PonziScheme
 
@@ -36,13 +40,14 @@ NUM_X_TICKS = 4
 class Tick:
     pos: float
     label: str
+    anchor: str = "middle"
 
 
 @dataclass
 class Point:
-    """Both totals from `offset` (relative to now) until the next point."""
+    """Both totals from `when` until the next point."""
 
-    offset: timedelta
+    when: datetime
     locked: int
     shortfall: Decimal
     x: float = 0
@@ -52,62 +57,111 @@ class Point:
 
 @dataclass
 class LockedChart:
-    gestation_period: timedelta
-    collapsed: bool
+    kind: str  # "history" or "forecast"
+    start: datetime
+    end: datetime
     points: list[Point]
-    now: Point
-    collapse_in: timedelta | None
-    y_max: int
+    gestation_period: timedelta
     width: int = WIDTH
     height: int = HEIGHT
     left: int = MARGIN_LEFT
     right: int = WIDTH - MARGIN_RIGHT
     top: int = MARGIN_TOP
     bottom: int = HEIGHT - MARGIN_BOTTOM
-    now_x: float = 0
     path: str = ""
     shortfall_path: str = ""
     x_ticks: list[Tick] = field(default_factory=list)
     y_ticks: list[Tick] = field(default_factory=list)
 
     @property
-    def plot_width(self) -> int:
-        return self.right - self.left
+    def dom_id(self) -> str:
+        return f"ponzi-chart-{self.kind}"
 
     @property
-    def center_x(self) -> float:
-        return (self.left + self.right) / 2
+    def data_id(self) -> str:
+        return f"{self.dom_id}-data"
+
+    @property
+    def plot_width(self) -> int:
+        return self.right - self.left
 
     @property
     def plot_height(self) -> int:
         return self.bottom - self.top
 
     @property
-    def axis_label(self) -> str:
-        return "time relative to collapse" if self.collapsed else "time relative to now"
+    def center_x(self) -> float:
+        return (self.left + self.right) / 2
 
     @property
-    def collapse_label(self) -> str | None:
-        if self.collapse_in is None:
-            return None
-        return format_duration(self.collapse_in, self.gestation_period)
+    def axis_label(self) -> str:
+        return "date" if self.kind == "history" else "time from now"
 
     def hover_data(self) -> dict[str, Any]:
         """What the crosshair script needs to read off both curves at any x."""
         unit, suffix = duration_unit(self.gestation_period)
         return {
+            "kind": self.kind,
             "left": self.left,
             "right": self.right,
             "top": self.top,
             "bottom": self.bottom,
-            "span": self.gestation_period / unit,
+            "startMs": self.start.timestamp() * 1000,
+            "endMs": self.end.timestamp() * 1000,
+            "unitMs": unit.total_seconds() * 1000,
             "unit": suffix,
-            "collapsed": self.collapsed,
             "points": [
                 [p.x, p.y, p.locked, p.y_shortfall, float(p.shortfall)]
                 for p in self.points
             ],
         }
+
+    def layout(self, y_max: int, y_step: int) -> None:
+        """Turn the points into pixel positions, paths, and ticks."""
+        span = max(self.end - self.start, timedelta(seconds=1))
+
+        def px(when: datetime) -> float:
+            return round(MARGIN_LEFT + PLOT_W * ((when - self.start) / span), 1)
+
+        def py(value: float | Decimal) -> float:
+            return round(self.bottom - PLOT_H * float(value) / y_max, 1)
+
+        for p in self.points:
+            p.x, p.y, p.y_shortfall = px(p.when), py(p.locked), py(p.shortfall)
+        first, rest = self.points[0], self.points[1:]
+        right = px(self.end)
+        self.path = (
+            f"M{first.x},{first.y}"
+            + "".join(f"H{p.x}V{p.y}" for p in rest)
+            + f"H{right}"
+        )
+        self.shortfall_path = (
+            f"M{first.x},{first.y_shortfall}"
+            + "".join(f"H{p.x}V{p.y_shortfall}" for p in rest)
+            + f"H{right}"
+        )
+        tick_times = [
+            self.start + span * i / NUM_X_TICKS for i in range(NUM_X_TICKS + 1)
+        ]
+        self.x_ticks = [Tick(px(t), self.tick_label(t, span)) for t in tick_times]
+        self.x_ticks[-1].anchor = "end"  # keep the last label inside the chart
+        self.y_ticks = [Tick(py(v), f"{v}♠") for v in range(0, y_max + 1, y_step)]
+
+    def tick_label(self, when: datetime, span: timedelta) -> str:
+        if self.kind == "forecast":
+            offset = when - self.start
+            if not offset:
+                return "now"
+            return "+" + format_duration(offset, self.gestation_period)
+        fmt = "M j" if span >= timedelta(days=4) else "M j H:i"
+        return format_date(timezone.localtime(when), fmt)
+
+
+@dataclass
+class LockedCharts:
+    history: LockedChart | None
+    forecast: LockedChart | None
+    collapse_at: datetime | None
 
 
 def duration_unit(gestation_period: timedelta) -> tuple[timedelta, str]:
@@ -162,79 +216,49 @@ def add_bid_changes(inv: PonziInvestment, T: timedelta, changes: Changes) -> Non
         add(inv.withdrawn_at, 0, (inv.payout or Decimal(0)) - inv.amount)
 
 
-def locked_chart(scheme: PonziScheme) -> LockedChart:
-    as_of = scheme.as_of
-    T = scheme.gestation_period
-    start, end = as_of - T, as_of + T
-
-    changes: Changes = {}
-    for inv in scheme.investments.prefetch_related("timers"):
-        add_bid_changes(inv, T, changes)
-
+def sample(changes: Changes, start: datetime, end: datetime) -> list[Point]:
+    """Both totals at `start`, then at every change in (start, end]."""
     locked, shortfall = 0, Decimal(0)
     points: list[Point] = []
-    now: Point | None = None
     for when in sorted(changes):
-        if when > start and not points:
-            points.append(Point(-T, locked, shortfall))
-        if when > as_of and now is None:
-            now = Point(timedelta(0), locked, shortfall)
         if when > end:
             break
+        if when > start and not points:
+            points.append(Point(start, locked, shortfall))
         d_locked, d_shortfall = changes[when]
         locked += d_locked
         shortfall += d_shortfall
         if when > start and (d_locked or d_shortfall):
-            points.append(Point(when - as_of, locked, shortfall))
+            points.append(Point(when, locked, shortfall))
     if not points:
-        points.append(Point(-T, locked, shortfall))
-    if now is None:
-        now = Point(timedelta(0), locked, shortfall)
+        points.append(Point(start, locked, shortfall))
+    return points
 
-    collapse_in = None
-    for p in [now, *(p for p in points if p.offset > timedelta(0))]:
-        if p.shortfall > p.locked:
-            collapse_in = p.offset
-            break
 
-    peak = max(max(p.locked, math.ceil(p.shortfall)) for p in points)
-    step = nice_step(peak)
-    y_max = max(step, math.ceil(peak / step) * step)
-    chart = LockedChart(
-        gestation_period=T,
-        collapsed=scheme.has_collapsed,
-        points=points,
-        now=now,
-        collapse_in=collapse_in,
-        y_max=y_max,
+def locked_charts(scheme: PonziScheme) -> LockedCharts:
+    as_of = scheme.as_of
+    T = scheme.gestation_period
+    changes: Changes = {}
+    for inv in scheme.investments.prefetch_related("timers"):
+        add_bid_changes(inv, T, changes)
+    if not changes:
+        return LockedCharts(None, None, None)
+
+    first_bid = min(changes)
+    history = LockedChart(
+        "history", first_bid, as_of, sample(changes, first_bid, as_of), T
     )
+    forecast = None
+    collapse_at = None
+    if not scheme.has_collapsed:
+        points = sample(changes, as_of, as_of + T)
+        forecast = LockedChart("forecast", as_of, as_of + T, points, T)
+        collapse_at = next((p.when for p in points if p.shortfall > p.locked), None)
 
-    def px(offset: timedelta) -> float:
-        return round(MARGIN_LEFT + PLOT_W * (offset + T) / (2 * T), 1)
-
-    def py(value: float | Decimal) -> float:
-        return round(chart.bottom - PLOT_H * float(value) / y_max, 1)
-
-    for p in points:
-        p.x, p.y, p.y_shortfall = px(p.offset), py(p.locked), py(p.shortfall)
-    first, rest = points[0], points[1:]
-    chart.path = f"M{first.x},{first.y}" + "".join(f"H{p.x}V{p.y}" for p in rest)
-    chart.shortfall_path = f"M{first.x},{first.y_shortfall}" + "".join(
-        f"H{p.x}V{p.y_shortfall}" for p in rest
-    )
-    chart.path += f"H{px(T)}"
-    chart.shortfall_path += f"H{px(T)}"
-    chart.now_x = px(timedelta(0))
-
-    def tick_label(offset: timedelta) -> str:
-        if not offset:
-            return "collapse" if chart.collapsed else "now"
-        sign = "+" if offset > timedelta(0) else "−"
-        return sign + format_duration(abs(offset), T)
-
-    tick_offsets = [
-        T * (2 * i - NUM_X_TICKS) / NUM_X_TICKS for i in range(NUM_X_TICKS + 1)
-    ]
-    chart.x_ticks = [Tick(px(o), tick_label(o)) for o in tick_offsets]
-    chart.y_ticks = [Tick(py(v), f"{v}♠") for v in range(0, y_max + 1, step)]
-    return chart
+    charts = [c for c in (history, forecast) if c is not None]
+    peak = max(max(p.locked, math.ceil(p.shortfall)) for c in charts for p in c.points)
+    y_step = nice_step(peak)
+    y_max = max(y_step, math.ceil(peak / y_step) * y_step)
+    for c in charts:
+        c.layout(y_max, y_step)
+    return LockedCharts(history, forecast, collapse_at)

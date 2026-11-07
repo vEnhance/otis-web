@@ -17,7 +17,7 @@ from otisweb.mixins import VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest
 from rpg.levelsys import Meter, get_total_spades
 
-from .chart import locked_chart
+from .chart import locked_charts
 from .forms import InvestmentForm
 from .models import (
     INVESTMENT_COOLDOWN,
@@ -73,7 +73,7 @@ def scheme_detail(request: AuthHttpRequest, pk: int) -> HttpResponse:
     }
     if request.user.is_superuser or scheme.has_collapsed:
         context["summary"] = scheme.summary()
-        context["locked_chart"] = locked_chart(scheme)
+        context["locked_charts"] = locked_charts(scheme)
         context["all_investments"] = (
             scheme.investments.select_related("user")
             .prefetch_related("timers")
