@@ -220,10 +220,6 @@
         <line x1="{{ locked_chart.now_x }}" x2="{{ locked_chart.now_x }}" y1="{{ locked_chart.top }}" y2="{{ locked_chart.bottom }}" stroke="var(--bs-secondary-color)" stroke-width="1" />
         <path d="{{ locked_chart.shortfall_path }}" fill="none" stroke="var(--bs-danger)" stroke-width="2" stroke-linejoin="round" />
         <path d="{{ locked_chart.path }}" fill="none" stroke="var(--bs-primary)" stroke-width="2" stroke-linejoin="round" />
-        {% for point in locked_chart.changes %}
-          <circle cx="{{ point.x }}" cy="{{ point.y_shortfall }}" r="3" fill="var(--bs-danger)" stroke="var(--bs-body-bg)" stroke-width="1.5" />
-          <circle cx="{{ point.x }}" cy="{{ point.y }}" r="3" fill="var(--bs-primary)" stroke="var(--bs-body-bg)" stroke-width="1.5" />
-        {% endfor %}
         <g id="ponzi-crosshair" visibility="hidden" pointer-events="none" font-size="16">
         <line y1="{{ locked_chart.top }}" y2="{{ locked_chart.bottom }}" stroke="var(--bs-secondary-color)" stroke-dasharray="3 3" />
         <circle r="5" fill="var(--bs-primary)" stroke="var(--bs-body-bg)" stroke-width="2" />

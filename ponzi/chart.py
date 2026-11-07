@@ -84,11 +84,6 @@ class LockedChart:
         return self.bottom - self.top
 
     @property
-    def changes(self) -> list[Point]:
-        """Points where a curve moves, which get a dot."""
-        return self.points[1:]
-
-    @property
     def axis_label(self) -> str:
         return "time relative to collapse" if self.collapsed else "time relative to now"
 
