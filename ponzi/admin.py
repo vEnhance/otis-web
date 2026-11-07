@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.db.models import QuerySet
+from django.http import HttpRequest
 
 from .models import PonziInvestment, PonziScheme, PonziTimer
 
@@ -31,17 +33,19 @@ class PonziInvestmentAdmin(admin.ModelAdmin):
         "amount",
         "target_tier",
         "created_at",
-        "upgraded_at",
         "withdrawn_at",
         "payout",
     )
-    list_filter = ("scheme", "target_tier")
+    list_filter = ("scheme",)
     search_fields = (
         "user__first_name",
         "user__last_name",
         "user__username",
     )
     autocomplete_fields = ("user",)
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet[PonziInvestment]:
+        return super().get_queryset(request).prefetch_related("timers")
 
     def view_on_site(self, obj: PonziInvestment) -> str:
         return obj.scheme.get_absolute_url()

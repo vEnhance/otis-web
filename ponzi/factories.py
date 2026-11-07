@@ -4,7 +4,6 @@ from typing import Any
 from factory.declarations import SubFactory
 from factory.django import DjangoModelFactory
 from factory.faker import Faker
-from factory.helpers import post_generation
 
 from core.factories import UserFactory
 
@@ -21,28 +20,34 @@ class PonziSchemeFactory(DjangoModelFactory):
 
 
 class PonziInvestmentFactory(DjangoModelFactory):
+    """Accepts `target_tier` and `upgraded_at` and turns them into timers,
+    guessing any intermediate upgrade the way the backfill migration does."""
+
     class Meta:
         model = PonziInvestment
-        skip_postgeneration_save = True
 
     scheme = SubFactory(PonziSchemeFactory)
     user = SubFactory(UserFactory)
     amount = 10
+    target_tier = 1
+    upgraded_at = None
 
-    @post_generation
-    def timers(self, create: bool, extracted: bool, **kwargs: dict[str, Any]):
-        """Log the timers the views would have, guessing any intermediate
-        upgrade the same way the backfill migration does."""
-        if not create:
-            return
-        inv: PonziInvestment = self  # type: ignore
+    @classmethod
+    def _create(
+        cls, model_class: type[PonziInvestment], *args: Any, **kwargs: Any
+    ) -> PonziInvestment:
+        target_tier: int = kwargs.pop("target_tier")
+        upgraded_at: datetime.datetime | None = kwargs.pop("upgraded_at")
+        inv = super()._create(model_class, *args, **kwargs)
         T = inv.scheme.gestation_period
-        PonziTimer.objects.create(investment=inv, tier=1, started_at=inv.created_at)
-        for tier in range(2, inv.target_tier + 1):
-            if tier == inv.target_tier and inv.upgraded_at is not None:
-                started_at, inferred = inv.upgraded_at, False
+        for tier in range(1, target_tier + 1):
+            if tier == 1:
+                started_at, inferred = inv.created_at, False
+            elif tier == target_tier and upgraded_at is not None:
+                started_at, inferred = upgraded_at, False
             else:
                 started_at, inferred = inv.created_at + (tier - 1) * T, True
             PonziTimer.objects.create(
                 investment=inv, tier=tier, started_at=started_at, inferred=inferred
             )
+        return inv

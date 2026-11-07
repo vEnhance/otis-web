@@ -169,17 +169,22 @@ def add_bid_changes(inv: PonziInvestment, T: timedelta, changes: Changes) -> Non
 
 
 def has_inferred_overlap(
-    scheme: PonziScheme, start: datetime, end: datetime, T: timedelta
+    inv: PonziInvestment, start: datetime, end: datetime, T: timedelta
 ) -> bool:
-    """Whether a guessed upgrade time could move the curves inside the window.
+    """Whether a guessed timer start could move the curves inside the window.
 
-    The guess only matters between a tier III bid's first maturity and its
-    last upgrade, so check whether any such stretch overlaps the window.
+    A guessed start can only lie between the previous timer's maturity and the
+    next timer's start, so check whether that stretch overlaps the window.
     """
-    return any(
-        inv.created_at + T < end and (inv.upgraded_at or inv.created_at) > start
-        for inv in scheme.investments.filter(timers__inferred=True).distinct()
-    )
+    timers = list(inv.timers.all())
+    for i, timer in enumerate(timers):
+        if not timer.inferred:
+            continue
+        earliest = (timers[i - 1].started_at if i else inv.created_at) + T
+        latest = timers[i + 1].started_at if i + 1 < len(timers) else end
+        if earliest < end and latest > start:
+            return True
+    return False
 
 
 def locked_chart(scheme: PonziScheme) -> LockedChart:
@@ -188,8 +193,10 @@ def locked_chart(scheme: PonziScheme) -> LockedChart:
     start, end = as_of - T, as_of + T
 
     changes: Changes = {}
+    has_inferred = False
     for inv in scheme.investments.prefetch_related("timers"):
         add_bid_changes(inv, T, changes)
+        has_inferred = has_inferred or has_inferred_overlap(inv, start, end, T)
 
     locked, shortfall = 0, Decimal(0)
     points: list[Point] = []
@@ -226,7 +233,7 @@ def locked_chart(scheme: PonziScheme) -> LockedChart:
         points=points,
         now=now,
         collapse_in=collapse_in,
-        has_inferred=has_inferred_overlap(scheme, start, end, T),
+        has_inferred=has_inferred,
         y_max=y_max,
     )
 

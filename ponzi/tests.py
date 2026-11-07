@@ -1,10 +1,10 @@
 import datetime
-import importlib
 from decimal import Decimal
 
 import pytest
-from django.apps import apps as django_apps
 from django.contrib.auth.models import Group, User
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from freezegun import freeze_time
 
 from core.factories import UserFactory
@@ -186,7 +186,7 @@ def test_upgrade_to_tier_three(otis, scheme: PonziScheme):
         otis.post_30x("ponzi-upgrade", investment.pk)
         investment.refresh_from_db()
         assert investment.target_tier == 2
-        assert investment.upgraded_at == at(15)
+        assert investment.current_timer.started_at == at(15)
         assert investment.tier == 1
         otis.post_30x("ponzi-withdraw", investment.pk)
         investment.refresh_from_db()
@@ -355,7 +355,7 @@ def test_summary_splits_idle_and_locked(scheme: PonziScheme):
     with freeze_time(at(0)):
         PonziInvestmentFactory.create(scheme=scheme, amount=3)  # idle by day 20
         PonziInvestmentFactory.create(
-            scheme=scheme, amount=4, upgraded_at=at(10)
+            scheme=scheme, amount=4, target_tier=2, upgraded_at=at(10)
         )  # upgrade restarts the timer, so locked
         PonziInvestmentFactory.create(
             scheme=scheme, amount=5, payout=Decimal(5), withdrawn_at=at(15)
@@ -483,33 +483,51 @@ def test_invest_and_upgrade_log_timers(otis, scheme: PonziScheme):
     assert timers == [(1, at(0), False), (2, at(15), False)]
 
 
-@pytest.mark.django_db
-def test_backfill_migration(scheme: PonziScheme):
-    backfill = importlib.import_module(
-        "ponzi.migrations.0005_backfill_ponzitimer"
-    ).backfill
-    plain = PonziInvestment.objects.create(
-        scheme=scheme, user=verified_user(), amount=1
-    )
-    tier3 = PonziInvestment.objects.create(
-        scheme=scheme,
-        user=verified_user(),
-        amount=1,
-        target_tier=3,
-        created_at=at(0),
-        upgraded_at=at(40),
-    )
-    backfill(django_apps, None)
-    assert list(plain.timers.values_list("tier", "inferred")) == [(1, False)]
-    assert list(tier3.timers.values_list("tier", "started_at", "inferred")) == [
-        (1, at(0), False),
-        (2, at(14), True),
-        (3, at(40), False),
-    ]
-
-
 @pytest.mark.parametrize(
     ("total", "step"), [(0, 1), (3, 1), (9, 5), (40, 10), (75, 20), (1000, 500)]
 )
 def test_nice_step(total: int, step: int):
     assert nice_step(total) == step
+
+
+def count_queries(otis, *args) -> int:
+    otis.get_ok(*args)  # warm up per-request caches such as content types
+    with CaptureQueriesContext(connection) as captured:
+        otis.get_ok(*args)
+    return len(captured.captured_queries)
+
+
+def add_mixed_bids(scheme: PonziScheme, n: int) -> None:
+    """Growing, idle, upgraded and withdrawn bids, so every code path that
+    reads a bid's timers gets exercised."""
+    for i in range(n):
+        with freeze_time(at(i)):
+            PonziInvestmentFactory.create(
+                scheme=scheme,
+                target_tier=1 + i % 3,
+                upgraded_at=at(i + 15) if i % 3 else None,
+                withdrawn_at=at(40) if i % 4 == 0 else None,
+                payout=Decimal(11) if i % 4 == 0 else None,
+            )
+
+
+@pytest.mark.django_db
+def test_scheme_page_queries_do_not_grow_with_bids(otis, scheme: PonziScheme):
+    otis.login(UserFactory.create(is_staff=True, is_superuser=True))
+    add_mixed_bids(scheme, 3)
+    with freeze_time(at(50)):
+        few = count_queries(otis, "ponzi-scheme", scheme.pk)
+    add_mixed_bids(scheme, 12)
+    with freeze_time(at(50)):
+        many = count_queries(otis, "ponzi-scheme", scheme.pk)
+    assert many == few
+
+
+@pytest.mark.django_db
+def test_investment_admin_queries_do_not_grow_with_bids(otis, scheme: PonziScheme):
+    otis.login(UserFactory.create(is_staff=True, is_superuser=True))
+    add_mixed_bids(scheme, 3)
+    few = count_queries(otis, "admin:ponzi_ponziinvestment_changelist")
+    add_mixed_bids(scheme, 12)
+    many = count_queries(otis, "admin:ponzi_ponziinvestment_changelist")
+    assert many == few
