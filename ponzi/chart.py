@@ -1,14 +1,22 @@
 """Server-side geometry for the locked-spades chart on the scheme stats page.
 
-For each x in [0, T], the curve shows the total spades in still-growing bids
-whose current timer has been running for at most x. So the curve ends at the
-total locked amount, and how fast it rises shows how soon those spades unlock.
+Both curves look x into the future (x in [0, T]) assuming no new bids,
+withdrawals, or upgrades. For a collapsed scheme, "now" is the collapse.
+
+- Locked (blue): spades in still-growing bids with more than x left on their
+  timer. These are guaranteed to still be in the pool x from now.
+- Shortfall (red): payouts promised beyond the principal that was paid in,
+  i.e. profit already withdrawn plus profit owed on every bid unlocked by x.
+
+The pool equals all unpaid principal minus profit already withdrawn, so paying
+out every unlocked bid would overdraw it exactly when shortfall > locked.
+That first crossing is the earliest the scheme could collapse.
 """
 
 import math
 from dataclasses import dataclass, field
 from datetime import timedelta
-from itertools import groupby
+from decimal import Decimal
 from typing import Any
 
 from .models import PonziScheme
@@ -32,21 +40,28 @@ class Tick:
 
 @dataclass
 class Step:
-    """A jump in the curve: `amount` spades whose growth is exactly `growth`."""
+    """Bids unlocking once `time_left` has passed: `amount` spades leave the
+    locked curve and `profit` is added to the shortfall curve."""
 
-    growth: timedelta
+    time_left: timedelta
     amount: int
-    cumulative: int
+    profit: Decimal
+    remaining: int
+    shortfall: Decimal
     num_bids: int
     x: float = 0
     y: float = 0
+    y_shortfall: float = 0
 
 
 @dataclass
 class LockedChart:
     gestation_period: timedelta
+    collapsed: bool
     steps: list[Step]
     total: int
+    initial_shortfall: Decimal
+    collapse_in: timedelta | None
     y_max: int
     width: int = WIDTH
     height: int = HEIGHT
@@ -55,6 +70,9 @@ class LockedChart:
     top: int = MARGIN_TOP
     bottom: int = HEIGHT - MARGIN_BOTTOM
     path: str = ""
+    shortfall_path: str = ""
+    total_y: float = 0
+    initial_shortfall_y: float = 0
     x_ticks: list[Tick] = field(default_factory=list)
     y_ticks: list[Tick] = field(default_factory=list)
 
@@ -70,17 +88,35 @@ class LockedChart:
     def plot_height(self) -> int:
         return self.bottom - self.top
 
+    @property
+    def axis_label(self) -> str:
+        return "time after collapse" if self.collapsed else "time from now"
+
+    @property
+    def collapse_label(self) -> str | None:
+        if self.collapse_in is None:
+            return None
+        return format_duration(self.collapse_in, self.gestation_period)
+
     def hover_data(self) -> dict[str, Any]:
-        """What the crosshair script needs to read off f(x) at any cursor position."""
+        """What the crosshair script needs to read off both curves at any x."""
         unit, suffix = duration_unit(self.gestation_period)
         return {
             "left": self.left,
             "right": self.right,
-            "top": self.top,
-            "bottom": self.bottom,
             "span": self.gestation_period / unit,
             "unit": suffix,
-            "steps": [[s.x, s.y, s.cumulative] for s in self.steps],
+            "prefix": "+" if self.collapsed else "in ",
+            "start": [
+                self.total_y,
+                self.total,
+                self.initial_shortfall_y,
+                float(self.initial_shortfall),
+            ],
+            "steps": [
+                [s.x, s.y, s.remaining, s.y_shortfall, float(s.shortfall)]
+                for s in self.steps
+            ],
         }
 
 
@@ -109,34 +145,58 @@ def nice_step(total: int, num_ticks: int = 4) -> int:
 def locked_chart(scheme: PonziScheme) -> LockedChart:
     as_of = scheme.as_of
     T = scheme.gestation_period
-    growths = sorted(
-        (as_of - (inv.upgraded_at or inv.created_at), inv.amount)
-        for inv in scheme.locked_investments()
-    )
+
+    shortfall = Decimal(0)
+    unlocks: dict[timedelta, list[tuple[int, Decimal]]] = {}
+    for inv in scheme.investments.select_related("scheme"):
+        if inv.withdrawn_at is not None:
+            shortfall += (inv.payout or Decimal(0)) - inv.amount
+        elif inv.matures_at > as_of:
+            profit = inv.value_at_tier(inv.target_tier) - inv.amount
+            unlocks.setdefault(inv.matures_at - as_of, []).append((inv.amount, profit))
+        else:
+            shortfall += inv.current_value - inv.amount
+    initial_shortfall = shortfall
+    total = sum(amount for bids in unlocks.values() for amount, _ in bids)
 
     steps: list[Step] = []
-    cumulative = 0
-    for growth, group in groupby(growths, key=lambda pair: pair[0]):
-        amounts = [amount for _, amount in group]
-        cumulative += sum(amounts)
-        steps.append(Step(growth, sum(amounts), cumulative, len(amounts)))
+    remaining = total
+    collapse_in = timedelta(0) if shortfall > remaining else None
+    for time_left in sorted(unlocks):
+        bids = unlocks[time_left]
+        amount = sum(a for a, _ in bids)
+        profit = sum((p for _, p in bids), Decimal(0))
+        remaining -= amount
+        shortfall += profit
+        steps.append(Step(time_left, amount, profit, remaining, shortfall, len(bids)))
+        if collapse_in is None and shortfall > remaining:
+            collapse_in = time_left
 
-    step = nice_step(cumulative)
-    y_max = max(step, math.ceil(cumulative / step) * step)
-    chart = LockedChart(T, steps, cumulative, y_max)
+    peak = max(total, math.ceil(shortfall))
+    step = nice_step(peak)
+    y_max = max(step, math.ceil(peak / step) * step)
+    chart = LockedChart(
+        T, scheme.has_collapsed, steps, total, initial_shortfall, collapse_in, y_max
+    )
 
-    def px(growth: timedelta) -> float:
-        return round(MARGIN_LEFT + PLOT_W * min(growth / T, 1), 1)
+    def px(d: timedelta) -> float:
+        return round(MARGIN_LEFT + PLOT_W * min(d / T, 1), 1)
 
-    def py(value: int) -> float:
-        return round(chart.bottom - PLOT_H * value / y_max, 1)
+    def py(value: float | Decimal) -> float:
+        return round(chart.bottom - PLOT_H * float(value) / y_max, 1)
 
-    d = [f"M{px(timedelta(0))},{py(0)}"]
+    chart.total_y = py(total)
+    chart.initial_shortfall_y = py(initial_shortfall)
+    locked_d = [f"M{px(timedelta(0))},{chart.total_y}"]
+    shortfall_d = [f"M{px(timedelta(0))},{chart.initial_shortfall_y}"]
     for s in steps:
-        s.x, s.y = px(s.growth), py(s.cumulative)
-        d.append(f"H{s.x}V{s.y}")
-    d.append(f"H{px(T)}")
-    chart.path = "".join(d)
+        s.x, s.y, s.y_shortfall = px(s.time_left), py(s.remaining), py(s.shortfall)
+        locked_d.append(f"H{s.x}V{s.y}")
+        shortfall_d.append(f"H{s.x}V{s.y_shortfall}")
+    locked_d.append(f"H{px(T)}")
+    shortfall_d.append(f"H{px(T)}")
+    chart.path = "".join(locked_d)
+    chart.shortfall_path = "".join(shortfall_d)
 
     chart.x_ticks = [
         Tick(px(T * i / NUM_X_TICKS), format_duration(T * i / NUM_X_TICKS, T))

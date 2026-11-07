@@ -162,12 +162,45 @@
       </tr>
     </table>
     {% if locked_chart %}
-      <h2>Locked spades</h2>
+      <h2>Locked spades vs. shortfall</h2>
+      {% if scheme.has_collapsed %}
+        <p data-testid="ponzi-collapse-snapshot">
+          When the scheme collapsed,
+          {{ locked_chart.total }}♠ was still locked
+          against a {{ locked_chart.initial_shortfall|floatformat:2 }}♠ shortfall.
+          The chart shows how that would have unwound afterwards.
+        </p>
+      {% else %}
+        <p data-testid="ponzi-collapse-eta">
+          Assuming no new activity,
+          {% if locked_chart.collapse_label is None %}
+            the scheme can't collapse within $T$.
+          {% elif locked_chart.collapse_in %}
+            the scheme could first collapse in <strong>{{ locked_chart.collapse_label }}</strong>.
+          {% else %}
+            the scheme could collapse <strong>right now</strong>.
+          {% endif %}
+        </p>
+      {% endif %}
+      <ul class="list-inline mb-1">
+        <li class="list-inline-item me-4">
+          <svg width="20" height="10" aria-hidden="true">
+            <line x1="0" x2="20" y1="5" y2="5" stroke="var(--bs-primary)" stroke-width="3" />
+          </svg>
+          Locked: still-growing principal
+        </li>
+        <li class="list-inline-item">
+          <svg width="20" height="10" aria-hidden="true">
+            <line x1="0" x2="20" y1="5" y2="5" stroke="var(--bs-danger)" stroke-width="3" />
+          </svg>
+          Shortfall: profit paid or owed on unlocked bids
+        </li>
+      </ul>
       <svg viewBox="0 0 {{ locked_chart.width }} {{ locked_chart.height }}"
            class="w-100 mb-3"
            style="max-width: 720px"
            role="img"
-           aria-label="Locked spades by time grown, {{ locked_chart.total }} spades in total"
+           aria-label="Locked spades and shortfall by {{ locked_chart.axis_label }}"
            data-testid="ponzi-locked-chart">
         <g font-size="15" fill="var(--bs-secondary-color)">
         {% for tick in locked_chart.y_ticks %}
@@ -177,16 +210,21 @@
         {% for tick in locked_chart.x_ticks %}
           <text x="{{ tick.pos }}" y="{{ locked_chart.bottom|add:20 }}" text-anchor="middle">{{ tick.label }}</text>
         {% endfor %}
-        <text x="{{ locked_chart.center_x }}" y="{{ locked_chart.height|add:-4 }}" text-anchor="middle">time grown</text>
+        <text x="{{ locked_chart.center_x }}" y="{{ locked_chart.height|add:-4 }}" text-anchor="middle">{{ locked_chart.axis_label }}</text>
         </g>
+        <path d="{{ locked_chart.shortfall_path }}" fill="none" stroke="var(--bs-danger)" stroke-width="2" stroke-linejoin="round" />
         <path d="{{ locked_chart.path }}" fill="none" stroke="var(--bs-primary)" stroke-width="2" stroke-linejoin="round" />
         {% for step in locked_chart.steps %}
+          <circle cx="{{ step.x }}" cy="{{ step.y_shortfall }}" r="4" fill="var(--bs-danger)" stroke="var(--bs-body-bg)" stroke-width="2" />
           <circle cx="{{ step.x }}" cy="{{ step.y }}" r="4" fill="var(--bs-primary)" stroke="var(--bs-body-bg)" stroke-width="2" />
         {% endfor %}
         <g id="ponzi-crosshair" visibility="hidden" pointer-events="none" font-size="16">
         <line y1="{{ locked_chart.top }}" y2="{{ locked_chart.bottom }}" stroke="var(--bs-secondary-color)" stroke-dasharray="3 3" />
         <circle r="5" fill="var(--bs-primary)" stroke="var(--bs-body-bg)" stroke-width="2" />
+        <circle r="5" fill="var(--bs-danger)" stroke="var(--bs-body-bg)" stroke-width="2" />
         <text y="{{ locked_chart.top|add:14 }}" fill="var(--bs-body-color)" font-weight="bold"></text>
+        <text y="{{ locked_chart.top|add:34 }}" fill="var(--bs-body-color)"></text>
+        <text y="{{ locked_chart.top|add:54 }}" fill="var(--bs-body-color)"></text>
         </g>
         <rect x="{{ locked_chart.left }}" y="{{ locked_chart.top }}" width="{{ locked_chart.plot_width }}" height="{{ locked_chart.plot_height }}" fill="transparent" id="ponzi-hover-area" />
       </svg>
@@ -235,27 +273,30 @@
             const area = document.getElementById("ponzi-hover-area");
             const svg = area.ownerSVGElement;
             const cross = document.getElementById("ponzi-crosshair");
-            const [line, dot, label] = cross.children;
+            const [line, dot, redDot, ...labels] = cross.children;
             area.addEventListener("pointermove", (e) => {
                 const pt = new DOMPoint(e.clientX, e.clientY).matrixTransform(svg.getScreenCTM().inverse());
                 const x = Math.min(Math.max(pt.x, data.left), data.right);
-                // f is right-continuous: count every jump at or before the cursor
-                let y = data.bottom,
-                    total = 0;
-                for (const [sx, sy, cum] of data.steps) {
-                    if (sx > x) break;
-                    y = sy;
-                    total = cum;
+                // a bid with exactly x left has unlocked by x, so apply every drop at or before the cursor
+                let [y, locked, yShort, shortfall] = data.start;
+                for (const step of data.steps) {
+                    if (step[0] > x) break;
+                    [, y, locked, yShort, shortfall] = step;
                 }
                 const t = ((x - data.left) / (data.right - data.left)) * data.span;
                 line.setAttribute("x1", x);
                 line.setAttribute("x2", x);
                 dot.setAttribute("cx", x);
                 dot.setAttribute("cy", y);
+                redDot.setAttribute("cx", x);
+                redDot.setAttribute("cy", yShort);
                 const flip = x > (data.left + data.right) / 2;
-                label.setAttribute("x", flip ? x - 6 : x + 6);
-                label.setAttribute("text-anchor", flip ? "end" : "start");
-                label.textContent = `≤ ${t.toFixed(1)}${data.unit}: ${total}♠`;
+                const texts = [`${data.prefix}${t.toFixed(1)}${data.unit}`, `locked ${locked}♠`, `shortfall ${shortfall.toFixed(2)}♠`];
+                labels.forEach((label, i) => {
+                    label.setAttribute("x", flip ? x - 8 : x + 8);
+                    label.setAttribute("text-anchor", flip ? "end" : "start");
+                    label.textContent = texts[i];
+                });
                 cross.setAttribute("visibility", "visible");
             });
             area.addEventListener("pointerleave", () => cross.setAttribute("visibility", "hidden"));

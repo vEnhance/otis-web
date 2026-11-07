@@ -334,6 +334,8 @@ def test_admin_sees_all_bids_before_collapse(otis, scheme: PonziScheme):
     assert resp.context["locked_chart"].total == 20
     otis.assert_testid(resp, "ponzi-summary")
     otis.assert_testid(resp, "ponzi-locked-chart")
+    otis.assert_testid(resp, "ponzi-collapse-eta")
+    otis.assert_no_testid(resp, "ponzi-collapse-snapshot")
     otis.assert_testid(resp, "ponzi-all-bids")
 
 
@@ -380,13 +382,59 @@ def test_locked_chart_steps(scheme: PonziScheme):
         PonziInvestmentFactory.create(scheme=scheme, amount=4)
     with freeze_time(at(20)):
         chart = locked_chart(scheme)
-    assert [(s.growth, s.amount, s.cumulative, s.num_bids) for s in chart.steps] == [
-        (datetime.timedelta(days=2), 4, 4, 1),
-        (datetime.timedelta(days=12), 5, 9, 2),
+    # the day-8 bids have 2 days left and the day-18 bid has 12;
+    # each tier I bid adds 6.7% of its amount to the shortfall when it unlocks
+    assert [
+        (s.time_left, s.amount, s.remaining, s.shortfall, s.num_bids)
+        for s in chart.steps
+    ] == [
+        (datetime.timedelta(days=2), 5, 4, Decimal("0.40"), 2),
+        (datetime.timedelta(days=12), 4, 0, Decimal("0.67"), 1),
     ]
     assert chart.total == 9
+    assert chart.initial_shortfall == Decimal("0.07")  # the idle bid
+    assert chart.collapse_in == datetime.timedelta(days=12)
     assert chart.y_max >= 9
     assert chart.x_ticks[-1].label == "14d"
+
+
+@pytest.mark.django_db
+def test_locked_chart_collapse_now(scheme: PonziScheme):
+    with freeze_time(at(0)):
+        PonziInvestmentFactory.create(
+            scheme=scheme, amount=10, payout=Decimal("13.40"), withdrawn_at=at(0)
+        )
+    with freeze_time(at(1)):
+        PonziInvestmentFactory.create(scheme=scheme, amount=2)
+        chart = locked_chart(scheme)
+    assert chart.initial_shortfall == Decimal("3.40")
+    assert chart.total == 2
+    assert chart.collapse_in == datetime.timedelta(0)
+
+
+@pytest.mark.django_db
+def test_locked_chart_no_collapse_without_profit(scheme: PonziScheme):
+    with freeze_time(at(0)):
+        PonziInvestmentFactory.create(
+            scheme=scheme, amount=10, payout=Decimal(10), withdrawn_at=at(0)
+        )
+    chart = locked_chart(scheme)
+    assert chart.steps == []
+    assert chart.collapse_in is None
+
+
+@pytest.mark.django_db
+def test_collapsed_scheme_shows_snapshot_not_eta(otis, scheme: PonziScheme):
+    with freeze_time(at(0)):
+        PonziInvestmentFactory.create(scheme=scheme, amount=4)
+    scheme.collapsed_at = at(15)
+    scheme.save()
+    otis.login(verified_user())
+    with freeze_time(at(20)):
+        resp = otis.get_ok("ponzi-scheme", scheme.pk)
+    otis.assert_testid(resp, "ponzi-collapse-snapshot")
+    otis.assert_no_testid(resp, "ponzi-collapse-eta")
+    assert resp.context["locked_chart"].axis_label == "time after collapse"
 
 
 @pytest.mark.django_db
@@ -394,6 +442,7 @@ def test_locked_chart_empty(scheme: PonziScheme):
     chart = locked_chart(scheme)
     assert chart.steps == []
     assert chart.total == 0
+    assert chart.collapse_in is None
     assert chart.y_max == 1
 
 
