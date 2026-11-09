@@ -10,6 +10,7 @@ from roster.factories import StudentFactory
 from roster.models import Student
 from rpg.factories import QuestCompleteFactory
 from rpg.levelsys import get_level_info, get_student_rows
+from rpg.models import Achievement, AchievementUnlock
 
 from .factories import PonziInvestmentFactory, PonziSchemeFactory
 from .models import PonziInvestment, PonziScheme
@@ -225,6 +226,13 @@ def test_collapse(otis, scheme: PonziScheme):
     assert scheme.collapsed_by == bob
     assert bob_inv.payout is None
     assert bob_inv.withdrawn_at is None
+    achievement = Achievement.objects.get(special_effect_id="ponzi-collapse")
+    assert AchievementUnlock.objects.filter(
+        user=bob, achievement=achievement, is_first_obtain=True
+    ).exists()
+    assert not AchievementUnlock.objects.filter(
+        user=alice, achievement=achievement
+    ).exists()
 
     with freeze_time(at(40)):
         otis.login(bob)

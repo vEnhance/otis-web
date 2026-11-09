@@ -16,6 +16,7 @@ from otisweb.decorators import verified_required
 from otisweb.mixins import VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest
 from rpg.levelsys import Meter, get_total_spades
+from rpg.models import Achievement, AchievementUnlock
 
 from .forms import InvestmentForm
 from .models import (
@@ -26,6 +27,8 @@ from .models import (
     PonziInvestment,
     PonziScheme,
 )
+
+PONZI_COLLAPSE_EFFECT_ID = "ponzi-collapse"
 
 
 class PonziSchemeList(VerifiedRequiredMixin, ListView[PonziScheme]):
@@ -116,6 +119,28 @@ def lock_own_investment(
     return scheme, investment
 
 
+def award_collapse_diamond(user: User) -> bool:
+    achievement, _ = Achievement.objects.select_for_update().get_or_create(
+        special_effect_id=PONZI_COLLAPSE_EFFECT_ID,
+        defaults={
+            "name": "Ponzi Popper",
+            "description": (
+                "Be the player whose withdrawal causes a Ponzi scheme to collapse."
+            ),
+        },
+    )
+    _, was_created = AchievementUnlock.objects.get_or_create(
+        user=user,
+        achievement=achievement,
+        defaults={
+            "is_first_obtain": not AchievementUnlock.objects.filter(
+                achievement=achievement
+            ).exists()
+        },
+    )
+    return was_created
+
+
 @verified_required
 @require_POST
 def upgrade(request: AuthHttpRequest, pk: int) -> HttpResponse:
@@ -147,6 +172,8 @@ def withdraw(request: AuthHttpRequest, pk: int) -> HttpResponse:
             scheme.collapsed_by = request.user
             scheme.save()
             messages.error(request, "The scheme has collapsed!")
+            if award_collapse_diamond(request.user):
+                messages.success(request, "You earned the Ponzi Popper diamond!")
         else:
             investment.payout = payout
             investment.withdrawn_at = timezone.now()
