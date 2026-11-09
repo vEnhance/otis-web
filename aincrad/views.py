@@ -10,6 +10,7 @@ from typing import Any, Literal, TypedDict
 from allauth.socialaccount.models import SocialAccount
 from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from django.core.files.uploadhandler import TemporaryFileUploadHandler
+from django.db import transaction
 from django.db.models.aggregates import Sum
 from django.db.models.query import QuerySet, prefetch_related_objects
 from django.db.models.query_utils import Q
@@ -25,7 +26,7 @@ from aincrad.auth import get_token, reject_bad_token
 from arch.models import Hint, Problem
 from dashboard.models import Announcement, PSet
 from hanabi.models import HanabiContest, HanabiParticipation, HanabiPlayer, HanabiReplay
-from opal.models import OpalPuzzle, sha256_of
+from opal.models import OpalPuzzle, sha256_of, solution_hash
 from payments.models import Job
 from roster.models import (
     ENABLED_STANDINGS,
@@ -53,6 +54,11 @@ class ReplayData(TypedDict):
     turn_count: int
     replay_id: int
     players: list[str]
+
+
+class SolutionData(TypedDict):
+    pk: int
+    solution: str
 
 
 class JSONData(TypedDict):
@@ -95,6 +101,9 @@ class JSONData(TypedDict):
     # announcement (also reuses `content` above)
     slug: str
     subject: str
+
+    # OPAL solutions
+    solutions: list[SolutionData]
 
     # ApplyUUID
     uuid: str
@@ -657,27 +666,59 @@ def email_handler(action: str, data: JSONData) -> JsonResponse:
 def opal_handler(action: str, data: JSONData) -> JsonResponse:
     del action
     del data
-    return JsonResponse(
-        {
-            "puzzles": list(
-                OpalPuzzle.objects.all().values(
-                    "pk",
-                    "hunt__slug",
-                    "title",
-                    "slug",
-                    "order",
-                    "num_to_unlock",
-                    "content",
-                    "content_hash",
-                    "is_metapuzzle",
-                    "answer",
-                    "partial_answers",
-                    "credits",
-                    "hint_text",
-                )
-            )
-        }
+    puzzles = list(
+        OpalPuzzle.objects.all().values(
+            "pk",
+            "hunt__slug",
+            "title",
+            "slug",
+            "order",
+            "num_to_unlock",
+            "content",
+            "content_hash",
+            "is_metapuzzle",
+            "answer",
+            "partial_answers",
+            "credits",
+            "hint_text",
+            "solution",
+        )
     )
+    for row in puzzles:
+        row["solution_hash"] = solution_hash(row.pop("solution"))
+    return JsonResponse({"puzzles": puzzles})
+
+
+def opal_solutions_handler(action: str, data: JSONData) -> JsonResponse:
+    """Overwrite the Markdown solutions of the given puzzles, all or nothing."""
+    del action
+    entries = data["solutions"]
+    puzzles = OpalPuzzle.objects.select_related("hunt").in_bulk(
+        [entry["pk"] for entry in entries]
+    )
+    if missing := [entry["pk"] for entry in entries if entry["pk"] not in puzzles]:
+        return JsonResponse({"error": "Unknown puzzle pks", "pks": missing}, status=400)
+
+    results: list[dict[str, Any]] = []
+    with transaction.atomic():
+        for entry in entries:
+            puzzle = puzzles[entry["pk"]]
+            if puzzle.solution == entry["solution"]:
+                status = "unchanged"
+            else:
+                puzzle.solution = entry["solution"]
+                puzzle.save()
+                status = "updated"
+            results.append(
+                {
+                    "pk": puzzle.pk,
+                    "hunt": puzzle.hunt.slug,
+                    "slug": puzzle.slug,
+                    "status": status,
+                    "solution_hash": puzzle.solution_hash,
+                }
+            )
+    return JsonResponse({"results": results})
 
 
 @csrf_exempt
@@ -831,6 +872,8 @@ def api(request: HttpRequest) -> JsonResponse:
         return announcement_handler(action, data)
     elif action == "opal_list":
         return opal_handler(action, data)
+    elif action == "opal_solutions_update":
+        return opal_solutions_handler(action, data)
     elif action == "apply_uuid":
         return apply_handler(action, data)
     else:

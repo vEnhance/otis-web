@@ -1203,3 +1203,67 @@ def test_staff_log_links_on_hunt_list(otis):
     otis.login(admin)
     resp = otis.get_20x("opal-hunt-list")
     otis.assert_testid(resp, "opal-hunt-log-link", count=3)
+
+
+@pytest.mark.django_db
+def test_solution_renders_markdown():
+    puzzle = OpalPuzzleFactory.create(solution="The answer is *GEM*.")
+    assert "<em>GEM</em>" in puzzle.solution_rendered
+
+
+@pytest.mark.django_db
+def test_solution_shown_to_solver(otis):
+    alice = UserFactory.create(groups=(GroupFactory(name="Verified"),))
+    puzzle = OpalPuzzleFactory.create(answer="Gem", solution="It is *GEM*.")
+    OpalAttemptFactory.create(puzzle=puzzle, user=alice, guess="GEM")
+    otis.login(alice)
+    resp = otis.get_ok("opal-show-solution", puzzle.hunt.slug, puzzle.slug)
+    assert resp.context["puzzle"] == puzzle
+    otis.assert_testid(resp, "opal-solution")
+
+
+@pytest.mark.django_db
+def test_solution_hidden_from_non_solver(otis):
+    alice = UserFactory.create(groups=(GroupFactory(name="Verified"),))
+    puzzle = OpalPuzzleFactory.create(answer="Gem", solution="It is *GEM*.")
+    OpalAttemptFactory.create(puzzle=puzzle, user=alice, guess="ROCK")
+    otis.login(alice)
+    resp = otis.get_denied("opal-show-solution", puzzle.hunt.slug, puzzle.slug)
+    otis.assert_not_has(resp, "It is")
+
+
+@pytest.mark.django_db
+def test_solution_visible_to_superuser(otis):
+    admin = UserFactory.create(is_superuser=True, is_staff=True)
+    puzzle = OpalPuzzleFactory.create(solution="It is *GEM*.")
+    otis.login(admin)
+    otis.get_ok("opal-show-solution", puzzle.hunt.slug, puzzle.slug)
+
+
+@pytest.mark.django_db
+def test_solution_missing_is_404(otis):
+    alice = UserFactory.create(groups=(GroupFactory(name="Verified"),))
+    puzzle = OpalPuzzleFactory.create(answer="Gem")
+    OpalAttemptFactory.create(puzzle=puzzle, user=alice, guess="GEM")
+    otis.login(alice)
+    otis.get_not_found("opal-show-solution", puzzle.hunt.slug, puzzle.slug)
+
+
+@pytest.mark.django_db
+def test_solution_link_on_puzzle_page(otis):
+    alice = UserFactory.create(groups=(GroupFactory(name="Verified"),))
+    with_solution = OpalPuzzleFactory.create(answer="Gem", solution="It is *GEM*.")
+    without_solution = OpalPuzzleFactory.create(hunt=with_solution.hunt, answer="Gem")
+    otis.login(alice)
+
+    resp = otis.get_ok("opal-show-puzzle", with_solution.hunt.slug, with_solution.slug)
+    otis.assert_no_testid(resp, "opal-solution-link")
+
+    OpalAttemptFactory.create(puzzle=with_solution, user=alice, guess="GEM")
+    OpalAttemptFactory.create(puzzle=without_solution, user=alice, guess="GEM")
+    resp = otis.get_ok("opal-show-puzzle", with_solution.hunt.slug, with_solution.slug)
+    otis.assert_testid(resp, "opal-solution-link")
+    resp = otis.get_ok(
+        "opal-show-puzzle", without_solution.hunt.slug, without_solution.slug
+    )
+    otis.assert_no_testid(resp, "opal-solution-link")
