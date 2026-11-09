@@ -1212,6 +1212,13 @@ def test_solution_renders_markdown():
 
 
 @pytest.mark.django_db
+def test_solution_saved_in_canonical_form():
+    puzzle = OpalPuzzleFactory.create(solution="a\r\nb\n")
+    puzzle.refresh_from_db()
+    assert puzzle.solution == "a\nb"
+
+
+@pytest.mark.django_db
 def test_solution_shown_to_solver(otis):
     alice = UserFactory.create(groups=(GroupFactory(name="Verified"),))
     puzzle = OpalPuzzleFactory.create(answer="Gem", solution="It is *GEM*.")

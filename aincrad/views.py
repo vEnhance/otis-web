@@ -26,7 +26,7 @@ from aincrad.auth import get_token, reject_bad_token
 from arch.models import Hint, Problem
 from dashboard.models import Announcement, PSet
 from hanabi.models import HanabiContest, HanabiParticipation, HanabiPlayer, HanabiReplay
-from opal.models import OpalPuzzle, sha256_of, solution_hash
+from opal.models import OpalPuzzle, canonical_solution, sha256_of, solution_hash
 from payments.models import Job
 from roster.models import (
     ENABLED_STANDINGS,
@@ -703,10 +703,11 @@ def opal_solutions_handler(action: str, data: JSONData) -> JsonResponse:
     with transaction.atomic():
         for entry in entries:
             puzzle = puzzles[entry["pk"]]
-            if puzzle.solution == entry["solution"]:
+            solution = canonical_solution(entry["solution"])
+            if puzzle.solution == solution:
                 status = "unchanged"
             else:
-                puzzle.solution = entry["solution"]
+                puzzle.solution = solution
                 puzzle.save()
                 status = "updated"
             results.append(

@@ -40,8 +40,15 @@ def sha256_of(f: File[Any]) -> str:
     return digest.hexdigest()
 
 
+def canonical_solution(text: str) -> str:
+    # Browsers submit textareas with CRLF and the admin form strips whitespace,
+    # so store one form regardless of source or the sync hash would never match.
+    return text.replace("\r\n", "\n").strip()
+
+
 def solution_hash(solution: str) -> str:
     """Fingerprint a Markdown solution for the bulk sync, or "" if there is none."""
+    solution = canonical_solution(solution)
     if not solution:
         return ""
     return sha256(solution.encode("utf-8")).hexdigest()
@@ -190,6 +197,10 @@ class OpalPuzzle(models.Model):
 
     def __str__(self) -> str:
         return self.slug
+
+    def save(self, *args: Any, **kwargs: Any):
+        self.solution = canonical_solution(self.solution)
+        super().save(*args, **kwargs)
 
     def get_absolute_url(self) -> str:
         return reverse("opal-show-puzzle", args=(self.hunt.slug, self.slug))

@@ -794,7 +794,7 @@ def test_opal_solutions_update(otis):
         "api",
         json={
             "action": "opal_solutions_update",
-            "solutions": [{"pk": puzzle.pk, "solution": "It is *GEM*."}],
+            "solutions": [{"pk": puzzle.pk, "solution": "It is *GEM*.\n"}],
         },
     )
     assert resp.json()["results"] == [
@@ -814,7 +814,7 @@ def test_opal_solutions_update(otis):
         "api",
         json={
             "action": "opal_solutions_update",
-            "solutions": [{"pk": puzzle.pk, "solution": "It is *GEM*."}],
+            "solutions": [{"pk": puzzle.pk, "solution": "It is *GEM*.\r\n"}],
         },
     )
     assert resp.json()["results"][0]["status"] == "unchanged"
