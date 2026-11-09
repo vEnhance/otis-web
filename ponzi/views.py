@@ -18,6 +18,7 @@ from otisweb.utils import AuthHttpRequest
 from rpg.levelsys import Meter, get_total_spades
 from rpg.models import Achievement, AchievementUnlock
 
+from .chart import locked_charts
 from .forms import InvestmentForm
 from .models import (
     INVESTMENT_COOLDOWN,
@@ -61,7 +62,9 @@ def scheme_detail(request: AuthHttpRequest, pk: int) -> HttpResponse:
         "scheme": scheme,
         "max_bid": MAX_INVESTMENT,
         "num_investors": scheme.investments.values("user").distinct().count(),
-        "investments": scheme.investments.filter(user=request.user),
+        "investments": scheme.investments.filter(user=request.user).prefetch_related(
+            "timers"
+        ),
         "spades_meter": Meter.SpadeMeter(
             round(get_total_spades(request.user), 2),
             dynamic_progress=profile is not None and profile.dynamic_progress,
@@ -73,8 +76,11 @@ def scheme_detail(request: AuthHttpRequest, pk: int) -> HttpResponse:
     }
     if request.user.is_superuser or scheme.has_collapsed:
         context["summary"] = scheme.summary()
-        context["all_investments"] = scheme.investments.select_related("user").order_by(
-            "created_at"
+        context["locked_charts"] = locked_charts(scheme)
+        context["all_investments"] = (
+            scheme.investments.select_related("user")
+            .prefetch_related("timers")
+            .order_by("created_at")
         )
     return TemplateResponse(request, "ponzi/scheme_detail.html", context)
 
@@ -101,9 +107,10 @@ def invest(request: AuthHttpRequest, pk: int) -> HttpResponse:
         elif amount > get_total_spades(request.user):
             messages.error(request, "You don't have enough spades for that.")
         else:
-            PonziInvestment.objects.create(
+            investment = PonziInvestment.objects.create(
                 scheme=scheme, user=request.user, amount=amount
             )
+            investment.start_timer(1, investment.created_at)
             messages.success(request, "Action recorded. Thanks for playing!")
     return HttpResponseRedirect(scheme.get_absolute_url())
 
@@ -151,9 +158,7 @@ def upgrade(request: AuthHttpRequest, pk: int) -> HttpResponse:
         elif not investment.can_upgrade:
             messages.error(request, "This bid can't be upgraded right now.")
         else:
-            investment.target_tier += 1
-            investment.upgraded_at = timezone.now()
-            investment.save()
+            investment.start_timer(investment.target_tier + 1, timezone.now())
             messages.success(request, "Upgrade has started!")
     return HttpResponseRedirect(scheme.get_absolute_url())
 

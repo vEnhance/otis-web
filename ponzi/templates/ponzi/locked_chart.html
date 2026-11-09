@@ -1,0 +1,33 @@
+<svg viewBox="0 0 {{ chart.width }} {{ chart.height }}"
+     class="w-100 mb-3"
+     style="max-width: 720px"
+     role="img"
+     aria-label="Locked spades and shortfall by {{ chart.axis_label }}"
+     data-ponzi-chart="{{ chart.data_id }}"
+     data-testid="{{ chart.dom_id }}">
+  <g font-size="15" fill="var(--bs-secondary-color)">
+  {% for tick in chart.y_ticks %}
+    <line x1="{{ chart.left }}" x2="{{ chart.right }}" y1="{{ tick.pos }}" y2="{{ tick.pos }}" stroke="var(--bs-border-color)" stroke-width="1" />
+    <text x="{{ chart.left|add:-8 }}" y="{{ tick.pos }}" text-anchor="end" dominant-baseline="middle">{{ tick.label }}</text>
+  {% endfor %}
+  {% for tick in chart.x_ticks %}
+    <text x="{{ tick.pos }}" y="{{ chart.bottom|add:20 }}" text-anchor="{{ tick.anchor }}">{{ tick.label }}</text>
+  {% endfor %}
+  <text x="{{ chart.center_x }}" y="{{ chart.height|add:-4 }}" text-anchor="middle">{{ chart.axis_label }}</text>
+  </g>
+  <path d="{{ chart.shortfall_path }}" fill="none" stroke="var(--bs-danger)" stroke-width="2" stroke-linejoin="round" />
+  <path d="{{ chart.path }}" fill="none" stroke="var(--bs-primary)" stroke-width="2" stroke-linejoin="round" />
+  <g class="ponzi-crosshair" visibility="hidden" pointer-events="none" font-size="16">
+  <line y1="{{ chart.top }}" y2="{{ chart.bottom }}" stroke="var(--bs-secondary-color)" stroke-dasharray="3 3" />
+  <circle r="5" fill="var(--bs-primary)" stroke="var(--bs-body-bg)" stroke-width="2" />
+  <circle r="5" fill="var(--bs-danger)" stroke="var(--bs-body-bg)" stroke-width="2" />
+  <g>
+  <rect rx="4" fill="var(--bs-body-bg)" fill-opacity="0.85" />
+  <text y="14" fill="var(--bs-body-color)" font-weight="bold"></text>
+  <text y="34" fill="var(--bs-body-color)"></text>
+  <text y="54" fill="var(--bs-body-color)"></text>
+  </g>
+  </g>
+  <rect class="ponzi-hover-area" x="{{ chart.left }}" y="{{ chart.top }}" width="{{ chart.plot_width }}" height="{{ chart.plot_height }}" fill="transparent" />
+</svg>
+{{ chart.hover_data|json_script:chart.data_id }}

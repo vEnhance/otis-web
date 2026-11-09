@@ -16,7 +16,7 @@
     <h1>Before</h1>
     <p>
       Currently, you are <b>Level {% level level_number prestige %}</b>
-      with the title <b>{% level_name level_name prestige %}</b>.
+      with the title <b>{{ level_name }}</b>.
     </p>
     <div class="container">
       <div class="row">
@@ -28,11 +28,11 @@
     </div>
     <hr />
     <div data-testid="prestige-preview">
-      <h1>After (+1<span class="otis-prestige">✷</span>)</h1>
+      <h1>After (+1<span class="otis-prestige" role="img" aria-label="Prestige star"></span>)</h1>
       <p>
         After Prestige, you would be
         <b>Level {% level preview.level_number preview.prestige %}</b>,
-        with the title <b>{% level_name preview.level_name preview.prestige %}</b>.
+        with the title <b>{{ preview.level_name }}</b>.
       </p>
       <div class="container">
         <div class="row">
@@ -58,7 +58,7 @@
   {% else %}
     <h2>
       About Prestige
-      <span class="otis-prestige">✷</span>
+      <span class="otis-prestige" role="img" aria-label="Prestige star"></span>
     </h2>
     <p>
       Do you miss the beginning of OTIS when you could go up ten levels

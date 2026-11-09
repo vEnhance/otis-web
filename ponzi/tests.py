@@ -3,6 +3,8 @@ from decimal import Decimal
 
 import pytest
 from django.contrib.auth.models import Group, User
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from freezegun import freeze_time
 
 from core.factories import UserFactory
@@ -12,6 +14,7 @@ from rpg.factories import QuestCompleteFactory
 from rpg.levelsys import get_level_info, get_student_rows
 from rpg.models import Achievement, AchievementUnlock
 
+from .chart import locked_charts, nice_step
 from .factories import PonziInvestmentFactory, PonziSchemeFactory
 from .models import PonziInvestment, PonziScheme
 
@@ -184,7 +187,7 @@ def test_upgrade_to_tier_three(otis, scheme: PonziScheme):
         otis.post_30x("ponzi-upgrade", investment.pk)
         investment.refresh_from_db()
         assert investment.target_tier == 2
-        assert investment.upgraded_at == at(15)
+        assert investment.current_timer.started_at == at(15)
         assert investment.tier == 1
         otis.post_30x("ponzi-withdraw", investment.pk)
         investment.refresh_from_db()
@@ -254,6 +257,10 @@ def test_collapse(otis, scheme: PonziScheme):
         "total_paid": Decimal("10.67"),
         "num_outstanding": 1,
         "total_outstanding": 10,
+        "num_idle": 1,
+        "total_idle": 10,
+        "num_locked": 0,
+        "total_locked": None,
         "pool": Decimal("9.33"),
     }
 
@@ -334,7 +341,11 @@ def test_admin_sees_all_bids_before_collapse(otis, scheme: PonziScheme):
         resp = otis.get_ok("ponzi-scheme", scheme.pk)
     assert list(resp.context["all_investments"]) == [first, second]
     assert resp.context["summary"]["pool"] == 20
+    assert resp.context["locked_charts"].history.points[-1].locked == 20
     otis.assert_testid(resp, "ponzi-summary")
+    otis.assert_testid(resp, "ponzi-chart-history")
+    otis.assert_testid(resp, "ponzi-chart-forecast")
+    otis.assert_testid(resp, "ponzi-collapse-eta")
     otis.assert_testid(resp, "ponzi-all-bids")
 
 
@@ -345,3 +356,201 @@ def test_unverified_users_are_denied(otis, scheme: PonziScheme):
     otis.get_denied("ponzi-scheme", scheme.pk)
     otis.post_denied("ponzi-invest", scheme.pk, data={"amount": 1})
     assert not PonziInvestment.objects.exists()
+
+
+@pytest.mark.django_db
+def test_summary_splits_idle_and_locked(scheme: PonziScheme):
+    with freeze_time(at(0)):
+        PonziInvestmentFactory.create(scheme=scheme, amount=3)  # idle by day 20
+        PonziInvestmentFactory.create(
+            scheme=scheme, amount=4, target_tier=2, upgraded_at=at(10)
+        )  # upgrade restarts the timer, so locked
+        PonziInvestmentFactory.create(
+            scheme=scheme, amount=5, payout=Decimal(5), withdrawn_at=at(15)
+        )  # paid out, so neither
+    with freeze_time(at(12)):
+        PonziInvestmentFactory.create(scheme=scheme, amount=6)  # locked
+    with freeze_time(at(20)):
+        summary = scheme.summary()
+        locked = set(scheme.locked_investments())
+        assert all(
+            inv.is_growing == (inv in locked) for inv in scheme.investments.all()
+        )
+    assert (summary["num_outstanding"], summary["total_outstanding"]) == (3, 13)
+    assert (summary["num_idle"], summary["total_idle"]) == (1, 3)
+    assert (summary["num_locked"], summary["total_locked"]) == (2, 10)
+
+
+def chart_points(chart) -> list[tuple[float, int, Decimal]]:
+    """Each point as (day since START, locked, shortfall)."""
+    days = datetime.timedelta(days=1)
+    return [((p.when - START) / days, p.locked, p.shortfall) for p in chart.points]
+
+
+@pytest.mark.django_db
+def test_locked_charts_points(scheme: PonziScheme):
+    with freeze_time(at(0)):
+        PonziInvestmentFactory.create(scheme=scheme, amount=1)
+    with freeze_time(at(8)):
+        PonziInvestmentFactory.create(scheme=scheme, amount=2)
+        PonziInvestmentFactory.create(scheme=scheme, amount=3)
+    with freeze_time(at(18)):
+        PonziInvestmentFactory.create(scheme=scheme, amount=4)
+    with freeze_time(at(20)):
+        charts = locked_charts(scheme)
+    # each tier I bid adds 6.7% profit once it matures
+    assert chart_points(charts.history) == [
+        (0, 1, Decimal(0)),
+        (8, 6, Decimal(0)),  # two bids placed
+        (14, 5, Decimal("0.07")),  # the first bid matures
+        (18, 9, Decimal("0.07")),
+    ]
+    assert chart_points(charts.forecast) == [
+        (20, 9, Decimal("0.07")),  # now
+        (22, 4, Decimal("0.40")),  # the day-8 bids mature
+        (32, 0, Decimal("0.67")),
+    ]
+    assert charts.collapse_at == at(32)
+    assert [t.label for t in charts.forecast.x_ticks] == [
+        "now",
+        "+3.5d",
+        "+7d",
+        "+10.5d",
+        "+14d",
+    ]
+    # both charts share a y-axis so they line up
+    assert charts.history.y_ticks == charts.forecast.y_ticks
+
+
+@pytest.mark.django_db
+def test_locked_charts_reconstruct_upgrades(scheme: PonziScheme):
+    with freeze_time(at(0)):
+        PonziInvestmentFactory.create(
+            scheme=scheme, amount=10, target_tier=3, upgraded_at=at(30)
+        )
+    with freeze_time(at(40)):
+        charts = locked_charts(scheme)
+    # the tier II timer is guessed to start on day 14, as the first one ends
+    assert chart_points(charts.history) == [
+        (0, 10, Decimal(0)),
+        (28, 0, Decimal("1.40")),  # matures at tier II
+        (30, 10, Decimal(0)),  # upgraded again
+    ]
+    assert chart_points(charts.forecast) == [
+        (40, 10, Decimal(0)),
+        (44, 0, Decimal("3.40")),  # matures at tier III
+    ]
+    assert charts.collapse_at == at(44)
+
+
+@pytest.mark.django_db
+def test_locked_charts_collapse_now(scheme: PonziScheme):
+    with freeze_time(at(0)):
+        PonziInvestmentFactory.create(
+            scheme=scheme, amount=10, payout=Decimal("13.40"), withdrawn_at=at(0)
+        )
+    with freeze_time(at(1)):
+        PonziInvestmentFactory.create(scheme=scheme, amount=2)
+        charts = locked_charts(scheme)
+    assert chart_points(charts.forecast)[0] == (1, 2, Decimal("3.40"))
+    assert charts.collapse_at == at(1)
+
+
+@pytest.mark.django_db
+def test_locked_charts_no_collapse_without_profit(scheme: PonziScheme):
+    with freeze_time(at(0)):
+        PonziInvestmentFactory.create(
+            scheme=scheme, amount=10, payout=Decimal(10), withdrawn_at=at(0)
+        )
+    with freeze_time(at(1)):
+        charts = locked_charts(scheme)
+    assert charts.collapse_at is None
+
+
+@pytest.mark.django_db
+def test_collapsed_scheme_has_history_but_no_forecast(otis, scheme: PonziScheme):
+    with freeze_time(at(0)):
+        PonziInvestmentFactory.create(scheme=scheme, amount=4)
+    scheme.collapsed_at = at(15)
+    scheme.save()
+    otis.login(verified_user())
+    with freeze_time(at(20)):
+        resp = otis.get_ok("ponzi-scheme", scheme.pk)
+    charts = resp.context["locked_charts"]
+    assert charts.forecast is None
+    assert charts.history.end == at(15)
+    otis.assert_testid(resp, "ponzi-chart-history")
+    otis.assert_no_testid(resp, "ponzi-chart-forecast")
+    otis.assert_no_testid(resp, "ponzi-collapse-eta")
+
+
+@pytest.mark.django_db
+def test_locked_charts_empty(otis, scheme: PonziScheme):
+    charts = locked_charts(scheme)
+    assert charts.history is None
+    assert charts.forecast is None
+    otis.login(UserFactory.create(is_staff=True, is_superuser=True))
+    resp = otis.get_ok("ponzi-scheme", scheme.pk)
+    otis.assert_no_testid(resp, "ponzi-chart-history")
+
+
+@pytest.mark.django_db
+def test_invest_and_upgrade_log_timers(otis, scheme: PonziScheme):
+    otis.login(verified_user())
+    with freeze_time(at(0)):
+        otis.post_30x("ponzi-invest", scheme.pk, data={"amount": 5})
+    investment = PonziInvestment.objects.get()
+    with freeze_time(at(15)):
+        otis.post_30x("ponzi-upgrade", investment.pk)
+    timers = list(investment.timers.values_list("tier", "started_at", "inferred"))
+    assert timers == [(1, at(0), False), (2, at(15), False)]
+
+
+@pytest.mark.parametrize(
+    ("total", "step"), [(0, 1), (3, 1), (9, 5), (40, 10), (75, 20), (1000, 500)]
+)
+def test_nice_step(total: int, step: int):
+    assert nice_step(total) == step
+
+
+def count_queries(otis, *args) -> int:
+    otis.get_ok(*args)  # warm up per-request caches such as content types
+    with CaptureQueriesContext(connection) as captured:
+        otis.get_ok(*args)
+    return len(captured.captured_queries)
+
+
+def add_mixed_bids(scheme: PonziScheme, n: int) -> None:
+    """Growing, idle, upgraded and withdrawn bids, so every code path that
+    reads a bid's timers gets exercised."""
+    for i in range(n):
+        with freeze_time(at(i)):
+            PonziInvestmentFactory.create(
+                scheme=scheme,
+                target_tier=1 + i % 3,
+                upgraded_at=at(i + 15) if i % 3 else None,
+                withdrawn_at=at(40) if i % 4 == 0 else None,
+                payout=Decimal(11) if i % 4 == 0 else None,
+            )
+
+
+@pytest.mark.django_db
+def test_scheme_page_queries_do_not_grow_with_bids(otis, scheme: PonziScheme):
+    otis.login(UserFactory.create(is_staff=True, is_superuser=True))
+    add_mixed_bids(scheme, 3)
+    with freeze_time(at(50)):
+        few = count_queries(otis, "ponzi-scheme", scheme.pk)
+    add_mixed_bids(scheme, 12)
+    with freeze_time(at(50)):
+        many = count_queries(otis, "ponzi-scheme", scheme.pk)
+    assert many == few
+
+
+@pytest.mark.django_db
+def test_investment_admin_queries_do_not_grow_with_bids(otis, scheme: PonziScheme):
+    otis.login(UserFactory.create(is_staff=True, is_superuser=True))
+    add_mixed_bids(scheme, 3)
+    few = count_queries(otis, "admin:ponzi_ponziinvestment_changelist")
+    add_mixed_bids(scheme, 12)
+    many = count_queries(otis, "admin:ponzi_ponziinvestment_changelist")
+    assert many == few

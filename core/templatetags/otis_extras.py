@@ -20,35 +20,46 @@ from django.utils.timezone import template_localtime  # type: ignore
 from core.models import Unit, UserProfile
 from core.utils import find_profile
 from rpg.levelsys import BONUS_D_UNIT, BONUS_Z_UNIT
-from rpg.models import Achievement
+from rpg.models import Achievement, PrestigeContract
 
 register = template.Library()
 
 
-def with_prestige_stars(text: str | int, prestige: int) -> SafeString:
+@register.simple_tag
+def level(level: int, prestige: int) -> SafeString:
     """Built in Python rather than a template because any whitespace a formatter
-    adds between the text and the stars would show up on the page."""
+    adds between the level and the stars would show up on the page."""
     if not prestige:
-        return format_html('<span class="otis-level">{}</span>', text)
+        return format_html('<span class="otis-level">{}</span>', level)
     return format_html(
         '<span class="otis-level">{}<span class="otis-prestige" tabindex="0" '
-        'data-testid="prestige-stars" title="Prestige {}">{}</span></span>',
-        text,
+        'role="img" aria-label="Prestige {}" style="--stars: {}" '
+        'data-testid="prestige-stars" title="Prestige {}"></span></span>',
+        level,
         prestige,
-        "✷" * prestige,
+        prestige,
+        prestige,
     )
 
 
 @register.simple_tag
-def level(level: int, prestige: int) -> SafeString:
-    """Render a level number with one star per prestige contract."""
-    return with_prestige_stars(level, prestige)
-
-
-@register.simple_tag
-def level_name(name: str, prestige: int) -> SafeString:
-    """Render a level name with one star per prestige contract."""
-    return with_prestige_stars(name, prestige)
+def header_prestige_stars(user: User | AnonymousUser) -> str:
+    if not user.is_authenticated:
+        return ""
+    try:
+        prestige = PrestigeContract.objects.filter(user=user).count()
+    except DatabaseError:
+        return ""
+    if not prestige:
+        return ""
+    return format_html(
+        '<h1 id="header-prestige"><span class="otis-prestige" tabindex="0" '
+        'role="img" aria-label="Prestige {}" style="--stars: {}" '
+        'data-testid="header-prestige-stars" title="Prestige {}"></span></h1>',
+        prestige,
+        prestige,
+        prestige,
+    )
 
 
 @register.simple_tag

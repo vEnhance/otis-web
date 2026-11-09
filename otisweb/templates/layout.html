@@ -1,14 +1,17 @@
 {% extends "base.html" %}
+{% load otis_extras %}
 {% load static %}
 {% load django_bootstrap5 %}
 {% block base-content %}
   <div class="container">
     <div class="row align-items-center">
       <div class="col-12">
-        <div id="header">
+        <div id="header"
+             class="d-flex align-items-baseline justify-content-between">
           <a href="{% url "top" %}">
             <h1 id="sitetitle">⛵'S-WEB</h1>
           </a>
+          {% header_prestige_stars request.user %}
         </div>
       </div>
     </div>
