@@ -11,7 +11,7 @@ from tubes.factories import (
 )
 from tubes.models import OIMEComment, OIMEFight, OIMEProposal
 
-from .helpers import verified_contributor, verified_staff
+from .helpers import verified_admin, verified_contributor, verified_staff
 
 # ---------------------------------------------------------------------------
 # Proposal creation / editing
@@ -558,3 +558,18 @@ def test_update_can_return_a_proposal_to_draft(otis):
     )
     proposal.refresh_from_db()
     assert proposal.is_draft is True
+
+
+@pytest.mark.django_db
+def test_admin_link_only_for_superuser(otis):
+    user, contributor = verified_contributor()
+    proposal = OIMEProposalFactory.create(author=contributor)
+    otis.login(user)
+    otis.assert_no_testid(
+        otis.get_20x("oime-proposal-detail", proposal.pk), "proposal-admin-link"
+    )
+    admin, _ = verified_admin(casual_mode=True)
+    otis.login(admin)
+    otis.assert_testid(
+        otis.get_20x("oime-proposal-detail", proposal.pk), "proposal-admin-link"
+    )

@@ -360,6 +360,29 @@ def test_eic_desk_buckets(otis):
 
 
 @pytest.mark.django_db
+def test_eic_desk_separates_archived(otis):
+    admin, _ = verified_admin()
+    year = OIMEYearFactory.create()
+    live = OIMESelectionFactory.create(year=year)
+    archived_chosen = OIMESelectionFactory.create(
+        year=year, proposal=OIMEProposalFactory.create(archived=True)
+    )
+    archived_deferred = OIMESelectionFactory.create(
+        year=year,
+        status="SEL_DEFERRED",
+        proposal=OIMEProposalFactory.create(archived=True),
+    )
+    otis.login(admin)
+    desk = otis.get_20x("oime-year-detail", year.pk).context["desk"]
+    assert desk["chosen_eic"] == [live]
+    assert desk["deferred_proposals"] == []
+    assert set(desk["archived_proposals"]) == {
+        archived_chosen.proposal,
+        archived_deferred.proposal,
+    }
+
+
+@pytest.mark.django_db
 def test_eic_desk_splits_on_who_is_blocking(otis):
     admin, _ = verified_admin()
     year = OIMEYearFactory.create()

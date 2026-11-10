@@ -60,7 +60,11 @@
       </div>
       <p class="text-muted">
         Written by {{ proposal.credit_display }}
-        on {% timestamp proposal.created_at "date" %}
+        on {% timestamp proposal.created_at "date" %}.
+        {% if request.user.is_superuser %}
+          <a href="{% url "admin:tubes_oimeproposal_change" proposal.pk %}"
+             data-testid="proposal-admin-link">Admin</a>
+        {% endif %}
       </p>
     </div>
     <div class="d-flex gap-2">
