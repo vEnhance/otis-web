@@ -78,6 +78,21 @@
     </div>
   </div>
   {# ---- Problem statement ---- #}
+  {% if is_chosen %}
+    <div class="alert alert-warning" data-testid="proposal-outdated-note">
+      This problem was selected for a mock AIME,
+      so the problem and solution below may be outdated.
+      The latest version is on
+      {% if overleaf_url %}
+        <a href="{{ overleaf_url }}"
+           target="_blank"
+           rel="noopener"
+           data-testid="proposal-outdated-overleaf">Overleaf</a>.
+      {% else %}
+        Overleaf.
+      {% endif %}
+    </div>
+  {% endif %}
   <div class="card mb-4">
     <div class="card-header fw-bold">Problem Statement</div>
     <div class="card-body">
