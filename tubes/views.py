@@ -1035,6 +1035,17 @@ def proposal_detail(request: HttpRequest, pk: int) -> HttpResponse:
         }
         for sel in selections
     ]
+    # A chosen problem is edited in Overleaf.
+    # Warn every viewer; link Overleaf only for those it is shared with.
+    chosen = [sel for sel in all_selections if not sel.is_deferred]
+    overleaf_url = next(
+        (
+            sel.year.overleaf_url
+            for sel in chosen
+            if sel.year.overleaf_url and (is_staff or sel.editor == contributor)
+        ),
+        None,
+    )
     # An unreviewed problem gets the same card for the current year, with no
     # selection behind it; its buttons write the first verdict.
     current_year = OIMEYear.current() if is_eic else None
@@ -1072,6 +1083,8 @@ def proposal_detail(request: HttpRequest, pk: int) -> HttpResponse:
             "frozen": proposal.is_frozen,
             "can_edit": _can_edit(request, proposal, contributor),
             "selection_cards": cards,
+            "is_chosen": bool(chosen),
+            "overleaf_url": overleaf_url,
             "can_triage": can_triage,
             "status_choices": OIMESelection.STATUS_CHOICES,
             **ctx,

@@ -990,3 +990,67 @@ def test_bulk_edit_bulk_save(otis):
     assert first.description == "$3n$ and $4n$"
     assert first.editor == editor
     assert second.description == ""
+
+
+@pytest.mark.django_db
+def test_chosen_problem_warns_outdated_with_overleaf_for_editor(otis):
+    user, editor = verified_contributor()
+    selection = OIMESelectionFactory.create(
+        editor=editor,
+        status="SEL_EDITING",
+        year=closed_year(overleaf_url="https://www.overleaf.com/project/x"),
+    )
+    OIMEFightFactory.create(
+        contributor=editor, proposal=selection.proposal, status="OIME_FAIL"
+    )
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-detail", selection.proposal.pk)
+    assert resp.context["is_chosen"] is True
+    assert resp.context["overleaf_url"] == "https://www.overleaf.com/project/x"
+    otis.assert_testid(resp, "proposal-outdated-overleaf")
+
+
+@pytest.mark.django_db
+def test_chosen_problem_warns_author_without_overleaf(otis):
+    user, author = verified_contributor()
+    selection = OIMESelectionFactory.create(
+        proposal__author=author,
+        year=closed_year(overleaf_url="https://www.overleaf.com/project/x"),
+    )
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-detail", selection.proposal.pk)
+    assert resp.context["is_chosen"] is True
+    assert resp.context["overleaf_url"] is None
+    otis.assert_testid(resp, "proposal-outdated-note")
+    otis.assert_no_testid(resp, "proposal-outdated-overleaf")
+
+
+@pytest.mark.django_db
+def test_deferred_problem_has_no_outdated_warning(otis):
+    user, me = verified_staff()
+    selection = OIMESelectionFactory.create(status="SEL_DEFERRED")
+    OIMEFightFactory.create(
+        contributor=me, proposal=selection.proposal, status="OIME_FAIL"
+    )
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-detail", selection.proposal.pk)
+    assert resp.context["is_chosen"] is False
+    otis.assert_no_testid(resp, "proposal-outdated-note")
+
+
+@pytest.mark.django_db
+def test_chosen_problem_warns_uninvolved_testsolver(otis):
+    user, me = verified_contributor()
+    selection = OIMESelectionFactory.create(
+        editor=OIMEContributorFactory.create(),
+        year=closed_year(overleaf_url="https://www.overleaf.com/project/x"),
+    )
+    OIMEFightFactory.create(
+        contributor=me, proposal=selection.proposal, status="OIME_FAIL"
+    )
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-detail", selection.proposal.pk)
+    assert resp.context["selection_cards"] == []
+    assert resp.context["is_chosen"] is True
+    assert resp.context["overleaf_url"] is None
+    otis.assert_testid(resp, "proposal-outdated-note")
