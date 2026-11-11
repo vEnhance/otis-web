@@ -62,6 +62,7 @@
         Written by {{ proposal.credit_display }}
         on {% timestamp proposal.created_at "date" %}.
         {% if request.user.is_superuser %}
+          <br />
           <a href="{% url "admin:tubes_oimeproposal_change" proposal.pk %}"
              data-testid="proposal-admin-link">Open in Django admin</a>
         {% endif %}
