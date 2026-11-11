@@ -1,6 +1,7 @@
 {% comment %}
   A slim, collapsible list of proposals for the editor-in-chief's desk. Each
   proposal carries `upvote_count` and `stats` from `_attach_stats`.
+  An optional `note` is shown above the table.
 {% endcomment %}
 <h3 class="mt-4">
   <a class="oime-table-toggle link-dark text-decoration-none {% if not show %}collapsed{% endif %}"
@@ -12,6 +13,7 @@
 </h3>
 <div class="collapse {% if show %}show{% endif %}"
      id="oime-desk-{{ title|slugify }}">
+  {% if note %}<p class="text-muted">{{ note }}</p>{% endif %}
   {% if proposals %}
     <table class="table table-striped otis-sortable">
       <thead class="table-dark">

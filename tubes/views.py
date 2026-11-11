@@ -1540,17 +1540,20 @@ def _year_desk(year: OIMEYear) -> dict[str, Any]:
     selections = list(
         year.selections.select_related("proposal", "proposal__author", "editor")
     )
-    chosen = [sel for sel in selections if not sel.is_deferred]
-    deferred = [sel for sel in selections if sel.is_deferred]
+    archived = [sel.proposal for sel in selections if sel.proposal.archived]
+    live = [sel for sel in selections if not sel.proposal.archived]
+    chosen = [sel for sel in live if not sel.is_deferred]
+    deferred = [sel for sel in live if sel.is_deferred]
     pool = list(_unreviewed(year).select_related("author"))
-    # Only the pool and deferred tables show stats; the chosen tables do not.
-    _attach_stats([sel.proposal for sel in deferred] + pool)
+    # Only the pool, deferred and archived tables show stats; the chosen tables do not.
+    _attach_stats([sel.proposal for sel in deferred] + pool + archived)
     return {
         "year": year,
         "chosen_eic": [sel for sel in chosen if sel.blocked_on == "EIC"],
         "chosen_others": [sel for sel in chosen if sel.blocked_on != "EIC"],
         "deferred_proposals": [sel.proposal for sel in deferred],
         "pool": pool,
+        "archived_proposals": archived,
     }
 
 

@@ -26,4 +26,5 @@
   {% include "tubes/components/chosen_table.html" with title="Waiting on others" selections=desk.chosen_others empty="Nothing here." %}
   {% include "tubes/components/desk_table.html" with title="Pool" proposals=desk.pool testid="pool-row" show=True %}
   {% include "tubes/components/desk_table.html" with title="Deferred" proposals=desk.deferred_proposals testid="deferred-row" show=False %}
+  {% include "tubes/components/desk_table.html" with title="Archived" proposals=desk.archived_proposals testid="archived-row" show=False note="Problems appear in this section if they have a selection status for the year, but are now archived." %}
 {% endblock layout-content %}
