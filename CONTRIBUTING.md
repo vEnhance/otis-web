@@ -14,6 +14,8 @@ If you prefer videos to text, see:
 
 <https://youtu.be/W27XcqeXp20>
 
+TODO: link updated tutorial
+
 ## Getting started
 
 ### Pre-reading
@@ -28,33 +30,25 @@ pick up Vim later.)
 
 ### Fork
 
-Before you get started,
-you will actually want to create your own _fork_ of OTIS-WEB.
+Before you get started, you will actually want to create your own _fork_ of OTIS-WEB.
 This is a bit counter-intuitive,
 but essentially the reason is that I own OTIS-WEB,
 so if you want to make edits of any sort,
 it has to be on a _copy_ owned by you first --- that's a fork.
 
-Follow the
-[fork instructions here](https://docs.github.com/en/get-started/quickstart/fork-a-repo).
+Follow the [fork instructions here](https://docs.github.com/en/get-started/quickstart/fork-a-repo).
 When you're done, you should have your own copy
-of OTIS-WEB owned by you,
-that you can edit however you want.
+of OTIS-WEB owned by you, that you can edit however you want.
 
 ### Installation
 
-Follow the [README](README.md) instructions.
+Follow the [README](README.md) instructions (`make install`, etc.).
 
 ### Claiming tasks
 
 If you haven't already, create a free account on [GitHub](https://github.com/).
-
-The list of things to-do is sorted with two different views:
-
-- The [Projects](https://github.com/vEnhance/otis-web/projects?query=is%3Aopen+sort%3Acreated-asc)
-  view shows the set of tasks to do sorted by bounty.
-- The [issues page](https://github.com/vEnhance/otis-web/issues)
-  lists all the issues, including those with no bounty set yet.
+The [issues page](https://github.com/vEnhance/otis-web/issues)
+lists issues you might be interested in.
 
 To claim a task, you should go to the corresponding issue
 and leave a comment that you'd like to work on it.
@@ -89,8 +83,7 @@ Here are some details about what is checked:
 
 ### Style
 
-Your code should conform to the style of the rest of the OTIS,
-which follows Google's standards.
+Your code should conform to the style of the rest of the OTIS.
 
 - The codebase uses `ruff` for linting and formatting of Python files,
   to ensure the uniformity of style across the repository.
@@ -100,6 +93,8 @@ To preserve your sanity you may optionally configure
 your editor to automatically apply these formatters after each save:
 if you're using a sufficiently sophisticated editor,
 you can probably configure it to do so.
+However, if you ran `make install` to install the pre-commit hooks,
+`git` will automatically run these formatters before you can actually commit.
 
 ### Unit testing
 
@@ -147,18 +142,6 @@ and the exact specification can be read in `.github/workflows/django.yml`.
 If this is your first time doing this sort of thing
 it's likely that at least one of these checks will fail.
 Don't freak out; I'll help you through getting the tests to pass.
-
-## For people with some software experience
-
-### Pre-commit hooks
-
-You can use `prek` to run pre-commit hooks:
-
-```bash
-uv run prek install
-```
-
-This will install hooks that run the formatters and linters before each commit.
 
 ## LLM usage for pull requests
 
