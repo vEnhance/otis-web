@@ -29,8 +29,6 @@ from .models import (
     PonziScheme,
 )
 
-PONZI_COLLAPSE_EFFECT_ID = "ponzi-collapse"
-
 
 class PonziSchemeList(VerifiedRequiredMixin, ListView[PonziScheme]):
     model = PonziScheme
@@ -126,16 +124,14 @@ def lock_own_investment(
     return scheme, investment
 
 
-def award_collapse_diamond(user: User) -> bool:
-    achievement, _ = Achievement.objects.select_for_update().get_or_create(
-        special_effect_id=PONZI_COLLAPSE_EFFECT_ID,
-        defaults={
-            "name": "Ponzi Popper",
-            "description": (
-                "Be the player whose withdrawal causes a Ponzi scheme to collapse."
-            ),
-        },
-    )
+def award_collapse_diamond(user: User) -> Achievement | None:
+    try:
+        achievement = Achievement.objects.select_for_update().get(
+            special_effect_id="ponzi"
+        )
+    except Achievement.DoesNotExist:
+        return None
+
     _, was_created = AchievementUnlock.objects.get_or_create(
         user=user,
         achievement=achievement,
@@ -145,7 +141,7 @@ def award_collapse_diamond(user: User) -> bool:
             ).exists()
         },
     )
-    return was_created
+    return achievement if was_created else None
 
 
 @verified_required
@@ -177,8 +173,10 @@ def withdraw(request: AuthHttpRequest, pk: int) -> HttpResponse:
             scheme.collapsed_by = request.user
             scheme.save()
             messages.error(request, "The scheme has collapsed!")
-            if award_collapse_diamond(request.user):
-                messages.success(request, "You earned the Ponzi Popper diamond!")
+            if (achievement := award_collapse_diamond(request.user)) is not None:
+                messages.success(
+                    request, f"You earned the {achievement.name} diamond!"
+                )
         else:
             investment.payout = payout
             investment.withdrawn_at = timezone.now()
