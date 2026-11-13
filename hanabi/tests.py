@@ -28,7 +28,7 @@ def test_contest():
     assert contest.create_table_url == (
         r"https://hanab.live/create-table?name=%21seed+otis1"
         r"&variantName=Duck+%285+Suits%29"
-        r"&timed=true&timeBase=180&timePerTurn=30"
+        r"&timed=true&timeBaseSeconds=180&timePerTurnSeconds=30"
     )
     assert contest.hanab_stats_page_url == "https://hanab.live/seed/p3v55sotis1"
     assert contest.max_score == 25
