@@ -10,8 +10,9 @@ from freezegun import freeze_time
 from core.factories import UserFactory
 from roster.factories import StudentFactory
 from roster.models import Student
-from rpg.factories import QuestCompleteFactory
+from rpg.factories import AchievementFactory, QuestCompleteFactory
 from rpg.levelsys import get_level_info, get_student_rows
+from rpg.models import AchievementUnlock
 
 from .chart import locked_charts, nice_step
 from .factories import PonziInvestmentFactory, PonziSchemeFactory
@@ -212,6 +213,9 @@ def test_upgrade_to_tier_three(otis, scheme: PonziScheme):
 def test_collapse(otis, scheme: PonziScheme):
     alice = verified_user()
     bob = verified_user()
+    achievement = AchievementFactory.create(
+        name="Scheme collapse diamond", special_effect_id="ponzi"
+    )
     with freeze_time(at(0)):
         alice_inv = PonziInvestmentFactory.create(scheme=scheme, user=alice, amount=10)
         bob_inv = PonziInvestmentFactory.create(scheme=scheme, user=bob, amount=10)
@@ -228,6 +232,12 @@ def test_collapse(otis, scheme: PonziScheme):
     assert scheme.collapsed_by == bob
     assert bob_inv.payout is None
     assert bob_inv.withdrawn_at is None
+    assert AchievementUnlock.objects.filter(
+        user=bob, achievement=achievement, is_first_obtain=True
+    ).exists()
+    assert not AchievementUnlock.objects.filter(
+        user=alice, achievement=achievement
+    ).exists()
 
     with freeze_time(at(40)):
         otis.login(bob)
@@ -255,6 +265,21 @@ def test_collapse(otis, scheme: PonziScheme):
         "total_locked": None,
         "pool": Decimal("9.33"),
     }
+
+
+@pytest.mark.django_db
+def test_collapse_without_configured_diamond(otis, scheme: PonziScheme):
+    bob = verified_user()
+    with freeze_time(at(0)):
+        investment = PonziInvestmentFactory.create(scheme=scheme, user=bob, amount=10)
+
+    otis.login(bob)
+    with freeze_time(at(15)):
+        otis.post_30x("ponzi-withdraw", investment.pk)
+
+    scheme.refresh_from_db()
+    assert scheme.collapsed_by == bob
+    assert not AchievementUnlock.objects.exists()
 
 
 @pytest.mark.django_db

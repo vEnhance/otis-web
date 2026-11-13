@@ -16,6 +16,7 @@ from otisweb.decorators import verified_required
 from otisweb.mixins import VerifiedRequiredMixin
 from otisweb.utils import AuthHttpRequest
 from rpg.levelsys import Meter, get_total_spades
+from rpg.models import Achievement, AchievementUnlock
 
 from .chart import locked_charts
 from .forms import InvestmentForm
@@ -123,6 +124,26 @@ def lock_own_investment(
     return scheme, investment
 
 
+def award_collapse_diamond(user: User) -> Achievement | None:
+    try:
+        achievement = Achievement.objects.select_for_update().get(
+            special_effect_id="ponzi"
+        )
+    except Achievement.DoesNotExist:
+        return None
+
+    _, was_created = AchievementUnlock.objects.get_or_create(
+        user=user,
+        achievement=achievement,
+        defaults={
+            "is_first_obtain": not AchievementUnlock.objects.filter(
+                achievement=achievement
+            ).exists()
+        },
+    )
+    return achievement if was_created else None
+
+
 @verified_required
 @require_POST
 def upgrade(request: AuthHttpRequest, pk: int) -> HttpResponse:
@@ -152,6 +173,8 @@ def withdraw(request: AuthHttpRequest, pk: int) -> HttpResponse:
             scheme.collapsed_by = request.user
             scheme.save()
             messages.error(request, "The scheme has collapsed!")
+            if (achievement := award_collapse_diamond(request.user)) is not None:
+                messages.success(request, f"You earned the {achievement.name} diamond!")
         else:
             investment.payout = payout
             investment.withdrawn_at = timezone.now()
