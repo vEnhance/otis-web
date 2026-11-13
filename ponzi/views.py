@@ -174,9 +174,7 @@ def withdraw(request: AuthHttpRequest, pk: int) -> HttpResponse:
             scheme.save()
             messages.error(request, "The scheme has collapsed!")
             if (achievement := award_collapse_diamond(request.user)) is not None:
-                messages.success(
-                    request, f"You earned the {achievement.name} diamond!"
-                )
+                messages.success(request, f"You earned the {achievement.name} diamond!")
         else:
             investment.payout = payout
             investment.withdrawn_at = timezone.now()
