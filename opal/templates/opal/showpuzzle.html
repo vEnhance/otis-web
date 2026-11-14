@@ -47,6 +47,11 @@
             <br />
             <a href="{% url "opal-finish" hunt.slug puzzle.slug %}">It was worth {{ puzzle.achievement.diamonds }}♦️</a>.
           {% endif %}
+          {% if puzzle.solution_rendered %}
+            <br />
+            <a href="{% url "opal-show-solution" hunt.slug puzzle.slug %}"
+               data-testid="opal-solution-link">Read the solution</a>.
+          {% endif %}
         </div>
       {% elif not solved %}
         <div class="alert alert-danger">You have run out of guesses for this puzzle.</div>

@@ -19,5 +19,9 @@
   <p class="text-center">
     <a href="{{ hunt.get_absolute_url }}" class="btn btn-primary">Back to hunt</a>
     <a href="{{ puzzle.get_absolute_url }}" class="btn btn-secondary">Back to puzzle</a>
+    {% if puzzle.solution_rendered %}
+      <a href="{% url "opal-show-solution" hunt.slug puzzle.slug %}"
+         class="btn btn-outline-primary">Read the solution</a>
+    {% endif %}
   </p>
 {% endblock layout-content %}
