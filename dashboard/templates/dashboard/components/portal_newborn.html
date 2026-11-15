@@ -48,16 +48,13 @@
     Once you are happy with your selection, you may
     finalize your choices.
     <br />
-    <form action="{% url 'finalize' student.pk %}" method="post">
-      {% csrf_token %}
-      <input type="submit" class="btn btn-warning" value="Finalize" />
-    </form>
+    <a href="{% url 'finalize' student.pk %}" class="btn btn-warning">Finalize</a>
     <br />
-    <i>Warning:</i> once you click this link,
+    <i>Warning:</i> once you confirm your starting units,
     your decision is complete and you cannot directly make further changes.
     However, the <b>unit petition</b> system (linked below) becomes enabled,
     and you can request changes there.
-    Moreover, the <b>first three</b> of the units above will be unlocked to start.
+    You will be asked to pick <b>three</b> of your units to unlock to start.
     Use the "Manage Units" button to request more (up to 9 unlocked at once).
   </li>
 </ol>

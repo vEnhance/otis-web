@@ -216,15 +216,85 @@ def test_finalize_without_units(otis) -> None:
 
 
 @pytest.mark.django_db
-def test_finalize_unlocks_first_three_units(otis) -> None:
+def test_finalize_offers_curriculum(otis) -> None:
     alice = StudentFactory.create(standing=StudentStanding.NEWBORN)
-    alice.curriculum.set(UnitFactory.create_batch(20))
+    units = UnitFactory.create_batch(5)
+    alice.curriculum.set(units)
+    UnitFactory.create()
     otis.login(alice)
 
-    otis.post_30x("finalize", alice.pk)
+    resp = otis.get_20x("finalize", alice.pk)
+    form = resp.context["form"]
+    assert form.num_to_unlock == 3
+    assert set(form.fields["units_to_unlock"].queryset) == set(units)
+    alice.refresh_from_db()
+    assert alice.standing == StudentStanding.NEWBORN
+
+
+@pytest.mark.django_db
+def test_finalize_unlocks_chosen_units(otis) -> None:
+    alice = StudentFactory.create(standing=StudentStanding.NEWBORN)
+    units = UnitFactory.create_batch(20)
+    alice.curriculum.set(units)
+    otis.login(alice)
+
+    chosen = [units[4], units[11], units[17]]
+    otis.post_30x(
+        "finalize", alice.pk, data={"units_to_unlock": [u.pk for u in chosen]}
+    )
     alice.refresh_from_db()
     assert alice.standing == StudentStanding.GOOD
-    assert alice.unlocked_units.count() == 3
+    assert set(alice.unlocked_units.all()) == set(chosen)
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("num_chosen", [0, 2, 4])
+def test_finalize_requires_exactly_three(otis, num_chosen: int) -> None:
+    alice = StudentFactory.create(standing=StudentStanding.NEWBORN)
+    units = UnitFactory.create_batch(10)
+    alice.curriculum.set(units)
+    otis.login(alice)
+
+    resp = otis.post_20x(
+        "finalize",
+        alice.pk,
+        data={"units_to_unlock": [u.pk for u in units[:num_chosen]]},
+    )
+    assert resp.context["form"].errors
+    alice.refresh_from_db()
+    assert alice.standing == StudentStanding.NEWBORN
+    assert not alice.unlocked_units.exists()
+
+
+@pytest.mark.django_db
+def test_finalize_small_curriculum_unlocks_all(otis) -> None:
+    alice = StudentFactory.create(standing=StudentStanding.NEWBORN)
+    units = UnitFactory.create_batch(2)
+    alice.curriculum.set(units)
+    otis.login(alice)
+
+    otis.post_30x("finalize", alice.pk, data={"units_to_unlock": [u.pk for u in units]})
+    alice.refresh_from_db()
+    assert alice.standing == StudentStanding.GOOD
+    assert set(alice.unlocked_units.all()) == set(units)
+
+
+@pytest.mark.django_db
+def test_finalize_rejects_unit_outside_curriculum(otis) -> None:
+    alice = StudentFactory.create(standing=StudentStanding.NEWBORN)
+    units = UnitFactory.create_batch(5)
+    alice.curriculum.set(units)
+    outsider = UnitFactory.create()
+    otis.login(alice)
+
+    otis.post_20x(
+        "finalize",
+        alice.pk,
+        data={"units_to_unlock": [units[0].pk, units[1].pk, outsider.pk]},
+    )
+    alice.refresh_from_db()
+    assert alice.standing == StudentStanding.NEWBORN
+    assert not alice.unlocked_units.exists()
 
 
 @pytest.mark.django_db
@@ -234,16 +304,6 @@ def test_finalize_only_once(otis) -> None:
     otis.login(alice)
     otis.post_40x("finalize", alice.pk)
     assert not alice.unlocked_units.exists()
-
-
-@pytest.mark.django_db
-def test_finalize_rejects_get(otis) -> None:
-    alice = StudentFactory.create(standing=StudentStanding.NEWBORN)
-    alice.curriculum.set(UnitFactory.create_batch(5))
-    otis.login(alice)
-    otis.get_40x("finalize", alice.pk)
-    alice.refresh_from_db()
-    assert alice.standing == StudentStanding.NEWBORN
 
 
 @pytest.mark.django_db

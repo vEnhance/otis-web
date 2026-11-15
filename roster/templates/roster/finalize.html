@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block layout-content %}
+  {% include "dashboard/components/back_link.html" %}
+  <p>
+    Pick <b>{{ form.num_to_unlock }}</b> of the units you chose to unlock first.
+    Once you submit this form, your curriculum is finalized
+    and further changes go through the unit petition system.
+  </p>
+  {% if form.errors %}
+    <div class="alert alert-danger">{{ form.units_to_unlock.errors|striptags }}</div>
+  {% endif %}
+  <form action="{{ request.path }}" method="post">
+    {% csrf_token %}
+    {% for checkbox in form.units_to_unlock %}
+      <div class="form-check">
+        {{ checkbox.tag }}
+        <label class="form-check-label" for="{{ checkbox.id_for_label }}">{{ checkbox.choice_label }}</label>
+      </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-warning mt-3">Unlock and finalize</button>
+  </form>
+{% endblock layout-content %}
