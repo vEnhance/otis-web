@@ -225,7 +225,6 @@ def test_finalize_offers_curriculum(otis) -> None:
 
     resp = otis.get_20x("finalize", alice.pk)
     form = resp.context["form"]
-    assert form.num_to_unlock == 3
     assert set(form.fields["units_to_unlock"].queryset) == set(units)
     alice.refresh_from_db()
     assert alice.standing == StudentStanding.NEWBORN
@@ -248,8 +247,8 @@ def test_finalize_unlocks_chosen_units(otis) -> None:
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("num_chosen", [0, 2, 4])
-def test_finalize_requires_exactly_three(otis, num_chosen: int) -> None:
+@pytest.mark.parametrize("num_chosen", [0, 4])
+def test_finalize_rejects_bad_count(otis, num_chosen: int) -> None:
     alice = StudentFactory.create(standing=StudentStanding.NEWBORN)
     units = UnitFactory.create_batch(10)
     alice.curriculum.set(units)
@@ -267,16 +266,20 @@ def test_finalize_requires_exactly_three(otis, num_chosen: int) -> None:
 
 
 @pytest.mark.django_db
-def test_finalize_small_curriculum_unlocks_all(otis) -> None:
+@pytest.mark.parametrize("num_chosen", [1, 2])
+def test_finalize_allows_fewer_than_three(otis, num_chosen: int) -> None:
     alice = StudentFactory.create(standing=StudentStanding.NEWBORN)
-    units = UnitFactory.create_batch(2)
+    units = UnitFactory.create_batch(5)
     alice.curriculum.set(units)
     otis.login(alice)
 
-    otis.post_30x("finalize", alice.pk, data={"units_to_unlock": [u.pk for u in units]})
+    chosen = units[:num_chosen]
+    otis.post_30x(
+        "finalize", alice.pk, data={"units_to_unlock": [u.pk for u in chosen]}
+    )
     alice.refresh_from_db()
     assert alice.standing == StudentStanding.GOOD
-    assert set(alice.unlocked_units.all()) == set(units)
+    assert set(alice.unlocked_units.all()) == set(chosen)
 
 
 @pytest.mark.django_db
