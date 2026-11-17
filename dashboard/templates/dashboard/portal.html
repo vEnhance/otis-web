@@ -9,8 +9,8 @@
     {% include "dashboard/components/portal_newborn.html" %}
   {% else %}
     {% include "dashboard/components/portal_greeting.html" %}
+    {% include "dashboard/components/portal_buttons.html" %}
   {% endif %}
-  {% include "dashboard/components/portal_buttons.html" %}
   {% if num_news > 0 and not student.newborn %}
     {% include "dashboard/components/portal_news.html" %}
   {% endif %}

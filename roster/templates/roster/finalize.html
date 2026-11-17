@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% block layout-content %}
+  {% include "dashboard/components/back_link.html" %}
+  <p>
+    Pick up to <b>{{ form.MAX_TO_UNLOCK }}</b> units you want to start.
+  </p>
+  <hr />
+  {% if form.errors %}
+    <div class="alert alert-danger">{{ form.units_to_unlock.errors|striptags }}</div>
+  {% endif %}
+  <form action="{{ request.path }}" method="post">
+    {% csrf_token %}
+    {% for checkbox in form.units_to_unlock %}
+      <div class="form-check">
+        {{ checkbox.tag }}
+        <label class="form-check-label" for="{{ checkbox.id_for_label }}">{{ checkbox.choice_label }}</label>
+      </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-warning mt-3">Unlock and finalize</button>
+  </form>
+  <hr />
+  <p>
+    <b>Warning:</b> after this step, your setup is complete and cannot be edited directly.
+    However, the <b>unit petition</b> system becomes enabled,
+    and you can request changes there.
+    Use the "Manage Units" button to request more (up to 9 unlocked at once).
+  </p>
+{% endblock layout-content %}

@@ -45,20 +45,10 @@
     They can be easily edited later, and isn't a commitment.
   </li>
   <li>
-    Once you are happy with your selection, you may
-    finalize your choices.
+    Once you are happy with your selection,
+    you can then pick up to three of the units to start with,
+    using the button below:
     <br />
-    <form action="{% url 'finalize' student.pk %}" method="post">
-      {% csrf_token %}
-      <input type="submit" class="btn btn-warning" value="Finalize" />
-    </form>
-    <br />
-    <i>Warning:</i> once you click this link,
-    your decision is complete and you cannot directly make further changes.
-    However, the <b>unit petition</b> system (linked below) becomes enabled,
-    and you can request changes there.
-    Moreover, the <b>first three</b> of the units above will be unlocked to start.
-    Use the "Manage Units" button to request more (up to 9 unlocked at once).
+    <a href="{% url 'finalize' student.pk %}" class="btn btn-primary">Pick initial units</a>
   </li>
 </ol>
-<hr />

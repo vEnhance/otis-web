@@ -77,6 +77,7 @@ from .forms import (
     BackfillUSStateForm,
     CurriculumForm,
     DecisionForm,
+    FinalizeForm,
     MassLateFeeForm,
     PetitionForm,
     UserForm,
@@ -142,31 +143,40 @@ def curriculum(request: HttpRequest, student_pk: int) -> HttpResponse:
 
 @login_required
 def finalize(request: HttpRequest, student_pk: int) -> HttpResponse:
-    if not request.method == "POST":
-        raise PermissionDenied("Must use POST")
     student = get_student_by_pk(request, student_pk)
     if student.newborn is not True:
         raise PermissionDenied("Not allowed to call finalize more than once.")
-    elif student.semester.active is False:
+    if student.semester.active is False:
         raise PermissionDenied("Not allowed to call finalize on a completed semester.")
-    elif student.curriculum.count() > 0:
-        student.standing = StudentStanding.GOOD
-        first_units = student.curriculum.all()[:3]
-        student.unlocked_units.set(first_units)
-        student.save()
-        messages.success(
-            request,
-            "Your curriculum has been finalized! "
-            "You can start working now; "
-            "the first three units have been unlocked.",
-        )
-    else:
+    if not student.curriculum.exists():
         messages.error(
             request,
             "You didn't select any units. "
             "You should select some units before using this link.",
         )
-    return HttpResponseRedirect(reverse("portal", args=(student_pk,)))
+        return HttpResponseRedirect(reverse("portal", args=(student_pk,)))
+
+    if request.method == "POST":
+        form = FinalizeForm(request.POST, student=student)
+        if form.is_valid():
+            student.standing = StudentStanding.GOOD
+            student.unlocked_units.set(form.cleaned_data["units_to_unlock"])
+            student.save()
+            messages.success(
+                request,
+                "Your curriculum has been finalized! "
+                "You can start working now on the units you unlocked.",
+            )
+            return HttpResponseRedirect(reverse("portal", args=(student_pk,)))
+    else:
+        form = FinalizeForm(student=student)
+
+    context = {
+        "title": "Choose your starting units",
+        "student": student,
+        "form": form,
+    }
+    return render(request, "roster/finalize.html", context)
 
 
 @login_required

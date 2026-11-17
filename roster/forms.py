@@ -80,6 +80,27 @@ class AdvanceUnitChoiceField(forms.ModelMultipleChoiceField):
         super().__init__(*args, widget=widget, required=required, **kwargs)
 
 
+class FinalizeForm(forms.Form):
+    MAX_TO_UNLOCK = 3
+
+    def __init__(self, *args: Any, **kwargs: Any):
+        student: Student = kwargs.pop("student")
+        super().__init__(*args, **kwargs)
+        self.fields["units_to_unlock"] = forms.ModelMultipleChoiceField(
+            queryset=student.curriculum.select_related("group"),
+            widget=forms.CheckboxSelectMultiple(attrs={"class": "form-check-input"}),
+            label="Units to unlock",
+        )
+
+    def clean_units_to_unlock(self):
+        units = self.cleaned_data["units_to_unlock"]
+        if len(units) > self.MAX_TO_UNLOCK:
+            raise forms.ValidationError(
+                f"Please pick at most {self.MAX_TO_UNLOCK} units to start with."
+            )
+        return units
+
+
 class AdvanceForm(forms.Form):
     def __init__(self, *args: Any, **kwargs: Any):
         student = kwargs.pop("student")
