@@ -10,11 +10,12 @@ and work with you as you pick things up.
 
 ## Video tutorial
 
-If you prefer videos to text, see:
+If you prefer videos to text, there are a couple of videos:
 
-<https://youtu.be/W27XcqeXp20>
-
-TODO: link updated tutorial
+- [2027 video](https://youtu.be/YnkHdwyAjX8):
+  installation only (~10 minutes)
+- [2023 video](https://youtu.be/W27XcqeXp20):
+  full 2-hour feature implementation demo, but using an older setup
 
 ## Getting started
 

@@ -24,7 +24,10 @@ which is great.
 
 ## Installation instructions
 
-Video tutorial: <https://youtu.be/W27XcqeXp20>
+- [2027 video](https://youtu.be/YnkHdwyAjX8):
+  installation only (~10 minutes)
+- [2023 video](https://youtu.be/W27XcqeXp20):
+  full 2-hour feature implementation demo, but using an older setup
 
 ### Standard Linux environment
 
