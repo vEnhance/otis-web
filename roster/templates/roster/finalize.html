@@ -2,9 +2,13 @@
 {% block layout-content %}
   {% include "dashboard/components/back_link.html" %}
   <p>
-    Pick up to <b>{{ form.MAX_TO_UNLOCK }}</b> of the units you chose to unlock first.
-    Once you submit this form, your curriculum is finalized
-    and further changes go through the unit petition system.
+    Pick up to <b>{{ form.num_to_unlock }}</b> units you want to start.
+  </p>
+  <p>
+    <b>Warning:</b> after this step, your setup is complete and cannot be edited directly.
+    However, the <b>unit petition</b> system becomes enabled,
+    and you can request changes there.
+    Use the "Manage Units" button to request more (up to 9 unlocked at once).
   </p>
   {% if form.errors %}
     <div class="alert alert-danger">{{ form.units_to_unlock.errors|striptags }}</div>
