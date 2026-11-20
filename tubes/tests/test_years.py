@@ -393,7 +393,8 @@ def test_eic_desk_splits_on_who_is_blocking(otis):
     otis.login(admin)
     desk = otis.get_20x("oime-year-detail", year.pk).context["desk"]
     assert set(desk["chosen_eic"]) == {shortlisted, review}
-    assert set(desk["chosen_others"]) == {editing, done}
+    assert desk["chosen_others"] == [editing]
+    assert desk["chosen_done"] == [done]
 
 
 @pytest.mark.django_db

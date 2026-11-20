@@ -1562,7 +1562,12 @@ def _year_desk(year: OIMEYear) -> dict[str, Any]:
     return {
         "year": year,
         "chosen_eic": [sel for sel in chosen if sel.blocked_on == "EIC"],
-        "chosen_others": [sel for sel in chosen if sel.blocked_on != "EIC"],
+        "chosen_others": [
+            sel
+            for sel in chosen
+            if sel.blocked_on != "EIC" and sel.status != "SEL_DONE"
+        ],
+        "chosen_done": [sel for sel in chosen if sel.status == "SEL_DONE"],
         "deferred_proposals": [sel.proposal for sel in deferred],
         "pool": pool,
         "archived_proposals": archived,
