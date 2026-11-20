@@ -1,0 +1,26 @@
+{% comment %}
+  A dropdown of archive reasons, for inside a POST form. Each reason submits
+  the form with `field` set to its code, and shows the text its author will
+  see. Takes `field`, `label`, `testid` and `btn` (the button's colour class).
+{% endcomment %}
+<div class="dropdown d-inline-block">
+  <button type="button"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+          class="btn {{ btn }} btn-sm dropdown-toggle"
+          data-testid="{{ testid }}">{{ label }}</button>
+  <ul class="dropdown-menu" style="width: 22rem;">
+    {% for code, name, text in proposal.ARCHIVE_MENU %}
+      <li>
+        <button type="submit"
+                name="{{ field }}"
+                value="{{ code }}"
+                class="dropdown-item text-wrap">
+          <small class="text-muted">
+            <strong>{{ name }}:</strong>
+          {{ text }}</small>
+        </button>
+      </li>
+    {% endfor %}
+  </ul>
+</div>

@@ -594,10 +594,10 @@ def test_triage_archive(otis):
         otis.url("oime-year-detail", year.pk),
         "oime-year-triage",
         year.pk,
-        data={"proposal": proposal.pk, "archive": ""},
+        data={"proposal": proposal.pk, "archive": "KNOWN"},
     )
     proposal.refresh_from_db()
-    assert proposal.archived is True
+    assert proposal.archive_reason == "KNOWN"
     assert not OIMESelection.objects.exists()
 
 
