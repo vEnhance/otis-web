@@ -403,6 +403,19 @@ def _bulk_proposal_stats(
     return {p.pk: _stats_from_fights(by_proposal[p.pk]) for p in proposals}
 
 
+def _with_counts(proposals: QuerySet[OIMEProposal]) -> QuerySet[OIMEProposal]:
+    """Annotate ``upvote_count`` and ``testsolve_count`` (completed fights).
+
+    Both joins fan out the rows, so each count has to be distinct.
+    """
+    return proposals.annotate(
+        upvote_count=Count("upvotes", distinct=True),
+        testsolve_count=Count(
+            "fights", filter=~Q(fights__status="OIME_TBD"), distinct=True
+        ),
+    )
+
+
 def _stats_from_fights(fights: Sequence[OIMEFight]) -> dict[str, Any]:
     total = len(fights)
     correct = [f for f in fights if f.status == "OIME_OK"]
@@ -665,11 +678,8 @@ def subject_browse(request: HttpRequest, subject: str) -> HttpResponse:
     # for an empty page: drop it rather than offer it.
     lock = None if contributor.casual_mode else _parse_lock(request.GET.get("lock"))
 
-    proposals = (
-        OIMEProposal.in_pool()
-        .filter(subject=subject)
-        .select_related("author")
-        .annotate(upvote_count=Count("upvotes", distinct=True))
+    proposals = _with_counts(
+        OIMEProposal.in_pool().filter(subject=subject).select_related("author")
     )
     if difficulty is not None:
         proposals = proposals.filter(difficulty=difficulty)
@@ -753,11 +763,8 @@ class ProposalListView(ContributorRequiredMixin, ListView[OIMEProposal]):
         # Archived and retired proposals are hidden from everyone, authors and
         # staff included; use the Django admin to browse them. Drafts are hidden
         # the same way here, but their authors can find them on the drafts page.
-        return (
-            OIMEProposal.in_pool()
-            .select_related("author")
-            .annotate(upvote_count=Count("upvotes", distinct=True))
-            .order_by("-created_at")
+        return _with_counts(OIMEProposal.in_pool().select_related("author")).order_by(
+            "-created_at"
         )
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
@@ -1486,18 +1493,18 @@ class LandingView(VerifiedRequiredMixin, TemplateView):
                 )
 
         recent = list(
-            OIMEProposal.in_pool()
-            .select_related("author")
-            .annotate(upvote_count=Count("upvotes", distinct=True))
-            .order_by("-created_at")[:LANDING_RECENT_COUNT]
+            _with_counts(OIMEProposal.in_pool().select_related("author")).order_by(
+                "-created_at"
+            )[:LANDING_RECENT_COUNT]
         )
         # Drafts belong here alongside the published ones: this is the one page that
         # shows an author everything they have written, whatever state it is in.
         own = list(
-            OIMEProposal.objects.filter(author=contributor, archived=False)
-            .select_related("author")
-            .annotate(upvote_count=Count("upvotes", distinct=True))
-            .order_by("-created_at")
+            _with_counts(
+                OIMEProposal.objects.filter(
+                    author=contributor, archived=False
+                ).select_related("author")
+            ).order_by("-created_at")
         )
         _annotate_user_status(recent, contributor)
         _annotate_user_status(own, contributor)
