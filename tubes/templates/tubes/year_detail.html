@@ -10,6 +10,10 @@
          target="_blank"
          rel="noopener"
          data-testid="year-overleaf-link">Overleaf</a>
+    {% else %}
+      <a href="{% url "admin:tubes_oimeyear_change" desk.year.pk %}"
+         class="btn btn-danger"
+         data-testid="year-overleaf-missing">Overleaf</a>
     {% endif %}
     <a href="{% url "oime-year-bulk-edit" desk.year.pk %}"
        class="btn btn-primary"

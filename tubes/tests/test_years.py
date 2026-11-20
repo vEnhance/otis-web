@@ -398,6 +398,16 @@ def test_eic_desk_splits_on_who_is_blocking(otis):
 
 
 @pytest.mark.django_db
+def test_eic_desk_flags_missing_overleaf(otis):
+    admin, _ = verified_admin()
+    year = OIMEYearFactory.create(overleaf_url="")
+    otis.login(admin)
+    resp = otis.get_20x("oime-year-detail", year.pk)
+    otis.assert_testid(resp, "year-overleaf-missing")
+    otis.assert_no_testid(resp, "year-overleaf-link")
+
+
+@pytest.mark.django_db
 def test_eic_desk_shows_description(otis):
     admin, _ = verified_admin()
     year = OIMEYearFactory.create()
