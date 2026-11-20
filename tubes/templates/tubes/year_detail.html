@@ -27,9 +27,29 @@
        class="btn btn-outline-secondary">Admin</a>
   </div>
   {% include "tubes/components/chosen_table.html" with title="Waiting on you" selections=desk.chosen_eic empty="Nothing needs your attention." %}
+  {% if desk.sendable %}
+    <form method="post"
+          action="{% url "oime-year-send-to-editors" desk.year.pk %}"
+          data-testid="year-send-to-editors">
+      {% csrf_token %}
+      {% for sel in desk.sendable %}<input type="hidden" name="selection" value="{{ sel.pk }}" />{% endfor %}
+      <button type="submit" class="btn btn-outline-primary btn-sm">
+        📝 Send all to editors ({{ desk.sendable|length }})
+      </button>
+    </form>
+  {% endif %}
   {% include "tubes/components/chosen_table.html" with title="Waiting on others" selections=desk.chosen_others empty="Nothing here." %}
   {% include "tubes/components/chosen_table.html" with title="Done" selections=desk.chosen_done empty="Nothing here." collapsed=True %}
   {% include "tubes/components/desk_table.html" with title="Pool" proposals=desk.pool testid="pool-row" show=True %}
+  {% if desk.pool %}
+    <form method="post"
+          action="{% url "oime-year-defer-pool" desk.year.pk %}"
+          data-testid="year-defer-pool">
+      {% csrf_token %}
+      {% for proposal in desk.pool %}<input type="hidden" name="proposal" value="{{ proposal.pk }}" />{% endfor %}
+      <button type="submit" class="btn btn-outline-secondary btn-sm">⏸️ Defer all ({{ desk.pool|length }})</button>
+    </form>
+  {% endif %}
   {% include "tubes/components/desk_table.html" with title="Deferred" proposals=desk.deferred_proposals testid="deferred-row" show=False %}
   {% include "tubes/components/desk_table.html" with title="Archived" proposals=desk.archived_proposals testid="archived-row" show=False note="Problems appear in this section if they have a selection status for the year, but are now archived." %}
 {% endblock layout-content %}
