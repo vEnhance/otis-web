@@ -312,19 +312,39 @@ class OIMEProposal(models.Model):
     def time_limit_minutes(self) -> int:
         return 5 * self.difficulty + 5
 
-    @cached_property
+    @property
     def is_selected(self) -> bool:
         """Chosen for some year's contest (shortlisted or further along).
 
         From that point the TeX repository owns the text, so the author can no
         longer edit it here. Deferred selections do not count.
         """
-        return self.selections.filter(OIMESelection.CHOSEN).exists()
+        sel = self.latest_selection
+        return sel is not None and not sel.is_deferred
 
     @cached_property
+    def latest_selection(self) -> "OIMESelection | None":
+        """The verdict from the most recent year that reviewed this problem.
+
+        Earlier verdicts can only be deferrals: a chosen problem retires when its
+        year is released, and can't be triaged for another year before then.
+        """
+        return (
+            self.selections.select_related("year", "editor")
+            .order_by("-year__proposals_open_at")
+            .first()
+        )
+
+    @property
     def is_retired(self) -> bool:
         """Chosen for a released contest."""
-        return OIMESelection.retiring().filter(proposal=self).exists()
+        sel = self.latest_selection
+        return (
+            sel is not None
+            and not sel.is_deferred
+            and sel.year.release_at is not None
+            and sel.year.release_at <= timezone.now()
+        )
 
     @property
     def is_frozen(self) -> bool:
