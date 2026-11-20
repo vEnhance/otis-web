@@ -72,6 +72,9 @@
           <a href="{{ proposal.get_absolute_url }}">{{ proposal.label }}: {{ proposal.title|truncatechars:"32" }}</a>
         </span>
         <span class="d-flex align-items-center gap-1 text-nowrap">
+          <span class="badge border bg-light text-dark"
+                title="Testsolves"
+                data-testid="browse-testsolve-count">🧪 × {{ proposal.testsolve_count }}</span>
           <a class="badge border text-decoration-none {% if difficulty %}bg-primary text-white{% else %}bg-light text-dark{% endif %}"
              data-testid="browse-difficulty-badge"
              title="{% if difficulty %}Clear the difficulty filter{% else %}Show only 🔥 × {{ proposal.difficulty }} problems{% endif %}"
