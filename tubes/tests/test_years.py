@@ -46,11 +46,9 @@ def released_year(**kwargs):
 # ---------------------------------------------------------------------------
 
 
-def update_data(**kwargs):
-    """Form data for editing a proposal; difficulty is fixed after creation."""
-    data = {**PROPOSAL_DATA, **kwargs}
-    data.pop("difficulty")
-    return data
+def update_data(proposal, **kwargs):
+    """Form data for editing ``proposal`` without a breaking change."""
+    return {**PROPOSAL_DATA, "difficulty": proposal.difficulty, **kwargs}
 
 
 @pytest.mark.django_db
@@ -154,7 +152,9 @@ def test_publishing_a_draft_blocked_without_open_window(otis):
     closed_year()
     proposal = OIMEProposalFactory.create(author=contributor, is_draft=True)
     otis.login(user)
-    otis.post_30x("oime-proposal-update", proposal.pk, data=update_data(is_draft=False))
+    otis.post_30x(
+        "oime-proposal-update", proposal.pk, data=update_data(proposal, is_draft=False)
+    )
     proposal.refresh_from_db()
     assert proposal.is_draft is True
 
@@ -165,7 +165,9 @@ def test_editing_a_draft_allowed_without_open_window(otis):
     closed_year()
     proposal = OIMEProposalFactory.create(author=contributor, is_draft=True)
     otis.login(user)
-    otis.post_30x("oime-proposal-update", proposal.pk, data=update_data(is_draft=True))
+    otis.post_30x(
+        "oime-proposal-update", proposal.pk, data=update_data(proposal, is_draft=True)
+    )
     proposal.refresh_from_db()
     assert proposal.title == "Squares"
     assert proposal.is_draft is True
@@ -177,7 +179,9 @@ def test_unpublishing_blocked_without_open_window(otis):
     closed_year()
     proposal = OIMEProposalFactory.create(author=contributor, is_draft=False)
     otis.login(user)
-    otis.post_30x("oime-proposal-update", proposal.pk, data=update_data(is_draft=True))
+    otis.post_30x(
+        "oime-proposal-update", proposal.pk, data=update_data(proposal, is_draft=True)
+    )
     proposal.refresh_from_db()
     assert proposal.is_draft is False
 
@@ -188,7 +192,7 @@ def test_editing_a_published_problem_allowed_without_open_window(otis):
     closed_year()
     proposal = OIMEProposalFactory.create(author=contributor, is_draft=False)
     otis.login(user)
-    otis.post_30x("oime-proposal-update", proposal.pk, data=update_data())
+    otis.post_30x("oime-proposal-update", proposal.pk, data=update_data(proposal))
     proposal.refresh_from_db()
     assert proposal.title == "Squares"
     assert proposal.is_draft is False
@@ -200,7 +204,9 @@ def test_publishing_a_draft_during_window(otis):
     OIMEYearFactory.create()
     proposal = OIMEProposalFactory.create(author=contributor, is_draft=True)
     otis.login(user)
-    otis.post_30x("oime-proposal-update", proposal.pk, data=update_data(is_draft=False))
+    otis.post_30x(
+        "oime-proposal-update", proposal.pk, data=update_data(proposal, is_draft=False)
+    )
     proposal.refresh_from_db()
     assert proposal.is_draft is False
 
