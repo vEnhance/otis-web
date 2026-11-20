@@ -59,11 +59,11 @@ class OIMEProposalAdmin(admin.ModelAdmin[OIMEProposal]):
         "credit_display",
         "difficulty_display",
         "created_at",
-        "archived",
+        "archive_reason",
         "is_draft",
     )
     list_display_links = ("label", "title")
-    list_filter = ("subject", "difficulty", "archived", "is_draft")
+    list_filter = ("subject", "difficulty", "archive_reason", "is_draft")
     search_fields = ("author__display_name", "title", "statement")
     readonly_fields = ("created_at", "updated_at")
     filter_horizontal = ("upvotes",)
@@ -71,18 +71,18 @@ class OIMEProposalAdmin(admin.ModelAdmin[OIMEProposal]):
     actions = ("archive_problems", "unarchive_problems")
     autocomplete_fields = ("author",)
 
-    @admin.action(description="Archive selected problems")
+    @admin.action(description="Archive selected problems (reason: other)")
     def archive_problems(
         self, request: HttpRequest, queryset: QuerySet[OIMEProposal]
     ) -> None:
-        count = queryset.update(archived=True)
+        count = queryset.filter(archive_reason="").update(archive_reason="OTHER")
         self.message_user(request, f"Archived {count} problem(s).")
 
     @admin.action(description="Unarchive selected problems")
     def unarchive_problems(
         self, request: HttpRequest, queryset: QuerySet[OIMEProposal]
     ) -> None:
-        count = queryset.update(archived=False)
+        count = queryset.update(archive_reason="")
         self.message_user(request, f"Unarchived {count} problem(s).")
 
 
@@ -138,6 +138,7 @@ class OIMEYearAdmin(admin.ModelAdmin[OIMEYear]):
         "release_at",
     )
     list_display_links = ("display_name",)
+    autocomplete_fields = ("editors",)
     inlines = (OIMESelectionInline,)
 
 

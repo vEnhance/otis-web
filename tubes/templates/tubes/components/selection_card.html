@@ -76,10 +76,7 @@
                   data-testid="selection-transition">{{ label }}</button>
         {% endfor %}
         {% if not sel %}
-          <button type="submit"
-                  name="archive"
-                  class="btn btn-outline-danger btn-sm"
-                  data-testid="triage-archive">🗄️ Archive</button>
+          {% include "tubes/components/archive_menu.html" with field="archive" label="🗄️ Archive" testid="triage-archive" btn="btn-outline-danger" %}
         {% endif %}
         {% if sel and request.user.is_superuser %}
           <details class="d-inline-block ms-1 my-1">

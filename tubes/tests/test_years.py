@@ -335,6 +335,8 @@ def test_year_pages_are_admin_only(otis):
     otis.login(staff)
     otis.get_40x("oime-year-detail", year.pk)
     otis.get_40x("oime-year-release", year.pk)
+    otis.post_40x("oime-year-send-to-editors", year.pk)
+    otis.post_40x("oime-year-defer-pool", year.pk)
     otis.post_40x(
         "oime-year-triage",
         year.pk,
@@ -393,7 +395,18 @@ def test_eic_desk_splits_on_who_is_blocking(otis):
     otis.login(admin)
     desk = otis.get_20x("oime-year-detail", year.pk).context["desk"]
     assert set(desk["chosen_eic"]) == {shortlisted, review}
-    assert set(desk["chosen_others"]) == {editing, done}
+    assert desk["chosen_others"] == [editing]
+    assert desk["chosen_done"] == [done]
+
+
+@pytest.mark.django_db
+def test_eic_desk_flags_missing_overleaf(otis):
+    admin, _ = verified_admin()
+    year = OIMEYearFactory.create(overleaf_url="")
+    otis.login(admin)
+    resp = otis.get_20x("oime-year-detail", year.pk)
+    otis.assert_testid(resp, "year-overleaf-missing")
+    otis.assert_no_testid(resp, "year-overleaf-link")
 
 
 @pytest.mark.django_db
@@ -523,6 +536,55 @@ def test_triage_moves_to_next_unreviewed(otis):
 
 
 @pytest.mark.django_db
+def test_send_to_editors_only_listed_with_editor(otis):
+    admin, _ = verified_admin()
+    year = OIMEYearFactory.create()
+    editor = OIMEContributorFactory.create()
+    ready = OIMESelectionFactory.create(year=year, editor=editor)
+    no_editor = OIMESelectionFactory.create(year=year)
+    unlisted = OIMESelectionFactory.create(year=year, editor=editor)
+    other_year = OIMESelectionFactory.create(year=closed_year(), editor=editor)
+    otis.login(admin)
+    resp = otis.get_20x("oime-year-detail", year.pk)
+    assert set(resp.context["desk"]["sendable"]) == {ready, unlisted}
+    otis.post_redirects(
+        otis.url("oime-year-detail", year.pk),
+        "oime-year-send-to-editors",
+        year.pk,
+        data={"selection": [ready.pk, no_editor.pk, other_year.pk]},
+    )
+    statuses = dict(OIMESelection.objects.values_list("pk", "status"))
+    assert statuses == {
+        ready.pk: "SEL_EDITING",
+        no_editor.pk: "SEL_SHORTLISTED",
+        unlisted.pk: "SEL_SHORTLISTED",
+        other_year.pk: "SEL_SHORTLISTED",
+    }
+
+
+@pytest.mark.django_db
+def test_defer_pool_only_listed_unreviewed(otis):
+    admin, _ = verified_admin()
+    year = OIMEYearFactory.create()
+    listed = OIMEProposalFactory.create()
+    unlisted = OIMEProposalFactory.create()
+    archived = OIMEProposalFactory.create(archived=True)
+    shortlisted = OIMESelectionFactory.create(year=year).proposal
+    otis.login(admin)
+    otis.post_redirects(
+        otis.url("oime-year-detail", year.pk),
+        "oime-year-defer-pool",
+        year.pk,
+        data={"proposal": [listed.pk, archived.pk, shortlisted.pk]},
+    )
+    assert dict(year.selections.values_list("proposal", "status")) == {
+        listed.pk: "SEL_DEFERRED",
+        shortlisted.pk: "SEL_SHORTLISTED",
+    }
+    assert not unlisted.selections.exists()
+
+
+@pytest.mark.django_db
 def test_triage_archive(otis):
     admin, _ = verified_admin()
     year = OIMEYearFactory.create()
@@ -532,10 +594,10 @@ def test_triage_archive(otis):
         otis.url("oime-year-detail", year.pk),
         "oime-year-triage",
         year.pk,
-        data={"proposal": proposal.pk, "archive": ""},
+        data={"proposal": proposal.pk, "archive": "KNOWN"},
     )
     proposal.refresh_from_db()
-    assert proposal.archived is True
+    assert proposal.archive_reason == "KNOWN"
     assert not OIMESelection.objects.exists()
 
 
@@ -649,6 +711,7 @@ def test_eic_assigns_editor_and_notes(otis):
     admin, _ = verified_admin()
     editor = OIMEContributorFactory.create()
     selection = OIMESelectionFactory.create()
+    selection.year.editors.add(editor)
     otis.login(admin)
     otis.post_30x(
         "oime-selection-action",
@@ -1012,6 +1075,7 @@ def test_bulk_edit_bulk_save(otis):
     first = OIMESelectionFactory.create(year=year)
     second = OIMESelectionFactory.create(year=year, description="old")
     editor = OIMEContributorFactory.create()
+    year.editors.add(editor)
     otis.login(admin)
     otis.post_redirects(
         otis.url("oime-year-bulk-edit", year.pk),
@@ -1032,6 +1096,34 @@ def test_bulk_edit_bulk_save(otis):
     assert first.description == "$3n$ and $4n$"
     assert first.editor == editor
     assert second.description == ""
+
+
+@pytest.mark.django_db
+def test_editor_choices_are_pool_plus_assigned(otis):
+    admin, _ = verified_admin()
+    year = OIMEYearFactory.create()
+    pooled = OIMEContributorFactory.create()
+    year.editors.add(pooled)
+    assigned = OIMEContributorFactory.create()
+    OIMESelectionFactory.create_batch(2, year=year, editor=assigned)
+    OIMESelectionFactory.create(year=year, editor=assigned, status="SEL_DEFERRED")
+    OIMESelectionFactory.create(year=closed_year(), editor=assigned)
+    otis.login(admin)
+    resp = otis.get_20x("oime-year-bulk-edit", year.pk)
+    editors = resp.context["formset"].forms[0].fields["editor"].queryset
+    assert {c: c.load for c in editors} == {pooled: 0, assigned: 2}
+
+
+@pytest.mark.django_db
+def test_editor_choices_without_pool_are_only_assigned(otis):
+    admin, _ = verified_admin(casual_mode=True)
+    year = OIMEYearFactory.create()
+    assigned = OIMEContributorFactory.create()
+    selection = OIMESelectionFactory.create(year=year, editor=assigned)
+    otis.login(admin)
+    resp = otis.get_20x("oime-proposal-detail", selection.proposal.pk)
+    editors = resp.context["selection_card"]["form"].fields["editor"].queryset
+    assert list(editors) == [assigned]
 
 
 @pytest.mark.django_db

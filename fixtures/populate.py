@@ -326,6 +326,7 @@ def create_oime_proposals(
 ) -> list[OIMEProposal]:
     """Writes proposals, spread over the last few months, some drafted or archived."""
     subjects = [subject for subject, _ in OIMEProposal.SUBJECT_CHOICES]
+    archive_reasons = [code for code, _ in OIMEProposal.ARCHIVE_REASONS]
     print(f"Creating {oime_num} OIME proposals")
     proposals: list[OIMEProposal] = bulk_create_rows(
         OIMEProposalFactory,
@@ -335,7 +336,9 @@ def create_oime_proposals(
                 random.choice(subjects),
                 randint_low(1, 5),
                 random.random() < P_OIME_DRAFT,
-                random.random() < P_OIME_ARCHIVED,
+                random.choice(archive_reasons)
+                if random.random() < P_OIME_ARCHIVED
+                else "",
             )
             for _ in range(oime_num)
         ],
@@ -343,7 +346,7 @@ def create_oime_proposals(
         "subject",
         "difficulty",
         "is_draft",
-        "archived",
+        "archive_reason",
     )
 
     # created_at is auto_now_add, so spreading the proposals out over the term

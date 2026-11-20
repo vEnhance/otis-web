@@ -6,9 +6,15 @@
 {% block layout-content %}
   {% if proposal.archived %}
     <div class="alert alert-warning" data-testid="proposal-archived-note">
-      This problem has been archived by staff, so it is not viewable to other
-      users anymore, and it can no longer be testsolved, upvoted or commented
-      on. If you think this is an error, please contact Evan.
+      <p class="mt-0">
+        This problem has been archived by staff, so it is not viewable to other
+        users anymore, and it can no longer be testsolved, upvoted or commented
+        on. If you think this is an error, please contact Evan.
+      </p>
+      <p class="mb-0">
+        <strong>Reason:</strong>
+        <span data-testid="proposal-archive-reason">{{ proposal.archive_reason_text }}</span>
+      </p>
     </div>
   {% elif proposal.is_retired %}
     <div class="alert alert-info" data-testid="proposal-retired-note">
@@ -44,15 +50,13 @@
                 action="{% url "oime-proposal-archive" proposal.pk %}"
                 class="d-inline">
             {% csrf_token %}
-            <button type="submit"
-                    class="btn btn-outline-secondary btn-sm"
-                    data-testid="proposal-archive-toggle">
-              {% if proposal.archived %}
-                Unarchive
-              {% else %}
-                Archive
-              {% endif %}
-            </button>
+            {% if proposal.archived %}
+              <button type="submit"
+                      class="btn btn-outline-secondary btn-sm"
+                      data-testid="proposal-archive-toggle">Unarchive</button>
+            {% else %}
+              {% include "tubes/components/archive_menu.html" with field="reason" label="Archive" testid="proposal-archive-toggle" btn="btn-outline-secondary" %}
+            {% endif %}
           </form>
         {% endif %}
       </div>

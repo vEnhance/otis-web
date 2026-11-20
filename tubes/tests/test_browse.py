@@ -726,3 +726,19 @@ def test_all_problems_always_links_to_every_subject(otis, casual_mode: bool):
     for code in ("A", "C", "G", "N"):
         otis.assert_has(resp, otis.url("oime-subject-browse", code))
     otis.assert_has(resp, otis.url("oime-landing"))
+
+
+@pytest.mark.django_db
+def test_lists_count_completed_testsolves(otis):
+    user, _ = verified_contributor()
+    proposal = OIMEProposalFactory.create(subject="A")
+    OIMEFightFactory.create_batch(2, proposal=proposal, status="OIME_OK")
+    OIMEFightFactory.create(proposal=proposal, status="OIME_TBD")
+    proposal.upvotes.add(*OIMEContributorFactory.create_batch(3))
+    otis.login(user)
+    resp = otis.get_20x("oime-proposal-list")
+    (row,) = resp.context["proposals"]
+    assert (row.testsolve_count, row.upvote_count) == (2, 3)
+    resp = otis.get_20x("oime-subject-browse", "A")
+    (row,) = resp.context["page_obj"].object_list
+    assert (row.testsolve_count, row.upvote_count) == (2, 3)

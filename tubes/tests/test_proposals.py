@@ -274,10 +274,20 @@ def test_superuser_can_toggle_archive(otis):
     proposal = OIMEProposalFactory.create(author=contributor, archived=False)
     UserFactory.create(username="staff", is_staff=True, is_superuser=True)
     otis.login("staff")
+    otis.post("oime-proposal-archive", proposal.pk, data={"reason": "BASHY"})
+    proposal.refresh_from_db()
+    assert proposal.archive_reason == "BASHY"
     otis.post("oime-proposal-archive", proposal.pk)
     proposal.refresh_from_db()
-    assert proposal.archived is True
-    otis.post("oime-proposal-archive", proposal.pk)
+    assert proposal.archived is False
+
+
+@pytest.mark.django_db
+def test_archive_rejects_unknown_reason(otis):
+    proposal = OIMEProposalFactory.create()
+    UserFactory.create(username="staff", is_staff=True, is_superuser=True)
+    otis.login("staff")
+    otis.post_40x("oime-proposal-archive", proposal.pk, data={"reason": "BOGUS"})
     proposal.refresh_from_db()
     assert proposal.archived is False
 
@@ -288,7 +298,7 @@ def test_non_superuser_cannot_toggle_archive(otis):
     _, other = verified_contributor("bob")
     proposal = OIMEProposalFactory.create(author=other, archived=False)
     otis.login(user)
-    resp = otis.post("oime-proposal-archive", proposal.pk)
+    resp = otis.post("oime-proposal-archive", proposal.pk, data={"reason": "EASY"})
     assert resp.status_code == 403
     proposal.refresh_from_db()
     assert proposal.archived is False
@@ -299,7 +309,7 @@ def test_author_cannot_toggle_own_proposal_archive(otis):
     user, contributor = verified_contributor()
     proposal = OIMEProposalFactory.create(author=contributor, archived=False)
     otis.login(user)
-    resp = otis.post("oime-proposal-archive", proposal.pk)
+    resp = otis.post("oime-proposal-archive", proposal.pk, data={"reason": "EASY"})
     assert resp.status_code == 403
     proposal.refresh_from_db()
     assert proposal.archived is False
@@ -308,10 +318,11 @@ def test_author_cannot_toggle_own_proposal_archive(otis):
 @pytest.mark.django_db
 def test_archived_author_sees_note_but_no_archive_button(otis):
     user, contributor = verified_contributor()
-    proposal = OIMEProposalFactory.create(author=contributor, archived=True)
+    proposal = OIMEProposalFactory.create(author=contributor, archive_reason="ROUGH")
     otis.login(user)
     resp = otis.get_20x("oime-proposal-detail", proposal.pk)
     otis.assert_testid(resp, "proposal-archived-note")
+    otis.assert_testid(resp, "proposal-archive-reason")
     # only a superuser gets the archive toggle
     otis.assert_no_testid(resp, "proposal-archive-toggle")
 

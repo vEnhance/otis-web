@@ -31,6 +31,7 @@ from .forms import (
     OIMEProposalForm,
     OIMEReleaseForm,
     OIMESelectionForm,
+    editor_choices,
 )
 from .models import (
     OIMEComment,
@@ -403,6 +404,19 @@ def _bulk_proposal_stats(
     return {p.pk: _stats_from_fights(by_proposal[p.pk]) for p in proposals}
 
 
+def _with_counts(proposals: QuerySet[OIMEProposal]) -> QuerySet[OIMEProposal]:
+    """Annotate ``upvote_count`` and ``testsolve_count`` (completed fights).
+
+    Both joins fan out the rows, so each count has to be distinct.
+    """
+    return proposals.annotate(
+        upvote_count=Count("upvotes", distinct=True),
+        testsolve_count=Count(
+            "fights", filter=~Q(fights__status="OIME_TBD"), distinct=True
+        ),
+    )
+
+
 def _stats_from_fights(fights: Sequence[OIMEFight]) -> dict[str, Any]:
     total = len(fights)
     correct = [f for f in fights if f.status == "OIME_OK"]
@@ -665,11 +679,8 @@ def subject_browse(request: HttpRequest, subject: str) -> HttpResponse:
     # for an empty page: drop it rather than offer it.
     lock = None if contributor.casual_mode else _parse_lock(request.GET.get("lock"))
 
-    proposals = (
-        OIMEProposal.in_pool()
-        .filter(subject=subject)
-        .select_related("author")
-        .annotate(upvote_count=Count("upvotes", distinct=True))
+    proposals = _with_counts(
+        OIMEProposal.in_pool().filter(subject=subject).select_related("author")
     )
     if difficulty is not None:
         proposals = proposals.filter(difficulty=difficulty)
@@ -753,11 +764,8 @@ class ProposalListView(ContributorRequiredMixin, ListView[OIMEProposal]):
         # Archived and retired proposals are hidden from everyone, authors and
         # staff included; use the Django admin to browse them. Drafts are hidden
         # the same way here, but their authors can find them on the drafts page.
-        return (
-            OIMEProposal.in_pool()
-            .select_related("author")
-            .annotate(upvote_count=Count("upvotes", distinct=True))
-            .order_by("-created_at")
+        return _with_counts(OIMEProposal.in_pool().select_related("author")).order_by(
+            "-created_at"
         )
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
@@ -1347,15 +1355,25 @@ def upvote_proposal(request: HttpRequest, pk: int) -> HttpResponse:
 
 @verified_required
 def toggle_archive(request: HttpRequest, pk: int) -> HttpResponse:
-    """Flip a problem's archived state. Archiving is a staff-only moderation action."""
+    """Archive a problem with the POSTed ``reason``, or unarchive it with none.
+
+    Archiving is a staff-only moderation action.
+    """
     if request.method != "POST":
         return redirect("oime-proposal-detail", pk)
     proposal = get_object_or_404(OIMEProposal, pk=pk)
     if not request.user.is_superuser:  # type: ignore[union-attr]
         raise PermissionDenied
-    proposal.archived = not proposal.archived
-    proposal.save(update_fields=["archived"])
+    proposal.archive_reason = _archive_reason(request.POST.get("reason", ""))
+    proposal.save(update_fields=["archive_reason"])
     return redirect("oime-proposal-detail", pk)
+
+
+def _archive_reason(raw: str) -> str:
+    """Validate an archive reason from a form; blank means unarchive."""
+    if raw and raw not in OIMEProposal.ARCHIVE_REASON_TEXT:
+        raise Http404("Unknown archive reason.")
+    return raw
 
 
 @verified_required
@@ -1486,18 +1504,18 @@ class LandingView(VerifiedRequiredMixin, TemplateView):
                 )
 
         recent = list(
-            OIMEProposal.in_pool()
-            .select_related("author")
-            .annotate(upvote_count=Count("upvotes", distinct=True))
-            .order_by("-created_at")[:LANDING_RECENT_COUNT]
+            _with_counts(OIMEProposal.in_pool().select_related("author")).order_by(
+                "-created_at"
+            )[:LANDING_RECENT_COUNT]
         )
         # Drafts belong here alongside the published ones: this is the one page that
         # shows an author everything they have written, whatever state it is in.
         own = list(
-            OIMEProposal.objects.filter(author=contributor, archived=False)
-            .select_related("author")
-            .annotate(upvote_count=Count("upvotes", distinct=True))
-            .order_by("-created_at")
+            _with_counts(
+                OIMEProposal.objects.filter(
+                    author=contributor, archive_reason=""
+                ).select_related("author")
+            ).order_by("-created_at")
         )
         _annotate_user_status(recent, contributor)
         _annotate_user_status(own, contributor)
@@ -1555,7 +1573,16 @@ def _year_desk(year: OIMEYear) -> dict[str, Any]:
     return {
         "year": year,
         "chosen_eic": [sel for sel in chosen if sel.blocked_on == "EIC"],
-        "chosen_others": [sel for sel in chosen if sel.blocked_on != "EIC"],
+        "chosen_others": [
+            sel
+            for sel in chosen
+            if sel.blocked_on != "EIC" and sel.status != "SEL_DONE"
+        ],
+        "chosen_done": [sel for sel in chosen if sel.status == "SEL_DONE"],
+        # Shortlisted with an editor already assigned: ready to send in one go.
+        "sendable": [
+            sel for sel in chosen if sel.status == "SEL_SHORTLISTED" and sel.editor
+        ],
         "deferred_proposals": [sel.proposal for sel in deferred],
         "pool": pool,
         "archived_proposals": archived,
@@ -1589,9 +1616,9 @@ def year_triage(request: HttpRequest, pk: int) -> HttpResponse:
         OIMESelection.objects.update_or_create(
             year=year, proposal=proposal, defaults={"status": status}
         )
-    elif "archive" in request.POST:
-        proposal.archived = True
-        proposal.save(update_fields=["archived"])
+    elif request.POST.get("archive"):
+        proposal.archive_reason = _archive_reason(request.POST["archive"])
+        proposal.save(update_fields=["archive_reason"])
     else:
         raise Http404("Unknown triage action.")
     next_proposal = _unreviewed(year).first()
@@ -1599,6 +1626,46 @@ def year_triage(request: HttpRequest, pk: int) -> HttpResponse:
         messages.success(request, "Every problem has been reviewed.")
         return redirect(year)
     return redirect(next_proposal)
+
+
+@admin_required
+def year_send_to_editors(request: HttpRequest, pk: int) -> HttpResponse:
+    """Move the listed shortlisted problems that have an editor to Editing.
+
+    Acts only on the pks the desk displayed, so nothing shortlisted since the
+    page loaded is sent unseen. Rows without an editor are skipped.
+    """
+    year = get_object_or_404(OIMEYear, pk=pk)
+    if request.method != "POST":
+        return redirect(year)
+    pks = request.POST.getlist("selection")
+    sent = year.selections.filter(
+        pk__in=pks, status="SEL_SHORTLISTED", editor__isnull=False
+    ).update(status="SEL_EDITING", updated_at=timezone.now())
+    messages.success(request, f"Sent {sent} to editors.")
+    return redirect(year)
+
+
+@admin_required
+def year_defer_pool(request: HttpRequest, pk: int) -> HttpResponse:
+    """Defer the listed pool problems for this year.
+
+    Acts only on the pks the desk displayed, so a problem published since the
+    page loaded is not deferred unseen.
+    """
+    year = get_object_or_404(OIMEYear, pk=pk)
+    if request.method != "POST":
+        return redirect(year)
+    proposals = _unreviewed(year).filter(pk__in=request.POST.getlist("proposal"))
+    created = OIMESelection.objects.bulk_create(
+        [
+            OIMESelection(year=year, proposal=proposal, status="SEL_DEFERRED")
+            for proposal in proposals
+        ],
+        ignore_conflicts=True,
+    )
+    messages.success(request, f"Deferred {len(created)}.")
+    return redirect(year)
 
 
 @verified_required
@@ -1887,7 +1954,11 @@ def year_export(request: HttpRequest, pk: int) -> HttpResponse:
 def year_bulk_edit(request: HttpRequest, pk: int) -> HttpResponse:
     """Set the editor and description of every chosen problem on one page."""
     year = get_object_or_404(OIMEYear, pk=pk)
-    formset = OIMEBulkEditFormSet(request.POST or None, queryset=_chosen(year))
+    formset = OIMEBulkEditFormSet(
+        request.POST or None,
+        queryset=_chosen(year),
+        form_kwargs={"editors": editor_choices(year)},
+    )
     # Each row's editor dropdown would otherwise query every contributor again.
     if formset.forms:
         choices = list(formset.forms[0].fields["editor"].choices)  # type: ignore[attr-defined]
