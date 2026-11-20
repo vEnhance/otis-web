@@ -43,6 +43,16 @@ urlpatterns = [
     path(r"serious/", views.go_serious, name="oime-serious"),
     path(r"years/<int:pk>/", views.year_detail, name="oime-year-detail"),
     path(r"years/<int:pk>/triage/", views.year_triage, name="oime-year-triage"),
+    path(
+        r"years/<int:pk>/send-to-editors/",
+        views.year_send_to_editors,
+        name="oime-year-send-to-editors",
+    ),
+    path(
+        r"years/<int:pk>/defer-pool/",
+        views.year_defer_pool,
+        name="oime-year-defer-pool",
+    ),
     path(r"years/<int:pk>/release/", views.year_release, name="oime-year-release"),
     path(r"years/<int:pk>/export.zip", views.year_export, name="oime-year-export"),
     path(

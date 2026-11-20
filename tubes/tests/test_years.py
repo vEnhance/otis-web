@@ -335,6 +335,8 @@ def test_year_pages_are_admin_only(otis):
     otis.login(staff)
     otis.get_40x("oime-year-detail", year.pk)
     otis.get_40x("oime-year-release", year.pk)
+    otis.post_40x("oime-year-send-to-editors", year.pk)
+    otis.post_40x("oime-year-defer-pool", year.pk)
     otis.post_40x(
         "oime-year-triage",
         year.pk,
@@ -531,6 +533,55 @@ def test_triage_moves_to_next_unreviewed(otis):
         year.pk,
         data={"proposal": current.pk, "change_status": "SEL_DEFERRED"},
     )
+
+
+@pytest.mark.django_db
+def test_send_to_editors_only_listed_with_editor(otis):
+    admin, _ = verified_admin()
+    year = OIMEYearFactory.create()
+    editor = OIMEContributorFactory.create()
+    ready = OIMESelectionFactory.create(year=year, editor=editor)
+    no_editor = OIMESelectionFactory.create(year=year)
+    unlisted = OIMESelectionFactory.create(year=year, editor=editor)
+    other_year = OIMESelectionFactory.create(year=closed_year(), editor=editor)
+    otis.login(admin)
+    resp = otis.get_20x("oime-year-detail", year.pk)
+    assert set(resp.context["desk"]["sendable"]) == {ready, unlisted}
+    otis.post_redirects(
+        otis.url("oime-year-detail", year.pk),
+        "oime-year-send-to-editors",
+        year.pk,
+        data={"selection": [ready.pk, no_editor.pk, other_year.pk]},
+    )
+    statuses = dict(OIMESelection.objects.values_list("pk", "status"))
+    assert statuses == {
+        ready.pk: "SEL_EDITING",
+        no_editor.pk: "SEL_SHORTLISTED",
+        unlisted.pk: "SEL_SHORTLISTED",
+        other_year.pk: "SEL_SHORTLISTED",
+    }
+
+
+@pytest.mark.django_db
+def test_defer_pool_only_listed_unreviewed(otis):
+    admin, _ = verified_admin()
+    year = OIMEYearFactory.create()
+    listed = OIMEProposalFactory.create()
+    unlisted = OIMEProposalFactory.create()
+    archived = OIMEProposalFactory.create(archived=True)
+    shortlisted = OIMESelectionFactory.create(year=year).proposal
+    otis.login(admin)
+    otis.post_redirects(
+        otis.url("oime-year-detail", year.pk),
+        "oime-year-defer-pool",
+        year.pk,
+        data={"proposal": [listed.pk, archived.pk, shortlisted.pk]},
+    )
+    assert dict(year.selections.values_list("proposal", "status")) == {
+        listed.pk: "SEL_DEFERRED",
+        shortlisted.pk: "SEL_SHORTLISTED",
+    }
+    assert not unlisted.selections.exists()
 
 
 @pytest.mark.django_db

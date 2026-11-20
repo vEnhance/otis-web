@@ -1568,6 +1568,10 @@ def _year_desk(year: OIMEYear) -> dict[str, Any]:
             if sel.blocked_on != "EIC" and sel.status != "SEL_DONE"
         ],
         "chosen_done": [sel for sel in chosen if sel.status == "SEL_DONE"],
+        # Shortlisted with an editor already assigned: ready to send in one go.
+        "sendable": [
+            sel for sel in chosen if sel.status == "SEL_SHORTLISTED" and sel.editor
+        ],
         "deferred_proposals": [sel.proposal for sel in deferred],
         "pool": pool,
         "archived_proposals": archived,
@@ -1611,6 +1615,46 @@ def year_triage(request: HttpRequest, pk: int) -> HttpResponse:
         messages.success(request, "Every problem has been reviewed.")
         return redirect(year)
     return redirect(next_proposal)
+
+
+@admin_required
+def year_send_to_editors(request: HttpRequest, pk: int) -> HttpResponse:
+    """Move the listed shortlisted problems that have an editor to Editing.
+
+    Acts only on the pks the desk displayed, so nothing shortlisted since the
+    page loaded is sent unseen. Rows without an editor are skipped.
+    """
+    year = get_object_or_404(OIMEYear, pk=pk)
+    if request.method != "POST":
+        return redirect(year)
+    pks = request.POST.getlist("selection")
+    sent = year.selections.filter(
+        pk__in=pks, status="SEL_SHORTLISTED", editor__isnull=False
+    ).update(status="SEL_EDITING", updated_at=timezone.now())
+    messages.success(request, f"Sent {sent} to editors.")
+    return redirect(year)
+
+
+@admin_required
+def year_defer_pool(request: HttpRequest, pk: int) -> HttpResponse:
+    """Defer the listed pool problems for this year.
+
+    Acts only on the pks the desk displayed, so a problem published since the
+    page loaded is not deferred unseen.
+    """
+    year = get_object_or_404(OIMEYear, pk=pk)
+    if request.method != "POST":
+        return redirect(year)
+    proposals = _unreviewed(year).filter(pk__in=request.POST.getlist("proposal"))
+    created = OIMESelection.objects.bulk_create(
+        [
+            OIMESelection(year=year, proposal=proposal, status="SEL_DEFERRED")
+            for proposal in proposals
+        ],
+        ignore_conflicts=True,
+    )
+    messages.success(request, f"Deferred {len(created)}.")
+    return redirect(year)
 
 
 @verified_required
