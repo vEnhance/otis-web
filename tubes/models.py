@@ -229,6 +229,41 @@ class OIMEProposal(models.Model):
         (4, "🔥 × 4 (AIME 10-12): 25 minutes"),
         (5, "🔥 × 5 (AIME 13-15): 30 minutes"),
     )
+    # (code, button label, text shown to the author)
+    ARCHIVE_MENU: ClassVar[list[tuple[str, str, str]]] = [
+        ("EASY", "Easy", "Too easy for OTIS Mock AIME."),
+        ("HARD", "Hard", "Too hard for OTIS Mock AIME."),
+        (
+            "KNOWN",
+            "Well-known",
+            "Too similar to existing problems; solvers will have seen this before.",
+        ),
+        (
+            "VARIANCE",
+            "High-variance",
+            (
+                "Difficulty too high-variance: guessing much easier than solving, "
+                "depends on obscure fact, etc."
+            ),
+        ),
+        ("BASHY", "Bashy", "Too much computation needed to solve."),
+        (
+            "CONTRIVED",
+            "Contrived",
+            "Problem and solution are both contrived or uninspiring.",
+        ),
+        (
+            "ROUGH",
+            "Rough",
+            "Solution is rough, lacks details, or needs too much editing.",
+        ),
+        ("VAGUE", "Vague", "Problem statement is too vague or unclear."),
+        ("OTHER", "Other", "Reason unspecified; contact Evan."),
+    ]
+    ARCHIVE_REASONS = tuple((code, label) for code, label, _ in ARCHIVE_MENU)
+    ARCHIVE_REASON_TEXT: ClassVar[dict[str, str]] = {
+        code: text for code, _, text in ARCHIVE_MENU
+    }
 
     author = models.ForeignKey(
         OIMEContributor,
@@ -258,9 +293,12 @@ class OIMEProposal(models.Model):
         choices=DIFFICULTY_CHOICES,
         validators=[MinValueValidator(1), MaxValueValidator(5)],
     )
-    archived = models.BooleanField(
-        default=False,
-        help_text="Hide this problem from the active list (staff-visible only).",
+    archive_reason = models.CharField(
+        max_length=16,
+        choices=ARCHIVE_REASONS,
+        blank=True,
+        help_text="Why staff archived this problem, shown to its author. "
+        "Blank means not archived.",
     )
     is_draft = models.BooleanField(
         default=False,
@@ -297,9 +335,17 @@ class OIMEProposal(models.Model):
         A problem is retired once it's selected for a released contest year.
         """
         retired = OIMESelection.retiring().values("proposal_id")
-        return cls.objects.filter(is_draft=False, archived=False).exclude(
+        return cls.objects.filter(is_draft=False, archive_reason="").exclude(
             pk__in=retired
         )
+
+    @property
+    def archived(self) -> bool:
+        return self.archive_reason != ""
+
+    @property
+    def archive_reason_text(self) -> str:
+        return self.ARCHIVE_REASON_TEXT.get(self.archive_reason, "")
 
     @property
     def label(self) -> str:

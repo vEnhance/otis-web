@@ -1355,15 +1355,25 @@ def upvote_proposal(request: HttpRequest, pk: int) -> HttpResponse:
 
 @verified_required
 def toggle_archive(request: HttpRequest, pk: int) -> HttpResponse:
-    """Flip a problem's archived state. Archiving is a staff-only moderation action."""
+    """Archive a problem with the POSTed ``reason``, or unarchive it with none.
+
+    Archiving is a staff-only moderation action.
+    """
     if request.method != "POST":
         return redirect("oime-proposal-detail", pk)
     proposal = get_object_or_404(OIMEProposal, pk=pk)
     if not request.user.is_superuser:  # type: ignore[union-attr]
         raise PermissionDenied
-    proposal.archived = not proposal.archived
-    proposal.save(update_fields=["archived"])
+    proposal.archive_reason = _archive_reason(request.POST.get("reason", ""))
+    proposal.save(update_fields=["archive_reason"])
     return redirect("oime-proposal-detail", pk)
+
+
+def _archive_reason(raw: str) -> str:
+    """Validate an archive reason from a form; blank means unarchive."""
+    if raw and raw not in OIMEProposal.ARCHIVE_REASON_TEXT:
+        raise Http404("Unknown archive reason.")
+    return raw
 
 
 @verified_required
@@ -1503,7 +1513,7 @@ class LandingView(VerifiedRequiredMixin, TemplateView):
         own = list(
             _with_counts(
                 OIMEProposal.objects.filter(
-                    author=contributor, archived=False
+                    author=contributor, archive_reason=""
                 ).select_related("author")
             ).order_by("-created_at")
         )
@@ -1606,9 +1616,9 @@ def year_triage(request: HttpRequest, pk: int) -> HttpResponse:
         OIMESelection.objects.update_or_create(
             year=year, proposal=proposal, defaults={"status": status}
         )
-    elif "archive" in request.POST:
-        proposal.archived = True
-        proposal.save(update_fields=["archived"])
+    elif request.POST.get("archive"):
+        proposal.archive_reason = _archive_reason(request.POST["archive"])
+        proposal.save(update_fields=["archive_reason"])
     else:
         raise Http404("Unknown triage action.")
     next_proposal = _unreviewed(year).first()
