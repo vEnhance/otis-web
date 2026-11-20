@@ -174,6 +174,12 @@ class OIMEYear(models.Model):
         blank=True,
         help_text="The Overleaf project where selected problems are edited.",
     )
+    editors = models.ManyToManyField(
+        "OIMEContributor",
+        blank=True,
+        related_name="editor_years",
+        help_text="Who can be assigned to edit this year's problems.",
+    )
 
     if TYPE_CHECKING:
         selections: "RelatedManager[OIMESelection]"

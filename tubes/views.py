@@ -31,6 +31,7 @@ from .forms import (
     OIMEProposalForm,
     OIMEReleaseForm,
     OIMESelectionForm,
+    editor_choices,
 )
 from .models import (
     OIMEComment,
@@ -1943,7 +1944,11 @@ def year_export(request: HttpRequest, pk: int) -> HttpResponse:
 def year_bulk_edit(request: HttpRequest, pk: int) -> HttpResponse:
     """Set the editor and description of every chosen problem on one page."""
     year = get_object_or_404(OIMEYear, pk=pk)
-    formset = OIMEBulkEditFormSet(request.POST or None, queryset=_chosen(year))
+    formset = OIMEBulkEditFormSet(
+        request.POST or None,
+        queryset=_chosen(year),
+        form_kwargs={"editors": editor_choices(year)},
+    )
     # Each row's editor dropdown would otherwise query every contributor again.
     if formset.forms:
         choices = list(formset.forms[0].fields["editor"].choices)  # type: ignore[attr-defined]
