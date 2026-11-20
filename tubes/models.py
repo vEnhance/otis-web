@@ -289,6 +289,7 @@ class OIMEProposal(models.Model):
     solution = models.TextField(help_text="Full solution write-up, in LaTeX.")
     subject = models.CharField(max_length=1, choices=SUBJECT_CHOICES)
     difficulty = models.IntegerField(
+        # TODO(cj): edit this text
         help_text="Difficulty rating (affects testsolve time limits). CANNOT BE CHANGED AFTER SUBMISSION.",
         choices=DIFFICULTY_CHOICES,
         validators=[MinValueValidator(1), MaxValueValidator(5)],
@@ -313,11 +314,18 @@ class OIMEProposal(models.Model):
         blank=True,
         help_text="Contributors who have upvoted this problem after solving it.",
     )
+    revised_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Last breaking change. Fights before this still spoil the "
+        "problem, but no longer count toward its stats.",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     if TYPE_CHECKING:
         selections: "RelatedManager[OIMESelection]"
+        fights: "RelatedManager[OIMEFight]"
 
     class Meta:
         ordering = ("-created_at",)
@@ -346,6 +354,27 @@ class OIMEProposal(models.Model):
     @property
     def archive_reason_text(self) -> str:
         return self.ARCHIVE_REASON_TEXT.get(self.archive_reason, "")
+
+    def revise(self) -> None:
+        """Record a breaking change, which also resubmits an archived problem.
+
+        Fights from here on are the current version's. Any deferral from the
+        current year was a verdict on the old version, so it is dropped and the
+        problem goes back to that year's triage pool.
+        """
+        self.revised_at = timezone.now()
+        self.archive_reason = ""
+        self.save(update_fields=["revised_at", "archive_reason"])
+        year = OIMEYear.current()
+        if year is not None:
+            self.selections.filter(year=year, status="SEL_DEFERRED").delete()
+
+    def current_fights(self) -> "models.QuerySet[OIMEFight]":
+        """Fights on the current version: since the last breaking change, if any."""
+        fights = self.fights.all()
+        if self.revised_at is not None:
+            fights = fights.filter(started_at__gte=self.revised_at)
+        return fights
 
     @property
     def label(self) -> str:

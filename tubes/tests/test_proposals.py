@@ -164,28 +164,6 @@ def test_update_own_proposal(otis):
 
 
 @pytest.mark.django_db
-def test_cannot_change_difficulty_after_submission(otis):
-    user, contributor = verified_contributor()
-    proposal = OIMEProposalFactory.create(author=contributor, difficulty=2)
-    otis.login(user)
-    resp = otis.post(
-        "oime-proposal-update",
-        proposal.pk,
-        data={
-            "title": proposal.title,
-            "statement": proposal.statement,
-            "answer": proposal.answer,
-            "solution": proposal.solution,
-            "subject": proposal.subject,
-            "difficulty": 5,
-        },
-    )
-    otis.assert_30x(resp)
-    proposal.refresh_from_db()
-    assert proposal.difficulty == 2
-
-
-@pytest.mark.django_db
 def test_cannot_update_others_proposal(otis):
     user, _ = verified_contributor()
     _, other_contributor = verified_contributor("bob")
@@ -543,6 +521,7 @@ def test_update_can_publish_a_draft(otis):
             "answer": proposal.answer,
             "solution": proposal.solution,
             "subject": proposal.subject,
+            "difficulty": proposal.difficulty,
         },
     )
     proposal.refresh_from_db()
@@ -564,6 +543,7 @@ def test_update_can_return_a_proposal_to_draft(otis):
             "answer": proposal.answer,
             "solution": proposal.solution,
             "subject": proposal.subject,
+            "difficulty": proposal.difficulty,
             "is_draft": "on",
         },
     )
