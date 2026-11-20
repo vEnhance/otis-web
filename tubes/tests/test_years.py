@@ -571,6 +571,48 @@ def test_triage_needs_a_current_year(otis):
     assert resp.context["can_triage"] is False
 
 
+@pytest.mark.django_db
+def test_triage_after_deferral_last_year(otis):
+    admin, _ = verified_admin(casual_mode=True)
+    deferred = OIMESelectionFactory.create(year=closed_year(), status="SEL_DEFERRED")
+    OIMEYearFactory.create()
+    otis.login(admin)
+    resp = otis.get_20x("oime-proposal-detail", deferred.proposal.pk)
+    assert resp.context["can_triage"] is True
+    # Last year's deferral is replaced, so its buttons can't act on that year.
+    assert resp.context["selection_card"]["selection"] is None
+
+
+@pytest.mark.django_db
+def test_only_latest_selection_shown(otis):
+    admin, _ = verified_admin(casual_mode=True)
+    year = OIMEYearFactory.create()
+    deferred = OIMESelectionFactory.create(year=closed_year(), status="SEL_DEFERRED")
+    latest = OIMESelectionFactory.create(year=year, proposal=deferred.proposal)
+    otis.login(admin)
+    resp = otis.get_20x("oime-proposal-detail", latest.proposal.pk)
+    assert resp.context["can_triage"] is False
+    assert resp.context["selection_card"]["selection"] == latest
+
+
+@pytest.mark.django_db
+def test_no_triage_while_chosen_for_unreleased_year(otis):
+    admin, _ = verified_admin(casual_mode=True)
+    chosen = OIMESelectionFactory.create(year=closed_year())
+    year = OIMEYearFactory.create()
+    otis.login(admin)
+    resp = otis.get_20x("oime-proposal-detail", chosen.proposal.pk)
+    assert resp.context["can_triage"] is False
+    resp = otis.get_20x("oime-year-detail", year.pk)
+    assert chosen.proposal not in resp.context["desk"]["pool"]
+    otis.post_40x(
+        "oime-year-triage",
+        year.pk,
+        data={"proposal": chosen.proposal.pk, "change_status": "SEL_SHORTLISTED"},
+    )
+    assert not OIMESelection.objects.filter(year=year).exists()
+
+
 # ---------------------------------------------------------------------------
 # Selection cards: transitions, editor, notes
 # ---------------------------------------------------------------------------
@@ -583,7 +625,7 @@ def test_eic_transitions_and_jumps(otis):
     selection = OIMESelectionFactory.create()
     otis.login(admin)
     resp = otis.get_20x("oime-proposal-detail", selection.proposal.pk)
-    (card,) = resp.context["selection_cards"]
+    card = resp.context["selection_card"]
     assert [t for t, _ in card["transitions"]] == ["SEL_EDITING", "SEL_DEFERRED"]
 
     otis.post_30x(
@@ -632,11 +674,11 @@ def test_eic_form_only_on_chosen(otis):
     deferred = OIMESelectionFactory.create(year=year, status="SEL_DEFERRED")
     otis.login(admin)
     resp = otis.get_20x("oime-proposal-detail", chosen.proposal.pk)
-    (card,) = resp.context["selection_cards"]
+    card = resp.context["selection_card"]
     assert card["form"] is not None
     otis.assert_testid(resp, "selection-form")
     resp = otis.get_20x("oime-proposal-detail", deferred.proposal.pk)
-    (card,) = resp.context["selection_cards"]
+    card = resp.context["selection_card"]
     assert card["form"] is None
     otis.assert_no_testid(resp, "selection-form")
 
@@ -663,7 +705,7 @@ def test_editor_requests_review_only(otis):
     )
     otis.login(user)
     resp = otis.get_20x("oime-proposal-detail", selection.proposal.pk)
-    (card,) = resp.context["selection_cards"]
+    card = resp.context["selection_card"]
     assert [t for t, _ in card["transitions"]] == ["SEL_REVIEW"]
     assert card["form"] is None
     otis.assert_testid(resp, "selection-blocked-on")
@@ -686,7 +728,7 @@ def test_editor_requests_review_only(otis):
     assert selection.status == "SEL_REVIEW"
     assert any(m.level == message_levels.SUCCESS for m in resp.context["messages"])
     # While the EIC has the ball, the editor can only pull it back.
-    (card,) = resp.context["selection_cards"]
+    card = resp.context["selection_card"]
     assert [t for t, _ in card["transitions"]] == ["SEL_EDITING"]
 
 
@@ -754,12 +796,12 @@ def test_selection_card_visibility(otis):
     )
     otis.login(user)
     resp = otis.get_20x("oime-proposal-detail", selection.proposal.pk)
-    assert resp.context["selection_cards"] == []
+    assert resp.context["selection_card"] is None
 
     # The author sees the card but gets no buttons.
     mine = OIMESelectionFactory.create(proposal__author=me)
     resp = otis.get_20x("oime-proposal-detail", mine.proposal.pk)
-    (card,) = resp.context["selection_cards"]
+    card = resp.context["selection_card"]
     assert card["selection"] == mine
     assert card["transitions"] == []
     otis.assert_no_testid(resp, "selection-transition")
@@ -1050,7 +1092,7 @@ def test_chosen_problem_warns_uninvolved_testsolver(otis):
     )
     otis.login(user)
     resp = otis.get_20x("oime-proposal-detail", selection.proposal.pk)
-    assert resp.context["selection_cards"] == []
+    assert resp.context["selection_card"] is None
     assert resp.context["is_chosen"] is True
     assert resp.context["overleaf_url"] is None
     otis.assert_testid(resp, "proposal-outdated-note")

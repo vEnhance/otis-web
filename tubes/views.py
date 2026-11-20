@@ -1008,66 +1008,52 @@ def proposal_detail(request: HttpRequest, pk: int) -> HttpResponse:
 
     is_eic: bool = request.user.is_superuser  # type: ignore[union-attr]
     is_staff: bool = request.user.is_staff  # type: ignore[union-attr]
-    all_selections = list(proposal.selections.select_related("year", "editor"))
-    selections = [
-        sel
-        for sel in all_selections
-        if is_staff
-        or sel.editor == contributor
-        or (ctx["is_author"] and not sel.is_deferred)
-    ]
-    cards: list[dict[str, Any]] = [
-        {
-            "year": sel.year,
-            "selection": sel,
-            "transitions": sel.transitions(is_eic=is_eic)
-            if is_eic or sel.editor == contributor
-            else [],
-            "form": OIMESelectionForm(instance=sel)
-            if is_eic and not sel.is_deferred
-            else None,
-            # Overleaf is shared with editors, not authors. The editor-in-chief
-            # gets it in the row below instead, next to the metadata button.
-            "overleaf_inline": not is_eic
-            and not sel.is_deferred
-            and bool(sel.year.overleaf_url)
-            and (is_staff or sel.editor == contributor),
-        }
-        for sel in selections
-    ]
-    # A chosen problem is edited in Overleaf.
-    # Warn every viewer; link Overleaf only for those it is shared with.
-    chosen = [sel for sel in all_selections if not sel.is_deferred]
-    overleaf_url = next(
-        (
-            sel.year.overleaf_url
-            for sel in chosen
-            if sel.year.overleaf_url and (is_staff or sel.editor == contributor)
-        ),
-        None,
-    )
-    # An unreviewed problem gets the same card for the current year, with no
+    sel = proposal.latest_selection
+    is_chosen = sel is not None and not sel.is_deferred
+    shares_overleaf = sel is not None and (is_staff or sel.editor == contributor)
+
+    # A problem with no verdict for the current year gets a card with no
     # selection behind it; its buttons write the first verdict.
     current_year = OIMEYear.current() if is_eic else None
     can_triage = (
         current_year is not None
         and not proposal.is_draft
         and not proposal.is_frozen
-        and not any(sel.year == current_year for sel in all_selections)
+        and (sel is None or (sel.is_deferred and sel.year != current_year))
     )
+    card: dict[str, Any] | None = None
     if can_triage:
-        cards.insert(
-            0,
-            {
-                "year": current_year,
-                "selection": None,
-                "transitions": [
-                    ("SEL_SHORTLISTED", "✅ Shortlist"),
-                    ("SEL_DEFERRED", "⏸️ Defer"),
-                ],
-                "form": None,
-            },
-        )
+        card = {
+            "year": current_year,
+            "selection": None,
+            "transitions": [
+                ("SEL_SHORTLISTED", "✅ Shortlist"),
+                ("SEL_DEFERRED", "⏸️ Defer"),
+            ],
+            "form": None,
+        }
+    elif sel is not None and (shares_overleaf or (ctx["is_author"] and is_chosen)):
+        card = {
+            "year": sel.year,
+            "selection": sel,
+            "transitions": sel.transitions(is_eic=is_eic)
+            if is_eic or sel.editor == contributor
+            else [],
+            "form": OIMESelectionForm(instance=sel) if is_eic and is_chosen else None,
+            # Overleaf is shared with editors, not authors. The editor-in-chief
+            # gets it in the row below instead, next to the metadata button.
+            "overleaf_inline": not is_eic
+            and is_chosen
+            and bool(sel.year.overleaf_url)
+            and shares_overleaf,
+        }
+    # A chosen problem is edited in Overleaf.
+    # Warn every viewer; link Overleaf only for those it is shared with.
+    overleaf_url = (
+        sel.year.overleaf_url or None
+        if sel is not None and is_chosen and shares_overleaf
+        else None
+    )
 
     return render(
         request,
@@ -1082,8 +1068,8 @@ def proposal_detail(request: HttpRequest, pk: int) -> HttpResponse:
             "stats": stats,
             "frozen": proposal.is_frozen,
             "can_edit": _can_edit(request, proposal, contributor),
-            "selection_cards": cards,
-            "is_chosen": bool(chosen),
+            "selection_card": card,
+            "is_chosen": is_chosen,
             "overleaf_url": overleaf_url,
             "can_triage": can_triage,
             "status_choices": OIMESelection.STATUS_CHOICES,
@@ -1539,10 +1525,16 @@ def _attach_stats(proposals: Sequence[OIMEProposal]) -> None:
 
 
 def _unreviewed(year: OIMEYear) -> QuerySet[OIMEProposal]:
-    """Problems in the pool with no verdict for this year, most upvoted first."""
+    """Problems in the pool with no verdict for this year, most upvoted first.
+
+    A problem chosen for another year that hasn't been released yet is not up for
+    review: it would end up chosen twice.
+    """
+    chosen = OIMESelection.objects.filter(OIMESelection.CHOSEN).values("proposal_id")
     return (
         OIMEProposal.in_pool()
         .exclude(selections__year=year)
+        .exclude(pk__in=chosen)
         .annotate(n_upvotes=Count("upvotes", distinct=True))
         .order_by("-n_upvotes", "-pk")
     )
@@ -1590,6 +1582,8 @@ def year_triage(request: HttpRequest, pk: int) -> HttpResponse:
     if request.method != "POST":
         return redirect(year)
     proposal = get_object_or_404(OIMEProposal, pk=request.POST.get("proposal"))
+    if proposal.selections.filter(OIMESelection.CHOSEN).exclude(year=year).exists():
+        raise PermissionDenied("This problem is already chosen for another year.")
     status = request.POST.get("change_status")
     if status in ("SEL_SHORTLISTED", "SEL_DEFERRED"):
         OIMESelection.objects.update_or_create(

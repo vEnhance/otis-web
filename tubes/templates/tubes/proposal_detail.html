@@ -16,10 +16,8 @@
       testsolved, upvoted or commented on.
     </div>
   {% endif %}
-  {% if selection_cards %}
-    {% for card in selection_cards %}
-      {% include "tubes/components/selection_card.html" %}
-    {% endfor %}
+  {% if selection_card %}
+    {% include "tubes/components/selection_card.html" with card=selection_card %}
     <hr />
   {% endif %}
   <div class="d-flex justify-content-between align-items-start mb-3">
