@@ -1508,13 +1508,12 @@ class LandingView(VerifiedRequiredMixin, TemplateView):
                 "-created_at"
             )[:LANDING_RECENT_COUNT]
         )
-        # Drafts belong here alongside the published ones: this is the one page that
-        # shows an author everything they have written, whatever state it is in.
+        # Drafts and archived problems belong here alongside the published ones:
+        # this is the one page that shows an author everything they have written,
+        # whatever state it is in, so they can revise and resubmit.
         own = list(
             _with_counts(
-                OIMEProposal.objects.filter(
-                    author=contributor, archive_reason=""
-                ).select_related("author")
+                OIMEProposal.objects.filter(author=contributor).select_related("author")
             ).order_by("-created_at")
         )
         _annotate_user_status(recent, contributor)
