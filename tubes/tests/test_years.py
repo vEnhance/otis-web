@@ -711,6 +711,7 @@ def test_eic_assigns_editor_and_notes(otis):
     admin, _ = verified_admin()
     editor = OIMEContributorFactory.create()
     selection = OIMESelectionFactory.create()
+    selection.year.editors.add(editor)
     otis.login(admin)
     otis.post_30x(
         "oime-selection-action",
@@ -1074,6 +1075,7 @@ def test_bulk_edit_bulk_save(otis):
     first = OIMESelectionFactory.create(year=year)
     second = OIMESelectionFactory.create(year=year, description="old")
     editor = OIMEContributorFactory.create()
+    year.editors.add(editor)
     otis.login(admin)
     otis.post_redirects(
         otis.url("oime-year-bulk-edit", year.pk),
@@ -1094,6 +1096,34 @@ def test_bulk_edit_bulk_save(otis):
     assert first.description == "$3n$ and $4n$"
     assert first.editor == editor
     assert second.description == ""
+
+
+@pytest.mark.django_db
+def test_editor_choices_are_pool_plus_assigned(otis):
+    admin, _ = verified_admin()
+    year = OIMEYearFactory.create()
+    pooled = OIMEContributorFactory.create()
+    year.editors.add(pooled)
+    assigned = OIMEContributorFactory.create()
+    OIMESelectionFactory.create_batch(2, year=year, editor=assigned)
+    OIMESelectionFactory.create(year=year, editor=assigned, status="SEL_DEFERRED")
+    OIMESelectionFactory.create(year=closed_year(), editor=assigned)
+    otis.login(admin)
+    resp = otis.get_20x("oime-year-bulk-edit", year.pk)
+    editors = resp.context["formset"].forms[0].fields["editor"].queryset
+    assert {c: c.load for c in editors} == {pooled: 0, assigned: 2}
+
+
+@pytest.mark.django_db
+def test_editor_choices_without_pool_are_only_assigned(otis):
+    admin, _ = verified_admin(casual_mode=True)
+    year = OIMEYearFactory.create()
+    assigned = OIMEContributorFactory.create()
+    selection = OIMESelectionFactory.create(year=year, editor=assigned)
+    otis.login(admin)
+    resp = otis.get_20x("oime-proposal-detail", selection.proposal.pk)
+    editors = resp.context["selection_card"]["form"].fields["editor"].queryset
+    assert list(editors) == [assigned]
 
 
 @pytest.mark.django_db

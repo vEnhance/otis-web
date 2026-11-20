@@ -1,8 +1,15 @@
 from typing import Any, ClassVar
 
 from django import forms
+from django.db.models import Count, Q, QuerySet
 
-from .models import OIMEComment, OIMEContributor, OIMEProposal, OIMESelection
+from .models import (
+    OIMEComment,
+    OIMEContributor,
+    OIMEProposal,
+    OIMESelection,
+    OIMEYear,
+)
 
 
 class OIMEContributorForm(forms.ModelForm[OIMEContributor]):
@@ -82,11 +89,36 @@ class OIMESelectionForm(forms.ModelForm[OIMESelection]):
             "notes": forms.Textarea(attrs={"class": "form-control", "rows": 2}),
         }
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(
+        self,
+        *args: Any,
+        editors: QuerySet[OIMEContributor] | None = None,
+        **kwargs: Any,
+    ) -> None:
         super().__init__(*args, **kwargs)
-        self.fields["editor"].queryset = OIMEContributor.objects.order_by(  # type: ignore[attr-defined]
-            "display_name"
+        field = self.fields["editor"]
+        field.queryset = (  # type: ignore[attr-defined]
+            editors if editors is not None else editor_choices(self.instance.year)
         )
+        field.label_from_instance = lambda c: f"{c} ({c.load})"  # type: ignore[attr-defined]
+
+
+def editor_choices(year: OIMEYear) -> QuerySet[OIMEContributor]:
+    """The year's editor pool, plus anyone already editing for it.
+
+    Each carries ``load``, the number of the year's chosen problems they edit, so
+    the dropdown can be balanced at a glance.
+    """
+    pks = set(year.editors.values_list("pk", flat=True)) | set(
+        year.selections.filter(editor__isnull=False).values_list("editor_id", flat=True)
+    )
+    contributors = OIMEContributor.objects.filter(pk__in=pks)
+    return contributors.annotate(
+        load=Count(
+            "editing",
+            filter=Q(editing__year=year) & ~Q(editing__status="SEL_DEFERRED"),
+        )
+    ).order_by("display_name")
 
 
 class OIMEBulkEditForm(OIMESelectionForm):

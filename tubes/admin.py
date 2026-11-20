@@ -138,6 +138,7 @@ class OIMEYearAdmin(admin.ModelAdmin[OIMEYear]):
         "release_at",
     )
     list_display_links = ("display_name",)
+    autocomplete_fields = ("editors",)
     inlines = (OIMESelectionInline,)
 
 
