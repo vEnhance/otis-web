@@ -105,12 +105,13 @@ def test_landing_shows_own_proposals_and_drafts(otis):
     _, other = verified_contributor("bob")
     published = OIMEProposalFactory.create(author=contributor)
     draft = OIMEProposalFactory.create(author=contributor, is_draft=True)
-    OIMEProposalFactory.create(author=contributor, archived=True)
+    archived = OIMEProposalFactory.create(author=contributor, archived=True)
     OIMEProposalFactory.create()  # somebody else's
     OIMEProposalFactory.create(author=other, is_draft=True, title="Bob's draft")
     otis.login(user)
     resp = otis.get_20x("oime-landing")
-    assert set(resp.context["own_proposals"]) == {published, draft}
+    assert set(resp.context["own_proposals"]) == {published, draft, archived}
+    otis.assert_testid(resp, "table-archived")
     otis.assert_not_has(resp, "Bob's draft")
     assert all(p.user_list_status == "author" for p in resp.context["own_proposals"])
     # The status column names which is which. The published one is also in the

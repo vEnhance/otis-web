@@ -37,7 +37,9 @@
             <td>
               <a href="{{ proposal.get_absolute_url }}">
                 {% if proposal.user_list_status == "author" %}
-                  {% if proposal.is_draft %}
+                  {% if proposal.archived %}
+                    <span class="text-muted" data-testid="table-archived">Archived</span>
+                  {% elif proposal.is_draft %}
                     <span class="text-danger" data-testid="table-draft">Draft</span>
                   {% else %}
                     <span class="text-success" data-testid="table-published">Published</span>
