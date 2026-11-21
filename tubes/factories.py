@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 from django.utils import timezone
-from factory.declarations import LazyFunction, SubFactory
+from factory.declarations import LazyFunction, SubFactory, Trait
 from factory.django import DjangoModelFactory
 from factory.faker import Faker
 from factory.fuzzy import FuzzyChoice, FuzzyInteger
@@ -59,8 +59,10 @@ class OIMEProposalFactory(DjangoModelFactory):
     solution = Faker("paragraph")
     subject = FuzzyChoice(["A", "C", "G", "N"])
     difficulty = FuzzyInteger(1, 5)
-    archived = False
     is_draft = False
+
+    class Params:
+        archived = Trait(archive_reason="OTHER")
 
 
 class OIMEFightFactory(DjangoModelFactory):

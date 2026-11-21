@@ -1,17 +1,19 @@
 {% comment %}
   A collapsible table of chosen problems with where each stands in the editing
   pipeline. Takes `title`, `selections` and `empty`, plus `first` to
-  drop the top margin when the table opens a section.
+  drop the top margin when the table opens a section and `collapsed` to start
+  it closed.
 {% endcomment %}
 <h3 class="{% if not first %}mt-4{% endif %}">
-  <a class="oime-table-toggle link-dark text-decoration-none"
+  <a class="oime-table-toggle link-dark text-decoration-none {% if collapsed %}collapsed{% endif %}"
      data-bs-toggle="collapse"
      href="#oime-desk-{{ title|slugify }}"
      role="button"
-     aria-expanded="true"
+     aria-expanded="{{ collapsed|yesno:'false,true' }}"
      aria-controls="oime-desk-{{ title|slugify }}">{{ title }} ({{ selections|length }})</a>
 </h3>
-<div class="collapse show" id="oime-desk-{{ title|slugify }}">
+<div class="collapse {% if not collapsed %}show{% endif %}"
+     id="oime-desk-{{ title|slugify }}">
   {% if selections %}
     <table class="table table-striped otis-sortable">
       <thead class="table-dark">

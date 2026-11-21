@@ -174,6 +174,12 @@ class OIMEYear(models.Model):
         blank=True,
         help_text="The Overleaf project where selected problems are edited.",
     )
+    editors = models.ManyToManyField(
+        "OIMEContributor",
+        blank=True,
+        related_name="editor_years",
+        help_text="Who can be assigned to edit this year's problems.",
+    )
 
     if TYPE_CHECKING:
         selections: "RelatedManager[OIMESelection]"
@@ -223,6 +229,41 @@ class OIMEProposal(models.Model):
         (4, "🔥 × 4 (AIME 10-12): 25 minutes"),
         (5, "🔥 × 5 (AIME 13-15): 30 minutes"),
     )
+    # (code, button label, text shown to the author)
+    ARCHIVE_MENU: ClassVar[list[tuple[str, str, str]]] = [
+        ("EASY", "Easy", "Too easy for OTIS Mock AIME."),
+        ("HARD", "Hard", "Too hard for OTIS Mock AIME."),
+        (
+            "KNOWN",
+            "Well-known",
+            "Too similar to existing problems; solvers will have seen this before.",
+        ),
+        (
+            "VARIANCE",
+            "High-variance",
+            (
+                "Difficulty too high-variance: guessing much easier than solving, "
+                "depends on obscure fact, etc."
+            ),
+        ),
+        ("BASHY", "Bashy", "Too much computation needed to solve."),
+        (
+            "CONTRIVED",
+            "Contrived",
+            "Problem and solution are both contrived or uninspiring.",
+        ),
+        (
+            "ROUGH",
+            "Rough",
+            "Solution is rough, lacks details, or needs too much editing.",
+        ),
+        ("VAGUE", "Vague", "Problem statement is too vague or unclear."),
+        ("OTHER", "Other", "Reason unspecified; contact Evan."),
+    ]
+    ARCHIVE_REASONS = tuple((code, label) for code, label, _ in ARCHIVE_MENU)
+    ARCHIVE_REASON_TEXT: ClassVar[dict[str, str]] = {
+        code: text for code, _, text in ARCHIVE_MENU
+    }
 
     author = models.ForeignKey(
         OIMEContributor,
@@ -248,13 +289,17 @@ class OIMEProposal(models.Model):
     solution = models.TextField(help_text="Full solution write-up, in LaTeX.")
     subject = models.CharField(max_length=1, choices=SUBJECT_CHOICES)
     difficulty = models.IntegerField(
+        # TODO(cj): edit this text
         help_text="Difficulty rating (affects testsolve time limits). CANNOT BE CHANGED AFTER SUBMISSION.",
         choices=DIFFICULTY_CHOICES,
         validators=[MinValueValidator(1), MaxValueValidator(5)],
     )
-    archived = models.BooleanField(
-        default=False,
-        help_text="Hide this problem from the active list (staff-visible only).",
+    archive_reason = models.CharField(
+        max_length=16,
+        choices=ARCHIVE_REASONS,
+        blank=True,
+        help_text="Why staff archived this problem, shown to its author. "
+        "Blank means not archived.",
     )
     is_draft = models.BooleanField(
         default=False,
@@ -269,11 +314,18 @@ class OIMEProposal(models.Model):
         blank=True,
         help_text="Contributors who have upvoted this problem after solving it.",
     )
+    revised_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Last breaking change. Fights before this still spoil the "
+        "problem, but no longer count toward its stats.",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     if TYPE_CHECKING:
         selections: "RelatedManager[OIMESelection]"
+        fights: "RelatedManager[OIMEFight]"
 
     class Meta:
         ordering = ("-created_at",)
@@ -291,9 +343,38 @@ class OIMEProposal(models.Model):
         A problem is retired once it's selected for a released contest year.
         """
         retired = OIMESelection.retiring().values("proposal_id")
-        return cls.objects.filter(is_draft=False, archived=False).exclude(
+        return cls.objects.filter(is_draft=False, archive_reason="").exclude(
             pk__in=retired
         )
+
+    @property
+    def archived(self) -> bool:
+        return self.archive_reason != ""
+
+    @property
+    def archive_reason_text(self) -> str:
+        return self.ARCHIVE_REASON_TEXT.get(self.archive_reason, "")
+
+    def revise(self) -> None:
+        """Record a breaking change, which also resubmits an archived problem.
+
+        Fights from here on are the current version's. Any deferral from the
+        current year was a verdict on the old version, so it is dropped and the
+        problem goes back to that year's triage pool.
+        """
+        self.revised_at = timezone.now()
+        self.archive_reason = ""
+        self.save(update_fields=["revised_at", "archive_reason"])
+        year = OIMEYear.current()
+        if year is not None:
+            self.selections.filter(year=year, status="SEL_DEFERRED").delete()
+
+    def current_fights(self) -> "models.QuerySet[OIMEFight]":
+        """Fights on the current version: since the last breaking change, if any."""
+        fights = self.fights.all()
+        if self.revised_at is not None:
+            fights = fights.filter(started_at__gte=self.revised_at)
+        return fights
 
     @property
     def label(self) -> str:
