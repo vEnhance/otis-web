@@ -13,8 +13,9 @@
         <tr>
           <th style="width: 3rem;">ID</th>
           <th class="d-none d-sm-table-cell">Title</th>
-          <th style="width: 5rem;">Diff.</th>
-          <th style="width: 5rem;">Votes</th>
+          <th class="text-nowrap" style="width: 1%;">Diff.</th>
+          <th class="text-nowrap" style="width: 1%;">Votes</th>
+          <th class="text-nowrap" style="width: 1%;">Tests</th>
           <th style="width: 5rem;">Status</th>
         </tr>
       </thead>
@@ -27,10 +28,12 @@
             <td class="d-none d-sm-table-cell">
               <a href="{{ proposal.get_absolute_url }}">{{ proposal.title|truncatechars:"30" }}</a>
             </td>
-            <td>{{ proposal.difficulty_display }}</td>
-            <td {% if proposal.has_upvoted %}class="fw-bold" data-testid="table-upvoted" title="You upvoted this problem"{% endif %}>
+            <td class="text-nowrap">{{ proposal.difficulty_display }}</td>
+            <td class="text-nowrap{% if proposal.has_upvoted %} fw-bold{% endif %}"
+                {% if proposal.has_upvoted %}data-testid="table-upvoted" title="You upvoted this problem"{% endif %}>
               🩷 × {{ proposal.upvote_count }}
             </td>
+            <td class="text-nowrap" data-testid="table-testsolve-count">🧪 × {{ proposal.testsolve_count }}</td>
             <td>
               <a href="{{ proposal.get_absolute_url }}">
                 {% if proposal.user_list_status == "author" %}
