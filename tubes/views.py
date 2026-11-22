@@ -380,9 +380,9 @@ def _get_solver_context(
 
 
 def _proposal_stats(proposal: OIMEProposal) -> dict[str, Any]:
-    """Aggregate testsolve statistics for a problem (completed fights only)."""
+    """Testsolve statistics for a problem's current version (completed fights only)."""
     fights = list(
-        OIMEFight.objects.filter(proposal=proposal)
+        proposal.current_fights()
         .exclude(status="OIME_TBD")
         .select_related("contributor")
     )
@@ -393,6 +393,7 @@ def _bulk_proposal_stats(
     proposals: Iterable[OIMEProposal],
 ) -> dict[int, dict[str, Any]]:
     """:func:`_proposal_stats` for many problems in one query, keyed by pk."""
+    revised_at = {p.pk: p.revised_at for p in proposals}
     by_proposal: dict[int, list[OIMEFight]] = defaultdict(list)
     fights = (
         OIMEFight.objects.filter(proposal__in=proposals)
@@ -400,7 +401,10 @@ def _bulk_proposal_stats(
         .select_related("contributor")
     )
     for fight in fights:
-        by_proposal[fight.proposal_id].append(fight)  # type: ignore[attr-defined]
+        pid: int = fight.proposal_id  # type: ignore[attr-defined]
+        # Only the current version counts, as in :meth:`OIMEProposal.current_fights`.
+        if revised_at[pid] is None or fight.started_at >= revised_at[pid]:
+            by_proposal[pid].append(fight)
     return {p.pk: _stats_from_fights(by_proposal[p.pk]) for p in proposals}
 
 
@@ -908,6 +912,13 @@ class ProposalUpdateView(
         _lock_draft_field(self.request, form)
         return form
 
+    def form_valid(self, form: OIMEProposalForm) -> HttpResponse:
+        with transaction.atomic():
+            response = super().form_valid(form)
+            if form.cleaned_data.get("breaking_change"):
+                self.object.revise()
+        return response
+
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["action"] = "Update"
@@ -1392,8 +1403,9 @@ def proposal_results(request: HttpRequest, pk: int) -> HttpResponse:
     if ctx["can_start_fight"]:
         return redirect("oime-proposal-detail", pk)
 
+    # Only the current version: times on an earlier version aren't comparable.
     fights = list(
-        OIMEFight.objects.filter(proposal=proposal)
+        proposal.current_fights()
         .exclude(status="OIME_TBD")
         .select_related("contributor")
     )
@@ -1508,13 +1520,12 @@ class LandingView(VerifiedRequiredMixin, TemplateView):
                 "-created_at"
             )[:LANDING_RECENT_COUNT]
         )
-        # Drafts belong here alongside the published ones: this is the one page that
-        # shows an author everything they have written, whatever state it is in.
+        # Drafts and archived problems belong here alongside the published ones:
+        # this is the one page that shows an author everything they have written,
+        # whatever state it is in, so they can revise and resubmit.
         own = list(
             _with_counts(
-                OIMEProposal.objects.filter(
-                    author=contributor, archive_reason=""
-                ).select_related("author")
+                OIMEProposal.objects.filter(author=contributor).select_related("author")
             ).order_by("-created_at")
         )
         _annotate_user_status(recent, contributor)

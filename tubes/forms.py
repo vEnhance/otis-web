@@ -50,12 +50,35 @@ class OIMEProposalForm(forms.ModelForm[OIMEProposal]):
             "solution": forms.Textarea(attrs={"rows": 10}),
         }
 
+    breaking_change = forms.BooleanField(required=False, label="Breaking change")
+
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
-        # Difficulty is fixed once the problem is submitted: its time limit and any
-        # recorded fights depend on it, so it can only be chosen at creation.
-        if self.instance.pk is not None:
-            self.fields.pop("difficulty", None)
+        if self.instance.pk is None:
+            # Nothing to break yet.
+            self.fields.pop("breaking_change")
+            return
+        # TODO(cj): help text for changing difficulty on an existing problem.
+        self.fields["difficulty"].help_text = "TODO: difficulty changes are breaking."
+        # TODO(cj): help text for the breaking-change checkbox.
+        help_text = "TODO: what a breaking change does (stats reset)."
+        if self.instance.archived:
+            # TODO(cj): extra line for an archived problem.
+            help_text += " TODO: this also unarchives the problem."
+        self.fields["breaking_change"].help_text = help_text
+
+    def clean(self) -> dict[str, Any]:
+        cleaned = super().clean() or {}
+        # A new difficulty means a new time limit, so earlier solve times no
+        # longer compare: changing it is always a breaking change.
+        if (
+            self.instance.pk is not None
+            and "difficulty" in self.changed_data
+            and not cleaned.get("breaking_change")
+        ):
+            # TODO(cj): error shown when difficulty changes without the box ticked.
+            self.add_error("breaking_change", "TODO: difficulty change needs this.")
+        return cleaned
 
 
 class OIMEAnswerForm(forms.Form):
