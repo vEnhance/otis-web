@@ -14,6 +14,7 @@ from django.db.models import Q
 from django.db.models.aggregates import Count, Max, Min
 from django.db.models.manager import Manager
 from django.db.models.query import QuerySet
+from django.http import Http404
 from django.http.response import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -624,6 +625,21 @@ def show_puzzle(
     )
     context["incorrect_attempts"] = eligibility.incorrect_attempts
     return render(request, "opal/showpuzzle.html", context)
+
+
+@verified_required
+def show_solution(
+    request: AuthHttpRequest, hunt_slug: str, puzzle_slug: str
+) -> HttpResponse:
+    puzzle = get_object_or_404(OpalPuzzle, hunt__slug=hunt_slug, slug=puzzle_slug)
+    if not puzzle.solution_rendered:
+        raise Http404("This puzzle has no solution yet.")
+    if not (request.user.is_superuser or puzzle.is_solved_by(request.user)):
+        raise PermissionDenied("Solve the puzzle to see its solution.")
+    context: dict[str, Any] = {}
+    context["puzzle"] = puzzle
+    context["hunt"] = puzzle.hunt
+    return render(request, "opal/showsolution.html", context)
 
 
 @verified_required

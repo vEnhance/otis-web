@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block title %}
+  Solution to {{ puzzle.title }}
+{% endblock title %}
+{% block layout-content %}
+  {% if puzzle.credits %}<p class="fst-italic">{{ puzzle.credits }}</p>{% endif %}
+  <div>
+    <a href="{{ puzzle.get_absolute_url }}" class="btn btn-primary">Back to puzzle</a>
+    <a href="{{ hunt.get_absolute_url }}" class="btn btn-secondary">Back to hunt</a>
+  </div>
+  <hr />
+  <div class="alert alert-success">
+    <h2 class="alert-heading">
+      Answer: <span class="font-monospace">{{ puzzle.answer }}</span>
+    </h2>
+  </div>
+  <div data-testid="opal-solution">{{ puzzle.solution_rendered|safe }}</div>
+{% endblock layout-content %}

@@ -777,6 +777,68 @@ def test_opal_handler_reports_content_hash(otis):
 
 
 @pytest.mark.django_db
+def test_opal_handler_reports_solution_hash(otis):
+    OpalPuzzleFactory.create(slug="blank")
+    OpalPuzzleFactory.create(slug="solved", solution="It is *GEM*.")
+    resp = otis.post_20x("api", json={"action": "opal_list"})
+    rows = {row["slug"]: row for row in resp.json()["puzzles"]}
+    assert rows["blank"]["solution_hash"] == ""
+    assert rows["solved"]["solution_hash"] == sha256(b"It is *GEM*.").hexdigest()
+    assert "solution" not in rows["solved"]
+
+
+@pytest.mark.django_db
+def test_opal_solutions_update(otis):
+    puzzle = OpalPuzzleFactory.create(hunt__slug="teammate", slug="tetrogram")
+    resp = otis.post_20x(
+        "api",
+        json={
+            "action": "opal_solutions_update",
+            "solutions": [{"pk": puzzle.pk, "solution": "It is *GEM*.\n"}],
+        },
+    )
+    assert resp.json()["results"] == [
+        {
+            "pk": puzzle.pk,
+            "hunt": "teammate",
+            "slug": "tetrogram",
+            "status": "updated",
+            "solution_hash": sha256(b"It is *GEM*.").hexdigest(),
+        }
+    ]
+    puzzle.refresh_from_db()
+    assert puzzle.solution == "It is *GEM*."
+    assert "<em>GEM</em>" in puzzle.solution_rendered
+
+    resp = otis.post_20x(
+        "api",
+        json={
+            "action": "opal_solutions_update",
+            "solutions": [{"pk": puzzle.pk, "solution": "It is *GEM*.\r\n"}],
+        },
+    )
+    assert resp.json()["results"][0]["status"] == "unchanged"
+
+
+@pytest.mark.django_db
+def test_opal_solutions_update_unknown_pk_writes_nothing(otis):
+    puzzle = OpalPuzzleFactory.create()
+    resp = otis.post_40x(
+        "api",
+        json={
+            "action": "opal_solutions_update",
+            "solutions": [
+                {"pk": puzzle.pk, "solution": "It is *GEM*."},
+                {"pk": puzzle.pk + 1000, "solution": "Nope."},
+            ],
+        },
+    )
+    assert resp.json()["pks"] == [puzzle.pk + 1000]
+    puzzle.refresh_from_db()
+    assert puzzle.solution == ""
+
+
+@pytest.mark.django_db
 def test_apply_uuid_handler(otis):
     otis.post_20x(
         "api",

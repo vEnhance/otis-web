@@ -33,6 +33,11 @@ urlpatterns = [
         name="opal-show-puzzle",
     ),
     path(
+        r"solution/<slug:hunt_slug>/<slug:puzzle_slug>/",
+        views.show_solution,
+        name="opal-show-solution",
+    ),
+    path(
         r"finish/<slug:hunt_slug>/<slug:puzzle_slug>/",
         views.finish,
         name="opal-finish",
